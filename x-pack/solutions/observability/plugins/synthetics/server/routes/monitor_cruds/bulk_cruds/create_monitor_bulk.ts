@@ -6,6 +6,7 @@
  */
 
 import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import path from 'path';
 import { z } from '@kbn/zod';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { ServiceLocationErrors } from '../../../../common/runtime_types';
@@ -53,6 +54,11 @@ export const createSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
     },
   },
   options: {
+    summary: 'Bulk create monitors',
+    description:
+      'Create up to 1000 monitors in one request. Every monitor is validated before any monitor is persisted. The API creates the Saved Objects and synchronizes Fleet once for the batch.\n\nYou must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges. If a monitor is shared to additional spaces, you must also have create privileges in each of those spaces.',
+    operationId: 'post-synthetic-monitors-bulk-create',
+    oasOperationObject: () => path.join(__dirname, '../examples/bulk_create_monitors.yaml'),
     body: {
       maxBytes: MAX_BULK_CREATE_REQUEST_BYTES,
     },

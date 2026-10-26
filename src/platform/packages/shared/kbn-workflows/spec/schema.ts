@@ -20,10 +20,15 @@ import {
 } from './schema/triggers/manual_trigger_schema';
 import { CONNECTOR_ID_MAX_LENGTH, IF_CONDITION_MAX_LENGTH } from '../common/constants';
 import {
+  HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_CHANNELS_DESCRIPTION,
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
+  HITL_EXTERNAL_REJECT_LINK_CONTEXT_KEY,
   MAX_HITL_ACTION_LABEL_LENGTH,
+  MAX_HITL_EMAIL_ADDRESS_LENGTH,
+  MAX_HITL_EMAIL_RECIPIENTS,
+  MAX_HITL_EMAIL_SUBJECT_LENGTH,
   MAX_HITL_EXTERNAL_LINK_LENGTH,
   MAX_HITL_MESSAGE_LENGTH,
   MAX_HITL_SLACK_CHANNEL_LENGTH,
@@ -352,6 +357,28 @@ export const HitlSlackApiChannelSchema = z.object({
     ),
 });
 
+export const HitlEmailRecipientListSchema = z
+  .array(z.string().min(1).max(MAX_HITL_EMAIL_ADDRESS_LENGTH))
+  .min(1)
+  .max(MAX_HITL_EMAIL_RECIPIENTS);
+
+export const HitlEmailChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('Email connector saved object id or name'),
+  to: HitlEmailRecipientListSchema.describe('Primary email recipients'),
+  cc: HitlEmailRecipientListSchema.optional().describe('CC recipients'),
+  bcc: HitlEmailRecipientListSchema.optional().describe('BCC recipients'),
+  subject: z
+    .string()
+    .min(1)
+    .max(MAX_HITL_EMAIL_SUBJECT_LENGTH)
+    .optional()
+    .describe('Email subject. Defaults to a built-in subject when omitted.'),
+});
+
 export const HitlSlack2ChannelSchema = z.object({
   'connector-id': z
     .string()
@@ -374,12 +401,124 @@ export const HitlSlack2ChannelSchema = z.object({
     ),
 });
 
+export const HitlTeamsChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('Microsoft Teams connector saved object id or name'),
+  'team-id': z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'Team ID, or Liquid that renders to one. Obtain this from listJoinedTeams (the "id" field on each team object).'
+    ),
+  'channel-id': z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'Channel ID, or Liquid that renders to one. Obtain this from listChannels (the "id" field on each channel object).'
+    ),
+});
+
+export const HitlServiceNowChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('ServiceNow connector saved object id or name'),
+  table: z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'ServiceNow table name, or Liquid that renders to one (e.g. incident, {{ inputs.table }}).'
+    ),
+  'sys-id': z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'sys_id of the record, or Liquid that renders to one (e.g. {{ inputs.incident_sys_id }}).'
+    ),
+});
+
+const MAX_HITL_HTTP_HEADER_COUNT = 20;
+const MAX_HITL_HTTP_HEADER_NAME_LENGTH = 256;
+
+export const HITL_HTTP_DESTINATION_ERROR = 'Set connector-id or url. Either one is enough.';
+
+export const HitlHttpChannelSchema = z
+  .object({
+    'connector-id': z
+      .string()
+      .min(1)
+      .max(CONNECTOR_ID_MAX_LENGTH)
+      .optional()
+      .describe(
+        'Saved HTTP connector id or name. When set, that connector supplies authentication. When omitted, the workflow HTTP system connector sends the request.'
+      ),
+    url: z
+      .string()
+      .min(1)
+      .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
+      .optional()
+      .describe(
+        'Full request URL. Required when connector-id is omitted. When connector-id is set, this replaces the connector URL. Rendered as a Liquid template.'
+      ),
+    path: z
+      .string()
+      .min(1)
+      .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
+      .optional()
+      .describe(
+        'Path appended to the connector URL, or to url when url is set. Rendered as a Liquid template.'
+      ),
+    method: z
+      .enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
+      .optional()
+      .describe('HTTP method. Defaults to POST.'),
+    headers: z
+      .record(
+        z.string().min(1).max(MAX_HITL_HTTP_HEADER_NAME_LENGTH),
+        z.string().max(MAX_HITL_MESSAGE_LENGTH)
+      )
+      .refine((headers) => Object.keys(headers).length <= MAX_HITL_HTTP_HEADER_COUNT, {
+        message: `At most ${MAX_HITL_HTTP_HEADER_COUNT} headers`,
+      })
+      .optional()
+      .describe('Optional request headers. Names and values are Liquid templates.'),
+    body: z
+      .string()
+      .min(1)
+      .max(MAX_HITL_MESSAGE_LENGTH)
+      .optional()
+      .describe(
+        'Optional request body template. For waitForInput use {{context.hitl.externalFormLink}}. For waitForApproval use {{context.hitl.externalApproveLink}} and {{context.hitl.externalRejectLink}}.'
+      ),
+  })
+  .strict()
+  .refine((channel) => Boolean(channel['connector-id'] || channel.url), {
+    message: HITL_HTTP_DESTINATION_ERROR,
+    path: ['url'],
+  })
+  .meta({
+    anyOf: [{ required: ['connector-id'] }, { required: ['url'] }],
+  });
+
 const hitlChannelDescriptions = {
   slack: 'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)',
   slack_api:
     'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.',
+  email: 'Notify via an Email connector. Requires connector-id and at least one `to` recipient.',
   slack2:
     'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs.',
+  teams: 'Post a message to a Microsoft Teams channel. Set connector-id, team-id, and channel-id.',
+  servicenow:
+    'Add a customer-visible comment to an existing ServiceNow record. Set connector-id, table, and sys-id.',
+  http: 'Send the response links in an HTTP request. Set a connector-id or a url. Uses the workflow HTTP connector, including its destination controls.',
 } as const;
 
 export const WaitForInputChannelsSchema = z
@@ -390,9 +529,19 @@ export const WaitForInputChannelsSchema = z
     slack_api: HitlSlackApiChannelSchema.extend(hitlChannelMessageField)
       .optional()
       .describe(hitlChannelDescriptions.slack_api),
+    email: HitlEmailChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.email),
     slack2: HitlSlack2ChannelSchema.extend(hitlChannelMessageField)
       .optional()
       .describe(hitlChannelDescriptions.slack2),
+    teams: HitlTeamsChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.teams),
+    servicenow: HitlServiceNowChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.servicenow),
+    http: HitlHttpChannelSchema.optional().describe(hitlChannelDescriptions.http),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
@@ -403,7 +552,13 @@ export const WaitForApprovalChannelsSchema = z
     slack_api: HitlSlackApiChannelSchema.loose()
       .optional()
       .describe(hitlChannelDescriptions.slack_api),
+    email: HitlEmailChannelSchema.loose().optional().describe(hitlChannelDescriptions.email),
     slack2: HitlSlack2ChannelSchema.loose().optional().describe(hitlChannelDescriptions.slack2),
+    teams: HitlTeamsChannelSchema.loose().optional().describe(hitlChannelDescriptions.teams),
+    servicenow: HitlServiceNowChannelSchema.loose()
+      .optional()
+      .describe(hitlChannelDescriptions.servicenow),
+    http: HitlHttpChannelSchema.optional().describe(hitlChannelDescriptions.http),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
@@ -545,6 +700,7 @@ export const ElasticsearchStepSchema = BaseStepSchema.extend({
     message: 'Elasticsearch step type must start with "elasticsearch."',
   }),
   with: ElasticsearchStepInputSchema,
+  timeout: DynamicTimeoutSchema.optional(),
 });
 export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
@@ -606,6 +762,7 @@ export const KibanaStepSchema = BaseStepSchema.extend({
     message: 'Kibana step type must start with "kibana."',
   }),
   with: KibanaStepInputSchema,
+  timeout: DynamicTimeoutSchema.optional(),
 });
 export type KibanaStep = z.infer<typeof KibanaStepSchema>;
 
@@ -1016,6 +1173,36 @@ export type WorkflowRunAsMode = z.infer<typeof WorkflowRunAsModeSchema>;
 // Base schema shared by both workflow.execute and workflow.executeAsync
 export const WorkflowExecuteStepInputSchema = z.object({
   'workflow-id': z.string().min(1).max(1024),
+  'allowed-workflow-ids': z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(1024)
+        .regex(/^(?![\s\S]*\{[{%])[\s\S]+$/, 'Allowed workflow IDs must be literal IDs')
+    )
+    .min(1)
+    .max(100)
+    .optional()
+    .describe(
+      'Literal child workflow IDs permitted to receive the parent service account. A templated workflow-id with inherit or override requires allowed-workflow-ids or allowed-workflow-tags; checked against the saved parent definition.'
+    )
+    .meta({ doNotSuggest: true }),
+  'allowed-workflow-tags': z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(1024)
+        .regex(/^(?![\s\S]*\{[{%])[\s\S]+$/, 'Allowed workflow tags must be literal tags')
+    )
+    .min(1)
+    .max(100)
+    .optional()
+    .describe(
+      'Literal tags permitting managed children to receive the parent service account. At least one must match the saved child definition. When IDs are also supplied, both restrictions must pass.'
+    )
+    .meta({ doNotSuggest: true }),
   inputs: z.record(z.string(), z.unknown()).optional(),
   'run-as-mode': WorkflowRunAsModeSchema.optional()
     .describe(
@@ -1342,6 +1529,20 @@ export const WorkflowHitlTemplateContextSchema = z.object({
     .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
     .optional()
     .describe('External GET resume URL with token set. Append `&<field>=<value>` per with.schema.'),
+  [HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY]: z
+    .string()
+    .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
+    .optional()
+    .describe(
+      'External waitForApproval approve URL. Populated when rendering an HTTP approval request.'
+    ),
+  [HITL_EXTERNAL_REJECT_LINK_CONTEXT_KEY]: z
+    .string()
+    .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
+    .optional()
+    .describe(
+      'External waitForApproval reject URL. Populated when rendering an HTTP approval request.'
+    ),
 });
 
 export const WorkflowTemplatePersistedContextSchema = z.object({

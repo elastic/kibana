@@ -7,6 +7,7 @@
 
 import type {
   Conversation,
+  ConversationEvent,
   PreExecutionWorkflowStep,
   CurrentUser,
   ExecutionFailedEvent,
@@ -17,6 +18,7 @@ import {
   CONVERSATION_SCHEMA_VERSION,
   ConversationAccessControlMode,
   ConversationAccessControlRole,
+  ConversationActivityEventType,
   ConversationRoundStatus,
   ConversationOriginType,
   EventActorType,
@@ -1001,6 +1003,26 @@ describe('conversation model converters', () => {
   });
 
   describe('toEs', () => {
+    it('keeps the owner principal type across writes', () => {
+      const conversation = {
+        id: 'conv-1',
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        created_at: creationDate,
+        updated_at: creationDate,
+        rounds: [],
+        user: {
+          id: 'service_account:kibana/automation',
+          username: 'kibana/automation',
+          type: 'service_account' as const,
+        },
+      };
+
+      const serialized = toEs(conversation as never, 'space');
+
+      expect(serialized.user_type).toBe('service_account');
+    });
+
     it('persists the per-user lists and clears the legacy read and pinned booleans', () => {
       const serialized = toEs(
         {
@@ -1341,6 +1363,43 @@ describe('conversation model converters', () => {
   });
 
   describe('createRequestToEs', () => {
+    it('records the owner principal type', () => {
+      const serialized = createRequestToEs({
+        conversation: { agent_id: 'agent_id', title: 'conv_title', rounds: [] },
+        space: 'space',
+        currentUser: {
+          id: 'service_account:kibana/automation',
+          username: 'kibana/automation',
+          type: 'service_account',
+        },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.user_id).toBe('service_account:kibana/automation');
+      expect(serialized.user_type).toBe('service_account');
+    });
+
+    it('records no principal type for an owner override that has none', () => {
+      const serialized = createRequestToEs({
+        conversation: {
+          agent_id: 'agent_id',
+          title: 'conv_title',
+          rounds: [],
+          user: { id: 'user_id', username: 'user_name' },
+        },
+        space: 'space',
+        currentUser: {
+          id: 'service_account:kibana/automation',
+          username: 'kibana/automation',
+          type: 'service_account',
+        },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.user_id).toBe('user_id');
+      expect(serialized.user_type).toBeUndefined();
+    });
+
     it('creates an unpinned, unread conversation with empty per-user lists', () => {
       const serialized = createRequestToEs({
         conversation: { agent_id: 'agent_id', title: 'conv_title', rounds: [] },
@@ -1642,6 +1701,87 @@ describe('conversation model converters', () => {
       // The round is still serialized to `conversation_rounds`, so read-through-rounds is intact.
       expect(serialized.conversation_rounds).toHaveLength(1);
       expect(serialized.conversation_rounds[0].id).toBe('round-seed');
+    });
+
+    it('stores leading events ahead of caller-supplied events', () => {
+      const createdEvent: ConversationEvent = {
+        id: 'created-1',
+        type: ConversationActivityEventType.conversationCreated,
+        created_at: creationDate,
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        data: { agent_id: 'agent_id', access_mode: ConversationAccessControlMode.Private },
+      };
+      const seedEvent: TimelineEvent = {
+        id: 'round-1::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2025-01-01T00:00:00.000Z',
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        data: { message: 'hello', attachment_refs: [] },
+      };
+
+      const serialized = createRequestToEs({
+        conversation: {
+          agent_id: 'agent_id',
+          title: 'conv_title',
+          rounds: [],
+          events: [seedEvent],
+        },
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+        leadingEvents: [createdEvent],
+      });
+
+      expect(serialized.events?.map((event) => event.id)).toEqual([
+        'created-1',
+        'round-1::user_message',
+      ]);
+    });
+
+    it('still projects rounds to events when the caller supplied none, after the leading events', () => {
+      const createdEvent: ConversationEvent = {
+        id: 'created-1',
+        type: ConversationActivityEventType.conversationCreated,
+        created_at: creationDate,
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        data: { agent_id: 'agent_id', access_mode: ConversationAccessControlMode.Private },
+      };
+      const serialized = createRequestToEs({
+        conversation: {
+          agent_id: 'agent_id',
+          title: 'conv_title',
+          rounds: [
+            {
+              id: 'round-seed',
+              status: ConversationRoundStatus.completed,
+              input: { message: 'hello' },
+              response: { message: 'hi' },
+              steps: [],
+              started_at: roundCreationDate,
+              time_to_first_token: 10,
+              time_to_last_token: 50,
+              model_usage: {
+                connector_id: 'unknown',
+                llm_calls: 1,
+                input_tokens: 3,
+                output_tokens: 4,
+              },
+            },
+          ],
+        },
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+        leadingEvents: [createdEvent],
+      });
+
+      // Leading events are not caller events, so they do not suppress the rounds projection.
+      expect(serialized.events?.map((event) => event.id)).toEqual([
+        'created-1',
+        'round-seed::user_message',
+        'round-seed::execution_started',
+        'round-seed::execution_terminated',
+      ]);
     });
   });
 
@@ -2283,8 +2423,27 @@ describe('conversation model converters', () => {
       });
 
       expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-      expect(updated.rounds).toBe(passedThroughRounds);
       expect(updated.rounds[0].response?.message).toBe('stored truth');
+    });
+
+    it('honors caller-supplied rounds when events are also provided (step-only appendEvents)', () => {
+      const base = eventsNativeStored();
+      const callerRounds = [{ ...base.rounds[0], response: { message: 'updated response' } }];
+
+      const updated = updateConversation({
+        conversation: base,
+        update: {
+          id: base.id,
+          events: base.events!,
+          rounds: callerRounds,
+        } as Parameters<typeof updateConversation>[0]['update'] & {
+          events: TimelineEvent[];
+        },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      expect(updated.rounds[0].response?.message).toBe('updated response');
     });
 
     it('promotes a legacy conversation to events-native when a caller supplies events (appendEvents on a legacy doc)', () => {

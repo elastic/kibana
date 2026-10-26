@@ -31,16 +31,10 @@ test.describe(
   'Infrastructure Inventory - Kubernetes Pods OpenTelemetry schema',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    // Sequential project (`playwright.config.ts` / `testDir: './tests'`): beforeAll /
-    // afterAll are safe for the temporary pod Schema flag. Parallel Inventory stays
-    // flag-off. This suite also ingests its own fixtures — sequential specs do not
-    // run `parallel_tests/global.setup.ts`.
-    test.beforeAll(async ({ apiServices, esClient, kbnUrl, log, config }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': {
-          'observability.infra.podSchemaSelectorEnabled': true,
-        },
-      });
+    // Sequential project (`playwright.config.ts` / `testDir: './tests'`). This suite
+    // ingests its own fixtures — sequential specs do not run
+    // `parallel_tests/global.setup.ts`.
+    test.beforeAll(async ({ esClient, kbnUrl, log, config }) => {
       log.info('Sequential suite: ingesting Inventory SemConv pod metrics');
       await ingestInventoryPodsSemconvSynthtraceData({ esClient, kbnUrl, log, config });
     });
@@ -51,14 +45,9 @@ test.describe(
       await inventoryPage.goToPage();
     });
 
-    test.afterAll(async ({ apiServices, esClient, kbnUrl, log, config }) => {
+    test.afterAll(async ({ esClient, kbnUrl, log, config }) => {
       log.info('Sequential suite: cleaning Inventory SemConv pod metrics');
       await cleanInventoryPodsSemconvSynthtraceData({ esClient, kbnUrl, log, config });
-      await apiServices.core.settings({
-        'feature_flags.overrides': {
-          'observability.infra.podSchemaSelectorEnabled': false,
-        },
-      });
     });
 
     test('OTel-only pods hydrate OpenTelemetry and render tiles', async ({
@@ -177,6 +166,27 @@ test.describe(
       await expect(inventoryPage.noDataPrompt).toBeVisible();
       await expect(inventoryPage.noDataSwitchSchemaLink).toBeVisible();
       await expect(page).toHaveURL(/preferredSchema:semconv/);
+    });
+
+    test('empty state call to action switches to the schema that has data', async ({
+      page,
+      pageObjects: { inventoryPage },
+    }) => {
+      await inventoryPage.showHosts();
+      await inventoryPage.goToTime(DATE_WITH_SEMCONV_DATA);
+      await inventoryPage.selectSchema('OpenTelemetry');
+
+      await inventoryPage.goToTime(DATE_WITH_POD_DATA);
+      await inventoryPage.showPods();
+      await expect(inventoryPage.noDataSwitchSchemaLink).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
+
+      await inventoryPage.switchSchemaFromNoDataPrompt();
+
+      await expect(page).toHaveURL(/preferredSchema:ecs/);
+      const ecsPod = await inventoryPage.podWaffleNodeByName(ECS_POD_NAME);
+      await expect(ecsPod.container).toBeVisible({ timeout: EXTENDED_TIMEOUT });
     });
 
     test('tile menu identity uses k8s.pod.uid on OpenTelemetry', async ({

@@ -137,6 +137,7 @@ export const DashboardListing = ({
   }, [goToDashboard, useSessionStorageIntegration]);
 
   const appMenu = useMemo<AppMenuConfig | undefined>(() => {
+    const { createNew } = getDashboardCapabilities();
     const secondaryCreateActions = getTabs
       ? getTabs()
           .filter((tab) => Boolean(tab.createAction))
@@ -151,29 +152,31 @@ export const DashboardListing = ({
       : [];
 
     return {
-      primaryActionItem: {
-        id: 'createDashboard',
-        testId: 'dashboardListingCreateButton',
-        iconType: 'plus',
-        label: i18n.translate('dashboard.listing.createButtonLabel', {
-          defaultMessage: 'Create dashboard',
-        }),
-        run: () => createDashboardAction(),
-        popoverWidth: 200,
-        splitButtonProps:
-          secondaryCreateActions.length > 0
-            ? {
-                secondaryButtonAriaLabel: i18n.translate(
-                  'dashboard.listing.createMoreActionsButtonAriaLabel',
-                  {
-                    defaultMessage: 'Create more dashboard content',
+      primaryActionItem: createNew
+        ? {
+            id: 'createDashboard',
+            testId: 'dashboardListingCreateButton',
+            iconType: 'plus',
+            label: i18n.translate('dashboard.listing.createButtonLabel', {
+              defaultMessage: 'Create dashboard',
+            }),
+            run: () => createDashboardAction(),
+            popoverWidth: 200,
+            splitButtonProps:
+              secondaryCreateActions.length > 0
+                ? {
+                    secondaryButtonAriaLabel: i18n.translate(
+                      'dashboard.listing.createMoreActionsButtonAriaLabel',
+                      {
+                        defaultMessage: 'Create more dashboard content',
+                      }
+                    ),
+                    items: secondaryCreateActions,
                   }
-                ),
-                items: secondaryCreateActions,
-              }
-            : undefined,
-      },
-      items: getDashboardCapabilities().createNew
+                : undefined,
+          }
+        : undefined,
+      items: createNew
         ? [
             {
               id: 'importDashboardJson',

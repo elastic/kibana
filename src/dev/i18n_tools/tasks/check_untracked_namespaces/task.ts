@@ -12,7 +12,7 @@ import type { TaskSignature } from '../../types';
 import { ErrorReporter } from '../../utils/error_reporter';
 import {
   extractUntrackedMessages,
-  getNamespacePathsForRoot,
+  reportUntrackedExtraction,
 } from './extract_untracked_translations';
 
 export interface TaskOptions {
@@ -38,26 +38,24 @@ export const checkUntrackedNamespacesTask: TaskSignature<TaskOptions> = (
       {
         title: `Checking Untracked Messages not defined in .i18nrc namespaces`,
         task: async () => {
-          const definedNamespacesPaths = Object.values(config.paths).flat();
+          const ignoredDirs = [...Object.values(config.paths).flat(), ...config.exclude];
 
           for (const rootPath of rootPaths) {
             parent.title = `Checking untracked messages inside "${rootPath}"`;
-            const definedPathsForRoot = getNamespacePathsForRoot(rootPath, definedNamespacesPaths);
 
-            for await (const untrackedMessageDetails of extractUntrackedMessages(
-              rootPath,
-              definedPathsForRoot
-            )) {
-              const { untrackedFilePath, extractedMessages, totalChecked, totalToCheck } =
-                untrackedMessageDetails;
+            for await (const extraction of extractUntrackedMessages(rootPath, ignoredDirs)) {
+              const {
+                untrackedFilePath,
+                extractedMessages,
+                parseError,
+                totalChecked,
+                totalToCheck,
+              } = extraction;
 
-              task.output = `[${totalChecked}/${totalToCheck}] Found ${extractedMessages.size} untracked messages in file ${untrackedFilePath}`;
-              if (extractedMessages.size > 0) {
-                const error = new Error(
-                  `The file ${untrackedFilePath} contains i18n messages but is not defined in the .i18nrc namespaces paths`
-                );
-                errorReporter.report(error);
+              if (extractedMessages.size > 0 || parseError) {
+                task.output = `[${totalChecked}/${totalToCheck}] Found ${extractedMessages.size} untracked messages in file ${untrackedFilePath}`;
               }
+              reportUntrackedExtraction(errorReporter, extraction);
             }
           }
 

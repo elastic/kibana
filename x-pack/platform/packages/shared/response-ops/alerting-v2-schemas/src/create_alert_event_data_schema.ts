@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { ALERT_EPISODE_STATUS } from './alert_action_schema';
 import {
   ID_MAX_LENGTH,
@@ -20,23 +20,27 @@ import { alertEventSeveritySchema } from './severity';
  * Same four lifecycle states as {@link ALERT_EPISODE_STATUS} / alert_events.ts.
  * All can be set explicitly by external callers; when omitted, status defaults to active.
  */
-const externalAlertStatusSchema = z.enum([
-  ALERT_EPISODE_STATUS.ACTIVE,
-  ALERT_EPISODE_STATUS.INACTIVE,
-  ALERT_EPISODE_STATUS.PENDING,
-  ALERT_EPISODE_STATUS.RECOVERING,
-]);
+const externalAlertStatusSchema = lazySchema(() =>
+  z.enum([
+    ALERT_EPISODE_STATUS.ACTIVE,
+    ALERT_EPISODE_STATUS.INACTIVE,
+    ALERT_EPISODE_STATUS.PENDING,
+    ALERT_EPISODE_STATUS.RECOVERING,
+  ])
+);
 
 const RESERVED_SOURCE_PREFIX = 'elastic';
 
-const sourceSchema = z
-  .string()
-  .min(1)
-  .max(ID_MAX_LENGTH)
-  .refine((v) => !v.startsWith(RESERVED_SOURCE_PREFIX), {
-    message:
-      'source cannot start with "elastic" — this prefix is reserved for Elastic-produced events.',
-  });
+const sourceSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(ID_MAX_LENGTH)
+    .refine((v) => !v.startsWith(RESERVED_SOURCE_PREFIX), {
+      message:
+        'source cannot start with "elastic" — this prefix is reserved for Elastic-produced events.',
+    })
+);
 
 /**
  * Shared request-body fields (no `source`).
@@ -50,39 +54,41 @@ const sourceSchema = z
  * want them put `rule_name` / `alert_url` inside `data`. The UI reads those
  * keys when present.
  */
-const createAlertEventBodyBaseObjectSchema = z
-  .object({
-    // At least one of fingerprint / fingerprint_fields / rule_id is required
-    // (enforced by .superRefine below). Priority when resolving the series key:
-    // fingerprint > fingerprint_fields > rule_id (hashed with source).
-    fingerprint: z.string().min(1).max(MAX_FINGERPRINT_LENGTH).optional(),
-    fingerprint_fields: z
-      .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
-      .min(1)
-      .max(MAX_FINGERPRINT_FIELDS)
-      .optional(),
-    rule_id: z.string().min(1).max(ID_MAX_LENGTH).optional(),
+const createAlertEventBodyBaseObjectSchema = lazySchema(() =>
+  z
+    .object({
+      // At least one of fingerprint / fingerprint_fields / rule_id is required
+      // (enforced by .superRefine below). Priority when resolving the series key:
+      // fingerprint > fingerprint_fields > rule_id (hashed with source).
+      fingerprint: z.string().min(1).max(MAX_FINGERPRINT_LENGTH).optional(),
+      fingerprint_fields: z
+        .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
+        .min(1)
+        .max(MAX_FINGERPRINT_FIELDS)
+        .optional(),
+      rule_id: z.string().min(1).max(ID_MAX_LENGTH).optional(),
 
-    alert_status: externalAlertStatusSchema.optional(),
-    data: z
-      .record(z.string().max(MAX_FIELD_NAME_LENGTH), z.any())
-      .optional()
-      .superRefine((data, ctx) => {
-        if (data != null && Object.keys(data).length > MAX_ALERT_EVENT_DATA_KEYS) {
-          ctx.addIssue({
-            code: 'custom',
-            message: `data must have at most ${MAX_ALERT_EVENT_DATA_KEYS} keys`,
-          });
-        }
-      }),
-    timestamp: isoDateTime()
-      .optional()
-      .describe(
-        'The ISO datetime when the event occurred at the source. Defaults to the time the request is received.'
-      ),
-    severity: alertEventSeveritySchema.optional(),
-  })
-  .strict();
+      alert_status: externalAlertStatusSchema.optional(),
+      data: z
+        .record(z.string().max(MAX_FIELD_NAME_LENGTH), z.any())
+        .optional()
+        .superRefine((data, ctx) => {
+          if (data != null && Object.keys(data).length > MAX_ALERT_EVENT_DATA_KEYS) {
+            ctx.addIssue({
+              code: 'custom',
+              message: `data must have at most ${MAX_ALERT_EVENT_DATA_KEYS} keys`,
+            });
+          }
+        }),
+      timestamp: isoDateTime()
+        .optional()
+        .describe(
+          'The ISO datetime when the event occurred at the source. Defaults to the time the request is received.'
+        ),
+      severity: alertEventSeveritySchema.optional(),
+    })
+    .strict()
+);
 
 const refineIdentityFields = (
   body: z.infer<typeof createAlertEventBodyBaseObjectSchema>,
@@ -101,17 +107,21 @@ const refineIdentityFields = (
 /**
  * Used as the input schema for the `alerting.create_alert` workflow step.
  */
-export const createAlertEventDataSchema = createAlertEventBodyBaseObjectSchema
-  .extend({
-    source: sourceSchema,
-  })
-  .strict()
-  .superRefine(refineIdentityFields);
+export const createAlertEventDataSchema = lazySchema(() =>
+  createAlertEventBodyBaseObjectSchema
+    .extend({
+      source: sourceSchema,
+    })
+    .strict()
+    .superRefine(refineIdentityFields)
+);
 
-export const createAlertEventResponseSchema = z.object({
-  group_hash: z.string(),
-  alert_id: z.string(),
-});
+export const createAlertEventResponseSchema = lazySchema(() =>
+  z.object({
+    group_hash: z.string(),
+    alert_id: z.string(),
+  })
+);
 
 /** Normalized ingest payload — `source` is always present past the HTTP edge. */
 export type CreateAlertEventData = z.infer<typeof createAlertEventDataSchema>;

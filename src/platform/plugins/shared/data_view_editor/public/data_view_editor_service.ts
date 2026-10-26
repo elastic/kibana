@@ -8,6 +8,8 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { Observable, Subscription } from 'rxjs';
 import {
   BehaviorSubject,
@@ -71,6 +73,7 @@ export interface DataViewEditorServiceConstructorArgs {
 
 interface DataViewEditorState {
   matchedIndices: MatchedIndicesSet;
+  matchedIndicesError?: Error;
   rollupIndicesCaps: RollupIndicesCapsResponse;
   isLoadingSourcesInternal: boolean;
   loadingTimestampFields: boolean;
@@ -82,6 +85,7 @@ interface DataViewEditorState {
 
 const defaultDataViewEditorState: DataViewEditorState = {
   matchedIndices: { ...matchedIndiciesDefault },
+  matchedIndicesError: undefined,
   rollupIndicesCaps: {},
   isLoadingSourcesInternal: false,
   loadingTimestampFields: false,
@@ -94,6 +98,13 @@ export const stateSelectorFactory =
   <S>(state$: Observable<S>) =>
   <R>(selector: (state: S) => R, equalityFn?: (arg0: R, arg1: R) => boolean) =>
     state$.pipe(map(selector), distinctUntilChanged(equalityFn));
+
+const isForbiddenError = (error: unknown): error is IHttpFetchError<ResponseErrorBody> =>
+  isHttpFetchError(error) && error.response?.status === 403;
+
+// the fetch error message is only the status text, the Elasticsearch reason is in the response body
+const getForbiddenErrorMessage = (error: IHttpFetchError<ResponseErrorBody>) =>
+  error.body?.message ?? error.message;
 
 export class DataViewEditorService {
   constructor({
@@ -124,6 +135,7 @@ export class DataViewEditorService {
 
     // public observables
     this.matchedIndices$ = stateSelector((state) => state.matchedIndices);
+    this.matchedIndicesError$ = stateSelector((state) => state.matchedIndicesError);
     this.rollupIndicesCaps$ = stateSelector((state) => state.rollupIndicesCaps);
     this.isLoadingSources$ = stateSelector((state) => state.isLoadingSourcesInternal);
     this.loadingTimestampFields$ = stateSelector((state) => state.loadingTimestampFields);
@@ -191,6 +203,8 @@ export class DataViewEditorService {
   private rollupIndexForProvider$ = new Subject<string | undefined | null>();
 
   matchedIndices$: Observable<MatchedIndicesSet>;
+  // set when the user lacks the privileges to view the indices matching the index pattern
+  matchedIndicesError$: Observable<Error | undefined>;
 
   // alernates between value and undefined so validation can treat new value as thought its a promise
   private matchedIndicesForProvider$ = new Subject<MatchedIndicesSet | undefined>();
@@ -232,37 +246,36 @@ export class DataViewEditorService {
   ): Promise<void> => {
     const currentLoadingMatchedIndicesIdx = ++this.currentLoadingMatchedIndices;
     const isRollupIndex = await this.getIsRollupIndex();
-    const indexRequests = [];
     let newRollupIndexName: string | undefined | null;
 
     this.updateState({ loadingTimestampFields: true });
 
-    if (query?.endsWith('*')) {
-      const exactMatchedQuery = this.getIndicesCached({
-        pattern: query,
-        showAllIndices: allowHidden,
-      });
+    let matchedIndicesError: Error | undefined;
+    // failed requests resolve with no matches instead of rejecting so that `ensureMinimumTime`
+    // still applies, otherwise the validation data provider could resolve with the previous index
+    // pattern before the debounced `setIndexPattern` call starts loading the current one
+    const exactMatchQuery = this.getIndicesCached({
+      pattern: query,
+      showAllIndices: allowHidden,
+    }).catch((error) => {
+      // only insufficient privileges are surfaced
+      if (isForbiddenError(error)) {
+        matchedIndicesError = new Error(getForbiddenErrorMessage(error));
+      }
+      return [];
+    });
+    // the partial match request is only needed when the query doesn't end with a wildcard
+    const partialMatchQuery = query?.endsWith('*')
+      ? Promise.resolve([])
+      : this.getIndicesCached({
+          pattern: `${query}*`,
+          showAllIndices: allowHidden,
+        }).catch(() => []);
 
-      indexRequests.push(exactMatchedQuery);
-      // provide default value when not making a request for the partialMatchQuery
-      indexRequests.push(Promise.resolve([]));
-    } else {
-      const exactMatchQuery = this.getIndicesCached({
-        pattern: query,
-        showAllIndices: allowHidden,
-      });
-      const partialMatchQuery = this.getIndicesCached({
-        pattern: `${query}*`,
-        showAllIndices: allowHidden,
-      });
-
-      indexRequests.push(exactMatchQuery);
-      indexRequests.push(partialMatchQuery);
-    }
-
-    const [exactMatched, partialMatched] = (await ensureMinimumTime(
-      indexRequests
-    )) as MatchedItem[][];
+    const [exactMatched, partialMatched] = (await ensureMinimumTime([
+      exactMatchQuery,
+      partialMatchQuery,
+    ])) as MatchedItem[][];
 
     const matchedIndices = getMatchedIndices(allSources, partialMatched, exactMatched, allowHidden);
 
@@ -292,7 +305,7 @@ export class DataViewEditorService {
         this.updateState({ rollupIndexName: null, rollupCaps: undefined });
       }
 
-      this.updateState({ matchedIndices });
+      this.updateState({ matchedIndices, matchedIndicesError });
     }
   };
 
@@ -315,7 +328,7 @@ export class DataViewEditorService {
     const allSrcs = await this.getIndicesCached({
       pattern: '*',
       showAllIndices: this.allowHidden,
-    });
+    }).catch(() => []);
     await this.loadMatchedIndices(this.indexPattern, this.allowHidden, allSrcs, this.type);
 
     this.updateState({ isLoadingSourcesInternal: false });
@@ -339,7 +352,7 @@ export class DataViewEditorService {
     this.getIndicesMemory[key] =
       this.getIndicesMemory[key] ||
       this.getIsRollupIndex().then((isRollupIndex) =>
-        this.dataViews.getIndices({ ...props, isRollupIndex })
+        this.dataViews.getIndices({ ...props, isRollupIndex, throwOnError: true })
       );
 
     this.getIndicesMemory[key].catch(() => {
@@ -444,7 +457,11 @@ export class DataViewEditorService {
       matchedIndicesPromise,
     ]);
 
-    return { rollupIndex, matchedIndices: matchedIndices || matchedIndiciesDefault };
+    return {
+      rollupIndex,
+      matchedIndices: matchedIndices || matchedIndiciesDefault,
+      matchedIndicesError: this.state$.getValue().matchedIndicesError,
+    };
   };
 
   destroy = () => {

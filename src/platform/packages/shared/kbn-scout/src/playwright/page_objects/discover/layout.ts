@@ -81,7 +81,7 @@ export abstract class DiscoverLayout extends DiscoverSave {
     await switcher.waitFor({ state: 'hidden' });
     // The trigger label renders the committed data view, so it is the only signal that the
     // switch's async `dataViews.get()` has resolved; the popover hides on the click itself.
-    await expect(dataViewSwitch.getByTestId('fullText')).toHaveText(name, { timeout: 30_000 });
+    await expect(dataViewSwitch.getByTestId('fullText')).toHaveText(name);
     if (waitForFieldList) {
       await this.waitUntilFieldListHasCountOfFields();
     }

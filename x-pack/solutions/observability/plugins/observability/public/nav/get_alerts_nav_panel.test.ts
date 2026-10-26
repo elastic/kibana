@@ -68,8 +68,8 @@ describe('getObservabilityAlertsLinkTitle', () => {
     expect(getObservabilityAlertsLinkTitle(false)).toBe('Alerts');
   });
 
-  it('is Alerts (V1) when alerting v2 is enabled', () => {
-    expect(getObservabilityAlertsLinkTitle(true)).toBe('Alerts (V1)');
+  it('is Alerts (Classic) when universal alerting is enabled', () => {
+    expect(getObservabilityAlertsLinkTitle(true)).toBe('Alerts (Classic)');
   });
 });
 
@@ -133,6 +133,7 @@ describe('getAlertsNavPanel', () => {
         title: 'Rule Management',
         children: [
           { link: 'observabilityAlerting:rules-v2' },
+          { link: 'observabilityAlerting:rule-library' },
           { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
         ],
       }),
@@ -233,7 +234,7 @@ describe('getAlertsNavPanel', () => {
         expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
         expect.objectContaining({
           link: 'observability-overview:alerts',
-          title: 'Alerts (V1)',
+          title: 'Alerts (Classic)',
         }),
       ]);
     });
@@ -265,20 +266,22 @@ describe('getAlertsNavPanel', () => {
       enableV2(core);
     });
 
-    it('shows the v2 Rules link without the library when the user has v2 rules read', () => {
+    it('shows the v2 Rules and Rule Library links when the user has v2 rules read', () => {
       setCapabilities(core, { alerting_v2_rules: { read: true } });
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
         { link: 'observabilityAlerting:rules-v2' },
+        { link: 'observabilityAlerting:rule-library' },
         { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
       ]);
     });
 
-    it('does not show the Rule library when the user has v2 rules write', () => {
+    it('shows the v2 Rules and Rule Library links when the user has v2 rules write', () => {
       setCapabilities(core, { alerting_v2_rules: { all: true } });
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
         { link: 'observabilityAlerting:rules-v2' },
+        { link: 'observabilityAlerting:rule-library' },
         { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
       ]);
     });
@@ -301,6 +304,7 @@ describe('getAlertsNavPanel', () => {
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
         { link: 'observabilityAlerting:rules-v2' },
+        { link: 'observabilityAlerting:rule-library' },
         { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
       ]);
     });

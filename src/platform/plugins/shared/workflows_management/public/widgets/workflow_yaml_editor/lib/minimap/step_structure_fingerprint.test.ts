@@ -17,6 +17,7 @@ const makeStep = (
   stepId: 'step',
   stepType: 'wait',
   stepYamlNode: new YAML.YAMLMap(),
+  path: ['steps', 0],
   propInfos: {},
   ...overrides,
 });

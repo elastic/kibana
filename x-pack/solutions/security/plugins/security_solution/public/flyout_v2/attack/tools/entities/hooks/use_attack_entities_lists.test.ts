@@ -11,10 +11,13 @@ import { useQueryAlerts } from '../../../../../detections/containers/detection_e
 
 jest.mock('@kbn/entity-store/public', () => {
   const actual = jest.requireActual('@kbn/entity-store/public');
-  const { euid } = jest.requireActual('@kbn/entity-store/common/euid_helpers');
+  const { euid, getBuiltInEntityDefinition } = jest.requireActual(
+    '@kbn/entity-store/common/euid_helpers'
+  );
+  const euidApi = { euid, getBuiltInEntityDefinition };
   return {
     ...actual,
-    useEntityStoreEuidApi: jest.fn(() => ({ euid })),
+    useEntityStoreEuidApi: jest.fn(() => euidApi),
   };
 });
 

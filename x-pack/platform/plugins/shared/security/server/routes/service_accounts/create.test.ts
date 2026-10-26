@@ -392,6 +392,13 @@ describe('Create service account route', () => {
       ]);
     });
 
+    // Platform assumers come from server-side callers only, never from a browser.
+    it('rejects `platformAssumers`, which only the server contract accepts', () => {
+      expect(issuesFor({ ...requestBody, platformAssumers: ['relay'] })).toEqual([
+        expect.objectContaining({ code: 'unrecognized_keys', keys: ['platformAssumers'] }),
+      ]);
+    });
+
     it('rejects organization_id, which Kibana derives from cloud context', () => {
       expect(issuesFor({ ...requestBody, organization_id: 'other-organization' })).toEqual([
         expect.objectContaining({ code: 'unrecognized_keys', keys: ['organization_id'] }),

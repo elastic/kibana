@@ -248,19 +248,38 @@ describe('GET all roles', () => {
             ? {
                 queryResponses: [
                   () => ({
-                    total: 2,
-                    count: 2,
+                    total: 4,
+                    count: 4,
                     roles: [
                       { name: 'custom', ...customRole },
                       { name: 'viewer', ...builtinRole },
+                      { name: '_alertzero_alert_triage', ...builtinRole },
+                      { name: '_alertzero_custom', ...customRole },
                     ],
                   }),
                 ],
               }
-            : { apiResponse: () => ({ custom: customRole, viewer: builtinRole }) }),
+            : {
+                apiResponse: () => ({
+                  custom: customRole,
+                  viewer: builtinRole,
+                  _alertzero_alert_triage: builtinRole,
+                  _alertzero_custom: customRole,
+                }),
+              }),
           asserts: {
             statusCode: 200,
             result: [
+              ...(buildFlavor === 'traditional'
+                ? [
+                    {
+                      ...returnedRole,
+                      name: '_alertzero_alert_triage',
+                      metadata: { _reserved: true },
+                    },
+                  ]
+                : []),
+              { ...returnedRole, name: '_alertzero_custom', metadata: {} },
               { ...returnedRole, name: 'custom', metadata: {} },
               ...(buildFlavor === 'traditional' || includeReservedRoles
                 ? [{ ...returnedRole, name: 'viewer', metadata: { _reserved: true } }]

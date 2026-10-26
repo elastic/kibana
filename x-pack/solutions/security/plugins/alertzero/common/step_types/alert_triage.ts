@@ -12,8 +12,12 @@ import { z } from '@kbn/zod/v4';
 
 export const TRIAGE_HEADROOM_STEP_ID = 'alertzero.triage.headroom' as const;
 export const TRIAGE_PLAN_SWEEP_STEP_ID = 'alertzero.triage.planSweep' as const;
+export const TRIAGE_LOAD_ALERTS_STEP_ID = 'alertzero.triage.loadAlerts' as const;
 
 const idSchema = z.string().trim().min(1).max(256);
+
+/** The longest sweep interval the Worker settings accept: `WorkerScheduleInterval` is at most five digits and a unit, so `99999d`. */
+const MAX_INTERVAL_MINUTES = 99_999 * 24 * 60;
 
 const headroomSchema = z.object({
   status: z.enum(['ok', 'behind', 'unknown']),
@@ -50,8 +54,11 @@ const planSweepInputSchema = z.object({
     'Alert Analysis tag prefix. An alert carrying it was analysed outside this Worker.'
   ),
   budget_per_hour: z.number().int().min(1).max(100_000),
-  interval_minutes: z.number().int().min(1).max(1440),
+  interval_minutes: z.number().int().min(1).max(MAX_INTERVAL_MINUTES),
   lookback_hours: z.number().int().min(1).max(8760),
+  min_severity: z.enum(['low', 'medium', 'high', 'critical']),
+  exclude_building_blocks: z.boolean(),
+  excluded_rule_tags: z.array(z.string().min(1).max(256)).max(50),
   headroom: headroomSchema.describe('Output of the headroom step.'),
 });
 
@@ -100,4 +107,32 @@ export const triagePlanSweepStepCommonDefinition: CommonStepDefinition<
   stability: 'tech_preview',
   inputSchema: planSweepInputSchema,
   outputSchema: planSweepOutputSchema,
+};
+
+const loadAlertsInputSchema = z.object({
+  alert_ids: z.array(idSchema).min(1).max(100).describe('Alerts of one triage batch.'),
+});
+
+const loadAlertsOutputSchema = z.object({
+  alerts: z
+    .array(z.record(z.string(), z.unknown()))
+    .describe('Alert documents with `_id` and `_index`, in the shape Alert Analysis takes.'),
+  missing_alert_ids: z.array(z.string()).describe('Ids that no longer match an alert.'),
+});
+
+export const triageLoadAlertsStepCommonDefinition: CommonStepDefinition<
+  typeof loadAlertsInputSchema,
+  typeof loadAlertsOutputSchema
+> = {
+  id: TRIAGE_LOAD_ALERTS_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageLoadAlerts.label', {
+    defaultMessage: 'Load triage batch alerts',
+  }),
+  description: i18n.translate('xpack.alertzero.workflows.steps.triageLoadAlerts.description', {
+    defaultMessage: 'Loads the alert documents of a triage batch by id.',
+  }),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: loadAlertsInputSchema,
+  outputSchema: loadAlertsOutputSchema,
 };

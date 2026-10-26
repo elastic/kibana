@@ -35,7 +35,7 @@ import { EsqlFunctionNames } from '../function_names';
 const toIntegerDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_INTEGER,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_integer', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_integer', {
     defaultMessage:
       'Converts an input value to an integer value.\nIf the input parameter is of a date type, its value will be interpreted as milliseconds\nsince the Unix epoch, converted to integer.\nBoolean `true` will be converted to integer `1`, `false` to `0`.',
   }),
@@ -292,7 +292,7 @@ const toIntegerDefinition: FunctionDefinition = {
 const toIpDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_IP,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_ip', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_ip', {
     defaultMessage: 'Converts an input string to an IP value.',
   }),
   preview: false,
@@ -422,7 +422,7 @@ const toIpDefinition: FunctionDefinition = {
 const toLongDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_LONG,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_long', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_long', {
     defaultMessage:
       'Converts the input value to a long.\nIf the input parameter is of a date type, its value will be interpreted as milliseconds\nsince the Unix epoch, converted to long.\nBoolean `true` will be converted to long `1`, `false` to `0`.',
   }),
@@ -739,7 +739,7 @@ const toLongDefinition: FunctionDefinition = {
 const toLowerDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_LOWER,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_lower', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_lower', {
     defaultMessage: 'Returns a new string representing the input string converted to lower case.',
   }),
   preview: false,
@@ -796,7 +796,7 @@ const toLowerDefinition: FunctionDefinition = {
 const toRadiansDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_RADIANS,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_radians', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_radians', {
     defaultMessage: 'Converts a number in degrees to radians.',
   }),
   preview: false,
@@ -874,7 +874,7 @@ const toRadiansDefinition: FunctionDefinition = {
 const toRangeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_RANGE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_range', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_range', {
     defaultMessage:
       'Constructs a range from two boundary values. The first argument is the inclusive lower bound; the second is the exclusive upper bound, following the half-open `[from, to)` convention used for all range types in ES|QL. Accepts `datetime` arguments and returns a `date_range`, or accepts `double` arguments and returns a `double_range`.',
   }),
@@ -945,7 +945,7 @@ const toRangeDefinition: FunctionDefinition = {
 const toStringDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_STRING,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_string', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_string', {
     defaultMessage: 'Converts an input value into a string.',
   }),
   preview: false,
@@ -1287,7 +1287,7 @@ const toStringDefinition: FunctionDefinition = {
 const toTdigestDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_TDIGEST,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_tdigest', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_tdigest', {
     defaultMessage:
       'Converts an untyped histogram to a TDigest, assuming the values are centroids.',
   }),
@@ -1353,10 +1353,10 @@ const toTdigestDefinition: FunctionDefinition = {
 const toTextDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_TEXT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_text', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_text', {
     defaultMessage: 'Converts an input value into text.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1407,7 +1407,7 @@ const toTextDefinition: FunctionDefinition = {
 const toTimedurationDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_TIMEDURATION,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_timeduration', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_timeduration', {
     defaultMessage: 'Converts an input value into a `time_duration` value.',
   }),
   preview: false,
@@ -1481,7 +1481,7 @@ const toTimedurationDefinition: FunctionDefinition = {
 const toUnsignedLongDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_UNSIGNED_LONG,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_unsigned_long', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_unsigned_long', {
     defaultMessage:
       'Converts an input value to an unsigned long value. If the input parameter is of a date type,\nits value will be interpreted as milliseconds since the Unix epoch, converted to unsigned long.\nBoolean `true` will be converted to unsigned long `1`, `false` to `0`.',
   }),
@@ -1610,7 +1610,7 @@ const toUnsignedLongDefinition: FunctionDefinition = {
 const toUpperDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_UPPER,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_upper', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_upper', {
     defaultMessage: 'Returns a new string representing the input string converted to upper case.',
   }),
   preview: false,
@@ -1664,7 +1664,7 @@ const toUpperDefinition: FunctionDefinition = {
 const toVersionDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_VERSION,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_version', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_version', {
     defaultMessage: 'Converts an input string to a version value.',
   }),
   preview: false,
@@ -1730,7 +1730,7 @@ const toVersionDefinition: FunctionDefinition = {
 const topSnippetsDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TOP_SNIPPETS,
-  description: i18n.translate('kbn-esql-language.esql.definitions.top_snippets', {
+  description: i18n.translate('esqlLanguage.esql.definitions.top_snippets', {
     defaultMessage:
       'Use `TOP_SNIPPETS` to extract the best snippets for a given query string from a text field.',
   }),
@@ -1874,7 +1874,7 @@ const topSnippetsDefinition: FunctionDefinition = {
 const trangeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TRANGE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.trange', {
+  description: i18n.translate('esqlLanguage.esql.definitions.trange', {
     defaultMessage: 'Filters data for the given time range using the @timestamp attribute.',
   }),
   preview: false,
@@ -2040,7 +2040,7 @@ const trangeDefinition: FunctionDefinition = {
 const trimDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TRIM,
-  description: i18n.translate('kbn-esql-language.esql.definitions.trim', {
+  description: i18n.translate('esqlLanguage.esql.definitions.trim', {
     defaultMessage: 'Removes leading and trailing whitespaces from a string.',
   }),
   preview: false,
@@ -2094,7 +2094,7 @@ const trimDefinition: FunctionDefinition = {
 const urlDecodeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.URL_DECODE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.url_decode', {
+  description: i18n.translate('esqlLanguage.esql.definitions.url_decode', {
     defaultMessage:
       'URL-decodes the input, or returns `null` and adds a warning header to the response if the input cannot be decoded.',
   }),
@@ -2149,7 +2149,7 @@ const urlDecodeDefinition: FunctionDefinition = {
 const urlEncodeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.URL_ENCODE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.url_encode', {
+  description: i18n.translate('esqlLanguage.esql.definitions.url_encode', {
     defaultMessage:
       'URL-encodes the input. All characters are percent-encoded except for alphanumerics, `.`, `-`, `_`, and `~`. Spaces are encoded as `+`.',
   }),
@@ -2202,7 +2202,7 @@ const urlEncodeDefinition: FunctionDefinition = {
 const urlEncodeComponentDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.URL_ENCODE_COMPONENT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.url_encode_component', {
+  description: i18n.translate('esqlLanguage.esql.definitions.url_encode_component', {
     defaultMessage:
       'URL-encodes the input. All characters are percent-encoded except for alphanumerics, `.`, `-`, `_`, and `~`. Spaces are encoded as `%20`.',
   }),
@@ -2255,7 +2255,7 @@ const urlEncodeComponentDefinition: FunctionDefinition = {
 const vCosineDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.V_COSINE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.v_cosine', {
+  description: i18n.translate('esqlLanguage.esql.definitions.v_cosine', {
     defaultMessage: 'Calculates the cosine similarity between two dense_vectors.',
   }),
   preview: false,
@@ -2304,7 +2304,7 @@ const vCosineDefinition: FunctionDefinition = {
 const vDotProductDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.V_DOT_PRODUCT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.v_dot_product', {
+  description: i18n.translate('esqlLanguage.esql.definitions.v_dot_product', {
     defaultMessage: 'Calculates the dot product between two dense_vectors.',
   }),
   preview: false,
@@ -2353,7 +2353,7 @@ const vDotProductDefinition: FunctionDefinition = {
 const vHammingDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.V_HAMMING,
-  description: i18n.translate('kbn-esql-language.esql.definitions.v_hamming', {
+  description: i18n.translate('esqlLanguage.esql.definitions.v_hamming', {
     defaultMessage: 'Calculates the Hamming distance between two dense vectors.',
   }),
   preview: false,
@@ -2402,7 +2402,7 @@ const vHammingDefinition: FunctionDefinition = {
 const vL1NormDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.V_L1_NORM,
-  description: i18n.translate('kbn-esql-language.esql.definitions.v_l1_norm', {
+  description: i18n.translate('esqlLanguage.esql.definitions.v_l1_norm', {
     defaultMessage: 'Calculates the l1 norm between two dense_vectors.',
   }),
   preview: false,
@@ -2451,7 +2451,7 @@ const vL1NormDefinition: FunctionDefinition = {
 const vL2NormDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.V_L2_NORM,
-  description: i18n.translate('kbn-esql-language.esql.definitions.v_l2_norm', {
+  description: i18n.translate('esqlLanguage.esql.definitions.v_l2_norm', {
     defaultMessage: 'Calculates the l2 norm between two dense_vectors.',
   }),
   preview: false,
@@ -2500,7 +2500,7 @@ const vL2NormDefinition: FunctionDefinition = {
 const vMagnitudeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.V_MAGNITUDE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.v_magnitude', {
+  description: i18n.translate('esqlLanguage.esql.definitions.v_magnitude', {
     defaultMessage: 'Calculates the magnitude of a dense_vector.',
   }),
   ignoreAsSuggestion: true,
@@ -2544,7 +2544,7 @@ const vMagnitudeDefinition: FunctionDefinition = {
 const yearDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.YEAR,
-  description: i18n.translate('kbn-esql-language.esql.definitions.year', {
+  description: i18n.translate('esqlLanguage.esql.definitions.year', {
     defaultMessage:
       'Extracts the calendar year from a date, using the query time zone.\nEquivalent to `DATE_EXTRACT("year", date)`.\nThis function accepts a `date` or `date_nanos` value. Unix timestamps in seconds must be converted first.\nFor example: `TO_DATETIME(start * 1000)`.',
   }),
@@ -2597,7 +2597,7 @@ const yearDefinition: FunctionDefinition = {
 const caseDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.CASE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.case', {
+  description: i18n.translate('esqlLanguage.esql.definitions.case', {
     defaultMessage:
       'Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to `true`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.',
   }),

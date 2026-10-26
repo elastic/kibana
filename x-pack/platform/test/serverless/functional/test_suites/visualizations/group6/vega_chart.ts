@@ -43,8 +43,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('vega chart in visualize app', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
+      // import the fixtures and set `defaultIndex` before the first page load, otherwise the browser promotes another data view
       await PageObjects.visualize.initTests();
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickVega');
@@ -91,8 +92,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should render different data in response to filter change', async function () {
           const { spec, isValid } = await PageObjects.vegaChart.getSpecAsJSON();
           expect(isValid).to.be(true);
-          // add SVG renderer to read the Y axis labels
-          const updatedSpec = { ...spec, config: { kibana: { renderer: 'svg' } } };
+          const updatedSpec = {
+            ...spec,
+            data: {
+              ...spec.data,
+              // name the index so the filter bar resolves this data view instead of the ambient default
+              url: { ...spec.data.url, index: PageObjects.visualize.index.LOGSTASH_TIME_BASED },
+            },
+            // add SVG renderer to read the Y axis labels
+            config: { kibana: { renderer: 'svg' } },
+          };
           await PageObjects.vegaChart.fillSpec(JSON.stringify(updatedSpec, null, 2));
           await PageObjects.visEditor.clickGo();
           await PageObjects.visChart.waitForVisualizationRenderingStabilized();

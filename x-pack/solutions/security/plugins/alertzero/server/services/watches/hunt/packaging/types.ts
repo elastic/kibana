@@ -10,6 +10,7 @@ import type {
   PackageReportBehavior,
   PackageReportMintPayload,
 } from '../../../../../common/step_types/package_report';
+import type { CapabilitiesSource } from '../../../fleet/resolve_host_enrollment';
 
 /** One host observed on the current-run SSE, with enrollment resolution applied. */
 export interface CurrentRunHost {
@@ -17,8 +18,13 @@ export interface CurrentRunHost {
   /** Elastic Defend agent id when enrolled; absent when unenrolled or unknown. */
   agentId?: string;
   enrolled: boolean;
-  /** `Endpoint.capabilities` from the endpoint metadata document; `[]` when unknown. */
+  /** `Endpoint.capabilities` from the endpoint metadata document. */
   capabilities: string[];
+  /**
+   * Set for enrolled hosts. `'unavailable'` when the metadata could not be read, so an empty
+   * `capabilities` means nothing is known rather than that the endpoint reports none.
+   */
+  capabilitiesSource?: CapabilitiesSource;
 }
 
 /** Process selector fillable into kill/suspend `parameters`. */
@@ -58,8 +64,7 @@ export type SubjectKind = ActionSubjectKind;
 
 /**
  * One thing packaging could act on. Hosts and processes are reachable when the host is
- * enrolled with an agent id; users and services are always reachable (the identity action
- * is a Kibana API). `value` is the human-readable name the proposal is about.
+ * enrolled with an agent id. `value` is the human-readable name the proposal is about.
  */
 export type Subject =
   | { kind: 'host'; value: string; reachable: boolean; host: CurrentRunHost }
@@ -69,9 +74,7 @@ export type Subject =
       reachable: boolean;
       host: CurrentRunHost;
       processSelector: ProcessSelector;
-    }
-  | { kind: 'user'; value: string; reachable: true }
-  | { kind: 'service'; value: string; reachable: true };
+    };
 
 /** One confirmed Tier 2 behavior, deduped by `technique_id` across current-run SSEs. */
 export interface HuntEvidenceTechnique {

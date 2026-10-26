@@ -9,6 +9,8 @@ import moment from 'moment';
 import { render, screen, act } from '@testing-library/react';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 
+jest.setTimeout(30_000);
+
 const onRefresh = jest.fn();
 
 describe('RulesListAutoRefresh', () => {

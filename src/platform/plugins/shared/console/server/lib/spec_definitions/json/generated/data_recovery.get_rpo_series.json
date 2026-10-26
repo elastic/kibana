@@ -1,0 +1,36 @@
+{
+  "data_recovery.get_rpo_series": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "start": [],
+      "end": [
+        "now"
+      ],
+      "bucket_duration": [
+        "1h",
+        "-1",
+        "0"
+      ],
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_data_recovery/rpo"
+    ],
+    "documentation": "",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-data-recovery-get-rpo-series",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}

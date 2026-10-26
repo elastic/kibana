@@ -148,6 +148,7 @@ function getBlocklistedNodes(
   return serializedWorkspaceState.blocklist.map((serializedNode) => {
     const currentField = allFields.find((field) => field.name === serializedNode.field)!;
     return {
+      id: makeNodeId(serializedNode.field, serializedNode.term),
       x: 0,
       y: 0,
       label: serializedNode.label,

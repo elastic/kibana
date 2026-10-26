@@ -630,6 +630,20 @@
     ]
   },
   {
+    "id": "obs-signals-rum",
+    "name": "Obs UX: Signals & RUM",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/obs-signals-rum-team",
+      "label": "Team:obs-signals-rum"
+    },
+    "responsibilities": [
+      "User Experience / Digital Experience app",
+      "Real User Monitoring (RUM, EDOT Browser, EDOT React Native)",
+      "Sessions and Session Replay"
+    ]
+  },
+  {
     "id": "obs-signals-logs",
     "name": "Obs UX: Signals & Logs",
     "areas": [
@@ -671,7 +685,7 @@
       "observability"
     ],
     "github": {
-      "team": "elastic/observability-bi"
+      "team": "elastic/obs-bi-team"
     }
   },
   {
@@ -770,7 +784,6 @@
     "name": "Search & ML UX",
     "areas": [
       "search",
-      "workplaceai",
       "vectordb",
       "platform"
     ],
@@ -835,16 +848,6 @@
     "github": {
       "team": "elastic/security-detection-engineering",
       "label": "Team:Detection Engineering"
-    }
-  },
-  {
-    "id": "security-detection-platform",
-    "name": "Security Detection Platform",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-detection-platform"
     }
   },
   {
@@ -1003,7 +1006,7 @@
     "id": "workchat-eng",
     "name": "Agent Builder",
     "areas": [
-      "workplaceai"
+      "platform"
     ],
     "github": {
       "team": "elastic/workchat-eng",

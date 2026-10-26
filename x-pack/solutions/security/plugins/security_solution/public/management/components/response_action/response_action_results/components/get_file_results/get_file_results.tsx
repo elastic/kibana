@@ -7,8 +7,8 @@
 
 import React, { memo, useMemo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
-import { EndpointActionFailureMessage } from '../../../../endpoint_action_failure_message';
-import { ResponseActionFileDownloadLink } from '../../../../response_action_file_download_link';
+import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
+import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import type { ActionDetails } from '../../../../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';

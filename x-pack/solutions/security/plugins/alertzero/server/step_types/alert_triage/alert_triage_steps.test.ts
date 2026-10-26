@@ -10,6 +10,7 @@ import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { TM_DELAY_LIMIT_MS } from '../../alert_triage/constants';
 import {
   getTriageHeadroomStepDefinition,
+  getTriageLoadAlertsStepDefinition,
   getTriagePlanSweepStepDefinition,
 } from './alert_triage_steps';
 
@@ -86,6 +87,9 @@ describe('triage plan sweep step', () => {
     budget_per_hour: 600,
     interval_minutes: 10,
     lookback_hours: 24,
+    min_severity: 'low' as const,
+    exclude_building_blocks: false,
+    excluded_rule_tags: [],
   };
 
   it('starts nothing and touches no alert when headroom is behind', async () => {
@@ -113,38 +117,44 @@ describe('triage plan sweep step', () => {
   });
 
   it('plans a batch for a pending alert and claims it', async () => {
+    const pendingAlert = {
+      _id: 'alert-1',
+      _source: {
+        'kibana.alert.rule.uuid': 'rule-a',
+        'kibana.alert.rule.name': 'Rule A name',
+        'kibana.alert.risk_score': 70,
+        'kibana.alert.workflow_status': 'open',
+        'kibana.alert.workflow_tags': [],
+        '@timestamp': new Date().toISOString(),
+      },
+    };
     const callKibanaApi = jest.fn(
-      async ({ path, body }: { path: string; body?: { query?: unknown } }) => {
+      async ({
+        path,
+        body,
+      }: {
+        path: string;
+        body?: { query?: unknown; aggs?: unknown; track_total_hits?: boolean };
+      }) => {
         if (path.includes('/executions'))
           return { status: 200, headers: {}, body: { results: [] } };
-        if (path.endsWith('/signals/search') && JSON.stringify(body).includes('"size":0')) {
+        if (path.endsWith('/signals/search') && body?.track_total_hits === true) {
           return { status: 200, headers: {}, body: { hits: { total: { value: 13 } } } };
         }
-        if (path.endsWith('/signals/search')) {
-          const isClaimedQuery = !JSON.stringify(body?.query).includes('must_not');
+        if (path.endsWith('/signals/search') && body?.aggs !== undefined) {
+          // The unclaimed alerts come back as the top alerts of each rule.
           return {
             status: 200,
             headers: {},
             body: {
-              hits: {
-                hits: isClaimedQuery
-                  ? []
-                  : [
-                      {
-                        _id: 'alert-1',
-                        _source: {
-                          'kibana.alert.rule.uuid': 'rule-a',
-                          'kibana.alert.rule.name': 'Rule A name',
-                          'kibana.alert.risk_score': 70,
-                          'kibana.alert.workflow_status': 'open',
-                          'kibana.alert.workflow_tags': [],
-                          '@timestamp': new Date().toISOString(),
-                        },
-                      },
-                    ],
+              aggregations: {
+                rules: { buckets: [{ top: { hits: { hits: [pendingAlert] } } }] },
               },
             },
           };
+        }
+        if (path.endsWith('/signals/search')) {
+          return { status: 200, headers: {}, body: { hits: { hits: [] } } };
         }
         return { status: 200, headers: {}, body: {} };
       }
@@ -183,5 +193,47 @@ describe('triage plan sweep step', () => {
         },
       })
     );
+  });
+});
+
+describe('triage load alerts step', () => {
+  it('loads the batch documents with _id and _index, as Alert Analysis takes them', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: {
+        hits: {
+          hits: [
+            {
+              _id: 'a-1',
+              _index: '.alerts-security.alerts-default',
+              _source: { '@timestamp': 't', 'kibana.alert.rule.uuid': 'rule-a' },
+            },
+          ],
+        },
+      },
+    });
+
+    const { output } = await getTriageLoadAlertsStepDefinition().handler(
+      createContext({ alert_ids: ['a-1', 'a-2'] }, callKibanaApi)
+    );
+
+    expect(output).toEqual({
+      alerts: [
+        {
+          '@timestamp': 't',
+          // Alert Analysis requires the nested shape, not the index's flat dotted keys.
+          kibana: { alert: { rule: { uuid: 'rule-a' } } },
+          _id: 'a-1',
+          _index: '.alerts-security.alerts-default',
+        },
+      ],
+      // An alert deleted between planning and the batch is reported, not silently dropped.
+      missing_alert_ids: ['a-2'],
+    });
+    expect(callKibanaApi.mock.calls[0][0].body).toEqual({
+      size: 2,
+      query: { ids: { values: ['a-1', 'a-2'] } },
+    });
   });
 });

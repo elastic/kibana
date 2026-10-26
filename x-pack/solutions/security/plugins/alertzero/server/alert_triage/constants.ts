@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { TRIAGE_ALERT_COST, TRIAGE_BATCH_OVERHEAD_COST } from '@kbn/alertzero-common';
+
 /** Largest number of alerts one batch analyses. */
 export const BATCH_ALERT_CAP = 100;
 
@@ -20,17 +22,26 @@ export const IN_FLIGHT_CEILING = 40;
 /** Cluster-wide `workflow:run` delay above which the sweep starts nothing. */
 export const TM_DELAY_LIMIT_MS = 120_000;
 
-/** Cost units a batch costs before its first alert (Investigation, analysis hop, review). */
-export const BATCH_OVERHEAD_COST = 5;
+/**
+ * Cost units a batch costs before its first alert (Investigation, analysis hop, review). Defined
+ * with the settings, which reject a budget that cannot fund a batch.
+ */
+export const BATCH_OVERHEAD_COST = TRIAGE_BATCH_OVERHEAD_COST;
 
 /** Cost units each alert in a batch adds. */
-export const ALERT_COST = 1;
+export const ALERT_COST = TRIAGE_ALERT_COST;
 
 /** Alerts per tag update, so one bulk call never exceeds the alert index's term limits. */
 export const TAG_CHUNK_SIZE = 500;
 
-/** Most alerts one sweep reads. Matches the default `index.max_result_window`. */
+/** Most claimed alerts one sweep reads. Matches the default `index.max_result_window`. */
 export const ALERT_FETCH_LIMIT = 10_000;
+
+/**
+ * Most rules one sweep reads unclaimed alerts for. The planner serves at most `IN_FLIGHT_CEILING`
+ * rules and skips those with a live batch, so a few times the ceiling is ample.
+ */
+export const RULE_FETCH_LIMIT = 5 * IN_FLIGHT_CEILING;
 
 export const TRIAGE_PENDING_TAG = 'az:triage_pending';
 export const TRIAGE_EXEC_TAG_PREFIX = 'az:triage_exec:';
@@ -40,3 +51,8 @@ export const TRIAGE_FAILED_TAG = 'az:triage_failed';
 export const VERDICT_TAGS = ['az:true_positive', 'az:false_positive', 'az:inconclusive'] as const;
 
 export const OPEN_ALERT_STATUSES = ['open', 'acknowledged'] as const;
+
+/** Ascending, so a minimum severity selects its own index and everything after it. */
+export const ALERT_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
+
+export type AlertSeverity = (typeof ALERT_SEVERITIES)[number];

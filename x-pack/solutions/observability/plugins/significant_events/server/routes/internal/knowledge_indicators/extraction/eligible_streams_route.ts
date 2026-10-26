@@ -35,6 +35,7 @@ export interface EligibleStreamsResponse {
   upToDate: SourceCandidate[];
   unsupported: string[];
   skipped: SourceCandidate[];
+  disabled: SourceClassificationResult['disabled'];
   settings: {
     enabled: boolean;
     intervalHours: number;
@@ -64,7 +65,7 @@ const eligibleStreamsRoute = createServerRoute({
     access: 'internal',
     summary: 'List sources eligible for KI extraction',
     description:
-      'Classifies sources into eligible candidates, already-running, up-to-date, unsupported, and skipped buckets based on extraction settings and workflow execution state.',
+      'Classifies sources into eligible candidates, already-running, up-to-date, unsupported, skipped, and disabled buckets based on extraction settings and workflow execution state.',
   },
   security: {
     authz: {
@@ -85,7 +86,6 @@ const eligibleStreamsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    logger,
     workflowClients,
     maintenanceService,
   }): Promise<EligibleStreamsResponse> => {
@@ -137,19 +137,11 @@ const eligibleStreamsRoute = createServerRoute({
     });
     const executions = await streamsKIsOnboardingClient.getRecentExecutions(request);
 
-    const disabledSourceIds = sources.filter((source) => !source.enabled).map(({ id }) => id);
-    if (disabledSourceIds.length > 0) {
-      const ids = disabledSourceIds.join(', ');
-      logger.info(
-        `Continuous onboarding skipped ${disabledSourceIds.length} disabled source(s): ${ids}`
-      );
-    }
-
     const intervalHours =
       query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
 
-    const { alreadyRunning, candidates, upToDate, unsupported } = classifySources({
-      sources: sources.filter((source) => source.enabled),
+    const { alreadyRunning, candidates, upToDate, unsupported, disabled } = classifySources({
+      sources,
       executions,
       intervalHours,
     });
@@ -174,6 +166,7 @@ const eligibleStreamsRoute = createServerRoute({
       upToDate,
       unsupported,
       skipped,
+      disabled,
       settings: {
         enabled,
         intervalHours: intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS,

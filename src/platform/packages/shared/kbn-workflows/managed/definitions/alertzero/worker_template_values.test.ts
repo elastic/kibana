@@ -13,11 +13,9 @@ import DETECTION_RULE_TUNING_YAML from './detection_rule_tuning.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './floor_attack_discovery.yaml';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
-import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './hunt_continuous_threat_hunt.yaml';
 import {
   renderAlertTriageWorkerYaml,
   renderCommonWorkerYaml,
-  renderHuntWorkerYaml,
   renderRuleCoverageWorkerYaml,
   renderRuleTuningWorkerYaml,
   renderScheduledWorkerYaml,
@@ -33,10 +31,14 @@ const workers: Array<[string, (serviceAccountId?: string) => string]> = [
     (serviceAccountId) =>
       renderAlertTriageWorkerYaml(FLOOR_ALERT_TRIAGE_YAML, {
         ...shared,
+        scheduleInterval: '15m',
         extras: {
           autoCloseConfidenceScoreMinThreshold: 0.85,
           budgetPerHour: 1300,
           lookbackHours: 24,
+          minSeverity: 'low',
+          excludeBuildingBlocks: false,
+          excludedRuleTags: [],
         },
         serviceAccountId,
       }),
@@ -54,15 +56,6 @@ const workers: Array<[string, (serviceAccountId?: string) => string]> = [
     'Endpoint analysis',
     (serviceAccountId) =>
       renderCommonWorkerYaml(FORENSICS_ENDPOINT_ANALYSIS_YAML, { ...shared, serviceAccountId }),
-  ],
-  [
-    'Continuous Threat Hunt',
-    (serviceAccountId) =>
-      renderHuntWorkerYaml(HUNT_CONTINUOUS_THREAT_HUNT_YAML, {
-        ...shared,
-        scheduleInterval: '4h',
-        serviceAccountId,
-      }),
   ],
   [
     'Rule Tuning',
@@ -109,5 +102,73 @@ describe('renderRunAs', () => {
     const settings = settingsOf(render(HOSTILE_ID)) as { run_as?: string };
 
     expect(settings.run_as).toBe(HOSTILE_ID);
+  });
+});
+
+describe('Alert Triage sweep rendering', () => {
+  const render = (scheduleInterval: string, excludedRuleTags: string[] = []) =>
+    renderAlertTriageWorkerYaml(FLOOR_ALERT_TRIAGE_YAML, {
+      ...shared,
+      scheduleInterval,
+      extras: {
+        autoCloseConfidenceScoreMinThreshold: 0.85,
+        budgetPerHour: 1300,
+        lookbackHours: 24,
+        minSeverity: 'low',
+        excludeBuildingBlocks: false,
+        excludedRuleTags,
+      },
+    });
+
+  it.each([
+    ['15m', 15],
+    ['2h', 120],
+    ['1d', 1440],
+  ])('renders the %s interval as %i minutes for the budget per sweep', (interval, minutes) => {
+    const rendered = parse(render(interval)) as {
+      triggers: Array<{ type: string; with?: { every: string } }>;
+      consts: { schedule_interval_minutes: number };
+    };
+
+    expect(rendered.triggers.find(({ type }) => type === 'scheduled')?.with?.every).toBe(interval);
+    expect(rendered.consts.schedule_interval_minutes).toBe(minutes);
+  });
+
+  it('renders the settings under consts and leaves no placeholder behind', () => {
+    const rendered = render('15m');
+
+    expect(rendered).not.toMatch(/__WORKER_[A-Z_]+__/);
+    expect(
+      (parse(rendered) as { consts: { worker_settings: { extras: unknown } } }).consts
+        .worker_settings.extras
+    ).toEqual({
+      autoCloseConfidenceScoreMinThreshold: 0.85,
+      budgetPerHour: 1300,
+      lookbackHours: 24,
+      minSeverity: 'low',
+      excludeBuildingBlocks: false,
+      excludedRuleTags: [],
+    });
+  });
+
+  // Rule tags are free-form, and `$` sequences in a string replacement are expanded: `price$$`
+  // would silently become `price$` and stop matching, and `$'` would splice YAML into the document.
+  it.each(['price$$', "a$'b", 'x$`y', '$&', '$1'])(
+    'renders the excluded rule tag %s exactly as typed',
+    (tag) => {
+      const rendered = render('15m', [tag]);
+
+      expect(
+        (
+          parse(rendered) as {
+            consts: { worker_settings: { extras: { excludedRuleTags: string[] } } };
+          }
+        ).consts.worker_settings.extras.excludedRuleTags
+      ).toEqual([tag]);
+    }
+  );
+
+  it('rejects an interval the settings schema would not allow', () => {
+    expect(() => render('90s')).toThrow(/Unsupported schedule interval/);
   });
 });

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import '@kbn/code-editor-mock/jest_helper';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpoint/service/artifacts/constants';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
@@ -42,8 +43,7 @@ describe('CustomYaraSignatureCriteria', () => {
     render();
 
     expect(renderResult.getByTestId('yaraCriteria-os').textContent).toEqual(' OSIS Windows, Linux');
-    expect(renderResult.getByTestId('yaraCriteria-rule')).toHaveTextContent('rule Example');
-    expect(renderResult.getByTestId('yaraCriteria-rule')).toHaveTextContent('condition:');
+    expect(renderResult.getByTestId('yaraCriteria-rule')).toHaveValue(RULE);
     expect(renderResult.queryByText(CUSTOM_YARA_SIGNATURE_FIELD_TYPE)).not.toBeInTheDocument();
   });
 });

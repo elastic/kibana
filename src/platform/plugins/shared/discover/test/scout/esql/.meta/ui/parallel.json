@@ -1,5 +1,5 @@
 {
-  "sha1": "5ea341c57efca1079236dad578fa0221173bd3d0",
+  "sha1": "5dbf2b2234c74ed687e292b6aa35b290de2fa10b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -435,6 +435,19 @@
       }
     },
     {
+      "id": "aee80964b1af3d9-2ec0d7705571eaa",
+      "title": "Discover ES|QL editor autocomplete drives the suggestion widget from the keyboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor_autocomplete.spec.ts",
+        "line": 27,
+        "column": 64
+      }
+    },
+    {
       "id": "4b89e8e1b84f7b8-2215118da8ac58f",
       "title": "Discover ES|QL editor shows an error callout for a malformed query and clears it",
       "expectedStatus": "passed",
@@ -472,6 +485,66 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts",
         "line": 29,
         "column": 5
+      }
+    },
+    {
+      "id": "4b89e8e1b84f7b8-aac83d98d59bcd8",
+      "title": "Discover ES|QL editor prettifies the query when clicking the format button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts",
+        "line": 36,
+        "column": 22
+      }
+    },
+    {
+      "id": "4b89e8e1b84f7b8-489ac5c3585c009",
+      "title": "Discover ES|QL editor submits the query with the Ctrl+Enter keyboard shortcut",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts",
+        "line": 46,
+        "column": 18
+      }
+    },
+    {
+      "id": "4b89e8e1b84f7b8-272ab5ac1f9f0ca",
+      "title": "Discover ES|QL editor shows and updates validation errors in the footer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts",
+        "line": 57,
+        "column": 20
       }
     },
     {
@@ -1008,92 +1081,92 @@
     {
       "id": "7559256b7de2725-d9df4ccfd2ab919",
       "title": "Discover ES|QL visualization persistence renders an ES|QL histogram and updates it for a new time range",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 28,
+        "line": 35,
         "column": 48
       }
     },
     {
       "id": "7559256b7de2725-b111512c2c5891a",
       "title": "Discover ES|QL visualization persistence preserves the chart data view ID after reload with a selected ES|QL control",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 43,
+        "line": 50,
         "column": 24
       }
     },
     {
       "id": "7559256b7de2725-4a53b8e635ec851",
       "title": "Discover ES|QL visualization persistence persists a Line histogram and reverts a shape change",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 81,
+        "line": 88,
         "column": 21
       }
     },
     {
       "id": "7559256b7de2725-b5ef1007684a89a",
       "title": "Discover ES|QL visualization persistence changes an ES|QL histogram to a breakdown and a Lens suggestion",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 101,
+        "line": 108,
         "column": 28
       }
     },
     {
       "id": "7559256b7de2725-5b86a1c0a252ef1",
       "title": "Discover ES|QL visualization persistence retains compatible visualization changes and reverts incompatible query changes",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 121,
+        "line": 128,
         "column": 24
       }
     },
     {
       "id": "7559256b7de2725-20af93919242847",
       "title": "Discover ES|QL visualization persistence saves an invalidated histogram as a Lens suggestion and restores it after a query revert",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 144,
+        "line": 151,
         "column": 24
       }
     },
     {
       "id": "7559256b7de2725-6ecf58a65a18325",
       "title": "Discover ES|QL visualization persistence persists a Lens flyout shape and closes the flyout on revert",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 167,
-        "column": 24
+        "line": 176,
+        "column": 27
       }
     },
     {

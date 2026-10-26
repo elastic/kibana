@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SavedObjectsFindResult } from '@kbn/core/server';
+import type { AttachmentAttributes } from '../../../common/types/domain';
 import { CustomFieldTypes, CaseStatuses, CaseSeverity } from '../../../common/types/domain';
 import { stringify as yamlStringify } from 'yaml';
 import {
@@ -17,10 +19,15 @@ import {
   MAX_USER_ACTIONS_PER_CASE,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  CASE_ATTACHMENT_SAVED_OBJECT,
 } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/constants/owners';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import {
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import { mockCaseComments, mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { Operations } from '../../authorization';
@@ -463,7 +470,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: invalid keys \\"foo\\""`
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Excess keys are not allowed"`
       );
     });
 
@@ -485,7 +492,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field assignees is too long. Array must be of length <= 10.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.assignees: The length of the field assignees is too long. Array must be of length <= 10.'
       );
     });
 
@@ -743,7 +750,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH}.,Invalid value \"A very long category with more than fifty characters!\" supplied to \"cases,category\"`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.category: The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH}.`
       );
     });
 
@@ -763,7 +770,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category field cannot be an empty string.,Invalid value "" supplied to "cases,category"'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.category: The category field cannot be an empty string.'
       );
     });
 
@@ -783,7 +790,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category field cannot be an empty string.,Invalid value "   " supplied to "cases,category"'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.category: The category field cannot be an empty string.'
       );
     });
 
@@ -846,7 +853,7 @@ describe('update', () => {
 
     it('resolves the applied template name and passes it to buildUserActions', async () => {
       clientArgs.services.templatesService.getTemplate.mockResolvedValue({
-        attributes: { name: 'My Template' },
+        attributes: { name: 'My Template', owner: SECURITY_SOLUTION_OWNER, templateId: 'tmpl-1' },
       } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
 
       await bulkUpdate(
@@ -871,8 +878,81 @@ describe('update', () => {
       );
     });
 
-    it('omits the applied template from templateNamesByKey when it cannot be resolved', async () => {
+    it('rejects when the applied template cannot be found', async () => {
       clientArgs.services.templatesService.getTemplate.mockResolvedValue(undefined);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-missing', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-missing version 1 not found');
+    });
+
+    it('rejects when the applied template belongs to a different owner', async () => {
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: {
+          name: 'Other Template',
+          owner: OBSERVABILITY_OWNER,
+          templateId: 'tmpl-other-owner',
+        },
+      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-other-owner', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-other-owner version 1 not found');
+    });
+
+    it('rejects when the template id is empty', async () => {
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: '', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template id must not be empty');
+    });
+
+    it('issues one getTemplate search when multiple cases switch to the same template version', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: { name: 'My Template', owner: SECURITY_SOLUTION_OWNER, templateId: 'tmpl-1' },
+      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
 
       await bulkUpdate(
         {
@@ -880,7 +960,12 @@ describe('update', () => {
             {
               id: mockCases[0].id,
               version: mockCases[0].version ?? '',
-              template: { id: 'tmpl-missing', version: 1 },
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
             },
           ],
         },
@@ -888,11 +973,69 @@ describe('update', () => {
         casesClientMock
       );
 
-      expect(clientArgs.services.userActionService.creator.buildUserActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          templateNamesByKey: new Map(),
-        })
-      );
+      // Both cases share the same template id+version — validation issues one search (not one
+      // per case), and the name-lookup for buildUserActions issues one more = 2 total, not 4.
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledTimes(2);
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith('tmpl-1', '3');
+    });
+
+    it('issues one getTemplate search when multiple cases request the same nonexistent template', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue(undefined);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-missing', version: 1 },
+              },
+              {
+                id: secondCase.id,
+                version: secondCase.version ?? '',
+                template: { id: 'tmpl-missing', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-missing version 1 not found');
+
+      // Both cases share the same nonexistent template — the cached undefined result
+      // is preserved as a null sentinel, so getTemplate is called exactly once.
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects when the fetched template id does not match the requested id', async () => {
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: {
+          name: 'Unrelated Template',
+          owner: SECURITY_SOLUTION_OWNER,
+          templateId: 'tmpl-different',
+        },
+      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-requested', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-requested version 1 not found');
     });
   });
 
@@ -933,9 +1076,15 @@ describe('update', () => {
       args.services.caseService.patchCases.mockResolvedValue({
         saved_objects: patchedCases ?? originalCases,
       });
-      args.services.templatesService.getTemplate.mockResolvedValue({
-        attributes: { name: 'My Template' },
-      } as Awaited<ReturnType<typeof args.services.templatesService.getTemplate>>);
+      args.services.templatesService.getTemplate.mockImplementation((templateId: string) =>
+        Promise.resolve({
+          attributes: {
+            name: 'My Template',
+            owner: SECURITY_SOLUTION_OWNER,
+            templateId,
+          },
+        } as Awaited<ReturnType<typeof args.services.templatesService.getTemplate>>)
+      );
 
       return args;
     };
@@ -1393,7 +1542,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.title: The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
       );
     });
 
@@ -1413,7 +1562,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The title field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.title: The title field cannot be an empty string.'
       );
     });
 
@@ -1433,7 +1582,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The title field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.title: The title field cannot be an empty string.'
       );
     });
 
@@ -1533,7 +1682,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.description: The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
       );
     });
 
@@ -1553,7 +1702,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The description field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.description: The description field cannot be an empty string.'
       );
     });
 
@@ -1573,7 +1722,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The description field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.description: The description field cannot be an empty string.'
       );
     });
 
@@ -1849,7 +1998,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.tags: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
       );
     });
 
@@ -1873,7 +2022,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.tags.0: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
       );
     });
 
@@ -1893,7 +2042,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The tag field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.tags.0: The tag field cannot be an empty string.'
       );
     });
 
@@ -1913,7 +2062,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The tag field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.tags.0: The tag field cannot be an empty string.'
       );
     });
 
@@ -2188,7 +2337,7 @@ describe('update', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: The length of the field customFields is too long. Array must be of length <= 10."`
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: cases.0.customFields: The length of the field customFields is too long. Array must be of length <= 10."`
       );
     });
 
@@ -2403,7 +2552,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Error: The length of the field cases is too long. Array must be of length <= 100.'
+        'Error: cases: The length of the field cases is too long. Array must be of length <= 100.'
       );
     });
 
@@ -2417,7 +2566,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Error: The length of the field cases is too short. Array must be of length >= 1.'
+        'Error: cases: The length of the field cases is too short. Array must be of length >= 1.'
       );
     });
 
@@ -3172,6 +3321,189 @@ describe('update', () => {
     });
   });
 
+  describe('Attack status sync', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    type FoundAttachment = SavedObjectsFindResult<AttachmentAttributes>;
+
+    const attachmentBase = {
+      created_at: '2019-11-25T22:32:30.608Z',
+      created_by: { full_name: 'elastic', email: 'testemail@elastic.co', username: 'elastic' },
+      owner: SECURITY_SOLUTION_OWNER,
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: '2019-11-25T22:32:30.608Z',
+      updated_by: { full_name: 'elastic', email: 'testemail@elastic.co', username: 'elastic' },
+    };
+
+    const caseReference = [
+      { type: 'cases', name: 'associated-cases', id: mockCases[0].id },
+    ] as const;
+
+    const attackAttachment = {
+      type: CASE_ATTACHMENT_SAVED_OBJECT,
+      id: 'mock-attack-attachment-1',
+      attributes: {
+        ...attachmentBase,
+        type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+        attachmentId: 'attack-doc-1',
+        metadata: {
+          title: 'Credential harvesting',
+          alertCount: 1,
+          index: 'alerts-security.attack.discovery.alerts',
+        },
+      },
+      references: [...caseReference],
+      score: 0,
+      updated_at: '2019-11-25T22:32:30.608Z',
+      version: 'WzYsMV0=',
+    } as unknown as FoundAttachment;
+
+    const entityAttachment = {
+      type: CASE_ATTACHMENT_SAVED_OBJECT,
+      id: 'mock-entity-attachment-1',
+      attributes: {
+        ...attachmentBase,
+        type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+        attachmentId: 'host-1',
+        metadata: { entityType: 'host' },
+      },
+      references: [...caseReference],
+      score: 0,
+      updated_at: '2019-11-25T22:32:30.608Z',
+      version: 'WzYsMV0=',
+    } as unknown as FoundAttachment;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+      clientArgs.services.alertsService.updateAlertsStatus.mockResolvedValue(1);
+    });
+
+    const mockAttachments = (savedObjects: FoundAttachment[]) => {
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: savedObjects,
+        total: savedObjects.length,
+        per_page: 10,
+        page: 1,
+      });
+    };
+
+    const patchStatus = async (status: CaseStatuses, closeReason?: string) =>
+      bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              status,
+              ...(closeReason != null ? { closeReason } : {}),
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+    it('closes the attack document and its attached alerts in separate calls', async () => {
+      const alertAttachment = {
+        ...mockCaseComments[3],
+        score: 0,
+        references: [{ ...mockCaseComments[3].references[0], id: mockCases[0].id }],
+      } as unknown as FoundAttachment;
+
+      mockAttachments([attackAttachment, alertAttachment]);
+
+      await patchStatus(CaseStatuses.closed, 'false_positive');
+
+      // Attacks are synced on their own so their updated document count never lands in
+      // `syncedAlertCount`.
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledTimes(2);
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+        {
+          id: 'attack-doc-1',
+          index: 'alerts-security.attack.discovery.alerts',
+          status: CaseStatuses.closed,
+          closingReason: 'false_positive',
+        },
+      ]);
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+        {
+          id: 'test-id',
+          index: 'test-index',
+          status: CaseStatuses.closed,
+          closingReason: 'false_positive',
+        },
+      ]);
+    });
+
+    it('does not count synced attacks towards the synced alert count', async () => {
+      mockAttachments([attackAttachment]);
+
+      const updatedCases = await patchStatus(CaseStatuses['in-progress']);
+
+      expect(updatedCases[0]).not.toHaveProperty('updateSummary');
+    });
+
+    it('syncs an attack attached from the adhoc index', async () => {
+      mockAttachments([
+        {
+          ...attackAttachment,
+          attributes: {
+            ...attackAttachment.attributes,
+            metadata: {
+              title: 'Credential harvesting',
+              alertCount: 0,
+              index: '.adhoc.alerts-security.attack.discovery.alerts',
+            },
+          },
+        } as unknown as FoundAttachment,
+      ]);
+
+      await patchStatus(CaseStatuses['in-progress']);
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+        {
+          id: 'attack-doc-1',
+          index: '.adhoc.alerts-security.attack.discovery.alerts',
+          status: CaseStatuses['in-progress'],
+          closingReason: undefined,
+        },
+      ]);
+    });
+
+    it('moves the attack document to in-progress with the case', async () => {
+      mockAttachments([attackAttachment]);
+
+      await patchStatus(CaseStatuses['in-progress']);
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+        {
+          id: 'attack-doc-1',
+          index: 'alerts-security.attack.discovery.alerts',
+          status: CaseStatuses['in-progress'],
+          closingReason: undefined,
+        },
+      ]);
+    });
+
+    it('ignores attachment types that carry no workflow status', async () => {
+      mockAttachments([entityAttachment]);
+
+      await patchStatus(CaseStatuses.closed, 'false_positive');
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).not.toHaveBeenCalled();
+    });
+  });
+
   describe('Global extended_fields — per-owner key isolation', () => {
     const clientArgs = createCasesClientMockArgs();
 
@@ -3318,6 +3650,8 @@ describe('update', () => {
     // no options inside validateCaseExtendedFields.
     const templateSO = {
       attributes: {
+        templateId: 'tmpl-1',
+        owner: SECURITY_SOLUTION_OWNER,
         name: 'Ref Template',
         definition: yamlStringify({ name: 'Ref Template', fields: [{ $ref: 'resolution' }] }),
       },
@@ -3577,6 +3911,62 @@ describe('update', () => {
       expect(updatedAttributes.extended_fields).toMatchObject({
         priority_as_keyword: 'high',
         count_as_integer: '3',
+      });
+    });
+
+    it('does not reject keys retained from another template version when pairing validates the pinned definition', async () => {
+      // Sequence: a case at template v2 is switched to v1 (all stored keys are intentionally
+      // preserved), then a later customFields update triggers pairing. Post-pairing validation
+      // is pinned to v1, but the merged map still holds the v2-only key the request never wrote.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupMocks(clientArgs, { v2_only_as_keyword: 'kept' });
+      const pinnedCase = {
+        ...mockCases[0],
+        attributes: {
+          ...mockCases[0].attributes,
+          template: { id: 'tmpl-1', version: 1 },
+          extended_fields: { v2_only_as_keyword: 'kept' },
+        },
+      };
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [pinnedCase],
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [pinnedCase],
+      });
+      // v1 of the template defines no fields of its own; `v2_only` only exists in v2.
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: {
+          templateId: 'tmpl-1',
+          owner: mockCases[0].attributes.owner,
+          name: 'Template',
+          definition: yamlStringify({ name: 'Template', fields: [] }),
+        },
+      } as unknown as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields: patchPayload,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock2
+        )
+      ).resolves.not.toThrow();
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      expect(updatedAttributes.extended_fields).toMatchObject({
+        priority_as_keyword: 'high',
+        count_as_integer: '3',
+        v2_only_as_keyword: 'kept',
       });
     });
 

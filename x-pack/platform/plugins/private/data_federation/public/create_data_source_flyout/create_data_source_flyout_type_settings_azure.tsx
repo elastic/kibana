@@ -16,28 +16,19 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
 import type { CreateDataSourceFlyoutFormValues } from './types';
 import type { AzureAuthenticationMode } from './create_data_source_flyout_authentication';
 
 export function CreateDataSourceFlyoutTypeSettingsAzure({
   control,
-  unregister,
 }: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: endpointField } = useController({
     name: 'settings.endpoint',
     control,
   });
-
-  useEffect(() => {
-    return () => {
-      unregister('settings.endpoint');
-    };
-  }, [unregister]);
 
   return (
     <EuiFormRow
@@ -63,19 +54,16 @@ export function CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields({
   authenticationMode,
   areFieldsRequired,
   control,
-  unregister,
 }: {
   authenticationMode: AzureAuthenticationMode;
   areFieldsRequired: boolean;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   if (authenticationMode === 'credentials') {
     return (
       <CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields
         areFieldsRequired={areFieldsRequired}
         control={control}
-        unregister={unregister}
       />
     );
   }
@@ -85,7 +73,6 @@ export function CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields({
       <CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields
         areFieldsRequired={areFieldsRequired}
         control={control}
-        unregister={unregister}
       />
     );
   }
@@ -96,11 +83,9 @@ export function CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields({
 function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
   areFieldsRequired,
   control,
-  unregister,
 }: {
   areFieldsRequired: boolean;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const [isOptionalOpen, setIsOptionalOpen] = useState(false);
   const optionalId = useGeneratedHtmlId({
@@ -149,15 +134,6 @@ function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
       setIsOptionalOpen(true);
     }
   }, [hasOptionalError]);
-
-  useEffect(() => {
-    return () => {
-      unregister('settings.tenant_id');
-      unregister('settings.client_id');
-      unregister('settings.jwt_audience');
-    };
-  }, [unregister]);
-
   return (
     <>
       <EuiFormRow
@@ -244,11 +220,9 @@ function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
 function CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields({
   areFieldsRequired,
   control,
-  unregister,
 }: {
   areFieldsRequired: boolean;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: accountField, fieldState: accountState } = useController({
     name: 'settings.account',
@@ -278,14 +252,6 @@ function CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields({
         }
       : undefined,
   });
-
-  useEffect(() => {
-    return () => {
-      unregister('settings.account');
-      unregister('settings.key');
-    };
-  }, [unregister]);
-
   return (
     <>
       <EuiFormRow

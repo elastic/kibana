@@ -49,6 +49,7 @@ export enum SYNTHETICS_API_URLS {
   PRIVATE_LOCATIONS_MONITORS = `/internal/synthetics/private_locations/monitors`,
   PRIVATE_LOCATION_AGENT_STATS = `/internal/synthetics/private_locations/agent_stats`,
   PRIVATE_LOCATION_OUTDATED_MW_AGENTS = `/internal/synthetics/private_locations/outdated_mw_agents`,
+  PRIVATE_LOCATION_MISSING_COMPLETE_AGENTS = `/internal/synthetics/private_locations/missing_complete_agents`,
   MONITOR_AGENT_ASSIGNMENT = `/internal/synthetics/monitors/{monitorId}/agent_assignment`,
   ENABLE_DEFAULT_ALERTING = `/internal/synthetics/enable_default_alerting`,
   GET_ACTIONS_CONNECTORS = `/internal/synthetics/get_actions_connectors`,
@@ -78,6 +79,8 @@ export enum SYNTHETICS_API_URLS {
   SYNTHETICS_MONITORS_PROJECT_DELETE = '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
 
   DYNAMIC_SETTINGS = `/api/synthetics/settings`,
+  SECRET_CONNECTION = `/internal/synthetics/settings/secret_connection`,
+  FLEET_SECRET_STORAGE_STATUS = `/internal/synthetics/settings/fleet_secret_storage_status`,
   MULTI_SPACE_SETTINGS = `/internal/synthetics/settings_multi_space`,
   CLUSTER_SETTINGS_PRIVILEGES = `/internal/synthetics/settings/cluster_privileges`,
 

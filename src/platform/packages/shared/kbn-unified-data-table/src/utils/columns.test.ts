@@ -9,7 +9,11 @@
 
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { getDisplayedColumns } from './columns';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import {
+  buildDataViewMock,
+  dataViewMock,
+  deepMockedFields,
+} from '@kbn/discover-utils/src/__mocks__';
 
 describe('getDisplayedColumns', () => {
   test('returns default columns given a data view without timefield', async () => {
@@ -35,6 +39,16 @@ describe('getDisplayedColumns', () => {
         "_source",
       ]
     `);
+  });
+  test('returns the time field column when it does not match any field of the data view', async () => {
+    const dataViewWithMissingTimeField = buildDataViewMock({
+      name: 'the-data-view-with-missing-time-field',
+      fields: deepMockedFields,
+      timeFieldName: 'missing_time_field',
+    });
+    expect(getDisplayedColumns(['missing_time_field'], dataViewWithMissingTimeField)).toEqual([
+      'missing_time_field',
+    ]);
   });
   test('returns columns given by argument, no fallback ', async () => {
     const result = getDisplayedColumns(['test'], dataViewWithTimefieldMock);

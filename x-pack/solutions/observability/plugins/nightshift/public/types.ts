@@ -6,7 +6,11 @@
  */
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-investigations-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { InferencePublicStart } from '@kbn/inference-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
 import type { NightshiftSourcesPublicPluginStart } from '@kbn/nightshift-sources-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -27,14 +31,19 @@ export interface NightshiftStartDependencies {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  inference: InferencePublicStart;
   lens: LensPublicStart;
+  licensing: LicensingPluginStart;
+  nightshiftSources: NightshiftSourcesPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   share: SharePluginStart;
   significantEvents: SignificantEventsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  /** Investigation cards and the shared investigations API. */
+  agenticInvestigations?: AgenticInvestigationsPublicPluginStart;
   nightshiftInvestigations?: NightshiftInvestigationsPublicStart;
-  nightshiftSources?: NightshiftSourcesPublicPluginStart;
+  cps?: CPSPluginStart;
   serverless?: ServerlessPluginStart;
   spaces?: SpacesPluginStart;
 }

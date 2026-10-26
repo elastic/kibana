@@ -38,7 +38,7 @@ interface TemplateStep {
   concurrency?: number;
   mode?: string;
   'on-failure'?: object;
-  with?: { query?: string; verifiers?: string[] };
+  with?: { query?: string; verifiers?: string[]; unit_escaped?: string };
   steps?: TemplateStep[];
   else?: TemplateStep[];
 }
@@ -122,6 +122,46 @@ describe('automation template rendering', () => {
     });
 
     expect(yaml).toContain('| WHERE code == \\"__KEEP__\\"');
+  });
+
+  describe('document batches', () => {
+    it('discovers ids only', () => {
+      const query = renderUnitQuery(
+        renderDocumentOrchestrationTemplate(documentValues),
+        'discover_documents'
+      );
+
+      expect(query).toMatch(/\| KEEP _id\s*$/);
+    });
+
+    it('fetches title and body for the batch ids', () => {
+      const definition = parse(renderDocumentOrchestrationTemplate(documentValues));
+      const query = createWorkflowLiquidEngine().parseAndRenderSync(
+        findStep(definition.steps, 'fetch_documents')?.with?.query ?? '',
+        { consts: definition.consts, foreach: { item: [['a'], ['b"c'], ['d\\e'], ['f\ng\rh']] } }
+      );
+
+      expect(query).toContain('| WHERE _id IN ("a", "b\\"c", "d\\\\e", "f\\ng\\rh")');
+      expect(query).toContain('| EVAL body = SUBSTRING(`body`, 1, 12000)');
+      expect(query).toContain('| KEEP _id, `title`, body');
+    });
+
+    it('applies the corpus filter to discovery and to the batch fetch', () => {
+      const definition = parse(
+        renderDocumentOrchestrationTemplate({
+          ...documentValues,
+          corpusFilter: 'WHERE status == "published"',
+        })
+      );
+
+      for (const step of ['discover_documents', 'fetch_documents']) {
+        const query = createWorkflowLiquidEngine().parseAndRenderSync(
+          findStep(definition.steps, step)?.with?.query ?? '',
+          { consts: definition.consts, inputs: {}, foreach: { item: [['a']] } }
+        );
+        expect(query).toContain('| WHERE status == "published"');
+      }
+    });
   });
 
   describe('index metadata', () => {
@@ -266,6 +306,16 @@ describe('automation template rendering', () => {
       for (const step of ['discover_units', 'unit_totals', 'unit_breakdown']) {
         expect(renderUnitQuery(yaml, step)).toContain('| WHERE `Enrollment Year` >= 2018');
       }
+    });
+
+    it('escapes the unit key as an ES|QL string literal', () => {
+      const definition = parse(renderUnitProfileTemplate(unitValues));
+      const unitEscaped = createWorkflowLiquidEngine().parseAndRenderSync(
+        findStep(definition.steps, 'unit_context')?.with?.unit_escaped ?? '',
+        { foreach: { item: ['a"b\\c\nd\re'] } }
+      );
+
+      expect(unitEscaped).toBe('a\\"b\\\\c\\nd\\re');
     });
 
     it('rejects a metric field that would break out of its backticks', () => {

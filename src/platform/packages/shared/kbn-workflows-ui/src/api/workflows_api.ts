@@ -358,7 +358,7 @@ export class WorkflowApi {
   }
 
   // ---------------------------------------------------------------------------
-  // Workflow Template Library
+  // Workflow Template library
   // ---------------------------------------------------------------------------
 
   async getCatalog(params: GetCatalogParams = {}): Promise<GetCatalogResponse> {

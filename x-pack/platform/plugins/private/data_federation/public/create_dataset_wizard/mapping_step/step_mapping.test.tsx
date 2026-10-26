@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { act, fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render, within } from '@testing-library/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { I18nProvider } from '@kbn/i18n-react';
@@ -92,5 +92,39 @@ describe('StepMapping', () => {
     expect(queryByText(createDatasetWizardStrings.comboBoxSelectValidOption)).toBeNull();
     expect(getStepContent().isValid).toBe(true);
     expect(await validate()).toBe(true);
+  });
+
+  it('requires at least one mapped field when Define schema is selected', async () => {
+    const { getByTestId, queryByTestId, getStepContent, validate } = renderStep();
+
+    // Select Define schema (dynamic = false) with no non-timestamp field mapped.
+    await act(async () => {
+      fireEvent.click(getByTestId('createDatasetWizardDefineSchemaCard'));
+    });
+
+    expect(await validate()).toBe(false);
+    expect(
+      within(getByTestId('createDatasetWizardMappingStepErrors')).getByTestId(
+        'createDatasetWizardDefineSchemaRequiresField'
+      )
+    ).toBeInTheDocument();
+    const testSubjsInDocumentOrder = Array.from(
+      document.querySelectorAll(
+        '[data-test-subj="dataFederationMappingEditorAddField"], [data-test-subj="createDatasetWizardMappingStepErrors"]'
+      ),
+      (element) => element.getAttribute('data-test-subj')
+    );
+    expect(testSubjsInDocumentOrder).toEqual([
+      'dataFederationMappingEditorAddField',
+      'createDatasetWizardMappingStepErrors',
+    ]);
+    expect(getStepContent().isValid).toBe(false);
+
+    // Fixing the problem clears the error and revalidates without calling `validate` again.
+    await act(async () => {
+      fireEvent.click(getByTestId('createDatasetWizardInferSchemaCard'));
+    });
+    expect(queryByTestId('createDatasetWizardDefineSchemaRequiresField')).toBeNull();
+    expect(getStepContent().isValid).toBe(true);
   });
 });
