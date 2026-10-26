@@ -1,0 +1,64 @@
+{
+  "10.1.0": [
+    {
+      "pluginId": "workflowsExecutionEngine",
+      "workloadType": "workflow",
+      "workloadId": "workflow-1",
+      "serviceAccountId": "kibana/nightshift-relay",
+      "spaceId": "default",
+      "boundBy": {
+        "type": "user",
+        "username": "elastic",
+        "userProfileId": "u_profile_1"
+      },
+      "boundAt": "2026-10-01T00:00:00.000Z",
+      "canary": "ZW5jcnlwdGVkLWNhbmFyeQ=="
+    },
+    {
+      "pluginId": "workflowsExecutionEngine",
+      "workloadType": "workflow",
+      "workloadId": "workflow-2",
+      "serviceAccountId": "kibana/nightshift-relay",
+      "spaceId": "marketing",
+      "boundBy": {
+        "type": "api_key",
+        "apiKeyId": "api-key-1",
+        "variant": "stack"
+      },
+      "boundAt": "2026-10-02T00:00:00.000Z",
+      "canary": "ZW5jcnlwdGVkLWNhbmFyeQ=="
+    }
+  ],
+  "10.2.0": [
+    {
+      "pluginId": "workflowsExecutionEngine",
+      "workloadType": "workflow",
+      "workloadId": "workflow-1",
+      "serviceAccountId": "kibana/nightshift-relay",
+      "spaceId": "default",
+      "boundBy": {
+        "type": "user",
+        "username": "elastic",
+        "userProfileId": "u_profile_1"
+      },
+      "boundAt": "2026-10-01T00:00:00.000Z",
+      "canary": "ZW5jcnlwdGVkLWNhbmFyeQ==",
+      "bindingKey": "819588a455ff7250dafecd2117b08cf3bbc91e1935faf023e9281c8423a6f681"
+    },
+    {
+      "pluginId": "workflowsExecutionEngine",
+      "workloadType": "workflow",
+      "workloadId": "workflow-2",
+      "serviceAccountId": "kibana/nightshift-relay",
+      "spaceId": "marketing",
+      "boundBy": {
+        "type": "api_key",
+        "apiKeyId": "api-key-1",
+        "variant": "stack"
+      },
+      "boundAt": "2026-10-02T00:00:00.000Z",
+      "canary": "ZW5jcnlwdGVkLWNhbmFyeQ==",
+      "bindingKey": "78020a9900b794f7d154434cbbe2a9f377b9d427bffb1443fe3a889537111559"
+    }
+  ]
+}

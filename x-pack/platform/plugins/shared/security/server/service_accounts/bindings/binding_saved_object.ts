@@ -65,6 +65,13 @@ export interface WorkloadBindingAttributes {
    * that was since changed or removed.
    */
   canary: string;
+  /**
+   * The binding's saved object ID, copied into an attribute so the stale binding cleanup can sort
+   * and page on it. Neither encrypted nor authenticated: it is only read to order the sweep, and
+   * every binding the sweep acts on is read again through its coordinates. Bindings written before
+   * model version 2, or by an older node during an upgrade, may lack it.
+   */
+  bindingKey?: string;
 }
 
 const binderSchemaV1 = schema.oneOf([
@@ -96,6 +103,10 @@ const workloadBindingSchemaV1 = schema.object({
   canary: schema.string(),
 });
 
+const workloadBindingSchemaV2 = workloadBindingSchemaV1.extends({
+  bindingKey: schema.string(),
+});
+
 /**
  * Registers the workload binding type. Called unconditionally, even when service accounts are
  * disabled: a type that appears and disappears with a feature flag leaves documents unreadable
@@ -114,6 +125,8 @@ export const registerWorkloadBindingSavedObjectType = (
       properties: {
         // Answers "which workloads run as this service account?".
         serviceAccountId: { type: 'keyword', ignore_above: 1024 },
+        // The stale binding cleanup sorts and pages on it.
+        bindingKey: { type: 'keyword', ignore_above: 1024 },
         // Mapped so bindings can later be reported on by age without a migration.
         boundAt: { type: 'date' },
         // The management UI groups a service account's workloads by plugin and labels them by
@@ -143,6 +156,26 @@ export const registerWorkloadBindingSavedObjectType = (
         schemas: {
           forwardCompatibility: workloadBindingSchemaV1.extends({}, { unknowns: 'ignore' }),
           create: workloadBindingSchemaV1,
+        },
+      },
+      2: {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: { bindingKey: { type: 'keyword', ignore_above: 1024 } },
+          },
+          {
+            type: 'data_backfill',
+            // Derived from the coordinates rather than read from the document ID, so it is the same
+            // value `getWorkloadBindingId` gives everywhere else.
+            backfillFn: ({ attributes }) => ({
+              attributes: { bindingKey: getWorkloadBindingId(attributes) },
+            }),
+          },
+        ],
+        schemas: {
+          forwardCompatibility: workloadBindingSchemaV2.extends({}, { unknowns: 'ignore' }),
+          create: workloadBindingSchemaV2,
         },
       },
     },
