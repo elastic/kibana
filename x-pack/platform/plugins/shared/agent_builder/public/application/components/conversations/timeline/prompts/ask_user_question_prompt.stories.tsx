@@ -15,7 +15,13 @@ const meta: Meta<typeof AskUserQuestionPrompt> = {
   title: 'Conversations/Timeline/Prompts/Ask User Question',
   component: AskUserQuestionPrompt,
   // Disable auto-action detection to prevent double-logging alongside the explicit action below
-  parameters: { actions: { argTypesRegex: '' } },
+  parameters: {
+    actions: { argTypesRegex: '' },
+    design: {
+      type: 'figma',
+      url: 'https://www.figma.com/design/DUq2xL4hweZ4B5cB2hSV4l/9.5-Deliverables?node-id=1214-54404&m=dev',
+    },
+  },
   args: { promptId: 'prompt-1', onSubmit: action('onSubmit') },
   decorators: [
     (Story) => (
