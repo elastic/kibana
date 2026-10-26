@@ -12,7 +12,6 @@ import { ENDPOINT_ALERTS_INDEX } from '../../../../scripts/endpoint/common/const
 import {
   countEndpointAlertsForAgent,
   deleteDetectionAlertsForAgent,
-  describeEndpointDetectionState,
   getEndpointSecurityAlertsQuery,
   getSecurityRoleApiKey,
   restartEndpointSecurityRule,
@@ -45,22 +44,8 @@ apiTest.describe(
   'Endpoint generated alerts',
   { tag: ['@local-stateful-classic', '@local-serverless-security_complete'] },
   () => {
-    apiTest.afterEach(async ({ esClient, enrolledEndpoint, log }, testInfo) => {
-      try {
-        if (testInfo.status !== testInfo.expectedStatus) {
-          const detectionState = await describeEndpointDetectionState(esClient, enrolledEndpoint, {
-            processArg: EICAR_URL,
-            fileName: EICAR_FILE_NAME,
-          });
-          log.error(`[edr_real_fleet] Endpoint detection state: ${detectionState}`);
-          await testInfo.attach('endpoint-detection-state', {
-            body: detectionState,
-            contentType: 'application/json',
-          });
-        }
-      } finally {
-        await deleteDetectionAlertsForAgent(esClient, enrolledEndpoint.agentId);
-      }
+    apiTest.afterEach(async ({ esClient, enrolledEndpoint }) => {
+      await deleteDetectionAlertsForAgent(esClient, enrolledEndpoint.agentId);
     });
 
     apiTest(
