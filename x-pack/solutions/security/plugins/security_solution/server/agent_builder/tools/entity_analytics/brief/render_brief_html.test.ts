@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +9,6 @@
  * 2.0.
  */
 
-/**
- * @jest-environment jsdom
- */
 // The sanitiser the card runs the brief through, DOMPurify, needs a DOM.
 
 import { CUSTOM_CONTENT_MAX_HEIGHT } from '@kbn/custom-content-common';
