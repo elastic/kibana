@@ -77,7 +77,7 @@ const lookupEntry = (
   const res = runGcloud([
     'dataplex',
     'entries',
-    'lookup',
+    'describe',
     entryId,
     '--project',
     project,

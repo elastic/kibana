@@ -90,7 +90,7 @@ describe('dataplexCmd sync', () => {
 
   const gcloudCalls = () => mockedSpawnSync.mock.calls.map(([, args]) => args as readonly string[]);
 
-  it('looks up an existing entry by positional ID and entry group, then updates it', async () => {
+  it('describes an existing entry by positional ID and entry group, then updates it', async () => {
     mockedSpawnSync
       .mockReturnValueOnce(result(0))
       .mockReturnValueOnce(result(0))
@@ -101,7 +101,7 @@ describe('dataplexCmd sync', () => {
     expect(gcloudCalls()[1]).toEqual([
       'dataplex',
       'entries',
-      'lookup',
+      'describe',
       entryId,
       '--project',
       project,
@@ -122,9 +122,9 @@ describe('dataplexCmd sync', () => {
   });
 
   it.each([
-    ['NOT_FOUND', 'ERROR: (gcloud.dataplex.entries.lookup) NOT_FOUND: Entry was not found'],
-    ['status 404', 'ERROR: (gcloud.dataplex.entries.lookup) Status code: 404'],
-  ])('creates after a confirmed %s lookup response', async (_label, diagnostic) => {
+    ['NOT_FOUND', 'ERROR: (gcloud.dataplex.entries.describe) NOT_FOUND: Entry was not found'],
+    ['status 404', 'ERROR: (gcloud.dataplex.entries.describe) Status code: 404'],
+  ])('creates after a confirmed %s describe response', async (_label, diagnostic) => {
     mockedSpawnSync
       .mockReturnValueOnce(result(0))
       .mockReturnValueOnce(result(1, diagnostic))
@@ -141,8 +141,8 @@ describe('dataplexCmd sync', () => {
     expect(logMessages).toContain(`Created: ${entryId}`);
   });
 
-  it('preserves other lookup failures and performs no write', async () => {
-    const diagnostic = 'ERROR: (gcloud.dataplex.entries.lookup) UNAVAILABLE: backend unavailable';
+  it('preserves other describe failures and performs no write', async () => {
+    const diagnostic = 'ERROR: (gcloud.dataplex.entries.describe) UNAVAILABLE: backend unavailable';
     mockedSpawnSync.mockReturnValueOnce(result(0)).mockReturnValueOnce(result(1, diagnostic));
 
     await expect(runCommand()).rejects.toThrow(diagnostic);
@@ -156,7 +156,7 @@ describe('dataplexCmd sync', () => {
     mockedSpawnSync
       .mockReturnValueOnce(result(0))
       .mockReturnValueOnce(
-        result(1, 'ERROR: (gcloud.dataplex.entries.lookup) NOT_FOUND: Entry was not found')
+        result(1, 'ERROR: (gcloud.dataplex.entries.describe) NOT_FOUND: Entry was not found')
       )
       .mockReturnValueOnce(result(1, diagnostic));
 
@@ -167,7 +167,7 @@ describe('dataplexCmd sync', () => {
     mockedSpawnSync
       .mockReturnValueOnce(result(0))
       .mockReturnValueOnce(
-        result(1, 'ERROR: (gcloud.dataplex.entries.lookup) NOT_FOUND: Entry was not found')
+        result(1, 'ERROR: (gcloud.dataplex.entries.describe) NOT_FOUND: Entry was not found')
       )
       .mockReturnValueOnce(
         result(
