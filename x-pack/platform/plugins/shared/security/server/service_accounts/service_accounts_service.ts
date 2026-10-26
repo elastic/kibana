@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
+
 import type {
   AuthenticatedUser,
   IClusterClient,
@@ -19,10 +21,16 @@ import type {
   AuditServiceSetup,
   CheckPrivilegesWithRequest,
 } from '@kbn/security-plugin-types-server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 
 import {
   SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
   ServiceAccountWorkloadBindings,
+  StaleBindingCleanupTask,
+  StaleBindingReaper,
   WorkloadBindingStore,
 } from './bindings';
 import { SERVICE_ACCOUNT_CREDENTIAL_TYPE, ServiceAccountCredentialStore } from './credentials';
@@ -36,6 +44,7 @@ import type {
 import { UiamServiceAccounts } from './uiam_service_accounts';
 import type { SecurityLicense } from '../../common';
 import type { ConfigType } from '../config';
+import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import type { UiamServicePublic } from '../uiam';
 
 export interface ServiceAccountsServiceStartParams {
@@ -58,10 +67,25 @@ export interface ServiceAccountsServiceStartParams {
   getSpaceId: (request: KibanaRequest) => string;
   /** What Core knows about the workload types plugins register. */
   workloadTypes: CoreSecurityDelegateServiceAccounts;
+  taskManager: TaskManagerStartContract;
+  /** Emits whenever Elasticsearch becomes available, which is when the cleanup task is scheduled. */
+  online$: Observable<OnlineStatusRetryScheduler>;
 }
 
 export class ServiceAccountsService {
-  constructor(private readonly logger: Logger) {}
+  private readonly cleanupTask: StaleBindingCleanupTask;
+
+  constructor(private readonly logger: Logger) {
+    this.cleanupTask = new StaleBindingCleanupTask(this.logger.get('binding-cleanup'));
+  }
+
+  setup({ taskManager }: { taskManager: TaskManagerSetupContract }): void {
+    this.cleanupTask.setup({ taskManager });
+  }
+
+  stop(): void {
+    this.cleanupTask.stop();
+  }
 
   /**
    * Returns the service account management API, or `null` when service accounts
@@ -83,9 +107,22 @@ export class ServiceAccountsService {
     getCurrentUserProfileId,
     getSpaceId,
     workloadTypes,
+    taskManager,
+    online$,
   }: ServiceAccountsServiceStartParams): ServiceAccountsServiceStart | null {
+    const { bindingCleanup } = config.serviceAccounts;
+    const startCleanupTask = (reaper?: StaleBindingReaper) =>
+      this.cleanupTask.start({
+        taskManager,
+        reaper,
+        isAvailable: () => license.isEnabled() && canEncrypt,
+        interval: `${bindingCleanup.interval.asSeconds()}s`,
+        online$,
+      });
+
     if (!config.serviceAccounts.enabled) {
       this.logger.debug('Service accounts are not enabled.');
+      startCleanupTask();
       return null;
     }
 
@@ -162,6 +199,19 @@ export class ServiceAccountsService {
       isEncryptionError: encryptedSavedObjects.isEncryptionError,
       logger: bindingsLogger,
     });
+
+    startCleanupTask(
+      new StaleBindingReaper({
+        logger: this.logger.get('binding-cleanup'),
+        store,
+        backend,
+        workloadTypes,
+        audit,
+        gracePeriodMs: bindingCleanup.gracePeriod.asMilliseconds(),
+        unregisteredTypeGracePeriodMs: bindingCleanup.unregisteredTypeGracePeriod.asMilliseconds(),
+        dryRun: bindingCleanup.dryRun,
+      })
+    );
 
     return {
       backend,

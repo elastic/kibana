@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EMPTY } from 'rxjs';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
@@ -15,6 +17,7 @@ import {
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { EsServiceAccounts } from './es_service_accounts';
 import { ServiceAccountsService } from './service_accounts_service';
@@ -63,6 +66,8 @@ describe('ServiceAccountsService', () => {
       getCurrentUserProfileId: jest.fn().mockResolvedValue(null),
       getSpaceId: jest.fn().mockReturnValue('default'),
       workloadTypes: securityServiceMock.createDelegateHandle().serviceAccounts,
+      taskManager: taskManagerMock.createStart(),
+      online$: EMPTY,
       ...overrides,
     };
   };
