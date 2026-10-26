@@ -15,7 +15,6 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import type { EuiContextMenuPanelDescriptor, IconType } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiCheckbox,
   EuiContextMenu,
   EuiIcon,
   EuiIconTip,
@@ -39,6 +38,7 @@ import {
   DEFAULT_QUICK_ACTIONS,
   EmbeddableRendererContext,
 } from '../../embeddable_renderer_context';
+import { PanelSelectCheckbox } from './panel_select_checkbox';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {
@@ -357,37 +357,6 @@ export const PresentationPanelHoverActions = ({
     [setDragHandle, euiTheme.size.xs]
   );
 
-  // The checkbox only exists in selection mode and lives in the panel's top right corner (see
-  // `.embPanel__selectPanel` styles) rather than in the floating hover bar, which is gone in that mode
-  const selectPanelLabel = selection?.isSelected
-    ? i18n.translate('embeddableApi.deselectPanel', {
-        defaultMessage: 'Deselect panel',
-      })
-    : i18n.translate('embeddableApi.selectPanel', {
-        defaultMessage: 'Select panel',
-      });
-  const selectCheckbox = selection?.isSelectionMode ? (
-    <div className="embPanel__selectPanel" data-test-subj="embeddablePanelSelectPanel">
-      <EuiToolTip content={selectPanelLabel} disableScreenReaderOutput>
-        <EuiCheckbox
-          id={`embeddablePanelSelect-${api.uuid}`}
-          className="embPanel--selectPanel"
-          // round variant of the EUI checkbox: only the shape changes, colors, check icon and focus
-          // ring stay EUI's. EUI exposes no shape prop, so the faux control is targeted directly.
-          css={css`
-            .euiCheckboxControl {
-              border-radius: 50%;
-            }
-          `}
-          checked={selection.isSelected}
-          aria-label={selectPanelLabel}
-          data-test-subj="embeddablePanelSelectToggle"
-          onChange={selection.toggle}
-        />
-      </EuiToolTip>
-    </div>
-  ) : null;
-
   const showContextMenu = useMemo(() => {
     return contextMenuPanels.some(({ items }) => items?.length);
   }, [contextMenuPanels]);
@@ -403,7 +372,11 @@ export const PresentationPanelHoverActions = ({
         >
           {dragHandle}
         </span>
-        {selectCheckbox}
+        <PanelSelectCheckbox
+          panelId={api.uuid}
+          isSelected={selection.isSelected}
+          onToggle={selection.toggle}
+        />
       </>
     );
   }
