@@ -418,6 +418,42 @@ describe('assertEsqlGroundedInReport', () => {
           reason: 'query filters on a value intel review rejected (drive.google.com)',
         });
       });
+
+      it('rejects an eligible URL under a full-text function, whose tokens OR the rejected host', () => {
+        const download = 'https://drive.google.com/uc?export=download&id=payload';
+        const repo = 'https://github.com/attacker/stage2';
+        const text = `AssumeRole preceded the pull from ${download} and the clone of ${repo}.`;
+        const eligibleWins = {
+          reportText: text,
+          iocValues: [download, repo],
+          excludedIocValues: ['drive.google.com', 'github.com'],
+        };
+        expect(
+          assertEsqlGroundedInReport(
+            `FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" AND MATCH(message, "${download}") | LIMIT 10`,
+            eligibleWins
+          )
+        ).toEqual({
+          ok: false,
+          reason: 'query filters on a value intel review rejected (drive.google.com)',
+        });
+        expect(
+          assertEsqlGroundedInReport(
+            `FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" AND message : "${repo}" | LIMIT 10`,
+            eligibleWins
+          )
+        ).toEqual({
+          ok: false,
+          reason: 'query filters on a value intel review rejected (github.com)',
+        });
+        // Exact and pattern operators still take the eligible URL as itself.
+        expect(
+          assertEsqlGroundedInReport(
+            `FROM logs-* | WHERE url.full == "${download}" OR url.full LIKE "*github.com/attacker/stage2*" | LIMIT 10`,
+            eligibleWins
+          ).ok
+        ).toBe(true);
+      });
     });
   });
 

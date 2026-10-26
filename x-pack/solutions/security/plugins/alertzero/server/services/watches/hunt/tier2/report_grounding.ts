@@ -502,38 +502,80 @@ const unescapeRegex = (value: string): string =>
  * tokens it refuses to ground positively (`MATCH` on a dotted IP/domain, `RLIKE` with parens or
  * quantifiers, `NOT RLIKE`) and would fail open here. A literal carries a rejected value when a
  * wildcard-free or regex-unescaped fragment equals one or embeds one as a term, unless it is an
- * eligible IOC or a distinguishing substring of one. The whole literal is tried first: an exact
- * eligible URL carrying `?` in its query string is the hunt the run asked for, not a pattern
- * whose `?`-split prefix happens to end at the rejected host.
+ * eligible IOC or a distinguishing substring of one.
+ *
+ * What the operator does with the literal decides how much of that exemption applies. Under an
+ * exact operator (`==`, `IN`) the whole literal is tried first: an exact eligible URL carrying
+ * `?` in its query string is the hunt the run asked for, not a pattern whose `?`-split prefix
+ * happens to end at the rejected host. Under a full-text or query-string function (`MATCH`,
+ * `:`, `QSTR`) there is no exemption at all: the literal is analyzed into tokens that `OR`
+ * together, so an eligible URL under `MATCH` matches events carrying only its rejected host.
  */
+const EXACT_VALUE_OPERATORS: ReadonlySet<string> = new Set(['==', '!=', 'in', 'not in']);
+
+const asLiteral = (node: ESQLAstNode): ESQLLiteral | undefined =>
+  !Array.isArray(node) && 'type' in node && node.type === 'literal' ? node : undefined;
+
+/** The literal nodes an operator reads directly, through an `IN (...)` list or parentheses. */
+const literalArgsOf = (fn: ESQLFunction): ESQLLiteral[] =>
+  fn.args.flatMap((arg) => {
+    if (Array.isArray(arg)) return [];
+    const direct = asLiteral(arg);
+    if (direct) return [direct];
+    if (arg.type === 'list') {
+      return (arg as ESQLList).values.flatMap((value) => asLiteral(value) ?? []);
+    }
+    if (arg.type === 'parens' && !Array.isArray(arg.child)) {
+      return asLiteral(arg.child) ?? [];
+    }
+    return [];
+  });
+
 const rejectedValueCarriedBy = (
   query: ESQLAstQueryExpression,
   rejected: ReadonlySet<string>,
   eligible: ReadonlySet<string>
 ): string | undefined => {
+  const exactLiterals = new Set<ESQLLiteral>();
+  const tokenizedLiterals = new Set<ESQLLiteral>();
+  Walker.walk(query, {
+    visitFunction: (fn) => {
+      const operator = fn.name.toLowerCase();
+      if (EXACT_VALUE_OPERATORS.has(operator)) {
+        for (const literal of literalArgsOf(fn)) exactLiterals.add(literal);
+      } else if (FULL_TEXT_FUNCTIONS.has(operator) || QUERY_STRING_FUNCTIONS.has(operator)) {
+        for (const literal of literalArgsOf(fn)) tokenizedLiterals.add(literal);
+      }
+    },
+  });
+
   let found: string | undefined;
   Walker.walk(query, {
     visitLiteral: (literal) => {
       if (found !== undefined) return;
       const stripped = valueOf(literal).replace(REGEXP_SURROUND, '');
-      const whole = normalize(stripped);
-      if (
-        eligible.has(whole) ||
-        (whole.length >= MIN_GROUNDING_LENGTH && isSpecificToEligibleIoc(whole, rejected, eligible))
-      ) {
-        return;
+      const tokenized = tokenizedLiterals.has(literal);
+      if (exactLiterals.has(literal)) {
+        const whole = normalize(stripped);
+        if (
+          eligible.has(whole) ||
+          (whole.length >= MIN_GROUNDING_LENGTH &&
+            isSpecificToEligibleIoc(whole, rejected, eligible))
+        ) {
+          return;
+        }
       }
       const unescaped = unescapeRegex(stripped);
       const candidates = [...stripped.split(LIKE_WILDCARDS), ...unescaped.split(LIKE_WILDCARDS)];
       for (const candidate of candidates) {
         const value = normalize(candidate);
         if (value.length < MIN_GROUNDING_LENGTH) continue;
-        if (eligible.has(value)) continue;
+        if (!tokenized && eligible.has(value)) continue;
         if (rejected.has(value)) {
           found = value;
           return;
         }
-        if (isSpecificToEligibleIoc(value, rejected, eligible)) continue;
+        if (!tokenized && isSpecificToEligibleIoc(value, rejected, eligible)) continue;
         for (const rejectedValue of rejected) {
           if (appearsAsTerm(value, rejectedValue)) {
             found = rejectedValue;
