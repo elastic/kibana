@@ -11,6 +11,8 @@ import type { ConsoleTestSetup } from '../../../mocks';
 import { getConsoleTestSetup } from '../../../mocks';
 import type { CommandArgumentValueSelectorProps } from '../../../types';
 
+jest.setTimeout(30_000); // Costly: every case mounts the whole Console to reach the argument selector
+
 describe('Console: ArgumentSelectorWrapper', () => {
   let testSetup: ConsoleTestSetup;
   let renderResult: ReturnType<ConsoleTestSetup['renderConsole']>;
