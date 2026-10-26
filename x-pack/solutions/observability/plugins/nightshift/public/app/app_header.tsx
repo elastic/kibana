@@ -57,6 +57,15 @@ const sandboxSecretsLabel = i18n.translate('xpack.nightshift.sandboxSecretsLinkL
   defaultMessage: 'Sandbox secrets',
 });
 
+const investigateLabel = i18n.translate('xpack.nightshift.header.investigateButtonText', {
+  defaultMessage: 'Investigate',
+});
+
+const startInvestigationEbtProps = getEbtProps({
+  action: NIGHTSHIFT_EBT_ACTIONS.OPEN_START_INVESTIGATION,
+  element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
+});
+
 const settingsEbtProps = getEbtProps({
   action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SETTINGS,
   element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
@@ -106,6 +115,8 @@ export interface NightshiftAppHeaderProps {
   onSandboxSecretsClick?: () => void;
   onAutomationsClick?: () => void | Promise<void>;
   automationsHref?: string;
+  /** Renders "Investigate" (opens the start investigation panel) as the primary action when set. */
+  onStartInvestigationClick?: () => void;
   tabs?: AppHeaderTab[];
   back?: AppHeaderBack;
 }
@@ -123,6 +134,7 @@ export function NightshiftAppHeader({
   onSandboxSecretsClick,
   onAutomationsClick,
   automationsHref,
+  onStartInvestigationClick,
   tabs,
   back,
 }: NightshiftAppHeaderProps): React.ReactElement {
@@ -133,6 +145,18 @@ export function NightshiftAppHeader({
   const isSettingsPage = page === 'settings';
   const menu = useMemo<AppMenuConfig>(
     () => ({
+      ...(onStartInvestigationClick && {
+        primaryActionItem: {
+          id: 'nightshiftStartInvestigation',
+          label: investigateLabel,
+          iconType: 'inspect',
+          testId: 'o11yNightshiftAppStartInvestigationButton',
+          run: (params?: AppMenuRunActionParams) => {
+            applyEbtProps(startInvestigationEbtProps, params);
+            onStartInvestigationClick();
+          },
+        },
+      }),
       items: [
         ...(onAutomationsClick && automationsHref && !isAutomationsPage
           ? [
@@ -241,6 +265,7 @@ export function NightshiftAppHeader({
       onSandboxSecretsClick,
       onSourcesClick,
       onSettingsClick,
+      onStartInvestigationClick,
       settingsHref,
       sourcesHref,
     ]

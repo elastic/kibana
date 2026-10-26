@@ -78,6 +78,7 @@ export class StreamsApp {
   public readonly canvasEmptyState;
   public readonly canvasSearch;
   public readonly canvasSearchNoMatches;
+  public readonly canvasDataStreamsNode;
   // Streams layout
   public readonly streamsSourcesTable;
   public readonly streamsAddSourceButton;
@@ -153,6 +154,7 @@ export class StreamsApp {
     this.canvasEmptyState = this.page.testSubj.locator('streamsCanvasEmptyState');
     this.canvasSearch = this.page.testSubj.locator('streamsCanvasSearch');
     this.canvasSearchNoMatches = this.page.testSubj.locator('streamsCanvasSearchNoMatches');
+    this.canvasDataStreamsNode = this.page.testSubj.locator('streamsCanvasDataStreamsNode');
     // Streams layout locators
     this.streamsSourcesTable = this.page.testSubj.locator('streamsSourcesTable');
     this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
@@ -216,10 +218,10 @@ export class StreamsApp {
     await this.getStreamsLayoutTab(tabName).click();
   }
 
-  /** Opens the canvas with its search pre-filled from the URL. */
+  /** Opens the map with its search pre-filled from the URL. */
   async gotoCanvasSearch(query: string) {
-    await this.page.gotoApp('streams/new-experience/canvas', {
-      params: { canvasState: `(flyoutName:!n,flyoutTab:!n,query:'${query}')` },
+    await this.page.gotoApp('streams/new-experience/map', {
+      params: { mapState: `(flyoutName:!n,flyoutTab:!n,query:'${query}')` },
     });
   }
 
@@ -227,13 +229,6 @@ export class StreamsApp {
     return this.streamsDestinationsTable
       .getByRole('row')
       .filter({ hasText: destinationName })
-      .getByTestId('streamsShowOnCanvasAction');
-  }
-
-  getSourceShowOnCanvasButton(sourceName: string) {
-    return this.streamsSourcesTable
-      .getByRole('row')
-      .filter({ hasText: sourceName })
       .getByTestId('streamsShowOnCanvasAction');
   }
 
@@ -246,10 +241,6 @@ export class StreamsApp {
     return this.page.testSubj
       .locator('streamsCanvasDestinationNode')
       .filter({ hasText: streamName });
-  }
-
-  getCanvasProcessingButton(streamName: string) {
-    return this.getCanvasDestinationNode(streamName).getByTestId('streamsCanvasProcessingButton');
   }
 
   getCanvasNodeByAriaLabel(ariaLabel: string) {

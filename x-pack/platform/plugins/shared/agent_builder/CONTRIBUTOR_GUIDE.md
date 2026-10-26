@@ -464,7 +464,7 @@ GitHub-flavored markdown is converted per surface: tables become native Slack ta
 
 Agent Builder already ships a built-in `image` attachment type, so agents can see images pasted into the chat input. It's a real, file-backed attachment type and a good reference to copy from — the placeholder above just reuses the same `id` to illustrate `getAgentDescription`. See `x-pack/platform/plugins/shared/agent_builder_platform/server/attachment_types/image.ts`.
 
-It validates by looking up the file through a request-scoped Files client, so a user can never read another user's file. `format` downloads and base64-encodes the file lazily, only when the agent actually reads the attachment, so the bytes never end up in a tool result. The binary itself lives in the Files plugin under the `chat-attachment-images` file kind (registered in `agent_builder/server/plugin.ts`); the attachment only carries a `file_id` pointer. Limits — PNG/JPEG only, 3.5 MB max, 10 images per message — are defined in `agent-builder-common/attachments/attachment_types.ts`; the count limit is enforced client-side only.
+It validates by looking up the file through a request-scoped Files client, which checks that the file exists in the user's space, not who uploaded it. `format` downloads and base64-encodes the file lazily, only when the agent actually reads the attachment, so the bytes never end up in a tool result. The binary itself lives in the Files plugin under the `chat-attachment-images` file kind (registered in `agent_builder/server/plugin.ts` with only the `create`, which also registers upload, and `download` HTTP routes, both requiring `agentBuilder:read`); the attachment only carries a `file_id` pointer. Limits — PNG/JPEG only, 3.5 MB max, 10 images per message — are defined in `agent-builder-common/attachments/attachment_types.ts`; the count limit is enforced client-side only.
 
 ### Browser-side registration
 
@@ -549,8 +549,8 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
       });
     }
 
-    // openSidebarConversation is {undefined} when already in the sidebar
-    if (openSidebarConversation) {
+    // Offer this only outside the sidebar, where the conversation is not already open
+    if (openSidebarConversation && !isSidebar) {
       buttons.push({
         label: 'Continue in sidebar',
         icon: 'comment',
@@ -602,7 +602,7 @@ The `getActionButtons` params include flags to customize behavior per viewport:
 - **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
 - **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
 - **`closeCanvas`** - Callback to dismiss the canvas; `undefined` when not in canvas
-- **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded; `undefined` when already in the sidebar
+- **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded
 
 #### Canvas flyout width
 
