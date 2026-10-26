@@ -14,7 +14,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
-import type { AppHeaderBadge, AppHeaderMetadataItems } from '@kbn/app-header';
+import type {
+  AppHeaderBadge,
+  AppHeaderMetadataItems,
+  AppHeaderMetadataTextItem,
+} from '@kbn/app-header';
 import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
@@ -27,6 +31,7 @@ import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useRuleAuditMetadata } from '../../hooks/use_rule_audit_metadata';
+import { useRuleLastExecution } from '../../hooks/use_rule_last_execution';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
@@ -151,36 +156,56 @@ export const RuleDetailPage: React.FunctionComponent = () => {
 
   const { createdByDisplay, createdAtFormatted, updatedByDisplay, updatedAtFormatted } =
     useRuleAuditMetadata(rule);
+  const lastExecution = useRuleLastExecution(rule.id);
 
   const badges = React.useMemo(() => getRuleDetailBadges(rule), [rule]);
 
-  const headerMetadata = React.useMemo<AppHeaderMetadataItems>(
-    () => [
-      {
-        type: 'text',
-        label: i18n.translate('xpack.alertingV2.ruleDetails.header.createdBy', {
-          defaultMessage: 'Created by',
-        }),
-        value: i18n.translate('xpack.alertingV2.ruleDetails.header.createdByValue', {
-          defaultMessage: '{user} on {date}',
-          values: { user: createdByDisplay, date: createdAtFormatted },
-        }),
-        'data-test-subj': 'ruleDetailsCreatedByMetadata',
-      },
-      {
-        type: 'text',
-        label: i18n.translate('xpack.alertingV2.ruleDetails.header.updatedBy', {
-          defaultMessage: 'Last updated by',
-        }),
-        value: i18n.translate('xpack.alertingV2.ruleDetails.header.updatedByValue', {
-          defaultMessage: '{user} on {date}',
-          values: { user: updatedByDisplay, date: updatedAtFormatted },
-        }),
-        'data-test-subj': 'ruleDetailsUpdatedByMetadata',
-      },
-    ],
-    [createdByDisplay, createdAtFormatted, updatedByDisplay, updatedAtFormatted]
-  );
+  const headerMetadata = React.useMemo<AppHeaderMetadataItems>(() => {
+    const createdBy: AppHeaderMetadataTextItem = {
+      type: 'text',
+      label: i18n.translate('xpack.alertingV2.ruleDetails.header.createdBy', {
+        defaultMessage: 'Created by',
+      }),
+      value: i18n.translate('xpack.alertingV2.ruleDetails.header.createdByValue', {
+        defaultMessage: '{user} on {date}',
+        values: { user: createdByDisplay, date: createdAtFormatted },
+      }),
+      'data-test-subj': 'ruleDetailsCreatedByMetadata',
+    };
+    const updatedBy: AppHeaderMetadataTextItem = {
+      type: 'text',
+      label: i18n.translate('xpack.alertingV2.ruleDetails.header.updatedBy', {
+        defaultMessage: 'Last updated by',
+      }),
+      value: i18n.translate('xpack.alertingV2.ruleDetails.header.updatedByValue', {
+        defaultMessage: '{user} on {date}',
+        values: { user: updatedByDisplay, date: updatedAtFormatted },
+      }),
+      'data-test-subj': 'ruleDetailsUpdatedByMetadata',
+    };
+
+    if (!lastExecution.visible) {
+      return [createdBy, updatedBy];
+    }
+
+    const lastExecutionMetadata: AppHeaderMetadataTextItem = {
+      type: 'text',
+      label: i18n.translate('xpack.alertingV2.ruleDetails.header.lastExecution', {
+        defaultMessage: 'Last execution',
+      }),
+      value: lastExecution.value,
+      'data-test-subj': 'ruleDetailsLastExecutionMetadata',
+    };
+
+    return [lastExecutionMetadata, createdBy, updatedBy];
+  }, [
+    createdAtFormatted,
+    createdByDisplay,
+    lastExecution.value,
+    lastExecution.visible,
+    updatedAtFormatted,
+    updatedByDisplay,
+  ]);
 
   const menu = React.useMemo(
     () =>

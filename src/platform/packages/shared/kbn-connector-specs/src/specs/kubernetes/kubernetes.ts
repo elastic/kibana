@@ -325,7 +325,7 @@ export const KubernetesConnector: ConnectorSpec = {
   metadata: {
     id: '.kubernetes',
     displayName: 'Kubernetes',
-    description: i18n.translate('core.kibanaConnectorSpecs.kubernetes.metadata.description', {
+    description: i18n.translate('connectorSpecs.kubernetes.metadata.description', {
       defaultMessage: 'Read and modify resources in a Kubernetes cluster via its REST API',
     }),
     minimumLicense: 'enterprise',
@@ -340,17 +340,16 @@ export const KubernetesConnector: ConnectorSpec = {
         isRecommended: true,
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.label', {
+          label: i18n.translate('connectorSpecs.kubernetes.auth.bearerWithTls.label', {
             defaultMessage: 'Service account token',
           }),
           meta: {
             token: {
-              label: i18n.translate(
-                'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.tokenLabel',
-                { defaultMessage: 'Token' }
-              ),
+              label: i18n.translate('connectorSpecs.kubernetes.auth.bearerWithTls.tokenLabel', {
+                defaultMessage: 'Token',
+              }),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.tokenHelpText',
+                'connectorSpecs.kubernetes.auth.bearerWithTls.tokenHelpText',
                 {
                   defaultMessage:
                     'A Kubernetes service account bearer token. Prefer a least-privilege service account scoped to the namespaces and verbs the connector needs.',
@@ -358,21 +357,17 @@ export const KubernetesConnector: ConnectorSpec = {
               ),
             },
             caCert: {
-              label: i18n.translate(
-                'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.caLabel',
-                { defaultMessage: 'Cluster CA certificate (PEM)' }
-              ),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.caHelpText',
-                {
-                  defaultMessage:
-                    'Paste the PEM-encoded certificate authority used to verify the API server. Leave empty to rely on the system trust store or to disable verification.',
-                }
-              ),
+              label: i18n.translate('connectorSpecs.kubernetes.auth.bearerWithTls.caLabel', {
+                defaultMessage: 'Cluster CA certificate (PEM)',
+              }),
+              helpText: i18n.translate('connectorSpecs.kubernetes.auth.bearerWithTls.caHelpText', {
+                defaultMessage:
+                  'Paste the PEM-encoded certificate authority used to verify the API server. Leave empty to rely on the system trust store or to disable verification.',
+              }),
             },
             verificationMode: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.verificationModeHelpText',
+                'connectorSpecs.kubernetes.auth.bearerWithTls.verificationModeHelpText',
                 {
                   defaultMessage:
                     'How to verify the API server TLS certificate. "full" verifies the certificate and hostname, "certificate" verifies the certificate only, and "none" disables verification (not recommended).',
@@ -404,7 +399,7 @@ export const KubernetesConnector: ConnectorSpec = {
         .url()
         .describe('Kubernetes API server URL (e.g., https://my-cluster.example.com:6443)')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.kubernetes.config.apiUrl.label', {
+          label: i18n.translate('connectorSpecs.kubernetes.config.apiUrl.label', {
             defaultMessage: 'API server URL',
           }),
           widget: 'text',
@@ -738,7 +733,7 @@ export const KubernetesConnector: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.kubernetes.test.description', {
+    description: i18n.translate('connectorSpecs.kubernetes.test.description', {
       defaultMessage: 'Verifies connectivity by requesting the Kubernetes API server version',
     }),
     handler: async (ctx) => {

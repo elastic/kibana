@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import type { ConversationEvent, UserMessageEvent } from '@kbn/agent-builder-common';
 import { TimelineEventType, EventActorType, TimelineTriggerType } from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
@@ -17,6 +17,7 @@ import { useConversationId } from '../../../context/conversation/use_conversatio
 import { useStreamRecord } from '../../../context/streaming/streaming_context';
 import { buildItems } from './to_timeline_items';
 import { resolveTimelineItems } from './resolve_timeline_items';
+import { reuseUnchangedItems } from './reuse_unchanged_items';
 import type { TimelineItem } from './types';
 
 const PENDING_USER_MESSAGE_ID = 'pending::user_message';
@@ -137,7 +138,7 @@ export const useTimelineItems = (): TimelineItem[] => {
     ]
   );
 
-  return useMemo(() => {
+  const withAwaitingTurn = useMemo(() => {
     if (!awaitingRunStart) {
       return items;
     }
@@ -152,4 +153,10 @@ export const useTimelineItems = (): TimelineItem[] => {
     };
     return [...items, awaitingTurn];
   }, [items, awaitingRunStart]);
+
+  const previousItems = useRef<TimelineItem[]>([]);
+  return useMemo(() => {
+    previousItems.current = reuseUnchangedItems(previousItems.current, withAwaitingTurn);
+    return previousItems.current;
+  }, [withAwaitingTurn]);
 };

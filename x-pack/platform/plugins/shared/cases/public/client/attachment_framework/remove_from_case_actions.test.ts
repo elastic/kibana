@@ -27,6 +27,7 @@ describe('getRemoveFromCaseActions', () => {
         key,
         label,
         icon: 'trash',
+        groupId: 'caseRemoval',
         'data-test-subj': key,
         disableOnQuery: true,
       })
