@@ -866,7 +866,7 @@ const myAttachmentType: AttachmentTypeDefinition<'my_type', MyContent> = {
 ```
 
 - `getLatestVersion(attachment).created_at` (from `@kbn/agent-builder-common/attachments`) — when the content the attachment holds was last written, whether by `resolve`, the agent or the user. Compare it against the origin's last-modified time
-- `attachment.origin_snapshot_at` — when the origin was last linked. Don't use it as the staleness baseline: `updateOrigin` also resets it without copying any content, so a save followed by a re-link (as the dashboard integration does on every save) would never show as stale
+- `attachment.origin_snapshot_at` — when the origin was last linked. Don't use it as the staleness baseline: `updateOrigin` also resets it without copying any content, so a save followed by a re-link (as the dashboard integration does on the first save and on "save as") would never show as stale. It also doesn't move when the agent or the user updates the attachment, so newer conversation content would look stale
 - If the origin's timestamp can move without its content changing, also compare the content before returning `true` (see the dashboard type in `agent_builder_dashboards`)
 - `context` — same `AttachmentResolveContext` as `resolve` (includes `savedObjectsClient`, `request`, `spaceId`)
 - Return `true` if the stored data is outdated; the framework will call `resolve` again to fetch fresh content and surface a resync prompt in the UI

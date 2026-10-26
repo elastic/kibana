@@ -100,8 +100,9 @@ export const createDashboardAttachmentType = ({
           return false;
         }
 
-        // Compare against the latest version rather than origin_snapshot_at: saving a dashboard
-        // re-links the attachment origin, which resets the snapshot time after the save.
+        // Compare against the latest version rather than origin_snapshot_at: the first save and
+        // "save as" re-link the origin, which resets the snapshot time, and the snapshot does not
+        // move when the agent or the user updates the attachment.
         if (Date.parse(dashboardUpdatedAt) <= Date.parse(latestVersion.created_at)) {
           return false;
         }

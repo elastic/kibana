@@ -33,12 +33,10 @@ export const createOriginSyncSubscription = ({
     if (!attachments) {
       return;
     }
-    const attachmentToSync = attachments.find(({ origin }) => {
-      if (origin === previousDashboardId || origin === dashboardId) {
-        return true;
-      }
-      return false;
-    });
+    if (attachments.some(({ origin }) => origin === dashboardId)) {
+      return;
+    }
+    const attachmentToSync = attachments.find(({ origin }) => origin === previousDashboardId);
     if (attachmentToSync) {
       return updateOrigin(attachmentToSync.id, dashboardId);
     }
