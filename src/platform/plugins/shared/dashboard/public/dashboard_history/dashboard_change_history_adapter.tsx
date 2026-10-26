@@ -40,7 +40,10 @@ export const createDashboardChangeHistoryAdapter = (
   getChange: async ({ objectId, changeId, signal }) => {
     try {
       const response = await http.get<ChangeDetailsResponse>(
-        buildPath(`${DASHBOARD_CHANGE_HISTORY_API_PATH}/{objectId}/{changeId}`, { objectId, changeId }),
+        buildPath(`${DASHBOARD_CHANGE_HISTORY_API_PATH}/{objectId}/{changeId}`, {
+          objectId,
+          changeId,
+        }),
         {
           signal,
         }
