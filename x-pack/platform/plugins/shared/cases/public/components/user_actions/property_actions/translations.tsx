@@ -12,6 +12,10 @@ export const DELETE_ATTACHMENT = i18n.translate('xpack.cases.userActions.deleteA
   defaultMessage: 'Delete attachment',
 });
 
+export const REMOVE_ATTACHMENT = i18n.translate('xpack.cases.userActions.removeAttachment', {
+  defaultMessage: 'Remove attachment',
+});
+
 export const REMOVE_ALERTS = (totalAlerts: number): string =>
   i18n.translate('xpack.cases.caseView.alerts.removeAlerts', {
     values: { totalAlerts },

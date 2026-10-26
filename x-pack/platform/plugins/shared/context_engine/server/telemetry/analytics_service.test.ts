@@ -41,6 +41,7 @@ describe('ContextEngineAnalyticsService', () => {
       ['create', CONTEXT_ENGINE_EVENT_TYPES.KiCreate],
       ['update', CONTEXT_ENGINE_EVENT_TYPES.KiUpdate],
       ['delete', CONTEXT_ENGINE_EVENT_TYPES.KiDelete],
+      ['restore', CONTEXT_ENGINE_EVENT_TYPES.KiRestore],
     ] as const)('reports a %s event with the expected fields', (action, eventType) => {
       service.reportKiWrite({ action, aiIndexId: 'my-index', managed: false, outcome: 'success' });
 

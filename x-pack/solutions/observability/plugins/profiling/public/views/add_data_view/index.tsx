@@ -8,11 +8,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderTab } from '@kbn/app-header';
-import { hasUsableProfilingData, ProfilingSchema } from '@kbn/profiling-utils';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { useEnabledProfilingStatus } from '../../components/contexts/profiling_status/use_enabled_profiling_status';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
+import { hasProfilingData } from '../../utils/has_profiling_data';
 import { OtelAddDataInstructions } from './otel/otel_add_data_instructions';
 import { UniversalProfilingAddData } from './universal_profiling/universal_profiling_add_data';
 
@@ -67,7 +68,7 @@ export function AddDataView() {
         defaultMessage: 'Add profiling data',
       })}
       tabs={tabs}
-      suppressMenu={!hasUsableProfilingData(profilingStatus) || universalProfiling.hasLegacyData}
+      suppressMenu={!hasProfilingData(profilingStatus) || universalProfiling.hasLegacyData}
     >
       {selectedSchema === ProfilingSchema.ECS ? (
         <UniversalProfilingAddData />

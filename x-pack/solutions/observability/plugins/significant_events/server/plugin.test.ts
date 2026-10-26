@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { consumeRunQuota, createRunQuotaInternalRepository } from './lib/run_quotas';
 import { knowledgeIndicatorsDataStream } from './lib/knowledge_indicators';
 import { detectionsDataStream } from './lib/significant_events/detections';
@@ -134,6 +135,43 @@ describe('SignificantEventsPlugin setup', () => {
     expect(consumeRunQuotaMock).toHaveBeenCalledWith({
       internalRepository,
       group: 'investigation',
+    });
+  });
+});
+
+describe('SignificantEventsPlugin alerting v2 rules client', () => {
+  it('requests the alerting v2 rules client attributed to nightshift', async () => {
+    const getRulesClientWithRequestInSpace = jest.fn().mockResolvedValue({});
+    const core = createCoreSetup();
+    core.getStartServices.mockResolvedValue([
+      coreMock.createStart(),
+      {
+        inference: { getClient: jest.fn() },
+        licensing: {
+          getLicense: jest.fn().mockResolvedValue({ getFeature: () => ({ isEnabled: true }) }),
+        },
+        fieldsMetadata: { getClient: jest.fn().mockResolvedValue({}) },
+        nightshiftSources: { getSourcesClient: jest.fn().mockResolvedValue({}) },
+        alertingVTwo: { getRulesClientWithRequestInSpace },
+      },
+      {},
+    ] as unknown as Awaited<ReturnType<typeof core.getStartServices>>);
+    const plugin = createPlugin();
+    plugin.setup(core, createSetupDeps());
+    const request = httpServerMock.createKibanaRequest({ spaceId: 'default' });
+    const getScopedClients = (
+      plugin as unknown as {
+        getScopedClients: (params: {
+          request: typeof request;
+        }) => Promise<{ getSignificantEventsAlertingContext: () => Promise<unknown> }>;
+      }
+    ).getScopedClients;
+
+    const scoped = await getScopedClients({ request });
+    await scoped.getSignificantEventsAlertingContext();
+
+    expect(getRulesClientWithRequestInSpace).toHaveBeenCalledWith(request, 'default', {
+      app: 'nightshift',
     });
   });
 });

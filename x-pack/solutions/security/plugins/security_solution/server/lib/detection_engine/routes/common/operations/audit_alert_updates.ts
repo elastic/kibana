@@ -119,7 +119,7 @@ export const auditAlertUpdateResponseFailure = (
 };
 
 /**
- * Logs a validation, precondition, or lookup failure that happens before the shared update operation runs.
+ * Logs a precondition or lookup failure that happens before the shared update operation runs.
  * A string becomes the error message; an `Error` is logged as-is.
  */
 export const auditAlertUpdatePreOperationFailure = (

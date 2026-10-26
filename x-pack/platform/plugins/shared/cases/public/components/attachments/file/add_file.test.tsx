@@ -7,8 +7,7 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, screen } from '@testing-library/react';
 
 import { buildCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 import { AddFile } from './add_file';
@@ -28,10 +27,10 @@ describe('AddFile', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the trigger button', async () => {
+  it('renders the trigger button', () => {
     renderWithTestingProviders(<AddFile caseId="foobar" />);
 
-    expect(await screen.findByTestId('cases-files-add')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-files-add')).toBeInTheDocument();
   });
 
   it('does not render when the user lacks createComment permission', () => {
@@ -44,21 +43,21 @@ describe('AddFile', () => {
     expect(screen.queryByTestId('cases-files-add')).not.toBeInTheDocument();
   });
 
-  it('opens the upload modal when the trigger is clicked', async () => {
+  it('opens the upload modal when the trigger is clicked', () => {
     renderWithTestingProviders(<AddFile caseId="foobar" />);
 
-    await userEvent.click(await screen.findByTestId('cases-files-add'));
+    fireEvent.click(screen.getByTestId('cases-files-add'));
 
-    expect(await screen.findByTestId('upload-file-modal-mock')).toBeInTheDocument();
+    expect(screen.getByTestId('upload-file-modal-mock')).toBeInTheDocument();
   });
 
-  it('closes the modal when `onClose` is invoked', async () => {
+  it('closes the modal when `onClose` is invoked', () => {
     renderWithTestingProviders(<AddFile caseId="foobar" />);
 
-    await userEvent.click(await screen.findByTestId('cases-files-add'));
-    expect(await screen.findByTestId('upload-file-modal-mock')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('cases-files-add'));
+    expect(screen.getByTestId('upload-file-modal-mock')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByTestId('upload-file-modal-mock-close'));
+    fireEvent.click(screen.getByTestId('upload-file-modal-mock-close'));
     expect(screen.queryByTestId('upload-file-modal-mock')).not.toBeInTheDocument();
   });
 });

@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderMenu } from '@kbn/app-header';
+import { USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG } from '../../../common/constants';
 import { SecurityPageName } from '../../app/types';
 import { SecurityAppHeader } from '../../common/components/app_header';
 import { useKibana } from '../../common/lib/kibana';
@@ -22,38 +23,72 @@ const SETTINGS_LABEL = i18n.translate(
   { defaultMessage: 'Settings' }
 );
 
+const PRODUCT_TOUR_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.homePage.productTourMenuItemLabel',
+  { defaultMessage: 'Product tour' }
+);
+
 export const ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID =
   'entityAnalyticsHomeSettingsMenuItem';
+export const ENTITY_ANALYTICS_HOME_PRODUCT_TOUR_MENU_ITEM_TEST_ID =
+  'entityAnalyticsHomeProductTourMenuItem';
 
-export const EntityAnalyticsHomeHeader = React.memo(() => {
-  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-  const { docLinks } = useKibana().services;
+export interface EntityAnalyticsHomeHeaderProps {
+  /** Adds a Product tour menu item that starts the page tour. */
+  onStartTour?: () => void;
+}
 
-  const menu = useMemo<AppHeaderMenu>(
-    () => ({
-      items: [
-        {
-          id: 'entityAnalyticsSettings',
-          label: SETTINGS_LABEL,
-          iconType: 'gear' as const,
-          href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.entityAnalyticsManagement }),
-          overflow: true,
-          order: 1,
-          testId: ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID,
-        },
-      ],
-    }),
-    [getSecuritySolutionUrl]
-  );
+export const EntityAnalyticsHomeHeader = React.memo(
+  ({ onStartTour }: EntityAnalyticsHomeHeaderProps) => {
+    const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+    const { docLinks, featureFlags } = useKibana().services;
+    // The new page's route drops the template padding that `largeBleed` reaches out of.
+    const isNewHomePageEnabled = featureFlags.useBooleanValue(
+      USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG,
+      false
+    );
 
-  return (
-    <SecurityAppHeader
-      title={PAGE_TITLE}
-      menu={menu}
-      spacing="largeBleed"
-      docLink={docLinks.links.securitySolution.entityAnalytics.entityRiskScoring}
-    />
-  );
-});
+    const menu = useMemo<AppHeaderMenu>(
+      () => ({
+        items: [
+          {
+            id: 'entityAnalyticsSettings',
+            label: SETTINGS_LABEL,
+            iconType: 'gear' as const,
+            href: getSecuritySolutionUrl({
+              deepLinkId: SecurityPageName.entityAnalyticsManagement,
+            }),
+            overflow: true,
+            order: 1,
+            testId: ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID,
+          },
+          ...(onStartTour
+            ? [
+                {
+                  id: 'entityAnalyticsProductTour',
+                  label: PRODUCT_TOUR_LABEL,
+                  iconType: 'bulb' as const,
+                  run: onStartTour,
+                  overflow: true,
+                  order: 2,
+                  testId: ENTITY_ANALYTICS_HOME_PRODUCT_TOUR_MENU_ITEM_TEST_ID,
+                },
+              ]
+            : []),
+        ],
+      }),
+      [getSecuritySolutionUrl, onStartTour]
+    );
+
+    return (
+      <SecurityAppHeader
+        title={PAGE_TITLE}
+        menu={menu}
+        spacing={isNewHomePageEnabled ? 'standard' : 'largeBleed'}
+        docLink={docLinks.links.securitySolution.entityAnalytics.entityRiskScoring}
+      />
+    );
+  }
+);
 
 EntityAnalyticsHomeHeader.displayName = 'EntityAnalyticsHomeHeader';

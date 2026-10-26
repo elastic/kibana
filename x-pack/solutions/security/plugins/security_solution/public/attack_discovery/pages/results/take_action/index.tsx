@@ -12,6 +12,7 @@ import {
   getOriginalAlertIds,
   type Replacements,
 } from '@kbn/elastic-assistant-common';
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import { i18n as i18nTranslate } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
 import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table';
@@ -34,8 +35,8 @@ import { isAttackDiscoveryAlert } from '../../utils/is_attack_discovery_alert';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAttackDiscoveryAttachment } from '../use_attack_discovery_attachment';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { useAttackCaseAttachments } from '../../../../detections/hooks/attacks/bulk_actions/use_attack_case_attachments';
-import type { AttackToAttach } from '../../../../cases/attachments/attack';
+import { useAttackCaseAttachments } from '../../../../cases/attachments/attack/hooks/use_attack_case_attachments';
+import { toAttacksToAttach } from '../../../../cases/attachments/attack/utils';
 import { useAttackRunWorkflowContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
 import { ATTACK_DISCOVERY_ACTION_IDS } from '../../../../common/constants/action_ids';
 
@@ -70,12 +71,6 @@ const TakeActionComponent: React.FC<Props> = ({
     () => userCasesPermissions.createComment && userCasesPermissions.read,
     [userCasesPermissions.createComment, userCasesPermissions.read]
   );
-  const { disabled: addToCaseDisabled, onAddToCase } = useAddToCase({
-    canUserCreateAndReadCases,
-    onSuccess: refetchFindAttackDiscoveries,
-    title: attackDiscoveries.map((discovery) => discovery.title).join(', '),
-  });
-
   const { hasAlertsUpdate } = useAlertsPrivileges();
 
   // boilerplate for the take action popover:
@@ -199,53 +194,41 @@ const TakeActionComponent: React.FC<Props> = ({
     replacements
   );
 
-  // Only a single persisted attack can be posted as a `security.attack` attachment: the payload
-  // builder takes one attack, and the metadata requires the index the document came from so the
-  // attachment can sync status and reopen the flyout. Everything else — ad hoc discoveries, and
-  // multi-select — keeps the markdown-comment payload below.
-  const attackToAttach = useMemo<Omit<AttackToAttach, 'alertsIndex'> | undefined>(() => {
-    if (persistedAttackDiscovery?.index == null) {
-      return undefined;
-    }
+  // Only persisted attacks have the index `security.attack` needs, and a selection cannot be split
+  // across payloads, so one unpersisted discovery sends the whole selection down the markdown path.
+  const attacksToAttach = useMemo(() => {
+    // Widened so `filter` keeps the type guard's narrowing, which a union of array types drops.
+    const discoveries: Array<AttackDiscovery | AttackDiscoveryAlert> = attackDiscoveries;
 
-    const {
-      alertIds: attackAlertIds,
-      detailsMarkdown,
-      entitySummaryMarkdown,
-      id,
-      index,
-      mitreAttackTactics,
-      riskScore,
-      summaryMarkdown,
-      timestamp,
-      title,
-    } = persistedAttackDiscovery;
+    const attacks = toAttacksToAttach(discoveries.filter(isAttackDiscoveryAlert)).map(
+      // A persisted attack's own replacements win over the page's generation-wide map.
+      (attack) => ({ ...attack, replacements: attack.replacements ?? replacements })
+    );
 
-    return {
-      id,
-      index,
-      title,
-      // The narrative the activity card renders from. Still anonymised here; the payload builder
-      // de-anonymises and truncates it.
-      summaryMarkdown,
-      detailsMarkdown,
-      entitySummaryMarkdown,
-      mitreAttackTactics,
-      timestamp,
-      riskScore,
-      // Raw (possibly anonymised) ids plus the replacements that reverse them; the payload builder
-      // de-anonymises and dedupes.
-      alertIds: attackAlertIds,
-      replacements: persistedAttackDiscovery.replacements ?? replacements,
-    };
-  }, [persistedAttackDiscovery, replacements]);
+    return attacks.length === attackDiscoveries.length && attacks.length > 0 ? attacks : undefined;
+  }, [attackDiscoveries, replacements]);
 
-  const getAttackAttachments = useAttackCaseAttachments(attackToAttach);
+  const attackCaseAttachments = useAttackCaseAttachments(attacksToAttach);
+
+  const onAddToCaseSuccess = useCallback(
+    (theCase: CaseUI) => {
+      // Not raised while building the payload, which the case selector does on every render.
+      attackCaseAttachments?.onAttached(theCase);
+      refetchFindAttackDiscoveries?.();
+    },
+    [attackCaseAttachments, refetchFindAttackDiscoveries]
+  );
+
+  const { disabled: addToCaseDisabled, onAddToCase } = useAddToCase({
+    canUserCreateAndReadCases,
+    onSuccess: onAddToCaseSuccess,
+    title: attackDiscoveries.map((discovery) => discovery.title).join(', '),
+  });
 
   const onClickAddToCase = useCallback(() => {
     closePopover();
 
-    if (getAttackAttachments == null) {
+    if (attackCaseAttachments == null) {
       onAddToCase({
         alertIds,
         markdownComments: [markdown],
@@ -255,14 +238,9 @@ const TakeActionComponent: React.FC<Props> = ({
       return;
     }
 
-    onAddToCase({
-      alertIds: [],
-      markdownComments: [],
-      // Built per case rather than up front: how many of the attack's alerts fit depends on how
-      // many the chosen case already holds, which isn't known until the user picks one.
-      getAttachments: getAttackAttachments,
-    });
-  }, [alertIds, closePopover, getAttackAttachments, markdown, onAddToCase, replacements]);
+    // Built per case, since how many alerts fit depends on how many the chosen case already holds.
+    onAddToCase({ getAttachments: attackCaseAttachments.getAttachments });
+  }, [alertIds, attackCaseAttachments, closePopover, markdown, onAddToCase, replacements]);
   const reportAddToChatClick = useReportAddToChat();
   const onViewInAgentBuilder = useCallback(() => {
     closePopover();

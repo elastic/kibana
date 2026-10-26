@@ -22,10 +22,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import { buildEmptyFilter, getFilterParams, BooleanRelation } from '@kbn/es-query';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { cx } from '@emotion/css';
 
 import { css } from '@emotion/react';
+import type { FilterableField } from '@kbn/data-source';
 import { FieldInput } from './field_input';
 import { OperatorInput } from './operator_input';
 import { ParamsEditor } from './params_editor';
@@ -105,7 +105,7 @@ export function FilterItem({
   } = useContext(FiltersBuilderContextType);
   const conditionalOperationType = getBooleanRelationType(filter);
   const { euiTheme } = useEuiTheme();
-  let field: DataViewField | undefined;
+  let field: FilterableField | undefined;
   let params: Filter['meta']['params'];
   const isMaxNesting = isMaxFilterNesting(path);
   if (!conditionalOperationType) {
@@ -124,7 +124,7 @@ export function FilterItem({
   >(Array.isArray(params) ? params : []);
 
   const onHandleField = useCallback(
-    (selectedField: DataViewField) => {
+    (selectedField: FilterableField) => {
       setOperator(undefined);
       dispatch({
         type: 'updateFilter',

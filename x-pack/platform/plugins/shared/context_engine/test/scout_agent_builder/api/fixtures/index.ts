@@ -12,3 +12,4 @@ export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures
 
 export * as testData from './constants';
 export * from './helpers';
+export * from './ki';

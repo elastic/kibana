@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldPassword, EuiFieldText, EuiFormRow, EuiSpacer, EuiTextColor } from '@elastic/eui';
 
-import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
 import type { CreateDataSourceFlyoutFormValues } from './types';
 import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
@@ -39,16 +38,14 @@ const SETUP_METHOD_OPTIONS: FederatedIdentitySetupMethodOption[] = [
     label: s3FederatedIdentitySetupStrings.cloudFormationMethod,
     icon: 'logoAWS',
   },
-  { id: 'manual', label: s3FederatedIdentitySetupStrings.manualMethod, icon: 'consoleApp' },
+  { id: 'manual', label: s3FederatedIdentitySetupStrings.manualMethod, icon: 'commandLine' },
 ];
 
 export function CreateDataSourceFlyoutTypeSettingsS3Region({
   control,
-  unregister,
   isRequired,
 }: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
   isRequired: boolean;
 }) {
   const { field: regionField, fieldState: regionState } = useController({
@@ -65,12 +62,6 @@ export function CreateDataSourceFlyoutTypeSettingsS3Region({
         }
       : undefined,
   });
-
-  useEffect(() => {
-    return () => {
-      unregister('settings.region');
-    };
-  }, [unregister]);
 
   return (
     <EuiFormRow
@@ -97,21 +88,13 @@ export function CreateDataSourceFlyoutTypeSettingsS3Region({
 
 export function CreateDataSourceFlyoutTypeSettingsS3({
   control,
-  unregister,
 }: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: endpointField } = useController({
     name: 'settings.endpoint',
     control,
   });
-
-  useEffect(() => {
-    return () => {
-      unregister('settings.endpoint');
-    };
-  }, [unregister]);
 
   return (
     <EuiFormRow
@@ -135,11 +118,9 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
 
 export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
   control,
-  unregister,
   areCredentialsRequired,
 }: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
   areCredentialsRequired: boolean;
 }) {
   const { field: accessKeyField, fieldState: accessKeyState } = useController({
@@ -170,13 +151,6 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
         }
       : undefined,
   });
-
-  useEffect(() => {
-    return () => {
-      unregister('settings.access_key');
-      unregister('settings.secret_key');
-    };
-  }, [unregister]);
 
   return (
     <>
@@ -226,12 +200,10 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
 export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
   control,
   cloudInfo,
-  unregister,
   areFieldsRequired,
 }: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   cloudInfo?: FederatedIdentityClusterInfo;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
   areFieldsRequired: boolean;
 }) {
   const [setupMethod, setSetupMethod] = useState<FederatedIdentitySetupMethod>('cloudformation');
@@ -272,12 +244,6 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
       },
     },
   });
-
-  useEffect(() => {
-    return () => {
-      unregister('settings.role_arn');
-    };
-  }, [unregister]);
 
   const currentRoleArn = roleArnField.value?.trim() ?? '';
   const showCloudFormationRoleWarning =

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ATTACK_DISCOVERY_TEST_ALIAS } from '../constants';
 import type { Role } from './types';
 
 const defaultElasticsearchPrivileges = {
@@ -264,6 +265,53 @@ export const securitySolutionOnlyReadNoIndexAlerts: Role = {
   },
 };
 
+/**
+ * Read on the attack discovery fixture's alias and on no other index, the way production roles are
+ * granted alert index privileges: on the `.alerts-*` alias, never on the `.internal.alerts-*` backing
+ * index behind it, which is the index an attack attachment carries.
+ */
+export const securitySolutionOnlyReadAttackAlias: Role = {
+  name: 'sec_only_read_attack_alias',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: [ATTACK_DISCOVERY_TEST_ALIAS],
+          privileges: ['read'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['all'],
+          securitySolutionAttackDiscovery: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
+/** The Kibana privileges of `sec_only_read_attack_alias`, without read on the alias. */
+export const securitySolutionOnlyNoIndexAttacks: Role = {
+  name: 'sec_only_no_index_attacks',
+  privileges: {
+    elasticsearch: {
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['all'],
+          securitySolutionAttackDiscovery: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
 export const observabilityOnlyAll: Role = {
   name: 'obs_only_all',
   privileges: {
@@ -410,5 +458,7 @@ export const roles = [
   observabilityOnlyReadAlerts,
   testDisabledPluginAll,
   securitySolutionOnlyReadNoIndexAlerts,
+  securitySolutionOnlyReadAttackAlias,
+  securitySolutionOnlyNoIndexAttacks,
   onlyActions,
 ];

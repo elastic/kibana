@@ -62,6 +62,7 @@ export const renderApp = async ({
         // service-account API is exposed under its own key.
         serviceAccounts: coreStart.security.serviceAccounts,
         isServerless,
+        appParams: { history: params.history },
       }}
     >
       <QueryClientProvider client={queryClient}>

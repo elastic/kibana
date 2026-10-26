@@ -33,7 +33,7 @@ export const createTextAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
-    toSurfaceComposition: ({ content }) => {
+    toSurfaceComposition: ({ data: { content } }) => {
       // Shown as written, like the UI's code block. The fence is longer than any backtick run in
       // the content, so the content can't close it.
       const longestBacktickRun = Math.max(

@@ -13,7 +13,8 @@ export KBN_BOOTSTRAP_NO_PREBUILT=true
 export KBN_NP_PLUGINS_BUILT=true
 
 VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
-KIBANA_CLOUD_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$VERSION-$GIT_COMMIT"
+BUILD_OUTPUT_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$VERSION-$GIT_COMMIT"
+KIBANA_CLOUD_IMAGE="$(kibana_ci_image_repository kibana-cloud):$VERSION-$GIT_COMMIT"
 
 echo "--- Build Cloud Distribution"
 
@@ -29,8 +30,8 @@ else
     --skip-cdn-assets \
     --skip-docker-contexts \
     --tar-zstd \
-    --docker-tag-qualifier="$GIT_COMMIT" \
-    --docker-push
+    --docker-tag-qualifier="$GIT_COMMIT"
+  retag_and_push_image "$BUILD_OUTPUT_IMAGE" "$KIBANA_CLOUD_IMAGE"
 fi
 
 cat <<EOF | buildkite-agent annotate --style "info" --context kibana-cloud-image

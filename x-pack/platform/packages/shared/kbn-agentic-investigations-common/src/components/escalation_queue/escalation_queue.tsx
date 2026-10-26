@@ -57,11 +57,6 @@ interface EscalationQueueProps {
   /** An Impact filter is applied, so an empty list means "no match" rather than "no escalations". */
   isFiltered?: boolean;
   /**
-   * Number of escalations loaded from the server before the Impact filter, so "Show more (N)"
-   * stays accurate while `escalations` is narrowed. Defaults to `escalations.length`.
-   */
-  loadedCount?: number;
-  /**
    * Explanatory content rendered at the bottom of the section body. When the bucket is empty
    * and unfiltered it replaces the "No escalations" line.
    */
@@ -100,19 +95,12 @@ export const EscalationQueue = memo<EscalationQueueProps>(
     selectedConversationId,
     getHref,
     isFiltered = false,
-    loadedCount,
     note,
   }) => {
     const { euiTheme } = useEuiTheme();
     const serverTotal = totalItemCount ?? escalations.length;
-    const remaining = serverTotal - (loadedCount ?? escalations.length);
+    const remaining = serverTotal - escalations.length;
     const showLoadMore = onLoadMore !== undefined && remaining > 0;
-
-    // Filtered, the badge counts the matching rows. Rows still to load may match too, so
-    // the figure is a floor then.
-    const badgeCount = isFiltered
-      ? `${escalations.length}${remaining > 0 ? '+' : ''}`
-      : serverTotal;
 
     const buttonContent = (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -127,8 +115,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {/* Unfiltered, show the server total so the badge reflects the full bucket. */}
-          <EuiBadge color="hollow">{badgeCount}</EuiBadge>
+          <EuiBadge color="hollow">{serverTotal}</EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

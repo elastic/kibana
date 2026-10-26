@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import {
@@ -20,6 +20,9 @@ import {
 import type { UserEntity } from '../../../../../common/api/entity_analytics';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import { User } from '.';
+import { useFlyoutApi } from '../../../use_flyout_api';
+import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
+import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
 const mockProps = {
   userName: 'test',
@@ -28,6 +31,41 @@ const mockProps = {
 };
 
 jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
+
+jest.mock('../../../use_flyout_api');
+const mockFlyoutApi = createFlyoutApiMock();
+
+// Wrap the real content with trigger buttons so `openDetailsPanel` can be exercised for the tools.
+jest.mock('./content', () => {
+  const actual = jest.requireActual('./content');
+  const { CspInsightLeftPanelSubTab, EntityDetailsLeftPanelTab } = jest.requireActual(
+    '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header'
+  );
+  const Content = (props: { openDetailsPanel: (path: EntityDetailsPath) => void }) => (
+    <>
+      <button
+        type="button"
+        data-test-subj="openAnomalyInsights"
+        onClick={() => props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.ANOMALIES })}
+      />
+      {Object.values(CspInsightLeftPanelSubTab).map((subTab) => (
+        <button
+          key={subTab as string}
+          type="button"
+          data-test-subj={`openCspInsights-${subTab}`}
+          onClick={() =>
+            props.openDetailsPanel({
+              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+              subTab: subTab as typeof CspInsightLeftPanelSubTab,
+            })
+          }
+        />
+      ))}
+      <actual.Content {...props} />
+    </>
+  );
+  return { ...actual, Content };
+});
 
 const mockedUserRiskScore = jest.fn().mockReturnValue(mockUserRiskScoreState);
 jest.mock('../../../../entity_analytics/api/hooks/use_risk_score', () => ({
@@ -118,6 +156,7 @@ const aliasRecord: UserEntity = {
 describe('<User />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useFlyoutApi as jest.Mock).mockReturnValue(mockFlyoutApi);
     mockedUserRiskScore.mockReturnValue(mockUserRiskScoreState);
     mockedEntityRiskScores.mockReturnValue(mockUserEntityRiskScores);
     mockedUseObservedUser.mockReturnValue(mockObservedUser);
@@ -273,6 +312,25 @@ describe('<User />', () => {
       );
     });
 
+    it('counts every group member in the badge even when the loaded aliases are capped', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord, [aliasRecord]);
+      mockedUseEntityFromStore.mockReturnValue({
+        ...mockedUseEntityFromStore(),
+        aliasCount: 250,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <User {...mockProps} entityId={targetEntityId} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(getByTestId('user-panel-header-observed-badge')).toHaveTextContent(
+        'Resolved from 251 records'
+      );
+    });
+
     describe('header risk level', () => {
       const recordWithResolutionRisk: UserEntity = {
         ...targetRecord,
@@ -376,9 +434,7 @@ describe('<User />', () => {
 
         expect(getByTestId('risk-summary-table')).toBeInTheDocument();
         expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
-        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent(
-          'Entity risk contributions'
-        );
+        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Risk contributions');
       });
 
       it('keeps showing the resolution group score next to the individual score when the feature flag is off', () => {
@@ -411,6 +467,58 @@ describe('<User />', () => {
 
         expect(getByTestId('risk-summary-table')).toBeInTheDocument();
         expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
+      });
+    });
+    describe('detail tools', () => {
+      const renderResolved = () => {
+        mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+        withStoreRecords(targetRecord, [aliasRecord]);
+        return render(
+          <TestProviders>
+            <User {...mockProps} entityId={targetEntityId} mode="resolved" />
+          </TestProviders>
+        );
+      };
+
+      it('passes the panel mode and scope to the anomaly insights tool', () => {
+        fireEvent.click(renderResolved().getByTestId('openAnomalyInsights'));
+        expect(mockFlyoutApi.openEntityAnomalyInsights).toHaveBeenCalledWith(
+          expect.objectContaining({ value: 'test', mode: 'resolved', scopeId: 'test-scope-id' })
+        );
+      });
+
+      it('passes the panel mode and scope to the alerts insights tool', () => {
+        fireEvent.click(renderResolved().getByTestId('openCspInsights-alertsTabId'));
+        expect(mockFlyoutApi.openEntityAlertsInsights).toHaveBeenCalledWith(
+          expect.objectContaining({
+            value: 'test',
+            entityId: targetEntityId,
+            mode: 'resolved',
+            scopeId: 'test-scope-id',
+          })
+        );
+      });
+
+      it('passes the panel mode to the misconfiguration insights tool', () => {
+        fireEvent.click(renderResolved().getByTestId('openCspInsights-misconfigurationTabId'));
+        expect(mockFlyoutApi.openEntityMisconfigurationInsights).toHaveBeenCalledWith(
+          expect.objectContaining({ value: 'test', entityId: targetEntityId, mode: 'resolved' })
+        );
+      });
+
+      it('downgrades the tool mode to single when the new entity analytics page is off', () => {
+        mockedUseNewEntityAnalyticsPage.mockReturnValue(false);
+        withStoreRecords(targetRecord);
+        const { getByTestId } = render(
+          <TestProviders>
+            <User {...mockProps} entityId={targetEntityId} mode="resolved" />
+          </TestProviders>
+        );
+
+        fireEvent.click(getByTestId('openCspInsights-alertsTabId'));
+        expect(mockFlyoutApi.openEntityAlertsInsights).toHaveBeenCalledWith(
+          expect.objectContaining({ entityId: targetEntityId, mode: 'single' })
+        );
       });
     });
   });

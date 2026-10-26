@@ -28,6 +28,7 @@ interface TitleFieldProps {
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
   indexPatternValidationProvider: () => Promise<{
     matchedIndices: MatchedIndicesSet;
+    matchedIndicesError?: Error;
     rollupIndex: string | null | undefined;
   }>;
   disabled?: boolean;
@@ -52,6 +53,13 @@ const mustMatchError = {
   }),
 };
 
+const noPrivilegesError = {
+  message: i18n.translate('indexPatternEditor.createIndex.noPrivileges', {
+    defaultMessage:
+      "You don't have permission to view the data streams, indices, or index aliases that match this name.",
+  }),
+};
+
 interface MatchesValidatorArgs {
   rollupIndicesCapabilities: Record<string, { error: string }>;
   isRollup: boolean;
@@ -62,13 +70,18 @@ const createMatchesIndicesValidator = ({
   isRollup,
 }: MatchesValidatorArgs): ValidationConfig<{}, string, string> => ({
   validator: async ({ customData: { provider } }) => {
-    const { matchedIndices, rollupIndex } = (await provider()) as {
+    const { matchedIndices, matchedIndicesError, rollupIndex } = (await provider()) as {
       matchedIndices: MatchedIndicesSet;
+      matchedIndicesError?: Error;
       rollupIndex?: string;
     };
 
     // verifies that the title matches at least one index, alias, or data stream
     const rollupIndices = Object.keys(rollupIndicesCapabilities);
+
+    if (matchedIndicesError) {
+      return noPrivilegesError;
+    }
 
     if (matchedIndices.exactMatchedIndices.length === 0) {
       return mustMatchError;

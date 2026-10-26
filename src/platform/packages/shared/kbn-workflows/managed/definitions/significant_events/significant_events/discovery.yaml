@@ -24,6 +24,8 @@ triggers:
         detectionBatchMax:
           type: number
           default: 10
+          minimum: 1
+          maximum: 1000
           description: 'Max rules per discovery invocation. Caps agent message size; remaining detections are picked up on the next cycle.'
         flakyRuleDetectionThreshold:
           type: number
@@ -37,6 +39,54 @@ triggers:
           type: number
           default: 80
           description: 'Rules with severity_score at or above this value are never suppressed, however frequently they fire. Default matches the 80-critical investigation boundary; set above 100 to disable the exemption.'
+        classifierProbeWindowMinutes:
+          type: number
+          default: 20
+          minimum: 15
+          maximum: 360
+          description: "Window, ending now, over which the classifier re-runs a rule's stored query. Keep it short: on c0, windows over about 30 minutes let earlier matches hide recoveries from the agent."
+        classifierProbeTimeoutMs:
+          type: number
+          default: 8000
+          minimum: 1000
+          maximum: 30000
+          description: 'Per-probe timeout for re-running a stored query. A probe that times out sends its detection to the agent.'
+        classifierProbeConcurrency:
+          type: number
+          default: 5
+          minimum: 1
+          maximum: 10
+          description: 'Maximum stored-query probes the classifier runs at once.'
+        classifierMaxSkipAgeHours:
+          type: number
+          default: 24
+          minimum: 1
+          maximum: 720
+          description: "A detection is never skipped on the strength of a verdict older than this many hours (the rule's last verification in its live series): it goes to the agent, so a long-running event is re-judged at least this often."
+        classifierBudgetMs:
+          type: number
+          default: 20000
+          minimum: 2000
+          maximum: 60000
+          description: 'Shared time budget for all probes of one run. Probes not started when it is spent send their detection to the agent.'
+        classifierReviewFreshMinutes:
+          type: number
+          default: 240
+          minimum: 15
+          maximum: 1440
+          description: "How long the agent's last review of a rule stands in for its verdict while the rule's match count is unchanged. It is also the minimum gap between hand-offs of a held-back rule's change to the agent."
+        classifierBaselineBucketMinutes:
+          type: number
+          default: 5
+          minimum: 1
+          maximum: 60
+          description: "Bucket size of the rule's match series the classifier reads: its baseline, and its state at a review. Must not exceed classifierProbeWindowMinutes."
+        classifierBaselineWindowMinutes:
+          type: number
+          default: 300
+          minimum: 60
+          maximum: 1440
+          description: "How far back the classifier reads the rule's match series: the baseline sample, and how old a verdict or review can be and still be compared. classifierBaselineWindowMinutes / classifierBaselineBucketMinutes must be 11 to 288."
         rootTriggeredBy:
           type: string
           description: 'Root workflow trigger type propagated by a managed driver.'
@@ -50,8 +100,18 @@ outputs:
     type: number
   - name: hasWork
     type: boolean
-  - name: suppressedRuleCount
+  - name: skippedCount
     type: number
+  - name: heldBackCount
+    type: number
+  - name: needsAgentCount
+    type: number
+  - name: classifierReasonCounts
+    type: string
+  - name: classifierProbeStatusCounts
+    type: string
+  - name: classifierFailed
+    type: boolean
 consts:
   DETECTIONS_INDEX: '.significant_events-detections'
   INVESTIGATABLE_SEVERITIES: ['critical', 'high']
@@ -90,7 +150,12 @@ steps:
         with:
           processedCount: 0
           hasWork: false
-          suppressedRuleCount: 0
+          skippedCount: 0
+          heldBackCount: 0
+          needsAgentCount: 0
+          classifierReasonCounts: '{}'
+          classifierProbeStatusCounts: '{}'
+          classifierFailed: false
 
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
   - name: set_initial_vars
@@ -99,15 +164,22 @@ steps:
       spaceId: '{{ workflow.spaceId }}'
 
   # Unbounded processed-marker semijoin by detection_id, then reduce to the latest
-  # unprocessed detection per rule (_id tie-break). Score by severity + age.
+  # unprocessed detection per rule (_id tie-break). `last_reviewed_at` is when the agent last processed
+  # a detection of the rule it was given: the newest processed marker (a marker without `skip`;
+  # every skip marker carries `skip.event_id`), not the detection's own time, since the agent reads
+  # the data when it reviews. The marker is written when the run ends, so the classifier never lets
+  # a review cover a detection that fired before it. Score by severity + age. The flaky-rule gate
+  # flags a rule `held_back` instead of dropping it, and held rows sort last, so noisy rules never
+  # take batch slots from quiet ones. The classifier reads the flag by name: it may skip a held row
+  # and never hands it to the agent.
   - name: get_detections
     type: elasticsearch.esql.query
     with:
       query: |-
         FROM .significant_events-detections METADATA _id, _source
-        | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
+        | INLINE STATS processed_count = COUNT(processed_by), skipped_count = COUNT(skip.event_id), processed_at = MAX(@timestamp) WHERE processed_by IS NOT NULL BY detection_id
         | WHERE change_point_type IS NOT NULL
-        | INLINE STATS recent_detection_count = COUNT(*) BY rule_uuid
+        | INLINE STATS recent_detection_count = COUNT(*), last_reviewed_at = MAX(processed_at) WHERE processed_count > 0 AND skipped_count == 0 BY rule_uuid
         | WHERE processed_count == 0
         | INLINE STATS oldest_unprocessed = MIN(@timestamp), latest_timestamp = MAX(@timestamp) BY rule_uuid
         | WHERE @timestamp == latest_timestamp
@@ -115,13 +187,13 @@ steps:
         | WHERE _id == latest_id
         | EVAL severity_score = COALESCE(severity_score, 0)
         | EVAL suppressed_age_minutes = DATE_DIFF("minute", oldest_unprocessed, NOW())
-        | WHERE recent_detection_count < ?2 OR suppressed_age_minutes >= ?3 OR severity_score >= ?4
+        | EVAL held_back = recent_detection_count >= ?2 AND suppressed_age_minutes < ?3 AND severity_score < ?4
         | EVAL flaky_probe = recent_detection_count >= ?2 AND suppressed_age_minutes >= ?3
         | EVAL staleness_minutes = DATE_DIFF("minute", @timestamp, NOW())
         | EVAL score = severity_score + staleness_minutes
-        | SORT score DESC, @timestamp ASC, _id ASC
+        | SORT held_back ASC, score DESC, @timestamp ASC, _id ASC
         | LIMIT ?1
-        | KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe
+        | KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe, held_back, last_reviewed_at
       params:
         - '${{ inputs.detectionBatchMax }}'
         - '${{ inputs.flakyRuleDetectionThreshold }}'
@@ -138,43 +210,109 @@ steps:
     on-failure:
       continue: true
 
-  # Size must be computed separately — comparison operators cannot follow a filter chain.
+  # Decides per detection whether the agent needs to see it. Read-only.
+  # A failure while classifying must never change behavior, so the step fails open itself: it hands
+  # on every row the agent may read, unjudged, and reports `failed`. A step that cannot run at all
+  # (an unregistered step, input it cannot read) is a defect, so it fails the run loudly: continuing
+  # would end every cycle as having no work and starve the agent without a trace.
+  - name: classify_detections
+    type: significantEvents.classifyDetections
+    with:
+      # No `| default: []`: the engine evaluates that to undefined even for an empty array, and the
+      # step already treats a missing `rows` as an empty batch.
+      rows: '${{ steps.get_detections.output.values }}'
+      columns: "${{ steps.get_detections.output.columns | map: 'name' }}"
+      space_id: '{{ variables.spaceId }}'
+      probe_window_minutes: '${{ inputs.classifierProbeWindowMinutes }}'
+      probe_timeout_ms: '${{ inputs.classifierProbeTimeoutMs }}'
+      probe_concurrency: '${{ inputs.classifierProbeConcurrency }}'
+      budget_ms: '${{ inputs.classifierBudgetMs }}'
+      max_skip_age_hours: '${{ inputs.classifierMaxSkipAgeHours }}'
+      review_fresh_minutes: '${{ inputs.classifierReviewFreshMinutes }}'
+      baseline_bucket_minutes: '${{ inputs.classifierBaselineBucketMinutes }}'
+      baseline_window_minutes: '${{ inputs.classifierBaselineWindowMinutes }}'
+
+  # Detections the classifier skipped are done: stamp them processed so they leave the queue. This
+  # runs before the batch gate, so it does not depend on the agent running or succeeding. A failed
+  # stamp only leaves the detection to be re-selected and re-classified next cycle.
+  - name: stamp_skipped_detections
+    type: if
+    condition: '${{ steps.classify_detections.output.skipped_count > 0 }}'
+    steps:
+      # Same query shape as get_written_rules_backlog: markers carry no rule_uuid, so the rule
+      # filter must stay a should alongside `exists: processed_by`. Each rule is stamped up to the
+      # detection the classifier judged (the ids in ?1, comma-delimited): a newer one that arrived
+      # after was never classified. One row per rule, so one marker request per rule.
+      - name: get_skipped_rules_backlog
+        type: elasticsearch.esql.query
+        with:
+          query: |-
+            FROM .significant_events-detections
+            | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
+            | WHERE change_point_type IS NOT NULL AND processed_count == 0
+            | EVAL classified = LOCATE(?1, CONCAT(",", detection_id, ",")) > 0
+            | INLINE STATS classified_at = MAX(@timestamp) WHERE classified BY rule_uuid
+            | WHERE classified_at IS NOT NULL AND @timestamp <= classified_at
+            | STATS detection_ids = VALUES(detection_id) BY rule_uuid
+          params:
+            - ",{{ steps.classify_detections.output.skipped_detection_ids | join: ',' }},"
+          filter:
+            bool:
+              filter:
+                - term:
+                    kibana.space_ids: '{{ variables.spaceId }}'
+                - bool:
+                    should:
+                      - terms:
+                          rule_uuid: '${{ steps.classify_detections.output.skipped_rule_uuids }}'
+                      - exists:
+                          field: processed_by
+                    minimum_should_match: 1
+                - range:
+                    '@timestamp':
+                      gte: '{{ inputs.detectionLookback }}'
+        on-failure:
+          continue: true
+
+      - name: foreach_stamp_skipped
+        type: foreach
+        foreach: '${{ steps.get_skipped_rules_backlog.output.values | default: [] }}'
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: prepare_skipped_marker
+            type: data.set
+            with:
+              # A rule with one detection comes back as a string, with several as an array.
+              detection_ids: '${{ foreach.item[0] | join: "," | split: "," }}'
+              rule_uuid: '${{ foreach.item[1] }}'
+          - name: foreach_skipped_detection_chunk
+            type: foreach
+            # The mark-processed route accepts at most 1,000 IDs per request.
+            foreach: '${{ steps.prepare_skipped_marker.output.detection_ids | chunk: 1000 | json }}'
+            iteration-on-failure:
+              continue: true
+            steps:
+              - name: write_skipped_marker
+                type: kibana.request
+                with:
+                  method: POST
+                  path: '/s/{{ variables.spaceId }}/internal/significant_events/detections/_mark_processed'
+                  headers:
+                    x-elastic-internal-origin: 'kibana'
+                  body:
+                    detection_ids: '${{ foreach.item }}'
+                    processed_by: '{{ execution.id }}'
+                    # The classifier's decision for this rule, so the marker says why.
+                    skip: "${{ steps.classify_detections.output.skips | where: 'rule_uuid', steps.prepare_skipped_marker.output.rule_uuid | map: 'skip' | first }}"
+                on-failure:
+                  continue: true
+
+  # Rows for the agent.
   - name: compute_batch_size
     type: data.set
     with:
-      processedCount: '${{ steps.get_detections.output.values | size | default: 0 }}'
-
-  - name: compute_suppressed_count
-    type: elasticsearch.esql.query
-    with:
-      query: |-
-        FROM .significant_events-detections METADATA _id
-        | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
-        | WHERE change_point_type IS NOT NULL
-        | INLINE STATS recent_detection_count = COUNT(*) BY rule_uuid
-        | WHERE processed_count == 0
-        | INLINE STATS oldest_unprocessed = MIN(@timestamp), latest_timestamp = MAX(@timestamp) BY rule_uuid
-        | WHERE @timestamp == latest_timestamp
-        | INLINE STATS latest_id = MAX(_id) BY rule_uuid
-        | WHERE _id == latest_id
-        | EVAL severity_score = COALESCE(severity_score, 0)
-        | EVAL suppressed_age_minutes = DATE_DIFF("minute", oldest_unprocessed, NOW())
-        | WHERE recent_detection_count >= ?1 AND suppressed_age_minutes < ?2 AND severity_score < ?3
-        | STATS suppressedRuleCount = COUNT(*)
-      params:
-        - '${{ inputs.flakyRuleDetectionThreshold }}'
-        - '${{ inputs.flakyRuleProbeAfterMinutes }}'
-        - '${{ inputs.flakyRuleExemptSeverityScore }}'
-      filter:
-        bool:
-          filter:
-            - term:
-                kibana.space_ids: '{{ variables.spaceId }}'
-            - range:
-                '@timestamp':
-                  gte: '{{ inputs.detectionLookback }}'
-    on-failure:
-      continue: true
+      processedCount: '${{ steps.classify_detections.output.row_count | default: 0 }}'
 
   - name: compute_has_work
     type: data.set
@@ -190,7 +328,12 @@ steps:
         with:
           processedCount: '${{ steps.compute_batch_size.output.processedCount }}'
           hasWork: false
-          suppressedRuleCount: '${{ steps.compute_suppressed_count.output.values[0][0] | default: 0 }}'
+          skippedCount: '${{ steps.classify_detections.output.skipped_count | default: 0 }}'
+          heldBackCount: '${{ steps.classify_detections.output.held_back_count | default: 0 }}'
+          needsAgentCount: '${{ steps.classify_detections.output.needs_agent_count | default: 0 }}'
+          classifierReasonCounts: "${{ steps.classify_detections.output.reason_counts | json | default: '{}' }}"
+          classifierProbeStatusCounts: "${{ steps.classify_detections.output.probe_status_counts | json | default: '{}' }}"
+          classifierFailed: '${{ steps.classify_detections.error != null or steps.classify_detections.output.failed == true }}'
 
   # -----------------------------------------------------------------------
   # Correlate detections into discoveries.
@@ -216,8 +359,7 @@ steps:
       message: |
         ## Detection batch
 
-        Columns: {{ steps.get_detections.output.columns | map: 'name' | json }}
-        Rows: {{ steps.get_detections.output.values | json }}
+        {{ steps.classify_detections.output.batch | json }}
       schema:
         type: object
         properties:
@@ -252,13 +394,12 @@ steps:
                 status:
                   type: string
                   enum: [active, recovering, inactive]
-                  description: 'Echo of the status events_write returned. The agent decides nothing here: every agent write is active, and the status engine owns recovering and inactive.'
+                  description: 'Echo of the status events_write returned. The agent decides nothing here: the server derives it from the per-rule verdicts (a breach is active, healthy members open an event recovering), and an operator or a close workflow owns inactive.'
                 written:
                   type: boolean
                   description: 'true when events_write appended the event version.'
                 reason:
                   type: string
-                  enum: [bulk_error, duplicate_in_batch, existing_active_event, unchanged_outcome, unknown_event_id]
                   description: 'Failure or skip reason when written is false.'
               required: [event_id, severity, status, written]
         required: [written_rule_uuids, significant_events]
@@ -286,6 +427,8 @@ steps:
       # The rule filter must be a should alongside `exists: processed_by` — markers carry no
       # rule_uuid, so a bare terms filter drops them before the processed_count semijoin and
       # every backlog detection gets re-stamped each cycle (nightshift-program#961).
+      # Each rule is stamped up to the detection the agent was given (the batch ids in ?1): one that
+      # arrived during the run was never seen, stays pending, and never becomes the rule's last review.
       - name: get_written_rules_backlog
         type: elasticsearch.esql.query
         with:
@@ -293,7 +436,12 @@ steps:
             FROM .significant_events-detections
             | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
             | WHERE change_point_type IS NOT NULL AND processed_count == 0
+            | EVAL given = LOCATE(?1, CONCAT(",", detection_id, ",")) > 0
+            | INLINE STATS given_at = MAX(@timestamp) WHERE given BY rule_uuid
+            | WHERE given_at IS NOT NULL AND @timestamp <= given_at
             | KEEP detection_id
+          params:
+            - ",{{ steps.classify_detections.output.batch | map: 'detection_id' | join: ',' }},"
           filter:
             bool:
               filter:
@@ -441,4 +589,9 @@ steps:
     with:
       processedCount: '${{ steps.compute_batch_size.output.processedCount }}'
       hasWork: true
-      suppressedRuleCount: '${{ steps.compute_suppressed_count.output.values[0][0] | default: 0 }}'
+      skippedCount: '${{ steps.classify_detections.output.skipped_count | default: 0 }}'
+      heldBackCount: '${{ steps.classify_detections.output.held_back_count | default: 0 }}'
+      needsAgentCount: '${{ steps.classify_detections.output.needs_agent_count | default: 0 }}'
+      classifierReasonCounts: "${{ steps.classify_detections.output.reason_counts | json | default: '{}' }}"
+      classifierProbeStatusCounts: "${{ steps.classify_detections.output.probe_status_counts | json | default: '{}' }}"
+      classifierFailed: '${{ steps.classify_detections.error != null or steps.classify_detections.output.failed == true }}'

@@ -77,7 +77,8 @@ steps:
               conversation_id: '{{ inputs.conversation_id }}'
       # No `if`, `on-failure`, or `timeout` on this step: a parallel branch body must be a
       # straight line of atomic steps, and anything else is rejected at graph-build time.
-      # The feature flag is honored inside the handler, which no-ops when trees are off.
+      # The feature flag and agent policy are honored inside the handler, which no-ops when
+      # trees are off or the agent does not use them.
       - name: decision_trees
         steps:
           - name: hydrate_decision_trees
@@ -85,6 +86,7 @@ steps:
             with:
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
               prompt: '{{ inputs.prompt }}'
+              agent_id: '{{ inputs.agent_id }}'
   - name: compose_prompt
     type: nightshift.composeHydrateNotifications
     if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}'

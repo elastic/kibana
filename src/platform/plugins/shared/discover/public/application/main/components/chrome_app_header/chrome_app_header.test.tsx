@@ -80,7 +80,7 @@ describe('ChromeAppHeader', () => {
     );
   });
 
-  it('should keep the new name as a draft for a session that has never been saved', async () => {
+  it('should open the save session modal prefilled with the typed title for an unsaved session', async () => {
     const { services, toolkit, user } = await setup({ persistedDiscoverSession: undefined });
 
     expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('New session');
@@ -88,10 +88,16 @@ describe('ChromeAppHeader', () => {
     await renameFromHeader(user, 'My draft');
 
     await waitFor(() => {
-      expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('My draft');
+      expect(toolkit.internalState.getState().saveSessionModal).toEqual({
+        isOpen: true,
+        initialTitle: 'My draft',
+        initialCopyOnSave: false,
+      });
     });
+    // The title is not persisted until the session is actually saved through the modal
     expect(services.discoverSessionService.save).not.toHaveBeenCalled();
-    expect(toolkit.internalState.getState().draftSessionTitle).toBe('My draft');
+    // While the modal is open the header keeps showing the title being saved, not the default
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('My draft');
   });
 
   it('should keep the editor open with an error when renaming fails', async () => {

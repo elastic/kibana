@@ -53,11 +53,11 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
         executeRequestResponse = responseBody;
       }, 'execute');
       submitCommand();
-      cy.contains('Action pending.').should('exist');
+      cy.contains('execute is pending').should('exist');
       cy.wait('@execute').then(() => {
         sendActionResponse(executeRequestResponse);
       });
-      cy.contains('Command execution was successful', { timeout: 120000 }).should('exist');
+      cy.contains('execute completed successfully', { timeout: 120000 }).should('exist');
     });
   });
 });

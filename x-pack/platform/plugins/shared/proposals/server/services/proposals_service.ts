@@ -22,8 +22,12 @@ import {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ActionMetadata, WorkflowExecutionDto } from '@kbn/workflows';
 import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
+import { CREATE_PROPOSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
   DEFAULT_PROPOSAL_TITLE,
+  isTodoProposal,
+  isTerminal,
+  PROPOSAL_CATEGORY_TODO,
   PROPOSAL_ATTACHMENT_TYPE,
   PROPOSALS_RESUME_CHANNEL,
 } from '@kbn/proposals-common';
@@ -100,6 +104,9 @@ export interface ProposalsServiceDeps {
   getWorkflowsApi: () => WorkflowsManagementApi;
   getAttachmentsClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
 }
+
+/** How long `reopen` waits for the gate workflow to create the successor. */
+const REOPEN_WAIT = { timeoutMs: 15_000, intervalMs: 250 };
 
 const gateEndedError = (status: ExecutionStatus): string =>
   `The gate execution ended as ${status} before it settled the proposal.`;
@@ -179,6 +186,14 @@ export class ProposalsService {
     // caller always "wins" with an empty string, the action's own metadata is
     // never consulted, and the queue silently drops a proposal it cannot group.
     const category = blankToUndefined(params.category) ?? metadata?.category;
+    // A to-do is offered as "I've applied" alone, so approving one must not run anything: the
+    // click records work the analyst already did, and there is no Decline beside it.
+    if (actionWorkflowId !== undefined && category === PROPOSAL_CATEGORY_TODO) {
+      throw new ProposalInvalidActionInputError(
+        `A "${PROPOSAL_CATEGORY_TODO}" proposal is carried out by the analyst, so it cannot ` +
+          `run action workflow [${actionWorkflowId}]`
+      );
+    }
     const impact = blankToUndefined(params.impact) ?? metadata?.impact ?? 'low';
     // Required on the stored document, so a blank has to resolve to something
     // rather than to an omission: it feeds the queue's secondary sort rank.
@@ -281,7 +296,7 @@ export class ProposalsService {
    * proposals sharing an action costs one `getWorkflow` rather than one each.
    */
   async list(
-    query: ListProposalsQuery,
+    query: ListProposalsQuery & InProcessProposalFilters,
     spaceId: string,
     request: KibanaRequest,
     /** Replaces the default priority sort; the queues page by recency instead. */
@@ -296,16 +311,21 @@ export class ProposalsService {
     });
 
     const current = await this.settleOrphans(
-      response.hits.hits
-        .filter((hit): hit is typeof hit & { _id: string } => hit._id !== undefined)
-        .map((hit) => toProposal(hit._id, hit._source as ProposalDocument)),
+      response.hits.hits.reduce<Proposal[]>((proposals, hit) => {
+        if (hit._id !== undefined) {
+          proposals.push(toProposal(hit._id, hit._source));
+        }
+        return proposals;
+      }, []),
       spaceId,
       request
     );
     // A proposal settled on this read no longer matches the status it was searched by.
-    const matching = query.status
-      ? current.filter(({ status }) => status === query.status)
-      : current;
+    const matching = current.filter(
+      ({ status }) =>
+        (!query.status || status === query.status) &&
+        (!query.statuses || query.statuses.includes(status))
+    );
     const settledAway = current.length - matching.length;
 
     const proposals = await this.withMetadataBatch(matching, spaceId, request);
@@ -696,6 +716,119 @@ export class ProposalsService {
   }
 
   /**
+   * Re-offers a to-do proposal that was marked as applied, for the analyst who marked it by
+   * mistake: a successor carrying the same content is created pending, behind a gate of its own,
+   * and the original is pointed at it.
+   *
+   * The original keeps its decision. A decision is immutable and reaches the record only through
+   * the gate, and the original's gate has ended, so it cannot be undone in place. Superseding it
+   * instead leaves the chain saying what happened — applied, then re-opened — and the successor
+   * goes through the same gate as any proposal, so "I've applied" works on it again.
+   *
+   * Only for a to-do proposal: an action that ran cannot be un-run by relabelling it.
+   */
+  async reopen(
+    id: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{ proposalId: string }> {
+    const { proposal } = await this.load(id, spaceId);
+
+    if (!isTodoProposal(proposal)) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] is not a to-do, and only a to-do proposal can be marked as not applied`
+      );
+    }
+    if (proposal.decision !== 'approved' || proposal.status !== 'no_action') {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was not marked as applied: it is ${proposal.decision ?? 'undecided'}/${
+          proposal.status
+        }`
+      );
+    }
+    if (proposal.supersededBy !== undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
+      );
+    }
+
+    // Through the gate workflow rather than written here, so the successor is gated, deadlined
+    // and attached to the conversation exactly like a proposal the agent created.
+    const successorId = uuidv4();
+    await this.deps.getWorkflowsApi().executeWorkflow({
+      workflowId: CREATE_PROPOSAL_WORKFLOW_ID,
+      spaceId,
+      request,
+      inputs: {
+        conversationId: proposal.conversationId,
+        title: proposal.title,
+        comment: proposal.comment,
+        origin: proposal.origin,
+        impact: proposal.impact,
+        confidence: proposal.confidence,
+        ...(proposal.category !== undefined && { category: proposal.category }),
+        proposalId: successorId,
+      },
+      // The gate parks on the analyst's decision; only its start is awaited.
+      waitForCompletion: false,
+    });
+
+    const successor = await this.waitForCreated(successorId, spaceId);
+    if (!successor) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] could not be re-offered: its successor [${successorId}] was not created in time`
+      );
+    }
+
+    // The original is marked before the successor joins its chain. If the successor were linked
+    // first and this write then lost, the chain would have two live heads for the gate's
+    // `getLatestRevision` to choose between; this way a failure leaves the successor as a
+    // chain of its own, still decidable.
+    const current = await this.load(id, spaceId);
+    if (current.proposal.supersededBy !== undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already superseded by ${current.proposal.supersededBy}`
+      );
+    }
+    const { id: _originalId, ...original } = current.proposal;
+    await this.writeDocument(id, { ...original, supersededBy: successorId }, current);
+
+    const { id: _successorId, ...successorDocument } = successor.proposal;
+    await this.writeDocument(
+      successorId,
+      {
+        ...successorDocument,
+        rootProposalId: original.rootProposalId,
+        supersedes: id,
+        revision: original.revision + 1,
+      },
+      successor
+    );
+
+    return { proposalId: successorId };
+  }
+
+  /** Waits for a proposal a gate workflow is creating, or `undefined` once the wait runs out. */
+  private async waitForCreated(
+    id: string,
+    spaceId: string,
+    { timeoutMs, intervalMs } = REOPEN_WAIT
+  ): Promise<StoredProposal | undefined> {
+    const deadline = Date.now() + timeoutMs;
+    do {
+      try {
+        return await this.load(id, spaceId);
+      } catch (error) {
+        if (!(error instanceof ProposalNotFoundError)) {
+          throw error;
+        }
+      }
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    } while (Date.now() < deadline);
+    return undefined;
+  }
+
+  /**
    * Appends a revision carrying the caller's overrides and retires the addressed
    * proposal.
    *
@@ -896,6 +1029,27 @@ export class ProposalsService {
       },
       aggs: {
         by_conversation: { terms: { field: 'conversationId', size: ids.length } },
+      },
+    });
+    const buckets = response.aggregations?.by_conversation.buckets ?? [];
+    return new Map(buckets.map(({ key, doc_count: count }) => [String(key), count]));
+  }
+
+  /**
+   * Proposals matching the filters per conversation, in one aggregation. Conversations without
+   * any are absent from the map.
+   */
+  async countByConversation(
+    filters: ProposalFilters & { decidedWithinHours?: number } & InProcessProposalFilters,
+    spaceId: string,
+    size: number
+  ): Promise<Map<string, number>> {
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 0,
+      query: { bool: { filter: toFilterClauses(filters, spaceId) } },
+      aggs: {
+        by_conversation: { terms: { field: 'conversationId', size } },
       },
     });
     const buckets = response.aggregations?.by_conversation.buckets ?? [];
@@ -1374,12 +1528,22 @@ export interface ReviseProposalParams extends ReviseProposalRequest {
 
 type QueryFilterList = Array<Record<string, unknown>>;
 
+/** Filters only in-process callers may use; none is part of the HTTP list contract. */
+export interface InProcessProposalFilters {
+  categories?: string[];
+  statuses?: ProposalStatus[];
+  conversationIds?: string[];
+}
+
 /**
  * Translates the shared filter vocabulary once, so every read applies it
  * identically. The space term is always present: no read crosses a space.
  */
 const toFilterClauses = (
-  filters: ProposalFilters & { category?: string; decidedWithinHours?: number },
+  filters: ProposalFilters & {
+    category?: string;
+    decidedWithinHours?: number;
+  } & InProcessProposalFilters,
   spaceId: string
 ): QueryFilterList => {
   const filter: QueryFilterList = [{ term: { spaceId } }];
@@ -1398,6 +1562,15 @@ const toFilterClauses = (
   }
   if (filters.category) {
     filter.push({ term: { category: filters.category } });
+  }
+  if (filters.categories) {
+    filter.push({ terms: { category: filters.categories } });
+  }
+  if (filters.statuses) {
+    filter.push({ terms: { status: filters.statuses } });
+  }
+  if (filters.conversationIds) {
+    filter.push({ terms: { conversationId: filters.conversationIds } });
   }
   if (filters.decidedWithinHours !== undefined) {
     filter.push({ range: { decidedAt: { gte: `now-${filters.decidedWithinHours}h` } } });
@@ -1433,21 +1606,6 @@ const stripRanks = ({ ranks, ...proposal }: StoredProposalRecord): Proposal => p
 
 const toProposal = (id: string, document: ProposalDocument): Proposal =>
   stripRanks({ id, ...document });
-
-/**
- * A status that has settled. `pending` and `executing` are the only two a
- * proposal can still be moved out of.
- */
-const isTerminal = (status: ProposalStatus): boolean =>
-  status === 'succeeded' ||
-  status === 'failed' ||
-  status === 'expired' ||
-  status === 'no_action' ||
-  // Undecided, unlike the other four, but equally unable to move: a
-  // superseded proposal is not the live revision anymore, and a caller that
-  // still holds its id (a stale workflow variable, a retried step) must not
-  // be able to resurrect it via update().
-  status === 'superseded';
 
 /** Still waiting on its gate: undecided, or approved with the action running. */
 const isUnsettled = ({ status, supersededBy }: Proposal): boolean =>

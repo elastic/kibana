@@ -1,5 +1,5 @@
 {
-  "sha1": "8782e8b2419e1b12459d11d6057ffd9805125d70",
+  "sha1": "17f1a837cc8c04f1ec0cc0e0dcc5e6ab1bd803a1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -128,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_activity_events_api.spec.ts",
-        "line": 68,
-        "column": 19
+        "line": 69,
+        "column": 7
       }
     },
     {
@@ -144,7 +144,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_activity_events_api.spec.ts",
-        "line": 80,
+        "line": 81,
         "column": 14
       }
     },
@@ -160,7 +160,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_activity_events_api.spec.ts",
-        "line": 112,
+        "line": 113,
         "column": 20
       }
     },
@@ -176,7 +176,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_activity_events_api.spec.ts",
-        "line": 175,
+        "line": 176,
         "column": 30
       }
     },
@@ -192,7 +192,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_activity_events_api.spec.ts",
-        "line": 197,
+        "line": 198,
         "column": 7
       }
     },
@@ -208,7 +208,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_activity_events_api.spec.ts",
-        "line": 262,
+        "line": 263,
         "column": 90
       }
     },
@@ -224,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_activity_events_api.spec.ts",
-        "line": 273,
+        "line": 274,
         "column": 25
       }
     },
@@ -402,6 +402,20 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_add_events_api.spec.ts",
         "line": 207,
         "column": 97
+      }
+    },
+    {
+      "id": "9e297ef1603b21d-92055caccf0c54e",
+      "title": "Agent Builder — conversation ownership with API keys an API key owns the same conversations as its owner once the owner has logged in",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api_key_ownership_api.spec.ts",
+        "line": 119,
+        "column": 30
       }
     },
     {

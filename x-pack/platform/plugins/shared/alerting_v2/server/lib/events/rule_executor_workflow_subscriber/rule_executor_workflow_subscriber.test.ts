@@ -95,7 +95,7 @@ describe('RuleExecutorWorkflowSubscriber', () => {
 
       await handlerFor(bus, RULE_EXECUTION_SUCCEEDED_EVENT_TYPE)(succeededEvent, {
         request,
-        origin: 'user',
+        origin: { actor: 'user', channel: 'api' },
       });
 
       expect(workflowsExtensions.getClient).toHaveBeenCalledWith(request);
@@ -112,7 +112,7 @@ describe('RuleExecutorWorkflowSubscriber', () => {
 
       await handlerFor(bus, RULE_EXECUTION_FAILED_EVENT_TYPE)(failedEvent, {
         request,
-        origin: 'user',
+        origin: { actor: 'user', channel: 'api' },
       });
 
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
@@ -127,7 +127,7 @@ describe('RuleExecutorWorkflowSubscriber', () => {
 
       await handlerFor(bus, RULE_EXECUTION_SUCCEEDED_EVENT_TYPE)(
         { ...succeededEvent, payload: { ...succeededEvent.payload, ruleEventsGenerated: 0 } },
-        { request, origin: 'user' }
+        { request, origin: { actor: 'user', channel: 'api' } }
       );
 
       expect(mockEmitEvent).not.toHaveBeenCalled();
@@ -141,7 +141,7 @@ describe('RuleExecutorWorkflowSubscriber', () => {
       await expect(
         handlerFor(bus, RULE_EXECUTION_SUCCEEDED_EVENT_TYPE)(succeededEvent, {
           request,
-          origin: 'user',
+          origin: { actor: 'user', channel: 'api' },
         })
       ).resolves.toBeUndefined();
 
