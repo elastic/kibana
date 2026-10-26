@@ -506,13 +506,11 @@
       "groupName": "@elastic/fleet dependencies",
       "matchDepNames": [
         "exponential-backoff",
-        "js-search",
         "openpgp",
         "remark-gfm",
         "rehype-raw",
         "rehype-sanitize",
-        "yaml",
-        "@types/js-search"
+        "yaml"
       ],
       "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
@@ -998,7 +996,6 @@
         "eslint-plugin-react-hooks",
         "eslint-plugin-react-perf",
         "eslint-plugin-testing-library",
-        "eslint-traverse",
         "@types/eslint"
       ],
       "matchUpdateTypes": ["minor", "patch"],
@@ -1369,8 +1366,8 @@
       "enabled": true
     },
     {
-      "groupName": "borc",
-      "matchDepNames": ["borc"],
+      "groupName": "cbor2",
+      "matchDepNames": ["cbor2"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1861,7 +1858,7 @@
         "team:streams-ui",
         "team:nightshift-sre-agent-team",
         "team:security-defend-workflows",
-        "team:security-genai-research-and-development"
+        "team:security-generative-ai"
       ],
       "matchBaseBranches": ["main"],
       "addLabels": ["blocked", "effort:low"],
@@ -1985,7 +1982,7 @@
     },
     {
       "groupName": "minify",
-      "matchDepNames": ["gulp-brotli", "terser-webpack-plugin"],
+      "matchDepNames": ["terser-webpack-plugin"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -2576,15 +2573,6 @@
     {
       "groupName": "lightningcss",
       "matchDepNames": ["lightningcss"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "tar-fs",
-      "matchDepNames": ["tar-fs"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

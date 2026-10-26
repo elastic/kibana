@@ -53,7 +53,7 @@ const mockIndex = useResolvedLatestEntitiesIndexName as jest.Mock;
 const mockJobs = useInstalledSecurityJobsIds as jest.Mock;
 
 const RANGE = '24h';
-const DOT_COUNT = 24;
+const DOT_COUNT = 6;
 const DOTS = Array.from({ length: DOT_COUNT }, (_, i) => 10 + i);
 
 interface TileGate {
@@ -306,7 +306,7 @@ describe('series hooks', () => {
       expect(mockUseQuery).toHaveBeenCalledTimes(1);
       const [key, queryFn] = lastCall();
       expect(key[0]).toBe(hook.tileKey);
-      // Oldest first: the first dot is column 23 of the tile, the last is column 0.
+      // Oldest first: the first dot is column 5 of the tile, the last is column 0.
       hook.fromParsed(await queryFn({ signal: undefined })).forEach((dots, t) => {
         expect(dots[0]).toBe(1000 * t + DOT_COUNT - 1);
         expect(dots[DOT_COUNT - 1]).toBe(1000 * t);

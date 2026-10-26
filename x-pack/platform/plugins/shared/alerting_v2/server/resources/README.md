@@ -200,7 +200,7 @@ That keeps stored schema, runtime validation, and application code aligned.
 
 ## Lifecycle and retention
 
-Both streams use data stream lifecycle (DSL), not ILM. Rollover follows the Elasticsearch DSL defaults. `.alert-actions` has no retention.
+Both streams use data stream lifecycle (DSL), not ILM. Rollover follows the Elasticsearch DSL defaults. `.alert-actions` has no DSL retention; a cleanup task deletes its dispatcher docs instead (see below).
 
 `.rule-events` retention is set in `kibana.yml`:
 
@@ -216,6 +216,17 @@ Caveats:
 - An active episode that stops getting new events expires once its last event is older than the window, with no recovery event or notification. This happens for rules using `no_data: ignore` with manual, condition or query recovery, and for rules that are disabled or keep failing.
 - Retention applies to the whole stream, not per rule, source or space. Significant Events shares this stream.
 - DSL deletes whole backing indices measured from rollover, so documents can live a little longer than the window.
+
+### `.alert-actions` cleanup
+
+The `alerting_v2:alert_actions_cleanup` task runs daily and deletes the dispatcher's bookkeeping docs (`action_type` of `fire`, `suppress` or `unmatched`) older than the retention. All other action types, including user actions and `notified`, are kept.
+
+| Setting | Default | Notes |
+| --- | --- | --- |
+| `xpack.alerting_v2.retention.alertActions.dispatcher.enabled` | `false` | When `false`, the task is removed at startup. |
+| `xpack.alerting_v2.retention.alertActions.dispatcher.dataRetention` | `90d` | Minimum `1d`. |
+
+Deleted docs only free disk space once their segments merge.
 
 ## Related server code
 

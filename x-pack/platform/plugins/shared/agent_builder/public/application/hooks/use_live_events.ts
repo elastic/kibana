@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { of } from 'rxjs';
+import { animationFrameScheduler, of, throttleTime } from 'rxjs';
 import type { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { TimelineDisplayEvent } from '../../services/events';
@@ -15,17 +15,20 @@ import { useConversationStreamService } from '../context/streaming/streaming_con
 
 const EMPTY_EVENTS: TimelineDisplayEvent[] = [];
 
-/** The live (streamed) events of the current conversation; empty when nothing streams. */
-export const useLiveEvents = (): TimelineDisplayEvent[] => {
+export const useLiveEvents$ = (): Observable<TimelineDisplayEvent[]> => {
   const conversationId = useConversationId();
   const conversationStreamService = useConversationStreamService();
 
-  const activeStream$: Observable<TimelineDisplayEvent[]> = useMemo(
+  return useMemo(
     () =>
       conversationId
-        ? conversationStreamService.getActiveStream$(conversationId)
+        ? conversationStreamService
+            .getActiveStream$(conversationId)
+            .pipe(throttleTime(0, animationFrameScheduler, { leading: true, trailing: true }))
         : of(EMPTY_EVENTS),
     [conversationStreamService, conversationId]
   );
-  return useObservable(activeStream$, EMPTY_EVENTS);
 };
+
+export const useLiveEvents = (): TimelineDisplayEvent[] =>
+  useObservable(useLiveEvents$(), EMPTY_EVENTS);

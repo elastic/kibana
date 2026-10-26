@@ -333,7 +333,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.pluginContext.env.packageInfo.version,
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
-    registerAttachments(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
+    registerAttachments(
+      agentBuilder,
+      core,
+      logger,
+      experimentalFeatures,
+      this.pluginContext.env.packageInfo.version,
+      plugins.ml
+    ).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
 
@@ -574,7 +581,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
-    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures);
+    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures, {
+      getStartServices: core.getStartServices,
+      logger: this.logger,
+    });
     plugins.cases.attachmentFramework.registerAttachment(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {

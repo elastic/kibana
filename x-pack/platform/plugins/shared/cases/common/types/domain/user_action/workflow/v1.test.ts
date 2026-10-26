@@ -7,10 +7,10 @@
 
 import { UserActionTypes } from '../action/v1';
 import {
-  WorkflowPayloadRt,
-  WorkflowOriginRt,
-  WorkflowUserActionPayloadRt,
-  WorkflowUserActionRt,
+  WorkflowPayloadSchema,
+  WorkflowOriginSchema,
+  WorkflowUserActionPayloadSchema,
+  WorkflowUserActionSchema,
 } from './v1';
 import {
   CASE_WORKFLOW_ORIGIN_TYPE,
@@ -28,23 +28,19 @@ const observableOrigin = {
   value: '1.2.3.4',
 };
 
-describe('WorkflowPayloadRt', () => {
+describe('WorkflowPayloadSchema', () => {
   it('accepts a valid workflow payload', () => {
-    expect(WorkflowPayloadRt.decode(defaultWorkflow)).toStrictEqual({
-      _tag: 'Right',
-      right: defaultWorkflow,
-    });
+    expect(WorkflowPayloadSchema.safeParse(defaultWorkflow).data).toStrictEqual(defaultWorkflow);
   });
 
   it('strips excess keys', () => {
-    expect(WorkflowPayloadRt.decode({ ...defaultWorkflow, extra: 'nope' })).toStrictEqual({
-      _tag: 'Right',
-      right: defaultWorkflow,
-    });
+    expect(
+      WorkflowPayloadSchema.safeParse({ ...defaultWorkflow, extra: 'nope' }).data
+    ).toStrictEqual(defaultWorkflow);
   });
 });
 
-describe('WorkflowOriginRt', () => {
+describe('WorkflowOriginSchema', () => {
   it.each([
     ['cases.case', caseOrigin],
     ['cases.observable', observableOrigin],
@@ -67,91 +63,78 @@ describe('WorkflowOriginRt', () => {
       },
     ],
   ] as const)('accepts origin type %s', (_label, origin) => {
-    const result = WorkflowOriginRt.decode(origin);
-    expect(result._tag).toBe('Right');
+    const result = WorkflowOriginSchema.safeParse(origin);
+    expect(result.success).toBe(true);
   });
 
   it('strips excess keys', () => {
-    expect(WorkflowOriginRt.decode({ ...caseOrigin, unknown: 'field' })).toStrictEqual({
-      _tag: 'Right',
-      right: caseOrigin,
-    });
+    expect(WorkflowOriginSchema.safeParse({ ...caseOrigin, unknown: 'field' }).data).toStrictEqual(
+      caseOrigin
+    );
   });
 
   it('rejects an unknown origin type', () => {
-    const result = WorkflowOriginRt.decode({ type: 'cases.unknown', id: 'x' });
-    expect(result._tag).toBe('Left');
+    const result = WorkflowOriginSchema.safeParse({ type: 'cases.unknown', id: 'x' });
+    expect(result.success).toBe(false);
   });
 
   it('rejects the removed cases.comment origin', () => {
-    const result = WorkflowOriginRt.decode({ type: 'cases.comment', id: 'x' });
-    expect(result._tag).toBe('Left');
+    const result = WorkflowOriginSchema.safeParse({ type: 'cases.comment', id: 'x' });
+    expect(result.success).toBe(false);
   });
 
   it.each(['cases.alert', 'cases.alerts', 'cases.event'])(
     'rejects removed origin type %s',
     (type) => {
-      const result = WorkflowOriginRt.decode({ type, id: 'x' });
-      expect(result._tag).toBe('Left');
+      const result = WorkflowOriginSchema.safeParse({ type, id: 'x' });
+      expect(result.success).toBe(false);
     }
   );
 });
 
-describe('WorkflowUserActionPayloadRt', () => {
+describe('WorkflowUserActionPayloadSchema', () => {
   const defaultPayload = { workflow: defaultWorkflow, origin: caseOrigin };
 
   it('has expected attributes', () => {
-    expect(WorkflowUserActionPayloadRt.decode(defaultPayload)).toStrictEqual({
-      _tag: 'Right',
-      right: defaultPayload,
-    });
+    expect(WorkflowUserActionPayloadSchema.safeParse(defaultPayload).data).toStrictEqual(
+      defaultPayload
+    );
   });
 
   it('accepts a payload without an origin for list-surface runs', () => {
     const payload = { workflow: defaultWorkflow };
-    expect(WorkflowUserActionPayloadRt.decode(payload)).toStrictEqual({
-      _tag: 'Right',
-      right: payload,
-    });
+    expect(WorkflowUserActionPayloadSchema.safeParse(payload).data).toStrictEqual(payload);
   });
 
   it('removes foo:bar attributes from payload', () => {
-    expect(WorkflowUserActionPayloadRt.decode({ ...defaultPayload, foo: 'bar' })).toStrictEqual({
-      _tag: 'Right',
-      right: defaultPayload,
-    });
+    expect(
+      WorkflowUserActionPayloadSchema.safeParse({ ...defaultPayload, foo: 'bar' }).data
+    ).toStrictEqual(defaultPayload);
   });
 });
 
-describe('WorkflowUserActionRt', () => {
+describe('WorkflowUserActionSchema', () => {
   const defaultRequest = {
     type: UserActionTypes.workflow,
     payload: { workflow: defaultWorkflow, origin: caseOrigin },
   };
 
   it('has expected attributes', () => {
-    expect(WorkflowUserActionRt.decode(defaultRequest)).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
+    expect(WorkflowUserActionSchema.safeParse(defaultRequest).data).toStrictEqual(defaultRequest);
   });
 
   it('strips excess keys at the top level', () => {
-    expect(WorkflowUserActionRt.decode({ ...defaultRequest, foo: 'bar' })).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
+    expect(
+      WorkflowUserActionSchema.safeParse({ ...defaultRequest, foo: 'bar' }).data
+    ).toStrictEqual(defaultRequest);
   });
 
   it('strips excess keys inside payload', () => {
     expect(
-      WorkflowUserActionRt.decode({
+      WorkflowUserActionSchema.safeParse({
         ...defaultRequest,
         payload: { ...defaultRequest.payload, foo: 'bar' },
-      })
-    ).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
+      }).data
+    ).toStrictEqual(defaultRequest);
   });
 });

@@ -98,8 +98,21 @@ const getTrendReversedBadgeColors = (
         icon: TREND_UPWARD,
       };
 
-/** Delta text with a thousands separator like the main number, e.g. `+3` or `+1,627`. */
-const formatDelta = (delta: number): string => `${delta > 0 ? '+' : ''}${delta.toLocaleString()}`;
+/** From this size on, a tile number is shortened: precision at that scale does not help triage. */
+const COMPACT_NUMBER_FROM = 10_000;
+
+/** A tile number: exact below 10,000 (`5,678`), shortened from there (`10K`, `10.5K`, `1.2M`). */
+const formatTileNumber = (value: number): string =>
+  Math.abs(value) >= COMPACT_NUMBER_FROM
+    ? // Kibana's locale rather than the browser's, so the suffix matches the UI language (`K`, not en-GB `k`).
+      new Intl.NumberFormat(i18n.getLocale(), {
+        notation: 'compact',
+        maximumFractionDigits: 1,
+      }).format(value)
+    : value.toLocaleString();
+
+/** Delta text formatted like the main number, e.g. `+3`, `+1,627` or `+10.5K`. */
+const formatDelta = (delta: number): string => `${delta > 0 ? '+' : ''}${formatTileNumber(delta)}`;
 
 /** What the delta row says, for a screen reader: the signed change, or that the history is too short. */
 const getDeltaDescription = (
@@ -107,6 +120,7 @@ const getDeltaDescription = (
   showNoHistory: boolean
 ): string | undefined => {
   if (shownDelta === undefined) return showNoHistory ? notEnoughHistory : undefined;
+  // Exact, even where the badge shortens it.
   const amount = Math.abs(shownDelta).toLocaleString();
   return shownDelta > 0
     ? i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.ariaLabelUp', {
@@ -366,7 +380,7 @@ const renderValueRow = (card: SignalCardData, isLoading: boolean, isZero: boolea
   if (isLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="eaFaceliftSignalCardLoading" />;
   }
-  return isZero ? '—' : card.value.toLocaleString();
+  return isZero ? '—' : formatTileNumber(card.value);
 };
 
 /**
@@ -382,6 +396,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
   const isLoading = card.isLoading ?? false;
   const isZero = card.value === 0;
   const interactive = !isZero && !isLoading;
+  const noDataMessage = isZero && !isLoading ? card.noDataMessage : undefined;
   // Hover only: mouse clicks must not leave focus chrome that looks like hover after deselect.
   const emphasized = interactive && hovered;
 
@@ -456,7 +471,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
         min-block-size: calc(${euiTheme.size.xxxxl} * ${MIN_HEIGHT_FACTOR});
         padding: ${euiTheme.size.base};
         border: 1px solid ${borderColor};
-        border-radius: ${euiTheme.border.radius.medium};
+        border-radius: ${euiTheme.border.radius.panel};
         background: ${tileBackground};
         cursor: ${interactive ? 'pointer' : 'default'};
         outline: none;
@@ -565,23 +580,24 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
                 gap: ${DELTA_VALUE_GAP}px;
               `}
             >
-              <EuiText
-                css={css`
-                  font-family: 'Elastic UI Numeric', ${euiTheme.font.family};
-                  font-size: ${VALUE_FONT_SIZE}px;
-                  font-weight: ${euiTheme.font.weight.bold};
-                  line-height: ${METRIC_LINE_HEIGHT};
-                  text-align: end;
-                  color: ${euiTheme.colors.textParagraph};
-                `}
-              >
-                {renderValueRow(card, isLoading, isZero)}
-              </EuiText>
-              {isZero && !isLoading && card.noDataMessage ? (
+              {noDataMessage ? (
                 <EuiText size="xs" color="subdued">
-                  {card.noDataMessage}
+                  {noDataMessage}
                 </EuiText>
-              ) : null}
+              ) : (
+                <EuiText
+                  css={css`
+                    font-family: 'Elastic UI Numeric', ${euiTheme.font.family};
+                    font-size: ${VALUE_FONT_SIZE}px;
+                    font-weight: ${euiTheme.font.weight.bold};
+                    line-height: ${METRIC_LINE_HEIGHT};
+                    text-align: end;
+                    color: ${euiTheme.colors.textParagraph};
+                  `}
+                >
+                  {renderValueRow(card, isLoading, isZero)}
+                </EuiText>
+              )}
               {interactive && card.isDeltaLoading ? (
                 <span>
                   <EuiLoadingSpinner size="s" /> <DeltaLabel />

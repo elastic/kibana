@@ -44,7 +44,6 @@ export const internalStateActions = {
     internalStateSlice.actions,
     'setTabs',
     'setPersistedDiscoverSession',
-    'setDraftSessionTitle',
     'disconnectTab',
     'setDefaultProfileAdHocDataViewIds',
     'setAppState',

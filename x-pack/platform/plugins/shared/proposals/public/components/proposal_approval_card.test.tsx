@@ -154,6 +154,8 @@ jest.mock('../hooks/use_proposals_api', () => ({
   useDismissProposal: jest.fn(),
   useIsApprovingProposal: jest.fn(),
   useIsDecliningProposal: jest.fn(),
+  useReopenProposal: jest.fn(() => ({ mutateAsync: jest.fn() })),
+  useIsReopeningProposal: jest.fn(() => false),
 }));
 
 jest.mock('../hooks/use_current_user_profile', () => ({
@@ -470,6 +472,25 @@ describe('ProposalApprovalCard', () => {
       expect(container.querySelector('[data-test-subj="approval-is-submitting"]')).toBeNull();
       expect(queryByText(/The decision deadline has passed/)).not.toBeInTheDocument();
       expect(useProposalMock.mock.calls.every(([id]) => id === PROPOSAL_ID)).toBe(true);
+    });
+
+    it('says a to-do proposal marked as not applied is offered again, with nothing to decide', () => {
+      setupMocks(
+        baseProposal({
+          actionWorkflowId: undefined,
+          category: 'todo',
+          decision: 'approved',
+          status: 'no_action',
+          supersededBy: 'proposal-2',
+        })
+      );
+      const { container, getByText } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(getByText('Marked as not applied. It is offered again below.')).toBeInTheDocument();
+      expect(
+        container.querySelector('[data-test-subj="proposalCard-proposal-1-confirm"]')
+      ).toBeNull();
+      expect(container.querySelector('[data-test-subj="proposalDismiss-proposal-1"]')).toBeNull();
     });
 
     it('hides an open dismissal form when the proposal is replaced', () => {
