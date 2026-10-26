@@ -19,7 +19,7 @@ import type { ZodObject } from '@kbn/zod/v4';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
@@ -38,6 +38,7 @@ import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { installAssistantAgent } from './lib/install_assistant_agent';
 import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
+import type { GetEpisodeLookup } from './routes/types';
 import {
   isInvestigationInfrastructureAvailable,
   isInvestigationRunAvailable,
@@ -124,6 +125,7 @@ export class NightshiftInvestigationsPlugin
   private inference?: NightshiftInvestigationsStartDeps['inference'];
   private sandboxStart?: NightshiftInvestigationsStartDeps['sandbox'];
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
+  private alertingVTwo?: NightshiftInvestigationsStartDeps['alertingVTwo'];
   private elasticsearch?: ElasticsearchServiceStart;
   private savedObjects?: CoreStart['savedObjects'];
   private uiSettings?: CoreStart['uiSettings'];
@@ -351,7 +353,9 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           triggerInvestigationStepDefinition(
             this.getInvestigationsClient,
-            this.getAutomationsSoClient
+            this.getAutomationsSoClient,
+            this.getAlertsClient,
+            this.getEpisodeLookup
           )
         );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
@@ -474,8 +478,8 @@ export class NightshiftInvestigationsPlugin
         dependencies: {
           getInvestigationsClient: this.getInvestigationsClient,
           getTriggerEmitter,
-          getAlertsClient: (request: KibanaRequest) =>
-            this.ruleRegistry?.getRacClientWithRequest(request),
+          getAlertsClient: this.getAlertsClient,
+          getEpisodeLookup: this.getEpisodeLookup,
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
@@ -553,6 +557,7 @@ export class NightshiftInvestigationsPlugin
     this.inference = plugins.inference;
     this.sandboxStart = plugins.sandbox;
     this.ruleRegistry = plugins.ruleRegistry;
+    this.alertingVTwo = plugins.alertingVTwo;
     this.elasticsearch = coreStart.elasticsearch;
     this.savedObjects = coreStart.savedObjects;
     this.uiSettings = coreStart.uiSettings;
@@ -722,6 +727,25 @@ export class NightshiftInvestigationsPlugin
       conversationId,
       investigationId,
     });
+  };
+
+  private getAlertsClient = (request: KibanaRequest) =>
+    this.ruleRegistry?.getRacClientWithRequest(request);
+
+  private getEpisodeLookup: GetEpisodeLookup = (request, spaceId) => {
+    const { elasticsearch, alertingVTwo } = this;
+    if (!elasticsearch) {
+      throw new Error('core services are not available — plugin start() has not been called');
+    }
+    const resolvedSpaceId =
+      spaceId ?? this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    return {
+      esClient: elasticsearch.client.asScoped(request).asCurrentUser,
+      getRulesClient: alertingVTwo
+        ? () => alertingVTwo.getRulesClientWithRequestInSpace(request, asSpaceId(resolvedSpaceId))
+        : undefined,
+      spaceId: resolvedSpaceId,
+    };
   };
 
   private getAutomationsSoClient = (request: KibanaRequest, spaceId: string) => {
