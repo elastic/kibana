@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiContextMenuPanelDescriptor, UseEuiTheme } from '@elastic/eui';
 import { EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
@@ -64,6 +64,14 @@ export const LegendActionPopover: React.FunctionComponent<{
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [ref, onClose] = useLegendAction<HTMLDivElement>();
+  // `useLegendAction` returns a new `onClose` each render; keep the latest so `closePopover` stays stable
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  // `onClose` refocuses `ref`, which by then points to the plain trigger button rendered while closed
+  const closePopover = useCallback(() => {
+    setPopoverOpen(false);
+    onCloseRef.current();
+  }, []);
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
     const defaultFilterActions: LegendCellValueActions = [
@@ -92,7 +100,7 @@ export const LegendActionPopover: React.FunctionComponent<{
       disabled: action.disabled ?? false,
       onClick: () => {
         action.execute();
-        setPopoverOpen(false);
+        closePopover();
       },
     });
 
@@ -126,7 +134,14 @@ export const LegendActionPopover: React.FunctionComponent<{
         items: [...filterPanelItems, ...footerMessageItem, ...cellValuePanelItems],
       },
     ];
-  }, [label, legendCellValueActions, onFilter, showDisabledFilterActions, footerMessage]);
+  }, [
+    label,
+    legendCellValueActions,
+    onFilter,
+    showDisabledFilterActions,
+    footerMessage,
+    closePopover,
+  ]);
 
   if (!panels[0]?.items?.length) {
     return null;
@@ -157,8 +172,7 @@ export const LegendActionPopover: React.FunctionComponent<{
     </div>
   );
 
-  // A legend can have thousands of items, so only mount the popover while it is open.
-  // On close, `onClose` refocuses `ref`, which by then points to this plain button.
+  // A legend can have thousands of items, so only mount the popover while it is open
   if (!popoverOpen) {
     return Button;
   }
@@ -171,10 +185,7 @@ export const LegendActionPopover: React.FunctionComponent<{
       })}
       button={Button}
       isOpen={popoverOpen}
-      closePopover={() => {
-        setPopoverOpen(false);
-        onClose();
-      }}
+      closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="upLeft"
       title={i18n.translate('expressionXY.legend.filterOptionsLegend', {
