@@ -56,6 +56,21 @@ const FALLBACK_SUMMARY_CHARS = 1_000;
 /** A malformed structured answer is the usual failure, so a pass asks again before giving up. */
 const MAX_ATTEMPTS = 2;
 
+/**
+ * The entity form is only for two or more entities affected in different ways, and only for ones
+ * the impact sentence names: the model sometimes lists a service it ruled out. A list that
+ * understates the blast radius is safer than one that misstates it, so an entity the sentence
+ * does not mention is dropped, and fewer than two left means none.
+ */
+export const namedAsAffected = (
+  entities: NonNullable<FindingsOutput['impact_entities']>,
+  impactSummary: string
+): NonNullable<FindingsOutput['impact_entities']> => {
+  const summary = impactSummary.toLowerCase();
+  const named = entities.filter(({ name }) => summary.includes(name.toLowerCase()));
+  return named.length >= 2 ? named : [];
+};
+
 /** Keeps the first confirmed hypothesis: at most one may be the root cause. */
 export const limitToOneConfirmed = (hypotheses: FindingsOutput['hypotheses']): Hypothesis[] => {
   let confirmedSeen = false;
@@ -300,10 +315,11 @@ export const runFindingsPass = async (
             conversationId,
             summary: impactSummary,
             // The entity form is only for two or more entities affected in different ways.
-            entities:
-              entities.length >= 2
-                ? entities.map(({ name, type }) => ({ id: name, name, ...(type ? { type } : {}) }))
-                : [],
+            entities: namedAsAffected(entities, impactSummary).map(({ name, type }) => ({
+              id: name,
+              name,
+              ...(type ? { type } : {}),
+            })),
           }),
       ]);
     }
