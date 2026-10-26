@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import type { KibanaRole } from '@kbn/scout';
 
-export const UPGRADE_ASSISTANT_TAGS = tags.stateful.classic;
+// The UI is behind xpack.upgrade_assistant.ui.enabled, set only by the local upgrade_assistant server config.
+export const UPGRADE_ASSISTANT_TAGS = ['@local-stateful-classic'];
 
 export const UPGRADE_ASSISTANT_PATHS = {
   overview: 'management/stack/upgrade_assistant/overview',
