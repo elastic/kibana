@@ -32,8 +32,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...apiIntegrationConfig.get('kbnTestServer.serverArgs'),
         '--server.xsrf.disableProtection=true',
-        // disable internal API restriction. See https://github.com/elastic/kibana/issues/163654
-        '--server.restrictInternalApis=false',
         `--xpack.fleet.registryUrl=http://localhost:12345`, // setting to invalid registry url to prevent installing preconfigured packages
       ],
     },
