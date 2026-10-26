@@ -20,6 +20,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { SandboxPluginSetup, SandboxPluginStart } from '@kbn/sandbox-plugin/server';
+import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -64,6 +65,7 @@ export interface NightshiftInvestigationsSetupDeps {
   contextEngine?: ContextEnginePluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   sandbox?: SandboxPluginSetup;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
 }

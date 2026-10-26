@@ -28,6 +28,7 @@ import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_tool';
+import { NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID } from '../../inference_feature';
 
 export { NIGHTSHIFT_INVESTIGATION_AGENT_ID };
 export const NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID = 'platform.nightshift.investigation-type';
@@ -147,6 +148,7 @@ export const buildNightshiftAgentConfiguration = ({
     ],
     enable_elastic_capabilities: false,
     connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
+    inference_feature_id: NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID,
     ...(() => {
       // Decision trees are no longer a separate before-agent hook: they hydrate as a third
       // parallel branch of the combined materialize workflow, which already carries the

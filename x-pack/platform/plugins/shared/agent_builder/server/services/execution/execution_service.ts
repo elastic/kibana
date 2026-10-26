@@ -770,7 +770,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         return undefined;
       }
       const agentRegistry = await agentService.getRegistry({ request });
-      return (await agentRegistry.get(agentId)).configuration.inference_feature_id;
+      const agent = await agentRegistry.get(agentId);
+      return (await agentService.resolveAgentConfiguration({ agent, request }))
+        .inference_feature_id;
     };
     return (
       getInferenceFeatureId()

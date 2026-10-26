@@ -185,7 +185,8 @@ export function registerInternalAgentRoutes({
       const { agents: agentsService } = getInternalServices();
       const registry = await agentsService.getRegistry({ request });
       const agent = await registry.get(request.params.id);
-      const inferenceFeatureId = agent.configuration.inference_feature_id;
+      const { inference_feature_id: inferenceFeatureId } =
+        await agentsService.resolveAgentConfiguration({ agent, request });
 
       const { connector, source } = await resolveExecutionConnectorId({
         inferenceFeatureId,

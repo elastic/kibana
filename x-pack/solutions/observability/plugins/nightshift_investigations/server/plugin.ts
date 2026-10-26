@@ -75,6 +75,7 @@ import type { NightshiftAgentTypeOptions } from './agents/investigation';
 import { registerInvestigationAgentType } from './agents/investigation';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { registerAssistantAgentType } from './agents/assistant';
+import { registerNightshiftInferenceFeature } from './inference_feature';
 import { createDecisionTreeTools } from './tools/decision_tree';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
@@ -230,6 +231,7 @@ export class NightshiftInvestigationsPlugin
     );
 
     if (plugins.agentBuilder) {
+      registerNightshiftInferenceFeature(plugins.searchInferenceEndpoints, this.logger);
       notificationRoutingAttachment.registerAttachmentType(plugins.agentBuilder, {
         getService: () => this.getNotificationRoutingService(),
         assertCanRead: async () => {},

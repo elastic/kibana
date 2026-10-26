@@ -20,7 +20,8 @@ import { allToolsSelection, allToolsSelectionWildcard } from '@kbn/agent-builder
  * Excludes `approvals`, which are not merged. An agent's defaults come only from its
  * own configuration.
  */
-export type AgentBaseConfiguration = Partial<Omit<AgentConfigurationInput, 'approvals'>>;
+export type AgentBaseConfiguration = Partial<Omit<AgentConfigurationInput, 'approvals'>> &
+  Pick<AgentConfiguration, 'inference_feature_id'>;
 
 /**
  * Delimiter inserted between a type's base instructions and the agent's own
@@ -63,6 +64,7 @@ const mergeToolSelections = (base: ToolSelection[], delta: ToolSelection[]): Too
  * - tools / skill_ids / plugin_ids / workflow_ids / post_execution_workflow_ids / connector_ids / ai_indices / subagent_ids: union, base-first,
  *   deduplicated. A base that sets `connector_ids: []` pins the floor to "no connectors".
  * - enable_elastic_capabilities: the delta overrides the base when set.
+ * - inference_feature_id: taken from the base, since agents cannot declare their own.
  */
 export const mergeAgentConfiguration = (
   base: AgentBaseConfiguration | undefined,
@@ -106,6 +108,9 @@ export const mergeAgentConfiguration = (
   if (base.enable_elastic_capabilities !== undefined) {
     result.enable_elastic_capabilities =
       delta.enable_elastic_capabilities ?? base.enable_elastic_capabilities;
+  }
+  if (base.inference_feature_id !== undefined) {
+    result.inference_feature_id = base.inference_feature_id;
   }
 
   return result;

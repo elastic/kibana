@@ -102,6 +102,11 @@ describe('registerInternalAgentRoutes', () => {
       agents: {
         getRegistry: jest.fn().mockResolvedValue({ list: mockList, get: mockGet }),
         resolveAgentBaseConfiguration: mockResolveBase,
+        resolveAgentConfiguration: jest
+          .fn()
+          .mockImplementation(
+            async ({ agent }: { agent: { configuration: unknown } }) => agent.configuration
+          ),
       },
     });
 

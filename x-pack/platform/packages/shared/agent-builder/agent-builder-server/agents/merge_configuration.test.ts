@@ -253,6 +253,22 @@ describe('mergeAgentConfiguration', () => {
     });
   });
 
+  describe('inference_feature_id (base only)', () => {
+    it('takes the base value', () => {
+      expect(
+        mergeAgentConfiguration({ inference_feature_id: 'type_feature' }, { tools: [] })
+          .inference_feature_id
+      ).toBe('type_feature');
+    });
+
+    it('keeps the delta value when the base leaves it unset', () => {
+      expect(
+        mergeAgentConfiguration({}, { tools: [], inference_feature_id: 'agent_feature' })
+          .inference_feature_id
+      ).toBe('agent_feature');
+    });
+  });
+
   it('does not mutate its inputs', () => {
     const base: AgentBaseConfiguration = { skill_ids: ['s1'], tools: [{ tool_ids: ['a'] }] };
     const delta: AgentConfiguration = { tools: [{ tool_ids: ['b'] }], skill_ids: ['s2'] };

@@ -23,6 +23,7 @@
       "proposals",
       "ruleRegistry",
       "sandbox",
+      "searchInferenceEndpoints",
       "security",
       "spaces",
       "workflowsExtensions",

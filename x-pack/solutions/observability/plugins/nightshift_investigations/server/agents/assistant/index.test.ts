@@ -17,6 +17,7 @@ import {
 } from '@kbn/workflows/managed';
 import type { NightshiftAgentTypeOptions } from '../investigation';
 import { getInvestigationAgentType } from '../investigation';
+import { NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID } from '../../inference_feature';
 import {
   ASSISTANT_AGENT_NAME,
   ASSISTANT_INSTRUCTIONS,
@@ -67,6 +68,7 @@ describe('Nightshift assistant agent type', () => {
     expect(assistant).toEqual(investigator);
     expect(assistant).toMatchObject({
       connector_ids: ['telemetry'],
+      inference_feature_id: NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID,
       workflow_ids: [NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID],
       post_execution_workflow_ids: [NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID],
     });

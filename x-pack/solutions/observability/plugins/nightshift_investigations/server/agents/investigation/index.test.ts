@@ -20,6 +20,7 @@ import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_tool';
+import { NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID } from '../../inference_feature';
 
 const SANDBOX_TOOL_IDS = [
   SANDBOX_BASH_TOOL_ID,
@@ -155,6 +156,14 @@ describe('Nightshift investigation agent type', () => {
     );
 
     expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
+  });
+
+  it('runs on the Nightshift investigation inference feature', () => {
+    const base = staticBase(
+      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true, ...ALL_PLUGINS })
+    );
+
+    expect(base.inference_feature_id).toBe(NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID);
   });
 
   it('offers the investigation and proposal tools only when their plugins are enabled', () => {
