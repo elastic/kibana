@@ -36,7 +36,6 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
   onClick,
 }: ChangeHistoryItemProps): JSX.Element {
   const { renderBadge, renderChangesSummary, renderChanges, supports } = useChangeHistoryConfig();
-  console.log({ renderChanges });
   const modalSelection = useContext(ChangeHistoryModalSelectionContext);
   const { euiTheme } = useEuiTheme();
   const timestamp = useMemo(() => new Date(item.timestamp), [item.timestamp]);
@@ -200,6 +199,7 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
                                 item,
                                 changes: item.changes,
                                 summary: item.changes.summary,
+                                nChanges: i18n.N_CHANGES(item.changes.count),
                               })
                             ) : (
                               <>

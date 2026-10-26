@@ -13,12 +13,12 @@ import type { ChangeHistoryListItem } from '@kbn/change-history-ui';
 import { ChangeHistoryModal, ChangeHistoryProvider } from '@kbn/change-history-ui';
 import { i18n } from '@kbn/i18n';
 
+import { EuiButtonEmpty } from '@elastic/eui';
 import { coreServices } from '../services/kibana_services';
 import { createDashboardChangeHistoryAdapter } from './dashboard_change_history_adapter';
 import { renderDashboardChangeHistoryBadge } from './dashboard_change_history_badge';
 import { DashboardChangeHistoryPreview } from './dashboard_change_history_preview';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
-import { EuiButtonEmpty } from '@elastic/eui';
 
 export interface DashboardChangeHistoryProviderProps {
   children: React.ReactNode;
@@ -82,23 +82,22 @@ export const DashboardChangeHistoryProvider = ({
       )}
       onSelectChange={onSelectChange}
       renderBadge={renderDashboardChangeHistoryBadge}
-      renderChanges={(props) => {
-        return (
+      renderChanges={({ item, nChanges }) =>
+        item.metadata?.version === 1 ? (
+          nChanges // version 1 has nothing to compare to so don't make it a button
+        ) : (
           <EuiButtonEmpty
             data-test-subj="changeHistoryItemChanges"
             size={'xs'}
             flush={'both'}
             onClick={() => {
-              requestedComparisonIdRef.current = props.item.id;
+              requestedComparisonIdRef.current = item.id;
             }}
           >
-            {i18n.translate('xpack.changeHistoryUi.timeline.nChanges', {
-              defaultMessage: '{count, plural, one {# change} other {# changes}}',
-              values: { count: props.changes.count },
-            })}
+            {nChanges}
           </EuiButtonEmpty>
-        );
-      }}
+        )
+      }
       labels={{
         previewBackLabel: i18n.translate('dashboard.changeHistory.backToDashboard', {
           defaultMessage: 'Back to dashboard',

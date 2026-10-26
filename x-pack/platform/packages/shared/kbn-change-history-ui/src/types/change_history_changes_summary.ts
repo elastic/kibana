@@ -15,3 +15,12 @@ export type ChangeHistoryChangesSummaryRenderFn = (props: {
   changes: ChangeHistoryListItemChanges;
   summary: unknown;
 }) => ReactNode;
+
+/** Renders the "N changes" content of a timeline row. */
+export type ChangeHistoryChangesRenderFn = (props: {
+  item: ChangeHistoryListItem;
+  changes: ChangeHistoryListItemChanges;
+  summary: unknown;
+  /** Localized "N changes" label for this row. */
+  nChanges: string;
+}) => ReactNode;

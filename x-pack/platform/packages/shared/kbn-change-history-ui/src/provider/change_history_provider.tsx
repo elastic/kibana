@@ -8,7 +8,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { ChangeHistoryBadgeRenderFn } from '../types/change_history_badge';
-import type { ChangeHistoryChangesSummaryRenderFn } from '../types/change_history_changes_summary';
+import type {
+  ChangeHistoryChangesRenderFn,
+  ChangeHistoryChangesSummaryRenderFn,
+} from '../types/change_history_changes_summary';
 import type {
   ChangeHistoryFeatures,
   ChangeHistoryPermissions,
@@ -30,7 +33,7 @@ export interface ChangeHistoryProviderProps {
   adapter: ChangeHistoryAdapter;
   renderPreview: ChangeHistoryPreviewRenderFn;
   renderChangesSummary?: ChangeHistoryChangesSummaryRenderFn;
-  renderChanges?: ChangeHistoryChangesSummaryRenderFn;
+  renderChanges?: ChangeHistoryChangesRenderFn;
   /** Called whenever the user selects a change in the timeline. */
   onSelectChange?: (item: ChangeHistoryListItem) => void;
   renderBadge?: ChangeHistoryBadgeRenderFn;
