@@ -289,6 +289,10 @@ export class Config {
     return Boolean(this.buildOptions.tarZstd);
   }
 
+  shouldForceNodePointerCompression() {
+    return Boolean(this.buildOptions.forceNodePointerCompression);
+  }
+
   getDistPluginsFromRepo() {
     return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
   }
