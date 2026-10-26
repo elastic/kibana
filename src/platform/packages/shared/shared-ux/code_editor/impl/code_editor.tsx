@@ -40,6 +40,7 @@ import {
   useFitToContent,
   ReBroadcastMouseDownEvents,
   usePersistHoverContentWidget,
+  FullScreenDisplay,
 } from './mods';
 import { styles } from './editor.styles';
 
@@ -271,10 +272,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       : ReactMonacoEditor;
   }, []);
 
-  const { FullScreenDisplay, FullScreenButton, isFullScreen, setIsFullScreen, onKeyDown } =
-    useFullScreen({
-      allowFullScreen,
-    });
+  const { FullScreenButton, isFullScreen, setIsFullScreen, onKeyDown } = useFullScreen({
+    allowFullScreen,
+  });
 
   const persistHoverContentWidget = usePersistHoverContentWidget();
   const wireHoverContentPersistence = useCallback(
@@ -633,7 +633,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     >
       <Global styles={classNameCss} />
       {accessibilityOverlayEnabled && renderPrompt()}
-      <FullScreenDisplay>
+      <FullScreenDisplay isFullScreen={isFullScreen}>
         {allowFullScreen || isCopyable ? (
           <div
             css={

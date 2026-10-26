@@ -8,15 +8,16 @@
  */
 
 import React from 'react';
-import { screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { monaco } from '@kbn/monaco';
 
-import { keys } from '@elastic/eui';
+import { EuiThemeProvider, keys } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { MockedMonacoEditor, mockedEditorInstance } from '@kbn/code-editor-mock/monaco_mock';
 
-import { CodeEditor } from './code_editor';
+import { CodeEditor, type CodeEditorProps } from './code_editor';
 
 jest.mock('./react_monaco_editor', () => {
   const original = jest.requireActual('./react_monaco_editor');
@@ -127,6 +128,55 @@ describe('<CodeEditor />', () => {
       1
     );
     expect((monaco.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(1);
+  });
+
+  describe('when the EUI theme changes', () => {
+    const renderInTheme = (colorMode: 'light' | 'dark', props: Partial<CodeEditorProps> = {}) => (
+      <I18nProvider>
+        <EuiThemeProvider colorMode={colorMode}>
+          <CodeEditor languageId="loglang" value={logs} onChange={() => {}} {...props} />
+        </EuiThemeProvider>
+      </I18nProvider>
+    );
+
+    test('keeps the same editor mounted instead of recreating it', () => {
+      const editorWillMount = jest.fn();
+      const { rerender } = render(renderInTheme('light', { editorWillMount }));
+      const editorBefore = screen.getByTestId('monacoEditorTextarea');
+      expect(editorWillMount).toHaveBeenCalledTimes(1);
+
+      rerender(renderInTheme('dark', { editorWillMount }));
+
+      // A remount would throw away the editor's cursor, selection and undo history on every theme
+      // switch, and make Monaco rebuild its DOM.
+      expect(screen.getByTestId('monacoEditorTextarea')).toBe(editorBefore);
+      expect(editorWillMount).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('full screen', () => {
+    const renderExpandable = () =>
+      render(
+        <I18nProvider>
+          <EuiThemeProvider>
+            <CodeEditor languageId="loglang" value={logs} onChange={() => {}} allowFullScreen />
+          </EuiThemeProvider>
+        </I18nProvider>
+      );
+
+    const isInOverlay = () =>
+      screen.getByTestId('monacoEditorTextarea').closest('.euiOverlayMask') !== null;
+
+    test('shows the editor in an overlay while expanded, and inline again once collapsed', () => {
+      renderExpandable();
+      expect(isInOverlay()).toBe(false);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Expand' }));
+      expect(isInOverlay()).toBe(true);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
+      expect(isInOverlay()).toBe(false);
+    });
   });
 
   describe('hint element', () => {
