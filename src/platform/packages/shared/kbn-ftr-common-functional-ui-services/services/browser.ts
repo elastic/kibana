@@ -262,16 +262,37 @@ export class BrowserService extends FtrService {
    * @param {boolean} insertTimestamp Optional
    * @return {Promise<void>}
    */
-  public async get(url: string, insertTimestamp: boolean = true) {
-    if (insertTimestamp) {
-      const urlWithTime = modifyUrl(url, (parsed) => {
-        (parsed.query as any)._t = Date.now();
-        return void 0;
-      });
-
-      return await this.withOpenDialogRetry(() => this.driver.get(urlWithTime));
+  public async get(url: string, insertTimestamp: boolean = true): Promise<void> {
+    if (!insertTimestamp) {
+      await this.withOpenDialogRetry(() => this.driver.get(url));
+      return;
     }
-    return await this.withOpenDialogRetry(() => this.driver.get(url));
+    const timestamp = String(Date.now());
+    const urlWithTime = modifyUrl(url, (parsed) => {
+      parsed.query = { ...parsed.query, _t: timestamp };
+    });
+    await this.withOpenDialogRetry(() => this.driver.get(urlWithTime));
+    if (!/^https?:/.test(urlWithTime)) return;
+    try {
+      await this.driver.executeScript((expectedTimestamp: string) => {
+        const current = new URL(window.location.href);
+        if (
+          !['http:', 'https:'].includes(current.protocol) ||
+          current.searchParams.get('_t') !== expectedTimestamp
+        )
+          return;
+        current.search = current.search
+          .slice(1)
+          .split('&')
+          .filter((parameter) => parameter !== `_t=${expectedTimestamp}`)
+          .join('&');
+        // The cache-buster has forced navigation; retaining it makes later hash links reload.
+        window.history.replaceState(window.history.state, '', current.toString());
+      }, timestamp);
+    } catch (error) {
+      if (!isBlockedByOpenDialogError(error)) throw error;
+      this.log.debug('Skipped navigation timestamp cleanup because a browser dialog is open');
+    }
   }
 
   /**

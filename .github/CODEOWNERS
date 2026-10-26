@@ -2158,6 +2158,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 
 # QA - AppEx QA
 /docs/extend/testing/ @elastic/appex-qa
+/src/platform/test/functional/apps/browser_navigation/ @elastic/appex-qa
 /x-pack/platform/test/index.d.ts @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/es/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/oblt/roles.yml @elastic/appex-qa
