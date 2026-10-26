@@ -1565,6 +1565,13 @@ export const WorkflowContextSchema = z.object({
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
   kibanaUrl: z.string(),
+  /**
+   * Kibana's `server.basePath` (`''` when unset, `/kbn` when set), for links the user follows
+   * inside Kibana: `{{ kibanaBasePath }}/s/{{ workflow.spaceId }}/app/...` stays relative, so it
+   * resolves against whatever origin the browser reached Kibana through. `kibanaUrl` is for links
+   * that leave Kibana (Slack, email), where only an absolute URL works.
+   */
+  kibanaBasePath: z.string().optional(),
   output: z
     .record(
       z.string(),

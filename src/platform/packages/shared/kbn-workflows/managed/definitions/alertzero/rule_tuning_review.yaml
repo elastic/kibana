@@ -211,7 +211,7 @@ steps:
   - name: compose_evidence
     type: data.set
     with:
-      rule_line: "**Rule:** [{{ steps.fetch_rule.output.name }}]({{ kibanaUrl }}/s/{{ workflow.spaceId }}/app/security/rules/id/{{ inputs.rule_uuid }}) (`{{ inputs.rule_uuid }}`)"
+      rule_line: "**Rule:** [{{ steps.fetch_rule.output.name }}]({{ kibanaBasePath }}/s/{{ workflow.spaceId }}/app/security/rules/id/{{ inputs.rule_uuid }}) (`{{ inputs.rule_uuid }}`)"
       fp_summary: "{% if inputs.total_alert_count > 0 %}Analysts closed {{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count | round }}%) as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. {{ inputs.fp_count }} of them are not reviewed yet.{% else %}Analysts closed {{ inputs.fp_count }} alerts as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}"
 
   # Manual mode only: ask the analyst before the agent diagnoses this rule. Assisted
