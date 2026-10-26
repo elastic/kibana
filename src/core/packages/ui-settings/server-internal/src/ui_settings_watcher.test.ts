@@ -108,6 +108,19 @@ describe('UiSettingsWatcher', () => {
     ]);
   });
 
+  it('keeps a space named like the global key apart from the global settings', async () => {
+    const { store, collect } = setup();
+    store('__global__', { foo: 'space' });
+    store(GLOBAL_NAMESPACE, { foo: 'global' });
+
+    const space = collect({ type: 'config', namespace: '__global__' });
+    const global = collect(GLOBAL_REF);
+    await flush();
+
+    expect(space.values).toEqual([{ foo: { userValue: 'space' } }]);
+    expect(global.values).toEqual([{ foo: { userValue: 'global' } }]);
+  });
+
   it('emits when the values change and not when a write keeps them equal', async () => {
     const { store, collect } = setup();
     store('default', { foo: 'a' });

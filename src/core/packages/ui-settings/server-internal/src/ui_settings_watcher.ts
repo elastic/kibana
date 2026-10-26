@@ -23,7 +23,8 @@ import type { NamespacedCache } from './namespaced_cache';
 import type { UserProvided } from './clients/user_provided';
 import { computeUpgradedConfigAttributes } from './create_or_upgrade_saved_config';
 
-export const GLOBAL_NAMESPACE = '__global__';
+// Brackets are not allowed in space ids, so no space can share this key.
+export const GLOBAL_NAMESPACE = '[global]';
 
 /** One stored settings doc. `namespace` is also its `NamespacedCache` key. */
 export type ConfigDocRef =
