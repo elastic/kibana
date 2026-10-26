@@ -60,7 +60,7 @@ export const ALERT_SERIES_NOT_FOUND_RESPONSE: OasExampleEntry = {
   } satisfies ErrorResponse,
 };
 
-export const SAMPLE_SNOOZED_UNTIL = '2026-01-16T12:00:00.000Z';
+export const SAMPLE_SNOOZED_UNTIL = '2099-01-16T12:00:00.000Z';
 
 /** Shared 409 body for `_snooze` with the expiry of the snooze already in effect. */
 export const ALERT_SERIES_ALREADY_SNOOZED_RESPONSE: OasExampleEntry = {

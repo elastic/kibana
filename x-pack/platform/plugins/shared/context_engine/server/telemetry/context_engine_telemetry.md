@@ -27,11 +27,12 @@ The usage collector runs regardless of the setting.
 | Event type | Fired when |
 |---|---|
 | `context_engine_ki_create` | The `context-engine.createKi` workflow step indexes a KI document, or fails to. |
-| `context_engine_ki_update` | The `context-engine.updateKi` workflow step updates a KI document, or fails to. |
-| `context_engine_ki_delete` | The `context-engine.deleteKi` workflow step deletes a KI document, or fails to. |
+| `context_engine_ki_update` | The `context-engine.updateKi` workflow step or the internal PATCH KI route updates a KI document, or fails to. |
+| `context_engine_ki_delete` | The `context-engine.deleteKi` workflow step or the internal DELETE KI route soft-deletes a KI document, or fails to. |
+| `context_engine_ki_restore` | The internal POST KI restore route restores a soft-deleted KI document, or fails to. |
 | `context_engine_ki_verification` | The `context-engine.verifyKi` step, or `context-engine.createKi` given `verifiers`, completes a verifier run, or fails to. |
 
-The AI index HTTP routes are not instrumented. Their ECS audit events in `server/audit/audit_events.ts` remain the record of AI index reads and writes.
+KI write HTTP routes (PATCH update, DELETE soft-delete, POST restore) report through `withKiWriteTelemetry` like the workflow steps. ECS audit events in `server/audit/audit_events.ts` still record AI index and KI operations for security auditing; other AI index HTTP routes (reads, index management) are not covered by these EBT events.
 
 A cancelled workflow run reports `outcome: aborted` instead of `failure`, keyed off the error itself (`RequestAbortedError`/`AbortError`) so a genuine error still reports as a failure even when the signal is already aborted. Aborted events carry no `error_type`.
 
@@ -73,7 +74,7 @@ KI counts use the latest revision of each KI, the same collapse the KI list appl
 |---|---|
 | `ai_indices.user` | Number of user-created AI indices across all spaces. |
 | `ai_indices.managed` | Number of managed AI index entries across all spaces, one per space the managed AI index is bootstrapped in. |
-| `kis.user.active.total` / `kis.managed.active.total` | KIs whose lifecycle status is `active` or unset and whose `expires_at` is unset or in the future. |
+| `kis.user.active.total` / `kis.managed.active.total` | KIs whose lifecycle status is `active` or unset and whose `expires_at` is unset or in the future. KIs with status `verification_failed` are not counted. |
 | `kis.user.expired.total` / `kis.managed.expired.total` | KIs that are not deleted and whose `expires_at` has passed. |
 | `kis.user.deleted.total` / `kis.managed.deleted.total` | KIs whose lifecycle status is `deleted`. |
 | `kis.<user\|managed>.<active\|expired\|deleted>.<max\|min\|avg>` | Spread of the matching count across that owner's dests. A dest that fails to count is left out. |
