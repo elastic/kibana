@@ -123,6 +123,24 @@ describe('AlertEpisodeStatusBadges', () => {
     expect(tooltip).not.toHaveTextContent('severity is changed');
   });
 
+  it('reports a muted alert as indefinite rather than reporting the expiry it replaces', async () => {
+    const user = userEvent.setup();
+    renderWithI18n(
+      <AlertEpisodeStatusBadges
+        status={ALERT_EPISODE_STATUS.ACTIVE}
+        groupAction={{
+          lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+          snoozedUntil: '2099-01-01T00:00:00.000Z',
+          isMuted: true,
+        }}
+      />
+    );
+    await user.hover(screen.getByTestId('alertEpisodeStatusCellSnoozeIndicator'));
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent('indefinitely');
+    expect(tooltip).not.toHaveTextContent('2099');
+  });
+
   it('renders checkCircle badge when acknowledged via episodeAction', () => {
     renderWithI18n(
       <AlertEpisodeStatusBadges
