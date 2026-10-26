@@ -10,7 +10,7 @@
 import { parse } from 'yaml';
 import type { z } from '@kbn/zod/v4';
 import CREATE_PROPOSAL_YAML from './create_proposal.yaml';
-import { isValidDuration, parseDuration } from '../../../common/utils';
+import { createWorkflowLiquidEngine, isValidDuration, parseDuration } from '../../../common/utils';
 import {
   DataSetStepSchema,
   IfStepSchema,
@@ -67,6 +67,10 @@ const workflow = parse(CREATE_PROPOSAL_YAML) as ParsedWorkflow;
 
 /** The deadline a caller gets when it does not ask for one. */
 const DEFAULT_EXPIRES_IN = '72h';
+
+/** Step types of every step in a branch, including nested ones. */
+const flattenTypes = (steps: WorkflowStep[]): string[] =>
+  steps.flatMap((step) => [step.type, ...flattenTypes(childrenOf(step))]);
 
 const findStep = (steps: WorkflowStep[], name: string): WorkflowStep | undefined => {
   for (const step of steps) {
@@ -201,6 +205,7 @@ describe('create-investigation-proposal workflow', () => {
         'proposalId',
         'status',
         'decision',
+        'error',
       ]);
     });
   });
@@ -226,6 +231,7 @@ describe('create-investigation-proposal workflow', () => {
         'proposalId',
         'status',
         'decision',
+        'error',
       ]);
     });
   });
@@ -758,12 +764,43 @@ describe('create-investigation-proposal workflow', () => {
 
         expect(adoptStep?.type).toBe('data.set');
         expect(adoptStep?.with?.action_failed).toBe(`\${{ steps.${execute}.error != blank }}`);
-        expect(adoptStep?.with?.action_error_message).toBe(`{{ steps.${execute}.error.message }}`);
+        expect(adoptStep?.with?.action_rejected).toBe(
+          `\${{ steps.${execute}.output.failure != blank }}`
+        );
+        const message = String(adoptStep?.with?.action_error_message);
+        expect(message).toContain(`steps.${execute}.error.message`);
+        expect(message).toContain(`steps.${execute}.output.failure`);
+        const other =
+          execute === 'execute_as_approver' ? 'execute_as_worker' : 'execute_as_approver';
+        expect(message).not.toContain(other);
+      });
+
+      // A failed action has no output and a completed one has no error, so the
+      // message takes whichever the step produced.
+      it.each([
+        ['the error of a failed action', { error: { message: 'boom' } }, 'boom'],
+        [
+          'the failure a completed action reports',
+          { output: { failure: 'half done' } },
+          'half done',
+        ],
+        ['nothing for a clean success', { output: { ruleId: 'r1' } }, ''],
+      ])('adopts %s as the error message', (_scenario, step, expected) => {
+        const adopt = findStep(workflow.steps, 'adopt_approver_result');
+        const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+          String(adopt?.with?.action_error_message),
+          { steps: { execute_as_approver: step } }
+        );
+
+        expect(rendered.trim()).toBe(expected);
       });
 
       it('branches on the adopted result rather than on either step', () => {
         expect(findStep(workflow.steps, 'handle_action_success')?.condition).toBe(
-          '${{ variables.action_failed != true }}'
+          '${{ variables.action_failed != true and variables.action_rejected != true }}'
+        );
+        expect(findStep(workflow.steps, 'handle_action_rejection')?.condition).toBe(
+          '${{ variables.action_rejected == true }}'
         );
         expect(findStep(workflow.steps, 'handle_action_failure')?.condition).toBe(
           '${{ variables.action_failed == true }}'
@@ -771,6 +808,49 @@ describe('create-investigation-proposal workflow', () => {
         expect(findStep(workflow.steps, 'record_action_failure')?.with?.executionError).toBe(
           '{{ variables.action_error_message }}'
         );
+      });
+    });
+
+    // An action that completed but reports a non-blank `failure` output did
+    // not fully apply, and running it again would compound the damage rather
+    // than repair it: a rule created but not enabled, say, where a second
+    // approval creates a second rule. It settles as failed and is not cloned.
+    describe('an action that reports a terminal failure', () => {
+      const branch = () => findStep(workflow.steps, 'handle_action_rejection');
+
+      it('records the failure with the action message and stops the loop', () => {
+        const names = (branch()?.steps ?? []).map(({ name }) => name);
+        expect(names).toEqual(['record_action_rejection', 'complete_rejected', 'break_rejected']);
+
+        const record = findStep(workflow.steps, 'record_action_rejection');
+        expect(record?.type).toBe('proposals.updateProposal');
+        expect(record?.with?.status).toBe('failed');
+        expect(record?.with?.executionError).toBe('{{ variables.action_error_message }}');
+
+        const complete = findStep(workflow.steps, 'complete_rejected');
+        expect(complete?.with?.completed).toBe(true);
+        expect(complete?.with?.final_status).toBe('failed');
+        expect(complete?.with?.final_decision).toBe('approved');
+        expect(findStep(workflow.steps, 'break_rejected')?.type).toBe('loop.break');
+      });
+
+      it('never re-offers it', () => {
+        const types = flattenTypes(branch()?.steps ?? []);
+        expect(types).not.toContain('proposals.cloneProposal');
+        expect(types).not.toContain('loop.continue');
+      });
+
+      it('mixes no and with or in its conditions, since Liquid cannot bind them', () => {
+        for (const name of ['handle_action_success', 'handle_action_rejection']) {
+          const condition = String(findStep(workflow.steps, name)?.condition);
+          expect(condition.includes(' and ') && condition.includes(' or ')).toBe(false);
+        }
+      });
+
+      it('hands the message to the caller next to the status', () => {
+        const output = workflow.steps.find(({ name }) => name === 'output_result');
+        expect(output?.with?.error).toBe('{{ variables.action_error_message }}');
+        expect(findStep(workflow.steps, 'init_state')?.with?.action_error_message).toBe('');
       });
     });
 

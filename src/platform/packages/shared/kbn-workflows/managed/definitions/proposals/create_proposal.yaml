@@ -140,6 +140,10 @@ outputs:
     type: string
   - name: decision
     type: string
+  # Why the action did not apply, for a caller that wants to tell the analyst.
+  # Set only with `status: failed`; empty otherwise.
+  - name: error
+    type: string
 
 steps:
   - name: create_proposal
@@ -180,6 +184,11 @@ steps:
       # replace it with the live revision's own value.
       action_input: '${{ inputs.actionInput }}'
       decided_by: ''
+      # Set by the adopt steps after the action runs. Initialised so a loop
+      # that never ran an action reads a blank, not an undefined.
+      action_failed: false
+      action_rejected: false
+      action_error_message: ''
       # Any one of these holds the decision for a human: the caller's autonomy
       # did not permit running unattended; there is no action to run, since
       # autonomy governs whether an *action* runs without a human and approval
@@ -476,7 +485,13 @@ steps:
                 type: data.set
                 with:
                   action_failed: '${{ steps.execute_as_approver.error != blank }}'
-                  action_error_message: '{{ steps.execute_as_approver.error.message }}'
+                  # A terminal failure the action reports as output, per the
+                  # contract documented at `handle_action_rejection` below.
+                  # Only a completed action has an output, so the two flags
+                  # are exclusive. Liquid reads a missing output as blank.
+                  action_rejected: '${{ steps.execute_as_approver.output.failure != blank }}'
+                  action_error_message: >-
+                    {% if steps.execute_as_approver.error != blank %}{{ steps.execute_as_approver.error.message }}{% else %}{{ steps.execute_as_approver.output.failure }}{% endif %}
             else:
               # Auto-approved: run as the caller's service account.
               - name: execute_as_worker
@@ -502,11 +517,16 @@ steps:
                 type: data.set
                 with:
                   action_failed: '${{ steps.execute_as_worker.error != blank }}'
-                  action_error_message: '{{ steps.execute_as_worker.error.message }}'
+                  # Same as `adopt_approver_result`.
+                  action_rejected: '${{ steps.execute_as_worker.output.failure != blank }}'
+                  action_error_message: >-
+                    {% if steps.execute_as_worker.error != blank %}{{ steps.execute_as_worker.error.message }}{% else %}{{ steps.execute_as_worker.output.failure }}{% endif %}
 
+          # A single `and`, never mixed with `or`: Liquid binds a mixed
+          # expression in a way that does not match how it reads.
           - name: handle_action_success
             type: if
-            condition: '${{ variables.action_failed != true }}'
+            condition: '${{ variables.action_failed != true and variables.action_rejected != true }}'
             steps:
               - name: record_success
                 type: proposals.updateProposal
@@ -520,6 +540,34 @@ steps:
                   final_status: succeeded
                   final_decision: approved
               - name: break_succeeded
+                type: loop.break
+
+          # The action completed but reports, as a non-blank `failure` output,
+          # that it did not fully apply and must not be run again — a partial
+          # application that a retry would compound rather than repair, such as
+          # a rule that was created but could not be enabled, where approving
+          # again would create a second rule. Recorded as `failed` with the
+          # action's own message, and not cloned: the analyst reads the failure
+          # on the settled proposal and finishes the work by hand. An action
+          # that wants to be re-offered fails instead, and takes the branch
+          # below.
+          - name: handle_action_rejection
+            type: if
+            condition: '${{ variables.action_rejected == true }}'
+            steps:
+              - name: record_action_rejection
+                type: proposals.updateProposal
+                with:
+                  proposalId: '{{ variables.current_proposal_id }}'
+                  status: failed
+                  executionError: '{{ variables.action_error_message }}'
+              - name: complete_rejected
+                type: data.set
+                with:
+                  completed: true
+                  final_status: failed
+                  final_decision: approved
+              - name: break_rejected
                 type: loop.break
 
           - name: handle_action_failure
@@ -585,3 +633,6 @@ steps:
       proposalId: '{{ variables.current_proposal_id }}'
       status: '{{ variables.final_status }}'
       decision: '{{ variables.final_decision }}'
+      # Meaningful only with `status: failed`; a retried-then-succeeded chain
+      # still carries its last attempt's message here, so read it with status.
+      error: '{{ variables.action_error_message }}'

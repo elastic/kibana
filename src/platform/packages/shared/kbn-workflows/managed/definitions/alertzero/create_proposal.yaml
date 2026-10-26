@@ -106,6 +106,8 @@ outputs:
     type: string
   - name: decision
     type: string
+  - name: error
+    type: string
 
 steps:
   # Reopen the investigation if it was closed before raising a proposal against
@@ -168,3 +170,4 @@ steps:
       proposalId: "{{ steps.create_proposal.output.proposalId }}"
       status: "{{ steps.create_proposal.output.status }}"
       decision: "{{ steps.create_proposal.output.decision }}"
+      error: "{{ steps.create_proposal.output.error }}"

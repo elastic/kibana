@@ -128,6 +128,24 @@ describe('Detection Rule Creation worker', () => {
       expect(comment).not.toContain('disabled');
     });
 
+    // A rule created but not enabled settles the proposal as failed without a
+    // re-offer, so the only place the analyst learns what happened is this note.
+    it('journals a creation the gate settled as failed on the investigation', () => {
+      const note = stepByName('journal_creation_failure');
+      expect(note?.type).toBe('workflow.execute');
+      expect(note?.with?.['workflow-id']).toBe('system-alertzero-journal-note');
+      expect(note?.if).toBe("${{ steps.propose_creation.output.status == 'failed' }}");
+      expect(note?.['on-failure']?.continue).toBe(true);
+      expect(inputsOf(note).conversation_id).toBe('{{ inputs.investigation_id }}');
+      expect(String(inputsOf(note).message)).toContain('steps.propose_creation.output.error');
+
+      const names = worker.steps.map(({ name }) => name);
+      expect(names.indexOf('propose_creation')).toBeLessThan(
+        names.indexOf('journal_creation_failure')
+      );
+      expect(names.indexOf('journal_creation_failure')).toBeLessThan(names.indexOf('emit_result'));
+    });
+
     // A draft is reviewable only with a query, a name, a description and an attachment.
     // The create action requires a name and a description, so proposing a draft without
     // them would ask the analyst to approve a rule that can never be created.
@@ -275,8 +293,16 @@ describe('Detection Rule Creation worker', () => {
 
     it('declares every output the coverage review reads', () => {
       expect(worker.outputs?.map(({ name }) => name)).toEqual(
-        expect.arrayContaining(['created', 'reviewed', 'decision', 'rule_name', 'skip_reason'])
+        expect.arrayContaining([
+          'created',
+          'reviewed',
+          'decision',
+          'rule_name',
+          'skip_reason',
+          'error',
+        ])
       );
+      expect(emit.error).toBe('{{ steps.propose_creation.output.error }}');
     });
 
     // The model's reason lives in the structured output, not only in its conversation,

@@ -31,6 +31,7 @@ interface ActionInputSchema {
 
 interface ActionYaml {
   tags?: string[];
+  outputs?: Array<{ name: string }>;
   consts?: { actionMetadata?: Record<string, unknown> };
   triggers?: Array<{
     type: string;
@@ -130,22 +131,49 @@ describe('AlertZero action workflows', () => {
 
     it('reports the created rule as enabled, including when it was already on', () => {
       const emit = stepByName(yaml, 'emit_result')?.with as Record<string, string>;
+      const outcome = stepByName(yaml, 'outcome')?.with as Record<string, string>;
       expect(emit.ruleId).toBe('{{ steps.create_rule.output.id }}');
-      expect(
-        evaluateExpression(emit.enabled, {
-          steps: { enable_rule: { output: { succeeded: 1, skipped: 0 } } },
-        })
-      ).toBe(true);
-      expect(
-        evaluateExpression(emit.enabled, {
-          steps: { enable_rule: { output: { succeeded: 0, skipped: 1 } } },
-        })
-      ).toBe(true);
-      expect(
-        evaluateExpression(emit.enabled, {
-          steps: { enable_rule: { output: { succeeded: 0, skipped: 0 } } },
-        })
-      ).toBe(false);
+      expect(emit.enabled).toBe('${{ steps.outcome.output.enabled }}');
+      const enabled = (output?: Record<string, number>) =>
+        evaluateExpression(outcome.enabled, { steps: { enable_rule: { output } } });
+      expect(enabled({ succeeded: 1, skipped: 0 })).toBe(true);
+      expect(enabled({ succeeded: 0, skipped: 1 })).toBe(true);
+      expect(enabled({ succeeded: 0, skipped: 0 })).toBe(false);
+      // A failed enable step has no output at all.
+      expect(enabled(undefined)).toBe(false);
+    });
+
+    // Failing the action would make the gate re-offer the proposal, and a second
+    // approval would create a second rule: the create step keeps no identity
+    // across attempts. So a rule that was created but not enabled is reported as
+    // a terminal `failure` the gate records without re-offering, and the message
+    // tells the analyst what to do instead.
+    it('reports a created-but-not-enabled rule as a terminal failure, not a failed action', () => {
+      const enable = stepByName(yaml, 'enable_rule') as YamlStep & {
+        'on-failure'?: { continue?: boolean };
+      };
+      expect(enable['on-failure']?.continue).toBe(true);
+      expect(yaml.steps.map(({ type }) => type)).not.toContain('workflow.fail');
+      expect(yaml.outputs?.map(({ name }) => name)).toContain('failure');
+
+      const emit = stepByName(yaml, 'emit_result')?.with as Record<string, string>;
+      const render = (enableStep: Record<string, unknown>) =>
+        createWorkflowLiquidEngine()
+          .parseAndRenderSync(emit.failure, {
+            steps: {
+              create_rule: { output: { id: 'rule-1', name: 'Rare locale check' } },
+              enable_rule: enableStep,
+            },
+          })
+          .trim();
+
+      expect(render({ output: { succeeded: 1, skipped: 0 } })).toBe('');
+
+      const failure = render({ error: { message: 'HTTP 403: Forbidden' } });
+      expect(failure).toContain('"Rare locale check"');
+      expect(failure).toContain('could not be enabled: HTTP 403: Forbidden');
+      expect(failure).toContain('rule-1');
+      expect(failure).toContain('Do not approve this proposal again');
     });
   });
 
