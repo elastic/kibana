@@ -344,9 +344,12 @@ exports[`pull_request fragments pull_request/base 1`] = `
       "env": {
         "FTR_CONFIGS_DEPS": "build",
         "FTR_CONFIGS_SCRIPT": ".buildkite/scripts/steps/test/ftr_configs.sh",
+        "FTR_SOLUTION_SELECTION": "dry-run",
         "FTR_TEST_CHANNELS": "ci-on-commit",
+        "INCLUDE_SHARED_FTR": "true",
         "JEST_INTEGRATION_SCRIPT": ".buildkite/scripts/steps/test/jest_integration.sh",
         "JEST_UNIT_SCRIPT": ".buildkite/scripts/steps/test/jest.sh",
+        "NARROW_PLATFORM_FTR": "false",
       },
       "key": "pick_test_group_run_order",
       "label": "Pick Test Group Run Order",
