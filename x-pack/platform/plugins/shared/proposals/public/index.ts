@@ -23,6 +23,8 @@ export {
   usePendingProposals,
   useProposal,
   useSettleDeclinedProposal,
+  RETRY_WAIT_MS,
+  isInFlux,
 } from './hooks/use_proposals_api';
 
 export { mutationKeys, queryKeys } from './query_keys';
