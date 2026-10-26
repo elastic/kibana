@@ -112,7 +112,6 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
     profileUid,
     shouldUpdateApiKey: true,
     errorMessage: 'Error updating API key for rule: could not create API key',
-    apiKeyOwnership: { apiKeyCreatedByUser: attributes.apiKeyCreatedByUser },
   });
 
   const updateAttributes = updateMeta(context, {
@@ -163,11 +162,12 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
   } catch (e) {
     const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updateAttributes;
 
+    // Only framework-managed keys are ours to revoke; a user-provided key stays valid for its owner.
     const apiKeysToInvalidate = [];
     if (apiKey && !apiKeyCreatedByUser) {
       apiKeysToInvalidate.push(apiKey);
     }
-    if (uiamApiKey) {
+    if (uiamApiKey && !apiKeyCreatedByUser) {
       apiKeysToInvalidate.push(uiamApiKey);
     }
 

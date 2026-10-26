@@ -51,8 +51,4 @@ export {
 } from './snooze_utils';
 export { tryToRemoveTasks } from './try_to_remove_tasks';
 export { resolveRuleAPIKey } from './resolve_rule_api_key';
-export type {
-  ResolvedAPIKey,
-  ResolveRuleAPIKeyOptions,
-  RuleApiKeyOwnership,
-} from './resolve_rule_api_key';
+export type { ResolvedAPIKey, ResolveRuleAPIKeyOptions } from './resolve_rule_api_key';

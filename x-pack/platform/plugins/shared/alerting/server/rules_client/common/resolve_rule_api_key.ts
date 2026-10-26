@@ -13,10 +13,6 @@ export interface ResolvedAPIKey {
   isAuthTypeApiKey: boolean;
 }
 
-export interface RuleApiKeyOwnership {
-  apiKeyCreatedByUser?: boolean | null;
-}
-
 const cloneKey = async (context: RulesClientContext, name: string): Promise<ResolvedAPIKey> => {
   return { createdAPIKey: await context.cloneAPIKey(name), isAuthTypeApiKey: false };
 };
@@ -33,16 +29,30 @@ const grantKey = async (
 };
 
 export interface ResolveRuleAPIKeyOptions {
-  apiKeyOwnership?: RuleApiKeyOwnership;
   cloneApiKey?: boolean;
   refresh?: boolean | 'wait_for';
 }
 
+/**
+ * Picks the API key an enabled rule runs on. The choice depends only on the current request,
+ * never on the rule's existing `apiKeyCreatedByUser`:
+ *
+ * - session authentication → a framework-managed key is granted (`apiKeyCreatedByUser: false`)
+ * - API key authentication, undeclared → the caller's key is stored (`apiKeyCreatedByUser: true`)
+ * - API key authentication declared borrowed (`cloneApiKey` option or the client-level
+ *   `cloneApiKeysOnCreate` flag set from `x-kbn-alerting-clone-api-key`) → a framework-managed
+ *   key is cloned from the caller's (`apiKeyCreatedByUser: false`)
+ *
+ * A borrowed key belongs to a task and is revoked when that task ends, so it is never persisted
+ * regardless of who owned the rule's key before. The rule's previous ownership only matters for
+ * cleanup, which the update paths handle: a replaced framework-managed key is queued for
+ * invalidation, a replaced user-owned key is left alone.
+ */
 export const resolveRuleAPIKey = async (
   context: RulesClientContext,
   name: string,
   enabled: boolean,
-  { apiKeyOwnership, cloneApiKey, refresh }: ResolveRuleAPIKeyOptions = {}
+  { cloneApiKey, refresh }: ResolveRuleAPIKeyOptions = {}
 ): Promise<ResolvedAPIKey> => {
   if (!enabled) {
     return { createdAPIKey: null, isAuthTypeApiKey: false };
@@ -50,27 +60,13 @@ export const resolveRuleAPIKey = async (
 
   const isApiKeyAuth = context.isAuthenticationTypeAPIKey();
 
-  // The client-level flag and the per-call option both declare the caller's API key as borrowed:
-  // the rule must be minted its own key instead of persisting the caller's. Only an explicitly
-  // user-owned key (apiKeyCreatedByUser === true) overrides the declaration — the user chose to
-  // run the rule on their own credential. A rule created disabled stores no key and a null
-  // ownership (as do pre-ownership legacy rules), so enabling it must still honor the
-  // declaration; requiring the absence of an ownership object here would persist the borrowed
-  // credential on that path. Without API-key authentication there is no key to clone
-  // (cloneAsInternalUser would throw), so the declaration is a no-op and the rule is granted a
-  // framework key as usual below.
+  // Without API-key authentication there is nothing to clone (cloneAsInternalUser would throw),
+  // so a borrowed declaration is a no-op and the rule is granted a framework key below.
   const callerKeyIsBorrowed =
-    (Boolean(cloneApiKey) || Boolean(context.cloneApiKeysOnCreate)) &&
-    apiKeyOwnership?.apiKeyCreatedByUser !== true &&
-    isApiKeyAuth;
-  const frameworkManaged = apiKeyOwnership?.apiKeyCreatedByUser === false;
+    (Boolean(cloneApiKey) || Boolean(context.cloneApiKeysOnCreate)) && isApiKeyAuth;
 
   if (callerKeyIsBorrowed) {
     return cloneKey(context, name);
-  }
-
-  if (frameworkManaged) {
-    return isApiKeyAuth ? cloneKey(context, name) : grantKey(context, name, refresh);
   }
 
   if (isApiKeyAuth) {

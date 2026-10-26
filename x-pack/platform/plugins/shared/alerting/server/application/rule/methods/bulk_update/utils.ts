@@ -174,7 +174,6 @@ export const prepareUpdate = async <Params extends RuleParams>({
       profileUid,
       shouldUpdateApiKey: originalRule.enabled,
       errorMessage: 'Error updating rule: could not create API key',
-      apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
       refresh: false,
     });
 

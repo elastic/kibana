@@ -344,6 +344,27 @@ describe('updateRuleApiKey()', () => {
     expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });
 
+  test('does not queue a user provided UIAM key for invalidation when the save fails', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingEncryptedAlert,
+      attributes: {
+        ...existingEncryptedAlert.attributes,
+        apiKeyCreatedByUser: true,
+      },
+    });
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
+      apiKeysEnabled: true,
+      uiamResult: { id: 'uiam-234', name: 'uiam-123', api_key: 'essu_user' },
+    });
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('write failed'));
+
+    await expect(rulesClient.updateRuleApiKey({ id: '1' })).rejects.toThrow('write failed');
+
+    // The key belongs to the caller; a failed write must not revoke it.
+    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+  });
+
   test('throws an error if API key creation throws', async () => {
     rulesClientParams.createAPIKey.mockImplementation(() => {
       throw new Error('no');

@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import type { RawRule } from '../../types';
 import { generateAPIKeyName, apiKeyAsAlertAttributes, resolveRuleAPIKey } from '../common';
-import type { RuleApiKeyOwnership } from '../common';
 import type { RulesClientContext } from '../types';
 
 export async function createNewAPIKeySet(
@@ -20,7 +19,6 @@ export async function createNewAPIKeySet(
     profileUid,
     shouldUpdateApiKey,
     errorMessage,
-    apiKeyOwnership,
     refresh,
   }: {
     id: string;
@@ -29,7 +27,6 @@ export async function createNewAPIKeySet(
     profileUid: string | null;
     shouldUpdateApiKey: boolean;
     errorMessage?: string;
-    apiKeyOwnership?: RuleApiKeyOwnership;
     refresh?: boolean | 'wait_for';
   }
 ): Promise<
@@ -47,10 +44,7 @@ export async function createNewAPIKeySet(
   let isAuthTypeApiKey = false;
   try {
     const name = generateAPIKeyName(id, ruleName);
-    const resolved = await resolveRuleAPIKey(context, name, shouldUpdateApiKey, {
-      apiKeyOwnership,
-      refresh,
-    });
+    const resolved = await resolveRuleAPIKey(context, name, shouldUpdateApiKey, { refresh });
     createdAPIKey = resolved.createdAPIKey;
     isAuthTypeApiKey = resolved.isAuthTypeApiKey;
   } catch (error) {

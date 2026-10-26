@@ -334,7 +334,6 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     profileUid,
     shouldUpdateApiKey: originalRule.enabled,
     errorMessage: 'Error updating rule: could not create API key',
-    apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
   });
 
   const notifyWhen = getRuleNotifyWhenType(
