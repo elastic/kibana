@@ -25,10 +25,11 @@ jest.mock('./install', () => ({
 
 jest.mock('../../packages/install', () => ({
   ...jest.requireActual('../../packages/install'),
-  saveKibanaAssetsRefs: jest.fn().mockResolvedValue(undefined),
+  saveKibanaAssetsRefs: (...args: unknown[]) => mockSaveKibanaAssetsRefs(...args),
 }));
 
 const { getSpaceAwareSaveobjectsClients } = jest.requireMock('./saved_objects');
+const mockSaveKibanaAssetsRefs = jest.fn().mockResolvedValue(undefined);
 
 const makeArchiveBuffer = (id: string, soType: string) =>
   Buffer.from(JSON.stringify({ id, type: soType, attributes: { title: id } }));
@@ -167,6 +168,47 @@ describe('installKibanaAssetsWithStreaming', () => {
     expect(refs).toEqual([
       { id: 'custom-index-pattern', type: KibanaSavedObjectType.indexPattern },
     ]);
+  });
+
+  it('should preserve the previously installed workflow refs when saving the refs', async () => {
+    const assetsMap = new Map([
+      [
+        'test-package-1.0.0/kibana/dashboard/my-dashboard.json',
+        makeArchiveBuffer('my-dashboard', 'dashboard'),
+      ],
+    ]);
+    const workflowRef = { id: 'my-workflow', type: KibanaSavedObjectType.workflow };
+
+    const refs = await installKibanaAssetsWithStreaming({
+      spaceId: 'default',
+      packageInstallContext: {
+        archiveIterator: createArchiveIteratorFromMap(assetsMap),
+        paths: [...assetsMap.keys()],
+        packageInfo: { title: 'Test', name: 'test-package', version: '1.0.0' } as any,
+      },
+      savedObjectsClient: soClient,
+      pkgName: 'test-package',
+      installedPkg: {
+        attributes: {
+          installed_kibana: [
+            { id: 'old-dashboard', type: KibanaSavedObjectType.dashboard },
+            workflowRef,
+          ],
+        },
+      } as any,
+    });
+
+    const expectedRefs = [
+      { id: 'my-dashboard', type: KibanaSavedObjectType.dashboard },
+      workflowRef,
+    ];
+    expect(refs).toEqual(expectedRefs);
+    expect(mockSaveKibanaAssetsRefs).toHaveBeenCalledWith(
+      soClient,
+      'test-package',
+      expectedRefs,
+      'default'
+    );
   });
 
   describe('overwrite gating on Kibana version', () => {

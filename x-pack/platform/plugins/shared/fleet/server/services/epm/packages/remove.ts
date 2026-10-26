@@ -59,6 +59,7 @@ import { FleetError, PackageRemovalError } from '../../../errors';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies/populate_package_policy_assigned_agents_count';
 import { deleteEsqlViews } from '../elasticsearch/esql_views/remove';
+import { uninstallWorkflows } from '../kibana/workflows/install';
 import type { PackageSpecConditions } from '../../../../common';
 
 import { isTrustedInstallSource } from './install_source';
@@ -142,6 +143,18 @@ export async function cleanupDependenciesStep(options: {
   }
 }
 
+const deleteInstallationWorkflows = async ({
+  installed_kibana: installedKibana,
+  installed_kibana_space_id: spaceId = DEFAULT_SPACE_ID,
+  additional_spaces_installed_kibana: additionalSpaces = {},
+}: Installation) => {
+  const logger = appContextService.getLogger();
+  await deleteWorkflowAssets({ refs: installedKibana, spaceId, logger, strict: true });
+  for (const [additionalSpaceId, refs] of Object.entries(additionalSpaces)) {
+    await deleteWorkflowAssets({ refs, spaceId: additionalSpaceId, logger, strict: true });
+  }
+};
+
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -219,9 +232,28 @@ export async function removeInstallation(options: {
     }
   }
 
+  // Workflows are removed before anything else and failures abort the uninstall: once the package
+  // SO is deleted their refs are lost and they could never be cleaned up. `force` keeps going.
+  try {
+    await deleteInstallationWorkflows(installation);
+  } catch (err) {
+    if (!options.force) {
+      const error = new PackageRemovalError(
+        `Unable to remove workflows of package ${pkgName}:${pkgVersion ?? installation.version}: ${
+          err.message
+        }`
+      );
+      await updateUninstallStatusToFailed(savedObjectsClient, pkgName, error);
+      throw error;
+    }
+    appContextService
+      .getLogger()
+      .warn(`Forced uninstall of ${pkgName}, workflows may be left behind: ${err.message}`);
+  }
+
   // Delete the installed assets. Don't include installation.package_assets. Those are irrelevant to users
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
-  await deleteAssets(savedObjectsClient, installation, esClient);
+  await deleteAssets(savedObjectsClient, installation, esClient, { skipWorkflows: true });
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
@@ -252,6 +284,35 @@ export async function removeInstallation(options: {
 }
 
 /**
+ * Removes the workflows referenced in `refs`; they are managed workflows, not saved objects.
+ * `strict` defaults to false (log and continue). Only `removeInstallation` passes `strict: true`
+ * so a missing client or failed uninstall keeps the package SO and refs for retry.
+ */
+export const deleteWorkflowAssets = async ({
+  refs,
+  spaceId,
+  logger,
+  strict = false,
+}: {
+  refs: KibanaAssetReference[];
+  spaceId: string;
+  logger: Logger;
+  strict?: boolean;
+}) => {
+  const workflowRefs = refs.filter(({ type }) => type === KibanaSavedObjectType.workflow);
+  if (!workflowRefs.length) return;
+
+  const client = await appContextService.getManagedWorkflowsClient();
+  if (!client) {
+    const message = `Workflows are not available, ${workflowRefs.length} workflow asset(s) were not removed`;
+    if (strict) throw new FleetError(message);
+    logger.warn(message);
+    return;
+  }
+  await uninstallWorkflows({ client, refs: workflowRefs, spaceId, logger, strict });
+};
+
+/**
  * This method deletes saved objects resolving them whenever necessary.
  *
  * Resolving is needed when deleting assets that were installed in 7.x to
@@ -261,7 +322,7 @@ export async function removeInstallation(options: {
  * installed in 8.x or later.
  */
 export async function deleteKibanaAssets({
-  installedObjects,
+  installedObjects: allInstalledObjects,
   packageSpecConditions,
   logger,
   spaceId = DEFAULT_SPACE_ID,
@@ -271,6 +332,10 @@ export async function deleteKibanaAssets({
   packageSpecConditions?: PackageSpecConditions;
   spaceId?: string;
 }) {
+  // Workflows are not saved objects, see deleteWorkflowAssets
+  const installedObjects = allInstalledObjects.filter(
+    ({ type }) => type !== KibanaSavedObjectType.workflow
+  );
   const savedObjectsClient = appContextService.getSavedObjects().getUnsafeInternalClient({
     includedHiddenTypes: [
       KibanaSavedObjectType.alertingRuleTemplate,
@@ -490,7 +555,8 @@ async function deleteAssets(
     version,
     install_source: installSource,
   }: Installation,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  { skipWorkflows = false }: { skipWorkflows?: boolean } = {}
 ) {
   const logger = appContextService.getLogger();
   const { indexTemplatesAndPipelines, indexAssets, transformAssets, otherAssets } =
@@ -524,13 +590,20 @@ async function deleteAssets(
         packageSpecConditions: packageInfo?.conditions,
         logger,
       }),
-      Object.entries(installedInAdditionalSpacesKibana).map(([additionalSpaceId, kibanaAssets]) =>
-        deleteKibanaAssets({
-          installedObjects: kibanaAssets,
-          spaceId: additionalSpaceId,
-          logger,
-          packageSpecConditions: packageInfo?.conditions,
-        })
+      ...(skipWorkflows ? [] : [deleteWorkflowAssets({ refs: installedKibana, spaceId, logger })]),
+      ...Object.entries(installedInAdditionalSpacesKibana).map(
+        ([additionalSpaceId, kibanaAssets]) =>
+          Promise.all([
+            deleteKibanaAssets({
+              installedObjects: kibanaAssets,
+              spaceId: additionalSpaceId,
+              logger,
+              packageSpecConditions: packageInfo?.conditions,
+            }),
+            ...(skipWorkflows
+              ? []
+              : [deleteWorkflowAssets({ refs: kibanaAssets, spaceId: additionalSpaceId, logger })]),
+          ])
       ),
       // Delete knowledge base content for this package
       deletePackageKnowledgeBase(esClient, name),
@@ -577,6 +650,7 @@ export async function deleteKibanaSavedObjectsAssets({
   if (!refsToDelete.length) return;
 
   const logger = appContextService.getLogger();
+  // Workflows are not deleted here: on upgrade/reinstall installWorkflows updates them in place
   const assetsToDelete = refsToDelete
     .filter(({ type }) => kibanaSavedObjectTypes.includes(type))
     .map(({ id, type }) => ({ id, type } as KibanaAssetReference));
@@ -662,6 +736,9 @@ export function cleanupEsqlViews(
  *
  * It is used to delete assets installed for input packages when they are no longer relevant,
  * e.g. when a package policy is deleted and the package has no more policies.
+ *
+ * Workflow removal here is best-effort (non-strict `deleteWorkflowAssets` via `deleteAssets`).
+ * Only `removeInstallation` uses strict workflow deletion.
  */
 export async function cleanupAssets(
   datasetName: string,

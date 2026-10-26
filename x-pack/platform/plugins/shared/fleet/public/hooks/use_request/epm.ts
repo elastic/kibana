@@ -495,6 +495,15 @@ export const sendRequestInstallRuleAssets = (pkgName: string, pkgVersion: string
   });
 };
 
+export const sendRequestInstallWorkflowAssets = (pkgName: string, pkgVersion: string) => {
+  return sendRequestForRq<InstallPackageResponse, FleetErrorResponse>({
+    path: epmRouteService.getInstallWorkflowAssetsPath(pkgName, pkgVersion),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: {},
+  });
+};
+
 interface UpdatePackageArgs {
   pkgName: string;
   pkgVersion: string;

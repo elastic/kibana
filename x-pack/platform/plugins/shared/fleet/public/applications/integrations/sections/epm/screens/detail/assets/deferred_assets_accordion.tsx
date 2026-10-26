@@ -29,6 +29,7 @@ import type { AssetReference } from '../../../../../../../../common';
 
 import {
   sendRequestInstallRuleAssets,
+  sendRequestInstallWorkflowAssets,
   sendRequestReauthorizeTransforms,
   useAuthz,
   useStartServices,
@@ -42,7 +43,10 @@ import { KibanaSavedObjectType } from '../../../../../../../../common/types/mode
 
 interface Props {
   packageInfo: PackageInfo;
-  type: ElasticsearchAssetType.transform | KibanaSavedObjectType.alert;
+  type:
+    | ElasticsearchAssetType.transform
+    | KibanaSavedObjectType.alert
+    | KibanaSavedObjectType.workflow;
   deferredInstallations: AssetReference[];
   forceRefreshAssets?: () => void;
 }
@@ -69,6 +73,25 @@ export const getDeferredAssetDescription = (
         {
           defaultMessage:
             '{assetCount, plural, one {Transform was installed but requires} other {# transforms were installed but require}} additional permissions to run. Contact your administrator to request the required privileges.',
+          values: { assetCount: assetCount ?? 1 },
+        }
+      );
+    case KibanaSavedObjectType.workflow:
+      if (permissions.canEdit) {
+        return i18n.translate(
+          'xpack.fleet.epm.packageDetails.assets.deferredWorkflowsRetryDescription',
+          {
+            defaultMessage:
+              '{assetCount, plural, one {Workflow was} other {# workflows were}} not installed because of a license restriction or temporary unavailability. Retry the install, or check the Kibana logs for details.',
+            values: { assetCount: assetCount ?? 1 },
+          }
+        );
+      }
+      return i18n.translate(
+        'xpack.fleet.epm.packageDetails.assets.deferredWorkflowsRequestPermissionDescription',
+        {
+          defaultMessage:
+            '{assetCount, plural, one {Workflow was} other {# workflows were}} not installed because of a license restriction or temporary unavailability. Contact your administrator to install packages, or check the Kibana logs for details.',
           values: { assetCount: assetCount ?? 1 },
         }
       );
@@ -109,7 +132,7 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
         authz.packagePrivileges?.transform?.actions?.canStartStopTransform?.executePackageAction ??
         false
       );
-    } else if (type === KibanaSavedObjectType.alert) {
+    } else if (type === KibanaSavedObjectType.alert || type === KibanaSavedObjectType.workflow) {
       return authz.integrations?.installPackages;
     }
 
@@ -227,6 +250,44 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
     [notifications.toasts, packageInfo.name, packageInfo.version, forceRefreshAssets]
   );
 
+  const retryInstallWorkflows = useCallback(
+    async (workflowCount: number) => {
+      setIsLoading(true);
+      notifications.toasts.addInfo(
+        i18n.translate('xpack.fleet.epm.packageDetails.assets.retryingWorkflowInstall', {
+          defaultMessage:
+            'Retrying install for {count, plural, one {# workflow} other {# workflows}}.',
+          values: { count: workflowCount },
+        }),
+        { toastLifeTimeMs: 500 }
+      );
+
+      try {
+        await sendRequestInstallWorkflowAssets(packageInfo.name, packageInfo.version);
+
+        notifications.toasts.addSuccess(
+          i18n.translate('xpack.fleet.epm.packageDetails.assets.retryWorkflowInstallSuccess', {
+            defaultMessage:
+              'Successfully retried install for {count, plural, one {# workflow} other {# workflows}}.',
+            values: { count: workflowCount },
+          }),
+          { toastLifeTimeMs: 1000 }
+        );
+      } catch (e) {
+        notifications.toasts.addError(e, {
+          title: i18n.translate('xpack.fleet.epm.packageDetails.assets.retryWorkflowInstallError', {
+            defaultMessage: 'An error occurred retrying workflow install.',
+          }),
+        });
+      }
+      if (forceRefreshAssets) {
+        forceRefreshAssets();
+      }
+      setIsLoading(false);
+    },
+    [notifications.toasts, packageInfo.name, packageInfo.version, forceRefreshAssets]
+  );
+
   if (deferredAssets.length === 0) return null;
   return (
     <EuiAccordion
@@ -268,6 +329,8 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
               authorizeTransforms(deferredAssets.map((t) => ({ transformId: t.id })));
             } else if (type === KibanaSavedObjectType.alert) {
               createRules(deferredAssets.map(({ id }) => id));
+            } else if (type === KibanaSavedObjectType.workflow) {
+              retryInstallWorkflows(deferredAssets.length);
             }
           }}
           aria-label={getDeferredAssetDescription(type, deferredInstallations.length, {
@@ -283,6 +346,12 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
           {type === KibanaSavedObjectType.alert
             ? i18n.translate('xpack.fleet.epm.packageDetails.assets.createRulesButton', {
                 defaultMessage: 'Create rules',
+              })
+            : null}
+
+          {type === KibanaSavedObjectType.workflow
+            ? i18n.translate('xpack.fleet.epm.packageDetails.assets.retryWorkflowInstallButton', {
+                defaultMessage: 'Retry install',
               })
             : null}
         </EuiButton>

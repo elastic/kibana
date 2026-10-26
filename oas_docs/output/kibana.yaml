@@ -54540,6 +54540,99 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/workflow_assets:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/workflow_assets</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Install or retry managed workflows for an already-installed package version. Workflows are created disabled. Fails if the `fleet.enableWorkflowAssets` feature flag is off or the workflows plugins are unavailable.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+      operationId: post-fleet-epm-packages-pkgname-pkgversion-workflow-assets
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Package name
+          in: path
+          name: pkgName
+          required: true
+          schema:
+            maxLength: 255
+            type: string
+        - description: Package version
+          in: path
+          name: pkgVersion
+          required: true
+          schema:
+            maxLength: 255
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              postInstallWorkflowAssetsRequestExample:
+                description: Install workflow assets for a specific package version
+                value: {}
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_install_workflow_assets_request'
+              default: null
+              nullable: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                postInstallWorkflowAssetsExample:
+                  description: Workflow assets successfully installed
+                  value:
+                    success: true
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_install_kibana_assets_response'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Install Kibana workflow assets for a package
+      tags:
+        - Elastic Package Manager (EPM)
+      x-state: Experimental; added in 9.7.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/epm/packages/{pkgName}/review_upgrade:
     post:
       description: |-
@@ -164640,6 +164733,13 @@ components:
         force:
           type: boolean
       title: install_rule_assets_request
+      type: object
+    Kibana_HTTP_APIs_install_workflow_assets_request:
+      additionalProperties: false
+      properties:
+        force:
+          type: boolean
+      title: install_workflow_assets_request
       type: object
     Kibana_HTTP_APIs_installed_package:
       additionalProperties: false

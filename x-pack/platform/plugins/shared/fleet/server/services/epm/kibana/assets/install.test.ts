@@ -6,6 +6,7 @@
  */
 import type {
   ISavedObjectsImporter,
+  SavedObject,
   SavedObjectsImportFailure,
   SavedObjectsImportSuccess,
   SavedObjectsImportResponse,
@@ -18,8 +19,26 @@ jest.mock('timers/promises', () => ({
   async setTimeout() {},
 }));
 
+jest.mock('../../packages/remove', () => ({
+  deleteWorkflowAssets: jest.fn(),
+  deleteKibanaSavedObjectsAssets: jest.fn(),
+}));
+jest.mock('../../packages/install', () => ({
+  saveKibanaAssetsRefs: jest.fn(),
+}));
+
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+
+import type { Installation } from '../../../../../common/types';
+import { deleteKibanaSavedObjectsAssets, deleteWorkflowAssets } from '../../packages/remove';
+import { saveKibanaAssetsRefs } from '../../packages/install';
+
 import { replaceIdsInKibanaAsset, type ArchiveAsset } from './install';
-import { createSavedObjectKibanaAsset, installKibanaSavedObjects } from './install';
+import {
+  createSavedObjectKibanaAsset,
+  deleteKibanaAssetsAndReferencesForSpace,
+  installKibanaSavedObjects,
+} from './install';
 
 const mockLogger = loggingSystemMock.createLogger();
 
@@ -723,5 +742,64 @@ describe('replaceIdsInKibanaAsset', () => {
 
     expect(updated).toBe(false);
     expect(updatedAsset).toBe(dashboardAsset);
+  });
+});
+
+describe('deleteKibanaAssetsAndReferencesForSpace', () => {
+  const workflowRef = { id: 'wf-1', type: KibanaSavedObjectType.workflow };
+  const installedPkg = {
+    attributes: {
+      installed_kibana_space_id: 'default',
+      additional_spaces_installed_kibana: { other: [workflowRef] },
+    } as unknown as Installation,
+  } as SavedObject<Installation>;
+
+  beforeEach(() => {
+    jest.mocked(deleteWorkflowAssets).mockReset();
+    jest.mocked(deleteKibanaSavedObjectsAssets).mockReset();
+    jest.mocked(saveKibanaAssetsRefs).mockReset();
+  });
+
+  it('should delete workflows strictly and clear the refs', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+
+    await deleteKibanaAssetsAndReferencesForSpace({
+      savedObjectsClient,
+      logger: mockLogger,
+      pkgName: 'pkg',
+      installedPkg,
+      spaceId: 'other',
+    });
+
+    expect(deleteWorkflowAssets).toHaveBeenCalledWith({
+      refs: [workflowRef],
+      spaceId: 'other',
+      logger: mockLogger,
+      strict: true,
+    });
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      savedObjectsClient,
+      'pkg',
+      null,
+      'other',
+      true
+    );
+  });
+
+  it('should keep the refs when the workflow deletion fails', async () => {
+    jest.mocked(deleteWorkflowAssets).mockRejectedValue(new Error('workflows unavailable'));
+
+    await expect(
+      deleteKibanaAssetsAndReferencesForSpace({
+        savedObjectsClient: savedObjectsClientMock.create(),
+        logger: mockLogger,
+        pkgName: 'pkg',
+        installedPkg,
+        spaceId: 'other',
+      })
+    ).rejects.toThrow('workflows unavailable');
+
+    expect(deleteKibanaSavedObjectsAssets).not.toHaveBeenCalled();
+    expect(saveKibanaAssetsRefs).not.toHaveBeenCalled();
   });
 });

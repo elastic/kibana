@@ -93,6 +93,53 @@ describe('installKibanaAssetsAndReferencesMultispace', () => {
     jest.clearAllMocks();
   });
 
+  describe('workflow refs', () => {
+    const workflowRef = { id: 'my-workflow', type: 'workflow' };
+
+    it('preserves the primary space workflow refs when saving the refs', async () => {
+      const installedPkg = makeInstalledPkg('default');
+      installedPkg.attributes.installed_kibana = [
+        { id: 'old-dash', type: 'dashboard' },
+        workflowRef,
+      ] as Installation['installed_kibana'];
+
+      await installKibanaAssetsAndReferencesMultispace({
+        ...baseArgs(),
+        spaceId: 'default',
+        installedPkg,
+      });
+
+      expect(mockSaveKibanaAssetsRefs).toHaveBeenCalledWith(
+        expect.anything(),
+        'nginx',
+        [workflowRef],
+        'default',
+        false
+      );
+    });
+
+    it('preserves the additional space workflow refs when saving the refs', async () => {
+      const installedPkg = makeInstalledPkg('default', ['space-a']);
+      installedPkg.attributes.additional_spaces_installed_kibana = {
+        'space-a': [{ id: 'old-dash', type: 'dashboard' }, workflowRef],
+      } as Installation['additional_spaces_installed_kibana'];
+
+      await installKibanaAssetsAndReferencesMultispace({
+        ...baseArgs(),
+        spaceId: 'default',
+        installedPkg,
+      });
+
+      expect(mockSaveKibanaAssetsRefs).toHaveBeenCalledWith(
+        expect.anything(),
+        'nginx',
+        [workflowRef],
+        'space-a',
+        true
+      );
+    });
+  });
+
   describe('when the requesting space is the primary (installed_kibana_space_id)', () => {
     it('installs into the primary space with saveAsAdditionalSpace=false', async () => {
       const installedPkg = makeInstalledPkg('default');

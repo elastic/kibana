@@ -108,6 +108,7 @@ export const item: GetInfoResponse['item'] = {
       ml_module: [],
       osquery_pack_asset: [],
       osquery_saved_query: [],
+      workflow: [],
       security_ai_prompt: [],
       security_rule: [],
       csp_rule_template: [],

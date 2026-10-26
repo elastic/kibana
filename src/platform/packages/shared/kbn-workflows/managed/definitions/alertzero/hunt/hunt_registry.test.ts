@@ -19,6 +19,7 @@ const renderWorkflowYaml = (definition: (typeof managedWorkflowDefinitions)[numb
         settingsVersion: 1,
         autonomyLevel: 'manual',
         serviceAccountId: 'kibana/nightshift_agent',
+        yaml: 'name: Package workflow\ntriggers:\n  - type: manual\nsteps: []\n',
       } as never);
 
 describe('Hunt Watch: registry-wide checks', () => {

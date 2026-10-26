@@ -22,8 +22,10 @@ import { WorkflowsService } from './api/workflows_management_service';
 import { AvailabilityUpdater } from './availability';
 import {
   createManagedWorkflowsSystemApiProvider,
+  createWorkflowsAvailabilityTracker,
   createWorkflowsClientProvider,
 } from './client/workflows_client';
+import type { WorkflowsAvailabilityTracker } from './client/workflows_client';
 import type { WorkflowsManagementConfig } from './config';
 import {
   getWorkflowsConnectorAdapter,
@@ -56,6 +58,7 @@ export class WorkflowsPlugin
   private config: WorkflowsManagementConfig;
   private readonly kibanaVersion: string;
   private availabilityUpdater: AvailabilityUpdater | null = null;
+  private availabilityTracker: WorkflowsAvailabilityTracker | null = null;
   private api: WorkflowsManagementApi | null = null;
   private workflowsService: WorkflowsService | null = null;
   private executionDataViewsBootstrap: ExecutionDataViewsBootstrap | null = null;
@@ -105,8 +108,10 @@ export class WorkflowsPlugin
     plugins.workflowsExtensions.registerWorkflowsClientProvider(
       createWorkflowsClientProvider(workflowsService, this.config, this.logger)
     );
+    const availabilityTracker = createWorkflowsAvailabilityTracker(workflowsService, this.config);
+    this.availabilityTracker = availabilityTracker;
     plugins.workflowsExtensions.registerManagedWorkflowsSystemApiProvider(
-      createManagedWorkflowsSystemApiProvider(workflowsService, this.config, this.logger)
+      createManagedWorkflowsSystemApiProvider(workflowsService, availabilityTracker, this.logger)
     );
 
     const spaces = plugins.spaces.spacesService;
@@ -236,5 +241,6 @@ export class WorkflowsPlugin
     this.unregisterHitlLifecycleAuditor = null;
     this.workflowsService?.setStopping(true);
     this.availabilityUpdater?.stop();
+    this.availabilityTracker?.stop();
   }
 }

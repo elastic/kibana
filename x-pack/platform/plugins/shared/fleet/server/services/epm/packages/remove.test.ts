@@ -8,6 +8,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
+import type { KibanaAssetReference } from '../../../../common/types';
+import { KibanaSavedObjectType } from '../../../../common/types';
 
 import { packagePolicyService, appContextService } from '../..';
 import { auditLoggingService } from '../../audit_logging';
@@ -16,6 +18,9 @@ import { deleteTransforms } from '../elasticsearch/transform/remove';
 
 import {
   deleteESAsset,
+  deleteKibanaAssets,
+  deleteKibanaSavedObjectsAssets,
+  deleteWorkflowAssets,
   deletePrerequisiteAssets,
   removeInstallation,
   cleanupAssets,
@@ -39,6 +44,7 @@ jest.mock('../..', () => {
         info: jest.fn(),
         error: jest.fn(),
         warn: jest.fn(),
+        debug: jest.fn(),
       }),
       getInternalUserSOClientWithoutSpaceExtension: jest.fn().mockReturnValue({}),
       getExperimentalFeatures: jest.fn().mockReturnValue({
@@ -826,6 +832,215 @@ describe('cleanupAssets', () => {
         'udp.generic': 'logs-udp.generic-*',
         'udp.test': 'logs-udp.test-*',
       },
+    });
+  });
+});
+
+describe('deleteKibanaSavedObjectsAssets', () => {
+  const uninstall = jest.fn();
+  const installedPkg = {
+    attributes: {
+      name: 'test-package',
+      version: '1.0.0',
+      install_source: 'registry',
+      installed_kibana_space_id: 'default',
+      installed_kibana: [
+        { id: 'system-fleet-package-workflow-default-test-package-a', type: 'workflow' },
+      ],
+    },
+  } as any;
+
+  beforeEach(() => {
+    uninstall.mockReset();
+    (appContextService as any).getManagedWorkflowsClient = jest
+      .fn()
+      .mockResolvedValue({ uninstall });
+    (appContextService as any).getSavedObjects = jest.fn().mockReturnValue({
+      getUnsafeInternalClient: jest.fn().mockReturnValue({ bulkDelete: jest.fn() }),
+    });
+  });
+
+  it('does not uninstall workflows, so upgrades can update them in place', async () => {
+    await deleteKibanaSavedObjectsAssets({
+      savedObjectsClient: {} as any,
+      installedPkg,
+      spaceId: 'default',
+    });
+
+    expect(uninstall).not.toHaveBeenCalled();
+  });
+});
+
+describe('workflow assets removal', () => {
+  const uninstall = jest.fn();
+  const bulkDelete = jest.fn();
+  const logger = appContextService.getLogger();
+  const workflowRef = (id: string): KibanaAssetReference => ({
+    id,
+    type: KibanaSavedObjectType.workflow,
+  });
+  const dashboardRef: KibanaAssetReference = {
+    id: 'a-dashboard',
+    type: KibanaSavedObjectType.dashboard,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    uninstall.mockReset().mockResolvedValue(undefined);
+    bulkDelete.mockReset().mockResolvedValue({ statuses: [] });
+    (appContextService as any).getManagedWorkflowsClient = jest
+      .fn()
+      .mockResolvedValue({ uninstall });
+    (appContextService as any).getSavedObjects = jest.fn().mockReturnValue({
+      getUnsafeInternalClient: jest.fn().mockReturnValue({ bulkDelete }),
+    });
+  });
+
+  describe('deleteWorkflowAssets', () => {
+    it('uninstalls only the workflow refs in the given space', async () => {
+      await deleteWorkflowAssets({
+        refs: [workflowRef('wf-1'), dashboardRef, workflowRef('wf-2')],
+        spaceId: 'my-space',
+        logger,
+      });
+
+      expect(uninstall).toHaveBeenCalledTimes(2);
+      expect(uninstall).toHaveBeenCalledWith('system-fleet-package-workflow', {
+        spaceId: 'my-space',
+        workflowId: 'wf-1',
+      });
+      expect(uninstall).toHaveBeenCalledWith('system-fleet-package-workflow', {
+        spaceId: 'my-space',
+        workflowId: 'wf-2',
+      });
+    });
+
+    it('does not look for the client when there are no workflow refs', async () => {
+      await deleteWorkflowAssets({ refs: [dashboardRef], spaceId: 'default', logger });
+
+      expect(appContextService.getManagedWorkflowsClient).not.toHaveBeenCalled();
+      expect(uninstall).not.toHaveBeenCalled();
+    });
+
+    it('warns and keeps going when the managed workflows client is not available', async () => {
+      (appContextService.getManagedWorkflowsClient as jest.Mock).mockResolvedValue(undefined);
+
+      await deleteWorkflowAssets({ refs: [workflowRef('wf-1')], spaceId: 'default', logger });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Workflows are not available, 1 workflow asset(s) were not removed'
+      );
+      expect(uninstall).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteKibanaAssets', () => {
+    it('does not try to delete workflows as saved objects', async () => {
+      await deleteKibanaAssets({
+        installedObjects: [workflowRef('wf-1'), dashboardRef],
+        packageSpecConditions: { kibana: { version: '^8.0.0' } },
+        logger,
+      });
+
+      const deleted = bulkDelete.mock.calls.flatMap(([objects]) => objects);
+      expect(deleted).toEqual([expect.objectContaining({ id: 'a-dashboard' })]);
+    });
+  });
+
+  describe('removeInstallation', () => {
+    it('uninstalls the workflows of the primary and the additional spaces', async () => {
+      const installation = {
+        name: 'test-package',
+        version: '1.0.0',
+        install_source: 'registry',
+        installed_kibana_space_id: 'default',
+        installed_kibana: [workflowRef('wf-default'), dashboardRef],
+        additional_spaces_installed_kibana: { other: [workflowRef('wf-other')] },
+        installed_es: [],
+        package_assets: [],
+      } as any;
+      mockGetInstallation.mockResolvedValue(installation);
+      const soClient = {
+        get: jest.fn().mockResolvedValue({ attributes: installation }),
+        update: jest.fn(),
+        delete: jest.fn(),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
+      } as any;
+
+      await removeInstallation({
+        savedObjectsClient: soClient,
+        pkgName: 'test-package',
+        pkgVersion: '1.0.0',
+        esClient: {} as any,
+        force: true,
+      });
+
+      expect(uninstall).toHaveBeenCalledTimes(2);
+      expect(uninstall).toHaveBeenCalledWith('system-fleet-package-workflow', {
+        spaceId: 'default',
+        workflowId: 'wf-default',
+      });
+      expect(uninstall).toHaveBeenCalledWith('system-fleet-package-workflow', {
+        spaceId: 'other',
+        workflowId: 'wf-other',
+      });
+    });
+
+    describe('when the workflows cannot be removed', () => {
+      const installation = {
+        name: 'test-package',
+        version: '1.0.0',
+        install_source: 'registry',
+        installed_kibana_space_id: 'default',
+        installed_kibana: [workflowRef('wf-default')],
+        installed_es: [],
+        package_assets: [],
+      } as any;
+      const soClient = () =>
+        ({
+          get: jest.fn().mockResolvedValue({ attributes: installation }),
+          update: jest.fn(),
+          delete: jest.fn(),
+          find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+          bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
+        } as any);
+      const remove = (client: any, force?: boolean) =>
+        removeInstallation({
+          savedObjectsClient: client,
+          pkgName: 'test-package',
+          pkgVersion: '1.0.0',
+          esClient: {} as any,
+          force,
+        });
+
+      beforeEach(() => {
+        mockGetInstallation.mockResolvedValue(installation);
+      });
+
+      it('keeps the package saved object when the client is unavailable', async () => {
+        (appContextService.getManagedWorkflowsClient as jest.Mock).mockResolvedValue(undefined);
+        const client = soClient();
+
+        await expect(remove(client)).rejects.toThrow('Unable to remove workflows');
+        expect(client.delete).not.toHaveBeenCalled();
+      });
+
+      it('keeps the package saved object when a workflow fails to uninstall', async () => {
+        uninstall.mockRejectedValue(new Error('boom'));
+        const client = soClient();
+
+        await expect(remove(client)).rejects.toThrow('boom');
+        expect(client.delete).not.toHaveBeenCalled();
+      });
+
+      it('continues the uninstall when forced', async () => {
+        uninstall.mockRejectedValue(new Error('boom'));
+        const client = soClient();
+
+        await remove(client, true);
+        expect(client.delete).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, 'test-package');
+      });
     });
   });
 });

@@ -45,6 +45,10 @@ export const DeferredAssetsSection: FunctionComponent<Props> = ({
     (asset) => asset.type === KibanaSavedObjectType.alert
   );
 
+  const deferredWorkflows = deferredInstallations.filter(
+    (asset) => asset.type === KibanaSavedObjectType.workflow
+  );
+
   return (
     <>
       <EuiTitle>
@@ -73,6 +77,13 @@ export const DeferredAssetsSection: FunctionComponent<Props> = ({
         packageInfo={packageInfo}
         type={KibanaSavedObjectType.alert}
         deferredInstallations={deferredAlerts}
+        forceRefreshAssets={forceRefreshAssets}
+      />
+
+      <DeferredAssetsAccordion
+        packageInfo={packageInfo}
+        type={KibanaSavedObjectType.workflow}
+        deferredInstallations={deferredWorkflows}
         forceRefreshAssets={forceRefreshAssets}
       />
     </>

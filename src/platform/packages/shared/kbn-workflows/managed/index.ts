@@ -10,6 +10,8 @@
 import { managedWorkflowDefinitions } from './definitions';
 import type {
   ManagedWorkflowDefinition,
+  ManagedWorkflowList,
+  ManagedWorkflowListVisibilityContext,
   ManagedWorkflowManagement,
   ManagedWorkflowSelector,
   ManagedWorkflowSelectorVisibilityContext,
@@ -22,6 +24,8 @@ import type {
 
 export type {
   ManagedWorkflowDefinition,
+  ManagedWorkflowList,
+  ManagedWorkflowListVisibilityContext,
   ManagedWorkflowManagement,
   ManagedWorkflowSelector,
   ManagedWorkflowSelectorVisibilityContext,
@@ -32,9 +36,11 @@ export type {
   ManagedWorkflowVisibilityContext,
 };
 export {
+  getManagedWorkflowListVisibilityContext,
   getManagedWorkflowSelectorVisibilityContext,
   getManagedWorkflowSolutionVisibilityContext,
   getManagedWorkflowVisibilityContexts,
+  MANAGED_WORKFLOW_LISTS,
   MANAGED_WORKFLOW_SELECTORS,
   MANAGED_WORKFLOW_SOLUTIONS,
 } from './types';

@@ -198,6 +198,7 @@ export class WorkflowsExtensionsServerPlugin
 
   private getNoopManagedWorkflowsSystemClient(): ManagedWorkflowsSystemApi {
     return {
+      isWorkflowsAvailable: false,
       install: async () => {
         this.logger.warn(
           'No managed workflows system API provider set, using noop install to avoid errors.'
@@ -239,6 +240,9 @@ export class WorkflowsExtensionsServerPlugin
     systemClient: ManagedWorkflowsSystemApi
   ): PluginScopedManagedWorkflowsApi {
     return {
+      get isWorkflowsAvailable() {
+        return systemClient.isWorkflowsAvailable;
+      },
       install: systemClient.install,
       uninstall: systemClient.uninstall,
       ready: systemClient.ready,
