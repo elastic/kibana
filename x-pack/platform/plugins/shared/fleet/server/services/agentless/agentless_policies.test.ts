@@ -173,6 +173,83 @@ describe('AgentlessPoliciesService', () => {
       );
     });
 
+    it('should refresh the agent version conditions of the agent policy before deploying it', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+      jest.mocked(agentPolicyService.update).mockResolvedValue({} as any);
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      await agentlessPoliciesService.createAgentlessPolicy({
+        id: 'test-agentless-policy-id',
+        name: 'Test Agentless Policy',
+        namespace: 'default',
+        package: {
+          name: 'agentless_integration',
+          version: '1.0.0',
+        },
+        inputs: {},
+      });
+
+      // The package policy is created without bumping the revision, which is what computes
+      // `has_agent_version_conditions` otherwise: it is refreshed without a revision bump or deploy event.
+      expect(jest.mocked(agentPolicyService.update)).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(agentPolicyService.update)).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'test-agentless-policy-id',
+        {},
+        expect.objectContaining({ bumpRevision: false, skipValidation: true })
+      );
+      const [updateOrder] = jest.mocked(agentPolicyService.update).mock.invocationCallOrder;
+      const [packagePolicyOrder] = jest.mocked(packagePolicyService.create).mock
+        .invocationCallOrder;
+      const [deployOrder] = jest.mocked(agentPolicyService.deployPolicy).mock.invocationCallOrder;
+      expect(packagePolicyOrder).toBeLessThan(updateOrder);
+      expect(updateOrder).toBeLessThan(deployOrder);
+    });
+
+    it('should delete agent policy if the agent version conditions cannot be refreshed', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+      jest.mocked(agentPolicyService.update).mockRejectedValueOnce(new Error('update failed'));
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      await expect(() =>
+        agentlessPoliciesService.createAgentlessPolicy({
+          id: 'test-agentless-policy-id',
+          name: 'Test Agentless Policy',
+          namespace: 'default',
+          package: {
+            name: 'agentless_integration',
+            version: '1.0.0',
+          },
+          inputs: {},
+        })
+      ).rejects.toThrow('update failed');
+
+      expect(jest.mocked(agentPolicyService.deployPolicy)).not.toHaveBeenCalled();
+      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'test-agentless-policy-id',
+        expect.objectContaining({ force: true })
+      );
+    });
+
     it('should delete agent policy if an error occurs during package policy creation', async () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;

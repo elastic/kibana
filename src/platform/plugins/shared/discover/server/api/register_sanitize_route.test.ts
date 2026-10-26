@@ -11,8 +11,8 @@ import { MAX_ID_LENGTH } from '@kbn/as-code-shared-schemas';
 import type { Type } from '@kbn/config-schema';
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
-  DISCOVER_SESSION_API_VERSION,
   DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
+  DISCOVER_SESSION_INTERNAL_API_VERSION,
 } from '../../common/constants';
 import { registerSanitizeRoute } from './register_sanitize_route';
 import { MAX_DISCOVER_SESSION_TAGS } from '@kbn/discover-session-constants';
@@ -35,12 +35,12 @@ describe('registerSanitizeRoute', () => {
 
   const getVersion = () => {
     const version = router.versioned.getRoute('post', SANITIZE_PATH).versions[
-      DISCOVER_SESSION_API_VERSION
+      DISCOVER_SESSION_INTERNAL_API_VERSION
     ];
 
     if (!version) {
       throw new Error(
-        `No version [${DISCOVER_SESSION_API_VERSION}] registered for ${SANITIZE_PATH}`
+        `No version [${DISCOVER_SESSION_INTERNAL_API_VERSION}] registered for ${SANITIZE_PATH}`
       );
     }
 
@@ -116,7 +116,8 @@ describe('registerSanitizeRoute', () => {
         type: 'dropped_property',
         tab_id: firstTab.id,
         key: 'control_panels',
-        message: expect.stringContaining('controlGroupJson is not valid JSON'),
+        value: 'not-json',
+        message: 'Invalid JSON.',
       },
     ]);
     expect(body.data.tabs).toHaveLength(discoverSessionAttributes.tabs.length);

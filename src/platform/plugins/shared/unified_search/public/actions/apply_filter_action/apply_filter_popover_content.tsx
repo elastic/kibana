@@ -27,12 +27,12 @@ import {
   getFieldDisplayValueFromFilter,
 } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import { FilterContent } from '../../filter_badge';
 
 interface Props {
   filters: Filter[];
-  indexPatterns: DataView[];
+  indexPatterns: FilterableSource[];
   onCancel: () => void;
   onSubmit: (filters: Filter[]) => void;
 }

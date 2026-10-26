@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { MAX_TAG_LENGTH } from '@kbn/alerting-v2-constants';
 import { MAX_KQL_LENGTH } from './constants';
 
@@ -47,29 +47,34 @@ const MATCHER_AT_LEAST_ONE_MESSAGE =
 const namesAMatcherLeaf = (matcher: { tags?: string[]; expression?: string }): boolean =>
   matcher.tags !== undefined || matcher.expression !== undefined;
 
-const matcherTagsSchema = z
-  .array(z.string().min(1).max(POLICY_MATCHER_TAG_MAX_LENGTH))
-  .min(1)
-  .max(POLICY_MATCHER_TAGS_MAX);
+const matcherTagsSchema = lazySchema(() =>
+  z.array(z.string().min(1).max(POLICY_MATCHER_TAG_MAX_LENGTH)).min(1).max(POLICY_MATCHER_TAGS_MAX)
+);
 
-const matcherExpressionSchema = z.string().max(MAX_KQL_LENGTH).trim().min(1);
+const matcherExpressionSchema = lazySchema(() => z.string().max(MAX_KQL_LENGTH).trim().min(1));
 
-export const policyMatcherSchema = z
-  .object({
-    tags: matcherTagsSchema.optional().describe(POLICY_MATCHER_TAGS_DESCRIPTION),
-    expression: matcherExpressionSchema.optional().describe(POLICY_MATCHER_EXPRESSION_DESCRIPTION),
-  })
-  .strict()
-  .refine(namesAMatcherLeaf, { message: MATCHER_AT_LEAST_ONE_MESSAGE });
+export const policyMatcherSchema = lazySchema(() =>
+  z
+    .object({
+      tags: matcherTagsSchema.optional().describe(POLICY_MATCHER_TAGS_DESCRIPTION),
+      expression: matcherExpressionSchema
+        .optional()
+        .describe(POLICY_MATCHER_EXPRESSION_DESCRIPTION),
+    })
+    .strict()
+    .refine(namesAMatcherLeaf, { message: MATCHER_AT_LEAST_ONE_MESSAGE })
+);
 
 export type PolicyMatcher = z.infer<typeof policyMatcherSchema>;
 
-export const policyMatcherPatchSchema = z
-  .object({
-    tags: matcherTagsSchema.nullable().optional().describe(POLICY_MATCHER_TAGS_PATCH_DESCRIPTION),
-    expression: matcherExpressionSchema
-      .nullable()
-      .optional()
-      .describe(POLICY_MATCHER_EXPRESSION_PATCH_DESCRIPTION),
-  })
-  .strict();
+export const policyMatcherPatchSchema = lazySchema(() =>
+  z
+    .object({
+      tags: matcherTagsSchema.nullable().optional().describe(POLICY_MATCHER_TAGS_PATCH_DESCRIPTION),
+      expression: matcherExpressionSchema
+        .nullable()
+        .optional()
+        .describe(POLICY_MATCHER_EXPRESSION_PATCH_DESCRIPTION),
+    })
+    .strict()
+);

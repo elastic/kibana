@@ -285,7 +285,6 @@ describe('Create OAuth Client route', () => {
     ['observability', 'observability'],
     ['security', 'security'],
     ['vectordb', 'vectordb'],
-    ['workplaceai', 'workplaceai'],
   ] as const)('maps %s to its UIAM project type', async (solution, projectType) => {
     ({ routeHandler, oauthMock } = setup(mcpConfig, { serverlessProjectType: solution }));
     oauthMock.createClient.mockResolvedValue({ id: 'client-id', resource: CONFIGURED_RESOURCE });

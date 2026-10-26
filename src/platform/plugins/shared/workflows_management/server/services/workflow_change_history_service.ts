@@ -57,11 +57,12 @@ export class WorkflowChangeHistoryService implements IWorkflowChangeHistoryServi
   initialize({
     elasticsearchClient,
     authService,
+    userProfileService,
   }: WorkflowChangeHistoryServiceInitializeParams): Promise<void> {
     this.logger.debug('Initializing workflow change history');
     this.authService = authService;
 
-    return this.client.initialize(elasticsearchClient).catch((cause) => {
+    return this.client.initialize(elasticsearchClient, { userProfileService }).catch((cause) => {
       const error = new Error(
         `Unable to initialize workflow change history for [${WORKFLOW_CHANGE_HISTORY_MODULE}, ${WORKFLOW_CHANGE_HISTORY_DATASET}]`,
         { cause }

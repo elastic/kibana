@@ -90,6 +90,7 @@ export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ onRefresh 
           refreshInterval={refreshInterval}
           onRefreshChange={onRefreshChange}
           commonlyUsedRanges={commonlyUsedRanges}
+          updateButtonProps={{ fill: false }}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

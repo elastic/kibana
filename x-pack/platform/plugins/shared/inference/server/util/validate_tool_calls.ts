@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
+import type { Logger } from '@kbn/logging';
 import type { ToolCall, ToolOptions, UnvalidatedToolCall } from '@kbn/inference-common';
 import { ToolChoiceType } from '@kbn/inference-common';
 import type { ToolCallOfToolOptions } from '@kbn/inference-common';
@@ -14,18 +15,24 @@ import {
   createToolNotFoundError,
   createToolValidationError,
 } from '../../common/chat_complete/errors';
+import { repairJsonEncodedArguments } from './repair_json_encoded_arguments';
 
 export function validateToolCalls<TToolOptions extends ToolOptions>({
   toolCalls,
   toolChoice,
   tools,
-}: TToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCallOfToolOptions<TToolOptions>[];
+  logger,
+}: TToolOptions & {
+  toolCalls: UnvalidatedToolCall[];
+  logger: Pick<Logger, 'debug'>;
+}): ToolCallOfToolOptions<TToolOptions>[];
 
 export function validateToolCalls({
   toolCalls,
   toolChoice,
   tools,
-}: ToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCall[] {
+  logger,
+}: ToolOptions & { toolCalls: UnvalidatedToolCall[]; logger: Pick<Logger, 'debug'> }): ToolCall[] {
   if (toolCalls.length && toolChoice === ToolChoiceType.none) {
     throw createToolValidationError(
       `tool_choice was "none" but ${toolCalls
@@ -64,7 +71,20 @@ export function validateToolCalls({
       // the recursive type compatibility, so we assert it as Record<string, unknown>
       const zodSchema = fromJSONSchema(toolSchema as unknown as Record<string, unknown>);
       if (zodSchema) {
-        zodSchema.parse(serializedArguments);
+        const firstAttempt = zodSchema.safeParse(serializedArguments);
+        if (!firstAttempt.success) {
+          const repair = repairJsonEncodedArguments(serializedArguments, zodSchema);
+          if (!repair) {
+            throw firstAttempt.error;
+          }
+          logger.debug(
+            () =>
+              `Repaired JSON-encoded arguments of ${toolCall.function.name} (${
+                toolCall.toolCallId
+              }) at: ${repair.repairedPaths.join(', ')}`
+          );
+          serializedArguments = repair.repaired as Record<string, unknown>;
+        }
       }
     } catch (error) {
       const errorMessage =

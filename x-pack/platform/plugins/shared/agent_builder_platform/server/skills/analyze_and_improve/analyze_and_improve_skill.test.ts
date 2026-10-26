@@ -28,10 +28,6 @@ describe('analyzeAndImproveSkill', () => {
     expect(isAllowedBuiltinSkill(analyzeAndImproveSkill.id)).toBe(true);
   });
 
-  it('is gated behind experimental features', () => {
-    expect(analyzeAndImproveSkill.experimental).toBe(true);
-  });
-
   it('is not excluded from Elastic capabilities, so the default agent picks it up', () => {
     expect(analyzeAndImproveSkill.excludeFromElasticCapabilities).toBeFalsy();
   });
@@ -68,6 +64,7 @@ describe('analyzeAndImproveSkill', () => {
   });
 
   it('is hidden in spaces where the Context Engine is off, like the other setup skills', () => {
+    expect(analyzeAndImproveSkill.experimental).toBeFalsy();
     expect(analyzeAndImproveSkill.availability).toBe(contextEngineSkillAvailability);
   });
 

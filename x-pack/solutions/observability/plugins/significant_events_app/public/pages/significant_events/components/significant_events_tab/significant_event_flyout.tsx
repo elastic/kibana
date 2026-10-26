@@ -45,7 +45,10 @@ import { FlyoutToolbarHeader } from '../../../../components/flyout_components/fl
 import { getConfidenceColor } from '../../../../components/knowledge_indicators/utils/get_confidence_color';
 import { DismissEventModal } from './dismiss_event_modal';
 import { LifecycleTimeline } from './lifecycle_timeline';
-import { getSignificantEventStatusColor } from '../shared/status_display';
+import {
+  getSignificantEventStatusColor,
+  isLiveSignificantEventStatus,
+} from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import { SignificantEventDetails } from '../../../../components/significant_event_details/significant_event_details';
@@ -217,7 +220,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation({ onTriggerSuccess });
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
-  const isOpen = latestEvent.status === 'active';
+  const isOpen = isLiveSignificantEventStatus(latestEvent.status);
 
   useInterval(
     refetchLifecycle,

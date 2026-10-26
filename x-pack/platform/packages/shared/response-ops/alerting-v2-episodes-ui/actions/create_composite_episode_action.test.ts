@@ -117,10 +117,10 @@ describe('createCompositeEpisodeAction', () => {
           episodes: [expect.objectContaining({ 'episode.id': 'e1' })],
           nativeExecute: def.execute,
           extension: undefined,
+          onSuccess,
           deps,
         })
       );
-      expect(onSuccess).toHaveBeenCalled();
     });
 
     it('skips execution when no episodes are eligible', async () => {
@@ -135,18 +135,6 @@ describe('createCompositeEpisodeAction', () => {
       await action.execute({ episodes: [makeEpisode('e1')], onSuccess });
 
       expect(spy).not.toHaveBeenCalled();
-      expect(onSuccess).not.toHaveBeenCalled();
-    });
-
-    it('shows danger toast on error and does not call onSuccess', async () => {
-      jest.spyOn(composite, 'executeCompositeAction').mockRejectedValue(new Error('fail'));
-      const deps = makeDeps();
-      const onSuccess = jest.fn();
-      const action = createCompositeEpisodeAction(makeDef(), undefined, deps);
-
-      await action.execute({ episodes: [makeEpisode('e1')], onSuccess });
-
-      expect(deps.notifications.toasts.addDanger).toHaveBeenCalled();
       expect(onSuccess).not.toHaveBeenCalled();
     });
 

@@ -117,3 +117,18 @@ assertion in `workflow_layout_pipeline.test.ts` guards against it in any future 
   concern).
 - Unequal-width lanes that would overlap after permutation produce no known fixture today; the
   no-overlap assertion will surface any regression.
+- **Fork owners stay centred over their lanes** ([security-team#20058](https://github.com/elastic/security-team/issues/20058)).
+  Dagre centres a fork owner on its lane heads, but the lane-order and compound passes move the
+  heads while the owner (on the spine) stays put. With lanes of unequal extent (a 1px bypass lane,
+  or a narrow leaf next to a wide nested `else`) the owner ends up hundreds of px off-centre.
+  `centreForkOwners` runs after compound packing and shifts every lane of each fork, including forks
+  inside container bodies, by the same delta so the owner sits on the midpoint of its outermost lane
+  heads. It skips forks with a fallback owner in a lane (their lane nodes are packed with the
+  branch, outside the lane sets); such forks keep their placement.
+- **Nested forks keep their fallback lanes.** Compound packing processes forks inner-first. An outer
+  fork carries the lanes of nested forks rigidly with their owners instead of re-placing them against
+  branch-wide obstacles, which used to throw a nested fork's lane past its sibling branch.
+- **Container boxes contain their bodies.** Boxes are sized before these passes, so
+  `containContainerContents` grows any box a shifted body spilled out of. It runs before the final
+  overlap repair (so outer nodes are separated from the grown box) and again after it. Grow-only: a
+  box that already contains its body is untouched.

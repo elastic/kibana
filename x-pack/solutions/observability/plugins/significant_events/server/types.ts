@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
@@ -81,6 +82,7 @@ export interface SignificantEventsPluginStartDependencies {
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   nightshiftSources: NightshiftSourcesServerStart;
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
+  agenticInvestigations?: AgenticInvestigationsPluginStart;
 }
 
 export interface SignificantEventsServer {
@@ -102,4 +104,6 @@ export interface SignificantEventsServer {
   /** Singleton client for the Relay service, owned by the Actions plugin. */
   relayClient?: RelayClientContract;
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
+  /** Reads investigations (status of the ones a significant event lists). */
+  agenticInvestigations?: AgenticInvestigationsPluginStart;
 }

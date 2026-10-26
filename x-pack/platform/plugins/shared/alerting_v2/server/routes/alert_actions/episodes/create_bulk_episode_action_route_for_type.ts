@@ -46,6 +46,7 @@ interface CreateBulkEpisodeActionRouteForTypeOptions<
   bodySchema: z.ZodType<BulkEpisodeActionBody<TAction>>;
   oasOperationObject?: RouteConfigOptions<RouteMethod>['oasOperationObject'];
   access?: RouteConfigOptions<RouteMethod>['access'];
+  availability?: RouteConfigOptions<RouteMethod>['availability'];
 }
 
 export const createBulkEpisodeActionRouteForType = <
@@ -57,6 +58,7 @@ export const createBulkEpisodeActionRouteForType = <
   bodySchema,
   oasOperationObject,
   access,
+  availability,
 }: CreateBulkEpisodeActionRouteForTypeOptions<TAction>): RouteDefinition<
   unknown,
   unknown,
@@ -74,6 +76,7 @@ export const createBulkEpisodeActionRouteForType = <
     };
     static routeOptions = {
       access,
+      availability,
       summary,
       description: 'Create the same action for multiple alerts in a single request.',
       oasOperationObject,

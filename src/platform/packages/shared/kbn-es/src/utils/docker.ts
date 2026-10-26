@@ -79,13 +79,7 @@ interface BaseOptions extends ImageOptions {
   files?: string | string[];
 }
 
-export const serverlessProjectTypes = [
-  'es',
-  'oblt',
-  'security',
-  'workplaceai',
-  'vectordb',
-] as const;
+export const serverlessProjectTypes = ['es', 'oblt', 'security', 'vectordb'] as const;
 export type ServerlessProjectType = (typeof serverlessProjectTypes)[number];
 
 export const esServerlessProjectTypes = [
@@ -94,7 +88,6 @@ export const esServerlessProjectTypes = [
   'elasticsearch_vector',
   'observability',
   'security',
-  'workplaceai',
   'vectordb',
 ] as const;
 export type EsServerlessProjectType = (typeof esServerlessProjectTypes)[number];
@@ -125,7 +118,6 @@ export const esProjectTypeFromKbn = new Map<string, string>([
   ['es', 'elasticsearch_general_purpose'],
   ['oblt', 'observability'],
   ['security', 'security'],
-  ['workplaceai', 'workplaceai'],
   ['vectordb', 'vectordb'],
 ]);
 
@@ -141,7 +133,6 @@ export const kbnProjectTypeFromEs = new Map<string, string>([
   ['elasticsearch_vector', 'es'],
   ['observability', 'oblt'],
   ['security', 'security'],
-  ['workplaceai', 'workplaceai'],
   ['vectordb', 'vectordb'],
 ]);
 

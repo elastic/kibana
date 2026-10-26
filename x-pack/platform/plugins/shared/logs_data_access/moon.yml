@@ -49,6 +49,4 @@ fileGroups:
     - public/**/*
     - jest.config.js
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

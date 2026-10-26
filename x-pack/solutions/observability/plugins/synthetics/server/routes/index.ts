@@ -7,6 +7,12 @@
 
 import { syncParamsSettingsParamsRoute } from './settings/params/sync_global_params_settings';
 import { syncParamsSyntheticsParamsRoute } from './settings/params/sync_global_params';
+import {
+  getSecretConnectionsRoute,
+  saveSecretConnectionRoute,
+  deleteSecretConnectionRoute,
+} from './settings/secret_connection/secret_connection';
+import { getFleetSecretStorageStatusRoute } from './settings/secret_connection/fleet_secret_storage';
 import { cleanupPrivateLocationRoute } from './settings/private_locations/cleanup_private_locations';
 import { resetPrivateLocationRoute } from './settings/private_locations/reset_private_location';
 import { getSyntheticsTriggerTaskRun } from './tasks/trigger_task_run';
@@ -84,6 +90,7 @@ import {
 } from './settings/private_locations/get_private_locations';
 import { getPrivateLocationAgentStats } from './settings/private_locations/get_agent_stats';
 import { getOutdatedMwAgentLocations } from './settings/private_locations/get_outdated_mw_agents';
+import { getMissingCompleteAgentLocations } from './settings/private_locations/get_missing_complete_agents';
 import { getMonitorAgentAssignment } from './settings/private_locations/get_monitor_agent_assignment';
 import { getSyntheticsFilters } from './filters/filters';
 import { getAllSyntheticsMonitorRoute } from './monitor_cruds/get_monitors_list';
@@ -152,6 +159,10 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   cleanupPrivateLocationRoute,
   resetPrivateLocationRoute,
   syncParamsSyntheticsParamsRoute,
+  getSecretConnectionsRoute,
+  saveSecretConnectionRoute,
+  deleteSecretConnectionRoute,
+  getFleetSecretStorageStatusRoute,
   syncParamsSettingsParamsRoute,
   getMonitorsHealthRoute,
   getMonitorHealthRoute,
@@ -161,6 +172,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getSyntheticsDiagnosticsRoute,
   getPrivateLocationAgentStats,
   getOutdatedMwAgentLocations,
+  getMissingCompleteAgentLocations,
   getMonitorAgentAssignment,
   getMaintenanceWindowsRoute,
 ];

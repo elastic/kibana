@@ -8,6 +8,7 @@
 import React, { Suspense } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiBadge,
   EuiCode,
   EuiCopy,
   EuiFlexGroup,
@@ -37,7 +38,7 @@ import { TagBadges } from './actions/tags';
 import { AlertEpisodeSeverityBadge } from './severity/episode_severity_badge';
 import type { EpisodeSeverity } from './severity/severity_utils';
 import { EMPTY_VALUE } from '../constants';
-import { useEpisodeSource } from '../source_labels';
+import { getConnectorSource, useEpisodeSource } from '../source_labels';
 import * as i18n from './translations';
 
 type Rule = FindRulesResponse['items'][number];
@@ -65,9 +66,6 @@ const getEpisodeGroupingFromRow = (
     groupingData: parseEpisodeDataJson(episode.episode_data),
   };
 };
-
-/** `source` written on events of native v2 rules; it carries no information worth showing. */
-const NATIVE_RULE_SOURCE = 'internal';
 
 /** The connector an alert came from: its icon, when one exists, followed by its name. */
 const EpisodeConnectorSource = ({ source }: { source: string }) => {
@@ -100,10 +98,10 @@ const EpisodeConnectorSource = ({ source }: { source: string }) => {
  */
 export const EpisodeSourceCell = ({ row }: CellRendererProps) => {
   const { label, icon } = useEpisodeSource(row.flattened.source_id as string | undefined);
-  const { source } = row.flattened as unknown as AlertEpisode;
+  const connectorSource = getConnectorSource((row.flattened as unknown as AlertEpisode).source);
 
-  if (typeof source === 'string' && source && source !== NATIVE_RULE_SOURCE) {
-    return <EpisodeConnectorSource source={source} />;
+  if (connectorSource) {
+    return <EpisodeConnectorSource source={connectorSource} />;
   }
 
   return (
@@ -199,6 +197,20 @@ export const EpisodeRuleTagsCell = ({
   }
 
   return <TagBadges tags={rule?.metadata.tags ?? []} data-test-subj="episodeRuleTagsCell" />;
+};
+
+export const EpisodeSuppressedCell = ({ row }: CellRendererProps) => {
+  const ids = row.flattened.maintenance_window_ids;
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return <>{EMPTY_VALUE}</>;
+  }
+
+  return (
+    <EuiBadge color="hollow" data-test-subj="episodeSuppressedCell">
+      {i18n.SUPPRESSED_BY_MAINTENANCE_WINDOW}
+    </EuiBadge>
+  );
 };
 
 export const EpisodeSeverityCell = ({ row }: CellRendererProps) => {

@@ -239,9 +239,10 @@ apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
       ]);
       expect(response.body.warnings).toStrictEqual([
         expect.objectContaining({
-          type: 'dropped_panel',
+          type: 'dropped_item',
           tab_id: firstTab.id,
-          panel_id: controlId,
+          key: 'control_panels',
+          item_id: controlId,
         }),
       ]);
     }

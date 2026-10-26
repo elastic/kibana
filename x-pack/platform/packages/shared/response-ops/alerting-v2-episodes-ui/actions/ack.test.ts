@@ -36,6 +36,7 @@ const makeClassicEpisode = (id: string, status = 'open'): AlertEpisode =>
       ruleId: 'r1',
       workflowStatus: status,
       workflowTags: [],
+      caseIds: [],
     } as ClassicAlertActionContext,
   });
 
@@ -147,7 +148,7 @@ describe('createAckAction', () => {
     expect(onSuccess).toHaveBeenCalled();
   });
 
-  it('execute: error path calls notifications.toasts.addDanger with BULK_ERROR_TOAST', async () => {
+  it('execute: error path calls notifications.toasts.addError', async () => {
     const deps = makeDeps();
     jest.spyOn(bulk, 'bulkAckEpisodeActions').mockRejectedValue(new Error('network error'));
     const onSuccess = jest.fn();
@@ -155,7 +156,7 @@ describe('createAckAction', () => {
       episodes: [makeEpisode()],
       onSuccess,
     });
-    expect(deps.notifications.toasts.addDanger).toHaveBeenCalled();
+    expect(deps.notifications.toasts.addError).toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
   });
 });

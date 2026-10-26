@@ -403,7 +403,7 @@ evaluate.describe(
           dataset: {
             name: 'agent builder: security-find-rules-distractors',
             description:
-              'Distractor queries that touch rule-related vocabulary but should activate a different skill (alert-analysis, threat-hunting, entity-analytics, find-security-ml-jobs, detection-rule-edit, rule-management).',
+              'Distractor queries that touch rule-related vocabulary but should activate a different skill (alert-analysis, threat-hunting, entity-analytics, find-security-ml-jobs, detection-rule-edit, rule-authoring).',
             examples: [
               {
                 input: {
@@ -481,7 +481,7 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'V2 Rule Discovery',
-                  expectedSkill: 'rule-management',
+                  expectedSkill: 'rule-authoring',
                 },
               },
             ],

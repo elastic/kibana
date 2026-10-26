@@ -55,7 +55,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   const { handleEnableAndContinue, isSaving } = useEnableWorkers(
     availableWorkerIds,
     workerEnabled,
-    () => history.push('/watches'),
+    () => history.push('/'),
     onSavingChange
   );
 
@@ -101,7 +101,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
         />
         <EuiSpacer size="l" />
 
-        <ScanFailureCallout />
+        <ScanFailureCallout surface="onboarding" />
 
         {canModifyWorkers ? null : (
           <>

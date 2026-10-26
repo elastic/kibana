@@ -10,7 +10,6 @@ import { inject, injectable } from 'inversify';
 import { ALERT_EPISODE_ACTION_TYPE, type RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import { LoggerServiceToken } from '../services/logger_service/logger_service';
-import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import { getLatestAlertEventStateQuery, type LatestAlertEventState } from './queries';
@@ -100,6 +99,12 @@ export interface DirectorRunStats {
 export interface DirectorRunResult {
   readonly alertEvents: AlertEventDocument[];
   readonly stats: DirectorRunStats;
+  /**
+   * Latest persisted lifecycle state per `group_hash`, as loaded for this batch.
+   * Exposed so downstream write-policy steps can compare each enriched event
+   * against what is already persisted without a second round trip.
+   */
+  readonly previousAlertStateByGroupHash: ReadonlyMap<string, LatestAlertEventState>;
 }
 
 @injectable()
@@ -118,7 +123,11 @@ export class DirectorService {
     spaceId,
   }: RunDirectorParams): Promise<DirectorRunResult> {
     if (alertEvents.length === 0) {
-      return { alertEvents: [], stats: { newEpisodeIds: [] } };
+      return {
+        alertEvents: [],
+        stats: { newEpisodeIds: [] },
+        previousAlertStateByGroupHash: new Map(),
+      };
     }
 
     const logger = this.logger.forSubsystem('director').withLabels({
@@ -139,50 +148,35 @@ export class DirectorService {
     executionContext: ExecutionContext,
     logger: LoggerServiceContract
   ): Promise<DirectorRunResult> {
-    const scope = executionContext.createScope();
     const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
-    const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
+    const previousAlertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
       rule,
       groupHashes,
       executionContext
     );
 
-    scope.add(() => alertStateByGroupHash.clear());
+    executionContext.throwIfAborted();
 
-    try {
-      executionContext.throwIfAborted();
-
-      const newEpisodeIds: string[] = [];
-      const evaluatedAt = new Date().toISOString();
-      const processed = alertEvents.map((currentAlertEvent) => {
-        const { alertEvent, isNewEpisode } = this.getAlertEventWithNextEpisode({
-          rule,
-          currentAlertEvent,
-          previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
-          strategy,
-          evaluatedAt,
-          logger,
-        });
-
-        if (isNewEpisode && alertEvent.alert) {
-          newEpisodeIds.push(alertEvent.alert.id);
-        }
-
-        return alertEvent;
+    const newEpisodeIds: string[] = [];
+    const evaluatedAt = new Date().toISOString();
+    const processed = alertEvents.map((currentAlertEvent) => {
+      const { alertEvent, isNewEpisode } = this.getAlertEventWithNextEpisode({
+        rule,
+        currentAlertEvent,
+        previousAlertEvent: previousAlertStateByGroupHash.get(currentAlertEvent.group_hash),
+        strategy,
+        evaluatedAt,
+        logger,
       });
 
-      return { alertEvents: processed, stats: { newEpisodeIds } };
-    } finally {
-      try {
-        await scope.disposeAll();
-      } catch (error) {
-        logger.warn({
-          message: 'Failed to release alert state cache',
-          error,
-          code: ALERTING_LOG_CODES.DIRECTOR_CLEANUP_FAILED,
-        });
+      if (isNewEpisode && alertEvent.alert) {
+        newEpisodeIds.push(alertEvent.alert.id);
       }
-    }
+
+      return alertEvent;
+    });
+
+    return { alertEvents: processed, stats: { newEpisodeIds }, previousAlertStateByGroupHash };
   }
 
   private async fetchLatestAlertStateByGroupHash(

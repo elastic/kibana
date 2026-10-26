@@ -20,6 +20,7 @@ import { isThreatMatchRule } from '../../../common/detection_engine/utils';
 import { DEFAULT_TIMELINE_TITLE } from '../../timelines/components/timeline/translations';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_THREAT_MATCH_QUERY } from '../../../common/constants';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../common/detection_engine/constants';
+import { MITRE_ATTACK_FRAMEWORK } from '../../../common/detection_engine/mitre/iterate_mitre_threat_entities';
 import type { AboutStepRule, DefineStepRule, RuleStepsOrder, ScheduleStepRule } from './types';
 import { AlertSuppressionDurationType, DataSourceType, RuleStep } from './types';
 import { fillEmptySeverityMappings } from './helpers';
@@ -33,7 +34,7 @@ export const ruleStepsOrder: RuleStepsOrder = [
 
 export const threatDefault = [
   {
-    framework: 'MITRE ATT&CK',
+    framework: MITRE_ATTACK_FRAMEWORK,
     tactic: { id: 'none', name: 'none', reference: 'none' },
     technique: [],
   },

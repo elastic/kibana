@@ -25,120 +25,17 @@ describe('normalizeVegaSpec', () => {
     expect(result.data).toEqual({ url: { '%type%': 'esql', '%context%': true, query: ESQL } });
   });
 
-  it('adds the timefield binding when provided', () => {
-    const result = normalizeVegaSpec({
-      spec: { mark: 'line' },
-      esqlQuery: ESQL,
-      timefield: '@timestamp',
-    });
-
-    expect(result.data).toEqual({
-      url: { '%type%': 'esql', '%context%': true, query: ESQL, '%timefield%': '@timestamp' },
-    });
-  });
-
-  it('binds %timefield% to the source field filtered in WHERE, not a date result column', () => {
+  it('leaves the time field for Kibana to resolve, even from a bucket alias', () => {
+    // Regression (#275519): a bucket alias is a result column, not a field Kibana
+    // can filter on, so the spec must never pin it as the %timefield%.
     const timeAwareEsql =
-      'FROM logs-* | WHERE event.created >= ?_tstart AND event.created < ?_tend | STATS count = COUNT()';
-
-    const result = normalizeVegaSpec({
-      spec: { mark: 'line' },
-      esqlQuery: timeAwareEsql,
-      // A stale/aliased date result column must NOT win over the real WHERE field.
-      columns: [
-        { name: 'Date', type: 'date' },
-        { name: 'count', type: 'long' },
-      ],
-    });
-
-    expect(result.data).toEqual({
-      url: {
-        '%type%': 'esql',
-        '%context%': true,
-        query: timeAwareEsql,
-        '%timefield%': 'event.created',
-      },
-    });
-  });
-
-  it('binds %timefield% to the bucketed source field, not the bucket alias column', () => {
-    // Regression: a time-series query buckets `@timestamp` under an alias (`Date`).
-    // The alias is a result column, not a filterable index field, so it must not
-    // become the %timefield%; the raw `@timestamp` source field must.
-    const timeSeriesEsql =
       'FROM logs-* | STATS count = COUNT() BY Date = BUCKET(@timestamp, 75, ?_tstart, ?_tend)';
 
-    const result = normalizeVegaSpec({
-      spec: { mark: 'line' },
-      esqlQuery: timeSeriesEsql,
-      columns: [
-        { name: 'Date', type: 'date' },
-        { name: 'count', type: 'long' },
-      ],
-    });
+    const result = normalizeVegaSpec({ spec: { mark: 'line' }, esqlQuery: timeAwareEsql });
 
     expect(result.data).toEqual({
-      url: {
-        '%type%': 'esql',
-        '%context%': true,
-        query: timeSeriesEsql,
-        '%timefield%': '@timestamp',
-      },
+      url: { '%type%': 'esql', '%context%': true, query: timeAwareEsql },
     });
-  });
-
-  it('falls back to a date result column only when no source field is in the query', () => {
-    // Time-aware via TBUCKET, which takes no field argument, so nothing to extract.
-    const tbucketEsql =
-      'TS metrics-* | STATS count = COUNT() BY bucket = TBUCKET(75, ?_tstart, ?_tend)';
-
-    const result = normalizeVegaSpec({
-      spec: { mark: 'line' },
-      esqlQuery: tbucketEsql,
-      columns: [
-        { name: 'created_at', type: 'date_nanos' },
-        { name: 'count', type: 'long' },
-      ],
-    });
-
-    expect(result.data).toEqual({
-      url: { '%type%': 'esql', '%context%': true, query: tbucketEsql, '%timefield%': 'created_at' },
-    });
-  });
-
-  it('defaults %timefield% to @timestamp when no source field or date column is available', () => {
-    // Time-aware (TBUCKET binds the params) but no field to extract and no date
-    // result column, so the conservative @timestamp default is used.
-    const timeAwareEsql =
-      'TS metrics-* | STATS count = COUNT() BY bucket = TBUCKET(75, ?_tstart, ?_tend)';
-
-    const result = normalizeVegaSpec({
-      spec: { mark: 'bar' },
-      esqlQuery: timeAwareEsql,
-      columns: [
-        { name: 'count', type: 'long' },
-        { name: 'bucket', type: 'integer' },
-      ],
-    });
-
-    expect(result.data).toEqual({
-      url: {
-        '%type%': 'esql',
-        '%context%': true,
-        query: timeAwareEsql,
-        '%timefield%': '@timestamp',
-      },
-    });
-  });
-
-  it('does not add %timefield% when the query is not time-aware', () => {
-    const result = normalizeVegaSpec({
-      spec: { mark: 'bar' },
-      esqlQuery: ESQL,
-      columns: [{ name: 'status', type: 'keyword' }],
-    });
-
-    expect(result.data).toEqual({ url: { '%type%': 'esql', '%context%': true, query: ESQL } });
   });
 
   it('replaces any data source the model may have authored', () => {

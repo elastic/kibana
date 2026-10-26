@@ -41,7 +41,7 @@ describe('THREAT_INTEL_INGEST_FEEDS_WORKFLOW yaml', () => {
   });
 
   // Not "-global": a space literally named "global" running the pre-space-aware
-  // version of this workflow would collide with a real global install's key.
+  // version of this workflow would collide with the key of the single shared install.
   it('uses a concurrency key with no space or "global" suffix', () => {
     expect(THREAT_INTEL_INGEST_FEEDS_WORKFLOW.yaml).toContain('key: "threat-intel-ingest"');
   });
@@ -49,7 +49,7 @@ describe('THREAT_INTEL_INGEST_FEEDS_WORKFLOW yaml', () => {
   // Load-bearing invariant: a disabled source must cause no fetch. The only source
   // enumeration the workflow does is `load_sources`, and every fetch runs inside the
   // foreach over its hits — so filtering `enabled: true` here is what keeps a disabled
-  // AWS or FortiGuard pack from ever being requested. Enablement is per-document, so this
+  // source from ever being requested. Enablement is per-document, so this
   // also means enabling one source never enables another.
   it('loads only enabled sources', () => {
     const step = findStepByName(workflow.steps, 'load_sources') as {
@@ -65,7 +65,7 @@ describe('THREAT_INTEL_INGEST_FEEDS_WORKFLOW yaml', () => {
   });
 
   // Load-bearing for future space-owned sources: this workflow is installed once,
-  // globally. A `space_id` filter here (even one that accepted the current space
+  // in the default space. A `space_id` filter here (even one that accepted the current space
   // plus `*`) would silently exclude a source owned by any other real space,
   // because there is only ever one instance of this workflow and it has no "current
   // space" of its own. `enabled` is deliberately the only gate.

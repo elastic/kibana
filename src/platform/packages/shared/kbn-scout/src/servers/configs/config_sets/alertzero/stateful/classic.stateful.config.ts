@@ -30,6 +30,13 @@ export const servers: ScoutServerConfig = {
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
+      // Already the traditional default; pinned so a local override cannot refuse the service
+      // account the Hunt Watch specs create.
+      '--xpack.security.serviceAccounts.enabled=true',
+      // Stateful Scout defaults restrictInternalApis=false. Pin true so authz specs can assert
+      // that hunt/TI internal routes reject requests that omit x-elastic-internal-origin.
+      // Applies to every suite on this config set, including agentic_investigations.
+      '--server.restrictInternalApis=true',
     ],
   },
 };

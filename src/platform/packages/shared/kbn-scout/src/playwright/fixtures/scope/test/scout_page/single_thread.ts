@@ -137,8 +137,11 @@ export function extendPlaywrightPage({
   // Extend page with EUI Component Object factories ('@elastic/eui-test-helpers')
   extendedPage.components = extendPageWithComponents(page);
   // Method to navigate to specific Kibana apps
-  extendedPage.gotoApp = (appName: string, pathOptions?: PathOptions) =>
-    page.goto(kbnUrl.app(appName, { pathOptions }));
+  extendedPage.gotoApp = (
+    appName: string,
+    pathOptions?: PathOptions,
+    options?: Parameters<Page['goto']>[1]
+  ) => page.goto(kbnUrl.app(appName, { pathOptions }), options);
   // Method to press a key until an element with the provided selector is in focus.
   extendedPage.keyTo = async (
     selector: string,

@@ -71,6 +71,7 @@ export const testMobileKPIAttr = {
       valueLabels: 'hide',
       fittingFunction: 'Linear',
       curveType: 'CURVE_MONOTONE_X',
+      areaFill: 'solid',
       axisTitlesVisibilitySettings: { x: false, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: false, yLeft: true, yRight: true },
