@@ -36,6 +36,8 @@ xpack.features.overrides:
   contextEngine.category: 'observability'
   ### Agentic investigations should be moved from Analytics category to the Observability one.
   agenticInvestigations.category: 'observability'
+  ### Proposed Actions should match Agentic Investigations (avoid orphan Kibana category).
+  proposals.category: 'observability'
   ### Both features only do something on projects onboarded to the Nightshift private preview, so
   ### Role management flags them until Nightshift is generally available.
   agenticInvestigations.description: 'Technical preview. Requires the Nightshift private preview to be enabled on this project.'
