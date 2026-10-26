@@ -175,6 +175,7 @@ export function SharedSettingsSection({
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
+            display="rowCompressed"
             label={i18n.translate('xpack.ingestHub.integrationSettings.section.name.label', {
               defaultMessage: 'Integration name',
             })}
@@ -183,6 +184,7 @@ export function SharedSettingsSection({
           >
             <EuiFieldText
               fullWidth
+              compressed
               value={integrationName}
               maxLength={MAX_INTEGRATION_NAME_LENGTH + 1}
               onChange={(e) => {
@@ -207,6 +209,7 @@ export function SharedSettingsSection({
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
+            display="rowCompressed"
             label={i18n.translate('xpack.ingestHub.integrationSettings.section.description.label', {
               defaultMessage: 'Description',
             })}
@@ -225,6 +228,7 @@ export function SharedSettingsSection({
           >
             <EuiFieldText
               fullWidth
+              compressed
               value={description}
               maxLength={MAX_DESCRIPTION_LENGTH + 1}
               onChange={(e) => {

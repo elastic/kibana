@@ -30,6 +30,7 @@ interface InstanceNamespaceFieldProps {
   /** Extra note under the field, e.g. what a change means for services that are already deployed. */
   note?: string;
   fullWidth?: boolean;
+  compressed?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -38,6 +39,7 @@ export const InstanceNamespaceField = ({
   onChange,
   note,
   fullWidth = false,
+  compressed = false,
   'data-test-subj': dataTestSubj = 'serviceSettings-namespaceField',
 }: InstanceNamespaceFieldProps) => {
   const { services } = useKibana<CoreStart>();
@@ -53,6 +55,7 @@ export const InstanceNamespaceField = ({
         docLinks={services.docLinks}
         onNamespaceChange={onChange}
         fullWidth={fullWidth}
+        compressed={compressed}
         helpTextAsTooltip
         data-test-subj={dataTestSubj}
       />

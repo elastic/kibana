@@ -30,6 +30,8 @@ interface NamespaceFormRowProps {
   helpTextId?: string;
   /** Shows the help text as a tooltip on an info icon next to the label, instead of under the field. */
   helpTextAsTooltip?: boolean;
+  /** Renders the field in the compact size. */
+  compressed?: boolean;
 }
 
 export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
@@ -43,6 +45,7 @@ export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
   'data-test-subj': dataTestSubj = 'packagePolicyNamespaceInput',
   fullWidth = false,
   helpTextAsTooltip = false,
+  compressed = false,
 }) => {
   const getHelpText = () => {
     if (isEditPage && packageType === 'input') {
@@ -90,6 +93,7 @@ export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
   return (
     <EuiFormRow
       fullWidth={fullWidth}
+      display={compressed ? 'rowCompressed' : 'row'}
       isInvalid={!!validationError}
       error={validationError}
       label={
@@ -118,6 +122,7 @@ export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
       <EuiComboBox
         isInvalid={!!validationError}
         fullWidth={fullWidth}
+        compressed={compressed}
         data-test-subj={dataTestSubj}
         noSuggestions
         placeholder={placeholder}

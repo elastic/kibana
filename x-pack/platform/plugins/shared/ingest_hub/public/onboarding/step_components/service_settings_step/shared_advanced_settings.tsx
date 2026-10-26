@@ -32,6 +32,7 @@ export function SharedAdvancedSettings({
       <EuiFlexItem>
         <InstanceNamespaceField
           fullWidth
+          compressed
           namespace={namespace}
           onChange={onNamespaceChange}
           note={
