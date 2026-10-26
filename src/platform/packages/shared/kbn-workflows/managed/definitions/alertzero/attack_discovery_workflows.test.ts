@@ -2467,21 +2467,17 @@ describe('Attack Discovery worker chain', () => {
 
   describe('the Investigation journal helper', () => {
     const append = stepIn(journalNoteSteps, 'append_note');
-    const request = append?.with as { body?: { trigger_mode?: string }; path?: string } | undefined;
 
-    it('POSTs the chat converse route, not the agent_builder converse route', () => {
-      expect(request?.path).toContain('/api/chat/converse');
+    it('persists a user_message without running the agent, named after the calling Worker', () => {
+      expect(append?.type).toBe('ai.conversation.add_user_message');
+      expect(append?.with).toEqual({
+        conversation_id: '{{ inputs.conversation_id }}',
+        message: '{{ inputs.message }}',
+        author_name: '{{ inputs.author_name | default: workflow.name }}',
+      });
     });
 
-    it('prefixes the converse path with the executing space', () => {
-      expect(request?.path).toContain('/s/{{ workflow.spaceId }}/');
-    });
-
-    it('persists a user_message without running the agent', () => {
-      expect(request?.body?.trigger_mode).toBe('never');
-    });
-
-    it('continues when the converse call fails', () => {
+    it('continues when the note fails', () => {
       expect(append?.['on-failure']?.continue).toBe(true);
     });
 
@@ -2618,6 +2614,42 @@ describe('Attack Discovery worker chain', () => {
 
     it('fails the handoff after journaling the KI error', () => {
       expect(stepIn(fallback, 'fail_handoff')?.type).toBe('workflow.fail');
+    });
+
+    // The step error is an object. Interpolating it stringifies to "[object Object]";
+    // the gate stores this rendered message as the proposal's previousExecutionError.
+    it('renders the knowledge indicator error message on the proposal failure', () => {
+      const cause =
+        'action [indices:admin/auto_create] is unauthorized for user [editor] on indices [ai-index-idx-security-investigations]';
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+        String(stepIn(fallback, 'fail_handoff')?.with?.message),
+        {
+          steps: {
+            write_analyze_endpoint_ki: {
+              error: { type: 'security_exception', message: cause },
+            },
+          },
+        }
+      );
+
+      expect(rendered).toBe(`Forensics handoff failed: knowledge indicator write failed. ${cause}`);
+    });
+
+    it('renders the same knowledge indicator error message in the journal note', () => {
+      const cause =
+        'action [indices:admin/auto_create] is unauthorized for user [editor] on indices [ai-index-idx-security-investigations]';
+      const inputs = stepIn(fallback, 'journal_handoff_failed')?.with?.inputs as
+        | { message?: string }
+        | undefined;
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(String(inputs?.message), {
+        steps: {
+          write_analyze_endpoint_ki: {
+            error: { type: 'security_exception', message: cause },
+          },
+        },
+      });
+
+      expect(rendered).toBe(`Forensics handoff failed: knowledge indicator write failed. ${cause}`);
     });
   });
 
