@@ -216,10 +216,10 @@ export type DashboardApi = CanExpandPanels &
       attributes: DashboardState;
     };
     /**
-     * Whether two dashboard states are equal under the unsaved-changes comparators, comparing each
-     * panel with the comparator of this dashboard's panel with the same id.
+     * The changes from `baseline` to `current`, computed like unsaved changes but for any two
+     * states. Each panel is compared by this dashboard's panel with the same id. Empty when equal.
      */
-    areStatesEqual: (baseline: DashboardState, current: DashboardState) => boolean;
+    diffStates: (baseline: DashboardState, current: DashboardState) => Partial<DashboardState>;
     getDashboardPanelFromId: (id: string) => {
       type: string;
       grid?: GridData;

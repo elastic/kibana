@@ -22,7 +22,7 @@ import type { DashboardReadResponseBody } from '../../server';
 import { initializeAccessControlManager } from './access_control_manager';
 import { initializeApproximationManager } from './approximation_manager';
 import { initializeChangeSourceTracker, type LatestChangeBySource } from './change_source_tracker';
-import { dashboardStatesMatch } from './compare_dashboard_state';
+import { diffDashboardStates } from './compare_dashboard_state';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { initializeESQLVariablesManager } from './esql_variables_manager';
@@ -309,8 +309,8 @@ export function getDashboardApi({
     getSerializedState: () => ({
       attributes: getState(),
     }),
-    areStatesEqual: (baseline: DashboardState, current: DashboardState) =>
-      dashboardStatesMatch(baseline, current, layoutManager.api.children$.getValue()),
+    diffStates: (baseline: DashboardState, current: DashboardState) =>
+      diffDashboardStates(baseline, current, layoutManager.api.children$.getValue()),
     setState,
     runInteractiveSave: (redirectTo?: DashboardRedirect) => {
       trackOverlayApi.clearOverlays();

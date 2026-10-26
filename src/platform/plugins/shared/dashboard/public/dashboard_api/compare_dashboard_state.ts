@@ -8,21 +8,24 @@
  */
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { apiComparesSerializedState, areComparatorsEqual } from '@kbn/presentation-publishing';
+import { apiComparesSerializedState, diffComparators } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
-import { areLayoutsEqual } from './layout_manager/are_layouts_equal';
+import {
+  arePanelLayoutsEqual,
+  arePinnedPanelLayoutsEqual,
+} from './layout_manager/are_layouts_equal';
 import { deserializeLayout } from './layout_manager/deserialize_layout';
 import { approximationComparators } from './approximation_manager';
 import { getProjectRoutingComparators } from './project_routing_manager';
-import { dashboardSettingsMatch } from './settings_manager';
+import { diffDashboardSettings } from './settings_manager';
 import { getUnifiedSearchComparators } from './unified_search_manager';
 
-// time restore and project routing restore are settings, compared on their own by the settings check
-const otherStateMatches = (baseline: DashboardState, current: DashboardState): boolean => {
+// time restore and project routing restore are settings, diffed on their own by the settings diff
+const diffOtherState = (baseline: DashboardState, current: DashboardState) => {
   const timeRestore = Boolean(baseline.time_range) || Boolean(current.time_range);
   const projectRoutingRestore =
     Boolean(baseline.project_routing) || Boolean(current.project_routing);
-  return areComparatorsEqual<
+  return diffComparators<
     Pick<
       DashboardState,
       | 'filters'
@@ -43,44 +46,46 @@ const otherStateMatches = (baseline: DashboardState, current: DashboardState): b
   );
 };
 
-const layoutMatches = (
+const diffLayout = (
   baseline: DashboardState,
   current: DashboardState,
   children?: { [id: string]: unknown }
-): boolean => {
+): Partial<Pick<DashboardState, 'panels' | 'pinned_panels'>> => {
   const baselineLayout = deserializeLayout(baseline.panels, baseline.pinned_panels);
   const currentLayout = deserializeLayout(current.panels, current.pinned_panels);
-  if (!areLayoutsEqual(baselineLayout.layout, currentLayout.layout)) {
-    return false;
-  }
 
-  const panelIds = new Set([
-    ...Object.keys(baselineLayout.childState),
-    ...Object.keys(currentLayout.childState),
-  ]);
-  for (const panelId of panelIds) {
+  const panelChanged = (panelId: string) => {
     const baselinePanel = baselineLayout.childState[panelId];
     const currentPanel = currentLayout.childState[panelId];
     const child = children?.[panelId];
-    const panelsMatch = apiComparesSerializedState(child)
-      ? child.compareSerializedState(baselinePanel, currentPanel)
-      : deepEqual(baselinePanel, currentPanel);
-    if (!panelsMatch) {
-      return false;
-    }
-  }
-  return true;
+    return apiComparesSerializedState(child)
+      ? !child.compareSerializedState(baselinePanel, currentPanel)
+      : !deepEqual(baselinePanel, currentPanel);
+  };
+
+  const hasPanelChanges =
+    !arePanelLayoutsEqual(baselineLayout.layout, currentLayout.layout) ||
+    Object.keys(currentLayout.layout.panels).some(panelChanged);
+  const hasPinnedPanelChanges =
+    !arePinnedPanelLayoutsEqual(baselineLayout.layout, currentLayout.layout) ||
+    Object.keys(currentLayout.layout.pinnedPanels).some(panelChanged);
+
+  return {
+    ...(hasPanelChanges && { panels: current.panels ?? [] }),
+    ...(hasPinnedPanelChanges && { pinned_panels: current.pinned_panels ?? [] }),
+  };
 };
 
 /**
- * Whether two dashboard states are equal under the unsaved-changes comparators.
- * Pass the open dashboard's children so each panel uses its own comparators.
+ * The changes from `baseline` to `current`, in the same shape the unsaved-changes manager
+ * produces. Pass the open dashboard's children so each panel uses its own comparators.
  */
-export const dashboardStatesMatch = (
+export const diffDashboardStates = (
   baseline: DashboardState,
   current: DashboardState,
   children?: { [id: string]: unknown }
-): boolean =>
-  dashboardSettingsMatch(baseline, current) &&
-  otherStateMatches(baseline, current) &&
-  layoutMatches(baseline, current, children);
+): Partial<DashboardState> => ({
+  ...diffDashboardSettings(baseline, current),
+  ...diffOtherState(baseline, current),
+  ...diffLayout(baseline, current, children),
+});
