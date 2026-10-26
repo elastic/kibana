@@ -48,6 +48,9 @@ const ALERT_FIELDS = {
   status: 'kibana.alert.workflow_status',
   tags: 'kibana.alert.workflow_tags',
   timestamp: '@timestamp',
+  nameOverride: 'kibana.alert.rule.rule_name_override',
+  defendRuleId: 'rule.id',
+  eventCode: 'event.code',
 } as const;
 
 const readField = (source: Record<string, unknown>, field: string): unknown => {
@@ -71,10 +74,14 @@ interface AlertHit {
 const toTriageAlert = ({ _id, _source = {} }: AlertHit): TriageAlert => {
   const tags = readField(_source, ALERT_FIELDS.tags);
   const timestamp = readField(_source, ALERT_FIELDS.timestamp);
+  const detection = readField(_source, ALERT_FIELDS.nameOverride)
+    ? readField(_source, ALERT_FIELDS.defendRuleId) || readField(_source, ALERT_FIELDS.eventCode)
+    : undefined;
   return {
     id: _id,
     ruleId: String(readField(_source, ALERT_FIELDS.ruleId) ?? ''),
     ruleName: String(readField(_source, ALERT_FIELDS.ruleName) ?? ''),
+    ...(detection ? { detection: String(detection) } : {}),
     riskScore: Number(readField(_source, ALERT_FIELDS.riskScore) ?? 0),
     timestamp: typeof timestamp === 'number' ? timestamp : Date.parse(String(timestamp)) || 0,
     status: String(readField(_source, ALERT_FIELDS.status) ?? ''),

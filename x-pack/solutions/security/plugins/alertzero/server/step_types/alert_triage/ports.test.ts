@@ -179,6 +179,40 @@ describe('fetchTriageAlerts', () => {
     };
   };
 
+  describe('detection of a rule that overrides the alert name', () => {
+    const overridden = (source: Record<string, unknown>) => ({
+      _id: 'd1',
+      _source: {
+        ...hit('d1', 'endpoint-rule', 50)._source,
+        'kibana.alert.rule.rule_name_override': 'message',
+        ...source,
+      },
+    });
+    const detectionOf = async (alertHit: unknown) =>
+      (await fetchWith([{ hits: [alertHit] }]).run())[0].detection;
+
+    it('is the Defend rule.id', async () => {
+      expect(await detectionOf(overridden({ 'rule.id': 'def-1', 'event.code': 'malware' }))).toBe(
+        'def-1'
+      );
+    });
+
+    it('falls back to event.code when rule.id is missing', async () => {
+      expect(await detectionOf(overridden({ 'event.code': 'shellcode_thread' }))).toBe(
+        'shellcode_thread'
+      );
+    });
+
+    it('is absent for a rule without a name override, whatever the event carries', async () => {
+      expect(
+        await detectionOf({
+          ...hit('d1', 'r', 1),
+          _source: { ...hit('d1', 'r', 1)._source, 'rule.id': 'x' },
+        })
+      ).toBeUndefined();
+    });
+  });
+
   // One rule with a large backlog used to fill the single global top-10,000 result, so quieter
   // rules never reached the planner and its fair split had nothing to share out.
   it('reads the most urgent alerts of each rule, not one global top list', async () => {
