@@ -116,110 +116,6 @@ describe('floor_alert_triage_batch — compute_fp_candidates', () => {
 });
 
 // ---------------------------------------------------------------------------
-// compute_fp_entities / build_fp_entity_summary — the title suffix naming the hosts and users
-// behind the candidates, so proposals in the queue can be told apart.
-// ---------------------------------------------------------------------------
-
-interface EntityVerdict {
-  classification: string;
-  confidence_score: number;
-  host_name: string;
-  user_name: string;
-}
-
-const fpVerdict = (host: string, user: string, overrides: Partial<EntityVerdict> = {}) => ({
-  classification: 'false_positive',
-  confidence_score: 0.9,
-  host_name: host,
-  user_name: user,
-  ...overrides,
-});
-
-const MISSING = '__missing__';
-
-const summarizeEntities = (verdicts: EntityVerdict[], confidenceFloor = 0.85): string => {
-  const fpThresholdExpr = renderString(fpThresholdExprTemplate, {
-    inputs: { confidence_floor: confidenceFloor },
-  }).trim();
-  const entitiesStep = stepByName('compute_fp_entities')?.with as Record<string, string>;
-  const context = {
-    steps: { classify_alerts: { output: { verdicts } } },
-    variables: { fp_threshold_expr: fpThresholdExpr } as Record<string, unknown>,
-  };
-  context.variables.fp_hosts = evalExpr(entitiesStep.fp_hosts, context);
-  context.variables.fp_users = evalExpr(entitiesStep.fp_users, context);
-  const summaryStep = stepByName('build_fp_entity_summary')?.with as Record<string, string>;
-  return renderString(summaryStep.fp_entity_summary, context).trim();
-};
-
-const hostsNamed = (count: number) =>
-  Array.from({ length: count }, (_, i) => fpVerdict(`host-${i + 1}`, MISSING));
-
-describe('floor_alert_triage_batch — fp entity summary', () => {
-  it('names a single host', () => {
-    expect(summarizeEntities([fpVerdict('build-agent-01', MISSING)])).toBe('on build-agent-01');
-  });
-
-  it('counts each host once however many of its alerts are candidates', () => {
-    expect(
-      summarizeEntities([
-        fpVerdict('build-agent-01', MISSING),
-        fpVerdict('build-agent-01', MISSING),
-        fpVerdict('build-agent-02', MISSING),
-      ])
-    ).toBe('on build-agent-01, build-agent-02');
-  });
-
-  it('lists the first two hosts and counts the rest, up to five hosts', () => {
-    expect(summarizeEntities(hostsNamed(3))).toBe('on host-1, host-2 +1');
-    expect(summarizeEntities(hostsNamed(5))).toBe('on host-1, host-2 +3');
-  });
-
-  it('collapses to a count above five hosts', () => {
-    expect(summarizeEntities(hostsNamed(6))).toBe('on 6 hosts');
-    expect(summarizeEntities(hostsNamed(37))).toBe('on 37 hosts');
-  });
-
-  it('says "for" and names the users when no candidate has a host', () => {
-    expect(summarizeEntities([fpVerdict(MISSING, 'svc-backup'), fpVerdict(MISSING, 'jdoe')])).toBe(
-      'for svc-backup, jdoe'
-    );
-  });
-
-  it('puts the user after the host in parentheses', () => {
-    expect(summarizeEntities([fpVerdict('DC-01', 'svc-backup')])).toBe('on DC-01 (svc-backup)');
-  });
-
-  it('applies the cap to hosts and users independently', () => {
-    const verdicts = [
-      ...hostsNamed(2),
-      ...['u1', 'u2', 'u3'].map((user) => fpVerdict(MISSING, user)),
-    ];
-    expect(summarizeEntities(verdicts)).toBe('on host-1, host-2 (u1, u2 +1)');
-  });
-
-  it('is empty when no candidate has a host or user, leaving the title unchanged', () => {
-    expect(summarizeEntities([fpVerdict(MISSING, MISSING)])).toBe('');
-  });
-
-  it('never names an entity whose alert is not a candidate', () => {
-    expect(
-      summarizeEntities([
-        fpVerdict('closing-host', MISSING),
-        fpVerdict('below-floor-host', MISSING, { confidence_score: 0.5 }),
-        fpVerdict('tp-host', MISSING, { classification: 'true_positive' }),
-        fpVerdict('inconclusive-host', MISSING, { classification: 'inconclusive' }),
-      ])
-    ).toBe('on closing-host');
-  });
-
-  it('shortens a very long name so one hostname cannot stretch the title', () => {
-    const summary = summarizeEntities([fpVerdict('h'.repeat(300), MISSING)]);
-    expect(summary.length).toBeLessThan(60);
-  });
-});
-
-// ---------------------------------------------------------------------------
 // post_comment_triage_started — alert IDs and feature routing
 // ---------------------------------------------------------------------------
 
@@ -819,6 +715,7 @@ describe('floor_alert_triage_batch — add_verdict_notes', () => {
       workflow: { spaceId: 'default' },
       execution: { url: 'https://kibana.example.com/app/exec/1' },
       steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
+      variables: { group_mints: [], group_joins: [], mint_conversation_ids: [] },
       foreach: {
         item: {
           classification: 'false_positive',
@@ -841,6 +738,46 @@ describe('floor_alert_triage_batch — add_verdict_notes', () => {
 
   it('omits the contributing factors heading when there are none', () => {
     expect(renderNote([])).not.toContain('Contributing factors');
+  });
+
+  // The note sits on the alert, so its link must lead to the Investigation the alert ended up in.
+  describe('the Investigation the note links to', () => {
+    const noteFor = (alertId: string): string =>
+      renderString(noteTemplate, {
+        workflow: { spaceId: 'default' },
+        execution: { url: 'https://kibana.example.com/app/exec/1' },
+        steps: { create_investigation: { output: { conversation_id: 'conv-batch' } } },
+        variables: {
+          group_mints: [{ alert_ids: ['a1', 'a2'] }, { alert_ids: ['b1'] }],
+          mint_conversation_ids: ['conv-mint-0', 'conv-mint-1'],
+          group_joins: [{ alert_ids: ['c1'], conversation_id: 'conv-owner' }],
+        },
+        foreach: {
+          item: {
+            alert_id: alertId,
+            classification: 'false_positive',
+            confidence_score: 0.9,
+            rationale: 'Known.',
+            contributing_factors: [],
+          },
+        },
+      });
+
+    it.each([
+      ['a2', 'conv-mint-0'],
+      ['b1', 'conv-mint-1'],
+      ['c1', 'conv-owner'],
+      ['tp-1', 'conv-batch'],
+    ])('links the note of alert %s to %s', (alertId, conversation) => {
+      expect(noteFor(alertId)).toContain(`/conversations/${conversation})`);
+    });
+
+    it('builds the retry note with the same link', () => {
+      const retryTemplate = (
+        stepByName('retry_verdict_note')?.with?.body as { note: { note: string } }
+      ).note.note;
+      expect(retryTemplate).toBe(noteTemplate);
+    });
   });
 
   it('tells the sub-workflow it is called by the Worker, which suppresses its own note', () => {
@@ -1011,7 +948,7 @@ describe('floor_alert_triage_batch — add_verdict_notes', () => {
         expect(names.indexOf('retry_failed_verdict_notes')).toBeGreaterThan(
           names.indexOf('add_verdict_notes')
         );
-        expect(names.indexOf('gate_fp_close')).toBeGreaterThan(
+        expect(names.indexOf('start_reviews')).toBeGreaterThan(
           names.indexOf('retry_failed_verdict_notes')
         );
       });
@@ -1039,10 +976,13 @@ describe('floor_alert_triage_batch — ai.conversation.metadata.patch failure ha
   const patchSteps = allSteps.filter((step) => step.type === 'ai.conversation.metadata.patch');
 
   it('finds every conversation-close step this workflow defines', () => {
-    expect(patchSteps.map((step) => step.name).sort()).toEqual(['close_no_fp']);
+    expect(patchSteps.map((step) => step.name).sort()).toEqual([
+      'close_batch_investigation',
+      'close_no_fp',
+    ]);
   });
 
-  it.each(['close_no_fp'])(
+  it.each(['close_no_fp', 'close_batch_investigation'])(
     '"%s" survives a patch failure via fallback + continue, so the step after it still runs',
     (name) => {
       const step = stepByName(name);
@@ -1055,9 +995,9 @@ describe('floor_alert_triage_batch — ai.conversation.metadata.patch failure ha
 // ---------------------------------------------------------------------------
 // Closure review hand-off
 //
-// The closure proposal waits for an analyst, so it lives in its own workflow started with
-// `workflow.executeAsync`. This run must not wait for it, must start it only after the tags and
-// notes exist.
+// Each new closure proposal waits for an analyst, so it lives in its own workflow started with
+// `workflow.executeAsync`, one per proposal and each in its own Investigation. This run must not
+// wait for them, and must start them only after the tags and notes exist.
 // ---------------------------------------------------------------------------
 describe('floor_alert_triage_batch — closure review hand-off', () => {
   const stepIndex = (name: string) => parsed.steps.findIndex((step) => step.name === name);
@@ -1071,17 +1011,21 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     expect(stepByName('start_fp_review')?.type).toBe('workflow.executeAsync');
   });
 
-  it('starts the review after every alert has its az: tag and its note', () => {
-    const gate = stepIndex('gate_fp_close');
-    AZ_TAG_STEPS.forEach((name) => expect(gate).toBeGreaterThan(stepIndex(name)));
-    expect(gate).toBeGreaterThan(stepIndex('add_verdict_notes'));
+  it('starts the reviews after every alert has its az: tag and its note', () => {
+    const start = stepIndex('start_reviews');
+    AZ_TAG_STEPS.forEach((name) => expect(start).toBeGreaterThan(stepIndex(name)));
+    expect(start).toBeGreaterThan(stepIndex('add_verdict_notes'));
   });
 
-  it('only starts a review when there is something to close', () => {
-    expect(stepByName('gate_fp_close')?.condition).toBe('${{ variables.fp_candidate_count > 0 }}');
-    expect(stepByName('gate_fp_close')?.steps?.map((step) => step.name)).toContain(
-      'start_fp_review'
-    );
+  it('starts one review for each new proposal, and none when there is nothing to close', () => {
+    const loop = stepByName('start_reviews');
+    expect(loop?.type).toBe('foreach');
+    expect(loop?.foreach).toBe('${{ variables.group_mints | json }}');
+    expect(loop?.steps?.map((step) => step.name)).toContain('start_fp_review');
+    // No grouping step runs without candidates, so the list stays empty.
+    expect(
+      evalExpr('${{ variables.group_mints | json }}', { variables: { group_mints: [] } })
+    ).toBe('[]');
   });
 
   it('hands the review everything it needs and resolves the autonomy mapping itself', () => {
@@ -1091,12 +1035,14 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     expect(Object.keys(inputs).sort()).toEqual(
       [
         'autonomy',
+        'comment',
         'conversation_id',
         'confidence_floor',
-        'entity_summary',
         'fp_candidate_ids',
+        'proposal_id',
         'rule_id',
         'rule_name',
+        'title',
       ].sort()
     );
 
@@ -1107,32 +1053,58 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
         autonomy: 'supervised',
         confidence_floor: 0.9,
       },
-      steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
-      variables: { fp_candidate_ids: ['a', 'b'], fp_entity_summary: 'on host-1' },
+      steps: {
+        start_reviews: {
+          index: 1,
+          item: {
+            alert_ids: ['a', 'b'],
+            title: 'Close 2 alerts',
+            comment: 'Why.',
+            proposal_id: 'p-1',
+          },
+        },
+      },
+      variables: { mint_conversation_ids: ['conv-0', 'conv-1'] },
     };
     expect(renderString(inputs.rule_id, context)).toBe('rule-1');
+    // Each proposal gets its own Investigation: the one at the proposal's position.
     expect(renderString(inputs.conversation_id, context)).toBe('conv-1');
     expect(renderString(inputs.autonomy, context)).toBe('supervised');
-    expect(renderString(inputs.entity_summary, context)).toBe('on host-1');
+    expect(renderString(inputs.title, context)).toBe('Close 2 alerts');
+    expect(renderString(inputs.proposal_id, context)).toBe('p-1');
     expect(evalExpr(inputs.fp_candidate_ids, context)).toEqual(['a', 'b']);
     expect(evalExpr(inputs.confidence_floor, context)).toBe(0.9);
   });
 
-  it('fails the run, after saying so, when the review cannot be started at all', () => {
-    const fallback = stepByName('start_fp_review')?.['on-failure']?.fallback ?? [];
-    expect(fallback.map((step) => step.name)).toEqual([
+  // One review that cannot start must not strand the alerts of the proposals after it.
+  it('tries every review, then fails the run once for those that could not start', () => {
+    const start = stepByName('start_fp_review');
+    expect(start?.['on-failure']?.fallback?.map((step) => step.name)).toEqual([
       'retag_review_not_started',
       'post_comment_review_not_started',
     ]);
-    expect(stepByName('start_fp_review')?.['on-failure']?.continue).toBeUndefined();
+    expect(start?.['on-failure']?.continue).toBe(true);
+
+    const abort = stepByName('abort_review_failed');
+    expect(abort?.type).toBe('workflow.fail');
+    expect(abort?.if).toBe('${{ variables.failed_review_count > 0 }}');
+    // Before the run report, which a failed run does not send, as before.
+    expect(stepIndex('abort_review_failed')).toBe(stepIndex('report_worker_run_completed') - 1);
+    expect(
+      evalExpr(stepByName('count_failed_review')?.with?.failed_review_count as string, {
+        variables: { failed_review_count: 1 },
+      })
+    ).toBe(2);
   });
 
   // Nobody revisits an alert left as az:false_positive, so a review that never ran must not leave one.
   it.each(['retag_review_not_started', 'retag_review_failed'])(
-    '"%s" moves every candidate from az:false_positive to az:inconclusive and keeps az:model_fp',
+    '"%s" moves every alert of the proposal from az:false_positive to az:inconclusive and keeps az:model_fp',
     (name) => {
       const call = stepByName(name)?.steps?.[0];
-      expect(stepByName(name)?.foreach).toContain('variables.fp_candidate_ids | chunk: 500');
+      expect(stepByName(name)?.foreach).toContain(
+        'steps.start_reviews.item.alert_ids | chunk: 500'
+      );
       expect(call?.with?.tags).toEqual({
         tags_to_remove: ['az:false_positive'],
         tags_to_add: ['az:inconclusive'],
@@ -1141,11 +1113,27 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     }
   );
 
+  it('re-tags the candidates, and fails the run, when the alerts cannot be grouped into proposals', () => {
+    const group = stepByName('group_fp_candidates_call');
+    expect(group?.type).toBe('alertzero.triage.groupFpCandidates');
+    expect(group?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+    // `fallback` without `continue` re-throws, which fails the run.
+    expect(group?.['on-failure']?.continue).toBeUndefined();
+    const retag = group?.['on-failure']?.fallback?.find(
+      ({ name }) => name === 'retag_grouping_failed'
+    );
+    expect(retag?.foreach).toContain('variables.fp_candidate_ids | chunk: 500');
+    expect(retag?.steps?.[0].with?.tags).toEqual({
+      tags_to_remove: ['az:false_positive'],
+      tags_to_add: ['az:inconclusive'],
+    });
+  });
+
   describe('reading the review status', () => {
     const outcomeTemplate = stepByName('resolve_review_dispatch')?.with?.review_dispatch as string;
-    const resolveDispatch = (status: string): string =>
+    const resolveDispatch = (status: string, error?: unknown): string =>
       renderString(outcomeTemplate, {
-        steps: { start_fp_review: { output: { status } } },
+        steps: { start_fp_review: { output: { status }, error } },
       }).trim();
 
     // The status comes from `workflow.executeAsync` itself. A separate read of the execution
@@ -1174,6 +1162,10 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
       expect(resolveDispatch(status)).toBe(expected);
     });
 
+    it('does not re-tag a dispatch that failed, because its own fallback did', () => {
+      expect(resolveDispatch('', { message: 'could not start' })).toBe('not_started');
+    });
+
     // The Worker matches the review's status by string. Tie each literal to the engine's enum so a
     // rename there fails here instead of silently sending every batch down the "started" branch.
     it('only matches statuses the engine can report', () => {
@@ -1194,9 +1186,18 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
         `\${{ variables.review_dispatch == '${dispatch}' }}`
       );
     });
+
+    it('counts the alerts of a started review as in flight', () => {
+      expect(
+        evalExpr(stepByName('count_started_alerts')?.with?.started_alert_count as string, {
+          variables: { started_alert_count: 3 },
+          steps: { start_reviews: { item: { alert_ids: ['a', 'b'] } } },
+        })
+      ).toBe(5);
+    });
   });
 
-  describe('a batch whose review ended without a decision', () => {
+  describe('a proposal whose review ended without a decision', () => {
     const branchStepNames = (branchName: string) =>
       flatten(stepByName(branchName)?.steps ?? []).map((step) => step.name);
 
@@ -1206,7 +1207,7 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
       expect(stepByName('close_investigation_review_limit')).toBeUndefined();
     });
 
-    it('leaves the Investigation open when the review failed', () => {
+    it('leaves the proposal Investigation open when the review failed', () => {
       expect(
         flatten(stepByName('handle_review_failed')?.steps ?? []).some(
           (step) => step.type === 'ai.conversation.metadata.patch'
@@ -1214,23 +1215,23 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
       ).toBe(false);
     });
 
-    it('fails the run for a review that ended without a decision, after commenting', () => {
-      const names = branchStepNames('handle_review_failed');
-      expect(names).toEqual([
+    it('re-tags and comments in the proposal Investigation', () => {
+      expect(branchStepNames('handle_review_failed')).toEqual([
         'retag_review_failed',
         'retag_review_failed_call',
         'post_comment_review_failed',
-        'abort_review_failed',
       ]);
-      expect(stepByName('abort_review_failed')?.type).toBe('workflow.fail');
     });
 
     const renderReviewFailed = (autonomy: string, count: number): string => {
       const template = (stepByName('post_comment_review_failed')?.with as { message: string })
         .message;
       return renderString(template, {
-        steps: { start_fp_review: { output: { status: 'failed' } } },
-        variables: { fp_candidate_count: count },
+        steps: {
+          start_fp_review: { output: { status: 'failed' } },
+          start_reviews: { index: 0, item: { alert_ids: Array.from({ length: count }, String) } },
+        },
+        variables: { mint_conversation_ids: ['conv-0'] },
         inputs: { autonomy },
       });
     };
@@ -1275,13 +1276,107 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     const template = (stepByName('post_comment_review_started')?.with as { message: string })
       .message;
     const rendered = renderString(template, {
-      variables: { fp_candidate_count: 2 },
+      steps: { start_reviews: { index: 0, item: { alert_ids: ['a', 'b'] } } },
+      variables: { mint_conversation_ids: ['conv-0'] },
       inputs: { autonomy: 'manual', confidence_floor: 0.85 },
     });
 
     expect(rendered).toContain('handed to the closure review');
     expect(rendered).toContain('A human decision is required.');
     expect(rendered).toContain('The outcome is posted here');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Grouping: joins, new proposals and their Investigations
+// ---------------------------------------------------------------------------
+describe('floor_alert_triage_batch — grouping', () => {
+  const names = parsed.steps.map((step) => step.name);
+
+  it('groups after the tags and before the notes, so each note can link its own Investigation', () => {
+    expect(names.indexOf('group_fp_candidates_call')).toBeGreaterThan(
+      names.indexOf('tag_pattern_keys')
+    );
+    ['process_mints', 'process_joins'].forEach((name) =>
+      expect(names.indexOf(name)).toBeLessThan(names.indexOf('add_verdict_notes'))
+    );
+  });
+
+  it('groups only when there are false positives, and falls back to empty lists otherwise', () => {
+    const group = stepByName('group_fp_candidates_call');
+    expect(evalExpr(group?.if as string, { variables: { fp_candidate_count: 0 } })).toBe(false);
+    const resolve = stepByName('resolve_grouping')?.with as Record<string, string>;
+    const context = { variables: { no_items: [] }, steps: { group_fp_candidates_call: {} } };
+    expect(evalExpr(resolve.group_mints, context)).toEqual([]);
+    expect(evalExpr(resolve.group_joins, context)).toEqual([]);
+  });
+
+  it('gives each new proposal its own Investigation, alerts, impact and az:proposal tag', () => {
+    const loop = stepByName('process_mints');
+    expect(loop?.foreach).toBe('${{ variables.group_mints | json }}');
+    const inner = flatten(loop?.steps ?? []).map((step) => step.name);
+    expect(inner).toEqual(
+      expect.arrayContaining([
+        'create_proposal_investigation',
+        'attach_mint_alert_chunk',
+        'attach_mint_impact',
+        'tag_mint_alert_chunk',
+      ])
+    );
+    expect(stepByName('tag_mint_alert_chunk')?.with?.tags).toEqual({
+      tags_to_add: ['az:proposal:{{ steps.process_mints.item.proposal_id }}'],
+    });
+  });
+
+  it('records the conversation of each proposal at its position, for the notes and the reviews', () => {
+    const wrap = stepByName('wrap_mint_conversation_id')?.with as Record<string, string>;
+    const record = stepByName('record_mint_conversation')?.with as Record<string, string>;
+    const wrapped = evalExpr(wrap.new_conversation_ids, {
+      steps: { create_proposal_investigation: { output: { conversation_id: 'conv-1' } } },
+    });
+    expect(wrapped).toEqual(['conv-1']);
+    expect(
+      evalExpr(record.mint_conversation_ids, {
+        variables: { mint_conversation_ids: ['conv-0'], new_conversation_ids: wrapped },
+      })
+    ).toEqual(['conv-0', 'conv-1']);
+  });
+
+  it('adds the joined alerts to the owner, tags them with its root id and says so in both Investigations', () => {
+    const loop = stepByName('process_joins');
+    expect(loop?.foreach).toBe('${{ variables.group_joins | json }}');
+    expect(stepByName('attach_joined_alert_chunk')?.with?.conversation_id).toBe(
+      '{{ steps.process_joins.item.conversation_id }}'
+    );
+    expect(stepByName('tag_joined_alert_chunk')?.with?.tags).toEqual({
+      tags_to_add: ['az:proposal:{{ steps.process_joins.item.owner_proposal_id }}'],
+    });
+    expect(flatten(loop?.steps ?? []).map((step) => step.name)).toEqual(
+      expect.arrayContaining(['post_comment_joined_owner', 'post_comment_joined_batch'])
+    );
+  });
+
+  it('closes the batch Investigation, which has no proposal of its own, once the reviews started', () => {
+    const close = stepByName('close_batch_investigation_with_fp');
+    expect(close?.condition).toBe('${{ variables.fp_candidate_count > 0 }}');
+    expect(names.indexOf('close_batch_investigation_with_fp')).toBeGreaterThan(
+      names.indexOf('start_reviews')
+    );
+  });
+
+  it('reports the grouping outcome of the batch', () => {
+    const input = stepByName('report_batch_grouped')?.with as Record<string, string>;
+    const context = {
+      steps: {
+        group_fp_candidates_call: {
+          output: { alerts_joined: 4, proposals_created: 2, alerts_pooled: 1 },
+        },
+      },
+    };
+    expect(evalExpr(input.alerts_joined, context)).toBe(4);
+    expect(evalExpr(input.proposals_created, context)).toBe(2);
+    expect(evalExpr(input.alerts_pooled, context)).toBe(1);
+    expect(evalExpr(input.alerts_joined, { steps: { group_fp_candidates_call: {} } })).toBe(0);
   });
 });
 
@@ -1335,7 +1430,9 @@ describe('floor_alert_triage_batch — tag_pattern_keys', () => {
       names.indexOf('set_az_inconclusive_tags')
     );
     expect(names.indexOf('tag_pattern_keys')).toBeLessThan(names.indexOf('add_verdict_notes'));
-    expect(names.indexOf('report_batch_grouped')).toBe(names.indexOf('tag_pattern_keys') + 1);
+    expect(names.indexOf('report_batch_grouped')).toBeGreaterThan(
+      names.indexOf('tag_pattern_keys')
+    );
   });
 
   it('tags the alerts that got a verdict, whatever the verdict, and names the confident false positives', () => {
@@ -1378,10 +1475,5 @@ describe('floor_alert_triage_batch — tag_pattern_keys', () => {
     expect(run(3)).toBe(true);
     expect(run(3, { message: 'failed' })).toBe(false);
     expect(run(0)).toBe(false);
-  });
-
-  it('sends no grouping outcome yet, because nothing joins proposals until grouping runs', () => {
-    const input = reportStep?.with as Record<string, unknown>;
-    expect([input.alerts_joined, input.proposals_created, input.alerts_pooled]).toEqual([0, 0, 0]);
   });
 });

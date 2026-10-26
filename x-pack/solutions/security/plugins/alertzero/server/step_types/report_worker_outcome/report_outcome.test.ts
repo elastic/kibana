@@ -115,6 +115,7 @@ describe('reportOutcome', () => {
       {
         alerts_proposed: 1,
         alerts_retag_failed: 0,
+        revisions: 1,
         auto_approve_requested: false,
         event: 'alert_triage_closure_resolved' as const,
         investigation_id: '0b9f4a3e-1c2d-8e3f-8a4b-5c6d7e8f9a0b',

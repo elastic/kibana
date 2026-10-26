@@ -6,7 +6,7 @@
  */
 
 import { TRIAGE_STRICT_KEY_TAG_PREFIX, TRIAGE_WIDE_KEY_TAG_PREFIX } from './constants';
-import { planKeyTags } from './key_tags';
+import { planKeyTags, strictKeyTags } from './key_tags';
 
 const processDoc = (executable: string, overrides: Record<string, unknown> = {}) => ({
   'kibana.alert.rule.uuid': 'rule-1',
@@ -103,5 +103,33 @@ describe('planKeyTags', () => {
         fpCandidatesOnFallback: 0,
       },
     });
+  });
+});
+
+describe('strictKeyTags', () => {
+  it('names each distinct strict key once, so the history reads one tag per pattern', () => {
+    const tags = strictKeyTags('default', [
+      processDoc('C:\\a.exe'),
+      processDoc('C:\\a.exe'),
+      processDoc('C:\\b.exe'),
+    ]);
+
+    expect(tags).toHaveLength(2);
+    tags.forEach((tag) => expect(tag.startsWith(TRIAGE_STRICT_KEY_TAG_PREFIX)).toBe(true));
+  });
+
+  it('names none for alerts that group by rule only, which have no history to read', () => {
+    expect(strictKeyTags('default', [cloudDoc('jdoe')])).toEqual([]);
+  });
+
+  it('matches the tag the batch writes on the alert', () => {
+    const doc = processDoc('C:\\a.exe');
+    const written = planKeyTags({
+      alerts: [{ id: 'a1', doc }],
+      fpCandidateIds: [],
+      spaceId: 'default',
+    }).groups[0].tags;
+
+    expect(written).toContain(strictKeyTags('default', [doc])[0]);
   });
 });

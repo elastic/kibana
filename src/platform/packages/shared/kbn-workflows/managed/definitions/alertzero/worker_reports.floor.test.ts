@@ -36,6 +36,12 @@ describe('Alert Triage close reports', () => {
         reportStep: 'report_investigation_closed_no_fp',
       },
       {
+        closeReason: 'other',
+        closeStep: 'close_batch_investigation',
+        definition: ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW,
+        reportStep: 'report_batch_investigation_closed',
+      },
+      {
         closeReason: 'false_positive',
         closeStep: 'close_investigation_after_approval',
         definition: ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW,
@@ -46,6 +52,12 @@ describe('Alert Triage close reports', () => {
         closeStep: 'close_investigation_after_dismissal',
         definition: ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW,
         reportStep: 'report_investigation_closed_after_dismissal',
+      },
+      {
+        closeReason: 'other',
+        closeStep: 'close_investigation_after_join',
+        definition: ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW,
+        reportStep: 'report_investigation_closed_after_join',
       },
       {
         closeReason: 'other',
@@ -96,12 +108,12 @@ describe('Alert Triage outcome reports', () => {
     const batchContext = ({
       alerts,
       fpCandidates = 0,
-      reviewDispatch,
+      startedAlerts = 0,
       verdicts,
     }: {
       alerts: number;
       fpCandidates?: number;
-      reviewDispatch?: 'started';
+      startedAlerts?: number;
       verdicts: { fp: number; inconclusive: number; tp: number };
     }): Record<string, unknown> => ({
       steps: {
@@ -118,7 +130,7 @@ describe('Alert Triage outcome reports', () => {
         alert_count: alerts,
         fp_candidate_count: fpCandidates,
         verdict_count: verdicts.fp + verdicts.inconclusive + verdicts.tp,
-        ...(reviewDispatch ? { review_dispatch: reviewDispatch } : {}),
+        started_alert_count: startedAlerts,
       },
     });
 
@@ -166,7 +178,7 @@ describe('Alert Triage outcome reports', () => {
         {
           alerts: 40,
           fpCandidates: 20,
-          reviewDispatch: 'started' as const,
+          startedAlerts: 20,
           verdicts: { fp: 20, inconclusive: 10, tp: 10 },
         },
         {
@@ -257,11 +269,13 @@ describe('Alert Triage outcome reports', () => {
     const reviewContext = ({
       autonomy = 'manual',
       failedRetag,
+      liveRevision,
       outcome,
       readFailed = false,
     }: {
       autonomy?: string;
       failedRetag?: number;
+      liveRevision?: number;
       outcome: string;
       readFailed?: boolean;
     }): Record<string, unknown> => ({
@@ -273,6 +287,7 @@ describe('Alert Triage outcome reports', () => {
         fp_candidate_count: 12,
         proposal_outcome: outcome,
         ...(failedRetag === undefined ? {} : { failed_retag_count: failedRetag }),
+        ...(liveRevision === undefined ? {} : { live_revision: liveRevision }),
       },
     });
 
@@ -293,6 +308,11 @@ describe('Alert Triage outcome reports', () => {
         { outcome: 'dismissed', proposal_read_failed: true },
       ],
       ['an expired proposal', { outcome: 'expired' }, { outcome: 'expired' }],
+      [
+        'a proposal that alerts joined',
+        { liveRevision: 4, outcome: 'approved' },
+        { outcome: 'approved', revisions: 4 },
+      ],
       ['an unknown gate state', { outcome: 'unknown' }, { outcome: 'unknown' }],
       ['a value outside the vocabulary', { outcome: 'failed' }, { outcome: 'unknown' }],
     ])('renders %s', (_scenario, scenario, expected) => {
@@ -302,6 +322,7 @@ describe('Alert Triage outcome reports', () => {
         auto_approve_requested: false,
         investigation_id: INVESTIGATION_ID,
         proposal_read_failed: false,
+        revisions: 1,
         ...expected,
       });
     });

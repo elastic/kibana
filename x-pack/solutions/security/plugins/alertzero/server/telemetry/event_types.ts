@@ -149,6 +149,7 @@ export interface AlertZeroAlertTriageBatchGroupedPayload extends AlertZeroEnvelo
 export interface AlertZeroAlertTriageClosureResolvedPayload extends AlertZeroEnvelope {
   alerts_proposed: number;
   alerts_retag_failed: number;
+  revisions: number;
   auto_approve_requested: boolean;
   investigation_id: string;
   outcome: AlertTriageClosureOutcome;
@@ -566,10 +567,10 @@ export const ALERTZERO_ALERT_TRIAGE_BATCH_GROUPED_EVENT: EventTypeOpts<AlertZero
     schema: {
       ...ENVELOPE_SCHEMA,
       alerts_joined: countField(
-        'Alerts that joined a proposal an earlier batch had opened; 0 until grouping runs'
+        'Alerts that joined a proposal an earlier batch had opened; 0 when grouping is off'
       ),
       alerts_pooled: countField(
-        'Alerts whose key had no other alert in the batch and no open proposal, so they went into one shared proposal; 0 until grouping runs'
+        'Alerts whose key had no other alert in the batch and no open proposal, so they went into one shared proposal; 0 when grouping is off'
       ),
       alerts_with_strict_key: countField(
         'Classified alerts with a strict pattern key, whatever their verdict'
@@ -581,7 +582,7 @@ export const ALERTZERO_ALERT_TRIAGE_BATCH_GROUPED_EVENT: EventTypeOpts<AlertZero
         'False positives at or above the confidence floor that have no strict key, so they group by rule and detection only'
       ),
       proposals_created: countField(
-        'New closure proposals the batch raised; 0 until grouping runs'
+        'New closure proposals the batch raised; 0 when grouping is off'
       ),
       strict_keys: countField('Distinct strict pattern keys among the classified alerts'),
       strict_keys_single_alert: countField(
@@ -600,6 +601,9 @@ export const ALERTZERO_ALERT_TRIAGE_CLOSURE_RESOLVED_EVENT: EventTypeOpts<AlertZ
       alerts_proposed: countField('Alerts the closure proposal covered'),
       alerts_retag_failed: countField(
         'Alerts a dismissal could not re-tag from `az:false_positive`, 0 on any other outcome'
+      ),
+      revisions: countField(
+        'Revisions the proposal reached when it settled, counting the first as 1; more than 1 means alerts joined it'
       ),
       auto_approve_requested: flagField(
         'Whether the review asked the gate to auto-approve (supervised autonomy)'

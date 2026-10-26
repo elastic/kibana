@@ -58,12 +58,24 @@ triggers:
           description: >-
             Alert `_id` values classified as false positive at or above the confidence floor.
             These are the alerts the proposal closes.
-        entity_summary:
+        title:
           type: string
-          maxLength: 256
+          minLength: 1
+          maxLength: 512
+          description: Proposal title, built by the grouping step together with `comment`.
+        comment:
+          type: string
+          minLength: 1
+          maxLength: 8192
           description: >-
-            Hosts and users behind the candidates, worded for the proposal title, such as
-            `on build-agent-01 (svc-backup)`. Empty or omitted when no candidate names one.
+            Proposal comment: what the proposal closes and what is inside it. Built by the
+            grouping step, which also rebuilds it on every join.
+        proposal_id:
+          type: string
+          maxLength: 64
+          description: >-
+            The UUID to create the proposal under, so the batch knows its root id for the
+            `az:proposal` tag. When another batch created it first, the alerts join that one.
         confidence_floor:
           type: number
           description: Confidence floor the candidates passed, quoted in the proposal and its comment.
@@ -79,6 +91,8 @@ triggers:
         - conversation_id
         - rule_id
         - fp_candidate_ids
+        - title
+        - comment
         - confidence_floor
       additionalProperties: false
 
@@ -142,49 +156,38 @@ steps:
     type: workflow.execute
     # Reached only when the proposal workflow itself fails (for example, the proposal could
     # not be created); gate outcomes, including an expired deadline, complete normally and
-    # are handled by the branches below. The fallback re-throws afterwards, so the run
-    # fails and shows up in execution history.
+    # are handled by the branches below. The usual cause is a collision: `proposal_id` is
+    # derived from the pattern, and a batch that started its review late can find that another
+    # batch created it first. The fallback then joins the alerts to that proposal. It cannot
+    # inspect the error class (YAML sees only `error.message`), so it just tries the join.
+    # `continue: true` is required: a fallback alone still re-throws the original error
+    # afterwards (see on_failure/fallback_step/README.md). `handle_proposal_failed` below
+    # re-creates that failure when the join did not happen.
     on-failure:
+      continue: true
       fallback:
-        - name: retag_proposal_failed
-          type: foreach
-          foreach: "${{ inputs.fp_candidate_ids | chunk: 500 | json }}"
-          steps:
-            - name: retag_proposal_failed_call
-              type: kibana.SetAlertTags
-              on-failure:
-                retry:
-                  max-attempts: 3
-                  delay: 5s
-                continue: true
-              with:
-                ids: "${{ foreach.item }}"
-                tags:
-                  tags_to_remove:
-                    - "az:false_positive"
-                  tags_to_add:
-                    - "az:inconclusive"
-        - name: post_comment_proposal_failed
-          type: ai.conversation.add_user_message
+        - name: join_on_collision
+          type: alertzero.triage.joinProposal
+          # The owner was created moments ago, so the usual reason the join fails is that its search
+          # index has not refreshed yet. The step fails then, and a few seconds later it finds it.
           on-failure:
+            retry:
+              max-attempts: 3
+              delay: 5s
             continue: true
+          if: "${{ inputs.proposal_id != blank }}"
           with:
-            author_name: "{{ consts.author_name }}"
-            conversation_id: "{{ inputs.conversation_id }}"
-            message: >-
-              ⚠️ The closure proposal could not be completed: {{ error.message }}.
-              {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and {% if variables.fp_candidate_count == 1 %}was{% else %}were{% endif %} re-tagged az:inconclusive.
+            proposal_id: "{{ inputs.proposal_id }}"
+            alert_ids: "${{ inputs.fp_candidate_ids }}"
+            rule_name: "{{ inputs.rule_name }}"
+            confidence_floor: "${{ inputs.confidence_floor }}"
     with:
       workflow-id: system-create-alertzero-proposal
       run-as-mode: inherit
       inputs:
         conversationId: "{{ inputs.conversation_id }}"
-        title: >-
-          {%- assign entity_summary = inputs.entity_summary | default: '' -%}
-          Close {% if variables.fp_candidate_count == 1 and entity_summary != '' %}alert{% elsif variables.fp_candidate_count == 1 %}1 alert{% else %}{{ variables.fp_candidate_count }} alerts{% endif %}{% if entity_summary != '' %} {{ entity_summary }}{% endif %} as false positive
-        comment: >-
-          {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} from rule "{{ inputs.rule_name }}" {% if variables.fp_candidate_count == 1 %}was{% else %}were{% endif %} classified as false positives at or above the configured confidence floor ({{ inputs.confidence_floor }}).
-          Approving this proposal will close them with workflow_reason=false_positive.
+        title: "{{ inputs.title }}"
+        comment: "{{ inputs.comment }}"
         actionWorkflowId: system-alertzero-action-close-alerts-fp
         actionInput:
           alertIds: "${{ inputs.fp_candidate_ids }}"
@@ -193,6 +196,113 @@ steps:
         confidence: high
         # Autonomy → autoApprove mapping. One site: update here if semantics change.
         autoApprove: "${{ inputs.autonomy == 'supervised' }}"
+        proposalId: "${{ inputs.proposal_id }}"
+
+  # The create failed and another batch's proposal took these alerts: this Investigation has
+  # nothing left to review. The owner's review decides, and reports the outcome.
+  - name: handle_proposal_joined
+    type: if
+    condition: "${{ steps.create_fp_proposal.error != blank and steps.join_on_collision.output.joined == true }}"
+    steps:
+      - name: post_comment_proposal_joined
+        type: ai.conversation.add_user_message
+        on-failure:
+          continue: true
+        with:
+          author_name: "{{ consts.author_name }}"
+          conversation_id: "{{ inputs.conversation_id }}"
+          message: >-
+            Another closure proposal for the same pattern was created first. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s were{% else %} was{% endif %} added to it, in Investigation {{ steps.join_on_collision.output.conversation_id }}, and its review decides.
+
+      - name: close_investigation_after_join
+        type: ai.conversation.metadata.patch
+        on-failure:
+          continue: true
+        with:
+          conversation_id: "{{ inputs.conversation_id }}"
+          updates:
+            status: closed
+            close_reason: other
+
+      - name: report_investigation_closed_after_join
+        type: alertzero.reportWorkerOutcome
+        if: "${{ steps.close_investigation_after_join.error == blank and steps.close_investigation_after_join.output.changed_fields contains 'status' }}"
+        on-failure:
+          continue: true
+        with:
+          event: worker_investigation_closed
+          investigation_id: "{{ inputs.conversation_id }}"
+          close_reason: other
+
+      - name: end_joined
+        type: workflow.output
+        status: completed
+        with: {}
+
+  # The create failed and nothing took the alerts. They leave az:false_positive, which nothing
+  # would revisit, and the run fails so it shows up in execution history.
+  - name: handle_proposal_failed
+    type: if
+    condition: "${{ steps.create_fp_proposal.error != blank }}"
+    steps:
+      - name: retag_proposal_failed
+        type: foreach
+        foreach: "${{ inputs.fp_candidate_ids | chunk: 500 | json }}"
+        steps:
+          - name: retag_proposal_failed_call
+            type: kibana.SetAlertTags
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
+            with:
+              ids: "${{ foreach.item }}"
+              tags:
+                tags_to_remove:
+                  - "az:false_positive"
+                tags_to_add:
+                  - "az:inconclusive"
+      - name: post_comment_proposal_failed
+        type: ai.conversation.add_user_message
+        on-failure:
+          continue: true
+        with:
+          author_name: "{{ consts.author_name }}"
+          conversation_id: "{{ inputs.conversation_id }}"
+          message: >-
+            ⚠️ The closure proposal could not be completed: {{ steps.create_fp_proposal.error.message }}.
+            {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and {% if variables.fp_candidate_count == 1 %}was{% else %}were{% endif %} re-tagged az:inconclusive.
+      - name: fail_proposal_failed
+        type: workflow.fail
+        with:
+          message: >-
+            The Alert Triage closure proposal could not be created: {{ steps.create_fp_proposal.error.message }}
+
+  # The head of the chain. Joins add alerts to a proposal while it waits, so every outcome
+  # below acts on the live revision's alerts, not on the ones this review started with. The
+  # approve close already runs the head, because the gate adopts the latest revision before it
+  # acts. A failed read falls back to the input list.
+  - name: get_live_revision
+    type: proposals.getLatestRevision
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+    with:
+      proposalId: "{{ steps.create_fp_proposal.output.proposalId }}"
+
+  - name: resolve_live_alerts
+    type: data.set
+    with:
+      live_alert_ids: "${{ steps.get_live_revision.output.actionInput.alertIds | default: inputs.fp_candidate_ids }}"
+      live_revision: "${{ steps.get_live_revision.output.revision | default: 1 }}"
+
+  - name: count_live_alerts
+    type: data.set
+    with:
+      fp_candidate_count: "${{ variables.live_alert_ids | size }}"
 
   # Fetch proposal details for outcome comment attribution (decision, decidedBy,
   # dismissReason, rationale). handle_dismissed below must not derive the retag from a
@@ -300,7 +410,7 @@ steps:
           # the first failure and skip the remaining chunks and the shortfall counters.
           - name: retag_dismissed_alerts
             type: foreach
-            foreach: "${{ inputs.fp_candidate_ids | chunk: 500 | json }}"
+            foreach: "${{ variables.live_alert_ids | chunk: 500 | json }}"
             steps:
               - name: retag_dismissed_chunk
                 type: kibana.SetAlertTags
@@ -379,7 +489,7 @@ steps:
         else:
           - name: retag_dismissed_read_failed
             type: foreach
-            foreach: "${{ inputs.fp_candidate_ids | chunk: 500 | json }}"
+            foreach: "${{ variables.live_alert_ids | chunk: 500 | json }}"
             steps:
               - name: retag_dismissed_read_failed_call
                 type: kibana.SetAlertTags
@@ -418,7 +528,7 @@ steps:
     steps:
       - name: retag_expired_alerts
         type: foreach
-        foreach: "${{ inputs.fp_candidate_ids | chunk: 500 | json }}"
+        foreach: "${{ variables.live_alert_ids | chunk: 500 | json }}"
         steps:
           - name: retag_expired_alerts_call
             type: kibana.SetAlertTags
@@ -484,7 +594,7 @@ steps:
     steps:
       - name: retag_unknown_alerts
         type: foreach
-        foreach: "${{ inputs.fp_candidate_ids | chunk: 500 | json }}"
+        foreach: "${{ variables.live_alert_ids | chunk: 500 | json }}"
         steps:
           - name: retag_unknown_alerts_call
             type: kibana.SetAlertTags
@@ -531,6 +641,7 @@ steps:
         unknown
         {%- endif -%}
       alerts_proposed: "${{ variables.fp_candidate_count | default: 0 }}"
+      revisions: "${{ variables.live_revision | default: 1 }}"
       alerts_retag_failed: "${{ variables.failed_retag_count | default: 0 }}"
       auto_approve_requested: "${{ inputs.autonomy == 'supervised' }}"
       proposal_read_failed: "${{ steps.get_proposal.error != blank }}"

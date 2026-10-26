@@ -223,6 +223,7 @@ const FIXTURES: {
     ...envelope,
     alerts_proposed: 20,
     alerts_retag_failed: 0,
+    revisions: 1,
     auto_approve_requested: true,
     investigation_id: '5f0c3c8e-2d51-4b8a-9e0f-7c1d2b3a4e5f',
     outcome: 'approved',

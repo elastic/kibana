@@ -1677,6 +1677,8 @@ export interface InProcessProposalFilters {
   categories?: string[];
   statuses?: ProposalStatus[];
   conversationIds?: string[];
+  /** Restricts to the chains with these root ids, so a caller can read the head of many chains in one search. */
+  rootProposalIds?: string[];
 }
 
 /**
@@ -1715,6 +1717,9 @@ const toFilterClauses = (
   }
   if (filters.conversationIds) {
     filter.push({ terms: { conversationId: filters.conversationIds } });
+  }
+  if (filters.rootProposalIds) {
+    filter.push({ terms: { rootProposalId: filters.rootProposalIds } });
   }
   if (filters.decidedWithinHours !== undefined) {
     filter.push({ range: { decidedAt: { gte: `now-${filters.decidedWithinHours}h` } } });

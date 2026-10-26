@@ -44,7 +44,7 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
         variables: {
           alert_count: 6,
           fp_candidate_count: 3,
-          review_dispatch: 'started',
+          started_alert_count: 3,
           verdict_count: 6,
         },
       },
@@ -57,6 +57,16 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
           create_investigation: OPENED_INVESTIGATION,
         },
         variables: { alert_count: 5, fp_candidate_count: 0, verdict_count: 4 },
+      },
+      {
+        steps: {
+          classify_alerts: {
+            output: { false_positive_count: 3, inconclusive_count: 0, true_positive_count: 0 },
+          },
+          close_batch_investigation: { output: CHANGED_STATUS },
+          create_investigation: OPENED_INVESTIGATION,
+        },
+        variables: { alert_count: 3, fp_candidate_count: 3, verdict_count: 3 },
       },
       {
         steps: { create_investigation: OPENED_INVESTIGATION },
@@ -73,6 +83,7 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
         close_investigation_after_approval: { output: CHANGED_STATUS },
         close_investigation_after_dismissal: { output: CHANGED_STATUS },
         close_investigation_after_expiry: { output: CHANGED_STATUS },
+        close_investigation_after_join: { output: CHANGED_STATUS },
         get_proposal: { output: {} },
       },
       variables: { failed_retag_count: 1, fp_candidate_count: 9, proposal_outcome: outcome },

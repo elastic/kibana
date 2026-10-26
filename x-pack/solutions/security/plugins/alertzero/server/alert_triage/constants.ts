@@ -63,3 +63,21 @@ export const OPEN_ALERT_STATUSES = ['open', 'acknowledged'] as const;
 export const ALERT_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
 
 export type AlertSeverity = (typeof ALERT_SEVERITIES)[number];
+
+/** Most alerts one grouped proposal holds. The close action's `maxItems` is the same number. */
+export const GROUPED_PROPOSAL_MAX_ALERTS = 1000;
+
+/** Most revisions one grouped proposal reaches. Each revision adds a proposal card to the chat. */
+export const GROUPED_PROPOSAL_MAX_REVISIONS = 20;
+
+/** A proposal this close to its deadline takes no joins, so a late alert still gets time to be reviewed. */
+export const GROUPED_PROPOSAL_JOIN_MARGIN_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Generations of one key the lookup reads. A key gains about one generation every 72 hours, so 200
+ * cover about 18 months. Past that, the key gets random ids and no joins.
+ */
+export const GROUPED_PROPOSAL_MAX_GENERATIONS = 200;
+
+/** Feature flag that turns Alert Triage grouping off: every batch then mints its own proposal. */
+export const TRIAGE_GROUPING_FLAG = 'alertzero.triageGrouping';

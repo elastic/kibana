@@ -100,62 +100,32 @@ describe('floor_alert_triage_review — no concurrency limit', () => {
   });
 });
 
-describe('floor_alert_triage_review — proposal comment', () => {
+describe('floor_alert_triage_review — proposal', () => {
   const proposal = stepByName('create_fp_proposal');
   const proposalInputs = proposal?.with?.inputs as Record<string, string>;
-  const context = {
-    inputs: { rule_name: 'Noisy rule', confidence_floor: 0.85 },
-    variables: { fp_candidate_count: 3 },
-  };
 
   it('counts the candidates from the input list', () => {
     const count = stepByName('count_fp_candidates')?.with?.fp_candidate_count as string;
     expect(evalExpr(count, { inputs: { fp_candidate_ids: ['a', 'b', 'c'] } })).toBe(3);
   });
 
-  it('names the rule, the number of alerts and the confidence floor', () => {
-    const comment = renderString(proposalInputs.comment, context);
-    expect(comment).toContain('3 alerts from rule "Noisy rule" were classified');
-    expect(comment).toContain('(0.85)');
+  // The grouping step builds the text, because it rebuilds it on every join. One builder keeps
+  // the first revision and the later ones worded alike.
+  it('takes its title and comment from the inputs instead of building them', () => {
+    expect(renderString(proposalInputs.title, { inputs: { title: 'Close 3 alerts' } })).toBe(
+      'Close 3 alerts'
+    );
+    expect(renderString(proposalInputs.comment, { inputs: { comment: 'Because.' } })).toBe(
+      'Because.'
+    );
+    const trigger = parsed.triggers.find(({ type }) => type === 'manual');
+    expect(trigger?.inputs?.required).toEqual(expect.arrayContaining(['title', 'comment']));
   });
 
-  it('titles the proposal with the alert count, singular or plural, so the queue card needs no action-specific label', () => {
-    expect(renderString(proposalInputs.title, context)).toBe('Close 3 alerts as false positive');
-    expect(
-      renderString(proposalInputs.title, { ...context, variables: { fp_candidate_count: 1 } })
-    ).toBe('Close 1 alert as false positive');
-  });
-
-  describe('title with the entities behind the alerts', () => {
-    const titleFor = (count: number, entitySummary?: string) =>
-      renderString(proposalInputs.title, {
-        inputs: { ...context.inputs, entity_summary: entitySummary },
-        variables: { fp_candidate_count: count },
-      });
-
-    it('inserts the entity summary between the count and the reason', () => {
-      expect(titleFor(12, 'on build-agent-01, build-agent-02')).toBe(
-        'Close 12 alerts on build-agent-01, build-agent-02 as false positive'
-      );
-      expect(titleFor(6, 'on DC-01 (svc-backup)')).toBe(
-        'Close 6 alerts on DC-01 (svc-backup) as false positive'
-      );
-      expect(titleFor(8, 'for svc-backup, jdoe')).toBe(
-        'Close 8 alerts for svc-backup, jdoe as false positive'
-      );
-    });
-
-    it('drops the number for a single alert that names an entity', () => {
-      expect(titleFor(1, 'on build-agent-01')).toBe(
-        'Close alert on build-agent-01 as false positive'
-      );
-    });
-
-    it("keeps today's title when there is no summary, empty or omitted", () => {
-      expect(titleFor(5, '')).toBe('Close 5 alerts as false positive');
-      expect(titleFor(5, undefined)).toBe('Close 5 alerts as false positive');
-      expect(titleFor(1, undefined)).toBe('Close 1 alert as false positive');
-    });
+  it('creates the proposal under the id the batch chose, so the batch knows its root id', () => {
+    expect(evalExpr(proposalInputs.proposalId, { inputs: { proposal_id: 'abc' } })).toBe('abc');
+    // `${{ }}` keeps an absent id undefined. `{{ }}` would send '' and fail the UUID check.
+    expect(proposalInputs.proposalId).toMatch(/^\$\{\{/);
   });
 
   it('closes exactly the candidate ids it was given', () => {
@@ -166,6 +136,91 @@ describe('floor_alert_triage_review — proposal comment', () => {
         inputs: { fp_candidate_ids: ['a', 'b'] },
       })
     ).toEqual(['a', 'b']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A create that collides: another batch created the proposal id first
+// ---------------------------------------------------------------------------
+describe('floor_alert_triage_review — create collision', () => {
+  const create = stepByName('create_fp_proposal');
+
+  // `fallback` alone re-throws the original error afterwards (on_failure/fallback_step/README.md),
+  // which would fail the run even when the join worked.
+  it('joins the owner in the fallback, and keeps going so the join can end the run as joined', () => {
+    expect(create?.['on-failure']?.continue).toBe(true);
+    const join = create?.['on-failure']?.fallback?.find(({ name }) => name === 'join_on_collision');
+    expect(join?.type).toBe('alertzero.triage.joinProposal');
+    // Search lag is the usual cause of a collision, so the join retries before it gives up.
+    expect(join?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+    expect(join?.['on-failure']?.continue).toBe(true);
+    expect(join?.with?.proposal_id).toBe('{{ inputs.proposal_id }}');
+    expect(join?.with?.alert_ids).toBe('${{ inputs.fp_candidate_ids }}');
+  });
+
+  it('ends as completed, without the outcome branches, when the join worked', () => {
+    const joined = stepByName('handle_proposal_joined');
+    expect(joined?.condition).toBe(
+      '${{ steps.create_fp_proposal.error != blank and steps.join_on_collision.output.joined == true }}'
+    );
+    const names = flatten(joined?.steps ?? []).map(({ name }) => name);
+    expect(names).toEqual(
+      expect.arrayContaining(['post_comment_proposal_joined', 'close_investigation_after_join'])
+    );
+    const end = stepByName('end_joined') as YamlStep & { status?: string };
+    expect(end.type).toBe('workflow.output');
+    expect(end.status).toBe('completed');
+    // Nothing runs between the join and the outcome branches that could skip the end.
+    const order = parsed.steps.map(({ name }) => name);
+    expect(order.indexOf('handle_proposal_joined')).toBeLessThan(order.indexOf('get_proposal'));
+  });
+
+  it('re-tags the candidates and fails the run when nothing could take them', () => {
+    const failed = stepByName('handle_proposal_failed');
+    expect(failed?.condition).toBe('${{ steps.create_fp_proposal.error != blank }}');
+    const names = flatten(failed?.steps ?? []).map(({ name }) => name);
+    expect(names).toEqual(
+      expect.arrayContaining(['retag_proposal_failed', 'post_comment_proposal_failed'])
+    );
+    expect(stepByName('fail_proposal_failed')?.type).toBe('workflow.fail');
+    const order = parsed.steps.map(({ name }) => name);
+    expect(order.indexOf('handle_proposal_joined')).toBeLessThan(
+      order.indexOf('handle_proposal_failed')
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Joins add alerts while the proposal waits, so the outcome acts on the live revision
+// ---------------------------------------------------------------------------
+describe('floor_alert_triage_review — live revision', () => {
+  it('reads the head of the chain, retrying before it falls back to the input list', () => {
+    const read = stepByName('get_live_revision');
+    expect(read?.type).toBe('proposals.getLatestRevision');
+    expect(read?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+    expect(read?.['on-failure']?.continue).toBe(true);
+  });
+
+  it('takes the alerts of the live revision, or the input list when it could not be read', () => {
+    const expr = stepByName('resolve_live_alerts')?.with?.live_alert_ids as string;
+    const inputs = { fp_candidate_ids: ['a'] };
+    expect(
+      evalExpr(expr, {
+        inputs,
+        steps: { get_live_revision: { output: { actionInput: { alertIds: ['a', 'b'] } } } },
+      })
+    ).toEqual(['a', 'b']);
+    expect(evalExpr(expr, { inputs, steps: { get_live_revision: {} } })).toEqual(['a']);
+  });
+
+  it('counts the alerts of the live revision in every outcome comment', () => {
+    const count = stepByName('count_live_alerts')?.with?.fp_candidate_count as string;
+    expect(evalExpr(count, { variables: { live_alert_ids: ['a', 'b', 'c'] } })).toBe(3);
+  });
+
+  it('reports how many revisions the proposal reached', () => {
+    const revisions = stepByName('report_closure_resolved')?.with?.revisions as string;
+    expect(evalExpr(revisions, { variables: { live_revision: 4 } })).toBe(4);
   });
 });
 
@@ -460,13 +515,13 @@ describe('floor_alert_triage_review — retag_dismissed_alerts chunking', () => 
   const renderChunks = (ids: string[]): string[][] =>
     JSON.parse(
       renderString((loop?.foreach ?? '').replace(/^\$\{\{/, '{{').trim(), {
-        inputs: { fp_candidate_ids: ids },
+        variables: { live_alert_ids: ids },
       })
     );
 
   it('iterates chunks of the candidate list rather than single ids', () => {
     expect(loop?.type).toBe('foreach');
-    expect(loop?.foreach).toContain('inputs.fp_candidate_ids');
+    expect(loop?.foreach).toContain('variables.live_alert_ids');
     expect(loop?.foreach).toContain('chunk: 500');
   });
 
@@ -509,6 +564,7 @@ describe('floor_alert_triage_review — ai.conversation.metadata.patch failure h
       'close_investigation_after_approval',
       'close_investigation_after_dismissal',
       'close_investigation_after_expiry',
+      'close_investigation_after_join',
     ]);
   });
 
@@ -573,11 +629,7 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
     expect(branchStepNames('handle_expired')).toContain('retag_expired_alerts');
     expect(branchStepNames('handle_unknown_outcome')).toContain('retag_unknown_alerts');
     expect(branchStepNames('handle_dismissed')).toContain('retag_dismissed_read_failed');
-    expect(
-      flatten(stepByName('create_fp_proposal')?.['on-failure']?.fallback ?? []).map(
-        ({ name }) => name
-      )
-    ).toContain('retag_proposal_failed');
+    expect(branchStepNames('handle_proposal_failed')).toContain('retag_proposal_failed');
   });
 
   it('never re-tags an approved closure, whose alerts are closed', () => {
@@ -596,7 +648,11 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
     'retag_unknown_alerts',
   ])('"%s" leaves az:false_positive for az:inconclusive and keeps az:model_fp', (name) => {
     const retag = stepByName(name);
-    expect(retag?.foreach).toContain('inputs.fp_candidate_ids | chunk: 500');
+    expect(retag?.foreach).toContain(
+      name === 'retag_proposal_failed'
+        ? 'inputs.fp_candidate_ids | chunk: 500'
+        : 'variables.live_alert_ids | chunk: 500'
+    );
     expect(retag?.steps?.[0].with?.tags).toEqual({
       tags_to_remove: ['az:false_positive'],
       tags_to_add: ['az:inconclusive'],

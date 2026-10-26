@@ -238,6 +238,7 @@ const alertTriageClosureResolvedInputSchema = lazySchema(() =>
     event: z.literal('alert_triage_closure_resolved'),
     alerts_proposed: count('Alerts the closure proposal covered'),
     alerts_retag_failed: count('Alerts a dismissal could not re-tag'),
+    revisions: count('Revisions the proposal reached when it settled'),
     auto_approve_requested: requiredFlag('Whether the review asked the gate to auto-approve'),
     investigation_id: investigationId('Investigation the closure review settles'),
     outcome: oneOf(ALERT_TRIAGE_CLOSURE_OUTCOMES, 'How the closure proposal settled'),

@@ -15,6 +15,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/server';
 import { chunk } from 'lodash';
+import type { Subscription } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -26,6 +27,7 @@ import {
   TEMPLATE_ID_ESCALATION,
   TEMPLATE_ID_INVESTIGATION,
 } from '@kbn/alertzero-common';
+import { TRIAGE_GROUPING_FLAG } from './alert_triage/constants';
 import { getSubscriptionAvailability } from '../common/availability';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
@@ -125,6 +127,8 @@ export class AlertZeroPlugin
   private huntServices?: HuntServices;
   private fleetAgentService?: AgentService;
   private coreStart?: CoreStart;
+  private triageGroupingEnabled = true;
+  private triageGroupingFlagSubscription?: Subscription;
   private scanFailuresService?: ScanFailuresService;
   private threatIntelSupplyService?: ThreatIntelSupplyService;
 
@@ -264,6 +268,11 @@ export class AlertZeroPlugin
       isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
       getInternalEsClient: () => this.requireCoreStart().elasticsearch.client.asInternalUser,
       getTaskManager: () => this.requireStarted(this.taskManager, 'Task Manager'),
+      grouping: {
+        getProposals: () => this.requireProposals(),
+        getWorkflowsManagement: () => this.workflowsManagementApi,
+        isGroupingEnabled: async () => this.triageGroupingEnabled,
+      },
       logger: stepsLogger,
     });
 
@@ -337,6 +346,12 @@ export class AlertZeroPlugin
     this.spaces = plugins.spaces;
     this.taskManager = plugins.taskManager;
     this.coreStart = core;
+    // The kill switch for Alert Triage grouping. It stays on where no flag provider exists.
+    this.triageGroupingFlagSubscription = core.featureFlags
+      .getBooleanValue$(TRIAGE_GROUPING_FLAG, true)
+      .subscribe((enabled) => {
+        this.triageGroupingEnabled = enabled;
+      });
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
@@ -565,5 +580,7 @@ export class AlertZeroPlugin
     return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
   }
 
-  stop() {}
+  stop() {
+    this.triageGroupingFlagSubscription?.unsubscribe();
+  }
 }

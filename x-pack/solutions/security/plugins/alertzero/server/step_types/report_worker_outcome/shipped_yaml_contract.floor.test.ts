@@ -116,7 +116,7 @@ describe('shipped Alert Triage Worker YAML and the reportWorkerOutcome schema', 
             variables: {
               alert_count: 40,
               fp_candidate_count: 20,
-              review_dispatch: 'started',
+              started_alert_count: 20,
               verdict_count: 38,
             },
           },

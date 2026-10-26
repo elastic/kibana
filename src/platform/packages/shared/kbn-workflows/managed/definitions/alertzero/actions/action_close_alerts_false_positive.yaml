@@ -42,6 +42,9 @@ triggers:
           properties:
             alertIds:
               type: array
+              # Grouped proposals grow by revision. `revise()` validates the merged input against
+              # this schema, so the limit also makes the server refuse an oversized revision.
+              maxItems: 1000
               items:
                 type: string
               description: Alert _id values to close.

@@ -24,6 +24,11 @@ import {
   type SummarizeInvestigationStepDependencies,
 } from './summarize_investigation';
 import type { PackageReportStepDependencies } from './package_report/package_report_step';
+import {
+  getTriageGroupFpCandidatesStepDefinition,
+  getTriageJoinProposalStepDefinition,
+  type GroupProposalsStepDependencies,
+} from './alert_triage/group_proposals_step';
 import type { ReportWorkerOutcomeStepDeps } from './report_worker_outcome/report_worker_outcome_step';
 import { getReportWorkerOutcomeStepDefinition } from './report_worker_outcome/report_worker_outcome_step';
 
@@ -38,6 +43,7 @@ export const registerStepDefinitions = ({
   isContextEngineEnabled,
   getInternalEsClient,
   getTaskManager,
+  grouping,
   logger,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -50,6 +56,7 @@ export const registerStepDefinitions = ({
   isContextEngineEnabled: PackageReportStepDependencies['isContextEngineEnabled'];
   getInternalEsClient?: () => ElasticsearchClient;
   getTaskManager: () => Pick<TaskManagerStartContract, 'aggregate'>;
+  grouping: Omit<GroupProposalsStepDependencies, 'getConversations' | 'logger'>;
   logger?: Logger;
 }) => {
   workflowsExtensions.registerStepDefinition(
@@ -83,6 +90,11 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(getTriagePlanSweepStepDefinition());
   workflowsExtensions.registerStepDefinition(getTriageLoadAlertsStepDefinition());
   workflowsExtensions.registerStepDefinition(getTriageTagPatternKeysStepDefinition());
+  const groupingDeps = { ...grouping, getConversations, logger };
+  workflowsExtensions.registerStepDefinition(
+    getTriageGroupFpCandidatesStepDefinition(groupingDeps)
+  );
+  workflowsExtensions.registerStepDefinition(getTriageJoinProposalStepDefinition(groupingDeps));
 };
 
 export { getPackageReportStepDefinition } from './package_report';

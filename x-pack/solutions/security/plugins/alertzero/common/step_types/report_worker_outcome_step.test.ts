@@ -89,6 +89,7 @@ const VALID_FIELDS: Readonly<Record<ReportWorkerOutcomeEvent, Override>> = {
   alert_triage_closure_resolved: {
     alerts_proposed: 20,
     alerts_retag_failed: 0,
+    revisions: 1,
     auto_approve_requested: false,
     investigation_id: INVESTIGATION_ID,
     outcome: 'dismissed',

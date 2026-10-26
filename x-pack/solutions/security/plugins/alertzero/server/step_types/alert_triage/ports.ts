@@ -372,6 +372,62 @@ const expandDottedKeys = (source: Record<string, unknown>): Record<string, unkno
   }, {});
 
 /** Loads a batch's alert documents by id, as `{ _id, _index, ...source }` for Alert Analysis. */
+export interface KeyHistory {
+  falsePositive: number;
+  truePositive: number;
+}
+
+/**
+ * How earlier alerts of the same pattern were judged: the false positives and true positives in the
+ * period, whatever their status. `excludeIds` are the alerts of the proposal itself, which already
+ * carry their verdict tag.
+ */
+export const readKeyHistory = async (
+  { callKibanaApi }: KibanaApi,
+  {
+    strictKeyTags,
+    excludeIds,
+    since,
+  }: { strictKeyTags: readonly string[]; excludeIds: readonly string[]; since: number }
+): Promise<KeyHistory> => {
+  const { body } = await callKibanaApi<{
+    aggregations?: {
+      verdicts?: { buckets?: Record<string, { doc_count?: number }> };
+    };
+  }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { terms: { [ALERT_FIELDS.tags]: [...strictKeyTags] } },
+            { range: { [ALERT_FIELDS.timestamp]: { gte: new Date(since).toISOString() } } },
+          ],
+          must_not: [{ ids: { values: [...excludeIds] } }],
+        },
+      },
+      aggs: {
+        verdicts: {
+          filters: {
+            filters: {
+              falsePositive: { term: { [ALERT_FIELDS.tags]: 'az:false_positive' } },
+              truePositive: { term: { [ALERT_FIELDS.tags]: 'az:true_positive' } },
+            },
+          },
+        },
+      },
+    },
+  });
+  const buckets = body.aggregations?.verdicts?.buckets;
+  if (buckets === undefined) throw new Error('Key history missing from the search response');
+  return {
+    falsePositive: buckets.falsePositive?.doc_count ?? 0,
+    truePositive: buckets.truePositive?.doc_count ?? 0,
+  };
+};
+
 export const loadAlertsByIds = async (
   { callKibanaApi }: KibanaApi,
   alertIds: readonly string[]

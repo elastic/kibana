@@ -224,9 +224,9 @@ Emitted by the Alert Triage Worker once for each classified batch, after it tagg
 | `wide_keys` | long | yes | Distinct wide keys among the classified alerts. Every alert has one |
 | `wide_keys_single_alert` | long | yes | Wide keys that only one alert of the batch has |
 | `fp_candidates_on_fallback` | long | yes | False positives at or above the confidence floor that have no strict key, so they group by rule and detection only |
-| `alerts_joined` | long | yes | Alerts that joined a proposal an earlier batch opened. `0` until grouping runs |
-| `proposals_created` | long | yes | New closure proposals the batch raised. `0` until grouping runs |
-| `alerts_pooled` | long | yes | Alerts pooled into one shared proposal. `0` until grouping runs |
+| `alerts_joined` | long | yes | Alerts that joined a proposal an earlier batch opened. `0` when grouping is off |
+| `proposals_created` | long | yes | New closure proposals the batch raised. `0` when grouping is off |
+| `alerts_pooled` | long | yes | Alerts pooled into one shared proposal. `0` when grouping is off |
 | `conversation_created` | boolean | yes | Whether the batch created a conversation of its own. Always `true` until the conversation is created only for a new proposal or a failure |
 
 ### `alertzero_alert_triage_closure_resolved`
@@ -239,6 +239,7 @@ Emitted by the Alert Triage closure review once its proposal has settled and the
 | `outcome` | keyword | yes | `approved`, `dismissed`, `expired` or `unknown` (any other gate state, which leaves the Investigation open) |
 | `alerts_proposed` | long | yes | Alerts the closure proposal covered |
 | `alerts_retag_failed` | long | yes | Alerts a dismissal could not re-tag from `az:false_positive`, `0` on any other outcome |
+| `revisions` | long | yes | Revisions the proposal reached when it settled, counting the first as `1`. More than `1` means alerts joined it |
 | `auto_approve_requested` | boolean | yes | Whether the review asked the gate to auto-approve (supervised autonomy) |
 | `proposal_read_failed` | boolean | yes | Whether the decided proposal could not be read back. A dismissal then leaves the tags and the Investigation untouched |
 | `investigation_id` | keyword | yes | The batch's Investigation. It joins to `alertzero_alert_triage_batch_classified` and to the close |

@@ -13,11 +13,26 @@ import { buildPatternKeys } from './pattern_key';
 const HASH_LENGTH = 16;
 
 /** Covers the space, which the alert document does not name, and the key (rule, revision, detection, condition). */
-const hashKey = (spaceId: string, key: string): string =>
+export const hashKey = (spaceId: string, key: string): string =>
   createHash('sha256')
     .update(JSON.stringify([spaceId, key]))
     .digest('hex')
     .slice(0, HASH_LENGTH);
+
+/** The strict key tags of the alerts that have a strict key. Fallback alerts have none, so they have no history. */
+export const strictKeyTags = (
+  spaceId: string,
+  docs: ReadonlyArray<Record<string, unknown>>
+): string[] => [
+  ...new Set(
+    docs.flatMap((doc) => {
+      const { strict } = buildPatternKeys(doc);
+      return strict === undefined
+        ? []
+        : [`${TRIAGE_STRICT_KEY_TAG_PREFIX}${hashKey(spaceId, strict)}`];
+    })
+  ),
+];
 
 export interface KeyTagGroup {
   alertIds: string[];

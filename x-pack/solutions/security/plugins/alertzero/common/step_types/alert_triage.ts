@@ -14,6 +14,8 @@ export const TRIAGE_HEADROOM_STEP_ID = 'alertzero.triage.headroom' as const;
 export const TRIAGE_PLAN_SWEEP_STEP_ID = 'alertzero.triage.planSweep' as const;
 export const TRIAGE_LOAD_ALERTS_STEP_ID = 'alertzero.triage.loadAlerts' as const;
 export const TRIAGE_TAG_PATTERN_KEYS_STEP_ID = 'alertzero.triage.tagPatternKeys' as const;
+export const TRIAGE_GROUP_FP_CANDIDATES_STEP_ID = 'alertzero.triage.groupFpCandidates' as const;
+export const TRIAGE_JOIN_PROPOSAL_STEP_ID = 'alertzero.triage.joinProposal' as const;
 
 const idSchema = z.string().trim().min(1).max(256);
 
@@ -181,4 +183,118 @@ export const triageTagPatternKeysStepCommonDefinition: CommonStepDefinition<
   stability: 'tech_preview',
   inputSchema: tagPatternKeysInputSchema,
   outputSchema: tagPatternKeysOutputSchema,
+};
+
+const proposalTextInputShape = {
+  rule_name: z.string().max(1024).describe('Name of the rule, quoted in the proposal comment.'),
+  confidence_floor: z.number().min(0).max(1).describe('Confidence floor, quoted in the comment.'),
+};
+
+const groupFpCandidatesInputSchema = lazySchema(() =>
+  z.object({
+    fp_candidate_ids: z
+      .array(idSchema)
+      .min(1)
+      .max(1000)
+      .describe('The false positives at or above the confidence floor.'),
+    autonomy: z.enum(['manual', 'supervised']),
+    space_id: idSchema.describe('Space of the alerts. It is part of every key hash.'),
+    impacted_entities: z
+      .array(z.object({ id: z.string(), name: z.string(), type: z.enum(['host', 'user']) }))
+      .max(100)
+      .optional()
+      .describe('Entities the analysis found. Each new proposal keeps those its alerts name.'),
+    ...proposalTextInputShape,
+  })
+);
+
+const groupFpCandidatesOutputSchema = lazySchema(() =>
+  z.object({
+    mints: z
+      .array(
+        z.object({
+          proposal_id: z.string().describe('The id the proposal is created under.'),
+          alert_ids: z.array(z.string()),
+          kind: z.enum(['keyed', 'pooled', 'overflow', 'batch']),
+          title: z.string(),
+          comment: z.string(),
+          impacted_entities: z.array(
+            z.object({ id: z.string(), name: z.string(), type: z.enum(['host', 'user']) })
+          ),
+        })
+      )
+      .describe('New proposals, one review each.'),
+    joins: z
+      .array(
+        z.object({
+          owner_proposal_id: z.string().describe('Root id of the proposal that took the alerts.'),
+          proposal_id: z.string().describe('The revision the join created.'),
+          revision: z.number(),
+          conversation_id: z.string().describe("The owner's Investigation."),
+          alert_ids: z.array(z.string()).describe('Only the alerts the proposal did not hold.'),
+        })
+      )
+      .describe('Alerts added to an open proposal.'),
+    grouped: z.boolean().describe('False when grouping is off, so the batch has one proposal.'),
+    alerts_joined: z.number(),
+    alerts_pooled: z.number(),
+    proposals_created: z.number(),
+    missing_alert_ids: z.array(z.string()).describe('Ids that no longer match an alert.'),
+  })
+);
+
+export const triageGroupFpCandidatesStepCommonDefinition: CommonStepDefinition<
+  typeof groupFpCandidatesInputSchema,
+  typeof groupFpCandidatesOutputSchema
+> = {
+  id: TRIAGE_GROUP_FP_CANDIDATES_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageGroupFpCandidates.label', {
+    defaultMessage: 'Group triage false positives into proposals',
+  }),
+  description: i18n.translate(
+    'xpack.alertzero.workflows.steps.triageGroupFpCandidates.description',
+    {
+      defaultMessage:
+        'Adds the false positives of a batch to the open proposal of their pattern, or plans a new proposal for them.',
+    }
+  ),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: groupFpCandidatesInputSchema,
+  outputSchema: groupFpCandidatesOutputSchema,
+};
+
+const joinProposalInputSchema = lazySchema(() =>
+  z.object({
+    proposal_id: idSchema.describe('Id the review tried to create the proposal under.'),
+    alert_ids: z.array(idSchema).min(1).max(1000),
+    ...proposalTextInputShape,
+  })
+);
+
+const joinProposalOutputSchema = lazySchema(() =>
+  z.object({
+    joined: z.boolean(),
+    proposal_id: z.string().describe('The revision the join created, when it joined.'),
+    conversation_id: z.string().describe("The owner's Investigation, when it joined."),
+    revision: z.number(),
+  })
+);
+
+export const triageJoinProposalStepCommonDefinition: CommonStepDefinition<
+  typeof joinProposalInputSchema,
+  typeof joinProposalOutputSchema
+> = {
+  id: TRIAGE_JOIN_PROPOSAL_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageJoinProposal.label', {
+    defaultMessage: 'Join a triage proposal',
+  }),
+  description: i18n.translate('xpack.alertzero.workflows.steps.triageJoinProposal.description', {
+    defaultMessage:
+      'Adds alerts to the open proposal that already holds the id, when a create collided with it.',
+  }),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: joinProposalInputSchema,
+  outputSchema: joinProposalOutputSchema,
 };
