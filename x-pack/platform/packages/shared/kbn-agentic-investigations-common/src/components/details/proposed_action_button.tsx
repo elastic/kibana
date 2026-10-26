@@ -26,6 +26,7 @@ import {
   type ApprovalPhase,
   type ApprovalProposal,
   type DeclineParams,
+  type GetUrlForApp,
 } from '@kbn/proposals-ui';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { getEmptyValue } from '../helpers';
@@ -54,6 +55,11 @@ export interface ProposedActionButtonProps {
   /** Marks a to-do proposal that was marked as applied as not applied, from the modal. */
   onReopen?: () => Promise<void>;
   isReopening?: boolean;
+  /**
+   * See `ApprovalModalProps.getUrlForApp`. Supplied by the caller: flyout slots render outside a
+   * `KibanaContextProvider`, so this package cannot read `core.application` itself.
+   */
+  getUrlForApp?: GetUrlForApp;
   'data-test-subj'?: string;
 }
 
@@ -147,6 +153,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     currentActorName,
     onReopen,
     isReopening,
+    getUrlForApp,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -243,6 +250,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             currentActorName={currentActorName}
             onReopen={onReopen}
             isReopening={isReopening}
+            getUrlForApp={getUrlForApp}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-modal` : undefined}
           />
         )}

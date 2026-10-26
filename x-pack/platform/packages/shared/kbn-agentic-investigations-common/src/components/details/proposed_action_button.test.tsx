@@ -134,6 +134,24 @@ describe('ProposedActionButton', () => {
     ).toBeGreaterThanOrEqual(2);
   });
 
+  it('hands getUrlForApp to the modal, so in-app links in the comment survive a base path', () => {
+    const getUrlForApp = jest.fn(
+      (appId: string, options?: { path?: string }) => `/kbn/app/${appId}${options?.path ?? ''}`
+    );
+    renderButton({
+      getUrlForApp,
+      proposal: {
+        ...mockProposal,
+        comment: '**Rule:** [Noisy rule](/s/default/app/security/rules/id/abc)',
+      },
+    });
+    fireEvent.click(screen.getByTestId('proposedAction'));
+
+    expect(
+      within(screen.getByRole('dialog')).getByRole('link', { name: /Noisy rule/ })
+    ).toHaveAttribute('href', '/kbn/app/security/rules/id/abc');
+  });
+
   it('commits the approval by calling onConfirm from the modal', () => {
     renderButton();
     fireEvent.click(screen.getByTestId('proposedAction'));

@@ -19,6 +19,7 @@ import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { ProposedActionButton, ProposedActionsList } from '@kbn/agentic-investigations-common';
+import type { GetUrlForApp } from '@kbn/proposals-ui';
 import { decisionErrorMessage } from './decision_errors';
 import { useProposalDecision } from './use_proposal_decision';
 import {
@@ -34,6 +35,7 @@ export interface ProposedActionsSlotProps {
 interface ProposedActionRowProps {
   proposal: ProposalWithMetadata;
   onDecisionError: (err: unknown) => void;
+  getUrlForApp: GetUrlForApp;
 }
 
 /**
@@ -41,7 +43,7 @@ interface ProposedActionRowProps {
  * own proposal id — are called a fixed number of times per render, rather than a variable number
  * inside the list's `.map`.
  */
-const ProposedActionRow = ({ proposal, onDecisionError }: ProposedActionRowProps) => {
+const ProposedActionRow = ({ proposal, onDecisionError, getUrlForApp }: ProposedActionRowProps) => {
   const { readOnly, isSubmitting, currentActorName, approve, dismiss, reopen, isReopening } =
     useProposalDecision(proposal.id);
 
@@ -76,6 +78,7 @@ const ProposedActionRow = ({ proposal, onDecisionError }: ProposedActionRowProps
       }}
       isReopening={isReopening}
       currentActorName={currentActorName}
+      getUrlForApp={getUrlForApp}
       data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
     />
   );
@@ -91,7 +94,7 @@ const ProposedActionRow = ({ proposal, onDecisionError }: ProposedActionRowProps
  */
 export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps) => {
   const {
-    services: { notifications },
+    services: { application, notifications },
   } = useKibana<CoreStart>();
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useConversationProposals(conversationId);
@@ -136,6 +139,7 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
               key={proposal.id}
               proposal={proposal}
               onDecisionError={onDecisionError}
+              getUrlForApp={application.getUrlForApp}
             />
           ))}
         </ProposedActionsList>

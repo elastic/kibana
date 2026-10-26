@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiLink, type EuiLinkAnchorProps } from '@elastic/eui';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { GetUrlForApp } from './types';
 
 /**
@@ -14,13 +15,21 @@ import type { GetUrlForApp } from './types';
  * prefix, never behind the server base path. Protocol-relative (`//host`) and absolute
  * (`https://`, `mailto:`) hrefs do not match and are left untouched.
  */
-const APP_HREF = /^(?:\/s\/[^/]+)?\/app\/([^/?#]+)([^]*)$/;
+const APP_HREF = /^(?:\/s\/([^/]+))?\/app\/([^/?#]+)([^]*)$/;
+
+/**
+ * A URL as core resolves it: the server base path, the current space's prefix when it is not the
+ * default space, then the app route and path. Splits off the base path so an authored space can
+ * stand in for the current one.
+ */
+const RESOLVED_APP_URL = /^(.*?)(?:\/s\/[^/]+)?(\/app\/.*)$/;
 
 /**
  * Resolves an authored in-app href through `core.application.getUrlForApp`, which prepends the
- * server base path and the current space and honors the app's registered route. The authored
- * space prefix is dropped: a proposal is viewed in the space that raised it, and core adds that
- * space back from the browser's own base path.
+ * server base path and the current space and honors the app's registered route. A link authored
+ * without a space inherits the current one. A link that names a space keeps it: comments accept
+ * arbitrary markdown, so `/s/other/app/dashboards#/view/id` may point at another space on purpose,
+ * and the default space is written with no prefix, as core writes it.
  */
 export const resolveAppHref = (href: string, getUrlForApp?: GetUrlForApp): string => {
   if (!getUrlForApp) {
@@ -30,8 +39,17 @@ export const resolveAppHref = (href: string, getUrlForApp?: GetUrlForApp): strin
   if (!match) {
     return href;
   }
-  const [, appId, path] = match;
-  return getUrlForApp(appId, { path });
+  const [, authoredSpace, appId, path] = match;
+  const resolved = getUrlForApp(appId, { path });
+  if (!authoredSpace) {
+    return resolved;
+  }
+  const resolvedMatch = RESOLVED_APP_URL.exec(resolved);
+  if (!resolvedMatch) {
+    return resolved;
+  }
+  const [, serverBasePath, appPath] = resolvedMatch;
+  return addSpaceIdToPath(serverBasePath || '/', authoredSpace, appPath);
 };
 
 /** Builds the `a` processing component for `EuiMarkdownFormat`, bound to one resolver. */
