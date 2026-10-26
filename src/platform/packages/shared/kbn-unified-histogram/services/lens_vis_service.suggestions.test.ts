@@ -69,7 +69,7 @@ describe('LensVisService suggestions', () => {
   test.each([
     { name: 'ES|QL chart', esql: 'from the-data-view | stats maxB = max(bytes)' },
     { name: 'ES|QL histogram', esql: 'from the-data-view | limit 100' },
-  ])('passes the Discover default legend to Lens for an $name', async ({ esql }) => {
+  ])('passes the unified histogram default legend to Lens for an $name', async ({ esql }) => {
     const onLensSuggestionsApiParams = jest.fn();
     await getLensVisMock({
       filters: [],

@@ -70,13 +70,13 @@ import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
 const ESQL_HISTOGRAM_RESULT_LIMIT = 10000;
-// Discover has little vertical space, so its charts keep the legend on the right.
-const DISCOVER_DEFAULT_LEGEND: XYConfiguration['legend'] = {
+// The unified histogram has little vertical space, so its charts keep the legend on the right.
+const UNIFIED_HISTOGRAM_DEFAULT_LEGEND: XYConfiguration['legend'] = {
   isVisible: true,
   position: 'right',
 };
-const DISCOVER_VISUALIZATION_OVERRIDES: DefaultVisualizationOverrides = {
-  lnsXY: { legend: DISCOVER_DEFAULT_LEGEND },
+const UNIFIED_HISTOGRAM_VISUALIZATION_OVERRIDES: DefaultVisualizationOverrides = {
+  lnsXY: { legend: UNIFIED_HISTOGRAM_DEFAULT_LEGEND },
 };
 
 /** Lens suggestions still take a DataView. Classic unwraps it; ES|QL uses the registered shim. */
@@ -475,7 +475,7 @@ export class LensVisService {
         },
       ],
       legend: {
-        ...DISCOVER_DEFAULT_LEGEND,
+        ...UNIFIED_HISTOGRAM_DEFAULT_LEGEND,
         legendSize,
         shouldTruncate: false,
       },
@@ -615,7 +615,7 @@ export class LensVisService {
           ['lnsDatatable'],
           ChartType.XY,
           updatedAttributesWithQuery,
-          DISCOVER_VISUALIZATION_OVERRIDES
+          UNIFIED_HISTOGRAM_VISUALIZATION_OVERRIDES
         ) ?? [];
       if (suggestions.length) {
         const suggestion = suggestions[0];
@@ -725,7 +725,7 @@ export class LensVisService {
         ['lnsDatatable'],
         preferredChartType,
         visAttributes,
-        DISCOVER_VISUALIZATION_OVERRIDES
+        UNIFIED_HISTOGRAM_VISUALIZATION_OVERRIDES
       ) ?? []
     );
   };
