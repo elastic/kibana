@@ -8,7 +8,7 @@
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ApiClientFixture } from '@kbn/scout-security';
-import { apiTest, tags } from '@kbn/scout-security';
+import { apiTest, getPlaywrightTagsFor } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
   ENTITY_LATEST,
@@ -41,7 +41,8 @@ const SPACE_USER_ID = 'user:brief-scout-space-user';
 
 apiTest.describe(
   'Entity Analytics AI brief - the brief tool bound to a captured view',
-  { tag: [...tags.stateful.classic] },
+  // Local-only: the LLM proxy binds to the runner's loopback, unreachable from a Cloud Kibana.
+  { tag: getPlaywrightTagsFor('stateful', 'classic', 'local') },
   () => {
     let headers: Record<string, string>;
     let connectorId: string;
