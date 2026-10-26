@@ -159,6 +159,7 @@
     "xpack.runtimeFields": "platform/plugins/private/runtime_fields",
     "xpack.screenshotting": "platform/plugins/shared/screenshotting",
     "xpack.searchSharedUI": "solutions/search/packages/shared-ui",
+    "xpack.sessionReplayPlayer": "solutions/observability/packages/kbn-session-replay-player",
     "xpack.searchGettingStarted": "solutions/search/plugins/search_getting_started",
     "xpack.searchHomepage": "solutions/search/plugins/search_homepage",
     "xpack.searchNavigation": "solutions/search/plugins/search_navigation",

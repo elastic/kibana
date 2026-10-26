@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Shop: sales chart</title>
+  <style>
+    body { margin: 0; padding: 24px; font: 16px/1.4 system-ui, sans-serif; color: #1a1c21; }
+    canvas { border: 1px solid #d3dae6; border-radius: 4px; display: block; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <h1>Sales this week</h1>
+  <canvas id="chart" width="360" height="180"></canvas>
+  <script>
+    var values = [30, 80, 55, 120, 90, 140, 70];
+    var context = document.getElementById('chart').getContext('2d');
+    function draw(scale) {
+      context.clearRect(0, 0, 360, 180);
+      context.fillStyle = '#0b64dd';
+      values.forEach(function (value, index) {
+        var height = value * scale;
+        context.fillRect(20 + index * 48, 160 - height, 32, height);
+      });
+    }
+    var step = 0;
+    var timer = setInterval(function () {
+      step += 1;
+      draw(Math.min(step / 6, 1));
+      if (step >= 6) { clearInterval(timer); }
+    }, 250);
+    draw(0.1);
+  </script>
+</body>
+</html>

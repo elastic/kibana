@@ -2101,6 +2101,15 @@
       "enabled": true
     },
     {
+      "groupName": "rrweb",
+      "matchDepNames": ["rrweb", "rrweb-snapshot", "@rrweb/types"],
+      "reviewers": ["team:obs-signals-rum-team"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:obs-signals-rum"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "json-schema-to-ts",
       "matchDepNames": ["json-schema-to-ts"],
       "reviewers": ["team:obs-ai-assistant"],

@@ -252,6 +252,16 @@ const RESTRICTED_IMPORTS = [
     name: `fp-ts/lib`,
     message: `Please, use fp-ts to avoid duplicating the package import`,
   },
+  {
+    name: 'rrweb',
+    message:
+      'rrweb is wrapped by @kbn/session-replay-player, the only package allowed to import it. Use that package instead.',
+  },
+  {
+    name: 'rrweb-snapshot',
+    message:
+      'rrweb-snapshot is wrapped by @kbn/session-replay-player, the only package allowed to import it. Use that package instead.',
+  },
 ];
 
 module.exports = {
@@ -1518,6 +1528,16 @@ module.exports = {
               scoutRestrictedFtrPatterns,
             ],
           },
+        ],
+      },
+    },
+    {
+      // The player package is the only code that may import rrweb at runtime.
+      files: ['x-pack/solutions/observability/packages/kbn-session-replay-player/**/*.{ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          ...RESTRICTED_IMPORTS.filter(({ name }) => name !== 'rrweb' && name !== 'rrweb-snapshot'),
         ],
       },
     },
