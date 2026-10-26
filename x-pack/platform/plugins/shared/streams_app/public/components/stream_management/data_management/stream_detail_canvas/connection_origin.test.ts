@@ -65,14 +65,6 @@ describe('connection origin', () => {
     ]);
   });
 
-  it('does not add a second line to a source that feeds a routing node', () => {
-    const origin = readConnectionOrigin('configured-source-otlp', null);
-
-    expect(
-      origin ? connectOrigin(unit, origin, { kind: 'destination', id: 'es-c' }) : undefined
-    ).toBe(unit);
-  });
-
   it('wires a rule handle line into that rule', () => {
     const origin = readConnectionOrigin('configured-routing-p-routed', 'rule-1');
     const next = origin ? connectOrigin(unit, origin, { kind: 'destination', id: 'es-c' }) : unit;

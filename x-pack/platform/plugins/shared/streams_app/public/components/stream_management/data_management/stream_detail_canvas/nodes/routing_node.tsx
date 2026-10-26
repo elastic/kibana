@@ -61,7 +61,7 @@ function RoutingRuleRow({ rule }: { rule: RoutingNodeRule }) {
         `}
       >
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
+          <EuiToolTip content={tooltipContent}>
             <EuiText tabIndex={0}>
               <strong>{rule.handleId}</strong>
             </EuiText>
