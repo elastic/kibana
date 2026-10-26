@@ -8,7 +8,7 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { syntheticsAvailabilityIndicatorSchema } from '@kbn/slo-schema';
+import { is, syntheticsAvailabilityIndicatorSchemaZod } from '@kbn/slo-schema';
 import React from 'react';
 import {
   syntheticsMonitorDetailLocatorID,
@@ -36,7 +36,7 @@ export function SyntheticsIndicatorOverview({ slo }: Props) {
   const { locationId, monitorId } = slo.meta?.synthetics || {};
 
   const indicator = slo.indicator;
-  if (!syntheticsAvailabilityIndicatorSchema.is(indicator)) {
+  if (!is(syntheticsAvailabilityIndicatorSchemaZod, indicator)) {
     return null;
   }
 

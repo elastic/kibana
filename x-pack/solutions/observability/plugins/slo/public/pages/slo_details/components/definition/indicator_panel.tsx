@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { ALL_VALUE, querySchema } from '@kbn/slo-schema';
+import { ALL_VALUE, is, querySchemaZod } from '@kbn/slo-schema';
 import React, { useMemo } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
@@ -149,7 +149,7 @@ export function IndicatorPanel({ slo }: Props) {
             />
           </EuiFlexItem>
         )}
-        {'good' in slo.indicator.params && querySchema.is(slo.indicator.params.good) && (
+        {'good' in slo.indicator.params && is(querySchemaZod, slo.indicator.params.good) && (
           <EuiFlexItem grow={false}>
             <DefinitionItem
               title={
@@ -179,7 +179,7 @@ export function IndicatorPanel({ slo }: Props) {
             />
           </EuiFlexItem>
         )}
-        {'total' in slo.indicator.params && querySchema.is(slo.indicator.params.total) && (
+        {'total' in slo.indicator.params && is(querySchemaZod, slo.indicator.params.total) && (
           <EuiFlexItem grow={false}>
             <DefinitionItem
               title={
