@@ -6,10 +6,15 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridControlColumn,
+} from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiCheckbox,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
@@ -36,6 +41,9 @@ import { getActionsColumnWidth } from '../../../../common/components/header_acti
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { RuleStatus } from '../../../../timelines/components/timeline/body/renderers/rule_status';
 import { AttacksGroupTakeActionItems } from '../../../../detections/components/attacks/table/attacks_group_take_action_items';
+import { ACTION_ICONS_BY_ID } from '../../../../common/utils/action_icons';
+import { withActionIcons } from '../../../../common/utils/action_menu_items';
+import { getRemoveFromCaseItems } from '../remove_from_case_items';
 import { AttackTitleLink } from './attack_title_link';
 import { ShowAttackButton } from './show_attack_button';
 import { InvestigateAttackInTimelineButton } from './investigate_attack_in_timeline_button';
@@ -151,19 +159,49 @@ const AttackActionsHeaderCell = () => <>{COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.act
 
 AttackActionsHeaderCell.displayName = 'AttackActionsHeaderCell';
 
-/** The row's overflow menu: the attack flyout's "Take action" items minus navigation. */
-const AttackMoreActionsButton = ({ row }: { row: AttackRow }) => {
+/**
+ * The row's overflow menu: the attack flyout's "Take action" items minus navigation, and
+ * "Remove from case", which is the only item an unresolved row offers.
+ */
+const AttackMoreActionsButton = ({
+  row,
+  onRemoveAttack,
+}: {
+  row: AttackRow;
+  onRemoveAttack?: (attackId: string) => void;
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
 
-  const { attack, savedObjectId } = row;
+  const { attack, attachmentId, savedObjectId } = row;
 
   const isRemoteDocument = useMemo(() => isNonLocalIndexName(attack?.index ?? ''), [attack?.index]);
 
-  // Every menu item reads the live document.
-  const isDisabled = attack == null;
+  const onRemoveFromCase = useMemo(
+    () => (onRemoveAttack != null ? () => onRemoveAttack(attachmentId) : undefined),
+    [attachmentId, onRemoveAttack]
+  );
+
+  const removeOnlyPanels = useMemo<EuiContextMenuPanelDescriptor[]>(
+    () =>
+      onRemoveFromCase != null
+        ? [
+            {
+              id: 0,
+              items: withActionIcons(
+                getRemoveFromCaseItems({ onRemove: onRemoveFromCase, closePopover }),
+                ACTION_ICONS_BY_ID
+              ),
+            },
+          ]
+        : [],
+    [closePopover, onRemoveFromCase]
+  );
+
+  // Every menu item but the removal reads the live document.
+  const isDisabled = attack == null && onRemoveFromCase == null;
 
   const button = (
     <EuiToolTip content={isDisabled ? UNRESOLVED_TOOLTIP : MORE_ACTIONS_LABEL} position="top">
@@ -179,7 +217,7 @@ const AttackMoreActionsButton = ({ row }: { row: AttackRow }) => {
     </EuiToolTip>
   );
 
-  if (attack == null) {
+  if (isDisabled) {
     return button;
   }
   return (
@@ -194,14 +232,19 @@ const AttackMoreActionsButton = ({ row }: { row: AttackRow }) => {
       panelProps={{ 'data-test-subj': ATTACK_TAB_ROW_MORE_ACTIONS_POPOVER_TEST_ID }}
       repositionOnScroll
     >
-      <AttacksGroupTakeActionItems
-        attack={attack}
-        closePopover={closePopover}
-        isRemoteDocument={isRemoteDocument}
-        showAiAssistantAction={false}
-        showNavigationAction={false}
-        telemetrySource={TELEMETRY_SOURCE}
-      />
+      {attack != null ? (
+        <AttacksGroupTakeActionItems
+          attack={attack}
+          closePopover={closePopover}
+          isRemoteDocument={isRemoteDocument}
+          onRemoveFromCase={onRemoveFromCase}
+          showAiAssistantAction={false}
+          showNavigationAction={false}
+          telemetrySource={TELEMETRY_SOURCE}
+        />
+      ) : (
+        <EuiContextMenu initialPanelId={0} panels={removeOnlyPanels} />
+      )}
     </EuiPopover>
   );
 };
@@ -209,7 +252,7 @@ const AttackMoreActionsButton = ({ row }: { row: AttackRow }) => {
 AttackMoreActionsButton.displayName = 'AttackMoreActionsButton';
 
 const AttackActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
-  const { canInvestigateInTimeline, investigateAttackInTimeline, rows } =
+  const { canInvestigateInTimeline, investigateAttackInTimeline, onRemoveAttack, rows } =
     useAttackGridCellContext();
 
   const row = rows[rowIndex];
@@ -246,7 +289,7 @@ const AttackActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
-        <AttackMoreActionsButton row={row} />
+        <AttackMoreActionsButton row={row} onRemoveAttack={onRemoveAttack} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

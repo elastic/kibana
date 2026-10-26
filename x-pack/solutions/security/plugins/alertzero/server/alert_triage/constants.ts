@@ -51,3 +51,8 @@ export const TRIAGE_FAILED_TAG = 'az:triage_failed';
 export const VERDICT_TAGS = ['az:true_positive', 'az:false_positive', 'az:inconclusive'] as const;
 
 export const OPEN_ALERT_STATUSES = ['open', 'acknowledged'] as const;
+
+/** Ascending, so a minimum severity selects its own index and everything after it. */
+export const ALERT_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
+
+export type AlertSeverity = (typeof ALERT_SEVERITIES)[number];

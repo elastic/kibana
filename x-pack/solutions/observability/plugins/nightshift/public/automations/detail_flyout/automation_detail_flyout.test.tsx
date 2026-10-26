@@ -76,7 +76,11 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     (useUpdateAutomation as jest.Mock).mockReturnValue({ mutate, isLoading: false });
   });
 
-  const renderFlyout = ({ canManage = true, usedToday = 0 } = {}) => {
+  const renderFlyout = ({
+    canManage = true,
+    usedToday = 0,
+    editDisabledReason,
+  }: { canManage?: boolean; usedToday?: number; editDisabledReason?: string } = {}) => {
     const history = createMemoryHistory({ initialEntries: ['/automations/automation-1'] });
     render(
       <I18nProvider>
@@ -85,6 +89,7 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
             automations={[automation]}
             automation={automation}
             canManage={canManage}
+            editDisabledReason={editDisabledReason}
             usedToday={usedToday}
             runRange={runRange}
             rangeLabel="Last 24 hours"
@@ -101,6 +106,22 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   const startEditing = () => fireEvent.click(screen.getByTestId('automationEditButton'));
   const renameTo = (name: string) =>
     fireEvent.change(screen.getByTestId('automationName'), { target: { value: name } });
+
+  it('shows edit disabled, with the reason, when only a privilege is missing', async () => {
+    renderFlyout({ canManage: false, editDisabledReason: 'Requires manage_security' });
+
+    const edit = screen.getByTestId('automationEditButton');
+    expect(edit).toBeDisabled();
+    expect(screen.queryByTestId('automationActionsButton')).not.toBeInTheDocument();
+    fireEvent.mouseOver(edit);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Requires manage_security');
+  });
+
+  it('offers no edit action without a reason to give', () => {
+    renderFlyout({ canManage: false });
+
+    expect(screen.queryByTestId('automationEditButton')).not.toBeInTheDocument();
+  });
 
   it('saves the edited name and leaves edit mode after a successful save', () => {
     mutate.mockImplementation((_variables, { onSuccess }) => onSuccess());

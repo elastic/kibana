@@ -17,7 +17,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 export const CandidateSkipReason = lazySchema(() =>
-  z.enum(['open_proposal', 'already_hunted', 'not_found'])
+  z.enum(['open_proposal', 'already_hunted', 'not_found', 'not_usable'])
 );
 export type CandidateSkipReason = z.infer<typeof CandidateSkipReason>;
 export type CandidateSkipReasonEnum = typeof CandidateSkipReason.enum;
@@ -28,6 +28,19 @@ export const CandidatesRequestBody = lazySchema(() =>
     .object({
       report_ids: z.array(z.string().min(1).max(512)).max(10).optional(),
       limit: z.number().int().min(1).max(10).optional(),
+      /**
+       * Maximum age in days of a report eligible on a request without report_ids, measured on content.published_at, or on @timestamp for a report that has no content.published_at. Ignored when report_ids is supplied.
+       */
+      lookback_days: z
+        .number()
+        .int()
+        .min(1)
+        .max(3650)
+        .optional()
+        .default(30)
+        .describe(
+          'Maximum age in days of a report eligible on a request without report_ids, measured on content.published_at, or on @timestamp for a report that has no content.published_at. Ignored when report_ids is supplied.'
+        ),
     })
     .strict()
 );
@@ -38,7 +51,7 @@ export const CandidatesResponse = lazySchema(() =>
   z.object({
     ids: z.array(z.string()),
     /**
-     * Reports that matched the request but are not being hunted, each with why. A report carrying an open Hunt Proposal is skipped on the scheduled and the manual-named path alike.
+     * Reports that matched the request but are not being hunted, each with why. A report carrying an open Hunt Proposal is skipped on the scheduled and the manual-named path alike. A named report that exists but fails the hunt-usable bar (extraction pending or rejected) is reported not_usable; the scheduled path never selects such a report, so it never appears there. not_usable takes precedence over open_proposal for a named report that is both.
      */
     skipped: z
       .array(
@@ -48,7 +61,7 @@ export const CandidatesResponse = lazySchema(() =>
         })
       )
       .describe(
-        'Reports that matched the request but are not being hunted, each with why. A report carrying an open Hunt Proposal is skipped on the scheduled and the manual-named path alike.'
+        'Reports that matched the request but are not being hunted, each with why. A report carrying an open Hunt Proposal is skipped on the scheduled and the manual-named path alike. A named report that exists but fails the hunt-usable bar (extraction pending or rejected) is reported not_usable; the scheduled path never selects such a report, so it never appears there. not_usable takes precedence over open_proposal for a named report that is both.'
       ),
     total: z.number().int(),
     truncated: z.boolean(),

@@ -1,5 +1,5 @@
 {
-  "sha1": "e30a7c2720f5f99bfc1cf72314d6435a6cd11c75",
+  "sha1": "3a426aeacdbfa0122cbf11ef2f56f4943d4b97f3",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -138,8 +138,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_self_call_oauth_attestation.spec.ts",
-        "line": 42,
-        "column": 11
+        "line": 48,
+        "column": 30
       }
     },
     {
@@ -151,8 +151,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_self_call_oauth_attestation.spec.ts",
-        "line": 61,
-        "column": 17
+        "line": 69,
+        "column": 16
       }
     }
   ]

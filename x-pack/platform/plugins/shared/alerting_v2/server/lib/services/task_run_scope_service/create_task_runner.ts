@@ -12,6 +12,8 @@ import { Request } from '@kbn/core-di-server';
 import type {
   RunContext,
   RunResult,
+  TaskCost,
+  TaskPriority,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server/task';
 import { createToken } from '@kbn/core-di';
@@ -37,6 +39,7 @@ export interface AlertingTaskRunner {
 export interface AlertingTaskDefinition<TRunner extends AlertingTaskRunner = AlertingTaskRunner> {
   taskType: string;
   title: string;
+  description?: string;
   timeout: string;
   resolveTimeout?: (config: PluginConfig) => string;
   paramsSchema?: ObjectType;
@@ -48,6 +51,8 @@ export interface AlertingTaskDefinition<TRunner extends AlertingTaskRunner = Ale
     }
   >;
   maxAttempts?: number;
+  cost?: TaskCost;
+  priority?: TaskPriority;
   taskRunnerClass: TaskRunnerConstructor<TRunner>;
   /**
    * Whether this task requires a fakeRequest from Task Manager.

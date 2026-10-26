@@ -14,6 +14,7 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import { isElasticsearchWriteConflict } from '@kbn/occ';
 import { formatPageRefs, previewText } from './log_format';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
+import { extractWorkspaceReads, extractWorkspaceReadsFromToolCalls } from '../investigation_round';
 import { hasToolEvidence, renderMemoryTranscript, type TranscriptStep } from './transcript';
 import type { MemoryPageStore, MemoryPageWrite, VersionedMemoryPage } from './page_store';
 import {
@@ -89,6 +90,7 @@ export interface MemoryExtractProposal {
 export type ProposeMemoryLabels = (input: {
   transcript: string;
   recalledMemories: MemoryPage[];
+  openedMemoryIds?: ReadonlySet<string>;
 }) => Promise<MemoryLabelProposal>;
 
 export interface MemoryExtractionBatch {
@@ -207,7 +209,8 @@ const formatEvidenceEntries = (entries: readonly EvidenceEntry[], maxTokens: num
 
 export const formatRecalled = (
   recalledMemories: readonly MemoryPage[],
-  maxTokens = OPTIMIZER_EVIDENCE_TOKEN_BUDGET
+  maxTokens = OPTIMIZER_EVIDENCE_TOKEN_BUDGET,
+  openedMemoryIds?: ReadonlySet<string>
 ): string => {
   if (recalledMemories.length === 0) {
     return '(none)';
@@ -219,6 +222,9 @@ export const formatRecalled = (
         `${index === 0 ? '' : '\n'}- id=${memory.id}\n` +
         `  title: ${memory.title.slice(0, MAX_RECALLED_TITLE_CHARS)}\n` +
         `  updated: ${memory.updated_at}\n` +
+        (openedMemoryIds !== undefined
+          ? `  opened_by_agent: ${openedMemoryIds.has(memory.id)}\n`
+          : '') +
         `  content: `,
       content: memory.content,
     })),
@@ -266,13 +272,15 @@ export const createLlmProposeMemoryLabels = ({
   inferenceClient: BoundInferenceClient;
   signal?: AbortSignal;
 }): ProposeMemoryLabels => {
-  return async ({ transcript, recalledMemories }) => {
+  return async ({ transcript, recalledMemories, openedMemoryIds }) => {
     const response = await inferenceClient.output({
       id: 'nightshift_memory_critique',
       abortSignal: signal,
       system: MEMORY_CRITIQUE_SYSTEM_PROMPT,
       input: `Evaluate the list of recalled memory per the system instructions.\n\nRecalled memories:\n${formatRecalled(
-        recalledMemories
+        recalledMemories,
+        OPTIMIZER_EVIDENCE_TOKEN_BUDGET,
+        openedMemoryIds
       )}\n\nInvestigation transcript:\n${transcript}`,
       schema: {
         type: 'object',
@@ -1070,6 +1078,10 @@ export const optimizeMemory = async ({
   );
 
   const task = unwrapUserTask(userMessage);
+  const reads = investigation
+    ? extractWorkspaceReads(investigation)
+    : extractWorkspaceReadsFromToolCalls(toolCalls);
+  const openedMemoryIds = new Set(reads.memoryIds);
   const transcript = renderMemoryTranscript({
     task,
     answer: assistantMessage,
@@ -1092,9 +1104,9 @@ export const optimizeMemory = async ({
     const critiqueStarted = Date.now();
     logger.debug(
       `Memory critique LLM start nightshift_memory_critique recalled=${recalledMemories.length} ` +
-        `transcriptChars=${transcript.length}`
+        `opened=${openedMemoryIds.size} transcriptChars=${transcript.length}`
     );
-    labels = await proposeLabels({ transcript, recalledMemories });
+    labels = await proposeLabels({ transcript, recalledMemories, openedMemoryIds });
     logger.debug(
       `Memory critique LLM done ${Date.now() - critiqueStarted}ms ` +
         `useful=[${labels.useful.join(', ') || '(none)'}] ` +

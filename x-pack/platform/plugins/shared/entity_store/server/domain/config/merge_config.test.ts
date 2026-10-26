@@ -292,7 +292,7 @@ describe('getMergedConfig', () => {
       expect(merged.delay).toBe('2m');
     });
 
-    it('logExtractionConfig exclusive fields still do not reach non-priority', () => {
+    it('logExtractionConfig volume fields now reach non-priority like any other shared field', () => {
       const merged = getMergedConfig(
         'user',
         {},
@@ -300,10 +300,21 @@ describe('getMergedConfig', () => {
         'nonPriority'
       );
 
-      expect(merged.maxLogsPerWindow).not.toBe(999);
-      expect(merged.maxLogsPerPage).not.toBe(999);
-      expect(merged.docsLimit).not.toBe(999);
-      expect(merged.maxTimeWindowSize).not.toBe('99m');
+      expect(merged.maxLogsPerWindow).toBe(999);
+      expect(merged.maxLogsPerPage).toBe(999);
+      expect(merged.docsLimit).toBe(999);
+      expect(merged.maxTimeWindowSize).toBe('99m');
+    });
+
+    it('logExtractionConfig exclusive field (maxLogsPerWindowCapBehavior) still does not reach non-priority', () => {
+      const merged = getMergedConfig(
+        'user',
+        {},
+        { maxLogsPerWindowCapBehavior: 'defer' },
+        'nonPriority'
+      );
+
+      expect(merged.maxLogsPerWindowCapBehavior).toBe('drop');
     });
 
     it('nonPriorityOverride wins over the same field set on logExtractionConfig', () => {
@@ -334,11 +345,10 @@ describe('getMergedConfig', () => {
       expect(merged.frequency).toBe('5m');
     });
 
-    it('global override of exclusive fields does not reach non-priority', () => {
+    it('global override of volume fields now reaches non-priority like any other shared field', () => {
       const merged = getMergedConfig(
         'user',
         {
-          maxLogsPerWindowCapBehavior: 'defer',
           maxLogsPerWindow: 999,
           maxLogsPerPage: 999,
           docsLimit: 999,
@@ -347,11 +357,33 @@ describe('getMergedConfig', () => {
         'nonPriority'
       );
 
-      // exclusive fields stay at their mode defaults / code defaults
+      expect(merged.maxLogsPerWindow).toBe(999);
+      expect(merged.maxLogsPerPage).toBe(999);
+      expect(merged.docsLimit).toBe(999);
+    });
+
+    it('global override of the exclusive field (maxLogsPerWindowCapBehavior) does not reach non-priority', () => {
+      const merged = getMergedConfig(
+        'user',
+        { maxLogsPerWindowCapBehavior: 'defer' },
+        undefined,
+        'nonPriority'
+      );
+
+      // the exclusive field stays at its mode default
       expect(merged.maxLogsPerWindowCapBehavior).toBe('drop');
-      expect(merged.maxLogsPerWindow).not.toBe(999);
-      expect(merged.maxLogsPerPage).not.toBe(999);
-      expect(merged.docsLimit).not.toBe(999);
+    });
+
+    it('nonPriorityOverride still wins over an inherited volume field (the override ceiling)', () => {
+      const merged = getMergedConfig(
+        'user',
+        { maxLogsPerWindow: 200000 },
+        undefined,
+        'nonPriority',
+        { maxLogsPerWindow: 50000 }
+      );
+
+      expect(merged.maxLogsPerWindow).toBe(50000);
     });
 
     it('global override of exclusive fields still reaches single and priority modes', () => {

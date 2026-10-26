@@ -93,7 +93,6 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache', () => (
 const buildItem = (overrides: Partial<RuleExecutionView> = {}): RuleExecutionView => ({
   id: 'exec-1',
   rule: { id: 'rule-1' },
-  space_id: 'default',
   started_at: '2026-05-05T10:00:00.000Z',
   ended_at: '2026-05-05T10:00:01.500Z',
   timings: { duration_ms: 1500, scheduled_delay_ms: 0 },
@@ -109,7 +108,7 @@ const mockResult = (
       total: number;
       page: number;
       per_page: number;
-      search_matches?: { rules: number; is_truncated: boolean };
+      search_matches?: { rule_count: number; is_truncated: boolean };
     };
     isFetching: boolean;
     isError: boolean;
@@ -348,7 +347,7 @@ describe('RulesTabContent', () => {
           total: 1,
           page: 1,
           per_page: 10,
-          search_matches: { rules: 600, is_truncated: true },
+          search_matches: { rule_count: 600, is_truncated: true },
         },
       });
       renderComponent();
@@ -365,7 +364,7 @@ describe('RulesTabContent', () => {
           total: 0,
           page: 1,
           per_page: 10,
-          search_matches: { rules: 600, is_truncated: true },
+          search_matches: { rule_count: 600, is_truncated: true },
         },
       });
       renderComponent();
