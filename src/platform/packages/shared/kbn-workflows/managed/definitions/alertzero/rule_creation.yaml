@@ -48,12 +48,25 @@ triggers:
           description: >-
             Investigation the proposal is recorded on. The caller opened it for the gap,
             so the analyst sees a single record whichever route the gap takes.
+        investigation_line:
+          type: string
+          maxLength: 1024
+          description: Markdown link to the caller's investigation, shown in the proposal.
+        review_context:
+          type: string
+          maxLength: 20000
+          description: >-
+            Markdown sections from the caller: the gap with its evidence, the check's
+            reasoning and the check link. The proposal shows them in place of its own
+            gap section, so it has the same structure as the caller's other proposals.
       required: [investigation_id]
       additionalProperties: false
 outputs:
   - name: created
     type: boolean
   - name: reviewed
+    type: boolean
+  - name: rejected
     type: boolean
   - name: decision
     type: string
@@ -91,7 +104,8 @@ steps:
         ATT&CK technique: {{ inputs.technique }}
         Detection gap: {{ inputs.gap_description }}
         Evidence: {{ inputs.evidence }}
-        Confidence: {{ inputs.confidence }}
+        {% if inputs.confidence != blank %}Confidence: {{ inputs.confidence }}
+        {% endif %}
 
         Echo the tool's returned rule fields under "rule" and the attachment
         metadata alongside it. Never return id or rule_id. If the tool did not
@@ -219,12 +233,22 @@ steps:
           invocationCount: "${{ inputs.preview_invocation_count }}"
           timeframeEnd: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
 
+  # A rule whose query fails in the preview does not work, for example because the
+  # query is not valid or the index does not exist. It is not attached and not
+  # proposed, and `rejected` tells the caller not to try again.
+  - name: rule_ready
+    type: data.set
+    with:
+      ok: >-
+        ${{ steps.draft_ready.output.ok == true
+          and steps.preview_creation.output.error_text == '' }}
+
   # The draft lives as an attachment in the agent's own conversation, which stays
   # opaque to the analyst. Copy it by value onto the investigation so the rule the
   # proposal asks about is right next to the decision.
   - name: attach_draft
     type: ai.attachment.add
-    if: "${{ steps.draft_ready.output.ok == true }}"
+    if: "${{ steps.rule_ready.output.ok == true }}"
     with:
       conversation_id: "{{ inputs.investigation_id }}"
       id: "rule-draft"
@@ -245,7 +269,7 @@ steps:
     type: data.set
     with:
       ok: >-
-        ${{ steps.draft_ready.output.ok == true
+        ${{ steps.rule_ready.output.ok == true
           and steps.attach_draft.error == null }}
 
   # The proposal gate records the draft on the investigation, parks on the
@@ -267,18 +291,21 @@ steps:
           **Create a new ES|QL detection rule for this gap**
 
           **Rule:** {{ steps.draft_creation.output.structured_output.rule.name }}
+          **Recommended action:** Create the rule in the disabled state
+          {% if inputs.investigation_line != blank %}{{ inputs.investigation_line }}
+          {% endif %}
           {{ steps.draft_creation.output.structured_output.rule.description }}
 
           ```esql
           {{ steps.draft_creation.output.structured_output.rule.query }}
           ```
 
-          **Detection gap**
+          {% if inputs.review_context != blank %}{{ inputs.review_context }}
+          {% else %}**Detection gap**
           {% if inputs.technique != null and inputs.technique != '' %}ATT&CK technique: {{ inputs.technique }}
           {% endif %}{{ inputs.gap_description }}
-
-          **Preview:** {% if steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs{% else %}inconclusive{% endif %}{% if steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
-          Preview errors: {{ steps.preview_creation.output.error_text }}{% endif %}
+          {% endif %}
+          **Preview:** {% if steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs{% else %}inconclusive{% endif %}
           **Severity:** {{ steps.draft_creation.output.structured_output.rule.severity }}. **Risk score:** {{ steps.draft_creation.output.structured_output.rule.risk_score }}.
 
           **Draft:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.draft_creation.output.conversation_id }})
@@ -307,9 +334,12 @@ steps:
       reviewed: >-
         ${{ steps.propose_creation.output.decision == 'approved'
           or steps.propose_creation.output.decision == 'dismissed' }}
+      # The agent made no working rule: no draft, or a query that fails in the preview.
+      # A new run gives the same result, so the caller retires the gap.
+      rejected: "${{ steps.rule_ready.output.ok != true }}"
       decision: "{{ steps.propose_creation.output.decision }}"
       rule_name: "{{ steps.draft_creation.output.structured_output.rule.name }}"
       # Why nothing was proposed, so a gap that keeps coming back can be explained
       # without opening the agent conversation. Empty when the draft reached the gate.
       skip_reason: >-
-        {% if steps.draft_ready.output.ok != true %}{% if steps.draft_creation.output.structured_output.reason != null and steps.draft_creation.output.structured_output.reason != '' %}{{ steps.draft_creation.output.structured_output.reason }}{% else %}The draft is incomplete: it needs a query, a name, a description and an attachment.{% endif %}{% elsif steps.attach_draft.error != null %}The draft could not be attached to the investigation: {{ steps.attach_draft.error.message }}{% endif %}
+        {% if steps.draft_ready.output.ok != true %}{% if steps.draft_creation.output.structured_output.reason != null and steps.draft_creation.output.structured_output.reason != '' %}{{ steps.draft_creation.output.structured_output.reason }}{% else %}The draft is incomplete: it needs a query, a name, a description and an attachment.{% endif %}{% elsif steps.rule_ready.output.ok != true %}The rule query failed in the preview: {{ steps.preview_creation.output.error_text | truncate: 1000 }}{% elsif steps.attach_draft.error != null %}The draft could not be attached to the investigation: {{ steps.attach_draft.error.message }}{% endif %}

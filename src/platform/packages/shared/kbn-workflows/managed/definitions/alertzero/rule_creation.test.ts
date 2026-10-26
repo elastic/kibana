@@ -139,8 +139,11 @@ describe('Detection Rule Creation worker', () => {
       expect(evaluate(ready, draftContext({ attachment_id: '', rule: complete }))).toBe(false);
       expect(evaluate(ready, draftContext({ rule: complete }))).toBe(false);
 
-      for (const name of ['preview_creation', 'attach_draft', 'proposal_ready']) {
+      for (const name of ['preview_creation', 'rule_ready']) {
         expect(JSON.stringify(stepByName(name))).toContain('steps.draft_ready.output.ok == true');
+      }
+      for (const name of ['attach_draft', 'proposal_ready']) {
+        expect(JSON.stringify(stepByName(name))).toContain('steps.rule_ready.output.ok == true');
       }
     });
 
@@ -156,9 +159,28 @@ describe('Detection Rule Creation worker', () => {
       );
       expect(
         evaluate(flagOf('proposal_ready', 'ok'), {
-          steps: { draft_ready: { output: { ok } }, attach_draft: { error: attachError } },
+          steps: { rule_ready: { output: { ok } }, attach_draft: { error: attachError } },
         })
       ).toBe(expected);
+    });
+
+    // A query that fails in the preview does not work, so it is not proposed, and the
+    // caller retires the gap. A preview that finds no errors keeps the draft.
+    it.each([
+      ['a draft whose preview ran', true, '', true],
+      ['a draft whose query failed in the preview', true, 'Unknown index [logs-x]; ', false],
+      ['a draft that was never ready', false, undefined, false],
+    ])('decides whether %s works', (_scenario, ok, errorText, expected) => {
+      const context = {
+        steps: {
+          draft_ready: { output: { ok } },
+          preview_creation: { output: { error_text: errorText } },
+        },
+      };
+      expect(evaluate(flagOf('rule_ready', 'ok'), context)).toBe(expected);
+      expect(evaluate(emit.rejected, { steps: { rule_ready: { output: { ok: expected } } } })).toBe(
+        !expected
+      );
     });
 
     // The no-draft answer the prompt asks for has to satisfy the output schema, or
@@ -284,6 +306,14 @@ describe('Detection Rule Creation worker', () => {
         'The draft is incomplete: it needs a query, a name, a description and an attachment.',
       ],
       [
+        'the preview error for a query that does not run',
+        { ok: true },
+        { reason: '' },
+        null,
+        'The rule query failed in the preview: Unknown index [logs-aws.cloudtrail-*]; ',
+        { ok: false },
+      ],
+      [
         'the attachment error for a draft that could not be copied',
         { ok: true },
         { reason: '' },
@@ -291,16 +321,21 @@ describe('Detection Rule Creation worker', () => {
         'The draft could not be attached to the investigation: boom',
       ],
       ['nothing for a proposed draft', { ok: true }, { reason: '' }, null, ''],
-    ])('reports %s as skip_reason', (_scenario, ready, structured, attachError, expected) => {
-      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(emit.skip_reason, {
-        steps: {
-          draft_ready: { output: ready },
-          draft_creation: { output: { structured_output: structured } },
-          attach_draft: { error: attachError },
-        },
-      });
-      expect(rendered).toBe(expected);
-    });
+    ])(
+      'reports %s as skip_reason',
+      (_scenario, ready, structured, attachError, expected, rule = ready) => {
+        const rendered = createWorkflowLiquidEngine().parseAndRenderSync(emit.skip_reason, {
+          steps: {
+            draft_ready: { output: ready },
+            rule_ready: { output: rule },
+            preview_creation: { output: { error_text: 'Unknown index [logs-aws.cloudtrail-*]; ' } },
+            draft_creation: { output: { structured_output: structured } },
+            attach_draft: { error: attachError },
+          },
+        });
+        expect(rendered).toBe(expected);
+      }
+    );
   });
 
   describe('inputs', () => {
