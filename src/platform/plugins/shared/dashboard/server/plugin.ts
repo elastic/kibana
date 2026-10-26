@@ -206,8 +206,20 @@ export class DashboardPlugin
         perPage: number
       ) => scanDashboards(savedObjectsClient, page, perPage, getCachedDashboardStateSchema()),
       client: {
-        read: async (savedObjectsClient: SavedObjectsClientContract, id: string) => {
-          return (await read(savedObjectsClient, getCachedDashboardStateSchema(), id)).body;
+        read: async (
+          savedObjectsClient: SavedObjectsClientContract,
+          id: string,
+          options?: { isDashboardAppRequest?: boolean }
+        ) => {
+          return (
+            await read(
+              savedObjectsClient,
+              getCachedDashboardStateSchema(),
+              id,
+              undefined,
+              options?.isDashboardAppRequest
+            )
+          ).body;
         },
       },
     };
