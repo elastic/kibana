@@ -427,11 +427,15 @@ describe('useServiceSettings — eager instances persistence', () => {
     ...overrides,
   });
 
-  const mockFlow = (selectedServiceIds: string[], awsServicesMap: unknown = servicesMap) =>
+  // `null` stands for a services map that has not loaded yet (`undefined` would take the default).
+  const mockFlow = (
+    selectedServiceIds: string[],
+    awsServicesMap: typeof servicesMap | null = servicesMap
+  ) =>
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds },
       removeDeployInstance: jest.fn(),
-      awsServicesMap,
+      awsServicesMap: awsServicesMap ?? undefined,
     } as unknown as ReturnType<typeof useOnboardingFlow>);
 
   /** Backs the session storage with state and records every write. */
@@ -496,18 +500,32 @@ describe('useServiceSettings — eager instances persistence', () => {
     expect(writes).toHaveLength(0);
   });
 
-  it('does not write while the services map is loading, then keeps persisted duplicates', () => {
-    mockFlow(['svc_a'], undefined);
-    const writes = mockStorage(
-      settings({ instances: [baseA, dupA], serviceVars: { svc_a: emptyVars } })
-    );
+  it('does not prune serviceVars while the services map is loading', () => {
+    // A resumed session: serviceVars are restored but instances are not. With no map yet the
+    // reconciled list is empty, so without the guard every stored key would look stale and the
+    // configuration would be erased before the matrix can rebuild the instances.
+    const vars = { enabledDataStreams: ['logs'], varsByDataStream: {} };
+    mockFlow(['svc_a'], null);
+    const writes = mockStorage(settings({ serviceVars: { svc_a: vars } }));
     const { result, rerender } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    expect(result.current.instances).toEqual([]);
     expect(writes).toHaveLength(0);
 
     mockFlow(['svc_a']);
     rerender();
 
-    expect(writes).toHaveLength(0);
+    expect(writes).toHaveLength(1);
+    expect(writes[0].instances).toEqual([baseA]);
+    expect(writes[0].serviceVars).toEqual({ svc_a: vars });
+  });
+
+  it('keeps persisted instances, duplicates included, while the services map is loading', () => {
+    mockFlow(['svc_a'], null);
+    mockStorage(settings({ instances: [baseA, dupA] }));
+
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
     expect(result.current.instances).toEqual([baseA, dupA]);
   });
 
