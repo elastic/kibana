@@ -65,6 +65,11 @@ export interface CasePersistedAttributes {
     version: number;
   } | null;
   extended_fields?: Record<string, unknown> | null;
+  /**
+   * Which path set `settings.extractObservables`. Server-owned: it is never part of a request or
+   * a response, and only the write codec for new cases keeps it.
+   */
+  extract_observables_source?: string;
 }
 
 type CasePersistedCustomFields = Array<{
@@ -81,6 +86,28 @@ export type CaseTransformedAttributesWithAttachmentStats = CaseAttributes & {
 };
 
 export const CaseTransformedAttributesSchema = CaseAttributesSchema;
+
+export const ExtractObservablesSourceSchema = z.enum([
+  'explicit',
+  'template',
+  'space_default',
+  'rule',
+]);
+
+export type ExtractObservablesSource = z.infer<typeof ExtractObservablesSourceSchema>;
+
+/**
+ * Write schema for new cases. `extract_observables_source` is set only by the server. It is outside
+ * `CaseAttributesSchema` on purpose: that schema also shapes the public request and response.
+ * Read schemas keep dropping this key, so it never reaches an API response.
+ */
+export const CaseCreateAttributesSchema = CaseAttributesSchema.extend({
+  extract_observables_source: ExtractObservablesSourceSchema.optional(),
+});
+
+export type CaseCreateAttributes = CaseTransformedAttributes & {
+  extract_observables_source?: ExtractObservablesSource;
+};
 
 /**
  * We add the `total_comments`, `total_alerts`, and `total_events` properties to allow the

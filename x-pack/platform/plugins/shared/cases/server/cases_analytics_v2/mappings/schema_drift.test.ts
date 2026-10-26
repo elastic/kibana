@@ -116,6 +116,8 @@ const buildFullAttributes = (): {
   customFields: [{ key: 'cf', type: 'text', value: 'x' }],
   // eslint-disable-next-line @typescript-eslint/naming-convention
   extended_fields: { riskScore_as_long: '42' },
+  // Server-owned and telemetry-only: `buildCaseDoc` does not emit it, so Layer 1 stays unaffected.
+  extract_observables_source: 'rule',
 });
 
 const fullCaseSO = (): SavedObject<CasePersistedAttributes> =>

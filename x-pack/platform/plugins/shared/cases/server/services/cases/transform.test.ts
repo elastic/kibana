@@ -799,6 +799,20 @@ describe('case transforms', () => {
       expect(result.status).toBe(CaseStatuses.open);
     });
 
+    it('does not expose the server-owned extract_observables_source attribute', () => {
+      const caseData: CasePersistedAttributes = {
+        ...basicESCaseFields,
+        total_alerts: 5,
+        total_comments: 3,
+        total_events: 2,
+        extract_observables_source: 'rule',
+      };
+
+      const result = transformESModelToCase('case-1', caseData, createMockSearchHit([]));
+
+      expect(result).not.toHaveProperty('extract_observables_source');
+    });
+
     it('transforms connector with reference correctly', () => {
       const connector = createESJiraConnector();
       const caseData: CasePersistedAttributes = {

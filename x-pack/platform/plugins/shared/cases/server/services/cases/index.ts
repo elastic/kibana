@@ -79,11 +79,13 @@ import {
   EF_ALL_VALUES_FIELD,
 } from './extended_field_search_utils';
 import type {
+  CaseCreateAttributes,
   CasePersistedAttributes,
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
 } from '../../common/types/case';
 import {
+  CaseCreateAttributesSchema,
   CaseTransformedAttributesSchema,
   CasePersistedStatus,
   getPartialCaseTransformedAttributesSchema,
@@ -1108,9 +1110,9 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to create a new case`);
 
-      const decodedAttributes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+      const decodedAttributes = decodeOrThrowZod(CaseCreateAttributesSchema)(
         attributes
-      ) as CaseTransformedAttributes;
+      ) as CaseCreateAttributes;
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
 
       transformedAttributes.attributes.total_alerts = 0;
@@ -1146,9 +1148,9 @@ export class CasesService {
       this.log.debug(`Attempting to bulk create cases`);
 
       const bulkCreateRequest = cases.map(({ id, ...attributes }) => {
-        const decodedAttributes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+        const decodedAttributes = decodeOrThrowZod(CaseCreateAttributesSchema)(
           attributes
-        ) as CaseTransformedAttributes;
+        ) as CaseCreateAttributes;
 
         const { attributes: transformedAttributes, referenceHandler } =
           transformAttributesToESModel(decodedAttributes);

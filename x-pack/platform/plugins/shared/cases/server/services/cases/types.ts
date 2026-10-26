@@ -11,6 +11,7 @@ import type { Case, CaseStatuses } from '../../../common/types/domain';
 import type { IndexRefresh } from '../types';
 import type { User } from '../../common/types/user';
 import type {
+  CaseCreateAttributes,
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
 } from '../../common/types/case';
@@ -60,12 +61,12 @@ export interface FindCaseCommentsArgs {
 }
 
 export interface CreateCaseArgs extends IndexRefresh {
-  attributes: CaseTransformedAttributes;
+  attributes: CaseCreateAttributes;
   id: string;
 }
 
 export interface BulkCreateCasesArgs extends IndexRefresh {
-  cases: Array<{ id: string } & CaseTransformedAttributes>;
+  cases: Array<{ id: string } & CaseCreateAttributes>;
 }
 
 export interface PatchCase extends IndexRefresh {
