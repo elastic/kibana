@@ -109,11 +109,13 @@ function setSections({
   hasActiveInvestigations = false,
   isInitialLoading = false,
   isFetching = false,
+  areSeverityCountsLoading = false,
 }: {
   sections: InvestigationSectionState[];
   hasActiveInvestigations?: boolean;
   isInitialLoading?: boolean;
   isFetching?: boolean;
+  areSeverityCountsLoading?: boolean;
 }) {
   mockUseInvestigationSections.mockReturnValue({
     sections,
@@ -123,6 +125,7 @@ function setSections({
       medium: sections.find((section) => section.id === 'medium')?.total ?? 0,
       low: sections.find((section) => section.id === 'low')?.total ?? 0,
     },
+    areSeverityCountsLoading,
     hasActiveInvestigations,
     isInitialLoading,
     isFetching,
@@ -446,6 +449,31 @@ describe('NightshiftApp', () => {
     expect(
       reportEvent.mock.calls.filter(([eventType]) => eventType === 'nightshift_homepage_viewed')
     ).toHaveLength(1);
+  });
+
+  it('waits for the severity counts before reporting the landing page view', () => {
+    const sections = defaultSections({
+      critical: { investigations: [criticalInvestigation], total: 1 },
+    });
+    setSections({ sections, areSeverityCountsLoading: true });
+
+    const { rerender } = renderApp();
+
+    expect(reportEvent).not.toHaveBeenCalledWith('nightshift_homepage_viewed', expect.anything());
+
+    setSections({ sections });
+    rerender(
+      <I18nProvider>
+        <MemoryRouter>
+          <NightshiftApp />
+        </MemoryRouter>
+      </I18nProvider>
+    );
+
+    expect(reportEvent).toHaveBeenCalledWith(
+      'nightshift_homepage_viewed',
+      expect.objectContaining({ critical_count: 1 })
+    );
   });
 
   it('reports a clicked investigation with the id it opened', async () => {

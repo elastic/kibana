@@ -44,6 +44,8 @@ export interface InvestigationSectionState extends FetchInvestigationsResult {
 export interface InvestigationSectionsResult {
   sections: InvestigationSectionState[];
   severityCounts: SeverityCounts;
+  /** The counts query is separate from the sections, so it settles on its own schedule. */
+  areSeverityCountsLoading: boolean;
   hasActiveInvestigations: boolean;
   isInitialLoading: boolean;
   isFetching: boolean;
@@ -197,6 +199,7 @@ export const useInvestigationSections = ({
   return {
     sections,
     severityCounts,
+    areSeverityCountsLoading: severityCountsQuery.isInitialLoading,
     hasActiveInvestigations,
     isInitialLoading: sections.some((section) => section.isInitialLoading),
     isFetching: sections.some((section) => section.isFetching),

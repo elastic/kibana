@@ -86,6 +86,7 @@ export function NightshiftApp(): React.ReactElement {
   const {
     sections,
     severityCounts,
+    areSeverityCountsLoading,
     hasActiveInvestigations,
     isInitialLoading,
     isFetching,
@@ -227,7 +228,13 @@ export function NightshiftApp(): React.ReactElement {
 
   // The landing page is "viewed" once its first load lands, with what it then shows.
   useEffect(() => {
-    if (hasReportedHomepageView.current || isInitialLoading || allFailed) {
+    // The counts come from their own query: reporting before it settles would report zeros.
+    if (
+      hasReportedHomepageView.current ||
+      isInitialLoading ||
+      areSeverityCountsLoading ||
+      allFailed
+    ) {
       return;
     }
     hasReportedHomepageView.current = true;
@@ -238,7 +245,14 @@ export function NightshiftApp(): React.ReactElement {
         ({ metadata }) => metadata.severity === undefined
       ).length,
     });
-  }, [allFailed, analytics, isInitialLoading, loadedCount, severityCounts]);
+  }, [
+    allFailed,
+    analytics,
+    areSeverityCountsLoading,
+    isInitialLoading,
+    loadedCount,
+    severityCounts,
+  ]);
 
   // Clicks cannot carry an id, and a deep link is not a click: report the view itself so both
   // paths join to the investigation they opened. Severity and status need the loaded list, so
