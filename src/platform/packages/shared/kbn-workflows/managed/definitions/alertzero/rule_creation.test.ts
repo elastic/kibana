@@ -178,9 +178,26 @@ describe('Detection Rule Creation worker', () => {
         },
       };
       expect(evaluate(flagOf('rule_ready', 'ok'), context)).toBe(expected);
-      expect(evaluate(emit.rejected, { steps: { rule_ready: { output: { ok: expected } } } })).toBe(
-        !expected
-      );
+    });
+
+    // Only a result that a new run repeats retires the gap: a reason from the agent or a
+    // preview error. An incomplete draft without a reason can be a model or tool failure.
+    it.each([
+      ['a query that failed in the preview', false, 'Unknown index [logs-x]; ', '', true],
+      ['no draft, with a reason from the agent', false, undefined, 'No data source.', true],
+      ['an incomplete draft without a reason', false, undefined, '', false],
+      ['a working rule', true, '', '', false],
+      ['a working rule with a stray reason', true, '', 'Some text.', false],
+    ])('reports %s as rejected or not', (_scenario, ok, errorText, reason, expected) => {
+      expect(
+        evaluate(emit.rejected, {
+          steps: {
+            rule_ready: { output: { ok } },
+            preview_creation: { output: { error_text: errorText } },
+            draft_creation: { output: { structured_output: { reason } } },
+          },
+        })
+      ).toBe(expected);
     });
 
     // The no-draft answer the prompt asks for has to satisfy the output schema, or
@@ -220,9 +237,11 @@ describe('Detection Rule Creation worker', () => {
       expect(schema.safeParse(allEmpty).success).toBe(false);
     });
 
-    // The preview informs the analyst; it does not gate the proposal.
-    it('proposes the draft whatever the preview returned', () => {
+    // A preview error gates the proposal through `rule_ready`. A preview without errors,
+    // also an aborted one, only informs the analyst.
+    it('gates the proposal only on preview errors', () => {
       expect(stepByName('propose_creation')?.if).not.toContain('preview_creation');
+      expect(flagOf('rule_ready', 'ok')).toContain('steps.preview_creation.output.error_text');
       expect(String(inputsOf(stepByName('propose_creation')).comment)).toContain(
         'steps.preview_creation.output.alert_count'
       );
