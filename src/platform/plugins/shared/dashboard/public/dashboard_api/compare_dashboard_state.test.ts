@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { DashboardPanel, DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 import { diffDashboardStates } from './compare_dashboard_state';
 
@@ -160,6 +160,7 @@ describe('diffDashboardStates', () => {
     expect(
       diffDashboardStates(baseline, current, {
         'panel-1': {
+          type: 'lens',
           compareSerializedState: (
             left: { attributes?: { title?: string } } | undefined,
             right: { attributes?: { title?: string } } | undefined
@@ -167,5 +168,54 @@ describe('diffDashboardStates', () => {
         },
       })
     ).toEqual({});
+  });
+
+  it('returns a removed description or title', () => {
+    expect(diffDashboardStates(state(), state({ description: undefined }))).toStrictEqual({
+      description: undefined,
+    });
+    expect(diffDashboardStates(state(), state({ title: '' }))).toStrictEqual({ title: '' });
+  });
+
+  describe('panels', () => {
+    const lensPanel = (overrides: Record<string, unknown> = {}) =>
+      ({
+        type: 'lens',
+        grid: { x: 0, y: 0, w: 12, h: 8 },
+        config: { title: 'Count' },
+        ...overrides,
+      } as DashboardPanel);
+    const panelsState = (panel: DashboardPanel) =>
+      state({
+        panels: [panel, { ...section(false), panels: [panel] }],
+        pinned_panels: [{ type: 'options_list_control', width: 'medium', config: {} }],
+      } as Partial<DashboardState>);
+    const ignoreConfig = { compareSerializedState: () => true };
+
+    it('finds no changes between equal panels without ids', () => {
+      expect(diffDashboardStates(panelsState(lensPanel()), panelsState(lensPanel()))).toEqual({});
+    });
+
+    it('returns the panels when a panel type changes', () => {
+      const current = state({ panels: [lensPanel({ id: 'panel-1', type: 'visualization' })] });
+
+      expect(
+        diffDashboardStates(state({ panels: [lensPanel({ id: 'panel-1' })] }), current, {
+          'panel-1': { type: 'lens', ...ignoreConfig },
+        })
+      ).toEqual({ panels: current.panels });
+    });
+
+    it('returns the panels when a library panel points to another library item', () => {
+      const libraryPanel = (refId: string) =>
+        lensPanel({ id: 'panel-1', config: { ref_id: refId } });
+      const current = state({ panels: [libraryPanel('library-b')] });
+
+      expect(
+        diffDashboardStates(state({ panels: [libraryPanel('library-a')] }), current, {
+          'panel-1': { type: 'lens', ...ignoreConfig },
+        })
+      ).toEqual({ panels: current.panels });
+    });
   });
 });

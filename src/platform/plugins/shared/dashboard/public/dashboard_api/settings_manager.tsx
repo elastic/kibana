@@ -60,21 +60,27 @@ function deserializeState(state: DashboardState) {
 
 /** Same settings diff the unsaved-changes manager produces, for any two dashboard states. */
 export const diffDashboardSettings = (baseline: DashboardState, current: DashboardState) => {
-  const { description, tags, time_restore, project_routing_restore, title, ...optionDiffs } =
-    diffComparators(
-      comparators,
-      deserializeState(baseline),
-      deserializeState(current),
-      DEFAULT_SETTINGS
-    );
+  // an empty description is saved as no description
+  const deserializeForDiff = (state: DashboardState) => ({
+    ...deserializeState(state),
+    description: state.description || undefined,
+  });
+  const diff = diffComparators(
+    comparators,
+    deserializeForDiff(baseline),
+    deserializeForDiff(current),
+    DEFAULT_SETTINGS
+  );
+  const { description, tags, time_restore, project_routing_restore, title, ...optionDiffs } = diff;
   // options needs to contain all values and not just diffs since is spread into saved state
   const options = Object.keys(optionDiffs).length
     ? { ...DEFAULT_DASHBOARD_OPTIONS, ...current.options }
     : undefined;
   return {
-    ...(description && { description }),
+    // key presence, not truthiness, so clearing the description or title is still a change
+    ...('description' in diff && { description }),
     ...(tags && { tags }),
-    ...(title && { title }),
+    ...('title' in diff && { title }),
     ...(typeof time_restore === 'boolean' && { time_restore }),
     ...(typeof project_routing_restore === 'boolean' && { project_routing_restore }),
     ...(options && { options }),
