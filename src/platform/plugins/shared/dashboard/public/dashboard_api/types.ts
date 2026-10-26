@@ -215,6 +215,11 @@ export type DashboardApi = CanExpandPanels &
     getSerializedState: () => {
       attributes: DashboardState;
     };
+    /**
+     * Whether two dashboard states are equal under the unsaved-changes comparators, comparing each
+     * panel with the comparator of this dashboard's panel with the same id.
+     */
+    areStatesEqual: (baseline: DashboardState, current: DashboardState) => boolean;
     getDashboardPanelFromId: (id: string) => {
       type: string;
       grid?: GridData;

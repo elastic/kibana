@@ -46,6 +46,27 @@ import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
 
 export const COMPARE_DEBOUNCE = 100;
 
+type UnifiedSearchState = Pick<
+  DashboardState,
+  'filters' | 'query' | 'refresh_interval' | 'time_range'
+>;
+
+/** Unsaved-changes comparators of the unified search state; time and refresh count only with time restore on. */
+export const getUnifiedSearchComparators = (
+  isTimeRestore: () => boolean
+): StateComparators<UnifiedSearchState> => ({
+  filters: (a, b) =>
+    compareFilters(
+      toStoredFilters(a, logger) ?? [],
+      toStoredFilters(b, logger) ?? [],
+      COMPARE_ALL_OPTIONS
+    ),
+  query: 'deepEquality',
+  refresh_interval: (a, b) => (isTimeRestore() ? fastIsEqual(a, b) : true),
+  time_range: (a, b) =>
+    !isTimeRestore() || (areTimesEqual(a?.from, b?.from) && areTimesEqual(a?.to, b?.to)),
+});
+
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
   timeRestore$: PublishingSubject<boolean>,
@@ -241,31 +262,9 @@ export function initializeUnifiedSearchManager(
     );
   }
 
-  const comparators = {
-    filters: (a, b) =>
-      compareFilters(
-        toStoredFilters(a, logger) ?? [],
-        toStoredFilters(b, logger) ?? [],
-        COMPARE_ALL_OPTIONS
-      ),
-    query: 'deepEquality',
-    refresh_interval: (a: RefreshInterval | undefined, b: RefreshInterval | undefined) =>
-      timeRestore$.value ? fastIsEqual(a, b) : true,
-    time_range: (a: TimeRange | undefined, b: TimeRange | undefined) => {
-      if (!timeRestore$.value) return true; // if time restore is set to false, time range doesn't count as a change.
-      if (!areTimesEqual(a?.from, b?.from) || !areTimesEqual(a?.to, b?.to)) {
-        return false;
-      }
-      return true;
-    },
-  } as StateComparators<
-    Pick<DashboardState, 'filters' | 'query' | 'refresh_interval' | 'time_range'>
-  >;
+  const comparators = getUnifiedSearchComparators(() => timeRestore$.value);
 
-  const getState = (): Pick<
-    DashboardState,
-    'filters' | 'query' | 'refresh_interval' | 'time_range'
-  > => {
+  const getState = (): UnifiedSearchState => {
     const serializableFilters = asCodeFilters$.value;
     const asCodeQuery = query$.value ? toAsCodeQuery(query$.value) : undefined;
 

@@ -54,6 +54,28 @@ describe('initializeSettingsManager', () => {
   });
 });
 
+describe('areStatesEqual', () => {
+  const { api } = getDashboardApi({
+    incomingEmbeddables: [],
+    initialState: DEFAULT_DASHBOARD_STATE,
+  });
+
+  test('treats states that differ only in what the unsaved-changes manager ignores as equal', () => {
+    expect(
+      api.areStatesEqual(DEFAULT_DASHBOARD_STATE, {
+        ...DEFAULT_DASHBOARD_STATE,
+        esql_approximation: false,
+      })
+    ).toBe(true);
+  });
+
+  test('finds a changed setting', () => {
+    expect(
+      api.areStatesEqual(DEFAULT_DASHBOARD_STATE, { ...DEFAULT_DASHBOARD_STATE, title: 'Logs' })
+    ).toBe(false);
+  });
+});
+
 describe('dashboard_saved telemetry', () => {
   beforeEach(() => {
     jest.clearAllMocks();
