@@ -38,6 +38,7 @@ import type {
 import { useFormatTimestamp } from '../../../common/format_timestamp';
 import { getChangePointLabel } from './change_point';
 import { getVerdictBadge } from './verdict';
+import { SkippedDetectionBadge } from './skipped_detection';
 import { ChangePointLensChart } from './change_point_lens_chart';
 import { EntityChip } from '../../../entity/entity_chip';
 import { EntityFlyout } from '../../../entity/entity_flyout';
@@ -172,6 +173,11 @@ export function DetectionFlyout({
             {verdictBadge && (
               <EuiFlexItem grow={false}>
                 <EuiBadge color={verdictBadge.color}>{verdictBadge.label}</EuiBadge>
+              </EuiFlexItem>
+            )}
+            {detection.skip && (
+              <EuiFlexItem grow={false}>
+                <SkippedDetectionBadge skip={detection.skip} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
