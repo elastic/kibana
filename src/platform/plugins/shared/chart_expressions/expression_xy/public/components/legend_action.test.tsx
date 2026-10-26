@@ -269,6 +269,21 @@ describe('getLegendAction', () => {
     expect(screen.getByTestId("legend-Women's Accessories - Label B")).toBeInTheDocument();
   });
 
+  it('mounts the popover only when opened, and unmounts it when closed', async () => {
+    const Component = buildComponent(sampleLayer);
+    renderWithKibanaRenderContext(<Component {...makeSeriesProps("Women's Accessories")} />);
+    expect(screen.queryByTitle(/filter options/)).not.toBeInTheDocument();
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: /legend actions/i }));
+    expect(await screen.findByText('Action 1')).toBeInTheDocument();
+    expect(screen.getByTitle(/filter options/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /legend actions/i }));
+    await waitFor(() => expect(screen.queryByTitle(/filter options/)).not.toBeInTheDocument());
+    expect(screen.getByRole('button', { name: /legend actions/i })).toBeInTheDocument();
+  });
+
   it('shows cell value actions in the popover', async () => {
     const Component = buildComponent(sampleLayer);
     await renderAndOpen(Component, makeSeriesProps("Women's Accessories"));

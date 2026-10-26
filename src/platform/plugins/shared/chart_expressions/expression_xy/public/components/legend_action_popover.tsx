@@ -156,6 +156,13 @@ export const LegendActionPopover: React.FunctionComponent<{
       <EuiIcon size="s" type="boxesVertical" aria-hidden={true} />
     </div>
   );
+
+  // A legend can have thousands of items, so only mount the popover while it is open.
+  // On close, `onClose` refocuses `ref`, which by then points to this plain button.
+  if (!popoverOpen) {
+    return Button;
+  }
+
   return (
     <EuiPopover
       aria-label={i18n.translate('expressionXY.legend.filterOptionsLegend', {
