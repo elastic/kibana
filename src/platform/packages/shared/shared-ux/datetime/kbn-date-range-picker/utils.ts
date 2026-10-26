@@ -11,6 +11,7 @@ import type { RefObject } from 'react';
 
 import moment from 'moment';
 
+import { TZDate } from 'react-day-picker';
 import type {
   TimePrecision,
   TimeRange,
@@ -348,13 +349,30 @@ export function getOptionInputText(
   return `${startFragment.text} ${DATE_RANGE_INPUT_DELIMITER} ${endFragment.text}`;
 }
 
-/** Returns a new Date set to the start of the given day (00:00:00.000). */
-export function getStartDate(date: Date): Date {
+/** Returns a new Date set to the start of the given day in the requested time zone. */
+export function getStartDate(date: Date, timeZone?: string): Date {
+  if (timeZone) {
+    return new TZDate(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0, timeZone);
+  }
+
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
 }
 
-/** Returns a new Date set to the end of the given day (23:59:59.999). */
-export function getEndDate(date: Date): Date {
+/** Returns a new Date set to the end of the given day in the requested time zone. */
+export function getEndDate(date: Date, timeZone?: string): Date {
+  if (timeZone) {
+    return new TZDate(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      23,
+      59,
+      59,
+      999,
+      timeZone
+    );
+  }
+
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
 }
 

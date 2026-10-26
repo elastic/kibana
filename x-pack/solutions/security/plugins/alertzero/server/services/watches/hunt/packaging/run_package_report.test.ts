@@ -200,7 +200,12 @@ const deps = (overrides: Partial<RunPackageReportDeps> = {}): RunPackageReportDe
     written: subjects.map((s) => ({ kiId: s.kiId, subject: s.reportId })),
     skipped: [],
   }),
-  resolveHostEnrollment: async () => ({ enrolled: true, agentId: 'agent-1', capabilities: [] }),
+  resolveHostEnrollment: async () => ({
+    enrolled: true,
+    agentId: 'agent-1',
+    capabilities: [],
+    capabilitiesSource: 'reported',
+  }),
   rehydrateProcessSelectors: async () => [],
   countExistingProposals: async () => 0,
   // Every subject is free by default, at the first generation, as it is in an empty space.
