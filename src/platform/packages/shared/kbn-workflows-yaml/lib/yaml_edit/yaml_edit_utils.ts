@@ -460,12 +460,13 @@ const formatValue = (value: unknown, indentUnit: number, original: Node | null):
     : stringify(value, { indent: indentUnit, lineWidth: 0 })
   ).trimEnd();
 
-/** `key: value`, or `key:` followed by an indented block for non-empty maps and lists. */
+/** `key: value` as YAML text. The `yaml` library quotes the key and indents block values. */
 const formatEntry = (key: string, value: unknown, indentUnit: number, original: Node | null) => {
-  const body = formatValue(value, indentUnit, original);
-  return isBlockValue(value)
-    ? `${key}:\n${padFollowingLines(`${' '.repeat(indentUnit)}${body}`, indentUnit)}`
-    : `${key}: ${body}`;
+  const entry = nodeFactory.createNode({ [key]: value }) as YAMLMap;
+  if (original && isPair(entry.items[0])) {
+    mergePreservingFormat(original, entry.items[0].value as Node);
+  }
+  return stringify(entry, { indent: indentUnit, lineWidth: 0 }).trimEnd();
 };
 
 const columnOf = (yaml: string, offset: number): number =>
@@ -490,27 +491,24 @@ const replaceEntry = (
   indentUnit: number,
   scope: EditScope
 ): EditResult => {
-  // Scalar to primitive: change only the value, so quoting and inline comments stay.
-  if (isInlineScalar(node) && node.range && !isBlockValue(value)) {
-    const valStr = formatValue(value, indentUnit, node);
+  // Scalar to a one-line value: change only the value, so quoting and inline comments stay.
+  const valStr = formatValue(value, indentUnit, node);
+  if (isInlineScalar(node) && node.range && !isBlockValue(value) && !valStr.includes('\n')) {
     return checkedResult(yaml, spliceYaml(yaml, node.range[0], node.range[1], valStr), scope);
   }
 
   const start = key?.range?.[0] ?? node?.range?.[0];
   if (start === undefined) return { success: false, yaml, error: 'Cannot determine value range' };
 
-  let end: number;
-  if (node?.range) {
-    end = contentEnd(yaml, node);
-  } else {
-    // `key:` with no value: replace up to the end of the line.
-    const lineEnd = yaml.indexOf('\n', start);
+  // Without a value (`key:`), or when the new value is a block scalar (`|`, `>`), replace
+  // to the end of the line: a trailing comment would become part of the new text.
+  let end = node?.range ? contentEnd(yaml, node) : start;
+  if (!node?.range || /^[|>]/.test(valStr)) {
+    const lineEnd = yaml.indexOf('\n', end);
     end = lineEnd === -1 ? yaml.length : lineEnd;
   }
 
-  const text = key?.range
-    ? formatEntry(yaml.slice(key.range[0], key.range[1]), value, indentUnit, node)
-    : formatValue(value, indentUnit, node);
+  const text = key ? formatEntry(String(key.value), value, indentUnit, node) : valStr;
   return checkedResult(
     yaml,
     spliceYaml(yaml, start, end, padFollowingLines(text, columnOf(yaml, start))),
@@ -535,16 +533,13 @@ const appendEntry = (
     formatEntry(key, value, indentUnit, null),
     column
   )}`;
-  const end = contentEnd(yaml, map);
-  return checkedResult(yaml, spliceYaml(yaml, end, end, `\n${entry}`), scope);
+  // Insert after the full map range: trailing blank lines can belong to a `|+` value.
+  const end = map.range?.[1] ?? yaml.length;
+  const insertion = yaml[end - 1] === '\n' ? `${entry}\n` : `\n${entry}`;
+  return checkedResult(yaml, spliceYaml(yaml, end, end, insertion), scope);
 };
 
-/**
- * Sets `value` at a dot path (e.g. `with.inputs.owner`, `triggers.0.with.every`)
- * under the block map `base`. Missing map keys are created. List indexes must
- * already exist.
- */
-const setValueAtPath = (
+const spliceAtPath = (
   yaml: string,
   base: YAMLMap,
   path: string[],
@@ -560,17 +555,8 @@ const setValueAtPath = (
     let node: Node | null;
 
     if (isSeq(parent)) {
-      const index = Number(segment);
-      if (!isIndexSegment(segment) || index >= parent.items.length) {
-        return {
-          success: false,
-          yaml,
-          error: `"${path.slice(0, i).join('.')}" is a list with ${
-            parent.items.length
-          } items; index "${segment}" does not exist`,
-        };
-      }
-      node = parent.items[index] as Node | null;
+      // `setValueAtPath` has already checked that every list index exists.
+      node = parent.items[Number(segment)] as Node | null;
     } else {
       const pair = findPairInMap(parent, segment);
       if (!pair) {
@@ -604,6 +590,43 @@ const setValueAtPath = (
   return { success: false, yaml, error: 'Empty property path' };
 };
 
+/**
+ * Sets `value` at a dot path (e.g. `with.inputs.owner`, `triggers.0.with.every`)
+ * under the block map that `locateBase` finds. Missing map keys are created. List
+ * indexes must already exist. The result is parsed again and must equal the old
+ * value with only this change; otherwise the edit fails and the YAML is unchanged.
+ */
+const setValueAtPath = (
+  yaml: string,
+  doc: Document,
+  locateBase: (document: Document) => YAMLMap | null,
+  property: string,
+  value: unknown,
+  scope: EditScope
+): EditResult => {
+  const base = locateBase(doc);
+  if (!base) return { success: false, yaml, error: 'Cannot find the map to edit' };
+
+  const path = property.split('.');
+  const expected = setInPlainValue(base.toJSON(), path, value);
+  if ('error' in expected) {
+    return { success: false, yaml, error: `"${property}": ${expected.error}` };
+  }
+
+  const result = spliceAtPath(yaml, base, path, value, detectIndent(yaml), scope);
+  if (!result.success) return result;
+
+  const after = locateBase(parseDocument(result.yaml));
+  if (!isEqual(after?.toJSON(), expected.value)) {
+    return {
+      success: false,
+      yaml,
+      error: `Editing "${property}" would change other values. No change was made.`,
+    };
+  }
+  return result;
+};
+
 export const modifyStepProperty = (
   yaml: string,
   stepName: string,
@@ -616,7 +639,6 @@ export const modifyStepProperty = (
   const stepNode = getStepNode(doc, stepName);
   if (!stepNode) return { success: false, yaml, error: `Step "${stepName}" not found` };
 
-  const indentUnit = detectIndent(yaml);
   const stepNodeRange = nodeRange(stepNode);
   const scope: EditScope = {
     type: 'step',
@@ -626,7 +648,8 @@ export const modifyStepProperty = (
       : undefined,
   };
 
-  return setValueAtPath(yaml, stepNode, property.split('.'), value, indentUnit, scope);
+  const locateStep = (document: Document) => getStepNode(document, stepName);
+  return setValueAtPath(yaml, doc, locateStep, property, value, scope);
 };
 
 /**
@@ -690,18 +713,17 @@ export const modifyWorkflowProperty = (
   if (!isMap(doc.contents)) {
     return { success: false, yaml, error: 'YAML root is not a mapping' };
   }
-  const indentUnit = detectIndent(yaml);
+  const scope: EditScope = { type: 'property', key: rootKey };
   if (findPairInMap(doc.contents, rootKey)) {
-    return setValueAtPath(yaml, doc.contents, [rootKey, ...nestedPath], value, indentUnit, {
-      type: 'property',
-      key: rootKey,
-    });
+    const locateRoot = (document: Document) =>
+      isMap(document.contents) ? document.contents : null;
+    return setValueAtPath(yaml, doc, locateRoot, property, value, scope);
   }
 
   // Missing root key: add it in canonical order with the nested value.
   const created = setInPlainValue(undefined, nestedPath, value);
   if ('error' in created) return { success: false, yaml, error: `"${rootKey}": ${created.error}` };
-  const scope: EditScope = { type: 'property', key: rootKey };
+  const indentUnit = detectIndent(yaml);
   const newProp = stringifyValue({ [rootKey]: created.value }, indentUnit, 0).trimEnd();
   const insertOffset = findCanonicalInsertOffset(doc.contents, rootKey);
 

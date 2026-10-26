@@ -1396,6 +1396,41 @@ steps:
       });
     });
 
+    it('replaces an inline scalar with a multi-line string', () => {
+      const yaml = PATH_WORKFLOW.replace('workflow-id: child', 'workflow-id: child # old');
+      const result = modifyStepProperty(
+        yaml,
+        'call_child',
+        'with.workflow-id',
+        'line one\nline two'
+      );
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().steps[0].with['workflow-id']).toBe(
+        'line one\nline two'
+      );
+    });
+
+    it('quotes a new key that needs quoting', () => {
+      const result = modifyStepProperty(
+        PATH_WORKFLOW,
+        'call_child',
+        'with.inputs.@timestamp',
+        'now'
+      );
+      expect(result.success).toBe(true);
+      expect(result.yaml).toContain('"@timestamp": now');
+    });
+
+    it('keeps trailing blank lines of a keep-chomp block scalar when adding a sibling', () => {
+      const yaml = withConsts('  banner: |+\n    keep me\n');
+      const result = modifyWorkflowProperty(yaml, 'consts.url', 'u');
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().consts).toEqual({
+        banner: 'keep me\n\n',
+        url: 'u',
+      });
+    });
+
     it('rejects a path through a scalar', () => {
       const result = modifyWorkflowProperty(PATH_WORKFLOW, 'name.first', 'x');
       expect(result.success).toBe(false);
