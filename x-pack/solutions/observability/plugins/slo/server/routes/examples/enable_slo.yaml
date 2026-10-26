@@ -1,0 +1,59 @@
+requestBody:
+  content:
+    application/json:
+      examples: {}
+responses:
+  '204':
+    description: Successful request
+  '400':
+    description: Bad request
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_schemas.yaml#/400_response
+        examples:
+          badRequestExample:
+            summary: Bad request
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: 'Invalid value ''foo'' supplied to: id'
+  '401':
+    description: Unauthorized response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_schemas.yaml#/401_response
+        examples:
+          unauthorizedExample:
+            summary: Unauthorized
+            value:
+              statusCode: 401
+              error: Unauthorized
+              message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+  '403':
+    description: Forbidden response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_schemas.yaml#/403_response
+        examples:
+          forbiddenExample:
+            summary: Forbidden
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: 'security_exception: action [slo_write] is unauthorized for user'
+  '404':
+    description: Not found response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_schemas.yaml#/404_response
+        examples:
+          notFoundExample:
+            summary: Not found
+            value:
+              statusCode: 404
+              error: Not Found
+              message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found

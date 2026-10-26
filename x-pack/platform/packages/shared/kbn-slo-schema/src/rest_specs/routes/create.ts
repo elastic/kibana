@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { allOrAnyStringOrArray } from '../../schema/common';
 import { indicatorSchema } from '../../schema/indicators';
 import {
+  artifactsWithIdSchema,
   budgetingMethodSchema,
-  dashboardsWithIdSchema,
+  groupBySchema,
   objectiveSchema,
   optionalSettingsSchema,
   sloIdSchema,
@@ -19,18 +19,18 @@ import { timeWindowSchema } from '../../schema/time_window';
 
 const createSLOParamsSchema = z.object({
   body: z.object({
-    name: z.string(),
-    description: z.string(),
+    name: z.string().describe('A name for the SLO.'),
+    description: z.string().describe('A description for the SLO.'),
     indicator: indicatorSchema,
     timeWindow: timeWindowSchema,
     budgetingMethod: budgetingMethodSchema,
     objective: objectiveSchema,
     id: sloIdSchema.optional(),
-    settings: optionalSettingsSchema.optional(),
+    settings: optionalSettingsSchema.optional().describe('Defines properties for SLO settings.'),
     tags: tagsSchema.optional(),
-    groupBy: allOrAnyStringOrArray.optional(),
+    groupBy: groupBySchema.optional(),
     revision: z.number().optional(),
-    artifacts: dashboardsWithIdSchema.optional(),
+    artifacts: artifactsWithIdSchema.optional(),
   }),
 });
 

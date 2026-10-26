@@ -47,6 +47,10 @@ export const createSloServerRoute: CreateServerRouteFactory<
 > = ({ handler, ...config }) => {
   return createPlainSloServerRoute({
     ...config,
+    options: {
+      ...config.options,
+      tags: [...(config.options?.tags ?? []), 'oas-tag:slo'],
+    },
     handler: async (options) => {
       addSpanLabels({ plugin: 'slo' });
       const { request } = options;

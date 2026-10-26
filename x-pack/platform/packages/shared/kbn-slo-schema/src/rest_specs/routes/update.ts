@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { allOrAnyStringOrArray } from '../../schema/common';
 import { indicatorSchema } from '../../schema/indicators';
 import {
+  artifactsWithIdSchema,
   budgetingMethodSchema,
-  dashboardsWithIdSchema,
+  groupBySchema,
   objectiveSchema,
   optionalSettingsSchema,
   sloDefinitionSchema,
@@ -23,16 +23,16 @@ const updateSLOParamsSchema = z.object({
     id: sloIdSchema,
   }),
   body: z.object({
-    name: z.string().optional(),
-    description: z.string().optional(),
+    name: z.string().optional().describe('A name for the SLO.'),
+    description: z.string().optional().describe('A description for the SLO.'),
     indicator: indicatorSchema.optional(),
     timeWindow: timeWindowSchema.optional(),
     budgetingMethod: budgetingMethodSchema.optional(),
     objective: objectiveSchema.optional(),
-    settings: optionalSettingsSchema.optional(),
+    settings: optionalSettingsSchema.optional().describe('Defines properties for SLO settings.'),
     tags: tagsSchema.optional(),
-    groupBy: allOrAnyStringOrArray.optional(),
-    artifacts: dashboardsWithIdSchema.optional(),
+    groupBy: groupBySchema.optional(),
+    artifacts: artifactsWithIdSchema.optional(),
   }),
 });
 

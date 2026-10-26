@@ -10,8 +10,13 @@ import { sloIdSchema } from '../../schema/slo';
 import { sloWithDataResponseSchema } from '../slo';
 
 const getSLOQuerySchema = z.object({
-  instanceId: allOrAnyString.optional(),
-  remoteName: z.string().optional(),
+  instanceId: allOrAnyString
+    .optional()
+    .describe('the specific instanceId used by the summary calculation'),
+  remoteName: z
+    .string()
+    .optional()
+    .describe('The name of the remote cluster where the SLO is defined, for remote SLOs'),
 });
 
 const getSLOParamsSchema = z.object({

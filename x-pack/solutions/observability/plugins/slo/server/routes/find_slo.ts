@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import { findSLOParamsSchema } from '@kbn/slo-schema';
 import { FindSLO } from '../services';
 import { DefaultSummarySearchClient } from '../services/summary_search_client/summary_search_client';
@@ -13,7 +14,14 @@ import { assertPlatinumLicense } from './utils/assert_platinum_license';
 
 export const findSLORoute = createSloServerRoute({
   endpoint: 'GET /api/observability/slos 2023-10-31',
-  options: { access: 'public' },
+  options: {
+    access: 'public',
+    summary: 'Get a paginated list of SLOs',
+    description:
+      'You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.',
+    operationId: 'findSlosOp',
+    oasOperationObject: () => path.join(__dirname, 'examples/find_slo.yaml'),
+  },
   security: {
     authz: {
       requiredPrivileges: ['slo_read'],

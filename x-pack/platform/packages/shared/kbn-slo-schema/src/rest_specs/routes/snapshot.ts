@@ -12,7 +12,11 @@ import { MAX_DATE_STRING_LENGTH } from '../../schema/limits';
 
 const bulkSnapshotRequestItemSchema = z.object({
   id: sloIdSchema,
-  instanceId: allOrAnyString.optional(),
+  instanceId: allOrAnyString
+    .optional()
+    .describe(
+      "The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value to return that instance only."
+    ),
 });
 
 const snapshotErrorBudgetSchema = z.object({
@@ -43,7 +47,9 @@ const snapshotResultSchema = z.intersection(
 const bulkSnapshotParamsSchema = z.object({
   body: z.object({
     at: dateType,
-    requests: z.array(bulkSnapshotRequestItemSchema),
+    requests: z
+      .array(bulkSnapshotRequestItemSchema)
+      .describe('The list of SLO instances to compute. Limited to 100 entries.'),
   }),
 });
 
@@ -58,7 +64,9 @@ const dateStringQuerySchema = z
   .string()
   .max(MAX_DATE_STRING_LENGTH)
   .refine((value) => !isNaN(new Date(value).getTime()), { message: 'Invalid date' })
-  .describe('A date string, for example 2023-01-12T10:03:19.000Z');
+  .describe(
+    'The point in time at which to compute the SLO instance summary (ISO 8601 date-time), for example 2023-01-12T10:03:19.000Z'
+  );
 
 const getSnapshotParamsSchema = z.object({
   path: z.object({
@@ -66,7 +74,11 @@ const getSnapshotParamsSchema = z.object({
   }),
   query: z.object({
     at: dateStringQuerySchema,
-    instanceId: allOrAnyString.optional(),
+    instanceId: allOrAnyString
+      .optional()
+      .describe(
+        "The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value (for example `host.name:web-01`) to return that instance only."
+      ),
   }),
 });
 

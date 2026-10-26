@@ -17,6 +17,8 @@ export const createCompositeSloServerRoute: CreateServerRouteFactory<
 > = ({ handler, ...config }) => {
   return createSloServerRoute({
     ...config,
+    // Hidden from the published API docs while composite SLOs are behind a feature flag
+    options: { ...config.options, excludeFromOAS: true },
     handler: async (options) => {
       const core = await options.context.core;
       await assertCompositeSloEnabled(core);

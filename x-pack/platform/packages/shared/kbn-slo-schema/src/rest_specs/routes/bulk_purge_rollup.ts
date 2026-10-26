@@ -10,21 +10,26 @@ import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types
 import { dateType } from '../../schema/common';
 import { durationType } from '../../schema/duration';
 
+const PURGE_TYPE_DESCRIPTION =
+  'Specifies whether documents will be purged based on a specific age or on a timestamp';
+
 const fixedAgePurge = z.object({
-  purgeType: z.literal('fixed_age'),
+  purgeType: z.literal('fixed_age').describe(PURGE_TYPE_DESCRIPTION),
   age: durationType,
 });
 
 const fixedTimePurge = z.object({
-  purgeType: z.literal('fixed_time'),
+  purgeType: z.literal('fixed_time').describe(PURGE_TYPE_DESCRIPTION),
   timestamp: dateType,
 });
 
-const bulkPurgePolicy = z.discriminatedUnion('purgeType', [fixedAgePurge, fixedTimePurge]);
+const bulkPurgePolicy = z
+  .discriminatedUnion('purgeType', [fixedAgePurge, fixedTimePurge])
+  .describe('Policy that dictates which SLI documents to purge based on age');
 
 const bulkPurgeRollupSchema = z.object({
   body: z.object({
-    list: z.array(z.string()),
+    list: z.array(z.string()).describe('An array of slo ids'),
     purgePolicy: bulkPurgePolicy,
     force: z.boolean().optional(),
   }),

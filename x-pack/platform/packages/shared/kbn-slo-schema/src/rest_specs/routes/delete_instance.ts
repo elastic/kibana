@@ -11,13 +11,15 @@ import { sloIdSchema } from '../../schema/slo';
 
 const deleteSLOInstancesParamsSchema = z.object({
   body: z.object({
-    list: z.array(
-      z.object({
-        sloId: sloIdSchema,
-        instanceId: z.string(),
-        excludeRollup: z.boolean().optional(),
-      })
-    ),
+    list: z
+      .array(
+        z.object({
+          sloId: sloIdSchema,
+          instanceId: z.string().describe('The SLO instance identifier'),
+          excludeRollup: z.boolean().optional(),
+        })
+      )
+      .describe('An array of slo id and instance id'),
   }),
 });
 

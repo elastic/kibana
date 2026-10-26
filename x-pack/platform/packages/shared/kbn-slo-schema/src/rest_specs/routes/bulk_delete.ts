@@ -10,13 +10,13 @@ import { sloIdSchema } from '../../schema/slo';
 
 const bulkDeleteParamsSchema = z.object({
   body: z.object({
-    list: z.array(sloIdSchema),
+    list: z.array(sloIdSchema).describe('An array of SLO Definition id'),
   }),
 });
 
 const bulkDeleteStatusParamsSchema = z.object({
   path: z.object({
-    taskId: z.string(),
+    taskId: z.string().describe('The task id of the bulk delete operation'),
   }),
 });
 
