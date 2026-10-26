@@ -61,6 +61,50 @@ describe('shipped Alert Triage Worker YAML and the reportWorkerOutcome schema', 
       });
     });
 
+    it('reports the pattern key statistics of an Alert Triage batch', () => {
+      expect(
+        reportOnDevModeClient(
+          reportNamed(
+            reportStepsOf(ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID),
+            'report_batch_grouped'
+          ),
+          {
+            steps: {
+              tag_pattern_keys: {
+                output: {
+                  alerts_with_strict_key: 36,
+                  fp_candidates_on_fallback: 4,
+                  strict_keys: 12,
+                  strict_keys_single_alert: 5,
+                  wide_keys: 8,
+                  wide_keys_single_alert: 3,
+                },
+              },
+            },
+            variables: { verdict_count: 40 },
+          },
+          SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+        )
+      ).toEqual({
+        eventType: 'alertzero_alert_triage_batch_grouped',
+        payload: {
+          ...ENVELOPE_FIELDS,
+          watch_tag: 'watch-floor',
+          worker_id: 'system-security-floor-alert-triage',
+          alerts_joined: 0,
+          alerts_pooled: 0,
+          alerts_with_strict_key: 36,
+          conversation_created: true,
+          fp_candidates_on_fallback: 4,
+          proposals_created: 0,
+          strict_keys: 12,
+          strict_keys_single_alert: 5,
+          wide_keys: 8,
+          wide_keys_single_alert: 3,
+        },
+      });
+    });
+
     it('reports an Alert Triage run that handed its candidates to the closure review', () => {
       expect(
         reportOnDevModeClient(

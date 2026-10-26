@@ -205,6 +205,20 @@ const FIXTURES: {
     verdicts_true_positive: 10,
     worker_id: 'system-security-floor-alert-triage',
   },
+  [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchGrouped]: {
+    ...envelope,
+    alerts_joined: 0,
+    alerts_pooled: 0,
+    alerts_with_strict_key: 36,
+    conversation_created: false,
+    fp_candidates_on_fallback: 4,
+    proposals_created: 0,
+    strict_keys: 12,
+    strict_keys_single_alert: 5,
+    wide_keys: 8,
+    wide_keys_single_alert: 3,
+    worker_id: 'system-security-floor-alert-triage',
+  },
   [ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved]: {
     ...envelope,
     alerts_proposed: 20,
@@ -611,6 +625,7 @@ describe('AlertZero telemetry event types', () => {
     it.each([
       [ALERTZERO_TELEMETRY_EVENTS.WorkerRunCompleted],
       [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchClassified],
+      [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchGrouped],
       [ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved],
       [ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted],
       [ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted],

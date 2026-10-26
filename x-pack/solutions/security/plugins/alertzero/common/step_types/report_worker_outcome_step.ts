@@ -49,6 +49,7 @@ export const REPORT_WORKER_OUTCOME_EVENTS = [
   'worker_investigation_closed',
   'worker_run_completed',
   'alert_triage_batch_classified',
+  'alert_triage_batch_grouped',
   'alert_triage_closure_resolved',
   'rule_tuning_review_completed',
   'rule_coverage_review_completed',
@@ -214,6 +215,24 @@ const alertTriageBatchClassifiedInputSchema = lazySchema(() =>
   })
 );
 
+const alertTriageBatchGroupedInputSchema = lazySchema(() =>
+  z.strictObject({
+    event: z.literal('alert_triage_batch_grouped'),
+    alerts_joined: count('Alerts that joined a proposal an earlier batch had opened'),
+    alerts_pooled: count('Alerts pooled into one shared proposal'),
+    alerts_with_strict_key: count('Classified alerts with a strict pattern key'),
+    conversation_created: flag('Whether the batch created a conversation of its own'),
+    fp_candidates_on_fallback: count(
+      'False positives at or above the confidence floor with no strict key'
+    ),
+    proposals_created: count('New closure proposals the batch raised'),
+    strict_keys: count('Distinct strict pattern keys among the classified alerts'),
+    strict_keys_single_alert: count('Strict pattern keys that only one alert of the batch has'),
+    wide_keys: count('Distinct wide pattern keys among the classified alerts'),
+    wide_keys_single_alert: count('Wide pattern keys that only one alert of the batch has'),
+  })
+);
+
 const alertTriageClosureResolvedInputSchema = lazySchema(() =>
   z.strictObject({
     event: z.literal('alert_triage_closure_resolved'),
@@ -328,6 +347,7 @@ export const reportWorkerOutcomeStepInputSchema = lazySchema(() =>
     workerInvestigationClosedInputSchema,
     workerRunCompletedInputSchema,
     alertTriageBatchClassifiedInputSchema,
+    alertTriageBatchGroupedInputSchema,
     alertTriageClosureResolvedInputSchema,
     ruleTuningReviewCompletedInputSchema,
     ruleCoverageReviewCompletedInputSchema,

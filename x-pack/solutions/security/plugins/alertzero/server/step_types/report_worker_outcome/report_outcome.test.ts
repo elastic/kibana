@@ -95,6 +95,22 @@ describe('reportOutcome', () => {
       },
     ],
     [
+      ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchGrouped,
+      {
+        alerts_joined: 0,
+        alerts_pooled: 0,
+        alerts_with_strict_key: 1,
+        conversation_created: false,
+        event: 'alert_triage_batch_grouped' as const,
+        fp_candidates_on_fallback: 0,
+        proposals_created: 0,
+        strict_keys: 1,
+        strict_keys_single_alert: 1,
+        wide_keys: 1,
+        wide_keys_single_alert: 1,
+      },
+    ],
+    [
       ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved,
       {
         alerts_proposed: 1,

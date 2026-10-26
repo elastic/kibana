@@ -671,6 +671,49 @@ steps:
               - "az:inconclusive"
 
   # ---------------------------------------------------------------------------
+  # 7b. Tag every classified alert with its pattern keys, whatever its verdict.
+  #
+  #     `az:triage_strict_key:<hash>` and `az:triage_wide_key:<hash>` record which pattern an alert
+  #     belongs to. Grouping, the proposal summary and Decisions read them. They are not verdict
+  #     tags, so the sweep ignores them. They are written in a step of their own, because each key
+  #     pair is a different tag set and `kibana.SetAlertTags` sends one tag set for all its ids. The
+  #     step makes one call per distinct key pair. The keys are data for tuning, so a failure after
+  #     the retries does not fail the run.
+  # ---------------------------------------------------------------------------
+  - name: tag_pattern_keys
+    type: alertzero.triage.tagPatternKeys
+    if: "${{ variables.verdict_count > 0 }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+    with:
+      alert_ids: "${{ steps.classify_alerts.output.verdicts | map: 'alert_id' }}"
+      fp_candidate_ids: "${{ variables.fp_candidate_ids }}"
+      space_id: "{{ workflow.spaceId }}"
+
+  # Telemetry: how well the keys group the batch. The grouping outcome fields are 0 until the
+  # alerts are joined to open proposals.
+  - name: report_batch_grouped
+    type: alertzero.reportWorkerOutcome
+    if: "${{ variables.verdict_count > 0 and steps.tag_pattern_keys.error == blank }}"
+    on-failure:
+      continue: true
+    with:
+      event: alert_triage_batch_grouped
+      alerts_with_strict_key: "${{ steps.tag_pattern_keys.output.alerts_with_strict_key }}"
+      strict_keys: "${{ steps.tag_pattern_keys.output.strict_keys }}"
+      strict_keys_single_alert: "${{ steps.tag_pattern_keys.output.strict_keys_single_alert }}"
+      wide_keys: "${{ steps.tag_pattern_keys.output.wide_keys }}"
+      wide_keys_single_alert: "${{ steps.tag_pattern_keys.output.wide_keys_single_alert }}"
+      fp_candidates_on_fallback: "${{ steps.tag_pattern_keys.output.fp_candidates_on_fallback }}"
+      alerts_joined: 0
+      proposals_created: 0
+      alerts_pooled: 0
+      conversation_created: true
+
+  # ---------------------------------------------------------------------------
   # 8. Write a verdict note to each alert referencing the Investigation (R4, R13).
   #    Always written — never gated on autonomy level. The only verdict note on the
   #    Worker path: the sub-workflow skips its own when calledByWorker is true.

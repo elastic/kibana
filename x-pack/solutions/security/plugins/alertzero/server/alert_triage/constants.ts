@@ -47,6 +47,13 @@ export const TRIAGE_PENDING_TAG = 'az:triage_pending';
 export const TRIAGE_EXEC_TAG_PREFIX = 'az:triage_exec:';
 export const TRIAGE_FAILED_TAG = 'az:triage_failed';
 
+/**
+ * Pattern key tags, written on every classified alert that has the key. They are not verdict tags,
+ * so the sweep ignores them. Grouping, the proposal summary and Decisions read them.
+ */
+export const TRIAGE_STRICT_KEY_TAG_PREFIX = 'az:triage_strict_key:';
+export const TRIAGE_WIDE_KEY_TAG_PREFIX = 'az:triage_wide_key:';
+
 /** Verdict tags written by the batch's classification. Any of them means the alert is done. */
 export const VERDICT_TAGS = ['az:true_positive', 'az:false_positive', 'az:inconclusive'] as const;
 

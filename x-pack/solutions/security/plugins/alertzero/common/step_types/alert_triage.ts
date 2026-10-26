@@ -8,11 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 export const TRIAGE_HEADROOM_STEP_ID = 'alertzero.triage.headroom' as const;
 export const TRIAGE_PLAN_SWEEP_STEP_ID = 'alertzero.triage.planSweep' as const;
 export const TRIAGE_LOAD_ALERTS_STEP_ID = 'alertzero.triage.loadAlerts' as const;
+export const TRIAGE_TAG_PATTERN_KEYS_STEP_ID = 'alertzero.triage.tagPatternKeys' as const;
 
 const idSchema = z.string().trim().min(1).max(256);
 
@@ -135,4 +136,49 @@ export const triageLoadAlertsStepCommonDefinition: CommonStepDefinition<
   stability: 'tech_preview',
   inputSchema: loadAlertsInputSchema,
   outputSchema: loadAlertsOutputSchema,
+};
+
+const tagPatternKeysInputSchema = lazySchema(() =>
+  z.object({
+    alert_ids: z
+      .array(idSchema)
+      .min(1)
+      .max(1000)
+      .describe('Alerts of one triage batch that received a verdict.'),
+    fp_candidate_ids: z
+      .array(idSchema)
+      .max(1000)
+      .describe('The false positives at or above the confidence floor, for the fallback count.'),
+    space_id: idSchema.describe('Space of the alerts. It is part of every key hash.'),
+  })
+);
+
+const tagPatternKeysOutputSchema = lazySchema(() =>
+  z.object({
+    alerts_with_strict_key: z.number(),
+    strict_keys: z.number(),
+    strict_keys_single_alert: z.number(),
+    wide_keys: z.number(),
+    wide_keys_single_alert: z.number(),
+    fp_candidates_on_fallback: z.number(),
+    missing_alert_ids: z.array(z.string()).describe('Ids that no longer match an alert.'),
+  })
+);
+
+export const triageTagPatternKeysStepCommonDefinition: CommonStepDefinition<
+  typeof tagPatternKeysInputSchema,
+  typeof tagPatternKeysOutputSchema
+> = {
+  id: TRIAGE_TAG_PATTERN_KEYS_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageTagPatternKeys.label', {
+    defaultMessage: 'Tag triage alerts with their pattern keys',
+  }),
+  description: i18n.translate('xpack.alertzero.workflows.steps.triageTagPatternKeys.description', {
+    defaultMessage:
+      'Computes the strict and wide pattern key of each alert, tags the alerts with the key hashes, and counts the keys.',
+  }),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: tagPatternKeysInputSchema,
+  outputSchema: tagPatternKeysOutputSchema,
 };

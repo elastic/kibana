@@ -5,6 +5,7 @@ Each batch the sweep starts reports how its alerts were classified and how its r
 | Workflow | Step | `event` | Where |
 |---|---|---|---|
 | `floor_alert_triage_batch.yaml` | `report_batch_classified` | `alert_triage_batch_classified` | Right after `post_comment_classification_results` |
+| `floor_alert_triage_batch.yaml` | `report_batch_grouped` | `alert_triage_batch_grouped` | Right after `tag_pattern_keys`, which tags every classified alert with its pattern keys. Skipped when that step fails |
 | `floor_alert_triage_batch.yaml` | `report_investigation_closed_no_fp` | `worker_investigation_closed` | Right after the close |
 | `floor_alert_triage_batch.yaml` | `report_worker_run_completed` | `worker_run_completed` | The last step, so it sees whether the closure review started |
 | `floor_alert_triage_review.yaml` | `report_investigation_closed_after_approval`, `_after_dismissal`, `_after_expiry` | `worker_investigation_closed` | Right after each close |

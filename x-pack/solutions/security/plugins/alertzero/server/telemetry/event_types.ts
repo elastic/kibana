@@ -133,6 +133,19 @@ export interface AlertZeroAlertTriageBatchClassifiedPayload extends AlertZeroEnv
   verdicts_true_positive: number;
 }
 
+export interface AlertZeroAlertTriageBatchGroupedPayload extends AlertZeroEnvelope {
+  alerts_joined: number;
+  alerts_pooled: number;
+  alerts_with_strict_key: number;
+  conversation_created: boolean;
+  fp_candidates_on_fallback: number;
+  proposals_created: number;
+  strict_keys: number;
+  strict_keys_single_alert: number;
+  wide_keys: number;
+  wide_keys_single_alert: number;
+}
+
 export interface AlertZeroAlertTriageClosureResolvedPayload extends AlertZeroEnvelope {
   alerts_proposed: number;
   alerts_retag_failed: number;
@@ -212,6 +225,7 @@ export interface AlertZeroTelemetryEventPayloads {
   [ALERTZERO_TELEMETRY_EVENTS.WorkerInvestigationReopened]: AlertZeroWorkerInvestigationReopenedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.WorkerRunCompleted]: AlertZeroWorkerRunCompletedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchClassified]: AlertZeroAlertTriageBatchClassifiedPayload;
+  [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchGrouped]: AlertZeroAlertTriageBatchGroupedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved]: AlertZeroAlertTriageClosureResolvedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted]: AlertZeroRuleTuningReviewCompletedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted]: AlertZeroRuleCoverageReviewCompletedPayload;
@@ -546,6 +560,38 @@ export const ALERTZERO_ALERT_TRIAGE_BATCH_CLASSIFIED_EVENT: EventTypeOpts<AlertZ
     },
   };
 
+export const ALERTZERO_ALERT_TRIAGE_BATCH_GROUPED_EVENT: EventTypeOpts<AlertZeroAlertTriageBatchGroupedPayload> =
+  {
+    eventType: ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchGrouped,
+    schema: {
+      ...ENVELOPE_SCHEMA,
+      alerts_joined: countField(
+        'Alerts that joined a proposal an earlier batch had opened; 0 until grouping runs'
+      ),
+      alerts_pooled: countField(
+        'Alerts whose key had no other alert in the batch and no open proposal, so they went into one shared proposal; 0 until grouping runs'
+      ),
+      alerts_with_strict_key: countField(
+        'Classified alerts with a strict pattern key, whatever their verdict'
+      ),
+      conversation_created: flagField(
+        'Whether the batch created a conversation of its own; always true until the conversation is created only for a new proposal or a failure'
+      ),
+      fp_candidates_on_fallback: countField(
+        'False positives at or above the confidence floor that have no strict key, so they group by rule and detection only'
+      ),
+      proposals_created: countField(
+        'New closure proposals the batch raised; 0 until grouping runs'
+      ),
+      strict_keys: countField('Distinct strict pattern keys among the classified alerts'),
+      strict_keys_single_alert: countField(
+        'Strict pattern keys that only one alert of the batch has'
+      ),
+      wide_keys: countField('Distinct wide pattern keys among the classified alerts'),
+      wide_keys_single_alert: countField('Wide pattern keys that only one alert of the batch has'),
+    },
+  };
+
 export const ALERTZERO_ALERT_TRIAGE_CLOSURE_RESOLVED_EVENT: EventTypeOpts<AlertZeroAlertTriageClosureResolvedPayload> =
   {
     eventType: ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved,
@@ -735,6 +781,7 @@ export const ALERTZERO_TELEMETRY_EVENT_TYPES = [
   ALERTZERO_WORKER_INVESTIGATION_REOPENED_EVENT,
   ALERTZERO_WORKER_RUN_COMPLETED_EVENT,
   ALERTZERO_ALERT_TRIAGE_BATCH_CLASSIFIED_EVENT,
+  ALERTZERO_ALERT_TRIAGE_BATCH_GROUPED_EVENT,
   ALERTZERO_ALERT_TRIAGE_CLOSURE_RESOLVED_EVENT,
   ALERTZERO_RULE_TUNING_REVIEW_COMPLETED_EVENT,
   ALERTZERO_RULE_COVERAGE_REVIEW_COMPLETED_EVENT,

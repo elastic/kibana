@@ -11,6 +11,7 @@ import { TM_DELAY_LIMIT_MS } from '../../alert_triage/constants';
 import {
   getTriageHeadroomStepDefinition,
   getTriageLoadAlertsStepDefinition,
+  getTriageTagPatternKeysStepDefinition,
   getTriagePlanSweepStepDefinition,
 } from './alert_triage_steps';
 
@@ -235,5 +236,82 @@ describe('triage load alerts step', () => {
       size: 2,
       query: { ids: { values: ['a-1', 'a-2'] } },
     });
+  });
+});
+
+describe('triage tag pattern keys step', () => {
+  const hit = (id: string, executable: string) => ({
+    _id: id,
+    _index: '.alerts-security.alerts-default',
+    _source: {
+      'kibana.alert.rule.uuid': 'rule-a',
+      'kibana.alert.rule.revision': 1,
+      'host.os.type': 'windows',
+      'process.executable': executable,
+    },
+  });
+
+  const run = async (hits: unknown[], fpCandidateIds: string[] = []) => {
+    const callKibanaApi = jest
+      .fn()
+      .mockImplementation(async ({ path }: { path: string }) =>
+        path.endsWith('/signals/tags')
+          ? { status: 200, headers: {}, body: { updated: 1, failures: [] } }
+          : { status: 200, headers: {}, body: { hits: { hits } } }
+      );
+    const { output } = await getTriageTagPatternKeysStepDefinition().handler(
+      createContext(
+        { alert_ids: ['a-1', 'a-2', 'a-3'], fp_candidate_ids: fpCandidateIds, space_id: 'default' },
+        callKibanaApi
+      )
+    );
+    const tagCalls = callKibanaApi.mock.calls
+      .map(([request]) => request)
+      .filter(({ path }) => path.endsWith('/signals/tags'));
+    return { output, tagCalls };
+  };
+
+  it('tags each pattern once with both key hashes, and counts the keys', async () => {
+    const { output, tagCalls } = await run(
+      [hit('a-1', 'C:\\Tools\\x.exe'), hit('a-2', 'C:\\Tools\\x.exe')],
+      ['a-1']
+    );
+
+    expect(tagCalls).toHaveLength(1);
+    expect(tagCalls[0].body.ids).toEqual(['a-1', 'a-2']);
+    expect(tagCalls[0].body.tags.tags_to_add).toEqual([
+      expect.stringMatching(/^az:triage_strict_key:[0-9a-f]{16}$/),
+      expect.stringMatching(/^az:triage_wide_key:[0-9a-f]{16}$/),
+    ]);
+    expect(tagCalls[0].body.tags.tags_to_remove).toEqual([]);
+    expect(output).toEqual({
+      alerts_with_strict_key: 2,
+      strict_keys: 1,
+      strict_keys_single_alert: 0,
+      wide_keys: 1,
+      wide_keys_single_alert: 0,
+      fp_candidates_on_fallback: 0,
+      // An alert deleted between the verdict and this step is reported, not silently dropped.
+      missing_alert_ids: ['a-3'],
+    });
+  });
+
+  it('fails when a tag update is not fully applied, so a missing key is never reported as written', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockImplementation(async ({ path }: { path: string }) =>
+        path.endsWith('/signals/tags')
+          ? { status: 200, headers: {}, body: { failures: [{}] } }
+          : { status: 200, headers: {}, body: { hits: { hits: [hit('a-1', 'C:\\x.exe')] } } }
+      );
+
+    await expect(
+      getTriageTagPatternKeysStepDefinition().handler(
+        createContext(
+          { alert_ids: ['a-1'], fp_candidate_ids: [], space_id: 'default' },
+          callKibanaApi
+        )
+      )
+    ).rejects.toThrow('not fully applied');
   });
 });

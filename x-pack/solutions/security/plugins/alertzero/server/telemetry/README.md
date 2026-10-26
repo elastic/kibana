@@ -77,6 +77,7 @@ The `alertzero.reportWorkerOutcome` workflow step emits these events from Worker
 |---|---|---|
 | `alertzero_ad_worker_run_completed`, `_review_started`, `_analysis_completed`, `_handoff_resolved` | Attack Discovery | Run, or reviewed attack |
 | `alertzero_alert_triage_batch_classified` | Alert Triage | Classified alert batch |
+| `alertzero_alert_triage_batch_grouped` | Alert Triage | Classified alert batch |
 | `alertzero_alert_triage_closure_resolved` | Alert Triage | Settled closure proposal |
 | `alertzero_rule_tuning_review_completed` | Rule Tuning | Reviewed rule |
 | `alertzero_rule_coverage_review_completed` | Rule Coverage | Reviewed detection gap |
@@ -209,6 +210,24 @@ Emitted by the Alert Triage Worker once a batch of alerts is classified, before 
 | `fp_candidates` | long | yes | False positives at or above the confidence floor, which the closure proposal covers |
 | `fp_below_floor` | long | yes | False positives below the floor, which are tagged and noted but not proposed |
 | `investigation_id` | keyword | yes | The Investigation the Worker opened for the batch. It joins to the batch's close |
+
+### `alertzero_alert_triage_batch_grouped`
+
+Emitted by the Alert Triage Worker once for each classified batch, after it tagged the alerts with their pattern keys. It shows how well a pattern key would group the alerts of one rule, and what the grouping did. A batch holds one rule (or one detection of a rule), so the counts give a distribution across batches. The event carries no rule id and no key.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| envelope | | | See above |
+| `alerts_with_strict_key` | long | yes | Classified alerts with a strict pattern key, whatever their verdict. An alert with no identifying field (path) has none |
+| `strict_keys` | long | yes | Distinct strict keys among those alerts |
+| `strict_keys_single_alert` | long | yes | Strict keys that only one alert of the batch has |
+| `wide_keys` | long | yes | Distinct wide keys among the classified alerts. Every alert has one |
+| `wide_keys_single_alert` | long | yes | Wide keys that only one alert of the batch has |
+| `fp_candidates_on_fallback` | long | yes | False positives at or above the confidence floor that have no strict key, so they group by rule and detection only |
+| `alerts_joined` | long | yes | Alerts that joined a proposal an earlier batch opened. `0` until grouping runs |
+| `proposals_created` | long | yes | New closure proposals the batch raised. `0` until grouping runs |
+| `alerts_pooled` | long | yes | Alerts pooled into one shared proposal. `0` until grouping runs |
+| `conversation_created` | boolean | yes | Whether the batch created a conversation of its own. Always `true` until the conversation is created only for a new proposal or a failure |
 
 ### `alertzero_alert_triage_closure_resolved`
 

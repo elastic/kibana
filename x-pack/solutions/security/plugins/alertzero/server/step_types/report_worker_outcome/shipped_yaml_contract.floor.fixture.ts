@@ -30,6 +30,16 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
             output: { false_positive_count: 3, inconclusive_count: 1, true_positive_count: 2 },
           },
           create_investigation: OPENED_INVESTIGATION,
+          tag_pattern_keys: {
+            output: {
+              alerts_with_strict_key: 5,
+              fp_candidates_on_fallback: 1,
+              strict_keys: 3,
+              strict_keys_single_alert: 1,
+              wide_keys: 2,
+              wide_keys_single_alert: 0,
+            },
+          },
         },
         variables: {
           alert_count: 6,

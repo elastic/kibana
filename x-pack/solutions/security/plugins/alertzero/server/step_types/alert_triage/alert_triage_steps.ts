@@ -12,9 +12,11 @@ import {
   triageHeadroomStepCommonDefinition,
   triageLoadAlertsStepCommonDefinition,
   triagePlanSweepStepCommonDefinition,
+  triageTagPatternKeysStepCommonDefinition,
 } from '../../../common/step_types/alert_triage';
 import { readHeadroom } from '../../alert_triage/headroom';
-import { planSweep } from '../../alert_triage/plan_sweep';
+import { planKeyTags } from '../../alert_triage/key_tags';
+import { planSweep, tagInChunks } from '../../alert_triage/plan_sweep';
 import type { HeadroomResult } from '../../alert_triage/types';
 import {
   countAgedOutAlerts,
@@ -154,6 +156,38 @@ export const getTriageLoadAlertsStepDefinition = () =>
         return { output: { alerts, missing_alert_ids: missingAlertIds } };
       } catch (error) {
         throw toApiError(error, 'load triage batch alerts');
+      }
+    },
+  });
+
+export const getTriageTagPatternKeysStepDefinition = () =>
+  createServerStepDefinition({
+    ...triageTagPatternKeysStepCommonDefinition,
+    handler: async ({ input, contextManager }) => {
+      try {
+        const { alerts, missingAlertIds } = await loadAlertsByIds(contextManager, input.alert_ids);
+        const { groups, counts } = planKeyTags({
+          alerts: alerts.map((doc) => ({ id: String(doc._id), doc })),
+          fpCandidateIds: input.fp_candidate_ids,
+          spaceId: input.space_id,
+        });
+        const write = tagAlerts(contextManager);
+        for (const { alertIds, tags } of groups) {
+          await tagInChunks(write, { alertIds, add: tags, remove: [] });
+        }
+        return {
+          output: {
+            alerts_with_strict_key: counts.alertsWithStrictKey,
+            strict_keys: counts.strictKeys,
+            strict_keys_single_alert: counts.strictKeysSingleAlert,
+            wide_keys: counts.wideKeys,
+            wide_keys_single_alert: counts.wideKeysSingleAlert,
+            fp_candidates_on_fallback: counts.fpCandidatesOnFallback,
+            missing_alert_ids: missingAlertIds,
+          },
+        };
+      } catch (error) {
+        throw toApiError(error, 'tag triage alerts with their pattern keys');
       }
     },
   });

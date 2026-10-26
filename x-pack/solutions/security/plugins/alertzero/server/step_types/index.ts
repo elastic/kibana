@@ -15,6 +15,7 @@ import {
   getTriageHeadroomStepDefinition,
   getTriageLoadAlertsStepDefinition,
   getTriagePlanSweepStepDefinition,
+  getTriageTagPatternKeysStepDefinition,
 } from './alert_triage/alert_triage_steps';
 import { getPackageReportStepDefinition } from './package_report';
 import { getResolveProposalsStepDefinition } from './resolve_proposals';
@@ -81,6 +82,7 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(getTriageHeadroomStepDefinition({ getTaskManager }));
   workflowsExtensions.registerStepDefinition(getTriagePlanSweepStepDefinition());
   workflowsExtensions.registerStepDefinition(getTriageLoadAlertsStepDefinition());
+  workflowsExtensions.registerStepDefinition(getTriageTagPatternKeysStepDefinition());
 };
 
 export { getPackageReportStepDefinition } from './package_report';

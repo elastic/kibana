@@ -1321,3 +1321,67 @@ describe('floor_alert_triage_batch — classification comment attribution', () =
     expect(comment).not.toContain('Connector:');
   });
 });
+
+// ---------------------------------------------------------------------------
+// tag_pattern_keys — the key tags that grouping, the proposal summary and Decisions read
+// ---------------------------------------------------------------------------
+describe('floor_alert_triage_batch — tag_pattern_keys', () => {
+  const tagStep = stepByName('tag_pattern_keys');
+  const reportStep = stepByName('report_batch_grouped');
+  const names = parsed.steps.map((step) => step.name);
+
+  it('runs after every verdict tag is written and before the notes', () => {
+    expect(names.indexOf('tag_pattern_keys')).toBeGreaterThan(
+      names.indexOf('set_az_inconclusive_tags')
+    );
+    expect(names.indexOf('tag_pattern_keys')).toBeLessThan(names.indexOf('add_verdict_notes'));
+    expect(names.indexOf('report_batch_grouped')).toBe(names.indexOf('tag_pattern_keys') + 1);
+  });
+
+  it('tags the alerts that got a verdict, whatever the verdict, and names the confident false positives', () => {
+    const verdicts = [
+      { alert_id: 'tp-1', classification: 'true_positive' },
+      { alert_id: 'inc-1', classification: 'inconclusive' },
+      { alert_id: 'fp-1', classification: 'false_positive' },
+    ];
+    const context = {
+      steps: { classify_alerts: { output: { verdicts } } },
+      variables: { fp_candidate_ids: ['fp-1'] },
+      workflow: { spaceId: 'team' },
+    };
+    const input = tagStep?.with as Record<string, string>;
+
+    expect(evalExpr(input.alert_ids, context)).toEqual(['tp-1', 'inc-1', 'fp-1']);
+    expect(evalExpr(input.fp_candidate_ids, context)).toEqual(['fp-1']);
+    expect(evalExpr(input.space_id, context)).toBe('team');
+  });
+
+  it('does not run for a batch with no verdict, which the step rejects as an empty list', () => {
+    expect(evalExpr(tagStep?.if as string, { variables: { verdict_count: 0 } })).toBe(false);
+    expect(evalExpr(tagStep?.if as string, { variables: { verdict_count: 3 } })).toBe(true);
+  });
+
+  // The keys are data for tuning, not part of the verdict, so a failure must not fail triage.
+  it('retries, then continues past a failure so the batch still reaches its review', () => {
+    expect(tagStep?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+    expect(tagStep?.['on-failure']?.continue).toBe(true);
+  });
+
+  it('reports the key statistics only when the tags were written', () => {
+    const guard = reportStep?.if as string;
+    const run = (verdictCount: number, error?: unknown) =>
+      evalExpr(guard, {
+        variables: { verdict_count: verdictCount },
+        steps: { tag_pattern_keys: { error } },
+      });
+
+    expect(run(3)).toBe(true);
+    expect(run(3, { message: 'failed' })).toBe(false);
+    expect(run(0)).toBe(false);
+  });
+
+  it('sends no grouping outcome yet, because nothing joins proposals until grouping runs', () => {
+    const input = reportStep?.with as Record<string, unknown>;
+    expect([input.alerts_joined, input.proposals_created, input.alerts_pooled]).toEqual([0, 0, 0]);
+  });
+});

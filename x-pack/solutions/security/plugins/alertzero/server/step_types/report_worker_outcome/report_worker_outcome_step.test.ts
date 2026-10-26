@@ -541,6 +541,18 @@ describe('alertzero.reportWorkerOutcome step', () => {
         },
       ],
       [
+        ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchGrouped,
+        SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+        {
+          alerts_with_strict_key: '36',
+          conversation_created: 'false',
+          event: 'alert_triage_batch_grouped',
+          fp_candidates_on_fallback: '',
+          strict_keys: 12,
+          wide_keys: 8,
+        },
+      ],
+      [
         ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved,
         SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
         {
