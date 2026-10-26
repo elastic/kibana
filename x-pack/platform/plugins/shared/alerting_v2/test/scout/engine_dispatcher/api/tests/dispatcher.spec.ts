@@ -648,8 +648,6 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         ...buildSeriesEvents('rule-005', 'rule-005-series-2', 'rule-005-series-2-episode-1', 180),
       ];
 
-      await apiServices.alertingV2.ruleEvents.seed(events);
-
       // User actions:
       //  - rule-001 ack then unack → suppression cancelled → fire
       //  - rule-002 ack only → suppress
@@ -729,7 +727,9 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
           timestamp: actionTs(173),
         }),
       ];
+      // Seed the user actions first: a tick between the two seeds would fire every episode.
       await apiServices.alertingV2.alertActionsEvents.seed(userActions);
+      await apiServices.alertingV2.ruleEvents.seed(events);
 
       // Wait until the dispatcher has produced the full set:
       //  - rule-001:                fire     (ack/unack net = no suppress)
@@ -887,7 +887,6 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
           timestamp: eventTs(60),
         }),
       ];
-      await apiServices.alertingV2.ruleEvents.seed(events);
 
       const futureExpiry = new Date(baseTime + 24 * 60 * 60 * 1000).toISOString();
       // `expiry` for the expired-snoozes must be strictly before the event's
@@ -960,7 +959,9 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
           expiry: pastExpiry,
         }),
       ];
+      // Seed the user actions first: a tick between the two seeds fires for the wrong reason.
       await apiServices.alertingV2.alertActionsEvents.seed(userActions);
+      await apiServices.alertingV2.ruleEvents.seed(events);
 
       await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(4, {
         actionTypes: ['fire'],

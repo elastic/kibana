@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MouseEvent } from 'react';
 import { renderHook } from '@testing-library/react';
 import type { FlyoutFooterMenuItem, FlyoutFooterMenuPanel } from '@kbn/flyout-template';
 import type { RuleApiResponse } from '../../services/rules_api';
@@ -29,7 +30,7 @@ const rule: RuleApiResponse = {
 
 type ActionItem = FlyoutFooterMenuItem & {
   'data-test-subj'?: string;
-  onClick?: () => void;
+  onClick?: (event?: MouseEvent) => void;
   href?: string;
   disabled?: boolean;
   toolTipContent?: unknown;
@@ -61,7 +62,7 @@ const ALL_HANDLERS = {
   onToggleEnabled: jest.fn(),
   onUpdateApiKey: jest.fn(),
   onViewChangeHistory: jest.fn(),
-  detailsHref: '/rules/rule-1',
+  detailsLink: { href: '/rules/rule-1', onClick: jest.fn() },
 };
 
 describe('useRuleMenuPanels', () => {
@@ -108,10 +109,21 @@ describe('useRuleMenuPanels', () => {
     expect(findItem(result.current, 'toggleEnabledRule-rule-1')?.disabled).toBeFalsy();
   });
 
-  it('links view details to detailsHref', () => {
-    const { result } = renderPanels(ALL_HANDLERS);
+  it('links view details to detailsLink and closes the menu before following it', () => {
+    const calls: string[] = [];
+    const event = {} as MouseEvent;
+    const onNavigate = jest.fn(() => calls.push('navigate'));
+    const { result } = renderPanels({
+      detailsLink: { href: '/rules/rule-1', onClick: onNavigate },
+      closeMenu: () => calls.push('close'),
+    });
+    const viewDetails = findItem(result.current, 'viewRuleDetails-rule-1');
 
-    expect(findItem(result.current, 'viewRuleDetails-rule-1')?.href).toBe('/rules/rule-1');
+    expect(viewDetails?.href).toBe('/rules/rule-1');
+    viewDetails?.onClick?.(event);
+
+    expect(calls).toEqual(['close', 'navigate']);
+    expect(onNavigate).toHaveBeenCalledWith(event);
   });
 
   it('calls closeMenu before running the item action', () => {
