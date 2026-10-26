@@ -320,6 +320,49 @@ describe('Navigation Tree', () => {
     );
   });
 
+  describe('Entity Inventory navigation group', () => {
+    const getInfrastructureSectionChildren = (
+      options: Parameters<typeof createNavigationTree>[0]
+    ): NodeDefinition[] => {
+      const { body } = createNavigationTree(options) as NavigationTreeDefinition;
+      const infrastructure = body.find((item) => item.id === 'metrics');
+
+      return (infrastructure?.children as NodeDefinition[]) ?? [];
+    };
+
+    it('does not include the group when the plugin is absent', () => {
+      const children = getInfrastructureSectionChildren({ core });
+
+      expect(children.find((item) => item.title === 'Entity Inventory')).toBeUndefined();
+    });
+
+    it('includes the group with the links provided by the plugin when it is present', () => {
+      const entityInventoryNavChildren: NodeDefinition[] = [
+        { link: 'entityInventoryApp:allResources' as const },
+        { link: 'entityInventoryApp:hosts' as const },
+        { link: 'entityInventoryApp:kubernetes' as const },
+      ];
+
+      const children = getInfrastructureSectionChildren({ core, entityInventoryNavChildren });
+
+      expect(children.find((item) => item.title === 'Entity Inventory')?.children).toEqual(
+        entityInventoryNavChildren
+      );
+    });
+
+    it('keeps the original Infrastructure links when the plugin is present', () => {
+      const children = getInfrastructureSectionChildren({
+        core,
+        entityInventoryNavChildren: [{ link: 'entityInventoryApp:allResources' as const }],
+      });
+      const infrastructureLinks = children[0].children?.map((item) => item.link);
+
+      expect(infrastructureLinks).toEqual(
+        expect.arrayContaining(['metrics:inventory', 'metrics:hosts'])
+      );
+    });
+  });
+
   describe('filterForFeatureAvailability', () => {
     it('should return empty array if feature flag is false', () => {
       const node = {
