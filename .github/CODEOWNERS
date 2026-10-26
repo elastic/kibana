@@ -1136,6 +1136,7 @@ x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-ui @elastic/n
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-shared-components @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-significant-events-schema @elastic/nightshift
+x-pack/platform/packages/shared/kbn-slo-constants @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/streams-ui
@@ -2636,7 +2637,7 @@ x-pack/platform/plugins/shared/actions/server/inbound/ @elastic/workflows-eng @e
 x-pack/platform/plugins/shared/connector_events_bridge/ @elastic/workflows-eng
 
 ## Relay
-x-pack/platform/plugins/shared/actions/server/lib/relay @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/actions/server/lib/relay @elastic/nightshift
 
 
 ## Bearer with TLS / Kubernetes auth
