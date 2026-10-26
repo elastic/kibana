@@ -412,17 +412,14 @@ export const RuleDetailsPage = connector(
           <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
         </EuiFlexItem>
       ) : (
-        <>
-          <EuiSpacer size="m" />
-          <RuleStatusFailedCallOut
-            ruleNameForChat={rule?.name ?? ruleI18n.DETECTION_RULES_CONVERSATION_ID}
-            ruleName={rule?.immutable ? rule?.name : undefined}
-            dataSources={rule?.immutable ? ruleIndex : undefined}
-            status={lastExecutionStatus}
-            date={lastExecutionDate}
-            message={lastExecutionMessage}
-          />
-        </>
+        <RuleStatusFailedCallOut
+          ruleNameForChat={rule?.name ?? ruleI18n.DETECTION_RULES_CONVERSATION_ID}
+          ruleName={rule?.immutable ? rule?.name : undefined}
+          dataSources={rule?.immutable ? ruleIndex : undefined}
+          status={lastExecutionStatus}
+          date={lastExecutionDate}
+          message={lastExecutionMessage}
+        />
       );
     }, [
       lastExecutionStatus,
@@ -612,6 +609,9 @@ export const RuleDetailsPage = connector(
               />
             </RuleDetailsStickyHeader>
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
+              <Display show={!globalFullScreen}>
+                <EuiSpacer size="m" />
+              </Display>
               <NeedAdminForUpdateRulesCallOut />
               <MissingDetectionsPrivilegesCallOut />
               {upgradeCallout}
