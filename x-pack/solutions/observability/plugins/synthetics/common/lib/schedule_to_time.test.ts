@@ -44,6 +44,14 @@ describe('schedule_to_time', () => {
       });
     });
 
+    it('treats a missing unit as minutes, like the backfill', () => {
+      expect(withScheduleInterval({ name: 'login', schedule: { number: '3' } })).toEqual({
+        name: 'login',
+        schedule: { number: '3' },
+        schedule_interval_seconds: 180,
+      });
+    });
+
     it('leaves attributes unchanged when there is no schedule', () => {
       expect(withScheduleInterval({ name: 'login' })).toEqual({ name: 'login' });
     });

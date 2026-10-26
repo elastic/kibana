@@ -27,12 +27,16 @@ export const withScheduleInterval = <T extends object>(
   attributes: T
 ): T & { schedule_interval_seconds?: number } => {
   const schedule = (attributes as { schedule?: SyntheticsMonitorSchedule }).schedule;
-  if (!schedule?.number || !schedule.unit) {
+  if (!schedule?.number) {
     return attributes;
   }
   return {
     ...attributes,
-    [SCHEDULE_INTERVAL_FIELD]: scheduleToSeconds(schedule),
+    // A missing unit is minutes, same as the model version backfill.
+    [SCHEDULE_INTERVAL_FIELD]: scheduleToSeconds({
+      number: schedule.number,
+      unit: schedule.unit ?? ScheduleUnit.MINUTES,
+    }),
   };
 };
 
