@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
-import type { DatasetConfig } from '../types';
+import type { Detection, Severity, SignificantEvent } from '@kbn/significant-events-schema';
+import type {
+  ChronicSeedConfig,
+  ChronicSeedSegment,
+} from '../../data_generators/seed_chronic_background';
+import type { ExpectedBaseline } from '../../evaluators/discovery/types';
+import type { DatasetConfig, DiscoveryScenario } from '../types';
 
 /**
  * Incident onset in snapshot-time coordinates — the change point the detection rules fired on.
@@ -391,6 +396,147 @@ const BALANCE_READER_WEAK_DETECTION_EVENT: Partial<SignificantEvent> = {
   ],
 };
 
+const MINUTES_PER_DAY = 24 * 60;
+const daysAgo = (days: number): number => days * MINUTES_PER_DAY;
+
+/**
+ * A seeded failure pattern with a known rate over time, graded on the baseline facts the agent
+ * states for it. Severity and status are not graded: only the baseline profile is under test.
+ */
+const baselineScenario = ({
+  slug,
+  ruleUuid,
+  title,
+  phrase,
+  level,
+  attributes,
+  segments,
+  expectedBaseline,
+  expectedSeverity,
+  criterion,
+}: {
+  slug: string;
+  ruleUuid: string;
+  title: string;
+  /**
+   * The failure text the seeded rows carry, written as a failing operation. Unique, and never a
+   * part of another scenario's phrase: the scenarios share one stream.
+   */
+  phrase: string;
+  level?: ChronicSeedConfig['level'];
+  attributes?: ChronicSeedConfig['attributes'];
+  segments: ChronicSeedSegment[];
+  /** What the baseline profile must show; leave out for a scenario that needs no profile. */
+  expectedBaseline?: ExpectedBaseline;
+  /** Grades the tier with `severity_exact`; leave out to grade only the baseline profile. */
+  expectedSeverity?: Severity;
+  criterion: string;
+}): DiscoveryScenario => {
+  return {
+    input: {
+      scenario_id: `baseline-${slug}`,
+      source_id: 'logs',
+      detections: [
+        {
+          detection_id: `${ruleUuid}-det`,
+          rule_name: title,
+          rule_uuid: ruleUuid,
+          source_id: 'logs',
+          change_point_type: 'spike',
+          p_value: 0.0001,
+        },
+      ],
+      chronic_seed: {
+        phrase,
+        service: `baseline-probe-${slug}`,
+        level,
+        attributes,
+        segments,
+        detection_offset_minutes: 30,
+        ki_title: title,
+        ki_description: `${title}: the seeded failure phrase for the baseline profile scenario.`,
+      },
+    },
+    output: {
+      expected_ground_truth: `A seeded ${slug} failure pattern; its baseline facts must match what was seeded.`,
+      expected_significant_events: expectedSeverity
+        ? [
+            {
+              event_id: `baseline-${slug}-event`,
+              title,
+              status: 'active',
+              severity: expectedSeverity,
+              signals: [
+                {
+                  type: 'detection',
+                  source_id: 'logs',
+                  verdict: 'confirms',
+                  description: `${title}: the seeded failure pattern.`,
+                  metadata: {
+                    detection_id: `${ruleUuid}-det`,
+                    rule_name: title,
+                    rule_uuid: ruleUuid,
+                    change_point_type: 'spike',
+                    p_value: 0.0001,
+                  },
+                },
+              ],
+            },
+          ]
+        : [],
+      ...(expectedBaseline ? { expected_baseline: expectedBaseline } : {}),
+      criteria: [{ id: `baseline-${slug}`, text: criterion, score: 2 }],
+    },
+    metadata: { difficulty: 'medium', failure_domain: 'baseline-profile', failure_mode: slug },
+    snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
+  };
+};
+
+/**
+ * Two shapes of the same failing operation, told apart only by their rate over the window (a steady
+ * failure the whole window, and a surge on an old low rate), and rows that match a failure phrase but
+ * report a normal state. Seeded ranges are wide: the profile's day
+ * buckets shift with the time of day the run starts.
+ */
+const BASELINE_SCENARIOS: DiscoveryScenario[] = [
+  baselineScenario({
+    slug: 'steady',
+    ruleUuid: 'b45e11ae-0001-4000-8000-000000000001',
+    title: 'Checkout session failures',
+    phrase: 'checkout session creation failed: inventory lookup timed out, order not created',
+    segments: [{ from_minutes_ago: daysAgo(8), to_minutes_ago: 0, rate_per_minute: 1 }],
+    expectedBaseline: { failed_days: [7, 8], days: [7, 8], factor: [0.5, 2] },
+    criterion:
+      'Describes the failure as long-standing: present on every day of the window at about the same rate, not as a new failure.',
+  }),
+  baselineScenario({
+    slug: 'surge',
+    ruleUuid: 'b45e11ae-0002-4000-8000-000000000002',
+    title: 'Payment authorization failures surging',
+    phrase: 'payment authorization request failed: upstream timeout, request not completed',
+    segments: [
+      { from_minutes_ago: daysAgo(8), to_minutes_ago: daysAgo(2), rate_per_minute: 1 },
+      { from_minutes_ago: daysAgo(2), to_minutes_ago: 0, rate_per_minute: 20 },
+    ],
+    expectedBaseline: { failed_days: [7, 8], days: [7, 8], factor: [5, 40] },
+    expectedSeverity: 'high',
+    criterion:
+      'Describes the failure as a surge on top of an existing low rate: the last complete day is many times the earlier days.',
+  }),
+  baselineScenario({
+    slug: 'handled',
+    ruleUuid: 'b45e11ae-0003-4000-8000-000000000003',
+    title: 'Task nudge index lookups failing',
+    phrase: 'task nudge poll raised index_not_found_exception: no such index [.demo_task_nudge]',
+    level: null,
+    attributes: { 'event.name': 'exception', 'error.exception.handled': true },
+    segments: [{ from_minutes_ago: daysAgo(8), to_minutes_ago: 0, rate_per_minute: 1 }],
+    // The rows name an exception, and carry the cue that the caller handled it: the agent must read both.
+    criterion:
+      'Does not write a high-severity active event: every matched row is an exception its caller handled, and what the agent writes says so instead of reporting the request as blocked.',
+  }),
+];
+
 export const discovery: DatasetConfig['discovery'] = [
   {
     input: {
@@ -406,6 +552,9 @@ export const discovery: DatasetConfig['discovery'] = [
     // replays one rule per cycle. Each chain legitimately continues ONE event, so the agent
     // should reuse a single event_id. `cascade` = upstream → downstreams across services, linked
     // by dependency topology.
+    // The same-rule and closed-event paths do not depend on the scenario; the weak-detection
+    // scenario already replays them.
+    continuationPaths: ['cascade'],
     continuationChains: {
       cascade: [
         'Transaction History Database SQL Connection Error',
@@ -517,4 +666,5 @@ export const discovery: DatasetConfig['discovery'] = [
     },
     snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
   },
+  ...BASELINE_SCENARIOS,
 ];

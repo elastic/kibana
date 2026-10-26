@@ -7,7 +7,11 @@
 
 import type { RunContextStackEntry } from '@kbn/agent-builder-server';
 import type { SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import {
+  DISCOVERY_SEVERITY_APPLICATION_RULE,
+  MAX_TEXT_LENGTH,
+  SEVERITY_CONTRACT_RULE,
+} from '@kbn/significant-events-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -178,13 +182,13 @@ describe('events_write tool', () => {
     };
     const { event_id: _omitted, ...newEventInput } = input;
 
-    it('accepts a new event backed only by an inconclusive result that found rows, rated low', () => {
+    it('accepts a new event backed only by an off_topic row, rated low', () => {
       expect(
         eventsWriteSchema.safeParse({
           items: [
             {
               ...newEventInput,
-              signals: [signalWith('inconclusive')],
+              signals: [signalWith('off_topic')],
               severity: 'low',
               confidence: 0.2,
             },
@@ -196,6 +200,7 @@ describe('events_write tool', () => {
     it.each([
       ['refuting evidence', [signalWith('refutes')]],
       ['a quiet not_checked rule', [quiet]],
+      ['an inconclusive result', [signalWith('inconclusive')]],
       [
         'an inconclusive result with no rows',
         [
@@ -217,23 +222,6 @@ describe('events_write tool', () => {
         );
       }
     });
-
-    it.each([
-      ['severity', { severity: 'medium', confidence: 0.2 }, 'severity must be low'],
-      ['confidence', { severity: 'low', confidence: 0.6 }, 'confidence is at most 0.3'],
-    ])(
-      'rejects a new event with nothing confirmed that rates its %s too high',
-      (_label, fields, message) => {
-        const result = eventsWriteSchema.safeParse({
-          items: [{ ...newEventInput, signals: [signalWith('inconclusive')], ...fields }],
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error.issues.map(({ message: m }) => m).join(' ')).toContain(message);
-        }
-      }
-    );
 
     it('rejects a new event with no signals at all', () => {
       const result = eventsWriteSchema.safeParse({
@@ -862,6 +850,13 @@ describe('eventsWriteItemSchema', () => {
       },
     ],
   };
+
+  it('describes severity with the shared contract and the discovery application rule', () => {
+    const description = eventsWriteItemSchema.shape.severity.description;
+
+    expect(description).toContain(SEVERITY_CONTRACT_RULE);
+    expect(description).toContain(DISCOVERY_SEVERITY_APPLICATION_RULE);
+  });
 
   it('accepts a valid item at the field length boundaries', () => {
     expect(eventsWriteItemSchema.safeParse(validItem).success).toBe(true);

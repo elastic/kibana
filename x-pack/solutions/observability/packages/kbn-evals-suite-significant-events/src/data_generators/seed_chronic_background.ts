@@ -11,32 +11,94 @@ import { KNOWLEDGE_INDICATORS_DATA_STREAM } from './snapshot_indices';
 
 const KI_TTL_MILLIS = 30 * 24 * 60 * 60 * 1000;
 
+/** One stretch of the seeded failure pattern, in minutes before seed time (`from` is the older end). */
+export interface ChronicSeedSegment {
+  from_minutes_ago: number;
+  to_minutes_ago: number;
+  rate_per_minute: number;
+}
+
 export interface ChronicSeedConfig {
-  /** Failure phrase written to `body.text`; the KI query greps for it. */
+  /**
+   * Failure phrase written to `body.text`; the KI query matches it as a phrase. Unique per scenario,
+   * and never a part of another scenario's phrase: seeding deletes by it, and the stream is shared.
+   */
   phrase: string;
   /** Service prefix written to `body.text` (mirrors the app-log format in the snapshots). */
   service: string;
-  /** Steady emission rate; identical before and after the change point, so rate evidence is flat. */
-  rate_per_minute: number;
-  /** Total seeded span ending at seed time — must exceed 60m + detection offset so the pre window has coverage. */
-  duration_minutes: number;
+  /**
+   * The failure rate over time: one segment is a steady condition, a low segment then a high one
+   * a surge, and a first segment that starts days ago a condition that is new. The span must cover
+   * the 7-day baseline window plus today, about 8 days, and the pre window of the detection.
+   */
+  segments: ChronicSeedSegment[];
+  /** Log level of the seeded rows. A failure phrase at INFO reports a normal state. Default `ERROR`, `null` for none. */
+  level?: 'ERROR' | 'WARN' | 'INFO' | 'DEBUG' | null;
+  /** Further fields on every seeded row, such as an exception the caller handled. */
+  attributes?: Record<string, string | number | boolean>;
   /** Detection change point is stamped this many minutes before seed time. */
   detection_offset_minutes: number;
   ki_title: string;
   ki_description: string;
 }
 
+/** One seeded log row: the phrase as an app log line, with the config's level and extra fields. */
+export const buildChronicDocument = ({
+  config,
+  timestamp,
+}: {
+  config: ChronicSeedConfig;
+  timestamp: number;
+}): Record<string, unknown> => ({
+  '@timestamp': new Date(timestamp).toISOString(),
+  body: { text: `${config.service} | ${config.phrase}` },
+  ...(config.level === null ? {} : { severity_text: config.level ?? 'ERROR' }),
+  attributes: config.attributes ?? {},
+  resource: { attributes: { 'service.name': config.service } },
+});
+
 export interface ChronicSeedResult {
   /** Detection `@timestamp` to stamp on the scenario's canonical detections. */
   detectionTimestamp: string;
 }
 
+/** Timestamps (epoch ms) of the failures a config seeds, oldest first, at each segment's own rate. */
+export const seedTimestamps = ({
+  now,
+  segments,
+}: {
+  now: number;
+  segments: readonly ChronicSeedSegment[];
+}): number[] =>
+  segments.flatMap(({ from_minutes_ago: from, to_minutes_ago: to, rate_per_minute: rate }) => {
+    if (!(from > to) || !(rate > 0)) {
+      throw new Error(
+        `Chronic seed segment needs from_minutes_ago > to_minutes_ago and a positive rate (got ${from}, ${to}, ${rate})`
+      );
+    }
+    const intervalMs = 60_000 / rate;
+    const timestamps: number[] = [];
+    for (let ts = now - from * 60_000; ts < now - to * 60_000; ts += intervalMs) {
+      timestamps.push(Math.round(ts));
+    }
+    return timestamps;
+  });
+
+const BULK_CHUNK_DOCS = 5_000;
+
+/** The KI's stored query: the exact phrase only, so scenarios sharing a stream never match each other. */
+export const kiQueryFor = ({
+  streamName,
+  phrase,
+}: {
+  streamName: string;
+  phrase: string;
+}): string => `FROM ${streamName}, ${streamName}.* | WHERE MATCH_PHRASE(body.text, "${phrase}")`;
+
 /**
- * Seeds a chronic, rate-flat failure pattern: steady matching logs for the whole seeded span
- * (identical rate before and after the change point) plus one rule-backed query KI for it.
- * The grounding skill's pre/post rate evidence over this pattern must come out flat, so the
- * expected verdict is `inconclusive` (mechanism present, not newly elevated) — the positive
- * fixture for the rate gate, which is otherwise only exercised by first-onset scenarios.
+ * Seeds a failure pattern with a known rate over time (`config.segments`): matching ERROR logs
+ * plus one rule-backed query KI for it. The truth is known exactly, so the grounding skill's
+ * baseline profile (days failed, last day against the earlier days) can be checked against it.
  */
 export const seedChronicBackground = async ({
   esClient,
@@ -61,10 +123,9 @@ export const seedChronicBackground = async ({
   config: ChronicSeedConfig;
 }): Promise<ChronicSeedResult> => {
   const now = Date.now();
-  const intervalMs = 60_000 / config.rate_per_minute;
-  const spanMs = config.duration_minutes * 60_000;
+  const timestamps = seedTimestamps({ now, segments: config.segments });
 
-  // Idempotency across repetitions: drop any previously seeded layer so the rate stays flat.
+  // Idempotency across repetitions: drop any previously seeded layer so the rates stay as given.
   await esClient
     .deleteByQuery({
       index: streamName,
@@ -76,21 +137,15 @@ export const seedChronicBackground = async ({
       if (err?.statusCode !== 404) throw err;
     });
 
-  const operations: Array<Record<string, unknown>> = [];
-  for (let ts = now - spanMs; ts < now; ts += intervalMs) {
-    operations.push({ create: {} });
-    operations.push({
-      '@timestamp': new Date(ts).toISOString(),
-      body: { text: `${config.service} | ${config.phrase}` },
-      severity_text: 'ERROR',
-      resource: { attributes: { 'service.name': config.service } },
-    });
-  }
-
-  const bulkResponse = await esClient.bulk({ index: streamName, operations, refresh: true });
-  if (bulkResponse.errors) {
-    const firstError = bulkResponse.items.find((item) => item.create?.error)?.create?.error;
-    throw new Error(`Chronic background bulk seed failed: ${JSON.stringify(firstError)}`);
+  for (let start = 0; start < timestamps.length; start += BULK_CHUNK_DOCS) {
+    const operations = timestamps
+      .slice(start, start + BULK_CHUNK_DOCS)
+      .flatMap((ts) => [{ create: {} }, buildChronicDocument({ config, timestamp: ts })]);
+    const bulkResponse = await esClient.bulk({ index: streamName, operations, refresh: true });
+    if (bulkResponse.errors) {
+      const firstError = bulkResponse.items.find((item) => item.create?.error)?.create?.error;
+      throw new Error(`Chronic background bulk seed failed: ${JSON.stringify(firstError)}`);
+    }
   }
 
   // Clean up any previously seeded KI doc so op_type: 'create' doesn't conflict on repeat runs.
@@ -120,7 +175,7 @@ export const seedChronicBackground = async ({
       'source.id': sourceId,
       'kibana.space_ids': [spaceId],
       query: {
-        esql: `FROM ${streamName}, ${streamName}.* | WHERE body.text : "${config.phrase}"`,
+        esql: kiQueryFor({ streamName, phrase: config.phrase }),
         query_type: 'match',
         severity_score: 60,
         rule_backed: true,
@@ -132,8 +187,8 @@ export const seedChronicBackground = async ({
 
   const detectionTimestamp = new Date(now - config.detection_offset_minutes * 60_000).toISOString();
   log.info(
-    `Seeded chronic background "${ruleName}": ${operations.length / 2} docs over ` +
-      `${config.duration_minutes}m at ${config.rate_per_minute}/min, change point ${detectionTimestamp}`
+    `Seeded chronic background "${ruleName}": ${timestamps.length} docs in ` +
+      `${config.segments.length} segment(s), change point ${detectionTimestamp}`
   );
   return { detectionTimestamp };
 };

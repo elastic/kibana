@@ -24,6 +24,19 @@ export interface ExampleOutputBase {
   criteria: EvaluationCriterion[];
 }
 
+/** Inclusive `[min, max]` bounds. */
+type Range = readonly [number, number];
+
+/**
+ * What a seeded scenario's baseline profile must show: the days the failure occurred on out of the
+ * days profiled, and the last complete day over the median of the days before it.
+ */
+export interface ExpectedBaseline {
+  failed_days: Range;
+  days: Range;
+  factor?: Range;
+}
+
 export interface DiscoveryAgentOutput extends AgentOutputBase {
   significantEvents: SignificantEvent[];
   inputDetections?: Detection[];
@@ -41,6 +54,8 @@ export interface DiscoveryEvaluationExample {
     expected_significant_events?: Array<Partial<SignificantEvent>>;
     /** Human-readable summary of the expected outcome, for orientation; no evaluator grades it. */
     expected_ground_truth?: string;
+    /** What the baseline facts in a confirming signal's description must show, for a seeded scenario. */
+    expected_baseline?: ExpectedBaseline;
     /** Expected confirmed rule UUIDs keyed by event ID for confirmation-alignment grading. */
     expected_confirmed_rule_uuids?: Record<string, string[]>;
   } & Record<string, unknown>;

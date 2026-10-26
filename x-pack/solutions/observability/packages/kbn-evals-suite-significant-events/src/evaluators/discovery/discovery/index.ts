@@ -35,6 +35,7 @@ import {
   type ContinuationEvaluator,
 } from './continuation/continuation_stability';
 import { continuationSeverityStabilityEvaluator } from './continuation/continuation_severity_stability';
+import { baselineProfileEvaluator } from './evidences/baseline_profile';
 import { confirmedEvidencesEvaluator } from './evidences/confirmed_evidences';
 import { confirmationAlignmentEvaluator } from './evidences/confirmation_alignment';
 import { severityExactEvaluator } from './severity/severity_exact';
@@ -55,6 +56,7 @@ export const createDiscoveryEvaluators = (
     createExecuteEsqlGroundingEvaluator(),
     confirmedEvidencesEvaluator,
     confirmationAlignmentEvaluator,
+    baselineProfileEvaluator,
     severityExactEvaluator,
     statusCorrectnessEvaluator,
   ];

@@ -225,11 +225,7 @@ const signalBaseSchema = lazySchema(() =>
       .max(MAX_TEXT_LENGTH)
       .describe(
         dedent`
-      What this signal's queries observed and what it affects, in plain prose a reader can act on, in at most three sentences.
-
-      Name the concrete row signature and failing target — or, when nothing matched, what was looked for and what was found instead — then who or what is affected, how badly, for how long, and how broadly (the share of the operation, the number and share of parties, regions), using the numbers measured. Say whether the rows show the operation failing, slow, completing, or not settled, and name any sensitive data the rows expose by type. Report only what the queries observed: the verdict is recorded separately, and this text neither states it nor depends on it. Never say only that rows were returned.
-
-      Do not name dependency chains, upstream causes, or topology here — use causal_features and blast_radius for that.
+      What this signal's queries observed and what it affects, as written by grounding. Keep it exactly as grounding wrote it: never shorten, merge, or reword it, and never add what the queries did not observe.
       ${NO_RAW_SENSITIVE_VALUES_RULE}
     `
       ),

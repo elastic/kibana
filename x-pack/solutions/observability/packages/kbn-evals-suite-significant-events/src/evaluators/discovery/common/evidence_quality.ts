@@ -8,6 +8,7 @@
 import type { EvaluationCriterion, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import {
   ASSESSMENT_NOTE_ROLE_RULE,
+  NARRATIVE_AGREEMENT_RULE,
   NO_RAW_SENSITIVE_VALUES_RULE,
   SUMMARY_ROLE_RULE,
   SYMPTOM_HYPOTHESIS_ROLE_RULE,
@@ -42,7 +43,7 @@ const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
 const NARRATIVE_FIELDS_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'narrative_fields_bounded_and_safe',
-    text: `symptom_hypothesis is one sentence, summary is at most three sentences, and assessment_note is at most three sentences. Judge sentence counts, not character counts: a sentence ends at a full stop, question mark or exclamation mark, so clauses joined by a comma, semicolon or "while" are one sentence. Judge only sentence counts and sensitive values here; counts, timestamps, wording and format belong to the other criteria. ${NO_RAW_SENSITIVE_VALUES_RULE}`,
+    text: `symptom_hypothesis, summary, and assessment_note are each at most three sentences. Judge sentence counts, not character counts: a sentence ends at a full stop, question mark or exclamation mark, so clauses joined by a comma, semicolon or "while" are one sentence. Judge only sentence counts and sensitive values here; counts, timestamps, wording and format belong to the other criteria. ${NO_RAW_SENSITIVE_VALUES_RULE}`,
     score: 1,
   },
   {
@@ -59,6 +60,11 @@ const NARRATIVE_FIELDS_CRITERIA: EvaluationCriterion[] = [
     id: 'assessment_note_reasoning_only',
     text: `assessment_note follows its field contract:\n${ASSESSMENT_NOTE_ROLE_RULE}`,
     score: 1,
+  },
+  {
+    id: 'narrative_fields_agree',
+    text: `The event's title, symptom_hypothesis, summary, assessment_note and severity agree with each other and with the event's signal descriptions. ${NARRATIVE_AGREEMENT_RULE} Judge only agreement here: for example, a summary that states impact is confirmed while the note says completion is unresolved, a field that names an operation or path the others omit, or a tier the note's reasoning does not support. Wording, sentence counts and figures belong to the other criteria.`,
+    score: 2,
   },
   {
     id: 'event_local_narrative',

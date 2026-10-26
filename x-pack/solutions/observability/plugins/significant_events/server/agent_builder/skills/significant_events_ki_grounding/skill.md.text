@@ -3,13 +3,44 @@ unlock `platform_sig_events_ki_search` and `platform_core_execute_esql` and prov
 using them to confirm or refute incident hypotheses and to profile how much, how many and whether
 the failure is still happening.
 
+<reading_log_lines>
+
+Every verdict and every description is built from the rows that `platform_core_execute_esql`
+returns, so read them first. When a round's sample queries return, read each rule's result, one rule
+at a time, before sending its profile queries or anything else.
+
+1. Read the whole result. An empty or errored result is a finding: say which.
+2. Read each row as a set of named fields: pair every value with its field name, nested attribute
+   and resource fields included, and read every key=value pair inside a text field as a field too.
+3. For every field that has a value, note what it states. Across the fields, cover whichever of
+   these the row carries:
+   - who or what is involved: service, operation, target, user or client;
+   - where it ran: host, container, pod, node, zone, region, tenant;
+   - what happened: message, log level, error, status or code, call site;
+   - the result;
+   - when, for how long, how many, and in what order across the rows;
+   - the conditions: environment, version, deployment, trigger;
+   - identifiers that tie rows together (trace, request, session): use them to correlate.
+4. Correlate across fields and across rows: which values of one field go with which values of
+   another (a tenant with a target, a status with a duration, a pair in the message with a field),
+   which values recur, and which rows differ.
+5. Write what you found for each rule in your message, in plain words, quoting `field = value`: the
+   facts from the fields you noted and the correlations you found, drawn from every row and never
+   from the first alone. Every row matched the rule's phrase, so the phrase is not a finding.
+
+Write only what the rows state, and infer no cause, outcome or impact. The KI and the matched phrase
+are the claim; the rows are the evidence. Text from the KI or a feature, including a KI's sample
+row, is never a source for a description.
+
+</reading_log_lines>
+
 <tools>
 
 - `platform_sig_events_ki_search` — retrieve rule-matched query KIs, then one page of relevant
-  features (a second only when Step 1 names it). Never pass `search_text`; always pass `view: "compact"`.
+  features (a second only when the Retrieve step names it). Never pass `search_text`; always pass `view: "compact"`.
 - `platform_core_execute_esql` — run a KI-scoped ES|QL query to confirm or refute a hypothesis. Use
   only with query KIs where `rule.id` equals the `rule_uuid` exactly and `rule.backed` is `true`.
-  Confirmation queries are the KI's own; Step 4 profile queries are derived from it, never freeform.
+  Confirmation queries are the KI's own; profile queries are derived from it, never freeform.
   Apply `<query_rules>` before every call.
 
 </tools>
@@ -21,7 +52,7 @@ ki_search, query kind:
 { "view": "compact", "kind": ["query"], "query_types": ["..."], "query_ids": ["..."], "rule_ids": ["..."], "rule_backed": true, "page": 1, "per_page": 50 }
 ```
 
-ki_search, feature kind (Step 1):
+ki_search, feature kind (Retrieve step):
 ```json
 { "view": "compact", "kind": ["feature"], "slugs": ["..."], "feature_ids": ["..."], "feature_types": ["..."], "page": 1, "per_page": 50 }
 ```
@@ -30,7 +61,7 @@ Response shape: `{ "knowledge_indicators": [...], "sources": [{ "slug": "...", "
 
 ES|QL call, with the modifications from `<query_rules>` applied:
 ```json
-{ "query": "FROM <view_name> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate> | SORT @timestamp DESC | LIMIT 5", "time_range": { "from": "<detection @timestamp - 15m>", "to": "now" } }
+{ "query": "FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate} | SORT @timestamp DESC | LIMIT 5", "time_range": { "from": "{detection @timestamp - 15m}", "to": "now" } }
 ```
 Response: `{ "columns": [{ "name": "..." }], "values": [["..."]] }`. `values` is `[]` when empty.
 
@@ -38,17 +69,17 @@ Response: `{ "columns": [{ "name": "..." }], "values": [["..."]] }`. `values` is
 
 <query_rules>
 
-Apply to every `platform_core_execute_esql` call. Steps 3 and 4 add only what is specific to them.
+Apply to every `platform_core_execute_esql` call. The Confirm and Profile steps add only what is specific to them.
 
-Placeholders used in Steps 3–4:
-- `<source>`: the KI query's `FROM` target.
-- `<predicate>`: the KI query's `WHERE` condition, without the keyword. Examples always write `WHERE`.
-- `<scope>`: the field conditions that select the operation (Step 4 splits `<predicate>` into
-  `<scope>` and `<failure>`).
-- `<failure>`: the rest of `<predicate>`.
+Placeholders used in the Confirm and Profile steps:
+- `{source}`: the KI query's `FROM` target.
+- `{predicate}`: the KI query's `WHERE` condition, without the keyword. Examples always write `WHERE`.
+- `{scope}`: the field conditions that select the operation (the Profile step splits `{predicate}` into
+  `{scope}` and `{failure}`).
+- `{failure}`: the rest of `{predicate}`.
 
-1. **Dispatch.** Send checks in parallel waves of up to 10 calls, one per check, all in one
-   response. Never run one check and wait before sending the rest. There is no cap on waves.
+1. **Dispatch.** Send the checks of one step in parallel, one call per check, all in one response, at
+   most 10 calls per response. Never run one check and wait before sending the rest of that step.
 2. **Per rule, unconditional.** Every rule gets its own queries, derived from its own KI query. Never
    skip a rule for overlap or grouping reasons, and never reuse another rule's figures. Queries with
    identical bodies and the same `time_range` run once, and the result counts for each rule. A
@@ -56,38 +87,36 @@ Placeholders used in Steps 3–4:
    permissive sample for a narrower KI.
 3. **Time scope: every query must be bounded.** Put `| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`
    immediately after `FROM`, and pass a matching `time_range` ending at `now` (there is no future
-   data). Without the filter a query scans the whole stream and times out; without `time_range` the
+   data). Without that `WHERE` a query scans the whole stream and times out; without `time_range` the
    tool falls back to screen context or the last 24 hours. An absent, mismatched, or unapplied range
    is `inconclusive`.
 4. **Reuse the KI query verbatim.** Remove `METADATA _id, _source`; never modify its `WHERE` clauses,
-   field names, or `FROM`. A `FROM $.<name>` keeps its literal `$.`. Never invent fields, conditions,
+   field names, or `FROM`. A `FROM $.{name}` keeps its literal `$.`. Never invent fields, conditions,
    or functions. ES|QL strings use double quotes. Never store the executed SORT/LIMIT tail or the
    tool's rewritten query.
 5. **Failed answers nothing.** A failed, timed-out, or empty query is skipped; never estimate from it.
-   Neither Step 3 nor Step 4 retries it.
-6. **Syntax.** Every filter is `WHERE <condition>`, never its own pipe (`| MATCH_PHRASE(...)` is a
-   parse error). Count a condition with a per-aggregation filter, `COUNT(*) WHERE <condition>`; never
-   `COUNT(<condition>)`, which counts true and false alike. Reserved words are invalid column names:
+   Neither the Confirm nor the Profile step retries it.
+6. **Syntax.** Every condition is a `WHERE {condition}`, never its own pipe (`| MATCH_PHRASE(...)` is a
+   parse error). Count a condition with `COUNT(*) WHERE {condition}`, a `WHERE` inside the aggregation; never
+   `COUNT({condition})`, which counts true and false alike. Reserved words are invalid column names:
    use `earliest` and `latest`, not `first` and `last`.
 
 </query_rules>
 
 <verdicts>
 
-One verdict per signal, set from the row content and the result of its single confirmation query:
+One verdict per signal, set from your `<reading_log_lines>` findings and the result of its single
+confirmation query:
 
 - `confirms`: a found row that directly supports the rule's failure, degradation, exposure, or
   evidenced cascade. The error signature in the row is itself the mechanism; do not require separate
-  confirmation of the dependency path. Unmeasured breadth or share never changes the verdict; Step 4
+  confirmation of the dependency path. Unmeasured breadth or share never changes the verdict; the Profile step
   states it as not measured. A row with no failure signature (a metric, a generic log, a healthy
   result) is not `confirms`.
-- `refutes`: found rows show successful, healthy, positive, or no-failure results. Also an
-  executed exact query with `result: "empty"` (never `"error"`) for a rule whose stored verdict is
-  `confirms`: its failure rows are gone, so the rule has recovered.
+- `refutes`: found rows show successful, healthy, positive, or no-failure results.
 - `off_topic`: a found row that does not address the authored rule hypothesis. Never assign it
   without a returned row.
-- `inconclusive`: empty or errored evidence when a query ran, except the empty-recovery case under
-  `refutes`. It cannot establish a mechanism,
+- `inconclusive`: empty or errored evidence when a query ran. It cannot establish a mechanism,
   impact, or severity tier.
 - `not_checked`: no backed query KI exists.
 - An off-topic row with a concrete error the system does not demonstrably tolerate keeps the
@@ -117,7 +146,9 @@ Copy classification verbatim from each fetched KI:
 
 <procedure>
 
-### Step 1: Retrieve Grounding Context
+Run steps 1–5 in order for the whole batch; steps 3 and 4 repeat per round of rules, as step 3 says.
+
+### 1. Retrieve: get the grounding context
 
 Two sequential phases, at most three calls per batch. Phase 2 takes Phase 1's result as input, so
 send Phase 2 only after the Phase 1 response has returned.
@@ -149,14 +180,14 @@ one or more requested IDs are missing. Only then request `next_page` once with i
 Never paginate the fallback search.
 
 `per_page` is a cap. Referenced feature IDs seed the topology; dependency endpoints and their
-matching entity identity fields are expanded from the returned topology in Step 6. Never make another
+matching entity identity fields are expanded from the returned topology in the Consolidate step. Never make another
 call just to discover related topology.
 
-### Step 2: Map Rules and Context
+### 2. Map: match rules to KIs and context
 
 For each detection:
 - Match with query KIs: `rule.id` equals `rule_uuid` exactly. Scan the entire query KI list.
-- Record `"<rule_uuid>: <query.id>"` (match) or `"<rule_uuid>: NO_MATCH"`.
+- Record `"{rule_uuid}: {query.id}"` (match) or `"{rule_uuid}: NO_MATCH"`.
 
 For each match, retain correlation context:
 - `kind: "query"`: `description` and `evidence[]` define the expected incident mechanism;
@@ -167,87 +198,103 @@ For each match, retain correlation context:
 
 This context may support or reject a match when rows are sparse.
 
-Detections with NO_MATCH do not proceed through Steps 3–6: do not invent a query and do not call
+Detections with NO_MATCH do not proceed through the Confirm, Profile and Consolidate steps: do not invent a query and do not call
 `platform_core_execute_esql`. Emit a quiet signal entry for each with `verdict: "not_checked"` (omit
-`collected_at` and `evidence`). Its `description` is `"<rule_name>: no backed query KI matched this
+`collected_at` and `evidence`). Its `description` is `"{rule_name}: no backed query KI matched this
 detection."`, using `rule_name`, never the UUID mapping notation. An invented success sample is
 invalid: the verdict is `not_checked`, not `inconclusive`.
 
-### Step 3: Run Confirmation Queries
+### 3. Confirm: run the confirmation queries
 
 One sample per rule proves whether its failure is happening now. Apply `<query_rules>`, plus:
 
-- **FROM target.** If the KI's `query.esql.query` starts with `FROM $.<name>`, copy that `FROM`
+- **Steps 3 and 4 run once per round of 2 rules** (the last round may hold 1), in this order:
+  1. Send the sample queries for the round's rules in one response.
+  2. When they return, read them as `<reading_log_lines>` requires and write the round's findings.
+  3. Send the profile queries for the round's rules whose sample shows a failure, in one
+     response.
+  4. Only then start the next round.
+- **FROM target.** If the KI's `query.esql.query` starts with `FROM $.{name}`, copy that `FROM`
   verbatim. Otherwise copy the `view_name` of the response `sources` entry whose `slug` equals the
   KI's `source_id`. Do not assemble view names or strip `$.`.
 - **Row-level queries** keep the authored KI shape: never add a `KEEP` projection or choose a text
   field, and leave any authored projection unchanged. Otherwise append `| SORT @timestamp DESC | LIMIT 5`,
   so the sample returns the most recent matching logs, which is the current state the severity
-  rests on. A stricter existing KI limit stays. Read every column of each returned row, including the
-  whole message or body field, before choosing a verdict.
+  rests on. A stricter existing KI limit stays.
 - **Aggregation queries** (`STATS`/`BY`) keep the aggregation and add `| LIMIT 2`; add no projection.
 - **Executed vs stored.** The ordering and limit are executed only. `evidence.esql_query` is stored
   as `<output_format>` specifies.
 
 ```
-KI query:             FROM <view_name> METADATA _id, _source | WHERE <KI predicate> | LIMIT <existing lower cap>
-Executed (rows):      FROM <view_name> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate> | SORT @timestamp DESC | LIMIT 5
-Executed (aggregate): FROM <view_name> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate> | STATS ... | LIMIT 2
-Stored:               FROM <view_name> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate>
-Avoid: KEEP projection, METADATA, or any edit to <KI predicate>, field names, or <view_name>
+KI query:             FROM {view_name} METADATA _id, _source | WHERE {KI predicate} | LIMIT {existing lower cap}
+Executed (rows):      FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate} | SORT @timestamp DESC | LIMIT 5
+Executed (aggregate): FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate} | STATS ... | LIMIT 2
+Stored:               FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate}
+Avoid: KEEP projection, METADATA, or any edit to {KI predicate}, field names, or {view_name}
 ```
 
-`time_range`: executed as `{ "from": "<detection @timestamp - 15m>", "to": "now" }`; stored in
+`time_range`: executed as `{ "from": "{detection @timestamp - 15m}", "to": "now" }`; stored in
 `evidence` as absolute ISO 8601 timestamps, never `now`.
 
-### Step 4: Profile the Impact
+### 4. Profile: measure the impact
 
-The sample proves a failure exists, not how bad it is. For every rule whose Step 3 sample returned
+The sample proves a failure exists, not how bad it is. For every rule whose sample returned
 failure rows, or an `off_topic` row with a concrete observed error, run the `spread` query (the
-variant below that matches whether `<scope>` isolates the operation) and the two `trend` queries
-(buckets, then `earliest`/`latest`), under `<query_rules>`, built from `<scope>` and `<failure>`.
+variant below that matches whether `{scope}` isolates the operation), the `trend` buckets query,
+and the `baseline` query, under `<query_rules>`, built from `{scope}` and `{failure}`.
 Every qualifying rule is profiled, whatever the batch size. A figure is unmeasured only when its
 query returned no rows or failed, never because the query was not run.
+A round's profile queries go out after its findings are written, and before the next round's samples.
 
-For an `off_topic` signal, `<failure>` measures the observed error, so use a condition that
+For an `off_topic` signal, `{failure}` measures the observed error, so use a condition that
 isolates it (an exact field value seen in its sample row). With no such condition, leave its
 profile unmeasured.
 
 | Profile | Question | Queries | `time_range` | Read |
 |---|---|---|---|---|
-| `spread` | What share of lines in scope fail, and how many services are hit, out of how many? | one query: per `service.name` under `<scope>`, `affected` = `COUNT(*) WHERE <failure>` and `total` = `COUNT(*)`, then a second `STATS` over those rows | last 1h | `failed` of `total_lines`: the failing share of log lines. It is a share of attempts, and total failure of the operation, only when the scope isolates one line per attempt; otherwise report it as a share of log lines. `services_hit` of `services`: the breadth. `top_names`: the services hit hardest, in order, and `top_failed` the largest count: together they show whether one dominates. A null result means the scope matched no rows: unmeasured |
-| `trend` | Still happening, since when? | `<failure>` counted per bucket with `BUCKET(@timestamp, 50, ?_tstart, ?_tend)` (the engine picks the span, at most 50 rows), and its `earliest` and `latest` occurrence | 24h for the buckets; up to 14d for `earliest`/`latest` | the latest bucket and `latest` against now: steady, rising, or ended (a stream that went silent shows as `latest` far from now); `earliest` is when the failure was first seen in the window, so onset is "since at least" that time |
+| `spread` | What share of lines in scope fail, and how many services are hit, out of how many? | one query: per `service.name` under `{scope}`, `affected` = `COUNT(*) WHERE {failure}` and `total` = `COUNT(*)`, then an `EVAL` and a second `STATS` over those rows | last 1h | `failed` of `total_lines`: the failing share of log lines. It is a share of attempts, and total failure of the operation, only when the scope isolates one line per attempt; otherwise report it as a share of log lines. `services_hit` of `services`: the breadth. `top_services`: the services hit hardest with their failing counts, in order, at most 10: they show whether one dominates and name the services the logs implicate. A null result means the scope matched no rows: unmeasured |
+| `trend` | Still happening? | `{failure}` counted per bucket with `BUCKET(@timestamp, 50, ?_tstart, ?_tend)` (the engine picks the span, at most 50 rows) | 24h | the latest bucket against now: steady, rising, or ended (a stream that went silent shows as no recent buckets) |
+| `baseline` | Is it new, or has it been going on at this rate? Since when? | per day, `day` = `BUCKET(@timestamp, 1 day, ?_tstart, ?_tend)`, under `{scope}`: `count` = `COUNT(*) WHERE {failure}` and `lines` = `COUNT(*)`, with the `earliest` failure of each day | last 7 days (`now-7d` to `now`) | `days_active` of `days`, `factor`, and the onset, as read below |
+
+Reading `baseline`:
+- `days_active` of `days`: the days with a failure, out of the days with any `lines`. A day with no
+  lines is no data, not a quiet day.
+- `factor`: the last complete day's `count` over the median of the complete days before it. The first
+  day and today are partial and never compared. Work it out in your findings, in order:
+  1. Drop the first and the last row; the last row left is the last complete day.
+  2. Write its `count` and the earlier complete days' counts, sorted, then their median (the middle
+     value, or the mean of the two middle values).
+  3. `factor` is the first count over that median, never over a single earlier day.
+
+  Report how many earlier days it rests on. Near 1 is steady, far above 1 a surge, far below 1 a
+  fall. It is unmeasured when no earlier complete day exists. When the median of the earlier complete
+  days is 0, `factor` is undefined: the failure is new since its first failing day; say so instead of
+  giving a ratio.
+- Onset: `earliest` of the first day with a failure. It is a lower bound when no earlier day with
+  `lines` is in the window.
 
 - **Aggregate, never rows.** Every profile query returns at most 100 rows. In `trend`, count
-  `<failure>` from its own `WHERE`; in `spread`, use the per-aggregation filter.
+  `{failure}` from its own `WHERE`; in `spread` and `baseline`, use `COUNT(*) WHERE {failure}`.
+- **A `baseline` query that fails or times out is unmeasured** (`<query_rules>`, "Failed answers nothing"): never estimate
+  it, never retry it with a longer window.
 - **Group by a low-cardinality field.** Each distinct value is a bucket held in memory, so group only
   by a keyword field with few values that names the component: `service.name`, or if the stream
   lacks it `k8s.deployment.name` or `host.name`, naming that unit in the description. Never group by
   an expression over message text or by a high-cardinality field (IDs, URLs, timestamps).
-- **No isolating scope:** drop `total`, `total_lines`, and `services`, filter `<failure>` before the
+- **No isolating scope (`spread`):** drop `total`, `total_lines`, and `services`, put `{failure}` in a `WHERE` before the
   first `STATS`, and report the failing count without a share.
 
 ```
-Good (spread, isolating scope): FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <scope> | STATS affected = COUNT(*) WHERE <failure>, total = COUNT(*) BY service.name | STATS failed = SUM(affected), total_lines = SUM(total), services_hit = COUNT(*) WHERE affected > 0, services = COUNT(*), top_failed = MAX(affected), top_names = TOP(affected, 5, "desc", service.name) WHERE affected > 0
-Good (spread, no isolating scope; use only when <scope> does not isolate the operation): FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <failure> | STATS affected = COUNT(*) BY service.name | STATS failed = SUM(affected), services_hit = COUNT(*), top_failed = MAX(affected), top_names = TOP(affected, 5, "desc", service.name)
-Good (trend, buckets):      FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <scope> | WHERE <failure> | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 50, ?_tstart, ?_tend) | SORT bucket ASC
-Good (trend, earliest/latest): FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <scope> | WHERE <failure> | STATS earliest = MIN(@timestamp), latest = MAX(@timestamp)
-Avoid: BY <function>(<text field>) of unbounded output   -- millions of buckets; a derived key is allowed only when bounded (see "Group by a low-cardinality field")
+Good (spread, isolating scope): FROM {source} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS affected = COUNT(*) WHERE {failure}, total = COUNT(*) BY service.name | EVAL entry = CONCAT(service.name, ": ", TO_STRING(affected)) | STATS failed = SUM(affected), total_lines = SUM(total), services_hit = COUNT(*) WHERE affected > 0, services = COUNT(*), top_services = TOP(affected, 10, "desc", entry) WHERE affected > 0
+Good (spread, no isolating scope; use only when {scope} does not isolate the operation): FROM {source} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {failure} | STATS affected = COUNT(*) BY service.name | EVAL entry = CONCAT(service.name, ": ", TO_STRING(affected)) | STATS failed = SUM(affected), services_hit = COUNT(*), top_services = TOP(affected, 10, "desc", entry)
+Good (trend, buckets):      FROM {source} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | WHERE {failure} | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 50, ?_tstart, ?_tend) | SORT bucket ASC
+Good (baseline):           FROM {source} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS count = COUNT(*) WHERE {failure}, lines = COUNT(*), earliest = MIN(@timestamp) WHERE {failure} BY day = BUCKET(@timestamp, 1 day, ?_tstart, ?_tend) | SORT day ASC
+Avoid: BY {function}({text field}) of unbounded output   -- millions of buckets; a derived key is allowed only when bounded (see "Group by a low-cardinality field")
 ```
 
-Step 5 writes these figures into the signal's `description`.
+`<output_format>` has these figures go into the signal's `description`.
 
-### Step 5: Record Signal Verdicts
-
-One `signals` entry per rule. `evidence.esql_query` and `evidence.result` reflect the single
-confirmation query, or the shared deduplicated execution. `<output_format>` defines the entry.
-
-1. **Write the `description`** from the query results, using the Step 4 numbers, in the form
-   `<output_format>` specifies. It reports observations only; the verdict is separate.
-2. **Set `verdict`** from the row content and result, per `<verdicts>`, independently of how the
-   description reads.
-
-### Step 6: Consolidate Causal Features and Blast Radius
+### 5. Consolidate: causal features and blast radius
 
 Build one topology graph for the batch. `query.features[]` seeds the graph; it never limits it. The
 query KI is authoritative for which entity a rule concerns: the found row is supporting evidence, and
@@ -276,11 +323,11 @@ search.
    - Resolve a target only when its identity is uniquely supported. If resolution remains ambiguous,
      retain the grounded source and dependency path without inventing a target.
 
-   Example, with placeholders: a confirming signal shows `<source>` unable to reach a store; a fetched
-   dependency has `source: <source>`, `target: <store-technology>`, and connection-timeout evidence; one
-   fetched entity matches `<store-technology>` and is attributed to `<source>`. Activate the path, select
+   Example, with placeholders: a confirming signal shows `{source}` unable to reach a store; a fetched
+   dependency has `source: {source}`, `target: {store-technology}`, and connection-timeout evidence; one
+   fetched entity matches `{store-technology}` and is attributed to `{source}`. Activate the path, select
    that entity as causal, and keep the dependency as blast radius. If several entities match
-   `<store-technology>` without attribution, select no target and use `<source>` as the causal fallback.
+   `{store-technology}` without attribution, select no target and use `{source}` as the causal fallback.
 
 2. **Build `causal_features`.** Add the entity or infrastructure that the query KI identifies as
    failed, with a confirming row as corroboration or, when the KI identifies none, as the identity.
@@ -290,9 +337,17 @@ search.
    entity when the signal shows it affected and it is not already in `causal_features`. Add any other
    affected entity or infrastructure only when a confirming row shows that impact. A `causal_features`
    entry never also appears in `blast_radius`.
-4. **Close the ledger.** Deduplicate all entries and assign each fetched candidate exactly one
+4. **Flag log-found gaps.** For each confirming signal, compare the services in its `top_services`,
+   and the dependency targets its rows state, with the features fetched in the Retrieve step, by
+   exact and unique name. Those that match no fetched feature were found in the logs and are not in
+   the KIs: record each as a `knowledge_gaps` entry (`<output_format>`). They are never added to `causal_features` or `blast_radius`, which need a fetched
+   `feature_id`.
+5. **Close the ledger.** Deduplicate all entries and assign each fetched candidate exactly one
    disposition: causal, blast radius, or excluded. `off_topic`, `refutes`, `inconclusive`, and
    `not_checked` may inform the narrative but cannot establish active topology.
+
+Before emitting, check each description against your `<reading_log_lines>` findings: every value it
+states is in a row you read. Then emit the result as `<output_format>` defines it.
 
 </procedure>
 
@@ -305,25 +360,34 @@ Each entry:
 - `type`: always `"detection"`.
 - `source_id`: the detection's batch `source_id`, copied as is. Not the title and not the view name.
   Quiet-rule entries carry it too.
-- `description`: plain prose in at most three sentences. Observations only: it neither states
-  nor depends on the verdict.
-  - Sentence 1: the concrete row signature and the failing target. When nothing matched, say what was
-    looked for and what was found instead. Never say only that rows were returned. Do not reproduce
-    raw sensitive values; name only the field and the exposure type.
-  - Then who or what is affected, how badly, for how long, and how broadly, using the Step 4 numbers.
-    Give each count as `N of M (P%)`, where P is N/M × 100 rounded to one decimal place (for example
-    `0.1%`, `37.5%`, `100.0%`), so downstream fields can copy P. A figure that was not measured is stated as not measured.
-  - Say whether the rows show the operation failing, slow, or completing, and name any exposed
-    sensitive data by type (PII, PCI, SSN, credentials, secrets, tokens).
-  - No dependency chains or upstream causes here; those go in `causal_features` and `blast_radius`.
-    Name a dependency or target only when the query filtered on it or the rows show it.
-  - Quiet-rule entries use the single sentence defined in Step 2.
-  - Template for a match: `"<signature> on <target>: N of M (P%) <scope> log lines failed in the <period observerd, e.g: last hour>, across N of M services; first seen at least as early as <time>; still active."`
-  - Template for no match: `"No <signature> rows for <target> matched in the <period observerd, e.g: last hour>; <what was found instead>."`
+- `description`: three sentences, in this order, in plain prose. Observations only: it neither
+  states nor depends on the verdict.
+  1. **What the rows state.** The signature and the target, then, for each dimension the rows carry,
+     `field = value`, any row that differs, and the correlations, all from your
+     `<reading_log_lines>` findings. The reader cannot see the rows. Sensitive data (PII, PCI, SSN,
+     credentials, secrets, tokens) and identifiers are named by field and type and never quoted.
+  2. **How much and how widely**, from the Profile step's numbers. Give each count as `N of M (P%)` with its
+     unit (log lines, or attempts when the scope isolates one line per attempt), scope and period,
+     where P is N/M × 100 rounded to one decimal place (for example `0.1%`, `37.5%`, `100.0%`), so
+     downstream fields can copy P. Give the services affected as `N of M`, listing the hardest hit
+     with their failing counts (`top_services`, at most 10) and "and K others" beyond that. A figure that was not measured is stated as not measured.
+  3. **How long and whether it continues**, from `baseline` and `trend` as read in the Profile step: the days
+     with a failure out of the days with data, `factor` with the number of earlier days, the onset
+     as a time (a lower bound is worded "at least as long as the data shows"), and the latest
+     bucket. A failure on every day at a steady `factor` is long-standing: do not word it as new.
+     When `baseline` was not measured, say so.
+  - No dependency chains or upstream causes in the description; those go in `causal_features` and
+    `blast_radius`. Name a dependency or target only when the query filtered on it or the rows show
+    it.
+  - Quiet-rule entries use the single sentence defined in the Map step.
+  - When nothing matched, say what was looked for and what was found instead, never only that rows
+    were returned: `"No {signature} rows for {target} matched in the {period observed}; <what was
+    found instead>."`
+  - Example of a match, with illustrative values: `"Rows from the export-renderer job report status = 504 on endpoint = /v2/render, all with region = eu-1, retries = 0 and duration_ms between 29,800 and 30,100; pod = render-7f accounts for 4 of 5 rows, and the fifth row differs with region = us-2 and status = 502 on pod = render-2c. In the last hour 412 of 6,880 log lines (6.0%) in the export-renderer scope failed, across 3 of 4 services: export-renderer 301, export-queue 88, export-gateway 23. The failure appears on 4 of 4 days with data, the last complete day at 1.4× the median of 1 earlier complete day, the onset is at least as long as the data shows (2026-03-02T09:14:00Z), and the latest bucket still contains failures."`
 - `verdict`: `confirms` | `refutes` | `off_topic` | `inconclusive` | `not_checked`, per `<verdicts>`.
 - `collected_at`: ISO-8601 query timestamp. Omit for quiet-rule entries.
-- `evidence`: `{ esql_query, result, time_range }` for the executed evidence query; omit for quiet
-  rules.
+- `evidence`: `{ esql_query, result, time_range }` for the executed evidence query, which is the
+  shared execution when identical rule queries were deduplicated; omit for quiet rules.
   - `esql_query`: the KI query with `METADATA` removed, any authored projection kept, and the
     `?_tstart`/`?_tend` predicate retained. Omit the executed ordering and limit tails. Never the
     tool's rewritten query.
@@ -331,8 +395,15 @@ Each entry:
     it a placeholder query cannot be interpreted.
   - `result`: `"found"` | `"empty"` | `"error"`.
 - `metadata`: detection input.
+
+**Batch-level fields** — emitted once after `signals`, built from all the confirming signals:
 - `causal_features`: array of cause entries (`<topology_entry_shapes>`); `[]` when empty.
 - `blast_radius`: array of dependency, entity, and infrastructure entries
   (`<topology_entry_shapes>`); `[]` when empty.
+- `knowledge_gaps`: array of strings, `[]` when none: one sentence for each service or dependency
+  target the logs found that no fetched KI covers (Consolidate step). It starts with the name exactly
+  as the rows state it, then a colon, then what the rows show about it: how it appears (it hit rows,
+  or is a call target) and how it relates to the failure (failing with it, impacted by it, healthy,
+  or not shown). Observations only, never a verdict. It is not topology: never a `feature_id`.
 
 </output_format>
