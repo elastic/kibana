@@ -39,6 +39,34 @@ ruleTester.run('@kbn/eslint/require-license-header', rule, {
 
       options: [{ license: '// license' }],
     },
+
+    // jest pragma block-comments may precede the license
+    {
+      code: dedent`
+        /**
+         * @jest-environment node
+         */
+
+        /* license */
+
+        console.log('foo')
+      `,
+
+      options: [{ license: '/* license */' }],
+    },
+    {
+      code: dedent`
+        /**
+         * @jest-environment node
+         * @jest-ignore-pragma
+         */
+        /* license */
+
+        console.log('foo')
+      `,
+
+      options: [{ license: '/* license */' }],
+    },
   ],
 
   invalid: [
@@ -227,6 +255,68 @@ console.log('foo')`,
         /* license */
 
         /* not license */
+
+        console.log('foo')
+      `,
+    },
+
+    // a docblock with anything besides jest pragmas is not exempt
+    {
+      code: dedent`
+        /**
+         * @jest-environment node
+         * Some description
+         */
+
+        /* license */
+
+        console.log('foo')
+      `,
+
+      options: [{ license: '/* license */' }],
+      errors: [
+        {
+          message: 'License header must be at the very beginning of the file',
+        },
+      ],
+
+      output: dedent`
+        /* license */
+
+        /**
+         * @jest-environment node
+         * Some description
+         */
+
+
+
+        console.log('foo')
+      `,
+    },
+
+    // inserts a missing license after the pragma so jest keeps reading it
+    {
+      code: dedent`
+        /**
+         * @jest-environment node
+         */
+
+        console.log('foo')
+      `,
+
+      options: [{ license: '/* license */' }],
+      errors: [
+        {
+          message: 'File must start with a license header',
+        },
+      ],
+
+      output: dedent`
+        /**
+         * @jest-environment node
+         */
+
+        /* license */
 
         console.log('foo')
       `,

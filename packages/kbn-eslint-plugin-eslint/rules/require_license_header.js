@@ -13,6 +13,31 @@ function isHashbang(text) {
   return text.trim().startsWith('#!') && !text.trim().includes('\n');
 }
 
+// Jest only reads pragmas from the first comment in a file; a docblock comment
+// consisting solely of `@jest-*` pragmas may percede the license header.
+function isJestPragma(comment) {
+  const lines = comment.value
+    .split('\n')
+    .map((line) => line.replace(/^[\s*]*/, ''))
+    .filter(Boolean);
+
+  return comment.type === 'Block' && lines.length > 0 && lines.every((l) => l.startsWith('@jest-'));
+}
+
+function getLeadingPragmaEnd(sourceCode) {
+  const text = sourceCode.getText();
+  let end = 0;
+
+  for (const comment of sourceCode.getAllComments()) {
+    if (!isJestPragma(comment) || text.slice(end, comment.range[0]).trim()) {
+      break;
+    }
+    end = comment.range[1];
+  }
+
+  return end;
+}
+
 module.exports = {
   meta: {
     fixable: 'code',
@@ -56,6 +81,12 @@ module.exports = {
           .getAllComments()
           .find((node) => normalizeWhitespace(node.value) === license.nodeValue);
 
+        const pragmaEnd = getLeadingPragmaEnd(sourceCode);
+        const insertLicense = (fixer) =>
+          pragmaEnd
+            ? fixer.insertTextAfterRange([0, pragmaEnd], '\n\n' + license.source)
+            : fixer.replaceTextRange([0, 0], license.source + '\n\n');
+
         // no licence comment
         if (!comment) {
           context.report({
@@ -69,16 +100,20 @@ module.exports = {
                 return undefined;
               }
 
-              return fixer.replaceTextRange([0, 0], license.source + '\n\n');
+              return insertLicense(fixer);
             },
           });
           return;
         }
 
-        // ensure there is nothing before the comment
+        // The license comment must come first; an exception is made for jest
+        // pragma docblocks.
         const sourceBeforeNode = sourceCode
           .getText()
-          .slice(0, sourceCode.getIndexFromLoc(comment.loc.start));
+          .slice(pragmaEnd, sourceCode.getIndexFromLoc(comment.loc.start));
+        if (pragmaEnd && !sourceBeforeNode.trim()) {
+          return;
+        }
         if (sourceBeforeNode.length && !isHashbang(sourceBeforeNode)) {
           context.report({
             node: comment,
@@ -91,10 +126,7 @@ module.exports = {
 
               // inject content at top and remove node from current location
               // if removing whitespace is not possible
-              return [
-                fixer.remove(comment),
-                fixer.replaceTextRange([0, 0], license.source + '\n\n'),
-              ];
+              return [fixer.remove(comment), insertLicense(fixer)];
             },
           });
         }
