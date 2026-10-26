@@ -317,27 +317,8 @@ export const createAgentGraph = ({
       updates.push(stepUpdates.setTodos({ type: ConversationRoundStepType.updateTodos, todos }));
     }
 
-    // A call to the final-answer tool ends the run with its response as the answer.
-    const finalAnswerToolId = structuredOutput ? undefined : configuration.finalAnswerToolId;
-    const finalAnswer = finalAnswerToolId
-      ? outcome.toolCalls
-          .filter((toolCall) => toolIdFor(toolCall.toolCallId) === finalAnswerToolId)
-          .map((toolCall) => toolCall.args?.response)
-          .filter((response): response is string => typeof response === 'string' && response !== '')
-          .at(-1)
-      : undefined;
-
     const completed = new Set(processed.completedToolCallIds);
     return {
-      ...(finalAnswer !== undefined
-        ? {
-            researchOutcome: {
-              type: 'handover' as const,
-              message: finalAnswer,
-              forceful: false,
-            },
-          }
-        : {}),
       steps: updates,
       toolRenderState: processed.renderState,
       pendingToolCallIds: state.pendingToolCallIds.filter((id) => !completed.has(id)),
@@ -351,10 +332,6 @@ export const createAgentGraph = ({
   const executeToolEdge = async (state: StateType) => {
     if (state.toolOutcome?.type === 'interrupted') {
       return steps.handleToolInterrupt;
-    }
-    // Only the final-answer tool turns the outcome into a handover after tools ran.
-    if (state.researchOutcome?.type === 'handover') {
-      return steps.finalize;
     }
     return steps.checkBackgroundWork;
   };
@@ -454,7 +431,6 @@ export const createAgentGraph = ({
     .addConditionalEdges(steps.executeTool, executeToolEdge, {
       [steps.checkBackgroundWork]: steps.checkBackgroundWork,
       [steps.handleToolInterrupt]: steps.handleToolInterrupt,
-      [steps.finalize]: steps.finalize,
     })
     .addEdge(steps.handleToolInterrupt, _END_)
     .addEdge(steps.finalize, _END_);

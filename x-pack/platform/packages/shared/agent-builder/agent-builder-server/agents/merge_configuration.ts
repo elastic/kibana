@@ -64,7 +64,6 @@ const mergeToolSelections = (base: ToolSelection[], delta: ToolSelection[]): Too
  *   deduplicated. A base that sets `connector_ids: []` pins the floor to "no connectors".
  * - enable_elastic_capabilities: the delta overrides the base when set.
  * - disable_internal_tools / raw_system_prompt: a base that sets one pins the floor, so the delta cannot undo it.
- * - final_answer_tool_id: a base that sets it wins over the delta.
  */
 export const mergeAgentConfiguration = (
   base: AgentBaseConfiguration | undefined,
@@ -114,9 +113,6 @@ export const mergeAgentConfiguration = (
   }
   if (base.raw_system_prompt !== undefined) {
     result.raw_system_prompt = base.raw_system_prompt || delta.raw_system_prompt;
-  }
-  if (base.final_answer_tool_id !== undefined) {
-    result.final_answer_tool_id = base.final_answer_tool_id;
   }
 
   return result;

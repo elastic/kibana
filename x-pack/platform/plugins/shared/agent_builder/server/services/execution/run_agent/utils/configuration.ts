@@ -29,9 +29,6 @@ export const resolveConfiguration = async (
   const base: ResolvedConfiguration = {
     instructions: configuration.instructions ?? '',
     rawSystemPrompt: configuration.raw_system_prompt ?? false,
-    ...(configuration.final_answer_tool_id
-      ? { finalAnswerToolId: configuration.final_answer_tool_id }
-      : {}),
     aiIndices: configuration.ai_indices ?? [],
   };
 
