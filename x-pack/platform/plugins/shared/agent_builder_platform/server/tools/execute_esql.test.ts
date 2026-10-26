@@ -14,6 +14,7 @@ jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => ({
 
 import { executeEsql } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { executeEsqlTool } from './execute_esql';
+import { resolveToolSchema } from './test_utils';
 
 const executeEsqlMock = executeEsql as jest.MockedFunction<typeof executeEsql>;
 
@@ -30,19 +31,40 @@ describe('executeEsqlTool', () => {
   });
 
   describe('include_frozen', () => {
+    const getSchema = (includeFrozenByDefault: boolean) =>
+      resolveToolSchema(executeEsqlTool(), includeFrozenByDefault);
+
     it('excludes frozen tier indices by default', async () => {
-      await executeEsqlTool().handler({ query: 'FROM logs' }, createHandlerContext());
+      const schema = await getSchema(false);
+
+      await executeEsqlTool().handler(schema.parse({ query: 'FROM logs' }), createHandlerContext());
 
       expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: false });
     });
 
-    it('includes frozen tier indices when opted in', async () => {
+    it('includes frozen tier indices by default when the space setting is enabled', async () => {
+      const schema = await getSchema(true);
+
+      await executeEsqlTool().handler(schema.parse({ query: 'FROM logs' }), createHandlerContext());
+
+      expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: true });
+    });
+
+    it('lets the agent override the default', async () => {
+      const schema = await getSchema(true);
+
       await executeEsqlTool().handler(
-        { query: 'FROM logs', include_frozen: true },
+        schema.parse({ query: 'FROM logs', include_frozen: false }),
         createHandlerContext()
       );
 
-      expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: true });
+      expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: false });
+    });
+
+    it('reuses the same schema instance for a given default', async () => {
+      expect(await getSchema(true)).toBe(await getSchema(true));
+      expect(await getSchema(false)).toBe(await getSchema(false));
+      expect(await getSchema(true)).not.toBe(await getSchema(false));
     });
 
     it('describes how to opt in to the frozen tier', () => {

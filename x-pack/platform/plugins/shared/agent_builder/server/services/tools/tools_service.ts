@@ -104,6 +104,8 @@ export class ToolsService {
     const builtinProviderFn = createBuiltinProviderFn({
       registry: this.builtinRegistry,
       toolTypes,
+      uiSettings,
+      savedObjects,
     });
     const persistedProviderFn = createPersistedProviderFn({
       logger,
