@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildCountQuery counts a ranked identity by evaluating the id and counting the id groups 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM metrics-system.*
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\")
+| STATS BY \`host.id\`, \`host.name\`
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ entity.id = CONCAT(\\"inventory_host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null))
+| STATS BY \`entity.id\`
+| STATS \`count\` = COUNT(*)"
+`;
+
+exports[`buildCountQuery counts k8s.deployment across both plans, filtering only the state plan 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM metrics-kubeletstatsreceiver.otel-default, metrics-kubernetes.state_deployment-* METADATA _index
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\")
+    AND ((\`_index\` LIKE \\"metrics-kubeletstatsreceiver.otel-default\\" OR \`_index\` LIKE \\".ds-metrics-kubeletstatsreceiver.otel-default-????.??.??-*\\") OR ((\`_index\` LIKE \\"metrics-kubernetes.state_deployment-*\\" OR \`_index\` LIKE \\".ds-metrics-kubernetes.state_deployment-*-????.??.??-*\\") AND (metricset.name == \\"state_deployment\\")))
+| STATS BY \`kubernetes.namespace\`, \`kubernetes.deployment.name\`
+| EVAL kubernetes_namespace_present = TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\",
+ kubernetes_deployment_name_present = TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\",
+ kubernetes_namespace_present_or_null = CASE(kubernetes_namespace_present, TO_STRING(kubernetes.namespace)),
+ kubernetes_deployment_name_present_or_null = CASE(kubernetes_deployment_name_present, TO_STRING(kubernetes.deployment.name)),
+ entity.id = CONCAT(\\"k8s.deployment:\\", CONCAT(kubernetes_namespace_present_or_null, \\"/\\", kubernetes_deployment_name_present_or_null))
+| STATS BY \`entity.id\`
+| STATS \`count\` = COUNT(*)"
+`;
+
+exports[`buildCountQuery counts k8s.node from its single plan without any _index clause 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM metrics-kubeletstatsreceiver.otel-default
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND ((TO_STRING(kubernetes.node.name) IS NOT NULL AND TO_STRING(kubernetes.node.name) != \\"\\"))
+| STATS BY \`kubernetes.node.name\`
+| STATS \`count\` = COUNT(*)"
+`;
+
+exports[`buildCountQuery lists a pattern shared by two plans once while keeping both branches 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM metrics-kubernetes.* METADATA _index
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\")
+    AND (((\`_index\` LIKE \\"metrics-kubernetes.*\\" OR \`_index\` LIKE \\".ds-metrics-kubernetes.*-????.??.??-*\\") AND (metricset.name == \\"state_deployment\\")) OR ((\`_index\` LIKE \\"metrics-kubernetes.*\\" OR \`_index\` LIKE \\".ds-metrics-kubernetes.*-????.??.??-*\\") AND (metricset.name == \\"state_replicaset\\")))
+| STATS BY \`kubernetes.namespace\`, \`kubernetes.deployment.name\`
+| EVAL kubernetes_namespace_present = TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\",
+ kubernetes_deployment_name_present = TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\",
+ kubernetes_namespace_present_or_null = CASE(kubernetes_namespace_present, TO_STRING(kubernetes.namespace)),
+ kubernetes_deployment_name_present_or_null = CASE(kubernetes_deployment_name_present, TO_STRING(kubernetes.deployment.name)),
+ entity.id = CONCAT(\\"k8s.deployment:\\", CONCAT(kubernetes_namespace_present_or_null, \\"/\\", kubernetes_deployment_name_present_or_null))
+| STATS BY \`entity.id\`
+| STATS \`count\` = COUNT(*)"
+`;
