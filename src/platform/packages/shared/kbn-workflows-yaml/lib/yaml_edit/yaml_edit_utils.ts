@@ -590,6 +590,24 @@ const spliceAtPath = (
   return { success: false, yaml, error: 'Empty property path' };
 };
 
+/** Keys and indexes from `root` to `target`, or null when `target` is not inside `root`. */
+const findNodePath = (root: unknown, target: Node): Array<string | number> | null => {
+  if (root === target) return [];
+  if (isSeq(root)) {
+    for (const [index, item] of root.items.entries()) {
+      const rest = findNodePath(item, target);
+      if (rest) return [index, ...rest];
+    }
+  } else if (isMap(root)) {
+    for (const { key, value } of root.items) {
+      if (!isScalar(key)) continue;
+      const rest = findNodePath(value, target);
+      if (rest) return [key.value as string, ...rest];
+    }
+  }
+  return null;
+};
+
 /**
  * Sets `value` at a dot path (e.g. `with.inputs.owner`, `triggers.0.with.every`)
  * under the block map that `locateBase` finds. Missing map keys are created. List
@@ -648,7 +666,13 @@ export const modifyStepProperty = (
       : undefined,
   };
 
-  const locateStep = (document: Document) => getStepNode(document, stepName);
+  // Find the step by position, not by name, so a `name` edit can be verified too.
+  const stepPath = findNodePath(doc.contents, stepNode);
+  if (!stepPath) return { success: false, yaml, error: `Step "${stepName}" not found` };
+  const locateStep = (document: Document) => {
+    const node = document.getIn(stepPath, true);
+    return isMap(node) ? node : null;
+  };
   return setValueAtPath(yaml, doc, locateStep, property, value, scope);
 };
 

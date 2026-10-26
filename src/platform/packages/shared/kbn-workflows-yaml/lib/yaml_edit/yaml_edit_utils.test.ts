@@ -621,6 +621,16 @@ steps:
       message: done
 `;
 
+    it.each([
+      ['a root step', 'setup', 'renamed_setup'],
+      ['a nested step', 'post_note', 'renamed_note'],
+    ])('renames %s through the name property', (_label, stepName, newName) => {
+      const result = modifyStepProperty(NESTED_WORKFLOW, stepName, 'name', newName);
+      expect(result.success).toBe(true);
+      expect(result.yaml).toContain(`name: ${newName}`);
+      expect(result.yaml).not.toContain(`name: ${stepName}\n`);
+    });
+
     const getInnerSteps = (yaml: string) =>
       parseDocument(yaml).toJSON().steps[1].steps[0].steps as Array<Record<string, unknown>>;
 
