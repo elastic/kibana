@@ -18,6 +18,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { convertTimeValueToIso } from './date_conversion';
 import type { IntervalValue } from './generate_intervals';
 import type { SurrDocType } from '../services/context';
+import { getHitsInIntervalRequestTitle } from './get_hits_in_interval_request_title';
 import type { DiscoverServices } from '../../../build_services';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
@@ -95,7 +96,7 @@ export async function fetchHitsInInterval(
       disableWarningToasts: true,
       inspector: {
         adapter,
-        title: type,
+        title: getHitsInIntervalRequestTitle(type, start, services.uiSettings),
       },
     });
 
