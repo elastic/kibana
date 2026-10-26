@@ -8,7 +8,11 @@
  */
 
 import { z, lazySchema } from '@kbn/zod';
-import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
+import {
+  DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  DEFAULT_ROW_HEIGHT_LINES,
+  LENS_DATATABLE_PAGE_SIZE_OPTIONS,
+} from '@kbn/lens-common';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import {
   applyColorToSchema,
@@ -153,7 +157,7 @@ const datatableStylingSchema = lazySchema(() =>
        * Paging configuration
        */
       paging: z
-        .union([z.literal(10), z.literal(20), z.literal(30), z.literal(50), z.literal(100)])
+        .literal(LENS_DATATABLE_PAGE_SIZE_OPTIONS)
         .optional()
         .meta({
           description:

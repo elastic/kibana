@@ -11,6 +11,7 @@ import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import type { DatatableConfig } from './datatable';
 import { datatableConfigSchema } from './datatable';
+import { LENS_DATATABLE_PAGE_SIZE_OPTIONS } from '@kbn/lens-common';
 
 type DefaultDatatableConfig = Pick<DatatableConfig, 'sampling' | 'ignore_global_filters'>;
 type DatatableWithoutDefaultsConfig = Omit<DatatableConfig, 'sampling' | 'ignore_global_filters'>;
@@ -278,6 +279,23 @@ describe('Datatable Schema', () => {
 
       const validated = datatableConfigSchema.parse(input);
       expect(validated).toMatchObject({ ...defaultValues, ...input });
+    });
+  });
+
+  describe('paging', () => {
+    const withPaging = (paging: number) =>
+      ({
+        ...baseDatatableConfig,
+        metrics: [{ operation: 'count', empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE }],
+        styling: { paging },
+      } as unknown as DatatableWithoutDefaultsConfig);
+
+    it.each(LENS_DATATABLE_PAGE_SIZE_OPTIONS)('accepts %s rows per page', (size) => {
+      expect(datatableConfigSchema.parse(withPaging(size)).styling?.paging).toBe(size);
+    });
+
+    it.each([0, 5, 25, 200])('rejects %s rows per page', (size) => {
+      expect(() => datatableConfigSchema.parse(withPaging(size))).toThrow();
     });
   });
 
