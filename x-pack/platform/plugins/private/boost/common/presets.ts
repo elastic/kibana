@@ -7,7 +7,6 @@
 
 import { MAX_BOOST } from './constants';
 import type {
-  BoostPeriod,
   BoostProfile,
   BoostProfileType,
   BoostRule,
@@ -60,22 +59,19 @@ export const DEFAULT_PROFILE_KEYS: Readonly<Record<BoostProfileType, keyof Defau
 
 /**
  * A window's periods: Recent for the first day, Standard up to the window's end, and Background for
- * the rest. A 1-day window has no Standard period, since it ends where Recent does.
+ * the rest, each boosted less than the one before. A 1-day window has no Standard period, since it
+ * ends where Recent does.
  */
 const createWindowPeriods = (
   windowMaxAge: string
-): Pick<DataStreamsBoostProfile, 'recent' | 'standard' | 'background'> => {
-  const boost: BoostPeriod = { min_boost: 1, max_boost: MAX_BOOST };
+): Pick<DataStreamsBoostProfile, 'recent' | 'standard' | 'background'> => ({
+  recent: { min_boost: 1, max_boost: MAX_BOOST, max_age: '1d' },
+  standard: { min_boost: 1, max_boost: 10, max_age: windowMaxAge },
+  background: { min_boost: 1, max_boost: 2 },
+});
 
-  return {
-    recent: { ...boost, max_age: '1d' },
-    standard: { ...boost, max_age: windowMaxAge },
-    background: boost,
-  };
-};
-
-// Boost values are placeholders pending pricing review. Indices presets follow the ES3 Search Power
-// cutover mapping, capped at the API maximum; data stream windows (1, 3, or 7 days) are also subject
+// Indices presets' boosts are placeholders pending pricing review, following the ES3 Search Power
+// cutover mapping, capped at the API maximum. Data stream windows (1, 3, or 7 days) are also subject
 // to change.
 export const BUILTIN_PROFILES: readonly BoostProfile[] = [
   {

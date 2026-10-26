@@ -51,6 +51,26 @@ describe('BUILTIN_PROFILES', () => {
       ['_last-7-days', '1d', '7d'],
     ]);
   });
+
+  it('boosts each data stream window less as its data ages', () => {
+    const boosts = BUILTIN_PROFILES.flatMap((profile) =>
+      profile.type === 'data_streams'
+        ? [
+            [profile.recent, profile.standard, profile.background].map(
+              ({ min_boost: minBoost, max_boost: maxBoost }) => [minBoost, maxBoost]
+            ),
+          ]
+        : []
+    );
+
+    expect(boosts).toEqual(
+      Array(3).fill([
+        [1, 5000],
+        [1, 10],
+        [1, 2],
+      ])
+    );
+  });
 });
 
 describe('getDefaultRuleType', () => {
