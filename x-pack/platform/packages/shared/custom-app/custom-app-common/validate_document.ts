@@ -9,7 +9,6 @@ import type { z } from '@kbn/zod/v4';
 import { CUSTOM_CONTENT_SCRIPT_PATTERN } from '@kbn/custom-content-common';
 import {
   CASES_FILTERS,
-  THEME_ACCENTS,
   CASES_SEVERITIES,
   CASES_STATUSES,
   MAX_NODE_COUNT,
@@ -17,6 +16,7 @@ import {
   MAX_STATE_KEYS,
 } from './constants';
 import type { AppNode, AppTheme, StateDeclaration } from './document_schema';
+import { BOUND_PROPS, THEME_BOUND_PROPS, getPath, isStateRef, type StateRef } from './bindings';
 import { findStateReferences, hasMalformedReference } from './interpolation';
 import {
   getInterpolatedText,
@@ -114,23 +114,38 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
   const { nodes, withinLimits } = collectNodes(document.root, ctx);
   if (!withinLimits) return;
 
-  const accentKey = document.theme?.accentFrom;
-  if (accentKey !== undefined) {
-    const declaration = state[accentKey];
+  /** What is wrong with a property that reads a value, and the value it starts as. */
+  const checkReference = (
+    subject: string,
+    property: string,
+    ref: StateRef,
+    bound: { schema: z.ZodType; kind: 'string' | 'number' | 'boolean' },
+    nodeId?: string
+  ) => {
+    const declaration = state[ref.$state];
     if (!declaration) {
-      issue(`The theme takes its accent from unknown state key "${accentKey}"`);
-    } else if (declaration.type !== 'string') {
+      issue(`${subject} reads "${property}" from unknown state key "${ref.$state}"`, nodeId);
+    } else if (declaration.type !== bound.kind) {
       issue(
-        `The theme takes its accent from state key "${accentKey}" (${declaration.type}); it needs a string key`
+        `${subject} reads "${property}" from state key "${ref.$state}" (${declaration.type}); it needs a ${bound.kind} key`,
+        nodeId
       );
-    } else if (!(THEME_ACCENTS as readonly string[]).includes(String(declaration.default))) {
+    } else if (!bound.schema.safeParse(declaration.default).success) {
       issue(
-        `The theme takes its accent from "${accentKey}", whose default "${
+        `${subject} reads "${property}" from state key "${
+          ref.$state
+        }", whose default ${JSON.stringify(
           declaration.default
-        }" is not an accent; use one of: ${THEME_ACCENTS.join(', ')}`
+        )} is not a value "${property}" can have`,
+        nodeId
       );
     }
-  }
+  };
+
+  Object.entries(THEME_BOUND_PROPS).forEach(([property, bound]) => {
+    const value = (document.theme as Record<string, unknown> | undefined)?.[property];
+    if (isStateRef(value)) checkReference('The theme', property, value, bound);
+  });
 
   // The sections that are held by what holds them, which is all they are for.
   const sectionParents = new Set(
@@ -164,17 +179,30 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
       }
     });
 
-    if (node.type === 'chart' && node.annotations?.showWhen !== undefined) {
-      const { showWhen } = node.annotations;
-      const declaration = state[showWhen];
+    Object.entries(BOUND_PROPS[node.type] ?? {}).forEach(([path, bound]) => {
+      const value = getPath(node, path);
+      if (isStateRef(value)) {
+        checkReference(`Node "${node.id}"`, path, value, bound, node.id);
+      }
+    });
+
+    if (node.visibleWhen) {
+      const { $state: key, equals } = node.visibleWhen;
+      const declaration = state[key];
       if (!declaration) {
+        issue(`Node "${node.id}" is shown by unknown state key "${key}"`, node.id);
+      } else if (declaration.type === 'list') {
+        issue(`Node "${node.id}" is shown by state key "${key}", which is a list`, node.id);
+      } else if (equals === undefined && declaration.type !== 'boolean') {
         issue(
-          `Node "${node.id}" shows its annotations by unknown state key "${showWhen}"`,
+          `Node "${node.id}" is shown by state key "${key}" (${declaration.type}); without "equals" it needs a boolean key`,
           node.id
         );
-      } else if (declaration.type !== 'boolean') {
+      } else if (equals !== undefined && typeof equals !== declaration.type) {
         issue(
-          `Node "${node.id}" shows its annotations by state key "${showWhen}" (${declaration.type}); it needs a boolean key`,
+          `Node "${node.id}" is shown when state key "${key}" (${
+            declaration.type
+          }) equals ${JSON.stringify(equals)}, which is a ${typeof equals}`,
           node.id
         );
       }

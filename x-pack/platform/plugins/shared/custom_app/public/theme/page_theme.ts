@@ -6,7 +6,12 @@
  */
 
 import type { EuiThemeModifications } from '@elastic/eui';
-import { THEME_ACCENTS, type AppTheme } from '@kbn/custom-app-common';
+import {
+  THEME_BOUND_PROPS,
+  isStateRef,
+  resolveBoundValue,
+  type AppTheme,
+} from '@kbn/custom-app-common';
 
 type Accent = NonNullable<AppTheme['accent']>;
 
@@ -130,23 +135,29 @@ export const getThemeModifications = (theme: AppTheme | undefined): EuiThemeModi
   return modifications;
 };
 
-/**
- * The theme as it is now: the accent is the value of the state key it follows, when that is an
- * accent, and the accent it names otherwise.
- */
+/** The theme as it is now: each setting that reads a value of the app is that value, when it can be. */
 export const resolveTheme = (
   theme: AppTheme | undefined,
   values: Readonly<Record<string, unknown>>
 ): AppTheme | undefined => {
-  if (!theme?.accentFrom) return theme;
-  const value = values[theme.accentFrom];
-  const accent = THEME_ACCENTS.find((name) => name === value) ?? theme.accent;
-  return { ...theme, accent };
+  if (!theme) return theme;
+  return Object.entries(THEME_BOUND_PROPS).reduce<AppTheme>((resolved, [property, bound]) => {
+    const value = (resolved as Record<string, unknown>)[property];
+    return isStateRef(value)
+      ? { ...resolved, [property]: resolveBoundValue(bound, value, values) }
+      : resolved;
+  }, theme);
 };
+
+/** Whether any setting of the theme reads a value of the app, and so changes while it is used. */
+export const isThemeBound = (theme: AppTheme | undefined): boolean =>
+  Object.keys(THEME_BOUND_PROPS).some((property) =>
+    isStateRef((theme as Record<string, unknown> | undefined)?.[property])
+  );
 
 /**
  * Whether a theme changes anything at all. One that follows a value is always kept, so that the
  * app is not drawn again from the start when the value first gives it an accent.
  */
 export const hasThemeModifications = (theme: AppTheme | undefined): boolean =>
-  Boolean(theme?.accent || theme?.accentFrom || theme?.shape);
+  Boolean(theme?.accent || theme?.shape);

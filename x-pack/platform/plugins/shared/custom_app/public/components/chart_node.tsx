@@ -111,10 +111,8 @@ const Chart = ({
 
 /** A chart with annotations: it reads their rows, and marks them while the value that shows them is true. */
 const AnnotatedChart = ({ node, data }: { node: AppNodeOfType<'chart'>; data: SourceData }) => {
-  const values = useStateValues();
   const source = useSource(getAnnotationsSourceId(node.id));
-  const { showWhen } = node.annotations ?? {};
-  const isShown = showWhen === undefined || values[showWhen] === true;
+  const isShown = node.annotations?.visible !== false;
 
   return (
     <Chart

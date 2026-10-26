@@ -10,6 +10,7 @@ import {
   ACCENT_COLORS,
   getThemeModifications,
   hasThemeModifications,
+  isThemeBound,
   resolveTheme,
 } from './page_theme';
 
@@ -97,16 +98,15 @@ describe('what a theme changes', () => {
 });
 
 describe('resolveTheme', () => {
-  it('is the theme itself when it does not follow a value', () => {
+  it('is the theme itself when it does not read a value', () => {
     const theme = { accent: 'blue' as const };
 
     expect(resolveTheme(theme, { look: 'teal' })).toBe(theme);
     expect(resolveTheme(undefined, {})).toBeUndefined();
   });
 
-  it('takes the accent from the value it follows, when it is an accent', () => {
-    expect(resolveTheme({ accentFrom: 'look', accent: 'blue' }, { look: 'teal' })).toEqual({
-      accentFrom: 'look',
+  it('takes the accent from the value it reads, when it is an accent', () => {
+    expect(resolveTheme({ accent: { $state: 'look' } as never }, { look: 'teal' })).toEqual({
       accent: 'teal',
     });
   });
@@ -114,13 +114,21 @@ describe('resolveTheme', () => {
   it.each([
     ['a name that is not an accent', 'magenta'],
     ['no value', undefined],
-  ])('keeps the accent of the theme for %s', (_what, value) => {
-    expect(resolveTheme({ accentFrom: 'look', accent: 'blue' }, { look: value })?.accent).toBe(
-      'blue'
+  ])('has no accent for %s', (_what, value) => {
+    expect(resolveTheme({ accent: { $state: 'look' } as never }, { look: value })?.accent).toBe(
+      undefined
     );
   });
 
-  it('is kept as a theme that changes things, even before the value gives it an accent', () => {
-    expect(hasThemeModifications({ accentFrom: 'look' })).toBe(true);
+  it('reads the shape the same way', () => {
+    expect(resolveTheme({ shape: { $state: 'corners' } as never }, { corners: 'sharp' })).toEqual({
+      shape: 'sharp',
+    });
+  });
+
+  it('is told apart as a theme that changes while it is used', () => {
+    expect(isThemeBound({ accent: { $state: 'look' } as never })).toBe(true);
+    expect(isThemeBound({ accent: 'teal' })).toBe(false);
+    expect(isThemeBound(undefined)).toBe(false);
   });
 });

@@ -9,7 +9,12 @@ import React, { createContext, useContext, type ContextType, type ReactNode } fr
 import { EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AppTheme } from '@kbn/custom-app-common';
-import { getThemeModifications, hasThemeModifications, resolveTheme } from '../theme/page_theme';
+import {
+  getThemeModifications,
+  hasThemeModifications,
+  isThemeBound,
+  resolveTheme,
+} from '../theme/page_theme';
 import { AppRuntimeContext } from '../runtime/app_runtime_context';
 import { useSubjectValue } from '../utils/use_subject_value';
 
@@ -27,14 +32,14 @@ export const usePageAccent = (): AppTheme['accent'] => useContext(PageAccentCont
  * is as wide as the panel, not as wide as its widest component.
  */
 export const AppFrame = ({ children, theme }: { children: ReactNode; theme?: AppTheme }) =>
-  theme?.accentFrom ? (
+  isThemeBound(theme) ? (
     <FollowingFrame theme={theme}>{children}</FollowingFrame>
   ) : (
     <ThemedFrame theme={theme}>{children}</ThemedFrame>
   );
 
 /** A frame whose accent is a value of the app, which is what a control of the app changes. */
-const FollowingFrame = ({ children, theme }: { children: ReactNode; theme: AppTheme }) => {
+const FollowingFrame = ({ children, theme }: { children: ReactNode; theme?: AppTheme }) => {
   const runtime = useContext(AppRuntimeContext);
   // Without an app around it there are no values, and the accent is the one the theme names.
   return runtime ? (
@@ -42,7 +47,9 @@ const FollowingFrame = ({ children, theme }: { children: ReactNode; theme: AppTh
       {children}
     </RuntimeFrame>
   ) : (
-    <ThemedFrame theme={resolveTheme(theme, {})}>{children}</ThemedFrame>
+    <ThemedFrame theme={resolveTheme(theme, {})} isFollowing>
+      {children}
+    </ThemedFrame>
   );
 };
 
@@ -52,14 +59,27 @@ const RuntimeFrame = ({
   runtime,
 }: {
   children: ReactNode;
-  theme: AppTheme;
+  theme?: AppTheme;
   runtime: NonNullable<ContextType<typeof AppRuntimeContext>>;
 }) => {
   const values = useSubjectValue(runtime.state$);
-  return <ThemedFrame theme={resolveTheme(theme, values)}>{children}</ThemedFrame>;
+  return (
+    <ThemedFrame theme={resolveTheme(theme, values)} isFollowing>
+      {children}
+    </ThemedFrame>
+  );
 };
 
-const ThemedFrame = ({ children, theme }: { children: ReactNode; theme?: AppTheme }) => {
+const ThemedFrame = ({
+  children,
+  theme,
+  isFollowing = false,
+}: {
+  children: ReactNode;
+  theme?: AppTheme;
+  /** The theme reads values of the app, so it keeps its place in the tree while it has nothing yet. */
+  isFollowing?: boolean;
+}) => {
   const { euiTheme } = useEuiTheme();
 
   const frame = (
@@ -79,7 +99,7 @@ const ThemedFrame = ({ children, theme }: { children: ReactNode; theme?: AppThem
   );
 
   // The theme of the page changes what is inside the frame, and nothing outside it.
-  return hasThemeModifications(theme) ? (
+  return isFollowing || hasThemeModifications(theme) ? (
     <PageAccentContext.Provider value={theme?.accent}>
       <EuiThemeProvider modify={getThemeModifications(theme)} wrapperProps={{ cloneElement: true }}>
         {frame}

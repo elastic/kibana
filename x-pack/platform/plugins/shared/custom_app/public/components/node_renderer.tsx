@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -16,7 +16,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { interpolate, type AppNode } from '@kbn/custom-app-common';
+import {
+  getBoundSignature,
+  interpolate,
+  isNodeVisible,
+  resolveBoundProps,
+  type AppNode,
+} from '@kbn/custom-app-common';
 import {
   KbnDangerCallout,
   KbnInfoCallout,
@@ -76,9 +82,20 @@ interface NodeRendererProps {
  * branch is reachable only if a document carries a type this build cannot render, and shows that
  * instead of failing the whole panel.
  */
-export const NodeRenderer = ({ node }: NodeRendererProps) => {
+export const NodeRenderer = ({ node: written }: NodeRendererProps) => {
   const state = useStateValues();
   const text = (value: string) => interpolate(value, state);
+  // What is written may read the values of the app, and what is drawn is how they are now. It is the
+  // same object until one of those values changes, as what is drawn from it, such as a chart, would
+  // otherwise start again every time something else in the app does.
+  const resolved = useRef<{ written: AppNode; signature: string; node: AppNode }>();
+  const signature = getBoundSignature(written, state);
+  if (resolved.current?.written !== written || resolved.current.signature !== signature) {
+    resolved.current = { written, signature, node: resolveBoundProps(written, state) };
+  }
+  const { node } = resolved.current;
+
+  if (!isNodeVisible(node, state)) return null;
 
   switch (node.type) {
     case 'heading':

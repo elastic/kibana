@@ -661,7 +661,7 @@ describe('the theme of a page', () => {
 describe('a theme whose accent follows a value of the app', () => {
   const followed = (state: Record<string, unknown>, theme: Record<string, unknown> = {}) => ({
     state,
-    theme: { accentFrom: 'look', ...theme },
+    theme: { accent: { $state: 'look' }, ...theme },
     root: { type: 'text', id: 't', text: 'x' },
   });
   const messagesOf = (document: unknown) => {
@@ -672,12 +672,12 @@ describe('a theme whose accent follows a value of the app', () => {
   it('is accepted when the key is a string whose default is an accent', () => {
     expect(
       appDocumentSchema.parse(followed({ look: { type: 'string', default: 'teal' } })).theme
-    ).toEqual({ accentFrom: 'look' });
+    ).toEqual({ accent: { $state: 'look' } });
   });
 
   it('is refused when the key does not exist', () => {
     expect(messagesOf(followed({}))).toEqual([
-      'The theme takes its accent from unknown state key "look"',
+      'The theme reads "accent" from unknown state key "look"',
     ]);
   });
 
@@ -689,7 +689,7 @@ describe('a theme whose accent follows a value of the app', () => {
 
   it('is refused when the default is not an accent, so that the page never starts with none', () => {
     expect(messagesOf(followed({ look: { type: 'string', default: 'magenta' } }))[0]).toContain(
-      'is not an accent'
+      'is not a value "accent" can have'
     );
   });
 });
@@ -766,13 +766,13 @@ describe('the annotations of a chart', () => {
   });
 
   it('are shown by a key that exists and is a true or a false', () => {
-    expect(messagesOf(chart({ query: 'FROM d', time: 't', showWhen: 'show' }))).toEqual([
-      'Node "trend" shows its annotations by unknown state key "show"',
+    expect(messagesOf(chart({ query: 'FROM d', time: 't', visible: { $state: 'show' } }))).toEqual([
+      'Node "trend" reads "annotations.visible" from unknown state key "show"',
     ]);
     expect(
       messagesOf(
         chart(
-          { query: 'FROM d', time: 't', showWhen: 'show' },
+          { query: 'FROM d', time: 't', visible: { $state: 'show' } },
           { show: { type: 'string', default: 'x' } }
         )
       )[0]

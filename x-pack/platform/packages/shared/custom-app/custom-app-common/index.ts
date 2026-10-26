@@ -35,6 +35,18 @@ export {
   MAX_WORKFLOW_INPUTS,
 } from './constants';
 export {
+  bindable,
+  getBoundSignature,
+  isNodeVisible,
+  isStateRef,
+  resolveBoundProps,
+  resolveBoundValue,
+  stateRefSchema,
+  THEME_BOUND_PROPS,
+  type StateRef,
+  type VisibleWhen,
+} from './bindings';
+export {
   actionSchema,
   appDocumentSchema,
   appDocumentShapeSchema,

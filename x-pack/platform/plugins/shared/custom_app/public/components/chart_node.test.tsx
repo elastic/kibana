@@ -200,7 +200,7 @@ describe('the annotations of a chart', () => {
               query: 'FROM deploys | KEEP @timestamp, name',
               time: '@timestamp',
               label: 'name',
-              showWhen: 'show',
+              visible: { $state: 'show' },
             },
           },
         ],

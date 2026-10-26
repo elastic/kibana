@@ -9,8 +9,6 @@ import { z } from '@kbn/zod/v4';
 import { CUSTOM_CONTENT_MAX_HEIGHT, CUSTOM_CONTENT_MIN_HEIGHT } from '@kbn/custom-content-common';
 import {
   CASES_SORT_FIELDS,
-  THEME_ACCENTS,
-  THEME_SHAPES,
   CUSTOM_APP_STATE_VERSION,
   MAX_ACTIONS_PER_EVENT,
   MAX_BUTTON_GROUP_OPTIONS,
@@ -27,7 +25,6 @@ import {
   MAX_NODE_ID_LENGTH,
   MAX_PROMPT_LENGTH,
   MAX_QUERY_LENGTH,
-  MAX_STATE_KEY_LENGTH,
   MAX_STATE_STRING_LENGTH,
   MAX_TABLE_COLUMNS,
   MAX_TEMPLATE_LENGTH,
@@ -35,28 +32,34 @@ import {
   MAX_WORKFLOW_INPUT_NAME_LENGTH,
   MAX_WORKFLOW_INPUTS,
   MAX_TEXT_LENGTH,
-  RESERVED_STATE_KEYS,
-  BADGE_COLORS,
-  CARD_ICONS,
-  MAX_COLUMNS,
-  PROGRESS_COLORS,
 } from './constants';
+import {
+  annotationsVisibleSchema,
+  badgeColorSchema,
+  betterWhenSchema,
+  bindable,
+  calloutColorSchema,
+  cardIconSchema,
+  chartTypeSchema,
+  columnsCountSchema,
+  progressColorSchema,
+  progressMaxSchema,
+  sectionOpenSchema,
+  stackDirectionSchema,
+  stateKeySchema,
+  themeAccentSchema,
+  themeShapeSchema,
+  visibleWhenSchema,
+} from './bindings';
 import { validateDocument } from './validate_document';
+
+export { stateKeySchema };
 
 const nodeIdSchema = z
   .string()
   .min(1)
   .max(MAX_NODE_ID_LENGTH)
   .regex(/^[A-Za-z0-9_-]+$/);
-
-/** A valid ES|QL parameter name, so a state key can be used as `?key` in a query. */
-export const stateKeySchema = z
-  .string()
-  .max(MAX_STATE_KEY_LENGTH)
-  .regex(/^[A-Za-z_][A-Za-z0-9_]*$/)
-  .refine((key) => !RESERVED_STATE_KEYS.includes(key.toLowerCase()), {
-    message: `Reserved by ES|QL for the time range: ${RESERVED_STATE_KEYS.join(', ')}`,
-  });
 
 const stateValueSchema = z.union([
   z.string().max(MAX_STATE_STRING_LENGTH),
@@ -129,21 +132,24 @@ const actionsSchema = z.array(actionSchema).max(MAX_ACTIONS_PER_EVENT);
 const headingNodeSchema = z.object({
   type: z.literal('heading'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   text: z.string().max(MAX_HEADING_LENGTH),
 });
 
 const textNodeSchema = z.object({
   type: z.literal('text'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   text: z.string().max(MAX_TEXT_LENGTH),
 });
 
 const calloutNodeSchema = z.object({
   type: z.literal('callout'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   title: z.string().max(MAX_HEADING_LENGTH),
   text: z.string().max(MAX_TEXT_LENGTH).optional(),
-  color: z.enum(['primary', 'success', 'warning', 'danger']).default('primary'),
+  color: bindable(calloutColorSchema),
 });
 
 /** A filter of the cases: a fixed value, or one of the app, so that an input can drive it. */
@@ -182,32 +188,31 @@ const dataFields = {
 const statNodeSchema = z.object({
   type: z.literal('stat'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   title: z.string().max(MAX_HEADING_LENGTH),
   ...dataFields,
 });
 
-/** What the chart looks like is picked from the shape of the result unless the author chooses. */
-const CHART_TYPES = ['bar', 'line', 'area', 'donut'] as const;
-
 const chartNodeSchema = z.object({
   type: z.literal('chart'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   /** A heading above the chart. */
   title: z.string().max(MAX_HEADING_LENGTH).optional(),
   query: querySchema,
   /** Left out, the chart is suggested from the columns of the query, as Discover does. */
-  chartType: z.enum(CHART_TYPES).optional(),
+  chartType: bindable(chartTypeSchema),
   /**
    * Moments to mark on a chart that is over time, from a query of their own: each row is a vertical
-   * line, at the time of its `time` column and named by its `label` column. With `showWhen`, they are
-   * shown only while that value of the app, a switch for example, is true.
+   * line, at the time of its `time` column and named by its `label` column. With `visible` given as a value of
+   * the app, a switch for example, they are shown only while that is true.
    */
   annotations: z
     .object({
       query: querySchema,
       time: z.string().min(1).max(MAX_HEADING_LENGTH),
       label: z.string().min(1).max(MAX_HEADING_LENGTH).optional(),
-      showWhen: stateKeySchema.optional(),
+      visible: bindable(annotationsVisibleSchema),
     })
     .optional(),
   /**
@@ -226,6 +231,7 @@ const chartNodeSchema = z.object({
 const customContentNodeSchema = z.object({
   type: z.literal('custom_content'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   /** Without a query the template is shown as it is. */
   query: querySchema.optional(),
   template: z.string().max(MAX_TEMPLATE_LENGTH).optional(),
@@ -237,6 +243,7 @@ const customContentNodeSchema = z.object({
 const tableNodeSchema = z.object({
   type: z.literal('table'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   ...dataFields,
   /** Names the table for screen readers. */
   caption: z.string().max(MAX_HEADING_LENGTH).optional(),
@@ -262,6 +269,7 @@ const tableNodeSchema = z.object({
 const timeRangeNodeSchema = z.object({
   type: z.literal('time_range'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
 });
 
 /**
@@ -303,6 +311,7 @@ const linkTargetSchema = z.discriminatedUnion('type', [
 const linkNodeSchema = z.object({
   type: z.literal('link'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   label: z.string().min(1).max(MAX_HEADING_LENGTH),
   to: linkTargetSchema,
 });
@@ -310,6 +319,7 @@ const linkNodeSchema = z.object({
 const buttonNodeSchema = z.object({
   type: z.literal('button'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   label: z.string().min(1).max(MAX_HEADING_LENGTH),
   onClick: actionsSchema.default([]),
 });
@@ -325,6 +335,7 @@ const inputOptionSchema = z.object({
  */
 const inputFields = {
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   label: z.string().max(MAX_HEADING_LENGTH),
   bind: stateKeySchema,
   onChange: actionsSchema.default([]),
@@ -364,6 +375,7 @@ const formFieldSchema = z.discriminatedUnion('kind', [
 const formNodeSchema = z.object({
   type: z.literal('form'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   fields: z.array(formFieldSchema).min(1).max(MAX_FORM_FIELDS),
   submitLabel: z.string().min(1).max(MAX_HEADING_LENGTH),
   onSubmit: actionsSchema.default([]),
@@ -417,6 +429,7 @@ const searchNodeSchema = z.object({
 const keyValueNodeSchema = z.object({
   type: z.literal('key_value'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   ...dataFields,
   /** Defaults to every column of the first row. */
   fields: z.array(z.string().min(1).max(MAX_HEADING_LENGTH)).max(MAX_KEY_VALUE_FIELDS).optional(),
@@ -430,68 +443,80 @@ const keyValueNodeSchema = z.object({
 const metricNodeSchema = z.object({
   type: z.literal('metric'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   title: z.string().max(MAX_HEADING_LENGTH),
   ...dataFields,
   compare: z.string().min(1).max(MAX_HEADING_LENGTH).optional(),
-  betterWhen: z.enum(['higher', 'lower']).default('higher'),
+  betterWhen: bindable(betterWhenSchema),
 });
 
 /** A bar that is filled as far as the first column of the first row is of `max`. */
 const progressNodeSchema = z.object({
   type: z.literal('progress'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   label: z.string().max(MAX_HEADING_LENGTH).optional(),
   ...dataFields,
-  max: z.number().finite().positive().default(100),
-  color: z.enum(PROGRESS_COLORS).default('primary'),
+  max: bindable(progressMaxSchema),
+  color: bindable(progressColorSchema),
 });
 
 /** A short word or two with a colour, such as a status. */
 const badgeNodeSchema = z.object({
   type: z.literal('badge'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   text: z.string().min(1).max(MAX_HEADING_LENGTH),
-  color: z.enum(BADGE_COLORS).default('default'),
+  color: bindable(badgeColorSchema),
 });
 
 const stackFields = {
   type: z.literal('stack'),
   id: nodeIdSchema,
-  direction: z.enum(['vertical', 'horizontal']).default('vertical'),
+  visibleWhen: visibleWhenSchema,
+  direction: bindable(stackDirectionSchema),
 };
 
 const flyoutFields = {
   type: z.literal('flyout'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   title: z.string().max(MAX_HEADING_LENGTH),
 };
 
 const cardFields = {
   type: z.literal('card'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   title: z.string().max(MAX_HEADING_LENGTH).optional(),
   description: z.string().max(MAX_TEXT_LENGTH).optional(),
-  icon: z.enum(CARD_ICONS).optional(),
+  icon: bindable(cardIconSchema),
 };
 
 /** What is inside is laid out in this many columns, which wrap under each other on a narrow screen. */
 const columnsFields = {
   type: z.literal('columns'),
   id: nodeIdSchema,
-  columns: z.number().int().min(2).max(MAX_COLUMNS).default(2),
+  visibleWhen: visibleWhenSchema,
+  columns: bindable(columnsCountSchema),
 };
 
 /** A titled part of `tabs` or `accordion`, which hold nothing else. */
 const sectionFields = {
   type: z.literal('section'),
   id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
   label: z.string().min(1).max(MAX_HEADING_LENGTH),
   /** In an accordion, whether it starts open. */
-  open: z.boolean().optional(),
+  open: bindable(sectionOpenSchema),
 };
 
-const tabsFields = { type: z.literal('tabs'), id: nodeIdSchema };
-const accordionFields = { type: z.literal('accordion'), id: nodeIdSchema };
+const tabsFields = { type: z.literal('tabs'), id: nodeIdSchema, visibleWhen: visibleWhenSchema };
+const accordionFields = {
+  type: z.literal('accordion'),
+  id: nodeIdSchema,
+  visibleWhen: visibleWhenSchema,
+};
 
 type LeafNode =
   | z.output<typeof metricNodeSchema>
@@ -657,13 +682,8 @@ export const getNodeChildren = (node: AppNode): readonly AppNode[] =>
  * shape is how round the corners are. A page with none looks as Kibana does.
  */
 export const themeSchema = z.object({
-  accent: z.enum(THEME_ACCENTS).optional(),
-  /**
-   * A string state key whose value is the accent, so that a control can change it, such as a button
-   * group whose options are accent names. A value that is not an accent leaves `accent`.
-   */
-  accentFrom: stateKeySchema.optional(),
-  shape: z.enum(THEME_SHAPES).optional(),
+  accent: bindable(themeAccentSchema),
+  shape: bindable(themeShapeSchema),
 });
 
 export const appDocumentShapeSchema = z.object({

@@ -655,7 +655,7 @@ describe('the components that hold others', () => {
   });
 
   it('are changed, and have what is in them removed, wherever they are', () => {
-    const changed = updateNode(nested, 'card', { title: 'New' });
+    const changed = updateNode<'card'>(nested, 'card', { title: 'New' });
     expect(
       changed.ok && (findNode(changed.document.root, 'card')?.node as { title: string }).title
     ).toBe('New');

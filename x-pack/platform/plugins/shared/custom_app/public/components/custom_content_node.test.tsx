@@ -175,7 +175,7 @@ describe('a page whose accent is picked by a control', () => {
   it('changes colour when the person picks another accent', async () => {
     const document = appDocumentSchema.parse({
       state: { look: { type: 'string', default: 'purple' } },
-      theme: { accentFrom: 'look' },
+      theme: { accent: { $state: 'look' } },
       root: {
         type: 'stack',
         id: 'root',
