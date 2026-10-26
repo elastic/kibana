@@ -72,8 +72,8 @@ export interface PubSubSubscription<TData> {
 }
 
 /**
- * `TData` is inferred from the topic alone (`NoInfer` on the other argument), so a topic defined
- * without a type argument is `Topic<never>` and cannot be published on or usefully subscribed to.
+ * `TData` is inferred from the topic alone (`NoInfer` on the other argument). A name-only topic
+ * (`Topic<never>`) cannot be published on or usefully subscribed to.
  *
  * @public
  */

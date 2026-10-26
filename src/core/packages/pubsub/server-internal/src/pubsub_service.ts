@@ -180,7 +180,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     }
 
     // A cast can still skip `defineTopic`. Re-check the name here.
-    defineTopic(topic.name);
+    assertTopicName(topic.name);
 
     const scopedConsumer = scopeConsumerName(pluginId, consumer);
     const alreadySubscribed = this.subscriptions.some(

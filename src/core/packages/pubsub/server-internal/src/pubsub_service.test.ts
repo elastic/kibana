@@ -29,15 +29,17 @@ interface NamedData {
   name: string;
 }
 type NamedTopic = Topic<NamedData, 'cases.updated'>;
-const topicFromData = defineTopic<NamedData>('cases.updated');
+type OrdersNameTopic = Topic<never, 'orders'>;
+type AnyNameTopic = Topic<never, string>;
+type OrdersSecretTopic = Topic<{ secret: string }, 'orders'>;
+type ShipmentsSecretTopic = Topic<{ secret: string }, 'shipments'>;
+
 const topicFromSharedType = defineTopic<NamedTopic>('cases.updated');
-const topicWithoutType = defineTopic('orders');
-const _typedName: Topic<NamedData, string> = topicFromData;
+const nameOnly = defineTopic<OrdersNameTopic>('orders');
 const _sharedType: Topic<NamedData, 'cases.updated'> = topicFromSharedType;
-const _untyped: Topic<never, string> = topicWithoutType;
-void _typedName;
+const _nameOnly: Topic<never, 'orders'> = nameOnly;
 void _sharedType;
-void _untyped;
+void _nameOnly;
 
 let idCounter = 0;
 const nextId = () => `evt-${++idCounter}`;
@@ -66,17 +68,17 @@ describe('PubSubService registration', () => {
   it('registers a topic during setup', () => {
     const setup = createService().setup();
 
-    expect(() => setup.registerTopic(PLUGIN, defineTopic('orders'))).not.toThrow();
+    expect(() => setup.registerTopic(PLUGIN, defineTopic<OrdersNameTopic>('orders'))).not.toThrow();
   });
 
   it('throws when the same topic name is registered twice, naming the first registrant', () => {
     const setup = createService().setup();
 
-    setup.registerTopic(PLUGIN, defineTopic('orders'));
+    setup.registerTopic(PLUGIN, defineTopic<OrdersNameTopic>('orders'));
 
-    expect(() => setup.registerTopic('shippingPlugin', defineTopic('orders'))).toThrow(
-      'Topic "orders" is already registered by "ordersPlugin".'
-    );
+    expect(() =>
+      setup.registerTopic('shippingPlugin', defineTopic<OrdersNameTopic>('orders'))
+    ).toThrow('Topic "orders" is already registered by "ordersPlugin".');
   });
 
   it('throws when a topic is registered after setup', () => {
@@ -84,18 +86,18 @@ describe('PubSubService registration', () => {
     const setup = service.setup();
     service.start();
 
-    expect(() => setup.registerTopic(PLUGIN, defineTopic('orders'))).toThrow(
+    expect(() => setup.registerTopic(PLUGIN, defineTopic<OrdersNameTopic>('orders'))).toThrow(
       'Cannot register topic "orders" outside of setup.'
     );
   });
 
   it('throws when a topic name has an empty segment, a trailing dot, or is too long', () => {
-    expect(() => defineTopic('')).toThrow(/invalid/i);
-    expect(() => defineTopic('has space')).toThrow(/invalid/i);
-    expect(() => defineTopic('a..b')).toThrow(/invalid/i);
-    expect(() => defineTopic('orders.')).toThrow(/invalid/i);
-    expect(() => defineTopic('a'.repeat(257))).toThrow(/invalid/i);
-    expect(() => defineTopic('cases.updated')).not.toThrow();
+    expect(() => defineTopic<AnyNameTopic>('')).toThrow(/invalid/i);
+    expect(() => defineTopic<AnyNameTopic>('has space')).toThrow(/invalid/i);
+    expect(() => defineTopic<AnyNameTopic>('a..b')).toThrow(/invalid/i);
+    expect(() => defineTopic<AnyNameTopic>('orders.')).toThrow(/invalid/i);
+    expect(() => defineTopic<AnyNameTopic>('a'.repeat(257))).toThrow(/invalid/i);
+    expect(() => defineTopic<NamedTopic>('cases.updated')).not.toThrow();
   });
 
   it('throws when a topic is registered without going through defineTopic', () => {
@@ -120,7 +122,7 @@ describe('PubSubService registration', () => {
   it('starts when a subscription is added before its topic is registered', () => {
     const service = createService();
     const setup = service.setup();
-    const topic = defineTopic('orders');
+    const topic = defineTopic<OrdersNameTopic>('orders');
 
     setup.subscribe(PLUGIN, topic, { consumer: 'sync', handler: () => {} });
     setup.registerTopic(PLUGIN, topic);
@@ -133,7 +135,10 @@ describe('PubSubService registration', () => {
     const service = new PubSubService(mockCoreContext.create({ logger }));
     const setup = service.setup();
 
-    setup.subscribe(PLUGIN, defineTopic('orders'), { consumer: 'sync', handler: () => {} });
+    setup.subscribe(PLUGIN, defineTopic<OrdersNameTopic>('orders'), {
+      consumer: 'sync',
+      handler: () => {},
+    });
 
     expect(() => service.start()).not.toThrow();
     const [warning] = loggerMock.collect(logger).warn.map(([message]) => String(message));
@@ -144,7 +149,7 @@ describe('PubSubService registration', () => {
 
   it('scopes the consumer name with the plugin id and rejects a second subscription under the same name', () => {
     const setup = createService().setup();
-    const topic = defineTopic('orders');
+    const topic = defineTopic<OrdersNameTopic>('orders');
     setup.registerTopic(PLUGIN, topic);
     setup.subscribe(PLUGIN, topic, { consumer: 'sync', handler: () => {} });
 
@@ -155,7 +160,7 @@ describe('PubSubService registration', () => {
 
   it('lets two plugins use the same plugin-local consumer name', () => {
     const setup = createService().setup();
-    const topic = defineTopic('orders');
+    const topic = defineTopic<OrdersNameTopic>('orders');
     setup.registerTopic(PLUGIN, topic);
     setup.subscribe(PLUGIN, topic, { consumer: 'sync', handler: () => {} });
 
@@ -166,7 +171,7 @@ describe('PubSubService registration', () => {
 
   it('rejects a consumer name that could impersonate another plugin', () => {
     const setup = createService().setup();
-    const topic = defineTopic('orders');
+    const topic = defineTopic<OrdersNameTopic>('orders');
     setup.registerTopic(PLUGIN, topic);
 
     expect(() =>
@@ -180,7 +185,7 @@ describe('PubSubService dispatch', () => {
     const logger = loggerMock.create();
     const service = new PubSubService(mockCoreContext.create({ logger }));
     const setup = service.setup();
-    const topic = defineTopic<{ secret: string }>('orders');
+    const topic = defineTopic<OrdersSecretTopic>('orders');
     setup.registerTopic(PLUGIN, topic);
 
     return { logger, service, setup, topic };
@@ -256,7 +261,7 @@ describe('PubSubService dispatch', () => {
 
   it('delivers every event on the topic to every consumer, and nothing from other topics', async () => {
     const { service, setup, topic } = createHarness();
-    const other = defineTopic<{ secret: string }>('shipments');
+    const other = defineTopic<ShipmentsSecretTopic>('shipments');
     setup.registerTopic('shippingPlugin', other);
     const seenByOrders: string[] = [];
     const seenByShipments: string[] = [];
@@ -391,7 +396,7 @@ describe('PubSubService dispatch', () => {
   it('throws when publishing a topic that was defined but never registered', async () => {
     const service = new PubSubService(mockCoreContext.create());
     service.setup();
-    const definedOnly = defineTopic<{ secret: string }>('shipments');
+    const definedOnly = defineTopic<ShipmentsSecretTopic>('shipments');
     const { publish } = start(service);
 
     await expect(
@@ -555,7 +560,7 @@ describe('PubSubEvent shape', () => {
   const createHarness = () => {
     const service = new PubSubService(mockCoreContext.create());
     const setup = service.setup();
-    const topic = defineTopic<{ secret: string; tags?: string[] }>('orders');
+    const topic = defineTopic<Topic<{ secret: string; tags?: string[] }, 'orders'>>('orders');
     setup.registerTopic(PLUGIN, topic);
     const received: Array<PubSubEvent<{ secret: string; tags?: string[] }>> = [];
     const subscribe = (consumer: string) =>
@@ -635,7 +640,7 @@ describe('JSON round-trip check', () => {
     const env = createTestEnv({ envOptions: getEnvOptions({ cliArgs: { dev } }) });
     const service = new PubSubService(mockCoreContext.create({ env }));
     const setup = service.setup();
-    const topic = defineTopic<Loose>('orders');
+    const topic = defineTopic<Topic<Loose, 'orders'>>('orders');
     setup.registerTopic(PLUGIN, topic);
     const received: Array<PubSubEvent<Loose>> = [];
     setup.subscribe(PLUGIN, topic, {
