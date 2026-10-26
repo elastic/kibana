@@ -26,7 +26,10 @@ export {
 export {
   createOnboardingSpace,
   createUiOnboardingSpace,
+  deleteSeededProposals,
   resetOnboardingState,
+  seedClosedProposal,
   type OnboardingSpace,
+  type SeededProposal,
   type SpacesService,
 } from './onboarding';

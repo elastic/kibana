@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
- * Elastic License 2.0; you may not use this file except in compliance with the Elastic
- * License 2.0.
- */
-
 import { randomUUID } from 'crypto';
 import type { ApiClientFixture } from '@kbn/scout-security';
 import type { KbnClient } from '@kbn/kbn-client';

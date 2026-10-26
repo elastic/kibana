@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApiClientFixture } from '@kbn/scout-security';
+import type { ApiClientFixture, EsClient } from '@kbn/scout-security';
 import type { KbnClient } from '@kbn/kbn-client';
 import {
   createApi,
@@ -136,3 +136,143 @@ interface WorkerInfoLike {
   id: string;
   enabled: boolean;
 }
+
+/** Backing index and alias of the shared proposals store (`@kbn/proposals-common`). */
+const PROPOSALS_INDEX = '.kibana-proposals';
+const PROPOSALS_BACKING_INDEX = `${PROPOSALS_INDEX}-000001`;
+
+export interface SeededProposal {
+  id: string;
+  title: string;
+  decidedAt: string;
+}
+
+/** Minimal `ProposalDocument` (storage shape of `proposals_storage.ts`) for a settled row. */
+interface ClosedProposalDoc {
+  spaceId: string;
+  conversationId: string;
+  title: string;
+  comment: string;
+  status: 'succeeded';
+  decision: 'approved';
+  rootProposalId: string;
+  revision: number;
+  impact: 'low' | 'medium' | 'high' | 'critical';
+  confidence: 'low' | 'medium' | 'high';
+  origin: 'alertzero';
+  decidedAt: string;
+  createdAt: string;
+  ranks: { impact: number; confidence: number };
+}
+
+/** Impact/confidence → numeric sort rank, mirroring `sort_ranks.ts` (`3 - rankIndex`). */
+const RANKS = {
+  impact: { critical: 0, high: 1, medium: 2, low: 3 },
+  confidence: { high: 0, medium: 1, low: 2 },
+} as const;
+
+/**
+ * Writes one settled AlertZero proposal straight to the proposals index, bypassing the
+ * create/decide workflow so the test controls `decidedAt` to the minute. The index is
+ * shared and the alias may not exist yet on a fresh boot; both are created idempotently
+ * with the storage adapter's mappings so a later server write never sees a conflict.
+ *
+ * `decidedAtHoursAgo` is fractional (e.g. `71` vs `73` around the 72h window edge).
+ */
+export const seedClosedProposal = async (
+  esClient: EsClient,
+  spaceId: string,
+  { title, decidedAtHoursAgo, id }: { title: string; decidedAtHoursAgo: number; id?: string }
+): Promise<SeededProposal> => {
+  const proposalId =
+    id ?? `scout-closed-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  const decidedAt = new Date(Date.now() - decidedAtHoursAgo * 3_600_000).toISOString();
+  const createdAt = new Date(Date.now() - (decidedAtHoursAgo + 2) * 3_600_000).toISOString();
+
+  const doc: ClosedProposalDoc = {
+    spaceId,
+    conversationId: `scout-conv-${proposalId}`,
+    title,
+    comment: `Seeded closed proposal ${title}`,
+    status: 'succeeded',
+    decision: 'approved',
+    rootProposalId: proposalId,
+    revision: 1,
+    impact: 'medium',
+    confidence: 'medium',
+    origin: 'alertzero',
+    decidedAt,
+    createdAt,
+    ranks: { impact: RANKS.impact.medium, confidence: RANKS.confidence.medium },
+  };
+
+  // Create backing index + alias on first use. The mappings mirror
+  // `proposals_storage.ts` loosely (all types the closed-list query reads);
+  // ES dynamic mapping would also accept the doc, but explicit mappings keep
+  // a later adapter write from hitting a mapping conflict.
+  const aliasExists = await esClient.indices.existsAlias({ name: PROPOSALS_INDEX });
+  if (!aliasExists) {
+    await esClient.indices.create({
+      index: PROPOSALS_BACKING_INDEX,
+      aliases: { [PROPOSALS_INDEX]: { is_write_index: true } },
+      mappings: {
+        properties: {
+          spaceId: { type: 'keyword' },
+          conversationId: { type: 'keyword' },
+          title: { type: 'text' },
+          comment: { type: 'text' },
+          status: { type: 'keyword' },
+          decision: { type: 'keyword' },
+          supersededBy: { type: 'keyword' },
+          rootProposalId: { type: 'keyword' },
+          supersedes: { type: 'keyword' },
+          revision: { type: 'long' },
+          impact: { type: 'keyword' },
+          confidence: { type: 'keyword' },
+          category: { type: 'keyword' },
+          origin: { type: 'keyword' },
+          expiresAt: { type: 'date' },
+          ranks: {
+            properties: { impact: { type: 'byte' }, confidence: { type: 'byte' } },
+          },
+          decidedBy: {
+            properties: {
+              username: { type: 'keyword' },
+              fullName: { type: 'keyword' },
+              email: { type: 'keyword' },
+              profileUid: { type: 'keyword' },
+            },
+          },
+          decidedAt: { type: 'date' },
+          dismissReason: { type: 'keyword' },
+          rationale: { type: 'text' },
+          executionError: { type: 'text' },
+          previousExecutionError: { type: 'text' },
+          workflowExecutionId: { type: 'keyword' },
+          createdAt: { type: 'date' },
+        },
+      },
+    });
+  }
+
+  await esClient.index({
+    index: PROPOSALS_INDEX,
+    id: proposalId,
+    document: doc,
+    refresh: 'wait_for',
+  });
+
+  return { id: proposalId, title, decidedAt };
+};
+
+/** Deletes seeded proposals by id (404-tolerant; space deletion is the hard backstop). */
+export const deleteSeededProposals = async (esClient: EsClient, ids: string[]): Promise<void> => {
+  if (ids.length === 0) return;
+  await esClient.deleteByQuery({
+    index: PROPOSALS_INDEX,
+    query: { ids: { values: ids } },
+    refresh: true,
+    ignore_unavailable: true,
+    conflicts: 'proceed',
+  });
+};
