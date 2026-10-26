@@ -320,7 +320,8 @@ steps:
   # The head of the chain. Joins add alerts to a proposal while it waits, so every outcome
   # below acts on the live revision's alerts, not on the ones this review started with. The
   # approve close already runs the head, because the gate adopts the latest revision before it
-  # acts. A failed read falls back to the input list.
+  # acts. A failed read falls back to the input list for re-tagging only; dismissal and expiry
+  # do not close the Investigation then, because joined alerts would be left with no review.
   - name: get_live_revision
     type: proposals.getLatestRevision
     on-failure:
@@ -489,6 +490,7 @@ steps:
           # landed, so a failed bookkeeping patch must not fail the run.
           - name: close_investigation_after_dismissal
             type: ai.conversation.metadata.patch
+            if: "${{ steps.get_live_revision.error == blank }}"
             on-failure:
               continue: true
               fallback:
@@ -523,7 +525,7 @@ steps:
               author_name: "{{ consts.author_name }}"
               conversation_id: "{{ inputs.conversation_id }}"
               message: >-
-                Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {% if variables.failed_retag_count > 0 %}{{ variables.fp_candidate_count | minus: variables.failed_retag_count }} of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}; {{ variables.failed_retag_count }} failed after retries and {% if variables.failed_retag_count == 1 %}needs{% else %}need{% endif %} manual re-tagging.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}.{% endif %}{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
+                Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {% if variables.failed_retag_count > 0 %}{{ variables.fp_candidate_count | minus: variables.failed_retag_count }} of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}; {{ variables.failed_retag_count }} failed after retries and {% if variables.failed_retag_count == 1 %}needs{% else %}need{% endif %} manual re-tagging.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}.{% endif %}{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}{% if steps.get_live_revision.error != blank %} The live revision could not be read, so joined alerts may still be tagged az:false_positive; this Investigation stays open.{% endif %}
         else:
           - name: retag_dismissed_read_failed
             type: foreach
@@ -585,6 +587,7 @@ steps:
 
       - name: close_investigation_after_expiry
         type: ai.conversation.metadata.patch
+        if: "${{ steps.get_live_revision.error == blank }}"
         on-failure:
           continue: true
           fallback:
@@ -619,7 +622,7 @@ steps:
           author_name: "{{ consts.author_name }}"
           conversation_id: "{{ inputs.conversation_id }}"
           message: >-
-            The closure proposal expired before a closure was completed. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} re-tagged az:inconclusive. If a closure attempt partially succeeded before the proposal expired, some may already be closed, so check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.
+            The closure proposal expired before a closure was completed. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} re-tagged az:inconclusive. If a closure attempt partially succeeded before the proposal expired, some may already be closed, so check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.{% if steps.get_live_revision.error != blank %} The live revision could not be read, so joined alerts may still be tagged az:false_positive; this Investigation stays open.{% endif %}
 
   # Defensive branch. The gate settles as succeeded, dismissed or expired: a failed close
   # action is recorded `failed`, cloned and re-parked for another decision, and an

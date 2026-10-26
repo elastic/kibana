@@ -223,6 +223,15 @@ describe('floor_alert_triage_review — live revision', () => {
     expect(read?.['on-failure']?.continue).toBe(true);
   });
 
+  it('does not close the Investigation on dismissal or expiry when the live revision could not be read', () => {
+    expect(stepByName('close_investigation_after_dismissal')?.if).toBe(
+      '${{ steps.get_live_revision.error == blank }}'
+    );
+    expect(stepByName('close_investigation_after_expiry')?.if).toBe(
+      '${{ steps.get_live_revision.error == blank }}'
+    );
+  });
+
   it('takes the alerts of the live revision, or the input list when it could not be read', () => {
     const expr = stepByName('resolve_live_alerts')?.with?.live_alert_ids as string;
     const inputs = { fp_candidate_ids: ['a'] };
