@@ -350,7 +350,7 @@ export interface RowControlsExtensionParams {
   esqlVariables?: ESQLControlVariable[];
   /**
    * False when the ungrouped grid should not offer a histogram comparison, for example while the
-   * chart is hidden or replaced, a breakdown is set, or the grouped layout is shown.
+   * chart is unavailable, hidden, or replaced, a breakdown is set, or the grouped layout is shown.
    */
   histogramComparisonEnabled?: boolean;
 }

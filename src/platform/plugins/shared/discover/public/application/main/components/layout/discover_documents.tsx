@@ -112,11 +112,13 @@ function DiscoverDocumentsComponent({
   dataView,
   onAddFilter,
   onFieldEdited,
+  isChartAvailable,
 }: {
   renderViewModeToggle: RenderViewModeToggle;
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   onFieldEdited?: (options: { editedDataView: DataView }) => void;
+  isChartAvailable?: boolean;
 }) {
   const [isDataGridFullScreen, setIsDataGridFullScreen] = useState(false);
   const styles = useMemoCss(componentStyles);
@@ -174,7 +176,8 @@ function DiscoverDocumentsComponent({
       replaceDefaultChart: false,
     }))().replaceDefaultChart;
   }, [getChartSectionConfiguration, isEsqlMode]);
-  const histogramComparisonEnabled = defaultHistogramAvailable && !breakdownField && !hideChart;
+  const histogramComparisonEnabled =
+    Boolean(isChartAvailable) && defaultHistogramAvailable && !breakdownField && !hideChart;
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
   const currentDataSource = useCurrentDataSource();

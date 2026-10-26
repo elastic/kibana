@@ -178,6 +178,7 @@ export const DiscoverMainContent = ({
               dataView={dataView}
               onAddFilter={onAddFilter}
               onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
+              isChartAvailable={isChartAvailable}
             />
           ) : null}
           {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (

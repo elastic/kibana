@@ -16,6 +16,7 @@ import { FetchStatus } from '../../../types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DiscoverMainContentProps } from './discover_main_content';
 import { DiscoverMainContent } from './discover_main_content';
+import { DiscoverDocuments } from './discover_documents';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDataSource } from '../../../../../common/data_sources';
@@ -203,9 +204,10 @@ describe('Discover main content component', () => {
 
   describe('Document view', () => {
     it('should show DiscoverDocuments when VIEW_MODE is DOCUMENT_LEVEL', async () => {
-      await renderComponent();
+      await renderComponent({ isChartAvailable: true });
 
       expect(screen.getByTestId('discoverDocumentsMock')).toBeVisible();
+      expect(jest.mocked(DiscoverDocuments).mock.lastCall?.[0].isChartAvailable).toBe(true);
       expect(screen.queryByTestId('patternAnalysisTabMock')).not.toBeInTheDocument();
       expect(screen.queryByTestId('fieldStatisticsTabMock')).not.toBeInTheDocument();
     });

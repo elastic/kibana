@@ -64,12 +64,14 @@ async function mountComponent({
   toolkit,
   isEsqlMode,
   dataView = dataViewMock,
+  isChartAvailable,
 }: {
   fetchStatus: FetchStatus;
   hits: EsHitRecord[];
   toolkit?: InternalStateMockToolkit;
   isEsqlMode?: boolean;
   dataView?: typeof dataViewMock;
+  isChartAvailable?: boolean;
 }) {
   if (!toolkit) {
     ({ toolkit } = await setup());
@@ -115,6 +117,7 @@ async function mountComponent({
     dataView,
     onAddFilter: jest.fn(),
     onFieldEdited: jest.fn(),
+    isChartAvailable,
   };
 
   return renderWithI18n(
@@ -364,6 +367,7 @@ describe('Discover documents layout', () => {
         hits: esHitsMock,
         toolkit,
         dataView: dataViewMockWithTimeField,
+        isChartAvailable: true,
       });
 
       await waitFor(() => {
@@ -395,6 +399,21 @@ describe('Discover documents layout', () => {
         hits: esHitsMock,
         toolkit,
         dataView: dataViewMockWithTimeField,
+      });
+
+      expect(discoverGridMock.mock.lastCall?.[0]?.histogramComparisonEnabled).toBe(false);
+    });
+
+    it('does not pass the compare action when the chart is unavailable', async () => {
+      const { toolkit } = await setup();
+      usePatternQuery(toolkit);
+
+      await mountComponent({
+        fetchStatus: FetchStatus.COMPLETE,
+        hits: esHitsMock,
+        toolkit,
+        dataView: dataViewMockWithTimeField,
+        isChartAvailable: false,
       });
 
       expect(discoverGridMock.mock.lastCall?.[0]?.histogramComparisonEnabled).toBe(false);
