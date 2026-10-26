@@ -1390,6 +1390,7 @@ x-pack/solutions/observability/plugins/digital_experience @elastic/obs-signals-r
 x-pack/solutions/observability/plugins/entity_inventory @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/entity_inventory_app @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-signals-logs-team
+x-pack/solutions/observability/plugins/feature_flags_management @elastic/kibana-core
 x-pack/solutions/observability/plugins/infra @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/nightshift @elastic/nightshift

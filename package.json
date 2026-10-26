@@ -770,6 +770,7 @@
     "@kbn/favorite-button": "workspace:*",
     "@kbn/feature-controls-examples-plugin": "workspace:*",
     "@kbn/feature-flags-example-plugin": "workspace:*",
+    "@kbn/feature-flags-management-plugin": "workspace:*",
     "@kbn/feature-usage-test-plugin": "workspace:*",
     "@kbn/features-plugin": "workspace:*",
     "@kbn/features-provider-plugin": "workspace:*",

@@ -75,6 +75,7 @@
     "xpack.evals": "platform/plugins/shared/evals",
     "xpack.failureStoreModal": "platform/packages/shared/kbn-failure-store-modal",
     "xpack.features": "platform/plugins/shared/features",
+    "xpack.featureFlagsManagement": "solutions/observability/plugins/feature_flags_management",
     "xpack.dataFederation": "platform/plugins/private/data_federation",
     "xpack.dataVisualizer": "platform/plugins/private/data_visualizer",
     "xpack.exploratoryView": "solutions/observability/plugins/exploratory_view",

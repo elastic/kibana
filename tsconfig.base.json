@@ -1475,6 +1475,8 @@
       "@kbn/feature-controls-examples-plugin/*": ["./examples/feature_control_examples/*"],
       "@kbn/feature-flags-example-plugin": ["./examples/feature_flags_example"],
       "@kbn/feature-flags-example-plugin/*": ["./examples/feature_flags_example/*"],
+      "@kbn/feature-flags-management-plugin": ["./x-pack/solutions/observability/plugins/feature_flags_management"],
+      "@kbn/feature-flags-management-plugin/*": ["./x-pack/solutions/observability/plugins/feature_flags_management/*"],
       "@kbn/feature-usage-test-plugin": ["./x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test"],
       "@kbn/feature-usage-test-plugin/*": ["./x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test/*"],
       "@kbn/features-plugin": ["./x-pack/platform/plugins/shared/features"],

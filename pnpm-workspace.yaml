@@ -1593,6 +1593,7 @@ packages:
   - 'x-pack/solutions/observability/plugins/entity_inventory'
   - 'x-pack/solutions/observability/plugins/entity_inventory_app'
   - 'x-pack/solutions/observability/plugins/exploratory_view'
+  - 'x-pack/solutions/observability/plugins/feature_flags_management'
   - 'x-pack/solutions/observability/plugins/infra'
   - 'x-pack/solutions/observability/plugins/metrics_data_access'
   - 'x-pack/solutions/observability/plugins/nightshift'

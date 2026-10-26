@@ -2237,6 +2237,9 @@ importers:
       '@kbn/feature-flags-example-plugin':
         specifier: workspace:*
         version: link:examples/feature_flags_example
+      '@kbn/feature-flags-management-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/feature_flags_management
       '@kbn/feature-usage-test-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test
@@ -9659,6 +9662,8 @@ importers:
   x-pack/solutions/observability/plugins/entity_inventory_app: {}
 
   x-pack/solutions/observability/plugins/exploratory_view: {}
+
+  x-pack/solutions/observability/plugins/feature_flags_management: {}
 
   x-pack/solutions/observability/plugins/infra: {}
 
