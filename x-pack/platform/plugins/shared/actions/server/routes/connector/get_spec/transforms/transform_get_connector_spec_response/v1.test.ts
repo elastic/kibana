@@ -48,68 +48,61 @@ const result: GetConnectorSpecResult = {
 };
 
 describe('transformGetConnectorSpecResponse', () => {
-  it('maps metadata and detail fields to the wire shape', () => {
-    const body = transformGetConnectorSpecResponse(result);
-
-    expect(body.metadata).toEqual({
-      id: 'test-connector',
-      display_name: 'Test Connector',
-      description: 'A test connector',
-      minimum_license: 'gold',
-      supported_feature_ids: ['alerting'],
-      icon: 'testIcon',
-      docs_url: 'https://example.com/docs',
-      is_technical_preview: true,
-    });
-    expect(body.schema).toBe(formSchema);
-    expect(body.is_testable).toBe(true);
-    expect(body.auth_type_ids).toEqual(['basic']);
-    expect(body.has_inbound_events).toBe(false);
-    expect(body.is_inbound_only).toBe(false);
-    expect(body.is_ears_experimental).toBe(false);
-    expect(body).not.toHaveProperty('availability');
-    expect(body.actions).toEqual([
-      {
-        name: 'listIncidents',
-        description: 'List incidents',
-        is_tool: true,
-        scope: 'read',
-        input_schema: inputSchema,
+  it('returns only the pre-PR wire fields', () => {
+    expect(transformGetConnectorSpecResponse(result)).toEqual({
+      metadata: {
+        id: 'test-connector',
+        display_name: 'Test Connector',
+        description: 'A test connector',
+        minimum_license: 'gold',
+        supported_feature_ids: ['alerting'],
+        icon: 'testIcon',
+        docs_url: 'https://example.com/docs',
+        is_technical_preview: true,
       },
-    ]);
+      schema: formSchema,
+      is_testable: true,
+      actions: [
+        {
+          name: 'listIncidents',
+          description: 'List incidents',
+          is_tool: true,
+          scope: 'read',
+        },
+      ],
+    });
   });
 
-  it('omits optional metadata keys when they are undefined', () => {
+  it('omits optional metadata keys and action fields when undefined', () => {
     const { icon, docsUrl, isTechnicalPreview, ...metadata } = result.metadata;
-    const body = transformGetConnectorSpecResponse({ ...result, metadata });
+    const pingAction: GetConnectorSpecResult['actions'][number] = {
+      name: 'ping',
+      isTool: false,
+      scope: 'write',
+      inputSchema,
+    };
+    const body = transformGetConnectorSpecResponse({ ...result, metadata, actions: [pingAction] });
 
     expect(body.metadata).not.toHaveProperty('icon');
     expect(body.metadata).not.toHaveProperty('docs_url');
     expect(body.metadata).not.toHaveProperty('is_technical_preview');
+    expect(body.actions[0]).toEqual({ name: 'ping', is_tool: false, scope: 'write' });
   });
 
-  it('keeps long bundled skill text off the wire and still validates', () => {
+  it('keeps rich server fields and bundled skill off the wire', () => {
     const longSkill = 'Use listIncidents to search incident records. '.repeat(40);
-    expect(longSkill.length).toBeGreaterThan(1024);
+    const withSkill: GetConnectorSpecResult = { ...result, skill: longSkill };
+    const body = transformGetConnectorSpecResponse(withSkill);
 
-    const resultWithSkill: GetConnectorSpecResult = { ...result, skill: longSkill };
-    const body = transformGetConnectorSpecResponse(resultWithSkill);
-
-    expect(resultWithSkill.skill).toBe(longSkill);
     expect(JSON.stringify(body)).not.toContain(longSkill);
     expect(body).not.toHaveProperty('skill');
-    expect(() => getConnectorSpecResponseBodySchemaV1.validate(body)).not.toThrow();
-    expect(() =>
-      getConnectorSpecResponseBodySchemaV1.validate({ ...body, skill: longSkill })
-    ).toThrow();
+    expect(body).not.toHaveProperty('auth_type_ids');
+    expect(body).not.toHaveProperty('has_inbound_events');
+    expect(body).not.toHaveProperty('availability');
+    expect(body.actions[0]).not.toHaveProperty('input_schema');
   });
 
-  it('passes input_schema through unchanged', () => {
-    const body = transformGetConnectorSpecResponse(result);
-    expect(body.actions[0].input_schema).toBe(inputSchema);
-  });
-
-  it('validates against getConnectorSpecResponseBodySchemaV1', () => {
+  it('validates against the live getConnectorSpecResponseBodySchemaV1', () => {
     expect(() =>
       getConnectorSpecResponseBodySchemaV1.validate(transformGetConnectorSpecResponse(result))
     ).not.toThrow();

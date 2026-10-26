@@ -8,19 +8,50 @@
 import type {
   ConnectorSpecActionSummary,
   ConnectorSpecSummary,
-} from '../../../../../common/connector_spec';
-import type { ConnectorSpecActionSummaryResponseV1 } from '../../../../../common/routes/connector/response';
+} from '../../../../common/connector_spec';
 
-export const transformConnectorSpecActionSummaryResponse = (
+export interface FormattedConnectorSpecActionSummary {
+  name: string;
+  description?: string;
+  is_tool: boolean;
+  scope?: ConnectorSpecActionSummary['scope'];
+}
+
+export interface FormattedConnectorSpecSummary {
+  id: string;
+  display_name: string;
+  description: string;
+  icon?: string;
+  docs_url?: string;
+  minimum_license: string;
+  is_technical_preview?: boolean;
+  supported_feature_ids: string[];
+  availability: {
+    enabled: boolean;
+    enabled_in_config: boolean;
+    enabled_in_license: boolean;
+    is_deprecated: boolean;
+  };
+  auth_type_ids: string[];
+  is_testable: boolean;
+  has_inbound_events: boolean;
+  is_inbound_only: boolean;
+  is_ears_experimental: boolean;
+  actions: FormattedConnectorSpecActionSummary[];
+}
+
+export const formatConnectorSpecActionSummary = (
   action: ConnectorSpecActionSummary
-): ConnectorSpecActionSummaryResponseV1 => ({
+): FormattedConnectorSpecActionSummary => ({
   name: action.name,
   is_tool: action.isTool,
   ...(action.description !== undefined ? { description: action.description } : {}),
   scope: action.scope,
 });
 
-export const transformConnectorSpecSummaryResponse = (summary: ConnectorSpecSummary) => ({
+export const formatConnectorSpecSummary = (
+  summary: ConnectorSpecSummary
+): FormattedConnectorSpecSummary => ({
   id: summary.id,
   display_name: summary.displayName,
   description: summary.description,
@@ -40,5 +71,5 @@ export const transformConnectorSpecSummaryResponse = (summary: ConnectorSpecSumm
   has_inbound_events: summary.hasInboundEvents,
   is_inbound_only: summary.isInboundOnly,
   is_ears_experimental: summary.isEarsExperimental,
-  actions: summary.actions.map(transformConnectorSpecActionSummaryResponse),
+  actions: summary.actions.map(formatConnectorSpecActionSummary),
 });

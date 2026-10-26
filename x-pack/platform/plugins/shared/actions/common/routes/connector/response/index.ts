@@ -11,8 +11,6 @@ export type {
   GetAllConnectorsResponse,
   ConnectorExecuteResponse,
   ConnectorAuthStatusResponse,
-  ConnectorSpecActionSummaryResponse,
-  ConnectorSpecActionDetailResponse,
   GetConnectorSpecResponse,
 } from './types/latest';
 
@@ -24,8 +22,6 @@ export {
   connectorTypeResponseSchema,
   connectorExecuteResponseSchema,
   connectorAuthStatusResponseSchema,
-  connectorSpecActionSummaryResponseSchema,
-  connectorSpecActionDetailResponseSchema,
   getConnectorSpecResponseBodySchema,
 } from './schemas/latest';
 
@@ -36,8 +32,6 @@ export type {
   GetAllConnectorTypesResponse as GetAllConnectorTypesResponseV1,
   ConnectorExecuteResponse as ConnectorExecuteResponseV1,
   ConnectorAuthStatusResponse as ConnectorAuthStatusResponseV1,
-  ConnectorSpecActionSummaryResponse as ConnectorSpecActionSummaryResponseV1,
-  ConnectorSpecActionDetailResponse as ConnectorSpecActionDetailResponseV1,
   GetConnectorSpecResponse as GetConnectorSpecResponseV1,
 } from './types/v1';
 
@@ -50,7 +44,5 @@ export {
   getAllConnectorTypesResponseSchema as getAllConnectorTypesResponseSchemaV1,
   connectorExecuteResponseSchema as connectorExecuteResponseSchemaV1,
   connectorAuthStatusResponseSchema as connectorAuthStatusResponseSchemaV1,
-  connectorSpecActionSummaryResponseSchema as connectorSpecActionSummaryResponseSchemaV1,
-  connectorSpecActionDetailResponseSchema as connectorSpecActionDetailResponseSchemaV1,
   getConnectorSpecResponseBodySchema as getConnectorSpecResponseBodySchemaV1,
 } from './schemas/v1';

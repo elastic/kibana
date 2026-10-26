@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { ConnectorSpecSummary } from '../../../../../common/connector_spec';
-import { getConnectorSpecResponseBodySchemaV1 } from '../../../../../common/routes/connector/response';
-import { transformConnectorSpecSummaryResponse } from './v1';
+import type { ConnectorSpecSummary } from '../../../../common/connector_spec';
+import { formatConnectorSpecSummary } from './format_connector_spec_summary';
 
 const summary: ConnectorSpecSummary = {
   id: 'test-connector',
@@ -39,9 +38,9 @@ const summary: ConnectorSpecSummary = {
   ],
 };
 
-describe('transformConnectorSpecSummaryResponse', () => {
+describe('formatConnectorSpecSummary', () => {
   it('maps camelCase summary fields to snake_case', () => {
-    expect(transformConnectorSpecSummaryResponse(summary)).toEqual({
+    expect(formatConnectorSpecSummary(summary)).toEqual({
       id: 'test-connector',
       display_name: 'Test Connector',
       description: 'A test connector',
@@ -74,7 +73,7 @@ describe('transformConnectorSpecSummaryResponse', () => {
 
   it('omits icon and docs_url when undefined and omits action description when undefined', () => {
     const { icon, docsUrl, ...rest } = summary;
-    const result = transformConnectorSpecSummaryResponse({
+    const result = formatConnectorSpecSummary({
       ...rest,
       actions: [{ name: 'ping', isTool: false, scope: 'write' }],
     });
@@ -83,33 +82,5 @@ describe('transformConnectorSpecSummaryResponse', () => {
     expect(result).not.toHaveProperty('docs_url');
     expect(result.actions[0]).toEqual({ name: 'ping', is_tool: false, scope: 'write' });
     expect(result.actions[0]).not.toHaveProperty('description');
-  });
-
-  it('produces fields that validate as a subset of the detail response schema', () => {
-    const wire = transformConnectorSpecSummaryResponse(summary);
-    const detailBody = {
-      metadata: {
-        id: wire.id,
-        display_name: wire.display_name,
-        description: wire.description,
-        minimum_license: wire.minimum_license,
-        supported_feature_ids: wire.supported_feature_ids,
-        icon: wire.icon,
-        docs_url: wire.docs_url,
-        is_technical_preview: wire.is_technical_preview,
-      },
-      schema: {},
-      is_testable: wire.is_testable,
-      auth_type_ids: wire.auth_type_ids,
-      has_inbound_events: wire.has_inbound_events,
-      is_inbound_only: wire.is_inbound_only,
-      is_ears_experimental: wire.is_ears_experimental,
-      actions: wire.actions.map((action) => ({
-        ...action,
-        input_schema: {},
-      })),
-    };
-
-    expect(() => getConnectorSpecResponseBodySchemaV1.validate(detailBody)).not.toThrow();
   });
 });
