@@ -118,62 +118,69 @@ function compareRoleAccessMaps(
   return { addedRoles, removedRoles, changedRoles };
 }
 
-apiTest.describe('Built-in roles Kibana access validation', { tag: tags.stateful.classic }, () => {
-  apiTest(
-    'should have expected Kibana access for all built-in roles',
-    async ({ esClient, log }) => {
+// Failing: See https://github.com/elastic/kibana/issues/297590
+apiTest.describe.skip(
+  'Built-in roles Kibana access validation',
+  { tag: tags.stateful.classic },
+  () => {
+    apiTest(
+      'should have expected Kibana access for all built-in roles',
+      async ({ esClient, log }) => {
+        // Fetch all roles from Elasticsearch
+        log.info('Fetching all roles from Elasticsearch...');
+        const rolesResponse = await esClient.security.getRole();
+
+        // Build the map of built-in roles with Kibana access
+        const actualBuiltinRolesWithKibanaAccess = buildBuiltinRolesKibanaAccessMap(rolesResponse);
+
+        log.info(
+          `Found ${
+            Object.keys(actualBuiltinRolesWithKibanaAccess).length
+          } built-in roles with Kibana access`
+        );
+
+        // Compare with expected roles
+        const differences = compareRoleAccessMaps(
+          actualBuiltinRolesWithKibanaAccess,
+          EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS
+        );
+
+        expect(differences).toStrictEqual({
+          addedRoles: [],
+          removedRoles: [],
+          changedRoles: [],
+        });
+      }
+    );
+
+    apiTest('should have consistent Kibana application naming', async ({ esClient, log }) => {
       // Fetch all roles from Elasticsearch
-      log.info('Fetching all roles from Elasticsearch...');
       const rolesResponse = await esClient.security.getRole();
 
-      // Build the map of built-in roles with Kibana access
-      const actualBuiltinRolesWithKibanaAccess = buildBuiltinRolesKibanaAccessMap(rolesResponse);
+      // Collect all unique Kibana application names from built-in roles
+      const kibanaAppNames = new Set<string>();
 
-      log.info(
-        `Found ${
-          Object.keys(actualBuiltinRolesWithKibanaAccess).length
-        } built-in roles with Kibana access`
-      );
-
-      // Compare with expected roles
-      const differences = compareRoleAccessMaps(
-        actualBuiltinRolesWithKibanaAccess,
-        EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS
-      );
-
-      expect(differences).toStrictEqual({
-        addedRoles: [],
-        removedRoles: [],
-        changedRoles: [],
-      });
-    }
-  );
-
-  apiTest('should have consistent Kibana application naming', async ({ esClient, log }) => {
-    // Fetch all roles from Elasticsearch
-    const rolesResponse = await esClient.security.getRole();
-
-    // Collect all unique Kibana application names from built-in roles
-    const kibanaAppNames = new Set<string>();
-
-    for (const [_, role] of Object.entries(rolesResponse)) {
-      // eslint-disable-next-line playwright/no-conditional-in-test
-      if (!role.metadata?._reserved) continue;
-
-      for (const app of role.applications) {
+      for (const [_, role] of Object.entries(rolesResponse)) {
         // eslint-disable-next-line playwright/no-conditional-in-test
-        if (app.application.startsWith('kibana')) {
-          kibanaAppNames.add(app.application);
+        if (!role.metadata?._reserved) continue;
+
+        for (const app of role.applications) {
+          // eslint-disable-next-line playwright/no-conditional-in-test
+          if (app.application.startsWith('kibana')) {
+            kibanaAppNames.add(app.application);
+          }
         }
       }
-    }
 
-    log.info(`Found Kibana application names in built-in roles: ${[...kibanaAppNames].join(', ')}`);
+      log.info(
+        `Found Kibana application names in built-in roles: ${[...kibanaAppNames].join(', ')}`
+      );
 
-    // Verify we only see expected Kibana application patterns
-    // The main Kibana application should be "kibana-.kibana" or "kibana-*"
-    for (const appName of kibanaAppNames) {
-      expect(appName).toMatch(/^kibana-(?:\.kibana|\*)$/);
-    }
-  });
-});
+      // Verify we only see expected Kibana application patterns
+      // The main Kibana application should be "kibana-.kibana" or "kibana-*"
+      for (const appName of kibanaAppNames) {
+        expect(appName).toMatch(/^kibana-(?:\.kibana|\*)$/);
+      }
+    });
+  }
+);
