@@ -9,7 +9,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SLONotFound } from '../../../../errors';
-import { getAuthenticationFailure } from './is_authentication_error';
+import { getAuthenticationFailure } from './get_authentication_failure';
 
 const createResponseError = (statusCode: number, type: string) =>
   new EsErrors.ResponseError(

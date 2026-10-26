@@ -51,7 +51,7 @@ import { getSloApmLabels } from '../../../services/utils';
 import { BURN_RATE_EXECUTOR_SPAN_NAMES } from './constants';
 import { evaluate } from './lib/evaluate';
 import { evaluateDependencies } from './lib/evaluate_dependencies';
-import { getAuthenticationFailure } from './lib/is_authentication_error';
+import { getAuthenticationFailure } from './lib/get_authentication_failure';
 import { shouldSuppressInstanceId } from './lib/should_suppress_instance_id';
 import { getSloSummary } from './lib/summary_repository';
 import type {
@@ -108,37 +108,28 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
       // Classify the lookup failure (missing SLO, rejected rule API key, or anything else) and keep
       // the original failure as `cause` so callers can still inspect it.
       const { name, id } = options.rule;
+      const ruleLabel = `Rule "${name}" ${id}`;
+      const lookupError = (message: string, source = TaskErrorSource.USER) =>
+        createTaskRunError(new Error(message, { cause: err }), source);
+
       if (err instanceof SLONotFound) {
-        throw createTaskRunError(
-          new Error(
-            `Rule "${name}" ${id} is referencing an SLO which cannot be found: "${params.sloId}": ${err.message}`,
-            { cause: err }
-          ),
-          TaskErrorSource.USER
+        throw lookupError(
+          `${ruleLabel} is referencing an SLO which cannot be found: "${params.sloId}": ${err.message}`
         );
       }
 
       const authFailure = getAuthenticationFailure(err);
       if (authFailure) {
-        const { statusCode, type = 'unknown' } = authFailure;
+        const { statusCode = 'unknown', type = 'unknown' } = authFailure;
         const reason =
           statusCode === 403
             ? `because the rule's API key is not authorized to read SLOs (403 ${type}). Re-save the rule as a user with SLO read privileges.`
-            : `because the rule's API key was rejected (${
-                statusCode ?? 'unknown'
-              } ${type}). Re-save or re-enable the rule to regenerate its API key.`;
-        throw createTaskRunError(
-          new Error(`Rule "${name}" ${id} could not load SLO "${params.sloId}" ${reason}`, {
-            cause: err,
-          }),
-          TaskErrorSource.USER
-        );
+            : `because the rule's API key was rejected (${statusCode} ${type}). Re-save or re-enable the rule to regenerate its API key.`;
+        throw lookupError(`${ruleLabel} could not load SLO "${params.sloId}" ${reason}`);
       }
 
-      throw createTaskRunError(
-        new Error(`Rule "${name}" ${id} could not load SLO "${params.sloId}": ${err.message}`, {
-          cause: err,
-        }),
+      throw lookupError(
+        `${ruleLabel} could not load SLO "${params.sloId}": ${err.message}`,
         SavedObjectsErrorHelpers.isEsUnavailableError(err)
           ? TaskErrorSource.FRAMEWORK
           : TaskErrorSource.USER

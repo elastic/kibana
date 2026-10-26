@@ -7,26 +7,20 @@
 
 import { get } from 'lodash';
 
-export interface AuthenticationFailure {
+interface AuthenticationFailure {
   statusCode?: 401 | 403;
   type?: string;
 }
-
-const SECURITY_EXCEPTION = 'security_exception';
 
 /**
  * Reads the raw Elasticsearch status and error type, because the saved objects security extension
  * rethrows a rejected credential as a general (500) Boom error that keeps the original 401 fields.
  */
 export const getAuthenticationFailure = (err: Error): AuthenticationFailure | undefined => {
-  const statusCode = 'statusCode' in err ? err.statusCode : undefined;
-  const authStatusCode = statusCode === 401 || statusCode === 403 ? statusCode : undefined;
+  const status = get(err, 'statusCode');
+  const statusCode = status === 401 || status === 403 ? status : undefined;
   const errorType = get(err, 'body.error.type') ?? get(err, 'meta.body.error.type');
   const type = typeof errorType === 'string' ? errorType : undefined;
 
-  if (authStatusCode === undefined && type !== SECURITY_EXCEPTION) {
-    return undefined;
-  }
-
-  return { statusCode: authStatusCode, type };
+  return statusCode || type === 'security_exception' ? { statusCode, type } : undefined;
 };

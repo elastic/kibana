@@ -286,78 +286,54 @@ describe('BurnRateRuleExecutor', () => {
           })
         );
 
-      it('reports a rejected API key and keeps the failure as `cause`', async () => {
-        const authError = Object.assign(new Error('security_exception'), {
-          statusCode: 401,
-          body: {
-            error: {
-              type: 'security_exception',
-              reason: 'failed to authenticate cloud API key: [0x28D520]',
-              caused_by: { authentication_error_code: '0x28D520' },
+      const rejectedKeyMessage = `Rule "an slo rule" 123-456 could not load SLO "some-slo" because the rule's API key was rejected (401 security_exception). Re-save or re-enable the rule to regenerate its API key.`;
+
+      it.each([
+        [
+          'a rejected API key',
+          Object.assign(new Error('security_exception'), {
+            statusCode: 401,
+            body: {
+              error: {
+                type: 'security_exception',
+                reason: 'failed to authenticate cloud API key: [0x28D520]',
+                caused_by: { authentication_error_code: '0x28D520' },
+              },
             },
-          },
-        });
+          }),
+          rejectedKeyMessage,
+          TaskErrorSource.USER,
+        ],
+        [
+          'a rejected API key wrapped by the saved objects security extension',
+          SavedObjectsErrorHelpers.decorateGeneralError(createSecurityException(401)),
+          rejectedKeyMessage,
+          TaskErrorSource.USER,
+        ],
+        [
+          'an API key that is not authorized to read SLOs',
+          createSecurityException(403),
+          `Rule "an slo rule" 123-456 could not load SLO "some-slo" because the rule's API key is not authorized to read SLOs (403 security_exception). Re-save the rule as a user with SLO read privileges.`,
+          TaskErrorSource.USER,
+        ],
+        [
+          'Elasticsearch being unavailable',
+          SavedObjectsErrorHelpers.decorateEsUnavailableError(new Error('no living connections')),
+          'Rule "an slo rule" 123-456 could not load SLO "some-slo": no living connections',
+          TaskErrorSource.FRAMEWORK,
+        ],
+        [
+          'any other failure',
+          new Error('Invalid stored SLO'),
+          'Rule "an slo rule" 123-456 could not load SLO "some-slo": Invalid stored SLO',
+          TaskErrorSource.USER,
+        ],
+      ])('reports %s and keeps the failure as `cause`', async (_, lookupError, message, source) => {
+        const err = await executeWithLookupFailure(lookupError);
 
-        const err = await executeWithLookupFailure(authError);
-
-        expect(err.message).toBe(
-          `Rule "an slo rule" 123-456 could not load SLO "some-slo" because the rule's API key was rejected (401 security_exception). Re-save or re-enable the rule to regenerate its API key.`
-        );
-        expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
-        expect(err.cause).toBe(authError);
-      });
-
-      it('reports a rejected API key wrapped by the saved objects security extension', async () => {
-        const authError = SavedObjectsErrorHelpers.decorateGeneralError(
-          createSecurityException(401)
-        );
-
-        const err = await executeWithLookupFailure(authError);
-
-        expect(err.message).toBe(
-          `Rule "an slo rule" 123-456 could not load SLO "some-slo" because the rule's API key was rejected (401 security_exception). Re-save or re-enable the rule to regenerate its API key.`
-        );
-        expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
-        expect(err.cause).toBe(authError);
-        expect(err.cause.statusCode).toBe(401);
-      });
-
-      it('reports an API key that is not authorized to read SLOs', async () => {
-        const authError = createSecurityException(403);
-
-        const err = await executeWithLookupFailure(authError);
-
-        expect(err.message).toBe(
-          `Rule "an slo rule" 123-456 could not load SLO "some-slo" because the rule's API key is not authorized to read SLOs (403 security_exception). Re-save the rule as a user with SLO read privileges.`
-        );
-        expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
-        expect(err.cause).toBe(authError);
-      });
-
-      it('reports Elasticsearch being unavailable as a framework error', async () => {
-        const unavailableError = SavedObjectsErrorHelpers.decorateEsUnavailableError(
-          new Error('no living connections')
-        );
-
-        const err = await executeWithLookupFailure(unavailableError);
-
-        expect(err.message).toBe(
-          'Rule "an slo rule" 123-456 could not load SLO "some-slo": no living connections'
-        );
-        expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
-        expect(err.cause).toBe(unavailableError);
-      });
-
-      it('reports any other failure as a lookup failure', async () => {
-        const otherError = new Error('Invalid stored SLO');
-
-        const err = await executeWithLookupFailure(otherError);
-
-        expect(err.message).toBe(
-          'Rule "an slo rule" 123-456 could not load SLO "some-slo": Invalid stored SLO'
-        );
-        expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
-        expect(err.cause).toBe(otherError);
+        expect(err.message).toBe(message);
+        expect(getErrorSource(err)).toBe(source);
+        expect(err.cause).toBe(lookupError);
       });
     });
 
