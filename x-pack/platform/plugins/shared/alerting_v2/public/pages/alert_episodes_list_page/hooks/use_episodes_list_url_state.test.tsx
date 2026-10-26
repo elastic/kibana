@@ -64,4 +64,37 @@ describe('useEpisodesListUrlState', () => {
       '?_a=(alertsList:(ruleId:r9,status:!(recovering),timeFrom:now-15m,timeTo:now))'
     );
   });
+
+  it('removes a cleared queryString from the URL', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    const urlStateStorage = createKbnUrlStateStorage({
+      history,
+      useHash: false,
+      useHashQuery: false,
+    });
+    const timefilter = createMockTimefilter();
+
+    await act(async () => {
+      await urlStateStorage.set(
+        '_a',
+        { [ALERTS_LIST_APP_STATE_KEY]: { queryString: 'severity: high' } },
+        { replace: true }
+      );
+    });
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <Router history={history}>{children}</Router>
+    );
+
+    const { result } = renderHook(() => useEpisodesListUrlState(timefilter), { wrapper });
+
+    expect(result.current.filterState.queryString).toBe('severity: high');
+
+    await act(async () => {
+      result.current.setFilterState((prev) => ({ ...prev, queryString: undefined }));
+    });
+
+    expect(result.current.filterState.queryString).toBeUndefined();
+    expect(history.location.search).toBe('?_a=(alertsList:(timeFrom:now-15m,timeTo:now))');
+  });
 });

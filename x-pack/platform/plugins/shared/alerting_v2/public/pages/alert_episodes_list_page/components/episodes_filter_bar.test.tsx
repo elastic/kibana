@@ -174,6 +174,42 @@ describe('EpisodesFilterBar', () => {
     });
   });
 
+  it('removes the applied query as soon as the input is cleared', () => {
+    render(
+      <TestProviders>
+        <EpisodesFilterBar
+          {...defaultProps}
+          filterState={{ status: ['active'], queryString: 'severity: high' }}
+        />
+      </TestProviders>
+    );
+    defaultProps.onFilterChange.mockClear();
+
+    act(() => {
+      getLatestEpisodesKqlInputProps().onChange('');
+    });
+
+    expect(defaultProps.onFilterChange).toHaveBeenCalledTimes(1);
+    const updateFilter = defaultProps.onFilterChange.mock.calls[0][0];
+    expect(updateFilter({ status: ['active'], queryString: 'severity: high' })).toStrictEqual({
+      status: ['active'],
+    });
+  });
+
+  it('does not update filters when an input without an applied query is emptied', () => {
+    renderFilterBar();
+    defaultProps.onFilterChange.mockClear();
+
+    act(() => {
+      getLatestEpisodesKqlInputProps().onChange('severity: high');
+    });
+    act(() => {
+      getLatestEpisodesKqlInputProps().onChange('');
+    });
+
+    expect(defaultProps.onFilterChange).not.toHaveBeenCalled();
+  });
+
   it('uses the refresh button to submit a valid draft', () => {
     renderFilterBar();
     defaultProps.onFilterChange.mockClear();

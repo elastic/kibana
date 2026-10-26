@@ -160,9 +160,16 @@ export const EpisodesFilterBar = ({
     [onFilterChange]
   );
 
-  const onKueryChange = useCallback((value: string) => {
-    setQueryStringInput(value);
-  }, []);
+  const onKueryChange = useCallback(
+    (value: string) => {
+      setQueryStringInput(value);
+      // An emptied input (e.g. the clear button) applies immediately instead of waiting for submit.
+      if (appliedQueryString && !value.trim()) {
+        onFilterChange(({ queryString: _queryString, ...rest }) => rest);
+      }
+    },
+    [appliedQueryString, onFilterChange]
+  );
 
   const submitQuery = useCallback(() => {
     if (!queryValidation.isValid || !queryNeedsUpdate) {
