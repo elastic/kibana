@@ -307,7 +307,7 @@ describe('useInvestigateAlert', () => {
       'POST /internal/nightshift/investigations',
       expect.objectContaining({
         params: {
-          body: { subject: { type: 'alert', id: 'alert-1' } },
+          body: { subject: { type: 'alert', ids: ['alert-1'] } },
         },
       })
     );

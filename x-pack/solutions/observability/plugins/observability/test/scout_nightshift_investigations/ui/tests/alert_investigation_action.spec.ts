@@ -87,7 +87,7 @@ test.describe(
       await pageObjects.alertsTablePage.clickInvestigate();
 
       expect((await requestPromise).postDataJSON()).toMatchObject({
-        subject: { type: 'alert', id: alertId },
+        subject: { type: 'alert', ids: [alertId] },
       });
 
       await pageObjects.toasts.waitForToastWithText('Investigation started');
@@ -115,7 +115,7 @@ test.describe(
       await pageObjects.alertPage.clickInvestigate();
 
       expect((await requestPromise).postDataJSON()).toMatchObject({
-        subject: { type: 'alert', id: alertId },
+        subject: { type: 'alert', ids: [alertId] },
       });
       await pageObjects.toasts.waitForToastWithText('Investigation started');
       expect(await pageObjects.toasts.getMessageText()).toContain('You will find it in Nightshift');
