@@ -184,7 +184,7 @@ export const SignalsTab = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {signalByIdQuery.isError ? (
+      {signalByIdQuery.isError && !openSignalData ? (
         <>
           <KbnDangerCallout
             announceOnMount

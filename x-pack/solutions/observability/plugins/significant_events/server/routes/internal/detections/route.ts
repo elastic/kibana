@@ -88,7 +88,7 @@ const detectionsSearchRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const detectionClient = await getDetectionClient();
-    const { entityIds, unassignedEntities, ...searchOptions } = params.query;
+    const { entityIds, unassignedEntities, ...searchOptions } = params.query ?? {};
     if (entityIds === undefined && unassignedEntities === undefined) {
       return detectionClient.findLatestPaginated(searchOptions);
     }

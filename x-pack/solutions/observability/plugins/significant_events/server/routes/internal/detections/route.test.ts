@@ -85,6 +85,17 @@ describe('GET /internal/significant_events/detections', () => {
     mockGetLiveEntities.mockReset();
   });
 
+  it('searches with default options when the request has no query parameters', async () => {
+    const { resources, findLatestPaginated } = createSearchResources([]);
+
+    await searchRoute.handler({
+      ...resources,
+      params: {},
+    } as unknown as Parameters<typeof searchRoute.handler>[0]);
+
+    expect(findLatestPaginated).toHaveBeenCalledWith({});
+  });
+
   it('passes the entity selection to the detection client as rule UUIDs', async () => {
     const { resources, findLatestPaginated } = createSearchResources([
       queryLink('rule-1', ['service-a']),

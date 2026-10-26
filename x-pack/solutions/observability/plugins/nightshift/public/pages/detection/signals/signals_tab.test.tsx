@@ -167,4 +167,19 @@ describe('SignalsTab', () => {
     fireEvent.click(screen.getByTestId('nightshiftDetectionSignalRetryButton'));
     expect(refetch).toHaveBeenCalledTimes(1);
   });
+
+  it('hides a retained by-id error when the selected signal is resolved by the list', () => {
+    mockUseDetectionById.mockReturnValue({
+      data: undefined,
+      isError: true,
+      isLoading: false,
+      isSuccess: false,
+      refetch: jest.fn(),
+    });
+
+    renderTab('/detections/signals?signalId=signal-1');
+
+    expect(screen.getByTestId('detectionDetailsFlyoutStub')).toHaveTextContent('Checkout latency');
+    expect(screen.queryByTestId('nightshiftDetectionSignalError')).not.toBeInTheDocument();
+  });
 });
