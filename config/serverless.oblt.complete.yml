@@ -36,6 +36,10 @@ xpack.features.overrides:
   contextEngine.category: 'observability'
   ### Agentic investigations should be moved from Analytics category to the Observability one.
   agenticInvestigations.category: 'observability'
+  ### Both features only do something on projects onboarded to the Nightshift private preview, so
+  ### Role management flags them until Nightshift is generally available.
+  agenticInvestigations.description: 'Technical preview. Requires the Nightshift private preview to be enabled on this project.'
+  proposals.description: 'Technical preview. Requires the Nightshift private preview to be enabled on this project.'
   
 # Elastic Managed LLMs
 xpack.actions.preconfigured:
