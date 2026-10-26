@@ -270,6 +270,20 @@ describe('rule_details', () => {
       expect(backLink.closest('a')).toHaveAttribute('href', '/');
     });
 
+    it('does not render the Classic badge when the page context omits it', () => {
+      const rule = mockRule();
+      renderPage(rule);
+      expect(screen.queryByTestId('classicRulesBadge')).not.toBeInTheDocument();
+    });
+
+    it('renders the Classic badge from the page context', () => {
+      useKibanaMock().services.showClassicBadge = true;
+      const rule = mockRule();
+      renderPage(rule);
+      expect(screen.getByTestId('classicRulesBadge')).toHaveTextContent('Classic');
+      delete useKibanaMock().services.showClassicBadge;
+    });
+
     it('renders the rule execution status badge', () => {
       const rule = mockRule({
         executionStatus: {

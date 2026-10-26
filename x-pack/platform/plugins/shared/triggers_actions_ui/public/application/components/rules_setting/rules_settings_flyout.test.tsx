@@ -182,6 +182,15 @@ describe('rules_settings_flyout', () => {
     expect(
       result.getByTestId('rulesSettingsFlyoutSaveButton').getAttribute('disabled')
     ).toBeFalsy();
+    expect(result.queryByTestId('rulesSettingsFlyoutClassicBadge')).not.toBeInTheDocument();
+  });
+
+  test('renders the Classic badge from the page context', async () => {
+    useKibanaMock().services.showClassicBadge = true;
+    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    await waitForFlyoutLoad();
+    expect(result.getByTestId('rulesSettingsFlyoutClassicBadge')).toHaveTextContent('Classic');
+    delete useKibanaMock().services.showClassicBadge;
   });
 
   test('can save flapping settings', async () => {

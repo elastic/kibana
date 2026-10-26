@@ -38,6 +38,7 @@ export const LogsListContainer = () => {
     notifications: { toasts },
     docLinks,
     setBreadcrumbs,
+    showClassicBadge,
   } = useKibana().services;
   const { rules } = useLocators();
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
@@ -81,6 +82,7 @@ export const LogsListContainer = () => {
       <LogsListHeader
         backHref={rulesListHref}
         shouldShowSettings={canShowSettings}
+        showClassicBadge={showClassicBadge}
         docLink={docLink}
         onOpenSettings={openSettingsFlyout}
       />

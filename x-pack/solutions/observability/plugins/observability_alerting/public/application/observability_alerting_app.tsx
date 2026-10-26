@@ -123,12 +123,14 @@ const ClassicRulesV1Route = ({
   history,
   setBreadcrumbs,
   tabs,
+  showClassicBadge,
 }: {
   coreStart: CoreStart;
   getClassicRulesPage: TriggersAndActionsUIPublicPluginStart['getClassicRulesPage'];
   history: ScopedHistory;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   tabs: AppHeaderTab[];
+  showClassicBadge?: boolean;
 }) => {
   const classicRulesHistory = useMemo(
     () => history.createSubHistory(OBSERVABILITY_ALERTING_RULES_V1_PATH),
@@ -145,6 +147,7 @@ const ClassicRulesV1Route = ({
       pathPrefix: OBSERVABILITY_ALERTING_RULES_V1_PATH,
     },
     tabs,
+    showClassicBadge,
   });
 };
 
@@ -247,6 +250,7 @@ export const ObservabilityAlertingApp = ({
               history={history}
               setBreadcrumbs={setBreadcrumbs}
               tabs={rulesV1Tabs}
+              showClassicBadge={hasV2Rules}
             />
           </EuiPageSection>
         </Route>

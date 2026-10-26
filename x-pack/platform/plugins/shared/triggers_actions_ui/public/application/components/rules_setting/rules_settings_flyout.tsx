@@ -107,6 +107,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
     notifications,
     isServerless,
     http,
+    showClassicBadge,
   } = useKibana().services;
   const {
     rulesSettings: {
@@ -303,14 +304,16 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
               </h3>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow" data-test-subj="rulesSettingsFlyoutClassicBadge">
-              <FormattedMessage
-                id="xpack.triggersActionsUI.rulesSettings.flyout.classicBadge"
-                defaultMessage="Classic"
-              />
-            </EuiBadge>
-          </EuiFlexItem>
+          {showClassicBadge && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow" data-test-subj="rulesSettingsFlyoutClassicBadge">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.rulesSettings.flyout.classicBadge"
+                  defaultMessage="Classic"
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
       </EuiFlyoutHeader>
