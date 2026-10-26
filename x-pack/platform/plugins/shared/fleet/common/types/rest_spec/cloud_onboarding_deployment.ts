@@ -8,6 +8,7 @@
 import type {
   CloudOnboardingDeployment,
   CloudOnboardingDeploymentAuthMethod,
+  CloudOnboardingDeploymentListItem,
   CloudProvider,
   DeploymentMethod,
   CloudOnboardingDeploymentStatus,
@@ -27,6 +28,8 @@ export interface CreateCloudOnboardingDeploymentRequest {
     dataFormat?: 'ecs' | 'otel';
     authMethod?: CloudOnboardingDeploymentAuthMethod;
     agentPolicyIds?: string[];
+    packageNames?: string[];
+    serviceNames?: Record<string, string>;
   };
 }
 
@@ -36,6 +39,22 @@ export interface CreateCloudOnboardingDeploymentResponse {
 
 export interface GetCloudOnboardingDeploymentResponse {
   item: CloudOnboardingDeployment;
+}
+
+export interface GetCloudOnboardingDeploymentsRequest {
+  query?: {
+    packageName?: string;
+    provider?: CloudProvider;
+    page?: number;
+    perPage?: number;
+  };
+}
+
+export interface GetCloudOnboardingDeploymentsResponse {
+  items: CloudOnboardingDeploymentListItem[];
+  total: number;
+  page: number;
+  perPage: number;
 }
 
 export interface UpdateCloudOnboardingDeploymentRequest {
@@ -52,6 +71,8 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     /** Set to null to clear the namespace. */
     namespace?: string | null;
     services?: string[];
+    packageNames?: string[];
+    serviceNames?: Record<string, string>;
     serviceVars?: Record<string, Record<string, unknown>>;
     attemptCount?: number;
     authMethod?: CloudOnboardingDeploymentAuthMethod | null;

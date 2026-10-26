@@ -156,6 +156,28 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       },
     })
   ),
+  packageNames: schema.maybe(
+    schema.arrayOf(schema.string(), {
+      maxSize: 100,
+      meta: {
+        description:
+          'Names of the integration packages this deployment covers (e.g. aws, aws_bedrock). Used to list the deployments of a package.',
+      },
+    })
+  ),
+  serviceNames: schema.maybe(
+    schema.recordOf(schema.string({ maxLength: 256 }), schema.string({ maxLength: 256 }), {
+      meta: {
+        description: 'Display name of each service as shown in the onboarding flow, by service ID.',
+      },
+    })
+  ),
+  updatedBy: schema.maybe(
+    schema.string({ meta: { description: 'Username of the user who last wrote the deployment.' } })
+  ),
+  updatedAt: schema.maybe(
+    schema.string({ meta: { description: 'ISO timestamp of the last write.' } })
+  ),
   dataFormat: schema.maybe(DataFormatSchema),
   authMethod: schema.maybe(
     schema.oneOf(
@@ -279,6 +301,23 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         },
       })
     ),
+    packageNames: schema.maybe(
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: 255 }), {
+        maxSize: 100,
+        meta: {
+          description:
+            'Names of the integration packages this deployment covers (e.g. aws, aws_bedrock). Used to list the deployments of a package.',
+        },
+      })
+    ),
+    serviceNames: schema.maybe(
+      schema.recordOf(schema.string({ maxLength: 256 }), schema.string({ maxLength: 256 }), {
+        meta: {
+          description:
+            'Display name of each service as shown in the onboarding flow, by service ID.',
+        },
+      })
+    ),
     dataFormat: schema.maybe(DataFormatSchema),
     authMethod: schema.maybe(
       schema.oneOf(
@@ -331,6 +370,58 @@ export const GetCloudOnboardingDeploymentsByConnectorIdResponseSchema = schema.o
   items: schema.arrayOf(CloudOnboardingDeploymentItemSchema, { maxSize: 100 }),
 });
 
+const CloudOnboardingDeploymentListItemSchema = CloudOnboardingDeploymentItemSchema.extends({
+  packages: schema.arrayOf(
+    schema.object({
+      name: schema.string({ meta: { description: 'Package name.' } }),
+      version: schema.string({
+        meta: { description: 'Package version the deployment policies run.' },
+      }),
+    }),
+    {
+      maxSize: 100,
+      meta: {
+        description:
+          'Packages of the deployment package policies with their deployed versions. Empty for ECF-only deployments.',
+      },
+    }
+  ),
+  servicesByMethod: schema.object(
+    {
+      managed_integration: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
+      ecf: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
+      agent_based: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
+    },
+    { meta: { description: 'Service IDs by the delivery mechanism that deploys them.' } }
+  ),
+  agentCount: schema.number({
+    min: 0,
+    meta: { description: 'Agents enrolled in the deployment agent policies.' },
+  }),
+});
+
+export const GetCloudOnboardingDeploymentsRequestSchema = {
+  query: schema.object({
+    packageName: schema.maybe(
+      schema.string({
+        minLength: 1,
+        maxLength: 255,
+        meta: { description: 'Only list deployments that cover this package.' },
+      })
+    ),
+    provider: schema.maybe(CloudOnboardingDeploymentProviderSchema),
+    page: schema.number({ defaultValue: 1, min: 1, max: 1000 }),
+    perPage: schema.number({ defaultValue: 20, min: 1, max: 100 }),
+  }),
+};
+
+export const GetCloudOnboardingDeploymentsResponseSchema = schema.object({
+  items: schema.arrayOf(CloudOnboardingDeploymentListItemSchema, { maxSize: 100 }),
+  total: schema.number(),
+  page: schema.number(),
+  perPage: schema.number(),
+});
+
 export const UpdateCloudOnboardingDeploymentRequestSchema = {
   params: OnboardingDeploymentIdParamSchema,
   body: schema.object({
@@ -381,6 +472,23 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
           },
         })
       )
+    ),
+    packageNames: schema.maybe(
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: 255 }), {
+        maxSize: 100,
+        meta: {
+          description:
+            'Names of the integration packages this deployment covers. Refreshed with the service set.',
+        },
+      })
+    ),
+    serviceNames: schema.maybe(
+      schema.recordOf(schema.string({ maxLength: 256 }), schema.string({ maxLength: 256 }), {
+        meta: {
+          description:
+            'Display name of each service as shown in the onboarding flow, by service ID.',
+        },
+      })
     ),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
     services: schema.maybe(

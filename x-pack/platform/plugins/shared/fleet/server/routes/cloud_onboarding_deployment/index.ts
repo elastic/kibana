@@ -20,6 +20,8 @@ import {
   GetCloudOnboardingDeploymentResponseSchema,
   GetCloudOnboardingDeploymentsByConnectorIdRequestSchema,
   GetCloudOnboardingDeploymentsByConnectorIdResponseSchema,
+  GetCloudOnboardingDeploymentsRequestSchema,
+  GetCloudOnboardingDeploymentsResponseSchema,
   UpdateCloudOnboardingDeploymentRequestSchema,
   UpdateCloudOnboardingDeploymentResponseSchema,
   DeleteCloudOnboardingDeploymentRequestSchema,
@@ -30,6 +32,7 @@ import {
   createCloudOnboardingDeploymentHandler,
   getCloudOnboardingDeploymentHandler,
   getCloudOnboardingDeploymentsByConnectorIdHandler,
+  getCloudOnboardingDeploymentsHandler,
   updateCloudOnboardingDeploymentHandler,
   deleteCloudOnboardingDeploymentHandler,
 } from './handlers';
@@ -83,6 +86,57 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       createCloudOnboardingDeploymentHandler
+    );
+
+  // GET /api/fleet/cloud_onboarding_deployments
+  router.versioned
+    .get({
+      path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.LIST_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+              ],
+            },
+          ],
+        },
+      },
+      summary: 'Get cloud onboarding deployments',
+      description:
+        'List cloud onboarding deployments, newest first. Optionally filter by package name or provider.',
+      options: {
+        tags: ['oas-tag:Fleet cloud onboarding deployments'],
+        availability: {
+          since: '9.7.0',
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/get_cloud_onboarding_deployments.yaml'),
+        },
+        validate: {
+          request: GetCloudOnboardingDeploymentsRequestSchema,
+          response: {
+            200: {
+              body: () => GetCloudOnboardingDeploymentsResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      getCloudOnboardingDeploymentsHandler
     );
 
   // GET /api/fleet/cloud_onboarding_deployments/{id}

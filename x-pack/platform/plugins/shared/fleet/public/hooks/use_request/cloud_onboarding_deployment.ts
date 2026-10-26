@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import { useQuery } from '@kbn/react-query';
+
 import { API_VERSIONS, CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT } from '../../../common';
 import type {
   CreateCloudOnboardingDeploymentRequest,
   CreateCloudOnboardingDeploymentResponse,
   GetCloudOnboardingDeploymentResponse,
+  GetCloudOnboardingDeploymentsRequest,
+  GetCloudOnboardingDeploymentsResponse,
   UpdateCloudOnboardingDeploymentRequest,
   UpdateCloudOnboardingDeploymentResponse,
 } from '../../../common/types/rest_spec/cloud_onboarding_deployment';
 
 import { sendRequestForRq } from './use_request';
+import type { RequestError } from './use_request';
 
 export const sendCreateCloudOnboardingDeployment = (
   body: CreateCloudOnboardingDeploymentRequest['body']
@@ -44,5 +49,27 @@ export const sendUpdateCloudOnboardingDeployment = (
     method: 'put',
     version: API_VERSIONS.public.v1,
     body,
+  });
+};
+
+export const sendGetCloudOnboardingDeployments = (
+  query?: GetCloudOnboardingDeploymentsRequest['query']
+) => {
+  return sendRequestForRq<GetCloudOnboardingDeploymentsResponse>({
+    path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT,
+    method: 'get',
+    version: API_VERSIONS.public.v1,
+    query,
+  });
+};
+
+export const useGetCloudOnboardingDeploymentsQuery = (
+  query?: GetCloudOnboardingDeploymentsRequest['query'],
+  options: { enabled?: boolean } = {}
+) => {
+  return useQuery<GetCloudOnboardingDeploymentsResponse, RequestError>({
+    queryKey: ['cloud_onboarding_deployments', query],
+    queryFn: () => sendGetCloudOnboardingDeployments(query),
+    enabled: options.enabled,
   });
 };

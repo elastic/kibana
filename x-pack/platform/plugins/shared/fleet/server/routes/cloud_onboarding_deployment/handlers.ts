@@ -6,10 +6,12 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { CloudOnboardingDeployment } from '../../../common/types';
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { appContextService } from '../../services/app_context';
 
 import { cloudOnboardingDeploymentService } from '../../services/cloud_onboarding_deployment';
 import type { FleetRequestHandler } from '../../types';
@@ -17,11 +19,17 @@ import type {
   CreateCloudOnboardingDeploymentRequestSchema,
   GetCloudOnboardingDeploymentRequestSchema,
   GetCloudOnboardingDeploymentsByConnectorIdRequestSchema,
+  GetCloudOnboardingDeploymentsRequestSchema,
   UpdateCloudOnboardingDeploymentRequestSchema,
   DeleteCloudOnboardingDeploymentRequestSchema,
 } from '../../types/rest_spec/cloud_onboarding_deployment';
 
-function toResponseItem(deployment: CloudOnboardingDeployment) {
+import { enrichDeployments } from './list_enrichment';
+
+const getUsername = (request: KibanaRequest): string | undefined =>
+  appContextService.getSecurityCore().authc.getCurrentUser(request)?.username;
+
+function toResponseItem<T extends CloudOnboardingDeployment>(deployment: T) {
   // Omit null optional fields — the response schema uses schema.maybe() (undefined-or-value),
   // which does not accept null. Null is only used internally to clear a stored field.
   const { connectorId, authMethod, ...rest } = deployment;
@@ -80,7 +88,8 @@ export const createCloudOnboardingDeploymentHandler: FleetRequestHandler<
   try {
     const deployment = await cloudOnboardingDeploymentService.create(
       internalSoClient,
-      request.body
+      request.body,
+      getUsername(request)
     );
     return response.ok({ body: { item: toResponseItem(deployment) } });
   } catch (error) {
@@ -115,6 +124,23 @@ export const getCloudOnboardingDeploymentHandler: FleetRequestHandler<
     }
     throw error;
   }
+};
+
+export const getCloudOnboardingDeploymentsHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetCloudOnboardingDeploymentsRequestSchema.query>
+> = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+  const { internalSoClient } = fleetContext;
+
+  const { items, total, page, perPage } = await cloudOnboardingDeploymentService.list(
+    internalSoClient,
+    request.query
+  );
+  const enriched = await enrichDeployments(internalSoClient, items);
+  return response.ok({
+    body: { items: enriched.map(toResponseItem), total, page, perPage },
+  });
 };
 
 export const getCloudOnboardingDeploymentsByConnectorIdHandler: FleetRequestHandler<
@@ -180,7 +206,8 @@ export const updateCloudOnboardingDeploymentHandler: FleetRequestHandler<
     const deployment = await cloudOnboardingDeploymentService.update(
       internalSoClient,
       request.params.id,
-      request.body
+      request.body,
+      getUsername(request)
     );
     return response.ok({ body: { item: toResponseItem(deployment) } });
   } catch (error) {

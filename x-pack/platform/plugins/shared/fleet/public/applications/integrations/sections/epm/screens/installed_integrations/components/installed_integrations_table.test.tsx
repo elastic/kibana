@@ -27,6 +27,9 @@ jest.mock('../hooks/use_url_filters', () => ({
   useViewPolicies: jest.fn().mockReturnValue({
     addViewPolicies: jest.fn(),
   }),
+  useViewCollectionInstances: jest.fn().mockReturnValue({
+    addViewCollectionInstances: jest.fn(),
+  }),
 }));
 
 jest.mock('../hooks/use_installed_integrations_actions', () => ({
@@ -55,6 +58,7 @@ jest.mock('../../../../../services', () => ({
 import { useAuthz, useLicense } from '../../../../../../../hooks';
 import { useRollbackAvailablePackages } from '../hooks/use_rollback_available';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
+import { useViewCollectionInstances } from '../hooks/use_url_filters';
 
 import { InstalledIntegrationsTable } from './installed_integrations_table';
 
@@ -133,6 +137,7 @@ describe('InstalledIntegrationsTable', () => {
   const renderComponent = (
     packages: InstalledPackageUIPackageListItem[],
     overrides?: {
+      collectionInstanceCounts?: Record<string, number>;
       rollingbackIntegrations?: InstalledPackageUIPackageListItem[];
       rollbackAvailable?: Record<string, boolean>;
     }
@@ -161,6 +166,7 @@ describe('InstalledIntegrationsTable', () => {
         isLoading={false}
         pagination={defaultPagination}
         selection={defaultSelection}
+        collectionInstanceCounts={overrides?.collectionInstanceCounts}
       />
     );
 
@@ -223,6 +229,41 @@ describe('InstalledIntegrationsTable', () => {
       });
       const rollbackButton = screen.getByTestId('rollbackButton');
       expect(rollbackButton).toBeDisabled();
+    });
+  });
+
+  describe('collection instances', () => {
+    it('shows no column and no badge without collection instances', () => {
+      renderComponent([basePackage]);
+      expect(screen.queryByText('Collection Instances')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('installedIntegrationsTable.collectionBadge.test-package')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows the count as a link and the Collection badge for a package with instances', () => {
+      renderComponent([basePackage], { collectionInstanceCounts: { 'test-package': 3 } });
+      expect(screen.getByText('Collection Instances')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('installedIntegrationsTable.collectionBadge.test-package')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId('installedIntegrationsTable.collectionInstancesLink.test-package')
+      ).toHaveTextContent('3');
+    });
+
+    it('opens the collection instances of the package on click', async () => {
+      const addViewCollectionInstances = jest.fn();
+      (useViewCollectionInstances as jest.Mock).mockReturnValue({ addViewCollectionInstances });
+      renderComponent([basePackage], { collectionInstanceCounts: { 'test-package': 2 } });
+
+      await act(async () => {
+        screen
+          .getByTestId('installedIntegrationsTable.collectionInstancesLink.test-package')
+          .click();
+      });
+
+      expect(addViewCollectionInstances).toHaveBeenCalledWith('test-package');
     });
   });
 });

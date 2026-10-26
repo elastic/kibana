@@ -1,0 +1,51 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getCloudOnboardingDeploymentsExample:
+            description: 'Page of cloud onboarding deployments that cover the aws package'
+            value:
+              items:
+                - id: 'onboarding-deployment-id-1'
+                  provider: 'aws'
+                  connectorId: 'cloud-connector-id-1'
+                  mechanisms:
+                    - 'managed_integration'
+                    - 'ecf'
+                  integrationName: 'aws-production'
+                  services:
+                    - 'cloudtrail'
+                    - 'vpcflow'
+                  status: 'succeeded'
+                  attemptCount: 1
+                  packageNames:
+                    - 'aws'
+                  packagePolicyIds:
+                    - 'package-policy-id-1'
+                  updatedBy: 'elastic'
+                  updatedAt: '2026-10-20T10:15:00.000Z'
+                  packages:
+                    - name: 'aws'
+                      version: '8.11.0'
+                  servicesByMethod:
+                    managed_integration:
+                      - 'cloudtrail'
+                    ecf:
+                      - 'vpcflow'
+                  agentCount: 1
+              total: 1
+              page: 1
+              perPage: 20
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

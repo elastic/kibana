@@ -445,6 +445,123 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('GET /api/fleet/cloud_onboarding_deployments', () => {
+      const createdIds: string[] = [];
+      const packageA = 'list-test-package-a';
+      const packageB = 'list-test-package-b';
+
+      const create = async (body: Record<string, unknown>) => {
+        const { body: created } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ mechanisms: ['ecf'], services: ['cloudtrail'], ...body })
+          .expect(200);
+        createdIds.push(created.item.id);
+        return created.item.id as string;
+      };
+
+      before(async () => {
+        await create({ provider: 'aws', packageNames: [packageA], integrationName: 'only-a' });
+        await create({
+          provider: 'aws',
+          packageNames: [packageA, packageB],
+          integrationName: 'a-and-b',
+        });
+        await create({ provider: 'azure', packageNames: [packageA], integrationName: 'azure-a' });
+        // Saved before packageNames existed: has no packageNames.
+        await create({ provider: 'aws', integrationName: 'no-packages' });
+      });
+
+      after(async () => {
+        for (const id of createdIds) {
+          try {
+            await supertest.delete(`${BASE_URL}/${id}`).set('kbn-xsrf', 'xxxx');
+          } catch (_) {
+            // ignore
+          }
+        }
+      });
+
+      it('should filter by packageName, listing a session under every package it covers', async () => {
+        const { body: a } = await supertest
+          .get(BASE_URL)
+          .query({ packageName: packageA })
+          .expect(200);
+        const { body: b } = await supertest
+          .get(BASE_URL)
+          .query({ packageName: packageB })
+          .expect(200);
+
+        expect(a.items.map((i: any) => i.integrationName).sort()).to.eql([
+          'a-and-b',
+          'azure-a',
+          'only-a',
+        ]);
+        expect(a.total).to.equal(3);
+        expect(b.items.map((i: any) => i.integrationName)).to.eql(['a-and-b']);
+      });
+
+      it('should filter by provider', async () => {
+        const { body } = await supertest
+          .get(BASE_URL)
+          .query({ packageName: packageA, provider: 'aws' })
+          .expect(200);
+
+        expect(body.items.map((i: any) => i.integrationName).sort()).to.eql(['a-and-b', 'only-a']);
+      });
+
+      it('should return the packages, services by method, agents, user and update time', async () => {
+        const { body } = await supertest.get(BASE_URL).query({ packageName: packageB }).expect(200);
+
+        const [item] = body.items;
+        expect(item.packageNames).to.eql([packageA, packageB]);
+        expect(item.packages).to.eql([]);
+        expect(item.servicesByMethod).to.eql({ ecf: ['cloudtrail'] });
+        expect(item.agentCount).to.equal(0);
+        expect(item.updatedAt).to.be.a('string');
+        expect(item.updatedBy).to.be.a('string');
+      });
+
+      it('should paginate, newest first', async () => {
+        const { body: first } = await supertest
+          .get(BASE_URL)
+          .query({ packageName: packageA, perPage: 2, page: 1 })
+          .expect(200);
+        const { body: second } = await supertest
+          .get(BASE_URL)
+          .query({ packageName: packageA, perPage: 2, page: 2 })
+          .expect(200);
+
+        expect(first.items).to.have.length(2);
+        expect(second.items).to.have.length(1);
+        expect(first.total).to.equal(3);
+        expect(second.page).to.equal(2);
+        expect(first.perPage).to.equal(2);
+        expect(first.items[0].updatedAt >= first.items[1].updatedAt).to.be(true);
+      });
+
+      it('should return an empty result for an unknown package', async () => {
+        const { body } = await supertest
+          .get(BASE_URL)
+          .query({ packageName: 'no-such-package' })
+          .expect(200);
+
+        expect(body).to.eql({ items: [], total: 0, page: 1, perPage: 20 });
+      });
+
+      it('should list a session saved without packageNames when not filtering by package', async () => {
+        const { body } = await supertest.get(BASE_URL).query({ perPage: 100 }).expect(200);
+
+        const item = body.items.find((i: any) => i.integrationName === 'no-packages');
+        expect(item).to.be.ok();
+        expect(item.packageNames).to.be(undefined);
+      });
+
+      it('should return 400 for an invalid perPage', async () => {
+        await supertest.get(BASE_URL).query({ perPage: 1000 }).expect(400);
+      });
+    });
+
     describe('PUT /api/fleet/cloud_onboarding_deployments/{id}', () => {
       let deploymentId: string;
 

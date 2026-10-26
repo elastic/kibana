@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiIconTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,7 +26,7 @@ import type { PackageListItem } from '../../../../../../../../common';
 import { type UrlPagination, useLink, useAuthz, useLicense } from '../../../../../../../hooks';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
-import { useViewPolicies } from '../hooks/use_url_filters';
+import { useViewCollectionInstances, useViewPolicies } from '../hooks/use_url_filters';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 
 import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
@@ -65,11 +66,22 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
     selectedItems: InstalledPackageUIPackageListItem[];
     setSelectedItems: React.Dispatch<React.SetStateAction<InstalledPackageUIPackageListItem[]>>;
   };
-}> = ({ installedPackages, total, isLoading, pagination, selection }) => {
+  /** Number of collection instances (onboarding sessions) per package name. */
+  collectionInstanceCounts?: Record<string, number>;
+}> = ({
+  installedPackages,
+  total,
+  isLoading,
+  pagination,
+  selection,
+  collectionInstanceCounts = {},
+}) => {
   const authz = useAuthz();
   const { getHref } = useLink();
   const { selectedItems, setSelectedItems } = selection;
   const { addViewPolicies } = useViewPolicies();
+  const { addViewCollectionInstances } = useViewCollectionInstances();
+  const hasCollectionInstances = Object.values(collectionInstanceCounts).some((count) => count > 0);
   const {
     actions: {
       bulkUninstallIntegrationsWithConfirmModal,
@@ -177,6 +189,19 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                     >
                       {wrapTitleWithDeprecated({ title: item.title, deprecated: isDeprecated })}
                     </EuiFlexItem>
+                    {collectionInstanceCounts[item.name] > 0 && (
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge
+                          iconType="layers"
+                          color="hollow"
+                          data-test-subj={`installedIntegrationsTable.collectionBadge.${item.name}`}
+                        >
+                          {i18n.translate('xpack.fleet.epmInstalledIntegrations.collectionBadge', {
+                            defaultMessage: 'Collection',
+                          })}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    )}
                     {(isDeprecated || isUpcomingDeprecated || hasDeprecatedPolicyTemplates) && (
                       <EuiFlexItem grow={false}>
                         <EuiIconTip
@@ -307,6 +332,30 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               return policiesLink;
             },
           },
+          ...(hasCollectionInstances
+            ? [
+                {
+                  name: i18n.translate(
+                    'xpack.fleet.epmInstalledIntegrations.collectionInstancesColumnTitle',
+                    {
+                      defaultMessage: 'Collection Instances',
+                    }
+                  ),
+                  width: '160px',
+                  render: (item: InstalledPackageUIPackageListItem) => {
+                    const count = collectionInstanceCounts[item.name] ?? 0;
+                    return count > 0 ? (
+                      <EuiLink
+                        onClick={() => addViewCollectionInstances(item.name)}
+                        data-test-subj={`installedIntegrationsTable.collectionInstancesLink.${item.name}`}
+                      >
+                        {count}
+                      </EuiLink>
+                    ) : null;
+                  },
+                },
+              ]
+            : []),
           {
             actions: [
               wrapActionWithDisabledTooltip(

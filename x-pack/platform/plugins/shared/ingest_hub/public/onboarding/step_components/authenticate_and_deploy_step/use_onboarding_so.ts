@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -20,6 +20,8 @@ import {
 } from '@kbn/fleet-plugin/public';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { useAwsServiceMatrix } from '../../use_aws_service_matrix';
+import { getServiceDisplayNames } from '../services_step/service_display_names';
 import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
 
 export interface UseOnboardingSOResult {
@@ -44,21 +46,61 @@ export function useOnboardingSO(): UseOnboardingSOResult {
   const history = useHistory();
   const { integrationId } = useParams<{ integrationId: string }>();
   const { updateDetectAndReviewStep } = useOnboardingFlow();
+  const { matrix } = useAwsServiceMatrix();
+  const { packageNameByServiceId, displayNameByServiceId } = useMemo(
+    () => ({
+      packageNameByServiceId: new Map((matrix ?? []).map((entry) => [entry.id, entry.packageName])),
+      displayNameByServiceId: getServiceDisplayNames(matrix ?? []),
+    }),
+    [matrix]
+  );
+  // What the list of onboarding sessions needs without knowing the service catalog: the packages a
+  // write covers, so the deployment can be listed under every package it touched, and the display
+  // name of each service. Derived from the service set, and left out until the matrix has loaded.
+  const withServiceDetails = useCallback(
+    <T extends { services?: string[] }>(
+      body: T
+    ): T & { packageNames?: string[]; serviceNames?: Record<string, string> } => {
+      if (!body.services || packageNameByServiceId.size === 0) return body;
+      const packageNames = [
+        ...new Set(
+          body.services.flatMap((id) => {
+            const packageName = packageNameByServiceId.get(id);
+            return packageName ? [packageName] : [];
+          })
+        ),
+      ];
+      const serviceNames = Object.fromEntries(
+        body.services.flatMap((id) => {
+          const name = displayNameByServiceId.get(id);
+          return name ? [[id, name]] : [];
+        })
+      );
+      return {
+        ...body,
+        ...(packageNames.length ? { packageNames } : {}),
+        ...(Object.keys(serviceNames).length ? { serviceNames } : {}),
+      };
+    },
+    [packageNameByServiceId, displayNameByServiceId]
+  );
 
   const createDeployment = useCallback(
     async (params: CreateCloudOnboardingDeploymentRequest['body']): Promise<string | null> => {
-      const resp = await sendCreateCloudOnboardingDeployment(params).catch(() => {
-        services.notifications.toasts.addDanger(
-          i18n.translate('xpack.ingestHub.authenticateAndDeployStep.soCreateError', {
-            defaultMessage:
-              'Could not save deployment record. Deploy will proceed, but resume may not be available.',
-          })
-        );
-        return null;
-      });
+      const resp = await sendCreateCloudOnboardingDeployment(withServiceDetails(params)).catch(
+        () => {
+          services.notifications.toasts.addDanger(
+            i18n.translate('xpack.ingestHub.authenticateAndDeployStep.soCreateError', {
+              defaultMessage:
+                'Could not save deployment record. Deploy will proceed, but resume may not be available.',
+            })
+          );
+          return null;
+        }
+      );
       return resp?.item?.id ?? null;
     },
-    [services]
+    [services, withServiceDetails]
   );
 
   const updateDeployment = useCallback(
@@ -67,7 +109,7 @@ export function useOnboardingSO(): UseOnboardingSOResult {
       update: UpdateCloudOnboardingDeploymentRequest['body']
     ): Promise<boolean> => {
       try {
-        await sendUpdateCloudOnboardingDeployment(id, update);
+        await sendUpdateCloudOnboardingDeployment(id, withServiceDetails(update));
         return true;
       } catch {
         services.notifications.toasts.addDanger(
@@ -79,7 +121,7 @@ export function useOnboardingSO(): UseOnboardingSOResult {
         return false;
       }
     },
-    [services]
+    [services, withServiceDetails]
   );
 
   const persistDeploymentId = useCallback(

@@ -68,7 +68,9 @@
         "aws.cloudtrail": "pkg-policy-id-1",
         "aws.vpcflow": "pkg-policy-id-2"
       },
-      "apiKeyId": "api-key-id-1"
+      "apiKeyId": "api-key-id-1",
+      "packageNames": ["aws"],
+      "updatedBy": "elastic"
     },
     {
       "provider": "aws",
