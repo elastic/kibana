@@ -43,6 +43,11 @@ export interface ClosePreviewProposal {
 export interface InvestigationClosePreviewResponse {
   pending_proposal_count: number;
   pending_proposals: ClosePreviewProposal[];
+  /**
+   * Approved proposals whose action is still running. Closing does not change them: they
+   * finish on their own.
+   */
+  running_proposal_count: number;
 }
 
 export const setEscalationStatusRequestSchema = z.object({

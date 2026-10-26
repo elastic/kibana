@@ -23,6 +23,14 @@ import type {
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 
+/** Options an in-process caller passes when it asks for a rules client. */
+export interface CreateRulesClientOptions {
+  /**
+   * The app making changes through this client, carried on every rule event.
+   * Takes precedence over the app derived from the request.
+   */
+  app?: string;
+}
 /** Re-exported from the shared schemas package. */
 export type {
   BulkByIdsParams,

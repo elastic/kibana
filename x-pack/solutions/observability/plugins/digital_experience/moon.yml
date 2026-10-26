@@ -46,6 +46,4 @@ fileGroups:
     - test/scout/**/*
     - test/scout_digital_experience/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

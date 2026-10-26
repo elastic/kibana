@@ -129,6 +129,9 @@ outputs:
   - name: proposal_decision
     type: string
 consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Attack Discovery worker"
   # What `resolve_analysis` falls back to when the analysis child produced no
   # payload. `failed` is an EXECUTION STATE, not a classification: the analysis
   # never returns it, and it is reachable here only by the child failing after its
@@ -281,6 +284,16 @@ steps:
     with:
       conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
 
+  # Telemetry: once the Investigation exists. A create error here means a re-review.
+  - name: report_review_started
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: ad_worker_review_started
+      investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      is_rereview: "${{ steps.open_investigation.error != blank }}"
+
   - name: append_workflow_execution
     type: investigations.appendWorkflowExecutionId
     if: "${{ inputs.parent_run_id != blank }}"
@@ -300,6 +313,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
           Review started for
@@ -398,6 +412,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
           Attached the Attack Discovery. Attempted attachment of
@@ -457,6 +472,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
           {% if steps.attach_impact.output.entities != blank %}Recorded impact:
@@ -485,6 +501,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: Starting FP/TP analysis.
     on-failure:
@@ -616,12 +633,23 @@ steps:
     on-failure:
       continue: true
 
+  # Reported for every verdict, including `failed`.
+  - name: report_analysis_completed
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: ad_worker_analysis_completed
+      verdict: "{{ steps.resolve_analysis.output.verdict }}"
+      analysis_error: "${{ steps.run_fp_tp_analysis.error != blank }}"
+
   - name: journal_analysis_finished
     type: workflow.execute
     with:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
           Analysis finished:
@@ -671,6 +699,16 @@ steps:
             on-failure:
               continue: true
 
+          - name: report_investigation_closed_false_positive
+            type: alertzero.reportWorkerOutcome
+            if: "${{ steps.close_investigation_false_positive.error == blank and steps.close_investigation_false_positive.output.changed_fields contains 'status' }}"
+            on-failure:
+              continue: true
+            with:
+              event: worker_investigation_closed
+              investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+              close_reason: false_positive
+
           # `reason: false_positive` is the verdict, recorded on the attack itself.
           # The claim is about the ATTACK — this narrative is not supported by its
           # evidence — not about the detection alerts underneath, which is why
@@ -703,6 +741,7 @@ steps:
                     workflow-id: system-alertzero-journal-note
                     run-as-mode: inherit
                     inputs:
+                      author_name: "{{ consts.author_name }}"
                       conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
                       message: >-
                         PARTIAL LIFECYCLE TRANSITION: the Investigation was closed as a
@@ -724,6 +763,7 @@ steps:
               workflow-id: system-alertzero-journal-note
               run-as-mode: inherit
               inputs:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
                 message: >-
                   Closed the Investigation and the attack as a false positive.
@@ -737,6 +777,7 @@ steps:
               workflow-id: system-alertzero-journal-note
               run-as-mode: inherit
               inputs:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
                 message: "Attack status written: closed (false_positive)."
             on-failure:
@@ -795,6 +836,7 @@ steps:
               workflow-id: system-alertzero-journal-note
               run-as-mode: inherit
               inputs:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
                 message: >-
                   Analysis failed. The Investigation is left open.
@@ -1000,6 +1042,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
           {%- assign retired = steps.resolve_alerts_retired.output -%}
@@ -1051,7 +1094,7 @@ steps:
     with:
       request:
         method: GET
-        path: "/internal/proposals/{{ steps.escalation_gate.output.proposalId }}"
+        path: "/s/{{ workflow.spaceId }}/internal/proposals/{{ steps.escalation_gate.output.proposalId }}"
         headers:
           elastic-api-version: "1"
     on-failure:
@@ -1080,6 +1123,27 @@ steps:
       declined: "${{ steps.escalation_gate.output.decision == 'dismissed' }}"
       expired: "${{ steps.escalation_gate.output.status == 'expired' }}"
 
+  # Only for an escalated review; the outcome follows the journal note's order.
+  - name: report_handoff_resolved
+    type: alertzero.reportWorkerOutcome
+    if: "${{ steps.resolve_escalation.output.escalate == true }}"
+    on-failure:
+      continue: true
+    with:
+      event: ad_worker_handoff_resolved
+      outcome: |-
+        {%- if steps.record_decision.output.approved == true -%}
+        approved
+        {%- elsif steps.record_decision.output.declined == true -%}
+        dismissed
+        {%- elsif steps.record_decision.output.expired == true -%}
+        expired
+        {%- elsif steps.escalation_gate.output.decision == 'approved' -%}
+        approved_action_failed
+        {%- endif -%}
+      verdict: "{{ steps.resolve_analysis.output.verdict }}"
+      auto_approve_requested: "${{ steps.resolve_escalation.output.auto_approve }}"
+
   - name: journal_decision_recorded
     type: workflow.execute
     if: "${{ steps.resolve_escalation.output.escalate == true }}"
@@ -1087,6 +1151,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: |-
           {% if steps.record_decision.output.approved == true %}Approved the forensics handoff.{% elsif steps.record_decision.output.declined == true %}Dismissed the forensics handoff as "{{ steps.read_proposal_decision.output.dismissReason | default: 'unspecified' }}". {{ steps.read_proposal_decision.output.rationale }}{% elsif steps.record_decision.output.expired == true %}The escalation proposal expired with no decision.{% endif %}
@@ -1138,6 +1203,16 @@ steps:
     on-failure:
       continue: true
 
+  - name: report_investigation_closed_declined
+    type: alertzero.reportWorkerOutcome
+    if: "${{ steps.record_decision.output.declined == true and steps.close_investigation_declined.error == blank and steps.close_investigation_declined.output.changed_fields contains 'status' }}"
+    on-failure:
+      continue: true
+    with:
+      event: worker_investigation_closed
+      investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      close_reason: other
+
   # Closed with NO `reason`, unlike the false-positive branch. There the analysis
   # produced a verdict about the attack, so `false_positive` records it. Here the
   # analyst only declined an escalation, which says the attack is not worth deeper
@@ -1166,6 +1241,7 @@ steps:
             workflow-id: system-alertzero-journal-note
             run-as-mode: inherit
             inputs:
+              author_name: "{{ consts.author_name }}"
               conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
               message: >-
                 PARTIAL LIFECYCLE TRANSITION: the escalation was declined and the
@@ -1187,6 +1263,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: "Attack status written: closed."
     on-failure:

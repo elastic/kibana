@@ -73,6 +73,37 @@ describe('inferenceEndpointAdapter', () => {
   };
 
   describe('when creating the request', () => {
+    it('sends a template and omits messages', async () => {
+      const source$ = of(
+        createOpenAIChunk({
+          delta: { content: 'ok' },
+        })
+      );
+
+      executorMock.invoke.mockResolvedValue(observableIntoEventSourceStream(source$, logger));
+
+      const response$ = inferenceEndpointAdapter.chatComplete({
+        ...defaultArgs,
+        messages: [{ role: MessageRole.User, content: 'should not be sent' }],
+        template: {
+          id: '.attack-discovery',
+          version: 1,
+          variables: { phase: 'generate', alerts: ['alert text'], partial: '' },
+        },
+      });
+
+      await lastValueFrom(response$.pipe(toArray()));
+
+      const body = executorMock.invoke.mock.calls[0][0].body as Record<string, unknown>;
+      expect(body.template).toEqual({
+        id: '.attack-discovery',
+        version: 1,
+        variables: { phase: 'generate', alerts: ['alert text'], partial: '' },
+      });
+      expect(body).not.toHaveProperty('messages');
+      expect(body).not.toHaveProperty('tools');
+    });
+
     it('emits chunk events', async () => {
       const source$ = of(
         createOpenAIChunk({

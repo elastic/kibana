@@ -7,7 +7,7 @@
 
 import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { ALERT_EPISODE_STATUS } from './alert_action_schema';
-import { groupHashSchema, tagsSchema } from './common';
+import { groupHashSchema, seriesIdSchema, tagsSchema } from './common';
 import { ID_MAX_LENGTH } from './constants';
 
 export const alertEpisodeStatusSchema = lazySchema(() =>
@@ -35,6 +35,11 @@ export const alertEpisodeSchema = lazySchema(() =>
       'episode.status': alertEpisodeStatusSchema,
       'rule.id': z.string().min(1).max(ID_MAX_LENGTH),
       group_hash: groupHashSchema,
+      /**
+       * Identifier of the series (space, rule or source, and `group_hash`) the
+       * episode belongs to; null when the stored event carries no owner.
+       */
+      series_id: seriesIdSchema.nullable().optional(),
       first_timestamp: isoDateTime(),
       last_timestamp: isoDateTime(),
       duration: z.number(),

@@ -94,6 +94,8 @@ describe('Attack attachment', () => {
       id: SECURITY_ATTACK_ATTACHMENT_TYPE,
       getIcon: expect.any(Function),
       getLabel: expect.any(Function),
+      getCountLabel: expect.any(Function),
+      getRelatedRemoval: expect.any(Function),
       schema: AttackAttachmentPayloadSchema,
       getCreationActivity: expect.any(Function),
       getRemovalActivity: expect.any(Function),
@@ -157,6 +159,30 @@ describe('Attack attachment', () => {
     const attackType = getAttackAttachment();
 
     expect(attackType.getCreationActivity(baseProps).hideDefaultActions).toBeUndefined();
+  });
+
+  it('labels a count of attacks', () => {
+    const attackType = getAttackAttachment();
+
+    expect(attackType.getCountLabel?.({ count: 1 })).toBe('1 attack');
+    expect(attackType.getCountLabel?.({ count: 3 })).toBe('3 attacks');
+  });
+
+  it('offers to keep the alerts the removed attacks brought to the case', () => {
+    const attackType = getAttackAttachment();
+
+    expect(attackType.getRelatedRemoval?.({ count: 1 })).toEqual({
+      description:
+        'Also remove the alerts this attack added to the case? Alerts that also belong to another attack in this case stay.',
+      removeOnlyLabel: 'Remove attack only',
+      removeWithRelatedLabel: 'Remove attack and alerts',
+    });
+    expect(attackType.getRelatedRemoval?.({ count: 2 })).toEqual({
+      description:
+        'Also remove the alerts these attacks added to the case? Alerts that also belong to another attack in this case stay.',
+      removeOnlyLabel: 'Remove attacks only',
+      removeWithRelatedLabel: 'Remove attacks and alerts',
+    });
   });
 
   it('returns no actions when the metadata is missing', () => {
@@ -290,7 +316,7 @@ describe('buildAttackAttachments', () => {
     expect(attachments[1]).toEqual({
       type: SECURITY_ALERT_ATTACHMENT_TYPE,
       attachmentId: ['alert-1', 'alert-2'],
-      metadata: { index: ALERTS_INDEX },
+      metadata: { index: ALERTS_INDEX, sourceAttachmentIds: ['attack-id-1'] },
     });
   });
 
@@ -697,7 +723,7 @@ describe('buildAttacksAttachments', () => {
       {
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
         attachmentId: ['alert-1', 'alert-2'],
-        metadata: { index: ALERTS_INDEX },
+        metadata: { index: ALERTS_INDEX, sourceAttachmentIds: ['attack-id-1'] },
       },
       expect.objectContaining({
         type: SECURITY_ATTACK_ATTACHMENT_TYPE,
@@ -706,7 +732,7 @@ describe('buildAttacksAttachments', () => {
       {
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
         attachmentId: ['alert-3'],
-        metadata: { index: ALERTS_INDEX },
+        metadata: { index: ALERTS_INDEX, sourceAttachmentIds: ['attack-id-2'] },
       },
     ]);
     expect(attackCount).toBe(2);

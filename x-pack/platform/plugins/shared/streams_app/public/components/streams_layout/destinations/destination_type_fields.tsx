@@ -9,17 +9,29 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LocalElasticsearchFields } from './local_elasticsearch_fields';
-import type { DestinationCreationFormErrors, DestinationStorageKind } from './types';
+import type {
+  DestinationCreationFormErrors,
+  DestinationStorageKind,
+  ElasticsearchDestinationFormData,
+} from './types';
 
 interface DestinationTypeFieldsProps {
   storageKind: DestinationStorageKind;
-  index: string;
-  indexPatterns: string;
-  indexError?: DestinationCreationFormErrors['index'];
-  indexPatternsError?: DestinationCreationFormErrors['indexPatterns'];
+  auto: boolean;
+  logsIndex: string;
+  metricsIndex: string;
+  tracesIndex: string;
+  staticIndexesError?: DestinationCreationFormErrors['staticIndexes'];
+  logsIndexError?: DestinationCreationFormErrors['logsIndex'];
+  metricsIndexError?: DestinationCreationFormErrors['metricsIndex'];
+  tracesIndexError?: DestinationCreationFormErrors['tracesIndex'];
   disabled: boolean;
-  onIndexChange: (index: string) => void;
-  onIndexPatternsChange: (indexPatterns: string) => void;
+  onAutoChange: (auto: boolean) => void;
+  onIndexesChange: (
+    indexes: Partial<
+      Pick<ElasticsearchDestinationFormData, 'logsIndex' | 'metricsIndex' | 'tracesIndex'>
+    >
+  ) => void;
   onBlur: () => void;
 }
 

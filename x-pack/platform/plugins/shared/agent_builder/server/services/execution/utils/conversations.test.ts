@@ -86,16 +86,11 @@ describe('conversations utils', () => {
         expect(result.operation).toBe('CREATE');
       });
 
-      it('returns UPDATE operation when no conversationId is provided and origin matches an existing conversation', async () => {
+      it('creates a conversation with the origin without looking it up, which the execution service did', async () => {
         const conversationClient = createConversationClientMock();
         const origin = {
           external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
         };
-        const existingConversation = createEmptyConversation({
-          id: 'existing-conversation',
-          origin,
-        });
-        conversationClient.getByOrigin.mockResolvedValue(existingConversation);
 
         const result = await getConversation({
           agentId: 'test-agent',
@@ -104,9 +99,9 @@ describe('conversations utils', () => {
           origin,
         });
 
-        expect(result.operation).toBe('UPDATE');
-        expect(result.id).toBe('existing-conversation');
-        expect(conversationClient.getByOrigin).toHaveBeenCalledWith(origin);
+        expect(result.operation).toBe('CREATE');
+        expect(result.origin).toEqual(origin);
+        expect(conversationClient.getByOrigin).not.toHaveBeenCalled();
       });
 
       it('defaults access control to private for new conversation placeholders', async () => {

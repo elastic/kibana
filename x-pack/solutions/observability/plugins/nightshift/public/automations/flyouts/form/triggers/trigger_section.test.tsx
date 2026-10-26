@@ -39,7 +39,6 @@ const legacyPatternTrigger: TriggerFormValues = {
   ruleNamePattern: 'cpu',
   ruleNames: [],
   ruleTags: [],
-  alertStatus: 'any',
 };
 
 const onTriggerChange = jest.fn();
@@ -133,14 +132,8 @@ describe('AutomationTriggerSection', () => {
     fireEvent.click(await screen.findByText('CPU usage high'));
     expect(lastTrigger()).toMatchObject({ kind: 'alert', ruleNames: ['CPU usage high'] });
     expect(screen.getByTestId('automationRulePicker')).toHaveTextContent('CPU usage high');
-
-    fireEvent.click(screen.getByTestId('automationStatusPicker'));
-    fireEvent.click(await screen.findByText('Recovered'));
-    expect(lastTrigger()).toMatchObject({ alertStatus: 'inactive' });
-    expect(screen.getByTestId('automationStatusPicker')).toHaveTextContent('Recovered');
-
-    fireEvent.click(screen.getByText('Active'));
-    expect(lastTrigger()).toMatchObject({ alertStatus: 'any' });
+    expect(screen.getByText('changes to')).toBeInTheDocument();
+    expect(screen.getByText('Active')).toBeInTheDocument();
   });
 
   it('selects rules and tags in the rule picker', async () => {
