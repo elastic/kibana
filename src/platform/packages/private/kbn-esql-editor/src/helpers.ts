@@ -283,15 +283,17 @@ export const onKeyDownResizeHandler = (
 };
 
 /**
- * The ES|QL editor's chrome: colours Monaco reads from its `--vscode-*` custom properties, applied
+ * The ES|QL editor's chrome: colors Monaco reads from its `--vscode-*` custom properties, applied
  * to this editor's own nodes only (see `CodeEditor`'s `chromeOverrides`). Syntax highlighting is a
  * separate layer — the ES|QL language theme — and is not affected by anything here. The full list
  * of properties is at
  * https://github.com/microsoft/vscode/blob/main/build/lib/stylelint/vscode-known-variables.json.
  */
 export const esqlEditorChromeOverrides: KbnCodeEditorChromeOverrides = ({ euiTheme }) => {
-  const borderColor = euiTheme.colors.borderBasePlain;
-  const bgColor = euiTheme.colors.backgroundBasePlain;
+  const { colors } = euiTheme;
+
+  const borderColor = colors.lightestShade || colors.borderBasePlain;
+  const bgColor = colors.emptyShade || colors.backgroundBasePlain;
   // EUI types these as `string | number | undefined`; an undefined entry is dropped.
   const cssValue = (value: string | number | undefined) =>
     value === undefined ? undefined : String(value);
@@ -299,20 +301,18 @@ export const esqlEditorChromeOverrides: KbnCodeEditorChromeOverrides = ({ euiThe
   return {
     '--vscode-cornerRadius-large': cssValue(euiTheme.border.radius.inline),
     '--vscode-shadow-lg': cssValue(euiTheme.shadows.l.down),
-    'editor.foreground': euiTheme.colors.textParagraph,
-    'editor.background': bgColor,
-    'editor.lineHighlightBackground': borderColor,
-    'editor.lineHighlightBorder': borderColor,
-    'editor.selectionHighlightBackground': borderColor,
-    'editor.selectionHighlightBorder': borderColor,
-    'editorLineNumber.foreground': euiTheme.colors.textDisabled,
-    'editorLineNumber.activeForeground': euiTheme.colors.textSubdued,
-    'editorHoverWidget.background': bgColor,
-    'editorSuggestWidget.foreground': euiTheme.colors.textParagraph,
-    'editorSuggestWidget.focusHighlightForeground': bgColor,
-    'editorSuggestWidget.highlightForeground': euiTheme.colors.primary,
-    'editorSuggestWidget.selectedBackground': euiTheme.colors.primary,
-    'editorSuggestWidget.selectedForeground': bgColor,
+    '--vscode-editor-foreground': colors.textParagraph,
+    '--vscode-editor-background': bgColor,
+    '--vscode-editor-selectionHighlightBackground': borderColor,
+    '--vscode-editor-selectionHighlightBorder': borderColor,
+    '--vscode-editorLineNumber-foreground': colors.textDisabled,
+    '--vscode-editorLineNumber-activeForeground': colors.textSubdued,
+    '--vscode-editorHoverWidget-background': bgColor,
+    '--vscode-editorSuggestWidget-foreground': colors.textParagraph,
+    '--vscode-editorSuggestWidget-focusHighlightForeground': bgColor,
+    '--vscode-editorSuggestWidget-highlightForeground': colors.primary,
+    '--vscode-editorSuggestWidget-selectedBackground': colors.primary,
+    '--vscode-editorSuggestWidget-selectedForeground': bgColor,
   };
 };
 
@@ -322,7 +322,20 @@ export const esqlEditorChromeOverrides: KbnCodeEditorChromeOverrides = ({ euiThe
  * over, so the rules reach this editor's inline nodes and its portaled widgets, and nothing else.
  */
 export const getEditorScopedStyles = (theme: UseEuiTheme<{}>, scope: CodeEditorScope) => {
+  const { colors } = theme.euiTheme;
+
   return css`
+    // Monaco paints the current line from a rule it generates with the colour already resolved,
+    // so the lineHighlight CSS variables never reach it and chromeOverrides cannot set them.
+    // These rules are scoped to this editor and more specific than the ones Monaco generates.
+    ${scope.editor} .monaco-editor.focused .view-overlays .current-line {
+      background-color: ${colors.lightestShade || colors.borderBasePlain};
+    }
+
+    ${scope.editor} .monaco-editor .view-overlays .current-line-exact {
+      border-color: ${colors.lightestShade || colors.borderBasePlain};
+    }
+
     ${scope.overflowWidgets} .suggest-details .scrollbar {
       display: none;
     }
