@@ -33,7 +33,11 @@ export const stepInstallWorkflows = async (
   context: Pick<
     InstallContext,
     'logger' | 'savedObjectsClient' | 'packageInstallContext' | 'spaceId' | 'installedPkg'
-  > & { installAsAdditionalSpace?: boolean; throwIfUnavailable?: boolean }
+  > & {
+    installAsAdditionalSpace?: boolean;
+    throwIfUnavailable?: boolean;
+    upgradeAdditionalSpaces?: boolean;
+  }
 ) => {
   const {
     logger,
@@ -43,6 +47,7 @@ export const stepInstallWorkflows = async (
     installAsAdditionalSpace: explicitInstallAsAdditionalSpace,
     installedPkg,
     throwIfUnavailable = false,
+    upgradeAdditionalSpaces = true,
   } = context;
 
   // The state machine does not set the flag; derive it from the package's primary space so
@@ -57,8 +62,9 @@ export const stepInstallWorkflows = async (
   const hasWorkflowAssets = packageInstallContext.paths.some(isWorkflowAssetPath);
   const primarySpaceId = installedPkg?.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
   // A primary-space upgrade also upgrades every additional space, like the Kibana assets step.
+  // HTTP callers opt out: route authz only covers the request's space.
   const additionalSpaceIds =
-    installedPkg && !installAsAdditionalSpace
+    upgradeAdditionalSpaces && installedPkg && !installAsAdditionalSpace
       ? Object.keys(installedPkg.attributes.additional_spaces_installed_kibana ?? {}).filter(
           (additionalSpaceId) => additionalSpaceId !== primarySpaceId
         )

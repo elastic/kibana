@@ -258,6 +258,21 @@ describe('stepInstallWorkflows', () => {
     expect(saveKibanaAssetsRefs).toHaveBeenCalledTimes(3);
   });
 
+  it('does not touch additional spaces when upgradeAdditionalSpaces is false', async () => {
+    jest.mocked(installWorkflows).mockResolvedValue([WORKFLOW_REF]);
+    const context = createContext({
+      paths: [WORKFLOW_PATH],
+      installedKibana: [WORKFLOW_REF],
+      additionalSpaces: { 'space-a': [{ ...WORKFLOW_REF, id: 'other' }], 'space-b': [] },
+    });
+
+    await stepInstallWorkflows({ ...context, upgradeAdditionalSpaces: false });
+
+    expect(installWorkflows).toHaveBeenCalledTimes(1);
+    expect(installWorkflows).toHaveBeenCalledWith(expect.objectContaining({ spaceId: 'default' }));
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledTimes(1);
+  });
+
   it('does not touch other spaces when installing in an additional space', async () => {
     jest.mocked(installWorkflows).mockResolvedValue([WORKFLOW_REF]);
     const context = createContext({

@@ -87,6 +87,7 @@ describe('installWorkflowAssetsHandler', () => {
         spaceId: 'default',
         installedPkg: installation,
         installAsAdditionalSpace: false,
+        upgradeAdditionalSpaces: false,
         packageInstallContext: expect.objectContaining({
           packageInfo: installedPkgWithAssets.packageInfo,
           paths: installedPkgWithAssets.paths,

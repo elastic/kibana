@@ -113,6 +113,7 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
       spaceId: spaceToInstallId,
       installedPkg: installation,
       installAsAdditionalSpace,
+      upgradeAdditionalSpaces: false,
     });
 
     await stepCreateAlertingAssets({
@@ -287,6 +288,7 @@ export const installWorkflowAssetsHandler: FleetRequestHandler<
     installedPkg: installation,
     installAsAdditionalSpace,
     throwIfUnavailable: true,
+    upgradeAdditionalSpaces: false,
   });
 
   return response.ok({ body: { success: true } });
