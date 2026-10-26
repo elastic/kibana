@@ -27,27 +27,27 @@ export const EXECUTION_TABLE_SORT_FIELD_MAP: Record<string, string> = {
 
 export const DEFAULT_EXECUTION_PAGE_FILTERS: FilterControlConfig[] = [
   {
-    title: i18n.translate('workflowsManagement.executionsPage.filterStatus', {
+    title: i18n.translate('workflows.executionsPage.filterStatus', {
       defaultMessage: 'Status',
     }),
     field_name: 'status',
     persist: true,
   },
   {
-    title: i18n.translate('workflowsManagement.executionsPage.filterWorkflow', {
+    title: i18n.translate('workflows.executionsPage.filterWorkflow', {
       defaultMessage: 'Workflow',
     }),
     field_name: 'workflowId',
     persist: true,
   },
   {
-    title: i18n.translate('workflowsManagement.executionsPage.filterExecutedBy', {
+    title: i18n.translate('workflows.executionsPage.filterExecutedBy', {
       defaultMessage: 'Triggered by',
     }),
     field_name: 'executedBy',
   },
   {
-    title: i18n.translate('workflowsManagement.executionsPage.filterTrigger', {
+    title: i18n.translate('workflows.executionsPage.filterTrigger', {
       defaultMessage: 'Trigger',
     }),
     field_name: 'triggeredBy',

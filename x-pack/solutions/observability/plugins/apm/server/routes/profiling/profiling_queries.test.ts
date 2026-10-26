@@ -8,7 +8,11 @@
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { getHostsProfilingEventsQuery, getTransactionsProfilingQuery } from './profiling_queries';
+import {
+  getHostsProfilingEventsQuery,
+  getProfilingEventsQueryFromKuery,
+  getTransactionsProfilingQuery,
+} from './profiling_queries';
 
 const range = { start: 1000, end: 1900 };
 const timeRangeFilter = {
@@ -81,6 +85,35 @@ describe('getHostsProfilingEventsQuery', () => {
       getHostsProfilingEventsQuery({ ...range, kuery: '', hostNames: ['host-1'], containerIds: [] })
     ).toEqual({
       bool: { filter: [...kqlQuery('(host.name : "host-1")'), timeRangeFilter] },
+    });
+  });
+});
+
+describe('getProfilingEventsQueryFromKuery', () => {
+  it('converts a pre-built kuery and the time range in seconds into a query', () => {
+    expect(
+      getProfilingEventsQueryFromKuery({
+        ...range,
+        kuery: '(orchestrator.resource.name : "cart-php")',
+      })
+    ).toEqual({
+      bool: {
+        filter: [...kqlQuery('(orchestrator.resource.name : "cart-php")'), timeRangeFilter],
+      },
+    });
+  });
+
+  it('handles an empty kuery without adding a KQL filter', () => {
+    expect(getProfilingEventsQueryFromKuery({ ...range, kuery: '' })).toEqual({
+      bool: { filter: [...kqlQuery(''), timeRangeFilter] },
+    });
+  });
+
+  it('combines a scope kuery and a user kuery when they are already merged by the caller', () => {
+    const merged =
+      '(host.name : "node-a" OR host.name : "node-b") AND (orchestrator.resource.name : "cart") AND process.thread.name : "main"';
+    expect(getProfilingEventsQueryFromKuery({ ...range, kuery: merged })).toEqual({
+      bool: { filter: [...kqlQuery(merged), timeRangeFilter] },
     });
   });
 });

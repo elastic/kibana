@@ -56,11 +56,12 @@ RuleList.displayName = 'RuleList';
 export interface InvalidMitreRulesModalProps {
   enabledRules: CoverageOverviewRuleWithInvalidMitre[];
   disabledRules: CoverageOverviewRuleWithInvalidMitre[];
+  framework: string;
   onClose: () => void;
 }
 
 export const InvalidMitreRulesModal = memo(
-  ({ enabledRules, disabledRules, onClose }: InvalidMitreRulesModalProps) => {
+  ({ enabledRules, disabledRules, framework, onClose }: InvalidMitreRulesModalProps) => {
     const modalTitleId = useGeneratedHtmlId();
 
     // Show section headers only when both groups are non-empty; otherwise render a flat list.
@@ -75,12 +76,12 @@ export const InvalidMitreRulesModal = memo(
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle id={modalTitleId}>
-            {i18n.INVALID_MITRE_RULES_MODAL_TITLE}
+            {i18n.INVALID_MITRE_RULES_MODAL_TITLE(framework)}
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <EuiText size="s" color="subdued">
-            <p>{i18n.INVALID_MITRE_RULES_MODAL_DESCRIPTION}</p>
+            <p>{i18n.INVALID_MITRE_RULES_MODAL_DESCRIPTION(framework)}</p>
           </EuiText>
           <EuiSpacer size="m" />
 

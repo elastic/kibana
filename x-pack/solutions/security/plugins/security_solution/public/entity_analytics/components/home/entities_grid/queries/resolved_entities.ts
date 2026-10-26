@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { escapeStringValue } from '@kbn/esql-utils';
 import { CriticalityLevels } from '../../../../../../common/entity_analytics/asset_criticality/constants';
 import {
@@ -27,6 +28,7 @@ import {
   toList,
 } from './esql';
 import type { EntityAggregation } from './esql';
+import { buildSearchedTargetsQuery } from './entities_in_view';
 import type { EsqlRunner } from './types';
 
 const SOURCE_FIELD = 'entity.source';
@@ -224,6 +226,103 @@ export const applyResolvedEntityFilterOverrides = (
     ? `(${expression}) AND NOT ${ENTITY_ID_FIELD} IN (${toList(exclude)})`
     : expression;
   return include.length ? `(${passing}) OR ${ENTITY_ID_FIELD} IN (${toList(include)})` : passing;
+};
+
+/** The DSL form of `applyResolvedEntityFilterOverrides`, for the reads that run on DSL. */
+export const applyResolvedEntityFilterOverridesToQuery = (
+  filters: QueryDslQueryContainer[],
+  { include = [], exclude = [] }: Partial<ResolvedEntityFilterOverrides> = {}
+): QueryDslQueryContainer[] => {
+  if (!include.length && !exclude.length) return filters;
+  const passing: QueryDslQueryContainer = {
+    bool: {
+      filter: filters,
+      ...(exclude.length ? { must_not: [{ terms: { [ENTITY_ID_FIELD]: [...exclude] } }] } : {}),
+    },
+  };
+  return include.length
+    ? [
+        {
+          bool: {
+            should: [passing, { terms: { [ENTITY_ID_FIELD]: [...include] } }],
+            minimum_should_match: 1,
+          },
+        },
+      ]
+    : [passing];
+};
+
+/** How many resolved entities a value of a group-valued field gains (positive) or loses (negative). */
+export interface ResolvedEntityValueChange {
+  field: string;
+  value: string | null;
+  change: number;
+}
+
+const VALUE_CHANGE_FIELDS = [
+  [CRITICALITY_FIELD, 'own_criticality'],
+  [SOURCE_FIELD, 'own_sources'],
+  [WATCHLISTS_FIELD, 'own_watchlists'],
+] as const;
+
+/** Each value counted once per group showing it, and once less per main entity holding it itself. */
+const buildResolvedEntityCountsChangesQuery = (
+  args: Pick<QueryArgs, 'namespace' | 'concreteEntityIndexName'>,
+  targetIds?: readonly string[]
+): string[] => [
+  `FROM ${getEntityAlias(args.namespace)}`,
+  `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
+  ...buildFilterClause(targetIds && `${RESOLVED_TO_FIELD} IN (${toList(targetIds)})`),
+  ...buildResolvedEntityAliasSteps(args),
+  // The value steps write the group's values over the main entity's own, so these are kept first.
+  `| EVAL ${VALUE_CHANGE_FIELDS.map(([field, own]) => `${own} = ${field}`).join(', ')}`,
+  ...buildResolvedEntityValueSteps(),
+  `| FORK ${VALUE_CHANGE_FIELDS.flatMap(([field, own]) => [
+    `(STATS n = COUNT(*) BY change_value = ${field} | EVAL change_field = "${field}", change = n)`,
+    `(STATS n = COUNT(*) BY change_value = ${own} | EVAL change_field = "${field}", change = -n)`,
+  ]).join(' ')}`,
+  '| KEEP change_field, change_value, change',
+  `| LIMIT ${ESQL_MAX_RESULT_ROWS}`,
+];
+
+/** The resolved entities whose main entity the search matches: KQL can't run after their join. */
+const fetchSearchedResolvedEntityIds = async (
+  args: Pick<QueryArgs, 'namespace' | 'searchExpression'>,
+  runQuery: EsqlRunner
+): Promise<string[]> => {
+  const resolvedEntityIds = getEntityIds(
+    await runQuery([
+      `FROM ${getEntityAlias(args.namespace)}`,
+      `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
+      `| STATS BY \`${ENTITY_ID_FIELD}\` = ${RESOLVED_TO_FIELD}`,
+      `| LIMIT ${ESQL_MAX_RESULT_ROWS}`,
+    ])
+  );
+  if (resolvedEntityIds.length === ESQL_MAX_RESULT_ROWS) {
+    throw new Error('Too many groups of entities to count with a search');
+  }
+  return getEntityIds(
+    await fetchPerIdChunk(runQuery, resolvedEntityIds, (ids) =>
+      buildSearchedTargetsQuery({ ...args, rowsMode: 'resolved' }, ids)
+    )
+  );
+};
+
+/** Entity docs hold own values, so counts by a group-valued field change for the resolved entities. */
+export const fetchResolvedEntityValueChanges = async (
+  args: Pick<QueryArgs, 'namespace' | 'concreteEntityIndexName' | 'searchExpression'>,
+  runQuery: EsqlRunner
+): Promise<ResolvedEntityValueChange[]> => {
+  const rows = args.searchExpression
+    ? await fetchPerIdChunk(runQuery, await fetchSearchedResolvedEntityIds(args, runQuery), (ids) =>
+        buildResolvedEntityCountsChangesQuery(args, ids)
+      )
+    : await runQuery(buildResolvedEntityCountsChangesQuery(args));
+  return rows.map((row) => ({
+    field: String(row.change_field),
+    value: typeof row.change_value === 'string' ? row.change_value : null,
+    change: Number(row.change),
+  }));
 };
 
 /** Aliases' data counts for their resolved entity, so reads of other data need the aliases too. */

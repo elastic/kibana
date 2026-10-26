@@ -27,6 +27,7 @@ export interface AgentBuilderAddToChatTelemetry {
     | 'entity_highlights'
     | 'entity_risk_contribution'
     | 'entity_flyout'
+    | 'entities_grid_row_actions'
     | 'rule_creation'
     | 'rule_editing'
     | 'rule_details'

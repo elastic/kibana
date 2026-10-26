@@ -11,10 +11,10 @@ import {
   ALERT_EVENTS_DATA_STREAM,
   DEFAULT_TIME_FIELD as TIME_FIELD,
 } from '@kbn/alerting-v2-constants';
-import { addEpisodeAggregation } from '@kbn/alerting-v2-common-queries';
+import { addEpisodeSummaryStats } from '@kbn/alerting-v2-common-queries';
 // Subset of `ALERT_EPISODE_FIELDS` actually populated by this query. The action
-// `last_*` columns are excluded because we only read from `.rule-events` here
-// and don't run the action INLINE STATS — keeping them caused a runtime error.
+// `last_*` columns come from the action queries, and `episode_data` from
+// `buildEpisodesDataRequest` for the few rows returned.
 export const RELATED_EPISODE_FIELDS = [
   '@timestamp',
   'episode.id',
@@ -24,14 +24,13 @@ export const RELATED_EPISODE_FIELDS = [
   'first_timestamp',
   'last_timestamp',
   'duration',
-  'episode_data',
   'severity',
 ] as const;
 
 const RELATED_EPISODE_LIMIT = 5;
 
 export const finishRelatedEpisodesQuery = (query: ComposerQuery) => {
-  addEpisodeAggregation(query);
+  addEpisodeSummaryStats(query);
 
   return query
     .sort([TIME_FIELD, 'DESC'])
@@ -72,9 +71,8 @@ export const buildRelatedBaseQuery = (
   scope: RelatedEpisodesScope,
   excludeEpisodeId: string
 ) => {
-  // Because addEpisodeAggregation uses JSON_EXTRACT(_source, "data"),
-  // _source must be included here.
-  const query = esql.from([ALERT_EVENTS_DATA_STREAM], ['_source']).where`space_id == ${spaceId}`
+  // No `_source`: the related rows are aggregated from indexed fields only.
+  const query = esql.from(ALERT_EVENTS_DATA_STREAM).where`space_id == ${spaceId}`
     .where`type == "alert"`;
 
   return scope.type === 'rule'

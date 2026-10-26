@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useCustomContentHtml } from './use_custom_content_html';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { CustomContentComponent } from './custom_content_component';
 import type { CustomContentRendererServices } from './types';
 
@@ -86,6 +87,16 @@ describe('CustomContentComponent', () => {
 
     expect(mockUseCustomContentHtml).toHaveBeenCalledWith(
       expect.objectContaining({ isInteractive: false })
+    );
+  });
+
+  it('passes the request adapter to the HTML hook', () => {
+    const requestAdapter = new RequestAdapter();
+
+    render(<CustomContentComponent {...defaultProps} requestAdapter={requestAdapter} />);
+
+    expect(mockUseCustomContentHtml).toHaveBeenCalledWith(
+      expect.objectContaining({ requestAdapter })
     );
   });
 

@@ -55,7 +55,7 @@ export function ProfilingAppPageTemplate({
   hideSearchBar = false,
   restrictWidth = false,
   pageTitle = i18n.translate('xpack.profiling.appPageTemplate.pageTitle', {
-    defaultMessage: 'Universal Profiling',
+    defaultMessage: 'Profiling',
   }),
   showBetaBadge = false,
   customSearchBar,

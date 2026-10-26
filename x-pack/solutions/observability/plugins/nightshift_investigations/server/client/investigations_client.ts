@@ -31,6 +31,7 @@ import {
 } from '@kbn/agentic-investigations-plugin/common';
 import { assertNever } from '@kbn/std';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
   validateNotificationDestination,
@@ -42,7 +43,7 @@ import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_in
 import type { InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
-  AlertSnapshot,
+  InvestigationAlertSnapshot,
   InvestigationContext,
   InvestigationSubject,
   InvestigationTriggerType,
@@ -300,6 +301,8 @@ export interface NightshiftInvestigationsClientDeps {
   agenticInvestigations?: AgenticInvestigationsPluginStart;
   /** Passed through to `agents.ensure` so a pre-installed agent is hidden while unavailable. */
   agentAvailability: AgentAvailabilityConfig;
+  /** Installs the assistant agent wherever the investigation agent is installed. */
+  assistantEnabled?: boolean;
   investigationQuotaCallback?: InvestigationQuotaCallback;
   inference?: InferenceServerStart;
   savedObjects?: CoreStart['savedObjects'];
@@ -317,6 +320,7 @@ export class NightshiftInvestigationsClient {
   private readonly agentBuilder?: AgentBuilderPluginStart;
   private readonly agenticInvestigations?: AgenticInvestigationsPluginStart;
   private readonly agentAvailability: AgentAvailabilityConfig;
+  private readonly assistantEnabled: boolean;
   private readonly investigationQuotaCallback?: InvestigationQuotaCallback;
   private readonly inference?: InferenceServerStart;
   private readonly savedObjects?: CoreStart['savedObjects'];
@@ -333,6 +337,7 @@ export class NightshiftInvestigationsClient {
     this.agentBuilder = deps.agentBuilder;
     this.agenticInvestigations = deps.agenticInvestigations;
     this.agentAvailability = deps.agentAvailability;
+    this.assistantEnabled = deps.assistantEnabled ?? false;
     this.investigationQuotaCallback = deps.investigationQuotaCallback;
     this.inference = deps.inference;
     this.savedObjects = deps.savedObjects;
@@ -343,6 +348,23 @@ export class NightshiftInvestigationsClient {
 
   public isAvailable = (connectorId?: string): Promise<boolean> =>
     this.checkAvailability(connectorId);
+
+  /**
+   * Installs the investigation agent in a space. The assistant is ensured alongside it without
+   * being awaited, so it cannot fail or slow down the investigation.
+   */
+  private installAgents = async (
+    agentBuilder: AgentBuilderPluginStart,
+    spaceId: string
+  ): Promise<void> => {
+    const availability = this.agentAvailability;
+    if (this.assistantEnabled) {
+      installAssistantAgent({ agentBuilder, spaceId, availability }).catch((err) => {
+        this.logger.warn(`Failed to install assistant agent in space ${spaceId}: ${err.message}`);
+      });
+    }
+    await installInvestigationAgent({ agentBuilder, spaceId, availability });
+  };
 
   private getSpaceId(): string {
     return (
@@ -363,7 +385,7 @@ export class NightshiftInvestigationsClient {
     subject: InvestigationSubject,
     message: string | undefined,
     context: InvestigationContext | AlertInvestigationContext
-  ): { message: string; context: Record<string, unknown>; alerts: AlertSnapshot[] } {
+  ): { message: string; context: Record<string, unknown>; alerts: InvestigationAlertSnapshot[] } {
     if (subject.type === 'alert') {
       const parsed = alertInvestigationContextSchema.safeParse(context);
       if (!parsed.success) {
@@ -472,11 +494,7 @@ export class NightshiftInvestigationsClient {
     // below executes the *stored* workflow definition, which predates that step until the managed
     // install has upgraded it — and that install is fire-and-forget. Deliberately without the
     // step's visibility retry: the workflow owns that, and this request path should not pay for it.
-    await installInvestigationAgent({
-      agentBuilder,
-      spaceId,
-      availability: this.agentAvailability,
-    });
+    await this.installAgents(agentBuilder, spaceId);
 
     const newSubjects = withoutRecordedSubjects(subjects, recorded);
     const newAlertIds = new Set(newSubjects.map(({ id }) => id));
@@ -558,15 +576,13 @@ export class NightshiftInvestigationsClient {
     executionId: string;
   }): Promise<void> {
     try {
-      const { workflowExecutionIds } = await getOrCreateInvestigationConversation({
+      // Records the run in the creating write. If the run's `_ensure` step created the
+      // conversation first, it already recorded itself, so there is nothing to add.
+      await getOrCreateInvestigationConversation({
         conversations,
         id: investigationId,
+        workflowExecutionId: executionId,
       });
-      if (!workflowExecutionIds.includes(executionId)) {
-        await conversations.patchMetadata(investigationId, {
-          workflow_execution_ids: [...workflowExecutionIds, executionId],
-        });
-      }
     } catch (error) {
       this.logger.warn(
         `Could not create the conversation of investigation "${investigationId}" on start; its run creates it: ${
@@ -743,15 +759,11 @@ export class NightshiftInvestigationsClient {
     const conversation = await getOrCreateInvestigationConversation({
       conversations,
       id: investigationId,
+      workflowExecutionId: executionId,
       // A raw workflow can fail before ensuring its agent, which conversation creation requires.
       ...(!reopen
         ? {
-            beforeCreate: () =>
-              installInvestigationAgent({
-                agentBuilder,
-                spaceId: this.getSpaceId(),
-                availability: this.agentAvailability,
-              }),
+            beforeCreate: () => this.installAgents(agentBuilder, this.getSpaceId()),
           }
         : {}),
     });
@@ -958,11 +970,7 @@ export class NightshiftInvestigationsClient {
     }
 
     const spaceId = this.getSpaceId();
-    await installInvestigationAgent({
-      agentBuilder,
-      spaceId,
-      availability: this.agentAvailability,
-    });
+    await this.installAgents(agentBuilder, spaceId);
 
     // Of two concurrent creates for one thread, the second continues the first.
     const newInvestigationId = uuidv4();
@@ -1063,8 +1071,8 @@ export class NightshiftInvestigationsClient {
 
   /**
    * What lifecycle events attribute the investigation to: its first recorded subject, preferring
-   * the subject types lifecycle triggers carry. A Slack thread is reported as a manual subject,
-   * since that is what it is to the trigger's consumers. Undefined when it has no subject.
+   * any other subject to a Slack thread the investigation also reports in. Undefined when it has
+   * no subject.
    */
   async getLifecycleSubject(investigationId: string): Promise<LifecycleSubject | undefined> {
     const { agenticInvestigations } = this.requireWriteDeps();
@@ -1081,10 +1089,7 @@ export class NightshiftInvestigationsClient {
       return undefined;
     }
     return {
-      subject: {
-        type: first.subjectType === 'slack_thread' ? 'manual' : first.subjectType,
-        id: first.subjectId,
-      },
+      subject: { type: first.subjectType, id: first.subjectId },
       triggerType: first.triggerType ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
       startedAt: first.createdAt,
     };

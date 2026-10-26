@@ -60,39 +60,39 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.actions.alertAcked',
-    schemaHash: '4d4610d1b9e373ebb499bcd869422085d603f4518c2c2e684a31a571f2a2e954',
+    schemaHash: 'ca5a31feffb0b5b8d9df7cac46938cba39f26bbe2322d2f2becc80ad325cb76b',
   },
   {
     id: 'alerting.actions.alertActivated',
-    schemaHash: '136c0fcf0b387b97bac050127c4b14244efd82a31400d28fc4cd2837fae330ca',
+    schemaHash: '1d32fea3765a97a2bb499a9531dc5689dcdea43843cc09f27c72a175ad455600',
   },
   {
     id: 'alerting.actions.alertAssigned',
-    schemaHash: 'bdbe4b8494809fa5e3a5311440aa4ff485bae7a2acd6d8989489aec8c36a279d',
+    schemaHash: '808f1767c070ec1a3f10dc81e56f34dda451b98fac0cf6976471052486cf3818',
   },
   {
     id: 'alerting.actions.alertDeactivated',
-    schemaHash: 'bb9a246794512ad64c03b1da1a61f727fa6b64083d0bd4860c3bf02b2ee03c4f',
+    schemaHash: 'fc9803d06cfc6eb58bc8a1d82a787c535ac5112e882089977376467fc1ffd4ad',
   },
   {
     id: 'alerting.actions.alertSnoozed',
-    schemaHash: 'a13f06208bb87f375480ca8f6c4c3e00665154bd192080a3a6b43d8d4a20fd26',
+    schemaHash: 'ec91e54213ffedd2d0821c2b96ce1af18ce6c1c020752d9d826d141bb27c8258',
   },
   {
     id: 'alerting.actions.alertTagged',
-    schemaHash: 'dc756297ccd64a6df4f36a97b293f2da6701687067416e2007be08b8607f799c',
+    schemaHash: 'ac0172750708b70b9d54fcd7cf4ce138db259028ec1b327d28ae610d51ca9e8f',
   },
   {
     id: 'alerting.actions.alertUnacked',
-    schemaHash: '4d4610d1b9e373ebb499bcd869422085d603f4518c2c2e684a31a571f2a2e954',
+    schemaHash: 'ca5a31feffb0b5b8d9df7cac46938cba39f26bbe2322d2f2becc80ad325cb76b',
   },
   {
     id: 'alerting.actions.alertUnassigned',
-    schemaHash: '4d4610d1b9e373ebb499bcd869422085d603f4518c2c2e684a31a571f2a2e954',
+    schemaHash: 'ca5a31feffb0b5b8d9df7cac46938cba39f26bbe2322d2f2becc80ad325cb76b',
   },
   {
     id: 'alerting.actions.alertUnsnoozed',
-    schemaHash: '4d4610d1b9e373ebb499bcd869422085d603f4518c2c2e684a31a571f2a2e954',
+    schemaHash: 'ca5a31feffb0b5b8d9df7cac46938cba39f26bbe2322d2f2becc80ad325cb76b',
   },
   {
     id: 'alerting.ruleCreated',
@@ -128,11 +128,11 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'cases.attachmentsAdded',
-    schemaHash: 'af8917afcff27e816e16aab810bb0295d4ea16931414fc266aa629f220e4592c',
+    schemaHash: '77ead983583983a13c3b771915293553e5febfd9d7940c4780ea2737596acf9c',
   },
   {
     id: 'cases.attachmentsDeleted',
-    schemaHash: 'af15c7003f07847f8e3b553e83925d6a82b2de4a0c66f9ecec4e48957c616ad1',
+    schemaHash: 'e75633546da2dec88fe25d5d1093b643b9168726fdf9c58b7d8bc0d41999ae23',
   },
   {
     id: 'cases.caseCreated',
@@ -228,15 +228,15 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'nightshift-investigations.completed',
-    schemaHash: '9c4a56800d90d397279b9e40a872a64d5cee0a3675556850dc16afa5840d3b9a',
+    schemaHash: '45751406a08db8725fd09651f83294e104cba5fc442d2855def0dee678abb5b0',
   },
   {
     id: 'nightshift-investigations.failed',
-    schemaHash: 'd5e9e788b13edf73d0f57d07f127e63153eb52a0b2dcb6dfdcaf80b751a428ec',
+    schemaHash: 'd3e858523a3b105f3f15ba199f5020ec9665c70a4857a8f7b024c4764dffea5b',
   },
   {
     id: 'nightshift-investigations.started',
-    schemaHash: '80cdd17e8634561e45af961d8df628f767dd02e2ed4e44c7ec2d3170bd39839b',
+    schemaHash: '3530efdfc8f92f51cd0f93eee863f033e5a9d6621b81e43fbfd197838424c00b',
   },
   {
     id: 'security.alertAssigneesChanged',
@@ -324,7 +324,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'slack2.message',
-    schemaHash: 'ebb7bba37b622893dc2b1fd55b1688fc27cdd0c220d9572c700f72e106c7aab4',
+    schemaHash: '2645d776ad762b38f99a1446b90054e11c2c32b97720c534c94eb757b6056147',
   },
   {
     id: 'slack2.reaction_added',
