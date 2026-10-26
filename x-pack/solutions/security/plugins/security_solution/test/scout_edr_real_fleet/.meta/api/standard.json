@@ -1,5 +1,5 @@
 {
-  "sha1": "dfb293cded5689aceaabe428292b3defba890bb0",
+  "sha1": "1121e98fbc0edae528a9b9226d3360c57292c3ba",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/endpoint_generated_alerts.spec.ts",
-        "line": 62,
+        "line": 61,
         "column": 12
       }
     },
