@@ -245,8 +245,9 @@ describe('useWorkflowLayout', () => {
       },
       triggersActionsUi: {},
     } as unknown as WorkflowsUiServices;
-    const wrapper = ({ children }: { children: React.ReactNode }) =>
-      React.createElement(WorkflowsUiServicesProvider, { services, children });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <WorkflowsUiServicesProvider services={services}>{children}</WorkflowsUiServicesProvider>
+    );
     const { result } = renderHook(() => useWorkflowLayout({ workflow }), { wrapper });
 
     const trigger = result.current.nodes.find((node) => node.type === 'trigger');
