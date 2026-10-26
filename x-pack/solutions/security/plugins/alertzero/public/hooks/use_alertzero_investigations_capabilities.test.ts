@@ -46,7 +46,19 @@ describe('getAlertZeroInvestigationsCapabilities', () => {
       manageEscalations: false,
       readInvestigations: false,
       manageInvestigations: false,
+      canAccessAgentBuilder: false,
     });
+  });
+
+  it('maps canAccessAgentBuilder from the Agent Builder show capability', () => {
+    const withAgentBuilder = (show: unknown) =>
+      getAlertZeroInvestigationsCapabilities({
+        ...caps(),
+        agentBuilder: { show },
+      } as unknown as Capabilities);
+
+    expect(withAgentBuilder(true).canAccessAgentBuilder).toBe(true);
+    expect(withAgentBuilder(false).canAccessAgentBuilder).toBe(false);
   });
 
   it('maps showEscalations correctly', () => {
@@ -99,6 +111,7 @@ describe('getAlertZeroInvestigationsCapabilities', () => {
       manageEscalations: true,
       readInvestigations: true,
       manageInvestigations: true,
+      canAccessAgentBuilder: false,
     });
   });
 

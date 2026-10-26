@@ -22,6 +22,7 @@ export interface AgenticInvestigationsCapabilities {
   /** Reading investigations, which includes the impact (entities) of proposals. */
   readInvestigations: boolean;
   manageInvestigations: boolean;
+  canAccessAgentBuilder: boolean;
 }
 
 /**
@@ -37,6 +38,7 @@ export const getAgenticInvestigationsCapabilities = (
     manageEscalations: investigationsCap?.[ESCALATIONS_UI_CAPABILITY_MANAGE] === true,
     readInvestigations: investigationsCap?.[INVESTIGATIONS_UI_CAPABILITY_READ] === true,
     manageInvestigations: investigationsCap?.[INVESTIGATIONS_UI_CAPABILITY_MANAGE] === true,
+    canAccessAgentBuilder: capabilities.agentBuilder?.show === true,
   };
 };
 

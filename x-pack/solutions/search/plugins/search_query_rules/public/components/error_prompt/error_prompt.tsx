@@ -17,7 +17,7 @@ const ERROR_MESSAGES = {
     title: <FormattedMessage id="xpack.queryRules.notFoundTitle" defaultMessage="Not found" />,
     body: (
       <FormattedMessage
-        id="xpack.queryRuleset.notFoundDescription"
+        id="xpack.queryRules.notFoundDescription"
         defaultMessage="Requested resource was not found. Check if the URL is correct."
       />
     ),

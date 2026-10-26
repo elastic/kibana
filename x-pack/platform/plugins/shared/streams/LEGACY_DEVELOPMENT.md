@@ -382,9 +382,9 @@ streams_app/
 | `/` | `StreamListView` | Stream list with tree table |
 | `/{key}/management/{tab}` | `StreamDetailManagement` | Tabbed management (differs by stream type) |
 
-Management tabs for **wired streams**: overview, partitioning, processing, schema, lifecycle, data quality, attachments, canvas.
+Management tabs for **wired streams**: overview, partitioning, processing, schema, lifecycle, data quality, attachments, map.
 
-Management tabs for **classic streams**: overview, lifecycle, partitioning, processing, data quality, schema, attachments, canvas.
+Management tabs for **classic streams**: overview, lifecycle, partitioning, processing, data quality, schema, attachments, map.
 
 ### Key UI Patterns
 

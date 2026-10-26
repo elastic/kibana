@@ -67,7 +67,6 @@ apiTest.describe('List rule executions API', { tag: testData.API_ENGINE_TAG }, (
 
       for (const item of response.body.items) {
         expect(item.rule.id).toBe(rule.id);
-        expect(item.space_id).toBe('default');
         expect(Date.parse(item.started_at)).toBeGreaterThan(0);
         expect(Date.parse(item.ended_at)).toBeGreaterThan(0);
         expect(['success', 'failure']).toContain(item.outcome);
@@ -114,18 +113,17 @@ apiTest.describe('List rule executions API', { tag: testData.API_ENGINE_TAG }, (
 
       const items = response.body.items as Array<{
         rule: { id: string };
-        space_id: string;
       }>;
 
-      const sawDefaultSpaceRule = items.some(
-        (item) => item.rule.id === ruleInDefaultSpace.id && item.space_id === 'default'
-      );
+      // The response no longer carries `space_id`; space isolation is verified
+      // by rule identity, since each space seeded a distinct rule.
+      const sawDefaultSpaceRule = items.some((item) => item.rule.id === ruleInDefaultSpace.id);
 
       expect(sawDefaultSpaceRule).toBe(true);
 
       const leaked = items
-        .filter((item) => item.space_id === OTHER_SPACE_ID || item.rule.id === ruleInOtherSpace.id)
-        .map((item) => `${item.space_id}/${item.rule.id}`);
+        .filter((item) => item.rule.id === ruleInOtherSpace.id)
+        .map((item) => item.rule.id);
 
       expect(leaked).toHaveLength(0);
     }
@@ -230,7 +228,7 @@ apiTest.describe('List rule executions API', { tag: testData.API_ENGINE_TAG }, (
       for (const item of response.body.items) {
         expect(item.rule.id).toBe(matchingRule.id);
       }
-      expect(response.body.search_matches).toStrictEqual({ rules: 1, is_truncated: false });
+      expect(response.body.search_matches).toStrictEqual({ rule_count: 1, is_truncated: false });
     }
   );
 
@@ -282,7 +280,7 @@ apiTest.describe('List rule executions API', { tag: testData.API_ENGINE_TAG }, (
       expect(response).toHaveStatusCode(200);
       expect(response.body.items).toStrictEqual([]);
       expect(response.body.total).toBe(0);
-      expect(response.body.search_matches).toStrictEqual({ rules: 0, is_truncated: false });
+      expect(response.body.search_matches).toStrictEqual({ rule_count: 0, is_truncated: false });
     }
   );
 
