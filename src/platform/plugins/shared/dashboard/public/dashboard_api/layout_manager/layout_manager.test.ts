@@ -333,6 +333,83 @@ describe('layout manager', () => {
     });
   });
 
+  describe('removePanels', () => {
+    const panel2 = { ...panel1, id: 'panelTwo', grid: { w: 1, h: 1, x: 1, y: 0 } };
+    const pinnedControl3 = { ...pinnedControls[0], id: 'control3' };
+
+    test('removes grid and pinned panels in a single layout update', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1, panel2],
+        [...pinnedControls, pinnedControl3],
+        trackPanelMock
+      );
+      layoutManager.api.registerChildApi(panel1Api);
+      const layoutListener = jest.fn();
+      const subscription = layoutManager.api.layout$.subscribe(layoutListener);
+      layoutListener.mockClear();
+
+      layoutManager.api.removePanels([PANEL_ONE_ID, 'control1']);
+
+      expect(layoutListener).toHaveBeenCalledTimes(1);
+      const { panels, pinnedPanels } = layoutManager.api.layout$.getValue();
+      expect(Object.keys(panels)).toEqual(['panelTwo']);
+      expect(pinnedPanels).toEqual({
+        control2: { ...pick(pinnedControls[1], ['grow', 'width', 'type']), order: 0 },
+        control3: { ...pick(pinnedControl3, ['grow', 'width', 'type']), order: 1 },
+      });
+      expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBeUndefined();
+      subscription.unsubscribe();
+    });
+
+    test('clears the state of a panel whose API never registered', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [{ ...section1, collapsed: true }],
+        [],
+        trackPanelMock
+      );
+      expect(layoutManager.internalApi.getSerializedStateForPanel(PANEL_ONE_ID)).toBeDefined();
+
+      layoutManager.api.removePanels([PANEL_ONE_ID]);
+
+      expect(layoutManager.internalApi.getSerializedStateForPanel(PANEL_ONE_ID)).toBeUndefined();
+    });
+
+    test('does not update the layout when none of the panels exist', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        [],
+        trackPanelMock
+      );
+      const layoutListener = jest.fn();
+      const subscription = layoutManager.api.layout$.subscribe(layoutListener);
+      layoutListener.mockClear();
+
+      layoutManager.api.removePanels(['unknownPanel']);
+
+      expect(layoutListener).not.toHaveBeenCalled();
+      subscription.unsubscribe();
+    });
+
+    test('removePanel removes a single pinned panel', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        pinnedControls,
+        trackPanelMock
+      );
+
+      layoutManager.api.removePanel('control1');
+
+      expect(layoutManager.api.layout$.getValue().pinnedPanels).toEqual({
+        control2: { ...pick(pinnedControls[1], ['grow', 'width', 'type']), order: 0 },
+      });
+      expect(Object.keys(layoutManager.api.layout$.getValue().panels)).toEqual([PANEL_ONE_ID]);
+    });
+  });
+
   describe('getChildApi', () => {
     test('should return api when api is available', (done) => {
       const layoutManager = initializeLayoutManager(
