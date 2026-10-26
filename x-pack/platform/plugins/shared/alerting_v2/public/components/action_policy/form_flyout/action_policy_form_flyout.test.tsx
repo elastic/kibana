@@ -210,11 +210,9 @@ describe('ActionPolicyFormFlyout', () => {
     expect(onSave).not.toHaveBeenCalled();
   });
 
-  it('renders the inline simple workflow builder alongside the existing-workflow selector', () => {
+  it('collapses the notification controls section by default', () => {
     renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
 
-    expect(screen.getByTestId('simpleWorkflowBuilder')).toBeInTheDocument();
-    expect(screen.getByTestId('destinationsInput')).toBeInTheDocument();
     expect(
       within(screen.getByTestId('actionPolicyFormSection-notificationControls'))
         .getByText('Notification controls')

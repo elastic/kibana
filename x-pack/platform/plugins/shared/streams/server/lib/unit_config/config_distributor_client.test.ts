@@ -201,7 +201,7 @@ describe('createConfigDistributorClient', () => {
     expect(resolveTargetId()).toBe('abc');
   });
 
-  it('POSTs credentials to /v1/validate when the unit has them', async () => {
+  it('POSTs credentials to /v1/units/validate when the unit has them', async () => {
     const fetchImpl = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -222,7 +222,7 @@ describe('createConfigDistributorClient', () => {
     });
   });
 
-  it('omits credentials from /v1/validate when there are none', async () => {
+  it('omits credentials from /v1/units/validate when there are none', async () => {
     const fetchImpl = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -237,7 +237,7 @@ describe('createConfigDistributorClient', () => {
     await expect(validate({ unit, credentials: [] })).resolves.toEqual({});
 
     expect(fetchImpl).toHaveBeenCalledWith(
-      'https://distributor.example:8443/v1/validate',
+      'https://distributor.example:8443/v1/units/validate',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ unit_yaml: expectedYaml }),
@@ -292,6 +292,67 @@ describe('createConfigDistributorClient', () => {
       message: 'OTTL parse error',
       statusCode: 400,
       data: { valid: false, diagnostics },
+    });
+  });
+
+  it('retries validate at the pre-rename path when the distributor answers 405', async () => {
+    const fetchImpl = jest
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 405, text: async () => 'Method Not Allowed' })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({ valid: true, diagnostics: [] }),
+      });
+    const { validate } = createConfigDistributorClient({
+      config: { url: 'https://distributor.example:8443', ssl: {} },
+      logger: loggerMock.create(),
+      fetchImpl,
+    });
+
+    await expect(validate({ unit, credentials: [] })).resolves.toEqual({});
+
+    expect(fetchImpl.mock.calls.map(([url]) => url)).toEqual([
+      'https://distributor.example:8443/v1/units/validate',
+      'https://distributor.example:8443/v1/validate',
+    ]);
+    expect(fetchImpl.mock.calls[1][1].body).toBe(fetchImpl.mock.calls[0][1].body);
+  });
+
+  it('does not retry validate on a 404', async () => {
+    const fetchImpl = jest
+      .fn()
+      .mockResolvedValue({ ok: false, status: 404, text: async () => 'Not Found' });
+    const { validate } = createConfigDistributorClient({
+      config: { url: 'https://distributor.example:8443', ssl: {} },
+      logger: loggerMock.create(),
+      fetchImpl,
+    });
+
+    await expect(validate({ unit, credentials: [] })).rejects.toMatchObject({ statusCode: 404 });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('aborts an in-flight request when the caller signal aborts', async () => {
+    const callerController = new AbortController();
+    const fetchImpl = jest.fn(
+      (_url: string, { signal }: { signal: AbortSignal }) =>
+        new Promise<never>((_, reject) => {
+          signal.addEventListener('abort', () => reject(new Error('This operation was aborted')));
+          callerController.abort();
+        })
+    );
+    const { publish } = createConfigDistributorClient({
+      config: { url: 'https://distributor.example:8443', ssl: {} },
+      logger: loggerMock.create(),
+      fetchImpl,
+    });
+
+    await expect(
+      publish({ unitId: 'default', unit, credentials: [], signal: callerController.signal })
+    ).rejects.toMatchObject({
+      message: expect.stringContaining('This operation was aborted'),
+      statusCode: 502,
     });
   });
 });
