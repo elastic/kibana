@@ -17,7 +17,7 @@ import { BUCKET_MS, DAY_MS, HOUR_MS, MINUTE_MS } from '../../../common';
 import type { IEngineScope } from '../engine/engine_scope';
 import { getErrorMessage } from '../errors';
 import { checkBaseline, fillSparseHistory } from '../pipeline/baseline';
-import { poissonRateLowerBound } from '../pipeline/poisson';
+import { poissonRateLowerBound } from '../pipeline/count_tests';
 import type { StoredSample } from '../storage/records_store';
 import { countDetectorsDirectly, learnedFingerprint } from '../strategies/learned_detectors';
 import { incidentWindow } from './incidents';

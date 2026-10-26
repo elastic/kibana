@@ -149,6 +149,7 @@ export async function buildCase({
             source: sourceTitle(member.source_id),
             strategy: member.strategy,
             importance: member.importance,
+            unit: member.unit,
           })),
         }
       : undefined,
@@ -159,6 +160,7 @@ export async function buildCase({
           relation: proposal.relation,
           via: proposal.via,
           minutes_apart: Math.round(proposal.minutesApart),
+          dependency_kind: proposal.dependencyKind,
         }
       : undefined,
     evidence,

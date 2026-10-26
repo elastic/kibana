@@ -71,6 +71,8 @@ export interface AgentCase {
       source?: string;
       strategy: SignalStrategyId;
       importance: number;
+      /** What the member measures, such as `ms` for latency: the kind of symptom it is. */
+      unit: string;
     }>;
   };
   join_proposal?: {
@@ -80,6 +82,8 @@ export interface AgentCase {
     /** The service linking them; for a shared dependency, the one both call. */
     via: string;
     minutes_apart: number;
+    /** For a dependency relation: a call seen in the logs, or a shared request path. */
+    dependency_kind?: string;
   };
   evidence: CaseEvidence[];
   firing_customer_alerts: Array<{ title: string; service: string }>;

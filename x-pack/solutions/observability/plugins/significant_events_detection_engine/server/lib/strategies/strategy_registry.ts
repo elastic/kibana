@@ -6,7 +6,9 @@
  */
 
 import type { SignalStrategyId } from '../../../common';
+import { changeRegressionsStrategy } from './change_regressions';
 import { customerAlertsStrategy } from './customer_alerts';
+import { dependencyHealthStrategy } from './dependency_health';
 import { healthChecksStrategy } from './health_checks';
 import { knownFailureQueriesStrategy } from './known_failure_queries';
 import { learnedDetectorsStrategy } from './learned_detectors';
@@ -23,4 +25,6 @@ export const STRATEGIES: Record<SignalStrategyId, ISignalStrategy> = {
   customer_alerts: customerAlertsStrategy,
   new_log_patterns: newLogPatternsStrategy,
   learned_detectors: learnedDetectorsStrategy,
+  dependency_health: dependencyHealthStrategy,
+  change_regressions: changeRegressionsStrategy,
 };

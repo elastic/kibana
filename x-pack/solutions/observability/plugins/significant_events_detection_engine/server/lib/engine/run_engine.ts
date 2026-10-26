@@ -23,6 +23,7 @@ import { recordRunCost } from '../cost/record_cost';
 import { EMPTY_RULES_RECORD, ensureRules } from '../rules/ensure_rules';
 import type { HistorySample } from '../storage/records_store';
 import { acquireRunLease } from '../storage/run_lease';
+import { trafficFingerprint } from '../strategies/health_checks';
 import { STRATEGIES } from '../strategies/strategy_registry';
 import { createAgentRunner } from './agent_runner';
 import { createTriageStep, type FiringAlert } from './triage_step';
@@ -376,7 +377,13 @@ async function executeRun({
     windows.length > 0
       ? Math.min(...windows.map((window) => window.from))
       : Math.floor(evaluationNow / BUCKET_MS) * BUCKET_MS;
-  const history = await readBaselineHistory({ scope, config, firing, events, before: earliest });
+  // Read up to the end of the run, not the earliest window: strategies settle at different
+  // times, so the earliest window can sit minutes behind a fast strategy's, and the minutes in
+  // between would be in neither the history nor this run. Each series takes only its own
+  // earlier minutes below.
+  const latest =
+    windows.length > 0 ? Math.max(...windows.map((window) => window.to)) : earliest + BUCKET_MS;
+  const history = await readBaselineHistory({ scope, config, firing, events, before: latest });
   // Internal series too: a sparse series reads its heartbeat from the same run.
   const runSeries = groupByFingerprint(evaluation.observations);
   // Every evaluated minute, even one with no observations: lifecycle still runs for it.
@@ -428,6 +435,7 @@ async function executeRun({
       recorder,
       thresholds,
       firingAlerts,
+      enabledSourceIds: new Set(sources.map((source) => source.id)),
     });
     processedUpTo = bucketStart + BUCKET_MS;
     if (events.dirty().some(({ change }) => change === 'changed')) {
@@ -716,7 +724,16 @@ async function readBaselineHistory({
   );
   const heartbeats = [
     ...new Set(
-      ownHistory.flatMap((observation) => (observation.heartbeat ? [observation.heartbeat] : []))
+      ownHistory.flatMap((observation) =>
+        observation.heartbeat
+          ? [
+              observation.heartbeat,
+              ...(observation.source_id
+                ? [trafficFingerprint(observation.source_id, observation.service)]
+                : []),
+            ]
+          : []
+      )
     ),
   ];
   const series = [
@@ -749,9 +766,12 @@ async function processBucket({
   recorder,
   thresholds,
   firingAlerts,
+  enabledSourceIds,
 }: {
   /** Customer alerts firing anywhere in the run, which a case lists for its own entities. */
   firingAlerts: FiringAlert[];
+  /** Sources enabled in this run, so events from removed ones can close. */
+  enabledSourceIds: Set<string>;
   bucketStart: number;
   config: EngineConfig;
   visible: TaggedObservation[];
@@ -772,15 +792,24 @@ async function processBucket({
     // Sequential: each decision can open an event the next signal may join.
     const { descriptor } = STRATEGIES[observation.strategy];
     const owner = events.ownerOf(observation.fingerprint);
-    const pastOf = (fingerprint: string) => [
-      ...(history.get(fingerprint) ?? []),
-      ...(runSeries.get(fingerprint) ?? [])
+    const pastOf = (fingerprint: string) => {
+      const fromRun = (runSeries.get(fingerprint) ?? [])
         .filter((item) => item.bucket_start < bucketStart)
         .map((item) => ({
           bucket_start: new Date(item.bucket_start).toISOString(),
           value: item.value,
-        })),
-    ];
+          looks_off: item.looks_off,
+        }));
+      // This run's evaluation of a minute replaces a stored one, so no minute counts twice.
+      const inRun = new Set(fromRun.map((sample) => Date.parse(sample.bucket_start)));
+      const stored = (history.get(fingerprint) ?? []).filter((sample) => {
+        const at = Date.parse(sample.bucket_start);
+        return at < bucketStart && !inRun.has(at);
+      });
+      return [...stored, ...fromRun].sort(
+        (a, b) => Date.parse(a.bucket_start) - Date.parse(b.bucket_start)
+      );
+    };
     const own = pastOf(observation.fingerprint);
     const baseline = checkBaseline({
       value: observation.value,
@@ -788,7 +817,13 @@ async function processBucket({
       policy: policyOf(descriptor.baselinePolicy, config),
       firing: observation.firing_history,
       history: observation.heartbeat
-        ? fillSparseHistory({ samples: own, heartbeat: pastOf(observation.heartbeat) })
+        ? fillSparseHistory({
+            samples: own,
+            heartbeat: pastOf(observation.heartbeat),
+            traffic: observation.source_id
+              ? pastOf(trafficFingerprint(observation.source_id, observation.service))
+              : [],
+          })
         : own,
       excludeWindows: owner?.open_windows ?? [],
       settings: {
@@ -800,9 +835,25 @@ async function processBucket({
     gates.set(observation.fingerprint, baseline.decision);
     if (baseline.decision === 'background' || baseline.decision === 'warming_up') {
       triage.recordBelowNormal({ observation, baseline });
-    } else {
-      await triage.process({ observation, baseline, firingAlerts });
+      continue;
     }
+    // Persistence: a series in no open event must look off in enough of the last minutes. One
+    // that is already in an event continues it at once, so recovery and repeats stay prompt.
+    const { confirmation } = descriptor;
+    const inOpenEvent = owner !== undefined && owner.status !== 'inactive';
+    if (confirmation && !observation.confirmed && !inOpenEvent) {
+      const since = bucketStart - (confirmation.of - 1) * BUCKET_MS;
+      const lookedOff =
+        1 +
+        own.filter(
+          (sample) => sample.looks_off === true && Date.parse(sample.bucket_start) >= since
+        ).length;
+      if (lookedOff < confirmation.need) {
+        triage.recordUnconfirmed({ observation, baseline, lookedOff, confirmation });
+        continue;
+      }
+    }
+    await triage.process({ observation, baseline, firingAlerts });
   }
 
   applyLifecycle({
@@ -817,6 +868,7 @@ async function processBucket({
     observations: new Map(inBucket.map((observation) => [observation.fingerprint, observation])),
     gates,
     recorder,
+    enabledSourceIds,
   });
 }
 

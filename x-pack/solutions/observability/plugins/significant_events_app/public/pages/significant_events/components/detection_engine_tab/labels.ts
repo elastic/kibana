@@ -48,6 +48,18 @@ export const STRATEGY_LABELS: Record<SignalStrategyId, string> = {
       defaultMessage: 'Learned detectors',
     }
   ),
+  dependency_health: i18n.translate(
+    'xpack.significantEventsApp.detectionEngine.strategy.dependencyHealth',
+    {
+      defaultMessage: 'Dependency health',
+    }
+  ),
+  change_regressions: i18n.translate(
+    'xpack.significantEventsApp.detectionEngine.strategy.changeRegressions',
+    {
+      defaultMessage: 'Change regressions',
+    }
+  ),
 };
 
 export const STRATEGY_ICONS: Record<SignalStrategyId, string> = {
@@ -56,6 +68,8 @@ export const STRATEGY_ICONS: Record<SignalStrategyId, string> = {
   customer_alerts: 'bell',
   new_log_patterns: 'sparkles',
   learned_detectors: 'beaker',
+  dependency_health: 'link',
+  change_regressions: 'timeline',
 };
 
 export const MODE_LABELS: Record<StrategyMode, string> = {
@@ -126,6 +140,12 @@ export const OUTCOME_LABELS: Record<SignalOutcome, string> = {
   conflict: i18n.translate('xpack.significantEventsApp.detectionEngine.outcome.conflict', {
     defaultMessage: 'Changed by someone else',
   }),
+  unconfirmed: i18n.translate('xpack.significantEventsApp.detectionEngine.outcome.unconfirmed', {
+    defaultMessage: 'Waiting for a second minute',
+  }),
+  supporting: i18n.translate('xpack.significantEventsApp.detectionEngine.outcome.supporting', {
+    defaultMessage: 'Supporting evidence',
+  }),
 };
 
 export const OUTCOME_COLORS: Record<SignalOutcome, string> = {
@@ -141,6 +161,8 @@ export const OUTCOME_COLORS: Record<SignalOutcome, string> = {
   refuted: 'success',
   deferred: 'warning',
   conflict: 'warning',
+  unconfirmed: 'default',
+  supporting: 'default',
 };
 
 export const STEP_LABELS: Record<ActivityStep, string> = {
@@ -285,27 +307,49 @@ export const CLOSE_REASON_LABELS: Record<EventCloseReason, string> = {
       defaultMessage: 'closed when its evidence was gone',
     }
   ),
+  source_removed: i18n.translate(
+    'xpack.significantEventsApp.detectionEngine.closeReason.sourceRemoved',
+    {
+      defaultMessage: 'closed when its source was removed',
+    }
+  ),
 };
 
 /** What each health check reports on, keyed by the check's part of the fingerprint. */
 const HEALTH_CHECK_RULES: Record<string, string> = {
   error_ratio: i18n.translate('xpack.significantEventsApp.detectionEngine.healthRule.errorRatio', {
     defaultMessage:
-      'Reports when 5% or more of the lines in a minute are errors, with at least 5 errors',
+      "Reports when more requests fail than the service's normal rate allows by chance: 5+ failures, 2+ points above normal, in two of three minutes",
   }),
   warning_ratio: i18n.translate(
     'xpack.significantEventsApp.detectionEngine.healthRule.warningRatio',
     {
       defaultMessage:
-        'Reports when 10% or more of the lines in a minute are warnings, with at least 10 warnings',
+        'Supports an event when 10% or more of the lines in a minute are warnings; never opens one',
     }
   ),
   latency_p95: i18n.translate('xpack.significantEventsApp.detectionEngine.healthRule.latency', {
-    defaultMessage: "Reports when the minute's p95 latency is twice that of the previous hour",
+    defaultMessage:
+      "Reports when the minute's p95 latency, over 100+ durations, is twice that of the previous hour",
   }),
+  latency_p50: i18n.translate(
+    'xpack.significantEventsApp.detectionEngine.healthRule.medianLatency',
+    {
+      defaultMessage:
+        "Reports when the minute's median latency, over 20+ durations, is twice that of the previous hour",
+    }
+  ),
   silence: i18n.translate('xpack.significantEventsApp.detectionEngine.healthRule.silence', {
-    defaultMessage: 'Reports when log volume drops by 90% or more against the previous hour',
+    defaultMessage:
+      'Reports when log volume drops by 90% or more for longer than the service’s traffic allows by chance',
   }),
+  source_silence: i18n.translate(
+    'xpack.significantEventsApp.detectionEngine.healthRule.sourceSilence',
+    {
+      defaultMessage:
+        'Reports when half or more of a source’s services go quiet in the same minute',
+    }
+  ),
 };
 
 /**

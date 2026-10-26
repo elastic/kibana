@@ -60,3 +60,60 @@ export function poissonRateLowerBound({
   );
   return bound.high / exposure;
 }
+
+/** Terms this small next to the running sum no longer change it. */
+const NEGLIGIBLE_TERM = 1e-15;
+
+/**
+ * P(X >= count) for X ~ Binomial(trials, probability): how likely this many failures are when
+ * the true failure rate is `probability`. A ratio alone cannot tell 5 failures of 100 from
+ * chance at a 1% normal rate; this can.
+ */
+export function binomialUpperTail({
+  count,
+  trials,
+  probability,
+}: {
+  count: number;
+  trials: number;
+  probability: number;
+}): number {
+  if (count <= 0) {
+    return 1;
+  }
+  if (count > trials || probability <= 0) {
+    return 0;
+  }
+  if (probability >= 1) {
+    return 1;
+  }
+  const logP = Math.log(probability);
+  const logQ = Math.log(1 - probability);
+  const logTrials = logFactorial(trials);
+  const logChoose = (k: number) => logTrials - logFactorial(k) - logFactorial(trials - k);
+  // A loop, not a reduce: above the mean each term is smaller than the last, so the sum stops
+  // as soon as the terms no longer matter instead of walking every trial.
+  let sum = 0;
+  for (let k = Math.floor(count); k <= trials; k++) {
+    const term = Math.exp(logChoose(k) + k * logP + (trials - k) * logQ);
+    sum += term;
+    if (k > trials * probability && term < sum * NEGLIGIBLE_TERM) {
+      break;
+    }
+  }
+  return Math.min(1, sum);
+}
+
+/** log(n!) with Stirling's series past 20, exact below. */
+function logFactorial(n: number): number {
+  if (n < 2) {
+    return 0;
+  }
+  if (n <= 20) {
+    return Array.from({ length: n - 1 }, (_, index) => Math.log(index + 2)).reduce(
+      (sum, value) => sum + value,
+      0
+    );
+  }
+  return n * Math.log(n) - n + 0.5 * Math.log(2 * Math.PI * n) + 1 / (12 * n) - 1 / (360 * n ** 3);
+}

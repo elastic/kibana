@@ -30,6 +30,7 @@ import {
   pathText,
   validateCondition,
 } from './detector_author';
+import { zScoreOf } from '../pipeline/baseline';
 import { DEFAULT_INCIDENT_MINUTES } from './incidents';
 import type { ConfirmedPath } from './tree_paths';
 
@@ -44,7 +45,6 @@ const MAX_DETECTORS_PER_MISSED = 2;
 /** Dismissals of the same series before the engine proposes raising its threshold. */
 export const MIN_DISMISSALS_FOR_TUNING = 2;
 const MAX_MAD_K = 10;
-const MAD_SCALE = 1.4826;
 
 /** What a generator needs, beyond the scope. */
 export interface ProposalContext {
@@ -393,7 +393,11 @@ export async function proposeFromDismissals(
     }
     const member = events[0].members.find((item) => item.fingerprint === fingerprint)!;
     // Learned detectors earn their threshold on the evolution path; tuning them is circular.
-    if (member.strategy === 'learned_detectors' || member.strategy === 'customer_alerts') {
+    if (
+      member.strategy === 'learned_detectors' ||
+      member.strategy === 'customer_alerts' ||
+      member.strategy === 'change_regressions'
+    ) {
       continue;
     }
     const signals = await context.scope.storage.records.findSignals({
@@ -408,10 +412,8 @@ export async function proposeFromDismissals(
       events.some((event) => event.event_id === signal.event_id)
     );
     const needed = dismissedSignals.flatMap((signal) => {
-      const { median, mad } = signal.baseline;
-      return median !== undefined && mad !== undefined && mad > 0
-        ? [(signal.value - median) / (MAD_SCALE * mad)]
-        : [];
+      const z = zScoreOf(signal.value, signal.baseline);
+      return z === undefined ? [] : [z];
     });
     if (needed.length === 0) {
       context.notes.push(

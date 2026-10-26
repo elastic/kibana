@@ -24,6 +24,10 @@ export const SIGNAL_OUTCOMES = [
   'refuted',
   'deferred',
   'conflict',
+  /** Above its trigger, but not yet in enough of the last minutes to be more than chance. */
+  'unconfirmed',
+  /** Supporting evidence only: it may join an open event, and opens none of its own. */
+  'supporting',
 ] as const;
 export type SignalOutcome = (typeof SIGNAL_OUTCOMES)[number];
 
@@ -50,6 +54,15 @@ export interface BaselineSummary {
   median?: number;
   mad?: number;
   threshold?: number;
+  /**
+   * Set when the check compared on a log scale, as it does for latency, whose spread grows
+   * with its level. `log_median` and `log_mad` are the values it compared with.
+   */
+  transform?: 'log';
+  log_median?: number;
+  log_mad?: number;
+  /** For counts: variance over mean of the history, which widens the floor for bursty series. */
+  dispersion?: number;
 }
 
 /**

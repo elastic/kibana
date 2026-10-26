@@ -102,7 +102,13 @@ export interface EventDismissal {
 }
 
 /** `evidence_gone`: the Verifier re-ran the evidence twice and nothing showed the problem. */
-export type EventCloseReason = 'recovered' | 'operator' | 'dismissed' | 'evidence_gone';
+export type EventCloseReason =
+  | 'recovered'
+  | 'operator'
+  | 'dismissed'
+  | 'evidence_gone'
+  /** Every source its signals came from was disabled or removed, so nothing can evaluate it. */
+  | 'source_removed';
 
 /**
  * One time an event was open. `from` is data time, the first minute that was above normal; the

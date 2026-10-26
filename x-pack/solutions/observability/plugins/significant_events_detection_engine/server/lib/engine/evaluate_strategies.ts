@@ -95,6 +95,7 @@ export async function evaluateStrategies({
           ruleEvents: scope.ruleEvents,
           ownedRules: ownedRules.filter((rule) => rule.strategy === window.strategy),
           records: scope.storage.records,
+          state: scope.storage.state,
           maxRows: rowsPerStrategy,
           customerRules,
           customerV2Rules: async (ids: string[]) => {

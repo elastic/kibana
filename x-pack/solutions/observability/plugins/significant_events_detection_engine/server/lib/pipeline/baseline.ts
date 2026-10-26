@@ -26,6 +26,14 @@ const MIN_DELTA_BY_UNIT: Record<string, number> = {
   drop: 0.5,
 };
 const DEFAULT_MIN_DELTA = 1;
+/**
+ * Units whose spread grows with their level, compared on a log scale. On a raw scale a
+ * lognormal latency crosses median + 3 MAD in about one minute in ten; on a log scale, in about
+ * one in three hundred.
+ */
+const LOG_UNITS = new Set(['ms']);
+/** The most a count floor widens for burstiness, so one huge burst cannot hide everything. */
+const MAX_DISPERSION = 25;
 
 /** More episodes than this in an hour and the alert flaps. */
 const FLAPPING_EPISODES_PER_HOUR = 3;
@@ -105,7 +113,15 @@ export function checkBaseline({
   if (policy === 'firing_frequency' && firing) {
     return judgeAlertFiring(firing);
   }
-  if (policy === 'skip' || policy === 'firing_frequency') {
+  if (policy === 'skip') {
+    return {
+      decision: 'skipped',
+      samples: 0,
+      excludedSamples: 0,
+      reason: 'the strategy compares the value with its own reference',
+    };
+  }
+  if (policy === 'firing_frequency') {
     return { decision: 'skipped', samples: 0, excludedSamples: 0 };
   }
   // A drop is capped at 1, while median + k x MAD of a bursty service's drops is often above
@@ -146,12 +162,40 @@ export function checkBaseline({
   const values = kept.map((sample) => sample.value);
   const center = median(values);
   const mad = median(values.map((sample) => Math.abs(sample - center)));
+
+  if (LOG_UNITS.has(unit)) {
+    const logs = values.map((sample) => Math.log1p(Math.max(0, sample)));
+    const logCenter = median(logs);
+    const logMad = median(logs.map((sample) => Math.abs(sample - logCenter)));
+    // The unit floor stays on the raw scale: 50 ms is the smallest change worth an event.
+    const logThreshold = Math.max(
+      Math.expm1(logCenter + settings.mad_k * MAD_SCALE * logMad),
+      center + minDelta
+    );
+    return {
+      decision: value > logThreshold ? 'above_normal' : 'background',
+      samples: kept.length,
+      excludedSamples,
+      median: center,
+      mad,
+      threshold: logThreshold,
+      transform: 'log',
+      log_median: logCenter,
+      log_mad: logMad,
+    };
+  }
+
   // A sparse count has a median and MAD of zero while it still matches a few lines most minutes;
-  // its spread grows with its mean, as for any count, so the floor follows the mean.
+  // its spread grows with its mean, as for any count, so the floor follows the mean. Log lines
+  // come in bursts, and a Poisson floor on a series whose variance is five times its mean lets
+  // through about 27 times the chance triggers, so the floor widens by the series' dispersion.
   const mean = values.reduce((sum, sample) => sum + sample, 0) / values.length;
+  const variance =
+    values.reduce((sum, sample) => sum + (sample - mean) ** 2, 0) / Math.max(1, values.length);
+  const dispersion = mean > 0 ? Math.min(MAX_DISPERSION, Math.max(1, variance / mean)) : 1;
   const countFloor =
     unit === 'count' && (settings.count_noise_k ?? 0) > 0
-      ? mean + settings.count_noise_k * Math.sqrt(mean + 1)
+      ? mean + settings.count_noise_k * Math.sqrt(dispersion * mean + 1)
       : 0;
   const threshold = Math.max(
     center + Math.max(settings.mad_k * MAD_SCALE * mad, minDelta),
@@ -165,7 +209,25 @@ export function checkBaseline({
     median: center,
     mad,
     threshold,
+    ...(unit === 'count' ? { dispersion } : {}),
   };
+}
+
+/**
+ * How many scaled MADs a value sits above the median a baseline compared with, on the scale
+ * it compared on. Undefined when the history never varied, so no threshold can separate it.
+ */
+export function zScoreOf(value: number, baseline: BaselineSummary): number | undefined {
+  if (baseline.transform === 'log') {
+    const { log_median: logMedian, log_mad: logMad } = baseline;
+    return logMedian !== undefined && logMad !== undefined && logMad > 0
+      ? (Math.log1p(Math.max(0, value)) - logMedian) / (MAD_SCALE * logMad)
+      : undefined;
+  }
+  const { median: center, mad } = baseline;
+  return center !== undefined && mad !== undefined && mad > 0
+    ? (value - center) / (MAD_SCALE * mad)
+    : undefined;
 }
 
 /**
@@ -177,13 +239,24 @@ export function checkBaseline({
 export function fillSparseHistory({
   samples,
   heartbeat,
+  traffic = [],
 }: {
   samples: Array<{ bucket_start: string; value: number }>;
   heartbeat: Array<{ bucket_start: string }>;
+  /**
+   * The service's documents per minute, when the health checks count them. A minute in which the
+   * service sent nothing is not a zero: after a collector outage, KIs whose history was all such
+   * minutes fired at once when the data came back.
+   */
+  traffic?: Array<{ bucket_start: string; value: number }>;
 }): Array<{ bucket_start: string; value: number }> {
   const seen = new Set(samples.map((sample) => Date.parse(sample.bucket_start)));
+  const sent = new Set(
+    traffic.filter((sample) => sample.value > 0).map((sample) => Date.parse(sample.bucket_start))
+  );
   const zeros = heartbeat
     .filter((beat) => !seen.has(Date.parse(beat.bucket_start)))
+    .filter((beat) => traffic.length === 0 || sent.has(Date.parse(beat.bucket_start)))
     .map((beat) => ({ bucket_start: beat.bucket_start, value: 0 }));
   return [...samples, ...zeros].sort(
     (a, b) => Date.parse(a.bucket_start) - Date.parse(b.bucket_start)

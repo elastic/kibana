@@ -115,11 +115,16 @@ export const DEFAULT_ENGINE_CONFIG: EngineConfig = {
     // Detectors the engine wrote. Each one runs as a trial until it proves itself, whatever
     // this mode says; `off` stops them all.
     learned_detectors: { mode: 'live', daily_cap: 5 },
+    dependency_health: { mode: 'live', daily_cap: 10 },
+    change_regressions: { mode: 'live', daily_cap: 5 },
   },
   agent: { kind: 'heuristic' },
-  baseline: { min_samples: 10, history_buckets: 60, mad_k: 3, count_noise_k: 3 },
+  // 30 samples: with 10 the noise in the MAD alone raises the false-alarm rate about 20x.
+  baseline: { min_samples: 30, history_buckets: 60, mad_k: 3, count_noise_k: 3 },
   join_window_minutes: 60,
-  quiet_period_buckets: 2,
+  // Five quiet minutes before closing: Alertmanager resolves after 5 minutes, and a shorter
+  // close splits an intermittent fault into several events.
+  quiet_period_buckets: 5,
   worse_margin: 0.25,
   max_agent_calls_per_run: 8,
   max_agent_calls_per_day: 500,

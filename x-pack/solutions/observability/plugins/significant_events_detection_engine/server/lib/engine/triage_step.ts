@@ -159,6 +159,16 @@ export interface ITriageStep {
   }): Promise<void>;
   /** Records a signal the baseline check stopped. */
   recordBelowNormal(params: { observation: TaggedObservation; baseline: BaselineSummary }): void;
+  /**
+   * Records a signal above normal that has not looked off in enough of the last minutes yet.
+   * It reaches triage once it has, a minute or two later.
+   */
+  recordUnconfirmed(params: {
+    observation: TaggedObservation;
+    baseline: BaselineSummary;
+    lookedOff: number;
+    confirmation: { need: number; of: number };
+  }): void;
   /** Signals that waited for budget, to retry on the next run. */
   pending(): PendingSignal[];
 }
@@ -341,6 +351,28 @@ export function createTriageStep({
     };
   };
 
+  const recordSupporting = ({
+    observation,
+    baseline,
+    signalId,
+  }: {
+    observation: TaggedObservation;
+    baseline: BaselineSummary;
+    signalId: string;
+  }) => {
+    const reason =
+      'Supporting evidence only: it joins an open event it belongs to, and no event fits.';
+    record({ observation, baseline, signalId, outcome: 'supporting', reason });
+    recorder.log({
+      step: 'join',
+      action: 'supporting',
+      strategy: observation.strategy,
+      service: observation.service,
+      signal_id: signalId,
+      message: `${observation.title}: ${reason}`,
+    });
+  };
+
   return {
     pending: () => queued,
 
@@ -375,6 +407,20 @@ export function createTriageStep({
       });
     },
 
+    recordUnconfirmed({ observation, baseline, lookedOff, confirmation }) {
+      const signalId = uuidv4();
+      const reason = `Above normal, but above its trigger in ${lookedOff} of the last ${confirmation.of} minutes; it needs ${confirmation.need} before it is more than chance.`;
+      record({ observation, baseline, signalId, outcome: 'unconfirmed', reason });
+      recorder.log({
+        step: 'baseline',
+        action: 'unconfirmed',
+        strategy: observation.strategy,
+        service: observation.service,
+        signal_id: signalId,
+        message: `${observation.title}: ${reason}`,
+      });
+    },
+
     async process({ observation, baseline, firingAlerts, fromPending }) {
       const strategyConfig = config.strategies[observation.strategy];
       const descriptor = STRATEGIES[observation.strategy].descriptor;
@@ -392,7 +438,9 @@ export function createTriageStep({
           signal_id: signalId,
           message:
             baseline.decision === 'skipped'
-              ? `${observation.title}: the customer's rule already decided; baseline check skipped.`
+              ? `${observation.title}: baseline check skipped, ${
+                  baseline.reason ?? "the customer's rule already decided"
+                }.`
               : baseline.reason
               ? `${observation.title}: above normal, ${baseline.reason}.`
               : `${observation.title}: above normal, ${formatMeasure(
@@ -578,6 +626,25 @@ export function createTriageStep({
           (service) => service !== observation.service && mentions(shownRows, service)
         ),
       })[0];
+
+      // While its source's own silence event is open, a service's silence belongs to that
+      // outage: in the lab, a source coming back service by service otherwise left the
+      // slowest ones to open five events of their own.
+      const sourceSilenceOpen =
+        observation.fingerprint.startsWith('health:silence:') &&
+        observation.source_id !== undefined &&
+        events
+          .open()
+          .some((event) =>
+            event.members.some(
+              (member) => member.fingerprint === `health:source_silence:${observation.source_id}`
+            )
+          );
+      // Supporting evidence joins an event someone else opened, and never opens one itself.
+      if ((observation.supporting || sourceSilenceOpen) && !proposal) {
+        recordSupporting({ observation, baseline, signalId });
+        return;
+      }
 
       /** Reopens the closed event that owns this series, as a new episode of it. */
       const reopen = async (
@@ -804,6 +871,11 @@ export function createTriageStep({
 
       // The same problem is back, or the agent vetoed regrouping a recurrence: its own event
       // reopens, with this answer.
+      // Reopening its own closed event is opening one, which supporting evidence never does.
+      if (owner && observation.supporting) {
+        recordSupporting({ observation, baseline, signalId });
+        return;
+      }
       if (owner && (sameProblem || !reopenCase)) {
         await reopen(owner, { agentCase, answer, agentKind, corrections });
         return;
@@ -822,6 +894,11 @@ export function createTriageStep({
             answer.join_reason ?? ''
           }`.trim(),
         });
+      }
+
+      if (observation.supporting) {
+        recordSupporting({ observation, baseline, signalId });
+        return;
       }
 
       const charged = openedToday.get(observation.strategy) ?? 0;

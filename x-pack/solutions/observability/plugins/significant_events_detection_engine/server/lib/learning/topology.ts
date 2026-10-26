@@ -13,6 +13,7 @@ import { esqlString, field, listColumns, queryRows, timeRangeWhere, toNumber } f
 import { mapWithConcurrency } from '../concurrency';
 import { messageFieldOf } from './detector_author';
 import { requestTokens } from '../agent/mentions';
+import { callNamePatterns } from '../strategies/dependency_health';
 
 /** How far back mentions are counted. */
 const TOPOLOGY_WINDOW_MS = HOUR_MS;
@@ -102,7 +103,9 @@ export async function observeTopology({
             query: `FROM ${source.view_name}
 | WHERE ${timeRangeWhere(from, now)} AND ${field('service.name')} != ${esqlString(
               target
-            )} AND ${message} LIKE ${esqlString(`*${target}*`)}
+            )} AND (${callNamePatterns(target)
+              .map((pattern) => `${message} LIKE ${esqlString(pattern)}`)
+              .join(' OR ')})
 | STATS mentions = COUNT(*) BY service = ${field('service.name')}
 | WHERE mentions >= ${MIN_MENTIONS}`,
             signal,

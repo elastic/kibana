@@ -12,6 +12,8 @@ export const SIGNAL_STRATEGY_IDS = [
   'customer_alerts',
   'new_log_patterns',
   'learned_detectors',
+  'dependency_health',
+  'change_regressions',
 ] as const;
 export type SignalStrategyId = (typeof SIGNAL_STRATEGY_IDS)[number];
 
@@ -73,6 +75,13 @@ export interface SignalStrategyDescriptor {
    * minute is then settled as soon as each rule has run after it, instead of after `settleMs`.
    */
   writesEveryRun?: boolean;
+  /**
+   * How many of the last few evaluations of a series must look off before it reaches triage,
+   * when it holds no open event. One noisy minute is rarely a problem: two of three cuts chance
+   * triggers by one to two orders of magnitude for one extra minute of delay. A series already
+   * in an open event, or one the strategy marks as confirmed, skips this.
+   */
+  confirmation?: { need: number; of: number };
 }
 
 /** Per-strategy engine settings. */

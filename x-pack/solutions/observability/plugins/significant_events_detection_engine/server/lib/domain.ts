@@ -63,6 +63,17 @@ export interface StrategyObservation {
   trial?: boolean;
   /** For customer alerts: how often the alert fired, which the baseline check judges. */
   firing_history?: AlertFiringHistory;
+  /**
+   * Supporting evidence only. It may join an open event, but never opens one: a warning ratio
+   * is a cause rather than a symptom, and one service's silence during a source-wide silence
+   * belongs to that silence.
+   */
+  supporting?: boolean;
+  /**
+   * The strategy already required persistence, as the silence check does over its own window,
+   * so the descriptor's confirmation does not apply again.
+   */
+  confirmed?: boolean;
 }
 
 export interface TaggedObservation extends StrategyObservation {
@@ -121,6 +132,20 @@ export interface StateDocs {
   rules: EngineRulesRecord;
   pending: { signals: PendingSignal[] };
   lease: RunLease;
+  /** A log pattern a service has logged, keyed `<source>:<service>:<pattern hash>`. */
+  seen_pattern: SeenPattern;
+}
+
+/**
+ * When a service last logged a pattern. A pattern is new only when the store has not seen it
+ * for days: a rule that looks back two hours calls every daily job new each time it runs.
+ */
+export interface SeenPattern {
+  source_id: string;
+  service: string;
+  pattern: string;
+  first_seen: string;
+  last_seen: string;
 }
 export type StateKind = keyof StateDocs;
 

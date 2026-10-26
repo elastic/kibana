@@ -78,6 +78,30 @@ function evidenceLinksServices(agentCase: AgentCase): boolean {
   return ownLinks || eventLinks || sameRequest;
 }
 
+/** How close in time two symptoms on a call edge must start to anchor a join. */
+const ANCHOR_MINUTES = 3;
+
+/**
+ * The anchor rule: a direct call edge, and the service at its other end in the event already
+ * shows the same kind of symptom, starting within minutes. Latency on the gateway and latency on
+ * the search it calls are one slowdown even though latency rows never name a service; in the lab,
+ * vetoing these split one supplier slowdown into three events. One hop only, and never a shared
+ * dependency, because topology propagation beyond the anchor is where wrong joins come from.
+ */
+function anchoredOnCallEdge(agentCase: AgentCase): boolean {
+  const proposal = agentCase.join_proposal;
+  if (
+    !proposal ||
+    (proposal.relation !== 'upstream' && proposal.relation !== 'downstream') ||
+    proposal.minutes_apart > ANCHOR_MINUTES
+  ) {
+    return false;
+  }
+  return (agentCase.event?.members ?? []).some(
+    (member) => member.service === proposal.via && member.unit === agentCase.signal.unit
+  );
+}
+
 /**
  * A deterministic stand-in for the triage agent. It answers in the same shape as the model,
  * so the pipeline around it is the same, and runs with no connector and no cost.
@@ -101,7 +125,8 @@ function assessHeuristically(agentCase: AgentCase): AgentAnswer {
   }));
 
   const proposal = agentCase.join_proposal;
-  const linked = proposal !== undefined && evidenceLinksServices(agentCase);
+  const linked =
+    proposal !== undefined && (evidenceLinksServices(agentCase) || anchoredOnCallEdge(agentCase));
   const joinConfirmed =
     proposal !== undefined &&
     (proposal.relation === 'same_service' ||

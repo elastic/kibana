@@ -80,6 +80,7 @@ export function applyLifecycle({
   observations,
   gates,
   recorder,
+  enabledSourceIds,
 }: {
   bucketStart: number;
   config: EngineConfig;
@@ -91,6 +92,8 @@ export function applyLifecycle({
   /** This bucket's baseline decisions, by series. */
   gates: Map<string, BaselineDecision>;
   recorder: IRunRecorder;
+  /** Sources enabled now; an event whose members all came from others can never recover. */
+  enabledSourceIds: Set<string>;
 }): void {
   const bucketIso = new Date(bucketStart).toISOString();
   const bucketEndIso = new Date(bucketStart + BUCKET_MS).toISOString();
@@ -100,6 +103,14 @@ export function applyLifecycle({
     // An event that opened in this bucket has nothing to recover from yet.
     .filter((event) => event.opened_at !== bucketIso)
     .forEach((event) => {
+      // Without its source nothing evaluates the event again, so it would stay open for good.
+      const orphaned = event.members.every(
+        (member) => member.source_id !== undefined && !enabledSourceIds.has(member.source_id)
+      );
+      if (orphaned) {
+        transitionEvent({ event, input: 'source_removed', at: bucketEndIso, events, recorder });
+        return;
+      }
       if (!event.members.some((member) => evaluatedStrategies.has(member.strategy))) {
         return;
       }

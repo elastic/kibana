@@ -13,6 +13,7 @@ import type { SignalStrategyDescriptor, LearnedDetector, StrategyMode } from '..
 import type { OwnedRule, StrategyObservation } from '../domain';
 import type { CustomerRuleDefinition, ICustomerRuleKnowledge } from '../knowledge/customer_rules';
 import type { IRecordsStore } from '../storage/records_store';
+import type { IStateStore } from '../storage/state_store';
 import type { IRuleEventsReader } from './rule_events_reader';
 
 /** A detector the learning loop wrote, with how it runs right now. */
@@ -55,6 +56,8 @@ export interface StrategyContext extends BaseStrategyContext {
   customerRules?: ICustomerRuleKnowledge;
   /** Definitions of the customer's own Alerting v2 rules, by id, for their alerts' entities. */
   customerV2Rules?: (ids: string[]) => Promise<Map<string, CustomerRuleDefinition>>;
+  /** The engine's state, for strategies that remember across runs, such as patterns seen. */
+  state?: IStateStore;
 }
 
 /** A replay over past buckets [from, to), run with direct queries because rules never backfill. */
