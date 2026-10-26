@@ -41,7 +41,6 @@ export interface CasePersistedAttributes {
   settings: {
     syncAlerts: boolean;
     extractObservables?: boolean;
-    extractObservablesSource?: string;
   };
   severity: CasePersistedSeverity;
   status: CasePersistedStatus;

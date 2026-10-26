@@ -19,6 +19,7 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { Owner } from '../../../common/constants/types';
 import { resolveExtractObservables } from '../../../common/utils/case_settings';
+import type { CaseCreateAttributes, ExtractObservablesSource } from '../../common/types/case';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestSchema } from '../../../common/types/api';
 import {
@@ -58,6 +59,19 @@ import {
   CREATE_CASE_WITH_TEMPLATE_COUNTER,
   incrementCasesClientCounter,
 } from '../usage_counters';
+
+const getCreateExtractObservablesSource = ({
+  callerValue,
+  valueAfterTemplate,
+}: {
+  callerValue: boolean | undefined;
+  valueAfterTemplate: boolean | undefined;
+}): ExtractObservablesSource => {
+  if (callerValue !== undefined) {
+    return 'explicit';
+  }
+  return valueAfterTemplate !== undefined ? 'template' : 'space_default';
+};
 
 /**
  * Creates a new case.
@@ -163,6 +177,13 @@ export const create = async (
       }
     }
 
+    // Where the extractObservables value came from. Stored as a server-owned top-level attribute,
+    // so it never enters the request, the response, or the user action payload.
+    const extractObservablesSource = getCreateExtractObservablesSource({
+      callerValue: rawQuery.settings.extractObservables,
+      valueAfterTemplate: query.settings.extractObservables,
+    });
+
     // Default extractObservables when the caller omitted it and template expansion did not fill it.
     // Precedence: caller-explicit > template definition > space config > owner default > false.
     if (query.settings.extractObservables === undefined) {
@@ -174,17 +195,7 @@ export const create = async (
             query.owner,
             configurations[0]?.extractObservables
           ),
-          extractObservablesSource: 'space_default',
         },
-      };
-    } else {
-      // Template expansion fills the value only when the caller omitted it, so a value present on
-      // the expanded request but absent on the raw request came from the template.
-      const extractObservablesSource =
-        rawQuery.settings.extractObservables === undefined ? 'template' : 'explicit';
-      query = {
-        ...query,
-        settings: { ...query.settings, extractObservablesSource },
       };
     }
 
@@ -354,10 +365,13 @@ export const create = async (
       });
     }
 
-    const attributes = transformNewCase({
-      user,
-      newCase: normalizedCase,
-    });
+    const attributes: CaseCreateAttributes = {
+      ...transformNewCase({
+        user,
+        newCase: normalizedCase,
+      }),
+      extract_observables_source: extractObservablesSource,
+    };
 
     // Server-derived assignee identity: resolve profile uids to username /
     // full_name / email so downstream consumers (e.g. cases-as-data analytics)

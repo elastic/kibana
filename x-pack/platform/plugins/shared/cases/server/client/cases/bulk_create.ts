@@ -44,7 +44,7 @@ import { applyProfilesToAssignees, getUserProfilesSafe, normalizeCreateCaseReque
 import { ensureTemplateVersionIsPinned } from './expand_template_defaults';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
-import type { CaseTransformedAttributes } from '../../common/types/case';
+import type { CaseTransformedAttributes, ExtractObservablesSource } from '../../common/types/case';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import type { TemplatesService } from '../../services/templates';
 import type { FieldDefinitionsService } from '../../services/field_definitions';
@@ -81,6 +81,15 @@ export interface BulkCreateCasesClientOptions {
    * space silently breaks every automated case creation in it.
    */
   relaxRequiredFields?: boolean;
+  /**
+   * Where each case's `settings.extractObservables` value came from, keyed by the case id the
+   * caller put in the request. Stored as the server-owned `extract_observables_source`
+   * attribute. Only an automated writer knows the source (the cases connector knows a rule
+   * override from a template value). When the map is passed, a case without an entry gets no
+   * source and an error is logged. When the map is not passed, the source is `explicit` if the
+   * request set the value, otherwise `space_default`.
+   */
+  extractObservablesSourceByCaseId?: ReadonlyMap<string, ExtractObservablesSource>;
 }
 
 /**
@@ -192,6 +201,7 @@ export const bulkCreate = async (
         templatesEnabled: clientArgs.config.templates.enabled,
         relaxRequiredFields: options.relaxRequiredFields === true,
         spaceExtractObservables: extractObservablesMap.get(theCase.owner),
+        extractObservablesSourceByCaseId: options.extractObservablesSourceByCaseId,
       });
       bulkCreateRequest.push(request);
     }
@@ -488,6 +498,37 @@ const validateAssigneesUsage = ({
   }
 };
 
+/**
+ * Picks the stored source of the extractObservables value. With a source map, only the map is
+ * trusted: a missing entry is logged and the attribute stays unset, so telemetry never counts a
+ * guessed source.
+ */
+const resolveBulkCreateExtractObservablesSource = ({
+  caseId,
+  owner,
+  callerValue,
+  extractObservablesSourceByCaseId,
+  logger,
+}: {
+  caseId: string;
+  owner: string;
+  callerValue: boolean | undefined;
+  extractObservablesSourceByCaseId?: ReadonlyMap<string, ExtractObservablesSource>;
+  logger: CasesClientArgs['logger'];
+}): ExtractObservablesSource | undefined => {
+  if (extractObservablesSourceByCaseId === undefined) {
+    return callerValue !== undefined ? 'explicit' : 'space_default';
+  }
+
+  const mappedSource = extractObservablesSourceByCaseId.get(caseId);
+  if (mappedSource === undefined) {
+    logger.error(
+      `Missing extractObservables source for bulk created case ${caseId} (owner: ${owner}). The case is created without extract_observables_source.`
+    );
+  }
+  return mappedSource;
+};
+
 const createBulkCreateCaseRequest = async ({
   theCase,
   customFieldsConfiguration,
@@ -501,6 +542,7 @@ const createBulkCreateCaseRequest = async ({
   templatesEnabled,
   relaxRequiredFields,
   spaceExtractObservables,
+  extractObservablesSourceByCaseId,
 }: {
   theCase: { id: string } & BulkCreateCasesRequest['cases'][number];
   customFieldsConfiguration?: CustomFieldsConfiguration;
@@ -518,6 +560,8 @@ const createBulkCreateCaseRequest = async ({
   relaxRequiredFields: boolean;
   /** Space-level extractObservables default from the configuration saved object. */
   spaceExtractObservables?: boolean;
+  /** See {@link BulkCreateCasesClientOptions.extractObservablesSourceByCaseId}. */
+  extractObservablesSourceByCaseId?: ReadonlyMap<string, ExtractObservablesSource>;
 }): Promise<{
   request: BulkCreateCasesArgs['cases'][number];
 }> => {
@@ -549,6 +593,14 @@ const createBulkCreateCaseRequest = async ({
   // fields, one supplied via customFields and the other via extended_fields — a pre-pair check
   // only sees the latter and rejects the former as missing.
 
+  const extractObservablesSource = resolveBulkCreateExtractObservablesSource({
+    caseId: id,
+    owner: theCase.owner,
+    callerValue: caseWithoutId.settings.extractObservables,
+    extractObservablesSourceByCaseId,
+    logger,
+  });
+
   // Default extractObservables when the caller omitted it.
   // Precedence: caller-explicit > space config > owner default > false.
   if (caseWithoutId.settings.extractObservables === undefined) {
@@ -557,18 +609,9 @@ const createBulkCreateCaseRequest = async ({
       settings: {
         ...caseWithoutId.settings,
         extractObservables: resolveExtractObservables(caseWithoutId.owner, spaceExtractObservables),
-        extractObservablesSource: 'space_default',
       },
     };
-  } else if (caseWithoutId.settings.extractObservablesSource == null) {
-    // extractObservables was explicitly provided (by the API caller or connector executor) but
-    // the source was not pre-set; mark it as an explicit override.
-    caseWithoutId = {
-      ...caseWithoutId,
-      settings: { ...caseWithoutId.settings, extractObservablesSource: 'explicit' },
-    };
   }
-  // Otherwise the source was already stamped by the connector executor ('rule', 'template' or 'space_default').
 
   const normalizedCase = normalizeCreateCaseRequest(caseWithoutId, customFieldsConfiguration);
 
@@ -669,6 +712,9 @@ const createBulkCreateCaseRequest = async ({
         user,
         newCase: normalizedCase,
       }),
+      ...(extractObservablesSource !== undefined
+        ? { extract_observables_source: extractObservablesSource }
+        : {}),
     },
   };
 };

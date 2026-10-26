@@ -24,6 +24,7 @@ import {
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/constants/owners';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import type { CasesPatchRequest } from '../../../common/types/api';
 import {
   SECURITY_ATTACK_ATTACHMENT_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
@@ -692,6 +693,57 @@ describe('update', () => {
           ]),
         })
       );
+    });
+  });
+
+  describe('server-owned extract_observables_source', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+    });
+
+    it('rejects a top-level extract_observables_source', async () => {
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                extract_observables_source: 'rule',
+              },
+            ],
+          } as unknown as CasesPatchRequest,
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Excess keys are not allowed');
+      expect(clientArgs.services.caseService.patchCases).not.toHaveBeenCalled();
+    });
+
+    it('rejects settings.extractObservablesSource', async () => {
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                settings: {
+                  syncAlerts: true,
+                  extractObservables: true,
+                  extractObservablesSource: 'rule',
+                },
+              },
+            ],
+          } as unknown as CasesPatchRequest,
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Excess keys are not allowed');
+      expect(clientArgs.services.caseService.patchCases).not.toHaveBeenCalled();
     });
   });
 
