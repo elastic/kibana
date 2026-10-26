@@ -137913,6 +137913,13 @@ paths:
           schema:
             maxLength: 255
             type: string
+        - description: Filter by execution name using a case-insensitive substring.
+          in: query
+          name: runName
+          required: false
+          schema:
+            maxLength: 1024
+            type: string
         - description: Filter by execution status.
           in: query
           name: statuses
