@@ -52,6 +52,18 @@ describe('actionPolicyChangedTelemetryDataSchema', () => {
     ).toBe(true);
   });
 
+  it('accepts a payload with only action_policy_id, space_id and origin', () => {
+    const { action_policy_id: actionPolicyId, space_id: spaceId, origin } = validPayload;
+
+    expect(
+      actionPolicyChangedTelemetryDataSchema.safeParse({
+        action_policy_id: actionPolicyId,
+        space_id: spaceId,
+        origin,
+      }).success
+    ).toBe(true);
+  });
+
   it.each([
     ['an unknown matcher_type', { matcher_type: 'regex' }],
     ['an unknown grouping_mode', { grouping_mode: 'per_host' }],

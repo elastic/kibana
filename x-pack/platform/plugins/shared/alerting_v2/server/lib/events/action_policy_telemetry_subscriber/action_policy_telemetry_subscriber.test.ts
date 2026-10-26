@@ -106,7 +106,7 @@ describe('ActionPolicyTelemetrySubscriber', () => {
         expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
         expect(ebtService.reportEvent).toHaveBeenCalledWith(
           ACTION_POLICY_EBT_EVENT_TYPE_BY_OPERATION[type],
-          buildActionPolicyChangedEventData(policy, context.origin, 'space-1')
+          buildActionPolicyChangedEventData(policy, context.origin, 'policy-1', 'space-1')
         );
       }
     );
@@ -134,7 +134,7 @@ describe('ActionPolicyTelemetrySubscriber', () => {
     });
 
     it.each(ACTION_POLICY_OPERATIONS)(
-      'does not report %s when the domain policy is missing',
+      'reports %s with only the id, space and origin when the domain policy is missing',
       async (type) => {
         subscriber.start();
 
@@ -143,7 +143,15 @@ describe('ActionPolicyTelemetrySubscriber', () => {
           context
         );
 
-        expect(ebtService.reportEvent).not.toHaveBeenCalled();
+        expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
+        expect(ebtService.reportEvent).toHaveBeenCalledWith(
+          ACTION_POLICY_EBT_EVENT_TYPE_BY_OPERATION[type],
+          {
+            action_policy_id: 'policy-1',
+            space_id: 'space-1',
+            origin: { actor: 'user', channel: 'api' },
+          }
+        );
       }
     );
   });

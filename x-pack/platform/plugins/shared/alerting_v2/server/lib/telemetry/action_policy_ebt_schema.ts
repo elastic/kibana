@@ -68,34 +68,45 @@ export const actionPolicyChangedTelemetryDataSchema = lazySchema(() =>
       .min(1)
       .max(ID_MAX_LENGTH)
       .describe('The space the action policy belongs to.'),
-    created_at: isoDateTime().describe('ISO timestamp of when the action policy was created.'),
+    created_at: isoDateTime()
+      .optional()
+      .describe(
+        'ISO timestamp of when the action policy was created. Absent when the action policy could not be read.'
+      ),
     enabled: z
       .boolean()
+      .optional()
       .describe(
-        'Whether the action policy was enabled after the operation (for a delete, whether it was enabled when deleted).'
+        'Whether the action policy was enabled after the operation (for a delete, whether it was enabled when deleted). Absent when the action policy could not be read.'
       ),
     destination_count: z
       .number()
       .int()
       .min(0)
-      .describe('The number of destinations the action policy notifies.'),
-    matcher_type: actionPolicyEbtMatcherTypeTelemetrySchema.describe(
-      'How the action policy selects alerts: no matcher, routing tags, a KQL expression, or tags and expression.'
-    ),
+      .optional()
+      .describe(
+        'The number of destinations the action policy notifies. Absent when the action policy could not be read.'
+      ),
+    matcher_type: actionPolicyEbtMatcherTypeTelemetrySchema
+      .optional()
+      .describe(
+        'How the action policy selects alerts: no matcher, routing tags, a KQL expression, or tags and expression. Absent when the action policy could not be read.'
+      ),
     grouping_mode: groupingModeSchema
       .optional()
       .describe(
-        'The grouping mode the policy sets: `per_alert`, `all` or `per_field`. Absent when the policy sets no grouping, in which case notifications are sent `per_alert`.'
+        'The grouping mode the policy sets: `per_alert`, `all` or `per_field`. Absent when the policy sets no grouping, in which case notifications are sent `per_alert`, or when the action policy could not be read.'
       ),
     throttle_strategy: throttleStrategySchema
       .optional()
       .describe(
-        'The throttle strategy the policy sets. Absent when the policy sets no throttle, in which case the strategy defaults to `on_status_change` for `per_alert` grouping and `time_interval` otherwise.'
+        'The throttle strategy the policy sets. Absent when the policy sets no throttle, in which case the strategy defaults to `on_status_change` for `per_alert` grouping and `time_interval` otherwise, or when the action policy could not be read.'
       ),
     snoozed: z
       .boolean()
+      .optional()
       .describe(
-        'Whether the action policy was snoozed at the time of the operation. An expired snooze is not reported as snoozed.'
+        'Whether the action policy was snoozed at the time of the operation. An expired snooze is not reported as snoozed. Absent when the action policy could not be read.'
       ),
     origin: eventOriginSchema.describe('Where the change came from.'),
   })

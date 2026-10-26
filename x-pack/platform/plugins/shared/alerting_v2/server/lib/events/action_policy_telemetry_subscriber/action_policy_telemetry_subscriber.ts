@@ -29,8 +29,8 @@ import type { ActionPolicyEvent } from '../action_policy_event_publisher/events'
  * Singleton bus subscriber that reports action policy lifecycle domain events
  * as event-based telemetry (EBT) through the {@link EbtServiceContract}.
  *
- * Events without a domain policy are not reported, because every reported
- * field except the id comes from the policy.
+ * Events without a domain policy still report `action_policy_id`, `space_id`
+ * and `origin`. Fields that come from the policy are omitted.
  */
 @injectable()
 export class ActionPolicyTelemetrySubscriber {
@@ -76,15 +76,12 @@ export class ActionPolicyTelemetrySubscriber {
   #reportActionPolicyChanged(event: ActionPolicyEvent, { origin }: AlertingPublisherContext): void {
     const {
       type,
-      payload: { policy, spaceId },
+      payload: { actionPolicyId, policy, spaceId },
     } = event;
-    if (policy === undefined) {
-      return;
-    }
 
     this.ebtService.reportEvent(
       ACTION_POLICY_EBT_EVENT_TYPE_BY_OPERATION[type],
-      buildActionPolicyChangedEventData(policy, origin, spaceId)
+      buildActionPolicyChangedEventData(policy, origin, actionPolicyId, spaceId)
     );
   }
 }

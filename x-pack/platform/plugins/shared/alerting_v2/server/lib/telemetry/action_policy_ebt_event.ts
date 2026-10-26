@@ -66,38 +66,40 @@ const actionPolicyChangedEventSchema: EventTypeOpts<ActionPolicyChangedEbtData>[
   created_at: {
     type: 'date',
     _meta: {
-      description: 'ISO timestamp of when the action policy was created.',
-      optional: false,
+      description:
+        'ISO timestamp of when the action policy was created. Absent when the action policy could not be read.',
+      optional: true,
     },
   },
   enabled: {
     type: 'boolean',
     _meta: {
       description:
-        'Whether the action policy was enabled after the operation (for a delete, whether it was enabled when deleted).',
-      optional: false,
+        'Whether the action policy was enabled after the operation (for a delete, whether it was enabled when deleted). Absent when the action policy could not be read.',
+      optional: true,
     },
   },
   destination_count: {
     type: 'integer',
     _meta: {
-      description: 'The number of destinations the action policy notifies.',
-      optional: false,
+      description:
+        'The number of destinations the action policy notifies. Absent when the action policy could not be read.',
+      optional: true,
     },
   },
   matcher_type: {
     type: 'keyword',
     _meta: {
       description:
-        'How the action policy selects alerts: `none` for a catch-all policy, `tags`, `expression`, or `tags_and_expression`.',
-      optional: false,
+        'How the action policy selects alerts: `none` for a catch-all policy, `tags`, `expression`, or `tags_and_expression`. Absent when the action policy could not be read.',
+      optional: true,
     },
   },
   grouping_mode: {
     type: 'keyword',
     _meta: {
       description:
-        'The grouping mode the policy sets: `per_alert`, `all` or `per_field`. Absent when the policy sets no grouping, in which case notifications are sent `per_alert`.',
+        'The grouping mode the policy sets: `per_alert`, `all` or `per_field`. Absent when the policy sets no grouping, in which case notifications are sent `per_alert`, or when the action policy could not be read.',
       optional: true,
     },
   },
@@ -105,7 +107,7 @@ const actionPolicyChangedEventSchema: EventTypeOpts<ActionPolicyChangedEbtData>[
     type: 'keyword',
     _meta: {
       description:
-        'The throttle strategy the policy sets. Absent when the policy sets no throttle, in which case the strategy defaults to `on_status_change` for `per_alert` grouping and `time_interval` otherwise.',
+        'The throttle strategy the policy sets. Absent when the policy sets no throttle, in which case the strategy defaults to `on_status_change` for `per_alert` grouping and `time_interval` otherwise, or when the action policy could not be read.',
       optional: true,
     },
   },
@@ -113,8 +115,8 @@ const actionPolicyChangedEventSchema: EventTypeOpts<ActionPolicyChangedEbtData>[
     type: 'boolean',
     _meta: {
       description:
-        'Whether the action policy was snoozed at the time of the operation. An expired snooze is not reported as snoozed.',
-      optional: false,
+        'Whether the action policy was snoozed at the time of the operation. An expired snooze is not reported as snoozed. Absent when the action policy could not be read.',
+      optional: true,
     },
   },
   origin: eventOriginEbtSchema,
@@ -145,11 +147,9 @@ const getMatcherType = ({ matcher }: ActionPolicyResponse): ActionPolicyEbtMatch
 };
 
 const buildActionPolicyFields = (
-  policy: ActionPolicyResponse,
-  spaceId: string
-): Omit<ActionPolicyChangedEbtData, 'origin'> => {
+  policy: ActionPolicyResponse
+): Omit<ActionPolicyChangedEbtData, 'action_policy_id' | 'space_id' | 'origin'> => {
   const {
-    id,
     created_at: createdAt,
     enabled,
     destinations,
@@ -159,8 +159,6 @@ const buildActionPolicyFields = (
   } = policy;
 
   return {
-    action_policy_id: id,
-    space_id: spaceId,
     created_at: createdAt,
     enabled,
     destination_count: destinations.length,
@@ -172,14 +170,18 @@ const buildActionPolicyFields = (
 };
 
 /**
- * Projects an action policy change telemetry payload. Names, descriptions, matcher contents,
- * grouping fields, destinations and actors are not reported.
+ * Projects an action policy change telemetry payload. Policy fields are omitted when `policy` is
+ * absent. Names, descriptions, matcher contents, grouping fields, destinations and actors are not
+ * reported.
  */
 export const buildActionPolicyChangedEventData = (
-  policy: ActionPolicyResponse,
+  policy: ActionPolicyResponse | undefined,
   origin: EventOrigin,
+  actionPolicyId: string,
   spaceId: string
 ): ActionPolicyChangedEbtData => ({
-  ...buildActionPolicyFields(policy, spaceId),
+  action_policy_id: actionPolicyId,
+  space_id: spaceId,
+  ...(policy ? buildActionPolicyFields(policy) : {}),
   origin,
 });

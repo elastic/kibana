@@ -19,6 +19,7 @@ import {
 } from './action_policy_ebt_event';
 
 const apiUserOrigin: EventOrigin = { actor: 'user', channel: 'api' };
+const POLICY_ID = 'policy-1';
 const SPACE_ID = 'space-1';
 
 const createActionPolicyResponse = (
@@ -78,6 +79,7 @@ describe('action policy change EBT events', () => {
         throttle: { strategy: 'every_time' },
       }),
       apiUserOrigin,
+      POLICY_ID,
       SPACE_ID
     );
 
@@ -88,7 +90,12 @@ describe('action policy change EBT events', () => {
 describe('buildActionPolicyChangedEventData', () => {
   it('projects the policy fields and nests the origin', () => {
     expect(
-      buildActionPolicyChangedEventData(createActionPolicyResponse(), apiUserOrigin, SPACE_ID)
+      buildActionPolicyChangedEventData(
+        createActionPolicyResponse(),
+        apiUserOrigin,
+        POLICY_ID,
+        SPACE_ID
+      )
     ).toEqual({
       action_policy_id: 'policy-1',
       space_id: SPACE_ID,
@@ -110,6 +117,7 @@ describe('buildActionPolicyChangedEventData', () => {
         snoozed_until: '2030-01-01T00:00:00.000Z',
       }),
       { actor: 'internal', channel: 'ui', app: 'discover' },
+      POLICY_ID,
       SPACE_ID
     );
 
@@ -130,19 +138,24 @@ describe('buildActionPolicyChangedEventData', () => {
   ])('derives matcher_type for %s', (_description, matcher, expected) => {
     const policy = createActionPolicyResponse({ matcher });
 
-    expect(buildActionPolicyChangedEventData(policy, apiUserOrigin, SPACE_ID).matcher_type).toBe(
-      expected
-    );
+    expect(
+      buildActionPolicyChangedEventData(policy, apiUserOrigin, POLICY_ID, SPACE_ID).matcher_type
+    ).toBe(expected);
   });
 
   it('reports grouping_mode only when grouping is set', () => {
     const grouped = createActionPolicyResponse({ grouping: { mode: 'all' } });
 
-    expect(buildActionPolicyChangedEventData(grouped, apiUserOrigin, SPACE_ID).grouping_mode).toBe(
-      'all'
-    );
     expect(
-      buildActionPolicyChangedEventData(createActionPolicyResponse(), apiUserOrigin, SPACE_ID)
+      buildActionPolicyChangedEventData(grouped, apiUserOrigin, POLICY_ID, SPACE_ID).grouping_mode
+    ).toBe('all');
+    expect(
+      buildActionPolicyChangedEventData(
+        createActionPolicyResponse(),
+        apiUserOrigin,
+        POLICY_ID,
+        SPACE_ID
+      )
     ).not.toHaveProperty('grouping_mode');
   });
 
@@ -152,10 +165,16 @@ describe('buildActionPolicyChangedEventData', () => {
     });
 
     expect(
-      buildActionPolicyChangedEventData(throttled, apiUserOrigin, SPACE_ID).throttle_strategy
+      buildActionPolicyChangedEventData(throttled, apiUserOrigin, POLICY_ID, SPACE_ID)
+        .throttle_strategy
     ).toBe('per_status_interval');
     expect(
-      buildActionPolicyChangedEventData(createActionPolicyResponse(), apiUserOrigin, SPACE_ID)
+      buildActionPolicyChangedEventData(
+        createActionPolicyResponse(),
+        apiUserOrigin,
+        POLICY_ID,
+        SPACE_ID
+      )
     ).not.toHaveProperty('throttle_strategy');
   });
 
@@ -176,9 +195,9 @@ describe('buildActionPolicyChangedEventData', () => {
     ])('%s', (_description, snoozedUntil, expected) => {
       const policy = createActionPolicyResponse({ snoozed_until: snoozedUntil });
 
-      expect(buildActionPolicyChangedEventData(policy, apiUserOrigin, SPACE_ID).snoozed).toBe(
-        expected
-      );
+      expect(
+        buildActionPolicyChangedEventData(policy, apiUserOrigin, POLICY_ID, SPACE_ID).snoozed
+      ).toBe(expected);
     });
   });
 
@@ -192,8 +211,20 @@ describe('buildActionPolicyChangedEventData', () => {
     });
 
     expect(
-      buildActionPolicyChangedEventData(policy, apiUserOrigin, SPACE_ID).destination_count
+      buildActionPolicyChangedEventData(policy, apiUserOrigin, POLICY_ID, SPACE_ID)
+        .destination_count
     ).toBe(3);
+  });
+
+  it('reports only the id, space and origin when the policy is missing', () => {
+    const data = buildActionPolicyChangedEventData(undefined, apiUserOrigin, POLICY_ID, SPACE_ID);
+
+    expect(data).toEqual({
+      action_policy_id: POLICY_ID,
+      space_id: SPACE_ID,
+      origin: apiUserOrigin,
+    });
+    expect(actionPolicyChangedTelemetryDataSchema.safeParse(data).success).toBe(true);
   });
 
   it('reports the origin as given', () => {
@@ -203,6 +234,7 @@ describe('buildActionPolicyChangedEventData', () => {
       buildActionPolicyChangedEventData(
         policy,
         { actor: 'user', channel: 'ui', app: 'discover' },
+        POLICY_ID,
         SPACE_ID
       ).origin
     ).toEqual({ actor: 'user', channel: 'ui', app: 'discover' });
@@ -214,7 +246,7 @@ describe('buildActionPolicyChangedEventData', () => {
       grouping: { mode: 'per_field', fields: ['secret.field'] },
     });
     const serialized = JSON.stringify(
-      buildActionPolicyChangedEventData(policy, apiUserOrigin, SPACE_ID)
+      buildActionPolicyChangedEventData(policy, apiUserOrigin, POLICY_ID, SPACE_ID)
     );
 
     for (const value of [
