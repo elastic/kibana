@@ -43,7 +43,7 @@ import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_in
 import type { InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
-  AlertSnapshot,
+  InvestigationAlertSnapshot,
   InvestigationContext,
   InvestigationSubject,
   InvestigationTriggerType,
@@ -385,7 +385,7 @@ export class NightshiftInvestigationsClient {
     subject: InvestigationSubject,
     message: string | undefined,
     context: InvestigationContext | AlertInvestigationContext
-  ): { message: string; context: Record<string, unknown>; alerts: AlertSnapshot[] } {
+  ): { message: string; context: Record<string, unknown>; alerts: InvestigationAlertSnapshot[] } {
     if (subject.type === 'alert') {
       const parsed = alertInvestigationContextSchema.safeParse(context);
       if (!parsed.success) {

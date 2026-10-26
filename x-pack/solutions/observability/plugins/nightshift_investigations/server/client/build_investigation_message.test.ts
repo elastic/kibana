@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { alertInvestigationContextSchema, type AlertSnapshot } from '../../common';
+import {
+  alertInvestigationContextSchema,
+  type AlertSnapshot,
+  type V2AlertSnapshot,
+} from '../../common';
 import { buildInvestigationMessage } from './build_investigation_message';
 
 /** What the client does at the boundary, reduced to accepted-or-not for these cases. */
@@ -314,4 +318,30 @@ describe('buildInvestigationMessage', () => {
   // Which subjects get a composed brief and which keep the caller's message is now the client's
   // decision, so it is asserted in investigations_client.test.ts rather than here. This function
   // only ever receives a validated alert context.
+});
+
+describe('buildInvestigationMessage with a mixed alert array', () => {
+  const v2Alert: V2AlertSnapshot = {
+    alert_version: 'v2',
+    id: 'episode-1',
+    rule_id: 'v2-rule-1',
+    group_hash: 'hash-1',
+    status: 'active',
+    start: '2026-08-24T12:00:00.000Z',
+    data: { 'host.name': 'h1' },
+  };
+
+  it('accepts classic and v2 alerts in one context', () => {
+    expect(accepts({ alerts: [alert(), v2Alert] })).toBe(true);
+  });
+
+  it('describes each alert by its own schema and data location', () => {
+    const message = buildInvestigationMessage({ alerts: [alert(), v2Alert] });
+
+    expect(message).toContain('Rule "Latency is too high"');
+    expect(message).toContain('Alerting v2 episode episode-1 of rule v2-rule-1');
+    expect(message).toContain('query the .alerts-* indices');
+    expect(message).toContain('.rule-events');
+    expect(message).toContain('"host.name":"h1"');
+  });
 });
