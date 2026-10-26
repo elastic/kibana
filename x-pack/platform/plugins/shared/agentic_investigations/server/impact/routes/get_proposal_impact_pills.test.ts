@@ -50,7 +50,17 @@ describe('registerGetProposalImpactPillsRoute', () => {
     const { validateQuery } = register();
 
     expect(validateQuery({ origin: 'alertzero', categories: 'respond' })).toEqual({
-      value: { origin: 'alertzero', categories: ['respond'] },
+      value: { origin: 'alertzero', categories: ['respond'], from: 0, size: 10 },
+    });
+  });
+
+  it('reads the page the client asks for', () => {
+    const { validateQuery } = register();
+
+    expect(
+      validateQuery({ origin: 'alertzero', categories: 'respond', from: '20', size: '10' })
+    ).toEqual({
+      value: { origin: 'alertzero', categories: ['respond'], from: 20, size: 10 },
     });
   });
 
@@ -68,6 +78,8 @@ describe('registerGetProposalImpactPillsRoute', () => {
         origin: 'alertzero',
         categories: ['respond', 'investigate'],
         decidedWithinHours: 72,
+        from: 0,
+        size: 10,
       },
     });
   });
@@ -77,6 +89,10 @@ describe('registerGetProposalImpactPillsRoute', () => {
     ['no categories', { origin: 'alertzero' }],
     ['too many categories', { origin: 'alertzero', categories: Array(11).fill('respond') }],
     ['an overlong category', { origin: 'alertzero', categories: 'x'.repeat(65) }],
+    ['an empty page', { origin: 'alertzero', categories: 'respond', size: 0 }],
+    ['an oversized page', { origin: 'alertzero', categories: 'respond', size: 101 }],
+    ['a negative offset', { origin: 'alertzero', categories: 'respond', from: -1 }],
+    ['a page past the reach', { origin: 'alertzero', categories: 'respond', from: 9995, size: 10 }],
     [
       'a window past a week',
       { origin: 'alertzero', categories: 'respond', decidedWithinHours: 169 },
