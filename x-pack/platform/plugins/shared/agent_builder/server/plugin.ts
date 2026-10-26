@@ -372,6 +372,7 @@ export class AgentBuilderPlugin
       searchInferenceEndpoints,
       licensing,
       security: securityPlugin,
+      isomer,
     } = startDeps;
     const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
@@ -408,6 +409,7 @@ export class AgentBuilderPlugin
         airgapped: this.env.airgapped,
       }),
       deductiveRegister: this.config.deductive?.register ?? false,
+      isomer,
       conversationEventBus: this.conversationEventBus,
     });
 

@@ -86,6 +86,7 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/esql-utils'
   - '@kbn/ebt-click'
+  - '@kbn/usage-collection-plugin'
 tags:
   - plugin
   - prod
