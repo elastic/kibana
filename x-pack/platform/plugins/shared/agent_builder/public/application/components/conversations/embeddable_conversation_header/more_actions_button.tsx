@@ -14,7 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { AGENT_BUILDER_UI_EBT, DEFAULT_CONVERSATION_TITLE } from '@kbn/agent-builder-common';
 import { downloadFileAs } from '@kbn/share-plugin/public';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -28,7 +28,6 @@ import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useLoadTraceFromFile } from '../../../hooks/use_load_trace_from_file';
 import { ActivityLogFlyout } from '../activity_log/activity_log_flyout';
-import { useActivityLogView } from '../activity_log/activity_log_view_context';
 import { isListedActivityEvent } from '../activity_log/to_activity_items';
 import { TraceFlyout } from '../timeline/response/trace_flyout';
 
@@ -78,8 +77,6 @@ interface MoreActionsButtonProps {
 export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSidebar }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
-  const embeddedActivityLog = useActivityLogView();
-  const moreActionsButtonRef = useRef<HTMLButtonElement>(null);
 
   const agentId = useAgentId();
   const { createAgentBuilderUrl, navigateToAgentBuilderUrl } = useNavigation();
@@ -141,12 +138,8 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
 
   const handleOpenActivityLog = useCallback(() => {
     setIsPopoverOpen(false);
-    if (embeddedActivityLog) {
-      embeddedActivityLog.open(moreActionsButtonRef.current);
-      return;
-    }
     setIsActivityLogOpen(true);
-  }, [embeddedActivityLog]);
+  }, []);
 
   const handleLoadTrace = useCallback(() => {
     setIsPopoverOpen(false);
@@ -202,6 +195,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       key="activity-log"
       icon="timeline"
       disabled={!hasActivity}
+      toolTipContent={hasActivity ? undefined : labels.activityLogNoActivityTooltip}
       data-test-subj="agentBuilderActivityLogMenuItem"
       onClick={handleOpenActivityLog}
       {...getEbtProps({
@@ -210,13 +204,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         detail: 'conversation',
       })}
     >
-      {hasActivity ? (
-        labels.activityLog
-      ) : (
-        <EuiToolTip content={labels.activityLogNoActivityTooltip}>
-          <span tabIndex={0}>{labels.activityLog}</span>
-        </EuiToolTip>
-      )}
+      {labels.activityLog}
     </EuiContextMenuItem>
   );
 
@@ -274,7 +262,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   ];
 
   const menuItems = isEmbeddedContext
-    ? [activityLogMenuItem, ...embeddedContextMenuItems]
+    ? embeddedContextMenuItems
     : [
         activityLogMenuItem,
         <EuiHorizontalRule key="activity-log-divider" margin="none" />,
@@ -282,7 +270,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       ];
 
   const buttonProps = {
-    buttonRef: moreActionsButtonRef,
     iconType: 'boxesVertical' as const,
     color: 'text' as const,
     size: 's' as const,

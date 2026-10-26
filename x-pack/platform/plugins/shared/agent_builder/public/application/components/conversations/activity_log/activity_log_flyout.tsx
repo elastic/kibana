@@ -8,9 +8,13 @@
 import React from 'react';
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActivityLogContent, activityLogTitle } from './activity_log_content';
+import { ActivityLogContent } from './activity_log_content';
 
 const FLYOUT_WIDTH = 500;
+
+const title = i18n.translate('xpack.agentBuilder.activityLog.title', {
+  defaultMessage: 'Activity log',
+});
 
 const closeAriaLabel = i18n.translate('xpack.agentBuilder.activityLog.closeAriaLabel', {
   defaultMessage: 'Close activity log',
@@ -32,7 +36,7 @@ export const ActivityLogFlyout: React.FC<ActivityLogFlyoutProps> = ({ onClose })
   >
     <EuiFlyoutHeader>
       <EuiTitle size="s">
-        <h2 id="agentBuilderActivityLogTitle">{activityLogTitle}</h2>
+        <h2 id="agentBuilderActivityLogTitle">{title}</h2>
       </EuiTitle>
     </EuiFlyoutHeader>
     <EuiFlyoutBody>

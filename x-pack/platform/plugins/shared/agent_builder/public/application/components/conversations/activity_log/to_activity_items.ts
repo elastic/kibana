@@ -12,6 +12,7 @@ import {
   isActivityEvent,
   type ActivityEvent,
   type ConversationEvent,
+  type ConversationParticipant,
   type EventActor,
 } from '@kbn/agent-builder-common';
 
@@ -63,3 +64,9 @@ export const findTriggeringUser = (
 
   return triggerActor?.type === EventActorType.user ? triggerActor : undefined;
 };
+
+export const getEventParticipants = (event: ActivityEvent): ConversationParticipant[] =>
+  event.type === ConversationActivityEventType.participantsAdded ||
+  event.type === ConversationActivityEventType.participantsRemoved
+    ? event.data.participants
+    : [];
