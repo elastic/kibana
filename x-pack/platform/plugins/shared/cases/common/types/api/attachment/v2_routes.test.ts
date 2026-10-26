@@ -13,9 +13,9 @@ import {
   MAX_OWNER_LENGTH,
   MAX_SAVED_OBJECT_VERSION_LENGTH,
 } from '../../../constants';
+import { AttachmentPatchRequestSchemaV2 } from './v2_union';
 import {
-  AttachmentPatchRequestSchemaV2,
-  BulkCreateUnifiedAttachmentsRequestSchema,
+  BulkCreateUnifiedAttachmentsRouteRequestSchema,
   UnifiedAttachmentBoundsSchema,
   UnifiedAttachmentPutRouteRequestSchema,
   UnifiedAttachmentRouteRequestSchema,
@@ -151,16 +151,16 @@ describe('UnifiedAttachmentRouteRequestSchema', () => {
   });
 });
 
-describe('BulkCreateUnifiedAttachmentsRequestSchema', () => {
+describe('BulkCreateUnifiedAttachmentsRouteRequestSchema', () => {
   const comment = { type: 'comment', owner: 'securitySolution', data: { content: 'hello' } };
 
   it('accepts bounded attachments', () => {
-    expect(BulkCreateUnifiedAttachmentsRequestSchema.safeParse([comment]).success).toBe(true);
+    expect(BulkCreateUnifiedAttachmentsRouteRequestSchema.safeParse([comment]).success).toBe(true);
   });
 
   it('rejects an attachment over the bounds', () => {
     expect(
-      BulkCreateUnifiedAttachmentsRequestSchema.safeParse([
+      BulkCreateUnifiedAttachmentsRouteRequestSchema.safeParse([
         comment,
         { ...comment, owner: 'a'.repeat(MAX_OWNER_LENGTH + 1) },
       ]).success
