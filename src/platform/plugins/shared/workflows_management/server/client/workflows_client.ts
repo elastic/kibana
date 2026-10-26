@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Subscription } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-types';
 import type {
@@ -88,11 +89,11 @@ export const createWorkflowsClientProvider = (
  */
 export const createManagedWorkflowsSystemApiProvider = (
   workflowsService: WorkflowsService,
-  config: WorkflowsManagementConfig,
+  availabilityTracker: WorkflowsAvailabilityTracker,
   logger: Logger
 ): ManagedWorkflowsSystemApiProvider => {
   return async (pluginId: string) => {
-    const getIsWorkflowsAvailable = await trackWorkflowsAvailability(workflowsService, config);
+    const getIsWorkflowsAvailable = await availabilityTracker.getIsWorkflowsAvailable();
 
     return {
       get isWorkflowsAvailable() {
@@ -150,23 +151,51 @@ export const createManagedWorkflowsSystemApiProvider = (
   };
 };
 
+export interface WorkflowsAvailabilityTracker {
+  getIsWorkflowsAvailable: () => Promise<() => boolean>;
+  stop: () => void;
+}
+
 /**
- * Returns a getter that follows license changes, so a client created once stays accurate when the
- * license is upgraded or downgraded.
+ * Tracks availability with a single `license$` subscription shared by all managed clients, so a
+ * client created once stays accurate when the license is upgraded or downgraded.
  */
-const trackWorkflowsAvailability = async (
+export const createWorkflowsAvailabilityTracker = (
   workflowsService: WorkflowsService,
   config: WorkflowsManagementConfig
-): Promise<() => boolean> => {
-  const { licensing } = await workflowsService.getPluginsStart();
-  const isAvailable = (license: ILicense) =>
-    license.hasAtLeast(REQUIRED_LICENSE_TYPE) && config.available;
+): WorkflowsAvailabilityTracker => {
+  let tracking: Promise<() => boolean> | undefined;
+  let subscription: Subscription | undefined;
+  let stopped = false;
 
-  let available = isAvailable(await licensing.getLicense());
-  licensing.license$.subscribe((license) => {
-    available = isAvailable(license);
-  });
-  return () => available;
+  const track = async (): Promise<() => boolean> => {
+    const { licensing } = await workflowsService.getPluginsStart();
+    const isAvailable = (license: ILicense) =>
+      license.hasAtLeast(REQUIRED_LICENSE_TYPE) && config.available;
+
+    let available = isAvailable(await licensing.getLicense());
+    if (!stopped) {
+      subscription = licensing.license$.subscribe((license) => {
+        available = isAvailable(license);
+      });
+    }
+    return () => available;
+  };
+
+  return {
+    getIsWorkflowsAvailable: () => {
+      tracking ??= track().catch((error) => {
+        tracking = undefined;
+        throw error;
+      });
+      return tracking;
+    },
+    stop: () => {
+      stopped = true;
+      subscription?.unsubscribe();
+      subscription = undefined;
+    },
+  };
 };
 
 const getWorkflowsAvailabilityContext = async (

@@ -13,6 +13,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { EXAMPLE_MANAGED_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
   createManagedWorkflowsSystemApiProvider,
+  createWorkflowsAvailabilityTracker,
   createWorkflowsClientProvider,
 } from './workflows_client';
 import type { WorkflowsService } from '../api/workflows_management_service';
@@ -206,7 +207,11 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
   it('should expose availability when the license and config allow it', async () => {
     const service = createMockWorkflowsService();
     const config = { available: true } as WorkflowsManagementConfig;
-    const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
+    const provider = createManagedWorkflowsSystemApiProvider(
+      service,
+      createWorkflowsAvailabilityTracker(service, config),
+      logger
+    );
 
     expect((await provider('testPlugin')).isWorkflowsAvailable).toBe(true);
   });
@@ -214,7 +219,11 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
   it('should expose unavailability when the license is insufficient', async () => {
     const service = createMockWorkflowsService({ hasAtLeast: false });
     const config = { available: true } as WorkflowsManagementConfig;
-    const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
+    const provider = createManagedWorkflowsSystemApiProvider(
+      service,
+      createWorkflowsAvailabilityTracker(service, config),
+      logger
+    );
 
     expect((await provider('testPlugin')).isWorkflowsAvailable).toBe(false);
   });
@@ -222,7 +231,11 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
   it('should expose unavailability when the config disables it', async () => {
     const service = createMockWorkflowsService();
     const config = { available: false } as WorkflowsManagementConfig;
-    const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
+    const provider = createManagedWorkflowsSystemApiProvider(
+      service,
+      createWorkflowsAvailabilityTracker(service, config),
+      logger
+    );
 
     expect((await provider('testPlugin')).isWorkflowsAvailable).toBe(false);
   });
@@ -232,7 +245,11 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
     const service = createMockWorkflowsService();
     service.installManagedWorkflow = installManagedWorkflow;
     const config = { available: true } as WorkflowsManagementConfig;
-    const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
+    const provider = createManagedWorkflowsSystemApiProvider(
+      service,
+      createWorkflowsAvailabilityTracker(service, config),
+      logger
+    );
     const client = await provider('testPlugin');
     const options = { spaceId: 'default', values: { recipient: 'test' } };
 
@@ -256,7 +273,11 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
     const getManagedWorkflowStatus = jest.fn().mockResolvedValue({ status: 'intact' });
     const service = createMockWorkflowsService({ getManagedWorkflowStatus });
     const config = { available: true } as WorkflowsManagementConfig;
-    const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
+    const provider = createManagedWorkflowsSystemApiProvider(
+      service,
+      createWorkflowsAvailabilityTracker(service, config),
+      logger
+    );
 
     const client = await provider('testPlugin');
     await client.getWorkflowStatus(EXAMPLE_MANAGED_WORKFLOW_ID, { spaceId: 'default' });
@@ -272,7 +293,11 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
     const getManagedWorkflowStatus = jest.fn();
     const service = createMockWorkflowsService({ hasAtLeast: false, getManagedWorkflowStatus });
     const config = { available: true } as WorkflowsManagementConfig;
-    const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
+    const provider = createManagedWorkflowsSystemApiProvider(
+      service,
+      createWorkflowsAvailabilityTracker(service, config),
+      logger
+    );
 
     const client = await provider('testPlugin');
 
@@ -294,7 +319,11 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
       listInstalledManagedWorkflowStates,
     });
     const config = { available: true } as WorkflowsManagementConfig;
-    const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
+    const provider = createManagedWorkflowsSystemApiProvider(
+      service,
+      createWorkflowsAvailabilityTracker(service, config),
+      logger
+    );
 
     const client = await provider('testPlugin');
     await client.getInstalledWorkflowState('workflow-1', 'space-a');
@@ -306,5 +335,60 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
       'testPlugin'
     );
     expect(listInstalledManagedWorkflowStates).toHaveBeenCalledWith('testPlugin');
+  });
+});
+
+describe('createWorkflowsAvailabilityTracker', () => {
+  const logger = loggingSystemMock.createLogger();
+  const config = { available: true } as WorkflowsManagementConfig;
+
+  const createServiceWithLicenseSpy = () => {
+    const license = { hasAtLeast: jest.fn().mockReturnValue(true) };
+    const licenseChanges = new BehaviorSubject(license);
+    const subscribe = jest.spyOn(licenseChanges, 'subscribe');
+    const service = createMockWorkflowsService();
+    (service.getPluginsStart as jest.Mock).mockResolvedValue({
+      licensing: {
+        getLicense: jest.fn().mockResolvedValue(license),
+        license$: licenseChanges,
+      },
+    });
+    return { service, licenseChanges, subscribe };
+  };
+
+  it('should subscribe to license changes once for all managed clients', async () => {
+    const { service, subscribe } = createServiceWithLicenseSpy();
+    const tracker = createWorkflowsAvailabilityTracker(service, config);
+    const provider = createManagedWorkflowsSystemApiProvider(service, tracker, logger);
+
+    await provider('pluginA');
+    await provider('pluginB');
+    await provider('pluginA');
+
+    expect(subscribe).toHaveBeenCalledTimes(1);
+  });
+
+  it('should unsubscribe from license changes on stop', async () => {
+    const { service, licenseChanges } = createServiceWithLicenseSpy();
+    const tracker = createWorkflowsAvailabilityTracker(service, config);
+    await tracker.getIsWorkflowsAvailable();
+
+    expect(licenseChanges.observed).toBe(true);
+    tracker.stop();
+    expect(licenseChanges.observed).toBe(false);
+  });
+
+  it('should retry tracking after a failed initialization', async () => {
+    const { service } = createServiceWithLicenseSpy();
+    const getPluginsStart = service.getPluginsStart as jest.Mock;
+    const pluginsStart = await getPluginsStart();
+    getPluginsStart.mockRejectedValueOnce(new Error('not started'));
+    const tracker = createWorkflowsAvailabilityTracker(service, config);
+
+    await expect(tracker.getIsWorkflowsAvailable()).rejects.toThrow('not started');
+    getPluginsStart.mockResolvedValue(pluginsStart);
+    const getIsWorkflowsAvailable = await tracker.getIsWorkflowsAvailable();
+
+    expect(getIsWorkflowsAvailable()).toBe(true);
   });
 });
