@@ -44,3 +44,17 @@ export const apiHasSerializableState = (api: unknown | null): api is HasSerializ
       (api as HasSerializableState)?.latestState$
   );
 };
+
+/**
+ * Compares two serialized snapshots with the same comparators unsaved-changes uses.
+ * The baseline does not have to be the last saved state.
+ */
+export interface ComparesSerializedState<SerializedState extends object = object> {
+  compareSerializedState: (
+    baseline: Partial<SerializedState> | undefined,
+    current: Partial<SerializedState> | undefined
+  ) => boolean;
+}
+
+export const apiComparesSerializedState = (api: unknown): api is ComparesSerializedState =>
+  typeof (api as ComparesSerializedState)?.compareSerializedState === 'function';

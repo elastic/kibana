@@ -8,7 +8,11 @@
  */
 
 import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
-import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
+import {
+  areComparatorsEqual,
+  diffComparators,
+  initializeStateManager,
+} from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { combineLatestWith, debounceTime, map, startWith } from 'rxjs';
 import type { DashboardState, DashboardOptions } from '@kbn/as-code-dashboard-schema';
@@ -57,6 +61,18 @@ function deserializeState(state: DashboardState) {
     title: state.title,
   };
 }
+
+/** Same settings diff the unsaved-changes manager runs, for any two dashboard states. */
+export const dashboardSettingsMatch = (
+  baseline: DashboardState,
+  current: DashboardState
+): boolean =>
+  areComparatorsEqual(
+    comparators,
+    deserializeState(baseline),
+    deserializeState(current),
+    DEFAULT_SETTINGS
+  );
 
 export function initializeSettingsManager(initialState: DashboardState) {
   const stateManager = initializeStateManager(
