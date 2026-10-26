@@ -10,7 +10,8 @@ import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { render } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { SecurityPageName } from '../../../../app/types';
-import type { createMockStore } from '../../../mock/create_store';
+import { createMockStore } from '../../../mock/create_store';
+import { mockGlobalState } from '../../../mock/global_state';
 import { TestProviders } from '../../../mock';
 import { BOTTOM_BAR_HEIGHT, EUI_HEADER_HEIGHT, SecuritySideNav } from './security_side_nav';
 import type { SolutionSideNavProps } from '@kbn/security-solution-side-nav';
@@ -98,6 +99,18 @@ jest.mock('../../../../management/pages/policy/view/policy_hooks', () => ({
   useIsPolicySettingsBarVisible: () => mockUseIsPolicySettingsBarVisible(),
 }));
 
+const createStoreWithAlignment = (enableAlertsAndAttacksAlignment: boolean) =>
+  createMockStore({
+    ...mockGlobalState,
+    app: {
+      ...mockGlobalState.app,
+      enableExperimental: {
+        ...mockGlobalState.app.enableExperimental,
+        enableAlertsAndAttacksAlignment,
+      },
+    },
+  });
+
 const renderNav = (options?: { store?: ReturnType<typeof createMockStore> }) =>
   render(<SecuritySideNav />, {
     wrapper: ({ children }) => <TestProviders store={options?.store}>{children}</TestProviders>,
@@ -135,7 +148,7 @@ describe('SecuritySideNav', () => {
             position: 'top',
           }),
         ],
-        categories: getNavCategories(AIChatExperience.Classic, false, false),
+        categories: getNavCategories(AIChatExperience.Classic, true, false),
         tracker: track,
       })
     );
@@ -329,10 +342,9 @@ describe('SecuritySideNav', () => {
     });
   });
 
-  describe('enableAlertsAndAttacksAlignment setting', () => {
-    it('should call getNavCategories with true when setting is enabled', () => {
-      useKibana().services.uiSettings.get = jest.fn().mockReturnValue(true);
-      renderNav();
+  describe('enableAlertsAndAttacksAlignment experimental feature', () => {
+    it('should call getNavCategories with true when the feature is enabled', () => {
+      renderNav({ store: createStoreWithAlignment(true) });
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
           categories: getNavCategories(AIChatExperience.Classic, true, false),
@@ -340,9 +352,8 @@ describe('SecuritySideNav', () => {
       );
     });
 
-    it('should call getNavCategories with false when setting is disabled', () => {
-      useKibana().services.uiSettings.get = jest.fn().mockReturnValue(false);
-      renderNav();
+    it('should call getNavCategories with false when the feature is disabled', () => {
+      renderNav({ store: createStoreWithAlignment(false) });
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
           categories: getNavCategories(AIChatExperience.Classic, false, false),
@@ -375,7 +386,7 @@ describe('SecuritySideNav', () => {
             position: 'top',
           }),
         ],
-        categories: getNavCategories(AIChatExperience.Classic, false, false),
+        categories: getNavCategories(AIChatExperience.Classic, true, false),
       })
     );
   });
@@ -415,7 +426,7 @@ describe('SecuritySideNav', () => {
             position: 'top',
           }),
         ],
-        categories: getNavCategories(AIChatExperience.Agent, false, true),
+        categories: getNavCategories(AIChatExperience.Agent, true, true),
       })
     );
   });

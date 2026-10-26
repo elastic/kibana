@@ -6,6 +6,7 @@
  */
 
 import type { Threat } from '../../../../../../common/api/detection_engine';
+import { MITRE_ATTACK_FRAMEWORK } from '../../../../../../common/detection_engine/mitre/iterate_mitre_threat_entities';
 import type { OriginalRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { QRadarMitreMappingsData } from '../../../../../../common/siem_migrations/model/vendor/rules/qradar.gen';
 import type { QradarRule } from '../../../../../../common/siem_migrations/parsers/qradar/types';
@@ -31,7 +32,7 @@ export function transformMitreMapping(mitreMapping: QRadarMitreMappingsData[stri
       }> = [];
 
       const threat = {
-        framework: 'MITRE ATT&CK',
+        framework: MITRE_ATTACK_FRAMEWORK,
         tactic: {
           id: tacticId,
           reference: `${TACTICS_BASE_URL}${tacticId}/`,

@@ -5,29 +5,34 @@
  * 2.0.
  */
 
+import { memoize } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { indexExplorer } from '@kbn/agent-builder-genai-utils';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { includeFrozenSchema } from './include_frozen_schema';
+import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
 
-const indexExplorerSchema = z.object({
-  query: z
-    .string()
-    .describe('A natural language query to infer which indices, aliases or datastreams to use.'),
-  limit: z
-    .number()
-    .optional()
-    .describe('(optional) Limit the max number of indices to return. Defaults to 1.'),
-  indexPattern: z
-    .string()
-    .optional()
-    .describe('(optional) Index pattern to filter indices by. Defaults to *.'),
-  include_frozen: includeFrozenSchema,
-});
+const createIndexExplorerSchema = memoize((includeFrozenByDefault: boolean) =>
+  z.object({
+    query: z
+      .string()
+      .describe('A natural language query to infer which indices, aliases or datastreams to use.'),
+    limit: z
+      .number()
+      .optional()
+      .describe('(optional) Limit the max number of indices to return. Defaults to 1.'),
+    indexPattern: z
+      .string()
+      .optional()
+      .describe('(optional) Index pattern to filter indices by. Defaults to *.'),
+    include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
+  })
+);
 
-export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerSchema> => {
+type IndexExplorerSchema = ReturnType<typeof createIndexExplorerSchema>;
+
+export const indexExplorerTool = (): DynamicSchemaBuiltinToolDefinition<IndexExplorerSchema> => {
   return {
     id: platformCoreTools.indexExplorer,
     type: ToolType.builtin,
@@ -49,9 +54,10 @@ Tool result: [{ type: "index", name: '.alerts' }]
       idempotentHint: true,
       openWorldHint: false,
     },
-    schema: indexExplorerSchema,
+    getSchema: async (schemaContext) =>
+      createIndexExplorerSchema(await getIncludeFrozenByDefault(schemaContext)),
     handler: async (
-      { query: nlQuery, indexPattern = '*', limit = 1, include_frozen: includeFrozen = false },
+      { query: nlQuery, indexPattern = '*', limit = 1, include_frozen: includeFrozen },
       { esClient, modelProvider, logger }
     ) => {
       logger.debug(

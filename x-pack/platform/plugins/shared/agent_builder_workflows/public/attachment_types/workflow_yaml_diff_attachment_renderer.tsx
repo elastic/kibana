@@ -247,10 +247,10 @@ const MonacoDiffViewer: React.FC<{
             onClick={isExpanded ? handleCollapse : handleExpand}
           >
             {isExpanded
-              ? i18n.translate('workflowsManagement.attachmentRenderers.diff.showLess', {
+              ? i18n.translate('workflows.attachmentRenderers.diff.showLess', {
                   defaultMessage: 'Show less',
                 })
-              : i18n.translate('workflowsManagement.attachmentRenderers.diff.showMore', {
+              : i18n.translate('workflows.attachmentRenderers.diff.showMore', {
                   defaultMessage:
                     'Show {hiddenLines, plural, one {# more line} other {# more lines}}',
                   values: { hiddenLines },
@@ -276,14 +276,14 @@ const DiffInlineContent: React.FC<{
 
   const displayName =
     name ??
-    i18n.translate('workflowsManagement.attachmentRenderers.diff.defaultName', {
+    i18n.translate('workflows.attachmentRenderers.diff.defaultName', {
       defaultMessage: 'Workflow',
     });
 
   if (beforeYaml === afterYaml) {
     return (
       <EuiText size="s" color="subdued" css={styles.noChanges}>
-        {i18n.translate('workflowsManagement.attachmentRenderers.diff.noChanges', {
+        {i18n.translate('workflows.attachmentRenderers.diff.noChanges', {
           defaultMessage: 'No changes detected',
         })}
       </EuiText>
@@ -371,11 +371,11 @@ export const workflowYamlDiffAttachmentUiDefinition: AttachmentUIDefinition<Work
   {
     getLabel: (attachment) =>
       attachment.data.name
-        ? i18n.translate('workflowsManagement.attachmentRenderers.diff.labelWithName', {
+        ? i18n.translate('workflows.attachmentRenderers.diff.labelWithName', {
             defaultMessage: '{name} changes',
             values: { name: attachment.data.name },
           })
-        : i18n.translate('workflowsManagement.attachmentRenderers.diff.label', {
+        : i18n.translate('workflows.attachmentRenderers.diff.label', {
             defaultMessage: 'Workflow changes',
           }),
     getIcon: () => 'compare',

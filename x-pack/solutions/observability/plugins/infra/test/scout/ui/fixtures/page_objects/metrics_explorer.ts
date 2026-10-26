@@ -23,6 +23,7 @@ export class MetricsExplorerPage {
   public readonly maxMetricsReachedMessage: Locator;
   // The selected metrics render as combo-box pills; their count is the number of plotted metrics.
   public readonly selectedMetricPills: Locator;
+  private readonly loadedSavedViewButton: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.metricsComboBox = this.page.getByTestId('metricsExplorer-metrics');
@@ -33,11 +34,14 @@ export class MetricsExplorerPage {
     // "max reached" option, which renders in a portal outside the combo box DOM.
     this.maxMetricsReachedMessage = this.page.getByTestId('infraMetricsExplorerMaxMetricsReached');
     this.selectedMetricPills = this.metricsComboBox.getByTestId('euiComboBoxPill');
+    this.loadedSavedViewButton = this.page.getByTestId('savedViews-openPopover-loaded');
   }
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('metrics')}/explorer`);
     await this.metricsComboBox.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    // The page re-applies the saved view's options once it resolves, clobbering earlier selections.
+    await this.loadedSavedViewButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   /**

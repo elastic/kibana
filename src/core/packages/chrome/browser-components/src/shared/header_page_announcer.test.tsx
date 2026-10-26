@@ -20,64 +20,63 @@ import {
   resolveChromeHeaderAnnouncement,
 } from './resolve_chrome_header_announcement';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-
-  return {
-    ...actual,
-    EuiLiveAnnouncer: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  };
-});
-
 describe('HeaderPageAnnouncer', () => {
-  it('renders with default brand when no branding is provided', async () => {
-    const { findByLabelText } = render(
-      <TestChromeProviders>
+  it('announces the page title with the default brand when no branding is provided', () => {
+    const deps = createMockChromeComponentsDeps();
+    render(
+      <TestChromeProviders deps={deps}>
         <HeaderPageAnnouncer breadcrumbs={[{ text: 'Home' }]} />
       </TestChromeProviders>
     );
-    const announcer = await findByLabelText('Page change announcements');
-    expect(announcer.textContent).toBe('Home - Elastic');
+
+    expect(deps.notifications.screenReader.notify).toHaveBeenCalledWith('Home - Elastic', {
+      key: 'pageTitle',
+    });
   });
 
-  it('renders with custom branding', async () => {
+  it('announces the page title with custom branding', () => {
     const deps = createMockChromeComponentsDeps();
     act(() => {
       deps.customBranding.customBranding$.next({ pageTitle: 'Kibana' });
     });
 
-    const { findByLabelText } = render(
+    render(
       <TestChromeProviders deps={deps}>
         <HeaderPageAnnouncer breadcrumbs={[{ text: 'Dashboard' }]} />
       </TestChromeProviders>
     );
-    const announcer = await findByLabelText('Page change announcements');
-    expect(announcer.textContent).toBe('Dashboard - Kibana');
+
+    expect(deps.notifications.screenReader.notify).toHaveBeenLastCalledWith('Dashboard - Kibana', {
+      key: 'pageTitle',
+    });
   });
 
-  it('updates route title when breadcrumbs change', async () => {
+  it('announces the new title when breadcrumbs change, but not the same title again', () => {
     const deps = createMockChromeComponentsDeps();
     act(() => {
       deps.customBranding.customBranding$.next({ pageTitle: 'Brand' });
     });
 
-    const { findByLabelText, rerender } = render(
+    const { rerender } = render(
       <TestChromeProviders deps={deps}>
         <HeaderPageAnnouncer breadcrumbs={[{ text: 'A' }]} />
       </TestChromeProviders>
     );
-    let announcer = await findByLabelText('Page change announcements');
-    expect(announcer.textContent).toContain('A');
-
+    rerender(
+      <TestChromeProviders deps={deps}>
+        <HeaderPageAnnouncer breadcrumbs={[{ text: 'B' }]} />
+      </TestChromeProviders>
+    );
     rerender(
       <TestChromeProviders deps={deps}>
         <HeaderPageAnnouncer breadcrumbs={[{ text: 'B' }]} />
       </TestChromeProviders>
     );
 
-    announcer = await findByLabelText('Page change announcements');
-
-    expect(announcer.textContent).toBe('B - Brand');
+    expect(deps.notifications.screenReader.notify.mock.calls).toEqual([
+      ['A - Brand', { key: 'pageTitle' }],
+      ['B - Brand', { key: 'pageTitle' }],
+    ]);
   });
 
   it('renders skip link', () => {
@@ -275,6 +274,9 @@ describe('ChromeHeaderPageAnnouncer', () => {
         </TestChromeProviders>
       );
 
+    const getAnnouncements = () =>
+      deps.notifications.screenReader.notify.mock.calls.map(([message]) => message);
+
     return {
       chrome,
       deps,
@@ -283,6 +285,7 @@ describe('ChromeHeaderPageAnnouncer', () => {
       navigation$,
       breadcrumbs$,
       renderAnnouncer,
+      getAnnouncements,
     };
   };
 
@@ -295,7 +298,8 @@ describe('ChromeHeaderPageAnnouncer', () => {
   });
 
   it('lets an inline title win over registered, document, and navigation titles', () => {
-    const { chrome, docTitleParts$, navigation$, renderAnnouncer } = createHarness();
+    const { chrome, docTitleParts$, navigation$, renderAnnouncer, getAnnouncements } =
+      createHarness();
     chrome.appHeader.set({ title: 'Registered' });
     chrome.inlineAppHeader.register('Inline');
     docTitleParts$.next(['Document title', 'Elastic']);
@@ -303,120 +307,115 @@ describe('ChromeHeaderPageAnnouncer', () => {
       activeNodes: [[createNavNode('root', 'Observability')]],
     });
 
-    const { getByLabelText } = renderAnnouncer();
+    renderAnnouncer();
     flushAnnouncement();
 
-    expect(getByLabelText('Page change announcements').textContent).toBe('Inline - Elastic');
+    expect(getAnnouncements()).toEqual(['Inline - Elastic']);
   });
 
   it('appends the default brand, and custom branding when set', () => {
-    const { chrome, deps, renderAnnouncer } = createHarness();
+    const { chrome, deps, renderAnnouncer, getAnnouncements } = createHarness();
     chrome.inlineAppHeader.register('SLOs');
 
-    const { getByLabelText } = renderAnnouncer();
+    renderAnnouncer();
     flushAnnouncement();
-    const announcer = getByLabelText('Page change announcements');
-    expect(announcer.textContent).toBe('SLOs - Elastic');
+    expect(getAnnouncements()).toEqual(['SLOs - Elastic']);
 
     act(() => {
       deps.customBranding.customBranding$.next({ pageTitle: 'Kibana' });
     });
     flushAnnouncement();
 
-    expect(announcer.textContent).toBe('SLOs - Kibana');
+    expect(getAnnouncements()).toEqual(['SLOs - Elastic', 'SLOs - Kibana']);
   });
 
   it('does not announce the brand when no page title is resolved', () => {
-    const { renderAnnouncer } = createHarness();
-    const { getByLabelText } = renderAnnouncer();
+    const { renderAnnouncer, getAnnouncements } = createHarness();
+    renderAnnouncer();
     flushAnnouncement();
 
-    expect(getByLabelText('Page change announcements').textContent).toBe('');
+    expect(getAnnouncements()).toEqual([]);
   });
 
-  it('does not expose a registered or fallback title while updating an inline title', () => {
-    const { chrome, docTitleParts$, renderAnnouncer } = createHarness();
+  it('does not announce a registered or fallback title while updating an inline title', () => {
+    const { chrome, docTitleParts$, renderAnnouncer, getAnnouncements } = createHarness();
     chrome.appHeader.set({ title: 'Registered' });
     const inline = chrome.inlineAppHeader.register('First');
     docTitleParts$.next(['Document title', 'Elastic']);
 
-    const { getByLabelText } = renderAnnouncer();
+    renderAnnouncer();
     flushAnnouncement();
-    const announcer = getByLabelText('Page change announcements');
-    expect(announcer).toHaveTextContent('First');
-
     act(() => {
       inline.update('Second');
     });
     flushAnnouncement();
 
-    expect(announcer).toHaveTextContent('Second');
-    expect(announcer).not.toHaveTextContent('Registered');
-    expect(announcer).not.toHaveTextContent('Document title');
+    expect(getAnnouncements()).toEqual(['First - Elastic', 'Second - Elastic']);
   });
 
   it('uses editable inline title text, then placeholder', () => {
-    const { chrome, renderAnnouncer } = createHarness();
+    const { chrome, renderAnnouncer, getAnnouncements } = createHarness();
     const inline = chrome.inlineAppHeader.register({
       text: 'Named dashboard',
       placeholder: 'Untitled dashboard',
       onSave: jest.fn(),
     });
 
-    const { getByLabelText } = renderAnnouncer();
+    renderAnnouncer();
     flushAnnouncement();
-    const announcer = getByLabelText('Page change announcements');
-    expect(announcer).toHaveTextContent('Named dashboard');
-
     act(() => {
       inline.update({ text: '  ', placeholder: 'Untitled dashboard', onSave: jest.fn() });
     });
     flushAnnouncement();
 
-    expect(announcer).toHaveTextContent('Untitled dashboard');
+    expect(getAnnouncements()).toEqual([
+      'Named dashboard - Elastic',
+      'Untitled dashboard - Elastic',
+    ]);
   });
 
   it('suppresses a registered title while an inline loading header is mounted', () => {
-    const { chrome, docTitleParts$, renderAnnouncer } = createHarness();
+    const { chrome, docTitleParts$, renderAnnouncer, getAnnouncements } = createHarness();
     chrome.appHeader.set({ title: 'Registered' });
     chrome.inlineAppHeader.register();
     docTitleParts$.next(['Document page', 'Elastic']);
 
-    const { getByLabelText } = renderAnnouncer();
+    renderAnnouncer();
     flushAnnouncement();
 
-    expect(getByLabelText('Page change announcements')).toHaveTextContent('Document page');
+    expect(getAnnouncements()).toEqual(['Document page - Elastic']);
   });
 
   it('lets a registered title win when no inline header is mounted', () => {
-    const { chrome, docTitleParts$, navigation$, renderAnnouncer } = createHarness();
+    const { chrome, docTitleParts$, navigation$, renderAnnouncer, getAnnouncements } =
+      createHarness();
     chrome.appHeader.set({ title: 'Registered' });
     docTitleParts$.next(['Document title', 'Elastic']);
     navigation$.next({
       activeNodes: [[createNavNode('root', 'Observability')]],
     });
 
-    const { getByLabelText } = renderAnnouncer();
+    renderAnnouncer();
     flushAnnouncement();
 
-    expect(getByLabelText('Page change announcements')).toHaveTextContent('Registered');
+    expect(getAnnouncements()).toEqual(['Registered - Elastic']);
   });
 
   it('lets a descriptive document title win over the navigation title', () => {
-    const { docTitleParts$, navigation$, renderAnnouncer } = createHarness();
+    const { docTitleParts$, navigation$, renderAnnouncer, getAnnouncements } = createHarness();
     docTitleParts$.next(['Saved object', 'Elastic']);
     navigation$.next({
       activeNodes: [[createNavNode('root', 'Observability')]],
     });
 
-    const { getByLabelText } = renderAnnouncer();
+    renderAnnouncer();
     flushAnnouncement();
 
-    expect(getByLabelText('Page change announcements')).toHaveTextContent('Saved object');
+    expect(getAnnouncements()).toEqual(['Saved object - Elastic']);
   });
 
   it('falls through a brand-only document title to the deepest navigation title', () => {
-    const { navigation$, renderAnnouncer } = createHarness();
+    const { navigation$, renderAnnouncer, getAnnouncements } = createHarness();
     navigation$.next({
       activeNodes: [
         [
@@ -426,73 +425,60 @@ describe('ChromeHeaderPageAnnouncer', () => {
       ],
     });
 
-    const { getByLabelText } = renderAnnouncer();
+    renderAnnouncer();
     flushAnnouncement();
 
-    expect(getByLabelText('Page change announcements')).toHaveTextContent('Workflows');
+    expect(getAnnouncements()).toEqual(['Workflows - Elastic']);
   });
 
-  it('does not change the live region when project breadcrumbs are replaced', () => {
-    const { chrome, breadcrumbs$, renderAnnouncer } = createHarness();
+  it('does not announce project breadcrumbs', () => {
+    const { chrome, breadcrumbs$, renderAnnouncer, getAnnouncements } = createHarness();
     chrome.inlineAppHeader.register('Dashboards');
 
-    const { getByLabelText } = renderAnnouncer();
+    renderAnnouncer();
     flushAnnouncement();
-    const announcer = getByLabelText('Page change announcements');
-    expect(announcer).toHaveTextContent('Dashboards');
-
     act(() => {
       breadcrumbs$.next([{ text: 'Hidden trail' }, { text: 'Should not appear' }]);
       chrome.project.setBreadcrumbs([{ text: 'Override' }]);
     });
     flushAnnouncement();
 
-    expect(announcer).toHaveTextContent('Dashboards');
-    expect(announcer).not.toHaveTextContent('Hidden trail');
-    expect(announcer).not.toHaveTextContent('Should not appear');
+    expect(getAnnouncements()).toEqual(['Dashboards - Elastic']);
   });
 
-  it('re-announces the same title when the location changes', () => {
-    const { chrome, currentLocation$, renderAnnouncer } = createHarness();
+  // Apps that keep state in the URL hash change the location without navigating to a new page
+  it('does not re-announce the same title when only the location changes', () => {
+    const { chrome, currentLocation$, renderAnnouncer, getAnnouncements } = createHarness();
     chrome.inlineAppHeader.register('Dashboards');
 
-    const { getByLabelText } = renderAnnouncer();
+    renderAnnouncer();
     flushAnnouncement();
-    const announcer = getByLabelText('Page change announcements');
-    expect(announcer).toHaveTextContent('Dashboards');
-
     act(() => {
       currentLocation$.next('/b');
     });
-    expect(announcer).toHaveTextContent('');
-
     flushAnnouncement();
-    expect(announcer).toHaveTextContent('Dashboards');
+
+    expect(getAnnouncements()).toEqual(['Dashboards - Elastic']);
   });
 
   it('cancels a scheduled fallback when a destination title arrives first', () => {
-    const { chrome, currentLocation$, navigation$, renderAnnouncer } = createHarness();
+    const { chrome, currentLocation$, navigation$, renderAnnouncer, getAnnouncements } =
+      createHarness();
     navigation$.next({
       activeNodes: [[createNavNode('root', 'Workflows')]],
     });
 
-    const { getByLabelText } = renderAnnouncer();
+    renderAnnouncer();
     flushAnnouncement();
-    const announcer = getByLabelText('Page change announcements');
-    expect(announcer).toHaveTextContent('Workflows');
-
     act(() => {
       currentLocation$.next('/details');
     });
-    expect(announcer).toHaveTextContent('');
-
     act(() => {
       chrome.inlineAppHeader.register('Details');
     });
     flushAnnouncement();
 
-    expect(announcer).toHaveTextContent('Details');
-    expect(announcer).not.toHaveTextContent('Workflows');
+    expect(getAnnouncements()).toEqual(['Workflows - Elastic', 'Details - Elastic']);
   });
 
   it('arms the skip link on a location change', () => {

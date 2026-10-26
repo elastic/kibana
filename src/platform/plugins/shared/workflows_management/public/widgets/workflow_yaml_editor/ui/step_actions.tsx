@@ -51,7 +51,7 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepRun }) => {
   const menuButton = useMemo(() => {
     return (
       <EuiToolTip
-        content={i18n.translate('console.requestOptionsButtonAriaLabel', {
+        content={i18n.translate('workflows.requestOptionsButtonAriaLabel', {
           defaultMessage: 'Request options',
         })}
         disableScreenReaderOutput
@@ -59,7 +59,7 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepRun }) => {
         <EuiButtonIcon
           onClick={togglePopover}
           data-test-subj="toggleConsoleMenu"
-          aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
+          aria-label={i18n.translate('workflows.requestOptionsButtonAriaLabel', {
             defaultMessage: 'Request options',
           })}
           iconType="ellipsis"

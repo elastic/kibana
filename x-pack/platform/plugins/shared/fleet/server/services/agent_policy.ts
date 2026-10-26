@@ -131,6 +131,7 @@ import {
   hasVersionSuffix,
   hasAgentVersionSuffix,
   getSentinelVersionPolicyId,
+  hasSentinelVersionPolicy,
   removeVersionSuffixFromPolicyId,
   splitVersionSuffixFromPolicyId,
   buildPolicyIdOrVariantsEsFilter,
@@ -1957,7 +1958,7 @@ class AgentPolicyService {
 
           if (!options?.agentVersions) {
             fleetServerPolicies.push(fleetServerPolicy);
-            if (enableSentinelPolicyVersion) {
+            if (enableSentinelPolicyVersion && hasSentinelVersionPolicy(policy)) {
               // Same content as the base doc, under the `#sentinel` id. The base doc is kept for
               // agents that were not reassigned yet (newly enrolled, or enrolled by an older fleet-server).
               const sentinelPolicyId = getSentinelVersionPolicyId(fullPolicy.id);

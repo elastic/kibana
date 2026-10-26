@@ -63,6 +63,24 @@ describe('buildRuleSoFilter', () => {
         'alerting_rule.attributes.metadata.tags: "production"'
       );
     });
+
+    it('maps metadata.routing_tags to SO attributes path', () => {
+      expect(buildRuleSoFilter('metadata.routing_tags: "sre"')).toBe(
+        'alerting_rule.attributes.metadata.routing_tags: "sre"'
+      );
+    });
+
+    it('maps metadata.template.id to SO attributes path', () => {
+      expect(buildRuleSoFilter('metadata.template.id: "nginx-error-rate"')).toBe(
+        'alerting_rule.attributes.metadata.template.id: "nginx-error-rate"'
+      );
+    });
+
+    it('keeps template ids containing special characters quoted', () => {
+      expect(buildRuleSoFilter('metadata.template.id: "kubernetes_otel-1.2.0-pod: crash"')).toBe(
+        'alerting_rule.attributes.metadata.template.id: "kubernetes_otel-1.2.0-pod: crash"'
+      );
+    });
   });
 
   describe('compound expressions', () => {

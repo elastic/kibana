@@ -111,6 +111,22 @@ export class KnowledgeIndicatorClient {
     return this.reader.countKnowledgeIndicators(type);
   }
 
+  countFeatures(sourceIds: string[]): Promise<number> {
+    return this.reader.countFeatures(sourceIds);
+  }
+
+  countEntities(sourceIds: string[]): Promise<number> {
+    return this.reader.countEntities(sourceIds);
+  }
+
+  countUnbackedQueries(sourceIds: string[]): Promise<number> {
+    return this.reader.countUnbackedQueries(sourceIds);
+  }
+
+  countRuleBackedQueries(sourceIds: string[]): Promise<number> {
+    return this.reader.countRuleBackedQueries(sourceIds);
+  }
+
   keepAlivePersistentIndicators(
     sourceId: string,
     options: { lastRefreshedBefore: string }
@@ -253,6 +269,22 @@ export class KnowledgeIndicatorClient {
     }
   ): Promise<{ hits: Feature[] }> {
     return this.searcher.findFeatures(sources, query, options);
+  }
+
+  findFeaturesAcrossSources(
+    sourceIds: string[],
+    query: string,
+    options: { featureType: string; searchMode?: SearchMode; limit?: number }
+  ): Promise<{ hits: Feature[] }> {
+    return this.searcher.findFeaturesAcrossSources(sourceIds, query, options);
+  }
+
+  getFeatureSourcesBySlug(
+    sourceIds: string[],
+    featureType: string,
+    slugs: string[]
+  ): Promise<Map<string, string[]>> {
+    return this.reader.getFeatureSourcesBySlug(sourceIds, featureType, slugs);
   }
 
   findQueries(

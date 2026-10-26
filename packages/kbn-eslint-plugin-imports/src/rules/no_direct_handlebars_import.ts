@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule } from 'eslint';
+import type { CreateOnceRule } from '@oxlint/plugins';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
 import { report } from '../helpers/report';
 
-export const NoDirectHandlebarsImportRule: Rule.RuleModule = {
+export const NoDirectHandlebarsImportRule: CreateOnceRule = {
   meta: {
     type: 'problem',
     fixable: 'code',
@@ -25,30 +25,32 @@ export const NoDirectHandlebarsImportRule: Rule.RuleModule = {
     },
   },
 
-  create(context) {
-    return visitAllImportStatements((req, { node }) => {
-      if (!req) {
-        return;
-      }
-
+  createOnce(context) {
+    return visitAllImportStatements(() => {
       // Skip the rule for files within the kbn-handlebars package itself
-      const filename = context.getFilename();
+      const { filename } = context;
       if (filename.includes('/kbn-handlebars/') || filename.includes('\\kbn-handlebars\\')) {
-        return;
+        return false;
       }
 
-      // Check for direct imports from 'handlebars' package
-      if (req === 'handlebars' || req.startsWith('handlebars/')) {
-        // Replace 'handlebars' with '@kbn/handlebars' in the import request
-        const correctImport = req.replace(/^handlebars/, '@kbn/handlebars');
+      return (req, { node }) => {
+        if (!req) {
+          return;
+        }
 
-        report(context, {
-          node,
-          message:
-            'Do not import directly from "handlebars". Use the custom Handlebars from "@kbn/handlebars" instead.',
-          correctImport,
-        });
-      }
+        // Check for direct imports from 'handlebars' package
+        if (req === 'handlebars' || req.startsWith('handlebars/')) {
+          // Replace 'handlebars' with '@kbn/handlebars' in the import request
+          const correctImport = req.replace(/^handlebars/, '@kbn/handlebars');
+
+          report(context, {
+            node,
+            message:
+              'Do not import directly from "handlebars". Use the custom Handlebars from "@kbn/handlebars" instead.',
+            correctImport,
+          });
+        }
+      };
     });
   },
 };

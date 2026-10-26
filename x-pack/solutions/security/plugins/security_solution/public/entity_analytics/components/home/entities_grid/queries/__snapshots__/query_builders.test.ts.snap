@@ -204,8 +204,11 @@ Array [
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL entity_id = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | WHERE entity_id IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
-| STATS group_reference = LAST(score, \`@timestamp\`) WHERE COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", own_reference = LAST(score, \`@timestamp\`) WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\") BY entity_id
-| EVAL reference_score = COALESCE(group_reference, own_reference)
+| EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+| STATS last_value = LAST(score, @timestamp) BY entity_id, is_group
+| EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+| STATS group_value = MAX(group_part), own_value = MAX(own_part) BY entity_id
+| EVAL reference_score = COALESCE(group_value, own_value)
 | KEEP entity_id, reference_score",
 ]
 `;
@@ -1247,8 +1250,11 @@ FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
-| STATS group_reference = LAST(score, \`@timestamp\`) WHERE COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", own_reference = LAST(score, \`@timestamp\`) WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\") BY \`entity.id\`
-| EVAL reference_score = COALESCE(group_reference, own_reference)
+| EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+| STATS last_value = LAST(score, @timestamp) BY \`entity.id\`, is_group
+| EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+| STATS group_value = MAX(group_part), own_value = MAX(own_part) BY \`entity.id\`
+| EVAL reference_score = COALESCE(group_value, own_value)
 | KEEP \`entity.id\`, reference_score
 ), (
 FROM entities-latest-default
@@ -1287,8 +1293,11 @@ FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
-| STATS group_reference = LAST(score, \`@timestamp\`) WHERE COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", own_reference = LAST(score, \`@timestamp\`) WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\") BY \`entity.id\`
-| EVAL reference_score = COALESCE(group_reference, own_reference)
+| EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+| STATS last_value = LAST(score, @timestamp) BY \`entity.id\`, is_group
+| EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+| STATS group_value = MAX(group_part), own_value = MAX(own_part) BY \`entity.id\`
+| EVAL reference_score = COALESCE(group_value, own_value)
 | KEEP \`entity.id\`, reference_score
 ), (
 FROM entities-latest-default
@@ -2523,8 +2532,11 @@ FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
-| STATS group_reference = LAST(score, \`@timestamp\`) WHERE COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", own_reference = LAST(score, \`@timestamp\`) WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\") BY \`entity.id\`
-| EVAL reference_score = COALESCE(group_reference, own_reference)
+| EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+| STATS last_value = LAST(score, @timestamp) BY \`entity.id\`, is_group
+| EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+| STATS group_value = MAX(group_part), own_value = MAX(own_part) BY \`entity.id\`
+| EVAL reference_score = COALESCE(group_value, own_value)
 | KEEP \`entity.id\`, reference_score
 ), (
 FROM entities-latest-default
@@ -2565,8 +2577,11 @@ FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
-| STATS group_reference = LAST(score, \`@timestamp\`) WHERE COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", own_reference = LAST(score, \`@timestamp\`) WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\") BY \`entity.id\`
-| EVAL reference_score = COALESCE(group_reference, own_reference)
+| EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+| STATS last_value = LAST(score, @timestamp) BY \`entity.id\`, is_group
+| EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+| STATS group_value = MAX(group_part), own_value = MAX(own_part) BY \`entity.id\`
+| EVAL reference_score = COALESCE(group_value, own_value)
 | KEEP \`entity.id\`, reference_score
 ), (
 FROM entities-latest-default
@@ -2615,8 +2630,11 @@ Array [
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL entity_id = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | WHERE entity_id IN (\\"host:h-1\\")
-| STATS group_reference = LAST(score, \`@timestamp\`) WHERE COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", own_reference = LAST(score, \`@timestamp\`) WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\") BY entity_id
-| EVAL reference_score = COALESCE(group_reference, own_reference)
+| EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+| STATS last_value = LAST(score, @timestamp) BY entity_id, is_group
+| EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+| STATS group_value = MAX(group_part), own_value = MAX(own_part) BY entity_id
+| EVAL reference_score = COALESCE(group_value, own_value)
 | KEEP entity_id, reference_score",
 ]
 `;
@@ -2628,8 +2646,11 @@ FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
-| STATS group_reference = LAST(score, \`@timestamp\`) WHERE COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", own_reference = LAST(score, \`@timestamp\`) WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\") BY \`entity.id\`
-| EVAL reference_score = COALESCE(group_reference, own_reference)
+| EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+| STATS last_value = LAST(score, @timestamp) BY \`entity.id\`, is_group
+| EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+| STATS group_value = MAX(group_part), own_value = MAX(own_part) BY \`entity.id\`
+| EVAL reference_score = COALESCE(group_value, own_value)
 | KEEP \`entity.id\`, reference_score
 ), (
 FROM entities-latest-default

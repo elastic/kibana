@@ -135,6 +135,14 @@ export interface SkillDefinition<
    */
   excludeFromElasticCapabilities?: boolean;
   /**
+   * When true, the skill is left out of registry listings (skill library, agent skill pickers,
+   * the elastic-capabilities auto-include) but stays resolvable by id, so explicit `skill_ids`
+   * references and runtime injection keep working. Use for skills Agent Builder grants as a
+   * built-in capability rather than something the user picks.
+   * Defaults to false.
+   */
+  hidden?: boolean;
+  /**
    * Optional dynamic availability configuration.
    * When provided, the framework evaluates the handler per-request to decide
    * whether the skill should be visible. See {@link AvailabilityConfig}.

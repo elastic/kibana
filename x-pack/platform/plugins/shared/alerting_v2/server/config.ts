@@ -122,10 +122,31 @@ const validateDataRetention = (duration: string): string | undefined => {
   }
 };
 
+const MIN_DISPATCHER_ACTIONS_RETENTION = '1d';
+
+const validateDispatcherActionsRetention = (duration: string): string | undefined => {
+  const formatError = validateDuration(duration);
+  if (formatError) {
+    return formatError;
+  }
+  if (parseDurationToMs(duration) < parseDurationToMs(MIN_DISPATCHER_ACTIONS_RETENTION)) {
+    return `duration cannot be less than ${MIN_DISPATCHER_ACTIONS_RETENTION}`;
+  }
+};
+
 const retentionSchema = schema.object({
   ruleEvents: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
     dataRetention: schema.string({ defaultValue: '90d', validate: validateDataRetention }),
+  }),
+  alertActions: schema.object({
+    dispatcher: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      dataRetention: schema.string({
+        defaultValue: '90d',
+        validate: validateDispatcherActionsRetention,
+      }),
+    }),
   }),
 });
 

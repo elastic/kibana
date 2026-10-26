@@ -27,6 +27,9 @@ export const WORKFLOWS_API_VERSION = '2023-10-31';
 /** Step ids from the managed workflow yaml (@kbn/workflows managed/definitions/alertzero/rule_creation.yaml). */
 export const DRAFT_STEP_ID = 'draft_creation';
 export const REVIEW_STEP_ID = 'review_creation';
+export const PROPOSE_STEP_ID = 'propose_creation';
+
+export const SCORING_INVESTIGATION_ID = '00000000-0000-4000-8000-000000000000';
 
 /**
  * Agent Builder tool the workflow's `ai.agent` step is instructed to call. Consumed by the
