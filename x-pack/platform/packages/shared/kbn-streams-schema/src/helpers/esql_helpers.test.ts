@@ -13,6 +13,7 @@ import {
   extractReferencedColumns,
   extractStatsGroupColumns,
   extractWhereExpression,
+  findCastFullTextArguments,
   findOverBroadMatchPredicates,
   getStatsQueryHints,
   hasSameEsql,
@@ -474,5 +475,61 @@ describe('extractReferencedColumns', () => {
 
   it('returns an empty array for an unparseable query', () => {
     expect(extractReferencedColumns('THIS IS NOT ESQL {{{')).toEqual([]);
+  });
+});
+
+describe('findCastFullTextArguments', () => {
+  it('flags MATCH_PHRASE on a casted field', () => {
+    expect(
+      findCastFullTextArguments(
+        'FROM logs | WHERE MATCH_PHRASE(exception.message::KEYWORD, "i/o timeout")'
+      )
+    ).toEqual([{ function: 'MATCH_PHRASE', argument: 'exception.message::KEYWORD' }]);
+  });
+
+  it('flags MATCH on a casted field', () => {
+    expect(
+      findCastFullTextArguments('FROM logs | WHERE MATCH(message::keyword, "timeout")')
+    ).toEqual([{ function: 'MATCH', argument: 'message::KEYWORD' }]);
+  });
+
+  it('flags the `:` operator on a casted field', () => {
+    expect(findCastFullTextArguments('FROM logs | WHERE message::keyword : "timeout"')).toEqual([
+      { function: ':', argument: 'message::KEYWORD' },
+    ]);
+  });
+
+  it('flags a function wrapping the field', () => {
+    expect(
+      findCastFullTextArguments('FROM logs | WHERE MATCH_PHRASE(TO_LOWER(message), "timeout")')
+    ).toEqual([{ function: 'MATCH_PHRASE', argument: 'TO_LOWER(message)' }]);
+  });
+
+  it('flags the generated query that failed in production', () => {
+    const esql = `FROM $.nightshift.sources.default.logging-eis | WHERE \`kubernetes.labels.app_kubernetes_io/name\` == "eis-entitlements-consumer" AND MATCH_PHRASE(exception.message::KEYWORD, "execute Kafka entitlements store upsert: i/o timeout")
+| STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)
+| LIMIT 6`;
+
+    expect(findCastFullTextArguments(esql)).toEqual([
+      { function: 'MATCH_PHRASE', argument: 'exception.message::KEYWORD' },
+    ]);
+  });
+
+  it('does not flag full-text functions on plain columns', () => {
+    expect(
+      findCastFullTextArguments(
+        'FROM logs | WHERE MATCH_PHRASE(exception.message, "i/o timeout") AND message : "timeout"'
+      )
+    ).toEqual([]);
+  });
+
+  it('does not flag a cast used with an exact comparison', () => {
+    expect(
+      findCastFullTextArguments('FROM logs | WHERE exception.message::keyword == "timeout"')
+    ).toEqual([]);
+  });
+
+  it('returns nothing when the query does not parse', () => {
+    expect(findCastFullTextArguments('FROM | WHERE (')).toEqual([]);
   });
 });

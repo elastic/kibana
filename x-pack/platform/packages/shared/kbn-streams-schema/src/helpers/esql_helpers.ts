@@ -618,6 +618,56 @@ export function findOverBroadMatchPredicates(esql: string): OverBroadMatchPredic
   return issues;
 }
 
+/** A full-text predicate whose field argument is an expression, not a mapped column. */
+export interface CastFullTextArgument {
+  function: ':' | 'MATCH' | 'MATCH_PHRASE';
+  argument: string;
+}
+
+/**
+ * Finds `:` / `MATCH` / `MATCH_PHRASE` calls whose field argument is anything other than a plain
+ * column, typically a `field::keyword` cast. Elasticsearch pushes full-text functions down to the
+ * index, so it rejects them with `not a field from an index mapping`. The check is static because
+ * a validation run can miss it when the time filter prunes the backing indices with a union type.
+ */
+export function findCastFullTextArguments(esql: string): CastFullTextArgument[] {
+  const { root, parsed } = tryParseEsql(esql);
+  if (!parsed) return [];
+
+  const issues: CastFullTextArgument[] = [];
+  walk(root, {
+    visitFunction: (fn) => {
+      const isColon = fn.name === ':' && fn.subtype === 'binary-expression';
+      const isCall = fn.name === 'match' || fn.name === 'match_phrase';
+      if (!isColon && !isCall) {
+        return;
+      }
+
+      const [field] = fn.args;
+      if (!field || Array.isArray(field) || ('type' in field && field.type === 'column')) {
+        return;
+      }
+
+      issues.push({
+        function: isColon ? ':' : fn.name === 'match' ? 'MATCH' : 'MATCH_PHRASE',
+        argument: getColumnName(field),
+      });
+    },
+  });
+  return issues;
+}
+
+/** Rejection message for {@link findCastFullTextArguments} results, written for the LLM that must repair the query. */
+export function renderCastFullTextArgumentError(issues: CastFullTextArgument[]): string {
+  const rendered = issues.map((issue) => `${issue.function}(${issue.argument}, ...)`).join(', ');
+  return (
+    `Full-text function(s) need a plain mapped field, not a cast or expression: ${rendered}. ` +
+    `Elasticsearch rejects them with "not a field from an index mapping". Reference the bare ` +
+    `field name. For a union-typed field that needs a cast, use an exact comparison on the cast ` +
+    `field instead, e.g. field::keyword LIKE "*a phrase*".`
+  );
+}
+
 /**
  * Every column identifier in the query (field references, output aliases, and `*`),
  * de-duplicated; empty when it does not parse.

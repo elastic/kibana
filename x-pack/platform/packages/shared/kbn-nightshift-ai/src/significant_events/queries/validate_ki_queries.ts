@@ -12,9 +12,11 @@ import type { Feature, QueryFeature, QueryType } from '@kbn/significant-events-s
 import {
   deriveQueryType,
   extractReferencedColumns,
+  findCastFullTextArguments,
   findOverBroadMatchPredicates,
   getStatsQueryHints,
   normalizeEsqlSafe,
+  renderCastFullTextArgumentError,
   renderOverBroadMatchError,
   replaceFromSources,
 } from '@kbn/streams-schema';
@@ -276,6 +278,19 @@ export async function validateKIQueries({
             status: 'Duplicate',
             exactDuplicate,
             error: 'This query already exists for this source.',
+          };
+        }
+
+        const castFullTextArguments = findCastFullTextArguments(rewritten);
+        if (castFullTextArguments.length > 0) {
+          hasNonIntentFailures = true;
+          return {
+            query,
+            valid: false,
+            status: 'Failed to add',
+            failureReason: 'validation_error',
+            exactDuplicate,
+            error: renderCastFullTextArgumentError(castFullTextArguments),
           };
         }
 
