@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-suite-security-esql-generation-regression'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/security-detection-platform'
+  defaultOwner: '@elastic/security-generative-ai'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/evals-suite-security-esql-generation-regression'
   description: Moon project for @kbn/evals-suite-security-esql-generation-regression
   channel: ''
-  owner: '@elastic/security-detection-platform'
+  owner: '@elastic/security-generative-ai'
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression
 dependsOn:
   - '@kbn/agent-builder-common'
@@ -36,6 +36,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

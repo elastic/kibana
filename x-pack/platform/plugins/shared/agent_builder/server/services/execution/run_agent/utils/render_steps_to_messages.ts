@@ -45,6 +45,7 @@ import { createRelevantSkillsNoticeMessage } from '../prompts/utils/skills';
 import type { CurrentRun } from '../transient_state';
 import { countNonTodosSteps } from '../step_state';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
+import { toModelToolCall } from './dynamic_tool_call';
 import { toolCallKey } from './filestore_substitution';
 import type { ToolCallResultTransformer } from './tool_summarization';
 
@@ -302,13 +303,12 @@ const renderToolCallGroup = async (
       const stepReasoning = joinReasoning(
         reasoningSteps.filter((s) => s.tool_call_id === call.tool_call_id)
       );
-      const name = sanitizeToolId(
-        current?.run.renderState[call.tool_call_id]?.toolName ?? call.tool_id
-      );
+      const { toolId, args } = toModelToolCall(call);
+      const name = sanitizeToolId(current?.run.renderState[call.tool_call_id]?.toolName ?? toolId);
       return {
         id: call.tool_call_id,
         name,
-        args: stepReasoning ? { _reasoning: stepReasoning, ...call.params } : call.params,
+        args: stepReasoning ? { _reasoning: stepReasoning, ...args } : args,
         type: 'tool_call' as const,
       };
     }),

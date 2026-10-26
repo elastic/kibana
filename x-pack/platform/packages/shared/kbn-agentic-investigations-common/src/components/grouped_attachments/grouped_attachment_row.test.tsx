@@ -69,7 +69,7 @@ describe('GroupedAttachmentRow', () => {
     expect(row).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByTestId('groupedAttachmentRowAffordance')).toHaveAttribute(
       'data-euiicon-type',
-      'arrowDown'
+      'chevronSingleDown'
     );
     expect(screen.getByText('Body')).toBeInTheDocument();
     expect(row).toHaveAttribute('aria-controls', screen.getByText('Body').parentElement?.id);
@@ -88,7 +88,7 @@ describe('GroupedAttachmentRow', () => {
     expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByTestId('groupedAttachmentRowAffordance')).toHaveAttribute(
       'data-euiicon-type',
-      'arrowUp'
+      'chevronSingleUp'
     );
   });
 

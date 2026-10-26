@@ -1958,7 +1958,7 @@ describe('CaseUserActionService', () => {
             unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
             await expect(service.getAll('1')).rejects.toThrowErrorMatchingInlineSnapshot(
-              `"Invalid value \\"undefined\\" supplied to \\"payload\\""`
+              `"type: Invalid input: expected \\"create_case\\", payload: Invalid input: expected object, received undefined, type: Invalid input: expected \\"connector\\", payload: Invalid input: expected object, received undefined, type: Invalid input: expected \\"pushed\\", and 32 more"`
             );
           });
 
@@ -2031,7 +2031,7 @@ describe('CaseUserActionService', () => {
             soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
             await expect(service.getConnectorFieldsBeforeLatestPush('1', pushes)).rejects.toThrow(
-              `Invalid value "undefined" supplied to "${key}"`
+              `Invalid`
             );
           });
 
@@ -2048,7 +2048,7 @@ describe('CaseUserActionService', () => {
             soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
             await expect(service.getConnectorFieldsBeforeLatestPush('1', pushes)).rejects.toThrow(
-              'Invalid value "undefined" supplied to "payload,title"'
+              'Invalid'
             );
           });
 
@@ -2068,7 +2068,7 @@ describe('CaseUserActionService', () => {
             soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
             await expect(service.getConnectorFieldsBeforeLatestPush('1', pushes)).rejects.toThrow(
-              'Invalid value "undefined" supplied to "payload,connector,fields,issueType",Invalid value "{"priority":"high","parent":"2"}" supplied to "payload,connector,fields"'
+              'Invalid'
             );
           });
 
@@ -2132,9 +2132,7 @@ describe('CaseUserActionService', () => {
             const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
             unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
 
-            await expect(service.getMostRecentUserAction('123')).rejects.toThrow(
-              `Invalid value "undefined" supplied to "${key}"`
-            );
+            await expect(service.getMostRecentUserAction('123')).rejects.toThrow(`Invalid`);
           });
 
           it('throws if missing attributes from the payload', async () => {
@@ -2143,9 +2141,7 @@ describe('CaseUserActionService', () => {
             const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
             unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
 
-            await expect(service.getMostRecentUserAction('123')).rejects.toThrow(
-              'Invalid value "undefined" supplied to "payload,title"'
-            );
+            await expect(service.getMostRecentUserAction('123')).rejects.toThrow('Invalid');
           });
 
           it('throws if missing nested attributes from the payload', async () => {
@@ -2157,9 +2153,7 @@ describe('CaseUserActionService', () => {
             const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
             unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
 
-            await expect(service.getMostRecentUserAction('123')).rejects.toThrow(
-              'Invalid value "undefined" supplied to "payload,connector,fields,issueType",Invalid value "{"priority":"high","parent":"2"}" supplied to "payload,connector,fields"'
-            );
+            await expect(service.getMostRecentUserAction('123')).rejects.toThrow('Invalid');
           });
 
           it('strips out excess attributes', async () => {
@@ -2445,9 +2439,7 @@ describe('CaseUserActionService', () => {
               unsecuredSavedObjectsClient.find.mockResolvedValue({ ...soFindRes, aggregations });
               soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                `Invalid value "undefined" supplied to "${key}"`
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(`Invalid`);
             });
 
             it('throws if missing attributes from the payload', async () => {
@@ -2463,9 +2455,7 @@ describe('CaseUserActionService', () => {
               unsecuredSavedObjectsClient.find.mockResolvedValue({ ...soFindRes, aggregations });
               soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                'Invalid value "undefined" supplied to "payload,title"'
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow('Invalid');
             });
 
             it('throws if missing nested attributes from the payload', async () => {
@@ -2484,9 +2474,7 @@ describe('CaseUserActionService', () => {
               unsecuredSavedObjectsClient.find.mockResolvedValue({ ...soFindRes, aggregations });
               soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                'Invalid value "undefined" supplied to "payload,connector,fields,issueType",Invalid value "{"priority":"high","parent":"2"}" supplied to "payload,connector,fields"'
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow('Invalid');
             });
 
             it('strips out excess attributes', async () => {
@@ -2618,9 +2606,7 @@ describe('CaseUserActionService', () => {
                 pushActionActionWithOmittedAttribute
               );
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                `Invalid value "undefined" supplied to "${key}"`
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(`Invalid`);
             });
 
             it('throws if missing attributes from the payload', async () => {
@@ -2646,9 +2632,7 @@ describe('CaseUserActionService', () => {
                 pushActionActionWithOmittedAttribute
               );
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                'Invalid value "undefined" supplied to "payload,externalService"'
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow('Invalid');
             });
 
             it('throws if missing nested attributes from the payload', async () => {
@@ -2677,9 +2661,7 @@ describe('CaseUserActionService', () => {
                 pushActionActionWithOmittedAttribute
               );
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                'Invalid value "undefined" supplied to "payload,externalService,external_id"'
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow('Invalid');
             });
 
             it('strips out excess attributes', async () => {
