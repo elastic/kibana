@@ -493,6 +493,11 @@ export const getNodeChildren = (node: AppNode): readonly AppNode[] =>
  */
 export const themeSchema = z.object({
   accent: z.enum(THEME_ACCENTS).optional(),
+  /**
+   * A string state key whose value is the accent, so that a control can change it, such as a button
+   * group whose options are accent names. A value that is not an accent leaves `accent`.
+   */
+  accentFrom: stateKeySchema.optional(),
   shape: z.enum(THEME_SHAPES).optional(),
 });
 

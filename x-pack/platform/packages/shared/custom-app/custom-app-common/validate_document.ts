@@ -9,13 +9,14 @@ import type { z } from '@kbn/zod/v4';
 import { CUSTOM_CONTENT_SCRIPT_PATTERN } from '@kbn/custom-content-common';
 import {
   CASES_FILTERS,
+  THEME_ACCENTS,
   CASES_SEVERITIES,
   CASES_STATUSES,
   MAX_NODE_COUNT,
   MAX_NODE_DEPTH,
   MAX_STATE_KEYS,
 } from './constants';
-import type { AppNode, StateDeclaration } from './document_schema';
+import type { AppNode, AppTheme, StateDeclaration } from './document_schema';
 import { findStateReferences, hasMalformedReference } from './interpolation';
 import {
   getInterpolatedText,
@@ -30,6 +31,7 @@ import {
 interface DocumentToValidate {
   state: Record<string, StateDeclaration>;
   root: AppNode;
+  theme?: AppTheme;
 }
 
 /** Where each action's `fromColumn` and `fromInput` values make sense. */
@@ -111,6 +113,24 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
   }
   const { nodes, withinLimits } = collectNodes(document.root, ctx);
   if (!withinLimits) return;
+
+  const accentKey = document.theme?.accentFrom;
+  if (accentKey !== undefined) {
+    const declaration = state[accentKey];
+    if (!declaration) {
+      issue(`The theme takes its accent from unknown state key "${accentKey}"`);
+    } else if (declaration.type !== 'string') {
+      issue(
+        `The theme takes its accent from state key "${accentKey}" (${declaration.type}); it needs a string key`
+      );
+    } else if (!(THEME_ACCENTS as readonly string[]).includes(String(declaration.default))) {
+      issue(
+        `The theme takes its accent from "${accentKey}", whose default "${
+          declaration.default
+        }" is not an accent; use one of: ${THEME_ACCENTS.join(', ')}`
+      );
+    }
+  }
 
   const firstTimeRangeId = nodes.find(({ type }) => type === 'time_range')?.id;
   const flyoutIds = new Set(nodes.filter(({ type }) => type === 'flyout').map(({ id }) => id));

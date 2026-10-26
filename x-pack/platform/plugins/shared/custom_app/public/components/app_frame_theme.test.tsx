@@ -52,6 +52,21 @@ describe('the frame of an app, with a theme', () => {
     expect(themeOf().link).toBe(ACCENT_COLORS.purple.text);
   });
 
+  it('follows the accent when it is changed while the app is shown', () => {
+    const { rerender } = render(
+      <AppFrame theme={{ accent: 'purple' }}>
+        <Reader />
+      </AppFrame>
+    );
+    rerender(
+      <AppFrame theme={{ accent: 'teal' }}>
+        <Reader />
+      </AppFrame>
+    );
+
+    expect(themeOf().fill).toBe(ACCENT_COLORS.teal.fill);
+  });
+
   it('gives what is inside the corners of the shape', () => {
     const radiusOf = (shape: 'soft' | 'sharp') => {
       const { unmount } = render(

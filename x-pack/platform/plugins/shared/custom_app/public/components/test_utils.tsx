@@ -13,6 +13,7 @@ import { createDataLayer, type DataLayer, type RunCases, type RunQuery } from '.
 import { DataLayerContext } from '../data/data_layer_context';
 import { createAppRuntime, type AppRuntime } from '../runtime/app_runtime';
 import { AppRuntimeContext } from '../runtime/app_runtime_context';
+import { AppFrame } from './app_frame';
 import { NodeRenderer } from './node_renderer';
 
 export const emptyDocument = (state: unknown = {}): AppDocument =>
@@ -44,7 +45,9 @@ const getParameterNames = (query: string) =>
 export const renderApp = async (
   document: AppDocument,
   runQuery: RunQuery,
-  runCases?: RunCases
+  runCases?: RunCases,
+  /** Shows the app in the frame of a page, with its theme, as a page does. */
+  { framed = false }: { framed?: boolean } = {}
 ): Promise<{ runtime: AppRuntime; layer: DataLayer } & RenderResult> => {
   const runtime = createAppRuntime(document);
   const layer = createDataLayer({ runQuery, runCases, getParameterNames });
@@ -54,7 +57,13 @@ export const renderApp = async (
   const view = render(
     <AppRuntimeContext.Provider value={runtime}>
       <DataLayerContext.Provider value={layer}>
-        <NodeRenderer node={document.root} />
+        {framed ? (
+          <AppFrame theme={document.theme}>
+            <NodeRenderer node={document.root} />
+          </AppFrame>
+        ) : (
+          <NodeRenderer node={document.root} />
+        )}
       </DataLayerContext.Provider>
     </AppRuntimeContext.Provider>
   );

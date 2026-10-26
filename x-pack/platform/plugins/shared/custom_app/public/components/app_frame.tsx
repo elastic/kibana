@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import React, { type ReactNode } from 'react';
+import React, { createContext, useContext, type ContextType, type ReactNode } from 'react';
 import { EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AppTheme } from '@kbn/custom-app-common';
-import { getThemeModifications, hasThemeModifications } from '../theme/page_theme';
+import { getThemeModifications, hasThemeModifications, resolveTheme } from '../theme/page_theme';
+import { AppRuntimeContext } from '../runtime/app_runtime_context';
+import { useSubjectValue } from '../utils/use_subject_value';
+
+/** The accent of the page the component is in, for what is drawn by something other than EUI. */
+const PageAccentContext = createContext<AppTheme['accent']>(undefined);
+
+export const usePageAccent = (): AppTheme['accent'] => useContext(PageAccentContext);
 
 /**
  * The room an app has inside its panel: breathing space all round, and a scroll of its own if
@@ -19,7 +26,40 @@ import { getThemeModifications, hasThemeModifications } from '../theme/page_them
  * only as much as its widest content. So the frame claims all of it, and what is stacked inside
  * is as wide as the panel, not as wide as its widest component.
  */
-export const AppFrame = ({ children, theme }: { children: ReactNode; theme?: AppTheme }) => {
+export const AppFrame = ({ children, theme }: { children: ReactNode; theme?: AppTheme }) =>
+  theme?.accentFrom ? (
+    <FollowingFrame theme={theme}>{children}</FollowingFrame>
+  ) : (
+    <ThemedFrame theme={theme}>{children}</ThemedFrame>
+  );
+
+/** A frame whose accent is a value of the app, which is what a control of the app changes. */
+const FollowingFrame = ({ children, theme }: { children: ReactNode; theme: AppTheme }) => {
+  const runtime = useContext(AppRuntimeContext);
+  // Without an app around it there are no values, and the accent is the one the theme names.
+  return runtime ? (
+    <RuntimeFrame theme={theme} runtime={runtime}>
+      {children}
+    </RuntimeFrame>
+  ) : (
+    <ThemedFrame theme={resolveTheme(theme, {})}>{children}</ThemedFrame>
+  );
+};
+
+const RuntimeFrame = ({
+  children,
+  theme,
+  runtime,
+}: {
+  children: ReactNode;
+  theme: AppTheme;
+  runtime: NonNullable<ContextType<typeof AppRuntimeContext>>;
+}) => {
+  const values = useSubjectValue(runtime.state$);
+  return <ThemedFrame theme={resolveTheme(theme, values)}>{children}</ThemedFrame>;
+};
+
+const ThemedFrame = ({ children, theme }: { children: ReactNode; theme?: AppTheme }) => {
   const { euiTheme } = useEuiTheme();
 
   const frame = (
@@ -40,9 +80,11 @@ export const AppFrame = ({ children, theme }: { children: ReactNode; theme?: App
 
   // The theme of the page changes what is inside the frame, and nothing outside it.
   return hasThemeModifications(theme) ? (
-    <EuiThemeProvider modify={getThemeModifications(theme)} wrapperProps={{ cloneElement: true }}>
-      {frame}
-    </EuiThemeProvider>
+    <PageAccentContext.Provider value={theme?.accent}>
+      <EuiThemeProvider modify={getThemeModifications(theme)} wrapperProps={{ cloneElement: true }}>
+        {frame}
+      </EuiThemeProvider>
+    </PageAccentContext.Provider>
   ) : (
     frame
   );

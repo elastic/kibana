@@ -6,7 +6,7 @@
  */
 
 import type { EuiThemeModifications } from '@elastic/eui';
-import type { AppTheme } from '@kbn/custom-app-common';
+import { THEME_ACCENTS, type AppTheme } from '@kbn/custom-app-common';
 
 type Accent = NonNullable<AppTheme['accent']>;
 
@@ -130,6 +130,23 @@ export const getThemeModifications = (theme: AppTheme | undefined): EuiThemeModi
   return modifications;
 };
 
-/** Whether a theme changes anything at all. */
+/**
+ * The theme as it is now: the accent is the value of the state key it follows, when that is an
+ * accent, and the accent it names otherwise.
+ */
+export const resolveTheme = (
+  theme: AppTheme | undefined,
+  values: Readonly<Record<string, unknown>>
+): AppTheme | undefined => {
+  if (!theme?.accentFrom) return theme;
+  const value = values[theme.accentFrom];
+  const accent = THEME_ACCENTS.find((name) => name === value) ?? theme.accent;
+  return { ...theme, accent };
+};
+
+/**
+ * Whether a theme changes anything at all. One that follows a value is always kept, so that the
+ * app is not drawn again from the start when the value first gives it an accent.
+ */
 export const hasThemeModifications = (theme: AppTheme | undefined): boolean =>
-  Boolean(theme?.accent || theme?.shape);
+  Boolean(theme?.accent || theme?.accentFrom || theme?.shape);

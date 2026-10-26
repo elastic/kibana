@@ -6,7 +6,12 @@
  */
 
 import { THEME_ACCENTS } from '@kbn/custom-app-common';
-import { ACCENT_COLORS, getThemeModifications, hasThemeModifications } from './page_theme';
+import {
+  ACCENT_COLORS,
+  getThemeModifications,
+  hasThemeModifications,
+  resolveTheme,
+} from './page_theme';
 
 /** The WCAG relative luminance of a colour written as #rrggbb. */
 const luminance = (hex: string): number => {
@@ -88,5 +93,34 @@ describe('what a theme changes', () => {
     const modifications = getThemeModifications({ accent: 'teal', shape: 'soft' });
 
     expect(Object.keys(modifications).sort()).toEqual(['border', 'colors']);
+  });
+});
+
+describe('resolveTheme', () => {
+  it('is the theme itself when it does not follow a value', () => {
+    const theme = { accent: 'blue' as const };
+
+    expect(resolveTheme(theme, { look: 'teal' })).toBe(theme);
+    expect(resolveTheme(undefined, {})).toBeUndefined();
+  });
+
+  it('takes the accent from the value it follows, when it is an accent', () => {
+    expect(resolveTheme({ accentFrom: 'look', accent: 'blue' }, { look: 'teal' })).toEqual({
+      accentFrom: 'look',
+      accent: 'teal',
+    });
+  });
+
+  it.each([
+    ['a name that is not an accent', 'magenta'],
+    ['no value', undefined],
+  ])('keeps the accent of the theme for %s', (_what, value) => {
+    expect(resolveTheme({ accentFrom: 'look', accent: 'blue' }, { look: value })?.accent).toBe(
+      'blue'
+    );
+  });
+
+  it('is kept as a theme that changes things, even before the value gives it an accent', () => {
+    expect(hasThemeModifications({ accentFrom: 'look' })).toBe(true);
   });
 });

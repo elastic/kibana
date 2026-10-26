@@ -8,6 +8,7 @@
 import { act, screen, waitFor } from '@testing-library/react';
 import { appDocumentSchema } from '@kbn/custom-app-common';
 import type { RunQuery } from '../data/data_layer';
+import { ACCENT_COLORS } from '../theme/page_theme';
 import { renderApp } from './test_utils';
 
 const TEMPLATE =
@@ -60,6 +61,42 @@ describe('the custom content node', () => {
     expect(srcdoc).toContain('hi');
     expect(srcdoc).not.toContain('onclick');
     expect(srcdoc).not.toContain('onerror');
+  });
+
+  describe('in a page with a theme', () => {
+    const themed = (theme: Record<string, unknown>) =>
+      appDocumentSchema.parse({
+        theme,
+        root: {
+          type: 'custom_content',
+          id: 'board',
+          query: 'FROM status',
+          template: TEMPLATE,
+        },
+      });
+
+    it('takes the accent of the page as its main colour, which is what a template is told to use', async () => {
+      await renderApp(themed({ accent: 'purple' }), runQuery, undefined, { framed: true });
+
+      const { srcdoc } = await frame();
+      expect(srcdoc).toContain(`--cc-color-primary:${ACCENT_COLORS.purple.fill}`);
+    });
+
+    it('takes the corners of the page, for the cards and the small elements of a template', async () => {
+      await renderApp(themed({ shape: 'soft' }), runQuery, undefined, { framed: true });
+
+      const { srcdoc } = await frame();
+      expect(srcdoc).toContain('--cc-radius:14px');
+      expect(srcdoc).toContain('--cc-radius-s:8px');
+    });
+
+    it('is as Kibana draws it for a page with no theme', async () => {
+      await renderApp(documentWith(), runQuery, undefined, { framed: true });
+
+      const { srcdoc } = await frame();
+      expect(srcdoc).not.toContain(ACCENT_COLORS.purple.fill);
+      expect(srcdoc).not.toContain('--cc-radius:14px');
+    });
   });
 
   const measure = async (scrollHeight: number) => {
@@ -131,5 +168,41 @@ describe('the custom content node', () => {
 
     await waitFor(() => expect(screen.getByText(/Unknown column \[nope\]/)).toBeInTheDocument());
     expect(screen.queryByTestId('customAppCustomContentFrame')).not.toBeInTheDocument();
+  });
+});
+
+describe('a page whose accent is picked by a control', () => {
+  it('changes colour when the person picks another accent', async () => {
+    const document = appDocumentSchema.parse({
+      state: { look: { type: 'string', default: 'purple' } },
+      theme: { accentFrom: 'look' },
+      root: {
+        type: 'stack',
+        id: 'root',
+        children: [
+          {
+            type: 'button_group',
+            id: 'picker',
+            label: 'Accent',
+            bind: 'look',
+            options: [
+              { value: 'purple', label: 'Purple' },
+              { value: 'teal', label: 'Teal' },
+            ],
+          },
+          { type: 'custom_content', id: 'board', template: '<p>hi</p>' },
+        ],
+      },
+    });
+    const { runtime } = await renderApp(document, runQuery, undefined, { framed: true });
+    expect((await frame()).srcdoc).toContain(`--cc-color-primary:${ACCENT_COLORS.purple.fill}`);
+
+    act(() => {
+      runtime.run([{ type: 'setState', key: 'look', value: 'teal' }]);
+    });
+
+    await waitFor(async () =>
+      expect((await frame()).srcdoc).toContain(`--cc-color-primary:${ACCENT_COLORS.teal.fill}`)
+    );
   });
 });

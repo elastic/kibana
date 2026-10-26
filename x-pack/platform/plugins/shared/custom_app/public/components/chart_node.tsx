@@ -7,7 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -22,6 +22,8 @@ import { useSubjectValue } from '../utils/use_subject_value';
 import { getClickedRow } from './clicked_row';
 import { DataState } from './data_state';
 import { DroppedActions } from './dropped_actions';
+import { applyAccentToChart } from '../theme/accent_chart_colors';
+import { usePageAccent } from './app_frame';
 import { useChartAttributes } from './use_chart_attributes';
 import type { SourceData } from '../data/data_layer';
 
@@ -33,7 +35,13 @@ const Chart = ({ node, data }: { node: AppNodeOfType<'chart'>; data: SourceData 
   const layer = useDataLayer();
   const state = useStateValues();
   const context = useSubjectValue(layer.context$);
-  const { attributes, error } = useChartAttributes(node, data.columns);
+  const { attributes: lensAttributes, error } = useChartAttributes(node, data.columns);
+  const accent = usePageAccent();
+  const { colorMode } = useEuiTheme();
+  const attributes = useMemo(
+    () => lensAttributes && applyAccentToChart(lensAttributes, accent, colorMode === 'DARK'),
+    [lensAttributes, accent, colorMode]
+  );
   const run = useActionRunner(node.id);
   const [dropped, setDropped] = useState<string[]>([]);
   // One id for as long as the chart is shown, so Lens keeps its own state between refreshes.

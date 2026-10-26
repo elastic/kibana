@@ -658,6 +658,42 @@ describe('the theme of a page', () => {
   });
 });
 
+describe('a theme whose accent follows a value of the app', () => {
+  const followed = (state: Record<string, unknown>, theme: Record<string, unknown> = {}) => ({
+    state,
+    theme: { accentFrom: 'look', ...theme },
+    root: { type: 'text', id: 't', text: 'x' },
+  });
+  const messagesOf = (document: unknown) => {
+    const result = appDocumentSchema.safeParse(document);
+    return result.success ? [] : result.error.issues.map(({ message }) => message);
+  };
+
+  it('is accepted when the key is a string whose default is an accent', () => {
+    expect(
+      appDocumentSchema.parse(followed({ look: { type: 'string', default: 'teal' } })).theme
+    ).toEqual({ accentFrom: 'look' });
+  });
+
+  it('is refused when the key does not exist', () => {
+    expect(messagesOf(followed({}))).toEqual([
+      'The theme takes its accent from unknown state key "look"',
+    ]);
+  });
+
+  it('is refused when the key is not a string', () => {
+    expect(messagesOf(followed({ look: { type: 'number', default: 1 } }))[0]).toContain(
+      'it needs a string key'
+    );
+  });
+
+  it('is refused when the default is not an accent, so that the page never starts with none', () => {
+    expect(messagesOf(followed({ look: { type: 'string', default: 'magenta' } }))[0]).toContain(
+      'is not an accent'
+    );
+  });
+});
+
 describe('links', () => {
   const linkDoc = (to: unknown, state: Record<string, unknown> = {}, label = 'Open') => ({
     state,
