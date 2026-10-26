@@ -507,11 +507,19 @@ const unescapeRegex = (value: string): string =>
  * What the operator does with the literal decides how much of that exemption applies. Under an
  * exact operator (`==`, `IN`) the whole literal is tried first: an exact eligible URL carrying
  * `?` in its query string is the hunt the run asked for, not a pattern whose `?`-split prefix
- * happens to end at the rejected host. Under a full-text or query-string function (`MATCH`,
- * `:`, `QSTR`) there is no exemption at all: the literal is analyzed into tokens that `OR`
- * together, so an eligible URL under `MATCH` matches events carrying only its rejected host.
+ * happens to end at the rejected host. `MATCH_PHRASE` counts as exact too: its terms are all
+ * required, in order, so a phrase that is an eligible URL searches for that URL. Under the
+ * token-`OR` functions (`MATCH`, `:`, `QSTR`, `KQL`) there is no exemption at all: the literal
+ * is analyzed into alternatives, so an eligible URL under `MATCH` matches events carrying only
+ * its rejected host.
  */
-const EXACT_VALUE_OPERATORS: ReadonlySet<string> = new Set(['==', '!=', 'in', 'not in']);
+const EXACT_VALUE_OPERATORS: ReadonlySet<string> = new Set([
+  '==',
+  '!=',
+  'in',
+  'not in',
+  'match_phrase',
+]);
 
 const asLiteral = (node: ESQLAstNode): ESQLLiteral | undefined =>
   !Array.isArray(node) && 'type' in node && node.type === 'literal' ? node : undefined;

@@ -419,6 +419,31 @@ describe('assertEsqlGroundedInReport', () => {
         });
       });
 
+      it('keeps an eligible URL under MATCH_PHRASE, whose terms are all required in order', () => {
+        const repo = 'https://github.com/attacker/stage2';
+        const text = `The loader cloned ${repo} before persisting.`;
+        const eligibleWins = {
+          reportText: text,
+          iocValues: [repo],
+          excludedIocValues: ['github.com'],
+        };
+        expect(
+          assertEsqlGroundedInReport(
+            `FROM logs-* | WHERE MATCH_PHRASE(message, "${repo}") | LIMIT 10`,
+            eligibleWins
+          ).ok
+        ).toBe(true);
+        expect(
+          assertEsqlGroundedInReport(
+            'FROM logs-* | WHERE MATCH_PHRASE(message, "github.com") | LIMIT 10',
+            eligibleWins
+          )
+        ).toEqual({
+          ok: false,
+          reason: 'query filters on a value intel review rejected (github.com)',
+        });
+      });
+
       it('rejects an eligible URL under a full-text function, whose tokens OR the rejected host', () => {
         const download = 'https://drive.google.com/uc?export=download&id=payload';
         const repo = 'https://github.com/attacker/stage2';
