@@ -38,7 +38,9 @@ export class MetricsExplorerPage {
   }
 
   async goto() {
-    await this.page.goto(`${this.kbnUrl.app('metrics')}/explorer`);
+    // Resolve on 'commit': Kibana's SPA can leave the `load` event pending past Scout's 20s
+    // `navigationTimeout`, and the locator waits below are stronger gates with a longer budget.
+    await this.page.goto(`${this.kbnUrl.app('metrics')}/explorer`, { waitUntil: 'commit' });
     await this.metricsComboBox.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     // The page re-applies the saved view's options once it resolves, clobbering earlier selections.
     await this.loadedSavedViewButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
