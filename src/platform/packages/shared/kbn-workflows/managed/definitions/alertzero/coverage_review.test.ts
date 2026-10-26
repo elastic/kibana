@@ -65,6 +65,7 @@ interface YamlStep {
   name: string;
   type: string;
   if?: string;
+  status?: string;
   condition?: string;
   expression?: string;
   with?: Record<string, unknown>;
@@ -749,6 +750,7 @@ describe('Detection Coverage review', () => {
 
   describe('outcome flags', () => {
     const emit = withOf('emit_result');
+    const failure = withOf('resolve_failure');
     const decision = withOf('record_decision');
     const outcome = withOf('resolve_outcome');
 
@@ -854,16 +856,18 @@ describe('Detection Coverage review', () => {
     // Two different failures need two different messages. "Not found" means the producer
     // or the index is wrong. "No verdict" means the check itself failed.
     it('tells a missing indicator apart from a check that returned no verdict', () => {
-      expect(emit?.check_error).toContain('steps.read_ki.output.hits.total.value == 0');
-      expect(emit?.check_error).toContain('knowledge indicator not found in this space');
-      expect(emit?.check_error).toContain('produced no verdict');
+      expect(failure?.check_error).toContain('steps.read_ki.output.hits.total.value == 0');
+      expect(failure?.check_error).toContain('knowledge indicator not found in this space');
+      expect(failure?.check_error).toContain('produced no verdict');
+      expect(emit?.check_error).toBe('{{ steps.resolve_failure.output.check_error }}');
     });
 
-    // A failed rule-creation child leaves the indicator pending and the run completed; without
-    // this field nothing in the run says why the indicator came back.
+    // A failed rule-creation child leaves the indicator pending; without this field nothing
+    // in the run says why the indicator came back.
     it('reports a failed rule-creation child', () => {
-      expect(emit?.creation_error).toContain('steps.run_rule_creation.error != null');
-      expect(emit?.creation_error).toContain('rule creation failed');
+      expect(failure?.creation_error).toContain('steps.run_rule_creation.error != null');
+      expect(failure?.creation_error).toContain('rule creation failed');
+      expect(emit?.creation_error).toBe('{{ steps.resolve_failure.output.creation_error }}');
     });
 
     it('propagates the creation worker outcome', () => {
@@ -900,6 +904,85 @@ describe('Detection Coverage review', () => {
           steps: { propose_creation: { output: { status: 'expired', decision: '' } } },
         })
       ).toBe(false);
+    });
+  });
+
+  // A model that is missing or fails used to leave an empty open investigation and a green
+  // run (elastic/security-team#20402).
+  describe('failed check or rule creation', () => {
+    const failure = withOf('resolve_failure');
+    const missingModel = 'No connector available for feature "alertzero_efficient".';
+    const render = (template: string | undefined, steps: Record<string, unknown>) =>
+      createWorkflowLiquidEngine().parseAndRenderSync(template ?? '', { steps });
+    const reviewSteps = (steps: Record<string, unknown>) => ({
+      read_ki: { output: { hits: { total: { value: 1 } } } },
+      create_investigation: { output: { conversation_id: 'investigation-1' } },
+      ...steps,
+    });
+
+    it.each([
+      [
+        'a check that failed on a missing model',
+        { coverage_check: { error: { message: missingModel }, output: {} } },
+        `**Coverage check failed:** ${missingModel}\n\nChoose a model for this feature in Stack Management > Feature Settings.`,
+      ],
+      [
+        'a check that returned no verdict',
+        { coverage_check: { output: { structured_output: {} } } },
+        '**Coverage check failed:** the check returned no verdict.',
+      ],
+      [
+        'a failed rule-creation run',
+        {
+          coverage_check: { output: { structured_output: { verdict: 'no_coverage' } } },
+          run_rule_creation: { error: { message: 'boom' } },
+        },
+        '**Rule creation failed:** boom',
+      ],
+      [
+        'a check with a verdict',
+        { coverage_check: { output: { structured_output: { verdict: 'covered_enabled' } } } },
+        '',
+      ],
+    ])('notes %s', (_scenario, steps, expected) => {
+      expect(render(failure?.note, reviewSteps(steps))).toBe(expected);
+    });
+
+    // No investigation, nowhere to write, and a missing indicator is not a failed run.
+    it('notes nothing without an investigation', () => {
+      expect(
+        render(failure?.note, {
+          read_ki: { output: { hits: { total: { value: 0 } } } },
+          create_investigation: { output: {} },
+          coverage_check: { output: {} },
+        })
+      ).toBe('');
+    });
+
+    it('writes the note on the investigation without failing the run', () => {
+      const note = stepByName('note_failure');
+      expect(note?.if).toBe("${{ steps.resolve_failure.output.note != '' }}");
+      expect(note?.['on-failure']?.continue).toBe(true);
+      expect(note?.with?.['workflow-id']).toBe('system-alertzero-journal-note');
+      expect(inputsOf(note).conversation_id).toBe(
+        '{{ steps.create_investigation.output.conversation_id }}'
+      );
+      expect(inputsOf(note).message).toContain('{{ steps.resolve_failure.output.note }}');
+    });
+
+    it('fails the run after the note, with the same outputs as a completed run', () => {
+      const emitFailure = stepByName('emit_failure');
+      expect(emitFailure?.status).toBe('failed');
+      expect(emitFailure?.if).toBe(stepByName('note_failure')?.if);
+      expect(stepIndex('note_failure')).toBeLessThan(stepIndex('emit_failure'));
+      expect(stepIndex('emit_failure')).toBeLessThan(stepIndex('emit_result'));
+
+      const declared = (reviewDefinition.outputs ?? []).map(({ name }) => name);
+      const emitted = Object.keys(emitFailure?.with ?? {}).filter((key) => key !== 'message');
+      expect(declared).toEqual(expect.arrayContaining(emitted));
+      for (const key of emitted) {
+        expect(emitFailure?.with?.[key]).toBe(stepByName('emit_result')?.with?.[key]);
+      }
     });
   });
 
