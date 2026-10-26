@@ -610,7 +610,7 @@ export const RuleDetailsPage = connector(
             </RuleDetailsStickyHeader>
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
               <Display show={!globalFullScreen}>
-                <EuiSpacer size="m" />
+                <EuiSpacer size="s" />
               </Display>
               <NeedAdminForUpdateRulesCallOut />
               <MissingDetectionsPrivilegesCallOut />
