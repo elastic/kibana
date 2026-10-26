@@ -957,6 +957,25 @@ describe('Detection Coverage review', () => {
       expect(render(failure?.note, reviewSteps(steps))).toBe(expected);
     });
 
+    // `system-alertzero-journal-note` rejects a message over 8000 characters.
+    it.each([
+      ['check', { coverage_check: { error: { message: 'x'.repeat(10000) }, output: {} } }],
+      [
+        'rule creation',
+        {
+          coverage_check: { output: { structured_output: { verdict: 'no_coverage' } } },
+          run_rule_creation: { error: { message: 'x'.repeat(10000) } },
+        },
+      ],
+    ])('keeps a note with an oversized %s error within the journal limit', (_scenario, steps) => {
+      const note = render(failure?.note, reviewSteps(steps));
+      const message = render(inputsOf(stepByName('note_failure')).message as string, {
+        resolve_failure: { output: { note } },
+      });
+      expect(note).toContain(`${'x'.repeat(1997)}...`);
+      expect(message.length).toBeLessThanOrEqual(8000);
+    });
+
     // No investigation, nowhere to write, and a missing indicator is not a failed run.
     it('notes nothing without an investigation', () => {
       expect(

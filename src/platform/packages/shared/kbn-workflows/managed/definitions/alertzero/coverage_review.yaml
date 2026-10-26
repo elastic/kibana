@@ -910,16 +910,17 @@ steps:
       # sweep opens a new review; this is the only record of why.
       creation_error: >-
         {% if steps.run_rule_creation.error != null %}rule creation failed: {{ steps.run_rule_creation.error.message }}{% endif %}
+      # Errors are cut to 2000 characters: `system-alertzero-journal-note` rejects messages over 8000.
       note: |-
         {%- assign verdict = steps.coverage_check.output.structured_output.verdict -%}
         {%- assign cause = steps.coverage_check.error.message | default: steps.run_rule_creation.error.message -%}
         {%- if steps.create_investigation.output.conversation_id != null -%}
         {%- if verdict == null or verdict == '' -%}
-        **Coverage check failed:** {{ steps.coverage_check.error.message | default: 'the check returned no verdict.' }}
+        **Coverage check failed:** {{ steps.coverage_check.error.message | default: 'the check returned no verdict.' | truncate: 2000 }}
 
         Nothing was proposed.
         {%- elsif steps.run_rule_creation.error != null -%}
-        **Rule creation failed:** {{ steps.run_rule_creation.error.message }}
+        **Rule creation failed:** {{ steps.run_rule_creation.error.message | truncate: 2000 }}
         {%- endif -%}
         {%- if cause contains 'No connector available' %}
 
