@@ -1245,6 +1245,19 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
   });
 
+  it('denies the start when the global quota allows the peek but denies the charge', async () => {
+    investigationQuotaCallback.mockImplementation(async ({ consume }) => ({ allowed: !consume }));
+    const automationBudget = budget();
+
+    await expect(startAutomaticAlert(automationBudget)).rejects.toBeInstanceOf(
+      InvestigationQuotaDeniedError
+    );
+
+    expect(automationBudget.consume).toHaveBeenCalledTimes(1);
+    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+  });
+
   it('does not consume the global quota when the automation budget denies the start', async () => {
     const error = new Error('own limit');
     const automationBudget = { check: jest.fn().mockRejectedValue(error), consume: jest.fn() };

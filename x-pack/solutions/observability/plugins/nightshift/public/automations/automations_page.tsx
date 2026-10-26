@@ -84,7 +84,7 @@ export const AutomationsPage = (): React.ReactElement => {
     visibleAutomations,
     options,
   } = useAutomationFilters(automations, getFacets);
-  const { data: quotas } = useRunQuotas();
+  const { data: quotas, refetch: refetchQuotas } = useRunQuotas();
   const isGlobalLimitReached = isGlobalInvestigationLimitReached(quotas);
   const globalLimitSettingsHref = quotas?.canManage
     ? services.application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/settings/investigations' })
@@ -197,6 +197,7 @@ export const AutomationsPage = (): React.ReactElement => {
             onRefresh={() => {
               setRefreshedAt(Date.now());
               refreshAutomations();
+              refetchQuotas();
             }}
             onCreate={openCreateFlyout}
           />

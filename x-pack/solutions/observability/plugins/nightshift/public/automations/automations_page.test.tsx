@@ -84,7 +84,7 @@ describe('AutomationsPage', () => {
     });
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
     mockUseAutomationsRunsInRange.mockReturnValue([]);
-    mockUseRunQuotas.mockReturnValue({ data: undefined });
+    mockUseRunQuotas.mockReturnValue({ data: undefined, refetch: jest.fn() });
     mockUseAutomationRunsInRange.mockReturnValue({
       data: { runs: [], total: 0, usedToday: 0 },
       isInitialLoading: false,
