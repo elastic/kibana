@@ -67,9 +67,7 @@ export class RulesPage {
    * Gets the settings page save button locator
    */
   public get settingsPageSaveButton() {
-    return this.page.testSubj.locator(
-      RULES_SETTINGS_TEST_SUBJECTS.RULES_SETTINGS_PAGE_SAVE_BUTTON
-    );
+    return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULES_SETTINGS_PAGE_SAVE_BUTTON);
   }
 
   /**
