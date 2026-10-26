@@ -138,6 +138,12 @@ export interface DashboardCreationOptions {
   /** Settings for unified search integration. */
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
+  /**
+   * Whether to sync the dashboard's `project_routing` with the shared CPS project routing.
+   * Defaults to `true`; set to `false` for dashboards that must not change the global routing, e.g. previews.
+   */
+  useProjectRoutingIntegration?: boolean;
+
   /** Whether to render the control group above the dashboard viewport. */
   useControlsIntegration?: boolean;
 

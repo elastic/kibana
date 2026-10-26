@@ -34,6 +34,8 @@ const PreviewRenderer = React.memo(
       getCreationOptions={() =>
         Promise.resolve({
           getInitialInput: () => ({ ...initialState, viewMode: 'non-interactive' }),
+          // previewing a version must not change the live dashboard's CPS project routing
+          useProjectRoutingIntegration: false,
         })
       }
       onApiAvailable={onApiAvailable}

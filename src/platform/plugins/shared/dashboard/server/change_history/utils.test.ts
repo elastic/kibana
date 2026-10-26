@@ -368,10 +368,23 @@ describe('getChangeHistoryContext', () => {
         {
           application: 'kibana-.kibana',
           resources: ['space:space-for-req-1'],
-          privileges: ['feature_dashboard_v2.all'],
+          privileges: ['saved_object:dashboard/update'],
         },
       ],
     });
+  });
+
+  it('does not require the complete feature_dashboard_v2.all bundle (customized editor role)', async () => {
+    mockedGetClient.mockResolvedValue({} as never);
+    await getChangeHistoryContext(
+      getRouteContext(true),
+      req,
+      httpServerMock.createResponseFactory(),
+      'dash-1'
+    );
+
+    const [{ application }] = hasPrivileges.mock.calls[0];
+    expect(application[0].privileges).not.toContain('feature_dashboard_v2.all');
   });
 
   it('returns a 503 when the change history client is not ready', async () => {
