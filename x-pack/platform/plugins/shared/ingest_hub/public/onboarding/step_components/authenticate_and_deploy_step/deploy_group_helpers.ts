@@ -12,34 +12,7 @@ import type { DeployGroup } from './deploy_groups';
 import { extractErrorMessage } from './deploy_errors';
 import { MAX_POLICY_NAME_LENGTH } from '../service_settings_step/integration_settings';
 
-/**
- * Reconcile persisted instances against the current selectedServiceIds.
- *
- * - Keeps only instances whose serviceId is in selectedServiceIds (drops deselected ones).
- * - Adds a synthetic base instance for each newly selected service not already covered.
- *
- * This mirrors the logic use_service_settings applies in-memory. Without it, a user who goes
- * back to step 1 and changes their selection would deploy stale instances.
- */
-export function reconcileInstances(
-  instances: ServiceInstance[],
-  selectedServiceIds: string[],
-  servicesMap: Map<string, AwsServiceMatrixEntry>
-): ServiceInstance[] {
-  const selectedSet = new Set(selectedServiceIds);
-  const kept = instances.filter((inst) => selectedSet.has(inst.serviceId));
-  const coveredServiceIds = new Set(kept.map((i) => i.serviceId));
-  const added: ServiceInstance[] = [];
-  for (const id of selectedServiceIds) {
-    if (!coveredServiceIds.has(id)) {
-      const service = servicesMap.get(id);
-      if (service?.showInUI) {
-        added.push({ instanceId: id, serviceId: id, name: service.name, isDuplicate: false });
-      }
-    }
-  }
-  return [...kept, ...added];
-}
+export { reconcileInstances } from '../service_settings_step/instances';
 
 const sanitizeGroupId = (groupId: string): string =>
   groupId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);

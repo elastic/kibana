@@ -6,11 +6,9 @@
  */
 
 import { useCallback, useMemo, useRef, useState } from 'react';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
-import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
+import { useReconciledServiceSettings } from '../service_settings_step/use_reconciled_service_settings';
 import {
   buildAgentBasedTargets,
   deployNewAgentPolicy,
@@ -82,10 +80,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
   const { selectedServiceIds } = servicesStep;
 
-  const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
-    SERVICE_SETTINGS_SESSION_KEY,
-    { globalRegion: '', serviceVars: {} }
-  );
+  const serviceSettings = useReconciledServiceSettings();
 
   const [isDeploying, setIsDeploying] = useState(false);
   // In-memory credential ref — secrets (secret_access_key, session_token) are never persisted.

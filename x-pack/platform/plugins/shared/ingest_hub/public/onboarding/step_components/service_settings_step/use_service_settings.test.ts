@@ -456,6 +456,154 @@ describe('useServiceSettings — lazy serviceVars prune', () => {
   });
 });
 
+// ─── eager persistence of reconciled instances ───────────────────────────────
+
+describe('useServiceSettings — eager instances persistence', () => {
+  const svcA = makeEntry('svc_a');
+  const svcB = makeEntry('svc_b');
+  const servicesMap = new Map([
+    ['svc_a', svcA],
+    ['svc_b', svcB],
+  ]);
+  const baseA = { instanceId: 'svc_a', serviceId: 'svc_a', name: 'svc_a', isDuplicate: false };
+  const baseB = { instanceId: 'svc_b', serviceId: 'svc_b', name: 'svc_b', isDuplicate: false };
+  const dupA = {
+    instanceId: 'svc_a__dup-1',
+    serviceId: 'svc_a',
+    name: 'Prod A',
+    isDuplicate: true,
+  };
+  const emptyVars = { enabledDataStreams: [], varsByDataStream: {} };
+  // A name is set so the integration-name prefill (an async fetch) stays out of these tests.
+  const settings = (overrides: Record<string, unknown> = {}) => ({
+    globalRegion: '',
+    integrationName: 'aws-1',
+    serviceVars: {},
+    ...overrides,
+  });
+
+  // `null` stands for a services map that has not loaded yet (`undefined` would take the default).
+  const mockFlow = (
+    selectedServiceIds: string[],
+    awsServicesMap: typeof servicesMap | null = servicesMap
+  ) =>
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: awsServicesMap ?? undefined,
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+
+  /** Backs the session storage with state and records every write. */
+  const mockStorage = (initial: unknown) => {
+    const writes: any[] = [];
+    mockUseSessionStorage.mockImplementation(() => {
+      const [state, setState] = useState(initial);
+      return [
+        state,
+        (next: unknown) => {
+          writes.push(next);
+          setState(next);
+        },
+      ] as any;
+    });
+    return writes;
+  };
+
+  it('writes the reconciled instances without handleNext being called', () => {
+    mockFlow(['svc_a', 'svc_b']);
+    const writes = mockStorage(settings());
+
+    renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    expect(writes).toHaveLength(1);
+    expect(writes[0].instances).toEqual([baseA, baseB]);
+  });
+
+  it('writes again when the selection changes, keeping persisted duplicates', () => {
+    mockFlow(['svc_a']);
+    const writes = mockStorage(settings({ instances: [baseA, dupA], serviceVars: {} }));
+    const { rerender } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    expect(writes).toHaveLength(0);
+
+    mockFlow(['svc_a', 'svc_b']);
+    rerender();
+
+    expect(writes).toHaveLength(1);
+    expect(writes[0].instances).toEqual([baseA, dupA, baseB]);
+  });
+
+  it('settles after one write: re-rendering does not write again', () => {
+    mockFlow(['svc_a']);
+    const writes = mockStorage(settings());
+    const { rerender } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    expect(writes).toHaveLength(1);
+
+    rerender();
+    rerender();
+
+    expect(writes).toHaveLength(1);
+  });
+
+  it('does not write when the stored instances already match', () => {
+    mockFlow(['svc_a']);
+    const writes = mockStorage(
+      settings({ instances: [baseA, dupA], serviceVars: { svc_a: emptyVars } })
+    );
+
+    renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    expect(writes).toHaveLength(0);
+  });
+
+  it('does not prune serviceVars while the services map is loading', () => {
+    // A resumed session: serviceVars are restored but instances are not. With no map yet the
+    // reconciled list is empty, so without the guard every stored key would look stale and the
+    // configuration would be erased before the matrix can rebuild the instances.
+    const vars = { enabledDataStreams: ['logs'], varsByDataStream: {} };
+    mockFlow(['svc_a'], null);
+    const writes = mockStorage(settings({ serviceVars: { svc_a: vars } }));
+    const { result, rerender } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    expect(result.current.instances).toEqual([]);
+    expect(writes).toHaveLength(0);
+
+    mockFlow(['svc_a']);
+    rerender();
+
+    expect(writes).toHaveLength(1);
+    expect(writes[0].instances).toEqual([baseA]);
+    expect(writes[0].serviceVars).toEqual({ svc_a: vars });
+  });
+
+  it('keeps persisted instances, duplicates included, while the services map is loading', () => {
+    mockFlow(['svc_a'], null);
+    mockStorage(settings({ instances: [baseA, dupA] }));
+
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    expect(result.current.instances).toEqual([baseA, dupA]);
+  });
+
+  it('drops a deselected service from instances and serviceVars in a single write', () => {
+    mockFlow(['svc_a', 'svc_b']);
+    const writes = mockStorage(
+      settings({
+        instances: [baseA, baseB],
+        serviceVars: { svc_a: emptyVars, svc_b: emptyVars },
+      })
+    );
+    const { rerender } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    expect(writes).toHaveLength(0);
+
+    mockFlow(['svc_a']);
+    rerender();
+
+    expect(writes).toHaveLength(1);
+    expect(writes[0].instances).toEqual([baseA]);
+    expect(Object.keys(writes[0].serviceVars)).toEqual(['svc_a']);
+  });
+});
+
 describe('getIncompleteInstances — required set follows the matrix view', () => {
   const def = (name: string) => ({ name, type: 'text', required: true, show_user: true } as any);
   const base = {

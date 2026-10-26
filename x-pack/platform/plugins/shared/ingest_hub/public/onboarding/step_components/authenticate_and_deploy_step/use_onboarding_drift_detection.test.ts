@@ -7,59 +7,202 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 
+jest.mock('@kbn/fleet-plugin/public', () => ({ sendGetCloudOnboardingDeployment: jest.fn() }));
+
+import { sendGetCloudOnboardingDeployment } from '@kbn/fleet-plugin/public';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
+import type { ServiceInstance } from '../service_settings_step/use_service_settings';
 import { useOnboardingDriftDetection } from './use_onboarding_drift_detection';
 
-const mockSendGet = jest.fn();
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  sendGetCloudOnboardingDeployment: (...args: unknown[]) => mockSendGet(...args),
-}));
+const mockGetDeployment = sendGetCloudOnboardingDeployment as jest.Mock;
 
-const ELB = {
-  id: 'elb',
-  name: 'ELB',
-  packageName: 'aws',
-  isManifestLoaded: true,
-  dataStreams: [],
-  deploymentMethods: [{ method: 'managed_integration', preferred: true }],
-} as unknown as AwsServiceMatrixEntry;
+const INSTANCE_ID = 'cloudtrail';
 
-const ORIGINAL = { instanceId: 'elb', serviceId: 'elb', name: 'ELB', isDuplicate: false };
-
-const setup = (serviceSettings: ServiceSettingsPersistedState, soItem: Record<string, unknown>) => {
-  mockSendGet.mockResolvedValue({
-    item: { services: ['elb'], serviceVars: {}, authMethod: undefined, ...soItem },
-  });
-  const updateDetectAndReviewStep = jest.fn();
-  const { result } = renderHook(() =>
-    useOnboardingDriftDetection({
-      onboardingDeploymentId: 'dep-1',
-      policyIdsByInstance: { elb: 'policy-1' },
-      awsServicesMap: new Map([['elb', ELB]]),
-      deploymentMethod: 'managed_integration',
-      connectorId: undefined,
-      agentBasedDeployment: {
-        agentCredentialMethod: undefined,
-        agentHostsMode: 'new',
-        selectedAgentPolicyIds: [],
-      },
-      serviceSettings,
-      isDirty: false,
-      updateDetectAndReviewStep,
-    })
-  );
-  return { result, updateDetectAndReviewStep };
+const instance: ServiceInstance = {
+  instanceId: INSTANCE_ID,
+  serviceId: INSTANCE_ID,
+  name: 'CloudTrail',
+  isDuplicate: false,
 };
 
+const makeVars = (enabledDataStreams: string[]) => ({ enabledDataStreams, varsByDataStream: {} });
+
+/**
+ * Pins how the drift check depends on `serviceSettings.instances`. The instances are what scope
+ * service-var drift to deployed, still-selected instances; with none, var drift is never raised
+ * (auth and agent-policy drift are independent of them).
+ */
+describe('useOnboardingDriftDetection — dependence on serviceSettings.instances', () => {
+  const updateDetectAndReviewStep = jest.fn();
+
+  const renderDrift = ({
+    instances,
+    connectorId = 'connector-1',
+    awsServicesMap = new Map(),
+  }: {
+    instances: ServiceInstance[] | undefined;
+    connectorId?: string;
+    awsServicesMap?: Map<string, AwsServiceMatrixEntry>;
+  }) =>
+    renderHook(
+      ({ servicesMap }: { servicesMap: Map<string, AwsServiceMatrixEntry> }) =>
+        useOnboardingDriftDetection({
+          onboardingDeploymentId: 'deployment-1',
+          policyIdsByInstance: { [INSTANCE_ID]: 'policy-1' },
+          // By default an empty (but defined) map: no manifest to wait for, and toSOServiceVars
+          // copies the vars.
+          awsServicesMap: servicesMap,
+          deploymentMethod: 'managed_integration',
+          connectorId,
+          agentBasedDeployment: {
+            agentCredentialMethod: undefined,
+            agentHostsMode: 'new',
+            selectedAgentPolicyIds: [],
+          },
+          // Session vars differ from the saved ones below.
+          serviceSettings: {
+            globalRegion: 'us-east-1',
+            serviceVars: { [INSTANCE_ID]: makeVars(['logs', 'metrics']) },
+            instances,
+          },
+          isDirty: false,
+          updateDetectAndReviewStep,
+        }),
+      { initialProps: { servicesMap: awsServicesMap } }
+    );
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetDeployment.mockResolvedValue({
+      item: {
+        connectorId: 'connector-1',
+        serviceVars: { [INSTANCE_ID]: makeVars(['logs']) },
+      },
+    });
+  });
+
+  it('flags var drift for a deployed instance that is listed in instances', async () => {
+    const { result } = renderDrift({ instances: [instance] });
+
+    await waitFor(() => expect(result.current.driftSettled).toBe(true));
+    expect(updateDetectAndReviewStep).toHaveBeenCalledWith({
+      isDirty: true,
+      isAuthDirty: false,
+      isPolicySelectionDirty: false,
+    });
+  });
+
+  it.each([
+    ['empty', [] as ServiceInstance[]],
+    ['absent', undefined],
+  ])('raises no var drift when instances are %s', async (_label, instances) => {
+    const { result } = renderDrift({ instances });
+
+    await waitFor(() => expect(result.current.driftSettled).toBe(true));
+    expect(updateDetectAndReviewStep).toHaveBeenCalledWith({
+      isDirty: false,
+      isAuthDirty: false,
+      isPolicySelectionDirty: false,
+    });
+  });
+
+  it('still raises auth drift when instances are empty', async () => {
+    const { result } = renderDrift({ instances: [], connectorId: 'connector-2' });
+
+    await waitFor(() => expect(result.current.driftSettled).toBe(true));
+    expect(updateDetectAndReviewStep).toHaveBeenCalledWith({
+      isDirty: true,
+      isAuthDirty: true,
+      isPolicySelectionDirty: false,
+    });
+  });
+
+  describe('while the manifest of a deployed instance is loading', () => {
+    // Session and saved vars are both empty, so the comparison itself is clean; what matters is
+    // when the check runs.
+    const entry = (overrides: Record<string, unknown>) =>
+      new Map([
+        [
+          INSTANCE_ID,
+          { id: INSTANCE_ID, isManifestLoaded: false, isManifestError: false, ...overrides },
+        ],
+      ]) as unknown as Map<string, AwsServiceMatrixEntry>;
+
+    it('does not check for drift, then checks once when the manifest has loaded', async () => {
+      const { result, rerender } = renderDrift({
+        instances: [instance],
+        awsServicesMap: entry({}),
+      });
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(mockGetDeployment).not.toHaveBeenCalled();
+      expect(updateDetectAndReviewStep).not.toHaveBeenCalled();
+      expect(result.current.driftSettled).toBe(false);
+
+      rerender({ servicesMap: entry({ isManifestLoaded: true }) });
+
+      await waitFor(() => expect(result.current.driftSettled).toBe(true));
+      expect(mockGetDeployment).toHaveBeenCalledTimes(1);
+      expect(updateDetectAndReviewStep).toHaveBeenCalledTimes(1);
+    });
+
+    it('checks once the manifest failed to load, instead of waiting forever', async () => {
+      const { result } = renderDrift({
+        instances: [instance],
+        awsServicesMap: entry({ isManifestError: true }),
+      });
+
+      await waitFor(() => expect(result.current.driftSettled).toBe(true));
+      expect(mockGetDeployment).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not wait for manifests when there are no stored instances', async () => {
+      const { result } = renderDrift({ instances: [], awsServicesMap: entry({}) });
+
+      await waitFor(() => expect(result.current.driftSettled).toBe(true));
+      expect(mockGetDeployment).toHaveBeenCalledTimes(1);
+    });
+  });
+});
+
 describe('useOnboardingDriftDetection — global namespace', () => {
+  const updateDetectAndReviewStep = jest.fn();
+
+  const renderDrift = ({
+    namespace,
+    savedNamespace,
+    instances,
+  }: {
+    namespace: string | undefined;
+    savedNamespace?: string;
+    instances: ServiceInstance[] | undefined;
+  }) => {
+    mockGetDeployment.mockResolvedValue({
+      item: { connectorId: 'connector-1', serviceVars: {}, namespace: savedNamespace },
+    });
+    return renderHook(() =>
+      useOnboardingDriftDetection({
+        onboardingDeploymentId: 'deployment-1',
+        policyIdsByInstance: { [INSTANCE_ID]: 'policy-1' },
+        awsServicesMap: new Map(),
+        deploymentMethod: 'managed_integration',
+        connectorId: 'connector-1',
+        agentBasedDeployment: {
+          agentCredentialMethod: undefined,
+          agentHostsMode: 'new',
+          selectedAgentPolicyIds: [],
+        },
+        serviceSettings: { globalRegion: 'us-east-1', namespace, serviceVars: {}, instances },
+        isDirty: false,
+        updateDetectAndReviewStep,
+      })
+    );
+  };
+
   beforeEach(() => jest.clearAllMocks());
 
-  it('marks the deployment dirty when the namespace changed since the last deploy', async () => {
-    const { result, updateDetectAndReviewStep } = setup(
-      { globalRegion: 'us-east-1', namespace: 'prod', serviceVars: {}, instances: [ORIGINAL] },
-      {}
-    );
+  it('is dirty when the namespace changed since the last deploy', async () => {
+    const { result } = renderDrift({ namespace: 'prod', instances: [instance] });
 
     await waitFor(() => expect(result.current.driftSettled).toBe(true));
     expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
@@ -67,11 +210,9 @@ describe('useOnboardingDriftDetection — global namespace', () => {
     );
   });
 
-  it('detects it in a session that has no instances yet', async () => {
-    const { result, updateDetectAndReviewStep } = setup(
-      { globalRegion: 'us-east-1', namespace: 'prod', serviceVars: {} },
-      {}
-    );
+  it('is dirty in a session that has no instances yet', async () => {
+    // Every deployed instance is then an original, which follows the global namespace.
+    const { result } = renderDrift({ namespace: 'prod', instances: undefined });
 
     await waitFor(() => expect(result.current.driftSettled).toBe(true));
     expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
@@ -80,10 +221,11 @@ describe('useOnboardingDriftDetection — global namespace', () => {
   });
 
   it('stays clean when the namespace is the one that was deployed', async () => {
-    const { result, updateDetectAndReviewStep } = setup(
-      { globalRegion: 'us-east-1', namespace: 'prod', serviceVars: {}, instances: [ORIGINAL] },
-      { namespace: 'prod' }
-    );
+    const { result } = renderDrift({
+      namespace: 'prod',
+      savedNamespace: 'prod',
+      instances: [instance],
+    });
 
     await waitFor(() => expect(result.current.driftSettled).toBe(true));
     expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
