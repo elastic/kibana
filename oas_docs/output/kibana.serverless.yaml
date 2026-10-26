@@ -52869,7 +52869,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install or retry Kibana workflow assets for a specific package version.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Install or retry managed workflows for an already-installed package version. Workflows are created disabled. Fails if the `fleet.enableWorkflowAssets` feature flag is off or the workflows plugins are unavailable.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages-pkgname-pkgversion-workflow-assets
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -52949,6 +52949,7 @@ paths:
       summary: Install Kibana workflow assets for a package
       tags:
         - Elastic Package Manager (EPM)
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
