@@ -7,6 +7,7 @@
 
 import { esql, type ComposerQuery, type ComposerSortShorthand } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import {
@@ -52,11 +53,13 @@ const storedSkipSchema = lazySchema(() =>
 export const queryEsql = async ({
   esClient,
   query,
+  filter,
 }: {
   esClient: ElasticsearchClient;
   query: ComposerQuery;
+  filter?: QueryDslQueryContainer;
 }): Promise<ESQLSearchResponse> =>
-  (await esClient.esql.query(toEsqlRequest(query))) as ESQLSearchResponse;
+  (await esClient.esql.query({ ...toEsqlRequest(query), filter })) as ESQLSearchResponse;
 
 // Converts a columnar ESQLSearchResponse into an array of plain objects keyed by column name.
 export const esqlToObjects = <T extends Record<string, unknown>>(
@@ -612,16 +615,17 @@ export const withSort = (query: ComposerQuery, sort?: ComposerSortShorthand[]): 
 export const executeAndDecodeSource = async <T>(
   esClient: ElasticsearchClient,
   query: ComposerQuery
-): Promise<{ hits: T[] }> => {
+): Promise<{ hits: T[]; esIds: string[] }> => {
   const response = await runEsqlQuery(esClient, query.print('basic'));
   if (!response) {
-    return { hits: [] };
+    return { hits: [], esIds: [] };
   }
 
   const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
   if (sourceIdx === -1) {
-    return { hits: [] };
+    return { hits: [], esIds: [] };
   }
+  const idIdx = response.columns.findIndex((c) => c.name === '_id');
 
   return {
     hits: response.values.map((row) => {
@@ -629,5 +633,9 @@ export const executeAndDecodeSource = async <T>(
       const { kibana: _kibana, ...rest } = source;
       return rest as T;
     }),
+    esIds:
+      idIdx === -1
+        ? []
+        : response.values.flatMap((row) => (typeof row[idIdx] === 'string' ? [row[idIdx]] : [])),
   };
 };

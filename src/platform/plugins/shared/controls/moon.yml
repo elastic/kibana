@@ -66,6 +66,4 @@ fileGroups:
     - server/**/*
     - ./jest_setup.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

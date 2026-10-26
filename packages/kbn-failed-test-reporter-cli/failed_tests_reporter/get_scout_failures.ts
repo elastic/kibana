@@ -119,7 +119,8 @@ const INFRA_FAILURE_RULES: readonly InfraFailureRule[] = [
     category: 'cdn',
     source: 'consoleErrors',
     cloudOnly: true,
-    substrings: ['ChunkLoadError'],
+    // 'Kibana bootstrap failed' is logged by the bootstrap template in @kbn/core-rendering-server-internal
+    substrings: ['ChunkLoadError', 'Kibana bootstrap failed: could not load'],
     message:
       'Kibana bundles failed to load from the CDN, so the app never finished loading. If this keeps happening, contact Kibana Core (@elastic/kibana-core) about a possible CDN issue.',
   },

@@ -7,20 +7,27 @@
 
 import React, { useMemo } from 'react';
 
-import type { AttachmentAction } from '../../../client/attachment_framework/types';
+import type {
+  AttachmentAction,
+  RelatedRemovalChoice,
+  RelatedRemovalOptions,
+} from '../../../client/attachment_framework/types';
 
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from './translations';
 import { UserActionPropertyActions } from './property_actions';
 import { DeleteAttachmentConfirmationModal } from '../delete_attachment_confirmation_modal';
+import { RemoveWithRelatedConfirmationModal } from '../remove_with_related_confirmation_modal';
 import { useDeletePropertyAction } from './use_delete_property_action';
 
 interface Props {
   isLoading: boolean;
   registeredAttachmentActions: AttachmentAction[];
-  onDelete: () => void;
+  onDelete: (options?: RelatedRemovalOptions) => void;
   hideDefaultActions: boolean;
+  /** Offers to keep the attachments the deletion would also remove. */
+  relatedRemoval?: RelatedRemovalChoice;
 }
 
 const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
@@ -28,11 +35,11 @@ const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
   registeredAttachmentActions,
   onDelete,
   hideDefaultActions,
+  relatedRemoval,
 }) => {
   const { permissions } = useCasesContext();
-  const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
-    onDelete,
-  });
+  const { showDeletionModal, onModalOpen, onConfirm, onConfirmWithOptions, onCancel } =
+    useDeletePropertyAction<RelatedRemovalOptions>({ onDelete });
   const buttonRef = React.useRef<HTMLAnchorElement>(null);
 
   const propertyActions = useMemo(() => {
@@ -55,6 +62,30 @@ const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
     ];
   }, [permissions.delete, hideDefaultActions, onModalOpen, registeredAttachmentActions]);
 
+  const renderModal = (): React.ReactNode => {
+    if (!showDeletionModal) {
+      return null;
+    }
+
+    return relatedRemoval != null ? (
+      <RemoveWithRelatedConfirmationModal
+        title={i18n.REMOVE_ATTACHMENT}
+        relatedRemoval={relatedRemoval}
+        onCancel={onCancel}
+        onConfirm={onConfirmWithOptions}
+        focusButtonRef={buttonRef}
+      />
+    ) : (
+      <DeleteAttachmentConfirmationModal
+        title={i18n.DELETE_ATTACHMENT}
+        confirmButtonText={i18n.DELETE}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        focusButtonRef={buttonRef}
+      />
+    );
+  };
+
   return (
     <>
       <UserActionPropertyActions
@@ -62,15 +93,7 @@ const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
         propertyActions={propertyActions}
         buttonRef={buttonRef}
       />
-      {showDeletionModal ? (
-        <DeleteAttachmentConfirmationModal
-          title={i18n.DELETE_ATTACHMENT}
-          confirmButtonText={i18n.DELETE}
-          onCancel={onCancel}
-          onConfirm={onConfirm}
-          focusButtonRef={buttonRef}
-        />
-      ) : null}
+      {renderModal()}
     </>
   );
 };
