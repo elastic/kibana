@@ -89,7 +89,6 @@ describe('collectRuleUpdatedFields', () => {
       created_by: { profile_uid: 'someone-else' },
       updated_at: '2026-02-01T00:00:00.000Z',
       updated_by: { profile_uid: 'someone-else' },
-      metadata: { ...previous.metadata, template: { id: 'template-1' } },
     });
 
     expect(collectRuleUpdatedFields(previous, next)).toEqual([
@@ -97,7 +96,6 @@ describe('collectRuleUpdatedFields', () => {
       'created_by.profile_uid',
       'enabled',
       'id',
-      'metadata.template.id',
       'updated_at',
       'updated_by.profile_uid',
       'version',
