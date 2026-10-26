@@ -605,7 +605,9 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       expectedLabel: string,
       formData: Record<string, any>
     ) {
-      const isPopoverFormVisible = await testSubjects.exists(
+      // The popover auto-opens for a not-yet-valid extended-form agg (e.g. filter) and the edit
+      // button toggles it, so only click once the popover is confirmed absent.
+      const isPopoverFormVisible = await testSubjects.waitForExists(
         `transformAggPopoverForm_${expectedLabel}`
       );
       if (!isPopoverFormVisible) {
