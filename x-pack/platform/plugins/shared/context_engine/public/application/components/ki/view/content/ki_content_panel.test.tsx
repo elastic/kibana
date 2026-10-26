@@ -7,32 +7,14 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import type { KiDocument } from '../../../../../../common/http_api/knowledge_indicators';
 import { KiContentPanel } from './ki_content_panel';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  return {
-    ...actual,
-    EuiMarkdownEditor: ({
-      value,
-      onChange,
-      'data-test-subj': testSubj,
-    }: {
-      value: string;
-      onChange: (next: string) => void;
-      'data-test-subj'?: string;
-    }) => (
-      <textarea
-        data-test-subj={testSubj}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-      />
-    ),
-  };
-});
+jest.mock('./edit_ki_content_panel', () => ({
+  EditKiContentPanel: () => <div data-test-subj="contextViewKiContentEditing" />,
+}));
 
 const renderPanel = (
   document: KiDocument,
@@ -75,61 +57,10 @@ describe('KiContentPanel', () => {
     expect(screen.queryByTestId('contextViewKiContent')).not.toBeInTheDocument();
   });
 
-  it('renders markdown editor in edit mode and saves when content changed', () => {
-    const onSave = jest.fn();
-    const onCancel = jest.fn();
-
-    renderPanel(
-      { content: 'Hello world' },
-      {
-        isEditing: true,
-        onCancel,
-        onSave,
-      }
-    );
+  it('renders the edit panel when isEditing is true', () => {
+    renderPanel({ content: 'Hello world' }, { isEditing: true });
 
     expect(screen.getByTestId('contextViewKiContentEditing')).toBeInTheDocument();
-    expect(screen.getByTestId('contextViewKiSaveButton')).toBeDisabled();
-
-    fireEvent.change(screen.getByTestId('contextViewKiContentField'), {
-      target: { value: 'Updated content' },
-    });
-
-    expect(screen.getByTestId('contextViewKiSaveButton')).toBeEnabled();
-    fireEvent.click(screen.getByTestId('contextViewKiSaveButton'));
-
-    expect(onSave).toHaveBeenCalledWith({ content: 'Updated content' });
-    expect(onCancel).not.toHaveBeenCalled();
-  });
-
-  it('disables the cancel button while saving', () => {
-    renderPanel(
-      { content: 'Hello world' },
-      {
-        isEditing: true,
-        isSaving: true,
-      }
-    );
-
-    expect(screen.getByTestId('contextViewKiCancelButton')).toBeDisabled();
-  });
-
-  it('cancels edit mode and resets draft', () => {
-    const onCancel = jest.fn();
-
-    renderPanel(
-      { content: 'Hello world' },
-      {
-        isEditing: true,
-        onCancel,
-      }
-    );
-
-    fireEvent.change(screen.getByTestId('contextViewKiContentField'), {
-      target: { value: 'Draft change' },
-    });
-    fireEvent.click(screen.getByTestId('contextViewKiCancelButton'));
-
-    expect(onCancel).toHaveBeenCalledWith();
+    expect(screen.queryByTestId('contextViewKiContent')).not.toBeInTheDocument();
   });
 });

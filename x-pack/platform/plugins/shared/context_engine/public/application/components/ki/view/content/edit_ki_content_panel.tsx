@@ -81,7 +81,8 @@ export const EditKiContentPanel = ({
         <EuiMarkdownEditor
           value={contentDraft}
           onChange={setContentDraft}
-          height={400}
+          readOnly={isSaving}
+          height={480}
           aria-label={markdownEditorLabel}
           data-test-subj="contextViewKiContentField"
         />

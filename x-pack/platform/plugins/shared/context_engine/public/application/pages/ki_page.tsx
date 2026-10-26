@@ -20,10 +20,13 @@ import { ViewKiRawJsonPanel } from '../components/ki/view/content/view_ki_raw_js
 import { getViewKiHeaderBadges } from '../components/ki/view/metadata/view_ki_header_badges';
 import { KiContentLayout } from '../components/ki/view/ki_content_layout';
 import { KiDeleteConfirmModal } from '../components/ki/view/ki_delete_confirm_modal';
+import { KiDiscardEditsConfirmModal } from '../components/ki/view/ki_discard_edits_confirm_modal';
 import { KiRestoreConfirmModal } from '../components/ki/view/ki_restore_confirm_modal';
 import { useCanWriteContextEngine } from '../hooks/use_can_write_context_engine';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
 import { useDeleteKi, useRestoreKi, useUpdateKi } from '../hooks/use_ki_mutations';
+import type { KiPageTabId } from '../hooks/use_ki_page_navigation';
+import { useKiPageNavigation } from '../hooks/use_ki_page_navigation';
 import { useKi } from '../hooks/use_ki';
 import { useKibana } from '../hooks/use_kibana';
 import { useNavigation } from '../hooks/use_navigation';
@@ -33,8 +36,6 @@ import {
   ContextEnginePageTemplate,
 } from '../layout/context_engine_page_template';
 import { decodeRouteParam, getAiIndexKnowledgeIndicatorsPath } from '../paths';
-
-type ViewKiTabId = 'details' | 'document';
 
 const getPageTitle = (ki: GetKiResponse | undefined, kiId: string): string => {
   if (!ki) {
@@ -70,23 +71,44 @@ export const KiPage = () => {
   const deleteKiMutation = useDeleteKi({ aiIndexId, kiId: resolvedKiId, index });
   const restoreKiMutation = useRestoreKi({ aiIndexId, kiId: resolvedKiId, index });
 
-  const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
+  const { createContextEngineUrl } = useNavigation();
   const {
     services: { notifications },
   } = useKibana();
 
-  const [selectedTab, setSelectedTab] = useState<ViewKiTabId>('details');
+  const [selectedTab, setSelectedTab] = useState<KiPageTabId>('details');
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isRestoreConfirmOpen, setIsRestoreConfirmOpen] = useState(false);
-
-  useEffect(() => {
-    setIsEditing(false);
-  }, [kiId, selectedTab]);
-
   const pageTitle = getPageTitle(ki, kiId);
   const backPath = getAiIndexKnowledgeIndicatorsPath(aiIndexId);
   const backHref = createContextEngineUrl(backPath);
+
+  useEffect(() => {
+    setIsEditing(false);
+  }, [kiId]);
+
+  const startContentEditing = useCallback(() => {
+    setIsEditing(true);
+  }, []);
+
+  const exitContentEditing = useCallback(() => {
+    setIsEditing(false);
+  }, []);
+
+  const {
+    handleSelectTab,
+    handleBackClick,
+    isDiscardEditsConfirmOpen,
+    closeDiscardEditsConfirm,
+    completePendingNavigation,
+  } = useKiPageNavigation({
+    backPath,
+    selectedTab,
+    onSelectTab: setSelectedTab,
+    shouldBlockNavigation: isEditing,
+    onDiscardConfirmed: exitContentEditing,
+  });
 
   useContextEngineBreadcrumbs([{ text: aiIndexId, path: backPath }, { text: pageTitle }]);
 
@@ -115,7 +137,7 @@ export const KiPage = () => {
           defaultMessage: 'Content',
         }),
         isSelected: selectedTab === 'details',
-        onClick: () => setSelectedTab('details'),
+        onClick: () => handleSelectTab('details'),
         'data-test-subj': 'contextViewKiTab-details',
         ...getEbtProps({
           element: CONTEXT_ENGINE_UI_EBT.element.viewKiPage,
@@ -128,7 +150,7 @@ export const KiPage = () => {
           defaultMessage: 'Document',
         }),
         isSelected: selectedTab === 'document',
-        onClick: () => setSelectedTab('document'),
+        onClick: () => handleSelectTab('document'),
         'data-test-subj': 'contextViewKiTab-document',
         ...getEbtProps({
           element: CONTEXT_ENGINE_UI_EBT.element.viewKiPage,
@@ -136,7 +158,7 @@ export const KiPage = () => {
         }),
       },
     ];
-  }, [selectedTab, showHeaderTabs]);
+  }, [handleSelectTab, selectedTab, showHeaderTabs]);
 
   const showContentEditAction = canEditContent && selectedTab === 'details' && !isEditing;
 
@@ -155,7 +177,7 @@ export const KiPage = () => {
             iconType: 'pencil',
             overflow: true,
             order: 10,
-            run: () => setIsEditing(true),
+            run: startContentEditing,
             testId: 'contextViewKiEditButton',
             ebt: {
               action: CONTEXT_ENGINE_UI_EBT.action.editKi.EDIT,
@@ -220,15 +242,8 @@ export const KiPage = () => {
     ki,
     restoreKiMutation.isLoading,
     showContentEditAction,
+    startContentEditing,
   ]);
-
-  const handleBackClick = useCallback(
-    (event: React.MouseEvent) => {
-      event.preventDefault();
-      navigateToContextEngine(backPath);
-    },
-    [backPath, navigateToContextEngine]
-  );
 
   const handleSaveContent = useCallback(
     (fields: KiContentPanelSaveFields) => {
@@ -236,7 +251,7 @@ export const KiPage = () => {
         { content: fields.content },
         {
           onSuccess: () => {
-            setIsEditing(false);
+            exitContentEditing();
 
             notifications.toasts.addSuccess({
               title: i18n.translate('xpack.contextEngine.viewKi.saveSuccess.title', {
@@ -254,7 +269,7 @@ export const KiPage = () => {
         }
       );
     },
-    [notifications.toasts, updateKiMutation]
+    [exitContentEditing, notifications.toasts, updateKiMutation]
   );
 
   const handleConfirmDelete = useCallback(async () => {
@@ -372,7 +387,7 @@ export const KiPage = () => {
               kiId={resolvedKiId}
               isLoading={isLoading}
               isEditing={canEditContent ? isEditing : false}
-              onCancel={canEditContent ? () => setIsEditing(false) : undefined}
+              onCancel={canEditContent ? exitContentEditing : undefined}
               isSaving={updateKiMutation.isLoading}
               onSave={canEditContent ? handleSaveContent : undefined}
             />
@@ -391,6 +406,12 @@ export const KiPage = () => {
           onClose={() => setIsRestoreConfirmOpen(false)}
           onConfirm={handleConfirmRestore}
           isLoading={restoreKiMutation.isLoading}
+        />
+      ) : null}
+      {isDiscardEditsConfirmOpen ? (
+        <KiDiscardEditsConfirmModal
+          onClose={closeDiscardEditsConfirm}
+          onConfirm={completePendingNavigation}
         />
       ) : null}
     </ContextEnginePageTemplate>

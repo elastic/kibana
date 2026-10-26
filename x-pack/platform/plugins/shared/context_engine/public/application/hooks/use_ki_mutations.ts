@@ -23,14 +23,15 @@ interface KiMutationScope {
 const invalidateKiQueries = (
   queryClient: ReturnType<typeof useQueryClient>,
   { aiIndexId, kiId, index }: KiMutationScope
-) => {
-  queryClient.invalidateQueries({
-    queryKey: ['context_engine', 'ai_index', aiIndexId, 'list_ki'],
-  });
-  queryClient.invalidateQueries({
-    queryKey: ['context_engine', 'ai_index', aiIndexId, 'ki', index, kiId],
-  });
-};
+): Promise<unknown[]> =>
+  Promise.all([
+    queryClient.invalidateQueries({
+      queryKey: ['context_engine', 'ai_index', aiIndexId, 'list_ki'],
+    }),
+    queryClient.invalidateQueries({
+      queryKey: ['context_engine', 'ai_index', aiIndexId, 'ki', index, kiId],
+    }),
+  ]);
 
 export const useUpdateKi = ({ aiIndexId, kiId, index }: KiMutationScope) => {
   const {
@@ -39,8 +40,11 @@ export const useUpdateKi = ({ aiIndexId, kiId, index }: KiMutationScope) => {
   const queryClient = useQueryClient();
 
   return useMutation<UpdateKiResponse, Error, { content: string }>({
-    mutationFn: ({ content }) => updateKi(http, { aiIndexId, kiId, index, content }),
-    onSuccess: () => invalidateKiQueries(queryClient, { aiIndexId, kiId, index }),
+    mutationFn: async ({ content }) => {
+      const response = await updateKi(http, { aiIndexId, kiId, index, content });
+      await invalidateKiQueries(queryClient, { aiIndexId, kiId, index });
+      return response;
+    },
   });
 };
 
@@ -51,8 +55,11 @@ export const useDeleteKi = ({ aiIndexId, kiId, index }: KiMutationScope) => {
   const queryClient = useQueryClient();
 
   return useMutation<DeleteKiResponse, Error, void>({
-    mutationFn: () => deleteKi(http, { aiIndexId, kiId, index }),
-    onSuccess: () => invalidateKiQueries(queryClient, { aiIndexId, kiId, index }),
+    mutationFn: async () => {
+      const response = await deleteKi(http, { aiIndexId, kiId, index });
+      await invalidateKiQueries(queryClient, { aiIndexId, kiId, index });
+      return response;
+    },
   });
 };
 
@@ -63,7 +70,10 @@ export const useRestoreKi = ({ aiIndexId, kiId, index }: KiMutationScope) => {
   const queryClient = useQueryClient();
 
   return useMutation<RestoreKiResponse, Error, void>({
-    mutationFn: () => restoreKi(http, { aiIndexId, kiId, index }),
-    onSuccess: () => invalidateKiQueries(queryClient, { aiIndexId, kiId, index }),
+    mutationFn: async () => {
+      const response = await restoreKi(http, { aiIndexId, kiId, index });
+      await invalidateKiQueries(queryClient, { aiIndexId, kiId, index });
+      return response;
+    },
   });
 };
