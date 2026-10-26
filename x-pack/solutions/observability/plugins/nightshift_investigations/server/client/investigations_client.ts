@@ -1166,6 +1166,52 @@ export class NightshiftInvestigationsClient {
   }
 
   /**
+   * Claims the Slack thread a root notification started for the investigation, so a mention or
+   * reply in it reaches the investigation. `externalConversationId` is the thread key the Relay
+   * returned for the post. A thread another investigation holds is left with that one. Resolves to
+   * whether the investigation now holds the thread.
+   */
+  async claimSlackThread({
+    investigationId,
+    externalConversationId,
+    channel,
+    threadTs,
+  }: {
+    investigationId: string;
+    externalConversationId: string;
+    channel: string;
+    threadTs: string;
+  }): Promise<boolean> {
+    const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
+    const conversations = await agentBuilder.conversations.getScopedClient({
+      request: this.request,
+    });
+    const subjectsClient = agenticInvestigations.getSubjectsClient(this.request);
+    const claim = await subjectsClient.claimSubjects({
+      conversationId: investigationId,
+      subjects: [{ type: 'slack_thread', id: externalConversationId }],
+      isHolderOpen: async (conversationId) => {
+        const [holder] = await findInvestigationConversations(conversations, [conversationId]);
+        return holder?.status === 'open';
+      },
+    });
+    if (!claim.claimed) {
+      this.logger.warn(
+        `Slack thread "${externalConversationId}" is held by investigation "${claim.heldBy}"; not claiming it for "${investigationId}"`
+      );
+      return false;
+    }
+    await subjectsClient.upsertSubjects(investigationId, [
+      {
+        type: 'slack_thread',
+        id: externalConversationId,
+        slack: { channel, thread_ts: threadTs },
+      },
+    ]);
+    return true;
+  }
+
+  /**
    * The thread's investigation, found by its `slack_thread` subject: an open one if there is one,
    * otherwise a closed one.
    */
