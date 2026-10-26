@@ -10,9 +10,11 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import type { Owner } from '../../../common/constants/types';
 import {
   FileAttachmentMetadataPayloadSchema,
+  type Case,
   type UnifiedAttachment,
 } from '../../../common/types/domain';
 import type { CasesClient, CasesClientArgs } from '..';
+import type { AttachmentSavedObjectTransformedV2 } from '../../common/types/attachments_v2';
 import type { AddFileArgs } from './types';
 
 import { CaseCommentModel } from '../../common/models';
@@ -26,14 +28,11 @@ import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import { flattenAttachmentSavedObject } from '../../common/utils';
 import { toUnifiedAttachment } from '../../services/attachments/operations/utils';
 
-/**
- * Create a file attachment to a case.
- */
-export const addFile = async (
+const createFileAttachment = async (
   addFileArgs: AddFileArgs,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
-): Promise<UnifiedAttachment> => {
+): Promise<{ model: CaseCommentModel; createdAttachment: AttachmentSavedObjectTransformedV2 }> => {
   const { caseId, file, filename, mimeType, $abort } = addFileArgs;
   const {
     logger,
@@ -91,7 +90,7 @@ export const addFile = async (
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
 
-    const createdAttachment = await model.createComment({
+    const { model: updatedModel, attachment: createdAttachment } = await model.createComment({
       createdDate,
       commentReq,
       id: savedObjectID,
@@ -101,7 +100,7 @@ export const addFile = async (
       throw new Error(`Failed to create the file attachment ${savedObjectID}`);
     }
 
-    return toUnifiedAttachment(flattenAttachmentSavedObject(createdAttachment));
+    return { model: updatedModel, createdAttachment };
   } catch (error) {
     if (createdFile?.id) {
       await fileService.delete({ id: createdFile.id });
@@ -113,4 +112,30 @@ export const addFile = async (
       logger,
     });
   }
+};
+
+/**
+ * Create a file attachment to a case. Returns the created attachment.
+ */
+export const addFile = async (
+  addFileArgs: AddFileArgs,
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+): Promise<UnifiedAttachment> => {
+  const { createdAttachment } = await createFileAttachment(addFileArgs, clientArgs, casesClient);
+
+  return toUnifiedAttachment(flattenAttachmentSavedObject(createdAttachment));
+};
+
+/**
+ * Create a file attachment to a case. Returns the case with all its attachments.
+ */
+export const addFileAndGetCase = async (
+  addFileArgs: AddFileArgs,
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+): Promise<Case> => {
+  const { model } = await createFileAttachment(addFileArgs, clientArgs, casesClient);
+
+  return model.encodeWithComments();
 };

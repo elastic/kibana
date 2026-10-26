@@ -23,17 +23,13 @@ export const addCommentStepDefinition = (
     ...addCommentStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, async (client, input: AddCommentStepInput) => {
       return withCaseOwner(client, input.case_id, async (owner) => {
-        await client.attachments.add({
+        const updatedCase = await client.attachments.addAndGetCase({
           caseId: input.case_id,
           comment: {
             type: COMMENT_ATTACHMENT_TYPE,
             data: { content: input.comment },
             owner,
           },
-        });
-        const updatedCase = await client.attachments.getCaseWithAttachments({
-          caseId: input.case_id,
-          writeOperation: 'create',
         });
 
         // The output schema mirrors the public (legacy) wire shape, so convert

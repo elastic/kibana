@@ -187,8 +187,7 @@ describe('manageAttachmentsTool', () => {
       updated_at: null,
     };
     casesClient.cases.get.mockResolvedValue(theCase as never);
-    casesClient.attachments.bulkCreate.mockResolvedValue([]);
-    casesClient.attachments.getCaseWithAttachments.mockResolvedValue(theCase as never);
+    casesClient.attachments.bulkCreateAndGetCase.mockResolvedValue(theCase as never);
 
     const attachments = buildMockAttachments();
     const tool = buildTool(buildRegistry([{ id: 'comment', schema: commentSchema }]), true);
@@ -201,7 +200,7 @@ describe('manageAttachmentsTool', () => {
       buildToolContext(attachments)
     );
 
-    expect(casesClient.attachments.bulkCreate).toHaveBeenCalledWith({
+    expect(casesClient.attachments.bulkCreateAndGetCase).toHaveBeenCalledWith({
       caseId: 'case-1',
       attachments: [{ type: 'comment', data: { content: 'hi' }, owner: 'securitySolution' }],
     });

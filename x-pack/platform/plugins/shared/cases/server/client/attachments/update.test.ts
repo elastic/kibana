@@ -12,7 +12,7 @@ import {
   MAX_USER_ACTIONS_PER_CASE,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
-import { update } from './update';
+import { update, updateAndGetCase } from './update';
 import {
   createAttachmentServiceMock,
   createCaseServiceMock,
@@ -56,33 +56,33 @@ describe('update', () => {
     );
   });
 
+  const theCase = { ...mockCases[0], id: caseID };
+  const commentId = 'comment-id';
+  const existingComment = {
+    id: commentId,
+    type: 'cases-comments',
+    version: 'WzAsMV0=',
+    attributes: {
+      type: 'comment',
+      data: { content: 'existing' },
+      created_at: '2024-01-01T00:00:00.000Z',
+      created_by: { username: 'u', full_name: null, email: null },
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+      owner: SECURITY_SOLUTION_OWNER,
+    },
+    references: [{ type: 'cases', id: caseID, name: `associated-cases` }],
+  };
+  const updatedAttachment = {
+    ...existingComment,
+    attributes: { ...existingComment.attributes, data: { content: 'updated content' } },
+    score: 0,
+  };
+
   it('returns the updated attachment read back after the write', async () => {
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseID]: 0 });
-
-    const theCase = { ...mockCases[0], id: caseID };
-    const commentId = 'comment-id';
-    const existingComment = {
-      id: commentId,
-      type: 'cases-comments',
-      version: 'WzAsMV0=',
-      attributes: {
-        type: 'comment',
-        data: { content: 'existing' },
-        created_at: '2024-01-01T00:00:00.000Z',
-        created_by: { username: 'u', full_name: null, email: null },
-        pushed_at: null,
-        pushed_by: null,
-        updated_at: null,
-        updated_by: null,
-        owner: SECURITY_SOLUTION_OWNER,
-      },
-      references: [{ type: 'cases', id: caseID, name: `associated-cases` }],
-    };
-    const updatedAttachment = {
-      ...existingComment,
-      attributes: { ...existingComment.attributes, data: { content: 'updated content' } },
-      score: 0,
-    };
 
     caseService.getCase.mockResolvedValue(theCase);
     caseService.patchCase.mockResolvedValue(theCase);
@@ -136,5 +136,35 @@ describe('update', () => {
         clientArgs
       )
     ).rejects.toThrow(`Comment content exceeds maximum length of ${MAX_COMMENT_LENGTH} characters`);
+  });
+
+  describe('updateAndGetCase', () => {
+    it('returns the case without reading the attachment back', async () => {
+      userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseID]: 0 });
+      caseService.getCase.mockResolvedValue(theCase);
+      caseService.patchCase.mockResolvedValue(theCase);
+      attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map([[caseID, { alerts: 0, userComments: 1, events: 0 }]])
+      );
+      attachmentService.getter.get.mockResolvedValue(
+        existingComment as unknown as Awaited<ReturnType<typeof attachmentService.getter.get>>
+      );
+      attachmentService.update.mockResolvedValue(updatedAttachment);
+      caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 0,
+        page: 1,
+      });
+
+      const res = await updateAndGetCase(
+        { updateRequest: unifiedUpdateRequest, caseID },
+        clientArgs
+      );
+
+      expect(res.id).toBe(caseID);
+      expect(attachmentService.getter.get).toHaveBeenCalledTimes(1);
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledTimes(1);
+    });
   });
 });

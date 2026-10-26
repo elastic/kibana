@@ -66,13 +66,9 @@ export const addAlertsStepDefinition = (
           };
         });
 
-        await client.attachments.bulkCreate({
+        const updatedCase = await client.attachments.bulkCreateAndGetCase({
           caseId: input.case_id,
           attachments,
-        });
-        const updatedCase = await client.attachments.getCaseWithAttachments({
-          caseId: input.case_id,
-          writeOperation: 'create',
         });
 
         // The output schema mirrors the public (legacy) wire shape, so convert

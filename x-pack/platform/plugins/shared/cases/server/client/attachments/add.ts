@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { AttachmentV2, UnifiedAttachment } from '../../../common/types/domain';
+import type { AttachmentV2, Case, UnifiedAttachment } from '../../../common/types/domain';
 import {
   UnifiedAttachmentPayloadSchema,
   type UnifiedAttachmentPayload,
@@ -27,6 +27,7 @@ import { isAlertAttachmentType, isEventAttachmentType } from '../../../common/ut
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { toUnifiedAttachment } from '../../services/attachments/operations/utils';
+import type { AttachmentSavedObjectTransformedV2 } from '../../common/types/attachments_v2';
 import type { AddArgs } from './types';
 import { validateUnifiedAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
@@ -92,16 +93,14 @@ const getExistingAttachment = async (
   return toUnifiedAttachment(existing);
 };
 
-/**
- * Create an attachment to a case. Returns the created attachment, or the attachment that
- * already covers the request when every referenced id is on the case.
- *
- * @ignore
- */
-export const addComment = async (
+const createAttachment = async (
   addArgs: AddArgs,
   clientArgs: CasesClientArgs
-): Promise<UnifiedAttachment> => {
+): Promise<{
+  query: UnifiedAttachmentPayload;
+  model: CaseCommentModel;
+  createdAttachment?: AttachmentSavedObjectTransformedV2;
+}> => {
   const { comment, caseId } = addArgs;
 
   const {
@@ -135,14 +134,14 @@ export const addComment = async (
     const createdDate = new Date().toISOString();
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
-    const createdAttachment = await model.createComment({
+    const { model: updatedModel, attachment: createdAttachment } = await model.createComment({
       createdDate,
       commentReq: query,
       id: savedObjectID,
     });
 
     if (createdAttachment == null) {
-      return await getExistingAttachment(caseId, query, clientArgs);
+      return { query, model: updatedModel };
     }
 
     const {
@@ -153,7 +152,7 @@ export const addComment = async (
     // This call never throws — failures are logged and do not abort the attachment creation.
     await extractAndAddObservables(caseId, [query], { settings }, clientArgs);
 
-    return toUnifiedAttachment(flattenAttachmentSavedObject(createdAttachment));
+    return { query, model: updatedModel, createdAttachment };
   } catch (error) {
     throw createCaseError({
       message: `Failed while adding a comment to case id: ${caseId} error: ${error}`,
@@ -161,4 +160,37 @@ export const addComment = async (
       logger,
     });
   }
+};
+
+/**
+ * Create an attachment to a case. Returns the created attachment, or the attachment that
+ * already covers the request when every referenced id is on the case.
+ *
+ * @ignore
+ */
+export const addComment = async (
+  addArgs: AddArgs,
+  clientArgs: CasesClientArgs
+): Promise<UnifiedAttachment> => {
+  const { query, createdAttachment } = await createAttachment(addArgs, clientArgs);
+
+  if (createdAttachment == null) {
+    return getExistingAttachment(addArgs.caseId, query, clientArgs);
+  }
+
+  return toUnifiedAttachment(flattenAttachmentSavedObject(createdAttachment));
+};
+
+/**
+ * Create an attachment to a case. Returns the case with all its attachments.
+ *
+ * @ignore
+ */
+export const addCommentAndGetCase = async (
+  addArgs: AddArgs,
+  clientArgs: CasesClientArgs
+): Promise<Case> => {
+  const { model } = await createAttachment(addArgs, clientArgs);
+
+  return model.encodeWithComments();
 };

@@ -67,18 +67,13 @@ export const postFileRoute = createCasesRoute({
         mimeType = mime.lookup(parsedFilename.ext.toLowerCase()) || undefined;
       }
 
-      await casesClient.attachments.addFile({
-        file,
-        filename: filename ?? '',
-        mimeType,
-        caseId: request.params.case_id,
-        $abort,
-      });
-
       const res: caseDomainV1.Case = toLegacyCaseResponse(
-        await casesClient.attachments.getCaseWithAttachments({
+        await casesClient.attachments.addFileAndGetCase({
+          file,
+          filename: filename ?? '',
+          mimeType,
           caseId: request.params.case_id,
-          writeOperation: 'create',
+          $abort,
         })
       );
 

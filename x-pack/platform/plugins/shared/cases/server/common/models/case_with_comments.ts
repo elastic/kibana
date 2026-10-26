@@ -99,7 +99,6 @@ export class CaseCommentModel {
 
   /**
    * Update a comment and update the corresponding case's update_at and updated_by fields.
-   * Returns the updated attachment.
    */
   public async updateComment({
     updateRequest,
@@ -109,7 +108,7 @@ export class CaseCommentModel {
     updateRequest: UnifiedAttachmentPayload & { id: string; version: string };
     updatedAt: string;
     currentAttachment: AttachmentSavedObjectTransformedV2;
-  }): Promise<AttachmentSavedObjectTransformedV2> {
+  }): Promise<CaseCommentModel> {
     try {
       // The PUT route checks the payload shape, type and owner only, so without this a caller
       // could attach a legitimate alert, event or attack and then replace its `attachmentId` and
@@ -170,8 +169,7 @@ export class CaseCommentModel {
         currentAttachment.attributes.owner
       );
 
-      // The update response only has the written attributes, so read the full attachment back.
-      return await this.params.services.attachmentService.getter.get({ savedObjectId: id });
+      return commentableCase;
     } catch (error) {
       throw createCaseError({
         message: `Failed to update comment in commentable case, case id: ${this.caseInfo.id}: ${error}`,
@@ -276,7 +274,7 @@ export class CaseCommentModel {
 
   /**
    * Create a new comment on the appropriate case. This updates the case's updated_at and updated_by fields.
-   * Returns the created attachment, or `undefined` when every referenced id is already on the case.
+   * `attachment` is `undefined` when every referenced id is already on the case.
    */
   public async createComment({
     createdDate,
@@ -286,7 +284,7 @@ export class CaseCommentModel {
     createdDate: string;
     commentReq: UnifiedAttachmentPayload;
     id: string;
-  }): Promise<AttachmentSavedObjectTransformedV2 | undefined> {
+  }): Promise<{ model: CaseCommentModel; attachment?: AttachmentSavedObjectTransformedV2 }> {
     try {
       await this.validateCreateCommentRequest([commentReq]);
       const attachmentsWithoutDuplicates = await this.filterDuplicatedAttachments([
@@ -294,7 +292,7 @@ export class CaseCommentModel {
       ]);
 
       if (attachmentsWithoutDuplicates.length === 0) {
-        return undefined;
+        return { model: this };
       }
 
       const { id: commentId, ...attachment } = attachmentsWithoutDuplicates[0];
@@ -324,7 +322,7 @@ export class CaseCommentModel {
         this.createCommentUserAction(comment, attachment),
       ]);
 
-      return comment;
+      return { model: commentableCase, attachment: comment };
     } catch (error) {
       throw createCaseError({
         message: `Failed creating a comment on a commentable case, case id: ${this.caseInfo.id}: ${error}`,
@@ -719,20 +717,20 @@ export class CaseCommentModel {
   }
 
   /**
-   * Creates the attachments that aren't duplicates. Returns the saved objects that were created.
+   * Creates the attachments that aren't duplicates. `attachments` holds the saved objects that were created.
    */
   public async bulkCreate({
     attachments,
   }: {
     attachments: CommentRequestWithId;
-  }): Promise<AttachmentSavedObjectTransformedV2[]> {
+  }): Promise<{ model: CaseCommentModel; attachments: AttachmentSavedObjectTransformedV2[] }> {
     try {
       await this.validateCreateCommentRequest(attachments);
 
       const attachmentWithoutDuplicateAlerts = await this.filterDuplicatedAttachments(attachments);
 
       if (attachmentWithoutDuplicateAlerts.length === 0) {
-        return [];
+        return { model: this, attachments: [] };
       }
 
       await this.ensureIndexedAttachmentsValid(attachmentWithoutDuplicateAlerts);
@@ -783,7 +781,7 @@ export class CaseCommentModel {
         this.bulkCreateCommentUserAction(withoutErrors(attachmentWithoutDuplicateAlerts)),
       ]);
 
-      return savedObjectsWithoutErrors;
+      return { model: commentableCase, attachments: savedObjectsWithoutErrors };
     } catch (error) {
       throw createCaseError({
         message: `Failed bulk creating attachments on a commentable case, case id: ${this.caseInfo.id}: ${error}`,

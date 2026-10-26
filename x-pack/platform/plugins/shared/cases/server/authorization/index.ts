@@ -322,29 +322,6 @@ const AttachmentOperations = {
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
-  /**
-   * Reads the case back after an attachment create, for the legacy responses that return the case.
-   * Checks the create privilege, not `getCase`, so users who can only add comments keep getting the case.
-   */
-  [ReadOperations.GetCaseAfterCreateComment]: {
-    ecsType: EVENT_TYPES.access,
-    name: WriteOperations.CreateComment as const,
-    action: 'case_get_after_comment_create',
-    verbs: accessVerbs,
-    docType: 'case',
-    savedObjectType: CASE_SAVED_OBJECT,
-  },
-  /**
-   * Same as `GetCaseAfterCreateComment`, for attachment updates.
-   */
-  [ReadOperations.GetCaseAfterUpdateComment]: {
-    ecsType: EVENT_TYPES.access,
-    name: WriteOperations.UpdateComment as const,
-    action: 'case_get_after_comment_update',
-    verbs: accessVerbs,
-    docType: 'case',
-    savedObjectType: CASE_SAVED_OBJECT,
-  },
   [WriteOperations.CreateComment]: {
     ecsType: EVENT_TYPES.creation,
     name: WriteOperations.CreateComment as const,

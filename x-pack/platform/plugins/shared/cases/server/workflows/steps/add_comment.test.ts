@@ -30,18 +30,17 @@ describe('addCommentStepDefinition', () => {
 
   it('adds comment to case', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const add = jest.fn().mockResolvedValue({ id: 'attachment-1' });
-    const getCaseWithAttachments = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const addAndGetCase = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get },
-      attachments: { add, getCaseWithAttachments },
+      attachments: { addAndGetCase },
     } as unknown as CasesClient);
     const definition = addCommentStepDefinition(getCasesClient);
 
     const result = await definition.handler(createContext(input));
 
     expect(get).toHaveBeenCalledWith({ id: 'case-1', includeComments: false });
-    expect(add).toHaveBeenCalledWith({
+    expect(addAndGetCase).toHaveBeenCalledWith({
       caseId: 'case-1',
       comment: {
         type: 'comment',
@@ -49,10 +48,7 @@ describe('addCommentStepDefinition', () => {
         owner: createCaseResponseFixture.owner,
       },
     });
-    expect(getCaseWithAttachments).toHaveBeenCalledWith({
-      caseId: 'case-1',
-      writeOperation: 'create',
-    });
+    // The case returned by `addAndGetCase` is used directly; no second reload.
     expect(get).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       output: {
@@ -64,10 +60,10 @@ describe('addCommentStepDefinition', () => {
   it('returns error when add comment throws', async () => {
     const addError = new Error('add comment failed');
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const add = jest.fn().mockRejectedValue(addError);
+    const addAndGetCase = jest.fn().mockRejectedValue(addError);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get },
-      attachments: { add },
+      attachments: { addAndGetCase },
     } as unknown as CasesClient);
     const definition = addCommentStepDefinition(getCasesClient);
 
@@ -79,27 +75,26 @@ describe('addCommentStepDefinition', () => {
   it('returns error when fetching case fails', async () => {
     const getError = new Error('get failed');
     const get = jest.fn().mockRejectedValue(getError);
-    const add = jest.fn();
+    const addAndGetCase = jest.fn();
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get },
-      attachments: { add },
+      attachments: { addAndGetCase },
     } as unknown as CasesClient);
     const definition = addCommentStepDefinition(getCasesClient);
 
     const result = await definition.handler(createContext(input));
 
-    expect(add).not.toHaveBeenCalled();
+    expect(addAndGetCase).not.toHaveBeenCalled();
     expect(result).toEqual({ error: getError });
   });
 
   it('pushes case when push-case is enabled', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const add = jest.fn().mockResolvedValue({ id: 'attachment-1' });
-    const getCaseWithAttachments = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const addAndGetCase = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const push = jest.fn().mockResolvedValue(undefined);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get, push },
-      attachments: { add, getCaseWithAttachments },
+      attachments: { addAndGetCase },
     } as unknown as CasesClient);
     const definition = addCommentStepDefinition(getCasesClient);
 

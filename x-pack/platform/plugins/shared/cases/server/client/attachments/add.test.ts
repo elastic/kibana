@@ -28,7 +28,7 @@ import {
   commentAttachmentType,
   stackAlertAttachmentType,
 } from '../../attachment_framework/attachments';
-import { addComment, findExistingAttachment } from './add';
+import { addComment, addCommentAndGetCase, findExistingAttachment } from './add';
 
 describe('addComment', () => {
   const caseId = 'test-case';
@@ -208,6 +208,61 @@ describe('addComment', () => {
         owner: SECURITY_SOLUTION_OWNER,
       })
     );
+  });
+
+  describe('addCommentAndGetCase', () => {
+    const theCase = { ...mockCases[0], id: caseId };
+    const emptyCommentsPage = { saved_objects: [], total: 0, per_page: 0, page: 1 };
+
+    beforeEach(() => {
+      userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+      caseService.getCase.mockResolvedValue(theCase);
+      caseService.patchCase.mockResolvedValue(theCase);
+      attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
+      );
+    });
+
+    it('returns the case after creating the attachment', async () => {
+      attachmentService.create.mockResolvedValue({
+        ...mockCaseUnifiedAttachments[0],
+        id: 'mock-saved-object-id',
+      });
+      caseService.getAllCaseComments.mockResolvedValue(emptyCommentsPage);
+
+      const res = await addCommentAndGetCase({ comment: unifiedComment, caseId }, clientArgs);
+
+      expect(res.id).toBe(caseId);
+      expect(attachmentService.create).toHaveBeenCalledTimes(1);
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns the case when every alert id is already on the case', async () => {
+      attachmentService.getter.getAllAlertIds.mockResolvedValue(new Set(['alert-1']));
+      attachmentService.getter.getAllEventIds.mockResolvedValue(new Set());
+      // The duplicate is past the first page of comments.
+      caseService.getAllCaseComments.mockResolvedValue(emptyCommentsPage);
+      caseService.getCase.mockResolvedValue({
+        ...theCase,
+        attributes: { ...theCase.attributes, owner: GENERAL_CASES_OWNER },
+      });
+
+      const res = await addCommentAndGetCase(
+        {
+          comment: {
+            type: STACK_ALERT_ATTACHMENT_TYPE,
+            attachmentId: 'alert-1',
+            metadata: { index: 'index-1', rule: { id: 'rule-1', name: 'rule-1' } },
+            owner: GENERAL_CASES_OWNER,
+          },
+          caseId,
+        },
+        clientArgs
+      );
+
+      expect(res.id).toBe(caseId);
+      expect(attachmentService.create).not.toHaveBeenCalled();
+    });
   });
 });
 

@@ -1137,8 +1137,7 @@ describe('CaseCommentModel', () => {
 
       const [{ options }] = clientArgs.services.attachmentService.update.mock.calls[0];
       expect(options?.references).toContainEqual(extraReference);
-      // The only read is the read-back of the updated attachment.
-      expect(clientArgs.services.attachmentService.getter.get).toHaveBeenCalledTimes(1);
+      expect(clientArgs.services.attachmentService.getter.get).not.toHaveBeenCalled();
     });
 
     it('passes the current saved object type to the attachment service', async () => {

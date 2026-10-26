@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import { UnifiedAttachmentPutRequestSchema } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import type { UnifiedAttachment } from '../../../common/types/domain';
+import type { Case, UnifiedAttachment } from '../../../common/types/domain';
 import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import { flattenAttachmentSavedObject } from '../../common/utils';
 import { toUnifiedAttachment } from '../../services/attachments/operations/utils';
@@ -21,10 +21,10 @@ import type { UpdateArgs } from './types';
 import { validateMaxUserActions } from '../../common/validators';
 import { validateUnifiedAttachments } from './validators';
 
-export async function update(
+const replaceAttachment = async (
   { caseID, updateRequest: queryParams }: UpdateArgs,
   clientArgs: CasesClientArgs
-): Promise<UnifiedAttachment> {
+): Promise<CaseCommentModel> => {
   const {
     services: { attachmentService, userActionService },
     logger,
@@ -87,7 +87,7 @@ export async function update(
 
     const updatedDate = new Date().toISOString();
 
-    const updatedAttachment = await model.updateComment({
+    return await model.updateComment({
       updateRequest: {
         id: queryCommentId,
         version: queryCommentVersion,
@@ -96,8 +96,6 @@ export async function update(
       updatedAt: updatedDate,
       currentAttachment: myComment,
     });
-
-    return toUnifiedAttachment(flattenAttachmentSavedObject(updatedAttachment));
   } catch (error) {
     throw createCaseError({
       message: `Failed to replace attachment case id: ${caseID}: ${error}`,
@@ -105,4 +103,33 @@ export async function update(
       logger,
     });
   }
-}
+};
+
+/**
+ * Full replace of an attachment. Returns the updated attachment.
+ */
+export const update = async (
+  updateArgs: UpdateArgs,
+  clientArgs: CasesClientArgs
+): Promise<UnifiedAttachment> => {
+  await replaceAttachment(updateArgs, clientArgs);
+
+  // The update response only has the written attributes, so read the full attachment back.
+  const updatedAttachment = await clientArgs.services.attachmentService.getter.get({
+    savedObjectId: updateArgs.updateRequest.id,
+  });
+
+  return toUnifiedAttachment(flattenAttachmentSavedObject(updatedAttachment));
+};
+
+/**
+ * Full replace of an attachment. Returns the case with all its attachments.
+ */
+export const updateAndGetCase = async (
+  updateArgs: UpdateArgs,
+  clientArgs: CasesClientArgs
+): Promise<Case> => {
+  const model = await replaceAttachment(updateArgs, clientArgs);
+
+  return model.encodeWithComments();
+};

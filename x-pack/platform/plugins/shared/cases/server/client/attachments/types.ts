@@ -178,17 +178,6 @@ export interface UpdateArgs {
   updateRequest: UnifiedAttachmentPayload & { id: string; version: string };
 }
 
-/**
- * Parameters for reading a case with all its attachments right after an attachment write.
- */
-export interface GetCaseWithAttachmentsArgs {
-  caseId: string;
-  /**
-   * The write that just ran. Decides which privilege the read is checked against.
-   */
-  writeOperation: 'create' | 'update';
-}
-
 export interface HapiReadableStream extends Readable {
   hapi: {
     filename: string;

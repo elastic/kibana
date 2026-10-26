@@ -8,7 +8,7 @@
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import { BulkCreateUnifiedAttachmentsRequestSchema } from '../../../common/types/api/attachment/v2';
-import type { UnifiedAttachment } from '../../../common/types/domain';
+import type { Case, UnifiedAttachment } from '../../../common/types/domain';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import { flattenAttachmentSavedObject } from '../../common/utils';
@@ -17,6 +17,7 @@ import { toUnifiedAttachment } from '../../services/attachments/operations/utils
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
+import type { AttachmentSavedObjectTransformedV2 } from '../../common/types/attachments_v2';
 
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
@@ -26,10 +27,13 @@ import { validateMaxUserActions } from '../../common/validators';
 import { emitAttachmentsAddedEvent } from './trigger_utils';
 import { extractAndAddObservables } from './extract_observables';
 
-export const bulkCreate = async (
+const createAttachments = async (
   args: BulkCreateArgs,
   clientArgs: CasesClientArgs
-): Promise<UnifiedAttachment[]> => {
+): Promise<{
+  model: CaseCommentModel;
+  createdAttachments: AttachmentSavedObjectTransformedV2[];
+}> => {
   const { attachments, caseId } = args;
 
   const {
@@ -79,7 +83,7 @@ export const bulkCreate = async (
     });
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
-    const createdAttachments = await model.bulkCreate({
+    const { model: updatedModel, attachments: createdAttachments } = await model.bulkCreate({
       attachments: attachmentsWithIds,
     });
 
@@ -101,9 +105,7 @@ export const bulkCreate = async (
     // This call never throws — failures are logged and do not abort the attachment creation.
     await extractAndAddObservables(caseId, decodedAttachments, { settings }, clientArgs);
 
-    return createdAttachments.map((attachment) =>
-      toUnifiedAttachment(flattenAttachmentSavedObject(attachment))
-    );
+    return { model: updatedModel, createdAttachments };
   } catch (error) {
     throw createCaseError({
       message: `Failed while bulk creating attachment to case id: ${caseId} error: ${error}`,
@@ -111,4 +113,30 @@ export const bulkCreate = async (
       logger,
     });
   }
+};
+
+/**
+ * Create attachments to a case. Returns the created attachments.
+ */
+export const bulkCreate = async (
+  args: BulkCreateArgs,
+  clientArgs: CasesClientArgs
+): Promise<UnifiedAttachment[]> => {
+  const { createdAttachments } = await createAttachments(args, clientArgs);
+
+  return createdAttachments.map((attachment) =>
+    toUnifiedAttachment(flattenAttachmentSavedObject(attachment))
+  );
+};
+
+/**
+ * Create attachments to a case. Returns the case with all its attachments.
+ */
+export const bulkCreateAndGetCase = async (
+  args: BulkCreateArgs,
+  clientArgs: CasesClientArgs
+): Promise<Case> => {
+  const { model } = await createAttachments(args, clientArgs);
+
+  return model.encodeWithComments();
 };

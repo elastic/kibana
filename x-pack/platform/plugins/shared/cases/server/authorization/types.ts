@@ -50,8 +50,6 @@ export enum ReadOperations {
   GetFieldDefinitions = 'getFieldDefinitions',
   GetTemplate = 'getTemplate',
   FindTemplates = 'findTemplates',
-  GetCaseAfterCreateComment = 'getCaseAfterCreateComment',
-  GetCaseAfterUpdateComment = 'getCaseAfterUpdateComment',
 }
 
 /**
