@@ -332,6 +332,7 @@ steps:
     type: data.set
     with:
       fp_threshold_expr: "v.confidence_score >= {{ inputs.confidence_floor }}"
+      fp_below_floor_expr: "v.confidence_score < {{ inputs.confidence_floor }}"
 
   - name: compute_fp_candidates
     type: data.set
@@ -562,6 +563,20 @@ steps:
   # per alert. Every step of a loop is recorded in the execution, so a per-alert loop over a
   # thousand alerts is thousands of step records on the same event loop as the UI.
   # The ids are partitioned by classification here.
+  #
+  # Only a false positive at or above the confidence floor keeps `az:false_positive`: it is the one
+  # the closure review proposes to close. A false positive below the floor is a guess nobody is
+  # asked about, so it is tagged `az:inconclusive` like the review's other dead ends. Otherwise it
+  # would stay open as `az:false_positive` and nothing would ever revisit it.
+  - name: compute_below_floor_fp_ids
+    type: data.set
+    with:
+      az_below_floor_fp_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'false_positive'
+            | where_exp: 'v', variables.fp_below_floor_expr
+            | map: 'alert_id' }}
+
   - name: compute_az_tag_ids
     type: data.set
     with:
@@ -572,11 +587,13 @@ steps:
       az_false_positive_ids: >-
         ${{ steps.classify_alerts.output.verdicts
             | where: 'classification', 'false_positive'
+            | where_exp: 'v', variables.fp_threshold_expr
             | map: 'alert_id' }}
       az_inconclusive_ids: >-
         ${{ steps.classify_alerts.output.verdicts
             | where: 'classification', 'inconclusive'
-            | map: 'alert_id' }}
+            | map: 'alert_id'
+            | concat: variables.az_below_floor_fp_ids }}
 
   # Each list is walked in chunks of 500 ids, as floor_alert_triage_review.yaml does for its
   # re-tag. One call carries the whole chunk, so a batch costs a call per chunk and class rather
@@ -601,6 +618,7 @@ steps:
             tags_to_remove:
               - "az:false_positive"
               - "az:inconclusive"
+              - "az:model_fp"
               - "az:triage_pending"
               - "az:triage_exec:{{ execution.id }}"
             tags_to_add:
@@ -624,8 +642,11 @@ steps:
               - "az:inconclusive"
               - "az:triage_pending"
               - "az:triage_exec:{{ execution.id }}"
+            # `az:model_fp` records the model's judgement for Rule Tuning. It is not a verdict tag
+            # and survives the re-tag to `az:inconclusive` when the proposal is not approved.
             tags_to_add:
               - "az:false_positive"
+              - "az:model_fp"
 
   - name: set_az_inconclusive_tags
     type: foreach
@@ -643,6 +664,7 @@ steps:
             tags_to_remove:
               - "az:true_positive"
               - "az:false_positive"
+              - "az:model_fp"
               - "az:triage_pending"
               - "az:triage_exec:{{ execution.id }}"
             tags_to_add:
@@ -818,6 +840,24 @@ steps:
         # re-throws afterwards, so the run fails and shows up in execution history.
         on-failure:
           fallback:
+            - name: retag_review_not_started
+              type: foreach
+              foreach: "${{ variables.fp_candidate_ids | chunk: 500 | json }}"
+              steps:
+                - name: retag_review_not_started_call
+                  type: kibana.SetAlertTags
+                  on-failure:
+                    retry:
+                      max-attempts: 3
+                      delay: 5s
+                    continue: true
+                  with:
+                    ids: "${{ foreach.item }}"
+                    tags:
+                      tags_to_remove:
+                        - "az:false_positive"
+                      tags_to_add:
+                        - "az:inconclusive"
             - name: post_comment_review_not_started
               type: ai.conversation.add_user_message
               on-failure:
@@ -827,7 +867,7 @@ steps:
                 conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 message: >-
                   ⚠️ The closure review could not be started: {{ error.message }}.
-                  {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive.
+                  {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} re-tagged az:inconclusive, because no proposal exists for them.
         with:
           workflow-id: system-security-floor-alert-triage-review
           run-as-mode: inherit
@@ -876,6 +916,25 @@ steps:
         type: if
         condition: "${{ variables.review_dispatch == 'failed' }}"
         steps:
+          - name: retag_review_failed
+            type: foreach
+            foreach: "${{ variables.fp_candidate_ids | chunk: 500 | json }}"
+            steps:
+              - name: retag_review_failed_call
+                type: kibana.SetAlertTags
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
+                  continue: true
+                with:
+                  ids: "${{ foreach.item }}"
+                  tags:
+                    tags_to_remove:
+                      - "az:false_positive"
+                    tags_to_add:
+                      - "az:inconclusive"
+
           - name: post_comment_review_failed
             type: ai.conversation.add_user_message
             on-failure:
@@ -885,7 +944,7 @@ steps:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
                 ⚠️ The closure review ended without a decision (status: {{ steps.start_fp_review.output.status }}).
-                {% if inputs.autonomy == 'supervised' %}The {{ variables.fp_candidate_count }} candidate alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} tagged az:false_positive. At supervised autonomy the review approves automatically and can start closing before this status is read, so some may already be closed: check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive, since nothing is closed without a human decision.{% endif %} This Investigation stays open for review.
+                {% if inputs.autonomy == 'supervised' %}The {{ variables.fp_candidate_count }} candidate alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} re-tagged az:inconclusive (the model's false-positive judgement is kept as az:model_fp). At supervised autonomy the review approves automatically and can start closing before this status is read, so some may already be closed: check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and re-tagged az:inconclusive (the model's false-positive judgement is kept as az:model_fp), since nothing is closed without a human decision.{% endif %} This Investigation stays open for review.
 
           # Fails the run so a review that never ran shows up in execution history, like a
           # dispatch that could not be started does.

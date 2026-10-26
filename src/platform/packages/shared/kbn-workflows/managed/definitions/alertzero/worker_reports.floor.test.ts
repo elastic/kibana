@@ -313,12 +313,12 @@ describe('Alert Triage managed versions', () => {
     [
       ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW.id,
       ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW.version,
-      8,
+      9,
     ],
     [
       ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW.id,
       ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW.version,
-      9,
+      10,
     ],
   ])('bumps %s to the version that carries its reports', (_id, version, expected) => {
     expect(version).toBe(expected);

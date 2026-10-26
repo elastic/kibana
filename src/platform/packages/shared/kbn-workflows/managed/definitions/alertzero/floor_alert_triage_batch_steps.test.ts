@@ -619,15 +619,27 @@ const AZ_TAG_STEPS = AZ_TAG_WRITES.map(({ step }) => step);
 describe('floor_alert_triage_batch — az: tags', () => {
   const idsStep = stepByName('compute_az_tag_ids');
 
+  const FLOOR = 0.85;
   const verdicts = [
-    { alert_id: 'tp-1', classification: 'true_positive' },
-    { alert_id: 'fp-1', classification: 'false_positive' },
-    { alert_id: 'fp-2', classification: 'false_positive' },
-    { alert_id: 'inc-1', classification: 'inconclusive' },
+    { alert_id: 'tp-1', classification: 'true_positive', confidence_score: 0.9 },
+    { alert_id: 'fp-1', classification: 'false_positive', confidence_score: 0.9 },
+    { alert_id: 'fp-2', classification: 'false_positive', confidence_score: 0.85 },
+    { alert_id: 'inc-1', classification: 'inconclusive', confidence_score: 0.5 },
   ];
 
   const computeIds = (batch: typeof verdicts): Record<string, unknown> => {
-    const context = { steps: { classify_alerts: { output: { verdicts: batch } } } };
+    const belowFloorStep = stepByName('compute_below_floor_fp_ids');
+    const thresholds = stepByName('build_fp_threshold_expr')?.with as Record<string, string>;
+    const variables: Record<string, unknown> = Object.fromEntries(
+      Object.entries(thresholds).map(([key, template]) => [
+        key,
+        renderString(template, { inputs: { confidence_floor: FLOOR } }).trim(),
+      ])
+    );
+    const context = { steps: { classify_alerts: { output: { verdicts: batch } } }, variables };
+    Object.entries(belowFloorStep?.with ?? {}).forEach(([key, expr]) => {
+      variables[key] = evalExpr(expr as string, context);
+    });
     return Object.fromEntries(
       Object.entries(idsStep?.with ?? {}).map(([key, expr]) => [
         key,
@@ -669,6 +681,28 @@ describe('floor_alert_triage_batch — az: tags', () => {
       az_false_positive_ids: ['fp-1', 'fp-2'],
       az_inconclusive_ids: ['inc-1'],
     });
+  });
+
+  // A below-floor false positive is never proposed for closure, so `az:false_positive` would stay
+  // on it forever. It is tagged `az:inconclusive` instead.
+  it('tags a false positive below the confidence floor inconclusive, not false_positive', () => {
+    const ids = computeIds([
+      ...verdicts,
+      { alert_id: 'fp-low', classification: 'false_positive', confidence_score: 0.4 },
+    ]);
+    expect(ids.az_false_positive_ids).toEqual(['fp-1', 'fp-2']);
+    expect(ids.az_inconclusive_ids).toEqual(['inc-1', 'fp-low']);
+  });
+
+  it('marks exactly the confident false positives with az:model_fp, which no other class keeps', () => {
+    const tagsOf = (step: string) =>
+      (callOf(step)?.with as { tags: { tags_to_add: string[]; tags_to_remove: string[] } }).tags;
+    expect(tagsOf('set_az_false_positive_tags').tags_to_add).toEqual([
+      'az:false_positive',
+      'az:model_fp',
+    ]);
+    expect(tagsOf('set_az_true_positive_tags').tags_to_remove).toContain('az:model_fp');
+    expect(tagsOf('set_az_inconclusive_tags').tags_to_remove).toContain('az:model_fp');
   });
 
   it('chunks each list at the size the closure review re-tags with', () => {
@@ -715,7 +749,9 @@ describe('floor_alert_triage_batch — az: tags', () => {
   });
 
   it('only writes a class tag for the alerts of that class', () => {
-    const ids = computeIds([{ alert_id: 'fp-1', classification: 'false_positive' }]);
+    const ids = computeIds([
+      { alert_id: 'fp-1', classification: 'false_positive', confidence_score: 0.9 },
+    ]);
     const chunksFor = (variable: string, step: string) =>
       renderChunks(step, variable, ids[variable] as string[]);
     expect(chunksFor('az_false_positive_ids', 'set_az_false_positive_tags')).toEqual([['fp-1']]);
@@ -743,12 +779,12 @@ describe('floor_alert_triage_batch — az: tags', () => {
       const { tags } = callOf(step)?.with as {
         tags: { tags_to_remove: string[]; tags_to_add: string[] };
       };
-      expect(tags.tags_to_add).toEqual([tagToAdd]);
+      expect(tags.tags_to_add).toEqual(expect.arrayContaining([tagToAdd]));
       // The claim tags leave in the same update, so an alert is never left with a verdict and a
       // claim, or with a claim and no verdict.
       const claimTags = ['az:triage_pending', 'az:triage_exec:{{ execution.id }}'];
-      const verdictTags = [...tags.tags_to_remove, ...tags.tags_to_add].filter(
-        (tag) => !claimTags.includes(tag)
+      const verdictTags = [...tags.tags_to_remove, ...tags.tags_to_add].filter((tag) =>
+        all.includes(tag)
       );
       expect(verdictTags.sort()).toEqual([...all].sort());
       expect(tags.tags_to_remove).toEqual(expect.arrayContaining(claimTags));
@@ -1084,9 +1120,26 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
 
   it('fails the run, after saying so, when the review cannot be started at all', () => {
     const fallback = stepByName('start_fp_review')?.['on-failure']?.fallback ?? [];
-    expect(fallback.map((step) => step.name)).toEqual(['post_comment_review_not_started']);
+    expect(fallback.map((step) => step.name)).toEqual([
+      'retag_review_not_started',
+      'post_comment_review_not_started',
+    ]);
     expect(stepByName('start_fp_review')?.['on-failure']?.continue).toBeUndefined();
   });
+
+  // Nobody revisits an alert left as az:false_positive, so a review that never ran must not leave one.
+  it.each(['retag_review_not_started', 'retag_review_failed'])(
+    '"%s" moves every candidate from az:false_positive to az:inconclusive and keeps az:model_fp',
+    (name) => {
+      const call = stepByName(name)?.steps?.[0];
+      expect(stepByName(name)?.foreach).toContain('variables.fp_candidate_ids | chunk: 500');
+      expect(call?.with?.tags).toEqual({
+        tags_to_remove: ['az:false_positive'],
+        tags_to_add: ['az:inconclusive'],
+      });
+      expect(call?.['on-failure']?.continue).toBe(true);
+    }
+  );
 
   describe('reading the review status', () => {
     const outcomeTemplate = stepByName('resolve_review_dispatch')?.with?.review_dispatch as string;
@@ -1163,7 +1216,12 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
 
     it('fails the run for a review that ended without a decision, after commenting', () => {
       const names = branchStepNames('handle_review_failed');
-      expect(names).toEqual(['post_comment_review_failed', 'abort_review_failed']);
+      expect(names).toEqual([
+        'retag_review_failed',
+        'retag_review_failed_call',
+        'post_comment_review_failed',
+        'abort_review_failed',
+      ]);
       expect(stepByName('abort_review_failed')?.type).toBe('workflow.fail');
     });
 
@@ -1178,8 +1236,8 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     };
 
     it.each([
-      [1, 'is tagged az:false_positive', 'it is still open'],
-      [3, 'are tagged az:false_positive', 'they are still open'],
+      [1, 'is re-tagged az:inconclusive', 'it is still open'],
+      [3, 'are re-tagged az:inconclusive', 'they are still open'],
     ])(
       'does not claim %i candidate alert(s) are still open when a supervised review failed',
       (count, tagged, stillOpen) => {
@@ -1207,7 +1265,7 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
 
         expect(rendered).toContain('status: failed');
         expect(rendered).toContain(expected);
-        expect(rendered).toContain('tagged az:false_positive');
+        expect(rendered).toContain('re-tagged az:inconclusive');
         expect(rendered).not.toContain('may already be closed');
       }
     );

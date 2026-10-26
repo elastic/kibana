@@ -209,7 +209,7 @@ describe('floor_alert_triage_review — dismiss mapping', () => {
       tags_to_add?: string[];
     };
 
-    expect(tags?.tags_to_remove).toEqual(['az:false_positive']);
+    expect(tags?.tags_to_remove).toEqual(['az:false_positive', 'az:model_fp']);
     // dismissed_tag is a variable, so check the value it resolves to.
     expect(tags?.tags_to_remove).not.toContain(evaluateDismissedTag(undefined));
   });
@@ -255,7 +255,7 @@ describe('floor_alert_triage_review — guard_get_proposal_readable', () => {
 
     expect(rendered).toContain('could not be read after');
     expect(rendered).toContain('timeout after 3 attempts');
-    expect(rendered).toContain('4 alerts remain tagged az:false_positive and untouched');
+    expect(rendered).toContain('4 alerts were re-tagged az:inconclusive');
   });
 });
 
@@ -568,19 +568,45 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
     expect(branchStepNames('handle_expired')).toContain('close_investigation_after_expiry');
   });
 
-  it('re-tags alerts only on a dismissal, never on an expiry', () => {
+  it('re-tags alerts on a dismissal and on every outcome that leaves them unclosed', () => {
     expect(branchStepNames('handle_dismissed')).toContain('retag_dismissed_alerts');
-    expect(branchStepNames('handle_expired')).not.toContain('retag_dismissed_alerts');
+    expect(branchStepNames('handle_expired')).toContain('retag_expired_alerts');
+    expect(branchStepNames('handle_unknown_outcome')).toContain('retag_unknown_alerts');
+    expect(branchStepNames('handle_dismissed')).toContain('retag_dismissed_read_failed');
     expect(
-      flatten(stepByName('handle_expired')?.steps ?? []).some(
+      flatten(stepByName('create_fp_proposal')?.['on-failure']?.fallback ?? []).map(
+        ({ name }) => name
+      )
+    ).toContain('retag_proposal_failed');
+  });
+
+  it('never re-tags an approved closure, whose alerts are closed', () => {
+    expect(
+      flatten(stepByName('handle_approved')?.steps ?? []).some(
         (step) => step.type === 'kibana.SetAlertTags'
       )
     ).toBe(false);
   });
 
+  // The model's judgement must survive for Rule Tuning. Only a human dismissal removes it.
   it.each([
-    [1, 'is tagged az:false_positive', 'it is still open'],
-    [3, 'are tagged az:false_positive', 'they are still open'],
+    'retag_proposal_failed',
+    'retag_dismissed_read_failed',
+    'retag_expired_alerts',
+    'retag_unknown_alerts',
+  ])('"%s" leaves az:false_positive for az:inconclusive and keeps az:model_fp', (name) => {
+    const retag = stepByName(name);
+    expect(retag?.foreach).toContain('inputs.fp_candidate_ids | chunk: 500');
+    expect(retag?.steps?.[0].with?.tags).toEqual({
+      tags_to_remove: ['az:false_positive'],
+      tags_to_add: ['az:inconclusive'],
+    });
+    expect(retag?.steps?.[0]['on-failure']?.continue).toBe(true);
+  });
+
+  it.each([
+    [1, 'is re-tagged az:inconclusive', 'it is still open'],
+    [3, 'are re-tagged az:inconclusive', 'they are still open'],
   ])(
     'post_comment_outcome_expired does not claim %i candidate alert(s) are still open',
     (count, tagged, stillOpen) => {

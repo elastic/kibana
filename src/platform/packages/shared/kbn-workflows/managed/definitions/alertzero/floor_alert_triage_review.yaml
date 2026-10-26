@@ -94,6 +94,11 @@ triggers:
 #   1. count_fp_candidates  — size of the candidate list, used by every comment below
 #   2. gate_fp_close        — post the proposal comment, raise the proposal, wait for the decision
 #   3. one branch per outcome — approved, dismissed, expired, unknown
+#
+# No outcome leaves an alert open as `az:false_positive`. Only an approved closure keeps it (the
+# alerts are closed). Dismissal, expiry, an unknown outcome and a failed proposal re-tag the
+# candidates `az:inconclusive`. `az:model_fp` stays on the alerts so Rule Tuning still sees the
+# model's judgement. A dismissal removes it, because a human disagreed.
 
 consts:
   # Temporary: service accounts have no display name, so the chat would show the raw account
@@ -141,6 +146,24 @@ steps:
     # fails and shows up in execution history.
     on-failure:
       fallback:
+        - name: retag_proposal_failed
+          type: foreach
+          foreach: "${{ inputs.fp_candidate_ids | chunk: 500 | json }}"
+          steps:
+            - name: retag_proposal_failed_call
+              type: kibana.SetAlertTags
+              on-failure:
+                retry:
+                  max-attempts: 3
+                  delay: 5s
+                continue: true
+              with:
+                ids: "${{ foreach.item }}"
+                tags:
+                  tags_to_remove:
+                    - "az:false_positive"
+                  tags_to_add:
+                    - "az:inconclusive"
         - name: post_comment_proposal_failed
           type: ai.conversation.add_user_message
           on-failure:
@@ -150,7 +173,7 @@ steps:
             conversation_id: "{{ inputs.conversation_id }}"
             message: >-
               ⚠️ The closure proposal could not be completed: {{ error.message }}.
-              {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive.
+              {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and {% if variables.fp_candidate_count == 1 %}was{% else %}were{% endif %} re-tagged az:inconclusive.
     with:
       workflow-id: system-create-alertzero-proposal
       run-as-mode: inherit
@@ -291,6 +314,7 @@ steps:
                   tags:
                     tags_to_remove:
                       - "az:false_positive"
+                      - "az:model_fp"
                     tags_to_add:
                       - "{{ variables.dismissed_tag }}"
 
@@ -353,6 +377,24 @@ steps:
               message: >-
                 Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {% if variables.failed_retag_count > 0 %}{{ variables.fp_candidate_count | minus: variables.failed_retag_count }} of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}; {{ variables.failed_retag_count }} failed after retries and {% if variables.failed_retag_count == 1 %}needs{% else %}need{% endif %} manual re-tagging.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}.{% endif %}{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
         else:
+          - name: retag_dismissed_read_failed
+            type: foreach
+            foreach: "${{ inputs.fp_candidate_ids | chunk: 500 | json }}"
+            steps:
+              - name: retag_dismissed_read_failed_call
+                type: kibana.SetAlertTags
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
+                  continue: true
+                with:
+                  ids: "${{ foreach.item }}"
+                  tags:
+                    tags_to_remove:
+                      - "az:false_positive"
+                    tags_to_add:
+                      - "az:inconclusive"
           - name: post_comment_dismissed_read_failed
             type: ai.conversation.add_user_message
             on-failure:
@@ -363,17 +405,36 @@ steps:
               message: >-
                 ⚠️ The proposal was dismissed, but its details could not be read after
                 retries ({{ steps.get_proposal.error.message }}). {{ variables.fp_candidate_count }}
-                alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} tagged az:false_positive and untouched; this Investigation
+                alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}was{% else %}were{% endif %} re-tagged az:inconclusive; this Investigation
                 stays open for manual follow-up.
 
-  # Expiry is not a dismissal: nobody rejected the verdict, so the alerts keep their
-  # az:false_positive tag and are not re-tagged. The gate also settles as expired when an
-  # approved close failed and its re-parked retry ran out of time, and that failed attempt
+  # Expiry is not a dismissal: nobody rejected the verdict, so the alerts keep `az:model_fp`. They
+  # leave `az:false_positive`, which nothing would revisit. The gate also settles as expired when
+  # an approved close failed and its re-parked retry ran out of time, and that failed attempt
   # may have closed some alerts, so the comment below does not claim they are all open.
   - name: handle_expired
     type: if
     condition: "${{ variables.proposal_outcome == 'expired' }}"
     steps:
+      - name: retag_expired_alerts
+        type: foreach
+        foreach: "${{ inputs.fp_candidate_ids | chunk: 500 | json }}"
+        steps:
+          - name: retag_expired_alerts_call
+            type: kibana.SetAlertTags
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
+            with:
+              ids: "${{ foreach.item }}"
+              tags:
+                tags_to_remove:
+                  - "az:false_positive"
+                tags_to_add:
+                  - "az:inconclusive"
+
       - name: close_investigation_after_expiry
         type: ai.conversation.metadata.patch
         on-failure:
@@ -410,7 +471,7 @@ steps:
           author_name: "{{ consts.author_name }}"
           conversation_id: "{{ inputs.conversation_id }}"
           message: >-
-            The closure proposal expired before a closure was completed. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} tagged az:false_positive. If a closure attempt partially succeeded before the proposal expired, some may already be closed, so check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.
+            The closure proposal expired before a closure was completed. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} re-tagged az:inconclusive. If a closure attempt partially succeeded before the proposal expired, some may already be closed, so check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.
 
   # Defensive branch. The gate settles as succeeded, dismissed or expired: a failed close
   # action is recorded `failed`, cloned and re-parked for another decision, and an
@@ -421,6 +482,25 @@ steps:
     type: if
     condition: "${{ variables.proposal_outcome == 'unknown' }}"
     steps:
+      - name: retag_unknown_alerts
+        type: foreach
+        foreach: "${{ inputs.fp_candidate_ids | chunk: 500 | json }}"
+        steps:
+          - name: retag_unknown_alerts_call
+            type: kibana.SetAlertTags
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
+            with:
+              ids: "${{ foreach.item }}"
+              tags:
+                tags_to_remove:
+                  - "az:false_positive"
+                tags_to_add:
+                  - "az:inconclusive"
+
       - name: post_comment_outcome_unknown
         type: ai.conversation.add_user_message
         on-failure:
@@ -435,7 +515,7 @@ steps:
           # per-alert result, so this reports the ambiguity instead of a specific (possibly
           # wrong) closed/open count.
           message: >-
-            ⚠️ The closure proposal ended in an unexpected state (status: "{{ steps.create_fp_proposal.output.status | default: 'unknown' }}"). Some of the {{ variables.fp_candidate_count }} candidate alert{% if variables.fp_candidate_count != 1 %}s{% endif %} may already be closed if a closure attempt partially succeeded before this outcome — check each alert's workflow_status rather than assuming all remain open and tagged az:false_positive. This Investigation stays open for review.
+            ⚠️ The closure proposal ended in an unexpected state (status: "{{ steps.create_fp_proposal.output.status | default: 'unknown' }}"). Some of the {{ variables.fp_candidate_count }} candidate alert{% if variables.fp_candidate_count != 1 %}s{% endif %} may already be closed if a closure attempt partially succeeded before this outcome — check each alert's workflow_status rather than assuming all remain open. The candidates were re-tagged az:inconclusive. This Investigation stays open for review.
 
   # Telemetry: how the closure proposal settled, once its outcome has been applied.
   - name: report_closure_resolved
