@@ -9,11 +9,11 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiCallOut, EuiTitle } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
-import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { HttpStart } from '@kbn/core-http-browser';
+import { useEpisodesKpisQuery } from '../../hooks/use_episodes_kpis_query';
 import {
   EPISODES_KPIS_ACKNOWLEDGED,
   EPISODES_KPIS_ALERTS_COUNT,
@@ -25,9 +25,9 @@ import {
   EPISODES_KPIS_FIRING_RULES,
   EPISODES_KPIS_SNOOZED,
   EPISODES_KPIS_UNASSIGNED_ALERTS,
-} from '../../translations';
+} from '../translations';
 
-interface EpisodesKpisServices {
+export interface EpisodesKpisServices {
   expressions: ExpressionsStart;
   spaces: SpacesPluginStart;
   userProfile: CoreStart['userProfile'];

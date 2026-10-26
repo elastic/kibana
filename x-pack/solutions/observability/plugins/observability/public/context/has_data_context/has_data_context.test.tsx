@@ -9,6 +9,8 @@ import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { registerDataHandler, unregisterDataHandler } from './data_handler';
 import { useHasData } from '../../hooks/use_has_data';
 import type { HasData, ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
@@ -547,6 +549,117 @@ describe('HasDataContextProvider', () => {
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
         })
+      );
+    });
+  });
+
+  describe('when universal alerting is enabled', () => {
+    const universalCore = coreMock.createStart();
+
+    const isUniversalRulesRequest = (path: string | HttpFetchOptionsWithPath) =>
+      (typeof path === 'string' ? path : path.path) === ALERTING_V2_RULE_API_PATH;
+
+    function universalWrapper({ children }: React.PropsWithChildren) {
+      const history = createMemoryHistory();
+      return (
+        <KibanaContextProvider
+          services={{
+            ...universalCore,
+            alertingVTwo: { AlertsProvider: () => null, createAlertingV2HostApp: jest.fn() },
+          }}
+        >
+          <Router history={history}>
+            <HasDataContextProvider>{children}</HasDataContextProvider>
+          </Router>
+        </KibanaContextProvider>
+      );
+    }
+
+    beforeEach(() => {
+      unregisterAll();
+      universalCore.settings.globalClient.isDeclared.mockReturnValue(true);
+      universalCore.settings.globalClient.get.mockReturnValue(true);
+      universalCore.settings.client.get.mockReturnValue(false);
+      universalCore.application.capabilities = {
+        ...universalCore.application.capabilities,
+        alerting_v2_rules: { read: true },
+      };
+    });
+
+    afterEach(() => {
+      universalCore.http.get.mockReset();
+    });
+
+    it('reports alert data from universal rules when no classic rules exist', async () => {
+      universalCore.http.get.mockImplementation(async (path) =>
+        isUniversalRulesRequest(path) ? { total: 1 } : { data: [] }
+      );
+
+      const { result } = renderHook(() => useHasData(), { wrapper: universalWrapper });
+
+      await waitFor(() =>
+        expect(result.current.hasDataMap.alert).toEqual({ hasData: true, status: 'success' })
+      );
+      expect(result.current.hasAnyData).toBe(true);
+    });
+
+    it('reports no alert data when neither classic nor universal rules exist', async () => {
+      universalCore.http.get.mockImplementation(async (path) =>
+        isUniversalRulesRequest(path) ? { total: 0 } : { data: [] }
+      );
+
+      const { result } = renderHook(() => useHasData(), { wrapper: universalWrapper });
+
+      await waitFor(() =>
+        expect(result.current.hasDataMap.alert).toEqual({ hasData: false, status: 'success' })
+      );
+    });
+
+    it('keeps classic alert data when the universal rules request fails', async () => {
+      universalCore.http.get.mockImplementation(async (path) => {
+        if (isUniversalRulesRequest(path)) {
+          throw new Error('forbidden');
+        }
+        return { data: [{ id: 1, consumer: 'apm' }] };
+      });
+
+      const { result } = renderHook(() => useHasData(), { wrapper: universalWrapper });
+
+      await waitFor(() =>
+        expect(result.current.hasDataMap.alert).toEqual({ hasData: true, status: 'success' })
+      );
+    });
+
+    it('does not request universal rules when the space opts into the classic alerts table', async () => {
+      universalCore.settings.client.get.mockReturnValue(true);
+      universalCore.http.get.mockImplementation(async () => ({ data: [] }));
+
+      const { result } = renderHook(() => useHasData(), { wrapper: universalWrapper });
+
+      await waitFor(() =>
+        expect(result.current.hasDataMap.alert).toEqual({ hasData: false, status: 'success' })
+      );
+      expect(universalCore.http.get).not.toHaveBeenCalledWith(
+        ALERTING_V2_RULE_API_PATH,
+        expect.anything()
+      );
+    });
+
+    it('does not request universal rules without the rules read capability', async () => {
+      universalCore.application.capabilities = {
+        ...universalCore.application.capabilities,
+        alerting_v2_rules: { read: false },
+      };
+      universalCore.http.get.mockImplementation(async () => ({ data: [] }));
+
+      const { result } = renderHook(() => useHasData(), { wrapper: universalWrapper });
+
+      await waitFor(() =>
+        expect(result.current.hasDataMap.alert).toEqual({ hasData: false, status: 'success' })
+      );
+      expect(universalCore.http.get).not.toHaveBeenCalledWith(
+        ALERTING_V2_RULE_API_PATH,
+        expect.anything()
       );
     });
   });

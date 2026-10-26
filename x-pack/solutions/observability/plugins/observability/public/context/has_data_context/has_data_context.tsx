@@ -10,6 +10,11 @@ import React, { createContext, useEffect, useState } from 'react';
 import { asyncForEach } from '@kbn/std';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { CoreStart } from '@kbn/core/public';
+import {
+  hasAlertingV2Capability,
+  shouldShowV1ObservabilityAlertsTable,
+} from '@kbn/alerting-v2-utils';
 import { useKibana } from '../../utils/kibana_react';
 import {
   ALERT_APP,
@@ -23,6 +28,7 @@ import {
 import { getDataHandler } from './data_handler';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { getObservabilityAlerts } from './get_observability_alerts';
+import { hasUniversalAlertingRules } from './get_universal_alerting_rules';
 import type { ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
 import type { ApmIndicesConfig } from '../../../common/typings';
 
@@ -83,9 +89,16 @@ export const appLabels: Record<DataContextApps, string> = {
 };
 
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
-  const { http } = useKibana().services;
+  const services = useKibana().services;
+  const { http } = services;
   const [forceUpdate, setForceUpdate] = useState('');
   const { absoluteStart, absoluteEnd } = useDatePickerContext();
+
+  const shouldCheckUniversalRules =
+    !!services.settings &&
+    !shouldShowV1ObservabilityAlertsTable(services as CoreStart) &&
+    services.alertingVTwo != null &&
+    hasAlertingV2Capability(services as CoreStart, 'rules', 'read');
 
   const [hasDataMap, setHasDataMap] = useState<HasDataContextValue['hasDataMap']>({});
 
@@ -169,11 +182,16 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
   useEffect(() => {
     async function fetchAlerts() {
       try {
-        const alerts = await getObservabilityAlerts({ http });
+        const [alerts, hasUniversalRules] = await Promise.all([
+          getObservabilityAlerts({ http }),
+          shouldCheckUniversalRules
+            ? hasUniversalAlertingRules({ http }).catch(() => false)
+            : Promise.resolve(false),
+        ]);
         setHasDataMap((prevState) => ({
           ...prevState,
           [ALERT_APP]: {
-            hasData: alerts.length > 0,
+            hasData: alerts.length > 0 || hasUniversalRules,
             status: FETCH_STATUS.SUCCESS,
           },
         }));
@@ -189,7 +207,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
     }
 
     fetchAlerts();
-  }, [forceUpdate, http]);
+  }, [forceUpdate, http, shouldCheckUniversalRules]);
 
   const isAllRequestsComplete = apps.every((app) => {
     const appStatus = hasDataMap[app]?.status;

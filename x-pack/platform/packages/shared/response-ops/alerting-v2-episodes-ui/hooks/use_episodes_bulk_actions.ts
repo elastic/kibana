@@ -7,9 +7,9 @@
 
 import { useMemo } from 'react';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
-import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
-import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
-import { getEpisodesFromDocIds } from '@kbn/alerting-v2-episodes-ui/utils/bulk_selection';
+import type { AlertEpisode } from '../queries/episodes_query';
+import type { EpisodeAction } from '../actions';
+import { getEpisodesFromDocIds } from '../utils/bulk_selection';
 
 interface UseEpisodesBulkActionsParams {
   actions: EpisodeAction[];

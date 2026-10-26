@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { OBSERVABILITY_RULE_TYPE_IDS, STACK_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import {
   OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_BASE_PATH,
@@ -13,13 +12,12 @@ import {
 } from '@kbn/deeplinks-observability';
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
 import { createClassicEpisodeSource } from '@kbn/alerting-v2-episodes-ui/classic_alerts/create_classic_episode_source';
+import { CLASSIC_OBS_AND_STACK_RULE_TYPE_IDS } from '@kbn/alerting-v2-episodes-ui/classic_alerts/constants';
 
-export const CLASSIC_ALERT_RULE_TYPE_IDS = Array.from(
-  new Set([...OBSERVABILITY_RULE_TYPE_IDS, ...STACK_RULE_TYPE_IDS])
-);
+export { CLASSIC_OBS_AND_STACK_RULE_TYPE_IDS };
 
 export const CLASSIC_ALERTS_DATA_SOURCE: EpisodeDataSource = createClassicEpisodeSource({
-  ruleTypeIds: CLASSIC_ALERT_RULE_TYPE_IDS,
+  ruleTypeIds: CLASSIC_OBS_AND_STACK_RULE_TYPE_IDS,
   host: {
     app: OBSERVABILITY_ALERTING_APP_ID,
     pathPrefix: OBSERVABILITY_ALERTING_RULES_V1_PATH,
