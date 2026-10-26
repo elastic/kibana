@@ -92,6 +92,7 @@ export function KnowledgePage({
     id,
     label: KNOWLEDGE_TAB_LABELS[id],
     isSelected: tab === id,
+    ...(id === 'decision_trees' && { badge: { iconType: 'code' } }),
     href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: `/knowledge/${id}` }),
     onClick: (event?: React.MouseEvent) => {
       event?.preventDefault();

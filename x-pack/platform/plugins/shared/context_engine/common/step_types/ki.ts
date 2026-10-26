@@ -25,7 +25,7 @@ export const MAX_KI_REFERENCE_URI_LENGTH = 2048;
 export const MAX_KI_REFERENCE_DESCRIPTION_LENGTH = 2048;
 
 export const KI_REFERENCE_RELATIONS = ['derived_from', 'relates_to', 'supersedes'] as const;
-export const KI_LIFECYCLE_STATUSES = ['active', 'deleted'] as const;
+export const KI_LIFECYCLE_STATUSES = ['active', 'deleted', 'verification_failed'] as const;
 
 export const aiIndexIdSchema = z
   .string()

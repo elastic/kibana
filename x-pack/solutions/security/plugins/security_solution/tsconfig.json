@@ -8,13 +8,6 @@
     "public/**/*",
     "server/**/*",
     "scripts/**/*",
-    "test/scout/**/*",
-    "test/scout_ai_value_report/**/*",
-    "test/scout_cps_local/**/*",
-    "test/scout_edr_real_fleet/**/*",
-    "test/scout_es_max_response_size/**/*",
-    "test/scout_security_attacks_alignment/**/*",
-    "test/scout_alertzero/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
@@ -22,7 +15,7 @@
     "public/**/*.json",
     "../../../../../typings/**/*"
   ],
-  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
+  "exclude": ["target/**/*", "test/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
     "@kbn/setup-node-env",
     "@kbn/core",
@@ -246,8 +239,6 @@
     "@kbn/security-ai-prompts",
     "@kbn/inference-common",
     "@kbn/inference-langchain",
-    "@kbn/scout-security",
-    "@kbn/ftr-llm-proxy",
     "@kbn/custom-icons",
     "@kbn/security-plugin-types-common",
     "@kbn/management-settings-ids",
@@ -326,7 +317,9 @@
     "@kbn/core-execution-context-common",
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
-    "@kbn/test-es-server",
     "@kbn/core-security-server",
+    "@kbn/css-utils",
+    "@kbn/custom-content-common",
+    "@kbn/custom-content-renderer",
   ]
 }

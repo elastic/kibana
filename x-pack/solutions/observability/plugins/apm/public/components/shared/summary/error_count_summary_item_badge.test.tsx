@@ -6,7 +6,11 @@
  */
 
 import React from 'react';
-import { ErrorCountSummaryItemBadge } from './error_count_summary_item_badge';
+import type { EuiThemeComputed } from '@elastic/eui';
+import {
+  ErrorCountSummaryItemBadge,
+  getErrorCountBadgeDescriptor,
+} from './error_count_summary_item_badge';
 import { expectTextsInDocument, renderWithTheme } from '../../../utils/test_helpers';
 
 describe('ErrorCountSummaryItemBadge', () => {
@@ -18,5 +22,16 @@ describe('ErrorCountSummaryItemBadge', () => {
   it('shows plural error message', () => {
     const component = renderWithTheme(<ErrorCountSummaryItemBadge count={2} />);
     expectTextsInDocument(component, ['2 Errors']);
+  });
+});
+
+describe('getErrorCountBadgeDescriptor', () => {
+  it('describes the badge with the danger color', () => {
+    const euiTheme = { colors: { danger: '#ff0000' } } as EuiThemeComputed;
+
+    expect(getErrorCountBadgeDescriptor(3, euiTheme)).toEqual({
+      label: '3 Errors',
+      color: '#ff0000',
+    });
   });
 });
