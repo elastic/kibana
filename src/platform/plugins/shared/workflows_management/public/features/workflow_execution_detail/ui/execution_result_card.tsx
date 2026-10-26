@@ -25,7 +25,7 @@ import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { ServiceAccountName } from '../../../entities/service_accounts';
-import { getExecutedByLabel, useUserProfilesByUid } from '../../../entities/user_profiles';
+import { getExecutedByLabel } from '../../../entities/user_profiles';
 import { useKibana } from '../../../hooks/use_kibana';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
@@ -63,13 +63,9 @@ export const ExecutionResultCard = ({
   const showExecutor = useUiSetting<boolean>(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID, true);
   const { cloud } = useKibana().services;
   const showUnresolvedExecutors = !cloud?.isServerlessEnabled;
-  const { data: executedByProfiles } = useUserProfilesByUid({
-    enabled: showExecutor,
-    uids: executedByValue ? [executedByValue] : [],
-  });
   const resolvedExecutedBy = showExecutor
     ? getExecutedByLabel(
-        executedByProfiles?.get(executedByValue),
+        workflowExecution.executedByProfile,
         showUnresolvedExecutors ? executedByValue : undefined
       )
     : undefined;

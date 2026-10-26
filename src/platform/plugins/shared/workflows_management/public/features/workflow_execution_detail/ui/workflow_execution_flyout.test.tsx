@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -470,47 +470,33 @@ describe('WorkflowExecutionFlyout triggered by', () => {
     return services;
   };
 
-  it('resolves the profile UID to the user display name', async () => {
-    const services = createServices();
-    services.userProfile.bulkGet.mockResolvedValue([profile]);
+  const withResolvedProfile = () => {
+    mockPollingResult.workflowExecution = createMockWorkflowExecutionDto({
+      id: 'exec-1',
+      executedBy: profileUid,
+      executedByProfile: profile,
+    });
+  };
 
-    renderFlyout(services);
+  it('shows the user display name resolved by the server, without a client profile lookup', () => {
+    withResolvedProfile();
+    const services = renderFlyout();
 
-    await waitFor(() =>
-      expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent('elastic')
-    );
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent('elastic');
     expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).not.toHaveTextContent(
       profileUid
     );
-    expect(services.userProfile.bulkGet).toHaveBeenCalledWith({
-      uids: new Set([profileUid]),
-      dataPath: 'avatar',
-    });
+    expect(services.userProfile.bulkGet).not.toHaveBeenCalled();
   });
 
-  it('keeps the raw UID when the profile cannot be resolved', async () => {
-    const services = createServices();
-    services.userProfile.bulkGet.mockResolvedValue([]);
-
-    renderFlyout(services);
-
-    // Let any profile lookup settle before asserting the fallback.
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
+  it('keeps the raw UID when the profile cannot be resolved', () => {
+    renderFlyout();
 
     expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent(profileUid);
   });
 
-  it('hides the unresolved UID on serverless, like the execution list', async () => {
-    const services = createServices({ isServerless: true });
-    services.userProfile.bulkGet.mockResolvedValue([]);
-
-    renderFlyout(services);
-
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
+  it('hides the unresolved UID on serverless, like the execution list', () => {
+    renderFlyout(createServices({ isServerless: true }));
 
     expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).not.toHaveTextContent(
       profileUid
@@ -518,17 +504,10 @@ describe('WorkflowExecutionFlyout triggered by', () => {
     expect(screen.queryByTestId('workflowExecutionFlyoutExecutedByCopy')).not.toBeInTheDocument();
   });
 
-  it('does not look up profiles nor show the user when the show executor setting is off', async () => {
-    const services = createServices({ showExecutor: false });
-    services.userProfile.bulkGet.mockResolvedValue([profile]);
+  it('does not show the user when the show executor setting is off', () => {
+    withResolvedProfile();
+    renderFlyout(createServices({ showExecutor: false }));
 
-    renderFlyout(services);
-
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
-
-    expect(services.userProfile.bulkGet).not.toHaveBeenCalled();
     expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).not.toHaveTextContent(
       profileUid
     );

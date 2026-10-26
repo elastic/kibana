@@ -11,7 +11,12 @@ import { schema } from '@kbn/config-schema';
 import { workflowAccessControlSchema, WorkflowsManagementApiActions } from '@kbn/workflows';
 import type { RouteDependencies } from '../types';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
+import {
+  assertCanReadManagedWorkflow,
+  hasWorkflowReadPrivilege,
+  WORKFLOW_READ_WITH_MANAGED_SECURITY,
+  WORKFLOW_UPDATE_SECURITY,
+} from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
@@ -40,6 +45,43 @@ export const registerWorkflowAccessControlRoutes = ({
         return response.ok({ body: result });
       } catch (error) {
         audit.logWorkflowUpdated(request, { id: request.params.id, error });
+        return handleRouteError(response, error);
+      }
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/workflows/{id}/access_control/_profiles',
+      security: WORKFLOW_READ_WITH_MANAGED_SECURITY,
+      validate: { params: idParamSchema },
+    },
+    withAvailabilityCheck(async (context, request, response) => {
+      try {
+        if (!hasWorkflowReadPrivilege(request)) {
+          return response.forbidden();
+        }
+        // `getWorkflow` only exposes the owner and entries to callers who can manage the workflow.
+        const workflow = await api.getWorkflow(
+          request.params.id,
+          spaces.getSpaceId(request),
+          request
+        );
+        if (!workflow) {
+          return response.notFound({ body: { message: 'Workflow not found' } });
+        }
+        assertCanReadManagedWorkflow(request, workflow);
+        const uids = new Set(
+          [
+            workflow.owner_id,
+            ...(workflow.access_control?.entries ?? []).map(({ id }) => id),
+          ].filter((id): id is string => Boolean(id))
+        );
+        if (uids.size === 0) return response.ok({ body: [] });
+        const { userProfile } = await workflowsService.getCoreStart();
+        const profiles = await userProfile.bulkGet({ uids, dataPath: 'avatar' });
+        return response.ok({ body: profiles });
+      } catch (error) {
         return handleRouteError(response, error);
       }
     })

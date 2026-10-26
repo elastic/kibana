@@ -21,6 +21,7 @@ import type { RouteDependencies } from '../types';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   WORKFLOW_READ_WITH_EXECUTION_EXTENDED_SECURITY,
+  WORKFLOW_READ_WITH_MANAGED_SECURITY,
   WORKFLOW_UPDATE_SECURITY,
 } from '../utils/route_security';
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
@@ -67,6 +68,7 @@ describe('Workflow routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
   let routeSecurity: Record<string, unknown>;
   let mockApi: Record<string, jest.Mock>;
+  let mockBulkGetProfiles: jest.Mock;
   let mockSpaces: { getSpaceId: jest.Mock };
   let mockAudit: ReturnType<typeof createWorkflowManagementAuditLogMock>;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -88,6 +90,7 @@ describe('Workflow routes', () => {
     mockAudit = createWorkflowManagementAuditLogMock();
     jest.spyOn(mockAudit, 'logWorkflowUpdated');
 
+    mockBulkGetProfiles = jest.fn();
     mockApi = {
       getWorkflows: jest.fn(),
       getWorkflow: jest.fn(),
@@ -122,6 +125,17 @@ describe('Workflow routes', () => {
     });
 
     const mockRouter = {
+      get: jest
+        .fn()
+        .mockImplementation(
+          (
+            config: Parameters<IRouter['get']>[0],
+            handler: (typeof routeHandlers)[string]['handler']
+          ) => {
+            routeSecurity[`GET:${config.path}`] = config.security;
+            routeHandlers[`GET:${config.path}`] = { handler };
+          }
+        ),
       put: jest
         .fn()
         .mockImplementation(
@@ -157,6 +171,11 @@ describe('Workflow routes', () => {
     registerWorkflowRoutes({
       router: mockRouter,
       api: mockApi as any,
+      workflowsService: {
+        getCoreStart: jest
+          .fn()
+          .mockResolvedValue({ userProfile: { bulkGet: mockBulkGetProfiles } }),
+      },
       logger: mockLogger,
       spaces: mockSpaces as any,
       audit: mockAudit,
@@ -494,6 +513,71 @@ describe('Workflow routes', () => {
       expect(mockAudit.logWorkflowUpdated).toHaveBeenCalledWith(request, { id: 'wf-1', error });
       expect(handleRouteError).toHaveBeenCalledWith(response, error);
       expect(response.ok).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('GET:/internal/workflows/{id}/access_control/_profiles', () => {
+    const key = 'GET:/internal/workflows/{id}/access_control/_profiles';
+    const createRequest = (authzResult: Record<string, boolean> = defaultAuthzResult) => {
+      const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
+      Object.defineProperty(request, 'authzResult', { value: authzResult });
+      return request;
+    };
+
+    it('resolves only the owner and entries of a workflow the caller can read', async () => {
+      const profiles = [{ uid: 'owner', user: { username: 'jdoe' } }];
+      mockBulkGetProfiles.mockResolvedValue(profiles);
+      mockApi.getWorkflow.mockResolvedValue({
+        id: 'wf-1',
+        owner_id: 'owner',
+        access_control: { access_mode: 'private', entries: [{ id: 'entry', role: 'viewer' }] },
+      });
+      const request = createRequest();
+      const response = mockResponse();
+
+      await routeHandlers[key].handler(createLicensingContext(), request, response);
+
+      expect(routeSecurity[key]).toEqual(WORKFLOW_READ_WITH_MANAGED_SECURITY);
+      expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default-space', request);
+      expect(mockBulkGetProfiles).toHaveBeenCalledWith({
+        uids: new Set(['owner', 'entry']),
+        dataPath: 'avatar',
+      });
+      expect(response.ok).toHaveBeenCalledWith({ body: profiles });
+    });
+
+    it('does not look up profiles when the caller is not shown the owner or entries', async () => {
+      // `getWorkflow` strips them for callers who cannot manage the workflow.
+      mockApi.getWorkflow.mockResolvedValue({ id: 'wf-1' });
+      const response = mockResponse();
+
+      await routeHandlers[key].handler(createLicensingContext(), createRequest(), response);
+
+      expect(mockBulkGetProfiles).not.toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledWith({ body: [] });
+    });
+
+    it('answers not found for a workflow the caller cannot read', async () => {
+      mockApi.getWorkflow.mockResolvedValue(null);
+      const response = mockResponse();
+
+      await routeHandlers[key].handler(createLicensingContext(), createRequest(), response);
+
+      expect(mockBulkGetProfiles).not.toHaveBeenCalled();
+      expect(response.notFound).toHaveBeenCalled();
+    });
+
+    it('is forbidden without the workflow read privilege', async () => {
+      const response = mockResponse();
+
+      await routeHandlers[key].handler(
+        createLicensingContext(),
+        createRequest({ [WorkflowsManagementApiActions.read]: false }),
+        response
+      );
+
+      expect(mockApi.getWorkflow).not.toHaveBeenCalled();
+      expect(response.forbidden).toHaveBeenCalled();
     });
   });
 

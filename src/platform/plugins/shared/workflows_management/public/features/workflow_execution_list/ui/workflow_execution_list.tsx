@@ -33,7 +33,7 @@ import {
 } from './workflow_execution_list_filters';
 import { WorkflowExecutionListFooter } from './workflow_execution_list_footer';
 import type { ExecutionListFiltersQueryParams } from './workflow_execution_list_stateful';
-import { getExecutedByLabel, useUserProfilesByUid } from '../../../entities/user_profiles';
+import { getExecutedByLabel, getExecutedByProfiles } from '../../../entities/user_profiles';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export interface WorkflowExecutionListProps {
@@ -93,10 +93,13 @@ export const WorkflowExecutionList = ({
     return Array.from(uniqueUsers).sort();
   }, [executions, filters.executedBy]);
 
-  const { data: executedByUserProfiles = EMPTY_EXECUTED_BY_USER_PROFILES } = useUserProfilesByUid({
-    enabled: showExecutor,
-    uids: executedByValuesToResolve,
-  });
+  const executedByUserProfiles = useMemo(
+    () =>
+      showExecutor
+        ? getExecutedByProfiles(executions?.results ?? [])
+        : EMPTY_EXECUTED_BY_USER_PROFILES,
+    [executions, showExecutor]
+  );
 
   const availableExecutedByOptions = useMemo<ExecutedByFilterOption[]>(() => {
     const options = executedByValuesToResolve.flatMap((executedBy) => {
