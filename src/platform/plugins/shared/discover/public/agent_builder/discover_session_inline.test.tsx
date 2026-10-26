@@ -246,6 +246,18 @@ describe('DiscoverSessionInline', () => {
       ));
   });
 
+  it('resets description list block margins inherited from chat text styles', () => {
+    renderInline();
+    const card = screen.getByTestId('discoverAgentBuilderSessionCard');
+
+    expect(card).toHaveStyleRule('margin-block-end', '0', {
+      target: /\.euiText .* dl$/,
+    });
+    expect(card).toHaveStyleRule('margin-block', '0', {
+      target: /\.euiText .* dt$/,
+    });
+  });
+
   it('keeps a local time picker and opens Discover with the selected range', async () => {
     const user = userEvent.setup();
     const registerActionButtons = jest.fn();
