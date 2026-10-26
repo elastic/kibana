@@ -86,7 +86,7 @@ const mockUseUiSetting = useUiSetting as jest.MockedFunction<typeof useUiSetting
 
 const mockProfilingTab: Tab = {
   id: ContentTabIds.PROFILING,
-  name: 'Universal Profiling',
+  name: 'Profiling',
 };
 
 const mockOverviewTab: Tab = {
@@ -154,7 +154,7 @@ describe('usePageHeader', () => {
       expect(profilingTabEntry).toBeDefined();
       expect(profilingTabEntry?.id).toBe(ContentTabIds.PROFILING);
       expect(profilingTabEntry?.['data-test-subj']).toBe('infraAssetDetailsProfilingTab');
-      expect(profilingTabEntry?.label).toBe('Universal Profiling');
+      expect(profilingTabEntry?.label).toBe('Profiling');
     });
 
     it('should exclude profiling tab when profiling plugin is disabled', () => {
@@ -219,7 +219,7 @@ describe('usePageHeader', () => {
         },
         {
           id: ContentTabIds.PROFILING,
-          label: 'Universal Profiling',
+          label: 'Profiling',
           isSelected: false,
           onClick: expect.any(Function),
           'data-test-subj': 'infraAssetDetailsProfilingTab',

@@ -35,7 +35,8 @@ import {
   EntitySourceValue,
   toEntitySourceArray,
 } from '../../../flyout/entity_details/shared/components/entity_source_value';
-import type { EntityFilters } from './use_entity_filters_param';
+import type { EntityFilters } from './entities_grid';
+import type { RowsMode } from './entities_grid/common';
 import { useEntityFilterBarCounts } from './use_entity_filter_bar_counts';
 export { toBucketMap } from './use_entity_filter_bar_counts';
 
@@ -67,7 +68,15 @@ const FilterEntry = ({ children }: { children: React.ReactNode }) => (
   </EuiFlexItem>
 );
 
-const ItemWithCount = ({ count, children }: { count: number; children: React.ReactNode }) => (
+const ItemWithCount = ({
+  count,
+  isCountLoading,
+  children,
+}: {
+  count: number;
+  isCountLoading: boolean;
+  children: React.ReactNode;
+}) => (
   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m" responsive={false}>
     <EuiFlexItem
       css={css`
@@ -92,9 +101,12 @@ const ItemWithCount = ({ count, children }: { count: number; children: React.Rea
         flex-shrink: 0;
       `}
     >
-      <EuiText size="s" color="subdued" title={count.toLocaleString()}>
-        <FormattedCount count={count} />
-      </EuiText>
+      {/* Counts that may be from before the last change aren't shown. */}
+      {!isCountLoading && (
+        <EuiText size="s" color="subdued" title={count.toLocaleString()}>
+          <FormattedCount count={count} />
+        </EuiText>
+      )}
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -103,7 +115,7 @@ interface Props {
   filters: EntityFilters;
   onFiltersChange: (filters: EntityFilters) => void;
   spaceId: string | undefined;
-  view: 'resolved' | 'raw';
+  rowsMode: RowsMode;
   esFilter?: QueryDslQueryContainer;
   watchlistNames: Map<string, string>;
 }
@@ -112,14 +124,14 @@ export const EntityFiltersBar: React.FC<Props> = ({
   filters,
   onFiltersChange,
   spaceId,
-  view,
+  rowsMode,
   esFilter,
   watchlistNames,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { counts, isLoading: isFiltersCountLoading } = useEntityFilterBarCounts({
+  const { counts, isLoading, isFetching } = useEntityFilterBarCounts({
     spaceId,
-    view,
+    rowsMode,
     filter: esFilter,
   });
 
@@ -169,7 +181,10 @@ export const EntityFiltersBar: React.FC<Props> = ({
           selectedItems={filters.entityTypes}
           onSelectionChange={(entityTypes) => onFiltersChange({ ...filters, entityTypes })}
           renderItem={(t) => (
-            <ItemWithCount count={entityTypeOptions.find((o) => o.value === t)?.count ?? 0}>
+            <ItemWithCount
+              isCountLoading={isFetching}
+              count={entityTypeOptions.find((o) => o.value === t)?.count ?? 0}
+            >
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                 {EntityIconByType[t] && (
                   <EuiFlexItem grow={false}>
@@ -180,7 +195,6 @@ export const EntityFiltersBar: React.FC<Props> = ({
               </EuiFlexGroup>
             </ItemWithCount>
           )}
-          disabled={isFiltersCountLoading}
           width={220}
         />
       </FilterEntry>
@@ -192,7 +206,10 @@ export const EntityFiltersBar: React.FC<Props> = ({
           selectedItems={filters.riskLevels}
           onSelectionChange={(riskLevels) => onFiltersChange({ ...filters, riskLevels })}
           renderItem={(s) => (
-            <ItemWithCount count={riskLevelOptions.find((o) => o.value === s)?.count ?? 0}>
+            <ItemWithCount
+              isCountLoading={isFetching}
+              count={riskLevelOptions.find((o) => o.value === s)?.count ?? 0}
+            >
               {(() => {
                 const colors = getRiskScoreColors(euiTheme, s as EntityRiskLevels);
                 return (
@@ -211,7 +228,6 @@ export const EntityFiltersBar: React.FC<Props> = ({
               })()}
             </ItemWithCount>
           )}
-          disabled={isFiltersCountLoading}
           width={220}
         />
       </FilterEntry>
@@ -225,14 +241,16 @@ export const EntityFiltersBar: React.FC<Props> = ({
             onFiltersChange({ ...filters, assetCriticality })
           }
           renderItem={(c) => (
-            <ItemWithCount count={criticalityOptions.find((o) => o.value === c)?.count ?? 0}>
+            <ItemWithCount
+              isCountLoading={isFetching}
+              count={criticalityOptions.find((o) => o.value === c)?.count ?? 0}
+            >
               <AssetCriticalityBadge
                 criticalityLevel={c as CriticalityLevels}
                 css={{ lineHeight: 'inherit' }}
               />
             </ItemWithCount>
           )}
-          disabled={isFiltersCountLoading}
           width={220}
         />
       </FilterEntry>
@@ -244,11 +262,15 @@ export const EntityFiltersBar: React.FC<Props> = ({
           selectedItems={filters.dataSources}
           onSelectionChange={(dataSources) => onFiltersChange({ ...filters, dataSources })}
           renderItem={(s) => (
-            <ItemWithCount count={dataSourceOptions.find((o) => o.value === s)?.count ?? 0}>
+            <ItemWithCount
+              isCountLoading={isFetching}
+              count={dataSourceOptions.find((o) => o.value === s)?.count ?? 0}
+            >
               <EntitySourceValue values={toEntitySourceArray(s)} textSize="s" />
             </ItemWithCount>
           )}
-          disabled={isFiltersCountLoading}
+          // Its options are the sources the counts find.
+          disabled={isLoading}
           width={220}
         />
       </FilterEntry>
@@ -261,9 +283,12 @@ export const EntityFiltersBar: React.FC<Props> = ({
           onSelectionChange={(watchlists) => onFiltersChange({ ...filters, watchlists })}
           renderItem={(id) => {
             const opt = watchlistOptions.find((o) => o.id === id);
-            return <ItemWithCount count={opt?.count ?? 0}>{opt?.name ?? id}</ItemWithCount>;
+            return (
+              <ItemWithCount isCountLoading={isFetching} count={opt?.count ?? 0}>
+                {opt?.name ?? id}
+              </ItemWithCount>
+            );
           }}
-          disabled={isFiltersCountLoading}
           spaceId={spaceId}
         />
       </FilterEntry>

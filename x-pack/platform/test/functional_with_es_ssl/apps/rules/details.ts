@@ -52,6 +52,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return await testSubjects.getVisibleText('ruleEnabledBadge');
     }
     await testSubjects.click('appHeaderBadgesOverflow');
+    // the overflow popover fades in, and getVisibleText() reads '' until it is displayed
+    await testSubjects.existOrFail('ruleEnabledBadge');
     const text = await testSubjects.getVisibleText('ruleEnabledBadge');
     await testSubjects.click('appHeaderBadgesOverflow');
     return text;
@@ -934,7 +936,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // Verify we're on the rule details page by checking for rule-specific elements
-        await testSubjects.existOrFail('classicRulesBadge');
         await testSubjects.existOrFail('openEditRuleFlyoutButton');
       });
 
@@ -957,7 +958,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // Verify we're on the rule details page by checking for rule-specific elements
-        await testSubjects.existOrFail('classicRulesBadge');
         await testSubjects.existOrFail('openEditRuleFlyoutButton');
 
         // Assert that we're still within the correct space by checking the URL

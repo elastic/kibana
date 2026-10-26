@@ -219,6 +219,7 @@ export class IacProvisionerUnavailableError extends FleetError {
 
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
+export class AgentAlreadyAssignedError extends AgentReassignmentError {}
 export class AgentRollbackError extends FleetError {
   constructor(message: string) {
     super(`Error rolling back agent in Fleet: ${message}`);
@@ -246,6 +247,13 @@ export class HostedAgentPolicyRestrictionRelatedError extends FleetError {
   constructor(message = 'Cannot perform that action') {
     super(
       `${message} in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.`
+    );
+  }
+}
+export class AgentlessAgentRestrictionError extends FleetError {
+  constructor(message = 'Cannot perform that action') {
+    super(
+      `${message} in Fleet because managed agents are managed by Elastic and do not support this action.`
     );
   }
 }

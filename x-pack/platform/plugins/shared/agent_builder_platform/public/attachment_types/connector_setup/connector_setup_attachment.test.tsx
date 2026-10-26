@@ -44,12 +44,24 @@ const setup = () => {
   const getUrlForApp = jest.fn().mockReturnValue('/app/agent_builder/manage/connectors');
   const application = { getUrlForApp } as unknown as CoreStart['application'];
 
+  const addWarning = jest.fn();
+  const notifications = {
+    toasts: { addWarning },
+  } as unknown as CoreStart['notifications'];
+
   const definition = createConnectorSetupAttachmentDefinition({
     triggersActionsUi,
     application,
+    notifications,
   });
 
-  return { definition, getAddConnectorForm, getFormProps: () => formProps, getUrlForApp };
+  return {
+    definition,
+    getAddConnectorForm,
+    getFormProps: () => formProps,
+    getUrlForApp,
+    addWarning,
+  };
 };
 
 describe('createConnectorSetupAttachmentDefinition', () => {
@@ -155,6 +167,61 @@ describe('createConnectorSetupAttachmentDefinition', () => {
 
     expect(handle.submit).toHaveBeenCalled();
     expect(updateOrigin).toHaveBeenCalledWith('c1');
+    expect(closeCanvas).toHaveBeenCalled();
+  });
+
+  const saveConnector = async (updateOrigin: jest.Mock) => {
+    const { definition, getFormProps, addWarning } = setup();
+    const registered: ActionButton[][] = [];
+    const registerActionButtons = jest.fn((btns: ActionButton[]) => registered.push(btns));
+    const closeCanvas = jest.fn();
+    const callbacks = {
+      registerActionButtons,
+      updateOrigin,
+      closeCanvas,
+    } as unknown as CanvasRenderCallbacks;
+
+    render(
+      <>
+        {definition.renderCanvasContent!(
+          { attachment: buildAttachment(), isSidebar: false },
+          callbacks
+        )}
+      </>
+    );
+
+    const handle = { submit: jest.fn().mockResolvedValue({ id: 'c1', name: 'Acme GitHub' }) };
+    act(() => {
+      getFormProps()!.onReady(handle);
+    });
+    act(() => {
+      getFormProps()!.onStateChange({ isSubmitDisabled: false, isSaving: false });
+    });
+
+    await act(async () => {
+      await registered[registered.length - 1][0].handler();
+    });
+
+    return { closeCanvas, addWarning };
+  };
+
+  it('shows a warning toast when the connector was created but not added to the agent', async () => {
+    const updateOrigin = jest
+      .fn()
+      .mockResolvedValue({ success: true, attachment: {}, warnings: ['Needs privilege'] });
+
+    const { closeCanvas, addWarning } = await saveConnector(updateOrigin);
+
+    expect(addWarning).toHaveBeenCalledWith(expect.objectContaining({ text: 'Needs privilege' }));
+    expect(closeCanvas).toHaveBeenCalled();
+  });
+
+  it('does not show a warning toast when the origin update has no warnings', async () => {
+    const updateOrigin = jest.fn().mockResolvedValue({ success: true, attachment: {} });
+
+    const { closeCanvas, addWarning } = await saveConnector(updateOrigin);
+
+    expect(addWarning).not.toHaveBeenCalled();
     expect(closeCanvas).toHaveBeenCalled();
   });
 });

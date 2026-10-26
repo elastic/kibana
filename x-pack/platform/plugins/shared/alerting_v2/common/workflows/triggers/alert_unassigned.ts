@@ -22,15 +22,15 @@ export const alertUnassignedTriggerCommonDefinition: CommonTriggerDefinition<
   id: ALERT_UNASSIGNED_TRIGGER_ID,
   stability: 'tech_preview',
   eventSchema: alertUnassignedPayloadSchema,
-  title: i18n.translate('xpack.alertingVTwo.workflowTriggers.alertUnassigned.title', {
+  title: i18n.translate('xpack.alertingV2.workflowTriggers.alertUnassigned.title', {
     defaultMessage: 'Alerting - Alert unassigned',
   }),
-  description: i18n.translate('xpack.alertingVTwo.workflowTriggers.alertUnassigned.description', {
+  description: i18n.translate('xpack.alertingV2.workflowTriggers.alertUnassigned.description', {
     defaultMessage: 'Emitted when the assignee is cleared from an alert.',
   }),
   documentation: {
     details: i18n.translate(
-      'xpack.alertingVTwo.workflowTriggers.alertUnassigned.documentation.details',
+      'xpack.alertingV2.workflowTriggers.alertUnassigned.documentation.details',
       {
         defaultMessage:
           'Emitted after an alert assign action is persisted with a null assignee. The payload includes event.alertId, event.ruleId, and event.spaceId for trigger conditions.',

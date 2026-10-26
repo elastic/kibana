@@ -59,6 +59,7 @@ RuleExecutionPipeline
    +--> CreateAlertEventsStep
    +--> ClassifyAbsentGroupsStep
    +--> DirectorStep
+   +--> SuppressRedundantNoDataEventsStep
    +--> StoreAlertEventsStep
 ```
 
@@ -172,6 +173,7 @@ Formats are strategies under [`services/query_service/formats`](../services/quer
 | `esqlRowBatch` | `ExecuteRuleQueryStep` | One streamed batch of ES\|QL rows. |
 | `alertEventsBatch` | Event-creation steps and director | Materialized rule events for the current batch. |
 | `activeGroups` | `FetchActiveGroupsStep` | The rule's active groups, fetched once for every `kind: 'alert'` rule (bounded by `alerts.max`) so the group cap never drops one; reused by `CreateAlertEventsStep` and `ClassifyAbsentGroupsStep`. |
+| `previousAlertStateByGroupHash` | `DirectorStep` | Latest persisted lifecycle state per `group_hash` for the groups in the batch, as loaded by the director. Lets `SuppressRedundantNoDataEventsStep` compare each enriched event against what is already persisted without a second `.rule-events` round trip. |
 
 ## Execution steps
 
@@ -186,8 +188,9 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 | 5 | `ExecuteRuleQueryStep` | Build and run ES\|QL, emitting streamed row batches. |
 | 6 | `CreateAlertEventsStep` | Turn a row batch into breached rule events (per batch). |
 | 7 | `ClassifyAbsentGroupsStep` | Forward every breach batch unchanged while accumulating the full-run breach set. Once the stream drains, run the data-presence and recovery queries once and emit recovery / `no_data` / continued-`breached` events for the active groups absent from that set, as a single final batch. No-op for `signal` rules and when `recovery.strategy` is `'manual'` and `no_data.strategy` is `'ignore'`. |
-| 8 | `DirectorStep` | Enrich alert-type events with episode state. |
-| 9 | `StoreAlertEventsStep` | Persist the batch into `.rule-events`. |
+| 8 | `DirectorStep` | Enrich alert-type events with episode state (1:1 — never drops events) and thread the prior state it loaded onto `state.previousAlertStateByGroupHash`. |
+| 9 | `SuppressRedundantNoDataEventsStep` | Write policy: drop director-enriched `no_data` events that carry no lifecycle change for a group already held in no-data (previous persisted event was `no_data` and episode id / `alert.status` / `status_count` are unchanged), so a held group writes one transition marker instead of one event per run. `breached` / `recovered` are never dropped. Pass-through when no prior state was threaded (`signal` rules). |
+| 10 | `StoreAlertEventsStep` | Persist the batch into `.rule-events`. |
 
 The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enabled`). The `alerting:v2:enabled` advanced setting gates only the user-facing surface (UI + APIs), not core engine execution, so rules keep producing events even while the UI and APIs stay hidden. This is intentional: Kibana cannot subscribe to UI setting changes, and a bail-out inside the executor would also stop internally created rules that must always run. The setting's description tells users to disable their rules before turning it off.
 
@@ -274,7 +277,7 @@ For a `no_data` event, the director's FSM decides the next episode status. There
 | `no_data.strategy` | Episode status the FSM lands on |
 | --- | --- |
 | `'alert'` | Sets the episode to `'active'` so downstream consumers (dispatcher, actions) keep treating the group as live during the data gap. |
-| `'keep_last'` | Preserves the prior episode status (e.g. an `active` episode stays `active`). |
+| `'keep_last'` | Preserves the prior episode status (e.g. an `active` episode stays `active`). Only the first `no_data` after a `breached` / `recovered` event is persisted; later identical holds are dropped by `SuppressRedundantNoDataEventsStep` (see the director README, "Held groups write one marker"). |
 | `'resolve'` | Mirrors the `'recovered'` FSM transitions, moving the episode toward `inactive` via the normal lifecycle. |
 | `'ignore'` | The presence query is skipped and no `no_data` event is produced; the episode drifts out of lookback windows over time. With `.rule-events` retention enabled and manual, condition or query recovery, an episode with no new events expires once its last event leaves the retention window, without a recovery event or notification. |
 

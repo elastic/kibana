@@ -24,7 +24,7 @@ import { GuidancePanel } from '../guidance_panel';
 import type { GraphWorkspaceSavedObject, Workspace } from '../../types';
 import type { GraphServices } from '../../application';
 import { ControlPanel } from '../control_panel';
-import { GraphVisualization } from '../graph_visualization';
+import { ReduxGraphVisualization } from '../graph_visualization';
 import { colorChoices } from '../../helpers/style_choices';
 import type { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
 import { getEditUrl } from '../../services/url';
@@ -214,7 +214,7 @@ export const WorkspaceLayoutComponent = ({
       {isInitialized && workspace && (
         <div id="GraphSvgContainer" css={styles.container}>
           <div css={styles.visualization}>
-            <GraphVisualization
+            <ReduxGraphVisualization
               workspace={workspace}
               selectSelected={selectSelected}
               onSetControl={onSetControl}

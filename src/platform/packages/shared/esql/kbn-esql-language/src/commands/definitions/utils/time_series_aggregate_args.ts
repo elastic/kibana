@@ -9,7 +9,7 @@
 
 import { isColumn, isIdentifier } from '@elastic/esql';
 import type { ESQLAstItem } from '@elastic/esql/types';
-import { timeSeriesAggregates } from '../generated/time_series_aggregates';
+import { timeSeriesAggregates } from '@elastic/esql-definitions/time-series-aggregates';
 import { FunctionDefinitionTypes, isFieldType, type SupportedDataType } from '../types';
 
 /**

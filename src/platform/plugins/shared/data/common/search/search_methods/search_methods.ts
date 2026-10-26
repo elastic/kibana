@@ -15,7 +15,11 @@ import {
   isOfQueryType,
   type EsQueryConfig,
 } from '@kbn/es-query';
-import { fixESQLQueryWithVariables, getNamedParams } from '@kbn/esql-utils';
+import {
+  fixESQLQueryWithVariables,
+  getEsqlInspectorStats,
+  getNamedParams,
+} from '@kbn/esql-utils';
 import type {
   ISearchMethods,
   IDslSearchParams,
@@ -53,7 +57,6 @@ import { mapEsqlResponseToDatatable, formatAndRethrowEsqlError } from './datatab
 import {
   getDslRequestInspectorStats,
   getDslResponseInspectorStats,
-  getEsqlInspectorStats,
   getSqlInspectorStats,
 } from './inspector_stats';
 

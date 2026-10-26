@@ -8,6 +8,7 @@
 import { useQuery, type UseQueryResult } from '@kbn/react-query';
 import type { EventLifecycleResponse } from '@kbn/significant-events-schema';
 import { useKibana } from './use_kibana';
+import { EVENT_LIFECYCLE_QUERY_KEY } from '../data/query_keys';
 
 // Keeps the flyout fresh while it stays open during a live incident.
 const REFETCH_INTERVAL_MS = 60_000;
@@ -28,13 +29,13 @@ export const useFetchEventLifecycle = (
   } = useKibana().services;
 
   return useQuery<EventLifecycleResponse, Error>({
-    queryKey: ['nightshift.eventLifecycle', eventId],
+    queryKey: [...EVENT_LIFECYCLE_QUERY_KEY, eventId],
     enabled: enabled && Boolean(eventId),
     queryFn: async ({ signal }) => {
       return significantEventsRepositoryClient.fetch(
         'GET /internal/significant_events/events/{id}/lifecycle',
         {
-          params: { path: { id: eventId } },
+          params: { path: { id: eventId }, query: { include_skipped: 'true' } },
           signal: signal ?? null,
         }
       );

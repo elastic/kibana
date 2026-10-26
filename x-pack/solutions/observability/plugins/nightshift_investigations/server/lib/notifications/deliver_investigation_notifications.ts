@@ -22,6 +22,7 @@ import type {
   NotificationRouting,
   NotificationDestination,
 } from './notification_routing';
+import { repliesUnderCallerMessage } from './notification_routing';
 
 export interface DeliverInvestigationNotificationsResult {
   sent: number;
@@ -77,8 +78,43 @@ const hasDeliveryAttempt = (
       attempt.phase === phase
   );
 
+/**
+ * The message this execution's phase posted or edited under the caller's message. Undefined for
+ * other destinations and when that delivery was not confirmed.
+ */
+export const getSentMessageTs = (
+  routing: NotificationRouting,
+  executionId: string,
+  destination: NotificationDestination,
+  phase: NotificationPhase
+): string | undefined => {
+  if (!repliesUnderCallerMessage(destination)) {
+    return undefined;
+  }
+  return routing.attempts.find(
+    (attempt) =>
+      attempt.execution_id === executionId &&
+      attempt.destination_id === destination.id &&
+      attempt.phase === phase &&
+      attempt.status === 'sent'
+  )?.message_ts;
+};
+
+/** The thread's single message: the one this execution's started phase posted. */
+export const getStartedMessageTs = (
+  routing: NotificationRouting,
+  executionId: string,
+  destination: NotificationDestination
+): string | undefined => getSentMessageTs(routing, executionId, destination, 'started');
+
 const prepareDestinationDelivery = (
-  { investigation, investigationUrl, phase, reason }: DeliverInvestigationNotificationsParams,
+  {
+    investigation,
+    investigationUrl,
+    executionId,
+    phase,
+    reason,
+  }: DeliverInvestigationNotificationsParams,
   routing: NotificationRouting,
   destination: NotificationDestination,
   setupError?: string
@@ -104,6 +140,9 @@ const prepareDestinationDelivery = (
     diagnostic = 'No confirmed notification thread is available';
   }
 
+  // The terminal phase edits the started message, so the thread keeps a single message.
+  const messageTs =
+    phase === 'started' ? undefined : getStartedMessageTs(routing, executionId, destination);
   let delivery: NotificationDelivery | undefined;
   try {
     delivery = prepareNotificationDelivery({
@@ -111,6 +150,7 @@ const prepareDestinationDelivery = (
       url: investigationUrl,
       phase,
       reason,
+      ...(messageTs ? { messageTs } : {}),
       notificationDestination: {
         type: destination.type,
         connector_id: destination.connector_id,
@@ -144,11 +184,29 @@ const executeDestinationDelivery = async (
     return { status: 'failed', error: diagnostic || 'Notification delivery is unavailable' };
   }
   try {
-    const response = await execute({
+    let response = await execute({
       actionId: destination.connector_id,
       signal,
       params: delivery.params,
     });
+    const subActionParams = delivery.params.subActionParams;
+    if (
+      !signal.aborted &&
+      response.status !== 'ok' &&
+      subActionParams &&
+      typeof subActionParams === 'object' &&
+      'blocks' in subActionParams &&
+      /invalid_blocks|msg_blocks_too_long|failed to post outbound message/i.test(
+        response.serviceMessage || response.message || ''
+      )
+    ) {
+      const { blocks, ...textOnlyParams } = subActionParams;
+      response = await execute({
+        actionId: destination.connector_id,
+        signal,
+        params: { ...delivery.params, subActionParams: textOnlyParams },
+      });
+    }
     return signal.aborted
       ? { status: 'unconfirmed', error: 'Cancelled during notification delivery' }
       : delivery.getOutcome(response);
