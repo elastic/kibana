@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type {
   NewPackagePolicy,
@@ -253,7 +253,7 @@ describe('GcpCredentialsForm', () => {
       const cloudShellOption = screen.getByTestId(
         GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.CLOUD_SHELL
       );
-      expect(cloudShellOption.closest('button')).toBeDisabled();
+      expect(within(cloudShellOption).getByRole('radio')).toBeDisabled();
     });
   });
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type {
   NewPackagePolicy,
@@ -150,8 +150,10 @@ describe('GcpAccountTypeSelect', () => {
 
       renderWithIntl(<GcpAccountTypeSelect {...defaultProps} />);
 
-      const orgButton = screen.getByTestId('gcpOrganizationAccountTestId').closest('button');
-      expect(orgButton).toBeDisabled();
+      const orgRadio = within(screen.getByTestId('gcpOrganizationAccountTestId')).getByRole(
+        'radio'
+      );
+      expect(orgRadio).toBeDisabled();
 
       // Check that the tooltip content appears when the organization option is disabled
       // The tooltip should be available via accessibility or data attributes
@@ -207,11 +209,15 @@ describe('GcpAccountTypeSelect', () => {
     it('renders disabled when disabled prop is true', () => {
       renderWithIntl(<GcpAccountTypeSelect {...defaultProps} disabled />);
 
-      // The outer button wrappers should be disabled
-      const orgButton = screen.getByTestId(GCP_ORGANIZATION_ACCOUNT_TEST_SUBJ).closest('button');
-      const singleButton = screen.getByTestId(GCP_SINGLE_ACCOUNT_TEST_SUBJ).closest('button');
-      expect(orgButton).toBeDisabled();
-      expect(singleButton).toBeDisabled();
+      // The radio inputs should be disabled
+      const orgRadio = within(screen.getByTestId(GCP_ORGANIZATION_ACCOUNT_TEST_SUBJ)).getByRole(
+        'radio'
+      );
+      const singleRadio = within(screen.getByTestId(GCP_SINGLE_ACCOUNT_TEST_SUBJ)).getByRole(
+        'radio'
+      );
+      expect(orgRadio).toBeDisabled();
+      expect(singleRadio).toBeDisabled();
     });
   });
 

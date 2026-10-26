@@ -190,16 +190,16 @@ describe('AwsCredentialsForm', () => {
 
       expect(cloudFormationRadio).toBeInTheDocument();
       expect(manualRadio).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'CloudFormation' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Manual' })).toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: 'CloudFormation' })).toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: 'Manual' })).toBeInTheDocument();
     });
 
     it('disables setup format options when disabled prop is true', () => {
       renderWithProviders({ ...defaultProps, disabled: true });
 
       // Verify both radio buttons are disabled
-      expect(screen.getByRole('button', { name: 'CloudFormation' })).toBeDisabled();
-      expect(screen.getByRole('button', { name: 'Manual' })).toBeDisabled();
+      expect(screen.getByRole('radio', { name: 'CloudFormation' })).toBeDisabled();
+      expect(screen.getByRole('radio', { name: 'Manual' })).toBeDisabled();
     });
   });
 

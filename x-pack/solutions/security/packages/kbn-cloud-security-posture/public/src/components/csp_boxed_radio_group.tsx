@@ -6,8 +6,14 @@
  */
 
 import React from 'react';
-import camelCase from 'lodash/camelCase';
-import { useEuiTheme, EuiButton, EuiRadio, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
+import {
+  useEuiTheme,
+  useGeneratedHtmlId,
+  EuiCheckableCard,
+  EuiIcon,
+  EuiToolTip,
+  EuiBetaBadge,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface CspRadioGroupProps {
@@ -38,6 +44,8 @@ export const RadioGroup = ({
   name,
 }: CspRadioGroupProps) => {
   const { euiTheme } = useEuiTheme();
+  const generatedGroupName = useGeneratedHtmlId({ prefix: 'cspBoxedRadioGroup' });
+  const groupName = name || generatedGroupName;
   return (
     <div
       css={css`
@@ -55,6 +63,7 @@ export const RadioGroup = ({
     >
       {options.map((option) => {
         const isChecked = option.id === idSelected;
+        const isDisabled = option.disabled || disabled;
         return (
           <EuiToolTip
             key={option.id}
@@ -65,51 +74,51 @@ export const RadioGroup = ({
               },
             }}
           >
-            <EuiButton
-              disabled={option.disabled || disabled}
-              color={isChecked ? 'primary' : 'text'}
-              onClick={() => onChange(option.id)}
-              iconType={option.icon}
-              iconSide="right"
-              contentProps={{
-                style: {
-                  justifyContent: 'flex-start',
-                },
+            <EuiCheckableCard
+              id={option.id}
+              data-test-subj={option.testId}
+              name={groupName}
+              checked={isChecked}
+              disabled={isDisabled}
+              onChange={() => onChange(option.id)}
+              label={
+                <>
+                  {option.label}
+                  {option.isBeta && (
+                    <span
+                      css={css`
+                        margin: auto;
+                      `}
+                    >
+                      <EuiBetaBadge label="Beta" alignment="middle" />
+                    </span>
+                  )}
+                  {option.icon && (
+                    <EuiIcon
+                      type={option.icon}
+                      size="l"
+                      aria-hidden={true}
+                      css={css`
+                        margin-left: auto;
+                        ${isDisabled ? 'filter: grayscale(1);' : ''}
+                      `}
+                    />
+                  )}
+                </>
+              }
+              labelProps={{
+                css: css`
+                  display: flex;
+                  align-items: center;
+                  width: 100%;
+                  gap: ${euiTheme.size.s};
+                `,
               }}
               css={css`
-                width: 100%;
-                height: ${size === 's' ? euiTheme.size.xxl : euiTheme.size.xxxl};
-                svg,
-                img {
-                  margin-left: auto;
-                }
-
-                &:disabled {
-                  svg,
-                  img {
-                    filter: grayscale(1);
-                  }
-                }
+                height: 100%;
+                min-height: ${size === 's' ? euiTheme.size.xxl : euiTheme.size.xxxl};
               `}
-            >
-              <EuiRadio
-                data-test-subj={option.testId}
-                label={option.label}
-                id={option.id}
-                checked={isChecked}
-                onChange={() => {}}
-                name={name || camelCase(option.label || 'optionsGroup')}
-              />
-              {option.isBeta && (
-                <div
-                  css={css`
-                    margin: auto;
-                  `}
-                >
-                  <EuiBetaBadge label="Beta" alignment="middle" />
-                </div>
-              )}
-            </EuiButton>
+            />
           </EuiToolTip>
         );
       })}
