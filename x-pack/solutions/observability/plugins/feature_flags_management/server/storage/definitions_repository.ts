@@ -14,7 +14,7 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AppAttributes } from '../../common/schemas/apps';
 import type { EnvironmentAttributes } from '../../common/schemas/environments';
-import type { FlagDefinition } from '../../common/schemas/flags';
+import type { CreatedBy, FlagDefinition } from '../../common/schemas/flags';
 import { conflictError, notFoundError } from '../errors';
 import { DEFINITIONS_INDEX } from './indices';
 import { decodeVersion, encodeVersion } from './version';
@@ -33,6 +33,8 @@ export interface StoredCredentialAttributes {
 export interface StoredFlagAttributes extends FlagDefinition {
   /** Keys of `environments`, derived on write so flags can be filtered by environment. */
   environment: string[];
+  /** Recorded when the flag is created. Updates keep the original user. */
+  created_by?: CreatedBy;
 }
 
 export interface DefinitionAttributes {

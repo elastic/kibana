@@ -88,7 +88,11 @@ export class FeatureFlagsManagementPlugin
       }),
       apps: new CatalogService(APPS_CATALOG, { repository, audit: this.audit, credentials }),
       credentials,
-      flags: new FlagsService({ repository, audit: this.audit }),
+      flags: new FlagsService({
+        repository,
+        audit: this.audit,
+        getCurrentUser: (request) => core.security.authc.getCurrentUser(request),
+      }),
       observedContexts: new ObservedContextsService({ esClient, ensureReady }),
     });
   }

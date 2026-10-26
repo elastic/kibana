@@ -112,7 +112,7 @@ export const PrerequisiteEditor = ({
         <p>
           <FormattedMessage
             id="xpack.featureFlagsManagement.flags.editor.prerequisitesDescription"
-            defaultMessage="This flag is served only when each prerequisite flag serves the chosen variation in this environment."
+            defaultMessage="Rules run only when every prerequisite flag serves the chosen variation in this environment. Otherwise this flag is not served, and the application uses its own fallback instead of the default variation."
           />
         </p>
       </EuiText>

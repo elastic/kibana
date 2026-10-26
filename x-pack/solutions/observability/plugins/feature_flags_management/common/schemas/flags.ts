@@ -128,8 +128,13 @@ export const environmentRuleSetSchema = lazySchema(() =>
 );
 
 export const tagSchema = lazySchema(() => z.string().trim().min(1).max(LIMITS.tagMaxLength));
-export const teamOwnerSchema = lazySchema(() =>
-  z.string().trim().min(1).max(LIMITS.teamOwnerMaxLength)
+
+/** Set by the server from the authenticated user. Clients cannot choose it. */
+export const createdBySchema = lazySchema(() =>
+  z.object({
+    username: z.string().min(1).max(LIMITS.usernameMaxLength),
+    full_name: z.string().max(LIMITS.fullNameMaxLength).optional(),
+  })
 );
 
 export const flagDefinitionSchema = lazySchema(() =>
@@ -144,8 +149,6 @@ export const flagDefinitionSchema = lazySchema(() =>
       .min(1)
       .max(LIMITS.maxApps)
       .describe('Apps that can evaluate this flag.'),
-    team_owner: teamOwnerSchema,
-    deprecate_by: z.string().max(LIMITS.deprecateByMaxLength).optional(),
     tags: z.array(tagSchema).max(LIMITS.maxTags).default([]),
     environments: z
       .record(environmentKeySchema, environmentRuleSetSchema)
@@ -165,7 +168,16 @@ export const updateFlagRequestSchema = lazySchema(() =>
 
 export const flagParamsSchema = lazySchema(() => z.object({ key: flagKeySchema }));
 
-export const flagSchema = lazySchema(() => flagDefinitionSchema.extend(timestampsSchema.shape));
+export const flagSchema = lazySchema(() =>
+  flagDefinitionSchema.extend({
+    created_by: createdBySchema
+      .optional()
+      .describe(
+        'The Kibana user who created the flag. Absent for flags created before this was recorded.'
+      ),
+    ...timestampsSchema.shape,
+  })
+);
 
 export const listFlagsQuerySchema = lazySchema(() =>
   z.object({
@@ -174,7 +186,6 @@ export const listFlagsQuerySchema = lazySchema(() =>
       .optional()
       .describe('Only flags with evaluation rules for this environment.'),
     tag: tagSchema.optional(),
-    team_owner: teamOwnerSchema.optional(),
     search: z
       .string()
       .max(LIMITS.searchMaxLength)
@@ -203,6 +214,7 @@ export const flagHistoryQuerySchema = lazySchema(() =>
 export const flagSnapshotSchema = lazySchema(() =>
   z.looseObject({
     ...flagDefinitionSchema.partial().shape,
+    created_by: createdBySchema.optional(),
     created_at: z.string().optional(),
     updated_at: z.string().optional(),
   })
@@ -227,6 +239,7 @@ export const flagHistoryResponseSchema = lazySchema(() =>
   z.object({ items: z.array(flagHistoryItemSchema) }).extend(paginationSchema.shape)
 );
 
+export type CreatedBy = z.infer<typeof createdBySchema>;
 export type Prerequisite = z.infer<typeof prerequisiteSchema>;
 export type EnvironmentRuleSet = z.infer<typeof environmentRuleSetSchema>;
 export type FlagDefinition = z.infer<typeof flagDefinitionSchema>;

@@ -32,7 +32,6 @@ export interface ListFlagsOptions {
   app?: string;
   environment?: string;
   tag?: string;
-  teamOwner?: string;
   search?: string;
   page: number;
   perPage: number;
@@ -45,6 +44,8 @@ const escapeWildcard = (value: string) => value.replace(/[\\*?]/g, (char) => `\\
 interface FlagsServiceDeps {
   repository: DefinitionsRepository;
   audit: AuditService;
+  /** The authenticated Kibana user, used to record who created a flag. */
+  getCurrentUser: (request: KibanaRequest) => { username: string; full_name?: string } | null;
 }
 
 export class FlagsService {
@@ -54,7 +55,6 @@ export class FlagsService {
     app,
     environment,
     tag,
-    teamOwner,
     search,
     page,
     perPage,
@@ -63,7 +63,6 @@ export class FlagsService {
     if (app) filters.push({ term: { 'flag.apps': app } });
     if (environment) filters.push({ term: { 'flag.environment': environment } });
     if (tag) filters.push({ term: { 'flag.tags': tag } });
-    if (teamOwner) filters.push({ term: { 'flag.team_owner': teamOwner } });
     if (search) {
       const value = `*${escapeWildcard(search)}*`;
       filters.push({
@@ -91,10 +90,16 @@ export class FlagsService {
 
   public async create(request: KibanaRequest, definition: FlagDefinition): Promise<Flag> {
     await this.validate(definition, { isNew: true });
+    const user = this.deps.getCurrentUser(request);
     const entity = await this.deps.repository.create(
       'flag',
       flagId(definition.key),
-      toStoredFlag(definition)
+      toStoredFlag(
+        definition,
+        user
+          ? { username: user.username, ...(user.full_name ? { full_name: user.full_name } : {}) }
+          : undefined
+      )
     );
     await this.audit(request, 'create', entity);
     return toFlag(entity);
@@ -107,10 +112,11 @@ export class FlagsService {
   ): Promise<Flag> {
     const definition: FlagDefinition = { ...changes, key };
     await this.validate(definition, { isNew: false });
+    const existing = await this.deps.repository.getOrThrow('flag', flagId(key));
     const entity = await this.deps.repository.update(
       'flag',
       flagId(key),
-      toStoredFlag(definition),
+      toStoredFlag(definition, existing.attributes.created_by),
       {
         version,
       }

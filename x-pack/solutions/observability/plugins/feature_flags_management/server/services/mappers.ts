@@ -8,7 +8,7 @@
 import type { App } from '../../common/schemas/apps';
 import type { Credential } from '../../common/schemas/credentials';
 import type { Environment } from '../../common/schemas/environments';
-import type { Flag, FlagDefinition } from '../../common/schemas/flags';
+import type { CreatedBy, Flag, FlagDefinition } from '../../common/schemas/flags';
 import type { StoredEntity, StoredFlagAttributes } from '../storage/definitions_repository';
 
 const timestamps = ({
@@ -39,16 +39,22 @@ export const toCredential = (entity: StoredEntity<'credential'>): Credential => 
 
 export const toFlagDefinition = ({
   environment,
+  created_by: _createdBy,
   ...definition
 }: StoredFlagAttributes): FlagDefinition => definition;
 
-export const toStoredFlag = (definition: FlagDefinition): StoredFlagAttributes => ({
+export const toStoredFlag = (
+  definition: FlagDefinition,
+  createdBy?: CreatedBy
+): StoredFlagAttributes => ({
   ...definition,
+  ...(createdBy ? { created_by: createdBy } : {}),
   environment: Object.keys(definition.environments),
 });
 
 export const toFlag = (entity: StoredEntity<'flag'>): Flag => ({
   ...toFlagDefinition(entity.attributes),
+  ...(entity.attributes.created_by ? { created_by: entity.attributes.created_by } : {}),
   ...timestamps(entity),
 });
 

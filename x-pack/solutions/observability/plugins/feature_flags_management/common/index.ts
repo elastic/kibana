@@ -98,6 +98,7 @@ export {
 } from './schemas/flags';
 export type {
   CreateFlagRequest,
+  CreatedBy,
   EnvironmentRuleSet,
   Flag,
   FlagDefinition,

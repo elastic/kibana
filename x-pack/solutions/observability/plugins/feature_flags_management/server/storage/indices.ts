@@ -23,8 +23,9 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
  * - `environment`: `{ key, name, description }`
  * - `app`: `{ key, name, description }`
  * - `credential`: `{ app, environment, sdk_key_hash, sdk_key_hint, client_id }`
- * - `flag`: the flag definition, plus `environment`, the keys of `flag.environments`
- *   (derived on write so flags can be filtered by environment).
+ * - `flag`: the flag definition, plus `environment` (the keys of `flag.environments`,
+ *   derived on write so flags can be filtered by environment) and `created_by`
+ *   (the Kibana user recorded when the flag is created).
  *
  * `created_at`, `updated_at` and `revision` (incremented on every write) are owned by
  * the repository; the API never accepts them.
@@ -71,7 +72,11 @@ export const definitionsMappings: MappingTypeMapping = {
         name: { type: 'keyword' },
         apps: { type: 'keyword' },
         tags: { type: 'keyword' },
-        team_owner: { type: 'keyword' },
+        created_by: {
+          properties: {
+            username: { type: 'keyword' },
+          },
+        },
         environment: { type: 'keyword' },
       },
     },

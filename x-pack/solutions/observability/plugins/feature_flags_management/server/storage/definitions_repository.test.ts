@@ -200,7 +200,10 @@ describe('DefinitionsRepository', () => {
 
   describe('findAll', () => {
     it('pages with a point in time instead of sorting on _id', async () => {
-      esClient.openPointInTime.mockResolvedValue({ id: 'pit-1' });
+      esClient.openPointInTime.mockResolvedValue({
+        id: 'pit-1',
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      });
       esClient.search.mockResolvedValue({
         took: 1,
         timed_out: false,

@@ -42,8 +42,8 @@ export interface FlagFormState {
   valueType: ValueType;
   variations: VariationValue[];
   apps: string[];
-  teamOwner: string;
-  deprecateBy: string;
+  /** Display only. The server records this when the flag is created. */
+  createdBy?: { username: string; fullName?: string };
   tags: string[];
   environmentKeys: string[];
   environments: Record<string, EnvironmentDraft>;
@@ -68,8 +68,6 @@ export const emptyFlagForm = (): FlagFormState => ({
   valueType: 'boolean',
   variations: defaultVariations('boolean'),
   apps: [],
-  teamOwner: '',
-  deprecateBy: '',
   tags: [],
   environmentKeys: [],
   environments: {},
@@ -82,8 +80,9 @@ export const flagToForm = (flag: Flag): FlagFormState => ({
   valueType: flag.value_type,
   variations: flag.variations,
   apps: flag.apps,
-  teamOwner: flag.team_owner,
-  deprecateBy: flag.deprecate_by ?? '',
+  createdBy: flag.created_by
+    ? { username: flag.created_by.username, fullName: flag.created_by.full_name }
+    : undefined,
   tags: flag.tags,
   environmentKeys: Object.keys(flag.environments),
   environments: Object.fromEntries(
@@ -190,8 +189,6 @@ export const toCreateFlagRequest = (form: FlagFormState): CreateFlagRequest => (
   value_type: form.valueType,
   variations: form.variations,
   apps: form.apps,
-  team_owner: form.teamOwner.trim(),
-  deprecate_by: optionalText(form.deprecateBy),
   tags: form.tags.map((tag) => tag.trim()).filter((tag) => tag.length > 0),
   environments: buildEnvironments(form),
 });

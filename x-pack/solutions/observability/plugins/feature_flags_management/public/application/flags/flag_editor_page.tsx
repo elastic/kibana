@@ -471,48 +471,18 @@ export const FlagEditorPage = () => {
             />
           </EuiFormRow>
         )}
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
-              fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.featureFlagsManagement.flags.editor.teamOwnerLabel"
-                  defaultMessage="Team owner"
-                />
-              }
-            >
-              <EuiFieldText
-                data-test-subj="featureFlagsManagementFlagEditorPageFieldText"
-                fullWidth
-                disabled={readOnly}
-                value={form.teamOwner}
-                maxLength={LIMITS.teamOwnerMaxLength}
-                onChange={(event) => setForm({ ...form, teamOwner: event.target.value })}
+        {form.createdBy && (
+          <>
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.featureFlagsManagement.flags.editor.createdByDescription"
+                defaultMessage="Created by {user}"
+                values={{ user: form.createdBy.fullName || form.createdBy.username }}
               />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.featureFlagsManagement.flags.editor.deprecateByLabel"
-                  defaultMessage="Deprecate by"
-                />
-              }
-            >
-              <EuiFieldText
-                data-test-subj="featureFlagsManagementFlagEditorPageFieldText"
-                fullWidth
-                disabled={readOnly}
-                value={form.deprecateBy}
-                maxLength={LIMITS.deprecateByMaxLength}
-                onChange={(event) => setForm({ ...form, deprecateBy: event.target.value })}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </EuiText>
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiFormRow
           fullWidth
           label={

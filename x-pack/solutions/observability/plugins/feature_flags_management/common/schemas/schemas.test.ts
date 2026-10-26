@@ -17,6 +17,7 @@ describe('feature flags schemas', () => {
       variations: [true, false],
       apps: ['kibana'],
       team_owner: '@elastic/kibana-core',
+      created_by: { username: 'someone' },
       environments: {
         production: {
           default: false,
@@ -34,6 +35,8 @@ describe('feature flags schemas', () => {
     });
     expect(result.success).toBe(true);
     expect(result.data?.tags).toEqual([]);
+    expect(result.data).not.toHaveProperty('team_owner');
+    expect(result.data).not.toHaveProperty('created_by');
   });
 
   it('rejects keys that are not URL-safe', () => {

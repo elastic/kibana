@@ -51,8 +51,8 @@ export const registerFlagsRoutes = (router: IRouter, getServices: GetServices) =
       async (context, request, response) =>
         handleErrors(response, async () => {
           const { flags } = await getServices();
-          const { team_owner: teamOwner, per_page: perPage, ...filters } = request.query;
-          return response.ok({ body: await flags.list({ ...filters, teamOwner, perPage }) });
+          const { per_page: perPage, ...filters } = request.query;
+          return response.ok({ body: await flags.list({ ...filters, perPage }) });
         })
     );
 

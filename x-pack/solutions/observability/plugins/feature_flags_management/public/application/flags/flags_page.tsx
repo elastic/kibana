@@ -42,7 +42,6 @@ export const FlagsPage = () => {
   const [app, setApp] = useState<string>();
   const [environment, setEnvironment] = useState<string>();
   const [tag, setTag] = useState('');
-  const [teamOwner, setTeamOwner] = useState('');
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
   const [pendingDelete, setPendingDelete] = useState<Flag>();
@@ -50,10 +49,7 @@ export const FlagsPage = () => {
   const [deleteError, setDeleteError] = useState<FeatureFlagsApiError>();
   const debouncedSearch = useDebouncedValue(searchText, 300);
   const debouncedTag = useDebouncedValue(tag, 300);
-  const debouncedTeam = useDebouncedValue(teamOwner, 300);
-  const filtersKey = `${debouncedSearch}|${app ?? ''}|${
-    environment ?? ''
-  }|${debouncedTag}|${debouncedTeam}`;
+  const filtersKey = `${debouncedSearch}|${app ?? ''}|${environment ?? ''}|${debouncedTag}`;
   const [appliedFilters, setAppliedFilters] = useState(filtersKey);
   if (filtersKey !== appliedFilters) {
     setAppliedFilters(filtersKey);
@@ -69,11 +65,10 @@ export const FlagsPage = () => {
         app,
         environment,
         tag: debouncedTag || undefined,
-        teamOwner: debouncedTeam || undefined,
         page,
         perPage,
       }),
-    [api, debouncedSearch, app, environment, debouncedTag, debouncedTeam, page, perPage]
+    [api, debouncedSearch, app, environment, debouncedTag, page, perPage]
   );
   const flags = useAsyncData(load);
   const apps = catalog.data?.apps ?? [];
@@ -120,10 +115,18 @@ export const FlagsPage = () => {
       render: (flagApps: Flag['apps']) => flagApps.join(', '),
     },
     {
-      field: 'team_owner',
-      name: i18n.translate('xpack.featureFlagsManagement.flags.list.teamOwnerColumnLabel', {
-        defaultMessage: 'Team owner',
+      field: 'created_by',
+      name: i18n.translate('xpack.featureFlagsManagement.flags.list.createdByColumnLabel', {
+        defaultMessage: 'Created by',
       }),
+      render: (createdBy: Flag['created_by']) =>
+        createdBy?.full_name ||
+        createdBy?.username || (
+          <FormattedMessage
+            id="xpack.featureFlagsManagement.flags.list.unknownCreatorLabel"
+            defaultMessage="Unknown"
+          />
+        ),
     },
     {
       field: 'tags',
@@ -212,31 +215,31 @@ export const FlagsPage = () => {
 
   return (
     <EuiPageTemplate.Section>
-      <EuiFlexGroup alignItems="flexEnd" wrap>
-        <EuiFlexItem>
+      <EuiFlexGroup alignItems="flexEnd" gutterSize="m" wrap>
+        <EuiFlexItem grow={2}>
           <EuiFormRow
+            fullWidth
             label={
               <FormattedMessage
                 id="xpack.featureFlagsManagement.flags.list.searchLabel"
                 defaultMessage="Search"
               />
             }
-            helpText={
-              <FormattedMessage
-                id="xpack.featureFlagsManagement.flags.list.searchHelp"
-                defaultMessage="Matches the flag key and name."
-              />
-            }
           >
             <EuiFieldText
               data-test-subj="featureFlagsManagementFlagsPageFieldText"
               compressed
+              fullWidth
+              placeholder={i18n.translate(
+                'xpack.featureFlagsManagement.flags.list.searchPlaceholder',
+                { defaultMessage: 'Key or name' }
+              )}
               value={searchText}
               onChange={(event) => setSearchText(event.target.value)}
               aria-label={i18n.translate(
                 'xpack.featureFlagsManagement.flags.list.searchAriaLabel',
                 {
-                  defaultMessage: 'Search flags',
+                  defaultMessage: 'Search flags by key or name',
                 }
               )}
             />
@@ -244,6 +247,7 @@ export const FlagsPage = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
+            fullWidth
             label={
               <FormattedMessage
                 id="xpack.featureFlagsManagement.flags.list.appFilterLabel"
@@ -253,6 +257,11 @@ export const FlagsPage = () => {
           >
             <EuiComboBox
               compressed
+              fullWidth
+              placeholder={i18n.translate(
+                'xpack.featureFlagsManagement.flags.list.appFilterPlaceholder',
+                { defaultMessage: 'Any app' }
+              )}
               aria-label={i18n.translate(
                 'xpack.featureFlagsManagement.flags.list.appFilterAriaLabel',
                 {
@@ -271,6 +280,7 @@ export const FlagsPage = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
+            fullWidth
             label={
               <FormattedMessage
                 id="xpack.featureFlagsManagement.flags.list.environmentFilterLabel"
@@ -280,6 +290,11 @@ export const FlagsPage = () => {
           >
             <EuiComboBox
               compressed
+              fullWidth
+              placeholder={i18n.translate(
+                'xpack.featureFlagsManagement.flags.list.environmentFilterPlaceholder',
+                { defaultMessage: 'Any environment' }
+              )}
               aria-label={i18n.translate(
                 'xpack.featureFlagsManagement.flags.list.environmentFilterAriaLabel',
                 { defaultMessage: 'Filter by environment' }
@@ -298,75 +313,51 @@ export const FlagsPage = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
+            fullWidth
             label={
               <FormattedMessage
                 id="xpack.featureFlagsManagement.flags.list.tagFilterLabel"
                 defaultMessage="Tag"
               />
             }
-            helpText={
-              <FormattedMessage
-                id="xpack.featureFlagsManagement.flags.list.exactMatchHelp"
-                defaultMessage="Exact match."
-              />
-            }
           >
             <EuiFieldText
               data-test-subj="featureFlagsManagementFlagsPageFieldText"
               compressed
+              fullWidth
+              placeholder={i18n.translate(
+                'xpack.featureFlagsManagement.flags.list.tagFilterPlaceholder',
+                { defaultMessage: 'Exact tag' }
+              )}
               value={tag}
               onChange={(event) => setTag(event.target.value)}
               aria-label={i18n.translate(
                 'xpack.featureFlagsManagement.flags.list.tagFilterAriaLabel',
                 {
-                  defaultMessage: 'Filter by tag',
+                  defaultMessage: 'Filter by an exact tag',
                 }
-              )}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.featureFlagsManagement.flags.list.teamOwnerFilterLabel"
-                defaultMessage="Team owner"
-              />
-            }
-            helpText={
-              <FormattedMessage
-                id="xpack.featureFlagsManagement.flags.list.teamOwnerExactMatchHelp"
-                defaultMessage="Exact match."
-              />
-            }
-          >
-            <EuiFieldText
-              data-test-subj="featureFlagsManagementFlagsPageFieldText"
-              compressed
-              value={teamOwner}
-              onChange={(event) => setTeamOwner(event.target.value)}
-              aria-label={i18n.translate(
-                'xpack.featureFlagsManagement.flags.list.teamOwnerFilterAriaLabel',
-                { defaultMessage: 'Filter by team owner' }
               )}
             />
           </EuiFormRow>
         </EuiFlexItem>
         {canSave && (
           <EuiFlexItem grow={false}>
-            <EuiButton
-              data-ebt-action="createFlag"
-              data-ebt-element="featureFlagsManagement"
-              data-test-subj="featureFlagsManagementFlagsPageCreateFlagButton"
-              fill
-              iconType="plus"
-              onClick={() => history.push(paths.createFlag)}
-            >
-              <FormattedMessage
-                id="xpack.featureFlagsManagement.flags.list.createButtonLabel"
-                defaultMessage="Create flag"
-              />
-            </EuiButton>
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiButton
+                data-ebt-action="createFlag"
+                data-ebt-element="featureFlagsManagement"
+                data-test-subj="featureFlagsManagementFlagsPageCreateFlagButton"
+                fill
+                size="s"
+                iconType="plus"
+                onClick={() => history.push(paths.createFlag)}
+              >
+                <FormattedMessage
+                  id="xpack.featureFlagsManagement.flags.list.createButtonLabel"
+                  defaultMessage="Create flag"
+                />
+              </EuiButton>
+            </EuiFormRow>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

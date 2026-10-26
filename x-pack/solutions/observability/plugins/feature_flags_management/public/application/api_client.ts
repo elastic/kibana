@@ -36,7 +36,6 @@ export interface ListFlagsFilters {
   app?: string;
   environment?: string;
   tag?: string;
-  teamOwner?: string;
   search?: string;
   page?: number;
   perPage?: number;
@@ -123,7 +122,6 @@ export class FeatureFlagsApiClient {
       app: filters.app,
       environment: filters.environment,
       tag: filters.tag,
-      team_owner: filters.teamOwner,
       search: filters.search,
       page: filters.page,
       per_page: filters.perPage,
