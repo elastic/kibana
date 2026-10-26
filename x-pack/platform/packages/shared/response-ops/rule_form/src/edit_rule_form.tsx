@@ -21,10 +21,15 @@ import {
   RuleFormCircuitBreakerError,
   RuleFormErrorPromptWrapper,
   RuleFormResolveRuleError,
+  RuleFormRulePermissionError,
   RuleFormRuleTypeError,
 } from './rule_form_errors';
 import { RULE_EDIT_ERROR_TEXT, RULE_EDIT_SUCCESS_TEXT } from './translations';
-import { getAvailableRuleTypes, parseRuleCircuitBreakerErrorMessage } from './utils';
+import {
+  getAvailableRuleTypes,
+  getMissingEditPrivilege,
+  parseRuleCircuitBreakerErrorMessage,
+} from './utils';
 import type { RuleFormStepId } from './constants';
 import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
 
@@ -120,16 +125,17 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     [id, mutate]
   );
 
-  const canEditRule = useMemo(() => {
+  const missingEditPrivilege = useMemo(() => {
     if (!ruleType || !fetchedFormData) {
-      return false;
+      return undefined;
     }
 
-    const { consumer, actions } = fetchedFormData;
-    const hasAllPrivilege = !!ruleType.authorizedConsumers[consumer]?.all;
-    const canExecuteActions = !!application.capabilities.actions?.execute;
-
-    return hasAllPrivilege && (canExecuteActions || (!canExecuteActions && !actions.length));
+    return getMissingEditPrivilege({
+      ruleType,
+      consumer: fetchedFormData.consumer,
+      hasActions: fetchedFormData.actions.length > 0,
+      canExecuteActions: !!application.capabilities.actions?.execute,
+    });
   }, [ruleType, fetchedFormData, application]);
 
   const computedInitialMetadata = useMemo(() => {
@@ -176,7 +182,15 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     );
   }
 
-  if (!canEditRule) {
+  if (missingEditPrivilege === 'rule') {
+    return (
+      <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
+        <RuleFormRulePermissionError />
+      </RuleFormErrorPromptWrapper>
+    );
+  }
+
+  if (missingEditPrivilege === 'actions') {
     return (
       <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
         <RuleFormActionPermissionError />
