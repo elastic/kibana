@@ -515,7 +515,8 @@ export const createRequestToEs = ({
   creationDate,
   leadingEvents = [],
 }: {
-  conversation: ConversationCreateRequest;
+  /** `active_execution` comes from the create request's `claim`, never from the request itself. */
+  conversation: ConversationCreateRequest & Pick<Conversation, 'active_execution'>;
   currentUser: UserIdAndName;
   creationDate: Date;
   space: string;

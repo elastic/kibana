@@ -269,8 +269,14 @@ export function registerConversationRoutes({
           { includeActiveExecution: true }
         );
 
+        // Liveness is best effort: a failed read omits `active_execution` rather than the GET.
         const holder = activeExecution
-          ? await execution.getExecution(activeExecution.execution_id)
+          ? await execution.peekExecution(activeExecution.execution_id).catch((err) => {
+              logger.warn(
+                `Failed to read execution ${activeExecution.execution_id} holding conversation ${conversationId}: ${err.message}`
+              );
+              return undefined;
+            })
           : undefined;
 
         return response.ok<GetConversationResponse>({

@@ -203,10 +203,12 @@ export interface ConversationClient {
    * Claims the run lock for an execution without touching anything else on the conversation,
    * failing with `conversationBusy` while another live execution holds it.
    */
-  claimActiveExecution(
-    request: { id: string; claim: ConversationClaim },
-    options: ConversationWriteOptions
-  ): Promise<Conversation>;
+  claimActiveExecution(request: { id: string; claim: ConversationClaim }): Promise<Conversation>;
+  /**
+   * Releases the run lock when `executionId` still holds it, without touching anything else on
+   * the conversation.
+   */
+  releaseActiveExecution(request: { id: string; executionId: string }): Promise<Conversation>;
   markRead(conversationId: string, read: boolean): Promise<Conversation>;
   setPinned(conversationId: string, pinned: boolean): Promise<Conversation>;
   updateRoundFeedback(
@@ -1264,10 +1266,13 @@ class ConversationClientImpl implements ConversationClient {
     return result;
   }
 
-  async claimActiveExecution(
-    { id: conversationId, claim }: { id: string; claim: ConversationClaim },
-    _options: ConversationWriteOptions
-  ): Promise<Conversation> {
+  async claimActiveExecution({
+    id: conversationId,
+    claim,
+  }: {
+    id: string;
+    claim: ConversationClaim;
+  }): Promise<Conversation> {
     // The lock is bookkeeping, not conversation content: no `ai.conversation.updated`, and
     // `read`/`read_by` stay as they are.
     return this.writeConversation({
@@ -1276,6 +1281,27 @@ class ConversationClientImpl implements ConversationClient {
       emit: false,
       claim,
       fields: () => ({}),
+    });
+  }
+
+  async releaseActiveExecution({
+    id: conversationId,
+    executionId,
+  }: {
+    id: string;
+    executionId: string;
+  }): Promise<Conversation> {
+    return this.writeConversation({
+      conversationId,
+      access: 'converse',
+      emit: false,
+      fields: (current) => {
+        if (current.active_execution?.execution_id !== executionId) {
+          throw skipWrite(current);
+        }
+
+        return releaseActiveExecution(current, executionId);
+      },
     });
   }
 

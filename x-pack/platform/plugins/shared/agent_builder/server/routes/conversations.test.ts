@@ -160,7 +160,8 @@ describe('registerConversationRoutes', () => {
     };
 
     const getConversationWithHolder = async (
-      holder: { status: ExecutionStatus; lastHeartbeat?: string } | undefined
+      holder: { status: ExecutionStatus; lastHeartbeat?: string } | undefined,
+      peekError?: Error
     ) => {
       let getConversationHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
       const get = jest.fn().mockResolvedValue({
@@ -168,7 +169,9 @@ describe('registerConversationRoutes', () => {
         agent_id: 'agent-1',
         active_execution: activeExecution,
       });
-      const getExecution = jest.fn().mockResolvedValue(holder);
+      const peekExecution = peekError
+        ? jest.fn().mockRejectedValue(peekError)
+        : jest.fn().mockResolvedValue(holder);
 
       const router = {
         versioned: {
@@ -196,7 +199,7 @@ describe('registerConversationRoutes', () => {
         router,
         getInternalServices: jest.fn().mockReturnValue({
           conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
-          execution: { getExecution },
+          execution: { peekExecution },
           agents: { getRegistry: jest.fn().mockResolvedValue({ get: jest.fn() }) },
         }),
         logger: loggingSystemMock.createLogger(),
@@ -220,16 +223,16 @@ describe('registerConversationRoutes', () => {
         response
       );
 
-      return { result, getExecution };
+      return { result, peekExecution };
     };
 
     it('returns active_execution while the holder is live', async () => {
-      const { result, getExecution } = await getConversationWithHolder({
+      const { result, peekExecution } = await getConversationWithHolder({
         status: ExecutionStatus.running,
         lastHeartbeat: new Date().toISOString(),
       });
 
-      expect(getExecution).toHaveBeenCalledWith('e1');
+      expect(peekExecution).toHaveBeenCalledWith('e1');
       expect(result.payload.active_execution).toEqual(activeExecution);
     });
 
@@ -242,6 +245,13 @@ describe('registerConversationRoutes', () => {
     it('omits active_execution when the holder has no execution record', async () => {
       const { result } = await getConversationWithHolder(undefined);
 
+      expect(result.payload).not.toHaveProperty('active_execution');
+    });
+
+    it('GET by id omits active_execution when the liveness read fails', async () => {
+      const { result } = await getConversationWithHolder(undefined, new Error('index unavailable'));
+
+      expect(result.status).toBe(200);
       expect(result.payload).not.toHaveProperty('active_execution');
     });
   });

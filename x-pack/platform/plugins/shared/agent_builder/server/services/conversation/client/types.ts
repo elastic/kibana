@@ -39,7 +39,7 @@ import type { ConversationWithoutRoundsWithPermissions } from '../../../../commo
 
 export type ConversationCreateRequest = Omit<
   Conversation,
-  'id' | 'created_at' | 'updated_at' | 'user' | 'access_control'
+  'id' | 'created_at' | 'updated_at' | 'user' | 'access_control' | 'active_execution'
 > & {
   id?: string;
   /**

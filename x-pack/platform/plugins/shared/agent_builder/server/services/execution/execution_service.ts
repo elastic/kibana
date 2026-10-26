@@ -29,6 +29,7 @@ import {
   createBadRequestError,
   createInternalError,
   isConversationBusyError,
+  isConversationWriteConflictError,
   isExecutionAbortReason,
   isRequestAbortedError,
   roundUserMessageEventId,
@@ -41,6 +42,7 @@ import type {
   AbortExecutionResult,
   AgentExecutionService,
   AgentExecution,
+  AgentExecutionPeek,
   ConversationExecutionParams,
   ExecuteAgentParams,
   ExecuteAgentResult,
@@ -241,6 +243,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     // After the record, so an idempotency-key replay is recognised before a second message lands
     // or the run lock is claimed. A resume continues a round that is already open, so it claims
     // the lock without writing a new message.
+    let claimedConversationId: string | undefined;
+
     if (conversationParams && conversation && conversationParams.storeConversation !== false) {
       const pendingResumeRound = getPendingResumeRound(conversation);
       const claim: ConversationClaim = {
@@ -252,10 +256,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
       try {
         if (pendingResumeRound) {
-          await conversationClient.claimActiveExecution(
-            { id: conversation.id, claim },
-            { source: 'execution' }
-          );
+          await conversationClient.claimActiveExecution({ id: conversation.id, claim });
         } else {
           await this.writeUserMessage({
             conversation,
@@ -273,14 +274,17 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             claim,
           });
         }
+
+        claimedConversationId = conversation.id;
       } catch (err) {
-        if (isConversationBusyError(err)) {
-          // A refused run never started, so it leaves no execution record behind.
+        // A refused run never started, so it leaves no execution record behind: a keyed
+        // redelivery then claims afresh instead of replaying the refusal.
+        if (isConversationBusyError(err) || isConversationWriteConflictError(err)) {
           try {
             await executionClient.delete(executionId);
           } catch (deleteErr) {
             this.logger.warn(
-              `Failed to delete execution ${executionId} refused on a busy conversation: ${deleteErr.message}`
+              `Failed to delete execution ${executionId} refused by conversation ${conversation.id}: ${deleteErr.message}`
             );
           }
           throw err;
@@ -319,15 +323,34 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }
     }
 
-    const useScheduledTask = await this.shouldUseScheduledTask(request, useTaskManager);
-    const result = useScheduledTask
-      ? await this.executeWithScheduledTask({
-          executionId,
-          agentId,
-          request,
-          requestImmediateClaim,
-        })
-      : await this.executeLocally({ execution, request, interactivity });
+    let result: ExecuteAgentResult;
+
+    try {
+      const useScheduledTask = await this.shouldUseScheduledTask(request, useTaskManager);
+      result = useScheduledTask
+        ? await this.executeWithScheduledTask({
+            executionId,
+            agentId,
+            request,
+            requestImmediateClaim,
+          })
+        : await this.executeLocally({ execution, request, interactivity });
+    } catch (err) {
+      // A run that never got dispatched would otherwise hold the lock until it goes stale.
+      if (claimedConversationId) {
+        try {
+          await conversationClient.releaseActiveExecution({
+            id: claimedConversationId,
+            executionId,
+          });
+        } catch (releaseErr) {
+          this.logger.warn(
+            `Failed to release conversation ${claimedConversationId} after execution ${executionId} failed to start: ${releaseErr.message}`
+          );
+        }
+      }
+      throw err;
+    }
 
     if (!conversation) {
       return result;
@@ -418,6 +441,18 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   async getExecution(executionId: string): Promise<AgentExecution | undefined> {
     const executionClient = this.createExecutionClient();
     return executionClient.get(executionId);
+  }
+
+  async peekExecution(executionId: string): Promise<AgentExecutionPeek | undefined> {
+    const execution = await this.createExecutionClient().peek(executionId);
+
+    if (!execution) {
+      return undefined;
+    }
+
+    const { status, lastHeartbeat } = execution;
+
+    return { status, ...(lastHeartbeat ? { lastHeartbeat } : {}) };
   }
 
   async abortExecution(

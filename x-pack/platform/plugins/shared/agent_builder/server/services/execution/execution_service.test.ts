@@ -30,9 +30,11 @@ import {
   ExecutionStatus,
   TimelineEventType,
   createConversationBusyError,
+  createConversationWriteConflictError,
   createRequestAbortedError,
   isBadRequestError,
   isConversationBusyError,
+  isConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
 import type { AgentExecutionClient } from './persistence';
@@ -1943,6 +1945,96 @@ describe('AgentExecutionService', () => {
       expect(logger.warn).toHaveBeenCalled();
     });
 
+    it('deletes its record when the claim write keeps conflicting', async () => {
+      conversationClient.appendEvents.mockRejectedValueOnce(
+        createConversationWriteConflictError({ conversationId: 'conversation-1' })
+      );
+
+      const error = await converse().catch((thrown) => thrown);
+
+      expect(isConversationWriteConflictError(error)).toBe(true);
+      const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
+      expect(mockExecutionClient.delete).toHaveBeenCalledWith(executionId);
+      expect(mockExecutionClient.updateStatus).not.toHaveBeenCalledWith(
+        expect.anything(),
+        ExecutionStatus.failed,
+        expect.anything()
+      );
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+    });
+
+    it('releases the claim when scheduling fails after claiming', async () => {
+      const scheduleError = new Error('task manager unavailable');
+      mockTaskManagerEnsureScheduled.mockRejectedValueOnce(scheduleError);
+
+      const error = await converse().catch((thrown) => thrown);
+
+      expect(error).toBe(scheduleError);
+      const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
+      expect(conversationClient.releaseActiveExecution).toHaveBeenCalledWith({
+        id: 'conversation-1',
+        executionId,
+      });
+    });
+
+    it('rethrows the scheduling error when releasing the claim fails', async () => {
+      const scheduleError = new Error('task manager unavailable');
+      mockTaskManagerEnsureScheduled.mockRejectedValueOnce(scheduleError);
+      conversationClient.releaseActiveExecution.mockRejectedValueOnce(new Error('ES unavailable'));
+
+      const error = await converse().catch((thrown) => thrown);
+
+      expect(error).toBe(scheduleError);
+      expect(logger.warn).toHaveBeenCalled();
+    });
+
+    it('does not release when scheduling fails without a claim', async () => {
+      mockTaskManagerEnsureScheduled.mockRejectedValueOnce(new Error('task manager unavailable'));
+
+      await converse({ storeConversation: false }).catch(() => undefined);
+
+      expect(conversationClient.releaseActiveExecution).not.toHaveBeenCalled();
+    });
+
+    it('a keyed redelivery runs normally once the holder is free', async () => {
+      const keyed = () =>
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          useTaskManager: true,
+          executionId: 'exec-1',
+          metadata: { execution_idempotency_key: 'Ev123' },
+          params: {
+            agentId: 'agent-1',
+            conversationId: 'conversation-1',
+            nextInput: { message: 'Hello' },
+          },
+        });
+
+      conversationClient.appendEvents.mockRejectedValueOnce(
+        createConversationBusyError({
+          conversationId: 'conversation-1',
+          activeExecutionId: 'other-exec',
+        })
+      );
+
+      const refused = await keyed().catch((thrown) => thrown);
+
+      expect(isConversationBusyError(refused)).toBe(true);
+      expect(mockExecutionClient.delete).toHaveBeenCalledWith('exec-1');
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+
+      const result = await keyed();
+
+      expect(result.executionId).toBe('exec-1');
+      expect(mockExecutionClient.create).toHaveBeenCalledTimes(2);
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(2);
+      expect(conversationClient.appendEvents.mock.calls[1][0].claim).toMatchObject({
+        executionId: 'exec-1',
+      });
+      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalledTimes(1);
+    });
+
     it("passes a claim that checks the holder's liveness", async () => {
       await converse();
 
@@ -1976,16 +2068,13 @@ describe('AgentExecutionService', () => {
       await converse();
 
       const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
-      expect(conversationClient.claimActiveExecution).toHaveBeenCalledWith(
-        {
-          id: 'conversation-1',
-          claim: expect.objectContaining({
-            executionId,
-            triggerEventId: 'round-1::user_message',
-          }),
-        },
-        { source: 'execution' }
-      );
+      expect(conversationClient.claimActiveExecution).toHaveBeenCalledWith({
+        id: 'conversation-1',
+        claim: expect.objectContaining({
+          executionId,
+          triggerEventId: 'round-1::user_message',
+        }),
+      });
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
 

@@ -6104,7 +6104,7 @@ describe('ConversationClient', () => {
       mockGetDocumentResponse(stored);
       const claim = createClaim('e2');
 
-      await client.claimActiveExecution({ id: 'conversation-1', claim }, { source: 'execution' });
+      await client.claimActiveExecution({ id: 'conversation-1', claim });
 
       const indexed = indexedSource();
       expect(indexed.events).toEqual(stored._source.events);
@@ -6114,6 +6114,27 @@ describe('ConversationClient', () => {
         trigger_event_id: 't2',
       });
       expect(describeConversationWriteMock).not.toHaveBeenCalled();
+    });
+
+    it('releaseActiveExecution clears only its own claim', async () => {
+      const stored = documentWithHolder('e1', { readBy: [{ userId: 'user-1' }] });
+      mockGetDocumentResponse(stored);
+
+      await client.releaseActiveExecution({ id: 'conversation-1', executionId: 'e1' });
+
+      const indexed = indexedSource();
+      expect(indexed.active_execution).toBeUndefined();
+      expect(indexed.events).toEqual(stored._source.events);
+      expect(indexed.read_by).toEqual([{ userId: 'user-1' }]);
+      expect(describeConversationWriteMock).not.toHaveBeenCalled();
+    });
+
+    it('releaseActiveExecution leaves a newer holder without writing', async () => {
+      mockGetDocumentResponse(documentWithHolder('e2'));
+
+      await client.releaseActiveExecution({ id: 'conversation-1', executionId: 'e1' });
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
     it('replaceRoundEvents with releaseExecutionId clears its own claim', async () => {

@@ -294,6 +294,7 @@ describe('runAgent', () => {
       executeAgent,
       maybeExecuteAgent: jest.fn(),
       getExecution: jest.fn(),
+      peekExecution: jest.fn(),
       abortExecution: jest.fn(),
       followExecution: jest.fn(),
       findExecutions: jest.fn(),
