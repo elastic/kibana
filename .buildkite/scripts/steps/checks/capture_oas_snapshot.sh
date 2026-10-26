@@ -33,7 +33,8 @@ cmd="node scripts/capture_oas_snapshot\
   --include-path /api/tags \
   --include-path /api/security/entity_store \
   --include-path /api/profiling \
-  --include-path /api/synthetics"
+  --include-path /api/synthetics \
+  --include-path /api/observability/slos"
 
 run_check() {
   eval "$cmd"
