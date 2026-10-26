@@ -6,17 +6,13 @@
  */
 
 import { isEqual } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getToolResultId } from '@kbn/agent-builder-server';
-import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  isSection,
-  type DashboardAttachmentData,
-} from '@kbn/agent-builder-dashboards-common';
+import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { IBasePath } from '@kbn/core/server';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
+import { isSection, type DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 
 import {
   arrangeDashboardLayout,
@@ -26,25 +22,22 @@ import {
   upsertDashboardSchema,
   type DashboardValidator,
 } from '@kbn/dashboard-agent-authoring';
-import {
-  dashboardTools,
-  DASHBOARD_UPDATED_UI_EVENT,
-  type DashboardUpdatedUiEventData,
-} from '../../../common';
-import { retrieveLatestVersion } from './attachment_state';
-import { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
+import { dashboardTools } from '../../../common';
+import { createAttachmentDashboardStore } from './attachment_dashboard_store';
+import type { DashboardReference } from './dashboard_store';
 import { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
 import { createLayoutArranger } from './layout_arranger';
 import { createPanelResolver } from './resolvers/panel_resolver';
+import { createSavedObjectDashboardStore } from './saved_object_dashboard_store';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
 const newDashboardMetadataErrorMessage = 'New dashboards require a non-empty `title`.';
 
 const noDashboardCreatedErrorMessage =
-  'No dashboard was created because none of the requested panels or controls could be added (see metadata.failures). Fix the failures and call again without dashboardAttachmentId.';
+  'No dashboard was created because none of the requested panels or controls could be added (see metadata.failures). Fix the failures and call again without dashboardId.';
 
 const noControlsAddedErrorMessage =
-  'No dashboard was created because none of the requested controls could be added: controls you add on your own are left out when their field is missing or does not suit the control. Add panels, or controls on suitable fields, and call again without dashboardAttachmentId.';
+  'No dashboard was created because none of the requested controls could be added: controls you add on your own are left out when their field is missing or does not suit the control. Add panels, or controls on suitable fields, and call again without dashboardId.';
 
 /** Whether the dashboard has no panels and no controls. Empty sections do not count. */
 const isEmptyDashboard = ({ panels, pinned_panels: pinnedPanels }: DashboardAttachmentData) =>
@@ -52,12 +45,12 @@ const isEmptyDashboard = ({ panels, pinned_panels: pinnedPanels }: DashboardAtta
   (pinnedPanels ?? []).length === 0;
 
 const generateDashboardSchema = z.object({
-  dashboardAttachmentId: z
+  dashboardId: z
     .string()
     .max(256)
     .optional()
     .describe(
-      '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
+      '(optional) The id returned by a previous call, to edit that dashboard. Omit to create a new dashboard. The tool reads the current dashboard from this id, so you never pass the full dashboard back in.'
     ),
   ...upsertDashboardSchema.shape,
   layout: z
@@ -76,8 +69,8 @@ const asString = (value: unknown): string | undefined =>
 /**
  * Compact projection of a dashboard payload, returned in the tool result.
  *
- * The full dashboard payload lives in the dashboard attachment (referenced by
- * id); the LLM only ever sees this slim summary, so it never has to re-emit the
+ * The full dashboard payload lives in the store (referenced by id); the LLM only
+ * ever sees this slim summary, so it never has to re-emit the
  * heavy payload into a follow-up tool call. Grids let it report where the layout step put panels.
  *
  * `authoringNotesByPanelId` holds the one-sentence note describing every chart
@@ -124,29 +117,33 @@ const summarizeDashboard = (
 
 export interface GenerateDashboardToolDeps {
   getDashboardValidator: () => Promise<DashboardValidator>;
+  getDashboardClient: () => Promise<DashboardPluginStart['client']>;
+  /** Whether the Dashboard app takes Lens panels in the Lens API format (Lens as code). */
+  isLensApiFormatEnabled: () => Promise<boolean>;
+  basePath: Pick<IBasePath, 'publicBaseUrl' | 'serverBasePath'>;
 }
 
 /**
  * Kibana dashboard generation tool.
  *
- * Wraps the environment-agnostic {@link executeDashboardUpsert} core with
- * Kibana attachment persistence so the LLM works against a lightweight reference:
- * - the prior payload is read server-side from `dashboardAttachmentId`,
- * - the generated payload is persisted as a `dashboard` attachment,
- * - the result returns only the attachment id, version, and a compact dashboard summary.
- *
- * This keeps the heavy payload out of the LLM transcript — the model references
- * the attachment id to render it rather than copying it into the next tool call.
+ * Wraps the environment-agnostic {@link executeDashboardUpsert} core with a store so the LLM
+ * works against a lightweight reference: it reads the prior dashboard from `dashboardId`, writes
+ * the result, and returns only the reference and a compact summary. In an Agent Builder
+ * conversation the store is a `dashboard` attachment; for every other caller (MCP,
+ * `tools/_execute`) it is a dashboard saved object.
  */
 export const generateDashboardTool = ({
   getDashboardValidator,
-}: GenerateDashboardToolDeps): BuiltinSkillBoundedTool<typeof generateDashboardSchema> => {
+  getDashboardClient,
+  isLensApiFormatEnabled,
+  basePath,
+}: GenerateDashboardToolDeps): BuiltinToolDefinition<typeof generateDashboardSchema> => {
   return {
     id: dashboardTools.generateDashboard,
     type: ToolType.builtin,
     description: `Create or update a dashboard by describing the desired changes, keyed by id.
 
-Persists the resulting dashboard as an attachment and returns its id plus a compact summary (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
+Returns an id for the dashboard plus a compact summary (not the full dashboard). Pass that id as \`dashboardId\` to edit the dashboard later; do not copy the dashboard into follow-up tool calls.
 
 - \`title\`, \`description\`, \`time_range\`: dashboard fields to set.
 - \`sections\`: sections to create or update.
@@ -157,20 +154,49 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 
 Panel positions and sizes are set automatically after the changes are applied, and the summary shows the resulting \`grid\` of every panel. The result lists the ids the call created, updated and removed, so a mistyped id that created a new panel instead of updating one is visible. A panel only moved or resized by the layout step is not listed as updated.`,
     schema: generateDashboardSchema,
+    tags: ['platform', 'dashboards'],
+    annotations: {
+      title: 'Generate dashboard',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     handler: async (
-      { dashboardAttachmentId: previousAttachmentId, layout, ...upsert },
-      { logger, attachments, events, esClient, modelProvider }
+      { dashboardId, layout, ...upsert },
+      {
+        logger,
+        attachments,
+        events,
+        esClient,
+        modelProvider,
+        callContext,
+        savedObjectsClient,
+        request,
+        spaceId,
+      }
     ) => {
       try {
-        const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
-        const isNewDashboard = !latestVersion;
+        const store =
+          callContext.callSource === 'agent'
+            ? createAttachmentDashboardStore({ attachments, events })
+            : await createSavedObjectDashboardStore({
+                dashboardClient: await getDashboardClient(),
+                savedObjectsClient,
+                request,
+                spaceId,
+                basePath,
+                modelProvider,
+                lensApiFormat: await isLensApiFormatEnabled(),
+              });
 
-        if (isNewDashboard && !hasValidNewDashboardMetadata(upsert)) {
+        const existing = dashboardId ? await store.load(dashboardId) : undefined;
+
+        if (!existing && !hasValidNewDashboardMetadata(upsert)) {
           logger.error(newDashboardMetadataErrorMessage);
           return missingNewDashboardMetadataErrorResult;
         }
 
-        const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
         const {
           dashboardData: validatedDashboardData,
           created,
@@ -179,7 +205,7 @@ Panel positions and sizes are set automatically after the changes are applied, a
           failures,
           panelAuthoringNotes,
         } = await executeDashboardUpsert({
-          dashboardData: latestVersion?.data,
+          dashboardData: existing?.data,
           upsert,
           logger,
           resolvePanelContent: createPanelResolver({
@@ -188,7 +214,7 @@ Panel positions and sizes are set automatically after the changes are applied, a
             events,
             esClient,
           }),
-          resolveAttachmentPanel: createAttachmentPanelResolver({ attachments }),
+          resolveAttachmentPanel: store.resolveAttachmentPanel,
           resolveControlFieldCapabilities: createControlFieldCapabilitiesResolver({
             esClient: esClient.asCurrentUser,
           }),
@@ -198,7 +224,7 @@ Panel positions and sizes are set automatically after the changes are applied, a
         // The arranger checks its own output and writes only grids, so the result is not validated again.
         const { dashboardData: generatedDashboardData, failure: layoutFailure } =
           await arrangeDashboardLayout({
-            originalPanels: latestVersion?.data.panels ?? [],
+            originalPanels: existing?.data.panels ?? [],
             dashboardData: validatedDashboardData,
             instructions: layout,
             arrangeLayout: createLayoutArranger({ modelProvider }),
@@ -210,16 +236,14 @@ Panel positions and sizes are set automatically after the changes are applied, a
 
         const toDashboardResult = (
           dashboardData: DashboardAttachmentData,
-          attachmentId: string,
-          version: number
+          reference: DashboardReference
         ) => ({
           results: [
             {
               type: ToolResultType.dashboard,
               tool_result_id: getToolResultId(),
               data: {
-                attachment_id: attachmentId,
-                version,
+                ...reference,
                 dashboard: summarizeDashboard(
                   dashboardData,
                   new Map(
@@ -238,11 +262,11 @@ Panel positions and sizes are set automatically after the changes are applied, a
           ],
         });
 
-        // None of the requested panels and controls were added, so no attachment version is
-        // persisted; the failures reach the agent through the tool result. Controls the agent
-        // added on its own are left out without a failure, so the failures can be empty.
+        // None of the requested panels and controls were added, so nothing is persisted; the
+        // failures reach the agent through the tool result. Controls the agent added on its own
+        // are left out without a failure, so the failures can be empty.
         const requestedContent = (upsert.panels?.length ?? 0) + (upsert.controls?.length ?? 0) > 0;
-        if (isNewDashboard && requestedContent && isEmptyDashboard(generatedDashboardData)) {
+        if (!existing && requestedContent && isEmptyDashboard(generatedDashboardData)) {
           logger.info('Dashboard was not created because none of the changes were applied');
           return {
             results: [
@@ -259,13 +283,9 @@ Panel positions and sizes are set automatically after the changes are applied, a
             ],
           };
         }
-        if (latestVersion && isEqual(generatedDashboardData, latestVersion.data)) {
+        if (existing && isEqual(generatedDashboardData, existing.data)) {
           logger.info('Dashboard was not updated because it did not change');
-          return toDashboardResult(
-            generatedDashboardData,
-            dashboardAttachmentId,
-            latestVersion.version
-          );
+          return toDashboardResult(generatedDashboardData, existing.reference);
         }
 
         // Data-aware default time range computation
@@ -275,38 +295,11 @@ Panel positions and sizes are set automatically after the changes are applied, a
           logger,
         });
 
-        const description = `Dashboard: ${dashboardData.title}`;
-        const attachment = isNewDashboard
-          ? await attachments.add({
-              id: dashboardAttachmentId,
-              type: DASHBOARD_ATTACHMENT_TYPE,
-              description,
-              data: dashboardData,
-            })
-          : await attachments.update(dashboardAttachmentId, {
-              data: dashboardData,
-              description,
-            });
+        const reference = await store.save(dashboardData, existing);
 
-        if (!attachment) {
-          throw new Error(`Failed to persist dashboard attachment "${dashboardAttachmentId}".`);
-        }
+        logger.info(`Dashboard payload ${existing ? 'updated' : 'generated'}`);
 
-        logger.info(`Dashboard payload ${isNewDashboard ? 'generated' : 'updated'}`);
-
-        events.sendUiEvent<typeof DASHBOARD_UPDATED_UI_EVENT, DashboardUpdatedUiEventData>(
-          DASHBOARD_UPDATED_UI_EVENT,
-          {
-            attachment: {
-              id: attachment.id,
-              type: DASHBOARD_ATTACHMENT_TYPE,
-              data: dashboardData,
-              origin: attachment.origin,
-            },
-          }
-        );
-
-        return toDashboardResult(dashboardData, attachment.id, attachment.current_version ?? 1);
+        return toDashboardResult(dashboardData, reference);
       } catch (error) {
         const errorMessage = getErrorMessage(error);
         logger.error(`Error in generate_dashboard tool: ${errorMessage}`);
@@ -316,7 +309,7 @@ Panel positions and sizes are set automatically after the changes are applied, a
               type: ToolResultType.error,
               data: {
                 message: `Failed to generate dashboard: ${errorMessage}`,
-                metadata: { dashboardAttachmentId: previousAttachmentId },
+                metadata: { dashboardId },
               },
             },
           ],

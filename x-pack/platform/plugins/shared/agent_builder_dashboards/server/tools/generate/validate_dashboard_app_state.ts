@@ -18,6 +18,18 @@ const getDashboardAppStateSchema = once(() =>
   getDashboardDataSchema({}, { isDashboardAppRequest: true })
 );
 
+// The dashboard application transforms and validates Lens panels with these transforms.
+const LENS_DASHBOARD_APP_TYPE = 'lens-dashboard-app';
+
+/**
+ * Whether the dashboard application takes Lens panels in the Lens API format. Its Lens transforms
+ * only have a schema while Lens as code is enabled.
+ */
+export const isDashboardAppLensApiFormat = ({
+  getTransforms,
+}: Pick<EmbeddableStart, 'getTransforms'>): boolean =>
+  getTransforms(LENS_DASHBOARD_APP_TYPE)?.schema !== undefined;
+
 const MAX_UNION_MESSAGE_LENGTH = 1000;
 
 const formatNestedIssue = (issue: z.core.$ZodIssue): string => {
@@ -64,7 +76,7 @@ export const createDashboardAppStateValidator = ({
     if (type === VEGA_VIS_TYPE) {
       return [];
     }
-    const transformType = type === LENS_EMBEDDABLE_TYPE ? 'lens-dashboard-app' : type;
+    const transformType = type === LENS_EMBEDDABLE_TYPE ? LENS_DASHBOARD_APP_TYPE : type;
     const configResult = getTransforms(transformType)?.schema?.safeParse(config);
     return configResult?.success === false
       ? toValidationIssues(configResult.error.issues).map(

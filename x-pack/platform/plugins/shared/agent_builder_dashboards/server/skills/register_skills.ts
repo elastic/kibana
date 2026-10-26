@@ -6,12 +6,8 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { GenerateDashboardToolDeps } from '../tools';
 import { createDashboardsSkill } from './dashboards_skill';
 
-export const registerSkills = (
-  agentBuilder: AgentBuilderPluginSetup,
-  deps: GenerateDashboardToolDeps
-): void => {
-  agentBuilder.skills.register(createDashboardsSkill(deps));
+export const registerSkills = (agentBuilder: AgentBuilderPluginSetup): void => {
+  agentBuilder.skills.register(createDashboardsSkill());
 };

@@ -10,6 +10,9 @@ import {
   DASHBOARD_ATTACHMENT_TYPE,
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { DASHBOARD_UPDATED_UI_EVENT } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
@@ -82,15 +85,44 @@ const keepRequestedLayout = async ({
 
 const generatedDashboard: DashboardAttachmentData = { title: 'Agent dashboard', panels: [] };
 
-const callHandler = async (
-  dashboardAttachmentId?: string,
-  layout?: string,
-  upsert: Record<string, unknown> = {}
-) => {
+type ToolCallSource = ToolHandlerContext['callContext']['callSource'];
+
+interface CallHandlerOptions {
+  dashboardId?: string;
+  layout?: string;
+  upsert?: Record<string, unknown>;
+  callSource?: ToolCallSource;
+  spaceId?: string;
+  publicBaseUrl?: string;
+  lensApiFormat?: boolean;
+}
+
+const mockDashboardClient = {
+  read: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+};
+const mockGetDefaultModel = jest.fn();
+
+const callHandler = async ({
+  dashboardId,
+  layout,
+  upsert = {},
+  callSource = 'agent',
+  spaceId = 'default',
+  publicBaseUrl,
+  lensApiFormat = true,
+}: CallHandlerOptions = {}) => {
   const tool = generateDashboardTool({
     getDashboardValidator: jest.fn(),
+    getDashboardClient: async () =>
+      mockDashboardClient as unknown as DashboardPluginStart['client'],
+    isLensApiFormatEnabled: async () => lensApiFormat,
+    basePath: { publicBaseUrl, serverBasePath: '/base' },
   });
   const sendUiEvent = jest.fn();
+  const savedObjectsClient = {};
+  const request = {};
   const ctx = {
     logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
     attachments: {
@@ -99,13 +131,24 @@ const callHandler = async (
     },
     events: { sendUiEvent },
     esClient: { asCurrentUser: {} },
+    callContext: { toolId: tool.id, toolCallId: 'call-1', callSource },
+    savedObjectsClient,
+    request,
+    spaceId,
+    modelProvider: { getDefaultModel: mockGetDefaultModel },
   };
   const ret = await tool.handler(
-    { dashboardAttachmentId, layout, ...upsert } as unknown as Parameters<typeof tool.handler>[0],
+    { dashboardId, layout, ...upsert } as unknown as Parameters<typeof tool.handler>[0],
     ctx as unknown as Parameters<typeof tool.handler>[1]
   );
   if (!('results' in ret)) throw new Error('Unexpected HITL return from tool handler');
-  return { results: ret.results, sendUiEvent, attachments: ctx.attachments };
+  return {
+    results: ret.results,
+    sendUiEvent,
+    attachments: ctx.attachments,
+    savedObjectsClient,
+    request,
+  };
 };
 
 describe('generateDashboardTool handler', () => {
@@ -135,7 +178,7 @@ describe('generateDashboardTool handler', () => {
         : undefined
     );
 
-    const { sendUiEvent } = await callHandler(id);
+    const { sendUiEvent } = await callHandler({ dashboardId: id });
 
     expect(sendUiEvent).toHaveBeenCalledWith(DASHBOARD_UPDATED_UI_EVENT, {
       attachment: {
@@ -189,8 +232,8 @@ describe('generateDashboardTool handler', () => {
       mockRetrieveLatestVersion.mockReturnValue(undefined);
       mockGeneratedDashboard(generatedDashboard);
 
-      const { results, sendUiEvent, attachments } = await callHandler(undefined, undefined, {
-        panels: [{ id: 'panel' }],
+      const { results, sendUiEvent, attachments } = await callHandler({
+        upsert: { panels: [{ id: 'panel' }] },
       });
 
       expect(results).toEqual([
@@ -213,9 +256,11 @@ describe('generateDashboardTool handler', () => {
         panels: [{ id: 'section', title: 'Section', collapsed: false, grid: { y: 0 }, panels: [] }],
       });
 
-      const { results, sendUiEvent, attachments } = await callHandler(undefined, undefined, {
-        sections: [{ id: 'section', title: 'Section' }],
-        panels: [{ id: 'panel', section: 'section' }],
+      const { results, sendUiEvent, attachments } = await callHandler({
+        upsert: {
+          sections: [{ id: 'section', title: 'Section' }],
+          panels: [{ id: 'panel', section: 'section' }],
+        },
       });
 
       expect(results[0]).toEqual({
@@ -229,8 +274,8 @@ describe('generateDashboardTool handler', () => {
     it('does not create a new dashboard when every requested control was left out without a failure', async () => {
       mockRetrieveLatestVersion.mockReturnValue(undefined);
 
-      const { results, sendUiEvent, attachments } = await callHandler(undefined, undefined, {
-        controls: [{ id: 'control' }],
+      const { results, sendUiEvent, attachments } = await callHandler({
+        upsert: { controls: [{ id: 'control' }] },
       });
 
       expect(results).toEqual([
@@ -265,7 +310,9 @@ describe('generateDashboardTool handler', () => {
       } as ReturnType<typeof retrieveLatestVersion>);
       mockGeneratedDashboard(structuredClone(latestData));
 
-      const { results, sendUiEvent, attachments } = await callHandler('dashboard-attachment-id');
+      const { results, sendUiEvent, attachments } = await callHandler({
+        dashboardId: 'dashboard-attachment-id',
+      });
 
       expect(results[0]).toMatchObject({
         type: ToolResultType.dashboard,
@@ -282,7 +329,9 @@ describe('generateDashboardTool handler', () => {
       } as ReturnType<typeof retrieveLatestVersion>);
       mockGeneratedDashboard({ ...generatedDashboard, panels: [panel] });
 
-      const { results, attachments } = await callHandler('dashboard-attachment-id');
+      const { results, attachments } = await callHandler({
+        dashboardId: 'dashboard-attachment-id',
+      });
 
       expect(results[0]).toMatchObject({ data: { version: 2, failures } });
       expect(attachments.update).toHaveBeenCalled();
@@ -351,10 +400,10 @@ describe('generateDashboardTool handler', () => {
         sections: [],
       });
 
-      const { results, attachments } = await callHandler(
-        'dashboard-attachment-id',
-        'make the panel full width'
-      );
+      const { results, attachments } = await callHandler({
+        dashboardId: 'dashboard-attachment-id',
+        layout: 'make the panel full width',
+      });
 
       expect(mockArrangeLayout).toHaveBeenCalledWith(
         expect.objectContaining({ instructions: 'make the panel full width' })
@@ -370,10 +419,10 @@ describe('generateDashboardTool handler', () => {
       mockExistingDashboard();
       mockArrangeLayout.mockRejectedValue(new Error('Model unavailable'));
 
-      const { results, attachments } = await callHandler(
-        'dashboard-attachment-id',
-        'make the panel full width'
-      );
+      const { results, attachments } = await callHandler({
+        dashboardId: 'dashboard-attachment-id',
+        layout: 'make the panel full width',
+      });
 
       expect(attachments.update).not.toHaveBeenCalled();
       expect(results[0]).toMatchObject({
@@ -388,6 +437,256 @@ describe('generateDashboardTool handler', () => {
           ],
         },
       });
+    });
+  });
+
+  describe('in an Agent Builder conversation', () => {
+    it('returns the attachment reference with the same result fields as before', async () => {
+      mockRetrieveLatestVersion.mockReturnValue(undefined);
+
+      const { results, attachments } = await callHandler();
+
+      expect(attachments.add).toHaveBeenCalledWith({
+        id: expect.any(String),
+        type: DASHBOARD_ATTACHMENT_TYPE,
+        description: 'Dashboard: Agent dashboard',
+        data: { ...generatedDashboard, time_range: { from: 'now-7d', to: 'now' } },
+      });
+      expect(results).toEqual([
+        {
+          type: ToolResultType.dashboard,
+          tool_result_id: expect.any(String),
+          data: {
+            attachment_id: attachments.add.mock.calls[0][0].id,
+            version: 1,
+            dashboard: {
+              title: 'Agent dashboard',
+              description: undefined,
+              panels: [],
+              controls: [],
+            },
+            created: [],
+            updated: [],
+            removed: [],
+            failures: undefined,
+          },
+        },
+      ]);
+      expect(Object.keys(results[0].data)).toEqual([
+        'attachment_id',
+        'version',
+        'dashboard',
+        'created',
+        'updated',
+        'removed',
+        'failures',
+      ]);
+      expect(mockDashboardClient.create).not.toHaveBeenCalled();
+      expect(mockGetDefaultModel).not.toHaveBeenCalled();
+    });
+  });
+
+  describe.each<ToolCallSource>(['mcp', 'user'])('outside a conversation (%s)', (callSource) => {
+    const lensPanel = {
+      id: 'lens-panel',
+      type: LENS_EMBEDDABLE_TYPE,
+      grid: { x: 0, y: 0, w: 24, h: 15 },
+      config: {
+        type: 'metric',
+        title: 'Count',
+        data_source: { type: 'esql', query: 'FROM logs | STATS count = COUNT(*)' },
+        metrics: [{ type: 'primary', column: 'count' }],
+        sampling: 1,
+        ignore_global_filters: false,
+      },
+    };
+    const newDashboard = {
+      ...generatedDashboard,
+      panels: [lensPanel],
+    } as unknown as DashboardAttachmentData;
+    const savedDashboardBody = (id: string, title: string) => ({
+      id,
+      data: { title, panels: [lensPanel] },
+      meta: {},
+    });
+
+    beforeEach(() => {
+      mockGetDefaultModel.mockResolvedValue({});
+      mockExecuteDashboardUpsert.mockResolvedValue({
+        dashboardData: newDashboard,
+        created: ['lens-panel'],
+        updated: [],
+        removed: [],
+        failures: [],
+        panelAuthoringNotes: [],
+      });
+      mockDashboardClient.create.mockResolvedValue(savedDashboardBody('new-id', 'Agent dashboard'));
+      mockDashboardClient.update.mockImplementation(async (_, id: string) =>
+        savedDashboardBody(id, 'Agent dashboard')
+      );
+    });
+
+    it('creates a dashboard saved object the way the Dashboard app saves it and returns an absolute url in the space', async () => {
+      const { results, attachments, sendUiEvent, request } = await callHandler({
+        callSource,
+        spaceId: 'marketing',
+        publicBaseUrl: 'https://kibana.example.com/base',
+      });
+
+      expect(mockDashboardClient.create).toHaveBeenCalledWith(
+        request,
+        expect.objectContaining({
+          title: 'Agent dashboard',
+          panels: [{ ...lensPanel, grid: expect.any(Object) }],
+          time_range: { from: 'now-7d', to: 'now' },
+        }),
+        { isDashboardAppRequest: true }
+      );
+      expect(results).toEqual([
+        {
+          type: ToolResultType.dashboard,
+          tool_result_id: expect.any(String),
+          data: {
+            dashboard_id: 'new-id',
+            url: 'https://kibana.example.com/base/s/marketing/app/dashboards#/view/new-id',
+            dashboard: expect.objectContaining({ title: 'Agent dashboard' }),
+            created: ['lens-panel'],
+            updated: [],
+            removed: [],
+            failures: undefined,
+          },
+        },
+      ]);
+      expect(mockDashboardClient.update).not.toHaveBeenCalled();
+      expect(attachments.add).not.toHaveBeenCalled();
+      expect(attachments.update).not.toHaveBeenCalled();
+      expect(sendUiEvent).not.toHaveBeenCalled();
+    });
+
+    it('saves Lens panels as stored Lens state while the Dashboard app does not take Lens API format', async () => {
+      await callHandler({ callSource, lensApiFormat: false });
+
+      const [[, { panels }]] = mockDashboardClient.create.mock.calls;
+      expect(panels).toEqual([
+        {
+          ...lensPanel,
+          grid: expect.any(Object),
+          config: expect.objectContaining({
+            title: 'Count',
+            attributes: expect.objectContaining({ visualizationType: 'lnsMetric' }),
+          }),
+        },
+      ]);
+      expect(panels[0].config).not.toHaveProperty('data_source');
+    });
+
+    it('returns a relative url when no public base url is configured', async () => {
+      const { results } = await callHandler({ callSource });
+
+      expect(results[0]).toMatchObject({
+        data: { dashboard_id: 'new-id', url: '/base/app/dashboards#/view/new-id' },
+      });
+    });
+
+    it('edits the dashboard it reads, overwriting the resolved id', async () => {
+      mockDashboardClient.read.mockResolvedValue(savedDashboardBody('resolved-id', 'Before'));
+
+      const { results, attachments, sendUiEvent, savedObjectsClient, request } = await callHandler({
+        callSource,
+        dashboardId: 'alias-id',
+      });
+
+      expect(mockDashboardClient.read).toHaveBeenCalledWith(savedObjectsClient, 'alias-id', {
+        isDashboardAppRequest: true,
+      });
+      expect(mockDashboardClient.update).toHaveBeenCalledWith(
+        request,
+        'resolved-id',
+        expect.objectContaining({
+          title: 'Agent dashboard',
+          panels: [{ ...lensPanel, grid: expect.any(Object) }],
+        }),
+        { isDashboardAppRequest: true }
+      );
+      expect(mockDashboardClient.create).not.toHaveBeenCalled();
+      expect(results[0]).toMatchObject({
+        type: ToolResultType.dashboard,
+        data: { dashboard_id: 'resolved-id', url: '/base/app/dashboards#/view/resolved-id' },
+      });
+      expect(attachments.update).not.toHaveBeenCalled();
+      expect(sendUiEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not write a dashboard that did not change', async () => {
+      mockDashboardClient.read.mockResolvedValue(savedDashboardBody('dash-id', 'Agent dashboard'));
+      mockExecuteDashboardUpsert.mockImplementation(async ({ dashboardData }) => ({
+        dashboardData: structuredClone(dashboardData)!,
+        created: [],
+        updated: [],
+        removed: [],
+        failures: [],
+        panelAuthoringNotes: [],
+      }));
+
+      const { results } = await callHandler({ callSource, dashboardId: 'dash-id' });
+
+      expect(results[0]).toMatchObject({
+        type: ToolResultType.dashboard,
+        data: { dashboard_id: 'dash-id', url: '/base/app/dashboards#/view/dash-id' },
+      });
+      expect(mockDashboardClient.update).not.toHaveBeenCalled();
+      expect(mockDashboardClient.create).not.toHaveBeenCalled();
+    });
+
+    it('refuses to edit a dashboard whose read dropped content', async () => {
+      mockDashboardClient.read.mockResolvedValue({
+        ...savedDashboardBody('dash-id', 'Before'),
+        warnings: [
+          {
+            type: 'dropped_panel',
+            message: 'unsupported',
+            panel_type: 'image',
+            panel_config: {},
+          },
+          { type: 'dropped_property', message: 'invalid', key: 'options' },
+        ],
+      });
+
+      const { results, sendUiEvent } = await callHandler({ callSource, dashboardId: 'dash-id' });
+
+      expect(results).toEqual([
+        {
+          type: ToolResultType.error,
+          data: {
+            message: expect.stringMatching(/image[\s\S]*options[\s\S]*Nothing was changed/),
+            metadata: { dashboardId: 'dash-id' },
+          },
+        },
+      ]);
+      expect(mockExecuteDashboardUpsert).not.toHaveBeenCalled();
+      expect(mockDashboardClient.update).not.toHaveBeenCalled();
+      expect(sendUiEvent).not.toHaveBeenCalled();
+    });
+
+    it('fails before doing any work when no AI connector is configured', async () => {
+      mockGetDefaultModel.mockRejectedValue(new Error('No connector available'));
+
+      const { results, attachments } = await callHandler({ callSource });
+
+      expect(results).toEqual([
+        {
+          type: ToolResultType.error,
+          data: {
+            message: expect.stringMatching(
+              /No AI connector is available \(No connector available\)/
+            ),
+            metadata: { dashboardId: undefined },
+          },
+        },
+      ]);
+      expect(mockExecuteDashboardUpsert).not.toHaveBeenCalled();
+      expect(mockDashboardClient.create).not.toHaveBeenCalled();
+      expect(attachments.add).not.toHaveBeenCalled();
     });
   });
 });

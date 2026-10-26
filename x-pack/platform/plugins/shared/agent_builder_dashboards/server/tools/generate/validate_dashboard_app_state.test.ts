@@ -11,7 +11,10 @@ import type {
   AttachmentPanel,
   DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
-import { createDashboardAppStateValidator } from './validate_dashboard_app_state';
+import {
+  createDashboardAppStateValidator,
+  isDashboardAppLensApiFormat,
+} from './validate_dashboard_app_state';
 
 const mockGetTransforms = jest.fn();
 
@@ -114,5 +117,18 @@ describe('createDashboardAppStateValidator', () => {
         } as DashboardAttachmentData)
       ).toEqual([{ path: ['title'], message: expect.any(String) }]);
     });
+  });
+});
+
+describe('isDashboardAppLensApiFormat', () => {
+  it('is true while the dashboard application lens transforms have a schema', () => {
+    expect(isDashboardAppLensApiFormat({ getTransforms: mockGetTransforms })).toBe(true);
+    expect(mockGetTransforms).toHaveBeenCalledWith('lens-dashboard-app');
+  });
+
+  it('is false when they have no schema', () => {
+    mockGetTransforms.mockReturnValue({});
+
+    expect(isDashboardAppLensApiFormat({ getTransforms: mockGetTransforms })).toBe(false);
   });
 });

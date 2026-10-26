@@ -128,6 +128,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.create_partition`,
   `${internalNamespaces.streams}.delete_stream`,
 
+  // Platform – Dashboards
+  `${internalNamespaces.platformDashboard}.generate_dashboard`,
+
   // Custom content panels
   'custom_content_update_panel',
 
