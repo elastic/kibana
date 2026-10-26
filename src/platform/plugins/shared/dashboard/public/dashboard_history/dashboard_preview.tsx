@@ -54,7 +54,6 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
 }> = ({ change, setPreviewTitle, inheritedTimeRange }) => {
   const initialState = useRef<DashboardInitializationState>({
     ...withInheritedTimeRange(change.snapshot as DashboardState, inheritedTimeRange),
-    viewMode: 'view' as const,
   });
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
 

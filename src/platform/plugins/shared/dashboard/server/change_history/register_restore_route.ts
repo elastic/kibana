@@ -12,6 +12,7 @@ import { z } from '@kbn/zod';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 import { getDashboardStateSchema } from '../api/dashboard_state_schemas';
+import { DASHBOARD_CHANGE_HISTORY_API_PATH } from '../../common/constants';
 import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './utils';
 import { update } from '../api/update/update';
 
@@ -20,7 +21,7 @@ export type RestoreChangeResponse = DashboardState;
 export const registerRestoreChangeRoute = (router: IRouter<RequestHandlerContext>) => {
   router.post(
     {
-      path: '/internal/dashboard/change_history/{id}/{changeId}/_restore',
+      path: `${DASHBOARD_CHANGE_HISTORY_API_PATH}/{id}/{changeId}/_restore`,
       validate: {
         request: {
           params: z

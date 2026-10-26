@@ -12,11 +12,12 @@ import { buildPath, type HttpSetup } from '@kbn/core-http-browser';
 import type { ChangeDetailsResponse } from '../../server/change_history/register_details_route';
 import type { HistoryListResponse } from '../../server/change_history/register_list_route';
 import type { RestoreChangeResponse } from '../../server/change_history/register_restore_route';
-import { DASHBOARD_UNSAVED_CHANGES_ACTION } from '../../common/constants';
+import {
+  DASHBOARD_CHANGE_HISTORY_API_PATH,
+  DASHBOARD_UNSAVED_CHANGES_ACTION,
+} from '../../common/constants';
 import type { DashboardApi } from '../dashboard_api/types';
 import { dashboardClient } from '../dashboard_client';
-
-const BASE_HISTORY_PATH = `/internal/dashboard/change_history` as const;
 
 export const createDashboardChangeHistoryAdapter = (
   http: HttpSetup,
@@ -25,7 +26,7 @@ export const createDashboardChangeHistoryAdapter = (
   listChanges: async ({ objectId, page, signal }) => {
     try {
       const response = await http.get<HistoryListResponse>(
-        buildPath(`${BASE_HISTORY_PATH}/{objectId}`, { objectId }),
+        buildPath(`${DASHBOARD_CHANGE_HISTORY_API_PATH}/{objectId}`, { objectId }),
         {
           query: { page: page.index + 1, per_page: page.size },
           signal,
@@ -39,7 +40,7 @@ export const createDashboardChangeHistoryAdapter = (
   getChange: async ({ objectId, changeId, signal }) => {
     try {
       const response = await http.get<ChangeDetailsResponse>(
-        buildPath(`${BASE_HISTORY_PATH}/{objectId}/{changeId}`, { objectId, changeId }),
+        buildPath(`${DASHBOARD_CHANGE_HISTORY_API_PATH}/{objectId}/{changeId}`, { objectId, changeId }),
         {
           signal,
         }
@@ -53,7 +54,7 @@ export const createDashboardChangeHistoryAdapter = (
     ? async ({ objectId, changeId, signal }) => {
         try {
           const response = await http.post<RestoreChangeResponse>(
-            buildPath(`${BASE_HISTORY_PATH}/{objectId}/{changeId}/_restore`, {
+            buildPath(`${DASHBOARD_CHANGE_HISTORY_API_PATH}/{objectId}/{changeId}/_restore`, {
               objectId,
               changeId,
             }),

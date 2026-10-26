@@ -12,6 +12,7 @@ import { z } from '@kbn/zod';
 
 import type { StartDeps } from '../plugin';
 import type { DashboardPluginStart } from '../types';
+import { DASHBOARD_CHANGE_HISTORY_API_PATH } from '../../common/constants';
 import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './utils';
 
 const MAX_PER_PAGE = 100;
@@ -41,7 +42,7 @@ export const registerHistoryListRoute = (
 ) => {
   router.get(
     {
-      path: '/internal/dashboard/change_history/{id}',
+      path: `${DASHBOARD_CHANGE_HISTORY_API_PATH}/{id}`,
       validate: {
         request: {
           params: z
