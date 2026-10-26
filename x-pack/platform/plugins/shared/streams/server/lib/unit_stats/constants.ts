@@ -37,6 +37,9 @@ export const DESTINATION_DURATION_FIELD = 'metrics.streams.destination.duration'
 
 /** The telemetry calls a processor a step. */
 export const STEP_ID_FIELD = 'scope.attributes.streams.step.id';
+export const STEP_PIPELINE_ID_FIELD = 'scope.attributes.streams.pipeline.id';
+/** Set only on a step that runs in a route pipeline. The full path: the short name is also a datapoint attribute of the route metrics. */
+export const STEP_ROUTE_INDEX_FIELD = 'scope.attributes.streams.route.index';
 export const STEP_ITEMS_FIELD = 'metrics.streams.step.items';
 export const STEP_DURATION_FIELD = 'metrics.streams.step.duration';
 
@@ -44,12 +47,13 @@ export const STEP_DURATION_FIELD = 'metrics.streams.step.duration';
 export const STATS_COLUMN = {
   id: 'id',
   step: 'step',
+  pipeline: 'pipeline',
+  routeIndex: 'route_index',
   bucket: 'bucket',
   incomingRate: 'incoming_rate',
   failedRate: 'failed_rate',
   avgLatency: 'avg_latency',
   sumItems: 'sum_items',
-  sumItemsIn: 'sum_items_in',
   avgDurationPerItem: 'avg_duration_per_item',
 } as const;
 

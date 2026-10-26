@@ -62,10 +62,15 @@ const responses = {
   processor: {
     columns: [
       { name: 'step', type: 'keyword' },
+      { name: 'pipeline', type: 'keyword' },
+      { name: 'route_index', type: 'integer' },
       { name: 'incoming_rate', type: 'double' },
       { name: 'avg_duration_per_item', type: 'double' },
     ],
-    values: [['uppercase-message', 4.6, 5.2e-6]],
+    values: [
+      ['uppercase-message', 'main', 0, 4.6, 5.2e-6],
+      ['uppercase-message', 'main', null, 1.2, 4.1e-6],
+    ],
   },
 };
 
@@ -154,13 +159,26 @@ describe('UnitStatsClient.getStats', () => {
       },
     });
     expect(response.components.processors['uppercase-message']).toEqual({
-      processing_duration: { average: { value: 5.2e-6, unit: 's' } },
-      events: {
-        incoming: {
-          rate: { value: 4.6, unit: '{item}', time_unit: 's' },
+      instances: [
+        {
+          pipeline_id: 'main',
+          route_index: 0,
+          processing_duration: { average: { value: 5.2e-6, unit: 's' } },
+          events: {
+            incoming: { rate: { value: 4.6, unit: '{item}', time_unit: 's' } },
+            failed: { rate: { value: null, unit: '{item}', time_unit: 's' } },
+          },
         },
-        failed: { rate: { value: null, unit: '{item}', time_unit: 's' } },
-      },
+        {
+          pipeline_id: 'main',
+          route_index: null,
+          processing_duration: { average: { value: 4.1e-6, unit: 's' } },
+          events: {
+            incoming: { rate: { value: 1.2, unit: '{item}', time_unit: 's' } },
+            failed: { rate: { value: null, unit: '{item}', time_unit: 's' } },
+          },
+        },
+      ],
     });
     expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
   });
@@ -320,9 +338,7 @@ describe('UnitStatsClient.getStats', () => {
 
       expect(esql).toHaveBeenCalledTimes(1);
       expect(response.components.destinations['es-prod'].events.incoming.rate.value).toBeNull();
-      expect(
-        response.components.processors['uppercase-message'].events.incoming.rate.value
-      ).toBeNull();
+      expect(response.components.processors['uppercase-message'].instances).toEqual([]);
       expect(response.components.destinations['es-prod'].error).toBeUndefined();
       expect(response.components.destinations.dbg.error).toBeUndefined();
       expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
@@ -348,9 +364,7 @@ describe('UnitStatsClient.getStats', () => {
       expect(response.components.destinations['es-prod'].events.incoming.rate.value).toBeNull();
       expect(response.components.destinations['es-prod'].events.incoming.total.value).toBeNull();
       expect(response.components.destinations['es-prod'].events.incoming.series.points).toEqual([]);
-      expect(
-        response.components.processors['uppercase-message'].events.incoming.rate.value
-      ).toBeNull();
+      expect(response.components.processors['uppercase-message'].instances).toEqual([]);
       expect(response.components.destinations['es-prod'].error).toBeUndefined();
       expect(response.meta.config_hash).toBe('nope');
     });
@@ -364,9 +378,9 @@ describe('UnitStatsClient.getStats', () => {
       expect(response.components.destinations['es-dev'].error?.code).toBe('unavailable');
       expect(response.components.destinations.dbg.error?.code).toBe('unavailable');
       expect(response.components.processors['uppercase-message'].error).toBeUndefined();
-      expect(response.components.processors['uppercase-message'].events.incoming.rate.value).toBe(
-        4.6
-      );
+      expect(
+        response.components.processors['uppercase-message'].instances[0].events.incoming.rate.value
+      ).toBe(4.6);
     });
 
     it('puts the same error on every processor when a processor query fails', async () => {
