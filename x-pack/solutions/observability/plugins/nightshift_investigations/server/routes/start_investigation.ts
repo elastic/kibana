@@ -8,16 +8,15 @@
 import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
-import { freeFormContextSchema, investigationNotificationDestinationsSchema } from '../../common';
+import {
+  freeFormContextSchema,
+  investigationNotificationDestinationsSchema,
+  MAX_ALERTS_PER_INVESTIGATION,
+} from '../../common';
 import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID, MAX_KEYWORD_LENGTH } from '../../common';
-import { fetchAlertSnapshot } from '../lib/alert_snapshot';
+import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
-
-const subjectIdAndSummary = {
-  id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-  summary: z.string().max(MAX_TEXT_LENGTH).optional(),
-};
 
 const startInvestigationMessage = {
   message: z.string().min(1).max(MAX_TEXT_LENGTH).optional(),
@@ -42,7 +41,11 @@ const startInvestigationBodySchema = z.union([
   z.object({
     subject: z.object({
       type: z.literal('alert'),
-      ...subjectIdAndSummary,
+      ids: z
+        .array(z.string().min(1).max(MAX_KEYWORD_LENGTH))
+        .min(1)
+        .max(MAX_ALERTS_PER_INVESTIGATION),
+      summary: z.string().max(MAX_TEXT_LENGTH).optional(),
     }),
     title: titleSchema.optional(),
     ...startInvestigationMessage,
@@ -81,7 +84,8 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
     summary: 'Start an investigation',
     description:
       'Starts an investigation for a given subject, or continues the open investigation that ' +
-      'already holds it, and returns the investigation (Agent Builder conversation) id. A new ' +
+      'already holds it. An alert subject takes one or more alert ids, classic or universal; the ' +
+      'first is the stored subject, used for naming and the summary, and returns the investigation (Agent Builder conversation) id. A new ' +
       'investigation is created when the start is accepted; its run records the subjects.',
   },
   security: {
@@ -96,7 +100,13 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
   params: z.object({
     body: startInvestigationBodySchema,
   }),
-  handler: async ({ request, params, getInvestigationsClient, getAlertsClient }) => {
+  handler: async ({
+    request,
+    params,
+    getInvestigationsClient,
+    getAlertsClient,
+    getEpisodeLookup,
+  }) => {
     const client = getInvestigationsClient(request);
     const { body } = params;
 
@@ -107,11 +117,17 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
         if (!alertsClient) {
           throw serverUnavailable('Alert lookup is unavailable');
         }
-        const snapshot = await fetchAlertSnapshot(alertsClient, body.subject.id);
+        const lookup = getEpisodeLookup(request);
+        const [primaryId] = body.subject.ids;
+        const alerts = await fetchInvestigationAlertSnapshots({
+          alertsClient,
+          alertIds: body.subject.ids,
+          ...lookup,
+        });
         return await client.start({
-          subject: body.subject,
+          subject: { type: 'alert', id: primaryId, summary: body.subject.summary },
           title: body.title,
-          context: { alerts: [snapshot] },
+          context: { alerts },
           trigger_type: 'manual',
           message: body.message,
           ...(body.connector_id ? { connector_id: body.connector_id } : {}),

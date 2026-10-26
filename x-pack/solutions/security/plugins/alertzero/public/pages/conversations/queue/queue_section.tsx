@@ -29,6 +29,7 @@ export interface QueueSectionProps {
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
+  canOpenInvestigationDetails?: boolean;
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   getChatHref: (id: Investigation['id']) => string | undefined;
   canManageEscalations?: boolean;
