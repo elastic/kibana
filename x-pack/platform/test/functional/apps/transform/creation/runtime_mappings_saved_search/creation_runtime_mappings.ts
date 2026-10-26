@@ -292,7 +292,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertIndexPreviewEmpty();
 
           await transform.testExecution.logTestStep(`sets the date picker to '15 Years ago'`);
-          await transform.datePicker.quickSelect(10, 'y');
+          await transform.datePicker.quickSelect(15, 'y');
 
           await transform.testExecution.logTestStep('loads the index preview');
           await transform.wizard.assertIndexPreviewLoaded();
