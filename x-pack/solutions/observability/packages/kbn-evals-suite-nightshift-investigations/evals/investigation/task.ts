@@ -14,7 +14,7 @@ import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { StartInvestigationResponse } from '@kbn/nightshift-investigations-plugin/common';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 import { extractAccessedDecisionTrees } from './decision_tree_evidence';
-import { extractReplyUserResponse, extractToolCallTrajectory } from './tool_call_trajectory';
+import { extractFinalResponse, extractToolCallTrajectory } from './tool_call_trajectory';
 import type {
   InvestigationExample,
   InvestigationReport,
@@ -213,9 +213,9 @@ export const runInvestigation = async (
     if (!investigation.in_progress && !isPersisted(conversation)) {
       output.execution_error = UNPERSISTED_CONVERSATION_ERROR;
     }
-    const reply = extractReplyUserResponse(conversation.rounds);
+    const reply = extractFinalResponse(conversation.rounds);
     if (reply && !output.structured_report.conclusion) {
-      // The agent answers through `reply_user` instead of recording a verdict on the investigation.
+      // The agent answers in its final message instead of recording a verdict on the investigation.
       output.structured_report = {
         ...output.structured_report,
         summary: output.structured_report.summary ?? reply,

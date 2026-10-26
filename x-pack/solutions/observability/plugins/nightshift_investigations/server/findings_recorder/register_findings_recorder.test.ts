@@ -113,23 +113,15 @@ describe('registerFindingsRecorder', () => {
       round: {
         status: ConversationRoundStatus.completed,
         input: { message: 'Why is checkout failing?' },
-        steps: [
-          {
-            type: 'tool_call',
-            tool_call_id: 't1',
-            tool_id: 'reply_user',
-            params: { response: 'Root cause: bad deploy' },
-            results: [],
-          },
-        ],
-        response: { message: 'Done.' },
+        steps: [],
+        response: { message: 'Root cause: bad deploy' },
       },
       ...overrides,
     };
     return { run: () => handler(context), coordinator };
   };
 
-  it("runs the final pass with the agent's reply_user answer", async () => {
+  it("runs the final pass with the agent's final message", async () => {
     const { run, coordinator } = afterExecution();
 
     await run();

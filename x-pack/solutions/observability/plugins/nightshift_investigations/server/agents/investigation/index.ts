@@ -24,7 +24,6 @@ import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
-import { REPLY_USER_TOOL_ID } from '../../tools/reply_user/tool';
 import { TIME_CONVERTER_TOOL_ID } from '../../tools/time_converter/tool';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
@@ -142,11 +141,7 @@ export const buildNightshiftAgentConfiguration = ({
     tools: [
       {
         tool_ids: standalone
-          ? [
-              ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
-              TIME_CONVERTER_TOOL_ID,
-              REPLY_USER_TOOL_ID,
-            ]
+          ? [...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []), TIME_CONVERTER_TOOL_ID]
           : [
               ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
               ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),

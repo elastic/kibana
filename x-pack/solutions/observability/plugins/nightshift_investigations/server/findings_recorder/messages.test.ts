@@ -203,7 +203,7 @@ describe('toolNamesToDefine', () => {
 
     expect(early).toEqual(late);
     expect(early).toEqual(
-      expect.arrayContaining(['nightshift_sandbox_bash', 'reply_user', 'time_converter_tool'])
+      expect.arrayContaining(['nightshift_sandbox_bash', 'time_converter_tool'])
     );
     expect(early).not.toContain(STRUCTURED_OUTPUT_TOOL);
     expect([...early].sort()).toEqual(early);
@@ -221,20 +221,14 @@ describe('toolNamesToDefine', () => {
 });
 
 describe('extractAnswer', () => {
-  it('prefers the last reply_user response over the closing message', () => {
-    const answer = extractAnswer({
-      steps: [
-        toolStep('a', 'r1', 'reply_user', { response: 'first' }, {}),
-        toolStep('b', 'r2', 'reply_user', { response: 'Root cause: bad deploy' }, {}),
-      ],
-      responseMessage: 'Done.',
-    });
-
-    expect(answer).toBe('Root cause: bad deploy');
+  it("is the round's response message", () => {
+    expect(extractAnswer({ responseMessage: 'Root cause: bad deploy' })).toBe(
+      'Root cause: bad deploy'
+    );
   });
 
-  it('falls back to the round response, and to nothing', () => {
-    expect(extractAnswer({ steps: [], responseMessage: 'Done.' })).toBe('Done.');
-    expect(extractAnswer({ steps: [] })).toBeUndefined();
+  it('is nothing when the round has no response', () => {
+    expect(extractAnswer({})).toBeUndefined();
+    expect(extractAnswer({ responseMessage: '' })).toBeUndefined();
   });
 });

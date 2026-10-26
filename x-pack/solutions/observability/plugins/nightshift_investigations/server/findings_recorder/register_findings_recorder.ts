@@ -91,8 +91,7 @@ export const registerFindingsRecorder = ({
           }
 
           try {
-            const answer =
-              extractAnswer({ steps: round.steps, responseMessage: round.response?.message }) ?? '';
+            const answer = extractAnswer({ responseMessage: round.response?.message }) ?? '';
             await coordinator.runFinal({
               conversationId,
               timeoutMs: FINDINGS_RECORDER_FINAL_TIMEOUT_MS,

@@ -15,7 +15,6 @@ import {
   registerInvestigationAgentType,
   NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
 } from '.';
-import { REPLY_USER_TOOL_ID } from '../../tools/reply_user/tool';
 import { TIME_CONVERTER_TOOL_ID } from '../../tools/time_converter/tool';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
@@ -62,11 +61,7 @@ describe('Nightshift investigation agent type', () => {
       workflow_ids: ['system-nightshift-sandbox-materialize-workspace'],
       post_execution_workflow_ids: ['system-nightshift-agent-optimize'],
     });
-    expect(base.tools?.[0]?.tool_ids).toEqual([
-      ...SANDBOX_TOOL_IDS,
-      TIME_CONVERTER_TOOL_ID,
-      REPLY_USER_TOOL_ID,
-    ]);
+    expect(base.tools?.[0]?.tool_ids).toEqual([...SANDBOX_TOOL_IDS, TIME_CONVERTER_TOOL_ID]);
     expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeEsql);
     // Its own prompt, not the significant-events one: it documents the sandbox query path.
     expect(base.instructions).toContain('/workspace/elastic.md');
@@ -124,7 +119,7 @@ describe('Nightshift investigation agent type', () => {
 
     expect(base.workflow_ids).toBeUndefined();
     expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
-    expect(base.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID, REPLY_USER_TOOL_ID]);
+    expect(base.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID]);
   });
 
   it('allow-lists the telemetry connector when one is configured', () => {
@@ -139,20 +134,21 @@ describe('Nightshift investigation agent type', () => {
     expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
   });
 
-  it('offers only time_converter_tool and reply_user when the sandbox is not configured', () => {
+  it('offers only time_converter_tool when the sandbox is not configured', () => {
     const base = staticBase(
       getInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: false })
     );
 
-    expect(base.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID, REPLY_USER_TOOL_ID]);
+    expect(base.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID]);
   });
 
-  it('instructs the agent to answer through reply_user and not to record findings', () => {
+  it('instructs the agent to answer in its final message and not to record findings', () => {
     const { instructions } = staticBase(
       getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true })
     );
 
-    expect(instructions).toContain('`reply_user`');
+    expect(instructions).not.toContain('reply_user');
+    expect(instructions).toContain('final message');
     for (const tool of [
       'set_conversation_metadata',
       'agentic_investigations.set_impact',

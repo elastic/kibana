@@ -19,23 +19,9 @@ import { deriveCausalConfirmed } from '../decision_trees/turn';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import { createInvestigationUsageTelemetry } from '../lib/investigation_usage_telemetry';
 import { renderMemoryTranscript } from '../memory/transcript';
-import { REPLY_USER_TOOL_ID } from '../tools/reply_user/tool';
 import { toolCallsSchema } from './tool_calls_schema';
 
 const MAX_INPUT_CHARS = 100_000;
-
-/**
- * The investigator's answer. It gives it with `reply_user`, so the round's closing message is not
- * the answer: take the last `reply_user` response, else the round's response.
- */
-const answerOf = (toolCalls: InvestigationToolCall[], response: string): string => {
-  const reply = toolCalls
-    .filter((call) => call.tool_id === REPLY_USER_TOOL_ID)
-    .map((call) => (call.params as { response?: unknown } | undefined)?.response)
-    .filter((value): value is string => typeof value === 'string' && value.length > 0)
-    .at(-1);
-  return reply ?? response;
-};
 
 /**
  * Whether the round is a follow-up: not the first round of its conversation. When the conversation
@@ -155,7 +141,7 @@ export const decisionTreePrepareStepDefinition = ({
       const workflowContext = context.contextManager.getContext();
       const { spaceId } = workflowContext.workflow;
       const investigatorToolCalls = (toolCalls ?? []) as InvestigationToolCall[];
-      const answer = answerOf(investigatorToolCalls, response);
+      const answer = response;
 
       // Whether a cause was confirmed needs ground truth, and a first round has none: only a
       // person's follow-up on the investigation can confirm or correct its cause. So the causal

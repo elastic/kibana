@@ -7,7 +7,7 @@
 
 import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
-import { extractReplyUserResponse, extractToolCallTrajectory } from './tool_call_trajectory';
+import { extractFinalResponse, extractToolCallTrajectory } from './tool_call_trajectory';
 
 let nextId = 0;
 
@@ -88,19 +88,18 @@ describe('extractToolCallTrajectory', () => {
   });
 });
 
-describe('extractReplyUserResponse', () => {
-  it('returns undefined when the agent never replied', () => {
-    expect(extractReplyUserResponse(roundsOf([]))).toBeUndefined();
+describe('extractFinalResponse', () => {
+  it('returns undefined when the last round has no response', () => {
+    expect(extractFinalResponse([])).toBeUndefined();
+    expect(extractFinalResponse([{ response: { message: '' } }] as never)).toBeUndefined();
   });
 
-  it('returns the response of the last reply_user call', () => {
-    const response = extractReplyUserResponse(
-      roundsOf([
-        toolCallStep('reply_user', { response: 'first' }, { response: 'first' }),
-        toolCallStep('nightshift_sandbox_bash', { command: 'ls' }, { stdout: '' }),
-        toolCallStep('reply_user', { response: 'Root cause: bad deploy' }, { response: 'x' }),
-      ])
-    );
-    expect(response).toBe('Root cause: bad deploy');
+  it('returns the message of the last round', () => {
+    expect(
+      extractFinalResponse([
+        { response: { message: 'first' } },
+        { response: { message: 'Root cause: bad deploy' } },
+      ] as never)
+    ).toBe('Root cause: bad deploy');
   });
 });

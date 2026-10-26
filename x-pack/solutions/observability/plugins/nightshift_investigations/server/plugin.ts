@@ -75,7 +75,6 @@ import { registerFindingsRecorder } from './findings_recorder';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { registerAssistantAgentType } from './agents/assistant';
 import { createDecisionTreeTools } from './tools/decision_tree';
-import { createReplyUserTool } from './tools/reply_user/tool';
 import { createTimeConverterTool } from './tools/time_converter/tool';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
@@ -276,7 +275,6 @@ export class NightshiftInvestigationsPlugin
           logger: this.logger.get('findings_recorder'),
         });
       }
-      plugins.agentBuilder.tools.register(createReplyUserTool());
       plugins.agentBuilder.tools.register(createTimeConverterTool());
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);

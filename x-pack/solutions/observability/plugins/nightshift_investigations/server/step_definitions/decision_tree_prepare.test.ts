@@ -99,10 +99,7 @@ describe('decisionTreePrepareStepDefinition', () => {
     });
   });
   describe('causal check', () => {
-    const replyUserCall = {
-      tool_id: 'reply_user',
-      params: { response: 'Root cause: the 01:00 deploy doubled DB latency.' },
-    };
+    const answer = 'Root cause: the 01:00 deploy doubled DB latency.';
 
     // The conversation has two rounds: r0 started the investigation, r1 is a person's follow-up.
     const agentBuilderWithRounds = () =>
@@ -139,7 +136,7 @@ describe('decisionTreePrepareStepDefinition', () => {
         .mockResolvedValue({ inferenceClient: { output: jest.fn() } } as never);
     });
 
-    it("uses the reply_user answer, not the round's closing message, and the check's verdict", async () => {
+    it("checks the round's answer and uses the check's verdict", async () => {
       jest.mocked(checkCausalConfirmation).mockResolvedValue({
         isFeedbackMessage: true,
         causalConfirmed: true,
@@ -147,11 +144,11 @@ describe('decisionTreePrepareStepDefinition', () => {
         learning: '',
       });
 
-      await runWithModel({ tool_calls: [replyUserCall] });
+      await runWithModel({ response: answer });
 
       expect(prepareReinforcementTurn).toHaveBeenCalledWith(
         expect.objectContaining({
-          response: 'Root cause: the 01:00 deploy doubled DB latency.',
+          response: answer,
           causalConfirmed: true,
         })
       );
@@ -169,7 +166,7 @@ describe('decisionTreePrepareStepDefinition', () => {
       });
 
       await runWithModel({
-        tool_calls: [{ tool_id: 'reply_user', params: { response: 'status: confirmed' } }],
+        response: 'status: confirmed',
       });
 
       expect(prepareReinforcementTurn).toHaveBeenCalledWith(
@@ -180,7 +177,7 @@ describe('decisionTreePrepareStepDefinition', () => {
     it('falls back to the text match when the check cannot run', async () => {
       jest.mocked(checkCausalConfirmation).mockResolvedValue(undefined);
 
-      await runWithModel({ tool_calls: [replyUserCall] });
+      await runWithModel({ response: answer });
 
       expect(prepareReinforcementTurn).toHaveBeenCalledWith(
         expect.objectContaining({ causalConfirmed: false })
@@ -190,7 +187,7 @@ describe('decisionTreePrepareStepDefinition', () => {
     it('does not check a first round: there is no ground truth yet', async () => {
       await runWithModel({
         round_id: 'r0',
-        tool_calls: [{ tool_id: 'reply_user', params: { response: 'status: confirmed' } }],
+        response: 'status: confirmed',
       });
 
       expect(checkCausalConfirmation).not.toHaveBeenCalled();
@@ -200,7 +197,7 @@ describe('decisionTreePrepareStepDefinition', () => {
     });
 
     it('treats a round it cannot place in its conversation as a first round', async () => {
-      await runWithModel({ conversation_id: undefined, tool_calls: [replyUserCall] });
+      await runWithModel({ conversation_id: undefined, response: answer });
 
       expect(checkCausalConfirmation).not.toHaveBeenCalled();
     });
@@ -208,7 +205,7 @@ describe('decisionTreePrepareStepDefinition', () => {
     it('does not fail the round when the model cannot be loaded', async () => {
       jest.mocked(createOptimizeModel).mockRejectedValue(new Error('no connector'));
 
-      await expect(runWithModel({ tool_calls: [replyUserCall] })).resolves.toMatchObject({
+      await expect(runWithModel({ response: answer })).resolves.toMatchObject({
         output: { skipped: false },
       });
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('no connector'));

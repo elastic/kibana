@@ -12,7 +12,6 @@ import {
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
 import { MessageRole, type Message, type ToolCall } from '@kbn/inference-common';
-import { REPLY_USER_TOOL_ID } from '../tools/reply_user/tool';
 import { SANDBOX_BASH_TOOL_ID } from '../tools/sandbox_bash/tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
@@ -189,7 +188,6 @@ export const buildRecorderMessages = ({
  * as the agent used new tools would throw the cached conversation away each time.
  */
 const KNOWN_AGENT_TOOLS = [
-  REPLY_USER_TOOL_ID,
   SANDBOX_BASH_TOOL_ID,
   SANDBOX_STR_REPLACE_TOOL_ID,
   SANDBOX_VIEW_FILE_TOOL_ID,
@@ -209,20 +207,10 @@ export const toolNamesToDefine = (messages: readonly Message[]): string[] => {
   return [...names].sort();
 };
 
-/** The agent's final answer: the last `reply_user` response, else the round's response message. */
+/** The agent's final answer: the round's response message, clipped. */
 export const extractAnswer = ({
-  steps,
   responseMessage,
 }: {
-  steps: readonly ConversationRoundStep[];
   responseMessage?: string;
-}): string | undefined => {
-  const reply = steps
-    .filter(isToolCallStep)
-    .filter(({ tool_id: toolId }) => toolId === REPLY_USER_TOOL_ID)
-    .map(({ params }) => (params as { response?: unknown }).response)
-    .filter((response): response is string => typeof response === 'string' && response.length > 0)
-    .at(-1);
-  const answer = reply ?? (responseMessage?.length ? responseMessage : undefined);
-  return answer?.slice(0, ANSWER_MAX_CHARS);
-};
+}): string | undefined =>
+  responseMessage?.length ? responseMessage.slice(0, ANSWER_MAX_CHARS) : undefined;

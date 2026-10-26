@@ -58,15 +58,10 @@ export const extractToolCallTrajectory = (
     }))
   );
 
-const REPLY_USER_TOOL_ID = 'reply_user';
-
-/** The `response` of the last `reply_user` call: the investigation's answer when it records no verdict. */
-export const extractReplyUserResponse = (
-  rounds: Array<Pick<ConversationRound, 'steps'>>
-): string | undefined =>
-  rounds
-    .flatMap(({ steps }) => steps.filter(isToolCallStep))
-    .filter(({ tool_id: toolId }) => toolId === REPLY_USER_TOOL_ID)
-    .map(({ params }) => (params as { response?: unknown }).response)
-    .filter((response): response is string => typeof response === 'string' && response.length > 0)
-    .at(-1);
+/** The final message of the last round: the investigation's answer when it records no verdict. */
+export const extractFinalResponse = (
+  rounds: Array<Pick<ConversationRound, 'response'>>
+): string | undefined => {
+  const message = rounds.at(-1)?.response?.message;
+  return typeof message === 'string' && message.length > 0 ? message : undefined;
+};
