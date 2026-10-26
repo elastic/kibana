@@ -263,15 +263,22 @@ export class LensStorage extends SOContentStorage<LensCrud> {
 
     const soClient = await LensStorage.getSOClientFromRequest(ctx);
 
-    // We need to use create instead of update because of https://github.com/elastic/kibana/issues/160116
-    const savedObject = await soClient.create<LensAttributes>(LENS_CONTENT_TYPE, dataToLatest, {
+    // `mergeAttributes: false` fully replaces nested Lens state instead of using the default
+    // deep merge (see #160116). `upsert` supplies the complete attributes when the object does
+    // not exist, allowing Saved Objects update to create it atomically.
+    const partialSavedObject = await soClient.update<LensAttributes>(
+      LENS_CONTENT_TYPE,
       id,
-      overwrite: true, // always upsert
-      ...optionsToLatest,
-    });
+      dataToLatest,
+      {
+        ...optionsToLatest,
+        mergeAttributes: false,
+        upsert: dataToLatest,
+      }
+    );
 
     const result = {
-      item: this.savedObjectToItem(savedObject),
+      item: this.savedObjectToItem(partialSavedObject, true),
     };
 
     const validationError = transforms.update.out.result.validate(result);
