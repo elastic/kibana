@@ -14,7 +14,6 @@ import {
   disconnectRouteFromTarget,
   disconnectSourceFromDestination,
   getUnitConnections,
-  hasSourceConnection,
   moveRouteConnection,
   moveUnitConnection,
   removeComponentFromPipelines,
