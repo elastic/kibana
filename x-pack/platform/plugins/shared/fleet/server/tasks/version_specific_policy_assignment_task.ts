@@ -267,13 +267,21 @@ export class VersionSpecificPolicyAssignmentTask {
         return;
       }
 
-      const mismatchedVariantsByPolicyId = await this.findMismatchedVariants(
+      // One query for the page: only the policies that have agents to look at are visited, instead of
+      // the agent queries of every policy of every run.
+      const candidatesByPolicyId = await this.findPolicyIdsWithCandidateAgents(
         esClient,
         agentPolicyPageResults.map((agentPolicy) => agentPolicy.id),
         abortController
       );
+      this.logger.debug(
+        `[VersionSpecificPolicyAssignmentTask] ${candidatesByPolicyId.size} of ${agentPolicyPageResults.length} agent policies have agents to assign`
+      );
 
       for (const agentPolicy of agentPolicyPageResults) {
+        if (!candidatesByPolicyId.has(agentPolicy.id)) {
+          continue;
+        }
         throwIfAborted(abortController);
         await this.processAgentPolicyForVersionAssignment(
           esClient,
@@ -281,7 +289,7 @@ export class VersionSpecificPolicyAssignmentTask {
           agentPolicy,
           abortController,
           deployedThisRun,
-          mismatchedVariantsByPolicyId.get(agentPolicy.id) ?? []
+          candidatesByPolicyId.get(agentPolicy.id)!
         );
       }
     }
@@ -330,25 +338,34 @@ export class VersionSpecificPolicyAssignmentTask {
   }
 
   /**
-   * Finds the variants of the given agent policies that have active agents running another minor version than
-   * the one of the variant, whenever they upgraded. They are found with the agent versions per `policy_id`, not
-   * by reading the agents, so that an idle fleet, where every agent is on the matching variant, is not read on
-   * every run.
+   * Which of the given agent policies have agents that `findAgentsNeedingVersionSpecificPolicies` may
+   * find, with one search for all of them. Same agents as its query, so that it can skip the others:
+   * - active agents on the policy
+   * - active agents on a variant that run another minor version than the one of the variant, whenever they
+   *   upgraded. They are found with the agent versions per `policy_id`, not by reading the agents, so that
+   *   an idle fleet, where every agent is on the matching variant, is not read on every run.
    *
+   * The result has the variants with such agents of every agent policy, to look only at those agents.
    * Agents without `policy_base_id` (enrolled by an older fleet-server) are found through their `policy_id`,
    * so that a missing field never hides an agent. Those can be of any agent policy, so the `policy_id`s are
    * paged through rather than truncated. Only exact terms are used, no wildcard or prefix queries.
    */
-  private async findMismatchedVariants(
+  private async findPolicyIdsWithCandidateAgents(
     esClient: ElasticsearchClient,
     agentPolicyIds: string[],
     abortController: AbortController
   ): Promise<Map<string, MismatchedVariant[]>> {
-    const mismatchedVariants = new Map<string, MismatchedVariant[]>();
+    // An agent policy has candidates when it has agents on the policy, or on a mismatched variant
+    const candidates = new Map<string, MismatchedVariant[]>();
     const policyIds = new Set(agentPolicyIds);
     if (policyIds.size === 0) {
-      return mismatchedVariants;
+      return candidates;
     }
+    const getVariants = (baseId: string) => {
+      const variants = candidates.get(baseId) ?? [];
+      candidates.set(baseId, variants);
+      return variants;
+    };
 
     let afterKey: Record<string, string> | undefined;
     do {
@@ -372,6 +389,8 @@ export class VersionSpecificPolicyAssignmentTask {
           bool: {
             filter: [{ term: { active: true } }],
             should: [
+              // on the policy
+              { terms: { policy_id: agentPolicyIds } },
               // on a variant: matched by the base policy id, or for agents without it, by any `policy_id`
               { terms: { policy_base_id: agentPolicyIds } },
               { bool: { must_not: [{ exists: { field: 'policy_base_id' } }] } },
@@ -399,33 +418,33 @@ export class VersionSpecificPolicyAssignmentTask {
       for (const bucket of agg?.buckets ?? []) {
         const policyId = bucket.key.policy_id;
         const { baseId, version } = splitVersionSuffixFromPolicyId(policyId);
-        if (version === null || !policyIds.has(baseId)) {
+        if (!policyIds.has(baseId)) {
           continue;
         }
-        const variants = mismatchedVariants.get(baseId) ?? [];
-        if (bucket.agent_versions.sum_other_doc_count) {
-          variants.push({ policyId });
-        } else {
-          // Unparsable versions are never moved, like in `findAgentsNeedingVersionSpecificPolicies`
-          const agentVersions = bucket.agent_versions.buckets
-            .map(({ key }) => key)
-            .filter((agentVersion) => {
-              const minorVersion = this.extractMinorVersion(agentVersion);
-              return minorVersion !== null && minorVersion !== version;
-            });
-          if (agentVersions.length > 0) {
-            variants.push({ policyId, agentVersions });
-          }
+        if (version === null) {
+          getVariants(baseId);
+          continue;
         }
-        if (variants.length > 0) {
-          mismatchedVariants.set(baseId, variants);
+        if (bucket.agent_versions.sum_other_doc_count) {
+          getVariants(baseId).push({ policyId });
+          continue;
+        }
+        // Unparsable versions are never moved, like in `findAgentsNeedingVersionSpecificPolicies`
+        const agentVersions = bucket.agent_versions.buckets
+          .map(({ key }) => key)
+          .filter((agentVersion) => {
+            const minorVersion = this.extractMinorVersion(agentVersion);
+            return minorVersion !== null && minorVersion !== version;
+          });
+        if (agentVersions.length > 0) {
+          getVariants(baseId).push({ policyId, agentVersions });
         }
       }
       // A composite aggregation returns `after_key` with any bucket: a page that is not full is the last one
       afterKey = (agg?.buckets.length ?? 0) < POLICY_IDS_PAGE_SIZE ? undefined : agg?.after_key;
     } while (afterKey);
 
-    return mismatchedVariants;
+    return candidates;
   }
 
   /**
