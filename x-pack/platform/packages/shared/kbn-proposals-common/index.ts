@@ -43,6 +43,7 @@ export {
   isTodoProposal,
   isExpired,
   isProposalSettling,
+  isAwaitingRetry,
   isTerminal,
   OPEN_PROPOSAL_STATUSES,
   SETTLED_PROPOSAL_STATUSES,
