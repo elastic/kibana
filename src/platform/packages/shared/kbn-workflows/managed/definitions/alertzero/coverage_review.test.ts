@@ -924,12 +924,12 @@ describe('Detection Coverage review', () => {
       [
         'a check that failed on a missing model',
         { coverage_check: { error: { message: missingModel }, output: {} } },
-        `**Coverage check failed:** ${missingModel}\n\nChoose a model for this feature in Stack Management > Feature Settings.`,
+        `**Coverage check failed:** ${missingModel}\n\nNothing was proposed.\n\nChoose an AI model in Stack Management > Feature Settings.`,
       ],
       [
         'a check that returned no verdict',
         { coverage_check: { output: { structured_output: {} } } },
-        '**Coverage check failed:** the check returned no verdict.',
+        '**Coverage check failed:** the check returned no verdict.\n\nNothing was proposed.',
       ],
       [
         'a failed rule-creation run',
@@ -938,6 +938,15 @@ describe('Detection Coverage review', () => {
           run_rule_creation: { error: { message: 'boom' } },
         },
         '**Rule creation failed:** boom',
+      ],
+      // The child's gate can fail after it posted a proposal, so this note claims nothing about one.
+      [
+        'a rule-creation run that failed on a missing model',
+        {
+          coverage_check: { output: { structured_output: { verdict: 'no_coverage' } } },
+          run_rule_creation: { error: { message: missingModel } },
+        },
+        `**Rule creation failed:** ${missingModel}\n\nChoose an AI model in Stack Management > Feature Settings.`,
       ],
       [
         'a check with a verdict',

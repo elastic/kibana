@@ -897,8 +897,8 @@ steps:
         attributes:
           status: processed
 
-  # A check without a verdict, or a failed rule-creation run, proposed nothing. `note` is
-  # set only when an investigation exists to tell the analyst so.
+  # A check without a verdict, or a failed rule-creation run, leaves the gap pending.
+  # `note` tells the analyst why, and is empty when no investigation exists.
   - name: resolve_failure
     type: data.set
     with:
@@ -916,12 +916,14 @@ steps:
         {%- if steps.create_investigation.output.conversation_id != null -%}
         {%- if verdict == null or verdict == '' -%}
         **Coverage check failed:** {{ steps.coverage_check.error.message | default: 'the check returned no verdict.' }}
+
+        Nothing was proposed.
         {%- elsif steps.run_rule_creation.error != null -%}
         **Rule creation failed:** {{ steps.run_rule_creation.error.message }}
         {%- endif -%}
         {%- if cause contains 'No connector available' %}
 
-        Choose a model for this feature in Stack Management > Feature Settings.
+        Choose an AI model in Stack Management > Feature Settings.
         {%- endif -%}
         {%- endif -%}
 
@@ -939,7 +941,7 @@ steps:
         message: |-
           {{ steps.resolve_failure.output.note }}
 
-          Nothing was proposed. The gap stays pending, and the next sweep retries it.
+          The gap stays pending, and the next sweep retries it.
 
   # Telemetry: the review's outcome. Free-text outputs are sent only as flags.
   - name: report_review_completed
