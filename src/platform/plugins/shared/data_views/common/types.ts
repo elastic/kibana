@@ -106,6 +106,10 @@ export interface SavedObjectsClientCommonFindArgs {
    * Fields to search
    */
   searchFields?: string[];
+  /**
+   * Namespaces to search
+   */
+  namespaces?: string[];
 }
 
 /**
@@ -152,8 +156,9 @@ export interface PersistenceAPI {
    * Delete a saved object by id
    * @param type - type of saved object
    * @param id - id of saved object
+   * @param namespaces - namespaces the saved object lives in, the first one is used to resolve it
    */
-  delete: (id: string) => Promise<void>;
+  delete: (id: string, namespaces?: string[]) => Promise<void>;
 }
 
 export interface GetFieldsOptions {

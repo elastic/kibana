@@ -542,6 +542,25 @@ describe('IndexPatterns', () => {
     expect(dataView.isPersisted()).toBe(true);
   });
 
+  test('createSavedObject with overwrite looks up and deletes the duplicate in the requested namespaces', async () => {
+    const namespaces = ['test-namespace'];
+    const dataView = await indexPatterns.create(
+      { title: 'kibana-*', name: 'test', namespaces },
+      true
+    );
+
+    savedObjectsClient.find = jest
+      .fn()
+      .mockResolvedValue([{ ...savedObject, id: 'dupe-id', namespaces }]);
+    savedObjectsClient.delete = jest.fn().mockResolvedValue(undefined);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({ ...savedObject, id: dataView.id });
+
+    await indexPatterns.createSavedObject(dataView, true);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledWith(expect.objectContaining({ namespaces }));
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('dupe-id', namespaces);
+  });
+
   test('find', async () => {
     const search = 'kibana*';
     const size = 10;

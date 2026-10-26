@@ -65,7 +65,13 @@ export class SavedObjectsClientWrapper implements PersistenceAPI {
   async create(attributes: DataViewAttributes, options: DataViewCrudTypes['CreateOptions']) {
     return await this.savedObjectClient.create(DATA_VIEW_SAVED_OBJECT_TYPE, attributes, options);
   }
-  async delete(id: string) {
-    await this.savedObjectClient.delete(DATA_VIEW_SAVED_OBJECT_TYPE, id, { force: true });
+  async delete(id: string, namespaces?: string[]) {
+    // `namespace` can't be passed per call when the spaces extension is enabled,
+    // so a client scoped to the target space is used instead
+    const [namespace] = namespaces ?? [];
+    const client = namespace
+      ? this.savedObjectClient.asScopedToNamespace(namespace)
+      : this.savedObjectClient;
+    await client.delete(DATA_VIEW_SAVED_OBJECT_TYPE, id, { force: true });
   }
 }

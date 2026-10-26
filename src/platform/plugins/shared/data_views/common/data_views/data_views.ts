@@ -1275,11 +1275,11 @@ export class DataViewsService {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError();
     }
-    const dupe = await findByName(this.savedObjectsClient, dataView.getName());
+    const dupe = await findByName(this.savedObjectsClient, dataView.getName(), dataView.namespaces);
 
     if (dupe) {
       if (overwrite) {
-        await this.delete(dupe.id);
+        await this.delete(dupe.id, dupe.namespaces);
       } else {
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
       }
@@ -1408,14 +1408,15 @@ export class DataViewsService {
   /**
    * Deletes an index pattern from .kibana index.
    * @param indexPatternId: Id of kibana Index Pattern to delete
+   * @param namespaces: Namespaces the index pattern lives in, defaults to the current one
    */
-  async delete(indexPatternId: string) {
+  async delete(indexPatternId: string, namespaces?: string[]) {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError(indexPatternId);
     }
     this.dataViewCache.delete(indexPatternId);
     this.dataViewLazyCache.delete(indexPatternId);
-    return this.savedObjectsClient.delete(indexPatternId);
+    return this.savedObjectsClient.delete(indexPatternId, namespaces);
   }
 
   private async getDefaultDataViewId() {
