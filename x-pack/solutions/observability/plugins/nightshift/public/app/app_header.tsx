@@ -72,6 +72,16 @@ const sourcesEbtProps = getEbtProps({
   element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
 });
 
+const automationsEbtProps = getEbtProps({
+  action: NIGHTSHIFT_EBT_ACTIONS.VIEW_AUTOMATIONS,
+  element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
+});
+
+const detectionsEbtProps = getEbtProps({
+  action: NIGHTSHIFT_EBT_ACTIONS.VIEW_DETECTIONS,
+  element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
+});
+
 const applyEbtProps = (
   ebtProps: typeof settingsEbtProps,
   params?: AppMenuRunActionParams
@@ -132,7 +142,10 @@ export function NightshiftAppHeader({
                 label: automationsLabel,
                 iconType: 'workflow',
                 href: automationsHref,
-                run: () => void onAutomationsClick(),
+                run: (params?: AppMenuRunActionParams) => {
+                  applyEbtProps(automationsEbtProps, params);
+                  void onAutomationsClick();
+                },
                 testId: 'nightshiftAutomationsPrimaryAction',
               },
             ]
@@ -144,7 +157,10 @@ export function NightshiftAppHeader({
                 label: detectionsLabel,
                 iconType: 'visGauge' as const,
                 href: detectionsHref,
-                run: () => void onDetectionsClick(),
+                run: (params?: AppMenuRunActionParams) => {
+                  applyEbtProps(detectionsEbtProps, params);
+                  void onDetectionsClick();
+                },
                 testId: 'nightshiftDetectionsPrimaryAction',
               },
             ]

@@ -52,6 +52,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   VIEW_ALL_SIGNIFICANT_EVENTS: 'viewAllSignificantEvents',
   VIEW_AUTOMATION_RUNS: 'viewAutomationRuns',
   VIEW_AUTOMATIONS: 'viewAutomations',
+  VIEW_DETECTIONS: 'viewDetections',
   VIEW_DETECTION: 'viewDetection',
   VIEW_DETECTION_TAB: 'viewDetectionTab',
   VIEW_ENTITY: 'viewEntity',
