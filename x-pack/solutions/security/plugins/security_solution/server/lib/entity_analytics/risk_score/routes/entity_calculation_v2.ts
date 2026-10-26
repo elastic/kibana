@@ -19,14 +19,15 @@ import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import type { RiskScoresEntityCalculationResponse } from '../../../../../common/api/entity_analytics';
 import { RiskScoresEntityCalculationRequest } from '../../../../../common/api/entity_analytics';
 import { APP_ID, RISK_SCORE_ENTITY_CALCULATION_V2_URL } from '../../../../../common/constants';
+import { RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES } from '../../../../../common/entity_analytics/risk_engine';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
+import { checkAndFormatPrivileges } from '../../utils/check_and_format_privileges';
 import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
 import { recalculateEntityRiskScore } from '../recalculate_entity_risk_score';
-import { RiskEngineDataWriter } from '../risk_engine_data_writer';
-import { getIndexPatternDataStream } from '../configurations';
+import { getLookupIndexName } from '../maintainer/lookup/lookup_index';
 import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
 
 type Handler = (
@@ -61,16 +62,31 @@ const handler: (
   }
 
   const namespace = securityContext.getSpaceId();
-  const [, { security, entityStore, workflowsExtensions }] = await getStartServices();
-  // The recalculation follows an entity update (e.g. a criticality change), so only users who can
-  // read and write entity store data may trigger it. The scoring itself runs with the internal user
-  // below, since it relies on system-owned indices.
+  const [, { security }] = await getStartServices();
+
+  // Check privileges by the indices the calculation reads and writes.
+  const [riskScorePrivileges, entityStorePrivileges] = await Promise.all([
+    checkAndFormatPrivileges({
+      request,
+      security,
+      privilegesToCheck: {
+        elasticsearch: {
+          cluster: [],
+          index: {
+            ...RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
+            [getLookupIndexName(namespace)]: ['read'],
+          },
+        },
+      },
+    }),
+    checkEntityStoreIndexPrivileges({ request, security, spaceId: namespace }),
+  ]);
   const { has_read_permissions: canReadEntityStore, has_write_permissions: canWriteEntityStore } =
-    await checkEntityStoreIndexPrivileges({ request, security, spaceId: namespace });
-  if (!canReadEntityStore || !canWriteEntityStore) {
+    entityStorePrivileges;
+  if (!riskScorePrivileges.has_all_required || !canReadEntityStore || !canWriteEntityStore) {
     return siemResponse.error({
       statusCode: 403,
-      body: 'You do not have the privileges required to calculate risk scores for this entity.',
+      body: 'You do not have the index privileges required to calculate risk scores.',
     });
   }
 
@@ -85,12 +101,13 @@ const handler: (
   });
 
   const soClient = coreContext.savedObjects.client;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
   try {
     const idBasedRiskScoringEnabled = await getIsIdBasedRiskScoringEnabled(
       coreContext.uiSettings.client
     );
+    const riskScoreDataClient = securityContext.getRiskScoreDataClient();
 
     await runWithSpan({
       name: ENTITY_ANALYTICS_SPAN_NAMES.riskScoreOndemandCalculate,
@@ -103,21 +120,11 @@ const handler: (
         recalculateEntityRiskScore({
           esClient,
           soClient,
-          crudClient: entityStore.createCRUDClient(
-            esClient,
-            namespace,
-            workflowsExtensions ? () => workflowsExtensions.getClient(request) : undefined
-          ),
+          crudClient: securityContext.getEntityStoreUpdateClient(),
           namespace,
           entityId,
           identifierType,
-          getWriter: async (ns) =>
-            new RiskEngineDataWriter({
-              esClient,
-              namespace: ns,
-              index: getIndexPatternDataStream(ns).alias,
-              logger,
-            }),
+          getWriter: (ns) => riskScoreDataClient.getWriter({ namespace: ns }),
           idBasedRiskScoringEnabled,
           logger,
           alertSampleSizePerShard:

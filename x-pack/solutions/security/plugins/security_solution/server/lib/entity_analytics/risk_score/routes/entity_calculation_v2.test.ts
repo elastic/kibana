@@ -10,6 +10,7 @@ import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { checkEntityStoreIndexPrivileges } from '@kbn/entity-store/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import { RISK_SCORE_ENTITY_CALCULATION_V2_URL } from '../../../../../common/constants';
+import { RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES } from '../../../../../common/entity_analytics/risk_engine';
 import {
   serverMock,
   requestContextMock,
@@ -22,6 +23,8 @@ import type {
 import { configMock } from '../../../../config.mock';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { riskScoreEntityCalculationRouteV2 } from './entity_calculation_v2';
+import { riskEnginePrivilegesMock } from '../../risk_engine/routes/risk_engine_privileges.mock';
+import { getLookupIndexName } from '../maintainer/lookup/lookup_index';
 import { getConfiguration } from '../../risk_engine/utils/saved_object_configuration';
 import { scoreBaseEntities } from '../maintainer/steps/score_base_entities';
 import { runResolutionScoringStep } from '../maintainer/steps/run_resolution_scoring_step';
@@ -71,7 +74,6 @@ describe('entity risk score V2 calculation route', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
   let logger: ReturnType<typeof loggerMock.create>;
   let getStartServicesMock: jest.Mock;
-  let createCRUDClientMock: jest.Mock;
   let mockCrudClient: jest.Mocked<EntityStoreCRUDClient>;
 
   const defaultBody = {
@@ -97,12 +99,11 @@ describe('entity risk score V2 calculation route', () => {
     mockCrudClient = {
       listEntities: jest.fn().mockResolvedValue({ entities: [entityDocMock] }),
     } as unknown as jest.Mocked<EntityStoreCRUDClient>;
-    createCRUDClientMock = jest.fn().mockReturnValue(mockCrudClient);
+    context.securitySolution.getEntityStoreUpdateClient.mockReturnValue(mockCrudClient);
     getStartServicesMock = jest.fn().mockResolvedValue([
       {},
       {
-        security: {},
-        entityStore: { createCRUDClient: createCRUDClientMock },
+        security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
       },
     ]);
 
@@ -141,19 +142,38 @@ describe('entity risk score V2 calculation route', () => {
     expect(response.status).toEqual(200);
   });
 
-  it('runs the scoring with the internal user', async () => {
-    const { elasticsearch } = await context.core;
+  it('only checks the index privileges the calculation needs, not cluster privileges', async () => {
+    const security = riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess();
+    getStartServicesMock.mockResolvedValue([{}, { security }]);
 
     await server.inject(buildRequest(), requestContextMock.convertContext(context));
 
-    expect(createCRUDClientMock).toHaveBeenCalledWith(
-      elasticsearch.client.asInternalUser,
-      context.securitySolution.getSpaceId(),
-      undefined
+    const checkPrivileges = (security.authz.checkPrivilegesDynamicallyWithRequest as jest.Mock).mock
+      .results[0].value;
+    expect(checkPrivileges).toHaveBeenCalledWith({
+      elasticsearch: {
+        cluster: [],
+        index: {
+          ...RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
+          [getLookupIndexName(context.securitySolution.getSpaceId())]: ['read'],
+        },
+      },
+    });
+  });
+
+  it('returns 403 and skips scoring when the user lacks the risk score or lookup index privileges', async () => {
+    getStartServicesMock.mockResolvedValue([
+      {},
+      { security: riskEnginePrivilegesMock.createMockSecurityStartWithNoRiskEngineAccess() },
+    ]);
+
+    const response = await server.inject(
+      buildRequest(),
+      requestContextMock.convertContext(context)
     );
-    expect(scoreBaseEntities).toHaveBeenCalledWith(
-      expect.objectContaining({ esClient: elasticsearch.client.asInternalUser })
-    );
+
+    expect(response.status).toEqual(403);
+    expect(scoreBaseEntities).not.toHaveBeenCalled();
   });
 
   it.each([

@@ -8,10 +8,13 @@
 import { useCallback } from 'react';
 import { useMutation } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../api';
+import { getMissingIndexPrivileges } from '../../../../common/entity_analytics/risk_engine';
 import { useEntityEnginePrivileges } from '../../components/entity_store/hooks/use_entity_engine_privileges';
+import { useRiskEnginePrivileges } from './use_risk_engine_privileges';
 
 export const useCalculateEntityRiskScore = ({
   identifierType,
@@ -26,14 +29,23 @@ export const useCalculateEntityRiskScore = ({
 }) => {
   const { addError } = useAppToasts();
   const { calculateEntityRiskScoreV2 } = useEntityAnalyticsRoutes();
-
+  const { data: riskEnginePrivileges } = useRiskEnginePrivileges();
   const { data: entityStorePrivileges } = useEntityEnginePrivileges();
-  // the route requires read and write access to the entity store
+
+  // Check if the user has the necessary privileges to calculate the risk score
+  const riskScoreIndexPrivileges = riskEnginePrivileges?.privileges.elasticsearch.index;
   const canCalculate =
-    !!entityStorePrivileges?.has_read_permissions && !!entityStorePrivileges?.has_write_permissions;
+    riskScoreIndexPrivileges != null &&
+    getMissingIndexPrivileges(riskScoreIndexPrivileges).length === 0 &&
+    !!entityStorePrivileges?.has_read_permissions &&
+    !!entityStorePrivileges?.has_write_permissions;
 
   const onError = useCallback(
     (error: unknown) => {
+      // the user can't calculate risk scores, so skip it instead of reporting an error after an
+      // otherwise successful action (e.g. changing asset criticality)
+      if (isHttpFetchError(error) && error.response?.status === 403) return;
+
       addError(error, {
         title: i18n.translate('xpack.securitySolution.entityDetails.userPanel.error', {
           defaultMessage: 'There was a problem calculating the {entity} risk score',
@@ -50,7 +62,7 @@ export const useCalculateEntityRiskScore = ({
   });
 
   const calculateEntityRiskScoreCb = useCallback(async () => {
-    // skip for users who can't trigger it
+    // skip for users who can't calculate it
     if (!canCalculate) return;
     mutateV2({
       identifier_type: identifierType,

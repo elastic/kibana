@@ -213,6 +213,11 @@ editor:
       privileges:
         - 'read'
       allow_restricted_indices: false
+    - names:
+        - '.entity_analytics.risk_score.lookup-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -946,6 +951,11 @@ soc_manager:
       privileges:
         - 'read'
       allow_restricted_indices: false
+    - names:
+        - '.entity_analytics.risk_score.lookup-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -1062,6 +1072,11 @@ detections_admin:
       privileges:
         - 'read'
       allow_restricted_indices: false
+    - names:
+        - '.entity_analytics.risk_score.lookup-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -1173,6 +1188,11 @@ platform_engineer:
     # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
     - names:
         - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
+    - names:
+        - '.entity_analytics.risk_score.lookup-*'
       privileges:
         - 'read'
       allow_restricted_indices: false
