@@ -158,11 +158,7 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
     actionId: 'ALERTING_V2_SNOOZE_EPISODE',
     isCompatible: (ep) => {
       const ctx = getActionContext(ep);
-      return (
-        Boolean(ctx?.instanceId) &&
-        Boolean(ctx?.ruleId) &&
-        !isEpisodeSnoozed(ep.last_snooze_action, ep.snoozed_until)
-      );
+      return Boolean(ctx?.instanceId) && Boolean(ctx?.ruleId);
     },
     execute: async (eps, http, context) => {
       const snoozedUntil: string | null = context?.snoozedUntil ?? null;
