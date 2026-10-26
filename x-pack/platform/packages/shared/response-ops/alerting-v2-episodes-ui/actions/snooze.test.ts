@@ -268,7 +268,6 @@ describe('createSnoozeAction', () => {
         episodes: [sourceEpisode, makeEpisode({ 'episode.id': 'e2' })],
       });
 
-      // Native rows have no source context to read a rule type from.
       expect(getRuleTypeIds).toHaveBeenCalledWith([sourceEpisode]);
       expect(open).toHaveBeenCalledWith(
         deps,
