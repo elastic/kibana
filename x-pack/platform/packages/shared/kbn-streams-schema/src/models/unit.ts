@@ -202,7 +202,11 @@ export const streamsUnitStatsFilterSchema = z.strictObject({
    * so the 128 cap is headroom, not a format check.
    */
   config_hash: z.string().min(1).max(128).optional(),
-  /** Absolute range, ISO 8601. Both fields are required when present. */
+  /**
+   * Absolute range, ISO 8601. Both fields are required when present. It applies to every
+   * component. A processor instance is a route position, so a range that spans a change of routes
+   * can mix routes: keep it short for processors.
+   */
   time_range: z
     .strictObject({ start: z.iso.datetime(), end: z.iso.datetime() })
     .refine(({ start, end }) => Date.parse(start) < Date.parse(end), {

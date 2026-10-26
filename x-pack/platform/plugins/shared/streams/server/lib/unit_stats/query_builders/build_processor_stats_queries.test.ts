@@ -14,9 +14,9 @@ const params = { unitId: 'default', window, ids: ['uppercase-message'] };
 const head = `SET unmapped_fields = "nullify"; FROM ${UNIT_METRICS_STREAM} | WHERE resource.attributes.unit.id == "default" AND @timestamp >= "${window.start}" AND @timestamp < "${window.end}" | WHERE scope.attributes.streams.step.id IN ("uppercase-message")`;
 
 describe('buildProcessorSumsQuery', () => {
-  it('divides the items in by the window and the duration by the items in, per pipeline and route', () => {
+  it('divides the items in by the time since the first data point and the duration by the items in, per pipeline and route', () => {
     expect(buildProcessorSumsQuery(params).print('basic')).toBe(
-      `${head} | EVAL delta = TO_DOUBLE(metrics.streams.step.items) | STATS sum_items_in = SUM(delta) WHERE attributes.direction == "in", duration_sum = SUM(metrics.streams.step.duration) BY step = scope.attributes.streams.step.id, pipeline = scope.attributes.streams.pipeline.id, route_index = scope.attributes.streams.route.index | EVAL window_seconds = DATE_DIFF("milliseconds", "${window.start}", "${window.end}") / 1000.0 | EVAL incoming_rate = sum_items_in / window_seconds, avg_duration_per_item = CASE(sum_items_in > 0, duration_sum / sum_items_in) | KEEP step, pipeline, route_index, incoming_rate, avg_duration_per_item | LIMIT 10000`
+      `${head} | EVAL delta = TO_DOUBLE(metrics.streams.step.items) | STATS sum_items_in = SUM(delta) WHERE attributes.direction == "in", duration_sum = SUM(metrics.streams.step.duration), first_seen = MIN(@timestamp) BY step = scope.attributes.streams.step.id, pipeline = scope.attributes.streams.pipeline.id, route_index = scope.attributes.streams.route.index | EVAL window_seconds = DATE_DIFF("milliseconds", first_seen, "${window.end}") / 1000.0 | EVAL incoming_rate = sum_items_in / window_seconds, avg_duration_per_item = CASE(sum_items_in > 0, duration_sum / sum_items_in) | KEEP step, pipeline, route_index, incoming_rate, avg_duration_per_item | LIMIT 10000`
     );
   });
 

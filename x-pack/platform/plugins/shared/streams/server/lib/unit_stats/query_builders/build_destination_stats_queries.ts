@@ -37,13 +37,12 @@ const filterDestinations = (
   );
 
 /**
- * Rate, failed rate and latency per destination over the window, from a plain `FROM`. A rate is
- * the exact sum of items over the length of the window. A sum of per-series `RATE`s would count
- * a series that ends and one that starts inside the window both in full. The window length is
- * taken in milliseconds: `DATE_DIFF` in seconds truncates, which skews short windows.
- * `failed_rate` counts every outcome except `success`: 0 when there are items and no failures,
- * null when there are no items. `AVG` of the duration histograms is the mean of all observations. `items` is a
- * counter, so it is cast first.
+ * Rate, failed rate and latency per destination, from a plain `FROM`. A rate is the exact sum of
+ * items over the time from the destination's first data point in the window to the end of it, so a
+ * destination that started inside the window is not diluted. The time is taken in milliseconds
+ * because `DATE_DIFF` in seconds truncates. `failed_rate` counts every outcome except `success`:
+ * 0 when there are items and no failures, null when there are no items. `AVG` of the duration
+ * histograms is the mean of all observations. `items` is a counter, so it is cast first.
  */
 export const buildDestinationRateQuery = (params: DestinationStatsQueryParams): ComposerQuery => {
   const items = normalizeColumn(DESTINATION_ITEMS_FIELD);
@@ -54,14 +53,15 @@ export const buildDestinationRateQuery = (params: DestinationStatsQueryParams): 
   const failedRate = esql.col(STATS_COLUMN.failedRate);
   const avgLatency = esql.col(STATS_COLUMN.avgLatency);
   const id = esql.col(STATS_COLUMN.id);
-  const { start, end } = params.window;
+  const { end } = params.window;
 
   return filterDestinations(esql.from(UNIT_METRICS_STREAM), params)
     .pipe`EVAL delta = TO_DOUBLE(${items})`.pipe`STATS sum_items = SUM(delta),
         failed_items = SUM(delta) WHERE ${outcome} != "success",
-        ${avgLatency} = AVG(${duration})
+        ${avgLatency} = AVG(${duration}),
+        first_seen = MIN(@timestamp)
       BY ${id} = ${destinationId}`
-    .pipe`EVAL window_seconds = DATE_DIFF("milliseconds", ${start}, ${end}) / 1000.0`
+    .pipe`EVAL window_seconds = DATE_DIFF("milliseconds", first_seen, ${end}) / 1000.0`
     .pipe`EVAL ${incomingRate} = sum_items / window_seconds,
         ${failedRate} = CASE(sum_items IS NOT NULL, COALESCE(failed_items, 0.0) / window_seconds)`
     .pipe`KEEP ${id}, ${incomingRate}, ${failedRate}, ${avgLatency}`;
