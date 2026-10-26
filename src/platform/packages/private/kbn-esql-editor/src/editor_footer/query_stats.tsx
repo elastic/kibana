@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { round } from 'lodash';
 import type { ESQLQueryStats } from '@kbn/esql-types';
 
@@ -28,7 +28,13 @@ function formatDocumentCount(count: number): string {
   return count.toString();
 }
 
-export function ESQLQueryStats({ queryStats }: { queryStats: ESQLQueryStats }) {
+export function ESQLQueryStats({
+  queryStats,
+  onDurationClick,
+}: {
+  queryStats: ESQLQueryStats;
+  onDurationClick?: () => void;
+}) {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup
@@ -39,9 +45,24 @@ export function ESQLQueryStats({ queryStats }: { queryStats: ESQLQueryStats }) {
     >
       {queryStats.durationInMs && (
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-queryStats-queryDuration">
-            <p>{queryStats.durationInMs}</p>
-          </EuiText>
+          {onDurationClick ? (
+            <EuiText size="xs">
+              <EuiLink
+                onClick={onDurationClick}
+                data-test-subj="ESQLEditor-queryStats-queryDuration"
+                aria-label={i18n.translate('esqlEditor.queryStats.openQueryProfileAriaLabel', {
+                  defaultMessage: '{duration}, open query profile',
+                  values: { duration: queryStats.durationInMs },
+                })}
+              >
+                {queryStats.durationInMs}
+              </EuiLink>
+            </EuiText>
+          ) : (
+            <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-queryStats-queryDuration">
+              <p>{queryStats.durationInMs}</p>
+            </EuiText>
+          )}
         </EuiFlexItem>
       )}
       {queryStats.totalDocumentsProcessed !== undefined && (

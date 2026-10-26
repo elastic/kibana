@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
+import { ESQL_QUERY_PROFILE_VIEW_ID } from '@kbn/data-plugin/public';
 import { DataViewType, type DataView, type DataViewSpec } from '@kbn/data-views-plugin/public';
 import {
   DiscoverFlyouts,
@@ -372,11 +373,19 @@ export const DiscoverTopNav = ({
     [esqlModeErrors]
   );
 
-  const { topNavBadges, topNavMenu, shareAction } = useDiscoverTopNav({
+  const { topNavBadges, topNavMenu, shareAction, openInspector } = useDiscoverTopNav({
     onOpenSaveModal,
     onOpenSaveAsModal,
     persistedDiscoverSession,
   });
+
+  const onQueryDurationClick = useCallback(() => {
+    const initialRequestId = dataStateContainer.inspectorAdapters.requests.getRequests().at(-1)?.id;
+    openInspector({
+      initialViewId: ESQL_QUERY_PROFILE_VIEW_ID,
+      initialRequestId,
+    });
+  }, [dataStateContainer, openInspector]);
 
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
@@ -468,6 +477,7 @@ export const DiscoverTopNav = ({
             : undefined
         }
         esqlQueryStats={esqlQueryStats}
+        onQueryDurationClick={onQueryDurationClick}
         onOpenQueryInNewTab={onOpenQueryInNewTab}
         esqlApproximation={
           isEsqlMode

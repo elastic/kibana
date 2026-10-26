@@ -58,6 +58,7 @@ import {
 } from '../../state_management/redux';
 import type { DiscoverAppState } from '../../state_management/redux';
 import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
+import type { useInspector } from '../../hooks/use_inspector';
 import { useDataState } from '../../hooks/use_data_state';
 import { TransferAction } from '../../../../plugin_imports/embeddable_editor_service';
 import { useDiscoverShareAction } from './use_discover_share_action';
@@ -82,6 +83,7 @@ export interface UseTopNavLinksParams {
 export interface UseTopNavLinksResult {
   menu: AppMenuConfig;
   shareAction: ReturnType<typeof useDiscoverShareAction>;
+  openInspector: ReturnType<typeof useInspector>;
 }
 
 /**
@@ -477,7 +479,7 @@ export const useTopNavLinks = ({
     onOpenSaveAsModal,
   ]);
 
-  return useMemo((): UseTopNavLinksResult => {
+  const menu = useMemo((): Pick<UseTopNavLinksResult, 'menu' | 'shareAction'> => {
     const config = appMenuRegistry.getAppMenuConfig();
 
     return {
@@ -498,4 +500,6 @@ export const useTopNavLinks = ({
       shareAction,
     };
   }, [appMenuRegistry, services, shareAction]);
+
+  return { ...menu, openInspector };
 };
