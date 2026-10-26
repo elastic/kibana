@@ -134,8 +134,9 @@ export function fetchEsql({
                 inlineHighlights = undefined;
               }
             }
+            const hasInlineHighlights = Object.keys(inlineHighlights ?? {}).length > 0;
             finalData = rows.map((row, idx) => {
-              const raw = Object.keys(inlineHighlights ?? {}).length
+              const raw = hasInlineHighlights
                 ? { ...row, inline_highlights: inlineHighlights }
                 : row;
               const record: DataTableRecord = {

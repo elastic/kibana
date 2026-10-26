@@ -8,7 +8,7 @@
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SignificantEvent, SignificantEventResponse } from '@kbn/significant-events-schema';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
@@ -76,6 +76,8 @@ const renderTab = (initialPath = '/detections/events') => {
       <EuiProvider>
         <Router history={history}>
           <EventsTab
+            entities={[]}
+            unassigned={false}
             timeRange={{ from: 'now-24h', to: 'now' }}
             onTimeRangeChange={mockTimeRangeChange}
           />
@@ -268,5 +270,19 @@ describe('EventsTab', () => {
 
     expect(history.location.search).toBe('');
     expect(screen.getByTestId('nightshiftDetectionEventsSearch')).toHaveValue('');
+  });
+
+  it('keeps a pending search on the next tab when the tab switches inside the debounce', () => {
+    const history = renderTab('/detections/events?entity=checkout');
+    fireEvent.change(screen.getByTestId('nightshiftDetectionEventsSearch'), {
+      target: { value: 'timeout' },
+    });
+    act(() => history.push('/detections/rules?entity=checkout'));
+    cleanup();
+
+    expect(history.location.pathname).toBe('/detections/rules');
+    const params = new URLSearchParams(history.location.search);
+    expect(params.get('search')).toBe('timeout');
+    expect(params.get('entity')).toBe('checkout');
   });
 });

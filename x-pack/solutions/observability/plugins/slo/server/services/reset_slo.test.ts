@@ -20,6 +20,7 @@ import {
   SLI_DESTINATION_INDEX_PATTERN,
   SLO_MODEL_VERSION,
   SUMMARY_DESTINATION_INDEX_PATTERN,
+  SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
 import { createSLO } from './fixtures/slo';
 import {
@@ -108,6 +109,44 @@ describe('ResetSLO', () => {
       await expect(resetSLO.execute(slo.id)).rejects.toThrow(
         "Missing ['read', 'view_index_metadata'] privileges on the source index [metrics-apm*]"
       );
+    });
+  });
+
+  describe('when resource installation fails', () => {
+    beforeEach(() => {
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        application: {},
+        cluster: {},
+        has_all_requested: true,
+        index: {},
+        username: 'some-user',
+      });
+    });
+
+    it('waits for in-flight install operations to settle before rolling back', async () => {
+      const slo = createSLO({ id: 'irrelevant', version: 1 });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const pendingSummaryInstall = Promise.withResolvers<string>();
+      mockSummaryTransformManager.install.mockReturnValueOnce(pendingSummaryInstall.promise);
+      mockTransformManager.install.mockRejectedValueOnce(new Error('Transform install error'));
+      const resetedRollupTransformId = getSLOTransformId(slo.id, slo.revision + 1);
+
+      const assertion = expect(resetSLO.execute(slo.id)).rejects.toThrow('Transform install error');
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(mockScopedClusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).not.toHaveBeenCalledWith(resetedRollupTransformId);
+
+      pendingSummaryInstall.resolve(getSLOSummaryTransformId(slo.id, slo.revision + 1));
+      await assertion;
+
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ index: SUMMARY_TEMP_INDEX_NAME }),
+        { ignore: [404] }
+      );
+      expect(mockTransformManager.uninstall).toHaveBeenCalledWith(resetedRollupTransformId);
+      expect(mockRepository.update).not.toHaveBeenCalled();
     });
   });
 
