@@ -307,6 +307,51 @@ describe('useWorkflowExecutionPolling', () => {
     expect(result.current.workflowExecution?.status).toBe(ExecutionStatus.COMPLETED);
   });
 
+  it('caps the backoff at the maximum interval', async () => {
+    mockGetExecution.mockRejectedValue(new Error('Server error'));
+    renderPolling();
+    await advance();
+    expect(mockGetExecution).toHaveBeenCalledTimes(1);
+
+    // 2, 4, 8 and 16 s are below the cap; from the fifth failure on every gap is the cap.
+    const gapsMs = [2000, 4000, 8000, 16000, 30000, 30000];
+    for (const [index, gapMs] of gapsMs.entries()) {
+      await advance(gapMs - 1);
+      expect(mockGetExecution).toHaveBeenCalledTimes(index + 1);
+      await advance(1);
+      expect(mockGetExecution).toHaveBeenCalledTimes(index + 2);
+    }
+  });
+
+  it('resets the backoff and the toast streak after a successful poll', async () => {
+    const { addError } = getMockServices(store).notifications.toasts;
+    mockGetExecution
+      .mockRejectedValueOnce(new Error('Server error'))
+      .mockResolvedValueOnce(createMockWorkflowExecution(ExecutionStatus.RUNNING))
+      .mockRejectedValueOnce(new Error('Server error'))
+      .mockResolvedValue(createMockWorkflowExecution(ExecutionStatus.RUNNING));
+    const { result } = renderPolling();
+    await advance();
+    expect(addError).toHaveBeenCalledTimes(1);
+
+    await advance(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 2);
+    expect(mockGetExecution).toHaveBeenCalledTimes(2);
+    expect(result.current.error).toBeNull();
+
+    // The running execution is not terminal, so polling continues at the base interval.
+    await advance(WORKFLOW_EXECUTION_POLL_INTERVAL_MS - 1);
+    expect(mockGetExecution).toHaveBeenCalledTimes(2);
+    await advance(1);
+    expect(mockGetExecution).toHaveBeenCalledTimes(3);
+    // A failure after a success starts a new streak, so it toasts again and backs off from scratch.
+    expect(addError).toHaveBeenCalledTimes(2);
+
+    await advance(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 2 - 1);
+    expect(mockGetExecution).toHaveBeenCalledTimes(3);
+    await advance(1);
+    expect(mockGetExecution).toHaveBeenCalledTimes(4);
+  });
+
   it('retries final page failures before stopping polling', async () => {
     mockGetExecution.mockResolvedValue(createMockWorkflowExecution(ExecutionStatus.COMPLETED));
     mockGetExecutionSteps.mockRejectedValueOnce(new Error('Page failed'));
