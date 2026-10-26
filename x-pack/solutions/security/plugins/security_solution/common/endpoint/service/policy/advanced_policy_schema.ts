@@ -3037,7 +3037,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.ai_auth_detection',
       {
         defaultMessage:
-          'Report the account an AI coding agent is signed in with on the events the agent generates. Requires file events and AI data collection to be enabled. When file events, AI data collection, and this setting are all on, file modify events are also turned on, which can increase CPU and IO usage on hosts with heavy file write activity. Not supported when linux.advanced.kernel.capture_mode uses kprobes. Default: true.',
+          'Report the account an AI coding agent is signed in with on the events the agent generates. Requires file events and AI data collection to be enabled. Not supported when linux.advanced.kernel.capture_mode uses kprobes. Default: true.',
       }
     ),
   },
@@ -3070,7 +3070,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.enable_codex_spawning',
       {
         defaultMessage:
-          "Allow Elastic Defend to run the user's Codex app-server to look up the signed-in Codex account. This runs code from the user's Codex installation as that user. Requires windows.advanced.ai_auth_detection. Default: false.",
+          "Allow Elastic Defend to run the user's Codex app-server to look up the signed-in Codex account. Requires windows.advanced.ai_auth_detection. Default: false.",
       }
     ),
   },
@@ -3114,7 +3114,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.ai_auth_cache_ttl_seconds',
       {
         defaultMessage:
-          "How long, in seconds, to skip new lookups of an AI coding agent's account after a successful lookup. Account changes during this period are not detected until it ends. Events continue to report the last resolved account after it ends. 0 disables caching. Default: 60.",
+          "How long, in seconds, to skip new lookups of an AI coding agent's account after a successful lookup. Account changes during this period are not detected until it ends. 0 disables caching. Default: 60.",
       }
     ),
   },
@@ -3125,7 +3125,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.ai_auth_cache_ttl_seconds',
       {
         defaultMessage:
-          "How long, in seconds, to skip new lookups of an AI coding agent's account after a successful lookup. Account changes during this period are not detected until it ends. Events continue to report the last resolved account after it ends. 0 disables caching. Default: 60.",
+          "How long, in seconds, to skip new lookups of an AI coding agent's account after a successful lookup. Account changes during this period are not detected until it ends. 0 disables caching. Default: 60.",
       }
     ),
   },
@@ -3136,7 +3136,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ai_auth_cache_ttl_seconds',
       {
         defaultMessage:
-          "How long, in seconds, to skip new lookups of an AI coding agent's account after a successful lookup. Account changes during this period are not detected until it ends. Events continue to report the last resolved account after it ends. 0 disables caching. Default: 60.",
+          "How long, in seconds, to skip new lookups of an AI coding agent's account after a successful lookup. Account changes during this period are not detected until it ends. 0 disables caching. Default: 60.",
       }
     ),
   },
@@ -3147,7 +3147,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.ai_auth_recheck_interval_seconds',
       {
         defaultMessage:
-          'How often, in seconds, to re-check the credential files of running AI coding agents for account changes that file events did not report. A file is only re-checked after its ai_auth_cache_ttl_seconds period ends. 0 disables the re-check. Default: 30.',
+          'How often, in seconds, to re-check the credential files of running AI coding agents for account changes that file events did not report. 0 disables the re-check. Default: 30.',
       }
     ),
   },
@@ -3158,7 +3158,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.ai_auth_recheck_interval_seconds',
       {
         defaultMessage:
-          'How often, in seconds, to re-check the credential files of running AI coding agents for account changes that file events did not report. A file is only re-checked after its ai_auth_cache_ttl_seconds period ends. 0 disables the re-check. Default: 30.',
+          'How often, in seconds, to re-check the credential files of running AI coding agents for account changes that file events did not report. 0 disables the re-check. Default: 30.',
       }
     ),
   },
@@ -3169,7 +3169,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ai_auth_recheck_interval_seconds',
       {
         defaultMessage:
-          'How often, in seconds, to re-check the credential files of running AI coding agents for account changes that file events did not report. A file is only re-checked after its ai_auth_cache_ttl_seconds period ends. 0 disables the re-check. Default: 30.',
+          'How often, in seconds, to re-check the credential files of running AI coding agents for account changes that file events did not report. 0 disables the re-check. Default: 30.',
       }
     ),
   },
