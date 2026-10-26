@@ -139,7 +139,7 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
       delete viz.applyColorTo;
     }
 
-    // The transform derives `showBar` purely from the presence of a max-accessor background bar.
+    // The transform shows the bar exactly when a max remains (a hidden bar's max is dropped above).
     viz.showBar = Boolean(viz.maxAccessor);
     viz.titlesTextAlign = viz.titlesTextAlign ?? DEFAULT_PRIMARY_LABELS_ALIGNMENT;
 
@@ -377,6 +377,33 @@ const alignTextBasedColumns: NormalizerConfig<MetricAttributes> = {
   },
 };
 
+/**
+ * The transform only carries the max when the bar is shown (`showBar` and a max): the runtime
+ * draws nothing for a hidden bar, and the API has the max only inside the bar. Drop the max of a
+ * hidden bar from the original.
+ */
+const alignHiddenBarMax: NormalizerConfig<MetricAttributes> = {
+  original: (attributes) => {
+    const viz = attributes.state.visualization;
+    const maxAccessor = viz.maxAccessor;
+    if (viz.showBar || !maxAccessor) {
+      return attributes;
+    }
+
+    const formBased = getFormBasedDatasourceState(attributes.state.datasourceStates);
+    for (const layer of Object.values(formBased?.layers ?? {})) {
+      delete layer.columns[maxAccessor];
+      layer.columnOrder = layer.columnOrder.filter((id: string) => id !== maxAccessor);
+    }
+    for (const layer of Object.values(attributes.state.datasourceStates.textBased?.layers ?? {})) {
+      layer.columns = layer.columns.filter((column) => column.columnId !== maxAccessor);
+    }
+    delete viz.maxAccessor;
+    delete viz.progressDirection;
+    return attributes;
+  },
+};
+
 const alignStaticValueMax: NormalizerConfig<MetricAttributes> = {
   original: (attributes) => {
     const viz = attributes.state.visualization;
@@ -508,6 +535,7 @@ export const normalizeMetric = mergeNormalizers([
     isSingleValueMetric
   ),
   alignIds,
+  alignHiddenBarMax,
   alignStaticValueMax,
   alignEmptyLinkedLayers,
   alignVisualizationDefaults,

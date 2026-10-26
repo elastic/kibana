@@ -452,6 +452,53 @@ describe('Metric', () => {
     });
   });
 
+  describe('hidden bar', () => {
+    const getBackgroundChart = (config: MetricConfig) => {
+      const [primaryMetric] = config.metrics;
+      return 'background_chart' in primaryMetric ? primaryMetric.background_chart : undefined;
+    };
+
+    it('(SO -> API) keeps the bar and its max when showBar is set', () => {
+      const attributes = structuredClone(complexMetricAttributes);
+      (attributes.state.visualization as MetricVisualizationState).showBar = true;
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(getBackgroundChart(apiOutput)).toMatchObject({ type: 'bar' });
+    });
+
+    it('(SO -> API) drops the bar when the max is set but showBar is false', () => {
+      // The editor's supporting visualization None/Trend keeps the max and sets showBar to false
+      const attributes = structuredClone(complexMetricAttributes);
+      (attributes.state.visualization as MetricVisualizationState).showBar = false;
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(getBackgroundChart(apiOutput)).toBeUndefined();
+    });
+
+    it('(SO -> API) drops the bar when showBar is missing, like the runtime', () => {
+      const attributes = structuredClone(complexMetricAttributes);
+      delete (attributes.state.visualization as MetricVisualizationState).showBar;
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(getBackgroundChart(apiOutput)).toBeUndefined();
+    });
+
+    it('(SO -> API -> SO) does not show a bar for a hidden one', () => {
+      const attributes = structuredClone(complexMetricAttributes);
+      (attributes.state.visualization as MetricVisualizationState).showBar = false;
+
+      const builder = new LensConfigBuilder();
+      const so = builder.fromAPIFormat(builder.toAPIFormat(attributes));
+      const viz = so.state.visualization as MetricVisualizationState;
+
+      expect(viz.showBar).toBe(false);
+      expect(viz.maxAccessor).toBeUndefined();
+    });
+  });
+
   describe('color by value named palette', () => {
     it('(API -> SO -> API) round-trips a named palette on a single-value metric as a numeric range', () => {
       const config = {

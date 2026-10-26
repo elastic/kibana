@@ -371,11 +371,18 @@ function fromCompareLensStateToAPI(
   };
 }
 
+// The runtime only draws the bar when `showBar` is set and there is a max (`showingBar`). The max
+// of a hidden bar isn't drawn, so it isn't persisted in the API, where it only exists inside the bar.
+const getShownBarMaxAccessor = (visualization: MetricVisualizationState) =>
+  visualization.showBar ? visualization.maxAccessor : undefined;
+
 function buildFromTextBasedLayer(
   layer: TextBasedLayer,
   metricAccessor: string,
   visualization: MetricVisualizationState
 ): WritableMetricConfigWithoutDataset {
+  const shownMaxAccessor = getShownBarMaxAccessor(visualization);
+
   return enrichConfigurationWithVisualizationProperties(
     {
       type: 'metric',
@@ -384,11 +391,11 @@ function buildFromTextBasedLayer(
         {
           type: 'primary',
           ...getValueApiColumn(metricAccessor, layer),
-          ...(visualization.maxAccessor
+          ...(shownMaxAccessor
             ? {
                 background_chart: {
                   type: 'bar',
-                  max_value: getValueApiColumn(visualization.maxAccessor, layer),
+                  max_value: getValueApiColumn(shownMaxAccessor, layer),
                   ...(visualization.progressDirection
                     ? { orientation: visualization.progressDirection }
                     : {}),
@@ -426,9 +433,8 @@ function buildFromFormBasedLayer(
     throw Error('The primary metric must refer to a metric operation.');
   }
 
-  const maxValue = visualization.maxAccessor
-    ? operationFromColumn(visualization.maxAccessor, layer)
-    : undefined;
+  const shownMaxAccessor = getShownBarMaxAccessor(visualization);
+  const maxValue = shownMaxAccessor ? operationFromColumn(shownMaxAccessor, layer) : undefined;
 
   if (maxValue && isAPIColumnOfBucketType(maxValue)) {
     throw Error('The max value must refer to a metric operation.');
@@ -535,7 +541,7 @@ function enrichConfigurationWithVisualizationProperties(
       // only an absolute-ranged palette (`rangeType: 'number'`) is acceptable. If rangeType is `'percent'`,
       // we attempt to resolve to the equivalent static color, else coloring is dropped entirely (i.e. AUTO_COLOR).
       const isPercentagePalette = visualization.palette.params?.rangeType === 'percent';
-      const isSingleValue = !state.breakdown_by && !visualization.maxAccessor;
+      const isSingleValue = !state.breakdown_by && !getShownBarMaxAccessor(visualization);
       const hasInvalidRangeType = isPercentagePalette && isSingleValue;
 
       primaryMetric.color = hasInvalidRangeType
