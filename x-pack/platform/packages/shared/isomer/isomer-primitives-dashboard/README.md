@@ -7,4 +7,4 @@ A Kibana dashboard as one Isomer node, `dashboard`: its title, description and p
 - `text`, `markdown` and `slack` always read in reading order. Slack gives each titled panel a container.
 - `dashboardChartSize(width)` is a `sizeFor` for `prepareCharts`: it draws each chart at its panel body's size.
 
-Demo lane only (`demo/dashboard-pack`). D1 re-cuts this package as a PR.
+Demo lane only (`isomer/demo/dashboard-pack`). D1 re-cuts this package as a PR.

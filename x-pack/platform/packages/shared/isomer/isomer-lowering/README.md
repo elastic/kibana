@@ -19,4 +19,4 @@ Differences from the source:
 - Data tables bind to `table` instead of being refused.
 - Tests run on Jest. `plan_snapshot.test.ts` compares against the recorded Vitest file snapshots byte for byte.
 
-Demo lane only (`demo/lowering`). F10 and F11 re-cut this package as PRs.
+Demo lane only (`isomer/demo/lowering`). F10 and F11 re-cut this package as PRs.
