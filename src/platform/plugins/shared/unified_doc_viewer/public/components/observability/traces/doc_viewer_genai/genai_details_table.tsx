@@ -156,10 +156,44 @@ export function getCachePercentage(cacheTokens: unknown, inputTokens: unknown): 
   return Math.min(99, Math.max(1, Math.round((cache / input) * 100)));
 }
 
+const FIELD_CONFIGURATIONS: Record<string, FieldConfiguration> = Object.fromEntries(
+  Object.entries(DETAIL_FIELD_TITLES).flatMap(([attributeName, title]) =>
+    fallbackShapes(attributeName).map((fieldName): [string, FieldConfiguration] => [
+      fieldName,
+      { title },
+    ])
+  )
+);
+
+const getCachePercentageLabel = (percentage: number): string =>
+  i18n.translate('unifiedDocViewer.observability.traces.genAi.details.cachePercentage', {
+    defaultMessage: '({percentage}%)',
+    values: { percentage },
+  });
+
+const withCachePercentage =
+  (inputTokens: unknown): FieldConfiguration['formatter'] =>
+  (value, formattedValue) => {
+    const percentage = getCachePercentage(value, inputTokens);
+    return (
+      <FormattedValue
+        truncate
+        value={
+          percentage === undefined ? (
+            formattedValue
+          ) : (
+            <>
+              {formattedValue} {getCachePercentageLabel(percentage)}
+            </>
+          )
+        }
+      />
+    );
+  };
+
 /**
- * Titles for every detail field, in each of its shapes. The cache token rows also show their
- * percentage of the input tokens, so they are built from the hit: a formatter only sees its own
- * field's value.
+ * The static titles, with the cache token rows layered on top to also show their percentage of the
+ * input tokens: a formatter only sees its own field's value, so it is built from the hit.
  */
 function buildFieldConfigurations(
   flattened: Record<string, unknown>
@@ -167,46 +201,14 @@ function buildFieldConfigurations(
   const inputTokens = fallbackShapes(ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS)
     .map((fieldName) => flattened[fieldName])
     .find(hasValue);
-
-  return Object.fromEntries(
-    Object.entries(DETAIL_FIELD_TITLES).flatMap(([attributeName, title]) =>
-      fallbackShapes(attributeName).map((fieldName): [string, FieldConfiguration] => {
-        if (!CACHE_TOKEN_ATTRIBUTES.includes(attributeName)) {
-          return [fieldName, { title }];
-        }
-        return [
-          fieldName,
-          {
-            title,
-            formatter: (value, formattedValue) => {
-              const percentage = getCachePercentage(value, inputTokens);
-              return (
-                <FormattedValue
-                  truncate
-                  value={
-                    percentage === undefined ? (
-                      formattedValue
-                    ) : (
-                      <>
-                        {formattedValue}{' '}
-                        {i18n.translate(
-                          'unifiedDocViewer.observability.traces.genAi.details.cachePercentage',
-                          {
-                            defaultMessage: '({percentage}%)',
-                            values: { percentage },
-                          }
-                        )}
-                      </>
-                    )
-                  }
-                />
-              );
-            },
-          },
-        ];
-      })
-    )
+  const formatter = withCachePercentage(inputTokens);
+  const cacheConfigurations = CACHE_TOKEN_ATTRIBUTES.flatMap((attributeName) =>
+    fallbackShapes(attributeName).map((fieldName): [string, FieldConfiguration] => [
+      fieldName,
+      { title: DETAIL_FIELD_TITLES[attributeName], formatter },
+    ])
   );
+  return { ...FIELD_CONFIGURATIONS, ...Object.fromEntries(cacheConfigurations) };
 }
 
 export function getGenAiDetailFieldNames(flattened: Record<string, unknown>): string[] {
