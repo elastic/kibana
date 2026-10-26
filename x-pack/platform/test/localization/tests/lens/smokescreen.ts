@@ -751,16 +751,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'cumulative_sum',
       });
-      expect(await lens.getWorkspaceErrorCount()).to.eql(1);
+      await lens.assertWorkspaceErrorCount(1);
 
       await lens.removeDimension('lnsXY_xDimensionPanel');
-      expect(await lens.getWorkspaceErrorCount()).to.eql(2);
+      await lens.assertWorkspaceErrorCount(2);
 
       await lens.dragFieldToDimensionTrigger(
         '@timestamp',
         'lnsXY_xDimensionPanel > lns-empty-dimension'
       );
-      expect(await lens.getWorkspaceErrorCount()).to.eql(1);
+      await lens.assertWorkspaceErrorCount(1);
 
       expect(await lens.hasChartSwitchWarning('lnsDatatable', termTranslator('datatable'))).to.eql(
         false

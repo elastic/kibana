@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Does NOT show the button Billing', async () => {
-        await PageObjects.common.clickAndValidate('userMenuButton', 'userMenuLink__Billing');
+        await PageObjects.common.clickAndValidate('userMenuButton', 'userMenuLink__Profile');
         const billingLinkExists = await find.existsByLinkText('Billing');
         expect(billingLinkExists).to.be(false);
       });

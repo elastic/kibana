@@ -73,7 +73,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // The connector flyout pops up a "discard unsaved changes" confirm
         // modal when the form is dirty (subject/message filled). Acknowledge
         // it so the flyout actually closes.
-        if (await testSubjects.exists('confirmModalConfirmButton', { timeout: 2000 })) {
+        if (await testSubjects.waitForExists('confirmModalConfirmButton', { timeout: 2000 })) {
           await testSubjects.click('confirmModalConfirmButton');
         }
         await find.waitForDeletedByCssSelector(

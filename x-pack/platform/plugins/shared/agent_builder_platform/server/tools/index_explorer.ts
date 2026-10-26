@@ -5,27 +5,34 @@
  * 2.0.
  */
 
+import { memoize } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { indexExplorer } from '@kbn/agent-builder-genai-utils';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
 
-const indexExplorerSchema = z.object({
-  query: z
-    .string()
-    .describe('A natural language query to infer which indices, aliases or datastreams to use.'),
-  limit: z
-    .number()
-    .optional()
-    .describe('(optional) Limit the max number of indices to return. Defaults to 1.'),
-  indexPattern: z
-    .string()
-    .optional()
-    .describe('(optional) Index pattern to filter indices by. Defaults to *.'),
-});
+const createIndexExplorerSchema = memoize((includeFrozenByDefault: boolean) =>
+  z.object({
+    query: z
+      .string()
+      .describe('A natural language query to infer which indices, aliases or datastreams to use.'),
+    limit: z
+      .number()
+      .optional()
+      .describe('(optional) Limit the max number of indices to return. Defaults to 1.'),
+    indexPattern: z
+      .string()
+      .optional()
+      .describe('(optional) Index pattern to filter indices by. Defaults to *.'),
+    include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
+  })
+);
 
-export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerSchema> => {
+type IndexExplorerSchema = ReturnType<typeof createIndexExplorerSchema>;
+
+export const indexExplorerTool = (): DynamicSchemaBuiltinToolDefinition<IndexExplorerSchema> => {
   return {
     id: platformCoreTools.indexExplorer,
     type: ToolType.builtin,
@@ -40,9 +47,10 @@ User: "Show me my latest alerts"
 You: call tool 'index_explorer' with { query: 'indices containing user alerts' }
 Tool result: [{ type: "index", name: '.alerts' }]
 `,
-    schema: indexExplorerSchema,
+    getSchema: async (schemaContext) =>
+      createIndexExplorerSchema(await getIncludeFrozenByDefault(schemaContext)),
     handler: async (
-      { query: nlQuery, indexPattern = '*', limit = 1 },
+      { query: nlQuery, indexPattern = '*', limit = 1, include_frozen: includeFrozen },
       { esClient, modelProvider, logger }
     ) => {
       logger.debug(
@@ -53,6 +61,7 @@ Tool result: [{ type: "index", name: '.alerts' }]
         nlQuery,
         indexPattern,
         limit,
+        includeFrozen,
         esClient: esClient.asCurrentUser,
         model,
       });

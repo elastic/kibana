@@ -106,7 +106,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await header.waitUntilLoadingHasFinished();
         });
         await lens.waitForVisualization();
-        expect(await lens.getDatatableCellText(0, 0)).to.match(/^.{3}\.\.\.$/);
+        await retry.tryForTime(10000, async () => {
+          expect(await lens.getDatatableCellText(0, 0)).to.match(/^.{3}\.\.\.$/);
+        });
       });
     });
 

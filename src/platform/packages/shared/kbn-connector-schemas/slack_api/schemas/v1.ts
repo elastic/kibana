@@ -124,8 +124,26 @@ export const PostBlockkitParamsSchema = z
   })
   .strict();
 
-export const SlackApiParamsSchema = z.union([
-  ValidChannelIdParamsSchema,
-  PostMessageParamsSchema,
-  PostBlockkitParamsSchema,
-]);
+/**
+ * Rules can be saved without subAction. postMessage is the connector default.
+ * An explicit subAction is left unchanged so the union still rejects unknown values.
+ */
+function setDefaultSubAction(value: unknown): unknown {
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+
+  if (
+    !Object.hasOwn(value, 'subAction') ||
+    (value as Record<string, unknown>).subAction === undefined
+  ) {
+    return { ...value, subAction: 'postMessage' };
+  }
+
+  return value;
+}
+
+export const SlackApiParamsSchema = z.preprocess(
+  setDefaultSubAction,
+  z.union([ValidChannelIdParamsSchema, PostMessageParamsSchema, PostBlockkitParamsSchema])
+);

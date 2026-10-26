@@ -13,6 +13,10 @@ export const DURATION = 'duration';
 export const KIND = 'kind';
 export const RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE =
   'resource.attributes.telemetry.sdk.language';
+// OTel semconv >= 1.27 replacement for `deployment.environment`. The otel-data index templates
+// alias `service.environment` only to the deprecated attribute, so this field must be queried explicitly.
+export const RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME =
+  'resource.attributes.deployment.environment.name';
 export const LINKS_TRACE_ID = 'links.trace_id';
 export const LINKS_SPAN_ID = 'links.span_id';
 export const ATTRIBUTE_HTTP_SCHEME = 'attributes.http.scheme';

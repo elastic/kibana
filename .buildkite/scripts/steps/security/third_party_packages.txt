@@ -68,4 +68,3 @@ magic-string
 graphql
 @swc/helpers
 bump-cli
-meow

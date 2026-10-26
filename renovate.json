@@ -1191,7 +1191,7 @@
     },
     {
       "groupName": "stylelint",
-      "matchDepNames": ["meow", "stylelint", "stylelint-scss"],
+      "matchDepNames": ["stylelint", "stylelint-scss"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
@@ -1980,7 +1980,6 @@
         "@types/chromedriver",
         "@types/selenium-webdriver",
         "geckodriver",
-        "ms-chromium-edge-driver",
         "selenium-webdriver"
       ],
       "reviewers": ["team:kibana-operations"],
