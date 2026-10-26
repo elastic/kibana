@@ -2651,4 +2651,80 @@ describe('conversation model converters', () => {
       });
     });
   });
+
+  describe('active_execution', () => {
+    const activeExecution = {
+      execution_id: 'execution-1',
+      trigger_event_id: 'trigger-1',
+      started_at: creationDate,
+    };
+
+    const documentWith = (
+      source: Partial<ConversationDocument['_source']>
+    ): ConversationDocument => ({
+      _id: 'conv-active',
+      _seq_no: 1,
+      _primary_term: 1,
+      _source: {
+        agent_id: 'agent_id',
+        title: 'Active conv',
+        user_id: 'user_id',
+        user_name: 'user_name',
+        space: 'space',
+        conversation_rounds: [],
+        created_at: creationDate,
+        updated_at: updateDate,
+        ...source,
+      },
+    });
+
+    it('active_execution round-trips through fromEs and toEs', () => {
+      const conversation = fromEs(
+        documentWith({ active_execution: activeExecution }),
+        requestingUser
+      );
+
+      expect(conversation.active_execution).toEqual(activeExecution);
+      expect(toEs(conversation, 'space').active_execution).toEqual(activeExecution);
+    });
+
+    it('omits active_execution when absent', () => {
+      const conversation = fromEs(documentWith({}), requestingUser);
+
+      expect(conversation).not.toHaveProperty('active_execution');
+      expect(toEs(conversation, 'space')).not.toHaveProperty('active_execution');
+    });
+
+    it('is not exposed on list rows', () => {
+      expect(
+        fromEsWithoutRounds(documentWith({ active_execution: activeExecution }), requestingUser)
+      ).not.toHaveProperty('active_execution');
+    });
+
+    it('is stripped from responses', () => {
+      const response = toConversationResponseFromDocument({
+        document: documentWith({ active_execution: activeExecution }),
+        user: requestingUser,
+        resolveTemplate: () => undefined,
+      });
+
+      expect(response).not.toHaveProperty('active_execution');
+    });
+
+    it('createRequestToEs writes active_execution when present', () => {
+      const result = createRequestToEs({
+        conversation: {
+          agent_id: 'agent_id',
+          title: 'Active conv',
+          rounds: [],
+          active_execution: activeExecution,
+        },
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(result.active_execution).toEqual(activeExecution);
+    });
+  });
 });

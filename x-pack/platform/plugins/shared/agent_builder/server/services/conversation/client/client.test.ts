@@ -19,6 +19,7 @@ import {
   TimelineTriggerType,
   createAgentNotFoundError,
   createAgentUnavailableError,
+  isConversationBusyError,
   isConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
 import type { ConversationAccessControlEntry } from '@kbn/agent-builder-common/chat/access_control';
@@ -5942,6 +5943,228 @@ describe('ConversationClient', () => {
 
         expect(activityOf(indexedEvents())).toEqual([]);
       });
+    });
+  });
+
+  describe('active execution', () => {
+    const userMessage: ConversationEvent = {
+      id: '9c2e0f11-0000-4000-8000-0000000000aa',
+      type: TimelineEventType.userMessage,
+      created_at: '2026-10-26T10:00:00.000Z',
+      actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+      data: { message: 'hello' },
+    } as ConversationEvent;
+
+    const activeExecution = (executionId: string) => ({
+      execution_id: executionId,
+      trigger_event_id: `${executionId}-trigger`,
+      started_at: '2026-10-26T09:00:00.000Z',
+    });
+
+    const documentWithHolder = (
+      executionId?: string,
+      overrides: Parameters<typeof createConversationDocument>[0] = {}
+    ): Document => {
+      const document = createConversationDocument({
+        schemaVersion: CONVERSATION_SCHEMA_VERSION,
+        events: [userMessage],
+        ...overrides,
+      });
+
+      return executionId === undefined
+        ? document
+        : {
+            ...document,
+            _source: { ...document._source, active_execution: activeExecution(executionId) },
+          };
+    };
+
+    const createClaim = (
+      executionId: string,
+      isHolderLive: jest.Mock<Promise<boolean>, [string]> = jest.fn().mockResolvedValue(true)
+    ) => ({ executionId, triggerEventId: 't2', isHolderLive });
+
+    const indexedSource = (call = 0) =>
+      (mockEsClient.index.mock.calls[call][0] as { document: Document['_source'] }).document;
+
+    const appendWithClaim = (claim: ReturnType<typeof createClaim>) =>
+      client.appendEvents({ id: 'conversation-1', events: [], claim }, { source: 'execution' });
+
+    it('appendEvents with a claim sets active_execution when no holder exists', async () => {
+      mockGetDocumentResponse(documentWithHolder());
+      const claim = createClaim('e2');
+
+      await appendWithClaim(claim);
+
+      expect(indexedSource().active_execution).toEqual({
+        execution_id: 'e2',
+        trigger_event_id: 't2',
+        started_at: expect.any(String),
+      });
+      expect(claim.isHolderLive).not.toHaveBeenCalled();
+    });
+
+    it('appendEvents with a claim throws conversationBusy when the stored holder is live', async () => {
+      mockGetDocumentResponse(documentWithHolder('e1'));
+      const claim = createClaim('e2', jest.fn().mockResolvedValue(true));
+
+      const error = await appendWithClaim(claim).catch((caught: unknown) => caught);
+
+      expect(isConversationBusyError(error)).toBe(true);
+      expect((error as { meta: { activeExecutionId: string } }).meta.activeExecutionId).toBe('e1');
+      expect(claim.isHolderLive).toHaveBeenCalledWith('e1');
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('appendEvents with a claim takes over a holder that is not live', async () => {
+      mockGetDocumentResponse(documentWithHolder('e1'));
+      const claim = createClaim('e2', jest.fn().mockResolvedValue(false));
+
+      await appendWithClaim(claim);
+
+      expect(claim.isHolderLive).toHaveBeenCalledWith('e1');
+      expect(indexedSource().active_execution).toMatchObject({
+        execution_id: 'e2',
+        trigger_event_id: 't2',
+      });
+    });
+
+    it('appendEvents with a claim re-reads when the holder changes between peek and write', async () => {
+      mockGetDocumentResponse(documentWithHolder('e3'));
+      mockGetDocumentResponseOnce(documentWithHolder('e1'));
+      const claim = createClaim(
+        'e2',
+        jest.fn(async (executionId: string) => executionId === 'e3')
+      );
+
+      const error = await appendWithClaim(claim).catch((caught: unknown) => caught);
+
+      expect(isConversationBusyError(error)).toBe(true);
+      expect((error as { meta: { activeExecutionId: string } }).meta.activeExecutionId).toBe('e3');
+      expect(claim.isHolderLive.mock.calls).toEqual([['e1'], ['e3']]);
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('appendEvents with a claim gives up with a write conflict when the holder keeps changing', async () => {
+      let reads = 0;
+      mockRawEsClient.get.mockImplementation(async () => {
+        reads += 1;
+        const document = documentWithHolder(`e-${reads}`);
+
+        return {
+          _id: document._id,
+          _index: TEST_CONVERSATION_INDEX,
+          _source: document._source,
+          _seq_no: document._seq_no,
+          _primary_term: document._primary_term,
+          found: true,
+        };
+      });
+      const claim = createClaim('e2', jest.fn().mockResolvedValue(false));
+
+      const error = await appendWithClaim(claim).catch((caught: unknown) => caught);
+
+      expect(isConversationWriteConflictError(error)).toBe(true);
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('appendEvents with a claim keeps its own claim', async () => {
+      mockGetDocumentResponse(documentWithHolder('e2'));
+      const claim = createClaim('e2');
+
+      await appendWithClaim(claim);
+
+      expect(claim.isHolderLive).not.toHaveBeenCalled();
+      expect(indexedSource().active_execution).toMatchObject({ execution_id: 'e2' });
+    });
+
+    it('create with a claim stores active_execution', async () => {
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockGetReturnsIndexedDocument();
+      const claim = createClaim('e2');
+
+      const result = await client.create(
+        { id: 'conversation-1', title: 'Conversation 1', agent_id: 'agent-1', rounds: [], claim },
+        { source: 'execution' }
+      );
+
+      const indexed = indexedSource();
+      expect(indexed.active_execution).toEqual({
+        execution_id: 'e2',
+        trigger_event_id: 't2',
+        started_at: expect.any(String),
+      });
+      expect(indexed).not.toHaveProperty('claim');
+      expect(claim.isHolderLive).not.toHaveBeenCalled();
+      expect(result).not.toHaveProperty('active_execution');
+    });
+
+    it('claimActiveExecution writes only active_execution', async () => {
+      const stored = documentWithHolder(undefined, { readBy: [{ userId: 'user-1' }] });
+      mockGetDocumentResponse(stored);
+      const claim = createClaim('e2');
+
+      await client.claimActiveExecution({ id: 'conversation-1', claim }, { source: 'execution' });
+
+      const indexed = indexedSource();
+      expect(indexed.events).toEqual(stored._source.events);
+      expect(indexed.read_by).toEqual([{ userId: 'user-1' }]);
+      expect(indexed.active_execution).toMatchObject({
+        execution_id: 'e2',
+        trigger_event_id: 't2',
+      });
+      expect(describeConversationWriteMock).not.toHaveBeenCalled();
+    });
+
+    it('replaceRoundEvents with releaseExecutionId clears its own claim', async () => {
+      mockGetDocumentResponse(documentWithHolder('e1'));
+
+      await client.replaceRoundEvents(
+        { id: 'conversation-1', roundId: 'round-1', events: [], releaseExecutionId: 'e1' },
+        { source: 'execution' }
+      );
+
+      expect(indexedSource().active_execution).toBeUndefined();
+    });
+
+    it('replaceRoundEvents with releaseExecutionId leaves a newer holder', async () => {
+      mockGetDocumentResponse(documentWithHolder('e2'));
+
+      await client.replaceRoundEvents(
+        { id: 'conversation-1', roundId: 'round-1', events: [], releaseExecutionId: 'e1' },
+        { source: 'execution' }
+      );
+
+      expect(indexedSource().active_execution).toEqual(activeExecution('e2'));
+    });
+
+    it('appendEvents with releaseExecutionId clears its own claim', async () => {
+      mockGetDocumentResponse(documentWithHolder('e1'));
+
+      await client.appendEvents(
+        { id: 'conversation-1', events: [], releaseExecutionId: 'e1' },
+        { source: 'execution' }
+      );
+
+      expect(indexedSource().active_execution).toBeUndefined();
+    });
+
+    it('markRead keeps active_execution', async () => {
+      mockGetDocumentResponse(documentWithHolder('e1'));
+
+      await client.markRead('conversation-1', true);
+
+      expect(indexedSource().active_execution).toEqual(activeExecution('e1'));
+    });
+
+    it('get strips active_execution unless includeActiveExecution is set', async () => {
+      mockGetDocumentResponse(documentWithHolder('e1'));
+
+      const stripped = await client.get('conversation-1');
+      const included = await client.get('conversation-1', { includeActiveExecution: true });
+
+      expect(stripped).not.toHaveProperty('active_execution');
+      expect(included.active_execution).toEqual(activeExecution('e1'));
     });
   });
 });

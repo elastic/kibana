@@ -47,7 +47,17 @@ export type ConversationCreateRequest = Omit<
    */
   user?: UserIdAndName;
   access_control?: ConversationAccessControl;
+  /** Claims the run lock for this execution in the create write. */
+  claim?: ConversationClaim;
 };
+
+/** An execution asking to hold a conversation's run lock (`active_execution`). */
+export interface ConversationClaim {
+  executionId: string;
+  triggerEventId: string;
+  /** Whether the execution currently holding the lock is still running. */
+  isHolderLive: (executionId: string) => Promise<boolean>;
+}
 
 export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
   Partial<
@@ -68,6 +78,7 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
       | 'metadata'
       | 'template_id'
       | 'template_version'
+      | 'active_execution'
     >
   > & { read_by?: ConversationReadByEntry[]; pinned_by?: ConversationPinnedByEntry[] };
 
@@ -105,6 +116,10 @@ export interface AppendEventsRequest {
    * on the returned conversation.
    */
   skipIfTerminalExistsFor?: string;
+  /** Claims the run lock for this execution in the same write; fails when a live execution holds it. */
+  claim?: ConversationClaim;
+  /** Releases the run lock in the same write, when this execution still holds it. */
+  releaseExecutionId?: string;
 }
 
 export interface ReplaceRoundEventsRequest {
@@ -131,6 +146,8 @@ export interface ReplaceRoundEventsRequest {
    * on the returned conversation.
    */
   skipIfTerminalExistsFor?: string;
+  /** Releases the run lock in the same write, when this execution still holds it. */
+  releaseExecutionId?: string;
 }
 
 export interface ConversationListOptions {
