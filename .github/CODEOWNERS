@@ -417,6 +417,7 @@ src/platform/packages/private/kbn-jest-serializers @elastic/kibana-operations
 src/platform/packages/private/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-discover
 src/platform/packages/private/kbn-lens-formula-docs @elastic/kibana-dashboards
+src/platform/packages/private/kbn-logging-ecs @elastic/kibana-core
 src/platform/packages/private/kbn-managed-content-badge @elastic/kibana-dashboards
 src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-dashboards
 src/platform/packages/private/kbn-migrator-test-kit @elastic/kibana-core

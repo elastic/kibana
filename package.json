@@ -904,6 +904,7 @@
     "@kbn/locator-explorer-plugin": "workspace:*",
     "@kbn/lock-manager": "workspace:*",
     "@kbn/logging": "workspace:*",
+    "@kbn/logging-ecs": "workspace:*",
     "@kbn/logging-mocks": "workspace:*",
     "@kbn/logs-data-access-plugin": "workspace:*",
     "@kbn/logs-overview": "workspace:*",
