@@ -7,6 +7,7 @@
 
 import type { ActionScope, ConnectorMetadata } from '@kbn/connector-specs';
 import type { GetConnectorSpecResponseV1 } from '../../../../../../common/routes/connector/response';
+import { formatConnectorSpecAction } from '../../../transforms/format_connector_spec_action';
 
 export interface ConnectorActionDef {
   name: string;
@@ -39,10 +40,5 @@ export const transformGetConnectorSpecResponse = (
   },
   schema: spec.schema,
   is_testable: spec.isTestable,
-  actions: spec.actions.map(({ name, description, isTool, scope }) => ({
-    name,
-    is_tool: isTool,
-    ...(description !== undefined ? { description } : {}),
-    ...(scope !== undefined ? { scope } : {}),
-  })),
+  actions: spec.actions.map(formatConnectorSpecAction),
 });
