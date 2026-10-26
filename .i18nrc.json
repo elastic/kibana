@@ -24,13 +24,21 @@
     "connectorSpecs.ssf": "src/platform/packages/shared/kbn-connector-specs/src/specs/ssf",
     "contentManagement": "src/platform/packages/shared/content-management",
     "core": [
-      "src/core"
+      "src/core",
+      "x-pack/platform/plugins/private/intercepts"
     ],
     "customIntegrations": "src/platform/plugins/shared/custom_integrations",
-    "dashboard": "src/platform/plugins/shared/dashboard",
+    "dashboard": [
+      "src/platform/plugins/shared/dashboard",
+      "src/platform/packages/private/dashboard/dashboard-navigation-options-components"
+    ],
     "cloud": "src/platform/packages/shared/cloud",
     "domDragDrop": "src/platform/packages/shared/kbn-dom-drag-drop",
-    "controls": "src/platform/plugins/shared/controls",
+    "controls": [
+      "src/platform/plugins/shared/controls",
+      "src/platform/packages/private/kbn-controls-renderer",
+      "src/platform/packages/shared/controls/control-group-renderer"
+    ],
     "data": "src/platform/plugins/shared/data",
     "observabilityAlertDetails": "x-pack/solutions/observability/packages/alert-details",
     "dashboardMarkdown": "src/platform/plugins/shared/dashboard_markdown",
@@ -86,7 +94,7 @@
     "interactiveSetup": "src/platform/plugins/private/interactive_setup",
     "interpreter": "src/legacy/core_plugins/interpreter",
     "imageEmbeddable": "src/platform/plugins/private/image_embeddable",
-    "kbn": "src/legacy/core_plugins/kibana",
+    "kbn": "src/platform/packages/shared/kbn-grok-ui",
     "kbnConfig": "src/platform/packages/shared/kbn-config/src",
     "kbnDocViews": "src/legacy/core_plugins/kbn_doc_views",
     "kbnUI": "src/platform/kbn-ui",
@@ -119,7 +127,10 @@
       "src/platform/packages/private/react"
     ],
     "esqlBrowser": "src/platform/packages/shared/esql/kbn-esql-browser",
-    "esqlEditor": "src/platform/packages/private/kbn-esql-editor",
+    "esqlEditor": [
+      "src/platform/packages/private/kbn-esql-editor",
+      "src/platform/packages/shared/kbn-esql-resource-browser"
+    ],
     "esqlUtils": "src/platform/packages/shared/esql/kbn-esql-utils",
     "reporting": "src/platform/packages/private/kbn-reporting",
     "savedObjects": "src/platform/plugins/shared/saved_objects",
@@ -152,7 +163,9 @@
       "x-pack/solutions/security/packages/navigation",
       "x-pack/solutions/security/packages/side-nav",
       "x-pack/solutions/security/packages/upselling",
-      "x-pack/solutions/security/packages/distribution-bar"
+      "x-pack/solutions/security/packages/distribution-bar",
+      "x-pack/solutions/security/packages/connectors",
+      "x-pack/solutions/security/packages/expandable-flyout"
     ],
     "sharedPlatformPackages": [
       "x-pack/platform/packages/shared/kbn-cloud-security-posture"
@@ -199,7 +212,7 @@
     ],
     "visualizationUiComponents": "src/platform/packages/shared/kbn-visualization-ui-components",
     "visualizationUtils": "src/platform/packages/shared/kbn-visualization-utils",
-    "workflowsUi": "src/platform/packages/shared/kbn-workflows-ui/src/components/run_workflow_panel",
+    "workflowsUi": "src/platform/packages/shared/kbn-workflows-ui",
     "unifiedDocViewer": [
       "src/platform/plugins/shared/unified_doc_viewer",
       "src/platform/packages/shared/kbn-unified-doc-viewer"
@@ -213,7 +226,51 @@
     "unsavedChangesBadge": "src/platform/packages/private/kbn-unsaved-changes-badge",
     "unsavedChangesPrompt": "src/platform/packages/shared/kbn-unsaved-changes-prompt",
     "managedContentBadge": "src/platform/packages/private/kbn-managed-content-badge",
-    "responseOpsRuleForm": "src/platform/packages/shared/response-ops/rule_form"
+    "responseOpsRuleForm": "x-pack/platform/packages/shared/response-ops/rule_form",
+    "backgroundSearch": "src/platform/packages/shared/kbn-background-search",
+    "chartExpressionsCommon": "src/platform/packages/shared/chart-expressions-common",
+    "contextSwitcherComponents": "src/platform/packages/shared/context-switcher-components",
+    "cps": "src/platform/plugins/shared/cps",
+    "cpsUtils": "src/platform/packages/shared/kbn-cps-utils",
+    "dashboardsSelector": "src/platform/packages/shared/dashboards/dashboards-selector",
+    "devComments": "src/platform/packages/private/kbn-dev-comments",
+    "kbnDesignTools": "src/platform/packages/shared/kbn-design-tools",
+    "kbnInspectComponent": "src/platform/plugins/private/inspect_component",
+    "kql": "src/platform/plugins/shared/kql",
+    "navigationCustomizationComponents": "src/platform/packages/shared/navigation-customization-components",
+    "savedSearchComponent": "src/platform/packages/shared/kbn-saved-search-component",
+    "visualizationListing": "src/platform/plugins/shared/visualization_listing",
+    "visualizationsCommon": "src/platform/packages/shared/kbn-visualizations-common",
+    "workflows": [
+      "src/platform/packages/shared/kbn-workflows",
+      "src/platform/packages/shared/kbn-workflows-library",
+      "src/platform/plugins/shared/workflows_management",
+      "x-pack/platform/plugins/shared/agent_builder_workflows"
+    ],
+    "workflowsExecutionEngine": "src/platform/plugins/shared/workflows_execution_engine",
+    "workflowsExtensions": "src/platform/plugins/shared/workflows_extensions",
+    "aiInfra": "x-pack/platform/plugins/shared/ai_infra/product_doc_base",
+    "alertsFiltersForm": "x-pack/platform/packages/shared/response-ops/alerts-filters-form",
+    "anonymizationUi": "x-pack/platform/packages/shared/ai-infra/anonymization-ui",
+    "entityStore": "x-pack/platform/plugins/shared/entity_store",
+    "feedback": "x-pack/platform/plugins/private/feedback",
+    "inferenceConnectors": "x-pack/platform/packages/shared/kbn-inference-connectors",
+    "ingestPipelines": "x-pack/platform/packages/shared/ingest-pipelines",
+    "keyValueMetadataTable": "x-pack/platform/packages/shared/kbn-key-value-metadata-table",
+    "responseOpsAlertDelete": "x-pack/platform/packages/shared/response-ops/alerts-delete",
+    "responseOpsAlertSnooze": "x-pack/platform/packages/shared/response-ops/alert-snooze",
+    "responseOpsAlertsFieldsBrowser": "x-pack/platform/packages/shared/response-ops/alerts-fields-browser",
+    "responseOpsRecurringScheduleForm": "x-pack/platform/packages/shared/response-ops/recurring-schedule-form",
+    "responseOpsRulesApis": "x-pack/platform/packages/shared/response-ops/rules-apis",
+    "responseOpsFormGenerator": "x-pack/platform/packages/shared/response-ops/form-generator",
+    "connectors": "src/platform/packages/shared/kbn-connector-schemas",
+    "connectorSpecs": "src/platform/packages/shared/kbn-connector-specs",
+    "esqlLanguage": "src/platform/packages/shared/esql/kbn-esql-language",
+    "indexEditor": "src/platform/packages/private/kbn-index-editor",
+    "palettes": "src/platform/packages/shared/kbn-palettes"
   },
+  "exclude": [
+    "packages/kbn-mock-idp-plugin"
+  ],
   "translations": []
 }

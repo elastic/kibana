@@ -89,35 +89,6 @@ describe('registerUpdateWorkerRoute', () => {
     );
   });
 
-  it('maps a blocked Alert Triage enable to 400 with a message for the reason', async () => {
-    const update = jest
-      .fn()
-      .mockResolvedValue({ outcome: 'blocked', reason: 'alertAnalysisRuntimeDisabled' });
-    const { handler } = setupRoute(update);
-    const response = httpServerMock.createResponseFactory();
-
-    await handler(
-      createRouteContextMock(),
-      httpServerMock.createKibanaRequest({
-        params: { workerId: TRIAGE },
-        body: { enabled: true },
-        kibanaRequestState: {
-          requestId: '123',
-          requestUuid: '123e4567-e89b-12d3-a456-426614174000',
-          startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
-          authzResult: managedUpdateAuthzResult,
-        },
-      }),
-      response
-    );
-
-    expect(response.badRequest).toHaveBeenCalledWith({
-      body: {
-        message: expect.stringContaining('alert analysis to be turned on for this space'),
-      },
-    });
-  });
-
   it('maps a template-free reports index block to 400 naming the index', async () => {
     const update = jest
       .fn()

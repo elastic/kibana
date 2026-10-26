@@ -34,6 +34,7 @@
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-server",
     "@kbn/es-query",
+    "@kbn/entity-store",
     "@kbn/agent-builder-platform-plugin",
     "@kbn/agent-builder-browser",
     "@kbn/core-http-browser",
@@ -50,7 +51,8 @@
     "@kbn/proposals-ui",
     "@kbn/charts-theme",
     "@kbn/core-ui-settings-browser",
-    "@kbn/visualization-utils"
+    "@kbn/visualization-utils",
+    "@kbn/shared-ux-ai-components"
   ],
   "exclude": ["target/**/*"]
 }

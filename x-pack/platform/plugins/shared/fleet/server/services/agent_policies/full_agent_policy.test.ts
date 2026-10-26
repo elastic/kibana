@@ -3239,6 +3239,106 @@ ssl.test: 123
     `);
   });
 
+  describe('kafka output with Kerberos authentication', () => {
+    const baseKafkaOutput = {
+      id: 'id123',
+      hosts: ['test:9999'],
+      topic: 'test',
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'test output',
+      type: 'kafka',
+      config_yaml: '',
+      client_id: 'Elastic',
+      version: '1.0.0',
+      compression: 'none',
+      partition: 'random',
+      random: { group_events: 1 },
+      headers: [{ key: '', value: '' }],
+      timeout: 30,
+      broker_timeout: 30,
+      required_acks: 1,
+    } as const;
+
+    it('should emit the kerberos settings, without a sasl mechanism or top-level credentials, and the password secret as it is', () => {
+      const policyOutput = transformOutputToFullPolicyOutput({
+        ...baseKafkaOutput,
+        auth_type: 'kerberos',
+        // not used with Kerberos
+        username: 'user',
+        password: 'pass',
+        sasl: { mechanism: 'PLAIN' },
+        kerberos: {
+          auth_type: 'password',
+          config_path: '/etc/krb5.conf',
+          username: 'kafka',
+          service_name: 'kafka',
+          realm: 'EXAMPLE.COM',
+          enable_krb5_fast: false,
+        },
+        secrets: { kerberos: { password: { id: 'password-id' } } },
+      } as any);
+
+      expect(policyOutput).toEqual({
+        type: 'kafka',
+        hosts: ['test:9999'],
+        client_id: 'Elastic',
+        version: '1.0.0',
+        compression: 'none',
+        key: undefined,
+        topic: 'test',
+        headers: [],
+        partition: { random: { group_events: 1 } },
+        timeout: 30,
+        broker_timeout: 30,
+        required_acks: 1,
+        kerberos: {
+          enabled: true,
+          auth_type: 'password',
+          config_path: '/etc/krb5.conf',
+          username: 'kafka',
+          service_name: 'kafka',
+          realm: 'EXAMPLE.COM',
+          enable_krb5_fast: false,
+        },
+        // Fleet Server writes the secret at kerberos.password
+        secrets: { kerberos: { password: { id: 'password-id' } } },
+      });
+    });
+
+    it('should keep emitting the timeout, the agent runs Kerberos on the Beats runtime when it cannot translate it', () => {
+      const policyOutput = transformOutputToFullPolicyOutput({
+        ...baseKafkaOutput,
+        auth_type: 'kerberos',
+        kerberos: {
+          auth_type: 'keytab',
+          config_path: '/etc/krb5.conf',
+          keytab: '/etc/kafka.keytab',
+          realm: 'EXAMPLE.COM',
+        },
+      } as any);
+
+      expect(policyOutput.timeout).toEqual(30);
+      expect(policyOutput.kerberos).toEqual({
+        enabled: true,
+        auth_type: 'keytab',
+        keytab: '/etc/kafka.keytab',
+        config_path: '/etc/krb5.conf',
+        realm: 'EXAMPLE.COM',
+      });
+    });
+
+    it('should not emit anything for an output with the kerberos type and no settings, as before', () => {
+      const policyOutput = transformOutputToFullPolicyOutput({
+        ...baseKafkaOutput,
+        auth_type: 'kerberos',
+      } as any);
+
+      expect(policyOutput).not.toHaveProperty('kerberos');
+      expect(policyOutput).not.toHaveProperty('sasl');
+    });
+  });
+
   describe('kafka output with OAuth2 authentication', () => {
     const baseKafkaOutput = {
       id: 'id123',

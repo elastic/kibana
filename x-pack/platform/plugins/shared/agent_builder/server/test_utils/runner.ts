@@ -207,6 +207,8 @@ export const createToolManagerMock = (): ToolManagerMock => {
     getExecutable: jest.fn(),
     getDynamicToolIds: jest.fn(),
     getSummarizer: jest.fn(),
+    getDynamicTool: jest.fn(),
+    listDynamicTools: jest.fn().mockReturnValue([]),
   };
 };
 
@@ -377,6 +379,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       todos: false,
       bash: false,
       apiDiscovery: false,
+      dynamicTools: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
@@ -451,6 +454,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
       todos: false,
       bash: false,
       apiDiscovery: false,
+      dynamicTools: false,
     },
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
@@ -469,6 +473,7 @@ export const createScopedRunnerMock = (): jest.Mocked<ScopedRunner> => {
 export const createHooksServiceStartMock = (): jest.Mocked<HooksServiceStart> => {
   return {
     run: jest.fn(async (_event: any, context: any) => context),
+    listCycleHooks: jest.fn(() => []),
   };
 };
 
@@ -511,6 +516,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
       todos: false,
       bash: false,
       apiDiscovery: false,
+      dynamicTools: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),

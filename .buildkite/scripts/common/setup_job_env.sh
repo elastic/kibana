@@ -16,11 +16,16 @@ source .buildkite/scripts/common/util.sh
   export BUILDKITE_TOKEN
 
   case "$BUILDKITE_PIPELINE_SLUG" in
+    kibana-deploy-cloud-from-pr | \
+    kibana-deploy-project-from-pr | \
     kibana-chromium-linux-build | \
     kibana-console-definitions-sync | \
     kibana-es-ql-grammar-sync | \
     kibana-opentelemetry-semantic-conventions-sync | \
-    kibana-scout-update-metadata)
+    kibana-purge-cloud-deployments | \
+    kibana-renovate-helper | \
+    kibana-scout-update-metadata | \
+    kibana-serverless-release-readiness)
       GITHUB_TOKEN="$VAULT_GITHUB_TOKEN"
       ;;
     *)
@@ -29,14 +34,7 @@ source .buildkite/scripts/common/util.sh
   esac
   export GITHUB_TOKEN
 
-  KIBANA_DOCKER_USERNAME="$(vault_get container-registry username)"
-  KIBANA_DOCKER_PASSWORD="$(vault_get container-registry password)"
-  function docker_login() {
-      if (command -v docker && docker version) &> /dev/null; then
-        echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-      fi
-  }
-  retry 5 15 docker_login
+  retry 5 15 docker_login_for_pipeline
 }
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
@@ -145,9 +143,10 @@ EOF
 
     KBN_EVALS_CONFIG_JSON="$(retry 5 5 vault kv get -field=config kv/ci-shared/kbn-evals/golden | base64 -d)"
     # Validate config shape. Guarded because lightweight sparse-checkout steps (pipeline upload, Post-Build)
-    #don't fetch the validator; eval steps run on a full checkout.
+    # don't fetch the validator, and orchestration steps on the minimal image have no node yet (this runs
+    # before setup_node.sh); eval steps run on a full checkout with node available.
     kbn_evals_validator="x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js"
-    if [[ -f "$kbn_evals_validator" ]]; then
+    if [[ -f "$kbn_evals_validator" ]] && command -v node >/dev/null; then
       node "$kbn_evals_validator" --stdin <<<"$KBN_EVALS_CONFIG_JSON" >/dev/null
     fi
 
@@ -195,6 +194,19 @@ EOF
 
   GCS_SA_CDN_AUDIENCE="$(vault_get gcs-sa-cdn-prod audience)"
   export GCS_SA_CDN_AUDIENCE
+}
+
+# Set up the workflow step-schema CDN publisher key.
+{
+  if [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-artifacts-container-image" && "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+    WORKFLOWS_SCHEMA_GCS_SA_KEY="$(retry 5 5 vault kv get -field=credentials kv/ci-shared/workflows-library/gcs-publish || true)"
+    if [[ -n "$WORKFLOWS_SCHEMA_GCS_SA_KEY" ]]; then
+      buildkite-agent redactor add <<<"$WORKFLOWS_SCHEMA_GCS_SA_KEY" 2>/dev/null || true
+      export WORKFLOWS_SCHEMA_GCS_SA_KEY
+    else
+      echo "Could not read the workflow step schema publisher key from Vault; the schema CDN publish will fail" >&2
+    fi
+  fi
 }
 
 # Setup Failed Test Reporter Elasticsearch credentials

@@ -9,6 +9,7 @@ import { type TypeOf, schema } from '@kbn/config-schema';
 
 import type {
   AgentPolicy,
+  AgentPolicyPackagePoliciesSummary,
   NewAgentPolicy,
   FullAgentPolicy,
   OutputsForAgentPolicy,
@@ -26,6 +27,16 @@ export interface GetAgentPoliciesRequest {
 }
 
 export type GetAgentPoliciesResponseItem = AgentPolicy;
+
+export interface GetAgentPoliciesPackagePoliciesSummaryRequest {
+  body: {
+    ids: string[];
+  };
+}
+
+export interface GetAgentPoliciesPackagePoliciesSummaryResponse {
+  items: Record<string, AgentPolicyPackagePoliciesSummary>;
+}
 
 export type BulkGetAgentPoliciesResponse = BulkGetResult<GetAgentPoliciesResponseItem>;
 export type GetAgentPoliciesResponse = ListResult<GetAgentPoliciesResponseItem>;

@@ -64,7 +64,7 @@ const ScriptRowActions = memo<{
     script: item,
     onClickAction,
   });
-  return <ActionsContextMenu items={items} data-test-subj={dataTestSubj} />;
+  return <ActionsContextMenu items={items} itemName={item.name} data-test-subj={dataTestSubj} />;
 });
 
 ScriptRowActions.displayName = 'ScriptRowActions';

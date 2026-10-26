@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { MemoryDumpResponseActionOutputResult } from '../../memory_dump_response_action_output_result';
+import { memo, useMemo } from 'react';
 import { useSendMemoryDumpRequest } from '../../../hooks/response_actions/use_send_memory_dump_request';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { MemoryDumpActionRequestBody } from '../../../../../common/api/endpoint/actions/response_actions/memory_dump';
@@ -56,7 +55,7 @@ export const MemoryDumpActionResult = memo<
     return reqBody;
   }, [agentType, command.args.args, endpointId]);
 
-  const { result, actionDetails } = useConsoleActionSubmitter<
+  return useConsoleActionSubmitter<
     MemoryDumpActionRequestBody,
     ResponseActionMemoryDumpOutputContent,
     ResponseActionMemoryDumpParameters
@@ -69,20 +68,6 @@ export const MemoryDumpActionResult = memo<
     actionCreator,
     actionRequestBody,
     dataTestSubj: 'memoryDump',
-  });
-
-  if (actionDetails?.isCompleted && actionDetails.wasSuccessful) {
-    return (
-      <ResultComponent>
-        <MemoryDumpResponseActionOutputResult
-          action={actionDetails}
-          agentId={endpointId}
-          data-test-subj="memoryDumpResult"
-        />
-      </ResultComponent>
-    );
-  }
-
-  return result;
+  }).result;
 });
 MemoryDumpActionResult.displayName = 'MemoryDumpActionResult';

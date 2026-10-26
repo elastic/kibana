@@ -6,14 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
@@ -25,11 +18,11 @@ import { useOnboardingFlow } from '../onboarding_flow_context';
 import { isAgentBasedOnly } from '../aws_service_matrix';
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../aws_service_matrix';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
-import { reconcileInstances } from './authenticate_and_deploy_step/deploy_group_helpers';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
 import { getIncompleteInstances } from './service_settings_step/use_service_settings';
 import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_deploy';
+import { toSOSettings, toSOSettingsUpdate } from './authenticate_and_deploy_step/so_settings';
 import { useOnboardingDriftDetection } from './authenticate_and_deploy_step/use_onboarding_drift_detection';
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
@@ -46,6 +39,8 @@ import {
   SERVICE_SETTINGS_SESSION_KEY,
   type ServiceSettingsPersistedState,
 } from './service_settings_step/use_service_settings';
+import { useReconciledServiceSettings } from './service_settings_step/use_reconciled_service_settings';
+import { StepFooter } from './step_footer';
 
 const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   globalRegion: '',
@@ -122,6 +117,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     [ecfOnlyServices]
   );
 
+  // Switching the method resets the agent policy name and options (see setDeploymentMethod), so
+  // when the user has entered some, the card asks before switching.
+  const switchResetsSettings =
+    !!agentBasedDeploymentFromFlow?.agentPolicyId ||
+    !!agentBasedDeploymentFromFlow?.agentPolicyName ||
+    agentBasedDeploymentFromFlow?.withSysMonitoring !== undefined;
+
   const handleDeploymentMethodChange = useCallback(
     (method: DeploymentMethod) => {
       setDeploymentMethod(method);
@@ -164,11 +166,16 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   // ── Service settings (region + vars) ─────────────────────────────────────────
   // Read from session storage so ECF URLs can be pre-filled without re-entering data.
-  const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
+  // Instances reconciled against the selection: the stored ones only reflect the last visit to
+  // Step 2 (see useReconciledServiceSettings).
+  const serviceSettings = useReconciledServiceSettings();
+  const { globalRegion, serviceVars } = serviceSettings;
+  // The stored settings as they are. Drift detection scopes service-var drift to the stored
+  // instances, so it stays on them rather than the reconciled list, to keep its callout unchanged.
+  const [persistedServiceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
     SERVICE_SETTINGS_SESSION_KEY,
     DEFAULT_SERVICE_SETTINGS
   );
-  const { globalRegion, serviceVars } = serviceSettings ?? DEFAULT_SERVICE_SETTINGS;
 
   // ── Drift detection ───────────────────────────────────────────────────────────
   const { onboardingDeploymentId, policyIdsByInstance } = detectAndReviewStep;
@@ -182,27 +189,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       deploymentMethod,
       connectorId,
       agentBasedDeployment: agentBasedDeploymentFromFlow,
-      serviceSettings,
+      serviceSettings: persistedServiceSettings,
       isDirty,
       updateDetectAndReviewStep,
     });
 
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
-
-  // ECF instances: prefer session-storage instances because they carry duplicate-instance ARNs
-  // (multi-bucket / multi-log-group configs from Step 2). Reconciling with the selection drops the
-  // instances of deselected services, and adds one base instance per selected service that has
-  // none — e.g. the user jumped to Step 3 directly via the horizontal step indicator without
-  // clicking Next in Step 2.
-  const ecfInstances = useMemo(
-    () =>
-      reconcileInstances(
-        serviceSettings?.instances ?? [],
-        selectedServiceIds,
-        awsServicesMap ?? new Map()
-      ),
-    [serviceSettings?.instances, selectedServiceIds, awsServicesMap]
-  );
 
   // ── Settings collected for ECF vs. the selected method ───────────────────────
   // Step 2 collects only the trigger ARN for services ECF can deploy. Under agent-based those
@@ -231,11 +223,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const incompleteSettingsInstances = useMemo(
     () =>
       getIncompleteInstances(
-        ecfInstances.filter((inst) => ecfCapableServiceIds.has(inst.serviceId)),
+        serviceSettings.instances.filter((inst) => ecfCapableServiceIds.has(inst.serviceId)),
         serviceVars,
         awsServicesMap
       ),
-    [ecfInstances, ecfCapableServiceIds, serviceVars, awsServicesMap]
+    [serviceSettings.instances, ecfCapableServiceIds, serviceVars, awsServicesMap]
   );
   const incompleteSettingsCount = incompleteSettingsInstances.length;
   // Name the services that need attention: the incomplete ones while Next is blocked, otherwise
@@ -373,7 +365,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     currentServiceIdsByFamily,
     advanceStaleSnapshots,
   } = useEcfDeployment({
-    instances: isAgentBased ? [] : ecfInstances,
+    instances: isAgentBased ? [] : serviceSettings.instances,
     serviceVars,
     globalRegion,
     otlpEndpoint,
@@ -454,6 +446,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           Record<string, unknown>
         >,
         globalRegion,
+        ...toSOSettings(serviceSettings),
         dataFormat,
       }));
     if (deploymentId) {
@@ -465,6 +458,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       // This write is load-bearing — failure leaves the SO advertising the wrong mechanism
       // and an orphaned connector reference, so we must confirm it before navigating.
       const writeSucceeded = await updateDeployment(deploymentId, {
+        ...toSOSettingsUpdate(serviceSettings),
         mechanisms: ['ecf'],
         connectorId: null,
         authMethod: null,
@@ -503,6 +497,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     detectAndReviewStep.onboardingDeploymentId,
     selectedServiceIds,
     serviceVars,
+    serviceSettings,
     awsServicesMap,
     globalRegion,
     dataFormat,
@@ -676,6 +671,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     (showAgentSection && isAgentDeploying) ||
     (showAgentSection && !isAgentDone && !(driftSettled && isAgentNextReady));
 
+  const showDriftCallout =
+    (showMiSection || showAgentSection) &&
+    isDirty &&
+    (deployGroups.length > 0 || agentTargets.length > 0);
+
   return (
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
       <DeploymentMethodCard
@@ -683,6 +683,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         onChange={handleDeploymentMethodChange}
         availableMethods={isSelfManaged ? SELF_MANAGED_DEPLOYMENT_METHODS : undefined}
         unsupportedServices={unsupportedServices}
+        switchResetsSettings={switchResetsSettings}
         locked={isSelfManaged || ((allAgentBasedOnly || allEcfOnly) && !isMethodLocked)}
         disabled={isMethodLocked}
       />
@@ -806,6 +807,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       )}
 
       {showMiSection && <EuiHorizontalRule margin="l" />}
+      {/* The rule above separates these callouts from what precedes them; without the managed
+          integration section there is none, so they would sit against the method cards. */}
+      {!showMiSection && (driftCheckError || showDriftCallout) && <EuiSpacer size="m" />}
 
       {driftCheckError && (
         <>
@@ -841,38 +845,36 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         </>
       )}
 
-      {(showMiSection || showAgentSection) &&
-        isDirty &&
-        (deployGroups.length > 0 || agentTargets.length > 0) && (
-          <>
-            <KbnWarningCallout
-              announceOnMount
-              title={
-                <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.title"
-                  defaultMessage="Settings changed since last deployment"
-                />
-              }
-              text={
-                <p>
-                  {showAgentSection ? (
-                    <FormattedMessage
-                      id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.bodyAgentBased"
-                      defaultMessage="Settings have changed since last deployment. Click Next to apply the updated configuration."
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.body"
-                      defaultMessage="Settings have changed since last deployment. Click Deploy to apply the updated configuration."
-                    />
-                  )}
-                </p>
-              }
-              data-test-subj="authenticateAndDeployStep-driftCallout"
-            />
-            <EuiSpacer size="m" />
-          </>
-        )}
+      {showDriftCallout && (
+        <>
+          <KbnWarningCallout
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.title"
+                defaultMessage="Settings changed since last deployment"
+              />
+            }
+            text={
+              <p>
+                {showAgentSection ? (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.bodyAgentBased"
+                    defaultMessage="Settings have changed since last deployment. Click Next to apply the updated configuration."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.body"
+                    defaultMessage="Settings have changed since last deployment. Click Deploy to apply the updated configuration."
+                  />
+                )}
+              </p>
+            }
+            data-test-subj="authenticateAndDeployStep-driftCallout"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       {showMiSection && (
         <ManagedIntegrationsSection
@@ -918,34 +920,20 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         <EcfDeploymentSection {...ecfSectionProps} />
       )}
 
-      <EuiSpacer size="l" />
-
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          {onBack && (
-            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.backButton"
-                defaultMessage="Back"
-              />
-            </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={handleNext}
-            isDisabled={isNextDisabled}
-            isLoading={hasUnloadedSelectedManifests || isSavingSO || isAgentDeploying}
-            data-test-subj="authenticateAndDeployStep-nextButton"
-          >
-            <FormattedMessage
-              id="xpack.ingestHub.authenticateAndDeployStep.nextButton"
-              defaultMessage="Next"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <StepFooter onBack={onBack}>
+        <EuiButton
+          fill
+          onClick={handleNext}
+          isDisabled={isNextDisabled}
+          isLoading={hasUnloadedSelectedManifests || isSavingSO || isAgentDeploying}
+          data-test-subj="authenticateAndDeployStep-nextButton"
+        >
+          <FormattedMessage
+            id="xpack.ingestHub.authenticateAndDeployStep.nextButton"
+            defaultMessage="Next"
+          />
+        </EuiButton>
+      </StepFooter>
     </div>
   );
 }

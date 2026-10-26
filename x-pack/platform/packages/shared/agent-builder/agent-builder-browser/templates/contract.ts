@@ -55,6 +55,8 @@ export interface ConversationLocation {
   conversationId: string;
   agentId: string;
   openDetails?: boolean;
+  /** Opens the Agent Builder page with its conversation list sidebar collapsed. */
+  collapseSidebar?: boolean;
 }
 
 /** Shared capabilities supplied by Agent Builder to all template UI registration callbacks. */

@@ -148,6 +148,10 @@ export interface SyntheticsPluginServices extends Partial<CoreStart> {
 export type ClientSetup = void;
 export type ClientStart = void;
 
+interface SyntheticsClientConfig {
+  secretConnections?: { enabled?: boolean };
+}
+
 export class SyntheticsPlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
 {
@@ -175,6 +179,8 @@ export class SyntheticsPlugin
         isDev: this.initContext.env.mode.dev,
         isServerless: this._isServerless,
         isCCSEnabled: !this._isServerless,
+        secretConnectionsEnabled:
+          this.initContext.config.get<SyntheticsClientConfig>().secretConnections?.enabled ?? true,
       });
     });
 

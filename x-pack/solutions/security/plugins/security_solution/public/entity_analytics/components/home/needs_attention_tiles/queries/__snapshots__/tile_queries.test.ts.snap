@@ -2,15 +2,15 @@
 
 exports[`needs attention tile queries over 24h without entity filters builds the alert based tiles query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
-FROM .alerts-security.alerts-default
-| WHERE @timestamp >= NOW() - 1 days
+FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA _index
+| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND @timestamp >= NOW() - 1 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND \`entity.relationships.resolution.resolved_to\` IS NOT NULL)
 | FORK (
-    WHERE \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP _ea_entity_id, \`kibana.alert.severity\`
   )
   (
-    WHERE \`kibana.alert.entity.id\` IS NULL
+    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NULL
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -25,20 +25,25 @@ FROM .alerts-security.alerts-default
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -63,29 +68,28 @@ FROM .alerts-security.alerts-default
       COALESCE(service_euid, user_euid, host_euid)))
     | KEEP _ea_entity_id, \`kibana.alert.severity\`
   )
+  (
+    WHERE _index == \\".entities.v2.latest.default-00001\\"
+    | EVAL _ea_entity_id = \`entity.relationships.resolution.resolved_to\`, alias_watchlisted = entity.attributes.watchlists IS NOT NULL
+    | KEEP _ea_entity_id, alias_watchlisted
+  )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | EVAL is_severe_alert = \`kibana.alert.severity\` IN (\\"high\\", \\"critical\\")
-| STATS has_severe_alert = MAX(is_severe_alert) BY _ea_entity_id
+| EVAL is_alert_row = \`kibana.alert.severity\` IS NOT NULL
+| STATS has_severe_alert = MAX(is_severe_alert), has_alert = MAX(is_alert_row), alias_watchlisted = MAX(alias_watchlisted) BY _ea_entity_id
 | RENAME _ea_entity_id AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE entity.name IS NOT NULL
-| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| EVAL is_watchlisted = entity.attributes.watchlists IS NOT NULL
-| STATS has_severe_alert = MAX(has_severe_alert), is_watchlisted = MAX(is_watchlisted) BY effective_id
-| RENAME effective_id AS \`entity.id\`
-| LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
-| EVAL is_new = entity.lifecycle.first_seen >= NOW() - 1 days
-| EVAL severe_id = CASE(has_severe_alert, entity.id, null)
-| EVAL watchlisted_id = CASE(is_watchlisted, entity.id, null)
-| EVAL new_alerting_id = CASE(is_new, entity.id, null)
+| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id), group_on_watchlist = COALESCE(alias_watchlisted, false) OR entity.attributes.watchlists IS NOT NULL
+| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), group_on_watchlist = MAX(group_on_watchlist) BY effective_id
+| EVAL severe_id = CASE(has_severe_alert, effective_id, null)
+| EVAL watchlisted_id = CASE(has_alert AND COALESCE(group_on_watchlist, false), effective_id, null)
 | STATS
-    severe_alerts_count      = COUNT_DISTINCT(severe_id),
+    severe_alerts_count      = COUNT(severe_id),
     severe_alerts_entity_ids = VALUES(severe_id),
-    watchlisted_count        = COUNT_DISTINCT(watchlisted_id),
-    watchlisted_entity_ids   = VALUES(watchlisted_id),
-    new_alerting_count       = COUNT_DISTINCT(new_alerting_id),
-    new_alerting_entity_ids  = VALUES(new_alerting_id)"
+    watchlisted_count        = COUNT(watchlisted_id),
+    watchlisted_entity_ids   = VALUES(watchlisted_id)"
 `;
 
 exports[`needs attention tile queries over 24h without entity filters builds the entities with anomalies query 1`] = `
@@ -106,20 +110,25 @@ FROM .ml-anomalies-shared*
  user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
  user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
  entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
  user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
  user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
  user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
  _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
  _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
- _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+ _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-TRUE, _euid_branch_1_formula, NULL))
+_euid_branch_1_cond, _euid_branch_1_formula,
+TRUE, _euid_branch_2_formula, NULL))
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -149,7 +158,8 @@ TRUE, _euid_branch_1_formula, NULL))
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE entity.name IS NOT NULL
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
+| STATS BY effective_id
+| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
 exports[`needs attention tile queries over 24h without entity filters builds the newly high or critical query 1`] = `
@@ -164,12 +174,20 @@ FROM (
          level_moderate = CASE(risk_level == \\"Moderate\\", 2, level_low),
          level_high = CASE(risk_level == \\"High\\", 3, level_moderate),
          level_num = CASE(risk_level == \\"Critical\\", 4, level_high)
-  | STATS boundary_level_num = LAST(level_num, @timestamp) BY entity_euid
+  | EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+  | STATS last_value = LAST(level_num, @timestamp) BY entity_euid, is_group
+  | EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+  | STATS group_value = MAX(group_part), own_value = MAX(own_part) BY entity_euid
+  | EVAL boundary_level_num = COALESCE(group_value, own_value)
+  | KEEP entity_euid, boundary_level_num
   | RENAME entity_euid AS \`entity.id\`
 ), (
   FROM .entities.v2.latest.default-00001
-  | WHERE entity.risk.calculated_level IN (\\"High\\", \\"Critical\\")
-  | EVAL current_level_num = CASE(entity.risk.calculated_level == \\"Critical\\", 4, 3)
+  | WHERE \`entity.relationships.resolution.resolved_to\` IS NULL
+    AND (entity.risk.calculated_level IN (\\"High\\", \\"Critical\\") OR \`entity.relationships.resolution.risk.calculated_level\` IN (\\"High\\", \\"Critical\\"))
+  | EVAL current_level = COALESCE(\`entity.relationships.resolution.risk.calculated_level\`, entity.risk.calculated_level)
+  | WHERE current_level IN (\\"High\\", \\"Critical\\")
+  | EVAL current_level_num = CASE(current_level == \\"Critical\\", 4, 3)
   | KEEP \`entity.id\`, current_level_num
 )
 | STATS boundary_level_num = MAX(boundary_level_num),
@@ -179,7 +197,8 @@ FROM (
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE entity.name IS NOT NULL
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
+| STATS BY effective_id
+| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
 exports[`needs attention tile queries over 24h without entity filters builds the risk movers query 1`] = `
@@ -190,12 +209,18 @@ FROM (
   | EVAL entity_euid = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)
   | EVAL risk_score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
   | WHERE entity_euid IS NOT NULL
-  | STATS boundary_score = LAST(risk_score, @timestamp) BY entity_euid
+  | EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+  | STATS last_value = LAST(risk_score, @timestamp) BY entity_euid, is_group
+  | EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+  | STATS group_value = MAX(group_part), own_value = MAX(own_part) BY entity_euid
+  | EVAL boundary_score = COALESCE(group_value, own_value)
+  | KEEP entity_euid, boundary_score
   | RENAME entity_euid AS \`entity.id\`
 ), (
   FROM .entities.v2.latest.default-00001
-  | WHERE entity.risk.calculated_score_norm IS NOT NULL AND entity.name IS NOT NULL
-  | EVAL current_score = entity.risk.calculated_score_norm,
+  | WHERE \`entity.relationships.resolution.resolved_to\` IS NULL AND entity.name IS NOT NULL
+    AND COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm) >= 10
+  | EVAL current_score = COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm),
          effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
   | KEEP \`entity.id\`, current_score, effective_id
 )
@@ -204,20 +229,21 @@ FROM (
         effective_id   = MAX(effective_id)
         BY \`entity.id\`
 | WHERE current_score - boundary_score >= 10
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
+| STATS BY effective_id
+| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
 exports[`needs attention tile queries over 30d with a criticality filter builds the alert based tiles query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
-FROM .alerts-security.alerts-default
-| WHERE @timestamp >= NOW() - 30 days
+FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA _index
+| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND @timestamp >= NOW() - 30 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND \`entity.relationships.resolution.resolved_to\` IS NOT NULL)
 | FORK (
-    WHERE \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP _ea_entity_id, \`kibana.alert.severity\`
   )
   (
-    WHERE \`kibana.alert.entity.id\` IS NULL
+    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NULL
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -232,20 +258,25 @@ FROM .alerts-security.alerts-default
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -270,30 +301,31 @@ FROM .alerts-security.alerts-default
       COALESCE(service_euid, user_euid, host_euid)))
     | KEEP _ea_entity_id, \`kibana.alert.severity\`
   )
+  (
+    WHERE _index == \\".entities.v2.latest.default-00001\\"
+    | EVAL _ea_entity_id = \`entity.relationships.resolution.resolved_to\`, alias_watchlisted = entity.attributes.watchlists IS NOT NULL
+    | KEEP _ea_entity_id, alias_watchlisted
+  )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | EVAL is_severe_alert = \`kibana.alert.severity\` IN (\\"high\\", \\"critical\\")
-| STATS has_severe_alert = MAX(is_severe_alert) BY _ea_entity_id
+| EVAL is_alert_row = \`kibana.alert.severity\` IS NOT NULL
+| STATS has_severe_alert = MAX(is_severe_alert), has_alert = MAX(is_alert_row), alias_watchlisted = MAX(alias_watchlisted) BY _ea_entity_id
 | RENAME _ea_entity_id AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE entity.name IS NOT NULL
-| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
-| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| EVAL is_watchlisted = entity.attributes.watchlists IS NOT NULL
-| STATS has_severe_alert = MAX(has_severe_alert), is_watchlisted = MAX(is_watchlisted) BY effective_id
-| RENAME effective_id AS \`entity.id\`
+| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id), group_on_watchlist = COALESCE(alias_watchlisted, false) OR entity.attributes.watchlists IS NOT NULL
+| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), group_on_watchlist = MAX(group_on_watchlist) BY effective_id
+| EVAL entity.id = effective_id
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
-| EVAL is_new = entity.lifecycle.first_seen >= NOW() - 30 days
-| EVAL severe_id = CASE(has_severe_alert, entity.id, null)
-| EVAL watchlisted_id = CASE(is_watchlisted, entity.id, null)
-| EVAL new_alerting_id = CASE(is_new, entity.id, null)
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| EVAL severe_id = CASE(has_severe_alert, effective_id, null)
+| EVAL watchlisted_id = CASE(has_alert AND COALESCE(group_on_watchlist, false), effective_id, null)
 | STATS
-    severe_alerts_count      = COUNT_DISTINCT(severe_id),
+    severe_alerts_count      = COUNT(severe_id),
     severe_alerts_entity_ids = VALUES(severe_id),
-    watchlisted_count        = COUNT_DISTINCT(watchlisted_id),
-    watchlisted_entity_ids   = VALUES(watchlisted_id),
-    new_alerting_count       = COUNT_DISTINCT(new_alerting_id),
-    new_alerting_entity_ids  = VALUES(new_alerting_id)"
+    watchlisted_count        = COUNT(watchlisted_id),
+    watchlisted_entity_ids   = VALUES(watchlisted_id)"
 `;
 
 exports[`needs attention tile queries over 30d with a criticality filter builds the entities with anomalies query 1`] = `
@@ -314,20 +346,25 @@ FROM .ml-anomalies-shared*
  user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
  user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
  entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
  user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
  user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
  user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
  _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
  _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
- _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+ _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-TRUE, _euid_branch_1_formula, NULL))
+_euid_branch_1_cond, _euid_branch_1_formula,
+TRUE, _euid_branch_2_formula, NULL))
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -356,9 +393,12 @@ TRUE, _euid_branch_1_formula, NULL))
 | RENAME derived_euids AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE entity.name IS NOT NULL
-| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
+| STATS BY effective_id
+| EVAL entity.id = effective_id
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
 exports[`needs attention tile queries over 30d with a criticality filter builds the newly high or critical query 1`] = `
@@ -373,12 +413,20 @@ FROM (
          level_moderate = CASE(risk_level == \\"Moderate\\", 2, level_low),
          level_high = CASE(risk_level == \\"High\\", 3, level_moderate),
          level_num = CASE(risk_level == \\"Critical\\", 4, level_high)
-  | STATS boundary_level_num = LAST(level_num, @timestamp) BY entity_euid
+  | EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+  | STATS last_value = LAST(level_num, @timestamp) BY entity_euid, is_group
+  | EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+  | STATS group_value = MAX(group_part), own_value = MAX(own_part) BY entity_euid
+  | EVAL boundary_level_num = COALESCE(group_value, own_value)
+  | KEEP entity_euid, boundary_level_num
   | RENAME entity_euid AS \`entity.id\`
 ), (
   FROM .entities.v2.latest.default-00001
-  | WHERE entity.risk.calculated_level IN (\\"High\\", \\"Critical\\")
-  | EVAL current_level_num = CASE(entity.risk.calculated_level == \\"Critical\\", 4, 3)
+  | WHERE \`entity.relationships.resolution.resolved_to\` IS NULL
+    AND (entity.risk.calculated_level IN (\\"High\\", \\"Critical\\") OR \`entity.relationships.resolution.risk.calculated_level\` IN (\\"High\\", \\"Critical\\"))
+  | EVAL current_level = COALESCE(\`entity.relationships.resolution.risk.calculated_level\`, entity.risk.calculated_level)
+  | WHERE current_level IN (\\"High\\", \\"Critical\\")
+  | EVAL current_level_num = CASE(current_level == \\"Critical\\", 4, 3)
   | KEEP \`entity.id\`, current_level_num
 )
 | STATS boundary_level_num = MAX(boundary_level_num),
@@ -389,7 +437,8 @@ FROM (
 | WHERE entity.name IS NOT NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
+| STATS BY effective_id
+| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
 exports[`needs attention tile queries over 30d with a criticality filter builds the risk movers query 1`] = `
@@ -400,13 +449,19 @@ FROM (
   | EVAL entity_euid = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)
   | EVAL risk_score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
   | WHERE entity_euid IS NOT NULL
-  | STATS boundary_score = LAST(risk_score, @timestamp) BY entity_euid
+  | EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+  | STATS last_value = LAST(risk_score, @timestamp) BY entity_euid, is_group
+  | EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+  | STATS group_value = MAX(group_part), own_value = MAX(own_part) BY entity_euid
+  | EVAL boundary_score = COALESCE(group_value, own_value)
+  | KEEP entity_euid, boundary_score
   | RENAME entity_euid AS \`entity.id\`
 ), (
   FROM .entities.v2.latest.default-00001
-  | WHERE entity.risk.calculated_score_norm IS NOT NULL AND entity.name IS NOT NULL
+  | WHERE \`entity.relationships.resolution.resolved_to\` IS NULL AND entity.name IS NOT NULL
+    AND COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm) >= 10
   | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
-  | EVAL current_score = entity.risk.calculated_score_norm,
+  | EVAL current_score = COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm),
          effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
   | KEEP \`entity.id\`, current_score, effective_id
 )
@@ -415,5 +470,6 @@ FROM (
         effective_id   = MAX(effective_id)
         BY \`entity.id\`
 | WHERE current_score - boundary_score >= 10
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
+| STATS BY effective_id
+| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;

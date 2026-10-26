@@ -42,7 +42,8 @@ const assertEpisodeIsDeactivatable = (alertEvent: AlertEventRecord): void => {
   throw noOpConflict({
     code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
     message: getCannotDeactivateEpisodeMessage(alertEvent.episode_id),
-    alertEvent,
+    groupHash: alertEvent.group_hash,
+    alertId: alertEvent.episode_id,
     actionType: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
     details: { alert_status: status },
   });

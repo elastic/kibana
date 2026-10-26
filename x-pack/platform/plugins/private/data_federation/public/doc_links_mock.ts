@@ -25,6 +25,7 @@ export const docLinksMock = {
       dataSources: '',
       datasets: '',
       datasetSettings: '',
+      datasetMappings: '',
       authentication: '',
       grantReadAccess: '',
       staticCredentials: '',

@@ -19,13 +19,11 @@ const renderFlyout = () =>
           {
             id: 'shas',
             typeLabel: 'SHA256',
-            shortLabel: 'SHAs',
             items: [{ value: 'a3f5c9d1e8b74620' }],
           },
           {
             id: 'ips',
             typeLabel: 'IP addresses',
-            shortLabel: 'IPs',
             items: [
               { value: '185.220.101.42', comment: 'C2 contacted by FIN-DB-02' },
               { value: '10.0.0.10' },

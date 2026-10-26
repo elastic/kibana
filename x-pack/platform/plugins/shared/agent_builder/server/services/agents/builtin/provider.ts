@@ -87,6 +87,7 @@ export const toInternalDefinition = async ({
         : {}),
     },
     type,
+    hidden: definition.hidden ?? false,
     access_control: undefined,
     created_by: undefined,
     readonly: true,

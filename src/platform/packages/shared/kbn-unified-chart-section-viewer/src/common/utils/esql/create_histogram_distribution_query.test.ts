@@ -31,10 +31,10 @@ describe('createHistogramDistributionQuery', () => {
         bounds,
         originalSource: 'metrics-*',
       })
-    ).toBe(`SET unmapped_fields = "NULLIFY";
-TS metrics-a
+    ).toBe(`TS metrics-a
   | STATS count = COUNT(latency.exp, bucket) BY bucket = BUCKET(latency.exp, 10, 1, 250), TBUCKET(100)
-  | EVAL bucket = RANGE_MIN(bucket)`);
+  | EVAL bucket = RANGE_MIN(bucket)
+  | SORT bucket DESC`);
   });
 
   it('uses a tdigest field directly', () => {
@@ -46,10 +46,10 @@ TS metrics-a
       bounds,
     });
 
-    expect(query).toBe(`SET unmapped_fields = "NULLIFY";
-TS metrics-a
+    expect(query).toBe(`TS metrics-a
   | STATS count = COUNT(latency.tdigest, bucket) BY bucket = BUCKET(latency.tdigest, 10, 1, 250), TBUCKET(100)
-  | EVAL bucket = RANGE_MIN(bucket)`);
+  | EVAL bucket = RANGE_MIN(bucket)
+  | SORT bucket DESC`);
   });
 
   it('casts a legacy histogram with TO_TDIGEST', () => {
@@ -61,10 +61,23 @@ TS metrics-a
       bounds,
     });
 
-    expect(query).toBe(`SET unmapped_fields = "NULLIFY";
-TS metrics-a
+    expect(query).toBe(`TS metrics-a
   | STATS count = COUNT(TO_TDIGEST(latency.legacy), bucket) BY bucket = BUCKET(TO_TDIGEST(latency.legacy), 10, 1, 250), TBUCKET(100)
-  | EVAL bucket = RANGE_MIN(bucket)`);
+  | EVAL bucket = RANGE_MIN(bucket)
+  | SORT bucket DESC`);
+  });
+
+  it('omits NULLIFY when WHERE cannot name an extra column', () => {
+    const query = createHistogramDistributionQuery({
+      metricItem: createMetric(),
+      bounds,
+      whereStatements: ['@timestamp IS NOT NULL', '1 == 1', '  '],
+      originalSource: 'metrics-*',
+    });
+
+    expect(query?.startsWith('SET unmapped_fields = "NULLIFY";\n')).toBe(false);
+    expect(query).toContain('| WHERE @timestamp IS NOT NULL');
+    expect(query).toContain('| WHERE 1 == 1');
   });
 
   it('applies the user WHERE clauses before STATS', () => {
@@ -79,7 +92,17 @@ TS metrics-a
 TS metrics-a
   | WHERE host.name == "a"
   | STATS count = COUNT(latency.exp, bucket) BY bucket = BUCKET(latency.exp, 10, 1, 250), TBUCKET(100)
-  | EVAL bucket = RANGE_MIN(bucket)`);
+  | EVAL bucket = RANGE_MIN(bucket)
+  | SORT bucket DESC`);
+  });
+
+  it('opens a positive span when min equals max', () => {
+    expect(
+      createHistogramDistributionQuery({
+        metricItem: createMetric(),
+        bounds: { min: 5, max: 5 },
+      })
+    ).toContain('BUCKET(latency.exp, 10, 5, 5.000005)');
   });
 
   it('returns undefined for a non-histogram instrument', () => {

@@ -79,6 +79,10 @@ export interface ChangeHistoryDocument {
     id?: string;
     /** Current login name for user that generated the change. */
     name: string;
+    /** Resolved at read time from the user profile; not persisted. */
+    full_name?: string;
+    /** Resolved at read time from the user profile; not persisted. */
+    email?: string;
   };
 
   event: {
@@ -127,7 +131,7 @@ export interface ChangeHistoryDocument {
       /** Full paths of fields replaced with a `[redacted]` placeholder (low-entropy sensitive data, large blobs). */
       redacted: string[];
     };
-    /** Full snapshot after the change. */
+    /** Full snapshot after the change, with masked fields applied. Another Kibana version may have written it. See "Reading snapshots back" in the README. */
     snapshot: Record<string, unknown>;
   };
 
@@ -164,7 +168,8 @@ export interface ObjectChange {
   sequence?: number;
   /**
    * Full snapshot of the object **after** the change (post-write state). Persisted as
-   * `object.snapshot`.
+   * `object.snapshot` and never migrated, so other Kibana versions read it back as stored.
+   * See "Reading snapshots back" in the README.
    */
   snapshot: Record<string, any>;
 }

@@ -9,9 +9,9 @@ import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
 /*
- * Below this container width the controls row cannot fit Search, the date picker, the 250px
- * time field and the ES|QL menu on one line. Search and the date picker then grow to fill the
- * first row alongside the menu, and the time field takes its own full-width second row.
+ * Below this container width the controls row cannot fit the date picker, the 250px time field
+ * and Search on one line. The date picker then grows to fill the first row alongside Search, and
+ * the time field takes its own full-width second row.
  */
 const COMPACT_CONTROLS_MAX_WIDTH = '560px';
 
@@ -23,15 +23,13 @@ const sandboxRootCss = css`
 
 const searchItemCss = css`
   @container (max-width: ${COMPACT_CONTROLS_MAX_WIDTH}) {
-    flex-grow: 1;
+    order: 1;
   }
 `;
 
-// Takes twice Search's share of the free space so the Search button stays the smaller of the two.
+// Takes the free space so the time field sits flush against Search.
 const dateRangeItemCss = css`
-  @container (max-width: ${COMPACT_CONTROLS_MAX_WIDTH}) {
-    flex-grow: 2;
-  }
+  min-width: 0;
 `;
 
 const timeFieldSelectCss = css`
@@ -45,20 +43,17 @@ const timeFieldSelectCss = css`
   }
 `;
 
-const esqlMenuItemCss = css`
-  margin-left: auto;
-
-  @container (max-width: ${COMPACT_CONTROLS_MAX_WIDTH}) {
-    order: 1;
-  }
-`;
-
 const loadingCenterCss = css`
   min-height: 200px;
 `;
 
 const editorBodyCss = css`
   overflow: auto;
+
+  /* Line numbers are one step smaller than the code, as in Discover's editor. */
+  .monaco-editor .margin-view-overlays .line-numbers {
+    font-size: 12px;
+  }
 `;
 
 export const useQuerySandboxStyles = ({ euiTheme }: UseEuiTheme) => {
@@ -128,7 +123,6 @@ export const useQuerySandboxStyles = ({ euiTheme }: UseEuiTheme) => {
     dateRangeItemCss,
     controlsRowCss,
     timeFieldSelectCss,
-    esqlMenuItemCss,
     loadingCenterCss,
     resultsSectionCss,
   };

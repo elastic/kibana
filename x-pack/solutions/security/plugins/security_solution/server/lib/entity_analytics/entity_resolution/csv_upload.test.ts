@@ -352,7 +352,9 @@ describe('processResolutionCsvUpload', () => {
       const csv = 'type,user.email,resolved_to\nuser,alias@test.com,target:golden';
       await processResolutionCsvUpload(createMockStream(csv), deps());
 
-      expect(mockResolutionClient.linkEntities).toHaveBeenCalledWith('target:golden', ['alias:1']);
+      expect(mockResolutionClient.linkEntities).toHaveBeenCalledWith('target:golden', ['alias:1'], {
+        reportTelemetry: false,
+      });
     });
 
     it('should report success with linked and skipped counts', async () => {

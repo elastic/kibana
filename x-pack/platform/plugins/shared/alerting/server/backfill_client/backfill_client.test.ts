@@ -409,6 +409,44 @@ describe('BackfillClient', () => {
       );
     });
 
+    test('should schedule backfill for a rule that only has a UIAM API key', async () => {
+      const uiamApiKey = Buffer.from('uiam-id:essu_key').toString('base64');
+      const rule = getMockRule({ apiKey: null, uiamApiKey });
+      ruleTypeRegistry.get.mockReturnValue({ ...mockRuleType, ruleTaskTimeout: '1d' });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [getBulkCreateParam('abc', '1', getMockAdHocRunAttributes())],
+      });
+
+      const result = await backfillClient.bulkQueue({
+        actionsClient,
+        auditLogger,
+        params: [getMockData()],
+        rules: [rule],
+        ruleTypeRegistry,
+        spaceId: 'default',
+        unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            apiKeyId: '',
+            apiKeyToUse: '',
+            uiamApiKey,
+            uiamApiKeyId: 'uiam-id',
+          }),
+        }),
+      ]);
+      expect(result).not.toContainEqual(
+        expect.objectContaining({
+          error: expect.objectContaining({ message: 'Rule 1 has no API key' }),
+        })
+      );
+    });
+
     test('should successfully schedule backfill for rule with actions when runActions=true', async () => {
       actionsClient.getBulk.mockResolvedValue([
         createMockConnector({

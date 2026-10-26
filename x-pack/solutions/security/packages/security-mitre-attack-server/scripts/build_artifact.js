@@ -14,7 +14,7 @@ const { buildMitreArtifact } = require('../src/build_artifact/build_artifact');
 const ARTIFACT_PATH = path.join(__dirname, '../artifacts/mitre_artifact.json');
 
 async function main() {
-  console.log('Fetching MITRE ATT&CK bundles…');
+  console.log('Fetching MITRE STIX bundles (ATT&CK Enterprise, ATLAS)…');
   const entities = await buildMitreArtifact();
 
   fs.mkdirSync(path.dirname(ARTIFACT_PATH), { recursive: true });

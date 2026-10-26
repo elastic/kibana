@@ -224,7 +224,7 @@ const InternalDocViewerTable = ({
         dataView,
         canPrependTimeFieldColumn(
           columns,
-          dataView.timeFieldName,
+          dataView,
           dataSource,
           !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)
         )

@@ -39,8 +39,9 @@ node scripts/evals run --suite agent-builder-visualizations
 
 Seed examples live in `evals/visualization_creation/datasets/`, one file per data source, concatenated by `datasets/index.ts` (~21 prompts):
 
-- **logs** (`kibana_sample_data_logs`): xy (bar/line/horizontal/stacked), a two-series time series scored on ES|QL only, metric (single and per-OS tiles via `breakdown_by`), gauge, pie, tag_cloud, data_table, heatmap, treemap, a line split by response code via `breakdown_by`, plus one Vega-Lite scatter
-- **ecommerce** (`kibana_sample_data_ecommerce`): metric (including a primary + secondary metric), pie, xy over `order_date` + numeric revenue/quantity fields
+- **logs** (`kibana_sample_data_logs`): xy (bar/line/horizontal/stacked), a two-series time series scored on ES|QL only, metric (single and per-OS tiles via `breakdown_by`), gauge, pie, tag_cloud, data_table, heatmap, treemap, a line split by response code via `breakdown_by`, plus a Vega-Lite scatter and a layered Vega-Lite time series (bars and a line)
+- **ecommerce** (`kibana_sample_data_ecommerce`): metric (an order count, revenue, and a primary + secondary metric), pie, xy over `order_date` + numeric revenue/quantity fields, and a Vega-Lite single number. The source has no `@timestamp`, so every gold filters `order_date` with the time-picker params
+- **flights** (`kibana_sample_data_flights`): a pie by carrier, filtered on its `timestamp` field
 - **host metrics** (synthtrace Beats load fixture): multi-series load averages on `metrics-system.load-default`
 - **edits** (`datasets/edits.ts`, run as its own dataset by `visualization_edit.spec.ts`): two-turn conversations where the first turn creates a chart and the second changes it (make it horizontal, split by response code, switch to a pie, add a second series). The gold describes the chart after the edit; only that chart is scored, and the trajectory sees both turns.
 - **refusals** (`datasets/negatives.ts`, run as its own dataset by `visualization_refusal.spec.ts`): a missing index, a missing field, and an ambiguous request. The missing-index case doubles as a canary: if positive evaluators ever score it, they have stopped discriminating.
@@ -73,7 +74,7 @@ Column resolution follows one alias hop inside `STATS` and `EVAL`, tolerates `.k
 
 **Gold queries follow the agent's idiom** (see `agent-builder-visualizations-server/shared/esql_instructions.ts`):
 
-- **Categorical / metric** golds include the raw-`@timestamp` time filter (`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`).
+- **Categorical / metric** golds on `@timestamp` omit the time filter, because Kibana applies the time range to `@timestamp` on its own. Golds on any other date field include it (for example `WHERE order_date >= ?_tstart AND order_date < ?_tend`).
 - **`@timestamp` time-series** golds use `TBUCKET(100, ?_tstart, ?_tend)` and omit the timestamp `WHERE`. The bounds size the buckets; Kibana binds them when the chart renders. An extra `@timestamp` WHERE is still accepted and stripped before equivalence scoring. `BUCKET(@timestamp, <count>, ?_tstart, ?_tend)` remains equivalent.
 - **Other date fields** (for example `order_date`) stay on `BUCKET(<time field>, 100, ?_tstart, ?_tend)`. `TBUCKET` only buckets `@timestamp`.
 

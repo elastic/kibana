@@ -26,3 +26,12 @@ responses:
                   lat: 0
                   lon: 0
                 namespace: test
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/synthetics/private_locations" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/synthetics/private_locations

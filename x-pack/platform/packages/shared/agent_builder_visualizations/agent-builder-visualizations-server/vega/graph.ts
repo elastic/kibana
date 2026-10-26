@@ -36,7 +36,7 @@ import {
 } from './actions';
 
 // Regex to extract JSON from markdown code blocks.
-const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
+const INLINE_JSON_REGEX = /```(?:json)?([\s\S]*?)```/gm;
 
 const REPAIR_INSTRUCTIONS =
   'Return the complete corrected response as a single JSON object matching the response schema ("title", "authoring_note", and "spec"). Change only what is needed to fix the error.';
@@ -195,8 +195,8 @@ export const createVegaGraph = async (
           logger,
           esClient,
           timeRange: DEFAULT_VALIDATION_TIME_RANGE,
-          // Vega must filter rows on the raw source time field itself (Kibana
-          // does not do it for us as with Lens); see vegaEsqlAdditionalInstructions.
+          // Vega needs dotless column names and a source time field; see
+          // vegaEsqlAdditionalInstructions.
           extraInstructions: vegaEsqlAdditionalInstructions,
         });
         if (!generated.query) {
@@ -320,7 +320,6 @@ export const createVegaGraph = async (
       const normalized = normalizeVegaSpec({
         spec: lastAuthor.spec,
         esqlQuery: state.esqlQuery,
-        columns: state.columns,
       });
 
       action = {
