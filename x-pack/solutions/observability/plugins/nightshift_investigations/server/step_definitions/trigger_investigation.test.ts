@@ -60,14 +60,20 @@ describe('triggerInvestigationStepDefinition', () => {
       const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
       const { definition, getEpisodeLookup } = createDefinition(start);
 
-      await definition.handler(createContext({ subject_type: 'alert', subject_id: 'episode-1' }));
+      await definition.handler(
+        createContext({
+          subject_type: 'alert',
+          subject_id: 'episode-1',
+          telemetry_target: 'orca',
+        })
+      );
 
       expect(getEpisodeLookup).toHaveBeenCalledWith(request, 'test-space');
       expect(fetchInvestigationAlertSnapshots).toHaveBeenCalledWith(
         expect.objectContaining({ alertIds: ['episode-1'] })
       );
       expect(start).toHaveBeenCalledWith(
-        expect.objectContaining({ context: { alerts: snapshots } })
+        expect.objectContaining({ context: { alerts: snapshots }, telemetry_target: 'orca' })
       );
     });
 

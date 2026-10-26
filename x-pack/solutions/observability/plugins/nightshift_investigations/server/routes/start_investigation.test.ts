@@ -53,7 +53,7 @@ it('loads the alert and builds the investigation context server-side', async () 
   });
 });
 
-it('loads every alert id and stores the first as the subject', async () => {
+it('loads every alert id and preserves the selected telemetry target', async () => {
   const find = jest.fn().mockResolvedValue({
     hits: { hits: [{ _source: alert }, { _source: { ...alert, 'kibana.alert.uuid': 'alert-2' } }] },
   });
@@ -66,12 +66,18 @@ it('loads every alert id and stores the first as the subject', async () => {
     getInvestigationsClient,
     getAlertsClient: jest.fn().mockResolvedValue(alertsClient),
     getEpisodeLookup,
-    params: { body: { subject: { type: 'alert', ids: ['alert-1', 'alert-2', 'alert-1'] } } },
+    params: {
+      body: {
+        subject: { type: 'alert', ids: ['alert-1', 'alert-2', 'alert-1'] },
+        telemetry_target: 'orca',
+      },
+    },
   } as never);
   expect(find).toHaveBeenCalledTimes(1);
   expect(start).toHaveBeenCalledWith(
     expect.objectContaining({
       subject: { type: 'alert', id: 'alert-1', summary: undefined },
+      telemetry_target: 'orca',
       context: {
         alerts: [
           expect.objectContaining({ id: 'alert-1' }),
