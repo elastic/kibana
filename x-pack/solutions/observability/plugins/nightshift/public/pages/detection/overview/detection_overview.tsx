@@ -120,7 +120,7 @@ export const DetectionOverview = ({
             status={status}
             isLoading={isStatusLoading}
             isError={isStatusError}
-            testSubject={compact ? 'nightshiftDetectionCompactStatus' : undefined}
+            data-test-subj={compact ? 'nightshiftDetectionCompactStatus' : undefined}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

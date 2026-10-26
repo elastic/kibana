@@ -21,7 +21,15 @@ import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
+import React, {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type UIEvent,
+} from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { NightshiftAppHeader } from '../../app/app_header';
 import type { NightshiftAppHeaderProps } from '../../app/app_header';
@@ -47,15 +55,15 @@ import {
   useDetectionTimeRange,
 } from './use_detection_time_range';
 
-const EventsTab = React.lazy(() =>
+const EventsTab = lazy(() =>
   import('./events/events_tab').then(({ EventsTab: Tab }) => ({ default: Tab }))
 );
 
-const RulesTab = React.lazy(() =>
+const RulesTab = lazy(() =>
   import('./rules/rules_tab').then(({ RulesTab: Tab }) => ({ default: Tab }))
 );
 
-const SignalsTab = React.lazy(() =>
+const SignalsTab = lazy(() =>
   import('./signals/signals_tab').then(({ SignalsTab: Tab }) => ({ default: Tab }))
 );
 
@@ -88,11 +96,11 @@ export const DetectionPage = ({
   const { timeRange, setTimeRange } = useDetectionTimeRange();
   const overview = useDetectionOverview(timeRange);
   const selection = useEntitySelection();
-  const [isOverviewCompact, setIsOverviewCompact] = React.useState(false);
-  const fullOverviewSlotRef = React.useRef<HTMLDivElement>(null);
-  React.useEffect(() => setIsOverviewCompact(false), [tab]);
-  const handleTabBodyScroll = React.useCallback(
-    (event: React.UIEvent<HTMLDivElement>) => {
+  const [isOverviewCompact, setIsOverviewCompact] = useState(false);
+  const fullOverviewSlotRef = useRef<HTMLDivElement>(null);
+  useEffect(() => setIsOverviewCompact(false), [tab]);
+  const handleTabBodyScroll = useCallback(
+    (event: UIEvent<HTMLDivElement>) => {
       const { clientHeight, scrollHeight, scrollTop } = event.currentTarget;
       const collapseThreshold = euiTheme.base / 2;
       setIsOverviewCompact((isCompact) => {
@@ -261,7 +269,7 @@ export const DetectionPage = ({
               data-test-subj="nightshiftDetectionTabBody"
               onScroll={handleTabBodyScroll}
             >
-              <React.Suspense
+              <Suspense
                 fallback={
                   <EuiLoadingSpinner size="xl" data-test-subj="nightshiftDetectionTabLoading" />
                 }
@@ -290,7 +298,7 @@ export const DetectionPage = ({
                     unassigned={selection.unassigned}
                   />
                 )}
-              </React.Suspense>
+              </Suspense>
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>

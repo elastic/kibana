@@ -64,7 +64,7 @@ const createSearchResources = (links: ReturnType<typeof queryLink>[]) => {
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getQueryLinks }),
     }),
   };
-  return { resources, findLatestPaginated };
+  return { resources, findLatestPaginated, getQueryLinks };
 };
 
 const createDetectionByIdResources = (hits: Array<typeof detection>) => {
@@ -94,6 +94,37 @@ describe('GET /internal/significant_events/detections', () => {
     } as unknown as Parameters<typeof searchRoute.handler>[0]);
 
     expect(findLatestPaginated).toHaveBeenCalledWith({});
+  });
+
+  it.each([
+    ['empty entity ids', { entityIds: [] }],
+    ['false Unassigned', { unassignedEntities: false }],
+  ])('skips entity resolution for %s', async (_, query) => {
+    const { resources, findLatestPaginated, getQueryLinks } = createSearchResources([]);
+
+    await searchRoute.handler({
+      ...resources,
+      params: { query },
+    } as unknown as Parameters<typeof searchRoute.handler>[0]);
+
+    expect(getQueryLinks).not.toHaveBeenCalled();
+    expect(findLatestPaginated).toHaveBeenCalledWith({});
+  });
+
+  it('bounds rule UUID filters from the request', () => {
+    const querySchema = searchRoute.params.shape.query;
+    const ruleUuid = (index: number) => `rule-${index}`;
+
+    expect(
+      querySchema.safeParse({
+        rule_uuid: Array.from({ length: 1000 }, (_, index) => ruleUuid(index)),
+      }).success
+    ).toBe(true);
+    expect(
+      querySchema.safeParse({
+        rule_uuid: Array.from({ length: 1001 }, (_, index) => ruleUuid(index)),
+      }).success
+    ).toBe(false);
   });
 
   it('passes the entity selection to the detection client as rule UUIDs', async () => {
@@ -149,6 +180,26 @@ describe('GET /internal/significant_events/detections', () => {
     expect(findLatestPaginated).toHaveBeenCalledWith({
       rule_uuid: ['rule-1', 'rule-2'],
     });
+  });
+
+  it('rejects an entity selection that expands to too many rule UUIDs', async () => {
+    const links = Array.from({ length: 1001 }, (_, index) =>
+      queryLink(`rule-${index}`, ['service-a'])
+    );
+    const { resources, findLatestPaginated } = createSearchResources(links);
+
+    await expect(
+      searchRoute.handler({
+        ...resources,
+        params: {
+          query: { entityIds: ['service-a'] },
+        },
+      } as unknown as Parameters<typeof searchRoute.handler>[0])
+    ).rejects.toMatchObject({
+      message: 'Entity filter matches more than 1000 rules. Narrow the entity selection.',
+      output: { statusCode: 400 },
+    });
+    expect(findLatestPaginated).not.toHaveBeenCalled();
   });
 });
 

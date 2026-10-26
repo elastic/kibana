@@ -12,7 +12,7 @@ import {
   MAX_RULE_NAME_LENGTH,
   type Detection,
 } from '@kbn/significant-events-schema';
-import { notFound } from '@hapi/boom';
+import { badRequest, notFound } from '@hapi/boom';
 import { z, isoDateTime } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
@@ -27,6 +27,7 @@ import { filterReadableSourceIds } from '../../utils/resolve_source_ids';
 import { listAllSources } from '../../utils/list_all_sources';
 
 const MAX_DETECTION_ENTITY_IDS = 100;
+const MAX_DETECTION_RULE_UUIDS = 1000;
 
 const detectionsSearchRoute = createServerRoute({
   endpoint: 'GET /internal/significant_events/detections',
@@ -52,7 +53,7 @@ const detectionsSearchRoute = createServerRoute({
             .string()
             .max(MAX_ID_LENGTH)
             .transform((value) => [value]),
-          z.array(z.string().max(MAX_ID_LENGTH)),
+          z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_DETECTION_RULE_UUIDS),
         ])
         .optional(),
       rule_name: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
@@ -89,7 +90,7 @@ const detectionsSearchRoute = createServerRoute({
 
     const detectionClient = await getDetectionClient();
     const { entityIds, unassignedEntities, ...searchOptions } = params.query ?? {};
-    if (entityIds === undefined && unassignedEntities === undefined) {
+    if (!entityIds?.length && !unassignedEntities) {
       return detectionClient.findLatestPaginated(searchOptions);
     }
 
@@ -108,6 +109,12 @@ const detectionsSearchRoute = createServerRoute({
     const ruleUuids = searchOptions.rule_uuid
       ? searchOptions.rule_uuid.filter((ruleUuid) => selectedRuleIds.has(ruleUuid))
       : [...selectedRuleIds];
+
+    if (ruleUuids.length > MAX_DETECTION_RULE_UUIDS) {
+      throw badRequest(
+        `Entity filter matches more than ${MAX_DETECTION_RULE_UUIDS} rules. Narrow the entity selection.`
+      );
+    }
 
     if (ruleUuids.length === 0) {
       return {
