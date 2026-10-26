@@ -43,6 +43,17 @@ import {
   type AwsContentType,
 } from './aws_content_data';
 
+type ServiceStatus = 'healthy' | 'unhealthy' | 'pending' | 'updating';
+
+const STATUS_CYCLE: ServiceStatus[] = ['healthy', 'unhealthy', 'pending', 'updating'];
+
+const STATUS_BADGE_COLOR: Record<ServiceStatus, string> = {
+  healthy: 'success',
+  unhealthy: 'warning',
+  pending: 'default',
+  updating: 'default',
+};
+
 const REGION_LABELS: Record<string, string> = {
   'us-east': 'US-East',
   'us-west': 'US-West',
@@ -87,6 +98,7 @@ const DeploymentSummaryCard: React.FunctionComponent<{
   agentPolicyName: string;
   managedReceivedCount: number;
   agentReceivedCount: number;
+  showErrorStatuses?: boolean;
 }> = ({
   deploymentMethod,
   services,
@@ -98,6 +110,7 @@ const DeploymentSummaryCard: React.FunctionComponent<{
   agentPolicyName,
   managedReceivedCount,
   agentReceivedCount,
+  showErrorStatuses,
 }) => {
   // All deploy/arrival animations run on the Authenticate & Deploy step; the
   // summary simply reads the lifted state, so it arrives already settled.
@@ -174,7 +187,7 @@ const DeploymentSummaryCard: React.FunctionComponent<{
       </EuiText>
       <EuiSpacer size="s" />
       <EuiFlexGrid columns={4} gutterSize="m">
-        {allServices.map((service) => (
+        {allServices.map((service, idx) => (
           <EuiFlexItem key={service.key} style={{ minWidth: 0 }}>
             <EuiPanel hasBorder paddingSize="m">
               <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
@@ -189,9 +202,15 @@ const DeploymentSummaryCard: React.FunctionComponent<{
                   <EuiText size="s" className="eui-textTruncate">
                     <strong>{service.name}</strong>
                   </EuiText>
-                  <EuiText size="xs" color="subdued">
-                    {service.receiving ? 'Receiving data' : 'Detecting data...'}
-                  </EuiText>
+                  {showErrorStatuses ? (
+                    <EuiBadge color={STATUS_BADGE_COLOR[STATUS_CYCLE[idx % STATUS_CYCLE.length]]}>
+                      {STATUS_CYCLE[idx % STATUS_CYCLE.length]}
+                    </EuiBadge>
+                  ) : (
+                    <EuiText size="xs" color="subdued">
+                      {service.receiving ? 'Receiving data' : 'Detecting data...'}
+                    </EuiText>
+                  )}
                   <EuiSpacer size="xs" />
                   <div>
                     <EuiBadge color="hollow">{service.badge}</EuiBadge>
@@ -647,6 +666,7 @@ export const StepDetectReview: React.FunctionComponent<{
   agentPolicyName: string;
   managedReceivedCount: number;
   agentReceivedCount: number;
+  showErrorStatuses?: boolean;
 }> = ({
   deploymentMethod,
   services,
@@ -659,6 +679,7 @@ export const StepDetectReview: React.FunctionComponent<{
   agentPolicyName,
   managedReceivedCount,
   agentReceivedCount,
+  showErrorStatuses,
 }) => {
   const [isAgentNoteDismissed, setIsAgentNoteDismissed] = useState(false);
 
@@ -704,6 +725,7 @@ export const StepDetectReview: React.FunctionComponent<{
         agentPolicyName={agentPolicyName}
         managedReceivedCount={managedReceivedCount}
         agentReceivedCount={agentReceivedCount}
+        showErrorStatuses={showErrorStatuses}
       />
       <EuiSpacer size="m" />
       <InstallContentCard services={services} schema={schema} />

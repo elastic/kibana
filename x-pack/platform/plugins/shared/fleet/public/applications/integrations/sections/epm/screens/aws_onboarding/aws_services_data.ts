@@ -23,18 +23,21 @@ export interface AwsServiceCategory {
 // Global data-format choice, set once in Step 1 and applied everywhere
 // downstream (which package variant installs, which CloudFormation template
 // the Elastic Cloud Forwarder card launches, which prebuilt content shows on
-// Detect & Review). Kept out of the main Step 1 view per the design
-// discussion — most users should never need to touch it.
+// Detect & Review).
 export type AwsSchema = 'ecs' | 'otel';
 
-export const AWS_SCHEMA_META: Record<AwsSchema, { label: string; description: string }> = {
-  ecs: {
-    label: 'ECS-compatible',
-    description: 'Elastic Common Schema field mappings — the default, broadest content coverage.',
-  },
+export const AWS_SCHEMA_META: Record<
+  AwsSchema,
+  { label: string; description: string; recommended?: boolean }
+> = {
   otel: {
-    label: 'OTel-native',
-    description: 'OpenTelemetry semantic conventions. Some services have limited content today.',
+    label: 'OpenTelemetry',
+    description: 'OpenTelemetry semantic conventions.',
+    recommended: true,
+  },
+  ecs: {
+    label: 'ECS',
+    description: 'Elastic Common Schema field mappings - best for compatibility.',
   },
 };
 
@@ -134,7 +137,12 @@ export const AWS_SERVICE_CATEGORIES: AwsServiceCategory[] = [
     label: 'Machine Learning',
     services: [
       { id: 'bedrock', name: 'Amazon Bedrock', dataTypes: ['Logs', 'Metrics'] },
-      { id: 'bedrock_agentcore', name: 'Amazon Bedrock AgentCore', dataTypes: ['Logs', 'Metrics'], beta: true },
+      {
+        id: 'bedrock_agentcore',
+        name: 'Amazon Bedrock AgentCore',
+        dataTypes: ['Logs', 'Metrics'],
+        beta: true,
+      },
     ],
   },
   {
@@ -143,7 +151,12 @@ export const AWS_SERVICE_CATEGORIES: AwsServiceCategory[] = [
     services: [
       { id: 'billing', name: 'AWS Billing', dataTypes: ['Metrics'] },
       { id: 'usage', name: 'AWS Usage', dataTypes: ['Metrics'] },
-      { id: 'cur', name: 'AWS Cost and Usage Report (CUR 2.0)', dataTypes: ['Metrics'], beta: true },
+      {
+        id: 'cur',
+        name: 'AWS Cost and Usage Report (CUR 2.0)',
+        dataTypes: ['Metrics'],
+        beta: true,
+      },
     ],
   },
   {

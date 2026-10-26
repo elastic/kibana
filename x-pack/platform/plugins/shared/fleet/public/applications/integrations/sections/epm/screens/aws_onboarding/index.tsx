@@ -7,7 +7,6 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButton,
@@ -21,11 +20,7 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiIcon,
-  EuiLink,
-  EuiNotificationBadge,
-  EuiPanel,
   EuiPopover,
   EuiSpacer,
   EuiStepsHorizontal,
@@ -42,7 +37,6 @@ import {
   AWS_SERVICE_CATEGORIES,
   MANAGED_INTEGRATION_EXAMPLES,
   type AwsSchema,
-  type AwsServiceCategory,
   type AwsServiceEntry,
 } from './aws_services_data';
 import { StepServiceSettings } from './step_service_settings';
@@ -57,49 +51,48 @@ const DATA_TYPE_OPTIONS = [
   { id: 'metrics', label: 'Metrics' },
 ];
 
-// EuiSuperSelect forwards any extra option properties straight through to
-// the underlying EuiListItemLayout for each row, so `css` and
-// `showIndicator` below aren't part of the documented EuiSuperSelectOption
-// type but are a supported (if undocumented) escape hatch — used here to
-// drop the built-in selected-row tint and replace the built-in check icon
-// (which centers on the *whole*, two-line row) with one aligned to the
-// title specifically.
-// !important because the built-in selected/hover rules are scoped under
-// a :not([aria-disabled]) selector, which out-specificities a plain class
-// override.
-const NO_SELECTED_TINT_CSS = css`
-  background-color: transparent !important;
-  &:hover {
-    background-color: transparent !important;
-  }
-`;
+type SortOptionId = 'popular' | 'az';
 
-// Each option shows its full description in the dropdown (not just once
-// selected) since the choice has real downstream effects and isn't a plain
-// filter — same idiom as e.g. ILM's phase picker.
-function getDataFormatOptions(
-  selectedSchema: AwsSchema
-): Array<EuiSuperSelectOption<AwsSchema> & { css?: unknown; showIndicator?: boolean }> {
-  return (['otel', 'ecs'] as const).map((value) => ({
-    value,
-    inputDisplay: AWS_SCHEMA_META[value].label,
-    showIndicator: false,
-    css: NO_SELECTED_TINT_CSS,
-    dropdownDisplay: (
-      <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false}>
-        <EuiFlexItem grow={false} style={{ width: 16, paddingTop: 2 }}>
-          {value === selectedSchema && <EuiIcon type="check" color="primary" size="m" />}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <strong>{AWS_SCHEMA_META[value].label}</strong>
-          <EuiText size="s" color="subdued">
-            <p>{AWS_SCHEMA_META[value].description}</p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-  }));
-}
+// "Popular" keeps the curated category/service order already encoded in
+// AWS_SERVICE_CATEGORIES; "A-Z" re-sorts the flattened list by name.
+const SORT_OPTIONS: Array<EuiSuperSelectOption<SortOptionId>> = [
+  { value: 'popular', inputDisplay: 'Sort: Popular' },
+  { value: 'az', inputDisplay: 'Sort: A-Z' },
+];
+
+const DataSchemaCard: React.FunctionComponent<{
+  value: AwsSchema;
+  checked: boolean;
+  onChange: (value: AwsSchema) => void;
+}> = ({ value, checked, onChange }) => {
+  const meta = AWS_SCHEMA_META[value];
+  return (
+    <EuiCheckableCard
+      id={`awsOnboardingSchema-${value}`}
+      name="awsOnboardingSchema"
+      checkableType="radio"
+      checked={checked}
+      onChange={() => onChange(value)}
+      data-test-subj={`awsOnboardingSchema-${value}`}
+      label={
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <strong>{meta.label}</strong>
+          </EuiFlexItem>
+          {meta.recommended && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">Recommended</EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      }
+    >
+      <EuiText size="s" color="subdued">
+        <p>{meta.description}</p>
+      </EuiText>
+    </EuiCheckableCard>
+  );
+};
 
 function serviceMatches(
   service: AwsServiceEntry,
@@ -117,7 +110,8 @@ const ServiceCard: React.FunctionComponent<{
   checked: boolean;
   onToggle: (id: string) => void;
   isOutdated?: boolean;
-}> = ({ service, checked, onToggle, isOutdated }) => {
+  orderNumber?: number;
+}> = ({ service, checked, onToggle, isOutdated, orderNumber }) => {
   const { euiTheme } = useEuiTheme();
   const [isWarningOpen, setIsWarningOpen] = useState(false);
   return (
@@ -141,11 +135,20 @@ const ServiceCard: React.FunctionComponent<{
             <EuiText
               size="s"
               className="eui-textTruncate"
-              style={{ fontWeight: checked && !isOutdated ? euiTheme.font.weight.medium : undefined }}
+              style={{
+                fontWeight: checked && !isOutdated ? euiTheme.font.weight.medium : undefined,
+              }}
             >
               {service.name}
             </EuiText>
           </EuiFlexItem>
+          {orderNumber !== undefined && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="primary" css={{ minWidth: 20, textAlign: 'center' }}>
+                {orderNumber}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
           {service.dataTypes.map((dt) => (
             <EuiFlexItem grow={false} key={dt}>
               <EuiBadge color="hollow">{dt}</EuiBadge>
@@ -199,87 +202,11 @@ const ServiceCard: React.FunctionComponent<{
   );
 };
 
-const CategorySidebarItem: React.FunctionComponent<{
-  category: AwsServiceCategory;
-  isActive: boolean;
-  visibleCount: number;
-  selectedCount: number;
-  onClick: () => void;
-}> = ({ category, isActive, visibleCount, selectedCount, onClick }) => {
-  const { euiTheme } = useEuiTheme();
-  const exampleNames = category.services
-    .slice(0, 2)
-    .map((s) => s.name)
-    .join(', ');
-  return (
-    <EuiPanel
-      hasShadow={false}
-      hasBorder={false}
-      color={isActive ? 'primary' : 'transparent'}
-      paddingSize="s"
-      onClick={onClick}
-      data-test-subj={`awsOnboardingCategory-${category.id}`}
-    >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem>
-          <EuiText size="s" style={{ fontWeight: euiTheme.font.weight.semiBold }}>
-            {category.label}
-          </EuiText>
-          <EuiText size="xs" color="subdued" className="eui-textTruncate">
-            {exampleNames}, ...
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiNotificationBadge color={selectedCount > 0 ? 'accent' : 'subdued'}>
-            {selectedCount > 0 ? `${selectedCount}/${visibleCount}` : visibleCount}
-          </EuiNotificationBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-};
-
-const CategoryServicesPanel: React.FunctionComponent<{
-  category: AwsServiceCategory;
-  services: AwsServiceEntry[];
-  selected: Set<string>;
-  onToggle: (id: string) => void;
-  onSelectAll: (ids: string[]) => void;
-  outdatedServiceIds?: Set<string>;
-}> = ({ category, services, selected, onToggle, onSelectAll, outdatedServiceIds }) => {
-  return (
-    <EuiPanel color="subdued" paddingSize="l" hasShadow={false}>
-      <EuiFlexGroup alignItems="center" responsive={false}>
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h3>{category.label}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink onClick={() => onSelectAll(services.map((s) => s.id))}>Select All</EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGrid columns={2} gutterSize="m">
-        {services.map((service) => (
-          <EuiFlexItem key={service.id}>
-            <ServiceCard
-              service={service}
-              checked={selected.has(service.id)}
-              onToggle={onToggle}
-              isOutdated={outdatedServiceIds?.has(service.id)}
-            />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
-    </EuiPanel>
-  );
-};
-
 // Re-exported via version_switcher.tsx as AwsOnboardingPage — import from there.
 export const AwsOnboardingProtoPage: React.FunctionComponent<{
   outdatedServiceIds?: Set<string>;
-}> = ({ outdatedServiceIds }) => {
+  showErrorStatuses?: boolean;
+}> = ({ outdatedServiceIds, showErrorStatuses }) => {
   const history = useHistory();
   const { euiTheme } = useEuiTheme();
 
@@ -287,14 +214,11 @@ export const AwsOnboardingProtoPage: React.FunctionComponent<{
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [dataTypeFilter, setDataTypeFilter] = useState<DataTypeFilterId>('all');
-  const [activeCategoryId, setActiveCategoryId] = useState<string>(
-    AWS_SERVICE_CATEGORIES[0].id
-  );
+  const [sortOption, setSortOption] = useState<SortOptionId>('popular');
   const [deploymentMethod, setDeploymentMethod] = useState<DeploymentMethod>('managed');
   const [triggerSources, setTriggerSources] = useState<Record<string, string>>({});
-  // Data format: hidden-by-default choice made once here and applied
-  // everywhere downstream (see aws_services_data.ts for the full rationale).
-  // OTel-native by default.
+  // Data schema: chosen once here and applied everywhere downstream (see
+  // aws_services_data.ts for the full rationale). OpenTelemetry by default.
   const [schema, setSchema] = useState<AwsSchema>('otel');
   // Switching format after services are already selected resets that
   // configuration — not additive — so flag it inline rather than silently.
@@ -328,10 +252,18 @@ export const AwsOnboardingProtoPage: React.FunctionComponent<{
     return () => deployTimers.current.forEach((t) => window.clearTimeout(t));
   }, []);
 
+  const allServices = useMemo(() => AWS_SERVICE_CATEGORIES.flatMap((c) => c.services), []);
+
   const selectedServices = useMemo(
-    () =>
-      AWS_SERVICE_CATEGORIES.flatMap((c) => c.services).filter((s) => selected.has(s.id)),
-    [selected]
+    () => allServices.filter((s) => selected.has(s.id)),
+    [allServices, selected]
+  );
+
+  // Drives both the deploy-sequencing timers below and the selection-order
+  // badges shown on step 1 — the two stay in sync since they share this order.
+  const selectedOrder = useMemo(
+    () => new Map(selectedServices.map((s, i) => [s.id, i + 1])),
+    [selectedServices]
   );
 
   // First service confirms after 5s, then each subsequent one 8s after the last.
@@ -379,29 +311,15 @@ export const AwsOnboardingProtoPage: React.FunctionComponent<{
     });
   };
 
-  const onSelectAll = (ids: string[]) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      ids.forEach((id) => next.add(id));
-      return next;
-    });
-  };
-
-  const visibleByCategory = useMemo(() => {
-    const map = new Map<string, AwsServiceEntry[]>();
-    for (const cat of AWS_SERVICE_CATEGORIES) {
-      map.set(
-        cat.id,
-        cat.services.filter((s) => serviceMatches(s, dataTypeFilter, searchQuery))
-      );
+  // Flat, ungrouped list: filtered by search/data-type, then ordered per the
+  // sort control ("Popular" keeps the curated catalog order).
+  const visibleServices = useMemo(() => {
+    const matched = allServices.filter((s) => serviceMatches(s, dataTypeFilter, searchQuery));
+    if (sortOption === 'az') {
+      return [...matched].sort((a, b) => a.name.localeCompare(b.name));
     }
-    return map;
-  }, [dataTypeFilter, searchQuery]);
-
-  const isSearching = searchQuery.trim().length > 0;
-  const renderedCategories = isSearching
-    ? AWS_SERVICE_CATEGORIES.filter((c) => (visibleByCategory.get(c.id) ?? []).length > 0)
-    : AWS_SERVICE_CATEGORIES.filter((c) => c.id === activeCategoryId);
+    return matched;
+  }, [allServices, dataTypeFilter, searchQuery, sortOption]);
 
   // Both deployment methods share the same 4-step frame. Step 3 owns the full
   // authenticate + deploy lifecycle (CloudFormation launch and detection
@@ -444,288 +362,304 @@ export const AwsOnboardingProtoPage: React.FunctionComponent<{
     // Full-bleed white page canvas per design reference, overriding
     // Kibana's default page background for this flow only. emptyShade
     // (not a literal hex) so this still adapts correctly in dark mode.
-    <div
-      style={{ background: euiTheme.colors.emptyShade, minHeight: '100%', width: '100%' }}
-    >
-    <div
-      style={{
-        maxWidth: 1240,
-        width: '100%',
-        minWidth: 0,
-        overflowX: 'hidden',
-        margin: '0 auto',
-        padding: euiTheme.size.l,
-      }}
-    >
-      <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="m" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="logoAWS" size="xl" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="l">
-            <h1>AWS Web Services</h1>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiText textAlign="center" color="subdued" size="m">
-        <p>Collect logs and metrics from Amazon Web Services (AWS)</p>
-      </EuiText>
-      <EuiSpacer size="m" />
-      {/* Fixed-width container so the progress bar never resizes between steps */}
-      <div style={{ maxWidth: 960, margin: '0 auto' }}>
-        <EuiStepsHorizontal steps={steps} size="m" />
-      </div>
-      <EuiSpacer size="xl" />
+    <div style={{ background: euiTheme.colors.emptyShade, minHeight: '100%', width: '100%' }}>
+      <div
+        style={{
+          maxWidth: 1240,
+          width: '100%',
+          minWidth: 0,
+          overflowX: 'hidden',
+          margin: '0 auto',
+          padding: euiTheme.size.l,
+        }}
+      >
+        <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="logoAWS" size="xl" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <h1>AWS Web Services</h1>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiText textAlign="center" color="subdued" size="m">
+          <p>Collect logs and metrics from Amazon Web Services (AWS)</p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        {/* Fixed-width container so the progress bar never resizes between steps */}
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
+          <EuiStepsHorizontal steps={steps} size="m" />
+        </div>
+        <EuiSpacer size="xl" />
 
-      {currentStep === 1 && (
-        <>
-          <EuiTitle size="m">
-            <h2>Which AWS services do you want to monitor?</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>
-              Select the services you use. Elastic will set up everything needed to start
-              collecting data from your AWS account.
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
+        {currentStep === 1 && (
+          <>
+            <EuiTitle size="s">
+              <h3>Data schema</h3>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              <p>
+                This can&apos;t be changed after installation without creating a new integration
+                policy.
+              </p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="m">
+              {(['otel', 'ecs'] as const).map((value) => (
+                <EuiFlexItem key={value}>
+                  <DataSchemaCard
+                    value={value}
+                    checked={schema === value}
+                    onChange={onSchemaChange}
+                  />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
 
-          {/* gutterSize="s" = 8px, per design. Data format sits inline with
-              the other task controls — it's still a real decision with
-              downstream effects, but per design feedback it reads better as
-              a compact select right in this row than as a separate settings
-              card. Each option shows its description in the dropdown so the
-              tradeoff is visible before picking. */}
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem>
-              <EuiFieldSearch
-                fullWidth
-                compressed
-                placeholder="Search services"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                isClearable
-                data-test-subj="awsOnboardingSearch"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ width: 340 }}>
-              <EuiSuperSelect
-                compressed
-                fullWidth
-                prepend="Data format"
-                options={getDataFormatOptions(schema)}
-                valueOfSelected={schema}
-                onChange={onSchemaChange}
-                aria-label="Data format"
-                data-test-subj="awsOnboardingEditSchema"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {/* buttonSize="s" matches a compressed field's height exactly
+            {showSchemaResetWarning && (
+              <>
+                <EuiSpacer size="m" />
+                <KbnWarningCallout
+                  announceOnMount
+                  title="This will reset your progress"
+                  onDismiss={() => setShowSchemaResetWarning(false)}
+                  data-test-subj="awsOnboardingSchemaResetWarning"
+                >
+                  <p>
+                    Changing the data format clears your selected services and any configuration
+                    entered so far — it isn&apos;t an additive change.
+                  </p>
+                </KbnWarningCallout>
+              </>
+            )}
+
+            <EuiSpacer size="xl" />
+
+            <EuiTitle size="m">
+              <h2>Which AWS services do you want to monitor?</h2>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>
+                Select the services you use. Elastic will set up everything needed to start
+                collecting data from your AWS account.
+              </p>
+            </EuiText>
+            <EuiSpacer size="m" />
+
+            {/* gutterSize="s" = 8px, per design. */}
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem>
+                <EuiFieldSearch
+                  fullWidth
+                  compressed
+                  placeholder="Search services"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  isClearable
+                  data-test-subj="awsOnboardingSearch"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} style={{ width: 160 }}>
+                <EuiSuperSelect
+                  compressed
+                  fullWidth
+                  options={SORT_OPTIONS}
+                  valueOfSelected={sortOption}
+                  onChange={setSortOption}
+                  aria-label="Sort services"
+                  data-test-subj="awsOnboardingSort"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {/* buttonSize="s" matches a compressed field's height exactly
                   (both resolve to the same token) — "compressed" is
                   actually a touch shorter than that, which read as uneven
                   next to the search bar. */}
-              <EuiButtonGroup
-                legend="Filter services by data type"
-                options={DATA_TYPE_OPTIONS}
-                idSelected={dataTypeFilter}
-                onChange={(id) => setDataTypeFilter(id as DataTypeFilterId)}
-                buttonSize="s"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          {showSchemaResetWarning && (
-            <>
-              <EuiSpacer size="m" />
-              <KbnWarningCallout
-                announceOnMount
-                title="This will reset your progress"
-                onDismiss={() => setShowSchemaResetWarning(false)}
-                data-test-subj="awsOnboardingSchemaResetWarning"
-              >
-                <p>
-                  Changing the data format clears your selected services and any configuration
-                  entered so far — it isn&apos;t an additive change.
-                </p>
-              </KbnWarningCallout>
-            </>
-          )}
-
-          {outdatedServiceIds && outdatedServiceIds.size > 0 && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiCallOut
-                size="s"
-                color="warning"
-                iconType="warning"
-                title="Some services need to be upgraded and cannot be selected"
-              />
-            </>
-          )}
-
-          <EuiSpacer size="l" />
-          <EuiFlexGroup gutterSize="l" alignItems="flexStart">
-            <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
-              {AWS_SERVICE_CATEGORIES.map((cat) => {
-                const visible = visibleByCategory.get(cat.id) ?? [];
-                const selectedCount = cat.services.filter((s) => selected.has(s.id)).length;
-                return (
-                  <CategorySidebarItem
-                    key={cat.id}
-                    category={cat}
-                    isActive={!isSearching && cat.id === activeCategoryId}
-                    visibleCount={visible.length}
-                    selectedCount={selectedCount}
-                    onClick={() => {
-                      setActiveCategoryId(cat.id);
-                      setSearchQuery('');
-                    }}
-                  />
-                );
-              })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={3} style={{ minWidth: 0 }}>
-              {renderedCategories.length === 0 ? (
-                <EuiEmptyPrompt
-                  iconType="search"
-                  title={<h3>No services match your search</h3>}
-                  body={<p>Try a different term, or switch the Logs/Metrics filter.</p>}
+                <EuiButtonGroup
+                  legend="Filter services by data type"
+                  options={DATA_TYPE_OPTIONS}
+                  idSelected={dataTypeFilter}
+                  onChange={(id) => setDataTypeFilter(id as DataTypeFilterId)}
+                  buttonSize="s"
                 />
-              ) : (
-                renderedCategories.map((cat, i) => (
-                  <React.Fragment key={cat.id}>
-                    {i > 0 && <EuiSpacer size="m" />}
-                    <CategoryServicesPanel
-                      category={cat}
-                      services={visibleByCategory.get(cat.id) ?? []}
-                      selected={selected}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            {outdatedServiceIds && outdatedServiceIds.size > 0 && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiCallOut
+                  size="s"
+                  color="warning"
+                  iconType="warning"
+                  title="Some services need to be upgraded and cannot be selected"
+                />
+              </>
+            )}
+
+            <EuiSpacer size="l" />
+            {visibleServices.length === 0 ? (
+              <EuiEmptyPrompt
+                iconType="search"
+                title={<h3>No services match your search</h3>}
+                body={<p>Try a different term, or switch the Logs/Metrics filter.</p>}
+              />
+            ) : (
+              <EuiFlexGrid columns={2} gutterSize="m">
+                {visibleServices.map((service) => (
+                  <EuiFlexItem key={service.id}>
+                    <ServiceCard
+                      service={service}
+                      checked={selected.has(service.id)}
                       onToggle={onToggle}
-                      onSelectAll={onSelectAll}
-                      outdatedServiceIds={outdatedServiceIds}
+                      isOutdated={outdatedServiceIds?.has(service.id)}
+                      orderNumber={selectedOrder.get(service.id)}
                     />
-                  </React.Fragment>
-                ))
-              )}
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGrid>
+            )}
+          </>
+        )}
+
+        {currentStep === 2 && (
+          <StepServiceSettings
+            services={selectedServices}
+            triggerSources={triggerSources}
+            onTriggerSourceChange={(id, value) =>
+              setTriggerSources((prev) => ({ ...prev, [id]: value }))
+            }
+            globalRegion={globalRegion}
+            onGlobalRegionChange={setGlobalRegion}
+          />
+        )}
+
+        {currentStep === 3 && (
+          <StepAuthentication
+            services={selectedServices}
+            schema={schema}
+            deploymentMethod={deploymentMethod}
+            onDeploymentMethodChange={onDeploymentMethodChange}
+            onCredentialsValidChange={setIsCredentialsValid}
+            deployIdentityName={deployIdentityName}
+            onDeployIdentityNameChange={setDeployIdentityName}
+            isDeployed={isDeployed}
+            onLaunchCloudFormation={onLaunchCloudFormation}
+            stackName={stackName}
+            onStackNameChange={setStackName}
+            isAgentEnrolled={isAgentEnrolled}
+            onAgentEnrolled={onAgentEnrolled}
+            isManagedDeployed={isManagedDeployed}
+            onDeployManagedIntegrations={onDeployManagedIntegrations}
+            agentReceivedCount={agentReceivedCount}
+          />
+        )}
+
+        {currentStep === 4 && (
+          <StepDetectReview
+            deploymentMethod={deploymentMethod}
+            services={selectedServices}
+            schema={schema}
+            triggerSources={triggerSources}
+            region={globalRegion}
+            identityName={deployIdentityName}
+            stackName={stackName}
+            receivedCount={receivedCount}
+            agentPolicyName={agentPolicyName}
+            managedReceivedCount={managedReceivedCount}
+            agentReceivedCount={agentReceivedCount}
+            showErrorStatuses={showErrorStatuses}
+          />
+        )}
+
+        <EuiSpacer size="xl" />
+      </div>
+      {/* Sticky footer so the primary action stays reachable without scrolling
+        past a potentially long service list — steps 3-4 end in bordered
+        cards, so a border above the footer there would read as a duplicate
+        line, hence the conditional. */}
+      <div
+        style={{
+          position: 'sticky',
+          bottom: 0,
+          background: euiTheme.colors.emptyShade,
+          borderTop:
+            currentStep < 3
+              ? `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`
+              : 'none',
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 1240,
+            width: '100%',
+            minWidth: 0,
+            margin: '0 auto',
+            padding: `${euiTheme.size.m} ${euiTheme.size.l}`,
+          }}
+        >
+          <EuiFlexGroup alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onCancel} flush="left">
+                Cancel
+              </EuiButtonEmpty>
             </EuiFlexItem>
+            <EuiFlexItem />
+            {currentStep > 1 && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="arrowLeft"
+                  onClick={() => setCurrentStep(currentStep - 1)}
+                  data-test-subj="awsOnboardingBack"
+                >
+                  Back
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+            {currentStep < totalSteps && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  isDisabled={
+                    selected.size === 0 ||
+                    // Authenticate & Deploy: credentials for the selected method must
+                    // be filled, and (managed only) CloudFormation must be launched,
+                    // Managed Integrations deployed, and the stack name entered.
+                    // None of these wait on data actually arriving — detection runs
+                    // in the background and is only surfaced on Detect & Review.
+                    (currentStep === 3 &&
+                      (!isCredentialsValid ||
+                        (deploymentMethod === 'managed' &&
+                          (!isDeployed || stackName.trim().length === 0 || !isManagedDeployed)) ||
+                        (deploymentMethod === 'agent' && !isAgentEnrolled)))
+                  }
+                  onClick={() => setCurrentStep(currentStep + 1)}
+                  data-test-subj="awsOnboardingNext"
+                >
+                  Continue
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            {currentStep === totalSteps && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  iconType="sortRight"
+                  iconSide="right"
+                  href="/app/dashboards"
+                  data-test-subj="awsOnboardingTakeMeToMyData"
+                >
+                  Take me to my data
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
-        </>
-      )}
-
-      {currentStep === 2 && (
-        <StepServiceSettings
-          services={selectedServices}
-          triggerSources={triggerSources}
-          onTriggerSourceChange={(id, value) =>
-            setTriggerSources((prev) => ({ ...prev, [id]: value }))
-          }
-          globalRegion={globalRegion}
-          onGlobalRegionChange={setGlobalRegion}
-        />
-      )}
-
-      {currentStep === 3 && (
-        <StepAuthentication
-          services={selectedServices}
-          schema={schema}
-          deploymentMethod={deploymentMethod}
-          onDeploymentMethodChange={onDeploymentMethodChange}
-          onCredentialsValidChange={setIsCredentialsValid}
-          deployIdentityName={deployIdentityName}
-          onDeployIdentityNameChange={setDeployIdentityName}
-          isDeployed={isDeployed}
-          onLaunchCloudFormation={onLaunchCloudFormation}
-          stackName={stackName}
-          onStackNameChange={setStackName}
-          isAgentEnrolled={isAgentEnrolled}
-          onAgentEnrolled={onAgentEnrolled}
-          isManagedDeployed={isManagedDeployed}
-          onDeployManagedIntegrations={onDeployManagedIntegrations}
-          agentReceivedCount={agentReceivedCount}
-        />
-      )}
-
-      {currentStep === 4 && (
-        <StepDetectReview
-          deploymentMethod={deploymentMethod}
-          services={selectedServices}
-          schema={schema}
-          triggerSources={triggerSources}
-          region={globalRegion}
-          identityName={deployIdentityName}
-          stackName={stackName}
-          receivedCount={receivedCount}
-          agentPolicyName={agentPolicyName}
-          managedReceivedCount={managedReceivedCount}
-          agentReceivedCount={agentReceivedCount}
-        />
-      )}
-
-      {/* Steps 3-4 end in bordered cards, so a rule above the footer reads as
-          a duplicate line there — keep it only on the first two steps. */}
-      {currentStep < 3 ? <EuiHorizontalRule margin="xl" /> : <EuiSpacer size="xl" />}
-      <EuiFlexGroup alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel} flush="left">
-            Cancel
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem />
-        {currentStep > 1 && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="arrowLeft"
-              onClick={() => setCurrentStep(currentStep - 1)}
-              data-test-subj="awsOnboardingBack"
-            >
-              Back
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-        {currentStep < totalSteps && (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              isDisabled={
-                selected.size === 0 ||
-                // Authenticate & Deploy: credentials for the selected method must
-                // be filled, and (managed only) CloudFormation must be launched,
-                // Managed Integrations deployed, and the stack name entered.
-                // None of these wait on data actually arriving — detection runs
-                // in the background and is only surfaced on Detect & Review.
-                (currentStep === 3 &&
-                  (!isCredentialsValid ||
-                    (deploymentMethod === 'managed' &&
-                      (!isDeployed ||
-                        stackName.trim().length === 0 ||
-                        !isManagedDeployed)) ||
-                    (deploymentMethod === 'agent' && !isAgentEnrolled)))
-              }
-              onClick={() => setCurrentStep(currentStep + 1)}
-              data-test-subj="awsOnboardingNext"
-            >
-              Next
-            </EuiButton>
-          </EuiFlexItem>
-        )}
-        {currentStep === totalSteps && (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="sortRight"
-              iconSide="right"
-              href="/app/dashboards"
-              data-test-subj="awsOnboardingTakeMeToMyData"
-            >
-              Take me to my data
-            </EuiButton>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="xl" />
-    </div>
+        </div>
+      </div>
     </div>
   );
 };

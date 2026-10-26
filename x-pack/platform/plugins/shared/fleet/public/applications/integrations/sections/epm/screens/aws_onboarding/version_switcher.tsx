@@ -17,11 +17,12 @@ import {
 
 import { AwsOnboardingProtoPage } from '.';
 
-type PrototypeVersion = 'sept-1' | 'outdated-services';
+type PrototypeVersion = 'sept-1' | 'outdated-services' | 'sept-16-errors';
 
 const VERSION_OPTIONS = [
   { value: 'sept-1', text: '1 Sept' },
   { value: 'outdated-services', text: 'Outdated services' },
+  { value: 'sept-16-errors', text: '16 Sept errors' },
 ];
 
 const VERSION_BAR_HEIGHT = 32;
@@ -109,6 +110,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
       <AwsOnboardingProtoPage
         key={version}
         outdatedServiceIds={version === 'outdated-services' ? OUTDATED_SERVICE_IDS : undefined}
+        showErrorStatuses={version === 'sept-16-errors'}
       />
     </>
   );
