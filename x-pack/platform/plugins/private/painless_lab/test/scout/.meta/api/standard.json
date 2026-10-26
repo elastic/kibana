@@ -1,5 +1,5 @@
 {
-  "sha1": "116b63b2ba9c94a191c676f5282614fe83b6fe70",
+  "sha1": "619971ea57c351eb1abbaeedae87cb8b385d9309",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -94,7 +94,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api_disabled.spec.ts",
-        "line": 21,
+        "line": 23,
         "column": 12
       }
     },
@@ -112,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 12
       }
     },
@@ -130,7 +130,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 12
       }
     }

@@ -92,7 +92,13 @@ const fetchResultCountsBatch = async (
     size: 0,
     query: {
       bool: {
-        filter: [{ terms: { action_id: actionIds } }, buildSpaceIdFilter(spaceId)],
+        filter: [
+          { terms: { action_id: actionIds } },
+          // Id-bound via `action_id` collected from already space-scoped Kibana
+          // action docs, so this read may also match the agent-carried
+          // `action_data.space_id`. Live responses often carry space only there.
+          buildSpaceIdFilter(spaceId, { matchActionDataSpaceId: true }),
+        ],
       },
     },
     aggs: {

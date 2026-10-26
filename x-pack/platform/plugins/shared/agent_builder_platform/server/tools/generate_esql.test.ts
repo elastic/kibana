@@ -14,6 +14,7 @@ jest.mock('@kbn/agent-builder-genai-utils', () => ({
 
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import { generateEsqlTool } from './generate_esql';
+import { resolveToolSchema } from './test_utils';
 
 const generateEsqlMock = generateEsql as jest.MockedFunction<typeof generateEsql>;
 
@@ -23,16 +24,17 @@ const createHandlerContext = () => {
   return context;
 };
 
-const run = async (includeFrozen?: boolean) =>
-  generateEsqlTool().handler(
-    {
-      query: 'total sales',
-      execute_query: true,
-      disable_named_params: false,
-      include_frozen: includeFrozen,
-    },
+const run = async ({
+  includeFrozen,
+  includeFrozenByDefault = false,
+}: { includeFrozen?: boolean; includeFrozenByDefault?: boolean } = {}) => {
+  const tool = generateEsqlTool();
+  const schema = await resolveToolSchema(tool, includeFrozenByDefault);
+  return tool.handler(
+    schema.parse({ query: 'total sales', include_frozen: includeFrozen }),
     createHandlerContext()
   );
+};
 
 describe('generateEsqlTool', () => {
   beforeEach(() => {
@@ -50,10 +52,26 @@ describe('generateEsqlTool', () => {
     });
 
     it('includes frozen tier indices when opted in', async () => {
-      await run(true);
+      await run({ includeFrozen: true });
 
       expect(generateEsqlMock).toHaveBeenCalledWith(
         expect.objectContaining({ includeFrozen: true })
+      );
+    });
+
+    it('includes frozen tier indices by default when the space setting is enabled', async () => {
+      await run({ includeFrozenByDefault: true });
+
+      expect(generateEsqlMock).toHaveBeenCalledWith(
+        expect.objectContaining({ includeFrozen: true })
+      );
+    });
+
+    it('lets the agent override the default', async () => {
+      await run({ includeFrozen: false, includeFrozenByDefault: true });
+
+      expect(generateEsqlMock).toHaveBeenCalledWith(
+        expect.objectContaining({ includeFrozen: false })
       );
     });
   });
