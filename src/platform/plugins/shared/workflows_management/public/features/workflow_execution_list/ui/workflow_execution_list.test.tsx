@@ -98,9 +98,9 @@ describe('WorkflowExecutionList', () => {
     expect(screen.getByText('Execution history')).toBeInTheDocument();
   });
 
-  it('shows the run name column only when a result has a name', () => {
+  it('shows the execution name column for named and unnamed runs', () => {
     const { unmount } = renderComponent();
-    expect(screen.queryByRole('columnheader', { name: 'Run name' })).not.toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Execution name' })).toBeInTheDocument();
     unmount();
 
     renderComponent({
@@ -109,7 +109,7 @@ describe('WorkflowExecutionList', () => {
         results: [{ ...mockExecutions.results[0], runName: 'Deploy staging' }],
       },
     });
-    expect(screen.getByRole('columnheader', { name: 'Run name' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Execution name' })).toBeInTheDocument();
     expect(screen.getByText('Deploy staging')).toBeInTheDocument();
   });
 

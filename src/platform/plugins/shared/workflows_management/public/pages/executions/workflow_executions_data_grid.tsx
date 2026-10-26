@@ -39,6 +39,7 @@ import { WorkflowExecutionsSelectionBar } from './workflow_executions_selection_
 import { useWorkflowExecutionsTrailingControlColumns } from './workflow_executions_table_actions';
 import {
   WorkflowExecutionDurationCell,
+  WorkflowExecutionRunNameCell,
   WorkflowExecutionStartedAtCell,
   WorkflowExecutionTagsCell,
   WorkflowExecutionTriggersCell,
@@ -171,6 +172,8 @@ const RenderCellValue = ({
   switch (columnId) {
     case 'workflow':
       return <WorkflowExecutionWorkflowCell execution={execution} onOpen={onOpenExecution} />;
+    case 'runName':
+      return <WorkflowExecutionRunNameCell execution={execution} />;
     case 'tags':
       return <WorkflowExecutionTagsCell execution={execution} />;
     case 'triggers':
@@ -387,9 +390,7 @@ export const WorkflowExecutionsDataGrid = ({
           sorting={sorting}
           onColumnResize={({ columnId, width }) => onColumnResize(columnId, width)}
           gridStyle={gridStyleWithSelection}
-          rowHeightsOptions={{
-            defaultHeight: { lineCount: executions.some((execution) => execution.runName) ? 2 : 1 },
-          }}
+          rowHeightsOptions={{ defaultHeight: { lineCount: 1 } }}
           toolbarVisibility={toolbarVisibility}
         />
       </div>

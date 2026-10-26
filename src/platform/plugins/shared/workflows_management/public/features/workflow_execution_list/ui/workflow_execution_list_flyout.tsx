@@ -41,7 +41,7 @@ export const WorkflowExecutionListFlyout = ({
       paddingSize="none"
       hideCloseButton
       ownFocus
-      style={{ minWidth: '480px', maxWidth: '480px' }}
+      size={680}
       data-test-subj="workflowExecutionListFlyout"
     >
       <div css={flyoutColumnStyles}>

@@ -33,6 +33,7 @@ interface UseWorkflowExecutionsParams {
   executionTypes?: ExecutionType[];
   /** Filter by the user who triggered the execution. */
   executedBy?: string[];
+  runName?: string;
   /** Number of results per page. */
   size?: number;
   /** Whether to omit single-step runs from the results. */
@@ -83,6 +84,7 @@ export function useWorkflowExecutions(
       return api.getWorkflowExecutions(params.workflowId, {
         statuses: params.statuses,
         executionTypes: params.executionTypes,
+        ...(params.runName?.trim() ? { runName: params.runName.trim() } : {}),
         ...(params.executedBy && params.executedBy.length > 0
           ? { executedBy: params.executedBy }
           : {}),
@@ -109,6 +111,7 @@ export function useWorkflowExecutions(
       params.statuses,
       params.executionTypes,
       params.executedBy,
+      params.runName,
       params.omitStepRuns,
       params.startedAfter,
       params.startedBefore,
@@ -149,6 +152,7 @@ export function useWorkflowExecutions(
       params.statuses,
       params.executionTypes,
       params.executedBy,
+      params.runName,
       params.omitStepRuns,
       params.startedAfter,
       params.startedBefore,

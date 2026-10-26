@@ -104,8 +104,11 @@ The template can contain up to 1,024 characters. The result is trimmed and limit
 characters. If the property is omitted, the result is blank or is not a string, or template
 evaluation fails, the execution keeps its default label and can continue.
 
-The executions page shows the name below the workflow name. Use its KQL search box to filter
-with `runName: "Deploy staging by elastic"` or `runName: Deploy*`.
+The executions page and workflow history show an **Execution name** column. Use the
+**Execution name** filter on the executions page, or its KQL search box with
+`runName: "Deploy staging by elastic"` or `runName: Deploy*`.
+In workflow history, open **Filter executions** and enter all or part of the name.
+This text filter ignores letter case and searches all executions for the workflow.
 
 The package includes comprehensive schema definitions for workflow structure:
 

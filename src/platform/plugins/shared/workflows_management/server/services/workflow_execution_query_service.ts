@@ -222,6 +222,18 @@ export class WorkflowExecutionQueryService {
       must.push({ terms: { executedBy: params.executedBy } });
     }
 
+    const runName = params.runName?.trim();
+    if (runName) {
+      must.push({
+        wildcard: {
+          runName: {
+            value: `*${runName.replace(/[\\*?]/g, '\\$&')}*`,
+            case_insensitive: true,
+          },
+        },
+      });
+    }
+
     if (params.concurrencyGroupKey !== undefined) {
       must.push({ term: { concurrencyGroupKey: params.concurrencyGroupKey } });
     }

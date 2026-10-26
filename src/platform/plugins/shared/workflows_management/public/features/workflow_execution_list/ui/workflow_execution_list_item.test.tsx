@@ -85,7 +85,7 @@ describe('execution history columns', () => {
     expect(EXECUTION_HISTORY_COLUMN_WIDTHS.duration).toBe('72px');
   });
 
-  it('orders columns Status → Started → Duration → Executed by', () => {
+  it('orders columns Execution name → Status → Started → Duration → Executed by', () => {
     const columns = getExecutionHistoryColumns({
       euiTheme: {
         colors: { textSubdued: '#666' },
@@ -96,6 +96,7 @@ describe('execution history columns', () => {
       timeZoneSetting: 'UTC',
     });
     expect(columns.map((c) => ('field' in c ? c.field : undefined))).toEqual([
+      'runName',
       'status',
       'startedAt',
       'duration',
@@ -113,8 +114,8 @@ describe('execution history columns', () => {
     expect(screen.queryByText('Error')).not.toBeInTheDocument();
   });
 
-  it('shows run names when the name column is enabled', () => {
-    renderColumns({ ...baseExecution, runName: 'Deploy staging' }, { showRunName: true });
+  it('shows the execution name', () => {
+    renderColumns({ ...baseExecution, runName: 'Deploy staging' });
     expect(screen.getByTestId('workflowExecutionListRunNameCell')).toHaveTextContent(
       'Deploy staging'
     );

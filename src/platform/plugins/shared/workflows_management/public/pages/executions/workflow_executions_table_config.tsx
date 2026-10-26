@@ -13,6 +13,7 @@ import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 
 export const DEFAULT_WORKFLOW_EXECUTIONS_TABLE_COLUMNS = [
   'workflow',
+  'runName',
   'tags',
   'triggers',
   'startedAt',
@@ -27,12 +28,13 @@ export type WorkflowExecutionsTableColumnId =
  * Restored to the pre-tightening 250px spacing for a roomier table layout.
  */
 export const EXECUTIONS_TABLE_COLUMN_WIDTH_TAGS = 250;
+export const EXECUTIONS_TABLE_COLUMN_WIDTH_RUN_NAME = 250;
 export const EXECUTIONS_TABLE_COLUMN_WIDTH_TRIGGER = 250;
 export const EXECUTIONS_TABLE_COLUMN_WIDTH_STARTED = 250;
 export const EXECUTIONS_TABLE_COLUMN_WIDTH_DURATION = 250;
 
 /** Floor width so fixed columns + Actions + a usable Workflow column (~200px) still fit; below this we scroll. */
-export const EXECUTIONS_TABLE_MIN_WIDTH_PX = 1300;
+export const EXECUTIONS_TABLE_MIN_WIDTH_PX = 1550;
 
 export interface WorkflowExecutionsGridColumnSettings {
   display: string;
@@ -50,6 +52,12 @@ export const WORKFLOW_EXECUTIONS_TABLE_COLUMN_SETTINGS: Record<
       defaultMessage: 'Workflow',
     }),
     isResizable: false,
+  },
+  runName: {
+    display: i18n.translate('workflows.executionsPage.column.executionNameLabel', {
+      defaultMessage: 'Execution name',
+    }),
+    initialWidth: EXECUTIONS_TABLE_COLUMN_WIDTH_RUN_NAME,
   },
   tags: {
     display: i18n.translate('workflows.executionsPage.column.tags', {

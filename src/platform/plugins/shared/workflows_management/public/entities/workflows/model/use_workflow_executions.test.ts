@@ -168,6 +168,49 @@ describe('useWorkflowExecutions', () => {
     expect(callParams).not.toHaveProperty('executedBy');
   });
 
+  it('starts a new result set when the execution name filter changes', async () => {
+    mockGetWorkflowExecutions.mockResolvedValueOnce({
+      ...executionsPage1,
+      results: [executionsPage1.results[0]],
+      searchAfter: ['2024-01-01T10:00:00Z', 'exec-1'],
+    });
+    const { result, rerender } = renderHook(
+      ({ runName }) => useWorkflowExecutions({ workflowId: 'wf-1', runName }, { retry: false }),
+      {
+        initialProps: { runName: ' production ' },
+        wrapper: createQueryClientWrapper(queryClient),
+      }
+    );
+    await waitFor(() => expect(result.current.hasNextPage).toBe(true));
+    mockGetWorkflowExecutions.mockResolvedValue({
+      ...executionsPage1,
+      results: [executionsPage1.results[1]],
+      total: 1,
+    });
+
+    rerender({ runName: 'staging' });
+
+    await waitFor(() => expect(result.current.data?.results).toEqual([executionsPage1.results[1]]));
+    expect(mockGetWorkflowExecutions).toHaveBeenNthCalledWith(
+      1,
+      'wf-1',
+      expect.objectContaining({ runName: 'production', page: 1 })
+    );
+    expect(mockGetWorkflowExecutions).toHaveBeenLastCalledWith(
+      'wf-1',
+      expect.objectContaining({ runName: 'staging', page: 1 })
+    );
+    expect(mockGetWorkflowExecutions.mock.lastCall?.[1]).not.toHaveProperty('searchAfter');
+    expect(result.current.hasNextPage).toBe(false);
+  });
+
+  it('omits a blank execution name filter', async () => {
+    renderExecutionsHook({ workflowId: 'wf-1', runName: '   ' });
+    await waitForExecutionsFetch();
+
+    expect(mockGetWorkflowExecutions.mock.calls[0][1]).not.toHaveProperty('runName');
+  });
+
   it('should pass omitStepRuns when provided', async () => {
     renderExecutionsHook({ workflowId: 'wf-1', omitStepRuns: true });
 

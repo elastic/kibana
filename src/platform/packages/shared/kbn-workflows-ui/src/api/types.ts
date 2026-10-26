@@ -104,6 +104,7 @@ export interface GetWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  runName?: string;
   omitStepRuns?: boolean;
   /** Datemath lower bound for filtering executions by finishedAt (applied to finishedAt). */
   finishedAfter?: string;
