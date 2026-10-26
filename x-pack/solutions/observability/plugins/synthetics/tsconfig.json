@@ -10,6 +10,7 @@
     "public/**/*",
     "server/**/*",
     "test/scout/**/*",
+    "test/agent_image/**/*",
     "test/scout_synthetics_agent_e2e/**/*",
     "test/scenarios/**/*",
     "../../../../../typings/**/*"

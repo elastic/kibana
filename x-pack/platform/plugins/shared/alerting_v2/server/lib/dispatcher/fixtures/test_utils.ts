@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { WorkflowDetailDto } from '@kbn/workflows';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { DEFAULT_GROUPING } from '../constants';
@@ -117,6 +118,7 @@ export function createDispatcherPipelineState(
           plan: DispatchPlan.of({
             toDispatch: dispatch ?? [],
             throttled: throttled ?? [],
+            alreadyNotified: [],
             dispatchable: dispatchable ?? [],
           }),
         }
@@ -235,6 +237,25 @@ export function createActionGroup(overrides: Partial<ActionGroup> = {}): ActionG
     groupKey: {},
     alerts: [createAlert()],
     rules: {},
+    ...overrides,
+  };
+}
+
+export function createWorkflowDetailDto(
+  overrides: Partial<WorkflowDetailDto> = {}
+): WorkflowDetailDto {
+  return {
+    id: 'workflow-1',
+    name: 'Test Workflow',
+    description: 'A test workflow',
+    enabled: true,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    createdBy: 'elastic',
+    lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+    lastUpdatedBy: 'elastic',
+    definition: null,
+    yaml: 'name: Test Workflow',
+    valid: true,
     ...overrides,
   };
 }
