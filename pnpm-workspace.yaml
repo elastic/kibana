@@ -33,7 +33,6 @@ allowBuilds:
   'core-js-pure': false # donation banner
   'es5-ext': false # prints an informational message
   'lmdb': false # native bindings; prebuilds are sufficient
-  'ms-chromium-edge-driver': false # downloads Edge driver only if EDGEDRIVER_DOWNLOAD_ON_INSTALL
   'msgpackr-extract': false # native bindings; prebuilds are sufficient
   'msw': false # copies a worker script if configured; unused
   'nice-napi': false # optional piscina nice-value helper
@@ -70,8 +69,8 @@ overrides:
   '@babel/runtime': '7.29.7'
   '@babel/traverse': '7.29.8'
   '@babel/types': '7.29.8'
-  '@elastic/opamp-client-node>undici': '6.28.1'
-  '@elastic/transport>undici': '6.28.1'
+  '@elastic/opamp-client-node>undici': '6.29.1'
+  '@elastic/transport>undici': '6.29.1'
   '@emotion/serialize>csstype': '3.0.7'
   '@hapi/mimos>mime-db': '1.53.0'
   '@hello-pangea/dnd': '16.6.0'
@@ -95,10 +94,10 @@ overrides:
   'globby>fast-glob': '3.3.2'
   'hoist-non-react-statics': '3.3.2'
   'isomorphic-fetch>node-fetch': '2.7.0'
-  'qs': '6.16.0'
+  'qs': '6.16.1'
   'remark-parse>trim': '1.0.1'
   'serialize-javascript': '7.1.2'
-  'sharp': '0.35.4'
+  'sharp': '0.35.5'
   'typescript': '5.9.3'
   'util': '0.12.5'
   'yauzl': '3.2.1'

@@ -358,8 +358,12 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   const getCheckboxValue = (testSubject: TestSubjects): boolean =>
     find(testSubject).props().checked;
 
-  const toggleFormRow = (formRowName: string) => {
-    form.toggleEuiSwitch(`${formRowName}.formRowToggle`);
+  const toggleFormRow = async (formRowName: string) => {
+    await act(async () => {
+      form.toggleEuiSwitch(`${formRowName}.formRowToggle`);
+    });
+
+    component.update();
   };
 
   return {

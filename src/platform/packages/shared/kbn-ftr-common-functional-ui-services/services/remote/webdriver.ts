@@ -23,8 +23,6 @@ import edge from 'selenium-webdriver/edge';
 import { Executor } from 'selenium-webdriver/lib/http';
 // @ts-ignore internal modules are not typed
 import { getLogger } from 'selenium-webdriver/lib/logging';
-import { installDriver } from 'ms-chromium-edge-driver';
-
 import { REPO_ROOT } from '@kbn/repo-info';
 import { FINAL_LOG_ENTRY_PREFIX, pollForLogEntry$ } from './poll_for_log_entry';
 import { createStdoutSocket } from './create_stdout_stream';
@@ -127,6 +125,13 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
     'enable-unsafe-swiftshader'
   );
 
+  if (process.env.USE_CITADEL_PROXY === 'true') {
+    // Chromium strips credentials embedded in HTTP(S)_PROXY, so it cannot use
+    // Citadel's per-job authenticated proxy URL. Keep only the browser direct;
+    // the FTR process and the rest of the job remain proxied.
+    options.addArguments('no-proxy-server');
+  }
+
   if (process.platform === 'linux') {
     // The /dev/shm partition is too small in certain VM environments, causing
     // Chrome to fail or crash. Use this flag to work-around this issue
@@ -190,7 +195,6 @@ function pollForChromiumLogs$(session: WebDriver, logPollingMs: number) {
 }
 
 let attemptCounter = 0;
-let edgePaths: { driverPath: string | undefined; browserPath: string | undefined };
 async function attemptToCreateCommand(
   log: ToolingLog,
   browserType: Browsers,
@@ -254,27 +258,20 @@ async function attemptToCreateCommand(
       }
 
       case 'msedge': {
-        if (edgePaths && edgePaths.browserPath && edgePaths.driverPath) {
-          const edgeOptions = initChromiumOptions(
-            browserType,
-            config.acceptInsecureCerts
-          ) as edge.Options;
-          const session = await new Builder()
-            .forBrowser('MicrosoftEdge')
-            .setEdgeOptions(edgeOptions)
-            .setEdgeService(new edge.ServiceBuilder(edgePaths.driverPath).setEnvironment(driverEnv))
-            .build();
-          return {
-            session,
-            consoleLog$: pollForChromiumLogs$(session, config.logPollingMs),
-          };
-        } else {
-          throw new Error(
-            `Chromium Edge session requires browser or driver path to be defined: ${JSON.stringify(
-              edgePaths
-            )}`
-          );
-        }
+        const edgeOptions = initChromiumOptions(
+          browserType,
+          config.acceptInsecureCerts
+        ) as edge.Options;
+        // without an explicit driver path, Selenium Manager resolves and caches msedgedriver
+        const session = await new Builder()
+          .forBrowser('MicrosoftEdge')
+          .setEdgeOptions(edgeOptions)
+          .setEdgeService(new edge.ServiceBuilder().setEnvironment(driverEnv))
+          .build();
+        return {
+          session,
+          consoleLog$: pollForChromiumLogs$(session, config.logPollingMs),
+        };
       }
 
       case 'firefox': {
@@ -406,11 +403,6 @@ export async function initWebDriver(
 
   // create browser download folder
   Fs.mkdirSync(downloadDir, { recursive: true });
-
-  // download Edge driver only in case of usage
-  if (browserType === Browsers.ChromiumEdge) {
-    edgePaths = await installDriver();
-  }
 
   let attempt = 1;
   return await Rx.firstValueFrom(

@@ -26,9 +26,20 @@ const validateAndProcessTestFilesMock =
   >;
 
 describe('parseTestFlags', () => {
+  const originalTargetAttributes = process.env.SCOUT_TARGET_ATTRIBUTES;
+
   beforeEach(() => {
     jest.clearAllMocks();
     validatePlaywrightConfigMock.mockResolvedValue();
+    delete process.env.SCOUT_TARGET_ATTRIBUTES;
+  });
+
+  afterAll(() => {
+    if (originalTargetAttributes === undefined) {
+      delete process.env.SCOUT_TARGET_ATTRIBUTES;
+    } else {
+      process.env.SCOUT_TARGET_ATTRIBUTES = originalTargetAttributes;
+    }
   });
 
   it(`should throw an error without 'config' or 'testFiles' flag`, async () => {
@@ -155,6 +166,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       serverConfigSet: 'default',
+      targetAttributes: [],
       testTarget: {
         arch: 'serverless',
         domain: 'observability_complete',
@@ -185,6 +197,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       serverConfigSet: 'default',
+      targetAttributes: [],
       testTarget: {
         arch: 'stateful',
         domain: 'classic',
@@ -214,6 +227,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       serverConfigSet: 'default',
+      targetAttributes: [],
       testTarget: {
         arch: 'serverless',
         domain: 'security_ease',
@@ -244,6 +258,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       serverConfigSet: 'default',
+      targetAttributes: [],
       testTarget: {
         arch: 'stateful',
         domain: 'classic',
@@ -274,6 +289,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       serverConfigSet: 'default',
+      targetAttributes: [],
       testTarget: {
         arch: 'stateful',
         domain: 'classic',
@@ -372,6 +388,7 @@ describe('parseTestFlags', () => {
         logsDir: undefined,
         serverConfigSet: 'default',
         testFiles: [testFile],
+        targetAttributes: [],
         testTarget: {
           arch: 'stateful',
           domain: 'classic',
@@ -416,6 +433,7 @@ describe('parseTestFlags', () => {
         logsDir: undefined,
         serverConfigSet: 'default',
         testFiles,
+        targetAttributes: [],
         testTarget: {
           arch: 'stateful',
           domain: 'classic',

@@ -122,6 +122,31 @@ describe('<FieldEditor />', () => {
     expect(lastState.isSubmitted).toBe(true);
   });
 
+  test('should keep the form marked as modified after switching the type to composite and back', async () => {
+    const onFormModifiedChange = jest.fn();
+    const field: Field = {
+      name: 'myRuntimeField',
+      type: 'keyword',
+      script: { source: 'emit("hello")' },
+    };
+
+    testBed = await setup(
+      { field, onChange, onFormModifiedChange },
+      { fieldTypeToProcess: 'runtime' }
+    );
+    const {
+      find,
+      actions: { fields },
+    } = testBed;
+
+    await fields.updateScript('emit("world")');
+    await fields.updateType('composite', 'Composite');
+    await fields.updateType('keyword', 'Keyword');
+
+    expect(find('scriptField').props().value).toBe('emit("world")');
+    expect(onFormModifiedChange).toHaveBeenLastCalledWith(true);
+  });
+
   describe('validation', () => {
     test('should prevent creating duplicates', async () => {
       const existingFields = ['myRuntimeField'];

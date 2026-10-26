@@ -40,7 +40,7 @@ import type {
   DiffableThreatMatchFields,
   DiffableThresholdFields,
 } from '../../../api/detection_engine/prebuilt_rules';
-import { addEcsToRequiredFields } from '../../rule_management/utils';
+import { normalizeRequiredFields } from './normalize_required_fields';
 import { extractBuildingBlockObject } from './extract_building_block_object';
 import {
   extractInlineKqlQuery,
@@ -134,7 +134,7 @@ const extractDiffableCommonFields = (
     note: rule.note ?? '',
     setup: rule.setup ?? '',
     related_integrations: rule.related_integrations ?? [],
-    required_fields: addEcsToRequiredFields(rule.required_fields),
+    required_fields: normalizeRequiredFields(rule.required_fields),
 
     // Other domain fields
     rule_schedule: extractRuleSchedule(rule),

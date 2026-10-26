@@ -48,6 +48,7 @@ import {
   esqlQueryDiffAlgorithm,
   ruleTypeDiffAlgorithm,
   forceTargetVersionDiffAlgorithm,
+  requiredFieldsDiffAlgorithm,
 } from './algorithms';
 import {
   ScalarArrayDiffMissingBaseVersionStrategy,
@@ -234,7 +235,7 @@ const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> 
   note: multiLineStringDiffAlgorithm,
   setup: multiLineStringDiffAlgorithm,
   related_integrations: simpleDiffAlgorithm,
-  required_fields: simpleDiffAlgorithm,
+  required_fields: requiredFieldsDiffAlgorithm,
   rule_schedule: simpleDiffAlgorithm,
   max_signals: numberDiffAlgorithm,
   rule_name_override: simpleDiffAlgorithm,

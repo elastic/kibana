@@ -251,6 +251,24 @@ describe('UrlFormat', () => {
       );
     });
 
+    test('resolves leading-slash relative urls against the base path, including the space prefix', () => {
+      const convert = (basePath: string) =>
+        new UrlFormat({ parsedUrl: { origin: 'http://kibana.host.com', basePath } }).convert(
+          '/test/hello',
+          HTML_CONTEXT_TYPE
+        );
+
+      expect(convert('')).toBe(
+        '<a href="http://kibana.host.com/test/hello" target="_blank" rel="noopener noreferrer">/test/hello</a>'
+      );
+      expect(convert('/xyz')).toBe(
+        '<a href="http://kibana.host.com/xyz/test/hello" target="_blank" rel="noopener noreferrer">/test/hello</a>'
+      );
+      expect(convert('/xyz/s/custom')).toBe(
+        '<a href="http://kibana.host.com/xyz/s/custom/test/hello" target="_blank" rel="noopener noreferrer">/test/hello</a>'
+      );
+    });
+
     test('should fail gracefully if there are no parsedUrl provided', () => {
       const url = new UrlFormat({});
 

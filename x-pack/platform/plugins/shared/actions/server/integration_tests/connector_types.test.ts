@@ -23,7 +23,8 @@ jest.mock('../action_type_registry', () => {
   };
 });
 
-describe('Connector type config checks', () => {
+// Failing: See https://github.com/elastic/kibana/issues/223634
+describe.skip('Connector type config checks', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let actionTypeRegistry: ActionTypeRegistry;

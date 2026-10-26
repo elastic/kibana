@@ -40,6 +40,10 @@ const stemMapping: MappingTextProperty = {
   type: 'text',
 };
 
+const documentIdMapping: MappingKeywordProperty = {
+  type: 'keyword',
+};
+
 const defaultMappings = {
   dynamic: true,
   dynamic_templates: [
@@ -59,6 +63,9 @@ const defaultMappings = {
       },
     },
   ],
+  properties: {
+    id: documentIdMapping,
+  },
 };
 
 export const createIndex = async (

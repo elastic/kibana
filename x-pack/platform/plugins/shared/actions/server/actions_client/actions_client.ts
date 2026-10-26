@@ -20,7 +20,6 @@ import type {
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { RunNowResult } from '@kbn/task-manager-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
-import type { KueryNode } from '@kbn/es-query';
 import type { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
 import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
@@ -587,9 +586,12 @@ export class ActionsClient {
   }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
     this.context.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
-    const authorizationTuple = {} as KueryNode;
+    let authorizationTuple;
     try {
-      await this.context.authorization.ensureAuthorized({ operation: 'get' });
+      authorizationTuple = await this.context.authorization.getFindAuthorizationFilter({
+        operation: 'get',
+        namespaces,
+      });
     } catch (error) {
       this.context.auditLogger?.log(
         connectorAuditEvent({
@@ -615,7 +617,7 @@ export class ActionsClient {
     try {
       const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
         'action',
-        authorizationTuple,
+        authorizationTuple.filter,
         {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),
@@ -647,9 +649,12 @@ export class ActionsClient {
   }: GetGlobalExecutionKPIParams) {
     this.context.logger.debug(`getGlobalExecutionKpiWithAuth(): getting global execution KPI`);
 
-    const authorizationTuple = {} as KueryNode;
+    let authorizationTuple;
     try {
-      await this.context.authorization.ensureAuthorized({ operation: 'get' });
+      authorizationTuple = await this.context.authorization.getFindAuthorizationFilter({
+        operation: 'get',
+        namespaces,
+      });
     } catch (error) {
       this.context.auditLogger?.log(
         connectorAuditEvent({
@@ -675,7 +680,7 @@ export class ActionsClient {
     try {
       const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
         'action',
-        authorizationTuple,
+        authorizationTuple.filter,
         {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),
