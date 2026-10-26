@@ -70,6 +70,7 @@ describe('registerInternalToolsRoutes - _list_connectors', () => {
               getAll: mockGetAll,
               listTypes: mockListTypes,
             }),
+            getUsableUserOAuthConnectorIds: jest.fn().mockResolvedValue(new Set<string>()),
           },
         },
       ]),
