@@ -19,7 +19,10 @@ const conflictResponse = (data: unknown) => ({
 });
 
 describe('getFormattedError', () => {
-  it('falls back to the server message for an unknown conflict reason', () => {
+  it('shows the message for a known conflict reason and the server message otherwise', () => {
+    expect(getFormattedError(conflictResponse({ reason: 'lease_held' })).message).toBe(
+      'This source is being updated. Try again in a few seconds.'
+    );
     expect(getFormattedError(conflictResponse({ reason: 'something_else' })).message).toBe(
       SERVER_MESSAGE
     );
