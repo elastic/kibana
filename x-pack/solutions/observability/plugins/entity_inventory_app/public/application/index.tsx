@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { EuiBetaBadge, EuiPageSection } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { Redirect, useLocation } from 'react-router-dom';
@@ -20,21 +21,34 @@ interface EntityInventoryShellProps {
 }
 
 const PATH_TITLES: Record<string, string> = {
-  '/all-resources': 'All resources',
-  '/hosts': 'Hosts',
-  '/kubernetes': 'Kubernetes',
+  '/all-resources': i18n.translate('xpack.entityInventoryApp.allResourcesTitle', {
+    defaultMessage: 'All resources',
+  }),
+  '/hosts': i18n.translate('xpack.entityInventoryApp.hostsTitle', {
+    defaultMessage: 'Hosts',
+  }),
+  '/kubernetes': i18n.translate('xpack.entityInventoryApp.kubernetesTitle', {
+    defaultMessage: 'Kubernetes',
+  }),
 };
+
+const techPreviewLabel = i18n.translate('xpack.entityInventoryApp.techPreviewBadgeLabel', {
+  defaultMessage: 'Technical preview',
+});
 
 const TECH_PREVIEW_BADGE: AppHeaderBadge[] = [
   {
-    label: 'Technical preview',
+    label: techPreviewLabel,
     renderCustomBadge: () => (
       <EuiBetaBadge
-        label="Technical preview"
+        label={techPreviewLabel}
         color="hollow"
         size="s"
         iconType="flask"
-        tooltipContent="This functionality is in technical preview and may be changed or removed in a future release."
+        tooltipContent={i18n.translate('xpack.entityInventoryApp.techPreviewBadgeTooltip', {
+          defaultMessage:
+            'This functionality is in technical preview and may be changed or removed in a future release.',
+        })}
       />
     ),
   },
@@ -42,7 +56,11 @@ const TECH_PREVIEW_BADGE: AppHeaderBadge[] = [
 
 function EntityInventoryShell({ PageTemplate }: EntityInventoryShellProps) {
   const { pathname } = useLocation();
-  const title = PATH_TITLES[pathname] ?? 'Entity Inventory';
+  const title =
+    PATH_TITLES[pathname] ??
+    i18n.translate('xpack.entityInventoryApp.entityInventoryTitle', {
+      defaultMessage: 'Entity Inventory',
+    });
 
   return (
     <PageTemplate isPageDataLoaded={true} pageSectionProps={{ paddingSize: 'none' }}>
