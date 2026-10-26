@@ -1737,20 +1737,39 @@ class AgentPolicyService {
       }
 
       if (policiesWithMultipleAP.length > 0) {
-        await packagePolicyService.bulkUpdate(
+        // Only the agent policy reference changes, so skip the full update path: it needs the
+        // package info, which may not be available for the package policy's version.
+        const { updatedPolicies, failedPolicies } = await packagePolicyService.bulkUpdatePartial(
           soClient,
-          esClient,
-          policiesWithMultipleAP.map((policy) => {
-            const newPolicyIds = policy.policy_ids.filter((policyId) => policyId !== id);
+          policiesWithMultipleAP.map(({ id: packagePolicyId, version, policy_ids: policyIds }) => {
+            const newPolicyIds = policyIds.filter((policyId) => policyId !== id);
             return {
-              ...policy,
-              policy_id: newPolicyIds[0],
-              policy_ids: newPolicyIds,
+              id: packagePolicyId,
+              version: version ?? '',
+              attributes: {
+                policy_id: newPolicyIds[0],
+                policy_ids: newPolicyIds,
+                updated_at: new Date().toISOString(),
+                updated_by: options?.user?.username ?? 'system',
+              },
             };
           })
         );
+
+        if (failedPolicies.length > 0) {
+          const failures = failedPolicies
+            .map(({ update, error }) => `[${update.id}]: ${error.message}`)
+            .join(', ');
+          logger.error(
+            `Failed to remove agent policy [${id}] from shared package policies ${failures}`
+          );
+          throw new FleetError(
+            `Cannot delete agent policy [${id}]: failed to remove it from shared package policies ${failures}`
+          );
+        }
+
         logger.debug(
-          `Updated package policies with multiple agent policies with ids ${policiesWithMultipleAP
+          `Updated package policies with multiple agent policies with ids ${updatedPolicies
             .map((policy) => policy.id)
             .join(', ')}`
         );
