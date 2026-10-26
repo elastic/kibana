@@ -136,6 +136,8 @@ export const PercentageRuleEditor = ({
         <>
           <EuiSpacer size="s" />
           <EuiButtonEmpty
+            data-ebt-action="equalizePercentages"
+            data-ebt-element="featureFlagsManagement"
             data-test-subj="featureFlagsManagementPercentageRuleEditorDistributeEvenlyButton"
             size="s"
             onClick={() => onChange({ ...rule, percentages: equalPercentages(variations) })}

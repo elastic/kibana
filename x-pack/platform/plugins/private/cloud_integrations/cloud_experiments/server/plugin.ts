@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { map, type Subscription } from 'rxjs';
 import { OpenFeature } from '@openfeature/server-sdk';
+import type { Provider } from '@openfeature/server-sdk';
 import { LaunchDarklyProvider } from '@launchdarkly/openfeature-node-server';
 import type { LogLevelId } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -21,6 +22,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { initializeMetadata, MetadataService } from '../common/metadata_service';
 import { getAllFlags, registerUsageCollector } from './usage';
+import { CachedOfrepProvider } from './ofrep_provider';
 import type { CloudExperimentsConfigType } from './config';
 
 interface CloudExperimentsPluginSetupDeps {
@@ -34,6 +36,7 @@ export class CloudExperimentsPlugin implements Plugin<void, void, CloudExperimen
   private readonly logger: Logger;
   private readonly metadataService: MetadataService;
   private readonly rolloutEvaluationProbeSubscriptions: Subscription[] = [];
+  private ofrepProvider?: CachedOfrepProvider;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -44,12 +47,10 @@ export class CloudExperimentsPlugin implements Plugin<void, void, CloudExperimen
       this.logger.get('metadata')
     );
 
-    const ldConfig = config.launch_darkly; // If the plugin is enabled and no flag_overrides are provided (dev mode only), launch_darkly must exist
-    if (!ldConfig && !initializerContext.env.mode.dev) {
-      // If the plugin is enabled, and it's in prod mode, launch_darkly must exist
-      // (config-schema should enforce it, but just in case).
+    if (!config.launch_darkly && !config.ofrep && !initializerContext.env.mode.dev) {
+      // Production needs a provider. Dev mode may use flag_overrides with neither.
       throw new Error(
-        'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
+        'xpack.cloud_integrations.experiments.launch_darkly or ofrep configuration should exist'
       );
     }
   }
@@ -73,19 +74,14 @@ export class CloudExperimentsPlugin implements Plugin<void, void, CloudExperimen
       logger: this.logger,
     });
 
-    const launchDarklyOpenFeatureProvider = this.createOpenFeatureProvider();
-    if (launchDarklyOpenFeatureProvider) {
-      core.featureFlags.setProvider(launchDarklyOpenFeatureProvider);
-      core.featureFlags.setInitialFeatureFlagsGetter(async () => {
-        const launchDarklyClient = launchDarklyOpenFeatureProvider.getClient();
-        const context = OpenFeature.getContext();
-        const { flags } = await getAllFlags(launchDarklyClient, context);
-        return flags;
-      });
+    const provider = this.createOpenFeatureProvider();
+    if (provider) {
+      core.featureFlags.setProvider(provider.provider);
+      core.featureFlags.setInitialFeatureFlagsGetter(provider.getInitialFeatureFlags);
     }
 
     registerUsageCollector(deps.usageCollection, () => ({
-      launchDarklyClient: launchDarklyOpenFeatureProvider?.getClient(),
+      launchDarklyClient: provider?.launchDarklyClient,
       currentContext: OpenFeature.getContext(),
     }));
   }
@@ -99,6 +95,7 @@ export class CloudExperimentsPlugin implements Plugin<void, void, CloudExperimen
   }
 
   public stop() {
+    void this.ofrepProvider?.onClose();
     this.rolloutEvaluationProbeSubscriptions.forEach((subscription) => subscription.unsubscribe());
     this.metadataService.stop();
   }
@@ -111,13 +108,38 @@ export class CloudExperimentsPlugin implements Plugin<void, void, CloudExperimen
     });
   }
 
-  private createOpenFeatureProvider() {
-    const { launch_darkly: ldConfig } =
+  private createOpenFeatureProvider():
+    | {
+        provider: Provider;
+        launchDarklyClient?: ReturnType<LaunchDarklyProvider['getClient']>;
+        getInitialFeatureFlags: () => Promise<Record<string, unknown>>;
+      }
+    | undefined {
+    const { launch_darkly: ldConfig, ofrep } =
       this.initializerContext.config.get<CloudExperimentsConfigType>();
+
+    if (ofrep) {
+      if (ldConfig) {
+        this.logger.warn(
+          'Both ofrep and launch_darkly are configured; the OFREP provider is used.'
+        );
+      }
+      const ofrepProvider = new CachedOfrepProvider({
+        baseUrl: ofrep.base_url,
+        sdkKey: ofrep.sdk_key,
+        pollIntervalMs: ofrep.poll_interval.asMilliseconds(),
+        logger: this.logger,
+      });
+      this.ofrepProvider = ofrepProvider;
+      return {
+        provider: ofrepProvider,
+        getInitialFeatureFlags: () => ofrepProvider.getBulkFlagValues(OpenFeature.getContext()),
+      };
+    }
 
     if (!ldConfig) return;
 
-    return new LaunchDarklyProvider(ldConfig.sdk_key, {
+    const provider = new LaunchDarklyProvider(ldConfig.sdk_key, {
       logger: this.logger.get('launch-darkly'),
       application: {
         id: 'kibana-server',
@@ -127,6 +149,14 @@ export class CloudExperimentsPlugin implements Plugin<void, void, CloudExperimen
             : this.initializerContext.env.packageInfo.version,
       },
     });
+    return {
+      provider,
+      launchDarklyClient: provider.getClient(),
+      getInitialFeatureFlags: async () => {
+        const { flags } = await getAllFlags(provider.getClient(), OpenFeature.getContext());
+        return flags;
+      },
+    };
   }
 
   private async addHasDataMetadata(core: CoreStart): Promise<{ has_data: boolean }> {

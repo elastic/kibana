@@ -87,8 +87,14 @@ export const FlagsPage = () => {
       }),
       render: (key: Flag['key']) => (
         <EuiLink
+          data-ebt-action="viewFlag"
+          data-ebt-element="featureFlagsManagement"
           data-test-subj="featureFlagsManagementColumnsLink"
-          onClick={() => history.push(paths.flag(key))}
+          href={history.createHref({ pathname: paths.flag(key) })}
+          onClick={(event: React.MouseEvent) => {
+            event.preventDefault();
+            history.push(paths.flag(key));
+          }}
         >
           {key}
         </EuiLink>
@@ -349,6 +355,8 @@ export const FlagsPage = () => {
         {canSave && (
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-ebt-action="createFlag"
+              data-ebt-element="featureFlagsManagement"
               data-test-subj="featureFlagsManagementFlagsPageCreateFlagButton"
               fill
               iconType="plus"

@@ -33,7 +33,7 @@ describe('Cloud Experiments server plugin', () => {
       const initializerContext = coreMock.createPluginInitializerContext();
       initializerContext.env.mode.dev = false;
       expect(() => new CloudExperimentsPlugin(initializerContext)).toThrow(
-        'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
+        'xpack.cloud_integrations.experiments.launch_darkly or ofrep configuration should exist'
       );
     });
   });

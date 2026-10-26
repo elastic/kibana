@@ -144,6 +144,8 @@ export const MatchRuleEditor = ({
         }
       >
         <EuiSelect
+          data-ebt-action="changeSelection"
+          data-ebt-element="featureFlagsManagement"
           data-test-subj="featureFlagsManagementMatchRuleEditorSelect"
           fullWidth
           disabled={readOnly}
@@ -210,6 +212,8 @@ export const MatchRuleEditor = ({
         }
       >
         <EuiRadioGroup
+          data-ebt-action="changeSelection"
+          data-ebt-element="featureFlagsManagement"
           data-test-subj="featureFlagsManagementMatchRuleEditorRadioGroup"
           disabled={readOnly}
           name={`feature-flags-rule-outcome-${depth}-${ruleIndex}`}
@@ -270,6 +274,8 @@ export const MatchRuleEditor = ({
           }
         >
           <EuiSelect
+            data-ebt-action="changeSelection"
+            data-ebt-element="featureFlagsManagement"
             data-test-subj="featureFlagsManagementMatchRuleEditorSelect"
             fullWidth
             disabled={readOnly}

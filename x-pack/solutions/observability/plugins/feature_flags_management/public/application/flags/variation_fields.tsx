@@ -35,6 +35,8 @@ export const VariationSelect = ({
   onChange: (value: VariationValue) => void;
 }) => (
   <EuiSelect
+    data-ebt-action="changeSelection"
+    data-ebt-element="featureFlagsManagement"
     data-test-subj="featureFlagsManagementVariationSelectSelect"
     fullWidth
     disabled={disabled}
@@ -129,6 +131,8 @@ export const VariationFields = ({
             {!readOnly && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-ebt-action="deleteFlag"
+                  data-ebt-element="featureFlagsManagement"
                   data-test-subj="featureFlagsManagementVariationFieldsRemoveButton"
                   color="danger"
                   iconType="trash"
@@ -155,6 +159,8 @@ export const VariationFields = ({
         <>
           <EuiSpacer size="s" />
           <EuiButtonEmpty
+            data-ebt-action="confirm"
+            data-ebt-element="featureFlagsManagement"
             data-test-subj="featureFlagsManagementVariationFieldsAddVariationButton"
             size="s"
             iconType="plus"

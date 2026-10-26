@@ -195,6 +195,8 @@ export const NamedEntityFlyout = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-ebt-action="cancel"
+              data-ebt-element="featureFlagsManagement"
               data-test-subj="featureFlagsManagementNamedEntityFlyoutButton"
               onClick={onClose}
             >
@@ -203,6 +205,8 @@ export const NamedEntityFlyout = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-ebt-action="saveFlag"
+              data-ebt-element="featureFlagsManagement"
               data-test-subj="featureFlagsManagementNamedEntityFlyoutButton"
               fill
               isLoading={saving}

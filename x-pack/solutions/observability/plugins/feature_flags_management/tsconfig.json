@@ -10,11 +10,13 @@
     "@kbn/core",
     "@kbn/core-http-browser",
     "@kbn/core-user-activity-server",
+    "@kbn/ebt-click",
     "@kbn/features-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
     "@kbn/task-manager-plugin",
+    "@kbn/ui-callout",
     "@kbn/zod"
   ],
   "exclude": ["target/**/*"]

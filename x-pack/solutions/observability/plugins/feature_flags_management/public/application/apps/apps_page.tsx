@@ -63,8 +63,14 @@ export const AppsPage = () => {
       }),
       render: (key: App['key']) => (
         <EuiLink
+          data-ebt-action="viewApp"
+          data-ebt-element="featureFlagsManagement"
           data-test-subj="featureFlagsManagementColumnsLink"
-          onClick={() => history.push(paths.app(key))}
+          href={history.createHref({ pathname: paths.app(key) })}
+          onClick={(event: React.MouseEvent) => {
+            event.preventDefault();
+            history.push(paths.app(key));
+          }}
         >
           {key}
         </EuiLink>
@@ -153,6 +159,8 @@ export const AppsPage = () => {
         {canSave && (
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-ebt-action="createApp"
+              data-ebt-element="featureFlagsManagement"
               data-test-subj="featureFlagsManagementAppsPageCreateAppButton"
               fill
               iconType="plus"

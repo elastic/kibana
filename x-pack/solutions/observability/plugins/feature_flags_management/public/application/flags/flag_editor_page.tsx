@@ -10,7 +10,6 @@ import { useHistory, useParams } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiComboBox,
   EuiEmptyPrompt,
   EuiFieldText,
@@ -28,6 +27,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { LIMITS, VALUE_TYPES, type ValueType } from '../../../common';
 import { ApiErrorCallout, ValidationIssuesCallout } from '../api_error_callout';
 import { isVersionConflict, toFeatureFlagsApiError, type FeatureFlagsApiError } from '../api_error';
@@ -122,6 +122,8 @@ export const FlagEditorPage = () => {
             }
             actions={
               <EuiButtonEmpty
+                data-ebt-action="cancel"
+                data-ebt-element="featureFlagsManagement"
                 data-test-subj="featureFlagsManagementFlagEditorPageBackToFlagsButton"
                 iconType="chevronSingleLeft"
                 onClick={() => history.push(paths.flags)}
@@ -227,16 +229,38 @@ export const FlagEditorPage = () => {
 
   return (
     <EuiPageTemplate.Section>
-      <EuiButtonEmpty
-        data-test-subj="featureFlagsManagementFlagEditorPageBackToFlagsButton"
-        iconType="chevronSingleLeft"
-        onClick={() => history.push(paths.flags)}
-      >
-        <FormattedMessage
-          id="xpack.featureFlagsManagement.flags.editor.backToFlagsButtonLabel"
-          defaultMessage="Back to flags"
-        />
-      </EuiButtonEmpty>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            data-ebt-action="cancel"
+            data-ebt-element="featureFlagsManagement"
+            data-test-subj="featureFlagsManagementFlagEditorPageBackToFlagsButton"
+            iconType="chevronSingleLeft"
+            href={history.createHref({ pathname: paths.flags })}
+          >
+            <FormattedMessage
+              id="xpack.featureFlagsManagement.flags.editor.backToFlagsButtonLabel"
+              defaultMessage="Back to flags"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        {!isCreate && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-ebt-action="viewFlagHistory"
+              data-ebt-element="featureFlagsManagement"
+              data-test-subj="featureFlagsManagementFlagEditorHistoryButton"
+              iconType="clock"
+              href={history.createHref({ pathname: paths.flagHistory(form.key) })}
+            >
+              <FormattedMessage
+                id="xpack.featureFlagsManagement.flags.editor.historyButtonLabel"
+                defaultMessage="History"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiTitle size="m">
         <h2>
@@ -356,6 +380,8 @@ export const FlagEditorPage = () => {
           }
         >
           <EuiSelect
+            data-ebt-action="changeSelection"
+            data-ebt-element="featureFlagsManagement"
             data-test-subj="featureFlagsManagementFlagEditorPageSelect"
             fullWidth
             disabled={readOnly}
@@ -435,6 +461,8 @@ export const FlagEditorPage = () => {
             }
           >
             <EuiSelect
+              data-ebt-action="changeSelection"
+              data-ebt-element="featureFlagsManagement"
               data-test-subj="featureFlagsManagementFlagEditorPageSelect"
               fullWidth
               value={activeSuggestionApp ?? ''}
@@ -596,14 +624,18 @@ export const FlagEditorPage = () => {
         {!percentagesValid && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
-              color="warning"
-              iconType="warning"
               title={
                 <FormattedMessage
                   id="xpack.featureFlagsManagement.flags.editor.percentageSumTitle"
                   defaultMessage="Percentage weights must sum to 100"
+                />
+              }
+              text={
+                <FormattedMessage
+                  id="xpack.featureFlagsManagement.flags.editor.percentageSumDescription"
+                  defaultMessage="Each percentage rule needs weights that add up to 100 before the flag can be saved."
                 />
               }
             />
@@ -614,6 +646,8 @@ export const FlagEditorPage = () => {
           <EuiFlexItem grow={false}>
             {!readOnly && !isCreate && (
               <EuiButtonEmpty
+                data-ebt-action="deleteFlag"
+                data-ebt-element="featureFlagsManagement"
                 data-test-subj="featureFlagsManagementFlagEditorPageButton"
                 color="danger"
                 onClick={() => setConfirmDelete(true)}
@@ -626,6 +660,8 @@ export const FlagEditorPage = () => {
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-ebt-action="saveFlag"
+                  data-ebt-element="featureFlagsManagement"
                   data-test-subj="featureFlagsManagementFlagEditorPageButton"
                   onClick={() => history.push(paths.flags)}
                 >
@@ -635,6 +671,8 @@ export const FlagEditorPage = () => {
               {!readOnly && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
+                    data-ebt-action="saveFlag"
+                    data-ebt-element="featureFlagsManagement"
                     type="submit"
                     fill
                     isLoading={saving}

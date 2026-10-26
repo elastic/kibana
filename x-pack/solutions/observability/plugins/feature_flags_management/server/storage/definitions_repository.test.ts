@@ -197,4 +197,54 @@ describe('DefinitionsRepository', () => {
       expect(deleted.attributes).toEqual({ key: 'production', name: 'Production' });
     });
   });
+
+  describe('findAll', () => {
+    it('pages with a point in time instead of sorting on _id', async () => {
+      esClient.openPointInTime.mockResolvedValue({ id: 'pit-1' });
+      esClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        pit_id: 'pit-2',
+        hits: {
+          hits: [
+            {
+              _index: DEFINITIONS_INDEX,
+              _id: definitionId('credential', 'kibana', 'production'),
+              _seq_no: 1,
+              _primary_term: 1,
+              _source: {
+                type: 'credential',
+                created_at: CREATED_AT,
+                updated_at: CREATED_AT,
+                revision: 1,
+                credential: {
+                  app: 'kibana',
+                  environment: 'production',
+                  sdk_key_hash: 'abc',
+                  sdk_key_hint: 'hint',
+                  client_id: 'ffcli-1',
+                },
+              },
+              sort: ['production', 0],
+            },
+          ],
+        },
+      });
+
+      const items = await repository.findAll('credential', { term: { 'credential.app': 'kibana' } });
+
+      expect(items).toHaveLength(1);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pit: { id: 'pit-1', keep_alive: '1m' },
+          sort: [{ 'credential.environment': 'asc' }, '_shard_doc'],
+        })
+      );
+      expect(esClient.search).not.toHaveBeenCalledWith(
+        expect.objectContaining({ index: DEFINITIONS_INDEX })
+      );
+      expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-2' });
+    });
+  });
 });

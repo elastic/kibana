@@ -1435,6 +1435,7 @@
     "@moonrepo/cli": "2.6.2",
     "@openfeature/core": "1.12.0",
     "@openfeature/launchdarkly-client-provider": "0.4.0",
+    "@openfeature/ofrep-web-provider": "0.4.3",
     "@openfeature/server-sdk": "1.23.0",
     "@openfeature/web-sdk": "1.10.0",
     "@opentelemetry/api": "1.9.1",

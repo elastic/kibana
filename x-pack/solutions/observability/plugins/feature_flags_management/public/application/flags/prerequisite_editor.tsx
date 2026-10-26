@@ -199,6 +199,8 @@ export const PrerequisiteEditor = ({
               {!readOnly && (
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
+                    data-ebt-action="deleteFlag"
+                    data-ebt-element="featureFlagsManagement"
                     data-test-subj="featureFlagsManagementPrerequisiteEditorRemoveButton"
                     color="danger"
                     iconType="trash"
@@ -228,6 +230,8 @@ export const PrerequisiteEditor = ({
         <>
           <EuiSpacer size="s" />
           <EuiButtonEmpty
+            data-ebt-action="confirm"
+            data-ebt-element="featureFlagsManagement"
             data-test-subj="featureFlagsManagementPrerequisiteEditorAddPrerequisiteButton"
             size="s"
             iconType="plus"

@@ -6,11 +6,14 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { ValidationIssue } from '../../common';
 import { apiErrorSummary, isVersionConflict, type FeatureFlagsApiError } from './api_error';
+import { FEATURE_FLAGS_EBT_ACTIONS, FEATURE_FLAGS_EBT_ELEMENT } from './ebt';
 import { reloadButtonLabel } from './labels';
 
 export const ApiErrorCallout = ({
@@ -22,9 +25,7 @@ export const ApiErrorCallout = ({
 }) => {
   const conflict = isVersionConflict(error);
   return (
-    <EuiCallOut
-      color="danger"
-      iconType="error"
+    <KbnDangerCallout
       title={
         conflict
           ? i18n.translate('xpack.featureFlagsManagement.api.versionConflictTitle', {
@@ -34,29 +35,35 @@ export const ApiErrorCallout = ({
               defaultMessage: 'The request failed',
             })
       }
-    >
-      <EuiText size="s">
-        <p>{apiErrorSummary(error)}</p>
-      </EuiText>
-      {error.issues.length > 0 && (
+      text={
         <>
-          <EuiSpacer size="s" />
-          <IssueList issues={error.issues} />
+          <EuiText size="s">
+            <p>{apiErrorSummary(error)}</p>
+          </EuiText>
+          {error.issues.length > 0 && (
+            <>
+              <EuiSpacer size="s" />
+              <IssueList issues={error.issues} />
+            </>
+          )}
         </>
-      )}
-      {conflict && onReload && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiButton
-            data-test-subj="featureFlagsManagementApiErrorCalloutButton"
-            size="s"
-            onClick={onReload}
-          >
-            {reloadButtonLabel()}
-          </EuiButton>
-        </>
-      )}
-    </EuiCallOut>
+      }
+      actionProps={
+        conflict && onReload
+          ? {
+              primary: {
+                children: reloadButtonLabel(),
+                onClick: onReload,
+                'data-test-subj': 'featureFlagsManagementApiErrorCalloutButton',
+                ...getEbtProps({
+                  action: FEATURE_FLAGS_EBT_ACTIONS.reload,
+                  element: FEATURE_FLAGS_EBT_ELEMENT,
+                }),
+              },
+            }
+          : undefined
+      }
+    />
   );
 };
 
@@ -65,18 +72,15 @@ export const ValidationIssuesCallout = ({ issues }: { issues: readonly Validatio
     return null;
   }
   return (
-    <EuiCallOut
-      color="danger"
-      iconType="error"
+    <KbnDangerCallout
       title={
         <FormattedMessage
           id="xpack.featureFlagsManagement.flags.editor.validationTitle"
           defaultMessage="Fix these problems before saving"
         />
       }
-    >
-      <IssueList issues={issues} />
-    </EuiCallOut>
+      text={<IssueList issues={issues} />}
+    />
   );
 };
 

@@ -24,19 +24,23 @@ const launchDarklySchema = schema.object({
   ),
 });
 
+/**
+ * Points Kibana's OpenFeature client at an OFREP server instead of LaunchDarkly.
+ * `sdk_key` stays on the server. `client_id` is public and is exposed to the browser.
+ */
+const ofrepSchema = schema.object({
+  base_url: schema.uri({ scheme: ['http', 'https'] }),
+  sdk_key: schema.string({ minLength: 1 }),
+  client_id: schema.string({ minLength: 1 }),
+  poll_interval: schema.duration({ defaultValue: '30s' }),
+});
+
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  launch_darkly: schema.conditional(
-    schema.siblingRef('enabled'),
-    true,
-    schema.conditional(
-      schema.contextRef('dev'),
-      schema.literal(true), // this is still optional when running on dev because devs might use the `flag_overrides`
-      schema.maybe(launchDarklySchema),
-      launchDarklySchema
-    ),
-    schema.maybe(launchDarklySchema)
-  ),
+  // Optional in every mode. Production still requires this or `ofrep`; the plugin constructor enforces it,
+  // because dev mode may rely on `flag_overrides` with neither provider.
+  launch_darkly: schema.maybe(launchDarklySchema),
+  ofrep: schema.maybe(ofrepSchema),
   metadata_refresh_interval: schema.duration({ defaultValue: '1h' }),
 });
 
@@ -47,6 +51,11 @@ export const config: PluginConfigDescriptor<CloudExperimentsConfigType> = {
     launch_darkly: {
       client_id: true,
       client_log_level: true,
+    },
+    ofrep: {
+      base_url: true,
+      client_id: true,
+      poll_interval: true,
     },
     metadata_refresh_interval: true,
   },

@@ -9,7 +9,6 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -17,6 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Rule, ValueType, VariationValue } from '../../../../common';
 import { parseRulesJson, serializeRules } from './rules_model';
@@ -77,24 +77,25 @@ export const RulesJsonEditor = ({
       {!parsed.ok && (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
-            color="danger"
-            iconType="error"
             title={
               <FormattedMessage
                 id="xpack.featureFlagsManagement.ruleComposer.jsonInvalidTitle"
                 defaultMessage="This JSON is not applied"
               />
             }
-          >
-            <FormattedMessage
-              id="xpack.featureFlagsManagement.ruleComposer.jsonInvalidDescription"
-              defaultMessage="The structured rules stay as they were until this JSON is valid and you apply it. Switching back discards invalid JSON."
-            />
-            <EuiSpacer size="s" />
-            <pre>{parsed.error}</pre>
-          </EuiCallOut>
+            text={
+              <>
+                <FormattedMessage
+                  id="xpack.featureFlagsManagement.ruleComposer.jsonInvalidDescription"
+                  defaultMessage="The structured rules stay as they were until this JSON is valid and you apply it. Switching back discards invalid JSON."
+                />
+                <EuiSpacer size="s" />
+                <pre>{parsed.error}</pre>
+              </>
+            }
+          />
         </>
       )}
       {!readOnly && (
@@ -103,6 +104,8 @@ export const RulesJsonEditor = ({
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-ebt-action="confirm"
+                data-ebt-element="featureFlagsManagement"
                 data-test-subj="featureFlagsManagementRulesJsonEditorApplyJsonButton"
                 size="s"
                 fill

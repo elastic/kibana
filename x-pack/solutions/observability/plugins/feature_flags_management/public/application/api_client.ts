@@ -17,6 +17,7 @@ import {
   type Credential,
   type Environment,
   type Flag,
+  type FlagHistoryResponse,
   type ListAppsResponse,
   type ListCredentialsResponse,
   type ListEnvironmentsResponse,
@@ -162,6 +163,10 @@ export class FeatureFlagsApiClient {
 
   public deleteFlag(key: string, version?: string): Promise<void> {
     return this.remove(buildPath(API_PATHS.flag, { key }), version);
+  }
+
+  public getFlagHistory(key: string, page = 1, perPage = 20): Promise<FlagHistoryResponse> {
+    return this.get(buildPath(API_PATHS.flagHistory, { key }), { page, per_page: perPage });
   }
 
   public listObservedAttributes(query: {

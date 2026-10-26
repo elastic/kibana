@@ -10,9 +10,10 @@ import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { LaunchDarklyClientProvider } from '@openfeature/launchdarkly-client-provider';
 import { type LDLogLevel, basicLogger } from '@launchdarkly/js-client-sdk';
+import { LaunchDarklyClientProvider } from '@openfeature/launchdarkly-client-provider';
 import { initializeMetadata, MetadataService } from '../common/metadata_service';
+import { SeededOfrepWebProvider } from './seeded_ofrep_provider';
 
 interface CloudExperimentsPluginSetupDeps {
   cloud: CloudSetup;
@@ -25,6 +26,12 @@ interface CloudExperimentsPluginStartDeps {
 interface LaunchDarklyClientConfig {
   client_id: string;
   client_log_level: LDLogLevel;
+}
+
+interface OfrepClientConfig {
+  base_url: string;
+  client_id: string;
+  poll_interval?: string;
 }
 
 /**
@@ -41,6 +48,7 @@ export class CloudExperimentsPlugin
     this.logger = initializerContext.logger.get();
     const config = initializerContext.config.get<{
       launch_darkly?: LaunchDarklyClientConfig;
+      ofrep?: OfrepClientConfig;
       metadata_refresh_interval: string;
     }>();
 
@@ -49,12 +57,14 @@ export class CloudExperimentsPlugin
       this.logger.get('metadata')
     );
 
-    const ldConfig = config.launch_darkly;
-    if (!ldConfig?.client_id && !initializerContext.env.mode.dev) {
-      // If the plugin is enabled, and it's in prod mode, launch_darkly must exist
-      // (config-schema should enforce it, but just in case).
+    if (
+      !config.launch_darkly?.client_id &&
+      !config.ofrep?.client_id &&
+      !initializerContext.env.mode.dev
+    ) {
+      // Production needs a provider. Dev mode may use flag_overrides with neither.
       throw new Error(
-        'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
+        'xpack.cloud_integrations.experiments.launch_darkly or ofrep configuration should exist'
       );
     }
   }
@@ -74,9 +84,9 @@ export class CloudExperimentsPlugin
     });
 
     const initialFeatureFlags = core.featureFlags.getInitialFeatureFlags();
-    const launchDarklyOpenFeatureProvider = this.createOpenFeatureProvider(initialFeatureFlags);
-    if (launchDarklyOpenFeatureProvider) {
-      core.featureFlags.setProvider(launchDarklyOpenFeatureProvider);
+    const openFeatureProvider = this.createOpenFeatureProvider(initialFeatureFlags);
+    if (openFeatureProvider) {
+      core.featureFlags.setProvider(openFeatureProvider);
     }
   }
 
@@ -103,9 +113,33 @@ export class CloudExperimentsPlugin
    * @internal
    */
   private createOpenFeatureProvider(initialFeatureFlags: Record<string, unknown>) {
-    const { launch_darkly: ldConfig } = this.initializerContext.config.get<{
+    const { launch_darkly: ldConfig, ofrep } = this.initializerContext.config.get<{
       launch_darkly?: LaunchDarklyClientConfig;
+      ofrep?: OfrepClientConfig;
     }>();
+
+    if (ofrep?.base_url && ofrep.client_id) {
+      const pollInterval = duration(ofrep.poll_interval ?? '30s').asMilliseconds();
+      try {
+        return new SeededOfrepWebProvider({
+          initialFlags: initialFeatureFlags,
+          logger: this.logger,
+          ofrep: {
+            baseUrl: ofrep.base_url,
+            headers: [['Authorization', `Bearer ${ofrep.client_id}`]],
+            // Poll for changes rather than assuming the OFREP server advertises an event stream.
+            pollInterval: pollInterval > 0 ? pollInterval : 30_000,
+            // Attempt to use SSE for change detection, falling back to polling if not supported.
+            changeDetection: 'sse',
+            // This option blocks the OFREP provider until the remote fetch completes. The wrapper `SeededOfrepWebProvider` serves injected flags as `initialFlags` until the remote provider is ready.
+            cacheMode: 'network-first',
+          },
+        });
+      } catch (error) {
+        this.logger.error('Error initializing the OFREP client', error);
+        return;
+      }
+    }
 
     if (!ldConfig) return;
 

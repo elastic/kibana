@@ -144,7 +144,7 @@ export class IndexManager {
   public ensureReady(): Promise<void> {
     if (!this.ready) {
       this.ready = Promise.all(this.indices.map((index) => ensureIndex(this.esClient, index))).then(
-        () => undefined,
+        () => this.logger.info('Feature flags indices created'),
         (error) => {
           this.ready = undefined;
           this.logger.error(`Unable to create the feature flags indices: ${error.message}`);

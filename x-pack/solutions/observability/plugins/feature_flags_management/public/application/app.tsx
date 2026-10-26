@@ -8,13 +8,16 @@
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { Redirect, useHistory, useLocation } from 'react-router-dom';
-import { EuiCallOut, EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { AppsPage } from './apps/apps_page';
 import { EnvironmentsPage } from './environments/environments_page';
 import { FlagEditorPage } from './flags/flag_editor_page';
+import { FlagHistoryPage } from './flags/flag_history_page';
 import { FlagsPage } from './flags/flags_page';
+import { ObservedContextsPage } from './observed/observed_contexts_page';
 import { paths } from './paths';
 import { useAppServices } from './app_services';
 
@@ -49,6 +52,14 @@ export const FeatureFlagsApp = () => {
       onClick: () => history.push(paths.environments),
       'data-test-subj': 'featureFlagsEnvironmentsTab',
     },
+    {
+      label: i18n.translate('xpack.featureFlagsManagement.app.observedContextsTabLabel', {
+        defaultMessage: 'Observed contexts',
+      }),
+      isSelected: pathname.startsWith(paths.observedContexts),
+      onClick: () => history.push(paths.observedContexts),
+      'data-test-subj': 'featureFlagsObservedContextsTab',
+    },
   ];
 
   return (
@@ -75,27 +86,28 @@ export const FeatureFlagsApp = () => {
       />
       {!canSave && (
         <EuiPageTemplate.Section grow={false} paddingSize="l">
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
-            color="primary"
-            iconType="iInCircle"
             title={
               <FormattedMessage
                 id="xpack.featureFlagsManagement.app.readOnlyTitle"
                 defaultMessage="You have read-only access"
               />
             }
-          >
-            <FormattedMessage
-              id="xpack.featureFlagsManagement.app.readOnlyDescription"
-              defaultMessage="You can view flags, apps and environments. Saving changes requires the feature flags save privilege."
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.featureFlagsManagement.app.readOnlyDescription"
+                defaultMessage="You can view flags, apps and environments. Saving changes requires the feature flags save privilege."
+              />
+            }
+          />
         </EuiPageTemplate.Section>
       )}
       <Routes>
         <Route exact path={paths.flags} component={FlagsPage} />
+        <Route exact path="/flags/:flagKey/history" component={FlagHistoryPage} />
         <Route exact path="/flags/:flagKey" component={FlagEditorPage} />
+        <Route exact path={paths.observedContexts} component={ObservedContextsPage} />
         <Route exact path={paths.apps} component={AppsPage} />
         <Route exact path="/apps/:appKey" component={AppsPage} />
         <Route exact path={paths.environments} component={EnvironmentsPage} />

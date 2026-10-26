@@ -283,32 +283,48 @@ export class DefinitionsRepository {
     };
   }
 
-  /** Loads every document of a type (up to {@link FIND_ALL_LIMIT}) with `search_after`. */
+  /**
+   * Loads every document of a type (up to {@link FIND_ALL_LIMIT}) with `search_after`.
+   * `_shard_doc` is the tiebreaker: sorting on `_id` needs fielddata, which Elasticsearch
+   * disables by default (`indices.id_field_data.enabled`).
+   */
   public async findAll<T extends DefinitionType>(
     type: T,
     query?: QueryDslQueryContainer
   ): Promise<Array<StoredEntity<T>>> {
     await this.ensureReady();
+    const pit = await this.esClient.openPointInTime({
+      index: DEFINITIONS_INDEX,
+      keep_alive: '1m',
+    });
+    let pitId = pit.id;
     const items: Array<StoredEntity<T>> = [];
     let searchAfter: SearchHit['sort'];
-    while (items.length < FIND_ALL_LIMIT) {
-      const result = await this.esClient.search<DefinitionDocument<T>>({
-        index: DEFINITIONS_INDEX,
-        query: this.scopedQuery(type, query),
-        size: FIND_ALL_PAGE_SIZE,
-        sort: [{ [DEFAULT_SORT[type]]: 'asc' }, { _id: 'asc' }],
-        search_after: searchAfter,
-        seq_no_primary_term: true,
-        track_total_hits: false,
-      });
-      const { hits } = result.hits;
-      items.push(...hits.flatMap((hit) => this.hitToEntity(type, hit)));
-      if (hits.length < FIND_ALL_PAGE_SIZE) {
-        break;
+    try {
+      while (items.length < FIND_ALL_LIMIT) {
+        const result = await this.esClient.search<DefinitionDocument<T>>({
+          pit: { id: pitId, keep_alive: '1m' },
+          query: this.scopedQuery(type, query),
+          size: FIND_ALL_PAGE_SIZE,
+          sort: [{ [DEFAULT_SORT[type]]: 'asc' }, '_shard_doc'],
+          search_after: searchAfter,
+          seq_no_primary_term: true,
+          track_total_hits: false,
+        });
+        if (result.pit_id) {
+          pitId = result.pit_id;
+        }
+        const { hits } = result.hits;
+        items.push(...hits.flatMap((hit) => this.hitToEntity(type, hit)));
+        if (hits.length < FIND_ALL_PAGE_SIZE) {
+          break;
+        }
+        searchAfter = hits[hits.length - 1].sort;
       }
-      searchAfter = hits[hits.length - 1].sort;
+      return items;
+    } finally {
+      await this.esClient.closePointInTime({ id: pitId }).catch(() => undefined);
     }
-    return items;
   }
 
   public async count(type: DefinitionType, query?: QueryDslQueryContainer): Promise<number> {

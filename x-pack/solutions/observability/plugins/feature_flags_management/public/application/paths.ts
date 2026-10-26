@@ -12,7 +12,9 @@ export const paths = {
   flags: '/flags',
   createFlag: `/flags/${CREATE_FLAG_ID}`,
   flag: (key: string) => `/flags/${encodeURIComponent(key)}`,
+  flagHistory: (key: string) => `/flags/${encodeURIComponent(key)}/history`,
   apps: '/apps',
   app: (key: string) => `/apps/${encodeURIComponent(key)}`,
   environments: '/environments',
+  observedContexts: '/observed_contexts',
 };

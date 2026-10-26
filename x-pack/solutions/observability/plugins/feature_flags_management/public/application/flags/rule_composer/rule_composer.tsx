@@ -191,6 +191,8 @@ export const RuleComposer = ({
                         <EuiFlexItem grow={false}>
                           <EuiToolTip content={moveUpLabel} disableScreenReaderOutput>
                             <EuiButtonIcon
+                              data-ebt-action="moveRule"
+                              data-ebt-element="featureFlagsManagement"
                               data-test-subj="featureFlagsManagementRuleComposerButton"
                               iconType="chevronSingleUp"
                               display="empty"
@@ -203,6 +205,8 @@ export const RuleComposer = ({
                         <EuiFlexItem grow={false}>
                           <EuiToolTip content={moveDownLabel} disableScreenReaderOutput>
                             <EuiButtonIcon
+                              data-ebt-action="moveRule"
+                              data-ebt-element="featureFlagsManagement"
                               data-test-subj="featureFlagsManagementRuleComposerButton"
                               iconType="chevronSingleDown"
                               display="empty"
@@ -215,6 +219,8 @@ export const RuleComposer = ({
                         <EuiFlexItem grow={false}>
                           <EuiToolTip content={deleteLabel} disableScreenReaderOutput>
                             <EuiButtonIcon
+                              data-ebt-action="removeRule"
+                              data-ebt-element="featureFlagsManagement"
                               data-test-subj="featureFlagsManagementRuleComposerButton"
                               iconType="trash"
                               color="danger"
@@ -285,6 +291,8 @@ export const RuleComposer = ({
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
+                    data-ebt-action="addRule"
+                    data-ebt-element="featureFlagsManagement"
                     data-test-subj="featureFlagsManagementRuleComposerAddMatchRuleButton"
                     size="s"
                     iconType="plus"
@@ -299,6 +307,8 @@ export const RuleComposer = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
+                    data-ebt-action="addRule"
+                    data-ebt-element="featureFlagsManagement"
                     data-test-subj="featureFlagsManagementRuleComposerAddPercentageRuleButton"
                     size="s"
                     iconType="plus"

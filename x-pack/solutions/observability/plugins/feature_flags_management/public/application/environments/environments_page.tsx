@@ -130,6 +130,8 @@ export const EnvironmentsPage = () => {
         {canSave && (
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-ebt-action="createEnvironment"
+              data-ebt-element="featureFlagsManagement"
               data-test-subj="featureFlagsManagementEnvironmentsPageCreateEnvironmentButton"
               fill
               iconType="plus"

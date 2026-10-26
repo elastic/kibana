@@ -10,7 +10,6 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCheckbox,
   EuiCode,
   EuiCopy,
@@ -29,6 +28,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Credential } from '../../../common';
 import { ApiErrorCallout } from '../api_error_callout';
@@ -145,6 +145,8 @@ export const CredentialsPanel = ({ appKey, appName }: { appKey: string; appName:
               <EuiCopy textToCopy={row.credential.client_id}>
                 {(copy) => (
                   <EuiButtonEmpty
+                    data-ebt-action="copyClientId"
+                    data-ebt-element="featureFlagsManagement"
                     data-test-subj="featureFlagsManagementColumnsButton"
                     size="xs"
                     iconType="copy"
@@ -190,6 +192,8 @@ export const CredentialsPanel = ({ appKey, appName }: { appKey: string; appName:
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      data-ebt-action="rotateCredential"
+                      data-ebt-element="featureFlagsManagement"
                       data-test-subj="featureFlagsManagementColumnsRotateButton"
                       size="s"
                       onClick={() => {
@@ -206,6 +210,8 @@ export const CredentialsPanel = ({ appKey, appName }: { appKey: string; appName:
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      data-ebt-action="deleteFlag"
+                      data-ebt-element="featureFlagsManagement"
                       data-test-subj="featureFlagsManagementColumnsRevokeButton"
                       size="s"
                       color="danger"
@@ -223,6 +229,8 @@ export const CredentialsPanel = ({ appKey, appName }: { appKey: string; appName:
                 </EuiFlexGroup>
               ) : (
                 <EuiButton
+                  data-ebt-action="rotateCredential"
+                  data-ebt-element="featureFlagsManagement"
                   data-test-subj="featureFlagsManagementColumnsCreateKeyButton"
                   size="s"
                   onClick={() => {
@@ -353,12 +361,16 @@ export const CredentialsPanel = ({ appKey, appName }: { appKey: string; appName:
           </EuiModalBody>
           <EuiModalFooter>
             <EuiButtonEmpty
+              data-ebt-action="cancel"
+              data-ebt-element="featureFlagsManagement"
               data-test-subj="featureFlagsManagementCredentialsPanelButton"
               onClick={() => setRotateEnvironment(undefined)}
             >
               {cancelButtonLabel()}
             </EuiButtonEmpty>
             <EuiButton
+              data-ebt-action="rotateCredential"
+              data-ebt-element="featureFlagsManagement"
               data-test-subj="featureFlagsManagementCredentialsPanelButton"
               fill
               isLoading={rotating}
@@ -393,22 +405,21 @@ export const CredentialsPanel = ({ appKey, appName }: { appKey: string; appName:
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
-              color="warning"
-              iconType="warning"
               title={
                 <FormattedMessage
                   id="xpack.featureFlagsManagement.apps.credentials.sdkKeyWarningTitle"
                   defaultMessage="Copy this key now"
                 />
               }
-            >
-              <FormattedMessage
-                id="xpack.featureFlagsManagement.apps.credentials.sdkKeyWarningDescription"
-                defaultMessage="This SDK key is shown only once. Kibana stores only a hash of it, so it cannot be displayed again."
-              />
-            </EuiCallOut>
+              text={
+                <FormattedMessage
+                  id="xpack.featureFlagsManagement.apps.credentials.sdkKeyWarningDescription"
+                  defaultMessage="This SDK key is shown only once. Kibana stores only a hash of it, so it cannot be displayed again."
+                />
+              }
+            />
             <EuiSpacer size="m" />
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem>
@@ -427,6 +438,8 @@ export const CredentialsPanel = ({ appKey, appName }: { appKey: string; appName:
                 <EuiCopy textToCopy={revealedKey}>
                   {(copy) => (
                     <EuiButton
+                      data-ebt-action="copyClientId"
+                      data-ebt-element="featureFlagsManagement"
                       data-test-subj="featureFlagsManagementCredentialsPanelButton"
                       iconType="copy"
                       onClick={copy}
@@ -440,6 +453,8 @@ export const CredentialsPanel = ({ appKey, appName }: { appKey: string; appName:
           </EuiModalBody>
           <EuiModalFooter>
             <EuiButton
+              data-ebt-action="deleteFlag"
+              data-ebt-element="featureFlagsManagement"
               data-test-subj="featureFlagsManagementCredentialsPanelButton"
               fill
               onClick={() => setRevealedKey(undefined)}
