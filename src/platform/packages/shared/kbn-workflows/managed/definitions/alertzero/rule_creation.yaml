@@ -74,6 +74,11 @@ outputs:
     type: string
   - name: skip_reason
     type: string
+consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Rule Coverage worker"
+
 steps:
   - name: draft_creation
     type: ai.agent
@@ -86,6 +91,7 @@ steps:
     timeout: "10m"
     create-conversation: true
     with:
+      author_name: "{{ consts.author_name }}"
       # The thin agent has no skills or tools of its own. List every skill the
       # step needs, including the skills those skills load.
       configuration_overrides:

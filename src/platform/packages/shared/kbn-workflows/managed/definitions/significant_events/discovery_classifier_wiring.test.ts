@@ -56,14 +56,28 @@ const evaluate = (expression: unknown, context: Record<string, unknown>): unknow
   return createWorkflowLiquidEngine().evalValueSync(expression.slice(3, -2).trim(), context);
 };
 
-const rawRows = [
-  ['rule-A', { detection_id: 'detection-A' }],
-  ['rule-B', { detection_id: 'detection-B' }],
+const COLUMNS = [
+  'rule_uuid',
+  '_source',
+  'score',
+  'recent_detection_count',
+  'flaky_probe',
+  'held_back',
 ];
+// The rows the flaky-rule gate did not hold back: the ones the agent may read.
+const openRows = [
+  ['rule-A', { detection_id: 'detection-A' }, 70, 1, false, false],
+  ['rule-B', { detection_id: 'detection-B' }, 70, 1, false, false],
+];
+const heldRows = [['rule-Z', { detection_id: 'detection-Z' }, 70, 12, false, true]];
 const baseContext = {
   steps: {
-    get_detections: { output: { columns: [{ name: 'rule_uuid' }], values: rawRows } },
-    count_detections: { output: { detectionCount: rawRows.length } },
+    get_detections: {
+      output: {
+        columns: COLUMNS.map((name) => ({ name })),
+        values: [...openRows, ...heldRows],
+      },
+    },
   },
 };
 const withClassify = (classify: unknown) => ({
@@ -75,7 +89,6 @@ describe('discovery workflow detection classifier wiring', () => {
     it('classifies after fetching detections and before the batch is sized and gated', () => {
       const order = [
         'get_detections',
-        'count_detections',
         'classify_detections',
         'compute_batch_size',
         'compute_has_work',
@@ -87,11 +100,11 @@ describe('discovery workflow detection classifier wiring', () => {
       expect([...order].sort((a, b) => a - b)).toEqual(order);
     });
 
-    it('uses the registered step type and never lets a classifier failure fail the run', () => {
+    it('uses the registered step type and lets a classifier failure fail the run', () => {
       const step = requireStep('classify_detections');
 
       expect(step.type).toBe('significantEvents.classifyDetections');
-      expect(step['on-failure']).toEqual({ continue: true });
+      expect(step['on-failure']).toBeUndefined();
     });
 
     it('passes the detection rows, the space and every classifier input to the step', () => {
@@ -106,6 +119,9 @@ describe('discovery workflow detection classifier wiring', () => {
         probe_concurrency: '${{ inputs.classifierProbeConcurrency }}',
         budget_ms: '${{ inputs.classifierBudgetMs }}',
         max_skip_age_hours: '${{ inputs.classifierMaxSkipAgeHours }}',
+        review_fresh_minutes: '${{ inputs.classifierReviewFreshMinutes }}',
+        baseline_bucket_minutes: '${{ inputs.classifierBaselineBucketMinutes }}',
+        baseline_window_minutes: '${{ inputs.classifierBaselineWindowMinutes }}',
       });
     });
   });
@@ -129,14 +145,15 @@ describe('discovery workflow detection classifier wiring', () => {
       }
     );
 
-    it('counts zero raw detections, so the run ends as having no work', () => {
+    it('hands the classifier no columns either, so it reads an empty batch and the run has no work', () => {
       const failed = { steps: { get_detections: { error: { message: 'boom' } } } };
 
-      expect(evaluate(requireStep('count_detections').with?.detectionCount, failed)).toBe(0);
+      expect(evaluate(requireStep('classify_detections').with?.columns, failed)).toEqual([]);
       expect(
-        evaluate(requireStep('compute_batch_size').with?.processedCount, {
-          steps: { count_detections: { output: { detectionCount: 0 } } },
-        })
+        evaluate(
+          requireStep('compute_batch_size').with?.processedCount,
+          withClassify({ output: { row_count: 0 } })
+        )
       ).toBe(0);
     });
   });
@@ -145,16 +162,53 @@ describe('discovery workflow detection classifier wiring', () => {
     const inputs = discovery.triggers[0].inputs;
 
     it.each([
+      // At most the rows the classifier step accepts, so a batch never fails its input schema.
+      ['detectionBatchMax', 'number', 10, 1, 1000],
       ['classifierProbeWindowMinutes', 'number', 20, 15, 360],
       ['classifierProbeTimeoutMs', 'number', 8000, 1000, 30000],
       ['classifierProbeConcurrency', 'number', 5, 1, 10],
       ['classifierBudgetMs', 'number', 20000, 2000, 60000],
+      ['classifierReviewFreshMinutes', 'number', 240, 15, 1440],
+      ['classifierBaselineBucketMinutes', 'number', 5, 1, 60],
+      ['classifierBaselineWindowMinutes', 'number', 300, 60, 1440],
     ])('declares %s with its default and bounds', (name, type, def, minimum, maximum) => {
       const property = inputs?.properties?.[name];
 
       expect(property).toMatchObject({ type, default: def });
       expect(property?.minimum).toBe(minimum);
       expect(property?.maximum).toBe(maximum);
+    });
+  });
+
+  describe('the detections the flaky-rule gate holds back', () => {
+    it('are handed to the classifier with the others, so it can judge them', () => {
+      const rows = requireStep('classify_detections').with?.rows;
+
+      expect(evaluate(rows, baseContext)).toEqual([...openRows, ...heldRows]);
+    });
+
+    it('are told apart by a column name the classifier reads, never by its position', () => {
+      const columns = evaluate(requireStep('classify_detections').with?.columns, baseContext);
+
+      expect(columns).toEqual(COLUMNS);
+      expect(JSON.stringify(discovery.steps)).not.toMatch(/where: '\d+'/);
+    });
+
+    describe('the heldBackCount output', () => {
+      it.each(['output_no_detections', 'output_result'])(
+        '%s reports what the classifier held back, and zero without a classifier',
+        (name) => {
+          const { heldBackCount } = requireStep(name).with ?? {};
+
+          expect(evaluate(heldBackCount, withClassify({ output: { held_back_count: 3 } }))).toBe(3);
+          expect(evaluate(heldBackCount, withClassify({ output: { held_back_count: 0 } }))).toBe(0);
+          expect(evaluate(heldBackCount, withClassify({ error: { message: 'boom' } }))).toBe(0);
+        }
+      );
+
+      it('is zero when the budget is denied', () => {
+        expect(requireStep('output_budget_denied').with?.heldBackCount).toBe(0);
+      });
     });
   });
 
@@ -165,11 +219,10 @@ describe('discovery workflow detection classifier wiring', () => {
       expect(evaluate(expression(), withClassify({ output: { row_count: 0 } }))).toBe(0);
     });
 
-    it.each([
-      ['has failed', { error: { message: 'boom' } }],
-      ['produced no output', undefined],
-    ])('falls back to the raw detection count when the classifier %s', (_name, classify) => {
-      expect(evaluate(expression(), withClassify(classify))).toBe(rawRows.length);
+    it('counts what a classifier that failed open handed on', () => {
+      expect(evaluate(expression(), withClassify({ output: { row_count: 2, failed: true } }))).toBe(
+        2
+      );
     });
   });
 
@@ -196,18 +249,39 @@ describe('discovery workflow detection classifier wiring', () => {
       expect(rendered).not.toContain('detection-A');
     });
 
-    it.each([
-      ['has failed', { error: { message: 'boom' } }],
-      ['produced no output', undefined],
-    ])(
-      'falls back to the raw rows, with their columns, when the classifier %s',
-      (_name, classify) => {
-        const rendered = renderMessage(classify);
+    it('lists what a classifier that failed open handed on, never the raw rows', () => {
+      const rendered = renderMessage({ output: { batch, failed: true } });
 
-        expect(rendered).toContain(`Rows: ${JSON.stringify(rawRows)}`);
-        expect(rendered).toContain('Columns: ["rule_uuid"]');
-      }
-    );
+      expect(rendered).toContain(JSON.stringify(batch));
+      expect(rendered).not.toContain('rule-Z');
+    });
+  });
+
+  describe('stamping the rules the agent wrote', () => {
+    const backlog = () => requireStep('get_written_rules_backlog').with ?? {};
+
+    it('stamps each rule only up to the detection the agent was given, so a later one stays pending', () => {
+      const query = String(backlog().query);
+
+      expect(query).toContain('| EVAL given = LOCATE(?1, CONCAT(",", detection_id, ",")) > 0');
+      expect(query).toContain('| INLINE STATS given_at = MAX(@timestamp) WHERE given BY rule_uuid');
+      expect(query).toContain('| WHERE given_at IS NOT NULL AND @timestamp <= given_at');
+    });
+
+    it('passes the ids of the detections the agent was given, comma-delimited', () => {
+      const [ids] = backlog().params as string[];
+      const context = {
+        steps: {
+          classify_detections: {
+            output: { batch: [{ detection_id: 'detection-A' }, { detection_id: 'detection-B' }] },
+          },
+        },
+      };
+
+      expect(createWorkflowLiquidEngine().parseAndRenderSync(ids, context)).toBe(
+        ',detection-A,detection-B,'
+      );
+    });
   });
 
   describe('stamping skipped detections', () => {
@@ -355,6 +429,12 @@ describe('discovery workflow detection classifier wiring', () => {
         const { classifierFailed } = requireStep(stepName).with ?? {};
 
         expect(evaluate(classifierFailed, withClassify({ error: { message: 'boom' } }))).toBe(true);
+        expect(
+          evaluate(classifierFailed, withClassify({ output: { row_count: 2, failed: true } }))
+        ).toBe(true);
+        expect(
+          evaluate(classifierFailed, withClassify({ output: { row_count: 0, failed: false } }))
+        ).toBe(false);
         expect(evaluate(classifierFailed, withClassify({ output: { row_count: 0 } }))).toBe(false);
       }
     );

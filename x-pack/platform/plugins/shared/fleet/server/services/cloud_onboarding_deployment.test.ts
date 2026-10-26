@@ -248,6 +248,49 @@ describe('cloudOnboardingDeploymentService', () => {
     });
   });
 
+  describe('update — integration name and description', () => {
+    const writtenAttributes = () => soClient.create.mock.calls[0][1] as Record<string, unknown>;
+
+    it('stores a new name and description', async () => {
+      const existing = makeAttributes({});
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        integrationName: 'my-aws',
+        description: 'Production AWS',
+      });
+
+      expect(writtenAttributes()).toEqual(
+        expect.objectContaining({ integrationName: 'my-aws', description: 'Production AWS' })
+      );
+    });
+
+    it('keeps the stored description when an update does not mention it', async () => {
+      const existing = makeAttributes({ description: 'Production AWS' });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(writtenAttributes()).toEqual(
+        expect.objectContaining({ description: 'Production AWS' })
+      );
+    });
+
+    it('removes the description when the update clears it with null', async () => {
+      const existing = makeAttributes({ description: 'Production AWS', integrationName: 'my-aws' });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { description: null });
+
+      // Not stored as null: the saved object schema has no null for it.
+      expect(writtenAttributes()).not.toHaveProperty('description');
+      expect(writtenAttributes()).toEqual(expect.objectContaining({ integrationName: 'my-aws' }));
+    });
+  });
+
   describe('update — full-replace semantics', () => {
     it('removed serviceVars and policyIdsByInstance keys are absent from the written SO', async () => {
       // Initial record has stale keys that the update intentionally omits.

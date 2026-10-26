@@ -47,7 +47,7 @@ export const GoogleDocsConnector: ConnectorSpec = {
   metadata: {
     id: '.google_docs',
     displayName: 'Google Docs',
-    description: i18n.translate('core.kibanaConnectorSpecs.googleDocs.metadata.description', {
+    description: i18n.translate('connectorSpecs.googleDocs.metadata.description', {
       defaultMessage: 'Read and update documents in Google Docs',
     }),
     minimumLicense: 'enterprise',
@@ -206,7 +206,7 @@ export const GoogleDocsConnector: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.googleDocs.test.description', {
+    description: i18n.translate('connectorSpecs.googleDocs.test.description', {
       defaultMessage: 'Verifies connection to the Google Docs API',
     }),
     handler: async (ctx) => {
