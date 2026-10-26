@@ -6,7 +6,7 @@
  */
 
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { is, kqlCustomIndicatorSchemaZod } from '@kbn/slo-schema';
 import { TransformGenerator, getElasticsearchQueryOrThrow, parseIndex } from '.';
 import {
   SLI_DESTINATION_INDEX_NAME,
@@ -20,7 +20,7 @@ import { getFilterRange, getTimesliceTargetComparator } from './common';
 
 export class KQLCustomTransformGenerator extends TransformGenerator {
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
-    if (!kqlCustomIndicatorSchema.is(slo.indicator)) {
+    if (!is(kqlCustomIndicatorSchemaZod, slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
@@ -75,7 +75,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
       'slo.denominator': {
         filter: denominator,
       },
-      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+      ...(slo.budgetingMethod === 'timeslices' && {
         'slo.isGoodSlice': {
           bucket_script: {
             buckets_path: {

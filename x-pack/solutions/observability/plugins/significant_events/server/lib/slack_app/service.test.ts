@@ -1402,14 +1402,21 @@ describe('SlackAppService', () => {
         bindings: [
           { scope_type: 'SUB', scope_id: 'C123', display_name: 'general', visibility: 'public' },
           { scope_type: 'SUB', scope_id: 'C456' }, // no persisted display snapshot
+          { scope_type: 'SUB', scope_id: 'G789', visibility: 'private' },
         ],
         nextCursor: 'cursor-2',
       });
 
       await expect(new SlackAppService(server).listBindings(request)).resolves.toEqual({
         bindings: [
-          { channel: 'C123', displayName: 'general', status: 'bound_to_self' },
+          {
+            channel: 'C123',
+            displayName: 'general',
+            visibility: 'public',
+            status: 'bound_to_self',
+          },
           { channel: 'C456', status: 'bound_to_self' },
+          { channel: 'G789', visibility: 'private', status: 'bound_to_self' },
         ],
         nextCursor: 'cursor-2',
       });
