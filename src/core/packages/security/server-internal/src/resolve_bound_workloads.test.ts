@@ -34,6 +34,7 @@ const binding = (
 
 const byId: ServiceAccountWorkloadResolver = async (workloads) =>
   workloads.map(({ workloadId }) => ({
+    status: 'present',
     title: `Workflow ${workloadId}`,
     path: `/app/workflows/${workloadId}`,
   }));
@@ -117,19 +118,32 @@ describe('buildWorkloadHref', () => {
 
 const DURATION = 'kibana.security.service_accounts.workload_resolution.duration';
 const BATCH_SIZE = 'kibana.security.service_accounts.workload_resolution.batch.size';
+const UNKNOWN = 'kibana.security.service_accounts.workload_resolution.unknown';
 
-/** A meter whose histograms record into jest mocks, keyed by metric name. */
+/** A meter whose histograms and counters record into jest mocks, keyed by metric name. */
 const createMeterMock = () => {
   const histograms = new Map<string, { record: jest.Mock }>();
+  const counters = new Map<string, { add: jest.Mock }>();
   const meter = {
     createHistogram: jest.fn((name: string) => {
       const histogram = { record: jest.fn() };
       histograms.set(name, histogram);
       return histogram;
     }),
+    createCounter: jest.fn((name: string) => {
+      const counter = { add: jest.fn() };
+      counters.set(name, counter);
+      return counter;
+    }),
   };
-  const recorded = (name: string) => histograms.get(name)?.record.mock.calls ?? [];
-  return { meter: meter as unknown as Meter, createHistogram: meter.createHistogram, recorded };
+  const recorded = (name: string) =>
+    histograms.get(name)?.record.mock.calls ?? counters.get(name)?.add.mock.calls ?? [];
+  return {
+    meter: meter as unknown as Meter,
+    createHistogram: meter.createHistogram,
+    createCounter: meter.createCounter,
+    recorded,
+  };
 };
 
 describe('createBoundWorkloadResolver', () => {
@@ -156,9 +170,10 @@ describe('createBoundWorkloadResolver', () => {
     const workflowAttributes = {
       'kibana.plugin.id': 'workflows',
       'kibana.service_account.workload.type': 'workflow',
+      'kibana.service_account.workload_resolution.purpose': 'display',
     };
 
-    it('creates its histograms once, not on every call', async () => {
+    it('creates its instruments once, not on every call', async () => {
       registry.register('workflows', {
         type: 'workflow',
         name: 'Workflow',
@@ -174,6 +189,44 @@ describe('createBoundWorkloadResolver', () => {
         DURATION,
         BATCH_SIZE,
       ]);
+      expect(meterMock.createCounter.mock.calls.map(([name]) => name)).toEqual([UNKNOWN]);
+    });
+
+    it('records the purpose the caller gave', async () => {
+      registry.register('workflows', {
+        type: 'workflow',
+        name: 'Workflow',
+        resolveWorkloads: byId,
+      });
+
+      await createResolver()([binding('w-1')], { purpose: 'cleanup' });
+
+      expect(meterMock.recorded(BATCH_SIZE)).toEqual([
+        [
+          1,
+          {
+            ...workflowAttributes,
+            'kibana.service_account.workload_resolution.purpose': 'cleanup',
+          },
+        ],
+      ]);
+    });
+
+    it('counts the workloads a resolver answered unknown', async () => {
+      registry.register('workflows', {
+        type: 'workflow',
+        name: 'Workflow',
+        resolveWorkloads: async () => [
+          { status: 'unknown' },
+          { status: 'missing' },
+          { status: 'unknown' },
+        ],
+      });
+
+      await createResolver()([binding('w-1'), binding('w-2'), binding('w-3')]);
+
+      expect(meterMock.recorded(UNKNOWN)).toEqual([[2, workflowAttributes]]);
+      expect(meterMock.recorded(DURATION)).toEqual([[expect.any(Number), workflowAttributes]]);
     });
 
     it('records the batch size and duration of each resolver call by plugin and type', async () => {
@@ -193,6 +246,7 @@ describe('createBoundWorkloadResolver', () => {
       const ruleAttributes = {
         'kibana.plugin.id': 'alerting',
         'kibana.service_account.workload.type': 'rule',
+        'kibana.service_account.workload_resolution.purpose': 'display',
       };
       expect(meterMock.recorded(BATCH_SIZE)).toEqual([
         [2, workflowAttributes],
@@ -217,6 +271,7 @@ describe('createBoundWorkloadResolver', () => {
         '_OTHER',
       ],
       ['an unexpected result', async () => [], 'invalid_result'],
+      ['an invalid status', async () => [{ status: 'gone' }], 'invalid_result'],
     ])('records the error type when a resolver returns %s', async (_, resolveWorkloads, type) => {
       registry.register('workflows', {
         type: 'workflow',
@@ -228,6 +283,9 @@ describe('createBoundWorkloadResolver', () => {
 
       expect(meterMock.recorded(DURATION)).toEqual([
         [expect.any(Number), { ...workflowAttributes, 'error.type': type }],
+      ]);
+      expect(meterMock.recorded(UNKNOWN)).toEqual([
+        [1, { ...workflowAttributes, 'error.type': type }],
       ]);
     });
 
@@ -249,7 +307,7 @@ describe('createBoundWorkloadResolver', () => {
     expect(resolveWorkloads).not.toHaveBeenCalled();
   });
 
-  it('returns empty entries for types that are not registered or have no resolver', async () => {
+  it('answers unknown for types that are not registered or have no resolver', async () => {
     registry.register('alerting', { type: 'rule', name: 'Rule' });
 
     await expect(
@@ -257,7 +315,48 @@ describe('createBoundWorkloadResolver', () => {
         binding('r-1', { pluginId: 'alerting', workloadType: 'rule' }),
         binding('x-1', { pluginId: 'unknown', workloadType: 'job' }),
       ])
-    ).resolves.toEqual([{}, {}]);
+    ).resolves.toEqual([{ status: 'unknown' }, { status: 'unknown' }]);
+  });
+
+  it('passes missing and unknown through for each workload', async () => {
+    registry.register('workflows', {
+      type: 'workflow',
+      name: 'Workflow',
+      resolveWorkloads: async () => [
+        { status: 'missing' },
+        { status: 'present', title: 'Kept' },
+        { status: 'unknown' },
+      ],
+    });
+
+    await expect(
+      createResolver()([binding('w-1'), binding('w-2'), binding('w-3')])
+    ).resolves.toEqual([
+      { status: 'missing' },
+      { status: 'present', title: 'Kept' },
+      { status: 'unknown' },
+    ]);
+  });
+
+  it.each([
+    ['an entry without a status', [{ status: 'present' }, { title: 'No status' }]],
+    ['an entry with an invalid status', [{ status: 'present' }, { status: 'deleted' }]],
+    ['an undefined entry', [{ status: 'present' }, undefined]],
+    ['a null entry', [{ status: 'present' }, null]],
+  ])('answers unknown for the whole batch when a resolver returns %s', async (_, details) => {
+    registry.register('workflows', {
+      type: 'workflow',
+      name: 'Workflow',
+      resolveWorkloads: async () => details as never,
+    });
+
+    await expect(createResolver()([binding('w-1'), binding('w-2')])).resolves.toEqual([
+      { status: 'unknown' },
+      { status: 'unknown' },
+    ]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Workload type [workflow] registered by plugin [workflows] returned an unexpected result for 2 workload(s), ignoring it.'
+    );
   });
 
   it('calls each resolver once per plugin and type, and keeps the order of the bindings', async () => {
@@ -267,11 +366,12 @@ describe('createBoundWorkloadResolver', () => {
       Parameters<ServiceAccountWorkloadResolver>
     >(async (workloads) =>
       workloads.map(({ workloadId }) => ({
+        status: 'present',
         title: `Rule ${workloadId}`,
         path: `/app/rules/${workloadId}`,
       }))
     );
-    const otherRules = jest.fn(async () => [{ title: 'Other rule' }]);
+    const otherRules = jest.fn(async () => [{ status: 'present' as const, title: 'Other rule' }]);
     registry.register('workflows', {
       type: 'workflow',
       name: 'Workflow',
@@ -289,11 +389,11 @@ describe('createBoundWorkloadResolver', () => {
     ]);
 
     expect(result).toEqual([
-      { title: 'Workflow w-1', href: '/app/workflows/w-1' },
-      { title: 'Rule r-1', href: '/s/marketing/app/rules/r-1' },
-      { title: 'Workflow w-2', href: '/s/marketing/app/workflows/w-2' },
-      { title: 'Other rule' },
-      { title: 'Rule r-2', href: '/app/rules/r-2' },
+      { status: 'present', title: 'Workflow w-1', href: '/app/workflows/w-1' },
+      { status: 'present', title: 'Rule r-1', href: '/s/marketing/app/rules/r-1' },
+      { status: 'present', title: 'Workflow w-2', href: '/s/marketing/app/workflows/w-2' },
+      { status: 'present', title: 'Other rule' },
+      { status: 'present', title: 'Rule r-2', href: '/app/rules/r-2' },
     ]);
     expect(workflows).toHaveBeenCalledTimes(1);
     expect(workflows).toHaveBeenCalledWith(
@@ -318,8 +418,8 @@ describe('createBoundWorkloadResolver', () => {
     await expect(
       resolve([binding('w-1'), binding('w-2', { spaceId: 'marketing' })])
     ).resolves.toEqual([
-      { title: 'Workflow w-1', href: '/kbn/app/workflows/w-1' },
-      { title: 'Workflow w-2', href: '/kbn/s/marketing/app/workflows/w-2' },
+      { status: 'present', title: 'Workflow w-1', href: '/kbn/app/workflows/w-1' },
+      { status: 'present', title: 'Workflow w-2', href: '/kbn/s/marketing/app/workflows/w-2' },
     ]);
   });
 
@@ -327,11 +427,11 @@ describe('createBoundWorkloadResolver', () => {
     registry.register('workflows', {
       type: 'workflow',
       name: 'Workflow',
-      resolveWorkloads: async () => [{ title: 'Nightly report' }],
+      resolveWorkloads: async () => [{ status: 'present', title: 'Nightly report' }],
     });
 
     await expect(createResolver()([binding('w-1')])).resolves.toEqual([
-      { title: 'Nightly report' },
+      { status: 'present', title: 'Nightly report' },
     ]);
   });
 
@@ -340,48 +440,110 @@ describe('createBoundWorkloadResolver', () => {
       type: 'workflow',
       name: 'Workflow',
       resolveWorkloads: async () =>
-        [{ title: '  ', path: '/app/workflows/w-1' }, { title: 42 }, undefined] as never,
+        [
+          { status: 'present', title: '  ', path: '/app/workflows/w-1' },
+          { status: 'present', title: 42 },
+        ] as never,
     });
 
-    await expect(
-      createResolver()([binding('w-1'), binding('w-2'), binding('w-3')])
-    ).resolves.toEqual([{ href: '/app/workflows/w-1' }, {}, {}]);
+    await expect(createResolver()([binding('w-1'), binding('w-2')])).resolves.toEqual([
+      { status: 'present', href: '/app/workflows/w-1' },
+      { status: 'present' },
+    ]);
   });
 
-  it('discards the whole entry, title included, when the path cannot be linked to', async () => {
+  it('drops the title and the link, but keeps the status, when the path cannot be linked to', async () => {
     registry.register('workflows', {
       type: 'workflow',
       name: 'Workflow',
       resolveWorkloads: async () => [
-        { title: 'Escapes the app', path: '/app/../api/status' },
-        { title: 'Encoded escape', path: '/app/%2e%2e/api/status' },
-        { title: 'Fine', path: '/app/workflows/w-3' },
-        { title: 'Absolute', path: 'https://evil.example/' },
+        { status: 'present', title: 'Escapes the app', path: '/app/../api/status' },
+        { status: 'present', title: 'Encoded escape', path: '/app/%2e%2e/api/status' },
+        { status: 'present', title: 'Fine', path: '/app/workflows/w-3' },
+        { status: 'present', title: 'Absolute', path: 'https://evil.example/' },
       ],
     });
 
     await expect(
       createResolver()([binding('w-1'), binding('w-2'), binding('w-3'), binding('w-4')])
-    ).resolves.toEqual([{}, {}, { title: 'Fine', href: '/app/workflows/w-3' }, {}]);
+    ).resolves.toEqual([
+      { status: 'present' },
+      { status: 'present' },
+      { status: 'present', title: 'Fine', href: '/app/workflows/w-3' },
+      { status: 'present' },
+    ]);
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(
-      `"Workload type [workflow] registered by plugin [workflows] returned 3 path(s) that Core cannot link to, ignoring those workloads."`
+      `"Workload type [workflow] registered by plugin [workflows] returned 3 path(s) that Core cannot link to, showing those workloads without a title or a link."`
     );
   });
 
-  it('discards an entry whose binding has an invalid space', async () => {
+  it('keeps only the status of an entry whose binding has an invalid space', async () => {
     registry.register('workflows', { type: 'workflow', name: 'Workflow', resolveWorkloads: byId });
 
     await expect(createResolver()([binding('w-1', { spaceId: 'Not A Space' })])).resolves.toEqual([
-      {},
+      { status: 'present' },
     ]);
+  });
+
+  describe('when the caller aborts', () => {
+    it('calls no resolver when the signal is already aborted', async () => {
+      const resolveWorkloads = jest.fn(byId);
+      registry.register('workflows', { type: 'workflow', name: 'Workflow', resolveWorkloads });
+      const controller = new AbortController();
+      controller.abort();
+
+      await expect(
+        createResolver()([binding('w-1')], { signal: controller.signal })
+      ).resolves.toEqual([{ status: 'unknown' }]);
+      expect(resolveWorkloads).not.toHaveBeenCalled();
+    });
+
+    it('aborts the resolver signal, answers unknown and ignores a late answer', async () => {
+      let resolverSignal: AbortSignal | undefined;
+      let answer: (details: Array<{ status: 'missing' }>) => void = () => {};
+      registry.register('workflows', {
+        type: 'workflow',
+        name: 'Workflow',
+        resolveWorkloads: (workloads, options) => {
+          resolverSignal = options.signal;
+          return new Promise((resolve) => {
+            answer = resolve;
+          });
+        },
+      });
+      const controller = new AbortController();
+
+      const pending = createResolver()([binding('w-1')], { signal: controller.signal });
+      await Promise.resolve();
+      controller.abort();
+      const result = await pending;
+
+      expect(resolverSignal?.aborted).toBe(true);
+      expect(result).toEqual([{ status: 'unknown' }]);
+      expect(meterMock.recorded(UNKNOWN)).toEqual([
+        [
+          1,
+          {
+            'kibana.plugin.id': 'workflows',
+            'kibana.service_account.workload.type': 'workflow',
+            'kibana.service_account.workload_resolution.purpose': 'display',
+            'error.type': 'aborted',
+          },
+        ],
+      ]);
+
+      answer([{ status: 'missing' }]);
+      await Promise.resolve();
+      expect(result).toEqual([{ status: 'unknown' }]);
+    });
   });
 
   describe('when a resolver fails', () => {
     const goodBindings = [binding('w-1'), binding('w-2', { spaceId: 'marketing' })];
     const goodResults = [
-      { title: 'Workflow w-1', href: '/app/workflows/w-1' },
-      { title: 'Workflow w-2', href: '/s/marketing/app/workflows/w-2' },
+      { status: 'present', title: 'Workflow w-1', href: '/app/workflows/w-1' },
+      { status: 'present', title: 'Workflow w-2', href: '/s/marketing/app/workflows/w-2' },
     ];
 
     beforeEach(() => {
@@ -424,7 +586,7 @@ describe('createBoundWorkloadResolver', () => {
       ],
       [
         'returns something other than an array',
-        async () => ({ title: 'x' } as never),
+        async () => ({ status: 'present' } as never),
         'Workload type [rule] registered by plugin [alerting] returned an unexpected result for 1 workload(s), ignoring it.',
       ],
     ])('falls back for that type only when it %s', async (_, resolveWorkloads, message) => {
@@ -436,7 +598,7 @@ describe('createBoundWorkloadResolver', () => {
           binding('r-1', { pluginId: 'alerting', workloadType: 'rule' }),
           goodBindings[1],
         ])
-      ).resolves.toEqual([goodResults[0], {}, goodResults[1]]);
+      ).resolves.toEqual([goodResults[0], { status: 'unknown' }, goodResults[1]]);
       expect(logger.warn).toHaveBeenCalledWith(message);
     });
 
@@ -455,7 +617,7 @@ describe('createBoundWorkloadResolver', () => {
 
       it('aborts the signal, falls back for that type only, and ignores a late answer', async () => {
         let signal: AbortSignal | undefined;
-        let answer: (details: Array<{ title: string; path: string }>) => void = () => {};
+        let answer: (details: Array<{ status: 'missing' }>) => void = () => {};
         registry.register('alerting', {
           type: 'rule',
           name: 'Rule',
@@ -480,7 +642,7 @@ describe('createBoundWorkloadResolver', () => {
         const result = await pending;
 
         expect(signal?.aborted).toBe(true);
-        expect(result).toEqual([goodResults[0], {}, goodResults[1]]);
+        expect(result).toEqual([goodResults[0], { status: 'unknown' }, goodResults[1]]);
         expect(logger.warn).toHaveBeenCalledWith(
           `Unable to resolve 1 workload(s) of type [rule] registered by plugin [alerting]: Timed out after ${WORKLOAD_RESOLUTION_TIMEOUT_MS}ms.`
         );
@@ -489,14 +651,15 @@ describe('createBoundWorkloadResolver', () => {
           {
             'kibana.plugin.id': 'alerting',
             'kibana.service_account.workload.type': 'rule',
+            'kibana.service_account.workload_resolution.purpose': 'display',
             'error.type': 'timeout',
           },
         ]);
 
-        answer([{ title: 'Late', path: '/app/rules/r-1' }]);
+        answer([{ status: 'missing' }]);
         await jest.advanceTimersByTimeAsync(0);
 
-        expect(result).toEqual([goodResults[0], {}, goodResults[1]]);
+        expect(result).toEqual([goodResults[0], { status: 'unknown' }, goodResults[1]]);
       });
 
       it('clears its timer once the resolver answers', async () => {

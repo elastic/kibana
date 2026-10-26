@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Attributes, Histogram, Meter } from '@opentelemetry/api';
+import type { Attributes, Counter, Histogram, Meter } from '@opentelemetry/api';
 import { metrics, ValueType } from '@opentelemetry/api';
 import type { Logger } from '@kbn/logging';
 import type {
   CoreSecurityDelegateServiceAccounts,
   ResolvedServiceAccountWorkload,
-  ServiceAccountWorkloadDetails,
   ServiceAccountWorkloadLocator,
   ServiceAccountWorkloadResolver,
 } from '@kbn/core-security-server';
 import { addSpaceIdToPath, asSpaceId, getSpaceUrlPrefix } from '@kbn/core-spaces-common';
-import { isInternalURL, withTimeout } from '@kbn/std';
+import { isInternalURL } from '@kbn/std';
 import type { WorkloadTypeRegistry } from './workload_type_registry';
 
 /**
@@ -70,37 +69,48 @@ const isNonBlankString = (value: unknown): value is string =>
 
 /**
  * Turns what a workload type returned for one workload into what the security provider gets.
- * Returns `null` when the workload type returned a path Core cannot link to, so the caller can
- * drop the entry and count it.
+ * Returns `null` for an entry that is not a valid status, so the caller can reject the whole
+ * result. A present workload whose path Core cannot link to keeps its status, without a title or
+ * a link, and is reported through `onRejectedPath`.
  */
 const toResolvedWorkload = (
   serverBasePath: string,
   { spaceId }: ServiceAccountWorkloadLocator,
-  details: ServiceAccountWorkloadDetails | undefined
+  details: unknown,
+  onRejectedPath: () => void
 ): ResolvedServiceAccountWorkload | null => {
   if (!details || typeof details !== 'object') {
-    return {};
+    return null;
   }
 
-  const { title, path } = details;
-  const resolved: ResolvedServiceAccountWorkload = {};
+  const status = 'status' in details ? details.status : undefined;
+  const title = 'title' in details ? details.title : undefined;
+  const path = 'path' in details ? details.path : undefined;
+  if (status === 'missing' || status === 'unknown') {
+    return { status };
+  }
+  if (status !== 'present') {
+    return null;
+  }
 
   if (path !== undefined) {
     const href = buildWorkloadHref(serverBasePath, spaceId, path);
     if (href === undefined) {
-      return null;
+      onRejectedPath();
+      return { status };
     }
-    resolved.href = href;
+    return isNonBlankString(title) ? { status, title, href } : { status, href };
   }
 
-  if (isNonBlankString(title)) {
-    resolved.title = title;
-  }
-
-  return resolved;
+  return isNonBlankString(title) ? { status, title } : { status };
 };
 
-class WorkloadResolutionTimeoutError extends Error {}
+/** Why Core stopped waiting for a resolver. */
+class WorkloadResolutionStoppedError extends Error {
+  constructor(public readonly reason: 'timeout' | 'aborted', message: string) {
+    super(message);
+  }
+}
 
 const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -111,6 +121,7 @@ const getErrorMessage = (error: unknown): string =>
 interface WorkloadResolutionMetrics {
   duration: Histogram;
   batchSize: Histogram;
+  unknown: Counter;
 }
 
 const createWorkloadResolutionMetrics = (meter: Meter): WorkloadResolutionMetrics => ({
@@ -131,31 +142,64 @@ const createWorkloadResolutionMetrics = (meter: Meter): WorkloadResolutionMetric
       advice: { explicitBucketBoundaries: [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500] },
     }
   ),
+  unknown: meter.createCounter('kibana.security.service_accounts.workload_resolution.unknown', {
+    description:
+      'Number of bound workloads a workload type could not say exist or not, because it failed or answered unknown.',
+    unit: '{workload}',
+    valueType: ValueType.INT,
+  }),
 });
 
 /**
- * Calls a resolver once, giving up after `timeoutMs`. On timeout it aborts the signal it passed
- * in, and whatever the resolver returns later is ignored.
+ * Calls a resolver once. Gives up after `timeoutMs`, or as soon as `callerSignal` aborts, and then
+ * aborts the signal it passed in. Whatever the resolver returns later is ignored.
  */
-const callWithTimeout = async (
+const callResolver = async (
   resolver: ServiceAccountWorkloadResolver,
   workloads: ServiceAccountWorkloadLocator[],
-  timeoutMs: number
+  timeoutMs: number,
+  callerSignal: AbortSignal | undefined
 ): Promise<unknown> => {
-  const controller = new AbortController();
-  const result = await withTimeout({
-    promise: Promise.resolve().then(() => resolver(workloads, { signal: controller.signal })),
-    timeoutMs,
-  });
-
-  if (result.timedout) {
-    const error = new WorkloadResolutionTimeoutError(`Timed out after ${timeoutMs}ms.`);
-    controller.abort(error);
-    throw error;
+  if (callerSignal?.aborted) {
+    throw new WorkloadResolutionStoppedError('aborted', 'Aborted before the call.');
   }
 
-  return result.value;
+  const controller = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let onCallerAbort: (() => void) | undefined;
+  const stopped = new Promise<never>((_, reject) => {
+    const stop = (error: Error) => {
+      controller.abort(error);
+      reject(error);
+    };
+    timer = setTimeout(
+      () => stop(new WorkloadResolutionStoppedError('timeout', `Timed out after ${timeoutMs}ms.`)),
+      timeoutMs
+    );
+    onCallerAbort = () =>
+      stop(new WorkloadResolutionStoppedError('aborted', 'Aborted by the caller.'));
+    callerSignal?.addEventListener('abort', onCallerAbort, { once: true });
+  });
+
+  try {
+    return await Promise.race([
+      Promise.resolve().then(() => resolver(workloads, { signal: controller.signal })),
+      stopped,
+    ]);
+  } finally {
+    clearTimeout(timer);
+    if (onCallerAbort) {
+      callerSignal?.removeEventListener('abort', onCallerAbort);
+    }
+  }
 };
+
+const isComplete = (
+  entries: Array<ResolvedServiceAccountWorkload | null>
+): entries is ResolvedServiceAccountWorkload[] => !entries.includes(null);
+
+const getErrorType = (error: unknown): string =>
+  error instanceof WorkloadResolutionStoppedError ? error.reason : '_OTHER';
 
 interface WorkloadGroup {
   pluginId: string;
@@ -182,10 +226,10 @@ export const createBoundWorkloadResolver = ({
   timeoutMs?: number;
   meter?: Meter;
 }): CoreSecurityDelegateServiceAccounts['resolveBoundWorkloads'] => {
-  const { duration, batchSize } = createWorkloadResolutionMetrics(meter);
+  const { duration, batchSize, unknown } = createWorkloadResolutionMetrics(meter);
 
-  return async (bindings) => {
-    const results: ResolvedServiceAccountWorkload[] = bindings.map(() => ({}));
+  return async (bindings, { signal, purpose = 'display' } = {}) => {
+    const results: ResolvedServiceAccountWorkload[] = bindings.map(() => ({ status: 'unknown' }));
 
     const groups = new Map<string, WorkloadGroup>();
     bindings.forEach(({ pluginId, workloadType }, index) => {
@@ -210,20 +254,23 @@ export const createBoundWorkloadResolver = ({
         const attributes: Attributes = {
           'kibana.plugin.id': pluginId,
           'kibana.service_account.workload.type': workloadType,
+          'kibana.service_account.workload_resolution.purpose': purpose,
         };
         batchSize.record(workloads.length, attributes);
         const start = performance.now();
-        const recordDuration = (errorType?: string) =>
+        const recordFailure = (errorType: string) => {
           duration.record((performance.now() - start) / 1000, {
             ...attributes,
-            ...(errorType && { 'error.type': errorType }),
+            'error.type': errorType,
           });
+          unknown.add(workloads.length, { ...attributes, 'error.type': errorType });
+        };
 
         let details: unknown;
         try {
-          details = await callWithTimeout(resolver, workloads, timeoutMs);
+          details = await callResolver(resolver, workloads, timeoutMs, signal);
         } catch (error) {
-          recordDuration(error instanceof WorkloadResolutionTimeoutError ? 'timeout' : '_OTHER');
+          recordFailure(getErrorType(error));
           logger.warn(
             `Unable to resolve ${
               workloads.length
@@ -234,33 +281,44 @@ export const createBoundWorkloadResolver = ({
           return;
         }
 
-        if (!Array.isArray(details) || details.length !== workloads.length) {
-          recordDuration('invalid_result');
+        let rejectedPaths = 0;
+        const resolved =
+          Array.isArray(details) && details.length === workloads.length
+            ? workloads.map((workload, position) =>
+                toResolvedWorkload(serverBasePath, workload, details[position], () => {
+                  rejectedPaths++;
+                })
+              )
+            : null;
+
+        // One malformed entry discards the whole result: a resolver that gets the shape wrong
+        // cannot be trusted to have the statuses right, and `missing` deletes bindings.
+        if (resolved === null || !isComplete(resolved)) {
+          recordFailure('invalid_result');
           logger.warn(
             `Workload type [${workloadType}] registered by plugin [${pluginId}] returned an unexpected result for ${workloads.length} workload(s), ignoring it.`
           );
           return;
         }
 
-        recordDuration();
+        duration.record((performance.now() - start) / 1000, attributes);
 
-        let rejectedPaths = 0;
+        let reportedUnknown = 0;
         indices.forEach((index, position) => {
-          const resolved = toResolvedWorkload(
-            serverBasePath,
-            workloads[position],
-            details[position]
-          );
-          if (resolved === null) {
-            rejectedPaths++;
-            return;
+          const entry = resolved[position];
+          if (entry.status === 'unknown') {
+            reportedUnknown++;
           }
-          results[index] = resolved;
+          results[index] = entry;
         });
+
+        if (reportedUnknown > 0) {
+          unknown.add(reportedUnknown, attributes);
+        }
 
         if (rejectedPaths > 0) {
           logger.warn(
-            `Workload type [${workloadType}] registered by plugin [${pluginId}] returned ${rejectedPaths} path(s) that Core cannot link to, ignoring those workloads.`
+            `Workload type [${workloadType}] registered by plugin [${pluginId}] returned ${rejectedPaths} path(s) that Core cannot link to, showing those workloads without a title or a link.`
           );
         }
       })
