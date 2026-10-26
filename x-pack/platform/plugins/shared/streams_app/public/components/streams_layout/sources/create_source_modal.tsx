@@ -33,6 +33,7 @@ import type { SourceType } from './types';
 import type { SourcesController } from './sources_context';
 import { SOURCE_TYPE_CONFIGS, SOURCE_TYPE_CONFIG_BY_TYPE } from './source_type_config';
 import { SourceSetupInstructions } from './source_setup_instructions';
+import { SourceSignalsFields } from './source_signals_fields';
 import { RevealedApiKeyCallout } from './revealed_api_key_callout';
 
 interface CreateSourceModalProps {
@@ -43,6 +44,8 @@ interface CreateSourceModalProps {
     | 'availableSourceTypes'
     | 'sourceName'
     | 'sourceNameError'
+    | 'sourceSignals'
+    | 'sourceSignalsError'
     | 'canCreateSource'
     | 'createdSource'
     | 'revealedApiKey'
@@ -53,6 +56,7 @@ interface CreateSourceModalProps {
     | 'isCreateFailed'
     | 'setCreateSourceType'
     | 'setCreateSourceName'
+    | 'setCreateSourceSignals'
     | 'validateCreateSourceName'
   >;
   onClose: () => void;
@@ -65,6 +69,8 @@ export const CreateSourceModal = ({ sources, onClose }: CreateSourceModalProps) 
     availableSourceTypes,
     sourceName,
     sourceNameError,
+    sourceSignals,
+    sourceSignalsError,
     canCreateSource,
     createdSource,
     revealedApiKey,
@@ -75,6 +81,7 @@ export const CreateSourceModal = ({ sources, onClose }: CreateSourceModalProps) 
     isCreateFailed,
     setCreateSourceType,
     setCreateSourceName,
+    setCreateSourceSignals,
     validateCreateSourceName,
   } = sources;
 
@@ -219,6 +226,13 @@ export const CreateSourceModal = ({ sources, onClose }: CreateSourceModalProps) 
                 data-test-subj="streamsSourceNameInput"
               />
             </EuiFormRow>
+            <SourceSignalsFields
+              sourceType={sourceType}
+              signals={sourceSignals}
+              disabled={isCreatingSource}
+              isInvalid={sourceSignalsError === 'required'}
+              onChange={setCreateSourceSignals}
+            />
             <EuiText size="xs" color="subdued">
               {i18n.translate('xpack.streams.sources.immutableSourceFieldsDescription', {
                 defaultMessage: 'Source type and name cannot be changed later',
