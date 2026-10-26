@@ -18,7 +18,6 @@ jest.mock('./config', () => ({
   createConfig: jest.fn().mockReturnValue({
     productTypes: [],
     experimentalFeatures: {
-      enableAlertsAndAttacksAlignment: false,
       ruleChangesHistoryEnabled: false,
     },
     usageApi: { enabled: false, url: undefined },

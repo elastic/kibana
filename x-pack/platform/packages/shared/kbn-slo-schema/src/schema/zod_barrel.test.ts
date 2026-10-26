@@ -8,16 +8,20 @@
 import * as schemaBarrel from '.';
 import * as zodSchemas from './zod';
 
-// The `is` guard ships to consumers with the guard-sweep PR of the migration.
-const NOT_YET_EXPORTED = new Set(['is']);
+// Helpers, not io-ts twins: exported under their final name without the suffix.
+const UNSUFFIXED_EXPORTS = new Set(['is']);
 
 describe('zod schema barrel', () => {
   it('re-exports every zod twin with the temporary Zod suffix', () => {
     // The barrel renames each export by hand, so a schema added to ./zod
     // without a matching entry would silently never reach package consumers.
     const missing = Object.keys(zodSchemas).filter(
-      (name) => !NOT_YET_EXPORTED.has(name) && !(`${name}Zod` in schemaBarrel)
+      (name) => !UNSUFFIXED_EXPORTS.has(name) && !(`${name}Zod` in schemaBarrel)
     );
     expect(missing).toEqual([]);
+  });
+
+  it('exports the is guard unsuffixed', () => {
+    expect(schemaBarrel.is).toBe(zodSchemas.is);
   });
 });

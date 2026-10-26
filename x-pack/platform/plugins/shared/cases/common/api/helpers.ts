@@ -41,8 +41,8 @@ export const getCaseFindAttachmentsUrl = (caseId: string): string => {
   return CASE_FIND_ATTACHMENTS_URL.replace('{case_id}', caseId);
 };
 
-export const getCaseAttachmentDetailsUrl = (caseId: string, attachmentId: string): string => {
-  return CASE_ATTACHMENT_DETAILS_URL.replace('{case_id}', caseId).replace('{id}', attachmentId);
+export const getCaseAttachmentDetailsUrl = (caseId: string, id: string): string => {
+  return CASE_ATTACHMENT_DETAILS_URL.replace('{case_id}', caseId).replace('{id}', id);
 };
 
 export const getCaseBulkDeleteAttachmentsUrl = (caseId: string): string => {

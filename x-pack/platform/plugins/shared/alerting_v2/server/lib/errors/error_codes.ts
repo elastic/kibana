@@ -214,7 +214,7 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
  * filter a whole area with a prefix: `RULE_*` (rule executor / rules client),
  * `DIRECTOR_*`, `DISPATCH_*`, `POLICY_*`, `EXECUTION_HISTORY_*`, `EVENTS_*`,
  * `STORAGE_*`, `QUERY_*`, `RESOURCES_*`, `MAINTENANCE_WINDOW_*`,
- * `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`, `TASKS_*`.
+ * `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`, `TASKS_*`, `TELEMETRY_*`.
  *
  * The suffix encodes the outcome, from a closed vocabulary:
  * - `warn` (degraded but continued): `_FAILED`, `_SKIPPED`, `_TIMED_OUT`,
@@ -350,6 +350,14 @@ export const ALERTING_LOG_CODES = {
    * the action-type vocabulary grows ahead of the publisher's mapping.
    */
   EVENTS_ALERT_ACTION_TYPE_UNMAPPED: 'EVENTS_ALERT_ACTION_TYPE_UNMAPPED',
+
+  // ───────────────────── Event-based telemetry (EBT) ─────────────────────
+  /**
+   * Core analytics refused an EBT event: the event type was not registered or,
+   * in dev mode, the payload did not match its schema. The operation that
+   * produced the event already succeeded; only the telemetry event was lost.
+   */
+  TELEMETRY_EBT_REPORT_FAILED: 'TELEMETRY_EBT_REPORT_FAILED',
 
   // ──────────────────────────── Dispatcher ───────────────────────────
   /**

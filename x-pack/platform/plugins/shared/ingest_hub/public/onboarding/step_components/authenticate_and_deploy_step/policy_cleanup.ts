@@ -88,8 +88,9 @@ export function resolveSurvivingMembers(
 ): Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }> | null {
   const instanceById = new Map(instances.map((i) => [i.instanceId, i]));
   const rawMembers = survivingInstanceIds.map((id) => {
-    // Fall back to a synthetic base instance (instanceId === serviceId) when session-storage
-    // instances are absent — e.g. the user skipped Step 2 or sessions don't overlap.
+    // Defensive: fall back to a synthetic base instance (instanceId === serviceId) when an id is not
+    // in `instances`. Callers pass the reconciled list, which lacks removed instances whose policy
+    // is still deployed, so cleanup can still resolve them.
     const inst = instanceById.get(id) ?? {
       instanceId: id,
       serviceId: id,

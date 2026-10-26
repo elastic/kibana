@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, within, act } from '@testing-library/react';
 import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import { contentListQueryClient } from '@kbn/content-list-provider';
-import { ListPageTestProviders } from '../../test_utils/test_providers';
+import { createMockLocators, ListPageTestProviders } from '../../test_utils/test_providers';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT } from '../../constants';
 import { getRulesLocation } from '../../locator_get_location';
 import type { RuleApiResponse } from '../../services/rules_api';
@@ -271,28 +271,51 @@ describe('RulesListPage', () => {
     resolveRules();
   });
 
-  it('marks the sequence builder entry point as experimental', async () => {
-    renderPage();
-    await waitForRules();
-
-    const overflowButton = screen.queryByTestId('app-menu-overflow-button');
-    if (overflowButton) {
-      fireEvent.click(overflowButton);
-    }
-
-    await waitFor(() =>
-      expect(screen.getByTestId('createSequenceRuleButton')).toHaveTextContent(
-        'Build a sequence (Experimental)'
-      )
-    );
-  });
-
-  it('hides the sequence builder entry point when Alerting V2 experimental features are disabled', async () => {
-    mockAlertingV2ExperimentalFeaturesEnabled = false;
+  it('does not render a sequence builder entry point in the header', async () => {
     renderPage();
     await waitForRules();
 
     expect(screen.queryByTestId('createSequenceRuleButton')).not.toBeInTheDocument();
+  });
+
+  it('shows an experimental "Build a sequence" card in the create rule flyout', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    const card = screen.getByTestId('createSequenceRuleCard');
+    expect(card).toHaveTextContent('Build a sequence');
+    expect(screen.getByTestId('createSequenceRuleExperimentalBadge')).toHaveTextContent(
+      'Experimental'
+    );
+  });
+
+  it('closes the flyout and navigates to the sequence builder when the card is clicked', async () => {
+    const locators = createMockLocators();
+    render(
+      <ListPageTestProviders locators={locators}>
+        <RulesListPage />
+      </ListPageTestProviders>
+    );
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByTestId('createSequenceRuleCard'));
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(locators.rulesLocators.navigateSync).toHaveBeenCalledWith({ page: 'sequence_create' });
+  });
+
+  it('hides the sequence card when Alerting V2 experimental features are disabled', async () => {
+    mockAlertingV2ExperimentalFeaturesEnabled = false;
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.queryByTestId('createSequenceRuleCard')).not.toBeInTheDocument();
   });
 
   it('renders loading state', async () => {

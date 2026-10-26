@@ -25,6 +25,7 @@ import {
 } from '@kbn/cases-plugin/public';
 import { RUN_DOCUMENT_WORKFLOW_ACTION_ID } from '../../../../common/constants/action_ids';
 import * as i18n from '../translations';
+import { getRunWorkflowTelemetry } from '../../../../common/lib/telemetry/run_workflow_telemetry';
 
 // Sort manual-trigger workflows to the top. Module-scoped so the reference is stable across renders.
 const sortManualWorkflow = (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
@@ -46,6 +47,8 @@ export interface DocumentWorkflowsPanelProps {
    * Outside a case the value is ignored — the panel falls back to the generic Workflows API.
    */
   originEventId?: string;
+  /** Reports the run as a bulk run outside a case. Bulk actions set it. */
+  isBulk?: boolean;
 }
 
 /** A panel that lets users select and execute a workflow against one or more documents. **/
@@ -54,6 +57,7 @@ export const DocumentWorkflowsPanel = ({
   onClose,
   onExecute,
   originEventId,
+  isBulk = false,
 }: DocumentWorkflowsPanelProps) => {
   const target = useMemo(
     (): CaseAttachmentWorkflowTarget =>
@@ -62,9 +66,14 @@ export const DocumentWorkflowsPanel = ({
         : { attachmentIds: documents.map(({ _id }) => _id) },
     [documents, originEventId]
   );
+  const fallbackTelemetry = useMemo(
+    () => getRunWorkflowTelemetry({ surface: 'document', isBulk, itemCount: documents.length }),
+    [documents.length, isBulk]
+  );
   const { runWorkflow, showSuccessToast, telemetry } = useCaseAttachmentWorkflowRun({
     attachmentType: SECURITY_EVENT_ATTACHMENT_TYPE,
     target,
+    fallbackTelemetry,
   });
 
   const inputs = useMemo(
@@ -102,6 +111,8 @@ export interface UseRunDocumentWorkflowPanelProps {
    * item is hidden when Cases runs are unavailable or there is no document to target.
    */
   originEventId?: string;
+  /** Reports the run as a bulk run outside a case. Bulk actions set it. */
+  isBulk?: boolean;
 }
 
 export interface UseRunDocumentWorkflowPanelResult {
@@ -115,6 +126,7 @@ export const useRunDocumentWorkflowPanel = ({
   closePopover,
   documents,
   originEventId,
+  isBulk,
 }: UseRunDocumentWorkflowPanelProps): UseRunDocumentWorkflowPanelResult => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
@@ -154,11 +166,12 @@ export const useRunDocumentWorkflowPanel = ({
             documents={documents}
             onClose={closePopover}
             originEventId={originEventId}
+            isBulk={isBulk}
           />
         ),
       },
     ],
-    [closePopover, documents, originEventId]
+    [closePopover, documents, isBulk, originEventId]
   );
 
   return useMemo(

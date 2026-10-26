@@ -177,6 +177,7 @@ function sanitizeItemForReadAgentOnly(item: AgentPolicy): AgentPolicy {
     namespace: item.namespace,
     is_managed: item.is_managed,
     is_protected: item.is_protected,
+    supports_agentless: item.supports_agentless,
     status: item.status,
     updated_at: item.updated_at,
     updated_by: item.updated_by,
@@ -758,6 +759,14 @@ export const deleteAgentPoliciesHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+
+  // agentless policies are managed by Elastic; `force` is the escape hatch
+  if (!request.body.force) {
+    const agentPolicy = await agentPolicyService.get(soClient, request.body.agentPolicyId, false);
+    if (agentPolicy?.supports_agentless) {
+      throw new FleetError('To delete managed integrations, use the managed integrations API.');
+    }
+  }
 
   const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
     soClient,

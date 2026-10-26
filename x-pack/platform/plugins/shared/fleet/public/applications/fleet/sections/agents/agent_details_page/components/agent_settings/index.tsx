@@ -27,6 +27,8 @@ export const AgentSettings: React.FunctionComponent<AgentSettingsProps> = ({
         <SelectLogLevel
           agent={agent}
           agentPolicyLogLevel={agentPolicy?.advanced_settings?.agent_logging_level}
+          // agentless agents are managed by Elastic: their log level can't be changed
+          isReadOnly={agentPolicy?.supports_agentless === true}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

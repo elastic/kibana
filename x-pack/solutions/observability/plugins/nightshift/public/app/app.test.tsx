@@ -21,17 +21,6 @@ jest.mock('../hooks/use_investigation_sections');
 jest.mock('../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
 
-jest.mock('../investigation/start_investigation_panel', () => ({
-  START_INVESTIGATION_PANEL_ID: 'nightshiftStartInvestigationPanel',
-  StartInvestigationPanel: ({ onClose }: { onClose: () => void }) => (
-    <div data-test-subj="nightshiftStartInvestigationPanel">
-      <button onClick={onClose} type="button">
-        Cancel investigation
-      </button>
-    </div>
-  ),
-}));
-
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 const mockUsePageReady = usePageReady as jest.Mock;
@@ -421,34 +410,7 @@ describe('NightshiftApp', () => {
     );
   });
 
-  it('opens and closes the start investigation panel from the header', () => {
-    renderApp();
-
-    const startButton = screen.getByTestId('o11yNightshiftAppStartInvestigationButton');
-    expect(screen.queryByTestId('nightshiftStartInvestigationPanel')).not.toBeInTheDocument();
-
-    fireEvent.click(startButton);
-    expect(screen.getByTestId('nightshiftStartInvestigationPanel')).toBeInTheDocument();
-    expect(startButton).toHaveAttribute('aria-expanded', 'true');
-
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel investigation' }));
-    expect(screen.queryByTestId('nightshiftStartInvestigationPanel')).not.toBeInTheDocument();
-  });
-
-  it('hides the start investigation button without the Nightshift manage privilege', () => {
-    mockUseKibana.mockReturnValue({
-      services: {
-        application: {
-          capabilities: { nightshift: { [NIGHTSHIFT_UI_PRIVILEGES.show]: true } },
-          getUrlForApp: () => '/app/significant_events/significant_events',
-        },
-        nightshiftInvestigations: { investigationsClient: {} },
-        agenticInvestigations: { InvestigationCard },
-        agentBuilder: { openConversationDetails },
-        notifications: { toasts: { addSuccess: jest.fn() } },
-      },
-    });
-
+  it('leaves the start investigation action to the page header', () => {
     renderApp();
 
     expect(

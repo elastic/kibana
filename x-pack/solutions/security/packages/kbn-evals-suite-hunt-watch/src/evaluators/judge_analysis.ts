@@ -119,8 +119,9 @@ interface ToolCallRecord {
 /** The report fields the Worker's narrative quotes, without the raw source body. */
 const threatReportFacts = (doc: NonNullable<HuntReportArtifacts['reportDoc']>) => {
   const source = doc.source as { name?: string; type?: string } | undefined;
+  const content = doc.content as { published_at?: unknown } | undefined;
   return {
-    published_at: doc['@timestamp'],
+    published_at: content?.published_at,
     source: source ? { name: source.name, type: source.type } : undefined,
     severity: doc.severity,
     content: doc.content,
