@@ -28,6 +28,10 @@ import { flipSeriesType, getIconForSeries, hasAreaSeries } from './state_helpers
 import { getDefaultPalette } from './default_palette';
 import { getDataLayers, isDataLayer, isDateHistogramOperation } from './visualization_helpers';
 
+const XY_SUGGESTION_DEFAULTS: Pick<XYVisualizationState, 'legend'> = {
+  legend: { isVisible: true, position: Position.Bottom, layout: LegendLayout.List },
+};
+
 const COLUMN_SORT_ORDER = {
   document: 0,
   date: 1,
@@ -654,13 +658,10 @@ function buildSuggestion({
   const layers =
     existingLayer && Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer];
 
+  const defaults = { ...XY_SUGGESTION_DEFAULTS, ...defaultOverrides };
+
   const state: XYVisualizationState = {
-    legend: currentState?.legend ??
-      defaultOverrides?.legend ?? {
-        isVisible: true,
-        position: Position.Bottom,
-        layout: LegendLayout.List,
-      },
+    legend: currentState?.legend ?? defaults.legend,
     valueLabels: currentState?.valueLabels || 'hide',
     fittingFunction: currentState?.fittingFunction ?? FittingFunctions.LINEAR,
     curveType: currentState?.curveType,
