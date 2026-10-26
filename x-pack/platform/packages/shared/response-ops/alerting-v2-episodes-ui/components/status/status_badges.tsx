@@ -70,6 +70,7 @@ export function AlertEpisodeStatusBadges({
             content={
               hasSnoozeConditions ? (
                 buildSnoozeSummary({
+                  isMuted: groupAction?.isMuted,
                   expiresAt: groupAction?.snoozedUntil,
                   conditions: groupAction?.snoozeConditions,
                   conditionOperator: groupAction?.snoozeConditionOperator,
