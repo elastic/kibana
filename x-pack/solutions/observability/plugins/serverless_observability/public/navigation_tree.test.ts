@@ -228,6 +228,7 @@ describe('Navigation Tree', () => {
           title: 'Rule Management',
           children: expect.arrayContaining([
             expect.objectContaining({ link: 'observabilityAlerting:rules-v2' }),
+            expect.objectContaining({ link: 'observabilityAlerting:rule-library' }),
             expect.objectContaining({
               link: 'observabilityAlerting:rules-v1',
               sideNavStatus: 'hidden',

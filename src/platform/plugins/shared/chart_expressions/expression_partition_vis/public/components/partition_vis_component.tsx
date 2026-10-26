@@ -558,7 +558,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
               distinctColors: visParams.distinctColors ?? false,
             }}
           >
-            {showToggleLegendElement && (
+            {interactive && showToggleLegendElement && (
               <LegendToggle
                 onClick={toggleLegend}
                 showLegend={showLegend}
@@ -582,7 +582,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 legendPosition={legendPosition}
                 legendSize={LegendSizeToPixels[visParams.legendSize ?? DEFAULT_LEGEND_SIZE]}
                 legendMaxDepth={visParams.nestedLegend ? undefined : 1}
-                legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
+                legendColorPicker={
+                  props.uiState && props.interactive ? LegendColorPickerWrapper : undefined
+                }
                 flatLegend={flatLegend}
                 legendSort={customLegendSort}
                 legendValues={visParams.legendStats}

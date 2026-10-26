@@ -59,7 +59,7 @@ apiTest.describe('Maps - maps telemetry', { tag: [...tags.stateful.classic] }, (
         basemaps: {},
         joins: { term: { min: 1, max: 1, total: 3, avg: 0.125 } },
         layerTypes: {
-          es_docs: { min: 1, max: 3, total: 16, avg: 0.6666666666666666 },
+          es_docs: { min: 1, max: 3, total: 17, avg: 0.7083333333333334 },
           es_agg_grids: { min: 1, max: 1, total: 6, avg: 0.25 },
           es_point_to_point: { min: 1, max: 1, total: 1, avg: 0.041666666666666664 },
           es_top_hits: { min: 1, max: 1, total: 2, avg: 0.08333333333333333 },
@@ -76,11 +76,11 @@ apiTest.describe('Maps - maps telemetry', { tag: [...tags.stateful.classic] }, (
         scalingOptions: {
           limit: { min: 1, max: 3, total: 12, avg: 0.5 },
           clusters: { min: 1, max: 1, total: 1, avg: 0.041666666666666664 },
-          mvt: { min: 1, max: 1, total: 3, avg: 0.125 },
+          mvt: { min: 1, max: 2, total: 4, avg: 0.16666666666666666 },
         },
         attributesPerMap: {
           customIconsCount: { avg: 0, max: 0, min: 0 },
-          dataSourcesCount: { avg: 1.25, max: 7, min: 1 },
+          dataSourcesCount: { avg: 1.2916666666666667, max: 7, min: 1 },
           emsVectorLayersCount: {
             idThatDoesNotExitForEMSFileSource: {
               avg: 0.041666666666666664,
@@ -93,10 +93,10 @@ apiTest.describe('Maps - maps telemetry', { tag: [...tags.stateful.classic] }, (
             EMS_VECTOR_TILE: { avg: 0.041666666666666664, max: 1, min: 1 },
             GEOJSON_VECTOR: { avg: 0.875, max: 6, min: 1 },
             HEATMAP: { avg: 0.041666666666666664, max: 1, min: 1 },
-            MVT_VECTOR: { avg: 0.25, max: 1, min: 1 },
+            MVT_VECTOR: { avg: 0.2916666666666667, max: 2, min: 1 },
             RASTER_TILE: { avg: 0.041666666666666664, max: 1, min: 1 },
           },
-          layersCount: { avg: 1.2916666666666667, max: 8, min: 1 },
+          layersCount: { avg: 1.3333333333333333, max: 8, min: 1 },
         },
       });
     }

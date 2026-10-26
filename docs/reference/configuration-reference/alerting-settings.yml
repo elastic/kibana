@@ -55,6 +55,8 @@ groups:
           Each entry in the list must have a `url` property, to associate a connection type (mail or https), hostname and port with the remaining options in the entry.
 
           The settings in `xpack.actions.customHostSettings` can be used to override the global option `xpack.actions.ssl.verificationMode` and provide customized TLS settings on a per-server basis. Set `xpack.actions.ssl.verificationMode` to the value to be used by default for all servers, then add an entry in `xpack.actions.customHostSettings` for every server that requires customized settings.
+
+          These settings apply only to {{kib}} connectors. {{es}} {{infer}} endpoints don't use them. For {{infer}} endpoints, refer to [Trust a private certificate authority for external {{infer}} endpoints](docs-content://explore-analyze/elastic-inference/external-inference-private-ca.md).
         datatype: string
         default: an empty list
         applies_to:

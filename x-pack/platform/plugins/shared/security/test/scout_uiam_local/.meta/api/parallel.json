@@ -1,5 +1,5 @@
 {
-  "sha1": "949bff5778f77996473a471e4e31f42258de71aa",
+  "sha1": "6045299e69514986e5498dd4fa8deceec5d85525",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -499,8 +499,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_self_call_attestation.spec.ts",
-        "line": 77,
-        "column": 44
+        "line": 76,
+        "column": 21
       }
     },
     {
@@ -518,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_self_call_attestation.spec.ts",
-        "line": 113,
-        "column": 16
+        "line": 111,
+        "column": 7
       }
     },
     {

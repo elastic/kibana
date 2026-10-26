@@ -54,4 +54,34 @@ describe('ServiceStatusIndicator', () => {
     const { container } = renderIndicator('detecting');
     expect(container.querySelector('[aria-live="polite"]')).toBeInTheDocument();
   });
+
+  describe('error wording', () => {
+    it('says the deployment failed by default', () => {
+      renderIndicator('error');
+      expect(screen.getByText('Deployment failed')).toBeInTheDocument();
+    });
+
+    it.each([
+      ['unhealthy', 'Agent needs attention'],
+      ['incompatible_version', 'Agent upgrade required'],
+      ['not_running', "Integration isn't running"],
+    ] as const)('explains an agent error of kind %s', (agentErrorReason, label) => {
+      render(
+        <I18nProvider>
+          <ServiceStatusIndicator status="error" agentErrorReason={agentErrorReason} />
+        </I18nProvider>
+      );
+      expect(screen.getByText(label)).toBeInTheDocument();
+      expect(screen.queryByText('Deployment failed')).not.toBeInTheDocument();
+    });
+
+    it('ignores the agent reason for statuses that are not errors', () => {
+      render(
+        <I18nProvider>
+          <ServiceStatusIndicator status="receiving" agentErrorReason="unhealthy" />
+        </I18nProvider>
+      );
+      expect(screen.getByText('Receiving data')).toBeInTheDocument();
+    });
+  });
 });

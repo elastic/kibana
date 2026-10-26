@@ -56,6 +56,12 @@ export const HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY = 'externalFormLink' as const;
 /** Workflow context path: `context.hitl.externalQueryLink`. */
 export const HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY = 'externalQueryLink' as const;
 
+/** Workflow context path: `context.hitl.externalApproveLink`. */
+export const HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY = 'externalApproveLink' as const;
+
+/** Workflow context path: `context.hitl.externalRejectLink`. */
+export const HITL_EXTERNAL_REJECT_LINK_CONTEXT_KEY = 'externalRejectLink' as const;
+
 export const DEFAULT_HITL_INPUT_OPEN_FORM_LABEL = 'Open form' as const;
 
 export const DEFAULT_HITL_INPUT_CHANNEL_MESSAGE =
@@ -92,6 +98,9 @@ export const HITL_CHANNEL_CONNECTOR_TYPES = {
   slack_api: 'slack_api',
   email: 'email',
   slack2: 'slack2.sendMessage',
+  teams: 'microsoft-teams.sendChannelMessage',
+  servicenow: 'servicenow_search.addComment',
+  http: 'http',
 } as const satisfies Record<string, string>;
 
 export type HitlChannelKey = keyof typeof HITL_CHANNEL_CONNECTOR_TYPES;

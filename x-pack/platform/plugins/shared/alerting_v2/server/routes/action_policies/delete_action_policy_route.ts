@@ -30,6 +30,7 @@ export class DeleteActionPolicyRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Delete an action policy',
     description:
       'Deletes the action policy whose ID you include in the URL path. Use the `id` returned when you created the policy, or from get or list. This request has no body.',

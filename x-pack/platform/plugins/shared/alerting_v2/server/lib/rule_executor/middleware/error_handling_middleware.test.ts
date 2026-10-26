@@ -63,21 +63,25 @@ describe('ErrorHandlingMiddleware', () => {
         labels: {
           code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
           step: 'fetch_rule',
+          error_source: 'framework',
         },
       })
     );
   });
 
   it('overrides the message for ES|QL user errors so the query fragment is not logged', async () => {
-    const error = new errors.ResponseError({
-      statusCode: 400,
-      body: {
-        error: {
-          type: 'verification_exception',
-          reason: 'Found 1 problem\nline 1:1: Unknown column [secret_field]',
+    const error = createTaskRunError(
+      new errors.ResponseError({
+        statusCode: 400,
+        body: {
+          error: {
+            type: 'verification_exception',
+            reason: 'Found 1 problem\nline 1:1: Unknown column [secret_field]',
+          },
         },
-      },
-    } as DiagnosticResult);
+      } as DiagnosticResult),
+      TaskErrorSource.USER
+    );
     const next = jest.fn().mockReturnValue(
       (async function* () {
         throw error;
@@ -95,6 +99,7 @@ describe('ErrorHandlingMiddleware', () => {
         labels: {
           code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
           step: 'execute_rule_query',
+          error_source: 'user',
         },
         error: expect.objectContaining({
           message: 'Rule query failed to parse or verify',
@@ -103,6 +108,34 @@ describe('ErrorHandlingMiddleware', () => {
     );
     const loggedMessage = (logger.error as jest.Mock).mock.calls[0][0] as string;
     expect(loggedMessage).not.toContain('secret_field');
+  });
+
+  it('labels a failure as framework when no step tagged it as a user error', async () => {
+    const error = new errors.ResponseError({
+      statusCode: 400,
+      body: { error: { type: 'verification_exception', reason: 'Unknown column [x]' } },
+    } as DiagnosticResult);
+    const next = jest.fn().mockReturnValue(
+      (async function* () {
+        throw error;
+      })()
+    );
+    const context = createRuleExecutionMiddlewareContext({ name: 'director' });
+
+    await expect(
+      collectStreamResults(middleware.execute(context, next, createPipelineStream()))
+    ).rejects.toBe(error);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        labels: {
+          code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+          step: 'director',
+          error_source: 'framework',
+        },
+      })
+    );
   });
 
   it('tags the rethrown error with the failing step', async () => {

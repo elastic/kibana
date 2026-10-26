@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/core-injected-metadata-browser-mocks'
   - '@kbn/core-injected-metadata-browser-internal'
   - '@kbn/core-http-browser-internal'
+  - '@kbn/core-http-browser'
 tags:
   - shared-browser
   - package
@@ -35,6 +36,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

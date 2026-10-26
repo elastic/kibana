@@ -78,5 +78,12 @@ export const FP_TP_BOOTSTRAP_RULE_ID = 'fptp-seeder-bootstrap-nomatch';
  */
 export const FP_TP_REASONING_FEATURE_ID = 'alertzero_reasoning';
 
-/** Half-width of the raw-event window the analysis reads around the attack timestamp. */
+/** Half-width of the raw-event window the analysis reads around the cited alerts' original time. */
 export const FP_TP_RAW_EVENT_WINDOW_MS = 2 * 60 * 60 * 1000;
+
+/**
+ * Raw events the analysis reads per run (`load_events` `size`). More hits than this
+ * mark the page truncated, and `block_truncated_clear` turns a `false_positive` into
+ * `inconclusive`.
+ */
+export const FP_TP_RAW_EVENT_PAGE_SIZE = 50;

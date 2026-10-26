@@ -307,4 +307,45 @@ describe('automated-resolution state migration', () => {
 
     expect(output.rules[relatedUserId].lastRun).toEqual(relatedLastRun);
   });
+
+  it('keeps custom rule fingerprints and attempt times, and drops malformed ones', () => {
+    const watermark = '2026-10-01T00:00:00Z';
+    const output = migrate(
+      {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: {
+          'custom:a': {
+            lastProcessedTimestamp: watermark,
+            lastRun: null,
+            definitionFingerprint: 'abc',
+            lastAttemptAt: '2026-10-13T10:00:00.000Z',
+            lastStartedFirstAt: '2026-10-13T09:55:00.000Z',
+            deferredByDeadline: true,
+            lastError: 'boom',
+          },
+          'custom:b': {
+            lastProcessedTimestamp: watermark,
+            lastRun: null,
+            definitionFingerprint: 42,
+            lastAttemptAt: 1760349600000,
+            lastStartedFirstAt: 1760349300000,
+            deferredByDeadline: 'yes',
+            lastError: { message: 'boom' },
+          },
+        },
+      },
+      loggerMock.create()
+    );
+
+    expect(output.rules['custom:a']).toEqual({
+      lastProcessedTimestamp: watermark,
+      lastRun: null,
+      definitionFingerprint: 'abc',
+      lastAttemptAt: '2026-10-13T10:00:00.000Z',
+      lastStartedFirstAt: '2026-10-13T09:55:00.000Z',
+      deferredByDeadline: true,
+      lastError: 'boom',
+    });
+    expect(output.rules['custom:b']).toEqual({ lastProcessedTimestamp: watermark, lastRun: null });
+  });
 });

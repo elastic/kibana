@@ -11,6 +11,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { EsqlSource } from '../sources/esql_source';
 import type { Column } from '../types';
 import { registerEsqlSourceInDataViewsCache } from '../cache_adapter';
+import { buildFilterableFieldSpecs } from '../filterable_fields';
 import { createMockDataViewsService } from './data_views_service.mock';
 
 type LooseColumn = Omit<Column, 'type'> & { type: string };
@@ -36,6 +37,13 @@ export const createMockEsqlSource = (
     getColumns: () => columns as Column[],
     getColumn: (name: string) => columns.find((c) => c.name === name) as Column | undefined,
     getFilterableFields: async () => columns as Column[],
+    toFilterableSource: async () => ({
+      id: `esql-mock-${timeFieldName ?? ''}`,
+      title: 'mock',
+      timeFieldName,
+      fields: Object.values(buildFilterableFieldSpecs(columns as Column[], timeFieldName)),
+      isTimeBased: () => !!timeFieldName,
+    }),
     isTimeBased: () => !!timeFieldName,
     isPersisted: () => false,
     isRollup: () => false,

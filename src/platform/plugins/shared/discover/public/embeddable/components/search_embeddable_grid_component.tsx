@@ -13,7 +13,12 @@ import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EsqlSource } from '@kbn/data-source';
 import { SORT_DEFAULT_ORDER_SETTING, getSortArray } from '@kbn/discover-utils';
-import { useBatchedPublishingSubjects, type FetchContext } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  type PublishingSubject,
+  type ViewMode,
+  type FetchContext,
+} from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
@@ -33,7 +38,7 @@ import {
   DISCOVER_CELL_ACTIONS_TRIGGER_ID,
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { isOfQueryType } from '@kbn/es-query';
+import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { buildDatatableFromTextBasedGrid } from '../../utils/build_datatable_from_text_based_grid';
@@ -44,10 +49,11 @@ import { DiscoverGridEmbeddable, type InlineEditing } from './saved_search_grid'
 import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
 import { showTimeFieldColumn } from '../../utils/show_time_field_column';
-import { useAdditionalCellActions } from '../../context_awareness';
+import { useAdditionalCellActions, useProfileAccessor } from '../../context_awareness';
 import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 import { createDataSource } from '../../../common/data_sources';
 import { replaceColumnsWithVariableDriven } from '../utils/replace_columns_with_variable_driven';
+import { getEmbeddableDisplayColumns } from '../utils/get_embeddable_display_columns';
 import type { DiscoverAppLocatorParams } from '../../../common';
 import { getExpandedDocLinkability } from '../../application/main/utils/expanded_doc';
 import { getExpandedDocLocatorParams } from '../utils/get_discover_locator_params';
@@ -61,6 +67,7 @@ interface SavedSearchEmbeddableComponentProps {
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
     abortSignal$: BehaviorSubject<AbortSignal | undefined>;
+    viewMode$: PublishingSubject<ViewMode>;
   };
   dataView: DataView;
   esqlSource$?: BehaviorSubject<EsqlSource | undefined>;
@@ -72,6 +79,11 @@ interface SavedSearchEmbeddableComponentProps {
   initialDocViewerTabId: string | undefined;
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
   stateManager: SearchEmbeddableStateManager;
+  documentViewerFlyoutType?: 'push' | 'overlay';
+  autoApplyDiscoverColumnDefaults?: boolean;
+  wrapToolbar?: boolean;
+  showKeyboardShortcuts?: boolean;
+  showSortSelector?: boolean;
 }
 
 const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
@@ -88,6 +100,11 @@ export function SearchEmbeddableGridComponent({
   initialDocViewerTabId,
   setExpandedDoc,
   stateManager,
+  documentViewerFlyoutType,
+  autoApplyDiscoverColumnDefaults = false,
+  wrapToolbar = true,
+  showKeyboardShortcuts,
+  showSortSelector,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
   const parentApi = api.parentApi;
@@ -102,6 +119,7 @@ export function SearchEmbeddableGridComponent({
   const kbnDataSource = useObservable(esqlSource$ ?? emptyEsqlSource$, undefined);
 
   const [
+    viewMode,
     loading,
     savedSearch,
     savedSearchId,
@@ -120,6 +138,7 @@ export function SearchEmbeddableGridComponent({
     esqlVariables,
     abortSignal,
   ] = useBatchedPublishingSubjects(
+    api.viewMode$,
     api.dataLoading$,
     api.savedSearch$,
     api.savedObjectId$,
@@ -151,14 +170,52 @@ export function SearchEmbeddableGridComponent({
     [dataView, isEsql, savedSearch.sort]
   );
 
+  const getDefaultAppState = useProfileAccessor('getDefaultAppState');
+  const displayColumnsState = useMemo(() => {
+    const defaultAppState = getDefaultAppState(() => ({}))({ dataView });
+    return getEmbeddableDisplayColumns({
+      autoApplyDiscoverColumnDefaults,
+      persistedColumns: savedSearch.columns,
+      profileColumns: defaultAppState.columns,
+      dataView,
+      isEsql,
+      esql: isOfAggregateQueryType(savedSearchQuery) ? savedSearchQuery.esql : undefined,
+      esqlResultColumnNames: resultDataSource
+        ? resultDataSource.getColumns().map(({ name }) => name)
+        : undefined,
+    });
+  }, [
+    autoApplyDiscoverColumnDefaults,
+    dataView,
+    getDefaultAppState,
+    isEsql,
+    resultDataSource,
+    savedSearch.columns,
+    savedSearchQuery,
+  ]);
+
   const originalColumns = useMemo(() => {
     return replaceColumnsWithVariableDriven(
-      savedSearch.columns,
+      displayColumnsState.columns,
       resultDataSource,
       esqlVariables,
       isEsql
     );
-  }, [resultDataSource, isEsql, esqlVariables, savedSearch.columns]);
+  }, [displayColumnsState.columns, esqlVariables, isEsql, resultDataSource]);
+
+  const displayGrid = useMemo(() => {
+    if (!displayColumnsState.grid?.columns) {
+      return grid;
+    }
+
+    return {
+      ...grid,
+      columns: {
+        ...displayColumnsState.grid.columns,
+        ...grid?.columns,
+      },
+    };
+  }, [displayColumnsState.grid, grid]);
 
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
     capabilities: discoverServices.capabilities,
@@ -178,6 +235,8 @@ export function SearchEmbeddableGridComponent({
     },
     columns: originalColumns,
     sort,
+    // Persist only stored grid settings so profile-derived widths stay display-only
+    // unless the user resizes a column (handled by onResize).
     settings: grid,
   });
 
@@ -387,7 +446,7 @@ export function SearchEmbeddableGridComponent({
       searchDescription={panelDescription || savedSearchDescription}
       sort={sort}
       totalHitCount={totalHitCount}
-      settings={savedSearch.grid}
+      settings={displayGrid}
       ariaLabelledBy={'documentsAriaLabel'}
       cellActionsTriggerId={
         isInSecuritySolution
@@ -419,8 +478,13 @@ export function SearchEmbeddableGridComponent({
       initialDocViewerTabId={initialDocViewerTabId}
       docViewerRef={docViewerRef}
       setExpandedDoc={setExpandedDoc}
+      documentViewerFlyoutType={documentViewerFlyoutType}
+      wrapToolbar={wrapToolbar}
+      showKeyboardShortcuts={showKeyboardShortcuts}
+      showSortSelector={showSortSelector}
       searchContext={searchContext}
       flyoutMenuTrailingActions={flyoutMenuTrailingActions}
+      isInteractive={viewMode !== 'non-interactive'}
     />
   );
 }

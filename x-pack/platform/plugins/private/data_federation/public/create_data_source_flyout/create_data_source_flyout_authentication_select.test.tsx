@@ -14,6 +14,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CreateDataSourceAuthenticationMode } from './create_data_source_flyout_authentication';
 import { CreateDataSourceFlyoutAuthenticationSelect } from './create_data_source_flyout_authentication_select';
 import { authenticationStrings } from './create_data_source_flyout_authentication_i18n';
+import { authOptionStrings } from '../service_definitions/auth_options_i18n';
+import { createServiceRegistry } from '../service_registry/create_service_registry';
 
 const docLinks = {
   links: {
@@ -36,7 +38,7 @@ const renderSelect = ({
 
   const utils = render(
     <EuiProvider>
-      <KibanaContextProvider services={{ docLinks }}>
+      <KibanaContextProvider services={{ docLinks, serviceRegistry: createServiceRegistry() }}>
         <CreateDataSourceFlyoutAuthenticationSelect
           dataSourceType="s3"
           authenticationMode={authenticationMode}
@@ -61,24 +63,24 @@ describe('CreateDataSourceFlyoutAuthenticationSelect', () => {
     const { getByText, getAllByText } = renderSelect();
 
     // A single occurrence of the method name means the dropdown is not expanded.
-    expect(getAllByText(authenticationStrings.federatedIdentityLabel)).toHaveLength(1);
+    expect(getAllByText(authOptionStrings.federatedIdentityLabel)).toHaveLength(1);
     expect(getByText(authenticationStrings.recommendedBadge)).toBeInTheDocument();
   });
 
   it.each([
     [
       'federated_identity' as const,
-      authenticationStrings.federatedIdentityDescription.s3,
+      authOptionStrings.federatedIdentityDescription.s3,
       docLinks.links.dataFederation.federatedIdentity,
     ],
     [
       'access_and_secret_keys' as const,
-      authenticationStrings.storedCredentialsDescription.s3,
+      authOptionStrings.storedCredentialsDescription.s3,
       docLinks.links.dataFederation.staticCredentials,
     ],
     [
       'anonymous' as const,
-      authenticationStrings.anonymousDescription.s3,
+      authOptionStrings.anonymousDescription.s3,
       docLinks.links.dataFederation.quickstart,
     ],
   ])('describes %s and links to its documentation', (authenticationMode, description, href) => {
@@ -96,15 +98,12 @@ describe('CreateDataSourceFlyoutAuthenticationSelect', () => {
     await expandDropdown(3);
 
     for (const [name, description] of [
+      [authOptionStrings.federatedIdentityLabel, authOptionStrings.federatedIdentityDescription.s3],
       [
-        authenticationStrings.federatedIdentityLabel,
-        authenticationStrings.federatedIdentityDescription.s3,
+        authOptionStrings.accessAndSecretKeysLabel,
+        authOptionStrings.storedCredentialsDescription.s3,
       ],
-      [
-        authenticationStrings.accessAndSecretKeysLabel,
-        authenticationStrings.storedCredentialsDescription.s3,
-      ],
-      [authenticationStrings.anonymousLabel, authenticationStrings.anonymousDescription.s3],
+      [authOptionStrings.anonymousLabel, authOptionStrings.anonymousDescription.s3],
     ]) {
       expect(
         getByRole('option', { name: new RegExp(`${name}.*${description}`) })
@@ -116,7 +115,7 @@ describe('CreateDataSourceFlyoutAuthenticationSelect', () => {
     const { getByText, onAuthenticationModeChange } = renderSelect();
 
     await expandDropdown(3);
-    fireEvent.click(getByText(authenticationStrings.anonymousLabel));
+    fireEvent.click(getByText(authOptionStrings.anonymousLabel));
 
     expect(onAuthenticationModeChange).toHaveBeenCalledWith('anonymous');
   });
@@ -129,7 +128,7 @@ describe('CreateDataSourceFlyoutAuthenticationSelect', () => {
 
     await expandDropdown(2);
 
-    expect(queryByText(authenticationStrings.federatedIdentityLabel)).not.toBeInTheDocument();
+    expect(queryByText(authOptionStrings.federatedIdentityLabel)).not.toBeInTheDocument();
     expect(queryByText(authenticationStrings.recommendedBadge)).not.toBeInTheDocument();
   });
 });

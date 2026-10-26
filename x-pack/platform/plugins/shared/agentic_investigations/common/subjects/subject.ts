@@ -11,7 +11,7 @@ import { userSchema } from '../user';
 import {
   INVESTIGATION_SUBJECT_TRIGGER_TYPES,
   INVESTIGATION_SUBJECT_TYPES,
-  MAX_SLACK_SEEN_EVENT_IDS,
+  MAX_SLACK_SEEN_EVENTS,
   MAX_SUBJECT_ID_LENGTH,
   MAX_SUBJECTS_PER_REQUEST,
 } from './constants';
@@ -70,6 +70,13 @@ export const alertSubjectSnapshotSchema = z
   });
 export type AlertSubjectSnapshot = z.infer<typeof alertSubjectSnapshotSchema>;
 
+/** A delivered Slack event and the run (for example a workflow execution) that handled it. */
+export const slackSeenEventSchema = z.object({
+  event_id: z.string().min(1).max(MAX_ID_LENGTH),
+  execution_id: z.string().min(1).max(MAX_ID_LENGTH),
+});
+export type SlackSeenEvent = z.infer<typeof slackSeenEventSchema>;
+
 /** Where a `slack_thread` subject lives, and the status message the investigation keeps updated. */
 export const slackThreadSubjectSchema = z.object({
   /** Channel id or name, rendered as `#channel`. */
@@ -83,13 +90,11 @@ export const slackThreadSubjectSchema = z.object({
     .max(MAX_URL_LENGTH)
     .optional(),
   /**
-   * Slack event ids the writer already handled for this thread, newest last, so an event that is
-   * delivered again can be recognised. A writer sends the whole list; it replaces the stored one.
+   * Slack events the writer already handled for this thread, each with the run that handled it,
+   * newest last, so an event that is delivered again can be recognised. A writer sends the whole
+   * list; it replaces the stored one.
    */
-  seen_event_ids: z
-    .array(z.string().min(1).max(MAX_ID_LENGTH))
-    .max(MAX_SLACK_SEEN_EVENT_IDS)
-    .optional(),
+  seen_events: z.array(slackSeenEventSchema).max(MAX_SLACK_SEEN_EVENTS).optional(),
 });
 export type SlackThreadSubject = z.infer<typeof slackThreadSubjectSchema>;
 

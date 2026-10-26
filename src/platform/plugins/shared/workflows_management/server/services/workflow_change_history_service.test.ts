@@ -8,7 +8,7 @@
  */
 
 import { ChangeHistoryClient } from '@kbn/change-history';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, userProfileServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { WorkflowChangeHistoryService } from './workflow_change_history_service';
@@ -62,16 +62,23 @@ describe('WorkflowChangeHistoryService', () => {
     );
   });
 
-  it('initializes the change history client with the elasticsearch client', async () => {
+  it('initializes the change history client with the elasticsearch client and user profile service', async () => {
     const service = new WorkflowChangeHistoryService(logger, '9.0.0');
     const elasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
+    const userProfileService = userProfileServiceMock.createStart();
     const authService = {
       getCurrentUser: jest.fn().mockReturnValue({ username: 'alice', profile_uid: 'profile-1' }),
     };
 
-    await service.initialize({ elasticsearchClient, authService: authService as any });
+    await service.initialize({
+      elasticsearchClient,
+      authService: authService as any,
+      userProfileService,
+    });
 
-    expect(clientMock.initialize).toHaveBeenCalledWith(elasticsearchClient);
+    expect(clientMock.initialize).toHaveBeenCalledWith(elasticsearchClient, {
+      userProfileService,
+    });
   });
 
   it('initialize resolves after client initialization completes', async () => {
@@ -89,7 +96,11 @@ describe('WorkflowChangeHistoryService', () => {
 
     let ready = false;
     const initializeCall = service
-      .initialize({ elasticsearchClient, authService: authService as any })
+      .initialize({
+        elasticsearchClient,
+        authService: authService as any,
+        userProfileService: userProfileServiceMock.createStart(),
+      })
       .then(() => {
         ready = true;
       });
@@ -113,7 +124,11 @@ describe('WorkflowChangeHistoryService', () => {
     };
 
     await expect(
-      service.initialize({ elasticsearchClient, authService: authService as any })
+      service.initialize({
+        elasticsearchClient,
+        authService: authService as any,
+        userProfileService: userProfileServiceMock.createStart(),
+      })
     ).resolves.toBeUndefined();
 
     expect(logger.error).toHaveBeenCalled();
@@ -148,6 +163,7 @@ describe('WorkflowChangeHistoryService', () => {
     await service.initialize({
       elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
       authService: authService as any,
+      userProfileService: userProfileServiceMock.createStart(),
     });
 
     const scoped = service.asScoped({} as any);

@@ -10,8 +10,7 @@
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { ScoutTestTarget } from '@kbn/scout-info';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT, SCOUT_TEST_RUN_SCOPE } from '@kbn/scout-info';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutFileInfo } from '@kbn/scout-reporting';
 import {
@@ -21,6 +20,7 @@ import {
   type ScoutTestRunInfo,
   generateTestRunId,
   computeTestID,
+  buildScoutTargetInfo,
 } from '@kbn/scout-reporting';
 import {
   type CodeOwnersEntry,
@@ -75,14 +75,10 @@ export class ScoutCypressReporter {
 
     const configPath = this.reporterOptions.config?.path || undefined;
     const category = this.reporterOptions.config?.category || undefined;
-    const testTarget = ScoutTestTarget.tryFromEnv();
-
     this.baseTestRunInfo = {
       id: this.runId,
-      target: {
-        type: testTarget?.location || 'local',
-        mode: testTarget?.tagWithoutLocation || 'unknown',
-      },
+      target: buildScoutTargetInfo(),
+      scope: SCOUT_TEST_RUN_SCOPE,
       config: {
         file: configPath
           ? this.getScoutFileInfoForPath(path.relative(REPO_ROOT, configPath))

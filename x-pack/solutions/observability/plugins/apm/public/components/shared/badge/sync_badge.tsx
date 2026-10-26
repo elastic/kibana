@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 
 export interface SyncBadgeProps {
@@ -60,15 +58,16 @@ export function getSyncLabel(agentName?: AgentName, sync?: boolean) {
   }
 }
 
-export function SyncBadge({ sync, agentName }: SyncBadgeProps) {
-  const syncLabel = getSyncLabel(agentName, sync);
-  if (!syncLabel) {
-    return null;
-  }
+export interface SyncBadgeDescriptor {
+  label: string;
+  toolTipContent: string;
+}
 
-  return (
-    <EuiToolTip content={TOOLTIP_CONTENT}>
-      <EuiBadge tabIndex={0}>{syncLabel}</EuiBadge>
-    </EuiToolTip>
-  );
+/** Resolves the sync badge's label and tooltip, or `undefined` when the agent's default sync mode applies. */
+export function getSyncBadgeDescriptor({
+  sync,
+  agentName,
+}: SyncBadgeProps): SyncBadgeDescriptor | undefined {
+  const label = getSyncLabel(agentName, sync);
+  return label ? { label, toolTipContent: TOOLTIP_CONTENT } : undefined;
 }

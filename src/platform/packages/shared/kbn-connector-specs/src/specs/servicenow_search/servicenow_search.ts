@@ -16,6 +16,7 @@
  * - Retrieve individual records by sys_id
  * - List records from any ServiceNow table with filtering
  * - Download attachment content as base64
+ * - Inbound incident, journal, and change-approval events
  *
  * Requires OAuth2 client credentials authentication.
  */
@@ -47,6 +48,7 @@ import {
   QueryUsersInputSchema,
   WhoAmIInputSchema,
 } from './types';
+import { servicenowSearchEvents } from './events';
 import type {
   SearchInput,
   GetRecordInput,
@@ -84,7 +86,7 @@ export const ServicenowSearch: ConnectorSpec = {
   metadata: {
     id: '.servicenow_search',
     displayName: 'ServiceNow',
-    description: i18n.translate('core.kibanaConnectorSpecs.servicenowSearch.metadata.description', {
+    description: i18n.translate('connectorSpecs.servicenowSearch.metadata.description', {
       defaultMessage:
         'Create, update, and search records, incidents, security incidents, events, and attachments in ServiceNow',
     }),
@@ -768,9 +770,11 @@ export const ServicenowSearch: ConnectorSpec = {
     'Useful for populating caller_id with the connector account or verifying permissions.',
   ].join('\n'),
 
+  events: servicenowSearchEvents,
+
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.servicenowSearch.test.description', {
+    description: i18n.translate('connectorSpecs.servicenowSearch.test.description', {
       defaultMessage: 'Verifies ServiceNow connection by fetching the current user record',
     }),
     handler: async (ctx) => {

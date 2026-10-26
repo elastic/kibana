@@ -13,7 +13,7 @@ import {
   DETECTION_OCCURRENCE_BUCKET_SIZE,
   getDetectionOccurrenceTimeRange,
   type OccurrencePoint,
-} from '../detection/change_point';
+} from '../components/entities/detection/change_point';
 import { useKibana } from './use_kibana';
 
 export type DetectionOccurrencesByRuleUuid = ReadonlyMap<string, OccurrencePoint[]>;

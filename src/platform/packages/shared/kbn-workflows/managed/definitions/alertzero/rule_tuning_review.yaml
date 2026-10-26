@@ -112,6 +112,9 @@ outputs:
   - name: applied
     type: boolean
 consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Rule Tuning worker"
   # Fallbacks for the optional operational inputs; keep in sync with the sweep's
   # consts in rule_tuning_worker.yaml.
   analysis_window_days: 7
@@ -274,6 +277,40 @@ steps:
                 on-failure:
                   continue: true
 
+              - name: report_investigation_closed_declined
+                type: alertzero.reportWorkerOutcome
+                if: "${{ steps.close_investigation_declined.error == blank and steps.close_investigation_declined.output.changed_fields contains 'status' }}"
+                on-failure:
+                  continue: true
+                with:
+                  event: worker_investigation_closed
+                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  close_reason: other
+
+              # Telemetry: the review's outcome when the analyst declined it.
+              - name: report_review_completed_declined
+                type: alertzero.reportWorkerOutcome
+                on-failure:
+                  continue: true
+                with:
+                  event: rule_tuning_review_completed
+                  entry_gate: declined
+                  change_type: none
+                  confidence: none
+                  decision: none
+                  applied: false
+                  backtest_ran: false
+                  backtest_reduced_alerts: false
+                  rule_unavailable: false
+                  rule_type: "{{ steps.fetch_rule.output.type }}"
+                  rule_source: |-
+                    {%- if steps.fetch_rule.output.rule_source.type == 'external' or steps.fetch_rule.output.immutable == true -%}
+                    prebuilt
+                    {%- elsif steps.fetch_rule.output.type != blank -%}
+                    custom
+                    {%- endif -%}
+                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+
               # workflow.output terminates the run, so no later step needs to check
               # the entry decision.
               - name: stop_declined
@@ -288,6 +325,30 @@ steps:
           # stays open, so the next sweep asks again.
           - match: expired
             steps:
+              # Telemetry: the review's outcome when nobody answered.
+              - name: report_review_completed_undecided
+                type: alertzero.reportWorkerOutcome
+                on-failure:
+                  continue: true
+                with:
+                  event: rule_tuning_review_completed
+                  entry_gate: undecided
+                  change_type: none
+                  confidence: none
+                  decision: none
+                  applied: false
+                  backtest_ran: false
+                  backtest_reduced_alerts: false
+                  rule_unavailable: false
+                  rule_type: "{{ steps.fetch_rule.output.type }}"
+                  rule_source: |-
+                    {%- if steps.fetch_rule.output.rule_source.type == 'external' or steps.fetch_rule.output.immutable == true -%}
+                    prebuilt
+                    {%- elsif steps.fetch_rule.output.type != blank -%}
+                    custom
+                    {%- endif -%}
+                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+
               - name: stop_expired
                 type: workflow.output
                 status: completed
@@ -299,8 +360,8 @@ steps:
   - name: diagnose_rule
     type: ai.agent
     agent-id: alertzero-thin-agent
-    # Keep in sync with ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
-    connector-id-by-feature: alertzero_agentic
+    # Keep in sync with ALERTZERO_BALANCED_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+    connector-id-by-feature: alertzero_balanced
     # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
     plugin-id: alertzero_rule_tuning_review
     aggregate-by: alertzero_parent
@@ -310,6 +371,7 @@ steps:
     timeout: "10m"
     create-conversation: true
     with:
+      author_name: "{{ consts.author_name }}"
       # The thin agent has no skills or tools of its own. List every skill the
       # step needs, including the skills those skills load.
       configuration_overrides:
@@ -350,7 +412,7 @@ steps:
           Glob patterns for matches/does_not_match: * matches any sequence, ? matches one char.
 
         query  — The query is too broad and FPs share a pattern not worth
-          excepting individually. Only valid for rule type "{{ steps.fetch_rule.output.type }}".
+          excepting individually. The rule stays a "{{ steps.fetch_rule.output.type }}" rule.
           Populate proposed_query with the full narrowed query in this rule's language,
           "{{ steps.fetch_rule.output.language }}". In KQL a quoted value is a phrase
           and a * inside quotes is a literal asterisk, so every substring match must
@@ -604,13 +666,15 @@ steps:
     on-failure:
       continue: true
 
-  # Rules using a data view, timestamp override, or alert suppression need fields
-  # the preview API cannot conditionally omit, so query and exception auto-apply is
-  # restricted the same way (both reuse this same preview mechanism below). The type
-  # check alone excludes saved-query rules, which carry no inline query. The exception arm additionally
-  # requires its filter to have been built: falling back to the rule's own filters
-  # would backtest the unchanged rule and present it as the exception's result.
-  # Gated on fetch_rule so a skipped diagnose_rule leaves supported null/false.
+  # The preview bodies below carry the rule's own data view, timestamp override,
+  # alert suppression and type-specific fields, so the preview covers query, EQL,
+  # ES|QL, new terms, indicator match and threshold rules. Saved-query rules carry
+  # no inline query and machine learning rules no query at all, so neither is
+  # previewed; an exception cannot be previewed on an ES|QL rule, which has no
+  # filters. The exception arm additionally requires its filter to have been built:
+  # falling back to the rule's own filters would backtest the unchanged rule and
+  # present it as the exception's result. Gated on fetch_rule so a skipped
+  # diagnose_rule leaves supported null/false.
   - name: can_preview_query_change
     type: data.set
     if: >-
@@ -624,13 +688,29 @@ steps:
               and steps.build_exception_filter.output.filters != null)
             or steps.diagnose_rule.output.structured_output.change_type == 'threshold'
             or steps.diagnose_rule.output.structured_output.change_type == 'schedule')
-          and (steps.fetch_rule.output.type == 'query'
-            or (steps.fetch_rule.output.type == 'threshold'
-              and (steps.diagnose_rule.output.structured_output.change_type == 'threshold'
-                or steps.diagnose_rule.output.structured_output.change_type == 'schedule')))
-          and steps.fetch_rule.output.data_view_id == null
-          and steps.fetch_rule.output.timestamp_override == null
-          and steps.fetch_rule.output.alert_suppression == null }}
+          and (
+            (steps.diagnose_rule.output.structured_output.change_type == 'query'
+              and (steps.fetch_rule.output.type == 'query'
+                or steps.fetch_rule.output.type == 'eql'
+                or steps.fetch_rule.output.type == 'esql'
+                or steps.fetch_rule.output.type == 'new_terms'
+                or steps.fetch_rule.output.type == 'threat_match'
+                or steps.fetch_rule.output.type == 'threshold'))
+            or (steps.diagnose_rule.output.structured_output.change_type == 'exception'
+              and (steps.fetch_rule.output.type == 'query'
+                or steps.fetch_rule.output.type == 'eql'
+                or steps.fetch_rule.output.type == 'new_terms'
+                or steps.fetch_rule.output.type == 'threat_match'
+                or steps.fetch_rule.output.type == 'threshold'))
+            or (steps.diagnose_rule.output.structured_output.change_type == 'threshold'
+              and steps.fetch_rule.output.type == 'threshold')
+            or (steps.diagnose_rule.output.structured_output.change_type == 'schedule'
+              and (steps.fetch_rule.output.type == 'query'
+                or steps.fetch_rule.output.type == 'eql'
+                or steps.fetch_rule.output.type == 'esql'
+                or steps.fetch_rule.output.type == 'new_terms'
+                or steps.fetch_rule.output.type == 'threat_match'
+                or steps.fetch_rule.output.type == 'threshold'))) }}
 
   # The diagnosis reports the proposed threshold as three fields; the preview body
   # and the apply action take one object. Skipped for every other arm, so the
@@ -683,6 +763,27 @@ steps:
           query: "{{ steps.fetch_rule.output.query }}"
           language: "{{ steps.fetch_rule.output.language }}"
           index: "${{ steps.fetch_rule.output.index }}"
+          # Unset on the rule means undefined here, and undefined keys are dropped from
+          # the request, so these are passed through as-is.
+          data_view_id: "${{ steps.fetch_rule.output.data_view_id }}"
+          timestamp_override: "${{ steps.fetch_rule.output.timestamp_override }}"
+          timestamp_override_fallback_disabled: "${{ steps.fetch_rule.output.timestamp_override_fallback_disabled }}"
+          alert_suppression: "${{ steps.fetch_rule.output.alert_suppression }}"
+          # Type-specific fields (EQL, new terms, indicator match); undefined and dropped
+          # for rule types that lack them.
+          event_category_override: "${{ steps.fetch_rule.output.event_category_override }}"
+          tiebreaker_field: "${{ steps.fetch_rule.output.tiebreaker_field }}"
+          timestamp_field: "${{ steps.fetch_rule.output.timestamp_field }}"
+          new_terms_fields: "${{ steps.fetch_rule.output.new_terms_fields }}"
+          history_window_start: "${{ steps.fetch_rule.output.history_window_start }}"
+          threat_index: "${{ steps.fetch_rule.output.threat_index }}"
+          threat_query: "${{ steps.fetch_rule.output.threat_query }}"
+          threat_language: "${{ steps.fetch_rule.output.threat_language }}"
+          threat_mapping: "${{ steps.fetch_rule.output.threat_mapping }}"
+          threat_filters: "${{ steps.fetch_rule.output.threat_filters }}"
+          threat_indicator_path: "${{ steps.fetch_rule.output.threat_indicator_path }}"
+          concurrent_searches: "${{ steps.fetch_rule.output.concurrent_searches }}"
+          items_per_search: "${{ steps.fetch_rule.output.items_per_search }}"
           filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
           exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
           severity: "{{ steps.fetch_rule.output.severity }}"
@@ -711,6 +812,27 @@ steps:
             {% if steps.diagnose_rule.output.structured_output.change_type == 'query' %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}{% else %}{{ steps.fetch_rule.output.query }}{% endif %}
           language: "{{ steps.fetch_rule.output.language }}"
           index: "${{ steps.fetch_rule.output.index }}"
+          # Unset on the rule means undefined here, and undefined keys are dropped from
+          # the request, so these are passed through as-is.
+          data_view_id: "${{ steps.fetch_rule.output.data_view_id }}"
+          timestamp_override: "${{ steps.fetch_rule.output.timestamp_override }}"
+          timestamp_override_fallback_disabled: "${{ steps.fetch_rule.output.timestamp_override_fallback_disabled }}"
+          alert_suppression: "${{ steps.fetch_rule.output.alert_suppression }}"
+          # Type-specific fields (EQL, new terms, indicator match); undefined and dropped
+          # for rule types that lack them.
+          event_category_override: "${{ steps.fetch_rule.output.event_category_override }}"
+          tiebreaker_field: "${{ steps.fetch_rule.output.tiebreaker_field }}"
+          timestamp_field: "${{ steps.fetch_rule.output.timestamp_field }}"
+          new_terms_fields: "${{ steps.fetch_rule.output.new_terms_fields }}"
+          history_window_start: "${{ steps.fetch_rule.output.history_window_start }}"
+          threat_index: "${{ steps.fetch_rule.output.threat_index }}"
+          threat_query: "${{ steps.fetch_rule.output.threat_query }}"
+          threat_language: "${{ steps.fetch_rule.output.threat_language }}"
+          threat_mapping: "${{ steps.fetch_rule.output.threat_mapping }}"
+          threat_filters: "${{ steps.fetch_rule.output.threat_filters }}"
+          threat_indicator_path: "${{ steps.fetch_rule.output.threat_indicator_path }}"
+          concurrent_searches: "${{ steps.fetch_rule.output.concurrent_searches }}"
+          items_per_search: "${{ steps.fetch_rule.output.items_per_search }}"
           # build_exception_filter's output (the rule's filters plus the negated exception
           # clause) takes precedence when it ran; otherwise this previews unchanged, same
           # as the query arm.
@@ -768,76 +890,55 @@ steps:
       proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
 
   # Diagnosis notes go to the investigation rather than into the proposal, which
-  # keeps only what the decision needs. `trigger_mode: never` appends a user_message
-  # without running the investigation agent. Called directly rather than through the
-  # journal note workflow, because this run allows one synchronous child per wake-up
+  # keeps only what the decision needs. `ai.conversation.add_user_message` appends
+  # a user_message without running the investigation agent. Called directly rather
+  # than through the journal note workflow, because this run allows one synchronous child per wake-up
   # cycle and the proposal gate below is that child. User messages render as plain
   # text, so no markdown. If a note fails, compose_proposal keeps that text so the
   # analyst still sees it.
   - name: post_fp_pattern
-    type: kibana.request
+    type: ai.conversation.add_user_message
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
         and steps.diagnose_rule.output.structured_output.fp_pattern != blank }}
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
-        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-        input: |-
-          False positive pattern for {{ steps.fetch_rule.output.name }}:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        False positive pattern for {{ steps.fetch_rule.output.name }}:
 
-          {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
-        trigger_mode: never
+        {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
     on-failure:
       continue: true
 
   - name: post_reasoning
-    type: kibana.request
+    type: ai.conversation.add_user_message
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
         and steps.diagnose_rule.output.structured_output.reasoning != blank }}
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
-        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-        input: |-
-          Reasoning behind the tuning proposal for {{ steps.fetch_rule.output.name }}:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        Reasoning behind the tuning proposal for {{ steps.fetch_rule.output.name }}:
 
-          {{ steps.diagnose_rule.output.structured_output.reasoning }}
-        trigger_mode: never
+        {{ steps.diagnose_rule.output.structured_output.reasoning }}
     on-failure:
       continue: true
 
   # A risk score change has no backtest, so this note explains what approving does.
   - name: post_risk_score_note
-    type: kibana.request
+    type: ai.conversation.add_user_message
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
         and steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
-        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-        input: |-
-          About the proposed risk score change for {{ steps.fetch_rule.output.name }}:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        About the proposed risk score change for {{ steps.fetch_rule.output.name }}:
 
-          A risk score change does not change which alerts fire. If you approve, the future alerts of the rule change severity from {{ steps.fetch_rule.output.severity }} to {{ steps.diagnose_rule.output.structured_output.proposed_severity }}. Existing alerts keep their severity. The false positive count in the proposal is the evidence for this change.
-        trigger_mode: never
+        A risk score change does not change which alerts fire. If you approve, the future alerts of the rule change severity from {{ steps.fetch_rule.output.severity }} to {{ steps.diagnose_rule.output.structured_output.proposed_severity }}. Existing alerts keep their severity. The false positive count in the proposal is the evidence for this change.
     on-failure:
       continue: true
 
@@ -940,9 +1041,16 @@ steps:
         Proposed preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
         {% else %}
-        No backtest is available. The preview supports only plain query rules.
-        It does not support a saved query, a data view, a timestamp override or alert suppression.
-        Or the agent could not convert the proposed exception into a preview filter.
+        No backtest is available for this change.
+        {% if steps.fetch_rule.output.type == 'saved_query' or steps.fetch_rule.output.type == 'machine_learning' %}
+        The preview does not support saved query rules or machine learning rules.
+        {% elsif steps.diagnose_rule.output.structured_output.change_type == 'exception' and steps.fetch_rule.output.type == 'esql' %}
+        The preview cannot apply an exception to an ES|QL rule, which has no filters.
+        {% elsif steps.diagnose_rule.output.structured_output.change_type == 'exception' %}
+        The agent could not convert the proposed exception into a preview filter.
+        {% else %}
+        The preview does not support this change on a {{ steps.fetch_rule.output.type }} rule.
+        {% endif %}
         Approving still applies the proposed change.
         Judge it on the change and on the false positives above, not on a simulated alert count.
         {% endif %}
@@ -1172,6 +1280,19 @@ steps:
     on-failure:
       continue: true
 
+  # Telemetry: whether an approved change landed. The gate's `succeeded` only says the action
+  # workflow completed; a change to the rule bumps its revision, and an added exception item
+  # does not, so that arm counts on the action's success.
+  - name: resolve_applied
+    type: data.set
+    with:
+      landed: >-
+        ${{ steps.record_proposal_action_decision.output.applied == true
+          and steps.refetch_rule.error == null
+          and steps.refetch_rule.output.id != null
+          and (steps.propose_exception.output.status == 'succeeded'
+            or steps.refetch_rule.output.revision > steps.fetch_rule.output.revision) }}
+
   # The rule attachment is a snapshot and never refreshes, so after the patch it
   # would silently show the pre-tuning rule. This writes the patched rule as
   # version 2; version 1 keeps the before state in the attachment history.
@@ -1251,6 +1372,16 @@ steps:
     on-failure:
       continue: true
 
+  - name: report_investigation_closed_applied
+    type: alertzero.reportWorkerOutcome
+    if: "${{ steps.record_proposal_action_decision.output.approved == true and steps.close_investigation_applied.error == blank and steps.close_investigation_applied.output.changed_fields contains 'status' }}"
+    on-failure:
+      continue: true
+    with:
+      event: worker_investigation_closed
+      investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      close_reason: resolved
+
   - name: close_investigation_dismissed
     type: ai.conversation.metadata.patch
     if: >-
@@ -1264,6 +1395,74 @@ steps:
         verdict: "The tuning proposal was dismissed."
     on-failure:
       continue: true
+
+  - name: report_investigation_closed_dismissed
+    type: alertzero.reportWorkerOutcome
+    if: "${{ steps.record_proposal_action_decision.output.dismissed == true and steps.close_investigation_dismissed.error == blank and steps.close_investigation_dismissed.output.changed_fields contains 'status' }}"
+    on-failure:
+      continue: true
+    with:
+      event: worker_investigation_closed
+      investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      close_reason: other
+
+  # Telemetry: the review's outcome. A change type the arms above don't name is `manual`.
+  - name: report_review_completed
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: rule_tuning_review_completed
+      entry_gate: |-
+        {%- if steps.propose_entry.output.decision == 'approved' -%}
+        approved
+        {%- else -%}
+        skipped
+        {%- endif -%}
+      change_type: |-
+        {%- assign change_type = steps.diagnose_rule.output.structured_output.change_type -%}
+        {%- if change_type == 'query' or change_type == 'risk_score' or change_type == 'exception' or change_type == 'threshold' or change_type == 'schedule' -%}
+        {{ change_type }}
+        {%- elsif steps.propose_manual.output.status != blank -%}
+        manual
+        {%- else -%}
+        none
+        {%- endif -%}
+      confidence: |-
+        {%- assign confidence = steps.diagnose_rule.output.structured_output.confidence -%}
+        {%- if confidence == 'low' or confidence == 'medium' or confidence == 'high' -%}
+        {{ confidence }}
+        {%- else -%}
+        none
+        {%- endif -%}
+      decision: |-
+        {%- if steps.record_proposal_action_decision.output.approved == true -%}
+        approved
+        {%- elsif steps.record_proposal_action_decision.output.dismissed == true -%}
+        dismissed
+        {%- elsif steps.propose_query.output.status != blank or steps.propose_risk_score.output.status != blank or steps.propose_exception.output.status != blank or steps.propose_threshold.output.status != blank or steps.propose_schedule.output.status != blank or steps.propose_manual.output.status != blank -%}
+        undecided
+        {%- else -%}
+        none
+        {%- endif -%}
+      applied: "${{ steps.resolve_applied.output.landed == true }}"
+      # An approved action whose change did not land. A `manual` change has no action.
+      approved_not_applied: >-
+        ${{ steps.record_proposal_action_decision.output.approved == true
+          and steps.propose_manual.output.decision != 'approved'
+          and steps.resolve_applied.output.landed != true }}
+      backtest_ran: "${{ steps.record_preview_outcome.output.current_succeeded == true and steps.record_preview_outcome.output.proposed_succeeded == true }}"
+      backtest_reduced_alerts: "${{ steps.record_preview_outcome.output.current_succeeded == true and steps.record_preview_outcome.output.proposed_succeeded == true and steps.record_preview_outcome.output.proposed_alert_count < steps.record_preview_outcome.output.current_alert_count }}"
+      rule_unavailable: "${{ steps.fetch_rule.error != null or steps.fetch_rule.output.enabled != true }}"
+      # The rule's own type; the step maps it to the event's vocabulary.
+      rule_type: "{{ steps.fetch_rule.output.type }}"
+      rule_source: |-
+        {%- if steps.fetch_rule.output.rule_source.type == 'external' or steps.fetch_rule.output.immutable == true -%}
+        prebuilt
+        {%- elsif steps.fetch_rule.output.type != blank -%}
+        custom
+        {%- endif -%}
+      investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
 
   - name: emit_result
     type: workflow.output

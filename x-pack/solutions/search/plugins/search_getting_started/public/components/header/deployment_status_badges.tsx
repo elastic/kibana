@@ -18,7 +18,8 @@ export const DeploymentStatusBadges: React.FC = () => {
   const {
     services: { cloud, kibanaVersion },
   } = useKibana();
-  const isTrial = cloud?.isInTrial() ?? false;
+  // Serverless shows the trial badge in the Chrome header instead
+  const isTrial = (cloud?.isInTrial() && !cloud.isServerlessEnabled) ?? false;
 
   return (
     <EuiFlexGroup

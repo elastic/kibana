@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERTZERO_FAST_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
+import { ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
   ENRICH_TAXONOMY_API_PATH,
   enrichTaxonomyBodySchema,
@@ -51,7 +51,7 @@ export const registerEnrichTaxonomyRoute = ({
           searchInferenceEndpoints: getSearchInferenceEndpoints(),
           request,
           uiSettingsClient: core.uiSettings.client,
-          featureId: ALERTZERO_FAST_INFERENCE_FEATURE_ID,
+          featureId: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
           logger,
         });
         if (!modelOutcome.ok) {

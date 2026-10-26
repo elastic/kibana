@@ -29,10 +29,14 @@ const makeExecution = (
     ...overrides,
   } as WorkflowExecutionListItemDto);
 
-const makeSource = (id: string, esqlUpdatedAt = '2020-01-01T00:00:00.000Z') => ({
+const makeSource = (
+  id: string,
+  { esqlUpdatedAt = '2020-01-01T00:00:00.000Z', enabled = true } = {}
+) => ({
   id,
   slug: slugFor(id),
   esql_updated_at: esqlUpdatedAt,
+  enabled,
 });
 
 const candidateNames = (result: ReturnType<typeof classifySources>) =>
@@ -73,7 +77,7 @@ describe('classifySources', () => {
   it('identifies already running executions, even when the query changed mid-run', () => {
     const result = classifySources({
       ...defaultArgs,
-      sources: [makeSource('running-source', '2026-06-01T00:00:00.000Z')],
+      sources: [makeSource('running-source', { esqlUpdatedAt: '2026-06-01T00:00:00.000Z' })],
       executions: [
         makeExecution('running-source', {
           status: ExecutionStatus.RUNNING,
@@ -113,7 +117,7 @@ describe('classifySources', () => {
     const recentCompletion = new Date().toISOString();
     const result = classifySources({
       ...defaultArgs,
-      sources: [makeSource('fresh-source', '2020-01-01T00:00:00.000Z')],
+      sources: [makeSource('fresh-source', { esqlUpdatedAt: '2020-01-01T00:00:00.000Z' })],
       executions: [
         makeExecution('fresh-source', {
           startedAt: '2025-01-01T00:00:00.000Z',
@@ -149,7 +153,7 @@ describe('classifySources', () => {
     const recentCompletion = new Date().toISOString();
     const result = classifySources({
       ...defaultArgs,
-      sources: [makeSource('edited-source', '2026-06-01T00:00:00.000Z')],
+      sources: [makeSource('edited-source', { esqlUpdatedAt: '2026-06-01T00:00:00.000Z' })],
       executions: [
         makeExecution('edited-source', {
           startedAt: '2026-01-01T00:00:00.000Z',
@@ -234,5 +238,38 @@ describe('classifySources', () => {
     });
 
     expect(candidateNames(result)).toEqual(['older-source', 'recent-source']);
+  });
+
+  it('accounts for every source, with a disabled source only in the disabled bucket', () => {
+    const sources = [
+      makeSource('on'),
+      makeSource('off', { enabled: false }),
+      makeSource('running', { esqlUpdatedAt: '2026-06-01T00:00:00.000Z' }),
+    ];
+    const result = classifySources({
+      ...defaultArgs,
+      sources,
+      executions: [
+        makeExecution('off', { status: ExecutionStatus.RUNNING, finishedAt: '' }),
+        makeExecution('running', {
+          status: ExecutionStatus.RUNNING,
+          startedAt: '2026-01-01T00:00:00.000Z',
+          finishedAt: '',
+        }),
+      ],
+    });
+
+    expect(result.disabled).toEqual([{ sourceId: 'off', sourceSlug: 'off-slug' }]);
+    const classifiedIds = [...result.candidates, ...result.alreadyRunning, ...result.upToDate].map(
+      ({ sourceId }) => sourceId
+    );
+    expect(classifiedIds).not.toContain('off');
+    expect(
+      result.candidates.length +
+        result.alreadyRunning.length +
+        result.upToDate.length +
+        result.unsupported.length +
+        result.disabled.length
+    ).toBe(sources.length);
   });
 });

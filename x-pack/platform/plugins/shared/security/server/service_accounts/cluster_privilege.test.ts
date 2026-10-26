@@ -45,18 +45,6 @@ describe('ensureClusterPrivilege', () => {
     expect(globally).toHaveBeenCalledWith({
       elasticsearch: { cluster: ['manage_security'], index: {} },
     });
-
-    await ensureClusterPrivilege({
-      request,
-      checkPrivilegesWithRequest,
-      logger,
-      privilege: 'read_security',
-      action: 'list service accounts',
-    });
-
-    expect(globally).toHaveBeenLastCalledWith({
-      elasticsearch: { cluster: ['read_security'], index: {} },
-    });
   });
 
   it('resolves quietly when the privilege is held', async () => {

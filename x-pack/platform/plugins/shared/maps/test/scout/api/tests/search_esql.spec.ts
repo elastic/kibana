@@ -42,7 +42,10 @@ apiTest.describe('Maps - search ES|QL', { tag: [...tags.stateful.classic] }, () 
       body: {
         params: {
           dropNullColumns: true,
-          query: 'from logstash-* | keep geo.coordinates, @timestamp | sort @timestamp | limit 1',
+          // Scoped to the logstash_functional indices so data from other archives
+          // matching logstash-* (e.g. makelogs) cannot change the first row.
+          query:
+            'from logstash-2015.09.2* | keep geo.coordinates, @timestamp | sort @timestamp | limit 1',
         },
       },
     });

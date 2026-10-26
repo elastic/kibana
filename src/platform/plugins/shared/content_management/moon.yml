@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/object-versioning-utils'
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/react-query'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
@@ -45,6 +46,4 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

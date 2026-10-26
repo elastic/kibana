@@ -28,6 +28,7 @@ export class BulkUpdateApiKeyActionPoliciesRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Rotate API keys for action policies in bulk by ID',
     oasOperationObject: bulkUpdateApiKeyActionPoliciesOasExamples,
   } as const;

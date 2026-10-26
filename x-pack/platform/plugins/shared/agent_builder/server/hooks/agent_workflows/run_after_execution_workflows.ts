@@ -14,10 +14,15 @@ import {
   type ToolCallStep,
   type ToolResult,
 } from '@kbn/agent-builder-common';
-import { WORKFLOWS_UI_SETTING_ID, ExecutionStatus } from '@kbn/workflows';
+import {
+  AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
+  WORKFLOWS_UI_SETTING_ID,
+  ExecutionStatus,
+} from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
+import { context as otelContext, ROOT_CONTEXT } from '@opentelemetry/api';
 import type { InternalStartServices } from '../../services/types';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AfterExecutionWorkflowParams } from './types';
@@ -130,22 +135,26 @@ export const runAfterExecutionWorkflows = async ({
   };
 
   for (const workflowId of workflowIds) {
-    const result = await executeWorkflow({
+    const workflowParamsWithOptionalInputs = await withDeclaredInputs({
       workflowId,
-      workflowParams: await withDeclaredInputs({
-        workflowId,
-        inputs: workflowParams as unknown as Record<string, unknown>,
-        optionalInputs: optionalWorkflowParams,
-        workflowApi,
-        spaceId,
-        request: context.request,
-        logger,
-      }),
-      request: context.request,
-      spaceId,
+      inputs: workflowParams as unknown as Record<string, unknown>,
+      optionalInputs: optionalWorkflowParams,
       workflowApi,
-      waitForCompletion: true,
+      spaceId,
+      request: context.request,
+      logger,
     });
+    const result = await otelContext.with(ROOT_CONTEXT, () =>
+      executeWorkflow({
+        workflowId,
+        workflowParams: workflowParamsWithOptionalInputs,
+        request: context.request,
+        spaceId,
+        workflowApi,
+        waitForCompletion: true,
+        triggeredBy: AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
+      })
+    );
 
     if (!result.success) {
       logger.error(`Post-execution workflow "${workflowId}" failed to execute: ${result.error}`);

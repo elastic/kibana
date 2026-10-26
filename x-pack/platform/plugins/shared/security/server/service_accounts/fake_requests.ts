@@ -81,8 +81,11 @@ export interface CreateServiceAccountFakeRequestParams {
  * verification), while a server error or a plain exception is a failure of the check itself — a
  * saved objects read against a briefly unavailable cluster, say — that the next refresh may not
  * hit again. Latching those would kill a still-valid execution over one blip.
+ *
+ * Workload executions audit a mint failure exactly when this says it is terminal, so the two
+ * rules cannot drift apart: a change here changes which failures reach the audit log.
  */
-const isTerminalMintFailure = (
+export const isTerminalMintFailure = (
   err: unknown,
   { raisedByInterceptor }: { raisedByInterceptor: boolean }
 ): boolean => {

@@ -366,6 +366,44 @@ describe('runAgent', () => {
       );
     });
 
+    it("passes the parent's workflow run on to the sub-agents of the rebuilt executor", async () => {
+      agent = createMockedInternalAgent({
+        configuration: { tools: [], approvals: storedApprovals },
+      });
+      agentClient.get.mockResolvedValue(agent);
+      const parentManager = new RunnerManager({
+        ...runnerDeps,
+        getExecutionService: () => executionService,
+        interactivity: { enabled: false, auto_approved_apis: [callerGrant] },
+        workflowExecutionId: 'workflow-run-1',
+      });
+      const createChild = jest.spyOn(parentManager, 'createChild');
+      await runAgent({
+        agentExecutionParams: {
+          agentId: 'test-agent',
+          agentParams: { nextInput: { message: 'hi' } },
+        },
+        parentManager,
+      });
+      const childManager = createChild.mock.results[0].value as RunnerManager;
+
+      await childManager.deps.subAgentExecutor.createSubAgent({
+        agentId: 'sub-agent',
+        conversationId: 'sub-conversation',
+        parentConversationId: 'parent-conversation',
+        parentExecutionId: 'parent-execution-id',
+        prompt: 'go',
+        subagentName: 'helper',
+        subagentPurpose: 'testing',
+      });
+
+      expect(executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ workflowExecutionId: 'workflow-run-1' }),
+        })
+      );
+    });
+
     it('passes the effective configuration to the child run without mutating the parent deps', async () => {
       const { parentManager, childManager } = await runWith({ approvals: storedApprovals });
 
