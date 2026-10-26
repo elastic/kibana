@@ -54,25 +54,25 @@ describe('initializeSettingsManager', () => {
   });
 });
 
-describe('areStatesEqual', () => {
+describe('diffStates', () => {
   const { api } = getDashboardApi({
     incomingEmbeddables: [],
     initialState: DEFAULT_DASHBOARD_STATE,
   });
 
-  test('treats states that differ only in what the unsaved-changes manager ignores as equal', () => {
+  test('finds no changes between states that differ only in what unsaved changes ignores', () => {
     expect(
-      api.areStatesEqual(DEFAULT_DASHBOARD_STATE, {
+      api.diffStates(DEFAULT_DASHBOARD_STATE, {
         ...DEFAULT_DASHBOARD_STATE,
         esql_approximation: false,
       })
-    ).toBe(true);
+    ).toEqual({});
   });
 
-  test('finds a changed setting', () => {
+  test('returns a changed setting', () => {
     expect(
-      api.areStatesEqual(DEFAULT_DASHBOARD_STATE, { ...DEFAULT_DASHBOARD_STATE, title: 'Logs' })
-    ).toBe(false);
+      api.diffStates(DEFAULT_DASHBOARD_STATE, { ...DEFAULT_DASHBOARD_STATE, title: 'Logs' })
+    ).toEqual({ title: 'Logs' });
   });
 });
 
