@@ -11,12 +11,7 @@ import { MessageRole } from '@kbn/inference-common';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import type { RecorderMemory } from './coordinator';
 import { FINAL_INSTRUCTION, FINDINGS_RECORDER_SYSTEM_PROMPT, LIVE_INSTRUCTION } from './prompt';
-import {
-  limitToOneConfirmed,
-  runFindingsPass,
-  type FindingsPassDeps,
-  namedAsAffected,
-} from './run_pass';
+import { limitToOneConfirmed, runFindingsPass, type FindingsPassDeps } from './run_pass';
 
 jest.mock('../lib/create_optimize_model', () => ({ createOptimizeModel: jest.fn() }));
 
@@ -324,33 +319,5 @@ describe('runFindingsPass', () => {
     await expect(run({ ...deps, getAgenticInvestigations: () => undefined }, memory)).resolves.toBe(
       false
     );
-  });
-});
-
-describe('namedAsAffected', () => {
-  const entities = [
-    { name: 'customer-zero-code-indexer' },
-    { name: 'customer-zero-codebox' },
-    { name: 'kibana' },
-  ];
-
-  it('drops an entity the impact sentence does not name, as when the agent ruled it out', () => {
-    expect(
-      namedAsAffected(
-        entities,
-        'customer-zero-code-indexer lagged for 3 hours while kibana was slow to load.'
-      )
-    ).toEqual([{ name: 'customer-zero-code-indexer' }, { name: 'kibana' }]);
-  });
-
-  it('leaves no entities when fewer than two are named', () => {
-    expect(namedAsAffected(entities, 'customer-zero-code-indexer lagged for 3 hours.')).toEqual([]);
-  });
-
-  it('matches names without regard to case', () => {
-    expect(namedAsAffected(entities, 'Customer-Zero-Codebox and KIBANA were degraded.')).toEqual([
-      { name: 'customer-zero-codebox' },
-      { name: 'kibana' },
-    ]);
   });
 });

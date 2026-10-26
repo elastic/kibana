@@ -112,7 +112,7 @@ export const FINDINGS_JSON_SCHEMA = {
     impact_entities: {
       type: 'array',
       description:
-        'Only when two or more services or components were affected in different ways, grouped at service level. Never a service that was ruled out, found healthy or only suspected, and each one is named in impact_summary. At most 5.',
+        'Only when two or more services or components were affected in different ways, grouped at service level. At most 5.',
       items: {
         type: 'object',
         properties: {
