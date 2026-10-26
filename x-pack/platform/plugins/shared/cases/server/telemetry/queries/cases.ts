@@ -237,7 +237,7 @@ const getCasesSavedObjectTelemetry = async (
         terms: { field: `${CASE_SAVED_OBJECT}.attributes.settings.extractObservables` },
       },
       extractObservablesSource: {
-        terms: { field: `${CASE_SAVED_OBJECT}.attributes.settings.extractObservablesSource` },
+        terms: { field: `${CASE_SAVED_OBJECT}.attributes.extract_observables_source` },
       },
       users: {
         cardinality: {

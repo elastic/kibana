@@ -636,7 +636,7 @@ describe('getCasesTelemetryData', () => {
             },
             "extractObservablesSource": Object {
               "terms": Object {
-                "field": "cases.attributes.settings.extractObservablesSource",
+                "field": "cases.attributes.extract_observables_source",
               },
             },
             "observability": Object {
