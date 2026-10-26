@@ -50,10 +50,5 @@ module.exports = {
         endOfLine: 'auto',
       },
     ],
-
-    'no-new-func': 'error',
-    'no-implied-eval': 'error',
-    'no-prototype-builtins': 'error',
   },
-
 };

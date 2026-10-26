@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
+import useObservable from 'react-use/lib/useObservable';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { Router, Route } from '@kbn/shared-ux-router';
@@ -26,11 +28,14 @@ import type { IngestHubStartDependencies } from '../../types';
 
 import { OnboardingShell } from './onboarding_shell';
 import { OnboardingFlowProvider } from '../onboarding_flow_context';
-import { clearOnboardingSession, getOnboardingSessionKey } from './onboarding_session_storage';
+import {
+  clearOnboardingSession,
+  discardMarkedSessions,
+  getOnboardingSessionKey,
+} from './onboarding_session_storage';
 import { ECF_LAUNCH_STEP_SESSION_KEY } from '../step_components/ecf_deployment_section';
 import { ONBOARDING_STEPS } from './steps';
-
-const DEFAULT_RETURN_APP = 'integrations';
+import { DEFAULT_RETURN_APP, saveReturnUrl } from './return_url';
 
 function RootRedirect() {
   const { services } = useKibana();
@@ -86,6 +91,9 @@ export async function hydrateOnboardingSession(
       getOnboardingSessionKey(integrationId, 'serviceSettingsStep'),
       JSON.stringify({
         globalRegion: item.globalRegion ?? '',
+        // Absent on onboardings saved before these fields existed; the default is then prefilled.
+        ...(item.integrationName ? { integrationName: item.integrationName } : {}),
+        ...(item.description ? { description: item.description } : {}),
         serviceVars: item.serviceVars ?? {},
       })
     );
@@ -188,6 +196,14 @@ export function getCloudService(
   return { ...cloudSetup, ...cloudStart };
 }
 
+function StyledComponentsThemeProvider({
+  theme,
+  children,
+}: PropsWithChildren<{ theme: CoreStart['theme'] }>) {
+  const { darkMode } = useObservable(theme.theme$, theme.getTheme());
+  return <EuiThemeProvider darkMode={darkMode}>{children}</EuiThemeProvider>;
+}
+
 export async function renderOnboardingApp(
   coreStart: CoreStart,
   params: AppMountParameters,
@@ -228,6 +244,13 @@ export async function renderOnboardingApp(
     }
   }
 
+  // Remember where the user came from, after the clear / hydrate above has wiped session storage.
+  const returnUrl = (state as { returnUrl?: string } | undefined)?.returnUrl;
+  const entryIntegrationId = pathname.split('/').filter(Boolean)[0];
+  if (entryIntegrationId && typeof returnUrl === 'string') {
+    saveReturnUrl(entryIntegrationId, returnUrl);
+  }
+
   const queryClient = new QueryClient();
   const root = createRoot(params.element);
   root.render(
@@ -237,7 +260,7 @@ export async function renderOnboardingApp(
       // Without it, styled-components receives undefined theme and throws at render time.
       // Fleet's own app root adds this provider for the same reason; we mirror it here.
       // See: fleet/public/applications/fleet/app.tsx lines 219-221.
-      <EuiThemeProvider darkMode={coreStart.theme.getTheme().darkMode}>
+      <StyledComponentsThemeProvider theme={coreStart.theme}>
         {/* authz must be part of the Kibana context so that Fleet's useAuthz() hook can read it
             when AgentEnrollmentFlyout is rendered. Without it, authz.fleet.readAgentPolicies throws.
             See: fleet/public/hooks/use_authz.ts */}
@@ -276,8 +299,12 @@ export async function renderOnboardingApp(
             </FleetStatusProvider>
           </QueryClientProvider>
         </KibanaContextProvider>
-      </EuiThemeProvider>
+      </StyledComponentsThemeProvider>
     )
   );
-  return () => root.unmount();
+  return () => {
+    root.unmount();
+    // Nothing can rewrite the session now, so a cancelled flow is dropped for good.
+    discardMarkedSessions();
+  };
 }

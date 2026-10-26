@@ -6,7 +6,12 @@
  */
 
 import { Subject, ReplaySubject } from 'rxjs';
-import { ChatEventType, SELF_AGENT_ID, SubagentMode } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  SELF_AGENT_ID,
+  SubagentMode,
+  internalTools,
+} from '@kbn/agent-builder-common';
 import type {
   AgentApprovals,
   AutoApprovedApi,
@@ -870,6 +875,7 @@ describe('createSubagentTool', () => {
       childConversationExists = false,
       allowSelf = false,
       subagentApprovals,
+      discoveryEnabled,
     }: {
       executeSubAgent?: jest.Mock;
       createSubAgent?: jest.Mock;
@@ -878,6 +884,7 @@ describe('createSubagentTool', () => {
       childConversationExists?: boolean;
       allowSelf?: boolean;
       subagentApprovals?: AgentApprovals;
+      discoveryEnabled?: boolean;
     } = {}) =>
       createSubagentTool({
         ownerAgentId: 'test-agent',
@@ -894,6 +901,7 @@ describe('createSubagentTool', () => {
         subagentTracker,
         parentConversationId,
         conversationExists: jest.fn().mockResolvedValue(childConversationExists),
+        discoveryEnabled,
       });
 
     it('asks the user to confirm the grant before spawning the sub-agent', async () => {
@@ -1247,6 +1255,28 @@ describe('createSubagentTool', () => {
         })
       );
     });
+
+    it.each([true, false])(
+      'points at the discovery tool on an unknown API only when discovery is enabled (%s)',
+      async (discoveryEnabled) => {
+        const tool = createTool({ discoveryEnabled });
+        const { context } = createMockContext();
+
+        const result = await callHandler(
+          tool,
+          {
+            description: 'x',
+            prompt: 'y',
+            auto_approved_apis: { elasticsearch: ['indices.nope'] },
+          },
+          context
+        );
+
+        expect(result.results[0].data.message.includes(internalTools.discoverApis)).toBe(
+          discoveryEnabled
+        );
+      }
+    );
 
     it('does not prompt for a grant when a persistent name is already taken', async () => {
       const createSubAgent = jest.fn();

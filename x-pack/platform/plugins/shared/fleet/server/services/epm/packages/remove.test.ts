@@ -14,12 +14,14 @@ import { KibanaSavedObjectType } from '../../../../common/types';
 import { packagePolicyService, appContextService } from '../..';
 import { auditLoggingService } from '../../audit_logging';
 import { FleetUnauthorizedError } from '../../../errors';
+import { deleteTransforms } from '../elasticsearch/transform/remove';
 
 import {
   deleteESAsset,
   deleteKibanaAssets,
   deleteKibanaSavedObjectsAssets,
   deleteWorkflowAssets,
+  deletePrerequisiteAssets,
   removeInstallation,
   cleanupAssets,
   cleanupDependenciesStep,
@@ -79,6 +81,10 @@ jest.mock('../..', () => {
   };
 });
 jest.mock('../../audit_logging');
+
+jest.mock('../elasticsearch/transform/remove', () => ({
+  deleteTransforms: jest.fn().mockResolvedValue(undefined),
+}));
 
 jest.mock('../../package_policies/populate_package_policy_assigned_agents_count');
 
@@ -687,6 +693,60 @@ describe('deleteESAsset', () => {
       { method: 'DELETE', path: '/_query/view/view-1' },
       { ignore: [404, 400] }
     );
+  });
+});
+
+describe('deletePrerequisiteAssets - transform destination indices', () => {
+  const transformAssets = [
+    { id: 'logs-my_package.probe-default-1.0.0', type: ElasticsearchAssetType.transform },
+  ];
+
+  beforeEach(() => {
+    jest.mocked(deleteTransforms).mockClear();
+  });
+
+  const run = async (installSource?: 'registry' | 'bundled' | 'upload' | 'custom') => {
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    await deletePrerequisiteAssets(
+      { indexAssets: [], transformAssets, indexTemplatesAndPipelines: [], installSource },
+      esClient
+    );
+    return esClient;
+  };
+
+  // Elasticsearch authorizes delete_dest_index against the identity stored on the transform.
+  // For an uploaded package that is the uploader's API key, which normally cannot delete the
+  // destination index — asking for it fails the whole call and strands the transform.
+  it.each(['upload', 'custom'] as const)(
+    'deletes a %s transform without its destination index',
+    async (installSource) => {
+      const esClient = await run(installSource);
+
+      expect(deleteTransforms).toHaveBeenCalledWith(
+        esClient,
+        ['logs-my_package.probe-default-1.0.0'],
+        false
+      );
+    }
+  );
+
+  it.each(['registry', 'bundled'] as const)(
+    'deletes a %s transform together with its destination index',
+    async (installSource) => {
+      const esClient = await run(installSource);
+
+      expect(deleteTransforms).toHaveBeenCalledWith(
+        esClient,
+        ['logs-my_package.probe-default-1.0.0'],
+        true
+      );
+    }
+  );
+
+  it('keeps the destination index when the install source is unknown', async () => {
+    await run(undefined);
+
+    expect(deleteTransforms).toHaveBeenCalledWith(expect.anything(), expect.anything(), false);
   });
 });
 

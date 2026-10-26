@@ -10,9 +10,10 @@ import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiIcon, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { InferenceConnectorType } from '@kbn/inference-common';
+import { InferenceConnectorType, isTemplateRequiredConnector } from '@kbn/inference-common';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { useConnectors } from '../../hooks/use_connectors';
+import { isConnectorUnavailableUnderRegionPolicy } from '../../utils/is_unavailable_under_region_policy';
 import { getConnectorIcon } from '../../utils/connector_display';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
 import { getModelStatus } from '../../utils/eis_utils';
@@ -41,6 +42,11 @@ interface AddModelPopoverProps {
   /** When set, only connectors compatible with this inference task type are listed. */
   taskType?: string;
   panelWidth?: number;
+  /**
+   * When true, the list contains only endpoints with
+   * `capabilities.templates.policy: required`. Otherwise those endpoints are hidden.
+   */
+  allowTemplateRequiredModels?: boolean;
 }
 
 export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
@@ -48,6 +54,7 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
   onAdd,
   taskType,
   panelWidth,
+  allowTemplateRequiredModels = false,
 }) => {
   const { data: connectors = [] } = useConnectors();
   const [isOpen, setIsOpen] = useState(false);
@@ -56,6 +63,13 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
     const existingSet = new Set(existingEndpointIds);
     const available = connectors.filter((connector) => {
       if (existingSet.has(connector.connectorId)) {
+        return false;
+      }
+      if (isConnectorUnavailableUnderRegionPolicy(connector)) {
+        return false;
+      }
+      const templateRequired = isTemplateRequiredConnector(connector);
+      if (allowTemplateRequiredModels !== templateRequired) {
         return false;
       }
       if (!taskType) {
@@ -78,6 +92,7 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
       return {
         label,
         key: connector.connectorId,
+        'data-test-subj': `add-model-option-${connector.connectorId}`,
         prepend: <EuiIcon type={getConnectorIcon(connector)} size="s" aria-hidden />,
         disabled: status === EisModelStatus.DeprecatedEOL,
         append: isDeprecated ? (
@@ -90,7 +105,7 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
         ) : undefined,
       };
     });
-  }, [connectors, existingEndpointIds, taskType]);
+  }, [allowTemplateRequiredModels, connectors, existingEndpointIds, taskType]);
 
   const handleChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
