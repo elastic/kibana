@@ -439,14 +439,19 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, skipped detect
     embedded,
     skipped,
     truncated = false,
+    includeSkipped = true,
   }: {
     embedded: Array<Record<string, unknown>>;
     skipped: Array<Record<string, unknown>>;
     truncated?: boolean;
+    includeSkipped?: boolean;
   }) => {
     const findSkippedForEvent = jest.fn().mockResolvedValue({ hits: skipped, truncated });
     const response = await lifecycleRoute.handler({
-      params: { path: { id: event.event_id } },
+      params: {
+        path: { id: event.event_id },
+        ...(includeSkipped ? { query: { include_skipped: 'true' as const } } : {}),
+      },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
@@ -469,6 +474,19 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, skipped detect
     probe_status: 'ok',
     checked_at: '2026-01-01T01:00:05.000Z',
   };
+
+  it('leaves the skipped detections out, without looking them up, unless asked for', async () => {
+    const { response, findSkippedForEvent } = await run({
+      embedded: [stored('detection-1')],
+      skipped: [stored('detection-2', { skip })],
+      truncated: true,
+      includeSkipped: false,
+    });
+
+    expect(findSkippedForEvent).not.toHaveBeenCalled();
+    expect(response.detections.map(({ detection_id: id }) => id)).toEqual(['detection-1']);
+    expect(response).not.toHaveProperty('skipped_truncated');
+  });
 
   it('adds the detections the classifier skipped on the strength of this event, with why', async () => {
     const { response, findSkippedForEvent } = await run({
