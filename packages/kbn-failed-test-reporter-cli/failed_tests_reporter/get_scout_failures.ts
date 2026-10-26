@@ -76,9 +76,12 @@ interface ScoutFailureTrackingEntry {
   };
 }
 
+/** `error` is the test error/stack trace, `consoleErrors` the captured browser console errors. */
+type InfraFailureSource = 'error' | 'consoleErrors';
+
 interface InfraFailureRule extends ScoutInfraFailureReason {
-  /** `error` matches the test error/stack trace, `consoleErrors` the captured browser console errors. */
-  source: 'error' | 'consoleErrors';
+  /** A rule matches when any of its substrings appears in any of these. */
+  sources: readonly InfraFailureSource[];
   /** Set when the same signal on a local run may be a Kibana bug caused by the change under test. */
   cloudOnly: boolean;
   substrings: readonly string[];
@@ -89,7 +92,7 @@ interface InfraFailureRule extends ScoutInfraFailureReason {
 const INFRA_FAILURE_RULES: readonly InfraFailureRule[] = [
   {
     category: 'auth',
-    source: 'error',
+    sources: ['error'],
     cloudOnly: true,
     substrings: [
       'Failed to parse SAML response value',
@@ -101,7 +104,7 @@ const INFRA_FAILURE_RULES: readonly InfraFailureRule[] = [
   },
   {
     category: 'role',
-    source: 'error',
+    sources: ['error'],
     cloudOnly: true,
     substrings: ['role is not defined'],
     message:
@@ -109,7 +112,7 @@ const INFRA_FAILURE_RULES: readonly InfraFailureRule[] = [
   },
   {
     category: 'connection',
-    source: 'error',
+    sources: ['error'],
     cloudOnly: false,
     substrings: ['ECONNREFUSED'],
     message:
@@ -117,7 +120,7 @@ const INFRA_FAILURE_RULES: readonly InfraFailureRule[] = [
   },
   {
     category: 'cdn',
-    source: 'consoleErrors',
+    sources: ['consoleErrors'],
     cloudOnly: true,
     // 'Kibana bootstrap failed' is logged by the bootstrap template in @kbn/core-rendering-server-internal
     substrings: ['ChunkLoadError', 'Kibana bootstrap failed: could not load'],
@@ -126,9 +129,12 @@ const INFRA_FAILURE_RULES: readonly InfraFailureRule[] = [
   },
   {
     category: 'network',
-    source: 'consoleErrors',
+    // Chromium reports these on the request that failed, so they surface either in the browser
+    // console or, when the failing request is the navigation itself, in the page.goto() error.
+    sources: ['error', 'consoleErrors'],
     cloudOnly: true,
     substrings: [
+      'net::ERR_ADDRESS_UNREACHABLE',
       'net::ERR_CONNECTION_CLOSED',
       'net::ERR_CONNECTION_RESET',
       'net::ERR_CONNECTION_REFUSED',
@@ -146,12 +152,14 @@ const getInfraReason = (
 ): ScoutInfraFailureReason | undefined => {
   const isCloudTarget = target.startsWith('cloud-');
 
-  const rule = INFRA_FAILURE_RULES.find(({ source, cloudOnly, substrings }) => {
+  const rule = INFRA_FAILURE_RULES.find(({ sources, cloudOnly, substrings }) => {
     if (cloudOnly && !isCloudTarget) {
       return false;
     }
-    const text = source === 'error' ? failure : consoleErrors;
-    return substrings.some((substring) => text.includes(substring));
+    return sources.some((source) => {
+      const text = source === 'error' ? failure : consoleErrors;
+      return substrings.some((substring) => text.includes(substring));
+    });
   });
 
   return rule ? { category: rule.category, message: rule.message } : undefined;

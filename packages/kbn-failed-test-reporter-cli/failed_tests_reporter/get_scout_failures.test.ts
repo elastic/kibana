@@ -21,6 +21,12 @@ const CONNECTION_CLOSED_CONSOLE_ERRORS = [
   '[2026-10-09T09:44:51.916Z] Failed to load resource: net::ERR_CONNECTION_CLOSED',
 ].join('\n');
 
+const ADDRESS_UNREACHABLE = `Error: page.goto: net::ERR_ADDRESS_UNREACHABLE at https://bk-serverless-scout-2666-observabilitycomplete-pla-d1a958.kb.eu-west-1.aws.qa.elastic.cloud/app/streams/new-experience/destinations
+Call log:
+  - navigating to "https://bk-serverless-scout-2666-observabilitycomplete-pla-d1a958.kb.eu-west-1.aws.qa.elastic.cloud/app/streams/new-experience/destinations", waiting until "load"
+
+    at _Page.gotoStreamsLayoutTab (src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/test/scout_page/single_thread.ts:159:22)`;
+
 const createEntry = (overrides: Record<string, unknown> = {}) => ({
   id: 'test-id',
   suite: 'Stream data processing - simulation preview',
@@ -128,6 +134,30 @@ describe('getScoutFailures', () => {
     );
     expect(failure.likelyIrrelevant).toBe(true);
     expect(failure.infraReason?.category).toBe('cdn');
+  });
+
+  it('attributes a Cloud navigation that never reached the deployment to the network', async () => {
+    const [failure] = await getScoutFailures(
+      writeReport([
+        createEntry({
+          error: { message: ADDRESS_UNREACHABLE, stack_trace: ADDRESS_UNREACHABLE },
+        }),
+      ])
+    );
+    expect(failure.likelyIrrelevant).toBe(true);
+    expect(failure.infraReason?.category).toBe('network');
+  });
+
+  it('keeps a local navigation failure relevant', async () => {
+    const [failure] = await getScoutFailures(
+      writeReport([
+        createEntry({
+          target: 'local-serverless-observability_complete',
+          error: { message: ADDRESS_UNREACHABLE, stack_trace: ADDRESS_UNREACHABLE },
+        }),
+      ])
+    );
+    expect(failure.likelyIrrelevant).toBe(false);
   });
 
   it('keeps local failures with connection-level browser console errors relevant', async () => {
