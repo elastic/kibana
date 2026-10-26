@@ -24,7 +24,7 @@ export const mmrCommand: ICommand = {
   methods: mmrCommandMethods,
   metadata: {
     docPreserving: true,
-    description: i18n.translate('kbn-esql-language.esql.definitions.mmrDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.mmrDoc', {
       defaultMessage:
         'The MMR command performs Maximal Marginal Relevance (MMR) to diversify results by removing close duplicates from the result set, while maintaining the accuracy of the result set.',
     }),

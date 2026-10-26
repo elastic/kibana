@@ -265,6 +265,23 @@ describe('SearchInferenceEndpointsPlugin', () => {
         });
       });
 
+      it('returns nothing for a registered feature with no saved row and no recommended endpoints', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        startContract.features.register({
+          featureId: 'child_feature',
+          featureName: 'Child',
+          featureDescription: 'Child',
+          taskType: 'chat_completion',
+          recommendedEndpoints: [],
+        });
+
+        const result = await startContract.endpoints.getForFeature('child_feature', request, {
+          onlyReturnConfigured: true,
+        });
+
+        expect(result).toEqual({ endpoints: [], warnings: [], soEntryFound: false });
+      });
+
       it('returns empty list when defaultConnectorOnly is set but no default connector is configured', async () => {
         const request = httpServerMock.createKibanaRequest();
 

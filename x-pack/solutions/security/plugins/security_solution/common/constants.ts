@@ -14,7 +14,6 @@ import * as i18n from './translations';
 
 export {
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
-  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
 
@@ -754,6 +753,7 @@ export enum SecurityAgentBuilderAttachments {
   entity = 'security.entity',
   entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   entityGraph = 'security.entity_graph',
+  entityAnalyticsAiBrief = 'security.entity_analytics_ai_brief',
   entityRiskScoreHistory = 'security.entity_risk_score_history',
   exception = 'security.exception',
   investigationIocs = 'security.investigation.iocs',
