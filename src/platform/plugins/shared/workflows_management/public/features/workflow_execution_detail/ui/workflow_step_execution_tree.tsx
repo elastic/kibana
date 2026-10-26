@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import {
   ExecutionStatus,
+  getTriggerName,
   isDangerousStatus,
   isFailedBeforeSteps,
   isInProgressStatus,
@@ -393,20 +394,7 @@ function convertTreeToOpenNodes(
       ? i18n.translate('workflows.WorkflowStepExecutionTree.triggerLabel', {
           defaultMessage: '{type} trigger',
           values: {
-            type:
-              stepType === 'trigger_manual'
-                ? i18n.translate('workflows.WorkflowStepExecutionTree.triggerManual', {
-                    defaultMessage: 'Manual',
-                  })
-                : stepType === 'trigger_alert'
-                ? i18n.translate('workflows.WorkflowStepExecutionTree.triggerAlert', {
-                    defaultMessage: 'Alert',
-                  })
-                : stepType === 'trigger_scheduled'
-                ? i18n.translate('workflows.WorkflowStepExecutionTree.triggerScheduled', {
-                    defaultMessage: 'Scheduled',
-                  })
-                : stepType.replace(/^trigger_/, ''),
+            type: getTriggerName(stepType.replace(/^trigger_/, '')),
           },
         })
       : undefined;

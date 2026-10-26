@@ -92,7 +92,7 @@ export function WorkflowVisualEditorFlyout({
 
   // Display-only, mirrors workflow_graph_node.tsx: `target.stepName`/`stepInfo.stepId`
   // are raw step names and must stay untouched elsewhere (e.g. YAML lookups).
-  // Trigger labels are already human-readable (getTriggerLabel), so left as-is.
+  // Trigger labels are already human-readable (getTriggerName), so left as-is.
   const title =
     target.kind === 'step'
       ? deslugifyStepName(target.stepInfo?.stepId ?? target.stepName)
