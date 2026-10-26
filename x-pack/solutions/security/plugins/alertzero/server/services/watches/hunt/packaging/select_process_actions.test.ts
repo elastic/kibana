@@ -18,11 +18,15 @@ import {
 } from './select_process_actions';
 import type { CurrentRunHost, CurrentRunState, ProcessSelector } from './types';
 
-const host = (capabilities: string[] = []): CurrentRunHost => ({
+const host = (
+  capabilities: string[] = [],
+  capabilitiesSource: CurrentRunHost['capabilitiesSource'] = 'reported'
+): CurrentRunHost => ({
   name: 'WIN-ANALYST01',
   enrolled: true,
   agentId: 'agent-1',
   capabilities,
+  capabilitiesSource,
 });
 
 const selector = (overrides: Partial<ProcessSelector> = {}): ProcessSelector => ({
@@ -104,6 +108,19 @@ describe('selectProcessActions', () => {
       expect(decision.rule).toBe('protected_system_process');
       expect(decision.actions).toEqual([]);
       expect(decision.heldBack).toContain('does not report memdump_process');
+    });
+
+    it('says the capabilities could not be read, not that the endpoint lacks them, when the metadata was unavailable', () => {
+      const decision = selectProcessActions({
+        selector: selector({ processName: 'lsass.exe', pid: 640 }),
+        host: host([], 'unavailable'),
+        state: state(),
+      });
+      expect(decision.rule).toBe('protected_system_process');
+      expect(decision.actions).toEqual([]);
+      expect(decision.heldBack).toBe(
+        "No action was proposed for `lsass.exe` (PID 640) on WIN-ANALYST01: it is a protected system process and the endpoint's capabilities could not be read (memdump_process is not assumed)"
+      );
     });
 
     it('matches on the basename of a full Windows path, case-insensitively', () => {
@@ -435,6 +452,24 @@ describe('selectProcessActions', () => {
       );
       expect(decision.heldBack).toBeUndefined();
     });
+
+    it('keeps the suspend-only decision but says the capabilities could not be read when the metadata was unavailable', () => {
+      const reported = selectProcessActions({
+        selector: selector(),
+        host: host([]),
+        state: state(),
+      });
+      const decision = selectProcessActions({
+        selector: selector(),
+        host: host([], 'unavailable'),
+        state: state(),
+      });
+      expect(decision.rule).toBe(reported.rule);
+      expect(decision.actions).toEqual(reported.actions);
+      expect(decision.why).toBe(
+        "Rule: default response; the endpoint's capabilities could not be read (memdump_process is not assumed), so suspend is the only process action proposed"
+      );
+    });
   });
 });
 
@@ -543,6 +578,21 @@ describe('selectHostActions', () => {
     expect(decision.isolate).toBe(false);
     expect(decision.heldBack).toContain('Isolate host WIN-ANALYST01 was not proposed');
     expect(decision.heldBack).toContain('does not report isolation');
+  });
+
+  it('says the capabilities could not be read when the metadata was unavailable', () => {
+    const decision = selectHostActions({
+      host: host([], 'unavailable'),
+      state: state(confirmed('T1071')),
+      activeProcessCount: 1,
+      hostTechniqueIds: ['T1071'],
+    });
+    expect(decision.rule).toBe('isolation_unsupported');
+    expect(decision.isolate).toBe(false);
+    expect(decision.heldBack).toContain(
+      "the endpoint's capabilities could not be read (isolation is not assumed)"
+    );
+    expect(decision.heldBack).not.toContain('does not report');
   });
 
   it('does not add an isolation hold-back when isolate was not warranted anyway', () => {

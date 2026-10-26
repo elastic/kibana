@@ -96,10 +96,11 @@ interface RawCoverage {
  * as: (1) world checks both support and contradict → inconclusive; (2) at least one
  * world check contradicts, none supports, and both sources have hits → false_positive;
  * (3) process_parent or network_destination supports and no world check contradicts →
- * true_positive; (4) anything else → inconclusive. A `block_truncated_clear` downgrade
- * emits verdict `inconclusive` with no `checks`/`claims` at all, so the presence check
- * only applies when checks would be present; a model's own inconclusive still emits
- * checks, so a truncation downgrade is only the `checks === undefined` shape.
+ * true_positive; (4) anything else → inconclusive. `block_truncated_clear` and
+ * `block_ungrounded_claims` both emit verdict `inconclusive` with no `checks`/`claims`
+ * at all, so the presence check only applies when checks would be present. A model's
+ * own inconclusive still emits checks, so either downgrade is the `checks === undefined`
+ * shape.
  */
 const contractProblems = (output: FpTpTaskOutput): string[] => {
   const { payload, raw } = output;
@@ -110,12 +111,10 @@ const contractProblems = (output: FpTpTaskOutput): string[] => {
   const coverage = (raw.coverage ?? {}) as Record<string, RawCoverage | undefined>;
   const sourceSeen = (source: string): number => Number(coverage[source]?.seen ?? 0);
 
-  // A truncation downgrade emits verdict `inconclusive` with no checks at all; a
-  // model's own inconclusive emits checks, so they are still required there.
-  const downgraded =
-    payload.verdict === 'inconclusive' &&
-    (coverage.entities?.truncated === true || coverage.events?.truncated === true) &&
-    raw.checks === undefined;
+  // A truncation downgrade and an ungrounded-claim downgrade both emit verdict
+  // `inconclusive` with no checks. A model's own inconclusive emits checks, so
+  // they are still required there.
+  const downgraded = payload.verdict === 'inconclusive' && raw.checks === undefined;
 
   const checks = (raw.checks ?? []) as RawCheck[];
   if (!downgraded) {
@@ -392,8 +391,8 @@ export const claimGrounding: Evaluator = {
     if (worldClaims.length === 0) {
       if (payload.verdict === 'inconclusive') {
         if (alertLink === undefined) {
-          // Including a downgraded truncation: an inconclusive verdict that
-          // emits no claims claims nothing about the world. Scoring it would
+          // Including a truncation or ungrounded-claim downgrade: an inconclusive
+          // verdict that emits no claims claims nothing about the world. Scoring it would
           // pad the mean by the inconclusive rate and confound model
           // comparison. But an inconclusive run that DOES emit claims is
           // validated below — verdict independence holds either way, and an
@@ -422,18 +421,19 @@ export const claimGrounding: Evaluator = {
       rawChecks.map((check) => [check.name, { result: check.result, status: check.status }])
     );
     // The permitted evidence source for each world check, per the managed YAML
-    // prompt: entity ids live in entity store hits, process and event ids in raw
-    // event hits. Seeding a valid id in one source must not ground a claim that
-    // cites the other.
+    // prompt: an entity claim may cite entity.id or the hit _id, and a raw-event
+    // claim cites the event _id. Seeding a valid id in one source must not ground
+    // a claim that cites the other.
     const CHECK_SOURCES: Record<string, 'entity_store' | 'raw_event'> = {
       entity_role: 'entity_store',
       process_parent: 'raw_event',
       network_destination: 'raw_event',
     };
     const seededEntityIds = new Set(
-      seededEvidence.entities.map(
-        ({ id, source }) => (source.entity as { id?: string } | undefined)?.id ?? id
-      )
+      seededEvidence.entities.flatMap(({ id, source }) => {
+        const entityId = (source.entity as { id?: string } | undefined)?.id;
+        return [entityId, id].filter((value): value is string => Boolean(value));
+      })
     );
     const seededEventIds = new Set(seededEvidence.events.map(({ id }) => id));
 

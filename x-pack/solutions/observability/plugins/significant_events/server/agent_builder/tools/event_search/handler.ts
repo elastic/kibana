@@ -98,6 +98,7 @@ interface DetailedEventSearchItem
     SignificantEvent,
     | '@timestamp'
     | 'confidence'
+    | 'summary'
     | 'event_id'
     | 'severity'
     | 'status'
@@ -176,6 +177,7 @@ const toEventSearchItemBase = (
   SignificantEvent,
   | '@timestamp'
   | 'confidence'
+  | 'summary'
   | 'event_id'
   | 'severity'
   | 'status'
@@ -191,6 +193,7 @@ const toEventSearchItemBase = (
   severity: event.severity,
   confidence: event.confidence,
   source_ids: event.source_ids,
+  summary: event.summary,
 });
 
 const toCompactEvent = (event: SignificantEvent): CompactEventSearchItem => {
@@ -198,7 +201,6 @@ const toCompactEvent = (event: SignificantEvent): CompactEventSearchItem => {
   const { ruleUuids, signalCounts } = collectSignalMetadata(signals);
   return {
     ...toEventSearchItemBase(event),
-    summary: event.summary,
     signal_counts: signalCounts,
     signal_rule_uuids: [...ruleUuids].sort(),
     causal_features: event.causal_features,
