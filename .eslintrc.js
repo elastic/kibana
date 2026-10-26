@@ -133,14 +133,24 @@ module.exports = {
       rules: {
         'import/no-extraneous-dependencies': [
           'error',
-          {
-            /* Files that ARE allowed to use devDependencies */
-            devDependencies: [...DEV_PATTERNS],
-            peerDependencies: true,
-            packageDir: __dirname,
-          },
+          { devDependencies: false, peerDependencies: true, packageDir: __dirname },
         ],
       },
+      overrides: [
+        {
+          /* Files that ARE allowed to use devDependencies. Matched here rather than through the
+           * rule's `devDependencies` globs, which the rule recompiles for every linted file. */
+          files: DEV_PATTERNS,
+          // the rule matched its globs without `dot`, so dot paths other than `.storybook` stay out
+          excludedFiles: ['**/.!(storybook)', '**/.!(storybook)/**'],
+          rules: {
+            'import/no-extraneous-dependencies': [
+              'error',
+              { devDependencies: true, peerDependencies: true, packageDir: __dirname },
+            ],
+          },
+        },
+      ],
     },
 
     /**

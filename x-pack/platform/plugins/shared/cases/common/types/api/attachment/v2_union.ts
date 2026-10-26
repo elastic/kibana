@@ -5,32 +5,37 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import {
-  AttachmentPatchRequestRt,
-  AttachmentRequestRt,
-  AttachmentRequestWithoutRefsRt,
+  AttachmentRequestSchema,
+  AttachmentRequestWithoutRefsSchema,
+  AttachmentPatchRequestSchema,
 } from './v1';
-import { AttachmentRtV2, UnifiedAttachmentPayloadRt } from '../../domain/attachment/v2';
-import { UnifiedAttachmentPutRequestRt } from './v2';
+import { AttachmentSchemaV2, UnifiedAttachmentPayloadSchema } from '../../domain/attachment/v2';
+import { UnifiedAttachmentPatchRouteRequestSchema } from './v2';
 
-export const AttachmentRequestRtV2 = rt.union([AttachmentRequestRt, UnifiedAttachmentPayloadRt]);
-export const AttachmentRequestWithoutRefsRtV2 = rt.union([
-  AttachmentRequestWithoutRefsRt,
-  UnifiedAttachmentPayloadRt,
-]);
-export const AttachmentPatchRequestRtV2 = rt.union([
-  AttachmentPatchRequestRt,
-  rt.intersection([UnifiedAttachmentPutRequestRt, rt.strict({ id: rt.string })]),
+export const AttachmentRequestSchemaV2 = z.union([
+  AttachmentRequestSchema,
+  UnifiedAttachmentPayloadSchema,
 ]);
 
-export const AttachmentsFindResponseRtV2 = rt.strict({
-  comments: rt.array(AttachmentRtV2),
-  page: rt.number,
-  per_page: rt.number,
-  total: rt.number,
+export const AttachmentRequestWithoutRefsSchemaV2 = z.union([
+  AttachmentRequestWithoutRefsSchema,
+  UnifiedAttachmentPayloadSchema,
+]);
+
+export const AttachmentPatchRequestSchemaV2 = z.union([
+  AttachmentPatchRequestSchema,
+  UnifiedAttachmentPatchRouteRequestSchema,
+]);
+
+export const AttachmentsFindResponseSchemaV2 = z.object({
+  comments: z.array(AttachmentSchemaV2),
+  page: z.number(),
+  per_page: z.number(),
+  total: z.number(),
 });
 
-export type AttachmentRequestV2 = rt.TypeOf<typeof AttachmentRequestRtV2>;
-export type AttachmentPatchRequestV2 = rt.TypeOf<typeof AttachmentPatchRequestRtV2>;
-export type AttachmentsFindResponseV2 = rt.TypeOf<typeof AttachmentsFindResponseRtV2>;
+export type AttachmentRequestV2 = z.infer<typeof AttachmentRequestSchemaV2>;
+export type AttachmentPatchRequestV2 = z.infer<typeof AttachmentPatchRequestSchemaV2>;
+export type AttachmentsFindResponseV2 = z.infer<typeof AttachmentsFindResponseSchemaV2>;

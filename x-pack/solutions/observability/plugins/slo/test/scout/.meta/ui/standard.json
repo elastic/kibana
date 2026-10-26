@@ -1,5 +1,5 @@
 {
-  "sha1": "f59e989661c59716b3a2fb0045c037b6b7d2a5e6",
+  "sha1": "027c1f71ed44cee95115610776ca7671abbb7887",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -87,7 +87,7 @@
     {
       "id": "1b1baaef6ea75c6-d584ec1839b42bf",
       "title": "Composite SLO UI renders SLOs and Composite SLOs tabs",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -96,14 +96,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/composite_slo_ui.spec.ts",
-        "line": 27,
+        "line": 28,
         "column": 46
       }
     },
     {
       "id": "1b1baaef6ea75c6-3b88ce926900368",
       "title": "Composite SLO UI shows Create composite SLO option in create dropdown",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -112,14 +112,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/composite_slo_ui.spec.ts",
-        "line": 29,
+        "line": 30,
         "column": 71
       }
     },
     {
       "id": "1b1baaef6ea75c6-aa9b5daab7a8160",
       "title": "Composite SLO UI renders composite SLO table when Composite SLOs tab is clicked",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -128,7 +128,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/composite_slo_ui.spec.ts",
-        "line": 33,
+        "line": 34,
         "column": 59
       }
     },
