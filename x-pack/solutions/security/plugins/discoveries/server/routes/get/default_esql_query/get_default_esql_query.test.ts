@@ -75,7 +75,7 @@ describe('GET /internal/attack_discovery/attack_discovery/queries/esql/default',
     );
   });
 
-  it('calls getSpaceId with the request and spaces service', async () => {
+  it('calls getSpaceId with the request', async () => {
     const { handleGetDefaultEsqlQuery } = await import('./get_default_esql_query');
 
     await handleGetDefaultEsqlQuery({
@@ -84,10 +84,7 @@ describe('GET /internal/attack_discovery/attack_discovery/queries/esql/default',
       request: mockRequest,
     });
 
-    expect(mockGetSpaceId).toHaveBeenCalledWith({
-      request: mockRequest,
-      spaces: expect.anything(),
-    });
+    expect(mockGetSpaceId).toHaveBeenCalledWith({ request: mockRequest });
   });
 
   it('calls buildDefaultEsqlQuery with the user-scoped ES client and spaceId', async () => {

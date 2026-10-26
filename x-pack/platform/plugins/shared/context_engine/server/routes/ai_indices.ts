@@ -820,7 +820,7 @@ export const registerAiIndexRoutes = ({
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId, kiId } = request.params;
         const { index: backingIndex } = request.query;
-        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const spaceId = resolveSpaceId(request);
         try {
           const { output } = await withKiWriteTelemetry({
             action: 'update',
@@ -893,7 +893,7 @@ export const registerAiIndexRoutes = ({
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId, kiId } = request.params;
         const { index: backingIndex } = request.query;
-        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const spaceId = resolveSpaceId(request);
         try {
           const { output } = await withKiWriteTelemetry({
             action: 'delete',
@@ -965,7 +965,7 @@ export const registerAiIndexRoutes = ({
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId, kiId } = request.params;
         const { index: backingIndex } = request.query;
-        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const spaceId = resolveSpaceId(request);
         try {
           const { output } = await withKiWriteTelemetry({
             action: 'restore',

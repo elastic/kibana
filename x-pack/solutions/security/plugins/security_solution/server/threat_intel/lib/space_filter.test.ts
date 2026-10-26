@@ -22,20 +22,10 @@ describe('space_filter', () => {
       expect(resolveCurrentSpaceId(undefined, request)).toBe('default');
     });
 
-    it('delegates to the spaces service when installed', () => {
-      const spaces = {
-        getSpaceId: jest.fn().mockReturnValue('team-a'),
-      } as unknown as SpacesServiceStart;
-      expect(resolveCurrentSpaceId(spaces, request)).toBe('team-a');
-    });
-
-    it('fails closed: propagates errors from an installed spaces service', () => {
-      const spaces = {
-        getSpaceId: jest.fn(() => {
-          throw new Error('boom');
-        }),
-      } as unknown as SpacesServiceStart;
-      expect(() => resolveCurrentSpaceId(spaces, request)).toThrow('boom');
+    it('uses the request space when the spaces plugin is installed', () => {
+      const spaces = {} as unknown as SpacesServiceStart;
+      const teamRequest = { spaceId: 'team-a' } as KibanaRequest;
+      expect(resolveCurrentSpaceId(spaces, teamRequest)).toBe('team-a');
     });
   });
 

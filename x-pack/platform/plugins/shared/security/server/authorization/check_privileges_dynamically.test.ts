@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { CheckPrivilegesOptions } from '@kbn/security-plugin-types-server';
 
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
@@ -17,12 +18,12 @@ test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
     atSpace: jest.fn().mockReturnValue(expectedResult),
   };
   const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-  const request = httpServerMock.createKibanaRequest();
+  const request = httpServerMock.createKibanaRequest({ spaceId: asSpaceId(spaceId) });
   const privilegeOrPrivileges = ['foo', 'bar'];
   const checkPrivilegesDynamically = checkPrivilegesDynamicallyWithRequestFactory(
     mockCheckPrivilegesWithRequest,
     () => ({
-      getSpaceId: jest.fn().mockReturnValue(spaceId),
+      getSpaceId: jest.fn(),
       namespaceToSpaceId: jest.fn(),
     })
   )(request);

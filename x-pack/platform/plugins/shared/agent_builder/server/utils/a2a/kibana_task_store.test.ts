@@ -7,6 +7,8 @@
 
 import { AgentExecutionMode, ChatEventType, ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { KibanaTaskStore } from './kibana_task_store';
 
 describe('KibanaTaskStore', () => {
@@ -31,9 +33,10 @@ describe('KibanaTaskStore', () => {
     const getInternalServices = () =>
       ({
         execution: { getExecution },
-        spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue(currentSpaceId) } },
       } as any);
-    const kibanaRequest = {} as any;
+    const kibanaRequest = httpServerMock.createKibanaRequest({
+      spaceId: asSpaceId(currentSpaceId),
+    });
     return new KibanaTaskStore(getInternalServices, kibanaRequest);
   };
 

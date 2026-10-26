@@ -8,6 +8,7 @@
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlAutocompleteResult } from '../services/sml/types';
 import { registerAutocompleteRoute } from './autocomplete';
@@ -41,11 +42,7 @@ describe('registerAutocompleteRoute', () => {
     mockSmlService = createMockSmlService();
 
     const coreSetup = coreMock.createSetup();
-    (coreSetup.getStartServices as jest.Mock).mockResolvedValue([
-      {},
-      { spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue('test-space') } } },
-      {},
-    ]);
+    (coreSetup.getStartServices as jest.Mock).mockResolvedValue([{}, {}, {}]);
 
     registerAutocompleteRoute({
       router: router as any,
@@ -59,7 +56,7 @@ describe('registerAutocompleteRoute', () => {
   });
 
   const callHandler = async (body: Record<string, unknown>, uiSettingsEnabled = true) => {
-    const request = httpServerMock.createKibanaRequest({ body });
+    const request = httpServerMock.createKibanaRequest({ body, spaceId: asSpaceId('test-space') });
     const response = httpServerMock.createResponseFactory();
     const mockUiSettings = createMockUiSettingsClient(uiSettingsEnabled);
     const ctx = {
@@ -129,7 +126,7 @@ describe('registerAutocompleteRoute', () => {
     });
   });
 
-  it('passes spaceId from spaces plugin to sml.autocomplete', async () => {
+  it('passes the request spaceId to sml.autocomplete', async () => {
     mockSmlService.autocomplete.mockResolvedValue({ results: [] });
     await callHandler({ query: 'test' });
     expect(mockSmlService.autocomplete).toHaveBeenCalledWith(

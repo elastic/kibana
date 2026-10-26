@@ -152,9 +152,9 @@ describe('data_views', () => {
       expect(mockLogger.error).toHaveBeenCalledWith('Failed to setup data view', expect.any(Error));
     });
 
-    it('should use custom space ID when spaces service is available', async () => {
+    it('should use custom space ID when the request targets a custom space', async () => {
       const customSpaceId = asSpaceId('custom-space');
-      mockSpacesService.getSpaceId.mockReturnValue(customSpaceId);
+      mockRequest = { spaceId: customSpaceId } as any;
       mockSoClient.get.mockRejectedValue(new Error('Not found'));
 
       const mockDataViewsClient = {

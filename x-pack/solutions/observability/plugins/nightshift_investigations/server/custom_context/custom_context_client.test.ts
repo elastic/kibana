@@ -16,6 +16,7 @@ import {
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import {
   MAX_CUSTOM_CONTEXT_SNIPPETS,
@@ -89,9 +90,7 @@ const setup = ({
     attributes,
   }));
 
-  const spaces = {
-    spacesService: { getSpaceId: jest.fn(() => 'space-a') },
-  } as unknown as SpacesPluginStart;
+  const spaces = { spacesService: {} } as unknown as SpacesPluginStart;
 
   const checkPrivileges = jest.fn(async () => ({ hasAllRequested: hasReadPrivilege }));
   const securityPlugin = {
@@ -111,7 +110,12 @@ const setup = ({
       spaces,
     }),
   });
-  return { client, soClient, checkPrivileges, request: httpServerMock.createKibanaRequest() };
+  return {
+    client,
+    soClient,
+    checkPrivileges,
+    request: httpServerMock.createKibanaRequest({ spaceId: asSpaceId('space-a') }),
+  };
 };
 
 describe('createCustomContextClient', () => {

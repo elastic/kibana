@@ -63,7 +63,8 @@
     "@kbn/kql",
     "@kbn/app-header",
     "@kbn/ui-callout",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/core-spaces-common"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
