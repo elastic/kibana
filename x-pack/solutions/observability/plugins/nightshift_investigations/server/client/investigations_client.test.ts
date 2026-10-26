@@ -898,6 +898,54 @@ describe('NightshiftInvestigationsClient.start()', () => {
       ).rejects.toThrow(/event_uuid[\s\S]*severity/);
     });
 
+    it('accepts a mixed array of classic and v2 snapshots and records both as subjects', async () => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockManagement.runWorkflow.mockResolvedValue('exec-123');
+      const v2Snapshot = {
+        alert_version: 'v2',
+        id: 'episode-1',
+        rule_id: 'v2-rule-1',
+        group_hash: 'hash-1',
+        status: 'active',
+        start: '2026-08-24T12:00:00.000Z',
+        data: { 'host.name': 'h1' },
+      };
+
+      await expect(
+        makeClient().start({
+          title: 'Latency is too high',
+          subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'manual',
+          context: { alerts: [alertContext.alerts[0], v2Snapshot] },
+        })
+      ).resolves.toEqual({ investigation_id: 'inv-new' });
+      expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+        expect.anything(),
+        SPACE_ID,
+        expect.objectContaining({
+          subjects: [
+            expect.objectContaining({ id: 'alert-1' }),
+            expect.objectContaining({ id: 'episode-1', snapshot: v2Snapshot }),
+          ],
+        }),
+        expect.anything(),
+        'nightshift-investigations'
+      );
+    });
+
+    it('rejects a v2 snapshot that lacks its required fields', async () => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+
+      await expect(
+        makeClient().start({
+          title: 'Latency is too high',
+          subject: { type: 'alert', id: 'episode-1' },
+          trigger_type: 'manual',
+          context: { alerts: [{ alert_version: 'v2', id: 'episode-1' }] },
+        })
+      ).rejects.toThrow(InvalidInvestigationContextError);
+    });
+
     it('reports which snapshot field was wrong rather than a bare rejection', async () => {
       mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
 
