@@ -11,6 +11,7 @@ import React from 'react';
 import { act, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { monaco } from '@kbn/code-editor';
+import { BehaviorSubject } from 'rxjs';
 import { MonacoEditor } from './monaco_editor';
 import {
   useEditorActionContext,
@@ -53,6 +54,7 @@ const mockServicesContext = {
   services: {
     application: {},
     autocompleteInfo: {
+      entitiesRefreshGeneration$: new BehaviorSubject(0),
       getEntitiesRefreshGeneration: jest.fn(),
     },
     data: {},
