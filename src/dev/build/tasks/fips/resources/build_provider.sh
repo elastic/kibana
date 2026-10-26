@@ -14,11 +14,7 @@ export OPENSSL_CONF=/dev/null
 unset OPENSSL_MODULES OPENSSL_CONF_INCLUDE
 
 ./Configure enable-fips
-build_jobs="$(getconf _NPROCESSORS_ONLN)"
-if [ "$build_jobs" -gt 16 ]; then
-  build_jobs=16
-fi
-make -j"$build_jobs"
+make -j"$(nproc)"
 make test TESTS='test_fipsinstall test_fipsload'
 
 mkdir -p "$output_dir/modules" "$output_dir/config"
