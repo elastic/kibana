@@ -54,6 +54,16 @@ describe('action policy change EBT events', () => {
     }
   });
 
+  it('reports the action policy domain events', () => {
+    expect(ACTION_POLICY_OPERATIONS).toEqual([
+      'action_policy.created',
+      'action_policy.updated',
+      'action_policy.deleted',
+      'action_policy.enabled',
+      'action_policy.disabled',
+    ]);
+  });
+
   it('maps each operation to its event type', () => {
     expect(
       ACTION_POLICY_OPERATIONS.map((op) => ACTION_POLICY_EBT_EVENT_TYPE_BY_OPERATION[op])

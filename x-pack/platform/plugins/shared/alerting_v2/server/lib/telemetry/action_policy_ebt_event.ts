@@ -20,25 +20,32 @@ import {
   type ActionPolicyEbtMatcherType,
 } from './action_policy_ebt_schema';
 import { eventOriginEbtSchema } from './event_origin';
+import {
+  ACTION_POLICY_CREATED_EVENT_TYPE,
+  ACTION_POLICY_DELETED_EVENT_TYPE,
+  ACTION_POLICY_DISABLED_EVENT_TYPE,
+  ACTION_POLICY_ENABLED_EVENT_TYPE,
+  ACTION_POLICY_UPDATED_EVENT_TYPE,
+} from '../events/action_policy_event_publisher/events';
 
-/** Operations on an action policy that are reported as telemetry. */
+/** Domain operations reported as telemetry. Each one is its own EBT event type. */
 export const ACTION_POLICY_OPERATIONS = [
-  'created',
-  'updated',
-  'deleted',
-  'enabled',
-  'disabled',
+  ACTION_POLICY_CREATED_EVENT_TYPE,
+  ACTION_POLICY_UPDATED_EVENT_TYPE,
+  ACTION_POLICY_DELETED_EVENT_TYPE,
+  ACTION_POLICY_ENABLED_EVENT_TYPE,
+  ACTION_POLICY_DISABLED_EVENT_TYPE,
 ] as const;
 
 export type ActionPolicyOperation = (typeof ACTION_POLICY_OPERATIONS)[number];
 
-/** Maps each operation to the EBT event type registered for it. */
+/** Maps each domain operation to the EBT event type registered for it. */
 export const ACTION_POLICY_EBT_EVENT_TYPE_BY_OPERATION = {
-  created: ACTION_POLICY_CREATED_EBT_EVENT_TYPE,
-  updated: ACTION_POLICY_UPDATED_EBT_EVENT_TYPE,
-  deleted: ACTION_POLICY_DELETED_EBT_EVENT_TYPE,
-  enabled: ACTION_POLICY_ENABLED_EBT_EVENT_TYPE,
-  disabled: ACTION_POLICY_DISABLED_EBT_EVENT_TYPE,
+  [ACTION_POLICY_CREATED_EVENT_TYPE]: ACTION_POLICY_CREATED_EBT_EVENT_TYPE,
+  [ACTION_POLICY_UPDATED_EVENT_TYPE]: ACTION_POLICY_UPDATED_EBT_EVENT_TYPE,
+  [ACTION_POLICY_DELETED_EVENT_TYPE]: ACTION_POLICY_DELETED_EBT_EVENT_TYPE,
+  [ACTION_POLICY_ENABLED_EVENT_TYPE]: ACTION_POLICY_ENABLED_EBT_EVENT_TYPE,
+  [ACTION_POLICY_DISABLED_EVENT_TYPE]: ACTION_POLICY_DISABLED_EBT_EVENT_TYPE,
 } as const satisfies Record<ActionPolicyOperation, ActionPolicyEbtEventType>;
 
 const actionPolicyChangedEventSchema: EventTypeOpts<ActionPolicyChangedEbtData>['schema'] = {

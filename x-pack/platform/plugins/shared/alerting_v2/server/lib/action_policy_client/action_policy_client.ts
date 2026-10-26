@@ -54,13 +54,12 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
-import type { EbtServiceContract } from '../services/ebt_service/ebt_service';
-import { EbtServiceToken } from '../services/ebt_service/tokens';
 import {
-  ACTION_POLICY_EBT_EVENT_TYPE_BY_OPERATION,
-  buildActionPolicyChangedEventData,
-  type ActionPolicyOperation,
-} from '../telemetry/action_policy_ebt_event';
+  ActionPolicyEventPublisher,
+  type ActionPolicyEventPublisherContract,
+  type EventActionPolicy,
+} from '../events/action_policy_event_publisher/action_policy_event_publisher';
+import type { AlertingPublisherContext } from '../events/domain_events';
 import { toEventOrigin } from '../event_origin/event_origin';
 import { buildSoSearch } from '../build_so_search';
 import { savedObjectNamespacesToSpaceId } from '../space_id_to_namespace';
@@ -158,6 +157,8 @@ const bulkErrorFromThrown = (id: string, e: unknown): ActionPolicyBulkError => {
 @injectable()
 export class ActionPolicyClient {
   private readonly logger: LoggerServiceContract;
+  private readonly eventContext: AlertingPublisherContext;
+  private readonly spaceId: string;
 
   constructor(
     @inject(ActionPolicySavedObjectServiceScopedToken)
@@ -170,72 +171,42 @@ export class ActionPolicyClient {
     private readonly namespace: string | undefined,
     @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
-    @inject(Request) private readonly request: KibanaRequest,
-    @inject(EventOriginActorToken) private readonly actor: EventOriginActor,
-    @inject(EbtServiceToken) private readonly ebtService: EbtServiceContract
+    @inject(Request) request: KibanaRequest,
+    @inject(EventOriginActorToken) actor: EventOriginActor,
+    @inject(ActionPolicyEventPublisher)
+    private readonly eventPublisher: ActionPolicyEventPublisherContract
   ) {
     this.logger = loggerService.forSubsystem('actionPolicyClient');
+    this.eventContext = { request, origin: toEventOrigin(actor, request) };
+    this.spaceId = savedObjectNamespacesToSpaceId(namespace ? [namespace] : undefined);
+  }
+
+  private toEventPolicy(actionPolicyId: string, policy?: ActionPolicyResponse): EventActionPolicy {
+    return { actionPolicyId, spaceId: this.spaceId, ...(policy ? { policy } : {}) };
   }
 
   /**
-   * Reports one telemetry event per policy. The origin is resolved here so reads never pay for it.
-   * Call only after the write succeeded. A failure is logged rather than thrown because the write
-   * has already happened.
+   * Reads the policies a bulk operation publishes events for, keeping one entry per id. A failed
+   * read is logged and yields id-only entries, because the write itself is not affected.
    */
-  private reportActionPolicyChanged(
-    operation: ActionPolicyOperation,
-    policies: ActionPolicyResponse[]
-  ): void {
-    if (policies.length === 0) {
-      return;
+  private async readEventPolicies(ids: string[]): Promise<EventActionPolicy[]> {
+    if (ids.length === 0) {
+      return [];
     }
 
     try {
-      const origin = toEventOrigin(this.actor, this.request);
-      const eventType = ACTION_POLICY_EBT_EVENT_TYPE_BY_OPERATION[operation];
-      const spaceId = savedObjectNamespacesToSpaceId(this.namespace ? [this.namespace] : undefined);
-
-      for (const policy of policies) {
-        this.ebtService.reportEvent(
-          eventType,
-          buildActionPolicyChangedEventData(policy, origin, spaceId)
-        );
-      }
+      const policiesById = new Map(
+        (await this.getActionPolicies({ ids })).map((policy) => [policy.id, policy])
+      );
+      return ids.map((id) => this.toEventPolicy(id, policiesById.get(id)));
     } catch (error) {
       this.logger.warn({
-        message: `Failed to build the ${operation} telemetry event`,
-        code: ALERTING_LOG_CODES.TELEMETRY_EBT_REPORT_FAILED,
+        message: 'Failed to read action policies for their domain events',
+        code: ALERTING_LOG_CODES.EVENTS_ACTION_POLICY_READ_FAILED,
         error,
       });
+      return ids.map((id) => this.toEventPolicy(id));
     }
-  }
-
-  /**
-   * Reports a change for policies written by a bulk operation. The policies are read back with
-   * their stored state, and a failed read is logged rather than thrown because the write has
-   * already happened. Callers do not await it, so the read does not delay the bulk response.
-   */
-  private async reportBulkActionPolicyChange(
-    operation: ActionPolicyOperation,
-    ids: string[]
-  ): Promise<void> {
-    if (ids.length === 0) {
-      return;
-    }
-
-    try {
-      this.reportActionPolicyChanged(operation, await this.getActionPolicies({ ids }));
-    } catch (error) {
-      this.logTelemetryReadFailure(operation, error);
-    }
-  }
-
-  private logTelemetryReadFailure(operation: ActionPolicyOperation, error: unknown): void {
-    this.logger.warn({
-      message: `Failed to read action policies for the ${operation} telemetry event`,
-      code: ALERTING_LOG_CODES.TELEMETRY_EBT_REPORT_FAILED,
-      error,
-    });
   }
 
   /**
@@ -371,7 +342,9 @@ export class ActionPolicyClient {
     }
 
     const policy = transformActionPolicySoAttributesToApiResponse({ id, attributes });
-    this.reportActionPolicyChanged('created', [policy]);
+    this.eventPublisher.emitActionPolicyCreated(this.eventContext, [
+      this.toEventPolicy(id, policy),
+    ]);
     return policy;
   }
 
@@ -463,7 +436,9 @@ export class ActionPolicyClient {
       id: params.options.id,
       attributes: nextAttrs,
     });
-    this.reportActionPolicyChanged('updated', [policy]);
+    this.eventPublisher.emitActionPolicyUpdated(this.eventContext, [
+      this.toEventPolicy(policy.id, policy),
+    ]);
     return policy;
   }
 
@@ -551,13 +526,17 @@ export class ActionPolicyClient {
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
     await this.licenseService.assertActionPoliciesLicense();
     const policy = await this.updatePolicyState(id, { enabled: true });
-    this.reportActionPolicyChanged('enabled', [policy]);
+    this.eventPublisher.emitActionPolicyEnabled(this.eventContext, [
+      this.toEventPolicy(id, policy),
+    ]);
     return policy;
   }
 
   public async disableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
     const policy = await this.updatePolicyState(id, { enabled: false });
-    this.reportActionPolicyChanged('disabled', [policy]);
+    this.eventPublisher.emitActionPolicyDisabled(this.eventContext, [
+      this.toEventPolicy(id, policy),
+    ]);
     return policy;
   }
 
@@ -618,7 +597,9 @@ export class ActionPolicyClient {
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
     await this.licenseService.assertActionPoliciesLicense();
     const { response, succeededIds } = await this.executeBulkUpdate(ids, { enabled: true });
-    void this.reportBulkActionPolicyChange('enabled', succeededIds);
+    void this.readEventPolicies(succeededIds).then((policies) =>
+      this.eventPublisher.emitActionPolicyEnabled(this.eventContext, policies)
+    );
     return response;
   }
 
@@ -626,7 +607,9 @@ export class ActionPolicyClient {
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
     const { response, succeededIds } = await this.executeBulkUpdate(ids, { enabled: false });
-    void this.reportBulkActionPolicyChange('disabled', succeededIds);
+    void this.readEventPolicies(succeededIds).then((policies) =>
+      this.eventPublisher.emitActionPolicyDisabled(this.eventContext, policies)
+    );
     return response;
   }
 
@@ -672,7 +655,7 @@ export class ActionPolicyClient {
     const blockedIds = new Set(invalidationErrors.map(({ id }) => id));
 
     const idsToDelete = ids.filter((id) => !blockedIds.has(id));
-    const policiesToDelete = await this.getPoliciesForDeleteTelemetry(idsToDelete);
+    const policiesToDelete = await this.readEventPolicies(idsToDelete);
     const deleteResults =
       idsToDelete.length > 0
         ? await this.actionPolicySavedObjectService.bulkDelete({ ids: idsToDelete })
@@ -698,25 +681,12 @@ export class ActionPolicyClient {
       this.logDivergedApiKeyInvalidation(divergedIds);
     }
 
-    this.reportActionPolicyChanged(
-      'deleted',
-      policiesToDelete.filter(({ id }) => deletedIds.has(id))
+    this.eventPublisher.emitActionPolicyDeleted(
+      this.eventContext,
+      policiesToDelete.filter(({ actionPolicyId }) => deletedIds.has(actionPolicyId))
     );
 
     return { affected_count: affectedCount, errors };
-  }
-
-  /**
-   * Reads the policies about to be deleted, because their fields are gone afterwards. A failed
-   * read is logged and the delete carries on without a telemetry event.
-   */
-  private async getPoliciesForDeleteTelemetry(ids: string[]): Promise<ActionPolicyResponse[]> {
-    try {
-      return await this.getActionPolicies({ ids });
-    } catch (error) {
-      this.logTelemetryReadFailure('deleted', error);
-      return [];
-    }
   }
 
   public async bulkUpdateActionPoliciesApiKey({
@@ -752,7 +722,7 @@ export class ActionPolicyClient {
    * disable / snooze / unsnooze). Applies the same `stateUpdate` to every
    * targeted policy in a single SO `bulkUpdate`, stamps audit metadata, and
    * maps per-object SO failures to the canonical bulk-error shape. `succeededIds` lists the
-   * policies that were written, for callers that report them.
+   * policies that were written, for callers that publish their events.
    */
   private async executeBulkUpdate(
     ids: string[],
@@ -835,8 +805,11 @@ export class ActionPolicyClient {
       throw e;
     }
 
-    this.reportActionPolicyChanged('deleted', [
-      transformActionPolicySoAttributesToApiResponse({ id, attributes: attrs }),
+    this.eventPublisher.emitActionPolicyDeleted(this.eventContext, [
+      this.toEventPolicy(
+        id,
+        transformActionPolicySoAttributesToApiResponse({ id, attributes: attrs })
+      ),
     ]);
   }
 
@@ -1090,7 +1063,9 @@ export class ActionPolicyClient {
       id,
       attributes: replacementAttrs,
     });
-    this.reportActionPolicyChanged('updated', [policy]);
+    this.eventPublisher.emitActionPolicyUpdated(this.eventContext, [
+      this.toEventPolicy(id, policy),
+    ]);
 
     return { policy, created: false };
   }

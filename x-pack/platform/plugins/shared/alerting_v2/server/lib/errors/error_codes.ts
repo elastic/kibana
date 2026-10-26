@@ -350,6 +350,12 @@ export const ALERTING_LOG_CODES = {
    * the action-type vocabulary grows ahead of the publisher's mapping.
    */
   EVENTS_ALERT_ACTION_TYPE_UNMAPPED: 'EVENTS_ALERT_ACTION_TYPE_UNMAPPED',
+  /**
+   * The action policy client could not read the policies around a bulk write
+   * or a bulk delete. The write already succeeded; its domain events are
+   * published with the policy ids only, without the policies.
+   */
+  EVENTS_ACTION_POLICY_READ_FAILED: 'EVENTS_ACTION_POLICY_READ_FAILED',
 
   // ───────────────────── Event-based telemetry (EBT) ─────────────────────
   /**
