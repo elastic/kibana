@@ -231,6 +231,30 @@ export default function (providerContext: FtrProviderContextWithServices) {
       expect(agent.policy_id).to.be(newVersionedPolicyId);
     });
 
+    it('should reassign agents on a variant that does not match their version, whenever they upgraded', async () => {
+      const oldVersionedPolicyId = `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.17`;
+      const newVersionedPolicyId = `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`;
+      const longAgoUpgraded = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+
+      await createAgentDoc(providerContext, 'agent1', oldVersionedPolicyId, '8.18.0', true, {
+        upgraded_at: longAgoUpgraded,
+      });
+      // version changed outside a Fleet upgrade
+      await createAgentDoc(providerContext, 'agent2', oldVersionedPolicyId, '8.18.0');
+      // already on the variant of its version
+      await createAgentDoc(providerContext, 'agent3', newVersionedPolicyId, '8.18.1', true, {
+        upgraded_at: longAgoUpgraded,
+      });
+
+      await waitForTask();
+
+      await retry.tryForTime(30000, async () => {
+        expect((await getAgent('agent1')).policy_id).to.be(newVersionedPolicyId);
+        expect((await getAgent('agent2')).policy_id).to.be(newVersionedPolicyId);
+      });
+      expect((await getAgent('agent3')).policy_id).to.be(newVersionedPolicyId);
+    });
+
     it('should handle multiple agent policies with version conditions', async () => {
       // Create a second agent policy with version conditions
       // Use unique name to avoid conflicts from previous failed runs
