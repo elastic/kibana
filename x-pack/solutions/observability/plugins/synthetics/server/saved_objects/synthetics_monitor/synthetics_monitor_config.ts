@@ -8,6 +8,7 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { monitorConfigMappings } from './monitor_mappings';
 import { monitorCreateSchema, monitorForwardCompatibilitySchema } from './monitor_attribute_schema';
+import { scheduleIntervalModelVersion } from './schedule_model_version';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { ConfigKey, secretKeys } from '../../../common/constants/monitor_management';
 
@@ -36,6 +37,7 @@ export const getSyntheticsMonitorConfigSavedObjectType = (): SavedObjectsType =>
           forwardCompatibility: monitorForwardCompatibilitySchema,
         },
       },
+      '2': scheduleIntervalModelVersion,
     },
   };
 };

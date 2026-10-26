@@ -39,6 +39,7 @@ import {
 } from '../../../common/utils/monitor_location_support';
 import { privateLocationCoversAllMonitorSpaces } from './monitor_locations_utils';
 import { valueContainsVaultReference } from '../../synthetics_service/formatters/vault_param_formatter';
+import { SCHEDULE_INTERVAL_FIELD } from '../../../common/lib/schedule_to_time';
 import {
   APIFieldsCodec,
   BrowserFieldsCodec,
@@ -446,6 +447,9 @@ export const normalizeAPIConfig = (
   }
   // needed for SO AAD
   supportedKeys.push(ConfigKey.PROJECT_ID, ConfigKey.ORIGINAL_SPACE);
+
+  // Recomputed from `schedule` on write, so a client-supplied value is ignored.
+  delete rawConfig[SCHEDULE_INTERVAL_FIELD];
 
   let unsupportedKeys = Object.keys(rawConfig).filter((key) => !supportedKeys.includes(key));
 
