@@ -13,6 +13,7 @@ import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/
 import { registerSignificantEventsSkills } from './register_skills';
 import { KI_QUERY_GENERATION_SKILL_ID } from './ki_query_generation';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
+import { nightshiftSourcesManagementSkill } from './nightshift_sources_management';
 import { significantEventsManagementSkill } from './significant_events_management';
 import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
 import {
@@ -27,6 +28,7 @@ const KI_IDENTIFICATION_SKILL_ID = 'ki-identification-management';
 // `ki-identification-management` is only added when a KI onboarding client is present.
 const CORE_SKILL_IDS = [
   knowledgeIndicatorsManagementSkill.id,
+  nightshiftSourcesManagementSkill.id,
   KI_QUERY_GENERATION_SKILL_ID,
   significantEventsKIGroundingSkill.id,
   significantEventsManagementSkill.id,

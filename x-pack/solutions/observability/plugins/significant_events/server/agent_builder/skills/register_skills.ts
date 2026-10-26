@@ -14,6 +14,7 @@ import type { GetScopedClients } from '../../routes/types';
 import type { SignificantEventsServer } from '../../types';
 import { createKIQueryGenerationSkill } from './ki_query_generation';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
+import { nightshiftSourcesManagementSkill } from './nightshift_sources_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
 import { featureIdentificationSkill } from './feature_identification';
 import { significantEventsManagementSkill } from './significant_events_management';
@@ -71,6 +72,7 @@ export const registerSignificantEventsSkills = async ({
 
   const getCoreSkills = (): SignificantEventsSkill[] => [
     knowledgeIndicatorsManagementSkill,
+    nightshiftSourcesManagementSkill,
     createKIQueryGenerationSkill({ getScopedClients, server, logger }),
     significantEventsKIGroundingSkill,
     significantEventsManagementSkill,

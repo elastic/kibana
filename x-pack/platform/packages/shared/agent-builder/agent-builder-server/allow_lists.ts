@@ -9,6 +9,7 @@ import {
   platformCoreTools,
   platformCoreCasesTools,
   platformSignificantEventsTools,
+  observabilityNightshiftSourceTools,
   contextEngineAiIndexTools,
   contextEngineMemoryTools,
   contextEngineAutomationTools,
@@ -29,6 +30,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   ...Object.values(platformCoreCasesTools),
   // Streams / Significant Events
   ...Object.values(platformSignificantEventsTools),
+  // Nightshift sources, registered by the Significant Events plugin
+  ...Object.values(observabilityNightshiftSourceTools),
 
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
@@ -244,6 +247,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'significant-events-ki-grounding',
   'significant-events-assessment',
   'knowledge-indicators-management',
+  'nightshift-sources-management',
   'ki-identification-management',
   'feature-identification',
   'ki-query-generation',
