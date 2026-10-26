@@ -289,11 +289,38 @@ describe('createBoundWorkloadResolver', () => {
       ]);
     });
 
-    it('records no call for types without a resolver', async () => {
+    it('counts the workloads of types that are not registered or have no resolver', async () => {
       registry.register('alerting', { type: 'rule', name: 'Rule' });
 
-      await createResolver()([binding('r-1', { pluginId: 'alerting', workloadType: 'rule' })]);
+      await createResolver()(
+        [
+          binding('r-1', { pluginId: 'alerting', workloadType: 'rule' }),
+          binding('x-1', { pluginId: 'unknown', workloadType: 'job' }),
+          binding('r-2', { pluginId: 'alerting', workloadType: 'rule' }),
+        ],
+        { purpose: 'cleanup' }
+      );
 
+      expect(meterMock.recorded(UNKNOWN)).toEqual([
+        [
+          2,
+          {
+            'kibana.plugin.id': 'alerting',
+            'kibana.service_account.workload.type': 'rule',
+            'kibana.service_account.workload_resolution.purpose': 'cleanup',
+            'error.type': 'no_resolver',
+          },
+        ],
+        [
+          1,
+          {
+            'kibana.plugin.id': 'unknown',
+            'kibana.service_account.workload.type': 'job',
+            'kibana.service_account.workload_resolution.purpose': 'cleanup',
+            'error.type': 'unregistered',
+          },
+        ],
+      ]);
       expect(meterMock.recorded(DURATION)).toEqual([]);
       expect(meterMock.recorded(BATCH_SIZE)).toEqual([]);
     });
