@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/pubsub-example-topic
   channel: ''
   owner: '@elastic/kibana-core'
-  sourceRoot: examples/pubsub_example_topic
+  sourceRoot: examples/pubsub-example-topic
 dependsOn:
   - '@kbn/core-pubsub-server'
 tags:

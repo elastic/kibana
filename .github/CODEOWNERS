@@ -32,7 +32,7 @@ examples/partial_results_example @elastic/kibana-discover
 examples/portable_dashboards_example @elastic/kibana-dashboards
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 examples/pubsub_example @elastic/kibana-core
-examples/pubsub_example_topic @elastic/kibana-core
+examples/pubsub-example-topic @elastic/kibana-core
 examples/resizable_layout_examples @elastic/kibana-discover
 examples/response_stream @elastic/search-ml-ux
 examples/routing_example @elastic/kibana-core
