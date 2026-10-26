@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Path from 'path';
 import type { Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import {
@@ -18,9 +17,7 @@ import {
 import type { AppliedCortexEdit, CortexTelemetry } from '../telemetry';
 import { isReinforcementOwnedSlug } from '../../common/decision_trees';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
-import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
-import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
-import { CORTEX_WORKSPACE_ROOT } from './materialize';
+import { isSeededWorkspaceAccess } from '../investigation_round';
 import type { CortexPageStore } from './page_store';
 import {
   canonicalizeSlug,
@@ -139,22 +136,11 @@ const boundToolCallResult = (_key: string, value: unknown): unknown => {
   return value;
 };
 
-// Nightshift writes these trees into the sandbox before the run, so reading them back is not
-// evidence, and echoing the wiki into its own optimizer would spend the budget on known pages.
-const SEEDED_WORKSPACE_ROOTS = [CORTEX_WORKSPACE_ROOT, DECISION_TREE_WORKSPACE_ROOT];
-
-/** True when the call reads back a Cortex or decision-tree file Nightshift seeded itself. */
+/** True when the call reads back a workspace file Nightshift seeded itself. */
 export const isSeededWorkspaceRead = ({
   tool_id: toolId,
   params,
-}: InvestigationToolCall): boolean => {
-  const filePath = params?.file_path;
-  if (toolId !== SANDBOX_VIEW_FILE_TOOL_ID || typeof filePath !== 'string') {
-    return false;
-  }
-  const resolved = Path.posix.resolve('/workspace', filePath);
-  return SEEDED_WORKSPACE_ROOTS.some((root) => resolved.startsWith(`${root}/`));
-};
+}: InvestigationToolCall): boolean => isSeededWorkspaceAccess(toolId, params);
 
 const renderToolResultValue = (value: unknown): string =>
   typeof value === 'string' ? value : JSON.stringify(value, boundToolCallResult) ?? '';
