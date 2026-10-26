@@ -136,11 +136,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await timePicker.setDefaultAbsoluteRange();
         await header.waitUntilLoadingHasFinished();
         // Warning callout is shown
-        await testSubjects.exists('searchResponseWarningsCallout');
+        await testSubjects.existOrFail('searchResponseWarningsCallout');
 
         // Timed out error notification is shown
-        const { title } = await toasts.getErrorByIndex(1, true);
-        expect(title).to.contain('Timed out');
+        await testSubjects.existOrFail('searchTimeoutError');
 
         // Dismiss the toast so it doesn't cover the callout's action button
         await toasts.dismissAllWithChecks();
