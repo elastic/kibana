@@ -23,7 +23,7 @@ export interface EpisodesAppProps extends EpisodeDetailsPageProps {
 
 export const EpisodesApp = ({
   dataSource,
-  useEpisodeDetailsHeaderMenuItems,
+  useAdditionalEpisodeDetailsHeaderMenuItems,
 }: EpisodesAppProps = {}) => {
   const { path } = useRouteMatch();
   const base = path.endsWith('/') ? path.slice(0, -1) : path;
@@ -39,7 +39,9 @@ export const EpisodesApp = ({
           <AlertsListPage dataSource={dataSource} />
         </Route>
         <Route path={`${base}/:episodeId`}>
-          <EpisodeDetailsPage useEpisodeDetailsHeaderMenuItems={useEpisodeDetailsHeaderMenuItems} />
+          <EpisodeDetailsPage
+            useAdditionalEpisodeDetailsHeaderMenuItems={useAdditionalEpisodeDetailsHeaderMenuItems}
+          />
         </Route>
       </Routes>
     </RequireAlertingPrivilege>

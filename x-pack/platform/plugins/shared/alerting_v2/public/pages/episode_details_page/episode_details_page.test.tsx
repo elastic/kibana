@@ -513,7 +513,7 @@ describe('EpisodeDetailsPage', () => {
         testId: 'hostReinvestigate',
       },
     ]);
-    renderPage({ useEpisodeDetailsHeaderMenuItems: useHeaderMenuItems });
+    renderPage({ useAdditionalEpisodeDetailsHeaderMenuItems: useHeaderMenuItems });
 
     expect(useHeaderMenuItems).toHaveBeenCalledWith(
       expect.objectContaining({ 'episode.id': episodeId })

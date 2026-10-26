@@ -86,8 +86,8 @@ interface EpisodeRouteParams {
 }
 
 export interface EpisodeDetailsPageProps {
-  /** A stable host hook supplying declarative header items for the current episode. */
-  useEpisodeDetailsHeaderMenuItems?: (
+  /** A stable host hook supplying additional declarative header items for the current episode. */
+  useAdditionalEpisodeDetailsHeaderMenuItems?: (
     episode: AlertEpisode | undefined
   ) => NonNullable<AppHeaderMenu['items']>;
 }
@@ -97,7 +97,7 @@ const useEmptyHeaderMenuItems = (): NonNullable<AppHeaderMenu['items']> => [];
 type EpisodeDetailsSidebarPanel = 'episode_details' | 'runbook';
 
 export function EpisodeDetailsPage({
-  useEpisodeDetailsHeaderMenuItems = useEmptyHeaderMenuItems,
+  useAdditionalEpisodeDetailsHeaderMenuItems = useEmptyHeaderMenuItems,
 }: EpisodeDetailsPageProps = {}) {
   const { euiTheme } = useEuiTheme();
   const { episodeId } = useParams<EpisodeRouteParams>();
@@ -311,7 +311,7 @@ export function EpisodeDetailsPage({
     [episode, episodeAction, groupAction, isFlapping]
   );
 
-  const additionalHeaderMenuItems = useEpisodeDetailsHeaderMenuItems(episode);
+  const additionalHeaderMenuItems = useAdditionalEpisodeDetailsHeaderMenuItems(episode);
   const headerMenu = useMemo(() => {
     const menu = getEpisodeHeaderMenu({
       actions: applicableActions,

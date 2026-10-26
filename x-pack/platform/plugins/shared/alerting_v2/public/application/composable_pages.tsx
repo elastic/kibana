@@ -171,7 +171,7 @@ export const AlertingV2EpisodesPage = ({
   hostApp,
   privilegeCheck,
   createActions,
-  useEpisodeDetailsHeaderMenuItems,
+  useAdditionalEpisodeDetailsHeaderMenuItems,
   manageRulesHref,
 }: InternalPageProps) => {
   const [queryClient] = useState(() => new QueryClient());
@@ -221,7 +221,9 @@ export const AlertingV2EpisodesPage = ({
                   <I18nProvider>
                     <EpisodesApp
                       dataSource={dataSource}
-                      useEpisodeDetailsHeaderMenuItems={useEpisodeDetailsHeaderMenuItems}
+                      useAdditionalEpisodeDetailsHeaderMenuItems={
+                        useAdditionalEpisodeDetailsHeaderMenuItems
+                      }
                     />
                   </I18nProvider>
                 </ManageRulesHrefProvider>

@@ -233,7 +233,7 @@ export const ObservabilityAlertingApp = ({
               hostApp={hostApp}
               privilegeCheck={privilegeCheck}
               createActions={createActions}
-              useEpisodeDetailsHeaderMenuItems={useInvestigateEpisodeHeaderMenuItems}
+              useAdditionalEpisodeDetailsHeaderMenuItems={useInvestigateEpisodeHeaderMenuItems}
               manageRulesHref={manageRulesHref}
             />
             <Route exact path={OBSERVABILITY_ALERTING_ALERTS_PATH}>
