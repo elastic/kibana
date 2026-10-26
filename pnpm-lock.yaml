@@ -3059,6 +3059,9 @@ importers:
       '@kbn/proposals-ui':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-proposals-ui
+      '@kbn/pubsub-example-plugin':
+        specifier: workspace:*
+        version: link:examples/pubsub_example
       '@kbn/query-activity-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/query_activity
@@ -5790,6 +5793,9 @@ importers:
       '@kbn/profiler':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-profiler
+      '@kbn/pubsub-example-topic':
+        specifier: workspace:*
+        version: link:examples/pubsub-example-topic
       '@kbn/relocate':
         specifier: workspace:*
         version: link:packages/kbn-relocate
@@ -6940,6 +6946,10 @@ importers:
   examples/portable_dashboards_example: {}
 
   examples/preboot_example: {}
+
+  examples/pubsub_example: {}
+
+  examples/pubsub-example-topic: {}
 
   examples/resizable_layout_examples: {}
 
