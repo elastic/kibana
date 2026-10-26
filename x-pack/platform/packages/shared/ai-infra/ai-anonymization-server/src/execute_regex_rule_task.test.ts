@@ -213,12 +213,27 @@ describe('executeRegexRulesTask', () => {
       );
     });
 
-    it('keeps built-in rules on native RegExp, which they are tested against', () => {
-      const builtIn = { ...custom('(?:ab)(?=c)'), builtIn: true };
+    // The `builtIn` flag lives in a stored setting that the API can write: only a rule identical to a
+    // shipped one may use the native engine, or a flagged `(a+)+$` would stall the worker again.
+    it('runs a rule that merely claims to be built in on RE2 as well', () => {
+      const claimsBuiltIn = { ...custom('(a+)+$'), id: 'builtin-made-up', builtIn: true };
+      const start = performance.now();
 
-      expect(
-        executeRegexRulesTask({ rules: [builtIn], records: [{ content: 'abc' }] })
-      ).toHaveLength(1);
+      const result = executeRegexRulesTask({
+        rules: [claimsBuiltIn],
+        records: [{ content: `${'a'.repeat(5000)}!` }],
+      });
+
+      expect(performance.now() - start).toBeLessThan(1000);
+      expect(result).toEqual([]);
+    });
+
+    it('rejects a lookahead pattern even when the rule claims to be built in', () => {
+      const claimsBuiltIn = { ...custom('foo(?=bar)'), id: 'builtin-made-up', builtIn: true };
+
+      expect(() =>
+        executeRegexRulesTask({ rules: [claimsBuiltIn], records: [{ content: 'foobar' }] })
+      ).toThrow(/invalid regular expression.*RE2/);
     });
   });
 

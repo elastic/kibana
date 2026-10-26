@@ -15,6 +15,7 @@ export type {
 } from './src/types';
 export { NER_MODEL_ID, aiAnonymizationSettings } from './src/constants';
 export { DEFAULT_BUILTIN_REGEX_RULES } from './src/default_builtin_regex_rules';
+export { isShippedBuiltInRule } from './src/is_shipped_builtin_rule';
 export { refineBuiltInMatch } from './src/builtin_match_filters';
 export type { MatchSpan } from './src/builtin_match_filters';
 export { refreshBuiltInAnonymizationRules } from './src/refresh_builtin_rules';

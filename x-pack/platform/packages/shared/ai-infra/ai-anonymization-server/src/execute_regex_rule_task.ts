@@ -7,7 +7,7 @@
 
 import { RE2JS } from 're2js';
 import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
-import { refineBuiltInMatch } from '@kbn/ai-anonymization-common';
+import { isShippedBuiltInRule, refineBuiltInMatch } from '@kbn/ai-anonymization-common';
 import type { DetectedMatch } from './types';
 
 interface Span {
@@ -66,14 +66,17 @@ const findSpansRe2 =
  * so the pipeline's `onFailure` mode decides what happens: silently dropping the rule would
  * leave data the admin believes is masked going to the model.
  *
- * Built-in rules run on native `RegExp`: they are written to behave the same on both engines and
- * are bounded, so they cannot backtrack catastrophically. Custom rules run on RE2, which matches
- * in linear time, so a pattern an admin saves (or an attacker's input to it) cannot stall the
- * worker and turn masking off for the request.
+ * Shipped built-in rules run on native `RegExp`: they are written to behave the same on both
+ * engines and are bounded, so they cannot backtrack catastrophically. Every other rule runs on RE2,
+ * which matches in linear time, so a pattern an admin saves (or an attacker's input to it) cannot
+ * stall the worker and turn masking off for the request. A rule only counts as built-in when it is
+ * identical to a shipped one: the `builtIn` flag is stored in the setting, which can be written
+ * through the API, and must not select the unprotected engine on its own.
  */
 export const compileRulePattern = (rule: RegexAnonymizationRule): FindSpans => {
+  const isShipped = isShippedBuiltInRule(rule);
   try {
-    return rule.builtIn
+    return isShipped
       ? findSpansNative(new RegExp(rule.pattern, 'g'))
       : findSpansRe2(RE2JS.compile(rule.pattern));
   } catch (error) {
@@ -81,7 +84,7 @@ export const compileRulePattern = (rule: RegexAnonymizationRule): FindSpans => {
     const reason = error instanceof Error ? error.message : String(error);
     throw new Error(
       `Anonymization rule "${label}" has an invalid regular expression: ${reason}${
-        rule.builtIn ? '' : `. ${RE2_HINT}`
+        isShipped ? '' : `. ${RE2_HINT}`
       }`
     );
   }
@@ -105,6 +108,7 @@ export const executeRegexRulesTask = ({
 }): DetectedMatch[] =>
   rules.flatMap((rule, ruleIndex) => {
     const findSpans = compileRulePattern(rule);
+    const isShipped = isShippedBuiltInRule(rule);
 
     return records.flatMap((record: Record<string, string>, recordIndex: number) =>
       Object.entries(record).flatMap(([key, value]) => {
@@ -113,7 +117,7 @@ export const executeRegexRulesTask = ({
         }
 
         return findSpans(value).flatMap((span) => {
-          const refined = rule.builtIn
+          const refined = isShipped
             ? refineBuiltInMatch(rule.id, value, span.start, span.end)
             : span;
           return refined
