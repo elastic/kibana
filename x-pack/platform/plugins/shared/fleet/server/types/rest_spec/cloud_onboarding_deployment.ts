@@ -371,7 +371,7 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
           maxLength: 100,
           meta: {
             description:
-              'Global data stream namespace from the Service settings step. Send null to clear it.',
+              'Global data stream namespace from the Service settings step. Send null to clear it. When omitted, using the default namespace or the one inherited from the agent policy.',
           },
         })
       )
