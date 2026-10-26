@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await PageObjects.console.clearEditorText();
         await PageObjects.console.enterText(
-          '\nGET ftr-remote:makelogs工程-*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"} \n}\n]\n}\n}\n}'
+          `\nGET ftr-remote:${UNICODE_INDEX}*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"} \n}\n]\n}\n}\n}`
         );
         await PageObjects.console.clickPlayAndWaitForResults();
 
