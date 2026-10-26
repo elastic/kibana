@@ -131,7 +131,11 @@ export class KnowledgeIndicatorClient {
     sourceId: string,
     options: { lastRefreshedBefore: string }
   ): Promise<{ refreshed: number }> {
-    return this.withSourceWrite(sourceId, () => this.writer.keepAlivePersistent(sourceId, options));
+    return this.withSourceWrite(
+      sourceId,
+      () => this.writer.keepAlivePersistent(sourceId, options),
+      { waitForLease: false }
+    );
   }
 
   deleteIndicators(sourceId: string) {
@@ -367,6 +371,8 @@ export class KnowledgeIndicatorClient {
   }
 
   reconcileSource(sourceId: string): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {
-    return this.withSourceWrite(sourceId, () => this.orchestrator.reconcileSource(sourceId));
+    return this.withSourceWrite(sourceId, () => this.orchestrator.reconcileSource(sourceId), {
+      waitForLease: false,
+    });
   }
 }
