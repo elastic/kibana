@@ -2662,8 +2662,6 @@
     "data.search.es_search.dataViewLabel": "Visualização de dados",
     "data.search.es_search.hitsDescription": "O número de documentos retornados pela consulta.",
     "data.search.es_search.hitsLabel": "Acertos",
-    "data.search.es_search.hitsTotalDescription": "O número de documentos que correspondem à consulta.",
-    "data.search.es_search.hitsTotalLabel": "Acertos (total)",
     "data.search.es_search.indexPatternDescription": "A Data view que se conecta aos índices do Elasticsearch.",
     "data.search.es_search.queryTimeDescription": "O tempo que levou para processar a consulta. Não inclui o tempo para enviar a solicitação ou analisá-la no navegador.",
     "data.search.es_search.queryTimeLabel": "Tempo de consulta",
