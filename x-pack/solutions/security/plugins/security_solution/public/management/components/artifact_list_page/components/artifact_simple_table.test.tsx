@@ -108,18 +108,29 @@ describe('ArtifactSimpleTable', () => {
     ]);
   });
 
-  it('renders the artifact name', () => {
+  it('renders the artifact name as a button', () => {
     render();
 
+    expect(renderResult.getByRole('button', { name: 'YARA rule one' })).toBeInTheDocument();
     expect(renderResult.getByTestId('testTable-columnName')).toHaveTextContent('YARA rule one');
+  });
+
+  it('invokes onAction when the name is clicked', () => {
+    render({ allowCardEditAction: false, allowCardDeleteAction: false });
+
+    fireEvent.click(renderResult.getByTestId('testTable-columnName'));
+
+    expect(onAction).toHaveBeenCalledWith({ type: 'view', item });
   });
 
   it('renders operating system badges with human-readable labels', () => {
     render();
 
-    expect(renderResult.getByTestId('testTable-osBadge-windows')).toHaveTextContent('Windows');
-    expect(renderResult.getByTestId('testTable-osBadge-linux')).toHaveTextContent('Linux');
-    expect(renderResult.getByTestId('testTable-osBadge-macos')).toHaveTextContent('Mac');
+    expect(renderResult.getByTestId('testTable-columnOs-osBadge-windows')).toHaveTextContent(
+      'Windows'
+    );
+    expect(renderResult.getByTestId('testTable-columnOs-osBadge-linux')).toHaveTextContent('Linux');
+    expect(renderResult.getByTestId('testTable-columnOs-osBadge-macos')).toHaveTextContent('Mac');
   });
 
   it('renders the updated by avatar and name', () => {
@@ -201,6 +212,14 @@ describe('ArtifactSimpleTable', () => {
     render({ items: [], pagination: { ...pagination, totalItemCount: 0 } });
 
     expect(renderResult.getByTestId('testTable-noResults')).toHaveTextContent('No items found');
+  });
+
+  it('names the row actions menu button after the artifact of that row', () => {
+    render();
+
+    expect(renderResult.getByTestId('testTable-rowActions-button')).toHaveAccessibleName(
+      `Open actions for ${item.name}`
+    );
   });
 
   it('opens the row actions menu with edit and delete', async () => {

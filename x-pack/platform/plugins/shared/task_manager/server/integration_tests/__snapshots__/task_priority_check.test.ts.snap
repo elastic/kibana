@@ -16,7 +16,7 @@ Array [
   },
   Object {
     "priority": 1,
-    "taskType": "nightshift-investigations:reconcile_investigation_statuses",
+    "taskType": "alerting_v2:alert_actions_cleanup",
   },
   Object {
     "priority": 40,

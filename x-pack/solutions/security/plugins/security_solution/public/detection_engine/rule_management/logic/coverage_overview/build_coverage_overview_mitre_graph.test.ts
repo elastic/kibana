@@ -91,14 +91,8 @@ describe('buildCoverageOverviewMitreGraph', () => {
     ]);
   });
 
-  it('sorts tactics by position ascending', () => {
-    const shuffledTactics = [
-      buildMockMitreTacticSummary({
-        id: 'TA003',
-        name: 'Tactic 3',
-        reference: 'https://some-link/TA003',
-        position: 2,
-      }),
+  it('preserves the tactic order it receives', () => {
+    const orderedTactics = [
       buildMockMitreTacticSummary({
         id: 'TA001',
         name: 'Tactic 1',
@@ -111,16 +105,22 @@ describe('buildCoverageOverviewMitreGraph', () => {
         reference: 'https://some-link/TA002',
         position: 1,
       }),
+      buildMockMitreTacticSummary({
+        id: 'TA003',
+        name: 'Tactic 3',
+        reference: 'https://some-link/TA003',
+        position: 2,
+      }),
     ];
 
-    const model = buildCoverageOverviewMitreGraph(shuffledTactics, [], []);
+    const model = buildCoverageOverviewMitreGraph(orderedTactics, [], []);
     expect(model.map((t) => t.id)).toEqual(['TA001', 'TA002', 'TA003']);
   });
 
   it('does not mutate the input tactics array', () => {
     const tactics = [
-      buildMockMitreTacticSummary({ id: 'TA002', position: 1 }),
       buildMockMitreTacticSummary({ id: 'TA001', position: 0 }),
+      buildMockMitreTacticSummary({ id: 'TA002', position: 1 }),
     ];
     const originalOrder = tactics.map((t) => t.id);
     buildCoverageOverviewMitreGraph(tactics, [], []);

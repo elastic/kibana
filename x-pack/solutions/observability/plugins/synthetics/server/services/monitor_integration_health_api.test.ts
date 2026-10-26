@@ -75,7 +75,7 @@ const createPackagePolicy = (policyId: string, agentPolicyIds: string[]): Packag
   } as unknown as PackagePolicy);
 
 interface BuildApiOverrides {
-  monitorConfigRepository?: { getAcrossSpaces: jest.Mock };
+  monitorConfigRepository?: { getAcrossSpaces?: jest.Mock; getAll?: jest.Mock };
   /**
    * Mocks the Synthetics PackagePolicyService wrapper that the health API
    * uses to fetch package policies across spaces.
@@ -192,6 +192,49 @@ describe('MonitorIntegrationHealthApi', () => {
     );
 
     mockedGetPrivateLocationsForNamespaces.mockResolvedValue([]);
+  });
+
+  describe('getHealthForLocations', () => {
+    it('checks every monitor on the given locations', async () => {
+      const location = createPrivateLocation('loc-1', 'agent-policy-1');
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([location]);
+      const getAll = jest
+        .fn()
+        .mockResolvedValue([
+          createMonitorSO('mon-1', { locations: [{ id: 'loc-1', isServiceManaged: false }] }),
+          createMonitorSO('mon-2', { locations: [{ id: 'loc-1', isServiceManaged: false }] }),
+        ]);
+      const api = buildApi({
+        monitorConfigRepository: { getAll },
+        packagePolicyServiceGetByIds: jest
+          .fn()
+          .mockResolvedValue([createPackagePolicy('mon-1-loc-1', ['agent-policy-1'])]),
+      });
+
+      const result = await api.getHealthForLocations(['loc-1']);
+
+      expect(getAll).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: expect.stringContaining('loc-1') })
+      );
+      expect(result.errors).toEqual([]);
+      expect(
+        result.monitors.map(({ configId, privateLocations }) => [
+          configId,
+          privateLocations[0].status,
+        ])
+      ).toEqual([
+        ['mon-1', PrivateLocationHealthStatusValue.Healthy],
+        ['mon-2', PrivateLocationHealthStatusValue.MissingPackagePolicy],
+      ]);
+    });
+
+    it('returns no monitors when none use the locations', async () => {
+      const api = buildApi({
+        monitorConfigRepository: { getAll: jest.fn().mockResolvedValue([]) },
+      });
+
+      expect(await api.getHealthForLocations(['loc-1'])).toEqual({ monitors: [], errors: [] });
+    });
   });
 
   describe('monitor fetching and partial errors', () => {

@@ -98,6 +98,20 @@ describe('AlertAnalysisCallerAlerts', () => {
     expect(AlertAnalysisCallerAlerts.parse([alert])).toEqual([alert]);
   });
 
+  it.each([
+    '.internal.alerts-security.alerts-default-000001',
+    '.ds-.alerts-security.alerts-default-2026.09.17-000001',
+  ])('accepts the Security alerts index form %s', (_index) => {
+    expect(AlertAnalysisCallerAlerts.safeParse([{ ...alert, _index }]).success).toBe(true);
+  });
+
+  it.each(['.ds-logs-endpoint.events.process-default-2026.09.17-000001', '.alerts-other.alerts-x'])(
+    'rejects a non-Security-alerts index (%s)',
+    (_index) => {
+      expect(AlertAnalysisCallerAlerts.safeParse([{ ...alert, _index }]).success).toBe(false);
+    }
+  );
+
   it.each(['not-a-date', '2026-09-23', '2026-09-23T12:00:00.000+02:00'])(
     'rejects a non-UTC date-time @timestamp (%s), matching execution-time validation',
     (timestamp) => {

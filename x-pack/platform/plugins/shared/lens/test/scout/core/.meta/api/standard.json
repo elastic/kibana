@@ -1,9 +1,23 @@
 {
-  "sha1": "1fabd56eaee3e9ad84385a0c492659999edffc74",
+  "sha1": "8d8a0aa4cc94b9202f8e1424187383845d68da45",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "04fc4fc86d29b75-af6050b61dc87ad",
+      "title": "Lens form-based → ES|QL conversion query execution preserves population standard deviation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 89,
+        "column": 59
+      }
+    },
     {
       "id": "04fc4fc86d29b75-7b12d59dc8db1da",
       "title": "Lens form-based → ES|QL conversion query execution core: executes converted query: count of records",
@@ -14,8 +28,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-5e37ed959b13955",
+      "title": "Lens form-based → ES|QL conversion query execution core: executes converted query: standard deviation of a numeric field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -28,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -42,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -56,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -70,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -84,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -98,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -112,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -126,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -140,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -154,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -168,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -182,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -196,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -210,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -224,8 +252,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-4c6c84ecb1473c8",
+      "title": "Lens form-based → ES|QL conversion query execution date_histogram: executes converted query: date histogram with drop partial buckets preserves the flag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -238,8 +280,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-152451ac92d3423",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: top values ordered by a dotted-field metric — SORT doubles backticks inside the quoted expression name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -252,8 +308,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -266,8 +322,260 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-9a09cd5fadc0533",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: terms above a date histogram (fixed interval) ranked by metric DESC",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-4300a5fab985b2f",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: terms above a date histogram (fixed interval) ranked by metric ASC",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-d6c25e21fe2ccad",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: terms above a date histogram (auto interval) ranked by metric",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-6489b2d33ecc125",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: terms above a date histogram ranked alphabetically DESC",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-62e9b674d1bb58e",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: terms above a date histogram ranked alphabetically ASC",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-389fb7407540d91",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: terms above a date histogram uses the metric column role in STATS only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-b05faf19a262d00",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: terms above a date histogram ranked by a KQL-filtered metric",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-31332a13137b7b4",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: date histogram (fixed interval) above terms ranked by metric",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-b4e83794c0aea48",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: date histogram (auto interval) above terms ranked alphabetically",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-668ad0701fde8e2",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: terms above a date histogram above terms keeps the top N per outer value and bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-78a175609318723",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: two terms both ranked by metric DESC",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-f6dd22a6413f8d7",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: two terms both ranked by count DESC",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-d0b7863e86457cc",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: outer ranked by a different metric than the inner dimension",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-514170c32425742",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: outer ranked by a KQL-filtered metric keeps the filter in the rank",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-1653fc47280b14c",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: outer rank uses its own alias when the metric has a column role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-6904075fe4a0e89",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: outer alphabetical, inner metric",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-2ed9aaf950103d1",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: both dimensions alphabetical",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-faab76f7719de42",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: both dimensions ranked by the same metric in opposite directions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -280,8 +588,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -294,8 +602,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -308,8 +616,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -322,8 +630,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -336,8 +644,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -350,8 +658,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -364,8 +672,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -378,8 +686,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -392,8 +700,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -406,8 +714,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -420,8 +728,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -434,8 +742,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -448,8 +756,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 145,
+        "column": 29
       }
     },
     {
@@ -483,6 +791,90 @@
     {
       "id": "b80703b0fc233d1-fc9ae43952b6c4b",
       "title": "Lens metric trendline query execution executes trendline query: regular source query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-8633276abe0983d",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with multiple piped STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-80e4f7bf0284690",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query carrying an existing BUCKET through a later STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-6a02d2bf5566e3e",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query carrying a BUCKET through DROP and a later STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-fe6910c2e351546",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query carrying an aliased BUCKET through an aliased later STATS grouping",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-d568edfd0a4b69e",
+      "title": "Lens metric trendline query execution executes trendline query: TS query carrying TBUCKET through a later STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-7953fd9bfd7e31b",
+      "title": "Lens metric trendline query execution executes trendline query: TS query carrying an aliased TBUCKET through a later STATS",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -553,6 +945,90 @@
     {
       "id": "b80703b0fc233d1-c12c99724ae8ab8",
       "title": "Lens metric trendline query execution executes trendline query: FROM query with aliased TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-b68068a0632070a",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with renamed source time field before STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-a95baec5ffa9cb5",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with chained source time renames and KEEP before STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-4cd5105b3630c01",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with existing BUCKET on renamed source time field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-bd178e849d3fb59",
+      "title": "Lens metric trendline query execution executes trendline query: raw query with renamed source time field and KEEP",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-34fe7f2c2c2f4b8",
+      "title": "Lens metric trendline query execution executes trendline query: TS query with renamed TBUCKET column and KEEP",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-568bc91fc774b77",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with aliased TBUCKET and KEEP after STATS",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

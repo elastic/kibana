@@ -15,6 +15,7 @@ import { ActionPolicyClient } from '../lib/action_policy_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
+import { InternalRulesClient } from '../lib/internal_rules_client';
 import type { AlertingServerSetup, AlertingServerStart } from '../types';
 import { bindContract } from './bind_contract';
 import { asSpaceId } from '@kbn/core-spaces-common';
@@ -29,11 +30,15 @@ describe('bindContract', () => {
   let mockActionPolicyClient: Partial<ActionPolicyClient>;
   let mockAlertEventsClient: Partial<AlertEventsClient>;
   let fork: jest.Mock;
+  let mockInternalRulesClient: Partial<InternalRulesClient>;
 
   beforeEach(() => {
     container = new Container();
     scope = new Container();
-    mockRulesClient = { getRule: jest.fn() };
+    mockRulesClient = {
+      getRule: jest.fn(),
+      bulkDisableRules: jest.fn().mockResolvedValue({ affected_count: 1, errors: [] }),
+    };
     mockActionPolicyClient = { getActionPolicy: jest.fn() };
     mockAlertEventsClient = { createAlertEvent: jest.fn() };
     scope.bind(RulesClient).toConstantValue(mockRulesClient as RulesClient);
@@ -46,6 +51,10 @@ describe('bindContract', () => {
       getContainer: jest.fn(() => container),
     } as never);
     container.bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
+    mockInternalRulesClient = { bulkDisableRules: jest.fn() };
+    container
+      .bind(InternalRulesClient)
+      .toConstantValue(mockInternalRulesClient as InternalRulesClient);
 
     container.load(new ContainerModule((options) => bindContract(options)));
   });
@@ -62,6 +71,7 @@ describe('bindContract', () => {
     expect(start).toEqual({
       getRulesClientWithRequest: expect.any(Function),
       getRulesClientWithRequestInSpace: expect.any(Function),
+      getUnsafeInternalRulesClient: expect.any(Function),
       getActionPolicyClientWithRequest: expect.any(Function),
       getActionPolicyClientWithRequestInSpace: expect.any(Function),
       getAlertEventsClientWithRequest: expect.any(Function),
@@ -124,5 +134,14 @@ describe('bindContract', () => {
     expect(client).toBe(mockAlertEventsClient);
     expect(fork).toHaveBeenCalledTimes(1);
     expect(scope.get(Request)).toBe(fakeRequest);
+  });
+
+  it('returns the singleton InternalRulesClient when getUnsafeInternalRulesClient is called', async () => {
+    const start = container.get(AlertingStartToken);
+
+    const client = await start.getUnsafeInternalRulesClient();
+
+    expect(client).toBe(mockInternalRulesClient);
+    expect(fork).not.toHaveBeenCalled();
   });
 });

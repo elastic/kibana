@@ -11,6 +11,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLensProps } from './use_lens_props';
 import { useChartLayers } from './use_chart_layers';
+import { buildHistogramHeatmapConfig } from '../build_histogram_heatmap_config';
 import {
   LensConfigBuilder,
   type LensAttributes,
@@ -442,6 +443,41 @@ describe('useLensProps', () => {
     await waitFor(() => {
       expect(LensConfigBuilder.prototype.build).not.toHaveBeenCalled();
       expect(result.current).toBeUndefined();
+    });
+  });
+
+  it('builds a heatmap with the same config builder as XY charts', async () => {
+    const chartRef = createMockChartRef();
+    const query = 'TS metrics-a | STATS count = COUNT(latency) BY bucket, TBUCKET(100)';
+    const heatmapConfig = buildHistogramHeatmapConfig({ query, title: 'latency' });
+
+    const { result } = renderHook(() =>
+      useLensProps({
+        chartId: 'testChartId',
+        title: 'latency',
+        query,
+        services: servicesMock as UnifiedHistogramServices,
+        fetchParams,
+        discoverFetch$,
+        chartRef,
+        chartLayers: mockEmptyChartLayers,
+        heatmapConfig,
+        profileId: 'testProfileId',
+      })
+    );
+
+    act(() => {
+      discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
+    });
+
+    await waitFor(() => {
+      expect(LensConfigBuilder.prototype.build).toHaveBeenCalledWith(
+        heatmapConfig,
+        expect.objectContaining({
+          query: { esql: query },
+        })
+      );
+      expect(result.current).toBeDefined();
     });
   });
 

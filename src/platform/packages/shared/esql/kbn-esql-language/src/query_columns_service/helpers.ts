@@ -21,6 +21,7 @@ import { columnIsPresent } from '../commands/definitions/utils/columns';
 import { getUnmappedFieldType } from '../commands/definitions/utils/settings';
 import { getLookupJoinSource } from '../commands/definitions/utils/sources';
 import { getIndexFromPromQLParams } from '../commands/definitions/utils/promql';
+import { isTimeseriesSourceCommand } from '../commands/definitions/utils/timeseries_check';
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
   if (!resourceRetriever?.getFieldsMetadata) {
@@ -189,6 +190,7 @@ export async function getCurrentQueryAvailableColumns(
     fromEnrich: getEnrichFields,
     fromFrom: getFromFields,
     fromPromql: getPromqlFields,
+    isTimeseriesSource: isTimeseriesSourceCommand(commands),
   };
 
   const previousCommands = commands.slice(0, -1);
@@ -201,14 +203,28 @@ export async function getCurrentQueryAvailableColumns(
 
   const fields = [...previousPipeFields, ...unmappedFields];
 
-  if (commandDef?.methods.columnsAfter) {
-    return commandDef.methods.columnsAfter(
-      lastCommand,
-      fields,
-      originalQueryText,
-      additionalFields,
-      unmappedFieldsStrategy ?? UnmappedFieldsStrategy.DEFAULT
-    );
-  }
-  return fields;
+  const columns = commandDef?.methods.columnsAfter
+    ? await commandDef.methods.columnsAfter(
+        lastCommand,
+        fields,
+        originalQueryText,
+        additionalFields,
+        unmappedFieldsStrategy ?? UnmappedFieldsStrategy.DEFAULT
+      )
+    : fields;
+
+  // A command that does not keep each row tied to one document breaks the link with the WHERE
+  // conditions a HIGHLIGHT could reuse.
+  return commandDef?.metadata.docPreserving ? columns : withoutFullTextMatch(columns);
 }
+
+const withoutFullTextMatch = (columns: ESQLColumnData[]): ESQLColumnData[] =>
+  columns.map((column) => {
+    if (column.fullTextMatch === undefined) {
+      return column;
+    }
+
+    const { fullTextMatch, ...rest } = column;
+
+    return rest;
+  });

@@ -1,5 +1,5 @@
 {
-  "sha1": "ed7924abd2fb42ddccc8af9b1c028fb0cb6544c2",
+  "sha1": "f34156b2b7095a570c124c2e5b637dfd85813ba9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -159,6 +159,20 @@
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_spaces.spec.ts",
         "line": 57,
         "column": 5
+      }
+    },
+    {
+      "id": "4c6123f145685f5-2eae084fca89f8f",
+      "title": "Advanced settings - disable animations disables animations while preserving completion events and exemptions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/disable_animations.spec.ts",
+        "line": 23,
+        "column": 60
       }
     },
     {

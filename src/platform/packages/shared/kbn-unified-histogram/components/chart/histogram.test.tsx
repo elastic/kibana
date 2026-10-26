@@ -14,7 +14,7 @@ import { act, screen } from '@testing-library/react';
 import { allSuggestionsMock } from '../../__mocks__/suggestions';
 import { BehaviorSubject } from 'rxjs';
 import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { DataViewSource, EsqlSource } from '@kbn/data-source';
+import { EsqlSource } from '@kbn/data-source';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { getFetch$Mock, getFetchParamsMock } from '../../__mocks__/fetch_params';
 import { getLensProps, useLensProps } from './hooks/use_lens_props';
@@ -39,7 +39,6 @@ const getMockLensAttributes = async () => {
       columns: [],
       dataView: dataViewWithTimefieldMock,
       filters: [],
-      isPlainRecord: false,
       query,
       timeInterval: 'auto',
     })
@@ -54,9 +53,9 @@ const getEmbeddableProps = () => {
 };
 
 const renderComponent = async ({
-  isPlainRecord = false,
+  isEsql = false,
   hasLensSuggestions = false,
-}: { isPlainRecord?: boolean; hasLensSuggestions?: boolean } = {}) => {
+}: { isEsql?: boolean; hasLensSuggestions?: boolean } = {}) => {
   const services = unifiedHistogramServicesMock;
 
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
@@ -76,7 +75,7 @@ const renderComponent = async ({
       from: '2020-05-14T11:05:13.590',
       to: '2020-05-14T11:20:13.590',
     },
-    ...(isPlainRecord
+    ...(isEsql
       ? {
           query: { esql: esqlQuery },
           dataSource: await EsqlSource.create({
@@ -93,7 +92,6 @@ const renderComponent = async ({
     columns: [],
     dataView: dataViewWithTimefieldMock,
     filters: fetchParams.filters,
-    isPlainRecord: fetchParams.isESQLQuery,
     query: fetchParams.query,
     timeInterval: fetchParams.timeInterval,
   });
@@ -107,9 +105,8 @@ const renderComponent = async ({
     fetch$,
     onLoad: jest.fn(),
     withDefaultActions: undefined,
-    dataSource: new DataViewSource(dataViewWithTimefieldMock),
+    dataSource: fetchParams.dataSource,
     abortController: fetchParams.abortController,
-    isPlainRecord: fetchParams.isESQLQuery,
     bucketInterval: undefined,
     visContext: lensVisMock.visContext!,
   };
@@ -298,7 +295,7 @@ describe('Histogram', () => {
   });
 
   it('should execute onLoad correctly for textbased language and no Lens suggestions', async () => {
-    const { props } = await renderComponent({ isPlainRecord: true, hasLensSuggestions: false });
+    const { props } = await renderComponent({ isEsql: true, hasLensSuggestions: false });
 
     const onLoad = getEmbeddableProps().onLoad!;
     const adapters = createDefaultInspectorAdapters();
@@ -333,7 +330,7 @@ describe('Histogram', () => {
   });
 
   it('should execute onLoad correctly for textbased language and Lens suggestions', async () => {
-    const { props } = await renderComponent({ isPlainRecord: true, hasLensSuggestions: true });
+    const { props } = await renderComponent({ isEsql: true, hasLensSuggestions: true });
 
     const onLoad = getEmbeddableProps().onLoad!;
     const adapters = createDefaultInspectorAdapters();

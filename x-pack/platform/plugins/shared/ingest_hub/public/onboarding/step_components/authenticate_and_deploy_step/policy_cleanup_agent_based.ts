@@ -14,6 +14,13 @@ import {
 
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
+import {
+  detectSecretRefs,
+  fetchPackagePolicySecretRefs,
+  withoutCoveredCredentials,
+} from './secret_refs';
+import type { ExistingSecretRefs } from './secret_refs';
+import { runWithSharedSecrets } from './shared_secrets';
 import type { AgentCredentialVars } from './package_inputs';
 import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
@@ -26,6 +33,13 @@ export interface UpdateAgentBasedPolicyOpts extends BuildPolicyBodyOpts {
 export interface CleanupAgentBasedOpts extends UpdateAgentBasedPolicyOpts {
   pendingCleanupPolicyIds: Record<string, string>;
   currentPolicyIdsByInstance: Record<string, string>;
+  /**
+   * True when the typed credentials will be stored as new Fleet secrets. They are then stored once
+   * (on the first updated policy) and the other updates use that secret.
+   */
+  hasTypedSecrets?: boolean;
+  /** Instances joining a policy in this run: written with its surviving members, in one PUT. */
+  addedInstanceIdsByPolicy?: Record<string, string[]>;
 }
 
 /**
@@ -37,15 +51,20 @@ export interface CleanupAgentBasedOpts extends UpdateAgentBasedPolicyOpts {
  */
 export async function cleanupAgentBasedPolicies(
   opts: CleanupAgentBasedOpts
-): Promise<PolicyCleanupOps> {
-  const { pendingCleanupPolicyIds, currentPolicyIdsByInstance } = opts;
+): Promise<PolicyCleanupOps & { sharedRefs?: ExistingSecretRefs }> {
+  const {
+    pendingCleanupPolicyIds,
+    currentPolicyIdsByInstance,
+    hasTypedSecrets,
+    addedInstanceIdsByPolicy,
+  } = opts;
   const planned = computePolicyCleanupOps(pendingCleanupPolicyIds, currentPolicyIdsByInstance);
 
   const succeededDeletes: string[] = [];
   const succeededUpdates: Array<{ policyId: string; survivingInstanceIds: string[] }> = [];
 
-  await Promise.allSettled([
-    ...planned.toDelete.map((policyId) =>
+  const deletes = Promise.allSettled(
+    planned.toDelete.map((policyId) =>
       sendDeletePackagePolicy({ packagePolicyIds: [policyId] })
         .then(() => {
           succeededDeletes.push(policyId);
@@ -54,20 +73,46 @@ export async function cleanupAgentBasedPolicies(
           // eslint-disable-next-line no-console
           console.error(`Failed to delete agent-based package policy ${policyId}:`, err);
         })
-    ),
-    ...planned.toUpdate.map(({ policyId, survivingInstanceIds }) =>
-      updateAgentBasedPolicy(policyId, survivingInstanceIds, opts)
-        .then(() => {
-          succeededUpdates.push({ policyId, survivingInstanceIds });
-        })
-        .catch((err) => {
-          // eslint-disable-next-line no-console
-          console.error(`Failed to update agent-based package policy ${policyId}:`, err);
-        })
-    ),
-  ]);
+    )
+  );
+  const updates = runWithSharedSecrets({
+    items: planned.toUpdate,
+    hasTypedSecrets: Boolean(hasTypedSecrets),
+    // An update can delete the secret it replaced: finish one before starting the next.
+    sequential: true,
+    run: ({ policyId, survivingInstanceIds }, sharedRefs) =>
+      updateAgentBasedPolicy(
+        policyId,
+        [...survivingInstanceIds, ...(addedInstanceIdsByPolicy?.[policyId] ?? [])],
+        sharedRefs
+          ? {
+              ...opts,
+              authenticateAndDeployStep: {
+                ...opts.authenticateAndDeployStep,
+                existingSecretRefs: sharedRefs,
+              },
+              agentCredentials:
+                opts.agentCredentials &&
+                withoutCoveredCredentials(opts.agentCredentials, sharedRefs),
+            }
+          : opts
+      ),
+    getPolicyId: ({ policyId }) => policyId,
+    fetchRefs: fetchPackagePolicySecretRefs,
+  });
 
-  return { toDelete: succeededDeletes, toUpdate: succeededUpdates };
+  const [, { results, sharedRefs }] = await Promise.all([deletes, updates]);
+  results.forEach((result, i) => {
+    const { policyId, survivingInstanceIds } = planned.toUpdate[i];
+    if (result.status === 'fulfilled') {
+      succeededUpdates.push({ policyId, survivingInstanceIds });
+    } else {
+      // eslint-disable-next-line no-console
+      console.error(`Failed to update agent-based package policy ${policyId}:`, result.reason);
+    }
+  });
+
+  return { toDelete: succeededDeletes, toUpdate: succeededUpdates, sharedRefs };
 }
 
 export async function updateAgentBasedPolicy(
@@ -105,6 +150,7 @@ export async function updateAgentBasedPolicy(
   // send an empty vars block that clears AWS credentials already stored as Fleet secrets.
   type ExistingVarValue = string | { isSecretRef: boolean; id: string };
   const existingVarValues: Record<string, ExistingVarValue> = {};
+  let existingSecretRefs: ExistingSecretRefs | undefined;
   try {
     const existing = await sendGetOnePackagePolicy(policyId);
     if (existing.error) throw existing.error;
@@ -112,6 +158,7 @@ export async function updateAgentBasedPolicy(
     existingNamespace = existing.data?.item?.namespace;
     existingVersion = existing.data?.item?.package?.version;
     existingPolicyIds = existing.data?.item?.policy_ids;
+    existingSecretRefs = detectSecretRefs(existing.data?.item);
     for (const [key, entry] of Object.entries(
       (existing.data?.item?.vars ?? {}) as Record<string, { value: unknown }>
     )) {
@@ -168,7 +215,13 @@ export async function updateAgentBasedPolicy(
 
   const { staticKeys } = authenticateAndDeployStep;
   const pkgVarNames = getPackageVarNames(pkgInfo as { vars?: Array<{ name: string }> });
-  const builtVars = buildPackageVars(globalRegion, staticKeys, pkgVarNames, agentCredentials);
+  const builtVars = buildPackageVars(
+    globalRegion,
+    staticKeys,
+    pkgVarNames,
+    agentCredentials,
+    authenticateAndDeployStep.existingSecretRefs ?? existingSecretRefs
+  );
   // When new credentials are explicitly provided, use only the newly built vars — merging the
   // existing values would retain stale fields from the old credential method (e.g. access_key_id
   // left over after switching to shared_credentials). When no credentials are in memory (access/

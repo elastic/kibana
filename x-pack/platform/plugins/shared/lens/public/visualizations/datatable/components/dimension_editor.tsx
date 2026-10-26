@@ -20,6 +20,7 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import type { KbnPalettes } from '@kbn/palettes';
 import {
   COLUMN_CELL_DECORATION_MODE,
+  LENS_DATATABLE_DEFAULT_COLOR_STEPS,
   type ColumnCellDecorationMode,
   type VisualizationDimensionEditorProps,
   type DatatableVisualizationState,
@@ -377,6 +378,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 paletteService={props.paletteService}
                 panelRef={props.panelRef}
                 dataBounds={currentMinMax}
+                defaultBandCount={LENS_DATATABLE_DEFAULT_COLOR_STEPS}
               />
             ))}
         </>

@@ -13,18 +13,26 @@ import {
 describe('matchActionPoliciesBodySchema', () => {
   it('accepts a valid rule payload', () => {
     const result = matchActionPoliciesBodySchema.parse({
-      rule: { tags: ['cpu'] },
+      rule: { routing_tags: ['cpu'] },
     });
 
     expect(result).toEqual({
-      rule: { tags: ['cpu'] },
+      rule: { routing_tags: ['cpu'] },
     });
+  });
+
+  it('rejects rule.tags, since policies match on routing tags', () => {
+    expect(() =>
+      matchActionPoliciesBodySchema.parse({
+        rule: { tags: ['cpu'] },
+      })
+    ).toThrow();
   });
 
   it('rejects unknown top-level fields (strict)', () => {
     expect(() =>
       matchActionPoliciesBodySchema.parse({
-        rule: { tags: ['cpu'] },
+        rule: { routing_tags: ['cpu'] },
         unknownField: 'x',
       })
     ).toThrow();
@@ -33,7 +41,7 @@ describe('matchActionPoliciesBodySchema', () => {
   it('rejects rule id and name (strict, no longer supported)', () => {
     expect(() =>
       matchActionPoliciesBodySchema.parse({
-        rule: { id: 'rule-1', name: 'my-rule', tags: ['cpu'] },
+        rule: { id: 'rule-1', name: 'my-rule', routing_tags: ['cpu'] },
       })
     ).toThrow();
   });

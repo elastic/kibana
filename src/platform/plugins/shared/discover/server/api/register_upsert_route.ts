@@ -31,6 +31,7 @@ export const registerUpsertRoute = (
     .put({
       path: `${basePath}/{id}`,
       summary: 'Upsert a Discover session',
+      operationId: 'upsert-discover-session',
       description:
         'Creates a Discover session with the specified ID, or fully replaces the existing session.',
       ...routeConfig,
@@ -38,6 +39,10 @@ export const registerUpsertRoute = (
     .addVersion(
       {
         version: routeVersion,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).upsertDiscoverSessionOASOperationObject,
+        },
         validate: {
           request: {
             params: z

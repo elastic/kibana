@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { listAutomationRunsRoute } from './list_automation_runs';
 
 const { handler } = listAutomationRunsRoute['GET /internal/nightshift/automations/{id}/runs'];
@@ -13,11 +14,19 @@ const { handler } = listAutomationRunsRoute['GET /internal/nightshift/automation
 const mockRequest = httpServerMock.createKibanaRequest();
 
 const mockGet = jest.fn();
-const getAutomationsSoClient = jest.fn().mockReturnValue({ get: mockGet });
+const mockBudgetGet = jest.fn();
+const getAutomationsSoClient = jest.fn().mockReturnValue({
+  get: (type: string, id: string) =>
+    (type === 'nightshift-automation-budget' ? mockBudgetGet : mockGet)(type, id),
+});
 
 const mockGetWorkflowExecutions = jest.fn();
+const mockSearchStepExecutions = jest.fn();
 const getWorkflowsManagement = jest.fn().mockReturnValue({
-  management: { getWorkflowExecutions: mockGetWorkflowExecutions },
+  management: {
+    getWorkflowExecutions: mockGetWorkflowExecutions,
+    searchStepExecutions: mockSearchStepExecutions,
+  },
 });
 
 const mockContext = {
@@ -49,10 +58,16 @@ const call = (
     context: mockContext,
   } as never);
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockBudgetGet.mockRejectedValue(
+    SavedObjectsErrorHelpers.createGenericNotFoundError('nightshift-automation-budget', 'auto-1')
+  );
+  mockSearchStepExecutions.mockResolvedValue({ results: [] });
+});
 
 it('returns mapped runs when the automation has a workflowId', async () => {
-  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1' } });
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
   mockGetWorkflowExecutions.mockResolvedValue({
     results: [
       {
@@ -67,6 +82,15 @@ it('returns mapped runs when the automation has a workflowId', async () => {
     total: 1,
     page: 1,
     size: 20,
+  });
+  mockSearchStepExecutions.mockResolvedValue({
+    results: [
+      {
+        workflowRunId: 'exec-1',
+        input: { title: 'Alert triage', message: 'Investigate the alert' },
+        output: { investigation_id: 'investigation-1' },
+      },
+    ],
   });
 
   const result = await call('auto-1');
@@ -83,21 +107,66 @@ it('returns mapped runs when the automation has a workflowId', async () => {
     },
     'default'
   );
+  expect(mockSearchStepExecutions).toHaveBeenCalledWith(
+    {
+      workflowId: 'wf-1',
+      stepId: 'trigger_investigation',
+      workflowExecutionIds: ['exec-1'],
+      includeInput: true,
+      includeOutput: true,
+      startedAfter: undefined,
+      startedBefore: undefined,
+      page: 1,
+      size: 1,
+      sourceIncludes: ['workflowRunId', 'input', 'output'],
+      request: mockRequest,
+    },
+    'default'
+  );
   expect(result).toEqual({
     runs: [
       {
         id: 'exec-1',
-        status: 'completed',
+        status: 'succeeded',
         startedAt: '2026-09-01T00:00:00.000Z',
         finishedAt: '2026-09-01T00:01:00.000Z',
         duration: 60000,
         triggeredBy: 'schedule',
+        title: 'Alert triage',
+        message: 'Investigate the alert',
+        investigationId: 'investigation-1',
+        skipReason: null,
+        dailyLimit: undefined,
       },
     ],
+    total: 1,
+    usedToday: 0,
+    page: 1,
+    size: 20,
+  });
+});
+
+it.each([
+  ['completed', 'succeeded'],
+  ['running', 'running'],
+  ['waiting_for_input', 'running'],
+  ['queued', 'running'],
+  ['failed', 'failed'],
+  ['cancelled', 'failed'],
+  ['timed_out', 'failed'],
+  ['skipped', 'skipped'],
+] as const)('maps workflow status %s to %s', async (status, expectedStatus) => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [{ id: 'exec-1', status, startedAt: '2026-09-01T00:00:00.000Z' }],
     total: 1,
     page: 1,
     size: 20,
   });
+
+  const result = await call('auto-1');
+
+  expect(result.runs[0].status).toBe(expectedStatus);
 });
 
 it('returns an empty list when the automation has no workflowId yet', async () => {
@@ -106,7 +175,7 @@ it('returns an empty list when the automation has no workflowId yet', async () =
   const result = await call('auto-1');
 
   expect(mockGetWorkflowExecutions).not.toHaveBeenCalled();
-  expect(result).toEqual({ runs: [], total: 0, page: 1, size: 20 });
+  expect(result).toEqual({ runs: [], total: 0, usedToday: 0, page: 1, size: 20 });
 });
 
 it('passes custom pagination to getWorkflowExecutions', async () => {
@@ -153,4 +222,78 @@ it('propagates saved-object 404 when the automation does not exist', async () =>
   mockGet.mockRejectedValue(notFoundError);
 
   await expect(call('missing-id')).rejects.toMatchObject({ output: { statusCode: 404 } });
+});
+
+it('links the executed alert branch of a mixed workflow', async () => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [{ id: 'exec-1', status: 'completed', triggeredBy: 'alerting.v1.alertStatusChanged' }],
+    total: 1,
+  });
+  mockSearchStepExecutions
+    .mockResolvedValueOnce({ results: [{ workflowRunId: 'exec-1' }] })
+    .mockResolvedValueOnce({
+      results: [
+        {
+          workflowRunId: 'exec-1',
+          input: { title: 'Alert' },
+          output: { investigation_id: 'inv-alert' },
+        },
+      ],
+    });
+  const result = await call('auto-1');
+  expect(result.runs[0]).toMatchObject({ title: 'Alert', investigationId: 'inv-alert' });
+});
+
+it.each([
+  ['alerting.v1.alertStatusChanged', 'trigger_investigation_alert'],
+  ['slack2.message', 'trigger_investigation_slack'],
+  ['scheduled', 'trigger_investigation'],
+])('links the %s branch of a workflow with all trigger kinds', async (triggeredBy, stepId) => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [{ id: 'exec-1', status: 'completed', triggeredBy }],
+    total: 1,
+  });
+  mockSearchStepExecutions.mockImplementation(async ({ stepId: requestedStepId }) => ({
+    results: [
+      {
+        workflowRunId: 'exec-1',
+        ...(requestedStepId === stepId
+          ? {
+              input: { title: triggeredBy },
+              output: { investigation_id: `inv-${stepId}` },
+            }
+          : {}),
+      },
+    ],
+  }));
+  const result = await call('auto-1');
+  expect(result.runs[0]).toMatchObject({ title: triggeredBy, investigationId: `inv-${stepId}` });
+});
+
+it('reports budget denials as skipped, preserving the limit at dispatch and excluding them from usage', async () => {
+  mockGet.mockResolvedValueOnce({
+    attributes: { workflowId: 'wf-1', runtime: { dailyDispatchLimit: 10 } },
+  });
+  mockBudgetGet.mockResolvedValueOnce({
+    attributes: { date: new Date().toISOString().slice(0, 10), used: 2 },
+  });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [{ id: 'exec-1', status: 'completed', triggeredBy: 'scheduled' }],
+    total: 3,
+    page: 1,
+    size: 20,
+  });
+  mockSearchStepExecutions.mockResolvedValue({
+    results: [{ workflowRunId: 'exec-1', output: { skip_reason: 'daily_limit', daily_limit: 2 } }],
+  });
+
+  const result = await call('auto-1');
+  expect(result).toMatchObject({
+    total: 3,
+    usedToday: 2,
+    runs: [{ status: 'skipped', skipReason: 'daily_limit', dailyLimit: 2 }],
+  });
+  expect(result.runs[0].investigationId).toBeUndefined();
 });

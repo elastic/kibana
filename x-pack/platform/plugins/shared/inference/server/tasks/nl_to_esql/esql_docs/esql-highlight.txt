@@ -1,0 +1,293 @@
+# HIGHLIGHT
+
+The `HIGHLIGHT` processing command extracts matching text snippets from one or more fields based on a full-text query. Matching terms are wrapped in highlight tags.
+
+## Syntax
+
+`HIGHLIGHT [prefix = "<prefix>"] [query] [ON field [, field, ...] | ON *] [WITH { "option": value [, ...] }]`
+
+### Parameters
+
+#### `prefix`
+
+Optional.
+
+A quoted string literal used to name the output columns. Each highlighted field is written to `<prefix><field>`. Defaults to `highlight_`. If a generated column name matches an existing column, the existing column is replaced. To overwrite the source column in place, specify an empty prefix (`prefix = ""`). Unlike the query and the `WITH` option values, `prefix` cannot be a query parameter.
+
+#### `query`
+
+Optional.
+
+The query used to find matching terms to highlight. This can be a string literal, which uses `query_string` syntax, or a full-text search function such as `MATCH`, `MATCH_PHRASE`, `QSTR`, `KQL`, or the match operator `:`. You can combine full-text functions using `AND`, `OR`, and `NOT`.
+
+If you don't specify a query, `HIGHLIGHT` automatically reuses full-text search conditions from earlier `WHERE` commands in the query. When you provide both a query and an `ON` clause, any field named in your query must also be listed in `ON`.
+
+Queries without positive search conditions, such as `NOT MATCH(...)`, have no terms to highlight and return `null`, unless you configure `no_match_size`.
+
+#### `field`
+
+Optional.
+
+One or more comma-separated columns to highlight, or `*` to highlight every `text` and `keyword` column in the table. Fields must be `text` or `keyword` types. `semantic_text` fields are supported and treated as `text`.
+
+You can only use `*` by itself. Wildcard patterns like `title*` and combinations such as `ON *, title` are not supported.
+
+If you omit `ON`, `HIGHLIGHT` determines which columns to highlight based on your query. Queries that target a specific column highlight only that column. Queries that don't target a single column check all `text` and `keyword` columns in the table.
+
+#### `pre_tags`
+
+Optional.
+
+Opening tag inserted before each highlighted term. Accepts a string or a single-element array of strings. Defaults to `<em>`. Multiple rotating tags are not supported. At most 256 characters.
+
+#### `post_tags`
+
+Optional.
+
+Closing tag inserted after each highlighted term. Accepts a string or a single-element array of strings. Defaults to `</em>`. At most 256 characters.
+
+#### `encoder`
+
+Optional.
+
+Text encoding applied before adding highlight tags. Accepts `default` for no encoding or `html` for HTML-escaped snippet text. Defaults to `default`. This value is case-sensitive, so `html` is valid but `HTML` is rejected.
+
+#### `analyzer`
+
+Optional.
+
+Analyzer to use across all highlighted fields, overriding each field's own analyzer. Also analyzes query terms, unless a full-text search function specifies its own `analyzer`. When omitted, `HIGHLIGHT` uses each field's analyzer. Only built-in and node-level plugin analyzers are supported.
+
+#### `number_of_fragments`
+
+Optional.
+
+Maximum number of snippets, or fragments, to return per field. Set to `0` to return the entire field value with matching terms highlighted without fragmenting. Must be `>= 0`. Defaults to `5`.
+
+#### `fragment_size`
+
+Optional.
+
+Approximate character length of each snippet. Must be `>= 0`. Defaults to `100`.
+
+#### `no_match_size`
+
+Optional.
+
+Approximate number of leading characters to return from the field when there are no matching terms. This is a minimum, not an exact limit: the returned text extends to the next boundary set by `boundary_scanner`, so the result can be longer than the requested size. Must be `>= 0`. Defaults to `0`, which returns `null`.
+
+#### `boundary_scanner`
+
+Optional.
+
+Boundary scanner used to split text into fragments. Accepts `sentence` or `word`, case-insensitively. Defaults to `sentence`.
+
+#### `boundary_scanner_locale`
+
+Optional.
+
+Locale used by the boundary scanner, given as an IETF BCP 47 language tag such as `en-US` or `ja-JP`. Use hyphens as separators. Defaults to the root locale.
+
+#### `order`
+
+Optional.
+
+Sort order of returned fragments. Accepts `none`, which preserves document order, or `score`, which orders fragments by descending relevance score, case-insensitively. Defaults to `none`.
+
+#### `max_analyzed_offset`
+
+Optional.
+
+Maximum number of characters to analyze per field value. Accepts a positive integer, or `-1` to leave the limit unset. Defaults to `-1`. `HIGHLIGHT` analyzes at most 1 million characters per field value regardless of this setting, and the index's `index.highlight.max_analyzed_offset` setting does not apply. Text beyond the effective offset is not highlighted.
+
+## Examples
+
+Highlight matching `fox` terms in a `content` field with the default `<em>` tags.
+
+```esql
+ROW content = "The quick brown fox jumps over the lazy dog."
+| HIGHLIGHT "fox" ON content
+| KEEP highlight_content
+```
+
+Filter `books` rows with `MATCH`, then highlight `return` matches in `title`.
+
+```esql
+FROM books
+| WHERE MATCH(title, "Return")
+| HIGHLIGHT "return" ON title
+| KEEP book_no, highlight_title
+| SORT book_no
+```
+
+Reuse the `WHERE` full-text condition and automatically highlight the searched `title` field.
+
+```esql
+FROM books
+| WHERE MATCH(title, "Return")
+| HIGHLIGHT
+| KEEP title, highlight_title
+| SORT title
+```
+
+Reuse the `WHERE` full-text condition and explicitly highlight `title`.
+
+```esql
+FROM books
+| WHERE MATCH(title, "Return")
+| HIGHLIGHT ON title
+| KEEP book_no, highlight_title
+| SORT book_no
+```
+
+Highlight a `MATCH` query field without an `ON` clause.
+
+```esql
+ROW title = "Return of the King", body = "An ordinary description."
+| HIGHLIGHT MATCH(title, "king")
+```
+
+Highlight all text and keyword columns when a string literal query has no target field.
+
+```esql
+ROW title = "Return of the King", body = "Tolkien wrote the epic saga."
+| HIGHLIGHT "tolkien"
+| KEEP highlight_title, highlight_body
+```
+
+Highlight every text and keyword column with `ON *`.
+
+```esql
+ROW title = "Return of the King", body = "An ordinary description."
+| HIGHLIGHT MATCH(title, "king") ON *
+| KEEP highlight_title, highlight_body
+```
+
+Highlight an exact phrase with `MATCH_PHRASE`.
+
+```esql
+FROM books
+| WHERE MATCH(title, "Return")
+| HIGHLIGHT MATCH_PHRASE(title, "Return of the") ON title
+| KEEP book_no, highlight_title
+| SORT book_no
+```
+
+Highlight terms with Lucene query syntax using `QSTR`.
+
+```esql
+ROW title = "The quick fox", body = "A loyal dog"
+| HIGHLIGHT QSTR("title:fox OR body:dog") ON title, body
+| KEEP highlight_title, highlight_body
+```
+
+Highlight terms with Kibana Query Language using `KQL`.
+
+```esql
+FROM books
+| WHERE MATCH(title, "Return")
+| HIGHLIGHT KQL("title: shad*") OR (MATCH(title, "return") AND MATCH(title, "king")) ON title
+| KEEP book_no, highlight_title
+| SORT book_no
+```
+
+Highlight `Rings` with the mapped `english` analyzer from the `books_english` index.
+
+```esql
+FROM books_english
+| WHERE MATCH(title, "ring") AND book_no == "2714"
+| HIGHLIGHT
+| KEEP title, highlight_title
+| SORT title
+```
+
+Use the `english` analyzer to highlight `Rings` in a computed `title` value.
+
+```esql
+ROW title = "The Lord of the Rings"
+| HIGHLIGHT "ring" ON title WITH { "analyzer": "english" }
+| KEEP highlight_title
+```
+
+Highlight matches in multiple fields by listing columns in `ON`.
+
+```esql
+ROW title = "Return of the King", body = "Tolkien wrote the epic saga."
+| HIGHLIGHT "king tolkien" ON title, body
+| KEEP highlight_title, highlight_body
+```
+
+Highlight a field extracted earlier in the pipeline with `DISSECT`.
+
+```esql
+ROW raw = "2024 Sauron Mordor"
+| DISSECT raw "%{yr} %{name} %{place}"
+| HIGHLIGHT "sauron" ON name
+| KEEP name, highlight_name
+```
+
+HTML-encode snippet text while preserving highlight tags.
+
+```esql
+ROW content = "Use <b>bold</b> tags & special chars with the Ring."
+| HIGHLIGHT "ring" ON content WITH { "encoder": "html" }
+| KEEP highlight_content
+```
+
+Return the complete field value without fragmenting.
+
+```esql
+ROW content = "Elasticsearch is fast. Elasticsearch is scalable. Elasticsearch is open."
+| HIGHLIGHT "elasticsearch" ON content WITH { "number_of_fragments": 0 }
+| KEEP highlight_content
+```
+
+Customize highlight wrappers with `pre_tags` and `post_tags`.
+
+```esql
+ROW content = "The quick brown fox jumps over the lazy dog."
+| HIGHLIGHT "fox" ON content WITH { "pre_tags": ["<b>"], "post_tags": ["</b>"] }
+| KEEP highlight_content
+```
+
+Customize generated output column names with `prefix`.
+
+```esql
+ROW content = "The One Ring was forged by Sauron."
+| HIGHLIGHT prefix = "hl_" "ring" ON content
+| KEEP content, hl_content
+```
+
+Overwrite the original column with an empty `prefix`.
+
+```esql
+ROW content = "The quick brown fox jumps over the lazy dog."
+| HIGHLIGHT prefix = "" "fox" ON content
+| KEEP content
+```
+
+Return leading field text when no query terms match.
+
+```esql
+ROW content = "Gardens and flowers bloom in spring."
+| HIGHLIGHT "elasticsearch" ON content WITH { "no_match_size": 200 }
+| KEEP highlight_content
+```
+
+Order snippets by relevance score instead of document order.
+
+```esql
+ROW content = ["fast search", "fast and fast results"]
+| HIGHLIGHT "fast" ON content WITH { "order": "score" }
+| KEEP highlight_content
+```
+
+## Limitations
+
+- `HIGHLIGHT` supports only built-in and node-level plugin analyzers. Specifying an analyzer defined in index settings in `WITH` or in a full-text search function returns an error.
+- `HIGHLIGHT` ignores `search_analyzer` and `search_quote_analyzer` settings. Fields configured with separate search analyzers might produce unexpected highlights.
+- On `keyword` fields, `HIGHLIGHT` tokenizes text using the `standard` analyzer and breaks it into snippets like a `text` field, rather than treating the value as a single atomic term.
+- On `semantic_text` fields, `HIGHLIGHT` only performs lexical matching against the underlying text. Pure semantic vector matches that lack literal term overlap are not highlighted.
+- Fields are analyzed up to a maximum of 1 million characters. Text beyond this limit is not analyzed or highlighted.
+- `HIGHLIGHT` cannot automatically reuse a `WHERE` query across commands that aggregate, summarize, or join rows, such as `STATS`, `LOOKUP JOIN`, or `FORK`. In those queries, specify the query directly on `HIGHLIGHT`.
+- If you drop a field targeted by the reused `WHERE` query before `HIGHLIGHT`, the implicit query can no longer highlight that field. If no other reusable fields remain, provide an explicit query and `ON` clause using columns that are still in scope.

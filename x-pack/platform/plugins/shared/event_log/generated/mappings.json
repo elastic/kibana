@@ -722,10 +722,10 @@
                                     "type": "keyword",
                                     "ignore_above": 1024
                                 },
-                                "episode_count": {
+                                "alert_count": {
                                     "type": "long"
                                 },
-                                "episode_ids": {
+                                "alert_ids": {
                                     "type": "keyword",
                                     "ignore_above": 1024,
                                     "meta": {

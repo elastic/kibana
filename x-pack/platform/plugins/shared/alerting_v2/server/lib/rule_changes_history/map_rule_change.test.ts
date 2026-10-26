@@ -52,6 +52,44 @@ describe('toListItem', () => {
 
     expect(item.changes).toEqual({ count: 1, summary: { version: 1 } });
   });
+
+  describe('actor', () => {
+    const docWithUser = (user: ChangeHistoryDocument['user']): ChangeHistoryDocument => ({
+      ...docWith(1, { id: 'rule-1', version: 1 }),
+      user,
+    });
+
+    it('uses the profile full name when available', () => {
+      const item = toListItem(
+        docWithUser({
+          id: 'profile-1',
+          name: 'jdoe',
+          full_name: 'Jane Doe',
+          email: 'jane@example.com',
+        }),
+        undefined,
+        { isCurrent: true }
+      );
+
+      expect(item.actor).toEqual({ name: 'Jane Doe', profile_id: 'profile-1' });
+    });
+
+    it('falls back to the profile email when there is no full name', () => {
+      const item = toListItem(
+        docWithUser({ id: 'profile-1', name: 'jdoe', full_name: '', email: 'jane@example.com' }),
+        undefined,
+        { isCurrent: true }
+      );
+
+      expect(item.actor).toEqual({ name: 'jane@example.com', profile_id: 'profile-1' });
+    });
+
+    it('falls back to the stored user name when the profile was not resolved', () => {
+      const item = toListItem(docWithUser({ name: 'jdoe' }), undefined, { isCurrent: true });
+
+      expect(item.actor).toEqual({ name: 'jdoe' });
+    });
+  });
 });
 
 describe('toDetail', () => {

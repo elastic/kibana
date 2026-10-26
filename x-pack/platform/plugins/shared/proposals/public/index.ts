@@ -20,8 +20,11 @@ export {
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
+  useIsReopeningProposal,
   usePendingProposals,
   useProposal,
+  useReopenProposal,
+  useSettleDeclinedProposal,
 } from './hooks/use_proposals_api';
 
 export { mutationKeys, queryKeys } from './query_keys';

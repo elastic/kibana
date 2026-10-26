@@ -20,6 +20,7 @@ describe('resolveConnectorIdStepType', () => {
     stepId: 'request-approval',
     propInfos: {},
     stepYamlNode: {} as StepInfo['stepYamlNode'],
+    path: ['steps', 0],
     lineStart: 1,
     lineEnd: 5,
   };
@@ -117,6 +118,76 @@ describe('resolveConnectorIdStepType', () => {
         focusedYamlPair
       )
     ).toBe('http');
+  });
+
+  it('maps waitForApproval email channel connector-id to email connector type', () => {
+    const focusedYamlPair = {
+      path: ['with', 'channels', 'email', 'connector-id'],
+    } as StepPropInfo;
+
+    expect(
+      resolveConnectorIdStepType(
+        waitForApprovalStep,
+        ['steps', 0, ...focusedYamlPair.path],
+        focusedYamlPair
+      )
+    ).toBe('email');
+  });
+
+  it('maps waitForInput email channel connector-id to email connector type', () => {
+    const focusedYamlPair = {
+      path: ['with', 'channels', 'email', 'connector-id'],
+    } as StepPropInfo;
+
+    expect(
+      resolveConnectorIdStepType(
+        { ...waitForApprovalStep, stepType: 'waitForInput', stepId: 'ask-input' },
+        ['steps', 0, ...focusedYamlPair.path],
+        focusedYamlPair
+      )
+    ).toBe('email');
+  });
+
+  it('maps waitForApproval slack2 channel connector-id to slack2.sendMessage', () => {
+    const focusedYamlPair = {
+      path: ['with', 'channels', 'slack2', 'connector-id'],
+    } as StepPropInfo;
+
+    expect(
+      resolveConnectorIdStepType(
+        waitForApprovalStep,
+        ['steps', 0, ...focusedYamlPair.path],
+        focusedYamlPair
+      )
+    ).toBe('slack2.sendMessage');
+  });
+
+  it('maps waitForApproval teams channel connector-id to microsoft-teams.sendChannelMessage', () => {
+    const focusedYamlPair = {
+      path: ['with', 'channels', 'teams', 'connector-id'],
+    } as StepPropInfo;
+
+    expect(
+      resolveConnectorIdStepType(
+        waitForApprovalStep,
+        ['steps', 0, ...focusedYamlPair.path],
+        focusedYamlPair
+      )
+    ).toBe('microsoft-teams.sendChannelMessage');
+  });
+
+  it('maps waitForApproval servicenow channel connector-id to servicenow_search.addComment', () => {
+    const focusedYamlPair = {
+      path: ['with', 'channels', 'servicenow', 'connector-id'],
+    } as StepPropInfo;
+
+    expect(
+      resolveConnectorIdStepType(
+        waitForApprovalStep,
+        ['steps', 0, ...focusedYamlPair.path],
+        focusedYamlPair
+      )
+    ).toBe('servicenow_search.addComment');
   });
 });
 

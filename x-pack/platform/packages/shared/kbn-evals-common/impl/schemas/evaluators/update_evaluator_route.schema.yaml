@@ -36,6 +36,16 @@ paths:
                   maxLength: 2048
                 judge:
                   $ref: '../common_attributes.schema.yaml#/components/schemas/LlmJudgeConfig'
+                base_version:
+                  type: string
+                  minLength: 1
+                  maxLength: 64
+                  description: >-
+                    The version this edit was made from. When set and the
+                    evaluator has since moved to another version, the update
+                    is rejected with `409` instead of being written over the
+                    newer version. Omit it to layer the update onto whatever
+                    the latest version is.
       responses:
         '200':
           description: Successful response
@@ -64,7 +74,9 @@ paths:
                   message:
                     type: string
         '409':
-          description: The name is built-in and cannot be redefined
+          description: >-
+            The name is built-in and cannot be redefined, or `base_version` is
+            no longer the latest version
           content:
             application/json:
               schema:

@@ -171,6 +171,18 @@ export function getCompletionItemProvider(
         };
       }
 
+      const { focusedStepInfo, focusedYamlPair } = autocompleteContext;
+      const identityField = focusedYamlPair?.path;
+      if (
+        (focusedStepInfo?.stepType === 'workflow.execute' ||
+          focusedStepInfo?.stepType === 'workflow.executeAsync') &&
+        identityField?.length === 2 &&
+        identityField[0] === 'with' &&
+        identityField[1] === 'run-as-mode'
+      ) {
+        return { suggestions: [], incomplete: false };
+      }
+
       // Incremental deduplication accumulator
       const deduplicatedMap = new Map<string, monaco.languages.CompletionItem>();
 

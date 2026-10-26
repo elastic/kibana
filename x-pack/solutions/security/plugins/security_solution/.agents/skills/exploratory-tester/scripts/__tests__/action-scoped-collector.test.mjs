@@ -39,10 +39,6 @@ function json(name) {
   return JSON.parse(readFileSync(join(FIXTURES_DIR, `${name}.json`), 'utf8'));
 }
 
-function typesOf(items) {
-  return items.map((i) => i.type);
-}
-
 // ══════════════════════════════════════════════════════════════════════════
 // BASELINE
 // ══════════════════════════════════════════════════════════════════════════

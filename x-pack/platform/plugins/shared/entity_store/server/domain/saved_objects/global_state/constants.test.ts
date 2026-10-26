@@ -8,9 +8,28 @@
 import {
   DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
   HistorySnapshotState,
+  LATEST_LOG_EXTRACTION_DEFAULTS,
+  LogExtractionConfig,
   LogExtractionOverride,
   LogExtractionTypeOverride,
 } from './constants';
+
+describe('LogExtractionConfig', () => {
+  it('parses an empty object into LATEST_LOG_EXTRACTION_DEFAULTS', () => {
+    expect(LogExtractionConfig.parse({})).toEqual(LATEST_LOG_EXTRACTION_DEFAULTS);
+  });
+
+  it('does not share array instances with LATEST_LOG_EXTRACTION_DEFAULTS', () => {
+    const parsed = LogExtractionConfig.parse({});
+
+    expect(parsed.additionalIndexPatterns).not.toBe(
+      LATEST_LOG_EXTRACTION_DEFAULTS.additionalIndexPatterns
+    );
+    expect(parsed.excludedIndexPatterns).not.toBe(
+      LATEST_LOG_EXTRACTION_DEFAULTS.excludedIndexPatterns
+    );
+  });
+});
 
 describe('LogExtractionTypeOverride', () => {
   it('accepts an empty object (no fields set)', () => {

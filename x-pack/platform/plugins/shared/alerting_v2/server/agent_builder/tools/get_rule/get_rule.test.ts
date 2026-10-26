@@ -71,14 +71,14 @@ describe('getRuleTool', () => {
   });
 
   describe('definition', () => {
-    it('is a builtin read-only tool that points at rule-management', () => {
+    it('is a builtin read-only tool that points at rule-authoring', () => {
       const tool = createTool();
       expect(tool.type).toBe(ToolType.builtin);
       expect(tool.description).toContain('rule-1');
       expect(tool.description).toContain('ep-1');
       expect(tool.description).toContain('attach-1');
       expect(tool.description).toContain('read-only');
-      expect(tool.description).toContain('rule-management');
+      expect(tool.description).toContain('rule-authoring');
       expect(tool.schema.safeParse({}).success).toBe(true);
     });
   });
@@ -141,7 +141,7 @@ describe('getRuleTool', () => {
         expect.objectContaining({
           labels: {
             rule_id: 'rule-1',
-            episode_id: 'ep-1',
+            alert_id: 'ep-1',
             space_id: 'default',
             code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_GET_RULE_FAILED,
           },

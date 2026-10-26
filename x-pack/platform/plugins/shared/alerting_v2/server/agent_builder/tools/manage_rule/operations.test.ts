@@ -10,6 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
+import { ROUTING_TAGS_SIGNAL_RULE_MESSAGE } from '@kbn/alerting-v2-schemas';
 import { RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
 import {
   executeRuleOperations as executeRuleOperationsImpl,
@@ -17,7 +18,6 @@ import {
   ruleOperationSchema,
   type RuleOperation,
 } from './operations';
-import { AGENT_BUILDER_TAG } from '../../common/constants';
 
 const createMockEsClient = () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -324,6 +324,206 @@ describe('executeRuleOperations', () => {
 
       expect(result.data.query).toEqual({ base: 'FROM metrics-* | WHERE cpu > 0.9' });
       expect(result.data.recovery).toEqual({ strategy: 'no_breach' });
+    });
+  });
+
+  describe('set_query with a data stream backing index', () => {
+    const backingIndexQuery =
+      'FROM .ds-logs-nginx.access-default-2026.06.11-000001 | STATS COUNT(*)';
+
+    it.each([
+      ['a new rule', { isNew: true }],
+      ['an existing rule', { isNew: false }],
+    ])('warns without throwing for %s', async (_description, options) => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_metadata', name: 'Test' },
+        { operation: 'set_query', query: { base: backingIndexQuery } },
+      ];
+
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), options);
+
+      expect(result.data.query).toEqual({ base: backingIndexQuery });
+      expect(result.warnings).toEqual([
+        expect.stringContaining('base name `logs-nginx.access-default`'),
+      ]);
+    });
+
+    it('keeps the query and the warning when ES validation also runs', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'count', type: 'long' }],
+        values: [],
+      } as never);
+
+      const result = await executeRuleOperations(
+        {},
+        [{ operation: 'set_query', query: { base: backingIndexQuery } }],
+        esClient
+      );
+
+      expect(result.queryColumns).toEqual([{ name: 'count', type: 'long' }]);
+      expect(result.warnings).toEqual([expect.stringContaining('generation index')]);
+    });
+
+    it('does not warn for wildcard patterns or data stream names', async () => {
+      const queries = [
+        'FROM logs-nginx.access-* | STATS COUNT(*)',
+        'FROM logs-nginx.access-default | STATS COUNT(*)',
+        'FROM orders-000123 | STATS COUNT(*)',
+      ];
+
+      for (const base of queries) {
+        const result = await executeRuleOperations({}, [
+          { operation: 'set_query', query: { base } },
+        ]);
+        expect(result.warnings).toBeUndefined();
+      }
+    });
+  });
+
+  describe('backing indices in recovery and no-data queries', () => {
+    const backingIndexQuery =
+      'FROM .ds-logs-nginx.access-default-2026.06.11-000001 | STATS COUNT(*)';
+
+    it('warns for a recovery query that targets a backing index', async () => {
+      const result = await executeRuleOperations({}, [
+        {
+          operation: 'set_recovery',
+          recovery: { strategy: 'query', query: backingIndexQuery },
+        },
+      ]);
+
+      expect(result.data.recovery).toEqual({ strategy: 'query', query: backingIndexQuery });
+      expect(result.warnings).toEqual([expect.stringMatching(/^The recovery query targets/)]);
+    });
+
+    it('warns for a no-data query that targets a backing index', async () => {
+      const result = await executeRuleOperations({}, [
+        { operation: 'set_no_data', no_data: { strategy: 'keep_last', query: backingIndexQuery } },
+      ]);
+
+      expect(result.data.no_data).toEqual({ strategy: 'keep_last', query: backingIndexQuery });
+      expect(result.warnings).toEqual([expect.stringMatching(/^The no-data query targets/)]);
+    });
+
+    it('reports each affected query separately', async () => {
+      const result = await executeRuleOperations({}, [
+        { operation: 'set_query', query: { base: backingIndexQuery } },
+        { operation: 'set_recovery', recovery: { strategy: 'query', query: backingIndexQuery } },
+        { operation: 'set_no_data', no_data: { strategy: 'resolve', query: backingIndexQuery } },
+      ]);
+
+      expect(result.warnings).toEqual([
+        expect.stringMatching(/^The rule query targets/),
+        expect.stringMatching(/^The recovery query targets/),
+        expect.stringMatching(/^The no-data query targets/),
+      ]);
+    });
+
+    it('does not warn for wildcard queries or strategies without their own query', async () => {
+      const result = await executeRuleOperations({}, [
+        {
+          operation: 'set_recovery',
+          recovery: { strategy: 'query', query: 'FROM logs-* | LIMIT 1' },
+        },
+        {
+          operation: 'set_no_data',
+          no_data: { strategy: 'keep_last', query: 'FROM logs-* | LIMIT 1' },
+        },
+      ]);
+      expect(result.warnings).toBeUndefined();
+
+      const withoutOwnQuery = await executeRuleOperations({}, [
+        { operation: 'set_recovery', recovery: { strategy: 'no_breach' } },
+        { operation: 'set_no_data', no_data: { strategy: 'ignore' } },
+      ]);
+      expect(withoutOwnQuery.warnings).toBeUndefined();
+    });
+  });
+
+  describe('backing index already used by the rule', () => {
+    const backingIndex = '.ds-logs-nginx.access-default-2026.06.11-000001';
+    const otherBackingIndex = '.ds-logs-nginx.access-default-2026.07.01-000002';
+    const queryOn = (index: string) => `FROM ${index} | STATS COUNT(*)`;
+
+    it('only mentions the existing source, without a retarget instruction, when it is unchanged', async () => {
+      const result = await executeRuleOperations({ query: { base: queryOn(backingIndex) } }, [
+        { operation: 'set_query', query: { base: queryOn(backingIndex) } },
+      ]);
+
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings?.[0]).toContain('already used');
+      expect(result.warnings?.[0]).toContain('Leave it unchanged');
+      expect(result.warnings?.[0]).not.toContain('call the operation again');
+    });
+
+    it('uses the retarget warning when the edit switches to a different backing index', async () => {
+      const result = await executeRuleOperations({ query: { base: queryOn(backingIndex) } }, [
+        { operation: 'set_query', query: { base: queryOn(otherBackingIndex) } },
+      ]);
+
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings?.[0]).toContain('call the operation again');
+      expect(result.warnings?.[0]).not.toContain('already used');
+    });
+
+    it('splits sources into inherited and new when the edit adds one', async () => {
+      const result = await executeRuleOperations({ query: { base: queryOn(backingIndex) } }, [
+        {
+          operation: 'set_query',
+          query: { base: `FROM ${backingIndex}, ${otherBackingIndex} | STATS COUNT(*)` },
+        },
+      ]);
+
+      expect(result.warnings).toHaveLength(2);
+      expect(result.warnings?.[0]).toContain(otherBackingIndex);
+      expect(result.warnings?.[0]).toContain('call the operation again');
+      expect(result.warnings?.[1]).toContain(backingIndex);
+      expect(result.warnings?.[1]).toContain('already used');
+    });
+
+    it('treats the source as new when the rule had a different query before', async () => {
+      const result = await executeRuleOperations({ query: { base: 'FROM logs-* | LIMIT 1' } }, [
+        { operation: 'set_query', query: { base: queryOn(backingIndex) } },
+      ]);
+
+      expect(result.warnings?.[0]).toContain('call the operation again');
+    });
+
+    it('applies the same rule to an unchanged recovery query', async () => {
+      const recovery = { strategy: 'query' as const, query: queryOn(backingIndex) };
+
+      const unchanged = await executeRuleOperations({ recovery }, [
+        { operation: 'set_recovery', recovery },
+      ]);
+      expect(unchanged.warnings?.[0]).toMatch(/^The recovery query still targets/);
+      expect(unchanged.warnings?.[0]).not.toContain('call the operation again');
+
+      const changed = await executeRuleOperations({ recovery }, [
+        {
+          operation: 'set_recovery',
+          recovery: { strategy: 'query', query: queryOn(otherBackingIndex) },
+        },
+      ]);
+      expect(changed.warnings?.[0]).toContain('call the operation again');
+    });
+
+    it('applies the same rule to an unchanged no-data query', async () => {
+      const noData = { strategy: 'keep_last' as const, query: queryOn(backingIndex) };
+
+      const unchanged = await executeRuleOperations({ no_data: noData }, [
+        { operation: 'set_no_data', no_data: noData },
+      ]);
+      expect(unchanged.warnings?.[0]).toMatch(/^The no-data query still targets/);
+      expect(unchanged.warnings?.[0]).not.toContain('call the operation again');
+
+      const changed = await executeRuleOperations({ no_data: noData }, [
+        {
+          operation: 'set_no_data',
+          no_data: { strategy: 'resolve', query: queryOn(otherBackingIndex) },
+        },
+      ]);
+      expect(changed.warnings?.[0]).toContain('call the operation again');
     });
   });
 
@@ -677,6 +877,215 @@ describe('executeRuleOperations', () => {
     });
   });
 
+  describe('set_time_field', () => {
+    it('sets the time field on the rule data', async () => {
+      const ops: RuleOperation[] = [{ operation: 'set_time_field', time_field: 'event.ingested' }];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.time_field).toBe('event.ingested');
+    });
+
+    it('overrides a previously auto-resolved time field', async () => {
+      const existing: Partial<RuleAttachmentData> = { time_field: '@timestamp' };
+      const ops: RuleOperation[] = [{ operation: 'set_time_field', time_field: 'timestamp' }];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.time_field).toBe('timestamp');
+    });
+
+    it('survives a subsequent set_query that cannot resolve via field-caps', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'cpu', type: 'double' }],
+        values: [],
+      } as never);
+      // fieldCaps fails — simulates a federated/external source.
+      esClient.asCurrentUser.fieldCaps.mockRejectedValueOnce(new Error('not an ES index'));
+
+      const ops: RuleOperation[] = [
+        { operation: 'set_time_field', time_field: 'event_time' },
+        {
+          operation: 'set_query',
+          query: { base: 'FROM external-source | STATS COUNT(*)' },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops, esClient);
+
+      expect(result.data.time_field).toBe('event_time');
+      expect(result.data.query).toBeDefined();
+    });
+
+    it('warns when the existing time_field is replaced by an auto-selected date field', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'value', type: 'long' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+        fields: { '@timestamp': { date: {} } },
+      } as never);
+
+      const ops: RuleOperation[] = [
+        { operation: 'set_time_field', time_field: 'event.ingested' },
+        { operation: 'set_query', query: { base: 'FROM only-timestamp | STATS COUNT(*)' } },
+      ];
+
+      const result = await executeRuleOperations({}, ops, esClient);
+
+      expect(result.data.time_field).toBe('@timestamp');
+      expect(result.warnings).toEqual([expect.stringContaining('"event.ingested" was not found')]);
+      expect(result.warnings?.[0]).toContain('"@timestamp" was auto-selected');
+    });
+
+    it('keeps a non-default time_field on an index with multiple date fields without warning', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'value', type: 'long' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+        fields: { '@timestamp': { date: {} }, 'event.ingested': { date: {} } },
+      } as never);
+
+      const ops: RuleOperation[] = [
+        { operation: 'set_time_field', time_field: 'event.ingested' },
+        { operation: 'set_query', query: { base: 'FROM multi-date | STATS COUNT(*)' } },
+      ];
+
+      const result = await executeRuleOperations({}, ops, esClient);
+
+      expect(result.data.time_field).toBe('event.ingested');
+      expect(result.warnings).toBeUndefined();
+    });
+
+    it('warns instead of throwing when existing time_field is not on the new index', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'value', type: 'long' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+        fields: {},
+      } as never);
+
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM no-date-index | STATS COUNT(*)' },
+        },
+      ];
+
+      const result = await executeRuleOperations({ time_field: 'event.ingested' }, ops, esClient);
+
+      expect(result.data.time_field).toBe('event.ingested');
+      expect(result.warnings).toEqual(
+        expect.arrayContaining([expect.stringContaining('event.ingested')])
+      );
+    });
+
+    describe('validation against the existing query', () => {
+      const existingWithQuery: Partial<RuleAttachmentData> = {
+        query: { base: 'FROM tf-multi-date | STATS COUNT(*)' },
+      } as never;
+
+      it('accepts a field that is a date field on the source index', async () => {
+        const esClient = createMockEsClient();
+        esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+          fields: { '@timestamp': { date: {} }, 'event.ingested': { date: {} } },
+        } as never);
+
+        const ops: RuleOperation[] = [
+          { operation: 'set_time_field', time_field: 'event.ingested' },
+        ];
+        const result = await executeRuleOperations(existingWithQuery, ops, esClient);
+
+        expect(result.data.time_field).toBe('event.ingested');
+      });
+
+      it('throws and lists the available date fields when the field is not one of them', async () => {
+        const esClient = createMockEsClient();
+        esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+          fields: { '@timestamp': { date: {} }, 'event.ingested': { date: {} } },
+        } as never);
+
+        const ops: RuleOperation[] = [{ operation: 'set_time_field', time_field: 'host.name' }];
+
+        await expect(executeRuleOperations(existingWithQuery, ops, esClient)).rejects.toThrow(
+          /"host\.name" is not a `date` or `date_nanos` field.*"@timestamp", "event\.ingested"/
+        );
+      });
+
+      it('does not validate when fieldCaps fails (federated sources)', async () => {
+        const esClient = createMockEsClient();
+        esClient.asCurrentUser.fieldCaps.mockRejectedValueOnce(new Error('not an ES index'));
+
+        const ops: RuleOperation[] = [{ operation: 'set_time_field', time_field: 'event_time' }];
+        const result = await executeRuleOperations(existingWithQuery, ops, esClient);
+
+        expect(result.data.time_field).toBe('event_time');
+      });
+
+      it('does not validate when the source index reports no date fields', async () => {
+        const esClient = createMockEsClient();
+        esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({ fields: {} } as never);
+
+        const ops: RuleOperation[] = [{ operation: 'set_time_field', time_field: 'event_time' }];
+        const result = await executeRuleOperations(existingWithQuery, ops, esClient);
+
+        expect(result.data.time_field).toBe('event_time');
+      });
+
+      it('validates against a query set earlier in the same batch', async () => {
+        const esClient = createMockEsClient();
+        esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+          columns: [{ name: 'cpu', type: 'double' }],
+          values: [],
+        } as never);
+        esClient.asCurrentUser.fieldCaps.mockResolvedValue({
+          fields: { '@timestamp': { date: {} } },
+        } as never);
+
+        const ops: RuleOperation[] = [
+          {
+            operation: 'set_query',
+            query: { base: 'FROM tf-multi-date | STATS COUNT(*)' },
+          },
+          { operation: 'set_time_field', time_field: 'cpu' },
+        ];
+
+        await expect(executeRuleOperations({}, ops, esClient)).rejects.toThrow(
+          /"cpu" is not a `date` or `date_nanos` field/
+        );
+      });
+    });
+
+    it('survives a subsequent set_query where field-caps returns no date fields', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'value', type: 'long' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+        fields: {},
+      } as never);
+
+      const ops: RuleOperation[] = [
+        { operation: 'set_time_field', time_field: 'ingest_timestamp' },
+        {
+          operation: 'set_query',
+          query: { base: 'FROM no-date-index | STATS COUNT(*)' },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops, esClient);
+
+      expect(result.data.time_field).toBe('ingest_timestamp');
+    });
+  });
+
   describe('cross-field validation', () => {
     it('clears the alert-only fields when an existing alert becomes a signal', async () => {
       const existing: Partial<RuleAttachmentData> = {
@@ -694,6 +1103,22 @@ describe('executeRuleOperations', () => {
       expect(result.data).not.toHaveProperty('recovery');
       expect(result.data).not.toHaveProperty('no_data');
       expect(result.data).not.toHaveProperty('state_transition');
+    });
+
+    it('clears routing tags when an existing alert becomes a signal', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        kind: 'alert',
+        metadata: { name: 'Existing Rule', tags: ['prod'], routing_tags: ['sre'] },
+        query: { base: 'FROM metrics-*' },
+        recovery: { strategy: 'no_breach' },
+        no_data: { strategy: 'ignore' },
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_kind', kind: 'signal' }];
+
+      const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient());
+
+      expect(result.data.metadata).not.toHaveProperty('routing_tags');
+      expect(result.data.metadata?.tags).toEqual(['prod']);
     });
 
     it('throws when isNew is true and no name is provided', async () => {
@@ -717,79 +1142,7 @@ describe('executeRuleOperations', () => {
     });
   });
 
-  describe('agent-builder provenance tag', () => {
-    it('stamps the agent-builder tag on a newly created rule', async () => {
-      const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'My Rule' }];
-
-      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
-        isNew: true,
-      });
-
-      expect(result.data.metadata?.tags).toEqual([AGENT_BUILDER_TAG]);
-    });
-
-    it('appends the tag without clobbering user/LLM-provided tags', async () => {
-      const ops: RuleOperation[] = [
-        { operation: 'set_metadata', name: 'My Rule', tags: ['production', 'cpu'] },
-      ];
-
-      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
-        isNew: true,
-      });
-
-      expect(result.data.metadata?.tags).toEqual(['production', 'cpu', AGENT_BUILDER_TAG]);
-    });
-
-    it('does not duplicate the tag when it is already present', async () => {
-      const ops: RuleOperation[] = [
-        { operation: 'set_metadata', name: 'My Rule', tags: [AGENT_BUILDER_TAG] },
-      ];
-
-      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
-        isNew: true,
-      });
-
-      expect(result.data.metadata?.tags).toEqual([AGENT_BUILDER_TAG]);
-    });
-
-    it('skips stamping when the 20-tag cap is already reached', async () => {
-      const maxTags = Array.from({ length: 20 }, (_, i) => `tag-${i}`);
-      const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'My Rule', tags: maxTags }];
-
-      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
-        isNew: true,
-      });
-
-      expect(result.data.metadata?.tags).toEqual(maxTags);
-      expect(result.data.metadata?.tags).toHaveLength(20);
-    });
-
-    it('stamps the tag when editing an existing rule, preserving existing tags', async () => {
-      const existing: Partial<RuleAttachmentData> = {
-        metadata: { name: 'Existing Rule', tags: ['cpu'] },
-      };
-      const ops: RuleOperation[] = [{ operation: 'set_metadata', description: 'updated' }];
-
-      const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient(), {
-        isNew: false,
-      });
-
-      expect(result.data.metadata?.tags).toEqual(['cpu', AGENT_BUILDER_TAG]);
-    });
-
-    it('re-adds the tag on edit when the user previously removed it', async () => {
-      const existing: Partial<RuleAttachmentData> = {
-        metadata: { name: 'Existing Rule', tags: ['cpu'] },
-      };
-      const ops: RuleOperation[] = [{ operation: 'set_metadata', tags: ['cpu'] }];
-
-      const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient(), {
-        isNew: false,
-      });
-
-      expect(result.data.metadata?.tags).toEqual(['cpu', AGENT_BUILDER_TAG]);
-    });
-
+  describe('kind and recovery constraints', () => {
     it('throws when state_transition is set on a non-alert kind', async () => {
       const ops: RuleOperation[] = [
         { operation: 'set_kind', kind: 'signal' },
@@ -921,6 +1274,17 @@ describe('executeRuleOperations', () => {
 
       await expect(executeRuleOperations({}, ops)).rejects.toThrow(
         'Signal rules cannot set recovery or no_data'
+      );
+    });
+
+    it('throws when a signal rule sets routing tags', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_kind', kind: 'signal' },
+        { operation: 'set_metadata', name: 'Signal Rule', routing_tags: ['sre'] },
+      ];
+
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+        ROUTING_TAGS_SIGNAL_RULE_MESSAGE
       );
     });
   });
@@ -1168,7 +1532,20 @@ describe('executeRuleOperations', () => {
       expect(result.data.metadata).toEqual({
         name: 'Test Rule',
         description: 'A test',
-        tags: ['test', AGENT_BUILDER_TAG],
+        tags: ['test'],
+      });
+    });
+
+    it('applies routing tags from set_metadata', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_metadata', name: 'Test Rule', routing_tags: ['sre'] },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.metadata).toEqual({
+        name: 'Test Rule',
+        routing_tags: ['sre'],
       });
     });
 
@@ -1350,7 +1727,7 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations({}, ops, undefined, soClient);
 
       expect(soClient.bulkGet).not.toHaveBeenCalled();
-      expect(result.data.artifacts).toEqual([]);
+      expect(result.data).not.toHaveProperty('artifacts');
     });
   });
 

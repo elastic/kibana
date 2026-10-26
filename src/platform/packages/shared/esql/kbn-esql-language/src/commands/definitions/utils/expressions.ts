@@ -32,6 +32,7 @@ import { inOperators } from '../all_operators';
 import { TIME_SYSTEM_PARAMS } from './literals';
 import { getUnmappedFieldType } from './settings';
 import { getPromqlFunctionDefinition } from './promql';
+import { applyTimeSeriesAggregateArgTypes } from './time_series_aggregate_args';
 
 // #region type detection
 
@@ -40,12 +41,14 @@ import { getPromqlFunctionDefinition } from './promql';
  * @param root The root AST node of the expression
  * @param columns Optional map of available columns to resolve column types
  * @param unmappedFieldsStrategy Strategy to handle unmapped fields, it's only relevant if columns maps is provided
+ * @param isTimeseriesSource When true, a bare column argument of an aggregate is typed as its implicit TS aggregate result
  * @returns The determined type or 'unknown' if it cannot be determined
  */
 export function getExpressionType(
   root: ESQLAstItem | undefined,
   columns?: Map<string, ESQLColumnData>,
-  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.DEFAULT
+  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.DEFAULT,
+  isTimeseriesSource = false
 ): SupportedDataType | 'unknown' {
   if (!root) {
     return 'unknown';
@@ -55,7 +58,7 @@ export function getExpressionType(
     if (root.length === 0) {
       return 'unknown';
     }
-    return getExpressionType(root[0], columns, unmappedFieldsStrategy);
+    return getExpressionType(root[0], columns, unmappedFieldsStrategy, isTimeseriesSource);
   }
 
   if (isLiteral(root)) {
@@ -98,7 +101,7 @@ export function getExpressionType(
   }
 
   if (root.type === 'list') {
-    return getExpressionType(root.values[0], columns, unmappedFieldsStrategy);
+    return getExpressionType(root.values[0], columns, unmappedFieldsStrategy, isTimeseriesSource);
   }
 
   if (root.type === 'map') {
@@ -138,7 +141,7 @@ export function getExpressionType(
        */
       const resultTypes = root.args
         .filter((_, index) => isRepeatingValuePosition(index, root.args.length))
-        .map((arg) => getExpressionType(arg, columns, unmappedFieldsStrategy));
+        .map((arg) => getExpressionType(arg, columns, unmappedFieldsStrategy, isTimeseriesSource));
 
       return resultTypes.findLast((type) => type !== 'null') ?? 'null';
     }
@@ -155,10 +158,17 @@ export function getExpressionType(
     const { argTypes, literalMask } = resolveArgumentTypes(root.args, {
       columns,
       unmappedFieldsStrategy,
+      isTimeseriesSource,
     });
+    const convertedArgTypes = applyTimeSeriesAggregateArgTypes(
+      root.args,
+      argTypes,
+      isTimeseriesSource,
+      fnDefinition.type
+    );
     const matchingSignatures = getMatchingSignatures(
       fnDefinition.signatures,
-      argTypes,
+      convertedArgTypes,
       literalMask,
       isTypeConversionFunction(fnDefinition.name)
     );
@@ -199,12 +209,15 @@ export function resolveArgumentTypes(
   options?: {
     columns?: Map<string, ESQLColumnData>;
     unmappedFieldsStrategy?: UnmappedFieldsStrategy;
+    isTimeseriesSource?: boolean;
   }
 ): { argTypes: (SupportedDataType | 'unknown')[]; literalMask: boolean[] } {
-  const { columns, unmappedFieldsStrategy } = options ?? {};
+  const { columns, unmappedFieldsStrategy, isTimeseriesSource = false } = options ?? {};
 
   return {
-    argTypes: args.map((arg) => getExpressionType(arg, columns, unmappedFieldsStrategy)),
+    argTypes: args.map((arg) =>
+      getExpressionType(arg, columns, unmappedFieldsStrategy, isTimeseriesSource)
+    ),
     literalMask: args.map((arg) => {
       const unwrapped = Array.isArray(arg) ? arg[0] : arg;
 

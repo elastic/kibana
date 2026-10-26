@@ -42,7 +42,6 @@ export {
   ALERTING_V2_INTERNAL_RULE_MATCH_API_PATH,
   ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH,
   ALERTING_V2_ACTION_POLICY_API_PATH,
-  ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH,
   ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
   ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH,
   ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH,
@@ -72,8 +71,6 @@ export const AGENT_BUILDER_NEW_CONVERSATION_PATH = '/agents/elastic-ai-agent/con
 export const paths = {
   ruleDetails: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(id)}`,
   ruleList: ALERTING_V2_RULES_BASE_PATH,
-  ruleListCreateFromTemplate: (templateId: string) =>
-    `${ALERTING_V2_RULES_BASE_PATH}?templateId=${encodeURIComponent(templateId)}`,
   ruleLibraryCreateFromTemplate: (templateId: string) =>
     `${ALERTING_V2_RULE_LIBRARY_BASE_PATH}?templateId=${encodeURIComponent(templateId)}`,
   sequenceRuleCreate: `${ALERTING_V2_RULES_BASE_PATH}/sequence/create`,

@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ConversationUpdatedOptIn } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
   ConversationMetadataUpdatedTriggerId,
@@ -20,7 +21,8 @@ import { toAttachmentTriggerEvent } from './attachment_trigger_mapping';
 export function registerConversationWorkflowEventBridge(
   conversationEventBus: ConversationEventBus,
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined,
-  logger: Logger
+  logger: Logger,
+  conversationUpdatedOptIns: readonly ConversationUpdatedOptIn[]
 ): void {
   if (!workflowsExtensions) {
     return;
@@ -68,7 +70,41 @@ export function registerConversationWorkflowEventBridge(
     );
   });
 
+  // Opt-in: without a solution enabling the trigger for the conversation's template, the emit is
+  // skipped before the subscriber lookup, so writes nothing listens to don't pay for it.
+  const isConversationUpdatedEnabled = async (
+    request: KibanaRequest,
+    optIns: readonly ConversationUpdatedOptIn[]
+  ): Promise<boolean> => {
+    for (const { isEnabled } of optIns) {
+      try {
+        if (await isEnabled(request)) {
+          return true;
+        }
+      } catch (error) {
+        logger.warn(
+          `Failed to check whether "${ConversationUpdatedTriggerId}" is enabled: ${error}`
+        );
+      }
+    }
+    return false;
+  };
+
   conversationEventBus.onConversationUpdated((request, payload) => {
-    void forward(ConversationUpdatedTriggerId, payload, request);
+    const { templateId } = payload;
+    if (!templateId) {
+      return;
+    }
+    const optIns = conversationUpdatedOptIns.filter(({ templateIds }) =>
+      templateIds.includes(templateId)
+    );
+    if (optIns.length === 0) {
+      return;
+    }
+    void (async () => {
+      if (await isConversationUpdatedEnabled(request, optIns)) {
+        await forward(ConversationUpdatedTriggerId, payload, request);
+      }
+    })();
   });
 }

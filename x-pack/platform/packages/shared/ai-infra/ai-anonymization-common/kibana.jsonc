@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ai-anonymization-common",
+  "owner": [
+    "@elastic/security-investigations"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

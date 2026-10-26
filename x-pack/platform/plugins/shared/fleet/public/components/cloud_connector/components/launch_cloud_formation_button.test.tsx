@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import {
@@ -34,14 +33,13 @@ describe('LaunchCloudFormationButton', () => {
       </I18nProvider>
     );
 
-  it('calls onClick when given onClick props', async () => {
-    const user = userEvent.setup();
+  it('calls onClick when given onClick props', () => {
     const onClick = jest.fn().mockResolvedValue(undefined);
     renderButton({ launchButtonProps: { onClick } });
 
     const button = screen.getByTestId(BUTTON_TEST_SUBJ);
     expect(button).not.toHaveAttribute('href');
-    await user.click(button);
+    fireEvent.click(button);
 
     expect(onClick).toHaveBeenCalledTimes(1);
   });

@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import pMap from 'p-map';
 import type {
   ActionPolicyResponse,
+  ActionPolicyRoutingTagsResponse,
   BulkResponse,
   MatchActionPoliciesResponse,
   MatchedActionPolicy,
@@ -19,6 +20,7 @@ import {
   putActionPolicyDataSchema,
   updateActionPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
@@ -49,7 +51,9 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { buildSoSearch } from '../build_so_search';
+import { applyPatch } from '../apply_patch';
 import { buildActionPolicySoFilter } from './build_action_policy_filter';
+import { groupRoutingTags } from './group_routing_tags';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import { ActionPolicyNamespaceToken } from './tokens';
@@ -59,6 +63,7 @@ import type {
   CreateActionPolicyParams,
   FindActionPoliciesArgs,
   FindActionPoliciesResponse,
+  GetRoutingTagsParams,
   MatchActionPoliciesParams,
   SnoozeActionPolicyParams,
   UpdateActionPolicyApiKeyParams,
@@ -68,12 +73,16 @@ import {
   buildCreateActionPolicyAttributes,
   buildUpdateActionPolicyAttributes,
   toApiKeyAttributes,
+  toPatchableActionPolicyData,
   transformActionPolicySoAttributesToApiResponse,
   validateDateString,
 } from './utils';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
+
+/** Most policies read to build the routing tag suggestions. */
+const ROUTING_TAGS_MAX_POLICIES = 10_000;
 
 const getActionPolicyApiKeyName = (policyName: string): string =>
   `Action Policy: ${policyName.trim()}`;
@@ -210,11 +219,33 @@ export class ActionPolicyClient {
     version,
   }: {
     id: string;
-    attrs: Partial<ActionPolicySavedObjectAttributes>;
+    attrs: ActionPolicySavedObjectAttributes;
     version?: string;
   }): Promise<{ id: string; version?: string }> {
+    return this.mapVersionConflict(id, () =>
+      this.actionPolicySavedObjectService.update({ id, attrs, version })
+    );
+  }
+
+  /**
+   * Writes server-owned fields onto a stored policy without rebuilding the whole document. Only for
+   * flat fields the caller owns; anything nested belongs in {@link writeActionPolicyAttrs}.
+   */
+  private async patchActionPolicyFields({
+    id,
+    attrs,
+  }: {
+    id: string;
+    attrs: PartiallyUpdateableActionPolicyAttributes;
+  }): Promise<{ id: string; version?: string }> {
+    return this.mapVersionConflict(id, () =>
+      this.actionPolicySavedObjectService.patchFields({ id, attrs })
+    );
+  }
+
+  private async mapVersionConflict<T>(id: string, write: () => Promise<T>): Promise<T> {
     try {
-      return await this.actionPolicySavedObjectService.update({ id, attrs, version });
+      return await write();
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(getActionPolicyVersionConflictMessage(id), {
@@ -237,7 +268,6 @@ export class ActionPolicyClient {
 
     const attributes = buildCreateActionPolicyAttributes({
       data: parsed,
-      enabled: params.options?.enabled ?? true,
       auth: apiKeyAttrs,
       createdBy: actor,
       createdAt: now,
@@ -322,12 +352,18 @@ export class ActionPolicyClient {
 
     const oldAuth = await this.getDecryptedAuth(params.options.id);
 
-    const policyName = parsed.name ?? existingPolicy.name;
-    const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(policyName));
+    const merged = applyPatch(
+      createActionPolicyDataSchema,
+      toPatchableActionPolicyData(existingPolicy),
+      parsed
+    );
+    const mergedData = this.parseActionPolicyData(createActionPolicyDataSchema, merged, 'update');
+
+    const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(mergedData.name));
 
     const nextAttrs = buildUpdateActionPolicyAttributes({
       existing: existingPolicy,
-      update: parsed,
+      data: mergedData,
       auth: apiKeyAttrs,
       updatedBy: actor,
       updatedAt: now,
@@ -388,7 +424,7 @@ export class ActionPolicyClient {
   public async matchActionPolicies(
     params: MatchActionPoliciesParams
   ): Promise<MatchActionPoliciesResponse> {
-    const { ruleTags = [] } = params;
+    const { routingTags = [] } = params;
 
     const items: MatchedActionPolicy[] = [];
 
@@ -402,7 +438,7 @@ export class ActionPolicyClient {
         continue;
       }
 
-      if (policyMatcher.hasTags() && policyMatcher.matchesTags(ruleTags)) {
+      if (policyMatcher.hasTags() && policyMatcher.matchesRoutingTags(routingTags)) {
         items.push({ action_policy: actionPolicy, category: 'tags' });
       }
     }
@@ -413,6 +449,24 @@ export class ActionPolicyClient {
       evaluated_count: evaluatedCount,
       is_truncated: allPolicies.total > evaluatedCount,
     };
+  }
+
+  public async getRoutingTags({
+    search,
+    policiesPerTag,
+  }: GetRoutingTagsParams): Promise<ActionPolicyRoutingTagsResponse> {
+    const { policies, isTruncated } =
+      await this.actionPolicySavedObjectService.findRoutingTagSources({
+        maxPolicies: ROUTING_TAGS_MAX_POLICIES,
+      });
+    const { items, totalTags } = groupRoutingTags({
+      policies,
+      search,
+      policiesPerTag,
+      tagsLimit: TAGS_RESPONSE_LIMIT,
+    });
+
+    return { items, total_tags: totalTags, is_truncated: isTruncated };
   }
 
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
@@ -443,8 +497,12 @@ export class ActionPolicyClient {
     return this.getActionPolicy({ id });
   }
 
+  /**
+   * The new key and the AAD it is bound to have to land in one write, so this goes through the
+   * whole-document path: a partial update of either leaves the stored key undecryptable.
+   */
   private async rotateApiKey(id: string): Promise<void> {
-    const { attrs: existingPolicy } = await this.getExistingActionPolicy(id);
+    const { attrs: existingPolicy, version } = await this.getExistingActionPolicy(id);
 
     const oldAuth = await this.getDecryptedAuth(id);
     const actor = await this.userService.getCurrentActor();
@@ -457,10 +515,12 @@ export class ActionPolicyClient {
       await this.writeActionPolicyAttrs({
         id,
         attrs: {
+          ...existingPolicy,
           ...toApiKeyAttributes(apiKeyAttrs),
           updatedBy: actor,
           updatedAt: now,
         },
+        version,
       });
     } catch (e) {
       this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
@@ -839,7 +899,7 @@ export class ActionPolicyClient {
     const now = new Date().toISOString();
 
     try {
-      await this.writeActionPolicyAttrs({
+      await this.patchActionPolicyFields({
         id,
         attrs: {
           ...stateUpdate,
@@ -875,8 +935,7 @@ export class ActionPolicyClient {
     const exists = await this.actionPolicyExists({ id });
 
     if (!exists) {
-      const { enabled, ...createData } = parsed;
-      const policy = await this.createActionPolicy({ data: createData, options: { id, enabled } });
+      const policy = await this.createActionPolicy({ data: parsed, options: { id } });
       return { policy, created: true };
     }
 
@@ -893,28 +952,13 @@ export class ActionPolicyClient {
     const oldAuth = await this.getDecryptedAuth(id);
     const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(parsed.name));
 
-    // PUT replaces every field accepted by createActionPolicyDataSchema, plus
-    // the optional `enabled`: omitted preserves the existing stored value,
-    // otherwise it becomes the new value. Audit metadata (createdBy/createdAt)
-    // and other operational state (snoozedUntil) are not part of the create
-    // schema and are preserved here. Tags are also preserved: they are no
-    // longer part of the API contract but remain in the saved object so they
-    // can be re-exposed later.
-    const nextEnabled = parsed.enabled ?? existingAttrs.enabled;
-    const replacementAttrs: ActionPolicySavedObjectAttributes = {
-      ...buildCreateActionPolicyAttributes({
-        data: parsed,
-        enabled: nextEnabled,
-        auth: apiKeyAttrs,
-        createdBy: existingAttrs.createdBy,
-        createdAt: existingAttrs.createdAt,
-        updatedBy: actor,
-        updatedAt: now,
-      }),
-      enabled: nextEnabled,
-      snoozedUntil: existingAttrs.snoozedUntil,
-      tags: existingAttrs.tags,
-    };
+    const replacementAttrs = buildUpdateActionPolicyAttributes({
+      existing: existingAttrs,
+      data: parsed,
+      auth: apiKeyAttrs,
+      updatedBy: actor,
+      updatedAt: now,
+    });
 
     try {
       await this.writeActionPolicyAttrs({

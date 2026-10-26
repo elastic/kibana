@@ -141,6 +141,7 @@ export type {
   TimeScaleIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
+  LastValueOrderAggColumn,
   RangeIndexPatternColumn,
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,

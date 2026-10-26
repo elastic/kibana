@@ -182,8 +182,6 @@ export const createInventoryMetricThresholdExecutor =
       );
 
     const compositeSize = libs.configuration.alerting.inventory_threshold.group_by_page_size;
-    const isPodSchemaSelectorEnabled =
-      nodeType === 'pod' && (await libs.isPodSchemaSelectorEnabled());
     const { dateEnd } = getTimeRange();
     const results = await Promise.all(
       criteria.map((condition) =>
@@ -193,7 +191,6 @@ export const createInventoryMetricThresholdExecutor =
           esClient,
           executionTimestamp: new Date(dateEnd),
           filterQuery,
-          isPodSchemaSelectorEnabled,
           logger,
           logQueryFields,
           nodeType,
@@ -281,7 +278,7 @@ export const createInventoryMetricThresholdExecutor =
 
         const evaluationValues = getEvaluationValues<ConditionResult>(results, group);
         const thresholds = getThresholds<InventoryMetricConditions>(criteria);
-        const field = getInventoryAlertGroupingField(nodeType, schema, isPodSchemaSelectorEnabled);
+        const field = getInventoryAlertGroupingField(nodeType, schema);
         const grouping = field ? unflattenGrouping({ [field]: group }) : undefined;
 
         const { uuid, start } = alertsClient.report({

@@ -7,56 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AST } from 'eslint';
+import type { Comment } from '@oxlint/plugins';
 
-const ESLINT_DISABLE_RE = /^eslint-disable(?:-next-line|-line)?(?<rulesBlock>.*)/;
+const DISABLE_DIRECTIVE_RE =
+  /^(?<directive>(?:eslint|oxlint)-(?<disableValueType>disable(?:-next-line|-line)?))(?=\s|$)(?<rulesBlock>.*)/;
 
-export enum ESLINT_DISABLE_VALUE {
-  DISABLE = 'eslint-disable',
-  DISABLE_NEXT_LINE = 'eslint-disable-next-line',
-  DISABLE_LINE = 'eslint-disable-line',
-}
+/** Separates the rule list from a `-- reason` description, matching ESLint's directive parser. */
+const DESCRIPTION_SEPARATOR_RE = /\s-{2,}\s/;
 
-export interface ParsedEslintDisableComment {
-  type: AST.Program['comments'][0]['type'];
-  range: AST.Program['comments'][0]['range'];
-  loc: AST.Program['comments'][0]['loc'];
-  value: AST.Program['comments'][0]['value'];
-  disableValueType: ESLINT_DISABLE_VALUE;
+export type DisableValueType = 'disable' | 'disable-line' | 'disable-next-line';
+
+export interface ParsedDisableComment {
+  /** The directive as written, e.g. `eslint-disable-next-line` or `oxlint-disable`. */
+  directive: string;
+  disableValueType: DisableValueType;
   rules: string[];
+  /** The `-- reason` description including its leading separator, or an empty string. */
+  description: string;
 }
 
-export function parseEslintDisableComment(
-  comment: AST.Program['comments'][0]
-): ParsedEslintDisableComment | undefined {
-  const commentVal = comment.value.trim();
-  const nakedESLintRegexResult = commentVal.match(ESLINT_DISABLE_RE);
-  const rulesBlock = nakedESLintRegexResult?.groups?.rulesBlock;
+/** Parses an `eslint-disable*` or `oxlint-disable*` comment; returns undefined for other comments. */
+export function parseDisableComment(comment: Comment): ParsedDisableComment | undefined {
+  const regexResult = comment.value.trim().match(DISABLE_DIRECTIVE_RE);
 
   // no regex match
-  if (!nakedESLintRegexResult) {
+  if (!regexResult?.groups) {
     return;
   }
 
-  const disableValueType = commentVal.includes(ESLINT_DISABLE_VALUE.DISABLE_NEXT_LINE)
-    ? ESLINT_DISABLE_VALUE.DISABLE_NEXT_LINE
-    : commentVal.includes(ESLINT_DISABLE_VALUE.DISABLE_LINE)
-    ? ESLINT_DISABLE_VALUE.DISABLE_LINE
-    : ESLINT_DISABLE_VALUE.DISABLE;
-
-  const rules = rulesBlock
-    ? rulesBlock
-        .trim()
-        .split(',')
-        .map((r) => r.trim())
-    : [];
+  const { directive, disableValueType, rulesBlock } = regexResult.groups;
+  const descriptionStart = rulesBlock.search(DESCRIPTION_SEPARATOR_RE);
+  const rulesList = (
+    descriptionStart === -1 ? rulesBlock : rulesBlock.slice(0, descriptionStart)
+  ).trim();
 
   return {
-    type: comment.type,
-    range: comment.range,
-    loc: comment.loc,
-    value: comment.value,
-    disableValueType,
-    rules,
+    directive,
+    // DISABLE_DIRECTIVE_RE only captures the three DisableValueType values
+    disableValueType: disableValueType as DisableValueType,
+    rules: rulesList ? rulesList.split(',').map((rule) => rule.trim()) : [],
+    description: descriptionStart === -1 ? '' : rulesBlock.slice(descriptionStart),
   };
 }

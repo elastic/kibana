@@ -12,7 +12,7 @@
     "server/**/*.json",
     "public/**/*",
     "test/scout/**/*",
-    "test/scout_alerting_v2/**/*"
+    "test/scout_alerting_v2_custom_config/**/*"
   ],
   "kbn_references": [
     "@kbn/agent-builder-elastic-ai-index-ki-types",
@@ -26,6 +26,7 @@
     "@kbn/config-schema",
     "@kbn/core-saved-objects-server",
     "@kbn/core-http-server",
+    "@kbn/core-http-common",
     "@kbn/logging",
     "@kbn/core-di",
     "@kbn/core-di-browser",
@@ -80,6 +81,7 @@
     "@kbn/core-security-server-mocks",
     "@kbn/kql",
     "@kbn/scout",
+    "@kbn/mock-idp-utils",
     "@kbn/object-utils",
     "@kbn/alerting-v2-browser-shared",
     "@kbn/alerting-v2-constants",
@@ -105,6 +107,7 @@
     "@kbn/utility-types",
     "@kbn/usage-collection-plugin",
     "@kbn/share-plugin",
+    "@kbn/router-utils",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-agent-builder",
     "@kbn/deeplinks-observability",
@@ -155,8 +158,14 @@
     "@kbn/core-ui-settings-server",
     "@kbn/licensing-plugin",
     "@kbn/licensing-types",
+    "@kbn/workflows-yaml",
     "@kbn/tooling-log",
-    "@kbn/test"
+    "@kbn/test",
+    "@kbn/cloud-plugin",
+    "@kbn/core-overlays-browser-mocks",
+    "@kbn/core-rendering-browser-mocks",
+    "@kbn/announcement-banner",
+    "@kbn/ftr-llm-proxy"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

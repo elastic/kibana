@@ -16,7 +16,12 @@ import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import type { StreamSummary } from '../../../../../common';
+import {
+  MAX_RESOLVE_INDEX_PATTERN_LENGTH,
+  MAX_RESOLVE_INDEX_PATTERNS,
+  collectResolvedIndexNames,
+  type StreamSummary,
+} from '../../../../../common';
 import { createServerRoute } from '../../../create_server_route';
 import { getDataStreamLifecycle, getFailureStore } from '../../../../lib/streams/stream_crud';
 
@@ -80,12 +85,16 @@ export const listStreamsRoute = createServerRoute({
       return dataStreamsChunk;
     });
 
+    const dataStreamsByName = new Map(
+      dataStreams.data_streams.map((dataStream) => [dataStream.name, dataStream])
+    );
+
     const enrichedStreams = availableStreams.map<ListStreamDetail>(({ stream }) => {
       if (Streams.QueryStream.Definition.is(stream)) {
         return { stream, privileges: { read_failure_store: false } };
       }
 
-      const match = dataStreams.data_streams.find((dataStream) => dataStream.name === stream.name);
+      const match = dataStreamsByName.get(stream.name);
       const privileges = streamPrivilegesMap.get(stream.name);
       const canReadFailureStore = privileges?.read_failure_store ?? false;
 
@@ -216,6 +225,36 @@ export const resolveIndexRoute = createServerRoute({
   },
 });
 
+export const resolveIndexPatternsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/_resolve_index_patterns',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      patterns: z
+        .array(z.string().min(1).max(MAX_RESOLVE_INDEX_PATTERN_LENGTH))
+        .min(1)
+        .max(MAX_RESOLVE_INDEX_PATTERNS),
+    }),
+  }),
+  handler: async ({ request, params, getScopedClients }): Promise<{ indices: string[] }> => {
+    const { scopedClusterClient } = await getScopedClients({ request });
+    const resolved = await scopedClusterClient.asCurrentUser.indices.resolveIndex({
+      name: params.body.patterns.join(','),
+      expand_wildcards: 'open',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+    return { indices: collectResolvedIndexNames(resolved) };
+  },
+});
+
 const BULK_GET_SUMMARIES_MAX_NAMES = 10_000;
 
 export const bulkGetStreamSummariesRoute = createServerRoute({
@@ -249,5 +288,6 @@ export const internalCrudRoutes = {
   ...listClassicStreamsRoute,
   ...streamDetailRoute,
   ...resolveIndexRoute,
+  ...resolveIndexPatternsRoute,
   ...bulkGetStreamSummariesRoute,
 };

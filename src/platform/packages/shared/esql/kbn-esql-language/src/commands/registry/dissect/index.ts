@@ -26,7 +26,8 @@ export const dissectCommand = {
   name: Commands.DISSECT,
   methods: dissectCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-language.esql.definitions.dissectDoc', {
+    docPreserving: true,
+    description: i18n.translate('esqlLanguage.esql.definitions.dissectDoc', {
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),

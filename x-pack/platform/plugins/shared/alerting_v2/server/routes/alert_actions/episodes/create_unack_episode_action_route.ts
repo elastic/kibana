@@ -8,6 +8,7 @@
 import {
   ALERT_EPISODE_ACTION_TYPE,
   createUnackEpisodeActionBodySchema,
+  errorResponseSchema,
 } from '@kbn/alerting-v2-schemas';
 import { createUnackEpisodeActionOasExamples } from './create_unack_episode_action_oas_example';
 import { createEpisodeActionRouteForType } from './create_episode_action_route_for_type';
@@ -15,8 +16,15 @@ import { createEpisodeActionRouteForType } from './create_episode_action_route_f
 export const CreateUnackEpisodeActionRoute = createEpisodeActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.UNACK,
   pathSuffix: '_unack',
-  summary: 'Unacknowledge an alert episode',
+  summary: 'Unacknowledge an alert',
   bodySchema: createUnackEpisodeActionBodySchema,
   oasOperationObject: createUnackEpisodeActionOasExamples,
   access: 'public' as const,
+  availability: { stability: 'stable' as const, since: '9.6.0' },
+  additionalResponses: {
+    409: {
+      body: () => errorResponseSchema,
+      description: 'Indicates the alert is not acknowledged.',
+    },
+  },
 });

@@ -13,7 +13,7 @@ import { KibanaContentListPage } from '@kbn/content-list-page';
 import { ContentListClientProvider } from '@kbn/content-list-provider-client';
 import type { TableListViewFindItemsFn } from '@kbn/content-list-provider-client';
 import type { ContentListItem } from '@kbn/content-list-provider';
-import { AppHeader, APP_HEADER_TEST_SUBJECTS, type AppHeaderMenu } from '@kbn/app-header';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { GraphContentList } from '../components/content_list';
 import { findSavedWorkspace, deleteSavedWorkspace } from '../helpers/saved_workspace_utils';
 import { getEditPath, getEditUrl, getNewPath, setBreadcrumbs } from '../services/url';
@@ -30,6 +30,10 @@ const labels = {
     defaultMessage: 'graphs',
   }),
 };
+
+const listingTitle = i18n.translate('xpack.graph.listing.graphsTitle', {
+  defaultMessage: 'Graphs',
+});
 
 const toGraphUserContent = (savedObject: GraphWorkspaceSavedObject): GraphUserContent => {
   return {
@@ -140,14 +144,9 @@ export function ListingRoute({
         selection: canDelete,
       }}
     >
-      <AppHeader
-        title={i18n.translate('xpack.graph.listing.graphsTitle', {
-          defaultMessage: 'Graphs',
-        })}
-        menu={menu}
-      />
+      <AppHeader title={listingTitle} menu={menu} />
       <KibanaContentListPage>
-        <KibanaContentListPage.Section aria-labelledby={APP_HEADER_TEST_SUBJECTS.title}>
+        <KibanaContentListPage.Section aria-label={listingTitle}>
           <GraphContentList {...{ canSave, sampleDataUrl, onCreateGraph }} />
         </KibanaContentListPage.Section>
       </KibanaContentListPage>

@@ -54,9 +54,10 @@ export const dataRegexReplaceStepCommonDefinition: CommonStepDefinition<
   }),
   documentation: {
     details: i18n.translate('workflowsExtensions.dataRegexReplaceStep.documentation.details', {
-      defaultMessage: `The ${DataRegexReplaceStepTypeId} step performs pattern-based text replacements using regular expressions. It supports backreferences, named groups, and can process single strings or arrays.
+      defaultMessage: `The {stepType} step performs pattern-based text replacements using regular expressions. It supports backreferences, named groups, and can process single strings or arrays.
 
 **Security Note**: Complex regex patterns can cause performance issues (ReDoS - Regular Expression Denial of Service). The step enforces a maximum input length of 100KB per string. Avoid patterns with nested quantifiers like (a+)+, (a*)+, or (a|a)* which can cause catastrophic backtracking and hang the server.`,
+      values: { stepType: DataRegexReplaceStepTypeId },
     }),
     examples: [
       `## Simple text replacement

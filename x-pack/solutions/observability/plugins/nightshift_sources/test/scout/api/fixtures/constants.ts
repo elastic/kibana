@@ -52,7 +52,7 @@ export const NIGHTSHIFT_READ_ONLY_ROLE: KibanaRole = {
   kibana: [{ base: [], feature: { [NIGHTSHIFT_FEATURE_ID]: ['read'] }, spaces: ['*'] }],
 };
 
-/** Kibana read access but no Elasticsearch privileges: GET health must degrade to `unknown`. */
+/** Kibana read access and no explicit Elasticsearch privileges. View read comes from the implicit grant, so GET health is `ok`. */
 export const NIGHTSHIFT_READ_ONLY_NO_ES_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
   kibana: [{ base: [], feature: { [NIGHTSHIFT_FEATURE_ID]: ['read'] }, spaces: ['*'] }],

@@ -7,7 +7,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
-import { getStreamSamplingSource, getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import { resolveNightshiftModelForRequest, type InferenceDocument } from '@kbn/nightshift-ai';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
@@ -33,6 +32,9 @@ import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../
 import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflow';
 import type { SignificantEventsMaintenanceService } from '../../../../lib/maintenance/maintenance_service';
 import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
+import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
+import { installFeatureIdentificationAgent } from '../../../../agent_builder/agents/feature_identification';
+import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
 
 const getSerializedByteLength = (value: unknown) =>
   Buffer.byteLength(JSON.stringify(value), 'utf8');
@@ -58,8 +60,8 @@ const inferenceDocumentsSchema = z
     message: `Documents cannot exceed ${MAX_INFERENCE_DOCUMENTS_BYTES} serialized bytes in aggregate`,
   });
 
-// Best-effort bootstrap of the standalone KI sync (groundedness) sweep workflow,
-// which runs under a request whose API key can schedule the workflow trigger.
+// Best-effort bootstrap of the standalone KI sync (groundedness) sweep workflow of the
+// request space, which runs under a request whose API key can schedule the workflow trigger.
 // Only the inferred route bootstraps: it runs at least once per identification
 // pass and always precedes computed identification, so hooking it covers every
 // path. Idempotent and non-blocking — a failure here must never fail extraction.
@@ -82,7 +84,7 @@ const bootstrapSyncWorkflow = async ({
     if (stateBlocksNewActivity(state)) {
       return;
     }
-    await syncWorkflowService.ensureEnabled({ request });
+    await syncWorkflowService.ensureEnabled({ request, spaceId: request.spaceId });
   } catch (error) {
     logger.warn(
       `Failed to ensure KI sync workflow is enabled: ${
@@ -93,7 +95,7 @@ const bootstrapSyncWorkflow = async ({
 };
 
 const prepareInferredSamplingRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/features/_identify/inferred/prepare',
+  endpoint: 'POST /internal/streams/{sourceId}/features/_identify/inferred/prepare',
   options: {
     access: 'internal',
     summary: 'Sample documents for one inferred feature identification iteration',
@@ -105,7 +107,7 @@ const prepareInferredSamplingRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string().max(MAX_ID_LENGTH) }),
+    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     body: z
       .object({
         start: z.number().optional(),
@@ -123,13 +125,13 @@ const prepareInferredSamplingRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
     const scopedClients = await getScopedClients({ request });
-    const { streamDataEsClient, streamsClient, tuningConfig, licensing } = scopedClients;
+    const { streamDataEsClient, sourcesClient, tuningConfig, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    const { streamName } = params.path;
-    const routeLogger = logger.get('features_identification', 'prepare', streamName);
+    const { sourceId } = params.path;
+    const routeLogger = logger.get('features_identification', 'prepare', sourceId);
     const now = Date.now();
     const {
       start = now - MS_PER_DAY,
@@ -144,16 +146,14 @@ const prepareInferredSamplingRoute = createServerRoute({
     } = params.body ?? {};
     const resolvedRunId = runId?.trim() || uuidv4();
 
-    const [kiClient, stream] = await Promise.all([
-      scopedClients.getKnowledgeIndicatorClient(),
-      streamsClient.getStream(streamName),
-    ]);
+    const { source } = await sourcesClient.get(sourceId);
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
 
     return prepareInferredSampling({
       esClient: streamDataEsClient,
       kiClient,
-      streamName,
-      samplingSource: getStreamSamplingSource(stream),
+      sourceId: source.id,
+      samplingSource: source.view_name,
       start,
       end,
       runId: resolvedRunId,
@@ -169,7 +169,7 @@ const prepareInferredSamplingRoute = createServerRoute({
 });
 
 const identifyInferredFeaturesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/features/_identify/inferred',
+  endpoint: 'POST /internal/streams/{sourceId}/features/_identify/inferred',
   options: {
     access: 'internal',
     summary: 'Run LLM inference and reconcile KI features for one iteration',
@@ -181,7 +181,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string().max(MAX_ID_LENGTH) }),
+    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     body: z.object({
       connectorId: z.string().max(MAX_ID_LENGTH).optional(),
       runId: z.string().max(MAX_ID_LENGTH).optional(),
@@ -207,14 +207,14 @@ const identifyInferredFeaturesRoute = createServerRoute({
     maintenanceService,
   }) => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, streamsClient, inferenceClient, tuningConfig, licensing } =
+    const { scopedClusterClient, sourcesClient, inferenceClient, tuningConfig, licensing } =
       scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    const { streamName } = params.path;
-    const routeLogger = logger.get('features_identification', 'inferred', streamName);
+    const { sourceId } = params.path;
+    const routeLogger = logger.get('features_identification', 'inferred', sourceId);
     const now = Date.now();
     const {
       connectorId: connectorIdOverride,
@@ -228,7 +228,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     const resolvedRunId = runId?.trim() || uuidv4();
     const { totalFilters, filtersCapped, hasFilteredDocuments } = samplingTelemetry;
 
-    const [connectorId, stream, kiClient] = await Promise.all([
+    const [connectorId, { source }] = await Promise.all([
       resolveNightshiftModelForRequest({
         request,
         inference: server.inference,
@@ -237,11 +237,19 @@ const identifyInferredFeaturesRoute = createServerRoute({
         step: 'kiExtraction',
         requestedId: connectorIdOverride,
       }),
-      streamsClient.getStream(streamName),
-      scopedClients.getKnowledgeIndicatorClient(),
+      sourcesClient.get(sourceId),
     ]);
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
 
-    const streamType = getStreamTypeFromDefinition(stream);
+    // Startup installs the agent in the default space only, and onboarding runs in the space of
+    // the request. Without this every iteration outside the default space fails on a missing agent.
+    if (server.agentBuilder) {
+      await installFeatureIdentificationAgent({
+        agentBuilder: server.agentBuilder,
+        spaceId: request.spaceId,
+        availability: createSignificantEventsAvailability({ server, logger: routeLogger }),
+      });
+    }
 
     try {
       const result = await identifyInferredFeatures({
@@ -252,9 +260,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         connectorId,
         logger: routeLogger,
         signal: getRequestAbortSignal(request),
-        streamName,
-        streamType,
-        definition: stream,
+        sourceId: source.id,
         runId: resolvedRunId,
         documents,
         totalFilters,
@@ -278,7 +284,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       return { ...result, connectorId };
     } catch (error) {
       routeLogger.error(
-        `Inferred feature identification failed for stream [${streamName}]: ${
+        `Inferred feature identification failed for source [${sourceId}]: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
@@ -289,8 +295,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
             run_id: resolvedRunId,
             connector_id: connectorId,
             iteration: iteration ?? 1,
-            stream_name: streamName,
-            stream_type: streamType,
+            source_id: source.id,
             docs_count: documents.length,
             excluded_features_count: 0,
             total_filters: totalFilters,
@@ -317,10 +322,10 @@ const identifyInferredFeaturesRoute = createServerRoute({
 });
 
 const identifyComputedFeaturesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/features/_identify/computed',
+  endpoint: 'POST /internal/streams/{sourceId}/features/_identify/computed',
   options: {
     access: 'internal',
-    summary: 'Generate and persist computed KI features for a stream',
+    summary: 'Generate and persist computed KI features for a source',
     timeout: { idleSocket: 300_000 },
   },
   security: {
@@ -329,7 +334,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string().max(MAX_ID_LENGTH) }),
+    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     body: z
       .object({
         start: z.number().optional(),
@@ -350,13 +355,13 @@ const identifyComputedFeaturesRoute = createServerRoute({
     maintenanceService,
   }) => {
     const scopedClients = await getScopedClients({ request });
-    const { streamDataEsClient, streamsClient, licensing, tuningConfig } = scopedClients;
+    const { streamDataEsClient, sourcesClient, licensing, tuningConfig } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    const { streamName } = params.path;
-    const routeLogger = logger.get('features_identification', 'computed', streamName);
+    const { sourceId } = params.path;
+    const routeLogger = logger.get('features_identification', 'computed', sourceId);
     const now = Date.now();
     const {
       start = now - MS_PER_DAY,
@@ -365,10 +370,8 @@ const identifyComputedFeaturesRoute = createServerRoute({
       computedFeaturesTimeoutMs = tuningConfig.computed_features_timeout_ms,
     } = params.body ?? {};
 
-    const [kiClient, stream] = await Promise.all([
-      scopedClients.getKnowledgeIndicatorClient(),
-      streamsClient.getStream(streamName),
-    ]);
+    const { source } = await sourcesClient.get(sourceId);
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
 
     // Enable code_analysis grounding only when the feature flag is on and Agent
     // Builder is available; otherwise the provider is omitted and the computed
@@ -379,8 +382,8 @@ const identifyComputedFeaturesRoute = createServerRoute({
 
     try {
       const { features: computedFeatures, errors } = await identifyComputedFeatures({
-        stream,
-        streamName,
+        target: sourceToAnalysisTarget(source),
+        sourceId: source.id,
         start,
         end,
         esClient: streamDataEsClient,
@@ -401,7 +404,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       };
     } catch (error) {
       routeLogger.error(
-        `Computed feature identification failed for stream [${streamName}]: ${
+        `Computed feature identification failed for source [${sourceId}]: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
@@ -411,10 +414,10 @@ const identifyComputedFeaturesRoute = createServerRoute({
 });
 
 const shouldIdentifyRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{streamName}/features/_should_identify',
+  endpoint: 'GET /internal/streams/{sourceId}/features/_should_identify',
   options: {
     access: 'internal',
-    summary: 'Check whether KI features identification should run for a stream',
+    summary: 'Check whether KI features identification should run for a source',
   },
   security: {
     authz: {
@@ -422,7 +425,7 @@ const shouldIdentifyRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string().max(MAX_ID_LENGTH) }),
+    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     query: z.object({
       thresholdHours: z.coerce.number().min(0),
     }),
@@ -433,13 +436,14 @@ const shouldIdentifyRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
     // Intentionally not guarded by assertNotPaused: continuous onboarding
-    // calls this route to decide whether to skip a stream, and a 409 here
+    // calls this route to decide whether to skip a source, and a 409 here
     // would turn a clean skip into a workflow failure.
 
+    const { source } = await scopedClients.sourcesClient.get(params.path.sourceId);
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     return shouldIdentifyFeatures({
       kiClient,
-      streamName: params.path.streamName,
+      sourceId: source.id,
       thresholdHours: params.query.thresholdHours,
     });
   },

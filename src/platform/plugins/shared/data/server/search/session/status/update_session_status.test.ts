@@ -83,13 +83,9 @@ describe('getSessionStatus', () => {
       expect(res).toEqual({
         status: SearchSessionStatus.COMPLETE,
       });
-      expect(deps.savedObjectsClient.update).toHaveBeenCalledWith(
-        SEARCH_SESSION_TYPE,
-        session.id,
-        expect.objectContaining({
-          status: SearchSessionStatus.COMPLETE,
-        })
-      );
+      expect(deps.savedObjectsClient.update).toHaveBeenCalledWith(SEARCH_SESSION_TYPE, session.id, {
+        status: SearchSessionStatus.COMPLETE,
+      });
       expect(deps.searchSessionEBTManager.trackBgsCompleted).toHaveBeenCalledWith(
         expect.objectContaining({
           session,
@@ -97,6 +93,26 @@ describe('getSessionStatus', () => {
         })
       );
       expect(deps.searchSessionEBTManager.trackBgsError).not.toHaveBeenCalled();
+    });
+
+    it('should not write back any other attribute it did not compute', async () => {
+      // Given
+      const deps = getDeps();
+      const session = getSavedObjectMock({
+        status: SearchSessionStatus.IN_PROGRESS,
+        name: 'name as read before a concurrent rename',
+        expires: '2026-10-15T09:18:00.000Z',
+      });
+      getSessionStatusMock.mockResolvedValue({
+        status: SearchSessionStatus.COMPLETE,
+      });
+
+      // When
+      await updateSessionStatus(deps, session);
+
+      // Then
+      const [, , attributes] = jest.mocked(deps.savedObjectsClient.update).mock.calls[0];
+      expect(Object.keys(attributes)).toEqual(['status']);
     });
   });
 

@@ -6,13 +6,19 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ICommandCallbacks } from '../types';
 import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/commands/validation';
-import { METADATA_FIELDS } from '../options/metadata';
+import { CPS_METADATA_FIELDS, METADATA_FIELDS } from '../options/metadata';
 
-const tsExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
-  return expectErrors(query, expectedErrors, context, 'ts', validate);
+const tsExpectErrors = (
+  query: string,
+  expectedErrors: string[],
+  context = mockContext,
+  callbacks?: ICommandCallbacks
+) => {
+  return expectErrors(query, expectedErrors, context, 'ts', validate, callbacks);
 };
 
 describe('TS Validation', () => {
@@ -105,6 +111,30 @@ describe('TS Validation', () => {
               ', '
             )}]`,
           ]);
+        });
+
+        test('accepts wildcards matching known metadata fields', () => {
+          tsExpectErrors('TS index METADATA _ind*', []);
+        });
+
+        test('rejects CPS fields when not serverless', () => {
+          tsExpectErrors('TS index METADATA _project._id', [
+            `Metadata field "_project._id" is not available. Available metadata fields are: [${METADATA_FIELDS.join(
+              ', '
+            )}]`,
+          ]);
+        });
+
+        test('accepts CPS fields, project tags and wildcards when serverless', () => {
+          const callbacks = { isServerless: true };
+          tsExpectErrors(
+            `TS index METADATA ${CPS_METADATA_FIELDS.join(', ')}`,
+            [],
+            mockContext,
+            callbacks
+          );
+          tsExpectErrors('TS index METADATA _project.*, _pro*', [], mockContext, callbacks);
+          tsExpectErrors('TS index METADATA _project.custom_tag', [], mockContext, callbacks);
         });
       });
     });

@@ -11,6 +11,7 @@ import {
   boundTargetPatterns,
   classifyActionableIndices,
   collapseIndexName,
+  collapseToDataSourcePattern,
 } from './classify_actionable_indices';
 import { MAX_SCOPE_TARGETS } from './scope_bounds';
 
@@ -42,6 +43,34 @@ describe('collapseIndexName', () => {
     expect(collapseIndexName('logs-endpoint.events.e8c68216.2026.09.29')).toBe(
       'logs-endpoint.events.e8c68216.2026.09.29*'
     );
+  });
+});
+
+describe('collapseToDataSourcePattern', () => {
+  it.each([
+    [
+      'a data stream backing index',
+      '.ds-logs-aws.cloudtrail-default-2026.10.08-000001',
+      'logs-aws.cloudtrail-*',
+    ],
+    ['an existing dataset pattern', 'logs-aws.cloudtrail-*', 'logs-aws.cloudtrail-*'],
+    ['a beats backing index', 'filebeat-8.17.0-2026.10.08', 'filebeat-*'],
+    ['an endgame index', 'endgame-2026.10.08', 'endgame-*'],
+    ['a plain pack index', 'logs-endpoint.events.00e5ea78.2026.10.08', undefined],
+    [
+      'a Defend alerts data stream',
+      '.ds-logs-endpoint.alerts-default-2026.10.08-000001',
+      undefined,
+    ],
+    ['a security alerts index', '.alerts-security.alerts-default', undefined],
+    [
+      'an agent-internal dataset',
+      '.ds-logs-elastic_agent.filebeat-default-2026.10.08-000001',
+      undefined,
+    ],
+    ['an unknown family', 'custom-index-2026.10.08', undefined],
+  ])('returns the expected pattern for %s', (_label, name, expected) => {
+    expect(collapseToDataSourcePattern(name)).toBe(expected);
   });
 });
 

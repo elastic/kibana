@@ -6,47 +6,48 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
-import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
+import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { SignificantEventsKIsOnboardingClient } from './onboarding_workflow_client';
 import { pollUntil } from './poll_until';
+import { removeLegacyContinuousOnboardingWorkflow } from './setup/remove_legacy_default_space_workflows';
 
-// The managed continuous onboarding workflow is installed and scheduled in the
-// default space so its executions (and the onboarding executions it triggers)
-// are stored there, matching the legacy workflow's original space.
-const MANAGED_WORKFLOW_SPACE_ID = DEFAULT_SPACE_ID;
-// The legacy (pre-migration) workflow was always created in the default space.
-const LEGACY_WORKFLOW_SPACE_ID = DEFAULT_SPACE_ID;
-
-export interface ContinuousKiOnboardingWorkflowService {
+export interface ContinuousOnboardingWorkflowService {
   /**
-   * Reconciles the continuous onboarding workflow when the user toggles the
-   * feature on or off.
+   * Reconciles the continuous onboarding workflow of a space when the user
+   * toggles the feature on or off there.
    *
-   * - Enabling only enables the managed workflow (which schedules its trigger).
-   *   The legacy normal workflow is never created again.
-   * - Disabling deletes the legacy workflow if it is still present (users who had
-   *   the feature enabled before the migration keep running on it until then),
-   *   disables the managed workflow, and cancels any in-flight executions.
+   * - Enabling installs the `<id>-<spaceId>` document and enables it (which
+   *   schedules its trigger).
+   * - Disabling disables the document and cancels any in-flight executions. The
+   *   document is kept so its execution history survives, and the next enable
+   *   reuses it.
+   * - In the default space, either transition also removes the unsuffixed
+   *   pre-per-space document if startup has not removed it yet.
    *
-   * Should be invoked only on an actual enabled-state transition so the legacy
-   * and managed workflows never run at the same time.
+   * Should be invoked only on an actual enabled-state transition.
    */
-  ensureWorkflow(params: { enabled: boolean; request: KibanaRequest }): Promise<void>;
+  ensureWorkflow(params: {
+    enabled: boolean;
+    request: KibanaRequest;
+    spaceId: string;
+  }): Promise<void>;
 }
 
-export const createContinuousKiOnboardingWorkflowService = ({
+export const createContinuousOnboardingWorkflowService = ({
   logger,
   managementApi,
   streamsKIsOnboardingClient,
+  getManagedWorkflowsClient,
 }: {
   logger: Logger;
   managementApi: WorkflowsServerPluginSetup['management'];
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
-}): ContinuousKiOnboardingWorkflowService => {
+  getManagedWorkflowsClient: () => Promise<PluginScopedManagedWorkflowsApi>;
+}): ContinuousOnboardingWorkflowService => {
   const log = logger.get('continuous-ki-onboarding-workflow');
 
   const getNonTerminalExecutions = async ({
@@ -97,22 +98,21 @@ export const createContinuousKiOnboardingWorkflowService = ({
 
   const setManagedEnabled = async ({
     enabled,
+    workflowId,
+    spaceId,
     request,
   }: {
     enabled: boolean;
+    workflowId: string;
+    spaceId: string;
     request: KibanaRequest;
   }) => {
-    const existing = await managementApi
-      .getClient(request)
-      .getWorkflow(
-        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-        MANAGED_WORKFLOW_SPACE_ID
-      );
+    const existing = await managementApi.getClient(request).getWorkflow(workflowId, spaceId);
 
     if (!existing) {
       if (enabled) {
         throw new Error(
-          `Managed continuous onboarding workflow ${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID} is not installed yet`
+          `Managed continuous onboarding workflow ${workflowId} is not installed yet`
         );
       }
       return;
@@ -122,71 +122,46 @@ export const createContinuousKiOnboardingWorkflowService = ({
       return;
     }
 
-    await managementApi.updateWorkflow(
-      SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-      { enabled },
-      MANAGED_WORKFLOW_SPACE_ID,
-      request
-    );
-  };
-
-  const deleteLegacyWorkflow = async ({ request }: { request: KibanaRequest }) => {
-    const legacy = await managementApi.getWorkflow(
-      LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-      LEGACY_WORKFLOW_SPACE_ID,
-      request
-    );
-    if (!legacy) {
-      return;
-    }
-
-    log.info(
-      `Found legacy continuous KI extraction workflow ${LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}, removing it`
-    );
-
-    await cancelAndAwaitTermination({
-      workflowId: LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-      spaceId: LEGACY_WORKFLOW_SPACE_ID,
-      request,
-    }).catch((err) => log.warn(`Failed to cancel legacy workflow executions: ${err}`));
-
-    const { deleted, failures } = await managementApi.deleteWorkflows(
-      [LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID],
-      LEGACY_WORKFLOW_SPACE_ID,
-      request,
-      { force: true }
-    );
-
-    if (deleted === 0 && failures.length > 0) {
-      const reasons = failures.map((f) => `${f.id}: ${f.error}`).join('; ');
-      throw new Error(
-        `Failed to delete legacy workflow ${LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}: ${reasons}`
-      );
-    }
-
-    log.info(`Deleted legacy workflow ${LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`);
+    await managementApi.updateWorkflow(workflowId, { enabled }, spaceId, request);
   };
 
   return {
-    async ensureWorkflow({ enabled, request }) {
+    async ensureWorkflow({ enabled, request, spaceId }) {
+      const workflowId = `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
+      const managedWorkflowOptions = { spaceId, workflowIdSuffix: spaceId };
+
+      // Startup removes the unsuffixed default-space document, but that cleanup is best-effort
+      // and runs in the background, so the document can still be there when the setting is
+      // toggled. Keeping it next to `${id}-default` shows two "Continuous KI Onboarding"
+      // workflows, and an enabled leftover keeps scheduling runs whatever the setting says.
+      // TODO: remove with the legacy default-space cleanup.
+      // https://github.com/elastic/kibana/issues/294271
+      if (spaceId === DEFAULT_SPACE_ID) {
+        await removeLegacyContinuousOnboardingWorkflow({
+          getManagedWorkflowsClient,
+          managementApi,
+          request,
+        }).catch((error: unknown) =>
+          log.warn(`Failed to remove legacy default-space continuous onboarding workflow: ${error}`)
+        );
+      }
+
       if (enabled) {
-        await setManagedEnabled({ enabled: true, request });
-        log.info(`Enabled continuous KI onboarding workflow`);
+        const managedWorkflowsClient = await getManagedWorkflowsClient();
+        await managedWorkflowsClient.install(
+          SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+          managedWorkflowOptions
+        );
+        await setManagedEnabled({ enabled: true, workflowId, spaceId, request });
+        log.info(`Enabled continuous KI onboarding workflow in space ${spaceId}`);
         return;
       }
 
-      // Disabling: retire the legacy workflow first so a delete failure does not
-      // leave managed disabled while legacy is still present. Then stop
-      // scheduling new managed runs and drain in-flight work.
-      await deleteLegacyWorkflow({ request });
+      // Disabling: stop scheduling new runs and drain in-flight work. The document
+      // stays: uninstalling force-deletes it, which purges its execution history.
+      await setManagedEnabled({ enabled: false, workflowId, spaceId, request });
 
-      await setManagedEnabled({ enabled: false, request });
-
-      await cancelAndAwaitTermination({
-        workflowId: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-        spaceId: MANAGED_WORKFLOW_SPACE_ID,
-        request,
-      }).catch((err) =>
+      await cancelAndAwaitTermination({ workflowId, spaceId, request }).catch((err) =>
         log.warn(`Failed to cancel running continuous onboarding executions: ${err}`)
       );
 
@@ -194,7 +169,7 @@ export const createContinuousKiOnboardingWorkflowService = ({
         .cancelAllRunning({ request })
         .catch((err) => log.warn(`Failed to cancel running onboarding workflows: ${err}`));
 
-      log.info(`Disabled continuous KI onboarding workflow`);
+      log.info(`Disabled continuous KI onboarding workflow in space ${spaceId}`);
     },
   };
 };

@@ -115,10 +115,11 @@ steps:
             type: data.set
             with:
               unit: "{{ foreach.item[0] }}"
-              # The key as an ES|QL string literal body: backslashes first, then quotes. LiquidJS
-              # reads backslash escapes inside a quoted argument, so '\\' is one backslash.
+              # The key as an ES|QL string literal body: backslashes first, then quotes and line
+              # breaks. LiquidJS reads backslash escapes inside a quoted argument, so '\\' is one
+              # backslash.
               unit_escaped: >-
-                {{ foreach.item[0] | replace: '\\', '\\\\' | replace: '"', '\\"' }}
+                {{ foreach.item[0] | replace: '\\', '\\\\' | replace: '"', '\\"' | replace: '\n', '\\n' | replace: '\r', '\\r' }}
               # The raw key, never a slug: `slugify` folds `ABC` and `abc` into one id, and those
               # units would overwrite each other. `ki_id` takes any string up to 512 characters.
               # Prefixed with automation_name so two installations on the same source index

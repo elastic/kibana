@@ -21,6 +21,10 @@ export const RESULTS_DATA_STREAM_INDEX = `logs-${OSQUERY_INTEGRATION_NAME}.resul
 
 export const DEFAULT_PLATFORM = 'linux,windows,darwin';
 
+/** osquery platform ids, as used by saved query and pack `platform`. */
+export const PLATFORM_IDS = ['linux', 'darwin', 'windows'] as const;
+export type PlatformId = (typeof PLATFORM_IDS)[number];
+
 export const OSQUERY_SCHEDULED_INPUT_TYPE = 'osquery_scheduled';
 
 export const API_VERSIONS = {

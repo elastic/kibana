@@ -13,4 +13,5 @@ export const searchParamNames = {
   pluginId: 'pluginId',
   connectorId: 'connectorId',
   openConversationDetails: 'openConversationDetails',
+  sidebarCollapsed: 'sidebarCollapsed',
 } as const;

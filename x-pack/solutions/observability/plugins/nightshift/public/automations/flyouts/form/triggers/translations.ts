@@ -10,7 +10,7 @@ import type { SlackTriggerKind } from '../automation_form_values';
 
 export const triggerLabels = {
   triggers: i18n.translate('xpack.nightshift.automations.flyout.triggers', {
-    defaultMessage: 'Triggers',
+    defaultMessage: 'Trigger',
   }),
   changeTrigger: i18n.translate('xpack.nightshift.automations.flyout.changeTriggerTooltip', {
     defaultMessage: 'Change trigger',
@@ -31,12 +31,22 @@ export const triggerLabels = {
   anyone: i18n.translate('xpack.nightshift.automations.flyout.anyone', {
     defaultMessage: 'Anyone',
   }),
+  via: i18n.translate('xpack.nightshift.automations.flyout.via', { defaultMessage: 'via' }),
+  anyApp: i18n.translate('xpack.nightshift.automations.flyout.anyApp', {
+    defaultMessage: 'Any app',
+  }),
+  searchApps: i18n.translate('xpack.nightshift.automations.flyout.searchApps', {
+    defaultMessage: 'Exact app name, app ID or bot ID…',
+  }),
   slackDailyLimitHelp: i18n.translate('xpack.nightshift.automations.flyout.slackDailyLimitHelp', {
     defaultMessage:
-      'When reached, Nightshift replies in Slack that the automation is paused. Resets daily at 12:00 AM UTC.',
+      "When reached, new messages aren't investigated until the limit resets at 12:00 AM UTC. Skipped messages appear in this automation's history.",
   }),
   empty: i18n.translate('xpack.nightshift.automations.flyout.triggersEmpty', {
     defaultMessage: 'Choose what starts this automation.',
+  }),
+  noTrigger: i18n.translate('xpack.nightshift.automations.flyout.noTrigger', {
+    defaultMessage: 'No trigger',
   }),
   addTrigger: i18n.translate('xpack.nightshift.automations.addTriggerButton', {
     defaultMessage: 'Add trigger',
@@ -56,9 +66,6 @@ export const triggerLabels = {
   every: i18n.translate('xpack.nightshift.automations.flyout.everyOption', {
     defaultMessage: 'Every…',
   }),
-  customCron: i18n.translate('xpack.nightshift.automations.flyout.customCronOption', {
-    defaultMessage: 'Custom cron…',
-  }),
   whenAnAlert: i18n.translate('xpack.nightshift.automations.flyout.whenAnAlert', {
     defaultMessage: 'When an alert',
   }),
@@ -66,28 +73,9 @@ export const triggerLabels = {
   changesTo: i18n.translate('xpack.nightshift.automations.flyout.changesTo', {
     defaultMessage: 'changes to',
   }),
+  active: i18n.translate('xpack.nightshift.automations.activeOption', { defaultMessage: 'Active' }),
   anyRule: i18n.translate('xpack.nightshift.automations.flyout.anyRule', {
     defaultMessage: 'Any rule',
-  }),
-  ruleName: i18n.translate('xpack.nightshift.automations.ruleNamePatternLabel', {
-    defaultMessage: 'Rule name pattern',
-  }),
-  ruleNameHelp: i18n.translate('xpack.nightshift.automations.ruleNamePatternHelp', {
-    defaultMessage: 'Matches rule names that contain this text.',
-  }),
-  tags: i18n.translate('xpack.nightshift.automations.tagsLabel', { defaultMessage: 'Tags' }),
-  anyStatus: i18n.translate('xpack.nightshift.automations.anyStatusOption', {
-    defaultMessage: 'Any status',
-  }),
-  active: i18n.translate('xpack.nightshift.automations.activeOption', { defaultMessage: 'Active' }),
-  activeHelp: i18n.translate('xpack.nightshift.automations.flyout.activeHelp', {
-    defaultMessage: 'Rule conditions are currently met',
-  }),
-  recovered: i18n.translate('xpack.nightshift.automations.recoveredOption', {
-    defaultMessage: 'Recovered',
-  }),
-  recoveredHelp: i18n.translate('xpack.nightshift.automations.flyout.recoveredHelp', {
-    defaultMessage: 'Rule conditions are no longer met',
   }),
   everyLead: i18n.translate('xpack.nightshift.automations.flyout.everyLead', {
     defaultMessage: 'Every',
@@ -120,9 +108,6 @@ export const triggerLabels = {
   timezonePlaceholder: i18n.translate('xpack.nightshift.automations.flyout.timezonePlaceholder', {
     defaultMessage: 'City or timezone…',
   }),
-  customCronLead: i18n.translate('xpack.nightshift.automations.flyout.customCronLead', {
-    defaultMessage: 'Custom cron',
-  }),
   dailyLimit: i18n.translate('xpack.nightshift.automations.dailyLimitLabel', {
     defaultMessage: 'Daily trigger limit',
   }),
@@ -135,10 +120,188 @@ export const triggerLabels = {
   dailyLimitHelp: i18n.translate('xpack.nightshift.automations.flyout.dailyLimitHelp', {
     defaultMessage: 'When reached, additional triggers are skipped. Resets daily at 12:00 AM UTC.',
   }),
+  dailyLimitReached: i18n.translate('xpack.nightshift.automations.flyout.dailyLimitReached', {
+    defaultMessage: 'Daily trigger limit reached',
+  }),
+  getDailyLimitReachedBody: (used: number, limit: number) =>
+    used > limit
+      ? i18n.translate('xpack.nightshift.automations.flyout.dailyLimitReachedOverBody', {
+          defaultMessage:
+            'This automation has handled {used} triggers today (limit of {limit}; {over} above the limit {over, plural, one {was} other {were}} not addressed). Additional triggers are throttled until midnight (UTC).',
+          values: { used, limit, over: used - limit },
+        })
+      : i18n.translate('xpack.nightshift.automations.flyout.dailyLimitReachedBody', {
+          defaultMessage:
+            'This automation has handled {used} triggers today (limit of {limit}). Additional triggers are throttled until midnight (UTC).',
+          values: { used, limit },
+        }),
+  dailyLimitApproaching: i18n.translate(
+    'xpack.nightshift.automations.flyout.dailyLimitApproaching',
+    {
+      defaultMessage: 'Approaching daily trigger limit',
+    }
+  ),
+  getDailyLimitApproachingBody: (used: number, limit: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.dailyLimitApproachingBody', {
+      defaultMessage:
+        'This automation has handled {used} of {limit} triggers today. Once it reaches the limit, additional triggers are throttled until midnight (UTC).',
+      values: { used, limit },
+    }),
+  highDailyLimit: i18n.translate('xpack.nightshift.automations.flyout.highDailyLimit', {
+    defaultMessage: 'High daily trigger limit',
+  }),
+  getHighDailyLimitBody: (limit: number, softLimit: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.highDailyLimitBody', {
+      defaultMessage:
+        'A limit of {limit} allows up to {limit} automation runs per day. Runs can consume investigation credits — consider staying at or below {softLimit} unless you expect sustained high volume.',
+      values: { limit, softLimit },
+    }),
+  getPlanLimitBody: (max: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.planLimitBody', {
+      defaultMessage: 'Your plan allows up to {max} triggers per day for this automation.',
+      values: { max },
+    }),
+  getUnsavedLimitTitle: (limit: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.unsavedLimitTitle', {
+      defaultMessage: 'New limit of {limit} applies when you save',
+      values: { limit },
+    }),
+  getUnsavedLimitBody: (saved: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.unsavedLimitBody', {
+      defaultMessage:
+        'The saved limit is still {saved} per day, so triggers above {saved} are throttled until you save.',
+      values: { saved },
+    }),
+  getRaiseLimit: (limit: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.raiseLimit', {
+      defaultMessage: 'Raise limit to {limit}',
+      values: { limit },
+    }),
 };
 
 export const slackTriggerLeads: Record<SlackTriggerKind, string> = {
   slack_message: i18n.translate('xpack.nightshift.automations.flyout.slackMessageLead', {
     defaultMessage: 'New message',
   }),
+};
+
+export const rulePickerLabels = {
+  searchAriaLabel: i18n.translate('xpack.nightshift.automations.rulePicker.searchAriaLabel', {
+    defaultMessage: 'Search rules and tags',
+  }),
+  searchSelected: i18n.translate('xpack.nightshift.automations.rulePicker.searchSelected', {
+    defaultMessage: 'Search selected…',
+  }),
+  searchRules: (count: number) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.searchRules', {
+      defaultMessage: 'Search {count} rules…',
+      values: { count },
+    }),
+  searchTags: (count: number) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.searchTags', {
+      defaultMessage: 'Search {count} tags…',
+      values: { count },
+    }),
+  allTags: i18n.translate('xpack.nightshift.automations.rulePicker.allTags', {
+    defaultMessage: 'All tags',
+  }),
+  filterByTag: i18n.translate('xpack.nightshift.automations.rulePicker.filterByTag', {
+    defaultMessage: 'Filter rules by tag',
+  }),
+  rulesTab: i18n.translate('xpack.nightshift.automations.rulePicker.rulesTab', {
+    defaultMessage: 'Rules',
+  }),
+  tagsTab: i18n.translate('xpack.nightshift.automations.rulePicker.tagsTab', {
+    defaultMessage: 'Tags',
+  }),
+  selectedTab: i18n.translate('xpack.nightshift.automations.rulePicker.selectedTab', {
+    defaultMessage: 'Selected',
+  }),
+  rulesList: i18n.translate('xpack.nightshift.automations.rulePicker.rulesList', {
+    defaultMessage: 'Alert rules',
+  }),
+  tagsList: i18n.translate('xpack.nightshift.automations.rulePicker.tagsList', {
+    defaultMessage: 'Rule tags',
+  }),
+  tagsHelp: i18n.translate('xpack.nightshift.automations.rulePicker.tagsHelp', {
+    defaultMessage: 'A tag selects every rule with it, including rules added later.',
+  }),
+  tagsGroup: i18n.translate('xpack.nightshift.automations.rulePicker.tagsGroup', {
+    defaultMessage: 'Tags · includes rules added later',
+  }),
+  rulesGroup: (count: number) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.rulesGroup', {
+      defaultMessage: 'Rules · {count} selected',
+      values: { count },
+    }),
+  includedByTag: (tags: string) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.includedByTag', {
+      defaultMessage: 'Included by tag {tags}. Remove the tag to exclude this rule.',
+      values: { tags },
+    }),
+  ruleTags: (tags: string) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.ruleTags', {
+      defaultMessage: 'Tags: {tags}',
+      values: { tags },
+    }),
+  ruleCount: (count: number) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.ruleCount', {
+      defaultMessage: '{count, plural, one {# rule} other {# rules}}',
+      values: { count },
+    }),
+  tagCount: (count: number) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.tagCount', {
+      defaultMessage: '{count, plural, one {# tag} other {# tags}}',
+      values: { count },
+    }),
+  taggedPill: (tag: string) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.taggedPill', {
+      defaultMessage: 'Tagged {tag}',
+      values: { tag },
+    }),
+  rulesNow: (count: number) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.rulesNow', {
+      defaultMessage: '{count, plural, one {# rule} other {# rules}} now',
+      values: { count },
+    }),
+  loadError: i18n.translate('xpack.nightshift.automations.rulePicker.loadError', {
+    defaultMessage: 'Unable to load rules.',
+  }),
+  clear: i18n.translate('xpack.nightshift.automations.rulePicker.clear', {
+    defaultMessage: 'Clear',
+  }),
+  selectShown: (count: number) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.selectShown', {
+      defaultMessage: 'Select {count} shown',
+      values: { count },
+    }),
+  deselectShown: (count: number) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.deselectShown', {
+      defaultMessage: 'Deselect {count} shown',
+      values: { count },
+    }),
+  selectTag: (tag: string) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.selectTag', {
+      defaultMessage: 'Select tag {tag}, incl. future rules',
+      values: { tag },
+    }),
+  removeTag: (tag: string) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.removeTag', {
+      defaultMessage: 'Remove tag {tag}',
+      values: { tag },
+    }),
+  nothingSelected: i18n.translate('xpack.nightshift.automations.rulePicker.nothingSelected', {
+    defaultMessage: 'Nothing selected yet. The trigger runs on alerts from any rule.',
+  }),
+  noRulesWithTag: (tag: string) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.noRulesWithTag', {
+      defaultMessage: 'No rules tagged {tag}.',
+      values: { tag },
+    }),
+  noMatch: (kind: 'rules' | 'tags', query: string, tag: string) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.noMatch', {
+      defaultMessage:
+        'No {kind, select, tags {tags} other {rules}} match “{query}”{tag, select, none {} other { tagged {tag}}}.',
+      values: { kind, query, tag: tag || 'none' },
+    }),
 };

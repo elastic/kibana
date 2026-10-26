@@ -1689,6 +1689,55 @@ describe('xy_suggestions', () => {
     });
   });
 
+  describe('areaFill', () => {
+    const bytesOverTimeTable: TableSuggestion = {
+      isMultiRow: true,
+      columns: [numCol('bytes'), dateCol('date')],
+      layerId: 'first',
+      changeType: 'unchanged',
+    };
+
+    const getAreaSuggestion = (areaFill?: XYVisualizationState['areaFill']) =>
+      getSuggestions({
+        table: bytesOverTimeTable,
+        keptLayerIds: ['first'],
+        subVisualizationId: 'area',
+        state: {
+          legend: { isVisible: true, position: 'bottom' },
+          valueLabels: 'hide',
+          preferredSeriesType: 'bar',
+          areaFill,
+          layers: [
+            {
+              layerId: 'first',
+              layerType: LayerTypes.DATA,
+              seriesType: 'bar',
+              xAccessor: 'date',
+              accessors: ['bytes'],
+            },
+          ],
+        },
+      }).find(({ state }) => getVisualizationSubtypeId(state) === 'area');
+
+    test('applies the default areaFill when suggesting area from a chart without one', () => {
+      expect(getAreaSuggestion()?.state.areaFill).toBe('gradient');
+    });
+
+    test('keeps the current chart areaFill when suggesting area', () => {
+      expect(getAreaSuggestion('solid')?.state.areaFill).toBe('solid');
+    });
+
+    test('does not add an areaFill to non-area suggestions', () => {
+      const [suggestion] = getSuggestions({
+        table: bytesOverTimeTable,
+        keptLayerIds: [],
+      });
+
+      expect(getVisualizationSubtypeId(suggestion.state)).toBe('bar_stacked');
+      expect(suggestion.state.areaFill).toBeUndefined();
+    });
+  });
+
   describe('preserves chart-level config when columns change', () => {
     test('preserves legend, axis titles, fitting function, and other chart-level settings', () => {
       const currentState: XYVisualizationState = {

@@ -70,6 +70,7 @@ const getOnSaveProps = (
 const setup = async ({
   additionalPersistedTabs,
   dataViewsList,
+  initialTitle,
   initialCopyOnSave,
   initialTabDataView,
   isEmbedded = false,
@@ -86,6 +87,7 @@ const setup = async ({
 }: {
   additionalPersistedTabs?: DiscoverSessionTab[];
   dataViewsList?: DataView[];
+  initialTitle?: string;
   initialCopyOnSave?: boolean;
   initialTabDataView?: DataView;
   isEmbedded?: boolean;
@@ -155,6 +157,7 @@ const setup = async ({
     <DiscoverToolkitTestProvider toolkit={toolkit}>
       <DiscoverSessionSaveModalContainer
         initialCopyOnSave={initialCopyOnSave}
+        initialTitle={initialTitle}
         onClose={onClose}
         onSaveCb={onSaveCb}
         services={services}
@@ -325,6 +328,15 @@ describe('DiscoverSessionSaveModalContainer', () => {
         sessionId: undefined,
         title: '',
       });
+    });
+
+    it('should prefill the title with the initial title of a new session', async () => {
+      const { modalProps } = await setup({
+        persistedDiscoverSession: false,
+        initialTitle: 'My draft',
+      });
+
+      expect(modalProps?.title).toBe('My draft');
     });
 
     it('should set sessionId to undefined for Save As and new sessions', async () => {

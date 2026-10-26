@@ -4,7 +4,6 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
 <div
   class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
   data-size="m"
-  style="--euiCallOutTypeColor: #C61E25;"
 >
   <div
     class="css-1slkmya-wrapper"
@@ -66,7 +65,6 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
 <div
   class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
   data-size="m"
-  style="--euiCallOutTypeColor: #C61E25;"
 >
   <div
     class="css-1slkmya-wrapper"
@@ -128,7 +126,6 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
 <div
   class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
   data-size="m"
-  style="--euiCallOutTypeColor: #C61E25;"
 >
   <div
     class="css-1slkmya-wrapper"
@@ -190,7 +187,6 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
 <div
   class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
   data-size="m"
-  style="--euiCallOutTypeColor: #C61E25;"
 >
   <div
     class="css-1slkmya-wrapper"

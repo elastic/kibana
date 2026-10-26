@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/std'
   - '@kbn/test-jest-helpers'
+  - '@kbn/test-eui-helpers'
   - '@kbn/config-schema'
   - '@kbn/task-manager-plugin'
   - '@kbn/usage-collection-plugin'
@@ -145,6 +146,4 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

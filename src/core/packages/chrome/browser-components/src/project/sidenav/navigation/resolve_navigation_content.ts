@@ -145,6 +145,7 @@ export const attachPopoverSections = (
         id: list.id,
         label: list.title,
         items: list.items,
+        isPaginated: true,
       })),
     };
   };

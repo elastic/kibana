@@ -44,13 +44,17 @@ export type {
 // them so consumers have a single entry point per the plugin's public surface.
 export {
   IMPACT_ATTACHMENT_TYPE,
+  IMPACT_ESCALATION_SUMMARY_URL,
   IMPACT_INDEX_NAME,
   IMPACT_INTERNAL_URL,
+  IMPACT_PILLS_PAGE_SIZE,
+  IMPACT_PROPOSAL_SUMMARY_URL,
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_IDS,
   MAX_ENTITY_NAME_LENGTH,
   MAX_IMPACT_CONVERSATION_IDS,
   MAX_IMPACT_ID_LENGTH,
+  MAX_IMPACT_PILLS_REACH,
   MAX_IMPACT_TOOL_ENTITIES,
   SET_IMPACT_TOOL_ID,
   attachImpactRequestSchema,
@@ -61,7 +65,54 @@ export {
   storedImpactEntitiesSchema,
 } from './impact';
 
-export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from './impact';
+export type {
+  AttachImpactRequest,
+  GetImpactQuery,
+  Impact,
+  ImpactEntity,
+  ImpactPillsResponse,
+} from './impact';
+
+// Subjects and hypotheses export constants and types only: this directory is an extra public
+// dir, so every value exported here lands in the page load bundle. Their schemas stay in the
+// entity barrels until a consumer outside this plugin needs them.
+export {
+  INVESTIGATION_SUBJECT_TRIGGER_TYPES,
+  INVESTIGATION_SUBJECT_TYPES,
+  MAX_SLACK_SEEN_EVENTS,
+  MAX_SUBJECT_ID_LENGTH,
+  MAX_SUBJECTS_PER_CONVERSATION,
+  MAX_SUBJECTS_PER_REQUEST,
+  SUBJECT_ATTACHMENT_TYPE,
+  SUBJECT_CLAIM_INDEX_NAME,
+  SUBJECT_INDEX_NAME,
+} from './subjects/constants';
+
+export type {
+  AlertSubjectSnapshot,
+  InvestigationSubject,
+  InvestigationSubjectInput,
+  InvestigationSubjectKey,
+  InvestigationSubjectTriggerType,
+  InvestigationSubjectType,
+  SlackSeenEvent,
+  SlackThreadSubject,
+} from './subjects/subject';
+
+export {
+  HYPOTHESES_ATTACHMENT_TYPE,
+  HYPOTHESES_INDEX_NAME,
+  HYPOTHESIS_STATUSES,
+  MAX_HYPOTHESES,
+  MAX_HYPOTHESIS_EVIDENCE,
+  SET_HYPOTHESES_TOOL_ID,
+} from './hypotheses/constants';
+
+export type {
+  Hypothesis,
+  HypothesisStatus,
+  InvestigationHypotheses,
+} from './hypotheses/hypotheses';
 
 export {
   ESCALATION_ASSIGNEES_FIELD,
@@ -73,6 +124,7 @@ export {
   ESCALATION_LINKED_INVESTIGATIONS_URL,
   ESCALATION_STATUS_FIELD,
   ESCALATION_STATUS_URL,
+  ESCALATION_SYNC_URL,
   ESCALATION_TEMPLATE_ID,
   ESCALATIONS_INTERNAL_URL,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
@@ -88,12 +140,18 @@ export {
   listEscalationsQuerySchema,
 } from './escalations';
 
+// Only what a browser consumer of the query API needs: every value exported here lands in the
+// page load bundle. The query API's bounds and the tool id stay in `investigations/constants`.
 export {
   INVESTIGATION_ASSIGN_URL,
+  INVESTIGATION_BY_ID_URL,
   INVESTIGATION_CLOSE_PREVIEW_URL,
+  INVESTIGATION_SEVERITIES,
+  INVESTIGATION_SEVERITY_URL,
   INVESTIGATION_STATUS_URL,
   INVESTIGATIONS_INTERNAL_URL,
   INVESTIGATIONS_PRIVILEGES_URL,
+  INVESTIGATIONS_SEVERITY_COUNTS_URL,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
   INVESTIGATIONS_UI_CAPABILITY_SHOW,
 } from './investigations/constants';
@@ -101,6 +159,32 @@ export type {
   InvestigationsPrivilegesResponse,
   ReadManagePrivileges,
 } from './investigations/privileges';
+
+export { isInvestigationSeverity } from './investigations/severity';
+export { isInvestigationTitlePending } from './investigations/title';
+
+// Query API shapes. Types only, like subjects and hypotheses: the schemas stay in the entity
+// barrel so the page load bundle does not carry them.
+export type {
+  Investigation,
+  InvestigationFilters,
+  InvestigationFiltersInput,
+  InvestigationHypothesesResponse,
+  InvestigationImpactEntityResponse,
+  InvestigationImpactResponse,
+  InvestigationMetadata,
+  InvestigationMetadataStatus,
+  InvestigationProposalSummary,
+  InvestigationSeverity,
+  InvestigationSeverityCounts,
+  InvestigationSeverityFilterValue,
+  InvestigationsSortField,
+  InvestigationSubjectResponse,
+  InvestigationSummary,
+  ListInvestigationsQuery,
+  ListInvestigationsQueryInput,
+  ListInvestigationsResponse,
+} from './investigations/investigation';
 
 export {
   setInvestigationStatusRequestSchema,
@@ -116,6 +200,12 @@ export type {
   SetEscalationStatusResponse,
   EscalationClosePreviewResponse,
 } from './investigations/status';
+
+export type {
+  SetInvestigationSeverityRequest,
+  SetInvestigationSeverityResponse,
+  InvestigationSeverityChangedEventData,
+} from './investigations/severity_change';
 
 export {
   assignConversationRequestBodySchema,
@@ -134,4 +224,12 @@ export type {
   ListEscalationsQuery,
   ListEscalationsResponse,
   ListLinkedInvestigationsResponse,
+  SyncEscalationResponse,
 } from './escalations';
+
+export {
+  AppendWorkflowExecutionIdStepId,
+  appendWorkflowExecutionIdStepCommonDefinition,
+  appendWorkflowExecutionIdStepInputSchema,
+  appendWorkflowExecutionIdStepOutputSchema,
+} from './workflow_execution/step_types';

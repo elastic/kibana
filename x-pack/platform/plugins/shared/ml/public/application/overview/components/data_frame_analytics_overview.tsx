@@ -90,13 +90,13 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
   }, [mlApi]);
 
   return !hasDFAs ? (
-    <AnalyticsEmptyPrompt customCss={overviewPageCardCustomCss} iconSize="m" />
+    <AnalyticsEmptyPrompt customCss={overviewPageCardCustomCss} iconSize="m" titleSize="xs" />
   ) : (
     <MLEmptyPromptCard
       customCss={overviewPageCardCustomCss}
       hasBorder
       hasShadow={false}
-      titleSize="s"
+      titleSize="xs"
       paddingSize="m"
       iconSrc={dfaImage}
       iconSize="m"

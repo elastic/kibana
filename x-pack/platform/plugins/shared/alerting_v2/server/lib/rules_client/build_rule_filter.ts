@@ -33,12 +33,18 @@ export const buildRuleSoFilter = createSoFilterBuilder({
     'metadata.name': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.name`,
     'metadata.description': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.description`,
     'metadata.tags': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
+    'metadata.routing_tags': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.routing_tags`,
+    // Internal-use only, pending the rule-template schema decision: it powers the
+    // rules-list "template" filter but is deliberately NOT in the documented
+    // `filter` field list, and `metadata.template` is not on the rule response.
+    // Do not document it; the public path may change when the shape is settled.
+    'metadata.template.id': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.template.id`,
   },
 });
 
 /**
- * Builds the API filter for the alert rules with at least one of the given tags,
- * or for every alert rule when no tags are given.
+ * Builds the API filter for the alert rules with at least one of the given routing
+ * tags, or for every alert rule when no tags are given.
  */
 export const buildMatchingRulesFilter = (tags: string[]): string => {
   const alertRules = nodeBuilder.is('kind', 'alert');
@@ -47,7 +53,9 @@ export const buildMatchingRulesFilter = (tags: string[]): string => {
   }
 
   const anyTag = nodeBuilder.or(
-    tags.map((tag) => nodeBuilder.is('metadata.tags', nodeTypes.literal.buildNode(tag, true)))
+    tags.map((tag) =>
+      nodeBuilder.is('metadata.routing_tags', nodeTypes.literal.buildNode(tag, true))
+    )
   );
   return toKqlExpression(nodeBuilder.and([alertRules, anyTag]));
 };
