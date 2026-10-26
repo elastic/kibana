@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -25,21 +24,13 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { pagePathGetters, useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 import type { EsAssetReference, KibanaAssetReference } from '@kbn/fleet-plugin/common';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import {
-  SERVICE_SETTINGS_SESSION_KEY,
-  type ServiceSettingsPersistedState,
-} from '../service_settings_step/use_service_settings';
+import { useReconciledServiceSettings } from '../service_settings_step/use_reconciled_service_settings';
 import { useServiceDataDetection } from './use_service_data_detection';
 import { DeploymentSummary } from './deployment_summary';
 import { AgentSetupCallout } from './agent_setup_callout';
 import { InstalledContent } from './installed_content';
 import { useAwsOverviewDashboardUrl } from './use_aws_overview_dashboard_url';
 import { StepFooter } from '../step_footer';
-
-const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
-  globalRegion: '',
-  serviceVars: {},
-};
 
 interface DetectAndReviewStepProps {
   onContinue: () => void;
@@ -52,10 +43,7 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
   const { servicesStep, awsServicesMap, deploymentMethod } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
-  const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
-    SERVICE_SETTINGS_SESSION_KEY,
-    DEFAULT_SERVICE_SETTINGS
-  );
+  const serviceSettings = useReconciledServiceSettings();
 
   // Build a display name map: instanceId → name from settings, falling back to matrix name.
   const serviceNames: Record<string, string> = useMemo(() => {

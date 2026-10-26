@@ -57,6 +57,44 @@ export const executeConnectorSubActionArgsSchema = z
   })
   .strict();
 
+const invalidRequestHint =
+  'Check the connector attachment for the correct sub-action names and required parameters.';
+
+const getNumber = (value: unknown): number | undefined =>
+  typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+
+const getErrorHint = ({
+  statusCode,
+  retryAfterSeconds,
+}: {
+  statusCode?: number;
+  retryAfterSeconds?: number;
+}): string => {
+  if (statusCode === 401 || statusCode === 403) {
+    return (
+      "The service rejected the connector's credentials or they lack the required permissions or scopes. " +
+      "Do not retry or change the parameters; tell the user to check the connector's credentials."
+    );
+  }
+  if (statusCode === 429) {
+    const retry =
+      retryAfterSeconds !== undefined
+        ? `Wait ${retryAfterSeconds} seconds before retrying this sub-action.`
+        : 'Retry at most once after a short wait.';
+    return (
+      `The service is rate limiting this connector. ${retry} ` +
+      'Do not change the parameters or switch to other sub-actions; if it still fails, tell the user.'
+    );
+  }
+  if (statusCode !== undefined && statusCode >= 500) {
+    return (
+      'The service failed to handle the request. Retry at most once; if it still fails, tell the user the service is unavailable. ' +
+      'Do not change the parameters or switch to other sub-actions.'
+    );
+  }
+  return invalidRequestHint;
+};
+
 /**
  * Creates the execute_connector_sub_action tool.
  *
@@ -231,8 +269,8 @@ export const createExecuteConnectorSubActionTool = ({
     }
 
     if (executeResult.status === 'error') {
+      const { errorMeta } = executeResult;
       if (executeResult.errorName === 'ConnectorAuthorizationError') {
-        const { errorMeta } = executeResult;
         const connectorName =
           typeof errorMeta?.connectorName === 'string' ? errorMeta.connectorName : undefined;
         const authResult = resolveAuthorizationResult({
@@ -243,18 +281,20 @@ export const createExecuteConnectorSubActionTool = ({
           return authResult;
         }
       }
+      const statusCode = getNumber(errorMeta?.statusCode);
+      const retryAfterSeconds = getNumber(errorMeta?.retryAfterSeconds);
       return {
         results: [
           createErrorResult({
-            message:
-              `Connector sub-action '${subAction}' returned an error: ${
-                executeResult.message ?? 'Unknown error'
-              }` +
-              ' — Check the connector attachment for the correct sub-action names and required parameters.',
+            message: `Connector sub-action '${subAction}' returned an error: ${
+              executeResult.message ?? 'Unknown error'
+            } — ${getErrorHint({ statusCode, retryAfterSeconds })}`,
             metadata: {
               connectorId,
               subAction,
               serviceMessage: executeResult.serviceMessage,
+              ...(statusCode !== undefined ? { statusCode } : {}),
+              ...(retryAfterSeconds !== undefined ? { retryAfterSeconds } : {}),
             },
           }),
         ],
