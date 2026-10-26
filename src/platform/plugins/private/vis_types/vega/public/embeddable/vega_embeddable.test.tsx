@@ -26,7 +26,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { VegaParser } from '../data_model/vega_parser';
+import type { VegaRenderDescriptor } from '../data_model/types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
 import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
@@ -50,7 +50,7 @@ interface MockVegaVisComponentProps {
   fireEvent: VegaEventHandler;
   renderComplete: () => void;
   showWarnings: boolean;
-  visData: VegaParser;
+  visData: VegaRenderDescriptor;
 }
 
 const mockVegaRequestHandler = jest.fn();
@@ -134,7 +134,7 @@ describe('vegaEmbeddableFactory', () => {
     getServiceSettings: jest.fn(),
   } as unknown as VegaVisualizationDependencies;
 
-  const visData = { isVegaLite: false, useMap: false } as unknown as VegaParser;
+  const visData = { isVegaLite: false, useMap: false } as unknown as VegaRenderDescriptor;
 
   const buildEmbeddable = async ({
     standaloneEmbeddableEnabled = false,
@@ -340,7 +340,7 @@ describe('vegaEmbeddableFactory', () => {
 
     // Entering edit mode alone does not refetch, so the mode is picked up by the next fetch.
     viewMode$.next('edit');
-    const refetchedVisData = { isVegaLite: true, useMap: false } as unknown as VegaParser;
+    const refetchedVisData = { isVegaLite: true, useMap: false } as unknown as VegaRenderDescriptor;
     mockVegaRequestHandler.mockResolvedValue(refetchedVisData);
     reload$.next();
 
@@ -423,8 +423,8 @@ describe('vegaEmbeddableFactory', () => {
   });
 
   it('renders partial results returned after a cancel', async () => {
-    const partialVisData = { isVegaLite: true, useMap: false } as unknown as VegaParser;
-    let resolveRequest: (data: VegaParser) => void = () => {};
+    const partialVisData = { isVegaLite: true, useMap: false } as unknown as VegaRenderDescriptor;
+    let resolveRequest: (data: VegaRenderDescriptor) => void = () => {};
     mockVegaRequestHandler.mockImplementation(
       () =>
         new Promise((resolve) => {
@@ -443,7 +443,7 @@ describe('vegaEmbeddableFactory', () => {
   });
 
   it('drops partial results from a cancelled request once a newer fetch starts', async () => {
-    const resolvers: Array<(data: VegaParser) => void> = [];
+    const resolvers: Array<(data: VegaRenderDescriptor) => void> = [];
     mockVegaRequestHandler.mockImplementation(
       () => new Promise((resolve) => resolvers.push(resolve))
     );
@@ -454,7 +454,7 @@ describe('vegaEmbeddableFactory', () => {
     api.cancelRequests(AbortReason.CANCELED);
     reload$.next();
     await waitFor(() => expect(mockVegaRequestHandler).toHaveBeenCalledTimes(2));
-    resolvers[0]({ isVegaLite: false, useMap: false } as unknown as VegaParser);
+    resolvers[0]({ isVegaLite: false, useMap: false } as unknown as VegaRenderDescriptor);
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(mockVegaVisComponentProps).toBeUndefined();

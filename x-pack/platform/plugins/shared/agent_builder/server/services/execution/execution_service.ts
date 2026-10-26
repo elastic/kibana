@@ -41,7 +41,6 @@ import type {
   AgentExecutionService,
   AgentExecution,
   ConversationExecutionParams,
-  ExecutionConversationOrigin,
   ExecuteAgentParams,
   ExecuteAgentResult,
   MaybeExecuteAgentResult,
@@ -127,24 +126,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       interactive,
     } = args;
     const executionId = providedExecutionId ?? uuidv4();
-    const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
     const interactivity = normalizeInteractive(interactive, mode);
     const executionClient = this.createExecutionClient();
-
-    if (
-      params.reasoningLevel !== undefined &&
-      !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
-    ) {
-      const connector = await this.resolveExecutionConnector({
-        agentId,
-        connectorId: params.connectorId,
-        request,
-      });
-      if (connector) {
-        validateReasoningEffort(connector, params.reasoningLevel);
-      }
-    }
 
     const { conversationClient, parentExecution } = await this.resolveConversationClient({
       request,
@@ -168,6 +152,21 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const conversation = resolvedConversation?.conversation;
     const validatedParams = conversationParams ?? (await this.validateAttachments(params, request));
     const receivedAt = resolvedConversation?.receivedAt ?? new Date();
+    const agentId = conversationParams?.agentId ?? this.requestedAgentId(params);
+
+    if (
+      params.reasoningLevel !== undefined &&
+      !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
+    ) {
+      const connector = await this.resolveExecutionConnector({
+        agentId,
+        connectorId: params.connectorId,
+        request,
+      });
+      if (connector) {
+        validateReasoningEffort(connector, params.reasoningLevel);
+      }
+    }
 
     // Reserved for the round this run opens, so its events are named after it.
     const roundId = uuidv4();
@@ -817,55 +816,61 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }> {
     const validatedParams = await this.validateAttachments(params, request);
     const receivedAt = new Date();
-    const { origin, conversationId } = validatedParams;
+    const { origin } = validatedParams;
 
-    const resolvedConversationId = await this.resolveConversationId({
-      conversationId,
-      origin,
+    const resolved = await this.resolveConversation({
+      params: validatedParams,
       spaceId,
       request,
       conversationClient,
     });
+    const resolvedParams = { ...validatedParams, agentId: resolved.agentId };
 
     const conversation = await getConversation({
-      agentId: validatedParams.agentId ?? agentBuilderDefaultAgentId,
-      conversationId: resolvedConversationId,
-      autoCreateConversationWithId: validatedParams.autoCreateConversationWithId,
+      agentId: resolved.agentId,
+      conversationId: resolved.conversationId,
+      autoCreateConversationWithId: resolvedParams.autoCreateConversationWithId,
       conversationClient,
-      accessControl: validatedParams.accessControl,
-      readOnly: validatedParams.readOnly,
+      accessControl: resolvedParams.accessControl,
+      readOnly: resolvedParams.readOnly,
       origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
-      subagentCreation: validatedParams.subagentCreation,
+      subagentCreation: resolvedParams.subagentCreation,
     });
 
-    return { validatedParams, conversation, receivedAt };
+    return { validatedParams: resolvedParams, conversation, receivedAt };
   }
 
   /**
-   * The conversation an execution continues: the one it names, else the one its origin continues.
-   * `undefined` starts a new conversation.
+   * The conversation an execution continues and the agent it runs on: the ones it names, else the
+   * ones its origin resolves to. No conversation id starts a new conversation.
    */
-  private async resolveConversationId({
-    conversationId,
-    origin,
+  private async resolveConversation({
+    params,
     spaceId,
     request,
     conversationClient,
   }: {
-    conversationId?: string;
-    origin?: ExecutionConversationOrigin;
+    params: ConversationExecutionParams;
     spaceId: string;
     request: KibanaRequest;
     conversationClient: ConversationClient;
-  }): Promise<string | undefined> {
+  }): Promise<{ conversationId?: string; agentId: string }> {
+    const { conversationId, origin } = params;
+    const agentId = this.requestedAgentId(params);
+
     if (conversationId || !origin) {
-      return conversationId;
+      return { conversationId, agentId };
     }
 
-    return this.deps.callbackDeliveryService.resolveConversation(
+    const resolution = await this.deps.callbackDeliveryService.resolveConversation(
       { origin, spaceId, request },
       conversationClient
     );
+
+    return {
+      conversationId: resolution?.conversationId,
+      agentId: resolution?.agentId ?? agentId,
+    };
   }
 
   private async writeUserMessage({
@@ -889,8 +894,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     parentExecution?: ParentExecution;
     appendRefresh?: Refresh;
   }): Promise<string> {
-    const { nextInput, origin: requestOrigin } = params;
-    const author = conversationClient.getAuthor(requestOrigin?.author);
+    const { nextInput, origin: requestOrigin, author: requestAuthor } = params;
+    const author = conversationClient.getAuthor(requestOrigin?.author, requestAuthor);
     const origin = requestOrigin ? { type: requestOrigin.type } : undefined;
     const base = {
       conversation,
@@ -967,5 +972,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       logger: this.logger.get('execution-client'),
       esClient: this.deps.elasticsearch.client.asInternalUser,
     });
+  }
+
+  /** The agent a request asks for, or the default agent when it names none. */
+  private requestedAgentId({ agentId }: { agentId?: string }): string {
+    return agentId ?? agentBuilderDefaultAgentId;
   }
 }

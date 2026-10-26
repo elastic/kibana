@@ -15,6 +15,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStepType,
+  ToolCallInvocation,
   ToolResultType,
   createInjectedContextStep,
 } from '@kbn/agent-builder-common';
@@ -586,5 +587,53 @@ describe('injected context', () => {
 
     expect(research.toDict()).toEqual(history.toDict());
     expect(answer.toDict()).toEqual(history.toDict());
+  });
+});
+
+describe('dynamic tool calls', () => {
+  const dynamicCall = (id: string, overrides: Partial<ToolCallStep> = {}) =>
+    call(id, {
+      tool_id: 'skill.tool',
+      params: { q: id },
+      invocation: ToolCallInvocation.dynamic,
+      ...overrides,
+    });
+
+  it('renders a history step as the execute_dynamic_tool call the model made', async () => {
+    const steps: ConversationRoundStep[] = [
+      reasoning('why a', { tool_call_group_id: 'g', tool_call_id: 'a' }),
+      dynamicCall('a', { tool_call_group_id: 'g' }),
+      call('b', { tool_call_group_id: 'g' }),
+    ];
+    const [ai, toolA] = (await renderHistorySteps({ steps })) as [AIMessage, ToolMessage];
+
+    expect(ai.tool_calls).toEqual([
+      {
+        id: 'a',
+        name: internalTools.executeDynamicTool,
+        args: { _reasoning: 'why a', tool_id: 'skill.tool', params: { q: 'a' } },
+        type: 'tool_call',
+      },
+      { id: 'b', name: 'my_tool', args: { q: 'b' }, type: 'tool_call' },
+    ]);
+    expect(toolA.tool_call_id).toBe('a');
+  });
+
+  it('renders a current-run step the same way, using the render state name', async () => {
+    const steps: ConversationRoundStep[] = [dynamicCall('a')];
+    const renderState = rendered('a', { toolName: internalTools.executeDynamicTool });
+
+    const [ai] = (await current(steps, renderState)) as [AIMessage];
+    const [history] = (await renderHistorySteps({ steps })) as [AIMessage];
+
+    expect(ai.tool_calls).toEqual([
+      {
+        id: 'a',
+        name: internalTools.executeDynamicTool,
+        args: { tool_id: 'skill.tool', params: { q: 'a' } },
+        type: 'tool_call',
+      },
+    ]);
+    expect(ai.tool_calls).toEqual(history.tool_calls);
   });
 });
