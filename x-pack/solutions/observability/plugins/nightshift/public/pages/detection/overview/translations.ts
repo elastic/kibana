@@ -37,9 +37,9 @@ export const STATUS_LOADING_LABEL = i18n.translate(
   { defaultMessage: 'Loading detection engine status' }
 );
 
-export const getSourcesLabel = (count: number): string =>
-  i18n.translate('xpack.nightshift.detectionPage.sourcesCountLabel', {
-    defaultMessage: '{count, plural, one {source} other {sources}}',
+export const getEntitiesLabel = (count: number): string =>
+  i18n.translate('xpack.nightshift.detectionPage.entitiesCountLabel', {
+    defaultMessage: '{count, plural, one {entity} other {entities}}',
     values: { count },
   });
 
