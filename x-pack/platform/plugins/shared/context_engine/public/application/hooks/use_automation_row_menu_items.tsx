@@ -14,8 +14,11 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 export interface UseAutomationRowMenuItemsParams {
   editHref: string;
   isReadOnly: boolean;
-  isDisabled: boolean;
+  isBusy: boolean;
+  canRun: boolean;
+  isRunDisabled: boolean;
   onCloseMenu: () => void;
+  onRun: () => void;
   onPreview: () => void;
   onDelete: () => void;
 }
@@ -23,13 +26,41 @@ export interface UseAutomationRowMenuItemsParams {
 export const useAutomationRowMenuItems = ({
   editHref,
   isReadOnly,
-  isDisabled,
+  isBusy,
+  canRun,
+  isRunDisabled,
   onCloseMenu,
+  onRun,
   onPreview,
   onDelete,
 }: UseAutomationRowMenuItemsParams): React.ReactElement[] => {
   return useMemo(() => {
-    const items = [
+    const items: React.ReactElement[] = [];
+
+    if (canRun) {
+      items.push(
+        <EuiContextMenuItem
+          key="run"
+          icon="play"
+          disabled={isRunDisabled}
+          data-test-subj="contextRunAutomationButton"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+            action: CONTEXT_ENGINE_UI_EBT.action.automations.RUN_WORKFLOW,
+          })}
+          onClick={() => {
+            onCloseMenu();
+            onRun();
+          }}
+        >
+          {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.runAction', {
+            defaultMessage: 'Run',
+          })}
+        </EuiContextMenuItem>
+      );
+    }
+
+    items.push(
       <EuiContextMenuItem
         key="view"
         icon="eye"
@@ -46,8 +77,8 @@ export const useAutomationRowMenuItems = ({
         {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.viewAction', {
           defaultMessage: 'View',
         })}
-      </EuiContextMenuItem>,
-    ];
+      </EuiContextMenuItem>
+    );
 
     if (!isReadOnly) {
       items.push(
@@ -70,7 +101,7 @@ export const useAutomationRowMenuItems = ({
         <EuiContextMenuItem
           key="delete"
           icon="trash"
-          disabled={isDisabled}
+          disabled={isBusy}
           data-test-subj="contextRemoveAutomationButton"
           {...getEbtProps({
             element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
@@ -89,5 +120,15 @@ export const useAutomationRowMenuItems = ({
     }
 
     return items;
-  }, [editHref, isDisabled, isReadOnly, onCloseMenu, onDelete, onPreview]);
+  }, [
+    canRun,
+    editHref,
+    isBusy,
+    isReadOnly,
+    isRunDisabled,
+    onCloseMenu,
+    onDelete,
+    onPreview,
+    onRun,
+  ]);
 };

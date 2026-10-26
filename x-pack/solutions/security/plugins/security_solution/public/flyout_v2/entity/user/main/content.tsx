@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { Entity } from '../../../../../common/api/entity_analytics';
 import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 import { useAnomalyOverview } from '../../../../entity_analytics/api/hooks/use_anomaly_overview';
 import { useAnomalyPrivileges } from '../../../../entity_analytics/api/hooks/use_anomaly_privileges';
+import { getScopeFlyoutTimeRangeMs } from '../../../../entity_analytics/common/scope_time_ranges';
 import { ObservedDataSection } from '../../shared/components/observed_data_section';
 import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
@@ -147,11 +148,13 @@ export const Content = ({
   const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);
   const hasAnomalyPrivileges = anomalyPrivilegesData?.has_all_required ?? false;
   const loadAnomalies = isAnomalyDetailsEnabled && hasAnomalyPrivileges && !!entityStoreEntityId;
-
+  const flyoutTimeRangeMs = useMemo(() => getScopeFlyoutTimeRangeMs(scopeId), [scopeId]);
   const anomalyOverview = useAnomalyOverview({
     entityId: entityStoreEntityId ?? '',
     mode,
     entityType: EntityType.user,
+    from: flyoutTimeRangeMs?.from,
+    to: flyoutTimeRangeMs?.to,
     enabled: loadAnomalies,
   });
 
@@ -202,6 +205,7 @@ export const Content = ({
               prefetchedResolutionRisk={prefetchedResolutionRisk}
               hideHeaderIcon={hideHeaderIcons}
               isGroupView={isGroupView}
+              scopeId={scopeId}
             />
             <EuiHorizontalRule />
           </>
@@ -213,6 +217,7 @@ export const Content = ({
             <AnomaliesSection
               data={anomalyOverview.data ?? EMPTY_ANOMALY_OVERVIEW}
               entityId={entityStoreEntityId}
+              scopeId={scopeId}
               isPreviewMode={isPreviewMode}
               openDetailsPanel={openDetailsPanel}
               hideHeaderIcons={hideHeaderIcons}

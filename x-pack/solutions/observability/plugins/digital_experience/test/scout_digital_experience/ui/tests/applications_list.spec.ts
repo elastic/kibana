@@ -28,7 +28,7 @@ test.describe(
       await test.step('lists the application with RUM data', async () => {
         await digitalExperience.gotoApplications();
 
-        await expect(digitalExperience.breadcrumbs).toContainText('Digital Experience');
+        await expect(digitalExperience.breadcrumbs).toContainText('Digital experience');
         await expect(digitalExperience.applicationLink(testData.SERVICE_NAME)).toBeVisible();
       });
 

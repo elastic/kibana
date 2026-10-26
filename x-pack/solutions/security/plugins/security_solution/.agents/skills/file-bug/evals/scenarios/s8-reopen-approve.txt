@@ -1,0 +1,4 @@
+(Context: earlier in this conversation the search found closed issue #98 in elastic/kibana as the same bug, and the human chose "reopen and comment". You showed this comment draft and stopped: action reopen_comment on #98 in elastic/kibana, comment body in $FIXTURES/s8-comment.md, no files to upload, no new title or labels.)
+
+The user's new message is:
+yes, post it

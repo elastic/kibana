@@ -50,7 +50,7 @@ describe('useMessageEditor handleCommandSelect', () => {
     const { result } = renderHook(() => useMessageEditor());
     attachRef(result.current.messageEditor, div);
 
-    div.textContent = '@connector/workday';
+    div.textContent = '#connector/workday';
     setCursorAtEnd(div);
 
     act(() => {
@@ -72,8 +72,8 @@ describe('useMessageEditor handleCommandSelect', () => {
 
     const badge = div.querySelector('[data-command-badge]');
     expect(badge).not.toBeNull();
-    expect(badge!.textContent).toBe('@connector/workday');
-    expect(stripZeroWidthSpaces(div.textContent ?? '')).toBe(`@connector/workday${NBSP}`);
+    expect(badge!.textContent).toBe('#connector/workday');
+    expect(stripZeroWidthSpaces(div.textContent ?? '')).toBe(`#connector/workday${NBSP}`);
   });
 });
 
