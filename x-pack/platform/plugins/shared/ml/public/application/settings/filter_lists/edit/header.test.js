@@ -10,6 +10,18 @@ import { renderWithI18n } from '../../../test_utils/render_with_ml_context';
 
 import { EditFilterListHeader } from './header';
 
+jest.mock('../../../contexts/kibana', () => ({
+  useMlKibana: () => ({
+    services: {
+      application: {
+        navigateToApp: jest.fn(),
+        getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/filter_lists'),
+      },
+    },
+  }),
+  useNavigateToPath: () => jest.fn(),
+}));
+
 describe('EditFilterListHeader', () => {
   const updateNewFilterId = jest.fn(() => {});
   const updateDescription = jest.fn(() => {});

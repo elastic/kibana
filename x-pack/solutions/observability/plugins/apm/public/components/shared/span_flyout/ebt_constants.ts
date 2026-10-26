@@ -7,4 +7,5 @@
 
 export const SPAN_FLYOUT_EBT_ELEMENTS = {
   HEADER: 'spanFlyoutHeader',
+  TABS: 'spanFlyoutTabs',
 } as const;

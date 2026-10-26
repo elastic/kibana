@@ -15,6 +15,7 @@ Scout is Kibana's **modern UI and API test framework** built on [Playwright](htt
 - [UI testing](./ui-testing.md)
 - [API testing](./api-testing.md)
 - [Migrate tests to Scout](./migrate-tests.md)
+- [EUI test helpers](./eui-test-helpers.md)
 
 ## Scout benefits [scout-main-features]
 
@@ -59,6 +60,8 @@ We welcome contributions to one of the Scout packages.
 | Is reusable across many plugins/teams | In `@kbn/scout`                                                                                           | Generic fixtures, page objects, and API helpers    |
 | Is reusable but scoped to a solution  | In the solution Scout package (for example `@kbn/scout-security`, `@kbn/scout-oblt`, `@kbn/scout-search`) | Solution workflows and domain-specific helpers     |
 | Is specific to one plugin or package  | In your plugin or package's `test/scout` directory                                                        | Components specific to your plugin or package only |
+
+For page objects, "reusable" depends on what renders the UI rather than on how many tests use the helper today. See the [page object placement policy](./page-objects.md#scout-page-objects-placement).
 
 ## Need help? [need-help]
 

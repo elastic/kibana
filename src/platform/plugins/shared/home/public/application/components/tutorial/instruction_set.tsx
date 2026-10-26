@@ -16,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
-  EuiCallOut,
   EuiTitle,
   EuiSplitPanel,
 } from '@elastic/eui';
@@ -24,6 +23,7 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme'; // FIXME: remove this, and access style variables from EUI context
+import { KbnInfoCallout, KbnSuccessCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { Instruction } from './instruction';
 import { Content } from './content';
 import type { INSTRUCTION_VARIANT } from '../../..';
@@ -133,10 +133,12 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
         color = 'warning';
         break;
     }
+    const CalloutComponent = color === 'success' ? KbnSuccessCallout : KbnWarningCallout;
+
     return (
       <>
         <EuiSpacer size="s" />
-        <EuiCallOut title={message} color={color} />
+        <CalloutComponent title={message} />
       </>
     );
   }
@@ -270,11 +272,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
     return (
       <>
         <EuiSpacer />
-        <EuiCallOut
-          title={this.props.callOut.title}
-          children={this.props.callOut.message}
-          iconType={this.props.callOut.iconType}
-        />
+        <KbnInfoCallout title={this.props.callOut.title} text={this.props.callOut.message} />
       </>
     );
   };

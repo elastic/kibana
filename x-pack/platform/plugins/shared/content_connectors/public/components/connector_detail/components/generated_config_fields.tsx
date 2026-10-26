@@ -10,7 +10,6 @@ import type { ComponentProps } from 'react';
 
 import {
   EuiButtonIcon,
-  EuiCallOut,
   EuiCode,
   EuiConfirmModal,
   EuiCopy,
@@ -24,6 +23,7 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 
@@ -357,9 +357,8 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
         {showApiKeyBanner && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <KbnSuccessCallout
               announceOnMount
-              color="success"
               size="s"
               title={i18n.translate(
                 'xpack.contentConnectors.connectorDeployment.generatedConfigCallout',
@@ -367,7 +366,6 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                   defaultMessage: `You'll only see this API key once, so save it somewhere safe. We don't store your API keys, so if you lose a key you'll need to generate a replacement`,
                 }
               )}
-              iconType="asterisk"
             />
           </>
         )}

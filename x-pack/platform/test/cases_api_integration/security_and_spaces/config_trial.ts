@@ -15,5 +15,8 @@ export default createTestConfig('security_and_spaces', {
   ssl: true,
   testFiles: [require.resolve('./tests/trial')],
   publicBaseUrl: true,
-  kbnServerArgs: ['--xpack.cases.templates.enabled=true'],
+  kbnServerArgs: [
+    '--xpack.cases.templates.enabled=true',
+    '--xpack.cases.runWorkflows.enabled=true',
+  ],
 });

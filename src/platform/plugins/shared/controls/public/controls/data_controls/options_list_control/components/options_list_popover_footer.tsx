@@ -14,13 +14,14 @@ import {
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiPopoverFooter,
   EuiProgress,
   useEuiBackgroundColor,
   useEuiPaddingSize,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, type ViewMode } from '@kbn/presentation-publishing';
 
 import { isDSLOptionsListApi } from '../../../utils';
 import { useOptionsListContext } from '../options_list_context_provider';
@@ -40,10 +41,14 @@ const aggregationToggleButtons = [
 ];
 
 export const OptionsListPopoverFooter = () => {
-  const { componentApi } = useOptionsListContext();
+  const { componentApi, displaySettings } = useOptionsListContext();
 
-  const [exclude, loading] = useBatchedPublishingSubjects(
+  const [exclude, viewMode, isPartial, loading] = useBatchedPublishingSubjects(
     isDSLOptionsListApi(componentApi) ? componentApi.exclude$ : new BehaviorSubject(false),
+    isDSLOptionsListApi(componentApi)
+      ? componentApi.viewMode$
+      : new BehaviorSubject('view' as ViewMode),
+    isDSLOptionsListApi(componentApi) ? componentApi.isPartial$ : new BehaviorSubject(false),
     componentApi.dataLoading$
   );
 
@@ -76,6 +81,7 @@ export const OptionsListPopoverFooter = () => {
         >
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
+              isDisabled={!(displaySettings.isInteractive ?? true)}
               legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
               options={aggregationToggleButtons}
               idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
@@ -87,6 +93,17 @@ export const OptionsListPopoverFooter = () => {
               data-test-subj="optionsList__includeExcludeButtonGroup"
             />
           </EuiFlexItem>
+          {isPartial && (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                size="m"
+                type="partial"
+                title={OptionsListStrings.popover.getPartialResultsTitle()}
+                aria-label={OptionsListStrings.popover.getPartialResultsTitle()}
+                content={OptionsListStrings.popover.getPartialResultsTooltip(viewMode)}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPopoverFooter>
     </>

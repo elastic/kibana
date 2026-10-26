@@ -12,7 +12,7 @@ import { mockInferenceEndpoints, unmockInferenceEndpoints } from '../fixtures/mo
 
 test.describe(
   'External Inference - row actions',
-  { tag: ['@local-stateful-classic', '@local-stateful-search', '@local-serverless-search'] },
+  { tag: ['@local-stateful-classic', '@local-serverless-search'] },
   () => {
     test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
       await mockInferenceEndpoints(page, externalInferenceEndpointsMockData);
@@ -26,13 +26,13 @@ test.describe(
       await unmockInferenceEndpoints(page);
     });
 
-    test('opens the edit inference flyout from the view endpoint row action', async ({
+    test('opens the edit inference flyout from the edit endpoint row action', async ({
       pageObjects,
     }) => {
       const { externalInference } = pageObjects;
 
       await externalInference.openRowActionsFor('openai-chat-completion-01');
-      await externalInference.viewEndpointAction.click();
+      await externalInference.editEndpointAction.click();
       await expect(externalInference.inferenceFlyout).toBeVisible();
     });
 

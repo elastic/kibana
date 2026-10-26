@@ -1,5 +1,8 @@
 # Common Flaky Patterns
 
+These examples are Cypress. They exist so you can recognize the race.
+Unless the spec is `@serverlessQA`, apply the equivalent wait in Scout/API — do not land the Cypress snippet.
+
 ## Table of Contents
 - [Missing API Wait](#missing-api-wait)
 - [Test Data Pollution](#test-data-pollution)

@@ -338,6 +338,44 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
       });
+
+      it('should pass expiration to the ES ApiKey and populate expire_at on the response', async () => {
+        const { body: apiResponse } = await supertest
+          .post(`/api/fleet/enrollment_api_keys`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            policy_id: 'policy1',
+            expiration: '30d',
+          })
+          .expect(200);
+
+        expect(apiResponse.item).to.have.property('expire_at');
+        expect(apiResponse.item.expire_at).to.be.a('string');
+
+        // Confirm the underlying ES API key also has an expiration set
+        const apiKeyRes = await es.security.getApiKey({
+          id: apiResponse.item.api_key_id,
+        });
+        expect(apiKeyRes.api_keys[0]).to.have.property('expiration');
+        expect(apiKeyRes.api_keys[0].expiration).to.be.a('number');
+
+        // The stored expire_at should match the ES expiration (epoch-ms → ISO)
+        const expectedExpireAt = new Date(apiKeyRes.api_keys[0].expiration as number).toISOString();
+        expect(apiResponse.item.expire_at).to.eql(expectedExpireAt);
+      });
+
+      it('should return 400 for an invalid expiration format', async () => {
+        const { body: apiResponse } = await supertest
+          .post(`/api/fleet/enrollment_api_keys`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            policy_id: 'policy1',
+            expiration: 'notaduration',
+          })
+          .expect(400);
+
+        expect(apiResponse.message).to.contain('Expiration must be a valid duration (for example');
+      });
     });
   });
 }

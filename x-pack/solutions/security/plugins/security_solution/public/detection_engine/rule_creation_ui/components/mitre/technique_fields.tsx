@@ -14,40 +14,24 @@ import {
   EuiSuperSelect,
   EuiToolTip,
 } from '@elastic/eui';
-import { kebabCase } from 'lodash/fp';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 
 import type { Threat, Threats, ThreatTechnique } from '@kbn/securitysolution-io-ts-alerting-types';
+import type {
+  MitreTacticSummary,
+  MitreTechniqueSummary,
+  MitreSubtechniqueSummary,
+} from '@kbn/security-mitre-attack-common';
+import { getMitreEntityDisplayName } from '@kbn/security-mitre-attack-common';
 import * as Rulei18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackSubtechniqueFields } from './subtechnique_fields';
-import type {
-  MitreSubTechnique,
-  MitreTactic,
-  MitreTechnique,
-} from '../../../../../common/detection_engine/mitre/types';
 import { createUnsupportedMitreOption } from './unsupported_mitre_option';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-
-const lazyMitreConfiguration = () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
-  return import(
-    /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
-  );
-};
-
-const hasSubtechniqueOptions = (
-  subtechniquesOptions: MitreSubTechnique[],
-  technique: ThreatTechnique
-) => subtechniquesOptions.some((subtechnique) => subtechnique.techniqueId === technique.id);
-
+import { hasSubtechniqueOptions } from './helpers';
 const TechniqueContainer = styled.div`
   ${({ theme }) => css`
     margin-left: 24px;
@@ -62,6 +46,10 @@ interface AddTechniqueProps {
   idAria: string;
   isDisabled: boolean;
   onFieldChange: (threats: Threats) => void;
+  tactics: MitreTacticSummary[];
+  techniques: MitreTechniqueSummary[];
+  subtechniques: MitreSubtechniqueSummary[];
+  labelPrefix: string;
 }
 
 export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
@@ -70,6 +58,10 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
   isDisabled,
   threatIndex,
   onFieldChange,
+  tactics,
+  techniques,
+  subtechniques,
+  labelPrefix,
 }): JSX.Element => {
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'
@@ -77,29 +69,14 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
 
   const values = field.value as Threats;
 
-  const [tacticsOptions, setTacticsOptions] = useState<MitreTactic[]>([]);
-  const [techniquesOptions, setTechniquesOptions] = useState<MitreTechnique[]>([]);
-  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
-
-  useEffect(() => {
-    async function getMitre() {
-      const mitreConfig = await lazyMitreConfiguration();
-      setTacticsOptions(mitreConfig.tactics);
-      setTechniquesOptions(mitreConfig.techniques);
-      setSubtechniquesOptions(mitreConfig.subtechniques);
-    }
-
-    getMitre();
-  }, []);
-
   const removeTechnique = useCallback(
     (index: number) => {
       const threats = [...(field.value as Threats)];
-      const techniques = threats[threatIndex].technique ?? [];
-      techniques.splice(index, 1);
+      const techniqueList = threats[threatIndex].technique ?? [];
+      techniqueList.splice(index, 1);
       threats[threatIndex] = {
         ...threats[threatIndex],
-        technique: techniques,
+        technique: techniqueList,
       };
       onFieldChange(threats);
     },
@@ -121,7 +98,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
   const updateTechnique = useCallback(
     (index: number, optionId: string) => {
       const threats = [...(field.value as Threats)];
-      const { id, reference, name } = techniquesOptions.find((t) => t.id === optionId) ?? {
+      const { id, reference, name } = techniques.find((t) => t.id === optionId) ?? {
         id: '',
         name: '',
         reference: '',
@@ -145,24 +122,24 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
         ...threats.slice(threatIndex + 1),
       ]);
     },
-    [field.value, techniquesOptions, threatIndex, onFieldChange]
+    [field.value, techniques, threatIndex, onFieldChange]
   );
 
   const findCurrentTechniqueOption = useCallback(
     (technique: ThreatTechnique) =>
-      technique.name === 'none' || techniquesOptions.length === 0
+      technique.name === 'none' || techniques.length === 0
         ? undefined
-        : techniquesOptions.find((t) => t.id === technique.id),
-    [techniquesOptions]
+        : techniques.find((t) => t.id === technique.id),
+    [techniques]
   );
 
   const isUnsupportedTechnique = useCallback(
     (technique: ThreatTechnique) =>
       isMitreAttackUpdatesUIEnabled &&
-      techniquesOptions.length > 0 &&
+      techniques.length > 0 &&
       technique.name !== 'none' &&
       findCurrentTechniqueOption(technique) === undefined,
-    [findCurrentTechniqueOption, isMitreAttackUpdatesUIEnabled, techniquesOptions]
+    [findCurrentTechniqueOption, isMitreAttackUpdatesUIEnabled, techniques]
   );
 
   // True when the technique id still exists in the dataset but is no longer
@@ -173,8 +150,8 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
     (parentTactic: Threat['tactic'], technique: ThreatTechnique) => {
       if (
         !isMitreAttackUpdatesUIEnabled ||
-        techniquesOptions.length === 0 ||
-        tacticsOptions.length === 0 ||
+        techniques.length === 0 ||
+        tactics.length === 0 ||
         technique.name === 'none'
       ) {
         return false;
@@ -183,20 +160,36 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
       if (!option) {
         return false;
       }
-      const currentTactic = tacticsOptions.find((t) => t.id === parentTactic.id);
-      const filterTacticName = kebabCase(currentTactic?.name ?? parentTactic.name);
-      return !option.tactics.includes(filterTacticName);
+      return !option.tactic_ids.includes(parentTactic.id);
     },
-    [findCurrentTechniqueOption, isMitreAttackUpdatesUIEnabled, tacticsOptions, techniquesOptions]
+    [findCurrentTechniqueOption, isMitreAttackUpdatesUIEnabled, tactics, techniques]
   );
 
   const getTechniqueRenamedFromName = useCallback(
     (technique: ThreatTechnique) => {
-      if (!isMitreAttackUpdatesUIEnabled) return undefined;
+      if (!isMitreAttackUpdatesUIEnabled) {
+        return undefined;
+      }
       const matchedOption = findCurrentTechniqueOption(technique);
       return matchedOption && matchedOption.name !== technique.name ? technique.name : undefined;
     },
     [findCurrentTechniqueOption, isMitreAttackUpdatesUIEnabled]
+  );
+
+  const parentTacticId = values[threatIndex]?.tactic?.id ?? '';
+  // Filter techniques belonging to the parent tactic using MITRE tactic ids so renames
+  // in MITRE upgrades don't blank the list. The managed source returns entities
+  // name-ordered, so the filtered subset is already in the correct display order.
+  const baseTechniqueOptions = useMemo(
+    () =>
+      techniques
+        .filter((t) => t.tactic_ids.includes(parentTacticId))
+        .map((option) => ({
+          inputDisplay: <>{getMitreEntityDisplayName(option)}</>,
+          value: option.id,
+          disabled: isDisabled,
+        })),
+    [techniques, parentTacticId, isDisabled]
   );
 
   const getSelectTechnique = useCallback(
@@ -206,18 +199,13 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
       disabled: boolean,
       technique: ThreatTechnique
     ) => {
-      // Resolve the cascade filter against the parent tactic's CURRENT name in the
-      // dataset (matched by id), so renames in MITRE upgrades don't blank the list.
-      const currentTactic = tacticsOptions.find((t) => t.id === parentTactic.id);
-      const filterTacticName = kebabCase(currentTactic?.name ?? parentTactic.name);
-      const options = techniquesOptions.filter((t) => t.tactics.includes(filterTacticName));
       const isUnsupported = isUnsupportedTechnique(technique);
       const isReassigned = isTechniqueReassignedFromTactic(parentTactic, technique);
       const reassignedOption = isReassigned ? findCurrentTechniqueOption(technique) : undefined;
       return (
         <>
           <EuiSuperSelect
-            id="mitreAttackTechnique"
+            id={`mitreAttackTechnique-${threatIndex}-${index}`}
             options={[
               ...(technique.name === 'none'
                 ? [
@@ -241,13 +229,9 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
                     }),
                   ]
                 : []),
-              ...options.map((option) => ({
-                inputDisplay: <>{option.label}</>,
-                value: option.id,
-                disabled,
-              })),
+              ...baseTechniqueOptions,
             ]}
-            prepend={`${field.label} ${i18n.TECHNIQUE}`}
+            prepend={`${labelPrefix} ${i18n.TECHNIQUE}`}
             aria-label=""
             onChange={updateTechnique.bind(null, index)}
             fullWidth={true}
@@ -261,22 +245,22 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
       );
     },
     [
-      field.label,
+      labelPrefix,
       findCurrentTechniqueOption,
       isTechniqueReassignedFromTactic,
       isUnsupportedTechnique,
-      tacticsOptions,
-      techniquesOptions,
+      baseTechniqueOptions,
       updateTechnique,
+      threatIndex,
     ]
   );
 
   const threatEntry = values[threatIndex];
-  const techniques = threatEntry?.technique ?? [];
+  const techniqueList = threatEntry?.technique ?? [];
 
   return (
     <TechniqueContainer>
-      {techniques.map((technique, index) => {
+      {techniqueList.map((technique, index) => {
         const techniqueUnsupported = isUnsupportedTechnique(technique);
         const techniqueReassigned = isTechniqueReassignedFromTactic(
           values[threatIndex].tactic,
@@ -284,9 +268,9 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
         );
         const techniqueRenamedFrom = getTechniqueRenamedFromName(technique);
         const techniqueErrorMessage = techniqueUnsupported
-          ? i18n.UNSUPPORTED_MITRE_ID_ERROR(technique.id)
+          ? i18n.UNSUPPORTED_MITRE_ID_ERROR(technique.id, labelPrefix)
           : techniqueReassigned
-          ? i18n.TECHNIQUE_REASSIGNED_FROM_TACTIC_ERROR(technique.id)
+          ? i18n.TECHNIQUE_REASSIGNED_FROM_TACTIC_ERROR(technique.id, labelPrefix)
           : undefined;
         return (
           <div key={index}>
@@ -297,7 +281,9 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
               isInvalid={techniqueUnsupported || techniqueReassigned}
               error={techniqueErrorMessage}
               helpText={
-                techniqueRenamedFrom ? i18n.RENAMED_FROM_HINT(techniqueRenamedFrom) : undefined
+                techniqueRenamedFrom
+                  ? i18n.RENAMED_FROM_HINT(techniqueRenamedFrom, labelPrefix)
+                  : undefined
               }
             >
               <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -324,11 +310,13 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
               isDisabled={
                 isDisabled ||
                 technique.name === 'none' ||
-                hasSubtechniqueOptions(subtechniquesOptions, technique) === false
+                hasSubtechniqueOptions(technique, subtechniques) === false
               }
               threatIndex={threatIndex}
               techniqueIndex={index}
               onFieldChange={onFieldChange}
+              subtechniques={subtechniques}
+              labelPrefix={labelPrefix}
             />
           </div>
         );

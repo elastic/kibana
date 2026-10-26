@@ -8,7 +8,6 @@
 import type { CoreSetup, IUiSettingsClient, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { LockManagerService } from '@kbn/lock-manager';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
-import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
 import type { StreamsPluginStartDependencies } from '../../types';
 import { createStreamsStorageClient } from './storage/streams_storage_client';
 import { StreamsClient } from './client';
@@ -23,14 +22,12 @@ export class StreamsService {
 
   async getClient({
     attachmentClient,
-    getKnowledgeIndicatorClient,
     esClient,
     esClientAsInternalUser,
     uiSettingsClient,
     isSecurityEnabled,
   }: {
     attachmentClient: AttachmentClient;
-    getKnowledgeIndicatorClient?: () => Promise<KnowledgeIndicatorClientContract>;
     esClient: ElasticsearchClient;
     esClientAsInternalUser: ElasticsearchClient;
     uiSettingsClient: IUiSettingsClient;
@@ -47,7 +44,6 @@ export class StreamsService {
 
     return new StreamsClient({
       attachmentClient,
-      getKnowledgeIndicatorClient,
       logger,
       esClient,
       esClientAsInternalUser,

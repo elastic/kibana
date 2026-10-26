@@ -8,7 +8,7 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
       id="generated-id-wrapper"
     >
       <a
-        class="euiLink emotion-euiLink-primary"
+        class="euiLink emotion-euiLink-text"
         data-test-subj="monitor-page-link-bad-ssl-dashboard"
         href="/monitor/YmFkLXNzbC1kYXNoYm9hcmQ="
         rel="noreferrer"
@@ -24,7 +24,7 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
       id="generated-id-wrapper"
     >
       <a
-        class="euiLink emotion-euiLink-primary"
+        class="euiLink emotion-euiLink-text"
         data-test-subj="monitor-page-link-elastic-co"
         href="/monitor/ZWxhc3RpYy1jbw=="
         rel="noreferrer"
@@ -40,7 +40,7 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
       id="generated-id-wrapper"
     >
       <a
-        class="euiLink emotion-euiLink-primary"
+        class="euiLink emotion-euiLink-text"
         data-test-subj="monitor-page-link-extended-validation"
         href="/monitor/ZXh0ZW5kZWQtdmFsaWRhdGlvbg=="
         rel="noreferrer"

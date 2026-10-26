@@ -105,7 +105,7 @@ describe('TutorialsRegistry', () => {
       testProvider = ({}) => invalidTutorialProvider;
 
       // Registration itself must not throw — validation is deferred.
-      expect(() => setup.registerTutorial(testProvider)).not.toThrowError();
+      expect(() => setup.registerTutorial(testProvider)).not.toThrow();
 
       // The deferred initializer (captured by the mock) should throw when called.
       const [deferredInit] =
@@ -121,7 +121,7 @@ describe('TutorialsRegistry', () => {
         mockCustomIntegrationsPluginSetup
       );
       testProvider = ({}) => validTutorialProvider;
-      expect(() => setup.registerTutorial(testProvider)).not.toThrowError();
+      expect(() => setup.registerTutorial(testProvider)).not.toThrow();
 
       // Nothing registered yet — deferred path not yet triggered.
       expect(mockCustomIntegrationsPluginSetup.registerCustomIntegration).not.toHaveBeenCalled();
@@ -173,7 +173,7 @@ describe('TutorialsRegistry', () => {
       testScopedTutorialContextFactory = ({}) => 'string';
       expect(() =>
         setup.addScopedTutorialContextFactory(testScopedTutorialContextFactory)
-      ).not.toThrowError();
+      ).not.toThrow();
     });
   });
 

@@ -79,7 +79,7 @@ export const ChangeHistoryItemComment = memo(function ChangeHistoryItemComment({
       {isExpandable && (
         <EuiFlexItem grow={false}>
           <EuiIcon
-            type={expanded ? 'arrowDown' : 'arrowRight'}
+            type={expanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             size="s"
             color="subdued"
             aria-hidden={true}

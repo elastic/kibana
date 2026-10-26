@@ -13,7 +13,7 @@ import { config as pathConfigDef } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import { coreConfigPaths, CriticalError } from '@kbn/core-base-server-internal';
+import { coreConfigPaths } from '@kbn/core-base-server-internal';
 import type { AnalyticsServicePreboot } from '@kbn/core-analytics-server';
 import type { HttpConfigType } from './types';
 import type { PidConfigType } from './pid_config';
@@ -71,14 +71,6 @@ export class EnvironmentService {
     process.on('unhandledRejection', (reason) => {
       const message = (reason as Error)?.stack ?? JSON.stringify(reason);
       this.log.warn(`Detected an unhandled Promise rejection: ${message}`);
-    });
-    // Log uncaughtExceptions in our logger before crashing the process: https://github.com/elastic/kibana/issues/183182
-    process.on('uncaughtExceptionMonitor', (error, origin) => {
-      // CriticalErrors are handled in a different path
-      if (!(error instanceof CriticalError)) {
-        const message = error?.stack ?? JSON.stringify(error);
-        this.log.warn(`Detected an ${origin}: ${message}`);
-      }
     });
 
     await createDataFolder({ pathConfig, logger: this.log });

@@ -8,13 +8,44 @@ import expect from '@kbn/expect';
 import pRetry from 'p-retry';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { defaultOriginalRule, ruleMigrationRouteHelpersFactory } from '../../../utils';
+import { createConnector, deleteConnector } from '../../../../detections_response/utils/connectors';
+
+/**
+ * This connector is created at runtime rather than relying on a preconfigured
+ * fixture, because MKI projects do not accept `--xpack.actions.preconfigured`
+ * as a Kibana server arg (it is an FTR-only mechanism). The apiUrl is
+ * deliberately unreachable so every inference call fails at the network layer:
+ * these tests only need a migration to reach `running` status, they must
+ * never make a real (billable) LLM call.
+ */
+const MOCK_BEDROCK_CONNECTOR = {
+  name: 'siem-migrations-mock-bedrock',
+  connector_type_id: '.bedrock',
+  config: {
+    apiUrl: 'https://mock-bedrock.invalid.example.com',
+  },
+  secrets: {
+    accessKey: 'mock-access-key',
+    secret: 'mock-secret-key',
+  },
+};
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
-  describe('@skipInServerlessMKI Stop Migration', () => {
+  describe('@ess @serverless @serverlessQA Stop Migration', () => {
     let migrationId: string;
+    let connectorId: string;
+
+    before(async () => {
+      connectorId = await createConnector(supertest, MOCK_BEDROCK_CONNECTOR);
+    });
+
+    after(async () => {
+      await deleteConnector(supertest, connectorId).expect(204);
+    });
+
     beforeEach(async () => {
       const createMigrationRespose = await migrationRulesRoutes.create({});
       migrationId = createMigrationRespose.body.migration_id;
@@ -33,7 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
         migrationId,
         payload: {
           settings: {
-            connector_id: 'preconfigured-bedrock',
+            connector_id: connectorId,
           },
         },
       });
@@ -71,7 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
         await migrationRulesRoutes.start({
           migrationId: 'invalid_migration_id',
           expectStatusCode: 404,
-          payload: { settings: { connector_id: 'preconfigured-bedrock' } },
+          payload: { settings: { connector_id: connectorId } },
         });
       });
 

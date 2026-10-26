@@ -60,7 +60,7 @@ export const EntityCardActions: React.FC<EntityCardActionsProps> = ({ identifier
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"
-            iconType="popout"
+            iconType="external"
             onClick={handleOpenEntityAnalytics}
             data-test-subj="entityAttachmentOpenEntityAnalyticsAction"
             aria-label={label}

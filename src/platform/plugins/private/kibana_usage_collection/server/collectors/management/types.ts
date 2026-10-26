@@ -33,6 +33,7 @@ export interface UsageStats {
   'search:timeout': number;
   'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
+  'discover:enableSolutionProfilesInClassic': boolean;
   'discover:showFieldStatistics': boolean;
   'discover:showMultiFields': boolean;
   enableESQL: boolean;
@@ -53,22 +54,29 @@ export interface UsageStats {
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'ai:anonymizationSettings': string;
+  'alerting:v2:experimentalFeatures': boolean;
   'agentBuilder:navEnabled': boolean;
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:bashSupport': boolean;
+  'agentBuilder:apiDiscovery': boolean;
+  'agentBuilder:includeFrozenByDefault': boolean;
+  'agentBuilder:deductiveEnabled': boolean;
+  'agentBuilder:deductiveEndpoint': string;
+  'agentBuilder:deductiveApiKey': string;
   'contextEngine:enabled': boolean;
-  'agentBuilder:uiamOAuthClientManagement': boolean;
   'agentBuilder:tracing:enabled': boolean;
   'agentBuilder:tracing:includeLlmResponses': boolean;
   'agentBuilder:tracing:includeRealIds': boolean;
   'agentBuilder:tracing:includeRealNames': boolean;
   'agentBuilder:tracing:includeSystemPrompt': boolean;
   'agentBuilder:tracing:includeToolDetails': boolean;
+  'agentBuilder:tracing:includeUserData': boolean;
   'agentBuilder:tracing:includeUserPrompts': boolean;
   'workflows:experimentalFeatures': boolean;
   'workflows:ui:enabled': boolean;
   'workflows:ui:showManagedWorkflows': boolean;
+  'workflows:executionFlyout:aiDiagnose:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;
@@ -94,7 +102,6 @@ export interface UsageStats {
   'securitySolution:defaultValueReportMinutes': string;
   'securitySolution:defaultValueReportRate': string;
   'securitySolution:defaultValueReportTitle': string;
-  'securitySolution:enableAlertsAndAttacksAlignment': boolean;
   'securitySolution:enableAttackDiscoveryWorkflows': boolean;
   'securitySolution:enableRuleChangesHistory': boolean;
   'search:includeFrozen': boolean;
@@ -113,6 +120,7 @@ export interface UsageStats {
   'data_views:cache_max_age': number;
   'discover:sampleSize': number;
   'discover:sampleRowsPerPage': number;
+  'discover:defaultEsqlQuery': string;
   defaultColumns: string[];
   'context:defaultSize': number;
   'context:tieBreakerFields': string[];
@@ -164,11 +172,6 @@ export interface UsageStats {
   'banners:textColor': string;
   'banners:linkColor': string;
   'banners:backgroundColor': string;
-  'labs:canvas:enable_ui': boolean;
-  'labs:canvas:byValueEmbeddable': boolean;
-  'labs:canvas:useDataService': boolean;
-  'labs:presentation:timeToPresent': boolean;
-  'labs:dashboard:enable_ui': boolean;
   'labs:dashboard:deferBelowFold': boolean;
   'discover:rowHeightOption': number;
   hideAnnouncements: boolean;
@@ -177,6 +180,7 @@ export interface UsageStats {
   'observability:enableLegacyUptimeApp': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
+  'observability:apmMaxNumberOfServices': number;
   'observability:profilingShowErrorFrames': boolean;
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
@@ -200,6 +204,7 @@ export interface UsageStats {
   'cases:incrementalIdDisplay:enabled': boolean;
   'cases:maxOpenCasesPerRuleRun': number;
   'observability:enableDiagnosticMode': boolean;
+  'observability:nightshiftDeveloperMode': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'agentBuilder:prePromptWorkflowIds': string[];
@@ -208,7 +213,8 @@ export interface UsageStats {
   'observability:streamsEnableWiredStreamViews': boolean;
   'observability:streamsEnableDraftStreams': boolean;
   'observability:streamsEnableCanvas': boolean;
-  'observability:streamsSigEventsIndexPatterns': string;
+  'observability:nightshiftContinuousOnboardingEnabled': boolean;
+  'observability:nightshiftContinuousOnboardingIntervalHours': number;
   'observability:streamsSigEventsScheduledDiscoveryEnabled': boolean;
   'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes': number;
   'observability:streamsSigEventsScheduledDiscoveryDetectionBucketIntervalMinutes': number;
@@ -218,6 +224,9 @@ export interface UsageStats {
   'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize': number;
   'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize': number;
   'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses': number;
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleDetectionThreshold': number;
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleProbeAfterMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleExemptSeverityScore': number;
   'securitySolution:entityStoreEnableV2': boolean;
   'securitySolution:alertAnalysisWorkflowEnabled': boolean;
   'securitySolution:alertAnalysisWorkflowAutoCloseEnabled': boolean;
@@ -226,9 +235,13 @@ export interface UsageStats {
   'securitySolution:alertAnalysisWorkflowConnectorId': string;
   'securitySolution:alertAnalysisWorkflowAgentId': string;
   'securitySolution:alertAnalysisWorkflowCreateConversation': boolean;
+  'securitySolution:alertAnalysisWorkflowUsePrompt': boolean;
   'securitySolution:alertAnalysisWorkflowTagPrefix': string;
   'cloudSecurityPosture:graphRuntimeEvaluationsEnabled': boolean;
+  'cloudSecurityPosture:graphShowUnknownTargetEnabled': boolean;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;
+  'genAiSettings:inferenceStreaming': boolean;
+  'alerting:v1:showV1ObservabilityAlertsTable': boolean;
 }

@@ -16,6 +16,8 @@ import { getFlattenedObject } from '@kbn/std';
 import { difference } from 'lodash';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { isCustomProjectRouting } from '@kbn/cps-common';
+import { PROJECT_ROUTING, projectRoutingCodec } from '@kbn/cps-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 import {
@@ -41,6 +43,55 @@ import {
   isLatestPartialRequest,
   isPivotPartialRequest,
 } from '../sections/create_transform/components/step_define/common/types';
+
+const SOURCE_INDICES_UNAVAILABLE_ERROR = 'Source indices have been deleted or closed.';
+
+export const sourceIndexUnavailableMessage = i18n.translate(
+  'xpack.transform.preview.sourceIndexUnavailableMessage',
+  {
+    defaultMessage:
+      'No source indices match the selected data view in the selected project scope. Select another project scope or choose a data view that exists in this scope.',
+  }
+);
+
+export const isSourceIndexUnavailableError = (error: unknown): boolean =>
+  getErrorMessage(error).includes(SOURCE_INDICES_UNAVAILABLE_ERROR);
+
+export const isProjectScopedSourceIndexUnavailableError = (
+  error: unknown,
+  projectRouting?: StepDefineExposedState['projectRouting']
+): boolean => isCustomProjectRouting(projectRouting) && isSourceIndexUnavailableError(error);
+
+const isOriginOnlyProjectRouting = (
+  projectRouting?: StepDefineExposedState['projectRouting'],
+  originProjectId?: string
+): boolean => {
+  if (projectRouting === PROJECT_ROUTING.ORIGIN) {
+    return true;
+  }
+
+  if (!projectRouting || !originProjectId) {
+    return false;
+  }
+
+  const { excludedProjectIds, filterExpressions, selectedProjectIds } =
+    projectRoutingCodec.decode(projectRouting);
+
+  return (
+    filterExpressions.length === 0 &&
+    excludedProjectIds.length === 0 &&
+    selectedProjectIds.length === 1 &&
+    selectedProjectIds[0] === originProjectId
+  );
+};
+
+export const isLinkedProjectScopedSourceIndexUnavailableError = (
+  error: unknown,
+  projectRouting?: StepDefineExposedState['projectRouting'],
+  originProjectId?: string
+): boolean =>
+  isProjectScopedSourceIndexUnavailableError(error, projectRouting) &&
+  !isOriginOnlyProjectRouting(projectRouting, originProjectId);
 
 function sortColumns(groupByArr: string[]) {
   return (a: string, b: string) => {
@@ -172,7 +223,13 @@ export const useTransformConfigData = (
       setNoDataMessage('');
       setStatus(INDEX_STATUS.LOADING);
     } else if (isError) {
-      setErrorMessage(getErrorMessage(previewError));
+      if (isProjectScopedSourceIndexUnavailableError(previewError, projectRouting)) {
+        setErrorMessage('');
+        setNoDataMessage(sourceIndexUnavailableMessage);
+      } else {
+        setErrorMessage(getErrorMessage(previewError));
+        setNoDataMessage('');
+      }
       setTableItems([]);
       setRowCountInfo({
         rowCount: 0,
@@ -246,7 +303,7 @@ export const useTransformConfigData = (
     resetPagination();
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(query)]);
+  }, [JSON.stringify([query, projectRouting])]);
 
   if (sortingColumns.length > 0) {
     const sortingColumnsWithTypes = sortingColumns.map((c) => {

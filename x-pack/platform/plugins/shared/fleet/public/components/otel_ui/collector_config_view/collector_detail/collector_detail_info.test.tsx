@@ -77,6 +77,34 @@ describe('CollectorDetailInfo', () => {
     expect(panel.textContent).toContain('2');
   });
 
+  it('falls back to hostname when elastic.display.name is absent', () => {
+    const agent = makeAgent({
+      non_identifying_attributes: {
+        'host.arch': 'x86_64',
+        'os.type': 'windows',
+      },
+    });
+    const result = testRenderer.render(<CollectorDetailInfo agent={agent} />);
+    const terms = result.getAllByRole('term');
+    const definitions = result.getAllByRole('definition');
+    const nameIndex = terms.findIndex((t) => t.textContent === 'Name');
+    expect(definitions[nameIndex].textContent).toBe('collector-prod-west-1');
+  });
+
+  it('falls back to agent id when both elastic.display.name and hostname are absent', () => {
+    const agent = makeAgent({
+      local_metadata: { host: {} },
+      non_identifying_attributes: {
+        'host.arch': 'x86_64',
+      },
+    });
+    const result = testRenderer.render(<CollectorDetailInfo agent={agent} />);
+    const terms = result.getAllByRole('term');
+    const definitions = result.getAllByRole('definition');
+    const nameIndex = terms.findIndex((t) => t.textContent === 'Name');
+    expect(definitions[nameIndex].textContent).toBe('opamp-collector-001');
+  });
+
   it('renders dashes for missing optional fields', () => {
     const result = testRenderer.render(
       <CollectorDetailInfo

@@ -199,22 +199,31 @@ const SuggestionPreview = ({
   const { euiTheme } = euiThemeContext;
   const xsFontSize = useEuiFontSize('xs');
   return (
-    <EuiToolTip
-      content={preview.title}
-      anchorProps={
+    <div
+      data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}
+      css={
         wrapSuggestions
-          ? {
-              css: css`
-                display: flex;
-                flex-direction: column;
-                flex-basis: calc(50% - 9px);
-              `,
-            }
+          ? css`
+              flex-basis: calc(50% - 9px);
+            `
           : undefined
       }
     >
-      {/* eslint-disable-next-line @elastic/eui/tooltip-focusable-anchor */}
-      <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
+      <EuiToolTip
+        content={preview.title}
+        // anchor element is button with aria label, tooltip announcement would be redundant
+        disableScreenReaderOutput
+        anchorProps={
+          wrapSuggestions
+            ? {
+                css: css`
+                  display: flex;
+                  flex-direction: column;
+                `,
+              }
+            : undefined
+        }
+      >
         <EuiPanel
           hasBorder={true}
           hasShadow={false}
@@ -226,6 +235,7 @@ const SuggestionPreview = ({
             margin-left: ${euiTheme.size.xxs};
             margin-bottom: ${euiTheme.size.xxs};
             padding: 0 ${euiTheme.size.s};
+            padding-bottom: ${euiTheme.size.s};
             box-shadow: none !important; // sass-lint:disable-line no-important
 
             &:focus {
@@ -296,8 +306,8 @@ const SuggestionPreview = ({
             </span>
           )}
         </EuiPanel>
-      </div>
-    </EuiToolTip>
+      </EuiToolTip>
+    </div>
   );
 };
 
@@ -669,13 +679,18 @@ export function SuggestionPanel({
           overflow-y: hidden;
           display: flex;
           padding-top: ${euiTheme.size.xs};
-          mask-image: linear-gradient(
-            to right,
-            ${dangerAlpha10} 0%,
-            ${euiTheme.colors.danger} 5px,
-            ${euiTheme.colors.danger} calc(100% - 5px),
-            ${dangerAlpha10} 100%
-          );
+          padding-bottom: ${wrapSuggestions ? euiTheme.size.base : 0};
+          ${!wrapSuggestions
+            ? `
+                mask-image: linear-gradient(
+                  to right,
+                  ${dangerAlpha10} 0%,
+                  ${euiTheme.colors.danger} 5px,
+                  ${euiTheme.colors.danger} calc(100% - 5px),
+                  ${dangerAlpha10} 100%
+                );
+              `
+            : ''}
         `}
       >
         {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}
@@ -726,6 +741,7 @@ function getPreviewExpression(
             layerId,
             state: datasourceState,
             indexPatterns: frame.dataViews.indexPatterns,
+            activeDataTable: frame.activeData?.[layerId],
           });
         }
         suggestionFrameApi.datasourceLayers[layerId] = updatedLayerApis[layerId];

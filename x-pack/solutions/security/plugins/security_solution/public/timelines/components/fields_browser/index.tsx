@@ -7,7 +7,6 @@
 
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux-v7';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   CreateFieldComponent,
@@ -17,8 +16,6 @@ import type { PageScope } from '../../../data_view_manager/constants';
 import type { ColumnHeaderOptions } from '../../../../common/types';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useKibana } from '../../../common/lib/kibana';
-import type { State } from '../../../common/store';
-import { sourcererSelectors } from '../../../common/store';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { useCreateFieldButton } from './create_field_button';
@@ -61,16 +58,13 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
     dataViewFieldEditor,
     data: { dataViews },
   } = useKibana().services;
-  const missingPatterns = useSelector((state: State) => {
-    return sourcererSelectors.sourcererScopeMissingPatterns(state, sourcererScope);
-  });
 
   const selectedDataViewId = useMemo(() => dataView?.id, [dataView?.id]);
   useEffect(() => {
-    if (dataView && selectedDataViewId != null && !missingPatterns.length) {
+    if (dataView && selectedDataViewId != null) {
       setDv(dataView);
     }
-  }, [selectedDataViewId, missingPatterns, dataViews, dataView]);
+  }, [selectedDataViewId, dataViews, dataView]);
 
   const openFieldEditor = useCallback<OpenFieldEditor>(
     async (fieldName) => {

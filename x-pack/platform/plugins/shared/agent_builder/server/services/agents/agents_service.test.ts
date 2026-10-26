@@ -15,8 +15,14 @@ import {
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { isAllowedBuiltinAgent, isAllowedAgentType } from '@kbn/agent-builder-server/allow_lists';
-import { chatAgentTypeId } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAiIndexId,
+  chatAgentTypeId,
+  SYSTEM_USER_ID,
+} from '@kbn/agent-builder-common';
+import type { AgentConfiguration, AgentDefinition } from '@kbn/agent-builder-common';
 import { AgentsService } from './agents_service';
+import { defaultAiIndices } from './default_ai_indices';
 import type { AgentsServiceStart } from './types';
 import type { AgentsServiceStartDeps } from './agents_service';
 import { createMockedAgent, createToolsServiceStartMock } from '../../test_utils';
@@ -155,7 +161,7 @@ describe('AgentsService', () => {
 
     beforeEach(() => {
       isAllowedBuiltinAgentMock.mockReturnValue(true);
-      service.setup({ logger });
+      service.setup({ logger }).registerType({ id: 'test-agent-type', baseConfiguration: {} });
       ensureAgent.mockReset();
       createClientMock.mockResolvedValue({
         getAgentsUsingTools: (params: { toolIds: string[] }) =>
@@ -194,6 +200,32 @@ describe('AgentsService', () => {
       request = httpServerMock.createKibanaRequest();
     });
 
+    describe('#resolveAgentConfiguration', () => {
+      const resolve = (configuration: AgentConfiguration) =>
+        started.resolveAgentConfiguration({
+          agent: { type: chatAgentTypeId, configuration } as AgentDefinition,
+          request,
+        });
+
+      it('grants the default AI index to chat agents that have none', async () => {
+        const resolved = await resolve({ tools: [], ai_indices: [] });
+
+        expect(resolved.ai_indices).toEqual([agentBuilderDefaultAiIndexId]);
+      });
+
+      it("unions the default AI index with the agent's own", async () => {
+        const resolved = await resolve({ tools: [], ai_indices: ['custom-index'] });
+
+        expect(resolved.ai_indices).toEqual([agentBuilderDefaultAiIndexId, 'custom-index']);
+      });
+
+      it('derives the chat type defaults from the default AI indices map', async () => {
+        const resolved = await resolve({ tools: [], ai_indices: [] });
+
+        expect(resolved.ai_indices).toEqual(Object.keys(defaultAiIndices));
+      });
+    });
+
     describe('#ensure', () => {
       const agent = {
         id: 'system-agent',
@@ -216,6 +248,85 @@ describe('AgentsService', () => {
         await expect(
           started.ensure({ spaceId: 'space-1', agent: { ...agent, type: 'unknown' } })
         ).rejects.toThrow('unknown agent type "unknown"');
+      });
+
+      it('keeps availability out of the persisted agent document', async () => {
+        await started.ensure({
+          spaceId: 'space-1',
+          agent,
+          availability: {
+            cacheMode: 'space',
+            handler: async () => ({ status: 'unavailable' }),
+          },
+        });
+
+        expect(ensureAgent).toHaveBeenCalledTimes(1);
+        expect(ensureAgent).toHaveBeenCalledWith(agent);
+      });
+
+      it('applies ensure-registered availability when reading the agent', async () => {
+        await started.ensure({
+          spaceId: 'default',
+          agent,
+          availability: {
+            cacheMode: 'none',
+            handler: async () => ({ status: 'unavailable', reason: 'off' }),
+          },
+        });
+
+        createClientMock.mockResolvedValue({
+          has: jest.fn().mockResolvedValue(true),
+          getWithAccess: jest.fn().mockResolvedValue({
+            ...agent,
+            access_control: undefined,
+            created_by: undefined,
+            permissions: {
+              update_agent: true,
+              update_access_control: true,
+              update_approvals: true,
+            },
+          }),
+        } as any);
+
+        const registry = await started.getRegistry({ request });
+        await expect(registry.get(agent.id)).rejects.toThrow(`Agent ${agent.id} is not available`);
+      });
+
+      describe('hidden', () => {
+        const typedAgent = { ...agent, id: 'typed-system-agent', type: 'test-agent-type' };
+        const persistedTypedAgent = {
+          ...typedAgent,
+          access_control: undefined,
+          created_by: { id: undefined, username: SYSTEM_USER_ID },
+          permissions: { update_agent: true, update_access_control: true, update_approvals: true },
+        };
+
+        const getAgent = async () => {
+          createClientMock.mockResolvedValue({
+            has: jest.fn().mockResolvedValue(true),
+            getWithAccess: jest.fn().mockResolvedValue(persistedTypedAgent),
+          } as any);
+          const registry = await started.getRegistry({ request });
+          return registry.get(typedAgent.id);
+        };
+
+        it('keeps hidden out of the persisted agent document', async () => {
+          await started.ensure({ spaceId: 'space-1', agent: typedAgent, hidden: false });
+
+          expect(ensureAgent).toHaveBeenCalledWith(typedAgent);
+        });
+
+        it('hides a system-created non-chat agent by default', async () => {
+          await started.ensure({ spaceId: 'default', agent: typedAgent });
+
+          expect((await getAgent()).hidden).toBe(true);
+        });
+
+        it('applies an ensure-registered hidden:false when reading the agent', async () => {
+          await started.ensure({ spaceId: 'default', agent: typedAgent, hidden: false });
+
+          expect((await getAgent()).hidden).toBe(false);
+        });
       });
     });
 

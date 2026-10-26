@@ -106,9 +106,30 @@ describe('formatCustomThresholdAlert', () => {
 
     expect(getViewInAppUrl).toHaveBeenCalledWith(
       expect.objectContaining({
-        metrics: [],
+        metrics: [...baseCriterion.metrics, ...baseCriterion.metrics],
         timeSize: undefined,
         timeUnit: undefined,
+      })
+    );
+  });
+
+  it('passes groups from the legacy group field/value arrays', () => {
+    const fields = {
+      [ALERT_RULE_PARAMETERS]: {
+        criteria: [baseCriterion],
+        searchConfiguration: { index: 'test-index', query: { query: '', language: 'kuery' } },
+      },
+      'kibana.alert.group.field': ['host.name'],
+      'kibana.alert.group.value': ['host-0'],
+      [ALERT_REASON]: 'test reason',
+      [ALERT_START]: '2023-12-07T16:30:15.403Z',
+    };
+
+    formatCustomThresholdAlert(fields);
+
+    expect(getViewInAppUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        groups: [{ field: 'host.name', value: 'host-0' }],
       })
     );
   });

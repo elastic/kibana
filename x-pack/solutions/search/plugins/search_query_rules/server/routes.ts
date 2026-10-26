@@ -23,6 +23,16 @@ import { putRuleset } from './lib/put_query_rules_ruleset_set';
 import { errorHandler } from './utils/error_handler';
 import { checkPrivileges } from './utils/privilege_check';
 
+const RESOURCE_ID_REGEX = /^[a-zA-Z0-9_-]+$/;
+
+const resourceIdSchema = schema.string({
+  maxLength: 512,
+  validate: (value) =>
+    RESOURCE_ID_REGEX.test(value)
+      ? undefined
+      : 'must only contain letters, numbers, hyphens (-), and underscores (_)',
+});
+
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
   router.get(
     {
@@ -74,7 +84,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          ruleset_id: schema.string(),
+          ruleset_id: resourceIdSchema,
         }),
       },
     },
@@ -88,7 +98,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
 
       if (!rulesetData) {
         return response.notFound({
-          body: i18n.translate('xpack.search.rules.api.routes.rulesetNotFoundErrorMessage', {
+          body: i18n.translate('xpack.queryRules.rules.api.routes.rulesetNotFoundErrorMessage', {
             defaultMessage: 'Ruleset not found',
           }),
         });
@@ -114,7 +124,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          ruleset_id: schema.string(),
+          ruleset_id: resourceIdSchema,
         }),
         query: schema.object({
           forceWrite: schema.boolean({ defaultValue: false }),
@@ -129,12 +139,16 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
                   schema.object({
                     type: schema.string({ maxLength: 512 }),
                     metadata: schema.maybe(schema.string({ maxLength: 4096 })),
-                    values: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+                    values: schema.maybe(
+                      schema.arrayOf(schema.string({ maxLength: 4096 }), { maxSize: 100 })
+                    ),
                   }),
                   { maxSize: 100 }
                 ),
                 actions: schema.object({
-                  ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
+                  ids: schema.maybe(
+                    schema.arrayOf(schema.string({ maxLength: 512 }), { maxSize: 10000 })
+                  ),
                   docs: schema.maybe(
                     schema.arrayOf(
                       schema.object({
@@ -166,10 +180,13 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       if (isExisting && !forceWrite) {
         return response.customError({
           statusCode: 409,
-          body: i18n.translate('xpack.search.rules.api.routes.rulesetAlreadyExistsErrorMessage', {
-            defaultMessage: `Ruleset {rulesetId} already exists. Use forceWrite=true to overwrite it.`,
-            values: { rulesetId },
-          }),
+          body: i18n.translate(
+            'xpack.queryRules.rules.api.routes.rulesetAlreadyExistsErrorMessage',
+            {
+              defaultMessage: `Ruleset {rulesetId} already exists. Use forceWrite=true to overwrite it.`,
+              values: { rulesetId },
+            }
+          ),
         });
       }
       const result = await putRuleset(asCurrentUser, rulesetId, rules);
@@ -194,7 +211,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          rulesetId: schema.string(),
+          rulesetId: resourceIdSchema,
         }),
       },
     },
@@ -231,7 +248,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          ruleset_id: schema.string(),
+          ruleset_id: resourceIdSchema,
         }),
       },
     },
@@ -266,8 +283,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          ruleset_id: schema.string(),
-          rule_id: schema.string(),
+          ruleset_id: resourceIdSchema,
+          rule_id: resourceIdSchema,
         }),
       },
     },
@@ -303,8 +320,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          ruleset_id: schema.string(),
-          rule_id: schema.string(),
+          ruleset_id: resourceIdSchema,
+          rule_id: resourceIdSchema,
         }),
       },
     },
@@ -339,7 +356,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         query: schema.object({
-          searchQuery: schema.maybe(schema.string()),
+          searchQuery: schema.maybe(schema.string({ maxLength: 1000 })),
         }),
       },
     },
@@ -373,8 +390,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
-          documentId: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
+          documentId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -426,7 +443,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          rulesetId: schema.string(),
+          rulesetId: resourceIdSchema,
         }),
       },
     },
@@ -460,7 +477,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       }
       return response.customError({
         statusCode: 409,
-        body: i18n.translate('xpack.search.rules.api.routes.generateRuleIdErrorMessage', {
+        body: i18n.translate('xpack.queryRules.rules.api.routes.generateRuleIdErrorMessage', {
           defaultMessage: 'Failed to generate a unique rule ID after 100 attempts.',
         }),
       });

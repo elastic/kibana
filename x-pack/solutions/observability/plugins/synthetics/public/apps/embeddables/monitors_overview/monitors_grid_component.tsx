@@ -28,25 +28,39 @@ import { MaybeMonitorDetailsFlyout } from '../../synthetics/components/monitors_
 import { useOverviewStatus } from '../../synthetics/components/monitors_page/hooks/use_overview_status';
 import { OverviewLoader } from '../../synthetics/components/monitors_page/overview/overview/overview_loader';
 import type { MonitorFilters } from '../../../../common/types';
+import type { RequestCancellationManager } from '../../synthetics/state/request_cancellation_manager';
 
 export const StatusGridComponent = ({
   reload$,
   filters,
   view,
+  isInteractive = true,
+  requestCancellationManager,
 }: {
   reload$: Subject<boolean>;
   filters: MonitorFilters;
   view: OverviewView;
+  isInteractive?: boolean;
+  requestCancellationManager: RequestCancellationManager;
 }) => {
-  const overviewStore = useRef(getOverviewStore());
+  const overviewStore = useRef(getOverviewStore(requestCancellationManager));
 
   const hasFilters = !areFiltersEmpty(filters);
   const singleMonitor =
     filters && filters.locations?.length === 1 && filters.monitor_ids?.length === 1;
 
   const monitorOverviewListComponent = (
-    <SyntheticsEmbeddableContext reload$={reload$} reduxStore={overviewStore.current}>
-      <MonitorsOverviewList filters={filters} singleMonitor={singleMonitor} view={view} />
+    <SyntheticsEmbeddableContext
+      reload$={reload$}
+      reduxStore={overviewStore.current}
+      onAutoRefresh={() => requestCancellationManager.resumeAfterCancellation()}
+    >
+      <MonitorsOverviewList
+        filters={filters}
+        singleMonitor={singleMonitor}
+        view={view}
+        isInteractive={isInteractive}
+      />
     </SyntheticsEmbeddableContext>
   );
 
@@ -61,7 +75,7 @@ export const StatusGridComponent = ({
   );
 };
 
-const SingleMonitorView = () => {
+const SingleMonitorView = ({ isInteractive = true }: { isInteractive?: boolean }) => {
   const trendData = useSelector(selectOverviewTrends);
   const dispatch = useDispatch();
 
@@ -112,7 +126,12 @@ const SingleMonitorView = () => {
 
   return (
     <>
-      <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} style={style} />
+      <MetricItem
+        monitor={monitor}
+        onClick={setFlyoutConfigCallback}
+        style={style}
+        isInteractive={isInteractive}
+      />
       <MaybeMonitorDetailsFlyout setFlyoutConfigCallback={setFlyoutConfigCallback} />
     </>
   );
@@ -122,10 +141,12 @@ const MonitorsOverviewList = ({
   filters,
   singleMonitor,
   view,
+  isInteractive,
 }: {
   filters: MonitorFilters;
   singleMonitor?: boolean;
   view: OverviewView;
+  isInteractive: boolean;
 }) => {
   const dispatch = useDispatch();
 
@@ -145,8 +166,8 @@ const MonitorsOverviewList = ({
   }, [dispatch, filters]);
 
   if (singleMonitor && view === 'cardView') {
-    return <SingleMonitorView />;
+    return <SingleMonitorView isInteractive={isInteractive} />;
   }
 
-  return <OverviewGrid view={view} isEmbeddable />;
+  return <OverviewGrid view={view} isEmbeddable isInteractive={isInteractive} />;
 };

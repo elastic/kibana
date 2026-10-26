@@ -62,7 +62,7 @@ export const CUSTOM_UNIT_ARIA_LABEL = i18n.translate(
 );
 export const PAST_DATETIME_ERROR = i18n.translate(
   'responseOpsAlertSnooze.quickSnoozePanel.pastDateTimeError',
-  { defaultMessage: 'Cannot snooze an alert for a past date or time.' }
+  { defaultMessage: 'Cannot snooze using a past date and time.' }
 );
 export const INVALID_DURATION_ERROR = i18n.translate(
   'responseOpsAlertSnooze.quickSnoozePanel.invalidDurationError',

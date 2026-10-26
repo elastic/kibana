@@ -6,6 +6,36 @@
  */
 
 export { Streams, streamDefinitionSchema } from './src/models/streams';
+export type * as StreamsV2 from './src/v2';
+export * as StreamsV2Examples from './src/v2/__examples__';
+export {
+  collectUnitComponentIds,
+  findDuplicateUnitComponentIds,
+  streamsConfigEntrySchema,
+  streamsOttlRoutingContextSchema,
+  streamsPipelineConfigEntrySchema,
+  streamsPipelineRouteSchema,
+  streamsPipelineSchema,
+  streamsSignalSchema,
+  streamsSupportedTelemetrySchema,
+  streamsUnitIdentifierSchema,
+  streamsUnitResponseSchema,
+  streamsUnitSchema,
+  streamsUnitSecretsSchema,
+  MAX_STREAMS_UNIT_STATS_COMPONENTS,
+  streamsUnitStatsComponentRefSchema,
+  streamsUnitStatsDestinationResultSchema,
+  streamsUnitStatsErrorSchema,
+  streamsUnitStatsFilterSchema,
+  streamsUnitStatsMetaSchema,
+  streamsUnitStatsProcessorResultSchema,
+  streamsUnitStatsRequestSchema,
+  streamsUnitStatsResponseSchema,
+  streamsUnitStatsSeriesSchema,
+  streamsUnitUiMetadataSchema,
+  streamsUnitUpsertRequestSchema,
+} from './src/models/unit';
+export type { StreamsUnit } from './src/models/unit';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
 export {
@@ -40,6 +70,11 @@ export {
 export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_definition';
 export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root_stream_definition';
+export {
+  isBuiltInRootStreamField,
+  otelRootBuiltInFieldNames,
+  ecsRootBuiltInFieldNames,
+} from './src/helpers/is_built_in_root_stream_field';
 export {
   isOtelStream,
   OTEL_CONTENT_FIELD,
@@ -80,8 +115,11 @@ export {
   extractBucketColumnName,
   extractBucketIntervalMs,
   extractBucketTargetField,
+  extractReferencedColumns,
   extractStatsGroupColumns,
   extractWhereExpression,
+  findOverBroadMatchPredicates,
+  renderOverBroadMatchError,
   getFromSources,
   getStatsQueryHints,
   hasStatsCommand,
@@ -99,6 +137,8 @@ export {
   type SampleDocument,
   type FlattenRecord,
   flattenRecord,
+  boundedFlattenRecord,
+  boundedJsonValue,
   recursiveRecord,
 } from './src/shared/record_types';
 export { isSchema, createIsNarrowSchema, isRecord } from './src/shared/type_guards';
@@ -136,6 +176,8 @@ export {
   ALL_FIELD_DEFINITION_TYPES,
   fieldDefinitionConfigSchema,
   namedFieldDefinitionConfigSchema,
+  boundedFieldDefinitionConfigSchema,
+  boundedNamedFieldDefinitionSchema,
 } from './src/fields';
 
 export {
@@ -196,6 +238,8 @@ export {
   type StreamNameValidationResult,
   MAX_STREAM_NAME_LENGTH,
   INVALID_STREAM_NAME_CHARACTERS,
+  INVALID_STREAM_NAME_PREFIXES,
+  RESERVED_STREAM_NAMES,
 } from './src/helpers/stream_name_validation';
 
 export {

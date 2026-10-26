@@ -13,26 +13,25 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
-import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
-import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
+import { ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { Subscription } from 'rxjs';
-import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
 import type { StreamsClient } from './lib/streams/client';
 import type { StreamsConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
-  STREAMS_CONSUMER,
+  STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE,
   STREAMS_FEATURE_ID,
   STREAMS_SETTINGS_DOCUMENT_ID,
   STREAMS_TIERED_FEATURES,
   STREAMS_UI_PRIVILEGES,
+  STREAMS_UI_METADATA_SAVED_OBJECT_TYPE,
 } from '../common/constants';
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
@@ -49,22 +48,29 @@ import type {
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
-import { baseFields } from './lib/streams/component_templates/logs_layer';
-import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
+import { getDefaultRootFields } from './lib/streams/root_stream_definition';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
 import { registerFieldsMetadataExtractors } from './register_fields_metadata_extractors';
 import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
 import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
 import type { AttachmentClient } from './lib/streams/attachments/attachment_client';
-import { getStreamsPromptsSavedObject } from './lib/prompts/prompts_config';
+import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
+import { createConfigDistributorClient } from './lib/unit_config/config_distributor_client';
+import { createEncryptionKeyStore } from './lib/unit_config/encryption_key_store';
+import { createCredentialPreparer } from './lib/unit_config/seal_credentials';
+import type { UnitConfigHooks } from './lib/unit_config/types';
+import {
+  registerRepublishUnitsTask,
+  removeRepublishUnitsTask,
+  scheduleRepublishUnitsTask,
+} from './lib/unit_config/republish_units_task';
+import { StreamsUnitService } from './lib/saved_objects/streams_unit_service';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
+const STREAMS_ALLOWED_PROJECT_TYPES = ['observability', 'security'];
 
 export interface StreamsPluginSetup {
-  registerKnowledgeIndicatorClientProvider(
-    provider: (request: KibanaRequest) => Promise<KnowledgeIndicatorClientContract>
-  ): void;
   getAttachmentClient(params: {
     request: KibanaRequest;
     rulesClientOptions?: RulesClientCreateOptions;
@@ -94,17 +100,23 @@ export class StreamsPlugin
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
+  private republishUnitsEnabled = false;
+  private readonly republishLogger: Logger;
+  private readonly stopController = new AbortController();
   private attachmentService?: AttachmentService;
   private streamsService?: StreamsService;
   private streamsGetScopedClients?: GetScopedClients;
   private subscriptions: Subscription[] = [];
-  private kiProvider?: (request: KibanaRequest) => Promise<KnowledgeIndicatorClientContract>;
+  private canEncrypt = false;
+  private readonly isServerless: boolean;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
+    this.republishLogger = this.logger.get('republish-units');
     this.processorSuggestionsService = new ProcessorSuggestionsService();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
@@ -122,7 +134,11 @@ export class StreamsPlugin
       this.logger.get('patternExtraction')
     );
 
-    core.savedObjects.registerType(getStreamsPromptsSavedObject());
+    registerStreamsSavedObjects(core.savedObjects, {
+      isStreamsCanvasEnabled: this.config.canvas.enabled,
+      encryptedSavedObjects: plugins.encryptedSavedObjects,
+    });
+    this.canEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
     this.ebtTelemetryService.setup(core.analytics);
     this.statsTelemetryService.setup(
@@ -130,11 +146,6 @@ export class StreamsPlugin
       this.logger.get('streams-stats-telemetry'),
       plugins.usageCollection
     );
-
-    const alertingFeatures = STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
-      ruleTypeId,
-      consumers: [STREAMS_CONSUMER],
-    }));
 
     registerSuggestionsInferenceFeatures(
       plugins.searchInferenceEndpoints,
@@ -156,7 +167,16 @@ export class StreamsPlugin
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
 
-      const scopedSoClient = coreStart.savedObjects.getScopedClient(request);
+      const scopedSoClient = coreStart.savedObjects.getScopedClient(request, {
+        includedHiddenTypes: this.config.canvas.enabled
+          ? [STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE, STREAMS_UI_METADATA_SAVED_OBJECT_TYPE]
+          : [],
+      });
+      const encryptedSavedObjectsClient = pluginsStart.encryptedSavedObjects.getClient({
+        includedHiddenTypes: this.config.canvas.enabled
+          ? [STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE]
+          : [],
+      });
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
       const globalUiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(scopedSoClient);
 
@@ -173,23 +193,11 @@ export class StreamsPlugin
         contentService.getClient(),
       ]);
 
-      let kiClientPromise: Promise<KnowledgeIndicatorClientContract> | undefined;
-      const getKnowledgeIndicatorClient = (): Promise<KnowledgeIndicatorClientContract> => {
-        if (!this.kiProvider) {
-          throw new Error(
-            'No KnowledgeIndicatorClient provider registered. Is the significant_events plugin enabled?'
-          );
-        }
-        kiClientPromise ??= this.kiProvider(request);
-        return kiClientPromise;
-      };
-
       const license = await licensing.getLicense();
       const isSecurityEnabled = license.getFeature('security').isEnabled;
 
       const streamsClient = await streamsService.getClient({
         attachmentClient,
-        getKnowledgeIndicatorClient,
         esClient: scopedClusterClient.asCurrentUser,
         esClientAsInternalUser: coreStart.elasticsearch.client.asInternalUser,
         uiSettingsClient,
@@ -204,9 +212,10 @@ export class StreamsPlugin
       return {
         scopedClusterClient,
         soClient,
+        encryptedSavedObjectsClient,
+        canEncrypt: this.canEncrypt,
         attachmentClient,
         streamsClient,
-        getKnowledgeIndicatorClient,
         inferenceClient,
         contentClient,
         fieldsMetadataClient,
@@ -220,7 +229,15 @@ export class StreamsPlugin
 
     const telemetryClient = this.ebtTelemetryService.getClient();
 
-    if (plugins.agentBuilder) {
+    const serverlessProjectType = this.isServerless
+      ? plugins.cloud?.serverless.projectType
+      : undefined;
+
+    const isStreamsAgentBuilderAllowed =
+      !this.isServerless ||
+      (!!serverlessProjectType && STREAMS_ALLOWED_PROJECT_TYPES.includes(serverlessProjectType));
+
+    if (plugins.agentBuilder && isStreamsAgentBuilderAllowed) {
       void core
         .getStartServices()
         .then(async ([]) => {
@@ -233,6 +250,7 @@ export class StreamsPlugin
             server,
             logger: this.logger,
             telemetry: telemetryClient,
+            core,
           });
         })
         .catch((err) => {
@@ -250,24 +268,12 @@ export class StreamsPlugin
       order: 600,
       category: DEFAULT_APP_CATEGORIES.management,
       app: [STREAMS_FEATURE_ID],
-      alerting: alertingFeatures,
       privileges: {
         all: {
           app: [STREAMS_FEATURE_ID],
           savedObject: {
             all: [],
             read: [],
-          },
-          alerting: {
-            rule: {
-              all: alertingFeatures,
-              enable: alertingFeatures,
-              manual_run: alertingFeatures,
-              manage_rule_settings: alertingFeatures,
-            },
-            alert: {
-              all: alertingFeatures,
-            },
           },
           api: [STREAMS_API_PRIVILEGES.read, STREAMS_API_PRIVILEGES.manage],
           ui: [STREAMS_UI_PRIVILEGES.show, STREAMS_UI_PRIVILEGES.manage],
@@ -278,14 +284,6 @@ export class StreamsPlugin
             all: [],
             read: [],
           },
-          alerting: {
-            rule: {
-              read: alertingFeatures,
-            },
-            alert: {
-              read: alertingFeatures,
-            },
-          },
           api: [STREAMS_API_PRIVILEGES.read],
           ui: [STREAMS_UI_PRIVILEGES.show],
         },
@@ -295,6 +293,49 @@ export class StreamsPlugin
     registerFeatureFlags(core);
     core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
 
+    const { path: encryptionKeyPath } = this.config.encryptionKey;
+    const distributorClient = createConfigDistributorClient({
+      config: this.config.distributor,
+      logger: this.logger.get('config-distributor'),
+      fallbackTargetId: plugins.cloud?.serverless.projectId,
+    });
+    const unitConfigHooks: UnitConfigHooks = {
+      validate: distributorClient.validate,
+      publish: distributorClient.publish,
+      prepareCredentials: encryptionKeyPath
+        ? createCredentialPreparer({
+            store: createEncryptionKeyStore({ path: encryptionKeyPath }),
+            resolveTargetId: distributorClient.resolveTargetId,
+            logger: this.logger.get('credential-sealer'),
+          })
+        : undefined,
+    };
+
+    this.republishUnitsEnabled = this.config.canvas.enabled && Boolean(this.config.distributor.url);
+    registerRepublishUnitsTask({
+      taskManager: plugins.taskManager,
+      logger: this.republishLogger,
+      enabled: this.republishUnitsEnabled,
+      stopSignal: this.stopController.signal,
+      getRepublisher: async () => {
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        return new StreamsUnitService({
+          soClient: coreStart.savedObjects.getUnsafeInternalClient({
+            includedHiddenTypes: [STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE],
+            excludedExtensions: [SPACES_EXTENSION_ID],
+          }),
+          logger: this.republishLogger,
+          validateUnit: unitConfigHooks.validate,
+          publishUnit: unitConfigHooks.publish,
+          prepareCredentials: unitConfigHooks.prepareCredentials,
+          encryptedSavedObjectsClient: pluginsStart.encryptedSavedObjects.getClient({
+            includedHiddenTypes: [STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE],
+          }),
+          canEncrypt: this.canEncrypt,
+        });
+      },
+    });
+
     const routeRegistrationOptions = {
       dependencies: {
         server: this.server,
@@ -302,6 +343,7 @@ export class StreamsPlugin
         processorSuggestions: this.processorSuggestionsService,
         patternExtractionService: this.patternExtractionService,
         getScopedClients: this.streamsGetScopedClients,
+        unitConfigHooks,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();
           return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -392,7 +434,7 @@ export class StreamsPlugin
                             ...definition.stream.ingest,
                             wired: {
                               ...definition.stream.ingest.wired,
-                              fields: name === LOGS_ECS_STREAM_NAME ? ecsBaseFields : baseFields,
+                              fields: getDefaultRootFields(name),
                             },
                           },
                         },
@@ -439,9 +481,6 @@ export class StreamsPlugin
     });
 
     return {
-      registerKnowledgeIndicatorClientProvider: (provider) => {
-        this.kiProvider = provider;
-      },
       getAttachmentClient: async ({ request }) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const soClient = coreStart.savedObjects.getScopedClient(request);
@@ -459,18 +498,9 @@ export class StreamsPlugin
           soClient,
           rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
         });
-        const getKnowledgeIndicatorClient = (): Promise<KnowledgeIndicatorClientContract> => {
-          if (!this.kiProvider) {
-            throw new Error(
-              'No KnowledgeIndicatorClient provider registered. Is the significant_events plugin enabled?'
-            );
-          }
-          return this.kiProvider(request);
-        };
         const license = await pluginsStart.licensing.getLicense();
         return this.streamsService!.getClient({
           attachmentClient,
-          getKnowledgeIndicatorClient,
           esClient: scopedClusterClient.asCurrentUser,
           esClientAsInternalUser: coreStart.elasticsearch.client.asInternalUser,
           uiSettingsClient,
@@ -497,10 +527,19 @@ export class StreamsPlugin
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
 
+    const republishTaskDeps = { taskManager: plugins.taskManager, logger: this.republishLogger };
+    if (this.republishUnitsEnabled) {
+      void scheduleRepublishUnitsTask(republishTaskDeps);
+    } else {
+      // Assumes every node has the same config, so a disabled node never removes a task another node needs.
+      void removeRepublishUnitsTask(republishTaskDeps);
+    }
+
     return {};
   }
 
   public async stop() {
+    this.stopController.abort();
     this.subscriptions.forEach((s) => s.unsubscribe());
     await this.patternExtractionService?.stop();
   }

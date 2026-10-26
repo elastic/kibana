@@ -172,7 +172,7 @@ describe('#encryptAttributes', () => {
       attrThree: 'three',
     });
 
-    expect(service.encryptAttributes).not.toBeCalled();
+    expect(service.encryptAttributes).not.toHaveBeenCalled();
   });
 
   test('encrypts attributes if the type is registered', async () => {
@@ -199,6 +199,6 @@ describe('#encryptAttributes', () => {
       attrThree: 'three',
     });
 
-    expect(service.encryptAttributes).toBeCalledTimes(1);
+    expect(service.encryptAttributes).toHaveBeenCalledTimes(1);
   });
 });

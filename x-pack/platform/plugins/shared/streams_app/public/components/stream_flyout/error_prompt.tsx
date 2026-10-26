@@ -13,7 +13,7 @@ import type { StreamFlyoutProps } from '.';
 export function ErrorPrompt({ name, onClose }: StreamFlyoutProps) {
   return (
     <EuiEmptyPrompt
-      iconType="search"
+      iconType="magnify"
       title={
         <h2>
           {i18n.translate('xpack.streams.flyout.error.title', {
@@ -35,7 +35,7 @@ export function ErrorPrompt({ name, onClose }: StreamFlyoutProps) {
       actions={
         <EuiButton data-test-subj="streamNotFoundCloseButton" fill onClick={onClose}>
           {i18n.translate('xpack.streams.flyout.error.closeButton', {
-            defaultMessage: 'Go back to stream canvas',
+            defaultMessage: 'Go back',
           })}
         </EuiButton>
       }

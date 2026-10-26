@@ -9,12 +9,15 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 
 import { buildMockDashboardApi } from '../mocks';
-import { dataService } from '../services/kibana_services';
+import { coreServices, dataService } from '../services/kibana_services';
+import { dashboardAppClientApi$ } from '../services/dashboard_app_client_api';
+import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import { DashboardRenderer } from './dashboard_renderer';
 import { loadDashboardApi } from '../dashboard_api/load_dashboard_api';
-import type { DashboardPinnedPanelsState } from '../../common';
+import type { DashboardPinnedPanelsState } from '@kbn/as-code-dashboard-schema';
 
 jest.mock('../dashboard_api/load_dashboard_api');
 
@@ -38,7 +41,11 @@ describe('Dashboard Renderer', () => {
   });
 
   it('renders the dashboard control group and dashboard viewport', async () => {
-    render(<DashboardRenderer />);
+    render(
+      <DashboardRenderer
+        getCreationOptions={() => Promise.resolve({ useControlsIntegration: true })}
+      />
+    );
 
     await waitFor(async () => {
       expect(await screen.queryByTestId('dshDashboardViewport')).toBeInTheDocument();
@@ -56,6 +63,83 @@ describe('Dashboard Renderer', () => {
     await waitFor(async () => {
       expect(await screen.queryByTestId('dshDashboardViewport')).toBeInTheDocument();
       expect(await screen.queryByTestId('controls-group-wrapper')).not.toBeInTheDocument();
+    });
+  });
+
+  it('removes a missing dashboard from recently accessed', async () => {
+    (loadDashboardApi as jest.Mock).mockRejectedValueOnce(
+      new SavedObjectNotFound({ type: 'dashboard', id: 'missing-id' })
+    );
+
+    render(<DashboardRenderer savedObjectId="missing-id" />);
+
+    await waitFor(() => {
+      expect(getDashboardRecentlyAccessedService().remove).toHaveBeenCalledWith('missing-id');
+      expect(coreServices.chrome.recentlyAccessed.remove).toHaveBeenCalledWith('missing-id');
+    });
+  });
+
+  describe('publishAsAppClientApi', () => {
+    it('publishes the loaded dashboard API until the renderer unmounts', async () => {
+      const onApiAvailable = jest.fn();
+      const { unmount } = render(
+        <DashboardRenderer publishAsAppClientApi onApiAvailable={onApiAvailable} />
+      );
+
+      await waitFor(() => expect(onApiAvailable).toHaveBeenCalledTimes(1));
+      const [api] = onApiAvailable.mock.calls[0];
+      expect(dashboardAppClientApi$.value).toBe(api);
+
+      unmount();
+      expect(dashboardAppClientApi$.value).toBeUndefined();
+    });
+
+    it('does not publish the dashboard API when not opted in', async () => {
+      const onApiAvailable = jest.fn();
+      render(<DashboardRenderer onApiAvailable={onApiAvailable} />);
+
+      await waitFor(() => expect(onApiAvailable).toHaveBeenCalledTimes(1));
+      expect(dashboardAppClientApi$.value).toBeUndefined();
+    });
+
+    it('keeps the published API when an embedded renderer without the prop unmounts', async () => {
+      const onPublishedApiAvailable = jest.fn();
+      const onEmbeddedApiAvailable = jest.fn();
+      const published = render(
+        <DashboardRenderer publishAsAppClientApi onApiAvailable={onPublishedApiAvailable} />
+      );
+      await waitFor(() => expect(onPublishedApiAvailable).toHaveBeenCalledTimes(1));
+      const [publishedApi] = onPublishedApiAvailable.mock.calls[0];
+
+      const embedded = render(<DashboardRenderer onApiAvailable={onEmbeddedApiAvailable} />);
+      await waitFor(() => expect(onEmbeddedApiAvailable).toHaveBeenCalledTimes(1));
+      expect(dashboardAppClientApi$.value).toBe(publishedApi);
+
+      embedded.unmount();
+      expect(dashboardAppClientApi$.value).toBe(publishedApi);
+
+      published.unmount();
+      expect(dashboardAppClientApi$.value).toBeUndefined();
+    });
+
+    it('keeps a newer published API when an older publisher unmounts', async () => {
+      const onFirstApiAvailable = jest.fn();
+      const onSecondApiAvailable = jest.fn();
+      const first = render(
+        <DashboardRenderer publishAsAppClientApi onApiAvailable={onFirstApiAvailable} />
+      );
+      await waitFor(() => expect(onFirstApiAvailable).toHaveBeenCalledTimes(1));
+      const second = render(
+        <DashboardRenderer publishAsAppClientApi onApiAvailable={onSecondApiAvailable} />
+      );
+      await waitFor(() => expect(onSecondApiAvailable).toHaveBeenCalledTimes(1));
+      const [secondApi] = onSecondApiAvailable.mock.calls[0];
+
+      first.unmount();
+      expect(dashboardAppClientApi$.value).toBe(secondApi);
+
+      second.unmount();
+      expect(dashboardAppClientApi$.value).toBeUndefined();
     });
   });
 });

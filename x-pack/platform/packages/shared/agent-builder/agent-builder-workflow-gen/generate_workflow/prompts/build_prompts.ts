@@ -71,6 +71,12 @@ ${formatConnectorsBlock(prefetched.connectors)}
 
 - Prefer connector-based steps over raw HTTP for integrations like Slack, Jira, PagerDuty, etc.
 
+- When indexing into Elasticsearch, add a time field only if the document records
+  something that happened at a point in time — never for static or reference data.
+  Name it \`@timestamp\` and render it with \`{{ now | date_to_xmlschema }}\`; bare
+  \`{{ now }}\` maps as \`text\` instead of \`date\`. Never hardcode a \`Z\` suffix, as
+  the \`date\` filter formats in the server's local time zone.
+
 ## Providing your final response
 
 Once the workflow is successfully generated, you should stop calling tools and respond with a plain text message.

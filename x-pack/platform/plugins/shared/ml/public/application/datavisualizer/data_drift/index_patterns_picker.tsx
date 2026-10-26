@@ -8,17 +8,18 @@
 import type { FC } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { EuiPageBody, EuiPageSection } from '@elastic/eui';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { type DataViewEditorService as DataViewEditorServiceSpec } from '@kbn/data-view-editor-plugin/public';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { DataDriftIndexPatternsEditor } from './data_drift_index_patterns_editor';
 
-import { MlAppHeader } from '../../components/ml_app_header';
+import { MlAppHeader, useDataVisualizerBack } from '../../components/ml_app_header';
 import { useMlKibana } from '../../contexts/kibana';
 
 export const DataDriftIndexPatternsPicker: FC = () => {
-  const { reference, comparison } = parse(location.search, {
+  const dataVisualizerBack = useDataVisualizerBack();
+  const { reference, comparison } = queryString.parse(location.search, {
     sort: false,
   }) as { reference: string; comparison: string };
 
@@ -101,6 +102,7 @@ export const DataDriftIndexPatternsPicker: FC = () => {
           title={i18n.translate('xpack.ml.dataDrift.createDataDriftDataViewTitle', {
             defaultMessage: 'Create data view and analyze data drift',
           })}
+          back={dataVisualizerBack}
         />
         <EuiPageSection>
           {dataViewEditorServices ? (

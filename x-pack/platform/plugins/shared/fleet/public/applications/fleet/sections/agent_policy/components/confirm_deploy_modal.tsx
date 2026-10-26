@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -54,21 +55,21 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
       }
       buttonColor="primary"
     >
-      <EuiCallOut
+      <KbnInfoCallout
         announceOnMount
-        iconType="info"
         data-test-subj="confirmNoPoliciesCallout"
         title={i18n.translate('xpack.fleet.agentPolicy.noPolicies.confirmModalCalloutTitle', {
           defaultMessage: 'No agent policies selected',
         })}
-      >
-        <div className="eui-textBreakWord">
-          <FormattedMessage
-            id="xpack.fleet.agentPolicy.noPolicies.confirmModalCalloutDescription"
-            defaultMessage="This integration will not be added to any agent policies."
-          />
-        </div>
-      </EuiCallOut>
+        text={
+          <div className="eui-textBreakWord">
+            <FormattedMessage
+              id="xpack.fleet.agentPolicy.noPolicies.confirmModalCalloutDescription"
+              defaultMessage="This integration will not be added to any agent policies."
+            />
+          </div>
+        }
+      />
     </EuiConfirmModal>
   ) : (
     <EuiConfirmModal
@@ -97,9 +98,8 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
       buttonColor="primary"
     >
       {agentCount > 0 ? (
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
-          iconType="info"
           title={i18n.translate('xpack.fleet.agentPolicy.confirmModalCalloutTitle', {
             defaultMessage:
               'This action will update {agentCount, plural, one {# agent} other {# agents}}',
@@ -107,24 +107,24 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
               agentCount,
             },
           })}
-        >
-          <div className="eui-textBreakWord">
-            <FormattedMessage
-              id="xpack.fleet.agentPolicy.confirmModalCalloutDescription"
-              defaultMessage="Fleet has detected that the selected agent policies, {policyNames}, are already in use by
+          text={
+            <div className="eui-textBreakWord">
+              <FormattedMessage
+                id="xpack.fleet.agentPolicy.confirmModalCalloutDescription"
+                defaultMessage="Fleet has detected that the selected agent policies, {policyNames}, are already in use by
             some of your agents. As a result of this action, Fleet will deploy updates to all agents
             that use these policies."
-              values={{
-                policyNames: <b>{agentPolicies.map((policy) => policy.name).join(', ')}</b>,
-              }}
-            />
-          </div>
-        </EuiCallOut>
+                values={{
+                  policyNames: <b>{agentPolicies.map((policy) => policy.name).join(', ')}</b>,
+                }}
+              />
+            </div>
+          }
+        />
       ) : (
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
           data-test-subj="confirmAddRemovePoliciesCallout"
-          iconType="info"
           title={i18n.translate('xpack.fleet.agentPolicy.confirmModalPoliciesCalloutTitle', {
             defaultMessage: 'This action will update the selected agent policies',
           })}
@@ -155,7 +155,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
               </ul>
             </div>
           )}
-        </EuiCallOut>
+        </KbnInfoCallout>
       )}
       <EuiSpacer size="l" />
       <FormattedMessage

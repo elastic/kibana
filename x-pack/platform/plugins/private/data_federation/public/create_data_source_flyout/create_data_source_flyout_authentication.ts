@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import type { DataSourceType, DataSourceWithSecrets } from '../../common/datasource_types';
+import { authFormatSettingsByDataSourceType } from './auth_format_settings';
 
 /** S3 authentication modes (UI-only). */
 export type S3AuthenticationMode = 'anonymous' | 'access_and_secret_keys' | 'federated_identity';
@@ -30,132 +31,28 @@ export const DATA_SOURCE_TYPES_WITH_AUTHENTICATION: ReadonlySet<DataSourceType> 
 ]);
 
 export const getDefaultAuthenticationMode = (
-  dataSourceType: DataSourceType
+  dataSourceType: DataSourceType,
+  { enableFederatedIdentity }: { enableFederatedIdentity?: boolean } = {}
 ): CreateDataSourceAuthenticationMode => {
-  if (dataSourceType === 'azure') {
-    return 'credentials';
-  }
+  if (enableFederatedIdentity) return 'federated_identity';
+  if (dataSourceType === 'azure') return 'credentials';
   return 'access_and_secret_keys';
 };
 
-export const getCreateDataSourceAuthenticationOptions = (
-  dataSourceType: DataSourceType,
-  { enableFederatedIdentity }: { enableFederatedIdentity?: boolean } = {}
-): Array<{
-  value: CreateDataSourceAuthenticationMode;
-  text: string;
-}> => {
-  if (dataSourceType === 'azure') {
-    return [
-      {
-        value: 'credentials',
-        text: i18n.translate('xpack.dataFederation.createFlyout.authentication.azure.credentials', {
-          defaultMessage: 'Credentials',
-        }),
-      },
-      ...(enableFederatedIdentity
-        ? [
-            {
-              value: 'federated_identity' as const,
-              text: i18n.translate(
-                'xpack.dataFederation.createFlyout.authentication.federatedIdentity',
-                {
-                  defaultMessage: 'Federated Identity',
-                }
-              ),
-            },
-          ]
-        : []),
-      {
-        value: 'anonymous',
-        text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
-          defaultMessage: 'Anonymous',
-        }),
-      },
-    ];
-  }
-
-  if (dataSourceType === 's3') {
-    return [
-      {
-        value: 'access_and_secret_keys',
-        text: i18n.translate(
-          'xpack.dataFederation.createFlyout.authentication.accessAndSecretKeys',
-          {
-            defaultMessage: 'Access and Secret Keys',
-          }
-        ),
-      },
-      ...(enableFederatedIdentity
-        ? [
-            {
-              value: 'federated_identity' as const,
-              text: i18n.translate(
-                'xpack.dataFederation.createFlyout.authentication.federatedIdentity',
-                {
-                  defaultMessage: 'Federated Identity',
-                }
-              ),
-            },
-          ]
-        : []),
-      {
-        value: 'anonymous',
-        text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
-          defaultMessage: 'Anonymous',
-        }),
-      },
-    ];
-  }
-
-  if (dataSourceType === 'gcs') {
-    return [
-      {
-        value: 'access_and_secret_keys',
-        text: i18n.translate(
-          'xpack.dataFederation.createFlyout.authentication.accessAndSecretKeys',
-          {
-            defaultMessage: 'Access and Secret Keys',
-          }
-        ),
-      },
-      ...(enableFederatedIdentity
-        ? [
-            {
-              value: 'federated_identity' as const,
-              text: i18n.translate(
-                'xpack.dataFederation.createFlyout.authentication.federatedIdentity',
-                {
-                  defaultMessage: 'Federated Identity',
-                }
-              ),
-            },
-          ]
-        : []),
-      {
-        value: 'anonymous',
-        text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
-          defaultMessage: 'Anonymous',
-        }),
-      },
-    ];
-  }
-
-  return [
-    {
-      value: 'access_and_secret_keys',
-      text: i18n.translate('xpack.dataFederation.createFlyout.authentication.accessAndSecretKeys', {
-        defaultMessage: 'Access and Secret Keys',
-      }),
-    },
-    {
-      value: 'anonymous',
-      text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
-        defaultMessage: 'Anonymous',
-      }),
-    },
-  ];
-};
+/**
+ * Documentation page for each authentication method, as a key into
+ * `docLinks.links.dataFederation`. The pages describe the method itself, so they are the
+ * same regardless of data source type.
+ */
+export const AUTHENTICATION_DOC_LINK_KEYS = {
+  federated_identity: 'federatedIdentity',
+  access_and_secret_keys: 'staticCredentials',
+  credentials: 'staticCredentials',
+  anonymous: 'quickstart',
+} as const satisfies Record<
+  CreateDataSourceAuthenticationMode,
+  keyof DocLinksStart['links']['dataFederation']
+>;
 
 export const showsAuthenticationCredentialFields = (
   mode: CreateDataSourceAuthenticationMode,
@@ -173,143 +70,53 @@ export const showsAuthenticationCredentialFields = (
   return mode === 'access_and_secret_keys';
 };
 
-export const createDataSourceFlyoutAuthenticationLabel = (): string =>
-  i18n.translate('xpack.dataFederation.createFlyout.authentication.label', {
-    defaultMessage: 'Preferred method',
-  });
+const isS3AuthenticationMode = (
+  mode: CreateDataSourceAuthenticationMode
+): mode is S3AuthenticationMode =>
+  mode === 'access_and_secret_keys' || mode === 'federated_identity' || mode === 'anonymous';
 
-export const createDataSourceFlyoutAuthenticationTitle = (): string =>
-  i18n.translate('xpack.dataFederation.createFlyout.authentication.title', {
-    defaultMessage: 'Authentication',
-  });
+const isGcsAuthenticationMode = (
+  mode: CreateDataSourceAuthenticationMode
+): mode is GcsAuthenticationMode =>
+  mode === 'access_and_secret_keys' || mode === 'federated_identity' || mode === 'anonymous';
 
-export const createDataSourceFlyoutAuthenticationHelpAriaLabel = (): string =>
-  i18n.translate('xpack.dataFederation.createFlyout.authentication.helpAriaLabel', {
-    defaultMessage: 'Open Cloud security documentation',
-  });
+const isAzureAuthenticationMode = (
+  mode: CreateDataSourceAuthenticationMode
+): mode is AzureAuthenticationMode =>
+  mode === 'credentials' || mode === 'federated_identity' || mode === 'anonymous';
 
 /** Applies UI authentication mode to the payload submitted to the API. */
 export const applyAuthenticationModeToDataSource = (
   data: DataSourceWithSecrets,
   mode: CreateDataSourceAuthenticationMode
 ): DataSourceWithSecrets => {
-  const authSettings = mode === 'anonymous' ? { auth: 'anonymous' } : {};
-
   switch (data.type) {
     case 's3': {
-      const {
-        access_key: _accessKey,
-        secret_key: _secretKey,
-        role_arn: _roleArn,
-        jwt_audience: _jwtAudience,
-        role_session_name: _roleSessionName,
-        sts_endpoint: _stsEndpoint,
-        sts_region: _stsRegion,
-        auth: _auth,
-        ...rest
-      } = data.settings;
-
-      let applied: Record<string, unknown> = {};
-      if (mode === 'access_and_secret_keys') {
-        applied = {
-          access_key: data.settings.access_key,
-          secret_key: data.settings.secret_key,
-          auth: 'static_credentials',
-        };
-      } else if (mode === 'federated_identity') {
-        applied = {
-          role_arn: data.settings.role_arn,
-          jwt_audience: data.settings.jwt_audience,
-          role_session_name: data.settings.role_session_name,
-          sts_endpoint: data.settings.sts_endpoint,
-          sts_region: data.settings.sts_region,
-          auth: 'federated_identity',
-        };
+      if (!isS3AuthenticationMode(mode)) {
+        throw new Error(`Invalid S3 authentication mode: ${mode}`);
       }
 
-      return {
-        ...data,
-        settings: {
-          ...rest,
-          ...authSettings,
-          ...applied,
-        },
-      };
+      const settings = authFormatSettingsByDataSourceType.s3[mode](data);
+
+      return { ...data, settings };
     }
     case 'gcs': {
-      const {
-        credentials: _credentials,
-        jwt_audience: _jwtAudience,
-        sts_audience: _stsAudience,
-        service_account_impersonation_url: _serviceAccountImpersonationUrl,
-        auth: _auth,
-        ...rest
-      } = data.settings;
-      const credentialsText = data.settings.credentials?.trim();
-
-      let applied: Record<string, unknown> = {};
-      if (mode === 'access_and_secret_keys' && credentialsText) {
-        applied = { credentials: credentialsText, auth: 'static_credentials' };
-      } else if (mode === 'federated_identity') {
-        applied = {
-          jwt_audience: data.settings.jwt_audience,
-          sts_audience: data.settings.sts_audience,
-          service_account_impersonation_url: data.settings.service_account_impersonation_url,
-          auth: 'federated_identity',
-        };
+      if (!isGcsAuthenticationMode(mode)) {
+        throw new Error(`Invalid GCS authentication mode: ${mode}`);
       }
-      return {
-        ...data,
-        settings: {
-          ...rest,
-          ...authSettings,
-          ...applied,
-        },
-      };
+
+      const settings = authFormatSettingsByDataSourceType.gcs[mode](data);
+
+      return { ...data, settings };
     }
     case 'azure': {
-      const {
-        account: _account,
-        key: _key,
-        tenant_id: _tenantId,
-        client_id: _clientId,
-        jwt_audience: _jwtAudience,
-        auth: _auth,
-        ...rest
-      } = data.settings;
-
-      const base = { ...rest };
-
-      if (mode === 'credentials') {
-        return {
-          ...data,
-          settings: {
-            ...base,
-            account: data.settings.account,
-            key: data.settings.key,
-            auth: 'static_credentials',
-          },
-        };
+      if (!isAzureAuthenticationMode(mode)) {
+        throw new Error(`Invalid Azure authentication mode: ${mode}`);
       }
-      if (mode === 'federated_identity') {
-        return {
-          ...data,
-          settings: {
-            ...base,
-            tenant_id: data.settings.tenant_id,
-            client_id: data.settings.client_id,
-            jwt_audience: data.settings.jwt_audience,
-            auth: 'federated_identity',
-          },
-        };
-      }
-      return {
-        ...data,
-        settings: {
-          ...base,
-          ...authSettings,
-        },
-      };
+
+      const settings = authFormatSettingsByDataSourceType.azure[mode](data);
+
+      return { ...data, settings };
     }
     default:
       return data;

@@ -65,6 +65,7 @@ import {
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { routeToConnectors } from '../../../constants';
+import { DisplayOptions } from './display_options';
 
 const ConnectorIconTipWithSpacing: React.FC = () => {
   return (
@@ -133,6 +134,7 @@ const ActionsConnectorsList = ({
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
   const [showWarningText, setShowWarningText] = useState<boolean>(false);
+  const [showDeprecated, setShowDeprecated] = useState(false);
 
   const disabledActConnectorCss = css`
     .actConnectorsList__tableRowDisabled {
@@ -192,6 +194,21 @@ const ActionsConnectorsList = ({
         })
       : [];
   }, [actions, actionTypesIndex]);
+
+  const visibleItems = useMemo(() => {
+    if (showDeprecated) {
+      return actionConnectorTableItems;
+    }
+    return actionConnectorTableItems.filter((item) => !item.isConnectorTypeDeprecated);
+  }, [actionConnectorTableItems, showDeprecated]);
+
+  const onShowDeprecatedChange = useCallback((nextShowDeprecated: boolean) => {
+    setShowDeprecated(nextShowDeprecated);
+    setPageIndex(0);
+    if (!nextShowDeprecated) {
+      setSelectedItems((current) => current.filter((item) => !item.isConnectorTypeDeprecated));
+    }
+  }, []);
 
   const actionTypesList: Array<{ value: string; name: string }> = actionTypesIndex
     ? Object.values(actionTypesIndex)
@@ -541,7 +558,7 @@ const ActionsConnectorsList = ({
   const table = (
     <EuiInMemoryTable
       loading={isLoadingActions || isLoadingActionTypes}
-      items={actionConnectorTableItems}
+      items={visibleItems}
       sorting={true}
       tableLayout="fixed"
       itemId={(item: ActionConnectorTableItem) =>
@@ -584,6 +601,7 @@ const ActionsConnectorsList = ({
       selection={
         canDelete
           ? {
+              selected: selectedItems,
               onSelectionChange(updatedSelectedItemsList: ActionConnectorTableItem[]) {
                 setSelectedItems(updatedSelectedItemsList);
               },
@@ -632,6 +650,13 @@ const ActionsConnectorsList = ({
                   />
                 </EuiButton>,
               ],
+        toolsRight: [
+          <DisplayOptions
+            key="displayOptions"
+            showDeprecated={showDeprecated}
+            onChange={onShowDeprecatedChange}
+          />,
+        ],
       }}
     />
   );

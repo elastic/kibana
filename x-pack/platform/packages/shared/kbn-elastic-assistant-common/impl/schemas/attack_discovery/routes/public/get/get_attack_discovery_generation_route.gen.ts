@@ -26,11 +26,19 @@ export const GetAttackDiscoveryGenerationRequestQuery = lazySchema(() =>
     /**
      * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
      */
-    enable_field_rendering: BooleanFromString.optional().default(false),
+    enable_field_rendering: BooleanFromString.optional()
+      .default(false)
+      .describe(
+        'Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.'
+      ),
     /**
      * When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. Defaults to `true`.
      */
-    with_replacements: BooleanFromString.optional().default(true),
+    with_replacements: BooleanFromString.optional()
+      .default(true)
+      .describe(
+        'When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. Defaults to `true`.'
+      ),
   })
 );
 export type GetAttackDiscoveryGenerationRequestQuery = z.infer<
@@ -45,7 +53,9 @@ export const GetAttackDiscoveryGenerationRequestParams = lazySchema(() =>
     /**
      * The unique identifier for the Attack Discovery generation execution. This UUID is returned at the start of an Attack Discovery generation.
      */
-    execution_uuid: NonEmptyString,
+    execution_uuid: NonEmptyString.describe(
+      'The unique identifier for the Attack Discovery generation execution. This UUID is returned at the start of an Attack Discovery generation.'
+    ),
   })
 );
 export type GetAttackDiscoveryGenerationRequestParams = z.infer<
@@ -60,11 +70,15 @@ export const GetAttackDiscoveryGenerationResponse = lazySchema(() =>
     /**
      * Array of Attack discoveries generated during this execution.
      */
-    data: z.array(AttackDiscoveryApiAlert),
+    data: z
+      .array(AttackDiscoveryApiAlert)
+      .describe('Array of Attack discoveries generated during this execution.'),
     /**
      * Optional metadata about the attack discovery generation process, metadata including execution status and statistics. This metadata may not be available for all generations.
      */
-    generation: AttackDiscoveryGeneration.optional(),
+    generation: AttackDiscoveryGeneration.optional().describe(
+      'Optional metadata about the attack discovery generation process, metadata including execution status and statistics. This metadata may not be available for all generations.'
+    ),
   })
 );
 export type GetAttackDiscoveryGenerationResponse = z.infer<

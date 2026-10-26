@@ -66,6 +66,7 @@ import type {
   GetKnowledgeBaseRequestSchema,
   DeletePackageResponseSchema,
   ReviewUpgradeRequestSchema,
+  NamespacePreflightCheckRequestSchema,
 } from '../../types';
 import { KibanaSavedObjectType } from '../../types';
 import {
@@ -82,6 +83,7 @@ import {
   getTemplateInputs,
   updateCustomIntegration,
 } from '../../services/epm/packages';
+import { filterOutNonFipsPolicyTemplates } from '../../services/epm/packages/filter_fips_packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import {
   fleetErrorToResponseOptions,
@@ -112,6 +114,10 @@ import {
   rollbackInstallation,
 } from '../../services/epm/packages/rollback';
 import { updatePackage, reviewUpgrade } from '../../services/epm/packages/update';
+import {
+  runNamespacePreflightCheck,
+  runAndLogNamespacePreflightCheck,
+} from '../../services/epm/packages/namespace_datastream_templates';
 import { scheduleSyncNamespaceTemplatesTask } from '../../tasks/sync_namespace_templates_task';
 import { scheduleSyncIlmPolicyTask } from '../../tasks/sync_ilm_policy_task';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
@@ -158,7 +164,10 @@ export const getListHandler: FleetRequestHandler<
     savedObjectsClient,
     ...request.query,
   });
-  const flattenedRes = res
+  const filteredByFips = appContextService.getIsFipsEnabled()
+    ? filterOutNonFipsPolicyTemplates(res)
+    : res;
+  const flattenedRes = filteredByFips
     // exclude the security_ai_prompts package from being shown in Kibana UI
     // https://github.com/elastic/kibana/pull/227308
     .filter((pkg) => pkg.id !== 'security_ai_prompts')
@@ -166,7 +175,7 @@ export const getListHandler: FleetRequestHandler<
 
   if (request.query.withPackagePoliciesCount) {
     const countByPackage = await getPackagePoliciesCountByPackageName(
-      appContextService.getInternalUserSOClientForSpaceId(fleetContext.spaceId)
+      appContextService.getInternalUserSOClientWithoutSpaceExtension()
     );
     for (const item of flattenedRes) {
       item.packagePoliciesInfo = {
@@ -414,6 +423,19 @@ export const updatePackageHandler: FleetRequestHandler<
     ...request.body,
   });
 
+  let warnings: UpdatePackageResponse['warnings'];
+  if (namespaceCustomizationDiff.addedNamespaces.length > 0) {
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const detected = await runAndLogNamespacePreflightCheck({
+      esClient,
+      soClient: savedObjectsClient,
+      packageName: pkgName,
+      namespaces: namespaceCustomizationDiff.addedNamespaces,
+      handlerName: 'updatePackageHandler',
+    });
+    if (detected.length > 0) warnings = detected;
+  }
+
   if (
     namespaceCustomizationDiff.addedNamespaces.length > 0 ||
     namespaceCustomizationDiff.removedNamespaces.length > 0
@@ -436,9 +458,30 @@ export const updatePackageHandler: FleetRequestHandler<
 
   const body: UpdatePackageResponse = {
     item: packageInfo,
+    ...(warnings && { warnings }),
   };
 
   return response.ok({ body });
+};
+
+export const namespacePreflightCheckHandler: FleetRequestHandler<
+  TypeOf<typeof NamespacePreflightCheckRequestSchema.params>,
+  unknown,
+  TypeOf<typeof NamespacePreflightCheckRequestSchema.body>
+> = async (context, request, response) => {
+  const savedObjectsClient = (await context.fleet).internalSoClient;
+  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  const { pkgName } = request.params;
+  const { namespaces } = request.body;
+
+  const warnings = await runNamespacePreflightCheck({
+    esClient,
+    soClient: savedObjectsClient,
+    packageName: pkgName,
+    namespaces,
+  });
+
+  return response.ok({ body: { warnings } });
 };
 
 export const reviewUpgradeHandler: FleetRequestHandler<
@@ -714,6 +757,7 @@ export const deletePackageHandler: FleetRequestHandler<
     pkgVersion,
     esClient,
     force: request.query?.force,
+    request,
   });
   const body: TypeOf<typeof DeletePackageResponseSchema> = {
     items: res,

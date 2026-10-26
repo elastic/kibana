@@ -6,14 +6,15 @@
  */
 
 import * as rt from 'io-ts';
-import type { HttpStart, IUiSettingsClient } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DataView, DataViewLazy } from '@kbn/data-views-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { getLogViewResponsePayloadRT, putLogViewRequestPayloadRT } from '../../../common/http_api';
-import { getLogViewUrl } from '../../../common/http_api/log_views';
+import { LOG_VIEW_URL } from '../../../common/http_api/log_views';
 import type {
   LogView,
   LogViewAttributes,
@@ -30,7 +31,7 @@ import {
   resolveLogView,
 } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import type { ILogViewsClient } from './types';
+import type { GetResolvedLogViewStatusOptions, ILogViewsClient } from './types';
 import { excludeTiersQuery } from './exclude_tiers_query';
 
 export class LogViewsClient implements ILogViewsClient {
@@ -52,7 +53,7 @@ export class LogViewsClient implements ILogViewsClient {
 
     const { logViewId } = logViewReference;
     const response = await this.http
-      .get(getLogViewUrl(logViewId), { version: '1' })
+      .get(buildPath(LOG_VIEW_URL, { logViewId }), { version: '1' })
       .catch((error) => {
         throw new FetchLogViewError(`Failed to fetch log view "${logViewId}": ${error}`);
       });
@@ -88,25 +89,29 @@ export class LogViewsClient implements ILogViewsClient {
 
   public async getResolvedLogViewStatus(
     resolvedLogView: ResolvedLogView<DataView>,
-    uiSettings?: IUiSettingsClient
+    options?: GetResolvedLogViewStatusOptions
   ): Promise<LogViewStatus> {
-    const excludedDataTiers = uiSettings?.get('observability:searchExcludedDataTiers') ?? [];
+    const excludedDataTiers =
+      options?.uiSettings?.get('observability:searchExcludedDataTiers') ?? [];
     const excludedQuery = excludedDataTiers.length
       ? excludeTiersQuery(excludedDataTiers)
       : undefined;
 
     const indexStatus = await lastValueFrom(
-      this.search({
-        params: {
-          ignore_unavailable: true,
-          allow_no_indices: true,
-          index: resolvedLogView.indices,
-          size: 0,
-          terminate_after: 1,
-          track_total_hits: 1,
-          query: excludedQuery ? { bool: { filter: excludedQuery } } : undefined,
+      this.search(
+        {
+          params: {
+            ignore_unavailable: true,
+            allow_no_indices: true,
+            index: resolvedLogView.indices,
+            size: 0,
+            terminate_after: 1,
+            track_total_hits: 1,
+            query: excludedQuery ? { bool: { filter: excludedQuery } } : undefined,
+          },
         },
-      })
+        { projectRouting: options?.projectRouting }
+      )
     ).then(
       ({ rawResponse }) => {
         if (rawResponse._shards.total <= 0) {
@@ -157,7 +162,7 @@ export class LogViewsClient implements ILogViewsClient {
     } else {
       const { logViewId } = logViewReference;
       const response = await this.http
-        .put(getLogViewUrl(logViewId), {
+        .put(buildPath(LOG_VIEW_URL, { logViewId }), {
           body: JSON.stringify(
             putLogViewRequestPayloadRT.encode({ attributes: logViewAttributes })
           ),

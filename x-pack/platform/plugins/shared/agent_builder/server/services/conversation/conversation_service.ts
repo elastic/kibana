@@ -11,23 +11,25 @@ import type {
   SecurityServiceStart,
   ElasticsearchServiceStart,
 } from '@kbn/core/server';
-import type { Conversation, ConversationRoundAuthor } from '@kbn/agent-builder-common';
-import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
-import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
+import type { CurrentUser } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getUserFromRequest } from '../utils';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AgentsServiceStart } from '../agents';
 import type { ConversationClient } from './client';
 import { createClient } from './client';
+import type { ConversationEventBus } from '../../workflows/triggers/conversation_event_bus';
+import { createScopedConversationEventEmitter } from '../../workflows/triggers/conversation_event_bus';
+import type { ConversationEventsServiceStart } from '../conversation_events';
+import type { AuditLogService } from '../../audit/audit_log_service';
+import type { AnalyticsService } from '../../telemetry';
 
 export interface ConversationService {
   getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
-  getConversationRoundAuthor(options: {
+  getScopedClientAsUser(options: {
     request: KibanaRequest;
-    conversation: Conversation;
-    origin?: ExecutionConversationOrigin;
-  }): Promise<ConversationRoundAuthor | undefined>;
+    user: CurrentUser;
+  }): Promise<ConversationClient>;
 }
 
 interface ConversationServiceDeps {
@@ -36,6 +38,10 @@ interface ConversationServiceDeps {
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
   agents: AgentsServiceStart;
+  eventBus?: ConversationEventBus;
+  conversationEvents: ConversationEventsServiceStart;
+  auditLogService: AuditLogService;
+  analyticsService?: AnalyticsService;
 }
 
 export class ConversationServiceImpl implements ConversationService {
@@ -44,63 +50,79 @@ export class ConversationServiceImpl implements ConversationService {
   private readonly elasticsearch: ElasticsearchServiceStart;
   private readonly spaces?: SpacesPluginStart;
   private readonly agents: AgentsServiceStart;
+  private readonly eventBus?: ConversationEventBus;
+  private readonly conversationEvents: ConversationEventsServiceStart;
+  private readonly auditLogService: AuditLogService;
+  private readonly analyticsService?: AnalyticsService;
 
-  constructor({ logger, security, elasticsearch, spaces, agents }: ConversationServiceDeps) {
+  constructor({
+    logger,
+    security,
+    elasticsearch,
+    spaces,
+    agents,
+    eventBus,
+    conversationEvents,
+    auditLogService,
+    analyticsService,
+  }: ConversationServiceDeps) {
     this.logger = logger;
     this.security = security;
     this.elasticsearch = elasticsearch;
     this.spaces = spaces;
     this.agents = agents;
+    this.eventBus = eventBus;
+    this.conversationEvents = conversationEvents;
+    this.auditLogService = auditLogService;
+    this.analyticsService = analyticsService;
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
-    const user = await this.getCurrentUser({ request });
-    const esClient = this.getScopedEsClient(request).asInternalUser;
-    const space = getCurrentSpaceId({ request, spaces: this.spaces });
-    const agentRegistry = await this.agents.getRegistry({ request });
-
-    return createClient({ user, esClient, logger: this.logger, space, agentRegistry });
-  }
-
-  /**
-   * Returns the author of a conversation round.
-   * Only public conversation rounds have an author; private conversations are single-owner
-   * (captured by conversation.user). External origins (e.g. Slack) provide their own author and
-   * take precedence; otherwise the author is the authenticated Kibana user that initiated the
-   * round, including rounds from an external origin that omits `author`.
-   */
-  async getConversationRoundAuthor({
-    request,
-    conversation,
-    origin,
-  }: {
-    request: KibanaRequest;
-    conversation: Conversation;
-    origin?: ExecutionConversationOrigin;
-  }): Promise<ConversationRoundAuthor | undefined> {
-    if (conversation.access_control?.access_mode !== ConversationAccessControlMode.Public) {
-      return undefined;
-    }
-
-    if (origin?.author) {
-      return origin.author;
-    }
-
-    const user = await this.getCurrentUser({ request });
-    const id = user.id ?? user.username;
-
-    if (!id) {
-      return undefined;
-    }
-
-    return { id, ...(user.username ? { username: user.username } : {}) };
-  }
-
-  private async getCurrentUser({ request }: { request: KibanaRequest }) {
-    return getUserFromRequest({
+    const user = await getUserFromRequest({
       request,
       security: this.security,
       esClient: this.getScopedEsClient(request).asCurrentUser,
+    });
+
+    return this.createScopedClient({ request, user });
+  }
+
+  async getScopedClientAsUser({
+    request,
+    user,
+  }: {
+    request: KibanaRequest;
+    user: CurrentUser;
+  }): Promise<ConversationClient> {
+    return this.createScopedClient({ request, user });
+  }
+
+  private async createScopedClient({
+    request,
+    user,
+  }: {
+    request: KibanaRequest;
+    user: CurrentUser;
+  }): Promise<ConversationClient> {
+    const esClient = this.getScopedEsClient(request).asInternalUser;
+    const space = getCurrentSpaceId({ request, spaces: this.spaces });
+    const agentRegistry = await this.agents.getRegistry({ request });
+    const eventBus = this.eventBus;
+    const analyticsService = this.analyticsService;
+
+    return createClient({
+      user,
+      esClient,
+      logger: this.logger,
+      space,
+      agentRegistry,
+      conversationEvents: this.conversationEvents,
+      eventEmitter: eventBus ? createScopedConversationEventEmitter(eventBus, request) : undefined,
+      onConversationCreated: (params) =>
+        this.auditLogService.logConversationCreated(request, params),
+      reportFieldsChange: analyticsService
+        ? (params) => analyticsService.reportConversationFieldsChanged(params)
+        : undefined,
     });
   }
 

@@ -352,6 +352,66 @@ describe('validateRemoteIndexPrivileges', () => {
   });
 });
 
+describe('validateDataSourcePrivileges', () => {
+  beforeEach(() => {
+    validator = new RoleValidator({ shouldValidate: true });
+  });
+
+  test('it treats a both-empty row as valid (placeholder)', () => {
+    const role = {
+      name: '',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+        global: {
+          application: { manage: { applications: [] } },
+          data_source: [{ names: [], privileges: [] }],
+        },
+      },
+      kibana: [],
+    };
+
+    expect(validator.validateDataSourcePrivileges(role as Role)).toEqual({ isInvalid: false });
+  });
+
+  test('it requires privileges when names are defined', () => {
+    const role = {
+      name: '',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+        global: {
+          application: { manage: { applications: [] } },
+          data_source: [{ names: ['acme_*'], privileges: [] }],
+        },
+      },
+      kibana: [],
+    };
+
+    expect(validator.validateDataSourcePrivileges(role as Role)).toEqual({ isInvalid: true });
+  });
+
+  test('it requires names when privileges are defined', () => {
+    const role = {
+      name: '',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+        global: {
+          application: { manage: { applications: [] } },
+          data_source: [{ names: [], privileges: ['read'] }],
+        },
+      },
+      kibana: [],
+    };
+
+    expect(validator.validateDataSourcePrivileges(role as Role)).toEqual({ isInvalid: true });
+  });
+});
+
 describe('validateSpacePrivileges', () => {
   beforeEach(() => {
     validator = new RoleValidator({ shouldValidate: true });

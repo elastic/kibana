@@ -21,6 +21,6 @@ describe('#parseObjectKey', () => {
   });
 
   it('throws error when input is malformed', () => {
-    expect(() => parseObjectKey('foobar')).toThrowError('Malformed object key');
+    expect(() => parseObjectKey('foobar')).toThrow('Malformed object key');
   });
 });

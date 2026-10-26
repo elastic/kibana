@@ -106,6 +106,8 @@ export type SmlIndexAttachmentParams = SmlIndexAttachmentOriginParams;
  * the default (`'crawled'`) the two are equivalent.
  */
 export interface SmlDeleteAttachmentParams {
+  /** Waits for refresh and rejects failed or incomplete deletions. */
+  strict?: boolean;
   request: KibanaRequest;
   originId: string;
   attachmentType: string;

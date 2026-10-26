@@ -8,6 +8,9 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { Request } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
+import type { EventOriginActor } from '../../event_origin/origin_schemas';
+import { toEventOrigin } from '../../event_origin/event_origin';
+import { EventOriginActorToken } from '../../event_origin/token';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,
@@ -49,7 +52,8 @@ export class RuleExecutorEventPublisher implements RuleExecutorEventPublisherCon
   constructor(
     @inject(AlertingDomainEventBusToken)
     private readonly eventBus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
-    @inject(Request) private readonly request: KibanaRequest
+    @inject(Request) private readonly request: KibanaRequest,
+    @inject(EventOriginActorToken) private readonly actor: EventOriginActor
   ) {}
 
   public publishExecutionSucceeded(payload: RuleExecutionSucceededPayload): void {
@@ -58,7 +62,10 @@ export class RuleExecutorEventPublisher implements RuleExecutorEventPublisherCon
       payload,
     };
 
-    this.eventBus.publish(event, { request: this.request });
+    this.eventBus.publish(event, {
+      request: this.request,
+      origin: toEventOrigin(this.actor, this.request),
+    });
   }
 
   public publishExecutionFailed(payload: RuleExecutionFailedPayload): void {
@@ -67,6 +74,9 @@ export class RuleExecutorEventPublisher implements RuleExecutorEventPublisherCon
       payload,
     };
 
-    this.eventBus.publish(event, { request: this.request });
+    this.eventBus.publish(event, {
+      request: this.request,
+      origin: toEventOrigin(this.actor, this.request),
+    });
   }
 }

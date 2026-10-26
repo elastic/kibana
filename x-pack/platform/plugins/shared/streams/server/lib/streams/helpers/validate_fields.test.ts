@@ -14,6 +14,7 @@ import {
   validateClassicFields,
 } from './validate_fields';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
+import { createRootStreamDefinition } from '../root_stream_definition';
 
 const createWiredStreamDefinition = (
   name: string,
@@ -165,6 +166,51 @@ describe('validateAncestorFields', () => {
       expect(() => validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })).toThrow(
         "Field invalid_field is not allowed to be defined as it doesn't match the namespaced ECS or OTel schema."
       );
+    });
+
+    it('should validate namespace prefixes when ancestors is empty (root stream)', () => {
+      const fields: FieldDefinition = {
+        invalid_field: { type: 'keyword' },
+      };
+
+      expect(() =>
+        validateAncestorFields({ ancestors: [], fields, streamName: 'logs.otel' })
+      ).toThrow(MalformedFieldsError);
+      expect(() =>
+        validateAncestorFields({ ancestors: [], fields, streamName: 'logs.otel' })
+      ).toThrow(
+        "Field invalid_field is not allowed to be defined as it doesn't match the namespaced ECS or OTel schema."
+      );
+    });
+
+    it('should accept namespaced fields on a root stream with no ancestors', () => {
+      const fields: FieldDefinition = {
+        'attributes.organization_id': { type: 'keyword' },
+      };
+
+      expect(() =>
+        validateAncestorFields({ ancestors: [], fields, streamName: 'logs.otel' })
+      ).not.toThrow();
+    });
+
+    it('should accept system fields that are not namespaced', () => {
+      // `stream.name` is managed by Streams and has no user-defined ES mapping, so it
+      // is exempt from the namespaced ECS/OTel naming rules.
+      const fields: FieldDefinition = {
+        'stream.name': { type: 'system' },
+      };
+
+      expect(() =>
+        validateAncestorFields({ ancestors: [], fields, streamName: 'logs.otel' })
+      ).not.toThrow();
+    });
+
+    it('should accept the default field set of the logs.otel root stream', () => {
+      const fields = createRootStreamDefinition('logs.otel').ingest.wired.fields;
+
+      expect(() =>
+        validateAncestorFields({ ancestors: [], fields, streamName: 'logs.otel' })
+      ).not.toThrow();
     });
   });
 

@@ -8,6 +8,7 @@
 import type { HttpStart } from '@kbn/core/public';
 
 import type { LensDocument, ILensDocumentService } from '@kbn/lens-common';
+import { withLegacyAggregateQuerySlot } from '@kbn/lens-common';
 import { LensClient } from './lens_client';
 import type { LensSearchRequestQuery } from '../../server';
 
@@ -24,7 +25,9 @@ export class LensDocumentService implements ILensDocumentService {
 
   save = async (vis: LensDocument): Promise<LensSaveResult> => {
     // TODO: Flatten LenDocument types to align with new LensItem, for now just keep it.
-    const { savedObjectId, references, ...attributes } = vis;
+    const { savedObjectId, references, ...rawAttributes } = vis;
+    // mixed-version compat: mirror the ES|QL layer query into the legacy slot
+    const attributes = withLegacyAggregateQuerySlot(rawAttributes);
 
     if (savedObjectId) {
       const {

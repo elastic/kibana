@@ -28,12 +28,14 @@ import {
   CLOSE_BUTTON_LABEL,
   SUMMARY_TAB_LABEL,
 } from '../../../common/components/details_flyout/translation';
+import type { FlyoutPrevNextNavigation } from '../../../../common/flyout_prev_next_nav';
 import {
   ScrollableFlyoutTabbedContent,
   TabContentPadding,
 } from '../../../common/components/details_flyout/utils';
 import { SummaryTab } from './tabs/summary';
 import { UpdatedByLabel } from '../../../common/components/updated_by_label';
+import { FlyoutPrevNextNav } from '../../../../common/flyout_prev_next_nav';
 
 export interface DashboardMigrationDashboardDetailsFlyoutProps {
   migrationDashboard: DashboardMigrationDashboard;
@@ -41,6 +43,7 @@ export interface DashboardMigrationDashboardDetailsFlyoutProps {
   size?: EuiFlyoutProps['size'];
   isLoading?: boolean;
   dashboardActions?: React.ReactNode;
+  navigation: FlyoutPrevNextNavigation;
 }
 
 export const DashboardMigrationDetailsFlyout = React.memo(function DashboardMigrationDetailsFlyout({
@@ -49,6 +52,7 @@ export const DashboardMigrationDetailsFlyout = React.memo(function DashboardMigr
   size,
   isLoading = false,
   dashboardActions,
+  navigation,
 }: DashboardMigrationDashboardDetailsFlyoutProps) {
   const summaryTab: EuiTabbedContentTab = useMemo(
     () => ({
@@ -101,12 +105,20 @@ export const DashboardMigrationDetailsFlyout = React.memo(function DashboardMigr
       data-test-subj="dashboardDetailsFlyout"
     >
       <EuiFlyoutHeader>
-        <EuiTitle size="m" data-test-subj="detailsFlyoutTitle">
-          <h2 id={migrationsDashboardsFlyoutTitleId}>
-            {migrationDashboard.elastic_dashboard?.title ||
-              migrationDashboard.original_dashboard.title}
-          </h2>
-        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" direction="row">
+          <EuiFlexItem grow={false}>
+            <FlyoutPrevNextNav navigation={navigation} isDisabled={isLoading} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m" data-test-subj="detailsFlyoutTitle">
+              <h2 id={migrationsDashboardsFlyoutTitleId}>
+                {migrationDashboard.elastic_dashboard?.title ||
+                  migrationDashboard.original_dashboard.title}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <UpdatedByLabel
           updatedBy={migrationDashboard.updated_by ?? migrationDashboard.created_by}

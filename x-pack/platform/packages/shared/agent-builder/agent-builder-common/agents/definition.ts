@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
 import type { ToolSelection } from '../tools';
 import type { UserIdAndName } from '../base/users';
 import type { AgentAccessControl } from './access_control';
+import type { ApiTarget } from '../apis';
 
 /**
- * Id of the default agent type
+ * ID of the default agent type
  */
 export const chatAgentTypeId = 'chat';
 
@@ -28,15 +30,26 @@ export enum AgentType {
 export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
 
 /**
+ * ID of the AI index available to every chat agent by default.
+ */
+export const agentBuilderDefaultAiIndexId = 'elastic';
+
+/**
+ * ID of the Context Engine retrieval skill. Agent Builder grants it at runtime to any agent that
+ * can reach an AI Index; it is never part of the agent's own configuration.
+ */
+export const kiRetrievalSkillId = 'ki-retrieval';
+
+/**
  * Definition of a agentBuilder agent.
  */
 export interface AgentDefinition {
   /**
-   * Id of the agent
+   * ID of the agent
    */
   id: string;
   /**
-   * Id of the agent type this agent derives from.
+   * ID of the agent type this agent derives from.
    * Defaults to {@link chatAgentTypeId}, whose base is empty.
    */
   type: string;
@@ -54,6 +67,12 @@ export interface AgentDefinition {
    */
   readonly: boolean;
   /**
+   * When true, the agent is hidden from UI listings (agent picker, management page) by default.
+   * Built-in agents must set this explicitly during registration; it defaults to false.
+   * Persisted agents derive it automatically: system-created non-chat agents are hidden.
+   */
+  hidden?: boolean;
+  /**
    * Access control controls who can read, run, write, delete, and manage this agent.
    */
   access_control?: AgentAccessControl;
@@ -61,6 +80,18 @@ export interface AgentDefinition {
    * Agent owner metadata.
    */
   created_by?: UserIdAndName;
+  /**
+   * ISO timestamp of when the agent was created.
+   */
+  created_at?: string;
+  /**
+   * Metadata for who last updated the agent.
+   */
+  updated_by?: UserIdAndName;
+  /**
+   * ISO timestamp of when the agent was last updated.
+   */
+  updated_at?: string;
   /**
    * Optional labels used to organize or filter agents
    */
@@ -111,6 +142,11 @@ export interface AgentConfiguration {
   workflow_ids?: string[];
 
   /**
+   * Optional list of workflow IDs. When set, these workflows run after the agent finishes each execution.
+   */
+  post_execution_workflow_ids?: string[];
+
+  /**
    * Optional list of plugin IDs assigned to this agent.
    * Skills contributed by these plugins will be available to the agent during execution.
    */
@@ -122,14 +158,66 @@ export interface AgentConfiguration {
    * When undefined, all connectors remain visible (backward compatibility).
    */
   connector_ids?: string[];
+
+  /**
+   * Optional list of AI indices IDs associated with this agent.
+   * When set, if Context Engine is enabled, the agent will first search through these indices
+   * to answer questions before potentially querying the raw data, in order to improve
+   * the accuracy and token efficiency.
+   * */
+  ai_indices?: string[];
+
+  /**
+   * Optional list of agent IDs this agent may spawn as sub-agents.
+   * Must use SELF_AGENT_ID (_self) to reference itself.
+   */
+  subagent_ids?: string[];
+
+  /**
+   * Optional ID of the inference feature whose first model this agent runs on.
+   */
+  inference_feature_id?: string;
+
+  /**
+   * Optional default reasoning level for this agent's runs. A `reasoning_level` passed to the
+   * converse API or workflow step overrides it.
+   */
+  reasoning_level?: ChatCompletionReasoningEffort;
+
+  /**
+   * Destructive APIs pre-approved for every run of this agent.
+   */
+  approvals?: AgentApprovals;
 }
+
+/**
+ * Agent-level destructive API auto-approval defaults.
+ */
+export interface AgentApprovals {
+  /**
+   * API selectors keyed by backend. Each entry is an exact API identifier, a namespace
+   * wildcard (`indices.*`), or `*`.
+   */
+  auto_approved_apis?: Partial<Record<ApiTarget, string[]>>;
+}
+
+/**
+ * Agent configuration without the fields that only built-in agents can declare.
+ */
+export type AgentConfigurationInput = Omit<
+  AgentConfiguration,
+  'inference_feature_id' | 'reasoning_level'
+>;
 
 /**
  * Runtime configuration overrides for agent execution.
  * These override the stored agent configuration for a single execution instance.
  * Each field, if provided, completely replaces the corresponding field in the stored configuration.
+ *
+ * Excludes `approvals`, since per-run grants go through the execution's interactivity config, which
+ * adds to the stored defaults instead of replacing them.
  */
-export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
+export type AgentConfigurationOverrides = Partial<Omit<AgentConfigurationInput, 'approvals'>>;
 
 /**
  * Runtime configuration overrides exposed via the public API and persisted on conversation rounds.

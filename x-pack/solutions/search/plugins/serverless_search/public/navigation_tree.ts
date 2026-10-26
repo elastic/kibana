@@ -12,7 +12,6 @@ import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { i18n } from '@kbn/i18n';
-import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
 function isEditingFromDashboard(
@@ -28,9 +27,6 @@ function isEditingFromDashboard(
   return isVizApp && hasOriginatingApp;
 }
 
-const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
-  defaultMessage: 'Elasticsearch',
-});
 const PERFORMANCE_TITLE = i18n.translate('xpack.serverlessSearch.nav.performance', {
   defaultMessage: 'Performance',
 });
@@ -73,10 +69,11 @@ export function createNavigationTree({
   return {
     body: [
       {
-        icon: 'logoElasticsearch',
+        icon: 'home',
         link: 'searchHomepage',
-        renderAs: 'home',
-        title: NAV_TITLE,
+        title: i18n.translate('xpack.serverlessSearch.nav.home', {
+          defaultMessage: 'Home',
+        }),
         breadcrumbStatus: 'hidden',
       },
       {
@@ -84,7 +81,7 @@ export function createNavigationTree({
         link: 'agent_builder',
       },
       {
-        icon: 'sparkles',
+        icon: 'tableSparkles',
         link: 'context_engine',
       },
       {
@@ -167,11 +164,12 @@ export function createNavigationTree({
           {
             children: [
               { link: 'management:index_management', breadcrumbStatus: 'hidden' },
+              { link: 'management:data_federation', breadcrumbStatus: 'hidden' },
               { link: 'management:index_lifecycle_management', breadcrumbStatus: 'hidden' },
               { link: 'management:snapshot_restore', breadcrumbStatus: 'hidden' },
               { link: 'management:transform', breadcrumbStatus: 'hidden' },
               { link: 'management:rollup_jobs', breadcrumbStatus: 'hidden' },
-              { link: 'management:data_federation', breadcrumbStatus: 'hidden' },
+              { link: 'management:esql_views', breadcrumbStatus: 'hidden' },
               { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
               { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
             ],
@@ -189,11 +187,7 @@ export function createNavigationTree({
             }),
           },
           {
-            children: [
-              { link: 'searchSynonyms:synonyms' },
-              { link: 'searchQueryRules' },
-              { link: 'searchPlayground' },
-            ],
+            children: [{ link: 'searchSynonyms:synonyms' }, { link: 'searchQueryRules' }],
             id: 'search_relevance',
             title: i18n.translate('xpack.serverlessSearch.nav.ingest.relevance.title', {
               defaultMessage: 'Relevance',
@@ -240,6 +234,7 @@ export function createNavigationTree({
             children: [
               { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
               { link: 'management:application_connections', breadcrumbStatus: 'hidden' },
+              { link: 'management:service_accounts', breadcrumbStatus: 'hidden' },
               { link: 'management:roles', breadcrumbStatus: 'hidden' },
             ],
           },
@@ -267,7 +262,6 @@ export function createNavigationTree({
               },
             ],
           },
-          ...getAlertingV2ManagementNavPanel(core),
           {
             id: 'settings_alerts',
             title: ALERTS_AND_INSIGHTS_TITLE,
@@ -325,6 +319,7 @@ export function createNavigationTree({
             title: AI_TITLE,
             children: [
               { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
+              { link: 'management:aiAnonymizationSettings', breadcrumbStatus: 'hidden' },
               { link: 'management:evals', breadcrumbStatus: 'hidden' },
               ...(showAiAssistant
                 ? [

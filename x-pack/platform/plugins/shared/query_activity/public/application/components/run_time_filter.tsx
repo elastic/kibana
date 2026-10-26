@@ -106,7 +106,7 @@ export const RunTimeFilter: React.FC<RunTimeFilterProps> = ({ value, unit, onCha
       })}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           hasActiveFilters={hasActiveFilter}
           numActiveFilters={hasActiveFilter ? 1 : undefined}

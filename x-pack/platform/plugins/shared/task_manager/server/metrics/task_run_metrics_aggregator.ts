@@ -112,7 +112,7 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
     const { task, isExpired, result } = taskRunResult;
     const success = isOk((taskEvent as TaskRun).event);
     const taskType = task.taskType.replaceAll('.', '__');
-    const taskTypeGroup = getTaskTypeGroup(taskType);
+    const taskTypeGroup = getTaskTypeGroup(taskRunResult.taskTypeGroup);
 
     // increment the total counters
     this.incrementCounters(TaskRunKeys.TOTAL, taskType, taskTypeGroup);

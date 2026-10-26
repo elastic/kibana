@@ -371,6 +371,64 @@ describe('WorkflowContextManager', () => {
     });
   });
 
+  describe('variables', () => {
+    const workflow: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      description: 'A test workflow',
+      enabled: true,
+      consts: {},
+      triggers: [],
+      steps: [],
+    };
+    let testContainer: ReturnType<typeof createTestContainer>;
+
+    beforeEach(() => {
+      testContainer = createTestContainer(workflow);
+      testContainer.workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([
+        {
+          stepType: 'data.set',
+          status: 'completed',
+          output: {
+            channel: '#one-workflow',
+            retries: 3,
+          },
+          globalExecutionIndex: 1,
+        } as unknown as EsWorkflowStepExecution,
+      ]);
+    });
+
+    it('should have variables from data.set steps', () => {
+      const stepContext = testContainer.underTest.getContext();
+      expect(stepContext.variables).toEqual({
+        channel: '#one-workflow',
+        retries: 3,
+      });
+    });
+
+    it('should override variables with mocked data', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        scopeStack: [] as StackFrame[],
+        context: {
+          contextOverride: {
+            variables: {
+              channel: '#mocked-channel',
+              newVariable: 'new variable',
+            },
+          },
+        } as Record<string, any>,
+      } as EsWorkflowExecution);
+
+      const context = testContainer.underTest.getContext();
+      expect(context.variables).toEqual({
+        channel: '#mocked-channel',
+        retries: 3,
+        newVariable: 'new variable',
+      });
+    });
+  });
+
   describe('workflow context', () => {
     let testContainer: ReturnType<typeof createTestContainer>;
     const workflow: WorkflowYaml = {
@@ -746,6 +804,50 @@ describe('WorkflowContextManager', () => {
           total: 3,
         })
       );
+    });
+
+    it('prefers snapshotted input.items over re-evaluating the foreach expression', () => {
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'outerForeachStep',
+          nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep', nodeType: 'enter-foreach' }],
+        },
+      ];
+      testContainer = createTestContainer(workflow, { stackFrames });
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+      } as EsWorkflowExecution);
+      testContainer.workflowExecutionState.getStepExecution = jest
+        .fn()
+        .mockImplementation((stepExecutionId) => {
+          if (stepExecutionId === 'outerForeachStep_generated') {
+            return {
+              id: stepExecutionId,
+              stepId: 'outerForeachStep',
+              stepType: 'foreach',
+              input: {
+                foreach: '{{variables.items}}',
+                items: ['a', 'b'],
+              },
+              state: { index: 1, total: 2 },
+            };
+          }
+          return undefined;
+        });
+      (testContainer.templatingEngineMock.evaluateExpression as jest.Mock).mockReturnValue([
+        'x',
+        'y',
+      ]);
+      (testContainer.templatingEngineMock.render as jest.Mock).mockReturnValue(['x', 'y']);
+
+      const context = testContainer.underTest.getContext();
+
+      expect(context.foreach).toEqual({
+        items: ['a', 'b'],
+        item: 'b',
+        index: 1,
+        total: 2,
+      });
     });
 
     describe('nested foreach with inner expression {{foreach.item}}', () => {
@@ -1522,6 +1624,7 @@ describe('WorkflowContextManager', () => {
               url: 'http://localhost:5601/s/space-789/app/workflows/workflow-456?executionId=exec-123&tab=executions',
               executedBy: 'unknown',
               triggeredBy: undefined,
+              usage: undefined,
             },
             workflow: {
               id: 'workflow-456',
@@ -1534,7 +1637,13 @@ describe('WorkflowContextManager', () => {
               API_URL: 'https://api.example.com',
               TIMEOUT: 5000,
             },
-            event: undefined,
+            event: {
+              spaceId: 'space-789',
+              inputs: {
+                userId: 'user-123',
+                count: 10,
+              },
+            },
             inputs: {
               userId: 'user-123',
               count: 10,
@@ -2044,7 +2153,6 @@ describe('WorkflowContextManager', () => {
       expect(deps.coreStart).toBe(
         (testContainer.underTest as unknown as { coreStart: unknown }).coreStart
       );
-      expect(deps.cloudSetup).toBe(dependencies.cloudSetup);
       expect(deps.workflowRunId).toBe('workflow-run-123');
       expect(params).toEqual({ method: 'GET', path: '/api/status' });
     });

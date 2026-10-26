@@ -14,7 +14,6 @@ export {
 } from './backfill';
 export * from './limits';
 export { PLUGIN } from './plugin';
-export const PROVISION_UIAM_API_KEYS_FEATURE_FLAG = 'alerting.rules.provisionUiamApiKeys';
 export { gapStatus, gapFillStatus } from './gap_status';
 export type { GapStatus, GapFillStatus } from './gap_status';
 export { gapReasonType, DEFAULT_EXCLUDED_GAP_REASONS } from './gap_reason';
@@ -27,3 +26,7 @@ export { validFields } from './valid_fields_with_read_auth';
 export { gapAutoFillSchedulerLimits } from './gap_auto_fill_scheduler';
 export { GAP_AUTO_FILL_STATUS } from './gap_auto_fill_scheduler';
 export type { GapAutoFillStatus } from './gap_auto_fill_scheduler';
+export {
+  MISSING_UIAM_API_KEY_TAG,
+  LEGACY_MISSING_UIAM_API_KEY_TAG,
+} from './missing_uiam_api_key_tag';

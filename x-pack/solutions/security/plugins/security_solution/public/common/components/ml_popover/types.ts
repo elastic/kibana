@@ -208,5 +208,6 @@ export interface JobsFilters {
   showCustomJobs: boolean;
   showElasticJobs: boolean;
   selectedGroups: string[];
-  selectedTab: MlJobsTab;
+  /** Prototype: prebuilt vs integration jobs tab (optional for upstream content). */
+  selectedTab?: MlJobsTab;
 }

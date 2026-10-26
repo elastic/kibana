@@ -14,6 +14,7 @@ export type {
   DiscoverSessionTabAttributes,
   DiscoverSessionAttributes,
 } from './saved_objects/schema';
+export { SCHEMA_DISCOVER_SESSION_LATEST } from './saved_objects/schema';
 export { getSavedSearch } from './services/saved_searches';
 
 export const plugin = async (initContext: PluginInitializerContext) => {

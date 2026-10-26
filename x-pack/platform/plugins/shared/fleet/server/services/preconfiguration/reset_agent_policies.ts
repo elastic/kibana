@@ -25,6 +25,7 @@ import type { AgentPolicy } from '../../types';
 import { AgentPolicyInvalidError } from '../../errors';
 
 import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '../../constants';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../../common/services/version_specific_policies_utils';
 
 export async function resetPreconfiguredAgentPolicies(
   soClient: SavedObjectsClientContract,
@@ -168,7 +169,7 @@ async function _deleteExistingData(
   const { agents } = await getAgentsByKuery(esClient, soClient, {
     showInactive: true,
     perPage: SO_SEARCH_LIMIT,
-    kuery: existingPolicies.map((policy) => `policy_id:"${escapeQuotes(policy.id)}"`).join(' or '),
+    kuery: buildPolicyBaseIdsWithFallbackKuery(existingPolicies.map((policy) => policy.id)),
   });
 
   // Delete

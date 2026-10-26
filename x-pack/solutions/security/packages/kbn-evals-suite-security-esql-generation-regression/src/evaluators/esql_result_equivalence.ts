@@ -200,6 +200,7 @@ export function createEsqlResultEquivalenceEvaluator<
   return {
     name,
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output, expected }): Promise<EvaluationResult> => {
       let candidateQuery: string;
       let goldQuery: string;

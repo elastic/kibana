@@ -261,7 +261,7 @@ describe('buildRuleActionButtons', () => {
   it('returns a "Create rule" primary action for a create-intent attachment', () => {
     const buttons = buildRuleActionButtons(baseProps);
     expect(primaryButton(buttons)?.label).toBe('Create rule');
-    expect(primaryButton(buttons)?.icon).toBe('plusInCircle');
+    expect(primaryButton(buttons)?.icon).toBe('plusCircle');
   });
 
   it('returns an "Update rule" primary action for an update-intent attachment', () => {

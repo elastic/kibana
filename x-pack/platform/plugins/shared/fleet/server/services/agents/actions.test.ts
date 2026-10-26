@@ -122,7 +122,7 @@ describe('Agent actions', () => {
       });
     });
 
-    it.each(['UNENROLL', 'UPGRADE', 'MIGRATE'] as AgentActionType[])(
+    it.each(['UNENROLL', 'UPGRADE', 'MIGRATE', 'RESTART'] as AgentActionType[])(
       'should sign %s action',
       async (actionType: AgentActionType) => {
         const esClient = elasticsearchServiceMock.createInternalClient();
@@ -148,7 +148,7 @@ describe('Agent actions', () => {
           agents: ['agent1'],
         });
 
-        expect(esClient.create).toBeCalledWith(
+        expect(esClient.create).toHaveBeenCalledWith(
           expect.objectContaining({
             document: expect.objectContaining({
               signed: {
@@ -194,7 +194,7 @@ describe('Agent actions', () => {
         agents: ['agent1'],
       });
 
-      expect(esClient.create).toBeCalledWith(
+      expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.not.objectContaining({
             signed: expect.any(Object),
@@ -235,37 +235,34 @@ describe('Agent actions', () => {
       }
     });
 
-    it('should sign UNENROLL, UPGRADE and MIGRATE actions', async () => {
-      const esClient = elasticsearchServiceMock.createInternalClient();
-      const newActions: NewAgentAction[] = (
-        ['UNENROLL', 'UPGRADE', 'MIGRATE'] as AgentActionType[]
-      ).map((actionType, i) => {
-        const actionId = `action${i + 1}`;
-        return {
-          id: actionId,
-          type: actionType,
-          agents: [actionId],
-        };
-      });
+    it.each(['UNENROLL', 'UPGRADE', 'MIGRATE', 'RESTART'] as AgentActionType[])(
+      'should sign %s action',
+      async (actionType: AgentActionType) => {
+        const esClient = elasticsearchServiceMock.createInternalClient();
 
-      await bulkCreateAgentActions(esClient, newActions);
-      expect(esClient.bulk).toHaveBeenCalledWith(
-        expect.objectContaining({
-          operations: expect.arrayContaining([
-            expect.arrayContaining([
-              expect.objectContaining({
-                signed: {
-                  data: expect.any(String),
-                  signature: expect.any(String),
-                },
-              }),
+        await bulkCreateAgentActions(esClient, [
+          { id: 'action1', type: actionType, agents: ['agent1'] },
+        ]);
+
+        expect(esClient.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({
+            operations: expect.arrayContaining([
+              expect.arrayContaining([
+                expect.objectContaining({
+                  type: actionType,
+                  signed: {
+                    data: expect.any(String),
+                    signature: expect.any(String),
+                  },
+                }),
+              ]),
             ]),
-          ]),
-        })
-      );
-    });
+          })
+        );
+      }
+    );
 
-    it('should not sign actions other than UNENROLL, UPGRADE and MIGRATE', async () => {
+    it('should not sign actions other than UNENROLL, UPGRADE, MIGRATE and RESTART', async () => {
       const esClient = elasticsearchServiceMock.createInternalClient();
       const newActions: NewAgentAction[] = (
         [
@@ -335,9 +332,9 @@ describe('Agent actions', () => {
         },
       } as any);
       const soClient = savedObjectsClientMock.create();
-      await expect(() =>
-        cancelAgentAction(esClient, soClient, 'i-do-not-exists')
-      ).rejects.toThrowError(/Action not found/);
+      await expect(() => cancelAgentAction(esClient, soClient, 'i-do-not-exists')).rejects.toThrow(
+        /Action not found/
+      );
     });
 
     it('should create one CANCEL action for each UPGRADE action found', async () => {
@@ -367,8 +364,8 @@ describe('Agent actions', () => {
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'action1');
 
-      expect(esClient.create).toBeCalledTimes(2);
-      expect(esClient.create).toBeCalledWith(
+      expect(esClient.create).toHaveBeenCalledTimes(2);
+      expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({
             type: 'CANCEL',
@@ -377,7 +374,7 @@ describe('Agent actions', () => {
           }),
         })
       );
-      expect(esClient.create).toBeCalledWith(
+      expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({
             type: 'CANCEL',
@@ -407,8 +404,8 @@ describe('Agent actions', () => {
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'action1');
 
-      expect(mockedBulkUpdateAgents).toBeCalled();
-      expect(mockedBulkUpdateAgents).toBeCalledWith(
+      expect(mockedBulkUpdateAgents).toHaveBeenCalled();
+      expect(mockedBulkUpdateAgents).toHaveBeenCalledWith(
         expect.anything(),
         [
           expect.objectContaining({ agentId: 'agent1' }),
@@ -467,7 +464,7 @@ describe('Agent actions', () => {
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'unenroll-action-1');
 
-      expect(esClient.create).toBeCalledWith(
+      expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({
             type: 'CANCEL',
@@ -517,7 +514,7 @@ describe('Agent actions', () => {
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'unenroll-action-1');
 
-      expect(mockedBulkUpdateAgents).not.toBeCalled();
+      expect(mockedBulkUpdateAgents).not.toHaveBeenCalled();
     });
 
     it('should disable unenroll_timeout on the agent policy when cancelling UNENROLL', async () => {

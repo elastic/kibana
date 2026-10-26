@@ -100,7 +100,7 @@ export const anomalyDetectionUpdateJobSchema = schema.object({
 export const analysisConfigSchema = schema.object({
   bucket_span: schema.string({ maxLength: 10000 }),
   summary_count_field_name: schema.maybe(schema.string({ maxLength: 10000 })),
-  detectors: schema.arrayOf(detectorSchema, { maxSize: 10000 }),
+  detectors: schema.arrayOf(detectorSchema, { maxSize: 100 }),
   influencers: schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 10000 }),
   categorization_field_name: schema.maybe(schema.string({ maxLength: 10000 })),
   categorization_analyzer: schema.maybe(schema.any()),

@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useCallback } from 'react';
@@ -33,6 +34,7 @@ export const PrivilegedAccessInfoPopover = () => {
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
   const entityAnalyticsLinks = docLinks.links.securitySolution.entityAnalytics;
   const state = useIntegrationLinkState(ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH);
+  const popoverTitleId = useGeneratedHtmlId();
 
   const { navigateTo } = useNavigation();
   const padPackage = usePrivilegedAccessDetectionIntegration();
@@ -67,10 +69,15 @@ export const PrivilegedAccessInfoPopover = () => {
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover
+      aria-labelledby={popoverTitleId}
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+    >
       <EuiPopoverTitle>
         <EuiTitle size="xs">
-          <h4>
+          <h4 id={popoverTitleId}>
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.privilegedAccessDetection.infoPopover.title"
               defaultMessage="Top privileged access anomalies"

@@ -11,14 +11,19 @@ import type {
   UserActionFindResponse,
 } from '../../../common/types/api';
 import {
-  UserActionInternalFindRequestRt,
-  UserActionFindResponseRt,
+  UserActionInternalFindRequestSchema,
+  UserActionFindResponseSchema,
 } from '../../../common/types/api';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 import type { CasesClientArgs } from '../types';
 import type { UserActionFind } from './types';
 import { Operations } from '../../authorization';
-import { formatSavedObject, formatSavedObjects, matchesSearch } from './utils';
+import {
+  formatSavedObject,
+  formatSavedObjects,
+  matchesSearch,
+  projectUserActionForSearch,
+} from './utils';
 import { createCaseError } from '../../common/error';
 import { asArray } from '../../common/utils';
 import type { CasesClient } from '../client';
@@ -49,12 +54,14 @@ export const find = async (
     // supertest and query-string encode a single entry in an array as just a string so make sure we have an array
     const types = asArray(params.types);
     const authors = asArray(params.authors);
+    const sources = asArray(params.sources);
 
-    const queryParams = decodeWithExcessOrThrow(UserActionInternalFindRequestRt)({
+    const queryParams = decodeWithExcessOrThrowZod(UserActionInternalFindRequestSchema)({
       ...params,
       types,
       authors,
-    });
+      sources,
+    }) as UserActionInternalFindRequest;
 
     const [authorizationFilterRes] = await Promise.all([
       authorization.getAuthorizationFilter(Operations.findUserActions),
@@ -92,7 +99,7 @@ export const find = async (
       total: userActions.total,
     };
 
-    return decodeOrThrow(UserActionFindResponseRt)(res);
+    return decodeOrThrowZod(UserActionFindResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find user actions for case id: ${caseId}: ${error}`,
@@ -116,7 +123,7 @@ const findWithSearch = async ({
    * `matchesSearch` only reads `type`, `payload`, and `created_by` off the raw
    * (transformed but undecoded) attributes, so we skip `decodeOrThrow` here and
    * only decode the page of results we actually return. Otherwise we'd pay the
-   * io-ts decode cost for every user action in the case just to discard most of
+   * zod decode cost for every user action in the case just to discard most of
    * them during filtering/pagination.
    */
   const allUserActions = await userActionService.finder.findAll({
@@ -131,7 +138,27 @@ const findWithSearch = async ({
     allUserActions.map((so) => ({ owner: so.attributes.owner, id: so.id }))
   );
 
-  const filtered = allUserActions.filter((so) => matchesSearch(so.attributes, search));
+  /**
+   * Document-level match first, then project extended_fields payloads so a
+   * multi-field save only returns the fields that explain the hit (author hits
+   * keep the full map). Projection is response-only — stored SOs are untouched.
+   */
+  const filtered = allUserActions.flatMap((so) => {
+    if (!matchesSearch(so.attributes, search)) {
+      return [];
+    }
+
+    const projectedAttributes = projectUserActionForSearch(so.attributes, search);
+    if (projectedAttributes == null) {
+      return [];
+    }
+
+    if (projectedAttributes === so.attributes) {
+      return [so];
+    }
+
+    return [{ ...so, attributes: projectedAttributes }];
+  });
 
   const currentPage = page ?? DEFAULT_PAGE;
   const currentPerPage = perPage ?? DEFAULT_PER_PAGE;
@@ -147,5 +174,5 @@ const findWithSearch = async ({
     total: filtered.length,
   };
 
-  return decodeOrThrow(UserActionFindResponseRt)(res);
+  return decodeOrThrowZod(UserActionFindResponseSchema)(res);
 };

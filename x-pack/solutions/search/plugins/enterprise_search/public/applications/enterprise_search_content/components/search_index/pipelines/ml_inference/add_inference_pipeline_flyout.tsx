@@ -13,7 +13,6 @@ import type { EuiStepsHorizontalProps, EuiStepStatus } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -29,6 +28,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import {
   BACK_BUTTON_LABEL,
@@ -120,19 +121,17 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
       <EuiFlyoutBody>
         {createErrors.length > 0 && (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               title={i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.createErrors',
                 { defaultMessage: 'Error creating pipeline' }
               )}
-              color="danger"
-              iconType="error"
             >
               {createErrors.map((message, i) => (
                 <p key={`createError.${i}`}>{message}</p>
               ))}
-            </EuiCallOut>
+            </KbnDangerCallout>
             <EuiSpacer />
           </>
         )}

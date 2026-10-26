@@ -440,7 +440,7 @@ describe('calculateBounds', () => {
     };
 
     stubNowTime('not_a_parsable_date');
-    expect(() => timefilter.calculateBounds(timeRange)).toThrowError();
+    expect(() => timefilter.calculateBounds(timeRange)).toThrow();
   });
 });
 
@@ -454,14 +454,14 @@ describe('getAutoRefreshFetch$', () => {
     });
     timefilter.setRefreshInterval({ pause: false, value: 1000 });
 
-    expect(autoRefreshFetch).toBeCalledTimes(0);
+    expect(autoRefreshFetch).toHaveBeenCalledTimes(0);
     jest.advanceTimersByTime(5000);
-    expect(autoRefreshFetch).toBeCalledTimes(1);
+    expect(autoRefreshFetch).toHaveBeenCalledTimes(1);
 
     if (doneCb) doneCb();
 
     jest.advanceTimersByTime(1005);
-    expect(autoRefreshFetch).toBeCalledTimes(2);
+    expect(autoRefreshFetch).toHaveBeenCalledTimes(2);
   });
 
   test('new getAutoRefreshFetch$ subscription restarts refresh loop', () => {
@@ -473,14 +473,14 @@ describe('getAutoRefreshFetch$', () => {
     });
     timefilter.setRefreshInterval({ pause: false, value: 1000 });
 
-    expect(autoRefreshFetch).toBeCalledTimes(0);
+    expect(autoRefreshFetch).toHaveBeenCalledTimes(0);
     jest.advanceTimersByTime(5000);
-    expect(autoRefreshFetch).toBeCalledTimes(1);
+    expect(autoRefreshFetch).toHaveBeenCalledTimes(1);
 
     fetch$.subscribe(autoRefreshFetch);
-    expect(autoRefreshFetch).toBeCalledTimes(1);
+    expect(autoRefreshFetch).toHaveBeenCalledTimes(1);
     sub1.unsubscribe();
     jest.advanceTimersByTime(1005);
-    expect(autoRefreshFetch).toBeCalledTimes(2);
+    expect(autoRefreshFetch).toHaveBeenCalledTimes(2);
   });
 });

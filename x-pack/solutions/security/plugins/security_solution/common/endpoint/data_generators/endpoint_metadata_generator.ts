@@ -169,7 +169,12 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
 
     // v9.6.0 introduced Kill-Process descendents
     if (gte(agentVersion, '9.6.0')) {
-      capabilities.push('kill_process_descendents');
+      capabilities.push('kill_process_descendants');
+    }
+
+    // v9.6.0 introduced physical memory dump capability
+    if (gte(agentVersion, '9.6.0')) {
+      capabilities.push('memdump_raw');
     }
 
     const hostMetadataDoc: HostMetadataInterface = {

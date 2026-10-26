@@ -69,7 +69,11 @@ export const OtelLogsStartStep: React.FC<OtelLogsStartStepProps> = ({
         </p>
       </EuiText>
 
-      <EuiCodeBlock language={codeLanguage} isCopyable={useInlineCopyOnly}>
+      <EuiCodeBlock
+        language={codeLanguage}
+        isCopyable={useInlineCopyOnly}
+        data-test-subj="observabilityOnboardingOtelLogsStartPanelCodeBlock"
+      >
         {startCommand}
       </EuiCodeBlock>
       {!useInlineCopyOnly && (

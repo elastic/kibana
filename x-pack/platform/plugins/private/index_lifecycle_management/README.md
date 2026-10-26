@@ -102,7 +102,7 @@ moved to a tier corresponding to a phase. For instance, when a cluster only has 
 with this cluster state by starting an ES node with the `data_hot` role. Using this command:
 
 ```bash
-yarn es snapshot --license=trial -E node.roles=data_hot,master,data_content
+pnpm es snapshot --license=trial -E node.roles=data_hot,master,data_content
 ```
 
 This will create a cluster where we have a single node that belongs to the hot-tier. In the data allocation section of
@@ -114,7 +114,7 @@ Default configuration for a node is that it belongs to all tiers, in which case 
 this by running:
 
 ```bash
-yarn es snapshot --license=trial
+pnpm es snapshot --license=trial
 ```
 
 ## Integration tests

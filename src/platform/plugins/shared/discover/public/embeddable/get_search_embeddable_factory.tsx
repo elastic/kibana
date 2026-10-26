@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, firstValueFrom, map, merge, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, firstValueFrom, map, merge, skip } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
@@ -16,7 +16,7 @@ import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { FetchContext } from '@kbn/presentation-publishing';
+import type { FetchContext, ViewMode } from '@kbn/presentation-publishing';
 import {
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -24,6 +24,8 @@ import {
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
+  apiHasDisableTriggers,
+  getViewModeSubject,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
@@ -32,16 +34,14 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
-import {
-  getDiscoverSessionEmbeddableComparators,
-  getSearchEmbeddableComparators,
-} from './utils/get_search_embeddable_comparators';
+import { PresentationPanelError } from '@kbn/embeddable-plugin/public';
+import { getDiscoverSessionEmbeddableComparators } from './utils/get_search_embeddable_comparators';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
 import { SearchEmbeddableInlineEditHoverActions } from './components/search_embeddable_inline_edit_hover_actions';
 import { SearchEmbeddableDeletedTabPrompt } from './components/search_embeddable_deleted_tab_prompt';
+import { SavedSearchEmbeddableBase } from './components/saved_search_embeddable_base';
 import { SearchEmbeddableMissingDataViewPrompt } from './components/search_embeddable_missing_data_view_prompt';
 import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
@@ -78,8 +78,10 @@ export const getSearchEmbeddableFactory = ({
       parentApi,
       uuid,
     }) => {
-      const embeddableTransformsEnabled =
-        discoverServices.discoverFeatureFlags.getEmbeddableTransformsEnabled();
+      const viewMode$ = getViewModeSubject(parentApi) ?? new BehaviorSubject<ViewMode>('view');
+      const disableTriggers$ = apiHasDisableTriggers(parentApi)
+        ? parentApi.disableTriggers$
+        : new BehaviorSubject<boolean>(false);
 
       const runtimeState = await deserializeState({
         serializedState: initialState,
@@ -105,20 +107,15 @@ export const getSearchEmbeddableFactory = ({
 
       const tabs = runtimeState.tabs ?? [];
 
-      const defaultState = embeddableTransformsEnabled
-        ? { selected_tab_id: tabs[0]?.id }
-        : {
-            selectedTabId: tabs[0]?.id,
-            sort: [],
-            grid: {},
-            ...getSearchEmbeddableDefaults(discoverServices.uiSettings),
-          };
+      const defaultState = { selected_tab_id: tabs[0]?.id };
 
       /** All other state */
+      const searchError$ = new BehaviorSubject<Error | undefined>(undefined);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const fetchContext$ = new BehaviorSubject<FetchContext | undefined>(undefined);
       const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
+      const abortSignal$ = new BehaviorSubject<AbortSignal | undefined>(undefined);
       const refreshTrigger$ = new BehaviorSubject<void>(undefined);
 
       /** Build API */
@@ -141,7 +138,6 @@ export const getSearchEmbeddableFactory = ({
           serializeDynamicActions: drilldownsManager.getLatestState,
           savedObjectId,
           selectedTabId: selectedTabId$.getValue(),
-          embeddableTransformsEnabled,
         });
 
       const inlineEditingApi = initializeInlineEditingApi({
@@ -152,8 +148,16 @@ export const getSearchEmbeddableFactory = ({
         selectedTabId$,
         savedObjectId$,
         searchEmbeddable,
-        blockingError$,
+        setSearchError: (error: Error | undefined) => searchError$.next(error),
         dataLoading$,
+      });
+
+      // Prevent blocking error when inline editing, with no direct way out of this mode
+      const blockingErrorSubscription = combineLatest([
+        searchError$,
+        inlineEditingApi.isInlineEditing$,
+      ]).subscribe(([searchError, isInlineEditing]) => {
+        blockingError$.next(isInlineEditing ? undefined : searchError);
       });
 
       const stateApi = initializeStateApi<SearchEmbeddablePanelApiState>({
@@ -181,9 +185,7 @@ export const getSearchEmbeddableFactory = ({
             ...drilldownsManager.comparators,
             ...titleComparators,
             ...timeRangeComparators,
-            ...(embeddableTransformsEnabled
-              ? getDiscoverSessionEmbeddableComparators(isByValue, shouldSkipTabComparators)
-              : getSearchEmbeddableComparators(isByValue, shouldSkipTabComparators)),
+            ...getDiscoverSessionEmbeddableComparators(isByValue, shouldSkipTabComparators),
             nonPersistedDisplayOptions: 'skip',
           };
         },
@@ -214,6 +216,8 @@ export const getSearchEmbeddableFactory = ({
         isEditable: startServices.isEditable,
         getTitle: () => titleManager.api.title$.getValue(),
       });
+
+      let cancelRequests: () => void = () => {};
 
       const api: SearchEmbeddableApi = finalizeApi({
         ...stateApi,
@@ -274,6 +278,7 @@ export const getSearchEmbeddableFactory = ({
         supportedTriggers: () => {
           return [ON_OPEN_PANEL_MENU];
         },
+        cancelRequests: () => cancelRequests(),
       });
 
       const addFilter: DocViewFilterFn = async (mapping, values, operation) => {
@@ -303,6 +308,14 @@ export const getSearchEmbeddableFactory = ({
       const enableFilters = runtimeState.nonPersistedDisplayOptions?.enableFilters !== false;
       const enableDocumentViewer =
         runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !== false;
+      const documentViewerFlyoutType =
+        runtimeState.nonPersistedDisplayOptions?.documentViewerFlyoutType;
+      const autoApplyDiscoverColumnDefaults = Boolean(
+        runtimeState.nonPersistedDisplayOptions?.autoApplyDiscoverColumnDefaults
+      );
+      const wrapToolbar = runtimeState.nonPersistedDisplayOptions?.wrapToolbar !== false;
+      const showKeyboardShortcuts = runtimeState.nonPersistedDisplayOptions?.showKeyboardShortcuts;
+      const showSortSelector = runtimeState.nonPersistedDisplayOptions?.showSortSelector;
 
       const expandedDoc$ = new BehaviorSubject<DataTableRecord | undefined>(undefined);
       const initialDocViewerTabId$ = new BehaviorSubject<string | undefined>(undefined);
@@ -315,8 +328,10 @@ export const getSearchEmbeddableFactory = ({
         initialDocViewerTabId$.next(options?.initialTabId);
       };
 
+      const { profileStateRegistry } = discoverServices;
       const toolkit = createInMemoryContextAwarenessToolkit({
-        profileStateRegistry: discoverServices.profileStateRegistry,
+        profileStateRegistry,
+        initialProfileState: profileStateRegistry.fromSavedState(runtimeState.tabTypeState),
         actions: {
           addFilter: enableFilters ? addFilter : undefined,
           refreshData: () => refreshTrigger$.next(undefined),
@@ -330,7 +345,7 @@ export const getSearchEmbeddableFactory = ({
         toolkit,
       });
 
-      const unsubscribeFromFetch = initializeFetch({
+      const { cleanup: cleanupFetch, cancelRequests: _cancelRequests } = initializeFetch({
         api: {
           ...api,
           parentApi,
@@ -341,17 +356,20 @@ export const getSearchEmbeddableFactory = ({
           dataViews$: searchEmbeddable.api.dataViews$,
           savedObjectId$,
           dataLoading$,
-          blockingError$,
           fetchContext$,
           fetchWarnings$,
+          abortSignal$,
         },
         discoverServices,
         stateManager: searchEmbeddable.stateManager,
         scopedProfilesManager,
         refreshTrigger$,
         setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
-        setBlockingError: (error: Error | undefined) => blockingError$.next(error),
+        setSearchError: (error: Error | undefined) => searchError$.next(error),
+        setApproximationApplied: searchEmbeddable.internalApi.setApproximationApplied,
+        esqlSource$: searchEmbeddable.esqlSource$,
       });
+      cancelRequests = _cancelRequests;
 
       return {
         api,
@@ -363,13 +381,17 @@ export const getSearchEmbeddableFactory = ({
             draftSelectedTabId,
             selectedTabId,
             isInlineEditDirty,
+            searchError,
+            disableTriggers,
           ] = useBatchedPublishingSubjects(
             api.savedSearch$,
             api.dataViews$,
             inlineEditingApi.isInlineEditing$,
             inlineEditingApi.draftSelectedTabId$,
             selectedTabId$,
-            inlineEditingApi.inlineEditDirty$
+            inlineEditingApi.inlineEditDirty$,
+            searchError$,
+            disableTriggers$
           );
 
           const expandedDoc = useObservable(expandedDoc$, expandedDoc$.getValue());
@@ -389,7 +411,8 @@ export const getSearchEmbeddableFactory = ({
             return () => {
               drilldownsManager.cleanup();
               searchEmbeddable.cleanup();
-              unsubscribeFromFetch();
+              cleanupFetch();
+              blockingErrorSubscription.unsubscribe();
             };
           }, []);
 
@@ -442,6 +465,26 @@ export const getSearchEmbeddableFactory = ({
             );
           }
 
+          if (searchError) {
+            return isInlineEditing ? (
+              <KibanaRenderContextProvider {...discoverServices.core}>
+                <SavedSearchEmbeddableBase
+                  inlineEditing={{
+                    hasPendingChanges: hasPendingInlineTabChanges,
+                    isActive: isInlineEditing,
+                    onApply: inlineEditingApi.applyInlineTabSelection,
+                    onCancel: inlineEditingApi.cancelInlineTabSelection,
+                  }}
+                  isLoading={false}
+                >
+                  <div style={{ height: '100%' }} data-test-subj="discoverEmbeddableErrorCallout">
+                    <PresentationPanelError error={searchError} />
+                  </div>
+                </SavedSearchEmbeddableBase>
+              </KibanaRenderContextProvider>
+            ) : null;
+          }
+
           return (
             <KibanaRenderContextProvider {...discoverServices.core}>
               <KibanaContextProvider services={discoverServices}>
@@ -454,10 +497,13 @@ export const getSearchEmbeddableFactory = ({
                       api={{
                         ...api,
                         fetchContext$,
+                        viewMode$,
                       }}
                       dataView={dataView!}
                       onAddFilter={
-                        isEsqlMode(savedSearch) || !enableFilters ? undefined : addFilter
+                        isEsqlMode(savedSearch) || !enableFilters || disableTriggers
+                          ? undefined
+                          : addFilter
                       }
                       stateManager={searchEmbeddable.stateManager}
                     />
@@ -468,16 +514,28 @@ export const getSearchEmbeddableFactory = ({
                       }
                     >
                       <SearchEmbeddableGridComponent
-                        api={{ ...api, fetchWarnings$, fetchContext$ }}
+                        documentViewerFlyoutType={documentViewerFlyoutType}
+                        autoApplyDiscoverColumnDefaults={autoApplyDiscoverColumnDefaults}
+                        wrapToolbar={wrapToolbar}
+                        showKeyboardShortcuts={showKeyboardShortcuts}
+                        showSortSelector={showSortSelector}
+                        api={{ ...api, fetchWarnings$, fetchContext$, abortSignal$, viewMode$ }}
                         dataView={dataView!}
-                        onAddFilter={enableFilters ? addFilter : undefined}
-                        enableDocumentViewer={enableDocumentViewer}
-                        expandedDoc={enableDocumentViewer ? expandedDoc : undefined}
+                        esqlSource$={searchEmbeddable.esqlSource$}
+                        onAddFilter={enableFilters && !disableTriggers ? addFilter : undefined}
+                        enableDocumentViewer={enableDocumentViewer && !disableTriggers}
+                        expandedDoc={
+                          enableDocumentViewer && !disableTriggers ? expandedDoc : undefined
+                        }
                         initialDocViewerTabId={
-                          enableDocumentViewer ? initialDocViewerTabId : undefined
+                          enableDocumentViewer && !disableTriggers
+                            ? initialDocViewerTabId
+                            : undefined
                         }
                         docViewerRef={docViewerRef}
-                        setExpandedDoc={enableDocumentViewer ? setExpandedDoc : undefined}
+                        setExpandedDoc={
+                          enableDocumentViewer && !disableTriggers ? setExpandedDoc : undefined
+                        }
                         inlineEditing={{
                           isActive: isInlineEditing,
                           hasPendingChanges: hasPendingInlineTabChanges,

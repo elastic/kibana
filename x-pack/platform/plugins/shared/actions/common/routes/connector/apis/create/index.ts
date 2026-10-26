@@ -8,12 +8,14 @@
 export {
   createConnectorRequestParamsSchema,
   createConnectorRequestBodySchema,
+  getCreateConnectorRequestBodySchema,
 } from './schemas/latest';
 export type { CreateConnectorRequestParams, CreateConnectorRequestBody } from './types/latest';
 
 export {
   createConnectorRequestParamsSchema as createConnectorRequestParamsSchemaV1,
   createConnectorRequestBodySchema as createConnectorRequestBodySchemaV1,
+  getCreateConnectorRequestBodySchema as getCreateConnectorRequestBodySchemaV1,
 } from './schemas/v1';
 export type {
   CreateConnectorRequestParams as CreateConnectorRequestParamsV1,

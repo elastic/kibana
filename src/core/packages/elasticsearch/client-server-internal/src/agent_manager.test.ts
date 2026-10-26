@@ -66,12 +66,12 @@ describe('AgentManager', () => {
           scheduling: 'lifo',
         });
         agentFactory2({ url: new URL('http://elastic-node-2:9200') });
-        expect(HttpAgent).toBeCalledTimes(2);
-        expect(HttpAgent).toBeCalledWith({
+        expect(HttpAgent).toHaveBeenCalledTimes(2);
+        expect(HttpAgent).toHaveBeenCalledWith({
           maxTotalSockets: 1024,
           scheduling: 'fifo',
         });
-        expect(HttpAgent).toBeCalledWith({
+        expect(HttpAgent).toHaveBeenCalledWith({
           maxFreeSockets: 10,
           scheduling: 'lifo',
         });

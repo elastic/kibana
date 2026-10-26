@@ -410,7 +410,7 @@ Users will need a way to view what spaces your objects are currently assigned to
         type: myObject.type,
         namespaces: myObject.namespaces,
         id: myObject.id,
-        icon: 'beaker', <1>
+        icon: 'flask', <1>
         title: myObject.attributes.title, <2>
         noun: OBJECT_NOUN, <3>
       },

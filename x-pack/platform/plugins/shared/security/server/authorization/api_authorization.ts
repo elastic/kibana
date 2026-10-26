@@ -18,7 +18,10 @@ import type {
   PrivilegeSet,
   RouteAuthz,
 } from '@kbn/core/server';
-import { unwindNestedSecurityPrivileges } from '@kbn/core-security-server';
+import {
+  flattenSecurityPrivileges,
+  unwindNestedSecurityPrivileges,
+} from '@kbn/core-security-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type {
   AuthorizationServiceSetup,
@@ -111,8 +114,12 @@ export function initAPIAuthorization(
     // We need to normalize privileges to drop unintended privilege checks.
     // Operator privileges check should be only performed if the `operator_privileges` are enabled in config.
     const requiredPrivileges = await normalizeRequiredPrivileges(authz.requiredPrivileges);
+    const extendedPrivileges = authz.extendedPrivileges ?? [];
 
-    const { requestedPrivileges, requestedReservedPrivileges } = requiredPrivileges.reduce(
+    const { requestedPrivileges, requestedReservedPrivileges } = [
+      ...requiredPrivileges,
+      ...extendedPrivileges,
+    ].reduce(
       (acc, privilegeEntry) => {
         const privileges =
           typeof privilegeEntry === 'object'
@@ -203,25 +210,24 @@ export function initAPIAuthorization(
       return kibanaPrivileges[kbPrivilege];
     };
 
-    for (const privilege of requiredPrivileges) {
-      if (!hasRequestedPrivilege(privilege)) {
-        const missingPrivileges = Object.keys(kibanaPrivileges).filter(
-          (key) => !kibanaPrivileges[key]
-        );
-        const forbiddenMessage = `API [${request.route.method.toUpperCase()} ${
-          request.url.pathname
-        }${
-          request.url.search
-        }] is unauthorized for user, this action is granted by the Kibana privileges [${missingPrivileges}]`;
+    if (requiredPrivileges.some((privilege) => !hasRequestedPrivilege(privilege))) {
+      // Flatten only for the 403 body. Access above still uses PrivilegeSet-aware checks so
+      // anyRequired alternatives aren't treated as independently required. Extended privileges
+      // are omitted because they are not in requiredPrivileges.
+      const missingPrivileges = flattenSecurityPrivileges(requiredPrivileges).filter(
+        (privilege) => !kibanaPrivileges[privilege]
+      );
+      const forbiddenMessage = `API [${request.route.method.toUpperCase()} ${request.url.pathname}${
+        request.url.search
+      }] is unauthorized for user, this action is granted by the Kibana privileges [${missingPrivileges}]`;
 
-        logger.warn(forbiddenMessage);
+      logger.warn(forbiddenMessage);
 
-        return response.forbidden({
-          body: {
-            message: forbiddenMessage,
-          },
-        });
-      }
+      return response.forbidden({
+        body: {
+          message: forbiddenMessage,
+        },
+      });
     }
 
     return toolkit.authzResultNext(kibanaPrivileges);

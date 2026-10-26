@@ -48,6 +48,33 @@ describe('createBaseHandlerContext', () => {
     expect(mocks.workflowLogger.logInfo).toHaveBeenCalledWith('hello', { meta: true });
   });
 
+  it('creates a renderer that snapshots the workflow context once', () => {
+    const mocks = createHandlerTestMocks();
+    const workflowContext = { workflow: { id: 'workflow-id' } };
+    mocks.stepExecutionRuntime.contextManager.getContext.mockReturnValue(workflowContext);
+
+    const context = createBaseHandlerContext(
+      {},
+      {},
+      {},
+      defaultTestNode as any,
+      mocks.stepExecutionRuntime as any,
+      mocks.workflowLogger as any
+    );
+    const renderTemplate = context.contextManager.createTemplateRenderer?.();
+
+    renderTemplate?.('{{ item.id }}', { item: { id: 1 } });
+    renderTemplate?.('{{ item.id }}', { item: { id: 2 } });
+
+    expect(mocks.stepExecutionRuntime.contextManager.getContext).toHaveBeenCalledTimes(1);
+    expect(
+      mocks.stepExecutionRuntime.contextManager.renderValueWithContext
+    ).toHaveBeenNthCalledWith(1, '{{ item.id }}', workflowContext, { item: { id: 1 } });
+    expect(
+      mocks.stepExecutionRuntime.contextManager.renderValueWithContext
+    ).toHaveBeenNthCalledWith(2, '{{ item.id }}', workflowContext, { item: { id: 2 } });
+  });
+
   it('defaults rawInput and config to empty objects when omitted', () => {
     const mocks = createHandlerTestMocks();
 

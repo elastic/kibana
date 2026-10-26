@@ -9,6 +9,8 @@ import React from 'react';
 import { render, screen, waitFor, within, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+jest.setTimeout(15 * 1000);
+
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { StepAboutRule, StepAboutRuleReadOnly } from '.';
 import { useFetchIndex } from '../../../../common/containers/source';
@@ -88,19 +90,20 @@ export const stepDefineStepMLRule: DefineStepRule = {
   shouldLoadQueryDynamically: false,
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/235182
-describe.skip('StepAboutRuleComponent', () => {
+describe('StepAboutRuleComponent', () => {
   let useGetInstalledJobMock: jest.Mock;
   let useSecurityJobsMock: jest.Mock;
   const TestComp = ({
     defineStepDefaultOverride,
+    aboutStepDefaultOverride,
     onSubmit,
   }: {
     defineStepDefaultOverride?: DefineStepRule;
+    aboutStepDefaultOverride?: AboutStepRule;
     onSubmit?: (data: AboutStepRule, isValid: boolean) => void;
   }) => {
     const defineStepDefault = defineStepDefaultOverride ?? stepDefineDefaultValue;
-    const aboutStepDefault = stepAboutDefaultValue;
+    const aboutStepDefault = aboutStepDefaultOverride ?? stepAboutDefaultValue;
     const { aboutStepForm } = useRuleForms({
       defineStepDefault,
       aboutStepDefault,
@@ -250,11 +253,13 @@ describe.skip('StepAboutRuleComponent', () => {
   });
 
   it('is invalid if no "name" is present', async () => {
-    const { user } = setup(<TestComp />);
-
-    await user.type(
-      within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
-      'Test description text'
+    setup(
+      <TestComp
+        aboutStepDefaultOverride={{
+          ...stepAboutDefaultValue,
+          description: 'Test description text',
+        }}
+      />
     );
 
     await submitForm();
@@ -296,16 +301,17 @@ describe.skip('StepAboutRuleComponent', () => {
   it('it allows user to set the risk score as a number (and not a string)', async () => {
     const handleSubmit = jest.fn();
 
-    const { user } = setup(<TestComp onSubmit={handleSubmit} />);
+    const { user } = setup(
+      <TestComp
+        aboutStepDefaultOverride={{
+          ...stepAboutDefaultValue,
+          name: 'Test name text',
+          description: 'Test description text',
+        }}
+        onSubmit={handleSubmit}
+      />
+    );
 
-    await user.type(
-      within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
-      'Test name text'
-    );
-    await user.type(
-      within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
-      'Test description text'
-    );
     await user.clear(
       within(screen.getByTestId('detectionEngineStepAboutRuleRiskScore-defaultRisk')).getByRole(
         'spinbutton'
@@ -335,15 +341,15 @@ describe.skip('StepAboutRuleComponent', () => {
   it('does not modify the provided risk score until the user changes the severity', async () => {
     const handleSubmit = jest.fn();
 
-    const { user } = setup(<TestComp onSubmit={handleSubmit} />);
-
-    await user.type(
-      within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
-      'Test name text'
-    );
-    await user.type(
-      within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
-      'Test description text'
+    const { user } = setup(
+      <TestComp
+        aboutStepDefaultOverride={{
+          ...stepAboutDefaultValue,
+          name: 'Test name text',
+          description: 'Test description text',
+        }}
+        onSubmit={handleSubmit}
+      />
     );
 
     await submitForm();
@@ -361,6 +367,15 @@ describe.skip('StepAboutRuleComponent', () => {
       within(screen.getByTestId('detectionEngineStepAboutRuleSeverity')).getByTestId('select')
     );
     await user.click(await screen.findByRole('option', { name: /medium/i }));
+
+    // Wait for the risk score to auto-update to 47 (medium default) before submitting
+    await waitFor(() => {
+      expect(
+        within(screen.getByTestId('detectionEngineStepAboutRuleRiskScore-defaultRisk')).getByRole(
+          'spinbutton'
+        )
+      ).toHaveValue(47);
+    });
 
     await submitForm();
 

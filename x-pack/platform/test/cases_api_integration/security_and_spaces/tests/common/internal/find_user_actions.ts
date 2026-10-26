@@ -9,9 +9,14 @@ import expect from '@kbn/expect';
 import type { Case } from '@kbn/cases-plugin/common/types/domain';
 import { AttachmentType, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import {
+  COMMENT_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
   MAX_USER_ACTIONS_PER_PAGE,
   MAX_USER_ACTION_SEARCH_LENGTH,
   MAX_USER_ACTION_AUTHOR_LENGTH,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
 import type { CommentUserAction } from '@kbn/cases-plugin/common/types/domain';
 import { UserActionTypes, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
@@ -26,11 +31,12 @@ import {
 } from '../../../../common/lib/authentication/users';
 import {
   getPostCaseRequest,
-  persistableStateAttachment,
-  postCommentActionsReq,
-  postCommentAlertReq,
   postCommentUserReq,
-  postExternalReferenceESReq,
+  postUnifiedActionsReq,
+  postUnifiedAlertReq,
+  postUnifiedCommentReq,
+  postUnifiedIndicatorReq,
+  postUnifiedLensReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -175,7 +181,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: theCase.id,
-          params: [postCommentUserReq, postCommentUserReq],
+          params: [postUnifiedCommentReq, postUnifiedCommentReq],
         });
       });
 
@@ -371,7 +377,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(commentUserAction.type).to.eql('comment');
         expect(commentUserAction.action).to.eql('create');
         expect(commentUserAction.payload).to.eql({
-          comment: postCommentUserReq,
+          comment: postUnifiedCommentReq,
         });
       });
 
@@ -675,10 +681,10 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: theCase.id,
           params: [
-            postCommentUserReq,
-            postExternalReferenceESReq,
-            persistableStateAttachment,
-            postCommentActionsReq,
+            postUnifiedCommentReq,
+            postUnifiedIndicatorReq,
+            postUnifiedLensReq,
+            postUnifiedActionsReq,
           ],
         });
 
@@ -715,19 +721,19 @@ export default ({ getService }: FtrProviderContext): void => {
         const externalRef = response.userActions[1] as CommentUserAction;
 
         expect(externalRef.type).to.eql('comment');
-        expect(externalRef.payload.comment.type).to.eql('externalReference');
+        expect(externalRef.payload.comment.type).to.eql(INDICATOR_ATTACHMENT_TYPE);
         expect(externalRef.action).to.eql('create');
 
         const persistableState = response.userActions[2] as CommentUserAction;
 
         expect(persistableState.type).to.eql('comment');
-        expect(persistableState.payload.comment.type).to.eql('persistableState');
+        expect(persistableState.payload.comment.type).to.eql(LENS_ATTACHMENT_TYPE);
         expect(persistableState.action).to.eql('create');
 
         const actions = response.userActions[3] as CommentUserAction;
 
         expect(actions.type).to.eql('comment');
-        expect(actions.payload.comment.type).to.eql('actions');
+        expect(actions.payload.comment.type).to.eql(SECURITY_ENDPOINT_ATTACHMENT_TYPE);
         expect(actions.action).to.eql('create');
 
         expect(response.userActions[4].type).to.eql('severity');
@@ -740,7 +746,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: theCase.id,
-          params: [postCommentUserReq, postCommentAlertReq],
+          params: [postUnifiedCommentReq, postUnifiedAlertReq],
         });
 
         const response = await findInternalCaseUserActions({
@@ -759,7 +765,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(alertUserAction.type).to.eql('comment');
         expect(alertUserAction.action).to.eql('create');
-        expect(alertUserAction.payload.comment.type).to.eql('alert');
+        expect(alertUserAction.payload.comment.type).to.eql(SECURITY_ALERT_ATTACHMENT_TYPE);
       });
 
       it('retrieves only user comment user actions', async () => {
@@ -768,7 +774,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: theCase.id,
-          params: [postCommentUserReq, postCommentActionsReq, postCommentAlertReq],
+          params: [postUnifiedCommentReq, postUnifiedActionsReq, postUnifiedAlertReq],
         });
 
         const response = await findInternalCaseUserActions({
@@ -787,7 +793,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(userCommentUserAction.type).to.eql('comment');
         expect(userCommentUserAction.action).to.eql('create');
-        expect(userCommentUserAction.payload.comment.type).to.eql('user');
+        expect(userCommentUserAction.payload.comment.type).to.eql(COMMENT_ATTACHMENT_TYPE);
       });
 
       it('retrieves attachment user actions', async () => {
@@ -798,13 +804,13 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: theCase.id,
           params: [
             // This one should not show up in the filter for attachments
-            postCommentUserReq,
-            postExternalReferenceESReq,
-            persistableStateAttachment,
+            postUnifiedCommentReq,
+            postUnifiedIndicatorReq,
+            postUnifiedLensReq,
+            // Stored as `externalReference` in the user action.
+            postUnifiedActionsReq,
             // This one should not show up in the filter for attachments
-            postCommentActionsReq,
-            // This one should not show up in the filter for attachments
-            postCommentAlertReq,
+            postUnifiedAlertReq,
           ],
         });
 
@@ -817,20 +823,28 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        expect(response.userActions.length).to.be(2);
-        expect(response.latestAttachments.length).to.be(2);
+        expect(response.userActions.length).to.be(3);
+        expect(response.latestAttachments.length).to.be(3);
 
         const externalRefUserAction = response.userActions[0] as CommentUserAction;
 
         expect(externalRefUserAction.type).to.eql('comment');
         expect(externalRefUserAction.action).to.eql('create');
-        expect(externalRefUserAction.payload.comment.type).to.eql('externalReference');
+        expect(externalRefUserAction.payload.comment.type).to.eql(INDICATOR_ATTACHMENT_TYPE);
 
         const peristableStateUserAction = response.userActions[1] as CommentUserAction;
 
         expect(peristableStateUserAction.type).to.eql('comment');
         expect(peristableStateUserAction.action).to.eql('create');
-        expect(peristableStateUserAction.payload.comment.type).to.eql('persistableState');
+        expect(peristableStateUserAction.payload.comment.type).to.eql(LENS_ATTACHMENT_TYPE);
+
+        const legacyActionsUserAction = response.userActions[2] as CommentUserAction;
+
+        expect(legacyActionsUserAction.type).to.eql('comment');
+        expect(legacyActionsUserAction.action).to.eql('create');
+        expect(legacyActionsUserAction.payload.comment.type).to.eql(
+          SECURITY_ENDPOINT_ATTACHMENT_TYPE
+        );
       });
 
       describe('filtering on multiple types', () => {

@@ -9,6 +9,7 @@
 
 import { computeTopologyFingerprint } from './compute_topology_fingerprint';
 import { transformWorkflowToGraph } from './transform_workflow_to_graph';
+import type { StructureSequence } from './types';
 import type { WorkflowYaml } from '../spec/schema';
 
 const minimal = (overrides: Partial<WorkflowYaml> = {}): WorkflowYaml =>
@@ -144,6 +145,32 @@ describe('transformWorkflowToGraph', () => {
       ] as unknown as WorkflowYaml['steps'],
     });
     expect(computeTopologyFingerprint(base)).not.toBe(computeTopologyFingerprint(withExtra));
+  });
+
+  it('foreach with iteration-on-failure uses steps body, not fallback, as inner nodes', () => {
+    // iteration-on-failure.fallback must not overwrite the loop body.
+    // If the last-wins bug regresses, innerNodes will contain only 'error-handler'
+    // instead of 'item-process'.
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'loop',
+            type: 'foreach',
+            foreach: '{{ items }}',
+            steps: [{ name: 'item-process', type: 'http' }],
+            'iteration-on-failure': {
+              fallback: [{ name: 'error-handler', type: 'console' }],
+            },
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+
+    expect(r.foreachGroups).toHaveLength(1);
+    const group = r.foreachGroups[0];
+    expect(group.innerNodes).toHaveLength(1);
+    expect(group.innerNodes[0].data.label).toBe('item-process');
   });
 
   it('connects branch leaves to the step that follows an if', () => {
@@ -654,6 +681,33 @@ describe('computeTopologyFingerprint', () => {
     });
     expect(computeTopologyFingerprint(wfBase)).not.toEqual(computeTopologyFingerprint(wfMutated));
   });
+
+  it('changes when a step is added inside on-failure.fallback', () => {
+    const wfBase = minimal({
+      steps: [
+        {
+          name: 'act',
+          type: 'http',
+          'on-failure': { fallback: [{ name: 'handler', type: 'http' }] },
+        },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+    const wfWithExtra = minimal({
+      steps: [
+        {
+          name: 'act',
+          type: 'http',
+          'on-failure': {
+            fallback: [
+              { name: 'handler', type: 'http' },
+              { name: 'extra', type: 'http' },
+            ],
+          },
+        },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+    expect(computeTopologyFingerprint(wfBase)).not.toEqual(computeTopologyFingerprint(wfWithExtra));
+  });
 });
 
 // ─── nodeRefs ────────────────────────────────────────────────────────────────
@@ -932,5 +986,500 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
       ];
       expect(allBypassIds).toHaveLength(new Set(allBypassIds).size);
     });
+  });
+});
+
+// ─── fallback lane ────────────────────────────────────────────────────────────
+describe('transformWorkflowToGraph — fallback lane', () => {
+  it('emits fallback nodes and a failure edge for a mid-sequence step with on-failure.fallback', () => {
+    // Three-step workflow: start → risky (has fallback: notify-oncall) → finish
+    // The fallback node must appear in the graph and a failure edge must exist.
+    // A single-owner fixture hides the zigzag (nothing sits above the owner to be
+    // dragged), so the mid-sequence placement is load-bearing for the dagre defect.
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          { name: 'start', type: 'http' },
+          {
+            name: 'risky',
+            type: 'http',
+            'on-failure': { fallback: [{ name: 'notify-oncall', type: 'http' }] },
+          },
+          { name: 'finish', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+
+    // Fallback node must be present.
+    expect(r.nodes.map((n) => n.id)).toContain('notify-oncall');
+
+    // A failure edge from the owner to the fallback head must exist.
+    expect(r.edges.some((e) => (e as { isFailure?: boolean }).isFailure === true)).toBe(true);
+
+    // The failure edge must originate from the owner node ('risky') and point to
+    // the fallback head ('notify-oncall').
+    const failureEdge = r.edges.find((e) => (e as { isFailure?: boolean }).isFailure === true);
+    expect(failureEdge?.source).toBe('risky');
+    expect(failureEdge?.target).toBe('notify-oncall');
+
+    // Shape 1 (no continue) — fallback leaf must NOT fan in to 'finish'.
+    // 'finish' is reached only from 'risky' via the normal spine.
+    const finishEdges = r.edges.filter((e) => e.target === 'finish');
+    const finishSources = finishEdges.map((e) => e.source);
+    expect(finishSources).not.toContain('notify-oncall');
+  });
+
+  it('nested fallback: fallbackOf is the innermost owner, not overwritten by outer recursion', () => {
+    // Before the fix, the outer loop re-stamped fallbackOf = outerOwnerId on all
+    // inner.nodes, clobbering the inner recursion's fallbackOf = innerOwnerId.
+    // After the fix: if (d.fallbackOf === undefined) d.fallbackOf = id — innermost wins.
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'outer-owner',
+            type: 'http',
+            'on-failure': {
+              fallback: [
+                {
+                  name: 'inner-owner',
+                  type: 'http',
+                  'on-failure': {
+                    fallback: [{ name: 'inner-lane-step', type: 'http' }],
+                  },
+                },
+              ],
+            },
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+
+    const innerLaneStep = r.nodes.find((n) => n.id === 'inner-lane-step');
+    expect(innerLaneStep).toBeDefined();
+    // The inner-lane-step's fallbackOf must be 'inner-owner', not 'outer-owner'.
+    const data = innerLaneStep!.data as Record<string, unknown>;
+    expect(data.fallbackOf).toBe('inner-owner');
+
+    // The inner-owner itself must have fallbackOf = 'outer-owner'.
+    const innerOwner = r.nodes.find((n) => n.id === 'inner-owner');
+    expect(innerOwner).toBeDefined();
+    const innerOwnerData = innerOwner!.data as Record<string, unknown>;
+    expect(innerOwnerData.fallbackOf).toBe('outer-owner');
+  });
+
+  it('edge order: all structural edges precede all failure edges within the same graph', () => {
+    // The packing pass reads declaration order from the graph edge list.
+    // Failure edges must come after all structural edges in the same graph
+    // boundary — otherwise the packing sees [failure, spine] and places the
+    // lane on the wrong side.
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'outer-owner',
+            type: 'http',
+            'on-failure': {
+              fallback: [
+                {
+                  name: 'inner-owner',
+                  type: 'http',
+                  'on-failure': {
+                    fallback: [{ name: 'inner-lane-step', type: 'http' }],
+                  },
+                },
+              ],
+            },
+          },
+          { name: 'final-step', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+
+    const edges = r.edges;
+    const isFailureEdge = (e: (typeof edges)[number]) =>
+      (e as { isFailure?: boolean }).isFailure === true;
+
+    // Find the index of the first failure edge.
+    const firstFailureIdx = edges.findIndex(isFailureEdge);
+    expect(firstFailureIdx).toBeGreaterThanOrEqual(0);
+
+    // All edges before the first failure edge must be structural.
+    for (let i = 0; i < firstFailureIdx; i++) {
+      expect(isFailureEdge(edges[i])).toBe(false);
+    }
+
+    // All failure edges must come after all structural edges.
+    // i.e., once we see a structural edge after a failure edge, that's a bug.
+    let seenFailure = false;
+    for (const e of edges) {
+      if (isFailureEdge(e)) {
+        seenFailure = true;
+      } else if (seenFailure) {
+        // Structural edge after a failure edge — violation.
+        fail(
+          `Structural edge ${e.source} → ${e.target} appears after a failure edge in the outer graph`
+        );
+      }
+    }
+  });
+
+  it('bypass node from unbalanced if-inside-fallback is claimed into the fallback lane', () => {
+    // Regression for the bug where bypassLaneNodes produced by an if-without-else
+    // inside on-failure.fallback were never added to FallbackLane.nodes.
+    // layoutGraphWithLanes uses lane.nodes to partition the dagre graph — bypass
+    // nodes left out of any lane were classified as spine nodes, making the
+    // gate→bypass edge a boundary edge with points:[].
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'risky',
+            type: 'http',
+            'on-failure': {
+              fallback: [
+                {
+                  // Unbalanced if: only the `steps` (then) branch, no `else`.
+                  // This synthesizes a `risky-if-else-bypass` bypass node.
+                  name: 'risky-if',
+                  type: 'if',
+                  condition: 'true == true',
+                  steps: [{ name: 'notify', type: 'http' }],
+                },
+              ],
+            },
+          },
+          { name: 'finish', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+
+    // A bypass node must have been synthesized for the else branch.
+    expect(r.bypassLaneNodes.length).toBeGreaterThan(0);
+    const bypassId = r.bypassLaneNodes.find((n) => n.id.includes('else-bypass'))?.id;
+    expect(bypassId).toBeDefined();
+
+    // The bypass node must be in the fallback lane's node set — not a spine node.
+    const fallbackLane = r.fallbackLanes.find((l) => l.owner === 'risky');
+    expect(fallbackLane).toBeDefined();
+    expect(fallbackLane!.nodes).toContain(bypassId!);
+
+    // It must NOT appear in the top-level bypassLaneNodes once it is claimed
+    // into the lane (the bypass was created inside the lane's transformInternal
+    // call and hoisted to the top-level bypassLaneNodes list — the claim only
+    // affects laneNodes, it does not remove the node from bypassLaneNodes).
+    // This assertion just documents the expected top-level plumbing.
+    expect(r.bypassLaneNodes.some((n) => n.id === bypassId)).toBe(true);
+  });
+});
+
+describe('transformWorkflowToGraph — structure', () => {
+  const transform = (steps: unknown) =>
+    transformWorkflowToGraph(minimal({ steps: steps as WorkflowYaml['steps'] }));
+
+  const step = (id: string, extra: Record<string, unknown> = {}) => ({
+    kind: 'step',
+    id,
+    lanes: [],
+    ...extra,
+  });
+
+  it('is empty for an undefined workflow', () => {
+    expect(transformWorkflowToGraph(undefined).structure).toEqual({ triggers: [], items: [] });
+  });
+
+  it('lists triggers and plain steps in declaration order', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        triggers: [
+          { type: 'manual', enabled: true },
+          { type: 'scheduled', enabled: true, with: { every: '1h' } },
+        ] as unknown as WorkflowYaml['triggers'],
+        steps: [
+          { name: 'first', type: 'http' },
+          { name: 'second', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    expect(r.structure).toEqual({
+      triggers: ['manual', 'scheduled'],
+      items: [step('first'), step('second')],
+    });
+  });
+
+  it('models an if/else as a fork whose join is the next item', () => {
+    const r = transform([
+      {
+        name: 'gate',
+        type: 'if',
+        condition: 'x',
+        steps: [{ name: 't1', type: 'http' }],
+        else: [{ name: 'e1', type: 'http' }],
+      },
+      { name: 'after', type: 'http' },
+    ]);
+    expect(r.structure?.items).toEqual([
+      {
+        kind: 'fork',
+        id: 'gate',
+        branches: [
+          { head: 't1', items: [step('t1')], label: 'true' },
+          { head: 'e1', items: [step('e1')], label: 'false' },
+        ],
+        lanes: [],
+      },
+      step('after'),
+    ]);
+  });
+
+  it('gives a missing else branch the bypass lane as its head', () => {
+    const r = transform([
+      { name: 'gate', type: 'if', condition: 'x', steps: [{ name: 't1', type: 'http' }] },
+    ]);
+    const [bypass] = r.bypassLaneNodes;
+    expect(r.structure?.items).toEqual([
+      {
+        kind: 'fork',
+        id: 'gate',
+        branches: [
+          { head: 't1', items: [step('t1')], label: 'true' },
+          { head: bypass.id, items: [], label: 'false' },
+        ],
+        lanes: [],
+      },
+    ]);
+  });
+
+  it('treats an if with two empty branches as a plain step', () => {
+    const r = transform([{ name: 'gate', type: 'if', condition: 'x', steps: [], else: [] }]);
+    expect(r.structure?.items).toEqual([step('gate')]);
+  });
+
+  it('keeps an empty switch case as a labelled bypass lane, in declaration order', () => {
+    const r = transform([
+      {
+        name: 'sw',
+        type: 'switch',
+        expression: 'v',
+        cases: [
+          { match: 'a', steps: [{ name: 'on_a', type: 'http' }] },
+          { match: 'b', steps: [] },
+        ],
+      },
+      { name: 'after', type: 'http' },
+    ]);
+    const [emptyCase, defaultLane] = r.bypassLaneNodes;
+    expect(r.structure?.items).toEqual([
+      {
+        kind: 'fork',
+        id: 'sw',
+        branches: [
+          { head: 'on-a', items: [step('on-a')], label: 'a' },
+          { head: emptyCase.id, items: [], label: 'b' },
+          { head: defaultLane.id, items: [], label: 'default' },
+        ],
+        lanes: [],
+      },
+      step('after'),
+    ]);
+    expect(r.edges).toContainEqual(
+      expect.objectContaining({
+        source: 'sw',
+        target: emptyCase.id,
+        label: 'b',
+        branchType: 'switch',
+      })
+    );
+    expect(r.edges.filter((e) => e.target === 'after').map((e) => e.source)).toEqual(
+      expect.arrayContaining(['on-a', emptyCase.id, defaultLane.id])
+    );
+  });
+
+  it('keeps an empty parallel branch as a lane when another branch has steps', () => {
+    const r = transform([
+      {
+        name: 'par',
+        type: 'parallel',
+        branches: [
+          { name: 'a', steps: [{ name: 'a1', type: 'http' }] },
+          { name: 'b', steps: [] },
+        ],
+      },
+      { name: 'after', type: 'http' },
+    ]);
+    const [bypass] = r.bypassLaneNodes;
+    expect(r.structure?.items[0]).toEqual({
+      kind: 'fork',
+      id: 'par',
+      branches: [
+        { head: 'a1', items: [step('a1')], label: 'a' },
+        { head: bypass.id, items: [], label: 'b' },
+      ],
+      lanes: [],
+    });
+    expect(r.edges).toContainEqual(
+      expect.objectContaining({ source: 'par', target: bypass.id, label: 'b', branchIndex: 1 })
+    );
+    expect(r.edges.filter((e) => e.target === 'after').map((e) => e.source)).toEqual(
+      expect.arrayContaining(['a1', bypass.id])
+    );
+  });
+
+  it('treats a parallel whose branches are all empty as a plain step', () => {
+    const r = transform([
+      {
+        name: 'par',
+        type: 'parallel',
+        branches: [
+          { name: 'a', steps: [] },
+          { name: 'b', steps: [] },
+        ],
+      },
+    ]);
+    expect(r.structure?.items).toEqual([step('par')]);
+    expect(r.bypassLaneNodes).toEqual([]);
+  });
+
+  it('models a foreach as a container holding its own body', () => {
+    const r = transform([
+      {
+        name: 'loop',
+        type: 'foreach',
+        foreach: 'items',
+        steps: [
+          { name: 'i1', type: 'http' },
+          {
+            name: 'inner_gate',
+            type: 'if',
+            condition: 'x',
+            steps: [{ name: 'i2', type: 'http' }],
+            else: [{ name: 'i3', type: 'http' }],
+          },
+        ],
+      },
+      { name: 'after', type: 'http' },
+    ]);
+    expect(r.structure?.items).toEqual([
+      {
+        kind: 'container',
+        id: 'loop',
+        body: [
+          step('i1'),
+          {
+            kind: 'fork',
+            id: 'inner-gate',
+            branches: [
+              { head: 'i2', items: [step('i2')], label: 'true' },
+              { head: 'i3', items: [step('i3')], label: 'false' },
+            ],
+            lanes: [],
+          },
+        ],
+        lanes: [],
+      },
+      step('after'),
+    ]);
+  });
+
+  it('lists a fallback lane on its owner and records whether it rejoins', () => {
+    const lane = (extra: Record<string, unknown>) =>
+      transform([
+        {
+          name: 'risky',
+          type: 'http',
+          'on-failure': {
+            fallback: [
+              { name: 'f1', type: 'http' },
+              { name: 'f2', type: 'http' },
+            ],
+            ...extra,
+          },
+        },
+        { name: 'after', type: 'http' },
+      ]).structure?.items[0];
+
+    expect(lane({})).toEqual(
+      step('risky', { lanes: [{ head: 'f1', items: [step('f1'), step('f2')], rejoins: false }] })
+    );
+    expect(lane({ continue: true })).toEqual(
+      step('risky', { lanes: [{ head: 'f1', items: [step('f1'), step('f2')], rejoins: true }] })
+    );
+  });
+
+  it('keeps a merge step body attached to the step instead of in the sequence', () => {
+    const r = transform([
+      {
+        name: 'combine',
+        type: 'merge',
+        steps: [
+          { name: 'm1', type: 'http' },
+          { name: 'm2', type: 'http' },
+        ],
+      },
+      { name: 'after', type: 'http' },
+    ]);
+    expect(r.structure?.items).toEqual([
+      step('combine', { attached: [step('m1'), step('m2')] }),
+      step('after'),
+    ]);
+  });
+
+  it('places every node exactly once', () => {
+    const r = transform([
+      { name: 'a', type: 'http' },
+      {
+        name: 'gate',
+        type: 'if',
+        condition: 'x',
+        steps: [
+          {
+            name: 'loop',
+            type: 'foreach',
+            foreach: 'items',
+            steps: [
+              {
+                name: 'sw',
+                type: 'switch',
+                expression: 'v',
+                cases: [
+                  { match: 'a', steps: [{ name: 'on_a', type: 'http' }] },
+                  { match: 'b', steps: [] },
+                ],
+              },
+            ],
+          },
+        ],
+        'on-failure': { fallback: [{ name: 'recover', type: 'http' }], continue: true },
+      },
+      { name: 'last', type: 'http' },
+    ]);
+
+    const ids: string[] = [];
+    const collect = (items: StructureSequence): void => {
+      for (const item of items) {
+        ids.push(item.id);
+        if (item.kind === 'fork') {
+          for (const branch of item.branches) {
+            if (branch.items.length === 0) ids.push(branch.head);
+            collect(branch.items);
+          }
+        }
+        if (item.kind === 'container') collect(item.body);
+        if (item.kind === 'step' && item.attached) collect(item.attached);
+        for (const lane of item.lanes) collect(lane.items);
+      }
+    };
+    collect(r.structure?.items ?? []);
+
+    const expected = [
+      ...r.nodes.filter((n) => n.type !== 'trigger').map((n) => n.id),
+      ...r.bypassLaneNodes.map((n) => n.id),
+      ...r.foreachGroups.flatMap((g) => [
+        ...g.innerNodes.map((n) => n.id),
+        ...g.bypassLaneNodes.map((n) => n.id),
+      ]),
+    ];
+    expect([...ids].sort()).toEqual([...expected].sort());
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });

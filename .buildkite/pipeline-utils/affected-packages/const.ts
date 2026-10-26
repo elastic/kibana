@@ -15,9 +15,8 @@ export const CRITICAL_FILES_JEST_UNIT_TESTS = [
   'scripts/jest.js',
   'scripts/jest_all.js',
   'package.json',
-  'yarn.lock',
+  'pnpm-lock.yaml',
   'tsconfig.json',
-  '.node-version',
   '.nvmrc',
   'src/setup_node_env/**/*',
   'packages/kbn-babel-preset/**/*',
@@ -34,9 +33,8 @@ export const CRITICAL_FILES_JEST_INTEGRATION_TESTS = [
   'scripts/jest_integration.js',
   'scripts/jest_all.js',
   'package.json',
-  'yarn.lock',
+  'pnpm-lock.yaml',
   'tsconfig.json',
-  '.node-version',
   '.nvmrc',
   'src/setup_node_env/**/*',
   'packages/kbn-babel-preset/**/*',
@@ -46,4 +44,13 @@ export const CRITICAL_FILES_JEST_INTEGRATION_TESTS = [
   'src/platform/packages/shared/react/kibana_mount/test_helpers/react_mount_serializer.ts',
   '.buildkite/pipeline-utils/affected-packages/**/*.{ts,js,sh}',
   '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',
+];
+
+// Integration configs that snapshot a global registry (rule-type params, connector types, task
+// types) fed by downstream plugins. Those publishers sit upstream of these configs, so
+// includeDownstream never marks them affected — they must run regardless of the graph. Keep tiny.
+export const ALWAYS_RUN_JEST_INTEGRATION_CONFIGS = [
+  'x-pack/platform/plugins/shared/alerting/jest.integration.config.js',
+  'x-pack/platform/plugins/shared/actions/jest.integration.config.js',
+  'x-pack/platform/plugins/shared/task_manager/jest.integration.config.js',
 ];

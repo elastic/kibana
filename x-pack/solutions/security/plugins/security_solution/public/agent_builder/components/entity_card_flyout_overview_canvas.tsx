@@ -265,10 +265,12 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     const legacyFields =
       hostName != null && hostName !== '' ? { 'host.name': hostName } : ({} as IdentityFields);
     const fromStore =
-      euidApi?.euid?.getEntityIdentifiersFromDocument('host', entityFromStoreResult.entityRecord) ??
-      {};
+      euidApi?.euid?.getEntityIdentifiersFromDocument(
+        euidApi.getBuiltInEntityDefinition('host'),
+        entityFromStoreResult.entityRecord
+      ) ?? {};
     return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
-  }, [euidApi?.euid, entityFromStoreResult.entityRecord, hostName]);
+  }, [euidApi, entityFromStoreResult.entityRecord, hostName]);
 
   const hostNameFilterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
@@ -454,7 +456,8 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
             onAssetCriticalityChange={calculateEntityRiskScore}
             isPreviewMode={isPreviewMode}
             entityRecord={observedHost.entityRecord ?? undefined}
-            skipRiskAndCriticality={noEntityInStore}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
             riskScoreQueryId={AGENT_BUILDER_HOST_PANEL_RISK_SCORE_QUERY_ID}
@@ -576,10 +579,12 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
     const legacyFields =
       userName != null && userName !== '' ? { 'user.name': userName } : ({} as IdentityFields);
     const fromStore =
-      euidApi?.euid?.getEntityIdentifiersFromDocument('user', entityFromStoreResult.entityRecord) ??
-      {};
+      euidApi?.euid?.getEntityIdentifiersFromDocument(
+        euidApi.getBuiltInEntityDefinition('user'),
+        entityFromStoreResult.entityRecord
+      ) ?? {};
     return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
-  }, [euidApi?.euid, entityFromStoreResult.entityRecord, userName]);
+  }, [euidApi, entityFromStoreResult.entityRecord, userName]);
 
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
@@ -765,7 +770,8 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
             isPreviewMode={isPreviewMode}
             identityFields={documentEntityIdentifiers}
             entityRecord={observedUser.entityRecord ?? undefined}
-            skipRiskAndCriticality={noEntityInStore}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
             riskScoreQueryId={AGENT_BUILDER_USER_PANEL_RISK_SCORE_QUERY_ID}
@@ -876,11 +882,11 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
         : ({} as IdentityFields);
     const fromStore =
       euidApi?.euid?.getEntityIdentifiersFromDocument(
-        'service',
+        euidApi.getBuiltInEntityDefinition('service'),
         entityFromStoreResult.entityRecord ?? {}
       ) ?? {};
     return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
-  }, [entityFromStoreResult.entityRecord, euidApi?.euid, serviceName]);
+  }, [entityFromStoreResult.entityRecord, euidApi, serviceName]);
 
   const serviceNameFilterQuery = useMemo(
     () => (serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined),
@@ -1024,6 +1030,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
+            entityStoreV2Enabled
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
             riskScoreQueryId={AGENT_BUILDER_SERVICE_PANEL_RISK_SCORE_QUERY_ID}

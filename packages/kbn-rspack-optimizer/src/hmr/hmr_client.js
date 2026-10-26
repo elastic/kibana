@@ -66,6 +66,10 @@ function injectIndicatorStyles() {
     '#' + INDICATOR_ID + ' {',
     '  width: 14px;',
     '  padding: 0 2px;',
+    '  bottom: 16px;',
+    '}',
+    'body:has(#developerToolbar) #' + INDICATOR_ID + ' {',
+    '  bottom: 40px;', // 32px toolbar + 8px gap
     '}',
     '#' + INDICATOR_ID + ':hover {',
     '  width: 150px;',
@@ -95,7 +99,6 @@ function createIndicator() {
     'style',
     [
       'position:fixed',
-      'bottom:16px',
       'right:16px',
       'height:28px',
       'border-radius:14px',

@@ -14,4 +14,3 @@ export {
   trimEntityValues,
   type SourceEntities,
 } from './entity_utils';
-export { getErrorMessage, isElasticsearchNotFoundError } from './es_errors';

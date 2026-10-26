@@ -13,7 +13,7 @@ module.exports = {
     '<rootDir>/x-pack/platform/packages/shared/ai-assistant/common/src/**/*.{ts,tsx}',
     '!<rootDir>/x-pack/platform/packages/shared/ai-assistant/common/src/*.test.{ts,tsx}',
   ],
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/platform/packages/shared/ai-assistant/common'],
 };

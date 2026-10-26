@@ -7,7 +7,6 @@
 
 import type { Rule, RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server';
 import { generateChangeHistoryDocument } from '@kbn/change-history/test_utils';
-import type { UserProfile } from '@kbn/core-user-profile-common';
 import { getQueryRuleParams } from '../../../../../rule_schema/mocks';
 import type { RuleParams } from '../../../../../rule_schema';
 import { mapRuleHistoryItem } from './map_rule_history_item';
@@ -61,37 +60,35 @@ describe('mapRuleHistoryItem', () => {
     expect(item.user).toEqual({ id: 'profile-1', name: 'alice' });
   });
 
-  it('resolves `name` to the profile `full_name` when the profile is known', () => {
-    const userProfilesById = new Map<string, UserProfile>([
-      [
-        'profile-1',
-        {
-          uid: 'profile-1',
-          enabled: true,
-          user: { username: 'alice', full_name: 'Alice Smith' },
-          data: {},
-        },
-      ],
-    ]);
-
+  it('uses the resolved `full_name` as `name` when present', () => {
     const item = mapRuleHistoryItem(
-      buildHistoryDoc({}, { user: { id: 'profile-1', name: 'alice' } }),
-      undefined,
-      userProfilesById
+      buildHistoryDoc(
+        {},
+        {
+          user: {
+            id: 'profile-1',
+            name: 'alice',
+            full_name: 'Alice Smith',
+            email: 'alice@elastic.co',
+          },
+        }
+      )
     );
 
     expect(item.user).toEqual({ id: 'profile-1', name: 'Alice Smith' });
   });
 
-  it('falls back to the raw `name` when the profile has no `full_name`', () => {
-    const userProfilesById = new Map<string, UserProfile>([
-      ['profile-1', { uid: 'profile-1', enabled: true, user: { username: 'alice' }, data: {} }],
-    ]);
-
+  it('falls back to the resolved `email` when there is no `full_name`', () => {
     const item = mapRuleHistoryItem(
-      buildHistoryDoc({}, { user: { id: 'profile-1', name: 'alice' } }),
-      undefined,
-      userProfilesById
+      buildHistoryDoc({}, { user: { id: 'profile-1', name: 'alice', email: 'alice@elastic.co' } })
+    );
+
+    expect(item.user).toEqual({ id: 'profile-1', name: 'alice@elastic.co' });
+  });
+
+  it('falls back to the raw `name` when neither `full_name` nor `email` is present', () => {
+    const item = mapRuleHistoryItem(
+      buildHistoryDoc({}, { user: { id: 'profile-1', name: 'alice', full_name: '', email: '' } })
     );
 
     expect(item.user).toEqual({ id: 'profile-1', name: 'alice' });

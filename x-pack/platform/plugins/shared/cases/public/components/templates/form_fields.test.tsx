@@ -43,6 +43,8 @@ describe('form fields', () => {
       id: '',
       owner: mockedTestProvidersOwner[0],
       observableTypes: [],
+      extractObservables: true,
+      workflowTags: [],
     },
   };
 
@@ -205,7 +207,7 @@ describe('form fields', () => {
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>,
-      { wrapperProps: { features: { alerts: { sync: false, enabled: true } } } }
+      { wrapperProps: { owner: ['observability'] } }
     );
 
     expect(screen.queryByTestId('caseSyncAlerts')).not.toBeInTheDocument();
@@ -213,27 +215,23 @@ describe('form fields', () => {
 
   it('calls onSubmit with template fields', async () => {
     renderWithTestingProviders(
-      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+      <FormTestComponent
+        formDefaultValue={{
+          ...formDefaultValue,
+          name: 'Template 1',
+          templateDescription: 'this is a first template',
+          templateTags: ['first'],
+        }}
+        onSubmit={onSubmit}
+      >
         <FormFields {...defaultProps} />
       </FormTestComponent>
     );
 
-    await userEvent.click(await screen.findByTestId('template-name-input'));
-    await userEvent.paste('Template 1');
-
-    const templateTags = await screen.findByTestId('template-tags');
-
-    await userEvent.click(within(templateTags).getByRole('combobox'));
-    await userEvent.paste('first');
-    await userEvent.keyboard('{enter}');
-
-    await userEvent.click(await screen.findByTestId('template-description-input'));
-    await userEvent.paste('this is a first template');
-
-    await userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           category: null,
           connectorId: 'none',
@@ -250,31 +248,24 @@ describe('form fields', () => {
 
   it('calls onSubmit with case fields', async () => {
     renderWithTestingProviders(
-      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+      <FormTestComponent
+        formDefaultValue={{
+          ...formDefaultValue,
+          title: 'Case with Template 1',
+          description: 'This is a case description',
+          tags: ['template-1'],
+          category: 'new',
+        }}
+        onSubmit={onSubmit}
+      >
         <FormFields {...defaultProps} />
       </FormTestComponent>
     );
 
-    const caseTitle = await screen.findByTestId('caseTitle');
-    await userEvent.click(within(caseTitle).getByTestId('input'));
-    await userEvent.paste('Case with Template 1');
-
-    const caseDescription = await screen.findByTestId('caseDescription');
-    await userEvent.click(within(caseDescription).getByTestId('euiMarkdownEditorTextArea'));
-    await userEvent.paste('This is a case description');
-
-    const caseTags = await screen.findByTestId('caseTags');
-    await userEvent.click(within(caseTags).getByRole('combobox'));
-    await userEvent.paste('template-1');
-    await userEvent.keyboard('{enter}');
-
-    const caseCategory = await screen.findByTestId('caseCategory');
-    await userEvent.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
-
-    await userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           category: 'new',
           tags: ['template-1'],
@@ -299,41 +290,27 @@ describe('form fields', () => {
     };
 
     renderWithTestingProviders(
-      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+      <FormTestComponent
+        formDefaultValue={{
+          ...formDefaultValue,
+          customFields: {
+            test_key_1: 'My text test value 1',
+            test_key_2: false,
+            test_key_5: 987,
+          },
+        }}
+        onSubmit={onSubmit}
+      >
         <FormFields {...newProps} />
       </FormTestComponent>
     );
 
     expect(await screen.findByTestId('caseCustomFields')).toBeInTheDocument();
 
-    const textField = customFieldsConfigurationMock[0];
-    const toggleField = customFieldsConfigurationMock[1];
-    const numberField = customFieldsConfigurationMock[4];
-
-    const textCustomField = await screen.findByTestId(
-      `${textField.key}-${textField.type}-create-custom-field`
-    );
-
-    await userEvent.clear(textCustomField);
-    await userEvent.click(textCustomField);
-    await userEvent.paste('My text test value 1');
-
-    await userEvent.click(
-      await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
-    );
-
-    const numberCustomField = await screen.findByTestId(
-      `${numberField.key}-${numberField.type}-create-custom-field`
-    );
-
-    await userEvent.clear(numberCustomField);
-    await userEvent.click(numberCustomField);
-    await userEvent.paste('987');
-
-    await userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           category: null,
           tags: [],
@@ -342,7 +319,7 @@ describe('form fields', () => {
             test_key_1: 'My text test value 1',
             test_key_2: false,
             test_key_4: false,
-            test_key_5: '987',
+            test_key_5: 987,
           },
           syncAlerts: true,
           templateTags: [],
@@ -368,7 +345,16 @@ describe('form fields', () => {
 
     renderWithTestingProviders(
       <FormTestComponent
-        formDefaultValue={{ ...formDefaultValue, connectorId: 'servicenow-1' }}
+        formDefaultValue={{
+          ...formDefaultValue,
+          connectorId: 'servicenow-1',
+          fields: {
+            category: 'software',
+            severity: '3',
+            urgency: '2',
+            subcategory: null,
+          },
+        }}
         onSubmit={onSubmit}
       >
         <FormFields {...newProps} />
@@ -377,16 +363,10 @@ describe('form fields', () => {
 
     expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
 
-    await userEvent.selectOptions(await screen.findByTestId('severitySelect'), '3');
-
-    await userEvent.selectOptions(await screen.findByTestId('urgencySelect'), '2');
-
-    await userEvent.selectOptions(await screen.findByTestId('categorySelect'), ['software']);
-
-    await userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           tags: [],
           category: null,

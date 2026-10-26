@@ -8,7 +8,6 @@ Array [
     onToggleColumn={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -27,6 +26,7 @@ Array [
           "type": "string",
         },
         "displayNameOverride": undefined,
+        "esqlColumn": undefined,
         "flattenedValue": "test",
         "isPinned": false,
         "name": "message",
@@ -46,7 +46,6 @@ Array [
     onFilter={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -65,6 +64,7 @@ Array [
           "type": "string",
         },
         "displayNameOverride": undefined,
+        "esqlColumn": undefined,
         "flattenedValue": "test",
         "isPinned": false,
         "name": "message",
@@ -77,7 +77,6 @@ Array [
     onToggleColumn={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -96,6 +95,7 @@ Array [
           "type": "string",
         },
         "displayNameOverride": undefined,
+        "esqlColumn": undefined,
         "flattenedValue": "test",
         "isPinned": false,
         "name": "message",
@@ -114,7 +114,6 @@ Array [
     onFilter={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "isComputedColumn": true,
           "kbnFieldType": KbnFieldType {
@@ -141,6 +140,7 @@ Array [
           },
         },
         "displayNameOverride": undefined,
+        "esqlColumn": undefined,
         "flattenedValue": "test",
         "isPinned": false,
         "name": "message",
@@ -154,7 +154,6 @@ Array [
     onFilter={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "isComputedColumn": true,
           "kbnFieldType": KbnFieldType {
@@ -181,6 +180,7 @@ Array [
           },
         },
         "displayNameOverride": undefined,
+        "esqlColumn": undefined,
         "flattenedValue": "test",
         "isPinned": false,
         "name": "message",
@@ -191,7 +191,6 @@ Array [
     Component={[Function]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "isComputedColumn": true,
           "kbnFieldType": KbnFieldType {
@@ -218,6 +217,7 @@ Array [
           },
         },
         "displayNameOverride": undefined,
+        "esqlColumn": undefined,
         "flattenedValue": "test",
         "isPinned": false,
         "name": "message",
@@ -245,7 +245,6 @@ Array [
     Component={[Function]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -264,6 +263,7 @@ Array [
           "type": "string",
         },
         "displayNameOverride": undefined,
+        "esqlColumn": undefined,
         "flattenedValue": "test",
         "isPinned": false,
         "name": "message",
@@ -293,7 +293,6 @@ Array [
     onFilter={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -312,6 +311,7 @@ Array [
           "type": "string",
         },
         "displayNameOverride": undefined,
+        "esqlColumn": undefined,
         "flattenedValue": "test",
         "isPinned": false,
         "name": "message",
@@ -324,7 +324,6 @@ Array [
     onFilter={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -343,6 +342,7 @@ Array [
           "type": "string",
         },
         "displayNameOverride": undefined,
+        "esqlColumn": undefined,
         "flattenedValue": "test",
         "isPinned": false,
         "name": "message",
@@ -353,7 +353,6 @@ Array [
     Component={[Function]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -372,6 +371,7 @@ Array [
           "type": "string",
         },
         "displayNameOverride": undefined,
+        "esqlColumn": undefined,
         "flattenedValue": "test",
         "isPinned": false,
         "name": "message",

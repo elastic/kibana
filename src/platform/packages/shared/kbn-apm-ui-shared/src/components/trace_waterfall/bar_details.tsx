@@ -181,12 +181,19 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                 onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
                   if (onErrorClick) {
                     e.preventDefault();
+                    const hasApm = item.errors.some((error) => error.source === 'apm');
+                    const hasOtel = item.errors.some((error) => error.source === 'unprocessedOtel');
                     onErrorClick({
                       traceId: item.traceId,
                       docId: item.id,
                       errorCount,
                       errorDocId: errorCount > 1 ? undefined : item.errors[0].errorDocId,
                       docIndex: errorCount > 1 ? undefined : item.errors[0].errorDocIndex,
+                      // 'mixed' means the row carries both classic APM errors and unprocessed OTel
+                      // exception logs; used by use_error_click_handler to route to the Errors page
+                      // with an additional OTel panel, rather than to the generic span flyout.
+                      errorSource:
+                        hasApm && hasOtel ? 'mixed' : hasOtel ? 'unprocessedOtel' : 'apm',
                     });
                   }
                 }}
@@ -218,7 +225,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                 'aria-label': ORPHAN_TITLE,
               }}
               color={theme.euiTheme.colors.danger}
-              type="unlink"
+              type="linkSlash"
               title={ORPHAN_TITLE}
               content={ORPHAN_CONTENT}
             />

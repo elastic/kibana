@@ -12,7 +12,7 @@ import pMap from 'p-map';
 
 import type { Agent } from '../../types';
 import { packagePolicyService } from '../package_policy';
-import { FleetUnauthorizedError } from '../../errors';
+import { AgentlessAgentRestrictionError, FleetUnauthorizedError } from '../../errors';
 import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS } from '../../constants';
 import {
   MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION,
@@ -24,6 +24,7 @@ import { ActionRunner } from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
 import { createAgentAction, createErrorActionResults } from './actions';
 import { getPackagesWithRootPrivilege } from './change_privilege_level';
+import { getAgentPolicyRestrictions, isAgentlessAgent } from './hosted_agent';
 
 export class ChangePrivilegeActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -65,9 +66,17 @@ export async function bulkChangePrivilegeAgentsBatch(
   const spaceId = options.spaceId;
   const namespaces = spaceId ? [spaceId] : [];
 
+  const restrictions = await getAgentPolicyRestrictions(soClient, agents);
+
   await pMap(
     agents,
     async (agent) => {
+      if (isAgentlessAgent(restrictions, agent)) {
+        errors[agent.id] = new AgentlessAgentRestrictionError(
+          `Cannot remove root privilege for managed agent ${agent.id}`
+        );
+        return;
+      }
       // Create error if agent is on an unsupported version.
       if (!isAgentPrivilegeLevelChangeSupported(agent)) {
         errors[agent.id] = new FleetUnauthorizedError(
@@ -75,9 +84,10 @@ export async function bulkChangePrivilegeAgentsBatch(
         );
         return;
       }
-      if (agent?.policy_id) {
+      if (agent?.policy_base_id) {
         const allPackagePolicies =
-          (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_id)) || [];
+          // policy_base_id is always the base policy id, matching the key used by findAllForAgentPolicy.
+          (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_base_id)) || [];
         const packagesWithRootPrivilege = getPackagesWithRootPrivilege(allPackagePolicies);
         // Create error if agent contains an integration that requires root privilege.
         if (packagesWithRootPrivilege.length > 0) {

@@ -27,15 +27,15 @@ export const DefendInsightEvent = lazySchema(() =>
     /**
      * The event's ID
      */
-    id: z.string(),
+    id: z.string().describe("The event's ID"),
     /**
      * The endpoint's ID
      */
-    endpointId: z.string(),
+    endpointId: z.string().describe("The endpoint's ID"),
     /**
      * The value of the event
      */
-    value: z.string(),
+    value: z.string().describe('The value of the event'),
   })
 );
 export type DefendInsightEvent = z.infer<typeof DefendInsightEvent>;
@@ -58,15 +58,19 @@ export const DefendInsight = lazySchema(() =>
     /**
      * The group category of the events (ie. Windows Defender)
      */
-    group: z.string(),
+    group: z.string().describe('The group category of the events (ie. Windows Defender)'),
     /**
      * An array of event objects
      */
-    events: z.array(DefendInsightEvent).optional(),
+    events: z.array(DefendInsightEvent).optional().describe('An array of event objects'),
     /**
      * The suggested remediation for the insight
      */
-    remediation: z.object({}).catchall(z.unknown()).optional(),
+    remediation: z
+      .object({})
+      .catchall(z.unknown())
+      .optional()
+      .describe('The suggested remediation for the insight'),
   })
 );
 export type DefendInsight = z.infer<typeof DefendInsight>;
@@ -95,11 +99,11 @@ export const DefendInsightGenerationInterval = lazySchema(() =>
     /**
      * The time the Defend insight was generated
      */
-    date: z.string(),
+    date: z.string().describe('The time the Defend insight was generated'),
     /**
      * The duration of the Defend insight generation
      */
-    durationMs: z.number().int(),
+    durationMs: z.number().int().describe('The duration of the Defend insight generation'),
   })
 );
 export type DefendInsightGenerationInterval = z.infer<typeof DefendInsightGenerationInterval>;
@@ -111,55 +115,63 @@ export const DefendInsightsResponse = lazySchema(() =>
     /**
      * The last time the Defend insight was updated.
      */
-    updatedAt: z.string(),
+    updatedAt: z.string().describe('The last time the Defend insight was updated.'),
     /**
      * The last time the Defend insight was viewed in the browser.
      */
-    lastViewedAt: z.string(),
+    lastViewedAt: z
+      .string()
+      .describe('The last time the Defend insight was viewed in the browser.'),
     /**
      * The number of events in the context.
      */
-    eventsContextCount: z.number().int().optional(),
+    eventsContextCount: z
+      .number()
+      .int()
+      .optional()
+      .describe('The number of events in the context.'),
     /**
      * The time the Defend insight was created.
      */
-    createdAt: z.string(),
+    createdAt: z.string().describe('The time the Defend insight was created.'),
     replacements: Replacements.optional(),
     users: z.array(User),
     /**
      * The status of the Defend insight.
      */
-    status: DefendInsightStatus,
+    status: DefendInsightStatus.describe('The status of the Defend insight.'),
     endpointIds: z.array(NonEmptyString),
     insightType: DefendInsightType,
     /**
      * The Defend insights.
      */
-    insights: DefendInsights,
+    insights: DefendInsights.describe('The Defend insights.'),
     /**
      * LLM API configuration.
      */
-    apiConfig: ApiConfig,
+    apiConfig: ApiConfig.describe('LLM API configuration.'),
     /**
      * Kibana space
      */
-    namespace: z.string(),
+    namespace: z.string().describe('Kibana space'),
     /**
      * The backing index required for update requests.
      */
-    backingIndex: z.string(),
+    backingIndex: z.string().describe('The backing index required for update requests.'),
     /**
      * The most 5 recent generation intervals
      */
-    generationIntervals: z.array(DefendInsightGenerationInterval),
+    generationIntervals: z
+      .array(DefendInsightGenerationInterval)
+      .describe('The most 5 recent generation intervals'),
     /**
      * The average generation interval in milliseconds
      */
-    averageIntervalMs: z.number().int(),
+    averageIntervalMs: z.number().int().describe('The average generation interval in milliseconds'),
     /**
      * The reason for a status of failed.
      */
-    failureReason: z.string().optional(),
+    failureReason: z.string().optional().describe('The reason for a status of failed.'),
   })
 );
 export type DefendInsightsResponse = z.infer<typeof DefendInsightsResponse>;
@@ -170,36 +182,46 @@ export const DefendInsightUpdateProps = lazySchema(() =>
     /**
      * LLM API configuration.
      */
-    apiConfig: ApiConfig.optional(),
+    apiConfig: ApiConfig.optional().describe('LLM API configuration.'),
     /**
      * The number of events in the context.
      */
-    eventsContextCount: z.number().int().optional(),
+    eventsContextCount: z
+      .number()
+      .int()
+      .optional()
+      .describe('The number of events in the context.'),
     /**
      * The Defend insights.
      */
-    insights: DefendInsights.optional(),
+    insights: DefendInsights.optional().describe('The Defend insights.'),
     /**
      * The status of the Defend insight.
      */
-    status: DefendInsightStatus.optional(),
+    status: DefendInsightStatus.optional().describe('The status of the Defend insight.'),
     replacements: Replacements.optional(),
     /**
      * The most 5 recent generation intervals
      */
-    generationIntervals: z.array(DefendInsightGenerationInterval).optional(),
+    generationIntervals: z
+      .array(DefendInsightGenerationInterval)
+      .optional()
+      .describe('The most 5 recent generation intervals'),
     /**
      * The backing index required for update requests.
      */
-    backingIndex: z.string(),
+    backingIndex: z.string().describe('The backing index required for update requests.'),
     /**
      * The reason for a status of failed.
      */
-    failureReason: z.string().optional(),
+    failureReason: z.string().optional().describe('The reason for a status of failed.'),
     /**
      * The last time the Defend insight was viewed in the browser.
      */
-    lastViewedAt: z.string().optional(),
+    lastViewedAt: z
+      .string()
+      .optional()
+      .describe('The last time the Defend insight was viewed in the browser.'),
   })
 );
 export type DefendInsightUpdateProps = z.infer<typeof DefendInsightUpdateProps>;
@@ -212,25 +234,29 @@ export const DefendInsightCreateProps = lazySchema(() =>
     /**
      * The Defend insight id.
      */
-    id: z.string().optional(),
+    id: z.string().optional().describe('The Defend insight id.'),
     /**
      * The status of the Defend insight.
      */
-    status: DefendInsightStatus,
+    status: DefendInsightStatus.describe('The status of the Defend insight.'),
     /**
      * The number of events in the context.
      */
-    eventsContextCount: z.number().int().optional(),
+    eventsContextCount: z
+      .number()
+      .int()
+      .optional()
+      .describe('The number of events in the context.'),
     endpointIds: z.array(NonEmptyString),
     insightType: DefendInsightType,
     /**
      * The Defend insights.
      */
-    insights: DefendInsights,
+    insights: DefendInsights.describe('The Defend insights.'),
     /**
      * LLM API configuration.
      */
-    apiConfig: ApiConfig,
+    apiConfig: ApiConfig.describe('LLM API configuration.'),
     replacements: Replacements.optional(),
   })
 );

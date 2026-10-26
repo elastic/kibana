@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator } from '@playwright/test';
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 import { DataGrid } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -56,6 +55,25 @@ export class DocViewer {
     await this.waitForFlyoutOpen();
   }
 
+  async copyDirectLink(): Promise<string> {
+    await this.page.evaluate(() => navigator.clipboard.writeText(''));
+    await this.page.testSubj
+      .locator('discoverDocFlyoutShareDirectLink')
+      .getByRole('button')
+      .click();
+
+    const clipboardValue = await this.page.waitForFunction(async () => {
+      return (await navigator.clipboard.readText()) || undefined;
+    });
+    const sharedUrl = await clipboardValue.jsonValue();
+
+    if (typeof sharedUrl !== 'string') {
+      throw new Error('Direct document link was not copied to the clipboard');
+    }
+
+    return sharedUrl;
+  }
+
   async close() {
     await this.page.testSubj.click('euiFlyoutCloseButton');
     await this.page.testSubj.waitForSelector('kbnDocViewer', { state: 'hidden' });
@@ -65,12 +83,110 @@ export class DocViewer {
     await this.page.testSubj.click(`docViewerTab-${tabId}`);
   }
 
+  async openFieldDescription(fieldName: string) {
+    await this.openAndWaitForFlyout({ rowIndex: 0 });
+    await this.openTab('doc_view_table');
+
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    const fieldNameCell = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
+
+    await fieldNameCell.waitFor({ state: 'visible' });
+    await fieldNameCell.scrollIntoViewIfNeeded();
+    await fieldNameCell.click();
+    await fieldNameCell.press('Enter');
+  }
+
+  getExpandedFieldDescription(fieldName: string): Locator {
+    return this.page.testSubj.locator(`fieldDescription-${fieldName}`);
+  }
+
+  /** Inner doc-viewer content. Present only while the flyout is open. */
   getFlyout() {
     return this.page.testSubj.locator('kbnDocViewer');
   }
 
+  /**
+   * Outer `EuiFlyoutResizable` element wrapping {@link getFlyout}. This is the
+   * element carrying the dialog a11y attributes (`role`, `tabindex`,
+   * `aria-describedby`, `data-no-focus-lock`) and the keyboard handler.
+   */
+  getFlyoutContainer(): Locator {
+    return this.page.testSubj.locator('docViewerFlyout');
+  }
+
+  /**
+   * Visually hidden description announced by screen readers. Only rendered for
+   * the push flyout, where focus is not trapped.
+   */
+  getScreenReaderDescription(): Locator {
+    return this.page.testSubj.locator('unifiedDocViewerScreenReaderDescription');
+  }
+
   getTab(tabId: string) {
     return this.page.testSubj.locator(`docViewerTab-${tabId}`);
+  }
+
+  /**
+   * All field-type filter option chips rendered inside the open filter panel.
+   * Only meaningful after {@link openFieldTypeFilter} has resolved.
+   */
+  getFieldTypeFilterOptions(): Locator {
+    return this.page.testSubj
+      .locator('unifiedDocViewerFieldsTableFieldTypeFilterOptions')
+      .locator('[data-test-subj*="typeFilter"]');
+  }
+
+  async clickFieldTypeFilterOption(type: string) {
+    await this.page.testSubj.click(`typeFilter-${type}`);
+  }
+
+  async clearAllFieldTypeFilters() {
+    await this.page.testSubj.click('unifiedDocViewerFieldsTableFieldTypeFilterClearAll');
+  }
+
+  async toggleHideNullValues() {
+    await this.page.testSubj.click('unifiedDocViewerHideNullValuesSwitch');
+  }
+
+  /**
+   * Pagination control for the document at `pageIndex` in the flyout navigation.
+   * Only the currently active document's page control is rendered.
+   */
+  getNavigationPage(pageIndex: number): Locator {
+    return this.page.testSubj.locator(`docViewerFlyoutNavigationPage-${pageIndex}`);
+  }
+
+  /**
+   * Navigation bar that wraps the page dots. Hidden when the pinned document
+   * is filtered out of the current result set.
+   */
+  getFlyoutNavigation(): Locator {
+    return this.page.testSubj.locator('docViewerFlyoutNavigation');
+  }
+
+  /**
+   * Value cell for a field in the doc-viewer fields table.
+   */
+  getFieldValue(fieldName: string): Locator {
+    return this.page.testSubj
+      .locator('docViewerFlyout')
+      .locator(`[data-test-subj="tableDocViewRow-${fieldName}-value"]`);
+  }
+
+  getFieldSearchInput(): Locator {
+    return this.page.testSubj
+      .locator('docViewerFlyout')
+      .locator('[data-test-subj="unifiedDocViewerFieldsSearchInput"]');
+  }
+
+  /**
+   * Drag handle of the resizable push flyout. Scoped to the flyout because
+   * `euiResizableButton` is a generic EUI test subject.
+   */
+  getResizeHandle(): Locator {
+    return this.page.testSubj
+      .locator('docViewerFlyout')
+      .locator('[data-test-subj="euiResizableButton"]');
   }
 
   async getFieldTokens(limit = 10): Promise<string[]> {
@@ -86,10 +202,13 @@ export class DocViewer {
     return flyout.locator('[data-test-subj*="docTableRowAction"]').count();
   }
 
+  /** JSON editor rendered by the source tab. Use it to gate on that tab being rendered. */
+  getJsonCodeEditor(): Locator {
+    return this.page.getByLabel('Read only JSON view of an elasticsearch document');
+  }
+
   async getJsonCodeEditorValue(): Promise<string> {
-    await this.page
-      .getByLabel('Read only JSON view of an elasticsearch document')
-      .waitFor({ state: 'visible' });
+    await this.getJsonCodeEditor().waitFor({ state: 'visible' });
 
     const raw = await this.page.evaluate(() => {
       const monacoEnv = (window as unknown as MonacoJsonEnvironment).MonacoEnvironment;
@@ -138,6 +257,17 @@ export class DocViewer {
     return this.page.testSubj.locator('docViewerFlyout').locator('.kbnDocViewer__fieldName');
   }
 
+  /**
+   * Scrolls the virtualized fields-table grid to its last row. Rows outside the
+   * mounted window are absent from the DOM until they are scrolled into view.
+   */
+  async scrollFieldsTableToBottom() {
+    await this.page.testSubj
+      .locator('docViewerFlyout')
+      .locator('.euiDataGrid__virtualized')
+      .evaluate((el) => el.scrollTo(0, el.scrollHeight));
+  }
+
   async openFieldTypeFilter() {
     await this.page.testSubj.locator('unifiedDocViewerFieldsTableFieldTypeFilterToggle').click();
     await this.page.testSubj
@@ -174,11 +304,19 @@ export class DocViewer {
     return (await this.page.testSubj.locator(testSubj).getAttribute('aria-checked')) === 'true';
   }
 
+  /**
+   * Pin control for a field, matching only while that field is pinned. The
+   * control is always rendered; pinned rows are the ones *without* the
+   * `pinAction` class, which marks the hover-only affordance on unpinned rows.
+   */
+  getPinnedFieldControl(fieldName: string): Locator {
+    return this.page.locator(
+      `[data-test-subj="unifiedDocViewer_pinControl_${fieldName}"]:not(.kbnDocViewer__fieldsGrid__pinAction)`
+    );
+  }
+
   async isFieldPinned(fieldName: string): Promise<boolean> {
-    return this.page
-      .locator(
-        `[data-test-subj="unifiedDocViewer_pinControl_${fieldName}"]:not(.kbnDocViewer__fieldsGrid__pinAction)`
-      )
+    return this.getPinnedFieldControl(fieldName)
       .waitFor({ state: 'attached', timeout: 1_000 })
       .then(() => true)
       .catch(() => false);
@@ -255,6 +393,30 @@ export class DocViewer {
 
   async toggleColumn(fieldName: string) {
     await this.clickFieldActionInTable(fieldName, 'toggleColumnButton');
+  }
+
+  /**
+   * Opens the cell popover for a field's name cell, revealing the cell-level
+   * actions — unlike {@link openFieldDescription}, which opens the field's
+   * description. The expand button belongs to the enclosing grid cell and only
+   * mounts while that cell is hovered, so it is resolved from there rather than
+   * from the name element nested inside it.
+   */
+  async expandFieldNameCell(fieldName: string) {
+    await this.openTab('doc_view_table');
+
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    const nameCell = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
+    const gridCell = nameCell.locator('xpath=ancestor::*[@data-gridcell-column-id][1]');
+
+    await nameCell.evaluate((el) => {
+      el.scrollIntoView({ block: 'center', inline: 'nearest' });
+    });
+
+    await gridCell.hover();
+    await gridCell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
+
+    await this.page.testSubj.locator('euiDataGridExpansionPopover').waitFor({ state: 'visible' });
   }
 
   async openSurroundingDocuments(rowIndex: number) {

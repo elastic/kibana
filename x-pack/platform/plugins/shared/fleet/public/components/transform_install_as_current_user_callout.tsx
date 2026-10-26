@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { uniqBy } from 'lodash';
 
 import type { PackageInfo } from '../../common';
@@ -31,23 +33,31 @@ export const TransformInstallWithCurrentUserPermissionCallout: React.FunctionCom
 }> = ({ count }) => {
   const { docLinks } = useStartServices();
   return (
-    <EuiCallOut color="primary" iconType="info">
-      <FormattedMessage
-        id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout.text"
-        defaultMessage="This package has {count, plural, one {one} other {#}} {docsLink} which will be created and started with the same roles as the user installing the package."
-        values={{
-          count,
-          docsLink: (
-            <EuiLink href={docLinks.links.transforms.overview} target="_blank" external>
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout.docsLink"
-                defaultMessage="{count, plural, one {transform asset} other {transform assets}}"
-                values={{ count }}
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    </EuiCallOut>
+    <KbnInfoCallout
+      title={i18n.translate(
+        'xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout.title',
+        {
+          defaultMessage: 'Transforms use your privileges',
+        }
+      )}
+      text={
+        <FormattedMessage
+          id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout.text"
+          defaultMessage="This package has {count, plural, one {one} other {#}} {docsLink}. They're created and started with your privileges when you install the package."
+          values={{
+            count,
+            docsLink: (
+              <EuiLink href={docLinks.links.transforms.overview} target="_blank" external>
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout.docsLink"
+                  defaultMessage="{count, plural, one {transform asset} other {transform assets}}"
+                  values={{ count }}
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      }
+    />
   );
 };

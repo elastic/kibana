@@ -59,8 +59,7 @@ describe('getEpisodeHeaderBadges', () => {
         ruleId: 'rule-1',
         lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
         lastSnoozeAction: null,
-        snoozeExpiry: null,
-        tags: [],
+        snoozedUntil: null,
         lastSnoozeActor: null,
         lastDeactivateActor: null,
       },
@@ -100,14 +99,15 @@ describe('getEpisodeHeaderBadges', () => {
         lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
         lastAssigneeUid: null,
         lastAckActor: null,
+        lastDeactivateAction: null,
+        lastDeactivateActor: null,
       },
       groupAction: {
         groupHash: 'group-1',
         ruleId: 'rule-1',
         lastDeactivateAction: null,
         lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-        snoozeExpiry: '3035-05-08T12:00:00.000Z',
-        tags: [],
+        snoozedUntil: '3035-05-08T12:00:00.000Z',
         lastSnoozeActor: null,
         lastDeactivateActor: null,
       },
@@ -133,17 +133,18 @@ describe('getEpisodeHeaderBadges', () => {
     const badges = getEpisodeHeaderBadges({
       status: undefined,
       severity: undefined,
-      episodeAction: undefined,
-      groupAction: {
-        groupHash: 'group-1',
+      episodeAction: {
+        episodeId: 'ep-1',
         ruleId: 'rule-1',
+        groupHash: 'group-1',
+        lastAckAction: null,
+        lastAssigneeUid: null,
+        lastAckActor: null,
         lastDeactivateAction: null,
-        lastSnoozeAction: null,
-        snoozeExpiry: null,
-        tags: ['tag-a', 'tag-b'],
-        lastSnoozeActor: null,
         lastDeactivateActor: null,
+        tags: ['tag-a', 'tag-b'],
       },
+      groupAction: undefined,
     });
 
     expect(badges).toEqual([]);

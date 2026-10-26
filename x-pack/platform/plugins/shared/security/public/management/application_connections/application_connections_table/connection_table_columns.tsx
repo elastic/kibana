@@ -35,7 +35,8 @@ export interface ConnectionTableColumnsOptions {
 export const useConnectionTableColumns = ({
   withClientNameColumn = true,
 }: ConnectionTableColumnsOptions = {}): Array<EuiBasicTableColumn<ApplicationConnection>> => {
-  const { revokeConnections, viewClientDetails } = useApplicationConnectionsActions();
+  const { revokeConnections, deleteConnections, viewClientDetails } =
+    useApplicationConnectionsActions();
 
   return useMemo(() => {
     const connectionNameColumn: EuiTableFieldDataColumnType<ApplicationConnection> = {
@@ -137,30 +138,29 @@ export const useConnectionTableColumns = ({
       name: labels.connectionColumns.actions,
       render: (applicationConnection) => {
         const { client, connection } = applicationConnection;
-        if (!isRevocable(applicationConnection)) {
-          return (
-            <EuiText size="s" color="subdued">
-              {labels.connectionColumns.revokedLabel}
-            </EuiText>
-          );
-        }
+        const revocable = isRevocable(applicationConnection);
+        const modalConnection = {
+          client,
+          connectionId: connection.id,
+          connectionName: connection.name,
+          userId: connection.user_id,
+          user: connection.user,
+        };
         return (
           <EuiLink
             color="danger"
-            data-test-subj={`revokeConnection-${connection.id}`}
+            data-test-subj={
+              revocable ? `revokeConnection-${connection.id}` : `deleteConnection-${connection.id}`
+            }
             onClick={() =>
-              revokeConnections([
-                {
-                  client,
-                  connectionId: connection.id,
-                  connectionName: connection.name,
-                  userId: connection.user_id,
-                  user: connection.user,
-                },
-              ])
+              revocable
+                ? revokeConnections([modalConnection])
+                : deleteConnections([modalConnection])
             }
           >
-            {labels.connectionColumns.revokeLabel}
+            {revocable
+              ? labels.connectionColumns.revokeLabel
+              : labels.connectionColumns.deleteLabel}
           </EuiLink>
         );
       },
@@ -174,5 +174,5 @@ export const useConnectionTableColumns = ({
       statusColumn,
       actionsColumn,
     ];
-  }, [revokeConnections, viewClientDetails, withClientNameColumn]);
+  }, [revokeConnections, deleteConnections, viewClientDetails, withClientNameColumn]);
 };

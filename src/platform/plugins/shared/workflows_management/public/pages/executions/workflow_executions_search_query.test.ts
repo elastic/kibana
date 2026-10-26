@@ -7,53 +7,96 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Filter } from '@kbn/es-query';
 import {
-  buildWorkflowExecutionsSearchFilters,
+  filtersToKql,
   getWorkflowExecutionsFetchErrorMessage,
+  isWorkflowExecutionsIndexNotFoundError,
 } from './workflow_executions_search_query';
 
+const phraseFilter = (
+  key: string,
+  query: string | undefined,
+  { negate = false, value }: { negate?: boolean; value?: string } = {}
+): Filter => ({
+  meta: { type: 'phrase', key, negate, disabled: false, params: { query }, value },
+});
+
 describe('workflow_executions_search_query', () => {
-  describe('buildWorkflowExecutionsSearchFilters', () => {
-    it('includes user filters, space, step-run exclusion, and time range', () => {
-      const userFilters = [
-        {
-          meta: { alias: 'status filter', disabled: false },
-          query: { term: { status: 'completed' } },
-        },
-      ];
+  describe('filtersToKql', () => {
+    it('reads the phrase value from meta.params.query when meta.value is not set', () => {
+      expect(filtersToKql([phraseFilter('workflowId', 'abc')])).toBe('(workflowId: abc)');
+    });
 
-      const filters = buildWorkflowExecutionsSearchFilters({
-        spaceId: 'default',
-        timeRange: { from: 'now-24h', to: 'now' },
-        timeField: 'startedAt',
-        userFilters,
-      });
+    it('negates phrase filters', () => {
+      expect(filtersToKql([phraseFilter('workflowId', 'abc', { negate: true })])).toBe(
+        '(NOT workflowId: abc)'
+      );
+    });
 
-      expect(filters).toHaveLength(4);
-      expect(filters[0]).toBe(userFilters[0]);
-      expect(filters[1].query).toEqual({
-        bool: {
-          should: [
-            { term: { spaceId: 'default' } },
-            { bool: { must_not: { exists: { field: 'spaceId' } } } },
-          ],
-          minimum_should_match: 1,
-        },
-      });
-      expect(filters[2].query).toEqual({
-        bool: {
-          must_not: { exists: { field: 'stepId' } },
-        },
-      });
-      expect(filters[3].query).toEqual({
-        range: {
-          startedAt: {
-            gte: 'now-24h',
-            lte: 'now',
-            format: 'strict_date_optional_time',
-          },
-        },
-      });
+    it('quotes phrase values that need escaping', () => {
+      expect(filtersToKql([phraseFilter('workflowId', 'my workflow: 1')])).toBe(
+        '(workflowId: "my workflow: 1")'
+      );
+    });
+
+    it('drops phrase filters without a resolvable value instead of emitting invalid KQL', () => {
+      expect(filtersToKql([phraseFilter('workflowId', undefined)])).toBe('');
+    });
+
+    it('quotes an empty phrase value', () => {
+      expect(filtersToKql([phraseFilter('workflowId', '')])).toBe('(workflowId: "")');
+    });
+
+    it('converts phrases filters', () => {
+      const filter: Filter = {
+        meta: { type: 'phrases', key: 'triggeredBy', negate: false, params: ['manual', 'alert'] },
+      };
+      expect(filtersToKql([filter])).toBe('(triggeredBy: (manual or alert))');
+    });
+
+    it('converts exists filters', () => {
+      const filter: Filter = { meta: { type: 'exists', key: 'executedBy', negate: true } };
+      expect(filtersToKql([filter])).toBe('(NOT executedBy: *)');
+    });
+
+    it('falls back to query.match_phrase for filters without meta.type', () => {
+      const filter = {
+        meta: { key: 'workflowId', negate: false },
+        query: { match_phrase: { workflowId: 'abc' } },
+      } as Filter;
+      expect(filtersToKql([filter])).toBe('(workflowId: abc)');
+    });
+
+    it('skips disabled filters and joins the rest with and', () => {
+      const disabled: Filter = {
+        meta: { type: 'phrase', key: 'a', disabled: true, params: { query: 'x' } },
+      };
+      expect(filtersToKql([disabled, phraseFilter('b', '1'), phraseFilter('c', '2')])).toBe(
+        '(b: 1) and (c: 2)'
+      );
+    });
+  });
+
+  describe('isWorkflowExecutionsIndexNotFoundError', () => {
+    it('returns true for an EsError-shaped index_not_found_exception', () => {
+      const error = {
+        attributes: { error: { type: 'index_not_found_exception', reason: 'missing' } },
+      };
+
+      expect(isWorkflowExecutionsIndexNotFoundError(error)).toBe(true);
+    });
+
+    it('returns true for a response error-shaped index_not_found_exception', () => {
+      const error = {
+        body: { error: { type: 'index_not_found_exception', reason: 'missing' } },
+      };
+
+      expect(isWorkflowExecutionsIndexNotFoundError(error)).toBe(true);
+    });
+
+    it('returns false for other errors', () => {
+      expect(isWorkflowExecutionsIndexNotFoundError(new Error('other'))).toBe(false);
     });
   });
 

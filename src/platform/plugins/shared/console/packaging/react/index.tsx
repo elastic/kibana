@@ -74,6 +74,7 @@ const translations = {
   'ja-JP': require('./translations/ja-JP.json'),
   'zh-CN': require('./translations/zh-CN.json'),
   'de-DE': require('./translations/de-DE.json'),
+  'pt-BR': require('./translations/pt-BR.json'),
 };
 /* eslint-enable @kbn/imports/no_unresolvable_imports */
 

@@ -167,7 +167,7 @@ export const ManageIntegrationActions: React.FC<{
         <EuiButtonEmpty
           size="xs"
           color="primary"
-          iconType="checkInCircleFilled"
+          iconType="checkCircleFill"
           iconSide="left"
           onClick={openReviewModal}
           data-test-subj="manageIntegrationReviewApproveInlineBtn"
@@ -248,7 +248,7 @@ export const ManageIntegrationActions: React.FC<{
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 key="installToCluster"
-                icon="exportAction"
+                icon="upload"
                 disabled={!isApproved || isInstalling || isSameVersionInstalled}
                 data-test-subj="manageIntegrationInstallMenuItem"
                 toolTipContent={getInstallToClusterTooltip()}

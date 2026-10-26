@@ -1,0 +1,59 @@
+version: '1'
+name: Nightshift Investigation (space entry point)
+description: >
+  Runs Nightshift investigations in this space as the Nightshift service account. It only hands
+  its inputs to the shared investigation workflow, which runs with this workflow's identity.
+enabled: true
+settings:
+  # Replaced with the bound service account when the workflow is installed in a space.
+  run_as: __SERVICE_ACCOUNT_ID__
+  # Longer than the investigation's own timeout, since this run waits for it.
+  timeout: '65m'
+  # A follow-up waits here until the investigation's previous round has finished, since a wait in
+  # the shared workflow's queue would count against the timeout above and could cancel the
+  # follow-up before it starts. The timeout only starts once a run leaves this queue. The key
+  # differs from the shared workflow's, which this run would otherwise block.
+  concurrency:
+    key: 'bound-investigation:{{ inputs.investigation_id | default: execution.id }}'
+    strategy: queue
+    max: 1
+tags:
+  - observability
+  - investigation
+  - nightshift
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        # The investigation is named after this run, as if the shared workflow had been run
+        # directly. A caller continuing an existing investigation passes its id instead.
+        investigation_id:
+          type: string
+          default: '{{ execution.id }}'
+          description: Investigation to run. Defaults to one named after this execution.
+      # The shared investigation validates the rest of the inputs.
+      additionalProperties: true
+
+steps:
+  # Only Nightshift's investigations client may start this workflow (it checks the caller's
+  # privileges and claims the subjects). Anyone allowed to run workflows could otherwise start an
+  # investigation as the service account. Only server code sets `triggeredBy`.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : "nightshift-investigations"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow runs Nightshift investigations as the Nightshift service account. Start
+            investigations from Nightshift instead. This run was started by
+            {{ execution.triggeredBy }}.
+
+  - name: investigate
+    type: workflow.execute
+    with:
+      workflow-id: system-nightshift-investigation
+      run-as-mode: inherit
+      inputs: ${{ inputs }}

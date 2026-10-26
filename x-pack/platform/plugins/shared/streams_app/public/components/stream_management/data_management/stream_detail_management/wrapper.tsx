@@ -316,7 +316,7 @@ export function Wrapper({
       ? {
           id: 'discover',
           label: viewInDiscoverLabel,
-          iconType: 'discoverApp',
+          iconType: 'productDiscover',
           href: discoverHref,
           testId: `streamsDiscoverActionButton-${definition.stream.name}`,
         }
@@ -381,7 +381,7 @@ export function Wrapper({
         );
       })}
       <StreamsAppPageTemplate.Body
-        noPadding={tab === 'partitioning' || tab === 'processing' || tab === 'canvas'}
+        noPadding={tab === 'partitioning' || tab === 'processing'}
         paddingSize="m"
       >
         {topContent}

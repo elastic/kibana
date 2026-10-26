@@ -51,7 +51,7 @@ export const CorrelationsOverview: React.FC<CorrelationsOverviewProps> = memo(
         }
         highlightTitle
         link={link}
-        linkIconType="arrowStart"
+        linkIconType="chevronLimitLeft"
       >
         <EuiFlexGroup
           direction="column"

@@ -6,12 +6,6 @@
 product: Kibana
 collection: Telemetry settings in Kibana
 id: telemetry-settings-kbn
-page_description: |
-  Usage Collection (also known as Telemetry) is enabled by default. This allows us to learn what our users are most interested in, so we can improve our products and services.
-
-  Refer to our [Privacy Statement](https://www.elastic.co/legal/product-privacy-statement) to learn more.
-
-  You can control whether this data is sent from the {{kib}} servers, or if it should be sent from the user's browser, in case a firewall is blocking the connections from the server. Additionally, you can disable this feature either in **Stack Management > {{kib}} > Advanced Settings > Global Settings > Usage collection** or the config file with the following settings.
 
 groups:
   - group: General telemetry settings
@@ -29,7 +23,10 @@ groups:
         applies_to:
           stack: ga
           ech: unavailable
+          ece: ga
+          eck: ga
           self: ga
+          serverless: unavailable
 
       - setting: telemetry.allowChangingOptInStatus
         description: |
@@ -39,7 +36,10 @@ groups:
         applies_to:
           stack: ga
           ech: unavailable
+          ece: ga
+          eck: ga
           self: ga
+          serverless: unavailable
 
       - setting: telemetry.sendUsageFrom
         description: |
@@ -52,7 +52,10 @@ groups:
         applies_to:
           stack: ga
           ech: unavailable
+          ece: ga
+          eck: ga
           self: ga
+          serverless: unavailable
 
       - setting: xpack.apm.telemetryCollectionEnabled
         description: |
@@ -62,4 +65,7 @@ groups:
         applies_to:
           stack: ga
           ech: unavailable
+          ece: ga
+          eck: ga
           self: ga
+          serverless: unavailable

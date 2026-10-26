@@ -11,11 +11,6 @@ export const ALERT_DISPLAY_NAME = i18n.translate('xpack.securitySolution.cases.a
   defaultMessage: 'Alerts',
 });
 
-export const ALERT_AVATAR_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.cases.alertAttachment.avatarAriaLabel',
-  { defaultMessage: 'alert' }
-);
-
 export const ALERT_COMMENT_LABEL_TITLE = i18n.translate(
   'xpack.securitySolution.cases.alertAttachment.alertCommentLabelTitle',
   { defaultMessage: 'added an alert from' }
@@ -43,7 +38,7 @@ export const REMOVED_ALERTS_LABEL_TITLE = (totalAlerts: number) =>
     values: { totalAlerts },
   });
 
-export const DELETE_ALERTS_SUCCESS_TITLE = (totalAlerts: number) =>
+export const DELETE_ALERTS_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate('xpack.securitySolution.cases.alertAttachment.deleteAlertsSuccessTitle', {
     defaultMessage:
       'Deleted {totalAlerts, plural, =1 {one} other {{totalAlerts}}} {totalAlerts, plural, =1 {alert} other {alerts}}',
@@ -58,4 +53,15 @@ export const SHOW_ALERT_TOOLTIP = i18n.translate(
 export const ALERTS_EMPTY_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.cases.alertAttachment.alertsEmptyDescription',
   { defaultMessage: 'No alerts have been added to this case.' }
+);
+
+export const ALERTS_COUNT = (count: number) =>
+  i18n.translate('xpack.securitySolution.cases.alertAttachment.alertsCount', {
+    defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
+    values: { count },
+  });
+
+export const REMOVE_FROM_CASE = i18n.translate(
+  'xpack.securitySolution.cases.alertAttachment.removeFromCase',
+  { defaultMessage: 'Remove from case' }
 );

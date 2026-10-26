@@ -49,7 +49,7 @@ describe('AddFilter', () => {
 
     await user.type(screen.getByTestId('fieldFilterInput'), 'tim*');
     await user.click(screen.getByText('Add'));
-    expect(onAddFilter).toBeCalledWith('tim*');
+    expect(onAddFilter).toHaveBeenCalledWith('tim*');
   });
 
   test('should ignore strings with just spaces', async () => {
@@ -61,7 +61,7 @@ describe('AddFilter', () => {
     // Set a value in the input field
     await user.type(screen.getByTestId('fieldFilterInput'), ' ');
     await user.click(screen.getByText('Add'));
-    expect(onAddFilter).not.toBeCalled();
+    expect(onAddFilter).not.toHaveBeenCalled();
   });
 
   test('should handle errors with invalid filter patterns', async () => {

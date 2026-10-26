@@ -14,11 +14,20 @@ export const CONNECTOR_NAME = i18n.translate('connectors.jiraServiceManagement.t
 });
 
 export const MESSAGE_NON_EMPTY = i18n.translate(
-  'xpack.stackConnectors.jiraServiceManagement.nonEmptyMessageField',
+  'connectors.jiraServiceManagement.nonEmptyMessageField',
   {
     defaultMessage: 'must be populated with a value other than just whitespace',
   }
 );
+
+/** Jira Service Management's create-alert `message` API limit. */
+export const MESSAGE_MAX_LENGTH = 130;
+
+/**
+ * HTTP-facing schema bound for `message`. Matches the vendor `description` max so Mustache-expanded
+ * messages can pass validation and be truncated to `MESSAGE_MAX_LENGTH`. Values above this still fail.
+ */
+export const MESSAGE_SCHEMA_MAX_LENGTH = 15000;
 
 export enum SUB_ACTION {
   CreateAlert = 'createAlert',

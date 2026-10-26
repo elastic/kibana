@@ -176,6 +176,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             function: 'high_mean',
             fieldName: 'failed_transaction_rate',
           },
+          {
+            description: 'low count of transactions for an APM service',
+            function: 'low_count',
+          },
         ]);
       });
 

@@ -7,20 +7,28 @@
 
 import type { IconType } from '@elastic/eui';
 import type { Edge, Node } from '@xyflow/react';
+import type { DestinationSignal } from '../../../streams_layout/destinations/types';
 
 export const SOURCE_NODE_TYPE = 'source';
 export const DESTINATION_NODE_TYPE = 'destination';
 export const ANIMATED_EDGE_TYPE = 'animated';
 
 export interface SourceNodeData extends Record<string, unknown> {
+  sourceId?: string;
   title: string;
   subtitle: string;
-  iconType: IconType;
+  iconType?: IconType;
+  signals?: DestinationSignal[];
 }
 
 export interface DestinationNodeData extends Record<string, unknown> {
   title: string;
-  hasProcessing: boolean;
+  subtitle?: string;
+  streamName?: string;
+  destinationId?: string;
+  signals?: DestinationSignal[];
+  indexCount?: number;
+  targetedIndexNames?: string[];
 }
 
 export type SourceNode = Node<SourceNodeData, typeof SOURCE_NODE_TYPE>;

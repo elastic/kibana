@@ -24,12 +24,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { StepInfo } from '@kbn/workflows-yaml';
 import { deslugifyStepName } from './deslugify_step_name';
+import { getStepChipPalette } from './step_chip_palette';
 import type { RenderStepIcon } from './workflow_graph_actions_context';
 import {
   useWorkflowsMonacoTheme,
   WORKFLOWS_MONACO_EDITOR_THEME,
 } from '../../hooks/use_workflows_monaco_theme';
-import { TypeIcon } from '../step_icons';
+import { getStepFamily, TypeIcon } from '../step_icons';
 
 export type WorkflowVisualEditorFlyoutTarget =
   | {
@@ -118,25 +119,25 @@ export function WorkflowVisualEditorFlyout({
   const hasMoreActions = Boolean(renderMoreMenuItems);
   const hasHeaderActions = hasRunAction || hasMoreActions;
   const runDisabled = isTrigger || !canExecuteWorkflow || !isYamlValid;
-  const moreActionsLabel = i18n.translate('workflows.visualEditor.flyout.more', {
+  const moreActionsLabel = i18n.translate('workflowsUi.visualEditor.flyout.more', {
     defaultMessage: 'More actions',
   });
-  const closeLabel = i18n.translate('workflows.visualEditor.flyout.close', {
+  const closeLabel = i18n.translate('workflowsUi.visualEditor.flyout.close', {
     defaultMessage: 'Close',
   });
   const runDisabledReason = isTrigger
-    ? i18n.translate('workflows.visualEditor.flyout.runDisabledTrigger', {
+    ? i18n.translate('workflowsUi.visualEditor.flyout.runDisabledTrigger', {
         defaultMessage: 'Triggers cannot be run individually.',
       })
     : !canExecuteWorkflow
-    ? i18n.translate('workflows.visualEditor.flyout.runDisabledNoCapability', {
+    ? i18n.translate('workflowsUi.visualEditor.flyout.runDisabledNoCapability', {
         defaultMessage: 'You do not have permission to run workflows.',
       })
     : !isYamlValid
-    ? i18n.translate('workflows.visualEditor.flyout.runDisabledInvalidYaml', {
+    ? i18n.translate('workflowsUi.visualEditor.flyout.runDisabledInvalidYaml', {
         defaultMessage: 'Fix YAML errors to run this step.',
       })
-    : i18n.translate('workflows.visualEditor.flyout.runStep', {
+    : i18n.translate('workflowsUi.visualEditor.flyout.runStep', {
         defaultMessage: 'Run step',
       });
 
@@ -148,9 +149,9 @@ export function WorkflowVisualEditorFlyout({
         display: 'flex',
         flexDirection: 'column',
         background: euiTheme.colors.backgroundBasePlain,
-        borderRadius: 8,
+        borderRadius: euiTheme.border.radius.panel,
         overflow: 'hidden',
-        border: `1px solid ${euiTheme.colors.borderBasePlain}`,
+        border: euiTheme.border.thin,
       }}
     >
       <div
@@ -160,7 +161,7 @@ export function WorkflowVisualEditorFlyout({
           display: 'flex',
           alignItems: 'center',
           gap: 16,
-          borderBottom: `1px solid ${euiTheme.colors.borderBasePlain}`,
+          borderBottom: euiTheme.border.thin,
           flexShrink: 0,
         }}
       >
@@ -171,28 +172,42 @@ export function WorkflowVisualEditorFlyout({
           css={{ minWidth: 0, flex: '1 1 auto' }}
         >
           <EuiFlexItem grow={false}>
-            <div
-              css={{
-                width: 40,
-                height: 40,
-                // Same light-gray inner-box stroke the graph step uses
-                // (Figma FIGMA_STEP_INNER_BOX_BORDER) so the flyout header
-                // visually echoes the row that opened it.
-                border: `1px solid #e4e7f1`,
-                borderRadius: 8,
-                background: euiTheme.colors.backgroundBasePlain,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              {renderStepIcon ? (
-                renderStepIcon({ stepType: iconStepType, isTrigger, size: 'm' })
-              ) : (
-                <TypeIcon type={iconStepType} kind={isTrigger ? 'trigger' : 'step'} size="m" />
-              )}
-            </div>
+            {(() => {
+              // Flyout is the editor context — no execution status, always idle.
+              const flyoutChip = getStepChipPalette(
+                euiTheme,
+                getStepFamily(iconStepType, isTrigger),
+                'none'
+              );
+              return (
+                <div
+                  css={{
+                    width: 40,
+                    height: 40,
+                    // Echoes the idle chip colours from the graph node so the
+                    // flyout header reads as the same step that was clicked.
+                    background: flyoutChip.fill,
+                    border: `${euiTheme.border.width.thin} solid ${flyoutChip.border}`,
+                    borderRadius: euiTheme.border.radius.control,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  {renderStepIcon ? (
+                    renderStepIcon({
+                      stepType: iconStepType,
+                      isTrigger,
+                      size: 'm',
+                      color: flyoutChip.icon,
+                    })
+                  ) : (
+                    <TypeIcon type={iconStepType} kind={isTrigger ? 'trigger' : 'step'} size="m" />
+                  )}
+                </div>
+              );
+            })()}
           </EuiFlexItem>
           <EuiFlexItem css={{ minWidth: 0 }}>
             <div
@@ -245,7 +260,7 @@ export function WorkflowVisualEditorFlyout({
                   size="s"
                   onClick={onRunStep}
                   isDisabled={runDisabled}
-                  aria-label={i18n.translate('workflows.visualEditor.flyout.runStep.aria', {
+                  aria-label={i18n.translate('workflowsUi.visualEditor.flyout.runStep.aria', {
                     defaultMessage: 'Run step',
                   })}
                   data-test-subj="workflowVisualEditorFlyoutRunStep"
@@ -264,7 +279,7 @@ export function WorkflowVisualEditorFlyout({
                 button={
                   <EuiToolTip content={moreActionsLabel} disableScreenReaderOutput>
                     <EuiButtonIcon
-                      iconType="boxesHorizontal"
+                      iconType="boxesVertical"
                       color="text"
                       size="s"
                       aria-label={moreActionsLabel}
@@ -335,7 +350,7 @@ export function WorkflowVisualEditorFlyout({
           <div css={{ padding: 16 }}>
             <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="workflows.visualEditor.flyout.unavailable"
+                id="workflowsUi.visualEditor.flyout.unavailable"
                 defaultMessage="Step details unavailable. The YAML may have errors."
               />
             </EuiText>
@@ -350,19 +365,19 @@ export function WorkflowVisualEditorFlyout({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
+            borderTop: euiTheme.border.thin,
             flexShrink: 0,
             background: euiTheme.colors.backgroundBasePlain,
           }}
         >
           <EuiButtonEmpty
             size="m"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={onOpenInYaml}
             data-test-subj="workflowVisualEditorFlyoutOpenInYaml"
           >
             <FormattedMessage
-              id="workflows.visualEditor.flyout.openInYaml"
+              id="workflowsUi.visualEditor.flyout.openInYaml"
               defaultMessage="Open in YAML editor"
             />
           </EuiButtonEmpty>

@@ -30,15 +30,23 @@ export const CreateTimelinesRequestBody = lazySchema(() =>
     /**
      * A unique identifier for the Timeline template.
      */
-    templateTimelineId: z.string().nullable().optional(),
+    templateTimelineId: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('A unique identifier for the Timeline template.'),
     /**
      * Timeline template version number.
      */
-    templateTimelineVersion: z.number().nullable().optional(),
+    templateTimelineVersion: z
+      .number()
+      .nullable()
+      .optional()
+      .describe('Timeline template version number.'),
     /**
      * A unique identifier for the Timeline.
      */
-    timelineId: z.string().nullable().optional(),
+    timelineId: z.string().nullable().optional().describe('A unique identifier for the Timeline.'),
     timelineType: TimelineType.nullable().optional(),
     version: z.string().nullable().optional(),
   })

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import yaml from 'js-yaml';
+import { parse, stringify } from 'yaml';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Truthy } from 'lodash';
 import { INTEGRATION_PACKAGE_NAME } from '../constants';
@@ -48,7 +48,7 @@ export function getSelectorsAndResponsesFromYaml(configuration: string): {
   let responses: Response[] = [];
 
   try {
-    const result = yaml.load(configuration);
+    const result = parse(configuration);
 
     if (result) {
       // iterate selector/response types
@@ -107,5 +107,5 @@ export function getYamlFromSelectorsAndResponses(selectors: Selector[], response
     return current;
   }, schema);
 
-  return yaml.dump(schema);
+  return stringify(schema);
 }

@@ -12,7 +12,15 @@ import type {
   ObservabilityLogsAIInsightFeature,
   ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
-import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
+import {
+  fieldConstants,
+  getFieldValueWithFallback,
+  getMessageFieldWithFallbacks,
+  getStacktraceFields,
+  type DataTableRecord,
+  type LogDocument,
+  type ObservabilityIndexes,
+} from '@kbn/discover-utils';
 import { PROJECT_ROUTING, type ICPSManager } from '@kbn/cps-utils';
 import { i18n } from '@kbn/i18n';
 import {
@@ -27,6 +35,23 @@ import { EMPTY, filter, map, skip } from 'rxjs';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import type { LogOverviewContext } from '../../logs_data_source_profile/profile';
 import { OBSERVABILITY_LOG_DOCUMENT_PROFILE_ID, type LogDocumentProfileProvider } from '../profile';
+
+/**
+ * Whether the Log overview tab has anything to show for the record. Mirrors what the overview
+ * sections and the row leading controls look at, so every control that requests this tab finds
+ * the section it asked for.
+ */
+const hasLogOverviewContent = (record: DataTableRecord) => {
+  const { flattened, raw } = record;
+
+  const hasMessage = Boolean(getMessageFieldWithFallbacks(flattened).value);
+  const hasStacktrace = Object.values(getStacktraceFields(record as LogDocument)).some(Boolean);
+  const hasQualityIssues = Object.keys(raw.ignored_field_values ?? {}).length > 0;
+  const { value: traceId } = getFieldValueWithFallback(flattened, fieldConstants.TRACE_ID_FIELD);
+  const hasTrace = Boolean(Array.isArray(traceId) ? traceId[0] : traceId);
+
+  return hasMessage || hasStacktrace || hasQualityIssues || hasTrace;
+};
 
 export const createGetDocViewer =
   (services: ProfileProviderServices): LogDocumentProfileProvider['profile']['getDocViewer'] =>
@@ -61,6 +86,7 @@ export const createGetDocViewer =
             defaultMessage: 'Log overview',
           }),
           order: 0,
+          enabled: hasLogOverviewContent(params.record),
           render: (props: DocViewRenderProps) => (
             <LogOverviewTab
               logOverviewContext$={context.logOverviewContext$}
@@ -136,7 +162,10 @@ const useAccordionExpansionEffect = (
   logsOverviewApi: UnifiedDocViewerLogsOverviewApi | null,
   recordId: string
 ) => {
-  const initialAccordionSection = useRef(logOverviewContext$.getValue()?.initialAccordionSection);
+  const initialContext = logOverviewContext$.getValue();
+  const initialAccordionSection = useRef(
+    initialContext?.recordId === recordId ? initialContext.initialAccordionSection : undefined
+  );
 
   useEffect(() => {
     if (!logsOverviewApi) {

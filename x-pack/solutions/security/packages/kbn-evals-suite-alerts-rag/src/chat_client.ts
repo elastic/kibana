@@ -30,7 +30,19 @@ interface ConverseParams {
   message: string;
   conversationId?: string;
   agentId?: string;
+  /**
+   * Kibana space to run the conversation in. When set (and not `default`),
+   * requests go to `/s/<spaceId>/api/agent_builder/converse`.
+   */
+  spaceId?: string;
 }
+
+const conversePathForSpace = (spaceId?: string): string => {
+  if (!spaceId || spaceId === 'default') {
+    return '/api/agent_builder/converse';
+  }
+  return `/s/${encodeURIComponent(spaceId)}/api/agent_builder/converse`;
+};
 
 /**
  * Thin wrapper around the Agent Builder `converse` HTTP API that drives the
@@ -56,9 +68,11 @@ export class AlertsRagAgentBuilderChatClient {
     message,
     conversationId,
     agentId = agentBuilderDefaultAgentId,
+    spaceId,
   }: ConverseParams): Promise<ConverseResponse> {
+    const path = conversePathForSpace(spaceId);
     const call = async (): Promise<ConverseResponse> => {
-      const response = (await this.fetch('/api/agent_builder/converse', {
+      const response = (await this.fetch(path, {
         method: 'POST',
         version: '2023-10-31',
         body: JSON.stringify({

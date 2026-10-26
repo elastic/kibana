@@ -108,7 +108,7 @@ export const PhaseAccordion = ({ phase, phases }: PhaseAccordionProps) => {
       <EuiFlexItem />
       <EuiFlexItem grow={false}>
         <EuiIcon
-          type="arrowDown"
+          type="chevronSingleDown"
           size="m"
           aria-hidden
           css={toggleIconCss}

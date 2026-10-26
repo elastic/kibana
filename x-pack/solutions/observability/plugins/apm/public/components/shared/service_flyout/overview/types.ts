@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import type { LensConfig, LensESQLDataset } from '@kbn/lens-embeddable-utils';
+import type { LensESQLDataset, LensXYConfig } from '@kbn/lens-embeddable-utils';
 
-export type LensESQLConfig = LensConfig & { dataset: LensESQLDataset };
+export type LensESQLConfig = LensXYConfig & { dataset: LensESQLDataset };

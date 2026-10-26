@@ -39,7 +39,12 @@ export async function getLatestTestRun<F>({
         filter: [
           SUMMARY_FILTER,
           getRangeFilter({ from, to }),
-          { term: { 'monitor.id': monitorId } },
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [{ term: { 'monitor.id': monitorId } }, { term: { config_id: monitorId } }],
+            },
+          },
           ...getHeartbeatLocationFilter({ field: 'observer.geo.name', value: locationLabel }),
           ...getHeartbeatLocationFilter({ field: 'observer.name', value: locationId }),
         ] as QueryDslQueryContainer[],

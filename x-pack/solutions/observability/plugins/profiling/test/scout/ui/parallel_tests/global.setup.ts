@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { globalSetupHook, tags } from '@kbn/scout-oblt';
+import { mergeTests, globalSetupHook as obltGlobalSetupHook, tags } from '@kbn/scout-oblt';
+import { apiTest as profilingFixtures } from '../../common/fixtures';
 import { APM_AGENT_POLICY_ID } from '../../common/fixtures/constants';
+
+const globalSetupHook = mergeTests(obltGlobalSetupHook, profilingFixtures);
 
 globalSetupHook(
   'Set up Profiling Resources and Data',
   { tag: tags.stateful.classic },
-  async ({ profilingSetup, apiServices, log }) => {
+  async ({ profilingSetup, profilingHelper, apiServices, log }) => {
     try {
       // Create APM agent policy via Fleet API
       await apiServices.fleet.internal.setup();
@@ -64,6 +67,10 @@ globalSetupHook(
       } else {
         log.info('Profiling data already loaded.');
       }
+
+      log.info('Loading OTel profiling data...');
+      await profilingHelper.loadOtelData();
+      log.info('[Done] Loading OTel profiling data.');
     } catch (error) {
       log.error(`Error setting up profiling: ${error}`);
       throw error;

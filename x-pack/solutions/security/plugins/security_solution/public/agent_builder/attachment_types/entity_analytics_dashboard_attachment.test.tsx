@@ -179,7 +179,7 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
     });
 
     expect(buttons).toHaveLength(1);
-    expect(buttons[0].icon).toBe('popout');
+    expect(buttons[0].icon).toBe('external');
     expect(buttons[0].label).toMatch(/open entity analytics in security/i);
 
     buttons[0].handler();

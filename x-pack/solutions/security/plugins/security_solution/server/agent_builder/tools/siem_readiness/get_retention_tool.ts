@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -25,7 +25,7 @@ import {
 } from '../../../lib/siem_readiness/fetchers';
 import { SIEM_READINESS_RETENTION_TOOL_ID } from './tool_ids';
 
-const schema = z.object({});
+const schema = lazySchema(() => z.object({}));
 
 export const getRetentionTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
@@ -38,6 +38,13 @@ export const getRetentionTool = (
     'Retrieves SIEM data retention health. Returns data streams and standalone indices with their retention configuration (ILM policy or DSL), retention period in days, and compliance status against the 365-day FedRAMP threshold — filtered to categorized SIEM indices. Includes an overall health status (healthy / actionsRequired / noData) and actionable findings for non-compliant indices. Each actionable finding includes blast radius data. When presenting any finding, always show these as explicit labeled fields: Affected Platform, Affected Rules, Affected Tactics.',
   schema,
   tags: ['security', 'siem-readiness', 'retention'],
+  annotations: {
+    title: 'Get SIEM Retention',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   availability: {
     cacheMode: 'space',
     handler: async ({ request }) => {

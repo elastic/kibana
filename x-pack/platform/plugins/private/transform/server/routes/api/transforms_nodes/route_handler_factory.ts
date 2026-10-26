@@ -15,8 +15,15 @@ import { NODES_INFO_PRIVILEGES } from '../../../../common/constants';
 import { wrapError, wrapEsError } from '../../utils/error_utils';
 
 const NODE_ROLES = 'roles';
+const REQUIRED_CROSS_PROJECT_FEATURE_FLAGS = [
+  'es.transform_cross_project_feature_flag_enabled',
+  'es.ml_cross_project_feature_flag_enabled',
+] as const;
 
 interface NodesAttributes {
+  jvm?: {
+    input_arguments?: string[];
+  };
   roles: string[];
 }
 
@@ -27,6 +34,46 @@ export const isNodes = (arg: unknown): arg is Nodes => {
     isPopulatedObject(arg) &&
     Object.values(arg).every(
       (node) => isPopulatedObject(node, [NODE_ROLES]) && Array.isArray(node.roles)
+    )
+  );
+};
+
+const isFeatureFlagEnabled = ({
+  featureFlag,
+  inputArguments,
+  isSnapshotBuild,
+}: {
+  featureFlag: (typeof REQUIRED_CROSS_PROJECT_FEATURE_FLAGS)[number];
+  inputArguments?: string[];
+  isSnapshotBuild: boolean;
+}): boolean => {
+  const argumentPrefix = `-D${featureFlag}=`;
+
+  for (let index = (inputArguments?.length ?? 0) - 1; index >= 0; index--) {
+    const argument = inputArguments?.[index];
+    if (argument?.startsWith(argumentPrefix)) {
+      return argument.slice(argumentPrefix.length) === 'true';
+    }
+  }
+
+  return isSnapshotBuild;
+};
+
+export const areCrossProjectFeatureFlagsEnabled = (
+  nodes: unknown,
+  isSnapshotBuild: boolean
+): boolean => {
+  if (!isNodes(nodes)) {
+    return false;
+  }
+
+  return Object.values(nodes).every(({ jvm }) =>
+    REQUIRED_CROSS_PROJECT_FEATURE_FLAGS.every((featureFlag) =>
+      isFeatureFlagEnabled({
+        featureFlag,
+        inputArguments: jvm?.input_arguments,
+        isSnapshotBuild,
+      })
     )
   );
 };
@@ -49,9 +96,12 @@ export const routeHandlerFactory: (
       }
     }
 
-    const { nodes } = await esClient.asInternalUser.nodes.info({
-      filter_path: `nodes.*.${NODE_ROLES}`,
-    });
+    const [{ nodes }, { version }] = await Promise.all([
+      esClient.asInternalUser.nodes.info({
+        filter_path: `nodes.*.${NODE_ROLES},nodes.*.jvm.input_arguments`,
+      }),
+      esClient.asInternalUser.info(),
+    ]);
 
     let count = 0;
     if (isNodes(nodes)) {
@@ -62,7 +112,12 @@ export const routeHandlerFactory: (
       }
     }
 
-    return res.ok({ body: { count } });
+    return res.ok({
+      body: {
+        count,
+        isCrossProjectEnabled: areCrossProjectFeatureFlagsEnabled(nodes, version.build_snapshot),
+      },
+    });
   } catch (e) {
     return res.customError(wrapError(wrapEsError(e)));
   }

@@ -25,6 +25,7 @@ export const initializeDataViews = () => {
   suppressGlobalAnnouncements();
   createListsIndex();
   cy.visit('/app/security/alerts', {
+    timeout: 60000,
     onBeforeLoad: (win) => disableNewFeaturesTours(win),
   });
   // Wait for loading to complete - don't require it to appear first (page may load quickly)

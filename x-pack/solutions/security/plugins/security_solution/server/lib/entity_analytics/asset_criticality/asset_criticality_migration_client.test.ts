@@ -90,9 +90,32 @@ describe('AssetCriticalityMigrationClient', () => {
   });
 
   describe('migrateMappings', () => {
+    let createOrUpdateIndexSpy: jest.Mock;
+
+    beforeEach(() => {
+      // Replace createOrUpdateIndex with a fresh spy each time to avoid count bleed-over
+      // from previous tests sharing the same AssetCriticalityDataClient mock instance.
+      createOrUpdateIndexSpy = jest.fn();
+      assetCriticalityDataClient.createOrUpdateIndex = createOrUpdateIndexSpy;
+
+      migrationClient.getAllSpacesWithAssetCriticalityInstalled = jest
+        .fn()
+        .mockResolvedValue(['default', 'other-space']);
+    });
+
     it('should call createOrUpdateIndex on assetCriticalityDataClient', async () => {
       await migrationClient.migrateMappings();
-      expect(assetCriticalityDataClient.createOrUpdateIndex).toHaveBeenCalled();
+      expect(createOrUpdateIndexSpy).toHaveBeenCalled();
+    });
+
+    it('should call createOrUpdateIndex only for the matching space when filterSpaceId matches an installed space', async () => {
+      await migrationClient.migrateMappings('default');
+      expect(createOrUpdateIndexSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not call createOrUpdateIndex when filterSpaceId does not match any installed space', async () => {
+      await migrationClient.migrateMappings('unknown-space');
+      expect(createOrUpdateIndexSpy).not.toHaveBeenCalled();
     });
   });
 

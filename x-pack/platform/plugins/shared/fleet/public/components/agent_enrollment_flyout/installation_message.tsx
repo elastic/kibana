@@ -45,7 +45,7 @@ export const InstallationMessage: React.FunctionComponent<Props> = ({
                 <EuiLink
                   target="_blank"
                   external
-                  href={`https://www.elastic.co/downloads/past-releases/elastic-agent-${kibanaVersionURLString}`}
+                  href={`${docLinks.links.fleet.elasticAgentDownloads}${kibanaVersionURLString}`}
                 >
                   <FormattedMessage
                     id="xpack.fleet.enrollmentInstructions.downloadLink"

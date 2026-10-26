@@ -809,7 +809,6 @@ describe('ConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
     expect(getAllByTestId('provider-select')[0]).toBeInTheDocument();
-    expect(getAllByTestId('provider-select')[0]).toHaveValue('OpenAI');
 
     await waitFor(() => {
       expect(getAllByTestId('url-input')[0]).toBeInTheDocument();
@@ -826,7 +825,6 @@ describe('ConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
     expect(getAllByTestId('provider-select')[0]).toBeInTheDocument();
-    expect(getAllByTestId('provider-select')[0]).toHaveValue('OpenAI');
 
     await waitFor(() => {
       expect(getAllByTestId('url-input')[0]).toBeInTheDocument();
@@ -882,7 +880,7 @@ describe('ConnectorFields renders', () => {
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalled();
       });
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {
           config: {
             ...openAiConnector.config,

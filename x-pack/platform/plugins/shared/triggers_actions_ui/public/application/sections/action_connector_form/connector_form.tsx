@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -15,8 +16,10 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiSpacer } from '@elastic/eui';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
+import { connectorTypePublishesKeys } from '@kbn/connector-specs';
 import type { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { ConnectorFormFields } from './connector_form_fields';
+import { ConnectorPublicKeys } from './connector_public_keys';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
 
 export interface ConnectorFormState {
@@ -47,6 +50,10 @@ interface Props {
   /** Handler to receive update on the form "isModified" state */
   onFormModifiedChange?: (isModified: boolean) => void;
   setResetForm?: (value: ResetForm) => void;
+  /** Optional content rendered under Connector settings (e.g. inbound webhook URL). */
+  settingsContent?: ReactNode;
+  /** The add modal creates and closes, so it cannot reveal a one-time ingest token. */
+  showInboundEvents?: boolean;
 }
 
 const ConnectorFormComponent: React.FC<Props> = ({
@@ -56,6 +63,8 @@ const ConnectorFormComponent: React.FC<Props> = ({
   onChange,
   onFormModifiedChange,
   setResetForm,
+  settingsContent,
+  showInboundEvents = true,
 }) => {
   const { form } = useForm({
     defaultValue: connector,
@@ -103,6 +112,21 @@ const ConnectorFormComponent: React.FC<Props> = ({
         isEdit={isEdit}
         registerPreSubmitValidator={registerPreSubmitValidator}
         authMode={connector.authMode}
+        settingsContent={
+          connectorTypePublishesKeys(connector.actionTypeId) ? (
+            <>
+              {settingsContent}
+              <ConnectorPublicKeys
+                connectorTypeId={connector.actionTypeId}
+                connectorId={connector.id}
+              />
+            </>
+          ) : (
+            settingsContent
+          )
+        }
+        showInboundEvents={showInboundEvents}
+        savedIsInboundEventsEnabled={connector.isInboundEventsEnabled === true}
       />
       <EuiSpacer size="m" />
       <EncryptedFieldsCallout isEdit={isEdit} isMissingSecrets={connector.isMissingSecrets} />

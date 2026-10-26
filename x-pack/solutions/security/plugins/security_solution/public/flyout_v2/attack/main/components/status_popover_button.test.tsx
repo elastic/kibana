@@ -14,6 +14,10 @@ import { StatusPopoverButton } from './status_popover_button';
 import { TestProviders } from '../../../../common/mock';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useAttackWorkflowStatusContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items';
+import {
+  ALERT_CLOSE_WITH_REASON_ACTION_ID,
+  ATTACK_STATUS_ACTION_IDS,
+} from '../../../../common/constants/action_ids';
 
 jest.mock('../../../../common/hooks/use_space_id', () => ({
   useSpaceId: () => 'default',
@@ -68,10 +72,14 @@ describe('StatusPopoverButton (attack flyout v2)', () => {
       ({ onSuccess }: { onSuccess: () => void }) => ({
         items: [
           {
+            key: ATTACK_STATUS_ACTION_IDS.markAsAcknowledged,
+            'data-test-subj': 'acknowledged-attack-status',
             name: 'Mark as acknowledged',
             onClick: () => onSuccess(),
           },
           {
+            key: ALERT_CLOSE_WITH_REASON_ACTION_ID,
+            'data-test-subj': 'alert-close-context-menu-item',
             name: 'Mark as closed',
             onClick: () => onSuccess(),
           },
@@ -79,6 +87,25 @@ describe('StatusPopoverButton (attack flyout v2)', () => {
         panels: [],
       })
     );
+  });
+
+  test('decorates status items with coloured dot icons', async () => {
+    const user = userEvent.setup();
+    render(
+      <TestProviders>
+        <StatusPopoverButton hit={buildHit()} disabled={false} onAttackUpdated={onAttackUpdated} />
+      </TestProviders>
+    );
+
+    await user.click(screen.getByText('open'));
+    await waitForEuiPopoverOpen();
+
+    expect(
+      screen.getByTestId('acknowledged-attack-status').querySelector('[data-euiicon-type="dot"]')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('alert-close-context-menu-item').querySelector('[data-euiicon-type="dot"]')
+    ).toBeInTheDocument();
   });
 
   test('renders the current status value', () => {

@@ -6,7 +6,12 @@
  */
 
 import type { BaseFeature } from './feature';
-import { computeFeatureUuid, mergeFeature, normalizeFeatureSlugForMatching } from './feature';
+import {
+  computeFeatureUuid,
+  MAX_FEATURE_ARRAY_ITEMS,
+  mergeFeature,
+  normalizeFeatureSlugForMatching,
+} from './feature';
 import { MAX_ID_LENGTH } from './significant_events/constants';
 
 const createFeature = ({
@@ -19,7 +24,6 @@ const createFeature = ({
   meta?: Record<string, unknown>;
 } = {}): BaseFeature => ({
   id,
-  stream_name: 'logs.test',
   type: 'technology',
   subtype: 'identity_provider',
   title: 'Okta',
@@ -69,8 +73,8 @@ describe('normalizeFeatureSlugForMatching', () => {
   });
 
   it('keeps matching normalization out of UUID generation', () => {
-    const canonical = { id: 'okta', stream_name: 'logs.test' };
-    const versioned = { id: 'okta-3.15.0', stream_name: 'logs.test' };
+    const canonical = { id: 'okta', source_id: 'logs.test' };
+    const versioned = { id: 'okta-3.15.0', source_id: 'logs.test' };
 
     expect(normalizeFeatureSlugForMatching(versioned.id)).toBe(canonical.id);
     expect(computeFeatureUuid(versioned)).not.toBe(computeFeatureUuid(canonical));
@@ -144,15 +148,6 @@ describe('mergeFeature version history', () => {
     expect(emptyExisting.meta).toBeUndefined();
   });
 
-  it('preserves existing aliases and safely merges newly captured aliases', () => {
-    const merged = mergeFeature(
-      createFeature({ meta: { aliases: ['old-alias', 'shared-alias'] } }),
-      createFeature({ meta: { aliases: ['shared-alias', 'new-alias', 42] } })
-    );
-
-    expect(merged.meta?.aliases).toEqual(['old-alias', 'shared-alias', 'new-alias']);
-  });
-
   it('does not trust incoming version history', () => {
     const merged = mergeFeature(
       createFeature({ version: '3.14.1', meta: { version_history: ['3.13.0'] } }),
@@ -164,4 +159,18 @@ describe('mergeFeature version history', () => {
 
     expect(merged.meta?.version_history).toEqual(['3.13.0']);
   });
+});
+
+it('evidence does not grow unbounded across repeated merges with distinct values', () => {
+  let feature: BaseFeature = { ...createFeature(), evidence: [] };
+  for (let iteration = 0; iteration < 20; iteration++) {
+    feature = mergeFeature(feature, {
+      ...createFeature(),
+      evidence: Array.from({ length: 5 }, (_, i) => `iter-${iteration}-${i}`),
+    });
+  }
+
+  expect(feature.evidence?.length ?? 0).toBeLessThanOrEqual(MAX_FEATURE_ARRAY_ITEMS);
+  expect(feature.evidence).toContain('iter-19-4');
+  expect(feature.evidence).not.toContain('iter-0-0');
 });

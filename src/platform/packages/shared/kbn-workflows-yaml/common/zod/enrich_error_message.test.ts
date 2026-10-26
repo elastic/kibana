@@ -174,5 +174,25 @@ describe('enrichErrorMessage', () => {
       expect(result.enriched).toBe(true);
       expect(result.message).toContain('No steps found');
     });
+
+    it.each([
+      {
+        path: ['steps'],
+        message: 'No steps found. Add at least one step.',
+      },
+      {
+        path: ['triggers'],
+        message: 'No triggers found. Add at least one trigger.',
+      },
+    ])('short-circuits too_small at top-level $path', ({ path, message }) => {
+      const result = enrichErrorMessage(
+        path,
+        'Too small: expected array to have >=1 items',
+        'too_small',
+        {}
+      );
+
+      expect(result).toEqual({ enriched: true, message });
+    });
   });
 });

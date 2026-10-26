@@ -12,6 +12,7 @@ import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import type { CreateMaintenanceWindowFormProps } from './create_maintenance_windows_form';
 import { CreateMaintenanceWindowForm } from './create_maintenance_windows_form';
+import type { FormProps } from './schema';
 import moment from 'moment';
 
 jest.mock('../utils/kibana_react');
@@ -27,6 +28,9 @@ jest.mock('../hooks/use_create_maintenance_window', () => ({
 }));
 jest.mock('../hooks/use_update_maintenance_window', () => ({
   useUpdateMaintenanceWindow: jest.fn(),
+}));
+jest.mock('./episode_matcher_input', () => ({
+  EpisodeMatcherInput: () => <div data-test-subj="mockEpisodeMatcherInput" />,
 }));
 
 const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
@@ -47,13 +51,46 @@ const formPropsForEditMode: CreateMaintenanceWindowFormProps = {
     startDate: '2023-03-24',
     endDate: '2023-03-26',
     recurring: false,
-    scopedQuery: {
-      kql: 'kibana.alert.job_errors_results.job_id : * ',
-      filters: [],
-      dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+    scope: {
+      alerting: {
+        kql: 'kibana.alert.job_errors_results.job_id : * ',
+        filters: [],
+        dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+      },
     },
   },
   maintenanceWindowId: 'fake_mw_id',
+};
+
+const mockKibanaServices = (isUniversalAlertingEnabled: boolean) => {
+  useKibana.mockReturnValue({
+    services: {
+      notifications: {
+        toasts: {
+          addSuccess: jest.fn(),
+          addDanger: jest.fn(),
+        },
+      },
+      unifiedSearch: {
+        ui: {
+          SearchBar: <div />,
+        },
+      },
+      data: {
+        dataViews: {
+          get: jest.fn(),
+          getIdsWithTitle: jest.fn().mockResolvedValue([]),
+          getDefaultDataView: jest.fn(),
+        },
+      },
+      settings: {
+        globalClient: {
+          isDeclared: jest.fn().mockReturnValue(true),
+          get: jest.fn().mockReturnValue(isUniversalAlertingEnabled),
+        },
+      },
+    },
+  });
 };
 
 describe('CreateMaintenanceWindowForm', () => {
@@ -74,29 +111,7 @@ describe('CreateMaintenanceWindowForm', () => {
     useCreateMaintenanceWindow.mockReturnValue({ mutate: createMutate, isLoading: false });
     useUpdateMaintenanceWindow.mockReturnValue({ mutate: updateMutate, isLoading: false });
 
-    useKibana.mockReturnValue({
-      services: {
-        notifications: {
-          toasts: {
-            addSuccess: jest.fn(),
-            addDanger: jest.fn(),
-          },
-        },
-        unifiedSearch: {
-          ui: {
-            SearchBar: <div />,
-          },
-        },
-        data: {
-          dataViews: {
-            get: jest.fn(),
-            getIdsWithTitle: jest.fn().mockResolvedValue([]),
-            getDefaultDataView: jest.fn(),
-          },
-        },
-      },
-    });
-
+    mockKibanaServices(true);
     useUiSetting.mockReturnValue('America/New_York');
     appMockRenderer = createAppMockRenderer();
   });
@@ -164,7 +179,7 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(timezoneInput).toHaveValue('America/Los_Angeles');
   });
 
-  it('should initialize the form when no initialValue provided', () => {
+  it('should initialize the form when no initialValue provided', async () => {
     const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
     const titleInput = within(result.getByTestId('title-field')).getByTestId(
@@ -183,6 +198,12 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(dateInputs[0]).not.toHaveValue('');
     expect(dateInputs[1]).not.toHaveValue('');
     expect(recurringInput).not.toBeChecked();
+
+    // Alerts (v1) defaults ON; Episodes (v2) stays OFF.
+    await waitFor(() => {
+      expect(result.getByTestId('maintenanceWindowScopedQuerySwitch')).toBeChecked();
+    });
+    expect(result.getByTestId('alertingV2ScopedQuerySwitch')).not.toBeChecked();
   });
 
   it('should prefill the form when provided with initialValue', async () => {
@@ -266,53 +287,300 @@ describe('CreateMaintenanceWindowForm', () => {
 
   describe('confirmation modal for saving without filters', () => {
     const user = userEvent.setup({ delay: null });
+    const APPLY_TO_ALL_BODY =
+      'This maintenance window has no alert filters, so it will apply to all alerts.';
+    const SCOPED_BODY =
+      'One of the selected scopes has no alert filters, so it will apply to all of its alerts.';
+    const v1Filtered = { kql: 'kibana.alert.rule.name : "x"', filters: [], dsl: '{}' };
+    const v2Filtered = { enabled: true, kql: 'rule.id: "a"' };
 
-    const fillTitleAndSubmit = async () => {
+    const renderEditMode = (scope: NonNullable<FormProps['scope']>) =>
+      appMockRenderer.render(
+        <CreateMaintenanceWindowForm
+          {...formPropsForEditMode}
+          initialValue={{ ...formPropsForEditMode.initialValue!, scope }}
+        />
+      );
+
+    const fillTitle = async () => {
       const titleInput = await screen.findByTestId('createMaintenanceWindowFormNameInput');
       await user.click(titleInput);
       await user.paste('My window');
-      await user.click(screen.getByTestId('create-submit'));
     };
 
-    it('calls create when user confirms save without filters modal', async () => {
+    const confirmApplyToAllAlerts = async (expectedBody: string) => {
+      const modal = await screen.findByTestId('applyToAllAlertsConfirmModal');
+      expect(within(modal).getByText(expectedBody)).toBeInTheDocument();
+      await user.click(within(modal).getByRole('button', { name: 'Apply to all alerts' }));
+    };
+
+    it('creates with the default scope when Alerts is on and no filters are set', async () => {
       appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-      await fillTitleAndSubmit();
-
-      const modal = await screen.findByTestId('saveWithoutFiltersConfirmModal');
-      await user.click(within(modal).getByRole('button', { name: 'Save without filters' }));
+      await fillTitle();
+      await user.click(screen.getByTestId('create-submit'));
+      await confirmApplyToAllAlerts(APPLY_TO_ALL_BODY);
 
       await waitFor(() => {
         expect(createMutate).toHaveBeenCalledTimes(1);
         expect(createMutate.mock.calls[0][0]).toMatchObject({
           title: 'My window',
-          scopedQuery: null,
+          scope: { alerting: { enabled: true } },
         });
       });
-      expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
     });
 
-    it('does not call create when user cancels save without filters modal', async () => {
+    it('calls create when user toggles Alerts off then confirms save without scopes modal', async () => {
       appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-      await fillTitleAndSubmit();
+      await fillTitle();
+      // Turn v1 off so the "no scope" path is reached.
+      await user.click(await screen.findByTestId('maintenanceWindowScopedQuerySwitch'));
 
-      const modal = await screen.findByTestId('saveWithoutFiltersConfirmModal');
+      await user.click(screen.getByTestId('create-submit'));
+
+      const modal = await screen.findByTestId('saveWithoutScopesConfirmModal');
+      await user.click(within(modal).getByRole('button', { name: 'Save without scope' }));
+
+      await waitFor(() => {
+        expect(createMutate).toHaveBeenCalledTimes(1);
+        expect(createMutate.mock.calls[0][0]).toMatchObject({
+          title: 'My window',
+          scope: {},
+        });
+      });
+      expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
+    });
+
+    it('does not call create when user cancels save without scopes modal', async () => {
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+      await fillTitle();
+      // Turn v1 off first so the modal appears.
+      await user.click(await screen.findByTestId('maintenanceWindowScopedQuerySwitch'));
+      await user.click(screen.getByTestId('create-submit'));
+
+      const modal = await screen.findByTestId('saveWithoutScopesConfirmModal');
       await user.click(within(modal).getByRole('button', { name: 'Cancel' }));
 
       await waitFor(() => {
-        expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
       });
       expect(createMutate).not.toHaveBeenCalled();
     });
 
-    it('does not show confirmation modal when saving with filters (scoped query present)', async () => {
+    it('does not show confirmation modal when saving with scoped query present', async () => {
       appMockRenderer.render(<CreateMaintenanceWindowForm {...formPropsForEditMode} />);
 
       await user.click(await screen.findByTestId('create-submit'));
 
       await waitFor(() => expect(updateMutate).toHaveBeenCalledTimes(1));
-      expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
+    });
+
+    it('shows the generic body when only Episodes is on with no filter', async () => {
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+      await fillTitle();
+      await user.click(await screen.findByTestId('maintenanceWindowScopedQuerySwitch'));
+      await user.click(screen.getByTestId('alertingV2ScopedQuerySwitch'));
+      await user.click(screen.getByTestId('create-submit'));
+
+      await confirmApplyToAllAlerts(APPLY_TO_ALL_BODY);
+
+      await waitFor(() => {
+        expect(createMutate).toHaveBeenCalledTimes(1);
+        expect(createMutate.mock.calls[0][0].scope).toMatchObject({
+          alertingV2: { enabled: true },
+        });
+        expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
+      });
+    });
+
+    it('shows the scoped body when Alerts is filtered and Episodes is not', async () => {
+      renderEditMode({ alerting: v1Filtered, alertingV2: { enabled: true } });
+
+      await user.click(screen.getByTestId('create-submit'));
+      await confirmApplyToAllAlerts(SCOPED_BODY);
+
+      await waitFor(() => {
+        expect(updateMutate).toHaveBeenCalledTimes(1);
+        expect(updateMutate.mock.calls[0][0].updateParams.scope).toMatchObject({
+          alerting: { enabled: true, kql: v1Filtered.kql },
+          alertingV2: { enabled: true },
+        });
+        expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
+      });
+    });
+
+    it('shows the scoped body when Episodes is filtered and Alerts is not', async () => {
+      renderEditMode({ alerting: null, alertingV2: v2Filtered });
+
+      await user.click(screen.getByTestId('create-submit'));
+      await confirmApplyToAllAlerts(SCOPED_BODY);
+
+      await waitFor(() => {
+        expect(updateMutate).toHaveBeenCalledTimes(1);
+        expect(updateMutate.mock.calls[0][0].updateParams.scope).toEqual({
+          alerting: { enabled: true },
+          alertingV2: v2Filtered,
+        });
+        expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
+      });
+    });
+
+    it('does not show the modal when both scopes are filtered', async () => {
+      renderEditMode({ alerting: v1Filtered, alertingV2: v2Filtered });
+
+      await user.click(screen.getByTestId('create-submit'));
+
+      expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
+      await waitFor(() => expect(updateMutate).toHaveBeenCalledTimes(1));
+    });
+  });
+
+  describe('onCreateOrUpdateError — scope-aware error routing', () => {
+    let capturedOnError: ((error: unknown) => void) | undefined;
+
+    beforeEach(() => {
+      // Switch to mockImplementation so we can capture the onError callback.
+      useCreateMaintenanceWindow.mockImplementation(
+        (props?: { onError?: (e: unknown) => void }) => {
+          capturedOnError = props?.onError;
+          return { mutate: createMutate, isLoading: false };
+        }
+      );
+    });
+
+    const buildError = (scopeErrors: Array<{ scope: string; message: string }>) => ({
+      body: {
+        statusCode: 400,
+        message: `Error validating create maintenance window data - invalid scope - parse error`,
+        attributes: { scopeErrors },
+      },
+    });
+
+    const buildFallbackError = (message: string) => ({
+      body: { statusCode: 400, message },
+    });
+
+    it('shows "Invalid episode filter." under the Episodes field (v2) when attributes name alertingV2', async () => {
+      appMockRenderer.render(
+        <CreateMaintenanceWindowForm
+          {...formProps}
+          initialValue={{
+            title: 'test',
+            startDate: '2023-03-24',
+            endDate: '2023-03-26',
+            recurring: false,
+            scope: {
+              alerting: { kql: 'kibana.alert.rule.name : "x"', filters: [], dsl: '{}' },
+              alertingV2: { enabled: true, kql: 'bad_kql:' },
+            },
+          }}
+          maintenanceWindowId="fake_mw_id"
+        />
+      );
+
+      // Trigger onError from the hook with a structured attributes payload.
+      expect(capturedOnError).toBeDefined();
+      capturedOnError!(buildError([{ scope: 'alertingV2', message: 'parse error' }]));
+
+      await waitFor(() => {
+        expect(screen.getByText('Invalid episode filter.')).toBeInTheDocument();
+      });
+      // v1 field must NOT show an error.
+      expect(screen.queryByText('Invalid scoped query.')).not.toBeInTheDocument();
+    });
+
+    it('shows "Invalid scoped query." under the alerts (v1) field when attributes name alerting', async () => {
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...formPropsForEditMode} />);
+
+      expect(capturedOnError).toBeDefined();
+      capturedOnError!(buildError([{ scope: 'alerting', message: 'parse error' }]));
+
+      await waitFor(() => {
+        expect(screen.getByText('Invalid scoped query.')).toBeInTheDocument();
+      });
+      expect(screen.queryByText('Invalid episode filter.')).not.toBeInTheDocument();
+    });
+
+    it('does not show any inline error when attributes are absent', async () => {
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...formPropsForEditMode} />);
+
+      expect(capturedOnError).toBeDefined();
+      // Error without structured attributes — no inline field error should appear.
+      capturedOnError!(buildFallbackError('Failed to create maintenance window'));
+
+      // Give React a tick to settle; neither error string should be rendered.
+      await waitFor(() => {
+        expect(screen.queryByText('Invalid scoped query.')).not.toBeInTheDocument();
+        expect(screen.queryByText('Invalid episode filter.')).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Universal Alerting scope gating', () => {
+    const user = userEvent.setup({ delay: null });
+
+    const editModeWithUniversalScope: CreateMaintenanceWindowFormProps = {
+      ...formPropsForEditMode,
+      initialValue: {
+        ...formPropsForEditMode.initialValue!,
+        scope: { alertingV2: { enabled: true, kql: 'rule.id: "a"' } },
+      },
+    };
+
+    it('renders the Universal Alerting scope section when the setting is on', async () => {
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+      expect(await screen.findByTestId('alertingV2ScopedQuerySwitch')).toBeInTheDocument();
+    });
+
+    it('hides the Universal Alerting scope section when the setting is off', async () => {
+      mockKibanaServices(false);
+
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+      expect(await screen.findByTestId('maintenanceWindowScopedQuerySwitch')).toBeInTheDocument();
+      expect(screen.queryByTestId('alertingV2ScopedQuerySwitch')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('maintenanceWindowAlertingV2FilterInput')
+      ).not.toBeInTheDocument();
+    });
+
+    it('drops an existing Universal Alerting scope on save when the setting is off', async () => {
+      mockKibanaServices(false);
+
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...editModeWithUniversalScope} />);
+
+      await user.click(await screen.findByTestId('create-submit'));
+
+      const modal = await screen.findByTestId('saveWithoutScopesConfirmModal');
+      await user.click(within(modal).getByRole('button', { name: 'Save without scope' }));
+
+      await waitFor(() => {
+        expect(updateMutate).toHaveBeenCalledTimes(1);
+        expect(updateMutate.mock.calls[0][0].updateParams.scope).toEqual({});
+      });
+    });
+
+    it('saves an edited Universal Alerting scope when the setting is on', async () => {
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...editModeWithUniversalScope} />);
+
+      await user.click(await screen.findByTestId('create-submit'));
+
+      await waitFor(() => {
+        expect(updateMutate).toHaveBeenCalledTimes(1);
+        expect(updateMutate.mock.calls[0][0].updateParams.scope).toEqual({
+          alertingV2: { enabled: true, kql: 'rule.id: "a"' },
+        });
+      });
+      expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
     });
   });
 });

@@ -40,6 +40,7 @@ import type {
   BrushTriggerEvent,
   ClickTriggerEvent,
   MultiClickTriggerEvent,
+  AnnotationClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -187,6 +188,9 @@ export interface LensPublicCallbacks extends LensApiProps {
   onFilter?: (
     data: Simplify<(ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) & PreventableEvent>
   ) => void;
+  onAnnotationClick?: (
+    data: Simplify<AnnotationClickTriggerEvent['data'] & PreventableEvent>
+  ) => void;
   onTableRowClick?: (
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
@@ -296,17 +300,17 @@ export type LensComponentProps = Simplify<
        */
       disabledActions?: string[];
       /**
-       * Toggles the inspector
-       */
-      showInspector?: boolean;
-      /**
        * Toggle inline editing feature
        */
       canEditInline?: boolean;
       /**
-       * Optional search term to highlight in the panel title
+       * Optional search terms to highlight in the panel title
        */
-      titleHighlight?: string;
+      titleHighlight?: string | string[];
+      /**
+       * Callback invoked with the Lens embeddable API once it is available
+       */
+      onApiAvailable?: (api: unknown) => void;
     }
 >;
 
@@ -336,6 +340,7 @@ type LensRendererPrivateProps = ComponentSerializedProps & ComponentProps;
 export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title' | 'time_range'> & {
   hidePanelTitles?: boolean;
   timeRange?: TimeRange;
+  parentApi?: unknown;
 };
 
 /**
@@ -348,6 +353,8 @@ export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title' | 't
 export type LensRuntimeState = Simplify<
   Omit<ComponentSerializedProps, 'attributes' | 'references'> & {
     attributes: NonNullable<LensSerializedState['attributes']>;
+    /** Set when the by-reference document failed to load and empty attributes were used instead */
+    loadError?: Error;
   } & Pick<
       LensComponentForwardedProps,
       'viewMode' | 'abortController' | 'executionContext' | 'forceDSL'
@@ -377,9 +384,10 @@ export type LensInternalApi = Simplify<
     PublishesDataViews &
     VisualizationContextHelper & {
       esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
+      loadError$: PublishingSubject<Error | undefined>;
       attributes$: PublishingSubject<LensRuntimeState['attributes']>;
       overrides$: PublishingSubject<LensOverrides['overrides']>;
-      disableTriggers$: PublishingSubject<LensPanelProps['disableTriggers']>;
+      disableTriggers$: PublishingSubject<boolean>;
       dataLoading$: PublishingSubject<boolean | undefined>;
       hasRenderCompleted$: PublishingSubject<boolean>;
       isNewlyCreated$: PublishingSubject<boolean>;
@@ -390,18 +398,17 @@ export type LensInternalApi = Simplify<
       updateDataLoading: (newDataLoading: boolean | undefined) => void;
       expressionParams$: PublishingSubject<ExpressionWrapperProps | null>;
       updateExpressionParams: (newParams: ExpressionWrapperProps | null) => void;
-      expressionAbortController$: PublishingSubject<AbortController | undefined>;
-      updateAbortController: (newAbortController: AbortController | undefined) => void;
+      expressionAbortController$: PublishingSubject<AbortController>;
+      updateAbortController: (newAbortController: AbortController) => void;
       renderCount$: PublishingSubject<number>;
       updateDataViews: (dataViews: DataView[] | undefined) => void;
-      updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) => void;
       messages$: PublishingSubject<UserMessage[]>;
       updateMessages: (newMessages: UserMessage[]) => void;
       validationMessages$: PublishingSubject<UserMessage[]>;
       updateValidationMessages: (newMessages: UserMessage[]) => void;
       blockingError$: PublishingSubject<Error | undefined>;
       updateBlockingError: (newBlockingError: Error | undefined) => void;
-      resetAllMessages: () => void;
+      updateLoadError: (newLoadError: Error | undefined) => void;
       getDisplayOptions: () => VisualizationDisplayOptions;
       updateEditingState: (inProgress: boolean) => void;
       isEditingInProgress: () => boolean;

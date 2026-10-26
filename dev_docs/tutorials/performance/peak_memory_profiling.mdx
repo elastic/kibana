@@ -483,8 +483,31 @@ Use the local probe above when you need a reproducible on-demand peak-memory che
 Other Kibana memory tooling has different goals:
 
 - Core process metrics report current memory gauges during normal operation. They are useful for observability, but they do not produce a focused peak-memory comparison for a specific feature flow.
-- The warm-start memory benchmark compares distributable artifacts in CI and focuses on warm-start memory after Kibana becomes available. It is useful for startup footprint regression detection, but it is not a replacement for feature-specific peak-memory profiling.
+- The warm-start memory benchmark compares distributable artifacts in CI and focuses on warm-start memory after Kibana becomes available. It is useful for startup footprint regression detection, but it is not a replacement for feature-specific peak-memory profiling. See [the warm-start memory CI check](#the-warm-start-memory-ci-check) below.
 - Draft in-console profilers or personal Puppeteer scripts can be useful for exploration. If you use them, record the exact commit, command, scenario, and output files because they are not yet a stable shared workflow.
+
+## The warm-start memory CI check
+
+Every pull request runs a non-blocking `Warm-start Memory Bench` step that compares the
+heap Kibana retains after startup against the merge base. It starts Kibana four times
+per side, forces a garbage collection, and reports the mean paired delta. Growth above
+5 MiB posts a PR comment.
+
+The check never fails your build. If it comments on your PR:
+
+1. Open the `warm_start_memory_regression_report.json` artifact on the Buildkite build.
+   `postForcedGcHeapUsed` holds the per-pair numbers behind the reported mean.
+2. The usual causes are a new top-level import in server code that pulls in a large
+   dependency tree, or a schema (Zod or `@kbn/config-schema`) constructed at module load
+   that could be constructed lazily instead. Check whether a server plugin's
+   `server/index.ts` started eagerly importing `./plugin`.
+3. Use the local probe described above to confirm the growth and find what is retained.
+
+An `inconclusive` result means fewer than four measurement pairs completed and nothing
+was compared; it is an infrastructure problem, not a signal about your change.
+
+See `src/platform/packages/shared/kbn-core-server-benchmarks/README.md` for the full
+protocol and for how to run the same comparison locally.
 
 ## Cleanup
 

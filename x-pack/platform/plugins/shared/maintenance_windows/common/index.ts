@@ -35,14 +35,21 @@ export {
   MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
 } from './constants';
 
-export type MaintenanceWindowUI = Omit<MaintenanceWindow, 'schedule' | 'scope'>;
+export type MaintenanceWindowUI = Omit<MaintenanceWindow, 'schedule'>;
 
 export {
   getScopedQueryErrorMessage,
   isScopedQueryError,
+  getScopedQueryErrorAttributes,
+  isScopedQueryErrorAttributes,
+} from './maintenance_window_scoped_query_error_message';
+export type {
+  MaintenanceWindowScopeName,
+  ScopedQueryErrorAttributes,
 } from './maintenance_window_scoped_query_error_message';
 
 export type { MaintenanceWindowAttributes } from '../server/data/types/maintenance_window_attributes';
+export type { AlertingV2ScopeAttributes } from '../server/data/types/alerts_filter_query_attributes';
 
 // export only necessary server types
 export type { MaintenanceWindowCategoryIds } from '../server/routes/schemas/maintenance_window/shared';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { UserProfile } from '@kbn/core/server';
+import { elasticsearchServiceMock, userProfileServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { DataStreamClient } from '@kbn/data-streams';
 import { withSpan } from '@kbn/apm-utils';
@@ -32,6 +33,29 @@ const dataStreamClientMock = {
   search: jest.fn().mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } }),
 };
 
+const createSearchResult = () => ({
+  hits: {
+    total: { value: 1 },
+    hits: [
+      {
+        _source: {
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+          user: { id: 'uid-1', name: 'alice' },
+          event: { id: 'e1', module: 'workflows', dataset: 'definitions', action: 'update' },
+          object: { id: 'obj-1', type: 'workflow' },
+        },
+      },
+    ],
+  },
+});
+
+const createProfile = (uid: string, user: Partial<UserProfile['user']> = {}): UserProfile => ({
+  uid,
+  enabled: true,
+  data: {},
+  user: { username: uid, ...user },
+});
+
 describe('ChangeHistoryClient', () => {
   const logger = loggingSystemMock.createLogger();
   const defaultConstructorOpts = {
@@ -41,9 +65,11 @@ describe('ChangeHistoryClient', () => {
     kibanaVersion: '9.4.0',
   };
 
-  const createInitializedClient = async () => {
+  const createInitializedClient = async (
+    opts?: Parameters<ChangeHistoryClient['initialize']>[1]
+  ) => {
     const client = new ChangeHistoryClient(defaultConstructorOpts);
-    await client.initialize(elasticsearchServiceMock.createElasticsearchClient());
+    await client.initialize(elasticsearchServiceMock.createElasticsearchClient(), opts);
     return client;
   };
 
@@ -217,6 +243,294 @@ describe('ChangeHistoryClient', () => {
           },
         })
       );
+    });
+
+    it('does not resolve user profiles when no userProfileService was provided', async () => {
+      dataStreamClientMock.search.mockResolvedValueOnce(createSearchResult());
+      const client = await createInitializedClient();
+
+      const result = await client.getHistory('default', 'workflow', 'obj-1');
+
+      expect(result.items[0].user.full_name).toBeUndefined();
+      expect(result.items[0].user.email).toBeUndefined();
+    });
+
+    it('resolves user.full_name from the user profile when userProfileService was provided', async () => {
+      const userProfileService = userProfileServiceMock.createStart();
+      userProfileService.bulkGet.mockResolvedValue([
+        createProfile('uid-1', { full_name: 'Alice A.' }),
+      ]);
+      dataStreamClientMock.search.mockResolvedValueOnce(createSearchResult());
+      const client = await createInitializedClient({ userProfileService });
+
+      const result = await client.getHistory('default', 'workflow', 'obj-1');
+
+      expect(userProfileService.bulkGet).toHaveBeenCalledWith({ uids: new Set(['uid-1']) });
+      expect(result.items[0].user.full_name).toBe('Alice A.');
+    });
+  });
+
+  describe('getEvent', () => {
+    it('searches by event.id scoped to the space, module and dataset, without object filters', async () => {
+      const client = await createInitializedClient();
+
+      await client.getEvent('default', 'event-1', { spanLabels: { solution: 'security' } });
+
+      expect(withSpanMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'change_history.get_event.es_search',
+          type: 'db',
+          subtype: 'elasticsearch',
+          labels: { solution: 'security' },
+        }),
+        expect.any(Function)
+      );
+      expect(dataStreamClientMock.search).toHaveBeenCalledWith({
+        space: 'default',
+        query: {
+          bool: {
+            filter: [
+              { term: { 'event.module': 'workflows' } },
+              { term: { 'event.dataset': 'definitions' } },
+              { term: { 'event.id': 'event-1' } },
+            ],
+          },
+        },
+        size: 1,
+      });
+    });
+
+    it('returns undefined when no event matches', async () => {
+      const client = await createInitializedClient();
+
+      await expect(client.getEvent('default', 'missing')).resolves.toBeUndefined();
+    });
+
+    it('resolves user.full_name and user.email from the user profile when userProfileService was provided', async () => {
+      const userProfileService = userProfileServiceMock.createStart();
+      userProfileService.bulkGet.mockResolvedValue([
+        createProfile('uid-1', { full_name: 'Alice A.', email: 'alice@example.com' }),
+      ]);
+      dataStreamClientMock.search.mockResolvedValueOnce(createSearchResult());
+      const client = await createInitializedClient({ userProfileService });
+
+      const document = await client.getEvent('default', 'e1');
+
+      expect(userProfileService.bulkGet).toHaveBeenCalledWith({ uids: new Set(['uid-1']) });
+      expect(document?.user.full_name).toBe('Alice A.');
+      expect(document?.user.email).toBe('alice@example.com');
+    });
+
+    it('throws when the data stream is not initialized', async () => {
+      const client = new ChangeHistoryClient(defaultConstructorOpts);
+
+      await expect(client.getEvent('default', 'event-1')).rejects.toThrow(
+        /Change history data stream not initialized/
+      );
+    });
+  });
+
+  describe('getHistoryByFields', () => {
+    it('builds a terms aggregation and returns parsed buckets for a single field', async () => {
+      dataStreamClientMock.search.mockResolvedValueOnce({
+        hits: { total: { value: 0 }, hits: [] },
+        aggregations: {
+          'user.name': {
+            sum_other_doc_count: 3,
+            buckets: [
+              { key: 'alice', doc_count: 2 },
+              { key: 'bob', doc_count: 1 },
+            ],
+          },
+        },
+      });
+
+      const client = await createInitializedClient();
+      const result = await client.getHistoryByFields('default', 'alert', 'rule-1', ['user.name'], {
+        size: 25,
+      });
+
+      expect(dataStreamClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          space: 'default',
+          size: 0,
+          aggregations: {
+            'user.name': {
+              terms: {
+                field: 'user.name',
+                size: 25,
+                order: { _count: 'desc' },
+              },
+            },
+          },
+          query: {
+            bool: {
+              filter: [
+                { term: { 'event.module': 'workflows' } },
+                { term: { 'event.dataset': 'definitions' } },
+                { term: { 'object.type': 'alert' } },
+                { term: { 'object.id': 'rule-1' } },
+              ],
+            },
+          },
+        })
+      );
+      expect(result.results).toEqual([
+        {
+          field: 'user.name',
+          buckets: [
+            { key: 'alice', docCount: 2 },
+            { key: 'bob', docCount: 1 },
+          ],
+          sumOtherDocCount: 3,
+        },
+      ]);
+    });
+
+    it('returns empty buckets when aggregations are missing', async () => {
+      dataStreamClientMock.search.mockResolvedValueOnce({
+        hits: { total: { value: 0 }, hits: [] },
+      });
+
+      const client = await createInitializedClient();
+      const result = await client.getHistoryByFields('default', 'alert', 'rule-1', ['user.name']);
+
+      expect(result.results).toEqual([
+        {
+          field: 'user.name',
+          buckets: [],
+          sumOtherDocCount: 0,
+        },
+      ]);
+    });
+
+    it('returns empty buckets and warns when aggregation shape is unexpected', async () => {
+      dataStreamClientMock.search.mockResolvedValueOnce({
+        hits: { total: { value: 0 }, hits: [] },
+        aggregations: {
+          'user.name': { value: 42 },
+        },
+      });
+
+      const client = await createInitializedClient();
+      const result = await client.getHistoryByFields('default', 'alert', 'rule-1', ['user.name']);
+
+      expect(result.results).toEqual([
+        {
+          field: 'user.name',
+          buckets: [],
+          sumOtherDocCount: 0,
+        },
+      ]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Unexpected aggregation shape for change history field [user.name]')
+      );
+    });
+
+    it('skips non-string bucket keys and warns', async () => {
+      dataStreamClientMock.search.mockResolvedValueOnce({
+        hits: { total: { value: 0 }, hits: [] },
+        aggregations: {
+          'user.name': {
+            sum_other_doc_count: 0,
+            buckets: [
+              { key: 123, doc_count: 1 },
+              { key: 'alice', doc_count: 2 },
+            ],
+          },
+        },
+      });
+
+      const client = await createInitializedClient();
+      const result = await client.getHistoryByFields('default', 'alert', 'rule-1', ['user.name']);
+
+      expect(result.results[0]?.buckets).toEqual([{ key: 'alice', docCount: 2 }]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Skipping unexpected bucket for change history field [user.name]')
+      );
+    });
+
+    it('accepts empty string bucket keys', async () => {
+      dataStreamClientMock.search.mockResolvedValueOnce({
+        hits: { total: { value: 0 }, hits: [] },
+        aggregations: {
+          'user.name': {
+            sum_other_doc_count: 0,
+            buckets: [{ key: '', doc_count: 1 }],
+          },
+        },
+      });
+
+      const client = await createInitializedClient();
+      const result = await client.getHistoryByFields('default', 'alert', 'rule-1', ['user.name']);
+
+      expect(result.results[0]?.buckets).toEqual([{ key: '', docCount: 1 }]);
+    });
+
+    it('builds sibling terms aggregations for multiple fields in one search', async () => {
+      dataStreamClientMock.search.mockResolvedValueOnce({
+        hits: { total: { value: 0 }, hits: [] },
+        aggregations: {
+          'user.name': {
+            sum_other_doc_count: 0,
+            buckets: [{ key: 'alice', doc_count: 2 }],
+          },
+          'event.action': {
+            sum_other_doc_count: 1,
+            buckets: [
+              { key: 'rule_update', doc_count: 3 },
+              { key: 'rule_create', doc_count: 1 },
+            ],
+          },
+        },
+      });
+
+      const client = await createInitializedClient();
+      const result = await client.getHistoryByFields(
+        'default',
+        'alert',
+        'rule-1',
+        ['user.name', 'event.action', 'user.name'],
+        { size: 10 }
+      );
+
+      expect(dataStreamClientMock.search).toHaveBeenCalledTimes(1);
+      expect(dataStreamClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 0,
+          aggregations: {
+            'user.name': {
+              terms: { field: 'user.name', size: 10, order: { _count: 'desc' } },
+            },
+            'event.action': {
+              terms: { field: 'event.action', size: 10, order: { _count: 'desc' } },
+            },
+          },
+        })
+      );
+      expect(result.results).toEqual([
+        {
+          field: 'user.name',
+          buckets: [{ key: 'alice', docCount: 2 }],
+          sumOtherDocCount: 0,
+        },
+        {
+          field: 'event.action',
+          buckets: [
+            { key: 'rule_update', docCount: 3 },
+            { key: 'rule_create', docCount: 1 },
+          ],
+          sumOtherDocCount: 1,
+        },
+      ]);
+    });
+
+    it('returns empty results without searching when fields is empty', async () => {
+      const client = await createInitializedClient();
+      const result = await client.getHistoryByFields('default', 'alert', 'rule-1', []);
+
+      expect(result).toEqual({ results: [] });
+      expect(dataStreamClientMock.search).not.toHaveBeenCalled();
     });
   });
 });

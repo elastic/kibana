@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 export const LogLevel = lazySchema(() => z.enum(['trace', 'debug', 'info', 'warn', 'error']));
 export type LogLevel = z.infer<typeof LogLevel>;
@@ -41,7 +41,7 @@ NOTE: This is a read model of rule execution events and it is pretty generic. It
   */
 export const RuleExecutionEvent = lazySchema(() =>
   z.object({
-    timestamp: z.string().datetime(),
+    timestamp: isoDateTime(),
     sequence: z.number().int(),
     level: LogLevel,
     type: RuleExecutionEventType,
@@ -50,7 +50,11 @@ export const RuleExecutionEvent = lazySchema(() =>
     /**
      * Event details. The details vary per event type.
      */
-    details: z.object({}).catchall(z.unknown()).optional(),
+    details: z
+      .object({})
+      .catchall(z.unknown())
+      .optional()
+      .describe('Event details. The details vary per event type.'),
   })
 );
 export type RuleExecutionEvent = z.infer<typeof RuleExecutionEvent>;

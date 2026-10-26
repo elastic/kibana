@@ -7,8 +7,9 @@
 
 import React, { useEffect, useRef } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import type { Subscription } from 'rxjs';
+import { BehaviorSubject, type Subscription } from 'rxjs';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import type { MapEmbeddableState } from '../../common';
 import { INITIAL_LOCATION, MAP_SAVED_OBJECT_TYPE } from '../../common';
@@ -18,6 +19,8 @@ import type { MapApi } from '../react_embeddable/types';
 export interface Props {
   passiveLayer: LayerDescriptor;
   onRenderComplete?: () => void;
+  interactive?: boolean;
+  viewMode: ViewMode;
 }
 
 /*
@@ -54,6 +57,9 @@ export function PassiveMap(props: Props) {
       <EmbeddableRenderer<MapEmbeddableState, MapApi>
         type={MAP_SAVED_OBJECT_TYPE}
         getParentApi={() => ({
+          // the passive map is never independently editable, regardless of the host's view mode
+          viewMode$: new BehaviorSubject(props.viewMode === 'edit' ? 'view' : props.viewMode),
+          disableTriggers$: new BehaviorSubject(!(props.interactive ?? true)),
           hideFilterActions: true,
           getSerializedStateForChild: () => {
             const basemapLayerDescriptor = createBasemapLayerDescriptor();
@@ -75,7 +81,6 @@ export function PassiveMap(props: Props) {
                 initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
                 autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
               },
-              isSharable: false,
             };
           },
         })}

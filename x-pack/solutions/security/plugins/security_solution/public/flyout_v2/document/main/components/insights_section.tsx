@@ -113,7 +113,6 @@ export const InsightsSection = memo(
         openDocumentCorrelations({
           hit,
           scopeId: '',
-          isRulePreview: false,
           onShowAlert,
           onShowAttack,
           origin: FLYOUT_ORIGIN.INSIGHTS_CORRELATIONS,
@@ -156,7 +155,6 @@ export const InsightsSection = memo(
         <CorrelationsOverview
           hit={hit}
           scopeId=""
-          isRulePreview={false}
           showIcon={false}
           onShowCorrelationsDetails={onShowCorrelationsDetails}
         />

@@ -27,6 +27,7 @@
     "@kbn/discoveries",
     "@kbn/security-plugin",
     "@kbn/scout-security",
+    "@kbn/security-solution-test-api-clients",
     "@kbn/securitysolution-es-utils",
     "@kbn/securitysolution-utils",
     "@kbn/spaces-plugin",
@@ -36,6 +37,7 @@
     "@kbn/workflows-management-plugin",
     "@kbn/workflows-yaml",
     "@kbn/zod",
+    "@kbn/std",
     "@kbn/logging-mocks",
     "@kbn/event-log-plugin",
     "@kbn/inference-common",
@@ -53,6 +55,7 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/alerts-as-data-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
-    "@kbn/core-ui-settings-server"
+    "@kbn/core-ui-settings-server",
+    "@kbn/search-inference-endpoints"
   ]
 }

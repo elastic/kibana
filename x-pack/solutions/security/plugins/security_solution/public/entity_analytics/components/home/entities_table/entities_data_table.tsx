@@ -79,7 +79,6 @@ import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import {
   ENTITY_FIELDS,
   ENTITY_GROUPING_OPTIONS,
-  DEFAULT_VISIBLE_ROWS_PER_PAGE,
   MAX_ENTITIES_TO_LOAD,
   TEST_SUBJ_DATA_GRID,
   TEST_SUBJ_GROUPING,
@@ -253,7 +252,6 @@ export const EntitiesDataTable = ({
     query,
     sort,
     enabled: !queryError,
-    pageSize: DEFAULT_VISIBLE_ROWS_PER_PAGE,
   });
 
   const rows = getRowsFromPages(rowsData?.pages);
@@ -392,7 +390,7 @@ export const EntitiesDataTable = ({
 
   const onAddFilter: AddFieldFilterHandler | undefined = useMemo(
     () =>
-      filterManager && dataView
+      config.supportsFieldFiltering !== false && filterManager && dataView
         ? (clickedField, values, operation) => {
             const newFilters = generateFilters(
               filterManager,
@@ -406,7 +404,7 @@ export const EntitiesDataTable = ({
             });
           }
         : undefined,
-    [dataView, filterManager, filters, setUrlQuery]
+    [config.supportsFieldFiltering, dataView, filterManager, filters, setUrlQuery]
   );
 
   const onResize = (colSettings: { columnId: string; width: number | undefined }) => {
@@ -464,10 +462,11 @@ export const EntitiesDataTable = ({
                     <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiIconTip
+                        aria-label={TARGET_ENTITY_TOOLTIP}
                         content={TARGET_ENTITY_TOOLTIP}
                         type="aggregate"
                         size="s"
-                        data-test-subj="target-entity-icon"
+                        iconProps={{ 'data-test-subj': 'target-entity-icon' }}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -595,8 +594,11 @@ export const EntitiesDataTable = ({
                   {groupSelectorComponent}
                 </EuiFlexItem>
               )}
-              {gridProps.inTableSearchControl && (
-                <EuiFlexItem grow={false}>{gridProps.inTableSearchControl}</EuiFlexItem>
+              {gridProps.inTableSearchInput && (
+                <EuiFlexItem grow={false}>{gridProps.inTableSearchInput}</EuiFlexItem>
+              )}
+              {gridProps.inTableSearchButton && (
+                <EuiFlexItem grow={false}>{gridProps.inTableSearchButton}</EuiFlexItem>
               )}
               {hasRoomForGridControls && keyboardShortcutsControl && (
                 <EuiFlexItem grow={false}>{keyboardShortcutsControl}</EuiFlexItem>
@@ -644,7 +646,9 @@ export const EntitiesDataTable = ({
             columns={currentColumns}
             dataView={dataView}
             loadingState={loadingState}
-            onFilter={onAddFilter as DocViewFilterFn}
+            onFilter={
+              config.supportsFieldFiltering !== false ? (onAddFilter as DocViewFilterFn) : undefined
+            }
             onResize={onResize}
             onSetColumns={onSetColumns}
             onSort={onSort}

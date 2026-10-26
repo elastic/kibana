@@ -709,8 +709,7 @@
               true,
               false
             ]
-          },
-          "frozen_after": ""
+          }
         },
         "data_stream_options": {
           "failure_store": {

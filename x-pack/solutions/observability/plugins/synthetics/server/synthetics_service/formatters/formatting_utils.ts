@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
-import { type ConfigKey, type MonitorFields } from '../../../common/runtime_types';
+import { ConfigKey, type MonitorFields } from '../../../common/runtime_types';
 import type { ParsedVars } from './lightweight_param_formatter';
 import { replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
@@ -65,6 +65,44 @@ export const replaceStringWithParams = (
   return value as string | null;
 };
 
+/**
+ * Resolve `${params}` on each Kerberos/NTLM string field individually so
+ * values with quotes/newlines stay valid when the object is later serialized.
+ * Shared by public Heartbeat and private Fleet formatters; those keys are in
+ * PARAMS_KEYS_TO_SKIP so the whole-object JSON-stringify path is not used.
+ */
+export const resolveHttpAuthParams = <T extends Partial<MonitorFields>>(
+  config: T,
+  params: Record<string, string>,
+  logger?: Logger
+): T => {
+  const next = { ...config };
+
+  const resolveAuthObject = <A extends Record<string, unknown>>(auth: A): A => {
+    const resolved = { ...auth };
+    for (const [field, fieldValue] of Object.entries(auth)) {
+      if (typeof fieldValue === 'string') {
+        (resolved as Record<string, unknown>)[field] = replaceStringWithParams(
+          fieldValue,
+          params,
+          logger
+        );
+      }
+    }
+    return resolved;
+  };
+
+  const kerberos = next[ConfigKey.KERBEROS];
+  if (kerberos?.enabled) {
+    next[ConfigKey.KERBEROS] = resolveAuthObject(kerberos);
+  }
+  const ntlm = next[ConfigKey.NTLM];
+  if (ntlm?.enabled) {
+    next[ConfigKey.NTLM] = resolveAuthObject(ntlm);
+  }
+  return next;
+};
+
 const allParamsAreMissing = (parsedVars: ParsedVars, params: Record<string, string>) => {
   const hasDefault = parsedVars.some(
     (parsedVar) => parsedVar.type === 'var' && parsedVar.content.default
@@ -106,6 +144,10 @@ function frequencyToString(value?: number): string | undefined {
   return name ? name.toLowerCase() : 'unknown';
 }
 
+// A one-off window created through the public API is stored without a freq, and Heartbeat cannot
+// unpack a window without one. Send it as a single yearly occurrence, the shape the UI stores.
+const ONE_OFF_RULE_DEFAULTS = { freq: 'yearly', count: 1 } as const;
+
 export const formatMWs = (mws?: MaintenanceWindow[], strRes = true) => {
   if (!mws) {
     return;
@@ -113,9 +155,10 @@ export const formatMWs = (mws?: MaintenanceWindow[], strRes = true) => {
   const formatted = mws.map((mw) => {
     const mwRule = mw?.rRule;
     if (mw && mwRule) {
+      const freq = frequencyToString(mwRule.freq);
       return {
         ...mwRule,
-        freq: frequencyToString(mwRule.freq),
+        ...(freq === undefined ? ONE_OFF_RULE_DEFAULTS : { freq }),
         duration: `${mw.duration}ms`,
       };
     }

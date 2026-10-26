@@ -52,7 +52,8 @@ export class NewJobCapsService extends NewJobCapabilitiesServiceBase {
   public async initializeFromDataVIew(
     dataView: DataView,
     includeEventRateField = true,
-    removeTextFields = true
+    removeTextFields = true,
+    projectRouting?: string
   ) {
     try {
       this._includeEventRateField = includeEventRateField;
@@ -60,7 +61,8 @@ export class NewJobCapsService extends NewJobCapabilitiesServiceBase {
 
       const resp = await this._mlApiService.jobs.newJobCaps(
         dataView.getIndexPattern(),
-        dataView.type === DataViewType.ROLLUP
+        dataView.type === DataViewType.ROLLUP,
+        projectRouting
       );
 
       const { fields: allFields, aggs } = createObjects(resp, dataView.getIndexPattern());

@@ -100,7 +100,8 @@ export class OasConverter {
     const unwrapped = this.#unwrapSchema(schema);
     const { params, shared } = this.#getConverter(unwrapped).convertPathParameters(
       unwrapped,
-      pathParameters
+      pathParameters,
+      { env: this.#env, sharedSchemas: this.#sharedSchemas, onCollision: this.#onCollision }
     );
     this.#addComponents(shared);
     return params;
@@ -108,7 +109,11 @@ export class OasConverter {
 
   public convertQuery(schema: unknown) {
     const unwrapped = this.#unwrapSchema(schema);
-    const { query, shared } = this.#getConverter(unwrapped).convertQuery(unwrapped);
+    const { query, shared } = this.#getConverter(unwrapped).convertQuery(unwrapped, {
+      env: this.#env,
+      sharedSchemas: this.#sharedSchemas,
+      onCollision: this.#onCollision,
+    });
     this.#addComponents(shared);
     return query;
   }

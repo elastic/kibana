@@ -16,6 +16,7 @@ import { getTableTabItems } from '../utils/table_tab_items';
 import { getAllFieldsByName } from '../../../../common/containers/source';
 import { getTimelineEventsDetailsFromRecord } from '../../../document/main/utils/get_timeline_events_details_from_record';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../../data_view_manager/constants';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 
@@ -71,7 +72,8 @@ export const TableTab = memo(({ hit, renderCellActions }: TableTabProps) => {
     [hit]
   );
 
-  const browserFields = useBrowserFields(PageScope.attacks);
+  const { dataView } = useDataView(PageScope.attacks);
+  const browserFields = useBrowserFields(dataView);
 
   const onTableChange = useCallback(
     ({ page: { index } }: { page: { index: number } }) => setPagination({ pageIndex: index }),

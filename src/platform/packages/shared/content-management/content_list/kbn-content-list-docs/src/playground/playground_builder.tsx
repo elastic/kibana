@@ -278,12 +278,7 @@ const usePreview = (
                       return <Action.Delete key={act.instanceId} />;
                     case 'export':
                       return (
-                        <Action
-                          key={act.instanceId}
-                          id="export"
-                          name="Export"
-                          icon="exportAction"
-                        />
+                        <Action key={act.instanceId} id="export" name="Export" icon="upload" />
                       );
                     default:
                       return null;

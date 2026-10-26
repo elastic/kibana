@@ -12,6 +12,7 @@ import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { attachmentDomainV2 } from '../../../../common/types/domain';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
+import { toLegacyAttachmentResponse } from '../../../common/attachments';
 
 export const getCommentRoute = createCasesRoute({
   method: 'get',
@@ -26,17 +27,19 @@ export const getCommentRoute = createCasesRoute({
   routerOptions: {
     access: 'public',
     summary: `Get a case comment or alert`,
-    // decription: 'You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.',
+    // description: 'You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you\'re seeking.',
     tags: ['oas-tag:cases'],
   },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
-      const res: attachmentDomainV2.AttachmentV2 = await client.attachments.get({
-        savedObjectId: request.params.comment_id,
-        caseID: request.params.case_id,
-      });
+      const res: attachmentDomainV2.AttachmentV2 = toLegacyAttachmentResponse(
+        await client.attachments.get({
+          savedObjectId: request.params.comment_id,
+          caseID: request.params.case_id,
+        })
+      );
 
       return response.ok({
         body: res,

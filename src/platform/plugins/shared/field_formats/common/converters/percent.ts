@@ -31,12 +31,18 @@ export class PercentFormat extends NumeralFormat {
   });
 
   textConvert: TextContextTypeConvert = (val: string | number) => {
-    const formatted = super.getConvertedValue(val);
-
     if (this.param('fractional')) {
-      return formatted;
+      return super.getConvertedValue(val);
     }
 
-    return String(Number(formatted) / 100);
+    // the value is expressed in percent units (35 means 35%): convert it to the
+    // fraction the percent pattern expects before formatting, rather than trying
+    // to divide the formatted string (which contains % and group separators)
+    const numericVal = typeof val === 'string' ? parseFloat(val) : val;
+    if (typeof numericVal !== 'number' || !Number.isFinite(numericVal)) {
+      return super.getConvertedValue(val);
+    }
+
+    return super.getConvertedValue(numericVal / 100);
   };
 }

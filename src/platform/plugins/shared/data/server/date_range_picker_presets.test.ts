@@ -27,15 +27,35 @@ describe('date range picker presets userStorage registration', () => {
     expect(dateRangePickerPresetsStorageDefinition.preload).toBe(false);
   });
 
-  it('accepts the unseeded default value', () => {
+  it('accepts the empty default value', () => {
     expect(
       dateRangePickerPresetsStorageDefinition.schema.safeParse(DEFAULT_STORED_PRESETS).success
     ).toBe(true);
   });
 
+  it('still accepts legacy v1 values', () => {
+    expect(
+      dateRangePickerPresetsStorageDefinition.schema.safeParse({ version: 1, presets: null })
+        .success
+    ).toBe(true);
+    expect(
+      dateRangePickerPresetsStorageDefinition.schema.safeParse({
+        version: 1,
+        presets: [{ start: 'now-15m', end: 'now' }],
+      }).success
+    ).toBe(true);
+  });
+
+  it('rejects a null preset list on v2', () => {
+    expect(
+      dateRangePickerPresetsStorageDefinition.schema.safeParse({ version: 2, presets: null })
+        .success
+    ).toBe(false);
+  });
+
   it('rejects preset lists over the cap', () => {
     const oversize = {
-      version: 1 as const,
+      version: 2 as const,
       presets: Array.from({ length: MAX_PRESETS + 1 }, (_, i) => ({
         start: `now-${i}d`,
         end: 'now',
@@ -47,15 +67,15 @@ describe('date range picker presets userStorage registration', () => {
 
   it('rejects preset items with oversized string fields', () => {
     const oversizeStart = {
-      version: 1 as const,
+      version: 2 as const,
       presets: [{ start: 'a'.repeat(201), end: 'now' }],
     };
     const oversizeEnd = {
-      version: 1 as const,
+      version: 2 as const,
       presets: [{ start: 'now-15m', end: 'a'.repeat(201) }],
     };
     const oversizeLabel = {
-      version: 1 as const,
+      version: 2 as const,
       presets: [{ start: 'now-15m', end: 'now', label: 'a'.repeat(256) }],
     };
 

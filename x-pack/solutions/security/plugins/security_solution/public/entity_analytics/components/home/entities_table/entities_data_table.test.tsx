@@ -20,11 +20,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  TEST_SUBJ_DATA_GRID,
-  TEST_SUBJ_EMPTY_STATE,
-  DEFAULT_VISIBLE_ROWS_PER_PAGE,
-} from './constants';
+import { ENTITY_GROUPING_OPTIONS, TEST_SUBJ_DATA_GRID, TEST_SUBJ_EMPTY_STATE } from './constants';
 
 const mockUseFetchGridData = jest.mocked(useFetchGridData);
 const mockUseInvestigateInTimeline = jest.mocked(useInvestigateInTimeline);
@@ -37,6 +33,7 @@ const capturedProps: {
   externalCustomRenderers?: CustomCellRenderer;
   columns?: string[];
   rowAdditionalLeadingControls?: RowControlColumn[];
+  onFilter?: unknown;
 } = {};
 
 jest.mock('@kbn/unified-data-table', () => {
@@ -47,10 +44,12 @@ jest.mock('@kbn/unified-data-table', () => {
       externalCustomRenderers?: CustomCellRenderer;
       columns?: string[];
       rowAdditionalLeadingControls?: RowControlColumn[];
+      onFilter?: unknown;
     }) => {
       capturedProps.externalCustomRenderers = props.externalCustomRenderers;
       capturedProps.columns = props.columns;
       capturedProps.rowAdditionalLeadingControls = props.rowAdditionalLeadingControls;
+      capturedProps.onFilter = props.onFilter;
       return <div data-test-subj="unifiedDataTable" />;
     },
   };
@@ -153,12 +152,14 @@ const defaultKibanaServices = {
 const renderWithProviders = (
   state: EntityURLStateResult,
   dataView: DataView = mockDataView,
-  dataViewIsLoading = false
+  dataViewIsLoading = false,
+  config = DEFAULT_ENTITIES_TABLE_CONFIG,
+  selectedGroup?: string
 ) =>
   render(
     <TestProviders>
       <DataViewContext.Provider value={{ dataView, dataViewIsLoading }}>
-        <EntitiesDataTable state={state} config={DEFAULT_ENTITIES_TABLE_CONFIG} />
+        <EntitiesDataTable state={state} config={config} selectedGroup={selectedGroup} />
       </DataViewContext.Provider>
     </TestProviders>
   );
@@ -262,7 +263,6 @@ describe('EntitiesDataTable', () => {
         query: { bool: { filter: [{ term: { test: true } }], must: [], must_not: [], should: [] } },
         sort: [['entity.name', 'asc']],
         enabled: true,
-        pageSize: DEFAULT_VISIBLE_ROWS_PER_PAGE,
       })
     );
   });
@@ -319,6 +319,47 @@ describe('EntitiesDataTable', () => {
     });
   });
 
+  describe('entity.name column renderer in resolution grouping', () => {
+    it('gives the target entity icon an accessible name matching its tooltip', () => {
+      const state = createMockState();
+      renderWithProviders(
+        state,
+        mockDataView,
+        false,
+        DEFAULT_ENTITIES_TABLE_CONFIG,
+        ENTITY_GROUPING_OPTIONS.RESOLUTION
+      );
+
+      const renderer = capturedProps.externalCustomRenderers?.['entity.name'];
+      if (!renderer) throw new Error('entity.name renderer was not registered');
+
+      const row = { flattened: { 'entity.name': 'alice' } } as never;
+      const fieldFormats = { getDefaultInstance: () => ({ convertToText: String }) };
+      // The renderer only consumes `row`, `dataView` and `fieldFormats`, so the rest are stubs.
+      render(
+        <TestProviders>
+          {renderer({
+            row,
+            columnId: 'entity.name',
+            rowIndex: 0,
+            colIndex: 0,
+            setCellProps: jest.fn(),
+            isDetails: false,
+            isExpanded: false,
+            isExpandable: false,
+            dataView: mockDataView,
+            fieldFormats,
+          } as never)}
+        </TestProviders>
+      );
+
+      // The EUI test-env EuiIcon stub renders aria-label as text content
+      expect(screen.getByTestId('target-entity-icon')).toHaveTextContent(
+        'Primary entity in the resolution group'
+      );
+    });
+  });
+
   describe('alerts column privilege', () => {
     it('includes the alerts column when the user has alerts read access', () => {
       const state = createMockState();
@@ -355,6 +396,29 @@ describe('EntitiesDataTable', () => {
       renderWithProviders(state);
 
       expect(capturedProps.columns).not.toContain('alerts');
+    });
+  });
+
+  describe('supportsFieldFiltering', () => {
+    it('passes onFilter to UnifiedDataTable when supportsFieldFiltering is not set', () => {
+      const state = createMockState();
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+
+      renderWithProviders(state);
+
+      expect(capturedProps.onFilter).toBeDefined();
+    });
+
+    it('passes undefined onFilter to UnifiedDataTable when supportsFieldFiltering is false', () => {
+      const state = createMockState();
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+
+      renderWithProviders(state, mockDataView, false, {
+        ...DEFAULT_ENTITIES_TABLE_CONFIG,
+        supportsFieldFiltering: false,
+      });
+
+      expect(capturedProps.onFilter).toBeUndefined();
     });
   });
 

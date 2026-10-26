@@ -9,7 +9,7 @@
 
 import moment from 'moment';
 import type { Readable } from 'stream';
-import mimeType from 'mime';
+import mimeTypes from 'mime-types';
 import { randomUUID } from 'crypto';
 import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
@@ -134,7 +134,7 @@ export class FileClientImpl implements FileClient {
         ...serializedMetadata,
         name: serializedMetadata.name!,
         extension:
-          (serializedMetadata.mime_type && mimeType.getExtension(serializedMetadata.mime_type)) ??
+          (serializedMetadata.mime_type && mimeTypes.extension(serializedMetadata.mime_type)) ||
           undefined,
         FileKind: this.fileKind,
       },

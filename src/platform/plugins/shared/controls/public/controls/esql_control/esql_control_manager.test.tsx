@@ -351,5 +351,61 @@ describe('initializeESQLControlManager', () => {
 
       expect(callArgs.signal.aborted).toBe(true);
     });
+
+    test('cancelRequests() should abort in-flight request', async () => {
+      const initialState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        variable_name: 'variable1',
+        variable_type: ESQLVariableType.VALUES,
+        esql_query: 'FROM foo | STATS BY column',
+        control_type: EsqlControlType.VALUES_FROM_QUERY,
+      } as OptionsListESQLControlState;
+
+      const mock = getMock();
+      mock.mockClear();
+      const manager = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
+
+      await waitFor(() => {
+        expect(mock).toHaveBeenCalled();
+      });
+
+      const callArgs = mock.mock.calls[0][0];
+      expect(callArgs.signal.aborted).toBe(false);
+
+      manager.api.cancelRequests();
+
+      expect(callArgs.signal.aborted).toBe(true);
+    });
+
+    test('should abort previous request when new fetch starts', async () => {
+      const initialState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        variable_name: 'variable2',
+        variable_type: ESQLVariableType.VALUES,
+        esql_query: 'FROM foo | WHERE col == ?variable1 | STATS BY column',
+        control_type: EsqlControlType.VALUES_FROM_QUERY,
+      } as OptionsListESQLControlState;
+
+      const mock = getMock();
+      mock.mockClear();
+      initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
+
+      // Wait for initial fetch (triggered on subscription); mock was cleared before init
+      // so mock.mock.calls[0] belongs to this manager's initial fetch
+      await waitFor(() => expect(mock).toHaveBeenCalled());
+
+      const firstSignal: AbortSignal = mock.mock.calls[0][0].signal;
+      expect(firstSignal.aborted).toBe(false);
+
+      // Trigger second fetch by changing the variable value; switchMap aborts the
+      // previous AbortController synchronously before starting the new request
+      mockFetch$.next({
+        esqlVariables: [
+          { key: 'variable1', value: 'newAbortTestValue', type: ESQLVariableType.VALUES },
+        ],
+      });
+
+      await waitFor(() => expect(firstSignal.aborted).toBe(true));
+    });
   });
 });

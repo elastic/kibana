@@ -34,17 +34,86 @@ export const COLUMN_SAMPLE_SIZE = i18n.translate(
   }
 );
 
-export const COLUMN_MEAN_A = i18n.translate('xpack.evals.compareExperiments.columns.meanA', {
-  defaultMessage: 'Mean A',
-});
+export const COLUMN_MEAN_BASELINE = i18n.translate(
+  'xpack.evals.compareExperiments.columns.meanBaseline',
+  {
+    defaultMessage: 'Mean baseline',
+  }
+);
 
-export const COLUMN_MEAN_B = i18n.translate('xpack.evals.compareExperiments.columns.meanB', {
-  defaultMessage: 'Mean B',
-});
+export const COLUMN_MEAN_TARGET = i18n.translate(
+  'xpack.evals.compareExperiments.columns.meanTarget',
+  {
+    defaultMessage: 'Mean target',
+  }
+);
 
 export const COLUMN_DIFF = i18n.translate('xpack.evals.compareExperiments.columns.diff', {
   defaultMessage: 'Diff',
 });
+
+export const COLUMN_TEST = i18n.translate('xpack.evals.compareExperiments.columns.test', {
+  defaultMessage: 'Test',
+});
+
+export const TEST_LABEL_PAIRED_T = i18n.translate(
+  'xpack.evals.compareExperiments.testLabel.pairedT',
+  { defaultMessage: 't-test' }
+);
+
+export const TEST_LABEL_WILCOXON = i18n.translate(
+  'xpack.evals.compareExperiments.testLabel.wilcoxon',
+  { defaultMessage: 'Wilcoxon' }
+);
+
+export const TEST_LABEL_MCNEMAR = i18n.translate(
+  'xpack.evals.compareExperiments.testLabel.mcnemar',
+  { defaultMessage: 'McNemar' }
+);
+
+export const METRIC_TYPE_LABEL_BINARY = i18n.translate(
+  'xpack.evals.compareExperiments.metricType.binary',
+  { defaultMessage: 'pass/fail scores' }
+);
+
+export const METRIC_TYPE_LABEL_CONTINUOUS_BOUNDED = i18n.translate(
+  'xpack.evals.compareExperiments.metricType.continuousBounded',
+  { defaultMessage: 'scores in [0, 1]' }
+);
+
+export const METRIC_TYPE_LABEL_CONTINUOUS_UNBOUNDED = i18n.translate(
+  'xpack.evals.compareExperiments.metricType.continuousUnbounded',
+  { defaultMessage: 'unbounded scores' }
+);
+
+export const METRIC_TYPE_LABEL_COUNT = i18n.translate(
+  'xpack.evals.compareExperiments.metricType.count',
+  { defaultMessage: 'counts' }
+);
+
+export const METRIC_TYPE_LABEL_ORDINAL = i18n.translate(
+  'xpack.evals.compareExperiments.metricType.ordinal',
+  { defaultMessage: 'ordinal scale' }
+);
+
+export const getTestTooltip = (testLabel: string, metricTypeLabel: string, method?: string) =>
+  method
+    ? i18n.translate('xpack.evals.compareExperiments.testTooltipWithMethod', {
+        defaultMessage:
+          '{testLabel} ({method}), chosen because the evaluator produces {metricTypeLabel}',
+        values: { testLabel, method, metricTypeLabel },
+      })
+    : i18n.translate('xpack.evals.compareExperiments.testTooltip', {
+        defaultMessage: '{testLabel}, chosen because the evaluator produces {metricTypeLabel}',
+        values: { testLabel, metricTypeLabel },
+      });
+
+export const getDiscordantPairsHint = (targetOnly: number, baselineOnly: number) =>
+  i18n.translate('xpack.evals.compareExperiments.discordantPairsHint', {
+    defaultMessage:
+      '{targetOnly, plural, one {# example} other {# examples}} score 1 only in target, {baselineOnly, plural, one {# example} other {# examples}} score 1 only in baseline',
+    values: { targetOnly, baselineOnly },
+  });
 
 export const COLUMN_P_VALUE = i18n.translate('xpack.evals.compareExperiments.columns.pValue', {
   defaultMessage: 'p-value',
@@ -149,17 +218,17 @@ export const FLYOUT_COLUMN_EXAMPLE = i18n.translate(
   { defaultMessage: 'Example' }
 );
 
-export const FLYOUT_COLUMN_SCORE_A = i18n.translate(
-  'xpack.evals.compareExperiments.flyout.columnScoreA',
+export const FLYOUT_COLUMN_SCORE_BASELINE = i18n.translate(
+  'xpack.evals.compareExperiments.flyout.columnScoreBaseline',
   {
-    defaultMessage: 'Score A',
+    defaultMessage: 'Score baseline',
   }
 );
 
-export const FLYOUT_COLUMN_SCORE_B = i18n.translate(
-  'xpack.evals.compareExperiments.flyout.columnScoreB',
+export const FLYOUT_COLUMN_SCORE_TARGET = i18n.translate(
+  'xpack.evals.compareExperiments.flyout.columnScoreTarget',
   {
-    defaultMessage: 'Score B',
+    defaultMessage: 'Score target',
   }
 );
 
@@ -216,11 +285,11 @@ export const CLICK_ROW_HINT = i18n.translate('xpack.evals.compareExperiments.cli
 });
 
 export const DIFF_IMPROVED = i18n.translate('xpack.evals.compareExperiments.diffImproved', {
-  defaultMessage: 'Improvement (Experiment A is better)',
+  defaultMessage: 'Improvement (Target is better than Baseline)',
 });
 
 export const DIFF_REGRESSED = i18n.translate('xpack.evals.compareExperiments.diffRegressed', {
-  defaultMessage: 'Regression (Experiment A is worse)',
+  defaultMessage: 'Regression (Target is worse than Baseline)',
 });
 
 export const DIFF_LOWER_IS_BETTER = i18n.translate(
@@ -234,6 +303,13 @@ export const DIFF_HIGHER_IS_BETTER = i18n.translate(
   'xpack.evals.compareExperiments.diffHigherIsBetter',
   {
     defaultMessage: 'Higher is better for this metric',
+  }
+);
+
+export const DIFF_NEUTRAL_DIRECTION = i18n.translate(
+  'xpack.evals.compareExperiments.diffNeutralDirection',
+  {
+    defaultMessage: 'Neutral',
   }
 );
 
@@ -260,7 +336,7 @@ export const FLYOUT_NO_EXAMPLES_BODY = i18n.translate(
 export const SWAP_EXPERIMENTS_LABEL = i18n.translate(
   'xpack.evals.compareExperiments.swapExperimentsLabel',
   {
-    defaultMessage: 'Swap experiment A and experiment B',
+    defaultMessage: 'Swap baseline and target',
   }
 );
 
@@ -279,13 +355,19 @@ export const BADGE_OLDER = i18n.translate('xpack.evals.compareExperiments.badgeO
   defaultMessage: 'Older',
 });
 
-export const FLYOUT_TRACE_A = i18n.translate('xpack.evals.compareExperiments.flyoutTraceA', {
-  defaultMessage: 'View trace (Experiment A)',
-});
+export const FLYOUT_TRACE_BASELINE = i18n.translate(
+  'xpack.evals.compareExperiments.flyoutTraceBaseline',
+  {
+    defaultMessage: 'View trace (baseline)',
+  }
+);
 
-export const FLYOUT_TRACE_B = i18n.translate('xpack.evals.compareExperiments.flyoutTraceB', {
-  defaultMessage: 'View trace (Experiment B)',
-});
+export const FLYOUT_TRACE_TARGET = i18n.translate(
+  'xpack.evals.compareExperiments.flyoutTraceTarget',
+  {
+    defaultMessage: 'View trace (target)',
+  }
+);
 
 export const EXPORT_CSV = i18n.translate('xpack.evals.compareExperiments.exportCsv', {
   defaultMessage: 'Copy as CSV',

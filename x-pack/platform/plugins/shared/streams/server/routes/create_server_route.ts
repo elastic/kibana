@@ -7,7 +7,15 @@
 
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
-import { badRequest, conflict, forbidden, internal, notFound } from '@hapi/boom';
+import {
+  badRequest,
+  conflict,
+  entityTooLarge,
+  forbidden,
+  internal,
+  notFound,
+  serverUnavailable,
+} from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import { get } from 'lodash';
 import type { StreamsRouteHandlerResources } from './types';
@@ -54,8 +62,14 @@ export const createServerRoute: CreateServerRouteFactory<
               case 409:
                 throw conflict(error, 'data' in error ? error.data : undefined);
 
+              case 413:
+                throw entityTooLarge(error, 'data' in error ? error.data : undefined);
+
               case 500:
                 throw internal(error, 'data' in error ? error.data : undefined);
+
+              case 503:
+                throw serverUnavailable(error, 'data' in error ? error.data : undefined);
             }
           }
           throw error;

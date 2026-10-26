@@ -353,8 +353,14 @@ const UnstyledProcessEventDot = React.memo(
       selectors.statsTotalForNode(state.analyzer[id])(node)
     );
     const nodeName = nodeModel.nodeName(node);
+    const originTimestampMs = useSelector((state: State) =>
+      selectors.originTimestamp(state.analyzer[id])
+    );
     const processEvent = useSelector((state: State) =>
-      nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(String(node.id)))
+      nodeDataModel.eventAtOrBefore(
+        selectors.nodeDataForID(state.analyzer[id])(String(node.id)),
+        originTimestampMs
+      )
     );
     const processName = useMemo(() => {
       if (processEvent !== undefined) {
@@ -389,6 +395,7 @@ const UnstyledProcessEventDot = React.memo(
         id={generatedNodeHTMLID}
         tabIndex={-1}
       >
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
         <svg
           viewBox="-15 -15 90 30"
           preserveAspectRatio="xMidYMid meet"

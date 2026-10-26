@@ -7,8 +7,26 @@
 
 import { i18n } from '@kbn/i18n';
 import { ARTIFACT_FLYOUT_LABELS } from './components/artifact_flyout';
+import { ARTIFACT_VIEW_FLYOUT_LABELS } from './components/artifact_view_flyout';
 import { ARTIFACT_DELETE_LABELS } from './components/artifact_delete_modal';
 import { ARTIFACT_DELETE_ACTION_LABELS } from './hooks/use_with_artifact_delete_item';
+import { ARTIFACT_ENABLED_SWITCH_LABELS } from './components/artifact_enabled_switch';
+import { ARTIFACT_ENABLE_DISABLE_ACTION_LABELS } from './hooks/use_with_artifact_enable_disable';
+
+export const ARTIFACT_CARD_ACTION_LABELS = Object.freeze({
+  cardActionEditLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.cardActionEditLabel',
+    {
+      defaultMessage: 'Edit artifact',
+    }
+  ),
+  cardActionDeleteLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.cardActionDeleteLabel',
+    {
+      defaultMessage: 'Delete artifact',
+    }
+  ),
+});
 
 export const artifactListPageLabels = Object.freeze({
   // ------------------------------
@@ -108,6 +126,12 @@ export const artifactListPageLabels = Object.freeze({
       defaultMessage: 'Import artifacts to your artifact list.',
     }
   ),
+  importFlyoutFilePickerLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importFlyoutFilePickerLabel',
+    {
+      defaultMessage: 'Select or drag and drop a file',
+    }
+  ),
   importFlyoutImportSubmitButtonLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.importFlyoutImportSubmitButtonLabel',
     {
@@ -168,16 +192,81 @@ export const artifactListPageLabels = Object.freeze({
   // ------------------------------
   // CARD ACTIONS labels
   // ------------------------------
-  cardActionEditLabel: i18n.translate(
-    'xpack.securitySolution.artifactListPage.cardActionEditLabel',
+  ...ARTIFACT_CARD_ACTION_LABELS,
+
+  // ------------------------------
+  // TABLE labels
+  // ------------------------------
+  tableColumnNameLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnNameLabel',
     {
-      defaultMessage: 'Edit artifact',
+      defaultMessage: 'Name',
     }
   ),
-  cardActionDeleteLabel: i18n.translate(
-    'xpack.securitySolution.artifactListPage.cardActionDeleteLabel',
+  tableColumnPolicyAssignmentLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnPolicyAssignmentLabel',
     {
-      defaultMessage: 'Delete artifact',
+      defaultMessage: 'Policy assignment',
+    }
+  ),
+  tablePolicyAssignmentGlobalLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.policyAssignmentGlobalLabel',
+    {
+      defaultMessage: 'Global',
+    }
+  ),
+  tablePolicyAssignmentNoneLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.policyAssignmentNoneLabel',
+    {
+      defaultMessage: 'None',
+    }
+  ),
+  getTablePolicyAssignmentAdditionalCountLabel: (count: number): string => {
+    return i18n.translate(
+      'xpack.securitySolution.artifactListPage.table.policyAssignmentAdditionalCountLabel',
+      {
+        defaultMessage: '+{count}',
+        values: { count },
+      }
+    );
+  },
+  getTablePolicyAssignmentAdditionalCountAriaLabel: (count: number): string => {
+    return i18n.translate(
+      'xpack.securitySolution.artifactListPage.table.policyAssignmentAdditionalCountAriaLabel',
+      {
+        defaultMessage: '{count, plural, one {# more policy} other {# more policies}}',
+        values: { count },
+      }
+    );
+  },
+  tableColumnOperatingSystemsLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnOperatingSystemsLabel',
+    {
+      defaultMessage: 'Operating systems',
+    }
+  ),
+  tableColumnUpdatedByLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnUpdatedByLabel',
+    {
+      defaultMessage: 'Updated by',
+    }
+  ),
+  tableColumnLastUpdatedLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnLastUpdatedLabel',
+    {
+      defaultMessage: 'Last updated',
+    }
+  ),
+  tableColumnActionsLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnActionsLabel',
+    {
+      defaultMessage: 'Actions',
+    }
+  ),
+  tableNoItemsMessage: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.noItemsMessage',
+    {
+      defaultMessage: 'No items found',
     }
   ),
 
@@ -185,12 +274,19 @@ export const artifactListPageLabels = Object.freeze({
   // ARTIFACT FLYOUT
   // ------------------------------
   ...ARTIFACT_FLYOUT_LABELS,
+  ...ARTIFACT_VIEW_FLYOUT_LABELS,
 
   // ------------------------------
   // ARTIFACT DELETE MODAL
   // ------------------------------
   ...ARTIFACT_DELETE_LABELS,
   ...ARTIFACT_DELETE_ACTION_LABELS,
+
+  // ------------------------------
+  // ARTIFACT ENABLE / DISABLE
+  // ------------------------------
+  ...ARTIFACT_ENABLED_SWITCH_LABELS,
+  ...ARTIFACT_ENABLE_DISABLE_ACTION_LABELS,
 });
 
 type IAllLabels = typeof artifactListPageLabels;

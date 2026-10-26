@@ -15,14 +15,19 @@ import { serviceThroughputRoute } from './service_throughput';
 import { serviceTransactionTypesRoute } from './service_transaction_types';
 import { servicesDetailedStatisticsRoute } from './services_detailed_statistics';
 import { servicesListRoute } from './services_list';
+import { serviceHasSystemMetricsRoute } from './service_has_system_metrics';
+import { serviceIngestionTypeRoute } from './service_ingestion_type';
+
+const start = '2021-01-01T00:00:00.000Z';
+const end = '2021-01-02T00:00:00.000Z';
 
 describe('serviceMetadataDetailsRoute params', () => {
   it('accepts a valid path and query', () => {
     const result = serviceMetadataDetailsRoute.params!.safeParse({
       path: { serviceName: 'opbeans-java' },
       query: {
-        start: '2021-01-01T00:00:00.000Z',
-        end: '2021-01-02T00:00:00.000Z',
+        start,
+        end,
         environment: 'production',
       },
     });
@@ -35,8 +40,8 @@ describe('serviceMetadataDetailsRoute params', () => {
       serviceMetadataDetailsRoute.params!.safeParse({
         path: {},
         query: {
-          start: '2021-01-01T00:00:00.000Z',
-          end: '2021-01-02T00:00:00.000Z',
+          start,
+          end,
           environment: 'production',
         },
       })
@@ -48,10 +53,23 @@ describe('serviceMetadataIconsRoute params', () => {
   it('accepts a valid path and query', () => {
     const result = serviceMetadataIconsRoute.params!.safeParse({
       path: { serviceName: 'opbeans-java' },
-      query: { start: '2021-01-01T00:00:00.000Z', end: '2021-01-02T00:00:00.000Z' },
+      query: {
+        start,
+        end,
+        environment: 'production',
+      },
     });
 
     expectParseSuccess(result);
+  });
+
+  it('rejects a missing environment', () => {
+    expectParseError(
+      serviceMetadataIconsRoute.params!.safeParse({
+        path: { serviceName: 'opbeans-java' },
+        query: { start, end },
+      })
+    );
   });
 
   it('rejects a missing query', () => {
@@ -69,8 +87,8 @@ describe('serviceMixedIngestionRoute params', () => {
     const result = serviceMixedIngestionRoute.params!.safeParse({
       path: { serviceName: 'opbeans-java' },
       query: {
-        start: '2021-01-01T00:00:00.000Z',
-        end: '2021-01-02T00:00:00.000Z',
+        start,
+        end,
         environment: 'production',
         kuery: '',
       },
@@ -84,8 +102,8 @@ describe('serviceMixedIngestionRoute params', () => {
       serviceMixedIngestionRoute.params!.safeParse({
         path: { serviceName: 'opbeans-java' },
         query: {
-          start: '2021-01-01T00:00:00.000Z',
-          end: '2021-01-02T00:00:00.000Z',
+          start,
+          end,
           environment: 'production',
         },
       })
@@ -99,8 +117,8 @@ describe('serviceNodeMetadataRoute params', () => {
       path: { serviceName: 'opbeans-java', serviceNodeName: 'instance-1' },
       query: {
         kuery: '',
-        start: '2021-01-01T00:00:00.000Z',
-        end: '2021-01-02T00:00:00.000Z',
+        start,
+        end,
         environment: 'production',
         documentType: 'transactionMetric',
         rollupInterval: '1m',
@@ -116,8 +134,8 @@ describe('serviceNodeMetadataRoute params', () => {
         path: { serviceName: 'opbeans-java' },
         query: {
           kuery: '',
-          start: '2021-01-01T00:00:00.000Z',
-          end: '2021-01-02T00:00:00.000Z',
+          start,
+          end,
           environment: 'production',
           documentType: 'transactionMetric',
           rollupInterval: '1m',
@@ -187,8 +205,8 @@ describe('serviceThroughputRoute params', () => {
         bucketSizeInSeconds: '60',
         environment: 'production',
         kuery: '',
-        start: '2021-01-01T00:00:00.000Z',
-        end: '2021-01-02T00:00:00.000Z',
+        start,
+        end,
         documentType: 'transactionMetric',
         rollupInterval: '1m',
       },
@@ -204,8 +222,8 @@ describe('serviceThroughputRoute params', () => {
         query: {
           environment: 'production',
           kuery: '',
-          start: '2021-01-01T00:00:00.000Z',
-          end: '2021-01-02T00:00:00.000Z',
+          start,
+          end,
           documentType: 'transactionMetric',
           rollupInterval: '1m',
         },
@@ -219,8 +237,8 @@ describe('serviceTransactionTypesRoute params', () => {
     const result = serviceTransactionTypesRoute.params!.safeParse({
       path: { serviceName: 'opbeans-java' },
       query: {
-        start: '2021-01-01T00:00:00.000Z',
-        end: '2021-01-02T00:00:00.000Z',
+        start,
+        end,
         documentType: 'transactionMetric',
         rollupInterval: '1m',
       },
@@ -234,8 +252,8 @@ describe('serviceTransactionTypesRoute params', () => {
       serviceTransactionTypesRoute.params!.safeParse({
         path: { serviceName: 'opbeans-java' },
         query: {
-          start: '2021-01-01T00:00:00.000Z',
-          end: '2021-01-02T00:00:00.000Z',
+          start,
+          end,
           rollupInterval: '1m',
         },
       })
@@ -249,8 +267,8 @@ describe('servicesDetailedStatisticsRoute params', () => {
       query: {
         environment: 'production',
         kuery: '',
-        start: '2021-01-01T00:00:00.000Z',
-        end: '2021-01-02T00:00:00.000Z',
+        start,
+        end,
         documentType: 'transactionMetric',
         rollupInterval: '1m',
         bucketSizeInSeconds: '60',
@@ -271,8 +289,8 @@ describe('servicesDetailedStatisticsRoute params', () => {
         query: {
           environment: 'production',
           kuery: '',
-          start: '2021-01-01T00:00:00.000Z',
-          end: '2021-01-02T00:00:00.000Z',
+          start,
+          end,
           documentType: 'transactionMetric',
           rollupInterval: '1m',
           bucketSizeInSeconds: '60',
@@ -294,8 +312,8 @@ describe('servicesListRoute params', () => {
         useDurationSummary: 'true',
         environment: 'production',
         kuery: '',
-        start: '2021-01-01T00:00:00.000Z',
-        end: '2021-01-02T00:00:00.000Z',
+        start,
+        end,
       },
     });
 
@@ -316,8 +334,8 @@ describe('servicesListRoute params', () => {
         useDurationSummary: 'false',
         environment: 'production',
         kuery: '',
-        start: '2021-01-01T00:00:00.000Z',
-        end: '2021-01-02T00:00:00.000Z',
+        start,
+        end,
       },
     });
 
@@ -332,8 +350,8 @@ describe('servicesListRoute params', () => {
         rollupInterval: '1m',
         environment: 'production',
         kuery: '',
-        start: '2021-01-01T00:00:00.000Z',
-        end: '2021-01-02T00:00:00.000Z',
+        start,
+        end,
       },
     });
 
@@ -341,5 +359,61 @@ describe('servicesListRoute params', () => {
     if (result.success) {
       expect(result.data.query.useDurationSummary).toBe(false);
     }
+  });
+});
+
+describe('serviceHasSystemMetricsRoute params', () => {
+  it('accepts a valid path and range query', () => {
+    expectParseSuccess(
+      serviceHasSystemMetricsRoute.params!.safeParse({
+        path: { serviceName: 'opbeans-java' },
+        query: {
+          start,
+          end,
+          environment: 'production',
+        },
+      })
+    );
+  });
+
+  it('rejects a serviceName exceeding MAX_SERVICE_NAME_LENGTH', () => {
+    expectParseError(
+      serviceHasSystemMetricsRoute.params!.safeParse({
+        path: { serviceName: 'a'.repeat(1025) },
+        query: {
+          start,
+          end,
+          environment: 'production',
+        },
+      })
+    );
+  });
+});
+
+describe('serviceIngestionTypeRoute params', () => {
+  it('accepts a valid path and range query', () => {
+    expectParseSuccess(
+      serviceIngestionTypeRoute.params!.safeParse({
+        path: { serviceName: 'opbeans-java' },
+        query: {
+          start,
+          end,
+          environment: 'production',
+        },
+      })
+    );
+  });
+
+  it('rejects a serviceName exceeding MAX_SERVICE_NAME_LENGTH', () => {
+    expectParseError(
+      serviceIngestionTypeRoute.params!.safeParse({
+        path: { serviceName: 'a'.repeat(1025) },
+        query: {
+          start,
+          end,
+          environment: 'production',
+        },
+      })
+    );
   });
 });

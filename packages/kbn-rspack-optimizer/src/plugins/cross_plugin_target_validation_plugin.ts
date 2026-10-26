@@ -20,8 +20,8 @@ interface CrossPluginViolation {
 
 /**
  * Dist-only validation plugin that detects undeclared cross-plugin import
- * targets within the browser compilation graph. Uses the same
- * `normalModuleFactory` hook pattern as the legacy `BundleRemotesPlugin`.
+ * targets within the browser compilation graph via the `normalModuleFactory`
+ * hook.
  *
  * In the single compile, all in-repo cross-plugin imports resolve via normal
  * module resolution, so they succeed even without `extraPublicDirs`
@@ -33,7 +33,6 @@ interface CrossPluginViolation {
  * `__kbnBundles__`). This plugin surfaces those undeclared targets as
  * errors during dist builds so developers can fix them before shipping.
  *
- * @see packages/kbn-optimizer/src/worker/bundle_remotes_plugin.ts (legacy)
  * @see packages/kbn-rspack-optimizer/src/config/create_external_plugin_config.ts (external)
  */
 export class CrossPluginTargetValidationPlugin {

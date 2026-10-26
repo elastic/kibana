@@ -32,9 +32,13 @@ describe('ScheduleNotificationResponseActions', () => {
 
   const osqueryActionMock = {
     create: jest.fn().mockResolvedValue({}),
+    // Osquery resolves the stored saved query / pack to decide whether this run substitutes
+    // parameters, rather than trusting the copy persisted on the rule.
+    containsDynamicQueries: jest.fn().mockResolvedValue({ isDynamic: false }),
     stop: jest.fn(),
     logger: {
       error: jest.fn(),
+      warn: jest.fn(),
     } as unknown as Logger,
   };
 
@@ -84,9 +88,9 @@ describe('ScheduleNotificationResponseActions', () => {
       queries: [],
     };
 
-    it('should pass correct space id from alert.kibana.space_ids[0] when space awareness is enabled', () => {
+    it('should pass correct space id from alert.kibana.space_ids[0] when space awareness is enabled', async () => {
       const signals = getSignals();
-      scheduleNotificationResponseActions({
+      await scheduleNotificationResponseActions({
         signals,
         signalsCount: signals.length,
         responseActions: [
@@ -106,9 +110,9 @@ describe('ScheduleNotificationResponseActions', () => {
       );
     });
 
-    it('should log error if space awareness is enabled and space id is missing', () => {
+    it('should log error if space awareness is enabled and space id is missing', async () => {
       const signals = [{ ...getSignals()[0], [SPACE_IDS]: undefined }];
-      scheduleNotificationResponseActions({
+      await scheduleNotificationResponseActions({
         signals,
         signalsCount: signals.length,
         responseActions: [
@@ -145,10 +149,32 @@ describe('ScheduleNotificationResponseActions', () => {
       );
     });
 
-    it('should pass alertData when dynamic queries are present', () => {
+    it('does not reject when the osquery parameterization preflight fails', async () => {
+      const signals = getSignals();
+      osqueryActionMock.containsDynamicQueries.mockRejectedValueOnce(new Error('ES unavailable'));
+
+      await expect(
+        scheduleNotificationResponseActions({
+          signals,
+          signalsCount: signals.length,
+          responseActions: [
+            {
+              actionTypeId: ResponseActionTypesEnum['.osquery'],
+              params: { ...defaultQueryParams, queries: [{ id: 'query-1', query: simpleQuery }] },
+            } as RuleResponseAction,
+          ],
+        })
+      ).resolves.toEqual(expect.anything());
+
+      expect(osqueryActionMock.create).toHaveBeenCalled();
+    });
+
+    it('should pass alertData when dynamic queries are present', async () => {
       const dynamicQuery = 'select * from uptime where id = {{host.id}}';
       const signals = getSignals();
-      scheduleNotificationResponseActions({
+      // The parameterization verdict now comes from osquery resolving the stored content.
+      osqueryActionMock.containsDynamicQueries.mockResolvedValueOnce({ isDynamic: true });
+      await scheduleNotificationResponseActions({
         signals,
         signalsCount: signals.length,
         responseActions: [
@@ -329,6 +355,107 @@ describe('ScheduleNotificationResponseActions', () => {
           ruleName: 'rule-name-1',
         }
       );
+    });
+
+    describe('and command is kill-process with `kill_descendants`', () => {
+      const buildKillProcessResponseAction = (killDescendants?: boolean): RuleResponseAction => ({
+        actionTypeId: ResponseActionTypesEnum['.endpoint'],
+        params: {
+          command: 'kill-process',
+          comment: 'test process comment',
+          config: {
+            overwrite: true,
+            field: '',
+            ...(killDescendants === undefined ? {} : { kill_descendants: killDescendants }),
+          },
+        },
+      });
+
+      const getKillProcessParameters = (): Array<Record<string, unknown>> =>
+        (mockedResponseActionsClient.killProcess as jest.Mock).mock.calls.map(
+          ([requestBody]) => requestBody.parameters
+        );
+
+      afterEach(() => {
+        // @ts-expect-error write to readonly prop is ok
+        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
+          false;
+      });
+
+      it('should pass `kill_descendants` when the feature flag is enabled and it is `true`', async () => {
+        // @ts-expect-error write to readonly prop is ok
+        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
+          true;
+        const signals = getSignals();
+
+        await scheduleNotificationResponseActions({
+          signals,
+          signalsCount: signals.length,
+          responseActions: [buildKillProcessResponseAction(true)],
+        });
+
+        expect(mockedResponseActionsClient.killProcess).toHaveBeenCalledWith(
+          expect.objectContaining({
+            endpoint_ids: ['agent-id-1'],
+            parameters: { pid: 123, kill_descendants: true },
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should NOT pass `kill_descendants` when it is `false`', async () => {
+        // @ts-expect-error write to readonly prop is ok
+        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
+          true;
+        const signals = getSignals();
+
+        await scheduleNotificationResponseActions({
+          signals,
+          signalsCount: signals.length,
+          responseActions: [buildKillProcessResponseAction(false)],
+        });
+
+        expect(mockedResponseActionsClient.killProcess).toHaveBeenCalled();
+        getKillProcessParameters().forEach((parameters) => {
+          expect(parameters).not.toHaveProperty('kill_descendants');
+        });
+      });
+
+      it('should NOT pass `kill_descendants` when it is not defined', async () => {
+        // @ts-expect-error write to readonly prop is ok
+        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
+          true;
+        const signals = getSignals();
+
+        await scheduleNotificationResponseActions({
+          signals,
+          signalsCount: signals.length,
+          responseActions: [buildKillProcessResponseAction()],
+        });
+
+        expect(mockedResponseActionsClient.killProcess).toHaveBeenCalled();
+        getKillProcessParameters().forEach((parameters) => {
+          expect(parameters).not.toHaveProperty('kill_descendants');
+        });
+      });
+
+      it('should NOT pass `kill_descendants` when the feature flag is disabled', async () => {
+        // @ts-expect-error write to readonly prop is ok
+        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
+          false;
+        const signals = getSignals();
+
+        await scheduleNotificationResponseActions({
+          signals,
+          signalsCount: signals.length,
+          responseActions: [buildKillProcessResponseAction(true)],
+        });
+
+        expect(mockedResponseActionsClient.killProcess).toHaveBeenCalled();
+        getKillProcessParameters().forEach((parameters) => {
+          expect(parameters).not.toHaveProperty('kill_descendants');
+        });
+      });
     });
 
     it('should handle endpoint runscript actions', async () => {

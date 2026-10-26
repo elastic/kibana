@@ -34,11 +34,11 @@ import type {
 import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deeplinks-security';
 import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
 import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
-import type { WorkplaceAIApp, DeepLinkId as WorkplaceAILink } from '@kbn/deeplinks-workplace-ai';
 import type { VectordbApp, DeepLinkId as VectordbLink } from '@kbn/deeplinks-vectordb';
 import type { DeepLinkId as AgentBuilderLink } from '@kbn/deeplinks-agent-builder';
 import type { DeepLinkId as ContextEngineLink } from '@kbn/deeplinks-context-engine';
 import type { AppId as WorkflowsApp, DeepLinkId as WorkflowsLink } from '@kbn/deeplinks-workflows';
+import type { DeepLinkId as EvalsLink } from '@kbn/deeplinks-evals';
 import type { KibanaProject } from '@kbn/projects-solutions-groups';
 import type { BadgeType } from '@kbn/ui-side-navigation';
 
@@ -60,7 +60,6 @@ export type AppId =
   | SecurityApp
   | FleetApp
   | SharedApp
-  | WorkplaceAIApp
   | VectordbApp
   | WorkflowsApp;
 
@@ -75,11 +74,11 @@ export type AppDeepLinkId =
   | SecurityLink
   | FleetLink
   | SharedLink
-  | WorkplaceAILink
   | VectordbLink
   | AgentBuilderLink
   | ContextEngineLink
-  | WorkflowsLink;
+  | WorkflowsLink
+  | EvalsLink;
 
 /** @public */
 export type CloudLinkId =
@@ -88,7 +87,8 @@ export type CloudLinkId =
   | 'billingAndSub'
   | 'deployment'
   | 'deployments'
-  | 'projects';
+  | 'projects'
+  | 'searchPower';
 
 export interface CloudURLs {
   baseUrl?: string;
@@ -98,6 +98,7 @@ export interface CloudURLs {
   projectsUrl?: string;
   performanceUrl?: string;
   usersAndRolesUrl?: string;
+  searchPowerUrl?: string;
 }
 
 export interface CloudLink {
@@ -111,7 +112,7 @@ export type CloudLinks = {
 
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
-export type RenderAs = 'home' | 'panelOpener';
+export type RenderAs = 'panelOpener';
 
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
@@ -178,8 +179,7 @@ interface ChromeNavigationNodeCommon
  */
 export interface ChromeProjectNavigationNode extends ChromeNavigationNodeCommon {
   /**
-   * Indicate if this is a special node
-   * - home - node should be rendered as the home link
+   * When `panelOpener`, this node opens a secondary panel instead of navigating.
    */
   renderAs?: RenderAs;
   /** App id or deeplink id */
@@ -195,7 +195,12 @@ export interface ChromeProjectNavigationNode extends ChromeNavigationNodeCommon 
   isExternalLink?: boolean;
 }
 
-/** @public */
+/**
+ * @deprecated Project breadcrumb overrides remain only for compatibility fallback back navigation.
+ * Declare hierarchy in the project navigation tree and pass explicit `back` configuration to
+ * `AppHeader` from `@kbn/app-header`.
+ * @public
+ */
 export interface ChromeSetProjectBreadcrumbsParams {
   absolute: boolean;
 }
@@ -238,10 +243,6 @@ export type RootNodeDefinition<
   ChildrenId extends string = Id
 > =
   | StandardNodeDefinition<LinkId, Id, ChildrenId>
-  | (NodeDefinitionCommon<LinkId, Id> & {
-      renderAs: 'home';
-      children?: never;
-    })
   | RootNodePanelOpenerDefinition<LinkId, Id, ChildrenId>;
 
 /**
@@ -292,6 +293,33 @@ export interface NavigationTreeDefinitionUI {
   id: SolutionId;
   body: Array<ChromeProjectNavigationNode>;
   footer?: Array<ChromeProjectNavigationNode>;
+}
+
+/** Chrome-owned popover row. Not a re-export of SecondaryMenuItem. */
+export interface ProjectNavigationLinkItem {
+  id: string;
+  href: string;
+  label: string;
+  badgeType?: BadgeType;
+  isExternal?: boolean;
+}
+
+/** One titled list inside a hover registration. */
+export interface ProjectNavigationLinkList {
+  /** Unique within the registration. Rendered ids are `${id}:${item.id}`. */
+  id: string;
+  title: string;
+  items$: Observable<readonly ProjectNavigationLinkItem[]>;
+}
+
+/**
+ * Everything one feature contributes to an existing deep link's hover popover. One per target.
+ * Chrome attaches this to primary and footer hover only, not More.
+ */
+export interface ProjectNavigationLinks {
+  id: string;
+  target: AppDeepLinkId;
+  lists: readonly ProjectNavigationLinkList[];
 }
 
 /**

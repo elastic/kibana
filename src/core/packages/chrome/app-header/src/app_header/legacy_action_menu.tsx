@@ -9,11 +9,9 @@
 
 import type { FC } from 'react';
 import React, { useLayoutEffect, useRef } from 'react';
-import type { UnmountCallback } from '@kbn/core-mount-utils-browser';
-import { useLegacyActionMenu } from './hooks/chrome';
+import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
 
-export const LegacyHeaderActionMenu: FC = () => {
-  const mount = useLegacyActionMenu();
+export const LegacyHeaderActionMenu: FC<{ mount: MountPoint }> = ({ mount }) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef = useRef<UnmountCallback | null>(null);
 

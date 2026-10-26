@@ -51,11 +51,28 @@ describe('FieldName', () => {
   });
 
   test('renders with a search highlight', () => {
-    render(<FieldName fieldName={'test.test.test'} fieldType={'number'} highlight="te" />);
+    const { container } = render(
+      <FieldName fieldName={'test.test.test'} fieldType={'number'} highlight="te" />
+    );
 
-    expect(screen.getByText('te').closest('mark')).toBeVisible();
-    expect(screen.getByText('st.test.test')).toBeVisible();
+    expect(
+      Array.from(container.querySelectorAll('mark')).map(({ textContent }) => textContent)
+    ).toEqual(['te', 'te', 'te']);
     expect(screen.getByText('Number')).toBeVisible();
+  });
+
+  test('renders with multiple search highlights', () => {
+    const { container } = render(
+      <FieldName
+        fieldName={'system.memory.usage'}
+        fieldType={'number'}
+        highlight={['memory', 'usage']}
+      />
+    );
+
+    expect(
+      Array.from(container.querySelectorAll('mark')).map(({ textContent }) => textContent)
+    ).toEqual(['memory', 'usage']);
   });
 
   test('renders when mapping is provided', () => {

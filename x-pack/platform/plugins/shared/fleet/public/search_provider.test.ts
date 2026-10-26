@@ -6,10 +6,12 @@
  */
 
 import { TestScheduler } from 'rxjs/testing';
-import { NEVER } from 'rxjs';
+import { NEVER, firstValueFrom, of } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { CustomIntegrationsSetup } from '@kbn/custom-integrations-plugin/public';
+
+import { allowedExperimentalValues } from '../common/experimental_features';
 
 import {
   createCustomIntegrationsSearchProvider,
@@ -17,6 +19,7 @@ import {
   toSearchResult,
 } from './search_provider';
 import type { GetPackagesResponse } from './types';
+import { ExperimentalFeaturesService } from './services/experimental_features';
 
 jest.mock('./hooks/use_request/epm', () => {
   return {
@@ -245,6 +248,7 @@ describe('Package search provider', () => {
 
   beforeEach(() => {
     setupMock = coreMock.createSetup();
+    ExperimentalFeaturesService.init(allowedExperimentalValues);
   });
 
   afterEach(() => {
@@ -630,6 +634,214 @@ describe('Package search provider', () => {
         });
 
         expect(sendGetPackages).toHaveBeenCalledTimes(1);
+      });
+
+      describe('collections', () => {
+        const makePackage = (name: string, title: string, extra: Record<string, unknown> = {}) =>
+          ({
+            description: title,
+            download: name,
+            id: name,
+            name,
+            path: name,
+            release: 'ga',
+            status: 'not_installed',
+            title,
+            version: '1.0.0',
+            ...extra,
+          } as GetPackagesResponse['items'][number]);
+
+        const packages = [
+          makePackage('aws', 'AWS', {
+            policy_templates: [
+              { name: 'cloudtrail', title: 'AWS CloudTrail' },
+              { name: 's3', title: 'Amazon S3' },
+              { name: 'ec2', title: 'Amazon EC2' },
+            ],
+          }),
+          makePackage('aws_logs', 'AWS Custom Logs'),
+          makePackage('aws_ec2_otel', 'AWS EC2 OpenTelemetry'),
+          makePackage('nginx', 'Nginx', {
+            group: 'nginx',
+            policy_templates: [
+              { name: 'metrics', title: 'Stub status metrics' },
+              { name: 'logs', title: 'Access and error logs' },
+            ],
+          }),
+          makePackage('nginx_ingress_controller', 'Nginx Ingress Controller', {
+            group: 'nginx',
+            policy_templates_behavior: 'individual_policies',
+            policy_templates: [
+              { name: 'access', title: 'Nginx access logs' },
+              { name: 'error', title: 'Nginx error logs' },
+            ],
+          }),
+          ...['One', 'Two', 'Three', 'Four', 'Five'].map((n) =>
+            makePackage(`kafka_${n.toLowerCase()}`, `Stream ${n}`, { group: 'kafka' })
+          ),
+          // A group with a single package is not a collection
+          makePackage('redis', 'Redis', { group: 'redis' }),
+          makePackage('sample', 'Sample'),
+        ];
+
+        // aws templates (3) + aws_logs, the otel variant is not counted
+        const awsResult = (meta: Record<string, string> = {}) => ({
+          id: 'aws-onboarding',
+          type: 'integration',
+          title: 'Amazon Web Services',
+          score: 80,
+          icon: 'logoAWS',
+          url: { path: '/app/onboarding/aws', prependBasePath: false },
+          meta: { trailingLabel: 'Collection of 4', ...meta },
+        });
+
+        const nginxResult = (meta: Record<string, string> = {}) =>
+          expect.objectContaining({
+            id: 'collection:nginx',
+            type: 'integration',
+            title: 'Nginx',
+            url: { path: '/app/integrations/browse?collection=nginx', prependBasePath: false },
+            meta: { trailingLabel: 'Collection of 2', ...meta },
+          });
+
+        const find = async ({
+          onboardingEnabled = true,
+          collectionTilesEnabled = true,
+          search,
+          maxResults = 100,
+        }: {
+          onboardingEnabled?: boolean;
+          collectionTilesEnabled?: boolean;
+          search: { term?: string; types?: string[] };
+          maxResults?: number;
+        }) => {
+          ExperimentalFeaturesService.init({
+            ...allowedExperimentalValues,
+            enableIntegrationCollectionTiles: collectionTilesEnabled,
+          });
+          const start = coreMock.createStart();
+          (start.featureFlags.getBooleanValue$ as jest.Mock).mockReturnValue(of(onboardingEnabled));
+          (start.application.getUrlForApp as jest.Mock).mockImplementation(
+            (app: string, options?: { path?: string }) => `/app/${app}${options?.path ?? ''}`
+          );
+          mockSendGetPackages.mockReturnValue(Promise.resolve({ data: { items: packages } }));
+          setupMock.getStartServices.mockResolvedValue([start, {}, {}] as any);
+
+          return firstValueFrom(
+            createPackageSearchProvider(setupMock).find(search, {
+              aborted$: NEVER,
+              maxResults,
+              preference: '',
+            })
+          );
+        };
+
+        const ids = (results: Array<{ id: string }>) => results.map((r) => r.id);
+
+        describe('AWS onboarding', () => {
+          test('flag off: keeps one result per AWS package and template', async () => {
+            const results = await find({ onboardingEnabled: false, search: { term: 'aws' } });
+
+            expect(ids(results)).toEqual(['aws', 'cloudtrail', 'aws_logs', 'aws_ec2_otel']);
+          });
+
+          test('flag on: a search for the collection returns it with its size and no subtitle', async () => {
+            expect(await find({ search: { term: 'aws' } })).toEqual([awsResult()]);
+          });
+
+          test('flag on: a search for a member service explains the match', async () => {
+            expect(await find({ search: { term: 'cloudtrail' } })).toEqual([
+              awsResult({
+                description: 'AWS CloudTrail is part of the Amazon Web Services collection',
+              }),
+            ]);
+          });
+
+          test('flag on: a search for a word of the collection title shows no subtitle', async () => {
+            expect(await find({ search: { term: 'amazon' } })).toEqual([awsResult()]);
+          });
+        });
+
+        describe('manifest group collections', () => {
+          test('a search for the group returns one collection and no member rows', async () => {
+            expect(await find({ search: { term: 'nginx' } })).toEqual([nginxResult()]);
+          });
+
+          test('a search for a member package explains the match', async () => {
+            expect(await find({ search: { term: 'ingress' } })).toEqual([
+              nginxResult({
+                description: 'Nginx Ingress Controller is part of the Nginx collection',
+              }),
+            ]);
+          });
+
+          test('a search for a policy template of a member package finds the collection', async () => {
+            expect(await find({ search: { term: 'stub status' } })).toEqual([nginxResult()]);
+          });
+
+          test('a search for the title of an individual_policies package finds the collection', async () => {
+            expect(await find({ search: { term: 'ingress controller' } })).toEqual([
+              nginxResult({
+                description: 'Nginx Ingress Controller is part of the Nginx collection',
+              }),
+            ]);
+          });
+
+          test('a search matching many members names the first three and counts the rest', async () => {
+            const [result] = await find({ search: { term: 'stream' } });
+
+            expect(result).toEqual(
+              expect.objectContaining({
+                id: 'collection:kafka',
+                meta: {
+                  trailingLabel: 'Collection of 5',
+                  description:
+                    'Stream One, Stream Two, Stream Three, and 2 more are part of the Kafka collection',
+                },
+              })
+            );
+          });
+
+          test('a group with a single package stays a regular result', async () => {
+            const results = await find({ search: { term: 'redis' } });
+
+            expect(ids(results)).toEqual(['redis']);
+          });
+
+          test('collection tiles disabled: keeps one result per package', async () => {
+            const results = await find({
+              collectionTilesEnabled: false,
+              search: { term: 'nginx' },
+            });
+
+            // `nginx_ingress_controller` is `individual_policies`: it is listed by its templates
+            expect(ids(results)).toEqual(['nginx', 'access', 'error']);
+          });
+        });
+
+        test('an unrelated search returns no collection', async () => {
+          const results = await find({ search: { term: 'sample' } });
+
+          expect(ids(results)).toEqual(['sample']);
+        });
+
+        test('listing all integrations returns each collection once, first', async () => {
+          const results = await find({ search: { types: ['integration'] } });
+
+          expect(ids(results)).toEqual([
+            'aws-onboarding',
+            'collection:nginx',
+            'collection:kafka',
+            'redis',
+            'sample',
+          ]);
+        });
+
+        test('collections do not use up maxResults', async () => {
+          const results = await find({ search: { types: ['integration'] }, maxResults: 3 });
+
+          expect(ids(results)).toEqual(['aws-onboarding', 'collection:nginx', 'collection:kafka']);
+        });
       });
     });
   });

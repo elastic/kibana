@@ -11,19 +11,28 @@ import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   Background,
+  ConnectionLineType,
   ReactFlow,
   ReactFlowProvider,
   SelectionMode,
   type CoordinateExtent,
   type Edge,
   type EdgeTypes,
+  type FinalConnectionState,
+  type HandleType,
+  type IsValidConnection,
   type Node,
   type NodeMouseHandler,
   type NodeSelectionChange,
   type NodeTypes,
+  type OnConnect,
+  type OnConnectEnd,
+  type OnConnectStart,
   type OnEdgesChange,
   type OnNodeDrag,
   type OnNodesChange,
+  type OnNodesDelete,
+  type OnReconnect,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
@@ -44,6 +53,7 @@ import { canvasEdgeTypes, canvasNodeTypes } from './registry';
 // selected or clicked. Module-level so the object/function identity stays stable
 // across renders.
 const NON_SELECTABLE_EDGE_OPTIONS = { selectable: false };
+const FIT_VIEW_OPTIONS = { padding: FIT_VIEW_PADDING } as const;
 const noop = () => {};
 
 export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
@@ -70,6 +80,60 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
     background: ${euiTheme.colors.borderBaseProminent};
     border-color: ${euiTheme.colors.borderBaseProminent};
   }
+
+  // Configured unit nodes: a plus while hovering a handle you can drag from,
+  // and a blue ring around every handle that can receive the line.
+  .react-flow__handle.streamsConnectionHandle {
+    width: 16px;
+    height: 16px;
+    background: ${euiTheme.colors.backgroundBasePlain};
+    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseProminent};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${euiTheme.colors.textParagraph};
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .react-flow__handle.streamsConnectionHandle.connectablestart.connectionindicator:hover::after {
+    content: '+';
+  }
+
+  .react-flow__handle.streamsConnectionHandle.streamsConnectionTarget,
+  .react-flow__handle.streamsConnectionHandle.valid {
+    z-index: 1;
+    background: ${euiTheme.colors.backgroundBasePlain};
+    border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+    box-shadow: 0 0 0 ${euiTheme.size.xs} ${euiTheme.colors.backgroundLightPrimary};
+  }
+
+  .react-flow__handle.streamsConnectionHandle.valid {
+    box-shadow: 0 0 0 ${euiTheme.size.s} ${euiTheme.colors.backgroundLightPrimary};
+  }
+
+  .react-flow__handle.streamsConnectionHandle.valid::after {
+    content: none;
+  }
+
+  // Unit connections can be pulled off a node. The grab cursor covers the line,
+  // and the invisible updater circles sit on the line just outside each handle.
+  .react-flow__edge.streamsUnitConnection {
+    cursor: grab;
+  }
+  .react-flow__edge.streamsUnitConnection.updating {
+    cursor: grabbing;
+  }
+
+  .react-flow__edges {
+    z-index: 1;
+  }
+  .react-flow__nodes {
+    z-index: 3;
+  }
+  .react-flow__edgelabel-renderer {
+    z-index: 2;
+  }
 `;
 
 /**
@@ -79,7 +143,8 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
  * rough estimate on the first render.
  */
 const getTranslateExtent = (nodes: Node[]): CoordinateExtent | undefined => {
-  if (nodes.length === 0) {
+  const visibleNodes = nodes.filter((node) => !node.hidden);
+  if (visibleNodes.length === 0) {
     return undefined;
   }
 
@@ -88,7 +153,7 @@ const getTranslateExtent = (nodes: Node[]): CoordinateExtent | undefined => {
   let maxX = -Infinity;
   let maxY = -Infinity;
 
-  for (const node of nodes) {
+  for (const node of visibleNodes) {
     const width = node.measured?.width ?? NODE_WIDTH_ESTIMATE;
     const height = node.measured?.height ?? NODE_HEIGHT_ESTIMATE;
     minX = Math.min(minX, node.position.x);
@@ -106,11 +171,31 @@ const getTranslateExtent = (nodes: Node[]): CoordinateExtent | undefined => {
 interface CanvasShellProps<NodeType extends Node, EdgeType extends Edge> {
   nodes: NodeType[];
   edges: EdgeType[];
-  /** Defaults to the shared registry; the mock canvas overrides with its own. */
   nodeTypes?: NodeTypes;
   edgeTypes?: EdgeTypes;
   onNodesChange?: OnNodesChange<NodeType>;
   onEdgesChange?: OnEdgesChange<EdgeType>;
+  onNodesDelete?: OnNodesDelete<NodeType>;
+  /** Keys that delete the selection. `null` turns deletion off. */
+  deleteKeyCode?: string | string[] | null;
+  onConnect?: OnConnect;
+  onConnectStart?: OnConnectStart;
+  onConnectEnd?: OnConnectEnd;
+  onReconnect?: OnReconnect<EdgeType>;
+  onReconnectEnd?: (
+    event: MouseEvent | TouchEvent,
+    edge: EdgeType,
+    handleType: HandleType,
+    connectionState: FinalConnectionState
+  ) => void;
+  isValidConnection?: IsValidConnection<EdgeType>;
+  connectionLineType?: ConnectionLineType;
+  connectionLineStyle?: React.CSSProperties;
+  /** How close a dragged line must be to a handle before it snaps. */
+  connectionRadius?: number;
+  /** How close a pointer must be to an edge end to pull that line off. */
+  reconnectRadius?: number;
+  edgesReconnectable?: boolean;
   onNodeClick?: NodeMouseHandler<NodeType>;
   onNodeContextMenu?: NodeMouseHandler<NodeType>;
   onNodeDragStart?: OnNodeDrag<NodeType>;
@@ -138,8 +223,8 @@ interface CanvasShellProps<NodeType extends Node, EdgeType extends Edge> {
 /**
  * Shared canvas shell owning the React Flow provider, container, common viewport
  * configuration (zoom bounds, trackpad panning, dotted grid), and the custom
- * zoom/fit controls. Both the classic and mock canvases render through this so
- * the control chrome and look-and-feel stay consistent.
+ * zoom/fit controls. Every canvas renders through this so the control chrome and
+ * look-and-feel stay consistent.
  */
 export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge = Edge>({
   nodes,
@@ -148,6 +233,19 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
   edgeTypes = canvasEdgeTypes,
   onNodesChange,
   onEdgesChange,
+  onNodesDelete,
+  deleteKeyCode,
+  onConnect,
+  onConnectStart,
+  onConnectEnd,
+  onReconnect,
+  onReconnectEnd,
+  isValidConnection,
+  connectionLineType = ConnectionLineType.SmoothStep,
+  connectionLineStyle,
+  connectionRadius = 24,
+  reconnectRadius = 6,
+  edgesReconnectable = false,
   onNodeClick,
   onNodeContextMenu,
   onNodeDragStart,
@@ -176,20 +274,23 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
         return;
       }
       const nodeElement = (event.target as HTMLElement).closest('.react-flow__node');
-      const focusedId = nodeElement?.getAttribute('data-id');
-      const focusVisible = nodeElement ? nodeElement.matches(':focus-visible') : false;
-      if (!focusedId || !focusVisible) {
+      const focusedNodeId = nodeElement?.getAttribute('data-id');
+      const nodeFocusVisible = nodeElement ? nodeElement.matches(':focus-visible') : false;
+
+      if (!focusedNodeId || !nodeFocusVisible) {
         return;
       }
-      const changes = nodes
-        .filter((node) => node.selected !== (node.id === focusedId))
+
+      const nodeChanges = nodes
+        .filter((node) => node.selected !== (node.id === focusedNodeId))
         .map<NodeSelectionChange>((node) => ({
           id: node.id,
           type: 'select',
-          selected: node.id === focusedId,
+          selected: node.id === focusedNodeId,
         }));
-      if (changes.length > 0) {
-        onNodesChange(changes);
+
+      if (nodeChanges.length > 0) {
+        onNodesChange(nodeChanges);
       }
     },
     [nodes, onNodesChange]
@@ -215,6 +316,19 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           edgeTypes={edgeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          onNodesDelete={onNodesDelete}
+          deleteKeyCode={deleteKeyCode}
+          onConnect={onConnect}
+          onConnectStart={onConnectStart}
+          onConnectEnd={onConnectEnd}
+          onReconnect={onReconnect}
+          onReconnectEnd={onReconnectEnd}
+          isValidConnection={isValidConnection}
+          connectionLineType={connectionLineType}
+          connectionLineStyle={connectionLineStyle}
+          connectionRadius={connectionRadius}
+          reconnectRadius={reconnectRadius}
+          edgesReconnectable={edgesReconnectable}
           onEdgeClick={noop}
           onNodeClick={onNodeClick}
           onNodeContextMenu={onNodeContextMenu}
@@ -228,7 +342,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           edgesFocusable={edgesFocusable}
           defaultEdgeOptions={NON_SELECTABLE_EDGE_OPTIONS}
           fitView
-          fitViewOptions={{ padding: FIT_VIEW_PADDING }}
+          fitViewOptions={FIT_VIEW_OPTIONS}
           minZoom={MIN_ZOOM}
           maxZoom={MAX_ZOOM}
           translateExtent={translateExtent}

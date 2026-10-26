@@ -7,136 +7,88 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  AS_CODE_DATA_VIEW_SPEC_TYPE,
-  AS_CODE_ESQL_DATA_SOURCE_TYPE,
-} from '@kbn/as-code-data-views-schema';
-import { ESQL_TYPE } from '@kbn/data-view-utils';
+import { toStoredTags } from '@kbn/as-code-shared-transforms';
+import type { DiscoverSessionApiData, DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { get } from 'lodash';
+import type { StoredDiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import { toStoredTab } from '../../../common/embeddable/transform_utils';
-import type {
-  DiscoverSessionApiData,
-  DiscoverSessionApiEsqlTab,
-  DiscoverSessionApiTab,
-} from '../schema';
-import { transformControlPanelsIn } from './transform_control_panels';
-import { transformVisContextIn } from './transform_vis_context';
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import type { DiscoverSessionInternalData } from '../internal_schema';
+import { serializeEsqlControls } from '../../../common/session/control_panels';
+import { getVisContextRequestData } from '../../../common/session/get_vis_context_request_data';
+import { toStoredSearchAndTableAttributes } from '../../../common/session/search_and_table_mapping';
+import { toStoredSessionSettings } from '../../../common/session/session_tab_mapping';
+import { toStoredTabTypeState } from '../../../common/session/tab_type_state';
+import { fromApiVisContext } from '../../../common/session/vis_context';
 
-const isEsqlTab = (tab: DiscoverSessionApiTab): tab is DiscoverSessionApiEsqlTab =>
-  tab.data_source.type === AS_CODE_ESQL_DATA_SOURCE_TYPE;
+interface StoredSessionTabWithReferences {
+  tab: DiscoverSessionAttributes['tabs'][number];
+  references: SavedObjectReference[];
+}
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+/** Assembles saved attributes and references from a validated API session without persisting it. */
+export const transformDiscoverSessionIn = (data: DiscoverSessionApiData): StoredDiscoverSession => {
+  const storedTabs = data.tabs.map((tab) => toStoredSessionTab(tab));
 
-/**
- * Extracts the ES|QL data view fingerprint from Lens attributes.
- */
-const extractEsqlFingerprint = (
-  attributes: Record<string, unknown>
-): { dataViewId: string; timeField?: string } | undefined => {
-  const layers = get(attributes, 'state.datasourceStates.textBased.layers');
-  if (!isRecord(layers)) return undefined;
+  return assembleStoredSession(data, storedTabs);
+};
 
-  const layerIndexes = new Set<string>();
+/** Preserves inline Data View IDs and uses them in the stored chart fingerprint. */
+export const transformInternalDiscoverSessionIn = (
+  data: DiscoverSessionInternalData
+): StoredDiscoverSession => {
+  const storedTabs = data.tabs.map((tab) => {
+    const { data_source: dataSource } = tab;
+    let inlineDataViewId: string | undefined;
 
-  for (const layer of Object.values(layers)) {
-    if (isRecord(layer) && typeof layer.index === 'string' && layer.index.length > 0) {
-      layerIndexes.add(layer.index);
+    if (dataSource.type === AS_CODE_DATA_VIEW_SPEC_TYPE) {
+      inlineDataViewId = dataSource.id;
     }
-  }
 
-  if (layerIndexes.size !== 1) return undefined;
+    return toStoredSessionTab(tab, inlineDataViewId);
+  });
 
-  const [dataViewId] = layerIndexes;
-  const adHocDataViews = get(attributes, 'state.adHocDataViews');
-
-  if (!isRecord(adHocDataViews)) return undefined;
-  const lensDataViewSpec = adHocDataViews[dataViewId];
-
-  if (!isRecord(lensDataViewSpec) || lensDataViewSpec.type !== ESQL_TYPE) {
-    return undefined;
-  }
-
-  return {
-    dataViewId,
-    ...(typeof lensDataViewSpec.timeFieldName === 'string' &&
-      lensDataViewSpec.timeFieldName !== '' && { timeField: lensDataViewSpec.timeFieldName }),
-  };
+  return assembleStoredSession(data, storedTabs);
 };
 
-const getVisContextRequestData = (tab: DiscoverSessionApiTab) => {
-  const esqlFingerprint = tab.vis_context
-    ? extractEsqlFingerprint(tab.vis_context.attributes)
-    : undefined;
-
-  if (esqlFingerprint) {
-    return {
-      dataViewId: esqlFingerprint.dataViewId,
-      ...(esqlFingerprint.timeField !== undefined && { timeField: esqlFingerprint.timeField }),
-      ...(tab.breakdown_field !== undefined &&
-        tab.breakdown_field !== '' && { breakdownField: tab.breakdown_field }),
-    };
-  }
-
-  const dataViewId =
-    tab.data_source.type !== AS_CODE_DATA_VIEW_SPEC_TYPE && 'ref_id' in tab.data_source
-      ? tab.data_source.ref_id
-      : undefined;
-  const timeField =
-    tab.data_source.type === AS_CODE_DATA_VIEW_SPEC_TYPE && 'time_field' in tab.data_source
-      ? tab.data_source.time_field
-      : undefined;
+/** Converts an API tab to saved attributes and references, including its chart and controls. */
+const toStoredSessionTab = (
+  tab: DiscoverSessionApiTab,
+  inlineDataViewId?: string
+): StoredSessionTabWithReferences => {
+  const { attributes, references } = toStoredSearchAndTableAttributes(tab, {
+    refNamePrefix: `tab_${tab.id}`,
+  });
+  const tabTypeState = toStoredTabTypeState(tab);
 
   return {
-    ...(dataViewId !== undefined && { dataViewId }),
-    ...(timeField !== undefined && { timeField }),
-    ...(!isEsqlTab(tab) &&
-      tab.chart_interval !== undefined && { timeInterval: tab.chart_interval }),
-    ...(tab.breakdown_field !== undefined &&
-      tab.breakdown_field !== '' && { breakdownField: tab.breakdown_field }),
-  };
-};
-
-export const transformDiscoverSessionIn = (
-  data: DiscoverSessionApiData
-): { attributes: DiscoverSessionAttributes; references: SavedObjectReference[] } => {
-  const references: SavedObjectReference[] = [];
-
-  const tabs: DiscoverSessionAttributes['tabs'] = data.tabs.map((tab) => {
-    const { state: tabAttributes, references: tabReferences } = toStoredTab(tab, {
-      refNamePrefix: `tab_${tab.id}`,
-    });
-
-    references.push(...tabReferences);
-
-    return {
+    tab: {
       id: tab.id,
       label: tab.label,
       attributes: {
-        ...tabAttributes,
-        hideChart: tab.hide_chart,
-        hideTable: tab.hide_table,
-        hideAggregatedPreview: tab.hide_aggregated_preview,
-        breakdownField: tab.breakdown_field,
-        chartInterval: tab.chart_interval,
-        timeRestore: tab.time_restore,
-        timeRange: tab.time_range,
-        refreshInterval: tab.refresh_interval,
-        visContext: transformVisContextIn(tab.vis_context, getVisContextRequestData(tab)),
-        controlGroupJson: transformControlPanelsIn(tab.control_panels),
-        usesAdHocDataView: tab.data_source.type === AS_CODE_DATA_VIEW_SPEC_TYPE,
+        ...attributes,
+        ...toStoredSessionSettings(tab),
+        visContext: fromApiVisContext(
+          tab.vis_context,
+          getVisContextRequestData(tab, inlineDataViewId)
+        ),
+        controlGroupJson: serializeEsqlControls(tab.control_panels),
+        ...(tabTypeState !== undefined && { tabTypeState }),
       },
-    };
-  });
-
-  return {
-    attributes: {
-      title: data.title,
-      description: data.description,
-      tabs,
     },
     references,
+  };
+};
+
+/** Combines the converted tabs with session metadata, placing tag references before tab references. */
+const assembleStoredSession = (
+  { title, description, tags }: Pick<DiscoverSessionApiData, 'title' | 'description' | 'tags'>,
+  storedTabs: StoredSessionTabWithReferences[]
+): StoredDiscoverSession => {
+  const { references: tagReferences } = toStoredTags({ tags });
+
+  return {
+    attributes: { title, description, tabs: storedTabs.map(({ tab }) => tab) },
+    references: [...tagReferences, ...storedTabs.flatMap(({ references }) => references)],
   };
 };

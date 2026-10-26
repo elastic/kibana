@@ -101,7 +101,7 @@ describe('StatusDetails', () => {
       documentsDeleted: 7,
     });
 
-    expect(screen.getByText('Unable to retrieve')).toBeInTheDocument();
+    expect(screen.getByText('Unable to retrieve documents')).toBeInTheDocument();
     expect(screen.getByText(/7 Deleted/)).toBeInTheDocument();
   });
 

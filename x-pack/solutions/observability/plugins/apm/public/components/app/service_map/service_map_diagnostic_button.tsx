@@ -36,7 +36,7 @@ export function ServiceMapDiagnosticButton({ selection }: ServiceMapDiagnosticBu
           >
             <EuiButtonEmpty
               size="s"
-              iconType="unlink"
+              iconType="linkSlash"
               onClick={() => setIsOpen(true)}
               data-test-subj="serviceMapOpenDiagnosticButton"
               data-ebt-action="openDiagnosticTool"

@@ -8,12 +8,19 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
+import type { HostsPage } from '../../fixtures/page_objects/hosts_page';
 import {
   HOSTS,
   DATE_WITH_HOSTS_DATA_MIDPOINT,
   KPI_RENDER_TIMEOUT,
   KPI_METRICS,
 } from '../../fixtures/constants';
+
+const expectKnownHostsVisible = async (hostsPage: HostsPage) => {
+  for (const { hostName } of HOSTS) {
+    await expect(hostsPage.getHostRow(hostName)).toBeVisible();
+  }
+};
 
 test.describe(
   'Hosts Page - Time Drift',
@@ -31,8 +38,6 @@ test.describe(
       pageObjects: { hostsPage },
       page,
     }) => {
-      test.setTimeout(180_000);
-
       await test.step('install clock and navigate with a relative range covering the data', async () => {
         await browserAuth.loginAsViewer();
         // Freeze browser Date.now() at the midpoint of the pre-ingested data
@@ -41,12 +46,13 @@ test.describe(
         await hostsPage.goToPageWithRelativeRange({
           rangeFrom: 'now-15m',
           rangeTo: 'now',
+          hostNames: HOSTS.map(({ hostName }) => hostName),
           preferredSchema: 'ecs',
         });
       });
 
       await test.step('all hosts and KPIs render with data', async () => {
-        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+        await expectKnownHostsVisible(hostsPage);
         await hostsPage.waitForHostKPIChartsToLoad(KPI_METRICS, KPI_RENDER_TIMEOUT);
         for (const metric of KPI_METRICS) {
           // Non-empty and not the regression symptom 'N/A'.
@@ -64,7 +70,7 @@ test.describe(
       });
 
       await test.step('table still has data and KPIs never show N/A', async () => {
-        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+        await expectKnownHostsVisible(hostsPage);
         await hostsPage.waitForHostKPIChartsToLoad(KPI_METRICS, KPI_RENDER_TIMEOUT);
         for (const metric of KPI_METRICS) {
           await expect(hostsPage.getHostKPIChartValueLocator(metric)).toHaveAttribute(
@@ -80,20 +86,19 @@ test.describe(
       pageObjects: { hostsPage },
       page,
     }) => {
-      test.setTimeout(180_000);
-
       await test.step('install clock and navigate with a relative range covering the data', async () => {
         await browserAuth.loginAsViewer();
         await page.clock.install({ time: new Date(DATE_WITH_HOSTS_DATA_MIDPOINT) });
         await hostsPage.goToPageWithRelativeRange({
           rangeFrom: 'now-15m',
           rangeTo: 'now',
+          hostNames: HOSTS.map(({ hostName }) => hostName),
           preferredSchema: 'ecs',
         });
       });
 
       await test.step('initial state has data', async () => {
-        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+        await expectKnownHostsVisible(hostsPage);
         await hostsPage.waitForHostKPIChartsToLoad(KPI_METRICS, KPI_RENDER_TIMEOUT);
       });
 
@@ -106,7 +111,7 @@ test.describe(
         for (const step of driftSteps) {
           await page.clock.fastForward(step);
           await hostsPage.clickRefresh();
-          await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+          await expectKnownHostsVisible(hostsPage);
           const snapshot = await hostsPage.getKPIValuesSnapshot(KPI_RENDER_TIMEOUT);
           for (const metric of KPI_METRICS) {
             expect(snapshot[metric]).not.toBe('N/A');

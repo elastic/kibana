@@ -28,12 +28,12 @@ import type {
   GetConfigurationFindRequest,
 } from '../../../common/types/api';
 import {
-  ConfigurationPatchRequestRt,
-  ConfigurationRequestRt,
-  GetConfigurationFindRequestRt,
-  FindActionConnectorResponseRt,
+  ConfigurationPatchRequestSchema,
+  ConfigurationRequestSchema,
+  GetConfigurationFindRequestSchema,
+  FindActionConnectorResponseSchema,
 } from '../../../common/types/api';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 import {
   MAX_CONCURRENT_SEARCHES,
   MAX_SUPPORTED_CONNECTORS_RETURNED,
@@ -48,7 +48,7 @@ import { combineAuthorizedAndOwnerFilter, transformTemplateCustomFields } from '
 import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
-import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
+import { ConfigurationSchema, ConfigurationsSchema } from '../../../common/types/domain';
 import {
   validateDuplicatedKeysInRequest,
   validateDuplicatedObservableTypesInRequest,
@@ -58,6 +58,8 @@ import {
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import { OWNER_INFO } from '../../../common/constants/owners';
+import type { Owner } from '../../../common/constants/types';
 import { ensureGlobalFieldDefinitions } from './ensure_field_definitions';
 
 /**
@@ -197,7 +199,7 @@ export async function get(
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(GetConfigurationFindRequestRt)(params);
+    const queryParams = decodeWithExcessOrThrowZod(GetConfigurationFindRequestSchema)(params);
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findConfigurations);
@@ -245,6 +247,7 @@ export async function get(
         return {
           ...caseConfigureWithoutConnector,
           connector,
+          extractObservables: caseConfigureWithoutConnector.extractObservables,
           mappings: mappings != null ? mappings.mappings : [],
           version: configuration.version ?? '',
           error,
@@ -253,7 +256,7 @@ export async function get(
       }
     );
 
-    return decodeOrThrow(ConfigurationsRt)(configurations);
+    return decodeOrThrowZod(ConfigurationsSchema)(configurations);
   } catch (error) {
     throw createCaseError({ message: `Failed to get case configure: ${error}`, error, logger });
   }
@@ -273,7 +276,7 @@ export async function getConnectors({
       .filter((action) => isConnectorSupported(action, actionTypes))
       .slice(0, MAX_SUPPORTED_CONNECTORS_RETURNED);
 
-    return decodeOrThrow(FindActionConnectorResponseRt)(res);
+    return decodeOrThrowZod(FindActionConnectorResponseSchema)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to get connectors: ${error}`, error, logger });
   }
@@ -305,7 +308,7 @@ export async function update(
   } = clientArgs;
 
   try {
-    const request = decodeWithExcessOrThrow(ConfigurationPatchRequestRt)(req);
+    const request = decodeWithExcessOrThrowZod(ConfigurationPatchRequestSchema)(req);
 
     validateDuplicatedKeysInRequest({
       requestFields: request.customFields,
@@ -328,10 +331,15 @@ export async function update(
       originalCustomFields: configuration.attributes.customFields,
     });
 
-    const updatedTemplates = transformTemplateCustomFields({
-      templates,
-      customFields: request.customFields,
-    });
+    // Templates are only rewritten when the patch touches them or the custom fields they mirror;
+    // otherwise unrelated patches (e.g. workflow tags only) would wipe the stored templates.
+    const updatedTemplates =
+      templates === undefined && request.customFields === undefined
+        ? undefined
+        : transformTemplateCustomFields({
+            templates: templates ?? configuration.attributes.templates,
+            customFields: request.customFields,
+          });
 
     await validateTemplates({
       templates: updatedTemplates,
@@ -389,6 +397,24 @@ export async function update(
           }`;
     }
 
+    // Linked field definitions are ensured BEFORE the configuration is persisted so a
+    // configured v1 custom field can never become active without its v2 definition; a
+    // linkage failure fails the whole update (addendum A1). Runs regardless of the
+    // templates feature flag — the definition substrate must stay consistent either way.
+    // Skipped entirely when the patch omits customFields: the pre-patch set is already
+    // linked (a no-op), and re-running it would re-validate every existing link on writes
+    // that never touch custom fields (e.g. a connector-only patch) — a link that's since
+    // gone stale (imported duplicate legacyKey, etc.) would then block an unrelated edit.
+    if (request.customFields !== undefined) {
+      await ensureGlobalFieldDefinitions({
+        owner: configuration.attributes.owner,
+        spaceId: clientArgs.spaceId,
+        customFields: request.customFields,
+        fieldDefinitionsService,
+        logger,
+      });
+    }
+
     const patch = await caseConfigureService.patch({
       unsecuredSavedObjectsClient,
       configurationId: configuration.id,
@@ -402,29 +428,22 @@ export async function update(
       originalConfiguration: configuration,
     });
 
-    if (clientArgs.config.templates.enabled) {
-      // Mirror new custom fields into global field definitions. Uses the effective post-patch set
-      // so a patch that omits customFields falls back to the existing configuration's fields
-      // (all names will already exist → cheap no-op). Non-fatal: logged and swallowed.
-      await ensureGlobalFieldDefinitions({
-        owner: configuration.attributes.owner,
-        customFields: request.customFields ?? configuration.attributes.customFields,
-        fieldDefinitionsService,
-        logger,
-      });
-    }
-
-    const res = {
+    const merged = {
       ...configuration.attributes,
       ...patch.attributes,
+    };
+
+    const res = {
+      ...merged,
       connector: patch.attributes.connector ?? configuration.attributes.connector,
+      extractObservables: merged.extractObservables,
       mappings,
       version: patch.version ?? '',
       error,
       id: patch.id,
     };
 
-    return decodeOrThrow(ConfigurationRt)(res);
+    return decodeOrThrowZod(ConfigurationSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get patch configure in route: ${error}`,
@@ -448,8 +467,9 @@ export async function create(
   } = clientArgs;
 
   try {
-    const validatedConfigurationRequest =
-      decodeWithExcessOrThrow(ConfigurationRequestRt)(configRequest);
+    const validatedConfigurationRequest = decodeWithExcessOrThrowZod(ConfigurationRequestSchema)(
+      configRequest
+    );
 
     validateDuplicatedKeysInRequest({
       requestFields: validatedConfigurationRequest.customFields,
@@ -496,6 +516,28 @@ export async function create(
       }))
     );
 
+    const savedObjectID = SavedObjectsUtils.generateId();
+
+    await authorization.ensureAuthorized({
+      operation: Operations.createConfiguration,
+      entities: [{ owner: validatedConfigurationRequest.owner, id: savedObjectID }],
+    });
+
+    // Ensure linked field definitions BEFORE deleting any existing configuration and BEFORE
+    // persisting the new one (addendum A1): a linkage failure (definition cap reached, malformed
+    // link, failed definition write) is fatal to the create, and running it after the deletion
+    // below would destroy the caller's active configuration when the replacement is rejected.
+    // An orphaned inactive definition when a later delete/post fails is an accepted trade-off —
+    // strictly safer than losing the active configuration. Must stay after ensureAuthorized
+    // above (it performs unsecured SO writes). Runs regardless of the templates feature flag.
+    await ensureGlobalFieldDefinitions({
+      owner: validatedConfigurationRequest.owner,
+      spaceId: clientArgs.spaceId,
+      customFields: validatedConfigurationRequest.customFields ?? [],
+      fieldDefinitionsService,
+      logger,
+    });
+
     if (myCaseConfigure.saved_objects.length > 0) {
       const deleteConfigurationMapper = async (c: SavedObject<ConfigurationAttributes>) =>
         caseConfigureService.delete({
@@ -504,18 +546,11 @@ export async function create(
           refresh: false,
         });
 
-      // Ensuring we don't too many concurrent deletions running.
+      // Ensuring we don't have too many concurrent deletions running.
       await pMap(myCaseConfigure.saved_objects, deleteConfigurationMapper, {
         concurrency: MAX_CONCURRENT_SEARCHES,
       });
     }
-
-    const savedObjectID = SavedObjectsUtils.generateId();
-
-    await authorization.ensureAuthorized({
-      operation: Operations.createConfiguration,
-      entities: [{ owner: validatedConfigurationRequest.owner, id: savedObjectID }],
-    });
 
     const creationDate = new Date().toISOString();
     let mappings: ConnectorMappings = [];
@@ -546,19 +581,15 @@ export async function create(
         updated_at: null,
         updated_by: null,
         observableTypes: validatedConfigurationRequest.observableTypes ?? [],
+        extractObservables:
+          validatedConfigurationRequest.extractObservables ??
+          OWNER_INFO[validatedConfigurationRequest.owner as Owner]?.features.observables
+            .autoExtractDefault ??
+          false,
+        workflowTags: validatedConfigurationRequest.workflowTags ?? [],
       },
       id: savedObjectID,
     });
-
-    if (clientArgs.config.templates.enabled) {
-      // Mirror new custom fields into global field definitions. Non-fatal: logged and swallowed.
-      await ensureGlobalFieldDefinitions({
-        owner: validatedConfigurationRequest.owner,
-        customFields: validatedConfigurationRequest.customFields ?? [],
-        fieldDefinitionsService,
-        logger,
-      });
-    }
 
     const res = {
       ...post.attributes,
@@ -570,7 +601,7 @@ export async function create(
       id: post.id,
     };
 
-    return decodeOrThrow(ConfigurationRt)(res);
+    return decodeOrThrowZod(ConfigurationSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to create case configuration: ${error}`,

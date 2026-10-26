@@ -51,6 +51,8 @@ import {
   createEventIngestedPipeline,
   getIngestPipelineName,
 } from '../utils/event_ingested_pipeline';
+import { riskScoreSeriesEntityBatchSize } from '../utils/elasticsearch_terms_limits';
+import { toScoreTypeFilter } from './score_type_filter';
 
 interface RiskScoringDataClientOpts {
   logger: Logger;
@@ -128,46 +130,56 @@ export class RiskScoreDataClient {
     const idFieldPath = `${entityType}.risk.id_field`;
     const idValuePath = `${entityType}.risk.id_value`;
 
-    const response = await esClient.search({
-      index,
-      size: 0,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      query: {
-        bool: {
-          filter: [
-            { term: { [idFieldPath]: 'entity.id' } },
-            { terms: { [idValuePath]: [...entityIds] } },
-            { range: { '@timestamp': range } },
-          ],
+    // Each request nests a daily date_histogram under a per-entity terms agg, so its
+    // bucket count grows as `entities × days-in-lookback`. Batch entities small enough
+    // that a single request stays under both the terms-query limit and Elasticsearch's
+    // `search.max_buckets` ceiling; larger lookbacks shrink the batch further.
+    const batchSize = riskScoreSeriesEntityBatchSize(range);
+
+    for (let offset = 0; offset < entityIds.length; offset += batchSize) {
+      const batch = entityIds.slice(offset, offset + batchSize);
+
+      const response = await esClient.search({
+        index,
+        size: 0,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        query: {
+          bool: {
+            filter: [
+              { term: { [idFieldPath]: 'entity.id' } },
+              { terms: { [idValuePath]: [...batch] } },
+              { range: { '@timestamp': range } },
+            ],
+          },
         },
-      },
-      aggs: {
-        by_entity: {
-          terms: { field: idValuePath, size: entityIds.length },
-          aggs: {
-            scores_over_time: {
-              date_histogram: { field: '@timestamp', calendar_interval: 'day' },
-              aggs: {
-                avg_score: { avg: { field: `${entityType}.risk.calculated_score_norm` } },
+        aggs: {
+          by_entity: {
+            terms: { field: idValuePath, size: batch.length },
+            aggs: {
+              scores_over_time: {
+                date_histogram: { field: '@timestamp', calendar_interval: 'day' },
+                aggs: {
+                  avg_score: { avg: { field: `${entityType}.risk.calculated_score_norm` } },
+                },
               },
             },
           },
         },
-      },
-    });
+      });
 
-    const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
-      []) as Array<{
-      key: string;
-      scores_over_time: { buckets: Array<{ avg_score: { value: number | null } }> };
-    }>;
+      const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
+        []) as Array<{
+        key: string;
+        scores_over_time: { buckets: Array<{ avg_score: { value: number | null } }> };
+      }>;
 
-    for (const bucket of buckets) {
-      const scores = bucket.scores_over_time.buckets
-        .map((b) => b.avg_score.value)
-        .filter((v): v is number => v != null);
-      result.set(bucket.key, scores);
+      for (const bucket of buckets) {
+        const scores = bucket.scores_over_time.buckets
+          .map((b) => b.avg_score.value)
+          .filter((v): v is number => v != null);
+        result.set(bucket.key, scores);
+      }
     }
 
     return result;
@@ -179,6 +191,12 @@ export class RiskScoreDataClient {
    * executes a `date_histogram` and returns, per bucket, the maximum-scoring
    * document so each entry keeps a real document `@timestamp` (the point-in-time
    * contributions flow refetches by exact timestamp).
+   *
+   * TODO: normalized scores written before the alert sample size dropped from 10,000 to 500
+   * (see DEFAULT_ALERT_SAMPLE_SIZE) are on the old scale, about 2.8% lower than the same alerts
+   * score today, so history shows a step at the upgrade. Either rescale older entries here
+   * (score documents don't record which normalizer produced them, so that needs a cutover
+   * timestamp or a new field on the score document) or mark the change in the history UI.
    */
   public getRiskScoreHistory = async (params: {
     entityType: string;
@@ -582,33 +600,6 @@ const toDateHistogramInterval = (interval: {
     ? { calendar_interval: calendarExpression }
     : { fixed_interval: `${interval.value}${interval.unit}` };
 };
-
-const toScoreTypeFilter = (
-  riskPath: string,
-  scoreType: string | undefined
-): Array<Record<string, unknown>> => {
-  if (scoreType === undefined) {
-    return [];
-  }
-
-  // documents written before score_type was introduced have no field — treat as base
-  if (scoreType === 'base') {
-    return [
-      {
-        bool: {
-          should: [
-            { term: { [`${riskPath}.score_type`]: 'base' } },
-            { bool: { must_not: { exists: { field: `${riskPath}.score_type` } } } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-    ];
-  }
-
-  return [{ term: { [`${riskPath}.score_type`]: scoreType } }];
-};
-
 const getRiskFromSource = (
   source: RiskScoreTimeSeriesSource,
   entityType: string

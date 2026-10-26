@@ -11,7 +11,7 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
+  EuiIllustration,
   EuiText,
   EuiTitle,
   EuiButton,
@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EsQuerySnapshot } from '@kbn/alerting-types';
 import { css } from '@emotion/react';
 import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
-import icon from '../assets/illustration_product_no_results_magnifying_glass.svg';
+import { notFound } from '@elastic/eui-illustrations';
 import { AlertsQueryInspector } from './alerts_query_inspector';
 import {
   ALERTS_TABLE_TITLE,
@@ -74,7 +74,7 @@ export const EmptyState: React.FC<
           <EuiTitle>
             <h3>
               <FormattedMessage
-                id="xpack.triggersActionsUI.error.title"
+                id="xpack.responseOpsAlertsTable.error.title"
                 defaultMessage={'Cannot display alerts'}
               />
             </h3>
@@ -100,10 +100,17 @@ export const EmptyState: React.FC<
           <EuiFlexGroup justifyContent="flexStart">
             <EuiFlexItem grow={false}>
               <EuiButton onClick={onReset} size="m" data-test-subj="resetButton">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.empty.resetButton"
-                  defaultMessage={fieldWithSortingError ? 'Reset sort' : 'Reset'}
-                />
+                {fieldWithSortingError ? (
+                  <FormattedMessage
+                    id="xpack.responseOpsAlertsTable.empty.resetSortButton"
+                    defaultMessage="Reset sort"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.responseOpsAlertsTable.empty.resetButton"
+                    defaultMessage="Reset"
+                  />
+                )}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -124,7 +131,7 @@ export const EmptyState: React.FC<
                 messageTitle
               ) : (
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.empty.title"
+                  id="xpack.responseOpsAlertsTable.empty.title"
                   defaultMessage={'No results match your search criteria'}
                 />
               )}
@@ -135,7 +142,7 @@ export const EmptyState: React.FC<
               messageBody
             ) : (
               <FormattedMessage
-                id="xpack.triggersActionsUI.empty.description"
+                id="xpack.responseOpsAlertsTable.empty.description"
                 defaultMessage={
                   'Try searching over a longer period of time or modifying your search'
                 }
@@ -183,10 +190,15 @@ export const EmptyState: React.FC<
                 hasShadow={false}
                 css={error ? undefined : panelStyle}
               >
-                <EuiFlexGroup alignItems={variant === 'transparent' ? 'center' : 'flexStart'}>
+                <EuiFlexGroup alignItems="center">
                   <EuiFlexItem>{error ? renderErrorState() : renderEmptyState()}</EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiImage css={{ width: 200, height: 148 }} size="200" alt="" url={icon} />
+                    <EuiIllustration
+                      type={notFound}
+                      alt=""
+                      fullWidth={false}
+                      style={{ maxInlineSize: 160 }}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPanel>

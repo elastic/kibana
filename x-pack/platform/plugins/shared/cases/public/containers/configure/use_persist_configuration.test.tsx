@@ -18,6 +18,8 @@ import {
   observableTypesMock,
   templatesConfigurationMock,
 } from '../mock';
+import { casesConfigurationsMock } from './mock';
+import type { CasesConfigurationUI } from '../types';
 import { TestProviders, createTestQueryClient } from '../../common/mock';
 import React from 'react';
 
@@ -190,6 +192,46 @@ describe('usePersistConfiguration', () => {
     });
   });
 
+  it('includes extractObservables in postCaseConfigure payload', async () => {
+    const spyPost = jest.spyOn(api, 'postCaseConfigure');
+
+    const { result } = renderHook(() => usePersistConfiguration(), {
+      wrapper: TestProviders,
+    });
+
+    act(() => {
+      result.current.mutate({ ...request, extractObservables: false });
+    });
+
+    await waitFor(() => {
+      expect(spyPost).toHaveBeenCalledWith(expect.objectContaining({ extractObservables: false }));
+    });
+  });
+
+  it('includes extractObservables in patchCaseConfigure payload', async () => {
+    const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
+
+    const { result } = renderHook(() => usePersistConfiguration(), {
+      wrapper: TestProviders,
+    });
+
+    act(() => {
+      result.current.mutate({
+        ...request,
+        id: 'test-id',
+        version: 'test-version',
+        extractObservables: false,
+      });
+    });
+
+    await waitFor(() => {
+      expect(spyPatch).toHaveBeenCalledWith(
+        'test-id',
+        expect.objectContaining({ extractObservables: false })
+      );
+    });
+  });
+
   it('calls patchCaseConfigure without observableTypes if it is not specified', async () => {
     const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
 
@@ -217,6 +259,79 @@ describe('usePersistConfiguration', () => {
         templates: templatesConfigurationMock,
         version: 'test-version',
       });
+    });
+  });
+
+  it('sends workflowTags to patchCaseConfigure', async () => {
+    const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
+
+    const { result } = renderHook(() => usePersistConfiguration(), {
+      wrapper: TestProviders,
+    });
+
+    act(() => {
+      result.current.mutate({
+        ...request,
+        workflowTags: ['soc-triage'],
+        id: 'test-id',
+        version: 'test-version',
+      });
+    });
+
+    await waitFor(() => {
+      expect(spyPatch).toHaveBeenCalledWith(
+        'test-id',
+        expect.objectContaining({ workflowTags: ['soc-triage'] })
+      );
+    });
+  });
+
+  it('replaces the cached configuration for the saved owner with the saved configuration', async () => {
+    const queryClient = createTestQueryClient();
+    const otherOwnerConfiguration = { ...casesConfigurationsMock, owner: 'cases', id: 'other' };
+    const staleConfiguration = { ...casesConfigurationsMock, version: 'stale-version' };
+    const savedConfiguration = {
+      ...casesConfigurationsMock,
+      version: 'saved-version',
+      workflowTags: ['soc-triage'],
+    };
+    queryClient.setQueryData(casesQueriesKeys.configuration({}), [
+      otherOwnerConfiguration,
+      staleConfiguration,
+    ]);
+    jest.spyOn(api, 'patchCaseConfigure').mockResolvedValue(savedConfiguration);
+
+    const { result } = renderHook(() => usePersistConfiguration(), {
+      wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
+    });
+
+    act(() => {
+      result.current.mutate({ ...request, id: 'test-id', version: 'stale-version' });
+    });
+
+    await waitFor(() => {
+      expect(
+        queryClient.getQueryData<CasesConfigurationUI[]>(casesQueriesKeys.configuration({}))
+      ).toEqual([otherOwnerConfiguration, savedConfiguration]);
+    });
+  });
+
+  it('adds the saved configuration to an empty cache', async () => {
+    const queryClient = createTestQueryClient();
+    jest.spyOn(api, 'postCaseConfigure').mockResolvedValue(casesConfigurationsMock);
+
+    const { result } = renderHook(() => usePersistConfiguration(), {
+      wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
+    });
+
+    act(() => {
+      result.current.mutate(request);
+    });
+
+    await waitFor(() => {
+      expect(
+        queryClient.getQueryData<CasesConfigurationUI[]>(casesQueriesKeys.configuration({}))
+      ).toEqual([casesConfigurationsMock]);
     });
   });
 

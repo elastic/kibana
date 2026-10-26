@@ -9,6 +9,8 @@ export const CLOSE_ALERTS_CHECKBOX = '[data-test-subj="bulkCloseAlertOnAddExcept
 
 export const CLOSE_SINGLE_ALERT_CHECKBOX = '[data-test-subj="closeAlertOnAddExceptionCheckbox"]';
 
+export const CLOSE_ALERTS_REASON_SELECT = '[data-test-subj="exceptionFlyoutCloseReasonSelect"]';
+
 export const CONFIRM_BTN = '[data-test-subj="addExceptionConfirmButton"]';
 
 export const ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN =
@@ -162,14 +164,13 @@ export const EXCEPTION_COMMENTS_ACCORDION_BTN = '[data-test-subj="exceptionItemC
 export const EXCEPTION_COMMENT_TEXT_AREA = '[data-test-subj="newExceptionItemCommentTextArea"]';
 
 // Shared Exception List Management Page
-export const MANAGE_EXCEPTION_CREATE_BUTTON_MENU =
-  '[data-test-subj="manageExceptionListCreateButton"]';
+export const MANAGE_EXCEPTION_MENU_DROPDOWN =
+  '[data-test-subj="manageExceptionListCreateButton-secondary-button"]';
 
-export const MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION =
+export const MANAGE_EXCEPTION_CREATE_ITEM =
   '[data-test-subj="manageExceptionListCreateExceptionButton"]';
 
-export const MANAGE_EXCEPTION_CREATE_LIST_BUTTON =
-  '[data-test-subj="manageExceptionListCreateExceptionListButton"]';
+export const MANAGE_EXCEPTION_CREATE_LIST = '[data-test-subj="manageExceptionListCreateButton"]';
 
 export const RULE_ACTION_LINK_RULE_SWITCH = '[data-test-subj="ruleActionLinkRuleSwitch"]';
 
@@ -249,5 +250,11 @@ export const EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE =
   '[data-test-subj="exceptionItemCardHeaderActionItemdelete"]';
 
 export const EXECPTION_ITEM_CARD_HEADER_TITLE = '[data-test-subj="exceptionItemCardHeaderTitle"]';
+
+export const EXCEPTION_ITEM_DELETE_CONFIRM_MODAL =
+  '[data-test-subj="exceptionItemDeleteConfirmModal"]';
+
+export const EXCEPTION_ITEM_DELETE_CONFIRM_MODAL_CONFIRM_BTN =
+  '[data-test-subj="exceptionItemDeleteConfirmModal"] [data-test-subj="confirmModalConfirmButton"]';
 
 export const EMPTY_EXCEPTIONS_VIEWER = '[data-test-subj="emptyViewerState"]';

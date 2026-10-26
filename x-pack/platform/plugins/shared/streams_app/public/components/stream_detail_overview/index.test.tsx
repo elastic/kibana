@@ -16,7 +16,6 @@ import {
 
 const mockUseStreamDetail = jest.fn();
 const mockUseStreamsPrivileges = jest.fn();
-const mockUseSignificantEventsAvailability = jest.fn();
 
 jest.mock('../../hooks/use_stream_detail', () => ({
   useStreamDetail: () => mockUseStreamDetail(),
@@ -24,10 +23,6 @@ jest.mock('../../hooks/use_stream_detail', () => ({
 
 jest.mock('../../hooks/use_streams_privileges', () => ({
   useStreamsPrivileges: () => mockUseStreamsPrivileges(),
-}));
-
-jest.mock('../../hooks/significant_events/use_significant_events_availability', () => ({
-  useSignificantEventsAvailability: () => mockUseSignificantEventsAvailability(),
 }));
 
 jest.mock('./data_quality_card', () => ({
@@ -46,12 +41,6 @@ jest.mock('./import_export_panel', () => ({
   ImportExportPanel: () => <div data-test-subj="mockImportExportPanel">Import & export</div>,
 }));
 
-jest.mock('./knowledge_indicators_panel', () => ({
-  KnowledgeIndicatorsPanel: () => (
-    <div data-test-subj="mockKnowledgeIndicatorsPanel">Knowledge indicators</div>
-  ),
-}));
-
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('StreamOverview', () => {
@@ -60,12 +49,7 @@ describe('StreamOverview', () => {
     mockUseStreamsPrivileges.mockReturnValue({
       features: {
         contentPacks: { enabled: false },
-        significantEvents: { available: false },
       },
-      isLoading: false,
-    });
-    mockUseSignificantEventsAvailability.mockReturnValue({
-      availability: { available: false },
       isLoading: false,
     });
   });
@@ -89,109 +73,6 @@ describe('StreamOverview', () => {
 
     expect(screen.getByTestId('mockIngestRateChart')).toBeInTheDocument();
     expect(screen.getByText('Dataset quality')).toBeInTheDocument();
-  });
-
-  it('renders knowledge indicators panel when significant events is available', () => {
-    mockUseStreamsPrivileges.mockReturnValue({
-      features: {
-        contentPacks: { enabled: false },
-        significantEvents: { available: true },
-      },
-      isLoading: false,
-    });
-    mockUseSignificantEventsAvailability.mockReturnValue({
-      availability: { available: true },
-      isLoading: false,
-    });
-    mockUseStreamDetail.mockReturnValue({
-      definition: createMockWiredStreamDefinition(),
-      refresh: jest.fn(),
-    });
-
-    renderWithI18n(<StreamOverview />);
-
-    expect(screen.getByTestId('mockKnowledgeIndicatorsPanel')).toBeInTheDocument();
-  });
-
-  it('does not render knowledge indicators panel when significant events is unavailable on the client', () => {
-    mockUseSignificantEventsAvailability.mockReturnValue({
-      availability: { available: true },
-      isLoading: false,
-    });
-    mockUseStreamDetail.mockReturnValue({
-      definition: createMockWiredStreamDefinition(),
-      refresh: jest.fn(),
-    });
-
-    renderWithI18n(<StreamOverview />);
-
-    expect(screen.queryByTestId('mockKnowledgeIndicatorsPanel')).not.toBeInTheDocument();
-  });
-
-  it('does not render knowledge indicators panel while privileges are loading', () => {
-    mockUseStreamsPrivileges.mockReturnValue({
-      features: {
-        contentPacks: { enabled: false },
-        significantEvents: { available: true },
-      },
-      isLoading: true,
-    });
-    mockUseSignificantEventsAvailability.mockReturnValue({
-      availability: { available: true },
-      isLoading: false,
-    });
-    mockUseStreamDetail.mockReturnValue({
-      definition: createMockWiredStreamDefinition(),
-      refresh: jest.fn(),
-    });
-
-    renderWithI18n(<StreamOverview />);
-
-    expect(screen.queryByTestId('mockKnowledgeIndicatorsPanel')).not.toBeInTheDocument();
-  });
-
-  it('does not render knowledge indicators panel while availability is loading', () => {
-    mockUseStreamsPrivileges.mockReturnValue({
-      features: {
-        contentPacks: { enabled: false },
-        significantEvents: { available: true },
-      },
-      isLoading: false,
-    });
-    mockUseSignificantEventsAvailability.mockReturnValue({
-      availability: undefined,
-      isLoading: true,
-    });
-    mockUseStreamDetail.mockReturnValue({
-      definition: createMockWiredStreamDefinition(),
-      refresh: jest.fn(),
-    });
-
-    renderWithI18n(<StreamOverview />);
-
-    expect(screen.queryByTestId('mockKnowledgeIndicatorsPanel')).not.toBeInTheDocument();
-  });
-
-  it('does not render knowledge indicators panel when significant events is unavailable', () => {
-    mockUseStreamsPrivileges.mockReturnValue({
-      features: {
-        contentPacks: { enabled: false },
-        significantEvents: { available: true },
-      },
-      isLoading: false,
-    });
-    mockUseSignificantEventsAvailability.mockReturnValue({
-      availability: { available: false, reason: 'feature_flag' },
-      isLoading: false,
-    });
-    mockUseStreamDetail.mockReturnValue({
-      definition: createMockWiredStreamDefinition(),
-      refresh: jest.fn(),
-    });
-
-    renderWithI18n(<StreamOverview />);
-
-    expect(screen.queryByTestId('mockKnowledgeIndicatorsPanel')).not.toBeInTheDocument();
   });
 
   it('renders import and export panel when content packs are enabled', () => {

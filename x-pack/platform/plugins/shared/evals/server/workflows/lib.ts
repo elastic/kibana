@@ -9,6 +9,7 @@ import os from 'os';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import {
   EVALS_EVALUATE_URL,
+  EVALS_ONLINE_SCORES_URL,
   EVALS_SCORES_URL,
   EVALS_DATASET_URL,
   EVALS_EXPERIMENTS_COMPARE_URL,
@@ -16,7 +17,10 @@ import {
 } from '@kbn/evals-common';
 import type {
   CompareExperimentsResponse,
+  Direction,
   EvaluateResponse,
+  IngestOnlineScoresRequestBodyInput,
+  IngestOnlineScoresResponse,
   IngestScoresRequestBody,
   IngestScoresResponse,
   Model,
@@ -99,6 +103,8 @@ export const runTask = async (
 export interface EvaluateTraceResult {
   results: EvaluatorResult[];
   errors: string[];
+  /** Whether any failure could succeed on a retry; unmet evidence is a property of the trace. */
+  hasRetriableErrors: boolean;
 }
 
 /** Grades a single trace against the configured evaluators via `POST /_evaluate`. */
@@ -135,6 +141,9 @@ export const evaluateTrace = async (
   const results = allResults
     .filter((result) => result.status === 'ok' && Array.isArray(result.scores))
     .map((result) => ({
+      // `evaluator` carries the judge model the route resolved from this evaluator's
+      // own `connector_id`, so scores are attributed per evaluator rather than to a
+      // single experiment-wide model.
       evaluator: result.evaluator,
       scores: (result.scores ?? []).map((score) => ({
         name: score.name,
@@ -142,20 +151,23 @@ export const evaluateTrace = async (
         label: score.label,
         explanation: score.explanation,
         metadata: score.metadata,
+        ...(score.direction ? { direction: score.direction } : {}),
       })),
     }));
 
-  const errors = allResults
-    .filter((result) => result.status === 'error')
-    .map((result) => {
-      const message = `Evaluator "${result.evaluator?.name ?? 'unknown'}" failed: ${
-        result.error?.message ?? 'unknown error'
-      }`;
-      runtime.logger.warn(message);
-      return message;
-    });
+  const failedResults = allResults.filter((result) => result.status === 'error');
+  const errors = failedResults.map((result) => {
+    const message = `Evaluator "${result.evaluator?.name ?? 'unknown'}" failed: ${
+      result.error?.message ?? 'unknown error'
+    }`;
+    runtime.logger.warn(message);
+    return message;
+  });
+  const hasRetriableErrors = failedResults.some(
+    (result) => result.error?.code !== 'evidence_unmet'
+  );
 
-  return { results, errors };
+  return { results, errors, hasRetriableErrors };
 };
 
 /** Persists a batch of score documents via `POST /scores`, stamped with the workflow's space. */
@@ -174,9 +186,60 @@ export const ingestScores = async (
   return response;
 };
 
+export interface PersistOnlineScoresParams {
+  monitor: { id: string; name: string };
+  traceId: string;
+  connectorId?: string;
+  results: Array<
+    SnakeEvaluatorResult & {
+      evaluator: SnakeEvaluatorResult['evaluator'] & { version: string; kind: 'llm' | 'code' };
+    }
+  >;
+  errors?: string[];
+}
+
+/** Persists one trace's online scores via `POST /online_scores`, in the workflow's space. */
+export const persistOnlineScores = async (
+  runtime: StepRuntime,
+  params: PersistOnlineScoresParams
+): Promise<IngestOnlineScoresResponse> => {
+  const body: IngestOnlineScoresRequestBodyInput = {
+    monitor: params.monitor,
+    trace_id: params.traceId,
+    ...(params.connectorId ? { connector_id: params.connectorId } : {}),
+    results: params.results.map(({ evaluator, scores }) => ({
+      status: 'ok',
+      evaluator,
+      scores: scores.map(({ name, score, label, explanation, metadata, direction }) => ({
+        name,
+        score,
+        ...(label != null ? { label } : {}),
+        ...(explanation != null ? { explanation } : {}),
+        ...(metadata ? { metadata } : {}),
+        ...(direction ? { direction } : {}),
+      })),
+    })),
+  };
+
+  const { body: response } = await runtime.callKibanaApi<IngestOnlineScoresResponse>({
+    method: 'POST',
+    path: EVALS_ONLINE_SCORES_URL,
+    headers: INTERNAL_API_HEADERS,
+    body,
+  });
+
+  return { ...response, failed_evaluators: params.errors?.length ?? 0 };
+};
+
 /** The snake_case evaluator-result shape used by the workflow step schemas. */
 export interface SnakeEvaluatorResult {
-  evaluator: { name: string; version?: string; kind?: 'llm' | 'code' };
+  evaluator: {
+    name: string;
+    version?: string;
+    kind?: 'llm' | 'code';
+    model?: Model;
+    direction?: Direction;
+  };
   scores: Array<{
     name: string;
     score?: number | null;
@@ -184,6 +247,7 @@ export interface SnakeEvaluatorResult {
     explanation?: string | null;
     metadata?: Record<string, unknown>;
     trace_id?: string | null;
+    direction?: Direction;
   }>;
 }
 
@@ -198,6 +262,7 @@ export const toRunnerEvaluatorResults = (results: SnakeEvaluatorResult[]): Evalu
       explanation: score.explanation,
       metadata: score.metadata,
       traceId: score.trace_id,
+      ...(score.direction ? { direction: score.direction } : {}),
     })),
   }));
 
@@ -561,7 +626,12 @@ export const resolveTaskModel = async (
   return runtime.resolveModel(connectorId);
 };
 
-/** Derives the default judge model from the evaluator connectors, falling back to the task connector. */
+/**
+ * Derives the experiment-wide default judge model from the evaluator connectors,
+ * falling back to the task connector. Each score now carries the model resolved
+ * from its own evaluator's connector, so this only backs scores whose evaluator
+ * reports no model of its own.
+ */
 export const resolveEvaluatorModel = async (
   runtime: StepRuntime,
   evaluators: EvaluatorConfig[],

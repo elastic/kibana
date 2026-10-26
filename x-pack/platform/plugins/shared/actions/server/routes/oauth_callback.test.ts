@@ -18,10 +18,12 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { actionsConfigMock } from '../actions_config.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { oauthCallbackRoute } from './oauth_callback';
+import { connectorAuthCounter } from '../lib/connector_metrics';
 import { OAuthStateClient } from '../lib/oauth_state_client';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
 import { requestEarsToken } from '../lib/ears/request_ears_token';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 const KIBANA_URL = 'https://kibana.example.com';
 
@@ -48,6 +50,10 @@ const mockOAuthStateClientInstance = {
 const mockConnectorTokenClientInstance = {
   deleteConnectorTokens: jest.fn(),
   createWithRefreshToken: jest.fn(),
+};
+
+const mockActionsClient = {
+  evictClientPool: jest.fn(),
 };
 
 const mockEncryptedSavedObjectsClient = {
@@ -100,7 +106,7 @@ const createMockContext = (
     },
   }),
   actions: Promise.resolve({
-    getActionsClient: jest.fn(),
+    getActionsClient: jest.fn().mockReturnValue(mockActionsClient),
   }),
 });
 
@@ -109,6 +115,7 @@ describe('oauthCallbackRoute', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.spyOn(connectorAuthCounter, 'add').mockImplementation(() => {});
     router = httpServiceMock.createRouter();
     (verifyAccessAndContext as jest.Mock).mockImplementation((_license, handler) => handler);
 
@@ -119,6 +126,7 @@ describe('oauthCallbackRoute', () => {
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue({
       getDecryptedAsInternalUser: jest.fn(),
     });
+    mockActionsClient.evictClientPool.mockReset();
 
     MockOAuthStateClient.mockImplementation(() => mockOAuthStateClientInstance as never);
     MockUserConnectorTokenClient.mockImplementation(
@@ -175,6 +183,12 @@ describe('oauthCallbackRoute', () => {
         body: expect.stringContaining('Unable to retrieve Kibana user profile ID'),
       })
     );
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'authorize',
+      'connector.auth_type': 'unknown',
+      success: false,
+      'error.type': 'other',
+    });
     expect(mockRateLimiter.log).not.toHaveBeenCalled();
   });
 
@@ -187,6 +201,12 @@ describe('oauthCallbackRoute', () => {
     const res = httpServerMock.createResponseFactory();
 
     await handler(context, req, res);
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'authorize',
+      'connector.auth_type': 'unknown',
+      success: false,
+      'error.type': 'rate_limited',
+    });
 
     expect(mockRateLimiter.log).toHaveBeenCalledWith('test-profile-uid', 'callback');
     expect(res.ok).toHaveBeenCalledWith(
@@ -203,7 +223,7 @@ describe('oauthCallbackRoute', () => {
       state: 'valid-state',
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',
@@ -232,7 +252,7 @@ describe('oauthCallbackRoute', () => {
       state: 'some-state',
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',
@@ -264,6 +284,12 @@ describe('oauthCallbackRoute', () => {
     const res = httpServerMock.createResponseFactory();
 
     await handler(context, req, res);
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'authorize',
+      'connector.auth_type': 'unknown',
+      success: false,
+      'error.type': 'invalid',
+    });
 
     expect(res.ok).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -284,6 +310,12 @@ describe('oauthCallbackRoute', () => {
     const res = httpServerMock.createResponseFactory();
 
     await handler(context, req, res);
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'authorize',
+      'connector.auth_type': 'unknown',
+      success: false,
+      'error.type': 'invalid',
+    });
 
     expect(res.ok).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -293,13 +325,14 @@ describe('oauthCallbackRoute', () => {
   });
 
   it('exchanges code for tokens and redirects on success', async () => {
+    const credentialMutationOrder: string[] = [];
     const mockOAuthState = {
       id: 'state-id',
       state: 'valid-state',
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',
@@ -309,6 +342,7 @@ describe('oauthCallbackRoute', () => {
     const connectorEncryptedClient = {
       getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
         attributes: {
+          actionTypeId: '.google_drive',
           config: { tokenUrl: 'https://provider.example.com/token' },
           secrets: {
             clientId: 'client-id',
@@ -327,8 +361,17 @@ describe('oauthCallbackRoute', () => {
       expiresIn: 3600,
     });
 
-    mockConnectorTokenClientInstance.deleteConnectorTokens.mockResolvedValue(undefined);
-    mockConnectorTokenClientInstance.createWithRefreshToken.mockResolvedValue(undefined);
+    mockActionsClient.evictClientPool.mockImplementation(async () => {
+      credentialMutationOrder.push('evictClientPoolStarted');
+      await Promise.resolve();
+      credentialMutationOrder.push('evictClientPoolFinished');
+    });
+    mockConnectorTokenClientInstance.deleteConnectorTokens.mockImplementation(async () => {
+      credentialMutationOrder.push('deleteConnectorTokens');
+    });
+    mockConnectorTokenClientInstance.createWithRefreshToken.mockImplementation(async () => {
+      credentialMutationOrder.push('createWithRefreshToken');
+    });
 
     const [, handler] = registerRoute();
     const context = createMockContext();
@@ -386,6 +429,20 @@ describe('oauthCallbackRoute', () => {
           'https://kibana.example.com/app/connectors?oauth_authorization=success&connector_id=connector-1&status_code=200',
       },
     });
+    expect(mockActionsClient.evictClientPool).toHaveBeenCalledWith('connector-1');
+    expect(connectorAuthCounter.add).toHaveBeenCalledTimes(1);
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'authorize',
+      'connector.auth_type': 'none',
+      'connector.type': '.google_drive',
+      success: true,
+    });
+    expect(credentialMutationOrder).toEqual([
+      'evictClientPoolStarted',
+      'evictClientPoolFinished',
+      'deleteConnectorTokens',
+      'createWithRefreshToken',
+    ]);
   });
 
   it('uses EARS token exchange when authType is set in config (not secrets)', async () => {
@@ -395,7 +452,7 @@ describe('oauthCallbackRoute', () => {
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',
@@ -452,7 +509,7 @@ describe('oauthCallbackRoute', () => {
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',
@@ -485,6 +542,12 @@ describe('oauthCallbackRoute', () => {
     await handler(context, req, res);
 
     expect(mockLogger.error).toHaveBeenCalledWith('OAuth callback failed: Token exchange failed');
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'authorize',
+      'connector.auth_type': 'none',
+      success: false,
+      'error.type': 'other',
+    });
     expect(res.redirected).toHaveBeenCalledWith({
       headers: {
         location:
@@ -500,7 +563,7 @@ describe('oauthCallbackRoute', () => {
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',
@@ -546,7 +609,7 @@ describe('oauthCallbackRoute', () => {
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'different-profile-uid',
@@ -561,6 +624,12 @@ describe('oauthCallbackRoute', () => {
 
     await handler(context, req, res);
 
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'authorize',
+      'connector.auth_type': 'unknown',
+      success: false,
+      'error.type': 'user_mismatch',
+    });
     expect(mockRequestOAuthAuthorizationCodeToken).not.toHaveBeenCalled();
     expect(mockConnectorTokenClientInstance.createWithRefreshToken).not.toHaveBeenCalled();
     expect(res.redirected).toHaveBeenCalledWith({
@@ -579,7 +648,7 @@ describe('oauthCallbackRoute', () => {
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
     });
@@ -613,7 +682,7 @@ describe('oauthCallbackRoute', () => {
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',
@@ -666,7 +735,7 @@ describe('oauthCallbackRoute', () => {
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',
@@ -747,7 +816,7 @@ describe('oauthCallbackRoute', () => {
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',
@@ -800,7 +869,7 @@ describe('oauthCallbackRoute', () => {
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',

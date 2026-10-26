@@ -5,30 +5,32 @@
  * 2.0.
  */
 
-import { isValidTraceId } from '@opentelemetry/api';
 import {
   API_VERSIONS,
   EVALS_EVALUATE_URL,
   EvaluateRequestBody,
-  type EvaluateResponse,
   INTERNAL_API_ACCESS,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
-import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
-import { formatEvidenceSchemaIssues } from '../../evaluators/evidence/schema_issues';
-import { createTraceAccessor } from '../../evaluators/trace_accessor';
-import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
-import type { EvaluatorDefinition } from '../../evaluators/types';
+import {
+  findDuplicateEvaluatorNames,
+  getDuplicateEvaluatorNamesMessage,
+} from '../../lib/duplicate_evaluator_names';
 import type { RouteDependencies } from '../register_routes';
+import {
+  EvaluationExecutionError,
+  executeEvaluators,
+  type ResolvedEvaluator,
+} from './shared/execute_evaluators';
 
 export const registerEvaluateRoute = ({
   router,
   logger,
   evaluatorRegistry,
   getInferenceStart,
+  getSpaceId,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -51,180 +53,51 @@ export const registerEvaluateRoute = ({
       },
       async (context, request, response) => {
         const { subject, evaluators } = request.body;
-        if (subject.mode === 'multi-turn') {
+        const duplicateEvaluatorNames = findDuplicateEvaluatorNames(evaluators);
+        if (duplicateEvaluatorNames.length > 0) {
           return response.badRequest({
-            body: { message: 'multi-turn evaluation is not yet supported' },
+            body: { message: getDuplicateEvaluatorNamesMessage(duplicateEvaluatorNames) },
           });
         }
 
-        if (subject.mode === 'single-turn' && subject.traces.length !== 1) {
-          return response.badRequest({
-            body: { message: 'single-turn mode requires exactly one trace' },
-          });
-        }
-
-        const resolvedEvaluators: Array<{
-          config: (typeof evaluators)[number];
-          definition: EvaluatorDefinition;
-          parsedReferenceData?: Record<string, unknown>;
-        }> = [];
+        const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
+        const scopedRegistry = evaluatorRegistry.asScoped({ spaceId });
+        const resolvedEvaluators: ResolvedEvaluator[] = [];
 
         for (const config of evaluators) {
-          const definition = evaluatorRegistry.get(config.name, config.version);
+          const definition = await scopedRegistry.get(config.name, config.version);
           if (!definition) {
             const message = config.version
               ? `Evaluator not found: ${config.name}@${config.version}`
               : `Evaluator not found: ${config.name}`;
             return response.badRequest({ body: { message } });
           }
-
-          if (definition.kind === 'llm' && !config.connector_id) {
-            return response.badRequest({
-              body: { message: `connector_id is required for llm evaluator "${config.name}"` },
-            });
-          }
-
-          resolvedEvaluators.push({ config, definition });
-        }
-
-        const [{ trace_id: traceId, reference_data: referenceData }] = subject.traces;
-        if (!isValidTraceId(traceId)) {
-          return response.badRequest({
-            body: { message: 'Invalid trace_id: must be a 32-character hex string' },
-          });
-        }
-
-        for (const entry of resolvedEvaluators) {
-          if (!entry.definition.referenceDataSchema) {
-            entry.parsedReferenceData = referenceData;
-            continue;
-          }
-          const parsed = entry.definition.referenceDataSchema.safeParse(referenceData);
-          if (!parsed.success) {
-            return response.badRequest({
-              body: {
-                message: `Invalid reference_data for evaluator "${
-                  entry.definition.name
-                }": ${z.prettifyError(parsed.error)}`,
-              },
-            });
-          }
-          entry.parsedReferenceData = parsed.data as Record<string, unknown>;
+          resolvedEvaluators.push({ definition, connectorId: config.connector_id });
         }
 
         const coreContext = await context.core;
-        const traceAccessor = createTraceAccessor({
-          traceId,
-          esClient: coreContext.elasticsearch.client.asInternalUser,
-        });
-
-        const activeProfile = subject.instrumentation?.profile ?? 'elastic-inference';
-        const resolvedMapping = getInstrumentationProfile(activeProfile);
-
-        let round: Awaited<ReturnType<typeof awaitTraceReady>>;
         try {
-          round = await awaitTraceReady(traceAccessor, resolvedMapping, activeProfile, logger);
+          const results = await executeEvaluators({
+            coreContext,
+            request,
+            subject,
+            evaluators: resolvedEvaluators,
+            logger,
+            getInferenceStart,
+            // Unchanged from before this route was refactored: experiment runs reach here
+            // through a workflow's fake request, so scoping the read to the caller needs
+            // its own change. Only persisted evaluators run here, so the prompt is not
+            // caller-controlled the way it is on `_test`.
+            traceReader: coreContext.elasticsearch.client.asInternalUser,
+          });
+
+          return response.ok({ body: { results } });
         } catch (error) {
-          if (error instanceof TraceReadinessError) {
-            return response.notFound({ body: { message: String(error) } });
+          if (error instanceof EvaluationExecutionError) {
+            return response[error.responseType]({ body: { message: error.message } });
           }
           throw error;
         }
-
-        let inferenceStartPromise: ReturnType<RouteDependencies['getInferenceStart']> | undefined;
-        const inferenceClientByConnectorId = new Map<string, BoundInferenceClient>();
-        const getInferenceClient = async (
-          connectorId: string
-        ): Promise<BoundInferenceClient | undefined> => {
-          const cachedClient = inferenceClientByConnectorId.get(connectorId);
-          if (cachedClient) {
-            return cachedClient;
-          }
-
-          if (!getInferenceStart) {
-            logger.error('Inference start contract is not configured');
-            return undefined;
-          }
-
-          if (!inferenceStartPromise) {
-            inferenceStartPromise = getInferenceStart();
-          }
-
-          const inference = await inferenceStartPromise;
-          const inferenceClient = inference.getClient({
-            request,
-            bindTo: { connectorId },
-          });
-          inferenceClientByConnectorId.set(connectorId, inferenceClient);
-
-          return inferenceClient;
-        };
-
-        const results: EvaluateResponse['results'] = [];
-        for (const { config, definition, parsedReferenceData } of resolvedEvaluators) {
-          if (definition.evidenceSchema) {
-            const evidenceParsed = definition.evidenceSchema.safeParse(round);
-            if (!evidenceParsed.success) {
-              results.push({
-                status: 'error',
-                evaluator: {
-                  name: definition.name,
-                  version: definition.version,
-                  kind: definition.kind,
-                },
-                error: {
-                  code: 'evidence_unmet',
-                  message: `Evaluator evidence requirements not met: ${formatEvidenceSchemaIssues(
-                    evidenceParsed.error
-                  )}`,
-                },
-              });
-              continue;
-            }
-          }
-
-          try {
-            const inferenceClient =
-              definition.kind === 'llm' && config.connector_id
-                ? await getInferenceClient(config.connector_id)
-                : undefined;
-
-            const result = await definition.evaluate({
-              trace: traceAccessor,
-              round,
-              referenceData: parsedReferenceData,
-              inferenceClient,
-              log: logger,
-            });
-
-            results.push({
-              status: 'ok',
-              evaluator: {
-                name: definition.name,
-                version: definition.version,
-                kind: definition.kind,
-              },
-              scores: result.scores,
-            });
-          } catch (error) {
-            logger.error(`Failed to execute evaluator "${config.name}": ${error}`);
-            results.push({
-              status: 'error',
-              evaluator: {
-                name: definition.name,
-                version: definition.version,
-                kind: definition.kind,
-              },
-              error: { message: String(error) },
-            });
-          }
-        }
-
-        return response.ok({
-          body: {
-            results,
-          },
-        });
       }
     );
 };

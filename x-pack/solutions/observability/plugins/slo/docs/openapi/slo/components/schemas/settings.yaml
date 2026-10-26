@@ -21,3 +21,15 @@ properties:
     type: boolean
     default: false
     example: true
+  preventCrossProjectSearch:
+    description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false, meaning rollup transforms target all linked projects.
+    type: boolean
+    default: false
+    example: true
+    deprecated: true
+  projectRoutings:
+    description: ES ProjectRouting expression controlling which linked projects the L1 rollup reads. When set (including null), overrides preventCrossProjectSearch. null and `_alias:_origin` mean origin only; `_alias:*` means all linked projects. Subset example `_id:p1 AND _id:p2`.
+    type: string
+    nullable: true
+    maxLength: 8192
+    example: _alias:_origin

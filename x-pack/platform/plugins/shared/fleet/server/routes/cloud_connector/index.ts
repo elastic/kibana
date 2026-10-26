@@ -26,6 +26,8 @@ import {
   DeleteCloudConnectorResponseSchema,
   GetCloudConnectorUsageRequestSchema,
   GetCloudConnectorUsageResponseSchema,
+  VerifyCloudConnectorIacKeyRequestSchema,
+  VerifyCloudConnectorIacKeyResponseSchema,
 } from '../../types/rest_spec/cloud_connector';
 
 import {
@@ -35,6 +37,7 @@ import {
   updateCloudConnectorHandler,
   deleteCloudConnectorHandler,
   getCloudConnectorUsageHandler,
+  verifyCloudConnectorIacKeyHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -381,5 +384,56 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       getCloudConnectorUsageHandler
+    );
+
+  // POST /internal/fleet/cloud_connectors/{cloudConnectorId}/verify_iac_key
+  router.versioned
+    .post({
+      path: CLOUD_CONNECTOR_API_ROUTES.VERIFY_IAC_KEY_PATTERN,
+      access: 'internal',
+      security: {
+        authz: {
+          // Loads the connector + its policies and proxies a comparison render. Called without
+          // added integrations it also stores the upgrade status it just derived, so it needs the
+          // same privileges as updating the connector (PUT above), not READ. Consequence: a
+          // read-only user gets 403 on the flyout's compare:false read as well; the flyout
+          // tolerates that (no integration set → no Redeploy/Launch, the callout still follows the
+          // stored status).
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+                FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
+              ],
+            },
+          ],
+        },
+      },
+      summary: 'Verify a cloud connector IaC template key',
+      description:
+        'Compares the stored IaC template key with the key the IaC Provisioner would produce for the connector integrations (plus an optional new integration).',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: VerifyCloudConnectorIacKeyRequestSchema,
+          response: {
+            200: {
+              body: () => VerifyCloudConnectorIacKeyResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            404: {
+              body: genericErrorResponse,
+              description: 'Cloud connector not found.',
+            },
+            500: {
+              body: genericErrorResponse,
+              description: 'Unexpected error while verifying the key.',
+            },
+          },
+        },
+      },
+      verifyCloudConnectorIacKeyHandler
     );
 };

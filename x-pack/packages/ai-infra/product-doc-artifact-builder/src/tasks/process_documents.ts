@@ -8,6 +8,7 @@
 import { uniqBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { resolveContentTitle } from '@kbn/product-doc-common';
 import type { ExtractedDocument } from './extract_documentation';
 
 export const processDocuments = async ({
@@ -37,10 +38,11 @@ const EMPTY_DOC_TOKEN_LIMIT = 120;
 
 /**
  * Filter "this content has moved" or "deleted pages" type of documents, just based on token count.
+ * Allow special tokens (e.g. `<|endoftext|>` in LLM docs) so token counting does not abort the build.
  */
 const filterEmptyDocs = (documents: ExtractedDocument[]): ExtractedDocument[] => {
   return documents.filter((doc) => {
-    const tokenCount = encode(doc.content_body).length;
+    const tokenCount = encode(doc.content_body, { allowedSpecial: 'all' }).length;
     if (tokenCount < EMPTY_DOC_TOKEN_LIMIT) {
       return false;
     }
@@ -63,7 +65,7 @@ const processDocument = (document: ExtractedDocument) => {
     // limit to 2 consecutive carriage return
     .replaceAll(/\n\n+/g, '\n\n');
 
-  document.content_title = document.content_title.split('|')[0].trim();
+  document.content_title = resolveContentTitle(document.content_title, document.content_body);
 
   // specific to security: remove rule query section as it's usually large without much value for the LLM
   if (document.product_name === 'security') {

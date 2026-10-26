@@ -24,12 +24,15 @@ export const registerGetDataViewAsCodeRoute = ({
   router.versioned
     .get({
       path: GET_DATA_VIEW_AS_CODE_PATH,
-      access: 'internal',
-      description: 'Get a data view by id',
+      access: 'public',
+      enableQueryVersion: true,
+      summary: 'Get a data view',
+      description: 'Returns a data view by ID, including its field settings and runtime fields.',
       options: {
+        tags: ['oas-tag:data-views-v2'],
         availability: {
-          stability: 'tech_preview',
-          since: '9.5.0',
+          stability: 'stable',
+          since: '9.6.0',
         },
       },
       security: {
@@ -42,6 +45,10 @@ export const registerGetDataViewAsCodeRoute = ({
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).getDataViewOASOperationObject,
+        },
         validate: {
           request: {
             params: schema.object(
@@ -49,6 +56,9 @@ export const registerGetDataViewAsCodeRoute = ({
                 id: schema.string({
                   minLength: 1,
                   maxLength: 1_000,
+                  meta: {
+                    description: 'The ID of the data view to return.',
+                  },
                 }),
               },
               { unknowns: 'allow' }
@@ -57,6 +67,7 @@ export const registerGetDataViewAsCodeRoute = ({
           response: {
             200: {
               body: () => asCodeResponseSchema,
+              description: 'OK',
             },
             404: {
               description: 'not found',

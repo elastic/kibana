@@ -27,12 +27,18 @@ describe('Embeddable interaction event handlers', () => {
 
   function getCallbacks(shouldPreventDefault?: boolean) {
     if (!shouldPreventDefault) {
-      return { onFilter: jest.fn(), onBrushEnd: jest.fn(), onTableRowClick: jest.fn() };
+      return {
+        onFilter: jest.fn(),
+        onBrushEnd: jest.fn(),
+        onTableRowClick: jest.fn(),
+        onAnnotationClick: jest.fn(),
+      };
     }
     return {
       onFilter: jest.fn((event) => event.preventDefault()),
       onBrushEnd: jest.fn((event) => event.preventDefault()),
       onTableRowClick: jest.fn((event) => event.preventDefault()),
+      onAnnotationClick: jest.fn((event) => event.preventDefault()),
     };
   }
 
@@ -125,6 +131,18 @@ describe('Embeddable interaction event handlers', () => {
       },
     };
     const { getTrigger } = await submitEvent(event, true);
+    expect(getTrigger).not.toHaveBeenCalled();
+  });
+
+  it('should call onAnnotationClick', async () => {
+    const event = {
+      name: 'annotationClick',
+      data: {
+        annotations: [{ id: 'ann-1', type: 'point', time: '2022-03-18T08:25:17.140Z' }],
+      },
+    };
+    const { callbacks, getTrigger } = await submitEvent(event);
+    expect(callbacks.onAnnotationClick).toHaveBeenCalledWith(expect.objectContaining(event.data));
     expect(getTrigger).not.toHaveBeenCalled();
   });
 

@@ -11,6 +11,7 @@
     "common/**/*"
   ],
   "kbn_references": [
+    "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/human-readable-id",
     "@kbn/spaces-plugin",

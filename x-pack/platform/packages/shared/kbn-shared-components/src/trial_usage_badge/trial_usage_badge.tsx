@@ -78,7 +78,7 @@ export const TrialUsageBadge = ({ cloud }: TrialUsageBadgeProps) => {
       onClickAriaLabel={i18n.translate('xpack.sharedComponents.trialUsageBadge.toggleAriaLabel', {
         defaultMessage: 'Toggle trial usage details',
       })}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       data-test-subj="trialUsageBadge"
     >
@@ -108,13 +108,9 @@ export const TrialUsageBadge = ({ cloud }: TrialUsageBadgeProps) => {
       >
         <EuiTitle size="xxs">
           <h4>
-            {cloud.isServerlessEnabled
-              ? i18n.translate('xpack.sharedComponents.trialUsageBadge.serverlessTitle', {
-                  defaultMessage: 'Elastic Cloud Serverless',
-                })
-              : i18n.translate('xpack.sharedComponents.trialUsageBadge.cloudHostedTitle', {
-                  defaultMessage: 'Elastic Cloud Hosted',
-                })}
+            {i18n.translate('xpack.sharedComponents.trialUsageBadge.cloudHostedTitle', {
+              defaultMessage: 'Elastic Cloud Hosted',
+            })}
           </h4>
         </EuiTitle>
       </EuiPopoverTitle>
@@ -202,7 +198,7 @@ export const TrialUsageBadge = ({ cloud }: TrialUsageBadgeProps) => {
             target="_blank"
             fullWidth
             color="primary"
-            iconType="popout"
+            iconType="external"
             iconSide="right"
           >
             {i18n.translate('xpack.sharedComponents.trialUsageBadge.manageSubscription', {

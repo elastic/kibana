@@ -43,8 +43,7 @@ const wiredUpsertRequestSchema = DeepStrict(Streams.WiredStream.UpsertRequest.ri
 
 /**
  * Content-pack stream entries match the wired stream upsert request. Significant-event
- * queries are not part of content packs (they are managed via the dedicated
- * `/api/streams/{name}/queries` endpoints), so this guard validates the strict wired upsert
+ * queries are not part of content packs, so this guard validates the strict wired upsert
  * shape. `extractEntries` calls `rejectStreamQueries` first, so any entry that still carries a
  * `queries` field is rejected upfront and this guard only ever sees a queries-free request.
  */
@@ -53,10 +52,10 @@ export function isContentPackStreamRequest(value: unknown): value is ContentPack
 }
 
 /**
- * Significant-event queries are not part of content packs; they are managed via the dedicated
- * `/api/streams/{name}/queries` endpoints. Content packs are tech preview, so rather than
- * half-supporting a legacy shape we reject any stream entry that carries a `queries` field at
- * all (including an empty `queries: []`) so detections are never silently dropped on import.
+ * Significant-event queries are not part of content packs. Content packs are tech preview, so
+ * rather than half-supporting a legacy shape we reject any stream entry that carries a
+ * `queries` field at all (including an empty `queries: []`) so detections are never silently
+ * dropped on import.
  */
 export function rejectStreamQueries(
   streamName: string | undefined,
@@ -65,7 +64,7 @@ export function rejectStreamQueries(
 ): void {
   if (request.queries !== undefined) {
     throw new InvalidContentPackError(
-      `Stream [${streamName}] in entry [${entryName}] contains significant-event queries, which are not supported by content packs. Manage them via the /api/streams/{name}/queries endpoints.`
+      `Stream [${streamName}] in entry [${entryName}] contains significant-event queries, which are not supported by content packs.`
     );
   }
 }

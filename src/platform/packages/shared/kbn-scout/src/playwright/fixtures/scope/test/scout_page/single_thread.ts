@@ -11,6 +11,14 @@ import { EuiComboBoxObject, type ObjectScope } from '@elastic/eui-test-helpers';
 import { subj } from '@kbn/test-subj-selector';
 import type { Page, TestInfo } from '@playwright/test';
 import { test as base } from '@playwright/test';
+import {
+  EuiBasicTableObject,
+  EuiDataGridObject,
+  EuiDraggableObject,
+  EuiGlobalToastListObject,
+  EuiSelectableObject,
+  EuiSuperSelectObject,
+} from '../../../../eui_components';
 import type { ScoutPage } from '.';
 import { attachBrowserConsoleErrors, collectBrowserConsoleErrors } from './browser_console_errors';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
@@ -101,6 +109,18 @@ function extendPageWithComponents(page: Page): ScoutPage['components'] {
   return {
     comboBox: (testSubj: string, scope?: ObjectScope) =>
       new EuiComboBoxObject(scope ?? page, testSubj),
+    dataGrid: (testSubj: string, scope?: ObjectScope) =>
+      new EuiDataGridObject(scope ?? page, testSubj),
+    superSelect: (testSubj: string, scope?: ObjectScope) =>
+      new EuiSuperSelectObject(scope ?? page, testSubj),
+    selectable: (testSubj: string, scope?: ObjectScope) =>
+      new EuiSelectableObject(scope ?? page, testSubj),
+    basicTable: (testSubj: string, scope?: ObjectScope) =>
+      new EuiBasicTableObject(scope ?? page, testSubj),
+    draggable: (testSubj: string, scope?: ObjectScope) =>
+      new EuiDraggableObject(scope ?? page, testSubj),
+    toast: (testSubj: string = 'globalToastList', scope?: ObjectScope) =>
+      new EuiGlobalToastListObject(scope ?? page, testSubj),
   };
 }
 
@@ -117,8 +137,11 @@ export function extendPlaywrightPage({
   // Extend page with EUI Component Object factories ('@elastic/eui-test-helpers')
   extendedPage.components = extendPageWithComponents(page);
   // Method to navigate to specific Kibana apps
-  extendedPage.gotoApp = (appName: string, pathOptions?: PathOptions) =>
-    page.goto(kbnUrl.app(appName, { pathOptions }));
+  extendedPage.gotoApp = (
+    appName: string,
+    pathOptions?: PathOptions,
+    options?: Parameters<Page['goto']>[1]
+  ) => page.goto(kbnUrl.app(appName, { pathOptions }), options);
   // Method to press a key until an element with the provided selector is in focus.
   extendedPage.keyTo = async (
     selector: string,

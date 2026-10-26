@@ -166,6 +166,7 @@ describe('getAxiosInstance()', () => {
     await actionsClient.getAxiosInstance(defaultConnectorId);
     expect(getAxiosInstanceWithAuth).toHaveBeenCalledWith({
       connectorId: defaultConnectorId,
+      connectorTypeId: defaultConnectorTypeId,
       connectorTokenClient,
       secrets: { foobar: true },
       additionalHeaders: { foo: 'bar' },
@@ -188,6 +189,7 @@ describe('getAxiosInstance()', () => {
       await actionsClient.getAxiosInstance(inMemoryConnectorId);
       expect(getAxiosInstanceWithAuth).toHaveBeenCalledWith({
         connectorId: inMemoryConnectorId,
+        connectorTypeId: inMemoryConnectorTypeId,
         connectorTokenClient,
         secrets: { foobar: true },
       });
@@ -238,6 +240,7 @@ describe('getAxiosInstance()', () => {
       await actionsClient.getAxiosInstance(inMemoryConnectorId);
       expect(getAxiosInstanceWithAuth).toHaveBeenCalledWith({
         connectorId: inMemoryConnectorId,
+        connectorTypeId: inMemoryConnectorTypeId,
         connectorTokenClient,
         secrets: { foobar: true },
       });

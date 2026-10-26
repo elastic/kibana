@@ -19,11 +19,7 @@ export const ObsCasesContext: React.FC<{
 
   if (userCasesPermissions && CasesContext) {
     return (
-      <CasesContext
-        owner={[observabilityFeatureId]}
-        permissions={userCasesPermissions}
-        features={{ alerts: { sync: false } }}
-      >
+      <CasesContext owner={[observabilityFeatureId]} permissions={userCasesPermissions}>
         {children}
       </CasesContext>
     );

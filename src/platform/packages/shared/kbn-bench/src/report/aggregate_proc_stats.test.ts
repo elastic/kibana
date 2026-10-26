@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { aggregateProcStats, aggregateProcStatSamples } from './aggregate_proc_stats';
-import type { ProcStatSample } from '../runner/monitor/types';
+import {
+  aggregateForcedGcHeapStats,
+  aggregateProcStats,
+  aggregateProcStatSamples,
+} from './aggregate_proc_stats';
+import type { ForcedGcHeapStats, ProcStatSample } from '../runner/monitor/types';
 
 const makeSample = ({
   pid,
@@ -74,6 +78,43 @@ describe('aggregateProcStatSamples', () => {
         tailArrayBuffers: 1150,
       })
     );
+  });
+});
+
+describe('aggregateForcedGcHeapStats', () => {
+  const makeForcedGcStats = (pid: number, postForcedGcHeapUsed: number): ForcedGcHeapStats => ({
+    requestId: 'request',
+    pid,
+    argv: ['node'],
+    requestedAt: '2026-01-01T00:00:00.000Z',
+    startedAt: '2026-01-01T00:00:01.000Z',
+    completedAt: '2026-01-01T00:00:02.000Z',
+    nodeVersion: '24.18.0',
+    v8Version: '13.6',
+    preForcedGcHeapUsed: postForcedGcHeapUsed + 100,
+    postForcedGcHeapUsed,
+    forcedGcHeapReduction: 100,
+    forcedGcDurationMs: 10,
+  });
+
+  it('sums the separate forced-GC signal across monitored processes', () => {
+    expect(
+      aggregateForcedGcHeapStats([makeForcedGcStats(100, 200), makeForcedGcStats(200, 300)])
+    ).toEqual({
+      preForcedGcHeapUsed: 700,
+      postForcedGcHeapUsed: 500,
+      forcedGcHeapReduction: 200,
+      forcedGcDurationMs: 20,
+    });
+  });
+
+  it('does not substitute a partial or failed forced-GC result', () => {
+    expect(
+      aggregateForcedGcHeapStats([
+        makeForcedGcStats(100, 200),
+        { ...makeForcedGcStats(200, 300), error: { name: 'Error', message: 'probe failed' } },
+      ])
+    ).toBeUndefined();
   });
 });
 

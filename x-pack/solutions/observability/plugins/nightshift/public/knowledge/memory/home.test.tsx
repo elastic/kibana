@@ -1,0 +1,277 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { SettingsProps } from '@elastic/charts';
+import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React, { useState } from 'react';
+import { MemoryHome } from './home';
+import { useMemoryKeywordPages } from './use_memory';
+import type { MemoryStats, MemorySummary } from './types';
+
+jest.mock('@elastic/charts', () => {
+  const actual = jest.requireActual('@elastic/charts');
+  return {
+    ...actual,
+    Chart: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    Settings: (props: Record<string, unknown>) => {
+      settingsProps(props);
+      return null;
+    },
+    Partition: () => null,
+    Tooltip: () => null,
+  };
+});
+
+jest.mock('./use_memory');
+
+const settingsProps = jest.fn();
+
+const mockUseMemoryKeywordPages = useMemoryKeywordPages as jest.MockedFunction<
+  typeof useMemoryKeywordPages
+>;
+
+const summary = (overrides: Partial<MemorySummary> = {}): MemorySummary =>
+  ({
+    id: 'memory_a',
+    slug: 'a',
+    title: 'Memory A',
+    content: '',
+    tags: ['memory', 'kafka', 'redis'],
+    archived: false,
+    categories: [],
+    references: [],
+    created_at: '',
+    updated_at: '2026-03-01T00:00:00.000Z',
+    created_by: '',
+    updated_by: '',
+    telemetry: { impressions: 1, conversions: 0, last_impression_time: '' },
+    usefulness: 0.9,
+    confidence: 0.9,
+    ...overrides,
+  } as MemorySummary);
+
+const PAGES = [
+  summary({ id: 'memory_a', title: 'Kafka and Redis', tags: ['memory', 'kafka', 'redis'] }),
+  summary({
+    id: 'memory_b',
+    title: 'Kafka only',
+    tags: ['memory', 'kafka'],
+    updated_at: '2026-03-02T00:00:00.000Z',
+  }),
+  summary({
+    id: 'memory_c',
+    title: 'Redis only',
+    tags: ['memory', 'redis'],
+    updated_at: '2026-03-03T00:00:00.000Z',
+  }),
+];
+
+/**
+ * Stands in for the server: AND across the selected canonical keywords, which
+ * is what the route and the store do with the terms.
+ */
+const serverFilter = (pages: MemorySummary[], keywords: readonly string[]): MemorySummary[] => {
+  if (keywords.length === 0) return pages;
+  return pages.filter((page) => keywords.every((keyword) => page.tags.includes(keyword)));
+};
+
+const stats = { total: PAGES.length, archived: 0 };
+
+/**
+ * The tab owns the keyword selection — a memory's tags select one too — so Home
+ * is handed it rather than keeping its own. This is that wiring, without the
+ * rest of the tab around it.
+ */
+const HomeHarness = ({ stats: given }: { stats?: MemoryStats }) => {
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+  return (
+    <MemoryHome
+      pages={PAGES}
+      stats={given ?? stats}
+      onSelectPage={jest.fn()}
+      selectedKeywords={selectedKeywords}
+      onToggleKeyword={(keyword) =>
+        setSelectedKeywords((selected) =>
+          selected.includes(keyword)
+            ? selected.filter((k) => k !== keyword)
+            : [...selected, keyword]
+        )
+      }
+      onClearKeywords={() => setSelectedKeywords([])}
+    />
+  );
+};
+
+/** Every memory title the "Recently updated" list is showing. */
+/** Every memory title the home lists, deduplicated across its two lists. */
+const listedTitles = () => [
+  ...new Set(screen.queryAllByTestId(/^nightshiftMemoryRow-/).map((row) => row.textContent ?? '')),
+];
+
+/** The chart reports a cell click; the view answers by updating its selection. */
+const clickCell = (keyword: string) => {
+  const onElementClick = settingsProps.mock.calls.at(-1)?.[0]
+    .onElementClick as SettingsProps['onElementClick'];
+  act(() => {
+    onElementClick!([[{ type: 'layerValue', groupByRollup: keyword }]] as unknown as Parameters<
+      NonNullable<SettingsProps['onElementClick']>
+    >[0]);
+  });
+};
+
+const renderHome = () =>
+  render(
+    <EuiProvider>
+      <I18nProvider>
+        <HomeHarness />
+      </I18nProvider>
+    </EuiProvider>
+  );
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockUseMemoryKeywordPages.mockImplementation(
+    (tags: readonly string[] = []) =>
+      ({
+        data: { pages: serverFilter(PAGES, tags), total: PAGES.length, stats },
+      } as unknown as ReturnType<typeof useMemoryKeywordPages>)
+  );
+});
+
+describe('MemoryHome keyword filtering', () => {
+  it('lists every memory until a keyword is selected', () => {
+    renderHome();
+
+    expect(listedTitles()).toHaveLength(PAGES.length);
+    expect(mockUseMemoryKeywordPages).toHaveBeenCalledWith([]);
+  });
+
+  it('narrows the lists and the chart to the keyword whose cell was clicked', () => {
+    renderHome();
+
+    clickCell('kafka');
+
+    // The server is asked for the filtered set.
+    expect(mockUseMemoryKeywordPages).toHaveBeenLastCalledWith(['kafka']);
+    const titles = listedTitles().join(' ');
+    expect(titles).toContain('Kafka and Redis');
+    expect(titles).toContain('Kafka only');
+    expect(titles).not.toContain('Redis only');
+  });
+
+  it('ANDs two selected keywords', () => {
+    renderHome();
+
+    clickCell('kafka');
+    clickCell('redis');
+
+    expect(mockUseMemoryKeywordPages).toHaveBeenLastCalledWith(['kafka', 'redis']);
+    const titles = listedTitles().join(' ');
+    // Only the one memory carrying both survives.
+    expect(titles).toContain('Kafka and Redis');
+    expect(titles).not.toContain('Kafka only');
+  });
+
+  it('removes a keyword when its chip is clicked again', async () => {
+    renderHome();
+    clickCell('kafka');
+    clickCell('redis');
+
+    await userEvent.click(screen.getByTestId('nightshiftMemoryKeywordChip-redis'));
+
+    expect(mockUseMemoryKeywordPages).toHaveBeenLastCalledWith(['kafka']);
+    // Back to the memories carrying `kafka` alone, so `Redis only` is gone again.
+    const titles = listedTitles().join(' ');
+    expect(titles).toContain('Kafka and Redis');
+    expect(titles).toContain('Kafka only');
+    expect(titles).not.toContain('Redis only');
+  });
+
+  it('clears the whole selection at once', async () => {
+    renderHome();
+    clickCell('kafka');
+
+    await userEvent.click(screen.getByTestId('nightshiftMemoryClearKeywords'));
+
+    expect(mockUseMemoryKeywordPages).toHaveBeenLastCalledWith([]);
+    expect(listedTitles()).toHaveLength(PAGES.length);
+  });
+
+  it('lists a matching memory the sidebar has not loaded', () => {
+    // The sidebar is a 25-row slice; a keyword drawn from the wider treemap can
+    // belong only to memories outside it, and its lists must still answer.
+    const older = summary({
+      id: 'memory_old',
+      title: 'Older kafka memory',
+      tags: ['memory', 'kafka'],
+      updated_at: '2026-02-01T00:00:00.000Z',
+    });
+    mockUseMemoryKeywordPages.mockImplementation(
+      (tags: readonly string[] = []) =>
+        ({
+          data: { pages: serverFilter([...PAGES, older], tags), total: 4, stats, capped: false },
+        } as unknown as ReturnType<typeof useMemoryKeywordPages>)
+    );
+    renderHome();
+
+    clickCell('kafka');
+
+    expect(listedTitles().join(' ')).toContain('Older kafka memory');
+  });
+
+  it.each([
+    ['fails', { isError: true }, 'nightshiftMemoryKeywordError'],
+    ['is loading', { isLoading: true }, 'nightshiftMemoryKeywordLoading'],
+  ])('does not report an empty store while the filtered query %s', (_, state, testSubj) => {
+    mockUseMemoryKeywordPages.mockImplementation(
+      (tags: readonly string[] = []) =>
+        (tags.length === 0
+          ? { data: { pages: PAGES, total: PAGES.length, stats } }
+          : { data: undefined, ...state }) as unknown as ReturnType<typeof useMemoryKeywordPages>
+    );
+    renderHome();
+
+    clickCell('kafka');
+
+    expect(screen.getByTestId(testSubj)).toBeInTheDocument();
+    expect(screen.queryByText(/No memories yet/)).not.toBeInTheDocument();
+  });
+
+  it('says so when the ranking could not reach the whole store', () => {
+    mockUseMemoryKeywordPages.mockReturnValue({
+      data: { pages: PAGES, total: 900, stats, capped: true },
+    } as unknown as ReturnType<typeof useMemoryKeywordPages>);
+    renderHome();
+
+    expect(screen.getByTestId('nightshiftMemoryKeywordCap')).toHaveTextContent(
+      `newest ${PAGES.length} memories`
+    );
+  });
+
+  it('shows the Space-wide archived count, which does not follow the keyword selection', () => {
+    // The sidebar lists Active by default, so the archived number used to be
+    // counted inside a listing that excludes archived memories and read zero.
+    // It is the Space's own count now, and it stays put when a keyword narrows
+    // the view, because the Archived list is not keyword-filtered.
+    const archived = 4;
+    render(
+      <EuiProvider>
+        <I18nProvider>
+          <HomeHarness stats={{ total: PAGES.length, archived }} />
+        </I18nProvider>
+      </EuiProvider>
+    );
+    const header = screen.getByTestId('nightshiftMemoryHomeStats');
+    expect(header).toHaveTextContent(`${archived} archived`);
+
+    clickCell('kafka');
+    expect(header).toHaveTextContent(`${archived} archived`);
+  });
+});

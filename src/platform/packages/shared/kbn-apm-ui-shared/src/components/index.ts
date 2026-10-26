@@ -8,6 +8,7 @@
  */
 
 export * from './actions_menu';
+export * from './genai';
 export * from './service_flyout/transactions';
 export * from './duration';
 export * from './duration_distribution_chart';
@@ -40,6 +41,6 @@ export {
 } from './trace_waterfall/trace_waterfall_context';
 export { Loading } from './trace_waterfall/loading';
 export { useGetServiceBadgeHrefFromCore } from './trace_waterfall/use_get_service_badge_href_from_core';
-export { ColdStartBadge } from './trace_waterfall/badges/cold_start_badge';
+export { COLD_START_BADGE_LABEL, ColdStartBadge } from './trace_waterfall/badges/cold_start_badge';
 export { FocusedTraceWaterfallWithFetching } from './focused_trace_waterfall/focused_trace_waterfall_with_fetching';
 export { FocusedTraceWaterfall } from './focused_trace_waterfall';

@@ -15,33 +15,37 @@ import {
   MAX_TITLE_LENGTH,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
-export const searchResponseBodySchema = schema.object({
-  data: schema.arrayOf(
-    schema.object({
-      id: schema.string({ maxLength: MAX_ID_LENGTH }),
-      data: schema.object({
-        description: schema.maybe(
-          schema.string({
-            maxLength: MAX_DESCRIPTION_LENGTH,
-            meta: { description: 'A short description of the links library item.' },
+export const searchResponseBodySchema = z
+  .object({
+    data: z
+      .array(
+        z
+          .object({
+            id: z.string().max(MAX_ID_LENGTH),
+            data: z
+              .object({
+                description: z
+                  .string()
+                  .max(MAX_DESCRIPTION_LENGTH)
+                  .optional()
+                  .meta({ description: 'A short description of the links library item.' }),
+                title: z
+                  .string()
+                  .max(MAX_TITLE_LENGTH)
+                  .meta({ description: 'The links library item title.' }),
+              })
+              .strict(),
+            meta: asCodeMetaSchema,
           })
-        ),
-        title: schema.string({
-          maxLength: MAX_TITLE_LENGTH,
-          meta: { description: 'The links library item title.' },
-        }),
-      }),
-      meta: asCodeMetaSchema,
-    }),
-    {
-      minSize: 0,
-      maxSize: PAGINATION_MAX_SIZE,
-      meta: {
+          .strict()
+      )
+      .min(0)
+      .max(PAGINATION_MAX_SIZE)
+      .meta({
         description: 'List of links library items matching the query.',
-      },
-    }
-  ),
-  meta: asCodePaginationResponseMetaSchema,
-});
+      }),
+    meta: asCodePaginationResponseMetaSchema,
+  })
+  .strict();

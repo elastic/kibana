@@ -8,26 +8,46 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiBasicTable } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 
-import type { SortFieldTimeline } from '../../../../common/api/timeline';
+import { TimelineTypeEnum, type SortFieldTimeline } from '../../../../common/api/timeline';
 import type {
+  ActionTimelineToShow,
   OnOpenTimeline,
   OnTableChange,
   OpenTimelineResult,
 } from '../../../timelines/components/open_timeline/types';
 import { TimelinesTable } from '../../../timelines/components/open_timeline/timelines_table';
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
+import { useEditTimelineBatchActions } from '../../../timelines/components/open_timeline/edit_timeline_batch_actions';
+import {
+  BATCH_ACTIONS,
+  REFRESH,
+  SELECTED_TIMELINES,
+  SHOWING,
+} from '../../../timelines/components/open_timeline/translations';
+import {
+  UtilityBar,
+  UtilityBarAction,
+  UtilityBarGroup,
+  UtilityBarSection,
+  UtilityBarText,
+} from '../../../common/components/utility_bar';
 import { useGetTimelinesByIds } from './use_get_timelines_by_ids';
+import { useRefetchOnTimelineClose } from '../../../common/hooks/timeline/use_refetch_on_timeline_close';
 import { NO_TIMELINES_ATTACHED, TIMELINE_DISPLAY_NAME } from './translations';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD: SortFieldTimeline = 'updated';
 const DEFAULT_SORT_ORDER: 'asc' | 'desc' = 'desc';
+const ACTIONS: ActionTimelineToShow[] = ['selectable'];
+const ACTIONS_WITH_REMOVE: ActionTimelineToShow[] = ['selectable', 'removeFromCase'];
 
-const extractTimelineIds = (caseData: CommonAttachmentTabViewProps['caseData']): string[] => {
+const extractTimelineIds = (caseData: CommonAttachmentListViewProps['caseData']): string[] => {
   const ids: string[] = [];
   for (const comment of caseData.comments) {
     // `attachmentId` may be a string or array of strings on unified reference attachments,
@@ -43,7 +63,10 @@ const extractTimelineIds = (caseData: CommonAttachmentTabViewProps['caseData']):
   return ids;
 };
 
-export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ caseData }) => {
+export const CaseViewTimelines: React.FC<CommonAttachmentListViewProps> = ({
+  caseData,
+  onRemove,
+}) => {
   const timelineIds = useMemo(() => extractTimelineIds(caseData), [caseData]);
 
   const [pageIndex, setPageIndex] = useState(1);
@@ -53,11 +76,12 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ case
   const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
     Record<string, JSX.Element>
   >({});
+  const [selectedItems, setSelectedItems] = useState<OpenTimelineResult[]>([]);
 
   const sort = useMemo(() => ({ sortField, sortOrder: sortDirection }), [sortField, sortDirection]);
   const pageInfo = useMemo(() => ({ pageSize, pageIndex }), [pageSize, pageIndex]);
 
-  const { timelines, totalCount, loading } = useGetTimelinesByIds({
+  const { timelines, totalCount, loading, refetch } = useGetTimelinesByIds({
     ids: timelineIds,
     pageInfo,
     sort,
@@ -65,12 +89,46 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ case
 
   const tableRef = useRef<EuiBasicTable<OpenTimelineResult> | null>(null);
 
+  useRefetchOnTimelineClose(refetch);
+
   const queryTimelineById = useQueryTimelineById();
   const onOpenTimeline = useCallback<OnOpenTimeline>(
     ({ duplicate, timelineId, timelineType }) =>
       queryTimelineById({ duplicate, timelineId, timelineType }),
     [queryTimelineById]
   );
+
+  const onSelectionChange = useCallback((items: OpenTimelineResult[]) => {
+    setSelectedItems(items);
+  }, []);
+
+  const onRemoveSelectedFromCase = useMemo(() => {
+    if (!onRemove) {
+      return undefined;
+    }
+    return () =>
+      onRemove(
+        {
+          attachmentIds: selectedItems.flatMap(({ savedObjectId }) =>
+            savedObjectId ? [savedObjectId] : []
+          ),
+        },
+        { onSuccess: () => tableRef.current?.changeSelection([]) }
+      );
+  }, [onRemove, selectedItems]);
+
+  const onRemoveFromCase = useMemo(
+    () => onRemove && ((timelineId: string) => onRemove({ attachmentIds: [timelineId] })),
+    [onRemove]
+  );
+
+  const { getBatchItemsPopoverContent } = useEditTimelineBatchActions({
+    onRemoveSelectedFromCase,
+    selectedItems,
+    showExportAction: false,
+    tableRef,
+    timelineType: TimelineTypeEnum.default,
+  });
 
   const onTableChange = useCallback<OnTableChange>(({ page, sort: nextSort }) => {
     if (page) {
@@ -97,15 +155,62 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ case
   }
 
   return (
-    <EuiFlexGroup gutterSize="none" data-test-subj="case-view-timelines">
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="case-view-timelines">
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          padding-top: 16px;
+          padding-bottom: 8px;
+        `}
+      >
+        <UtilityBar>
+          <UtilityBarSection>
+            <UtilityBarGroup>
+              <UtilityBarText data-test-subj="case-view-timelines-showing-count">
+                <>
+                  {SHOWING}{' '}
+                  <FormattedMessage
+                    id="xpack.securitySolution.cases.timelineAttachment.nTimelines"
+                    defaultMessage="{totalCount} {totalCount, plural, =1 {timeline} other {timelines}}"
+                    values={{ totalCount }}
+                  />
+                </>
+              </UtilityBarText>
+            </UtilityBarGroup>
+            <UtilityBarGroup>
+              <UtilityBarText data-test-subj="case-view-timelines-selected-count">
+                {SELECTED_TIMELINES(selectedItems.length)}
+              </UtilityBarText>
+              <UtilityBarAction
+                dataTestSubj="case-view-timelines-batch-actions-button"
+                iconSide="right"
+                iconType="chevronSingleDown"
+                popoverContent={getBatchItemsPopoverContent}
+                popoverPanelPaddingSize="none"
+              >
+                {BATCH_ACTIONS}
+              </UtilityBarAction>
+              <UtilityBarAction
+                dataTestSubj="case-view-timelines-refresh-button"
+                iconSide="right"
+                iconType="refresh"
+                onClick={refetch}
+              >
+                {REFRESH}
+              </UtilityBarAction>
+            </UtilityBarGroup>
+          </UtilityBarSection>
+        </UtilityBar>
+      </EuiFlexItem>
       <EuiFlexItem>
         <TimelinesTable
-          actionTimelineToShow={[]}
+          actionTimelineToShow={onRemoveFromCase ? ACTIONS_WITH_REMOVE : ACTIONS}
           defaultPageSize={DEFAULT_PAGE_SIZE}
           loading={loading}
           itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
           onOpenTimeline={onOpenTimeline}
-          onSelectionChange={noop}
+          onRemoveFromCase={onRemoveFromCase}
+          onSelectionChange={onSelectionChange}
           onTableChange={onTableChange}
           onToggleShowNotes={setItemIdToExpandedNotesRowMap}
           pageIndex={pageIndex - 1}
@@ -124,5 +229,3 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ case
 };
 
 CaseViewTimelines.displayName = 'CaseViewTimelines';
-
-const noop = () => {};

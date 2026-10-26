@@ -10,7 +10,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ConnectedProps } from 'react-redux-v7';
 import { connect, useDispatch } from 'react-redux-v7';
 import deepEqual from 'fast-deep-equal';
-import { type EuiDataGridControlColumn } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -95,8 +94,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
 
   const { dataView, status: dataViewStatus } = useDataView(PageScope.timeline);
-  const browserFields = useBrowserFields(PageScope.timeline);
-  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const browserFields = useBrowserFields(dataView);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const dataViewLoading = useMemo(() => dataViewStatus !== 'ready', [dataViewStatus]);
   const dataViewId = useMemo(() => dataView.id ?? '', [dataView.id]);
 
@@ -297,7 +296,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [enableNewFlyout, openNotes, openFlyout, selectedPatterns, telemetry, timelineId]
   );
 
-  const leadingControlColumns = useTimelineControlColumn({
+  const rowAdditionalLeadingControls = useTimelineControlColumn({
     timelineId,
     refetch,
     events,
@@ -380,7 +379,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         refetch={refetch}
         dataLoadingState={dataLoadingState}
         totalCount={isBlankTimeline ? 0 : totalCount}
-        leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+        rowAdditionalLeadingControls={rowAdditionalLeadingControls}
         onFetchMoreRecords={loadNextBatch}
         activeTab={activeTab}
         updatedAt={refreshedAt}
@@ -454,7 +453,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const connector = connect(makeMapStateToProps);
+type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+const connector = connect<StateProps, {}, TimelineTabCommonProps, State>(makeMapStateToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

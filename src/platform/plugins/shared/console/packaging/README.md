@@ -11,7 +11,7 @@ Instead of requiring the full Kibana platform, One Console bundles all necessary
 - **Standalone React Component**: Can be imported and used in any React application without Kibana dependencies
 - **Request Parsing**: Intelligently parses Elasticsearch API requests (method, URL, and body)
 - **Autocomplete Support**: Includes Elasticsearch API autocomplete functionality
-- **Internationalization**: Supports multiple languages (en, fr-FR, ja-JP, zh-CN)
+- **Internationalization**: Supports multiple languages (en, fr-FR, ja-JP, zh-CN, de-DE, pt-BR)
 - **HTTP Integration**: Allows custom HTTP clients and notification handlers to be injected
 
 ### Usage

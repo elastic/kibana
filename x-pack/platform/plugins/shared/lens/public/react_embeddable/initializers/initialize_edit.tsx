@@ -15,7 +15,6 @@ import type {
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { apiHasAppContext, apiPublishesDisabledActionIds } from '@kbn/presentation-publishing';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -38,6 +37,7 @@ import { APP_ID, getEditPath } from '../../../common/constants';
 import type { LensEmbeddableStartServices } from '../types';
 import {
   extractInheritedViewModeObservable,
+  getParentContext,
   saveUpdatedLinkedAnnotationsToLibrary,
 } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
@@ -49,6 +49,7 @@ import {
   apiPublishesIsEditableByUser,
 } from '../type_guards';
 import type { SearchContextConfig } from './initialize_search_context';
+import { isESQLModeEnabled } from './utils';
 
 function getSupportedTriggers(
   getState: GetStateType,
@@ -122,8 +123,6 @@ export function initializeEditApi(
     return currentState.managed || (hasManagedApi(parentApi) ? parentApi.isManaged : false);
   };
 
-  const isESQLModeEnabled = () => uiSettings.get(ENABLE_ESQL);
-
   const viewMode$ = extractInheritedViewModeObservable(parentApi);
 
   const { disabledActionIds$, setDisabledActionIds } = apiPublishesDisabledActionIds(parentApi)
@@ -150,6 +149,7 @@ export function initializeEditApi(
           valueInput: currentState,
           originatingApp: parentApiContext.currentAppId ?? 'dashboards',
           originatingPath: parentApiContext.getCurrentPath?.(),
+          originatingContainer: getParentContext(parentApi)?.type,
           searchSessionId: currentState.searchSessionId,
         },
         skipAppLeave,
@@ -231,7 +231,7 @@ export function initializeEditApi(
     }
     const currentState = getState();
     // check if it's in ES|QL mode
-    if (isTextBasedLanguage(currentState) && !isESQLModeEnabled()) {
+    if (isTextBasedLanguage(currentState) && !isESQLModeEnabled({ uiSettings })) {
       return false;
     }
     if (isManaged(currentState)) {
@@ -332,7 +332,7 @@ export function initializeEditApi(
           core: startDependencies.coreStart,
           api: parentApi,
           loadContent: getEditPanel,
-          options: { uuid },
+          options: { uuid, isEsql: isTextBasedLanguage(getState()) },
         });
       },
       getEditPanel,
@@ -374,7 +374,7 @@ export function initializeEditApi(
               closeFlyout,
             });
           },
-          options: { uuid },
+          options: { uuid, isEsql: isTextBasedLanguage(getState()) },
         });
       },
       getEditHref: async () => {

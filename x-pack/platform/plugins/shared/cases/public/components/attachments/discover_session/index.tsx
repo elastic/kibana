@@ -18,7 +18,10 @@ import {
   defineAttachment,
   type UnifiedReferenceAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
-import { SavedObjectAddedEvent } from '../common/saved_object/saved_object_added_event';
+import {
+  SavedObjectAddedEvent,
+  getSavedObjectDeletedEvent,
+} from '../common/saved_object/saved_object_added_event';
 import { createSavedObjectAttachmentsTab } from '../common/saved_object/saved_object_attachments_tab';
 import * as i18n from './translations';
 
@@ -44,14 +47,25 @@ const DiscoverSessionAttachmentsTab = createSavedObjectAttachmentsTab({
 export const getDiscoverSessionAttachmentType = () =>
   defineAttachment({
     id: DISCOVER_SESSION_ATTACHMENT_TYPE,
-    icon: 'discoverApp',
-    displayName: i18n.DISCOVER_SESSIONS,
+    getIcon: () => 'discoverApp',
+    getLabel: () => i18n.DISCOVER_SESSIONS,
     schema: DiscoverSessionAttachmentPayloadSchema,
-    getAttachmentViewObject: (props) => ({
+    getCreationActivity: (props) => ({
       event: <DiscoverSessionEvent {...props} />,
-      timelineAvatar: 'discoverApp',
       hideDefaultActions: false,
     }),
-    getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_DISCOVER_SESSION }),
-    getAttachmentTabViewObject: () => ({ children: DiscoverSessionAttachmentsTab }),
+    getRemovalActivity: ({
+      attachmentId,
+      metadata,
+    }: UnifiedReferenceAttachmentViewProps<SavedObjectReferenceMetadata, string>) => ({
+      event: getSavedObjectDeletedEvent({
+        soType: DISCOVER_SESSION_SO_TYPE,
+        attachmentId,
+        title: metadata?.title,
+        label: i18n.REMOVED_DISCOVER_SESSION,
+        'data-test-subj': `cases-discover-session-deleted-event-link-${attachmentId}`,
+      }),
+    }),
+    getAttachmentList: () => ({ children: DiscoverSessionAttachmentsTab }),
+    getCountLabel: ({ count }) => i18n.DISCOVER_SESSIONS_COUNT(count),
   });

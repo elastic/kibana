@@ -46,20 +46,20 @@ export {
   SecurityConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
   GenerativeAIForObservabilityConnectorFeatureId,
-  GenerativeAIForSearchPlaygroundConnectorFeatureId,
   EndpointSecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
   AgentBuilderConnectorFeatureId,
+  ContextEngineConnectorFeatureId,
   AlertingConnectorFeature,
   CasesConnectorFeature,
   UptimeConnectorFeature,
   SecuritySolutionFeature,
   GenerativeAIForSecurityFeature,
   GenerativeAIForObservabilityFeature,
-  GenerativeAIForSearchPlaygroundFeature,
   EndpointSecurityConnectorFeature,
   WorkflowsConnectorFeature,
   AgentBuilderConnectorFeature,
+  ContextEngineConnectorFeature,
   areValidFeatures,
   getConnectorFeatureName,
   getConnectorCompatibility,
@@ -74,9 +74,28 @@ export type {
 } from './execution_log_types';
 export { EMPTY_EXECUTION_KPI_RESULT, executionLogSortableColumns } from './execution_log_types';
 export { validateEmptyStrings } from './validate_empty_strings';
+export type {
+  ConnectorSpecSummary,
+  ConnectorSpecDetail,
+  ConnectorSpecActionSummary,
+  ConnectorSpecActionDetail,
+  ConnectorSpecAvailability,
+} from './connector_spec';
 
 export const BASE_ACTION_API_PATH = '/api/actions';
 export const INTERNAL_BASE_ACTION_API_PATH = '/internal/actions';
+export {
+  buildInboundEventsPath,
+  buildInboundEventsUrl,
+  INBOUND_EVENTS_TOKEN_MAX_LENGTH,
+} from './inbound_events';
+export { ACTIONS_INBOUND_EVENTS_ENABLED_FLAG } from './feature_flags';
+export {
+  buildConnectorPublicKeyUrls,
+  CONNECTOR_PUBLIC_KEYS_API_PATH,
+  SSF_DISCOVERY_PATH_PREFIX,
+} from './connector_public_keys';
+export type { ConnectorPublicKeyUrls } from './connector_public_keys';
 export const ACTIONS_FEATURE_ID = 'actions';
 
 export const DEFAULT_MICROSOFT_EXCHANGE_URL = 'https://login.microsoftonline.com';
@@ -89,6 +108,8 @@ export const DEFAULT_MICROSOFT_GRAPH_API_SCOPE = 'https://graph.microsoft.com/.d
 export const MAX_EMAIL_BODY_LENGTH = 25 * 1000 * 1000; // 25MB
 
 export const CONNECTOR_ID_MAX_LENGTH = 36;
+export const CONNECTOR_NAME_MAX_LENGTH = 1024;
+export const CONNECTOR_CONFIG_KEY_MAX_LENGTH = 1024;
 export const ISO_DATE_MAX_LENGTH = 100;
 export const MAX_EXECUTION_FILTER_LENGTH = 8192;
 export const MAX_FEATURE_ID_LENGTH = 100;

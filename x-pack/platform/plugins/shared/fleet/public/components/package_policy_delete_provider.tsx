@@ -6,13 +6,8 @@
  */
 
 import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
-import {
-  EuiCallOut,
-  EuiConfirmModal,
-  EuiSpacer,
-  EuiIconTip,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, EuiIconTip, useGeneratedHtmlId } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -27,6 +22,7 @@ import {
 import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE } from '../../common/constants';
 import type { AgentPolicy, PackagePolicyPackage } from '../types';
 import { sendDeleteAgentlessPolicy } from '../hooks/use_request/agentless_policy';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../common/services/version_specific_policies_utils';
 
 interface Props {
   agentPolicies?: AgentPolicy[];
@@ -85,9 +81,11 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
       }
       setIsLoadingAgentsCount(true);
 
-      const kuery = `(${agentPolicies
-        .map((policy) => `${AGENTS_PREFIX}.policy_id:"${policy.id}"`)
-        .join(' or ')})`;
+      const kuery = buildPolicyBaseIdsWithFallbackKuery(
+        agentPolicies.map((policy) => policy.id),
+        `${AGENTS_PREFIX}.policy_base_id`,
+        `${AGENTS_PREFIX}.policy_id`
+      );
 
       const request = await sendGetAgents({
         kuery,
@@ -272,10 +270,8 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
       >
         {isDeletingFleetServer && (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount={false}
-              color="danger"
-              iconType="warning"
               title={
                 <FormattedMessage
                   id="xpack.fleet.deletePackagePolicy.confirmModal.fleetServerWarningTitle"
@@ -283,21 +279,20 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                 />
               }
               data-test-subj="fleetServerDeleteCallOut"
-            >
-              <FormattedMessage
-                id="xpack.fleet.deletePackagePolicy.confirmModal.fleetServerWarningMessage"
-                defaultMessage="If this policy is assigned to any Fleet Servers, deleting the Fleet Server integration will stop them from running. Agents that depend on those Fleet Servers will lose their connection to Fleet — you won't be able to manage them or send policy updates until you re-enroll each agent individually."
-              />
-            </EuiCallOut>
+              text={
+                <FormattedMessage
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.fleetServerWarningMessage"
+                  defaultMessage="If this policy is assigned to any Fleet Servers, deleting the Fleet Server integration will stop them from running. Agents that depend on those Fleet Servers will lose their connection to Fleet — you won't be able to manage them or send policy updates until you re-enroll each agent individually."
+                />
+              }
+            />
             <EuiSpacer size="m" />
           </>
         )}
         {packagePolicyPackage?.type === 'input' && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount={false}
-              color="warning"
-              iconType="warning"
               title={
                 <FormattedMessage
                   id="xpack.fleet.deletePackagePolicy.confirmModal.inputPackage.message"
@@ -311,10 +306,8 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         )}
         {(hasMultipleAgentPolicies || isShared) && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount={false}
-              color="warning"
-              iconType="warning"
               title={
                 <FormattedMessage
                   id="xpack.fleet.deletePackagePolicy.confirmModal.warningMultipleAgentPolicies"
@@ -334,9 +327,8 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
           />
         ) : agentsCount && agentPolicies ? (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount={false}
-              color="danger"
               data-test-subj="affectedAgentsCallOut"
               title={
                 !isAgentlessAgentPolicy && (
@@ -390,7 +382,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                   }}
                 />
               )}
-            </EuiCallOut>
+            </KbnDangerCallout>
             <EuiSpacer size="l" />
           </>
         ) : null}

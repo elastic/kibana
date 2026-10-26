@@ -13,9 +13,7 @@ import type { Query } from '@kbn/es-query';
 import type {
   ColumnBuildHints,
   FieldBasedIndexPatternColumn,
-  FormattedIndexPatternColumn,
   GenericIndexPatternColumn,
-  TextBasedLayerColumn,
   FormBasedLayer,
   FormBasedPersistedState,
   IndexPattern,
@@ -128,15 +126,6 @@ export const generateMissingFieldMessage = (
   ],
 });
 
-export function getSafeName(name: string, indexPattern: IndexPattern | undefined): string {
-  const field = indexPattern?.getFieldByName(name);
-  return field
-    ? field.displayName
-    : i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
-        defaultMessage: 'Missing field',
-      });
-}
-
 function areDecimalsValid(inputValue: string | number, digits: number) {
   const [, decimals = ''] = `${inputValue}`.split('.');
   return decimals.length <= digits;
@@ -160,18 +149,6 @@ export function isValidNumber(
     (lowerBound === undefined || inputValueAsNumber >= lowerBound) &&
     areDecimalsValid(inputValue, integer ? 0 : digits)
   );
-}
-
-/**
- * Type guard for narrowing a full column to a specific column type.
- * Use this when you have a complete `GenericIndexPatternColumn` and need to
- * access type-specific properties with full type safety.
- */
-export function isColumnOfType<C extends GenericIndexPatternColumn>(
-  type: C['operationType'],
-  column: GenericIndexPatternColumn
-): column is C {
-  return column.operationType === type;
 }
 
 /**
@@ -218,16 +195,6 @@ export const isColumn = (
 ): setter is GenericIndexPatternColumn => {
   return 'operationType' in setter;
 };
-
-export function isColumnFormatted(
-  column: GenericIndexPatternColumn | TextBasedLayerColumn
-): column is FormattedIndexPatternColumn | TextBasedLayerColumn {
-  return Boolean(
-    'params' in column &&
-      (column as FormattedIndexPatternColumn).params &&
-      'format' in (column as FormattedIndexPatternColumn).params!
-  );
-}
 
 export function getFormatFromPreviousColumn(previousColumn: ColumnBuildHints | undefined) {
   return previousColumn?.dataType === 'number' && previousColumn.params?.format
@@ -290,4 +257,37 @@ export function cleanupFormulaColumns(state: FormBasedPersistedState): FormBased
     ...state,
     layers,
   };
+}
+
+function isTimeFieldNameDateField(indexPattern: IndexPattern) {
+  return (
+    indexPattern.timeFieldName &&
+    indexPattern.fields.find(
+      (field) => field.name === indexPattern.timeFieldName && field.type === 'date'
+    )
+  );
+}
+
+export function getDateFields(indexPattern: IndexPattern): IndexPatternField[] {
+  const dateFields = indexPattern.fields.filter((field) => field.type === 'date');
+  if (isTimeFieldNameDateField(indexPattern)) {
+    dateFields.sort(({ name: nameA }, { name: nameB }) => {
+      if (nameA === indexPattern.timeFieldName) {
+        return -1;
+      }
+      if (nameB === indexPattern.timeFieldName) {
+        return 1;
+      }
+      return 0;
+    });
+  }
+  return dateFields;
+}
+
+// Resolves the date field a last value column should sort by when none is set: the data view's
+// default time field when it is a date, otherwise the first available date field.
+export function getDefaultDateFieldName(indexPattern: IndexPattern): string | undefined {
+  return isTimeFieldNameDateField(indexPattern)
+    ? indexPattern.timeFieldName
+    : indexPattern.fields.find((field) => field.type === 'date')?.name;
 }

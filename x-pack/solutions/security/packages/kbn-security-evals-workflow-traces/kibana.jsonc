@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/security-evals-workflow-traces",
+  "owner": "@elastic/security-generative-ai",
+  "group": "security",
+  "visibility": "private",
+  "devOnly": true
+}

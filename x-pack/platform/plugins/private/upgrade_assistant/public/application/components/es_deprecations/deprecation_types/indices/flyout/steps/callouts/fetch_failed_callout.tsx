@@ -6,7 +6,8 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
@@ -17,9 +18,7 @@ export const FetchFailedCallOut: React.FunctionComponent<Props> = (props) => {
   const { errorMessage } = props;
   return (
     <Fragment>
-      <EuiCallOut
-        color="danger"
-        iconType="warning"
+      <KbnDangerCallout
         data-test-subj="fetchFailedCallout"
         title={
           <FormattedMessage
@@ -27,9 +26,8 @@ export const FetchFailedCallOut: React.FunctionComponent<Props> = (props) => {
             defaultMessage="Reindex status not available"
           />
         }
-      >
-        {errorMessage}
-      </EuiCallOut>
+        text={errorMessage}
+      />
       <EuiSpacer />
     </Fragment>
   );

@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/std'
   - '@kbn/router-utils'
-  - '@kbn/split-button'
   - '@kbn/scout'
   - '@kbn/security-plugin'
   - '@kbn/navigation-customization-components'
@@ -56,6 +55,4 @@ fileGroups:
     - server/**/*.ts
     - test/**/*.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

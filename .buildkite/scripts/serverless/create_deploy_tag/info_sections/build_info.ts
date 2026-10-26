@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CommitWithStatuses } from '../shared';
-import { buildkite, buildkiteBuildStateToEmoji } from '../shared';
-import type { GitCommitExtract } from './commit_info';
+import type { CommitWithStatuses } from '../shared.ts';
+import { buildkite, buildkiteBuildStateToEmoji } from '../shared.ts';
+import type { GitCommitExtract } from './commit_info.ts';
 import type { Build } from '#pipeline-utils/buildkite';
 
 const QA_FTR_TEST_SLUG = 'appex-qa-serverless-kibana-ftr-tests';

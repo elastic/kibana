@@ -11,6 +11,7 @@ import { TestProviders } from '../../common/mock';
 import { EntityAnalyticsReadPrivilegesCallout } from './entity_analytics_read_privileges_callout';
 import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
+import { LEADS_INDEX_PATTERN } from '../../../common/entity_analytics/lead_generation/constants';
 
 jest.mock('../../common/components/callouts/use_callout_storage', () => ({
   useCallOutStorage: () => ({
@@ -46,7 +47,8 @@ const renderCallout = (
   riskEngineReadPrivileges: RiskEngineMissingPrivilegesResponse,
   entityEnginePrivileges: EntityAnalyticsPrivileges | undefined,
   leadGenerationPrivileges?: EntityAnalyticsPrivileges,
-  anomalyPrivileges?: EntityAnalyticsPrivileges
+  anomalyPrivileges?: EntityAnalyticsPrivileges,
+  alertsIndexPrivileges?: Record<string, Record<string, boolean>>
 ) =>
   render(
     <TestProviders>
@@ -55,6 +57,7 @@ const renderCallout = (
         entityEnginePrivileges={entityEnginePrivileges}
         leadGenerationPrivileges={leadGenerationPrivileges}
         anomalyPrivileges={anomalyPrivileges}
+        alertsIndexPrivileges={alertsIndexPrivileges}
         id="entity-analytics-home"
       />
     </TestProviders>
@@ -93,6 +96,17 @@ describe('EntityAnalyticsReadPrivilegesCallout', () => {
 
     expect(screen.getByText(CALLOUT_TITLE)).toBeInTheDocument();
     expect(screen.getByText(RISK_ENGINE_PRIVILEGE)).toBeInTheDocument();
+  });
+
+  it('shows callout when the alerts index is missing read privilege', () => {
+    const alertsIndex = '.alerts-security.alerts-default';
+
+    renderCallout(ALL_PRIVILEGES_GRANTED, makeEntityEnginePrivileges({}), undefined, undefined, {
+      [alertsIndex]: { read: false, view_index_metadata: true, write: false },
+    });
+
+    expect(screen.getByText(CALLOUT_TITLE)).toBeInTheDocument();
+    expect(screen.getByText(alertsIndex)).toBeInTheDocument();
   });
 
   it('shows callout when entity store index is missing read privilege', () => {
@@ -153,7 +167,7 @@ describe('EntityAnalyticsReadPrivilegesCallout', () => {
   });
 
   it('shows callout when lead generation index is missing read privilege', () => {
-    const leadsIndex = '.entity_analytics.entity-leads-*';
+    const leadsIndex = LEADS_INDEX_PATTERN;
     const leadPrivileges = makeEntityEnginePrivileges({
       [leadsIndex]: { read: false, view_index_metadata: true },
     });
@@ -165,7 +179,7 @@ describe('EntityAnalyticsReadPrivilegesCallout', () => {
   });
 
   it('combines missing privileges from risk engine, entity store, and lead generation', () => {
-    const leadsIndex = '.entity_analytics.entity-leads-*';
+    const leadsIndex = LEADS_INDEX_PATTERN;
     const missingRiskPrivileges: RiskEngineMissingPrivilegesResponse = {
       isLoading: false,
       hasAllRequiredPrivileges: false,
@@ -246,7 +260,7 @@ describe('EntityAnalyticsReadPrivilegesCallout', () => {
   });
 
   it('combines missing privileges from all sources including anomaly', () => {
-    const leadsIndex = '.entity_analytics.entity-leads-*';
+    const leadsIndex = LEADS_INDEX_PATTERN;
     const anomalyIndex = '.ml-anomalies-*';
     const missingRiskPrivileges: RiskEngineMissingPrivilegesResponse = {
       isLoading: false,

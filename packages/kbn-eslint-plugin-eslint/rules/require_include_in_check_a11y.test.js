@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./require_include_in_check_a11y');
+const rule = require('../oxlint_plugin').rules.require_include_in_check_a11y;
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({

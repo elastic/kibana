@@ -74,6 +74,7 @@ export class RegistryResponseError extends RegistryError {
 // Package errors
 
 export class PackageInvalidDeploymentMode extends FleetError {}
+export class PackageFipsIncompatibleError extends FleetError {}
 export class PackageOutdatedError extends FleetError {}
 export class PackageFailedVerificationError extends FleetError {
   constructor(pkgName: string, pkgVersion: string) {
@@ -184,8 +185,41 @@ export class CloudConnectorUpdateError extends FleetError {
   }
 }
 
+export class IacProvisionerConfigError extends FleetError {
+  constructor(message: string) {
+    super(`Error validating IaC Provisioner configuration in Fleet, ${message}`);
+  }
+}
+
+/**
+ * The IaC Provisioner rejected the request (4xx). `errorCodes` carries the
+ * provider's `errors[].code` values (e.g. `render.unknown_blueprint`) so the
+ * route can decide whether the caller may fall back to the static template.
+ */
+export class IacProvisionerRequestError extends FleetError {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+    public readonly errorCodes: string[] = []
+  ) {
+    super(`Error calling IaC Provisioner, ${message}`);
+  }
+}
+
+/**
+ * The IaC Provisioner could not be reached, returned a 5xx, or responded
+ * without the expected payload — a retryable availability problem rather
+ * than a contract rejection.
+ */
+export class IacProvisionerUnavailableError extends FleetError {
+  constructor(message: string, public readonly statusCode?: number) {
+    super(`IaC Provisioner unavailable, ${message}`);
+  }
+}
+
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
+export class AgentAlreadyAssignedError extends AgentReassignmentError {}
 export class AgentRollbackError extends FleetError {
   constructor(message: string) {
     super(`Error rolling back agent in Fleet: ${message}`);
@@ -213,6 +247,13 @@ export class HostedAgentPolicyRestrictionRelatedError extends FleetError {
   constructor(message = 'Cannot perform that action') {
     super(
       `${message} in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.`
+    );
+  }
+}
+export class AgentlessAgentRestrictionError extends FleetError {
+  constructor(message = 'Cannot perform that action') {
+    super(
+      `${message} in Fleet because managed agents are managed by Elastic and do not support this action.`
     );
   }
 }

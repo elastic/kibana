@@ -26,6 +26,7 @@ Table of Contents
     - [Executor](#executor)
     - [Example](#example)
   - [RESTful API](#restful-api)
+  - [Inbound connector events (tech preview)](#inbound-connector-events-tech-preview)
   - [Firing actions](#firing-actions)
     - [Accessing a scoped ActionsClient](#accessing-a-scoped-actionsclient)
     - [actionsClient.enqueueExecution(options)](#actionsclientenqueueexecutionoptions)
@@ -33,6 +34,7 @@ Table of Contents
     - [actionsClient.execute(options)](#actionsclientexecuteoptions)
       - [Example](#example-2)
 - [Command Line Utility](#command-line-utility)
+- [Logging](#Logging)
 
 ## Terminology
 
@@ -69,6 +71,27 @@ optional SSL settings, including a client certificate and key for mTLS. Actions 
 configured Relay client to server plugins so all Relay consumers use the same outbound HTTP,
 proxy, and TLS policy. The Relay host must also be added to `xpack.actions.allowedHosts`, since
 Relay requests go through the same `ensureUriAllowed` check as any other connector call.
+
+On Serverless, `xpack.actions.relay.uiam.enabled: true` makes every Relay request also carry an
+`Authorization: Bearer` header holding a fresh, short-lived token for Kibana's own UIAM identity,
+obtained from the security plugin's `authc.systemIdentity`. The Relay forwards that token together
+with the certificate identity injected by the ingress proxy to UIAM, which is what lets Relay
+authenticate Kibana across regions. At the Relay, the token only validates alongside Kibana's mTLS
+certificate identity, so the certificate configured under `xpack.actions.relay.ssl` must be the same
+one configured under `xpack.security.uiam.ssl`. That certificate is also what UIAM derives Kibana's own
+identity from. `authc.systemIdentity` is therefore only available when
+`xpack.security.uiam.ssl.certificate` and `.key` are set. If the token cannot be minted, or the flag is
+on without that configuration, the Relay request fails rather than being sent unauthenticated.
+The setting is rejected outside Serverless; with it off (the default) the header is omitted and the
+Relay identifies Kibana from the mTLS leg alone.
+
+The same flag chooses the Slack install credential. With it off (ECH, or Serverless with the
+default), install sends `kibana_api_key`; with it on, install creates a user-managed UIAM service
+account with Relay's platform service account (`relay-service`) in `assumable_by` and sends only
+`uiam_service_account_id`. Each connect creates a new account. The previous one is revoked after
+the new install is accepted, and a failed install revokes the account it just created. Disconnect
+revokes the stored account. The two credentials are mutually exclusive, and HTTP callers cannot
+name an assumer: the create-service-account route rejects unknown keys such as `assumable_by` and `platformAssumers`.
 
 ### Configuration Utilities
 
@@ -201,6 +224,10 @@ The built-in email action type provides a good example of creating an action typ
 
 Using an action type requires an action to be created that will contain and encrypt configuration for a given action type. See the [REST API Documentation](https://www.elastic.co/guide/en/kibana/master/actions-and-connectors-api.html) API for CRUD operations for Actions.
 
+## Inbound connector events (tech preview)
+
+Operator loop (flag, create, copy URL + token, `curl` POST, rotate): see [server/inbound/README.md](./server/inbound/README.md).
+
 ## Firing actions
 
 Running actions is possible by using the ActionsClient which is provided by the `getActionsClientWithRequest` function part of the plugin's Start Contract.
@@ -304,3 +331,7 @@ $ kbn-action create .slack "post to slack" '{"webhookUrl": "https://hooks.slack.
     "version": "WzMsMV0="
 }
 ```
+
+# Logging
+
+For logging and editorial guidance see the [logging guidelines](../../../../../docs/extend/contributing/codebase/logging.md).

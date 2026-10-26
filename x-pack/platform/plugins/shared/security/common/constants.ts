@@ -6,14 +6,10 @@
  */
 
 /**
- * The identifier in a saved object's `namespaces` array when it is shared globally to all spaces.
+ * Re-exported from `@kbn/core-spaces-common` rather than redeclared, so the security
+ * plugin and the spaces plugin cannot drift apart on the saved-objects sentinels.
  */
-export const ALL_SPACES_ID = '*';
-
-/**
- * The identifier in a saved object's `namespaces` array when it is shared to an unknown space (e.g., one that the end user is not authorized to see).
- */
-export const UNKNOWN_SPACE = '?';
+export { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/core-spaces-common';
 
 export const APPLICATION_PREFIX = 'kibana-';
 
@@ -139,6 +135,12 @@ export const API_VERSIONS = {
     },
   },
 };
+
+/**
+ * Name prefixes of predefined roles that Serverless hides from role listings. These roles are meant only
+ * for internal workloads, such as the service accounts of AlertZero workers and Nightshift agents.
+ */
+export const HIDDEN_PREDEFINED_ROLE_NAME_PREFIXES = ['_alertzero_', '_nightshift_'] as const;
 
 /**
  * Privileges that define the superuser role or the role equivalent to the superuser role.

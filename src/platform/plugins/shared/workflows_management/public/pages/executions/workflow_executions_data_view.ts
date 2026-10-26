@@ -10,15 +10,9 @@
 import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../common';
+import { WORKFLOWS_EXECUTIONS_DATA_VIEW_TITLE } from '../../../common';
 
 export const WORKFLOW_EXECUTIONS_DATA_VIEW_ID = 'workflows-executions-adhoc';
-
-export const WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC: DataViewSpec = {
-  id: WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
-  title: WORKFLOWS_EXECUTIONS_INDEX,
-  timeFieldName: 'startedAt',
-};
 
 const keywordField = (name: string): FieldSpec => ({
   name,
@@ -50,7 +44,7 @@ const booleanField = (name: string): FieldSpec => ({
   scripted: false,
 });
 
-export const WORKFLOW_EXECUTIONS_FIELD_SPECS: Record<string, FieldSpec> = {
+const WORKFLOW_EXECUTIONS_FIELD_SPECS: Record<string, FieldSpec> = {
   startedAt: dateField('startedAt'),
   createdAt: dateField('createdAt'),
   finishedAt: dateField('finishedAt'),
@@ -64,15 +58,20 @@ export const WORKFLOW_EXECUTIONS_FIELD_SPECS: Record<string, FieldSpec> = {
   spaceId: keywordField('spaceId'),
 };
 
-export const WORKFLOW_EXECUTIONS_DATA_VIEW_CREATE_SPEC: DataViewSpec = {
-  ...WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
-  allowNoIndex: true,
+export const WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC: DataViewSpec = {
+  id: WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
+  title: WORKFLOWS_EXECUTIONS_DATA_VIEW_TITLE,
+  timeFieldName: 'startedAt',
+  allowHidden: true,
   fields: WORKFLOW_EXECUTIONS_FIELD_SPECS,
 };
 
 export function createWorkflowExecutionsDataView(fieldFormats: FieldFormatsStart): DataView {
   return new DataView({
-    spec: WORKFLOW_EXECUTIONS_DATA_VIEW_CREATE_SPEC,
+    spec: {
+      ...WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
+      allowNoIndex: true,
+    },
     fieldFormats,
     metaFields: ['_id', '_type', '_source'],
   });

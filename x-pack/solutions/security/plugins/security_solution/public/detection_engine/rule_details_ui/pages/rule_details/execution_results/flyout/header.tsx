@@ -16,7 +16,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -50,16 +49,18 @@ export const FlyoutHeader: React.FC<FlyoutHeaderProps> = ({ item, titleId }) => 
         </EuiFlexItem>
         {item.execution_uuid !== null && (
           <EuiFlexItem grow={false}>
-            <EuiCopy textToCopy={item.execution_uuid} beforeMessage={i18n.FLYOUT_COPY_EXECUTION_ID}>
+            <EuiCopy
+              textToCopy={item.execution_uuid}
+              beforeMessage={i18n.FLYOUT_COPY_EXECUTION_ID}
+              tooltipProps={{ disableScreenReaderOutput: true }}
+            >
               {(copy) => (
-                <EuiToolTip content={i18n.FLYOUT_COPY_EXECUTION_ID} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    onClick={copy}
-                    iconType="copy"
-                    color="text"
-                    aria-label={i18n.FLYOUT_COPY_EXECUTION_ID}
-                  />
-                </EuiToolTip>
+                <EuiButtonIcon
+                  onClick={copy}
+                  iconType="copy"
+                  color="text"
+                  aria-label={i18n.FLYOUT_COPY_EXECUTION_ID}
+                />
               )}
             </EuiCopy>
           </EuiFlexItem>
