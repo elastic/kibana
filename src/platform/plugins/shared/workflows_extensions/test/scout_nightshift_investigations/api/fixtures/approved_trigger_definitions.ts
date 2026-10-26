@@ -324,7 +324,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'slack2.message',
-    schemaHash: '2645d776ad762b38f99a1446b90054e11c2c32b97720c534c94eb757b6056147',
+    schemaHash: '07628098f9ab1dab2890b457416de279f0f8082ac3ff04a75c1f484056a75d31',
   },
   {
     id: 'slack2.reaction_added',
