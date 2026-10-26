@@ -15,6 +15,7 @@ import type {
   ResolvedServiceAccountWorkload,
   ServiceAccountWorkloadLocator,
   ServiceAccountWorkloadResolver,
+  ServiceAccountWorkloadTypeRegistration,
 } from '@kbn/core-security-server';
 import { addSpaceIdToPath, asSpaceId, getSpaceUrlPrefix } from '@kbn/core-spaces-common';
 import { isInternalURL } from '@kbn/std';
@@ -144,7 +145,7 @@ const createWorkloadResolutionMetrics = (meter: Meter): WorkloadResolutionMetric
   ),
   unknown: meter.createCounter('kibana.security.service_accounts.workload_resolution.unknown', {
     description:
-      'Number of bound workloads a workload type could not say exist or not, because it failed or answered unknown.',
+      'Number of bound workloads that came back unknown, because their workload type is not registered, has no resolver, failed or answered unknown.',
     unit: '{workload}',
     valueType: ValueType.INT,
   }),
@@ -204,7 +205,7 @@ const getErrorType = (error: unknown): string =>
 interface WorkloadGroup {
   pluginId: string;
   workloadType: string;
-  resolver: ServiceAccountWorkloadResolver;
+  registration: ServiceAccountWorkloadTypeRegistration | undefined;
   indices: number[];
 }
 
@@ -233,29 +234,38 @@ export const createBoundWorkloadResolver = ({
 
     const groups = new Map<string, WorkloadGroup>();
     bindings.forEach(({ pluginId, workloadType }, index) => {
-      const resolver = registry.get(pluginId, workloadType)?.resolveWorkloads;
-      if (!resolver) {
-        return;
-      }
-
       const key = JSON.stringify([pluginId, workloadType]);
-      const group = groups.get(key) ?? { pluginId, workloadType, resolver, indices: [] };
+      const group = groups.get(key) ?? {
+        pluginId,
+        workloadType,
+        registration: registry.get(pluginId, workloadType),
+        indices: [],
+      };
       group.indices.push(index);
       groups.set(key, group);
     });
 
     await Promise.all(
-      [...groups.values()].map(async ({ pluginId, workloadType, resolver, indices }) => {
-        const workloads = indices.map((index) => ({
-          workloadId: bindings[index].workloadId,
-          spaceId: bindings[index].spaceId,
-        }));
-
+      [...groups.values()].map(async ({ pluginId, workloadType, registration, indices }) => {
         const attributes: Attributes = {
           'kibana.plugin.id': pluginId,
           'kibana.service_account.workload.type': workloadType,
           'kibana.service_account.workload_resolution.purpose': purpose,
         };
+
+        const resolver = registration?.resolveWorkloads;
+        if (!resolver) {
+          unknown.add(indices.length, {
+            ...attributes,
+            'error.type': registration ? 'no_resolver' : 'unregistered',
+          });
+          return;
+        }
+
+        const workloads = indices.map((index) => ({
+          workloadId: bindings[index].workloadId,
+          spaceId: bindings[index].spaceId,
+        }));
         batchSize.record(workloads.length, attributes);
         const start = performance.now();
         const recordFailure = (errorType: string) => {
