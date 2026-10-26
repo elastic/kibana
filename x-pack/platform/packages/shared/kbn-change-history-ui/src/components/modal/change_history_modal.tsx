@@ -67,7 +67,6 @@ export function ChangeHistoryModal(): JSX.Element | null {
     objectId,
     enabled: isOpen,
   });
-  console.log({ items });
 
   const reportChangeSelected = useCallback(
     (item: ChangeHistoryListItem, selectionSource: ChangeHistorySelectionSource) => {

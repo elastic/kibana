@@ -33,7 +33,6 @@ import {
   ChangeHistoryPreviewFooterSpacer,
 } from './change_history_preview_footer';
 import { ChangeHistoryPreviewSettingsPopover } from './change_history_preview_settings_popover';
-import type { ChangeHistoryMonacoTheme } from './monaco_theme';
 
 const FLOATING_NAVIGATOR_BOTTOM = `calc(${CHANGE_HISTORY_PREVIEW_FOOTER_HEIGHT} - ${CHANGE_HISTORY_PREVIEW_NAVIGATOR_HEIGHT} / 2)`;
 
@@ -68,11 +67,6 @@ export interface ChangeHistoryPreviewProps {
   diffTelemetry?: ChangeHistoryDiffTelemetry;
   /** Version labels shown above the diff panes. */
   compareIndicator?: ChangeHistoryCompareIndicator;
-  /**
-   * Monaco theme: the id of a registered theme, or a definition the component registers (see
-   * `createChangeHistoryEuiMonacoTheme` to extend the default). Defaults to the EUI theme.
-   */
-  monacoTheme?: ChangeHistoryMonacoTheme;
   /**
    * Extra Monaco options applied to the editors (and both diff panes), e.g. to show validation
    * squiggles. Keep the identity stable (memoize) to avoid reapplying on every render.
@@ -122,7 +116,6 @@ export const ChangeHistoryPreview = ({
   language = 'json',
   diffTelemetry,
   compareIndicator,
-  monacoTheme: monacoThemeProp,
   editorOptions,
   renderFooter,
   extraSettings,
@@ -173,6 +166,7 @@ export const ChangeHistoryPreview = ({
   return (
     <>
       <div
+        data-test-subj={dataTestSubj}
         css={[
           containerStyles?.(euiThemeContext),
           css`
@@ -198,7 +192,6 @@ export const ChangeHistoryPreview = ({
           baseline={baselineComparison}
           target={targetComparison}
           language={language}
-          monacoTheme={monacoThemeProp}
           editorOptions={editorOptions}
           data-test-subj={dataTestSubj}
           compareMode={compareMode}

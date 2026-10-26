@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 
-import type { ChangeHistoryListItem } from '@kbn/change-history-ui';
+import type { ChangeHistoryListItem, ChangeHistoryProviderProps } from '@kbn/change-history-ui';
 import { ChangeHistoryModal, ChangeHistoryProvider } from '@kbn/change-history-ui';
 import { i18n } from '@kbn/i18n';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { coreServices } from '../services/kibana_services';
@@ -19,6 +20,12 @@ import { createDashboardChangeHistoryAdapter } from './dashboard_change_history_
 import { renderDashboardChangeHistoryBadge } from './dashboard_change_history_badge';
 import { DashboardChangeHistoryPreview } from './dashboard_change_history_preview';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
+
+const CHANGE_HISTORY_SCOPE = {
+  module: 'dashboard',
+  dataset: 'dashboards',
+  objectType: 'dashboard',
+};
 
 export interface DashboardChangeHistoryProviderProps {
   children: React.ReactNode;
@@ -31,30 +38,12 @@ export const DashboardChangeHistoryProvider = ({
   const dashboardId = dashboardApi.savedObjectId$.getValue() ?? dashboardApi.uuid;
 
   const { analytics } = coreServices;
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const hasUnsavedChanges = useStateFromPublishingSubject(dashboardApi.hasUnsavedChanges$);
   const [comparisonChangeId, setComparisonChangeId] = useState<string>();
   // set by the "N changes" button, whose click bubbles up to the row and selects the change
   const requestedComparisonIdRef = useRef<string>();
   const [previewTitle, setPreviewTitle] = useState<string>(
     dashboardApi?.title$.getValue() ?? dashboardId
-  );
-
-  useEffect(() => {
-    const unsavedChangesSubscription = dashboardApi?.hasUnsavedChanges$.subscribe((result) => {
-      setHasUnsavedChanges(result);
-    });
-    return () => {
-      unsavedChangesSubscription?.unsubscribe();
-    };
-  }, [dashboardApi]);
-
-  const scope = useMemo(
-    () => ({
-      module: 'dashboard',
-      dataset: 'dashboards',
-      objectType: 'dashboard',
-    }),
-    []
   );
 
   const adapter = useMemo(
@@ -68,36 +57,45 @@ export const DashboardChangeHistoryProvider = ({
     requestedComparisonIdRef.current = undefined;
   }, []);
 
+  const renderChanges = useCallback<NonNullable<ChangeHistoryProviderProps['renderChanges']>>(
+    ({ item, nChanges }) =>
+      item.metadata?.version === 1 ? (
+        nChanges // version 1 has nothing to compare to so don't make it a button
+      ) : (
+        <EuiButtonEmpty
+          data-test-subj="changeHistoryItemChanges"
+          size={'xs'}
+          flush={'both'}
+          onClick={() => {
+            requestedComparisonIdRef.current = item.id;
+          }}
+        >
+          {nChanges}
+        </EuiButtonEmpty>
+      ),
+    []
+  );
+
+  const renderPreview = useCallback<NonNullable<ChangeHistoryProviderProps['renderPreview']>>(
+    (props) => (
+      <DashboardChangeHistoryPreview
+        previewProps={props}
+        setPreviewTitle={setPreviewTitle}
+        comparisonChangeId={comparisonChangeId}
+        inheritedTimeRange={dashboardApi?.timeRange$.getValue()}
+      />
+    ),
+    [comparisonChangeId, dashboardApi]
+  );
+
   return (
     <ChangeHistoryProvider
       objectId={dashboardId}
       adapter={adapter}
-      renderPreview={(props) => (
-        <DashboardChangeHistoryPreview
-          previewProps={props}
-          setPreviewTitle={setPreviewTitle}
-          comparisonChangeId={comparisonChangeId}
-          inheritedTimeRange={dashboardApi?.timeRange$.getValue()}
-        />
-      )}
+      renderPreview={renderPreview}
       onSelectChange={onSelectChange}
       renderBadge={renderDashboardChangeHistoryBadge}
-      renderChanges={({ item, nChanges }) =>
-        item.metadata?.version === 1 ? (
-          nChanges // version 1 has nothing to compare to so don't make it a button
-        ) : (
-          <EuiButtonEmpty
-            data-test-subj="changeHistoryItemChanges"
-            size={'xs'}
-            flush={'both'}
-            onClick={() => {
-              requestedComparisonIdRef.current = item.id;
-            }}
-          >
-            {nChanges}
-          </EuiButtonEmpty>
-        )
-      }
+      renderChanges={renderChanges}
       labels={{
         previewBackLabel: i18n.translate('dashboard.changeHistory.backToDashboard', {
           defaultMessage: 'Back to dashboard',
@@ -106,7 +104,7 @@ export const DashboardChangeHistoryProvider = ({
       }}
       features={{ compare: true, restore: true, unsavedChanges: hasUnsavedChanges }}
       permissions={{ canRestore: !dashboardApi.isManaged }}
-      scope={scope}
+      scope={CHANGE_HISTORY_SCOPE}
       analytics={analytics}
     >
       {children}

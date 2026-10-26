@@ -102,9 +102,6 @@ jest.mock('@kbn/code-editor', () => {
 const mockCreateEditor = monaco.editor.create as jest.Mock;
 const mockCreateDiffEditor = monaco.editor.createDiffEditor as jest.Mock;
 
-const testThemeData = { base: 'vs' as const, inherit: true, rules: [], colors: {} };
-const testThemeDefinition = { id: 'test-theme', getDefinition: () => testThemeData };
-
 const renderPreview = (props: React.ComponentProps<typeof ChangeHistoryPreview>) =>
   render(
     <TestProvider>
@@ -400,17 +397,6 @@ describe('ChangeHistoryPreview', () => {
     expect(monaco.editor.createModel).toHaveBeenCalledWith('{\n  "a": 2\n}', 'json');
   });
 
-  it('uses a provided Monaco theme instead of defining its own', () => {
-    jest.useFakeTimers();
-    renderPreview({ target: 'name: current\n', monacoTheme: 'my-theme' });
-
-    expect(monaco.editor.defineTheme).not.toHaveBeenCalled();
-    expect(mockCreateEditor).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ theme: 'my-theme' })
-    );
-  });
-
   it('registers and uses the EUI theme by default', () => {
     jest.useFakeTimers();
     renderPreview({ target: 'name: current\n' });
@@ -424,17 +410,6 @@ describe('ChangeHistoryPreview', () => {
     expect(mockCreateEditor).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ theme: 'change-history-eui' })
-    );
-  });
-
-  it('registers a theme definition and uses its id', () => {
-    jest.useFakeTimers();
-    renderPreview({ target: 'name: current\n', monacoTheme: testThemeDefinition });
-
-    expect(monaco.editor.defineTheme).toHaveBeenCalledWith('test-theme', testThemeData);
-    expect(mockCreateEditor).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ theme: 'test-theme' })
     );
   });
 
@@ -474,8 +449,8 @@ describe('ChangeHistoryPreview', () => {
     fireEvent.click(screen.getByTestId('changeHistoryPreviewSettingsButton'));
 
     expect(
-      screen.getAllByText(/Code comparing|My setting/).map((element) => element.textContent)
-    ).toEqual(['Code comparing', 'My setting']);
+      screen.getAllByText(/Comparison mode|My setting/).map((element) => element.textContent)
+    ).toEqual(['Comparison mode', 'My setting']);
 
     fireEvent.click(screen.getByTestId('changeHistoryCompareSplit'));
 

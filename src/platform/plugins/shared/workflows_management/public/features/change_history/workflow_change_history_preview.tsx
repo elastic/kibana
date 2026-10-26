@@ -14,6 +14,7 @@ import React, { useMemo, useState } from 'react';
 import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
 import {
   ChangeHistoryPreview,
+  ChangeHistoryPreviewFooterSpacer,
   getChangeHistoryValidationDisplayOptions,
 } from '@kbn/change-history-ui';
 import { getWorkflowChangeHistoryCompareIndicator } from './get_workflow_change_history_compare_indicator';
@@ -84,13 +85,17 @@ const WorkflowChangeHistoryPreview = ({
           onHighlightValidationErrorsChange={setHighlightValidationErrors}
         />
       }
-      renderFooter={(context) => (
-        <WorkflowChangeHistoryPreviewValidation
-          context={context}
-          highlightValidationErrors={highlightValidationErrors}
-          validationYaml={targetYaml}
-        />
-      )}
+      renderFooter={(context) =>
+        context ? (
+          <WorkflowChangeHistoryPreviewValidation
+            context={context}
+            highlightValidationErrors={highlightValidationErrors}
+            validationYaml={targetYaml}
+          />
+        ) : (
+          <ChangeHistoryPreviewFooterSpacer />
+        )
+      }
       data-test-subj="workflowChangeHistoryMonacoPreview"
     />
   );

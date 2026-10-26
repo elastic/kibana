@@ -22,18 +22,11 @@ const LazyDashboardPreview = lazy(async () => {
   return { default: DashboardPreview };
 });
 
-const layoutStyles = {
-  container: css({
-    display: 'grid',
-    gridTemplateRows: '1fr auto',
-    height: '100%',
-    width: '100%',
-  }),
-  content: css({
-    minHeight: 0,
-    overflow: 'auto',
-  }),
-};
+const contentStyles = css({
+  height: '100%',
+  width: '100%',
+  overflow: 'auto',
+});
 
 type PreviewProps = Parameters<ChangeHistoryPreviewRenderFn>[0];
 
@@ -53,12 +46,9 @@ export const DashboardChangeHistoryPreview = ({
   comparisonChangeId,
 }: DashboardChangeHistoryPreviewProps): JSX.Element => {
   const { compareSpec, diffTelemetry, change } = previewProps;
-  const selectedViewMode =
-    compareSpec?.comparisonType === 'vs_row' || comparisonChangeId === change.id
-      ? 'comparison'
-      : 'preview';
+  const isComparison = compareSpec?.comparisonType === 'vs_row' || comparisonChangeId === change.id;
 
-  if (selectedViewMode === 'comparison' && compareSpec) {
+  if (isComparison && compareSpec) {
     return (
       <ChangeHistoryPreview
         baseline={compareSpec.baseline.snapshot as object}
@@ -71,16 +61,14 @@ export const DashboardChangeHistoryPreview = ({
   }
 
   return (
-    <div css={layoutStyles.container}>
-      <div css={layoutStyles.content}>
-        <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-          <LazyDashboardPreview
-            {...previewProps}
-            setPreviewTitle={setPreviewTitle}
-            inheritedTimeRange={inheritedTimeRange}
-          />
-        </Suspense>
-      </div>
+    <div css={contentStyles}>
+      <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
+        <LazyDashboardPreview
+          {...previewProps}
+          setPreviewTitle={setPreviewTitle}
+          inheritedTimeRange={inheritedTimeRange}
+        />
+      </Suspense>
     </div>
   );
 };

@@ -24,34 +24,25 @@ export const createDashboardChangeHistoryAdapter = (
 ): ChangeHistoryAdapter => ({
   listChanges: async ({ objectId, page, signal }) => {
     try {
-      const response = await http.get<HistoryListResponse>(
+      return await http.get<HistoryListResponse>(
         buildPath(`${BASE_HISTORY_PATH}/{objectId}`, { objectId }),
         {
           query: { page: page.index + 1, per_page: page.size },
           signal,
         }
       );
-      const test = response.items.map((item) => {
-        console.log({ item });
-        return item.changes
-          ? { ...item, changes: { ...item.changes, summary: 'This is a summary' } }
-          : item;
-      });
-      console.log({ test });
-      return { ...response, items: test };
     } catch (e) {
       throw mapChangeHistoryHttpError(e);
     }
   },
   getChange: async ({ objectId, changeId, signal }) => {
     try {
-      const response = await http.get<ChangeDetailsResponse>(
+      return await http.get<ChangeDetailsResponse>(
         buildPath(`${BASE_HISTORY_PATH}/{objectId}/{changeId}`, { objectId, changeId }),
         {
           signal,
         }
       );
-      return response;
     } catch (e) {
       throw mapChangeHistoryHttpError(e);
     }

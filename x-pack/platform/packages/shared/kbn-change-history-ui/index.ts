@@ -27,8 +27,6 @@ export {
   ChangeHistoryPreviewFooter,
   ChangeHistoryPreviewFooterSpacer,
   ChangeHistoryPreviewSettingsSection,
-  createChangeHistoryEuiMonacoTheme,
-  euiChangeHistoryMonacoTheme,
   getChangeHistoryValidationDisplayOptions,
 } from './src/components/preview';
 export type {
@@ -36,10 +34,7 @@ export type {
   ChangeHistoryCompareIndicator,
   ChangeHistoryPreviewProps,
   ChangeHistoryMonacoLanguage,
-  ChangeHistoryMonacoTheme,
-  ChangeHistoryMonacoThemeDefinition,
   ChangeHistoryPreviewEditorContext,
-  CreateChangeHistoryEuiMonacoThemeOptions,
 } from './src/components/preview';
 export {
   ChangeHistoryTimeline,

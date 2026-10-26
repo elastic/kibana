@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
-
 /**
  * Unified (inline) diff layout selectors — Monaco positions `.editor.original` at left:0
  * with width = max(5px, decorationsLeft). Collapse original and stretch modified to
@@ -18,9 +16,10 @@ export const CHANGE_HISTORY_UNIFIED_DIFF_COLLAPSE_ORIGINAL_SELECTOR =
 export const CHANGE_HISTORY_UNIFIED_DIFF_STRETCH_MODIFIED_SELECTOR =
   '& .monaco-diff-editor:not(.side-by-side) .editor.modified';
 
-export const buildChangeHistoryUnifiedDiffLayoutStyles = (
-  _theme: UseEuiTheme
-): Record<string, Record<string, string | number>> => ({
+export const buildChangeHistoryUnifiedDiffLayoutStyles = (): Record<
+  string,
+  Record<string, string | number>
+> => ({
   [CHANGE_HISTORY_UNIFIED_DIFF_COLLAPSE_ORIGINAL_SELECTOR]: {
     width: '0 !important',
     minWidth: '0 !important',

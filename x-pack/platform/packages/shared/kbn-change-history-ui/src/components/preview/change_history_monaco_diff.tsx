@@ -28,8 +28,7 @@ import {
   CHANGE_HISTORY_UNIFIED_DIFF_EDITOR_OPTIONS,
   CHANGE_HISTORY_UNIFIED_DIFF_MODIFIED_EDITOR_OPTIONS,
 } from './monaco_options';
-import type { ChangeHistoryMonacoTheme } from './monaco_theme';
-import { useResolveChangeHistoryMonacoTheme } from './monaco_theme';
+import { useDefineChangeHistoryMonacoTheme } from './monaco_theme';
 
 const getDiffEditorOptions = (
   compareMode: ChangeHistoryCompareMode,
@@ -134,7 +133,6 @@ export interface ChangeHistoryMonacoDiffProps {
   baseline?: string;
   target: string;
   language?: ChangeHistoryMonacoLanguage;
-  monacoTheme?: ChangeHistoryMonacoTheme;
   editorOptions?: monaco.editor.IEditorOptions;
   compareMode: ChangeHistoryCompareMode;
   diffTelemetry?: ChangeHistoryDiffTelemetry;
@@ -162,8 +160,7 @@ const monacoDiffPreviewStyles = {
         margin-right: 2px;
       }
     `,
-  unifiedDiffLayout: (themeContext: UseEuiTheme) =>
-    css(buildChangeHistoryUnifiedDiffLayoutStyles(themeContext)),
+  unifiedDiffLayout: css(buildChangeHistoryUnifiedDiffLayoutStyles()),
   monacoHostSplit: css({
     padding: 0,
   }),
@@ -177,7 +174,6 @@ export const ChangeHistoryMonacoDiff = ({
   baseline,
   target,
   language = 'plaintext',
-  monacoTheme: monacoThemeProp,
   editorOptions,
   compareMode,
   diffTelemetry,
@@ -201,7 +197,7 @@ export const ChangeHistoryMonacoDiff = ({
   const editorOptionsRef = useRef(editorOptions);
   editorOptionsRef.current = editorOptions;
 
-  const monacoTheme = useResolveChangeHistoryMonacoTheme(monacoThemeProp);
+  const monacoTheme = useDefineChangeHistoryMonacoTheme();
   const monacoThemeRef = useRef(monacoTheme);
   monacoThemeRef.current = monacoTheme;
 

@@ -12,10 +12,6 @@ import {
 } from './change_history_unified_diff_layout';
 
 describe('change_history_unified_diff_layout', () => {
-  const mockEuiTheme = {
-    size: { m: '16px', s: '8px' },
-  };
-
   it('keeps unified diff gutter-collapse selectors stable', () => {
     expect(CHANGE_HISTORY_UNIFIED_DIFF_COLLAPSE_ORIGINAL_SELECTOR).toBe(
       '& .monaco-diff-editor:not(.side-by-side) .editor.original'
@@ -26,9 +22,7 @@ describe('change_history_unified_diff_layout', () => {
   });
 
   it('collapses the original pane and stretches the modified pane in unified mode', () => {
-    const styles = buildChangeHistoryUnifiedDiffLayoutStyles({
-      euiTheme: mockEuiTheme,
-    } as Parameters<typeof buildChangeHistoryUnifiedDiffLayoutStyles>[0]);
+    const styles = buildChangeHistoryUnifiedDiffLayoutStyles();
 
     expect(styles[CHANGE_HISTORY_UNIFIED_DIFF_COLLAPSE_ORIGINAL_SELECTOR]).toMatchObject({
       width: '0 !important',
