@@ -15,8 +15,7 @@ import { openSnoozeModal } from './snooze_modal';
 
 jest.mock('@kbn/react-kibana-mount', () => ({
   toMountPoint: (node: unknown) => (element: HTMLElement) => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { createRoot } = require('react-dom/client');
+    const { createRoot } = jest.requireActual('react-dom/client');
     const root = createRoot(element);
     root.render(node);
     return () => root.unmount();
@@ -86,8 +85,7 @@ const makeDeps = () => ({
   }),
 });
 
-// Tests that never confirm or cancel leave the modal mounted, so each opened
-// modal is torn down afterwards to keep `getByTestId` unambiguous.
+// Tests that never confirm or cancel leave the modal mounted.
 let openModals: Array<() => void> = [];
 
 beforeEach(() => {

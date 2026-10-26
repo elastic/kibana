@@ -15,9 +15,7 @@ export type ConditionFieldsSource = Pick<EpisodeDataSource, 'id' | 'fetchSearchF
 
 export interface UseConditionFieldNamesOptions {
   http: HttpStart;
-  /** Source whose searchable fields back the `field_change` condition dropdown. */
   dataSource?: ConditionFieldsSource;
-  /** Narrows the fields to the rule types of the rows being snoozed. */
   ruleTypeIds?: string[];
   enabled?: boolean;
 }
@@ -27,10 +25,6 @@ export interface UseConditionFieldNamesResult {
   isLoading: boolean;
 }
 
-/**
- * Loads the scalar field names offered in the `field_change` snooze condition's
- * dropdown from a data source's searchable fields.
- */
 export const useConditionFieldNames = ({
   http,
   dataSource,
