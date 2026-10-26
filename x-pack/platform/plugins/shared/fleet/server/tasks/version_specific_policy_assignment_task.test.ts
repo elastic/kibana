@@ -575,6 +575,33 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       );
     });
 
+    it('Should select agents inactive by timeout, not unenrolled agents', async () => {
+      mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
+        { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+      ] as AgentPolicy[]);
+      const agents = generateAgents(1, 'policy-1', '8.18.0');
+      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockedGetAgentsByKuery.mockResolvedValue({ total: 1, agents, page: 1, perPage: 1 });
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+
+      await runTask();
+
+      // no agent status filter (inactive by timeout), the stored `active` field excludes unenrolled agents
+      for (const [, , options] of [
+        mockedGetAgentsByKuery.mock.calls[0],
+        mockedFetchAllAgentsByKuery.mock.calls[0],
+      ]) {
+        expect(options.showInactive).toBe(true);
+        expect(options.kuery).toMatch(/ and active:true$/);
+      }
+      expect(mockedReassignAgents).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ showInactive: true }),
+        'policy-1#8.18'
+      );
+    });
+
     describe('Mismatched variants search', () => {
       beforeEach(() => {
         mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
