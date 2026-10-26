@@ -568,9 +568,9 @@ describe('UpdateSLO', () => {
         });
         mockRepository.findById.mockResolvedValueOnce(originalSlo);
         mockSummaryTransformManager.install.mockImplementationOnce(
-          (_slo, { signal } = {}) =>
+          (_slo, { signal }) =>
             new Promise((_resolve, reject) => {
-              signal?.addEventListener('abort', () =>
+              signal.addEventListener('abort', () =>
                 reject(new errors.RequestAbortedError('Request aborted'))
               );
             })

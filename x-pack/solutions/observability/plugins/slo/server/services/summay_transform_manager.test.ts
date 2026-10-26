@@ -22,6 +22,7 @@ import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/sl
 describe('SummaryTransformManager', () => {
   let scopedClusterClientMock: ScopedClusterClientMock;
   let loggerMock: jest.Mocked<MockedLogger>;
+  const { signal } = new AbortController();
 
   const alreadyExistsError = new EsErrors.ResponseError(
     elasticsearchClientMock.createApiResponse({
@@ -55,7 +56,7 @@ describe('SummaryTransformManager', () => {
         .mockRejectedValueOnce(alreadyExistsError);
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
 
-      await expect(createManager().install(slo)).resolves.toBe(
+      await expect(createManager().install(slo, { signal })).resolves.toBe(
         getSLOSummaryTransformId(slo.id, slo.revision)
       );
       expect(
@@ -77,24 +78,17 @@ describe('SummaryTransformManager', () => {
       expect(options?.signal).toBe(controller.signal);
     });
 
-    it('forwards the call signal to startTransform', async () => {
-      const controller = new AbortController();
-
-      await createManager().start('slo-summary-transform-id', { signal: controller.signal });
-
-      const [[, options]] =
-        scopedClusterClientMock.asSecondaryAuthUser.transform.startTransform.mock.calls;
-      expect(options?.signal).toBe(controller.signal);
-    });
-
-    it('forwards the call signal to deleteTransform', async () => {
-      const controller = new AbortController();
-
-      await createManager().uninstall('slo-summary-transform-id', { signal: controller.signal });
+    it.each([
+      ['start', 'startTransform'],
+      ['stop', 'stopTransform'],
+      ['uninstall', 'deleteTransform'],
+      ['preview', 'previewTransform'],
+    ] as const)('forwards the call signal from %s to %s', async (method, esMethod) => {
+      await createManager()[method]('slo-summary-transform-id', { signal });
 
       const [[, options]] =
-        scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform.mock.calls;
-      expect(options?.signal).toBe(controller.signal);
+        scopedClusterClientMock.asSecondaryAuthUser.transform[esMethod].mock.calls;
+      expect(options?.signal).toBe(signal);
     });
 
     it('forwards the call signal to getTransform', async () => {
@@ -110,16 +104,6 @@ describe('SummaryTransformManager', () => {
         scopedClusterClientMock.asSecondaryAuthUser.transform.getTransform.mock.calls;
       expect(options?.signal).toBe(controller.signal);
     });
-
-    it('uses the constructor signal when no call signal is given', async () => {
-      const controller = new AbortController();
-
-      await createManager({ signal: controller.signal }).uninstall('slo-summary-transform-id');
-
-      const [[, options]] =
-        scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform.mock.calls;
-      expect(options?.signal).toBe(controller.signal);
-    });
   });
 
   describe('Retry options', () => {
@@ -129,7 +113,10 @@ describe('SummaryTransformManager', () => {
       );
 
       await expect(
-        createManager({ retryOptions: REQUEST_RETRY_OPTIONS }).uninstall('slo-summary-transform-id')
+        createManager({ retryOptions: REQUEST_RETRY_OPTIONS }).uninstall(
+          'slo-summary-transform-id',
+          { signal }
+        )
       ).rejects.toThrow('irrelevant');
       expect(
         scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform

@@ -55,8 +55,8 @@ export class DeleteSLO {
     const customWildcardPipelineId = getCustomSLOWildcardPipelineId(slo.id);
 
     await Promise.all([
-      this.transformManager.uninstall(rollupTransformId),
-      this.summaryTransformManager.uninstall(summaryTransformId),
+      this.transformManager.uninstall(rollupTransformId, { signal: this.signal }),
+      this.summaryTransformManager.uninstall(summaryTransformId, { signal: this.signal }),
       retryTransientEsErrors(() =>
         this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
           { id: wildcardPipelineId },

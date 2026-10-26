@@ -361,9 +361,9 @@ describe('CreateSLO', () => {
 
     it('throws SLOOperationTimeout and rolls back when the deadline is exceeded', async () => {
       mockTransformManager.install.mockImplementationOnce(
-        (_slo, { signal } = {}) =>
+        (_slo, { signal }) =>
           new Promise((_resolve, reject) => {
-            signal?.addEventListener('abort', () =>
+            signal.addEventListener('abort', () =>
               reject(new errors.RequestAbortedError('Request aborted'))
             );
           })

@@ -204,9 +204,9 @@ describe('ResetSLO', () => {
       const slo = createSLO({ id: 'irrelevant', version: 1 });
       mockRepository.findById.mockResolvedValueOnce(slo);
       mockTransformManager.install.mockImplementationOnce(
-        (_slo, { signal } = {}) =>
+        (_slo, { signal }) =>
           new Promise((_resolve, reject) => {
-            signal?.addEventListener('abort', () =>
+            signal.addEventListener('abort', () =>
               reject(new errors.RequestAbortedError('Request aborted'))
             );
           })
