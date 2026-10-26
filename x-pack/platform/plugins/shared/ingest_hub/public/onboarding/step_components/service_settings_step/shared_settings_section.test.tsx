@@ -112,13 +112,13 @@ describe('SharedSettingsSection', () => {
         'aria-expanded',
         'false'
       );
-      expect(screen.queryByTestId('sharedSettingsNamespace')).not.toBeInTheDocument();
+      expect(screen.getByTestId('sharedSettingsNamespace')).not.toBeVisible();
     });
 
     it('stays collapsed when the namespace is prefilled', () => {
       renderSection({ namespace: 'prod' });
 
-      expect(screen.queryByTestId('sharedSettingsNamespace')).not.toBeInTheDocument();
+      expect(screen.getByTestId('sharedSettingsNamespace')).not.toBeVisible();
     });
 
     it('shows the namespace once expanded and collapses again', () => {
@@ -132,7 +132,7 @@ describe('SharedSettingsSection', () => {
       );
 
       fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
-      expect(screen.queryByTestId('sharedSettingsNamespace')).not.toBeInTheDocument();
+      expect(screen.getByTestId('sharedSettingsNamespace')).not.toBeVisible();
     });
 
     it('reports namespace edits', () => {
@@ -149,9 +149,9 @@ describe('SharedSettingsSection', () => {
     it('opens on its own, and cannot be collapsed, while the namespace is invalid', () => {
       renderSection({ namespace: 'Prod', namespaceError: 'Namespace must be lowercase' });
 
-      expect(screen.getByTestId('sharedSettingsNamespace')).toBeInTheDocument();
+      expect(screen.getByTestId('sharedSettingsNamespace')).toBeVisible();
       fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
-      expect(screen.getByTestId('sharedSettingsNamespace')).toBeInTheDocument();
+      expect(screen.getByTestId('sharedSettingsNamespace')).toBeVisible();
     });
 
     it('notes that a change reaches deployed services only when some are deployed', () => {

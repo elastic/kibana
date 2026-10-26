@@ -17,14 +17,16 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
     namespace,
     validationError,
     onNamespaceChange,
+    helpTextAsTooltip,
     'data-test-subj': dataTestSubj,
   }: {
     namespace?: string;
     validationError?: string[] | null;
     onNamespaceChange: (ns: string) => void;
+    helpTextAsTooltip?: boolean;
     'data-test-subj'?: string;
   }) => (
-    <div>
+    <div data-help-as-tooltip={String(!!helpTextAsTooltip)}>
       <input
         data-test-subj={dataTestSubj}
         value={namespace ?? ''}
@@ -77,6 +79,14 @@ describe('InstanceNamespaceField', () => {
   it('shows the validation error for an invalid namespace', () => {
     renderField({ namespace: 'Prod' });
     expect(screen.getByTestId('namespaceError')).toHaveTextContent('Namespace must be lowercase');
+  });
+
+  it('shows the help text as a tooltip next to the label', () => {
+    renderField();
+    expect(screen.getByTestId('serviceSettings-namespaceField').parentElement).toHaveAttribute(
+      'data-help-as-tooltip',
+      'true'
+    );
   });
 
   it('shows the note under the field', () => {

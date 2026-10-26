@@ -53,6 +53,7 @@ export const InstanceNamespaceField = ({
         docLinks={services.docLinks}
         onNamespaceChange={onChange}
         fullWidth={fullWidth}
+        helpTextAsTooltip
         data-test-subj={dataTestSubj}
       />
       {note && (

@@ -446,6 +446,9 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     ) => {
       const current = getServiceVars(instanceId);
       const merged = mergeVarsByDataStream(current.varsByDataStream, newVarsByDataStream);
+      // Only a duplicate has a namespace of its own; an original always follows the global one.
+      const isDuplicate = instances.some((i) => i.instanceId === instanceId && i.isDuplicate);
+      const ownNamespace = isDuplicate ? instanceNamespace ?? current.namespace : undefined;
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
         instances,
@@ -454,7 +457,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
           [instanceId]: {
             enabledDataStreams,
             varsByDataStream: merged,
-            namespace: instanceNamespace ?? current.namespace,
+            namespace: ownNamespace,
           },
         },
       });

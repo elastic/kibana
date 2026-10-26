@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiFieldText,
@@ -20,6 +21,8 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  euiCanAnimate,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +30,8 @@ import { i18n } from '@kbn/i18n';
 import { GlobalRegionField } from './global_region_field';
 import { SharedAdvancedSettings } from './shared_advanced_settings';
 import { MAX_DESCRIPTION_LENGTH, MAX_INTEGRATION_NAME_LENGTH } from './integration_settings';
+
+const ADVANCED_ANIMATION_MS = 300;
 
 interface SharedSettingsSectionProps {
   integrationName: string;
@@ -78,6 +83,52 @@ export function SharedSettingsSection({
   const [advancedToggled, setAdvancedToggled] = useState(false);
   const isAdvancedOpen = advancedToggled || !!namespaceError;
   const advancedId = useGeneratedHtmlId({ prefix: 'sharedAdvancedSettings' });
+  const { euiTheme } = useEuiTheme();
+
+  // Fully rounded, unlike EuiButton's own radius.
+  const toggleStyle = css`
+    && {
+      border-radius: ${euiTheme.size.xl};
+    }
+  `;
+  const chevronStyle = css`
+    ${euiCanAnimate} {
+      transition: transform ${euiTheme.animation.fast} ease-in-out;
+    }
+    transform: rotate(${isAdvancedOpen ? '90deg' : '0deg'});
+  `;
+  // The region is always mounted so it can animate. It grows from zero height, its content fades in,
+  // and it stays out of the tab order and the accessibility tree while collapsed.
+  const collapsibleStyle = css`
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    ${euiCanAnimate} {
+      transition: grid-template-rows ${ADVANCED_ANIMATION_MS}ms ease-in-out,
+        visibility 0s linear ${ADVANCED_ANIMATION_MS}ms;
+    }
+    &[data-open='true'] {
+      grid-template-rows: 1fr;
+      visibility: visible;
+      ${euiCanAnimate} {
+        transition: grid-template-rows ${ADVANCED_ANIMATION_MS}ms ease-in-out;
+      }
+    }
+  `;
+  const collapsibleInnerStyle = css`
+    min-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    /* Room for focus rings, which the clipping would otherwise cut off. */
+    padding: ${euiTheme.size.xs};
+    margin: -${euiTheme.size.xs};
+    ${euiCanAnimate} {
+      transition: opacity ${ADVANCED_ANIMATION_MS}ms ease-in-out;
+    }
+    [data-open='true'] > & {
+      opacity: 1;
+    }
+  `;
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m" data-test-subj="sharedSettingsSection">
@@ -106,6 +157,7 @@ export function SharedSettingsSection({
             size="s"
             color="text"
             iconType="gear"
+            css={toggleStyle}
             onClick={() => setAdvancedToggled((open) => !open)}
             aria-expanded={isAdvancedOpen}
             aria-controls={advancedId}
@@ -114,7 +166,7 @@ export function SharedSettingsSection({
             {i18n.translate('xpack.ingestHub.integrationSettings.section.advancedOptions', {
               defaultMessage: 'Advanced options',
             })}{' '}
-            <EuiIcon type={isAdvancedOpen ? 'arrowDown' : 'arrowRight'} size="s" aria-hidden />
+            <EuiIcon type="chevronSingleRight" size="s" aria-hidden css={chevronStyle} />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -186,17 +238,20 @@ export function SharedSettingsSection({
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGrid>
-      <div id={advancedId}>
-        {isAdvancedOpen && (
-          <>
-            <EuiHorizontalRule margin="m" />
-            <SharedAdvancedSettings
-              namespace={namespace}
-              onNamespaceChange={onNamespaceChange}
-              hasDeployedServices={hasDeployedServices}
-            />
-          </>
-        )}
+      <div
+        id={advancedId}
+        css={collapsibleStyle}
+        data-open={isAdvancedOpen}
+        data-test-subj="sharedSettingsAdvancedRegion"
+      >
+        <div css={collapsibleInnerStyle}>
+          <EuiHorizontalRule margin="m" />
+          <SharedAdvancedSettings
+            namespace={namespace}
+            onNamespaceChange={onNamespaceChange}
+            hasDeployedServices={hasDeployedServices}
+          />
+        </div>
       </div>
     </EuiPanel>
   );

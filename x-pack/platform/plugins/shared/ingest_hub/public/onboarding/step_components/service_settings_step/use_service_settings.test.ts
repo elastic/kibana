@@ -175,31 +175,45 @@ describe('useServiceSettings — namespace', () => {
     } as unknown as ReturnType<typeof useOnboardingFlow>);
   });
 
-  it('persists the namespace alongside the instance vars', () => {
+  it('persists the namespace of a duplicate alongside its instance vars', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
-    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'prod'));
-    expect(result.current.getServiceVars('svc_a').namespace).toBe('prod');
+    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', filledVars, ['svc_a']));
+    act(() =>
+      result.current.setServiceFieldsAndInputs('svc_a__dup-1', filledVars, ['svc_a'], 'prod')
+    );
+    expect(result.current.getServiceVars('svc_a__dup-1').namespace).toBe('prod');
   });
 
   it('copies the source namespace onto a duplicate when none is given', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
-    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'prod'));
-    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, []));
-    expect(result.current.getServiceVars('svc_a__dup-1').namespace).toBe('prod');
+    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, [], 'prod'));
+    act(() => result.current.addDuplicate('svc_a__dup-1', 'svc_a [Duplicate 2]', {}, []));
+    expect(result.current.getServiceVars('svc_a__dup-2').namespace).toBe('prod');
   });
 
   it('uses the namespace given for a duplicate over the source one', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
-    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'prod'));
-    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, [], 'staging'));
-    expect(result.current.getServiceVars('svc_a__dup-1').namespace).toBe('staging');
+    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, [], 'prod'));
+    act(() =>
+      result.current.addDuplicate('svc_a__dup-1', 'svc_a [Duplicate 2]', {}, [], 'staging')
+    );
+    expect(result.current.getServiceVars('svc_a__dup-2').namespace).toBe('staging');
   });
 
-  it('marks an instance incomplete when its namespace is invalid', () => {
+  it('never keeps a namespace on an original, which follows the global one', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'prod'));
+    expect(result.current.getServiceVars('svc_a').namespace).toBeUndefined();
+  });
+
+  it('marks a duplicate incomplete when its namespace is invalid', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
     act(() => result.current.setGlobalRegion('us-east-1'));
-    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'Prod'));
-    expect(result.current.incompleteInstanceIds.has('svc_a')).toBe(true);
+    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', filledVars, ['svc_a']));
+    act(() =>
+      result.current.setServiceFieldsAndInputs('svc_a__dup-1', filledVars, ['svc_a'], 'Prod')
+    );
+    expect(result.current.incompleteInstanceIds.has('svc_a__dup-1')).toBe(true);
     expect(result.current.isReady).toBe(false);
   });
 
@@ -232,13 +246,6 @@ describe('useServiceSettings — namespace', () => {
 
       expect(result.current.namespaceError).toBeDefined();
       expect(result.current.isReady).toBe(false);
-    });
-
-    it('does not store a namespace on an original when its settings are saved', () => {
-      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
-      act(() => result.current.setNamespace('prod'));
-      act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a']));
-      expect(result.current.getServiceVars('svc_a').namespace).toBeUndefined();
     });
   });
 });

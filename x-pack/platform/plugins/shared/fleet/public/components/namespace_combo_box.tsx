@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiComboBox, EuiLink } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiIconTip, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -28,6 +28,8 @@ interface NamespaceFormRowProps {
   fullWidth?: boolean;
   labelId?: string;
   helpTextId?: string;
+  /** Shows the help text as a tooltip on an info icon next to the label, instead of under the field. */
+  helpTextAsTooltip?: boolean;
 }
 
 export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
@@ -40,6 +42,7 @@ export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
   onNamespaceChange,
   'data-test-subj': dataTestSubj = 'packagePolicyNamespaceInput',
   fullWidth = false,
+  helpTextAsTooltip = false,
 }) => {
   const getHelpText = () => {
     if (isEditPage && packageType === 'input') {
@@ -77,18 +80,40 @@ export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
     );
   };
 
+  const label = (
+    <FormattedMessage
+      id={'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel'}
+      defaultMessage="Namespace"
+    />
+  );
+
   return (
     <EuiFormRow
       fullWidth={fullWidth}
       isInvalid={!!validationError}
       error={validationError}
       label={
-        <FormattedMessage
-          id={'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel'}
-          defaultMessage="Namespace"
-        />
+        helpTextAsTooltip ? (
+          <>
+            {label}{' '}
+            <EuiIconTip
+              type="info"
+              color="subdued"
+              content={i18n.translate(
+                'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceTooltip',
+                {
+                  defaultMessage:
+                    "Change the default namespace inherited from the parent agent policy. This setting changes the name of the integration's data stream.",
+                }
+              )}
+              anchorProps={{ 'data-test-subj': `${dataTestSubj}-helpTooltip` }}
+            />
+          </>
+        ) : (
+          label
+        )
       }
-      helpText={getHelpText()}
+      helpText={helpTextAsTooltip ? undefined : getHelpText()}
     >
       <EuiComboBox
         isInvalid={!!validationError}
