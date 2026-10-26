@@ -10,7 +10,7 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { usesKnowledge } from '../agents/agent_policy';
 import { hydrateMemoryWorkspace } from '../memory/register_memory';
 import { MEMORY_WORKSPACE_ROOT } from '../memory/materialize';
 import { degradeOnWriterFailure } from '../lib/hydrate_notification';
@@ -102,7 +102,7 @@ export const memoryMaterializeToSandboxStepDefinition = ({
           output: { sandbox_id: sandboxId, skipped: true, recalled_ids: [], notification: '' },
         };
       }
-      if (trimmedAgentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
+      if (!usesKnowledge(trimmedAgentId)) {
         context.logger.info('Skipped memory materialize for unsupported agent');
         context.logger.debug(`Memory materialize unsupported agent=${trimmedAgentId}`);
         return {

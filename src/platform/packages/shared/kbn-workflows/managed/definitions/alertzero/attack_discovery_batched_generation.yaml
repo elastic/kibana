@@ -39,7 +39,9 @@ triggers:
             Maximum alerts per Attack Discovery run. Also sets the retrieval
             ceiling at `batch_size * 100`, because the engine caps a parallel
             fan-out at 100 branches — a smaller batch buys less total coverage,
-            not more.
+            not more. A prompt-template connector analyzes at most 100 alerts
+            per batch; a larger batch reports that count and logs how many
+            alerts were omitted.
           maximum: 1000
           minimum: 50
           type: integer
@@ -157,10 +159,14 @@ steps:
           connector_id: "{{ inputs.connector_id }}"
           # Stated on the leaf step rather than threaded down from the Worker: the
           # tier is a property of the call, not of the caller. Only consulted when
-          # `connector_id` is empty, and ignored when AlertZero is disabled and the
-          # tier is therefore unregistered. Keep in sync with
-          # ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
-          feature_id: alertzero_frontier
+          # `connector_id` is empty. An unset cyber-domain row resolves to nothing
+          # (it recommends no endpoints), so the frontier tier stays in charge.
+          # Ignored when AlertZero is disabled and the ids are therefore
+          # unregistered. Keep in sync with ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID
+          # and ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+          feature_id:
+            - alertzero_template_models
+            - alertzero_frontier
           # No ground-truth gate: each generated attack goes to a review whose FP/TP
           # analysis owns the false-positive decision. The gate corroborates the
           # alerts against the same entities and raw events and hands its

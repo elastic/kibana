@@ -12,6 +12,7 @@ import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { RuleStateStatus, type LoadedRuleState } from '../../../types/rule_state';
 import { RelatedEpisodesGroupSubsection } from './group_subsection';
+import { useFetchEpisodesDataQuery } from '../../../hooks/use_fetch_episodes_data_query';
 import { useFetchSameGroupEpisodesQuery } from '../../../hooks/use_fetch_same_group_episodes_query';
 jest.mock('../../../hooks/use_fetch_same_group_episodes_query');
 
@@ -27,17 +28,28 @@ jest.mock('../../../hooks/use_fetch_episode_actions', () => ({
   useFetchEpisodeActions: () => ({ data: undefined }),
 }));
 
+jest.mock('../../../hooks/use_fetch_episodes_data_query', () => ({
+  ...jest.requireActual('../../../hooks/use_fetch_episodes_data_query'),
+  useFetchEpisodesDataQuery: jest.fn(() => ({ data: undefined })),
+}));
+
 jest.mock('../../../hooks/use_fetch_group_actions', () => ({
   useFetchGroupActions: () => ({ data: undefined }),
 }));
 
 jest.mock('./related_list', () => ({
   RelatedAlertEpisodesList: ({ rows }: { rows: AlertEpisode[] }) => (
-    <div data-test-subj="mockEpisodesList">{rows.length} episodes</div>
+    <div
+      data-test-subj="mockEpisodesList"
+      data-episode-data={rows.map((row) => row.episode_data ?? 'none').join(',')}
+    >
+      {rows.length} episodes
+    </div>
   ),
 }));
 
 const mockUseFetch = jest.mocked(useFetchSameGroupEpisodesQuery);
+const mockUseFetchEpisodesData = jest.mocked(useFetchEpisodesDataQuery);
 
 const loadedRuleState: LoadedRuleState = {
   status: RuleStateStatus.loaded,
@@ -159,5 +171,52 @@ describe('RelatedEpisodesGroupSubsection', () => {
     expect(mockUseFetch).toHaveBeenCalledWith(
       expect.objectContaining({ scope: { type: 'source', source: 'zabbix' } })
     );
+  });
+
+  it('adds the data of the episodes once it loads, to show their grouping', () => {
+    const mockEpisodes = [{ 'episode.id': 'ep-2' }, { 'episode.id': 'ep-3' }] as AlertEpisode[];
+    mockUseFetch.mockReturnValue({ data: mockEpisodes, isLoading: false } as any);
+    mockUseFetchEpisodesData.mockReturnValue({
+      data: new Map([['ep-2', '{"host":"web-01"}']]),
+    } as any);
+
+    render(
+      <I18nProvider>
+        <RelatedEpisodesGroupSubsection
+          currentEpisodeId="ep-1"
+          groupHash="gh-1"
+          {...mockRuleProps}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
+      </I18nProvider>
+    );
+
+    expect(mockUseFetchEpisodesData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ episodeIds: ['ep-2', 'ep-3'] })
+    );
+    expect(screen.getByTestId('mockEpisodesList')).toHaveAttribute(
+      'data-episode-data',
+      '{"host":"web-01"},none'
+    );
+  });
+
+  it('shows the episodes without their data when the data lookup fails', () => {
+    const mockEpisodes = [{ 'episode.id': 'ep-2' }] as AlertEpisode[];
+    mockUseFetch.mockReturnValue({ data: mockEpisodes, isLoading: false } as any);
+    mockUseFetchEpisodesData.mockReturnValue({ data: undefined, isError: true } as any);
+
+    render(
+      <I18nProvider>
+        <RelatedEpisodesGroupSubsection
+          currentEpisodeId="ep-1"
+          groupHash="gh-1"
+          {...mockRuleProps}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('1 episodes')).toBeInTheDocument();
+    expect(screen.getByTestId('mockEpisodesList')).toHaveAttribute('data-episode-data', 'none');
   });
 });

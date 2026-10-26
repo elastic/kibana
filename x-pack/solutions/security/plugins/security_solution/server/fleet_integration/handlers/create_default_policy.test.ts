@@ -51,6 +51,7 @@ describe('Create Default Policy tests ', () => {
     trustedDevices: true,
     customYaraSignaturesEnabled: true,
     linuxRansomwareProtection: true,
+    endpointAiDataCollection: true,
     perOsPolicySettings: true,
   } as ExperimentalFeatures;
 
@@ -277,8 +278,7 @@ describe('Create Default Policy tests ', () => {
       // update defaultPolicy w/ platinum license & cloud info
       defaultPolicy.meta.license = license;
       defaultPolicy.meta.cloud = isCloud;
-      // endpointAiDataCollection defaults to off, so the block is absent from the real policy.
-      expect(policy).toMatchObject(PolicyConfigHelpers.removeAiDataCollection(defaultPolicy));
+      expect(policy).toMatchObject(defaultPolicy);
     });
 
     it('Should return the default config when preset is EDR Complete on enterprise', async () => {
@@ -300,8 +300,7 @@ describe('Create Default Policy tests ', () => {
       // update defaultPolicy w/ enterprise license & cloud info
       defaultPolicy.meta.license = license;
       defaultPolicy.meta.cloud = isCloud;
-      // endpointAiDataCollection defaults to off, so the block is absent from the real policy.
-      expect(policy).toMatchObject(PolicyConfigHelpers.removeAiDataCollection(defaultPolicy));
+      expect(policy).toMatchObject(defaultPolicy);
     });
 
     it('should set policy to event collection only if endpointPolicyProtections productFeature is disabled', async () => {

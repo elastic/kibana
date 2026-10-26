@@ -120,7 +120,7 @@ describe('buildUnitedRolloutStatusSearch', () => {
 
     expect(assignmentScript).toContain('params._source');
     expect(assignmentScript).toContain('policy_base_id');
-    expect(assignmentScript).toContain("replaceAll(/#\\d+\\.\\d+$/, m -> '')");
+    expect(assignmentScript).toContain("replaceAll(/#(?:sentinel|\\d+\\.\\d+)$/, m -> '')");
     expect(assignmentScript).toContain("emit('')");
     expect(reportedIdScript).toContain('united.endpoint.Endpoint.policy.applied.id');
     expect(reportedIdScript).toContain("emit('')");
@@ -137,7 +137,7 @@ describe('buildUnitedRolloutStatusSearch', () => {
     expect(serializedQuery).not.toContain('united.agent.policy_id');
   });
 
-  it('strips only a trailing #major.minor suffix from the assignment policy id', () => {
+  it('strips only a trailing #major.minor or #sentinel suffix from the assignment policy id', () => {
     const assignmentScript = runtimeScriptSource(UNITED_ROLLOUT_STATUS_ASSIGNMENT_FIELD);
     const patternStart = assignmentScript.indexOf('replaceAll(/') + 'replaceAll(/'.length;
     const patternEnd = assignmentScript.indexOf("/, m -> '')", patternStart);
@@ -145,6 +145,7 @@ describe('buildUnitedRolloutStatusSearch', () => {
 
     expect(patternEnd).toBeGreaterThan(patternStart);
     expect('policy-id#1.0'.replace(suffixPattern, '')).toBe('policy-id');
+    expect('policy-id#sentinel'.replace(suffixPattern, '')).toBe('policy-id');
     expect('eval-agent-policy-id'.replace(suffixPattern, '')).toBe('eval-agent-policy-id');
     expect('policy#123'.replace(suffixPattern, '')).toBe('policy#123');
   });

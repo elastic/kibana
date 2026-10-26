@@ -366,7 +366,7 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
         defaultMessage: 'Workflow',
       }),
 
-    getIcon: () => 'workflowsApp',
+    getIcon: () => 'workflow',
 
     canvasHideTopPadding: true,
 

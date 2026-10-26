@@ -25,7 +25,7 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
       text: '_alias:_origin',
       kind: 'Value',
       detail: i18n.translate(
-        'kbn-esql-language.esql.autocomplete.set.projectRouting.currentProjectDoc',
+        'esqlLanguage.esql.autocomplete.set.projectRouting.currentProjectDoc',
         {
           defaultMessage: 'Search only the current project',
         }
@@ -36,12 +36,9 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
       label: '_alias:*',
       text: '_alias:*',
       kind: 'Value',
-      detail: i18n.translate(
-        'kbn-esql-language.esql.autocomplete.set.projectRouting.allProjectsDoc',
-        {
-          defaultMessage: 'Search all projects',
-        }
-      ),
+      detail: i18n.translate('esqlLanguage.esql.autocomplete.set.projectRouting.allProjectsDoc', {
+        defaultMessage: 'Search all projects',
+      }),
       category: SuggestionCategory.CONSTANT_VALUE,
     },
   ];
@@ -53,7 +50,7 @@ const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
       label: UnmappedFieldsStrategy.DEFAULT,
       text: UnmappedFieldsStrategy.DEFAULT,
       kind: 'Value',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.failDoc', {
+      detail: i18n.translate('esqlLanguage.esql.autocomplete.set.unmappedFields.failDoc', {
         defaultMessage: 'Fails the query if unmapped fields are present',
       }),
       category: SuggestionCategory.CONSTANT_VALUE,
@@ -62,7 +59,7 @@ const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
       label: UnmappedFieldsStrategy.NULLIFY,
       text: UnmappedFieldsStrategy.NULLIFY,
       kind: 'Value',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.nullifyDoc', {
+      detail: i18n.translate('esqlLanguage.esql.autocomplete.set.unmappedFields.nullifyDoc', {
         defaultMessage: 'Treats unmapped fields as null values',
       }),
       category: SuggestionCategory.CONSTANT_VALUE,
@@ -71,7 +68,7 @@ const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
       label: UnmappedFieldsStrategy.LOAD,
       text: UnmappedFieldsStrategy.LOAD,
       kind: 'Value',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadDoc', {
+      detail: i18n.translate('esqlLanguage.esql.autocomplete.set.unmappedFields.loadDoc', {
         defaultMessage:
           'Attempts to load the fields from the source that are explicitly mentioned in the query',
       }),
@@ -81,7 +78,7 @@ const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
       label: UnmappedFieldsStrategy.LOAD_ALL,
       text: UnmappedFieldsStrategy.LOAD_ALL,
       kind: 'Value',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadAllDoc', {
+      detail: i18n.translate('esqlLanguage.esql.autocomplete.set.unmappedFields.loadAllDoc', {
         defaultMessage:
           'Attempts to load all the fields from the source, even if they are not mentioned in the query',
       }),
@@ -113,7 +110,7 @@ const getApproximateCompletionItems = (
       kind: 'Value',
       category: SuggestionCategory.VALUE,
       detail: i18n.translate(
-        'kbn-esql-language.esql.autocomplete.set.approximate.disallowApproximateResults',
+        'esqlLanguage.esql.autocomplete.set.approximate.disallowApproximateResults',
         {
           defaultMessage: 'Default - do not approximate results',
         }
@@ -125,7 +122,7 @@ const getApproximateCompletionItems = (
       kind: 'Value',
       category: SuggestionCategory.VALUE,
       detail: i18n.translate(
-        'kbn-esql-language.esql.autocomplete.set.approximate.allowApproximateResults',
+        'esqlLanguage.esql.autocomplete.set.approximate.allowApproximateResults',
         {
           defaultMessage: 'Allow approximate results',
         }
@@ -133,7 +130,7 @@ const getApproximateCompletionItems = (
     },
     {
       label: i18n.translate(
-        'kbn-esql-language.esql.autocomplete.set.approximate.approximateWithParameters',
+        'esqlLanguage.esql.autocomplete.set.approximate.approximateWithParameters',
         {
           defaultMessage: 'Approximate with parameters',
         }
@@ -142,7 +139,7 @@ const getApproximateCompletionItems = (
       asSnippet: true,
       kind: 'Reference',
       detail: i18n.translate(
-        'kbn-esql-language.esql.autocomplete.set.approximate.approximateWithParameters',
+        'esqlLanguage.esql.autocomplete.set.approximate.approximateWithParameters',
         {
           defaultMessage: 'Approximate results based on parameters',
         }

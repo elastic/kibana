@@ -143,6 +143,36 @@ describe('AlertEpisodeGroupingSection', () => {
     );
   });
 
+  it('keeps the loading panel while the data is loading', async () => {
+    runEsqlAsyncSearchMock.mockImplementation(async ({ params }) =>
+      String(params.query).includes('JSON_EXTRACT')
+        ? new Promise(() => {})
+        : mockEpisodeSearchResult(null)
+    );
+    mockHttp.get.mockResolvedValue(mockRule);
+
+    renderSection();
+
+    await waitFor(() => expect(mockHttp.get).toHaveBeenCalled());
+    expect(screen.getByTestId('alertingV2EpisodeGroupingSectionLoading')).toBeInTheDocument();
+  });
+
+  it('renders an error when the data lookup fails', async () => {
+    runEsqlAsyncSearchMock.mockImplementation(async ({ params }) => {
+      if (String(params.query).includes('JSON_EXTRACT')) {
+        throw new Error('boom');
+      }
+      return mockEpisodeSearchResult(null);
+    });
+    mockHttp.get.mockResolvedValue(mockRule);
+
+    renderSection();
+
+    await waitFor(() =>
+      expect(screen.getByTestId('alertingV2EpisodeGroupingSectionError')).toBeInTheDocument()
+    );
+  });
+
   it('renders nothing when no grouping field holds a value', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue(mockEpisodeSearchResult(null));
     mockHttp.get.mockResolvedValueOnce(mockRule);
