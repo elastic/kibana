@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import type { Renderers, StyledRenderContext } from '@elastic/isomer-sdk';
 import { nodeAnchor } from '@elastic/isomer-sdk';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
@@ -13,8 +13,8 @@ import { classNames, isomerDistillery } from '@kbn/isomer-theme';
 import type { ComponentsPackTypes } from '../../lib';
 import type { TableNode } from './table';
 import type { SortDirection, TableView } from './table_model';
-import { sortOrder, tableView } from './table_model';
-import { TABLE_SORT_ENHANCEMENT } from './table_sort';
+import { tableView } from './table_model';
+import { TABLE_SORT_ATTRIBUTES, TABLE_SORT_ENHANCEMENT } from './table_sort';
 
 const { handles } = isomerDistillery.createStyleModule(
   'componentsTable',
@@ -35,6 +35,17 @@ const { handles } = isomerDistillery.createStyleModule(
       color: ${color.text.heading};
       font-weight: ${font.weight.semiBold};
       white-space: nowrap;
+
+      /* The button the tableSort script wraps a sortable heading in: TABLE_SORT_ATTRIBUTES.button. */
+      & > button[data-isomer-sort-button] {
+        padding: 0;
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        text-align: inherit;
+        cursor: pointer;
+      }
     `,
     cell: css`
       padding: ${size.xs} ${size.s};
@@ -55,15 +66,10 @@ const { handles } = isomerDistillery.createStyleModule(
     sortMark: css`
       margin-left: ${size.xs};
       color: ${color.text.subdued};
-    `,
-    sortButton: css`
-      padding: 0;
-      border: 0;
-      background: none;
-      color: inherit;
-      font: inherit;
-      text-align: inherit;
-      cursor: pointer;
+
+      &:empty {
+        display: none;
+      }
     `,
     note: css`
       margin: ${size.xs} 0 0;
@@ -75,94 +81,88 @@ const { handles } = isomerDistillery.createStyleModule(
 );
 
 const ARIA_SORT = { asc: 'ascending', desc: 'descending' } as const;
-const SORT_MARK = { asc: '↑', desc: '↓', none: '↕' } as const;
+const SORT_MARK = { asc: '↑', desc: '↓' } as const;
 
 interface SortState {
   column: number;
   direction: SortDirection;
 }
 
+/** The node's own sort, which `tableView` has already applied to the rows. */
+const nodeSort = ({ sort }: TableNode): SortState | undefined =>
+  sort ? { column: sort.column, direction: sort.direction ?? 'asc' } : undefined;
+
+const data = (name: string, value: string | number = '') => ({ [name]: String(value) });
+
 interface TableProps {
   node: TableNode;
   context: StyledRenderContext;
   view: TableView;
-  /** The order to show `view.rows` in, as indexes. */
-  order: readonly number[];
-  /** Set when headings sort the rows. */
-  sort?: { state?: SortState; onSort: (column: number) => void };
+  /** Marks the table for the `tableSort` script, which sorts it in the browser. */
+  sortable: boolean;
 }
 
-const Table = ({ node, context, view: { columns, rows, note }, order, sort }: TableProps) => (
-  <div {...nodeAnchor(context, node)} className={classNames(context, handles.root)}>
-    <table className={classNames(context, handles.table)}>
-      <thead>
-        <tr>
-          {columns.map(({ label, align }, index) => (
-            <th
-              key={index}
-              scope="col"
-              className={classNames(context, handles.head, handles[align])}
-              {...(sort?.state?.column === index
-                ? { 'aria-sort': ARIA_SORT[sort.state.direction] }
-                : {})}
-            >
-              {sort ? (
-                <button
-                  type="button"
-                  className={classNames(context, handles.sortButton)}
-                  onClick={() => sort.onSort(index)}
+const Table = ({ node, context, view: { columns, rows, cells, note }, sortable }: TableProps) => {
+  const sorted = nodeSort(node);
+  return (
+    <div {...nodeAnchor(context, node)} className={classNames(context, handles.root)}>
+      <table
+        className={classNames(context, handles.table)}
+        {...(sortable ? data(TABLE_SORT_ATTRIBUTES.table) : {})}
+      >
+        <thead>
+          <tr>
+            {columns.map(({ label, align }, index) => {
+              const direction = sorted?.column === index ? sorted.direction : undefined;
+              return (
+                <th
+                  key={index}
+                  scope="col"
+                  className={classNames(context, handles.head, handles[align])}
+                  {...(direction ? { 'aria-sort': ARIA_SORT[direction] } : {})}
+                  {...(sortable ? data(TABLE_SORT_ATTRIBUTES.column, index) : {})}
                 >
                   {label}
-                  <span aria-hidden="true" className={classNames(context, handles.sortMark)}>
-                    {sort.state?.column === index
-                      ? SORT_MARK[sort.state.direction]
-                      : SORT_MARK.none}
-                  </span>
-                </button>
-              ) : (
-                label
-              )}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {order.map((rowIndex) => (
-          <tr key={rowIndex}>
-            {rows[rowIndex].map((text, index) => (
-              <td
-                key={index}
-                className={classNames(context, handles.cell, handles[columns[index].align])}
-              >
-                {text}
-              </td>
-            ))}
+                  {direction || sortable ? (
+                    <span
+                      aria-hidden="true"
+                      className={classNames(context, handles.sortMark)}
+                      {...(sortable ? data(TABLE_SORT_ATTRIBUTES.mark) : {})}
+                    >
+                      {direction ? SORT_MARK[direction] : ''}
+                    </span>
+                  ) : null}
+                </th>
+              );
+            })}
           </tr>
-        ))}
-      </tbody>
-    </table>
-    {note || rows.length === 0 ? (
-      <p className={classNames(context, handles.note)}>{note ?? 'No rows'}</p>
-    ) : null}
-  </div>
-);
-
-/** A table whose headings sort its rows: the first click ascending, the next reversing. */
-const SortableTable = (props: Omit<TableProps, 'order' | 'sort'>) => {
-  const { node, view } = props;
-  const [state, setState] = useState<SortState | undefined>(
-    node.sort ? { column: node.sort.column, direction: node.sort.direction ?? 'asc' } : undefined
+        </thead>
+        <tbody>
+          {rows.map((row, rowIndex) => (
+            <tr key={rowIndex} {...(sortable ? data(TABLE_SORT_ATTRIBUTES.row, rowIndex) : {})}>
+              {row.map((text, index) => {
+                const cell = cells[rowIndex][index];
+                return (
+                  <td
+                    key={index}
+                    className={classNames(context, handles.cell, handles[columns[index].align])}
+                    {...(sortable && cell !== null
+                      ? data(TABLE_SORT_ATTRIBUTES.value, JSON.stringify(cell))
+                      : {})}
+                  >
+                    {text}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {note || rows.length === 0 ? (
+        <p className={classNames(context, handles.note)}>{note ?? 'No rows'}</p>
+      ) : null}
+    </div>
   );
-  // The rows arrive in the node's sort; re-sorting by that same sort leaves them in place.
-  const order = state
-    ? sortOrder(view.cells, state.column, state.direction)
-    : view.rows.map((_row, index) => index);
-  const onSort = (column: number) =>
-    setState((current) => ({
-      column,
-      direction: current?.column === column && current.direction === 'asc' ? 'desc' : 'asc',
-    }));
-  return <Table {...props} order={order} sort={{ state, onSort }} />;
 };
 
 export const tableReactRenderer: Renderers<TableNode, ComponentsPackTypes>['react'] = (
@@ -175,14 +175,5 @@ export const tableReactRenderer: Renderers<TableNode, ComponentsPackTypes>['reac
     context.enhancements?.has(TABLE_SORT_ENHANCEMENT) === true &&
     !view.note &&
     view.rows.length > 1;
-  return sortable ? (
-    <SortableTable node={node} context={context} view={view} />
-  ) : (
-    <Table
-      node={node}
-      context={context}
-      view={view}
-      order={view.rows.map((_row, index) => index)}
-    />
-  );
+  return <Table node={node} context={context} view={view} sortable={sortable} />;
 };
