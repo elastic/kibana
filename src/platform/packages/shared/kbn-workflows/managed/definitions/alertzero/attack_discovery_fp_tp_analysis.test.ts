@@ -1011,6 +1011,33 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       ).toBe('true');
     });
 
+    const realEntityContext = (citedId: string, verdict: string) => {
+      const context = groundingContext({
+        world: [{ source: 'entity_store', id: citedId }],
+        eventIds: ['event-1'],
+        entityIds: [],
+        verdict,
+      });
+      (context.steps.load_entities.output.hits as { hits: unknown[] }).hits = [
+        { _id: 'cc6e7258465a02d8e5f9389f2e020dc4', _source: { entity: { id: 'host:host-1' } } },
+      ];
+      return context;
+    };
+
+    it('returns false when a true positive cites an entity hit by its entity.id', () => {
+      expect(downgraded(realEntityContext('host:host-1', 'true_positive'))).toBe('false');
+    });
+
+    it('returns false when a true positive cites an entity hit by its document _id', () => {
+      expect(
+        downgraded(realEntityContext('cc6e7258465a02d8e5f9389f2e020dc4', 'true_positive'))
+      ).toBe('false');
+    });
+
+    it('returns true when a true positive cites an entity id that matches neither', () => {
+      expect(downgraded(realEntityContext('host:invented', 'true_positive'))).toBe('true');
+    });
+
     it('returns true when a false positive cites an entity id that was not returned', () => {
       expect(
         downgraded(
