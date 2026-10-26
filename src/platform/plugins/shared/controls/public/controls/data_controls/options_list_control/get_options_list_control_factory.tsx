@@ -302,6 +302,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
           exclude: false,
           exists_selected: false,
         },
+        normalizeSerializedState: normalizeEsqlSort,
         applySerializedState: (nextState) => {
           const normalizedState = normalizeEsqlSort(nextState);
           dataControlManager.reinitializeState(normalizedState);

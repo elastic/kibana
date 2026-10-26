@@ -10,7 +10,7 @@
 import { combineLatestWith, debounceTime, map, of, shareReplay, startWith } from 'rxjs';
 import { type StateComparators, areComparatorsEqual } from '../../../state_manager';
 import type { HasParentApi } from '../../has_parent_api';
-import type { HasSerializableState } from '../../has_serializable_state';
+import type { ComparesSerializedState, HasSerializableState } from '../../has_serializable_state';
 import type { HasUniqueId } from '../../has_uuid';
 import type { PublishesUnsavedChanges } from '../../publishes_unsaved_changes';
 import { getTitle } from '../../titles/publishes_title';
@@ -26,12 +26,30 @@ export const initializeStateApi = <StateType extends object = object>({
   defaultState,
   serializeState,
   anyStateChange$,
+  normalizeSerializedState,
 }: Omit<HasSerializableState<StateType>, 'latestState$'> &
   HasUniqueId &
   HasParentApi & {
     getComparators: () => StateComparators<StateType>;
     defaultState?: Partial<StateType>;
-  }): PublishesUnsavedChanges & HasSerializableState<StateType> => {
+    /**
+     * Rewrites serialized state the way the embeddable does when it loads it, so
+     * `compareSerializedState` compares what the embeddable would show.
+     */
+    normalizeSerializedState?: (state: StateType) => StateType;
+  }): PublishesUnsavedChanges &
+  HasSerializableState<StateType> &
+  ComparesSerializedState<StateType> => {
+  const normalize = (state: Partial<StateType> | undefined) =>
+    state && normalizeSerializedState
+      ? normalizeSerializedState(state as StateType)
+      : (state as StateType | undefined);
+
+  const compareSerializedState = (
+    baseline: Partial<StateType> | undefined,
+    current: Partial<StateType> | undefined
+  ) => areComparatorsEqual(getComparators(), normalize(baseline), normalize(current), defaultState);
+
   const latestState$ = anyStateChange$.pipe(
     debounceTime(0), // combine all state changes
     // anyStateChange$ does not emit on subscribe
@@ -45,6 +63,7 @@ export const initializeStateApi = <StateType extends object = object>({
     return {
       anyStateChange$,
       applySerializedState,
+      compareSerializedState,
       hasUnsavedChanges$: of(false),
       serializeState,
       latestState$,
@@ -76,6 +95,7 @@ export const initializeStateApi = <StateType extends object = object>({
   return {
     anyStateChange$,
     applySerializedState,
+    compareSerializedState,
     hasUnsavedChanges$,
     latestState$,
     serializeState,

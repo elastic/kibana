@@ -18,6 +18,13 @@ import { cpsService } from '../services/kibana_services';
 
 export const COMPARE_DEBOUNCE = 100;
 
+/** Unsaved-changes comparator of the project routing, which counts only with project routing restore on. */
+export const getProjectRoutingComparators = (
+  isProjectRoutingRestore: () => boolean
+): StateComparators<Pick<DashboardState, 'project_routing'>> => ({
+  project_routing: (a, b) => !isProjectRoutingRestore() || a === b,
+});
+
 export function initializeProjectRoutingManager(
   initialState: DashboardState,
   projectRoutingRestore$: PublishingSubject<boolean>
@@ -52,13 +59,7 @@ export function initializeProjectRoutingManager(
       setProjectRouting(cpsProjectRouting);
     });
 
-  const comparators = {
-    project_routing: (_a, _b, lastSavedState, _latestState) => {
-      if (!projectRoutingRestore$.value) return true;
-      const savedValue = lastSavedState?.project_routing;
-      return savedValue === projectRouting$.value;
-    },
-  } as StateComparators<Pick<DashboardState, 'project_routing'>>;
+  const comparators = getProjectRoutingComparators(() => projectRoutingRestore$.value);
 
   const getState = (): Pick<DashboardState, 'project_routing'> => {
     if (!projectRoutingRestore$.value) {
