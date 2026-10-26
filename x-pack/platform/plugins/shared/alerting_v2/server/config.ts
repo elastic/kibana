@@ -150,6 +150,61 @@ const retentionSchema = schema.object({
   }),
 });
 
+const MIN_DISPATCHER_TIMEOUT = '1m';
+const MAX_DISPATCHER_TIMEOUT = '5m';
+const MAX_DISPATCHER_ALERTS_PER_TICK = 10000;
+
+const validateDispatcherTimeout = (duration: string): string | undefined => {
+  const formatError = validateDuration(duration);
+  if (formatError) {
+    return formatError;
+  }
+
+  const durationMs = parseDurationToMs(duration);
+  if (durationMs < parseDurationToMs(MIN_DISPATCHER_TIMEOUT)) {
+    return `duration cannot be less than ${MIN_DISPATCHER_TIMEOUT}`;
+  }
+  if (durationMs > parseDurationToMs(MAX_DISPATCHER_TIMEOUT)) {
+    return `duration cannot exceed ${MAX_DISPATCHER_TIMEOUT}`;
+  }
+};
+
+const dispatcherSchema = schema.object({
+  /**
+   * Operator kill switch. While true, every dispatcher tick is a no-op: no
+   * alert is scanned or notified and the watermark is held, so the backlog is
+   * dispatched late once the switch is removed. Logged once per Kibana start
+   * as `DISPATCHER_PAUSED`; revert the override after the incident.
+   */
+  paused: schema.boolean({ defaultValue: false }),
+  run: schema.object({
+    /**
+     * Task Manager timeout for one dispatcher tick. The tick's soft deadline
+     * is derived at 70 % of it. Raise it when slow Elasticsearch responses make
+     * ticks hit `DISPATCHER_TICK_DEADLINE_EXCEEDED`. The default is the floor:
+     * the timeout can only be raised, up to 5m.
+     */
+    timeout: schema.string({
+      defaultValue: MIN_DISPATCHER_TIMEOUT,
+      validate: validateDispatcherTimeout,
+    }),
+    alerts: schema.object({
+      /**
+       * Alerts scanned per dispatcher tick. Lower it when ticks cannot finish
+       * before their deadline under alert overload: smaller batches complete
+       * and the watermark keeps advancing. The drain rate is roughly this many
+       * alerts per ~5 s tick, so too low a value lets lag grow under sustained
+       * load. Defaults to the ES|QL maximum of 10000.
+       */
+      max: schema.number({
+        defaultValue: MAX_DISPATCHER_ALERTS_PER_TICK,
+        min: 1,
+        max: MAX_DISPATCHER_ALERTS_PER_TICK,
+      }),
+    }),
+  }),
+});
+
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   invalidateApiKeysTask: schema.object({
@@ -158,11 +213,13 @@ export const configSchema = schema.object({
   }),
   rules: rulesSchema,
   retention: retentionSchema,
+  dispatcher: dispatcherSchema,
 });
 
 export type PluginConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
 export type RetentionConfig = TypeOf<typeof retentionSchema>;
+export type DispatcherConfig = TypeOf<typeof dispatcherSchema>;
 
 /**
  * Rows a single execution may request: the product-level `alerts.max` ceiling,

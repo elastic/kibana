@@ -296,6 +296,71 @@ describe('alerting_v2 config schema', () => {
     });
   });
 
+  describe('dispatcher.paused', () => {
+    it('defaults to false', () => {
+      expect(configSchema.validate({}).dispatcher.paused).toBe(false);
+    });
+
+    it('can be turned on', () => {
+      expect(configSchema.validate({ dispatcher: { paused: true } }).dispatcher.paused).toBe(true);
+    });
+  });
+
+  describe('dispatcher.run.timeout', () => {
+    it('defaults to 1m', () => {
+      expect(configSchema.validate({}).dispatcher.run.timeout).toBe('1m');
+    });
+
+    it.each(['3m', '5m'])('accepts %s', (timeout) => {
+      expect(
+        configSchema.validate({ dispatcher: { run: { timeout } } }).dispatcher.run.timeout
+      ).toBe(timeout);
+    });
+
+    it('rejects a value below the 1m floor', () => {
+      expect(() => configSchema.validate({ dispatcher: { run: { timeout: '30s' } } })).toThrow(
+        /cannot be less than 1m/
+      );
+    });
+
+    it('rejects a value above the 5m ceiling', () => {
+      expect(() => configSchema.validate({ dispatcher: { run: { timeout: '6m' } } })).toThrow(
+        /cannot exceed 5m/
+      );
+    });
+
+    it('rejects a malformed duration', () => {
+      expect(() => configSchema.validate({ dispatcher: { run: { timeout: 'abc' } } })).toThrow(
+        /Invalid duration/
+      );
+    });
+  });
+
+  describe('dispatcher.run.alerts.max', () => {
+    it('defaults to 10000', () => {
+      expect(configSchema.validate({}).dispatcher.run.alerts.max).toBe(10000);
+    });
+
+    it('accepts a smaller configured value', () => {
+      expect(
+        configSchema.validate({ dispatcher: { run: { alerts: { max: 500 } } } }).dispatcher.run
+          .alerts.max
+      ).toBe(500);
+    });
+
+    it('rejects values below 1', () => {
+      expect(() =>
+        configSchema.validate({ dispatcher: { run: { alerts: { max: 0 } } } })
+      ).toThrow();
+    });
+
+    it('rejects values above the 10000 ceiling', () => {
+      expect(() =>
+        configSchema.validate({ dispatcher: { run: { alerts: { max: 10001 } } } })
+      ).toThrow();
+    });
+  });
+
   describe('esql', () => {
     it('no longer exposes a response format setting (it is the alertingV2.esqlResponseFormat feature flag)', () => {
       expect(() => configSchema.validate({ esql: { responseFormat: 'arrow' } })).toThrow();

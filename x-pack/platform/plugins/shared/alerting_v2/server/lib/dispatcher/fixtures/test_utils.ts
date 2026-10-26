@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import { configSchema, type PluginConfig } from '../../../config';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { DEFAULT_GROUPING } from '../constants';
@@ -41,6 +44,19 @@ import type {
 
 export function createStepLogger(): LoggerServiceContract {
   return createLoggerService().loggerService;
+}
+
+export interface DispatcherConfigOverrides {
+  paused?: boolean;
+  run?: { timeout?: string; alerts?: { max?: number } };
+}
+
+export function createDispatcherConfigAccessor(
+  dispatcher: DispatcherConfigOverrides = {}
+): PluginInitializerContext<PluginConfig>['config'] {
+  return coreMock.createPluginInitializerContext<PluginConfig>(
+    configSchema.validate({ dispatcher })
+  ).config;
 }
 
 export function createDispatcherPipelineInput(
