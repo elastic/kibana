@@ -10,6 +10,7 @@
 import React, { useMemo } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { useExecutedByFieldFormats } from './use_executed_by_field_formats';
 import {
   WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
   WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
@@ -49,12 +50,15 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
     const { dataViews } = useKibana().services;
     const spaceId = useSpaceId();
 
+    const { fieldFormats, isReady } = useExecutedByFieldFormats({ spaceId });
+
     const dataViewSpec = useMemo(
       () => ({
         ...WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
         id: WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
+        fieldFormats,
       }),
-      []
+      [fieldFormats]
     );
 
     const services = useMemo(
@@ -65,7 +69,7 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
       [dataViews]
     );
 
-    if (!spaceId) {
+    if (!spaceId || !isReady) {
       return null;
     }
 
