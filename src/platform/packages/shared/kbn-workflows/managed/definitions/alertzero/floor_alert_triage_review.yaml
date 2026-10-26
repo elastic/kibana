@@ -566,6 +566,11 @@ steps:
     type: if
     condition: "${{ variables.proposal_outcome == 'expired' }}"
     steps:
+      - name: init_expired_retag_count
+        type: data.set
+        with:
+          failed_retag_count: 0
+
       - name: retag_expired_alerts
         type: foreach
         foreach: "${{ variables.live_alert_ids | chunk: 500 | json }}"
@@ -584,6 +589,18 @@ steps:
                   - "az:false_positive"
                 tags_to_add:
                   - "az:inconclusive"
+
+          - name: record_expired_retag_step_failure
+            type: data.set
+            if: "${{ steps.retag_expired_alerts_call.error != blank }}"
+            with:
+              failed_retag_count: "${{ variables.failed_retag_count | plus: foreach.item.size }}"
+
+          - name: record_expired_retag_partial_failure
+            type: data.set
+            if: "${{ steps.retag_expired_alerts_call.error == blank and (steps.retag_expired_alerts_call.output.updated | default: 0) != foreach.item.size }}"
+            with:
+              failed_retag_count: "${{ variables.failed_retag_count | plus: foreach.item.size | minus: (steps.retag_expired_alerts_call.output.updated | default: 0) }}"
 
       - name: close_investigation_after_expiry
         type: ai.conversation.metadata.patch
@@ -622,7 +639,7 @@ steps:
           author_name: "{{ consts.author_name }}"
           conversation_id: "{{ inputs.conversation_id }}"
           message: >-
-            The closure proposal expired before a closure was completed. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} re-tagged az:inconclusive. If a closure attempt partially succeeded before the proposal expired, some may already be closed, so check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.{% if steps.get_live_revision.error != blank %} The live revision could not be read, so joined alerts may still be tagged az:false_positive; this Investigation stays open.{% endif %}
+            The closure proposal expired before a closure was completed. {% if variables.failed_retag_count > 0 %}{{ variables.fp_candidate_count | minus: variables.failed_retag_count }} of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged az:inconclusive; {{ variables.failed_retag_count }} failed after retries and {% if variables.failed_retag_count == 1 %}needs{% else %}need{% endif %} manual re-tagging.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} re-tagged az:inconclusive.{% endif %} If a closure attempt partially succeeded before the proposal expired, some may already be closed, so check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.{% if steps.get_live_revision.error != blank %} The live revision could not be read, so joined alerts may still be tagged az:false_positive; this Investigation stays open.{% endif %}
 
   # Defensive branch. The gate settles as succeeded, dismissed or expired: a failed close
   # action is recorded `failed`, cloned and re-parked for another decision, and an

@@ -711,6 +711,16 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
     expect(retag?.steps?.[0]['on-failure']?.continue).toBe(true);
   });
 
+  it('tracks expiry re-tag failures the same way dismissal does', () => {
+    expect(stepByName('init_expired_retag_count')?.with?.failed_retag_count).toBe(0);
+    expect(stepByName('record_expired_retag_step_failure')?.if).toBe(
+      '${{ steps.retag_expired_alerts_call.error != blank }}'
+    );
+    expect(stepByName('record_expired_retag_partial_failure')?.if).toBe(
+      '${{ steps.retag_expired_alerts_call.error == blank and (steps.retag_expired_alerts_call.output.updated | default: 0) != foreach.item.size }}'
+    );
+  });
+
   it.each([
     [1, 'is re-tagged az:inconclusive', 'it is still open'],
     [3, 'are re-tagged az:inconclusive', 'they are still open'],
