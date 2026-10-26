@@ -305,7 +305,7 @@ describe('nightshift.handleInvestigationFailure step', () => {
     expect(await failureDefinition.handler(context())).toEqual({
       output: { sent: 1, failed: 0, unconfirmed: 0 },
     });
-    expect(ensureForFailure).toHaveBeenCalledWith('inv-1', 'exec-follow-up');
+    expect(ensureForFailure).toHaveBeenCalledWith('inv-1', 'exec-follow-up', 'Model unavailable');
     expect(getActionsClientWithRequestInSpace).toHaveBeenCalledWith(request, spaceId);
     expect(emitter).toHaveBeenCalledWith(
       'nightshift-investigations.failed',

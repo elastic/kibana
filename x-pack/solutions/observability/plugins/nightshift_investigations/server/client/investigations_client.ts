@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { i18n } from '@kbn/i18n';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -28,6 +29,9 @@ import {
   MAX_SLACK_SEEN_EVENTS,
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_SUBJECTS_PER_CONVERSATION,
+  INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+  MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH,
+  investigationRunFailedEventSchema,
 } from '@kbn/agentic-investigations-plugin/common';
 import { assertNever } from '@kbn/std';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
@@ -728,15 +732,20 @@ export class NightshiftInvestigationsClient {
     return this.ensureInvestigationConversation(investigationId, executionId, true);
   }
 
-  /** Records a failed run without reopening a conversation the user has closed. */
-  async ensureForFailure(investigationId: string, executionId: string): Promise<string> {
-    return this.ensureInvestigationConversation(investigationId, executionId, false);
+  /** Records a failed run and its context without reopening a conversation the user has closed. */
+  async ensureForFailure(
+    investigationId: string,
+    executionId: string,
+    reason: string
+  ): Promise<string> {
+    return this.ensureInvestigationConversation(investigationId, executionId, false, reason);
   }
 
   private async ensureInvestigationConversation(
     investigationId: string,
     executionId: string,
-    reopen: boolean
+    reopen: boolean,
+    failureReason?: string
   ): Promise<string> {
     const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
 
@@ -767,6 +776,41 @@ export class NightshiftInvestigationsClient {
           }
         : {}),
     });
+
+    if (failureReason !== undefined) {
+      try {
+        const message = asString(inputs?.message);
+        await conversations.addEvents({
+          conversationId: conversation.id,
+          events: [
+            {
+              type: INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+              data: investigationRunFailedEventSchema.parse({
+                execution_id: executionId,
+                request: message?.trim()
+                  ? message.slice(0, MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH)
+                  : undefined,
+                reason: (
+                  failureReason.trim() ||
+                  i18n.translate(
+                    'xpack.nightshiftInvestigations.failure.defaultReasonErrorMessage',
+                    {
+                      defaultMessage: 'Investigation failed',
+                    }
+                  )
+                ).slice(0, MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH),
+              }),
+            },
+          ],
+        });
+      } catch (error) {
+        this.logger.warn(
+          `Could not record failure context for investigation "${investigationId}", execution "${executionId}": ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
 
     const subjects = recoverSubjectsFromInputs(inputs, investigationId);
     if (subjects.length > 0) {
