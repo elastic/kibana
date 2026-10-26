@@ -293,6 +293,17 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
         {isRenderable ? (
           <>
             {renderedEmbeddable}
+            {viewMode === 'edit' && !isInSelectMode && (
+              // Panels without a title have no header to click, so this strip along their top edge
+              // gives the Cmd+click hint a place to show up. It's only visible when the panel has
+              // no header.
+              <div
+                className="dshDashboardGrid__hintArea"
+                css={styles.hintArea}
+                aria-hidden={true}
+                data-test-subj={`dashboardPanelHintArea-${id}`}
+              />
+            )}
             {isInSelectMode && (
               <span
                 className={classNames('dshDashboardGrid__selectionIndicator', {
@@ -344,6 +355,10 @@ const dashboardGridItemStyles = {
         '.kbnAppWrapper--hiddenChrome & .dshDashboardGrid__item--expanded': {
           padding: 0,
         },
+        // anchors the hint strip of untitled panels to the panel's top edge
+        '&:has(> .dshDashboardGrid__hintArea)': {
+          position: 'relative',
+        },
         // anchors the selection indicator and the selected panel actions to the panel's edges
         '&.dshDashboardGrid__item--selectMode': {
           position: 'relative',
@@ -382,6 +397,26 @@ const dashboardGridItemStyles = {
       getHighlightStyles(context),
       printViewportVisStyles(context),
     ]),
+  hintArea: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'none',
+      // only for panels without a header; a titled panel's header row already shows the hint
+      '.dshDashboardGrid__item:not(:has(.embPanel__header)) > &': {
+        display: 'block',
+      },
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: euiTheme.size.s,
+      zIndex: 1,
+      borderTopLeftRadius: euiTheme.border.radius.medium,
+      borderTopRightRadius: euiTheme.border.radius.medium,
+      // same feedback as hovering a panel's title row
+      '&:hover': {
+        backgroundColor: transparentize(euiTheme.colors.backgroundBasePrimary, 0.5),
+      },
+    }),
   // Inset in the top-right corner; the selected panel actions sit on the top edge to its left
   selectionIndicator: ({ euiTheme }: UseEuiTheme) =>
     css({

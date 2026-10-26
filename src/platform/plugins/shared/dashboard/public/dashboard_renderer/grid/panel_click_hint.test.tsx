@@ -53,6 +53,12 @@ describe('isDragAreaClick', () => {
     ).toBe(true);
   });
 
+  it('is true for a click on the hint strip of a panel without a title', () => {
+    expect(
+      getClickResult(<div className="dshDashboardGrid__hintArea" data-test-subj="target" />)
+    ).toBe(true);
+  });
+
   it('is false for a click on panel content', () => {
     expect(
       getClickResult(

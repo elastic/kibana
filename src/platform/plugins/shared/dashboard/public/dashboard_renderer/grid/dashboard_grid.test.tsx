@@ -319,6 +319,26 @@ describe('DashboardGrid', () => {
       expect(await screen.findByTestId('dashboardPanelClickHint')).toBeInTheDocument();
     });
 
+    test('is anchored to the top center of the clicked panel', async () => {
+      const { dashboardApi } = await createAndMountDashboardGrid({ panels: getMockPanels() });
+      await act(async () => {
+        dashboardApi.setViewMode('edit');
+        await new Promise((resolve) => setTimeout(resolve, 1));
+      });
+
+      const header = screen.getByTestId('mockPanelHeader_1');
+      const panel = header.closest('[data-test-subj="dashboardPanel"]') as HTMLElement;
+      jest
+        .spyOn(panel, 'getBoundingClientRect')
+        .mockReturnValue({ left: 100, width: 200, top: 300, bottom: 500 } as DOMRect);
+      fireEvent.mouseDown(header, { clientX: 10, clientY: 10 });
+      fireEvent.click(header, { clientX: 10, clientY: 10, detail: 1 });
+
+      const hint = await screen.findByTestId('dashboardPanelClickHint');
+      expect(hint.style.left).toBe('200px');
+      expect(hint.style.top).toBe('300px');
+    });
+
     test('does not show in select mode', async () => {
       const { dashboardApi } = await createAndMountDashboardGrid({ panels: getMockPanels() });
       await act(async () => {

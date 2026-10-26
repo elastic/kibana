@@ -20,9 +20,11 @@ const HINT_OPACITY = 0.9;
 
 /**
  * The panel's drag area: the whole header row (the title is the registered drag handle, but the
- * empty space next to it reads as part of it) and the move button in the hover actions
+ * empty space next to it reads as part of it), the move button in the hover actions, and the
+ * strip along the top edge of panels without a title
  */
-const DRAG_AREA_SELECTOR = '.embPanel__header, .kbnGridPanel--dragHandle';
+const DRAG_AREA_SELECTOR =
+  '.embPanel__header, .kbnGridPanel--dragHandle, .dshDashboardGrid__hintArea';
 
 /** Controls inside the header (e.g. the title editor or badges) keep their own clicks */
 const INTERACTIVE_SELECTOR = [
@@ -81,7 +83,7 @@ export const isDragAreaClick = (e: React.MouseEvent, panel: Element): boolean =>
 };
 
 export interface PanelClickHintProps {
-  /** viewport coordinates the hint is centered above, typically the bottom center of the panel */
+  /** viewport coordinates the hint hangs centered below, typically the top center of the panel */
   position: { x: number; y: number };
   onDismiss: () => void;
 }
@@ -120,10 +122,10 @@ export const PanelClickHint = ({ position, onDismiss }: PanelClickHintProps) => 
 
 const panelClickHintStyles = {
   hint: ({ euiTheme }: UseEuiTheme) => {
-    // centered above the anchor point, inset from the panel's bottom edge
-    const restingTransform = `translate(-50%, calc(-100% - ${euiTheme.size.s}))`;
+    // centered below the anchor point, inset from the panel's top edge so it sits inside the panel
+    const restingTransform = `translate(-50%, ${euiTheme.size.s})`;
     const lifecycle = keyframes({
-      '0%': { opacity: 0, transform: 'translate(-50%, -100%)' },
+      '0%': { opacity: 0, transform: 'translate(-50%, 0)' },
       '12%, 80%': { opacity: HINT_OPACITY, transform: restingTransform },
       '100%': { opacity: 0, transform: restingTransform },
     });

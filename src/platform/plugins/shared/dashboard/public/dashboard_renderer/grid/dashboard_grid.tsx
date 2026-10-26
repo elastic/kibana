@@ -63,6 +63,9 @@ function rectsIntersect(
   );
 }
 
+/** Keeps the hint clear of the top of the window when the panel's top is scrolled out of view */
+const MIN_CLICK_HINT_ANCHOR_TOP = 48;
+
 export const DashboardGrid = () => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
@@ -167,11 +170,12 @@ export const DashboardGrid = () => {
             Math.abs(e.clientY - pointerDown.y) >= SELECTION_DRAG_THRESHOLD_PX);
         // in select mode the user already knows how to select, so the hint would only be noise
         if (!hasMoved && !isSelectMode && isDragAreaClick(e, panel)) {
-          const { left, width, bottom } = panel.getBoundingClientRect();
+          const { left, width, top } = panel.getBoundingClientRect();
           setClickHint({
             id: Date.now(),
-            // bottom center of the panel, kept on screen when the panel runs past the viewport
-            position: { x: left + width / 2, y: Math.min(bottom, window.innerHeight) },
+            // top center of the panel, near where the user clicked, kept on screen when the panel's
+            // top is scrolled out of view
+            position: { x: left + width / 2, y: Math.max(top, MIN_CLICK_HINT_ANCHOR_TOP) },
           });
         }
         return;

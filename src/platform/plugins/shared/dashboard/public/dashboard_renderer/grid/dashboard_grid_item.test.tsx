@@ -342,6 +342,48 @@ describe('select mode clicks', () => {
   });
 });
 
+describe('hint area', () => {
+  test('is rendered in edit mode', async () => {
+    const { component, dashboardApi } = createAndMountDashboardGridItem({
+      id: '1',
+      key: '1',
+      type: TEST_EMBEDDABLE,
+    });
+    await act(async () => {
+      dashboardApi.setViewMode('edit');
+      await new Promise((resolve) => setTimeout(resolve, 1));
+    });
+    expect(component.getByTestId('dashboardPanelHintArea-1')).toBeInTheDocument();
+  });
+
+  test('is not rendered in view mode', async () => {
+    const { component, dashboardApi } = createAndMountDashboardGridItem({
+      id: '1',
+      key: '1',
+      type: TEST_EMBEDDABLE,
+    });
+    await act(async () => {
+      dashboardApi.setViewMode('view');
+      await new Promise((resolve) => setTimeout(resolve, 1));
+    });
+    expect(component.queryByTestId('dashboardPanelHintArea-1')).toBeNull();
+  });
+
+  test('is not rendered in select mode', async () => {
+    const { component, dashboardApi } = createAndMountDashboardGridItem({
+      id: '1',
+      key: '1',
+      type: TEST_EMBEDDABLE,
+    });
+    await act(async () => {
+      dashboardApi.setViewMode('edit');
+      dashboardApi.setSelectedPanelIds(new Set(['2']));
+      await new Promise((resolve) => setTimeout(resolve, 1));
+    });
+    expect(component.queryByTestId('dashboardPanelHintArea-1')).toBeNull();
+  });
+});
+
 describe('selection indicator', () => {
   const select = async (
     dashboardApi: { setSelectedPanelIds: (ids: Set<string>) => void },
