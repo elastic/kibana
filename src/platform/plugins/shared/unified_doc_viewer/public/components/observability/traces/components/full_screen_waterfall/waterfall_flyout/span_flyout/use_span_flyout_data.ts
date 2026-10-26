@@ -18,12 +18,17 @@ import type { BaseFlyoutData } from '../use_document_flyout_data';
 export interface UseSpanFlyoutDataParams {
   spanId: string;
   traceId: string;
+  timeRange?: { from: string; to: string };
 }
 
 export type SpanFlyoutData = BaseFlyoutData;
 
-export function useSpanFlyoutData({ spanId, traceId }: UseSpanFlyoutDataParams): SpanFlyoutData {
-  const { span, loading, error } = useFetchSpan({ spanId, traceId });
+export function useSpanFlyoutData({
+  spanId,
+  traceId,
+  timeRange,
+}: UseSpanFlyoutDataParams): SpanFlyoutData {
+  const { span, loading, error } = useFetchSpan({ spanId, traceId, timeRange });
 
   const hit = useMemo<DataTableRecord | null>(() => {
     if (!span) return null;
