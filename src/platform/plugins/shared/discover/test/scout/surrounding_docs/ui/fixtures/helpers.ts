@@ -38,8 +38,7 @@ export async function addFilterWithoutStrictCheck(
   await page.testSubj.click('filterOperatorOption-is');
   const filterParamsInput = page.locator('[data-test-subj="filterParams"] input');
   await expect(filterParamsInput).toBeEditable();
-  await filterParamsInput.focus();
-  await page.typeWithDelay('[data-test-subj="filterParams"] input', value);
+  await filterParamsInput.fill(value);
   await page.testSubj.click('saveFilter');
   await expect(page.testSubj.locator('addFilterPopover')).toBeHidden();
 }
