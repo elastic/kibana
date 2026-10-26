@@ -34,6 +34,7 @@ import {
 } from '@kbn/proposals-plugin/public';
 import {
   useAssignInvestigation,
+  useSetInvestigationStatus,
   useProposalImpactPills,
   impactPillsQueryKeys,
   useCurrentUserProfile,
@@ -255,10 +256,6 @@ const ConversationsPageContent: React.FC = () => {
     surface: 'queue',
   });
 
-  const onClickAction: BaseActionsProps['onClickAction'] = useCallback((action, recordId) => {
-    setModalState({ type: action, recordId });
-  }, []);
-
   // Cards are keyed by proposal id, but the flyout addresses a conversation, so the
   // click has to be translated through the proposal's conversation.
   const onClickCard = useCallback(
@@ -298,6 +295,38 @@ const ConversationsPageContent: React.FC = () => {
   const {
     services: { application, notifications },
   } = useKibana<CoreStart>();
+
+  const { mutateAsync: setInvestigationStatus } = useSetInvestigationStatus();
+
+  // Reopening needs no confirmation: unlike closing, it dismisses nothing.
+  const reopenInvestigation = useCallback(
+    async (recordId: Investigation['recordId']) => {
+      const conversationId = conversations.find((c) => c.recordId === recordId)?.conversationId;
+      if (!conversationId) return;
+      try {
+        await setInvestigationStatus({
+          investigationId: conversationId,
+          body: { status: 'open' },
+        });
+        notifications?.toasts.addSuccess(QUEUE_PAGE_INFO.reopenSuccess);
+        void queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
+      } catch {
+        notifications?.toasts.addDanger(QUEUE_PAGE_INFO.reopenError);
+      }
+    },
+    [conversations, notifications, queryClient, setInvestigationStatus]
+  );
+
+  const onClickAction: BaseActionsProps['onClickAction'] = useCallback(
+    (action, recordId) => {
+      if (action === 'reopen') {
+        void reopenInvestigation(recordId);
+        return;
+      }
+      setModalState({ type: action, recordId });
+    },
+    [reopenInvestigation]
+  );
 
   const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
   const {

@@ -131,15 +131,17 @@ const PRIORITY_SORT: SortCombinations[] = [
 ];
 
 /**
- * A conversation's history, newest first. An undecided proposal has no `decidedAt` yet and is the
- * live one, so it leads; a retry inherits its original's `createdAt`, which therefore cannot
- * order a chain. The chain keys make the order total, so paging cannot repeat or skip a row.
+ * A conversation's history, newest first. A decision or a status change does not move a row.
+ * A retry copies `createdAt`, `rootProposalId` and `revision` from its original, so
+ * `supersededBy` tells the attempts apart. The current attempt has none and comes first. Each
+ * older attempt has the id of its own retry. The order is total, so paging cannot repeat or
+ * skip a row.
  */
 const NEWEST_SORT: SortCombinations[] = [
-  { decidedAt: { order: 'desc', missing: '_first' } },
   { createdAt: { order: 'desc' } },
   { rootProposalId: { order: 'asc' } },
   { revision: { order: 'asc' } },
+  { supersededBy: { order: 'asc', missing: '_first' } },
 ];
 
 export class ProposalsService {
