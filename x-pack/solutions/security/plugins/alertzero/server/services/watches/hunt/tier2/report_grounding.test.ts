@@ -332,6 +332,43 @@ describe('assertEsqlGroundedInReport', () => {
       );
     });
 
+    describe('an excluded value that is a prefix of a longer eligible token', () => {
+      const longer = '192.0.2.30';
+      const prefix = '192.0.2.3';
+      const prefixOptions = {
+        reportText: `${reportText} The beacon called ${longer} every hour.`,
+        iocValues: [longer],
+        excludedIocValues: [prefix],
+      };
+
+      it('does not let the excluded value ground a wildcard through the longer token', () => {
+        expect(
+          assertEsqlGroundedInReport(
+            `FROM logs-* | WHERE message LIKE "*${prefix}*" | LIMIT 10`,
+            prefixOptions
+          )
+        ).toEqual({
+          ok: false,
+          reason: `query filters on a value intel review rejected (${prefix})`,
+        });
+      });
+
+      it('still grounds the longer eligible value and still lets the excluded value narrow', () => {
+        expect(
+          assertEsqlGroundedInReport(
+            `FROM logs-* | WHERE message LIKE "*${longer}*" | LIMIT 10`,
+            prefixOptions
+          ).ok
+        ).toBe(true);
+        expect(
+          assertEsqlGroundedInReport(
+            `FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" AND message LIKE "*${prefix}*" | LIMIT 10`,
+            prefixOptions
+          ).ok
+        ).toBe(true);
+      });
+    });
+
     it('keeps an exact eligible URL whose query string carries ? grounded under a rejected host', () => {
       const download = 'https://drive.google.com/uc?export=download&id=payload';
       const eligibleWins = {

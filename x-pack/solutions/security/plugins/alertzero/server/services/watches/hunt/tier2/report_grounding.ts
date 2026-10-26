@@ -669,6 +669,12 @@ export const assertEsqlGroundedInReport = (
       if (groundingIocs.has(value)) {
         return true;
       }
+      // Blanking only term occurrences leaves a rejected value readable inside a longer token
+      // (`192.0.2.3` inside an eligible `192.0.2.30`), so the exact value is refused outright
+      // here rather than looked up: it may narrow a query, never ground one.
+      if (scrubbed && excludedSet.has(value)) {
+        return false;
+      }
       if (!standalone && isSpecificToEligibleIoc(value, excludedSet, scrubbedEligible)) {
         return true;
       }
