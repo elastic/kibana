@@ -4406,9 +4406,6 @@ importers:
       blurhash:
         specifier: 2.0.5
         version: 2.0.5
-      borc:
-        specifier: 3.0.0
-        version: 3.0.0
       brok:
         specifier: 6.0.0
         version: 6.0.0(@hapi/hapi@21.4.10)
@@ -4424,6 +4421,9 @@ importers:
       canvg:
         specifier: 4.0.3
         version: 4.0.3
+      cbor2:
+        specifier: 2.4.0
+        version: 2.4.0
       chalk:
         specifier: 4.1.2
         version: 4.1.2
@@ -10962,6 +10962,10 @@ packages:
     peerDependencies:
       postcss-selector-parser: ^7.1.1
 
+  '@cto.af/wtf8@0.0.6':
+    resolution: {integrity: sha512-xp/zbWLXuh2WBxi9tIc+Jep7BAwLu8ETTI8xN68ks10bxOBMISs/jcu9DBEkOeGXLaTKUbA0Y2Ficx/jmmPABg==}
+    engines: {node: '>=20'}
+
   '@cypress/grep@5.1.0':
     resolution: {integrity: sha512-n/8m5g2AuZf4thHhuo+rp7Fgkfm06k0uM9NlP0GrfWE5vaIJJ+8U10SOtjVj9bapjYI7l9RZiT87XSBU3wBFOA==}
     peerDependencies:
@@ -14586,10 +14590,6 @@ packages:
   '@socket.io/component-emitter@3.1.2':
     resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
 
-  '@sovpro/delimited-stream@1.1.0':
-    resolution: {integrity: sha512-kQpk267uxB19X3X2T1mvNMjyvIEonpNSHrMlK5ZaBU6aZxw7wPbpgKJOjHN3+/GPVpXgAV9soVT2oyHpLkLtyw==}
-    engines: {node: '>= 8'}
-
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
@@ -16770,11 +16770,6 @@ packages:
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
 
-  borc@3.0.0:
-    resolution: {integrity: sha512-ec4JmVC46kE0+layfnwM3l15O70MlFiEbmQHY/vpqIKiUtPVntv4BY4NVnz3N4vb21edV3mY97XVckFvYHWF9g==}
-    engines: {node: '>=4'}
-    hasBin: true
-
   bowser@2.14.1:
     resolution: {integrity: sha512-tzPjzCxygAKWFOJP011oxFHs57HzIhOEracIgAePE4pqB3LikALKnSzUyU4MGs9/iCEUuHlAJTjTc5M+u7YEGg==}
 
@@ -16998,6 +16993,10 @@ packages:
 
   caseless@0.12.0:
     resolution: {integrity: sha512-4tYFyifaFfGacoiObjJegolkwSU4xQNGbVgUiNYVUxbQ2x2lUsFvY4hVgVzGiIe6WLOPqycWXA40l+PWsxthUw==}
+
+  cbor2@2.4.0:
+    resolution: {integrity: sha512-s6+CPoEI6tgwasK2cWMTXt5sy8Yxo4vgRmKgkJSCdKDL/0bHU3aYJoYeHRX7/oywKYA3bxcpqEYkXkrdHe0+0Q==}
+    engines: {node: '>=22'}
 
   ccount@1.1.0:
     resolution: {integrity: sha512-vlNK021QdI7PNeiUh/lKkC/mNHHfV0m/Ad5JoI0TYtlBnJAslM/JIkm/tGC88bkLIwO6OQ5uV6ztS6kVAtCDlg==}
@@ -20410,10 +20409,6 @@ packages:
   isnumber@1.0.0:
     resolution: {integrity: sha512-JLiSz/zsZcGFXPrB4I/AGBvtStkt+8QmksyZBZnVXnnK9XdTEyz0tX8CRYljtwYDuIuZzih6DpHQdi+3Q6zHPw==}
 
-  iso-url@1.2.1:
-    resolution: {integrity: sha512-9JPDgCN4B7QPkLtYAAOrEuAWvP9rWvR5offAr0/SeF046wIkglqH3VXgYYP6NcsKslH80UIVgmPqNe3j7tG2ng==}
-    engines: {node: '>=12'}
-
   isobject@3.0.1:
     resolution: {integrity: sha512-WhB9zCku7EGTj/HQQRz5aUQEUeoQZH2bWcltRErOpymJ4boYE6wL9Tbr23krRPSZ+C5zqNSrSw+Cc7sZZ4b7vg==}
     engines: {node: '>=0.10.0'}
@@ -20728,10 +20723,6 @@ packages:
 
   json-stringify-safe@5.0.1:
     resolution: {integrity: sha512-ZClg6AaYvamvYEE82d3Iyd3vSSIjQ+odgjaTzRuO3s7toCdFKczob2i0zCh7JE8kWn17yvAWhUVxvqGwUalsRA==}
-
-  json-text-sequence@0.3.0:
-    resolution: {integrity: sha512-7khKIYPKwXQem4lWXfpIN/FEnhztCeRPSxH4qm3fVlqulwujrRDD54xAwDDn/qVKpFtV550+QAkcWJcufzqQuA==}
-    engines: {node: '>=10.18.0'}
 
   json-with-bigint@3.5.12:
     resolution: {integrity: sha512-uwbF/wSSuOgC7qqlq27Xp5B6a2MHVug3t0idZdTqu0JnlFvgJuH7ju+KAk/J06C7GfhoYy2gnb9wz2INqcne7w==}
@@ -27600,6 +27591,8 @@ snapshots:
     dependencies:
       postcss-selector-parser: 7.1.6
 
+  '@cto.af/wtf8@0.0.6': {}
+
   '@cypress/grep@5.1.0(@babel/core@7.29.7(supports-color@10.2.2))(cypress@15.12.0)(supports-color@10.2.2)':
     dependencies:
       cypress: 15.12.0
@@ -31804,8 +31797,6 @@ snapshots:
 
   '@socket.io/component-emitter@3.1.2': {}
 
-  '@sovpro/delimited-stream@1.1.0': {}
-
   '@standard-schema/spec@1.1.0': {}
 
   '@standard-schema/utils@0.3.0': {}
@@ -34321,16 +34312,6 @@ snapshots:
 
   boolbase@1.0.0: {}
 
-  borc@3.0.0:
-    dependencies:
-      bignumber.js: 9.3.1
-      buffer: 6.0.3
-      commander: 2.20.3
-      ieee754: 1.2.1
-      iso-url: 1.2.1
-      json-text-sequence: 0.3.0
-      readable-stream: 3.6.2
-
   bowser@2.14.1: {}
 
   brace-expansion@1.1.21:
@@ -34598,6 +34579,10 @@ snapshots:
   case-sensitive-paths-webpack-plugin@2.4.0: {}
 
   caseless@0.12.0: {}
+
+  cbor2@2.4.0:
+    dependencies:
+      '@cto.af/wtf8': 0.0.6
 
   ccount@1.1.0: {}
 
@@ -38645,8 +38630,6 @@ snapshots:
 
   isnumber@1.0.0: {}
 
-  iso-url@1.2.1: {}
-
   isobject@3.0.1: {}
 
   isomorphic-timers-promises@1.0.1: {}
@@ -39178,10 +39161,6 @@ snapshots:
   json-stringify-pretty-compact@4.0.0: {}
 
   json-stringify-safe@5.0.1: {}
-
-  json-text-sequence@0.3.0:
-    dependencies:
-      '@sovpro/delimited-stream': 1.1.0
 
   json-with-bigint@3.5.12: {}
 
