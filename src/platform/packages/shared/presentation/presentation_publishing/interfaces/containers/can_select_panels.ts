@@ -8,6 +8,7 @@
  */
 
 import type { PublishingSubject } from '../../publishing_subject';
+import { apiHasParentApi } from '../has_parent_api';
 
 /**
  * This API can select child panels (multi-selection used for bulk actions)
@@ -29,3 +30,7 @@ export const apiCanSelectPanels = (api: unknown): api is CanSelectPanels => {
     Boolean((api as CanSelectPanels)?.selectedPanelIds$)
   );
 };
+
+/** Returns the parent API when it supports panel selection (e.g. a dashboard), otherwise undefined */
+export const getSelectionApi = (api: unknown): CanSelectPanels | undefined =>
+  apiHasParentApi(api) && apiCanSelectPanels(api.parentApi) ? api.parentApi : undefined;

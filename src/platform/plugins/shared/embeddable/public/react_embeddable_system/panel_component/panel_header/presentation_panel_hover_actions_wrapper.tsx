@@ -11,6 +11,7 @@ import React, { type PropsWithChildren } from 'react';
 
 import {
   canOverrideHoverActions,
+  getSelectionApi,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
@@ -18,7 +19,6 @@ import classNames from 'classnames';
 import { BehaviorSubject } from 'rxjs';
 import type { PresentationPanelHoverActionsProps } from './presentation_panel_hover_actions';
 import { PresentationPanelHoverActions } from './presentation_panel_hover_actions';
-import { getSelectionApi } from './get_selection_api';
 import { useHoverActionStyles } from './use_hover_actions_styles';
 
 const customActionsStyles = css({

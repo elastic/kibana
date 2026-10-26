@@ -28,7 +28,11 @@ import { buildContextMenuForActions, triggers } from '@kbn/ui-actions-plugin/pub
 
 import { css } from '@emotion/react';
 import type { EmbeddableApiContext, PublishesTitle, ViewMode } from '@kbn/presentation-publishing';
-import { apiCanLockHoverActions, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  apiCanLockHoverActions,
+  getSelectionApi,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { getPanelContextMenuTriggerId } from '@kbn/presentation-util';
 import type { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
 import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
@@ -39,7 +43,6 @@ import {
   DEFAULT_QUICK_ACTIONS,
   EmbeddableRendererContext,
 } from '../../embeddable_renderer_context';
-import { getSelectionApi } from './get_selection_api';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {

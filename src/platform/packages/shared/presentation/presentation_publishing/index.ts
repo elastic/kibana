@@ -301,6 +301,7 @@ export {
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/can_focus_panel';
 export {
   apiCanSelectPanels,
+  getSelectionApi,
   type CanSelectPanels,
 } from './interfaces/containers/can_select_panels';
 
