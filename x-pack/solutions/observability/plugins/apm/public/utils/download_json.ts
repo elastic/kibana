@@ -12,9 +12,12 @@ export function downloadJson({
   fileName: string;
   data?: Record<string, any>;
 }) {
-  const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(JSON.stringify(data))}`;
+  // A blob URL keeps the download out of the connect-src CSP check that a data: href triggers.
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href = jsonString;
+  link.href = url;
   link.download = fileName;
   link.click();
+  URL.revokeObjectURL(url);
 }
