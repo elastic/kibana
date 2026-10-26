@@ -12,10 +12,7 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import { ScheduleUnit } from '../../../common/runtime_types';
 import { SCHEDULE_INTERVAL_FIELD, scheduleToSeconds } from '../../../common/lib/schedule_to_time';
-import {
-  monitorCreateSchema,
-  monitorForwardCompatibilitySchema,
-} from './monitor_attribute_schema';
+import { monitorCreateSchema, monitorForwardCompatibilitySchema } from './monitor_attribute_schema';
 
 interface ScheduleAttributes {
   schedule?: {
