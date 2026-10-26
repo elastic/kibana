@@ -54,6 +54,7 @@ apiTest.describe(
     let workflowsApi: WorkflowsApiService;
     let editorHeaders: Record<string, string>;
     const createdWorkflowIds: string[] = [];
+    const createdExecutionIds: string[] = [];
 
     apiTest.beforeAll(async ({ kbnClient, esClient }) => {
       workflowsApi = new WorkflowsApiService(spaceId, kbnClient);
@@ -83,10 +84,27 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ kbnClient, esClient }) => {
-      await Promise.all(createdWorkflowIds.map((id) => workflowsApi.hardDelete(id)));
-      await kbnClient.request({ method: 'DELETE', path: `/api/spaces/space/${spaceId}` });
-      await esClient.security.deleteUser({ username: editorName });
-      await esClient.security.deleteRole({ name: editorName });
+      // A failed test leaves executions paused, and force-deleting a workflow with a running execution answers 409.
+      // Each stage settles independently so a failure cannot skip the cleanup that follows it.
+      await Promise.allSettled(
+        createdWorkflowIds.map((id) =>
+          kbnClient.request({
+            method: 'POST',
+            path: `/s/${spaceId}/api/workflows/workflow/${id}/executions/cancel`,
+          })
+        )
+      );
+      await Promise.allSettled(
+        createdExecutionIds.map((workflowExecutionId) =>
+          workflowsApi.waitForTermination({ workflowExecutionId })
+        )
+      );
+      await Promise.allSettled(createdWorkflowIds.map((id) => workflowsApi.hardDelete(id)));
+      await Promise.allSettled([
+        kbnClient.request({ method: 'DELETE', path: `/api/spaces/space/${spaceId}` }),
+        esClient.security.deleteUser({ username: editorName }),
+        esClient.security.deleteRole({ name: editorName }),
+      ]);
     });
 
     apiTest(
@@ -108,6 +126,7 @@ apiTest.describe(
             workflowsApi.run(workflowA.id, {}),
             workflowsApi.run(workflowB.id, {}),
           ]);
+        createdExecutionIds.push(executionA, executionB);
         const [pausedA, pausedB] = await Promise.all(
           [executionA, executionB].map((workflowExecutionId) =>
             workflowsApi.waitForStatus({
