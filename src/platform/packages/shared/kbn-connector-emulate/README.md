@@ -32,11 +32,68 @@ const { fetch, calls } = createEmulatorFetch({ specs: { v1: datadogV1, v2: datad
 
 Each call's `matched.source` then says which spec answered it. Fixtures, recordings and pagination entries can name a `source` next to their method and path template to apply to that spec only; without one, they apply to the operation in every spec.
 
+## Server mode
+
+A running Kibana can't use an in-process `fetch`, so the mock can also sit behind an HTTP forward proxy, which Kibana reaches through `xpack.actions.proxyUrl`:
+
+```ts
+import { createCertificateAuthority, createEmulatorProxy } from '@kbn/connector-emulate';
+
+const certificateAuthority = createCertificateAuthority();
+const proxy = createEmulatorProxy({ fetch: mock.fetch, certificateAuthority });
+const proxyUrl = await proxy.listen(8080);
+```
+
+Requests aren't forwarded: the proxy answers each one with `fetch`, so the vendor hosts in connector code and config need no changes. Plain HTTP requests arrive in absolute form (`GET http://vendor.example/path`). HTTPS ones arrive through `CONNECT` tunnels, whose TLS the proxy terminates with a certificate for the requested host, issued on first use by `certificateAuthority`. Requests sent to the proxy as if it were the vendor, or whose URL doesn't parse, get **400**, and errors thrown by `fetch` **502**.
+
+Clients must trust the CA's certificate (`certificateAuthority.cert`, PEM). Kibana's actions plugin trusts it for a vendor host through `xpack.actions.customHostSettings` (`ssl.certificateAuthoritiesData`), or for every host through the `NODE_EXTRA_CA_CERTS` environment variable. `createCertificateAuthority({ cert, key })` loads a CA created earlier, so a Kibana configured to trust it keeps working when the mock restarts.
+
+## GraphQL
+
+GraphQL APIs are specs too: the schema in SDL, and the URLs the vendor serves it at.
+
+```ts
+const { fetch, calls } = createEmulatorFetch({
+  specs: {
+    v2: mondayOpenApi,
+    graphql: { format: 'graphql', sdl: mondaySchema, endpoints: ['https://api.monday.com/v2'] },
+  },
+});
+```
+
+Requests to an endpoint (`GET` with `query`, `operationName` and `variables` in the query string, or `POST` with them in a JSON body) are parsed and validated against the schema, and their variables and arguments coerced to their declared types. A request that breaks the schema gets **400** with GraphQL `errors`, and a mutation sent with `GET` is rejected. Valid requests execute against the schema with sampled values, so a response has exactly the fields the document selects: scalars are sampled as in OpenAPI responses (custom scalars by their names, such as `ISO8601DateTime`), enums answer their first value, lists hold one item, abstract types resolve to their first possible type, and `Boolean`s are `false`, so flags such as a connection's `hasNextPage` end paging after one page. Documents that use `@defer` or `@stream` get **501**.
+
+Each root field a request selects is recorded in `calls` as its own operation, named by the operation type and field, such as `query items`. Its `matched` has that `name` instead of a method and path, and `readOnly` is `true` for queries.
+
+Fixtures and recordings name a root field the same way, `{ name: 'query boards' }`, and store the body the vendor answers a document selecting only that field, unaliased: `{ data: { boards: [...] } }`. The field then resolves from the stored value whatever the request's arguments and aliases: selected fields read the stored ones, fields the value lacks are sampled, and abstract types resolve by the value's `__typename`. Recordings with GraphQL `errors` are skipped, like recorded HTTP errors, though vendors answer them with HTTP 200. A recording is served only while its value fits the schema; fields the schema doesn't declare, `null` in non-null fields, and scalars or enum values the type can't represent put it in `rejectedResponses`. A fixture is always served: where it breaks the schema, the response carries GraphQL `errors` and partial data, as a vendor's would, and the call's `responseViolations` list them. Every request gets the same stored value, so a stored page of a connection should end paging (`hasNextPage: false`).
+
+## MCP
+
+MCP servers are specs too: the tools their `tools/list` describes, and the URLs of their Streamable HTTP endpoint.
+
+```ts
+const { fetch, calls } = createEmulatorFetch({
+  specs: {
+    mcp: { format: 'mcp', tools: githubTools, endpoints: ['https://api.githubcopilot.com/mcp/'] },
+  },
+});
+```
+
+The mock answers as a stateless server that replies with JSON: `POST`s must name both `application/json` and `text/event-stream` in `Accept`, and carry a JSON-RPC message or batch; `GET` (the event stream) and `DELETE` (ending a session) get **405**. Specs whose tools have no `inputSchema` object, or list a tool twice, are refused.
+
+`tools/call` arguments are validated against the tool's `inputSchema`, and arguments it doesn't declare are reported when it declares its `properties` and doesn't allow others, as servers ignore them. Calls that break the schema, or name a tool the spec doesn't list, get a JSON-RPC `InvalidParams` error; calls the SDK rejects itself, such as `arguments` that aren't an object, are reported in `requestViolations` too, and batches that repeat a request id get **400**. Valid calls answer a sample of the tool's `outputSchema` as JSON text, and as `structuredContent` when the sample is an object; tools without one answer `{}`. Samples that break the `outputSchema`, as a vendor's examples can, are reported in the call's `responseViolations`.
+
+`tools/list` and each `tools/call` are recorded in `calls` as operations named by the method and tool, such as `tools/call get_me`, with `readOnly` from the tool's `readOnlyHint` annotation. The other messages, such as `initialize`, are recorded with `protocolMessage: true`.
+
+Fixtures and recordings name a tool call the same way, `{ name: 'tools/call get_me' }`, and store the `result` of the vendor's JSON-RPC reply (`content`, and `structuredContent` when the tool returns it). Recordings with `isError: true` are skipped, like recorded HTTP errors. A recording is served only while it is a `tools/call` result whose `structuredContent` matches the tool's `outputSchema`, which it must have unless the schema is an array (`structuredContent` can't be one); others are listed in `rejectedResponses`. A fixture is always served, with where it breaks the `outputSchema` in the call's `responseViolations`, unless it isn't a `tools/call` result at all, which gets a JSON-RPC `InternalError`.
+
 ## Credentials
 
 Requests need the credentials of one of the operation's `security` requirements (or the document's), in the place each scheme declares: the `apiKey` header, query parameter or cookie, or an `Authorization` header with the `http` scheme (`Basic`, `Bearer`, …), and `Bearer` for `oauth2` and `openIdConnect`. Any value is accepted. A request without them gets **401** listing what the operation expects, which catches connectors that forget a credential or send it in the wrong place. Schemes that can't be checked on a request, such as `mutualTLS`, count as present, and API keys in the query string aren't reported as undeclared parameters.
 
 The `tokenUrl` and `refreshUrl` of each `oauth2` flow (relative ones resolved against each of the spec's servers, keeping server variables such as `{subdomain}`) issue stub bearer tokens, as an authorization server would (RFC 6749): a form-encoded `POST` with the `grant_type` of a declared flow and the parameters it requires gets a token, and `client_credentials` also needs `client_id` or Basic client authentication. Token URLs also accept JWT bearer assertions (RFC 7523, `urn:ietf:params:oauth:grant-type:jwt-bearer`), as service accounts such as Google's send them; signatures aren't checked, and an assertion that claims a `target_audience` gets an `id_token`, as Google issues. Other requests get the OAuth error a vendor would return, such as `unsupported_grant_type`. Token requests are recorded in `calls` with `token: true`, and rejected ones list the OAuth error in `requestViolations`. A token URL that can't be parsed throws when the mock is created. Token URLs the spec also documents as operations are answered by those operations.
+
+A token request with a `scope` (or a JWT assertion with a `scope` claim) gets a token that carries those scopes, and the response echoes them in `scope`; a refresh keeps the original scopes unless it asks for others. With `checkScopes: true`, a request with such a token gets **403** with `WWW-Authenticate: Bearer error="insufficient_scope", scope="…"` (RFC 6750) when the token lacks a scope that every satisfied `oauth2` or `openIdConnect` requirement of the operation lists, which catches connectors that request too few scopes. Tokens issued without a scope, which get the vendor's defaults, and tokens the mock didn't issue, such as static tokens from connector config, aren't checked. The check is off by default because some specs declare scopes loosely.
 
 Vendor specs are sometimes wrong about authentication too. Trello's declares only OAuth2 for most operations, while the API also takes `key` and `token` query parameters; an overlay can add the missing requirement:
 
@@ -57,7 +114,7 @@ Responses come from, in order of preference:
 3. **Spec examples**: the response media type's `example` or `examples`, when they match the schema;
 4. **Samples** of the response schema.
 
-Fixtures and recordings name their operation by method and path template, not by URL, so they apply whatever the request's parameters are:
+Fixtures and recordings name their operation by method and path template, not by URL, so they apply whatever the request's parameters are (GraphQL and MCP operations by name, see above):
 
 ```ts
 const { fetch, rejectedResponses } = createEmulatorFetch({

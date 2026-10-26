@@ -39,8 +39,11 @@ export const securityResponseHeadersSchema = schema.object({
   permissionsPolicy: schema.oneOf([schema.string(), schema.literal(null)], {
     // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
     // Note: this currently lists all non-experimental permissions, as of May 2023
+    // `geolocation` is allowed for `self` because Maps' browser location starting view and the Canvas
+    // `location()` function call it. `fullscreen` allows Vidyard so that the videos Security Solution
+    // embeds can go fullscreen; core's CSP already allows Vidyard in `frame-src`.
     defaultValue:
-      'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()',
+      'camera=(), display-capture=(), fullscreen=(self "https://play.vidyard.com"), geolocation=(self), microphone=(), web-share=()',
   }),
   permissionsPolicyReportOnly: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
   disableEmbedding: schema.boolean({ defaultValue: false }), // is used to control X-Frame-Options and CSP headers

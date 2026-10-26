@@ -1,5 +1,5 @@
 {
-  "sha1": "a69b9ea6511e82ed608246dad9fee1dc910c5af6",
+  "sha1": "46c6acc9418c7ae8f2919b4cebb50b86928079d8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -3829,8 +3829,8 @@
       }
     },
     {
-      "id": "8174f26f08c8838-5e10957aa7efecd",
-      "title": "Bulk get rules API bulk-get: should return 404 when one or more requested ids are missing",
+      "id": "8174f26f08c8838-2e4a05608da20f4",
+      "title": "Bulk get rules API bulk-get: returns the found rules and a not-found error for each missing id",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -3845,8 +3845,8 @@
       }
     },
     {
-      "id": "8174f26f08c8838-ff3689aedd0f8fa",
-      "title": "Bulk get rules API bulk-get: should return 404 when all requested ids are missing",
+      "id": "8174f26f08c8838-b6f7acfb3456fad",
+      "title": "Bulk get rules API bulk-get: returns no items and a not-found error per id when all ids are missing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -3856,8 +3856,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/get_rules_bulk.spec.ts",
-        "line": 122,
-        "column": 32
+        "line": 130,
+        "column": 19
       }
     },
     {
@@ -3872,8 +3872,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/get_rules_bulk.spec.ts",
-        "line": 135,
-        "column": 49
+        "line": 164,
+        "column": 20
       }
     },
     {
@@ -3888,8 +3888,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/get_rules_bulk.spec.ts",
-        "line": 146,
-        "column": 13
+        "line": 171,
+        "column": 38
       }
     },
     {
@@ -3904,8 +3904,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/get_rules_bulk.spec.ts",
-        "line": 154,
-        "column": 22
+        "line": 180,
+        "column": 95
       }
     },
     {
@@ -3920,8 +3920,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/get_rules_bulk.spec.ts",
-        "line": 164,
-        "column": 22
+        "line": 190,
+        "column": 79
       }
     },
     {
@@ -3936,7 +3936,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/get_rules_bulk.spec.ts",
-        "line": 170,
+        "line": 200,
         "column": 5
       }
     },
@@ -3952,8 +3952,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/get_rules_bulk.spec.ts",
-        "line": 185,
-        "column": 63
+        "line": 212,
+        "column": 4
       }
     },
     {
@@ -3968,8 +3968,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/get_rules_bulk.spec.ts",
-        "line": 200,
-        "column": 41
+        "line": 225,
+        "column": 14
       }
     },
     {
@@ -3984,13 +3984,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/get_rules_bulk.spec.ts",
-        "line": 215,
-        "column": 70
+        "line": 241,
+        "column": 9
       }
     },
     {
-      "id": "8a93277aa066f10-a475bd945b74406",
-      "title": "Install rule template API should create the rule from the body and record the template on it",
+      "id": "8a93277aa066f10-3a2827a876219a1",
+      "title": "Install rule template API should create the rule from the body",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -4005,22 +4005,6 @@
       }
     },
     {
-      "id": "8a93277aa066f10-a470d38cb2ef589",
-      "title": "Install rule template API should record the template when the body is the unedited template rule",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/install_rule_template.spec.ts",
-        "line": 65,
-        "column": 14
-      }
-    },
-    {
       "id": "8a93277aa066f10-3d48faec52859ac",
       "title": "Install rule template API should not let the body choose the template",
       "expectedStatus": "passed",
@@ -4032,8 +4016,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/install_rule_template.spec.ts",
-        "line": 78,
-        "column": 72
+        "line": 59,
+        "column": 13
       }
     },
     {
@@ -4048,8 +4032,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/install_rule_template.spec.ts",
-        "line": 98,
-        "column": 16
+        "line": 78,
+        "column": 34
       }
     },
     {
@@ -4064,8 +4048,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/install_rule_template.spec.ts",
-        "line": 109,
-        "column": 25
+        "line": 90,
+        "column": 55
       }
     },
     {
@@ -4080,8 +4064,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/install_rule_template.spec.ts",
-        "line": 116,
-        "column": 31
+        "line": 99,
+        "column": 14
       }
     },
     {
@@ -4096,8 +4080,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/install_rule_template.spec.ts",
-        "line": 132,
-        "column": 5
+        "line": 115,
+        "column": 25
       }
     },
     {
@@ -4112,8 +4096,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/install_rule_template.spec.ts",
-        "line": 154,
-        "column": 25
+        "line": 135,
+        "column": 13
       }
     },
     {
@@ -4128,8 +4112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/install_rule_template.spec.ts",
-        "line": 167,
-        "column": 19
+        "line": 152,
+        "column": 23
       }
     },
     {
@@ -4917,8 +4901,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_templates_integration.spec.ts",
@@ -4933,8 +4916,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_templates_integration.spec.ts",
@@ -4949,8 +4931,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_templates_integration.spec.ts",
@@ -4959,14 +4940,13 @@
       }
     },
     {
-      "id": "877dd578d5d0c3f-395752ff52a54cd",
-      "title": "Rule metadata.template get and find: return metadata.template when present",
+      "id": "877dd578d5d0c3f-156dff0fa6668f0",
+      "title": "Rule metadata.template get and find: do not return metadata.template even when it is stored",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_templates_integration.spec.ts",
@@ -4975,35 +4955,33 @@
       }
     },
     {
-      "id": "877dd578d5d0c3f-1e1bca9bb6e7ce6",
-      "title": "Rule metadata.template update: keeps metadata.template",
+      "id": "877dd578d5d0c3f-6e4af4a1d0870b9",
+      "title": "Rule metadata.template update: keeps metadata.template in storage without returning it",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_templates_integration.spec.ts",
-        "line": 101,
-        "column": 12
+        "line": 107,
+        "column": 25
       }
     },
     {
-      "id": "877dd578d5d0c3f-9342707c04c28a4",
-      "title": "Rule metadata.template upsert: keeps metadata.template on an existing rule",
+      "id": "877dd578d5d0c3f-f4052e684dde9f1",
+      "title": "Rule metadata.template upsert: keeps metadata.template in storage on an existing rule without returning it",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_templates_integration.spec.ts",
-        "line": 117,
-        "column": 8
+        "line": 122,
+        "column": 19
       }
     },
     {

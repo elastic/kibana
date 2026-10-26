@@ -38,6 +38,8 @@ export const AlertEpisodeOverviewListSection = ({
     data: episode,
     isLoading: isLoadingEpisode,
     isError: isEpisodeError,
+    isDataLoading: isLoadingEpisodeData,
+    isDataError: isEpisodeDataError,
   } = useFetchEpisodeQuery({ episodeId, services });
 
   const ruleId = episode?.['rule.id'];
@@ -88,12 +90,14 @@ export const AlertEpisodeOverviewListSection = ({
   const groupingStatus: GroupingRowStatus =
     isRuleForbidden(ruleState) || isRuleNotFound(ruleState)
       ? 'hidden'
-      : isRuleError(ruleState)
+      : isRuleError(ruleState) || isEpisodeDataError
       ? 'error'
+      : isLoadingEpisodeData
+      ? 'loading'
       : 'visible';
   const groupingData = parseEpisodeDataJson(episode?.episode_data);
-  const assigneeUid = episode?.last_assignee_uid ?? undefined;
   const episodeAction = episodeActionsMap?.get(episodeId);
+  const assigneeUid = episodeAction?.lastAssigneeUid ?? undefined;
   const groupAction = groupHash ? getGroupAction(groupActionsMap, ruleId, groupHash) : undefined;
 
   return (

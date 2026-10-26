@@ -10,12 +10,12 @@
 import { addReportToParameter } from './report_to_parameter';
 
 const DEFAULT_POLICY =
-  'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()';
+  'camera=(), display-capture=(), fullscreen=(self "https://play.vidyard.com"), geolocation=(self), microphone=(), web-share=()';
 
 describe('addReportToParameter', () => {
   it('attaches the parameter to every directive of the default policy', () => {
     expect(addReportToParameter(DEFAULT_POLICY, 'violations-endpoint')).toEqual(
-      'camera=();report-to=violations-endpoint, display-capture=();report-to=violations-endpoint, fullscreen=(self);report-to=violations-endpoint, geolocation=();report-to=violations-endpoint, microphone=();report-to=violations-endpoint, web-share=();report-to=violations-endpoint'
+      'camera=();report-to=violations-endpoint, display-capture=();report-to=violations-endpoint, fullscreen=(self "https://play.vidyard.com");report-to=violations-endpoint, geolocation=(self);report-to=violations-endpoint, microphone=();report-to=violations-endpoint, web-share=();report-to=violations-endpoint'
     );
   });
 

@@ -24,8 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
     const defaultPermissionsPolicy = [
       'camera=()',
       'display-capture=()',
-      'fullscreen=(self)',
-      'geolocation=()',
+      'fullscreen=(self "https://play.vidyard.com")',
+      'geolocation=(self)',
       'microphone=()',
       'web-share=()',
     ]
