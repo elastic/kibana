@@ -83,9 +83,8 @@ export function TransformDatePickerProvider({ getService, getPageObjects }: FtrP
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
 
       await retry.try(async () => {
-        const start = await testSubjects.getVisibleText('superDatePickerstartDatePopoverButton');
-        const end = await testSubjects.getVisibleText('superDatePickerendDatePopoverButton');
-        const actualTimeConfig = { start, end };
+        // Works for both the new DateRangePicker and the legacy EuiSuperDatePicker.
+        const actualTimeConfig = await pageObjects.timePicker.getTimeConfig();
 
         expect(actualTimeConfig).to.eql(
           expectedTimeConfig,
