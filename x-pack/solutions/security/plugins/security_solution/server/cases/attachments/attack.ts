@@ -50,11 +50,11 @@ const StoredAttackAttachmentSchema = z.object({
 });
 
 /**
- * Stands in for the payload schema while `attackAttachmentsEnabled` is off, refusing every
+ * Stands in for the payload schema while `attackAttachments` is off, refusing every
  * attach with an explanation rather than the framework's "type is not registered".
  */
 const AttachDisabledSchema = z.never({
-  error: `Attaching ${SECURITY_ATTACK_ATTACHMENT_TYPE} attachments requires the attackAttachmentsEnabled feature flag`,
+  error: `Attaching ${SECURITY_ATTACK_ATTACHMENT_TYPE} attachments requires the attackAttachments feature flag`,
 });
 
 const toAttackReferences = (targets: readonly AttachmentDeleteTarget[]): AttackReference[] =>
@@ -180,6 +180,9 @@ export const getAttackAttachmentType = (
 ): UnifiedAttachmentTypeSetup => ({
   id: SECURITY_ATTACK_ATTACHMENT_TYPE,
   schema: deps.isAttachEnabled ? AttackAttachmentPayloadSchema : AttachDisabledSchema,
-  getRelatedAttachments: getAttackRelatedAttachments(deps),
+  relatedAttachments: {
+    readTypes: [SECURITY_ATTACK_ATTACHMENT_TYPE, SECURITY_ALERT_ATTACHMENT_TYPE],
+    get: getAttackRelatedAttachments(deps),
+  },
   workflow: { validateTargets: validateAttackWorkflowTargets },
 });

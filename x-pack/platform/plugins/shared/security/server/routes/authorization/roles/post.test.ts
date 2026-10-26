@@ -213,7 +213,7 @@ const postRolesTest = (
 describe('POST roles', () => {
   describe('failure', () => {
     postRolesTest('returns result of license checker', {
-      payload: { roles: {} } as BulkCreateOrUpdateRolesPayloadSchemaType,
+      payload: { roles: { 'role-1': { elasticsearch: {}, kibana: [] } } },
       licenseCheckResult: { state: 'invalid', message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });

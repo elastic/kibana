@@ -15,9 +15,12 @@ import { getWidgetComponent } from './widgets';
 import { extractSchemaCore } from './schema_extract_core';
 import { getMeta as defaultGetMeta, setMeta as defaultSetMeta } from './schema_connector_metadata';
 
-const OPTIONAL_LABEL = i18n.translate('responseOps.formGenerator.fieldBuilder.optionalLabel', {
-  defaultMessage: 'Optional',
-});
+const OPTIONAL_LABEL = i18n.translate(
+  'responseOpsFormGenerator.formGenerator.fieldBuilder.optionalLabel',
+  {
+    defaultMessage: 'Optional',
+  }
+);
 
 export type FieldValidationFunc = (
   ...args: Parameters<ValidationFunc>

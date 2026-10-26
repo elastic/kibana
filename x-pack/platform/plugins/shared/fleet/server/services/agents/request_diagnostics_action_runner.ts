@@ -12,12 +12,13 @@ import type { RequestDiagnosticsAdditionalMetrics } from '../../../common/types'
 import { isAgentRequestDiagnosticsSupported } from '../../../common/services';
 import type { Agent } from '../../types';
 import { REQUEST_DIAGNOSTICS_TIMEOUT_MS } from '../../constants';
-import { FleetError } from '../../errors';
+import { AgentlessAgentRestrictionError, FleetError } from '../../errors';
 import { appContextService } from '../app_context';
 
 import { ActionRunner } from './action_runner';
 import { createAgentAction, createErrorActionResults } from './actions';
 import { BulkActionTaskType } from './bulk_action_types';
+import { getAgentPolicyRestrictions, isAgentlessAgent } from './hosted_agent';
 
 export class RequestDiagnosticsActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -49,18 +50,28 @@ export async function requestDiagnosticsBatch(
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
 
+  const spaceId = options.spaceId;
+  const namespaces = spaceId ? [spaceId] : [];
+  const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+
+  const restrictions = await getAgentPolicyRestrictions(soClient, givenAgents);
+
   givenAgents.forEach((agent: Agent) => {
-    if (!isAgentRequestDiagnosticsSupported(agent)) {
+    if (isAgentlessAgent(restrictions, agent)) {
+      errors[agent.id] = new AgentlessAgentRestrictionError(
+        `Cannot request diagnostics for managed agent ${agent.id}`
+      );
+    } else if (!isAgentRequestDiagnosticsSupported(agent)) {
       errors[agent.id] = new FleetError(
         `Agent ${agent.id} does not support request diagnostics action.`
       );
     }
   });
 
-  const agentIds = givenAgents.map((agent) => agent.id);
-  const spaceId = options.spaceId;
-  const namespaces = spaceId ? [spaceId] : [];
-  const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+  // agentless agents are never sent the action
+  const agentIds = givenAgents
+    .filter((agent) => !isAgentlessAgent(restrictions, agent))
+    .map((agent) => agent.id);
 
   await createAgentAction(esClient, soClient, {
     id: actionId,

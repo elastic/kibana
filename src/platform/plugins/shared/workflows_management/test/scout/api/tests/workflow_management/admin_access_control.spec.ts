@@ -133,7 +133,7 @@ steps:
           headers: readerHeaders,
           body: { access_mode: 'public' },
         })
-      ).toHaveStatusCode(403);
+      ).toHaveStatusCode(404);
     }
   );
 

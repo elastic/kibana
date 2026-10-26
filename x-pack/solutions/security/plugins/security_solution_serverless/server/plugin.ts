@@ -24,10 +24,7 @@ import {
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
 } from '@kbn/workflows/common/constants';
-import {
-  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-  ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
-} from '@kbn/security-solution-navigation';
+import { ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING } from '@kbn/security-solution-navigation';
 import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
 import { isAlertZeroAvailable } from '../common/alertzero_availability';
 import { ProductTier } from '../common/product';
@@ -125,11 +122,6 @@ export class SecuritySolutionServerlessPlugin
     // so follow the contract the plugin reports rather than assuming it ran.
     if (pluginsSetup.alertzero?.isEnabled) {
       projectSettings.push(ALERTZERO_ENABLED_SETTING_ID);
-    }
-
-    // This setting is only registered when `enableAlertsAndAttacksAlignment` is enabled
-    if (this.config.experimentalFeatures.enableAlertsAndAttacksAlignment) {
-      projectSettings.push(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
     }
 
     // TODO(rule-changes-history GA): remove this block when the feature is GA

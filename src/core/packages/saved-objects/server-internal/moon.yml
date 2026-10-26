@@ -66,6 +66,4 @@ fileGroups:
     - removed_types.json
     - wip_types.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
