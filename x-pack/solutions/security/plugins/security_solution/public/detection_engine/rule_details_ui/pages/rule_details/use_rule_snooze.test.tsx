@@ -126,6 +126,32 @@ describe('useRuleSnooze', () => {
     );
   });
 
+  it('opens the snooze modal when the snoozed badge is clicked', async () => {
+    httpGet.mockResolvedValue({ id: 'rule-id', name: 'Rule', mute_all: true });
+    (useRuleSnoozeSettings as jest.Mock).mockReturnValue({
+      snoozeSettings: { ...unsnoozedSettings, muteAll: true },
+    });
+    const { result } = renderUseRuleSnooze();
+
+    await act(async () => {
+      await result.current.badge?.onClick?.();
+    });
+
+    expect(getRuleSnoozeModal).toHaveBeenCalledWith(
+      expect.objectContaining({ rule: expect.objectContaining({ id: 'rule-id' }) })
+    );
+  });
+
+  it('makes the snoozed badge not clickable without the rules edit privilege', () => {
+    mockCanEditRules(false);
+    (useRuleSnoozeSettings as jest.Mock).mockReturnValue({
+      snoozeSettings: { ...unsnoozedSettings, muteAll: true },
+    });
+    const { result } = renderUseRuleSnooze();
+
+    expect(result.current.badge?.onClick).toBeUndefined();
+  });
+
   it('formats the end day as month and day without the year', () => {
     (useRuleSnoozeSettings as jest.Mock).mockReturnValue({
       snoozeSettings: {

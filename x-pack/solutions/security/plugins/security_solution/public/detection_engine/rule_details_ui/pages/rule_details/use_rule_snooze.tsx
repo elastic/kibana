@@ -135,7 +135,12 @@ export const useRuleSnooze = ({
     [isLoading, isExistingRule, canEditRules, snoozeSettings, error, openSnoozeModal]
   );
 
-  const badge = useMemo(() => getSnoozeBadge(snoozeSettings), [snoozeSettings]);
+  const canOpenSnoozeModal = isExistingRule && canEditRules;
+  const badge = useMemo(() => {
+    const snoozeBadge = getSnoozeBadge(snoozeSettings);
+    if (!snoozeBadge || !canOpenSnoozeModal) return snoozeBadge;
+    return { ...snoozeBadge, onClick: openSnoozeModal, onClickAriaLabel: i18n.SET_SNOOZE };
+  }, [snoozeSettings, canOpenSnoozeModal, openSnoozeModal]);
 
   const modal = alertingRule
     ? getRuleSnoozeModal({
