@@ -23,6 +23,7 @@ jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
 const onCreateThresholdRule = jest.fn();
+const onBuildSequence = jest.fn();
 
 const renderPanel = () =>
   render(
@@ -150,6 +151,38 @@ describe('RuleCreateOptionsPanel', () => {
 
     fireEvent.mouseOver(agentCard);
     expect(await screen.findByText(/Agent Builder: Read/)).toBeInTheDocument();
+  });
+
+  describe('vertical (flyout) layout sequence card', () => {
+    const renderVertical = (withSequence: boolean) =>
+      render(
+        <I18nProvider>
+          <RuleCreateOptionsPanel
+            layout="vertical"
+            onCreateEsqlRule={onCreateEsqlRule}
+            onCreateWithAgent={onCreateWithAgent}
+            onCreateThresholdRule={onCreateThresholdRule}
+            onBuildSequence={withSequence ? onBuildSequence : undefined}
+          />
+        </I18nProvider>
+      );
+
+    it('renders the card with an Experimental badge and calls onBuildSequence on click', () => {
+      renderVertical(true);
+
+      expect(screen.getByTestId('createSequenceRuleExperimentalBadge')).toHaveTextContent(
+        'Experimental'
+      );
+      fireEvent.click(screen.getByTestId('createSequenceRuleCard'));
+
+      expect(onBuildSequence).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not render the card when onBuildSequence is not provided', () => {
+      renderVertical(false);
+
+      expect(screen.queryByTestId('createSequenceRuleCard')).not.toBeInTheDocument();
+    });
   });
 });
 

@@ -9,10 +9,10 @@
 
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import { getEsqlControls } from '@kbn/esql-controls-utils';
 import {
   convertFiltersToESQLExpression,
   convertQueryToESQLExpression,
-  getEsqlControls,
   injectWhereClauseAfterSourceCommand,
 } from '@kbn/esql-utils';
 import { apiIsPresentationContainer } from '@kbn/presentation-publishing';

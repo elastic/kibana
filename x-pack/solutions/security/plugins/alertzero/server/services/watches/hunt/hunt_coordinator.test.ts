@@ -48,6 +48,7 @@ jest.mock('./common/load_report_context', () => ({
     iocs: [{ type: 'ip', value: '192.0.2.30' }],
     techniques: ['T1078.004'],
     text: 'report body text',
+    extraction_pending: false,
   }),
 }));
 
@@ -1035,6 +1036,93 @@ describe('huntCoordinator', () => {
       expect(mockLoad).not.toHaveBeenCalled();
     });
 
+    it('skips the entire hunt and stays retryable when the report is not enriched yet', async () => {
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+      const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+      const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+      mockScope.mockClear();
+      mockT2.mockClear();
+      mockLoad.mockResolvedValueOnce({
+        iocs: [],
+        techniques: [],
+        text: 'raw ingest text',
+        extraction_pending: true,
+      });
+      const result = await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
+        report_id: 'rpt-pending',
+        spaceId: 'hunt-a',
+        indexPatterns: INDEX_PATTERNS,
+        trigger: 'scheduled',
+        run_id: 'run-pending',
+      });
+      expect(mockScope).not.toHaveBeenCalled();
+      expect(mockT1).not.toHaveBeenCalled();
+      expect(mockT2).not.toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.objectContaining({
+          status: 'tier1_only',
+          tier2_skipped_reason: 'extraction_pending',
+          completeness: 'incomplete_retryable',
+          completed_successfully: false,
+          has_confirmed_hit: false,
+          incomplete: [{ reason: 'extraction_pending', detail: expect.any(String) }],
+        })
+      );
+    });
+
+    it('still skips the entire hunt for an unenriched report when the caller supplied every input', async () => {
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+      mockLoad.mockResolvedValueOnce({
+        iocs: [],
+        techniques: [],
+        extraction_pending: true,
+      });
+      const result = await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
+        report_id: 'rpt-pending',
+        spaceId: 'hunt-a',
+        indexPatterns: INDEX_PATTERNS,
+        trigger: 'manual',
+        run_id: 'run-pending-inputs',
+        iocs: [{ type: 'domain', value: 'evil.example' }],
+        techniques: ['T1078.004'],
+        text: 'caller text',
+      });
+      expect(mockT1).not.toHaveBeenCalled();
+      expect(result.tier2_skipped_reason).toBe('extraction_pending');
+      expect(result.completed_successfully).toBe(false);
+    });
+
+    it('still retires an enriched report that has nothing to search, as before', async () => {
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+      mockLoad.mockResolvedValueOnce({ iocs: [], techniques: [], extraction_pending: false });
+      mockT1.mockResolvedValueOnce({
+        status: 'no_searchable_terms',
+        has_confirmed_hit: false,
+        searched_iocs: 0,
+        searched_techniques: 0,
+        resolved_iocs: [],
+        resolved_techniques: [],
+        time_range: { from: 'now-24h', to: 'now' },
+        counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+        hits: [],
+        affected_assets: { hosts: [], users: [], services: [] },
+        per_index: [],
+      });
+      const result = await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
+        report_id: 'rpt-rejected',
+        spaceId: 'hunt-a',
+        indexPatterns: INDEX_PATTERNS,
+        trigger: 'scheduled',
+        run_id: 'run-rejected',
+        tier2_when: 'never',
+      });
+      expect(result.completeness).toBe('incomplete_final');
+      expect(result.completed_successfully).toBe(true);
+    });
+
     it('fails the run, never clean, when the report is not in the space', async () => {
       const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
       mockLoad.mockResolvedValueOnce(null);
@@ -1810,6 +1898,21 @@ describe('huntCoordinator', () => {
 
       expect(result.completeness).toBe('incomplete_retryable');
       expect(result.completed_successfully).toBe(false);
+    });
+
+    it('carries a collapsed Tier 2 gap through as incomplete_final, so the report is not re-swept forever', async () => {
+      mockT1.mockResolvedValueOnce(tier1Result());
+      mockT2.mockResolvedValueOnce(
+        tier2Result({
+          incomplete: [{ reason: 'collapsed', technique_id: 'T1566', detail: 'cut' }],
+        })
+      );
+
+      const result = await run('run-t2-collapsed');
+
+      expect(result.completeness).toBe('incomplete_final');
+      // Retrying reproduces the same gap, so the run counts as done — but not as clean.
+      expect(result.completed_successfully).toBe(true);
     });
 
     it('reports nothing_searched when Tier 1 mapped no term and Tier 2 was configured off', async () => {

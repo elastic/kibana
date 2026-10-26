@@ -1999,8 +1999,8 @@ describe('extract_iocs — over-long values', () => {
 // `extracted.iocs` is a `nested` field and the reports index leaves
 // `nested_objects.limit` at the Elasticsearch default of 10,000. Crossing it rejects the
 // whole report document rather than dropping the extra entries, so the report stays
-// `pending` and every enrichment run re-tries it. Only `text_indicator_list` chunks
-// across documents; a 5MB analyst paste writes one.
+// `pending` and every enrichment run re-tries it. No current path chunks across
+// documents; a 5MB analyst paste writes one.
 describe('extract_iocs — nested-object cap', () => {
   /** Enough distinct public domains to blow past the cap. */
   const manyDomains = (n: number) =>

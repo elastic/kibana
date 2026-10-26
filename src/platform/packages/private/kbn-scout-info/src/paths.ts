@@ -38,7 +38,7 @@ export const PLATFORM_AND_SOLUTION_SCOUT_ROOT_PATH_GLOB =
 
 export const EXAMPLE_PLUGIN_SCOUT_ROOT_PATH_GLOB = '{examples,x-pack/examples}/**/test/scout{_*,}';
 
-export const CORE_MODULE_SCOUT_ROOT_PATH_GLOB = 'src/core/test/scout{_*,}';
+export const CORE_MODULE_SCOUT_ROOT_PATH_GLOB = 'src/core/packages/core/test/scout{_*,}';
 
 export const DEV_BUILD_SCOUT_ROOT_PATH_GLOB = 'src/dev/build/test/scout{_*,}';
 
@@ -94,7 +94,7 @@ export const SCOUT_UNIFIED_CONFIG_PATH_REGEX = new RegExp(
   `^(?:` +
     `(?<examplesRoot>examples|x-pack/examples)/(?<examplePlugin>[^/]+)` +
     `|` +
-    `(?<coreRoot>src/core)` +
+    `(?<coreRoot>src/core/packages/core)` +
     `|` +
     `(?<devBuildRoot>src/dev/build)` +
     `|` +
@@ -189,7 +189,6 @@ export const CRITICAL_FILES_SCOUT: readonly string[] = [
   'package.json',
   'pnpm-lock.yaml',
   'tsconfig.json',
-  '.node-version',
   '.nvmrc',
   'config/**/*.yml',
   'config/node.options',

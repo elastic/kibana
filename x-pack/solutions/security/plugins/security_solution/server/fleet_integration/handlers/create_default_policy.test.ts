@@ -51,6 +51,7 @@ describe('Create Default Policy tests ', () => {
     trustedDevices: true,
     customYaraSignaturesEnabled: true,
     linuxRansomwareProtection: true,
+    endpointAiDataCollection: true,
     perOsPolicySettings: true,
   } as ExperimentalFeatures;
 
@@ -1317,6 +1318,140 @@ describe('Create Default Policy tests ', () => {
 
         expect(policy.linux).not.toHaveProperty('ransomware');
         expect(policy.linux.popup).not.toHaveProperty('ransomware');
+      });
+    });
+  });
+
+  describe('AI Data Collection Feature Flag', () => {
+    const osList = ['windows', 'mac', 'linux'] as const;
+
+    const expectAiDataCollectionEnabled = (policy: PolicyConfig) => {
+      for (const os of osList) {
+        expect(policy[os].ai_data_collection).toEqual({ enabled: true });
+      }
+    };
+
+    const expectAiDataCollectionAbsent = (policy: PolicyConfig) => {
+      for (const os of osList) {
+        expect(policy[os]).not.toHaveProperty('ai_data_collection');
+      }
+    };
+
+    const createPolicyWithFlags = async (
+      flags: { endpointAiDataCollection: boolean; perOsPolicySettings: boolean },
+      config: AnyPolicyCreateConfig | undefined,
+      license: ILicense,
+      productFeatures: ProductFeaturesService
+    ): Promise<PolicyConfig> => {
+      licenseEmitter.next(license);
+
+      const experimentalFeaturesWithFlags = {
+        trustedDevices: true,
+        ...flags,
+      } as ExperimentalFeatures;
+
+      const esClientInfo = await elasticsearchServiceMock
+        .createClusterClient()
+        .asInternalUser.info();
+      esClientInfo.cluster_name = '';
+      esClientInfo.cluster_uuid = '';
+
+      return createDefaultPolicy(
+        licenseService,
+        config,
+        cloud,
+        esClientInfo,
+        productFeatures,
+        telemetryConfigProviderMock,
+        experimentalFeaturesWithFlags
+      );
+    };
+
+    describe('with endpointAiDataCollection and perOsPolicySettings both enabled', () => {
+      const bothEnabled = { endpointAiDataCollection: true, perOsPolicySettings: true };
+      const edrCompleteConfig: PolicyCreateEndpointConfig = {
+        type: 'endpoint',
+        endpointConfig: { preset: 'EDRComplete' },
+      };
+      // `endpoint_policy_protections` disabled emulates the serverless essentials tier.
+      const serverlessEssentialsProductFeatures = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter(
+          (key) => key !== ProductFeatureSecurityKey.endpointPolicyProtections
+        )
+      );
+
+      it.each<
+        [
+          name: string,
+          config: AnyPolicyCreateConfig | undefined,
+          license: ILicense,
+          productFeatures: 'default' | 'serverlessEssentials'
+        ]
+      >([
+        [
+          'the NGAV preset',
+          { type: 'endpoint', endpointConfig: { preset: 'NGAV' } },
+          Platinum,
+          'default',
+        ],
+        [
+          'the EDREssential preset',
+          { type: 'endpoint', endpointConfig: { preset: 'EDREssential' } },
+          Platinum,
+          'default',
+        ],
+        ['the EDRComplete preset', edrCompleteConfig, Platinum, 'default'],
+        [
+          'the DataCollection preset',
+          { type: 'endpoint', endpointConfig: { preset: 'DataCollection' } },
+          Platinum,
+          'default',
+        ],
+        ['a cloud config', { type: 'cloud' } as PolicyCreateCloudConfig, Platinum, 'default'],
+        ['a below-platinum license', edrCompleteConfig, Gold, 'default'],
+        [
+          'the endpoint_policy_protections product feature disabled',
+          edrCompleteConfig,
+          Platinum,
+          'serverlessEssentials',
+        ],
+      ])(
+        'enables ai_data_collection on every OS for %s',
+        async (_name, config, license, productFeaturesVariant) => {
+          const productFeatures =
+            productFeaturesVariant === 'serverlessEssentials'
+              ? serverlessEssentialsProductFeatures
+              : productFeaturesService;
+
+          const policy = await createPolicyWithFlags(bothEnabled, config, license, productFeatures);
+
+          expectAiDataCollectionEnabled(policy);
+        }
+      );
+    });
+
+    describe('with either flag disabled', () => {
+      it.each<
+        [name: string, flags: { endpointAiDataCollection: boolean; perOsPolicySettings: boolean }]
+      >([
+        ['both flags off', { endpointAiDataCollection: false, perOsPolicySettings: false }],
+        [
+          'only perOsPolicySettings on',
+          { endpointAiDataCollection: false, perOsPolicySettings: true },
+        ],
+        [
+          'only endpointAiDataCollection on',
+          { endpointAiDataCollection: true, perOsPolicySettings: false },
+        ],
+      ])('omits ai_data_collection on every OS when %s', async (_name, flags) => {
+        const config: PolicyCreateEndpointConfig = {
+          type: 'endpoint',
+          endpointConfig: { preset: 'EDRComplete' },
+        };
+
+        const policy = await createPolicyWithFlags(flags, config, Platinum, productFeaturesService);
+
+        expectAiDataCollectionAbsent(policy);
       });
     });
   });

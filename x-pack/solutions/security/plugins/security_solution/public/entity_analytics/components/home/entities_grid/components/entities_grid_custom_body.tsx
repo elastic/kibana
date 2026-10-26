@@ -48,21 +48,23 @@ const ESTIMATED_ROW_HEIGHT = 41;
 /** Rows rendered above and below the visible ones, so fast scrolling doesn't show gaps. */
 const OVERSCAN_ROWS = 5;
 
+// Grouped grids have no height to fill, so the cap keeps their rows virtualized.
 const scrollContainerCss = css`
-  max-block-size: 70vh;
+  block-size: 100%;
+  max-block-size: var(--kbn-application--content-height);
   overflow: auto;
 `;
 
+// Placed with `top`, not a transform: sticky expanded rows read the untransformed position.
 const rowContainerCss = css`
   position: absolute;
-  inset-block-start: 0;
   min-inline-size: 100%;
 `;
 
 const stickyHeaderCss = css`
   position: sticky;
   inset-block-start: 0;
-  z-index: 1;
+  z-index: 2;
 `;
 
 type GroupProps = Omit<ComponentProps<typeof ExpandedEntityGroup>, 'entityId'>;
@@ -73,6 +75,7 @@ interface EntityGridRowProps {
   isExpanded: boolean;
   visCols: EuiDataGridCustomBodyProps['visibleColumns'];
   rowBorderCss: SerializedStyles;
+  expandedRowCss: SerializedStyles;
   cellCss: SerializedStyles;
   cellHandlers?: RowCellHandlers;
   groupProps: GroupProps;
@@ -92,12 +95,17 @@ const EntityGridRow = memo(
     isExpanded,
     visCols,
     rowBorderCss,
+    expandedRowCss,
     cellCss,
     cellHandlers,
     groupProps,
   }: EntityGridRowProps) => (
     <>
-      <div role="row" className="euiDataGridRow" css={[gridRowCss, rowBorderCss]}>
+      <div
+        role="row"
+        className="euiDataGridRow"
+        css={[gridRowCss, rowBorderCss, isExpanded && expandedRowCss]}
+      >
         <div css={gridRowCellsCss}>
           {visCols.map((col, colIndex) => {
             const cellProps = {
@@ -214,6 +222,17 @@ export const EntityGridCustomBody = memo(
       setListOffset(listRef.current?.offsetTop ?? 0);
     }, [scrollElement]);
 
+    // An expanded row stays under the header while its records scroll, until its group ends.
+    const expandedRowCss = useMemo(
+      () => css`
+        position: sticky;
+        inset-block-start: ${listOffset}px;
+        z-index: 1;
+        background-color: ${euiTheme.colors.emptyShade};
+      `,
+      [listOffset, euiTheme.colors.emptyShade]
+    );
+
     const virtualizer = useVirtualizer({
       count: rows.length,
       getScrollElement: () => scrollElement,
@@ -259,7 +278,7 @@ export const EntityGridCustomBody = memo(
                   data-index={index}
                   ref={virtualizer.measureElement}
                   css={rowContainerCss}
-                  style={{ transform: `translateY(${start - listOffset}px)` }}
+                  style={{ insetBlockStart: start - listOffset }}
                 >
                   <EntityGridRow
                     index={index}
@@ -267,6 +286,7 @@ export const EntityGridCustomBody = memo(
                     isExpanded={entityId != null && expandedIds.has(entityId)}
                     visCols={visCols}
                     rowBorderCss={rowBorderCss}
+                    expandedRowCss={expandedRowCss}
                     cellCss={cellCss}
                     cellHandlers={cellHandlers}
                     groupProps={groupProps}

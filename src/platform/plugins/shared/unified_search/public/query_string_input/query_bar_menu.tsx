@@ -24,10 +24,10 @@ import type {
 } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { QueryBarMenuPanelsProps, AdditionalQueryBarMenuItems } from './query_bar_menu_panels';
 import { useQueryBarMenuPanels, QueryBarMenuPanel } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
@@ -73,7 +73,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   showSavedQueryControls?: boolean;
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
-  indexPatterns?: Array<DataView | string>;
+  indexPatterns?: Array<FilterableSource | string>;
   buttonProps?: Partial<EuiButtonIconProps>;
   isDisabled?: boolean;
   suggestionsAbstraction?: SuggestionsAbstraction;

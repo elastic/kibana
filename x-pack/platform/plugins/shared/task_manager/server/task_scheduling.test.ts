@@ -151,6 +151,24 @@ describe('TaskScheduling', () => {
     );
   });
 
+  test('should pass refreshApiKey false to the task store', async () => {
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const task = {
+      taskType: 'foo',
+      params: {},
+      state: {},
+    };
+
+    const mockRequest = httpServerMock.createKibanaRequest();
+
+    await taskScheduling.schedule(task, { request: mockRequest, refreshApiKey: false });
+
+    expect(mockTaskStore.schedule).toHaveBeenCalledWith(expect.anything(), {
+      request: mockRequest,
+      refreshApiKey: false,
+    });
+  });
+
   test('does not notify the claim nudge', async () => {
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
     const task = {

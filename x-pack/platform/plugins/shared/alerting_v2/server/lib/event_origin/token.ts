@@ -6,12 +6,11 @@
  */
 
 import { createToken } from '@kbn/core-di';
+import type { EventOriginActor } from './origin_schemas';
 
 /**
- * Who is behind a change: a `user` request with credentials, or the `internal`
- * Kibana user acting on its own (e.g. a feature flag pausing background work).
+ * Who is behind a change in the current scope: a `user` request with
+ * credentials, or the `internal` Kibana user acting on its own. Defaults to
+ * `user`. Publishers combine this actor with the request into the context origin.
  */
-export type EventOrigin = 'user' | 'internal';
-
-/** Origin of the changes made by the current scope. Defaults to `user`. */
-export const EventOriginToken = createToken<EventOrigin>('alerting_v2.EventOrigin');
+export const EventOriginActorToken = createToken<EventOriginActor>('alerting_v2.EventOriginActor');

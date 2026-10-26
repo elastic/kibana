@@ -12,10 +12,10 @@
   ],
   "kbn_references": [
     "@kbn/std",
-    "@kbn/io-ts-utils",
     "@kbn/zod",
     "@kbn/zod-helpers",
     "@kbn/router-to-openapispec",
+    "@kbn/slo-constants",
   ],
   "exclude": [
     "target/**/*",

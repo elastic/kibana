@@ -29,6 +29,7 @@ export const NoDataViewsPrompt = ({
   onDataViewCreated,
   allowAdHocDataView = false,
   onTryESQL: onTryESQLProp,
+  isTryESQLDisabled,
   onESQLNavigationComplete,
 }: NoDataViewsPromptProps) => {
   const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink, esqlDocLink, ...services } =
@@ -93,6 +94,7 @@ export const NoDataViewsPrompt = ({
               }
             }
           : undefined,
+        isTryESQLDisabled,
       }}
     />
   );

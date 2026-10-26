@@ -197,6 +197,7 @@ describe('ESQLDataCascadeLeafCell', () => {
     expect(getRenderDocumentViewMetaSetter).toHaveBeenCalledWith(cellId);
     expect(unifiedDataTableProps.rows).toEqual(cellData);
     expect(unifiedDataTableProps.dataSource).toBe(cascadedLeafDataSource);
+    expect(unifiedDataTableProps.enableComparisonMode).toBe(true);
     expect(unifiedDataTableProps.renderDocumentView).toBe('external');
     expect(unifiedDataTableProps.expandedDoc).toEqual(expandedDoc);
     expect(unifiedDataTableProps.setExpandedDoc).toBe(ownerBoundSetExpandedDoc);

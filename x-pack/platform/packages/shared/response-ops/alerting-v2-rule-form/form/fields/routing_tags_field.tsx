@@ -68,7 +68,10 @@ export const RoutingTagsField = () => {
               })}
               customOptionText={i18n.translate(
                 'xpack.alertingV2.ruleForm.routingTagsCustomOptionText',
-                { defaultMessage: 'Add {searchValue} as a routing tag' }
+                {
+                  defaultMessage: 'Add {searchValue} as a routing tag',
+                  values: { searchValue: '{searchValue}' },
+                }
               )}
               data-test-subj="ruleRoutingTagsInput"
               async

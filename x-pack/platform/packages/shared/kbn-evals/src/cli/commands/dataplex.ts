@@ -9,7 +9,7 @@ import { spawnSync } from 'child_process';
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
-import type { Command } from '@kbn/dev-cli-runner';
+import type { Command, RunContext } from '@kbn/dev-cli-runner';
 import {
   buildEntrySourceDisplayName,
   buildFullyQualifiedName,
@@ -61,22 +61,12 @@ const ensureGcloud = (): void => {
 };
 
 const isPermissionDenied = (stderrOrStdout: string): boolean =>
-  (stderrOrStdout.includes('Permission') && stderrOrStdout.includes('denied')) ||
   stderrOrStdout.includes('PERMISSION_DENIED') ||
-  stderrOrStdout.includes('dataplex.entries.create') ||
-  stderrOrStdout.includes('dataplex.entries.update') ||
-  stderrOrStdout.includes('dataplex.entries.lookup') ||
+  stderrOrStdout.includes('Permission denied') ||
   stderrOrStdout.includes('Status code: 403');
 
 const entryTypeResource = (project: string) =>
   `projects/${project}/locations/global/entryTypes/${DEFAULT_ENTRY_TYPE_ID}`;
-
-const entryResourceName = (
-  project: string,
-  location: string,
-  entryGroup: string,
-  entryId: string
-) => `projects/${project}/locations/${location}/entryGroups/${entryGroup}/entries/${entryId}`;
 
 const lookupEntry = (
   project: string,
@@ -87,17 +77,27 @@ const lookupEntry = (
   const res = runGcloud([
     'dataplex',
     'entries',
-    'lookup',
+    'describe',
+    entryId,
     '--project',
     project,
     '--location',
     location,
-    '--entry',
-    entryResourceName(project, location, entryGroup, entryId),
+    '--entry-group',
+    entryGroup,
     '--view',
     'BASIC',
   ]);
-  return res.status === 0;
+  if (res.status === 0) {
+    return true;
+  }
+
+  const diagnostic = res.stderr || res.stdout;
+  if (diagnostic.includes('NOT_FOUND') || diagnostic.includes('Status code: 404')) {
+    return false;
+  }
+
+  throw new Error(`Failed to look up Dataplex entry "${entryId}": ${diagnostic}`);
 };
 
 const syncEntry = ({
@@ -435,7 +435,7 @@ const maybeBootstrap = (
   }
 };
 
-export const dataplexCmd: Command<void> = {
+export const dataplexCmd = {
   name: 'dataplex',
   description: `
   Manage Dataplex catalog entries for snapshot datasets.
@@ -464,7 +464,7 @@ export const dataplexCmd: Command<void> = {
       'entry-group': DEFAULT_ENTRY_GROUP,
     },
   },
-  run: async ({ log, flagsReader }) => {
+  run: async ({ log, flagsReader }: RunContext) => {
     ensureGcloud();
 
     const repoRoot = process.cwd();
@@ -539,4 +539,4 @@ export const dataplexCmd: Command<void> = {
     if (skipped.length) log.info(`Unchanged: ${skipped.join(', ')}`);
     if (dryRun) log.info('Dry run: no changes were applied.');
   },
-};
+} satisfies Command<void>;

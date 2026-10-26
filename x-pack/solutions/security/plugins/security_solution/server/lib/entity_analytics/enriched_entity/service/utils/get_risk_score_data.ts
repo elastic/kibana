@@ -7,6 +7,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Entity } from '@kbn/entity-store/common';
 import { createGetRiskScores } from '../../../risk_score/get_risk_score';
+import type { RiskScoreType } from '../../../risk_score/score_type_filter';
 import type { EntityRiskScoreRecord } from '../../../../../../common/api/entity_analytics/common';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { ESSENTIAL_ALERT_FIELDS } from '../../../../../../common/constants';
@@ -17,6 +18,7 @@ interface GetRiskScoreDataOptions {
   getAlerts?: boolean;
   logger: Logger;
   spaceId: string;
+  scoreType?: RiskScoreType;
 }
 
 export interface RiskScoreWithAlerts {
@@ -30,6 +32,7 @@ export const getRiskScoreData = async ({
   getAlerts = true,
   logger,
   spaceId,
+  scoreType,
 }: GetRiskScoreDataOptions): Promise<RiskScoreWithAlerts[]> => {
   if (entities.length === 0) {
     return [];
@@ -49,6 +52,7 @@ export const getRiskScoreData = async ({
           entityType: entityType as EntityType,
           entityIdentifier,
           pagination: { querySize: 1, cursorStart: 0 },
+          scoreType,
         });
       })
     );

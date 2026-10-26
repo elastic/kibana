@@ -15,7 +15,7 @@ import {
   externalReferenceAttachment,
 } from '../../../containers/mock';
 import type { CaseUI } from '../../../../common';
-import { renderWithTestingProviders } from '../../../common/mock';
+import { noDeleteCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 import { CaseViewAttachments } from './case_view_attachments';
 import { screen, waitFor } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -267,6 +267,57 @@ describe('Case View Attachments tab', () => {
     expect(
       screen.queryByTestId('case-view-attachment-accordion-security.event')
     ).not.toBeInTheDocument();
+  });
+
+  describe('removal', () => {
+    const buildRemovableRegistry = () => {
+      const registry = new UnifiedAttachmentTypeRegistry();
+      registry.register({
+        id: 'security.alert',
+        getLabel: () => 'Alerts',
+        getIcon: () => 'bell',
+        getCreationActivity: () => ({ event: 'added an alert' }),
+        getAttachmentList: () => ({
+          children: ({ onRemove }) => (
+            <div data-test-subj="test-alerts-table">{onRemove ? 'removable' : 'read-only'}</div>
+          ),
+        }),
+        schema: z.object({}),
+      });
+      return registry;
+    };
+    const caseWithAlert: CaseUI = { ...basicCase, comments: [alertComment] };
+
+    it('passes onRemove to the sections when the user can delete', () => {
+      renderWithTestingProviders(
+        <CaseViewAttachments
+          caseData={caseWithAlert}
+          onSearch={onSearchMock}
+          onUpdateField={onUpdateFieldMock}
+        />,
+        { wrapperProps: { unifiedAttachmentTypeRegistry: buildRemovableRegistry() } }
+      );
+
+      expect(screen.getByTestId('test-alerts-table')).toHaveTextContent('removable');
+    });
+
+    it('does not pass onRemove to the sections without the delete permission', () => {
+      renderWithTestingProviders(
+        <CaseViewAttachments
+          caseData={caseWithAlert}
+          onSearch={onSearchMock}
+          onUpdateField={onUpdateFieldMock}
+        />,
+        {
+          wrapperProps: {
+            unifiedAttachmentTypeRegistry: buildRemovableRegistry(),
+            permissions: noDeleteCasesPermissions(),
+          },
+        }
+      );
+
+      expect(screen.getByTestId('test-alerts-table')).toHaveTextContent('read-only');
+    });
   });
 
   it('collapses and expands every visible attachment section', async () => {

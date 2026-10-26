@@ -96,6 +96,11 @@ export interface ValidationResult {
   parsedWorkflow?: WorkflowYaml;
   /** Compact human-readable strings; empty when valid. */
   errors: string[];
+  /**
+   * ES|QL sources the cluster does not know. They do not block generation: the
+   * source can exist where and when the workflow runs.
+   */
+  unknownSources: string[];
 }
 
 /**

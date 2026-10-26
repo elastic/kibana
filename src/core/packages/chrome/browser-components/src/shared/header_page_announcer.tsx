@@ -9,7 +9,7 @@
 
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { EuiLiveAnnouncer, EuiSkipLink, keys } from '@elastic/eui';
+import { EuiSkipLink, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FLYOUT_SELECTOR, MAIN_CONTENT_SELECTORS } from '@kbn/ui-chrome-layout';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
@@ -22,15 +22,29 @@ import { resolveChromeHeaderAnnouncement } from './resolve_chrome_header_announc
 // Classic and project chrome both append this brand. Revisit in https://github.com/elastic/kibana/issues/289752
 const DEFAULT_BRAND = 'Elastic';
 const TITLE_SEPARATOR = ' - ';
+// Only the latest page title is announced when several are waiting, e.g. after quick navigations
+const PAGE_TITLE_ANNOUNCEMENT_KEY = 'pageTitle';
 
 const PageAnnouncerView: FC<{
   routeTitle: string;
   shouldHandleTab: boolean;
   onInteraction: () => void;
 }> = ({ routeTitle, shouldHandleTab, onInteraction }) => {
+  const { notifications } = useChromeComponentsDeps();
   const skipLinkRef = useRef<HTMLAnchorElement | null>(null);
   const onInteractionRef = useRef(onInteraction);
   onInteractionRef.current = onInteraction;
+  const lastAnnouncedTitle = useRef('');
+
+  // Announced through the shared screen reader queue, so a page change and a toast caused by the
+  // same action are announced together instead of interrupting each other. Only a different title
+  // is announced: apps that keep state in the URL hash change the location without a new page.
+  useEffect(() => {
+    if (routeTitle && routeTitle !== lastAnnouncedTitle.current) {
+      lastAnnouncedTitle.current = routeTitle;
+      notifications.screenReader.notify(routeTitle, { key: PAGE_TITLE_ANNOUNCEMENT_KEY });
+    }
+  }, [routeTitle, notifications]);
 
   useEffect(() => {
     const events: Array<keyof WindowEventMap> = ['keydown', 'mousedown'];
@@ -63,30 +77,19 @@ const PageAnnouncerView: FC<{
   }, [shouldHandleTab]);
 
   return (
-    <>
-      <EuiLiveAnnouncer
-        clearAfterMs={false}
-        aria-label={i18n.translate('core.ui.pageChangeAnnouncements', {
-          defaultMessage: 'Page change announcements',
-        })}
-      >
-        {routeTitle}
-      </EuiLiveAnnouncer>
-
-      <EuiSkipLink
-        buttonRef={skipLinkRef}
-        position="fixed"
-        destinationId=""
-        fallbackDestination={[FLYOUT_SELECTOR, ...MAIN_CONTENT_SELECTORS]}
-        overrideLinkBehavior
-        data-test-subj="skipToMainButton"
-        role="button"
-      >
-        {i18n.translate('core.ui.skipToMainButton', {
-          defaultMessage: 'Skip to main content',
-        })}
-      </EuiSkipLink>
-    </>
+    <EuiSkipLink
+      buttonRef={skipLinkRef}
+      position="fixed"
+      destinationId=""
+      fallbackDestination={[FLYOUT_SELECTOR, ...MAIN_CONTENT_SELECTORS]}
+      overrideLinkBehavior
+      data-test-subj="skipToMainButton"
+      role="button"
+    >
+      {i18n.translate('core.ui.skipToMainButton', {
+        defaultMessage: 'Skip to main content',
+      })}
+    </EuiSkipLink>
   );
 };
 
@@ -169,10 +172,10 @@ export const ChromeHeaderPageAnnouncer: FC = () => {
     previousLocationRef.current = location;
 
     if (locationChanged) {
-      setRouteTitle('');
       setShouldHandleTab(true);
     }
 
+    // Deferred, so that a fallback title isn't announced right before the destination page sets its own
     let timeout: ReturnType<typeof setTimeout> | undefined;
     const frame = requestAnimationFrame(() => {
       timeout = setTimeout(() => setRouteTitle(announcement), 0);
