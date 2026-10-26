@@ -88,10 +88,12 @@ export const updateScoutHtmlReport = ({
   fs.writeFileSync(htmlReportPath, updatedContent, 'utf-8');
 };
 
+/** Returns the failures considered for an issue: those not attributed to infrastructure. */
 export async function processScoutReports(
   reportPaths: string[],
   params: ProcessReportsParams
-): Promise<void> {
+): Promise<ScoutTestFailureExtended[]> {
+  const considered: ScoutTestFailureExtended[] = [];
   const {
     log,
     existingIssues,
@@ -143,6 +145,7 @@ export async function processScoutReports(
         updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
         continue;
       }
+      considered.push(failure);
 
       // a test tracked by a flaky suite issue gets its failures recorded there, not on an issue of its own
       const suiteIssue = existingIssues.getSuiteIssueForFailure(failure);
@@ -220,4 +223,6 @@ export async function processScoutReports(
       );
     }
   }
+
+  return considered;
 }
