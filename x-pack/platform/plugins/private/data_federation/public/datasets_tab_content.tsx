@@ -16,6 +16,7 @@ import { DatasetsTable, type DataSetListRow } from './datasets_table';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
+import { UI_COUNTER_EVENTS } from './ui_counters';
 
 export interface DatasetsTabContentProps {
   dataSources: DataSource[];
@@ -29,7 +30,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
   loadDataSets,
 }) => {
   const {
-    services: { datasetsClient, toasts },
+    services: { datasetsClient, toasts, reportUiCounter },
   } = useKibana<DataFederationKibanaServices>();
 
   const [selectedDataSets, setSelectedDataSets] = useState<DataSetListRow[]>([]);
@@ -51,6 +52,17 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
   }, [dataSets, dataSources]);
 
   const dataSourceNames = useMemo(() => dataSources.map((ds) => ds.name).sort(), [dataSources]);
+
+  const refreshDataSets = useCallback(async () => {
+    try {
+      await loadDataSets();
+    } catch (e) {
+      toasts.addDanger({
+        title: mainTranslations.refreshDataSetsErrorTitle,
+        text: getFlyoutSaveErrorMessage(e),
+      });
+    }
+  }, [loadDataSets, toasts]);
 
   const handleDeleteDataSet = useCallback((item: DataSetListRow) => {
     setPendingDeleteDataSet(item);
@@ -86,9 +98,10 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     setDeleteDataSetError(null);
     try {
       await datasetsClient.delete(pendingDeleteDataSet.name);
+      reportUiCounter?.(UI_COUNTER_EVENTS.datasetDelete);
       setSelectedDataSets([]);
       setPendingDeleteDataSet(null);
-      void loadDataSets();
+      void refreshDataSets();
     } catch (e) {
       const message = getFlyoutSaveErrorMessage(e);
       setDeleteDataSetError(message);
@@ -99,7 +112,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     } finally {
       setIsDeletingDataSet(false);
     }
-  }, [datasetsClient, loadDataSets, pendingDeleteDataSet, toasts]);
+  }, [datasetsClient, pendingDeleteDataSet, refreshDataSets, reportUiCounter, toasts]);
 
   const confirmDeleteDataSets = useCallback(async () => {
     if (!pendingDeleteDataSets || pendingDeleteDataSets.length === 0) {
@@ -110,9 +123,10 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     setDeleteDataSetsError(null);
     try {
       await datasetsClient.delete(pendingDeleteDataSets.map((item) => item.name));
+      reportUiCounter?.(UI_COUNTER_EVENTS.datasetDelete, pendingDeleteDataSets.length);
       setSelectedDataSets([]);
       setPendingDeleteDataSets(null);
-      void loadDataSets();
+      void refreshDataSets();
     } catch (e) {
       const message = getFlyoutSaveErrorMessage(e);
       setDeleteDataSetsError(message);
@@ -123,7 +137,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     } finally {
       setIsDeletingDataSets(false);
     }
-  }, [datasetsClient, loadDataSets, pendingDeleteDataSets, toasts]);
+  }, [datasetsClient, pendingDeleteDataSets, refreshDataSets, reportUiCounter, toasts]);
 
   return (
     <>

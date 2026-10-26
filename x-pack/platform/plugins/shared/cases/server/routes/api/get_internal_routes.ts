@@ -16,6 +16,7 @@ import { bulkGetCasesRoute } from './internal/bulk_get_cases';
 import { suggestUserProfilesRoute } from './internal/suggest_user_profiles';
 import type { CaseRoute } from './types';
 import { bulkGetAttachmentsRoute } from './internal/bulk_get_attachments';
+import { bulkDeleteAttachmentsRoute } from './internal/bulk_delete_attachments';
 import { getCaseUsersRoute } from './internal/get_case_users';
 import { bulkDeleteFileAttachments } from './internal/bulk_delete_file_attachments';
 import { getCategoriesRoute } from './cases/categories/get_categories';
@@ -26,6 +27,7 @@ import { replaceCustomFieldRoute } from './internal/replace_custom_field';
 import { postObservableRoute } from './observables/post_observable';
 import { similarCaseRoute } from './cases/similar';
 import { patchObservableRoute } from './observables/patch_observable';
+import { bulkDeleteObservablesRoute } from './observables/bulk_delete_observables';
 import { deleteObservableRoute } from './observables/delete_observable';
 import { findUserActionsRoute } from './internal/find_user_actions';
 import { findCasesContainingAllDocumentsRoute } from './internal/find_cases_containing_all_documents';
@@ -50,6 +52,7 @@ export const getInternalRoutes = (
     bulkGetCasesRoute,
     getCaseUserActionStatsRoute,
     bulkGetAttachmentsRoute,
+    bulkDeleteAttachmentsRoute,
     getCaseUsersRoute,
     bulkDeleteFileAttachments,
     getCategoriesRoute,
@@ -58,6 +61,7 @@ export const getInternalRoutes = (
     searchCasesRoute,
     replaceCustomFieldRoute,
     postObservableRoute,
+    bulkDeleteObservablesRoute,
     patchObservableRoute,
     deleteObservableRoute,
     similarCaseRoute,

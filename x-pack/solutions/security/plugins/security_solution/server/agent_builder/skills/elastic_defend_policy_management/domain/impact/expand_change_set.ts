@@ -6,12 +6,14 @@
  */
 
 import { get } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
+import type { ILicense } from '@kbn/licensing-types';
 import type { PolicyConfig } from '../../../../../../common/endpoint/types';
-import { ProtectionModes } from '../../../../../../common/endpoint/types';
+import { PolicyOperatingSystem, ProtectionModes } from '../../../../../../common/endpoint/types';
+import { isAtLeast } from '../../../../../../common/license/license';
 import {
   getPolicyProtectionsReference,
   POLICY_COUPLING_MALWARE_BOOLEAN_FIELDS,
+  POLICY_COUPLING_PROTECTIONS,
   type PolicyCouplingProtection,
 } from '../../../../../../common/endpoint/models/policy_config_helpers';
 import * as helpers from '../../../../../../common/endpoint/models/policy_config_helpers';
@@ -19,24 +21,19 @@ import * as fieldRegistry from '../field_registry';
 import { policyValuesEqual } from '../policy_value_equality';
 import type { ClassifiedSetFieldValue } from './validate_set_field_value';
 import {
+  applySetFieldValue,
+  canCreateMissingSetting,
   classifySetFieldValue,
   isDeviceControlEnabledPath,
   isDeviceControlUsbPath,
-  isDevicePopupEnabledPath,
 } from './validate_set_field_value';
 import type {
   ExplicitPolicyChange,
   PolicyChangeOperation,
   PreparedPolicyChangeSet,
 } from './policy_change_operation';
-import {
-  DEVICE_CONTROL_MISSING_POPUP_MESSAGE,
-  DEVICE_POPUP_ENABLED_UNSUPPORTED_MESSAGE,
-  POLICY_CHANGE_PREPARATION_ERROR_CODE,
-  PolicyChangePreparationError,
-  nonWritablePathMessage,
-  unknownCurrentValueMessage,
-} from './policy_change_operation';
+import type { PolicyOperationRejection } from './policy_operation_rejection';
+import { PolicyChangeRejectedError } from './policy_operation_rejection';
 
 interface Evidence {
   readonly operation: PolicyChangeOperation;
@@ -44,11 +41,114 @@ interface Evidence {
   readonly target: ClassifiedSetFieldValue | undefined;
   readonly patch: Array<{ path: string; from: unknown; to: unknown }>;
   readonly primary: readonly string[];
+  readonly defaulted: readonly string[];
   readonly semantic: string | undefined;
+}
+
+export interface RansomwareLinuxContext {
+  readonly linuxRansomwareProtection: boolean;
+  readonly licenseInformation: ILicense | null;
+}
+
+interface OperationValidation {
+  readonly rejection?: PolicyOperationRejection;
+  readonly target?: ClassifiedSetFieldValue;
+}
+
+interface CoupledConflict {
+  readonly identity: string;
+  readonly first: number;
+  readonly second: number;
 }
 
 const protectionReference = (protection: PolicyCouplingProtection) =>
   getPolicyProtectionsReference().find(({ keyPath }) => keyPath === `${protection}.mode`);
+
+/**
+ * Card-level operations (`set_protection_level`/`set_protection_enabled`) and coupled popup writes
+ * otherwise apply to every OS a protection supports. Linux ransomware and its notification must
+ * stay untouched while `linuxRansomwareProtection` is off, so those broad writes drop Linux from
+ * the protection's OS list before dispatch runs.
+ */
+const restrictBroadOsList = (
+  protection: PolicyCouplingProtection,
+  osList: readonly PolicyOperatingSystem[],
+  linuxRansomwareProtection: boolean
+): readonly PolicyOperatingSystem[] =>
+  protection === 'ransomware' && !linuxRansomwareProtection
+    ? osList.filter((os) => os !== PolicyOperatingSystem.linux)
+    : osList;
+
+interface LinuxRansomwareBranches {
+  readonly protection: boolean;
+  readonly popup: boolean;
+}
+
+const linuxRansomwareBranches = (policy: PolicyConfig): LinuxRansomwareBranches => ({
+  protection: policy.linux.ransomware !== undefined,
+  popup: policy.linux.popup.ransomware !== undefined,
+});
+
+/**
+ * Linux ransomware and its notification are optional, paired branches. Dispatch writes their
+ * leaves with a plain `set()`, which creates `{ mode }` with no `supported` key, `{ enabled }`
+ * with no `message` key, and (for a targeted write) only one of the two branches. Any dispatch
+ * that could have materialized either branch must be followed by this backfill, which completes
+ * the branch (`supported` from the license, `message: ''`) and creates the missing partner the
+ * way the per-OS UI would: notification on only for `prevent`, protection `off` for a
+ * notification-only write. Returns the leaves it filled in; they are defaults, not intents.
+ */
+const backfillLinuxRansomware = (
+  policy: PolicyConfig,
+  existedBefore: LinuxRansomwareBranches,
+  licenseInformation: ILicense | null
+): readonly string[] => {
+  const { linux } = policy;
+  const supported = isAtLeast(licenseInformation, 'platinum');
+  const defaulted: string[] = [];
+  if (linux.ransomware !== undefined && linux.ransomware.supported === undefined) {
+    linux.ransomware.supported = supported;
+    defaulted.push('linux.ransomware.supported');
+  }
+  if (linux.popup.ransomware !== undefined && linux.popup.ransomware.message === undefined) {
+    linux.popup.ransomware.message = '';
+    defaulted.push('linux.popup.ransomware.message');
+  }
+  if (
+    !existedBefore.protection &&
+    linux.ransomware !== undefined &&
+    linux.popup.ransomware === undefined
+  ) {
+    linux.popup.ransomware = {
+      message: '',
+      enabled: linux.ransomware.mode === ProtectionModes.prevent,
+    };
+    defaulted.push('linux.popup.ransomware.message', 'linux.popup.ransomware.enabled');
+  }
+  if (
+    !existedBefore.popup &&
+    linux.popup.ransomware !== undefined &&
+    linux.ransomware === undefined
+  ) {
+    linux.ransomware = { mode: ProtectionModes.off, supported };
+    defaulted.push('linux.ransomware.mode', 'linux.ransomware.supported');
+  }
+  return defaulted;
+};
+
+/**
+ * Linux ransomware is absent on legacy policies, so a targeted Linux ransomware write has no
+ * current value. While `linuxRansomwareProtection` is on, its mode and notification switch may
+ * still be set; dispatch materializes the complete paired branches.
+ */
+const isMaterializableLinuxRansomwarePath = (
+  path: string,
+  current: PolicyConfig,
+  { linuxRansomwareProtection }: RansomwareLinuxContext
+): boolean =>
+  linuxRansomwareProtection &&
+  ((path === 'linux.ransomware.mode' && current.linux.ransomware === undefined) ||
+    (path === 'linux.popup.ransomware.enabled' && current.linux.popup.ransomware === undefined));
 
 const pathProtection = (path: string): string | undefined => {
   const reference = getPolicyProtectionsReference().find(({ keyPath, osList }) =>
@@ -56,7 +156,7 @@ const pathProtection = (path: string): string | undefined => {
   );
   const protection = reference?.keyPath.split('.')[0];
   return protection &&
-    ['malware', 'ransomware', 'memory_protection', 'behavior_protection'].includes(protection)
+    POLICY_COUPLING_PROTECTIONS.includes(protection as (typeof POLICY_COUPLING_PROTECTIONS)[number])
     ? reference?.keyPath
     : undefined;
 };
@@ -75,29 +175,16 @@ const leaves = (
       leaves(from[key], to[key], path ? `${path}.${key}` : key)
     );
   }
-  if (isObject(from))
+  if (isObject(from) && to === undefined && Object.keys(from).length > 0)
     return Object.keys(from).flatMap((key) =>
       leaves(from[key], undefined, path ? `${path}.${key}` : key)
     );
-  if (isObject(to))
+  if (isObject(to) && from === undefined && Object.keys(to).length > 0)
     return Object.keys(to).flatMap((key) =>
       leaves(undefined, to[key], path ? `${path}.${key}` : key)
     );
   return [{ path, from, to }];
 };
-
-const assertWritable = (path: string): void => {
-  const entry = fieldRegistry.getFieldRegistryEntry(path);
-  if (!entry || !fieldRegistry.isWritablePath(entry)) {
-    throw new PolicyChangePreparationError(
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.non_writable_path,
-      nonWritablePathMessage(path)
-    );
-  }
-};
-
-const hasPopup = (policy: PolicyConfig): boolean =>
-  policy.windows.popup.device_control != null && policy.mac.popup.device_control != null;
 
 const primaryTargets = (operation: PolicyChangeOperation): readonly string[] => {
   if (operation.op !== 'set_field') {
@@ -129,16 +216,14 @@ const involvesDeviceControl = (evidence: Evidence): boolean =>
 const dispatch = (
   policy: PolicyConfig,
   operation: PolicyChangeOperation,
-  classified?: ClassifiedSetFieldValue
-): void => {
+  classified: ClassifiedSetFieldValue | undefined,
+  ransomwareLinuxContext: RansomwareLinuxContext
+): readonly string[] => {
+  const { linuxRansomwareProtection, licenseInformation } = ransomwareLinuxContext;
+  const existedBefore = linuxRansomwareBranches(policy);
   if (operation.op === 'set_protection_enabled' || operation.op === 'set_protection_level') {
-    const protection = operation.protection;
-    const reference = protectionReference(protection);
-    if (!reference)
-      throw new PolicyChangePreparationError(
-        POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
-        `Unknown protection: ${protection}`
-      );
+    const reference = protectionReference(operation.protection);
+    if (!reference) throw new Error(`Unknown protection: ${operation.protection}`);
     const mode =
       operation.op === 'set_protection_enabled'
         ? operation.enabled
@@ -147,118 +232,98 @@ const dispatch = (
         : operation.mode;
     helpers.setProtectionModeAndPopup({
       policy,
-      protection,
-      osList: reference.osList,
+      protection: operation.protection,
+      osList: restrictBroadOsList(
+        operation.protection,
+        reference.osList,
+        linuxRansomwareProtection
+      ),
       mode,
       syncPopupEnabled: true,
       popupEnabled: mode === ProtectionModes.prevent,
     });
-    if (operation.op === 'set_protection_enabled' && protection === 'malware') {
+    if (operation.op === 'set_protection_enabled' && operation.protection === 'malware')
       for (const field of POLICY_COUPLING_MALWARE_BOOLEAN_FIELDS)
         helpers.setMalwareBoolean(policy, field, operation.enabled, reference.osList);
-    }
-    if (operation.op === 'set_protection_enabled' && protection === 'behavior_protection')
+    if (operation.op === 'set_protection_enabled' && operation.protection === 'behavior_protection')
       helpers.setBehaviorReputationService(policy, mode !== ProtectionModes.off);
-    return;
+    return backfillLinuxRansomware(policy, existedBefore, licenseInformation);
   }
-  const target = classified ?? classifySetFieldValue(operation.path, operation.value);
-  switch (target.kind) {
-    case 'protection_mode': {
-      const reference = protectionReference(target.protection);
-      if (!reference)
-        throw new PolicyChangePreparationError(
-          POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
-          `Unknown protection: ${target.protection}`
-        );
-      const os = operation.path.split('.')[0];
-      const osList = reference.osList.filter((candidate) => candidate === os);
-      if (osList.length === 0) {
-        set(policy, operation.path, target.value);
-        break;
-      }
-      helpers.setProtectionModeAndPopup({
+  // The shared popup rule writes every OS the protection supports; Linux must stay out while the flag is off.
+  if (
+    classified?.kind === 'popup_enabled' &&
+    classified.protection === 'ransomware' &&
+    !linuxRansomwareProtection
+  ) {
+    const reference = protectionReference(classified.protection);
+    if (reference)
+      helpers.setPopupEnabled(
         policy,
-        protection: target.protection,
-        osList,
-        mode: target.value,
-        syncPopupEnabled: false,
-        popupEnabled: false,
-      });
-      break;
-    }
-    case 'device_control_enabled':
-      helpers.setDeviceControlSwitch(policy, target.value);
-      break;
-    case 'device_control_usb_storage':
-      helpers.setDeviceControlUsbStorage(policy, target.value);
-      break;
-    case 'linux_session_data':
-      policy.linux.events.session_data = target.value;
-      helpers.constrainLinuxTtyIo(policy);
-      break;
-    case 'linux_tty_io':
-      policy.linux.events.tty_io = target.value;
-      break;
-    case 'popup_enabled': {
-      const reference = protectionReference(target.protection);
-      if (reference)
-        helpers.setPopupEnabled(policy, target.protection, reference.osList, target.value);
-      break;
-    }
-    case 'malware_boolean': {
-      const reference = protectionReference('malware');
-      if (reference)
-        helpers.setMalwareBoolean(policy, target.field, target.value, reference.osList);
-      break;
-    }
-    case 'behavior_reputation_service':
-      helpers.setBehaviorReputationService(policy, target.value);
-      break;
-    default:
-      set(policy, operation.path, operation.value);
+        classified.protection,
+        restrictBroadOsList(classified.protection, reference.osList, linuxRansomwareProtection),
+        classified.value
+      );
+  } else {
+    applySetFieldValue(policy, operation, classified);
   }
+  return backfillLinuxRansomware(policy, existedBefore, licenseInformation);
 };
 
 const validateOperation = (
   operation: PolicyChangeOperation,
-  current: PolicyConfig
-): ClassifiedSetFieldValue | undefined => {
-  if (operation.op !== 'set_field') return undefined;
-  if (isDevicePopupEnabledPath(operation.path))
-    throw new PolicyChangePreparationError(
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
-      DEVICE_POPUP_ENABLED_UNSUPPORTED_MESSAGE
-    );
-  assertWritable(operation.path);
-  if (get(current, operation.path) === undefined)
-    throw new PolicyChangePreparationError(
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.unknown_current_value,
-      unknownCurrentValueMessage(operation.path)
-    );
-  if (isDeviceControlEnabledPath(operation.path) && !hasPopup(current))
-    throw new PolicyChangePreparationError(
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
-      DEVICE_CONTROL_MISSING_POPUP_MESSAGE
-    );
-  return classifySetFieldValue(operation.path, operation.value);
+  index: number,
+  current: PolicyConfig,
+  operationsForCurrentRequest: readonly PolicyChangeOperation[],
+  ransomwareLinuxContext: RansomwareLinuxContext
+): OperationValidation => {
+  if (operation.op !== 'set_field') return {};
+  const writability = fieldRegistry.describePathWritability(operation.path);
+  if (!writability.writable) {
+    return {
+      rejection: { operationIndexes: [index], path: operation.path, reason: writability.reason },
+    };
+  }
+  const missingCanBeCreated = canCreateMissingSetting(operation.path);
+  if (
+    get(current, operation.path) === undefined &&
+    !missingCanBeCreated &&
+    !isMaterializableLinuxRansomwarePath(operation.path, current, ransomwareLinuxContext) &&
+    !(
+      isDeviceControlUsbPath(operation.path) &&
+      operationsForCurrentRequest.some(
+        (item) =>
+          item.op === 'set_field' && isDeviceControlEnabledPath(item.path) && item.value === true
+      )
+    )
+  ) {
+    return {
+      rejection: {
+        operationIndexes: [index],
+        path: operation.path,
+        reason: 'current_value_missing',
+      },
+    };
+  }
+  try {
+    return { target: classifySetFieldValue(operation.path, operation.value) };
+  } catch (error) {
+    if (error instanceof PolicyChangeRejectedError && error.rejections.length > 0) {
+      return { rejection: { ...error.rejections[0], operationIndexes: [index] } };
+    }
+    throw error;
+  }
 };
 
-const coupledFieldConflict = (identity: string): PolicyChangePreparationError =>
-  new PolicyChangePreparationError(
-    POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
-    `Conflicting values for coupled policy field: ${identity}`
-  );
-
-const assertPairHasNoCoupledConflict = (
+const coupledPairConflict = (
   first: Evidence | undefined,
   second: Evidence | undefined
-): void => {
-  if (!first || !second) return;
+): CoupledConflict | undefined => {
+  if (!first || !second) return undefined;
   const sameRequestedPath =
     first.operation.op === 'set_field' &&
     second.operation.op === 'set_field' &&
     first.operation.path === second.operation.path;
-  if (sameRequestedPath) return;
+  if (sameRequestedPath) return undefined;
   if (first.semantic !== undefined && first.semantic === second.semantic) {
     const firstValue = protectionModeIntent(first);
     const secondValue = protectionModeIntent(second);
@@ -267,43 +332,43 @@ const assertPairHasNoCoupledConflict = (
       secondValue !== undefined &&
       !Object.is(firstValue, secondValue)
     )
-      throw coupledFieldConflict(first.semantic);
-    return;
+      return { identity: first.semantic, first: first.index, second: second.index };
+    return undefined;
   }
-  if (involvesDeviceControl(first) || involvesDeviceControl(second)) return;
+  if (involvesDeviceControl(first) || involvesDeviceControl(second)) return undefined;
   for (const a of first.patch)
     for (const b of second.patch) {
       const bothCoupled = !first.primary.includes(a.path) && !second.primary.includes(b.path);
-      if (a.path === b.path && bothCoupled && !Object.is(a.to, b.to))
-        throw coupledFieldConflict(a.path);
+      const eitherDefaulted = first.defaulted.includes(a.path) || second.defaulted.includes(b.path);
+      if (a.path === b.path && bothCoupled && !eitherDefaulted && !Object.is(a.to, b.to))
+        return { identity: a.path, first: first.index, second: second.index };
     }
-};
-
-const assertNoCoupledConflicts = (evidence: readonly Evidence[]): void => {
-  for (let left = 0; left < evidence.length; left++)
-    for (let right = left + 1; right < evidence.length; right++)
-      assertPairHasNoCoupledConflict(evidence[left], evidence[right]);
-};
-
-const assertFinalState = (proposal: PolicyConfig): void => {
-  if (proposal.linux.events.session_data === false && proposal.linux.events.tty_io === true)
-    throw new PolicyChangePreparationError(
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
-      'Linux tty_io cannot be enabled while session_data is disabled.'
-    );
+  return undefined;
 };
 
 export const expandChangeSet = (
   operations: readonly PolicyChangeOperation[],
-  currentConfig: PolicyConfig
+  currentConfig: PolicyConfig,
+  ransomwareLinuxContext: RansomwareLinuxContext
 ): PreparedPolicyChangeSet => {
-  const classified = operations.map((operation) => ({
+  const validations = operations.map((operation, index) =>
+    validateOperation(operation, index, currentConfig, operations, ransomwareLinuxContext)
+  );
+  const passOneRejections = validations.flatMap(({ rejection }) =>
+    rejection !== undefined ? [rejection] : []
+  );
+  if (passOneRejections.length > 0) {
+    throw new PolicyChangeRejectedError(passOneRejections);
+  }
+
+  const classified = operations.map((operation, index) => ({
     operation,
-    target: validateOperation(operation, currentConfig),
+    target: validations[index].target,
   }));
 
   const proposal = structuredClone(currentConfig);
   const origins = new Map<string, ExplicitPolicyChange['origin']>();
+  const linuxEventIndexes = new Set<number>();
 
   const recordOrigins = (
     evidenceOperation: PolicyChangeOperation,
@@ -311,21 +376,33 @@ export const expandChangeSet = (
     primary: readonly string[],
     patch: Array<{ path: string; from: unknown; to: unknown }>
   ): void => {
-    for (const change of patch)
+    for (const change of patch) {
       origins.set(change.path, {
         operationIndex: index,
         op: evidenceOperation.op,
         kind: primary.includes(change.path) ? ('direct' as const) : ('coupled' as const),
       });
+      if (change.path === 'linux.events.session_data' || change.path === 'linux.events.tty_io') {
+        linuxEventIndexes.add(index);
+      }
+    }
   };
 
   const evidence: Evidence[] = classified.map(({ operation, target }, index) => {
     const before = structuredClone(proposal);
-    dispatch(proposal, operation, target);
+    const defaulted = dispatch(proposal, operation, target, ransomwareLinuxContext);
     const patch = leaves(before, proposal);
     const primary = primaryTargets(operation);
     recordOrigins(operation, index, primary, patch);
-    return { operation, index, target, patch, primary, semantic: semanticIdentity(operation) };
+    return {
+      operation,
+      index,
+      target,
+      patch,
+      primary,
+      defaulted,
+      semantic: semanticIdentity(operation),
+    };
   });
 
   const latestExactPathIndex = new Map<string, number>();
@@ -333,13 +410,32 @@ export const expandChangeSet = (
     if (item.operation.op === 'set_field')
       latestExactPathIndex.set(item.operation.path, item.index);
   }
-  assertNoCoupledConflicts(
-    evidence.filter(
-      (item) =>
-        item.operation.op !== 'set_field' ||
-        latestExactPathIndex.get(item.operation.path) === item.index
-    )
+  const participants = evidence.filter(
+    (item) =>
+      item.operation.op !== 'set_field' ||
+      latestExactPathIndex.get(item.operation.path) === item.index
   );
+
+  const coupledConflicts = new Map<string, number[]>();
+  for (let left = 0; left < participants.length; left++)
+    for (let right = left + 1; right < participants.length; right++) {
+      const conflict = coupledPairConflict(participants[left], participants[right]);
+      if (conflict !== undefined) {
+        const indexes = coupledConflicts.get(conflict.identity) ?? [];
+        if (!indexes.includes(conflict.first)) indexes.push(conflict.first);
+        if (!indexes.includes(conflict.second)) indexes.push(conflict.second);
+        coupledConflicts.set(conflict.identity, indexes);
+      }
+    }
+  if (coupledConflicts.size > 0) {
+    throw new PolicyChangeRejectedError(
+      [...coupledConflicts.entries()].map(([identity, operationIndexes]) => ({
+        operationIndexes,
+        path: identity,
+        reason: 'conflicting_operations' as const,
+      }))
+    );
+  }
 
   const intents = new Map<
     string,
@@ -362,7 +458,7 @@ export const expandChangeSet = (
       if (!satisfied) {
         converged = false;
         const before = structuredClone(proposal);
-        dispatch(proposal, intent.operation, intent.target);
+        dispatch(proposal, intent.operation, intent.target, ransomwareLinuxContext);
         recordOrigins(
           intent.operation,
           intent.index,
@@ -372,23 +468,34 @@ export const expandChangeSet = (
       }
     }
   }
-  if (!converged) {
-    const path = intents.keys().next().value ?? 'unknown';
-    throw new PolicyChangePreparationError(
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
-      `Conflicting values for coupled policy field: ${path}`
+  const unsatisfiedIntents = [...intents.values()].filter(
+    (intent) => !policyValuesEqual(get(proposal, intent.operation.path), intent.operation.value)
+  );
+  if (unsatisfiedIntents.length > 0) {
+    throw new PolicyChangeRejectedError(
+      unsatisfiedIntents.map((intent) => ({
+        operationIndexes: [intent.index],
+        path: intent.operation.path,
+        reason: 'conflicting_operations' as const,
+      }))
     );
   }
 
-  assertFinalState(proposal);
+  if (proposal.linux.events.session_data === false && proposal.linux.events.tty_io === true) {
+    throw new PolicyChangeRejectedError([
+      {
+        operationIndexes: [...linuxEventIndexes],
+        path: 'linux.events.tty_io',
+        reason: 'invalid_combination' as const,
+      },
+    ]);
+  }
 
   const explicitChanges = leaves(currentConfig, proposal).map((change) => {
     const origin = origins.get(change.path);
-    if (!origin)
-      throw new PolicyChangePreparationError(
-        POLICY_CHANGE_PREPARATION_ERROR_CODE.non_writable_path,
-        nonWritablePathMessage(change.path)
-      );
+    if (!origin) {
+      throw new Error(`Expanded policy change has no recorded origin: ${change.path}`);
+    }
     return { ...change, origin };
   });
 

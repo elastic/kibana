@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { UseInfiniteQueryResult } from '@kbn/react-query';
+import { useCallback } from 'react';
+import type { QueryClient, UseInfiniteQueryResult } from '@kbn/react-query';
 import {
   useInfiniteQuery,
   useIsMutating,
@@ -20,6 +21,7 @@ import {
   MAX_PROPOSALS_PAGE_SIZE,
   PROPOSALS_API_VERSION,
   PROPOSALS_INTERNAL_URL,
+  PROPOSAL_REOPEN_URL,
   PROPOSAL_SETTLING_POLL_INTERVAL_MS,
   isProposalSettling,
 } from '@kbn/proposals-common';
@@ -110,8 +112,8 @@ const nextConversationProposalsOffset = (
 /**
  * Every proposal on one conversation, decided or not — the investigation flyout's own proposal
  * history, as opposed to `usePendingProposals`'s cross-conversation "awaiting a human" queue.
- * Superseded rows are still dropped: a retried proposal's earlier attempts are not history worth
- * a card of their own, only the live head is.
+ * Superseded rows are dropped: an earlier revision's successor carries the same ask, and a
+ * failed attempt's retry carries its error as `previousExecutionError`.
  *
  * Paged rather than a single fixed-size read: the list API caps a page at
  * `MAX_PROPOSALS_PAGE_SIZE`, so an investigation with more proposals than that would otherwise
@@ -133,6 +135,7 @@ export const useConversationProposals = (
         query: {
           conversationId,
           excludeSuperseded: true,
+          order: 'newest',
           size: MAX_PROPOSALS_PAGE_SIZE,
           from: pageParam ?? 0,
         },
@@ -277,6 +280,72 @@ export const useDismissProposal = () => {
 };
 
 /**
+ * Marks a to-do proposal that was marked as applied as not applied. The server re-offers it as a
+ * pending successor before it answers, so the proposals are refetched right away.
+ */
+export const useReopenProposal = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: mutationKeys.proposals.reopen,
+    mutationFn: ({ id }: { id: string }): Promise<{ proposalId: string }> =>
+      services.http!.post<{ proposalId: string }>(
+        PROPOSAL_REOPEN_URL.replace('{id}', encodeURIComponent(id)),
+        { version: PROPOSALS_API_VERSION }
+      ),
+    onSuccess: async () => {
+      await invalidateProposals(queryClient);
+    },
+  });
+};
+
+/**
+ * Tracks a decline that was issued elsewhere — a bulk close of an investigation releases each
+ * pending proposal's gate server-side — until its decision lands. Shares the decline
+ * `mutationKey`, so `useIsDecliningProposal` reads "Declining" for the row while it settles.
+ * Resolves once the decision is recorded or the bounded wait gives up; it never rejects.
+ *
+ * Takes the `QueryClient` to track it on, since the surface that closes (the flyout's status
+ * toggle) can run in a different client than the one the cards read `Declining` from. Defaults
+ * to the one in context.
+ *
+ * `afterDecision` runs once the decision is recorded. The tracker stays open until it finishes.
+ * Use it to refresh the data first, so the row never reads old data after "Declining" ends.
+ */
+export const useSettleDeclinedProposal = () => {
+  const { services } = useKibana();
+  const contextClient = useQueryClient();
+
+  return useCallback(
+    async (
+      id: string,
+      queryClient: QueryClient = contextClient,
+      afterDecision?: () => Promise<void>
+    ): Promise<void> => {
+      // Built on the cache rather than through a `MutationObserver`: an observer stays attached
+      // to the mutation it started, which keeps it out of garbage collection for the life of a
+      // long-lived shared client. Nothing observes this one, so it is removed once settled.
+      const mutationCache = queryClient.getMutationCache();
+      const mutation = mutationCache.build(queryClient, {
+        mutationKey: mutationKeys.proposals.decline,
+        mutationFn: async ({ id: proposalId }: { id: string }): Promise<void> => {
+          await waitForDecision(services.http!, proposalId);
+          await afterDecision?.();
+        },
+        variables: { id },
+      });
+      try {
+        await mutation.execute();
+      } finally {
+        mutationCache.remove(mutation);
+      }
+    },
+    [contextClient, services.http]
+  );
+};
+
+/**
  * Whether *this* proposal's approve/decline is currently in flight, read from the shared
  * mutation cache rather than component state — so the answer is the same for the flyout row and
  * the modal alike, and survives the modal being closed and reopened mid-submission (a local
@@ -289,6 +358,12 @@ export const useDismissProposal = () => {
 export const useIsApprovingProposal = (id: string | undefined): boolean =>
   useIsMutating({
     mutationKey: mutationKeys.proposals.approve,
+    predicate: (mutation) => id !== undefined && mutation.state.variables?.id === id,
+  }) > 0;
+
+export const useIsReopeningProposal = (id: string | undefined): boolean =>
+  useIsMutating({
+    mutationKey: mutationKeys.proposals.reopen,
     predicate: (mutation) => id !== undefined && mutation.state.variables?.id === id,
   }) > 0;
 

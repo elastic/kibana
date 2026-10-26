@@ -141,6 +141,7 @@ export type {
   TimeScaleIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
+  LastValueOrderAggColumn,
   RangeIndexPatternColumn,
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
@@ -177,6 +178,7 @@ export type {
   RegisterLibraryAnnotationGroupFunction,
   AxesSettingsConfig,
   LensEditContextMapping,
+  DefaultVisualizationOverrides,
 } from './visualizations/types';
 export type {
   LensDatatableSortingState,
@@ -471,7 +473,9 @@ export { convertToAbsoluteDateRange } from './esql/date_range';
 export type { EsqlConversionFailureReason } from './esql/to_esql_failure_reasons';
 export {
   esqlConversionFailureReasonMessages,
+  esqlConversionFailureTitle,
   getFailureTooltip,
+  getFailureTooltipText,
 } from './esql/to_esql_failure_reasons';
 export type { CreateEsAggsIdMapEntryParams } from './esql/create_es_aggs_id_map_entry';
 export type { GetDefaultLabelFn } from './esql/operations';

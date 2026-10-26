@@ -20,6 +20,7 @@ import { registerEmbeddables } from './embeddables';
 import { registerAiopsUiActions } from './ui_actions';
 import { registerCases } from './cases/register_cases';
 import { canUseAiops } from './capabilities';
+import { AiopsUsage } from './track_usage';
 
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
@@ -52,6 +53,7 @@ export class AiopsPlugin
         return getPatternAnalysisAvailable(core.application);
       },
       PatternAnalysisComponent,
+      aiopsUsage: new AiopsUsage(core.http, core.application),
     };
   }
 

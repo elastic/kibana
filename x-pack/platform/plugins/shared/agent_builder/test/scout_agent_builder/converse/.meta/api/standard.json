@@ -1,5 +1,5 @@
 {
-  "sha1": "dce3d2a08b3467e9f34da62232865f6cc09a6985",
+  "sha1": "28e3ccd562f48ffefcfa6cc16cc1f54630ff8114",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -160,7 +160,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 137,
+        "line": 140,
         "column": 8
       }
     },
@@ -176,7 +176,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 242,
+        "line": 256,
         "column": 13
       }
     },
@@ -192,8 +192,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 280,
-        "column": 17
+        "line": 289,
+        "column": 13
       }
     },
     {
@@ -208,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 324,
-        "column": 30
+        "line": 343,
+        "column": 17
       }
     },
     {
@@ -224,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 356,
-        "column": 19
+        "line": 318,
+        "column": 27
       }
     },
     {
@@ -240,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 389,
-        "column": 13
+        "line": 430,
+        "column": 7
       }
     },
     {
@@ -256,8 +256,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 416,
-        "column": 25
+        "line": 460,
+        "column": 16
       }
     },
     {
@@ -272,8 +272,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 474,
-        "column": 22
+        "line": 530,
+        "column": 14
       }
     },
     {
@@ -288,7 +288,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 113,
+        "line": 114,
         "column": 7
       }
     },
@@ -304,8 +304,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 183,
-        "column": 30
+        "line": 187,
+        "column": 13
       }
     },
     {
@@ -320,8 +320,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 240,
-        "column": 16
+        "line": 243,
+        "column": 17
       }
     },
     {
@@ -336,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 254,
-        "column": 11
+        "line": 260,
+        "column": 13
       }
     },
     {
@@ -352,8 +352,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 274,
-        "column": 7
+        "line": 278,
+        "column": 23
+      }
+    },
+    {
+      "id": "9220e328dff6e91-b94fd512ffd866c",
+      "title": "Agent Builder — execute_api state change events a successful create call sends one api_state_changed event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_api_state_changes_api.spec.ts",
+        "line": 124,
+        "column": 19
+      }
+    },
+    {
+      "id": "9220e328dff6e91-2267afb1048b4ce",
+      "title": "Agent Builder — execute_api state change events a successful read-only call sends no api_state_changed event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_api_state_changes_api.spec.ts",
+        "line": 149,
+        "column": 17
       }
     },
     {
@@ -592,8 +624,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 134,
+        "line": 138,
         "column": 23
+      }
+    },
+    {
+      "id": "69411a87481f950-afb719b3a3f36ee",
+      "title": "Agent Builder - converse callback API renders the Slack surface payload with attachments in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 225,
+        "column": 14
       }
     },
     {
@@ -608,8 +656,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 197,
-        "column": 29
+        "line": 268,
+        "column": 14
       }
     },
     {
@@ -624,8 +672,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 292,
-        "column": 22
+        "line": 365,
+        "column": 15
       }
     },
     {
@@ -640,8 +688,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 328,
-        "column": 48
+        "line": 397,
+        "column": 18
       }
     },
     {
@@ -656,14 +704,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 369,
-        "column": 15
+        "line": 439,
+        "column": 19
       }
     },
     {
       "id": "69411a87481f950-e3a4852c5eeefc2",
       "title": "Agent Builder - converse callback API schedules a single execution for concurrent duplicate deliveries",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -672,8 +720,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 432,
-        "column": 13
+        "line": 507,
+        "column": 17
       }
     },
     {
@@ -688,8 +736,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 497,
-        "column": 25
+        "line": 568,
+        "column": 13
       }
     },
     {
@@ -704,8 +752,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 556,
-        "column": 17
+        "line": 627,
+        "column": 13
       }
     },
     {
@@ -720,8 +768,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 595,
-        "column": 16
+        "line": 668,
+        "column": 32
+      }
+    },
+    {
+      "id": "bca2309a02a613a-e12e2371ba1dd9a",
+      "title": "Agent Builder — ephemeral ai.agent workflow step runs on top of the conversation without modifying it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_ephemeral_workflow_step_api.spec.ts",
+        "line": 67,
+        "column": 37
       }
     },
     {
@@ -981,6 +1043,48 @@
       }
     },
     {
+      "id": "d4715fb1272d42d-21c7644969d5435",
+      "title": "Agent Builder — Task Manager runs act as the API key owner the owner of a private agent can run it on Task Manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_task_manager_ownership_api.spec.ts",
+        "line": 194,
+        "column": 15
+      }
+    },
+    {
+      "id": "d4715fb1272d42d-7b51574e37ba431",
+      "title": "Agent Builder — Task Manager runs act as the API key owner the agent can write metadata to its owner private conversation on Task Manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_task_manager_ownership_api.spec.ts",
+        "line": 255,
+        "column": 32
+      }
+    },
+    {
+      "id": "d4715fb1272d42d-b213631e46799f4",
+      "title": "Agent Builder — Task Manager runs act as the API key owner a workflow run by the owner continues their private conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_task_manager_ownership_api.spec.ts",
+        "line": 291,
+        "column": 16
+      }
+    },
+    {
       "id": "12984d044214c4f-d856e86368deee2",
       "title": "Agent Builder — converse tool calling API [local] single tool call (search with esql)",
       "expectedStatus": "passed",
@@ -1058,6 +1162,160 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_tracing_snapshot_api.spec.ts",
         "line": 207,
         "column": 9
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-fe43db7a08d704e",
+      "title": "Agent Builder — service accounts creates a public conversation under its own identity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 94,
+        "column": 62
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-3d82ffa9f55715f",
+      "title": "Agent Builder — service accounts reads back its own conversation as the owner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 111,
+        "column": 12
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-e7dc0faef234077",
+      "title": "Agent Builder — service accounts attributes messages it posts to a public conversation owned by a user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 123,
+        "column": 7
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-4a10c45b3a30d58",
+      "title": "Agent Builder — service accounts attributes custom events it adds to a public conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 147,
+        "column": 23
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-e9eb2f1b4aff288",
+      "title": "Agent Builder — service accounts creates and owns a public conversation through converse [local]",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 173,
+        "column": 64
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-cfe6b836147825f",
+      "title": "Agent Builder — service accounts joins a user's public conversation through converse [local]",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 207,
+        "column": 21
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-536d17559f67531",
+      "title": "Agent Builder — service accounts creates and owns a public conversation through converse [task_manager]",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 173,
+        "column": 64
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-f952ce7bb27c974",
+      "title": "Agent Builder — service accounts joins a user's public conversation through converse [task_manager]",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 207,
+        "column": 21
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-902888b2f2c0c18",
+      "title": "Agent Builder — service accounts runs tools with its own Elasticsearch privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 249,
+        "column": 16
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-bb99a80394dc8f6",
+      "title": "Agent Builder — service accounts cannot reach a private conversation it does not own",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 288,
+        "column": 7
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-7cdc2dc0a76610d",
+      "title": "Agent Builder — service accounts refuses a service account without Agent Builder privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 304,
+        "column": 78
       }
     }
   ]

@@ -34,7 +34,7 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'detection_metadata_not_severity',
-    text: 'Severity must not be lowered (or raised) because of `p_value`, `change_point_type`, or alert volume when grounding confirms a non-benign failure or material degradation. Those inputs may affect `confidence` only. Rule `severity_score` may support a higher applicable tier when grounding confirms a matching failure class, but cannot override absent or contradictory grounding.',
+    text: 'Severity must not be lowered (or raised) because of `p_value`, `change_point_type`, or alert volume when grounding confirms a non-benign failure or material degradation. Those inputs, and the `severity_score` of the rule, are not severity inputs and may affect `confidence` only.',
     score: 2,
   },
   {

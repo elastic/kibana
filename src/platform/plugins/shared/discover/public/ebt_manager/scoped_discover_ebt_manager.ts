@@ -31,14 +31,6 @@ import {
   CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE,
   FIELD_USAGE_EVENT_NAME,
   FIELD_USAGE_EVENT_TYPE,
-  QUERY_PERFORMANCE_DURATION,
-  QUERY_PERFORMANCE_EVENT_NAME,
-  QUERY_PERFORMANCE_EVENT_TYPE,
-  QUERY_PERFORMANCE_FETCH_TYPE,
-  QUERY_PERFORMANCE_MULTI_MATCH_TYPES,
-  QUERY_PERFORMANCE_PHRASE_QUERY_COUNT,
-  QUERY_PERFORMANCE_QUERY_RANGE_SECONDS,
-  QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND,
   QUERY_FIELDS_USAGE_EVENT_TYPE,
   FIELD_USAGE_FIELD_NAME,
   FIELD_USAGE_FILTER_OPERATION,
@@ -106,16 +98,6 @@ interface ContextualProfileResolvedEventData {
   [CONTEXTUAL_PROFILE_ID]: string;
 }
 
-interface QueryPerformanceEventData {
-  [QUERY_PERFORMANCE_EVENT_NAME]: string;
-  [QUERY_PERFORMANCE_DURATION]: number;
-  [QUERY_PERFORMANCE_QUERY_RANGE_SECONDS]: number;
-  [QUERY_PERFORMANCE_PHRASE_QUERY_COUNT]: number;
-  [QUERY_PERFORMANCE_MULTI_MATCH_TYPES]: string[];
-  [QUERY_PERFORMANCE_FETCH_TYPE]: QueryPerformanceFetchType;
-  [QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND]: string | undefined;
-}
-
 type QueryPerformanceFetchType = 'fetchTextBased' | 'fetchDocuments';
 
 interface QueryPerformanceTrackerParams {
@@ -126,6 +108,7 @@ interface QueryPerformanceTrackerParams {
 
 interface QueryPerformanceReportEventParams {
   requestAdapter: RequestAdapter | undefined;
+  approximationApplied?: boolean;
 }
 
 export class ScopedDiscoverEBTManager {
@@ -452,8 +435,11 @@ export class ScopedDiscoverEBTManager {
     let reported = false;
 
     return {
-      reportEvent: ({ requestAdapter }: QueryPerformanceReportEventParams) => {
-        if (reported || (!this.reportPerformanceEvent && !this.reportEvent)) {
+      reportEvent: ({
+        requestAdapter,
+        approximationApplied,
+      }: QueryPerformanceReportEventParams) => {
+        if (reported || !this.reportPerformanceEvent) {
           return;
         }
 
@@ -466,15 +452,16 @@ export class ScopedDiscoverEBTManager {
         );
         const mergedAnalysis = mergeMultiMatchAnalyses(queryAnalyses);
         const phraseQueryCount = mergedAnalysis.typeCounts.get('match_phrase') ?? 0;
-        const fetchType: QueryPerformanceFetchType = isOfAggregateQueryType(query)
+        const isEsqlQuery = isOfAggregateQueryType(query);
+        const fetchType: QueryPerformanceFetchType = isEsqlQuery
           ? 'fetchTextBased'
           : 'fetchDocuments';
         const queryRangeSeconds = timeRange ? getTimeDifferenceInSeconds(timeRange) : 0;
-        const querySourceCommand = isOfAggregateQueryType(query)
+        const querySourceCommand = isEsqlQuery
           ? getAnySourceCommandFromESQLQuery(query.esql) || undefined
           : undefined;
 
-        this.reportPerformanceEvent?.({
+        this.reportPerformanceEvent({
           key1: 'query_range_secs',
           value1: queryRangeSeconds,
           key2: 'phrase_query_count',
@@ -482,22 +469,12 @@ export class ScopedDiscoverEBTManager {
           meta: {
             fetchType,
             multi_match_types: mergedAnalysis.rawTypes,
+            ...(querySourceCommand ? { query_source_command: querySourceCommand } : {}),
+            ...(isEsqlQuery ? { approximationApplied: approximationApplied ?? false } : {}),
           },
           eventName,
           duration,
         });
-
-        const eventData: QueryPerformanceEventData = {
-          [QUERY_PERFORMANCE_EVENT_NAME]: eventName,
-          [QUERY_PERFORMANCE_DURATION]: duration,
-          [QUERY_PERFORMANCE_QUERY_RANGE_SECONDS]: queryRangeSeconds,
-          [QUERY_PERFORMANCE_PHRASE_QUERY_COUNT]: phraseQueryCount,
-          [QUERY_PERFORMANCE_MULTI_MATCH_TYPES]: mergedAnalysis.rawTypes,
-          [QUERY_PERFORMANCE_FETCH_TYPE]: fetchType,
-          [QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND]: querySourceCommand,
-        };
-
-        this.reportEvent?.(QUERY_PERFORMANCE_EVENT_TYPE, eventData);
       },
     };
   }

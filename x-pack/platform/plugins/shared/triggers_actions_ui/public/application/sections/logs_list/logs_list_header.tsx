@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { AppHeader } from '@kbn/app-header';
+import { AppHeader, type AppHeaderBadge } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { getRulesPageMenu } from '../rules_page/get_rules_page_menu';
 
@@ -27,6 +27,14 @@ const BACK_TO_RULES_LABEL = i18n.translate(
     defaultMessage: 'Rules',
   }
 );
+
+const CLASSIC_RULES_ONLY_BADGE: AppHeaderBadge = {
+  label: i18n.translate('xpack.triggersActionsUI.rulesLogsPage.classicRulesOnlyBadgeLabel', {
+    defaultMessage: 'Classic',
+  }),
+  color: 'hollow',
+  'data-test-subj': 'classicRulesOnlyBadge',
+};
 
 /**
  * Header for the v1 Rules Logs page: a child-page heading with its own title and a back
@@ -51,6 +59,7 @@ export const LogsListHeader = ({
   return (
     <AppHeader
       title={LOGS_PAGE_TITLE}
+      badges={[CLASSIC_RULES_ONLY_BADGE]}
       spacing="bleed"
       back={{ href: backHref, label: BACK_TO_RULES_LABEL }}
       docLink={docLink}

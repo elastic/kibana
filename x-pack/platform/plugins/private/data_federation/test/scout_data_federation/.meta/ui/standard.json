@@ -1,5 +1,5 @@
 {
-  "sha1": "7df2dc7d9cd3aa46b38c002993e84859a6af32ae",
+  "sha1": "cf8b1fec834c2e6b3c096ec00a16f6761a83c28f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -10,11 +10,17 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_create_csv_dataset_wizard.spec.ts",
-        "line": 104,
+        "line": 120,
         "column": 28
       }
     },
@@ -24,7 +30,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_data_sources_crud.spec.ts",
@@ -38,7 +50,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_dataset_passthrough_settings.spec.ts",
@@ -47,12 +65,38 @@
       }
     },
     {
+      "id": "5da4e61a7d44a83-b989871ff5e1826",
+      "title": "ES|QL Data Federation — dataset settings not defined in the Kibana schema preserves multiline_fields when the description is edited",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_dataset_unknown_settings.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
       "id": "01aa1437955fee0-289be30bafdb9c9",
       "title": "ES|QL Data Federation — datasets CRUD creates, edits, and deletes a data set",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_datasets_crud.spec.ts",
@@ -61,12 +105,58 @@
       }
     },
     {
+      "id": "eaef1e5949ac83f-e443c3c74d87594",
+      "title": "ES|QL Data Federation — dataset Discover link opens the dataset in Discover with an ES|QL query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_datasets_discover_link.spec.ts",
+        "line": 48,
+        "column": 57
+      }
+    },
+    {
+      "id": "eaef1e5949ac83f-162787ed3a84250",
+      "title": "ES|QL Data Federation — dataset Discover link hides the Discover action without Discover access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_datasets_discover_link.spec.ts",
+        "line": 60,
+        "column": 25
+      }
+    },
+    {
       "id": "58549959a45779a-c1aa05b35aa13cc",
       "title": "ES|QL Data Federation — Stack Management loads the management app and can open the connect data source flyout",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_management.spec.ts",
@@ -80,7 +170,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_mapping_fields.spec.ts",

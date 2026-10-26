@@ -131,7 +131,7 @@ export class IngestPipelinesPage {
     await this.fileInput.setInputFiles(
       path.join(
         process.cwd(),
-        'x-pack/platform/test/functional/fixtures/ingest_pipeline_example_mapping.csv'
+        'x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/fixtures/files/ingest_pipeline_example_mapping.csv'
       )
     );
 

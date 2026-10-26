@@ -21,12 +21,12 @@ const getScopeCardText = (matcher: PolicyMatcher | null): string => {
   if (hasTags && hasExpression) {
     return i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.card.tagsAndExpression', {
       defaultMessage:
-        'Applies to all rules with one or more of the selected tags, and matching the expression conditions',
+        'Applies to all rules with one or more of the selected routing tags, and matching the expression conditions',
     });
   }
   if (hasTags) {
     return i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.card.tagsOnly', {
-      defaultMessage: 'Applies to all rules with one or more of the selected tags',
+      defaultMessage: 'Applies to all rules with one or more of the selected routing tags',
     });
   }
   if (hasExpression) {
@@ -46,7 +46,7 @@ export const PolicyScopeDescription = ({ matcher }: PolicyScopeDescriptionProps)
         <p>
           {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.description', {
             defaultMessage:
-              'Define which alerts this policy applies to. Select rule tags (joined with OR) and/or add a KQL match expression in advanced matching.',
+              'Define which alert episodes this policy applies to. Select routing tags (joined with OR) and/or add a KQL match expression in advanced matching.',
           })}
         </p>
       </EuiText>

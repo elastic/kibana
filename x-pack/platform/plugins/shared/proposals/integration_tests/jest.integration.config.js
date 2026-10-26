@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_integration',
+  preset: '@kbn/jest/jest_integration',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/proposals/integration_tests'],
   forceExit: true,

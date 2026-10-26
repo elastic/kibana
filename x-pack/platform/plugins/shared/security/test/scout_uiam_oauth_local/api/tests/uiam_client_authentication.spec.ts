@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { MOCK_IDP_GATEWAY_SHARED_SECRET } from '@kbn/mock-idp-utils';
+import {
+  deriveInternalCallerAttestation,
+  HTTPAuthorizationHeader,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
+import {
+  MOCK_IDP_GATEWAY_SHARED_SECRET,
+  MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
+  MOCK_IDP_UIAM_SHARED_SECRET,
+} from '@kbn/mock-idp-utils';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
@@ -68,6 +77,74 @@ apiTest.describe(
 
         expect(response).toHaveStatusCode(200);
         expect(Array.isArray(response.body.clients)).toBe(true);
+      }
+    );
+
+    apiTest(
+      'omits client authentication for an external API key on direct UIAM calls',
+      async ({ apiClient }) => {
+        const response = await apiClient.get('internal/security/oauth/clients', {
+          headers: {
+            ...COMMON_HEADERS,
+            Authorization: `ApiKey ${MOCK_IDP_UIAM_ORG_ADMIN_API_KEY}`,
+          },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(Array.isArray(response.body.clients)).toBe(true);
+      }
+    );
+
+    apiTest(
+      'preserves the API key authorization scheme for direct UIAM calls',
+      async ({ apiClient, ephemeralToken }) => {
+        const grantResponse = await apiClient.post('test_endpoints/uiam/api_keys/_grant', {
+          headers: { ...COMMON_UNSAFE_HEADERS },
+          responseType: 'json',
+          body: {
+            name: 'scout-oauth-client-internal-key',
+            authcScheme: 'Bearer',
+            credential: ephemeralToken,
+          },
+        });
+
+        expect(grantResponse).toHaveStatusCode(200);
+        const { id, api_key: apiKey }: { id: string; api_key: string } = grantResponse.body;
+        const credential = new HTTPAuthorizationHeader('ApiKey', apiKey);
+        const apiKeyHeaders = {
+          ...COMMON_UNSAFE_HEADERS,
+          Authorization: credential.toString(),
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+            MOCK_IDP_UIAM_SHARED_SECRET,
+            credential
+          ),
+        };
+        const createResponse = await apiClient.post('internal/security/oauth/clients', {
+          headers: apiKeyHeaders,
+          responseType: 'json',
+          body: {
+            client_name: `scout-api-key-${Date.now()}`,
+            client_type: 'public',
+            redirect_uris: ['https://example.com/callback'],
+          },
+        });
+        const clientId = createResponse.body.id as string;
+
+        try {
+          expect(createResponse).toHaveStatusCode(200);
+          expect(clientId).toBeDefined();
+        } finally {
+          await apiClient.delete(
+            `internal/security/oauth/clients/${encodeURIComponent(clientId)}`,
+            { headers: apiKeyHeaders }
+          );
+          await apiClient.post('test_endpoints/uiam/api_keys/_invalidate', {
+            headers: { ...COMMON_UNSAFE_HEADERS },
+            responseType: 'json',
+            body: { id, authcScheme: 'ApiKey', credential: apiKey },
+          });
+        }
       }
     );
 

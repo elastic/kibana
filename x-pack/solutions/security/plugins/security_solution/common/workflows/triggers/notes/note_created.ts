@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { MAX_ID_LENGTH, MAX_USERNAME_LENGTH } from '../constants';
 import {
@@ -25,23 +25,25 @@ triggers:
   - type: security.noteCreated
 \`\`\``;
 
-const noteCreatedEventSchema = z.object({
-  noteId: z
-    .string()
-    .min(1)
-    .max(MAX_ID_LENGTH)
-    .meta({ description: NOTE_CREATED_SCHEMA_NOTE_ID_DESCRIPTION }),
-  createdBy: z
-    .string()
-    .min(1)
-    .max(MAX_USERNAME_LENGTH)
-    .meta({ description: NOTE_CREATED_SCHEMA_CREATED_BY_DESCRIPTION }),
-  documentId: z
-    .string()
-    .min(1)
-    .max(MAX_ID_LENGTH)
-    .meta({ description: NOTE_CREATED_SCHEMA_DOCUMENT_ID_DESCRIPTION }),
-});
+const noteCreatedEventSchema = lazySchema(() =>
+  z.object({
+    noteId: z
+      .string()
+      .min(1)
+      .max(MAX_ID_LENGTH)
+      .meta({ description: NOTE_CREATED_SCHEMA_NOTE_ID_DESCRIPTION }),
+    createdBy: z
+      .string()
+      .min(1)
+      .max(MAX_USERNAME_LENGTH)
+      .meta({ description: NOTE_CREATED_SCHEMA_CREATED_BY_DESCRIPTION }),
+    documentId: z
+      .string()
+      .min(1)
+      .max(MAX_ID_LENGTH)
+      .meta({ description: NOTE_CREATED_SCHEMA_DOCUMENT_ID_DESCRIPTION }),
+  })
+);
 
 export const noteCreatedTriggerDef: CommonTriggerDefinition = {
   id: NoteCreatedTriggerId,

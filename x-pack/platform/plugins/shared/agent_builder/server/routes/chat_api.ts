@@ -15,6 +15,7 @@ import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-
 import {
   agentBuilderDefaultAgentId,
   agentIdMaxLength,
+  CHAT_MESSAGE_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
   createNonInteractiveConfig,
 } from '@kbn/agent-builder-common';
@@ -48,9 +49,6 @@ export const chatPayloadSchema = conversePayloadSchema.extends({
     }
   ),
 });
-
-/** Upper bound of a `POST /api/chat/message` message, so a pasted CLI input cannot be unbounded. */
-export const CHAT_MESSAGE_MAX_LENGTH = 100_000;
 
 /**
  * Body of `POST /api/chat/message`. Deliberately minimal: `schema.object` rejects unknown keys, so

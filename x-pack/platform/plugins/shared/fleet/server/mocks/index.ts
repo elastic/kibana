@@ -164,6 +164,7 @@ export const createAppContextStartContractMock = (
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
     encryptedSavedObjectsSetup: encryptedSavedObjectsMock.createSetup({ canEncrypt: true }),
     savedObjects: mockedSavedObject,
+    isFipsEnabled: false,
     securityCoreStart: securityServiceMock.createStart(),
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
@@ -272,6 +273,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     getUpgradeDryRunDiff: jest.fn(),
     enrichPolicyWithDefaultsFromPackage: jest.fn(),
     findAllForAgentPolicy: jest.fn(),
+    getSummaryForAgentPolicies: jest.fn(),
     fetchAllItems: jest.fn((..._) => {
       return Promise.resolve({
         async *[Symbol.asyncIterator]() {

@@ -20,10 +20,11 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#sdh-security-team'
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false' # temporary: reducing noise in #sdh-security-team
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false' # temporary: reducing noise in #sdh-security-team
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
         SCOUT_REPORTER_ENABLED: 'true'
+        SCOUT_TEST_RUN_SCOPE: 'security-solution-on-merge'
       allow_rebuilds: true
       branch_configuration: main 9.5 9.4 8.19
       default_branch: main

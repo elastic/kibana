@@ -7,7 +7,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { CREATE_PROPOSAL_WORKFLOW_ID, getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/test_helpers';
 import type { Proposal, ProposalOrigin } from '@kbn/proposals-common';
@@ -67,10 +67,26 @@ const createInMemoryStorage = () => {
   return {
     documents,
     client: {
-      index: jest.fn(async ({ id, document }: { id: string; document: ProposalDocument }) => {
-        documents.set(id, { document, seqNo: (seqNo += 1) });
-        return { _id: id };
-      }),
+      index: jest.fn(
+        async ({
+          id,
+          document,
+          op_type,
+        }: {
+          id: string;
+          document: ProposalDocument;
+          op_type?: string;
+        }) => {
+          // Elasticsearch's own contract for `op_type: 'create'`, which a
+          // caller-chosen id rests on: an id that already exists is refused,
+          // never overwritten.
+          if (op_type === 'create' && documents.has(id)) {
+            throw Object.assign(new Error('version conflict'), { statusCode: 409 });
+          }
+          documents.set(id, { document, seqNo: (seqNo += 1) });
+          return { _id: id };
+        }
+      ),
       search: jest.fn(async ({ query }: { query: unknown }) => {
         const bool = (query as { bool?: { filter?: Clause[]; must_not?: Clause[] } })?.bool ?? {};
         const filter = bool.filter ?? [];
@@ -101,6 +117,8 @@ const FIXTURE_ORIGIN = 'alertzero' satisfies ProposalOrigin;
 
 export interface ProposalGateFixture {
   engine: WorkflowRunFixture;
+  /** The service the gate writes through, to read and decide as the routes do. */
+  service: ProposalsService;
   attachedProposalIds: () => string[];
   /** Every proposal written so far, in insertion order. */
   proposals: () => Array<Proposal & { id: string }>;
@@ -129,6 +147,12 @@ export interface ProposalGateFixture {
    * idle wake-up and the resume check both read.
    */
   gateTimeout: () => string | undefined;
+  /**
+   * Creates a proposal through the real service, outside the workflow under
+   * test: what another execution's gate has already done by the time this run
+   * starts.
+   */
+  seedProposal: (params: { id?: string }) => Promise<{ id: string }>;
   /** Runs the workflow to its first park (or to completion). */
   start: (inputs?: Record<string, unknown>) => Promise<void>;
   /** Answers the parked gate as a human would through a resume surface. */
@@ -153,6 +177,12 @@ export interface ProposalGateFixture {
    * caller-supplied deadline rather than the 72h default.
    */
   timeOutGate: (advanceMs?: number) => Promise<void>;
+  /**
+   * Ends the parked gate as a cancel does, a parent's timeout cascading into it
+   * for instance: the execution is marked cancelled and runs no handler, so
+   * nothing in the workflow settles the record.
+   */
+  cancelGate: () => void;
   /** Flips what `proposals.checkDecidePrivileges` reports. */
   setCanDecide: (canDecide: boolean) => void;
   /** Replaces what the action workflow declares, e.g. to make it `always-gate`. */
@@ -170,9 +200,30 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     // Supplies the action metadata `create` and `get` resolve. No `triggers`,
     // so the best-effort action-input validation is skipped.
     getWorkflow: jest.fn().mockResolvedValue({
-      definition: { consts: { actionMetadata: { name: 'Create rule', category: 'tune' } } },
+      definition: {
+        consts: {
+          actionMetadata: {
+            name: 'Create rule',
+            category: 'tune',
+            approvalPolicy: 'autonomy-dependent',
+          },
+        },
+      },
     }),
-    getWorkflowExecution: jest.fn(),
+    // Both report the fixture engine's own executions, so a read or a decision
+    // settles a proposal only when its gate really ended.
+    getWorkflowExecution: jest.fn(async (id: string) => {
+      const execution = engine.workflowExecutionRepositoryMock.workflowExecutions.get(id);
+      return execution ? { ...execution, stepExecutions: [] } : null;
+    }),
+    getWorkflowExecutionStatuses: jest.fn(async (ids: string[]) =>
+      ids.flatMap((id) => {
+        const execution = engine.workflowExecutionRepositoryMock.workflowExecutions.get(id);
+        return execution
+          ? [{ id, workflowId: execution.workflowId, status: execution.status }]
+          : [];
+      })
+    ),
     resumeWorkflowExecution: jest.fn(),
   };
 
@@ -222,6 +273,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
 
   return {
     engine,
+    service,
     attachedProposalIds: () => [...attachedProposalIds],
     proposals,
     onlyProposal: () => {
@@ -246,6 +298,19 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       const latest = parks[parks.length - 1];
       const dynamicTimeout = latest?.state?.dynamicTimeout;
       return typeof dynamicTimeout === 'string' ? dynamicTimeout : undefined;
+    },
+    seedProposal: async ({ id }) => {
+      const created = await service.create(
+        {
+          conversationId: 'conv-other',
+          comment: 'Seeded',
+          origin: FIXTURE_ORIGIN,
+          confidence: 'medium',
+          id,
+        },
+        { spaceId: 'fake_space_id', request: httpServerMock.createKibanaRequest() }
+      );
+      return { id: created.id };
     },
     start: async (inputs = {}) => {
       await engine.runWorkflow({
@@ -277,7 +342,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     /**
      * Goes through the real service, the same path the tool and HTTP route take,
      * so a test can park a gate, revise under it, resume, and assert the revision
-     * rather than the trigger's original input reaches `execute_action`.
+     * rather than the trigger's original input reaches `execute_as_approver`.
      */
     revise: async (overrides: { comment?: string; actionInput?: Record<string, unknown> }) => {
       const [live] = proposals().filter((proposal) => proposal.supersededBy === undefined);
@@ -296,6 +361,11 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       } finally {
         jest.useRealTimers();
       }
+    },
+    cancelGate: () => {
+      const executions = engine.workflowExecutionRepositoryMock.workflowExecutions;
+      const execution = executions.get('fake_workflow_execution_id')!;
+      executions.set(execution.id, { ...execution, status: ExecutionStatus.CANCELLED });
     },
     setCanDecide: (value) => {
       canDecide = value;

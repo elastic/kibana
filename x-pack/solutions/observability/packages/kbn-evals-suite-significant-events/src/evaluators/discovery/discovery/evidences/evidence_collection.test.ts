@@ -13,7 +13,7 @@ const detection = (ruleUuid: string): Omit<Detection, 'processed'> => ({
   detection_id: `${ruleUuid}-det`,
   rule_uuid: ruleUuid,
   rule_name: ruleUuid,
-  stream_name: 'logs',
+  source_id: 'logs',
   change_point_type: 'spike',
   p_value: 0,
 });
@@ -29,7 +29,7 @@ const detectionSignal = (
       : 'Found: checkout payment timeout to payment API. Impact: checkout requests fail.',
   verdict:
     evidence === 'found' ? 'confirms' : evidence === 'quiet' ? 'not_checked' : 'inconclusive',
-  stream_name: 'logs',
+  source_id: 'logs',
   ...(evidence === 'found'
     ? { evidence: { esql_query: 'FROM logs | LIMIT 1', result: 'found' as const } }
     : evidence === 'quiet'
@@ -53,6 +53,22 @@ const evaluate = (events: Partial<SignificantEvent>[], ruleUuids: string[]) =>
       significantEvents: events as SignificantEvent[],
     },
     expected: {} as never,
+    metadata: null,
+  });
+
+const evaluateWithExpected = (
+  events: Partial<SignificantEvent>[],
+  ruleUuids: string[],
+  expectedEvents: Partial<SignificantEvent>[]
+) =>
+  evidenceCollectionEvaluator.evaluate({
+    input: {
+      detections: ruleUuids.map(detection),
+    },
+    output: {
+      significantEvents: events as SignificantEvent[],
+    },
+    expected: { expected_significant_events: expectedEvents } as never,
     metadata: null,
   });
 
@@ -117,5 +133,68 @@ describe('evidenceCollectionEvaluator', () => {
 
     expect(result).toMatchObject({ score: 0, label: 'unexpected-rule-uuid' });
     expect(result.explanation).toContain('"unexpected"');
+  });
+  describe('with expected events declared', () => {
+    const expectedActive: Partial<SignificantEvent> = {
+      status: 'active',
+      signals: [detectionSignal('rule-a'), detectionSignal('rule-b')],
+    };
+
+    it('owes no signal for an input rule outside every expected active event', async () => {
+      const result = await evaluateWithExpected(
+        [{ signals: [detectionSignal('rule-a'), detectionSignal('rule-b')] }],
+        ['rule-a', 'rule-b', 'rule-benign'],
+        [expectedActive]
+      );
+
+      expect(result.score).toBe(1);
+    });
+
+    it('still penalizes a missing signal for a rule in the expected active event', async () => {
+      const result = await evaluateWithExpected(
+        [{ signals: [detectionSignal('rule-a')] }],
+        ['rule-a', 'rule-b', 'rule-benign'],
+        [expectedActive]
+      );
+
+      expect(result.score).toBe(0.5);
+      expect(result.explanation).toContain('missing signal for input rule "rule-b"');
+      expect(result.explanation).not.toContain('rule-benign');
+    });
+
+    it('does not treat an expected inactive event as one that owes signals', async () => {
+      const result = await evaluateWithExpected(
+        [{ signals: [detectionSignal('rule-a')] }],
+        ['rule-a', 'rule-quiet'],
+        [
+          { status: 'active', signals: [detectionSignal('rule-a')] },
+          { status: 'inactive', signals: [detectionSignal('rule-quiet', 'quiet')] },
+        ]
+      );
+
+      expect(result.score).toBe(1);
+    });
+
+    it('is unavailable when no expected event is active', async () => {
+      const result = await evaluateWithExpected(
+        [],
+        ['rule-benign'],
+        [{ status: 'inactive', signals: [detectionSignal('rule-benign', 'quiet')] }]
+      );
+
+      expect(result.score).toBeNull();
+      expect(result.label).toBe('unavailable');
+    });
+
+    it('still rejects a signal for a rule that is not in the input batch', async () => {
+      const result = await evaluateWithExpected(
+        [{ signals: [detectionSignal('rule-a'), detectionSignal('rule-stranger')] }],
+        ['rule-a', 'rule-b'],
+        [expectedActive]
+      );
+
+      expect(result.score).toBe(0);
+      expect(result.label).toBe('unexpected-rule-uuid');
+    });
   });
 });

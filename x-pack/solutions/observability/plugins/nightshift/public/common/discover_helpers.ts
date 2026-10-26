@@ -1,0 +1,46 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { esql } from '@elastic/esql';
+import type { TimeRange, TimeState } from '@kbn/es-query';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
+import { conditionToESQLFilterAst } from '@kbn/nightshift-shared';
+import type { Condition } from '@kbn/streamlang';
+
+export function buildDiscoverParams(esqlQuery: string, timeRange: TimeRange) {
+  return {
+    timeRange: {
+      from: timeRange.from,
+      to: timeRange.to,
+    },
+    query: {
+      esql: esqlQuery,
+    },
+    interval: 'auto',
+  };
+}
+
+/** Opens a feature in Discover over the source's view, so the source's own filters apply. */
+export function buildFeatureDiscoverParams(
+  source: Pick<NightshiftSource, 'view_name'>,
+  filter: Condition,
+  timeState: TimeState
+) {
+  const query = esql.from([source.view_name]).pipe`WHERE ${conditionToESQLFilterAst(filter)}`;
+  query.addSetCommand('unmapped_fields', 'LOAD');
+
+  return {
+    timeRange: {
+      from: timeState.timeRange.from,
+      to: timeState.timeRange.to,
+    },
+    query: {
+      esql: query.print('basic'),
+    },
+    interval: 'auto',
+  };
+}

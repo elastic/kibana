@@ -20,15 +20,13 @@ import {
   AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
   MIGRATION_STATE_FRESHNESS_BLOCK,
 } from './rules/content';
-import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
+import { RULE_MIGRATION_SKILLS } from './rules/skill_catalog';
 
 export const automaticMigrationRulesStopMigrationSkill = defineSkillType({
-  id: RULE_MIGRATION_SKILLS.STOP,
-  name: RULE_MIGRATION_SKILLS.STOP,
+  id: RULE_MIGRATION_SKILLS.STOP.id,
+  name: RULE_MIGRATION_SKILLS.STOP.id,
   basePath: 'skills/security/siem_migrations',
-  description: `Stop a running Automatic Rule Migration translation run.
-
-Resolves the migration by name and stops the run. Use when the user wants to pause a migration that is currently translating rules.`,
+  description: RULE_MIGRATION_SKILLS.STOP.description,
   content: `
 # Stop an Automatic Rule Migration
 
@@ -73,7 +71,7 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 ${AUTOMATIC_MIGRATION_NAVIGATION_BLOCK}
 
 To resume a stopped migration or check its progress, route the user to the
-**${RULE_MIGRATION_SKILLS.START}** or **${RULE_MIGRATION_SKILLS.SUMMARIZE}** sibling skill.
+**${RULE_MIGRATION_SKILLS.START.id}** or **${RULE_MIGRATION_SKILLS.SUMMARIZE.id}** sibling skill.
 `,
   getRegistryTools: () => [
     SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,

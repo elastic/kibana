@@ -1,9 +1,37 @@
 {
-  "sha1": "ebc43539294f11ef3e7f332b1ac33b32b6d03f97",
+  "sha1": "e0ba8a5372b5971642c1ee76d3fd7d2d33fb9371",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "56944439133b9fb-3fcfad399edc723",
+      "title": "Ingest receipts destination installs a hidden index template for the receipts stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/ingest_receipts_destination.spec.ts",
+        "line": 23,
+        "column": 18
+      }
+    },
+    {
+      "id": "56944439133b9fb-5ff487631e24bea",
+      "title": "Ingest receipts destination creates the hidden receipts data stream with retention",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/ingest_receipts_destination.spec.ts",
+        "line": 36,
+        "column": 13
+      }
+    },
     {
       "id": "8a7a94441188b62-53d61478147c06c",
       "title": "Observability onboarding flow ownership hides flow saved objects from generic saved object find",

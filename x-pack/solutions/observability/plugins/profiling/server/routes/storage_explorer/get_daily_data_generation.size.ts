@@ -7,6 +7,7 @@
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import type { ProfilingESClient } from '@kbn/profiling-data-access-plugin/server';
+import { universalProfilingEventsIndices } from './get_indices_stats';
 
 export function getEstimatedSizeForDocumentsInIndex({
   allIndicesStats,
@@ -43,7 +44,7 @@ export async function getDailyDataGenerationSize({
 }) {
   const response = await client.search('profiling_indices_size', {
     index: [
-      'profiling-events-*',
+      ...universalProfilingEventsIndices,
       'profiling-stacktraces',
       'profiling-hosts',
       'profiling-metrics',

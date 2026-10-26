@@ -21,6 +21,7 @@ const getStackManagementSectionLinks = async (
   coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
   coreStart.settings.client.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
   coreStart.settings.globalClient.get.mockReturnValue(alertingV2Enabled);
+  coreStart.settings.globalClient.isDeclared.mockReturnValue(true);
 
   const definition = createDefinition(coreStart, {
     streams: { navigationStatus$: of({ status: 'disabled' as const }) },

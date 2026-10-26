@@ -14,7 +14,7 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { DataSetWithName, DataSource } from '../../common';
-import { storybookDocLinksMock } from '../__stories__/doc_links_mock';
+import { docLinksMock } from '../doc_links_mock';
 import { CreateDatasetWizardPage } from './create_dataset_wizard_page';
 
 const dataSources: DataSource[] = [{ name: 'source-1', type: 's3', description: '', settings: {} }];
@@ -43,7 +43,7 @@ const WizardStory = ({ saveErrorMessage }: WizardStoryProps) => (
     <MemoryRouter initialEntries={[`/datasets/edit/${initialDataSet.name}`]}>
       <KibanaContextProvider
         services={{
-          docLinks: storybookDocLinksMock,
+          docLinks: docLinksMock,
           datasetsClient: {
             add: async () => {
               throw new Error(saveErrorMessage);

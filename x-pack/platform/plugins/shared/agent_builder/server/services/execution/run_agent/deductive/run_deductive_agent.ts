@@ -7,7 +7,12 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ConversationRound, MetadataFieldValue, RoundInput } from '@kbn/agent-builder-common';
-import { ChatEventType, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  ConversationRoundStatus,
+  EventActorType,
+  timelineExecutionId,
+} from '@kbn/agent-builder-common';
 import { createMessageEvent, createTextChunkEvent } from '@kbn/agent-builder-genai-utils/langchain';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import type { ConversationClient } from '../../../conversation';
@@ -165,6 +170,8 @@ export const runDeductiveAgent = async (
     conversationId,
     metadata,
     sessionId,
+    agentId: params.agentId,
+    executionId: timelineExecutionId(messageId, 0),
   });
 
   const endTime = new Date();
@@ -247,11 +254,15 @@ const persistDeductiveSessionId = async ({
   conversationId,
   metadata,
   sessionId,
+  agentId,
+  executionId,
 }: {
   context: AgentHandlerContext;
   conversationId: string | undefined;
   metadata: Record<string, MetadataFieldValue>;
   sessionId: string;
+  agentId: string | undefined;
+  executionId: string;
 }): Promise<void> => {
   if (!conversationId) {
     return;
@@ -269,7 +280,20 @@ const persistDeductiveSessionId = async ({
     const conversationClient = context.conversationClient as ConversationClient;
     await conversationClient.update(
       { id: conversationId, metadata: updatedMetadata },
-      { access: 'owner', retryOnConflict: true }
+      {
+        access: 'owner',
+        retryOnConflict: true,
+        source: 'execution',
+        // Attribute the change to the agent's run.
+        ...(agentId
+          ? {
+              activity: {
+                actor: { type: EventActorType.agent, id: agentId },
+                execution_id: executionId,
+              },
+            }
+          : {}),
+      }
     );
   } catch (error) {
     context.logger.warn(

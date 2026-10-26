@@ -36,6 +36,7 @@ export class StreamsApp {
   public readonly conditionEditorValueComboBox;
   public readonly processorTypeComboBox;
   public readonly dateProcessorFormatsComboBox;
+  public readonly stepsListSaveSettledToast;
   public readonly fieldTypeSuperSelect;
   public readonly previewDataGrid;
   public readonly schemaDataGrid;
@@ -75,6 +76,9 @@ export class StreamsApp {
   public readonly canvasContextMenu;
   public readonly canvasContextMenuTidyUp;
   public readonly canvasEmptyState;
+  public readonly canvasSearch;
+  public readonly canvasSearchNoMatches;
+  public readonly canvasDataStreamsNode;
   // Streams layout
   public readonly streamsSourcesTable;
   public readonly streamsAddSourceButton;
@@ -97,6 +101,10 @@ export class StreamsApp {
     this.dateProcessorFormatsComboBox = this.page.components.comboBox(
       'streamsAppDateProcessorFormatsComboBox'
     );
+    // Either terminal outcome of a steps list "Save changes" round-trip.
+    this.stepsListSaveSettledToast = this.page
+      .getByText("Stream's processors updated")
+      .or(this.page.getByText("An issue occurred saving processors' changes."));
     this.fieldTypeSuperSelect = this.page.components.superSelect('streamsAppFieldFormTypeSelect');
     this.previewDataGrid = this.page.components.dataGrid('streamsAppPreviewDataGrid');
     this.schemaDataGrid = this.page.components.dataGrid('streamsAppSchemaEditorFieldsTableLoaded');
@@ -144,6 +152,9 @@ export class StreamsApp {
     this.canvasContextMenu = this.page.testSubj.locator('streamsCanvasContextMenu');
     this.canvasContextMenuTidyUp = this.page.testSubj.locator('streamsCanvasContextMenuTidyUp');
     this.canvasEmptyState = this.page.testSubj.locator('streamsCanvasEmptyState');
+    this.canvasSearch = this.page.testSubj.locator('streamsCanvasSearch');
+    this.canvasSearchNoMatches = this.page.testSubj.locator('streamsCanvasSearchNoMatches');
+    this.canvasDataStreamsNode = this.page.testSubj.locator('streamsCanvasDataStreamsNode');
     // Streams layout locators
     this.streamsSourcesTable = this.page.testSubj.locator('streamsSourcesTable');
     this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
@@ -207,6 +218,20 @@ export class StreamsApp {
     await this.getStreamsLayoutTab(tabName).click();
   }
 
+  /** Opens the map with its search pre-filled from the URL. */
+  async gotoCanvasSearch(query: string) {
+    await this.page.gotoApp('streams/new-experience/map', {
+      params: { mapState: `(flyoutName:!n,flyoutTab:!n,query:'${query}')` },
+    });
+  }
+
+  getDestinationShowOnCanvasButton(destinationName: string) {
+    return this.streamsDestinationsTable
+      .getByRole('row')
+      .filter({ hasText: destinationName })
+      .getByTestId('streamsShowOnCanvasAction');
+  }
+
   // Canvas utility methods
   getCanvasSourceNode(streamName: string) {
     return this.page.testSubj.locator('streamsCanvasSourceNode').filter({ hasText: streamName });
@@ -216,10 +241,6 @@ export class StreamsApp {
     return this.page.testSubj
       .locator('streamsCanvasDestinationNode')
       .filter({ hasText: streamName });
-  }
-
-  getCanvasProcessingButton(streamName: string) {
-    return this.getCanvasDestinationNode(streamName).getByTestId('streamsCanvasProcessingButton');
   }
 
   getCanvasNodeByAriaLabel(ariaLabel: string) {
@@ -509,10 +530,7 @@ export class StreamsApp {
 
   // Routing-specific utility methods
   async clickCreateRoutingRule() {
-    const button = this.page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
-    await expect(button).toBeVisible();
-    // Locator.click() can get flaky here due to rapid re-renders; use a direct DOM click.
-    await button.evaluate((el) => (el as HTMLElement).click());
+    await this.page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton').click();
   }
 
   async fillRoutingRuleName(name: string) {
@@ -892,25 +910,18 @@ export class StreamsApp {
   }
 
   async fillGrokPatternInput(value: string) {
-    // Clean previous content
-    await this.page.getByTestId('streamsAppPatternExpression').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
+      'streamsAppPatternExpression',
+      value
+    );
   }
 
   async fillGrokPatternDefinitionsInput(value: string) {
     await this.page.getByRole('button', { name: 'Advanced settings' }).click();
-    // Clean previous content
-    await this.page.getByTestId('streamsAppPatternDefinitionsEditor').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page
-      .getByTestId('streamsAppPatternDefinitionsEditor')
-      .getByRole('textbox')
-      .fill(value);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
+      'streamsAppPatternDefinitionsEditor',
+      value
+    );
   }
 
   async fillDateProcessorSourceFieldInput(value: string) {
@@ -942,15 +953,10 @@ export class StreamsApp {
   }
 
   async fillCustomSamplesEditor(value: string) {
-    // Clean previous content
-    await this.page.getByTestId('streamsAppCustomSamplesDataSourceEditor').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page
-      .getByTestId('streamsAppCustomSamplesDataSourceEditor')
-      .getByRole('textbox')
-      .fill(value);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
+      'streamsAppCustomSamplesDataSourceEditor',
+      value
+    );
   }
 
   async fillCondition(field: string, operator: string, value: string) {
@@ -983,8 +989,29 @@ export class StreamsApp {
     await expect.poll(async () => readySignal.count(), { timeout: 60_000 }).toBeGreaterThan(0);
   }
 
-  async saveStepsListChanges() {
+  async clickSaveStepsListChanges() {
+    // Clearing the toast list first keeps the Save button clickable and guarantees that a
+    // toast awaited after the click belongs to this save rather than a previous one.
+    await this.waitForEmptyGlobalToastList();
     await this.page.getByRole('button', { name: 'Save changes' }).click();
+  }
+
+  /**
+   * Waits for the steps list save round-trip to reach a terminal state. The success and
+   * failure toasts both fire on the upsert actor settling, i.e. strictly after the
+   * `_ingest` request has resolved and released the deployment-wide streams lock.
+   */
+  async waitForStepsListSaveSettled(timeout: number = 30_000) {
+    // `stepsListSaveSettledToast` matches either outcome, so avoid strict-locator
+    // assertions like `toBeVisible()` which require a single match.
+    await expect
+      .poll(async () => this.stepsListSaveSettledToast.count(), { timeout })
+      .toBeGreaterThan(0);
+  }
+
+  async saveStepsListChanges() {
+    await this.clickSaveStepsListChanges();
+    await this.waitForStepsListSaveSettled();
   }
 
   private async getStepListItems(testId: string, expectItems: boolean = true) {

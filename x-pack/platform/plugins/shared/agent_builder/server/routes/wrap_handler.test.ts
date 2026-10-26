@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createInternalError } from '@kbn/agent-builder-common';
@@ -133,6 +134,43 @@ describe('getHandlerWrapper', () => {
   it('falls back to 500 for an inference error with status outside 4xx/5xx', async () => {
     const handler = wrapHandler(async () => {
       throw createInferenceProviderError('not really an error', { status: 200 });
+    });
+
+    const result: any = await handler(createCtx(), req, kibanaResponseFactory);
+
+    expect(result.status).toBe(500);
+  });
+
+  it('propagates the status of a 4xx Boom error', async () => {
+    const message =
+      'Unable to grant an API key for service account [elastic/fleet-server]: refused';
+    const handler = wrapHandler(async () => {
+      throw Boom.badRequest(message);
+    });
+
+    const result: any = await handler(createCtx(), req, kibanaResponseFactory);
+
+    expect(result.status).toBe(400);
+    expect(result.payload).toEqual({ message });
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('forwards the headers of a 4xx Boom error', async () => {
+    const boom = Boom.tooManyRequests('slow down');
+    boom.output.headers['Retry-After'] = '10';
+    const handler = wrapHandler(async () => {
+      throw boom;
+    });
+
+    const result: any = await handler(createCtx(), req, kibanaResponseFactory);
+
+    expect(result.status).toBe(429);
+    expect(result.options.headers).toEqual({ 'Retry-After': '10' });
+  });
+
+  it('falls back to 500 for a 5xx Boom error', async () => {
+    const handler = wrapHandler(async () => {
+      throw Boom.serverUnavailable('unavailable');
     });
 
     const result: any = await handler(createCtx(), req, kibanaResponseFactory);

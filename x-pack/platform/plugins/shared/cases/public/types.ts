@@ -59,15 +59,7 @@ import type {
   CasesBulkGetResponse,
   CasesMetricsRequest,
 } from '../common/types/api';
-import type {
-  AlertAttachmentPayload,
-  UserCommentAttachmentPayload,
-  PersistableStateAttachmentPayload,
-  ExternalReferenceNoSOAttachmentPayload,
-  ExternalReferenceSOAttachmentPayload,
-  EventAttachmentPayload,
-  UnifiedAttachmentPayload,
-} from '../common/types/domain';
+import type { UnifiedAttachmentPayload } from '../common/types/domain';
 import type { DashboardAttachmentPayload } from '../common/types/domain_zod/attachment/dashboard/v2';
 import type { MapAttachmentPayload } from '../common/types/domain_zod/attachment/map/v2';
 import type { DiscoverSessionAttachmentPayload } from '../common/types/domain_zod/attachment/saved_object/v2';
@@ -196,12 +188,6 @@ export interface CasesPublicStart {
 }
 
 export type SupportedCaseAttachment =
-  | AlertAttachmentPayload
-  | EventAttachmentPayload
-  | UserCommentAttachmentPayload
-  | PersistableStateAttachmentPayload
-  | ExternalReferenceNoSOAttachmentPayload
-  | ExternalReferenceSOAttachmentPayload
   | UnifiedAttachmentPayload
   // Born-unified, SO-backed reference attachments. Listed explicitly so the
   // SO attach hook can build typed payloads without casting through the

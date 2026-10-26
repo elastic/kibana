@@ -29,35 +29,6 @@ export const globalLayoutStyles = () => {
   `;
 };
 
-/**
- * Framed appearance background styles with gradient.
- * Only applied when appearance is 'framed'.
- */
-export const framedAppearanceBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
-  const { colorMode } = euiThemeContext;
-  const isDarkMode = colorMode === 'DARK';
-
-  // Dark mode layered background: radial light source in center, blue tint, dark gradient base
-  const darkModeBackground = [
-    'radial-gradient(1200px 800px at 50% 50%, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.04))',
-    'linear-gradient(rgba(36, 61, 111, 0.1), rgba(36, 61, 111, 0))',
-    'linear-gradient(#07101F 0%, #050D1A 50%, #040A15 100%)',
-  ].join(', ');
-
-  // Light mode layered background: subtle blue glow at top center, light gradient base
-  const lightModeBackground = [
-    'radial-gradient(1200px 800px at 50% 0%, rgba(36, 61, 111, 0.04), rgba(36, 61, 111, 0))',
-    'linear-gradient(#ECF1F9, #E8EDF6)',
-  ].join(', ');
-
-  return css`
-    html {
-      background: ${isDarkMode ? darkModeBackground : lightModeBackground};
-      background-repeat: no-repeat;
-    }
-  `;
-};
-
 // temporary hacks that need to be removed after better flyout and global sidenav customization support in EUI
 // https://github.com/elastic/eui/issues/8820
 const globalTempHackStyles = (
@@ -154,15 +125,8 @@ export interface GridLayoutGlobalStylesProps {
 
 export const GridLayoutGlobalStyles = ({ appearance = 'plain' }: GridLayoutGlobalStylesProps) => {
   const euiTheme = useEuiTheme();
-  const isFramedAppearance = appearance === 'framed';
 
   return (
-    <Global
-      styles={[
-        globalLayoutStyles(),
-        globalTempHackStyles(euiTheme.euiTheme, appearance),
-        isFramedAppearance && framedAppearanceBackgroundStyles(euiTheme),
-      ]}
-    />
+    <Global styles={[globalLayoutStyles(), globalTempHackStyles(euiTheme.euiTheme, appearance)]} />
   );
 };

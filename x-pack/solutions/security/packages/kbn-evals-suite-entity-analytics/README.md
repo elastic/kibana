@@ -134,7 +134,7 @@ Prompt-to-spec mapping showing which strategy doc prompts are covered by which s
 | V2        | Leads skill routing (`list_leads`, `generate_leads`, `dismiss_lead`)                                                                   | `v2/entity_analytics_leads.spec.ts`                                            |
 | V2        | `set_asset_criticality` tool selection, argument extraction, confirmation gating, unassign path                                        | `v2/set_asset_criticality.spec.ts`                                             |
 | V2        | `list_watchlists` routing (discovery, membership, and `get_entity` cross-checks)                                                       | `v2/list_watchlists.spec.ts`                                                   |
-| V2        | `manage-watchlists` skill routing (create/update/delete, add/remove entities, query-then-add flows)                                    | `v2/manage_watchlists.spec.ts`                                                 |
+| V2        | `manage-watchlists` skill routing (create/update/delete, add/remove entities, query-then-add flows, rule-based/standing-query sources) | `v2/manage_watchlists.spec.ts`                                                 |
 
 ## Adding New Tests
 

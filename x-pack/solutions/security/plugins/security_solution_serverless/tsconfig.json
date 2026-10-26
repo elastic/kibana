@@ -58,5 +58,6 @@
     "@kbn/workflows-management-plugin",
     "@kbn/navigation-plugin",
     "@kbn/scout-security",
+    "@kbn/deeplinks-security",
   ]
 }

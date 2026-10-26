@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { IUiSettingsClient } from '@kbn/core/server';
@@ -12,11 +13,16 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
-import type { AttachmentClient } from '@kbn/streams-plugin/server';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicatorClient } from '../../lib/knowledge_indicators';
 import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/types';
+import type { SignificantEventsServer } from '../../types';
+import type { SourceToolDeps } from '../tools/sources/source_tool_deps';
 
 /**
  * Subset of RouteHandlerScopedClients that tools actually use.
@@ -25,7 +31,7 @@ import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/t
  */
 type ToolScopedClients = Pick<
   RouteHandlerScopedClients,
-  'scopedClusterClient' | 'getKnowledgeIndicatorClient' | 'uiSettingsClient' | 'attachmentClient'
+  'scopedClusterClient' | 'getKnowledgeIndicatorClient' | 'uiSettingsClient'
 >;
 
 export const createMockGetScopedClients = () => {
@@ -37,15 +43,11 @@ export const createMockGetScopedClients = () => {
     get: jest.fn().mockResolvedValue(true),
   };
 
-  const kiClient: jest.Mocked<Pick<KnowledgeIndicatorClient, 'getStreamToQueryLinksMap'>> = {
-    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({}),
+  const kiClient: jest.Mocked<Pick<KnowledgeIndicatorClient, 'getSourceToQueryLinksMap'>> = {
+    getSourceToQueryLinksMap: jest.fn().mockResolvedValue({}),
   };
 
   const getKnowledgeIndicatorClient = jest.fn().mockResolvedValue(kiClient);
-
-  const attachmentClient: jest.Mocked<Pick<AttachmentClient, 'getAttachments'>> = {
-    getAttachments: jest.fn().mockResolvedValue([]),
-  };
 
   // Satisfies ensures property names stay in sync with RouteHandlerScopedClients.
   // If a property is renamed or removed from the interface, this will fail.
@@ -55,7 +57,6 @@ export const createMockGetScopedClients = () => {
     scopedClusterClient,
     getKnowledgeIndicatorClient,
     uiSettingsClient,
-    attachmentClient,
   };
 
   const getScopedClients = jest
@@ -67,10 +68,37 @@ export const createMockGetScopedClients = () => {
     esClient,
     scopedClusterClient,
     getKnowledgeIndicatorClient,
-    attachmentClient,
     uiSettingsClient,
   };
 };
+
+/** A source whose id equals its slug, so tool tests can keep the old stream-name strings. */
+export const sourceWithSlug = (
+  slug: string,
+  overrides: Partial<NightshiftSource> = {}
+): NightshiftSource => ({
+  id: slug,
+  title: slug,
+  tags: [],
+  esql: '',
+  type: 'unknown',
+  slug,
+  view_name: `$.nightshift.sources.default.${slug}`,
+  enabled: true,
+  created_by: 'user',
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_at: '2026-01-01T00:00:00.000Z',
+  esql_updated_at: '2026-01-01T00:00:00.000Z',
+  ...overrides,
+});
+
+export const mockSourcesClient = (slugs: readonly string[]) => ({
+  list: jest.fn().mockResolvedValue({
+    sources: slugs.map((slug) => sourceWithSlug(slug)),
+    total: slugs.length,
+  }),
+  assertReadable: jest.fn().mockResolvedValue(undefined),
+});
 
 export const createMockRequest = () => httpServerMock.createKibanaRequest();
 
@@ -95,3 +123,51 @@ export const createMockToolContext = (): ToolHandlerContext => {
   toolHandlerContext.modelProvider = modelProvider;
   return toolHandlerContext;
 };
+
+/** Nightshift feature privilege of a role: `all` always includes `read`, so manage never comes without read. */
+export type NightshiftFeaturePrivilege = 'none' | 'read' | 'all';
+
+const API_PRIVILEGES_BY_FEATURE_PRIVILEGE: Record<NightshiftFeaturePrivilege, readonly string[]> = {
+  none: [],
+  read: [NIGHTSHIFT_API_PRIVILEGES.read],
+  all: [NIGHTSHIFT_API_PRIVILEGES.read, NIGHTSHIFT_API_PRIVILEGES.manage],
+};
+
+/**
+ * A server whose Kibana privilege check behaves like a user with `featurePrivilege` on Nightshift:
+ * a check passes only when every requested API privilege is granted by it. Only `security` is
+ * real, so mock any other server dependency (e.g. `assertSignificantEventsAccess`).
+ */
+export const createSignificantEventsServer = ({
+  featurePrivilege,
+}: {
+  featurePrivilege: NightshiftFeaturePrivilege;
+}): SignificantEventsServer => {
+  const security = securityMock.createStart();
+  const toApiAction = (privilege: string) => `api:${privilege}`;
+  jest.spyOn(security.authz.actions.api, 'get').mockImplementation(toApiAction);
+
+  const grantedActions = new Set(
+    API_PRIVILEGES_BY_FEATURE_PRIVILEGE[featurePrivilege].map(toApiAction)
+  );
+  security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+    jest.fn(async ({ kibana = [] }: { kibana?: string | string[] }) => ({
+      hasAllRequested: [kibana].flat().every((action) => grantedActions.has(action)),
+    }))
+  );
+  const server: Pick<SignificantEventsServer, 'security'> = { security };
+  return server as SignificantEventsServer;
+};
+
+/** The dependencies every source tool takes, with the given sources client behind the scoped clients. */
+export const createSourceToolDeps = ({
+  featurePrivilege,
+  sourcesClient,
+}: {
+  featurePrivilege: NightshiftFeaturePrivilege;
+  sourcesClient: Partial<SourcesClient>;
+}): SourceToolDeps => ({
+  getScopedClients: jest.fn().mockResolvedValue({ licensing: {}, sourcesClient }),
+  server: createSignificantEventsServer({ featurePrivilege }),
+  logger: loggingSystemMock.createLogger(),
+});

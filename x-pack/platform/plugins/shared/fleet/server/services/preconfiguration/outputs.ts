@@ -9,7 +9,8 @@ import crypto from 'node:crypto';
 import utils from 'node:util';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { isEqual } from 'lodash';
+import { get, isEqual } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { stringify } from 'yaml';
 import pMap from 'p-map';
 
@@ -45,6 +46,10 @@ import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
 import { checkOtlpOutputAllowed } from '../outputs/helpers';
+import { checkKafkaAuthMethodAllowed } from '../outputs/kafka_auth_gate';
+import { KAFKA_AUTH_METHODS, usesKafkaAuth } from '../outputs/kafka_auth';
+import type { KafkaAuthMethod } from '../outputs/kafka_auth';
+import { getKafkaSecretLeaves } from '../secrets/outputs';
 import {
   isAgentlessEnabled,
   isManagedBulkEnabled,
@@ -228,10 +233,35 @@ export async function createOrUpdatePreconfiguredOutputs(
     ? await checkOtlpOutputAllowed(esClient, soClient)
     : { result: true as const };
 
+  // Same for the Kafka outputs using an authentication method that has to be allowed. The result
+  // can depend on the output (e.g. a Kerberos password needs the secrets storage), so each distinct
+  // check is made once, when the first output needs it.
+  const kafkaAuthChecks = new Map<string, ReturnType<typeof checkKafkaAuthMethodAllowed>>();
+  const checkKafkaAuthMethod = (method: KafkaAuthMethod, output: PreconfiguredOutput) => {
+    const key =
+      method === 'kerberos' ? `${method}:${(output as KafkaOutput).kerberos?.auth_type}` : method;
+    if (!kafkaAuthChecks.has(key)) {
+      kafkaAuthChecks.set(
+        key,
+        checkKafkaAuthMethodAllowed(method, esClient, soClient, output as KafkaOutput)
+      );
+    }
+    return kafkaAuthChecks.get(key)!;
+  };
+
   const updateOrConfigureOutput = async (output: PreconfiguredOutput) => {
     if (isOtlpOutput(output) && !otlpCheck.result) {
       logger.warn(`Skipping preconfigured OTLP output ${output.id}: ${otlpCheck.error}`);
       return;
+    }
+
+    for (const method of KAFKA_AUTH_METHODS) {
+      if (!usesKafkaAuth(method, output)) continue;
+      const { result, error } = await checkKafkaAuthMethod(method, output);
+      if (!result) {
+        logger.warn(`Skipping preconfigured Kafka output ${output.id}: ${error}`);
+        return;
+      }
     }
 
     const existingOutput = existingOutputs.find((o) => o.id === output.id);
@@ -328,11 +358,10 @@ async function hashSecrets(output: PreconfiguredOutput) {
   if (output.type === 'kafka') {
     const kafkaOutput = output as KafkaOutput;
 
-    if (typeof kafkaOutput.secrets?.password === 'string') {
-      const password = await hashSecret(kafkaOutput.secrets?.password);
-      secrets = {
-        password,
-      };
+    for (const { path, value } of getKafkaSecretLeaves(kafkaOutput.secrets)) {
+      if (typeof value === 'string') {
+        set(secrets, path, await hashSecret(value));
+      }
     }
   }
 
@@ -518,10 +547,17 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       return false;
     }
 
-    const passwordHashIsDifferent = await isSecretDifferent(
-      preconfiguredOutput.secrets?.password,
-      existingOutput.secrets?.password
+    // every secret of the preconfigured and of the existing output, whatever its depth
+    const secretPaths = new Set([
+      ...getKafkaSecretLeaves(preconfiguredOutput.secrets).map(({ path }) => path),
+      ...getKafkaSecretLeaves(existingOutput.secrets).map(({ path }) => path),
+    ]);
+    const secretsDifferences = await Promise.all(
+      [...secretPaths].map((path) =>
+        isSecretDifferent(get(preconfiguredOutput.secrets, path), get(existingOutput.secrets, path))
+      )
     );
+    const secretsAreDifferent = secretsDifferences.some(Boolean);
 
     return (
       isDifferent(existingOutput.client_id, preconfiguredOutput.client_id) ||
@@ -534,6 +570,8 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       isDifferent(existingOutput.username, preconfiguredOutput.username) ||
       isDifferent(existingOutput.password, preconfiguredOutput.password) ||
       isDifferent(existingOutput.sasl, preconfiguredOutput.sasl) ||
+      isDifferent(existingOutput.oauth2, preconfiguredOutput.oauth2) ||
+      isDifferent(existingOutput.kerberos, preconfiguredOutput.kerberos) ||
       isDifferent(existingOutput.partition, preconfiguredOutput.partition) ||
       isDifferent(existingOutput.random, preconfiguredOutput.random) ||
       isDifferent(existingOutput.round_robin, preconfiguredOutput.round_robin) ||
@@ -547,7 +585,7 @@ async function isPreconfiguredOutputDifferentFromCurrent(
         existingOutput.write_to_logs_streams,
         preconfiguredOutput.write_to_logs_streams
       ) ||
-      passwordHashIsDifferent
+      secretsAreDifferent
     );
   };
 

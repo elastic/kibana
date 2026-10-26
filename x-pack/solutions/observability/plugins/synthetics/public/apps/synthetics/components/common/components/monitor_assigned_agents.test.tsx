@@ -37,9 +37,10 @@ const assignment = (
 ): MonitorLocationAssignment => ({
   locationId: 'loc-1',
   locationLabel: 'Local Docker PL',
-  isAgentSharding: false,
+  isShardingActive: false,
   agentPolicyId: 'policy-1',
   agentPolicyName: 'Policy One',
+  hasCompleteAgent: true,
   agents: [
     { agentId: 'agent-1', host: 'host-a', healthy: true, agentVersion: '9.6.0', enrolled: true },
     { agentId: 'agent-2', host: 'host-b', healthy: false, agentVersion: '9.5.0', enrolled: true },
@@ -135,7 +136,7 @@ describe('MonitorAssignedAgents', () => {
     mockUseAssignments.mockReturnValue({
       assignments: [
         assignment({
-          isAgentSharding: true,
+          isShardingActive: true,
           agents: [
             {
               agentId: 'agent-2',
@@ -165,7 +166,7 @@ describe('MonitorAssignedAgents', () => {
 
   it('shows an unassigned state when a sharded location has no pinned agent yet', () => {
     mockUseAssignments.mockReturnValue({
-      assignments: [assignment({ isAgentSharding: true, agents: [] })],
+      assignments: [assignment({ isShardingActive: true, agents: [] })],
       loading: false,
       error: false,
     });
@@ -185,7 +186,7 @@ describe('MonitorAssignedAgents', () => {
     mockUseAssignments.mockReturnValue({
       assignments: [
         assignment({
-          isAgentSharding: true,
+          isShardingActive: true,
           agents: [
             {
               agentId: 'gone-agent',
@@ -211,5 +212,28 @@ describe('MonitorAssignedAgents', () => {
     expect(screen.getByText('gone-agent')).toBeInTheDocument();
     expect(screen.queryByText(/not yet assigned/i)).not.toBeInTheDocument();
     expect(screen.getByTestId('syntheticsAssignedAgentMissingFromFleet')).toBeInTheDocument();
+  });
+
+  it('warns when a browser monitor has no elastic-agent-complete agent', () => {
+    mockUseAssignments.mockReturnValue({
+      assignments: [assignment({ isShardingActive: true, agents: [], hasCompleteAgent: false })],
+      loading: false,
+      error: false,
+    });
+
+    render(
+      <MonitorAssignedAgents
+        configId="mon-1"
+        isBrowserMonitor
+        monitorLocations={[{ id: 'loc-1', label: 'Local Docker PL', isServiceManaged: false }]}
+      />
+    );
+
+    expect(screen.getByTestId('syntheticsBrowserCompleteAgentCallout')).toHaveTextContent(
+      'Local Docker PL'
+    );
+    expect(screen.getByTestId('syntheticsBrowserCompleteAgentCallout')).toHaveTextContent(
+      'elastic-agent-complete'
+    );
   });
 });

@@ -33,6 +33,11 @@ export const OUTPUT_MESSAGES = Object.freeze({
       defaultMessage: `{command} failed`,
       values: { command },
     }),
+  wasCanceled: (command: string) =>
+    i18n.translate('xpack.securitySolution.responseActionsList.list.item.wasCanceled', {
+      defaultMessage: `{command} was canceled`,
+      values: { command },
+    }),
   expandSection: {
     placedAt: i18n.translate(
       'xpack.securitySolution.responseActionsList.list.item.expandSection.placedAt',

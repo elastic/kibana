@@ -84,7 +84,12 @@ Object {
     "environments": Object {
       "terms": Object {
         "field": "service.environment",
-        "missing": undefined,
+        "size": 50,
+      },
+    },
+    "otelEnvironments": Object {
+      "terms": Object {
+        "field": "resource.attributes.deployment.environment.name",
         "size": 50,
       },
     },

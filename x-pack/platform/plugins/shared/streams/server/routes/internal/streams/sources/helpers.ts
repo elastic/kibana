@@ -15,8 +15,7 @@ export type ManagedSourceTypeSlug = (typeof MANAGED_SOURCE_TYPE_SLUGS)[number];
 export type DirectSourceTypeSlug = (typeof DIRECT_SOURCE_TYPE_SLUGS)[number];
 export type SourceTypeSlug = ManagedSourceTypeSlug | DirectSourceTypeSlug;
 
-// TODO: Temporary until we can use "ingest" https://github.com/elastic/hosted-otel-collector/pull/3729
-export const SOURCE_API_KEY_APPLICATION = 'apm';
+export const SOURCE_API_KEY_APPLICATION = 'streams';
 export const SOURCE_API_KEY_APPLICATION_PRIVILEGE = 'write';
 export const SOURCE_API_KEY_CLUSTER_PRIVILEGE = 'manage_own_api_key';
 
@@ -119,9 +118,12 @@ export const interpretSourceApiKeyPrivileges = ({
 export const isOwnedBySource = ({
   metadata,
   sourceResource,
+  unitId,
 }: {
   metadata: Record<string, unknown> | undefined;
   sourceResource: string;
+  unitId?: string;
 }): boolean =>
   metadata?.managed_by === STREAMS_SOURCES_MANAGED_BY &&
-  metadata?.source_resource === sourceResource;
+  metadata?.source_resource === sourceResource &&
+  (unitId === undefined || metadata?.streams_unit_id === unitId);

@@ -14,6 +14,8 @@ import {
   MAX_METRICS_TAB_STATE_STRING_LENGTH,
   METRICS_GRID_HISTOGRAM_PERCENTILES,
   METRICS_GRID_SIMPLE_AGGREGATIONS,
+  METRICS_GRID_SORT_DIRECTIONS,
+  METRICS_GRID_SORT_FIELDS,
 } from '@kbn/discover-session-constants';
 
 const simpleAggregationSchema = z.enum(METRICS_GRID_SIMPLE_AGGREGATIONS);
@@ -42,6 +44,18 @@ export const discoverSessionApiMetricsTabTypeStateSchema = z
     }),
     histogram_percentile: z.enum(METRICS_GRID_HISTOGRAM_PERCENTILES).meta({
       description: 'Percentile displayed for histogram metric fields.',
+    }),
+    grid_sort_field: z
+      .enum(METRICS_GRID_SORT_FIELDS)
+      .optional()
+      .meta({
+        description:
+          'Criterion used to order metrics in the metrics grid. ' +
+          '`recency` orders by the metrics the viewing user explored most recently in their own browser. ' +
+          'If omitted, metrics are ordered alphabetically.',
+      }),
+    grid_sort_direction: z.enum(METRICS_GRID_SORT_DIRECTIONS).optional().meta({
+      description: 'Direction of the metrics grid order. If omitted, defaults to ascending.',
     }),
   })
   .strict();

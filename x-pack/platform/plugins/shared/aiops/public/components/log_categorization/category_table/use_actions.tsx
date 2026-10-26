@@ -7,6 +7,8 @@
 
 import { useCallback } from 'react';
 
+import type { AggregateQuery, Query } from '@kbn/es-query';
+
 import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 
 import { QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
@@ -32,7 +34,8 @@ export function useActions(
   timefilter: TimefilterContract,
   onAddFilter?: (values: Filter, alias?: string) => void,
   additionalFilter?: CategorizationAdditionalFilter,
-  onClose: () => void = () => {}
+  onClose: () => void = () => {},
+  query?: Query | AggregateQuery
 ): UseActions {
   const openInDiscover = useOpenInDiscover(
     dataViewId,
@@ -41,7 +44,9 @@ export function useActions(
     aiopsListState,
     timefilter,
     onAddFilter,
-    additionalFilter
+    additionalFilter,
+    onClose,
+    query
   );
 
   const { getLabels: getOpenInDiscoverLabels, openFunction: openInDiscoverFunction } =

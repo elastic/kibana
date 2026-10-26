@@ -11,6 +11,8 @@ import { getAgentsByKuery } from '../agents';
 import { appContextService } from '../app_context';
 import { packagePolicyService } from '../package_policy';
 
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services/version_specific_policies_utils';
+
 import { updateAgentPolicySpaces } from './agent_policy';
 import { isSpaceAwarenessEnabled } from './helpers';
 import { validatePackagePoliciesUniqueNameAcrossSpaces } from './policy_namespaces';
@@ -146,6 +148,20 @@ describe('updateAgentPolicySpaces', () => {
         },
       },
     ]);
+  });
+
+  it('moves the agents of the policy by their base policy id, so agents on #sentinel are moved too', async () => {
+    await updateAgentPolicySpaces({
+      agentPolicy: { id: 'policy1', name: 'Policy 1', space_ids: ['test'] },
+      currentSpaceId: 'default',
+      authorizedSpaces: ['test', 'default'],
+    });
+
+    expect(getAgentsByKuery).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ kuery: buildPolicyBaseIdWithFallbackKuery('policy1') })
+    );
   });
 
   it('throw when trying to change space to a policy with reusable package policies', async () => {

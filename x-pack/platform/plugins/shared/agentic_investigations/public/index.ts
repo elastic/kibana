@@ -39,6 +39,12 @@ export {
 } from './investigations/hooks/use_investigations_api';
 
 export { escalationQueryKeys } from './escalations/query_keys';
+export { impactPillsQueryKeys } from './impact/query_keys';
+
+export {
+  useEscalationImpactPills,
+  useProposalImpactPills,
+} from './impact/hooks/use_impact_pills_api';
 
 export {
   useCurrentUserProfile,
@@ -66,3 +72,15 @@ export {
   LazyConnectedCloseInvestigationModal,
   LazyConnectedEscalationModal,
 } from './conversation_templates/shared/lazy_connected_components';
+
+export { LazyEvidenceView, type EvidenceViewProps } from './evidence';
+export {
+  InvestigationCard,
+  type InvestigationCardProps,
+} from './conversation_templates/templates/investigation/card';
+export {
+  registerInvestigationAttachmentRenderer,
+  type InvestigationAttachmentContentProps,
+  type InvestigationAttachmentRenderer,
+  type InvestigationAttachmentVariant,
+} from './investigation_attachments';

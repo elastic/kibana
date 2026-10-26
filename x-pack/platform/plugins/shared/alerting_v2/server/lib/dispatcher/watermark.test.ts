@@ -6,8 +6,8 @@
  */
 
 import { computeNextWatermark } from './watermark';
-import { createAlertEpisode, createDispatcherPipelineInput } from './fixtures/test_utils';
-import { EpisodeScan } from './state';
+import { createAlert, createDispatcherPipelineInput } from './fixtures/test_utils';
+import { AlertScan } from './state';
 import type { DispatcherPipelineResult } from './types';
 
 const BASE_INPUT = createDispatcherPipelineInput({
@@ -23,21 +23,21 @@ const makeResult = (overrides: Partial<DispatcherPipelineResult>): DispatcherPip
 });
 
 describe('computeNextWatermark', () => {
-  describe('aborted before StoreActionsStep (recordedEpisodes undefined)', () => {
+  describe('aborted before StoreActionsStep (recordedAlerts undefined)', () => {
     it('does not advance the watermark', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
           completed: false,
           haltReason: 'aborted',
-          finalState: { input: BASE_INPUT }, // recordedEpisodes undefined
+          finalState: { input: BASE_INPUT }, // recordedAlerts undefined
         }),
       });
 
       expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
     });
 
-    it('uses eventWatermark even when episodes are fetched but not recorded', () => {
+    it('uses eventWatermark even when alerts are fetched but not recorded', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
@@ -45,10 +45,10 @@ describe('computeNextWatermark', () => {
           haltReason: 'aborted',
           finalState: {
             input: BASE_INPUT,
-            scan: EpisodeScan.of({
-              episodes: [createAlertEpisode({ last_event_timestamp: '2026-01-22T07:34:00.000Z' })],
+            scan: AlertScan.of({
+              alerts: [createAlert({ last_event_timestamp: '2026-01-22T07:34:00.000Z' })],
             }),
-            // recordedEpisodes still undefined — StoreActionsStep not reached
+            // recordedAlerts still undefined — StoreActionsStep not reached
           },
         }),
       });
@@ -57,18 +57,18 @@ describe('computeNextWatermark', () => {
     });
   });
 
-  describe('aborted after StoreActionsStep (recordedEpisodes defined)', () => {
-    it('advances to windowEnd when some episodes were recorded', () => {
+  describe('aborted after StoreActionsStep (recordedAlerts defined)', () => {
+    it('advances to windowEnd when some alerts were recorded', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
           completed: false,
           haltReason: 'aborted',
-          finalState: { input: BASE_INPUT, recordedEpisodes: 5 },
+          finalState: { input: BASE_INPUT, recordedAlerts: 5 },
         }),
       });
 
-      // Not truncated, not no_episodes/no_actions — falls through to windowEnd
+      // Not truncated, not no_alerts/no_actions — falls through to windowEnd
       expect(result.toISOString()).toBe('2026-01-22T07:35:00.000Z');
     });
   });
@@ -83,7 +83,7 @@ describe('computeNextWatermark', () => {
       expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
     });
 
-    it('holds even when scan is empty (no episodes fetched)', () => {
+    it('holds even when scan is empty (no alerts fetched)', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
@@ -97,11 +97,11 @@ describe('computeNextWatermark', () => {
     });
   });
 
-  describe('no_episodes halt', () => {
+  describe('no_alerts halt', () => {
     it('advances to windowEnd', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
-        result: makeResult({ completed: false, haltReason: 'no_episodes' }),
+        result: makeResult({ completed: false, haltReason: 'no_alerts' }),
       });
 
       expect(result.toISOString()).toBe('2026-01-22T07:35:00.000Z');
@@ -120,30 +120,33 @@ describe('computeNextWatermark', () => {
   });
 
   describe('truncated scan', () => {
-    it('advances to the last fetched episode timestamp', () => {
-      const episodes = [
-        createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
-        createAlertEpisode({ episode_id: 'e2', last_event_timestamp: '2026-01-22T07:28:00.000Z' }),
-        createAlertEpisode({ episode_id: 'e3', last_event_timestamp: '2026-01-22T07:33:00.000Z' }),
+    it('advances to the last fetched alert timestamp', () => {
+      const alerts = [
+        createAlert({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
+        createAlert({ alert_id: 'e2', last_event_timestamp: '2026-01-22T07:28:00.000Z' }),
+        createAlert({ alert_id: 'e3', last_event_timestamp: '2026-01-22T07:33:00.000Z' }),
       ];
 
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
-          finalState: { input: BASE_INPUT, scan: EpisodeScan.of({ episodes, truncated: true }) },
+          finalState: {
+            input: BASE_INPUT,
+            scan: AlertScan.of({ alerts, truncated: true }),
+          },
         }),
       });
 
       expect(result.toISOString()).toBe('2026-01-22T07:33:00.000Z');
     });
 
-    it('uses eventWatermark when episodes array is empty (degenerate)', () => {
+    it('uses eventWatermark when alerts array is empty (degenerate)', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
           finalState: {
             input: BASE_INPUT,
-            scan: EpisodeScan.of({ episodes: [], truncated: true }),
+            scan: AlertScan.of({ alerts: [], truncated: true }),
           },
         }),
       });
@@ -152,16 +155,19 @@ describe('computeNextWatermark', () => {
     });
 
     it('truncated wins over windowEnd even when last row is older than windowEnd', () => {
-      const episodes = [
-        createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
+      const alerts = [
+        createAlert({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
         // last_event_timestamp deliberately before windowEnd (07:35)
-        createAlertEpisode({ episode_id: 'e2', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
+        createAlert({ alert_id: 'e2', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
       ];
 
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
-          finalState: { input: BASE_INPUT, scan: EpisodeScan.of({ episodes, truncated: true }) },
+          finalState: {
+            input: BASE_INPUT,
+            scan: AlertScan.of({ alerts, truncated: true }),
+          },
         }),
       });
 
@@ -177,8 +183,8 @@ describe('computeNextWatermark', () => {
           completed: true,
           finalState: {
             input: BASE_INPUT,
-            scan: EpisodeScan.of({ episodes: [createAlertEpisode()] }),
-            recordedEpisodes: 1,
+            scan: AlertScan.of({ alerts: [createAlert()] }),
+            recordedAlerts: 1,
           },
         }),
       });
@@ -199,7 +205,7 @@ describe('computeNextWatermark', () => {
 
       const result = computeNextWatermark({
         input,
-        result: makeResult({ haltReason: 'no_episodes', finalState: { input } }),
+        result: makeResult({ haltReason: 'no_alerts', finalState: { input } }),
       });
 
       expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');

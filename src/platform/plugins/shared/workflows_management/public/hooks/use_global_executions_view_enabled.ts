@@ -24,9 +24,9 @@ export function useGlobalExecutionsViewEnabled(): boolean {
   const client = settings?.globalClient;
 
   const observable =
-    client?.get$<boolean>(WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID, false) ?? EMPTY;
+    client?.get$<boolean>(WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID, true) ?? EMPTY;
   const defaultValue =
-    client?.get<boolean>(WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID, false) ?? false;
+    client?.get<boolean>(WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID, true) ?? false;
 
   return useObservable(observable, defaultValue) === true;
 }

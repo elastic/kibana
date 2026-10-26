@@ -21,6 +21,7 @@ import { registerFlameChartSearchRoute } from './flamechart';
 import { registerTopNFunctionsSearchRoute } from './functions';
 import { registerSetupRoute } from './universal_profiling/setup/route';
 import { registerStatusRoute } from './status/route';
+import { registerSchemasRoute } from './schemas/route';
 import { registerStorageExplorerRoute } from './storage_explorer/route';
 import {
   registerTraceEventsTopNContainersSearchRoute,
@@ -64,6 +65,8 @@ export function registerRoutes(params: RouteRegisterParameters) {
   registerSetupRoute(params);
   // Profiling status across the OTel and Universal Profiling schemas
   registerStatusRoute(params);
+  // Schemas with profiling data for a given time range and query
+  registerSchemasRoute(params);
   registerStorageExplorerRoute(params);
   registerTopNFunctionsAPMTransactionsRoute(params);
 }

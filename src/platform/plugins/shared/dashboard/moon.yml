@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/plugins/shared/dashboard
 dependsOn:
+  - '@kbn/search-sessions-management-plugin'
   - '@kbn/core'
   - '@kbn/inspector-plugin'
   - '@kbn/kibana-react-plugin'
@@ -155,6 +156,4 @@ fileGroups:
     - test/scout_search_sessions/**/*
     - test/scout_test_plugins/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

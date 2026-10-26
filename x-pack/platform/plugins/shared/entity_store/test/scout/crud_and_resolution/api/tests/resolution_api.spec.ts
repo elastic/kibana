@@ -14,49 +14,21 @@ import {
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
-  LATEST_INDEX,
-  UPDATES_INDEX,
 } from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
-import { clearEntityStoreIndices } from '../../../common/fixtures/helpers';
+import { clearInstalledEntityStoreDocuments } from '../../../common/fixtures/helpers';
 
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 
 apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ apiClient, esClient, kbnClient, samlAuth }) => {
+  apiTest.beforeAll(async ({ esClient, samlAuth }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
       ...PUBLIC_HEADERS,
     };
-
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
-
-    await esClient.indices.delete({
-      index: [LATEST_INDEX, UPDATES_INDEX],
-      ignore_unavailable: true,
-    });
-
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect([200, 201]).toContain(response.statusCode);
-  });
-
-  apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearEntityStoreIndices(esClient);
+    await clearInstalledEntityStoreDocuments(esClient);
   });
 
   apiTest('Link: should link entities to a target', async ({ apiClient, esClient }) => {

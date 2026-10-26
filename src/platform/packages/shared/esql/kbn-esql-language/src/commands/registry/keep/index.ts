@@ -24,7 +24,8 @@ export const keepCommand = {
   name: Commands.KEEP,
   methods: keepCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-language.esql.definitions.keepDoc', {
+    docPreserving: true,
+    description: i18n.translate('esqlLanguage.esql.definitions.keepDoc', {
       defaultMessage:
         'Rearranges fields in the Results table by applying the keep clauses in fields',
     }),

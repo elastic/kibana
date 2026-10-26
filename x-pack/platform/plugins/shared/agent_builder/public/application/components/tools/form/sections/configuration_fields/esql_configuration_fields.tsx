@@ -10,6 +10,7 @@ import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { EsqlEditorField } from '../../components/esql/esql_editor_field';
 import { EsqlParams } from '../../components/esql/esql_params';
+import { IncludeFrozenField } from '../../components/include_frozen_field';
 import { i18nMessages } from '../../i18n';
 import type { EsqlToolFormData } from '../../types/tool_form_types';
 
@@ -32,6 +33,7 @@ export const EsqlConfiguration = () => {
       >
         <EsqlParams />
       </EuiFormRow>
+      <IncludeFrozenField />
     </>
   );
 };

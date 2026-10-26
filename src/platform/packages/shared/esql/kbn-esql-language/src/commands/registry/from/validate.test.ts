@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { Parser, isSubQuery } from '@elastic/esql';
+import type { ICommandCallbacks } from '../types';
 import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/commands/validation';
-import { METADATA_FIELDS } from '../options/metadata';
+import { CPS_METADATA_FIELDS, METADATA_FIELDS } from '../options/metadata';
 
-const fromExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
-  return expectErrors(query, expectedErrors, context, 'from', validate);
+const fromExpectErrors = (
+  query: string,
+  expectedErrors: string[],
+  context = mockContext,
+  callbacks?: ICommandCallbacks
+) => {
+  return expectErrors(query, expectedErrors, context, 'from', validate, callbacks);
 };
 
 describe('FROM Validation', () => {
@@ -169,6 +175,47 @@ describe('FROM Validation', () => {
               ', '
             )}]`,
           ]);
+        });
+
+        test('accepts wildcards matching known metadata fields', () => {
+          fromExpectErrors('from index METADATA _ind*', []);
+          fromExpectErrors('from index METADATA _ind*, _id', []);
+          fromExpectErrors(`from index METADATA _nope*`, [
+            `Metadata field "_nope*" is not available. Available metadata fields are: [${METADATA_FIELDS.join(
+              ', '
+            )}]`,
+          ]);
+        });
+
+        test('rejects CPS fields when not serverless', () => {
+          fromExpectErrors('from index METADATA _project._id', [
+            `Metadata field "_project._id" is not available. Available metadata fields are: [${METADATA_FIELDS.join(
+              ', '
+            )}]`,
+          ]);
+          fromExpectErrors('from index METADATA _project.*', [
+            `Metadata field "_project.*" is not available. Available metadata fields are: [${METADATA_FIELDS.join(
+              ', '
+            )}]`,
+          ]);
+        });
+
+        test('accepts CPS fields, project tags and wildcards when serverless', () => {
+          const callbacks = { isServerless: true };
+          fromExpectErrors(
+            `from index METADATA ${CPS_METADATA_FIELDS.join(', ')}`,
+            [],
+            mockContext,
+            callbacks
+          );
+          fromExpectErrors('from index METADATA _project.*', [], mockContext, callbacks);
+          fromExpectErrors('from index METADATA _pro*, _ind*', [], mockContext, callbacks);
+          fromExpectErrors(
+            'from index METADATA _project.custom_tag_origin',
+            [],
+            mockContext,
+            callbacks
+          );
         });
       });
     });

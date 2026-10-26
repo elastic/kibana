@@ -13,8 +13,8 @@ import type {
   ESQLAstAllCommands,
 } from '@elastic/esql/types';
 import { isColumn, isOptionNode, isSource } from '@elastic/esql';
-import type { ICommandContext } from '../types';
-import { METADATA_FIELDS } from '../options/metadata';
+import type { ICommandCallbacks, ICommandContext } from '../types';
+import { getAvailableMetadataFields, isValidMetadataField } from '../options/metadata';
 import { getMessageFromId } from '../../definitions/utils';
 import { validateSources } from '../../definitions/utils/validation/sources';
 import type { ESQLMessage } from '../../definitions/types';
@@ -22,7 +22,8 @@ import type { ESQLMessage } from '../../definitions/types';
 export const validate = (
   command: ESQLAstAllCommands,
   ast: ESQLAst,
-  context?: ICommandContext
+  context?: ICommandContext,
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const metadataStatement = command.args.find(
     (arg) => isOptionNode(arg) && arg.name === 'metadata'
@@ -32,13 +33,13 @@ export const validate = (
 
   const fields = metadataStatement?.args.filter(isColumn) ?? [];
   for (const field of fields) {
-    if (!METADATA_FIELDS.includes(field.name)) {
+    if (!isValidMetadataField(field.name, callbacks?.isServerless)) {
       messages.push(
         getMessageFromId({
           messageId: 'unknownMetadataField',
           values: {
             value: field.name,
-            availableFields: Array.from(METADATA_FIELDS).join(', '),
+            availableFields: getAvailableMetadataFields(callbacks?.isServerless).join(', '),
           },
           locations: field.location,
         })

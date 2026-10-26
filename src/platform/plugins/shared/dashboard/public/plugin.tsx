@@ -51,6 +51,7 @@ import type {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
+import type { SearchSessionsManagementPluginStart } from '@kbn/search-sessions-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type {
   ExportShareDerivatives,
@@ -77,12 +78,16 @@ import {
   SEARCH_SESSION_ID,
 } from '../common/page_bundle_constants';
 import { untilPluginStartServicesReady, setKibanaServices } from './services/kibana_services';
+import { dashboardAppClientApi$ } from './services/dashboard_app_client_api';
 import { getDashboardRecentlyAccessedService } from './services/dashboard_recently_accessed_service';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
+import { getDashboardPageTitle } from './dashboard_app/_dashboard_app_strings';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/telemetry/dashboard_duration_start_mark';
+import { dashboardSavedEventSchema } from './dashboard_api/telemetry/report_dashboard_saved';
+import { DASHBOARD_SAVED_EVENT } from './utils/telemetry_constants';
 import type { DashboardApi } from './dashboard_api/types';
 
 export interface DashboardSetupDependencies {
@@ -112,6 +117,7 @@ export interface DashboardStartDependencies {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   screenshotMode: ScreenshotModePluginStart;
   share?: SharePluginStart;
+  searchSessionsManagement?: SearchSessionsManagementPluginStart;
   spaces?: SpacesPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -141,6 +147,9 @@ export interface DashboardStart {
    */
   findDashboardsService: () => Promise<FindDashboardsService>;
 
+  /**
+   * The API of the loaded dashboard rendered with `publishAsAppClientApi`, if any.
+   */
   dashboardAppClientApi$: PublishingSubject<DashboardApi | undefined>;
 }
 
@@ -159,7 +168,6 @@ export class DashboardPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private listingViewRegistry: Set<DashboardListingTab> = new Set();
-  private dashboardAppApi$ = new BehaviorSubject<DashboardApi | undefined>(undefined);
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
@@ -168,6 +176,10 @@ export class DashboardPlugin
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
       schema: {},
+    });
+    core.analytics.registerEventType({
+      eventType: DASHBOARD_SAVED_EVENT,
+      schema: dashboardSavedEventSchema,
     });
 
     if (share) {
@@ -257,7 +269,7 @@ export class DashboardPlugin
 
     const app: App = {
       id: DASHBOARD_APP_ID,
-      title: 'Dashboards',
+      title: getDashboardPageTitle(),
       order: 2500,
       euiIconType: 'logoKibana',
       defaultPath: `#${LANDING_PAGE_PATH}`,
@@ -292,7 +304,6 @@ export class DashboardPlugin
           appUnMounted,
           element: params.element,
           mountContext,
-          setDashboardAppApi: (api) => this.dashboardAppApi$.next(api),
         });
       },
     };
@@ -354,7 +365,7 @@ export class DashboardPlugin
             .get$()
             .pipe(
               map((items) =>
-                items.slice(0, 5).map((item) => ({
+                items.map((item) => ({
                   id: item.id,
                   href: core.http.basePath.prepend(item.link),
                   label: item.label,
@@ -396,7 +407,7 @@ export class DashboardPlugin
         const { findService } = await import('./dashboard_client');
         return findService;
       },
-      dashboardAppClientApi$: this.dashboardAppApi$,
+      dashboardAppClientApi$,
     };
   }
 

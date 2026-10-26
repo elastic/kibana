@@ -27,6 +27,7 @@ export interface AgentBuilderAddToChatTelemetry {
     | 'entity_highlights'
     | 'entity_risk_contribution'
     | 'entity_flyout'
+    | 'entities_grid_row_actions'
     | 'rule_creation'
     | 'rule_editing'
     | 'rule_details'
@@ -38,11 +39,13 @@ export interface AgentBuilderAddToChatTelemetry {
     | 'attacks_page_group_summary'
     | 'attacks_page_group_take_action'
     | 'attacks_page_flyout_take_action'
+    | 'translated_rules_flyout'
+    | 'translated_rules_bulk'
     | BulkAlertPathway;
   /**
    * Attachment type
    */
-  attachments?: Array<'alert' | 'attack_discovery' | 'entity' | 'rule'>;
+  attachments?: Array<'alert' | 'attack_discovery' | 'entity' | 'rule' | 'rule_migration_items'>;
   /** Number of items added (for bulk add-to-chat actions) */
   item_count?: number;
 }

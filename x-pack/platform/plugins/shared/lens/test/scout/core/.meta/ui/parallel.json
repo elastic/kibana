@@ -1,5 +1,5 @@
 {
-  "sha1": "9077c13f7a85e748bdfe7a72f59646b91bb080a1",
+  "sha1": "5970e8e457d262b426d3bea30e1523060e9f39de",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -518,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/xy_chart_interactions.spec.ts",
-        "line": 42,
-        "column": 29
+        "line": 53,
+        "column": 15
       }
     },
     {
@@ -531,8 +531,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/xy_chart_interactions.spec.ts",
-        "line": 63,
-        "column": 31
+        "line": 67,
+        "column": 50
       }
     },
     {
@@ -544,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/xy_chart_interactions.spec.ts",
-        "line": 81,
-        "column": 96
+        "line": 87,
+        "column": 15
       }
     },
     {
@@ -1300,6 +1300,20 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/legacy_metric.spec.ts",
         "line": 31,
         "column": 11
+      }
+    },
+    {
+      "id": "ca140b51b7c75bc-76bb16367ac9c67",
+      "title": "Lens ES|QL metric EVAL maximum renders an EVAL maximum as a bar and can switch to a trendline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_esql_eval_maximum.spec.ts",
+        "line": 21,
+        "column": 5
       }
     },
     {

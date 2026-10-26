@@ -11,7 +11,7 @@ import type { SyntheticsServerSetup } from '../../types';
 import {
   getAgentShardingLicenseStatus,
   getAgentShardingMode,
-  isAgentShardingActive,
+  isShardingEnabled,
 } from './agent_sharding_license';
 
 type LicenseType = 'basic' | 'platinum' | 'enterprise' | 'trial';
@@ -68,7 +68,7 @@ describe('getAgentShardingLicenseStatus', () => {
 describe('getAgentShardingMode', () => {
   it('is active with an Enterprise license and rebalancing on', async () => {
     expect(await getAgentShardingMode(buildServer(licenseOf('enterprise')))).toBe('active');
-    expect(await isAgentShardingActive(buildServer(licenseOf('enterprise')))).toBe(true);
+    expect(await isShardingEnabled(buildServer(licenseOf('enterprise')))).toBe(true);
   });
 
   it('is inactive when shard rebalancing is turned off', async () => {
@@ -83,7 +83,7 @@ describe('getAgentShardingMode', () => {
   it('is unknown when the license cannot be read and rebalancing is on', async () => {
     const server = buildServer(jest.fn().mockRejectedValue(new Error('boom')));
     expect(await getAgentShardingMode(server)).toBe('unknown');
-    expect(await isAgentShardingActive(server)).toBe(false);
+    expect(await isShardingEnabled(server)).toBe(false);
   });
 
   it('is inactive when rebalancing is off, even if the license cannot be read', async () => {

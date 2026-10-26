@@ -109,6 +109,10 @@ export function getPreGroupedAggregationName(textBeforeCursor: string): string |
 /* Extracts the index parameter from parsed params, with query-text fallback for trailing tokens. */
 const INDEX_PARAM_REGEX = /\bindex\s*=\s*(\S+)/i;
 
+// Unlike FROM sources, sources in PROMQL params keep their quotes in `name` (`"metrics-a"`).
+const unquoteIndexName = (name: string): string =>
+  name.length > 1 && name.startsWith('"') && name.endsWith('"') ? name.slice(1, -1) : name;
+
 export function getIndexFromPromQLParams({
   params,
   query,
@@ -125,22 +129,22 @@ export function getIndexFromPromQLParams({
 
     if (isList(value) && value.values.length > 0) {
       const { text, values } = value;
-      const listText = text?.trim();
-      if (listText) {
-        return listText;
-      }
-
       const names = values
-        .map((item) => (isIdentifier(item) || isSource(item) ? item.name : ''))
+        .map((item) => (isIdentifier(item) || isSource(item) ? unquoteIndexName(item.name) : ''))
         .filter(Boolean);
 
       if (names.length > 0) {
         return names.join(',');
       }
+
+      const listText = text?.trim();
+      if (listText) {
+        return listText;
+      }
     }
 
     if (isIdentifier(value) || isSource(value)) {
-      return value.name;
+      return unquoteIndexName(value.name);
     }
   }
 

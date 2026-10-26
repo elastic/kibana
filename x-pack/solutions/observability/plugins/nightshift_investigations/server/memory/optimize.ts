@@ -14,6 +14,7 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import { isElasticsearchWriteConflict } from '@kbn/occ';
 import { formatPageRefs, previewText } from './log_format';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
+import { extractWorkspaceReads, extractWorkspaceReadsFromToolCalls } from '../investigation_round';
 import { hasToolEvidence, renderMemoryTranscript, type TranscriptStep } from './transcript';
 import type { MemoryPageStore, MemoryPageWrite, VersionedMemoryPage } from './page_store';
 import {
@@ -24,6 +25,7 @@ import {
 } from './page_store';
 import { toCounterUpdates } from './ranking';
 import { type MemoryPage } from '../../common/memory';
+import { canonicalizeTags, MAX_MEMORY_TAGS_PER_PAGE } from '../../common/memory_tags';
 
 const MAX_EXTRACTIONS = 3;
 
@@ -81,15 +83,14 @@ export interface MemoryLabelProposal {
 export interface MemoryExtractProposal {
   slug: string;
   title: string;
-  /** Keywords for the topic, stored as tags. */
   tags: string[];
-  /** Recalled memory ids this entry supersedes; they are archived once it is written. */
   replaces: string[];
 }
 
 export type ProposeMemoryLabels = (input: {
   transcript: string;
   recalledMemories: MemoryPage[];
+  openedMemoryIds?: ReadonlySet<string>;
 }) => Promise<MemoryLabelProposal>;
 
 export interface MemoryExtractionBatch {
@@ -140,11 +141,9 @@ export type SynthesizeMemoryGroup = (input: {
   sources: MemoryPage[];
   extract: MemoryExtractProposal;
   transcript?: string;
-  /** Titles of the other entries proposed this round. */
   otherTopics?: string[];
 }) => Promise<MemoryMergeSynthesis>;
 
-/** Normalize the user-authored task without interpreting literal prompt content. */
 export const unwrapUserTask = (prompt: string | undefined): string => {
   return prompt?.trim() ?? '';
 };
@@ -210,7 +209,8 @@ const formatEvidenceEntries = (entries: readonly EvidenceEntry[], maxTokens: num
 
 export const formatRecalled = (
   recalledMemories: readonly MemoryPage[],
-  maxTokens = OPTIMIZER_EVIDENCE_TOKEN_BUDGET
+  maxTokens = OPTIMIZER_EVIDENCE_TOKEN_BUDGET,
+  openedMemoryIds?: ReadonlySet<string>
 ): string => {
   if (recalledMemories.length === 0) {
     return '(none)';
@@ -222,6 +222,9 @@ export const formatRecalled = (
         `${index === 0 ? '' : '\n'}- id=${memory.id}\n` +
         `  title: ${memory.title.slice(0, MAX_RECALLED_TITLE_CHARS)}\n` +
         `  updated: ${memory.updated_at}\n` +
+        (openedMemoryIds !== undefined
+          ? `  opened_by_agent: ${openedMemoryIds.has(memory.id)}\n`
+          : '') +
         `  content: `,
       content: memory.content,
     })),
@@ -269,13 +272,15 @@ export const createLlmProposeMemoryLabels = ({
   inferenceClient: BoundInferenceClient;
   signal?: AbortSignal;
 }): ProposeMemoryLabels => {
-  return async ({ transcript, recalledMemories }) => {
+  return async ({ transcript, recalledMemories, openedMemoryIds }) => {
     const response = await inferenceClient.output({
       id: 'nightshift_memory_critique',
       abortSignal: signal,
       system: MEMORY_CRITIQUE_SYSTEM_PROMPT,
       input: `Evaluate the list of recalled memory per the system instructions.\n\nRecalled memories:\n${formatRecalled(
-        recalledMemories
+        recalledMemories,
+        OPTIMIZER_EVIDENCE_TOKEN_BUDGET,
+        openedMemoryIds
       )}\n\nInvestigation transcript:\n${transcript}`,
       schema: {
         type: 'object',
@@ -377,15 +382,15 @@ Investigation transcript:\n${transcript}`,
           const candidate =
             typeof entry === 'object' && entry !== null ? (entry as Record<string, unknown>) : {};
           const title = String(candidate.title ?? '').trim();
-          // Validate before canonicalization: replacing `api_key=` punctuation with hyphens would
-          // otherwise hide the secret pattern while retaining it in the durable ID/path.
-          if (looksLikeSecret(title)) {
+          const keywords = Array.isArray(candidate.keywords) ? candidate.keywords.map(String) : [];
+          // Validate before canonicalization, or punctuation replaced by hyphens hides the pattern.
+          if (looksLikeSecret(title) || keywords.some(looksLikeSecret)) {
             return undefined;
           }
           return {
             slug: canonicalizeSlug(title),
             title,
-            tags: Array.isArray(candidate.keywords) ? candidate.keywords.map(String) : [],
+            tags: canonicalizeTags(keywords).slice(0, MAX_MEMORY_TAGS_PER_PAGE),
             replaces: Array.isArray(candidate.replaces)
               ? canonicalizeMemoryLabelIds(candidate.replaces.map(String))
               : [],
@@ -465,7 +470,6 @@ export const formatMemoryMergeSources = ({
     maxTokens
   );
 
-// Models miss character targets and overshoot word targets, so compaction aims well below the budget.
 const COMPACT_TARGET_RATIO = 0.6;
 
 const CONTENT_SCHEMA = {
@@ -562,8 +566,7 @@ const unionStrings = (...groups: Array<readonly string[] | undefined>): string[]
 };
 
 /**
- * Writes a fresh memory over an archived one that holds the same id. The archived version's
- * counters are not inherited; its merge history is.
+ * Writes over an archived page of the same id, inheriting its merge history but not its counters.
  */
 const writeOverArchived = async (
   store: MemoryPageStore,
@@ -571,7 +574,9 @@ const writeOverArchived = async (
   write: MemoryPageWrite,
   nowSec: number
 ): Promise<void> => {
-  const mergedFrom = unionStrings(write.merged_from, archived.page.merged_from);
+  const mergedFrom = unionStrings(write.merged_from, archived.page.merged_from).filter(
+    (id) => id !== archived.page.id
+  );
   await store.update(
     archived.page.id,
     {
@@ -595,6 +600,8 @@ export const applyMemoryEdits = async ({
   extractions,
   context,
   transcript,
+  agentId,
+  conversationId,
   synthesizeMemoryGroup,
   now = () => Date.now() / 1000,
   logger,
@@ -604,9 +611,10 @@ export const applyMemoryEdits = async ({
   recalledMemories?: MemoryPage[];
   labels: MemoryLabelProposal;
   extractions: MemoryExtractProposal[];
-  /** Current user task — stored on new pages as the recall key. */
   context?: string;
   transcript?: string;
+  agentId?: string;
+  conversationId?: string;
   synthesizeMemoryGroup?: SynthesizeMemoryGroup;
   now?: () => number;
   logger: Logger;
@@ -651,8 +659,6 @@ export const applyMemoryEdits = async ({
   );
 
   const harmful = new Set(harmfulIds);
-  // A harmful memory never reaches the writer, even when an entry replaces or overlaps it; that
-  // entry is written without it.
   for (const id of archiveIds) {
     await store.archive(id, 'harmful');
     summary.harmfulArchiveCount += 1;
@@ -686,8 +692,7 @@ export const applyMemoryEdits = async ({
     }
 
     const named = recalledMemories.filter(
-      (page) =>
-        extra.replaces.includes(page.id) && page.status !== 'archived' && !harmful.has(page.id)
+      (page) => extra.replaces.includes(page.id) && !page.archived && !harmful.has(page.id)
     );
     const harmfulReplaces = extra.replaces.filter((id) => harmful.has(id));
     if (harmfulReplaces.length > 0) {
@@ -705,11 +710,9 @@ export const applyMemoryEdits = async ({
           `live recalled memories: [${unknownReplaces.join(', ')}]`
       );
     }
-    // The extractor only sees recalled memories, so a live memory already at this entry's id
-    // joins the entry even when it is not named.
     const exactId = toMemoryKiId(extra.slug);
     const exactStored = await store.get(exactId);
-    const exactPage = exactStored && exactStored.status !== 'archived' ? exactStored : undefined;
+    const exactPage = exactStored && !exactStored.archived ? exactStored : undefined;
     const sources = exactPage ? [...named.filter((page) => page.id !== exactId), exactPage] : named;
     if (sources.some((page) => consumedIds.has(page.id))) {
       logger.debug(`Skipped extraction "${extra.slug}" — a source already belongs to an entry`);
@@ -746,14 +749,15 @@ export const applyMemoryEdits = async ({
       task,
       transcript,
       otherTopics: otherTopicsOf(group.extract),
+      agentId,
+      conversationId,
       synthesizeMemoryGroup,
       now,
       logger,
     });
-    if (result.writtenId && result.sourceCount === 0) {
+    if (result.writtenId && result.mergedFromCount === 0) {
       summary.standaloneUpsertCount += 1;
     } else if (result.writtenId) {
-      // A new entry whose create lost a race was merged into the page that won it.
       summary.mergeAttemptCount += replacing ? 0 : 1;
       summary.mergeSuccessCount += 1;
     }
@@ -771,10 +775,8 @@ export const applyMemoryEdits = async ({
 };
 
 interface MergeMemoryGroupResult {
-  /** The page the entry was written to; unset when nothing was written. */
   writtenId?: string;
-  /** Stored memories the written entry incorporates, the canonical page included. */
-  sourceCount: number;
+  mergedFromCount: number;
   archivedSourceCount: number;
   writeFailureCount: number;
 }
@@ -787,6 +789,8 @@ const mergeMemoryGroup = async ({
   task,
   transcript,
   otherTopics,
+  agentId,
+  conversationId,
   synthesizeMemoryGroup,
   now,
   logger,
@@ -798,6 +802,8 @@ const mergeMemoryGroup = async ({
   task: string;
   transcript?: string;
   otherTopics: string[];
+  agentId?: string;
+  conversationId?: string;
   synthesizeMemoryGroup: SynthesizeMemoryGroup;
   now: () => number;
   logger: Logger;
@@ -816,14 +822,12 @@ const mergeMemoryGroup = async ({
     const sourceSnapshots = await Promise.all(
       requiredSourceIds.map(async (id) => store.getVersioned(id))
     );
-    const unavailableIndex = sourceSnapshots.findIndex(
-      (source) => !source || source.page.status === 'archived'
-    );
+    const unavailableIndex = sourceSnapshots.findIndex((source) => !source || source.page.archived);
     if (unavailableIndex !== -1) {
       logger.debug(
         `Memory merge aborted — required source ${requiredSourceIds[unavailableIndex]} is missing or archived`
       );
-      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
+      return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
     }
     const versionedSources = sourceSnapshots as VersionedMemoryPage[];
     const currentSources = versionedSources.map(({ page }) => page);
@@ -832,8 +836,6 @@ const mergeMemoryGroup = async ({
         ? versionedSources[requiredSourceIds.indexOf(canonicalId)]
         : undefined;
 
-    // Synthesis is asynchronous and may overlap another optimizer round. The versioned
-    // snapshots above are therefore validated again immediately before any canonical write.
     let synthesis: MemoryMergeSynthesis;
     try {
       synthesis = await synthesizeMemoryGroup({
@@ -845,20 +847,18 @@ const mergeMemoryGroup = async ({
     } catch (err) {
       logger.warn('Memory merge synthesis failed');
       logger.debug(`Memory merge synthesis error: ${(err as Error).message}`);
-      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
+      return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
     }
 
     const content = capMergedContent(synthesis.content);
-    // A page's title and slug are set once, together; writing into an existing canonical page
-    // keeps both, and only a newly minted canonical page takes the entry's topic.
     const title = versionedCanonical?.page.title ?? extract.title;
     if (title.length === 0 || content.trim().length === 0) {
       logger.info(`Memory write skipped for "${extract.slug}" — the writer returned no content`);
-      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
+      return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
     }
     if (looksLikeSecret([title, content, extract.tags.join('\n')].join('\n'))) {
       logger.warn('Memory merge aborted — synthesised content looks like a secret');
-      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
+      return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
     }
 
     let slug = versionedCanonical?.page.slug;
@@ -875,11 +875,11 @@ const mergeMemoryGroup = async ({
           continue;
         }
         const occupant = await store.get(candidateId);
-        if (occupant && occupant.status !== 'archived') {
+        if (occupant && !occupant.archived) {
           continue;
         }
         archivedTarget = occupant ? await store.getVersioned(candidateId) : undefined;
-        if (occupant && archivedTarget?.page.status !== 'archived') {
+        if (occupant && !archivedTarget?.page.archived) {
           continue;
         }
         slug = candidate;
@@ -888,7 +888,7 @@ const mergeMemoryGroup = async ({
       }
       if (!slug || !canonicalId) {
         logger.warn('Memory merge aborted — no free canonical slug found');
-        return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
+        return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
       }
     }
 
@@ -899,33 +899,32 @@ const mergeMemoryGroup = async ({
       impressions += display.impressions;
       conversions += display.conversions;
     }
-    const mergedFrom =
-      currentSources.length > 0
-        ? unionStrings(
-            currentSources.flatMap((page) => [page.id, ...(page.merged_from ?? [])]),
-            [toMemoryKiId(extract.slug)]
-          )
-        : [];
+    // `canonicalId` is filtered out: a page named as its own ancestor hides the real lineage.
+    const mergedFrom = unionStrings(
+      currentSources.flatMap((page) => [page.id, ...(page.merged_from ?? [])]),
+      [toMemoryKiId(extract.slug)]
+    ).filter((id) => id !== canonicalId);
     const write: MemoryPageWrite = {
       slug,
       title,
       content,
-      // Recall matches the next round's task against this key, so it is this round's task.
       context: task || (versionedCanonical?.page.context ?? ''),
-      tags: unionStrings(
-        currentSources.flatMap((page) => page.tags),
-        extract.tags
-      ).filter((tag) => tag !== 'memory'),
+      tags: canonicalizeTags([...currentSources.flatMap((page) => page.tags), ...extract.tags])
+        .filter((tag) => tag !== 'memory')
+        .slice(0, MAX_MEMORY_TAGS_PER_PAGE),
       categories: unionStrings(currentSources.flatMap((page) => page.categories)),
       references: unionStrings(currentSources.flatMap((page) => page.references)),
-      status: currentSources.some((page) => page.status === 'established')
-        ? 'established'
-        : 'tentative',
+      agent_id: agentId,
+      conversation_id: conversationId,
       user: 'nightshift-optimizer',
       ...(currentSources.length > 0
         ? {
-            source: `Merged from memories: ${mergedFrom.join(', ')}`,
-            merged_from: mergedFrom,
+            ...(mergedFrom.length > 0
+              ? {
+                  source: `Merged from memories: ${mergedFrom.join(', ')}`,
+                  merged_from: mergedFrom,
+                }
+              : {}),
             telemetry: {
               impressions,
               conversions,
@@ -936,20 +935,20 @@ const mergeMemoryGroup = async ({
     };
     const targetCanonicalId = canonicalId;
     if (!targetCanonicalId) {
-      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
+      return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
     }
 
     const validatedSources = await Promise.all(
       requiredSourceIds.map(async (id) => store.getVersioned(id))
     );
     const unavailableAfterSynthesisIndex = validatedSources.findIndex(
-      (source) => !source || source.page.status === 'archived'
+      (source) => !source || source.page.archived
     );
     if (unavailableAfterSynthesisIndex !== -1) {
       logger.debug(
         `Memory merge aborted after synthesis — required source ${requiredSourceIds[unavailableAfterSynthesisIndex]} is missing or archived`
       );
-      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
+      return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
     }
     const revalidatedSources = validatedSources as VersionedMemoryPage[];
     const sourceChanged = versionedSources.some((source, index) => {
@@ -959,7 +958,7 @@ const mergeMemoryGroup = async ({
     if (sourceChanged) {
       if (attempt === 2) {
         logger.warn('Memory merge exhausted source changes; sources preserved');
-        return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
+        return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
       }
       continue;
     }
@@ -979,19 +978,19 @@ const mergeMemoryGroup = async ({
       if (!isElasticsearchWriteConflict(err)) {
         logger.warn('Memory merge failed to write its canonical page');
         logger.debug(`Memory merge canonical write error: ${(err as Error).message}`);
-        return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
+        return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
       }
       if (attempt === 2) {
         logger.warn('Memory merge exhausted version conflicts; sources preserved');
         logger.debug(`Memory merge conflict exhaustion canonical=${targetCanonicalId}`);
-        return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
+        return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
       }
       canonicalIsSource = true;
     }
   }
 
   if (!writtenCanonicalId) {
-    return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
+    return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
   }
 
   let archivedSourceCount = 0;
@@ -1002,8 +1001,6 @@ const mergeMemoryGroup = async ({
       continue;
     }
     try {
-      // A merge may only consume the source snapshot incorporated into the committed canonical.
-      // Chasing a conflict here could archive a newer source that the canonical does not contain.
       await store.archiveVersioned(source, 'merged');
       archivedSourceCount += 1;
     } catch (err) {
@@ -1012,13 +1009,18 @@ const mergeMemoryGroup = async ({
       logger.debug(`Memory merge archive failed source=${page.id}: ${String(err)}`);
     }
   }
+  const mergedFromCount = committedSources.filter(
+    ({ page }) => page.id !== writtenCanonicalId
+  ).length;
   logger.debug(
-    `Merged ${committedSources.map(({ page }) => page.id).join(', ')} into ${writtenCanonicalId}` +
-      ` (entry ${extract.slug})`
+    mergedFromCount > 0
+      ? `Merged ${committedSources.map(({ page }) => page.id).join(', ')} into ` +
+          `${writtenCanonicalId} (entry ${extract.slug})`
+      : `Rewrote ${writtenCanonicalId} in place (entry ${extract.slug})`
   );
   return {
     writtenId: writtenCanonicalId,
-    sourceCount: committedSources.length,
+    mergedFromCount,
     archivedSourceCount,
     writeFailureCount,
   };
@@ -1034,6 +1036,8 @@ export const optimizeMemory = async ({
   assistantMessage,
   toolCalls,
   investigation,
+  agentId,
+  conversationId,
   logger,
   signal,
 }: {
@@ -1044,12 +1048,11 @@ export const optimizeMemory = async ({
   synthesizeMemoryGroup?: SynthesizeMemoryGroup;
   userMessage: string;
   assistantMessage: string;
-  /** Parameters-only fallback for when the round's steps could not be read. */
   toolCalls: InvestigationToolCall[];
-  /** The round's steps in order with tool results, when the persisted round could be read. */
   investigation?: TranscriptStep[];
+  agentId?: string;
+  conversationId?: string;
   logger: Logger;
-  /** Aborted on step timeout or workflow cancellation; no later LLM call or write starts. */
   signal?: AbortSignal;
 }): Promise<MemoryOptimizeSummary> => {
   logger.debug(
@@ -1075,6 +1078,10 @@ export const optimizeMemory = async ({
   );
 
   const task = unwrapUserTask(userMessage);
+  const reads = investigation
+    ? extractWorkspaceReads(investigation)
+    : extractWorkspaceReadsFromToolCalls(toolCalls);
+  const openedMemoryIds = new Set(reads.memoryIds);
   const transcript = renderMemoryTranscript({
     task,
     answer: assistantMessage,
@@ -1097,9 +1104,9 @@ export const optimizeMemory = async ({
     const critiqueStarted = Date.now();
     logger.debug(
       `Memory critique LLM start nightshift_memory_critique recalled=${recalledMemories.length} ` +
-        `transcriptChars=${transcript.length}`
+        `opened=${openedMemoryIds.size} transcriptChars=${transcript.length}`
     );
-    labels = await proposeLabels({ transcript, recalledMemories });
+    labels = await proposeLabels({ transcript, recalledMemories, openedMemoryIds });
     logger.debug(
       `Memory critique LLM done ${Date.now() - critiqueStarted}ms ` +
         `useful=[${labels.useful.join(', ') || '(none)'}] ` +
@@ -1107,7 +1114,6 @@ export const optimizeMemory = async ({
     );
   }
 
-  // Cold-start rounds have an empty recalled set; still extract or the store never fills.
   signal?.throwIfAborted();
   let extractions: MemoryExtractProposal[] = [];
   if (assistantMessage.trim().length === 0) {
@@ -1164,6 +1170,8 @@ export const optimizeMemory = async ({
     extractions,
     context: task,
     transcript: evidenceTranscript,
+    agentId,
+    conversationId,
     synthesizeMemoryGroup,
     logger,
   });

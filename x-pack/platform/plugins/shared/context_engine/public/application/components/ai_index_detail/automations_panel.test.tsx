@@ -38,18 +38,21 @@ jest.mock('@kbn/workflows-ui', () => ({
     mgetWorkflows: jest.fn(),
     createWorkflow: jest.fn(),
   }),
+  useWorkflowsCapabilities: () => ({
+    canExecuteWorkflow: true,
+  }),
 }));
 
 jest.mock('./automation_row', () => ({
   AutomationRow: ({
-    name,
+    workflowSummary,
     onDelete,
   }: {
-    name: string | undefined;
+    workflowSummary?: { name?: string };
     onDelete: () => Promise<void>;
   }) => (
     <div data-test-subj="contextAiIndexAutomationRow">
-      {name}
+      {workflowSummary?.name}
       <button type="button" data-test-subj="stubAutomationRowDelete" onClick={() => onDelete()}>
         Delete
       </button>
@@ -95,6 +98,7 @@ const summariesResult = (
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [{ type: 'esql', value: 'FROM My view' }],
@@ -326,7 +330,9 @@ describe('AutomationsPanel', () => {
       editorResult({ automations: oneAutomation, workflowIds: ['wf-1'] })
     );
     mockUseWorkflowSummaries.mockReturnValue(
-      summariesResult([['wf-1', { id: 'wf-1', name: 'My workflow', enabled: true }]])
+      summariesResult([
+        ['wf-1', { id: 'wf-1', name: 'My workflow', enabled: true, definition: undefined }],
+      ])
     );
 
     renderPanel();

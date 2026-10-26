@@ -110,6 +110,11 @@ export const listEscalationsQuerySchema = z
      * opening the escalation creation modal.
      */
     linked_investigation_id: conversationIdSchema.optional(),
+    /**
+     * When set, only escalations whose linked investigations impact this entity id are returned,
+     * and `pagination.total` counts only those.
+     */
+    entity: z.string().min(1).max(256).optional(),
   })
   .refine(({ page, per_page: perPage }) => page * perPage <= MAX_ESCALATIONS_RESULT_WINDOW, {
     message: `page * per_page must not exceed ${MAX_ESCALATIONS_RESULT_WINDOW}; escalations beyond that are not reachable through this API`,
@@ -120,7 +125,17 @@ export type ListEscalationsQuery = z.infer<typeof listEscalationsQuerySchema>;
 /**
  * An escalation as returned by the **list** endpoint.
  */
-export type EscalationConversationSummary = ConversationWithoutRoundsWithPermissions;
+export type EscalationConversationSummary = ConversationWithoutRoundsWithPermissions & {
+  /**
+   * Union of the entity ids from the Impact of the linked investigations. Absent when none of
+   * them has an Impact document or the impact could not be read.
+   */
+  entity_ids?: string[];
+  /** Entity type (`host`, `user`, …) by entity id, for the ids that have one. */
+  entity_types?: Record<string, string>;
+  /** Display name by entity id, for the ids that have one. */
+  entity_names?: Record<string, string>;
+};
 
 export interface ListEscalationsResponse {
   pagination: { total: number; page: number; per_page: number };
@@ -141,8 +156,21 @@ export interface LinkedInvestigationSummary {
   status: 'open' | 'closed';
   /** Agent Builder agent id, used for deep-linking to the conversation. */
   agent_id: string;
+  /**
+   * Proposals awaiting a decision (pending, not superseded, not expired). Omitted when the caller
+   * may not read proposals; always 0 for a closed investigation.
+   */
+  pending_proposal_count?: number;
 }
 
 export interface ListLinkedInvestigationsResponse {
   results: LinkedInvestigationSummary[];
+}
+
+/** Response of the `POST /{id}/_sync_attachments` endpoint. Both counts are 0 when nothing needed syncing. */
+export interface SyncEscalationResponse {
+  /** Attachments newly copied from linked investigations into the escalation. */
+  copied: number;
+  /** Attachments that needed copying but could not be written. */
+  failed: number;
 }

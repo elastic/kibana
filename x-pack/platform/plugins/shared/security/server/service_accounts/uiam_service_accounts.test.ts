@@ -11,7 +11,7 @@ import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
-import type { Logger } from '@kbn/logging';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import type {
   CheckPrivileges,
   CheckPrivilegesResponse,
@@ -29,9 +29,9 @@ import type { SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import {
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
-  SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
 } from '../../common/service_accounts';
+import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import type { UiamServiceAccount, UiamServicePublic } from '../uiam';
 import { uiamServiceMock } from '../uiam/uiam_service.mock';
 
@@ -41,8 +41,10 @@ describe('UiamServiceAccounts', () => {
   let mockUiam: jest.Mocked<UiamServicePublic>;
   let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
   let mockCheckPrivilegesWithRequest: jest.Mocked<CheckPrivilegesWithRequest>;
-  let logger: Logger;
+  let logger: MockedLogger;
   let getCurrentUser: jest.Mock<AuthenticatedUser | null, [KibanaRequest]>;
+  let audit: ReturnType<typeof auditServiceMock.create>;
+  let auditLogger: ReturnType<typeof auditLoggerMock.create>;
 
   const clusterPrivilegesResponse = (authorized: boolean): CheckPrivilegesResponse => ({
     hasAllRequested: authorized,
@@ -96,10 +98,17 @@ describe('UiamServiceAccounts', () => {
     ],
   };
 
+  /** A UIAM refusal as `UiamService` surfaces it: a Boom carrying UIAM's error payload. */
+  const uiamRefusal = (code: string, statusCode = 400) => {
+    const error = new Boom.Boom('[code/type] upstream wording', { statusCode });
+    Object.assign(error.output.payload, { error: { code, message: 'upstream wording' } });
+    return error;
+  };
+
   beforeEach(() => {
     mockLicense = licenseMock.create();
     mockLicense.isEnabled.mockReturnValue(true);
-    logger = loggingSystemMock.create().get('service-accounts');
+    logger = loggingSystemMock.create().get('service-accounts') as MockedLogger;
     mockUiam = uiamServiceMock.create();
     getCurrentUser = jest.fn().mockReturnValue(null);
     mockCheckPrivileges = {
@@ -108,6 +117,9 @@ describe('UiamServiceAccounts', () => {
       globally: jest.fn().mockResolvedValue(clusterPrivilegesResponse(true)),
     };
     mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+    auditLogger = auditLoggerMock.create();
+    audit = auditServiceMock.create();
+    audit.asScoped.mockReturnValue(auditLogger);
 
     serviceAccounts = new UiamServiceAccounts({
       logger,
@@ -115,6 +127,7 @@ describe('UiamServiceAccounts', () => {
       license: mockLicense,
       uiam: mockUiam,
       checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+      audit,
       getCurrentUser,
       cloudProjectContext: {
         organizationId: 'organization-id',
@@ -152,6 +165,55 @@ describe('UiamServiceAccounts', () => {
         },
         undefined
       );
+    });
+
+    it('appends the named platform assumers to `assumable_by` after the project', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+
+      await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+        ...createParams,
+        platformAssumers: ['relay', 'sandbox', 'relay'],
+      });
+
+      expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          assumable_by: [
+            {
+              type: 'project-service-account',
+              organization_id: 'organization-id',
+              project_type: 'security',
+              project_id: 'project-id',
+            },
+            { type: 'platform-service-account', service_account_id: 'relay-service' },
+            { type: 'platform-service-account', service_account_id: 'sandbox-api' },
+          ],
+        }),
+        undefined
+      );
+    });
+
+    it('refuses an assumer that is not in the catalog, without calling UIAM', async () => {
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          platformAssumers: ['unknown-service'],
+        } as never)
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it('ignores an `assumable_by` passed in the params', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+
+      await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+        ...createParams,
+        assumable_by: [{ type: 'platform-service-account', service_account_id: 'other-service' }],
+      } as never);
+
+      const [, body] = mockUiam.createServiceAccount.mock.calls[0];
+      expect(JSON.stringify(body)).not.toContain('other-service');
     });
 
     // UIAM counts duplicates against its 50-role cap before dropping them, so the request is
@@ -333,8 +395,8 @@ describe('UiamServiceAccounts', () => {
       }
     );
 
-    // Kibana neither consumes nor reports the rest of UIAM's payload, so drift there is not
-    // Kibana's to detect and must not fail a creation that already succeeded.
+    // The response is taken as typed. By the time it arrives the account exists, so refusing to
+    // report it would describe a failure that did not happen, to the caller and in the audit log.
     it.each<{ name: string; result: UiamServiceAccount }>([
       {
         name: 'an unsupported `assumable_by` principal',
@@ -362,39 +424,6 @@ describe('UiamServiceAccounts', () => {
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
       ).resolves.toEqual(createdAccount);
       expect(logger.error).not.toHaveBeenCalled();
-    });
-
-    // The id and the name are the only fields that cross the contract boundary, so these are the
-    // only ones worth refusing over: handing back an id Kibana just rejected would be worse than
-    // failing, even though the account does exist upstream.
-    it.each<{ name: string; result: UiamServiceAccount }>([
-      { name: 'the name is missing', result: { id: 'service-account-id' } as UiamServiceAccount },
-      {
-        name: 'the id is missing',
-        result: { ...validResponse, id: undefined } as never,
-      },
-      {
-        name: 'the id is too long',
-        result: { ...validResponse, id: 'a'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH + 1) },
-      },
-      {
-        name: 'the name is not a string',
-        result: { ...validResponse, name: 123 } as never,
-      },
-    ])('rejects with a 502 when $name', async ({ result }) => {
-      mockUiam.createServiceAccount.mockResolvedValue(result);
-
-      await expect(
-        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-      ).rejects.toMatchObject({ output: { statusCode: 502 } });
-
-      // Named in the log, since the account exists upstream and nothing else can find it now,
-      // and logged once: this is not also a failure to create the account.
-      expect(logger.error).toHaveBeenCalledTimes(1);
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('UIAM reported the created service account [nightshift-relay]')
-      );
-      expect(mockUiam.createServiceAccount).toHaveBeenCalledTimes(1);
     });
 
     it(`accepts ${UIAM_SERVICE_ACCOUNT_MAX_ROLES} distinct roles, UIAM's cap`, async () => {
@@ -475,13 +504,6 @@ describe('UiamServiceAccounts', () => {
       );
     });
 
-    /** A UIAM refusal as `UiamService` surfaces it: a Boom carrying UIAM's error payload. */
-    const uiamRefusal = (code: string, statusCode = 400) => {
-      const error = new Boom.Boom('[code/type] upstream wording', { statusCode });
-      Object.assign(error.output.payload, { error: { code, message: 'upstream wording' } });
-      return error;
-    };
-
     // UIAM's own wording is written for its clients. The first code only fires when the creator
     // has no application roles at all, so the message must not blame the roles that were asked for.
     it.each([
@@ -556,11 +578,130 @@ describe('UiamServiceAccounts', () => {
       expect(created).not.toHaveProperty('description');
       expect(mockUiam.createServiceAccount.mock.calls[0][1]).not.toHaveProperty('description');
     });
+
+    describe('audit', () => {
+      const createEvent = (outcome: 'success' | 'failure') =>
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'service_account_create',
+            category: ['iam'],
+            type: ['user', 'creation'],
+            outcome,
+          }),
+        });
+
+      it('logs a `success` event naming the account UIAM created, scoped to the request', async () => {
+        mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+        const request = createMockRequest('Bearer essu_my_token');
+
+        await serviceAccounts.create(request, createParams);
+
+        expect(audit.asScoped).toHaveBeenCalledWith(request);
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(createEvent('success'));
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            user: { target: { id: 'service-account-id', name: 'nightshift-relay' } },
+          })
+        );
+      });
+
+      it('names the platform assumers in the `success` event, without returning them', async () => {
+        mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+
+        const created = await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          platformAssumers: ['relay', 'relay'],
+        });
+
+        expect(created).not.toHaveProperty('platformAssumers');
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message:
+              'User has created service account [id=service-account-id, name=nightshift-relay] [platformAssumers=relay]',
+          })
+        );
+      });
+
+      it('logs a `success` event without `user.target.id` when UIAM omits the id', async () => {
+        mockUiam.createServiceAccount.mockResolvedValue({
+          ...validResponse,
+          id: undefined,
+        } as never);
+
+        await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams);
+
+        expect(auditLogger.log).toHaveBeenCalledWith(createEvent('success'));
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({ user: { target: { name: 'nightshift-relay' } } })
+        );
+      });
+
+      it('logs a `failure` event with the name when the caller is not authorized', async () => {
+        mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+        await expect(
+          serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
+        ).rejects.toThrow();
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(createEvent('failure'));
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            user: { target: { name: 'nightshift-relay' } },
+            error: {
+              code: 'Error',
+              message:
+                'Cannot create a service account: missing `manage_security` cluster privilege',
+            },
+          })
+        );
+      });
+
+      it('logs nothing when the request carries no authorization header', async () => {
+        await expect(serviceAccounts.create(createMockRequest(), createParams)).rejects.toThrow();
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when security features are disabled', async () => {
+        mockLicense.isEnabled.mockReturnValue(false);
+
+        await expect(
+          serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
+        ).rejects.toThrow();
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when UIAM refuses the create', async () => {
+        mockUiam.createServiceAccount.mockRejectedValue(uiamRefusal('0xF448ED', 409));
+
+        await expect(
+          serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
+        ).rejects.toMatchObject({ output: { statusCode: 409 } });
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when the name did not validate', async () => {
+        await expect(
+          serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+            ...createParams,
+            name: 'not valid!',
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+        expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('#list', () => {
     const listedAccount = {
       ...validResponse,
+      revoked: false,
       creator: {
         type: 'user' as const,
         id: 'user-id',
@@ -637,7 +778,9 @@ describe('UiamServiceAccounts', () => {
 
     it('omits the display name when UIAM reports the creator without a name', async () => {
       mockUiam.listServiceAccounts.mockResolvedValue({
-        service_accounts: [{ ...validResponse, creator: { type: 'user' as const, id: 'user-id' } }],
+        service_accounts: [
+          { ...validResponse, revoked: false, creator: { type: 'user' as const, id: 'user-id' } },
+        ],
       });
 
       const result = await serviceAccounts.list(createMockRequest('Bearer essu_my_token'));
@@ -650,6 +793,7 @@ describe('UiamServiceAccounts', () => {
         service_accounts: [
           {
             ...validResponse,
+            revoked: false,
             creator: { type: 'api-key' as const, id: 'api-key-id', description: 'nightshift key' },
           },
         ],
@@ -675,7 +819,7 @@ describe('UiamServiceAccounts', () => {
       expect(mockUiam.listServiceAccounts).not.toHaveBeenCalled();
     });
 
-    it('checks the `read_security` cluster privilege for the caller', async () => {
+    it('checks the `manage_security` cluster privilege for the caller', async () => {
       mockUiam.listServiceAccounts.mockResolvedValue({ service_accounts: [] });
       const request = createMockRequest('Bearer essu_my_token');
 
@@ -683,11 +827,11 @@ describe('UiamServiceAccounts', () => {
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
-        elasticsearch: { cluster: ['read_security'], index: {} },
+        elasticsearch: { cluster: ['manage_security'], index: {} },
       });
     });
 
-    it('rejects with a 403 when the caller lacks the `read_security` cluster privilege', async () => {
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
       mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
 
       await expect(
@@ -741,6 +885,7 @@ describe('UiamServiceAccounts', () => {
   describe('#get', () => {
     const retrievedAccount = {
       ...validResponse,
+      revoked: false,
       creator: {
         type: 'user' as const,
         id: 'user-id',
@@ -770,6 +915,7 @@ describe('UiamServiceAccounts', () => {
     it('maps an api-key creator onto an api_key binder', async () => {
       const withApiKeyCreator = {
         ...validResponse,
+        revoked: false,
         creator: {
           type: 'api-key' as const,
           id: 'api-key-id',
@@ -801,7 +947,7 @@ describe('UiamServiceAccounts', () => {
       expect(mockUiam.getServiceAccount).not.toHaveBeenCalled();
     });
 
-    it('checks the `read_security` cluster privilege for the caller', async () => {
+    it('checks the `manage_security` cluster privilege for the caller', async () => {
       mockUiam.getServiceAccount.mockResolvedValue(retrievedAccount);
       const request = createMockRequest('Bearer essu_my_token');
 
@@ -809,11 +955,11 @@ describe('UiamServiceAccounts', () => {
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
-        elasticsearch: { cluster: ['read_security'], index: {} },
+        elasticsearch: { cluster: ['manage_security'], index: {} },
       });
     });
 
-    it('rejects with a 403 when the caller lacks the `read_security` cluster privilege', async () => {
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
       mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
 
       await expect(
@@ -840,6 +986,136 @@ describe('UiamServiceAccounts', () => {
       await expect(
         serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
       ).resolves.toMatchObject({ description: 'Relays the nightshift alerts.' });
+    });
+
+    it('answers 404 for the 403 UIAM sends for an account it does not know', async () => {
+      mockUiam.getServiceAccount.mockRejectedValue(uiamRefusal('0xEDF789', 403));
+
+      await expect(
+        serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).rejects.toMatchObject({ output: { statusCode: 404 } });
+    });
+
+    it('propagates any other UIAM refusal unchanged', async () => {
+      const refusal = uiamRefusal('0x93B121', 403);
+      mockUiam.getServiceAccount.mockRejectedValue(refusal);
+
+      await expect(
+        serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).rejects.toBe(refusal);
+    });
+
+    it('answers 404 for an account UIAM still holds but has revoked', async () => {
+      mockUiam.getServiceAccount.mockResolvedValue({ ...retrievedAccount, revoked: true });
+
+      await expect(
+        serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).rejects.toMatchObject({ output: { statusCode: 404 } });
+    });
+  });
+
+  describe('#delete', () => {
+    beforeEach(() => {
+      getCurrentUser.mockReturnValue(mockAuthenticatedUser({ username: 'user-id' }));
+    });
+
+    it('rejects a credential UIAM would not accept, without revoking', async () => {
+      await expect(
+        serviceAccounts.delete(
+          createMockRequest('Basic dXNlcjpwYXNzd29yZA=='),
+          'service-account-id'
+        )
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(mockUiam.revokeServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it('rejects a request without credentials, without revoking', async () => {
+      await expect(
+        serviceAccounts.delete(createMockRequest(), 'service-account-id')
+      ).rejects.toMatchObject({ output: { statusCode: 401 } });
+
+      expect(mockUiam.revokeServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it('rejects a service account caller, without revoking', async () => {
+      getCurrentUser.mockReturnValue(
+        mockAuthenticatedUser({
+          username: 'caller-service-account-id',
+          authentication_provider: { type: 'http', name: '__http__' },
+          authentication_realm: { type: '_cloud_service_account', name: '_cloud_service_account' },
+        })
+      );
+
+      await expect(
+        serviceAccounts.delete(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).rejects.toMatchObject({
+        output: {
+          statusCode: 400,
+          payload: {
+            message:
+              'Cannot delete a service account: a service account cannot delete service ' +
+              'accounts. Make the request from a user session',
+          },
+        },
+      });
+
+      expect(mockUiam.revokeServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it('revokes the account in UIAM as Kibana, not as the user', async () => {
+      const request = createMockRequest('Bearer essu_my_token');
+
+      await expect(serviceAccounts.delete(request, 'service-account-id')).resolves.toEqual({
+        warnings: [],
+      });
+
+      expect(mockUiam.revokeServiceAccount).toHaveBeenCalledTimes(1);
+      expect(mockUiam.revokeServiceAccount).toHaveBeenCalledWith('service-account-id');
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['manage_security'], index: {} },
+      });
+    });
+
+    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+
+      await expect(
+        serviceAccounts.delete(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(mockUiam.revokeServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(
+        serviceAccounts.delete(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(mockUiam.revokeServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it('answers 404 for the 403 UIAM sends for an account it does not know', async () => {
+      mockUiam.revokeServiceAccount.mockRejectedValue(uiamRefusal('0xEDF789', 403));
+
+      await expect(
+        serviceAccounts.delete(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).rejects.toMatchObject({ output: { statusCode: 404 } });
+    });
+
+    it('propagates any other UIAM refusal unchanged', async () => {
+      const refusal = uiamRefusal('0x93B121', 403);
+      mockUiam.revokeServiceAccount.mockRejectedValue(refusal);
+
+      await expect(
+        serviceAccounts.delete(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).rejects.toBe(refusal);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to delete service account')
+      );
     });
   });
 
@@ -943,7 +1219,12 @@ describe('UiamServiceAccounts', () => {
           mockUiam.exchangeServiceAccountToken.mockRejectedValue(cause);
           await expect(
             serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-          ).rejects.toMatchObject({ cause, retryable: false });
+          ).rejects.toMatchObject({
+            cause,
+            retryable: false,
+            statusCode,
+            message: `Error occurred during service account token exchange (status ${statusCode}).`,
+          });
         }
       );
 
@@ -979,7 +1260,12 @@ describe('UiamServiceAccounts', () => {
         mockUiam.exchangeServiceAccountToken.mockRejectedValue(cause);
         await expect(
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-        ).rejects.toMatchObject({ cause, retryable: true });
+        ).rejects.toMatchObject({
+          cause,
+          retryable: true,
+          statusCode: undefined,
+          message: 'Error occurred during service account token exchange.',
+        });
       });
 
       it.each(['ENOTFOUND', 'CERT_HAS_EXPIRED', 'UNABLE_TO_VERIFY_LEAF_SIGNATURE', 'UNCLASSIFIED'])(

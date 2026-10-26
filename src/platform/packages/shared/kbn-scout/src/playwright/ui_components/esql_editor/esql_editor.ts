@@ -52,6 +52,10 @@ export class EsqlEditor {
   readonly menuPopover: Locator;
   readonly quickReferenceFlyout: Locator;
   readonly historyPanel: Locator;
+  /** Footer button that opens the errors popover; only rendered while the query has errors. */
+  readonly footerErrorButton: Locator;
+  /** Content of the footer errors popover, rendered in a portal. */
+  readonly footerErrorContent: Locator;
   /** Lookup-join index editor flyout, opened from this editor. */
   readonly lookupIndexEditor: LookupIndexEditor;
 
@@ -60,6 +64,7 @@ export class EsqlEditor {
   private readonly helpButton: Locator;
   private readonly historyToggle: Locator;
   private readonly resizeHandle: Locator;
+  private readonly formatButton: Locator;
 
   constructor(private readonly page: ScoutPage, containerTestSubj?: string) {
     this.scope = containerTestSubj ? page.testSubj.locator(containerTestSubj) : page;
@@ -67,7 +72,7 @@ export class EsqlEditor {
 
     this.editor = this.scope.getByTestId('ESQLEditor');
     this.content = this.editor.locator('.view-lines');
-    this.input = this.editor.locator('textarea');
+    this.input = this.editor.locator(this.codeEditor.editorInputLocator);
     this.runButton = this.scope.getByTestId('ESQLEditor-run-query-button');
     this.queryStatsTotalDocumentsProcessed = this.scope.getByTestId(
       'ESQLEditor-queryStats-totalDocumentsProcessed'
@@ -77,6 +82,9 @@ export class EsqlEditor {
     this.historyToggle = this.scope.getByTestId('ESQLEditor-toggle-query-history-icon');
     this.historyPanel = this.scope.getByTestId('ESQLEditor-history-container');
     this.resizeHandle = this.scope.getByTestId('ESQLEditor-resize');
+    this.formatButton = this.scope.getByTestId('ESQLEditor-toggleWordWrap');
+    this.footerErrorButton = this.scope.getByTestId('ESQLEditor-footerPopoverButton-error');
+    this.footerErrorContent = page.testSubj.locator('ESQLEditor-errors-warnings-content');
 
     this.menuPopover = page.testSubj.locator('esql-menu-popover');
     this.quickReferenceFlyout = page.testSubj.locator('esqlInlineDocumentationFlyout');
@@ -118,6 +126,39 @@ export class EsqlEditor {
     await this.runQuery();
   }
 
+  /**
+   * Clears this editor (and only this one) and types `query` character by character, firing
+   * the per-keystroke events that auto-suggest listens to. `setQuery` replaces the model value
+   * in one go, so it doesn't trigger auto-suggest.
+   */
+  async typeQuery(query: string): Promise<void> {
+    await this.setQuery('');
+    await this.codeEditor.simulateTypingByContainer(this.editor, query);
+  }
+
+  /**
+   * Clicks the editor to give it keyboard focus. Goes through the code editor's "activate edit
+   * mode" hint overlay, which sits on top of the input and intercepts clicks aimed at it.
+   */
+  async focus(): Promise<void> {
+    await this.editor.click();
+  }
+
+  /** Removes keyboard focus from the editor input. */
+  async blur(): Promise<void> {
+    await this.input.blur();
+  }
+
+  /** Clicks the footer button that prettifies the query. */
+  async formatQuery(): Promise<void> {
+    await this.formatButton.click();
+  }
+
+  /** Ghost text of the inline suggestion; a Monaco decoration, so a CSS class is the only hook. */
+  getInlineSuggestion(): Locator {
+    return this.editor.locator('.ghost-text-decoration');
+  }
+
   /** Moves the cursor after `text` (if given) and opens Monaco's suggestion widget. */
   async triggerSuggest(text?: string): Promise<void> {
     const modelIndex = await this.codeEditor.getModelIndexByContainer(this.editor);
@@ -139,7 +180,7 @@ export class EsqlEditor {
   async selectSuggestion(query: string, label: string): Promise<void> {
     await this.setQuery(query);
 
-    const suggestion = this.getSuggestWidget().locator('.monaco-list-row', { hasText: label });
+    const suggestion = await this.codeEditor.getCodeEditorSuggestionItem(label);
     const deadline = Date.now() + SELECT_SUGGESTION_TIMEOUT_MS;
     for (;;) {
       await this.triggerSuggest(query);

@@ -14,12 +14,14 @@ import { streamsInvestigationManagementSkill } from './investigation_management'
 import { registerSignificantEventsSkills } from './register_skills';
 import { KI_QUERY_GENERATION_SKILL_ID } from './ki_query_generation';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
+import { nightshiftSourcesManagementSkill } from './nightshift_sources_management';
 import { significantEventsManagementSkill } from './significant_events_management';
 import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
 import {
   FEATURE_IDENTIFICATION_SKILL_ID,
   FINALIZE_FEATURES_TOOL_ID,
 } from './feature_identification';
+import { createSignificantEventsServer } from '../utils/test_helpers';
 
 const KI_IDENTIFICATION_SKILL_ID = 'ki-identification-management';
 const INVESTIGATION_SKILL_ID = streamsInvestigationManagementSkill.id;
@@ -28,6 +30,7 @@ const INVESTIGATION_SKILL_ID = streamsInvestigationManagementSkill.id;
 // `ki-identification-management` is only added when a KI onboarding client is present.
 const CORE_SKILL_IDS = [
   knowledgeIndicatorsManagementSkill.id,
+  nightshiftSourcesManagementSkill.id,
   KI_QUERY_GENERATION_SKILL_ID,
   significantEventsKIGroundingSkill.id,
   significantEventsManagementSkill.id,
@@ -49,6 +52,7 @@ const createOptions = (
     agentBuilder,
     telemetry,
     getScopedClients: jest.fn(),
+    server: createSignificantEventsServer({ featurePrivilege: 'all' }),
     maintenanceService,
     logger: loggerMock.create(),
     isAvailable: jest.fn().mockResolvedValue(true),

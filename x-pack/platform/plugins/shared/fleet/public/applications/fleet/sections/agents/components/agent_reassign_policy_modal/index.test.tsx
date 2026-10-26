@@ -84,6 +84,28 @@ describe('AgentReassignAgentPolicyModal', () => {
     });
   });
 
+  it('does not offer agentless policies', async () => {
+    mockPolicies([
+      POLICY_A,
+      POLICY_B,
+      {
+        id: 'policy-agentless',
+        name: 'Agentless Policy',
+        is_managed: false,
+        supports_agentless: true,
+      },
+    ] as any);
+    const { utils } = render({ agents: [{ id: 'agent-1', policy_id: 'policy-a' } as any] });
+
+    const combobox = utils.getByRole('combobox');
+    act(() => {
+      fireEvent.change(combobox, { target: { value: 'Polic' } });
+    });
+
+    expect(await utils.findByText('Policy B')).toBeInTheDocument();
+    expect(utils.queryByText('Agentless Policy')).not.toBeInTheDocument();
+  });
+
   describe('single agent', () => {
     const singleAgent = [{ id: 'agent-1', policy_id: 'policy-a' } as any];
 
@@ -359,6 +381,24 @@ describe('AgentReassignAgentPolicyModal', () => {
         expect(mockSendPostBulkAgentReassign).toHaveBeenCalled();
       });
       expect(mockSendPostAgentReassign).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('policy ordering', () => {
+    it('lists policies alphabetically, case-insensitive', async () => {
+      mockPolicies([
+        { id: 'p-c', name: 'charlie', is_managed: false },
+        { id: 'p-a', name: 'Alpha', is_managed: false },
+        { id: 'p-b', name: 'bravo', is_managed: false },
+      ]);
+      const { utils } = render({ agents: [{ id: 'agent-1', policy_id: 'p-a' } as any] });
+
+      act(() => {
+        fireEvent.click(utils.getByTestId('comboBoxToggleListButton'));
+      });
+
+      const options = await utils.findAllByRole('option');
+      expect(options.map((o) => o.textContent)).toEqual(['Alpha', 'bravo', 'charlie']);
     });
   });
 });

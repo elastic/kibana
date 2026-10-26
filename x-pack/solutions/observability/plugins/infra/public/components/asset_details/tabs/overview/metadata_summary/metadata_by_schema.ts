@@ -7,6 +7,7 @@
 
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraMetadata } from '../../../../../../common/http_api';
+import { firstValue } from '../../../../../utils/first_value';
 import type { MetadataData } from './metadata_summary_list';
 
 const ecsHostExtendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
@@ -78,17 +79,28 @@ const ecsContainerMetadataData = (metadataInfo: InfraMetadata['info']): Metadata
   },
 ];
 
+// OpenTelemetry data streams surface their resource attributes under ECS names through the
+// `semconv-resource-to-ecs@mappings` aliases and the `resource.attributes` passthrough object, so the
+// ECS-shaped path is read first and the raw `resource.attributes.*` path is kept as a fallback.
 const semConvHostExtendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   {
     field: 'cloudProvider',
-    value: metadataInfo?.resource?.attributes?.cloud?.provider,
+    value: firstValue(
+      metadataInfo?.cloud?.provider,
+      metadataInfo?.resource?.attributes?.cloud?.provider
+    ),
     tooltipFieldLabel: 'cloud.provider',
     tooltipLink:
       'https://opentelemetry.io/docs/specs/semconv/registry/attributes/cloud/#cloud-provider',
   },
   {
     field: 'operatingSystem',
-    value: metadataInfo?.resource?.attributes?.os?.name,
+    value: firstValue(
+      metadataInfo?.host?.os?.name,
+      metadataInfo?.resource?.attributes?.os?.name,
+      metadataInfo?.host?.os?.platform,
+      metadataInfo?.resource?.attributes?.os?.type
+    ),
     tooltipFieldLabel: 'os.name',
     tooltipLink: 'https://opentelemetry.io/docs/specs/semconv/registry/attributes/os/#os-name',
   },
@@ -97,13 +109,16 @@ const semConvHostExtendedMetadata = (metadataInfo: InfraMetadata['info']): Metad
 const semConvHostMetadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   {
     field: 'hostIp',
-    value: metadataInfo?.resource?.attributes?.host?.ip,
+    value: firstValue(metadataInfo?.host?.ip, metadataInfo?.resource?.attributes?.host?.ip),
     tooltipFieldLabel: 'host.ip',
     tooltipLink: 'https://opentelemetry.io/docs/specs/semconv/registry/attributes/host/#host-ip',
   },
   {
     field: 'hostOsVersion',
-    value: metadataInfo?.resource?.attributes?.os?.version,
+    value: firstValue(
+      metadataInfo?.host?.os?.version,
+      metadataInfo?.resource?.attributes?.os?.version
+    ),
     tooltipFieldLabel: 'os.version',
     tooltipLink: 'https://opentelemetry.io/docs/specs/semconv/registry/attributes/os/#os-version',
   },

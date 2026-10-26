@@ -265,38 +265,24 @@ describe('action policy events queries', () => {
       });
     });
 
-    describe('episodeIds', () => {
-      it('adds an AND terms filter on episode_ids when episodeIds are provided', () => {
-        const filters = filtersOf(buildShared({ episodeIds: ['ep-1', 'ep-2'] }));
+    describe('alertIds', () => {
+      it('adds an AND terms filter on alert_ids when alertIds are provided', () => {
+        const filters = filtersOf(buildShared({ alertIds: ['alert-1', 'alert-2'] }));
         expect(filters).toEqual(
           expect.arrayContaining([
-            { terms: { 'kibana.alerting_v2.dispatcher.episode_ids': ['ep-1', 'ep-2'] } },
+            { terms: { 'kibana.alerting_v2.dispatcher.alert_ids': ['alert-1', 'alert-2'] } },
           ])
         );
       });
 
-      it('omits the episode_ids terms filter when episodeIds is not provided', () => {
-        const filters = filtersOf(buildShared());
-        expect(
-          filters.find((clause) =>
-            Boolean(
-              clause?.terms &&
-                'kibana.alerting_v2.dispatcher.episode_ids' in (clause.terms as object)
-            )
-          )
-        ).toBeUndefined();
-      });
+      it.each([
+        ['not provided', undefined],
+        ['empty', []],
+      ])('omits the alert id clause when alertIds is %s', (_, alertIds) => {
+        const filters = filtersOf(buildShared({ alertIds }));
 
-      it('omits the episode_ids terms filter when episodeIds is empty', () => {
-        const filters = filtersOf(buildShared({ episodeIds: [] }));
-        expect(
-          filters.find((clause) =>
-            Boolean(
-              clause?.terms &&
-                'kibana.alerting_v2.dispatcher.episode_ids' in (clause.terms as object)
-            )
-          )
-        ).toBeUndefined();
+        expect(filters.length).toBe(filtersOf(buildShared()).length);
+        expect(JSON.stringify(filters)).not.toContain('alert_ids');
       });
     });
 

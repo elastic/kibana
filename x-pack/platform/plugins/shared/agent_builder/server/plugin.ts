@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  CoreStart,
-  KibanaRequest,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { ConversationUpdatedOptIn } from '@kbn/agent-builder-server';
 import {
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
   SUPPORTED_IMAGE_MIME_TYPES,
@@ -57,7 +51,7 @@ import { registerInferenceFeatures } from './inference_features';
 import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
 import { registerAttachmentWorkflowSteps, registerConversationWorkflowSteps } from './workflows';
 import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
-import { AGENTBUILDER_FEATURE_ID } from '../common/features';
+import { apiPrivileges } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
 import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
 import { registerDeductiveAgent } from './services/execution/run_agent/deductive/register_deductive_agent';
@@ -84,7 +78,7 @@ export class AgentBuilderPlugin
   private teardownTracing?: () => Promise<void>;
   private startDeps?: AgentBuilderStartDependencies;
   private readonly conversationEventBus = createConversationEventBus();
-  private isExperimentalEnabled?: (request: KibanaRequest) => Promise<boolean>;
+  private readonly conversationUpdatedOptIns: ConversationUpdatedOptIn[] = [];
   private recommendedEndpointsPoller?: RecommendedEndpointsPoller;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
@@ -105,11 +99,8 @@ export class AgentBuilderPlugin
       allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
       maxSizeBytes: MAX_IMAGE_BYTES,
       http: {
-        create: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        download: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        getById: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        list: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        delete: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        create: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+        download: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     });
 
@@ -181,14 +172,6 @@ export class AgentBuilderPlugin
       agents: serviceSetups.agents,
       register: this.config.deductive?.register ?? false,
     });
-
-    this.isExperimentalEnabled = async (request: KibanaRequest): Promise<boolean> => {
-      const [coreStart] = await coreSetup.getStartServices();
-      const soClient = coreStart.savedObjects.getScopedClient(request);
-      return coreStart.uiSettings
-        .asScopedToClient(soClient)
-        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-    };
 
     setupDeps.workflowsExtensions.registerStepDefinition(
       getRunAgentStepDefinition(this.serviceManager)
@@ -323,6 +306,7 @@ export class AgentBuilderPlugin
       },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
+        registerCycleHook: serviceSetups.hooks.registerCycleHook.bind(serviceSetups.hooks),
       },
       skills: {
         register: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
@@ -334,6 +318,15 @@ export class AgentBuilderPlugin
         register: serviceSetups.conversationTemplates.register.bind(
           serviceSetups.conversationTemplates
         ),
+      },
+      conversations: {
+        enableUpdatedTrigger: (optIn) => {
+          this.conversationUpdatedOptIns.push(optIn);
+        },
+      },
+      callbacks: {
+        registerConversationResolver: serviceSetups.callbacks.registerConversationResolver,
+        registerTransport: serviceSetups.callbacks.registerTransport,
       },
       topSnippets: this.config.topSnippets,
     };
@@ -355,6 +348,7 @@ export class AgentBuilderPlugin
       searchInferenceEndpoints,
       licensing,
       security: securityPlugin,
+      isomer,
     } = startDeps;
     const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
@@ -391,6 +385,7 @@ export class AgentBuilderPlugin
         airgapped: this.env.airgapped,
       }),
       deductiveRegister: this.config.deductive?.register ?? false,
+      isomer,
       conversationEventBus: this.conversationEventBus,
     });
 
@@ -398,7 +393,7 @@ export class AgentBuilderPlugin
       this.conversationEventBus,
       startDeps.workflowsExtensions,
       this.logger,
-      this.isExperimentalEnabled!
+      this.conversationUpdatedOptIns
     );
 
     const {
@@ -423,6 +418,9 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       searchInferenceEndpoints,
       logger: this.logger.get('model-provider'),
+      spaces,
+      security,
+      elasticsearch,
     });
 
     this.recommendedEndpointsPoller = new RecommendedEndpointsPoller({
@@ -461,7 +459,7 @@ export class AgentBuilderPlugin
         getScopedClient: async ({ request }) => {
           const client = await conversations.getScopedClient({ request });
           const agentRegistry = await agents.getRegistry({ request });
-          return createConversationPublicClient({ client, agentRegistry });
+          return createConversationPublicClient({ client, agentRegistry, source: 'server_api' });
         },
       },
       attachments: {
