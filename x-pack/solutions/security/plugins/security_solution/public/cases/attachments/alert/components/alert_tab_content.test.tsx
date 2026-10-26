@@ -27,8 +27,13 @@ jest.mock('@kbn/cases-plugin/common', () => ({
 jest.mock('../../../../detections/components/alerts_table', () => ({
   AlertsTable: (props: MockAlertsTableProps) => mockAlertsTable(props),
 }));
+const mockEaseAlertsTable = jest.fn((_props: MockAlertsTableProps) => (
+  <div data-test-subj="ease-alerts-table" />
+));
+let mockIsEase = false;
+
 jest.mock('../../../components/ease/wrapper', () => ({
-  EaseAlertsTable: () => <div data-test-subj="ease-alerts-table" />,
+  EaseAlertsTable: (props: MockAlertsTableProps) => mockEaseAlertsTable(props),
 }));
 jest.mock('../../../../notes/hooks/use_fetch_notes', () => ({
   useFetchNotes: () => ({ onLoad: jest.fn() }),
@@ -42,7 +47,7 @@ jest.mock('../../../../common/lib/kibana', () => {
   return {
     useKibana: () => ({
       services: {
-        application: { capabilities: { [SECURITY_FEATURE_ID]: { configurations: false } } },
+        application: { capabilities: { [SECURITY_FEATURE_ID]: { configurations: mockIsEase } } },
       },
     }),
   };
@@ -62,6 +67,22 @@ const toAlerts = (ids: string[]): TimelineItem[] =>
 describe('AlertTabContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsEase = false;
+  });
+
+  it('passes the remove actions to the EASE alerts table', () => {
+    mockIsEase = true;
+    const onRemove = jest.fn();
+    render(<AlertTabContent caseData={caseData} onRemove={onRemove} />);
+
+    const easeProps = mockEaseAlertsTable.mock.calls.at(-1)?.[0];
+    expect(easeProps?.additionalBulkActionItems).toEqual([
+      expect.objectContaining({ key: REMOVE_ALERTS_FROM_CASE_TEST_ID }),
+    ]);
+
+    easeProps?.onRemoveFromCase?.('alert-1');
+
+    expect(onRemove).toHaveBeenCalledWith({ attachmentIds: ['alert-1'] });
   });
 
   it('adds no bulk action without onRemove', () => {

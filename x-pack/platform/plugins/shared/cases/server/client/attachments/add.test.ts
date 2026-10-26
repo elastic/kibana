@@ -62,7 +62,7 @@ describe('addComment', () => {
     await expect(
       // @ts-expect-error: excess attribute
       addComment({ comment: { ...unifiedComment, foo: 'bar' }, caseId }, clientArgs)
-    ).rejects.toThrow('invalid keys "foo"');
+    ).rejects.toThrow('Excess keys are not allowed');
   });
 
   it('rejects a legacy v1 body', async () => {
