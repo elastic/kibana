@@ -13,7 +13,7 @@ import {
 } from '@kbn/significant-events-plugin/common';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import React from 'react';
-import { useMaintenanceStatus } from '../hooks/use_significant_events_maintenance';
+import { useMaintenanceStatus } from '../../data/maintenance/use_significant_events_maintenance';
 
 export const DetectionPausedCallout = () => {
   const { data: status } = useMaintenanceStatus();

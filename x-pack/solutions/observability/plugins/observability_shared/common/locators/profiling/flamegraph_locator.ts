@@ -7,11 +7,13 @@
 import qs from 'query-string';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 
 export interface FlamegraphLocatorParams extends SerializableRecord {
   kuery?: string;
   rangeFrom?: string;
   rangeTo?: string;
+  schema?: ProfilingSchema;
 }
 
 export type FlamegraphLocator = LocatorPublic<FlamegraphLocatorParams>;
@@ -19,8 +21,13 @@ export type FlamegraphLocator = LocatorPublic<FlamegraphLocatorParams>;
 export class FlamegraphLocatorDefinition implements LocatorDefinition<FlamegraphLocatorParams> {
   public readonly id = 'flamegraphLocator';
 
-  public readonly getLocation = async ({ rangeFrom, rangeTo, kuery }: FlamegraphLocatorParams) => {
-    const params = { rangeFrom, rangeTo, kuery };
+  public readonly getLocation = async ({
+    rangeFrom,
+    rangeTo,
+    kuery,
+    schema,
+  }: FlamegraphLocatorParams) => {
+    const params = { rangeFrom, rangeTo, kuery, schema };
     return {
       app: 'profiling',
       path: `/flamegraphs/flamegraph?${qs.stringify(params)}`,

@@ -119,6 +119,7 @@ export const CommandExecutionResult = memo<CommandExecutionResultProps>(
     return (
       <EuiPanel
         hasShadow={false}
+        hasBorder={false}
         paddingSize="none"
         borderRadius="none"
         color="transparent"

@@ -4,7 +4,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/packages/private/kbn-handlebars'],
 };

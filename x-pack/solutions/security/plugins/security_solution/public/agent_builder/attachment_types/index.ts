@@ -10,10 +10,10 @@ import type {
   AgentBuilderPluginStart,
 } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { CoreStart } from '@kbn/core/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, ISessionService } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -21,10 +21,7 @@ import type { Subscription } from 'rxjs';
 import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-investigations-plugin/public';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
-import {
-  ENABLE_NEW_FLYOUT_SETTING,
-  SecurityAgentBuilderAttachments,
-} from '../../../common/constants';
+import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
@@ -153,16 +150,33 @@ export const registerInvestigationIocsAttachment = ({
  * `security.search_entities`), which are gated on `entityAnalyticsEntityStoreV2`, so non-V2
  * environments never exercise this renderer even though it's registered unconditionally.
  */
+/**
+ * The impact entity opener links into Security entity flyouts, so it is registered only in
+ * Security solution spaces. If the active space can't be resolved, fall back to registering.
+ */
+const isSecuritySolutionSpace = async (spaces?: SpacesPluginStart): Promise<boolean> => {
+  if (!spaces) {
+    return true;
+  }
+  try {
+    const { solution } = await spaces.getActiveSpace();
+    return solution === 'security';
+  } catch {
+    return true;
+  }
+};
+
 export const registerEntityAttachment = ({
   attachments,
   application,
   agentBuilder,
   chrome,
   experimentalFeatures,
-  overlays,
   resolveSecurityCanvasContext,
   searchSession,
   uiSettings,
+  rendering,
+  spaces,
   registerImpactEntityOpener,
 }: {
   attachments: AttachmentServiceStartContract;
@@ -170,31 +184,28 @@ export const registerEntityAttachment = ({
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   experimentalFeatures: ExperimentalFeatures;
-  overlays: Pick<OverlayStart, 'openFlyoutTemplate'>;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
   uiSettings: IUiSettingsClient;
+  rendering: CoreStart['rendering'];
+  spaces?: SpacesPluginStart;
   registerImpactEntityOpener?: AgenticInvestigationsPublicPluginStart['registerImpactEntityOpener'];
 }): void => {
-  registerImpactEntityOpener?.((entity) => {
-    void import(
-      /* webpackChunkName: "security_impact_entity_flyout" */
-      './open_impact_entity_flyout'
-    ).then(({ openImpactEntityFlyout }) =>
-      openImpactEntityFlyout({
-        entity,
-        overlays,
-        application,
-        agentBuilder,
-        chrome,
-        isNewFlyoutEnabled:
-          !experimentalFeatures.newFlyoutSystemDisabled &&
-          (uiSettings.get<boolean>(ENABLE_NEW_FLYOUT_SETTING, true) ?? false),
-        resolveSecurityCanvasContext,
-        searchSession,
-      })
-    );
-  });
+  if (registerImpactEntityOpener) {
+    void isSecuritySolutionSpace(spaces).then((isSecuritySpace) => {
+      if (!isSecuritySpace) {
+        return;
+      }
+      registerImpactEntityOpener((entity) => {
+        void import(
+          /* webpackChunkName: "security_impact_entity_flyout" */
+          './open_impact_entity_flyout'
+        ).then(({ openImpactEntityFlyout }) =>
+          openImpactEntityFlyout({ entity, rendering, resolveSecurityCanvasContext })
+        );
+      });
+    });
+  }
 
   void import(
     /* webpackChunkName: "security_entity_attachment_rich" */

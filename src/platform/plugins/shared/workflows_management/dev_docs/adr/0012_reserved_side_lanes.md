@@ -1,7 +1,7 @@
 
 # ADR-0012 — Reserved side lanes
 
-**Status:** Accepted
+**Status:** Accepted (the pipeline and the post-dagre passes are superseded by ADR-0013; reserved lanes in `@kbn/dag-layout` remain in effect)
 **Date:** 2026-09-22
 **Deciders:** @elastic/workflows-eng
 

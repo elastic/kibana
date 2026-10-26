@@ -38,7 +38,10 @@ import {
   formatMetadataListDuration,
 } from '@kbn/alerting-v2-episodes-ui/components/details/translations';
 import { useAlertDetailsFlyoutWidth } from '@kbn/alerting-v2-episodes-ui/components/details/use_alert_details_flyout_width';
-import { CLASSIC_ALERTING_SYSTEM_NAME } from '@kbn/alerting-v2-episodes-ui/source_labels';
+import {
+  CLASSIC_SOURCE_LABEL,
+  ELASTIC_SOURCE_ICON,
+} from '@kbn/alerting-v2-episodes-ui/source_labels';
 import {
   ALERT_DURATION,
   ALERT_REASON,
@@ -300,8 +303,12 @@ export const ClassicAlertDetailsFlyout = ({
             <h2 id={flyoutTitleId}>{title}</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiBadge color="hollow" data-test-subj="classicAlertEpisodeSourceBadge">
-            {CLASSIC_ALERTING_SYSTEM_NAME}
+          <EuiBadge
+            color="hollow"
+            iconType={ELASTIC_SOURCE_ICON}
+            data-test-subj="classicAlertEpisodeSourceBadge"
+          >
+            {CLASSIC_SOURCE_LABEL}
           </EuiBadge>
           {!isLoading && !isError && alert ? (
             <>

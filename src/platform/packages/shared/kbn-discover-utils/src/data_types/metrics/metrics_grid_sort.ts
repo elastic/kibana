@@ -8,10 +8,14 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+import type {
+  METRICS_GRID_SORT_DIRECTIONS,
+  METRICS_GRID_SORT_FIELDS,
+} from '@kbn/discover-session-constants';
 
-export type MetricsGridSortField = 'alphabetically' | 'recency';
+export type MetricsGridSortField = (typeof METRICS_GRID_SORT_FIELDS)[number];
 
-export type MetricsGridSortDirection = 'asc' | 'desc';
+export type MetricsGridSortDirection = (typeof METRICS_GRID_SORT_DIRECTIONS)[number];
 
 export interface MetricsGridSort extends SerializableRecord {
   sortField: MetricsGridSortField;

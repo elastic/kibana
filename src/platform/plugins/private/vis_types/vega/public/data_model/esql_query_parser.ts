@@ -212,6 +212,7 @@ export class EsqlQueryParser {
       return await getESQLTimeField({
         query: url.query,
         http: getHttp(),
+        projectRouting: this._searchAPI.projectRouting,
       });
     } catch {
       // Http may be unavailable in some test/unit contexts

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAction, createReducer, current } from 'redux-toolkit-v1';
+import { createAction, createReducer, current } from '@reduxjs/toolkit';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
 import type { Filter, Query } from '@kbn/es-query';
@@ -1342,26 +1342,30 @@ function addInitialValueIfAvailable({
       });
 
       if (!noDatasource && activeDatasource?.initializeDimension) {
+        const initializedDatasourceState = activeDatasource.initializeDimension(
+          datasourceState,
+          layerId,
+          framePublicAPI.dataViews.indexPatterns,
+          {
+            ...info,
+            columnId: columnId || info.columnId,
+            visualizationGroups: activeVisualization.getConfiguration({
+              layerId,
+              frame: framePublicAPI,
+              state: activeVisualizationState,
+            }).groups,
+            activeVisualizationTypeId: activeVisualization.getVisualizationTypeId?.(
+              activeVisualizationState,
+              layerId
+            ),
+          }
+        );
         return {
-          activeDatasourceState: activeDatasource.initializeDimension(
-            datasourceState,
-            layerId,
-            framePublicAPI.dataViews.indexPatterns,
-            {
-              ...info,
-              columnId: columnId || info.columnId,
-              visualizationGroups: activeVisualization.getConfiguration({
-                layerId,
-                frame: framePublicAPI,
-                state: activeVisualizationState,
-              }).groups,
-              activeVisualizationTypeId: activeVisualization.getVisualizationTypeId?.(
-                activeVisualizationState,
-                layerId
-              ),
-            }
-          ),
-          activeVisualizationState,
+          activeDatasourceState: initializedDatasourceState,
+          activeVisualizationState:
+            initializedDatasourceState === datasourceState
+              ? visualizationState
+              : activeVisualizationState,
         };
       } else {
         return {

@@ -8,10 +8,16 @@
  */
 
 import type { FlakyTestBranchStats } from '@kbn/scout-reporting';
+import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
+  FLAKY_TEST_SUITE_METADATA_PREFIX,
   flakySuiteIssueTitle,
+  lastPostedAt,
   readFlakySuiteIssueMetadata,
+  refreshFlakySuiteIssueMetadata,
   renderFlakySuiteIssueBody,
+  renderFlakySuiteIssueComment,
+  type RecordedFlakySuiteIssueMetadata,
 } from './issue_body';
 import { groupIntoSuites } from './suites';
 import { flakyReport, flakyTest, pipelineStats, SUITE_PATH } from './test_fixtures';
@@ -494,6 +500,24 @@ describe('renderFlakySuiteIssueBody', () => {
     expect(renderFlakySuiteIssueBody(suite, { report, relatedIssues: [7, 8] })).toMatchSnapshot();
   });
 
+  it('names the closed issues it takes over from before the possibly related ones', () => {
+    const { suite, report } = singleTestReport();
+    const body = renderFlakySuiteIssueBody(suite, {
+      report,
+      relatedIssues: [9],
+      supersededIssues: [7, 8],
+    });
+
+    const superseded = body.indexOf(
+      'Previously tracked in #7, #8, closed before the suite failed again.'
+    );
+    expect(superseded).toBeGreaterThan(-1);
+    expect(body.indexOf('Possibly related: #9.')).toBeGreaterThan(superseded);
+    expect(renderFlakySuiteIssueBody(suite, { report, supersededIssues: [] })).not.toContain(
+      'Previously tracked'
+    );
+  });
+
   it('records the suite and the first report snapshot in the metadata', () => {
     const { suite, report } = singleTestReport();
     const body = renderFlakySuiteIssueBody(suite, { report });
@@ -571,5 +595,151 @@ describe('renderFlakySuiteIssueBody', () => {
       'appex-qa-serverless-kibana-scout-tests',
       'kibana-on-merge',
     ]);
+  });
+});
+
+describe('refreshing a suite issue', () => {
+  const previous: RecordedFlakySuiteIssueMetadata = {
+    'suite.filePath': SUITE_PATH,
+    'suite.title': 'Default status alert',
+    'suite.framework': 'playwright',
+    'suite.testIds': ['no-longer-flaky'],
+    'suite.branches': ['9.3'],
+    'suite.pipelines': ['kibana-on-merge', 'appex-qa-stateful-kibana-scout-tests'],
+    'report.generatedAt': '2026-09-08T09:04:41.000Z',
+    'report.count': 3,
+    'report.history': [
+      { generatedAt: '2026-09-07T09:04:41.000Z', builds: 400, failedBuilds: 20 },
+      { generatedAt: '2026-09-08T09:04:41.000Z', builds: 450, failedBuilds: 25 },
+    ],
+  };
+
+  /** The body as filed from an older report, with `previous` as its metadata. */
+  const filedBody = (metadata: RecordedFlakySuiteIssueMetadata = previous) =>
+    updateIssueMetadata(
+      '1 test in the suite appears to be flaky:\n\n| Test | Flaky branches |\n|---|---|\n| creates default alert | **`main` 5% (20 / 400)** |',
+      metadata,
+      FLAKY_TEST_SUITE_METADATA_PREFIX
+    );
+  const textOf = (body: string) => body.replace(/\n\n<!-- kibanaCiData = .* -->$/, '');
+
+  it('leaves the text as filed and only brings the metadata up to the report', () => {
+    const { suite, report } = singleTestReport();
+
+    const refreshed = refreshFlakySuiteIssueMetadata(filedBody(), suite, {
+      report,
+      previous,
+      comment: false,
+    });
+
+    expect(textOf(refreshed)).toBe(textOf(filedBody()));
+    expect(refreshed).not.toContain('49 / 509');
+    expect(readFlakySuiteIssueMetadata(refreshed)?.['report.generatedAt']).toBe(
+      '2026-09-09T09:04:41.000Z'
+    );
+  });
+
+  it('keeps the test ids and branches it recorded and moves pipelines it no longer fails on first', () => {
+    const { suite, report } = singleTestReport();
+
+    const metadata = readFlakySuiteIssueMetadata(
+      refreshFlakySuiteIssueMetadata(filedBody(), suite, { report, previous, comment: false })
+    );
+
+    expect(metadata).toEqual({
+      ...previous,
+      'suite.testIds': [suite.tests[0].testId, 'no-longer-flaky'],
+      'suite.branches': ['main', '9.3'],
+      'suite.pipelines': ['appex-qa-stateful-kibana-scout-tests', 'kibana-on-merge'],
+      'report.generatedAt': '2026-09-09T09:04:41.000Z',
+      'report.count': 4,
+      'report.history': [
+        ...previous['report.history'],
+        { generatedAt: '2026-09-09T09:04:41.000Z', builds: 509, failedBuilds: 49 },
+      ],
+    });
+  });
+
+  it('records this report as the last comment when the refresh comments, else keeps the last one', () => {
+    const { suite, report } = singleTestReport();
+    const commented = { ...previous, 'report.commentedAt': '2026-09-08T09:04:41.000Z' };
+
+    const commenting = readFlakySuiteIssueMetadata(
+      refreshFlakySuiteIssueMetadata(filedBody(), suite, { report, previous, comment: true })
+    );
+    const silent = readFlakySuiteIssueMetadata(
+      refreshFlakySuiteIssueMetadata(filedBody(commented), suite, {
+        report,
+        previous: commented,
+        comment: false,
+      })
+    );
+
+    expect(commenting?.['report.commentedAt']).toBe('2026-09-09T09:04:41.000Z');
+    expect(silent?.['report.commentedAt']).toBe('2026-09-08T09:04:41.000Z');
+  });
+
+  it('takes the report that filed the issue as the last one posted until a comment is recorded', () => {
+    expect(lastPostedAt(previous)).toBe('2026-09-07T09:04:41.000Z');
+    expect(lastPostedAt({ ...previous, 'report.commentedAt': '2026-09-08T09:04:41.000Z' })).toBe(
+      '2026-09-08T09:04:41.000Z'
+    );
+    expect(lastPostedAt({ ...previous, 'report.history': [] })).toBeUndefined();
+  });
+
+  it('counts the reports of an issue filed before the count was recorded and caps the history', () => {
+    const { suite, report } = singleTestReport();
+    const history = Array.from({ length: 30 }, (_, day) => ({
+      generatedAt: new Date(Date.UTC(2026, 7, day + 1)).toISOString(),
+      builds: 100,
+      failedBuilds: day,
+    }));
+    const uncounted = { ...previous, 'report.count': undefined, 'report.history': history };
+
+    const metadata = readFlakySuiteIssueMetadata(
+      refreshFlakySuiteIssueMetadata(filedBody(uncounted), suite, {
+        report,
+        previous: uncounted,
+        comment: false,
+      })
+    );
+
+    expect(metadata?.['report.count']).toBe(31);
+    expect(metadata?.['report.history']).toHaveLength(30);
+    expect(metadata?.['report.history'][0]).toEqual(history[1]);
+    expect(metadata?.['report.history'][29].generatedAt).toBe('2026-09-09T09:04:41.000Z');
+  });
+
+  it("comments with the report's numbers for the suite, then how to skip it", () => {
+    const { suite, report } = singleTestReport();
+
+    const comment = renderFlakySuiteIssueComment(suite, { report, reopened: false });
+
+    expect(comment).toMatch(
+      /^This test suite still appears to be flaky, with 1 flaky test over 2–9 Sep 2026:\n\n\| Test \| Flaky branches \| Dashboard \|\n/
+    );
+    for (const section of [
+      '#### Failures by Error Message',
+      '#### Failures by Branch',
+      '#### Failures by Target',
+      '#### Failures by Pipeline',
+    ]) {
+      expect(comment).toContain(section);
+    }
+    // the suite's details and the metadata are the body's, which is left as filed
+    expect(comment).not.toContain('### Suite');
+    expect(comment).not.toContain('kibanaCiData');
+    expect(comment).toMatch(
+      /\n\n> \[!TIP\]\n> Review the failures\. .*`\/skip` it, or skip the test case manually\.$/
+    );
+    expect(comment).toMatchSnapshot();
+  });
+
+  it('says why the issue is reopened and counts the tests', () => {
+    const { suite, report } = multiTestReport();
+
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: true })).toMatch(
+      /^This test suite appears to be flaky again after this issue was closed, with 3 flaky tests over 2–9 Sep 2026:\n\n\| Test \|/
+    );
   });
 });

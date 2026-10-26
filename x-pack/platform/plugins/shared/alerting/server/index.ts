@@ -41,6 +41,7 @@ export { DEFAULT_AAD_CONFIG } from './types';
 export { RULE_SAVED_OBJECT_TYPE, API_KEY_PENDING_INVALIDATION_TYPE } from './saved_objects';
 export { RuleNotifyWhen } from '../common';
 export type { AlertingServerSetup, AlertingServerStart } from './plugin';
+export type { AlertStatusChangedOptIn } from './lib/workflow_extensions/alert_status_changed_opt_in';
 export type {
   RuleQueryInspectorFn,
   RuleQueryInspectorResponse,

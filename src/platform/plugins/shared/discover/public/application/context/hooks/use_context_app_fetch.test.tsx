@@ -59,10 +59,8 @@ const initDefaults = (
   predecessorCount = 2,
   successorCount = 2
 ) => {
-  const dangerNotification = jest.fn();
   const services = createDiscoverServicesMock();
 
-  services.toastNotifications.addDanger = dangerNotification;
   services.uiSettings.get = ((key: string) => {
     if (key === CONTEXT_TIE_BREAKER_FIELDS_SETTING) {
       return tieBreakerFields;
@@ -70,7 +68,6 @@ const initDefaults = (
   }) as unknown as DiscoverServices['uiSettings']['get'];
 
   const props = {
-    dangerNotification,
     props: {
       anchorId: 'mock_anchor_id',
       dataView: { ...dataViewWithTimefieldMock, id: dataViewId },
@@ -99,7 +96,6 @@ const initDefaults = (
         <DiscoverTestProvider services={services}>{children}</DiscoverTestProvider>
       ),
     }).result,
-    dangerNotification,
   };
 };
 
@@ -143,7 +139,7 @@ describe('test useContextAppFetch', () => {
   });
 
   it('should set anchorStatus to failed when invalid dataViewId provided', async () => {
-    const { result, dangerNotification } = initDefaults(['_doc'], '');
+    const { result } = initDefaults(['_doc'], '');
 
     expect(result.current.fetchedState.anchorStatus.value).toBe(LoadingStatus.UNINITIALIZED);
 
@@ -151,9 +147,9 @@ describe('test useContextAppFetch', () => {
       await result.current.fetchAllRows();
     });
 
-    expect(dangerNotification.mock.calls.length).toBe(1);
     expect(result.current.fetchedState.anchorStatus.value).toBe(LoadingStatus.FAILED);
     expect(result.current.fetchedState.anchorStatus.reason).toBe(FailureReason.UNKNOWN);
+    expect(result.current.fetchedState.anchorStatus.error).toBeInstanceOf(Error);
     expect(result.current.fetchedState.anchor).toEqual({});
     expect(result.current.fetchedState.predecessors).toEqual([]);
     expect(result.current.fetchedState.successors).toEqual([]);
@@ -176,7 +172,7 @@ describe('test useContextAppFetch', () => {
   });
 
   it('should set context rows statuses to failed when invalid dataViewId provided', async () => {
-    const { result, dangerNotification } = initDefaults(['_doc'], '');
+    const { result } = initDefaults(['_doc'], '');
 
     expect(result.current.fetchedState.predecessorsStatus.value).toBe(LoadingStatus.UNINITIALIZED);
     expect(result.current.fetchedState.successorsStatus.value).toBe(LoadingStatus.UNINITIALIZED);
@@ -185,11 +181,36 @@ describe('test useContextAppFetch', () => {
       await result.current.fetchContextRows(mockAnchorHit);
     });
 
-    expect(dangerNotification.mock.calls.length).toBe(2); // for successors and predecessors
     expect(result.current.fetchedState.predecessorsStatus.value).toBe(LoadingStatus.FAILED);
     expect(result.current.fetchedState.successorsStatus.value).toBe(LoadingStatus.FAILED);
+    expect(result.current.fetchedState.predecessorsStatus.reason).toBe(FailureReason.UNKNOWN);
     expect(result.current.fetchedState.successorsStatus.reason).toBe(FailureReason.UNKNOWN);
-    expect(result.current.fetchedState.successorsStatus.reason).toBe(FailureReason.UNKNOWN);
+    expect(result.current.fetchedState.predecessorsStatus.error).toBeInstanceOf(Error);
+    expect(result.current.fetchedState.successorsStatus.error).toBeInstanceOf(Error);
+    expect(result.current.fetchedState.predecessors).toEqual([]);
+    expect(result.current.fetchedState.successors).toEqual([]);
+  });
+
+  it('should clear previously fetched context rows when fetching fails', async () => {
+    const { result } = initDefaults(['_doc']);
+
+    await act(async () => {
+      await result.current.fetchContextRows(mockAnchorHit);
+    });
+
+    expect(result.current.fetchedState.predecessors).toEqual(mockPredecessorHits);
+    expect(result.current.fetchedState.successors).toEqual(mockSuccessorHits);
+
+    mockFetchSurroundingDocs.mockImplementation(() => {
+      throw new Error('Something went wrong');
+    });
+
+    await act(async () => {
+      await result.current.fetchContextRows(mockAnchorHit);
+    });
+
+    expect(result.current.fetchedState.predecessorsStatus.value).toBe(LoadingStatus.FAILED);
+    expect(result.current.fetchedState.successorsStatus.value).toBe(LoadingStatus.FAILED);
     expect(result.current.fetchedState.predecessors).toEqual([]);
     expect(result.current.fetchedState.successors).toEqual([]);
   });

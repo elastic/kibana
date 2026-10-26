@@ -21,6 +21,23 @@ const isConnectorSpecWithEvents = (spec: ConnectorSpec): spec is ConnectorSpecWi
   connectorSpecHasEvents(spec);
 
 /**
+ * Connector catalogs append ` (v2)` so a new type can sit next to a legacy one.
+ * The trigger menu has a single entry per connector, so that suffix is omitted.
+ */
+const connectorTriggerDisplayName = (displayName: string): string =>
+  displayName.replace(/ \(v\d+\)$/, '');
+
+/**
+ * Menu groups and autocomplete read this title. The ` - ` separator is the same
+ * one the actions menu uses to name a trigger group
+ */
+const formatConnectorEventTriggerTitle = (displayName: string, eventTitle: string): string =>
+  i18n.translate('workflows.triggers.connectorEvent.displayNameLabel', {
+    defaultMessage: '{displayName} - {eventTitle}',
+    values: { displayName: connectorTriggerDisplayName(displayName), eventTitle },
+  });
+
+/**
  * Hub/bridge fields always present on connector-event payloads at emit time.
  * Spec `eventSchema` is the spoke mapping only (e.g. `body`); Workflows must
  * accept the enriched object or `emitEvent` validation rejects the event.
@@ -28,17 +45,17 @@ const isConnectorSpecWithEvents = (spec: ConnectorSpec): spec is ConnectorSpecWi
 export const toConnectorEventTriggerSchema = (specEventSchema: z.ZodObject): z.ZodObject =>
   specEventSchema.extend({
     connectorId: z.string().describe(
-      i18n.translate('workflowsManagement.triggers.connectorEvent.connectorIdDescription', {
+      i18n.translate('workflows.triggers.connectorEvent.connectorIdDescription', {
         defaultMessage: 'Id of the connector instance that received this event.',
       })
     ),
     connectorTypeId: z.string().describe(
-      i18n.translate('workflowsManagement.triggers.connectorEvent.connectorTypeIdDescription', {
+      i18n.translate('workflows.triggers.connectorEvent.connectorTypeIdDescription', {
         defaultMessage: 'Connector type id (for example .inboundWebhook).',
       })
     ),
     spaceId: z.string().describe(
-      i18n.translate('workflowsManagement.triggers.connectorEvent.spaceIdDescription', {
+      i18n.translate('workflows.triggers.connectorEvent.spaceIdDescription', {
         defaultMessage: 'Kibana space of the connector instance.',
       })
     ),
@@ -46,7 +63,7 @@ export const toConnectorEventTriggerSchema = (specEventSchema: z.ZodObject): z.Z
       .string()
       .optional()
       .describe(
-        i18n.translate('workflowsManagement.triggers.connectorEvent.correlationKeyDescription', {
+        i18n.translate('workflows.triggers.connectorEvent.correlationKeyDescription', {
           defaultMessage: 'Optional correlation key supplied by the connector for this ingest.',
         })
       ),
@@ -66,7 +83,7 @@ export const getConnectorEventTriggerDefinitions = ({
   return specs.filter(isConnectorSpecWithEvents).flatMap((spec) =>
     Object.values(spec.events.definitions).map((eventDefinition) => ({
       id: eventDefinition.eventId,
-      title: eventDefinition.title,
+      title: formatConnectorEventTriggerTitle(spec.metadata.displayName, eventDefinition.title),
       description: eventDefinition.description,
       eventSchema: toConnectorEventTriggerSchema(eventDefinition.eventSchema),
       stability: 'tech_preview' as const,

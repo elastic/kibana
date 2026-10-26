@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/apm-plugin'
   - '@kbn/apm-sources-access-plugin'
   - '@kbn/server-route-repository'
+  - '@kbn/std'
   - '@kbn/synthtrace'
   - '@kbn/test-suites-xpack-platform'
   - '@kbn/tooling-log'
@@ -92,6 +93,7 @@ dependsOn:
   - '@kbn/content-packs-schema'
   - '@kbn/streamlang'
   - '@kbn/ai-anonymization-common'
+  - '@kbn/zod'
 tags:
   - test-helper
   - package

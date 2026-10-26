@@ -8,26 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  isWellKnownWorkflowTriggerSource,
-  type WellKnownWorkflowTriggerSource,
-} from '@kbn/workflows';
-import { getTriggerLabel } from '../../widgets/worflows_triggers_list/worflows_triggers_list';
+import { triggerSchemas } from '../../trigger_schemas';
 
-const WELL_KNOWN_TRIGGER_LABELS: Record<WellKnownWorkflowTriggerSource, string> = {
-  manual: i18n.translate('workflowsManagement.executionsPage.trigger.manual', {
-    defaultMessage: 'Manual',
-  }),
-  scheduled: i18n.translate('workflowsManagement.executionsPage.trigger.schedule', {
-    defaultMessage: 'Schedule',
-  }),
-  alert: i18n.translate('workflowsManagement.executionsPage.trigger.alert', {
-    defaultMessage: 'Alert',
-  }),
-  'workflow-step': i18n.translate('workflowsManagement.executionsPage.trigger.workflowStep', {
+const WORKFLOW_STEP_TRIGGER_LABEL = i18n.translate(
+  'workflows.executionsPage.trigger.workflowStep',
+  {
     defaultMessage: 'Workflow step',
-  }),
-};
+  }
+);
 
 export const formatExecutionTriggerLabel = (
   triggeredBy: string | undefined
@@ -36,9 +24,9 @@ export const formatExecutionTriggerLabel = (
     return undefined;
   }
 
-  if (isWellKnownWorkflowTriggerSource(triggeredBy)) {
-    return WELL_KNOWN_TRIGGER_LABELS[triggeredBy];
+  if (triggeredBy === 'workflow-step') {
+    return WORKFLOW_STEP_TRIGGER_LABEL;
   }
 
-  return getTriggerLabel(triggeredBy);
+  return triggerSchemas.getTriggerName(triggeredBy);
 };

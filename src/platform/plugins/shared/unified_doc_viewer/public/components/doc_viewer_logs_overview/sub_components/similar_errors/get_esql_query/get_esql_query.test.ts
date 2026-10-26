@@ -88,6 +88,31 @@ describe('getEsqlQuery', () => {
     );
   });
 
+  it('appends a multivalue-safe MATCH level predicate after the other conditions', () => {
+    const result = renderQuery(
+      getEsqlQuery({
+        serviceName: 'payment-service',
+        message: { fieldName: 'message', value: 'Connection attempt failed' },
+        level: { fieldName: 'log.level', value: 'error' },
+      })
+    );
+
+    expect(result).toEqual(
+      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND message == "Connection attempt failed" AND MATCH(log.level, "error")`
+    );
+  });
+
+  it('does not add a level predicate when level is omitted', () => {
+    const result = renderQuery(
+      getEsqlQuery({
+        serviceName: 'payment-service',
+        message: { fieldName: 'message', value: 'Connection attempt failed' },
+      })
+    );
+
+    expect(result).not.toContain('log.level');
+  });
+
   it('returns undefined when serviceName is not provided', () => {
     const result = getEsqlQuery({});
 

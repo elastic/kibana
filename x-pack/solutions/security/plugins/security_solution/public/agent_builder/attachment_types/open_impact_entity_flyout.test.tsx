@@ -5,91 +5,122 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import { useEntityAnalyticsAgentNavigation } from './entity_analytics_agent_navigation_context';
+import React, { useEffect } from 'react';
+import { act, screen } from '@testing-library/react';
+import type { CoreStart } from '@kbn/core/public';
 import { openImpactEntityFlyout } from './open_impact_entity_flyout';
 
-jest.mock('@kbn/react-query', () => ({
-  ...jest.requireActual('@kbn/react-query'),
-  QueryClientProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+const opened = jest.fn();
 
-jest.mock('@kbn/flyout-template', () => {
-  const Passthrough = ({ children }: { children: React.ReactNode }) => <>{children}</>;
-  Passthrough.displayName = 'Passthrough';
-  return { FlyoutTemplate: Object.assign(Passthrough, { Body: Passthrough }) };
-});
-
-jest.mock('../components/security_redux_embedded_provider', () => ({
-  SecurityReduxEmbeddedProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
-jest.mock('../components/entity_card_flyout_overview_canvas', () => ({
-  EntityCardFlyoutOverviewCanvas: () => {
-    const { canNavigate } = useEntityAnalyticsAgentNavigation();
-    return <div data-test-subj="entityOverview">{canNavigate ? 'can-navigate' : 'no-nav'}</div>;
+jest.mock('./grouped_attachments/flyout_opener', () => ({
+  GroupedAttachmentFlyoutOpener: ({ descriptor }: { descriptor: unknown }) => {
+    // The real opener opens the flyout in an effect.
+    useEffect(() => {
+      opened(descriptor);
+    }, [descriptor]);
+    return (
+      <div
+        data-test-subj="groupedAttachmentFlyoutOpener"
+        data-descriptor={JSON.stringify(descriptor)}
+      />
+    );
   },
 }));
 
-jest.mock('./entity_attachment/query_client', () => ({
-  entityAttachmentQueryClient: {},
-}));
+/** Enough of the rendering service for `toMountPoint`: it only wraps the node. */
+const rendering = { addContext: (node: React.ReactNode) => <>{node}</> } as CoreStart['rendering'];
+
+const container = () =>
+  document.querySelector('[data-test-subj="securityImpactEntityFlyoutOpener"]');
 
 describe('openImpactEntityFlyout', () => {
-  const overlays = { openFlyoutTemplate: jest.fn() };
   const resolveSecurityCanvasContext = jest.fn();
-  const application = {} as ApplicationStart;
-  const base = { overlays, application, isNewFlyoutEnabled: true, resolveSecurityCanvasContext };
+  const base = { rendering, resolveSecurityCanvasContext };
 
   beforeEach(() => {
-    overlays.openFlyoutTemplate.mockReset();
+    opened.mockReset();
   });
 
-  it('opens the entity overview as a child flyout on the current page', () => {
-    openImpactEntityFlyout({
-      entity: { id: 'user:cfo@corp', name: 'cfo@corp', type: 'user' },
-      ...base,
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('opens an Entity Store host by its id, titled by its name', () => {
+    act(() => {
+      openImpactEntityFlyout({
+        entity: { id: 'host:ws-finance-04', name: 'ws-finance-04', type: 'host' },
+        ...base,
+      });
     });
 
-    expect(overlays.openFlyoutTemplate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        session: 'inherit',
-        flyoutMenuProps: { title: 'cfo@corp' },
-        id: 'securityImpactEntityFlyout',
-      }),
-      expect.any(Function)
+    expect(opened).toHaveBeenCalledWith({
+      kind: 'host',
+      hostName: 'ws-finance-04',
+      entityId: 'host:ws-finance-04',
+    });
+  });
+
+  it('cuts the Entity Store prefix off an id when the entity has no name yet', () => {
+    act(() => {
+      openImpactEntityFlyout({ entity: { id: 'user:cfo@corp' }, ...base });
+    });
+
+    expect(opened).toHaveBeenCalledWith({
+      kind: 'user',
+      userName: 'cfo@corp',
+      entityId: 'user:cfo@corp',
+    });
+  });
+
+  it('opens a user recorded by name through the user flyout, without an entity id', () => {
+    act(() => {
+      openImpactEntityFlyout({ entity: { id: 'jsmith', name: 'jsmith', type: 'user' }, ...base });
+    });
+
+    expect(opened).toHaveBeenCalledWith({ kind: 'user', userName: 'jsmith' });
+  });
+
+  it('opens a service by name', () => {
+    act(() => {
+      openImpactEntityFlyout({ entity: { id: 'okta-sso', type: 'service' }, ...base });
+    });
+
+    expect(opened).toHaveBeenCalledWith({ kind: 'service', serviceName: 'okta-sso' });
+  });
+
+  it('keeps the opener mounted after the flyout opens, so its data-view listeners can finish', () => {
+    act(() => {
+      openImpactEntityFlyout({ entity: { id: 'jsmith', type: 'user' }, ...base });
+    });
+
+    expect(screen.getByTestId('groupedAttachmentFlyoutOpener')).toBeInTheDocument();
+    expect(container()).not.toBeNull();
+  });
+
+  it('replaces the mounted opener when another entity is opened', () => {
+    act(() => {
+      openImpactEntityFlyout({ entity: { id: 'jsmith', type: 'user' }, ...base });
+    });
+    act(() => {
+      openImpactEntityFlyout({ entity: { id: 'ws-finance-04', type: 'host' }, ...base });
+    });
+
+    expect(opened).toHaveBeenCalledTimes(2);
+    expect(
+      document.querySelectorAll('[data-test-subj="securityImpactEntityFlyoutOpener"]')
+    ).toHaveLength(1);
+    expect(screen.getByTestId('groupedAttachmentFlyoutOpener')).toHaveAttribute(
+      'data-descriptor',
+      JSON.stringify({ kind: 'host', hostName: 'ws-finance-04' })
     );
   });
 
-  it('provides the navigation context so entity detail links can navigate', () => {
-    openImpactEntityFlyout({
-      entity: { id: 'user:cfo@corp', name: 'cfo@corp', type: 'user' },
-      ...base,
-    });
-
-    const Content = overlays.openFlyoutTemplate.mock.calls[0][1];
-    render(<Content onClose={jest.fn()} />);
-
-    expect(screen.getByTestId('entityOverview')).toHaveTextContent('can-navigate');
-  });
-
-  it('does nothing for a named entity that is not an entity-store id', () => {
-    openImpactEntityFlyout({
-      entity: { id: 'checkout-service', name: 'checkout-service', type: 'service' },
-      ...base,
-    });
-
-    expect(overlays.openFlyoutTemplate).not.toHaveBeenCalled();
-  });
-
   it('does nothing when the entity has no flyout type', () => {
-    openImpactEntityFlyout({
-      entity: { id: 'generic-1', type: 'generic' },
-      ...base,
+    act(() => {
+      openImpactEntityFlyout({ entity: { id: 'generic-1', type: 'generic' }, ...base });
     });
 
-    expect(overlays.openFlyoutTemplate).not.toHaveBeenCalled();
+    expect(opened).not.toHaveBeenCalled();
+    expect(container()).toBeNull();
   });
 });

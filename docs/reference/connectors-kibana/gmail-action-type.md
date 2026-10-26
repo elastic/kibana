@@ -22,7 +22,7 @@ You can create a Gmail connector in **{{stack-manage-app}} > {{connectors-ui}}**
 Gmail connectors support the following authentication types:
 
 Quick Connect OAuth 2.0 (recommended, read-only) {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
-:   Elastic's managed OAuth flow for Gmail. Grants `gmail.readonly` access only. **Write actions are not available** with this authentication type. No app setup is required — select this option and authorize access through Elastic.
+:   Elastic's managed OAuth flow for Gmail. Grants `gmail.readonly` access only. **Write actions are not available** with this authentication type. No app setup is required — select this option and authorize access through Elastic. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 OAuth 2.0 authorization code (required for write actions)
 :   Uses your own Google OAuth 2.0 app. Grants `gmail.modify` access, which covers reads, label changes, trash, and send. Required for `modifyLabels`, `trashMessage`, `untrashMessage`, `sendMessage`, `replyMessage`, `markAsRead`, and `markAsUnread`. See [Get API credentials](#gmail-api-credentials) for setup instructions.
@@ -185,6 +185,12 @@ Send a reply to an existing message, preserving the thread. The connector fetche
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 ## Get API credentials [gmail-api-credentials]
+
+### Quick Connect OAuth 2.0
+
+No setup required. Select **Quick Connect OAuth 2.0** when you create the connector in {{kib}} and follow the authorization prompt to grant Elastic read-only access to your Gmail. Your Google Workspace administrator might need to approve the Elastic app. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
+
+### OAuth 2.0 authorization code
 
 To use write actions, create a Google OAuth 2.0 app and authorize it with the `gmail.modify` scope:
 

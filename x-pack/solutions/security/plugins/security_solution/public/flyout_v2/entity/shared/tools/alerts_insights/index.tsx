@@ -22,6 +22,7 @@ import { ALERTS_INSIGHTS_TITLE } from '../../../../shared/constants/flyout_title
 import { getAlertHistoryTitle } from '../../../../document/main/utils/get_header_title';
 import { ALERTS_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+import type { EntityViewMode } from '../../../../../../common/entity_analytics/entity_store/resolution_group';
 
 const TITLE = ALERTS_INSIGHTS_TITLE;
 
@@ -43,12 +44,21 @@ export interface AlertsInsightsProps {
   value: string;
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
   entityId?: string;
+  /**
+   * Entity-store lookup mode of the originating entity flyout. In `resolved` mode the table also
+   * covers the entities that resolve to `entityId`. Defaults to `single`.
+   */
+  mode?: EntityViewMode;
+  /**
+   * Scope of the originating panel.
+   */
+  scopeId?: string;
   /** Opens the originating entity flyout as a child. */
   onShowEntity?: () => void;
 }
 
 export const AlertsInsights = memo(
-  ({ entityType, value, entityId, onShowEntity }: AlertsInsightsProps) => {
+  ({ entityType, value, entityId, mode, scopeId, onShowEntity }: AlertsInsightsProps) => {
     const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
 
     const onExpandAlert = useCallback(
@@ -80,6 +90,8 @@ export const AlertsInsights = memo(
             field={FIELD[entityType]}
             value={value}
             entityId={entityId}
+            mode={mode}
+            scopeId={scopeId}
             // The alerts table only resolves host/user entity types; for generic it relies on
             // the `field`/`value` filter (`related.entity`) instead.
             entityType={

@@ -118,9 +118,28 @@ const getHelpText = ({
   return undefined;
 };
 
-export function SchemaSelector() {
-  const { selectedSchema, schemas, supportedSchemas, isLoading, error, onSchemaChange } =
-    useProfilingSchema();
+export interface SchemaSelectorProps {
+  /** Undefined until a default is selected */
+  selectedSchema?: ProfilingSchema;
+  onSchemaChange: (schema: ProfilingSchema) => void;
+  /** Schemas with data, undefined while unknown */
+  schemas?: ProfilingSchema[];
+  /** Schemas the deployment supports, regardless of their data */
+  supportedSchemas: ProfilingSchema[];
+  /** Whether the schemas with data or the supported schemas are loading */
+  isLoading: boolean;
+  /** Set when the schemas with data cannot be fetched */
+  error?: Error;
+}
+
+export function SchemaSelector({
+  selectedSchema,
+  schemas,
+  supportedSchemas,
+  isLoading,
+  error,
+  onSchemaChange,
+}: SchemaSelectorProps) {
   const { fontSize } = useEuiFontSize('s');
 
   const offeredSchemas = schemas ?? supportedSchemas;
@@ -194,4 +213,9 @@ export function SchemaSelector() {
       />
     </EuiFormRow>
   );
+}
+
+export function ProfilingAppSchemaSelector() {
+  const profilingSchemaProps = useProfilingSchema();
+  return <SchemaSelector {...profilingSchemaProps} />;
 }

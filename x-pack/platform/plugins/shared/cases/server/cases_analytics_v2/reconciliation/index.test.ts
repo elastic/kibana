@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type {
@@ -18,6 +18,7 @@ import { V2_NOOP_ATTACHMENTS_WRITER } from '../writer/attachments';
 import { runReconciliation } from './runner';
 import { runActivityReconciliation } from './activity_runner';
 import { runAttachmentsReconciliation } from './attachments_runner';
+import { sweepDeletedSpaces } from './deleted_spaces_sweep';
 import {
   clampCursorToNotFuture,
   registerReconciliationTask,
@@ -29,6 +30,7 @@ import {
 jest.mock('./runner');
 jest.mock('./activity_runner');
 jest.mock('./attachments_runner');
+jest.mock('./deleted_spaces_sweep');
 const mockRunReconciliation = runReconciliation as jest.MockedFunction<typeof runReconciliation>;
 const mockRunActivityReconciliation = runActivityReconciliation as jest.MockedFunction<
   typeof runActivityReconciliation
@@ -36,6 +38,7 @@ const mockRunActivityReconciliation = runActivityReconciliation as jest.MockedFu
 const mockRunAttachmentsReconciliation = runAttachmentsReconciliation as jest.MockedFunction<
   typeof runAttachmentsReconciliation
 >;
+const mockSweepDeletedSpaces = sweepDeletedSpaces as jest.MockedFunction<typeof sweepDeletedSpaces>;
 
 describe('clampCursorToNotFuture', () => {
   const logger = loggerMock.create();
@@ -212,7 +215,12 @@ describe('registerReconciliationTask run()', () => {
   const setupRun = ({
     signal = new AbortController().signal,
     state = {},
-  }: { signal?: AbortSignal; state?: Record<string, unknown> } = {}) => {
+    deletedSpacesSweepEnabled = true,
+  }: {
+    signal?: AbortSignal;
+    state?: Record<string, unknown>;
+    deletedSpacesSweepEnabled?: boolean;
+  } = {}) => {
     const taskManager = taskManagerMock.createSetup() as unknown as TaskManagerSetupContract;
     const savedObjectsClient = savedObjectsClientMock.create();
 
@@ -220,10 +228,12 @@ describe('registerReconciliationTask run()', () => {
       taskManager,
       logger,
       getRunnerDeps: async () => ({
+        esClient: elasticsearchServiceMock.createElasticsearchClient(),
         savedObjectsClient,
         writer: V2_NOOP_WRITER,
         activityWriter: V2_NOOP_ACTIVITY_WRITER,
         attachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
+        deletedSpacesSweepEnabled,
       }),
     });
 
@@ -371,5 +381,44 @@ describe('registerReconciliationTask run()', () => {
       expect.stringContaining('activity reconciliation tick failed'),
       expect.objectContaining({ error: expect.any(Error) })
     );
+  });
+
+  it('runs the deleted-spaces sweep after the three surface walks', async () => {
+    const { run } = setupRun();
+
+    await run();
+
+    expect(mockSweepDeletedSpaces).toHaveBeenCalledTimes(1);
+    expect(mockSweepDeletedSpaces.mock.invocationCallOrder[0]).toBeGreaterThan(
+      mockRunAttachmentsReconciliation.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('skips the deleted-spaces sweep when the Spaces plugin is disabled', async () => {
+    const { run } = setupRun({ deletedSpacesSweepEnabled: false });
+
+    const { state, taskRunError } = await run();
+
+    expect(mockSweepDeletedSpaces).not.toHaveBeenCalled();
+    expect(state).toEqual({
+      cases_last_run_at: 'CASES_NEW',
+      activity_last_run_at: 'ACTIVITY_NEW',
+      attachments_last_run_at: 'ATTACHMENTS_NEW',
+    });
+    expect(taskRunError).toBeUndefined();
+  });
+
+  it('reports a deleted-spaces sweep failure as taskRunError and still advances every cursor', async () => {
+    mockSweepDeletedSpaces.mockRejectedValue(new Error('sweep boom'));
+    const { run } = setupRun();
+
+    const { state, taskRunError } = await run();
+
+    expect(state).toEqual({
+      cases_last_run_at: 'CASES_NEW',
+      activity_last_run_at: 'ACTIVITY_NEW',
+      attachments_last_run_at: 'ATTACHMENTS_NEW',
+    });
+    expect(taskRunError).toBeDefined();
   });
 });

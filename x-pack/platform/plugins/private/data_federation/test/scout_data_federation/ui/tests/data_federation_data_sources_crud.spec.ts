@@ -14,7 +14,7 @@ import { test, CUSTOM_ROLES } from '../fixtures';
 const S3_ACCESS_KEY = 'AKIAIOSFODNN7EXAMPLE';
 const S3_SECRET_KEY = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY';
 
-test.describe('ES|QL Data Federation — data sources CRUD', { tag: tags.stateful.classic }, () => {
+test.describe('ES|QL Data Federation — data sources CRUD', { tag: tags.deploymentAgnostic }, () => {
   let dataSourceName: string | undefined;
 
   test.afterAll(async ({ kbnClient }) => {
