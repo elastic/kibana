@@ -67,8 +67,24 @@ describe('addReportToParameter', () => {
   it.each([
     ['a quoted string', 'camera=();report-to="elsewhere"'],
     ['a boolean', 'camera=();report-to'],
-  ])('attaches the parameter when an existing report-to is %s', (_, policy) => {
-    expect(addReportToParameter(policy, 'endpoint')).toEqual(`${policy};report-to=endpoint`);
+    ['a token overridden by a later quoted string', 'camera=();report-to=elsewhere;report-to="x"'],
+    ['a token overridden by a later boolean', 'camera=();report-to=elsewhere;report-to'],
+    ['a token overridden by a later boolean and whitespace', 'camera=();report-to=a;report-to '],
+  ])('attaches the parameter when the effective report-to is %s', (_, policy) => {
+    expect(addReportToParameter(policy, 'endpoint')).toEqual(
+      `${policy.trimEnd()};report-to=endpoint`
+    );
+  });
+
+  it('leaves a directive alone when its last report-to is a token', () => {
+    const policy = 'camera=();report-to="x";report-to=elsewhere';
+    expect(addReportToParameter(policy, 'endpoint')).toEqual(policy);
+  });
+
+  it('does not mistake a similarly named parameter for report-to', () => {
+    expect(addReportToParameter('camera=();report-tox=elsewhere', 'endpoint')).toEqual(
+      'camera=();report-tox=elsewhere;report-to=endpoint'
+    );
   });
 
   it('leaves a directive alone when it reports somewhere and an origin also carries report-to', () => {

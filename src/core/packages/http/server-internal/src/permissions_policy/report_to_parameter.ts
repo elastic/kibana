@@ -14,10 +14,23 @@
 const REPORTING_GROUP_NAME = /^[A-Za-z*][A-Za-z0-9!#$%&'*+\-.^_`|~:/]*$/;
 
 /**
- * A `report-to` parameter whose value is a token, the only form browsers honor. Any other value is
- * ignored, so the member still needs ours.
+ * Every `report-to` parameter, capturing its value when it has one. A bare `report-to` is a boolean.
+ * Quoted strings are already removed from the text this runs on, so a quoted value captures as empty.
  */
-const REPORT_TO_PARAMETER = /;\s*report-to=[A-Za-z*]/;
+const REPORT_TO_PARAMETERS = /;\s*report-to(?:=([^;]*))?(?=;|\s*$)/g;
+
+/** The first character of a token, the only form of `report-to` value that browsers honor. */
+const TOKEN_START = /^[A-Za-z*]/;
+
+/**
+ * Whether a member already reports somewhere. A repeated parameter takes its last value, so only the
+ * last `report-to` counts, and only when its value is a token. Otherwise the member still needs ours,
+ * which is appended last and so takes effect.
+ */
+const hasOwnReportTo = (topLevel: string): boolean => {
+  const last = [...topLevel.matchAll(REPORT_TO_PARAMETERS)].at(-1);
+  return last !== undefined && TOKEN_START.test(last[1] ?? '');
+};
 
 interface PolicyMember {
   /** The member as written. */
@@ -97,7 +110,7 @@ export const addReportToParameter = (policy: string, reportTo: string): string =
 
   return members
     .map(({ text, topLevel }) => {
-      if (REPORT_TO_PARAMETER.test(topLevel)) {
+      if (hasOwnReportTo(topLevel)) {
         return text;
       }
       // Keep the separator's whitespace, but put the parameter directly after the member.
