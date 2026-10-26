@@ -20,6 +20,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import { githubEvents } from './events';
+import { githubSkillFile } from './skills/github-skill';
 import type {
   AddAssigneeInput,
   AddIssueCommentInput,
@@ -727,11 +728,14 @@ export const GithubConnector: ConnectorSpec = {
     },
   },
 
+  skillFiles: [githubSkillFile],
+
   skill: [
     'Action strategy guide:',
     '- Parameter names are camelCase. Use the exact names shown (e.g. issueNumber, pullNumber, workflowId) — never snake_case equivalents like issue_number or pull_number.',
     '- Start with getMe to identify the authenticated user.',
     '- For broad discovery: use search* actions (searchCode, searchRepositories, searchIssues, searchPullRequests, searchUsers).',
+    '- For searching issues and pull requests, use the `/github` skill: it returns compact results instead of the full (very large) API payload.',
     '- For browsing a specific repo: use list* actions (listIssues, listPullRequests, listCommits, listBranches, listReleases, listTags). All use cursor-based pagination via "first" + "after".',
     '- For specific details: use get* actions (getIssue, getIssueComments, pullRequestRead, getCommit, getLatestRelease, getFileContents).',
     '- Write actions (require write permission on the repo):',
