@@ -267,7 +267,13 @@ describe('AlertZero action workflows', () => {
     it('checks the rule before installing it', () => {
       const names = yaml.steps.map(({ name }) => name);
       const install = names.indexOf('install_rule');
-      for (const check of ['fail_already_installed', 'fail_rule_lookup', 'fail_version_changed']) {
+      const checks = [
+        'fail_already_installed',
+        'fail_rule_lookup',
+        'fail_not_available',
+        'fail_version_changed',
+      ];
+      for (const check of checks) {
         expect(names.indexOf(check)).toBeLessThan(install);
       }
     });
@@ -291,6 +297,18 @@ describe('AlertZero action workflows', () => {
       const names = yaml.steps.map(({ name }) => name);
       expect(names.indexOf('fail_install_skipped')).toBeLessThan(
         names.indexOf('enable_installed_rule')
+      );
+    });
+
+    it('tells the analyst to decline when the rule is no longer available', () => {
+      const fail = stepByName(yaml, 'fail_not_available');
+      expect(
+        createWorkflowLiquidEngine().parseAndRenderSync(String(fail?.with?.message), {
+          inputs: { actionInput: { rule_id: 'r-1', version: 10 } },
+        })
+      ).toBe(
+        'The prebuilt rule r-1 is no longer available to install. It may have been removed from ' +
+          "the prebuilt rules package. Approving again won't work, so decline it."
       );
     });
 
@@ -328,7 +346,13 @@ describe('AlertZero action workflows', () => {
         'a review that matched another rule',
         notInstalled,
         latest(11, 'other'),
-        ['enable_installed_rule'],
+        ['fail_not_available'],
+      ],
+      [
+        'a rule no longer in the package',
+        notInstalled,
+        { output: { rules: [] } },
+        ['fail_not_available'],
       ],
       [
         'a rule lookup that failed',

@@ -114,6 +114,17 @@ steps:
           term: 'security-rule.rule_id: "{{ inputs.actionInput.rule_id }}"'
         fields: [rule_id, version, name]
 
+  # Not installed and not installable: dropped from the package, deprecated, or hidden
+  # from this user, such as an ML rule without ML privileges.
+  - name: fail_not_available
+    type: workflow.fail
+    if: "${{ steps.review_rule.output.rules[0].rule_id != inputs.actionInput.rule_id }}"
+    with:
+      message: >-
+        The prebuilt rule {{ inputs.actionInput.rule_id }} is no longer available to
+        install. It may have been removed from the prebuilt rules package. Approving
+        again won't work, so decline it.
+
   - name: fail_version_changed
     type: workflow.fail
     if: >-
