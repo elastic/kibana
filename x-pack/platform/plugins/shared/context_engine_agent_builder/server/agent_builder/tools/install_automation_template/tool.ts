@@ -385,6 +385,9 @@ export const createInstallAutomationTemplateTool = ({
       unit_profile           → name, sourceIndex, unitKey, activityField, breakdownField
       targeted_ki_writer     → name, kis  (no sourceIndex)
 
+    Pass index and field names bare, exactly as they appear in the mapping: no backticks or quotes.
+    The workflow quotes them itself, so names with spaces (Currency Code) work as they are.
+
     name is always required. It identifies this automation within the AI index. Same template and
     name → replaces the existing automation in-place. Different name → installs an additional copy.
 
