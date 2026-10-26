@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InvestigationTimelineEvent } from './types';
+import type { InvestigationTimelineEvent, InvestigationTimelineWindow } from './types';
 
 const isTimelineEvent = (value: unknown): value is InvestigationTimelineEvent => {
   if (typeof value !== 'object' || value === null) {
@@ -27,4 +27,19 @@ export const parseTimelineEvents = (data: unknown): InvestigationTimelineEvent[]
   if (typeof data !== 'object' || data === null) return [];
   const { events } = data as { events?: unknown };
   return Array.isArray(events) ? events.filter(isTimelineEvent) : [];
+};
+
+/** The searched window when the payload carries a complete one, else undefined. */
+export const parseTimelineWindow = (data: unknown): InvestigationTimelineWindow | undefined => {
+  if (typeof data !== 'object' || data === null) return undefined;
+  const { window } = data as { window?: { start?: unknown; end?: unknown } };
+  if (
+    typeof window?.start === 'string' &&
+    window.start !== '' &&
+    typeof window.end === 'string' &&
+    window.end !== ''
+  ) {
+    return { start: window.start, end: window.end };
+  }
+  return undefined;
 };

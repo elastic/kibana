@@ -8,7 +8,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink, EuiTitle } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
 import { StatusFilter } from './status_filter';
 import { MONITOR_HISTORY_ROUTE } from '../../../../../../common/constants';
@@ -48,8 +48,10 @@ export const TestRunsTableHeader = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {showViewHistoryButton ? (
-          <EuiLink
-            data-test-subj="syntheticsTestRunsTableHeaderLink"
+          <EuiButtonEmpty
+            data-test-subj="monitorStatusChartViewHistoryButton"
+            size="xs"
+            iconType="listBullet"
             href={
               monitor?.[ConfigKey.CONFIG_ID]
                 ? history.createHref({
@@ -65,16 +67,10 @@ export const TestRunsTableHeader = ({
                 : undefined
             }
           >
-            <EuiButtonEmpty
-              data-test-subj="monitorStatusChartViewHistoryButton"
-              size="xs"
-              iconType="listBullet"
-            >
-              {i18n.translate('xpack.synthetics.monitorDetails.summary.viewHistory', {
-                defaultMessage: 'View History',
-              })}
-            </EuiButtonEmpty>
-          </EuiLink>
+            {i18n.translate('xpack.synthetics.monitorDetails.summary.viewHistory', {
+              defaultMessage: 'View History',
+            })}
+          </EuiButtonEmpty>
         ) : null}
       </EuiFlexItem>
     </EuiFlexGroup>
