@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { Suspense, useRef, useState } from 'react';
-import { EuiButtonIcon, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import type { EuiFlyoutProps } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { StardustWrapper } from '@kbn/content-management-favorites-public';
 import { useEsqlEditorActions } from '../editor_actions_context';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
@@ -18,6 +17,7 @@ import { KeyboardShortcuts } from '../editor_footer/keyboard_shortcuts';
 import { QueryWrapComponent } from '../editor_footer/query_wrap_component';
 import { MagnifySparklesIcon } from './magnify_sparkles_icon';
 import { CreateViewModal, createViewLabel } from '../save_as_view/create_view_modal';
+import { ViewCreatedSource } from '../telemetry/telemetry_service';
 import { useApplySavedView } from '../save_as_view/use_apply_saved_view';
 import { useCanCreateView } from '../save_as_view/use_can_create_view';
 import {
@@ -62,7 +62,6 @@ export function ESQLMenu({
   /** Size for the docs flyout. Pass a named size when embedding the menu in another flyout. */
   docsFlyoutSize?: EuiFlyoutProps['size'];
 } = {}) {
-  const { euiTheme } = useEuiTheme();
   const editorActions = useEsqlEditorActions();
   const isNlToEsqlEnabled = useNlToEsqlCheck();
   const visorTooltip = isNlToEsqlEnabled ? searchWithNlTooltipLabel : searchTooltipLabel;
@@ -93,33 +92,31 @@ export function ESQLMenu({
       <KeyboardShortcuts />
       {canCreateView && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={createViewLabel} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="tablePlus"
-              size="xs"
-              aria-label={createViewLabel}
-              onClick={() => setQueryToSave(currentQuery)}
-              isDisabled={currentQuery.trim().length === 0}
-              data-test-subj="ESQLEditor-create-view-icon"
-              color="text"
-              css={css`
-                position: relative;
-
-                &::after {
-                  content: '';
-                  position: absolute;
-                  inset-block-start: 0;
-                  inset-inline-end: 0;
-                  inline-size: ${euiTheme.size.s};
-                  block-size: ${euiTheme.size.s};
-                  border-radius: 50%;
-                  background-color: ${euiTheme.colors.primary};
-                  box-shadow: 0 0 0 1px ${euiTheme.colors.body};
-                  pointer-events: none;
-                }
-              `}
+          <span css={{ position: 'relative', display: 'inline-flex' }}>
+            <EuiToolTip position="top" content={createViewLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="tablePlus"
+                size="xs"
+                aria-label={createViewLabel}
+                onClick={() => setQueryToSave(currentQuery)}
+                isDisabled={currentQuery.trim().length === 0}
+                data-test-subj="ESQLEditor-create-view-icon"
+                color="text"
+              />
+            </EuiToolTip>
+            <EuiIcon
+              type="dot"
+              color="primary"
+              data-test-subj="ESQLEditor-create-view-dot"
+              aria-hidden={true}
+              css={{
+                position: 'absolute',
+                insetBlockStart: '-1px',
+                insetInlineEnd: '-1px',
+                pointerEvents: 'none',
+              }}
             />
-          </EuiToolTip>
+          </span>
         </EuiFlexItem>
       )}
       {!hideHistory && (
@@ -200,6 +197,7 @@ export function ESQLMenu({
           query={queryToSave}
           onClose={() => setQueryToSave(undefined)}
           onSaved={applySavedView}
+          source={ViewCreatedSource.EDITOR_MENU}
         />
       )}
     </>

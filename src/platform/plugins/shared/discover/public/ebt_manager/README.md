@@ -176,4 +176,4 @@ These counters are reported with `usageCollection.reportUiCounter('discover', ..
 | `click`     | `filter_added`                 | A filter was added while in data view mode.                |
 | `loaded`    | `field_statistics_loaded`      | The field statistics table loaded.                         |
 | `loaded`    | `pattern_analysis_loaded`      | The pattern analysis table loaded.                         |
-| `count`     | `ad_hoc_data_view`             | Discover rendered with an ad hoc data view.                |
+| `count`     | `ad_hoc_data_view`             | Discover rendered with an ad hoc data view (classic mode). |

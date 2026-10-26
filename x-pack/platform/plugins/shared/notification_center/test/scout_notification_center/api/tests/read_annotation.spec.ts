@@ -37,17 +37,14 @@ apiTest.describe(
     const afterMarker = (marker: string, ms: number) =>
       new Date(Date.parse(marker) + ms).toISOString();
 
-    apiTest.beforeAll(async ({ samlAuth, requestAuth, esClient, apiClient }) => {
+    apiTest.beforeAll(async ({ samlAuth, requestAuth, systemEsClient, apiClient }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
       ({ apiKeyHeader } = await requestAuth.getApiKey('admin'));
-      // The plugin creates the backing data stream lazily, on the first read. Touch the route
-      // before seeding so the bulk write below lands in a data stream, not a conflicting index.
-      await asUser.getNotifications(apiClient);
 
       const markAll = await asUser.markAllRead(apiClient);
       const marker: string = markAll.body.read_all_before;
 
-      await seedNotifications(esClient, [
+      await seedNotifications(systemEsClient, [
         // At or before the marker: read via the bulk catch-up.
         makeDoc('rs-caught-up', { namespace: NAMESPACE, '@timestamp': daysAgo(1) }),
         // Re-pushed after the marker: the newest copy postdates it, so the mark-all-read
@@ -70,7 +67,7 @@ apiTest.describe(
       await asUser.markRead(apiClient, { notification_id: 'rs-acked-repushed' });
       // A copy pushed after its own mark-read: the override acknowledges the copy in hand,
       // not the id, so this resurfaces as unread.
-      await seedNotifications(esClient, [
+      await seedNotifications(systemEsClient, [
         makeDoc('rs-acked-repushed', {
           namespace: NAMESPACE,
           title: 're-push after mark-read',
@@ -79,8 +76,8 @@ apiTest.describe(
       ]);
     });
 
-    apiTest.afterAll(async ({ esClient }) => {
-      await clearNotifications(esClient, NAMESPACE);
+    apiTest.afterAll(async ({ systemEsClient }) => {
+      await clearNotifications(systemEsClient, NAMESPACE);
     });
 
     apiTest('annotates isRead against the newest copy', async ({ apiClient }) => {

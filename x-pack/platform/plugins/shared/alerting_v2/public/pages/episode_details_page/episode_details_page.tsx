@@ -55,14 +55,18 @@ import { AlertEpisodeTimelineSection } from '@kbn/alerting-v2-episodes-ui/compon
 import { useAlertAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { useAlertingLocators } from '../../application/locator_context';
-import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
+import type { AlertsKibanaServices } from '../../alerts_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
-import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import {
-  filterEpisodeActionsByPrivilege,
-  EPISODE_ACTIONS_PRIVILEGE,
-} from '../../utils/filter_episode_actions_by_privilege';
+  canOpenDiscover,
+  getDiscoverHrefForAlertEventsHistory,
+  getDiscoverHrefForRuleAndAlertTimestamp,
+} from '../../utils/discover_href_for_alert';
+import {
+  filterAlertActionsByPrivilege,
+  ALERT_ACTIONS_PRIVILEGE,
+} from '../../utils/filter_alert_actions_by_privilege';
 import { getEpisodeHeaderBadges } from './utils/get_episode_header_badges';
 import { getEpisodeHeaderMenu } from './utils/get_episode_header_menu';
 import {
@@ -84,12 +88,12 @@ export function EpisodeDetailsPage() {
   const [sidebarPanel, setSidebarPanel] = useState<EpisodeDetailsSidebarPanel>('episode_details');
   const [mainPanel, setMainPanel] = useState<EpisodeDetailsMainPanel>('overview');
 
-  const { services } = useKibana<AlertEpisodesKibanaServices>();
+  const { services } = useKibana<AlertsKibanaServices>();
   const { episodesLocators, rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
-    ? EPISODE_ACTIONS_PRIVILEGE.all
-    : EPISODE_ACTIONS_PRIVILEGE.read;
+    ? ALERT_ACTIONS_PRIVILEGE.all
+    : ALERT_ACTIONS_PRIVILEGE.read;
   const { data, http, spaces } = services;
 
   const largeMediaQuery = useEuiMinBreakpoint('m');
@@ -201,7 +205,7 @@ export function EpisodeDetailsPage() {
 
   const episodeActions: EpisodeAction[] = useMemo(
     () =>
-      filterEpisodeActionsByPrivilege(
+      filterAlertActionsByPrivilege(
         createEpisodeActions({
           http: services.http,
           overlays: services.overlays,
@@ -216,12 +220,27 @@ export function EpisodeDetailsPage() {
           isRuleAvailable: (selectedRuleId) =>
             isRuleLoaded(ruleState) && ruleState.rule.id === selectedRuleId,
           getDiscoverHref: ({ episodeIsoTimestamp: ts }) =>
-            getDiscoverHrefForRuleAndEpisodeTimestamp({
+            getDiscoverHrefForRuleAndAlertTimestamp({
               share: services.share,
               capabilities: services.application.capabilities,
               uiSettings: services.uiSettings,
               ruleEsql: showRuleDependentUi ? getBreachEsqlQuery(ruleState.rule.query) : undefined,
-              episodeIsoTimestamp: ts,
+              alertIsoTimestamp: ts,
+            }),
+          getAlertEventsHistoryHref: ({ episodeId: selectedEpisodeId, episodeStart, spaceId }) =>
+            getDiscoverHrefForAlertEventsHistory({
+              share: services.share,
+              capabilities: services.application.capabilities,
+              uiSettings: services.uiSettings,
+              episodeId: selectedEpisodeId,
+              episodeStart,
+              spaceId,
+            }),
+          isAlertEventsHistoryAvailable: () =>
+            canOpenDiscover({
+              share: services.share,
+              capabilities: services.application.capabilities,
+              uiSettings: services.uiSettings,
             }),
         }),
         alertsCapability
@@ -229,13 +248,16 @@ export function EpisodeDetailsPage() {
     [services, queryClient, showRuleDependentUi, ruleState, alertsCapability]
   );
 
-  const applicableActions = useMemo(
-    () =>
-      episode
-        ? episodeActions.filter((action) => action.isCompatible({ episodes: [episode] }))
-        : [],
-    [episodeActions, episode]
-  );
+  const applicableActions = useMemo(() => {
+    if (!episode) {
+      return [];
+    }
+    const episodes = [episode];
+    return episodeActions.filter(
+      (action) =>
+        action.isCompatible({ episodes }) || Boolean(action.showWhenDisabled?.({ episodes }))
+    );
+  }, [episodeActions, episode]);
 
   const headerTabs = useMemo(
     () =>
@@ -419,6 +441,7 @@ export function EpisodeDetailsPage() {
         menu={headerMenu}
         tabs={headerTabs}
         spacing="bleed"
+        docLink={services.docLinks.links.alerting.investigateAlertEpisodes}
       />
       {isLoading ? (
         <KibanaPageTemplate.Section grow>
@@ -467,6 +490,7 @@ export function EpisodeDetailsPage() {
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
                   <AlertEpisodeTimelineSection
                     episodeId={episodeId}
+                    seriesId={episode ? episode.series_id ?? null : undefined}
                     groupHash={groupHash}
                     services={{ data, spaces, userProfile: services.userProfile }}
                   />

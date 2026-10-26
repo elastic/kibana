@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 export const EntitySourceType = lazySchema(() =>
   z.enum(['index', 'entity_analytics_integration', 'store'])
@@ -64,17 +64,13 @@ export const Integrations = lazySchema(() =>
         /**
          * Timestamp of the last full sync from integrations
          */
-        lastFullSync: z
-          .string()
-          .datetime()
+        lastFullSync: isoDateTime()
           .optional()
           .describe('Timestamp of the last full sync from integrations'),
         /**
          * Timestamp of the last update processed from integrations
          */
-        lastUpdateProcessed: z
-          .string()
-          .datetime()
+        lastUpdateProcessed: isoDateTime()
           .optional()
           .describe('Timestamp of the last update processed from integrations'),
       })

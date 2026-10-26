@@ -99,6 +99,13 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.isExperimental).toBeUndefined();
   });
 
+  it('keeps a reference to the source spec', () => {
+    const spec = createMockSpec();
+    const result = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+    expect(result.spec).toBe(spec);
+  });
+
   it('builds the connector network from the actions configuration utilities', () => {
     const createConnectorNetworkSettingsSpy = jest.spyOn(
       createConnectorNetworkSettingsModule,
@@ -124,6 +131,20 @@ describe('createConnectorTypeFromSpec', () => {
     });
     const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
     expect(connectorType.isExperimental).toBe(true);
+  });
+
+  it('sets sandboxSupportedAuthTypes from auth type defs with supportsSandbox', () => {
+    const spec = createMockSpec({
+      auth: {
+        types: [
+          'basic',
+          { type: 'bearer', supportsSandbox: true, defaults: {} },
+          { type: 'oauth_authorization_code', supportsSandbox: true, defaults: {} },
+        ],
+      },
+    });
+    const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+    expect(connectorType.sandboxSupportedAuthTypes).toEqual(['bearer', 'oauth_authorization_code']);
   });
 
   it('sets description from metadata.description', () => {

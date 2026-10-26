@@ -11,6 +11,7 @@ export type { ProposalAttachmentData } from './src/attachment';
 export {
   MAX_CHARTS_SUMMARY_BUCKETS,
   PROPOSALS_API_VERSION,
+  PROPOSALS_CREATE_TOOL_ID,
   PROPOSALS_REVISE_TOOL_ID,
   PROPOSALS_INDEX_NAME,
   PROPOSALS_INTERNAL_URL,
@@ -40,6 +41,9 @@ export {
   isAwaitingDecision,
   isExpired,
   isProposalSettling,
+  isTerminal,
+  OPEN_PROPOSAL_STATUSES,
+  SETTLED_PROPOSAL_STATUSES,
   listProposalsQuerySchema,
   MAX_PROPOSALS_PAGE_OFFSET,
   MAX_PROPOSALS_PAGE_SIZE,

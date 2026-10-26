@@ -153,13 +153,13 @@ export const streamsUnitSchema = z.strictObject({
 export const streamsUnitUiMetadataSchema = recursiveRecord.default({});
 
 /**
- * Named plaintext credentials for a unit. Keys are referenced from authored
- * unit YAML (e.g. a destination config value); values are never stored in
- * `unit`. Kibana encrypts this map at rest (ESO) and re-encrypts each value
- * under the project public key before `PUT /v1/units/{id}`.
+ * Named plaintext credentials for a unit. Each key is a credential name that a
+ * config value references as `{ credential: <name> }`; values are never stored
+ * in `unit`. Kibana encrypts this map at rest (ESO) and seals each value under
+ * the project wrap key for the distributor `credentials[]` sidecar.
  */
 export const streamsUnitSecretsSchema = z
-  .record(z.string().min(1).max(256), z.string().max(16384))
+  .record(streamsUnitIdentifierSchema, z.string().max(16384))
   .refine((secrets) => Object.keys(secrets).length <= 500, {
     message: 'At most 500 unit secrets are allowed',
   });
@@ -174,6 +174,9 @@ export const streamsUnitUpsertRequestSchema = z.object({
   ui_metadata: streamsUnitUiMetadataSchema,
   // Omitted on PUT means keep the stored secrets. Provided keys merge with the
   // stored keys (the UI only sends newly entered values; GET does not return them).
+  // Every provided key must be referenced as `{ credential: <key> }` (400 otherwise),
+  // and every reference needs a provided or stored secret (400 otherwise).
+  // Stored secrets no config value references any more are dropped.
   secrets: streamsUnitSecretsSchema.optional(),
 });
 

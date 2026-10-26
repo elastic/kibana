@@ -13,7 +13,8 @@ import type { ManagedWorkflowDefinition } from '../../../types';
 export const NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID = 'system-nightshift-agent-optimize';
 
 /**
- * Post-round workflow that updates Cortex and Semantic Memory in parallel.
+ * Post-round workflow that updates Cortex and Semantic Memory in parallel, then
+ * distills the round into the decision tree.
  *
  * Agent Builder's afterExecution hook still runs `post_execution_workflow_ids`
  * in sequence. Optimize must not be two entries in that list. Obtain returns
@@ -23,6 +24,12 @@ export const NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID = 'system-nightshift-agent-op
  * `mode: settled` — one optimizer failing must not skip the other (the old
  * per-workflow `on-failure: continue`).
  *
+ * Decision-tree reinforcement is a sequential phase after the parallel, not a
+ * third branch: it runs an `ai.agent` for up to 900s and a parallel branch has
+ * no per-branch timeout, so it would inherit the 120s `branch-timeout` and be
+ * killed. Its steps carry no `on-failure`, so a broken reinforcement stays
+ * visible instead of reporting a green round that reinforced nothing.
+ *
  * `enablement: 'enforced'` — post-round workflows log failures rather than
  * aborting the agent, but enablement must stay on so every investigation
  * writes durable knowledge back.
@@ -30,7 +37,7 @@ export const NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID = 'system-nightshift-agent-op
 export const NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW = {
   id: NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 1,
+  version: 3,
   billable: false,
   yaml: AGENT_OPTIMIZE_WORKFLOW_YAML,
   management: {

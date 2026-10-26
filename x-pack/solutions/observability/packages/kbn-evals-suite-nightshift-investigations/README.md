@@ -65,18 +65,41 @@ Vault, so run with `--profile dev-vault` and there is nothing to configure:
 # Every eval (smoke + trace-only); prefix NIGHTSHIFT_DATASETS=trace-only to run only this one
 node scripts/evals start \
   --suite nightshift-investigations --profile dev-vault \
-  --model eis-anthropic-claude-4-6-sonnet \
+  --model eis-anthropic-claude-5-5-sonnet \
   --judge eis-anthropic-claude-4-6-sonnet
 ```
 
 The suite owns its sandbox wiring through the `scoutHook` in its
 [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json) entry,
-[`scout/scout_hook.sh`](scout/scout_hook.sh). The evals CLI (and `run_suite.sh` in CI) pipes the
-profile's evals config to it; the hook reads the `sandbox` block and exports the `SANDBOX_*`
-variables plus `SANDBOX_KIBANA_CONFIG`, which tells the `evals_nightshift_investigations` Scout
-config set to load [`scout/kibana.sandbox.yml`](scout/kibana.sandbox.yml). Kibana resolves the
+[`scout/scout_hook.sh`](scout/scout_hook.sh). The hook reads the `sandbox` block and exports the
+`SANDBOX_*` variables plus `SANDBOX_KIBANA_CONFIG`, which tells the `evals_nightshift_investigations`
+Scout config set to load [`scout/kibana.sandbox.yml`](scout/kibana.sandbox.yml). Kibana resolves the
 `${SANDBOX_*}` references in that file from its environment, so API keys never reach disk or
-process arguments. CI reads the same block from the ci-prod Vault. The hook needs `jq`.
+process arguments. The hook needs `jq`.
+
+The `sandbox` and `nightshift` blocks live in the suite's own Vault secret (`"vaultSecret":
+"nightshift"`), separate from the general `@kbn/evals` config that every other suite reads, so
+rotating them cannot break other suites:
+
+| Where                 | Hook input                                                       |
+| --------------------- | ---------------------------------------------------------------- |
+| CI (`run_suite.sh`)   | `kv/ci-shared/kbn-evals/nightshift` in the ci-prod Vault         |
+| `--profile dev-vault` | `secret/kibana-issues/dev/kbn-evals/nightshift` in the dev Vault |
+| Other profiles        | The profile's `config.<profile>.json` (see below)                |
+
+#### Rotating Nightshift secrets
+
+Retrieve the secret into the gitignored [`vault/config.json`](vault/config.example.json), edit it, and upload it. Upload runs this suite's hook on the file first and refuses a config the hook rejects. Each upload replaces the whole secret, so always retrieve first. See [updating Vault config](../../../../platform/packages/shared/kbn-evals/README.md#ci-ops) for logging in to each Vault.
+
+```bash
+# dev Vault (dev-vault profile)
+node x-pack/platform/packages/shared/kbn-evals/scripts/vault/retrieve_secrets.js --vault dev --suite nightshift-investigations
+node x-pack/platform/packages/shared/kbn-evals/scripts/vault/upload_secrets.js --vault dev --suite nightshift-investigations
+
+# ci-prod Vault (CI)
+node x-pack/platform/packages/shared/kbn-evals/scripts/vault/retrieve_secrets.js --vault ci-prod --suite nightshift-investigations
+node x-pack/platform/packages/shared/kbn-evals/scripts/vault/upload_secrets.js --vault ci-prod --suite nightshift-investigations
+```
 
 #### Other profiles or a different sandbox
 
@@ -125,8 +148,10 @@ ungraded; this fixture-specific execution check does not apply to custom files o
 The default [synthetic file](evals/investigation/synthetic.json) contains two public fictional
 incidents. Their questions contain all evidence and request a sandbox calculation, so no telemetry
 connector, Elasticsearch identity, customer dataset, reference answer or snapshot is required.
-The selected model runs the product manual-investigation route; the runner polls its status and
-reads the saved report and conversation. Scores store the report, execution status, conversation
+The selected model runs the product manual-investigation route; the runner polls the shared
+investigations API (`GET /internal/investigations/investigations/{id}`) until no agent works on the
+investigation, and reads what it recorded (summary, verdict, severity, hypotheses, impact, proposed
+actions) and its conversation. Scores store the report, execution status, conversation
 round count, and investigation/conversation/trace identifiers. Conversation rounds and tool payloads
 stay in the product conversation and full agent traces rather than being duplicated in each score,
 whose ingestion request has a 5 MiB limit. Acceptance fetches the saved conversation separately and
@@ -154,7 +179,7 @@ To run another file with the same loader and task:
 ```bash
 NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/absolute/path/examples.json \
   node scripts/evals run --suite nightshift-investigations --profile dev-vault \
-  --model eis-anthropic-claude-4-6-sonnet --judge eis-anthropic-claude-4-6-sonnet
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
 ```
 
 ```json
@@ -205,7 +230,7 @@ Select an existing evaluations dataset by its exact name in the evaluations UI:
 ```bash
 NIGHTSHIFT_DATASET_NAME='<dataset-name>' \
   node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
-  --model eis-anthropic-claude-4-6-sonnet \
+  --model eis-anthropic-claude-5-5-sonnet \
   --judge eis-anthropic-claude-4-6-sonnet
 ```
 
@@ -243,9 +268,9 @@ cross-cluster search, verify that the key can read the intended remote and index
 endpoints, keys and readable-index hints in Vault (or a private local profile JSON), and customer
 example files private and uncommitted.
 
-Add a `nightshift.telemetry` block beside `sandbox` in the profile's existing evals Vault config
-(or local profile JSON). The suite hook reads it without adding Nightshift fields to the shared
-CLI or global config schema:
+Add a `nightshift.telemetry` block beside `sandbox` in this suite's Vault secret (see
+[rotating Nightshift secrets](#rotating-nightshift-secrets)) or local profile JSON. The suite hook
+reads it without adding Nightshift fields to the shared CLI or global config schema:
 
 ```json
 "nightshift": {
@@ -273,7 +298,7 @@ With those variables and the sandbox credentials configured:
 ```bash
 NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.json \
   node scripts/evals start --suite nightshift-investigations --profile dev-vault \
-  --model eis-anthropic-claude-4-6-sonnet --judge eis-anthropic-claude-4-6-sonnet
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
 ```
 
 The committed [`scout/kibana.telemetry.yml`](scout/kibana.telemetry.yml) creates the preconfigured `nightshift-evals-telemetry` webhook with a secret
@@ -373,7 +398,8 @@ For seeded evals, follow [`evals/smoke/`](evals/smoke). For file-driven investig
    and an evaluator type bound to your task's output.
 2. **`task.ts`** — call the thing under test and return a typed result. For the investigation
    engine that means `POST /internal/nightshift/investigations` through the `fetch` fixture, passing
-   the eval model as `connector_id`, then following the investigation to a terminal status.
+   the eval model as `connector_id`, then polling the shared investigations API until the
+   investigation is no longer in progress.
 3. **`datasets.ts`** — declare `Dataset` objects with an `id`, a `name` that scores are recorded
    against, a `seedSource`, and an `examples()` call returning ground truth. Export a
    `get<Name>Datasets()` that passes them through `selectDatasets`, which is what makes
@@ -476,12 +502,13 @@ as `nightshift-investigations`.
 
 - **Where it runs:** a serverless observability Scout cluster; `run_suite.sh` reads `scoutArch` /
   `scoutDomain` from the suite entry.
-- **What runs:** every eval — smoke and trace-only investigations. The ci-prod Vault config must
-  hold the `sandbox` block; `.buildkite/scripts/steps/evals/run_suite.sh` runs the suite's
-  `scoutHook` on it before starting Scout, and Buildkite agents must be able to reach the
-  sandbox-api host.
+- **What runs:** every eval — smoke and trace-only investigations. The suite's ci-prod secret,
+  `kv/ci-shared/kbn-evals/nightshift`, must hold the `sandbox` block;
+  `.buildkite/scripts/steps/evals/run_suite.sh` reads it and runs the suite's `scoutHook` on it
+  before starting Scout (failing the step if it cannot be read), and Buildkite agents must be able
+  to reach the sandbox-api host.
 - **On a PR:** add the `evals:nightshift-investigations` label plus a `models:` label (for example
-  `models:eis/anthropic-claude-4.6-sonnet`) to choose which model investigates. Without a `models:`
+  `models:eis/anthropic-claude-5.5-sonnet`) to choose which model investigates. Without a `models:`
   label the suite is skipped, like other suites that run the real agent.
 - **Weekly:** a step in [`llm_evals.yml`](../../../../../.buildkite/pipelines/evals/llm_evals.yml)
   runs it against the weekly core models (`weekly_eis_core_models`).

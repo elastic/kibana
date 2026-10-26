@@ -37,7 +37,7 @@ export interface UseLinkedActionPoliciesResult {
   error: Error | null;
 }
 
-export const useLinkedActionPolicies = (tags: string[]): UseLinkedActionPoliciesResult => {
+export const useLinkedActionPolicies = (routingTags: string[]): UseLinkedActionPoliciesResult => {
   const http = useService(CoreStart('http'));
   const {
     isLoading,
@@ -48,10 +48,12 @@ export const useLinkedActionPolicies = (tags: string[]): UseLinkedActionPolicies
     isTruncated,
   } = useMatchedActionPolicies({
     http,
-    tags,
+    routingTags,
   });
-  // keepPreviousData keeps the last tag query on screen with isLoading false.
-  // Hide those rows until the match for the current tags arrives.
+  /*
+   * keepPreviousData keeps the last tag query on screen with isLoading false.
+   * Hide those rows until the match for the current routing tags arrives.
+   */
   const awaitingCurrentMatches = isPreviousData && error == null;
 
   const sortedItems = useMemo(

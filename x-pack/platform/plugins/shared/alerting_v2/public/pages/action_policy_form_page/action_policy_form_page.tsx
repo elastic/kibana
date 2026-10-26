@@ -213,7 +213,7 @@ const ActionPolicyFormPageContent = ({
     [submitWithInlineWorkflows, updatePolicy]
   );
 
-  const { methods, isEditMode, isSubmitEnabled, handleSubmit } = useActionPolicyForm({
+  const { methods, isEditMode, handleSubmit } = useActionPolicyForm({
     initialValues: initialPolicy,
     onSubmitCreate,
     onSubmitUpdate,
@@ -282,7 +282,7 @@ const ActionPolicyFormPageContent = ({
             fill
             onClick={handleSubmit}
             isLoading={isLoading}
-            disabled={!isSubmitEnabled || !isLicenseValid}
+            disabled={!isLicenseValid}
             data-test-subj="submitButton"
           >
             {isEditMode ? (

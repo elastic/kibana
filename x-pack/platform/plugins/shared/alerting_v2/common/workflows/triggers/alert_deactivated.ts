@@ -6,23 +6,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
 export const ALERT_DEACTIVATED_TRIGGER_ID = 'alerting.actions.alertDeactivated' as const;
 
-export const alertDeactivatedPayloadSchema = alertActionEnvelopeSchema.extend({
-  reason: z
-    .string()
-    .min(1)
-    .max(1024)
-    .describe(
-      i18n.translate('xpack.alertingVTwo.triggers.alertDeactivated.schema.reason', {
-        defaultMessage: 'Reason the alert was deactivated.',
-      })
-    ),
-});
+export const alertDeactivatedPayloadSchema = lazySchema(() =>
+  alertActionEnvelopeSchema.extend({
+    reason: z
+      .string()
+      .min(1)
+      .max(1024)
+      .describe(
+        i18n.translate('xpack.alertingVTwo.triggers.alertDeactivated.schema.reason', {
+          defaultMessage: 'Reason the alert was deactivated.',
+        })
+      ),
+  })
+);
 
 export type AlertDeactivatedPayload = z.infer<typeof alertDeactivatedPayloadSchema>;
 

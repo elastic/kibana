@@ -8,7 +8,7 @@
 const path = require('path');
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: path.resolve(__dirname, '../../../../..'),
   roots: ['<rootDir>/x-pack/platform/plugins/shared/logs_data_access'],
 };

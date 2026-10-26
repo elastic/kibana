@@ -13,8 +13,10 @@ import { addTagsStepCommonDefinition } from '../../common/workflows/steps/add_ta
 import { removeTagsStepCommonDefinition } from '../../common/workflows/steps/remove_tags';
 import { assignCaseStepCommonDefinition } from '../../common/workflows/steps/assign_case';
 import { closeCaseStepCommonDefinition } from '../../common/workflows/steps/close_case';
+import { deleteAttachmentsStepCommonDefinition } from '../../common/workflows/steps/delete_attachments';
 import { deleteCasesStepCommonDefinition } from '../../common/workflows/steps/delete_cases';
 import { deleteObservableStepCommonDefinition } from '../../common/workflows/steps/delete_observable';
+import { bulkDeleteObservablesStepCommonDefinition } from '../../common/workflows/steps/bulk_delete_observables';
 import { findCasesStepCommonDefinition } from '../../common/workflows/steps/find_cases';
 import { findSimilarCasesStepCommonDefinition } from '../../common/workflows/steps/find_similar_cases';
 import { getAllAttachmentsStepCommonDefinition } from '../../common/workflows/steps/get_all_attachments';
@@ -129,10 +131,18 @@ export const deleteObservableStepDefinition = createPublicCaseStepDefinition({
   ...deleteObservableStepCommonDefinition,
 });
 
+export const bulkDeleteObservablesStepDefinition = createPublicCaseStepDefinition({
+  ...bulkDeleteObservablesStepCommonDefinition,
+});
+
 export const getCasesStepDefinition = createPublicCaseStepDefinition({
   ...getCasesStepCommonDefinition,
 });
 
 export const pushCasesStepDefinition = createPublicCaseStepDefinition({
   ...pushCasesStepCommonDefinition,
+});
+
+export const deleteAttachmentsStepDefinition = createPublicCaseStepDefinition({
+  ...deleteAttachmentsStepCommonDefinition,
 });

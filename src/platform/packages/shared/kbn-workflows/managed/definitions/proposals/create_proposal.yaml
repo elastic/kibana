@@ -117,6 +117,14 @@ triggers:
           description: >
             Set by the caller when its autonomy policy already permits this
             action. Defaults to false so the gate is fail-closed.
+        proposalId:
+          type: string
+          description: >
+            The id to create the proposal under, instead of a random one, for a
+            caller that derives it from what it is proposing. An id that already
+            exists fails the run with a conflict before anything is gated or
+            settled: whether that is a problem is the caller's to decide. Must be
+            a UUID. Omit for a proposal that is always new.
       required:
         - conversationId
         - comment
@@ -149,6 +157,7 @@ steps:
       # The only deadline in this workflow. Every park below derives from the
       # `expiresAt` it resolves to.
       expiresIn: "{{ inputs.expiresIn | default: '72h' }}"
+      proposalId: '{{ inputs.proposalId }}'
 
   # Everything the loop carries lives in variables: `data.set` is the only step
   # type exempt from output eviction, so its values survive a HITL park, a task
@@ -428,31 +437,76 @@ steps:
               decidedBy: '{{ variables.decided_by }}'
               status: executing
 
-          - name: execute_action
-            type: workflow.execute
-            on-failure:
-              # Keeps the failure inside the loop so the clone branch below can
-              # re-offer it; without this the workflow-level handler settles
-              # the proposal and stops.
-              #
-              # `WorkflowExecuteStepSchema` does not model this key — same
-              # lightweight-validation caveat and schema gap as the gate's
-              # handler above (elastic/security-team#19315).
-              continue: true
-            with:
-              workflow-id: '{{ variables.action_workflow_id }}'
-              inputs:
-                # Every action workflow takes one `actionInput` object, so this
-                # workflow never needs to know an action's parameter names.
-                #
-                # From variables, not `inputs`: a revision may have corrected
-                # the input while the gate was parked, and the trigger value
-                # would execute parameters the analyst never approved.
-                actionInput: '${{ variables.action_input }}'
+          # Split by approval mode so each path runs under the right identity.
+          # Each outcome is recorded by a `data.set` in the same branch: a step
+          # that did not run this pass still returns its previous value, so
+          # after a failed auto-approved attempt the other branch's stale error
+          # would otherwise fail the human-approved retry.
+          - name: execute_by_approval_mode
+            type: if
+            condition: '${{ variables.needs_gate == true }}'
+            steps:
+              # Human-approved: default mode, so it runs as the approver (the
+              # original caller after resume).
+              - name: execute_as_approver
+                type: workflow.execute
+                on-failure:
+                  # Keeps the failure inside the loop so the clone branch below
+                  # can re-offer it; without this the workflow-level handler
+                  # settles the proposal and stops.
+                  #
+                  # `WorkflowExecuteStepSchema` does not model this key — same
+                  # lightweight-validation caveat and schema gap as the gate's
+                  # handler above (elastic/security-team#19315).
+                  continue: true
+                with:
+                  workflow-id: '{{ variables.action_workflow_id }}'
+                  inputs:
+                    # Every action workflow takes one `actionInput` object, so
+                    # this workflow never needs to know an action's parameter
+                    # names.
+                    #
+                    # From variables, not `inputs`: a revision may have
+                    # corrected the input while the gate was parked, and the
+                    # trigger value would execute parameters the analyst never
+                    # approved.
+                    actionInput: '${{ variables.action_input }}'
+
+              - name: adopt_approver_result
+                type: data.set
+                with:
+                  action_failed: '${{ steps.execute_as_approver.error != blank }}'
+                  action_error_message: '{{ steps.execute_as_approver.error.message }}'
+            else:
+              # Auto-approved: run as the caller's service account.
+              - name: execute_as_worker
+                type: workflow.execute
+                on-failure:
+                  # Same reason as `execute_as_approver`.
+                  continue: true
+                with:
+                  workflow-id: '{{ variables.action_workflow_id }}'
+                  run-as-mode: inherit
+                  # Only action workflows may inherit the service account. The
+                  # gate already holds back `always-gate` actions, so this only
+                  # stops a target that is not an action at all: it fails this
+                  # step without starting, the failure is recorded, and the
+                  # clone below parks for a human.
+                  allowed-workflow-tags:
+                    - action
+                  inputs:
+                    # Same as `execute_as_approver`.
+                    actionInput: '${{ variables.action_input }}'
+
+              - name: adopt_worker_result
+                type: data.set
+                with:
+                  action_failed: '${{ steps.execute_as_worker.error != blank }}'
+                  action_error_message: '{{ steps.execute_as_worker.error.message }}'
 
           - name: handle_action_success
             type: if
-            condition: '${{ steps.execute_action.error == blank }}'
+            condition: '${{ variables.action_failed != true }}'
             steps:
               - name: record_success
                 type: proposals.updateProposal
@@ -470,14 +524,14 @@ steps:
 
           - name: handle_action_failure
             type: if
-            condition: '${{ steps.execute_action.error != blank }}'
+            condition: '${{ variables.action_failed == true }}'
             steps:
               - name: record_action_failure
                 type: proposals.updateProposal
                 with:
                   proposalId: '{{ variables.current_proposal_id }}'
                   status: failed
-                  executionError: '{{ steps.execute_action.error.message }}'
+                  executionError: '{{ variables.action_error_message }}'
 
               # The failed proposal has settled, so the retry is a new record
               # against the same still-parked gate execution. It inherits the

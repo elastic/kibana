@@ -38,7 +38,17 @@ export interface CanvasStateServiceDeps {
 export interface CanvasUrlInput {
   flyoutName: string | null;
   flyoutTab: string | null;
+  query: string | null;
 }
+
+export const defaultCanvasUrlState: CanvasUrlInput = {
+  flyoutName: null,
+  flyoutTab: null,
+  query: null,
+};
+
+export type RouteEditModes = 'processing' | 'routing';
+export type RouteEdit = [string, RouteEditModes];
 
 export interface CanvasState {
   urlState: CanvasUrlInput;
@@ -48,6 +58,7 @@ export interface CanvasState {
   savingComponentIds?: string[];
   savingComponentKind?: 'source' | 'destination';
   savingComponentIntent?: 'create' | 'delete' | 'connect';
+  editingRoute: Partial<RouteEdit>;
   nodePositions: Record<string, XYPosition>;
   sourcesRef: SourcesActorRef;
   destinationsRef: DestinationsActorRef;
@@ -56,7 +67,7 @@ export interface CanvasState {
 
 export type CanvasUrlEvent =
   | { type: 'url.init'; urlState: CanvasUrlInput }
-  | { type: 'url.sync' }
+  | { type: 'url.sync'; replace?: boolean }
   | {
       type: 'unit.changed';
       unitDefinition: Unit;
@@ -89,4 +100,7 @@ export type CanvasUrlEvent =
   | { type: 'xstate.error.actor.persistUnitDefinition'; error: unknown }
   | { type: 'flyout.open'; flyoutName: string }
   | { type: 'flyout.tab'; flyoutTab: string }
-  | { type: 'flyout.close' };
+  | { type: 'flyout.close' }
+  | { type: 'search.change'; query: string }
+  | { type: 'routing.edit.open'; edgeId: string; mode: RouteEditModes }
+  | { type: 'routing.edit.close' };

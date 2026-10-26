@@ -63,7 +63,8 @@ const rolloverAndOpenDataStream = async (
   await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
 };
 
-test.describe('Data streams index mode', { tag: tags.deploymentAgnostic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/296941
+test.describe.skip('Data streams index mode', { tag: tags.deploymentAgnostic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsIndexManagementUser();
     await pageObjects.indexManagement.navigateToIndexManagementTab('data_streams');

@@ -387,21 +387,71 @@ describe('detection rule workflows', () => {
 
       // Manual autonomy stops once for permission to do the work; the entry gate
       // carries no action and a dismissal terminates the run before diagnosis.
-      expect(entry.if).toContain("inputs.autonomy_level == 'manual'");
+      const gate = all.find(({ name }) => name === 'entry_gate')!;
+      expect(gate.type).toBe('if');
+      expect(gate.condition).toContain("inputs.autonomy_level == 'manual'");
+      expect(gate.condition).toContain('steps.create_investigation.output.conversation_id != null');
+      expect((gate.steps ?? []).map(({ name }) => name)).toEqual([
+        'propose_entry',
+        'entry_decision',
+      ]);
+      expect(gate).not.toHaveProperty('else');
       expect(entryInputs).not.toHaveProperty('actionWorkflowId');
       expect(entryInputs).not.toHaveProperty('actionInput');
       // No action, so no inherited category; the queue drops an uncategorised proposal.
       expect(entryInputs.category).toBe('configure');
+      // Only an approval continues: it matches no case and falls through to diagnosis.
+      // A gate nobody answered reports an empty decision and must stop, not pass as an
+      // approval.
+      const entryDecision = all.find(({ name }) => name === 'entry_decision')!;
+      expect(entryDecision.type).toBe('switch');
+      expect(
+        (entryDecision.cases ?? []).map(({ match, steps: caseSteps }) => [
+          match,
+          caseSteps.map(({ name }) => name),
+        ])
+      ).toEqual([
+        [
+          'dismissed',
+          [
+            'mark_alerts_declined',
+            'close_investigation_declined',
+            'report_investigation_closed_declined',
+            'report_review_completed_declined',
+            'stop_declined',
+          ],
+        ],
+        ['expired', ['report_review_completed_undecided', 'stop_expired']],
+      ]);
+      expect(entryDecision.default).toBeUndefined();
+      for (const [decision, routed] of [
+        ['approved', ''],
+        ['dismissed', 'dismissed'],
+        ['', 'expired'],
+      ]) {
+        expect(
+          createWorkflowLiquidEngine().parseAndRenderSync(String(entryDecision.expression), {
+            steps: { propose_entry: { output: { decision } } },
+          })
+        ).toBe(routed);
+      }
+      const stopExpired = all.find(({ name }) => name === 'stop_expired')!;
+      expect(stopExpired.type).toBe('workflow.output');
+      expect(stopExpired.with).toEqual({
+        rule_uuid: '{{ inputs.rule_uuid }}',
+        approved: false,
+        applied: false,
+      });
       const diagnoseIndex = all.findIndex(({ name }) => name === 'diagnose_rule');
       const stopIndex = all.findIndex(({ name }) => name === 'stop_declined');
       expect(all.findIndex(({ name }) => name === 'propose_entry')).toBeLessThan(stopIndex);
       expect(stopIndex).toBeLessThan(diagnoseIndex);
       expect(all[stopIndex].type).toBe('workflow.output');
-      expect(all[stopIndex].if).toContain('steps.record_entry.output.declined == true');
 
       expect(actionInputs.actionWorkflowId).toBe(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID);
       expect(actionInputs.actionInput).toEqual({
         id: '{{ inputs.rule_uuid }}',
+        expected_revision: '${{ steps.fetch_rule.output.revision }}',
         query: '{{ steps.diagnose_rule.output.structured_output.proposed_query }}',
       });
       // Same edit-rule action as the query path; it patches only the fields it is given.
@@ -409,6 +459,7 @@ describe('detection rule workflows', () => {
       expect(settingsInputs.actionWorkflowId).toBe(actionInputs.actionWorkflowId);
       expect(settingsInputs.actionInput).toEqual({
         id: '{{ inputs.rule_uuid }}',
+        expected_revision: '${{ steps.fetch_rule.output.revision }}',
         // `${{ }}` keeps the score a number.
         risk_score: '${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}',
         severity: '{{ steps.diagnose_rule.output.structured_output.proposed_severity }}',
@@ -453,10 +504,10 @@ describe('detection rule workflows', () => {
       // still reaches the analyst.
       expect((fork.default ?? []).map(({ name }) => name)).toEqual(['propose_manual']);
 
-      expect(entry.if).toContain('steps.create_investigation.output.conversation_id != null');
-      // The switch already guards the arms; propose_threshold also has a step-level
-      // guard (incomplete_threshold_output) verified by the case-arm assertion above.
-      for (const proposal of [action, settings, exception, threshold, schedule, manual]) {
+      // The `entry_gate` if-step guards the entry proposal and the switch guards the
+      // arms; propose_threshold also has a step-level guard (incomplete_threshold_output)
+      // verified by the case-arm assertion above.
+      for (const proposal of [entry, action, settings, exception, threshold, schedule, manual]) {
         expect(proposal).not.toHaveProperty('if');
       }
       for (const proposal of proposals) {
@@ -493,7 +544,7 @@ describe('detection rule workflows', () => {
       // starts asking for its own deadline has to be checked against the
       // ceiling here.
       //
-      // Flattened, not top-level: only `propose_entry` sits at the top, and
+      // Flattened, not top-level: `propose_entry` sits inside `entry_gate`, and
       // the other six hang off `propose_tuning`'s switch cases and default.
       const proposals = flattenSteps(review.steps as NestedStep[]).filter(
         (step) => step.with?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
@@ -596,12 +647,10 @@ describe('detection rule workflows', () => {
       // disabled after alerting keeps harvesting until its FPs age out of the window.
       // The sweep checks live enabled status for the harvested candidates only and
       // drops disabled rules from the fan-out source (a parallel branch body cannot
-      // carry a step-level `if`), failing open into a full fan-out when the lookup
-      // returned nothing.
+      // carry a step-level `if`).
       it('skips reviews for rules that are no longer enabled', () => {
         const collect = tuningSteps.find(({ name }) => name === 'collect_candidates')!;
         const lookup = tuningSteps.find(({ name }) => name === 'list_enabled_candidates')!;
-        const resolve = tuningSteps.find(({ name }) => name === 'resolve_enabled_rules')!;
         const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
         const fanOut = tuningSteps.find(({ name }) => name === 'run_reviews')!;
 
@@ -616,25 +665,17 @@ describe('detection rule workflows', () => {
         expect(String(lookup.if)).toContain('steps.collect_candidates.output.count > 0');
         expect(lookup['on-failure']).toEqual({ continue: true });
 
-        // The prefixed joined string stays non-empty when zero candidates are
-        // enabled, so all-disabled never reads as a missing lookup.
-        expect(String(resolve.if)).toContain('steps.list_enabled_candidates.output.data != null');
-        expect(String(resolve.with?.enabled_rule_ids)).toContain(
-          "| join: ',' | prepend: 'enabled:'"
-        );
-
         const rowsExpr = String(rows.with?.rows);
         expect(rowsExpr).toContain(
-          "where_exp: 'row', 'steps.resolve_enabled_rules.output.enabled_rule_ids == null or steps.resolve_enabled_rules.output.enabled_rule_ids contains row[0]'"
+          "where_exp: 'row', 'steps.resolve_current_revisions.output.rule_revision_keys contains row[6]'"
         );
         // No `default` after where_exp: an empty filtered array is legitimate and a
         // default would resurrect every disabled candidate.
         expect(rowsExpr).not.toMatch(/where_exp:.*\| default:/);
         // The engine's rehydration planner cannot see step paths inside the quoted
-        // where_exp argument; this direct reference keeps the ids resident. If it
-        // is removed, an evicted value renders null and the filter fails open.
-        expect(String(rows.with?.enabled_rule_ids)).toContain(
-          '${{ steps.resolve_enabled_rules.output.enabled_rule_ids }}'
+        // where_exp argument. This direct reference keeps the keys resident.
+        expect(String(rows.with?.rule_revision_keys)).toContain(
+          '${{ steps.resolve_current_revisions.output.rule_revision_keys }}'
         );
         // Slice after the enabled filter: the pool overscans the launch cap so
         // disabled candidates cannot starve enabled rules ranked below them.
@@ -646,6 +687,149 @@ describe('detection rule workflows', () => {
         expect(String((fanOut as NestedStep & { foreach?: string }).foreach)).toContain(
           'steps.resolve_fanout_rows.output.rows'
         );
+      });
+
+      // Rule A was edited after its false positives, so they came from an older
+      // version. Rule B was not edited. Only rule B should be reviewed.
+      it('reviews a rule only on false positives from its current version', () => {
+        const resolveVersions = tuningSteps.find(
+          ({ name }) => name === 'resolve_current_revisions'
+        )!;
+        const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
+
+        expect(harvestQuery).toContain('BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`');
+
+        const currentVersions = createWorkflowLiquidEngine().parseAndRenderSync(
+          String(resolveVersions.with?.rule_revision_keys),
+          {
+            steps: {
+              list_enabled_candidates: {
+                output: {
+                  data: [
+                    { id: 'rule-a', revision: 2 },
+                    { id: 'rule-b', revision: 5 },
+                  ],
+                },
+              },
+            },
+          }
+        );
+
+        // The last column is the "rule@version" key the harvest query adds to each row.
+        const ruleAOldVersion = [
+          'rule-a',
+          12,
+          '2026-10-01T00:00:00.000Z',
+          ['a1'],
+          20,
+          12,
+          ',rule-a@1,',
+        ];
+        const ruleBCurrentVersion = [
+          'rule-b',
+          15,
+          '2026-10-01T00:00:00.000Z',
+          ['b1'],
+          20,
+          15,
+          ',rule-b@5,',
+        ];
+
+        const reviewedRows = resolveExpression(rows.with?.rows, {
+          consts: tuning.consts,
+          steps: {
+            harvest_fp_alerts_by_rule: {
+              output: { values: [ruleAOldVersion, ruleBCurrentVersion] },
+            },
+            resolve_current_revisions: { output: { rule_revision_keys: currentVersions } },
+            collect_candidates: { output: { fanout_limit: 10 } },
+          },
+        });
+
+        expect(reviewedRows).toEqual([ruleBCurrentVersion]);
+      });
+
+      describe('expiring stale tuning proposals', () => {
+        const expireStaleProposalsStep = tuningSteps.find(
+          ({ name }) => name === 'expire_stale_tuning_proposals'
+        ) as NestedStep & {
+          foreach?: string;
+        };
+        const fetchProposalRuleStep = tuningSteps.find(
+          ({ name }) => name === 'fetch_proposal_rule'
+        )!;
+        const expireSteps = ['expire_deleted_rule_proposal', 'expire_changed_rule_proposal'].map(
+          (stepName) => tuningSteps.find(({ name }) => name === stepName)!
+        );
+
+        it('checks only exception proposals for staleness, not Rule Coverage proposals', () => {
+          const exception = { actionWorkflowId: 'system-alertzero-action-add-rule-exception' };
+          const install = { actionWorkflowId: 'system-alertzero-action-install-prebuilt-rule' };
+          const context = {
+            consts: tuning.consts,
+            steps: {
+              list_pending_tuning_proposals: { output: { proposals: [exception, install] } },
+            },
+          };
+
+          expect(resolveExpression(expireStaleProposalsStep.foreach, context)).toEqual([exception]);
+        });
+
+        it("looks up an exception proposal's rule by rule_id, not id", async () => {
+          const path = await createWorkflowLiquidEngine().parseAndRender(
+            String(fetchProposalRuleStep.with?.path),
+            {
+              workflow: { spaceId: 'default' },
+              foreach: { item: { actionInput: { rule_id: 'rule-1' } } },
+            }
+          );
+
+          expect(path).toBe('/s/default/api/detection_engine/rules?id=rule-1');
+        });
+
+        const proposal = (expectedRevision?: number) => ({
+          id: 'proposal-1',
+          actionInput: { id: 'rule-1', expected_revision: expectedRevision },
+        });
+
+        it.each([
+          [
+            'a deleted rule',
+            { error: { message: 'HTTP 404: Not Found' } },
+            0,
+            ['expire_deleted_rule_proposal'],
+          ],
+          ['a failed rule read', { error: { message: 'HTTP 500: Internal Server Error' } }, 0, []],
+          ['an edited rule', { output: { revision: 1 } }, 0, ['expire_changed_rule_proposal']],
+          ['an unchanged rule', { output: { revision: 0 } }, 0, []],
+          ['a proposal without a revision', { output: { revision: 3 } }, undefined, []],
+        ])('handles %s', (_, fetchRule, expectedRevision, expected) => {
+          const context = {
+            foreach: { item: proposal(expectedRevision) },
+            steps: { fetch_proposal_rule: fetchRule },
+          };
+          const fired = expireSteps.filter((step) => resolveExpression(step.if, context) === true);
+
+          expect(fired.map(({ name }) => name)).toEqual(expected);
+        });
+
+        it('explains why in plain text', async () => {
+          const context = {
+            foreach: { item: proposal(0) },
+            steps: { fetch_proposal_rule: { output: { revision: 1, updated_by: 'jane' } } },
+          };
+          const engine = createWorkflowLiquidEngine();
+          const [deleted, changed] = await Promise.all(
+            expireSteps.map((step) => engine.parseAndRender(String(step.with?.rationale), context))
+          );
+
+          expect(deleted).toBe(
+            "The rule was deleted after this proposal was created, so this tuning can't be applied."
+          );
+          expect(changed).toBe(
+            'The rule was changed by "jane" after this proposal was created, so this tuning can\'t be applied.'
+          );
+        });
       });
 
       // The pool is cut in ES|QL before the enabled check runs, so it must exceed
@@ -680,10 +864,10 @@ describe('detection rule workflows', () => {
 
       // The per-document exclusions live in the DSL filter so Lucene drops the rows
       // before ES|QL sees them.
-      it('excludes hidden building-block alerts and bounds the window in the filter', () => {
+      it('excludes EQL sequence members and bounds the window in the filter', () => {
         const filter = JSON.stringify(harvest.with?.filter);
 
-        expect(filter).toContain('"exists":{"field":"kibana.alert.building_block_type"}');
+        expect(filter).toContain('"exists":{"field":"kibana.alert.group.index"}');
         expect(filter).toContain(
           '"range":{"@timestamp":{"gte":"now-{{ inputs.analysis_window_days | default: consts.analysis_window_days }}d"}}'
         );
@@ -711,7 +895,12 @@ describe('detection rule workflows', () => {
 
         const [declined, dismissed, applied, acknowledged] = tagSteps;
         // A declined entry gate retires the alerts too, or the next sweep re-opens it.
-        expect(declined.if).toContain('steps.record_entry.output.declined == true');
+        const entryDecision = reviewSteps.find(({ name }) => name === 'entry_decision')!;
+        expect(
+          entryDecision.cases
+            ?.find(({ match }) => match === 'dismissed')
+            ?.steps.map(({ name }) => name)
+        ).toContain(declined.name);
         expect(declined.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.dismissed_tag }}',
@@ -823,18 +1012,64 @@ describe('detection rule workflows', () => {
         }
       });
 
-      // The whole object is the patch body, so one action covers any field.
-      it('passes the whole edit through as one patch, so one action covers any field', () => {
+      // Every editable field must be in the pick list, or edits to it would be dropped.
+      it('patches every editable field it is given, and nothing else', () => {
         const yaml = parse(getManagedYaml(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID)) as WorkflowYaml;
         const actionSteps = flattenSteps(yaml.steps as unknown as NestedStep[]);
         const patchStep = actionSteps.find(({ type }) => type === 'security.patchRule')!;
+        const [trigger] = yaml.triggers as unknown as Array<{
+          inputs: { properties: { actionInput: { properties: Record<string, unknown> } } };
+        }>;
+        const editable = Object.keys(trigger.inputs.properties.actionInput.properties).filter(
+          (key) => key !== 'expected_revision'
+        );
+        const patch = String(patchStep.with?.patch);
 
-        expect(patchStep.with?.patch).toBe('${{ inputs.actionInput }}');
+        expect(patch).toMatch(/^\$\{\{ inputs\.actionInput \| pick: /);
+        expect(patch).not.toContain('expected_revision');
+        for (const key of editable) {
+          expect(patch).toContain(`'${key}'`);
+        }
 
         // No impact on the action: the caller's value wins.
         const metadata = (yaml.consts as Record<string, Record<string, unknown>>).actionMetadata;
         expect(metadata).not.toHaveProperty('impact');
         expect(metadata.approvalPolicy).toBe('always-gate');
+      });
+
+      describe.each([
+        ['edit', ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID],
+        ['exception', ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID],
+      ])('refuses a stale %s proposal', (_kind, workflowId) => {
+        it.each([
+          ['a deleted rule', { error: { message: 'HTTP 404: Not Found' } }, 0, 'fail_rule_deleted'],
+          [
+            'any other read failure',
+            { error: { message: 'HTTP 500: Internal Server Error' } },
+            0,
+            'fail_rule_read',
+          ],
+          ['a rule edited since', { output: { revision: 1 } }, 0, 'fail_rule_changed'],
+          ['an unchanged rule', { output: { revision: 0 } }, 0, undefined],
+          ['a proposal without a revision', { output: { revision: 3 } }, undefined, undefined],
+        ])('for %s', (_, fetchRule, expectedRevision, expectedFailStep) => {
+          const yaml = parse(getManagedYaml(workflowId)) as WorkflowYaml;
+          const context = {
+            inputs: { actionInput: { id: 'rule-1', expected_revision: expectedRevision } },
+            steps: { fetch_rule: fetchRule },
+          };
+          const steps = flattenSteps(yaml.steps as unknown as NestedStep[]);
+          const failStep = steps.find(
+            ({ type, if: condition }) =>
+              type === 'workflow.fail' && resolveExpression(condition, context) === true
+          );
+
+          expect(failStep?.name).toBe(expectedFailStep);
+          // The rule is only touched after every check has had its chance to stop the run.
+          expect(steps.findIndex(({ type }) => type.startsWith('security.'))).toBeGreaterThan(
+            steps.findIndex((step) => step === failStep)
+          );
+        });
       });
 
       // The gate validates actionInput against this schema at proposal creation.
@@ -949,6 +1184,7 @@ describe('detection rule workflows', () => {
         const propose = reviewSteps.find(({ name }) => name === 'propose_exception')!;
         const {
           rule_id: ruleId,
+          expected_revision: expectedRevision,
           description: actionDescription,
           ...exceptionItem
         } = (propose.with?.inputs as { actionInput: Record<string, unknown> }).actionInput;
@@ -961,6 +1197,7 @@ describe('detection rule workflows', () => {
             'Exception proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts.',
         });
         expect(ruleId).toBe('{{ inputs.rule_uuid }}');
+        expect(expectedRevision).toBe('${{ steps.fetch_rule.output.revision }}');
         expect(actionDescription).toBe(
           'Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed.'
         );
@@ -1009,12 +1246,22 @@ describe('detection rule workflows', () => {
           string,
           Record<string, string> | string
         >;
-        expect((previewInputs.preview_body as Record<string, string>).query).toBe(
-          '{{ steps.fetch_rule.output.query }}'
+        const previewBody = previewInputs.preview_body as Record<string, string>;
+        const proposedBody = previewInputs.proposed_body as Record<string, string>;
+        expect(previewBody.query).toBe('{{ steps.fetch_rule.output.query }}');
+        expect(previewBody.filters).toBe(
+          '${{ steps.fetch_rule.output.filters | default: consts.no_items }}'
         );
-        expect((previewInputs.proposed_body as Record<string, string>).query).toBe(
-          '{{ steps.diagnose_rule.output.structured_output.proposed_query }}'
+        // Only the query arm previews the proposed query; exception, threshold and
+        // schedule keep the rule's own query and change filters, threshold or schedule.
+        expect(proposedBody.query).toContain(
+          "{% if steps.diagnose_rule.output.structured_output.change_type == 'query' %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
         );
+        expect(proposedBody.query).toContain(
+          '{% else %}{{ steps.fetch_rule.output.query }}{% endif %}'
+        );
+        expect(proposedBody.filters).toContain('steps.build_exception_filter.output.filters');
+        expect(proposedBody.filters).toContain('| default: steps.fetch_rule.output.filters');
       });
 
       // The backtest informs the analyst but never decides whether the edit-rule
@@ -1030,10 +1277,44 @@ describe('detection rule workflows', () => {
         // The unbacktested branch must not promise a manual handoff. The query arm
         // carries the edit-rule action whether or not the preview ran, so approving
         // applies the change and the alerts are tagged applied, not acknowledged.
-        expect(comment).toContain('Approving still applies the proposed query');
+        expect(comment).toContain('Approving still applies the proposed change');
         expect(comment).not.toContain('not previewed or applied automatically');
         expect(comment).not.toContain('marks these alerts acknowledged');
       });
+
+      // The unbacktested branch names the one reason that applies, so a threshold
+      // rule with a query change is not told it is the wrong rule type.
+      it.each([
+        ['saved_query', 'query', 'does not support saved query rules or machine learning rules'],
+        [
+          'machine_learning',
+          'query',
+          'does not support saved query rules or machine learning rules',
+        ],
+        ['esql', 'exception', 'cannot apply an exception to an ES|QL rule'],
+        ['query', 'exception', 'could not convert the proposed exception into a preview filter'],
+        ['query', 'threshold', 'does not support this change on a query rule'],
+      ])(
+        'explains why a %s rule with a %s change has no backtest',
+        async (type, changeType, reason) => {
+          const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
+          const comment = String((compose.with as Record<string, string>).comment);
+
+          const rendered = await createWorkflowLiquidEngine().parseAndRender(comment, {
+            inputs: {},
+            consts: {},
+            steps: {
+              fetch_rule: { output: { type, name: 'r', id: 'id' } },
+              diagnose_rule: { output: { structured_output: { change_type: changeType } } },
+              can_preview_query_change: { output: { supported: false } },
+            },
+          });
+
+          expect(rendered).toContain('No backtest is available for this change.');
+          expect(rendered).toContain(reason);
+          expect(rendered).toContain('Approving still applies the proposed change');
+        }
+      );
 
       // The diagnosis schema leaves its title unbounded and the proposal step
       // rejects anything longer, so an unbounded forward fails the whole review.
@@ -1178,17 +1459,44 @@ describe('detection rule workflows', () => {
         expect(emitInput).toContain('_shards.failed == 0');
       });
 
-      it('excludes rule modes with omitted preview fields from auto-apply', () => {
+      // An EQL sequence writes one building-block alert per matched event next to the
+      // sequence alert. The sweep leaves those out when it counts false positives, so
+      // the backtest counts the same way or a two-event sequence reads as three alerts.
+      it('leaves EQL sequence members out of both preview counts', () => {
+        const preview = parse(getManagedYaml(ALERTZERO_RULE_PREVIEW_WORKFLOW_ID)) as WorkflowYaml;
+        const previewSteps = flattenSteps(preview.steps as unknown as NestedStep[]);
+        const counts = previewSteps.filter(({ type }) => type === 'elasticsearch.search');
+
+        expect(counts).toHaveLength(2);
+        for (const count of counts) {
+          const query = count.with?.query as {
+            bool: { filter: unknown[]; must_not: unknown[] };
+          };
+          expect(query.bool.filter).toEqual([
+            { term: { 'kibana.alert.rule.uuid': expect.stringContaining('previewId') } },
+          ]);
+          expect(query.bool.must_not).toEqual([{ exists: { field: 'kibana.alert.group.index' } }]);
+        }
+      });
+
+      // Data view, timestamp override and alert suppression are passed through to
+      // both preview bodies instead of excluding the rule from the backtest.
+      it('previews rules with a data view, timestamp override or alert suppression', () => {
         const support = reviewSteps.find(({ name }) => name === 'can_preview_query_change')!;
-        expect(String(support.with?.supported)).toContain(
-          'steps.fetch_rule.output.data_view_id == null'
-        );
-        expect(String(support.with?.supported)).toContain(
-          'steps.fetch_rule.output.timestamp_override == null'
-        );
-        expect(String(support.with?.supported)).toContain(
-          'steps.fetch_rule.output.alert_suppression == null'
-        );
+        expect(String(support.with?.supported)).not.toContain('data_view_id');
+        expect(String(support.with?.supported)).not.toContain('timestamp_override');
+        expect(String(support.with?.supported)).not.toContain('alert_suppression');
+
+        const previewStep = reviewSteps.find(({ name }) => name === 'run_previews')!;
+        const bodies = previewStep.with?.inputs as Record<string, Record<string, string>>;
+        for (const body of [bodies.preview_body, bodies.proposed_body]) {
+          expect(body.data_view_id).toBe('${{ steps.fetch_rule.output.data_view_id }}');
+          expect(body.timestamp_override).toBe('${{ steps.fetch_rule.output.timestamp_override }}');
+          expect(body.timestamp_override_fallback_disabled).toBe(
+            '${{ steps.fetch_rule.output.timestamp_override_fallback_disabled }}'
+          );
+          expect(body.alert_suppression).toBe('${{ steps.fetch_rule.output.alert_suppression }}');
+        }
         expect(String(support.with?.supported)).toContain(
           "steps.diagnose_rule.output.structured_output.change_type == 'query'"
         );
@@ -1200,6 +1508,65 @@ describe('detection rule workflows', () => {
         expect(String(previews.if)).toContain(
           'steps.can_preview_query_change.output.supported == true'
         );
+      });
+
+      // The gate is a hand-written table of rule type by change type, evaluated here
+      // rather than string-matched so a dropped or misspelled cell fails the test.
+      // Saved query rules carry no inline query and machine learning rules none at
+      // all; an exception cannot be previewed on an ES|QL rule, which has no filters.
+      describe('backtest gate', () => {
+        const evaluateGate = (
+          type: string,
+          changeType: string,
+          exceptionFilter: { error: null; output: { filters: unknown[] } } | { error: string }
+        ) => {
+          const support = reviewSteps.find(({ name }) => name === 'can_preview_query_change')!;
+          const expression = String(support.with?.supported).trim().slice(3, -2).trim();
+          return createWorkflowLiquidEngine().evalValueSync(expression, {
+            steps: {
+              fetch_rule: { error: null, output: { type, enabled: true } },
+              diagnose_rule: { output: { structured_output: { change_type: changeType } } },
+              build_exception_filter: exceptionFilter,
+            },
+          });
+        };
+        const builtFilter = { error: null, output: { filters: [{ bool: {} }] } };
+
+        it.each([
+          ['query', { query: true, exception: true, threshold: false, schedule: true }],
+          ['eql', { query: true, exception: true, threshold: false, schedule: true }],
+          ['esql', { query: true, exception: false, threshold: false, schedule: true }],
+          ['new_terms', { query: true, exception: true, threshold: false, schedule: true }],
+          ['threat_match', { query: true, exception: true, threshold: false, schedule: true }],
+          ['threshold', { query: true, exception: true, threshold: true, schedule: true }],
+          ['saved_query', { query: false, exception: false, threshold: false, schedule: false }],
+          [
+            'machine_learning',
+            { query: false, exception: false, threshold: false, schedule: false },
+          ],
+        ])('decides each change type on a %s rule', (type, expected) => {
+          for (const [changeType, supported] of Object.entries(expected)) {
+            expect([changeType, evaluateGate(type, changeType, builtFilter)]).toEqual([
+              changeType,
+              supported,
+            ]);
+          }
+        });
+
+        it.each(['risk_score', 'manual'])('never previews a %s change', (changeType) => {
+          expect(evaluateGate('query', changeType, builtFilter)).toBe(false);
+        });
+
+        // Falling back to the rule's own filters would backtest the unchanged rule.
+        it('withholds the exception backtest when the filter was not built', () => {
+          expect(evaluateGate('query', 'exception', { error: 'boom' })).toBe(false);
+          expect(
+            evaluateGate('query', 'exception', {
+              error: null,
+              output: { filters: null as unknown as unknown[] },
+            })
+          ).toBe(false);
+        });
       });
 
       it('bounds direct review inputs', () => {
@@ -1309,29 +1676,22 @@ describe('detection rule workflows', () => {
 
       // The gates live in the review children (one execution = one resume slot),
       // while the sweep fans out synchronously and joins once every gate settles.
-      it('fans out one sync review per rule and joins on all gates', () => {
-        const fanOut = tuningSteps.find(({ name }) => name === 'run_reviews')! as NestedStep & {
-          mode?: string;
-          concurrency?: { max: number; 'count-waiting': boolean };
-        };
-        const launches = tuningSteps.filter(({ type }) => type === 'workflow.execute');
+      it('fans out one async review per rule without waiting on its gate', () => {
+        const fanOut = tuningSteps.find(({ name }) => name === 'run_reviews')!;
+        const launches = tuningSteps.filter(({ type }) => type === 'workflow.executeAsync');
 
-        expect(fanOut.type).toBe('parallel');
-        // Settled: one failed review must not skip the other rules' gates.
-        expect(fanOut.mode).toBe('settled');
-        // A slot per launched rule (max_rules_per_sweep; the input can only lower
-        // the cap) so every gate opens at once.
-        expect(fanOut.concurrency).toEqual({ max: 10, 'count-waiting': false });
-        // A timeout here would abort branches and cancel children mid-approval;
-        // the child gate's own timeout is the only clock.
+        // A sync launch would park the sweep in WAITING_FOR_CHILD for up to 72h
+        // per gate and block the space's scheduled sweeps behind it.
+        expect(fanOut.type).toBe('foreach');
         expect(fanOut).not.toHaveProperty('timeout');
         expect(fanOut).not.toHaveProperty('branch-timeout');
 
         expect(launches.map(({ name }) => name)).toEqual(['run_review']);
         expect(launches[0].with?.['workflow-id']).toBe(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID);
-        expect(launches[0]).not.toHaveProperty('on-failure');
+        // A start the engine rejects must not stop the remaining rules' reviews.
+        expect(launches[0]['on-failure']).toEqual({ continue: true });
         expect(tuningSteps.map(({ type }) => type)).not.toContain('waitForApproval');
-        expect(tuningSteps.map(({ type }) => type)).not.toContain('workflow.executeAsync');
+        expect(tuningSteps.map(({ type }) => type)).not.toContain('workflow.execute');
 
         const { concurrency } = (review as unknown as { settings: Record<string, unknown> })
           .settings as { concurrency: { key: string; strategy: string; max: number } };
@@ -1340,36 +1700,33 @@ describe('detection rule workflows', () => {
         expect(concurrency.max).toBe(1);
       });
 
-      // The limit is per space; with max 1 a sweep waiting on its gates (up to 72h)
-      // would make every scheduled 2h sweep get skipped until it finishes.
-      it('keeps sweeping a space for new rules while earlier gates are pending', () => {
+      // The sweep finishes in seconds now that it does not join on gates, so two
+      // sweeps in one space would only race each other for the same rules.
+      it('runs one sweep per space at a time', () => {
         const { concurrency } = (tuning as unknown as { settings: Record<string, unknown> })
           .settings as { concurrency: { strategy: string; max: number } };
 
         expect(concurrency.strategy).toBe('drop');
-        expect(concurrency.max).toBe(5);
+        expect(concurrency.max).toBe(1);
       });
 
-      // The fan-in reads the settled aggregate, so the summary cannot run before
-      // every gate has resolved or failed.
-      it('summarizes decisions from the settled fan-out results', () => {
-        const summary = tuningSteps.find(({ name }) => name === 'summarize_decisions')!;
+      // Decisions land in each review, not in the sweep: the sweep can only report
+      // what it started and what was already in flight.
+      it('reports launches and in-flight reviews instead of decisions', () => {
         const emit = tuningSteps.find(({ name }) => name === 'emit_result')!;
-        const summaryInput = JSON.stringify(summary.with);
+        const outputs = emit.with as Record<string, string>;
 
-        expect(summaryInput).toContain('steps.run_reviews.output.failed');
-        expect(summaryInput).toContain("where: 'approved'");
-        expect(summaryInput).toContain("where: 'applied'");
-        for (const key of [
+        expect(tuningSteps.map(({ name }) => name)).not.toContain('summarize_decisions');
+        expect(Object.keys(outputs).sort()).toEqual([
+          'harvest_failed',
+          'lookup_failed',
+          'reviews_in_flight',
           'reviews_requested',
-          'reviews_approved',
-          'reviews_failed',
-          'rules_applied',
-        ]) {
-          expect(String((emit.with as Record<string, string>)[key])).toContain(
-            `steps.summarize_decisions.output.${key}`
-          );
-        }
+        ]);
+        expect(outputs.reviews_requested).toContain('steps.resolve_fanout_rows.output.rows');
+        expect(outputs.reviews_in_flight).toContain('steps.collect_active_rules.output.expected');
+        expect(outputs.harvest_failed).toContain('steps.harvest_fp_alerts_by_rule.error != null');
+        expect(outputs.lookup_failed).toContain('steps.list_active_reviews.error != null');
       });
     });
 

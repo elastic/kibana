@@ -16,6 +16,7 @@ import {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
+  hasAggregatingCommand,
   parseTimeFieldFromESQLQuery,
   prettifyQuery,
   retrieveMetadataColumns,
@@ -127,6 +128,52 @@ describe('esql query helpers', () => {
     });
   });
 
+  describe('hasAggregatingCommand', () => {
+    it('returns false for KEEP', () => {
+      expect(hasAggregatingCommand('FROM logs | KEEP host')).toBe(false);
+    });
+
+    it('returns false when a column is named like an aggregating command', () => {
+      expect(hasAggregatingCommand('FROM logs | KEEP stats, promql')).toBe(false);
+    });
+
+    it('returns false for INLINE STATS', () => {
+      expect(hasAggregatingCommand('FROM logs | INLINE STATS count = COUNT(*) BY host')).toBe(
+        false
+      );
+    });
+
+    it('returns true for STATS', () => {
+      expect(hasAggregatingCommand('FROM logs | STATS count = COUNT(*) BY status')).toBe(true);
+    });
+
+    it('returns true for PROMQL', () => {
+      expect(hasAggregatingCommand('PROMQL index=metrics (avg(cpu_usage))')).toBe(true);
+    });
+
+    it('returns true for STATS nested in a FORK branch', () => {
+      expect(hasAggregatingCommand('FROM logs | FORK (WHERE x > 0) (STATS count = COUNT(*))')).toBe(
+        true
+      );
+    });
+
+    it('returns false when STATS only appears in a string literal', () => {
+      expect(hasAggregatingCommand('FROM logs | WHERE message == "STATS count"')).toBe(false);
+    });
+
+    it('returns false for commented-out STATS', () => {
+      expect(
+        hasAggregatingCommand(`FROM logs
+      // | STATS count = COUNT(*)`)
+      ).toBe(false);
+    });
+
+    it('returns false for undefined and empty queries', () => {
+      expect(hasAggregatingCommand(undefined)).toBe(false);
+      expect(hasAggregatingCommand('')).toBe(false);
+    });
+  });
+
   describe('parseTimeFieldFromESQLQuery', () => {
     it('should return undefined if there are no time params', () => {
       expect(parseTimeFieldFromESQLQuery('from a | eval b = 1')).toBeUndefined();
@@ -156,6 +203,23 @@ describe('esql query helpers', () => {
           'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?_tstart, ?_tend)'
         )
       ).toBe('event.timefield');
+    });
+
+    it('should return @timestamp for a query that uses TBUCKET', () => {
+      expect(parseTimeFieldFromESQLQuery('ts a | stats sum(bytes) by tbucket(100)')).toBe(
+        '@timestamp'
+      );
+      expect(parseTimeFieldFromESQLQuery('TS a | STATS SUM(bytes) BY TBUCKET(1 hour)')).toBe(
+        '@timestamp'
+      );
+    });
+
+    it('should prefer the field used with the time params over the TBUCKET default', () => {
+      expect(
+        parseTimeFieldFromESQLQuery(
+          'from a | where event.created >= ?_tstart | stats sum(bytes) by tbucket(100)'
+        )
+      ).toBe('event.created');
     });
 
     it('should return the time field if the column is casted', () => {

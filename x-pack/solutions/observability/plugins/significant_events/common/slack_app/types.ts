@@ -14,6 +14,8 @@
 export const RELAY_APP_CONNECTION_STATUS = {
   notConnected: 'not_connected',
   oauthInProgress: 'oauth_in_progress',
+  /** The install completed; the admin must confirm the Slack workspace before it is used. */
+  pendingConfirmation: 'pending_confirmation',
   connected: 'connected',
   error: 'error',
 } as const;
@@ -26,12 +28,30 @@ export interface SlackAppConnectResponse {
   authorizeUrl: string;
 }
 
+export interface SlackAppWorkspace {
+  /** Slack team id. */
+  tenantKey: string;
+  /** Workspace name. Anyone can pick any name, so it is a display label only. */
+  name?: string;
+  /** Workspace URL from Slack `auth.test` (https://api.slack.com/methods/auth.test), unique to the workspace. */
+  url?: string;
+}
+
 /** Response from the status route driving the card state. */
 export interface SlackAppStatusResponse {
-  /** `streams.significantEventsAppsEnabled` flag on + `xpack.actions.relay.url` set + agentBuilder available. */
   available: boolean;
   status: RelayAppConnectionStatus;
   error?: string;
+  /** Present once the install has registered a workspace (`pending_confirmation` and `connected`). */
+  workspace?: SlackAppWorkspace;
+  /** Username of the admin who started the install; present with `workspace` when the request had one. */
+  createdBy?: string;
+  /** ISO timestamp of when the install started; present with `workspace`. */
+  createdAt?: string;
+}
+
+export interface SlackAppConfirmResponse {
+  status: typeof RELAY_APP_CONNECTION_STATUS.connected;
 }
 
 export interface SlackAppDisconnectResponse {

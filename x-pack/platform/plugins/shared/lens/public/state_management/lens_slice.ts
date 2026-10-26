@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAction, createReducer, current } from 'redux-toolkit-v1';
+import { createAction, createReducer, current } from '@reduxjs/toolkit';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
 import type { Filter, Query } from '@kbn/es-query';
@@ -34,7 +34,7 @@ import type {
   LensDatasourceId,
 } from '@kbn/lens-common';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
-import { isComingFromContainerView } from '../app_plugin/app_helpers';
+import { isSaveAndReturn } from '../app_plugin/app_helpers';
 import { generateId } from '../id_generator';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
@@ -140,7 +140,7 @@ export const getPreloadedState = ({
     searchSessionId: data.search.session.getSessionId() ?? '',
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(
-      isComingFromContainerView(embeddableEditorIncomingState) ||
+      isSaveAndReturn(embeddableEditorIncomingState) ||
         (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable)
     ),
     activeDatasourceId: initialDatasourceId,
@@ -1342,26 +1342,30 @@ function addInitialValueIfAvailable({
       });
 
       if (!noDatasource && activeDatasource?.initializeDimension) {
+        const initializedDatasourceState = activeDatasource.initializeDimension(
+          datasourceState,
+          layerId,
+          framePublicAPI.dataViews.indexPatterns,
+          {
+            ...info,
+            columnId: columnId || info.columnId,
+            visualizationGroups: activeVisualization.getConfiguration({
+              layerId,
+              frame: framePublicAPI,
+              state: activeVisualizationState,
+            }).groups,
+            activeVisualizationTypeId: activeVisualization.getVisualizationTypeId?.(
+              activeVisualizationState,
+              layerId
+            ),
+          }
+        );
         return {
-          activeDatasourceState: activeDatasource.initializeDimension(
-            datasourceState,
-            layerId,
-            framePublicAPI.dataViews.indexPatterns,
-            {
-              ...info,
-              columnId: columnId || info.columnId,
-              visualizationGroups: activeVisualization.getConfiguration({
-                layerId,
-                frame: framePublicAPI,
-                state: activeVisualizationState,
-              }).groups,
-              activeVisualizationTypeId: activeVisualization.getVisualizationTypeId?.(
-                activeVisualizationState,
-                layerId
-              ),
-            }
-          ),
-          activeVisualizationState,
+          activeDatasourceState: initializedDatasourceState,
+          activeVisualizationState:
+            initializedDatasourceState === datasourceState
+              ? visualizationState
+              : activeVisualizationState,
         };
       } else {
         return {

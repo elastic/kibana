@@ -72,6 +72,8 @@ interface ServiceSettingsFlyoutProps {
   config: ServiceVars;
   globalRegion: string;
   isNamespaceLocked?: boolean;
+  /** What an empty namespace resolves to for the chosen deployment method, when it is known. */
+  resolvedEmptyNamespace?: string;
   onApply: (
     varsByDataStream: Record<string, ServiceDataStreamVars>,
     enabledDataStreams: string[],
@@ -85,6 +87,7 @@ export function ServiceSettingsFlyout({
   config,
   globalRegion,
   isNamespaceLocked = false,
+  resolvedEmptyNamespace,
   onApply,
   onClose,
 }: ServiceSettingsFlyoutProps) {
@@ -149,6 +152,7 @@ export function ServiceSettingsFlyout({
               namespace={namespace}
               onChange={setNamespace}
               isLocked={isNamespaceLocked}
+              resolvedEmptyNamespace={resolvedEmptyNamespace}
             />
             <EuiSpacer size="m" />
           </>

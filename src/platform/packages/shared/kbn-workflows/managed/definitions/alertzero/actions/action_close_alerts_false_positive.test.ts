@@ -57,6 +57,33 @@ describe('Close alerts as false positive action', () => {
     expect(typeof failStep.if).toBe('string');
   });
 
+  // Approving a proposal runs this with the proposal's `alertIds`. The close is an update by
+  // query, so any clause beyond the ids (a rule, a time range) would close alerts the analyst
+  // was never shown.
+  it('closes only the alerts named in the approved input, with nothing else in the query', () => {
+    const closeStep = workflow.steps.find((step) => step.name === 'close_alerts')!;
+
+    expect(closeStep.with).toEqual({
+      status: 'closed',
+      reason: 'false_positive',
+      conflicts: 'proceed',
+      query: { bool: { filter: { terms: { _id: '${{ inputs.actionInput.alertIds }}' } } } },
+    });
+  });
+
+  it('resolves the close query to the approved ids', () => {
+    const closeStep = workflow.steps.find((step) => step.name === 'close_alerts')!;
+    const idsExpression = (
+      closeStep.with!.query as { bool: { filter: { terms: { _id: string } } } }
+    ).bool.filter.terms._id.trim();
+
+    expect(
+      engine.evalValueSync(idsExpression.slice(3, -2).trim(), {
+        inputs: { actionInput: { alertIds: ['alert-1', 'alert-2'] } },
+      })
+    ).toEqual(['alert-1', 'alert-2']);
+  });
+
   it('does not fail when every requested alert was updated', () => {
     expect(evaluateIfCondition(2, ['alert-1', 'alert-2'])).toBe(false);
   });

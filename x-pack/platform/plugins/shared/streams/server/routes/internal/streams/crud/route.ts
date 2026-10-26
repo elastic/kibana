@@ -80,12 +80,16 @@ export const listStreamsRoute = createServerRoute({
       return dataStreamsChunk;
     });
 
+    const dataStreamsByName = new Map(
+      dataStreams.data_streams.map((dataStream) => [dataStream.name, dataStream])
+    );
+
     const enrichedStreams = availableStreams.map<ListStreamDetail>(({ stream }) => {
       if (Streams.QueryStream.Definition.is(stream)) {
         return { stream, privileges: { read_failure_store: false } };
       }
 
-      const match = dataStreams.data_streams.find((dataStream) => dataStream.name === stream.name);
+      const match = dataStreamsByName.get(stream.name);
       const privileges = streamPrivilegesMap.get(stream.name);
       const canReadFailureStore = privileges?.read_failure_store ?? false;
 

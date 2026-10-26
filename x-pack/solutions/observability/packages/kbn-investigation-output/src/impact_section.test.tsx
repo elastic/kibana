@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { EvidenceChart } from '@kbn/significant-events-schema';
+import type { EvidenceChart } from '@kbn/agentic-investigations-plugin/common';
 import { ImpactSection } from './impact_section';
 
 const sampleChart: EvidenceChart = {
@@ -55,11 +55,12 @@ describe('ImpactSection', () => {
             summary: 'Checkout failed for ~30% of requests for 40 minutes.',
             entities: [
               {
+                id: 'checkout-service',
                 name: 'checkout-service',
                 type: 'service',
                 evidence: { description: 'Error rate peaked at 31%.' },
               },
-              { name: 'payments-db' },
+              { id: 'payments-db', name: 'payments-db' },
             ],
           }}
         />
@@ -89,7 +90,12 @@ describe('ImpactSection', () => {
     render(
       <I18nProvider>
         <ImpactSection
-          impact={{ entities: [{ name: 'checkout-service' }, { name: 'payments-db' }] }}
+          impact={{
+            entities: [
+              { id: 'checkout-service', name: 'checkout-service' },
+              { id: 'payments-db', name: 'payments-db' },
+            ],
+          }}
         />
       </I18nProvider>
     );
@@ -140,7 +146,10 @@ describe('ImpactSection', () => {
 
   it('cuts a long summary short behind "Show more" and shows it in full on click', () => {
     const summary = `${'Checkout failed for most shoppers. '.repeat(20)}Final sentence.`;
-    const entities = Array.from({ length: 8 }, (_, index) => ({ name: `service-${index}` }));
+    const entities = Array.from({ length: 8 }, (_, index) => ({
+      id: `service-${index}`,
+      name: `service-${index}`,
+    }));
     render(
       <I18nProvider>
         <ImpactSection
@@ -174,7 +183,9 @@ describe('ImpactSection', () => {
   it('renders no "Show more" for a short summary', () => {
     render(
       <I18nProvider>
-        <ImpactSection impact={{ summary: 'Checkout failed.', entities: [{ name: 'checkout' }] }} />
+        <ImpactSection
+          impact={{ summary: 'Checkout failed.', entities: [{ id: 'checkout', name: 'checkout' }] }}
+        />
       </I18nProvider>
     );
 

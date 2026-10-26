@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "server/**/*", "public/**/*", "test/scout*/**/*"],
+  "include": [
+    "common/**/*",
+    "server/**/*",
+    "public/**/*",
+    "integration_tests/**/*",
+    "test/scout*/**/*"
+  ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/share-plugin",
@@ -19,6 +25,7 @@
     "@kbn/spaces-plugin",
     "@kbn/std",
     "@kbn/workflows",
+    "@kbn/workflows-execution-engine",
     "@kbn/workflows-extensions",
     "@kbn/workflows-management-plugin",
     "@kbn/zod",
@@ -31,26 +38,31 @@
     "@kbn/nightshift-ai",
     "@kbn/nightshift-shared",
     "@kbn/agent-builder-server",
+    "@kbn/agentic-investigations-plugin",
+    "@kbn/storage-adapter",
     "@kbn/agent-builder-genai-utils",
     "@kbn/i18n",
     "@kbn/core-saved-objects-server",
-    "@kbn/es-query",
-    "@kbn/task-manager-plugin",
     "@kbn/rule-data-utils",
     "@kbn/rule-registry-plugin",
     "@kbn/actions-plugin",
-    "@kbn/investigation-output",
+    "@kbn/alerting-plugin",
     "@kbn/sandbox-plugin",
     "@kbn/context-engine-plugin",
     "@kbn/inference-common",
     "@kbn/inference-plugin",
-    "@kbn/i18n-react",
     "@kbn/utility-types",
     "@kbn/es-errors",
     "@kbn/test",
     "@kbn/tooling-log",
     "@kbn/occ",
     "@kbn/encrypted-saved-objects-plugin",
-    "@kbn/security-plugin"
+    "@kbn/security-plugin",
+    "@kbn/agentic-investigations-plugin",
+    "@kbn/proposals-plugin",
+    "@kbn/proposals-common",
+    "@kbn/core-security-common",
+    "@kbn/eval-kql",
+    "@kbn/rrule"
   ]
 }

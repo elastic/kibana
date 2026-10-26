@@ -118,6 +118,32 @@ describe('assertReadOnly', () => {
     expect(() => assertReadOnly('/*! DROP TABLE users */ SELECT 1')).toThrow(/executable comment/i);
   });
 
+  describe('extraWritePattern', () => {
+    const intoPattern = /\bINTO\b/i;
+
+    it('rejects a statement matching the vendor-specific pattern', () => {
+      expect(() =>
+        assertReadOnly('SELECT * INTO copy FROM users', SELECT_OR_WITH_PREFIX, intoPattern)
+      ).toThrow(/write operations/i);
+    });
+
+    it('allows the same statement when no extra pattern is passed', () => {
+      expect(() => assertReadOnly('SELECT * INTO copy FROM users')).not.toThrow();
+    });
+
+    it('still allows read-only SQL that does not match the extra pattern', () => {
+      expect(() =>
+        assertReadOnly('SELECT id FROM users LIMIT 10', SELECT_OR_WITH_PREFIX, intoPattern)
+      ).not.toThrow();
+    });
+
+    it('still applies the shared checks alongside the extra pattern', () => {
+      expect(() => assertReadOnly('DROP TABLE users', SELECT_OR_WITH_PREFIX, intoPattern)).toThrow(
+        /read-only/i
+      );
+    });
+  });
+
   it('can use the broader discovery prefix set', () => {
     expect(() => assertReadOnly('SHOW TABLES', READ_ONLY_STATEMENT_PREFIXES)).not.toThrow();
   });

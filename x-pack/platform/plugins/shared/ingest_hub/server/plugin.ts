@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 
 import type { IngestHubServerSetupDeps, IngestHubServerStartDeps } from './types';
-import { registerRoutes } from './routes';
+import { registerRoutes } from './core/register_routes';
 
 export class IngestHubPlugin
   implements Plugin<void, void, IngestHubServerSetupDeps, IngestHubServerStartDeps>

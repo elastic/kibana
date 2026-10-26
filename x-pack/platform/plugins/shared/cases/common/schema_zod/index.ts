@@ -148,3 +148,28 @@ export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
     z.record(z.string(), jsonValueSchema),
   ])
 );
+
+/**
+ * Bounded JSON object for request input: caps every nested string and array, and the serialized size.
+ */
+export const limitedJsonObjectSchema = ({ fieldName, max }: Omit<LimitedSchemaType, 'min'>) => {
+  const limitedJsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
+    z.union([
+      z.string().max(max),
+      z.number(),
+      z.boolean(),
+      z.null(),
+      z.array(limitedJsonValueSchema).max(max),
+      z.record(z.string().max(max), limitedJsonValueSchema),
+    ])
+  );
+
+  return z.record(z.string().max(max), limitedJsonValueSchema).superRefine((value, ctx) => {
+    if (JSON.stringify(value).length > max) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `The ${fieldName} field is too large. The maximum serialized length is ${max}.`,
+      });
+    }
+  });
+};

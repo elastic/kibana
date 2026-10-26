@@ -7,18 +7,11 @@
 
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '@kbn/security-solution-navigation';
 
 spaceTest.describe(
   'serverless security navigation',
   { tag: [...tags.serverless.security.complete] },
   () => {
-    // Reset the per-space setting toggled by the "alignment disabled" test below so it
-    // never leaks into other tests sharing this worker's space.
-    spaceTest.afterEach(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
-    });
-
     spaceTest(
       'security serverless navigation, Launchpad panel, and active nav highlight',
       async ({ page, pageObjects, browserAuth }) => {
@@ -63,20 +56,6 @@ spaceTest.describe(
             ).toBeVisible();
           }
         );
-      }
-    );
-
-    spaceTest(
-      'shows a flat Alerts link when alerts-and-attacks alignment is disabled',
-      async ({ page, pageObjects, browserAuth, scoutSpace }) => {
-        const { collapsibleNav } = pageObjects;
-        await scoutSpace.uiSettings.set({ [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: false });
-        await browserAuth.loginAsPrivilegedUser();
-        await pageObjects.serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
-
-        await expect(collapsibleNav.getNavItemById('securityGroup:alertDetections')).toBeHidden();
-        await collapsibleNav.clickNavItemByDeepLinkId('securitySolutionUI:alerts');
-        await page.waitForURL(/\/app\/security\/alerts/);
       }
     );
   }

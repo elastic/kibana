@@ -11,6 +11,7 @@ import {
   EXECUTION_HISTORY_MAX_PER_PAGE,
   EXECUTION_HISTORY_MAX_RESULT_WINDOW,
   EXECUTION_HISTORY_MAX_RULE_ID_FILTER,
+  MAX_SEARCH_LENGTH,
 } from './constants';
 import {
   listRuleExecutionsRequestSchema,
@@ -21,14 +22,12 @@ import {
 
 const validView = {
   id: 'doc-1',
-  rule: { id: 'rule-1', version: null },
+  rule: { id: 'rule-1' },
   space_id: 'default',
   started_at: '2026-06-01T00:00:00.000Z',
   ended_at: '2026-06-01T00:00:01.500Z',
   timings: { duration_ms: 1500, scheduled_delay_ms: 250 },
   outcome: 'success' as const,
-  reason: null,
-  error: null,
 };
 
 describe('rule_execution_history_schema', () => {
@@ -70,9 +69,38 @@ describe('rule_execution_history_schema', () => {
       it('does not inject rule_ids / outcomes / from / to when missing', () => {
         const parsed = listRuleExecutionsRequestSchema.parse({});
         expect(parsed).not.toHaveProperty('rule_ids');
+        expect(parsed).not.toHaveProperty('search');
         expect(parsed).not.toHaveProperty('outcomes');
         expect(parsed).not.toHaveProperty('from');
         expect(parsed).not.toHaveProperty('to');
+      });
+    });
+
+    describe('search', () => {
+      it('accepts a valid search string', () => {
+        expect(listRuleExecutionsRequestSchema.parse({ search: 'my rule' }).search).toBe('my rule');
+      });
+
+      it('trims surrounding whitespace', () => {
+        expect(listRuleExecutionsRequestSchema.parse({ search: '  hello  ' }).search).toBe('hello');
+      });
+
+      it('rejects a whitespace-only string (empty after trim)', () => {
+        expect(listRuleExecutionsRequestSchema.safeParse({ search: '   ' }).success).toBe(false);
+      });
+
+      it(`accepts a search of exactly MAX_SEARCH_LENGTH (${MAX_SEARCH_LENGTH}) chars`, () => {
+        expect(
+          listRuleExecutionsRequestSchema.safeParse({ search: 'a'.repeat(MAX_SEARCH_LENGTH) })
+            .success
+        ).toBe(true);
+      });
+
+      it(`rejects a search longer than MAX_SEARCH_LENGTH (${MAX_SEARCH_LENGTH}) chars`, () => {
+        expect(
+          listRuleExecutionsRequestSchema.safeParse({ search: 'a'.repeat(MAX_SEARCH_LENGTH + 1) })
+            .success
+        ).toBe(false);
       });
     });
 
@@ -334,37 +362,43 @@ describe('rule_execution_history_schema', () => {
   });
 
   describe('ruleExecutionViewSchema', () => {
-    it('accepts a valid row with error=null', () => {
+    it('accepts a valid row with no reason and no error', () => {
       expect(ruleExecutionViewSchema.parse(validView)).toEqual(validView);
     });
 
-    it('accepts a populated error object with a nullable stack trace', () => {
+    it('accepts a populated error object with a stack trace', () => {
       const row = {
         ...validView,
         outcome: 'failure' as const,
         reason: 'rule executor threw',
-        error: { message: 'boom', stack_trace: null },
+        error: { message: 'boom', stack_trace: 'at foo (bar.ts:1:1)' },
       };
+      expect(ruleExecutionViewSchema.parse(row)).toEqual(row);
+    });
+
+    it('accepts an error whose stack trace the source did not record', () => {
+      const row = { ...validView, outcome: 'failure' as const, error: { message: 'boom' } };
       expect(ruleExecutionViewSchema.parse(row)).toEqual(row);
     });
 
     it('strips unknown rule fields like a previously-supported name', () => {
       const row = {
         ...validView,
-        rule: { id: 'rule-1', version: null, name: 'My rule' },
+        rule: { id: 'rule-1', name: 'My rule' },
       };
 
       const parsed = ruleExecutionViewSchema.parse(row);
-      expect(parsed.rule).toEqual({ id: 'rule-1', version: null });
+      expect(parsed.rule).toEqual({ id: 'rule-1' });
     });
 
     it('requires rule.id', () => {
-      const row = { ...validView, rule: { version: null } as unknown as { id: string } };
+      const row = { ...validView, rule: {} as unknown as { id: string } };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 
-    it('requires rule.version to be present (may be null until the executor writes it)', () => {
-      const row = { ...validView, rule: { id: 'rule-1' } as { id: string } };
+    it('omits rule.version until the executor writes one, and rejects an explicit null', () => {
+      expect(ruleExecutionViewSchema.parse(validView).rule).not.toHaveProperty('version');
+      const row = { ...validView, rule: { id: 'rule-1', version: null } };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 
@@ -403,7 +437,7 @@ describe('rule_execution_history_schema', () => {
     });
 
     it('requires error.message when error is present', () => {
-      const row = { ...validView, error: { stack_trace: null } };
+      const row = { ...validView, error: { stack_trace: 'at foo (bar.ts:1:1)' } };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 

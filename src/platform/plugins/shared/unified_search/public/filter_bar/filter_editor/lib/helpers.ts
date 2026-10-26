@@ -9,8 +9,8 @@
 
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { FilterableField } from '@kbn/data-source';
 import { validateParams } from './filter_editor_utils';
 
 export const strings = {
@@ -21,7 +21,7 @@ export const strings = {
 };
 
 export const getFieldValidityAndErrorMessage = (
-  field: DataViewField,
+  field: FilterableField,
   value?: string | undefined
 ): { isInvalid: boolean; errorMessage?: string } => {
   const type = field?.type;

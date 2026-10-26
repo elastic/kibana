@@ -31,6 +31,13 @@ export const configSchema = schema.object({
     },
     { defaultValue: { ssl: {} } }
   ),
+  /** Mount directory of the project-controller `streams-encryption-key` Secret. */
+  encryptionKey: schema.object(
+    {
+      path: schema.maybe(schema.string({ maxLength: 4096 })),
+    },
+    { defaultValue: {} }
+  ),
   preconfigured: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     stream_definitions: schema.arrayOf(schema.any(), { defaultValue: [] }),

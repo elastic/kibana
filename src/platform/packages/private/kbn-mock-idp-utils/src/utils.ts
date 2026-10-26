@@ -308,7 +308,6 @@ export const projectTypeToAlias = new Map<string, string>([
   ['observability', 'oblt'],
   ['security', 'security'],
   ['search', 'es'],
-  ['workplaceai', 'workplaceai'],
   ['vectordb', 'vectordb'],
 ]);
 

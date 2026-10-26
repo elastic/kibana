@@ -34,7 +34,7 @@ import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
 
 import {
-  hasVersionSuffix,
+  hasAgentVersionSuffix,
   removeVersionSuffixFromPolicyId,
 } from '../../../../../../../common/services/version_specific_policies_utils';
 
@@ -300,7 +300,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         <PolicyCell
           agent={agent}
           agentPolicy={agentPoliciesIndexedById[removeVersionSuffixFromPolicyId(policyId)]}
-          isVersionSpecific={hasVersionSuffix(policyId)}
+          isVersionSpecific={hasAgentVersionSuffix(policyId)}
         />
       ),
     },

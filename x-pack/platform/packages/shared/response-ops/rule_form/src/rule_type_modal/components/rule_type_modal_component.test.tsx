@@ -222,6 +222,7 @@ describe('RuleTypeModalComponent', () => {
     );
 
     expect(screen.getByText('Create new rule')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTypeModalClassicBadge')).toHaveTextContent('Classic');
     // all rules that do not require app context should be present
     ruleTypes.forEach((ruleType) => {
       if (ruleType.requiresAppContext) {

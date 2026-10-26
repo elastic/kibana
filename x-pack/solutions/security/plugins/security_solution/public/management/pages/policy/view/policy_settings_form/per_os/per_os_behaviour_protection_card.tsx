@@ -163,6 +163,7 @@ const PerOsBehaviourProtectionRow = memo<PerOsBehaviourProtectionRowProps>(
             onChange={onChange}
             mode={mode}
             protection="behavior_protection"
+            os={os}
             data-test-subj={getTestId('notifyUser')}
           />
         )}

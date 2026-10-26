@@ -9,10 +9,10 @@ import type { KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import {
   ImpactConflictError,
-  ImpactForbiddenError,
   ImpactInvalidRequestError,
   ImpactNotFoundError,
 } from '../services/errors';
+import { InvestigationsForbiddenError } from '../../investigations/services/investigations_forbidden_error';
 
 export const handleRouteError = (
   error: unknown,
@@ -22,7 +22,7 @@ export const handleRouteError = (
   if (error instanceof ImpactNotFoundError || isConversationNotFoundError(error)) {
     return response.notFound({ body: { message: error.message } });
   }
-  if (error instanceof ImpactForbiddenError) {
+  if (error instanceof InvestigationsForbiddenError) {
     return response.forbidden({ body: { message: error.message } });
   }
   if (error instanceof ImpactInvalidRequestError) {

@@ -11,9 +11,12 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS } from '@kbn/management-settings-ids';
-import { ExecutionStatus } from '@kbn/workflows';
+import { AGENT_BUILDER_HOOK_TRIGGER_SOURCE, ExecutionStatus } from '@kbn/workflows';
+import type { ExecutionConversationAccess } from '@kbn/agent-builder-server';
 import { runBeforeAgentWorkflows } from './run_before_agent_workflows';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
+import { context as otelContext, createContextKey, ROOT_CONTEXT } from '@opentelemetry/api';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { getCurrentSpaceId } from '../../utils/spaces';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
@@ -35,11 +38,17 @@ describe('runBeforeAgentWorkflows', () => {
   const logger = loggingSystemMock.createLogger();
 
   const createContext = (
-    overrides: { conversationId?: string; agentId?: string; roundExecutionIndex?: number } = {}
+    overrides: {
+      conversationId?: string;
+      agentId?: string;
+      roundExecutionIndex?: number;
+      conversationAccess?: ExecutionConversationAccess;
+    } = {}
   ) => ({
     request,
     nextInput: { message: 'hello', attachments: [] },
     agentId: 'agent-1',
+    conversationAccess: 'readWrite' as const,
     ...overrides,
   });
 
@@ -211,6 +220,8 @@ describe('runBeforeAgentWorkflows', () => {
     });
     expect(executeWorkflowMock).toHaveBeenCalledWith(
       expect.objectContaining({
+        // Lets a workflow refuse runs that a user started directly.
+        triggeredBy: AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
         workflowParams: expect.objectContaining({ round_execution_index: roundExecutionIndex }),
       })
     );
@@ -257,6 +268,29 @@ describe('runBeforeAgentWorkflows', () => {
         workflowParams: expect.objectContaining({ round_execution_index: 1 }),
       })
     );
+  });
+
+  it('still runs pre-execution workflows for an ephemeral run', async () => {
+    const context = createContext({
+      conversationId: 'conv-1',
+      conversationAccess: 'readOnly',
+    });
+    const { workflowApi, getInternalServices } = createDeps();
+    executeWorkflowMock.mockResolvedValue({
+      success: true,
+      execution: {
+        execution_id: 'exec-ephemeral',
+        status: ExecutionStatus.COMPLETED,
+        workflow_id: 'wf-1',
+        started_at: '2026-01-01T00:00:00.000Z',
+        output: { model_context: 'ephemeral context' },
+      },
+    });
+
+    await expect(
+      runBeforeAgentWorkflows({ context, workflowApi, getInternalServices, logger })
+    ).resolves.toEqual({ preExecutionWorkflow: { model_context: 'ephemeral context' } });
+    expect(executeWorkflowMock).toHaveBeenCalledTimes(1);
   });
 
   it('accumulates model_context without replacing the user message', async () => {
@@ -747,5 +781,49 @@ describe('runBeforeAgentWorkflows', () => {
         expect.objectContaining({ workflowParams: { prompt: 'hello' } })
       );
     });
+  });
+
+  it('detaches executeWorkflow from the active OpenTelemetry context using ROOT_CONTEXT', async () => {
+    const contextManager = new AsyncLocalStorageContextManager();
+    otelContext.setGlobalContextManager(contextManager);
+    contextManager.enable();
+
+    try {
+      const context = createContext();
+      const { workflowApi, getInternalServices } = createDeps();
+      const testKey = createContextKey('test.foreground_span_key');
+      let observedContextBeforeHook: unknown;
+      let observedContextDuringExecute: unknown = 'unset';
+
+      executeWorkflowMock.mockImplementation(async () => {
+        observedContextDuringExecute = otelContext.active().getValue(testKey);
+        return {
+          success: true,
+          execution: {
+            execution_id: 'exec-ctx',
+            status: ExecutionStatus.COMPLETED,
+            workflow_id: 'wf-1',
+            started_at: '2026-01-01T00:00:00.000Z',
+            output: {},
+          },
+        };
+      });
+
+      const parentCtx = ROOT_CONTEXT.setValue(testKey, 'foreground-span');
+      await otelContext.with(parentCtx, () => {
+        observedContextBeforeHook = otelContext.active().getValue(testKey);
+        return runBeforeAgentWorkflows({
+          context,
+          workflowApi,
+          getInternalServices,
+          logger,
+        });
+      });
+
+      expect(observedContextBeforeHook).toBe('foreground-span');
+      expect(observedContextDuringExecute).toBeUndefined();
+    } finally {
+      contextManager.disable();
+    }
   });
 });

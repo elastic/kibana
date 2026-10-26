@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiHealth, EuiToolTip } from '@elastic/eui';
@@ -164,7 +165,28 @@ interface AnomaliesBadgeProps {
   ebt?: Omit<EbtClickAttrs, 'detail'>;
 }
 
-export function AnomaliesBadge({ score, detectorType, navigationProps, ebt }: AnomaliesBadgeProps) {
+/** Presentation descriptor shared by {@link AnomaliesBadge} and the service flyout header badge. */
+export interface AnomaliesBadgeDescriptor {
+  color: 'hollow';
+  /** Badge content (the severity health indicator + label). */
+  label: ReactNode;
+  toolTipContent: string;
+  ariaLabel: string;
+  /** Set when the badge navigates to the service overview with the anomaly highlighted. */
+  href?: string;
+  ebtProps: ReturnType<typeof getEbtProps> | {};
+}
+
+/**
+ * Resolves the anomaly badge presentation. A hook because the in-app href is derived via
+ * `useLocatorUrl`; shared by the standalone badge and the service flyout header so they agree.
+ */
+export function useAnomaliesBadgeDescriptor({
+  score,
+  detectorType,
+  navigationProps,
+  ebt,
+}: AnomaliesBadgeProps): AnomaliesBadgeDescriptor {
   const isNone = isNoAnomalyScore(score);
   const severity = getSeverity(score);
   const text = isNone
@@ -201,41 +223,53 @@ export function AnomaliesBadge({ score, detectorType, navigationProps, ebt }: An
   const locatorUrl = useLocatorUrl(locator, locatorParams, undefined, [locator, locatorParams]);
   const href = isInteractive && locatorUrl ? locatorUrl : undefined;
 
-  const tooltipContent = getTooltipContent({
-    isNone,
-    score,
-    detectorType,
+  return {
+    color: 'hollow',
+    ariaLabel: text,
+    toolTipContent: getTooltipContent({
+      isNone,
+      score,
+      detectorType,
+      href,
+      comparisonEnabled: navigationProps?.comparisonEnabled,
+      isInServiceOverview: navigationProps?.isInServiceOverview,
+    }),
     href,
-    comparisonEnabled: navigationProps?.comparisonEnabled,
-    isInServiceOverview: navigationProps?.isInServiceOverview,
-  });
+    ebtProps:
+      ebt && href
+        ? getEbtProps({
+            ...ebt,
+            detail: severity,
+          })
+        : {},
+    label: (
+      <EuiHealth
+        textSize="inherit"
+        color={score === undefined || isNone ? 'subdued' : getSeverityColor(score)}
+        css={anomaliesBadgeHealthCss}
+      >
+        {text}
+      </EuiHealth>
+    ),
+  };
+}
 
-  const roleProps = href ? { href } : { role: 'img' as const, 'aria-label': text };
-  const ebtProps =
-    ebt && href
-      ? getEbtProps({
-          ...ebt,
-          detail: severity,
-        })
-      : {};
+export function AnomaliesBadge(props: AnomaliesBadgeProps) {
+  const { color, label, toolTipContent, ariaLabel, href, ebtProps } =
+    useAnomaliesBadgeDescriptor(props);
+  const roleProps = href ? { href } : { role: 'img' as const, 'aria-label': ariaLabel };
 
   return (
-    <EuiToolTip position="bottom" content={tooltipContent}>
+    <EuiToolTip position="bottom" content={toolTipContent}>
       <EuiBadge
         tabIndex={0}
-        color="hollow"
+        color={color}
         css={anomaliesBadgeCss}
         data-test-subj="apmAnomaliesBadge"
         {...roleProps}
         {...ebtProps}
       >
-        <EuiHealth
-          textSize="inherit"
-          color={score === undefined || isNone ? 'subdued' : getSeverityColor(score)}
-          css={anomaliesBadgeHealthCss}
-        >
-          {text}
-        </EuiHealth>
+        {label}
       </EuiBadge>
     </EuiToolTip>
   );

@@ -29,6 +29,7 @@ import {
   MAX_AI_INDICES,
   MAX_AI_INDEX_TRACES,
   MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS,
+  MAX_KI_SEARCH_QUERY_LENGTH,
   AI_INDEX_BY_ID_PATH,
   AI_INDEX_DESCRIBE_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
@@ -180,6 +181,15 @@ describe('ai indices routes', () => {
     const route = routes[`${method}:${path}`];
     expect(route).toBeDefined();
     return route;
+  };
+
+  const getQuerySchema = (method: string, path: string): Type<unknown> => {
+    const { validate } = getRoute(method, path);
+    const querySchema = validate && validate.request?.query;
+    if (!querySchema) {
+      throw new Error(`No query schema registered for ${method} ${path}`);
+    }
+    return querySchema;
   };
 
   beforeEach(() => {
@@ -1020,11 +1030,25 @@ describe('ai indices routes', () => {
 
   describe('GET /internal/context_engine/ai_index/{aiIndexId}/kis', () => {
     const rows = (values: unknown[][]) => ({
-      columns: [{ name: '_index' }, { name: 'id' }, { name: 'type' }, { name: 'title' }],
+      columns: [
+        { name: '_index' },
+        { name: 'id' },
+        { name: 'type' },
+        { name: 'title' },
+        { name: 'updated_at' },
+        { name: 'lifecycle_status' },
+      ],
       values,
     });
     const probe = {
-      columns: ['id', '@timestamp', 'type', 'title', 'governance.lifecycle.status'].map((name) => ({
+      columns: [
+        'id',
+        '@timestamp',
+        'updated_at',
+        'type',
+        'title',
+        'governance.lifecycle.status',
+      ].map((name) => ({
         name,
       })),
       values: [],
@@ -1035,11 +1059,20 @@ describe('ai indices routes', () => {
       values,
     });
 
+    const validateListKisQuery = (query: unknown) =>
+      getQuerySchema('GET', AI_INDEX_KI_LIST_PATH).validate(query);
+
+    it('accepts scalar lifecycle_status as sent by ?lifecycle_status=deleted', () => {
+      expect(() => validateListKisQuery({ size: 25, lifecycle_status: 'deleted' })).not.toThrow();
+    });
+
     it('returns the current Knowledge Indicators from the destination', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
       esEsqlQuery
         .mockResolvedValueOnce(probe)
-        .mockResolvedValueOnce(rows([[kiBackingIndex, 'ki-1', 'playbook', 'Refund playbook']]))
+        .mockResolvedValueOnce(
+          rows([[kiBackingIndex, 'ki-1', 'playbook', 'Refund playbook', null, 'active']])
+        )
         .mockResolvedValueOnce(totals(12))
         .mockResolvedValueOnce(buckets([[12, 'playbook']]));
 
@@ -1066,10 +1099,27 @@ describe('ai indices routes', () => {
               index: kiBackingIndex,
               type: 'playbook',
               title: 'Refund playbook',
+              lifecycle_status: 'active',
             },
           ],
         },
       });
+    });
+
+    it('passes lifecycle_status to the list query', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(rows([]))
+        .mockResolvedValueOnce(totals(0))
+        .mockResolvedValueOnce(buckets([]));
+
+      await callRoute('GET', AI_INDEX_KI_LIST_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        query: { size: 25, lifecycle_status: ['deleted'] },
+      });
+
+      expect(esEsqlQuery.mock.calls[1][0].query).toContain('WHERE lifecycle_status IN ("deleted")');
     });
 
     it('passes type filter to Elasticsearch', async () => {
@@ -1094,6 +1144,46 @@ describe('ai indices routes', () => {
       expect(esEsqlQuery.mock.calls[1][0]).toEqual({
         query: expect.stringContaining('| WHERE type == ?type'),
         params: [{ type: 'fact' }],
+      });
+    });
+
+    it('passes search query to Elasticsearch', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(rows([]))
+        .mockResolvedValueOnce(totals(0))
+        .mockResolvedValueOnce(buckets([]));
+
+      await callRoute('GET', AI_INDEX_KI_LIST_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        query: { size: 25, query: 'refund policy' },
+      });
+
+      expect(esEsqlQuery.mock.calls[1][0]).toEqual({
+        query: expect.stringContaining(
+          'MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2})'
+        ),
+        params: [{ searchQuery: 'refund policy' }],
+      });
+    });
+
+    describe('query validation', () => {
+      const validateQuery = (queryParams: unknown) => {
+        const { validate } = getRoute('GET', AI_INDEX_KI_LIST_PATH);
+        if (validate === false || !validate.request?.query) {
+          throw new Error('expected a query schema');
+        }
+        return validate.request.query.validate(queryParams);
+      };
+
+      it('accepts a bounded search query', () => {
+        expect(() =>
+          validateQuery({ query: 'a'.repeat(MAX_KI_SEARCH_QUERY_LENGTH) })
+        ).not.toThrow();
+        expect(() =>
+          validateQuery({ query: 'a'.repeat(MAX_KI_SEARCH_QUERY_LENGTH + 1) })
+        ).toThrow();
       });
     });
 
@@ -1138,6 +1228,50 @@ describe('ai indices routes', () => {
   });
 
   describe('GET /internal/context_engine/ai_index/{aiIndexId}/kis/{kiId}', () => {
+    const validateGetKiQuery = (query: unknown) =>
+      getQuerySchema('GET', AI_INDEX_KI_BY_ID_PATH).validate(query);
+
+    it('accepts scalar lifecycle_status as sent by ?lifecycle_status=deleted', () => {
+      expect(() =>
+        validateGetKiQuery({ index: kiBackingIndex, lifecycle_status: 'deleted' })
+      ).not.toThrow();
+    });
+
+    it('returns a deleted KI when lifecycle_status is a single query value', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esSearch.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'generated-es-id',
+              _index: kiBackingIndex,
+              _source: {
+                id: 'ki-1',
+                type: 'playbook',
+                governance: { lifecycle: { status: 'deleted' } },
+              },
+            },
+          ],
+        },
+      });
+
+      await callRoute('GET', AI_INDEX_KI_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+        query: { index: kiBackingIndex, lifecycle_status: 'deleted' },
+      });
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          id: 'ki-1',
+          document: {
+            id: 'ki-1',
+            type: 'playbook',
+            governance: { lifecycle: { status: 'deleted' } },
+          },
+        },
+      });
+    });
+
     it('returns the stored Knowledge Indicator document', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
       esSearch.mockResolvedValue({
@@ -1182,6 +1316,65 @@ describe('ai indices routes', () => {
             content: 'Verify the order first.',
           },
         },
+      });
+    });
+
+    it('passes lifecycle_status to getKi', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esSearch.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'generated-es-id',
+              _index: kiBackingIndex,
+              _source: {
+                id: 'ki-1',
+                type: 'playbook',
+                governance: { lifecycle: { status: 'deleted' } },
+              },
+            },
+          ],
+        },
+      });
+
+      await callRoute('GET', AI_INDEX_KI_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+        query: { index: kiBackingIndex, lifecycle_status: ['deleted'] },
+      });
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          id: 'ki-1',
+          document: {
+            id: 'ki-1',
+            type: 'playbook',
+            governance: { lifecycle: { status: 'deleted' } },
+          },
+        },
+      });
+    });
+
+    it('returns 404 when lifecycle_status excludes the stored KI', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esSearch.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'ki-1',
+              _index: kiBackingIndex,
+              _source: { type: 'playbook', title: 'Still active' },
+            },
+          ],
+        },
+      });
+
+      await callRoute('GET', AI_INDEX_KI_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+        query: { index: kiBackingIndex, lifecycle_status: ['deleted'] },
+      });
+
+      expect(response.notFound).toHaveBeenCalledWith({
+        body: { message: new KiNotFoundError('customer_support', 'ki-1').message },
       });
     });
 

@@ -413,14 +413,14 @@ describe('UnenrollInactiveAgentsTask', () => {
     it('Should get a query that only gets agents that have been inactive for longer than the unenroll_timeout', async () => {
       const policies = [policy1];
       expect(mockTask.getAgentsQuery(policies as any)).toEqual(
-        `(fleet-agents.policy_id:\"agent-policy-1\" and (fleet-agents.last_checkin < 1748735000000)) and fleet-agents.status: inactive`
+        `(((fleet-agents.policy_base_id:\"agent-policy-1\" or (fleet-agents.policy_id:\"agent-policy-1\" and not fleet-agents.policy_base_id:*)) and (fleet-agents.last_checkin < 1748735000000))) and fleet-agents.status: inactive`
       );
     });
 
     it('Should get a query for multiple agent policies that only gets agents inactive for longer than the unenroll_timeout', async () => {
       const policies = [policy1, policy2];
       expect(mockTask.getAgentsQuery(policies as any)).toEqual(
-        `(fleet-agents.policy_id:\"agent-policy-1\" and (fleet-agents.last_checkin < 1748735000000) or \"agent-policy-2\" and (fleet-agents.last_checkin < 1748735700000)) and fleet-agents.status: inactive`
+        `(((fleet-agents.policy_base_id:\"agent-policy-1\" or (fleet-agents.policy_id:\"agent-policy-1\" and not fleet-agents.policy_base_id:*)) and (fleet-agents.last_checkin < 1748735000000)) or ((fleet-agents.policy_base_id:\"agent-policy-2\" or (fleet-agents.policy_id:\"agent-policy-2\" and not fleet-agents.policy_base_id:*)) and (fleet-agents.last_checkin < 1748735700000))) and fleet-agents.status: inactive`
       );
     });
   });

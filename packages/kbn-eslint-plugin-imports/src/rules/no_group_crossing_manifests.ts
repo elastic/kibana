@@ -8,28 +8,73 @@
  */
 
 import { join } from 'path';
-import { TSESTree } from '@typescript-eslint/typescript-estree';
-import type { Rule } from 'eslint';
-import type { Node } from 'estree';
+import type { Context, CreateOnceRule, DiagnosticData } from '@oxlint/plugins';
 import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
-import { getSourcePath } from '../helpers/source';
+import type { SomeNode } from '../helpers/ast';
 import { getImportResolver } from '../get_import_resolver';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { isImportableFrom } from '../helpers/groups';
 import { formatSuggestions } from '../helpers/report';
 
-const NODE_TYPES = TSESTree.AST_NODE_TYPES;
+/**
+ * Build the report data for the plugins that the manifest of the plugin owning the linted file
+ * depends on across group boundaries. Returns `null` when the file isn't part of a plugin or there
+ * are none.
+ */
+function getManifestViolationData(context: Context): DiagnosticData | null {
+  const resolver = getImportResolver(context);
+  const classifier = getRepoSourceClassifier(resolver);
+  const moduleId = classifier.classify(context.physicalFilename);
 
-interface PluginInfo {
-  id: string;
-  pluginId: string;
-  group: ModuleGroup;
-  visibility: ModuleVisibility;
+  if (moduleId.manifest?.type !== 'plugin') {
+    return null;
+  }
+
+  const manifestPath = join(moduleId.pkgInfo!.pkgDir, 'kibana.jsonc')
+    .replace(REPO_ROOT, '')
+    .replace(/^\//, '');
+  const allPlugins = getPackages(REPO_ROOT).filter(getPluginPackagesFilter());
+  const currentPluginInfo = moduleId.manifest.plugin;
+  const violations: string[] = [];
+  // check all the dependencies in the manifest, looking for plugin violations
+  [
+    ...(currentPluginInfo.requiredPlugins ?? []),
+    ...(currentPluginInfo.requiredBundles ?? []),
+    ...(currentPluginInfo.optionalPlugins ?? []),
+    ...(currentPluginInfo.runtimePluginDependencies ?? []),
+  ].forEach((pluginId) => {
+    const dependency = allPlugins.find(({ manifest }) => manifest.plugin.id === pluginId);
+    if (dependency) {
+      // at this point, we know the dependency is a plugin
+      const { id, group, visibility } = dependency;
+      if (!isImportableFrom(moduleId, group, visibility)) {
+        violations.push(
+          `⚠ Illegal dependency on manifest: Plugin "${currentPluginInfo.id}" (package: "${
+            moduleId.pkgInfo!.pkgId
+          }"; group: "${
+            moduleId.group
+          }") depends on "${pluginId}" (package: "${id}"; group: ${group}/${visibility}). File: ${manifestPath}`
+        );
+      }
+    }
+  });
+
+  if (!violations.length) {
+    return null;
+  }
+
+  return {
+    violations: violations.join('\n'),
+    suggestion: formatSuggestions([
+      `Please review the dependencies in your plugin's manifest (kibana.jsonc).`,
+      `Relocate this module to a different group, and/or make sure it has the right 'visibility'.`,
+      `Address the conflicting dependencies by refactoring the code`,
+    ]),
+  };
 }
 
-export const NoGroupCrossingManifestsRule: Rule.RuleModule = {
+export const NoGroupCrossingManifestsRule: CreateOnceRule = {
   meta: {
     docs: {
       url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsno_unused_imports',
@@ -38,121 +83,50 @@ export const NoGroupCrossingManifestsRule: Rule.RuleModule = {
       ILLEGAL_MANIFEST_DEPENDENCY: `{{violations}}\n{{suggestion}}`,
     },
   },
-  create(context) {
-    const sourcePath = getSourcePath(context);
-    let manifestPath: string;
-    const resolver = getImportResolver(context);
-    const classifier = getRepoSourceClassifier(resolver);
-    const moduleId = classifier.classify(sourcePath);
-    const offendingDependencies: PluginInfo[] = [];
-    let currentPlugin: PluginInfo;
+  createOnce(context) {
+    // `undefined` until the file declares a plugin entry point, then the manifest check result
+    let violationData: DiagnosticData | null | undefined;
 
-    if (moduleId.manifest?.type === 'plugin') {
-      manifestPath = join(moduleId.pkgInfo!.pkgDir, 'kibana.jsonc')
-        .replace(REPO_ROOT, '')
-        .replace(/^\//, '');
-      currentPlugin = {
-        id: moduleId.pkgInfo!.pkgId,
-        pluginId: moduleId.manifest.plugin.id,
-        group: moduleId.group,
-        visibility: moduleId.visibility,
-      };
-
-      const allPlugins = getPackages(REPO_ROOT).filter(getPluginPackagesFilter());
-      const currentPluginInfo = moduleId.manifest!.plugin;
-      // check all the dependencies in the manifest, looking for plugin violations
-      [
-        ...(currentPluginInfo.requiredPlugins ?? []),
-        ...(currentPluginInfo.requiredBundles ?? []),
-        ...(currentPluginInfo.optionalPlugins ?? []),
-        ...(currentPluginInfo.runtimePluginDependencies ?? []),
-      ].forEach((pluginId) => {
-        const dependency = allPlugins.find(({ manifest }) => manifest.plugin.id === pluginId);
-        if (dependency) {
-          // at this point, we know the dependency is a plugin
-          const { id, group, visibility } = dependency;
-          if (!isImportableFrom(moduleId, group, visibility)) {
-            offendingDependencies.push({ id, pluginId, group, visibility });
-          }
-        }
-      });
-    }
+    const reportManifestViolation = (node: SomeNode) => {
+      if (violationData === undefined) {
+        violationData = getManifestViolationData(context);
+      }
+      if (violationData) {
+        context.report({
+          node,
+          messageId: 'ILLEGAL_MANIFEST_DEPENDENCY',
+          data: violationData,
+        });
+      }
+    };
 
     return {
+      before() {
+        violationData = undefined;
+      },
       FunctionDeclaration(node) {
         // complain in exported plugin() function
-        if (
-          currentPlugin &&
-          offendingDependencies.length &&
-          node.id?.name === 'plugin' &&
-          node.parent.type === NODE_TYPES.ExportNamedDeclaration
-        ) {
-          reportViolation({
-            context,
-            node,
-            currentPlugin,
-            manifestPath,
-            offendingDependencies,
-          });
+        if (node.id?.name === 'plugin' && node.parent.type === 'ExportNamedDeclaration') {
+          reportManifestViolation(node);
         }
       },
       MethodDefinition(node) {
+        const classNode = node.parent.parent;
         // complain in setup() and start() hooks
         if (
-          offendingDependencies.length &&
-          node.key.type === NODE_TYPES.Identifier &&
+          node.key.type === 'Identifier' &&
           (node.key.name === 'setup' || node.key.name === 'start') &&
           node.kind === 'method' &&
-          node.parent.parent.type === NODE_TYPES.ClassDeclaration &&
-          (node.parent.parent.id?.name.includes('Plugin') ||
-            (node.parent.parent as TSESTree.ClassDeclaration).implements?.find(
+          classNode?.type === 'ClassDeclaration' &&
+          (classNode.id?.name.includes('Plugin') ||
+            classNode.implements?.find(
               (value) =>
-                value.expression.type === NODE_TYPES.Identifier &&
-                value.expression.name === 'Plugin'
+                value.expression.type === 'Identifier' && value.expression.name === 'Plugin'
             ))
         ) {
-          reportViolation({
-            context,
-            node,
-            currentPlugin,
-            manifestPath,
-            offendingDependencies,
-          });
+          reportManifestViolation(node);
         }
       },
     };
   },
 };
-
-interface ReportViolationParams {
-  context: Rule.RuleContext;
-  node: Node;
-  currentPlugin: PluginInfo;
-  offendingDependencies: PluginInfo[];
-  manifestPath: string;
-}
-
-const reportViolation = ({
-  context,
-  node,
-  currentPlugin,
-  offendingDependencies,
-  manifestPath,
-}: ReportViolationParams) =>
-  context.report({
-    node,
-    messageId: 'ILLEGAL_MANIFEST_DEPENDENCY',
-    data: {
-      violations: [
-        ...offendingDependencies.map(
-          ({ id, pluginId, group, visibility }) =>
-            `⚠ Illegal dependency on manifest: Plugin "${currentPlugin.pluginId}" (package: "${currentPlugin.id}"; group: "${currentPlugin.group}") depends on "${pluginId}" (package: "${id}"; group: ${group}/${visibility}). File: ${manifestPath}`
-        ),
-      ].join('\n'),
-      suggestion: formatSuggestions([
-        `Please review the dependencies in your plugin's manifest (kibana.jsonc).`,
-        `Relocate this module to a different group, and/or make sure it has the right 'visibility'.`,
-        `Address the conflicting dependencies by refactoring the code`,
-      ]),
-    },
-  });

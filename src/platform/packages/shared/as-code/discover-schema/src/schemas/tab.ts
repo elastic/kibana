@@ -22,7 +22,9 @@ export const discoverSessionApiClassicTabBaseSchema = z
     filters: z.array(asCodeFilterSchema).max(100).default([]).meta({
       description: 'List of filters to apply to the data in the tab.',
     }),
-    data_source: dataViewSchema,
+    data_source: dataViewSchema.meta({
+      description: 'The data view used by the tab, specified by reference or defined inline.',
+    }),
     view_mode: viewModeSchema,
   })
   .strict();

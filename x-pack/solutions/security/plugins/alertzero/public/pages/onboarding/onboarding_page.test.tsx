@@ -21,6 +21,7 @@ import {
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+  type WorkerBlockingReason,
 } from '@kbn/alertzero-common';
 import { SECURITY_APP_ID, SecurityPageName } from '@kbn/deeplinks-security';
 import { queryKeys } from '../../query_keys';
@@ -30,6 +31,25 @@ import { OnboardingPage } from './onboarding_page';
 jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
   ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
 }));
+
+jest.mock('../../components/worker_dependencies/worker_dependencies_callout', () => ({
+  WorkerDependenciesCallout: ({ worker, surface }: { worker: { id: string }; surface: string }) => (
+    <div data-test-subj={`alertZeroWorkerDependencies-${surface}-${worker.id}`} />
+  ),
+}));
+
+const mockEnsureWorkerServiceAccounts = jest.fn();
+jest.mock('../../service_accounts/ensure_worker_service_accounts', () => ({
+  ensureWorkerServiceAccounts: (...args: unknown[]) => mockEnsureWorkerServiceAccounts(...args),
+}));
+
+beforeEach(() => {
+  mockEnsureWorkerServiceAccounts.mockReset();
+  mockEnsureWorkerServiceAccounts.mockImplementation(
+    async (_http: unknown, _serviceAccounts: unknown, workerIds: string[]) =>
+      new Map(workerIds.map((id) => [id, { ok: true, serviceAccountId: 'account-a' }]))
+  );
+});
 
 const ALL_ONBOARDING_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -51,13 +71,19 @@ const ALL_WORKERS_RESPONSE = {
     id,
     enabled: true,
     settings: EVENT_DRIVEN_WORKER_IDS.includes(id) ? {} : { scheduleInterval: '4h' },
+    blockingReasons: [] as WorkerBlockingReason[],
   })),
 };
 
-const selectServiceAccount = () => {
-  fireEvent.click(screen.getByTestId('alertZeroServiceAccountSelect-onboarding'));
-  fireEvent.click(screen.getByRole('button', { name: 'Select service account' }));
+const NO_MODEL_WORKERS_RESPONSE = {
+  workers: ALL_WORKERS_RESPONSE.workers.map((worker) => ({
+    ...worker,
+    enabled: false,
+    blockingReasons: ['no_model'] as WorkerBlockingReason[],
+  })),
 };
+
+const FEATURE_SETTINGS_URL = '/app/management/modelManagement/model_settings';
 
 const enabledWorkerBody = JSON.stringify({
   enabled: true,
@@ -66,7 +92,7 @@ const enabledWorkerBody = JSON.stringify({
 });
 
 const renderPage = ({
-  canWrite = false,
+  canWrite = true,
   httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } }),
   httpGet,
   serverWorkers = ALL_WORKERS_RESPONSE,
@@ -81,7 +107,8 @@ const renderPage = ({
       id: string;
       enabled: boolean;
       settingsRevision?: number | null;
-      settings?: { scheduleInterval?: string };
+      settings?: { scheduleInterval?: string; serviceAccountId?: string };
+      blockingReasons: WorkerBlockingReason[];
     }>;
     canModifyWorkers?: boolean;
   };
@@ -90,6 +117,9 @@ const renderPage = ({
   // coreMock.createStart() does not populate feature capabilities; set the
   // alertzero.write capability so the component can branch on it.
   (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: canWrite };
+  coreStart.application.getUrlForApp.mockImplementation((appId, options) =>
+    options?.deepLinkId === 'model_settings' ? FEATURE_SETTINGS_URL : `/app/${appId}`
+  );
   // Mock http.get so useWorkers() always returns the configured server response
   // (including on background refetches), and http.patch so mutation calls are
   // interceptable per-test.
@@ -97,24 +127,8 @@ const renderPage = ({
   const core = {
     ...coreStart,
     http: { ...coreStart.http, get: resolvedHttpGet, patch: httpPatch },
-    security: {
-      ...coreStart.security,
-      uiApi: {
-        components: {
-          getServiceAccountPicker: ({
-            onSelect,
-          }: {
-            onSelect: (account: { id: string } | null) => void;
-          }) => (
-            <button type="button" onClick={() => onSelect({ id: 'account-a' })}>
-              Select service account
-            </button>
-          ),
-        },
-      },
-    },
   };
-  const history = createMemoryHistory();
+  const history = createMemoryHistory({ initialEntries: ['/onboarding'] });
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
@@ -141,7 +155,12 @@ const renderPage = ({
     fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
   }
 
-  return { history, application: core.application };
+  return {
+    history,
+    application: core.application,
+    reportEvent: core.analytics.reportEvent as jest.Mock,
+    toasts: core.notifications.toasts,
+  };
 };
 
 describe('OnboardingPage', () => {
@@ -155,12 +174,28 @@ describe('OnboardingPage', () => {
       expect(screen.queryByRole('switch')).not.toBeInTheDocument();
     });
 
-    it('is shown to read-only users and does not send PATCHes', () => {
+    it('disables Continue with an explanation for users without write access', () => {
       const httpPatch = jest.fn();
       renderPage({ canWrite: false, skipIntro: false, httpPatch });
 
-      expect(screen.getByTestId('alertZeroOnboardingContinueButton')).toBeInTheDocument();
+      expect(screen.getByTestId('alertZeroOnboardingContinueButton')).toBeDisabled();
+      expect(screen.getByTestId('alertZeroOnboardingContinueDisabledReason')).toHaveTextContent(
+        'You need the AlertZero All privilege'
+      );
+
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
+      expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
+      expect(screen.queryByRole('switch')).not.toBeInTheDocument();
       expect(httpPatch).not.toHaveBeenCalled();
+    });
+
+    it('enables Continue without an explanation for users with write access', () => {
+      renderPage({ canWrite: true, skipIntro: false });
+
+      expect(screen.getByTestId('alertZeroOnboardingContinueButton')).toBeEnabled();
+      expect(
+        screen.queryByTestId('alertZeroOnboardingContinueDisabledReason')
+      ).not.toBeInTheDocument();
     });
 
     it('shows a disabled video placeholder', () => {
@@ -241,6 +276,65 @@ describe('OnboardingPage', () => {
     ).toBeDisabled();
   });
 
+  describe('when the space has no AI model', () => {
+    it('explains the missing models, links to Feature settings and disables the controls', () => {
+      const httpPatch = jest.fn();
+      renderPage({ httpPatch, serverWorkers: NO_MODEL_WORKERS_RESPONSE });
+
+      const callout = screen.getByTestId('alertZeroOnboardingNoModelCallout');
+      expect(callout).toHaveTextContent("AI models aren't set up for this space");
+      expect(callout).toHaveTextContent('Workers need AI models to run.');
+      const action = screen.getByTestId('alertZeroOnboardingNoModelFeatureSettingsButton');
+      expect(action).toHaveTextContent('Open Feature settings');
+      expect(action).toHaveAttribute('href', FEATURE_SETTINGS_URL);
+      expect(action).toHaveAttribute('target', '_blank');
+
+      const enableButton = screen.getByRole('button', { name: 'Enable and run' });
+      expect(enableButton).toBeDisabled();
+      for (const toggle of screen.getAllByRole('switch')) {
+        expect(toggle).toBeDisabled();
+      }
+
+      fireEvent.click(enableButton);
+      expect(mockEnsureWorkerServiceAccounts).not.toHaveBeenCalled();
+      expect(httpPatch).not.toHaveBeenCalled();
+    });
+
+    it('places the callout between the intro paragraph and the Worker list', () => {
+      renderPage({ serverWorkers: NO_MODEL_WORKERS_RESPONSE });
+
+      const callout = screen.getByTestId('alertZeroOnboardingNoModelCallout');
+      const intro = screen.getByText(/A Watch is a small team of Workers/);
+      const firstToggle = screen.getAllByRole('switch')[0];
+      expect(intro.compareDocumentPosition(callout)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(callout.compareDocumentPosition(firstToggle)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('does not show the callout to a user who cannot change Workers', () => {
+      renderPage({ serverWorkers: { ...NO_MODEL_WORKERS_RESPONSE, canModifyWorkers: false } });
+
+      expect(screen.queryByTestId('alertZeroOnboardingNoModelCallout')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertZeroOnboardingModifyForbidden')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Enable and run' })).toBeDisabled();
+    });
+  });
+
+  it('shows no no-model callout and keeps the controls enabled when the space has a model', () => {
+    renderPage();
+
+    expect(screen.queryByTestId('alertZeroOnboardingNoModelCallout')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Enable and run' })).toBeEnabled();
+    expect(
+      screen.getByTestId(
+        `alertZeroOnboardingWorkerToggle-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
+    ).toBeEnabled();
+    expect(screen.getByTestId('alertZeroOnboardingFeatureSettingsLink')).toHaveAttribute(
+      'href',
+      FEATURE_SETTINGS_URL
+    );
+  });
+
   it('renders the title', () => {
     renderPage({ canWrite: true });
     expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
@@ -271,15 +365,84 @@ describe('OnboardingPage', () => {
       expect(history.location.pathname).toBe('/watches');
     });
 
-    it('keeps Enable and run unavailable until a service account is selected', () => {
-      renderPage({ canWrite: true });
+    it('sets up a service account for each worker it turns on and binds it', async () => {
+      const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
+      const { history } = renderPage({ canWrite: true, httpPatch });
 
-      expect(screen.getByText(/Workers run as the service account you select/)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Enable and run' })).toBeDisabled();
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
-      selectServiceAccount();
+      await waitFor(() => expect(history.location.pathname).toBe('/'));
+      expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledTimes(1);
+      expect([...mockEnsureWorkerServiceAccounts.mock.calls[0][2]].sort()).toEqual(
+        [...ALL_ONBOARDING_WORKER_IDS].sort()
+      );
+      expect(httpPatch).toHaveBeenCalledWith(
+        expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID),
+        expect.objectContaining({ body: enabledWorkerBody })
+      );
+    });
 
-      expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled();
+    it('keeps the service account a worker already has', async () => {
+      const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
+      const serverWorkers = {
+        workers: ALL_WORKERS_RESPONSE.workers.map((worker) =>
+          worker.id === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+            ? { ...worker, enabled: false, settings: { serviceAccountId: 'kibana/existing' } }
+            : worker
+        ),
+      };
+      renderPage({ canWrite: true, httpPatch, serverWorkers });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+
+      await waitFor(() =>
+        expect(httpPatch).toHaveBeenCalledWith(
+          expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID),
+          expect.objectContaining({ body: JSON.stringify({ enabled: true }) })
+        )
+      );
+      expect(mockEnsureWorkerServiceAccounts.mock.calls[0][2]).not.toContain(
+        SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+      );
+    });
+
+    it('turns on the workers that got an account, names the ones that did not and retries them', async () => {
+      mockEnsureWorkerServiceAccounts.mockImplementation(
+        async (_http: unknown, _serviceAccounts: unknown, workerIds: string[]) =>
+          new Map(
+            workerIds.map((id) => [
+              id,
+              id === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+                ? { ok: false, error: 'Forbidden' }
+                : { ok: true, serviceAccountId: 'account-a' },
+            ])
+          )
+      );
+      const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
+      const { history, toasts } = renderPage({ canWrite: true, httpPatch });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled()
+      );
+      expect(httpPatch).toHaveBeenCalledTimes(ALL_ONBOARDING_WORKER_IDS.length - 1);
+      expect(httpPatch).not.toHaveBeenCalledWith(
+        expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID),
+        expect.anything()
+      );
+      expect(toasts.addDanger).toHaveBeenCalledTimes(1);
+      expect(toasts.addDanger).toHaveBeenCalledWith(
+        expect.objectContaining({ text: expect.stringContaining('Alert Triage: Forbidden') })
+      );
+      expect(history.location.pathname).toBe('/onboarding');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+
+      await waitFor(() => expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledTimes(2));
+      expect(mockEnsureWorkerServiceAccounts.mock.calls[1][2]).toContain(
+        SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+      );
     });
 
     it('recommends keeping all Watches enabled', () => {
@@ -323,11 +486,13 @@ describe('OnboardingPage', () => {
       expect(httpPatch).not.toHaveBeenCalled();
     });
 
-    it('shows the Attack Discovery workflows note', () => {
+    it('shows the Attack Discovery dependency callout', () => {
       renderPage({ canWrite: true });
-      expect(screen.getByTestId('alertZeroOnboardingAttackDiscoveryNote')).toHaveTextContent(
-        'Turning this on also enables the Attack Discovery workflows in Settings.'
-      );
+      expect(
+        screen.getByTestId(
+          `alertZeroWorkerDependencies-onboarding-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+        )
+      ).toBeInTheDocument();
     });
 
     it('does not render the Before you enable panel', () => {
@@ -335,14 +500,13 @@ describe('OnboardingPage', () => {
       expect(screen.queryByText('Before you enable')).not.toBeInTheDocument();
     });
 
-    it('calls the API for all workers and navigates to /watches when Enable and run is clicked', async () => {
+    it('calls the API for all workers and navigates to the AlertZero home when Enable and run is clicked', async () => {
       const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
       const { history } = renderPage({ canWrite: true, httpPatch });
 
-      selectServiceAccount();
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
-      await waitFor(() => expect(history.location.pathname).toBe('/watches'));
+      await waitFor(() => expect(history.location.pathname).toBe('/'));
       expect(httpPatch).toHaveBeenCalledTimes(6);
     });
 
@@ -357,7 +521,6 @@ describe('OnboardingPage', () => {
       );
       renderPage({ canWrite: true, httpPatch });
 
-      selectServiceAccount();
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
       // While all six PATCHes are pending, the button must be disabled.
@@ -385,7 +548,6 @@ describe('OnboardingPage', () => {
       const httpPatch = jest.fn().mockRejectedValue(new Error('server error'));
       const { history } = renderPage({ canWrite: true, httpPatch });
 
-      selectServiceAccount();
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
       // Wait for the entire save to settle (button stops loading) before asserting
@@ -396,7 +558,28 @@ describe('OnboardingPage', () => {
           'disabled'
         )
       );
-      expect(history.location.pathname).toBe('/');
+      expect(history.location.pathname).toBe('/onboarding');
+    });
+
+    it('reports each failed enable and the partial save as onboarding errors', async () => {
+      const triageId = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
+      const httpPatch = jest.fn(async (url: string) => {
+        if (url.includes(triageId)) {
+          throw new Error('blocked by index [secret]');
+        }
+        return { worker: { id: 'mock', enabled: true } };
+      });
+      const { reportEvent } = renderPage({ canWrite: true, httpPatch });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled()
+      );
+
+      expect(reportEvent.mock.calls).toEqual([
+        ['alertzero_ui_error_shown', { error_class: 'unknown', surface: 'onboarding' }],
+        ['alertzero_ui_error_shown', { error_class: 'partial_failure', surface: 'onboarding' }],
+      ]);
     });
 
     it('sends the saved revision when Enable and run is retried after a partial save', async () => {
@@ -407,6 +590,7 @@ describe('OnboardingPage', () => {
           id,
           enabled: id !== triageId && savedRevision != null,
           settingsRevision: id === triageId ? null : savedRevision,
+          blockingReasons: [],
         })),
       });
       const httpGet = jest.fn(async () => list());
@@ -424,7 +608,6 @@ describe('OnboardingPage', () => {
           String(url).includes(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID)
         );
 
-      selectServiceAccount();
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
       await waitFor(() =>
         expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled()
@@ -444,13 +627,14 @@ describe('OnboardingPage', () => {
       expect(screen.getByTestId('alertZeroOnboardingBackButton')).toBeInTheDocument();
     });
 
-    it('navigates to Security and does not send PATCHes when Back is clicked', () => {
+    it('returns to the intro step and does not send PATCHes when Back is clicked', () => {
       const httpPatch = jest.fn();
       const { application } = renderPage({ canWrite: true, httpPatch });
 
       fireEvent.click(screen.getByTestId('alertZeroOnboardingBackButton'));
 
-      expect(application.navigateToApp).toHaveBeenCalledWith(SECURITY_APP_ID);
+      expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
+      expect(application.navigateToApp).not.toHaveBeenCalled();
       expect(httpPatch).not.toHaveBeenCalled();
     });
 
@@ -464,7 +648,6 @@ describe('OnboardingPage', () => {
       );
       const { application } = renderPage({ canWrite: true, httpPatch });
 
-      selectServiceAccount();
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
       // While PATCHes are pending the Back button must be disabled.
@@ -503,7 +686,6 @@ describe('OnboardingPage', () => {
       const toggles = screen.getAllByRole('switch');
       fireEvent.click(toggles[1]);
 
-      selectServiceAccount();
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
       await waitFor(() =>
@@ -525,7 +707,7 @@ describe('OnboardingPage', () => {
       const serverWorkers = {
         workers: ALL_ONBOARDING_WORKER_IDS.filter(
           (id) => id !== SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
-        ).map((id) => ({ id, enabled: true })),
+        ).map((id) => ({ id, enabled: true, blockingReasons: [] })),
       };
       renderPage({ canWrite: true, serverWorkers });
 
@@ -547,15 +729,14 @@ describe('OnboardingPage', () => {
       const serverWorkers = {
         workers: ALL_ONBOARDING_WORKER_IDS.filter(
           (id) => id !== SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
-        ).map((id) => ({ id, enabled: true })),
+        ).map((id) => ({ id, enabled: true, blockingReasons: [] })),
       };
       const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
       const { history } = renderPage({ canWrite: true, httpPatch, serverWorkers });
 
-      selectServiceAccount();
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
-      await waitFor(() => expect(history.location.pathname).toBe('/watches'));
+      await waitFor(() => expect(history.location.pathname).toBe('/'));
       // Only the 5 present workers should be PATCHed — not the skill-gated absent one.
       expect(httpPatch).toHaveBeenCalledTimes(5);
       expect(httpPatch).not.toHaveBeenCalledWith(
@@ -576,7 +757,9 @@ describe('OnboardingPage', () => {
     it('does not count the absent worker toward the last-enabled guard', () => {
       // Three workers known to server; toggling two of them off should disable the last, not crash.
       const presentIds = ALL_ONBOARDING_WORKER_IDS.slice(0, 3);
-      const serverWorkers = { workers: presentIds.map((id) => ({ id, enabled: true })) };
+      const serverWorkers = {
+        workers: presentIds.map((id) => ({ id, enabled: true, blockingReasons: [] })),
+      };
       renderPage({ canWrite: true, serverWorkers });
 
       // Toggle two of the three present workers off.
@@ -595,8 +778,8 @@ describe('OnboardingPage', () => {
       // enabledCount should drop to 0 and the Enable button must be disabled.
       const twoWorkers = {
         workers: [
-          { id: ALL_ONBOARDING_WORKER_IDS[0], enabled: false },
-          { id: ALL_ONBOARDING_WORKER_IDS[1], enabled: false },
+          { id: ALL_ONBOARDING_WORKER_IDS[0], enabled: false, blockingReasons: [] },
+          { id: ALL_ONBOARDING_WORKER_IDS[1], enabled: false, blockingReasons: [] },
         ],
       };
       const coreStart = coreMock.createStart();
@@ -609,22 +792,6 @@ describe('OnboardingPage', () => {
       const core = {
         ...coreStart,
         http: { ...coreStart.http, get: httpGet },
-        security: {
-          ...coreStart.security,
-          uiApi: {
-            components: {
-              getServiceAccountPicker: ({
-                onSelect,
-              }: {
-                onSelect: (account: { id: string } | null) => void;
-              }) => (
-                <button type="button" onClick={() => onSelect({ id: 'account-a' })}>
-                  Select service account
-                </button>
-              ),
-            },
-          },
-        },
       };
 
       const history = createMemoryHistory();
@@ -650,13 +817,12 @@ describe('OnboardingPage', () => {
       // Toggle Alert Triage (B) off — Attack Discovery (A) becomes the sole enabled worker.
       const toggles = screen.getAllByRole('switch');
       fireEvent.click(toggles[0]);
-      selectServiceAccount();
       expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled();
 
       // Simulate a background workers refetch that removes the sole checked worker (Attack Discovery).
       // Update the http mock so the next fetch returns only Alert Triage (B), then force a refetch.
       const oneWorker = {
-        workers: [{ id: ALL_ONBOARDING_WORKER_IDS[1], enabled: false }], // only B = Alert Triage
+        workers: [{ id: ALL_ONBOARDING_WORKER_IDS[1], enabled: false, blockingReasons: [] }], // only B = Alert Triage
       };
       httpGet.mockResolvedValue(oneWorker);
       await act(async () => {
@@ -673,14 +839,10 @@ describe('OnboardingPage', () => {
   });
 
   describe('without write capability (read-only user)', () => {
-    it('renders the read-only body copy', () => {
-      renderPage({ canWrite: false });
-      expect(screen.getByText(/Ask an administrator to enable a Watch worker/)).toBeInTheDocument();
-    });
-
-    it('does not render the worker toggle list', () => {
+    it('cannot reach the worker selection step', () => {
       renderPage({ canWrite: false });
       expect(screen.queryByTestId(/alertZeroOnboardingWorkerToggle/)).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Enable and run' })).not.toBeInTheDocument();
     });
   });
 });

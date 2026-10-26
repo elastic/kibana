@@ -14,6 +14,7 @@ import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_c
 import { updateEventStatusToolHandler } from './handler';
 import {
   createEventStatusUpdateTool,
+  eventStatusUpdateSchema,
   SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID,
 } from './tool';
 
@@ -43,6 +44,11 @@ describe('event_status_update tool', () => {
     expect(tool.id).toBe(SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID);
   });
 
+  it('does not let the caller set recovering, which only the status reconciliation writes', () => {
+    expect(eventStatusUpdateSchema.shape.status.safeParse('recovering').success).toBe(false);
+    expect(eventStatusUpdateSchema.shape.status.safeParse('inactive').success).toBe(true);
+  });
+
   it('returns success result', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
@@ -54,7 +60,7 @@ describe('event_status_update tool', () => {
     });
 
     const getScopedClients = jest.fn().mockResolvedValue({
-      getEventClient: jest.fn().mockReturnValue({}),
+      getEventSearchClient: jest.fn().mockReturnValue({}),
       getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
       licensing: {},
       uiSettingsClient: {},

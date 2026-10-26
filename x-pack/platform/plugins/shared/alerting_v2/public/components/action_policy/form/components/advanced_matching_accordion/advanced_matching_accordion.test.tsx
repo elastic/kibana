@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AdvancedMatchingAccordion } from './advanced_matching_accordion';
 
@@ -37,10 +36,8 @@ describe('AdvancedMatchingAccordion', () => {
     expect(screen.getByText('Advanced matching')).toBeInTheDocument();
   });
 
-  it('starts collapsed when matcher.expression is null', () => {
-    renderWithI18n(
-      <AdvancedMatchingAccordion matcher={{ expression: null }} onChange={jest.fn()} />
-    );
+  it('starts collapsed when matcher.expression is unset', () => {
+    renderWithI18n(<AdvancedMatchingAccordion matcher={{}} onChange={jest.fn()} />);
 
     expect(getAccordionButton()).toHaveAttribute('aria-expanded', 'false');
   });
@@ -70,37 +67,36 @@ describe('AdvancedMatchingAccordion', () => {
     expect(getAccordionButton()).toHaveAttribute('aria-expanded', 'true');
   });
 
-  it('calls onChange when input changes', async () => {
-    const user = userEvent.setup();
+  it('calls onChange when input changes', () => {
     const onChange = jest.fn();
     renderWithI18n(
       <AdvancedMatchingAccordion matcher={{ expression: 'data.host:"x"' }} onChange={onChange} />
     );
 
-    await user.type(screen.getByTestId('matcherInput'), 'a');
+    fireEvent.change(screen.getByTestId('matcherInput'), {
+      target: { value: 'data.host:"x"a' },
+    });
 
     expect(onChange).toHaveBeenLastCalledWith(
       expect.objectContaining({ expression: 'data.host:"x"a' })
     );
   });
 
-  it('calls onChange with expression: null when input is cleared', async () => {
-    const user = userEvent.setup();
+  it('calls onChange with an unset expression when input is cleared', () => {
     const onChange = jest.fn();
     renderWithI18n(<AdvancedMatchingAccordion matcher={{ expression: 'x' }} onChange={onChange} />);
 
-    await user.clear(screen.getByTestId('matcherInput'));
+    fireEvent.change(screen.getByTestId('matcherInput'), { target: { value: '' } });
 
-    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ expression: null }));
+    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ expression: undefined }));
   });
 
-  it('expands accordion when button is clicked', async () => {
-    const user = userEvent.setup();
+  it('expands accordion when button is clicked', () => {
     renderWithI18n(<AdvancedMatchingAccordion matcher={null} onChange={jest.fn()} />);
 
     expect(getAccordionButton()).toHaveAttribute('aria-expanded', 'false');
 
-    await user.click(getAccordionButton());
+    fireEvent.click(getAccordionButton());
 
     expect(getAccordionButton()).toHaveAttribute('aria-expanded', 'true');
   });

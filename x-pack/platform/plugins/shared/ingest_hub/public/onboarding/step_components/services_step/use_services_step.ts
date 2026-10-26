@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import type { SignalType } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, SignalType } from '../../aws_service_matrix';
 import { isAgentBasedOnly } from '../../aws_service_matrix';
 import type { ServiceCategory } from '../../service_categories';
 import { CATEGORY_ORDER } from '../../service_categories';
@@ -24,6 +24,7 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     setSelectedServiceIds,
     setDataFormat,
     awsServiceMatrix: rawMatrix,
+    deploymentMethod,
   } = useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
 
@@ -102,6 +103,11 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     [awsServiceMatrix, selectedSet]
   );
 
+  const ecfOnlySelected = useMemo(
+    () => awsServiceMatrix.filter((s) => selectedSet.has(s.id) && s.ecfOnly),
+    [awsServiceMatrix, selectedSet]
+  );
+
   const isReady = selectedServiceIds.length > 0;
 
   const handleToggle = useCallback(
@@ -114,15 +120,28 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     [selectedServiceIds, setSelectedServiceIds]
   );
 
+  // Agent-based cannot deploy ECF-only services, so they cannot be selected while it is the method.
+  const isUnavailableForMethod = useCallback(
+    (service: AwsServiceMatrixEntry) =>
+      deploymentMethod === 'agent_based' && service.ecfOnly === true,
+    [deploymentMethod]
+  );
+
+  const selectableInCategory = useMemo(
+    () => servicesInCategory.filter((s) => !isUnavailableForMethod(s)),
+    [servicesInCategory, isUnavailableForMethod]
+  );
+
   const allInCategorySelected = useMemo(
-    () => servicesInCategory.length > 0 && servicesInCategory.every((s) => selectedSet.has(s.id)),
-    [servicesInCategory, selectedSet]
+    () =>
+      selectableInCategory.length > 0 && selectableInCategory.every((s) => selectedSet.has(s.id)),
+    [selectableInCategory, selectedSet]
   );
 
   const handleSelectAllInCategory = useCallback(() => {
-    const ids = servicesInCategory.map((s) => s.id);
+    const ids = selectableInCategory.map((s) => s.id);
     setSelectedServiceIds([...new Set([...selectedServiceIds, ...ids])]);
-  }, [servicesInCategory, selectedServiceIds, setSelectedServiceIds]);
+  }, [selectableInCategory, selectedServiceIds, setSelectedServiceIds]);
 
   const handleDeselectAllInCategory = useCallback(() => {
     const ids = new Set(servicesInCategory.map((s) => s.id));
@@ -156,5 +175,7 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     dataFormat,
     setDataFormat,
     agentBasedOnlySelected,
+    ecfOnlySelected,
+    isUnavailableForMethod,
   };
 }

@@ -6,23 +6,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
 export const ALERT_ACTIVATED_TRIGGER_ID = 'alerting.actions.alertActivated' as const;
 
-export const alertActivatedPayloadSchema = alertActionEnvelopeSchema.extend({
-  reason: z
-    .string()
-    .min(1)
-    .max(1024)
-    .describe(
-      i18n.translate('xpack.alertingVTwo.triggers.alertActivated.schema.reason', {
-        defaultMessage: 'Reason the alert was activated.',
-      })
-    ),
-});
+export const alertActivatedPayloadSchema = lazySchema(() =>
+  alertActionEnvelopeSchema.extend({
+    reason: z
+      .string()
+      .min(1)
+      .max(1024)
+      .describe(
+        i18n.translate('xpack.alertingVTwo.triggers.alertActivated.schema.reason', {
+          defaultMessage: 'Reason the alert was activated.',
+        })
+      ),
+  })
+);
 
 export type AlertActivatedPayload = z.infer<typeof alertActivatedPayloadSchema>;
 

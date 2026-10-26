@@ -66,9 +66,9 @@ describe('createThreatReport', () => {
   });
 
   it('ignores a missing reports index on the dedup precheck so the first ingest still writes', async () => {
-    // The reports index is created lazily on first write. Without
-    // ignore_unavailable the precheck would throw index_not_found_exception and
-    // 500 the very request that would have created the index.
+    // Bootstrap usually creates the companion index, but without
+    // ignore_unavailable a missing index would throw index_not_found_exception
+    // and 500 the precheck before create can run.
     const esClient = buildEsClient();
     const result = await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
 

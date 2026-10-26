@@ -100,6 +100,10 @@ Body
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
+::::{note}
+These settings don't apply to {{es}} {{infer}} endpoints. To connect an {{infer}} endpoint to a service that uses a private certificate authority, refer to [Trust a private certificate authority for external {{infer}} endpoints](docs-content://explore-analyze/elastic-inference/external-inference-private-ca.md).
+::::
+
 ## Token usage dashboard [openai-connector-token-dashboard]
 
 Once you've created a OpenAI connector, you can monitor its token usage using the **OpenAI Token Usage** dashboard. Select the connector in **{{stack-manage-app}}** > **{{connectors-ui}}** to view its details, then click the **View OpenAI Usage Dashboard for "*<Name>*" Connector** link to open the dashboard.

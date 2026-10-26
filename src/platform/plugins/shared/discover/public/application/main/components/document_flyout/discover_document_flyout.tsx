@@ -19,9 +19,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { DocViewerApi, DocViewerRestorableState } from '@kbn/unified-doc-viewer';
+import type {
+  DocViewerApi,
+  DocViewerRestorableState,
+  DocViewerShareableState,
+} from '@kbn/unified-doc-viewer';
 import { getDisplayedColumns } from '@kbn/unified-data-table';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import {
   DiscoverGridFlyout,
   useShareDirectLinkAction,
@@ -33,6 +36,7 @@ import {
   useCurrentTabAction,
   useCurrentDataSource,
   useCurrentTabDataStateContainer,
+  useCurrentTabRuntimeState,
   useCurrentTabSelector,
   useInternalStateDispatch,
   useInternalStateSelector,
@@ -41,7 +45,6 @@ import { useDataState } from '../../hooks/use_data_state';
 import { ExpandedDocNotice, useExpandedDocSync } from './use_expanded_doc_sync';
 import { useCopyExpandedDocLink } from './use_copy_expanded_doc_link';
 import { getExpandedDocLinkability } from '../../utils/expanded_doc';
-import { columnsToColumnsMeta } from '../../../../utils/columns_to_columns_meta';
 
 export interface DiscoverDocumentFlyoutProps {
   dataView: DataView;
@@ -73,8 +76,9 @@ export const DiscoverDocumentFlyout = memo(
     const expandedDocCascadePath = useCurrentTabSelector((state) => state.expandedDocCascadePath);
     const renderDocumentViewMeta = useCurrentTabSelector((state) => state.renderDocumentViewMeta);
     const initialDocViewerTabId = useCurrentTabSelector((state) => state.initialDocViewerTabId);
-    const cascadedColumnsMeta = useCurrentTabSelector(
-      (state) => state.cascadedDocumentsState.columnsMeta
+    const docViewerState = useAppStateSelector((state) => state.docViewerState);
+    const cascadedLeafDataSource = useCurrentTabRuntimeState(
+      (runtimeState) => runtimeState.cascadedLeafDataSource$
     );
 
     const dataStateContainer = useCurrentTabDataStateContainer();
@@ -143,20 +147,20 @@ export const DiscoverDocumentFlyout = memo(
       [dispatch, setInitialDocViewerTabIdAction]
     );
 
-    const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
-      () =>
-        currentDataSource.kind === 'esql'
-          ? columnsToColumnsMeta(currentDataSource.getColumns())
-          : undefined,
-      [currentDataSource]
+    const setDocViewerShareableStateAction = useCurrentTabAction(
+      internalStateActions.setDocViewerShareableState
+    );
+    const onShareableStateChange = useCallback(
+      (newDocViewerState: DocViewerShareableState) => {
+        dispatch(setDocViewerShareableStateAction({ docViewerState: newDocViewerState }));
+      },
+      [dispatch, setDocViewerShareableStateAction]
     );
 
-    const flyoutColumnsMeta = useMemo(() => {
-      if (!expandedDocOwner || expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER) {
-        return columnsMeta;
-      }
-      return cascadedColumnsMeta;
-    }, [expandedDocOwner, columnsMeta, cascadedColumnsMeta]);
+    const flyoutDataSource =
+      !expandedDocOwner || expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER
+        ? currentDataSource
+        : cascadedLeafDataSource;
 
     // Derive columns for when a linked flyout opens before the grid exists.
     const displayedColumns = useMemo(
@@ -179,7 +183,7 @@ export const DiscoverDocumentFlyout = memo(
         }
         hits={renderDocumentViewMeta?.displayedRows}
         columns={renderDocumentViewMeta?.displayedColumns ?? displayedColumns}
-        columnsMeta={flyoutColumnsMeta}
+        dataSource={flyoutDataSource}
         savedSearchId={persistedDiscoverSession?.id}
         query={query}
         initialTabId={initialDocViewerTabId}
@@ -193,6 +197,8 @@ export const DiscoverDocumentFlyout = memo(
         onUpdateSelectedTabId={onUpdateSelectedTabId}
         initialDocViewerState={docViewerUiState}
         onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+        initialShareableState={docViewerState}
+        onShareableStateChange={onShareableStateChange}
       />
     );
   }

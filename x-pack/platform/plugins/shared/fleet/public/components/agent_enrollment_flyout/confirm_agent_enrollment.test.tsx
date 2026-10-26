@@ -11,6 +11,7 @@ import { act, renderHook, fireEvent, render } from '@testing-library/react';
 import { sendGetAgents } from '../../hooks';
 
 import { ConfirmAgentEnrollment, usePollingAgentCount } from './confirm_agent_enrollment';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services/version_specific_policies_utils';
 
 const mockNavigateToUrl = jest.fn();
 
@@ -61,6 +62,21 @@ describe('usePollingAgentCount', () => {
       expect.objectContaining({
         kuery: expect.stringContaining('enrolled_at >= now-10m'),
       })
+    );
+  });
+
+  it('polls the agents by the base policy id, so an agent moved to #sentinel is still found', async () => {
+    renderHook(() => usePollingAgentCount('policy-1', { pollImmediately: true }));
+
+    await act(async () => {});
+
+    const { kuery } = mockSendGetAgents.mock.calls[0][0];
+    expect(kuery).toContain(
+      buildPolicyBaseIdWithFallbackKuery(
+        'policy-1',
+        'fleet-agents.policy_base_id',
+        'fleet-agents.policy_id'
+      )
     );
   });
 

@@ -44,6 +44,13 @@ import type { LoadBalancerConfig, SpecGroup } from './utils';
 import { getFTRConfig } from './get_ftr_config';
 import { resolveLoadBalancerConfig } from './lb_config_registry';
 import { isInBuildkite, isSpecCompleted, markSpecCompleted } from './buildkite_checkpoint';
+import { recordCypressResult } from './cypress_result_report';
+import {
+  getSpecFailureSeed,
+  hasUnresolvedFailures,
+  routeGroupFailure,
+} from './group_failure_routing';
+import { hasFailedTests, routeRunResult, runWithAssertionRetry } from './cypress_run_result';
 
 const filterCompletedSpecs = async (
   specFiles: string[],
@@ -269,25 +276,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const failedSpecFilePaths: string[] = [];
       const infraFailedSpecFilePaths: string[] = [];
 
-      const isCypressFailedRunResult = (
-        runResult:
-          | CypressCommandLine.CypressRunResult
-          | CypressCommandLine.CypressFailedRunResult
-          | undefined
-      ): runResult is CypressCommandLine.CypressFailedRunResult =>
-        Boolean(runResult && 'status' in runResult && runResult.status === 'failed');
-
-      const isTestAssertionFailure = (
-        runResult:
-          | CypressCommandLine.CypressRunResult
-          | CypressCommandLine.CypressFailedRunResult
-          | undefined
-      ): boolean => {
-        if (!runResult) return false;
-        const asRunResult = runResult as CypressCommandLine.CypressRunResult;
-        return Boolean(asRunResult.totalFailed && asRunResult.totalFailed > 0 && asRunResult.runs);
-      };
-
       const runSpecGroups = async (
         specGroups: SpecGroup[],
         isRetryRun: boolean = false
@@ -328,6 +316,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
           | undefined
         > = [];
 
+        const completedSpecFilePaths: string[] = [];
         const esPort: number = getEsPort();
         const kibanaPort: number = getKibanaPort();
         const fleetServerPort: number = getFleetServerPort();
@@ -536,7 +525,7 @@ ${JSON.stringify(
             };
 
             for (const filePath of group.specFilePaths) {
-              failedSpecFilePaths.push(filePath);
+              failedSpecFilePaths.push(...getSpecFailureSeed(isOpen, filePath));
 
               log.info(`
 ----------------------------------------------
@@ -582,41 +571,60 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                     env: cyCustomEnv,
                   },
                 });
-              } else {
-                let runResult = await executeCypressRun(isRetryRun);
 
-                if (isTestAssertionFailure(runResult) && !isRetryRun) {
-                  log.info(
-                    `Test assertion failure detected for ${filePath}, retrying in-place against the same stack (with video enabled)...`
-                  );
-                  runResult = await executeCypressRun(true);
+                // The interactive session closed normally: treat the spec as
+                // completed so a later teardown error in `isOpen` mode is not
+                // routed as an unresolved spec failure.
+                if (!completedSpecFilePaths.includes(filePath)) {
+                  completedSpecFilePaths.push(filePath);
                 }
-
+              } else {
+                const runResult = await runWithAssertionRetry({
+                  execute: executeCypressRun,
+                  record: recordCypressResult,
+                  spec: filePath,
+                  isRetryRun,
+                });
                 results.push(runResult);
-
-                if (isCypressFailedRunResult(runResult)) {
-                  infraFailedSpecFilePaths.push(filePath);
-                } else if (runResult.totalFailed === 0) {
-                  _.pull(failedSpecFilePaths, filePath);
-                  if (!isOpen && isInBuildkite()) {
-                    markSpecCompleted(filePath).catch(() => {});
-                  }
+                if (
+                  routeRunResult({
+                    result: runResult,
+                    spec: filePath,
+                    failedSpecFilePaths,
+                    infraFailedSpecFilePaths,
+                    completedSpecFilePaths,
+                  }) &&
+                  !isOpen &&
+                  isInBuildkite()
+                ) {
+                  markSpecCompleted(filePath).catch(() => {});
                 }
               }
             }
           } catch (error) {
             log.error(error);
 
-            for (const filePath of group.specFilePaths) {
-              if (failedSpecFilePaths.includes(filePath)) {
-                infraFailedSpecFilePaths.push(filePath);
-              }
+            // Seed both arrays unconditionally for every spec in the group:
+            // gating on prior membership of `failedSpecFilePaths` collapses to a
+            // no-op whenever the throw precedes the per-spec loop, which is the
+            // false-green pathway this PR closes. Invariant and tests live in
+            // `group_failure_routing.ts`.
+            const message = error instanceof Error ? error.message : String(error);
+            for (const record of routeGroupFailure({
+              specFilePaths: group.specFilePaths,
+              completedSpecFilePaths,
+              failedSpecFilePaths,
+              infraFailedSpecFilePaths,
+              message,
+              isRetryRun,
+            })) {
+              recordCypressResult(record);
             }
 
             results.push({
               status: 'failed',
               failures: 1,
-              message: error.message,
+              message,
             });
           }
 
@@ -686,27 +694,11 @@ ${specGroups
           log.error(e);
         }
 
-        const hasFailedTests = (
-          runResults: Array<
-            | CypressCommandLine.CypressFailedRunResult
-            | CypressCommandLine.CypressRunResult
-            | undefined
-          >
-        ) =>
-          _.some(
-            runResults,
-            (runResult) =>
-              (runResult as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
-              (runResult as CypressCommandLine.CypressRunResult)?.totalFailed
-          );
-
-        const hasFailedInitialTests = hasFailedTests(initialResults);
         const hasFailedRetryTests = hasFailedTests(retryResults);
 
-        if (
-          (hasFailedRetryTests && failedSpecFilePaths.length) ||
-          (hasFailedInitialTests && !retryResults.length)
-        ) {
+        // Successful retries must not mask failures from other specs.
+        const stillFailing = hasUnresolvedFailures(failedSpecFilePaths, hasFailedRetryTests);
+        if (stillFailing) {
           throw createFailError('Not all tests passed');
         }
       } else {
@@ -761,27 +753,11 @@ ${specGroups
           log.error(e);
         }
 
-        const hasFailedTests = (
-          runResults: Array<
-            | CypressCommandLine.CypressFailedRunResult
-            | CypressCommandLine.CypressRunResult
-            | undefined
-          >
-        ) =>
-          _.some(
-            runResults,
-            (runResult) =>
-              (runResult as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
-              (runResult as CypressCommandLine.CypressRunResult)?.totalFailed
-          );
-
-        const hasFailedInitialTests = hasFailedTests(initialResults);
         const hasFailedRetryTests = hasFailedTests(retryResults);
 
-        if (
-          (hasFailedRetryTests && failedSpecFilePaths.length) ||
-          (hasFailedInitialTests && !retryResults.length)
-        ) {
+        // Successful retries must not mask failures from other specs.
+        const stillFailing = hasUnresolvedFailures(failedSpecFilePaths, hasFailedRetryTests);
+        if (stillFailing) {
           throw createFailError('Not all tests passed');
         }
       }

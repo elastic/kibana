@@ -22,6 +22,15 @@ const buildLifecycle = (data: Partial<RuleAttachmentData>) =>
       }
     : {};
 
+const buildMetadata = (metadata: Partial<RuleAttachmentData>['metadata']) => {
+  if (metadata) {
+    // `template` is server-managed and rejected by the write API.
+    const { template: _template, ...rest } = metadata;
+    return { metadata: rest };
+  }
+  return { metadata: metadata! };
+};
+
 /**
  * Maps partial rule attachment data to the API request payload,
  * filling in required defaults for missing fields. Used by both the canvas
@@ -29,10 +38,10 @@ const buildLifecycle = (data: Partial<RuleAttachmentData>) =>
  */
 export const buildRulePayload = (data: Partial<RuleAttachmentData>): CreateRuleData => ({
   kind: data.kind!,
-  metadata: data.metadata!,
+  ...buildMetadata(data.metadata),
   schedule: data.schedule!,
   query: data.query!,
-  state_transition: data.state_transition ?? null,
+  state_transition: data.state_transition,
   time_field: data.time_field ?? DEFAULT_TIME_FIELD,
   ...buildLifecycle(data),
   ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),

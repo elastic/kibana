@@ -75,6 +75,6 @@ export const isWorkflowExecutionsIndexNotFoundError = (error: unknown): boolean 
   getElasticsearchErrorType(error) === 'index_not_found_exception';
 
 export const getWorkflowExecutionsFetchErrorMessage = (): string =>
-  i18n.translate('workflowsManagement.executionsPage.fetchError', {
+  i18n.translate('workflows.executionsPage.fetchError', {
     defaultMessage: 'Failed to load executions',
   });

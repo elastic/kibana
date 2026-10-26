@@ -38,7 +38,7 @@ export const registerStreamsAgentBuilder = async ({
   logger: Logger;
   telemetry: EbtTelemetryClient;
 }): Promise<void> => {
-  registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
+  registerAgentBuilderAttachments({ agentBuilder, getScopedClients, server, logger });
   registerAgentBuilderTools({
     agentBuilder,
     getScopedClients,

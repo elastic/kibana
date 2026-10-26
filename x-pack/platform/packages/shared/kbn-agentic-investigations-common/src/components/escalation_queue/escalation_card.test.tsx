@@ -30,17 +30,12 @@ const closedEscalation: EscalationQueueItem = {
 
 const renderCard = (
   escalation: EscalationQueueItem,
-  {
-    hasBorder = false,
-    onClickCard,
-    href,
-  }: { hasBorder?: boolean; onClickCard?: jest.Mock; href?: string } = {}
+  { onClickCard, href }: { onClickCard?: jest.Mock; href?: string } = {}
 ) => {
   const renderAssignees = jest.fn(() => <span data-test-subj="assignees-widget" />);
   renderWithKibanaRenderContext(
     <EscalationCard
       escalation={escalation}
-      hasBorder={hasBorder}
       renderAssignees={renderAssignees}
       onClickCard={onClickCard}
       href={href}

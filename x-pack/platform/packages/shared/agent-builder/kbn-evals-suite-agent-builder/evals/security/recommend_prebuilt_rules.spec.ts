@@ -27,7 +27,7 @@ import { createEvaluateDataset } from '../../src/evaluate_dataset';
  *    (already-installed rules -> `find-security-rules`, editing a rule ->
  *    `detection-rule-edit`, ML jobs -> `find-security-ml-jobs`, alert triage ->
  *    `alert-analysis`, authoring a custom Alerting V2 / ES|QL rule ->
- *    `rule-management`). These answer "can the agent distinguish when to call
+ *    `rule-authoring`). These answer "can the agent distinguish when to call
  *    this skill vs. others?" and mirror the find-rules "Boundaries" suite.
  *
  * Requirements for the eval target Kibana:
@@ -36,7 +36,7 @@ import { createEvaluateDataset } from '../../src/evaluate_dataset';
  *   registered and the agent cannot route to it.
  * - The boundary examples that route to `find-security-rules` also require the
  *   `dexAiSkillFindRules` flag, so that sibling skill is registered too.
- * - The boundary example that routes to `rule-management` requires the Alerting V2
+ * - The boundary example that routes to `rule-authoring` requires the Alerting V2
  *   plugin enabled (`xpack.alerting_v2.enabled: true`); that plugin is disabled by
  *   default, so otherwise its skill is never registered and the agent cannot route
  *   to it.
@@ -491,7 +491,7 @@ evaluate.describe(
               'Distractor queries that touch rules/prebuilt vocabulary but concern ' +
               'already-installed rules, rule editing, ML jobs, alert triage, or authoring a ' +
               'custom alerting rule, and should activate a sibling skill (find-security-rules, ' +
-              'detection-rule-edit, find-security-ml-jobs, alert-analysis, rule-management) ' +
+              'detection-rule-edit, find-security-ml-jobs, alert-analysis, rule-authoring) ' +
               'rather than recommend-prebuilt-rules.',
             examples: [
               {
@@ -571,7 +571,7 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Alerting V2 Rule Authoring',
-                  expectedSkill: 'rule-management',
+                  expectedSkill: 'rule-authoring',
                 },
               },
             ],

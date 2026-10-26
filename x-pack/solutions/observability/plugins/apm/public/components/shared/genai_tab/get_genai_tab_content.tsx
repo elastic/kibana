@@ -8,7 +8,8 @@
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { GenAiTab, GenAiTabImpression, type GenAiFields } from '@kbn/apm-ui-shared';
+import type { GenAiFields } from '@kbn/genai-common';
+import { GenAiTab, GenAiTabImpression } from '@kbn/apm-ui-shared';
 import { getEbtProps, type EbtClickAttrsElementOnly } from '@kbn/ebt-click';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';

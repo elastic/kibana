@@ -46,7 +46,12 @@ import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getProfileAppStateDefaults } from './utils/profile_app_state_defaults';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
-import { internalStateActions, selectCurrentProfileUrlState, selectTabRuntimeState } from './redux';
+import {
+  getDataViewOfSource,
+  internalStateActions,
+  selectCurrentProfileUrlState,
+  selectTabRuntimeState,
+} from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
 import { createSearchSource } from './utils/create_search_source';
 import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
@@ -308,12 +313,13 @@ export function getDataStateContainer({
           const {
             scopedProfilesManager$,
             scopedEbtManager$,
-            currentDataView$,
             currentDataSource$,
+            cascadedLeafDataSource$,
           } = selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
           const scopedEbtManager = scopedEbtManager$.getValue();
           const existingSource = currentDataSource$.getValue();
+          const currentDataView = getDataViewOfSource(existingSource);
           const esqlSource = existingSource?.kind === 'esql' ? existingSource : undefined;
 
           let searchSessionId: string;
@@ -328,7 +334,7 @@ export function getDataStateContainer({
           }
 
           const searchSource = createSearchSource({
-            dataView: currentDataView$.getValue(),
+            dataView: currentDataView,
             appState,
             globalState,
             services,
@@ -383,17 +389,17 @@ export function getDataStateContainer({
             injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
               cascadedDocumentsState: {
                 ...getCurrentTab().cascadedDocumentsState,
-                columnsMeta: {},
                 cascadedDocumentsMap: {},
               },
             })
           );
+          cascadedLeafDataSource$.next(undefined);
 
           const { didProfileChange, isFirstResolution } =
             await scopedProfilesManager.resolveDataSourceProfile(
               {
                 dataSource: getCurrentTab().appState.dataSource,
-                dataView: currentDataView$.getValue(),
+                dataView: currentDataView,
                 query: getCurrentTab().appState.query,
               },
               resetFetchChart$

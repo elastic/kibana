@@ -7,8 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
 } from '@kbn/management-settings-ids';
 import { NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
@@ -30,7 +30,7 @@ const putContinuousKIExtractionSettingsRoute = createServerRoute({
     access: 'internal',
     summary: 'Update continuous KI extraction settings',
     description:
-      'Updates continuous KI extraction settings (enabled, interval) and ensures the extraction workflow is created or updated accordingly.',
+      'Updates the continuous KI onboarding settings (enabled, interval) of the current space and enables or disables the space onboarding workflow accordingly.',
   },
   security: {
     authz: {
@@ -45,15 +45,15 @@ const putContinuousKIExtractionSettingsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    continuousKiOnboardingWorkflowService,
+    continuousOnboardingWorkflowService,
     maintenanceService,
     logger,
   }): Promise<{ success: true }> => {
-    if (!continuousKiOnboardingWorkflowService) {
+    if (!continuousOnboardingWorkflowService) {
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, globalUiSettingsClient } = await getScopedClients({
+    const { licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
@@ -71,41 +71,41 @@ const putContinuousKIExtractionSettingsRoute = createServerRoute({
     const updates: Record<string, boolean | number | string> = {};
 
     if (continuousKiExtraction.enabled !== undefined) {
-      updates[OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED] =
+      updates[OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED] =
         continuousKiExtraction.enabled;
     }
     if (continuousKiExtraction.intervalHours !== undefined) {
-      updates[OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS] =
+      updates[OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS] =
         continuousKiExtraction.intervalHours;
     }
 
     const previousValues: Record<string, boolean | number | string> = {};
     const keys = Object.keys(updates);
-    const allSettings = await globalUiSettingsClient.getAll<boolean | number | string>();
+    const allSettings = await uiSettingsClient.getAll<boolean | number | string>();
     if (keys.length > 0) {
       for (const key of keys) {
         previousValues[key] = allSettings[key];
       }
-      await globalUiSettingsClient.setMany(updates);
+      await uiSettingsClient.setMany(updates);
     }
 
-    // Only reconcile the workflow on an actual enabled-state transition so the
-    // legacy and managed workflows never run at the same time. Interval changes are
-    // picked up by the running workflow at execution time.
+    // Only reconcile the workflow on an actual enabled-state transition. Interval
+    // changes are picked up by the running workflow at execution time.
     const previousEnabled = allSettings[
-      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
+      OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED
     ] as boolean;
     const nextEnabled = continuousKiExtraction.enabled;
 
     if (nextEnabled !== undefined && nextEnabled !== previousEnabled) {
       try {
-        await continuousKiOnboardingWorkflowService.ensureWorkflow({
+        await continuousOnboardingWorkflowService.ensureWorkflow({
           enabled: nextEnabled,
           request,
+          spaceId: request.spaceId,
         });
       } catch (err) {
         if (Object.keys(previousValues).length > 0) {
-          await globalUiSettingsClient.setMany(previousValues).catch((rollbackErr) => {
+          await uiSettingsClient.setMany(previousValues).catch((rollbackErr) => {
             logger.warn(`Failed to rollback settings after workflow sync error: ${rollbackErr}`);
           });
         }

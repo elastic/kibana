@@ -5,9 +5,25 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { mockCaseUnifiedAttachments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { find, get } from './get';
+
+const toLegacyShaped = (so: (typeof mockCaseUnifiedAttachments)[number], id = so.id) => {
+  return {
+    ...so,
+    id,
+    attributes: {
+      ...omit(so.attributes, 'data'),
+      type: 'externalReference',
+      externalReferenceId: 'ref-1',
+      externalReferenceStorage: { type: 'elasticSearchDoc' },
+      externalReferenceAttachmentTypeId: 'unknown-third-party-type',
+      externalReferenceMetadata: null,
+    },
+  };
+};
 
 describe('get', () => {
   describe('find', () => {
@@ -60,6 +76,21 @@ describe('get', () => {
     // Type-resolution precision (leftover bucket/subtype mapping) is covered by
     // `type_filter.test.ts`; these tests only check `find` wires the filter through.
 
+    it('skips rows with no unified shape and logs a warning', async () => {
+      const [unifiedSO] = mockCaseUnifiedAttachments;
+      const legacyShapedSO = toLegacyShaped(unifiedSO, 'legacy-shaped');
+      clientArgs.services.attachmentService.find.mockResolvedValue({
+        ...emptyFindResponse,
+        total: 2,
+        saved_objects: [legacyShapedSO, unifiedSO],
+      } as never);
+
+      const res = await find({ caseID: 'mock-id-1', findQueryParams: {} }, clientArgs);
+
+      expect(res.data.map(({ id }) => id)).toEqual([unifiedSO.id]);
+      expect(clientArgs.logger.warn).toHaveBeenCalledWith(expect.stringContaining('legacy-shaped'));
+    });
+
     it('Invalid total items results in error', async () => {
       await expect(() =>
         find({ caseID: 'mock-id', findQueryParams: { page: 209, perPage: 100 } }, clientArgs)
@@ -111,6 +142,21 @@ describe('get', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Failed to get attachment case id: other-case attachment id: mock-attachment-1: Error: This attachment mock-attachment-1 does not exist in case other-case."`
       );
+    });
+
+    it('404s when the attachment has no unified shape', async () => {
+      clientArgs.services.attachmentService.getter.get.mockResolvedValue(
+        toLegacyShaped(attachmentSO) as never
+      );
+
+      await expect(
+        get({ caseID: 'mock-id-1', savedObjectId: attachmentSO.id }, clientArgs)
+      ).rejects.toMatchObject({
+        wrappedError: expect.objectContaining({
+          message: 'Attachment mock-attachment-1 could not be read.',
+          output: expect.objectContaining({ statusCode: 404 }),
+        }),
+      });
     });
   });
 });

@@ -13,7 +13,7 @@ import {
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { dashboardDesignGuidancePrompt } from './design';
-import { enhanceGuidancePrompt } from './enhance_guidance';
+import { ENHANCE_GUIDANCE_PATH, enhanceGuidanceReference } from './enhance_guidance';
 
 const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
 
@@ -21,7 +21,9 @@ const guidance = `## Dashboard Operations
 
 The ${dashboardTools.generateDashboard} tool builds the resulting dashboard from the current dashboard (if any) plus an ordered \`operations\` array. This section describes the \`operations\` vocabulary; see the environment workflow below for how the current dashboard is referenced and how the result is surfaced.
 
-${enhanceGuidancePrompt}
+## Improving an Existing Dashboard (Enhance)
+
+When asked to enhance, improve, or clean up an existing dashboard, read \`${ENHANCE_GUIDANCE_PATH}\` with \`read_file\` before inspecting the dashboard or calling any other tool. Follow that file. It takes precedence over the create-dashboard guidance in this skill. Do not enhance without reading it.
 
 ## Using Dashboard Operations
 
@@ -30,7 +32,7 @@ Every dashboard MUST have a non-empty \`title\`. If the current dashboard's titl
 Operations run in order, so earlier operations should set up state needed by later ones. Batch all operations into a single ${dashboardTools.generateDashboard} call whenever possible.
 
 When a dashboard needs sections, prefer a single batched call:
-1. For existing panels, create an empty \`add_section\` with a unique \`key\` (e.g. \`"overview"\`), omitting \`panels\`. Then use \`update_panel_layouts\` with the original \`panelId\` values and that key as \`sectionId\`. This moves the panels with their configurations intact.
+1. For existing panels, create an empty \`add_section\` with a unique \`key\` (e.g. \`"overview"\`), omitting \`panels\`. Then use \`move_panels\` with the original \`panelId\` values and that key as \`sectionId\`. This moves the panels with their configurations intact.
 2. Only use \`add_section.panels\` or \`add_panels\` to create new panels. They cannot move existing panels.
 3. Create sections before referencing them. Keys must not match existing section IDs and are not saved; in later calls, use the generated section ID returned by the tool.
 
@@ -44,14 +46,14 @@ For an existing dashboard:
 - For focused edits, pass only the requested change in the edit \`query\` (e.g. "make the error series blue"). The chart author preserves unrelated presentation settings. Set \`applyChartRules: true\` to apply all presentation defaults to an existing ES|QL Lens panel instead.
 - Set \`preserveESQL: true\` when the panel's query should stay unchanged. Omit it when the edit changes what the panel measures. This is independent of \`applyChartRules\`, so a query change and presentation enhancement can share one edit.
 - If a requested change targets a DSL, form-based, or other non-ES|QL Lens visualization panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
-- Use \`update_panel_layouts\` to resize, reposition, or move existing panels between top-level and sections without changing panel content.
+- Use \`move_panels\` to move existing panels between the top level and sections without changing panel content.
 
 ## Panel Inputs
 
 Each visualization request is authored in a separate context. New-panel authors do not see the dashboard attachment or other panels, so for Lens and Vega panels pass the exact known \`index\` and describe the measure, fields, and filters in \`query\`. Omit \`index\` only when the source is unknown and discovery is needed. Custom content panels take no \`index\`; their data comes only from \`esql\` (see Custom content panels). Existing-panel edits receive the original configuration and queries automatically through \`panelId\`.
 
 - Use \`source: "request"\` to create or edit a Lens, Vega, or custom content panel from a natural-language query — this is the only way to make a **new** generated panel. Set \`renderer\` to pick the engine; each renderer accepts only its own fields.
-- Use \`source: "attachment"\` with an \`attachment_id\` to place any visualization that already exists in this conversation — anything \`${platformCoreTools.createVisualization}\` returned. Pass only the id and a \`grid\`; the attachment's own renderer decides the panel type. A \`source: "request"\` would generate a **new**, different panel instead.
+- Use \`source: "attachment"\` with an \`attachment_id\` to place any visualization that already exists in this conversation — anything \`${platformCoreTools.createVisualization}\` returned. Pass only the id; the attachment's own renderer decides the panel type. A \`source: "request"\` would generate a **new**, different panel instead.
 - Use \`source: "config"\` for panels you author by value: markdown and ML anomaly panels.
 
 ## Panel Type Selection
@@ -76,7 +78,6 @@ Reach for custom content only when nothing above fits:
 **Creating a custom content panel:**
 - Set \`query\` to a concise description of what to display. The HTML template is generated server-side from it.
 - Set \`esql\` when the panel needs live data.
-- Give it enough height. These panels lay out as HTML and scroll inside their own frame when the grid is too short for the content, so size \`grid.h\` from what you asked for — see the custom content entry in the grid sizes below.
 
 **Editing a custom content panel:**
 - Use \`edit_panels\` (\`source: "request"\`, \`renderer: "custom_content"\`) and set \`panelId\` to the target panel.
@@ -97,7 +98,7 @@ ${dashboardDesignGuidancePrompt}
 
 ## ES|QL
 
-Omit the \`esql\` field on Lens and Vega panels unless you received a validated query from a prior tool result or the user pasted one explicitly. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`. Custom content is the exception: the tool does not generate its query, so pass \`esql\` whenever the panel needs data (see Custom content panels).
+Omit the \`esql\` field on visualization panels unless the query came from \`${platformCoreTools.generateEsql}\` or the user pasted it. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`. A query you wrote yourself doesn't qualify, even after running it with \`${platformCoreTools.executeEsql}\`: running a query only shows that it works, so use \`${platformCoreTools.executeEsql}\` to inspect results, not to approve your own queries. Custom content is the exception: the tool does not generate its query, so pass \`esql\` whenever the panel needs data (see Custom content panels).
 
 ## Controls
 
@@ -127,7 +128,7 @@ Controls query the index directly, so columns created in ES|QL (\`DISSECT\`, \`G
 
 ## Generation Edge Cases
 
-- Use \`update_panel_layouts\` when the user wants to resize, reposition, or move panels without changing panel content.
+- Use \`move_panels\` only to move panels between sections.
 - If a user wants to change a dashboard panel's content, prefer \`edit_panels\` over removing and re-adding the panel. \`edit_panels\` works for ES|QL-backed Lens and Vega panels and custom content panels (\`source: "request"\` with the panel's \`renderer\`), markdown panels (\`source: "config"\`, \`type: "markdown"\`), and ML anomaly panels (\`source: "config"\`, \`type: "ml_anomaly_charts"\` / \`"ml_anomaly_swimlane"\` / \`"ml_single_metric_viewer"\`).
 - A dashboard can include DSL-based, form-based, or other non-ES|QL Lens panels. Do not attempt to edit those panels directly.
 - If the user asks to modify a DSL visualization or any other non-ES|QL panel, explicitly explain that direct editing is not supported, propose recreating and replacing it as a new ES|QL-based Lens chart, and ask for confirmation before you remove or replace the existing panel.
@@ -145,4 +146,5 @@ Controls query the index directly, so columns created in ES|QL (\`DISSECT\`, \`G
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
   guidance,
+  referencedContent: [enhanceGuidanceReference],
 };

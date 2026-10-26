@@ -53,6 +53,10 @@ export {
 } from './impl/utils/sharing_helpers';
 
 export * from './constants';
+export {
+  isAttackDiscoveryIndex,
+  toReadableAttackIndexPattern,
+} from './impl/utils/attack_discovery_index';
 
 /** currently the same shape as "fields" property in the ES response */
 export { type MaybeRawData } from './impl/alerts/helpers/types';

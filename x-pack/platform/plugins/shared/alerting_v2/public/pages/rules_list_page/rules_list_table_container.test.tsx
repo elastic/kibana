@@ -13,7 +13,15 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RulesListTableContainer } from './rules_list_table_container';
-import { MockLocatorProvider } from '../../test_utils/test_providers';
+import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
+
+const mockRuleSummaryFlyout = ({ rule }: { rule: { id: string } }) => (
+  <div data-test-subj="ruleSummaryFlyout">{rule.id}</div>
+);
+
+jest.mock('../../components/rule/flyouts', () => ({
+  RuleSummaryFlyout: (props: { rule: { id: string } }) => mockRuleSummaryFlyout(props),
+}));
 
 const mockNavigateToUrl = jest.fn();
 
@@ -118,9 +126,12 @@ const toListItem = (rule: RuleApiResponse) => ({
 const mockOnEditInFlyout = jest.fn();
 const mockOnCloneInFlyout = jest.fn();
 
-const renderContainer = ({ total = mockRules.length }: { total?: number } = {}) => {
+const renderContainer = ({
+  total = mockRules.length,
+  locators,
+}: { total?: number; locators?: ReturnType<typeof createMockLocators> } = {}) => {
   return render(
-    <MockLocatorProvider>
+    <MockLocatorProvider locators={locators}>
       <I18nProvider>
         <ContentListProvider
           id="rules-list-table-container-test"
@@ -218,6 +229,19 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
       expect(mockOnCloneInFlyout).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+
+    it('opens the rule summary flyout when the rule name is clicked', async () => {
+      const locators = createMockLocators();
+      renderContainer({ locators });
+      await waitForRules();
+
+      expect(screen.queryByTestId('expandRule-rule-1')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('ruleNameLink-rule-1'));
+
+      expect(await screen.findByTestId('ruleSummaryFlyout')).toHaveTextContent('rule-1');
+      expect(locators.rulesLocators.navigateSync).not.toHaveBeenCalled();
     });
   });
 

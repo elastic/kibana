@@ -15,6 +15,9 @@ The MongoDB connector provides access to MongoDB collections using the native Mo
 This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
 ::::
 
+:::{include} _snippets/native-driver-memory-note.md
+:::
+
 ## Create connectors in {{kib}} [define-mongodb-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

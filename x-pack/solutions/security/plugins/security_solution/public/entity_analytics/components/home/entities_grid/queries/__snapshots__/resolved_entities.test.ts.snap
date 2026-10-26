@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildResolvedEntityFilterOverridesQuery compares the resolved entity with its main entity on the filters, and keeps those that differ 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
+| EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
+| STATS alias_rank = MAX(rank), alias_sources = VALUES(entity.source), alias_watchlists = VALUES(entity.attributes.watchlists), alias_first_seen = MIN(entity.lifecycle.first_seen), alias_last_seen = MAX(\`@timestamp\`) BY group_key = entity.relationships.resolution.resolved_to
+| RENAME group_key AS \`entity.id\`
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
+| EVAL own_matches = COALESCE(asset.criticality IN (\\"high_impact\\"), false)
+| EVAL own_rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
+| EVAL group_rank = GREATEST(COALESCE(own_rank, alias_rank), COALESCE(alias_rank, own_rank))
+| EVAL asset.criticality = CASE(group_rank == 4, \\"extreme_impact\\", group_rank == 3, \\"high_impact\\", group_rank == 2, \\"medium_impact\\", group_rank == 1, \\"low_impact\\"), entity.source = MV_DEDUPE(COALESCE(MV_APPEND(entity.source, alias_sources), entity.source, alias_sources)), entity.attributes.watchlists = MV_DEDUPE(COALESCE(MV_APPEND(entity.attributes.watchlists, alias_watchlists), entity.attributes.watchlists, alias_watchlists)), entity.lifecycle.first_seen = LEAST(COALESCE(entity.lifecycle.first_seen, alias_first_seen), COALESCE(alias_first_seen, entity.lifecycle.first_seen)), \`@timestamp\` = GREATEST(COALESCE(\`@timestamp\`, alias_last_seen), COALESCE(alias_last_seen, \`@timestamp\`))
+| EVAL resolved_entity_matches = COALESCE(asset.criticality IN (\\"high_impact\\"), false)
+| WHERE own_matches != resolved_entity_matches
+| KEEP \`entity.id\`, resolved_entity_matches
+| LIMIT 4001"
+`;
+
+exports[`buildResolvedEntityValuesQuery reads the aliases of the targets, then joins the targets own values in 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IN (\\"host:a\\", \\"host:b\\")
+| EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
+| STATS alias_rank = MAX(rank), alias_sources = VALUES(entity.source), alias_watchlists = VALUES(entity.attributes.watchlists), alias_first_seen = MIN(entity.lifecycle.first_seen), alias_last_seen = MAX(\`@timestamp\`) BY group_key = entity.relationships.resolution.resolved_to
+| RENAME group_key AS \`entity.id\`
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
+| EVAL own_rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
+| EVAL group_rank = GREATEST(COALESCE(own_rank, alias_rank), COALESCE(alias_rank, own_rank))
+| EVAL asset.criticality = CASE(group_rank == 4, \\"extreme_impact\\", group_rank == 3, \\"high_impact\\", group_rank == 2, \\"medium_impact\\", group_rank == 1, \\"low_impact\\"), entity.source = MV_DEDUPE(COALESCE(MV_APPEND(entity.source, alias_sources), entity.source, alias_sources)), entity.attributes.watchlists = MV_DEDUPE(COALESCE(MV_APPEND(entity.attributes.watchlists, alias_watchlists), entity.attributes.watchlists, alias_watchlists)), entity.lifecycle.first_seen = LEAST(COALESCE(entity.lifecycle.first_seen, alias_first_seen), COALESCE(alias_first_seen, entity.lifecycle.first_seen)), \`@timestamp\` = GREATEST(COALESCE(\`@timestamp\`, alias_last_seen), COALESCE(alias_last_seen, \`@timestamp\`))
+| KEEP \`entity.id\`, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`
+| LIMIT 2"
+`;

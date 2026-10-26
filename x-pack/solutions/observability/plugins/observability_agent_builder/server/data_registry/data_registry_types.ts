@@ -159,7 +159,7 @@ export interface TraceMetrics {
 }
 
 export type ApmConnectionStatsEntry =
-  | { type: 'service'; serviceName: string; metrics: TraceMetrics }
+  | { type: 'service'; serviceName: string; agentName?: string; metrics: TraceMetrics }
   | {
       type: 'dependency';
       dependencyName: string;

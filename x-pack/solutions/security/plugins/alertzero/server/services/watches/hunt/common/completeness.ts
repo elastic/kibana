@@ -23,6 +23,9 @@ import type {
  * searched, the failure this classifier exists to prevent — and the neighbouring case,
  * a generation call that failed outright, is already retried.
  *
+ * `extraction_pending` closes on its own once the enrich workflow finishes, so a later
+ * sweep hunts the report with real terms.
+ *
  * The line is whether a later run could plausibly cover the same technique. A technique
  * that is not in the catalog, input this run truncated, a budget it exhausted, and rows
  * it could not interpret all stay final: those reproduce. Retries are not bounded here,
@@ -37,6 +40,8 @@ const RETRYABLE_REASONS: ReadonlySet<HuntIncompleteReason> = new Set<HuntIncompl
   'query_ungrounded',
   'quote_ungrounded',
   'execute_failed',
+  'catalog_unavailable',
+  'extraction_pending',
 ]);
 
 export const isRetryableIncompleteReason = (reason: HuntIncompleteReason): boolean =>

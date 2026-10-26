@@ -16,8 +16,8 @@ import {
 import type { SignificantEventsRouteHandlerResources } from './types';
 import type { StatusError } from '../lib/errors/status_error';
 
-// The streams plugin throws its own StatusError class (e.g. SecurityError from
-// StreamsClient.ensureStream), so match status errors by shape, not by class.
+// Errors can come from other plugins with their own StatusError class, so match status
+// errors by shape, not by class.
 const isStatusErrorLike = (error: unknown): error is StatusError =>
   error instanceof Error &&
   !(error instanceof errors.ResponseError) &&

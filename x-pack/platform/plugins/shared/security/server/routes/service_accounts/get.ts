@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getServiceAccountParamsSchema } from './schemas';
+import { serviceAccountIdParamsSchema } from './schemas';
 import { serviceAccountsUnavailable } from './unavailable';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
@@ -22,10 +22,10 @@ export function defineGetServiceAccountRoute({
         authz: {
           enabled: false,
           reason:
-            'This route delegates authorization to the service accounts backend, which requires the `read_security` cluster privilege',
+            'This route delegates authorization to the service accounts backend, which requires the `manage_security` cluster privilege',
         },
       },
-      validate: { params: getServiceAccountParamsSchema },
+      validate: { params: serviceAccountIdParamsSchema },
       options: {
         access: 'internal',
       },

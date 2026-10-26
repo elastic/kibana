@@ -55,6 +55,7 @@ describe('PerOsMemoryProtectionCard', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    mockedContext.setExperimentalFlag({ customYaraSignaturesEnabled: false });
     policy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
       .config.policy.value;
     props = {
@@ -319,7 +320,7 @@ describe('PerOsMemoryProtectionCard', () => {
           expect(getCustomYaraSignaturesSwitch(os)).toBeEnabled();
         }
         expect(renderResult.getByTestId(testSubj.windows.customYaraSignatures)).toHaveTextContent(
-          'Apply custom YARA signatures'
+          'Apply custom YARA signatures in detection mode'
         );
       });
 

@@ -53,6 +53,20 @@ export const OPEN_IN_DISCOVER = i18n.translate(
   }
 );
 
+export const OPEN_ALERT_EVENTS_HISTORY = i18n.translate(
+  'xpack.alertingV2.episodesUi.actions.openAlertEventsHistoryLabel',
+  {
+    defaultMessage: 'Open alert events history',
+  }
+);
+
+export const OPEN_ALERT_EVENTS_HISTORY_UNAVAILABLE = i18n.translate(
+  'xpack.alertingV2.episodesUi.actions.openAlertEventsHistoryUnavailableTooltip',
+  {
+    defaultMessage: 'Discover with ES|QL is required to open alert events history.',
+  }
+);
+
 export const TAGS_FLYOUT_TITLE = i18n.translate(
   'xpack.alertingV2.episodesUi.tagsAction.flyoutTitle',
   {
@@ -67,30 +81,81 @@ export const CANCEL = i18n.translate('xpack.alertingV2.episodesUi.tagsAction.can
 export const RESOLVE_ACTION_REASON = i18n.translate(
   'xpack.alertingV2.episodesUi.resolveAction.reason',
   {
-    defaultMessage: 'Updated from episodes actions UI',
+    defaultMessage: 'Updated from alerts actions UI',
   }
 );
 
-export const BULK_ERROR_TOAST = i18n.translate('xpack.alertingV2Episodes.actions.bulkErrorToast', {
-  defaultMessage: 'An error occurred while performing the bulk action.',
-});
+export const getBulkErrorDetailsHeading = (failed: number): string =>
+  i18n.translate('xpack.alertingV2Episodes.actions.bulkErrorDetailsHeadingErrorMessage', {
+    defaultMessage: 'The action failed for {failed, plural, one {# alert} other {# alerts}}.',
+    values: { failed },
+  });
+
+export const getBulkTotalFailureToast = (actionName: string, failed: number): string =>
+  i18n.translate('xpack.alertingV2Episodes.actions.bulkTotalFailureToastErrorMessage', {
+    defaultMessage: '{actionName} failed for {failed, plural, one {# alert} other {# alerts}}.',
+    values: { actionName, failed },
+  });
+
+export const getBulkPartialFailureToast = (actionName: string, failed: number): string =>
+  i18n.translate('xpack.alertingV2Episodes.actions.bulkPartialFailureToastErrorMessage', {
+    defaultMessage: '{actionName} completed with {failed, plural, one {# error} other {# errors}}.',
+    values: { actionName, failed },
+  });
+
+export const getBulkFailureReason = (reason: string, additionalReasons: number): string =>
+  i18n.translate('xpack.alertingV2Episodes.actions.bulkFailureReasonErrorMessage', {
+    defaultMessage:
+      '{reason}{additionalReasons, plural, =0 {} one { (+# more reason)} other { (+# more reasons)}}',
+    values: { reason, additionalReasons },
+  });
+
+export const UNKNOWN_ERROR = i18n.translate(
+  'xpack.alertingV2Episodes.actions.unknownBulkErrorMessage',
+  { defaultMessage: 'Unknown error' }
+);
 
 export const getBulkSuccessToast = (processed: number): string =>
   i18n.translate('xpack.alertingV2Episodes.actions.bulkSuccessToast', {
-    defaultMessage: '{processed, plural, one {# episode} other {# episodes}} updated successfully.',
+    defaultMessage: '{processed, plural, one {# alert} other {# alerts}} updated successfully.',
     values: { processed },
   });
 
-export const getBulkPartialSuccessToast = (processed: number, total: number): string =>
-  i18n.translate('xpack.alertingV2Episodes.actions.bulkPartialSuccessToast', {
-    defaultMessage:
-      '{processed} of {total} {total, plural, one {episode} other {episodes}} updated successfully.',
-    values: { processed, total },
-  });
+export const BULK_NO_CHANGES_TOAST = i18n.translate(
+  'xpack.alertingV2Episodes.actions.bulkNoChangesToast',
+  {
+    defaultMessage: 'No changes were needed.',
+  }
+);
 
 export const UNRESOLVE_NOT_AVAILABLE = i18n.translate(
   'xpack.alertingV2Episodes.actions.unresolveNotAvailable',
   {
     defaultMessage: 'Unresolve is not available for classic alerts',
+  }
+);
+
+export const ADD_TO_CASE = i18n.translate('xpack.alertingV2.episodesUi.addToCaseAction.addToCase', {
+  defaultMessage: 'Add to case',
+});
+
+export const NO_ALERTS_ADDED_TO_CASE = i18n.translate(
+  'xpack.alertingV2.episodesUi.addToCaseAction.noAlertsAddedTitle',
+  {
+    defaultMessage: 'No alerts added to the case',
+  }
+);
+
+export const ALERTS_ALREADY_ATTACHED_TO_CASE = i18n.translate(
+  'xpack.alertingV2.episodesUi.addToCaseAction.alertsAlreadyAttached',
+  {
+    defaultMessage: 'All selected alerts are already attached to the case',
+  }
+);
+
+export const EDIT_ASSIGNEE_NOT_AVAILABLE = i18n.translate(
+  'xpack.alertingV2Episodes.actions.editAssigneeNotAvailable',
+  {
+    defaultMessage: 'Edit assignee is not available for classic alerts',
   }
 );

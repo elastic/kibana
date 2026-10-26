@@ -14,6 +14,7 @@ import { useDateFormat, useTimeZone, useUiSetting$ } from '../../lib/kibana';
 import { getOrEmptyTagFromValue } from '../empty_value';
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import { getMaybeDate } from './maybe_date';
+import { getRelativePreferenceDate } from './get_relative_preference_date';
 
 export const PreferenceFormattedDate = React.memo<{ dateFormat?: string; value: Date }>(
   /* eslint-disable-next-line react-hooks/rules-of-hooks */
@@ -149,17 +150,11 @@ export interface FormattedRelativePreferenceDateProps {
  */
 export const FormattedRelativePreferenceDate = React.memo<FormattedRelativePreferenceDateProps>(
   ({ value, dateFormat, tooltipFieldName, tooltipAnchorClassName, relativeThresholdInHrs = 1 }) => {
-    if (value == null) {
+    const preferenceDate = getRelativePreferenceDate(value, relativeThresholdInHrs);
+    if (preferenceDate == null) {
       return getOrEmptyTagFromValue(value);
     }
-    const maybeDate = getMaybeDate(value);
-    if (!maybeDate.isValid()) {
-      return getOrEmptyTagFromValue(value);
-    }
-    const date = maybeDate.toDate();
-    const shouldDisplayPreferenceTime = moment(date)
-      .add(relativeThresholdInHrs, 'hours')
-      .isBefore(new Date());
+    const { date, displayPreferenceTime } = preferenceDate;
 
     return (
       <LocalizedDateTooltip
@@ -167,7 +162,7 @@ export const FormattedRelativePreferenceDate = React.memo<FormattedRelativePrefe
         fieldName={tooltipFieldName}
         className={tooltipAnchorClassName}
       >
-        {shouldDisplayPreferenceTime ? (
+        {displayPreferenceTime ? (
           <PreferenceFormattedDate
             data-test-subj="preference-time"
             value={date}

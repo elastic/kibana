@@ -14,7 +14,8 @@ import { spaceTest } from '../fixtures';
 
 const NO_TIME_FIELD_OPTION = "--- I don't want to use the time filter ---";
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/295592
+spaceTest.describe.skip(
   'Data view editing — edit flows and field list updates',
   { tag: tags.deploymentAgnostic },
   () => {

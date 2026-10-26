@@ -13,7 +13,7 @@ import { useArgs } from '@storybook/preview-api';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { DataSource } from '../../../../common';
-import { storybookDocLinksMock } from '../../../__stories__/doc_links_mock';
+import { docLinksMock } from '../../../doc_links_mock';
 import { fieldStoryDecorator } from '../../__stories__/field_story_decorator';
 import { DataSourceSelect } from './data_source_select';
 
@@ -28,7 +28,7 @@ const dataSources: DataSource[] = [
 const kibanaContextDecorator: Decorator = (Story) => (
   <KibanaContextProvider
     services={{
-      docLinks: storybookDocLinksMock,
+      docLinks: docLinksMock,
       dataSourcesClient: { add: action('dataSourcesClient.add') },
       featureFlags: {},
     }}

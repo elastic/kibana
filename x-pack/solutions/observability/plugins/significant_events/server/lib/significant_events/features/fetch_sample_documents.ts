@@ -6,17 +6,18 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/significant-events-schema';
 import { getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { getDiverseSampleDocuments } from '@kbn/nightshift-ai';
-import { conditionToESQLAst } from '@kbn/streamlang';
+import { conditionToESQLFilterAst } from '@kbn/nightshift-shared';
 import { withSpan } from '@kbn/apm-utils';
 import { getEntityFilters } from './get_entity_filters';
 import { parseError } from '../../streams/parse_error';
 import { createSignificantEventsTracedEsClient } from '../create_significant_events_traced_es_client';
+import { isIndexNotFoundError } from '../latest_source_query';
+import { StatusError } from '../../errors/status_error';
 
 const EMPTY_SAMPLE: { hits: Array<SearchHit<Record<string, unknown>>> } = { hits: [] };
 
@@ -32,11 +33,18 @@ type SamplingStrategy = 'entity-filtered' | 'diverse' | 'random';
  */
 const withRandomSamplingErrorContext = async <T>(
   promise: Promise<T>,
-  samplingTimeoutMs: number
+  { index, samplingTimeoutMs }: { index: string; samplingTimeoutMs: number }
 ): Promise<T> => {
   try {
     return await promise;
   } catch (err) {
+    // Missing data is the caller's input, not a sampling failure.
+    if (isIndexNotFoundError(err)) {
+      throw new StatusError(
+        `There are no documents to sample: an index behind [${index}] does not exist yet.`,
+        400
+      );
+    }
     throw new Error(
       `Random sampling query failed (samplingTimeoutMs=${samplingTimeoutMs}ms): ${
         parseError(err).message
@@ -132,7 +140,7 @@ export async function fetchSampleDocuments({
               abortSignal: samplingSignal,
             })
         ),
-        samplingTimeoutMs
+        { index, samplingTimeoutMs }
       ),
     ]);
 
@@ -159,9 +167,9 @@ export async function fetchSampleDocuments({
 
   const entityFilteredSize = Math.round(size * entityFilteredRatio);
   const diverseSize = Math.round(size * diverseRatio);
-  const whereCondition = entityFilters
-    .map((filter) => conditionToESQLAst({ not: filter }))
-    .reduce((acc, current) => esql.exp`${acc} AND ${current}`);
+  const whereCondition = conditionToESQLFilterAst({
+    and: entityFilters.map((filter) => ({ not: filter })),
+  });
 
   const [{ hits: entityFilteredHits }, { hits: diverseHits }, { hits: randomHits }] =
     await Promise.all([
@@ -230,7 +238,7 @@ export async function fetchSampleDocuments({
               abortSignal: samplingSignal,
             })
         ),
-        samplingTimeoutMs
+        { index, samplingTimeoutMs }
       ),
     ]);
 

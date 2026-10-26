@@ -12,6 +12,7 @@ import { buildPackageInputs, buildPackageVars, getPackageVarNames } from '../pac
 import type { PackageInputEntry, AgentCredentialVars } from '../package_inputs';
 import { REGION_FIELD_NAMES } from '../../service_settings_step/field_config';
 import type { DeployGroup } from '../deploy_groups';
+import type { SecretRefValue } from '../secret_refs';
 import { buildGroupPolicyNameStem } from '../deploy_group_helpers';
 
 export interface BuildPackagePolicyOpts {
@@ -187,7 +188,7 @@ export async function buildGroupPackagePolicy(
   name: string;
   package: { name: string; version: string };
   namespace?: string;
-  vars?: Record<string, string>;
+  vars?: Record<string, string | SecretRefValue>;
   inputs: Record<string, unknown>;
 }> {
   const { members } = group;
@@ -252,7 +253,8 @@ export async function buildGroupPackagePolicy(
     globalRegion,
     authenticateAndDeployStep.staticKeys,
     pkgVarNames,
-    agentCredentials
+    agentCredentials,
+    authenticateAndDeployStep.existingSecretRefs
   );
 
   if (Object.keys(prunedInputs).length === 0) {

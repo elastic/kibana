@@ -29,7 +29,7 @@ const makeQueryLink = (severityScore?: number, title = 'Error logs'): QueryLink 
     esql: { query: 'FROM logs-* | WHERE level == "error"' },
     severity_score: severityScore,
   },
-  stream_name: 'logs.test',
+  source_id: 'logs.test',
   rule_backed: true,
   rule_id: 'rule-1',
 });
@@ -56,9 +56,11 @@ const makeRulesClient = (): jest.Mocked<IRulesManagementClient> => ({
     ),
   updateRule: jest.fn().mockResolvedValue(undefined),
   bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+  setRulesEnabled: jest.fn().mockResolvedValue(undefined),
   findExistingRuleIds: jest.fn().mockResolvedValue([]),
   findOwnedRuleIds: jest.fn().mockResolvedValue([]),
-  findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue([]),
+  findSourceIdsWithOwnedRules: jest.fn().mockResolvedValue([]),
+  findRuleIdsByTagPrefix: jest.fn().mockResolvedValue([]),
 });
 
 describe('toRuleDefinition', () => {
@@ -67,7 +69,7 @@ describe('toRuleDefinition', () => {
     // affects analysis profiles, so a high score still uses METRIC_SERIES_EVERY.
     expect(toRuleDefinition(makeQueryLink(85))).toEqual({
       name: `Error logs${METRIC_SERIES_RULE_NAME_SUFFIX}`,
-      streamName: 'logs.test',
+      sourceId: 'logs.test',
       timestampField: '@timestamp',
       esqlQuery: 'FROM logs-* | WHERE level == "error"',
       schedule: { interval: METRIC_SERIES_EVERY },

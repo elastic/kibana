@@ -140,7 +140,7 @@ Because each round's card is pinned to the version that round produced, clicking
 
 ### 2. Agent-driven dashboard creation and editing
 
-The dashboard generation tool in `agent_builder_dashboards` treats custom content as a generated panel, like Lens and Vega: `source: "request"` with `renderer: "custom_content"` (schemas in `.../operations/panels/custom_content/index.ts`). The agent supplies `query` (what to display, or what to change) and optionally `esql`; it never supplies `template`. The server generates the template in `.../resolvers/custom_content_panel_resolver.ts`, in the same parallel phase as the tool's other generated panels.
+The dashboard generation tool in `agent_builder_dashboards` treats custom content as a generated panel, like Lens and Vega: `source: "request"` with `renderer: "custom_content"` (schemas in `.../dashboard-agent-authoring/src/panels/custom_content/index.ts`). The agent supplies `query` (what to display, or what to change) and optionally `esql`; it never supplies `template`. The server generates the template in `.../resolvers/custom_content_panel_resolver.ts`, in the same parallel phase as the tool's other generated panels.
 
 Unlike Lens and Vega, the query is not generated for you: a new panel without `esql` is static. On an edit, omitting `esql` keeps the current query and `null` removes it.
 

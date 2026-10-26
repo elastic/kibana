@@ -103,6 +103,53 @@ const rulesSchema = schema.object({
   run: rulesRunSchema,
 });
 
+/**
+ * Lower bound for `dataRetention`, so a rule's last event outlives the longest
+ * configurable minimum schedule interval.
+ */
+const MIN_DATA_RETENTION = MAX_MINIMUM_SCHEDULE_INTERVAL;
+
+const validateDataRetention = (duration: string): string | undefined => {
+  const formatError = validateDuration(duration);
+  if (formatError) {
+    return formatError;
+  }
+  if (duration.endsWith('w')) {
+    return 'weeks are not supported by Elasticsearch; use days instead, e.g. 90d';
+  }
+  if (parseDurationToMs(duration) < parseDurationToMs(MIN_DATA_RETENTION)) {
+    return `duration cannot be less than ${MIN_DATA_RETENTION}`;
+  }
+};
+
+const MIN_DISPATCHER_ACTIONS_RETENTION = '1d';
+
+const validateDispatcherActionsRetention = (duration: string): string | undefined => {
+  const formatError = validateDuration(duration);
+  if (formatError) {
+    return formatError;
+  }
+  if (parseDurationToMs(duration) < parseDurationToMs(MIN_DISPATCHER_ACTIONS_RETENTION)) {
+    return `duration cannot be less than ${MIN_DISPATCHER_ACTIONS_RETENTION}`;
+  }
+};
+
+const retentionSchema = schema.object({
+  ruleEvents: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    dataRetention: schema.string({ defaultValue: '90d', validate: validateDataRetention }),
+  }),
+  alertActions: schema.object({
+    dispatcher: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      dataRetention: schema.string({
+        defaultValue: '90d',
+        validate: validateDispatcherActionsRetention,
+      }),
+    }),
+  }),
+});
+
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   invalidateApiKeysTask: schema.object({
@@ -110,10 +157,12 @@ export const configSchema = schema.object({
     removalDelay: schema.string({ defaultValue: '1h', validate: validateDuration }),
   }),
   rules: rulesSchema,
+  retention: retentionSchema,
 });
 
 export type PluginConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
+export type RetentionConfig = TypeOf<typeof retentionSchema>;
 
 /**
  * Rows a single execution may request: the product-level `alerts.max` ceiling,

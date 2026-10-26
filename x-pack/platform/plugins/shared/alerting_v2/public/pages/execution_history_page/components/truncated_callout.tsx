@@ -12,22 +12,25 @@ import { i18n } from '@kbn/i18n';
 
 type MatchedType = 'policies' | 'rules';
 
+// The Rules tab only reports rule matches, so `policies` is optional.
+type SearchMatches = Omit<SearchMatchCounts, 'policies'> &
+  Partial<Pick<SearchMatchCounts, 'policies'>>;
+
 interface Props {
   searchParam?: string;
   data?: {
-    search_matches: SearchMatchCounts | null;
+    search_matches?: SearchMatches;
   };
 }
 
 export const TruncatedCallout = ({ data, searchParam }: Props) => {
-  const searchMatches = data?.search_matches ?? null;
-  const matchedTypes: MatchedType[] =
-    searchMatches !== null
-      ? (['policies', 'rules'] as const).filter((t) => searchMatches[t] > 0)
-      : [];
+  const searchMatches = data?.search_matches;
+  const matchedTypes: MatchedType[] = searchMatches
+    ? (['policies', 'rules'] as const).filter((t) => (searchMatches[t] ?? 0) > 0)
+    : [];
   const showSearchTruncatedCallout =
     searchParam !== undefined &&
-    searchMatches !== null &&
+    searchMatches !== undefined &&
     searchMatches.is_truncated &&
     matchedTypes.length > 0;
 
@@ -45,11 +48,11 @@ export const TruncatedCallout = ({ data, searchParam }: Props) => {
   ) : null;
 };
 
-const renderMatchedPart = (matches: SearchMatchCounts, type: MatchedType): string =>
+const renderMatchedPart = (matches: SearchMatches, type: MatchedType): string =>
   type === 'policies'
     ? i18n.translate('xpack.alertingV2.executionHistory.searchTruncatedCallout.policiesPart', {
         defaultMessage: '{total} matching action policies',
-        values: { total: matches.policies },
+        values: { total: matches.policies ?? 0 },
       })
     : i18n.translate('xpack.alertingV2.executionHistory.searchTruncatedCallout.rulesPart', {
         defaultMessage: '{total} matching rules',
@@ -57,7 +60,7 @@ const renderMatchedPart = (matches: SearchMatchCounts, type: MatchedType): strin
       });
 
 const buildSearchTruncatedCalloutTitle = (
-  matches: SearchMatchCounts,
+  matches: SearchMatches,
   matchedTypes: MatchedType[]
 ): string => {
   const summary = matchedTypes.map((t) => renderMatchedPart(matches, t));

@@ -7,45 +7,53 @@
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
-const entityListRowSchema = z.object({
-  entity_type: z.enum(['host', 'user', 'service', 'generic']),
-  entity_id: z.string().min(1),
-  entity_name: z.string().optional(),
-  source: z.unknown().optional(),
-  risk_score_norm: z.number().optional(),
-  risk_level: z.string().optional(),
-  criticality: z.string().optional(),
-  first_seen: z.string().optional(),
-  last_seen: z.string().optional(),
-});
+const entityListRowSchema = lazySchema(() =>
+  z.object({
+    entity_type: z.enum(['host', 'user', 'service', 'generic']),
+    entity_id: z.string().min(1),
+    entity_name: z.string().optional(),
+    source: z.unknown().optional(),
+    risk_score_norm: z.number().optional(),
+    risk_level: z.string().optional(),
+    criticality: z.string().optional(),
+    first_seen: z.string().optional(),
+    last_seen: z.string().optional(),
+  })
+);
 
-const severityCountSchema = z.object({
-  Critical: z.number().int().min(0),
-  High: z.number().int().min(0),
-  Moderate: z.number().int().min(0),
-  Low: z.number().int().min(0),
-  Unknown: z.number().int().min(0),
-});
+const severityCountSchema = lazySchema(() =>
+  z.object({
+    Critical: z.number().int().min(0),
+    High: z.number().int().min(0),
+    Moderate: z.number().int().min(0),
+    Low: z.number().int().min(0),
+    Unknown: z.number().int().min(0),
+  })
+);
 
-const anomalyHighlightSchema = z.object({
-  title: z.string().min(1),
-  body: z.string().optional(),
-});
+const anomalyHighlightSchema = lazySchema(() =>
+  z.object({
+    title: z.string().min(1),
+    body: z.string().optional(),
+  })
+);
 
-const entityAnalyticsDashboardAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  summary: z.string().max(8000).optional(),
-  time_range_label: z.string().max(256).optional(),
-  watchlist_id: z.string().max(512).optional(),
-  watchlist_name: z.string().max(512).optional(),
-  severity_count: severityCountSchema.optional(),
-  distribution_note: z.string().max(2000).optional(),
-  anomaly_highlights: z.array(anomalyHighlightSchema).max(25).optional(),
-  entities: z.array(entityListRowSchema).max(100),
-});
+const entityAnalyticsDashboardAttachmentDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    summary: z.string().max(8000).optional(),
+    time_range_label: z.string().max(256).optional(),
+    watchlist_id: z.string().max(512).optional(),
+    watchlist_name: z.string().max(512).optional(),
+    severity_count: severityCountSchema.optional(),
+    distribution_note: z.string().max(2000).optional(),
+    anomaly_highlights: z.array(anomalyHighlightSchema).max(25).optional(),
+    entities: z.array(entityListRowSchema).max(100),
+  })
+);
 
 export type EntityAnalyticsDashboardAttachmentData = z.infer<
   typeof entityAnalyticsDashboardAttachmentDataSchema

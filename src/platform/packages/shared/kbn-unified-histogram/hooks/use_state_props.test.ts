@@ -69,7 +69,6 @@ describe('useStateProps', () => {
       query: { language: 'kuery', query: '' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
-      columns: undefined,
     });
     const { result } = renderHook(() =>
       useStateProps({
@@ -145,7 +144,6 @@ describe('useStateProps', () => {
       query: { esql: 'FROM index' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
-      columns: undefined,
     });
     const { result } = renderHook(() =>
       useStateProps({
@@ -232,7 +230,6 @@ describe('useStateProps', () => {
       query: { esql: 'FROM index | keep field1' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
-      columns: undefined,
     });
     const { result } = renderHook(() =>
       useStateProps({
@@ -276,7 +273,6 @@ describe('useStateProps', () => {
       query: { esql: 'FROM index' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
-      columns: esqlColumns,
       breakdownField,
     });
     renderHook(() =>
@@ -325,7 +321,6 @@ describe('useStateProps', () => {
       query: { esql: 'FROM index' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
-      columns: esqlColumns,
     });
     const { result } = renderHook(() =>
       useStateProps({
@@ -351,7 +346,6 @@ describe('useStateProps', () => {
       query: { language: 'kuery', query: '' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
-      columns: undefined,
     });
     const { result } = renderHook(() =>
       useStateProps({
@@ -424,7 +418,6 @@ describe('useStateProps', () => {
       query: { language: 'kuery', query: '' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
-      columns: undefined,
     });
     const { result } = renderHook(() =>
       useStateProps({
@@ -497,7 +490,6 @@ describe('useStateProps', () => {
       query: { language: 'kuery', query: '' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
-      columns: undefined,
     });
     const { result } = renderHook(() =>
       useStateProps({

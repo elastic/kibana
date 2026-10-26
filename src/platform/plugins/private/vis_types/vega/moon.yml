@@ -78,6 +78,4 @@ fileGroups:
     - public/test_utils/vegalite_graph.json
     - public/test_utils/vega_graph.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

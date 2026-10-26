@@ -35,7 +35,6 @@ import {
   createDashboardListingFilterUrl,
 } from '../utils/urls';
 import { DASHBOARD_DURATION_START_MARK } from '../dashboard_api/telemetry/dashboard_duration_start_mark';
-import type { DashboardApi } from '../dashboard_api/types';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -49,7 +48,6 @@ export interface DashboardMountProps {
   element: AppMountParameters['element'];
   coreStart: CoreStart;
   mountContext: DashboardMountContextProps;
-  setDashboardAppApi: (api: DashboardApi | undefined) => void;
 }
 
 export async function mountApp({
@@ -57,7 +55,6 @@ export async function mountApp({
   element,
   appUnMounted,
   mountContext,
-  setDashboardAppApi,
 }: DashboardMountProps) {
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
 
@@ -118,7 +115,6 @@ export async function mountApp({
         savedDashboardId={routeProps.match.params.id}
         redirectTo={redirect}
         expandedPanelId={routeProps.match.params.expandedPanelId}
-        setDashboardAppApi={setDashboardAppApi}
       />
     );
   };

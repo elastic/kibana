@@ -26,9 +26,10 @@ interface ParamsEditorProps {
   value: string;
   onChange: (next: string) => void;
   height?: string | number;
+  errors?: string[];
 }
 
-export const ParamsEditor = ({ value, onChange, height = 200 }: ParamsEditorProps) => (
+export const ParamsEditor = ({ value, onChange, height = 200, errors = [] }: ParamsEditorProps) => (
   <EuiFormRow
     label={i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.params.label', {
       defaultMessage: 'Parameters',
@@ -44,6 +45,8 @@ export const ParamsEditor = ({ value, onChange, height = 200 }: ParamsEditorProp
       },
     })}
     fullWidth
+    isInvalid={errors.length > 0}
+    error={errors}
   >
     <CodeEditor
       languageId="yaml"

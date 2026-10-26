@@ -8,7 +8,6 @@
 import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type {
-  AnalyticsServiceSetup,
   ElasticsearchClient,
   KibanaRequest,
   Logger,
@@ -41,6 +40,7 @@ import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_str
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
+import { registerAlertUpdateAuthorizationAudit } from './lib/detection_engine/routes/common/operations/audit_alert_update_authz';
 import {
   createEqlAlertType,
   createEsqlAlertType,
@@ -119,11 +119,6 @@ import {
 } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 import type { CreateSecurityRuleTypeWrapperProps } from './lib/detection_engine/rule_types/types';
 import { calculateRulesAuthz } from './lib/detection_engine/rule_management/authz';
-import { buildMlAuthz } from './lib/machine_learning/authz';
-import { createPrebuiltRuleAssetsClient } from './lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
-import { createAlertAnalysisWorkflowRuleAttachmentService } from './workflows/alert_analysis_workflow/rule_attachments';
-import type { AlertAnalysisWorkflowRuleAttachmentService } from '../common/workflows/alert_analysis_workflow';
 
 import { RequestContextFactory } from './request_context_factory';
 
@@ -188,8 +183,12 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
-import { registerSecurityManagedWorkflowOwner } from './workflows/managed_workflows';
+import {
+  registerSecurityManagedWorkflowOwner,
+  initSecurityManagedWorkflowsClient,
+} from './workflows/managed_workflows';
 import { installSecurityManagedWorkflowsAndMarkReady } from './workflows/security_managed_workflows';
+import { ensureThreatIntelSupplyWorkflowsForSpace } from './workflows/threat_intel_workflow/install';
 import { SecuritySolutionEventBus } from './events/event_bus';
 import { registerSecurityWorkflowTriggers } from './workflows/triggers';
 import { registerSecurityWorkflowEventBridge } from './workflows/triggers/event_bridge';
@@ -219,7 +218,6 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly healthDiagnosticService: HealthDiagnosticService;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
-  private ml: SecuritySolutionPluginSetupDependencies['ml'];
   private licensing$!: Observable<ILicense>;
   private policyWatcher?: PolicyWatcher;
   private telemetryConfigProvider: TelemetryConfigProvider;
@@ -237,7 +235,6 @@ export class Plugin implements ISecuritySolutionPlugin {
   private securityEventBus?: SecuritySolutionEventBus;
 
   /** Captured in `setup()`: rule lifecycle telemetry needs the setup contract, not the start one. */
-  private analyticsSetup?: AnalyticsServiceSetup;
 
   /** Derived in `setup()`, where `cps` is available as a dependency, and consumed in `start()` */
   private platformCpsEnabled = false;
@@ -359,6 +356,11 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
 
+    registerAlertUpdateAuthorizationAudit({
+      http: core.http,
+      getAuditLogger: (request) => plugins.security?.audit.asScoped(request),
+    });
+
     if (plugins.share) {
       plugins.share.url.locators.create(new AIValueReportLocatorDefinition());
     }
@@ -366,7 +368,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { appClientFactory, productFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
 
-    this.analyticsSetup = core.analytics;
     this.platformCpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
     this.defendCpsFeatureFlagEnabled = experimentalFeatures.defendCrossProjectSearch;
 
@@ -428,6 +429,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       auditLogger: plugins.security?.audit.withoutRequest,
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,
+      entityAnalyticsConfig: config.entityAnalytics,
       hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
     }).catch((err) => {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
@@ -572,7 +574,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
-    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures);
+    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures, {
+      getStartServices: core.getStartServices,
+      logger: this.logger,
+    });
     plugins.cases.attachmentFramework.registerAttachment(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
@@ -750,8 +755,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       return plugins.taskManager && plugins.lists;
     };
 
-    this.ml = plugins.ml;
-
     if (exceptionListsSetupEnabled()) {
       this.lists = plugins.lists;
       this.manifestTask = new ManifestTask({
@@ -919,7 +922,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
-    const { config, logger, productFeaturesService, ml } = this;
+    const { config, logger, productFeaturesService } = this;
 
     initializeEndpointExceptionsPerPolicyOptInStatus(
       core.savedObjects,
@@ -1271,56 +1274,27 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not started.');
     }
 
-    const getAlertAnalysisWorkflowRuleAttachmentService = async (
-      request: KibanaRequest,
-      workflowId: string
-    ): Promise<AlertAnalysisWorkflowRuleAttachmentService> => {
-      const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
-      const [rulesClient, actionsClient, rulesAuthz, license] = await Promise.all([
-        plugins.alerting.getRulesClientWithRequest(request),
-        plugins.actions.getActionsClientWithRequest(request),
-        calculateRulesAuthz({ coreStart: core, request }),
-        plugins.licensing.getLicense(),
-      ]);
-      const mlAuthz = buildMlAuthz({
-        license,
-        ml,
-        request,
-        savedObjectsClient: scopedSavedObjectsClient,
+    // Push, not pull: alertzero cannot declare a dependency on this plugin's start contract, since
+    // this plugin already depends on alertzero (the `alertzero` setup dependency above) and the
+    // reverse edge would fail Kibana's plugin boot with a circular-dependency error. AlertZero Hunt
+    // ensure calls this when a required TI supply workflow document is missing (e.g. per-space
+    // attribute lag after space create).
+    if (plugins.alertzero && plugins.workflowsExtensions && this.threatIntelSupplyEnabled) {
+      const workflowsExtensions = plugins.workflowsExtensions;
+      const tiLogger = this.logger.get('threatIntel');
+      plugins.alertzero.registerThreatIntelSupplyWorkflowInstaller(async ({ spaceId }) => {
+        const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(
+          workflowsExtensions
+        );
+        await ensureThreatIntelSupplyWorkflowsForSpace({
+          managedWorkflowsClient,
+          spaceId,
+        });
+        tiLogger.info(
+          `Installed threat intel supply workflows for space '${spaceId}' on Hunt ensure request`
+        );
       });
-      const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(scopedSavedObjectsClient);
-      const detectionRulesClient = createDetectionRulesClient({
-        rulesClient,
-        actionsClient,
-        savedObjectsClient: scopedSavedObjectsClient,
-        mlAuthz,
-        rulesAuthz,
-        productFeaturesService,
-        license,
-        analytics: this.analyticsSetup,
-        userProfile: core.userProfile,
-        logger: this.logger,
-      });
-      return createAlertAnalysisWorkflowRuleAttachmentService({
-        rulesClient,
-        workflowId,
-        bulkEditDependencies: {
-          actionsClient,
-          prebuiltRuleAssetClient,
-          mlAuthz,
-          rulesAuthz,
-          ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
-        },
-      });
-    };
-
-    // Push, not pull: alertzero cannot declare a dependency on this plugin's start contract to
-    // pull this function itself, since this plugin already depends on alertzero (the `alertzero`
-    // setup dependency above) and the reverse edge would make the two plugins depend on each
-    // other, which fails Kibana's plugin boot with a circular-dependency error.
-    plugins.alertzero?.registerAlertTriageAttachmentServiceProvider(
-      getAlertAnalysisWorkflowRuleAttachmentService
-    );
+    }
 
     return {};
   }

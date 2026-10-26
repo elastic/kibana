@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { concat, of, shareReplay } from 'rxjs';
+import type { Refresh } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -23,6 +24,7 @@ import type {
 import {
   AgentExecutionMode,
   ChatTriggerMode,
+  EventActorType,
   agentBuilderDefaultAgentId,
   createBadRequestError,
   createInternalError,
@@ -39,6 +41,7 @@ import type {
   AgentExecutionService,
   AgentExecution,
   ConversationExecutionParams,
+  ExecutionConversationOrigin,
   ExecuteAgentParams,
   ExecuteAgentResult,
   MaybeExecuteAgentResult,
@@ -62,6 +65,7 @@ import { AbortMonitor } from './task/abort_monitor';
 import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
 import type { ConversationClient } from '../conversation';
+import type { CallbackDeliveryService } from './callback';
 import {
   getConversation,
   isPendingResumeConversation,
@@ -75,11 +79,17 @@ import {
 } from './utils/events';
 import { userMessageActor } from '../conversation/client/rounds_to_events';
 
+/** The still-recorded parent execution that spawned a sub-agent execution. */
+interface ParentExecution {
+  agentId: string;
+}
+
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   attachmentsService: AttachmentServiceStart;
+  callbackDeliveryService: CallbackDeliveryService;
 }
 
 export const createAgentExecutionService = (
@@ -111,6 +121,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       params,
       executionId: providedExecutionId,
       useTaskManager,
+      requestImmediateClaim = false,
       abortSignal,
       metadata,
       interactive,
@@ -126,6 +137,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
     ) {
       const connector = await this.resolveExecutionConnector({
+        agentId,
         connectorId: params.connectorId,
         request,
       });
@@ -134,7 +146,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }
     }
 
-    const conversationClient = await this.getConversationClient({
+    const { conversationClient, parentExecution } = await this.resolveConversationClient({
       request,
       executionClient,
       parentExecutionId: params.parentExecutionId,
@@ -149,6 +161,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             params: args.params,
             request,
             conversationClient,
+            spaceId,
           })
         : undefined;
     const conversationParams = resolvedConversation?.validatedParams;
@@ -166,7 +179,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         executionId,
         agentId,
         spaceId,
-        owner: { id: owner.id, username: owner.username },
+        owner: {
+          id: owner.id,
+          username: owner.username,
+          ...(owner.type ? { type: owner.type } : {}),
+        },
         agentParams:
           conversationParams && conversation
             ? {
@@ -233,6 +250,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           receivedAt,
           eventId: roundUserMessageEventId(roundId),
           mergeAttachments: false,
+          parentExecution,
+          // The run reads the conversation by id (real-time). The conversation is already listed,
+          // so a list search before the next scheduled refresh only sees the previous `updated_at`.
+          appendRefresh: false,
         });
       } catch (err) {
         try {
@@ -270,7 +291,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const useScheduledTask = await this.shouldUseScheduledTask(request, useTaskManager);
     const result = useScheduledTask
-      ? await this.executeWithScheduledTask({ executionId, agentId, request })
+      ? await this.executeWithScheduledTask({
+          executionId,
+          agentId,
+          request,
+          requestImmediateClaim,
+        })
       : await this.executeLocally({ execution, request, interactivity });
 
     if (!conversation) {
@@ -329,6 +355,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       params,
       request,
       conversationClient,
+      spaceId: getCurrentSpaceId({ request, spaces: this.deps.spaces }),
     });
 
     const created = conversation.operation === 'CREATE';
@@ -464,24 +491,41 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     executionId,
     agentId,
     request,
+    requestImmediateClaim,
   }: {
     executionId: string;
     agentId: string;
     request: ExecuteAgentParams['request'];
+    requestImmediateClaim: boolean;
   }): Promise<ExecuteAgentResult> {
+    const task = this.buildRunAgentTask(executionId);
     // ensureScheduled tolerates the task already existing: a concurrent idempotent
     // replay may have re-issued this schedule while repairing a stuck execution.
-    await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
+    await this.deps.taskManager.ensureScheduled(task, {
       request,
       cloneApiKey: true,
     });
 
     this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);
 
+    if (requestImmediateClaim) {
+      this.requestImmediateClaim(task.id);
+    }
+
     return {
       executionId,
       events$: this.followExecution(executionId),
     };
+  }
+
+  private requestImmediateClaim(taskId: string): void {
+    // Not awaited: regular polling still picks the task up when this fails, including when a
+    // poll claimed the task first and runSoon rejects it as already running.
+    this.deps.taskManager.runSoon(taskId, { requestImmediateClaim: true }).catch((error) => {
+      this.logger.debug(
+        `Could not request an immediate claim for task ${taskId}: ${error.message}`
+      );
+    });
   }
 
   /**
@@ -659,9 +703,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   /**
    * A sub-agent acts as its parent execution's owner: a Task Manager parent's request resolves to
    * the task's API key, which does not match the owner's id. Trusts `parentExecutionId` to name
-   * the running parent that spawned it.
+   * the running parent that spawned it. The same lookup identifies the parent execution, so the
+   * conversations this execution creates can be attributed to it. The attribution names the
+   * parent agent only: the record id is not a conversation `execution_id`, and the parent round
+   * already points at the child conversation through its sub-agent entry.
    */
-  private async getConversationClient({
+  private async resolveConversationClient({
     request,
     executionClient,
     parentExecutionId,
@@ -669,25 +716,29 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     request: KibanaRequest;
     executionClient: AgentExecutionClient;
     parentExecutionId?: string;
-  }): Promise<ConversationClient> {
+  }): Promise<{ conversationClient: ConversationClient; parentExecution?: ParentExecution }> {
     const { conversationService } = this.deps;
 
     const requestClient = await conversationService.getScopedClient({ request });
 
     if (!parentExecutionId) {
-      return requestClient;
+      return { conversationClient: requestClient };
     }
 
-    const parentOwner = (await executionClient.peek(parentExecutionId))?.owner;
+    const parent = await executionClient.peek(parentExecutionId);
+    const parentExecution = parent?.agentId ? { agentId: parent.agentId } : undefined;
 
-    if (!parentOwner) {
-      return requestClient;
+    if (!parent?.owner) {
+      return { conversationClient: requestClient, parentExecution };
     }
 
-    return conversationService.getScopedClientAsUser({
-      request,
-      user: { ...requestClient.getUser(), ...parentOwner },
-    });
+    return {
+      conversationClient: await conversationService.getScopedClientAsUser({
+        request,
+        user: { ...requestClient.getUser(), ...parent.owner },
+      }),
+      parentExecution,
+    };
   }
 
   private async isIdempotentReplay({
@@ -706,31 +757,59 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }
 
   private async resolveExecutionConnector({
+    agentId,
     connectorId,
     request,
   }: {
+    agentId: string;
     connectorId?: string;
     request: KibanaRequest;
   }): Promise<InferenceConnector | undefined> {
-    const { inference, searchInferenceEndpoints } = this.deps;
+    const { inference, searchInferenceEndpoints, agentService } = this.deps;
+    const getInferenceFeatureId = async (): Promise<string | undefined> => {
+      if (connectorId !== undefined) {
+        return undefined;
+      }
+      const agentRegistry = await agentService.getRegistry({ request });
+      return (await agentRegistry.get(agentId)).configuration.inference_feature_id;
+    };
     return (
-      resolveExecutionConnectorId({ connectorId, request, searchInferenceEndpoints })
-        .then((resolvedConnectorId) =>
-          resolvedConnectorId ? inference.getConnectorById(resolvedConnectorId, request) : undefined
+      getInferenceFeatureId()
+        .then((inferenceFeatureId) =>
+          resolveExecutionConnectorId({
+            connectorId,
+            inferenceFeatureId,
+            request,
+            searchInferenceEndpoints,
+          })
+        )
+        .then(
+          ({ connectorId: resolvedConnectorId, connector }) =>
+            connector ??
+            (resolvedConnectorId
+              ? inference.getConnectorById(resolvedConnectorId, request)
+              : undefined)
         )
         // Leaves resolution failures to the runner, which records them against the execution
         .catch(() => undefined)
     );
   }
 
+  /**
+   * Resolves the conversation a request writes to. A request with an origin and no conversation id
+   * continues the conversation its origin resolves to, if any; otherwise the conversation is the
+   * one it names, or a new one.
+   */
   private async resolveConversationRequest({
     params,
     request,
     conversationClient,
+    spaceId,
   }: {
     params: ConversationExecutionParams;
     request: KibanaRequest;
     conversationClient: ConversationClient;
+    spaceId: string;
   }): Promise<{
     validatedParams: ConversationExecutionParams;
     conversation: ConversationWithOperation;
@@ -738,21 +817,55 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }> {
     const validatedParams = await this.validateAttachments(params, request);
     const receivedAt = new Date();
+    const { origin, conversationId } = validatedParams;
+
+    const resolvedConversationId = await this.resolveConversationId({
+      conversationId,
+      origin,
+      spaceId,
+      request,
+      conversationClient,
+    });
 
     const conversation = await getConversation({
       agentId: validatedParams.agentId ?? agentBuilderDefaultAgentId,
-      conversationId: validatedParams.conversationId,
+      conversationId: resolvedConversationId,
       autoCreateConversationWithId: validatedParams.autoCreateConversationWithId,
       conversationClient,
       accessControl: validatedParams.accessControl,
       readOnly: validatedParams.readOnly,
-      origin: validatedParams.origin
-        ? { external_conversation_id: validatedParams.origin.external_conversation_id }
-        : undefined,
+      origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
       subagentCreation: validatedParams.subagentCreation,
     });
 
     return { validatedParams, conversation, receivedAt };
+  }
+
+  /**
+   * The conversation an execution continues: the one it names, else the one its origin continues.
+   * `undefined` starts a new conversation.
+   */
+  private async resolveConversationId({
+    conversationId,
+    origin,
+    spaceId,
+    request,
+    conversationClient,
+  }: {
+    conversationId?: string;
+    origin?: ExecutionConversationOrigin;
+    spaceId: string;
+    request: KibanaRequest;
+    conversationClient: ConversationClient;
+  }): Promise<string | undefined> {
+    if (conversationId || !origin) {
+      return conversationId;
+    }
+
+    return this.deps.callbackDeliveryService.resolveConversation(
+      { origin, spaceId, request },
+      conversationClient
+    );
   }
 
   private async writeUserMessage({
@@ -763,6 +876,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     receivedAt,
     eventId,
     mergeAttachments,
+    parentExecution,
+    appendRefresh,
   }: {
     conversation: ConversationWithOperation;
     conversationClient: ConversationClient;
@@ -771,9 +886,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     receivedAt: Date;
     eventId: string;
     mergeAttachments: boolean;
+    parentExecution?: ParentExecution;
+    appendRefresh?: Refresh;
   }): Promise<string> {
-    const { nextInput, origin: requestOrigin } = params;
-    const author = conversationClient.getAuthor(requestOrigin?.author);
+    const { nextInput, origin: requestOrigin, author: requestAuthor } = params;
+    const author = conversationClient.getAuthor(requestOrigin?.author, requestAuthor);
     const origin = requestOrigin ? { type: requestOrigin.type } : undefined;
     const base = {
       conversation,
@@ -781,7 +898,15 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       receivedAt,
       eventId,
       author,
+      appendRefresh,
       ...(origin ? { origin } : {}),
+      ...(parentExecution
+        ? {
+            activity: {
+              actor: { type: EventActorType.agent, id: parentExecution.agentId },
+            },
+          }
+        : {}),
     };
 
     // The round rewrite falls back to the conversation owner, not the requester.

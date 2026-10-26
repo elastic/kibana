@@ -28,8 +28,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
-import type { DeploymentMethod } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
 
 // Re-export the canonical type from the matrix so all consumers use the same spelling.
 export type { DeploymentMethod };
@@ -84,6 +85,13 @@ interface DeploymentMethodCardProps {
   locked?: boolean;
   /** When true, the Edit button is disabled with a tooltip — deployment method is locked after the first deploy. */
   disabled?: boolean;
+  /**
+   * Methods offered in the edit modal. Omitted means all of them; self-managed passes
+   * `['agent_based']` because the agentless infrastructure the other methods need is cloud-only.
+   */
+  availableMethods?: DeploymentMethod[];
+  /** Selected services that choosing a method would remove from the selection. */
+  unsupportedServices?: Partial<Record<DeploymentMethod, AwsServiceMatrixEntry[]>>;
 }
 
 export function DeploymentMethodCard({
@@ -91,17 +99,25 @@ export function DeploymentMethodCard({
   onChange,
   locked = false,
   disabled,
+  availableMethods,
+  unsupportedServices,
 }: DeploymentMethodCardProps) {
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [draftMethod, setDraftMethod] = useState<DeploymentMethod>(selectedMethod);
 
+  const options = availableMethods
+    ? DEPLOYMENT_METHOD_OPTIONS.filter((o) => availableMethods.includes(o.value))
+    : DEPLOYMENT_METHOD_OPTIONS;
+
   // Defensive fallback: if a stale/hand-edited session-storage value carries an unknown method,
   // show the first option rather than crashing. The type permits any DeploymentMethod string.
+  // The second fallback covers an availableMethods list that filters everything out.
   const selectedOption =
-    DEPLOYMENT_METHOD_OPTIONS.find((o) => o.value === selectedMethod) ??
-    DEPLOYMENT_METHOD_OPTIONS[0];
+    options.find((o) => o.value === selectedMethod) ?? options[0] ?? DEPLOYMENT_METHOD_OPTIONS[0];
+
+  const removedServiceNames = (unsupportedServices?.[draftMethod] ?? []).map((s) => s.name);
 
   const panelCss = css`
     border: 1px solid ${euiTheme.colors.borderBaseSubdued};
@@ -207,7 +223,8 @@ export function DeploymentMethodCard({
             </EuiText>
             <EuiSpacer size="m" />
             <EuiSelect
-              options={DEPLOYMENT_METHOD_OPTIONS}
+              fullWidth
+              options={options}
               value={draftMethod}
               onChange={(e) => setDraftMethod(e.target.value as DeploymentMethod)}
               aria-label={i18n.translate(
@@ -216,6 +233,31 @@ export function DeploymentMethodCard({
               )}
               data-test-subj="editDeploymentMethodModal-select"
             />
+            {removedServiceNames.length > 0 && (
+              <>
+                <EuiSpacer size="m" />
+                <KbnWarningCallout
+                  announceOnMount
+                  title={i18n.translate(
+                    'xpack.ingestHub.authenticateAndDeployStep.editDeploymentMethodModal.removedServicesCallout.title',
+                    { defaultMessage: 'Services will be removed' }
+                  )}
+                  text={
+                    <p>
+                      <FormattedMessage
+                        id="xpack.ingestHub.authenticateAndDeployStep.editDeploymentMethodModal.removedServicesCallout.body"
+                        defaultMessage="{services} can't be deployed by this method. Saving removes {count, plural, one {it} other {them}} from your selection."
+                        values={{
+                          services: <strong>{removedServiceNames.join(', ')}</strong>,
+                          count: removedServiceNames.length,
+                        }}
+                      />
+                    </p>
+                  }
+                  data-test-subj="editDeploymentMethodModal-removedServicesCallout"
+                />
+              </>
+            )}
           </EuiModalBody>
           <EuiModalFooter>
             <EuiButtonEmpty

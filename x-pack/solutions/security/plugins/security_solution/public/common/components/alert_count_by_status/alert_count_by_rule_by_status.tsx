@@ -102,12 +102,12 @@ export const AlertCountByRuleByStatus = React.memo(
           : null;
       } else {
         kqlFilter = euidApi.euid.kql.getEuidFilterBasedOnDocument(
-          entityType as EntityType,
+          euidApi.getBuiltInEntityDefinition(entityType as EntityType),
           entityRecord
         );
       }
       return kqlFilter && kqlFilter.length > 0 ? kqlFilter : '';
-    }, [euidApi?.euid, entityType, entityRecord, entityIdentifiersResolved, entityStoreV2Enabled]);
+    }, [euidApi, entityType, entityRecord, entityIdentifiersResolved, entityStoreV2Enabled]);
 
     const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${entityType}`;
     const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);

@@ -17,8 +17,7 @@ import type {
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider, useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows/common/constants';
+import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   useWorkflowsApi,
   useWorkflowsCapabilities,
@@ -94,7 +93,7 @@ const saveWorkflow = async ({
     }
     queryClient.invalidateQueries({ queryKey: ['workflows'] });
     notifications.toasts.addSuccess(
-      i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saveSuccess', {
+      i18n.translate('workflows.attachmentRenderers.workflowYaml.saveSuccess', {
         defaultMessage: 'Workflow saved',
       }),
       { toastLifeTimeMs: 2000 }
@@ -102,7 +101,7 @@ const saveWorkflow = async ({
     return savedId;
   } catch (error) {
     notifications.toasts.addDanger({
-      title: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saveError', {
+      title: i18n.translate('workflows.attachmentRenderers.workflowYaml.saveError', {
         defaultMessage: 'Failed to save workflow',
       }),
       text: extractErrorMessage(error),
@@ -133,8 +132,6 @@ const WorkflowYamlCanvasContent: React.FC<{
   const workflowApi = useWorkflowsApi();
   const { canCreateWorkflow, canUpdateWorkflow, canReadWorkflow } = useWorkflowsCapabilities();
   const { notifications } = useKibana<{ notifications: CoreStart['notifications'] }>().services;
-  // Same gate as the workflow library template page graph preview.
-  const showGraph = useUiSetting<boolean>(WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID, false);
 
   // Defer button registration past the initial mount cycle so the parent
   // flyout's clearing effect (which also fires on mount) doesn't overwrite
@@ -217,7 +214,7 @@ const WorkflowYamlCanvasContent: React.FC<{
         aiAssisted: true,
       });
       l.notifications.toasts.addSuccess(
-        i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saveAsNewSuccess', {
+        i18n.translate('workflows.attachmentRenderers.workflowYaml.saveAsNewSuccess', {
           defaultMessage: 'Workflow saved as new',
         }),
         { toastLifeTimeMs: 2000 }
@@ -225,10 +222,9 @@ const WorkflowYamlCanvasContent: React.FC<{
       l.application.navigateToApp(WORKFLOW_PLUGIN_ID, { path: result.id });
     } catch (error) {
       l.notifications.toasts.addDanger({
-        title: i18n.translate(
-          'workflowsManagement.attachmentRenderers.workflowYaml.saveAsNewError',
-          { defaultMessage: 'Failed to save workflow' }
-        ),
+        title: i18n.translate('workflows.attachmentRenderers.workflowYaml.saveAsNewError', {
+          defaultMessage: 'Failed to save workflow',
+        }),
         text: extractErrorMessage(error),
       });
     } finally {
@@ -238,22 +234,21 @@ const WorkflowYamlCanvasContent: React.FC<{
 
   const labels = useMemo(
     () => ({
-      saving: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saving', {
+      saving: i18n.translate('workflows.attachmentRenderers.workflowYaml.saving', {
         defaultMessage: 'Saving...',
       }),
-      override: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.override', {
+      override: i18n.translate('workflows.attachmentRenderers.workflowYaml.override', {
         defaultMessage: 'Override',
       }),
-      saveAsNew: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saveAsNew', {
+      saveAsNew: i18n.translate('workflows.attachmentRenderers.workflowYaml.saveAsNew', {
         defaultMessage: 'Save as new',
       }),
-      save: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.save', {
+      save: i18n.translate('workflows.attachmentRenderers.workflowYaml.save', {
         defaultMessage: 'Save',
       }),
-      openInEditor: i18n.translate(
-        'workflowsManagement.attachmentRenderers.workflowYaml.openInEditor',
-        { defaultMessage: 'Open in editor' }
-      ),
+      openInEditor: i18n.translate('workflows.attachmentRenderers.workflowYaml.openInEditor', {
+        defaultMessage: 'Open in editor',
+      }),
     }),
     []
   );
@@ -331,7 +326,7 @@ const WorkflowYamlCanvasContent: React.FC<{
     labels,
   ]);
 
-  return <WorkflowYamlCanvasPreview yaml={attachment.data.yaml} showGraph={showGraph} />;
+  return <WorkflowYamlCanvasPreview yaml={attachment.data.yaml} showGraph />;
 };
 
 export const createWorkflowYamlAttachmentUiDefinition = ({
@@ -367,7 +362,7 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
   return {
     getLabel: (attachment) =>
       attachment.data.name ||
-      i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.label', {
+      i18n.translate('workflows.attachmentRenderers.workflowYaml.label', {
         defaultMessage: 'Workflow',
       }),
 
@@ -382,7 +377,7 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
 
       if (openCanvas) {
         buttons.push({
-          label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.preview', {
+          label: i18n.translate('workflows.attachmentRenderers.workflowYaml.preview', {
             defaultMessage: 'Preview',
           }),
           icon: 'eye',
@@ -397,10 +392,9 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
         !isOnWorkflowPage(attachment.data.workflowId)
       ) {
         buttons.push({
-          label: i18n.translate(
-            'workflowsManagement.attachmentRenderers.workflowYaml.openInEditor',
-            { defaultMessage: 'Open in editor' }
-          ),
+          label: i18n.translate('workflows.attachmentRenderers.workflowYaml.openInEditor', {
+            defaultMessage: 'Open in editor',
+          }),
           icon: 'external',
           type: ActionButtonType.SECONDARY,
           handler: () => {

@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import { forbidden } from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
-import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
+import {
+  createMockToolContext,
+  createSignificantEventsServer,
+  invokeHandler,
+  mockSourcesClient,
+} from '../../utils/test_helpers';
 import {
   createFeatureSimilaritySearchTool,
   SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
@@ -21,25 +26,29 @@ jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
 
 describe('ki_feature_similarity_search tool', () => {
   const logger = loggingSystemMock.createLogger();
-  const server = {} as SignificantEventsServer;
+  const server = createSignificantEventsServer({ featurePrivilege: 'read' });
 
   beforeEach(() => {
     jest.clearAllMocks();
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
   });
 
-  const createTool = (findFeatures = jest.fn().mockResolvedValue({ hits: [] })) => {
+  const createTool = (
+    findFeatures = jest.fn().mockResolvedValue({ hits: [] }),
+    toolServer = server,
+    sourcesClient = mockSourcesClient(['logs.test'])
+  ) => {
     const getScopedClients = jest.fn(async () => {
       return {
         licensing: {},
-        streamsClient: { getStream: jest.fn().mockResolvedValue({ name: 'logs.test' }) },
+        sourcesClient,
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ findFeatures }),
       } as unknown as RouteHandlerScopedClients;
     }) as unknown as jest.MockedFunction<GetScopedClients>;
 
     const tool = createFeatureSimilaritySearchTool({
       getScopedClients,
-      server,
+      server: toolServer,
       logger,
     });
     if (!('schema' in tool)) {
@@ -65,7 +74,7 @@ describe('ki_feature_similarity_search tool', () => {
     );
     expect(
       tool.schema.safeParse({
-        stream_name: 'logs.test',
+        slug: 'logs.test',
         candidates: [
           {
             candidate_id: 'okta-sdk',
@@ -78,7 +87,7 @@ describe('ki_feature_similarity_search tool', () => {
     ).toBe(true);
     expect(
       tool.schema.safeParse({
-        stream_name: 'logs.test',
+        slug: 'logs.test',
         candidates: [
           {
             candidate_id: 'okta-sdk',
@@ -89,6 +98,26 @@ describe('ki_feature_similarity_search tool', () => {
         ],
       }).success
     ).toBe(false);
+  });
+
+  it('does not search a source the caller cannot read', async () => {
+    const sourcesClient = mockSourcesClient(['logs.test']);
+    sourcesClient.assertReadable.mockRejectedValue(forbidden('Cannot read source'));
+    const { tool, findFeatures } = createTool(undefined, server, sourcesClient);
+
+    const result = await invokeHandler(
+      tool,
+      {
+        slug: 'logs.test',
+        candidates: [
+          { candidate_id: 'tech-x', title: 'Tech X', description: 'tech', type: 'technology' },
+        ],
+      },
+      createMockToolContext()
+    );
+
+    expect(findFeatures).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 
   it('searches every candidate and groups hits by candidate_id', async () => {
@@ -108,7 +137,7 @@ describe('ki_feature_similarity_search tool', () => {
     const result = await invokeHandler(
       tool,
       {
-        stream_name: 'logs.test',
+        slug: 'logs.test',
         candidates: [
           {
             candidate_id: 'tech-x',
@@ -143,6 +172,9 @@ describe('ki_feature_similarity_search tool', () => {
           features: [
             { id: 'tech-0', title: 'Tech 0', description: 'Technology 0', confidence: 90 },
           ],
+          slug: 'logs.test',
+          title: 'logs.test',
+          view_name: '$.nightshift.sources.default.logs.test',
         },
       },
       {
@@ -152,6 +184,9 @@ describe('ki_feature_similarity_search tool', () => {
           features: [
             { id: 'tech-0', title: 'Tech 0', description: 'Technology 0', confidence: 90 },
           ],
+          slug: 'logs.test',
+          title: 'logs.test',
+          view_name: '$.nightshift.sources.default.logs.test',
         },
       },
     ]);
@@ -163,7 +198,7 @@ describe('ki_feature_similarity_search tool', () => {
     const result = await invokeHandler(
       tool,
       {
-        stream_name: 'logs.test',
+        slug: 'logs.test',
         candidates: [
           {
             candidate_id: 'okta',
@@ -182,8 +217,42 @@ describe('ki_feature_similarity_search tool', () => {
     expect(result.results).toEqual([
       {
         type: 'other',
-        data: { candidate_id: 'okta', features: [], error: 'semantic unavailable' },
+        data: {
+          candidate_id: 'okta',
+          features: [],
+          error: 'semantic unavailable',
+          slug: 'logs.test',
+          title: 'logs.test',
+          view_name: '$.nightshift.sources.default.logs.test',
+        },
       },
     ]);
+  });
+
+  it('does not search KIs without the Nightshift read privilege', async () => {
+    const findFeatures = jest.fn();
+    const { tool } = createTool(
+      findFeatures,
+      createSignificantEventsServer({ featurePrivilege: 'none' })
+    );
+
+    const result = await invokeHandler(
+      tool,
+      {
+        slug: 'logs.test',
+        candidates: [
+          {
+            candidate_id: 'okta-sdk',
+            title: 'Okta SDK',
+            description: 'Okta client',
+            type: 'technology',
+          },
+        ],
+      },
+      createMockToolContext()
+    );
+
+    expect(findFeatures).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });

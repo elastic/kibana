@@ -216,22 +216,27 @@ describe('WorkflowExecutionFlyout resume', () => {
     expect(resumeButtons[0]).toHaveAttribute('data-waiting-step', 'step-wait');
   });
 
-  it('also shows resume on the waiting step Input section', () => {
+  it('shows a single resume control when the waiting step is selected', () => {
     mockWaitingStepResume.waitingStepExecutionId = 'step-wait';
     mockWaitingStepResume.waitingStepStartedAt = '2024-01-01T00:00:00Z';
 
     renderFlyout();
     fireEvent.click(screen.getByTestId('select-waiting-step'));
 
-    const resumeButtons = screen.getAllByTestId('resume-execution-button');
-    expect(resumeButtons).toHaveLength(2);
-    expect(resumeButtons.map((button) => button.getAttribute('data-waiting-step'))).toEqual([
-      'step-wait',
-      'step-wait',
-    ]);
-    // Only the always-visible run control auto-opens from ?resume=true.
-    expect(resumeButtons[0]).toHaveAttribute('data-auto-open', 'false');
-    expect(resumeButtons[1]).toHaveAttribute('data-auto-open', 'false');
+    const resumeButton = screen.getByTestId('resume-execution-button');
+    expect(resumeButton).toHaveAttribute('data-waiting-step', 'step-wait');
+    expect(resumeButton).toHaveAttribute('data-execution-id', 'exec-1');
+  });
+
+  it('keeps ?resume=true auto-opening when the waiting step is selected', () => {
+    mockWaitingStepResume.waitingStepExecutionId = 'step-wait';
+    mockWaitingStepResume.waitingStepStartedAt = '2024-01-01T00:00:00Z';
+
+    renderFlyout('?resume=true');
+    fireEvent.click(screen.getByTestId('select-waiting-step'));
+
+    const resumeButton = screen.getByTestId('resume-execution-button');
+    expect(resumeButton).toHaveAttribute('data-auto-open', 'true');
   });
 });
 

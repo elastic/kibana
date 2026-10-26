@@ -156,6 +156,16 @@ export const HIDE_COMMENTS_LABEL = (count: number = 0) =>
     values: { count },
   });
 
+export const ARTIFACT_ENABLED_STATUS_LABEL = i18n.translate(
+  'xpack.securitySolution.artifactCard.enabledStatusLabel',
+  { defaultMessage: 'Enabled' }
+);
+
+export const ARTIFACT_DISABLED_STATUS_LABEL = i18n.translate(
+  'xpack.securitySolution.artifactCard.disabledStatusLabel',
+  { defaultMessage: 'Disabled' }
+);
+
 export const DESCRIPTION_LABEL = i18n.translate(
   'xpack.securitySolution.artifactMinifiedCard.descriptionLabel',
   {

@@ -176,6 +176,34 @@ export class InvestigationStatusService {
   }
 
   /**
+   * Counts the approved proposals whose action is still running (`executing`, not superseded).
+   * An executing proposal keeps the deadline it was approved under, so the deadline is not
+   * applied. Returns 0 when the proposals plugin is absent or disabled.
+   */
+  async countRunningProposals(
+    conversationId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<number> {
+    const proposals = this.getProposals();
+    if (!proposals) return 0;
+
+    const { total } = await proposals.getProposalsService().list(
+      {
+        conversationId,
+        status: 'executing',
+        excludeSuperseded: true,
+        excludeExpired: false,
+        size: 1,
+        from: 0,
+      },
+      spaceId,
+      request
+    );
+    return total;
+  }
+
+  /**
    * Convenience wrapper for callers that have a request but not a space ID.
    *
    * Also asserts proposal read privileges so callers don't have to do it themselves.
@@ -205,7 +233,16 @@ export class InvestigationStatusService {
     }
 
     const pending = await this.listPendingProposalsForRequest(conversationId, request);
-    return { pending_proposal_count: pending.length, pending_proposals: pending };
+    const running = await this.countRunningProposals(
+      conversationId,
+      this.getSpaceId(request),
+      request
+    );
+    return {
+      pending_proposal_count: pending.length,
+      pending_proposals: pending,
+      running_proposal_count: running,
+    };
   }
 
   async setStatus(

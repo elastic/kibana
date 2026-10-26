@@ -11,13 +11,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 
 const imageSets = {
-  knowledgeIndicatorsEmptyState: {
-    light: () => import('./knowledge_indicators_empty_state_light.svg'),
-    dark: () => import('./knowledge_indicators_empty_state_dark.svg'),
-    alt: i18n.translate('xpack.significantEventsApp.knowledgeIndicators.emptyStateImage', {
-      defaultMessage: 'Empty state illustration for the Knowledge Indicators view',
-    }),
-  },
   significantEventsEmptyState: {
     light: () => import('./significant_events_empty_state_light.svg'),
     dark: () => import('./significant_events_empty_state_dark.svg'),

@@ -6,18 +6,8 @@
  */
 
 import React from 'react';
-import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiHealth,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiHealth } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useBoolean } from '@kbn/react-hooks';
 import type { SourceStatus, SourceViewModel } from './types';
 import { SOURCE_TYPE_CONFIG_BY_TYPE } from './source_type_config';
 
@@ -81,64 +71,6 @@ export const SourceGridCell = ({ source, columnId, onOpen }: SourceGridCellProps
     default:
       return null;
   }
-};
-
-export const SourceRowActions = ({
-  source,
-  onRequestDelete,
-}: {
-  source: SourceViewModel;
-  onRequestDelete: (source: SourceViewModel) => void;
-}) => {
-  const [isOpen, { off: closePopover, toggle }] = useBoolean(false);
-  const sourceName = source.name ?? source.id;
-  const actionsLabel = i18n.translate('xpack.streams.sources.table.rowActionsAriaLabel', {
-    defaultMessage: 'Open actions for {sourceName}',
-    values: { sourceName },
-  });
-
-  return (
-    <EuiPopover
-      aria-label={actionsLabel}
-      button={
-        <EuiToolTip
-          content={i18n.translate('xpack.streams.sources.table.rowActionsTooltip', {
-            defaultMessage: 'Source actions',
-          })}
-          disableScreenReaderOutput
-        >
-          <EuiButtonIcon
-            iconType="ellipsis"
-            onClick={toggle}
-            aria-label={actionsLabel}
-            data-test-subj="streamsSourceRowActionsButton"
-          />
-        </EuiToolTip>
-      }
-      isOpen={isOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="leftUp"
-    >
-      <EuiContextMenuPanel
-        items={[
-          <EuiContextMenuItem
-            key="delete"
-            icon="trash"
-            onClick={() => {
-              closePopover();
-              onRequestDelete(source);
-            }}
-            data-test-subj="streamsSourceDeleteAction"
-          >
-            {i18n.translate('xpack.streams.sources.table.deleteMenuItemLabel', {
-              defaultMessage: 'Delete',
-            })}
-          </EuiContextMenuItem>,
-        ]}
-      />
-    </EuiPopover>
-  );
 };
 
 export const getSourceSortableValue = (source: SourceViewModel, columnId: string): string => {

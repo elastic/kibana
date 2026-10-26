@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { mockCase, mockObservables } from '../../containers/mock';
 import { ObservablesTable, type ObservablesTableProps } from './observables_table';
-import { renderWithTestingProviders } from '../../common/mock';
+import { readCasesPermissions, renderWithTestingProviders } from '../../common/mock';
 
 // Partial mock: keep createCaseWorkflowFilter / createCaseWorkflowComparator / useRunCaseWorkflow
 // real; only pin useCanRunCaseWorkflow so we don't need to wire up its four dependencies.
@@ -63,8 +63,16 @@ describe('ObservablesTable', () => {
 
     it('does not show selection checkboxes for read-only users', () => {
       (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(false);
-      renderWithTestingProviders(<ObservablesTable {...props} />);
+      renderWithTestingProviders(<ObservablesTable {...props} />, {
+        wrapperProps: { permissions: readCasesPermissions() },
+      });
       expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
+    });
+
+    it('shows selection checkboxes when the user can update the case', () => {
+      (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(false);
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+      expect(screen.getAllByRole('checkbox')).toHaveLength(mockObservables.length + 1);
     });
 
     it('surfaces the bulk-actions bar after selecting a row', async () => {

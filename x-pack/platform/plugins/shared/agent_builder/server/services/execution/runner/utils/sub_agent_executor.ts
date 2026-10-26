@@ -17,12 +17,19 @@ export const createSubAgentExecutor = ({
   getExecutionService,
   projectRouting,
   interactivity,
+  workflowExecutionId,
 }: {
   request: KibanaRequest;
   getExecutionService: () => AgentExecutionService;
   /** CPS routing of the parent run, inherited by every sub-agent it spawns. */
   projectRouting?: string;
   interactivity: InteractivityConfig;
+  /**
+   * The workflow run that started the parent run. Every sub-agent inherits it, so a persistent
+   * sub-agent's rounds join to that run. Sub-agents don't send it to EIS: only the main agent's
+   * LLM calls carry it as their `interactionId` (see `buildExecutionTelemetryMetadata`).
+   */
+  workflowExecutionId?: string;
 }): SubAgentExecutor => {
   const inheritedApis = interactivity.auto_approved_apis;
   const subAgentInteractivity = createNonInteractiveConfig(inheritedApis);
@@ -47,6 +54,8 @@ export const createSubAgentExecutor = ({
           parentExecutionId: params.parentExecutionId,
           nextInput: { message: params.prompt },
           projectRouting,
+          // Standalone runs report no round events; it's passed on to the sub-agents they spawn.
+          ...(workflowExecutionId ? { workflowExecutionId } : {}),
         },
         abortSignal: params.abortSignal,
       });
@@ -70,6 +79,7 @@ export const createSubAgentExecutor = ({
             subagentName: params.subagentName,
             subagentPurpose: params.subagentPurpose,
           },
+          ...(workflowExecutionId ? { workflowExecutionId } : {}),
         },
         abortSignal: params.abortSignal,
       });
@@ -82,11 +92,13 @@ export const createSubAgentExecutor = ({
         interactive: subAgentInteractivity,
         request,
         params: {
+          agentId: params.agentId,
           connectorId: params.connectorId,
           parentExecutionId: params.parentExecutionId,
           conversationId: params.conversationId,
           autoCreateConversationWithId: false,
           nextInput: { message: params.prompt },
+          ...(workflowExecutionId ? { workflowExecutionId } : {}),
         },
         abortSignal: params.abortSignal,
       });

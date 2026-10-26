@@ -26,6 +26,7 @@ export const renameCommand = {
   name: Commands.RENAME,
   methods: renameCommandMethods,
   metadata: {
+    docPreserving: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.renameDoc', {
       defaultMessage: 'Renames an old column to a new one',
     }),

@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
@@ -16,10 +17,6 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { SandboxPluginSetup, SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import type {
@@ -27,8 +24,13 @@ import type {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  AgenticInvestigationsPluginSetup,
+  AgenticInvestigationsPluginStart,
+} from '@kbn/agentic-investigations-plugin/server';
+import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
-import type { DeleteAllInvestigationsResult } from './storage';
 import type { TriggerEmitter } from './workflows/triggers/emit';
 
 export interface InvestigationQuotaResult {
@@ -44,16 +46,21 @@ export interface NightshiftInvestigationsServerSetup {
 export interface NightshiftInvestigationsServerStart {
   getInvestigationsClient: (request: KibanaRequest) => NightshiftInvestigationsClient;
   isInvestigationAvailable: (request: KibanaRequest) => Promise<boolean>;
-  /** Deletes investigations in every space; callers must authorize this destructive operation. */
-  deleteAllInvestigations: () => Promise<DeleteAllInvestigationsResult>;
 }
 
 export interface NightshiftInvestigationsSetupDeps {
+  share: SharePluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
+  alerting?: AlertingServerSetup;
+  /**
+   * Stores investigations as conversations. Without it investigations are unavailable.
+   */
+  agenticInvestigations?: AgenticInvestigationsPluginSetup;
+  /** Provides the `proposals.create` tool the investigation agent proposes actions with. */
+  proposals?: ProposalsPluginSetup;
   contextEngine?: ContextEnginePluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   sandbox?: SandboxPluginSetup;
-  taskManager: TaskManagerSetupContract;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
 }
@@ -61,13 +68,14 @@ export interface NightshiftInvestigationsSetupDeps {
 export interface NightshiftInvestigationsStartDeps {
   actions?: ActionsPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  agenticInvestigations?: AgenticInvestigationsPluginStart;
+  proposals?: ProposalsPluginStart;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
   inference?: InferenceServerStart;
   ruleRegistry?: RuleRegistryPluginStartContract;
   sandbox?: SandboxPluginStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  taskManager: TaskManagerStartContract;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 

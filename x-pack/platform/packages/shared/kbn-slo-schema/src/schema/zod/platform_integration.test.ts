@@ -55,8 +55,13 @@ describe('DeepStrict × z.codec', () => {
   it('rejects an unknown top-level key', () => {
     const result = strictBody.safeParse({ ...buildWireSLO(), unknownKey: 'value' });
     expectParseError(result);
-    expect(result.error.issues[0].code).toBe('unrecognized_keys');
-    expect(JSON.stringify(result.error.issues[0])).toContain('unknownKey');
+    expect(result.error.issues[0]).toEqual(
+      expect.objectContaining({
+        code: 'custom',
+        message: 'Excess keys are not allowed',
+        params: { keys: ['unknownKey'] },
+      })
+    );
   });
 
   it('rejects an unknown nested key next to a codec field', () => {
@@ -66,8 +71,13 @@ describe('DeepStrict × z.codec', () => {
       timeWindow: { ...wireSLO.timeWindow, extra: true },
     });
     expectParseError(result);
-    expect(result.error.issues[0].code).toBe('unrecognized_keys');
-    expect(JSON.stringify(result.error.issues[0])).toContain('timeWindow.extra');
+    expect(result.error.issues[0]).toEqual(
+      expect.objectContaining({
+        code: 'custom',
+        message: 'Excess keys are not allowed',
+        params: { keys: expect.arrayContaining(['timeWindow.extra']) },
+      })
+    );
   });
 
   it('preserves schema-level errors for invalid codec input', () => {

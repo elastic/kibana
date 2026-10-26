@@ -43,6 +43,7 @@ import type {
   ScopedRunnerRunAgentParams,
   SubAgentExecutor,
   WritableToolResultStore,
+  ExecutionConversationAccess,
 } from '@kbn/agent-builder-server';
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -142,8 +143,17 @@ export interface CreateScopedRunnerDeps {
   interactivity: InteractivityConfig;
   /** Id of the parent execution that spawned this one, if any. */
   parentExecutionId?: string;
+  /** How this run relates to its conversation. */
+  conversationAccess: ExecutionConversationAccess;
   /** Sub-agent executor for spawning child executions. */
   subAgentExecutor: SubAgentExecutor;
+  /**
+   * The workflow run whose `ai.agent` step started this run, if any. Kept so a sub-agent executor
+   * rebuilt for an agent run (see `runAgent`) still passes it on to the sub-agents it spawns.
+   */
+  workflowExecutionId?: string;
+  /** Lazy getter for the execution service. */
+  getExecutionService: () => AgentExecutionService;
   /** Experimental features enabled for this runner context. */
   experimentalFeatures: ExperimentalFeatures;
   /** The effective agent configuration for the current run (with overrides applied). */
@@ -176,14 +186,14 @@ export type CreateRunnerDeps = Omit<
   | 'stateManager'
   | 'toolManager'
   | 'subAgentExecutor'
+  | 'workflowExecutionId'
   | 'executionMode'
   | 'interactivity'
   | 'parentExecutionId'
+  | 'conversationAccess'
   | 'experimentalFeatures'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
-  /** Lazy getter for the execution service (breaks circular dep with runner). */
-  getExecutionService: () => AgentExecutionService;
 };
 
 const toToolRunInteractivity = (approvals?: RunApprovals): InteractivityConfig => {
@@ -250,8 +260,14 @@ export class RunnerManager {
     };
   };
 
-  createChild(childContext: RunContext): RunnerManager {
-    return new RunnerManager(this.deps, childContext);
+  createChild(
+    childContext: RunContext,
+    depsOverrides?: Partial<CreateScopedRunnerDeps>
+  ): RunnerManager {
+    return new RunnerManager(
+      depsOverrides ? { ...this.deps, ...depsOverrides } : this.deps,
+      childContext
+    );
   }
 }
 
@@ -261,7 +277,8 @@ export const createScopedRunner = (deps: CreateScopedRunnerDeps): ScopedRunner =
 };
 
 export const createRunner = (deps: CreateRunnerDeps): Runner => {
-  const { modelProviderFactory, getExecutionService, ...runnerDeps } = deps;
+  const { modelProviderFactory, ...runnerDeps } = deps;
+  const { getExecutionService } = runnerDeps;
 
   const createScopedRunnerWithDeps = async ({
     request,
@@ -278,6 +295,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     executionMode,
     interactivity,
     parentExecutionId,
+    conversationAccess = 'readWrite',
+    workflowExecutionId,
   }: {
     request: KibanaRequest;
     /** Agent id for this run; used to lazily resolve Deductive-only config. */
@@ -294,6 +313,9 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     executionMode: AgentExecutionMode;
     interactivity: InteractivityConfig;
     parentExecutionId?: string;
+    conversationAccess?: ExecutionConversationAccess;
+    /** Passed on to the sub-agents this run spawns, so their rounds join to the workflow run. */
+    workflowExecutionId?: string;
   }): Promise<ScopedRunner> => {
     const resultStore = createResultStore({ conversation });
     const skillsStore = createSkillsStore({ skills: [] });
@@ -321,6 +343,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       getExecutionService,
       projectRouting,
       interactivity,
+      workflowExecutionId,
     });
 
     const uiSettingsClient = runnerDeps.uiSettings.asScopedToClient(
@@ -376,7 +399,9 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       executionMode,
       interactivity,
       parentExecutionId,
+      conversationAccess,
       subAgentExecutor,
+      workflowExecutionId,
       experimentalFeatures,
       ...(deductive ? { deductive } : {}),
     };
@@ -424,6 +449,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         executionMode = AgentExecutionMode.conversation,
         interactive,
         parentExecutionId,
+        conversationAccess = 'readWrite',
+        workflowExecutionId,
         ...otherParams
       } = params;
       const { agentId } = params;
@@ -443,9 +470,12 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         executionMode,
         interactivity,
         parentExecutionId,
+        conversationAccess,
+        workflowExecutionId,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,
+          allowResume: conversationAccess === 'readWrite',
         }),
       });
       return runner.runAgent(otherParams);

@@ -69,7 +69,8 @@ const SLACK_CONVERSATION_TYPES = ['public_channel', 'private_channel', 'im', 'mp
 // are opaque tokens kept generous; email follows RFC 5321. Channel names are
 // capped at 80 characters by Slack; the generic name bound leaves room for a
 // leading "#" and usernames. Message text is truncated by Slack at 40,000
-// characters, and conversations.invite accepts up to 1000 user IDs.
+// characters, but chat.update rejects text over 4,000 characters (msg_too_long).
+// conversations.invite accepts up to 1000 user IDs.
 const SLACK_MAX_ID_LENGTH = 64;
 const SLACK_MAX_TIMESTAMP_LENGTH = 32;
 const SLACK_MAX_CURSOR_LENGTH = 1024;
@@ -78,6 +79,7 @@ const SLACK_MAX_CHANNEL_NAME_LENGTH = 80;
 const SLACK_MAX_NAME_LENGTH = 255;
 const SLACK_MAX_SEARCH_QUERY_LENGTH = 2000;
 const SLACK_MAX_MESSAGE_TEXT_LENGTH = 40000;
+const SLACK_MAX_UPDATE_MESSAGE_TEXT_LENGTH = 4000;
 const SLACK_MAX_INVITE_USERS = 1000;
 const SLACK_MAX_INVITE_USERS_LENGTH = SLACK_MAX_INVITE_USERS * (SLACK_MAX_ID_LENGTH + 1);
 
@@ -653,6 +655,25 @@ export interface SlackFilesInfoResponse extends SlackErrorFields {
   response_metadata?: { next_cursor?: string };
 }
 
+const SLACK_MAX_MESSAGE_BLOCKS = 50;
+
+const slackMessageBlocksSchema = () =>
+  z
+    .array(
+      z.looseObject({
+        type: z
+          .string()
+          .min(1)
+          .max(50)
+          .describe('Block type, for example section, divider, or actions'),
+      })
+    )
+    .max(SLACK_MAX_MESSAGE_BLOCKS)
+    .optional()
+    .describe(
+      'Slack Block Kit blocks (https://docs.slack.dev/reference/block-kit/blocks) that lay out the message. When set, text is the notification and fallback text only.'
+    );
+
 export const SlackSendMessageInputSchema = lazySchema(() =>
   z.object({
     channel: z
@@ -663,6 +684,7 @@ export const SlackSendMessageInputSchema = lazySchema(() =>
         'Conversation ID (C.../G.../D...) or, on the Elastic Slack app, a connected channel name (e.g. "#general"). Use listChannels or resolveChannelId to look up an ID.'
       ),
     text: z.string().min(1).max(SLACK_MAX_MESSAGE_TEXT_LENGTH).describe('The message text to send'),
+    blocks: slackMessageBlocksSchema(),
     threadTs: z
       .string()
       .max(SLACK_MAX_TIMESTAMP_LENGTH)
@@ -676,3 +698,31 @@ export const SlackSendMessageInputSchema = lazySchema(() =>
   })
 );
 export type SlackSendMessageInput = z.infer<typeof SlackSendMessageInputSchema>;
+
+export const SlackUpdateMessageInputSchema = lazySchema(() =>
+  z.object({
+    channel: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_NAME_LENGTH)
+      .describe(
+        'Conversation ID (C.../G.../D...) holding the message. Slack does not accept channel names when editing; only the Elastic Slack app also accepts a connected channel name (e.g. "#general").'
+      ),
+    messageTs: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .describe(
+        'Timestamp of the message to edit, as returned in ts by sendMessage. Must be a message this app posted.'
+      ),
+    text: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_UPDATE_MESSAGE_TEXT_LENGTH)
+      .describe(
+        'The new message text, at most 4,000 characters. It replaces the current text of the message, and without blocks Slack removes any blocks the message had.'
+      ),
+    blocks: slackMessageBlocksSchema(),
+  })
+);
+export type SlackUpdateMessageInput = z.infer<typeof SlackUpdateMessageInputSchema>;

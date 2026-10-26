@@ -392,9 +392,8 @@ export function InternalDashboardTopNav({
             onClick: () => {
               void enhanceAction.execute();
             },
-            tooltip: i18n.translate('dashboard.topNav.enhanceButtonTooltip', {
-              defaultMessage: 'Improve the content and style of your dashboard using AI',
-            }),
+            isDisabled: enhanceAction.isDisabled,
+            tooltip: enhanceAction.tooltip,
           }
         : undefined,
     [viewMode, enhanceAction]
@@ -522,6 +521,7 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
           {...visibilityProps}
+          isDisabled={viewMode === 'non-interactive'}
           showDatePicker={showDatePicker}
           query={query as Query | undefined}
           screenTitle={title}
@@ -552,7 +552,7 @@ export function InternalDashboardTopNav({
           esqlApproximation={{
             isApproximate: esqlApproximation ?? false,
             onChange: dashboardApi.setEsqlApproximation,
-            disabled: !hasEsqlPanel,
+            disabled: viewMode === 'non-interactive' || !hasEsqlPanel,
             additionalText: i18n.translate('dashboard.esqlApproximationToggle.additionalText', {
               defaultMessage:
                 'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',

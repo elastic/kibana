@@ -34,6 +34,20 @@ export const GRAPH_ALL_ROLE: KibanaRole = {
   ],
 };
 
+export const graphAllDiscoverReadRole = (spaceId: string): KibanaRole => ({
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: [SECREPO_INDEX], privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: { graph: ['all'], discover: ['read'] },
+      spaces: [spaceId],
+    },
+  ],
+});
+
 export const GRAPH_READ_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],

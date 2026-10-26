@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
+import styled from '@emotion/styled';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -26,7 +27,6 @@ import { createCardLinkClickHandler } from '../actions/card_link_click';
 
 interface EscalationCardProps {
   escalation: EscalationQueueItem;
-  hasBorder: boolean;
   /** Render the assignee widget. Supplied by the page so hook calls stay outside the package. */
   renderAssignees: (escalation: EscalationQueueItem) => React.ReactNode;
   /**
@@ -47,11 +47,47 @@ interface EscalationCardProps {
   href?: string;
 }
 
+interface StyledEuiPanelProps {
+  $isClickable: boolean;
+  $isSelected: boolean;
+  $hasLink: boolean;
+}
+
+const StyledEuiPanel = styled(EuiPanel, {
+  shouldForwardProp: (prop) => !prop.startsWith('$'),
+})<StyledEuiPanelProps>(({ theme: { euiTheme }, $isClickable, $isSelected, $hasLink }) => ({
+  borderRadius: 0,
+  '&:not(:last-child)': {
+    borderBottom: `1px solid ${euiTheme.colors.disabled}`,
+  },
+  // The last row rounds to the queue panel's corners so the hover fill does not
+  // square them off. A footer after the rows keeps it from being the last child.
+  '&:last-child': {
+    borderRadius: `0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel}`,
+  },
+  boxSizing: 'border-box',
+  cursor: $isClickable ? 'pointer' : undefined,
+  backgroundColor: $isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
+  ...($isClickable && {
+    '&:hover': {
+      backgroundColor: $isSelected
+        ? euiTheme.colors.backgroundBaseInteractiveSelect
+        : euiTheme.colors.backgroundBaseSubdued,
+      boxShadow: 'none',
+    },
+    ...(!$hasLink && {
+      '&:focus-visible': {
+        outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,
+      },
+    }),
+  }),
+}));
+
 /**
  * One row in the escalation queue.
  */
 export const EscalationCard = memo<EscalationCardProps>(
-  ({ escalation, hasBorder, renderAssignees, onClickCard, isSelected = false, href }) => {
+  ({ escalation, renderAssignees, onClickCard, isSelected = false, href }) => {
     const { euiTheme } = useEuiTheme();
     const isClosed = escalation.status === 'closed';
     const isClickable = onClickCard !== undefined;
@@ -84,7 +120,7 @@ export const EscalationCard = memo<EscalationCardProps>(
     );
 
     return (
-      <EuiPanel
+      <StyledEuiPanel
         paddingSize="l"
         borderRadius="none"
         hasBorder={false}
@@ -98,26 +134,9 @@ export const EscalationCard = memo<EscalationCardProps>(
         aria-current={isSelected || undefined}
         onClick={isClickable ? handleClick : undefined}
         onKeyDown={isClickable && !hasLink ? handleKeyDown : undefined}
-        css={{
-          borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
-          borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
-          boxSizing: 'border-box',
-          boxShadow: 'none',
-          cursor: isClickable ? 'pointer' : undefined,
-          backgroundColor: isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
-          ...(isClickable && {
-            '&:hover': {
-              backgroundColor: isSelected
-                ? euiTheme.colors.backgroundBaseInteractiveSelect
-                : euiTheme.colors.backgroundBaseSubdued,
-            },
-            ...(!hasLink && {
-              '&:focus-visible': {
-                outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,
-              },
-            }),
-          }),
-        }}
+        $isClickable={isClickable}
+        $isSelected={isSelected}
+        $hasLink={hasLink}
         data-test-subj={`escalationCard-${escalation.id}`}
       >
         <EuiFlexGroup
@@ -201,7 +220,7 @@ export const EscalationCard = memo<EscalationCardProps>(
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </StyledEuiPanel>
     );
   }
 );
