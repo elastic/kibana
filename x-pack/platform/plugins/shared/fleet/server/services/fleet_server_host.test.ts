@@ -954,5 +954,65 @@ describe('update', () => {
         })
       ).rejects.toThrowError('Cannot specify both ssl.key and secrets.ssl.key');
     });
+
+    describe('a preconfigured update declares every secret', () => {
+      const preconfiguredHost = {
+        name: 'Fleet Server With Secrets',
+        host_urls: ['https://fleet.example.com:8220'],
+        is_default: false,
+        is_preconfigured: true,
+      };
+      const sentUpdate = (soClient: ReturnType<typeof givenHostWithSecrets>) =>
+        (soClient.update as jest.Mock).mock.calls[0][2];
+
+      it('removes a secret the Kibana config file no longer declares', async () => {
+        const soClient = givenHostWithSecrets({ ssl: { key: { id: 'stored-key-id' } } });
+
+        await fleetServerHostService.update(
+          soClient,
+          esClientMock,
+          'fleet-server-with-secrets',
+          { ...preconfiguredHost, ssl: { certificate: 'CERT' } },
+          { fromPreconfiguration: true, secretHashes: {}, declaresAllSecrets: true }
+        );
+
+        // the saved secrets are not kept: the config file is authoritative
+        expect(extractAndUpdateFleetServerHostsSecrets).toHaveBeenCalledWith(
+          expect.objectContaining({
+            fleetServerHostUpdate: { ...preconfiguredHost, ssl: { certificate: 'CERT' } },
+          })
+        );
+        expect(sentUpdate(soClient).secrets).toBeUndefined();
+      });
+
+      it('stores a plain text value as plain text, as the config file declares it', async () => {
+        const soClient = givenHostWithSecrets({ ssl: { key: { id: 'stored-key-id' } } });
+
+        await fleetServerHostService.update(
+          soClient,
+          esClientMock,
+          'fleet-server-with-secrets',
+          { ...preconfiguredHost, ssl: { key: 'PLAIN KEY' } },
+          { fromPreconfiguration: true, secretHashes: {}, declaresAllSecrets: true }
+        );
+
+        expect(sentUpdate(soClient).secrets).toBeUndefined();
+        expect(sentUpdate(soClient).ssl).toEqual(JSON.stringify({ key: 'PLAIN KEY' }));
+      });
+
+      it('keeps the saved secrets for an internal partial update', async () => {
+        const soClient = givenHostWithSecrets({ ssl: { key: { id: 'stored-key-id' } } });
+
+        await fleetServerHostService.update(
+          soClient,
+          esClientMock,
+          'fleet-server-with-secrets',
+          { is_default: false },
+          { fromPreconfiguration: true }
+        );
+
+        expect(sentUpdate(soClient).secrets).toEqual({ ssl: { key: { id: 'stored-key-id' } } });
+      });
+    });
   });
 });
