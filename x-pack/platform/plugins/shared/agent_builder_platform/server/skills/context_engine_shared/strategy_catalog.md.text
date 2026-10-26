@@ -41,6 +41,9 @@ Choose from the shape of the data, read off the row sample, the row count and th
 `analyze-and-improve` runs, not from a default:
 
 - **Long text bodies in a bounded corpus** — articles, incident reports, product docs → Bottom-Up.
+  Bottom-Up covers at most 2,000 documents per run. When the source has more, say so in the
+  recommendation, and either agree on a corpus filter that keeps the slice within 2,000 or recommend
+  an aggregate strategy (Index/Table Metadata or Cumulative) for the whole source.
 - **A keyword key with many rows per value in one index** — customers, products, hosts →
   Cumulative, through the `unit_profile` template. When the unit needs a second index, it is a
   custom workflow built through a subagent.
@@ -99,7 +102,4 @@ match, and set the workflow's own `max_documents` const to 100 ÷ N, rounded dow
 more items than `maxItems` fails the step rather than being cut short, so the prompt and the schema
 must agree. The budget is guidance for the automation: tell the user how many KIs a
 run will write, but do not present the budget itself as a limit or a policy. It can be raised once
-the output has been reviewed and trusted, up to 2,000 documents or units per run: past that, the
-run fails partway through. When a user wants more than 2,000 documents covered, narrow the run with
-a corpus filter, or cover the source with an aggregate strategy (Index/Table Metadata or
-Cumulative), and tell the user why.
+the output has been reviewed and trusted, up to 2,000 documents or units per run.

@@ -661,6 +661,8 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('steers runs past 2,000 documents to a corpus filter or an aggregate template', () => {
+      expect(catalog).toMatch(/Bottom-Up covers at most 2,000 documents per run/);
+      expect(catalog).toMatch(/When the source has more, say so in the\s+recommendation/);
       expect(catalog).toMatch(/up to 2,000 documents or units per run/);
       expect(content).toMatch(/When the run must cover\s+more than 2,000 documents/);
     });
