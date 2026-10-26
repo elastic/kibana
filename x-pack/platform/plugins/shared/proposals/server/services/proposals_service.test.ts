@@ -2621,7 +2621,7 @@ describe('ProposalsService', () => {
       );
     });
 
-    it('should order a conversation history newest first, without moving a row when it is decided', async () => {
+    it('should order a conversation history newest first, telling an action from its new action (retry) apart', async () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
@@ -2632,6 +2632,7 @@ describe('ProposalsService', () => {
         { createdAt: { order: 'desc' } },
         { rootProposalId: { order: 'asc' } },
         { revision: { order: 'asc' } },
+        { supersededBy: { order: 'asc', missing: '_first' } },
       ]);
     });
 

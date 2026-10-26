@@ -131,14 +131,17 @@ const PRIORITY_SORT: SortCombinations[] = [
 ];
 
 /**
- * A conversation's history, newest first. A decision or a status change must not move a row,
- * so the order uses only fields that never change. A retry inherits its original's `createdAt`,
- * so the chain keys make the order total and paging cannot repeat or skip a row.
+ * A conversation's history, newest first. A decision or a status change does not move a row.
+ * A retry copies `createdAt`, `rootProposalId` and `revision` from its original, so
+ * `supersededBy` tells the attempts apart. The current attempt has none and comes first. Each
+ * older attempt has the id of its own retry. The order is total, so paging cannot repeat or
+ * skip a row.
  */
 const NEWEST_SORT: SortCombinations[] = [
   { createdAt: { order: 'desc' } },
   { rootProposalId: { order: 'asc' } },
   { revision: { order: 'asc' } },
+  { supersededBy: { order: 'asc', missing: '_first' } },
 ];
 
 export class ProposalsService {
