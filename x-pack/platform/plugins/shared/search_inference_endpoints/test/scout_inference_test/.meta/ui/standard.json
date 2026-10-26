@@ -1,5 +1,5 @@
 {
-  "sha1": "87eb5da26aba1a33744eec541da97790e1353b97",
+  "sha1": "59721c0a562b478bfe48bfb88c9ad42417ad0830",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -126,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 99,
+        "line": 97,
         "column": 13
       }
     },
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 125,
+        "line": 123,
         "column": 11
       }
     },

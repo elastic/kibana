@@ -10,7 +10,7 @@
 module.exports = {
   // Node environment (not jsdom): these tests exercise the real OTel SDK exporters, which
   // need Node timers (`unref`) and real sockets.
-  preset: '@kbn/test/jest_integration_node',
+  preset: '@kbn/jest/jest_integration_node',
   rootDir: '../../../../../../../..',
   roots: ['<rootDir>/src/core/packages/core/server/integration_tests/logging/otel'],
   // must override to match all tests given there is no `integration_tests` subfolder

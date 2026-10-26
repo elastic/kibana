@@ -6,20 +6,14 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiBadge, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { EuiBadge, EuiListGroup, EuiListGroupItem, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const CHANGE_STATUS_LABEL = i18n.translate('xpack.alertzero.statusToggle.changeStatus', {
   defaultMessage: 'Change status',
 });
 
-const MARK_AS_CLOSED_LABEL = i18n.translate('xpack.alertzero.statusToggle.markAsClosed', {
-  defaultMessage: 'Mark as closed',
-});
-
-const MARK_AS_OPEN_LABEL = i18n.translate('xpack.alertzero.statusToggle.markAsOpen', {
-  defaultMessage: 'Mark as open',
-});
+const STATUS_OPTIONS = ['open', 'closed'] as const;
 
 const STATUS_CONFIG: Record<'open' | 'closed', { label: string; color: 'primary' | 'default' }> = {
   open: {
@@ -45,10 +39,11 @@ export interface StatusToggleProps {
 }
 
 /**
- * A badge + popover status selector modelled after the Cases status dropdown.
+ * A badge + popover status selector.
  *
  * Shows the current status as a coloured badge with a chevron. Clicking it opens a popover
- * offering a single action — switching to the opposite status. All mutation logic lives in the
+ * listing Open and Closed, with a check mark on the current one. Picking the other status calls
+ * `onChange`; picking the current one just closes the popover. All mutation logic lives in the
  * consuming component that supplies `onChange`.
  */
 export const StatusToggle: React.FC<StatusToggleProps> = ({
@@ -97,25 +92,6 @@ export const StatusToggle: React.FC<StatusToggleProps> = ({
     </EuiBadge>
   );
 
-  const menuItem =
-    currentStatus === 'open' ? (
-      <EuiContextMenuItem
-        key="closed"
-        data-test-subj="statusToggleMarkAsClosed"
-        onClick={() => handleSelect('closed')}
-      >
-        {MARK_AS_CLOSED_LABEL}
-      </EuiContextMenuItem>
-    ) : (
-      <EuiContextMenuItem
-        key="open"
-        data-test-subj="statusToggleMarkAsOpen"
-        onClick={() => handleSelect('open')}
-      >
-        {MARK_AS_OPEN_LABEL}
-      </EuiContextMenuItem>
-    );
-
   return (
     <EuiPopover
       aria-label={CHANGE_STATUS_LABEL}
@@ -123,10 +99,26 @@ export const StatusToggle: React.FC<StatusToggleProps> = ({
       button={badge}
       closePopover={closePopover}
       isOpen={isPopoverOpen && !isLoading}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
+      panelStyle={{ minWidth: 140 }}
       data-test-subj={`${dataTestSubj}Popover`}
     >
-      <EuiContextMenuPanel title={CHANGE_STATUS_LABEL} items={[menuItem]} />
+      <EuiListGroup aria-label={CHANGE_STATUS_LABEL}>
+        {STATUS_OPTIONS.map((option) => {
+          const isSelected = option === currentStatus;
+          return (
+            <EuiListGroupItem
+              key={option}
+              // `empty` keeps the labels aligned when only the selected row shows a check.
+              iconType={isSelected ? 'check' : 'empty'}
+              isActive={isSelected}
+              label={STATUS_CONFIG[option].label}
+              onClick={() => (isSelected ? closePopover() : handleSelect(option))}
+              data-test-subj={option === 'open' ? 'statusToggleOpen' : 'statusToggleClosed'}
+            />
+          );
+        })}
+      </EuiListGroup>
     </EuiPopover>
   );
 };

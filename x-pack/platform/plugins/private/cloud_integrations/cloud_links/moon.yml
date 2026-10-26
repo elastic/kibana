@@ -50,6 +50,4 @@ fileGroups:
     - test/**/*
     - '@kbn/core-user-settings-types'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

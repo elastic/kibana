@@ -88,6 +88,7 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/agent-builder-sml-plugin'
   - '@kbn/server-http-tools'
+  - '@kbn/task-manager-plugin'
 tags:
   - plugin
   - prod
@@ -103,6 +104,4 @@ fileGroups:
     - types/**/*
     - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

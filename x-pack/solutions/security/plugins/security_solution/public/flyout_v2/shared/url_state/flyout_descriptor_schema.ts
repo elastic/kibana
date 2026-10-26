@@ -190,6 +190,7 @@ export const entityAnomalyInsightsDescriptorSchema = z.object({
   value: str,
   entityId: str.optional(),
   mode: entityDescriptorModeSchema.optional(),
+  scopeId: str.optional(),
 });
 
 export const entityAlertsInsightsDescriptorSchema = z.object({

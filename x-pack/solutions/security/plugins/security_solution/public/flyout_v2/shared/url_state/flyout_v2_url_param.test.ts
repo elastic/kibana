@@ -251,6 +251,7 @@ describe('flyoutV2 URL param', () => {
           entityType: 'user',
           value: 'alice',
           entityId: 'eid',
+          scopeId: 's',
         },
       ],
       [

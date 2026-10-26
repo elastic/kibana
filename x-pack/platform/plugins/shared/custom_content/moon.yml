@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/kbn-client'
   - '@kbn/esql-types'
   - '@kbn/i18n-react'
+  - '@kbn/inspector-plugin'
 tags:
   - plugin
   - prod
@@ -61,6 +62,4 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
