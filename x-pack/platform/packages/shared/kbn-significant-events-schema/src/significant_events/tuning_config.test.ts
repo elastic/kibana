@@ -99,8 +99,7 @@ describe('resolveSignificantEventsTuningConfig', () => {
   it('drops unknown keys without falling back to defaults', () => {
     const logger = { warn: jest.fn() };
     const result = resolveSignificantEventsTuningConfig(
-      // `sample_size` was a tuning key before it moved into the features identification workflow.
-      { [INTEGER_FIELD]: VALID_OVERRIDE, sample_size: 30, legacy_field: 99 },
+      { [INTEGER_FIELD]: VALID_OVERRIDE, legacy_field: 99 },
       logger
     );
     expect(result).toEqual({
