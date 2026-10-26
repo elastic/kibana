@@ -17,7 +17,7 @@ import type {
 } from '../../../common/subjects/subject';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
 import { getSubjectTitle, type SubjectRowData } from './subject_title';
-import { isModifiedClick, useSubjectLink } from './subject_link';
+import { isModifiedClick, useAlertsListLink, useSubjectLink } from './subject_link';
 import { canOpenSubjectFlyout, type SubjectServices } from './subject_services';
 import {
   OPENS_IN_NEW_TAB,
@@ -329,12 +329,39 @@ const LazySubjectDetailsFlyout = React.lazy(async () => {
 const subjectKey = ({ type, id }: SubjectRowData): string => `${type}:${id}`;
 
 /**
+ * The alerts an investigation is about, as one "N alerts" row that opens the alerts list filtered
+ * to them. Without that list (alerting v2 not available) the row lists the alerts inline instead.
+ */
+const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) => {
+  const { href, onClick } = useAlertsListLink(alerts);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <>
+      <CompactRow
+        iconType={SUBJECT_ICONS.alert}
+        tone={SUBJECT_ICON_TONES.alert}
+        title={alertsCountLabel(alerts.length)}
+        description={TRIGGER_LABEL}
+        href={href}
+        onLinkClick={onClick}
+        onToggle={href === undefined ? () => setIsExpanded((expanded) => !expanded) : undefined}
+        isExpanded={href === undefined ? isExpanded : undefined}
+        data-test-subj="investigationSubject-alerts"
+      />
+      {href === undefined &&
+        isExpanded &&
+        alerts.map((alert) => <SubjectRow key={subjectKey(alert)} subject={alert} isNested />)}
+    </>
+  );
+};
+
+/**
  * An investigation's subjects in one bordered list. Several alerts collapse into one "N alerts"
- * row that shows them when clicked, since they have no shared page to link to.
+ * row, which opens the alerts list filtered to them.
  */
 export const SubjectList: React.FC<{ subjects: SubjectRowData[] }> = ({ subjects }) => {
   const { euiTheme } = useEuiTheme();
-  const [isAlertsExpanded, setIsAlertsExpanded] = useState(false);
   const alerts = useMemo(() => subjects.filter(({ type }) => type === 'alert'), [subjects]);
 
   const rows = useMemo(() => {
@@ -346,23 +373,9 @@ export const SubjectList: React.FC<{ subjects: SubjectRowData[] }> = ({ subjects
       if (subject !== firstAlert) {
         return [];
       }
-      return [
-        <CompactRow
-          key="alerts"
-          iconType={SUBJECT_ICONS.alert}
-          tone={SUBJECT_ICON_TONES.alert}
-          title={alertsCountLabel(alerts.length)}
-          description={TRIGGER_LABEL}
-          onToggle={() => setIsAlertsExpanded((expanded) => !expanded)}
-          isExpanded={isAlertsExpanded}
-          data-test-subj="investigationSubject-alerts"
-        />,
-        ...(isAlertsExpanded
-          ? alerts.map((alert) => <SubjectRow key={subjectKey(alert)} subject={alert} isNested />)
-          : []),
-      ];
+      return [<AlertsSubjectRows key="alerts" alerts={alerts} />];
     });
-  }, [subjects, alerts, isAlertsExpanded]);
+  }, [subjects, alerts]);
 
   return (
     <EuiPanel

@@ -295,11 +295,13 @@ const alertSubject = (id: string): SubjectRowData => ({
   },
 });
 
-const renderList = (subjects: SubjectRowData[]) =>
+const renderList = (subjects: SubjectRowData[], services: SubjectServices = {}) =>
   render(
     <EuiProvider>
       <I18nProvider>
-        <SubjectList subjects={subjects} />
+        <KibanaContextProvider services={services}>
+          <SubjectList subjects={subjects} />
+        </KibanaContextProvider>
       </I18nProvider>
     </EuiProvider>
   );
@@ -316,7 +318,7 @@ describe('SubjectList', () => {
     expect(screen.queryByTestId('investigationSubject-alerts')).not.toBeInTheDocument();
   });
 
-  it('collapses several alerts into one "N alerts" row that shows them when clicked', () => {
+  it('lists several alerts inline when there is no alerts list to link to', () => {
     renderList([
       alertSubject('a-1'),
       { type: 'manual', id: 'q-1', summary: 'Why is it slow?' },
@@ -356,6 +358,44 @@ describe('SubjectList', () => {
     fireEvent.click(summary);
 
     expect(screen.queryByTestId('investigationSubject-alert')).not.toBeInTheDocument();
+  });
+
+  it('links several alerts to the alerts list, filtered to them', async () => {
+    const { services, navigate } = createShare();
+    renderList([alertSubject('a-1'), alertSubject('a-2'), alertSubject('a-3')], services);
+
+    // The row starts as a plain toggle and becomes the link once the locator resolves.
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alerts')).toHaveAttribute('href')
+    );
+    const summary = screen.getByTestId('investigationSubject-alerts');
+
+    expect(summary.tagName).toBe('A');
+    expect(summary).toHaveTextContent('3 alerts');
+    expect(JSON.parse(summary.getAttribute('href')!.split('?')[1])).toEqual({
+      host: { app: 'observabilityAlerting', pathPrefix: '/alerts' },
+      filters: {
+        queryString:
+          'alert.id: ("a-1" or "a-2" or "a-3") or kibana.alert.uuid: ("a-1" or "a-2" or "a-3")',
+        status: 'all',
+      },
+      // A minute before the earliest alert start.
+      timeRange: { from: '2026-07-28T14:00:00.000Z', to: 'now' },
+    });
+    // The alerts are on that page, not under the row.
+    expect(screen.queryByTestId('investigationSubject-alert')).not.toBeInTheDocument();
+
+    fireEvent.click(summary);
+
+    await waitFor(() =>
+      expect(navigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filters: expect.objectContaining({
+            queryString: expect.stringContaining('kibana.alert.uuid: ("a-1" or "a-2" or "a-3")'),
+          }),
+        })
+      )
+    );
   });
 });
 

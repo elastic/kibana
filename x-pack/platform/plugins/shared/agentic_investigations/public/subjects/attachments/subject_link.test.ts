@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSubjectLocatorTarget } from './subject_link';
+import { getAlertsListLocatorTarget, getSubjectLocatorTarget } from './subject_link';
 
 describe('getSubjectLocatorTarget', () => {
   it("opens an alert's details page by its id", () => {
@@ -40,5 +40,45 @@ describe('getSubjectLocatorTarget', () => {
     expect(getSubjectLocatorTarget({ type: 'significant_event', id: 'se-1' })).toBeUndefined();
     expect(getSubjectLocatorTarget({ type: 'manual', id: 'q-1' })).toBeUndefined();
     expect(getSubjectLocatorTarget({ type: 'slack_thread', id: 't-1' })).toBeUndefined();
+  });
+});
+
+describe('getAlertsListLocatorTarget', () => {
+  const alert = (id: string, start?: string) => ({
+    type: 'alert' as const,
+    id,
+    ...(start ? { snapshot: { start } } : {}),
+  });
+
+  it('opens the alerts list filtered to the alerts, over every status', () => {
+    expect(
+      getAlertsListLocatorTarget([
+        alert('a-2', '2026-07-28T14:05:00.000Z'),
+        { type: 'manual', id: 'q-1' },
+        alert('a-1', '2026-07-28T14:02:00.000Z'),
+      ])
+    ).toEqual({
+      locatorId: 'ALERTING_V2_EPISODES_LOCATOR',
+      params: {
+        host: { app: 'observabilityAlerting', pathPrefix: '/alerts' },
+        filters: {
+          queryString: 'alert.id: ("a-2" or "a-1") or kibana.alert.uuid: ("a-2" or "a-1")',
+          status: 'all',
+        },
+        // A minute before the earliest alert, so the list covers all of them.
+        timeRange: { from: '2026-07-28T14:01:00.000Z', to: 'now' },
+      },
+    });
+  });
+
+  it('falls back to a wide range when no alert says when it started', () => {
+    expect(getAlertsListLocatorTarget([alert('a-1'), alert('a-2')])?.params.timeRange).toEqual({
+      from: 'now-30d',
+      to: 'now',
+    });
+  });
+
+  it('has no list without alerts', () => {
+    expect(getAlertsListLocatorTarget([{ type: 'manual', id: 'q-1' }])).toBeUndefined();
   });
 });

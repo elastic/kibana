@@ -7,7 +7,10 @@
 
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ALERTING_V2_EPISODES_LOCATOR } from '@kbn/alerting-v2-constants';
+import {
+  ALERTING_V2_EPISODES_LOCATOR,
+  ALERTING_V2_EPISODES_STATUS_ALL,
+} from '@kbn/alerting-v2-constants';
 import { ALERTS_LOCATOR_ID, createObservabilityAlertingV2Host } from '@kbn/deeplinks-observability';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -80,6 +83,68 @@ export const getOwnSubjectHref = ({
   return undefined;
 };
 
+/**
+ * The alerts an investigation is about, as one page: the alerts list filtered to exactly those
+ * alerts (classic and alerting v2 alike), over every status and a range that starts before the
+ * earliest of them.
+ */
+export const getAlertsListLocatorTarget = (
+  alerts: readonly SubjectRowData[]
+): SubjectLocatorTarget | undefined =>
+  buildAlertsListLocatorTarget(getAlertIds(alerts), getAlertsListFrom(alerts));
+
+const getAlertIds = (alerts: readonly SubjectRowData[]): string[] =>
+  alerts.filter(({ type }) => type === 'alert').map(({ id }) => id);
+
+const buildAlertsListLocatorTarget = (
+  alertIds: string[],
+  from: string
+): SubjectLocatorTarget | undefined => {
+  if (alertIds.length === 0) {
+    return undefined;
+  }
+  return {
+    locatorId: ALERTING_V2_EPISODES_LOCATOR,
+    params: {
+      host: OBSERVABILITY_ALERTING_EPISODES_HOST,
+      filters: {
+        queryString: getAlertsListQueryString(alertIds),
+        status: ALERTING_V2_EPISODES_STATUS_ALL,
+      },
+      timeRange: { from, to: 'now' },
+    },
+  };
+};
+
+/**
+ * The list's search query for a set of alerts. The two sources behind the list read a query in
+ * their own vocabulary — `alert.id` for alerting v2 episodes, `kibana.alert.uuid` for classic
+ * alerts — and each ignores the half it does not know, so both halves are asked for.
+ */
+const getAlertsListQueryString = (alertIds: string[]): string => {
+  const values = alertIds.map(escapeKqlValue).join(' or ');
+  return `alert.id: (${values}) or kibana.alert.uuid: (${values})`;
+};
+
+const escapeKqlValue = (value: string): string =>
+  `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+
+/** The list's time range must cover the alerts, which can be older than the page's default. */
+const ALERTS_LIST_FALLBACK_FROM = 'now-30d';
+
+/** A minute before the earliest alert start, so a rounded timestamp still includes it. */
+const ALERTS_LIST_FROM_MARGIN_MS = 60_000;
+
+const getAlertsListFrom = (alerts: readonly SubjectRowData[]): string => {
+  const starts = alerts
+    .map(({ snapshot }) => (snapshot?.start ? new Date(snapshot.start).getTime() : NaN))
+    .filter((time) => !Number.isNaN(time));
+  if (starts.length === 0) {
+    return ALERTS_LIST_FALLBACK_FROM;
+  }
+  return new Date(Math.min(...starts) - ALERTS_LIST_FROM_MARGIN_MS).toISOString();
+};
+
 /** A click that the browser handles itself: middle button, or a new tab/window modifier. */
 export const isModifiedClick = (event: React.MouseEvent): boolean =>
   event.button !== 0 || event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
@@ -98,7 +163,6 @@ export interface SubjectLink {
  * do not link.
  */
 export const useSubjectLink = (subject: SubjectRowData | undefined): SubjectLink => {
-  const { share } = useKibana<SubjectServices>().services;
   const subjectType = subject?.type;
   const subjectId = subject?.id;
   const alertVersion = subject?.snapshot?.alert_version;
@@ -111,6 +175,47 @@ export const useSubjectLink = (subject: SubjectRowData | undefined): SubjectLink
         : undefined,
     [subjectType, subjectId, alertVersion]
   );
+  const { href: locatedHref, onClick: onLocatorClick } = useLocatorLink(target);
+
+  if (!subject) {
+    return { isExternal: false };
+  }
+  if (locatedHref !== undefined) {
+    return { href: locatedHref, onClick: onLocatorClick, isExternal: false };
+  }
+  const ownHref = getOwnSubjectHref(subject);
+  return { href: ownHref, isExternal: ownHref !== undefined && subject.type === 'slack_thread' };
+};
+
+/**
+ * Where the "N alerts" row goes: the alerts list, filtered to those alerts. Without the locator
+ * (alerting v2 not available) there is no link and the row lists the alerts inline instead.
+ */
+export const useAlertsListLink = (alerts: readonly SubjectRowData[]): SubjectLink => {
+  // Keyed on the ids and the range, so a re-render with an equal list keeps the located URL,
+  // whether or not the caller passes the same array.
+  const alertIdsKey = getAlertIds(alerts).join(ALERT_IDS_KEY_SEPARATOR);
+  const from = getAlertsListFrom(alerts);
+  const target = useMemo(
+    () =>
+      buildAlertsListLocatorTarget(
+        alertIdsKey ? alertIdsKey.split(ALERT_IDS_KEY_SEPARATOR) : [],
+        from
+      ),
+    [alertIdsKey, from]
+  );
+  const { href, onClick } = useLocatorLink(target);
+  return { href, onClick, isExternal: false };
+};
+
+/** Alert ids are uuids, so a comma never appears in one. */
+const ALERT_IDS_KEY_SEPARATOR = ',';
+
+/** Resolves a locator target to a URL, and to a click that navigates to it inside Kibana. */
+const useLocatorLink = (
+  target: SubjectLocatorTarget | undefined
+): { href?: string; onClick: (event: React.MouseEvent) => void } => {
+  const { share } = useKibana<SubjectServices>().services;
   // Memoized so the effect below does not re-run, and loop, when a lookup returns a new object.
   const locator = useMemo(
     () => (target ? share?.url.locators.get<SerializableRecord>(target.locatorId) : undefined),
@@ -133,14 +238,14 @@ export const useSubjectLink = (subject: SubjectRowData | undefined): SubjectLink
         }
       })
       .catch(() => {
-        // Without a URL the row falls back to the subject's own link.
+        // Without a URL the caller falls back to whatever link it has.
       });
     return () => {
       isCurrent = false;
     };
   }, [locator, stableParams]);
 
-  const onLocatorClick = useCallback(
+  const onClick = useCallback(
     (event: React.MouseEvent) => {
       if (!locator || !stableParams || isModifiedClick(event)) {
         return;
@@ -151,12 +256,5 @@ export const useSubjectLink = (subject: SubjectRowData | undefined): SubjectLink
     [locator, stableParams]
   );
 
-  if (!subject) {
-    return { isExternal: false };
-  }
-  if (locatedHref !== undefined) {
-    return { href: locatedHref, onClick: onLocatorClick, isExternal: false };
-  }
-  const ownHref = getOwnSubjectHref(subject);
-  return { href: ownHref, isExternal: ownHref !== undefined && subject.type === 'slack_thread' };
+  return { href: locatedHref, onClick };
 };
