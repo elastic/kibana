@@ -65,8 +65,9 @@ export const createGetConnectorSubActionsTool = ({
 
       const allowedIds = resolveAllowedConnectorIds(context.agentConfiguration);
       if (allowedIds !== undefined && !allowedIds.includes(input.connector_id)) {
-        // Look an unassigned connector up only to explain why it can't be called; its
-        // sub-actions are never returned.
+        // The agent can learn of unassigned connectors from list_connectors (include_unassigned).
+        // Read only the connector's type to say why it can't be called; never return its
+        // sub-actions.
         const { actionTypeId } = await actionsClient.get({ id: input.connector_id });
         return {
           results: [
