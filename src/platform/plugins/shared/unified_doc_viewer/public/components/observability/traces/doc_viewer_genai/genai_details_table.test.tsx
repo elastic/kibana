@@ -135,6 +135,15 @@ describe('getCachePercentage', () => {
     expect(getCachePercentage(2800, 2800)).toBe(100);
   });
 
+  it('only returns 0 or 100 when the share is exactly that', () => {
+    expect(getCachePercentage(0, 1000)).toBe(0);
+    expect(getCachePercentage(1000, 1000)).toBe(100);
+    expect(getCachePercentage(1, 1000)).toBe(1);
+    expect(getCachePercentage(4, 1000)).toBe(1);
+    expect(getCachePercentage(999, 1000)).toBe(99);
+    expect(getCachePercentage(996, 1000)).toBe(99);
+  });
+
   it('returns nothing when the share cannot be told', () => {
     expect(getCachePercentage(10, undefined)).toBeUndefined();
     expect(getCachePercentage(10, 0)).toBeUndefined();
@@ -269,6 +278,18 @@ describe('GenAiDetailsTable', () => {
       );
       expect(write.config?.title).toBe('Cache write tokens');
       expect(write.rendered.container).toHaveTextContent('1,000 (8%)');
+    });
+
+    it('does not show 0% or 100% for a share that is not exactly that', () => {
+      const read = 'attributes.gen_ai.usage.cache_read.input_tokens';
+      const input = 'attributes.gen_ai.usage.input_tokens';
+
+      const low = renderFormatted({ [input]: [1000], [read]: [1] }, read, 1);
+      expect(low.rendered.container).toHaveTextContent('1 (1%)');
+
+      mockContentFrameworkTable.mockClear();
+      const high = renderFormatted({ [input]: [1000], [read]: [999] }, read, 999);
+      expect(high.rendered.container).toHaveTextContent('999 (99%)');
     });
 
     it('shows the plain value when the input tokens are not on the span', () => {

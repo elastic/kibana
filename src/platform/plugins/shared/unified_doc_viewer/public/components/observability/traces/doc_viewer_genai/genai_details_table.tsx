@@ -139,7 +139,7 @@ const toFiniteNumber = (value: unknown): number | undefined => {
 
 /**
  * The share of the input tokens that were read from, or written to, the prompt cache, as a whole
- * percentage. Undefined when it cannot be told: the input tokens are missing or zero, or the cache
+ * percentage, kept within 1-99 unless it is exactly 0 or 100. Undefined when it cannot be told: the input tokens are missing or zero, or the cache
  * tokens exceed them, which happens when a provider reports them apart from the input tokens
  * instead of as a part of it.
  */
@@ -149,7 +149,11 @@ export function getCachePercentage(cacheTokens: unknown, inputTokens: unknown): 
   if (cache === undefined || input === undefined || input <= 0 || cache > input) {
     return undefined;
   }
-  return Math.round((cache / input) * 100);
+  // 0% and 100% are only shown when exact: a partial share never rounds onto either end.
+  if (cache === 0 || cache === input) {
+    return cache === 0 ? 0 : 100;
+  }
+  return Math.min(99, Math.max(1, Math.round((cache / input) * 100)));
 }
 
 /**
