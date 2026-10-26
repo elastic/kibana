@@ -234,7 +234,7 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
     const config = { available: true } as WorkflowsManagementConfig;
     const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
     const client = await provider('testPlugin');
-    const options = { spaceId: 'default', values: { yaml: '' } };
+    const options = { spaceId: 'default', values: { recipient: 'test' } };
 
     expect(client.isWorkflowsAvailable).toBe(true);
 
