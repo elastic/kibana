@@ -1626,6 +1626,10 @@ describe('handleAgentExecution — interrupted executions', () => {
     expect(conversationClient.replaceRoundEvents.mock.calls[0][0]).not.toHaveProperty(
       'skipIfTerminalExistsFor'
     );
+    // the terminal write releases the run lock this execution holds
+    expect(conversationClient.replaceRoundEvents.mock.calls[0][0].releaseExecutionId).toBe(
+      'execution-1'
+    );
     expect(seen.map((event) => event.type)).toContain(TimelineEventType.executionTerminated);
     expect(seen.map((event) => event.type)).not.toContain(TimelineEventType.executionAborted);
   });
