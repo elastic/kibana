@@ -56,6 +56,7 @@ dependsOn:
   - '@kbn/ftr-llm-proxy'
   - '@kbn/ui-callout'
   - '@kbn/core-spaces-common'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
