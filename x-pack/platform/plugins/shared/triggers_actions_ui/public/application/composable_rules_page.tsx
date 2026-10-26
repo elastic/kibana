@@ -22,6 +22,7 @@ export const ComposableClassicRulesPage = ({
   hideListBackButton,
   host = STACK_MANAGEMENT_RULES_HOST,
   tabs,
+  showClassicBadge,
   internalDeps,
 }: ClassicRulesPageProps & { internalDeps: ClassicRulesPageInternalDeps }) => {
   const { pluginsStart } = internalDeps;
@@ -87,6 +88,7 @@ export const ComposableClassicRulesPage = ({
       hideListBackButton,
       host,
       tabs,
+      showClassicBadge,
     }),
     [
       coreStart,
@@ -98,6 +100,7 @@ export const ComposableClassicRulesPage = ({
       hideListBackButton,
       host,
       tabs,
+      showClassicBadge,
     ]
   );
 

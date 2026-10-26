@@ -241,7 +241,12 @@ export const importPluginOverrides: OxlintOverride[] = [
     },
   },
   {
-    files: ['src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}'],
+    // Node-only dev tooling, not reachable from the package entry points
+    files: [
+      'src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}',
+      'src/platform/packages/shared/kbn-connector-specs/scripts/**/*.ts',
+      'src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/**/*.ts',
+    ],
     rules: {
       'import/no-nodejs-modules': 'off',
     },
