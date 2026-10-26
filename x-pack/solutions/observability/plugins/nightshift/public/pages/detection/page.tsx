@@ -5,22 +5,39 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, EuiPageTemplate, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { NightshiftAppHeader } from '../../app/app_header';
 import type { NightshiftAppHeaderProps } from '../../app/app_header';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
+import {
+  NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
+  NIGHTSHIFT_RULE_ID_QUERY_PARAM,
+} from '../../common/url_params';
 import { useDetectionOverview } from '../../data/detection_overview/use_detection_overview';
 import { useMaintenanceStatus } from '../../data/maintenance/use_significant_events_maintenance';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DetectionTabId } from './detection_tabs';
 import { DETECTION_TAB_IDS, DETECTION_TAB_LABELS } from './detection_tabs';
 import { DetectionOverview } from './overview/detection_overview';
+import { EntitiesPanel } from './entities/entities_panel';
+import { PAGE_QUERY_PARAM } from './constants';
+import { useEntitySelection } from './use_entity_selection';
 import {
   RANGE_FROM_QUERY_PARAM,
   RANGE_TO_QUERY_PARAM,
@@ -57,14 +74,20 @@ export const DetectionPage = ({
 }): React.ReactElement => {
   const { application } = useKibana().services;
   const history = useHistory();
+  const location = useLocation();
+  const { euiTheme } = useEuiTheme();
   const maintenanceStatus = useMaintenanceStatus();
   const { timeRange, setTimeRange } = useDetectionTimeRange();
   const overview = useDetectionOverview(timeRange);
-  // Tabs share only the time range; filters and the open flyout belong to one tab.
-  const tabSearch = `?${new URLSearchParams({
-    [RANGE_FROM_QUERY_PARAM]: timeRange.from,
-    [RANGE_TO_QUERY_PARAM]: timeRange.to,
-  }).toString()}`;
+  const selection = useEntitySelection();
+  // Tab switches keep every filter, so returning to a tab restores it; only pages and flyouts reset.
+  const tabParams = new URLSearchParams(location.search);
+  [PAGE_QUERY_PARAM, NIGHTSHIFT_EVENT_ID_QUERY_PARAM, NIGHTSHIFT_RULE_ID_QUERY_PARAM].forEach(
+    (param) => tabParams.delete(param)
+  );
+  tabParams.set(RANGE_FROM_QUERY_PARAM, timeRange.from);
+  tabParams.set(RANGE_TO_QUERY_PARAM, timeRange.to);
+  const tabSearch = `?${tabParams.toString()}`;
 
   return (
     <>
@@ -89,30 +112,63 @@ export const DetectionPage = ({
           onRetry={() => void overview.refetch()}
         />
         <EuiSpacer size="m" />
-        <EuiTabs size="s">
-          {DETECTION_TAB_IDS.map((id) => (
-            <EuiTab
-              key={id}
-              isSelected={tab === id}
-              {...reactRouterNavigate(history, `/detections/${id}${tabSearch}`)}
-              data-test-subj={`nightshiftDetectionTab-${id}`}
-              {...getEbtProps({
-                action: NIGHTSHIFT_EBT_ACTIONS.VIEW_DETECTION_TAB,
-                element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_WORKSPACE_TABS,
-                detail: id,
-              })}
+        <EuiFlexGroup gutterSize="l" alignItems="flexStart">
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              width: ${euiTheme.base * 16}px;
+            `}
+          >
+            <EntitiesPanel
+              timeRange={timeRange}
+              selection={selection}
+              knowledgeHref={headerProps.knowledgeHref}
+              onKnowledgeClick={headerProps.onKnowledgeClick}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTabs size="s">
+              {DETECTION_TAB_IDS.map((id) => (
+                <EuiTab
+                  key={id}
+                  isSelected={tab === id}
+                  {...reactRouterNavigate(history, `/detections/${id}${tabSearch}`)}
+                  data-test-subj={`nightshiftDetectionTab-${id}`}
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.VIEW_DETECTION_TAB,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_WORKSPACE_TABS,
+                    detail: id,
+                  })}
+                >
+                  {DETECTION_TAB_LABELS[id]}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+            <EuiSpacer size="m" />
+            <React.Suspense
+              fallback={
+                <EuiLoadingSpinner size="xl" data-test-subj="nightshiftDetectionTabLoading" />
+              }
             >
-              {DETECTION_TAB_LABELS[id]}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-        <EuiSpacer size="m" />
-        <React.Suspense
-          fallback={<EuiLoadingSpinner size="xl" data-test-subj="nightshiftDetectionTabLoading" />}
-        >
-          {tab === 'events' && <EventsTab timeRange={timeRange} onTimeRangeChange={setTimeRange} />}
-          {tab === 'rules' && <RulesTab timeRange={timeRange} onTimeRangeChange={setTimeRange} />}
-        </React.Suspense>
+              {tab === 'events' && (
+                <EventsTab
+                  timeRange={timeRange}
+                  onTimeRangeChange={setTimeRange}
+                  entities={selection.entities}
+                  unassigned={selection.unassigned}
+                />
+              )}
+              {tab === 'rules' && (
+                <RulesTab
+                  timeRange={timeRange}
+                  onTimeRangeChange={setTimeRange}
+                  entities={selection.entities}
+                  unassigned={selection.unassigned}
+                />
+              )}
+            </React.Suspense>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPageTemplate.Section>
     </>
   );
