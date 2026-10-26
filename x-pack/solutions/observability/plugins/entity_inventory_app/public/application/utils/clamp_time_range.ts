@@ -6,6 +6,7 @@
  */
 
 import dateMath from '@kbn/datemath';
+import moment from 'moment';
 import type { TimeRange } from '@kbn/es-query';
 
 export interface ClampTimeRangeResult {
@@ -18,7 +19,8 @@ const isRelative = (value: string): boolean => value.startsWith('now');
 
 /**
  * Limits a time range to `maxDays`, keeping the end of the range and moving the start forward.
- * An end in the future (e.g. "This week") is capped at now so the clamped range is never empty.
+ * Only the part of the range up to now is measured, so "This week" early in the week is left alone.
+ * An end in the future is capped at now, so the clamped range never starts before the selected start.
  */
 export const clampTimeRange = (
   range: TimeRange,
@@ -32,11 +34,13 @@ export const clampTimeRange = (
     return { range, wasClamped: false, isValid: false };
   }
 
-  if (to.diff(from, 'days', true) <= maxDays) {
+  const pastEnd = moment.min(to, moment(now));
+
+  if (pastEnd.diff(from, 'days', true) <= maxDays) {
     return { range, wasClamped: false, isValid: true };
   }
 
-  if (range.to === 'now' || to.isAfter(now)) {
+  if (!to.isBefore(now)) {
     return {
       range: { from: `now-${maxDays}d`, to: 'now' },
       wasClamped: true,
