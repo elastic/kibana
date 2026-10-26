@@ -25,7 +25,7 @@ import {
   type AlertingPublisherContext,
 } from '../domain_events';
 import type { EventBus, Subscription } from '../event_bus';
-import { RULE_UPDATED_EVENT_TYPE, type RuleEvent } from '../rule_event_publisher/events';
+import type { RuleEvent } from '../rule_event_publisher/events';
 
 type ReportedRuleEvent = Extract<RuleEvent, { type: RuleOperation }>;
 
@@ -92,14 +92,6 @@ export class RuleTelemetrySubscriber {
       return;
     }
 
-    const { ruleId, rule, templateId, updatedFields } = payload;
-
-    this.ebtService.reportEvent(
-      eventType,
-      buildRuleChangedEventData(rule, origin, ruleId, {
-        templateId,
-        updatedFields: operation === RULE_UPDATED_EVENT_TYPE ? updatedFields : undefined,
-      })
-    );
+    this.ebtService.reportEvent(eventType, buildRuleChangedEventData(operation, payload, origin));
   }
 }
