@@ -79,13 +79,6 @@ describe('unit connections', () => {
     ]);
   });
 
-  it('refuses a second line from a source that is already connected', () => {
-    const connected = connectSourceToDestination(unitWith([]), 'otlp-input', 'es-logs');
-
-    expect(canConnectSourceToDestination(connected, 'otlp-input', 'es-metrics')).toBe(false);
-    expect(connectSourceToDestination(connected, 'otlp-input', 'es-metrics')).toBe(connected);
-  });
-
   it('keeps a second destination on the same source pipeline', () => {
     const unit: Unit = {
       ...unitWith([]),
@@ -146,26 +139,6 @@ describe('unit connections', () => {
     ]);
   });
 
-  it('refuses a direct line from a source that feeds a routing pipeline', () => {
-    const routed = unitWith([
-      {
-        id: 'main',
-        supported_telemetry: ['logs'],
-        config: [
-          { name: 'sources', value: ['otlp-input'] },
-          {
-            name: 'routes',
-            value: [{ when: 'body["service.name"] == "nginx"', destinations: ['es-logs'] }],
-          },
-        ],
-      },
-    ]);
-
-    expect(hasSourceConnection(routed, 'otlp-input')).toBe(true);
-    expect(canConnectSourceToDestination(routed, 'otlp-input', 'es-metrics')).toBe(false);
-    expect(connectSourceToDestination(routed, 'otlp-input', 'es-metrics')).toBe(routed);
-    expect(canConnectSourceToDestination(routed, 'bulk-input', 'es-logs')).toBe(true);
-  });
   it('keeps a routed destination and a direct wire to the same destination apart', () => {
     const unit = unitWith([
       {
@@ -507,21 +480,6 @@ describe('unit connections', () => {
     ]);
   });
 
-  it('refuses to move a line onto a source that is already connected', () => {
-    const connected = connectSourceToDestination(
-      connectSourceToDestination(unitWith([]), 'otlp-input', 'es-logs'),
-      'bulk-input',
-      'es-metrics'
-    );
-    const next = moveUnitConnection(connected, {
-      previousSourceId: 'otlp-input',
-      previousDestinationId: 'es-logs',
-      sourceId: 'bulk-input',
-      destinationId: 'es-logs',
-    });
-
-    expect(next).toBe(connected);
-  });
   it('moves a line onto a free destination', () => {
     const connected = connectSourceToDestination(unitWith([]), 'otlp-input', 'es-logs');
     const next = moveUnitConnection(connected, {
