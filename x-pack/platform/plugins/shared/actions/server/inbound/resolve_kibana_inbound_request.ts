@@ -8,7 +8,14 @@
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
-import { isUiamCredential, markExternalUiamCredential } from '@kbn/core-security-server';
+import { CLOUD_SERVICE_ACCOUNT_REALM_TYPE } from '@kbn/core-security-common';
+import {
+  ES_CLIENT_AUTHENTICATION_HEADER,
+  HTTPAuthorizationHeader,
+  isUiamBearerCredential,
+  isUiamCredential,
+  markExternalUiamCredential,
+} from '@kbn/core-security-server';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import { isUnauthorizedError } from '@kbn/es-errors';
 
@@ -16,12 +23,26 @@ import { getUiamApiKeySecret } from './event_identity/encode_api_key';
 
 const MAX_API_KEY_CREDENTIAL_LENGTH = 8192;
 
-const readApiKey = (headers: Record<string, string | string[] | undefined>): string | undefined => {
+type InboundAuthorization =
+  | { readonly kind: 'bearer'; readonly authorization: HTTPAuthorizationHeader }
+  | { readonly kind: 'api_key'; readonly credential: string };
+
+const readHeaderValue = (
+  headers: Record<string, string | string[] | undefined>
+): string | undefined => {
   const authorization = headers.authorization;
   const header = Array.isArray(authorization) ? authorization[0] : authorization;
-  const credential =
-    typeof header === 'string' ? /^ApiKey\s+(\S+)$/i.exec(header.trim())?.[1] : undefined;
-  if (!credential || credential.length > MAX_API_KEY_CREDENTIAL_LENGTH) {
+  return typeof header === 'string' ? header : undefined;
+};
+
+/** One token after the scheme. A credential with internal whitespace is not an ApiKey. */
+const readApiKeyCredential = (credentials: string): string | undefined => {
+  const credential = credentials.trim();
+  if (
+    credential.length === 0 ||
+    credential.length > MAX_API_KEY_CREDENTIAL_LENGTH ||
+    /\s/.test(credential)
+  ) {
     return undefined;
   }
 
@@ -37,6 +58,28 @@ const readApiKey = (headers: Record<string, string | string[] | undefined>): str
   return getUiamApiKeySecret(credential);
 };
 
+/**
+ * Parses Authorization once. `kind` is the scheme already decided here, so callers do not
+ * parse the header again.
+ */
+const readInboundAuthorization = (
+  headers: Record<string, string | string[] | undefined>
+): InboundAuthorization | undefined => {
+  const header = readHeaderValue(headers)?.trim();
+  const authorization = header ? HTTPAuthorizationHeader.parseFromValue(header) : null;
+  if (!authorization) {
+    return undefined;
+  }
+  if (isUiamBearerCredential(authorization)) {
+    return { kind: 'bearer', authorization };
+  }
+  if (authorization.scheme.toLowerCase() !== 'apikey') {
+    return undefined;
+  }
+  const credential = readApiKeyCredential(authorization.credentials);
+  return credential ? { kind: 'api_key', credential } : undefined;
+};
+
 const kibanaApiKeyRequest = (credential: string, spaceId: string): KibanaRequest => {
   const requestHeaders: Headers = { authorization: `ApiKey ${credential}` };
   const fakeRawRequest: FakeRawRequest = {
@@ -44,6 +87,20 @@ const kibanaApiKeyRequest = (credential: string, spaceId: string): KibanaRequest
     spaceId: brandSpaceId(spaceId),
   };
   return kibanaRequestFactory(fakeRawRequest);
+};
+
+const readClientAuthentication = (
+  headers: Record<string, string | string[] | undefined>
+): string | undefined => {
+  const value = headers[ES_CLIENT_AUTHENTICATION_HEADER];
+  if (
+    typeof value !== 'string' ||
+    value.length === 0 ||
+    value.length > MAX_API_KEY_CREDENTIAL_LENGTH
+  ) {
+    return undefined;
+  }
+  return value;
 };
 
 const elasticsearchAccepts = async (
@@ -61,31 +118,117 @@ const elasticsearchAccepts = async (
   }
 };
 
+const kibanaBearerRequest = (
+  authorization: string,
+  clientAuthentication: string | undefined,
+  spaceId: string
+): KibanaRequest => {
+  const requestHeaders: Headers = {
+    authorization,
+    ...(clientAuthentication ? { [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication } : {}),
+  };
+  const fakeRawRequest: FakeRawRequest = {
+    headers: requestHeaders,
+    spaceId: brandSpaceId(spaceId),
+  };
+  return kibanaRequestFactory(fakeRawRequest);
+};
+
+const resolveServiceAccountBearer = async ({
+  authorization,
+  inboundRequest,
+  spaceId,
+  elasticsearchClient,
+  getKibanaRequestAccess,
+}: {
+  authorization: HTTPAuthorizationHeader;
+  inboundRequest: KibanaRequest;
+  spaceId: string;
+  elasticsearchClient: IClusterClient;
+  getKibanaRequestAccess: (request: KibanaRequest) => Promise<boolean>;
+}): Promise<KibanaRequest | undefined> => {
+  if (
+    authorization.credentials.length === 0 ||
+    authorization.credentials.length > MAX_API_KEY_CREDENTIAL_LENGTH
+  ) {
+    return undefined;
+  }
+
+  // Cluster client relays x-client-authentication only for a real request. A factory
+  // request is internal, and Kibana would attach its own secret.
+  const clientAuthentication = readClientAuthentication(inboundRequest.headers);
+  if (!clientAuthentication || inboundRequest.isFakeRequest) {
+    return undefined;
+  }
+
+  let authenticationRealmType: string | undefined;
+  try {
+    const user = await elasticsearchClient
+      .asScoped(inboundRequest)
+      .asCurrentUser.security.authenticate();
+    authenticationRealmType = user.authentication_realm?.type;
+  } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return undefined;
+    }
+    throw error;
+  }
+
+  // A user essu_ bearer must not fall through to the API-key grant.
+  if (authenticationRealmType !== CLOUD_SERVICE_ACCOUNT_REALM_TYPE) {
+    return undefined;
+  }
+
+  const allowed = await getKibanaRequestAccess(inboundRequest);
+  if (!allowed) {
+    return undefined;
+  }
+
+  // The schedule request carries the same pair the grant reads. It is not used to
+  // decide admission: asScoped on this object would classify the call as internal.
+  return kibanaBearerRequest(authorization.toString(), clientAuthentication, spaceId);
+};
+
 /**
- * Builds a Kibana request when Elasticsearch accepts the caller's ApiKey and the key can access the space.
- * A 401 or a failed space check returns undefined.
+ * Builds a Kibana request when Elasticsearch accepts the caller's ApiKey or UIAM service-account
+ * bearer and that credential can access the space. A 401 or a failed space check returns undefined.
  */
 export const resolveKibanaInboundRequest = async ({
   headers,
+  inboundRequest,
   spaceId,
   elasticsearchClient,
   getKibanaRequestAccess,
 }: {
   headers: Record<string, string | string[] | undefined>;
+  inboundRequest?: KibanaRequest;
   spaceId: string;
   elasticsearchClient: IClusterClient;
   getKibanaRequestAccess: (request: KibanaRequest) => Promise<boolean>;
 }): Promise<KibanaRequest | undefined> => {
-  const credential = readApiKey(headers);
-  if (!credential) {
+  const inbound = readInboundAuthorization(headers);
+  if (!inbound) {
     return undefined;
+  }
+
+  if (inbound.kind === 'bearer') {
+    if (!inboundRequest) {
+      return undefined;
+    }
+    return resolveServiceAccountBearer({
+      authorization: inbound.authorization,
+      inboundRequest,
+      spaceId,
+      elasticsearchClient,
+      getKibanaRequestAccess,
+    });
   }
 
   // A user-created Cloud key is rejected when Kibana's shared secret is attached, so try that first.
   // A 401 retries once without the mark, because a Kibana-granted UIAM key needs the secret.
-  const attempts = isUiamCredential(credential) ? [true, false] : [false];
+  const attempts = isUiamCredential(inbound.credential) ? [true, false] : [false];
   for (const external of attempts) {
-    const request = kibanaApiKeyRequest(credential, spaceId);
+    const request = kibanaApiKeyRequest(inbound.credential, spaceId);
     if (external) {
       markExternalUiamCredential(request);
     }

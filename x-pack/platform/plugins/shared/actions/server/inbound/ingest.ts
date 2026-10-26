@@ -55,11 +55,11 @@ export interface IngestInboundEventInput {
   connectorTypeId: string;
   connectorId: string;
   spaceId: SpaceId;
-  requestId?: string;
-  headers: Record<string, string | string[] | undefined>;
-  query: IngestEventsRequestQuery;
-  body: unknown;
-  remoteAddress: string | undefined;
+  /**
+   * The route request. Headers, query, body, the socket address, and the request id are
+   * read from it. A UIAM service-account bearer is authenticated on this same object.
+   */
+  request: KibanaRequest<unknown, IngestEventsRequestQuery, unknown>;
 }
 
 export interface IngestInboundEventParams extends IngestInboundEventInput {
@@ -89,11 +89,7 @@ export async function ingestInboundEvent({
   connectorTypeId: connectorTypeIdParam,
   connectorId,
   spaceId,
-  requestId,
-  headers,
-  query,
-  body,
-  remoteAddress,
+  request,
   inboundEventsEnabled,
   isActionTypeEnabled,
   maxEmitted,
@@ -107,6 +103,8 @@ export async function ingestInboundEvent({
   inMemoryConnectors,
   rateLimiter,
 }: IngestInboundEventParams): Promise<IngestInboundEventResult> {
+  const { headers, query, body, id: requestId } = request;
+  const remoteAddress = request.socket.remoteAddress;
   const connectorTypeId = normalizeConnectorTypeId(connectorTypeIdParam);
   const baseLog = {
     spaceId,
@@ -209,6 +207,7 @@ export async function ingestInboundEvent({
     try {
       kibanaScheduleRequest = await resolveKibanaInboundRequest({
         headers,
+        inboundRequest: request,
         spaceId,
         elasticsearchClient: await getElasticsearchClient(),
         getKibanaRequestAccess,

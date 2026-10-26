@@ -8,7 +8,13 @@
 import type { DiagnosticResult, TransportResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { isExternalUiamCredential } from '@kbn/core-security-server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { KibanaRequest } from '@kbn/core/server';
+import { CLOUD_SERVICE_ACCOUNT_REALM_TYPE } from '@kbn/core-security-common';
+import {
+  ES_CLIENT_AUTHENTICATION_HEADER,
+  isExternalUiamCredential,
+} from '@kbn/core-security-server';
 
 import { resolveKibanaInboundRequest } from './resolve_kibana_inbound_request';
 
@@ -136,5 +142,172 @@ describe('resolveKibanaInboundRequest', () => {
     await expect(resolve('Bearer credential.secret', client)).resolves.toBeUndefined();
     await expect(resolve(undefined, client)).resolves.toBeUndefined();
     expect(authenticate(client)).not.toHaveBeenCalled();
+  });
+
+  describe('UIAM service-account bearer', () => {
+    const clientAuthentication = 'gateway-secret';
+    const authorization = 'Bearer essu_exchange';
+
+    const serviceAccount = () =>
+      ({
+        username: 'sa-id',
+        authentication_realm: {
+          name: CLOUD_SERVICE_ACCOUNT_REALM_TYPE,
+          type: CLOUD_SERVICE_ACCOUNT_REALM_TYPE,
+        },
+      } as never);
+
+    const inboundRequestFor = (
+      extraHeaders: Record<string, string | string[] | undefined> = {
+        [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication,
+      }
+    ) =>
+      httpServerMock.createKibanaRequest({
+        headers: { authorization, ...extraHeaders },
+      });
+
+    const resolveBearer = (
+      client: ReturnType<typeof createClient>,
+      extraHeaders: Record<string, string | string[] | undefined> = {
+        [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication,
+      },
+      getKibanaRequestAccess: (request: KibanaRequest) => Promise<boolean> = async () => true,
+      inboundRequest: KibanaRequest | undefined = inboundRequestFor(extraHeaders)
+    ) =>
+      resolveKibanaInboundRequest({
+        headers: { authorization, ...extraHeaders },
+        inboundRequest,
+        spaceId: 'default',
+        elasticsearchClient: client,
+        getKibanaRequestAccess,
+      });
+
+    it('authenticates the route request and returns a schedule request with both headers', async () => {
+      const client = createClient();
+      authenticate(client).mockResolvedValue(serviceAccount());
+      const getKibanaRequestAccess = jest.fn().mockResolvedValue(true);
+      const inboundRequest = inboundRequestFor();
+
+      const request = await resolveBearer(
+        client,
+        undefined,
+        getKibanaRequestAccess,
+        inboundRequest
+      );
+
+      expect(inboundRequest.isFakeRequest).toBe(false);
+      expect(client.asScoped).toHaveBeenCalledWith(inboundRequest);
+      expect(getKibanaRequestAccess).toHaveBeenCalledWith(inboundRequest);
+      expect(request).not.toBe(inboundRequest);
+      expect(request?.headers.authorization).toBe(authorization);
+      expect(request?.headers[ES_CLIENT_AUTHENTICATION_HEADER]).toBe(clientAuthentication);
+      expect(request?.isFakeRequest).toBe(true);
+      expect(request?.spaceId).toBe('default');
+      expect(request && isExternalUiamCredential(request)).toBe(false);
+      expect(authenticate(client)).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns undefined when the caller sent no client authentication', async () => {
+      const client = createClient();
+      client.asScoped.mockClear();
+
+      await expect(resolveBearer(client, {})).resolves.toBeUndefined();
+      expect(client.asScoped).not.toHaveBeenCalled();
+    });
+
+    it('returns undefined when the route request is missing', async () => {
+      const client = createClient();
+      client.asScoped.mockClear();
+
+      await expect(
+        resolveKibanaInboundRequest({
+          headers: {
+            authorization,
+            [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication,
+          },
+          spaceId: 'default',
+          elasticsearchClient: client,
+          getKibanaRequestAccess: async () => true,
+        })
+      ).resolves.toBeUndefined();
+      expect(client.asScoped).not.toHaveBeenCalled();
+    });
+
+    it('returns undefined for a factory request and does not call Elasticsearch', async () => {
+      const client = createClient();
+      client.asScoped.mockClear();
+      const inboundRequest = httpServerMock.createFakeKibanaRequest({
+        headers: {
+          authorization,
+          [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication,
+        },
+      });
+
+      await expect(
+        resolveBearer(client, undefined, async () => true, inboundRequest)
+      ).resolves.toBeUndefined();
+      expect(client.asScoped).not.toHaveBeenCalled();
+    });
+
+    it('returns undefined for a user bearer and does not check space access', async () => {
+      const client = createClient();
+      authenticate(client).mockResolvedValue({
+        username: 'user',
+        authentication_realm: { name: 'cloud', type: 'cloud' },
+      } as never);
+      const getKibanaRequestAccess = jest.fn().mockResolvedValue(true);
+
+      await expect(
+        resolveBearer(client, undefined, getKibanaRequestAccess)
+      ).resolves.toBeUndefined();
+      expect(getKibanaRequestAccess).not.toHaveBeenCalled();
+    });
+
+    it('returns undefined when Elasticsearch rejects the bearer', async () => {
+      const client = createClient();
+      authenticate(client).mockRejectedValue(unauthorized(401));
+
+      await expect(resolveBearer(client)).resolves.toBeUndefined();
+      expect(authenticate(client)).toHaveBeenCalledTimes(1);
+    });
+
+    it('rethrows when Elasticsearch fails for a reason other than 401', async () => {
+      const client = createClient();
+      const failure = unauthorized(503);
+      authenticate(client).mockRejectedValue(failure);
+
+      await expect(resolveBearer(client)).rejects.toBe(failure);
+    });
+
+    it('returns undefined when the service account cannot access the space', async () => {
+      const client = createClient();
+      authenticate(client).mockResolvedValue(serviceAccount());
+
+      await expect(resolveBearer(client, undefined, async () => false)).resolves.toBeUndefined();
+      expect(authenticate(client)).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call Elasticsearch for a bearer longer than 8192 characters', async () => {
+      const client = createClient();
+      client.asScoped.mockClear();
+      const credential = `essu_${'a'.repeat(8192)}`;
+      const inboundRequest = httpServerMock.createKibanaRequest({
+        headers: {
+          authorization: `Bearer ${credential}`,
+          [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication,
+        },
+      });
+
+      await expect(
+        resolveKibanaInboundRequest({
+          headers: inboundRequest.headers,
+          inboundRequest,
+          spaceId: 'default',
+          elasticsearchClient: client,
+          getKibanaRequestAccess: async () => true,
+        })
+      ).resolves.toBeUndefined();
+      expect(client.asScoped).not.toHaveBeenCalled();
+    });
   });
 });

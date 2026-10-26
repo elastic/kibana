@@ -146,11 +146,7 @@ export function inboundEventsRoute({
           connectorTypeId,
           connectorId,
           spaceId: getSpaceId(request),
-          requestId: request.id,
-          headers: request.headers,
-          query: request.query,
-          body: request.body,
-          remoteAddress: request.socket.remoteAddress,
+          request,
         });
         return mapIngestResultToResponse(result, response);
       }
