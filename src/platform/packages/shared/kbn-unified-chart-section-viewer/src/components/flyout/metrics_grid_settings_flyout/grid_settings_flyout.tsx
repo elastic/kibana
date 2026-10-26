@@ -24,6 +24,7 @@ import {
   EuiAccordion,
   EuiIconTip,
   EuiButtonGroup,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -72,6 +73,7 @@ export const GridSettingsFlyout = ({
   onGridSettingsChange,
   onClose,
 }: GridSettingsFlyoutProps) => {
+  const { euiTheme } = useEuiTheme();
   const { trackAggregationConfigChanged } = useTelemetry();
   const titleId = useGeneratedHtmlId({ prefix: 'metricsGridSettingsFlyoutTitle' });
   const aggregationAccordionId = useGeneratedHtmlId({
@@ -255,6 +257,7 @@ export const GridSettingsFlyout = ({
     <EuiFlyout
       onClose={onClose}
       size="s"
+      maxWidth={euiTheme.breakpoint.xs}
       type="push"
       ownFocus
       data-test-subj="metricsExperienceGridSettingsFlyout"
