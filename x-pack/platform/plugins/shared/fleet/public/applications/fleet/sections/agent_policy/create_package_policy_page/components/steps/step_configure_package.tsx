@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import semverLt from 'semver/functions/lt';
 import {
   EuiHorizontalRule,
   EuiFlexGroup,
@@ -37,6 +38,7 @@ import type {
   RegistryInput,
 } from '../../../../../types';
 import { Loading } from '../../../../../components';
+import { useGetPackageInfoByKeyQuery } from '../../../../../hooks';
 import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
 
 import type { PackagePolicyValidationResults, VarGroupSelection } from '../../services';
@@ -96,20 +98,37 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
 
   // Columnar index mode: one choice per installed integration, stored on the installation and set
   // through the package API when the page is saved. It can only be turned on when every logs data
-  // stream of the integration declares readiness.
-  const logsDataStreams = useMemo(
-    () =>
-      packageInfo.type === 'input'
-        ? []
-        : (packageInfo.data_streams ?? []).filter((dataStream) => dataStream.type === 'logs'),
-    [packageInfo]
-  );
-  const isColumnarNotReady = useMemo(
-    () => getLogsdbColumnarNotReadyDataStreams(packageInfo, logsDataStreams).length > 0,
-    [packageInfo, logsDataStreams]
-  );
+  // stream of the installed version declares readiness, which is what the API checks. A policy
+  // being edited can still be on an older version than the installed one. A newer version on the
+  // add page is installed when the page is saved, so its own readiness applies.
   const installationInfo =
     'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
+  const installedVersion = installationInfo?.version;
+  const isPolicyBehindInstallation =
+    !!installedVersion && semverLt(packageInfo.version, installedVersion);
+  const { data: installedPackageData } = useGetPackageInfoByKeyQuery(
+    packageInfo.name,
+    installedVersion,
+    { full: true },
+    { enabled: isPolicyBehindInstallation && !!onLogsdbColumnarChange }
+  );
+  const columnarPackageInfo: PackageInfo =
+    isPolicyBehindInstallation && installedPackageData?.item
+      ? installedPackageData.item
+      : packageInfo;
+  const logsDataStreams = useMemo(
+    () =>
+      columnarPackageInfo.type === 'input'
+        ? []
+        : (columnarPackageInfo.data_streams ?? []).filter(
+            (dataStream) => dataStream.type === 'logs'
+          ),
+    [columnarPackageInfo]
+  );
+  const isColumnarNotReady = useMemo(
+    () => getLogsdbColumnarNotReadyDataStreams(columnarPackageInfo, logsDataStreams).length > 0,
+    [columnarPackageInfo, logsDataStreams]
+  );
   const isColumnarIndexModeEnabled =
     logsdbColumnar ??
     (installationInfo

@@ -539,6 +539,47 @@ describe('StepConfigurePackage', () => {
       expect(onLogsdbColumnarChange).toHaveBeenCalledWith(false);
     });
 
+    // On the edit page the policy can be on an older version than the installed one; the choice
+    // belongs to the installation, so readiness comes from the installed version, as in the API.
+    const installVersion = (version: string, installed: Partial<PackageInfo>) => {
+      (packageInfo as any).installationInfo = { version, logsdb_columnar_enabled: false };
+      testRenderer.startServices.http.get.mockImplementation(async (path: any) =>
+        path === `/api/fleet/epm/packages/nginx/${version}`
+          ? { item: { ...packageInfo, ...installed, version } }
+          : undefined
+      );
+    };
+
+    it('reads readiness from the installed version when the policy is on an older one', async () => {
+      // The policy's version declares nothing; the installed one is ready.
+      installVersion('2.0.0', { elasticsearch: { logsdb_columnar: 'opt_in' } });
+      renderWithSwitch();
+
+      await waitFor(() => expect(renderResult.getByTestId(SWITCH)).not.toBeDisabled());
+      expect(renderResult.getByTestId(SWITCH)).not.toBeChecked();
+    });
+
+    it('is greyed out when the installed version is not ready, even if the policy version is', async () => {
+      declareReadiness();
+      installVersion('2.0.0', { elasticsearch: {} });
+      renderWithSwitch();
+
+      await waitFor(() => expect(renderResult.getByTestId(SWITCH)).toBeDisabled());
+    });
+
+    it('reads readiness from the page version when it is newer than the installed one', () => {
+      // The add page installs this newer version when it is saved.
+      declareReadiness();
+      installVersion('1.0.0', { elasticsearch: {} });
+      renderWithSwitch();
+
+      expect(renderResult.getByTestId(SWITCH)).not.toBeDisabled();
+      expect(testRenderer.startServices.http.get).not.toHaveBeenCalledWith(
+        '/api/fleet/epm/packages/nginx/1.0.0',
+        expect.anything()
+      );
+    });
+
     it('starts on for a new installation of a package that defaults to it', () => {
       declareReadiness('default');
       renderWithSwitch();
