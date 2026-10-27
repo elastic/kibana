@@ -99,9 +99,10 @@ export const DashboardListing = ({
     [tabs, activeTabId, changeActiveTab]
   );
 
+  const activeTabTitle = tabs.find((tab) => tab.id === activeTabId)?.title;
+
   const getBreadcrumbs = useCallback(
     (appId: string): EmbeddableEditorBreadcrumb[] => {
-      const activeTabTitle = tabs.find((tab) => tab.id === activeTabId)?.title;
       const dashboardBreadcrumb = {
         text: dashboardListingTitle,
         href: coreServices.application.getUrlForApp(appId, {
@@ -123,7 +124,7 @@ export const DashboardListing = ({
         },
       ];
     },
-    [tabs, activeTabId]
+    [activeTabId, activeTabTitle]
   );
 
   const tabParentProps = useMemo<TableListTabParentProps>(
@@ -235,14 +236,16 @@ export const DashboardListing = ({
     };
   }, [onImportSuccess, createDashboardAction, getTabs]);
 
+  const sectionLabel = activeTabTitle ?? dashboardListingTitle;
+
   return (
     <I18nProvider>
       <QueryClientProvider client={dashboardQueryClient}>
         {children}
         <AppHeader title={dashboardListingTitle} tabs={headerTabs} menu={appMenu} />
         <KibanaContentListPage data-test-subj={pageDataTestSubject}>
-          <KibanaContentListPage.Section aria-label={dashboardListingTitle}>
-            <KibanaSectionErrorBoundary key={activeTabId} sectionName={dashboardListingTitle}>
+          <KibanaContentListPage.Section aria-label={sectionLabel}>
+            <KibanaSectionErrorBoundary key={activeTabId} sectionName={sectionLabel}>
               <KibanaContentListPage.ActiveTab tabs={contentTabs} activeTabId={activeTabId} />
             </KibanaSectionErrorBoundary>
           </KibanaContentListPage.Section>
