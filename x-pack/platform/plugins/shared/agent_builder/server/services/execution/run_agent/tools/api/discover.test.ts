@@ -7,11 +7,13 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
+import type { ErrorResultData } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { agentBuilderMocks } from '../../../../../mocks';
 import { createDiscoverApisTool } from './discover';
 import type { ApiDiscoverResultData } from './discover';
 import { getRegistries } from '../../api/registry';
+import { DISCOVER_RESULT_LIMIT } from '../../api';
 import type { ApiRegistry, ApiRegistryMeta } from '../../api';
 
 jest.mock('../../api/registry', () => ({
@@ -36,6 +38,12 @@ const createRegistry = (manifest: ApiRegistryMeta[]): ApiRegistry => ({
   manifest,
   loadApi: jest.fn(),
 });
+
+const discover = async (search: string): Promise<ToolHandlerStandardReturn> =>
+  (await createDiscoverApisTool().handler(
+    { target: 'elasticsearch', search },
+    agentBuilderMocks.tools.createHandlerContext()
+  )) as ToolHandlerStandardReturn;
 
 describe('createDiscoverApisTool', () => {
   const manifest = [
@@ -67,32 +75,29 @@ describe('createDiscoverApisTool', () => {
     expect(tool.id).toBe(internalTools.discoverApis);
   });
 
-  it('returns all APIs when no search is provided', async () => {
+  it('requires a search term', () => {
     const tool = createDiscoverApisTool();
-    const result = (await tool.handler(
-      { target: 'elasticsearch' },
-      agentBuilderMocks.tools.createHandlerContext()
-    )) as ToolHandlerStandardReturn;
+
+    expect(tool.schema.safeParse({ target: 'elasticsearch' }).success).toBe(false);
+    expect(
+      tool.schema.safeParse({ target: 'elasticsearch', search: 'x'.repeat(501) }).success
+    ).toBe(false);
+  });
+
+  it('returns an error result for a blank search', async () => {
+    const result = await discover('   ');
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    const data = result.results[0].data as ErrorResultData;
+    expect(data.message).toContain('search is required');
+  });
+
+  it('ranks the APIs matching a multi-word query', async () => {
+    const result = await discover('CLUSTER health status');
 
     expect(result.results[0].type).toBe(ToolResultType.other);
     const data = result.results[0].data as ApiDiscoverResultData;
-    expect(data.total).toBe(3);
-    expect(data.apis.map((entry) => entry.api)).toEqual([
-      'indices.create',
-      'bulk',
-      'cluster.health',
-    ]);
-  });
-
-  it('filters APIs by case-insensitive substring across name/namespace/description/id', async () => {
-    const tool = createDiscoverApisTool();
-    const result = (await tool.handler(
-      { target: 'elasticsearch', search: 'CLUSTER' },
-      agentBuilderMocks.tools.createHandlerContext()
-    )) as ToolHandlerStandardReturn;
-
-    const data = result.results[0].data as ApiDiscoverResultData;
-    expect(data.total).toBe(1);
+    expect(data.apis).toHaveLength(1);
     expect(data.apis[0]).toEqual({
       api: 'cluster.health',
       name: 'health',
@@ -101,25 +106,38 @@ describe('createDiscoverApisTool', () => {
     });
   });
 
-  it('maps root operations to a null namespace', async () => {
-    const tool = createDiscoverApisTool();
-    const result = (await tool.handler(
-      { target: 'elasticsearch', search: 'bulk' },
-      agentBuilderMocks.tools.createHandlerContext()
-    )) as ToolHandlerStandardReturn;
+  it(`returns at most ${DISCOVER_RESULT_LIMIT} APIs`, async () => {
+    mockGetRegistries.mockResolvedValue({
+      elasticsearch: createRegistry(
+        Array.from({ length: DISCOVER_RESULT_LIMIT + 5 }, (_, index) =>
+          createMeta({ id: `widgets.op${index}`, name: `op${index}`, namespace: 'widgets' })
+        )
+      ),
+      kibana: createRegistry([]),
+    });
 
-    const data = result.results[0].data as ApiDiscoverResultData;
-    expect(data.apis[0].namespace).toBeNull();
+    const data = (await discover('widgets')).results[0].data as ApiDiscoverResultData;
+
+    expect(data.apis).toHaveLength(DISCOVER_RESULT_LIMIT);
+  });
+
+  it('returns an empty listing when nothing matches', async () => {
+    const result = await discover('no-such-api');
+
+    expect(result.results[0].type).toBe(ToolResultType.other);
+    expect(result.results[0].data).toEqual({ target: 'elasticsearch', apis: [] });
+  });
+
+  it('maps root operations to a null namespace', async () => {
+    const data = (await discover('bulk')).results[0].data as ApiDiscoverResultData;
+
+    expect(data.apis[0]).toEqual(expect.objectContaining({ api: 'bulk', namespace: null }));
   });
 
   it('returns an error result when the schemas fail to load', async () => {
     mockGetRegistries.mockRejectedValue(new Error('boom'));
 
-    const tool = createDiscoverApisTool();
-    const result = (await tool.handler(
-      { target: 'kibana' },
-      agentBuilderMocks.tools.createHandlerContext()
-    )) as ToolHandlerStandardReturn;
+    const result = await discover('index');
 
     expect(result.results[0].type).toBe(ToolResultType.error);
   });

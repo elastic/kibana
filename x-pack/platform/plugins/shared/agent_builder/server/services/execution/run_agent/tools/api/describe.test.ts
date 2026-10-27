@@ -13,7 +13,7 @@ import { agentBuilderMocks } from '../../../../../mocks';
 import { createDescribeApiTool } from './describe';
 import type { ApiDescribeResultData } from './describe';
 import { getRegistries } from '../../api/registry';
-import type { ApiRegistry, ApiRegistryDefinition, LoadedApi } from '../../api';
+import type { ApiRegistry, ApiRegistryDefinition, ApiRegistryMeta, LoadedApi } from '../../api';
 
 jest.mock('../../api/registry', () => ({
   ...jest.requireActual('../../api/registry'),
@@ -48,6 +48,16 @@ class UnknownApiError extends Error {
     this.name = 'UnknownApiError';
   }
 }
+
+const indicesCreateMeta: ApiRegistryMeta = {
+  id: 'indices.create',
+  name: 'create',
+  namespace: 'indices',
+  description: 'Create an index',
+  namespaceFile: 'indices',
+  destructive: false,
+  readOnly: false,
+};
 
 describe('createDescribeApiTool', () => {
   let loadApi: jest.Mock;
@@ -291,6 +301,23 @@ describe('createDescribeApiTool', () => {
     expect(data.message).toContain(internalTools.discoverApis);
   });
 
+  it('suggests close identifiers for an unknown API identifier', async () => {
+    mockGetRegistries.mockResolvedValue({
+      elasticsearch: { ...createRegistry(loadApi), manifest: [indicesCreateMeta] },
+      kibana: createRegistry(jest.fn()),
+    });
+    loadApi.mockRejectedValue(new UnknownApiError('indices.craete'));
+
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
+    const result = (await tool.handler(
+      { target: 'elasticsearch', api: 'indices.craete' },
+      agentBuilderMocks.tools.createHandlerContext()
+    )) as ToolHandlerStandardReturn;
+
+    const data = result.results[0].data as ErrorResultData;
+    expect(data.message).toContain('Did you mean: indices.create?');
+  });
+
   describe('when API discovery is disabled', () => {
     it('never points the model at the discovery tool from its description', () => {
       const tool = createDescribeApiTool({ discoveryEnabled: false });
@@ -313,6 +340,24 @@ describe('createDescribeApiTool', () => {
       expect(data.message).not.toContain(internalTools.discoverApis);
       expect(data.message).toContain('no API named "does.not.exist"');
       expect(data.message).toContain('Do not retry with another identifier');
+    });
+
+    it('never suggests another identifier on an unknown API', async () => {
+      mockGetRegistries.mockResolvedValue({
+        elasticsearch: { ...createRegistry(loadApi), manifest: [indicesCreateMeta] },
+        kibana: createRegistry(jest.fn()),
+      });
+      loadApi.mockRejectedValue(new UnknownApiError('indices.craete'));
+
+      const tool = createDescribeApiTool({ discoveryEnabled: false });
+      const result = (await tool.handler(
+        { target: 'elasticsearch', api: 'indices.craete' },
+        agentBuilderMocks.tools.createHandlerContext()
+      )) as ToolHandlerStandardReturn;
+
+      const data = result.results[0].data as ErrorResultData;
+      expect(data.message).not.toContain('Did you mean');
+      expect(data.message).not.toContain('indices.create');
     });
   });
 

@@ -7,14 +7,20 @@
 
 import type { ApiTarget } from '@kbn/agent-builder-common';
 import { getRegistries } from './registry';
+import { getApiSearchIndex } from './search_index';
 import type { ApiRegistry, LoadedApi } from './types';
+
+const MAX_SUGGESTIONS = 5;
 
 export const isUnknownApiError = (err: unknown): err is Error =>
   err instanceof Error && err.name === 'UnknownApiError';
 
 export type LoadApiFailure =
   | { status: 'registry_unavailable'; error: unknown }
-  | { status: 'unknown_api' }
+  | {
+      status: 'unknown_api';
+      suggestions: string[];
+    }
   | { status: 'load_failed'; error: unknown };
 
 export type LoadApiResult = { status: 'loaded'; loaded: LoadedApi } | LoadApiFailure;
@@ -34,9 +40,16 @@ export const loadApi = async (target: ApiTarget, api: string): Promise<LoadApiRe
     return { status: 'registry_unavailable', error };
   }
 
+  const registry = registries[target];
   try {
-    return { status: 'loaded', loaded: await registries[target].loadApi(api) };
+    return { status: 'loaded', loaded: await registry.loadApi(api) };
   } catch (error) {
-    return isUnknownApiError(error) ? { status: 'unknown_api' } : { status: 'load_failed', error };
+    if (!isUnknownApiError(error)) {
+      return { status: 'load_failed', error };
+    }
+    return {
+      status: 'unknown_api',
+      suggestions: getApiSearchIndex(registry).suggest(api, MAX_SUGGESTIONS),
+    };
   }
 };

@@ -57,17 +57,26 @@ export const apiFailureToErrorResult = (
     case 'registry_unavailable':
       return registryUnavailableErrorResult(failure.error, { toolId, logger });
 
-    case 'unknown_api':
-      return createErrorResult({
-        message: discoveryEnabled
-          ? `Unknown API identifier: "${api}". Use the ${internalTools.discoverApis} tool to ` +
-            `find valid identifiers.`
-          : `The ${target} target exposes no API named "${api}". Do not retry with another ` +
+    case 'unknown_api': {
+      if (!discoveryEnabled) {
+        return createErrorResult({
+          message:
+            `The ${target} target exposes no API named "${api}". Do not retry with another ` +
             `identifier unless a skill or the user gave it to you. ` +
             `Otherwise, stop using ${internalTools.describeApi} and ${internalTools.executeApi} ` +
             `for this operation. Do the task with your other tools instead, or tell the user ` +
             `the operation is not available.`,
+        });
+      }
+
+      const { suggestions } = failure;
+      const didYouMean = suggestions.length > 0 ? ` Did you mean: ${suggestions.join(', ')}?` : '';
+      return createErrorResult({
+        message:
+          `Unknown API identifier: "${api}".${didYouMean} Use the ` +
+          `${internalTools.discoverApis} tool to find valid identifiers.`,
       });
+    }
 
     case 'load_failed':
       logger.error(`${toolId}: failed to load API "${api}" (target=${target}): ${failure.error}`);
