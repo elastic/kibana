@@ -26,11 +26,16 @@ import type {
  * `extraction_pending` closes on its own once the enrich workflow finishes, so a later
  * sweep hunts the report with real terms.
  *
+ * `generation_budget` belongs here too: a technique the budget never reached was not
+ * searched, and the next run skips the techniques the ledger records as searched, so
+ * the budget now goes to exactly the ones this run left out and the report converges
+ * instead of cycling. `collapsed` stays final: its artifacts were searched by a sibling.
+ *
  * The line is whether a later run could plausibly cover the same technique. A technique
- * that is not in the catalog, input this run truncated, a budget it exhausted, and rows
- * it could not interpret all stay final: those reproduce. Retries are not bounded here,
- * because a bound needs an attempt count kept alongside the report, which is state the
- * caller recording hunt outcomes owns rather than this run.
+ * that is not in the catalog, input this run truncated, and rows it could not interpret
+ * all stay final: those reproduce. Retries are not bounded here, because a bound needs an
+ * attempt count kept alongside the report, which is state the caller recording hunt
+ * outcomes owns rather than this run.
  */
 const RETRYABLE_REASONS: ReadonlySet<HuntIncompleteReason> = new Set<HuntIncompleteReason>([
   'search_partial',
@@ -40,6 +45,7 @@ const RETRYABLE_REASONS: ReadonlySet<HuntIncompleteReason> = new Set<HuntIncompl
   'query_ungrounded',
   'quote_ungrounded',
   'execute_failed',
+  'generation_budget',
   'catalog_unavailable',
   'extraction_pending',
 ]);

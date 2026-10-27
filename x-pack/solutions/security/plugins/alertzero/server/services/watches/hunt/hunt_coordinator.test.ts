@@ -1459,7 +1459,7 @@ describe('huntCoordinator', () => {
     );
   });
 
-  it('surfaces a budget-truncated Tier 2 without failing the run', async () => {
+  it('surfaces a budget-truncated Tier 2 as retryable, without failing the run', async () => {
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
     mockT2.mockResolvedValueOnce({
       status: 'behaviors_proposed',
@@ -1498,12 +1498,11 @@ describe('huntCoordinator', () => {
     expect(result.tier2?.incomplete).toHaveLength(2);
     expect(result.next_step).toContain('budget reached before T1059');
     expect(result.message).toContain('2 coverage gap(s)');
-    // A deterministic budget cut must not re-open the report: the next sweep would
-    // truncate it identically and re-spend the whole budget on the same techniques.
-    expect(result.completed_successfully).toBe(true);
-    // But it is not a clean environment either, which is the distinction the flag
-    // above cannot carry on its own.
-    expect(result.completeness).toBe('incomplete_final');
+    // A budget cut leaves techniques unsearched, and the next run skips the ones this run
+    // recorded as searched, so the report stays eligible to be resumed rather than retiring
+    // with part of it never hunted.
+    expect(result.completed_successfully).toBe(false);
+    expect(result.completeness).toBe('incomplete_retryable');
   });
 
   it('forwards the Tier 1 window into huntBehavior for execute', async () => {
@@ -2096,7 +2095,7 @@ describe('huntCoordinator', () => {
       );
       mockT2.mockResolvedValueOnce(
         tier2Result({
-          incomplete: [{ reason: 'generation_budget', technique_id: 'T1566', detail: 'cut' }],
+          incomplete: [{ reason: 'collapsed', technique_id: 'T1566', detail: 'cut' }],
         })
       );
 
