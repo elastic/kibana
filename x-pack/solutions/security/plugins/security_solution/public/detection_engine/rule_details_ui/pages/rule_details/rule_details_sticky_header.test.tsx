@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, renderHook, screen } from '@testing-library/react';
+import { useEuiTheme } from '@elastic/eui';
 import { RuleDetailsStickyHeader } from './rule_details_sticky_header';
 
 const expectedTop = (kqlBarHeight: number) =>
@@ -56,5 +57,17 @@ describe('RuleDetailsStickyHeader', () => {
 
     expect(screen.getByTestId('ruleDetailsStickyHeader')).toHaveStyleRule('top', expectedTop(48));
     expect(observe).toHaveBeenCalledWith(kqlBar);
+  });
+
+  it('stays below the full screen data grid, which uses the header level minus 2', () => {
+    const { result } = renderHook(() => useEuiTheme());
+    const fullScreenDataGridLevel = Number(result.current.euiTheme.levels.header) - 2;
+
+    renderHeader();
+
+    expect(screen.getByTestId('ruleDetailsStickyHeader')).toHaveStyleRule(
+      'z-index',
+      String(fullScreenDataGridLevel - 1)
+    );
   });
 });

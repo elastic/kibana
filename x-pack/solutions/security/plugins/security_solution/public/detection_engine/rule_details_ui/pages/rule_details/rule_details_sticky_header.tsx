@@ -37,7 +37,8 @@ const useStickyKqlHeaderHeight = (): number => {
  * scrolls. The AppHeader inside must be rendered with `sticky={false}`, and this container must be a
  * direct child of a container as tall as the page, otherwise CSS sticky is confined to the parent's
  * height. The top offset compensates the AppHeader's `largeBleed` negative top margin, which pulls it
- * above this box.
+ * above this box. The z-index sits one level below the full screen data grid (`levels.header - 2`),
+ * so the grid covers the header in full screen mode.
  */
 export const RuleDetailsStickyHeader = React.memo<RuleDetailsStickyHeaderProps>(({ children }) => {
   const { euiTheme } = useEuiTheme();
@@ -52,7 +53,7 @@ export const RuleDetailsStickyHeader = React.memo<RuleDetailsStickyHeaderProps>(
           var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0px)) + ${kqlHeaderHeight}px +
             ${euiTheme.size.l}
         );
-        z-index: ${euiTheme.levels.mask};
+        z-index: ${Number(euiTheme.levels.header) - 3};
         background-color: ${euiTheme.colors.backgroundBasePlain};
       `}
     >
