@@ -1661,6 +1661,27 @@ describe('create', () => {
         expect(createArgs.attributes.settings.extractObservables).toBe(true);
         expect(createArgs.attributes.extract_observables_source).toBe('explicit');
       });
+
+      it('stamps "template" when the caller value equals the template value', async () => {
+        const clientArgs = createClientArgs();
+        clientArgs.services.templatesService.getTemplate.mockResolvedValue(
+          templateWithSettingsSO as never
+        );
+
+        await create(
+          {
+            ...minimalRequest,
+            template: { id: 'tmpl-exp' },
+            settings: { syncAlerts: true, extractObservables: false },
+          },
+          clientArgs,
+          expansionCasesClientMock
+        );
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        expect(createArgs.attributes.settings.extractObservables).toBe(false);
+        expect(createArgs.attributes.extract_observables_source).toBe('template');
+      });
     });
 
     it('records the expanded (not raw) request on the create_case user action', async () => {
@@ -2516,6 +2537,20 @@ describe('create', () => {
         const { attributes } = clientArgs.services.caseService.createCase.mock.calls[0][0];
         expect(attributes.extract_observables_source).toBe('explicit');
         expect(attributes.settings).not.toHaveProperty('extractObservablesSource');
+      });
+
+      it('stamps "space_default" when the caller value equals the space default', async () => {
+        const clientArgs = createClientArgsWithConfig(true);
+
+        await create(
+          { ...theCase, settings: { syncAlerts: true, extractObservables: true } },
+          clientArgs,
+          extractObservablesCasesClient
+        );
+
+        const { attributes } = clientArgs.services.caseService.createCase.mock.calls[0][0];
+        expect(attributes.settings.extractObservables).toBe(true);
+        expect(attributes.extract_observables_source).toBe('space_default');
       });
 
       it('does not record the source in the create_case user action', async () => {

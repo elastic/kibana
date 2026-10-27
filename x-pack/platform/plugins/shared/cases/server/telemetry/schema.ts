@@ -420,27 +420,28 @@ export const casesSchema: CasesTelemetrySchema = {
         type: 'long',
         _meta: {
           description:
-            'Cases where extractObservables was explicitly set by the API caller or UI toggle',
+            'Cases where the caller set extractObservables to a value that differs from the template or space default. Cases created before this attribute existed are not counted in any source bucket',
         },
       },
       extractObservablesSourceTemplate: {
         type: 'long',
         _meta: {
-          description: 'Cases where extractObservables was set by the case template',
+          description:
+            'Cases where extractObservables comes from the case template, unless a caller or a rule changed the value',
         },
       },
       extractObservablesSourceSpaceDefault: {
         type: 'long',
         _meta: {
           description:
-            'Cases where extractObservables was inherited from the space or owner default',
+            'Cases where extractObservables comes from the space or owner default, unless a caller or a rule changed the value',
         },
       },
       extractObservablesSourceRule: {
         type: 'long',
         _meta: {
           description:
-            'Cases where extractObservables was set by a per-rule detection rule override',
+            'Cases where a detection rule set extractObservables to a value that differs from the template or space default',
         },
       },
       observables: observablesSchema,

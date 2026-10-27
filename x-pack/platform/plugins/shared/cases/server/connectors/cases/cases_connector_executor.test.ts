@@ -2610,17 +2610,24 @@ fields: []
               // A case without a template cannot get a value from a template.
               .filter((templateSets) => builder !== 'legacy-no-template' || !templateSets)
               .flatMap((templateSetsExtractObservables) =>
-                overrides.map((override) => ({
-                  builder,
-                  templateSetsExtractObservables,
-                  override,
-                  expected:
-                    override == null
-                      ? ((templateSetsExtractObservables
-                          ? 'template'
-                          : 'space_default') as ExtractObservablesSource)
-                      : ('rule' as ExtractObservablesSource),
-                }))
+                overrides.map((override) => {
+                  // The space default is `true`. The template value, when set, is `false`.
+                  const baselineValue = !templateSetsExtractObservables;
+                  const baselineSource: ExtractObservablesSource = templateSetsExtractObservables
+                    ? 'template'
+                    : 'space_default';
+
+                  return {
+                    builder,
+                    templateSetsExtractObservables,
+                    override,
+                    // An override that equals the baseline value is not a rule choice.
+                    expected:
+                      override == null || override === baselineValue
+                        ? baselineSource
+                        : ('rule' as ExtractObservablesSource),
+                  };
+                })
               )
           );
 

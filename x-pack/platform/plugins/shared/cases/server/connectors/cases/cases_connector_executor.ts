@@ -36,6 +36,7 @@ import {
 } from '../../../common/utils/case_settings';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { ExtractObservablesSource } from '../../common/types/case';
+import { getExtractObservablesSource } from '../../common/extract_observables_source';
 import type { BulkCreateCasesClientOptions } from '../../client/cases/bulk_create';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import type { Case, CaseSeverity } from '../../../common';
@@ -130,20 +131,6 @@ interface BuiltCreateCaseRequest {
   /** Where `settings.extractObservables` came from. Never sent in the request itself. */
   extractObservablesSource: ExtractObservablesSource;
 }
-
-/** A rule override wins over a template value, and a template value wins over the space default. */
-const getExtractObservablesSource = ({
-  override,
-  templateValue,
-}: {
-  override: boolean | null;
-  templateValue: boolean | undefined;
-}): ExtractObservablesSource => {
-  if (override != null) {
-    return 'rule';
-  }
-  return templateValue !== undefined ? 'template' : 'space_default';
-};
 
 /**
  * Splits the built requests into the bulkCreate cases and the internal options. The source map
@@ -995,8 +982,10 @@ export class CasesConnectorExecutor {
     return {
       request: baseRequest,
       extractObservablesSource: getExtractObservablesSource({
-        override: extractObservablesOverride,
+        chosenValue: extractObservablesOverride,
+        chosenSource: 'rule',
         templateValue: v2Template.settings?.extractObservables,
+        defaultValue: extractObservables,
       }),
     };
   }
@@ -1086,8 +1075,10 @@ export class CasesConnectorExecutor {
     return {
       request,
       extractObservablesSource: getExtractObservablesSource({
-        override: extractObservablesOverride,
+        chosenValue: extractObservablesOverride,
+        chosenSource: 'rule',
         templateValue: caseFieldsFromTemplate?.settings?.extractObservables,
+        defaultValue: extractObservables,
       }),
     };
   }

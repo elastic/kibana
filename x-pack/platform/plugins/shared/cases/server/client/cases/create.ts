@@ -19,7 +19,8 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { Owner } from '../../../common/constants/types';
 import { resolveExtractObservables } from '../../../common/utils/case_settings';
-import type { CaseCreateAttributes, ExtractObservablesSource } from '../../common/types/case';
+import type { CaseCreateAttributes } from '../../common/types/case';
+import { getExtractObservablesSource } from '../../common/extract_observables_source';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestSchema } from '../../../common/types/api';
 import {
@@ -59,19 +60,6 @@ import {
   CREATE_CASE_WITH_TEMPLATE_COUNTER,
   incrementCasesClientCounter,
 } from '../usage_counters';
-
-const getCreateExtractObservablesSource = ({
-  callerValue,
-  valueAfterTemplate,
-}: {
-  callerValue: boolean | undefined;
-  valueAfterTemplate: boolean | undefined;
-}): ExtractObservablesSource => {
-  if (callerValue !== undefined) {
-    return 'explicit';
-  }
-  return valueAfterTemplate !== undefined ? 'template' : 'space_default';
-};
 
 /**
  * Creates a new case.
@@ -134,6 +122,8 @@ export const create = async (
     // point-in-time name) the case was created from. Field values that differ from defaults are
     // audited separately; the create_case user action itself does not carry template or fields.
     let appliedTemplateName: string | undefined;
+    // The template's own `settings.extractObservables`, used as the baseline for the source.
+    let templateExtractObservables: boolean | undefined;
     // Resolved lazily and reused: template expansion needs it to decide whether to apply template
     // assignees, and the license-enforcement block below needs it again — resolve at most once.
     let hasPlatinumLicenseOrGreater: boolean | undefined;
@@ -151,6 +141,7 @@ export const create = async (
         fieldDefinitionsService,
       });
       appliedTemplateName = resolvedTemplate.parsed.name;
+      templateExtractObservables = resolvedTemplate.parsed.definition.settings?.extractObservables;
 
       const callerSentAssignees = query.assignees !== undefined;
 
@@ -177,11 +168,20 @@ export const create = async (
       }
     }
 
-    // Where the extractObservables value came from. Stored as a server-owned top-level attribute,
-    // so it never enters the request, the response, or the user action payload.
-    const extractObservablesSource = getCreateExtractObservablesSource({
-      callerValue: rawQuery.settings.extractObservables,
-      valueAfterTemplate: query.settings.extractObservables,
+    // The value the case gets when nobody chooses: the space configuration, then the owner default.
+    const defaultExtractObservables = resolveExtractObservables(
+      query.owner,
+      configurations[0]?.extractObservables
+    );
+
+    // Where the extractObservables value came from. A caller value that equals the template or the
+    // space default is not a choice: the create form always sends it. Stored as a server-owned
+    // top-level attribute, so it never enters the request, the response, or the user action payload.
+    const extractObservablesSource = getExtractObservablesSource({
+      chosenValue: rawQuery.settings.extractObservables,
+      chosenSource: 'explicit',
+      templateValue: templateExtractObservables,
+      defaultValue: defaultExtractObservables,
     });
 
     // Default extractObservables when the caller omitted it and template expansion did not fill it.
@@ -191,10 +191,7 @@ export const create = async (
         ...query,
         settings: {
           ...query.settings,
-          extractObservables: resolveExtractObservables(
-            query.owner,
-            configurations[0]?.extractObservables
-          ),
+          extractObservables: defaultExtractObservables,
         },
       };
     }
