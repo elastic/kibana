@@ -8,6 +8,8 @@
 import expect from '@kbn/expect';
 
 import { OBSERVABLE_TYPES_BUILTIN } from '@kbn/cases-plugin/common/constants';
+import type { SimilarCasesSearchRequest } from '@kbn/cases-plugin/common/types/api';
+import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
 import {
   getPostCaseRequest,
   postCommentAlertReq,
@@ -172,6 +174,103 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(casesSimilarToB.length).to.be(0);
+      });
+    });
+
+    describe('sorting', () => {
+      const observable = {
+        value: 'value',
+        typeKey: OBSERVABLE_TYPES_BUILTIN[0].key,
+        description: '',
+      };
+
+      const createSimilarCases = async () => {
+        const source = await createCase(supertest, getPostCaseRequest());
+        const caseB = await createCase(supertest, {
+          ...getPostCaseRequest(),
+          title: 'B similar case',
+          severity: CaseSeverity.HIGH,
+        });
+        const caseA = await createCase(supertest, {
+          ...getPostCaseRequest(),
+          title: 'A similar case',
+          severity: CaseSeverity.LOW,
+        });
+        const caseC = await createCase(supertest, {
+          ...getPostCaseRequest(),
+          title: 'C similar case',
+          severity: CaseSeverity.CRITICAL,
+        });
+
+        for (const { id } of [source, caseA, caseB, caseC]) {
+          await addObservable({ supertest, caseId: id, params: { observable } });
+        }
+
+        return { source, caseA, caseB, caseC };
+      };
+
+      it('sorts by title in ascending and descending order', async () => {
+        const { source, caseA, caseB, caseC } = await createSimilarCases();
+
+        const { cases: ascCases } = await similarCases({
+          supertest,
+          body: { perPage: 10, page: 1, sortField: 'title', sortOrder: 'asc' },
+          caseId: source.id,
+        });
+        expect(ascCases.map(({ id }) => id)).to.eql([caseA.id, caseB.id, caseC.id]);
+
+        const { cases: descCases } = await similarCases({
+          supertest,
+          body: { perPage: 10, page: 1, sortField: 'title', sortOrder: 'desc' },
+          caseId: source.id,
+        });
+        expect(descCases.map(({ id }) => id)).to.eql([caseC.id, caseB.id, caseA.id]);
+      });
+
+      it('sorts by severity in ascending and descending order', async () => {
+        const { source, caseA, caseB, caseC } = await createSimilarCases();
+
+        const { cases: ascCases } = await similarCases({
+          supertest,
+          body: { perPage: 10, page: 1, sortField: 'severity', sortOrder: 'asc' },
+          caseId: source.id,
+        });
+        expect(ascCases.map(({ id }) => id)).to.eql([caseA.id, caseB.id, caseC.id]);
+
+        const { cases: descCases } = await similarCases({
+          supertest,
+          body: { perPage: 10, page: 1, sortField: 'severity', sortOrder: 'desc' },
+          caseId: source.id,
+        });
+        expect(descCases.map(({ id }) => id)).to.eql([caseC.id, caseB.id, caseA.id]);
+      });
+
+      it('sorts by created_at in ascending order when no sort params are given', async () => {
+        const { source, caseA, caseB, caseC } = await createSimilarCases();
+
+        const { cases } = await similarCases({
+          supertest,
+          body: { perPage: 10, page: 1 },
+          caseId: source.id,
+        });
+
+        // createSimilarCases creates the cases in the order B, A, C
+        expect(cases.map(({ id }) => id)).to.eql([caseB.id, caseA.id, caseC.id]);
+      });
+
+      it('returns a 400 for an invalid sortField', async () => {
+        const { source } = await createSimilarCases();
+
+        await similarCases({
+          supertest,
+          body: {
+            perPage: 10,
+            page: 1,
+            sortField: 'notAField' as SimilarCasesSearchRequest['sortField'],
+          },
+          caseId: source.id,
+          expectedHttpCode: 400,
+        });
       });
     });
 

@@ -28,11 +28,13 @@ import {
   testIndexName,
   uniqueSuffix,
   updateSource,
+  validateSourceQuery,
 } from '../fixtures';
 
 const TITLE_PREFIX = 'scout-sources-authz';
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/298822
+apiTest.describe.skip(
   'Nightshift sources authorization',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -80,6 +82,9 @@ apiTest.describe(
       expect(fetched.body.health).toBe('ok');
 
       expect(await createSource(apiClient, cookieHeader, body)).toHaveStatusCode(403);
+      expect(
+        await validateSourceQuery(apiClient, cookieHeader, { esql: body.esql })
+      ).toHaveStatusCode(403);
       expect(
         await updateSource(apiClient, cookieHeader, sourceId, { ...body, tags: [] })
       ).toHaveStatusCode(403);

@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
-import { DayPicker, type DateRange } from 'react-day-picker';
+import { DayPicker, TZDate, type DateRange } from 'react-day-picker';
 import { useEuiTheme } from '@elastic/eui';
 
 import 'react-day-picker/style.css';
 import { calendarViewStyles } from './calendar_view.styles';
+import type { FirstDayOfWeek } from '../types';
 
 interface CalendarViewProps {
   /** The year to display. */
@@ -24,10 +25,12 @@ interface CalendarViewProps {
   /** Callback to update the selected range. */
   setRange: (range?: DateRange) => void;
   /**
-   * First day of the week: 0 for Sunday, 1 for Monday.
+   * First day of the week: 0 for Sunday through 6 for Saturday.
    * @default 0
    */
-  firstDayOfWeek?: 0 | 1;
+  firstDayOfWeek?: FirstDayOfWeek;
+  /** IANA time zone used for calendar dates. */
+  timeZone?: string;
 }
 
 /**
@@ -39,6 +42,7 @@ export const CalendarView = function CalendarView({
   range,
   setRange,
   firstDayOfWeek,
+  timeZone,
 }: CalendarViewProps) {
   const euiThemeContext = useEuiTheme();
   const styles = calendarViewStyles(euiThemeContext);
@@ -49,11 +53,12 @@ export const CalendarView = function CalendarView({
       disableNavigation
       hideNavigation
       mode="range"
-      month={new Date(year, monthIndex, 1)}
+      month={timeZone ? new TZDate(year, monthIndex, 1, timeZone) : new Date(year, monthIndex, 1)}
       onSelect={setRange}
       required={false}
       selected={range}
       weekStartsOn={firstDayOfWeek}
+      timeZone={timeZone}
     />
   );
 };

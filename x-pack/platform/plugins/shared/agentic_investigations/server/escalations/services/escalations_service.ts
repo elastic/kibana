@@ -731,13 +731,16 @@ export class EscalationsService {
         const entityIds = [...new Set(entities.map((entity) => entity.id))];
         if (entityIds.length === 0) return escalation;
         const entityTypes: Record<string, string> = {};
-        for (const { id, type } of entities) {
+        const entityNames: Record<string, string> = {};
+        for (const { id, type, name } of entities) {
           if (type && !(id in entityTypes)) entityTypes[id] = type;
+          if (name && !(id in entityNames)) entityNames[id] = name;
         }
         return {
           ...escalation,
           entity_ids: entityIds,
           ...(Object.keys(entityTypes).length > 0 ? { entity_types: entityTypes } : {}),
+          ...(Object.keys(entityNames).length > 0 ? { entity_names: entityNames } : {}),
         };
       });
     } catch (err) {

@@ -20,6 +20,7 @@ import { getExtendedFieldColumnKey } from '../all_cases/components/extended_fiel
 import { useGlobalInlineFields } from '../all_cases/hooks/use_global_inline_fields';
 import { ExternalServiceColumn } from '../all_cases/hooks/use_cases_columns';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
+import type { CasesColumnSelection } from '../all_cases/types';
 import type { UseSimilarCasesColumnsReturnValue } from './use_similar_cases_columns';
 import { useSimilarCasesColumns } from './use_similar_cases_columns';
 
@@ -150,6 +151,53 @@ describe('useSimilarCasesColumns', () => {
     );
 
     expect(getFields(result.current.columns)).toEqual(['similarities']);
+  });
+
+  describe('sortable flags', () => {
+    const allSelected: CasesColumnSelection[] = Object.values(casesColumnsConfig).map(
+      ({ field, name }) => ({ field, name, isChecked: true })
+    );
+
+    const findColumn = (field: string) => {
+      const { result } = renderHook(
+        () => useSimilarCasesColumns({ selectedColumns: allSelected }),
+        { wrapper }
+      );
+
+      // the external incident column has no `field`, so it is matched by its name
+      const name = (casesColumnsConfig as Record<string, { name: string }>)[field]?.name;
+
+      return result.current.columns.find(
+        (column) =>
+          ('field' in column && column.field === field) ||
+          (name != null && 'name' in column && column.name === name)
+      );
+    };
+
+    it.each(['title', 'category', 'status', 'severity', 'createdAt', 'updatedAt', 'closedAt'])(
+      'marks the %s column as sortable',
+      (field) => {
+        const column = findColumn(field);
+
+        expect(column).toBeDefined();
+        expect(column).toEqual(expect.objectContaining({ sortable: true }));
+      }
+    );
+
+    it.each([
+      'assignees',
+      'tags',
+      'totalAlerts',
+      'totalEvents',
+      'totalComment',
+      'externalIncident',
+      'similarities',
+    ])('does not mark the %s column as sortable', (field) => {
+      const column = findColumn(field);
+
+      expect(column).toBeDefined();
+      expect(column).toEqual(expect.not.objectContaining({ sortable: true }));
+    });
   });
 
   describe('custom fields', () => {

@@ -235,5 +235,5 @@ the configured deployment may not exist (or may not be reachable from your envir
 
 ## Package notes
 
-This suite is **Node-only** (Playwright eval suite). It includes a package-local ESLint override:
-- `./.eslintrc.js` disables `import/no-nodejs-modules` inside this package
+This suite is **Node-only** (Playwright eval suite), so `.oxlint/import_plugin.mts` disables
+`import/no-nodejs-modules` inside this package.

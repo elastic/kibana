@@ -12,11 +12,12 @@ import { createNightshiftInvestigationsServerRoute } from '../create_server_rout
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import { automationCompletionSchema, promptTemplateSchema } from '../../lib/automations/schemas';
 import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
+import { validateScheduledAutomation } from '../../lib/automations/validate_scheduled_automation';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { triggerRowSchema } from './trigger_row_schema';
 
 const triggerSchema = z.object({
-  rows: z.array(triggerRowSchema).min(1),
+  rows: z.array(triggerRowSchema).min(1).max(100),
 });
 
 const executionSchema = z.object({
@@ -82,6 +83,8 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       updatedAt: now,
     };
 
+    validateScheduledAutomation(attributes);
+
     const created = await soClient.create<NightshiftAutomationAttributes>(
       NIGHTSHIFT_AUTOMATION_SO_TYPE,
       attributes
@@ -89,7 +92,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
 
     let workflowId: string;
     try {
-      const yaml = generateWorkflowYaml(created.id, attributes);
+      const yaml = generateWorkflowYaml({ automationId: created.id, automation: attributes });
       const workflow = await workflowsManagement.management.createWorkflow(
         { yaml },
         spaceId,

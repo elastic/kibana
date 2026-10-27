@@ -29,7 +29,6 @@ import type {
   WorkflowDetailDto,
   WorkflowExecutionCollapseField,
   WorkflowExecutionDto,
-  WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
@@ -264,6 +263,8 @@ export class WorkflowsService {
       getActionsClient: this.getActionsClient,
       getActionsClientWithRequest: this.getActionsClientWithRequest,
       getCoreStart: () => this.coreStart,
+      licensing: pluginsStart.licensing,
+      logger: this.logger,
     });
 
     const { workflowExecutionsDataClient, stepExecutionsDataClient } =
@@ -673,14 +674,6 @@ export class WorkflowsService {
     return this.executionQueryService.getWaitingStepExecutionId(executionId, spaceId);
   }
 
-  public async getWorkflowExecutionHistory(
-    executionId: string,
-    spaceId: string
-  ): Promise<WorkflowExecutionHistoryModel[]> {
-    await this.ensureInitialized();
-    return this.executionQueryService.getWorkflowExecutionHistory(executionId, spaceId);
-  }
-
   public async getStepExecutions(params: GetStepExecutionParams, spaceId: string) {
     await this.ensureInitialized();
     return this.executionQueryService.getStepExecutions(params, spaceId);
@@ -729,7 +722,7 @@ export class WorkflowsService {
     yaml: string,
     spaceId: string,
     request: KibanaRequest,
-    options: { includeVariableRules: boolean }
+    options: { includeVariableRules: boolean; includeEsqlRules: boolean }
   ): Promise<ValidateWorkflowResponseDto> {
     await this.ensureInitialized();
     return this.validationService.validateWorkflow(yaml, spaceId, request, options);

@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { ActionTypeRegistry } from '../../../../action_type_registry';
@@ -218,7 +219,7 @@ describe('getSandboxCredentials()', () => {
 
   it('decrypts persisted secrets in the current space namespace', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
-    actionsClient = createClient({ spaceId: 'space-1' });
+    actionsClient = createClient({ spaceId: asSpaceId('space-1') });
 
     await actionsClient.getSandboxCredentials({ id: defaultConnectorId });
 

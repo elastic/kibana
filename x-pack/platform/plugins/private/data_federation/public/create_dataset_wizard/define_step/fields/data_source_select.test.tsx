@@ -37,7 +37,9 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   }),
 }));
 
-const renderComponent = () => {
+const renderComponent = ({
+  createdDataSourceNames = [],
+}: { createdDataSourceNames?: readonly string[] } = {}) => {
   const Wrapper = () => {
     const [value, setValue] = useState('');
     const dataSources: DataSource[] = [
@@ -53,6 +55,8 @@ const renderComponent = () => {
           onChange={setValue}
           onBlur={() => {}}
           loadDataSources={async () => {}}
+          createdDataSourceNames={createdDataSourceNames}
+          onDataSourceCreated={() => {}}
         />
         <div data-test-subj="dataSourceValue">{value}</div>
       </>
@@ -109,5 +113,20 @@ describe('DataSourceSelect', () => {
         'createDatasetDataSourceAuthenticationLearnMore'
       )
     ).toHaveAttribute('href', 'https://example.com/grant-read-access');
+  });
+
+  it('does not show the authentication callout when the selected data source was created in the wizard', async () => {
+    const { getByTestId, queryByTestId } = renderComponent({ createdDataSourceNames: ['my-s3'] });
+
+    await act(async () => {
+      fireEvent.click(getByTestId('createDatasetDataSource'));
+    });
+
+    await act(async () => {
+      fireEvent.click(getByTestId('createDatasetDataSource-my-s3'));
+    });
+
+    expect(getByTestId('dataSourceValue')).toHaveTextContent('my-s3');
+    expect(queryByTestId('createDatasetDataSourceAuthenticationCallout')).not.toBeInTheDocument();
   });
 });

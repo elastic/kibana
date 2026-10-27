@@ -46,4 +46,28 @@ describe('buildImpactPills', () => {
 
     expect(pills).toEqual([{ entityId: 'host-1', count: 1 }]);
   });
+
+  it('keeps the first name reported for an entity', () => {
+    const pills = buildImpactPills(
+      new Map([
+        ['c1', 1],
+        ['c2', 1],
+      ]),
+      new Map([
+        ['c1', [{ id: 'host:abc', type: 'host' }]],
+        [
+          'c2',
+          [
+            { id: 'host:abc', name: 'web-01' },
+            { id: 'service:orders', name: 'orders' },
+          ],
+        ],
+      ])
+    );
+
+    expect(pills).toEqual([
+      { entityId: 'host:abc', count: 2, entityType: 'host', name: 'web-01' },
+      { entityId: 'service:orders', count: 1, name: 'orders' },
+    ]);
+  });
 });

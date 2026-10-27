@@ -92,4 +92,41 @@ describe('buildAlertEuidPipeline', () => {
       expect(bucketed()).toContain('| RENAME _ea_entity_id AS `entity.id`');
     });
   });
+
+  describe('with the alias rows of the entity index in the same FROM', () => {
+    const withAliases = (bucket?: string): string =>
+      buildAlertEuidPipeline(bucket, {
+        alertBranchCondition: 'NOT _index == "e"',
+        extraBranch: {
+          steps: ['WHERE _index == "e"', '| EVAL _ea_entity_id = x', '| KEEP _ea_entity_id'],
+          aggregations: ['alias_watchlisted = MAX(alias_watchlisted)'],
+        },
+      }).join('\n');
+
+    it('keeps the entity rows out of both alert branches', () => {
+      const query = withAliases();
+      expect(query).toContain('WHERE (NOT _index == "e") AND `kibana.alert.entity.id` IS NOT NULL');
+      expect(query).toContain('WHERE (NOT _index == "e") AND `kibana.alert.entity.id` IS NULL');
+    });
+
+    it('adds the extra FORK branch after the two alert branches', () => {
+      const query = withAliases();
+      expect(query.indexOf('WHERE _index == "e"')).toBeGreaterThan(
+        query.indexOf('(NOT _index == "e") AND `kibana.alert.entity.id` IS NULL')
+      );
+    });
+
+    it('tells an alert row from the other rows, and adds the extra aggregations', () => {
+      const query = withAliases();
+      expect(query).toContain('| EVAL is_alert_row = `kibana.alert.severity` IS NOT NULL');
+      expect(query).toContain(
+        '| STATS has_severe_alert = MAX(is_severe_alert), has_alert = MAX(is_alert_row), alias_watchlisted = MAX(alias_watchlisted) BY _ea_entity_id'
+      );
+    });
+
+    it('is unchanged without the options', () => {
+      expect(pipelineText()).not.toContain('is_alert_row');
+      expect(pipelineText()).not.toContain('_index');
+    });
+  });
 });

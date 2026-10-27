@@ -14,8 +14,8 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
-import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
-import { getErrorMessage, type OperationFailure } from '../utils';
+import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
+import { getErrorMessage, type DashboardFailure } from '../utils';
 import {
   type ArrangeDashboardLayout,
   type LayoutArrangement,
@@ -240,7 +240,7 @@ interface ArrangeLayoutParams {
 interface ArrangeLayoutResult {
   dashboardData: DashboardAttachmentData;
   /** Set when a layout was asked for but not applied. */
-  failure?: OperationFailure;
+  failure?: DashboardFailure;
 }
 
 /**
@@ -297,7 +297,8 @@ export const arrangeDashboardLayout = async ({
     return {
       dashboardData,
       failure: {
-        type: DASHBOARD_OPERATION_FAILURE_TYPES.layout,
+        type: DASHBOARD_FAILURE_TYPES.layout,
+        kind: 'dashboard',
         identifier: 'layout',
         error: `The layout request was not applied, so panel positions and sizes are unchanged: ${message}`,
       },

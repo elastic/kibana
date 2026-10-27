@@ -12,12 +12,12 @@ import type { InjectedIntl } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FilterableField } from '@kbn/data-source';
 import { validateParams } from './lib/filter_editor_utils';
 
 interface Props {
   value?: string | number;
-  field: DataViewField;
+  field: FilterableField;
   onChange: (value: string | number | boolean) => void;
   onBlur?: (value: string | number | boolean) => void;
   placeholder: string;

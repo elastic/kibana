@@ -25,6 +25,12 @@ export const ERROR_DELETING_FILE = i18n.translate('xpack.cases.containers.errorD
   defaultMessage: 'Error deleting file',
 });
 
+export const ATTACHMENTS_REMOVED = (attachments: string) =>
+  i18n.translate('xpack.cases.containers.attachmentsRemoved', {
+    values: { attachments },
+    defaultMessage: 'Removed {attachments}',
+  });
+
 export const ERROR_UPDATING = i18n.translate('xpack.cases.containers.errorUpdatingTitle', {
   defaultMessage: 'Error updating data',
 });

@@ -29,9 +29,9 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth, page }) => {
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await page.gotoApp('discover');
+      await pageObjects.discover.goto({ queryMode: 'classic' });
     });
 
     test.afterAll(async ({ kbnClient }) => {

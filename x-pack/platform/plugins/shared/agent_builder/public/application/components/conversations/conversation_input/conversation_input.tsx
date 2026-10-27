@@ -248,7 +248,7 @@ const getMessageEditorAriaLabel = ({
   });
 };
 
-export const ConversationInput: React.FC<ConversationInputProps> = ({
+const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   onSubmit,
   onEditorFocus,
   onSubmitOverride,
@@ -555,3 +555,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     </InputContainer>
   );
 };
+
+export const ConversationInput = React.memo(ConversationInputComponent);
+ConversationInput.displayName = 'ConversationInput';

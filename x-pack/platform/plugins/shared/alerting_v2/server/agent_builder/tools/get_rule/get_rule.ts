@@ -12,7 +12,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { ALERTING_NAMESPACE, RULE_MANAGEMENT_SKILL_ID } from '@kbn/alerting-v2-constants';
+import { ALERTING_NAMESPACE, RULE_AUTHORING_SKILL_ID } from '@kbn/alerting-v2-constants';
 import { ruleAttachmentDataSchema } from '@kbn/alerting-v2-schemas';
 import { lazySchema, z } from '@kbn/zod/v4';
 import { ensureToolPrivilege } from '../../common/unauthorized_tool_result';
@@ -48,7 +48,7 @@ export const getRuleTool = ({
 }: GetRuleToolParams): BuiltinAttachmentBoundedTool<typeof getRuleSchema> => ({
   id: getRuleToolId(attachmentId),
   type: ToolType.builtin,
-  description: `Fetch the platform alert rule "${ruleId}" associated with alert "${alertId}" (attachment "${attachmentId}"), including name, schedule, query, source indices, enabled state, and metadata. This is not a Security/SIEM detection rule. This tool is read-only. To create, explain, or modify the rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`,
+  description: `Fetch the platform alert rule "${ruleId}" associated with alert "${alertId}" (attachment "${attachmentId}"), including name, schedule, query, source indices, enabled state, and metadata. This is not a Security/SIEM detection rule. This tool is read-only. To create, explain, or modify the rule, load the ${RULE_AUTHORING_SKILL_ID} skill.`,
   schema: getRuleSchema,
   handler: async (_args, toolContext) => {
     const unauthorized = await ensureToolPrivilege({

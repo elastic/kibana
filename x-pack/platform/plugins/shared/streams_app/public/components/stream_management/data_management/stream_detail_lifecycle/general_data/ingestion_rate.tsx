@@ -6,6 +6,7 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
+import { isIlmLifecycle } from '@kbn/streams-schema';
 import React from 'react';
 import type { TimeState } from '@kbn/es-query';
 import { useKibana } from '../../../../../hooks/use_kibana';
@@ -29,13 +30,42 @@ export function IngestionRate({
   aggregations?: StreamAggregations;
   statsError: Error | undefined;
 }) {
+  return (
+    <IngestionRateContent
+      indexName={definition.stream.name}
+      isIlm={isIlmLifecycle(definition.effective_lifecycle)}
+      stats={stats}
+      isLoadingStats={isLoadingStats}
+      timeState={timeState}
+      aggregations={aggregations}
+      statsError={statsError}
+    />
+  );
+}
+
+export function IngestionRateContent({
+  indexName,
+  isIlm,
+  stats,
+  isLoadingStats,
+  timeState,
+  aggregations,
+  statsError,
+}: {
+  indexName: string;
+  isIlm: boolean;
+  stats?: CalculatedStats;
+  isLoadingStats: boolean;
+  timeState: TimeState;
+  aggregations?: StreamAggregations;
+  statsError: Error | undefined;
+}) {
   const { isServerless } = useKibana();
 
   return (
     <IngestionRatePanel isLoading={isLoadingStats} hasAggregations={Boolean(aggregations)}>
       {isServerless ? (
         <ChartBarSeries
-          definition={definition}
           stats={stats}
           timeState={timeState}
           isLoadingStats={isLoadingStats}
@@ -44,7 +74,8 @@ export function IngestionRate({
         />
       ) : (
         <ChartBarPhasesSeries
-          definition={definition}
+          indexName={indexName}
+          isIlm={isIlm}
           stats={stats}
           timeState={timeState}
           isLoadingStats={isLoadingStats}

@@ -14,7 +14,7 @@ import { test, CUSTOM_ROLES } from '../fixtures';
 const REMOVED_FIELD = 'order_id';
 const KEPT_FIELD = 'customer_id';
 
-test.describe('ES|QL Data Federation — mapping fields', { tag: tags.stateful.classic }, () => {
+test.describe('ES|QL Data Federation — mapping fields', { tag: tags.deploymentAgnostic }, () => {
   let dataSourceName: string | undefined;
 
   test.afterAll(async ({ kbnClient }) => {

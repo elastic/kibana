@@ -205,76 +205,47 @@ describe('workspace_panel', () => {
     expect(screen.getByText('datasource | testVis')).toBeInTheDocument();
   });
 
-  it('should give user control when auto-apply disabled', async () => {
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-    };
-    mockDatasource.toExpression.mockReturnValue('datasource');
-    mockDatasource.getLayers.mockReturnValue(['first']);
+  it.each([undefined, 3])(
+    'should apply each request once when auto-apply disabled (initial counter: %s)',
+    async (applyChangesCounter) => {
+      const framePublicAPI = createMockFramePublicAPI();
+      framePublicAPI.datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+      };
+      mockDatasource.toExpression.mockReturnValue('datasource');
+      mockDatasource.getLayers.mockReturnValue(['first']);
 
-    const { rerender, store } = renderWithReduxStore(
-      <EditorFrameServiceProvider
-        datasourceMap={{
-          formBased: mockDatasource,
-        }}
-        visualizationMap={{
-          testVis: {
-            ...mockVisualization,
-            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
-              toExpr(datasourceExpressionsByLayers),
+      const { rerender, store } = renderWithReduxStore(
+        <EditorFrameServiceProvider
+          datasourceMap={{
+            formBased: mockDatasource,
+          }}
+          visualizationMap={{
+            testVis: {
+              ...mockVisualization,
+              toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+                toExpr(datasourceExpressionsByLayers),
+            },
+          }}
+        >
+          <WorkspacePanel
+            {...defaultProps}
+            framePublicAPI={framePublicAPI}
+            ExpressionRenderer={expressionRendererMock}
+          />
+        </EditorFrameServiceProvider>,
+        {},
+        {
+          preloadedState: {
+            autoApplyDisabled: true,
+            applyChangesCounter,
           },
-        }}
-      >
-        <WorkspacePanel
-          {...defaultProps}
-          framePublicAPI={framePublicAPI}
-          ExpressionRenderer={expressionRendererMock}
-        />
-      </EditorFrameServiceProvider>,
-      {},
-      {
-        preloadedState: {
-          autoApplyDisabled: true,
-        },
-      }
-    );
+        }
+      );
 
-    expect(screen.getByText('datasource | testVis')).toBeInTheDocument();
+      expect(screen.getByText('datasource | testVis')).toBeInTheDocument();
 
-    mockDatasource.toExpression.mockReturnValue('new-datasource');
-    rerender(
-      <EditorFrameServiceProvider
-        datasourceMap={{
-          formBased: mockDatasource,
-        }}
-        visualizationMap={{
-          testVis: {
-            ...mockVisualization,
-            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
-              toExpr(datasourceExpressionsByLayers, 'new-vis'),
-          },
-        }}
-      >
-        <WorkspacePanel
-          {...defaultProps}
-          framePublicAPI={framePublicAPI}
-          ExpressionRenderer={expressionRendererMock}
-        />
-      </EditorFrameServiceProvider>
-    );
-
-    expect(screen.getByText('datasource | testVis')).toBeInTheDocument();
-
-    act(() => {
-      store.dispatch(applyChanges());
-    });
-
-    expect(screen.getByText('new-datasource | new-vis')).toBeInTheDocument();
-
-    mockDatasource.toExpression.mockReturnValue('other-new-datasource');
-
-    act(() => {
+      mockDatasource.toExpression.mockReturnValue('new-datasource');
       rerender(
         <EditorFrameServiceProvider
           datasourceMap={{
@@ -284,7 +255,7 @@ describe('workspace_panel', () => {
             testVis: {
               ...mockVisualization,
               toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
-                toExpr(datasourceExpressionsByLayers, 'other-new-vis'),
+                toExpr(datasourceExpressionsByLayers, 'new-vis'),
             },
           }}
         >
@@ -295,11 +266,57 @@ describe('workspace_panel', () => {
           />
         </EditorFrameServiceProvider>
       );
-      store.dispatch(enableAutoApply());
-    });
 
-    expect(screen.getByText('other-new-datasource | other-new-vis')).toBeInTheDocument();
-  });
+      expect(screen.getByText('datasource | testVis')).toBeInTheDocument();
+
+      act(() => {
+        store.dispatch(applyChanges());
+      });
+
+      expect(screen.getByText('new-datasource | new-vis')).toBeInTheDocument();
+
+      mockDatasource.toExpression.mockReturnValue('other-new-datasource');
+
+      act(() => {
+        rerender(
+          <EditorFrameServiceProvider
+            datasourceMap={{
+              formBased: mockDatasource,
+            }}
+            visualizationMap={{
+              testVis: {
+                ...mockVisualization,
+                toExpression: (
+                  state,
+                  datasourceLayers,
+                  attrs,
+                  datasourceExpressionsByLayers = {}
+                ) => toExpr(datasourceExpressionsByLayers, 'other-new-vis'),
+              },
+            }}
+          >
+            <WorkspacePanel
+              {...defaultProps}
+              framePublicAPI={framePublicAPI}
+              ExpressionRenderer={expressionRendererMock}
+            />
+          </EditorFrameServiceProvider>
+        );
+      });
+
+      expect(screen.getByText('new-datasource | new-vis')).toBeInTheDocument();
+
+      act(() => {
+        store.dispatch(applyChanges());
+      });
+      expect(screen.getByText('other-new-datasource | other-new-vis')).toBeInTheDocument();
+
+      act(() => {
+        store.dispatch(enableAutoApply());
+      });
+      expect(screen.getByText('other-new-datasource | other-new-vis')).toBeInTheDocument();
+    }
+  );
 
   it('should base saveability on working changes when auto-apply disabled', async () => {
     const framePublicAPI = createMockFramePublicAPI();

@@ -13,7 +13,7 @@ import type { PackageInputEntry, AgentCredentialVars } from '../package_inputs';
 import { REGION_FIELD_NAMES } from '../../service_settings_step/field_config';
 import type { DeployGroup } from '../deploy_groups';
 import type { SecretRefValue } from '../secret_refs';
-import { buildGroupPolicyNameStem } from '../deploy_group_helpers';
+import { buildGroupPolicyNameStem, deriveGroupPolicyName } from '../deploy_group_helpers';
 
 export interface BuildPackagePolicyOpts {
   namespace: string;
@@ -22,6 +22,9 @@ export interface BuildPackagePolicyOpts {
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   pkgVersion: string;
   agentCredentials?: AgentCredentialVars;
+  /** Integration name as entered in step 2; the policy name is derived from it. */
+  integrationName?: string;
+  description?: string;
 }
 
 export interface PkgInfo {
@@ -40,8 +43,14 @@ export interface PkgInfo {
  * - Bundled originals (isDuplicateGroup: false): named after the package (e.g. "aws-logs").
  *   Date.now() suffix prevents cross-session name collisions (Fleet enforces unique names).
  * - Duplicates (isDuplicateGroup: true): named after the instance name the user typed.
+ *
+ * With an integration name, `deriveGroupPolicyName` decides instead and the Date.now() suffix is
+ * dropped.
  */
-export function buildPackagePolicyName(group: DeployGroup): string {
+export function buildPackagePolicyName(group: DeployGroup, integrationName?: string): string {
+  const derived = deriveGroupPolicyName(group, integrationName);
+  if (derived) return derived;
+  // Without an integration name (sessions that predate the field), keep the generated name.
   if (group.isDuplicateGroup) {
     const { instance } = group.members[0];
     const safe = instance.name.slice(0, 60).replace(/[^a-zA-Z0-9_\-. ]/g, '_');
@@ -72,6 +81,32 @@ function buildDisabledInputsForOtherTemplates(
     for (const input of pt.inputs ?? []) {
       const inputType = input.id ?? input.type;
       disabled[`${pt.name}-${inputType}`] = { enabled: false };
+    }
+  }
+  return disabled;
+}
+
+/**
+ * Build the set of input keys of this service's OWN policy templates that are not in `enabledKeys`.
+ *
+ * Fleet only overrides the inputs present in the request; an omitted input keeps its manifest
+ * default, which is enabled for most. So an input the user switched off (GuardDuty's API input
+ * when only S3 is collected), or that pruneUnsatisfiedInputs dropped, would still be validated and
+ * fail on its required vars. Sending it as disabled makes Fleet skip it, as the agentless path
+ * does for every input outside the selection.
+ */
+function buildDisabledInputsForOwnTemplates(
+  pkgInfo: PkgInfo,
+  servicePolicyTemplates: string[],
+  enabledKeys: Set<string>
+): Record<string, { enabled: false }> {
+  const ptSet = new Set(servicePolicyTemplates);
+  const disabled: Record<string, { enabled: false }> = {};
+  for (const pt of pkgInfo.policy_templates ?? []) {
+    if (!ptSet.has(pt.name)) continue;
+    for (const input of pt.inputs ?? []) {
+      const inputKey = `${pt.name}-${input.id ?? input.type}`;
+      if (!enabledKeys.has(inputKey)) disabled[inputKey] = { enabled: false };
     }
   }
   return disabled;
@@ -186,6 +221,7 @@ export async function buildGroupPackagePolicy(
   opts: BuildPackagePolicyOpts
 ): Promise<{
   name: string;
+  description?: string;
   package: { name: string; version: string };
   namespace?: string;
   vars?: Record<string, string | SecretRefValue>;
@@ -199,7 +235,10 @@ export async function buildGroupPackagePolicy(
     authenticateAndDeployStep,
     pkgVersion,
     agentCredentials,
+    integrationName,
+    description,
   } = opts;
+  const descriptionField = description?.trim() ? { description: description.trim() } : {};
 
   // Build serviceVarsMap for all members. Key by service.id for buildPackageInputs.
   // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.
@@ -262,21 +301,12 @@ export async function buildGroupPackagePolicy(
       // No inputs were built at all — the service has no configured data streams (e.g. aws_logs
       // which has no dataStreams in the matrix). Send all inputs explicitly disabled so Fleet
       // installs the package with everything off, matching the Fleet UI's default toggle state.
-      const selfDisabled: Record<string, { enabled: false }> = {};
-      for (const { service } of members) {
-        const servicePt = service.policyTemplate ?? service.id;
-        for (const pt of pkgInfo.policy_templates ?? []) {
-          if (pt.name !== servicePt) continue;
-          for (const input of pt.inputs ?? []) {
-            const inputType = input.id ?? input.type;
-            selfDisabled[`${pt.name}-${inputType}`] = { enabled: false };
-          }
-        }
-      }
       const servicePts = members.map(({ service }) => service.policyTemplate ?? service.id);
       const disabledOtherInputs = buildDisabledInputsForOtherTemplates(pkgInfo, servicePts);
+      const selfDisabled = buildDisabledInputsForOwnTemplates(pkgInfo, servicePts, new Set());
       return {
-        name: buildPackagePolicyName(group),
+        name: buildPackagePolicyName(group, integrationName),
+        ...descriptionField,
         package: { name: firstService.packageName, version: pkgVersion },
         ...(group.namespace ? { namespace: group.namespace } : {}),
         ...(vars ? { vars } : {}),
@@ -295,16 +325,24 @@ export async function buildGroupPackagePolicy(
     throw new Error(`No fully configured input for ${firstService.name} (and possibly others).`);
   }
 
-  // Disable all inputs from other policy templates in the package.
+  // Disable all inputs from other policy templates in the package, and the inputs of this
+  // service's own templates that were not selected: both would otherwise keep their enabled
+  // manifest default and be validated.
   const servicePts = members.map(({ service }) => service.policyTemplate ?? service.id);
   const disabledOtherInputs = buildDisabledInputsForOtherTemplates(pkgInfo, servicePts);
+  const disabledOwnInputs = buildDisabledInputsForOwnTemplates(
+    pkgInfo,
+    servicePts,
+    new Set(Object.keys(prunedInputs))
+  );
 
   return {
-    name: buildPackagePolicyName(group),
+    name: buildPackagePolicyName(group, integrationName),
+    ...descriptionField,
     package: { name: firstService.packageName, version: pkgVersion },
     ...(group.namespace ? { namespace: group.namespace } : {}),
     ...(vars ? { vars } : {}),
     // disabled entries first so our enabled inputs win if there's any key overlap
-    inputs: { ...disabledOtherInputs, ...prunedInputs },
+    inputs: { ...disabledOtherInputs, ...disabledOwnInputs, ...prunedInputs },
   };
 }

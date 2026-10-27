@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { groupBy } from 'lodash';
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,6 +28,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { QueryClientProvider, useQuery } from '@kbn/react-query';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import { isHuntEligibleIoc } from '@kbn/alertzero-common';
 import type { AttachmentNavigationDeps } from '../navigation';
 import { buildDiscoverThreatReportNestedIocUrl } from '../navigation';
 import { IocBadge, discoverAction } from '../shared/ioc_badge';
@@ -150,13 +152,45 @@ interface ThreatIoc {
   value?: string;
   severity?: string;
   tier?: string;
+  deferred_unreviewed?: boolean;
 }
+
+/** Translated tier label for IOC badge tooltips; unrecognized tiers pass through as-is. */
+const formatIocTierLabel = (ioc: ThreatIoc): string | undefined => {
+  if (asBoolean(ioc.deferred_unreviewed) === true) {
+    return i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocTierPendingReview', {
+      defaultMessage: 'Pending review',
+    });
+  }
+  switch (asString(ioc.tier)) {
+    case 'discriminating':
+      return i18n.translate(
+        'xpack.alertzero.agentBuilder.attachments.threat.iocTierDiscriminating',
+        { defaultMessage: 'Discriminating' }
+      );
+    case 'contextual':
+      return i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocTierContextual', {
+        defaultMessage: 'Contextual',
+      });
+    case 'uncertain':
+      return i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocTierUncertain', {
+        defaultMessage: 'Uncertain',
+      });
+    case 'reference':
+      return i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocTierReference', {
+        defaultMessage: 'Reference',
+      });
+    default:
+      return asString(ioc.tier);
+  }
+};
 
 const IocTypeValues: React.FC<{
   type: string;
   iocs: ThreatIoc[];
   navigation: AttachmentNavigationDeps;
-}> = ({ type, iocs, navigation }) => {
+  testSubjPrefix?: string;
+}> = ({ type, iocs, navigation, testSubjPrefix = 'alertzeroThreatAttachmentIocLink' }) => {
   const visible = iocs.slice(0, IOC_VISIBLE_LIMIT);
   const hidden = iocs.slice(IOC_VISIBLE_LIMIT);
 
@@ -169,13 +203,15 @@ const IocTypeValues: React.FC<{
       value,
       spaceId: navigation.spaceId,
     });
-    const tooltipContent = [asString(ioc.tier), asString(ioc.severity)].filter(Boolean).join(', ');
+    const tooltipContent = [formatIocTierLabel(ioc), asString(ioc.severity)]
+      .filter(Boolean)
+      .join(', ');
     const badge = (
       <IocBadge
         value={value}
         index={index}
         action={discoverAction(href)}
-        testSubj={`alertzeroThreatAttachmentIocLink-${type}-${index}`}
+        testSubj={`${testSubjPrefix}-${type}-${index}`}
       />
     );
     return (
@@ -193,6 +229,81 @@ const IocTypeValues: React.FC<{
           {hidden.map((ioc, index) => renderBadge(ioc, IOC_VISIBLE_LIMIT + index))}
         </IocOverflowBadge>
       )}
+    </>
+  );
+};
+
+const NotHuntedIocsGroup: React.FC<{
+  iocs: ThreatIoc[];
+  navigation: AttachmentNavigationDeps;
+  hasEligibleTable: boolean;
+}> = ({ iocs, navigation, hasEligibleTable }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const toggleExpanded = useCallback(() => {
+    setIsExpanded((open) => !open);
+  }, []);
+  const iocsByType = groupBy(iocs, (ioc) => asString(ioc.type));
+
+  return (
+    <>
+      {hasEligibleTable ? <EuiSpacer size="s" /> : null}
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocsNotHunted', {
+              defaultMessage: 'Not hunted',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            onClick={toggleExpanded}
+            aria-expanded={isExpanded}
+            data-test-subj="alertzeroThreatAttachmentIocNotHuntedToggle"
+          >
+            {isExpanded
+              ? i18n.translate(
+                  'xpack.alertzero.agentBuilder.attachments.threat.iocsNotHuntedHide',
+                  {
+                    defaultMessage: 'Hide ({count})',
+                    values: { count: iocs.length },
+                  }
+                )
+              : i18n.translate(
+                  'xpack.alertzero.agentBuilder.attachments.threat.iocsNotHuntedShow',
+                  {
+                    defaultMessage: 'Show ({count})',
+                    values: { count: iocs.length },
+                  }
+                )}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {isExpanded ? (
+        <>
+          <EuiSpacer size="s" />
+          <LabeledBadgeTable
+            testSubj="alertzeroThreatAttachmentIocNotHuntedTable"
+            caption={i18n.translate(
+              'xpack.alertzero.agentBuilder.attachments.threat.iocNotHuntedTableCaption',
+              { defaultMessage: 'Indicators not hunted by type' }
+            )}
+            rows={Object.entries(iocsByType).map(([type, group]) => ({
+              id: type,
+              label: type,
+              values: (
+                <IocTypeValues
+                  type={type}
+                  iocs={group}
+                  navigation={navigation}
+                  testSubjPrefix="alertzeroThreatAttachmentIocNotHuntedLink"
+                />
+              ),
+            }))}
+          />
+        </>
+      ) : null}
     </>
   );
 };
@@ -236,11 +347,26 @@ const renderIocsSection = (
   liveData: ThreatReportApiResponse,
   navigation: AttachmentNavigationDeps
 ): React.ReactNode => {
-  const iocs = asRecordArray(liveData.extracted?.iocs);
-  if (!iocs.length) {
+  const rawIocs = asRecordArray(liveData.extracted?.iocs);
+  const nonDenied = rawIocs.filter((ioc) => asString(ioc.tier) !== 'denied');
+  const eligibleIocs: ThreatIoc[] = [];
+  const notHuntedIocs: ThreatIoc[] = [];
+  for (const ioc of nonDenied) {
+    if (
+      isHuntEligibleIoc({
+        tier: asString(ioc.tier),
+        deferred_unreviewed: asBoolean(ioc.deferred_unreviewed),
+      })
+    ) {
+      eligibleIocs.push(ioc);
+    } else {
+      notHuntedIocs.push(ioc);
+    }
+  }
+  if (eligibleIocs.length === 0 && notHuntedIocs.length === 0) {
     return null;
   }
-  const iocsByType = groupBy(iocs, (ioc) => asString(ioc.type));
+  const eligibleByType = groupBy(eligibleIocs, (ioc) => asString(ioc.type));
   return (
     <Section
       key="iocs"
@@ -251,22 +377,32 @@ const renderIocsSection = (
         <EuiText size="xs" color="subdued">
           {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocCount', {
             defaultMessage: '{count, plural, one {# indicator} other {# indicators}}',
-            values: { count: iocs.length },
+            values: { count: eligibleIocs.length },
           })}
         </EuiText>
       }
     >
-      <LabeledBadgeTable
-        testSubj="alertzeroThreatAttachmentIocTable"
-        caption={i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocTableCaption', {
-          defaultMessage: 'Indicators of compromise by type',
-        })}
-        rows={Object.entries(iocsByType).map(([type, group]) => ({
-          id: type,
-          label: type,
-          values: <IocTypeValues type={type} iocs={group} navigation={navigation} />,
-        }))}
-      />
+      {eligibleIocs.length > 0 ? (
+        <LabeledBadgeTable
+          testSubj="alertzeroThreatAttachmentIocTable"
+          caption={i18n.translate(
+            'xpack.alertzero.agentBuilder.attachments.threat.iocTableCaption',
+            { defaultMessage: 'Indicators of compromise by type' }
+          )}
+          rows={Object.entries(eligibleByType).map(([type, group]) => ({
+            id: type,
+            label: type,
+            values: <IocTypeValues type={type} iocs={group} navigation={navigation} />,
+          }))}
+        />
+      ) : null}
+      {notHuntedIocs.length > 0 ? (
+        <NotHuntedIocsGroup
+          iocs={notHuntedIocs}
+          navigation={navigation}
+          hasEligibleTable={eligibleIocs.length > 0}
+        />
+      ) : null}
     </Section>
   );
 };
