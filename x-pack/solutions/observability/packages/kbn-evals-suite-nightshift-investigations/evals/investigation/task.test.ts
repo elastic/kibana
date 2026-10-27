@@ -37,6 +37,8 @@ const investigation = (overrides: Partial<Investigation> = {}): Investigation =>
 });
 
 const notFound = () => Object.assign(new Error('Not Found'), { status: 404 });
+const httpError = (status: number, message: string) =>
+  Object.assign(new Error(message), { status });
 
 it('executes the manual investigation and reads what it recorded from the shared API', async () => {
   const conversation = {
@@ -255,6 +257,57 @@ it('bounds a start failure even when no investigation was created', async () => 
   expect(output.execution_error).toContain('[truncated]');
   expect(Buffer.byteLength(JSON.stringify(output))).toBeLessThan(1024 * 1024);
   expect(output.investigation_id).toBeUndefined();
+});
+
+it('keeps polling when a read fails because a shard is not ready yet', async () => {
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'investigation' })
+    .mockRejectedValueOnce(httpError(500, 'no shard available'))
+    .mockResolvedValueOnce(investigation())
+    .mockRejectedValueOnce(httpError(503, 'conversation index starting'))
+    .mockResolvedValueOnce({ rounds: [{ trace_id: 'agent-trace', steps: [] }] });
+
+  const output = await runInvestigation(fetch, example, connector);
+
+  expect(output.execution_error).toBeUndefined();
+  expect(output).toMatchObject({
+    workflow_status: 'complete',
+    traceId: 'agent-trace',
+    structured_report: { conclusion: 'Synthetic timeouts increased.' },
+  });
+});
+
+it('still fails when transient reads never recover before the timeout', async () => {
+  const clock = jest
+    .spyOn(Date, 'now')
+    .mockReturnValueOnce(0)
+    .mockReturnValue(INVESTIGATION_TIMEOUT_MS + 60_000);
+  try {
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ investigation_id: 'unready' })
+      .mockRejectedValue(httpError(500, 'no shard available'));
+    expect(await runInvestigation(fetch, example, connector)).toMatchObject({
+      investigation_id: 'unready',
+      execution_error:
+        'Investigation was not created within 30 minutes. Last read failed: no shard available',
+    });
+  } finally {
+    clock.mockRestore();
+  }
+});
+
+it('does not retry a poll that failed for a reason other than a transient server error', async () => {
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'rejected' })
+    .mockRejectedValueOnce(httpError(400, 'bad investigation id'));
+
+  expect(await runInvestigation(fetch, example, connector)).toMatchObject({
+    execution_error: 'bad investigation id',
+  });
+  expect(fetch).toHaveBeenCalledTimes(2);
 });
 
 it('retains the latest report and conversation when a later poll fails', async () => {
