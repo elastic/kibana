@@ -128,9 +128,11 @@ describe('createAttachmentsClient', () => {
         } as never,
       ]);
 
-      expect(createAttachmentsClient(attachments).workflows.list().map(({ id }) => id)).toEqual([
-        'wf-att',
-      ]);
+      expect(
+        createAttachmentsClient(attachments)
+          .workflows.list()
+          .map(({ id }) => id)
+      ).toEqual(['wf-att']);
     });
   });
 
