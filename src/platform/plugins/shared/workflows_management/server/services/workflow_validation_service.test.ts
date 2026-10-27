@@ -606,11 +606,11 @@ describe('WorkflowValidationService', () => {
         (_, i) => `lookup-${i}`
       );
       mockGetSources.mockResolvedValue(
-        ['logs-app', ...lookups].map((name) => ({ name, hidden: false }))
+        ['logs-joins', ...lookups].map((name) => ({ name, hidden: false }))
       );
       const queries = Array.from({ length: MAX_VALIDATED_ESQL_STEPS }, (_, step) =>
         [
-          'FROM logs-app',
+          'FROM logs-joins',
           ...Array.from(
             { length: joinsPerStep },
             (__, join) => `LOOKUP JOIN ${lookups[step * joinsPerStep + join]} ON host.name`
