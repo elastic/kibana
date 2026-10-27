@@ -196,6 +196,7 @@ describe('global header', () => {
     '/rules/updates',
     '/rules/add_rules',
     '/exceptions',
+    '/exceptions/details/list-1',
     '/get_started',
     '/administration/endpoints',
     '/administration/policy',
@@ -223,23 +224,6 @@ describe('global header', () => {
       expect(setHeaderActionMenu).not.toHaveBeenCalledWith(expect.any(Function));
     }
   );
-
-  it('mounts the header action menu on the exception list details page', () => {
-    (useLocation as jest.Mock).mockReturnValue({ pathname: '/exceptions/details/list-1' });
-    const setHeaderActionMenu = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue({
-      ...mockUseKibana(),
-      services: { ...mockUseKibana().services, setHeaderActionMenu },
-    });
-
-    render(
-      <TestProviders store={store}>
-        <GlobalHeader />
-      </TestProviders>
-    );
-
-    expect(setHeaderActionMenu).toHaveBeenCalledWith(expect.any(Function));
-  });
 
   // Not migrated to `AdministrationListPage`: Notes (whose error state has no header) and the
   // `/administration` redirect keep the global header action menu.

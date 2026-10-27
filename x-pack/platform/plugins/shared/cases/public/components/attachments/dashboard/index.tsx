@@ -11,7 +11,7 @@ import {
   DashboardAttachmentPayloadSchema,
   type DashboardAttachmentData,
   type DashboardAttachmentMetadata,
-} from '../../../../common/types/domain_zod/attachment/dashboard/v2';
+} from '../../../../common/types/domain/attachment/dashboard/v2';
 import {
   defineAttachment,
   type UnifiedReferenceAttachmentViewProps,
