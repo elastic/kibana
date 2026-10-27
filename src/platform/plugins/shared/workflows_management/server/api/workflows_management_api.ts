@@ -95,7 +95,10 @@ import type {
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
 import { updateWorkflowYamlFields } from '../../common/lib/yaml/update_workflow_yaml_fields';
-import { getWorkflowDeleteOperation } from '../services/workflow_access_control';
+import {
+  EPHEMERAL_WORKFLOW_ID,
+  getWorkflowDeleteOperation,
+} from '../services/workflow_access_control';
 import type { BulkCreateWorkflowsResult } from '../services/workflow_crud_service';
 import type {
   ProcessedWaitForInputFacets,
@@ -863,7 +866,7 @@ export class WorkflowsManagementApi {
     const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
 
     return {
-      id: params.workflowId ?? 'ephemeral-workflow',
+      id: params.workflowId ?? EPHEMERAL_WORKFLOW_ID,
       name: params.name ?? workflowJson.name,
       enabled: workflowJson.enabled,
       definition: workflowJson.definition,
@@ -1145,6 +1148,15 @@ export class WorkflowsManagementApi {
       { ...params, accessControlFilter: await access.executionFilter(spaceId, params.request) },
       spaceId
     );
+  }
+
+  /** Workflow ids the caller can read, or `undefined` when no workflow is hidden from them. */
+  public async getReadableWorkflowIds(
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<string[] | undefined> {
+    const access = await this.workflowsService.getAccessControl();
+    return access.readableWorkflowIds(spaceId, request);
   }
 
   public async getWorkflowExecution(

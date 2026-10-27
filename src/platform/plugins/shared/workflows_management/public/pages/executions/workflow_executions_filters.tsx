@@ -10,6 +10,8 @@
 import React, { useMemo } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { useQuery } from '@kbn/react-query';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 import {
   WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
   WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
@@ -18,6 +20,10 @@ import {
   DEFAULT_EXECUTION_PAGE_FILTERS,
   EXECUTION_FILTERS_STORAGE_KEY,
 } from './workflow_executions_page_constants';
+import {
+  buildExcludeStepRunsFilter,
+  buildReadableWorkflowsFilter,
+} from './workflow_executions_scope_filters';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSpaceId } from '../../hooks/use_space_id';
 import {
@@ -48,6 +54,26 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
   }) => {
     const { dataViews } = useKibana().services;
     const spaceId = useSpaceId();
+    const api = useWorkflowsApi();
+
+    // The options lists read the execution data as the current user, which ignores workflow access
+    // control, so they are scoped to the workflows the user can read until that data enforces it.
+    const { data: readableWorkflows } = useQuery({
+      networkMode: 'always',
+      queryKey: ['workflows', 'executions', 'readableWorkflowIds', spaceId],
+      queryFn: () => api.getReadableWorkflowIds(),
+      enabled: Boolean(spaceId),
+      retry: false,
+    });
+    const readableWorkflowIds = readableWorkflows?.workflowIds;
+
+    const parentFilters = useMemo(
+      () => [
+        buildExcludeStepRunsFilter(),
+        ...(readableWorkflowIds ? [buildReadableWorkflowsFilter(readableWorkflowIds)] : []),
+      ],
+      [readableWorkflowIds]
+    );
 
     const dataViewSpec = useMemo(
       () => ({
@@ -65,7 +91,8 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
       [dataViews]
     );
 
-    if (!spaceId) {
+    // Wait for the scope so the options are never fetched unscoped, not even once.
+    if (!spaceId || !readableWorkflows) {
       return null;
     }
 
@@ -79,6 +106,7 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
           maxControls={4}
           onFiltersChange={onFiltersChange}
           onInit={onFilterGroupInit}
+          parentFilters={parentFilters}
           query={query}
           services={services}
           setControlsUrlState={setControlsUrlState}

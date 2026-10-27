@@ -48,6 +48,11 @@ export const WORKFLOW_READ_ACCESS_QUERY = {
   includeMissing: true,
 } as const;
 
+/** Workflow id stored on the executions of an unsaved workflow run from the editor. */
+export const EPHEMERAL_WORKFLOW_ID = 'ephemeral-workflow';
+
+const READABLE_WORKFLOW_IDS_LIMIT = 10000;
+
 const rolePrivileges = {
   viewer: [WorkflowsManagementApiActions.read],
   executor: [WorkflowsManagementApiActions.read, WorkflowsManagementApiActions.execute],
@@ -246,12 +251,42 @@ export class WorkflowAccessControlService {
     return filter;
   }
 
+  /**
+   * Ids of the workflows in a space the caller can read, or `undefined` when nothing is hidden
+   * from them. Interim scope for surfaces that read execution data without the Kibana APIs.
+   */
+  async readableWorkflowIds(
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<string[] | undefined> {
+    if (await this.isAdmin(request)) return undefined;
+    const access = await this.scanWorkflowAccess(spaceId, await this.getProfileId(request));
+    if (!access || access.hidden.length === 0) return undefined;
+    // Past this size the id list no longer fits in a request body, so the scope is dropped.
+    if (access.readable.length > READABLE_WORKFLOW_IDS_LIMIT) return undefined;
+    return [...access.readable, EPHEMERAL_WORKFLOW_ID];
+  }
+
   private async buildExecutionFilter(
     spaceId: string,
     request?: KibanaRequest
   ): Promise<estypes.QueryDslQueryContainer> {
     if (await this.isAdmin(request)) return { match_all: {} };
     const profileId = request ? await this.getProfileId(request) : undefined;
+    const access = await this.scanWorkflowAccess(spaceId, profileId);
+    if (!access) return { match_all: {} };
+    const excluded: estypes.QueryDslQueryContainer[] = [];
+    for (let offset = 0; offset < access.hidden.length; offset += 10000) {
+      excluded.push({ terms: { workflowId: access.hidden.slice(offset, offset + 10000) } });
+    }
+    return excluded.length ? { bool: { must_not: excluded } } : { match_all: {} };
+  }
+
+  /** Splits the workflows of a space by whether the profile can read them; `undefined` without a workflows index. */
+  private async scanWorkflowAccess(
+    spaceId: string,
+    profileId: string | undefined
+  ): Promise<{ readable: string[]; hidden: string[] } | undefined> {
     const client = this.core.elasticsearch.client.asInternalUser;
     let pitId: string;
     try {
@@ -263,9 +298,10 @@ export class WorkflowAccessControlService {
       });
       pitId = snapshot.id;
     } catch (error) {
-      if (isIndexNotFoundError(error)) return { match_all: {} };
+      if (isIndexNotFoundError(error)) return undefined;
       throw error;
     }
+    const readableIds: string[] = [];
     const hiddenIds: string[] = [];
     let searchAfter: estypes.SortResults | undefined;
     try {
@@ -286,14 +322,11 @@ export class WorkflowAccessControlService {
         for (const { _id: id, _source: source } of response.hits.hits) {
           if (!id || !source) throw new Error('Missing workflow execution access document.');
           const accessControl = storedWorkflowAccessControlSchema.parse(source.access_control);
-          if (
-            !getWorkflowPermissions(
-              { owner_id: source.owner_id, access_control: accessControl },
-              profileId
-            ).read
-          ) {
-            hiddenIds.push(id);
-          }
+          const { read } = getWorkflowPermissions(
+            { owner_id: source.owner_id, access_control: accessControl },
+            profileId
+          );
+          (read ? readableIds : hiddenIds).push(id);
         }
         if (response.hits.hits.length < 1000) break;
         searchAfter = response.hits.hits.at(-1)?.sort;
@@ -302,11 +335,7 @@ export class WorkflowAccessControlService {
     } finally {
       await client.closePointInTime({ id: pitId });
     }
-    const excluded: estypes.QueryDslQueryContainer[] = [];
-    for (let offset = 0; offset < hiddenIds.length; offset += 10000) {
-      excluded.push({ terms: { workflowId: hiddenIds.slice(offset, offset + 10000) } });
-    }
-    return excluded.length ? { bool: { must_not: excluded } } : { match_all: {} };
+    return { readable: readableIds, hidden: hiddenIds };
   }
 
   async update(
