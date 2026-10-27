@@ -67,6 +67,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import {
   type InTableSearchRestorableState,
   type InTableSearchScrollToCell,
+  type UseDataGridInTableSearchProps,
   useDataGridInTableSearch,
 } from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
@@ -524,6 +525,10 @@ interface InternalUnifiedDataTableProps {
    */
   enableInTableSearch?: boolean;
   /**
+   * Additional hosts containing table controls rendered outside the grid wrapper.
+   */
+  additionalSearchScopeElements?: UseDataGridInTableSearchProps['additionalSearchScopeElements'];
+  /**
    * Overrides how the grid scrolls to the active in-table search match. Provide this together with
    * `renderCustomGridBody`, since EUI's built-in `scrollToItem` only works with its own virtualized body.
    */
@@ -677,6 +682,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       customGridColumnsConfiguration,
       enableComparisonMode,
       enableInTableSearch = false,
+      additionalSearchScopeElements,
       scrollToCell,
       cellContext,
       renderCellPopover,
@@ -1095,6 +1101,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       renderCellValueWithInTableSearchSupport,
     } = useDataGridInTableSearch({
       enableInTableSearch: enableInTableSearch && isInteractive,
+      additionalSearchScopeElements,
       dataGridWrapper,
       dataGridRef,
       scrollToCell,

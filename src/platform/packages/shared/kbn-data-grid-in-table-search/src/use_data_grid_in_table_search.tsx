@@ -32,6 +32,8 @@ export interface UseDataGridInTableSearchProps
    * `renderCustomGridBody`, since EUI's `scrollToItem` is a no-op without its virtualized body.
    */
   scrollToCell?: InTableSearchScrollToCell;
+  /** Additional hosts containing table controls rendered outside the grid wrapper. */
+  additionalSearchScopeElements?: readonly HTMLElement[];
   cellContext: EuiDataGridProps['cellContext'] | undefined;
   pagination: EuiDataGridProps['pagination'] | undefined;
   renderCellValue: EuiDataGridProps['renderCellValue'];
@@ -59,6 +61,7 @@ export const useDataGridInTableSearch = (
   const {
     enableInTableSearch = true,
     dataGridWrapper,
+    additionalSearchScopeElements,
     dataGridRef,
     scrollToCell: customScrollToCell,
     visibleColumns,
@@ -129,8 +132,12 @@ export const useDataGridInTableSearch = (
   );
 
   const shouldOverrideCmdF = useCallback(
-    (element: HTMLElement) => dataGridWrapper?.contains(element) ?? false,
-    [dataGridWrapper]
+    (element: HTMLElement) =>
+      Boolean(
+        dataGridWrapper?.contains(element) ||
+          additionalSearchScopeElements?.some((scope) => scope.contains(element))
+      ),
+    [dataGridWrapper, additionalSearchScopeElements]
   );
 
   const onChange = useCallback(

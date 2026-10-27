@@ -8,7 +8,7 @@
  */
 
 import React, { createRef } from 'react';
-import { fireEvent, render, screen, waitFor, renderHook } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, renderHook, within } from '@testing-library/react';
 import {
   DataGridWithInTableSearchExample,
   generateMockData,
@@ -182,6 +182,64 @@ describe('useDataGridInTableSearch', () => {
       );
     });
   });
+
+  it.each(['ctrlKey', 'metaKey'] as const)(
+    'scopes %s+F to the grid and its current external hosts',
+    async (modifier) => {
+      const externalControls = render(
+        <div>
+          <div data-test-subj="externalHeader">
+            <button>Toolbar control</button>
+            <button>Column header</button>
+          </div>
+          <button>Unrelated control</button>
+        </div>
+      );
+      const externalHeader = externalControls.getByTestId('externalHeader');
+      const view = render(
+        <DataGridWithInTableSearchExample
+          rowsCount={2}
+          columnsCount={2}
+          pageSize={null}
+          additionalSearchScopeElements={[externalHeader]}
+        />
+      );
+      const otherGrid = render(
+        <DataGridWithInTableSearchExample rowsCount={2} columnsCount={2} pageSize={null} />
+      );
+      const gridQueries = within(view.container);
+      const otherGridQueries = within(otherGrid.container);
+      const shortcut = { key: 'f', [modifier]: true };
+
+      expect(fireEvent.keyDown(externalControls.getByText('Unrelated control'), shortcut)).toBe(
+        true
+      );
+      expect(gridQueries.queryByTestId(INPUT_TEST_SUBJ)).not.toBeInTheDocument();
+
+      for (const label of ['Toolbar control', 'Column header']) {
+        expect(fireEvent.keyDown(externalControls.getByText(label), shortcut)).toBe(false);
+        const input = await gridQueries.findByTestId(INPUT_TEST_SUBJ);
+        expect(input).toHaveFocus();
+        expect(otherGridQueries.queryByTestId(INPUT_TEST_SUBJ)).not.toBeInTheDocument();
+        expect(fireEvent.keyDown(externalControls.getByText(label), shortcut)).toBe(false);
+        expect(input).toHaveFocus();
+        fireEvent.keyUp(input, { key: 'Escape' });
+        await waitFor(() =>
+          expect(gridQueries.queryByTestId(INPUT_TEST_SUBJ)).not.toBeInTheDocument()
+        );
+      }
+
+      view.rerender(
+        <DataGridWithInTableSearchExample rowsCount={2} columnsCount={2} pageSize={null} />
+      );
+      expect(fireEvent.keyDown(externalControls.getByText('Toolbar control'), shortcut)).toBe(true);
+      expect(gridQueries.queryByTestId(INPUT_TEST_SUBJ)).not.toBeInTheDocument();
+
+      expect(fireEvent.keyDown(gridQueries.getByTestId(BUTTON_TEST_SUBJ), shortcut)).toBe(false);
+      expect(await gridQueries.findByTestId(INPUT_TEST_SUBJ)).toHaveFocus();
+      expect(otherGridQueries.queryByTestId(INPUT_TEST_SUBJ)).not.toBeInTheDocument();
+    }
+  );
 
   it('should handle parent contexts correctly', async () => {
     render(
