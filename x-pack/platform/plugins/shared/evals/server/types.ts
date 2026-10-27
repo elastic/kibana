@@ -52,8 +52,9 @@ export interface EvalsPluginStart {
   onlineScoreService?: OnlineScoreService;
   /**
    * Grades a subject in-process with the same evaluator execution as `_evaluate`. Throws
-   * `EvaluationExecutionError` when the input or trace rules out evaluating; failures of
-   * individual evaluators are returned as `error` results instead.
+   * `EvaluationExecutionError` when the input, the trace, or the caller's privileges to read
+   * it rule out evaluating; failures of individual evaluators are returned as `error`
+   * results instead.
    */
   evaluate?: EvaluateFn;
 }

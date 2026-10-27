@@ -212,8 +212,9 @@ const results = await evals.evaluate?.({
 ```
 
 - Evaluators are resolved in `spaceId` when given, otherwise in the request's space.
-- Traces are read as the request's current user, and judges call their connector on behalf of the request.
-- Invalid input, an unknown evaluator, or a trace that is not ready throws `EvaluationExecutionError`. A failing evaluator does not throw; it is returned as an `error` result next to the others.
+- Traces are read as the request's current user, and judges call their connector on behalf of the request. Whenever a trace is read, that identity needs read access to `traces-*` and `logs-*`. For a workflow step, it is the identity behind the step's fake request.
+- Invalid input, an unknown evaluator, a trace that is not ready, or missing privileges to read the trace throws `EvaluationExecutionError`. A failing evaluator does not throw; it is returned as an `error` result next to the others.
+- A caller with read access to only some of the matching indices gets no privilege error, because Elasticsearch narrows wildcard searches to the indices it can read. Its trace can then look not ready instead (see [Reading normalized trace evidence](#reading-normalized-trace-evidence)).
 
 ## Dataset tags and maturity
 

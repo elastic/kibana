@@ -10,7 +10,10 @@
  * evaluators are not thrown; they are returned as `error` results alongside the others.
  */
 export class EvaluationExecutionError extends Error {
-  constructor(message: string, public readonly responseType: 'badRequest' | 'notFound') {
+  constructor(
+    message: string,
+    public readonly responseType: 'badRequest' | 'forbidden' | 'notFound'
+  ) {
     super(message);
     this.name = 'EvaluationExecutionError';
   }

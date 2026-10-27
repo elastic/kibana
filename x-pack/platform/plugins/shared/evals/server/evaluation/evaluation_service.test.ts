@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -26,6 +27,15 @@ const ROUND = {
   response: { message: 'The payments service is returning 503s.' },
   steps: [],
 };
+
+const buildResponseError = (statusCode: number): errors.ResponseError =>
+  new errors.ResponseError({
+    statusCode,
+    body: {},
+    headers: {},
+    warnings: [],
+    meta: {} as ConstructorParameters<typeof errors.ResponseError>[0]['meta'],
+  });
 
 const buildEvaluator = ({
   name,
@@ -166,6 +176,30 @@ describe('createEvaluationService', () => {
       message: 'Evaluator not found: latency@9.9.9',
       responseType: 'badRequest',
     });
+  });
+
+  it('throws a forbidden error when the trace reader lacks privileges', async () => {
+    awaitTraceReadyMock.mockRejectedValueOnce(buildResponseError(403));
+    const latency = buildEvaluator({ name: 'latency' });
+    const { evaluate } = setup([latency]);
+
+    const evaluation = evaluate({ evaluators: [{ name: 'latency' }] });
+
+    await expect(evaluation).rejects.toThrow(EvaluationExecutionError);
+    await expect(evaluation).rejects.toMatchObject({
+      message:
+        'Insufficient Elasticsearch privileges to read the trace. Grant read access to traces-* and logs-*.',
+      responseType: 'forbidden',
+    });
+    expect(latency.evaluate).not.toHaveBeenCalled();
+  });
+
+  it('rethrows other Elasticsearch errors unchanged', async () => {
+    const searchFailure = buildResponseError(500);
+    awaitTraceReadyMock.mockRejectedValueOnce(searchFailure);
+    const { evaluate } = setup([buildEvaluator({ name: 'latency' })]);
+
+    await expect(evaluate({ evaluators: [{ name: 'latency' }] })).rejects.toBe(searchFailure);
   });
 
   it('throws when an evaluator is selected twice', async () => {

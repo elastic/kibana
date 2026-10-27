@@ -9,6 +9,7 @@ import { isValidTraceId } from '@opentelemetry/api';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { EvaluationSubject, EvaluateResponse, Model } from '@kbn/evals-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
+import { isResponseError } from '@kbn/es-errors';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { z } from '@kbn/zod/v4';
@@ -105,6 +106,12 @@ export const executeEvaluators = async ({
   } catch (error) {
     if (error instanceof TraceReadinessError) {
       throw new EvaluationExecutionError(error.message, 'notFound');
+    }
+    if (isResponseError(error) && error.statusCode === 403) {
+      throw new EvaluationExecutionError(
+        'Insufficient Elasticsearch privileges to read the trace. Grant read access to traces-* and logs-*.',
+        'forbidden'
+      );
     }
     throw error;
   }
