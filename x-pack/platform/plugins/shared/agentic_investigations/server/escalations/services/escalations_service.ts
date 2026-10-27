@@ -6,8 +6,6 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { canLinkEscalation } from '../../../common/escalations/can_link_escalation';
-import type { EscalationLinkActor } from '../../../common/escalations/can_link_escalation';
 import { escapeQuotes } from '@kbn/es-query';
 import {
   ConversationAccessControlMode,
@@ -20,6 +18,8 @@ import type {
   ConversationTemplatesStart,
 } from '@kbn/agent-builder-server';
 import type { ConversationSearchSort } from '@kbn/agent-builder-common';
+import type { EscalationLinkActor } from '../../../common/escalations/can_link_escalation';
+import { canLinkEscalation } from '../../../common/escalations/can_link_escalation';
 import type {
   CreateEscalationRequest,
   EscalationConversation,
