@@ -248,6 +248,46 @@ describe('buildHuntNarrative', () => {
     expect(narrative).not.toMatch(TECHNOLOGY_WORD);
   });
 
+  it('names adjudicated-out indicators in What was searched when excluded_report_iocs is set', () => {
+    expect(
+      buildHuntNarrative(
+        result({
+          excluded_report_iocs: { count: 1 },
+        }),
+        ctx
+      )
+    ).toContain('- **Not searched (adjudicated out):** 1 indicator');
+  });
+
+  it('pluralizes the adjudicated-out indicators line', () => {
+    expect(
+      buildHuntNarrative(
+        result({
+          excluded_report_iocs: { count: 2 },
+        }),
+        ctx
+      )
+    ).toContain('- **Not searched (adjudicated out):** 2 indicators');
+  });
+
+  it('omits the adjudicated-out line when excluded_report_iocs is absent', () => {
+    expect(buildHuntNarrative(result({}), ctx)).not.toContain('Not searched (adjudicated out)');
+  });
+
+  it('explains no_searchable_terms as adjudication when excluded indicators remain', () => {
+    expect(
+      buildHuntNarrative(
+        result({
+          tier1: tier1({ status: 'no_searchable_terms', resolved_iocs: [], searched_iocs: 0 }),
+          excluded_report_iocs: { count: 7 },
+        }),
+        ctx
+      )
+    ).toContain(
+      'Tier 1 had nothing to search: no eligible indicators remained (7 indicators excluded by adjudication) and the report exposed no searchable techniques.'
+    );
+  });
+
   it('names the model tiers that were unavailable when Tier 2 could not run for want of a model', () => {
     const narrative = buildHuntNarrative(
       result({
