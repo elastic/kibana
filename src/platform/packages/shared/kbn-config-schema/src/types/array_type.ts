@@ -23,27 +23,30 @@ export class ArrayType<T> extends Type<T[]> {
   private readonly arrayOptions: ArrayOptions<T>;
 
   constructor(type: Type<T>, options: ArrayOptions<T> = {}) {
-    let schema = internals.array().items(type.getSchema().optional()).sparse(false);
+    options = { ...options };
+    super(() => {
+      let schema = internals.array().items(type.getSchema().optional()).sparse(false);
 
-    if (options.minSize !== undefined) {
-      schema = schema.min(options.minSize);
-    }
+      if (options.minSize !== undefined) {
+        schema = schema.min(options.minSize);
+      }
 
-    if (options.maxSize !== undefined) {
-      schema = schema.max(options.maxSize);
-    }
+      if (options.maxSize !== undefined) {
+        schema = schema.max(options.maxSize);
+      }
 
-    // Only set stripUnknown if we have an explicit value of unknowns
-    const { unknowns } = options;
-    if (unknowns) {
-      schema = schema.options({ stripUnknown: { objects: unknowns === 'ignore' } });
-    }
+      // Only set stripUnknown if we have an explicit value of unknowns
+      const { unknowns } = options;
+      if (unknowns) {
+        schema = schema.options({ stripUnknown: { objects: unknowns === 'ignore' } });
+      }
 
-    if (options.meta?.id) {
-      schema = schema.id(options.meta.id);
-    }
+      if (options.meta?.id) {
+        schema = schema.id(options.meta.id);
+      }
 
-    super(schema, options);
+      return schema;
+    }, options);
     this.arrayType = type;
     this.arrayOptions = options;
   }
