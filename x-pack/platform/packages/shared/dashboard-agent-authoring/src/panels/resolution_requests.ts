@@ -111,10 +111,13 @@ const toEditResolutionRequest = (
         error: `Panel "${existingPanel.id}" cannot combine \`esql\`: null, which removes the query, with \`hasData\`: true or \`regenerateESQL\`.`,
       };
     }
-    const changesOnlyQuery = (esql !== undefined || hasData === false) && !regenerateESQL;
-    if (query === undefined && (!changesOnlyQuery || hasData === true)) {
+    const replacesQuery = typeof esql === 'string' && esql.trim() !== '';
+    const removesQuery = esql === null || hasData === false;
+    const changesOnlyQuery =
+      !regenerateESQL && (replacesQuery || (removesQuery && hasData !== true));
+    if (query === undefined && !changesOnlyQuery) {
       return {
-        error: `Panel "${existingPanel.id}" edit needs \`query\` unless it only replaces or removes the ES|QL query (\`esql\`, or \`hasData\`: false); \`regenerateESQL\` and \`hasData\`: true need it.`,
+        error: `Panel "${existingPanel.id}" edit needs \`query\` unless it only replaces the ES|QL query with a non-blank \`esql\` or removes it (\`esql\`: null, or \`hasData\`: false); \`regenerateESQL\` and \`hasData\`: true need it.`,
       };
     }
     return {

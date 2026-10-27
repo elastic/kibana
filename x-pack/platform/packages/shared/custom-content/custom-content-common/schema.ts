@@ -78,7 +78,7 @@ const hasSomethingToChange = ({
 }: {
   prompt?: string;
   esqlQuery?: string | null;
-}) => prompt !== undefined || esqlQuery !== undefined;
+}) => prompt !== undefined || esqlQuery === null || Boolean(esqlQuery?.trim());
 
 const atLeastOneChange = { message: 'At least one of prompt or esqlQuery must be provided.' };
 

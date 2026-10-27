@@ -654,7 +654,23 @@ describe('executeDashboardUpsert', () => {
         kind: 'panel',
         identifier: 'cc-1',
         error:
-          'Panel "cc-1" edit needs `query` unless it only replaces or removes the ES|QL query (`esql`, or `hasData`: false); `regenerateESQL` and `hasData`: true need it.',
+          'Panel "cc-1" edit needs `query` unless it only replaces the ES|QL query with a non-blank `esql` or removes it (`esql`: null, or `hasData`: false); `regenerateESQL` and `hasData`: true need it.',
+      },
+      {
+        name: 'a custom_content edit whose only change is a blank esql',
+        panels: [createPanel('cc-1', CUSTOM_CONTENT_EMBEDDABLE_TYPE, { template: '<div />' })],
+        upsert: {
+          panels: [
+            {
+              id: 'cc-1',
+              content: { source: 'request', renderer: 'custom_content', esql: '  ' },
+            },
+          ],
+        },
+        kind: 'panel',
+        identifier: 'cc-1',
+        error:
+          'Panel "cc-1" edit needs `query` unless it only replaces the ES|QL query with a non-blank `esql` or removes it (`esql`: null, or `hasData`: false); `regenerateESQL` and `hasData`: true need it.',
       },
       {
         name: 'a custom_content edit that regenerates the query without a query',
@@ -670,7 +686,7 @@ describe('executeDashboardUpsert', () => {
         kind: 'panel',
         identifier: 'cc-1',
         error:
-          'Panel "cc-1" edit needs `query` unless it only replaces or removes the ES|QL query (`esql`, or `hasData`: false); `regenerateESQL` and `hasData`: true need it.',
+          'Panel "cc-1" edit needs `query` unless it only replaces the ES|QL query with a non-blank `esql` or removes it (`esql`: null, or `hasData`: false); `regenerateESQL` and `hasData`: true need it.',
       },
       {
         name: 'a custom_content edit that regenerates and removes the query',
@@ -2169,6 +2185,50 @@ describe('executeDashboardUpsert', () => {
           nlQuery: 'show errors by host',
           regenerateESQL: true,
           index: 'logs-*',
+          existingPanel,
+        })
+      );
+      expect(result.failures).toEqual([]);
+    });
+
+    it('accepts a custom_content edit that replaces the query with esql and hasData: true, without a query', async () => {
+      const existingPanel: AttachmentPanel = {
+        id: 'cc-1',
+        type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+        config: { esql_query: ['FROM logs | STATS count = COUNT(*)'], template: '<div>Old</div>' },
+        grid: { x: 0, y: 0, w: 24, h: 6 },
+      };
+      const resolvePanelContent = createResolverMock(async () =>
+        createResolvedPanelContent({
+          type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+          config: { template: '<div>New</div>' },
+        })
+      );
+
+      const result = await executeDashboardUpsert({
+        dashboardData: { title: 'Test', panels: [existingPanel] },
+        upsert: {
+          panels: [
+            {
+              id: 'cc-1',
+              content: {
+                source: 'request',
+                renderer: 'custom_content',
+                esql: 'FROM metrics-* | STATS count = COUNT(*)',
+                hasData: true,
+              },
+            },
+          ],
+        },
+        logger,
+        resolvePanelContent,
+      });
+
+      expect(resolvePanelContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          renderer: 'custom_content',
+          esql: 'FROM metrics-* | STATS count = COUNT(*)',
+          hasData: true,
           existingPanel,
         })
       );

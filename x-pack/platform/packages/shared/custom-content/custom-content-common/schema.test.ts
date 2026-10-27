@@ -113,6 +113,22 @@ describe('customContentPanelUpdateSchema', () => {
     ).toBe(false);
   });
 
+  it('rejects an edit whose only change is a blank esqlQuery', () => {
+    expect(
+      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', esqlQuery: '  ' }).success
+    ).toBe(false);
+  });
+
+  it('accepts a blank esqlQuery next to a prompt, as not supplied', () => {
+    expect(
+      customContentPanelUpdateSchema.safeParse({
+        embeddable_id: 'p1',
+        prompt: 'Make the badges blue',
+        esqlQuery: '',
+      }).success
+    ).toBe(true);
+  });
+
   it('rejects regenerateEsql together with esqlQuery: null', () => {
     expect(
       customContentPanelUpdateSchema.safeParse({
