@@ -104,14 +104,20 @@ describe('SearchInferenceEndpointsPlugin', () => {
       const request = httpServerMock.createKibanaRequest();
       const getFeature = jest.fn();
       const getForFeature = jest.fn();
+      const getUiSetting = jest.fn();
 
-      const setupAndGetResolver = () => {
+      const setupAndGetResolver = async () => {
         const setupWithStart = coreMock.createSetup({
           pluginStartContract: {
             features: { get: getFeature },
             endpoints: { getForFeature },
           },
         });
+        const [coreStart] = await setupWithStart.getStartServices();
+        const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
+          savedObjectsClientMock.create()
+        );
+        jest.mocked(uiSettingsClient.get).mockImplementation(getUiSetting);
         plugin.setup(setupWithStart, { features, inference: inferenceSetup });
         return inferenceSetup.registerFeatureEndpointResolver.mock.calls[0][0];
       };
@@ -119,10 +125,11 @@ describe('SearchInferenceEndpointsPlugin', () => {
       beforeEach(() => {
         getFeature.mockReset();
         getForFeature.mockReset();
+        getUiSetting.mockReset();
       });
 
-      it('registers a resolver with the inference plugin', () => {
-        setupAndGetResolver();
+      it('registers a resolver with the inference plugin', async () => {
+        await setupAndGetResolver();
 
         expect(inferenceSetup.registerFeatureEndpointResolver).toHaveBeenCalledTimes(1);
       });
@@ -134,8 +141,9 @@ describe('SearchInferenceEndpointsPlugin', () => {
             { connectorId: 'top', parameters: { temperature: 0.2, reasoning: { effort: 'low' } } },
             { connectorId: 'second', parameters: { temperature: 0.7 } },
           ],
+          soEntryFound: true,
         });
-        const resolver = setupAndGetResolver();
+        const resolver = await setupAndGetResolver();
 
         await expect(resolver('my_feature', request)).resolves.toEqual({
           connectorId: 'top',
@@ -145,17 +153,61 @@ describe('SearchInferenceEndpointsPlugin', () => {
         expect(getForFeature).toHaveBeenCalledWith('my_feature', request);
       });
 
+      it('returns the top endpoint when it is recommended for the feature', async () => {
+        getFeature.mockReturnValue({ featureId: 'my_feature', taskType: 'chat_completion' });
+        getForFeature.mockResolvedValue({
+          endpoints: [{ connectorId: 'recommended', isRecommended: true }],
+          soEntryFound: false,
+        });
+        const resolver = await setupAndGetResolver();
+
+        await expect(resolver('my_feature', request)).resolves.toEqual({
+          connectorId: 'recommended',
+          temperature: undefined,
+          reasoning: undefined,
+        });
+      });
+
+      it('returns the top endpoint when it is the global default connector', async () => {
+        getFeature.mockReturnValue({ featureId: 'my_feature', taskType: 'chat_completion' });
+        getForFeature.mockResolvedValue({
+          endpoints: [{ connectorId: 'global-default' }, { connectorId: 'other' }],
+          soEntryFound: false,
+        });
+        getUiSetting.mockResolvedValue('global-default');
+        const resolver = await setupAndGetResolver();
+
+        await expect(resolver('my_feature', request)).resolves.toEqual({
+          connectorId: 'global-default',
+          temperature: undefined,
+          reasoning: undefined,
+        });
+        expect(getUiSetting).toHaveBeenCalledWith(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+      });
+
+      it('returns undefined when only the connector catalog is available', async () => {
+        getFeature.mockReturnValue({ featureId: 'my_feature', taskType: 'chat_completion' });
+        getForFeature.mockResolvedValue({
+          endpoints: [{ connectorId: 'first-in-catalog' }, { connectorId: 'other' }],
+          soEntryFound: false,
+        });
+        getUiSetting.mockResolvedValue('NO_DEFAULT_CONNECTOR');
+        const resolver = await setupAndGetResolver();
+
+        await expect(resolver('my_feature', request)).resolves.toBeUndefined();
+      });
+
       it('returns undefined when the feature has no endpoints', async () => {
         getFeature.mockReturnValue({ featureId: 'my_feature', taskType: 'chat_completion' });
         getForFeature.mockResolvedValue({ endpoints: [] });
-        const resolver = setupAndGetResolver();
+        const resolver = await setupAndGetResolver();
 
         await expect(resolver('my_feature', request)).resolves.toBeUndefined();
       });
 
       it('throws when the feature is not registered', async () => {
         getFeature.mockReturnValue(undefined);
-        const resolver = setupAndGetResolver();
+        const resolver = await setupAndGetResolver();
 
         await expect(resolver('unknown', request)).rejects.toMatchObject({
           code: InferenceTaskErrorCode.requestError,
@@ -167,7 +219,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
 
       it('throws when the feature is not a chat completion feature', async () => {
         getFeature.mockReturnValue({ featureId: 'my_feature', taskType: 'text_embedding' });
-        const resolver = setupAndGetResolver();
+        const resolver = await setupAndGetResolver();
 
         await expect(resolver('my_feature', request)).rejects.toMatchObject({
           code: InferenceTaskErrorCode.requestError,

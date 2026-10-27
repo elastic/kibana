@@ -1713,6 +1713,45 @@ describe('createChatCompleteApi', () => {
         }),
       });
     });
+
+    it('records the featureId of a featureId call as the token usage feature', async () => {
+      const callbackApi = createChatCompleteCallbackApi({
+        request,
+        namespace: 'default',
+        actions,
+        logger,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
+        esClient: mockEsClient,
+        endpointIdCache,
+        tokenUsageLogger: tokenUsageLogger as any,
+        isTokenUsageTrackingEnabled,
+        resolveFeatureEndpoint: jest.fn().mockResolvedValue({ connectorId: 'my-endpoint' }),
+      });
+
+      await createChatCompleteApi({ callbackApi })({
+        featureId: 'my_feature',
+        messages: [],
+        modelName: 'gpt-4o',
+        template: {
+          id: '.attack-discovery-fp-tp',
+          version: 1,
+          variables: { cited_alerts: 'no email here' },
+        },
+        maxRetries: 0,
+      });
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(tokenUsageLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: expect.objectContaining({
+            connectorId: 'my-endpoint',
+            featureId: 'my_feature',
+          }),
+        })
+      );
+    });
   });
 
   describe('anonymization onFailure', () => {

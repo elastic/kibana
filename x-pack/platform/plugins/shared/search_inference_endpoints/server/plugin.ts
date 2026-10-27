@@ -18,6 +18,7 @@ import type {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 import { createInferenceRequestError } from '@kbn/inference-common';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
@@ -113,7 +114,7 @@ export class SearchInferenceEndpointsPlugin
     });
 
     plugins.inference.registerFeatureEndpointResolver(async (featureId, request) => {
-      const [, , { features, endpoints }] = await core.getStartServices();
+      const [coreStart, , { features, endpoints }] = await core.getStartServices();
       const feature = features.get(featureId);
       if (!feature) {
         throw createInferenceRequestError(`Feature "${featureId}" is not registered`, 400);
@@ -127,9 +128,20 @@ export class SearchInferenceEndpointsPlugin
 
       const {
         endpoints: [topEndpoint],
+        soEntryFound,
       } = await endpoints.getForFeature(featureId, request);
       if (!topEndpoint) {
         return undefined;
+      }
+
+      const isConfiguredForFeature = soEntryFound || topEndpoint.isRecommended;
+      if (!isConfiguredForFeature) {
+        const defaultConnectorId = await coreStart.uiSettings
+          .asScopedToClient(coreStart.savedObjects.getScopedClient(request))
+          .get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+        if (topEndpoint.connectorId !== defaultConnectorId) {
+          return undefined;
+        }
       }
       return {
         connectorId: topEndpoint.connectorId,

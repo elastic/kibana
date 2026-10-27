@@ -160,6 +160,7 @@ export function createChatCompleteCallbackApi({
         defer(() =>
           resolveAndCreatePipeline({
             connectorId,
+            featureId: target.featureId,
             endpointIdCache,
             request,
             actions,
@@ -243,6 +244,7 @@ function createChatCompletePipeline({
   namespace,
   anonymization,
   connectorId,
+  featureId,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
 }: {
@@ -257,6 +259,7 @@ function createChatCompletePipeline({
   namespace: string;
   anonymization?: InferenceAnonymizationOptions;
   connectorId: string;
+  featureId?: string;
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
 }) {
@@ -292,7 +295,7 @@ function createChatCompletePipeline({
                 connectorId,
                 model: callbackContext.model,
                 modelName,
-                featureId: metadata?.connectorTelemetry?.pluginId,
+                featureId: featureId ?? metadata?.connectorTelemetry?.pluginId,
                 parentFeatureId: metadata?.connectorTelemetry?.aggregateBy,
               }),
             logger,
@@ -428,6 +431,7 @@ function createChatCompletePipeline({
 
 function resolveAndCreatePipeline({
   connectorId,
+  featureId,
   endpointIdCache,
   request,
   actions,
@@ -448,6 +452,7 @@ function resolveAndCreatePipeline({
   shouldStreamInferenceEndpoint,
 }: {
   connectorId: string;
+  featureId?: string;
   endpointIdCache: InferenceEndpointIdCache;
   request: KibanaRequest;
   actions: ActionsClientProvider;
@@ -546,6 +551,7 @@ function resolveAndCreatePipeline({
         namespace,
         anonymization,
         connectorId,
+        featureId,
         tokenUsageLogger,
         isTokenUsageTrackingEnabled,
       }).pipe(
