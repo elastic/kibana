@@ -389,7 +389,8 @@ steps:
       # revision, as this run's own identity. Nothing decided means the answer
       # never landed, and the proposal waits for a human whoever answered. An
       # approval caught mid-action is recorded as failed and re-offered like
-      # any failed action. Anything else had already settled, and only the
+      # any failed action, but its outcome is unknown, so the error says the
+      # action may have run. Anything else had already settled, and only the
       # report was lost.
       - name: handle_resolution_failure
         type: if
@@ -426,7 +427,7 @@ steps:
                 with:
                   proposalId: '{{ variables.resolved_proposal_id }}'
                   status: failed
-                  executionError: '{{ variables.resolution_error }}'
+                  executionError: 'The action may have run, but its outcome was not recorded: {{ variables.resolution_error }}'
               - name: adopt_interrupted_action
                 type: data.set
                 with:

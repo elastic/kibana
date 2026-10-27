@@ -240,8 +240,17 @@ steps:
           status: failed
           decision: approved
 
+  # The action has run, so a lost write must not fail this run: the gate reads
+  # the `executing` it would leave behind as an interrupted action and re-offers
+  # it. A write that never lands leaves the record to the service, which settles
+  # it as `failed`, without a re-offer, once the gate has ended.
   - name: record_success
     type: proposals.updateProposal
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: '1s'
+      continue: true
     with:
       proposalId: '{{ variables.proposal_id }}'
       status: succeeded

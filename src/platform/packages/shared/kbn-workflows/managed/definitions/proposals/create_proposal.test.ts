@@ -476,6 +476,8 @@ describe('create-investigation-proposal workflow', () => {
       expect(record?.with?.decision).toBeUndefined();
       expect(String(record?.with?.proposalId)).toContain('variables.resolved_proposal_id');
       expect(String(record?.with?.executionError)).toContain('variables.resolution_error');
+      // The approver of the clone must know the first attempt may have taken effect.
+      expect(String(record?.with?.executionError)).toContain('may have run');
       expect(step('adopt_interrupted_action')?.with?.resolution).toBe('action_failed');
     });
 

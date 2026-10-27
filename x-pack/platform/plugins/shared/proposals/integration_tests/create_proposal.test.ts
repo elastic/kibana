@@ -286,7 +286,7 @@ describe('create-investigation-proposal workflow execution', () => {
         status: 'failed',
         supersededBy: clone.id,
       });
-      expect(original.executionError).toEqual(expect.any(String));
+      expect(original.executionError).toEqual(expect.stringContaining('may have run'));
       expect(clone.status).toBe('pending');
       expect(clone.workflowExecutionId).toBe('fake_workflow_execution_id');
       expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);

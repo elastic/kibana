@@ -311,6 +311,15 @@ describe('resolve-proposal workflow', () => {
       );
       expect(order.slice(-2)).toEqual(['record_success', 'output_succeeded']);
     });
+
+    it('reports a successful action settled even when its success write is lost', () => {
+      const onFailure = step('record_success')?.['on-failure'];
+
+      // A failed run would leave the proposal `executing`, which the gate
+      // records as an interrupted action and re-offers.
+      expect(onFailure?.retry?.['max-attempts']).toBeGreaterThan(1);
+      expect(onFailure?.continue).toBe(true);
+    });
   });
 
   describe('what it leaves to the gate', () => {
