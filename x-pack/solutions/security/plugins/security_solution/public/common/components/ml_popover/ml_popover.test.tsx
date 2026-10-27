@@ -18,7 +18,7 @@ jest.mock('../../lib/kibana');
 jest.setTimeout(30_000);
 
 describe('MlPopover', () => {
-  test('shows upgrade popover on mouse click', async () => {
+  test('shows upgrade flyout on mouse click', async () => {
     const { getByTestId } = render(<MlPopover />, {
       wrapper: TestProviders,
     });

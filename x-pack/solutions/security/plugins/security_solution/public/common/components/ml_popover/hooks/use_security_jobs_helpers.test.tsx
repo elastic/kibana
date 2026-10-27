@@ -8,6 +8,7 @@
 import {
   composeModuleAndInstalledJobs,
   createSecurityJobs,
+  createSecurityJobsBySource,
   getAugmentedFields,
   getInstalledJobs,
   getModuleJobs,
@@ -43,6 +44,7 @@ describe('useSecurityJobsHelpers', () => {
         isCompatible: false,
         isElasticJob: true,
         isInstalled: false,
+        isIntegrationJob: false,
         isSingleMetricViewerJob: false,
         jobState: 'closed',
         jobTags: {},
@@ -87,7 +89,9 @@ describe('useSecurityJobsHelpers', () => {
           defaultIndexPattern: 'auditbeat-*',
           isCompatible: true,
           isElasticJob: true,
+          isIntegrationJob: false,
           moduleId: 'security_linux_v3',
+          packagedJobRevision: undefined,
         });
       });
     });
@@ -128,6 +132,82 @@ describe('useSecurityJobsHelpers', () => {
           checkRecognizerSuccess
         );
         expect(securityJobs.length).toEqual(6);
+      });
+    });
+
+    describe('createSecurityJobsBySource', () => {
+      test('limits integration jobs to Fleet ml-module saved objects', () => {
+        const fleetModule = {
+          ...mockGetModuleResponse[0],
+          id: 'nginx_data_stream',
+          title: 'Nginx access logs',
+          jobs: mockGetModuleResponse[0].jobs.slice(0, 1),
+        };
+        // File-based module outside the SIEM allowlist must not appear as integration
+        const legacyFileModule = {
+          ...mockGetModuleResponse[0],
+          id: 'apache_ecs',
+          title: 'Apache access logs',
+          jobs: mockGetModuleResponse[0].jobs.slice(0, 1),
+        };
+
+        const { jobs, integrationJobs } = createSecurityJobsBySource(
+          mockJobsSummaryResponse,
+          [...mockGetModuleResponse, fleetModule, legacyFileModule],
+          checkRecognizerSuccess,
+          [fleetModule]
+        );
+
+        expect(jobs.length).toEqual(6);
+        expect(integrationJobs).toHaveLength(1);
+        expect(integrationJobs[0].moduleId).toEqual('nginx_data_stream');
+        expect(integrationJobs[0].isIntegrationJob).toEqual(true);
+        expect(integrationJobs.every((job) => job.moduleId !== 'apache_ecs')).toEqual(true);
+      });
+
+      test('marks installed jobs outdated when packaged job_revision is newer', () => {
+        const moduleWithRevision = {
+          ...mockGetModuleResponse[0],
+          jobs: mockGetModuleResponse[0].jobs.map((job, index) =>
+            index === 0
+              ? {
+                  ...job,
+                  config: {
+                    ...job.config,
+                    custom_settings: {
+                      ...job.config.custom_settings,
+                      job_revision: 5,
+                    },
+                  },
+                }
+              : job
+          ),
+        };
+        const installedWithOldRevision = mockJobsSummaryResponse.map((job, index) =>
+          index === 0
+            ? {
+                ...job,
+                id: moduleWithRevision.jobs[0].id,
+                customSettings: {
+                  ...(job.customSettings ?? {}),
+                  job_revision: 1,
+                },
+              }
+            : job
+        );
+
+        const { jobs } = createSecurityJobsBySource(
+          installedWithOldRevision,
+          [moduleWithRevision],
+          checkRecognizerSuccess,
+          []
+        );
+
+        const outdated = jobs.find((job) => job.id === moduleWithRevision.jobs[0].id);
+        expect(outdated?.isInstalled).toEqual(true);
+        expect(outdated?.installedJobRevision).toEqual(1);
+        expect(outdated?.packagedJobRevision).toEqual(5);
+        expect(outdated?.isUpdateAvailable).toEqual(true);
       });
     });
   });

@@ -20,19 +20,14 @@ import * as i18n from './translations';
 import type { JobsFilters, SecurityJob } from '../../types';
 import { GroupsFilterPopover } from './groups_filter_popover';
 
-const SEARCH_BAR_MIN_WIDTH = 200;
-
 interface JobsTableFiltersProps {
   securityJobs: SecurityJob[];
   onFilterChanged: Dispatch<SetStateAction<JobsFilters>>;
 }
 
 /**
- * Collection of filters for filtering data within the JobsTable. Contains search bar, Elastic/Custom
- * Jobs filter button toggle, and groups selection
- *
- * @param securityJobs jobs to fetch groups from to display for filtering
- * @param onFilterChanged change listener to be notified on filter changes
+ * Filters for the Pre-built jobs tab: search, groups, and Elastic / Custom toggles.
+ * Neither Elastic nor Custom selected shows the unified job list.
  */
 export const JobsTableFiltersComponent = ({
   securityJobs,
@@ -43,9 +38,14 @@ export const JobsTableFiltersComponent = ({
   const [showCustomJobs, setShowCustomJobs] = useState<boolean>(false);
   const [showElasticJobs, setShowElasticJobs] = useState<boolean>(false);
 
-  // Propagate filter changes to parent
   useEffect(() => {
-    onFilterChanged({ filterQuery, showCustomJobs, showElasticJobs, selectedGroups });
+    onFilterChanged((current) => ({
+      ...current,
+      filterQuery,
+      showCustomJobs,
+      showElasticJobs,
+      selectedGroups,
+    }));
   }, [filterQuery, selectedGroups, showCustomJobs, showElasticJobs, onFilterChanged]);
 
   const handleChange = useCallback(
@@ -64,13 +64,14 @@ export const JobsTableFiltersComponent = ({
   }, [setShowElasticJobs, showCustomJobs, setShowCustomJobs]);
 
   return (
-    <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" wrap>
-      <EuiFlexItem grow={true} style={{ minWidth: SEARCH_BAR_MIN_WIDTH }}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={true}>
         <EuiSearchBar
           data-test-subj="jobs-filter-bar"
           box={{
             placeholder: i18n.FILTER_PLACEHOLDER,
             incremental: true,
+            fullWidth: true,
           }}
           onChange={handleChange}
         />
