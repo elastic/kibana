@@ -35,6 +35,14 @@ const StatusSchema = schema.oneOf(
 
 const DataFormatSchema = schema.oneOf([schema.literal('ecs'), schema.literal('otel')]);
 
+const EcfServiceConfigSchema = schema.object({
+  serviceId: schema.string({ minLength: 1, maxLength: 128 }),
+  bucketArns: schema.arrayOf(schema.string({ minLength: 1, maxLength: 2048 }), { maxSize: 1000 }),
+  logGroupArns: schema.arrayOf(schema.string({ minLength: 1, maxLength: 2048 }), {
+    maxSize: 1000,
+  }),
+});
+
 const EcfStackSchema = schema.object({
   family: schema.oneOf([
     schema.literal('unified'),
@@ -51,6 +59,8 @@ const EcfStackSchema = schema.object({
   serviceIds: schema.maybe(
     schema.arrayOf(schema.string({ minLength: 1, maxLength: 128 }), { maxSize: 1000 })
   ),
+  /** Stack-relevant settings per service when the stack was last launched or updated. Used for settings drift detection on session resume. */
+  serviceConfigs: schema.maybe(schema.arrayOf(EcfServiceConfigSchema, { maxSize: 1000 })),
 });
 
 const SharedFields = {

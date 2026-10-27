@@ -363,6 +363,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     isDone: isEcfDone,
     sectionProps: ecfSectionProps,
     currentServiceIdsByFamily,
+    currentConfigsByFamily,
     advanceStaleSnapshots,
   } = useEcfDeployment({
     instances: isAgentBased ? [] : serviceSettings.instances,
@@ -403,12 +404,14 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         if (!version) return null;
         const stackArn = ecfSectionProps.stackArns[family];
         const serviceIds = currentServiceIdsByFamily[family];
+        const serviceConfigs = currentConfigsByFamily[family];
         return {
           family,
           stackName: ecfSectionProps.stackNames[family] || defaultNames[family],
           templateVersion: version,
           ...(stackArn ? { stackArn } : {}),
           serviceIds,
+          serviceConfigs,
         };
       })
       .filter((s): s is NonNullable<typeof s> => s !== null);
@@ -418,6 +421,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     ecfSectionProps.stackNames,
     ecfSectionProps.stackArns,
     currentServiceIdsByFamily,
+    currentConfigsByFamily,
   ]);
 
   const ecfStacksUnchanged = useMemo(

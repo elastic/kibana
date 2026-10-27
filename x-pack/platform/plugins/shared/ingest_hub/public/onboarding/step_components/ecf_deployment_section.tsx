@@ -140,6 +140,8 @@ interface UseEcfDeploymentResult {
   stackArns: Partial<Record<EcfTemplateFamily, string>>;
   /** Current sorted service IDs per family — used by the parent to write the service snapshot to the SO on Next. */
   currentServiceIdsByFamily: Record<EcfTemplateFamily, string[]>;
+  /** Current stack-relevant settings per family — used by the parent to write the settings snapshot to the SO on Next. */
+  currentConfigsByFamily: Record<EcfTemplateFamily, EcfConfigSnapshot>;
   /** Advances the launchedServiceIds snapshot to the current selection for all stale families. Call on Next before persisting. */
   advanceStaleSnapshots: () => void;
 }
@@ -485,6 +487,7 @@ export const useEcfDeployment = ({
     isDone,
     stackArns,
     currentServiceIdsByFamily,
+    currentConfigsByFamily,
     advanceStaleSnapshots,
     sectionProps: {
       ecfUnifiedConfigs,
