@@ -118,7 +118,7 @@ export const WorkflowInfoStripe: React.FC<WorkflowInfoStripeProps> = ({ yaml, sh
     <>
       <EuiText size="xs">
         <strong>
-          {i18n.translate('workflowsManagement.attachmentRenderers.stripe.title', {
+          {i18n.translate('workflows.attachmentRenderers.stripe.title', {
             defaultMessage:
               '{triggerCount, plural, one {# trigger} other {# triggers}} and {stepCount, plural, one {# step} other {# steps}}',
             values: { triggerCount, stepCount },
@@ -134,15 +134,15 @@ export const WorkflowInfoStripe: React.FC<WorkflowInfoStripeProps> = ({ yaml, sh
 const triggerLabel = (type: string): string => {
   switch (type) {
     case 'manual':
-      return i18n.translate('workflowsManagement.attachmentRenderers.stripe.triggerManual', {
+      return i18n.translate('workflows.attachmentRenderers.stripe.triggerManual', {
         defaultMessage: 'Manual trigger',
       });
     case 'scheduled':
-      return i18n.translate('workflowsManagement.attachmentRenderers.stripe.triggerScheduled', {
+      return i18n.translate('workflows.attachmentRenderers.stripe.triggerScheduled', {
         defaultMessage: 'Scheduled trigger',
       });
     case 'alert':
-      return i18n.translate('workflowsManagement.attachmentRenderers.stripe.triggerAlert', {
+      return i18n.translate('workflows.attachmentRenderers.stripe.triggerAlert', {
         defaultMessage: 'Alert trigger',
       });
     default:

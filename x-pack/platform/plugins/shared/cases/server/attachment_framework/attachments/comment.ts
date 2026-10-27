@@ -8,8 +8,8 @@ import { badRequest } from '@hapi/boom';
 import {
   CommentAttachmentDataSchema,
   CommentAttachmentPayloadSchema,
-} from '../../../common/types/domain_zod/attachment/comment/v2';
-import type { CommentAttachmentData } from '../../../common/types/domain_zod/attachment/comment/v2';
+} from '../../../common/types/domain/attachment/comment/v2';
+import type { CommentAttachmentData } from '../../../common/types/domain/attachment/comment/v2';
 import type { UnifiedAttachmentTypeSetup } from '../types';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 

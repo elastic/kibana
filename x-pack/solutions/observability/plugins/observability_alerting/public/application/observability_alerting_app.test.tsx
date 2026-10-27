@@ -6,7 +6,10 @@
  */
 
 import type { Capabilities, ScopedHistory } from '@kbn/core/public';
-import type { AlertingV2PageProps } from '@kbn/alerting-v2-plugin/public';
+import {
+  type AlertingV2PageProps,
+  V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY,
+} from '@kbn/alerting-v2-plugin/public';
 import type { EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, waitFor } from '@testing-library/react';
@@ -55,18 +58,24 @@ const Placeholder = ({
 
 const HostTabs = ({ tabs }: { tabs?: AlertingV2PageProps['tabs'] }) => (
   <>
-    {tabs?.map((tab) => (
-      <button
-        key={tab.id}
-        type="button"
-        role="tab"
-        data-test-subj={tab['data-test-subj']}
-        data-href={tab.href}
-        aria-selected={tab.isSelected}
-      >
-        {tab.label}
-      </button>
-    ))}
+    {tabs?.map((tab) => {
+      const badgeColor =
+        tab.badge !== undefined && typeof tab.badge === 'object' ? tab.badge.color : undefined;
+
+      return (
+        <button
+          key={tab.id}
+          type="button"
+          role="tab"
+          data-test-subj={tab['data-test-subj']}
+          data-href={tab.href}
+          data-badge-color={badgeColor}
+          aria-selected={tab.isSelected}
+        >
+          {tab.label}
+        </button>
+      );
+    })}
   </>
 );
 
@@ -195,6 +204,7 @@ const renderAt = (
 describe('ObservabilityAlertingApp', () => {
   beforeEach(() => {
     mockTriggersActionsUi.getClassicRulesPage.mockClear();
+    localStorage.removeItem(V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY);
   });
 
   it('redirects / to alerts', () => {
@@ -290,6 +300,7 @@ describe('ObservabilityAlertingApp', () => {
         },
       })
     );
+    expect(mockTriggersActionsUi.getClassicRulesPage.mock.calls[0][0].showClassicBadge).toBe(false);
   });
 
   it('shows both rules tabs for a mixed v1 and v2 user on the classic rules page', async () => {
@@ -312,6 +323,11 @@ describe('ObservabilityAlertingApp', () => {
     );
     expect(getByTestId('v1RulesTab')).toHaveAttribute('aria-selected', 'true');
     expect(getByTestId('v2RulesTab')).toHaveAttribute('aria-selected', 'false');
+    expect(mockTriggersActionsUi.getClassicRulesPage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        showClassicBadge: true,
+      })
+    );
   });
 
   it('hides the rules tab bar for a v1-only user', async () => {
@@ -324,6 +340,7 @@ describe('ObservabilityAlertingApp', () => {
       expect(getByTestId('classicRulesPage')).toBeInTheDocument();
     });
     expect(queryAllByRole('tab')).toHaveLength(0);
+    expect(mockTriggersActionsUi.getClassicRulesPage.mock.calls[0][0].showClassicBadge).toBe(false);
   });
 
   it('renders RulesPage at /rules/universal with observability host', async () => {
@@ -354,6 +371,18 @@ describe('ObservabilityAlertingApp', () => {
     );
     expect(getByTestId('v2RulesTab')).toHaveAttribute('aria-selected', 'true');
     expect(getByTestId('v1RulesTab')).toHaveAttribute('aria-selected', 'false');
+    expect(getByTestId('v2RulesTab')).toHaveAttribute('data-badge-color', 'primary');
+  });
+
+  it('omits the Universal new-dot after the tab has been visited', async () => {
+    localStorage.setItem(V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY, JSON.stringify(true));
+
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_RULES_V2_PATH, mixedRulesCapabilities);
+
+    await waitFor(() => {
+      expect(getByTestId(`rulesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
+    });
+    expect(getByTestId('v2RulesTab')).not.toHaveAttribute('data-badge-color');
   });
 
   it('hides the rules tab bar for a v2-only user', async () => {

@@ -24,7 +24,7 @@ import type { Template } from '@kbn/workflows-library';
 import { TemplateCard } from '@kbn/workflows-ui';
 
 export interface AgenticFirstEmptyStateProps {
-  /** Workflow Template Library templates. The first three show as cards; none hides the row. */
+  /** Workflow Template library templates. The first three show as cards; none hides the row. */
   templates?: Template[];
   /** The prompt area, e.g. Agent Builder's chat input. Omitted when AI chat is unavailable. */
   agentInput?: React.ReactNode;

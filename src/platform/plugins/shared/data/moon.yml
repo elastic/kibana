@@ -55,6 +55,7 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/safer-lodash-set'
   - '@kbn/esql-utils'
+  - '@kbn/esql-types'
   - '@kbn/data-source'
   - '@kbn/shared-ux-table-persist'
   - '@kbn/core-execution-context-common'
@@ -91,6 +92,4 @@ fileGroups:
     - test/scout_search_sessions/**/*
     - test/scout_test_plugins/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

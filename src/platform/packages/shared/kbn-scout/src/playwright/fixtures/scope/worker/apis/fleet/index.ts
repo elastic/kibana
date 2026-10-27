@@ -32,7 +32,7 @@ export interface FleetApiService {
     get: (queryParams?: Record<string, any>) => Promise<any>;
     getById: (id: string) => Promise<any>;
     create: (body: PackagePolicyCreateBody, queryParams?: Record<string, string>) => Promise<any>;
-    delete: (id: string) => Promise<any>;
+    delete: (id: string, opts?: { force?: boolean }) => Promise<any>;
     bulkDelete: (ids: [string]) => Promise<any>;
   };
   agent_policies: {
@@ -193,7 +193,7 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
           }
         );
       },
-      delete: async (id: string) => {
+      delete: async (id: string, { force }: { force?: boolean } = {}) => {
         return await measurePerformanceAsync(
           log,
           `fleetApi.package_policies.delete [${id}]`,
@@ -201,6 +201,7 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
             const response = await kbnClient.request({
               method: 'DELETE',
               path: `/api/fleet/package_policies/${id}`,
+              query: force ? { force } : undefined,
               ignoreErrors: [400],
             });
             return { status: response.status };

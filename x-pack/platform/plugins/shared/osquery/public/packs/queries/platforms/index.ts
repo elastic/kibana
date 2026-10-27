@@ -9,8 +9,11 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-export const PLATFORM_IDS = ['linux', 'darwin', 'windows'] as const;
-export type PlatformId = (typeof PLATFORM_IDS)[number];
+import { PLATFORM_IDS } from '../../../../common/constants';
+import type { PlatformId } from '../../../../common/constants';
+
+export { PLATFORM_IDS };
+export type { PlatformId };
 
 export interface OsOption extends EuiComboBoxOptionOption<string> {
   key: PlatformId;

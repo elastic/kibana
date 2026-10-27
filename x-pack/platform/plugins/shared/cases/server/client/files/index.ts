@@ -12,7 +12,10 @@ import type { File, FileJSON } from '@kbn/files-plugin/common';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
 import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
 import pMap from 'p-map';
-import { CaseFileMetadataForDeletionRt, constructOwnerFromFileKind } from '../../../common/files';
+import {
+  CaseFileMetadataForDeletionSchema,
+  constructOwnerFromFileKind,
+} from '../../../common/files';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { OwnerEntity } from '../../authorization';
 
@@ -66,14 +69,15 @@ export const getFileEntitiesForCase = async ({
   // Files that no longer exist are left out.
   const files = await getFiles({ fileIds, fileService, logger });
 
-  const [validFiles, invalidFiles] = partition(
-    files,
-    (file) =>
-      CaseFileMetadataForDeletionRt.is(file.data.meta) &&
-      file.data.meta.caseIds.length === 1 &&
-      file.data.meta.caseIds.includes(caseId) &&
+  const [validFiles, invalidFiles] = partition(files, (file) => {
+    const parsed = CaseFileMetadataForDeletionSchema.safeParse(file.data.meta);
+    return (
+      parsed.success &&
+      parsed.data.caseIds.length === 1 &&
+      parsed.data.caseIds.includes(caseId) &&
       (!skipInvalid || constructOwnerFromFileKind(file.data.fileKind) != null)
-  ) as [File[], File[]];
+    );
+  }) as [File[], File[]];
 
   if (invalidFiles.length > 0) {
     const invalidIds = invalidFiles.map((fileInfo) => fileInfo.id);

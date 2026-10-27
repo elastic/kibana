@@ -15,6 +15,10 @@ const AGENT_BUILDER_EXPERIMENTAL_FEATURES_ARG =
 
 export const servers: ScoutServerConfig = {
   ...evalsAgentBuilderConfig,
+  esTestCluster: {
+    ...evalsAgentBuilderConfig.esTestCluster,
+    serverArgs: [...evalsAgentBuilderConfig.esTestCluster.serverArgs, 'xpack.ml.enabled=false'],
+  },
   kbnTestServer: {
     ...evalsAgentBuilderConfig.kbnTestServer,
     serverArgs: [

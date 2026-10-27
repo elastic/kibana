@@ -78,6 +78,24 @@ describe('SlackTriggerEditor', () => {
     expect(screen.getByTestId('automationSlackTriggerMessage')).toHaveTextContent('Any message');
     expect(screen.getByText('from')).toBeInTheDocument();
     expect(screen.getByTestId('automationSlackTriggerUsers')).toHaveTextContent('Anyone');
+    expect(screen.getByText('via')).toBeInTheDocument();
+    expect(screen.getByTestId('automationSlackTriggerBots')).toHaveTextContent('Any app');
+  });
+
+  it('adds an app or bot', async () => {
+    render(<Editor kind="slack_message" />);
+
+    fireEvent.click(screen.getByTestId('automationSlackTriggerBots'));
+    const input = within(await screen.findByTestId('automationSlackTriggerBotsInput')).getByRole(
+      'combobox'
+    );
+    fireEvent.change(input, { target: { value: 'PagerDuty' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ kind: 'slack_message', bots: ['PagerDuty'] })
+    );
+    expect(screen.getByTestId('automationSlackTriggerBots')).toHaveTextContent('PagerDuty');
   });
 
   it('adds a connected channel by id and a message filter', async () => {
@@ -155,7 +173,13 @@ describe('SlackTriggerEditor', () => {
       <I18nProvider>
         <SlackTriggerEditor
           readOnly
-          trigger={{ kind: 'slack_message', channels: ['C1'], users: [], messageFilter: '' }}
+          trigger={{
+            kind: 'slack_message',
+            channels: ['C1'],
+            users: [],
+            bots: [],
+            messageFilter: '',
+          }}
           onChange={onChange}
         />
       </I18nProvider>

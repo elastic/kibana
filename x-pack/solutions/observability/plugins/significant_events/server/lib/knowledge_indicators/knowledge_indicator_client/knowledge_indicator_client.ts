@@ -111,11 +111,31 @@ export class KnowledgeIndicatorClient {
     return this.reader.countKnowledgeIndicators(type);
   }
 
+  countFeatures(sourceIds: string[]): Promise<number> {
+    return this.reader.countFeatures(sourceIds);
+  }
+
+  countEntities(sourceIds: string[]): Promise<number> {
+    return this.reader.countEntities(sourceIds);
+  }
+
+  countUnbackedQueries(sourceIds: string[]): Promise<number> {
+    return this.reader.countUnbackedQueries(sourceIds);
+  }
+
+  countRuleBackedQueries(sourceIds: string[]): Promise<number> {
+    return this.reader.countRuleBackedQueries(sourceIds);
+  }
+
   keepAlivePersistentIndicators(
     sourceId: string,
     options: { lastRefreshedBefore: string }
   ): Promise<{ refreshed: number }> {
-    return this.withSourceWrite(sourceId, () => this.writer.keepAlivePersistent(sourceId, options));
+    return this.withSourceWrite(
+      sourceId,
+      () => this.writer.keepAlivePersistent(sourceId, options),
+      { waitForLease: false }
+    );
   }
 
   deleteIndicators(sourceId: string) {
@@ -255,6 +275,22 @@ export class KnowledgeIndicatorClient {
     return this.searcher.findFeatures(sources, query, options);
   }
 
+  findFeaturesAcrossSources(
+    sourceIds: string[],
+    query: string,
+    options: { featureType: string; searchMode?: SearchMode; limit?: number }
+  ): Promise<{ hits: Feature[] }> {
+    return this.searcher.findFeaturesAcrossSources(sourceIds, query, options);
+  }
+
+  getFeatureSourcesBySlug(
+    sourceIds: string[],
+    featureType: string,
+    slugs: string[]
+  ): Promise<Map<string, string[]>> {
+    return this.reader.getFeatureSourcesBySlug(sourceIds, featureType, slugs);
+  }
+
   findQueries(
     sources: string | string[],
     query: string,
@@ -335,6 +371,8 @@ export class KnowledgeIndicatorClient {
   }
 
   reconcileSource(sourceId: string): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {
-    return this.withSourceWrite(sourceId, () => this.orchestrator.reconcileSource(sourceId));
+    return this.withSourceWrite(sourceId, () => this.orchestrator.reconcileSource(sourceId), {
+      waitForLease: false,
+    });
   }
 }

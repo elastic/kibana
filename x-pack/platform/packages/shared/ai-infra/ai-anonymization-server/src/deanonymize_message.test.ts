@@ -484,6 +484,30 @@ describe('deanonymizeMessage', () => {
     });
   });
 
+  it('does not forward masked reasoning', async () => {
+    const value = 'Bob';
+    const mask = createMask('PER', value);
+
+    const anonymizationOutput: AnonymizationOutput = {
+      messages: [],
+      anonymizations: [{ entity: { class_name: 'PER', value, mask }, rule: { type: 'NER' } }],
+    } as AnonymizationOutput;
+
+    const result = await lastValueFrom(
+      from([
+        { ...chunkEvent(''), reasoning: `Looking up ${mask}. ` },
+        { ...chunkEvent('Hello '), reasoning: `Greeting ${mask}.` },
+        chunkEvent(`${mask}.`),
+        messageEvent(`Hello ${mask}.`),
+      ]).pipe(deanonymizeMessage(anonymizationOutput), toArray())
+    );
+
+    for (const event of result) {
+      expect(event).not.toHaveProperty('reasoning');
+    }
+    expect(concatenateChunkContent(result)).toBe(`Hello ${value}.`);
+  });
+
   it('emits final-string-valid deanonymization ranges for input/output when regex ordering differs from text ordering', async () => {
     const name = 'john';
     const email = 'john123@gmail.com';
