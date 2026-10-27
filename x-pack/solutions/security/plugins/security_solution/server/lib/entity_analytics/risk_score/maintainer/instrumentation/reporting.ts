@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { performance } from 'perf_hooks';
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 import { RISK_SCORE_PERFORMANCE_EVENT } from './events';
@@ -42,11 +43,23 @@ export const createRunInstrumentation = ({
 }) => {
   const identity = { calculationRunId, namespace };
   const stages: StageSummary[] = [];
+  const startedAt = performance.now();
+  const updateTaskEvent = (
+    status: RiskScorePerformanceEvent['status'] | 'running' = 'running',
+    durationMs = performance.now() - startedAt
+  ) => {
+    setCustomTaskRunEventFields?.(
+      buildRiskScoreTaskEvent(calculationRunId, status, durationMs, stages)
+    );
+  };
+  updateTaskEvent();
+
   const reportStage = (
     stage: StageSummary,
     measurements: RiskScorePerformanceEvent['measurements'] = []
   ) => {
     stages.push(stage);
+    updateTaskEvent();
     telemetry.reportEvent(RISK_SCORE_PERFORMANCE_EVENT.eventType, {
       ...identity,
       ...stage,
@@ -91,9 +104,7 @@ export const createRunInstrumentation = ({
         durationMs: health.durationMs,
         measurements: runHealthMeasurements(health),
       });
-      setCustomTaskRunEventFields?.(
-        buildRiskScoreTaskEvent(calculationRunId, status, health.durationMs, stages)
-      );
+      updateTaskEvent(status, health.durationMs);
     },
   };
 };

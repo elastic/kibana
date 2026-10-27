@@ -10,7 +10,7 @@ import type { RiskScorePerformanceEvent } from './events';
 /** Retains the longest stage prefix that fits Task Manager's custom-event budget. */
 export const buildRiskScoreTaskEvent = (
   calculationRunId: string,
-  status: RiskScorePerformanceEvent['status'],
+  status: TaskEvent['status'],
   durationMs: number,
   stages: readonly StageSummary[]
 ): TaskEvent =>
@@ -43,9 +43,9 @@ type StageSummary = Pick<
   'entityType' | 'stage' | 'status' | 'durationMs'
 >;
 
-interface TaskEvent {
+interface TaskEvent extends Record<string, string | number | StageSummary[]> {
   calculationRunId: string;
-  status: RiskScorePerformanceEvent['status'];
+  status: RiskScorePerformanceEvent['status'] | 'running';
   durationMs: number;
   stages: StageSummary[];
   omittedStages: number;

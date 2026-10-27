@@ -7,16 +7,20 @@
 
 import { buildRiskScoreTaskEvent } from './task_event';
 
-it('retains calculation identity and accounts for stages trimmed to the event budget', () => {
-  const stages = Array.from({ length: 100 }, (_, index) => ({
-    entityType: 'host',
-    stage: `stage_${index}`,
-    status: 'success' as const,
-    durationMs: 10,
-  }));
-  const event = buildRiskScoreTaskEvent('calculation-1', 'success', 100, stages);
-  expect(Buffer.byteLength(JSON.stringify(event))).toBeLessThanOrEqual(3500);
-  expect(event.calculationRunId).toBe('calculation-1');
-  expect(event.stages.length + event.omittedStages).toBe(100);
-  expect(stages).toHaveLength(100);
-});
+it.each(['running', 'success', 'aborted'] as const)(
+  'retains calculation identity and bounds the %s snapshot',
+  (status) => {
+    const stages = Array.from({ length: 100 }, (_, index) => ({
+      entityType: 'host',
+      stage: `stage_${index}`,
+      status: 'success' as const,
+      durationMs: 10,
+    }));
+    const event = buildRiskScoreTaskEvent('calculation-1', status, 100, stages);
+    expect(Buffer.byteLength(JSON.stringify(event))).toBeLessThanOrEqual(3500);
+    expect(event.calculationRunId).toBe('calculation-1');
+    expect(event.status).toBe(status);
+    expect(event.stages.length + event.omittedStages).toBe(100);
+    expect(stages).toHaveLength(100);
+  }
+);

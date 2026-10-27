@@ -33,7 +33,7 @@ const memorySample = (megabytes: number): NodeJS.MemoryUsage => ({
 
 const gcEntry = (kind: number, duration: number) => ({
   name: 'gc',
-  entryType: 'gc',
+  entryType: 'gc' as const,
   startTime: 0,
   duration,
   detail: { kind },

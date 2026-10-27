@@ -9,6 +9,54 @@ import { analyticsServiceMock, loggingSystemMock } from '@kbn/core/server/mocks'
 import { createRunInstrumentation } from './reporting';
 import { createRunHealthTracker } from './run_health';
 
+it('publishes calculation identity and completed stages before run finalization', () => {
+  const setCustomTaskRunEventFields = jest.fn<void, [Record<string, unknown>]>();
+  const reporting = createRunInstrumentation({
+    logger: loggingSystemMock.createLogger(),
+    telemetry: analyticsServiceMock.createAnalyticsServiceSetup(),
+    calculationRunId: 'cancelled-calculation',
+    namespace: 'default',
+    setCustomTaskRunEventFields,
+  });
+  expect(setCustomTaskRunEventFields).toHaveBeenLastCalledWith({
+    calculationRunId: 'cancelled-calculation',
+    status: 'running',
+    durationMs: expect.any(Number),
+    stages: [],
+    omittedStages: 0,
+  });
+  const [initialSnapshot] = setCustomTaskRunEventFields.mock.calls[0];
+
+  const lookup = { stage: 'lookup', status: 'success' as const, durationMs: 10 };
+  reporting.reportStage(lookup);
+  expect(setCustomTaskRunEventFields).toHaveBeenLastCalledWith(
+    expect.objectContaining({ stages: [lookup] })
+  );
+
+  const base = { entityType: 'host', stage: 'base', status: 'success' as const, durationMs: 20 };
+  const pages = reporting.createPageTimings('host', 'base', {
+    profile: false,
+    profileInterval: 20,
+  });
+  pages.startPage();
+  reporting.finishStage(base, pages);
+  expect(setCustomTaskRunEventFields).toHaveBeenLastCalledWith({
+    calculationRunId: 'cancelled-calculation',
+    status: 'running',
+    durationMs: expect.any(Number),
+    stages: [lookup, base],
+    omittedStages: 0,
+  });
+  const [cancellationSnapshot] = setCustomTaskRunEventFields.mock.calls[2];
+
+  reporting.finishRun(createRunHealthTracker().start().stop(), 'aborted');
+  expect(setCustomTaskRunEventFields).toHaveBeenLastCalledWith(
+    expect.objectContaining({ status: 'aborted', stages: [lookup, base] })
+  );
+  expect(initialSnapshot).toMatchObject({ status: 'running', stages: [] });
+  expect(cancellationSnapshot).toMatchObject({ status: 'running', stages: [lookup, base] });
+});
+
 it('correlates every page, sampled profiles, telemetry and the scheduled event', () => {
   const logger = loggingSystemMock.createLogger();
   const telemetry = analyticsServiceMock.createAnalyticsServiceSetup();

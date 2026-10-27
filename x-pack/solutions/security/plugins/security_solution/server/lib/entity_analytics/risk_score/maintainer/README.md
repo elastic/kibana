@@ -13,7 +13,9 @@ queries and configured filters stay in their existing diagnostic paths.
 
 Scheduled executions also attach compact stage summaries to `kibana.task.data` in the Task
 Manager event log. `calculationRunId` connects them to calculation logs, performance telemetry
-and scored documents. The risk-score instrumentation owns the payload and its 3,500-byte
+and scored documents. The calculation identity is attached at startup, and each completed stage
+updates the snapshot available to cancellation events. Finalization records the terminal status.
+The risk-score instrumentation owns the payload and its 3,500-byte
 budget, with `omittedStages` accounting for trimmed entries. The maintainer framework passes
 through the optional Task Manager callback. Synchronous executions use the same scoring logs
 and performance telemetry.
