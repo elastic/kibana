@@ -14,7 +14,8 @@ type EntityMaintainerRunSummary = Parameters<
 >[0];
 
 export interface RiskScoreFrameworkStageSummary {
-  name: 'base' | 'resolution' | 'reset_to_zero';
+  measurements?: EntityMaintainerRunSummary['measurements'];
+  name: 'base' | 'resolution' | 'reset_to_zero' | 'score_distributions' | 'prune';
   status: 'success' | 'error' | 'skipped';
   durationMs: number;
   applied?: number;
@@ -93,10 +94,12 @@ export const buildRiskScoreEntityMaintainerRunSummary = ({
   entityType,
   metrics,
   stages,
+  calculationRunId,
 }: {
   entityType: string;
   metrics: RunMetrics;
   stages: RiskScoreFrameworkStageSummary[];
+  calculationRunId?: string;
 }): EntityMaintainerRunSummary => {
   const skipped = metrics.scoresDroppedNotInStore - metrics.entitiesCreateFailed;
   const qualifiedBase = metrics.scoresCalculatedBase - skipped;
@@ -107,6 +110,7 @@ export const buildRiskScoreEntityMaintainerRunSummary = ({
   // from `metrics.scoresMissingFromStoreBase` as `phase1_base_scoring.scoresMissingFromStore`.
   return {
     scope: { kind: 'entity_type', value: entityType },
+    ...(calculationRunId ? { calculationRunId } : {}),
     iterations: metrics.pagesProcessed,
     funnel: {
       scanned: metrics.scoresCalculatedBase,

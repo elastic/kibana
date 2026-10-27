@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PageStepTimingsSummary } from './page_step_timings';
 import type { StepResult } from '../steps/pipeline_types';
 
 export interface RunMetrics {
@@ -92,18 +93,62 @@ interface RunSummaryContext extends SummaryContext {
   status: string;
   errorKind?: string;
   durationMs: number;
+  /** Per-stage wall time for this entity type. Stages that didn't run are left out. */
+  stageDurationsMs?: Partial<
+    Record<'base' | 'resolution' | 'resetToZero' | 'scoreDistributions' | 'prune', number>
+  >;
 }
 
 interface AggregateSummaryContext extends SummaryContext {
   durationMs: number;
+  /** Stage 0 (lookup build) wall time, shared by every entity type in the run. */
+  stage0Ms?: number;
   entityTypesProcessed: number;
 }
 
 export const createRunMetricsTracker = () => {
-  const aggregate: RunMetrics = emptyMetrics();
+  const runs: RunMetrics[] = [];
 
   return {
-    newRun: (): RunMetrics => emptyMetrics(),
+    newRun: (): RunMetrics => {
+      const run = emptyMetrics();
+      runs.push(run);
+      return run;
+    },
+
+    recordPageProgress: (
+      runMetrics: RunMetrics,
+      stage: 'base' | 'resolution',
+      timing: PageStepTimingsSummary
+    ) => {
+      const { counters } = timing;
+      if (stage === 'base') {
+        runMetrics.scoresCalculatedBase =
+          counters.scoresCalculated ?? runMetrics.scoresCalculatedBase;
+        runMetrics.scoresMissingFromStoreBase =
+          counters.scoresMissingFromStore ?? runMetrics.scoresMissingFromStoreBase;
+        runMetrics.scoresDroppedNotInStore =
+          counters.scoresDroppedNotInStore ?? runMetrics.scoresDroppedNotInStore;
+        runMetrics.entitiesCreated = counters.entitiesCreated ?? runMetrics.entitiesCreated;
+        runMetrics.entitiesCreateSkipped =
+          counters.entityCreationsSkipped ?? runMetrics.entitiesCreateSkipped;
+        runMetrics.entitiesCreateFailed =
+          counters.entityCreationsFailed ?? runMetrics.entitiesCreateFailed;
+        runMetrics.pagesProcessed = counters.pagesProcessed ?? runMetrics.pagesProcessed;
+        runMetrics.scoresFailedBase = counters.storeWriteFailures ?? runMetrics.scoresFailedBase;
+        runMetrics.scoresWrittenRiskIndexBase =
+          counters.riskDocumentsWritten ?? runMetrics.scoresWrittenRiskIndexBase;
+        runMetrics.scoresWrittenEntityStoreBase =
+          counters.storeDocumentsWritten ?? runMetrics.scoresWrittenEntityStoreBase;
+      } else {
+        runMetrics.scoresFailedResolution =
+          counters.storeWriteFailures ?? runMetrics.scoresFailedResolution;
+        runMetrics.scoresWrittenRiskIndexResolution =
+          counters.riskDocumentsWritten ?? runMetrics.scoresWrittenRiskIndexResolution;
+        runMetrics.scoresWrittenEntityStoreResolution =
+          counters.storeDocumentsWritten ?? runMetrics.scoresWrittenEntityStoreResolution;
+      }
+    },
 
     recordBase: (
       target: RunMetrics,
@@ -148,12 +193,6 @@ export const createRunMetricsTracker = () => {
       target.lookupPrunedDocs = prunedDocs;
     },
 
-    accumulate: (run: Readonly<RunMetrics>) => {
-      for (const key of METRIC_KEYS) {
-        aggregate[key] += run[key];
-      }
-    },
-
     toRunSummary: (runMetrics: RunMetrics, context: RunSummaryContext) => ({
       ...context,
       scoresWrittenRiskIndexTotal: scoresWrittenRiskIndexTotal(runMetrics),
@@ -161,11 +200,17 @@ export const createRunMetricsTracker = () => {
       ...runMetrics,
     }),
 
-    toAggregateSummary: (context: AggregateSummaryContext) => ({
-      ...context,
-      scoresWrittenRiskIndexTotal: scoresWrittenRiskIndexTotal(aggregate),
-      scoresFailedTotal: scoresFailedTotal(aggregate),
-      ...aggregate,
-    }),
+    toAggregateSummary: (context: AggregateSummaryContext) => {
+      const aggregate = emptyMetrics();
+      for (const run of runs) {
+        for (const key of METRIC_KEYS) aggregate[key] += run[key];
+      }
+      return {
+        ...context,
+        scoresWrittenRiskIndexTotal: scoresWrittenRiskIndexTotal(aggregate),
+        scoresFailedTotal: scoresFailedTotal(aggregate),
+        ...aggregate,
+      };
+    },
   };
 };

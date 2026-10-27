@@ -186,6 +186,7 @@ export const configSchema = schema.object({
   entityAnalytics: schema.object({
     riskEngine: schema.object({
       alertSampleSizePerShard: schema.number({ defaultValue: DEFAULT_ALERT_SAMPLE_SIZE }),
+      esqlProfiling: schema.maybe(schema.boolean()),
     }),
     assetCriticality: schema.object({
       csvUpload: schema.object({

@@ -18,6 +18,8 @@ import {
 } from './score_resolution_entities';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
 import type { ResolutionStepResult } from './pipeline_types';
+import type { PageStepTimings } from '../utils/page_step_timings';
+import { createPageStepTimings } from '../utils/page_step_timings';
 import type { ScopedLogger } from '../utils/with_log_context';
 
 interface RunResolutionScoringParams {
@@ -40,6 +42,8 @@ interface RunResolutionScoringParams {
   refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
   /** When true, populate `scores` in the result. Omit for full-population runs. */
   collectScores?: boolean;
+  /** Collects each page's step times; pass one in to read them after the stage. */
+  pageTimings?: PageStepTimings;
 }
 
 export const runResolutionScoringStep = async ({
@@ -61,6 +65,7 @@ export const runResolutionScoringStep = async ({
   alertFilters,
   refresh,
   collectScores,
+  pageTimings = createPageStepTimings(),
 }: RunResolutionScoringParams): Promise<ResolutionStepResult> => {
   runLogger.debug(
     `starting phase 2 resolution scoring: page_size=${pageSize}, sample_size=${sampleSize}`
@@ -80,15 +85,20 @@ export const runResolutionScoringStep = async ({
       scores,
       logger: runLogger,
       refresh,
+      pageTimings,
     });
-    const { docsWritten, errorsCount } = await persistScoresToEntityStore({
-      crudClient,
-      logger: runLogger,
-      entityType,
-      scores,
-      enabled: idBasedRiskScoringEnabled,
-    });
+    const { docsWritten, errorsCount } = await pageTimings.time('storeWrite', () =>
+      persistScoresToEntityStore({
+        crudClient,
+        logger: runLogger,
+        entityType,
+        scores,
+        enabled: idBasedRiskScoringEnabled,
+      })
+    );
     scoresWrittenRiskIndex += docsWrittenRiskIndex;
+    pageTimings.count('storeDocumentsWritten', docsWritten);
+    pageTimings.count('storeWriteFailures', errorsCount);
     scoresWrittenEntityStore += docsWritten;
     scoresFailed += errorsCount;
 
@@ -116,6 +126,7 @@ export const runResolutionScoringStep = async ({
     abortSignal,
     targetEntityIds,
     alertFilters,
+    pageTimings,
   })) {
     if (abortSignal?.aborted) {
       runLogger.info('Resolution scoring aborted between pages');

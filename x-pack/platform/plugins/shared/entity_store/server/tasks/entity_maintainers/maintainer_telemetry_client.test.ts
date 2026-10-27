@@ -213,3 +213,43 @@ describe('createMaintainerTelemetryClient', () => {
     expect(runId1).not.toBe(runId2);
   });
 });
+
+describe('task event-log summaries', () => {
+  it('shares run and calculation identity with telemetry while bounding the event-log payload', () => {
+    const analytics = createMockAnalytics();
+    const setCustomTaskRunEventFields = jest.fn();
+    const client = createMaintainerTelemetryClient({
+      id: 'risk-score',
+      namespace: 'default',
+      analytics,
+      setCustomTaskRunEventFields,
+    });
+    for (let index = 0; index < 100; index++) {
+      client.report({
+        calculationRunId: 'calculation-1',
+        scope: { kind: 'entity_type', value: 'host' },
+        funnel: BASE_FUNNEL,
+        stages: [
+          {
+            name: 'base',
+            status: 'success',
+            durationMs: 20,
+            measurements: [{ name: 'laterPages.esql.ms', value: 12, unit: 'ms' }],
+          },
+        ],
+      });
+    }
+    client.flush({ durationMs: 500, aborted: true });
+    const data = setCustomTaskRunEventFields.mock.calls[0][0];
+    const telemetry = analytics.reportEvent.mock.calls[0][1];
+    expect(data.runId).toBe(telemetry.runId);
+    expect(data.aborted).toBe(true);
+    expect(data.summaries[0].calculationRunId).toBe('calculation-1');
+    expect(data.omittedSummaries).toBeGreaterThan(0);
+    expect(Buffer.byteLength(JSON.stringify(data))).toBeLessThanOrEqual(3500);
+    expect(telemetry.stages[0].measurements).toEqual([
+      { name: 'laterPages.esql.ms', value: 12, unit: 'ms' },
+    ]);
+    expect(analytics.reportEvent).toHaveBeenCalledTimes(100);
+  });
+});
