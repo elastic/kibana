@@ -241,7 +241,7 @@ function createNavTree({
           {
             children: [
               {
-                link: 'metrics:inventory' as const,
+                link: 'metrics:inventory',
                 title: i18n.translate('xpack.observability.infrastructure.inventory', {
                   defaultMessage: 'Infrastructure inventory',
                 }),
@@ -256,7 +256,7 @@ function createNavTree({
                 },
               },
               {
-                link: 'metrics:hosts' as const,
+                link: 'metrics:hosts',
                 getIsActive: ({
                   pathNameSerialized,
                   prepend,
@@ -268,7 +268,7 @@ function createNavTree({
                 },
               },
               {
-                link: 'metrics:metrics-explorer' as const,
+                link: 'metrics:metrics-explorer',
                 title: i18n.translate(
                   'xpack.observability.obltNav.infrastructure.metricsExplorer',
                   { defaultMessage: 'Metrics explorer' }
