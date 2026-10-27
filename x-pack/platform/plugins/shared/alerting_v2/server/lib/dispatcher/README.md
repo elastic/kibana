@@ -64,7 +64,7 @@ The window caps **event** rows only. Action rows are not upper-bounded, so `last
 
 | Tick outcome                                    | `nextWatermark`                                     |
 | ----------------------------------------------- | --------------------------------------------------- |
-| Truncated (`ESQL_QUERY_ROW_LIMIT` rows returned) | `last_event_timestamp` of the last returned alert   |
+| Truncated (`dispatcher.run.alerts.max` rows returned) | `last_event_timestamp` of the last returned alert   |
 | `no_alerts` or `no_actions` halt                | `windowEnd`                                         |
 | `aborted` halt                                  | `eventWatermark` (no advance)                       |
 | `commit_failed` halt                            | `eventWatermark` (no advance)                       |
@@ -173,9 +173,10 @@ An empty matcher is a catch-all.
 | Parameter                   | Value                          | Source                                                                                                                                                                                                                                  |
 | --------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Task schedule               | `5s`                           | [`schedule_task.ts`](schedule_task.ts)                                                                                                                                                                                                  |
-| Task timeout                | `1m`                           | `DISPATCHER_TASK_TIMEOUT` in [`constants.ts`](constants.ts)                                                                                                                                                                             |
-| Soft deadline               | `42 000 ms` (~70 % of timeout) | `TICK_DEADLINE_MS` — pipeline is aborted at this point so the returned `RunResult` is always within the TM window                                                                                                                       |
-| Query row cap               | `10 000` rows                  | `ESQL_QUERY_ROW_LIMIT` in [`queries.ts`](queries.ts) — `LIMIT` on every dispatcher query; a truncated alert scan advances the watermark to the last returned row, not to `now`                                                          |
+| Task timeout                | `1m` (configurable `1m`–`5m`)  | `xpack.alerting_v2.dispatcher.run.timeout`, default `DISPATCHER_TASK_TIMEOUT` in [`constants.ts`](constants.ts); applied through the task definition's `resolveTimeout`                                                                 |
+| Soft deadline               | task timeout − `15 s` (`45 s` at `1m`) | `getTickDeadlineMs` / `TICK_DEADLINE_MARGIN_MS` in [`constants.ts`](constants.ts) — pipeline is aborted at this point so the returned `RunResult` is always within the TM window |
+| Alerts per tick             | `10 000` (configurable `1 000`–`10 000`) | `xpack.alerting_v2.dispatcher.run.alerts.max` — `LIMIT` on the alert scan; a truncated scan advances the watermark to the last returned row, not to `now`                                                                               |
+| Query row cap               | `10 000` rows                  | `ESQL_QUERY_ROW_LIMIT` in [`queries.ts`](queries.ts) — `LIMIT` on every other dispatcher query, whose results are bounded by the scanned batch                                                                                          |
 | Overlap re-read             | `10` minutes                   | `OVERLAP_WINDOW_MINUTES` — each scan re-reads this far behind the watermark; content-addressed dedup makes re-reads free                                                                                                                |
 | Max scan window             | `15` minutes                   | `MAX_WINDOW_MINUTES` — caps forward progress per tick; must be `> OVERLAP_WINDOW_MINUTES`                                                                                                                                               |
 | Settle buffer               | `5` seconds                    | `SETTLE_BUFFER_SECONDS` — excludes the most recent slice to avoid scanning mid-write                                                                                                                                                    |
@@ -183,6 +184,16 @@ An empty matcher is a catch-all.
 | Pre-fetch force-advance lag | `15` minutes                   | `PRE_FETCH_STUCK_ADVANCE_LAG_MS` — if the hatch fires with no known alerts and lag exceeds this, skip the unread window                                                                                                                 |
 | Dispatch chunk size         | `250` items                    | `DISPATCH_CHUNK_SIZE` — max items per `bulkScheduleWorkflow` call. Workflows are prefetched with a single `getWorkflowsByIdsForRequests` call (one lookup per space and API key) and scheduled in chunks batched by policy API key. A group's items never span two chunks. Each chunk is followed by one `.alert-actions` commit, and the next chunk is scheduled only after it. The tick signal is checked between chunks. |
 | Matcher language            | KQL                            | `@kbn/eval-kql`                                                                                                                                                                                                                         |
+
+### Mitigation levers
+
+Three `kibana.yml` settings (Serverless: a per-project config override) let an operator mitigate a dispatcher incident without a code change. All three require a Kibana restart, and their defaults match the values above.
+
+| Setting | Use it when | Effect and trade-off |
+| ------- | ----------- | -------------------- |
+| `xpack.alerting_v2.dispatcher.paused: true` | Notifications must stop now: duplicates, or a failing step that re-sends on every run | Every tick is a no-op. The watermark and stuck-tick counter are held, so once the setting is removed the backlog is dispatched late, at the normal drain rate. Two cases still lose alerts. If no watermark was persisted yet (first tick after a deploy, or a reset task state), resume cold-starts `OVERLAP_WINDOW_MINUTES` back and older events are not dispatched. After a pause longer than `MAX_WINDOW_MINUTES`, watermark lag already exceeds `PRE_FETCH_STUCK_ADVANCE_LAG_MS`: if `STUCK_TICK_LIMIT` consecutive ticks then stop before fetching (deadline or `inline_stats_too_large`), the escape hatch force-advances on its first fire and skips the unread window instead of holding. `DISPATCHER_PAUSED` is logged at `warn` once per Kibana start, so remove the override after the incident. |
+| `xpack.alerting_v2.dispatcher.run.alerts.max` | Ticks keep hitting `DISPATCHER_TICK_DEADLINE_EXCEEDED` under alert overload | Fewer alerts per tick (`1 000`–`10 000`), so each tick finishes before its deadline and the watermark advances to the truncation edge. The edge cannot move past the watermark when more alerts than this share one `@timestamp` (one rule run's bulk write): those ticks count as stuck even though the batches are dispatched, and after `STUCK_TICK_LIMIT` of them the escape hatch logs `DISPATCHER_WATERMARK_STUCK` and records the current batch as `unmatched`; any of its alerts the tick did not dispatch are dropped. The drain rate is about this many alerts per ~5 s tick; set too low under sustained load, lag grows until the escape hatch skips alerts. Does not help `inline_stats_too_large`: the INLINE STATS runs before `LIMIT`. |
+| `xpack.alerting_v2.dispatcher.run.timeout` | Slow Elasticsearch makes healthy-sized ticks hit the deadline | Raises the TM timeout (`1m`–`5m`); the soft deadline stays 15 s before it. A hung tick then holds the singleton task longer, delaying every notification. |
 
 ## Important pipeline state
 
@@ -253,7 +264,7 @@ An aggregated group keeps the same id from tick to tick and gets one `notified` 
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `no_alerts`              | Nothing relevant was found for this run; watermark advances to `windowEnd`.                                                                                      |
 | `no_actions`             | The run produced no stored outcomes after evaluation; watermark advances to `windowEnd`.                                                                         |
-| `aborted`                | The pipeline was stopped early by the TM signal or the soft deadline (`TICK_DEADLINE_MS`), or `DispatchStep` stopped with groups left unattempted. The watermark does not advance; the records already committed keep the progress. |
+| `aborted`                | The pipeline was stopped early by the TM signal or the soft deadline (`getTickDeadlineMs`), or `DispatchStep` stopped with groups left unattempted. The watermark does not advance; the records already committed keep the progress. |
 | `commit_failed`          | `DispatchStep` could not write a commit's `.alert-actions` records (the bulk request threw, or ES rejected every record) and stopped scheduling. Logged once as `DISPATCH_COMMIT_FAILED`. Watermark held; tick counts toward stuck-tick limit (see below). |
 | `inline_stats_too_large` | ES rejected the INLINE STATS pre-fetch query with `illegal_argument_exception: sub-plan execution results too large`. Watermark held; tick counts toward stuck-tick limit (see below). |
 
@@ -263,7 +274,7 @@ The invariant maintained across all ticks:
 
 > `scanLowerBound ≤ min(@timestamp of any rule-event not yet marked in .alert-actions)`
 
-`eventWatermark` is written to Task Manager state only via the returned `RunResult`. If the TM timeout elapses before `run()` returns, TM discards the state write entirely — the watermark freezes. The soft deadline (`TICK_DEADLINE_MS ≈ 70 % of task timeout`) ensures the pipeline always stops and returns a safe `RunResult` well within the TM window.
+`eventWatermark` is written to Task Manager state only via the returned `RunResult`. If the TM timeout elapses before `run()` returns, TM discards the state write entirely — the watermark freezes. The soft deadline (`TICK_DEADLINE_MARGIN_MS`, 15 s before the task timeout, `getTickDeadlineMs`) ensures the pipeline always stops and returns a safe `RunResult` well within the TM window.
 
 ### Stuck-watermark escape hatch
 
@@ -299,7 +310,7 @@ Alerts in the skipped window are **not dispatched** (accepted data loss). Once t
 - Commits use `refresh: false`: records become searchable only after the next `.alert-actions` refresh, which depends on the deployment's refresh settings (`index.refresh_interval`, 1 s by default). Each tick re-reads the last `OVERLAP_WINDOW_MINUTES` (10) of events, so any record of the previous tick that is not searchable yet when the next tick queries can be delivered again, whether that tick completed or aborted. In practice this exposes the last commits of the previous tick.
 - Destination handlers should therefore be idempotent.
 - Workflow destinations are scheduled in `DISPATCH_CHUNK_SIZE` (250) batches via `bulkScheduleWorkflow`, not per-group `pLimit(3)`.
-- The alert query is capped at `ESQL_QUERY_ROW_LIMIT` (10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
+- The alert query is capped at `xpack.alerting_v2.dispatcher.run.alerts.max` (default 10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
 - Sustained backlog is drained over multiple ticks at up to `MAX_WINDOW_MINUTES − OVERLAP_WINDOW_MINUTES` minutes per tick.
 - Per-tick observability is emitted at `debug` level: `halt_reason`, `watermark_lag_ms`, `window_span_ms`, `truncated`, `alert_count`, `stuck_ticks`.
 

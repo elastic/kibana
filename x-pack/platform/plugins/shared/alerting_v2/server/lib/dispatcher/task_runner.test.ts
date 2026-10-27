@@ -7,7 +7,11 @@
 
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import type { DispatcherServiceContract } from './dispatcher';
-import { createDispatcherPipelineInput } from './fixtures/test_utils';
+import { createLoggerService } from '../services/logger_service/logger_service.mock';
+import {
+  createDispatcherConfigAccessor,
+  createDispatcherPipelineInput,
+} from './fixtures/test_utils';
 import { DispatcherTaskRunner } from './task_runner';
 
 const createMockPipelineResult = () => ({
@@ -33,7 +37,11 @@ describe('DispatcherTaskRunner', () => {
 
   beforeEach(() => {
     dispatcherService = { run: jest.fn() };
-    runner = new DispatcherTaskRunner(dispatcherService);
+    runner = new DispatcherTaskRunner(
+      dispatcherService,
+      createDispatcherConfigAccessor(),
+      createLoggerService().loggerService
+    );
     signal = new AbortController().signal;
   });
 
@@ -119,6 +127,43 @@ describe('DispatcherTaskRunner', () => {
       const [params] = dispatcherService.run.mock.calls[0];
       expect(params.eventWatermark).toBeUndefined();
       expect(params.stuckTicks).toBe(0);
+    });
+  });
+
+  describe('when paused', () => {
+    let pausedRunner: DispatcherTaskRunner;
+
+    beforeEach(() => {
+      pausedRunner = new DispatcherTaskRunner(
+        dispatcherService,
+        createDispatcherConfigAccessor({ paused: true }),
+        createLoggerService().loggerService
+      );
+    });
+
+    it('skips the tick and holds the watermark and stuck counter', async () => {
+      const result = await pausedRunner.run({
+        taskInstance: {
+          ...taskInstance,
+          state: { eventWatermark: '2026-01-22T07:30:00.000Z', stuckTicks: 3 },
+        },
+        signal,
+      });
+
+      expect(dispatcherService.run).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        state: { eventWatermark: '2026-01-22T07:30:00.000Z', stuckTicks: 3 },
+      });
+    });
+
+    it('keeps an empty state empty (no watermark seeded while paused)', async () => {
+      const result = await pausedRunner.run({
+        taskInstance: { ...taskInstance, state: {} },
+        signal,
+      });
+
+      expect(dispatcherService.run).not.toHaveBeenCalled();
+      expect(result).toEqual({ state: { eventWatermark: undefined, stuckTicks: 0 } });
     });
   });
 });
