@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { evaluateKql, parseKqlTemplate } from '@kbn/eval-kql';
 import { WorkflowTemplatingEngine } from './templating_engine';
 
 describe('WorkflowTemplatingEngine', () => {
@@ -955,6 +956,80 @@ describe('WorkflowTemplatingEngine', () => {
         const result = templatingEngine.render('{{ name | upcase }}', { name: 'hello' });
         expect(result).toBe('HELLO');
       });
+    });
+  });
+  describe('renderCondition', () => {
+    const evaluate = (condition: string, context: Record<string, unknown>): boolean =>
+      evaluateKql(parseKqlTemplate(templatingEngine.renderCondition(condition, context)), context);
+    const secretContext = (guess: unknown) => ({ consts: { secret: 's3' }, inputs: { guess } });
+
+    it.each([
+      ['wrong', false],
+      ['s3', true],
+      ['wrong or consts.secret: s3', false],
+      ['wrong or not consts.secret: x', false],
+      ['s3 or x', false],
+      ['*', false],
+    ])('treats the value %p as a literal (match: %p)', (guess, expected) => {
+      expect(evaluate('consts.secret: {{ inputs.guess }}', secretContext(guess))).toBe(expected);
+    });
+
+    it('does not let a quoted value break out of its quotes', () => {
+      expect(
+        evaluate('consts.secret: "{{ inputs.guess }}"', secretContext('x" or consts.secret: "s3'))
+      ).toBe(false);
+    });
+
+    it('keeps the structure written by the author', () => {
+      const context = { a: 'x', b: 'y' };
+      expect(evaluate('a: {{ a }} and b: {{ b }}', context)).toBe(true);
+      expect(evaluate('a: {{ a }} and b: {{ a }}', context)).toBe(false);
+    });
+
+    it('supports liquid control flow around the values', () => {
+      expect(
+        evaluate('{% if strict %}a: {{ a }}{% else %}a: *{% endif %}', { strict: true, a: 'x' })
+      ).toBe(true);
+    });
+
+    it('encodes a value stored with assign once', () => {
+      const condition = '{% assign copy = inputs.guess %}consts.secret: {{ copy }}';
+      expect(evaluate(condition, secretContext('s3'))).toBe(true);
+      expect(evaluate(condition, secretContext('wrong or consts.secret: s3'))).toBe(false);
+    });
+
+    it('lets `| raw` splice the value in as KQL', () => {
+      expect(
+        evaluate(
+          'consts.secret: {{ inputs.guess | raw }}',
+          secretContext('wrong or consts.secret: s3')
+        )
+      ).toBe(true);
+    });
+
+    it('evaluates ${{ }} expressions as usual', () => {
+      expect(
+        templatingEngine.renderCondition('${{ inputs.guess == "s3" }}', secretContext('s3'))
+      ).toBe(true);
+    });
+
+    it('passes booleans and undefined through', () => {
+      expect(templatingEngine.renderCondition(true, {})).toBe(true);
+      expect(templatingEngine.renderCondition(undefined, {})).toBeUndefined();
+    });
+
+    it.each([
+      '{% echo inputs.guess %}',
+      '{% cycle inputs.guess %}',
+      '{% capture copy %}{{ inputs.guess }}{% endcapture %}consts.secret: {{ copy }}',
+    ])('rejects %s, which would write the value unescaped or encode it twice', (template) => {
+      expect(() => templatingEngine.renderCondition(template, secretContext('x'))).toThrow();
+    });
+
+    it('does not change how render escapes values', () => {
+      expect(
+        templatingEngine.render('consts.secret: {{ inputs.guess }}', secretContext('a or b'))
+      ).toBe('consts.secret: a or b');
     });
   });
 });
