@@ -22,6 +22,7 @@ export interface DataGridWithInTableSearchExampleProps {
   columnsCount: number;
   pageSize: number | null;
   scrollToCell?: UseDataGridInTableSearchProps['scrollToCell'];
+  additionalSearchScopeElements?: UseDataGridInTableSearchProps['additionalSearchScopeElements'];
 }
 
 export const DataGridWithInTableSearchExample: React.FC<DataGridWithInTableSearchExampleProps> = ({
@@ -29,6 +30,7 @@ export const DataGridWithInTableSearchExample: React.FC<DataGridWithInTableSearc
   columnsCount,
   pageSize,
   scrollToCell,
+  additionalSearchScopeElements,
 }) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [dataGridWrapper, setDataGridWrapper] = useState<HTMLElement | null>(null);
@@ -66,6 +68,7 @@ export const DataGridWithInTableSearchExample: React.FC<DataGridWithInTableSearc
     renderCellValueWithInTableSearchSupport,
   } = useDataGridInTableSearch({
     dataGridWrapper,
+    additionalSearchScopeElements,
     dataGridRef,
     scrollToCell,
     visibleColumns,

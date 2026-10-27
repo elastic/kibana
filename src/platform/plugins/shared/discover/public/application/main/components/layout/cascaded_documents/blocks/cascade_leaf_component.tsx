@@ -414,6 +414,12 @@ export const ESQLDataCascadeLeafCell = React.memo(
 
     const isToolbarInStickyHeader = stickyHeaderPortalTarget !== null;
 
+    // Create reference to the sticky header portal target for the in-table search to use as additional search scope elements
+    const additionalSearchScopeElements = useMemo(
+      () => (stickyHeaderPortalTarget ? [stickyHeaderPortalTarget] : []),
+      [stickyHeaderPortalTarget]
+    );
+
     const headerPortalNode = useMemo(() => createHtmlPortalNode(), []);
 
     // The data grid toolbar is rendered by EuiDataGrid outside of the custom grid body. To move it
@@ -503,6 +509,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
           sort={EMPTY_SORT}
           isSortEnabled={false}
           enableInTableSearch
+          additionalSearchScopeElements={additionalSearchScopeElements}
           enableComparisonMode
           scrollToCell={scrollToCell}
           showKeyboardShortcuts={false}

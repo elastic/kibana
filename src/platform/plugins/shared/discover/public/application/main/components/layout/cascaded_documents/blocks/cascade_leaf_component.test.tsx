@@ -368,12 +368,19 @@ describe('ESQLDataCascadeLeafCell', () => {
         const body = screen.getByTestId('discoverCascadeCustomDataGridBody');
         const toolbar = screen.getByTestId('unifiedDataTableToolbar');
         const headerRow = screen.getByTestId('gridHeaderRow');
+        expect(unifiedDataTableMock.mock.lastCall?.[0].additionalSearchScopeElements).toEqual([
+          extensionPointElement,
+        ]);
         act(() => unifiedDataTableMock.mock.lastCall?.[0].onFullScreenChange?.(true));
+        expect(unifiedDataTableMock.mock.lastCall?.[0].additionalSearchScopeElements).toEqual([]);
         expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toBe(body);
         expect(screen.getByTestId('gridRoot')).toContainElement(toolbar);
         expect(body).toContainElement(headerRow);
         expect(extensionPointElement).not.toContainElement(toolbar);
         act(() => unifiedDataTableMock.mock.lastCall?.[0].onFullScreenChange?.(false));
+        expect(unifiedDataTableMock.mock.lastCall?.[0].additionalSearchScopeElements).toEqual([
+          extensionPointElement,
+        ]);
         expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toBe(body);
         expect(extensionPointElement).toContainElement(toolbar);
         expect(extensionPointElement).toContainElement(headerRow);
