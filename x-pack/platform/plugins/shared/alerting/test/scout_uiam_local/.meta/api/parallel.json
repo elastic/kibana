@@ -21,8 +21,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -49,8 +47,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -77,8 +73,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -105,8 +99,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -133,8 +125,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -161,8 +151,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],

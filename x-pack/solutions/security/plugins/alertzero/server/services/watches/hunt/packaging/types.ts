@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { ActionCatalogEntry } from '@kbn/alertzero-common';
+import type { ActionCatalogEntry, ActionSubjectKind } from '@kbn/alertzero-common';
 import type {
   PackageReportBehavior,
   PackageReportMintPayload,
 } from '../../../../../common/step_types/package_report';
+import type { CapabilitiesSource } from '../../../fleet/resolve_host_enrollment';
 
 /** One host observed on the current-run SSE, with enrollment resolution applied. */
 export interface CurrentRunHost {
@@ -17,6 +18,13 @@ export interface CurrentRunHost {
   /** Elastic Defend agent id when enrolled; absent when unenrolled or unknown. */
   agentId?: string;
   enrolled: boolean;
+  /** `Endpoint.capabilities` from the endpoint metadata document. */
+  capabilities: string[];
+  /**
+   * Set for enrolled hosts. `'unavailable'` when the metadata could not be read, so an empty
+   * `capabilities` means nothing is known rather than that the endpoint reports none.
+   */
+  capabilitiesSource?: CapabilitiesSource;
 }
 
 /** Process selector fillable into kill/suspend `parameters`. */
@@ -33,6 +41,8 @@ export interface ProcessSelector {
   hostName: string;
   /** e.g. `powershell.exe`; drives both the Proposal title and comment. */
   processName: string;
+  /** Full executable path (`process.executable`) when the source document carried one. */
+  processExecutable?: string;
   observedAt?: string;
   /**
    * ATT&CK technique this specific process was matched against (from the source event's
@@ -41,7 +51,30 @@ export interface ProcessSelector {
    * every technique confirmed anywhere on the host.
    */
   techniqueId?: string;
+  /**
+   * Every technique any ref for this process was attributed to (`techniqueId` is the one
+   * representative). Lets rules see a destructive technique the representative did not carry.
+   */
+  techniqueIds?: string[];
+  /** True when a Tier 1 ref that rehydrated to this process carried `matched.ioc`. */
+  iocMatched: boolean;
 }
+
+export type SubjectKind = ActionSubjectKind;
+
+/**
+ * One thing packaging could act on. Hosts and processes are reachable when the host is
+ * enrolled with an agent id. `value` is the human-readable name the proposal is about.
+ */
+export type Subject =
+  | { kind: 'host'; value: string; reachable: boolean; host: CurrentRunHost }
+  | {
+      kind: 'process';
+      value: string;
+      reachable: boolean;
+      host: CurrentRunHost;
+      processSelector: ProcessSelector;
+    };
 
 /** One confirmed Tier 2 behavior, deduped by `technique_id` across current-run SSEs. */
 export interface HuntEvidenceTechnique {
@@ -117,6 +150,10 @@ export interface CurrentRunState {
   sseCount: number;
   /** True when at least one current-run SSE has `hunt_result.has_confirmed_hit`. */
   hasConfirmedHit: boolean;
+  /** Max SSE `confidence` across current-run SSEs. */
+  confidence: number;
+  /** Min `from` / max `to` of `hunt_result.time_range` across current-run SSEs; absent when none carried one. */
+  huntWindow?: { from: string; to: string };
   /** SSE titles for the closure summary. */
   titles: string[];
   /** Short evidence lines for the closure summary. */
@@ -127,7 +164,10 @@ export interface CurrentRunState {
   findings: CurrentRunFinding[];
   /** Technique id to display name, from SSE behaviors and technique SKIs (`T1078.004 (Cloud Accounts)`). */
   techniqueNames: Record<string, string>;
-  /** Distinct `user.name` entities across current-run SSEs. */
+  /**
+   * Distinct `user.name` entities across current-run SSEs, in SSE order. Tier 1's CloudTrail
+   * identity-type vote decides whether an identity lands here or in `services`.
+   */
   users: string[];
   /** Hunt window of the first current-run SSE that names one. */
   window?: { from: string; to: string };
@@ -148,10 +188,17 @@ export interface CurrentRunState {
    * Empty means kill/suspend cannot be filled.
    */
   processSelectors: ProcessSelector[];
-  /** True when any current-run SSE entity is `user.name` or `service.name`, not a host. */
-  hasNonHostEntity: boolean;
+  /** Deduped `service.name` entity values across current-run SSEs (assumed roles, service accounts). */
+  services: string[];
   /** True when any current-run SSE security knowledge indicator is IOC-typed. */
   hasIocIndicator: boolean;
+  /**
+   * True when a current-run SSE entity names an identity by `user.email`, `user.id`, or
+   * `service.id` -- allowlisted fields the deterministic mapper never emits, but an
+   * agent-written SSE could. Not resolvable to a `users`/`services` entry, so this is the
+   * only signal that evidence exists for it at all.
+   */
+  hasUnnamedIdentityEntity: boolean;
   /** False when a current-run SSE event ref's `source_index` falls outside the run's `actionable_indices`. */
   allEventsActionable: boolean;
   /** True when a current-run SSE event ref's `source_index` is one of the run's `actionable_indices`. */
@@ -196,8 +243,11 @@ export interface CoverageWriteResult {
   skipped: Array<{ kiId: string; subject: string; reason: CoverageSkipReason }>;
 }
 
+/** A mint payload before packaging has resolved the id it will be created under. */
+export type UnresolvedMintPayload = Omit<PackageReportMintPayload, 'proposalId'>;
+
 export interface DecidePackageReportResult {
   dismiss: boolean;
-  proposals: PackageReportMintPayload[];
+  proposals: UnresolvedMintPayload[];
   closureSummary: string;
 }

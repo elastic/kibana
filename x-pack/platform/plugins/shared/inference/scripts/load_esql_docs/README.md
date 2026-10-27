@@ -6,7 +6,7 @@ The generated documentation is validated and will emit warnings when invalid que
 ## Requirements
 
 - a running Kibana instance
-- an Elasticsearch `chat_completion` inference endpoint
+- an Elasticsearch `chat_completion` inference endpoint (CI uses EIS `.openai-gpt-5.5-chat_completion`)
 
 ### Run
 pnpm es snapshot --license trial
@@ -39,15 +39,15 @@ To deterministically get the ES|QL docs from the Elastic's documentation markdow
 node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js
 ```
 
-To call an LLM and enrich the extracted docs, pass an Elasticsearch `chat_completion` inference endpoint id. Enrichment explains in natural language what the ES|QL examples are doing. Without `--inferenceId` the script only extracts documentation and does not prompt for a connection.
+To call an LLM and enrich the extracted docs, pass an Elasticsearch `chat_completion` inference endpoint id. The product-docs CI job enables EIS and uses `.openai-gpt-5.5-chat_completion`. Enrichment explains in natural language what the ES|QL examples are doing. Without `--inferenceId` the script only extracts documentation and does not prompt for a connection.
 
 ```
-node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js --inferenceId .openai-gpt-4.1-chat_completion
+node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js --inferenceId .openai-gpt-5.5-chat_completion
 ```
 
 You can also combine flags:
 ```
-node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js --inferenceId .openai-gpt-4.1-chat_completion --force
+node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js --inferenceId .openai-gpt-5.5-chat_completion --force
 ```
 
 ### Checking syntax errors for generated files

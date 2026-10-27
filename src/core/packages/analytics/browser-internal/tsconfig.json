@@ -12,7 +12,9 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-base-browser-mocks",
     "@kbn/core-injected-metadata-browser-mocks",
-    "@kbn/lazy-object"
+    "@kbn/lazy-object",
+    "@kbn/logging",
+    "@kbn/logging-mocks"
   ],
   "exclude": ["target/**/*"]
 }

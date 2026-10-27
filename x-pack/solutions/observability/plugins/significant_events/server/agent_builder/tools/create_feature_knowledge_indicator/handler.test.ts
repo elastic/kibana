@@ -12,7 +12,7 @@ import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
 describe('createFeatureKnowledgeIndicatorToolHandler', () => {
   const logger = loggingSystemMock.createLogger();
 
-  const featureInput: Omit<BaseFeature, 'stream_name'> = {
+  const featureInput: BaseFeature = {
     id: 'feature-1',
     type: 'custom',
     description: 'Feature description',
@@ -31,7 +31,7 @@ describe('createFeatureKnowledgeIndicatorToolHandler', () => {
 
     const result = await createFeatureKnowledgeIndicatorToolHandler({
       kiClient: kiClient as never,
-      streamName: 'logs.test',
+      sourceId: 'logs.test',
       featureInput,
       logger,
     });
@@ -39,15 +39,12 @@ describe('createFeatureKnowledgeIndicatorToolHandler', () => {
     expect(result).toEqual({ id: 'feature-1' });
     expect(kiClient.bulk).toHaveBeenCalledTimes(1);
 
-    const [streamNameArg, operationsArg] = kiClient.bulk.mock.calls[0];
-    expect(streamNameArg).toBe('logs.test');
+    const [sourceIdArg, operationsArg] = kiClient.bulk.mock.calls[0];
+    expect(sourceIdArg).toBe('logs.test');
     expect(operationsArg).toHaveLength(1);
-    expect(operationsArg[0].index.feature).toEqual(
-      expect.objectContaining({
-        ...featureInput,
-        stream_name: 'logs.test',
-      })
-    );
+    // The source is routed through `bulk(sourceId, ...)`, never stored on the payload itself.
+    expect(operationsArg[0].index.feature).toEqual(expect.objectContaining(featureInput));
+    expect(operationsArg[0].index.feature).not.toHaveProperty('source_id');
   });
 
   it('throws when feature storage fails', async () => {
@@ -58,7 +55,7 @@ describe('createFeatureKnowledgeIndicatorToolHandler', () => {
     await expect(
       createFeatureKnowledgeIndicatorToolHandler({
         kiClient: kiClient as never,
-        streamName: 'logs.test',
+        sourceId: 'logs.test',
         featureInput,
         logger,
       })

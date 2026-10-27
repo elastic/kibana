@@ -137,7 +137,7 @@ async function loadDocsFromSnapshot<T>({
 }
 
 /**
- * Restores sigevents-captured KI features for the given stream and returns all
+ * Restores sigevents-captured KI features for the given source and returns all
  * {@link Feature} documents.
  */
 export async function loadKIFeaturesFromSnapshot(
@@ -145,7 +145,7 @@ export async function loadKIFeaturesFromSnapshot(
   log: ToolingLog,
   snapshotName: string,
   gcs: GcsConfig,
-  streamName: string = DEFAULT_LOGS_INDEX
+  sourceId: string = DEFAULT_LOGS_INDEX
 ): Promise<Feature[]> {
   return loadDocsFromSnapshot<Feature>({
     esClient,
@@ -155,7 +155,7 @@ export async function loadKIFeaturesFromSnapshot(
     index: getSnapshotKIFeaturesIndex(snapshotName),
     tempIndexPrefix: 'sigevents-replay-temp-features',
     label: 'KI feature(s)',
-    query: { term: { stream_name: streamName } },
+    query: { term: { source_id: sourceId } },
   });
 }
 

@@ -85,69 +85,67 @@ export const renderRuleTuningWorkerYaml = (
     JSON.stringify(values.extras)
   );
 
-export type HuntWorkerTemplateValues = ScheduledWorkerTemplateValues;
-
-/**
- * Hunt Watch Continuous Threat Hunt has no configurable dials: enabled/disabled
- * (autonomy) and the schedule interval are its only settings. tier2When, candidateLimit,
- * and fanOutMax are fixed implementation constants.
- */
-const HUNT_WORKER_DEFAULTS = {
-  tier2When: 'always' as const,
-  candidateLimit: 10,
-  fanOutMax: 10,
-};
-
-/**
- * The manual trigger's optional `reportIds` input: a manual-bypass
- * fan-out over named reports, capped at 10 to match `create_proposal.yaml`'s
- * trigger-input shape and the candidates route's own `report_ids` bound. Present on
- * every autonomy level's manual trigger, scheduled or not.
- */
-const MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT = [
-  '  - type: manual',
-  '    inputs:',
-  '      properties:',
-  '        reportIds:',
-  '          type: array',
-  '          items:',
-  '            type: string',
-  '          maxItems: 10',
-].join('\n');
-
-/**
- * Hunt always emits scheduled (locked 4h default) plus manual with optional reportIds.
- * Autonomy is fixed Manual; the schedule still runs on its own.
- */
-export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateValues): string => {
-  const triggers = [
-    '  - type: scheduled',
-    '    with:',
-    `      every: ${JSON.stringify(values.scheduleInterval)}`,
-    MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT,
-  ].join('\n');
-
-  return renderScheduledWorkerYaml(yaml, values)
-    .replaceAll('__WORKER_TRIGGERS__', triggers)
-    .replaceAll('__WORKER_TIER2_WHEN__', JSON.stringify(HUNT_WORKER_DEFAULTS.tier2When))
-    .replaceAll('__WORKER_CANDIDATE_LIMIT__', String(HUNT_WORKER_DEFAULTS.candidateLimit))
-    .replaceAll('__WORKER_FAN_OUT_MAX__', String(HUNT_WORKER_DEFAULTS.fanOutMax));
-};
-
-export interface AlertTriageWorkerTemplateValues extends CommonWorkerTemplateValues {
+export interface AlertTriageWorkerTemplateValues extends ScheduledWorkerTemplateValues {
   extras: {
     autoCloseConfidenceScoreMinThreshold: number;
+    budgetPerHour: number;
+    lookbackHours: number;
+    minSeverity: 'low' | 'medium' | 'high' | 'critical';
+    excludeBuildingBlocks: boolean;
+    excludedRuleTags: readonly string[];
   };
 }
+
+const SCHEDULE_INTERVAL_PATTERN = /^([1-9][0-9]*)([mhd])$/;
+const MINUTES_PER_UNIT = { m: 1, h: 60, d: 1440 } as const;
+
+/** Minutes in a schedule interval such as `15m`, `2h` or `1d`, the units the settings allow. */
+export const scheduleIntervalToMinutes = (interval: string): number => {
+  const match = SCHEDULE_INTERVAL_PATTERN.exec(interval);
+  if (!match) {
+    throw new Error(`Unsupported schedule interval: ${interval}`);
+  }
+  return Number(match[1]) * MINUTES_PER_UNIT[match[2] as keyof typeof MINUTES_PER_UNIT];
+};
+
+/** One day's retrieval. Also the hard ceiling: a longer interval does not raise it. */
+const ATTACK_DISCOVERY_ALERTS_PER_DAY = 10_000;
+/** One batch. Shorter intervals stay at a single batch rather than a partial one. */
+const ATTACK_DISCOVERY_MIN_ALERTS = 100;
+const MINUTES_PER_DAY = 24 * 60;
+
+/**
+ * Alerts one Attack Discovery run may retrieve, prorated to its schedule interval.
+ * 10,000 per 24h, at least 100, and never more than 10,000.
+ */
+export const attackDiscoveryMaxAlerts = (interval: string): number => {
+  const prorated = Math.floor(
+    (ATTACK_DISCOVERY_ALERTS_PER_DAY * scheduleIntervalToMinutes(interval)) / MINUTES_PER_DAY
+  );
+  return Math.min(ATTACK_DISCOVERY_ALERTS_PER_DAY, Math.max(ATTACK_DISCOVERY_MIN_ALERTS, prorated));
+};
+
+export const renderAttackDiscoveryWorkerYaml = (
+  yaml: string,
+  values: ScheduledWorkerTemplateValues
+): string =>
+  renderScheduledWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_MAX_ALERTS__',
+    String(attackDiscoveryMaxAlerts(values.scheduleInterval))
+  );
 
 export const renderAlertTriageWorkerYaml = (
   yaml: string,
   values: AlertTriageWorkerTemplateValues
 ): string =>
-  renderCommonWorkerYaml(yaml, values).replaceAll(
-    '__WORKER_AUTO_CLOSE_CONFIDENCE_MIN_THRESHOLD__',
-    String(values.extras.autoCloseConfidenceScoreMinThreshold)
-  );
+  renderScheduledWorkerYaml(yaml, values)
+    // JSON is a YAML flow mapping, so the whole object lands under consts in one substitution. A
+    // function replacement keeps `$` sequences in free-form rule tags (`$$`, `$&`, `$'`) literal.
+    .replaceAll('__WORKER_EXTRAS__', () => JSON.stringify(values.extras))
+    .replaceAll(
+      '__WORKER_SCHEDULE_INTERVAL_MINUTES__',
+      String(scheduleIntervalToMinutes(values.scheduleInterval))
+    );
 
 export interface RuleCoverageWorkerTemplateValues extends ScheduledWorkerTemplateValues {
   extras: {

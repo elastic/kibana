@@ -94,8 +94,8 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
 
       // verify that the file was retrieved
       // and that the file download link is available
-      cy.getByTestSubj('getFileSuccess').within(() => {
-        cy.contains('File retrieved from the host.');
+      cy.getByTestSubj('getFile-success').within(() => {
+        cy.contains('get-file completed successfully');
         cy.contains('(ZIP file passcode: elastic)');
         cy.contains(
           'Files are periodically deleted to clear storage space. Download and save file locally if needed.'

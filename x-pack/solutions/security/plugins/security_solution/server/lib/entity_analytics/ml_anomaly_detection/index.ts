@@ -8,6 +8,7 @@
 export type { AnomalyHit, EnrichedAnomalyHit } from './types';
 export type { AnomalySortField, AnomalySortOrder, EntityAnomalies } from './search_anomalies';
 export { searchEntityAnomalies, buildScoreRangeFilter } from './search_anomalies';
+export { getIdentityFieldsByEntityId, resolveRecordFields } from './resolve_record_fields';
 export type { JobConfig } from './get_job_config';
 export { getJobConfig } from './get_job_config';
 export { fetchBaselineBehavior } from './fetch_baseline_behavior';

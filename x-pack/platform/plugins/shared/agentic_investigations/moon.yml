@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/storage-adapter'
   - '@kbn/workflows'
   - '@kbn/workflows-extensions'
+  - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
   - '@kbn/core-http-server-mocks'
   - '@kbn/zod-helpers'
@@ -38,6 +39,7 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-server'
   - '@kbn/es-query'
+  - '@kbn/entity-store'
   - '@kbn/agent-builder-platform-plugin'
   - '@kbn/agent-builder-browser'
   - '@kbn/core-http-browser'
@@ -55,6 +57,21 @@ dependsOn:
   - '@kbn/charts-theme'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/visualization-utils'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/deeplinks-observability'
+  - '@kbn/alerting-v2-constants'
+  - '@kbn/share-plugin'
+  - '@kbn/utility-types'
+  - '@kbn/alerting-v2-episodes-ui'
+  - '@kbn/alerts-ui-shared'
+  - '@kbn/data-plugin'
+  - '@kbn/data-views-plugin'
+  - '@kbn/expressions-plugin'
+  - '@kbn/unified-doc-viewer-plugin'
+  - '@kbn/rule-data-utils'
+  - '@kbn/alerting-types'
+  - '@kbn/charts-plugin'
+  - '@kbn/flyout-template'
 tags:
   - plugin
   - prod
@@ -69,6 +86,4 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

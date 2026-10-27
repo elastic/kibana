@@ -7,8 +7,13 @@
 
 import { taskManagerMock } from '../mocks';
 
-import { getNextRunAt } from './get_next_run_at';
+import {
+  calculateNextRunAtFromSchedule,
+  getNextRunAt,
+  getRRuleScheduleDurationMs,
+} from './get_next_run_at';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { RruleSchedule } from '../task';
 const mockLogger = loggerMock.create();
 
 describe('getNextRunAt', () => {
@@ -175,6 +180,103 @@ describe('getNextRunAt', () => {
     const expectedNextRunAt = new Date(testStart.getTime() + oneDay);
 
     expect(nextRunAt).toEqual(expectedNextRunAt);
+  });
+
+  describe('hourly rrule claimed before its runAt', () => {
+    const schedule: RruleSchedule = {
+      rrule: { freq: 4, interval: 1, tzid: 'Europe/Berlin', byminute: [13] },
+    };
+    const runAt = new Date('2026-08-10T16:13:00.000Z');
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    test('should skip to the next occurrence when the run started early', () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-08-10T16:11:31.650Z'));
+
+      const nextRunAt = getNextRunAt(
+        taskManagerMock.createTask({
+          schedule,
+          runAt,
+          startedAt: new Date('2026-08-10T16:11:09.328Z'),
+        }),
+        3000,
+        mockLogger
+      );
+
+      expect(nextRunAt).toEqual(new Date('2026-08-10T17:13:00.000Z'));
+    });
+
+    test('should use the next occurrence when the run started on time', () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-08-10T16:13:20.478Z'));
+
+      const nextRunAt = getNextRunAt(
+        taskManagerMock.createTask({
+          schedule,
+          runAt,
+          startedAt: new Date('2026-08-10T16:13:00.196Z'),
+        }),
+        3000,
+        mockLogger
+      );
+
+      expect(nextRunAt).toEqual(new Date('2026-08-10T17:13:00.000Z'));
+    });
+
+    test('calculateNextRunAtFromSchedule only uses previousRunAt when provided', () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-08-10T16:11:31.650Z'));
+
+      expect(calculateNextRunAtFromSchedule({ schedule, startDate: runAt })).toEqual(
+        runAt.getTime()
+      );
+      expect(
+        calculateNextRunAtFromSchedule({ schedule, startDate: runAt, previousRunAt: runAt })
+      ).toEqual(new Date('2026-08-10T17:13:00.000Z').getTime());
+    });
+  });
+
+  describe('getRRuleScheduleDurationMs', () => {
+    test('returns the gap after runAt for an hourly rrule', () => {
+      expect(
+        getRRuleScheduleDurationMs(
+          { freq: 4, interval: 1, tzid: 'UTC', byminute: [13] },
+          new Date('2026-08-10T16:13:00.000Z')
+        )
+      ).toEqual(60 * 60 * 1000);
+    });
+
+    test('returns the gap after runAt for a daily rrule', () => {
+      expect(
+        getRRuleScheduleDurationMs(
+          { freq: 3, interval: 1, tzid: 'UTC', byhour: [12], byminute: [15] },
+          new Date('2026-08-10T12:15:00.000Z')
+        )
+      ).toEqual(24 * 60 * 60 * 1000);
+    });
+
+    test('returns the gap after runAt for a nonuniform rrule', () => {
+      const rrule: RruleSchedule['rrule'] = { freq: 4, interval: 1, tzid: 'UTC', byminute: [0, 5] };
+
+      expect(getRRuleScheduleDurationMs(rrule, new Date('2026-08-10T16:05:00.000Z'))).toEqual(
+        55 * 60 * 1000
+      );
+      expect(getRRuleScheduleDurationMs(rrule, new Date('2026-08-10T17:00:00.000Z'))).toEqual(
+        5 * 60 * 1000
+      );
+    });
+
+    test('throws when the rrule has no occurrence after runAt', () => {
+      expect(() =>
+        getRRuleScheduleDurationMs(
+          { freq: 4, interval: 1, tzid: 'UTC', byminute: [13], count: 1 } as RruleSchedule['rrule'],
+          new Date('2026-08-10T16:13:00.000Z')
+        )
+      ).toThrow('Unable to determine the schedule duration');
+    });
   });
 
   test('should throw an error if the next runAt cannot be calculated', () => {

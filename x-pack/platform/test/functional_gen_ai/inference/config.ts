@@ -22,6 +22,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...xpackFunctionalConfig.getAll(),
+    mochaOpts: {
+      ...xpackFunctionalConfig.get('mochaOpts'),
+      // Must stay above the product-doc install waiter (35m) and route idle socket.
+      // A 20m Mocha timeout expires together with the old task timeout, so the install
+      // response never arrives and the run aborts before after-hooks.
+      timeout: 45 * 60 * 1000,
+      hookTimeout: 45 * 60 * 1000,
+    },
     services,
     testFiles: [require.resolve('./tests')],
     esTestCluster: {
@@ -36,6 +44,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         `--xpack.actions.preconfigured=${JSON.stringify(preconfiguredConnectors)}`,
+        // This suite installs product docs itself. Startup auto-install holds the same
+        // cluster-wide lock and the explicit install then waits until Mocha times out.
+        '--xpack.productDocBase.autoInstallEnabled=false',
       ],
     },
   };

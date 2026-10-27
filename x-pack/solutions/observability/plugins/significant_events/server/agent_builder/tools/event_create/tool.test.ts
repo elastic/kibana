@@ -6,13 +6,17 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
+import { createMockToolContext, invokeHandler, mockSourcesClient } from '../../utils/test_helpers';
 import type { GetScopedClients } from '../../../routes/types';
 import type { SignificantEventsServer } from '../../../types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { eventsWriteHandler } from '../event_write/handler';
-import { createEventTool, SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID } from './tool';
+import {
+  createEventSchema,
+  createEventTool,
+  SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID,
+} from './tool';
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
@@ -40,6 +44,11 @@ describe('event_create tool', () => {
     expect(tool.id).toBe(SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID);
   });
 
+  it('does not let the caller set recovering, which only the status reconciliation writes', () => {
+    expect(createEventSchema.shape.status.safeParse('recovering').success).toBe(false);
+    expect(createEventSchema.shape.status.safeParse('inactive').success).toBe(true);
+  });
+
   it('returns success result', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
@@ -53,6 +62,7 @@ describe('event_create tool', () => {
     const getScopedClients = jest.fn().mockResolvedValue({
       getEventSearchClient: jest.fn().mockReturnValue({}),
       getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
+      sourcesClient: mockSourcesClient(['logs.a']),
       licensing: {},
       uiSettingsClient: {},
     });
@@ -70,8 +80,7 @@ describe('event_create tool', () => {
         title: 'T',
         symptom_hypothesis: 'Requests fail because the upstream dependency is unavailable.',
         summary: 'S',
-        stream_names: ['logs.a'],
-        severity: '60-high',
+        slugs: ['logs.a'],
         confidence: 0.8,
       },
       createMockToolContext()

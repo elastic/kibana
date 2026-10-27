@@ -6,7 +6,7 @@ Consumed by AlertZero (Security) and intended for Nightshift (Observability). No
 
 ## What belongs here, and what does not
 
-This plugin owns the record, the decision, and the guarantee that an approved action runs **as the approver**. It does not decide what to propose, when to propose it, or whether autonomy allows skipping the human gate — a Worker does all three.
+This plugin owns the record, the decision, and the guarantee that an approved action runs under the right identity: **as the approver** when a human approved it, and **as the caller's service account** when it was auto-approved. It does not decide what to propose, when to propose it, or whether autonomy allows skipping the human gate — a Worker does all three.
 
 ## Layout
 
@@ -86,7 +86,7 @@ AlertZero's Workers do not call `system-create-proposal`. They call `system-crea
 
 Two properties make this safe to copy for another producer:
 
-- **It must outlive the gate it waits on.** `workflow.execute` parks the caller in `WAITING_FOR_CHILD` for as long as the decision is held, and the engine's default workflow timeout is 6h. Because `expiresIn` is caller-configurable there is no fixed window to size against, so the bridge tracks the gate's `52w` sentinel rather than any particular deadline. A bridge that leaves `settings.timeout` unset is cancelled mid-decision, and a cancelled parent runs no handler, so the proposal strands `pending`.
+- **It must outlive the gate it waits on.** `workflow.execute` parks the caller in `WAITING_FOR_CHILD` for as long as the decision is held, and the engine's default workflow timeout is 6h. Because `expiresIn` is caller-configurable there is no fixed window to size against, so the bridge tracks the gate's `52w` sentinel rather than any particular deadline. A bridge that leaves `settings.timeout` unset is cancelled mid-decision, and the cancel reaches the gate, which runs no handler: the decision is lost, and the proposal is only settled `expired` the next time it is read (see [Settling orphaned proposals](#settling-orphaned-proposals)).
 - **It must re-declare the gate's `outputs`.** Callers read `steps.<step>.output.decision`, `.status` and `.proposalId`. A bridge that does not forward them leaves every one of those expressions undefined — falsy, so approval branches simply stop firing, with nothing logged.
 
 `create_proposal.test.ts` next to the bridge pins both, plus input parity with the gate, so an input added to `system-create-proposal` fails the build rather than being silently dropped at the hop. `proposal_origin.test.ts` in the AlertZero plugin sweeps every AlertZero definition to keep the bridge the only thing that reaches the gate.
@@ -122,6 +122,12 @@ The only valid combinations, enforced by `ProposalsService.update`:
 | `approved` | `no_action` | Accepted, but there is nothing to run |
 | `approved` | `executing` | The action is running |
 | `approved` | `succeeded` / `failed` | The action's outcome |
+
+### To-do proposals
+
+A proposal in the `todo` category (`PROPOSAL_CATEGORY_TODO`, `isTodoProposal` in `@kbn/proposals-common`) is one the analyst carries out themselves, so there is nothing to approve or decline. `ApprovalContent` offers it a single **I've applied** button instead of Approve/Decline, which approves it through the gate as usual, and shows it as **Applied** / **Marked as applied** once approved. The producer sets the category explicitly: a proposal without an action is not necessarily a to-do — it may still ask for permission, for example to run an analysis — so it keeps Approve/Decline unless it is categorised `todo`. A `todo` proposal cannot carry an `actionWorkflowId`: `create()` refuses the combination, since "I've applied" would otherwise run the action.
+
+An analyst who marked one by mistake can take it back with **Mark as not applied** (`POST /internal/proposals/{id}/reopen`, `ProposalsService.reopen`). The decision stays immutable: the original keeps `approved` + `no_action`, a successor with the same content is created pending through a gate of its own (the `system-create-proposal` workflow, as `proposals.create` does), and the two are linked as a revision chain (`supersededBy` on the original; `supersedes`, `rootProposalId` and `revision` on the successor). Lists that pass `excludeSuperseded` show only the successor, and "I've applied" works on it again.
 
 Note the consequence for an undecided proposal: `expired` is its *only* terminal status, since every execution state requires an approval. A malfunction before anyone decided therefore settles as "no decision was reached" rather than as a failure.
 
@@ -163,6 +169,28 @@ analyst answers — `proposals.getLatestRevision`, called after the resumer is
 authorized and before any write, resolves the carried id to the chain head. An
 approval therefore carries the `actionInput` of the revision the approver was
 shown, not the one the Worker first proposed.
+
+That only holds if the chain stops moving once the approver has answered. The
+gate writes the decision after it adopts the head, so a revision landing between
+the resume and that write would be the one executed. `releaseGate` therefore
+stamps `gateReleasedAt` before it resumes, under the sequence number it loaded
+the proposal with, and `revise()` refuses a proposal carrying it. Whichever of
+the two writes second conflicts: a revision that lands first makes the release
+refuse, and one that lands after is refused itself. A `revise()` that passed its
+checks just before the mark has already created its successor, which stays live
+until its lost predecessor write retires it; `getLatestRevision` sorts the
+released row first, so the gate cannot adopt that successor in the meantime.
+The mark is lifted only when
+the engine turns the resume away; any other resume failure leaves it, holding
+revisions back until the proposal is decided or expires, because lifting it
+under a resume that did land would reopen the window. A retry cloned from a
+failed action does not inherit it.
+
+A gate resumed through any other surface — the platform's resume API, the Inbox,
+Agent Builder — carries no mark, so a revision landing before its adopt is
+executed, exactly as one landing at any point during the park would be. Those
+surfaces answer an execution rather than a revision, so there is no shown
+revision to hold them to.
 
 Every stored proposal carries `rootProposalId` and `revision`. The plugin is
 unshipped, so legacy records without these fields are not supported.
@@ -257,13 +285,14 @@ sequenceDiagram
     G->>G: waitForApproval — parked
 
     A->>S: POST /approve
-    Note over S,I: Writes nothing but the rationale.<br/>Nothing durable, so nothing to roll back.
+    S->>I: gateReleasedAt (+ rationale), seq-no guarded
+    Note over S,I: No decision. The mark makes revise() refuse,<br/>and is reverted if the engine turns the resume away.
     S->>G: resume(approved: true), as the analyst
 
     G->>S: proposals.checkDecidePrivileges
     Note over G,S: Before any read or write. A denial re-parks<br/>rather than spending the gate.
     G->>S: proposals.getLatestRevision
-    Note over G,S: A revision may have landed during the park,<br/>so the decision settles the chain's live head.
+    Note over G,S: A revision may have landed during the park,<br/>so the decision settles the chain's live head.<br/>None can land after the release.
     G->>S: proposals.updateProposal(approved + executing)
     S->>I: decision=approved, decidedBy=<analyst>
     G->>AW: workflow.execute(actionInput)
@@ -354,7 +383,7 @@ You get back `proposalId` and `status`.
 
 **The decision deadline defaults to 72h and the caller may override it.** `expiresIn` is a workflow input; `create_proposal` renders it as `{{ inputs.expiresIn | default: '72h' }}`, and that is the only deadline in the definition. The gate derives every park from the `expiresAt` it resolves to — `timeout: '{{ variables.remaining_seconds }}s'`, rendered once at wait-entry and frozen on step state as `dynamicTimeout` ([#291744](https://github.com/elastic/kibana/pull/291744)) — so the queue and the parked gate cannot disagree about when a decision expires, and a proposal expires on its deadline however many times its gate re-parks. A gate that times out has therefore reached the deadline by construction, which is why the loop settles it as `expired` outright.
 
-**`expiresIn` is deliberately unbounded, and `settings.timeout` is a sentinel.** The workflow wants no ceiling at all: every path is already bounded — the gate by the remaining deadline, the action by its own workflow timeout, the loop by `max-iterations` — so a ceiling adds no safety and one failure mode, since it runs no handler and strands the record as `pending`. The engine has no way to express "no timeout" (omitting it applies `DEFAULT_WORKFLOW_TIMEOUT`, 6h, which would cut every parked gate short), so it is set to `52w`. Do not tighten it to fit a particular deadline, and do not bound `expiresIn` to fit it: a ceiling that can fire before the gate settles is strictly worse than no ceiling. A caller asking for a deadline beyond a year is the one case this does not cover.
+**`expiresIn` is deliberately unbounded, and `settings.timeout` is a sentinel.** The workflow wants no ceiling at all: every path is already bounded — the gate by the remaining deadline, the action by its own workflow timeout, the loop by `max-iterations` — so a ceiling adds no safety and one failure mode, since it runs no handler and leaves the record `pending` until a read settles it. The engine has no way to express "no timeout" (omitting it applies `DEFAULT_WORKFLOW_TIMEOUT`, 6h, which would cut every parked gate short), so it is set to `52w`. Do not tighten it to fit a particular deadline, and do not bound `expiresIn` to fit it: a ceiling that can fire before the gate settles is strictly worse than no ceiling. A caller asking for a deadline beyond a year is the one case this does not cover.
 
 **`autoApprove` is for callers that already resolved autonomy.** This plugin has no autonomy policy of its own; a Worker that has decided the action is permitted without a human passes `autoApprove: true`. Anything else leaves it unset.
 
@@ -362,9 +391,11 @@ The flag is a request, not a guarantee. The gate skips the human decision only w
 
 1. `autoApprove` is `true`;
 2. `actionWorkflowId` is set — autonomy governs whether an *action* may run unattended, and a proposal with no action has none to govern, so it is always gated regardless of the flag;
-3. the action does not declare `approvalPolicy: always-gate`.
+3. the action declares `approvalPolicy: autonomy-dependent`.
 
 An action declaring `always-gate` therefore overrides any autonomy the caller resolved: a Worker cannot auto-approve it by mistake, and the action's own declaration is what enforces that rather than the caller's good behaviour. When the gate is skipped the proposal is still recorded, and the action still runs.
+
+**An auto-approved action runs as the caller's service account.** With no approver to run as, `execute_as_worker` inherits the calling execution's identity (`run-as-mode: inherit`, restricted to workflows tagged `action`). `autoApprove: true` therefore needs a caller that is itself running as a service account: otherwise `execute_as_worker` fails, the failure is recorded, and the clone parks for a human like any other failed action.
 
 **The calling workflow must itself be managed.** An unmanaged parent can neither execute a managed child nor see globally-installed definitions, so a Worker registered outside `@kbn/workflows/managed` cannot reach the gate.
 
@@ -372,7 +403,7 @@ Omitting an optional input is safe. A Liquid template for an absent input still 
 
 ### How an agent creates a proposal
 
-The builtin Agent Builder tool `proposals.create` (`server/tools/create_proposal_tool.ts`, allow-listed in `@kbn/agent-builder-server`; the `proposals` tool namespace is reserved for built-in tools in `@kbn/agent-builder-common`) lets an agent propose an action in the conversation it runs in. It takes `title`, `comment` (Markdown), `origin` (the closed enum above; the agent's instructions name it), and optionally `impact`, `confidence`, and `category`. It takes no `actionWorkflowId`: the analyst carries the action out and approves or dismisses it.
+The builtin Agent Builder tool `proposals.create` (`server/tools/create_proposal_tool.ts`, allow-listed in `@kbn/agent-builder-server`; the `proposals` tool namespace is reserved for built-in tools in `@kbn/agent-builder-common`) lets an agent propose an action in the conversation it runs in. It takes `title`, `comment` (Markdown), `origin` (the closed enum above; the agent's instructions name it), and optionally `impact`, `confidence`, and `category`. It takes no `actionWorkflowId`: the analyst carries the action out and approves or dismisses it — or, for a `todo` proposal, marks it as applied (see [To-do proposals](#to-do-proposals)).
 
 - **It goes through the gate like any Worker.** The tool starts `system-create-proposal` with `workflowsManagement.management.executeWorkflow`, as the caller's request, with the conversation id of the innermost agent on the run stack. It does not call `ProposalsService.create`, because a proposal's decision is only ever recorded behind its gate (`resumeGate` refuses a proposal with no gate execution).
 - **The card is attached by the gate's create step**, through the public attachment client (`render_inline: true`), not through the run's attachment state. That write needs the caller to own the conversation, which holds for an investigation run started by its owner; otherwise the proposal is still created and only the card is missing, as for any Worker. Because the attachment is written out of band, the agent does not see its id in the same turn; the card is shown to the analyst all the same.
@@ -431,19 +462,35 @@ They do make **one narrow write**, because `waitForApproval` reconstructs its re
       },
 ```
 
-So `dismissReason` and `rationale` cannot reach the workflow through the gate. `releaseGate` therefore writes **only those two fields**, and only after every refusal has passed — the decided check, the expiry check and the action-input comparison all come first, so a rejected decision leaves the record exactly as it found it. Ordering matters more than it looks: an annotation written ahead of a conflict would leave a dismiss reason on a proposal that was never dismissed, and a later approval would land on top of it. The line is "the route annotates, the workflow decides." A dismissal arriving through the platform's own resume API simply carries no reason, which is fine because both fields are optional.
+So `dismissReason` and `rationale` cannot reach the workflow through the gate. `releaseGate` therefore writes **only those two fields**, together with the `gateReleasedAt` mark that freezes the chain (see [The revision chain](#the-revision-chain)), and only after every refusal has passed — the decided check, the expiry check, the action-input comparison and the gate's status all come first, so a rejected decision never leaves an annotation behind. The one write a refusal makes is settling a proposal its gate can no longer settle (see [Settling orphaned proposals](#settling-orphaned-proposals)). Ordering matters more than it looks: an annotation written ahead of a conflict would leave a dismiss reason on a proposal that was never dismissed, and a later approval would land on top of it. The line is "the route annotates, the workflow decides." A dismissal arriving through the platform's own resume API simply carries no reason, which is fine because both fields are optional.
 
-A resume that fails *after* that point does leave the annotation behind on an undecided proposal. That window cannot be closed without a transaction, and it is the better trade: annotating after the resume would race the workflow's own decision write and lose the reason outright.
+A resume the engine turns away — the gate step was claimed by someone else, or the execution is no longer waiting — is reverted: the record is put back as it was loaded, under the release write's own sequence number, so it can be revised again and keeps no annotation for a decision that never happened. Any other resume failure leaves its outcome unknown, so the mark and the annotation stay behind on an undecided proposal. That window cannot be closed without a transaction, and it is the better trade: writing after the resume would race the workflow's own decision write, losing the reason and reopening the revise window.
 
-The service surface follows from that: `releaseGate()` makes at most that one annotation write, `clone()` re-offers a failed proposal, and `update()` is the workflow's entry point. There is no `approve()`, `dismiss()` or resume-failure rollback — with no decision written before the resume, there is nothing to roll back.
+The service surface follows from that: `releaseGate()` makes that one write, `clone()` re-offers a failed proposal, and `update()` is the workflow's entry point. There is no `approve()` or `dismiss()`, and the only rollback is that revert — with no decision written before the resume, there is no decision to roll back.
+
+### Settling orphaned proposals
+
+A cancelled or timed-out gate execution runs no handler, so nothing in the workflow settles its proposal; a parent whose own timeout cancels the gate is enough ([#20138](https://github.com/elastic/security-team/issues/20138)). The service settles those proposals itself, whenever they are read (`get`, `list`) or decided (`releaseGate`):
+
+- **Only an ended gate settles.** The gates of the `pending` and `executing` proposals being read are fetched with a single `getWorkflowExecutionStatuses`. A terminal gate settles a `pending` proposal as `expired` and an `executing` one as `failed`, with an `executionError` naming the status the gate ended in. A gate that ended can never write again, so this settle cannot race the gate.
+- **The deadline alone never settles.** A live gate expires its own proposal at the deadline, and a decision released just before the deadline may still be on its way to the gate, whose write would conflict with an `expired` written first and lose an approval the route already answered. `releaseGate` refuses a decision past the deadline before reading the gate, but writes nothing.
+- **A gate that cannot be read is left alone.** An execution that is missing, or that the caller cannot read, settles nothing.
+- **It is best effort.** Every settle goes through `update()`, so its guards decide a race, and a lost race or a failed lookup is logged rather than thrown. A read never fails because of a settle.
+
+What follows from settling on read:
+
+- A read can write, and the write records no actor. `decidedAt` is when the read settled the proposal, not when its gate ended, so `chartsSummary` counts the close then.
+- A status-filtered `list` drops the rows it settled and lowers `total` by as many, so that page comes back short.
+- `countPendingByConversationIds` is an aggregation and settles nothing. An orphan whose deadline is still ahead keeps counting as pending until a `get` or `list` reads it.
+- A `pending` proposal past its deadline whose gate is still live, or cannot be read, keeps reading `pending` until the gate settles it. The queues already treat it as closed through `excludeExpired`.
 
 ### Invariants worth preserving
 
 - **The decision is written behind the gate, by the workflow.** Every resume surface funnels through the gate, so one write there covers them all; a write in the approve route would only ever cover that route.
-- **Nothing durable is written before the resume**, so a failed resume needs no rollback. The sole exception is the dismiss reason, which the gate cannot carry.
+- **No decision is written before the resume.** What is written is the release mark, which `revise()` refuses, and the dismiss reason and rationale, which the gate cannot carry; all three are reverted when the engine turns the resume away. The one other write is settling a proposal whose gate is gone, which is refused rather than resumed.
 - **The privilege check precedes every read and write on the answered path.** The chain resolve reads the proposal on the resumer's behalf, so it waits for the check too; an unauthorized resumer is re-parked before anything is read for it. Gate timeout, attempt-budget exhaustion, and the workflow-level fallback settle through `settleIncompleteProposal`, which skips the privilege check so a denied resumer's API key cannot strand the record. On the answered path, a write that failed before the check would leave the gate spent and the proposal stranded.
 - **A settled status cannot move and a decision cannot be overwritten.** Two independent guards, because the two axes settle independently.
-- **The gate step is resolved explicitly.** The platform's waiting-step lookup only matches `waitForInput`; for a `waitForApproval` gate it returns nothing and would resume *without* claiming the step or stamping the audit envelope. `resumeGate` finds the step itself and passes `stepExecutionId`.
+- **The gate step is resolved explicitly.** The platform's waiting-step lookup only matches `waitForInput`; for a `waitForApproval` gate it returns nothing and would resume *without* claiming the step or stamping the audit envelope. `releaseGate` finds the unclaimed step itself, before writing anything, and passes its `stepExecutionId`. The execution keeps reading `waiting_for_input` until the resumed gate runs, so finding none is how a second release learns the gate was already claimed; it is refused rather than allowed to write the mark under the gate's own decision write.
 - **The decision actor is server-derived.** Never accepted from a request body. `createdBy` and `decidedBy` store `{ username, fullName, email, profileUid? }`, the shape Cases established: the profile uid is the stable identity a UI resolves an avatar from, and the names are stored rather than looked up so attribution survives a missing profile. The uid is genuinely often absent — security disabled, a `run-as` proxy, a session without a profile, or an API key whose creator has no activated profile, which is exactly what the resume path runs under.
 - **Approval carries the action input the approver was shown**, so an approval that no longer matches the record is refused with a conflict.
 - **Action metadata is resolved on read** from the action workflow's `consts.actionMetadata`, never copied onto the proposal, so a catalog change is picked up rather than going stale. `impact` is the exception: it is snapshotted at creation, as `params.impact ?? metadata.impact ?? 'low'`. The caller wins because it knows the situation the proposal came out of, which the action's own metadata cannot; the `low` floor exists because `ranks.impact` is the queue's primary sort key and must always have a value.
@@ -526,8 +573,8 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 
 - **Two steps rely on an `on-failure` their schema does not model** ([#19315](https://github.com/elastic/security-team/issues/19315)). Neither `WaitForApprovalStepSchema` nor `WorkflowExecuteStepSchema` merges `StepWithOnFailureSchema`, unlike the connector-derived schema every custom step gets — so zod drops the key on any path that validates steps against the full schema. The engine honours it on both: a HITL wait fails through the ordinary `failStep` path with a `TimeoutError`, and `handleStepLevelOnFailure` wraps any step declaring the key with no exclusion by type. Both are load-bearing here — the gate's settles an unanswered proposal, the action's keeps a failed action inside the loop to be cloned — and they reach the engine only because managed workflows install under `lightweightValidation`, which does not validate steps. The schema-parity test beside the definition pins exactly these two so a third cannot appear unnoticed, and so the list shrinks when #19315 lands.
 - **An exhausted iteration budget settles as `expired`.** `max-iterations` is 200 with `on-limit: continue`, so hitting it exits the loop into `settle_unfinished`, which calls `settleIncompleteProposal` with `status: expired` and reports `final_status: expired`. Reaching the limit means something spun — a resumer who keeps failing the decide check, or a long chain of action retries.
-- **A write can still lose a race to a revision.** Every write is preceded by the one adopt, but a revision landing in the window between them makes the write conflict. Nothing retries, so a conflict reaches the workflow-level handler — which adopts and settles the live head rather than stranding it. Losing a decision to a millisecond race is bad but bounded, and a retry per write would undo the single-adopt simplification. If it ever matters, the fix is one retry around the whole post-adopt section, not one per write.
-- **A decision resumed past the deadline is accepted for a few seconds.** The engine schedules the gate's timeout task at the deadline, but it fires when Task Manager claims it, and `resume()` only checks expiry when the wake carries no input. A resume arriving in that gap is taken. The approve and dismiss routes are not affected — `releaseGate` refuses an expired proposal — so this is reachable only through the platform's generic resume API or the Inbox. Not worth a step in the loop to catch at 72h deadlines.
+- **A write can still lose a race to a revision.** Every write is preceded by the one adopt, but a revision landing in the window between them makes the write conflict. A gate released through the approve or dismiss route is immune, since `revise()` refuses its proposal from the release on; this is reachable only through the other resume surfaces. Nothing retries, so a conflict reaches the workflow-level handler — which adopts and settles the live head rather than stranding it. Losing a decision to a millisecond race is bad but bounded, and a retry per write would undo the single-adopt simplification. If it ever matters, the fix is one retry around the whole post-adopt section, not one per write.
+- **A decision resumed past the deadline is accepted for a few seconds.** The engine schedules the gate's timeout task at the deadline, but it fires when Task Manager claims it, and `resume()` only checks expiry when the wake carries no input. A resume arriving in that gap is taken. The approve and dismiss routes are not affected — `releaseGate` refuses a proposal past its deadline — so this is reachable only through the platform's generic resume API or the Inbox. Not worth a step in the loop to catch at 72h deadlines.
 - **Deep paging stops at 10,000.** The list pages with `from`/`size` inside Elasticsearch's default result window. Going past that needs `search_after`, which the list does not expose yet.
 - **`.kibana-*` index naming** buys us out of a system index registration, at the cost of living in a namespace we do not own.
 - **No Scout API coverage yet.** The HTTP surface is covered by Jest only, as `anonymization` shipped.

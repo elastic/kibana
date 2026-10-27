@@ -599,10 +599,7 @@ export class DashboardPageControls extends FtrService {
 
   public async optionsListWaitForLoading(controlId: string) {
     this.log.debug(`wait for ${controlId} to load`);
-    const enabled = await this.testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
-    if (!enabled) {
-      throw new Error(`${controlId} did not finish loading within the given time limit`);
-    }
+    await this.testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
   }
 
   public async optionsListPopoverWaitForLoading() {
@@ -810,25 +807,29 @@ export class DashboardPageControls extends FtrService {
 
   // Time slider functions
   public async gotoNextTimeSlice() {
-    await this.closeTimeSliderPopover(); // prevents the pin tooltip from getting in the way
+    // the next/previous buttons pause playback, which always opens the popover
     await this.testSubjects.click('timeSlider-nextTimeWindow');
+    await this.testSubjects.existOrFail('timeSlider-popoverContents', { timeout: 10_000 });
+  }
+
+  public async openTimeSliderPopover() {
+    if (await this.testSubjects.waitForExists('timeSlider-popoverContents')) {
+      return;
+    }
+    await this.testSubjects.click('timeSlider-popoverToggleButton');
+    await this.testSubjects.existOrFail('timeSlider-popoverContents', { timeout: 10_000 });
   }
 
   public async closeTimeSliderPopover() {
-    const isOpen = await this.testSubjects.exists('timeSlider-popoverContents');
-    if (isOpen) {
-      await this.testSubjects.click('timeSlider-popoverToggleButton');
+    if (!(await this.testSubjects.waitForExists('timeSlider-popoverContents'))) {
+      return;
     }
+    await this.testSubjects.click('timeSlider-popoverToggleButton');
+    await this.testSubjects.waitForDeleted('timeSlider-popoverContents');
   }
 
   public async getTimeSliceFromTimeSlider() {
-    const isOpen = await this.testSubjects.exists('timeSlider-popoverContents');
-    if (!isOpen) {
-      await this.testSubjects.click('timeSlider-popoverToggleButton');
-      await this.retry.try(async () => {
-        await this.testSubjects.existOrFail('timeSlider-popoverContents');
-      });
-    }
+    await this.openTimeSliderPopover();
     const popover = await this.testSubjects.find('timeSlider-popoverContents');
     const dualRangeSlider = await this.find.descendantDisplayedByCssSelector(
       '.euiRangeDraggable',

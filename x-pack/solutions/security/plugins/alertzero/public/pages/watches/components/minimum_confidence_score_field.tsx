@@ -24,7 +24,7 @@ const FIELD_WIDTH_PX = 120;
 
 /**
  * Confidence score field for Alert Triage Worker. Displays as 0–100% (integer),
- * stores and emits as 0–1 decimal. Persists on blur to avoid mid-type API calls.
+ * stores and emits as 0–1 decimal, on each valid keystroke.
  * Label/help live on the surrounding `SettingRow`; this is the control only.
  */
 export const MinimumConfidenceScoreField: React.FC<MinimumConfidenceScoreFieldProps> = ({
@@ -32,7 +32,10 @@ export const MinimumConfidenceScoreField: React.FC<MinimumConfidenceScoreFieldPr
   isDisabled,
   onChange,
 }) => {
-  const { draft, onValueChange, onBlur } = useMinimumConfidenceScoreDraft({ current, onChange });
+  const { draft, onValueChange, onFocus, onBlur } = useMinimumConfidenceScoreDraft({
+    current,
+    onChange,
+  });
 
   return (
     <div
@@ -49,6 +52,7 @@ export const MinimumConfidenceScoreField: React.FC<MinimumConfidenceScoreFieldPr
         value={draft}
         disabled={isDisabled}
         onChange={onValueChange}
+        onFocus={onFocus}
         onBlur={onBlur}
         append="%"
         aria-label={i18n.MINIMUM_CONFIDENCE_SCORE_LABEL}

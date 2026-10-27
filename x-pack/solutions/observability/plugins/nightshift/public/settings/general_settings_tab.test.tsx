@@ -11,7 +11,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { useKibana } from '../hooks/use_kibana';
 import { GeneralSettingsTab } from './general_settings_tab';
-import { useDeveloperMode } from './hooks/use_developer_mode';
+import { useDeveloperMode } from '../hooks/use_developer_mode';
 
 const baseCapabilities = coreMock.createStart().application.capabilities;
 let mockApplication: Pick<ReturnType<typeof useKibana>['services']['application'], 'capabilities'> =
@@ -22,10 +22,15 @@ let mockApplication: Pick<ReturnType<typeof useKibana>['services']['application'
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { application: mockApplication } }),
 }));
-jest.mock('./hooks/use_developer_mode');
+jest.mock('../hooks/use_developer_mode');
 jest.mock('./components/apps_section', () => ({
   AppsSection: ({ canEdit }: { canEdit: boolean }) => (
     <div data-test-subj="apps-section" data-can-edit={canEdit ? 'true' : 'false'} />
+  ),
+}));
+jest.mock('./components/knowledge_purge_section', () => ({
+  KnowledgePurgeSection: ({ canManage }: { canManage: boolean }) => (
+    <div data-test-subj="knowledge-purge-section" data-can-manage={canManage ? 'true' : 'false'} />
   ),
 }));
 
@@ -116,6 +121,37 @@ describe('GeneralSettingsTab', () => {
     });
 
     expect(screen.getByTestId('nightshiftDeveloperModeSwitch')).toBeDisabled();
+  });
+
+  it('hides the knowledge purge until developer mode is on', () => {
+    renderTab({
+      nightshift: {
+        [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
+        [NIGHTSHIFT_UI_PRIVILEGES.configure]: true,
+      },
+    });
+
+    expect(screen.queryByTestId('knowledge-purge-section')).not.toBeInTheDocument();
+  });
+
+  it('shows the knowledge purge in developer mode, gated on manage and configure', () => {
+    mockUseDeveloperMode.mockReturnValue({
+      isDeveloperMode: true,
+      isSaving: false,
+      setDeveloperMode,
+    });
+    renderTab({
+      nightshift: {
+        [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
+        [NIGHTSHIFT_UI_PRIVILEGES.configure]: true,
+      },
+    });
+
+    expect(screen.getByTestId('nightshiftKnowledgeSettingsSection')).toHaveTextContent('Knowledge');
+    expect(screen.getByTestId('knowledge-purge-section')).toHaveAttribute(
+      'data-can-manage',
+      'true'
+    );
   });
 
   it('disables developer mode without permission to save advanced settings', () => {

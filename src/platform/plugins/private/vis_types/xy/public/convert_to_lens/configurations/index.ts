@@ -214,13 +214,15 @@ export const getConfiguration = (
   const xColumn = layers[0].columns.find((c) => c.isBucketed && !c.isSplit);
   const isTimeChart = xColumn?.operationType === 'date_histogram';
   const fittingFunction = vis.params.fittingFunction ?? vis.type.visConfig.defaults.fittingFunction;
+  const dataLayers = getDataLayers(
+    layers.filter((l) => !l.isReferenceLineLayer),
+    series,
+    vis
+  );
+  const hasAreaLayer = dataLayers.some(({ seriesType }) => seriesType.includes('area'));
   return {
     layers: [
-      ...getDataLayers(
-        layers.filter((l) => !l.isReferenceLineLayer),
-        series,
-        vis
-      ),
+      ...dataLayers,
       ...getReferenceLineLayers(
         layers.filter((l) => l.isReferenceLineLayer),
         vis
@@ -242,6 +244,7 @@ export const getConfiguration = (
       ? fittingFunction[0].toUpperCase() + fittingFunction.slice(1)
       : undefined,
     fillOpacity: vis.params.fillOpacity ?? vis.type.visConfig.defaults.fillOpacity,
+    ...(hasAreaLayer ? { areaFill: 'solid' as const } : {}),
     gridlinesVisibilitySettings: {
       x: vis.params.grid.categoryLines ?? vis.type.visConfig.defaults.grid?.categoryLines,
       yLeft:

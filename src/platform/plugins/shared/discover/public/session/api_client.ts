@@ -13,7 +13,7 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { SavedSearchType, type DiscoverSession } from '@kbn/saved-search-plugin/common';
 import {
   DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
-  DISCOVER_SESSION_API_VERSION,
+  DISCOVER_SESSION_INTERNAL_API_VERSION,
 } from '../../common/constants';
 import type {
   DiscoverSessionInternalDataInput,
@@ -55,12 +55,10 @@ export type DiscoverSessionClientGetResult = DiscoverSessionInternalGetResponse 
 /** Uses the internal session routes so Discover keeps inline Data View IDs. */
 export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionClient => ({
   create: (data) =>
-    requestWithReadableError(() =>
-      http.post<DiscoverSessionInternalResponse>(DISCOVER_SESSION_INTERNAL_API_BASE_PATH, {
-        version: DISCOVER_SESSION_API_VERSION,
-        body: JSON.stringify(data),
-      })
-    ),
+    http.post<DiscoverSessionInternalResponse>(DISCOVER_SESSION_INTERNAL_API_BASE_PATH, {
+      version: DISCOVER_SESSION_INTERNAL_API_VERSION,
+      body: JSON.stringify(data),
+    }),
 
   get: (id) =>
     requestWithReadableError(
@@ -68,7 +66,7 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
         const { body, response } = await http.get<DiscoverSessionInternalGetResponse>(
           buildDiscoverSessionPath(id),
           {
-            version: DISCOVER_SESSION_API_VERSION,
+            version: DISCOVER_SESSION_INTERNAL_API_VERSION,
             asResponse: true,
           }
         );
@@ -86,12 +84,10 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
     ),
 
   upsert: (id, data) =>
-    requestWithReadableError(() =>
-      http.put<DiscoverSessionInternalResponse>(buildDiscoverSessionPath(id), {
-        version: DISCOVER_SESSION_API_VERSION,
-        body: JSON.stringify(data),
-      })
-    ),
+    http.put<DiscoverSessionInternalResponse>(buildDiscoverSessionPath(id), {
+      version: DISCOVER_SESSION_INTERNAL_API_VERSION,
+      body: JSON.stringify(data),
+    }),
   // TODO: Add DELETE when connecting Discover's session deletion flow to the HTTP API.
 });
 

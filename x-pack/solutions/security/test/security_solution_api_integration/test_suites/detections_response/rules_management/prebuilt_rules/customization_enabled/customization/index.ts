@@ -13,5 +13,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./detect_customization_without_base_version'));
     loadTestFile(require.resolve('./customize_via_bulk_editing'));
     loadTestFile(require.resolve('./unaffected_fields'));
+    loadTestFile(require.resolve('./ignore_system_managed_tags'));
   });
 };

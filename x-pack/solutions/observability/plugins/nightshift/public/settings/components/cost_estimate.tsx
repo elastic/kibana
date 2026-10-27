@@ -10,7 +10,7 @@ import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSignificantEventsCost } from '../hooks/use_significant_events_cost';
 import { useRunQuotas } from '../hooks/use_significant_events_run_quotas';
-import { getFormattedError } from '../utils/errors';
+import { getFormattedError } from '../../common/errors';
 import { CostData } from './cost_estimate_breakdown';
 import {
   CostHeaderActions,

@@ -20,7 +20,7 @@ import {
  */
 export function configToAnnotatedYaml(config: SignificantEventsTuningConfig): string {
   return [
-    '# Significant Events Tuning',
+    '# Significant events tuning',
     '# Changes take effect on the next feature identification run or query search.',
     '',
     '# ── Feature Discovery ──',

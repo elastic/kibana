@@ -11,7 +11,9 @@ import { z } from '@kbn/zod/v4';
 import {
   CONNECTOR_ID_MAX_LENGTH,
   type ConnectorContractUnion,
+  type CustomTriggerSchemaInput,
   generateYamlSchemaFromConnectors,
+  getWorkflowJsonSchema,
 } from '../..';
 
 const BASE_WORKFLOW = {
@@ -20,6 +22,40 @@ const BASE_WORKFLOW = {
 };
 
 describe('generateYamlSchemaFromConnectors', () => {
+  it.each<{ format: string; triggers: CustomTriggerSchemaInput[] }>([
+    {
+      format: 'strings',
+      triggers: ['cases.updated', 'slack.message', 'slack.reaction'],
+    },
+    {
+      format: 'objects',
+      triggers: [
+        { id: 'cases.updated' },
+        { id: 'slack.message', requiresConnectorId: true },
+        { id: 'slack.reaction', requiresConnectorId: true },
+      ],
+    },
+    {
+      format: 'mixed strings and objects',
+      triggers: [
+        'cases.updated',
+        { id: 'slack.message', requiresConnectorId: true },
+        { id: 'slack.reaction', requiresConnectorId: true },
+      ],
+    },
+  ])('generates identical JSON schemas regardless of trigger order for $format', ({ triggers }) => {
+    const reversedTriggers = triggers.toReversed();
+    const originalOrder = [...reversedTriggers];
+    const schema = getWorkflowJsonSchema(generateYamlSchemaFromConnectors([], triggers));
+    const reversedSchema = getWorkflowJsonSchema(
+      generateYamlSchemaFromConnectors([], reversedTriggers)
+    );
+
+    expect(schema).not.toBeNull();
+    expect(reversedSchema).toEqual(schema);
+    expect(reversedTriggers).toEqual(originalOrder);
+  });
+
   describe('strict mode', () => {
     it('should generate a valid YAML schema from connectors', () => {
       const connectors: ConnectorContractUnion[] = [

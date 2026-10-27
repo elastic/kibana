@@ -32,6 +32,7 @@ import { bulkCreateAgentActionResults } from '../services/agents/actions';
 import { unenrollBatch } from '../services/agents/unenroll_action_runner';
 import { agentPolicyService, appContextService, auditLoggingService } from '../services';
 import type { AgentPolicy, FleetServerAgentAction } from '../types';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../common/services/version_specific_policies_utils';
 
 export const TYPE = 'fleet:unenroll-inactive-agents-task';
 export const VERSION = '1.0.3';
@@ -143,11 +144,15 @@ export class UnenrollInactiveAgentsTask {
   // find inactive agents enrolled on selected policies
   // check that the time since last checkin was longer than unenroll_timeout
   public getAgentsQuery(agentPolicies: AgentPolicy[]): string {
-    return `(${AGENTS_PREFIX}.policy_id:${agentPolicies
+    return `(${agentPolicies
       .map((policy) => {
         // @ts-ignore-next-line
         const inactivityThreshold = Date.now() - policy.unenroll_timeout * 1000;
-        return `"${policy.id}" and (${AGENTS_PREFIX}.last_checkin < ${inactivityThreshold})`;
+        return `(${buildPolicyBaseIdWithFallbackKuery(
+          policy.id,
+          `${AGENTS_PREFIX}.policy_base_id`,
+          `${AGENTS_PREFIX}.policy_id`
+        )} and (${AGENTS_PREFIX}.last_checkin < ${inactivityThreshold}))`;
       })
       .join(' or ')}) and ${AGENTS_PREFIX}.status: inactive`;
   }
@@ -253,6 +258,7 @@ export class UnenrollInactiveAgentsTask {
 
       const scheduledBatch = await unenrollBatch(soClient, esClient, agentsToSchedule, {
         force: true,
+        skipAgentlessValidation: true,
         actionId,
         startTime,
       });
@@ -350,7 +356,9 @@ export class UnenrollInactiveAgentsTask {
         page: 1,
         perPage: action.agents.length,
       });
-      const stillInactiveAgents = agentDocs.filter((a) => a.active && !a.unenrolled_at);
+      // Only `active` is checked: legacy docs (Fleet Server 8.16.0-8.17.0 audit/unenroll bug) can be
+      // `active: true` with a stale `unenrolled_at`. Force unenroll below deactivates them and revokes keys.
+      const stillInactiveAgents = agentDocs.filter((a) => a.active);
 
       if (!stillInactiveAgents.length) {
         this.logger.debug(
@@ -369,6 +377,7 @@ export class UnenrollInactiveAgentsTask {
       await unenrollBatch(soClient, esClient, stillInactiveAgents, {
         revoke: true,
         force: true,
+        skipAgentlessValidation: true,
         actionId: action.action_id,
         skipActionCreation: true,
       });

@@ -14,12 +14,15 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/server';
 import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgenticInvestigationsConfig } from './config';
 import { registerFeatures } from './features';
 import { registerImpactAttachment } from './impact/attachments';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import { createInvestigationsPrivilegesChecker } from './investigations/services/check_investigations_privileges';
 import { createImpactClient } from './impact/services/impact_client';
+import { createEntityStoreNameLookup } from './impact/services/entity_store_names';
+import { ImpactPillsService } from './impact/services/impact_pills_service';
 import { ImpactService } from './impact/services/impact_service';
 import { registerImpactStepDefinitions } from './impact/step_types';
 import { registerInvestigationStepDefinitions } from './investigations/step_types';
@@ -33,11 +36,13 @@ import {
   SubjectClaimsService,
 } from './subjects/services/subject_claims_service';
 import { createSubjectsClient } from './subjects/services/subjects_client';
+import { createThreadConversationResolver } from './subjects/services/thread_conversation_resolver';
 import { hypothesesAttachment, registerHypothesesAttachment } from './hypotheses/attachments';
 import { HypothesesService } from './hypotheses/services/hypotheses_service';
 import { createSetHypothesesTool } from './hypotheses/tools/set_hypotheses_tool';
 import { EscalationsService } from './escalations/services/escalations_service';
 import { registerEscalationConversationEvents } from './escalations/conversation_events';
+import { registerInvestigationConversationEvents } from './investigations/conversation_events';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { AssignmentsService } from './assignments/assignments_service';
 import { InvestigationStatusService } from './investigations/services/investigation_status_service';
@@ -70,6 +75,7 @@ export class AgenticInvestigationsPlugin
   private readonly logger: Logger;
   private readonly escalationsEnabled: boolean;
   private impactService?: ImpactService;
+  private impactPillsService?: ImpactPillsService;
   private subjectsService?: SubjectsService;
   private hypothesesService?: HypothesesService;
   private escalationsService?: EscalationsService;
@@ -79,6 +85,7 @@ export class AgenticInvestigationsPlugin
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveUser;
   private agentBuilder?: AgenticInvestigationsStartDependencies['agentBuilder'];
+  private workflowsManagement?: WorkflowsServerPluginSetup['management'];
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsConfig>) {
     this.logger = context.logger.get();
@@ -87,10 +94,17 @@ export class AgenticInvestigationsPlugin
 
   setup(
     coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>,
-    { features, workflowsExtensions, agentBuilder }: AgenticInvestigationsSetupDependencies
+    {
+      features,
+      workflowsExtensions,
+      agentBuilder,
+      workflowsManagement,
+    }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
+    this.workflowsManagement = workflowsManagement?.management;
     registerFeatures({ features, escalationsEnabled: this.escalationsEnabled });
 
+    registerInvestigationConversationEvents(agentBuilder);
     if (this.escalationsEnabled) {
       registerEscalationConversationEvents(agentBuilder);
     }
@@ -126,6 +140,12 @@ export class AgenticInvestigationsPlugin
       logger: this.logger,
     });
 
+    agentBuilder.callbacks.registerConversationResolver(
+      createThreadConversationResolver({
+        getSubjectsService: () => this.requireSubjectsService(),
+      })
+    );
+
     agentBuilder.tools.register(
       createSetImpactTool({
         getImpactService: () => this.requireImpactService(),
@@ -158,6 +178,8 @@ export class AgenticInvestigationsPlugin
       router,
       logger: this.logger,
       getImpactService: () => this.requireImpactService(),
+      getImpactPillsService: () => this.requireImpactPillsService(),
+      escalationsEnabled: this.escalationsEnabled,
       getSpaceId: (request) => this.getSpaceId(request),
       resolveUser: (request) => this.requireUserResolver()(request),
       getAttachmentClient: (request) => this.getAttachmentClient(request),
@@ -248,7 +270,8 @@ export class AgenticInvestigationsPlugin
       getHypothesesService: () => this.requireHypothesesService(),
       getProposals: () => plugins.proposals,
       inProgress: new InProgressResolver({
-        getAgentExecutions: () => plugins.agentBuilder.execution,
+        getWorkflowsManagement: () => this.workflowsManagement,
+        getProposals: () => plugins.proposals,
         logger: this.logger,
       }),
       logger: this.logger,
@@ -285,6 +308,22 @@ export class AgenticInvestigationsPlugin
           }),
       });
     }
+
+    this.impactPillsService = new ImpactPillsService({
+      esClient,
+      logger: this.logger,
+      getImpactService: () => this.requireImpactService(),
+      privileges: startPrivileges,
+      getSpaceId: (request) => this.getSpaceId(request),
+      getProposals: () => plugins.proposals,
+      getEscalationsService: () => this.escalationsService,
+      getEntityStoreNames: createEntityStoreNameLookup({
+        getEntityStore: () => plugins.entityStore,
+        getEsClient: (request) => coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+        getSpaceId: (request) => this.getSpaceId(request),
+        logger: this.logger,
+      }),
+    });
 
     this.assignmentsService = new AssignmentsService({
       getConversationClient: (request) =>
@@ -332,6 +371,15 @@ export class AgenticInvestigationsPlugin
       },
       getEscalationsService: () => this.requireEscalationsService(),
     };
+  }
+
+  private requireImpactPillsService(): ImpactPillsService {
+    if (!this.impactPillsService) {
+      throw new Error(
+        'Impact pills service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.impactPillsService;
   }
 
   private requireImpactService(): ImpactService {

@@ -43,6 +43,11 @@ describe('AnalyticsService', () => {
     jest.clearAllMocks();
     analyticsService = new AnalyticsService(coreContextMock.create());
   });
+
+  afterEach(async () => {
+    await analyticsService.stop();
+  });
+
   test('should register some context providers on creation', async () => {
     expect(analyticsClientMock.registerContextProvider).toHaveBeenCalledTimes(4);
     expect(await firstValueFrom(findRegisteredContextProviderByName('build info')[0].context$))
@@ -74,8 +79,8 @@ describe('AnalyticsService', () => {
     });
   });
 
-  test('should register the `performance_metric` and `click` event types on creation', () => {
-    expect(analyticsClientMock.registerEventType).toHaveBeenCalledTimes(3);
+  test('should register the `performance_metric`, `click`, `viewport_resize`, and `browser_page_translated` event types on creation', () => {
+    expect(analyticsClientMock.registerEventType).toHaveBeenCalledTimes(4);
     expect(findRegisteredEventTypeByName('performance_metric')).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -269,6 +274,19 @@ describe('AnalyticsService', () => {
         },
       ]
     `);
+    expect(findRegisteredEventTypeByName('browser_page_translated')).toEqual([
+      {
+        eventType: 'browser_page_translated',
+        schema: {
+          detector: {
+            type: 'keyword',
+            _meta: {
+              description: expect.stringContaining('chrome_html_class'),
+            },
+          },
+        },
+      },
+    ]);
   });
 
   test('setup should expose all the register APIs, reportEvent and opt-in', () => {

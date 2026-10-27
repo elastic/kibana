@@ -39,7 +39,10 @@ export class WorkflowsAppPage {
       .or(this.page.testSubj.locator('workflowExecutionPanel'));
   }
 
-  /** Open the editor for a brand-new workflow. */
+  /**
+   * Open the editor for a brand-new workflow. "Create workflow" opens the
+   * agentic-first landing; "Start manually" opens the blank editor.
+   */
   async gotoNewWorkflow(): Promise<void> {
     await this.page.gotoApp(WORKFLOWS_APP_ID);
     await this.page.testSubj.waitForSelector('createWorkflowButton', {
@@ -47,6 +50,9 @@ export class WorkflowsAppPage {
       timeout: APP_LOAD_TIMEOUT,
     });
     await this.page.testSubj.click('createWorkflowButton');
+    await this.page.testSubj.click('agenticFirstStartManuallyButton', {
+      timeout: APP_LOAD_TIMEOUT,
+    });
     await this.yamlEditor.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT });
   }
 

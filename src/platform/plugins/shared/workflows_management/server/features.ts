@@ -20,10 +20,9 @@ import {
 // The kibana feature configuration for the Workflows Management plugin.
 export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
   id: WORKFLOWS_MANAGEMENT_FEATURE_ID,
-  name: i18n.translate(
-    'platform.plugins.shared.workflows_management.featureRegistry.workflowsManagementFeatureName',
-    { defaultMessage: 'Workflows' }
-  ),
+  name: i18n.translate('workflows.featureRegistry.workflowsManagementFeatureName', {
+    defaultMessage: 'Workflows',
+  }),
   category: DEFAULT_APP_CATEGORIES.kibana,
   app: [],
   order: 3000,
@@ -35,20 +34,18 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
   },
   subFeatures: [
     {
-      name: i18n.translate(
-        'platform.plugins.shared.workflows_management.featureRegistry.workflowsManagementSubFeatureName',
-        { defaultMessage: 'Workflows Actions' }
-      ),
+      name: i18n.translate('workflows.featureRegistry.workflowsManagementSubFeatureName', {
+        defaultMessage: 'Workflows Actions',
+      }),
       privilegeGroups: [
         {
           groupType: 'independent',
           privileges: [
             {
               id: 'workflow_create',
-              name: i18n.translate(
-                'platform.plugins.shared.workflows_management.featureRegistry.createWorkflowSubFeaturePrivilege',
-                { defaultMessage: 'Create' }
-              ),
+              name: i18n.translate('workflows.featureRegistry.createWorkflowSubFeaturePrivilege', {
+                defaultMessage: 'Create',
+              }),
               includeIn: 'all',
               savedObject: { all: [], read: [] },
               api: [WorkflowsManagementApiActions.create],
@@ -56,10 +53,9 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
             },
             {
               id: 'workflow_update',
-              name: i18n.translate(
-                'platform.plugins.shared.workflows_management.featureRegistry.updateWorkflowSubFeaturePrivilege',
-                { defaultMessage: 'Update' }
-              ),
+              name: i18n.translate('workflows.featureRegistry.updateWorkflowSubFeaturePrivilege', {
+                defaultMessage: 'Update',
+              }),
               includeIn: 'all',
               savedObject: { all: [], read: [] },
               api: [WorkflowsManagementApiActions.update],
@@ -67,10 +63,9 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
             },
             {
               id: 'workflow_delete',
-              name: i18n.translate(
-                'platform.plugins.shared.workflows_management.featureRegistry.deleteWorkflowSubFeaturePrivilege',
-                { defaultMessage: 'Delete' }
-              ),
+              name: i18n.translate('workflows.featureRegistry.deleteWorkflowSubFeaturePrivilege', {
+                defaultMessage: 'Delete',
+              }),
               includeIn: 'all',
               savedObject: { all: [], read: [] },
               api: [WorkflowsManagementApiActions.delete],
@@ -78,10 +73,9 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
             },
             {
               id: 'workflow_execute',
-              name: i18n.translate(
-                'platform.plugins.shared.workflows_management.featureRegistry.executeWorkflowSubFeaturePrivilege',
-                { defaultMessage: 'Execute' }
-              ),
+              name: i18n.translate('workflows.featureRegistry.executeWorkflowSubFeaturePrivilege', {
+                defaultMessage: 'Execute',
+              }),
               includeIn: 'all',
               savedObject: { all: [], read: [] },
               api: [WorkflowsManagementApiActions.execute],
@@ -89,10 +83,9 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
             },
             {
               id: 'workflow_read',
-              name: i18n.translate(
-                'platform.plugins.shared.workflows_management.featureRegistry.readWorkflowSubFeaturePrivilege',
-                { defaultMessage: 'Read' }
-              ),
+              name: i18n.translate('workflows.featureRegistry.readWorkflowSubFeaturePrivilege', {
+                defaultMessage: 'Read',
+              }),
               includeIn: 'read',
               savedObject: { all: [], read: [] },
               aiIndex: { read: [WORKFLOW_KI_TYPE] },
@@ -102,7 +95,7 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
             {
               id: 'workflow_execution_read',
               name: i18n.translate(
-                'platform.plugins.shared.workflows_management.featureRegistry.readWorkflowExecutionSubFeaturePrivilege',
+                'workflows.featureRegistry.readWorkflowExecutionSubFeaturePrivilege',
                 { defaultMessage: 'Read Workflow Execution' }
               ),
               includeIn: 'read',
@@ -113,7 +106,7 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
             {
               id: 'workflow_execution_cancel',
               name: i18n.translate(
-                'platform.plugins.shared.workflows_management.featureRegistry.cancelWorkflowExecutionSubFeaturePrivilege',
+                'workflows.featureRegistry.cancelWorkflowExecutionSubFeaturePrivilege',
                 { defaultMessage: 'Cancel Workflow Execution' }
               ),
               includeIn: 'all',
@@ -126,12 +119,11 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
       ],
     },
     {
-      name: i18n.translate(
-        'platform.plugins.shared.workflows_management.featureRegistry.managedWorkflowsSubFeatureName',
-        { defaultMessage: 'Managed Workflows Actions' }
-      ),
+      name: i18n.translate('workflows.featureRegistry.managedWorkflowsSubFeatureName', {
+        defaultMessage: 'Managed Workflows Actions',
+      }),
       description: i18n.translate(
-        'platform.plugins.shared.workflows_management.featureRegistry.managedWorkflowsSubFeatureDescription',
+        'workflows.featureRegistry.managedWorkflowsSubFeatureDescription',
         { defaultMessage: 'Managed workflow actions need explicit assignment' }
       ),
       privilegeGroups: [
@@ -141,7 +133,7 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
             {
               id: 'workflow_read_managed',
               name: i18n.translate(
-                'platform.plugins.shared.workflows_management.featureRegistry.readManagedWorkflowsSubFeaturePrivilege',
+                'workflows.featureRegistry.readManagedWorkflowsSubFeaturePrivilege',
                 { defaultMessage: 'Read managed workflows' }
               ),
               includeIn: 'read',
@@ -152,7 +144,7 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
             {
               id: 'workflow_execution_read_managed',
               name: i18n.translate(
-                'platform.plugins.shared.workflows_management.featureRegistry.readManagedWorkflowExecutionSubFeaturePrivilege',
+                'workflows.featureRegistry.readManagedWorkflowExecutionSubFeaturePrivilege',
                 { defaultMessage: 'Read managed workflow execution' }
               ),
               includeIn: 'read',
@@ -163,7 +155,7 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
             {
               id: 'workflow_update_managed',
               name: i18n.translate(
-                'platform.plugins.shared.workflows_management.featureRegistry.updateManagedWorkflowsSubFeaturePrivilege',
+                'workflows.featureRegistry.updateManagedWorkflowsSubFeaturePrivilege',
                 { defaultMessage: 'Update managed workflows' }
               ),
               includeIn: 'none',

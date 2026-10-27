@@ -19,6 +19,7 @@ describe('workflow validation rules registry', () => {
         "deprecatedStepType",
         "duplicateStepName",
         "esqlDiagnostic",
+        "esqlUnknownSource",
         "foreachItemRuntimeType",
         "graphBuildError",
         "ignoredFetcherSetting",

@@ -14,11 +14,24 @@ import { useEsqlGlobalFilterQuery } from '../../../../../../../common/hooks/esql
 import { esqlResponseToRecords } from '../../../../../../../common/utils/esql';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../../../../common/hooks/use_error_toast';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../../../common/utils/execution_context';
 import type { AnomalyBand } from '../../../../../recent_anomalies';
 import {
   usePadAnomalyDataEsqlSource,
   usePadTopAnomalousUsersEsqlSource,
 } from './pad_esql_source_query_hooks';
+
+const PAD_CHART_TOP_USERS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pad_chart_top_users'
+);
+const PAD_CHART_ANOMALIES_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pad_chart_anomalies'
+);
 
 interface ESQLRawAnomalyRecord extends Record<string, string | number> {
   '@timestamp': number | string;
@@ -59,6 +72,7 @@ const usePrivilegedAccessDetectionTopUsersQuery = (params: {
             search,
             signal,
             filter: filterQuery,
+            executionContext: PAD_CHART_TOP_USERS_CONTEXT,
           })
         )?.response
       );
@@ -109,6 +123,7 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
             search,
             signal,
             filter: filterQuery,
+            executionContext: PAD_CHART_ANOMALIES_CONTEXT,
           })
         ).response
       ).map((eachRawRecord) => ({

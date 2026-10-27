@@ -9,9 +9,9 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { userEvent, waitFor } from '@storybook/test';
 
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
+import { docLinksMock } from '../../../doc_links_mock';
 import type { MappingEditorValue } from './mapping_editor';
 import { MappingEditor } from './mapping_editor';
 import { emptyMappingEditorValue } from './constants';
@@ -23,24 +23,6 @@ const meta: Meta<typeof MappingEditor> = {
 
 export default meta;
 type Story = StoryObj<typeof MappingEditor>;
-
-const docLinksMock = {
-  links: {
-    elasticsearch: {
-      mappingReference: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference',
-      mappingKeyword:
-        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/keyword',
-      mappingBoolean:
-        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/boolean',
-      mappingIp: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/ip',
-      mappingDate: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/date',
-      mappingUnsignedLong:
-        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/unsigned-long',
-      mappingNumber: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/number',
-    },
-    dataFederation: {},
-  },
-} as unknown as DocLinksStart;
 
 const PopulatedStory = () => {
   const [value, setValue] = React.useState<MappingEditorValue>(() => ({

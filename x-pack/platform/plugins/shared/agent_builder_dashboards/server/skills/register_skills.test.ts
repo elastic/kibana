@@ -7,9 +7,11 @@
 
 import { internalTools, platformCoreTools } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import { dashboardsSkill as skill } from './dashboards_skill';
+import { createDashboardsSkill } from './dashboards_skill';
 import { ENHANCE_GUIDANCE_PATH } from './generation_guidance/enhance_guidance';
 import { registerSkills } from './register_skills';
+
+const skill = createDashboardsSkill({ getDashboardValidator: jest.fn() });
 
 const enhanceGuidance = (): string => {
   const reference = skill.referencedContent?.find((item) => item.name === 'enhance');
@@ -26,7 +28,7 @@ describe('registerSkills', () => {
       skills: { register },
     } as unknown as AgentBuilderPluginSetup;
 
-    registerSkills(agentBuilder);
+    registerSkills(agentBuilder, { getDashboardValidator: jest.fn() });
 
     expect(register).toHaveBeenCalledTimes(1);
     expect(register).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboards' }));
@@ -37,9 +39,22 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('platform.core.sml_attach');
   });
 
+  it('finds unnamed data in one broad index search without probing it', () => {
+    expect(skill.content).toContain(
+      'find it in one `platform.core.list_indices` call with a broad pattern around the topic (e.g. `*log*`, not `logs-*`)'
+    );
+    expect(skill.content).toContain('Do not query the data before generating');
+  });
+
+  it('treats by-reference panels as unknown content that can only be rearranged', () => {
+    expect(skill.content).toContain('by-reference panels (');
+    expect(skill.content).toContain('do not look it up with any tool or API');
+    expect(enhanceGuidance()).toContain('keep by-reference panels');
+  });
+
   it('inlines the dashboard design guidance directly in the skill body', () => {
     expect(skill.content).toContain('Dashboard Composition Guidelines');
-    expect(skill.content).toContain('Grid Packing Rules');
+    expect(skill.content).toContain('Panel Layout');
     expect(skill.content).toContain('show avg/min/max in the legend');
     expect(skill.content).toContain('at least one and at most two of those primary time-series XY');
   });
@@ -63,8 +78,8 @@ describe('registerSkills', () => {
     expect(guidance).toContain('applyChartRules: true');
     expect(guidance).toContain('for every existing ES|QL Lens panel');
     expect(guidance).toContain('preserveESQL: true');
-    expect(skill.content).toContain(
-      'a query change and presentation enhancement can share one edit'
+    expect(guidance).toContain(
+      'omit `preserveESQL` and describe only that change alongside the enhancement request'
     );
     // Lens mechanics stay with the chart author.
     expect(skill.content).not.toContain('apply_color_to');
@@ -98,7 +113,7 @@ describe('registerSkills', () => {
       "Skip this step when the user's message already asks for appearance only"
     );
     expect(guidance).toContain('**Content mode.** Do everything appearance mode does');
-    expect(guidance).toContain('`remove_panels`');
+    expect(guidance).toContain('Remove panels that meet the removal criteria with `remove`');
     expect(guidance).toContain(
       'replace non-ES|QL panels with new ES|QL Lens panels without asking again'
     );
@@ -111,8 +126,5 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('Available chart types');
     expect(skill.content).toContain('- region_map:');
     expect(skill.content).toContain('only when the terms are short strings');
-    expect(skill.content).toContain(
-      'provide a new `chartType` when the request changes the chart family'
-    );
   });
 });

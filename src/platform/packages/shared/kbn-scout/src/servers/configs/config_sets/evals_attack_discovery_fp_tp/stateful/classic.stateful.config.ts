@@ -14,7 +14,7 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 /**
  * Config set for the attack-discovery-fp-tp eval suite. The analysis workflow's `ai.agent`
  * step runs the `alertzero-thin-agent` and resolves its connector from the
- * `alertzero_reasoning` inference feature; both exist only when alertzero is enabled. The
+ * `alertzero_frontier` inference feature; both exist only when alertzero is enabled. The
  * step additionally requires the Workflows UI and agent settings, and the
  * `ai.conversation.metadata.read` step requires Agent Builder experimental features.
  *

@@ -13,6 +13,7 @@ import type {
   UiSettingsServiceStart,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import type {
   AgentAvailabilityConfig,
@@ -61,9 +62,12 @@ export class AgentsService {
   private typeRegistry: AgentTypeRegistry;
   /** In-memory availability for persisted agents, keyed by agent id. Filled by `ensure`. */
   private readonly availabilityByAgentId = new Map<string, AgentAvailabilityConfig>();
+  /** In-memory UI visibility overrides for persisted agents, keyed by agent id. Filled by `ensure`. */
+  private readonly hiddenByAgentId = new Map<string, boolean>();
   private aiIndexResolver?: AiIndexResolver;
 
   private setupDeps?: AgentsServiceSetupDeps;
+  private settingsDeps?: Pick<AgentsServiceStartDeps, 'uiSettings' | 'savedObjects'>;
 
   constructor() {
     this.builtinRegistry = createBuiltinAgentRegistry();
@@ -75,7 +79,11 @@ export class AgentsService {
 
     this.typeRegistry.register({
       id: chatAgentTypeId,
-      baseConfiguration: { ai_indices: Object.keys(defaultAiIndices) },
+      baseConfiguration: async ({ request }) => ({
+        ai_indices: (await this.isExperimentalEnabled(request))
+          ? Object.keys(defaultAiIndices)
+          : [],
+      }),
     });
 
     return {
@@ -98,6 +106,17 @@ export class AgentsService {
     };
   }
 
+  private async isExperimentalEnabled(request: KibanaRequest): Promise<boolean> {
+    if (!this.settingsDeps) {
+      throw new Error('Agent type base configuration resolved before #start');
+    }
+    const { uiSettings, savedObjects } = this.settingsDeps;
+    return uiSettings
+      .asScopedToClient(savedObjects.getScopedClient(request))
+      .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+      .catch(() => false);
+  }
+
   private validateAgentTypes() {
     for (const agent of this.builtinRegistry.list()) {
       if (agent.type !== undefined && !this.typeRegistry.has(agent.type)) {
@@ -115,6 +134,7 @@ export class AgentsService {
 
     const { logger } = this.setupDeps;
     const { security, elasticsearch, spaces, toolsService, uiSettings, savedObjects } = startDeps;
+    this.settingsDeps = { uiSettings, savedObjects };
 
     this.validateAgentTypes();
 
@@ -130,6 +150,7 @@ export class AgentsService {
       toolsService,
       logger,
       availabilityByAgentId: this.availabilityByAgentId,
+      hiddenByAgentId: this.hiddenByAgentId,
     });
 
     const getAgentClient = async ({ request }: { request: KibanaRequest }) => {
@@ -157,7 +178,12 @@ export class AgentsService {
       });
     };
 
-    const ensure: AgentsServiceStart['ensure'] = async ({ spaceId, agent, availability }) => {
+    const ensure: AgentsServiceStart['ensure'] = async ({
+      spaceId,
+      agent,
+      availability,
+      hidden,
+    }) => {
       if (this.builtinRegistry.has(agent.id)) {
         throw new Error(
           `Cannot ensure persisted agent "${agent.id}": a built-in agent uses this id`
@@ -169,6 +195,9 @@ export class AgentsService {
 
       if (availability) {
         this.availabilityByAgentId.set(agent.id, availability);
+      }
+      if (hidden !== undefined) {
+        this.hiddenByAgentId.set(agent.id, hidden);
       }
 
       const systemClient = createSystemClient({ space: spaceId, elasticsearch, logger });

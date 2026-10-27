@@ -28,18 +28,26 @@ const blankQueryNumberToNaN = (value: unknown) =>
   typeof value === 'string' && value.trim() === '' ? Number.NaN : value;
 
 /**
+ * Safe-range check written as a refinement so the OpenAPI spec doesn't list
+ * `-9007199254740991`/`9007199254740991` as min/max on every number.
+ */
+export const safeNumber = <T extends z.ZodType<number>>(schema: T) =>
+  schema.refine((value) => value >= Number.MIN_SAFE_INTEGER && value <= Number.MAX_SAFE_INTEGER, {
+    error: 'Value is outside the safe number range.',
+  });
+
+/**
  * config-schema `schema.number()` 400s blank query values (`?interval=`) and
  * integers outside `Number.MAX_SAFE_INTEGER`. `z.coerce.number()` alone turns
  * blanks into `0` and rounds unsafe ints.
  */
-export const queryNumberFrom = (min?: number, max?: number) =>
-  z.preprocess(
+export const queryNumberFrom = (min?: number, max?: number) => {
+  const withMin = min === undefined ? z.coerce.number() : z.coerce.number().min(min);
+  return z.preprocess(
     blankQueryNumberToNaN,
-    z.coerce
-      .number()
-      .min(min ?? Number.MIN_SAFE_INTEGER)
-      .max(max ?? Number.MAX_SAFE_INTEGER)
+    safeNumber(max === undefined ? withMin : withMin.max(max))
   );
+};
 
 export const queryNumber = queryNumberFrom();
 export const queryBoolean = z.preprocess(

@@ -16,6 +16,8 @@ import { MAX_RULES_NUMBER_FOR_BULK_OPERATION } from '../common/constants';
 import type { RulesClientContext } from '../types';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { RulesNotFoundError } from './rules_not_found_error';
+import { RulesNotVisibleError } from './rules_not_visible_error';
 
 const actionToConstantsMapping: Record<
   BulkAction,
@@ -61,9 +63,18 @@ export const checkAuthorizationAndGetTotal = async (
   context: RulesClientContext,
   {
     filter,
+    baseFilter,
     action,
   }: {
     filter: KueryNode | null;
+    /**
+     * The caller's query/ids filter before authorization is applied. When provided and the
+     * first count returns zero, a second count is run with baseFilter alone (no auth clause).
+     * Zero → rules genuinely don't exist → RulesNotFoundError.
+     * Non-zero → rules exist but hidden by auth → RulesNotVisibleError.
+     * Omitting baseFilter skips the second count; throws RulesNotFoundError without discrimination.
+     */
+    baseFilter?: KueryNode | null;
     action: BulkAction;
   }
 ) => {
@@ -99,7 +110,27 @@ export const checkAuthorizationAndGetTotal = async (
   const buckets = aggregations?.alertTypeId.buckets ?? [];
 
   if (buckets?.length === 0) {
-    throw Boom.badRequest(`No rules found for bulk ${errorMessageLabel}`);
+    if (baseFilter == null) {
+      throw Boom.boomify(new RulesNotFoundError(errorMessageLabel), { statusCode: 400 });
+    }
+
+    const { total: totalWithoutAuth } = await withSpan(
+      { name: 'unsecuredSavedObjectsClient.find.baseFilter', type: 'rules' },
+      () =>
+        context.unsecuredSavedObjectsClient.find<RawRule>({
+          filter: baseFilter,
+          page: 1,
+          perPage: 0,
+          type: RULE_SAVED_OBJECT_TYPE,
+        })
+    );
+
+    const error =
+      totalWithoutAuth === 0
+        ? new RulesNotFoundError(errorMessageLabel)
+        : new RulesNotVisibleError(errorMessageLabel);
+
+    throw Boom.boomify(error, { statusCode: 400 });
   }
 
   const ruleTypeIdConsumersPairs = buckets.map(({ key: [ruleTypeId, consumer] }) => ({

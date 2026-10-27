@@ -37,6 +37,7 @@ import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import { formatTimestamp } from '../../../../util/formatters';
 import { useFetchSignificantEventLifecycle } from '../../../../hooks/use_fetch_significant_event_lifecycle';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useSourcesById } from '../../../../hooks/use_sources_by_id';
 import { useTriggerInvestigation } from '../../../../hooks/use_trigger_investigation';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { FlyoutMetadataCard } from '../../../../components/flyout_components/flyout_metadata_card';
@@ -44,7 +45,10 @@ import { FlyoutToolbarHeader } from '../../../../components/flyout_components/fl
 import { getConfidenceColor } from '../../../../components/knowledge_indicators/utils/get_confidence_color';
 import { DismissEventModal } from './dismiss_event_modal';
 import { LifecycleTimeline } from './lifecycle_timeline';
-import { getSignificantEventStatusColor } from '../shared/status_display';
+import {
+  getSignificantEventStatusColor,
+  isLiveSignificantEventStatus,
+} from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import { SignificantEventDetails } from '../../../../components/significant_event_details/significant_event_details';
@@ -174,6 +178,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
     },
   } = useKibana();
   const { canManage } = getNightshiftCapabilities(nightshift);
+  const { getSourceTitle } = useSourcesById();
   const {
     data: lifecycleData,
     isLoading: isLifecycleLoading,
@@ -215,7 +220,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation({ onTriggerSuccess });
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
-  const isOpen = latestEvent.status === 'active';
+  const isOpen = isLiveSignificantEventStatus(latestEvent.status);
 
   useInterval(
     refetchLifecycle,
@@ -322,7 +327,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
           {formatTimestamp(event.created_at ?? event['@timestamp'])}
         </EuiText>
         <EuiSpacer size="m" />
-        <BadgeRow items={event.stream_names ?? []} color="hollow" />
+        <BadgeRow items={(event.source_ids ?? []).map(getSourceTitle)} color="hollow" />
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="s" responsive={false} wrap>
           <EuiFlexItem>

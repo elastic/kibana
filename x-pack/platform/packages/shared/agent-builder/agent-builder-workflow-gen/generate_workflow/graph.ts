@@ -19,6 +19,7 @@ import {
 import { StateAnnotation, type StateType } from './state';
 import { buildBoundTools, dispatchToolCall, isEditToolName } from './tools/tools';
 import { validateGeneratedYaml } from './validate';
+import { createYamlDiff } from './yaml_diff';
 import { buildMessagesFromActions } from './prompts';
 import { agentStepAction, findLastAgentStep, toolResultAction, validateAction } from './actions';
 import type { Action } from './types';
@@ -80,6 +81,9 @@ export const createGenerateWorkflowGraph = ({ model, api, request, spaceId }: Cr
       // Detect whether this dispatch mutated the YAML. We surface the post-edit YAML
       // and a fresh validation result so the LLM sees its own progress turn-by-turn.
       const yamlChanged = result.yaml !== undefined && result.yaml !== yaml;
+      // No diff on creation: it would just repeat the full YAML.
+      const diff =
+        yamlChanged && yaml && result.yaml ? createYamlDiff(yaml, result.yaml) : undefined;
       if (result.yaml !== undefined) {
         yaml = result.yaml;
       }
@@ -98,6 +102,7 @@ export const createGenerateWorkflowGraph = ({ model, api, request, spaceId }: Cr
           data: result.message.data,
           error: result.message.error,
           currentYaml: isEditToolName(call.toolName) ? yaml : undefined,
+          diff,
           validation: perEditValidation,
         })
       );

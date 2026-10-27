@@ -39,17 +39,101 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
       counterAggregation: 'max',
       gaugeAggregation: 'min',
       histogramPercentile: 'p50',
+      histogramVisualization: 'lnsXY',
       dimensions: ['host.name'],
       searchTerm: 'bytes',
+      gridSortField: 'recency',
+      gridSortDirection: 'desc',
     });
     expect(registry.fromSavedState(savedState)).toEqual({
       metricsState: {
         counterAggregation: 'max',
         gaugeAggregation: 'min',
         histogramPercentile: 'p50',
+        histogramVisualization: 'lnsXY',
         dimensions: ['host.name'],
         searchTerm: 'bytes',
+        sortField: 'recency',
+        sortDirection: 'desc',
       },
+    });
+  });
+
+  it('restores the default sort for a session saved before sort was persisted', () => {
+    expect(
+      createRegistry().fromSavedState({
+        type: DiscoverTabType.Metrics,
+        counterAggregation: 'max',
+        gaugeAggregation: 'min',
+        histogramPercentile: 'p50',
+        dimensions: ['host.name'],
+        searchTerm: 'bytes',
+      })
+    ).toEqual({
+      metricsState: {
+        counterAggregation: 'max',
+        gaugeAggregation: 'min',
+        histogramPercentile: 'p50',
+        histogramVisualization: 'lnsXY',
+        dimensions: ['host.name'],
+        searchTerm: 'bytes',
+        sortField: 'alphabetically',
+        sortDirection: 'asc',
+      },
+    });
+  });
+
+  it('replaces the current sort with the default when resetting to a session without sort fields', () => {
+    const registry = createRegistry();
+    const currentState = {
+      metricsState: { sortField: 'recency', sortDirection: 'desc' },
+    } as const;
+    const restored = registry.fromSavedState({
+      type: DiscoverTabType.Metrics,
+      counterAggregation: 'sum',
+      gaugeAggregation: 'avg',
+      histogramPercentile: 'p95',
+      dimensions: [],
+      searchTerm: '',
+    });
+
+    expect(registry.mergeState(currentState, restored).metricsState).toMatchObject({
+      sortField: 'alphabetically',
+      sortDirection: 'asc',
+    });
+  });
+
+  it('saves and restores histogram distribution', () => {
+    const registry = createRegistry();
+    const savedState = registry.toSavedState(DiscoverTabType.Metrics, {
+      metricsState: {
+        histogramVisualization: 'lnsHeatmap',
+      },
+    });
+
+    expect(savedState).toMatchObject({ histogramVisualization: 'lnsHeatmap' });
+    expect(registry.fromSavedState(savedState).metricsState).toMatchObject({
+      histogramVisualization: 'lnsHeatmap',
+    });
+  });
+
+  it('restores the default histogram visualization when a saved session predates it', () => {
+    const registry = createRegistry();
+    const currentState = {
+      metricsState: { histogramVisualization: 'lnsHeatmap' as const },
+    };
+    const restored = registry.fromSavedState({
+      type: DiscoverTabType.Metrics,
+      counterAggregation: 'sum',
+      gaugeAggregation: 'avg',
+      histogramPercentile: 'p95',
+      dimensions: [],
+      searchTerm: '',
+    });
+
+    expect(restored.metricsState).toMatchObject({ histogramVisualization: 'lnsXY' });
+    expect(registry.mergeState(currentState, restored).metricsState).toMatchObject({
+      histogramVisualization: 'lnsXY',
     });
   });
 
@@ -59,8 +143,11 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
       counterAggregation: 'sum',
       gaugeAggregation: 'avg',
       histogramPercentile: 'p95',
+      histogramVisualization: 'lnsXY',
       dimensions: [],
       searchTerm: '',
+      gridSortField: 'alphabetically',
+      gridSortDirection: 'asc',
     });
   });
 });

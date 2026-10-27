@@ -35,6 +35,7 @@ import {
   doAllChangesMatch,
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
+import { prBaseEnv, prBaseSteps, cpsTests, renderSteps } from '#pipeline-utils/step-library';
 
 const prConfigs =
   loadBuildkiteJson<typeof import('../../../pull_requests.json')>('pull_requests.json');
@@ -42,6 +43,7 @@ const prConfigs =
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
 const cancelable: GetPipelineOptions = { cancelOnGateFailure: true };
+const cancelOnGate = { cancelOnGateFailure: true } as const;
 
 if (!prConfig) {
   console.error(`'kibana-pull-request' pipeline not found in .buildkite/pull_requests.json`);
@@ -145,7 +147,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     await runPreBuild();
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+    pipeline.push(renderSteps(prBaseSteps(), { header: true, env: prBaseEnv }));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/local_check.yml', {}));
 
     // Gated together: check_api_contracts depends_on check_oas_snapshot.
@@ -156,8 +158,8 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
     }
 
-    // Register steps from base.yml that should still be canceled on gate failure.
-    // base.yml itself is not loaded with cancelOnGateFailure because it contains the gate steps.
+    // Register steps from the base steps that should still be canceled on gate failure.
+    // The base steps are not rendered with cancelOnGateFailure because they contain the gate steps.
     registerCancelKeys([
       'pick_test_group_run_order',
       'build_scout_tests',
@@ -222,6 +224,29 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml', cancelable));
+    }
+
+    // Docker Fleet Server + Elastic Agent: only for the policy version code paths and this suite,
+    // not for every Fleet change.
+    if (
+      // Scout suite: changes to its own Scout tests must still trigger it.
+      (await doAnyChangesMatch([
+        /^x-pack\/platform\/plugins\/shared\/fleet\/server\/tasks\/version_specific_policy_assignment_task/,
+        /^x-pack\/platform\/plugins\/shared\/fleet\/server\/services\/agent_policy\.ts/,
+        /^x-pack\/platform\/plugins\/shared\/fleet\/server\/services\/agent_policies\//,
+        /^x-pack\/platform\/plugins\/shared\/fleet\/server\/services\/utils\/(version_specific_policies|sentinel_policy_version)/,
+        /^x-pack\/platform\/plugins\/shared\/fleet\/common\/services\/version_specific_polic/,
+        /^x-pack\/platform\/plugins\/shared\/fleet\/test\/scout_fleet_real_agent/,
+        /^src\/platform\/packages\/shared\/kbn-scout\/src\/servers\/configs\/config_sets\/fleet_real_agent/,
+        /^\.buildkite\/pipelines\/pull_request\/scout_fleet_real_agent\.yml/,
+        /^\.buildkite\/scripts\/steps\/test\/scout_fleet_real_agent\.sh/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:scout-fleet-real-agent') ||
+      ALL_UI_TEST_SUITES
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/scout_fleet_real_agent.yml', cancelable)
+      );
     }
 
     const aiInfraPaths = [
@@ -666,6 +691,8 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/solutions\/security\/plugins\/security_solution\/common\/endpoint/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/scripts\/endpoint/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/lib\/detection_engine\/rule_response_actions/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/fleet_integration\/fleet_integration\.ts/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/lib\/detection_engine\/prebuilt_rules\/logic\/integrations\/install_endpoint_security_prebuilt_rule\.ts/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/detection_engine\/rule_response_actions/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout_v2\/document\/tools\/response/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout_v2\/document\/main\/components\/response_section/,
@@ -762,6 +789,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^src\/platform\/plugins\/shared\/workflows_management\/server\/.*internal_actions/,
         /^src\/platform\/packages\/shared\/workflows\//,
         /^\.buildkite\/pipelines\/pull_request\/workflows_oom_testing\.yml/,
+        /^\.buildkite\/scripts\/steps\/test\/scout\/workflows_oom_testing\.sh/,
       ]))
     ) {
       pipeline.push(
@@ -770,7 +798,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     if (GITHUB_PR_LABELS.includes('ci:cps-test')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/cps_testing.yml', cancelable));
+      pipeline.push(renderSteps(cpsTests(), cancelOnGate));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:bench-jest')) {

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiCodeBlock } from '@elastic/eui';
 import React, { memo } from 'react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpoint/service/artifacts/constants';
 import type { ArtifactViewModeComponentProps } from '../../../../components/artifact_list_page';
+import { YaraCodeEditor } from './yara_code_editor';
+import { SIGNATURE_EDITOR_ARIA_LABEL } from './translations';
 
 const getCustomYaraSignatureValue = (item: ExceptionListItemSchema): string => {
   const entry = item.entries[0];
@@ -28,15 +29,13 @@ const getCustomYaraSignatureValue = (item: ExceptionListItemSchema): string => {
 };
 
 export const CustomYaraSignaturesViewMode = memo<ArtifactViewModeComponentProps>(({ item }) => (
-  <EuiCodeBlock
-    language="text"
-    fontSize="m"
-    paddingSize="m"
+  <YaraCodeEditor
+    value={getCustomYaraSignatureValue(item)}
+    readOnly
     isCopyable
-    overflowHeight={360}
+    maxLines={17}
+    aria-label={SIGNATURE_EDITOR_ARIA_LABEL}
     data-test-subj="customYaraSignaturesViewMode"
-  >
-    {getCustomYaraSignatureValue(item)}
-  </EuiCodeBlock>
+  />
 ));
 CustomYaraSignaturesViewMode.displayName = 'CustomYaraSignaturesViewMode';

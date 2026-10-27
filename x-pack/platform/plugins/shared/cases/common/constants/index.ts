@@ -107,6 +107,8 @@ export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_create` as const;
 export const INTERNAL_BULK_GET_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_get` as const;
+export const INTERNAL_BULK_DELETE_ATTACHMENTS_URL =
+  `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_delete` as const;
 export const INTERNAL_SUGGEST_USER_PROFILES_URL =
   `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
 export const INTERNAL_CONNECTORS_URL = `${CASES_INTERNAL_URL}/{case_id}/_connectors` as const;
@@ -166,6 +168,7 @@ export const MAX_DOCS_PER_PAGE = 10000 as const;
 export const MAX_BULK_GET_ATTACHMENTS = 100 as const;
 export const MAX_CONCURRENT_SEARCHES = 10 as const;
 export const MAX_BULK_GET_CASES = 1000 as const;
+export const MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP = 1000 as const;
 export const MAX_COMMENTS_PER_PAGE = 100 as const;
 export const MAX_CASES_PER_PAGE = 100 as const;
 export const MAX_USER_ACTIONS_PER_PAGE = 100 as const;
@@ -190,10 +193,15 @@ export const MAX_SUPPORTED_CONNECTORS_RETURNED = 1000 as const;
  */
 
 export const MAX_TITLE_LENGTH = 160 as const;
+export const MAX_INDEX_NAME_LENGTH = 255 as const; // ES index name upper bound
 export const MAX_OWNER_LENGTH = 30 as const;
 export const MAX_ISO_DATE_LENGTH = 30 as const;
 export const MAX_ATTACHMENT_ID_LENGTH = 512 as const; // ES `_id` upper bound
+export const MAX_IDS_PER_ATTACHMENT = 1000 as const; // `attachmentId` array size on 1 attachment, not a per-case limit
+export const MAX_SOURCE_ATTACHMENT_IDS = 100 as const; // `metadata.sourceAttachmentIds` on 1 alert attachment
 export const MAX_ATTACHMENT_TYPE_LENGTH = 50 as const;
+export const MAX_ATTACHMENT_JSON_LENGTH = 524288 as const; // serialized characters per `data` / `metadata` object
+export const MAX_SAVED_OBJECT_VERSION_LENGTH = 128 as const;
 export const MAX_USERNAME_LENGTH = 1024 as const;
 export const MAX_RULE_NAME_LENGTH = 100 as const;
 export const MAX_SUFFIX_LENGTH = 60 as const;
@@ -207,6 +215,7 @@ export const MAX_SUGGESTED_PROFILES = 10 as const;
 export const MAX_CASES_TO_UPDATE = 100 as const;
 export const MAX_BULK_CREATE_ATTACHMENTS = 100 as const;
 export const MAX_ATTACHMENT_TYPES_PER_QUERY = 20 as const;
+export const MAX_BULK_DELETE_ATTACHMENTS = 100 as const;
 export const MAX_USER_ACTIONS_PER_CASE = 10000 as const;
 export const MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES = 100 as const;
 export const MAX_CUSTOM_FIELDS_PER_CASE = 10 as const;
@@ -440,6 +449,7 @@ export const LOCAL_STORAGE_KEYS = {
   templateEditorTourSeen: 'cases.templates.editor.tour.seen.v1',
   templatesListInfoPanelDismissed: 'cases.templates.list.infoPanel.dismissed.v1',
   showLegacyCustomFields: 'cases.showLegacyCustomFields',
+  similarCasesTableColumns: 'cases.similar.tableColumns',
 };
 
 /**

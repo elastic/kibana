@@ -148,6 +148,7 @@ export const setupThreatIntel = ({
       logger: logger.get('threatIntel', 'iocIndicatorSync'),
       getReconcileAttributeWorkflows: () =>
         runtime.reconcileAttributeWorkflows?.() ?? Promise.resolve(),
+      getBootstrapReady: () => runtime.bootstrapReady,
     });
     registerScrubReportContentTask({
       taskManager: plugins.taskManager,

@@ -28,8 +28,6 @@ import {
 
 const DATA_VIEW = 'auditbeat-*';
 
-const SKIPPED_PAGES: string[] = [];
-
 describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     // illegal_argument_exception: unknown setting [index.lifecycle.name]
@@ -87,14 +85,6 @@ describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
       });
     };
 
-    // NOTE: the CI spec load-balancer statically parses this file for literal `it`/`it.skip`
-    // calls, so this must stay an if/else rather than a `const itFn = cond ? it.skip : it`
-    // (a dynamic reference isn't recognized and would cause the whole file to be treated as
-    // fully skipped and excluded from CI runs).
-    if (SKIPPED_PAGES.includes(pageName)) {
-      it.skip(`inspect ${pageName} page`, testBody);
-    } else {
-      it(`inspect ${pageName} page`, testBody);
-    }
+    it(`inspect ${pageName} page`, testBody);
   });
 });

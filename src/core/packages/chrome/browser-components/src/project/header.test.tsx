@@ -8,12 +8,12 @@
  */
 
 import React from 'react';
-import { act, screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
-import { TestChromeProviders } from '../test_helpers';
+import { createMockChromeComponentsDeps, TestChromeProviders } from '../test_helpers';
 import { ChromeHeader } from './header';
 import { CHROME_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
@@ -34,6 +34,28 @@ describe('ChromeHeader', () => {
     );
     expect(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.projectPicker)).toHaveTextContent(
       'Project picker'
+    );
+  });
+
+  it('renders the subscription badge only once it is set', () => {
+    const chrome = chromeServiceMock.createStartContract();
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ChromeHeader />
+      </TestChromeProviders>
+    );
+
+    expect(
+      screen.queryByTestId(CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge)
+    ).not.toBeInTheDocument();
+
+    act(() => {
+      chrome.controls.subscriptionBadge.set(<span>Trial</span>);
+    });
+
+    expect(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge)).toHaveTextContent(
+      'Trial'
     );
   });
 
@@ -132,14 +154,21 @@ describe('ChromeHeader', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'Should not be announced' }]);
     chrome.project.getBreadcrumbs$.mockReturnValue(breadcrumbs$);
     chrome.inlineAppHeader.register('Dashboards');
+    const deps = createMockChromeComponentsDeps();
+    const { notify } = deps.notifications.screenReader;
 
     renderWithI18n(
-      <TestChromeProviders chrome={chrome}>
+      <TestChromeProviders chrome={chrome} deps={deps}>
         <ChromeHeader />
       </TestChromeProviders>
     );
 
-    const announcer = await screen.findByLabelText('Page change announcements');
-    expect(announcer).not.toHaveTextContent('Should not be announced');
+    await waitFor(() =>
+      expect(notify).toHaveBeenCalledWith('Dashboards - Elastic', { key: 'pageTitle' })
+    );
+    expect(notify).not.toHaveBeenCalledWith(
+      expect.stringContaining('Should not be announced'),
+      expect.anything()
+    );
   });
 });
