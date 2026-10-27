@@ -2088,7 +2088,6 @@
     "form-data": "4.0.6",
     "geckodriver": "6.1.1",
     "globby": "11.1.0",
-    "gulp-brotli": "3.0.0",
     "gulp-postcss": "10.0.0",
     "gulp-terser": "2.1.0",
     "has-ansi": "3.0.0",
