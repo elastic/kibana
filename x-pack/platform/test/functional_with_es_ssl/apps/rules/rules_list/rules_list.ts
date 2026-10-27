@@ -590,8 +590,11 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       expect(expandRulesErrorLink).to.have.length(0);
 
       await createFailingAlert({ supertest, objectRemover });
+      // The banner counts errors from an aggregation, but expanding reads the rules-list snapshot.
       await retry.try(async () => {
         await refreshAlertsList();
+        const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
+        expect(refreshResults.some((item: any) => item.status === 'Failed')).to.equal(true);
         expandRulesErrorLink = await find.allByCssSelector('[data-test-subj="expandRulesError"]');
         expect(expandRulesErrorLink).to.have.length(1);
       });
