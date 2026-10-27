@@ -161,6 +161,25 @@ describe('triage group false positives step', () => {
     }
   );
 
+  it('returns only the inconclusive link for a batch with no candidates, without grouping', async () => {
+    const { group, service } = setup({ heads: [openHead()] });
+
+    const output = await group({
+      ...baseInput,
+      fp_candidate_ids: [],
+      inconclusive_alert_ids: ['i1'],
+    });
+
+    expect(output).toEqual(
+      expect.objectContaining({
+        mints: [],
+        joins: [],
+        inconclusive_alerts_page_query: expect.stringContaining('filters='),
+      })
+    );
+    expect(service.revise).not.toHaveBeenCalled();
+  });
+
   it('requires manage_proposals before it revises a proposal', async () => {
     const { group, privileges } = setup({ heads: [openHead()] });
 

@@ -198,6 +198,24 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
       try {
         const { input, contextManager } = context;
         const text = { ruleName: input.rule_name, confidenceFloor: input.confidence_floor };
+        // A batch with no candidates has nothing to group; it only asks for the inconclusive link.
+        if (input.fp_candidate_ids.length === 0) {
+          return {
+            output: {
+              mints: [],
+              joins: [],
+              grouped: false,
+              grouping: 'flag_off' as const,
+              alerts_joined: 0,
+              alerts_pooled: 0,
+              proposals_created: 0,
+              missing_alert_ids: [],
+              inconclusive_alerts_page_query: input.inconclusive_alert_ids?.length
+                ? buildAlertsPagePath(input.inconclusive_alert_ids, new Date().toISOString())
+                : '',
+            },
+          };
+        }
         const { alerts, missingAlertIds } = await loadAlertsByIds(
           contextManager,
           input.fp_candidate_ids

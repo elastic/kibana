@@ -4,8 +4,9 @@ description: >
   Triages one batch of alerts of a single detection rule for the Alert Triage sweep. Classifies
   every alert with the Security Alert Analysis workflow, writes each verdict as an alert tag and
   note, and groups the confident false positives into closure proposals: each joins the open
-  proposal of its pattern or starts a new one with its own Investigation and review. The batch
-  has no Investigation of its own. Started by the sweep with `workflow.executeAsync` and never
+  proposal of its pattern or starts a new one with its own Investigation and review. The alerts in
+  no proposal go into the Investigation of the first proposal, or into one of their own, closed,
+  when the batch has no proposal. Started by the sweep with `workflow.executeAsync` and never
   waits for a human.
   The sweep claimed the alerts with `az:triage_pending` and recorded this execution as
   `az:triage_exec:<id>`; this run removes both when it has written the outcome, or marks the
@@ -192,8 +193,8 @@ steps:
   #    reports against the same floor this Worker applies in compute_fp_candidates.
   #
   #    No investigationConversationId: the batch has no Investigation while it classifies, so the
-  #    sub-workflow posts no progress comments. A conversation is created only for a new proposal
-  #    or a failure.
+  #    sub-workflow posts no progress comments. A conversation is created for a new proposal, a
+  #    failure, or a batch that has no proposal to hold its alerts.
   # ---------------------------------------------------------------------------
   - name: classify_alerts
     type: workflow.execute
@@ -613,6 +614,8 @@ steps:
       group_mints: []
       group_joins: []
       mint_conversation_ids: []
+      home_conversation_id: ""
+      batch_conversation_created: false
       failed_review_count: 0
       started_alert_count: 0
 
@@ -620,7 +623,7 @@ steps:
   # exists for them, and they must not stay `az:false_positive`.
   - name: group_fp_candidates_call
     type: alertzero.triage.groupFpCandidates
-    if: "${{ variables.fp_candidate_count > 0 }}"
+    if: "${{ variables.fp_candidate_count > 0 or steps.classify_alerts.output.inconclusive_count > 0 }}"
     on-failure:
       retry:
         max-attempts: 3
@@ -689,6 +692,7 @@ steps:
     type: data.set
     with:
       mint_count: "${{ variables.group_mints | size }}"
+      join_count: "${{ variables.group_joins | size }}"
 
   # Telemetry: how well the keys group the batch, and what grouping did with it.
   - name: report_batch_grouped
@@ -704,7 +708,7 @@ steps:
       wide_keys: "${{ steps.tag_pattern_keys.output.wide_keys }}"
       wide_keys_single_alert: "${{ steps.tag_pattern_keys.output.wide_keys_single_alert }}"
       fp_candidates_on_fallback: "${{ steps.tag_pattern_keys.output.fp_candidates_on_fallback }}"
-      grouping: "{{ steps.group_fp_candidates_call.output.grouping | default: 'no_candidates' }}"
+      grouping: "{% if variables.fp_candidate_count == 0 %}no_candidates{% else %}{{ steps.group_fp_candidates_call.output.grouping | default: 'no_candidates' }}{% endif %}"
       alerts_joined: "${{ steps.group_fp_candidates_call.output.alerts_joined | default: 0 }}"
       proposals_created: "${{ steps.group_fp_candidates_call.output.proposals_created | default: 0 }}"
       alerts_pooled: "${{ steps.group_fp_candidates_call.output.alerts_pooled | default: 0 }}"
@@ -889,6 +893,127 @@ steps:
             [View the added alert{% if steps.process_joins.item.alert_ids.size != 1 %}s{% endif %}](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.process_joins.item.alerts_page_query }})
 
   # ---------------------------------------------------------------------------
+  # 7c. The alerts that are in no proposal (true positives, inconclusive verdicts, false positives
+  #     below the floor) still need a durable record. When the batch made or joined exactly one
+  #     proposal, they go into its Investigation, so the batch has one. Otherwise (no proposal, or
+  #     several, so no single Investigation is the obvious home) they get an Investigation of their
+  #     own, closed straight away, as there is nothing to decide.
+  # ---------------------------------------------------------------------------
+  - name: compute_other_alerts
+    type: data.set
+    with:
+      other_alert_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | reject_exp: 'v', 'variables.fp_candidate_ids contains v.alert_id'
+            | map: 'alert_id' }}
+
+  - name: count_other_alerts
+    type: data.set
+    with:
+      other_alert_count: "${{ variables.other_alert_ids | size }}"
+      proposal_count: "${{ variables.mint_count | plus: variables.join_count }}"
+
+  - name: route_other_alerts
+    type: if
+    condition: "${{ variables.other_alert_count > 0 }}"
+    steps:
+      - name: home_from_mint
+        type: if
+        condition: "${{ variables.proposal_count == 1 and variables.mint_count == 1 }}"
+        steps:
+          - name: set_home_from_mint
+            type: data.set
+            with:
+              home_conversation_id: "${{ variables.mint_conversation_ids | first }}"
+
+      - name: home_from_join
+        type: if
+        condition: "${{ variables.proposal_count == 1 and variables.join_count == 1 }}"
+        steps:
+          - name: set_home_from_join
+            type: data.set
+            with:
+              home_conversation_id: "${{ variables.group_joins | map: 'conversation_id' | first }}"
+
+      - name: create_batch_investigation_gate
+        type: if
+        condition: "${{ variables.home_conversation_id == '' }}"
+        steps:
+          - name: create_batch_investigation
+            type: ai.conversation.create
+            with:
+              template_id: investigation
+              title: "Alert Triage — {{ inputs.rule_name }}"
+              access_control:
+                access_mode: public
+              metadata:
+                status: open
+                description: >-
+                  Automated triage of {{ variables.alert_count }} alert{% if variables.alert_count != 1 %}s{% endif %} from rule
+                  "{{ inputs.rule_name }}" ({{ inputs.rule_id }}).
+                workflow_execution_ids: ["{{ execution.id }}"]
+          - name: set_home_from_batch_investigation
+            type: data.set
+            with:
+              home_conversation_id: "{{ steps.create_batch_investigation.output.conversation_id }}"
+              batch_conversation_created: true
+
+      - name: attach_other_alerts
+        type: foreach
+        foreach: "${{ variables.other_alert_ids | chunk: 20 | json }}"
+        steps:
+          - name: attach_other_alert_chunk
+            type: ai.attachment.add
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
+            with:
+              conversation_id: "{{ variables.home_conversation_id }}"
+              type: security.alerts
+              render_inline: false
+              data:
+                alertIds: "${{ foreach.item }}"
+              description: "Alerts analysed in this triage run that are not in a closure proposal"
+
+      - name: post_comment_other_alerts
+        type: ai.conversation.add_user_message
+        on-failure:
+          continue: true
+        with:
+          author_name: "{{ consts.author_name }}"
+          conversation_id: "{{ variables.home_conversation_id }}"
+          message: |-
+            {% if variables.batch_conversation_created and variables.proposal_count == 0 %}Triage of rule **{{ inputs.rule_name }}** is complete. No closure proposal was needed.{% elsif variables.batch_conversation_created %}Triage of rule **{{ inputs.rule_name }}** is complete. The alerts in this Investigation are in none of the {{ variables.proposal_count }} closure proposals of this batch, each of which has its own Investigation.{% else %}This batch also held alerts that are in no closure proposal.{% endif %}
+
+            {{ variables.other_alert_count }} of the {{ variables.alert_count }} analyzed alert{% if variables.alert_count != 1 %}s{% endif %} {% if variables.other_alert_count == 1 %}is{% else %}are{% endif %} in no closure proposal: {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive, {{ variables.other_alert_count | minus: steps.classify_alerts.output.true_positive_count | minus: steps.classify_alerts.output.inconclusive_count | at_least: 0 }} false positive below the {{ inputs.confidence_floor }} confidence floor.{% if steps.classify_alerts.output.inconclusive_count > 0 and steps.group_fp_candidates_call.output.inconclusive_alerts_page_query != blank %} [View the inconclusive alerts](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.group_fp_candidates_call.output.inconclusive_alerts_page_query }}){% endif %}
+
+            [View execution]({{ execution.url }})
+
+      # Nothing is left to decide, so the Investigation of a batch without a proposal is closed.
+      # The patch errors when `agentBuilder:experimentalFeatures` is off, which must not fail the run.
+      - name: close_batch_investigation
+        type: ai.conversation.metadata.patch
+        if: "${{ variables.batch_conversation_created }}"
+        on-failure:
+          continue: true
+        with:
+          conversation_id: "{{ variables.home_conversation_id }}"
+          updates:
+            status: closed
+
+      - name: report_batch_investigation_closed
+        type: alertzero.reportWorkerOutcome
+        if: "${{ steps.close_batch_investigation.error == blank and steps.close_batch_investigation.output.changed_fields contains 'status' }}"
+        on-failure:
+          continue: true
+        with:
+          event: worker_investigation_closed
+          investigation_id: "{{ variables.home_conversation_id }}"
+          close_reason: other
+
+  # ---------------------------------------------------------------------------
   # 8. Write a verdict note to each alert referencing the Investigation (R4, R13).
   #    Always written — never gated on autonomy level. The only verdict note on the
   #    Worker path: the sub-workflow skips its own when calledByWorker is true.
@@ -942,7 +1067,7 @@ steps:
                     {%- assign note_alert = foreach.item.alert_id -%}
                     {%- for mint in variables.group_mints -%}{%- if mint.alert_ids contains note_alert -%}{%- assign note_conversation = variables.mint_conversation_ids[forloop.index0] -%}{%- endif -%}{%- endfor -%}
                     {%- assign note_join = variables.group_joins | where_exp: 'j', 'j.alert_ids contains note_alert' | first -%}
-                    {%- if note_join -%}{%- assign note_conversation = note_join.conversation_id -%}{%- endif -%}
+                    {%- if note_join -%}{%- assign note_conversation = note_join.conversation_id -%}{%- endif -%}{%- if note_conversation == '' -%}{%- assign note_conversation = variables.home_conversation_id -%}{%- endif -%}
                     {% if note_conversation != '' %}[Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ note_conversation }}) · {% endif %}[Workflow execution]({{ execution.url }})
 
                     **Verdict:** {{ foreach.item.classification }}
@@ -1011,7 +1136,7 @@ steps:
                 {%- assign note_alert = foreach.item.alert_id -%}
                 {%- for mint in variables.group_mints -%}{%- if mint.alert_ids contains note_alert -%}{%- assign note_conversation = variables.mint_conversation_ids[forloop.index0] -%}{%- endif -%}{%- endfor -%}
                 {%- assign note_join = variables.group_joins | where_exp: 'j', 'j.alert_ids contains note_alert' | first -%}
-                {%- if note_join -%}{%- assign note_conversation = note_join.conversation_id -%}{%- endif -%}
+                {%- if note_join -%}{%- assign note_conversation = note_join.conversation_id -%}{%- endif -%}{%- if note_conversation == '' -%}{%- assign note_conversation = variables.home_conversation_id -%}{%- endif -%}
                 {% if note_conversation != '' %}[Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ note_conversation }}) · {% endif %}[Workflow execution]({{ execution.url }})
 
                 **Verdict:** {{ foreach.item.classification }}
@@ -1177,8 +1302,7 @@ steps:
         with:
           failed_review_count: "${{ variables.failed_review_count | plus: 1 }}"
 
-  # What this batch did, for the execution history. A batch that created no Investigation (all true
-  # positives, inconclusive or below the floor) leaves no other record outside its alerts, and the
+  # What this batch did, for the execution history. The Investigation holds the verdicts too, and the
   # telemetry privacy rules do not apply here: it stays in the deployment.
   - name: log_batch_summary
     type: console

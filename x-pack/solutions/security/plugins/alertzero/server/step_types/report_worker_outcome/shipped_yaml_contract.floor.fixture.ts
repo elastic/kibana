@@ -48,8 +48,14 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
           classify_alerts: {
             output: { false_positive_count: 0, inconclusive_count: 0, true_positive_count: 4 },
           },
+          close_batch_investigation: { output: CHANGED_STATUS },
         },
-        variables: { alert_count: 5, fp_candidate_count: 0, verdict_count: 4 },
+        variables: {
+          alert_count: 5,
+          fp_candidate_count: 0,
+          home_conversation_id: INVESTIGATION_ID,
+          verdict_count: 4,
+        },
       },
       {
         steps: {},

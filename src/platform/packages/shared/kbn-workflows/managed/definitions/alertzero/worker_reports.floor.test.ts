@@ -30,6 +30,12 @@ describe('Alert Triage close reports', () => {
   describeCloseReports({
     closeReports: [
       {
+        closeReason: 'other',
+        closeStep: 'close_batch_investigation',
+        definition: ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW,
+        reportStep: 'report_batch_investigation_closed',
+      },
+      {
         closeReason: 'false_positive',
         closeStep: 'close_investigation_after_approval',
         definition: ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW,

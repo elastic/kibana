@@ -118,10 +118,11 @@ describe('floor_alert_triage_batch — compute_fp_candidates', () => {
 describe('floor_alert_triage_batch — Investigations', () => {
   const creates = allSteps.filter((step) => step.type === 'ai.conversation.create');
 
-  // A conversation exists only for a new proposal or a failure. The batch itself has none, so a
-  // batch of true positives, inconclusive verdicts and below-floor false positives creates nothing.
-  it('creates an Investigation only for a new proposal or for a failure', () => {
+  // A conversation exists for a new proposal, a failure, or a batch with alerts in no proposal and
+  // no proposal to hold them. Otherwise those alerts go into the Investigation of the first proposal.
+  it('creates an Investigation only for a new proposal, for a failure or for a batch with no proposal', () => {
     expect(creates.map((step) => step.name).sort()).toEqual([
+      'create_batch_investigation',
       'create_classification_empty_investigation',
       'create_classify_failed_investigation',
       'create_grouping_failed_investigation',
@@ -145,7 +146,12 @@ describe('floor_alert_triage_batch — Investigations', () => {
         `{{ steps.${create}.output.conversation_id }}`
       );
     });
-    expect(allSteps.some((step) => step.type === 'ai.conversation.metadata.patch')).toBe(false);
+    // Only the batch Investigation without a proposal is closed; a failure Investigation stays open.
+    expect(
+      allSteps
+        .filter((step) => step.type === 'ai.conversation.metadata.patch')
+        .map((step) => step.name)
+    ).toEqual(['close_batch_investigation']);
   });
 
   it('does not set a severity; Alert Analysis leaves it to the user', () => {
@@ -705,6 +711,7 @@ describe('floor_alert_triage_batch — add_verdict_notes', () => {
           group_mints: [{ alert_ids: ['a1', 'a2'] }, { alert_ids: ['b1'] }],
           mint_conversation_ids: ['conv-mint-0', 'conv-mint-1'],
           group_joins: [{ alert_ids: ['c1'], conversation_id: 'conv-owner' }],
+          home_conversation_id: 'conv-mint-0',
         },
         foreach: {
           item: {
@@ -725,12 +732,10 @@ describe('floor_alert_triage_batch — add_verdict_notes', () => {
       expect(noteFor(alertId)).toContain(`/conversations/${conversation})`);
     });
 
-    // A true positive, an inconclusive alert or a false positive below the floor is in no
-    // proposal, so no Investigation exists to link. The execution link is still there.
-    it('leaves the Investigation link out for an alert that is in no proposal', () => {
-      const note = noteFor('tp-1');
-      expect(note).not.toContain('/conversations/');
-      expect(note).toContain('[Workflow execution](https://kibana.example.com/app/exec/1)');
+    // A true positive, an inconclusive alert or a false positive below the floor is in no proposal,
+    // so its note links the Investigation that holds the batch's other alerts.
+    it('links an alert that is in no proposal to the batch Investigation', () => {
+      expect(noteFor('tp-1')).toContain('/conversations/conv-mint-0)');
     });
 
     it('builds the retry note with the same link', () => {
@@ -933,11 +938,42 @@ describe('floor_alert_triage_batch — add_verdict_notes', () => {
 // fails after fallback execution"), so `continue: true` is required alongside it,
 // or the run aborts and any step after the patch (e.g. the outcome comment) never runs.
 // ---------------------------------------------------------------------------
+describe('floor_alert_triage_batch — where the alerts in no proposal go', () => {
+  const route = (mint_count: number, join_count: number) => {
+    const variables = {
+      mint_count,
+      join_count,
+      proposal_count: mint_count + join_count,
+      home_conversation_id: '',
+    };
+    const runs = (name: string) =>
+      evalExpr((stepByName(name) as { condition: string }).condition, { variables });
+    return {
+      inMint: runs('home_from_mint'),
+      inJoin: runs('home_from_join'),
+      // The batch Investigation is created when neither proposal Investigation took them.
+      own: !runs('home_from_mint') && !runs('home_from_join'),
+    };
+  };
+
+  it.each([
+    ['no proposal', 0, 0, { inMint: false, inJoin: false, own: true }],
+    ['one new proposal', 1, 0, { inMint: true, inJoin: false, own: false }],
+    ['one join', 0, 1, { inMint: false, inJoin: true, own: false }],
+    ['two new proposals', 2, 0, { inMint: false, inJoin: false, own: true }],
+    ['a new proposal and a join', 1, 1, { inMint: false, inJoin: false, own: true }],
+  ])('%s', (_label, mints, joins, expected) => {
+    expect(route(mints, joins)).toEqual(expected);
+  });
+});
+
 describe('floor_alert_triage_batch — ai.conversation.metadata.patch failure handling', () => {
-  // The batch has no Investigation of its own to close: the reviews close theirs, and a failure
-  // Investigation stays open for follow-up.
-  it('closes no conversation itself', () => {
-    expect(allSteps.filter((step) => step.type === 'ai.conversation.metadata.patch')).toEqual([]);
+  // The reviews close theirs and a failure Investigation stays open for follow-up. The batch closes
+  // only the Investigation it made for a batch with no proposal, and a failed close must not fail the run.
+  it('closes only the Investigation of a batch with no proposal, without failing the run', () => {
+    const closes = allSteps.filter((step) => step.type === 'ai.conversation.metadata.patch');
+    expect(closes.map((step) => step.name)).toEqual(['close_batch_investigation']);
+    expect(closes[0]['on-failure']).toEqual({ continue: true });
   });
 });
 

@@ -194,9 +194,10 @@ const groupFpCandidatesInputSchema = lazySchema(() =>
   z.object({
     fp_candidate_ids: z
       .array(idSchema)
-      .min(1)
       .max(1000)
-      .describe('The false positives at or above the confidence floor.'),
+      .describe(
+        'The false positives at or above the confidence floor. May be empty, to get only the inconclusive link.'
+      ),
     autonomy: z.enum(['manual', 'supervised']),
     space_id: idSchema.describe('Space of the alerts. It is part of every key hash.'),
     impacted_entities: z
