@@ -2481,7 +2481,7 @@ describe('Attack Discovery worker chain', () => {
       expect(append?.['on-failure']?.continue).toBe(true);
     });
 
-    it('is installed with the Attack Discovery workflows so Review and handoff can execute it', () => {
+    it('is installed with the Attack Discovery workflows so Review can execute it', () => {
       expect(ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS).toContain(ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID);
     });
   });
@@ -2608,9 +2608,21 @@ describe('Attack Discovery worker chain', () => {
       expect(fallback.map((step) => step.name)).toEqual(['journal_handoff_failed', 'fail_handoff']);
     });
 
-    it('points the handoff journal at the helper', () => {
-      expect(forensicsAction.consts?.journal_note).toBe(ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID);
-    });
+    // A child workflow started without `run-as-mode: inherit` runs as the original request,
+    // not as the Worker's service account that runs this action on auto-approval.
+    it.each(['journal_handoff_succeeded', 'journal_handoff_failed'])(
+      'writes %s as a step, so it runs as this action and names the Worker',
+      (name) => {
+        const note = stepIn([...forensicsAction.steps, ...fallback], name);
+
+        expect(note?.type).toBe('ai.conversation.add_user_message');
+        expect(note?.with).toMatchObject({
+          author_name: '{{ consts.author_name }}',
+          conversation_id: '{{ inputs.actionInput.investigation_id }}',
+        });
+        expect(note?.['on-failure']).toEqual({ continue: true });
+      }
+    );
 
     it('fails the handoff after journaling the KI error', () => {
       expect(stepIn(fallback, 'fail_handoff')?.type).toBe('workflow.fail');
@@ -2638,7 +2650,7 @@ describe('Attack Discovery worker chain', () => {
     it('renders the same knowledge indicator error message in the journal note', () => {
       const cause =
         'action [indices:admin/auto_create] is unauthorized for user [editor] on indices [ai-index-idx-security-investigations]';
-      const inputs = stepIn(fallback, 'journal_handoff_failed')?.with?.inputs as
+      const inputs = stepIn(fallback, 'journal_handoff_failed')?.with as
         | { message?: string }
         | undefined;
       const rendered = createWorkflowLiquidEngine().parseAndRenderSync(String(inputs?.message), {
