@@ -20,6 +20,7 @@ import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { ALERT_RULE_UUID, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { useRunAlertWorkflowPanel } from './use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from './use_run_document_workflow_panel';
+import { toDocumentSelections } from './to_document_selections';
 import { EndpointExceptionsFlyout } from '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
@@ -238,20 +239,17 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     ecsRowData,
   });
 
-  const documentForWorkflow = useMemo(() => {
-    const fields: Record<string, unknown> = {};
-    for (const { field, value } of flattenedEcsData) {
-      fields[field] = value;
-    }
-    return [{ _id: ecsRowData._id, _index: ecsRowData._index ?? '', ...fields }];
-  }, [ecsRowData._id, ecsRowData._index, flattenedEcsData]);
+  const documentIdsForWorkflow = useMemo(
+    () => toDocumentSelections([{ _id: ecsRowData._id, _index: ecsRowData._index }]),
+    [ecsRowData._id, ecsRowData._index]
+  );
 
   const {
     runWorkflowMenuItem: runDocumentWorkflowMenuItem,
     runDocumentWorkflowPanel: runDocumentWorkflowPanels,
   } = useRunDocumentWorkflowPanel({
     closePopover,
-    documents: documentForWorkflow,
+    documentIds: documentIdsForWorkflow,
     originEventId: ecsRowData._id,
   });
 
