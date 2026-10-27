@@ -538,7 +538,9 @@ describe('DiscoverSessionSaveModalContainer', () => {
         await modalProps?.onSave(getOnSaveProps());
       });
 
-      expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveSession);
+      expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveSession, {
+        state: { controlGroupState: undefined },
+      });
     });
 
     it('should navigate to new session on Save As from embedded editor', async () => {

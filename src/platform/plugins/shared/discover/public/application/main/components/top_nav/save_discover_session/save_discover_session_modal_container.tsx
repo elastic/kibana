@@ -27,6 +27,7 @@ import {
   selectTab,
   selectTabRuntimeState,
   useCurrentTabRuntimeState,
+  useCurrentTabSelector,
   useInternalStateDispatch,
   useInternalStateGetState,
   useInternalStateSelector,
@@ -56,6 +57,7 @@ export const DiscoverSessionSaveModalContainer = ({
   const getState = useInternalStateGetState();
   const runtimeStateManager = useRuntimeStateManager();
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
+  const controlGroupState = useCurrentTabSelector((tab) => tab.attributes.controlGroupState);
   const allTabs = useInternalStateSelector(selectAllTabs);
   const persistedDiscoverSession = useInternalStateSelector(selectPersistedDiscoverSession);
   const savedDataViews = useInternalStateSelector(selectSavedDataViews);
@@ -141,6 +143,7 @@ export const DiscoverSessionSaveModalContainer = ({
           newPanel: isEmbeddedEditor && userWantsCopy,
           state: {
             savedObjectId: response.discoverSession.id,
+            controlGroupState,
           },
         });
         return;
@@ -182,7 +185,9 @@ export const DiscoverSessionSaveModalContainer = ({
             ...(profileState ? { profileState } : {}),
           });
         } else if (isEmbeddedEditor) {
-          services.embeddableEditor.transferBackToEditor(TransferAction.SaveSession);
+          services.embeddableEditor.transferBackToEditor(TransferAction.SaveSession, {
+            state: { controlGroupState },
+          });
         }
       }
 

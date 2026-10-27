@@ -23,7 +23,7 @@ import type { DiscoverServices } from '../build_services';
 import type { PublishesSavedSearch, PublishesSelectedTabId } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
 import { fromSavedSearchToSavedObjectTab } from '../application/main/state_management/redux';
-import type { DiscoverSessionByValueInput } from '../plugin_imports/embeddable_editor_service';
+import type { DiscoverSessionEditorInput } from '../plugin_imports/embeddable_editor_service';
 
 type SavedSearchPartialApi = PublishesSavedSearch &
   PublishesSavedObjectId &
@@ -94,10 +94,10 @@ export function initializeEditApi({
       const stateTransfer = discoverServices.embeddable.getStateTransfer();
       const isByReference = Boolean(partialApi.savedObjectId$.getValue());
       const locatorParams = getDiscoverLocatorParams({ ...partialApi, parentApi });
-      const valueInput: DiscoverSessionByValueInput | undefined = isByReference
-        ? undefined
-        : {
-            discoverSessionTab: fromSavedSearchToSavedObjectTab({
+      const valueInput: DiscoverSessionEditorInput = {
+        discoverSessionTab: isByReference
+          ? undefined
+          : fromSavedSearchToSavedObjectTab({
               tab: {
                 id: uuid,
                 label: getTitle() || displayName,
@@ -110,10 +110,12 @@ export function initializeEditApi({
               },
               services: discoverServices,
             }),
-            dashboardControlGroupState: apiIsPresentationContainer(parentApi)
-              ? (getAllEsqlControls(parentApi) as ControlPanelsState<OptionsListESQLControlState>)
-              : undefined,
-          };
+        // Passed for by-reference panels too, so controls created in Discover can be added to the
+        // dashboard without duplicating the ones it already has
+        dashboardControlGroupState: apiIsPresentationContainer(parentApi)
+          ? (getAllEsqlControls(parentApi) as ControlPanelsState<OptionsListESQLControlState>)
+          : undefined,
+      };
 
       let app: string;
       let path: string | undefined;
