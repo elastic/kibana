@@ -19,6 +19,7 @@ import {
   ListIndicesInputSchema,
   RequestInputSchema,
   SearchInputSchema,
+  toSearchPath,
   type EsqlInput,
   type GetMappingInput,
   type ListIndicesInput,
@@ -30,7 +31,7 @@ export const Elasticsearch: ConnectorSpec = {
   metadata: {
     id: '.elasticsearch',
     displayName: 'External Elasticsearch',
-    description: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.metadata.description', {
+    description: i18n.translate('connectorSpecs.elasticsearch.metadata.description', {
       defaultMessage:
         'Search and explore data on a remote Elasticsearch cluster, retrieve mappings and aliases, and run ES|QL queries. Use this when cross-cluster search (CCS) or cross-project search (CPS) is not available',
     }),
@@ -49,22 +50,19 @@ export const Elasticsearch: ConnectorSpec = {
         isRecommended: true,
         defaults: { headerField: 'Authorization' },
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.auth.apiKeyHeader.label', {
+          label: i18n.translate('connectorSpecs.elasticsearch.auth.apiKeyHeader.label', {
             defaultMessage: 'Elasticsearch API key',
           }),
           meta: {
             headerField: { hidden: true },
             apiKey: {
-              label: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.auth.apiKey.label', {
+              label: i18n.translate('connectorSpecs.elasticsearch.auth.apiKey.label', {
                 defaultMessage: 'API Key',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.elasticsearch.auth.apiKey.helpText',
-                {
-                  defaultMessage:
-                    'Enter "ApiKey encoded" where encoded is the base64-encoded "id:api_key" value from the Elasticsearch create API key response (POST /_security/api_key). Grant the key at minimum: read on the indices you search.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.elasticsearch.auth.apiKey.helpText', {
+                defaultMessage:
+                  'Enter "ApiKey encoded" where encoded is the base64-encoded "id:api_key" value from the Elasticsearch create API key response (POST /_security/api_key). Grant the key at minimum: read on the indices you search.',
+              }),
             },
           },
         },
@@ -73,13 +71,13 @@ export const Elasticsearch: ConnectorSpec = {
         type: 'basic',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.auth.basic.label', {
+          label: i18n.translate('connectorSpecs.elasticsearch.auth.basic.label', {
             defaultMessage: 'Username and password',
           }),
           meta: {
             password: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.elasticsearch.auth.basic.password.helpText',
+                'connectorSpecs.elasticsearch.auth.basic.password.helpText',
                 {
                   defaultMessage:
                     'The user must have at minimum: read privilege on the indices you search.',
@@ -99,7 +97,7 @@ export const Elasticsearch: ConnectorSpec = {
           'The Elasticsearch cluster endpoint URL. For Elastic Cloud, use the Elasticsearch endpoint shown in your deployment (e.g. https://my-deployment.es.us-east-1.aws.elastic.cloud). For self-managed clusters, use the full URL including port, e.g. https://elasticsearch.example.com:9200.'
         )
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.config.url.label', {
+          label: i18n.translate('connectorSpecs.elasticsearch.config.url.label', {
             defaultMessage: 'Elasticsearch URL',
           }),
         }),
@@ -116,7 +114,6 @@ export const Elasticsearch: ConnectorSpec = {
         'Search documents in one or more Elasticsearch indices using the Query DSL. Returns matching hits with source, score, and metadata. Supports aggregations, sorting, field filtering, and pagination. Use listIndices first if you do not know the index name, and getMapping to understand available fields.',
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
-        const indexParam = Array.isArray(input.index) ? input.index.join(',') : input.index;
         const body: Record<string, unknown> = {
           query: input.query,
           size: input.size,
@@ -127,7 +124,7 @@ export const Elasticsearch: ConnectorSpec = {
         if (input._source !== undefined) body._source = input._source;
         if (input.aggs) body.aggs = input.aggs;
         if (input.runtimeMappings) body.runtime_mappings = input.runtimeMappings;
-        return callEsApi(ctx, 'POST', `/${encodeURIComponent(indexParam)}/_search`, { body });
+        return callEsApi(ctx, 'POST', toSearchPath(input.index), { body });
       },
     },
 
@@ -231,7 +228,7 @@ export const Elasticsearch: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.test.description', {
+    description: i18n.translate('connectorSpecs.elasticsearch.test.description', {
       defaultMessage: 'Verifies the connection by fetching cluster information',
     }),
     handler: async (ctx) => {

@@ -28,11 +28,14 @@ import type { IngestHubStartDependencies } from '../../types';
 
 import { OnboardingShell } from './onboarding_shell';
 import { OnboardingFlowProvider } from '../onboarding_flow_context';
-import { clearOnboardingSession, getOnboardingSessionKey } from './onboarding_session_storage';
+import {
+  clearOnboardingSession,
+  discardMarkedSessions,
+  getOnboardingSessionKey,
+} from './onboarding_session_storage';
 import { ECF_LAUNCH_STEP_SESSION_KEY } from '../step_components/ecf_deployment_section';
 import { ONBOARDING_STEPS } from './steps';
-
-const DEFAULT_RETURN_APP = 'integrations';
+import { DEFAULT_RETURN_APP, saveReturnUrl } from './return_url';
 
 function RootRedirect() {
   const { services } = useKibana();
@@ -88,6 +91,10 @@ export async function hydrateOnboardingSession(
       getOnboardingSessionKey(integrationId, 'serviceSettingsStep'),
       JSON.stringify({
         globalRegion: item.globalRegion ?? '',
+        // Absent on onboardings saved before these fields existed; the default is then prefilled.
+        ...(item.integrationName ? { integrationName: item.integrationName } : {}),
+        ...(item.description ? { description: item.description } : {}),
+        ...(item.namespace ? { namespace: item.namespace } : {}),
         serviceVars: item.serviceVars ?? {},
       })
     );
@@ -238,6 +245,13 @@ export async function renderOnboardingApp(
     }
   }
 
+  // Remember where the user came from, after the clear / hydrate above has wiped session storage.
+  const returnUrl = (state as { returnUrl?: string } | undefined)?.returnUrl;
+  const entryIntegrationId = pathname.split('/').filter(Boolean)[0];
+  if (entryIntegrationId && typeof returnUrl === 'string') {
+    saveReturnUrl(entryIntegrationId, returnUrl);
+  }
+
   const queryClient = new QueryClient();
   const root = createRoot(params.element);
   root.render(
@@ -289,5 +303,9 @@ export async function renderOnboardingApp(
       </StyledComponentsThemeProvider>
     )
   );
-  return () => root.unmount();
+  return () => {
+    root.unmount();
+    // Nothing can rewrite the session now, so a cancelled flow is dropped for good.
+    discardMarkedSessions();
+  };
 }
