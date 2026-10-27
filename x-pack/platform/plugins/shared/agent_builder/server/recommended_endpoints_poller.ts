@@ -24,26 +24,34 @@ const DEFAULT_ERROR_RETRY_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
 const MAIN_CAPABILITIES = ['capable', 'balanced'];
 const FAST_CAPABILITIES = ['efficient'];
+const KNOWN_CAPABILITIES = new Set([...MAIN_CAPABILITIES, ...FAST_CAPABILITIES]);
 
 interface DerivedRecommendations {
   recommended?: string[];
   fast?: string[];
 }
 
-type EndpointMetadata = EisInferenceEndpointMetadata & {
-  capability?: string;
-  family?: string;
-};
-
-interface EndpointWithMetadata extends InferenceInferenceEndpointInfo {
-  metadata: EndpointMetadata;
-}
-
-const hasMetadata = (endpoint: InferenceInferenceEndpointInfo): endpoint is EndpointWithMetadata =>
+const hasMetadata = (
+  endpoint: InferenceInferenceEndpointInfo
+): endpoint is InferenceInferenceEndpointInfo & { metadata: EisInferenceEndpointMetadata } =>
   'metadata' in endpoint && typeof endpoint.metadata === 'object' && endpoint.metadata !== null;
 
-const getMetadata = (endpoint: InferenceInferenceEndpointInfo): EndpointMetadata | undefined =>
+const getMetadata = (
+  endpoint: InferenceInferenceEndpointInfo
+): EisInferenceEndpointMetadata | undefined =>
   hasMetadata(endpoint) ? endpoint.metadata : undefined;
+
+const extractCapability = (endpoint: InferenceInferenceEndpointInfo): string | undefined => {
+  const properties = getMetadata(endpoint)?.heuristics?.properties ?? [];
+  return properties.find((p) => KNOWN_CAPABILITIES.has(p));
+};
+
+const extractFamily = (inferenceId: string): string | undefined => {
+  const withoutSuffix = inferenceId.replace(/-chat_completion$/, '');
+  const withoutDotAndProvider = withoutSuffix.replace(/^\.[^-]+-/, '');
+  const family = withoutDotAndProvider.replace(/-\d+(\.\d+)?(?=-|$)/g, '');
+  return family || undefined;
+};
 
 const isEligibleEndpoint = (endpoint: InferenceInferenceEndpointInfo): boolean => {
   if (endpoint.task_type !== 'chat_completion') {
@@ -59,10 +67,13 @@ const isEligibleEndpoint = (endpoint: InferenceInferenceEndpointInfo): boolean =
   if (meta.heuristics?.end_of_life_date) {
     return false;
   }
-  if (meta.capability == null) {
+  if (meta.heuristics?.status !== 'ga') {
     return false;
   }
-  if (meta.family == null) {
+  if (extractCapability(endpoint) == null) {
+    return false;
+  }
+  if (extractFamily(endpoint.inference_id) == null) {
     return false;
   }
   return true;
@@ -89,13 +100,13 @@ const pickBestPerFamily = (
   const bestByFamily = new Map<string, InferenceInferenceEndpointInfo>();
 
   for (const endpoint of endpoints) {
-    const metadata = getMetadata(endpoint);
+    const capability = extractCapability(endpoint);
+    const family = extractFamily(endpoint.inference_id);
 
-    if (metadata?.family == null || !allowedCapabilities.has(metadata.capability ?? '')) {
+    if (family == null || !allowedCapabilities.has(capability ?? '')) {
       continue;
     }
 
-    const { family } = metadata;
     const current = bestByFamily.get(family);
 
     if (!current || isNewer(endpoint, current)) {
@@ -109,7 +120,7 @@ const pickBestPerFamily = (
 /**
  * Derives recommended endpoint lists from raw EIS endpoint data.
  *
- * Returns null when EIS capability/family fields are not yet deployed (safe no-op).
+ * Returns null when no AB-eligible endpoints are found.
  */
 export const deriveRecommendations = (
   endpoints: InferenceInferenceEndpointInfo[]
@@ -140,8 +151,9 @@ export const deriveRecommendations = (
  * Polls EIS for inference endpoint metadata and dynamically updates the
  * Agent Builder recommended model lists without requiring a Kibana release.
  *
- * The poller is a safe no-op until EIS delivers the `capability` and `family`
- * fields (elastic/search-team#15790) — static constants remain active until then.
+ * Capability tier is read from heuristics.properties; model family is derived
+ * from the inference_id. Static constants serve as the initial seed until the
+ * first successful poll.
  */
 export class RecommendedEndpointsPoller {
   private readonly logger: Logger;
@@ -217,7 +229,7 @@ export class RecommendedEndpointsPoller {
 
     if (!result) {
       this.logger.debug(
-        'EIS capability/family fields not yet available or no AB-validated models found; retaining static recommended list'
+        'No AB-eligible endpoints found in EIS response; retaining static recommended list'
       );
       return null;
     }

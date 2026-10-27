@@ -890,52 +890,80 @@ const buildConfiguredSourceNode = (source: SourceViewModel): SourceNode => {
   };
 };
 
-const buildConfiguredDestinationNode = (
+export const buildConfiguredDestinationNode = (
   destination: DestinationViewModel,
   hasConnectedSource: boolean,
   targetedIndexNames: string[]
-): DestinationNode => ({
-  id: configuredDestinationNodeId(destination.id),
-  type: DESTINATION_NODE_TYPE,
-  position: { x: 0, y: 0 },
-  deletable: true,
-  ariaLabel: hasConnectedSource
-    ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.ariaLabel', {
-        defaultMessage:
-          'Destination: {name}, {signal}, {indexCount, plural, one {# index} other {# indices}}',
-        values: {
-          name: destination.name,
-          signal: destination.signals.map((signal) => DESTINATION_SIGNAL_LABELS[signal]).join(', '),
-          indexCount: targetedIndexNames.length,
-        },
-      })
-    : i18n.translate('xpack.streams.canvas.configuredDestinationNode.noSourceAriaLabel', {
-        defaultMessage:
-          'Destination: {name}, {signal}, {indexCount, plural, one {# index} other {# indices}}, no source',
-        values: {
-          name: destination.name,
-          signal: destination.signals.map((signal) => DESTINATION_SIGNAL_LABELS[signal]).join(', '),
-          indexCount: targetedIndexNames.length,
-        },
-      }),
-  data: {
-    destinationId: destination.id,
-    signals: destination.signals,
-    streamName: destination.index,
-    indexCount: targetedIndexNames.length,
-    targetedIndexNames,
-    title: destination.name,
-    subtitle: !hasConnectedSource
-      ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.noSourceLabel', {
-          defaultMessage: 'No source',
+): DestinationNode => {
+  const signal = destination.signals.map((value) => DESTINATION_SIGNAL_LABELS[value]).join(', ');
+  const noSourceLabel = i18n.translate(
+    'xpack.streams.canvas.configuredDestinationNode.noSourceLabel',
+    { defaultMessage: 'No source' }
+  );
+  if (destination.type === 's3') {
+    return {
+      id: configuredDestinationNodeId(destination.id),
+      type: DESTINATION_NODE_TYPE,
+      position: { x: 0, y: 0 },
+      deletable: true,
+      ariaLabel: hasConnectedSource
+        ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.s3AriaLabel', {
+            defaultMessage: 'Destination: {name}, {signal}',
+            values: { name: destination.name, signal },
+          })
+        : i18n.translate('xpack.streams.canvas.configuredDestinationNode.s3NoSourceAriaLabel', {
+            defaultMessage: 'Destination: {name}, {signal}, no source',
+            values: { name: destination.name, signal },
+          }),
+      data: {
+        destinationId: destination.id,
+        signals: destination.signals,
+        title: destination.name,
+        subtitle: !hasConnectedSource ? noSourceLabel : destination.bucket,
+      },
+    };
+  }
+  return {
+    id: configuredDestinationNodeId(destination.id),
+    type: DESTINATION_NODE_TYPE,
+    position: { x: 0, y: 0 },
+    deletable: true,
+    ariaLabel: hasConnectedSource
+      ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.ariaLabel', {
+          defaultMessage:
+            'Destination: {name}, {signal}, {indexCount, plural, one {# index} other {# indices}}',
+          values: {
+            name: destination.name,
+            signal,
+            indexCount: targetedIndexNames.length,
+          },
         })
-      : destination.mode === 'auto'
-      ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.autoLabel', {
-          defaultMessage: 'Auto',
-        })
-      : destination.index,
-  },
-});
+      : i18n.translate('xpack.streams.canvas.configuredDestinationNode.noSourceAriaLabel', {
+          defaultMessage:
+            'Destination: {name}, {signal}, {indexCount, plural, one {# index} other {# indices}}, no source',
+          values: {
+            name: destination.name,
+            signal,
+            indexCount: targetedIndexNames.length,
+          },
+        }),
+    data: {
+      destinationId: destination.id,
+      signals: destination.signals,
+      streamName: destination.index,
+      indexCount: targetedIndexNames.length,
+      targetedIndexNames,
+      title: destination.name,
+      subtitle: !hasConnectedSource
+        ? noSourceLabel
+        : destination.mode === 'auto'
+        ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.autoLabel', {
+            defaultMessage: 'Auto',
+          })
+        : destination.index,
+    },
+  };
+};
 
 interface CanvasEditSnapshot {
   unit: Unit;

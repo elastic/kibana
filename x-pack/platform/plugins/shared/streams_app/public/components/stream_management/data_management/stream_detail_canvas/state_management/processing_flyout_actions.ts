@@ -145,6 +145,7 @@ export const getProcessingSaveUpdate = ({
     savingComponentIds: undefined,
     savingComponentKind: undefined,
     savingComponentIntent: 'processing',
+    savingSecrets: undefined,
     processingRollbackUnit: context.nextUnit,
     processingSaveIds: processorIds,
     error: undefined,

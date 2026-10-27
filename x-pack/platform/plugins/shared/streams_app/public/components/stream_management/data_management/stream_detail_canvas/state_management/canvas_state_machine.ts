@@ -22,6 +22,7 @@ import {
   stateIn,
   stopChild,
 } from 'xstate';
+import type { StreamsUnit } from '@kbn/streams-schema';
 import { processingFlyoutMachine } from '../../../../stream_processing_flyout/state_management/processing_flyout_machine';
 import {
   createDestinationsMachineImplementations,
@@ -147,6 +148,7 @@ export const canvasStateMachine = setup({
           savingComponentKind:
             'sourceIds' in event ? ('source' as const) : ('destination' as const),
           savingComponentIntent: event.intent,
+          savingSecrets: 'destinationIds' in event ? event.secrets : undefined,
           error: undefined,
         };
       }
@@ -156,6 +158,7 @@ export const canvasStateMachine = setup({
         savingComponentIds: undefined,
         savingComponentKind: undefined,
         savingComponentIntent: 'connect' as const,
+        savingSecrets: undefined,
         error: undefined,
       };
     }),
@@ -172,6 +175,7 @@ export const canvasStateMachine = setup({
       savingComponentIds: undefined,
       savingComponentKind: undefined,
       savingComponentIntent: undefined,
+      savingSecrets: undefined,
       error: undefined,
     }),
     storeLoadedUnitDefinition: assign(({ context, event }) =>
@@ -183,6 +187,7 @@ export const canvasStateMachine = setup({
             savingComponentIds: undefined,
             savingComponentKind: undefined,
             savingComponentIntent: undefined,
+            savingSecrets: undefined,
             error: undefined,
           }
         : context
@@ -198,6 +203,7 @@ export const canvasStateMachine = setup({
         savingComponentIds: undefined,
         savingComponentKind: undefined,
         savingComponentIntent: undefined,
+        savingSecrets: undefined,
         processingRollbackUnit: undefined,
         processingSaveIds: undefined,
         error: undefined,
@@ -210,10 +216,12 @@ export const canvasStateMachine = setup({
         event.type === 'xstate.error.actor.persistUnitDefinition'
           ? getFormattedError(event.error)
           : undefined,
+      savingSecrets: undefined,
     }),
     rollbackToPersistedUnit: assign({
       nextUnit: ({ context }) => context.unit,
       savingUnit: undefined,
+      savingSecrets: undefined,
     }),
     notifyUnitFailure: getPlaceholderFor(createNotifyUnitFailureAction),
     notifyUnitSaved: getPlaceholderFor(createNotifyUnitSavedAction),
@@ -604,7 +612,10 @@ export const canvasStateMachine = setup({
               invoke: {
                 id: 'persistUnitDefinition',
                 src: 'persistUnitDefinition',
-                input: ({ context }) => context.savingUnit ?? context.nextUnit,
+                input: ({ context }) => ({
+                  unit: context.savingUnit ?? context.nextUnit,
+                  secrets: context.savingSecrets,
+                }),
                 onDone: [
                   {
                     guard: 'isSavingProcessing',
@@ -811,9 +822,11 @@ function createPersistUnitDefinitionActor({
 }: {
   persistUnitDefinition: UnitRepository['persist'];
 }) {
-  return fromPromise(async ({ input }: { input: Unit }) => ({
-    unitDefinition: await persistUnitDefinition(input),
-  }));
+  return fromPromise(
+    async ({ input }: { input: { unit: Unit; secrets?: StreamsUnit.Secrets } }) => ({
+      unitDefinition: await persistUnitDefinition(input.unit, input.secrets),
+    })
+  );
 }
 
 function createHoldCreateHistoryAction(createHistoryRef: CanvasCreateHistoryRef) {
@@ -859,6 +872,16 @@ function createNotifyUnitSavedAction({ core }: Pick<CanvasStateServiceDeps, 'cor
 
 function createNotifyUnitFailureAction({ core }: Pick<CanvasStateServiceDeps, 'core'>) {
   return ({ context, event }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
+    // A failed destination create shows its error in the create modal. Load errors always
+    // toast, even though a rollback leaves the stale create intent in context.
+    if (
+      (event.type === 'xstate.error.actor.validateUnitDefinition' ||
+        event.type === 'xstate.error.actor.persistUnitDefinition') &&
+      context.savingComponentKind === 'destination' &&
+      context.savingComponentIntent === 'create'
+    ) {
+      return;
+    }
     if (
       event.type === 'xstate.error.actor.loadUnitDefinition' ||
       event.type === 'xstate.error.actor.validateUnitDefinition' ||

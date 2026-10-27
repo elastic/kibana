@@ -8,6 +8,7 @@
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { XYPosition } from '@xyflow/react';
+import type { StreamsUnit } from '@kbn/streams-schema';
 import type { Unit, UnitRepository } from '../../../../../services/unit_repository';
 import type { ProcessingNodeRef, UnitLine } from '../../../../../services/unit_graph';
 import type {
@@ -76,6 +77,7 @@ export interface CanvasState {
   savingComponentIds?: string[];
   savingComponentKind?: 'source' | 'destination';
   savingComponentIntent?: 'create' | 'delete' | 'connect' | 'processing';
+  savingSecrets?: StreamsUnit.Secrets;
   editingRoute: Partial<RouteEdit>;
   processingFlyout?: CanvasProcessingFlyout;
   /** Staged unit to return to when a processing flyout save fails. */
@@ -102,6 +104,7 @@ export type CanvasUrlEvent =
       unitDefinition: Unit;
       destinationIds: string[];
       intent: 'create' | 'delete';
+      secrets?: StreamsUnit.Secrets;
     }
   | {
       type: 'unit.changed';

@@ -57,6 +57,14 @@ describe('hydrateOnboardingSession', () => {
     );
   });
 
+  it('restores the global namespace into the service settings state', async () => {
+    mockSendGet.mockResolvedValue({ item: makeItem({ namespace: 'prod' }) });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    expect(
+      JSON.parse(sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.serviceSettingsStep`)!)
+    ).toEqual(expect.objectContaining({ namespace: 'prod' }));
+  });
+
   it('leaves the integration name unset for onboardings saved without one, so a default is prefilled', async () => {
     mockSendGet.mockResolvedValue({ item: makeItem() });
     await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
@@ -65,6 +73,7 @@ describe('hydrateOnboardingSession', () => {
     );
     expect(settings).not.toHaveProperty('integrationName');
     expect(settings).not.toHaveProperty('description');
+    expect(settings).not.toHaveProperty('namespace');
   });
 
   it('returns false and does not write session storage when fetch fails', async () => {
