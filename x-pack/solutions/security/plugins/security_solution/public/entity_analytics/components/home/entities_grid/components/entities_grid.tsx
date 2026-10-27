@@ -45,6 +45,7 @@ import { RISK_SCORE_NORM_FIELD } from '../common';
 import type { RowsMode, SortDir, TimeRange } from '../common';
 
 const gridContainerCss = css`
+  block-size: 100%;
   padding-block-start: 12px;
   position: relative;
 `;
@@ -244,8 +245,16 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   const gridColumns = useMemo(() => [...columns, ...extraColumns], [columns, extraColumns]);
 
   const prefetchChildren = useCallback(
-    (entityId: string) =>
-      prefetch(getGroupRecordsOptions(entityId, timeRange, keepFields, gridColumns)),
+    (entityId: string) => {
+      const { mainEntity, aliases } = getGroupRecordsOptions(
+        entityId,
+        timeRange,
+        keepFields,
+        gridColumns
+      );
+      prefetch(mainEntity);
+      prefetch(aliases);
+    },
     [prefetch, timeRange, keepFields, gridColumns]
   );
 

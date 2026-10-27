@@ -20,6 +20,6 @@ test.describe('Digital Experience access', { tag: DIGITAL_EXPERIENCE_WITH_UX_TAG
     await digitalExperience.gotoApplications();
 
     await expect(digitalExperience.mainContainer).toBeVisible();
-    await expect(digitalExperience.breadcrumbs).toContainText('Digital Experience');
+    await expect(digitalExperience.breadcrumbs).toContainText('Digital experience');
   });
 });

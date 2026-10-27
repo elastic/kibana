@@ -78,7 +78,9 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
     color,
     textProps = {},
   } = { ...fieldTopValuesBucketOverridableProps, ...overrides };
-  const fieldLabel = (field?.subType as IFieldSubTypeMulti)?.multi?.parent ?? field.name;
+  const multiFieldParent = (field?.subType as IFieldSubTypeMulti)?.multi?.parent;
+  const fieldLabel = multiFieldParent ?? field.name;
+  const fieldDisplayName = multiFieldParent ?? field.displayName;
   const isOtherBucket = type === 'other';
   const otherLabel = i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
     defaultMessage: 'Other',
@@ -87,13 +89,13 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
 
   const filterForLabel = i18n.translate('unifiedFieldList.fieldStats.filterValueButtonAriaLabel', {
     defaultMessage: 'Filter for {field}: "{value}"',
-    values: { value: filterValueLabel, field: fieldLabel },
+    values: { value: filterValueLabel, field: fieldDisplayName },
   });
   const filterOutLabel = i18n.translate(
     'unifiedFieldList.fieldStats.filterOutValueButtonAriaLabel',
     {
       defaultMessage: 'Filter out {field}: "{value}"',
-      values: { value: filterValueLabel, field: fieldLabel },
+      values: { value: filterValueLabel, field: fieldDisplayName },
     }
   );
 

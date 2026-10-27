@@ -16,7 +16,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain/connector/v1';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { TemplateConnectorForm } from './template_connector_form';

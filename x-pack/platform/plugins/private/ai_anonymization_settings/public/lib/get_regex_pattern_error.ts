@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { RE2JS } from 're2js';
+
 /**
- * Returns the engine's message when `pattern` does not compile as a global regular expression
- * (the way every rule is evaluated), or `undefined` when it does. A pattern that does not compile
- * must never be saved: the pipeline would otherwise fail every request or skip the rule.
+ * Returns the engine's message when `pattern` is not valid RE2 syntax, or `undefined` when it is.
+ * Custom rules run on RE2 (linear time, so no pattern can stall the pipeline), which has no
+ * lookahead, lookbehind or backreferences. A pattern that does not compile must never be saved:
+ * the pipeline would otherwise fail every request or skip the rule.
  */
 export const getRegexPatternError = (pattern: string): string | undefined => {
   try {
-    new RegExp(pattern, 'g');
+    RE2JS.compile(pattern);
     return undefined;
   } catch (error) {
     return error instanceof Error ? error.message : String(error);

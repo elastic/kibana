@@ -34,7 +34,7 @@ export const PUBLIC_API_VERSION = '2023-10-31';
 
 /**
  * Step ids from the managed Worker yaml
- * (`kbn-workflows/managed/definitions/alertzero/hunt_continuous_threat_hunt.yaml`) that the
+ * (`kbn-workflows/managed/definitions/alertzero/hunt/hunt_continuous_threat_hunt.yaml`) that the
  * client and evaluators address directly. A rename here must be mirrored below or installed
  * workflow checks fail loudly instead of surfacing as opaque poll timeouts downstream.
  */

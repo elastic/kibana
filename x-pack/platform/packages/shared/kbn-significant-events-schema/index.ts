@@ -83,6 +83,7 @@ export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   type Detection,
+  type DetectionSkip,
   type ChangePointType,
   CHANGE_POINT_TYPES,
   type KnowledgeIndicator,
@@ -107,11 +108,27 @@ export {
   severitySchema,
   SEVERITY_OPTIONS,
   SEVERITY_CONTRACT_RULE,
+  UNCONFIRMED_EVENT_MAX_CONFIDENCE,
   getSeverityLabel,
   detectionSchema,
+  detectionSkipSchema,
+  skipMarkerSchema,
+  type SkipMarker,
+  describeSkip,
+  PROBE_STATUSES,
+  type ProbeStatus,
+  type BaselineDecision,
+  SKIP_REASONS,
+  type SkipReason,
+  NEEDS_AGENT_REASONS,
+  type NeedsAgentReason,
+  baselineObservationSchema,
+  type BaselineObservation,
   blastRadiusEntrySchema,
   causalFeatureSchema,
   signalEntrySchema,
+  signalInputEntrySchema,
+  type SignalInputEntry,
   SIGNAL_VERDICTS,
   significantEventSchema,
   significantEventStatusSchema,
@@ -146,6 +163,12 @@ export { KIsOnboardingStep, KIS_ONBOARDING_IN_PROGRESS_STATUSES } from './src/on
 export type { SignificantEventsWorkflowStatusResult } from './src/workflows';
 
 export { SignificantEventsWorkflowStatus } from './src/workflows';
+
+export {
+  type SourceWriteConflictReason,
+  isRetryableSourceWriteConflict,
+  isSourceWriteConflictReason,
+} from './src/source_write_conflict';
 
 export { NightshiftModelBlockedError } from './src/nightshift_model_blocked_error';
 export { NightshiftModelNotFoundError } from './src/nightshift_model_not_found_error';
