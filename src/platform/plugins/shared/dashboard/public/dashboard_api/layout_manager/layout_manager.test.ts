@@ -643,7 +643,12 @@ describe('layout manager', () => {
     const getChanges = (
       layoutManager: ReturnType<typeof initializeLayoutManager>,
       lastSaved: DashboardState = lastSavedState
-    ) => firstValueFrom(layoutManager.internalApi.startComparing(new BehaviorSubject(lastSaved)));
+    ) => {
+      layoutManager.internalApi.setLastSavedState(lastSaved);
+      return firstValueFrom(
+        layoutManager.internalApi.startComparing(new BehaviorSubject(lastSaved))
+      );
+    };
 
     test('reports no changes when the layout matches the last saved state', async () => {
       expect(await getChanges(createLayoutManager())).toEqual({});

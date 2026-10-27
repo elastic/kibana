@@ -35,6 +35,7 @@ const layoutManagerMock = {
   },
   internalApi: {
     startComparing: () => layoutUnsavedChanges$,
+    setLastSavedState: jest.fn(),
     serializeLayout: () => {
       const panels = layoutUnsavedChanges$.getValue()?.panels ?? [];
       return {

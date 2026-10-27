@@ -21,7 +21,6 @@ import {
   mergeMap,
   skip,
   startWith,
-  tap,
   type Observable,
 } from 'rxjs';
 import { v4 } from 'uuid';
@@ -537,6 +536,12 @@ export function initializeLayoutManager(
       childrenStateLoading$,
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
+      setLastSavedState: (lastSavedState: DashboardState) => {
+        ({ layout: lastSavedLayout, childState: lastSavedChildState } = deserializeLayout(
+          lastSavedState.panels,
+          lastSavedState.pinned_panels
+        ));
+      },
       gridLayout$,
       childrenLoading$,
       reset: resetLayout,
@@ -550,15 +555,7 @@ export function initializeLayoutManager(
       }> => {
         return combineLatest([layout$, childrenChanges$]).pipe(
           debounceTime(100),
-          combineLatestWith(
-            lastSavedState$.pipe(
-              map((lastSaved) => deserializeLayout(lastSaved.panels, lastSaved.pinned_panels)),
-              tap(({ layout, childState }) => {
-                lastSavedChildState = childState;
-                lastSavedLayout = layout;
-              })
-            )
-          ),
+          combineLatestWith(lastSavedState$),
           map(([[currentLayout, childrenChanges]]) => {
             const changedPanelIds = new Set(
               childrenChanges

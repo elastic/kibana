@@ -76,6 +76,10 @@ export function initializeUnsavedChangesManager({
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
+  // subscribed first, so the layout knows the last saved panels before children read them
+  const lastSavedLayoutSubscription = lastSavedState$.subscribe((state) =>
+    layoutManager.internalApi.setLastSavedState(state)
+  );
   const onSaveSubscription = onSave$.subscribe(({ dashboardState }) => {
     lastSavedState$.next(dashboardState);
   });
@@ -135,6 +139,7 @@ export function initializeUnsavedChangesManager({
     cleanup: () => {
       unsavedChangesSubscription.unsubscribe();
       onSaveSubscription.unsubscribe();
+      lastSavedLayoutSubscription.unsubscribe();
     },
     internalApi: {
       getLastSavedState: () => lastSavedState$.value,
