@@ -16,7 +16,6 @@ export class ConsolePage {
   public readonly sendRequestButton: Locator;
   public readonly copyOutputButton: Locator;
   public readonly responseStatusBadge: Locator;
-  private readonly skipTourButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.inputEditor = this.page.testSubj.locator('consoleMonacoEditor');
@@ -24,23 +23,32 @@ export class ConsolePage {
     this.sendRequestButton = this.page.testSubj.locator('sendRequestButton');
     this.copyOutputButton = this.page.testSubj.locator('copyOutputButton');
     this.responseStatusBadge = this.page.testSubj.locator('consoleResponseStatusBadge');
-    this.skipTourButton = this.page.testSubj.locator('consoleSkipTourButton');
   }
 
   /**
-   * Opens Console with the given request preloaded through the `load_from`
-   * data-URI parameter (the "Open in Console" deep-link mechanism). This avoids
-   * typing into Monaco, which is flaky under autocomplete. The 8.19 onboarding
-   * tour steals focus, so dismiss it before focusing the appended request.
+   * A tour step's popover dialog. The steps carry their `data-test-subj` on the popover
+   * anchor, which exists whether the step is open or not, so the step is identified by the
+   * title it renders instead. Interactions must stay scoped to this dialog: during a step
+   * transition the outgoing popover is briefly still on the page.
+   */
+  tourStep(title: string) {
+    return this.page.getByRole('dialog', { name: title });
+  }
+
+  async goto() {
+    await this.page.gotoApp('dev_tools', { hash: 'console', readyWhen: this.inputEditor });
+  }
+
+  /**
+   * Preloads a request through the `load_from` data URI ("Open in Console"), avoiding
+   * autocomplete-prone typing. The appended request gets the cursor, so it can be sent.
    */
   async gotoWithRequestLoaded(request: string) {
     const encoded = compressToEncodedURIComponent(request);
     await this.page.gotoApp('dev_tools', {
-      hash: `console?load_from=data:text/plain,${encoded}`,
+      hash: `console/shell?load_from=data:text/plain,${encoded}`,
+      readyWhen: this.inputEditor,
     });
-    await this.inputEditor.waitFor({ state: 'visible' });
-    await this.skipTourButton.click();
-    await this.focusEditor(this.inputEditor);
     await this.sendRequestButton.waitFor({ state: 'visible' });
   }
 
