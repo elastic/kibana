@@ -8,13 +8,18 @@
 import { v4 as uuidv4 } from 'uuid';
 import { decode } from '@kbn/rison';
 import { buildAlertsPagePath } from './build_alerts_page_path';
+import { URL_PARAM_KEY } from '../../../common/hooks/constants';
 
 describe('buildAlertsPagePath', () => {
   it('keeps ids with reserved characters inside their own parameter', () => {
     const path = buildAlertsPagePath(['a&b', 'c#d', 'e+f'], '2026-09-01T00:00:00.000Z');
 
     const params = new URLSearchParams(path);
-    expect([...params.keys()]).toHaveLength(3);
+    expect([...params.keys()]).toEqual([
+      URL_PARAM_KEY.filters,
+      URL_PARAM_KEY.timerange,
+      URL_PARAM_KEY.pageFilter,
+    ]);
     expect(path).not.toMatch(/#/);
     expect(JSON.stringify(decode(params.get('filters') ?? ''))).toContain('e+f');
   });
