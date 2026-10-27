@@ -49,10 +49,11 @@ evaluate.describe(
                   mode: 'generateApi' as const,
                   connectorId: connector.id,
                   alertsIndexPattern: '.alerts-security.alerts-default',
-                  // EXP (50-alert ceiling probe): lowered from 100 to find the batch size at
-                  // which claude-5.5-opus / claude-5.1-fable / gemini-3.5-flash-lite stop
-                  // failing (10/10 truncated-JSON attempts at size 100). Revert before merge.
-                  size: 50,
+                  // EXP (batch-ceiling probe): size is env-driven so each probe build does not
+                  // need a new commit. Defaults to the production size 100; build #494 ran 50.
+                  ...(process.env.EVAL_AD_SIZE
+                    ? { size: Number(process.env.EVAL_AD_SIZE) }
+                    : { size: 100 }),
                   ...CORPUS_WINDOW,
                 },
                 output: { attackDiscoveries: [] },
