@@ -8,13 +8,14 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { mockTelemetryConstants, mockTelemetryService } from '../mocks';
 import { OptInStatusNoticeBanner } from './opt_in_status_notice_banner';
 import { OptInMessage } from './opt_in_message';
 
+const mockEvent = {} as React.MouseEvent<HTMLAnchorElement> & React.MouseEvent<HTMLButtonElement>;
 const mockHttp = httpServiceMock.createStartContract();
 const telemetryConstants = mockTelemetryConstants();
 const telemetryService = mockTelemetryService();
@@ -53,13 +54,13 @@ describe('OptInStatusNoticeBanner', () => {
       />
     );
 
-    const button = component.findWhere((n) => n.type() === EuiButton);
+    const { primary } = component.find(KbnInfoCallout).prop('actionProps') ?? {};
 
-    if (!button) {
-      throw new Error(`Couldn't find any buttons in opt-in notice`);
+    if (!primary?.onClick) {
+      throw new Error(`Couldn't find the dismiss action in opt-in notice`);
     }
 
-    button.simulate('click');
+    primary.onClick(mockEvent);
 
     expect(onLinkClick).toHaveBeenCalled();
   });

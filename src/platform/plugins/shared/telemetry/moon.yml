@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
+  - '@kbn/ui-callout'
   - '@kbn/config-schema'
   - '@kbn/utils'
   - '@kbn/core-saved-objects-server'
