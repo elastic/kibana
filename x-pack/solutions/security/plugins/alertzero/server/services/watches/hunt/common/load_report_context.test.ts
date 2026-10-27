@@ -50,6 +50,179 @@ describe('loadReportHuntContext', () => {
     ]);
   });
 
+  describe('adjudication eligibility', () => {
+    const withIocs = (
+      iocs: Array<{
+        type?: string;
+        value?: string;
+        tier?: unknown;
+        deferred_unreviewed?: unknown;
+      }>
+    ) =>
+      respond([
+        {
+          ...reportHit,
+          _source: {
+            ...reportHit._source,
+            extracted: { ...reportHit._source.extracted, iocs },
+          },
+        },
+      ]);
+
+    it('keeps IOCs with no tier (never adjudicated)', async () => {
+      esClient.search.mockResolvedValue(
+        withIocs([
+          { type: 'ip', value: '192.0.2.30' },
+          { type: 'domain', value: 'evil.example', tier: 'discriminating' },
+        ])
+      );
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.iocs).toEqual([
+        { type: 'ip', value: '192.0.2.30' },
+        { type: 'domain', value: 'evil.example' },
+      ]);
+      expect(context?.excluded_iocs).toBeUndefined();
+    });
+
+    it('drops reference, denied, and deferred IOCs from iocs and reports reference and deferred on excluded_iocs', async () => {
+      esClient.search.mockResolvedValue(
+        withIocs([
+          { type: 'hash', value: 'a'.repeat(64), tier: 'discriminating' },
+          { type: 'ip', value: '169.254.169.254', tier: 'reference' },
+          { type: 'domain', value: 'process.name', tier: 'denied' },
+          {
+            type: 'url',
+            value: 'https://pending.example/',
+            tier: 'discriminating',
+            deferred_unreviewed: true,
+          },
+        ])
+      );
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.iocs).toEqual([{ type: 'hash', value: 'a'.repeat(64) }]);
+      expect(context?.excluded_iocs).toEqual({
+        count: 2,
+        values: [
+          { type: 'ip', value: '169.254.169.254' },
+          { type: 'url', value: 'https://pending.example/' },
+        ],
+      });
+    });
+
+    it('keeps denied code-shaped tokens off the denylist so Tier 2 may still filter on them', async () => {
+      esClient.search.mockResolvedValue(
+        withIocs([
+          { type: 'hash', value: 'a'.repeat(64), tier: 'discriminating' },
+          { type: 'domain', value: 'install.sh', tier: 'denied' },
+          { type: 'domain', value: 'loader.py', tier: 'denied' },
+        ])
+      );
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.iocs).toEqual([{ type: 'hash', value: 'a'.repeat(64) }]);
+      expect(context?.excluded_iocs).toBeUndefined();
+    });
+
+    it('deduplicates excluded IOCs and skips values also present as eligible', async () => {
+      esClient.search.mockResolvedValue(
+        withIocs([
+          { type: 'ip', value: '192.0.2.30', tier: 'discriminating' },
+          { type: 'ip', value: '192.0.2.30', tier: 'reference' },
+          { type: 'domain', value: 'noise.example', tier: 'reference', deferred_unreviewed: true },
+          { type: 'domain', value: 'noise.example', tier: 'reference' },
+        ])
+      );
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.iocs).toEqual([{ type: 'ip', value: '192.0.2.30' }]);
+      expect(context?.excluded_iocs).toEqual({
+        count: 1,
+        values: [{ type: 'domain', value: 'noise.example' }],
+      });
+    });
+
+    it('counts an overlength excluded value in count but omits it from values', async () => {
+      const longUrl = 'https://example.test/' + 'a'.repeat(2048);
+      esClient.search.mockResolvedValue(
+        withIocs([
+          { type: 'ip', value: '192.0.2.30', tier: 'discriminating' },
+          { type: 'url', value: longUrl, tier: 'reference' },
+          { type: 'domain', value: 'noise.example', tier: 'reference' },
+        ])
+      );
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.excluded_iocs).toEqual({
+        count: 2,
+        values: [{ type: 'domain', value: 'noise.example' }],
+      });
+    });
+
+    it('carries every excluded value past the hunt IOC cap so none escapes the denylist', async () => {
+      esClient.search.mockResolvedValue(
+        withIocs([
+          { type: 'hash', value: 'a'.repeat(64), tier: 'discriminating' },
+          ...Array.from({ length: 150 }, (_, i) => ({
+            type: 'ip',
+            value: `203.0.${Math.floor(i / 256)}.${i % 256}`,
+            tier: 'reference',
+          })),
+        ])
+      );
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.iocs).toEqual([{ type: 'hash', value: 'a'.repeat(64) }]);
+      expect(context?.excluded_iocs?.count).toBe(150);
+      expect(context?.excluded_iocs?.values).toHaveLength(150);
+      expect(context?.excluded_iocs?.values[149]).toEqual({ type: 'ip', value: '203.0.0.149' });
+    });
+
+    it('does not change truncated accounting when IOCs are excluded by adjudication', async () => {
+      esClient.search.mockResolvedValue(
+        withIocs([
+          ...Array.from({ length: 100 }, (_, i) => ({
+            type: 'ip',
+            value: `10.0.0.${i}`,
+            tier: 'discriminating',
+          })),
+          { type: 'domain', value: 'noise.example', tier: 'reference' },
+          { type: 'ip', value: '10.0.0.200', tier: 'discriminating' },
+        ])
+      );
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.iocs).toHaveLength(100);
+      expect(context?.excluded_iocs).toEqual({
+        count: 1,
+        values: [{ type: 'domain', value: 'noise.example' }],
+      });
+      expect(context?.truncated).toEqual({ iocs: { kept: 100, dropped: 1 } });
+    });
+  });
+
   it("carries the report's techniques", async () => {
     const context = await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
     expect(context?.techniques).toEqual(['T1078.004', 'T1098.001']);
