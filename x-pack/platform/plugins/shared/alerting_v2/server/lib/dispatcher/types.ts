@@ -163,6 +163,12 @@ export interface LastNotifiedRecord {
   alert_status?: string;
 }
 
+export interface AlreadyNotifiedRecord {
+  action_group_id: ActionGroupId;
+  alert_id: string;
+  notified_through: string;
+}
+
 export interface LastNotifiedInfo {
   lastNotified: Date;
   alertStatus?: string;
@@ -170,7 +176,7 @@ export interface LastNotifiedInfo {
 
 /**
  * A single failed attempt to dispatch one action group to one workflow
- * destination. Carries everything the execution-history step needs to emit a
+ * destination. Carries everything `DispatchStep` needs to emit a
  * `dispatch_failed` event: the parent policy, the failing group + workflow, the
  * affected alerts, and a machine-readable + human-readable cause.
  */
@@ -199,8 +205,6 @@ export interface DispatcherPipelineState {
   readonly input: DispatcherPipelineInput;
   /** Result of the windowed candidate scan (alerts + truncation flag). */
   readonly scan?: AlertScan;
-  /** Count of alerts that received an `.alert-actions` record this tick. */
-  readonly recordedAlerts?: number;
   /** Suppression facts from `.alert-actions`, indexed for per-alert lookup. */
   readonly suppressions?: SuppressionIndex;
   /** Dispatchable vs suppressed verdict on the scanned alerts. */
@@ -209,6 +213,8 @@ export interface DispatcherPipelineState {
   readonly policies?: PolicyCatalog;
   readonly matched?: MatchedPair[];
   readonly groups?: ActionGroup[];
+  /** Alerts of each group an earlier tick already handled (scheduled, or failed to); recorded as `fire`, never dispatched again. */
+  readonly alreadyNotified?: ActionGroup[];
   /** Delivery decision: groups eligible to dispatch now vs groups held back. */
   readonly plan?: DispatchPlan;
   /** Dispatch results: workflow executions per group and failed attempts. */
@@ -219,7 +225,8 @@ export type DispatcherHaltReason =
   | 'no_alerts'
   | 'no_actions'
   | 'aborted'
-  | 'inline_stats_too_large';
+  | 'inline_stats_too_large'
+  | 'commit_failed';
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }
