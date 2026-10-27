@@ -10,7 +10,6 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { SUGGEST_FIX_ROUTE } from '@kbn/esql-types';
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import type { EsqlServerPluginStart } from '../types';
 import { createScopedModel, resolveConnectorId } from './helpers';
 
@@ -73,6 +72,9 @@ export const registerSuggestFixRoute = (
           });
         }
 
+        // loaded lazily so the langchain dependency tree stays out of memory
+        // until a suggest-fix request arrives
+        const { generateEsql } = await import('@kbn/agent-builder-genai-utils');
         const model = await createScopedModel({ inference, request, connectorId });
 
         const result = await generateEsql({
