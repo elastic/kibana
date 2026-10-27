@@ -12,7 +12,8 @@ import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { MemoryRouter, Route } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
+import { Route, Router } from '@kbn/shared-ux-router';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { GetKiResponse } from '../../../../common/http_api/knowledge_indicators';
@@ -108,8 +109,9 @@ const renderKiPage = (initialEntry: string, { canWrite = false }: { canWrite?: b
     },
   };
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const history = createMemoryHistory({ initialEntries: [initialEntry] });
 
-  return render(
+  const view = render(
     <ChromeServiceProvider value={{ chrome: services.chrome }}>
       <I18nProvider>
         <EuiProvider>
@@ -121,18 +123,20 @@ const renderKiPage = (initialEntry: string, { canWrite = false }: { canWrite?: b
             }}
           >
             <QueryClientProvider client={queryClient}>
-              <MemoryRouter initialEntries={[initialEntry]}>
+              <Router history={history}>
                 <Route
                   path={[CONTEXT_ENGINE_PATHS.viewKi, CONTEXT_ENGINE_PATHS.viewKiDocument]}
                   component={KiPage}
                 />
-              </MemoryRouter>
+              </Router>
             </QueryClientProvider>
           </KibanaContextProvider>
         </EuiProvider>
       </I18nProvider>
     </ChromeServiceProvider>
   );
+
+  return { ...view, history };
 };
 
 const openHeaderOverflowMenu = async () => {
@@ -465,6 +469,30 @@ describe('KiPage', () => {
       'href',
       `${getViewKiDocumentPath('sample-ki', 'ki-1')}?index=ai-index-idx-sample-ki`
     );
+  });
+
+  it('exits edit mode when switching tabs so returning to content is not treated as unsaved', async () => {
+    const contentPath = '/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki';
+    const documentPath = `${getViewKiDocumentPath(
+      'sample-ki',
+      'ki-1'
+    )}?index=ai-index-idx-sample-ki`;
+
+    const { history } = renderKiPage(contentPath, { canWrite: true });
+
+    fireEvent.click(await screen.findByTestId('contextViewKiEditButton'));
+    expect(screen.getByTestId('contextViewKiContentEditing')).toBeInTheDocument();
+
+    history.push(documentPath);
+    await waitFor(() => {
+      expect(screen.getByTestId('contextViewKiRawJsonPanel')).toBeInTheDocument();
+    });
+
+    history.push(contentPath);
+    await waitFor(() => {
+      expect(screen.getByTestId('contextViewKiEditButton')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('contextViewKiContentEditing')).not.toBeInTheDocument();
   });
 
   it('navigates back via context engine routing when back is clicked', async () => {

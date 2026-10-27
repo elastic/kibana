@@ -79,7 +79,7 @@ export const KiPage = () => {
 
   useEffect(() => {
     exitContentEditing();
-  }, [kiId, exitContentEditing]);
+  }, [kiId, selectedTab, exitContentEditing]);
 
   const handleBackClick = useCallback(
     (event: { preventDefault: () => void }) => {
