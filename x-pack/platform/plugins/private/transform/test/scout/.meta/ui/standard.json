@@ -1,0 +1,730 @@
+{
+  "sha1": "ea5b9109f85987966b68f68b4456d2a437ceddec",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "b3f53f27bb7dab8-6822a852dd05d20",
+      "title": "Load transform source data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "f73fd5a5ff4cf30-1b7f2049b2a5374",
+      "title": "Delete transform deletes a batch transform with pivot configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/actions/deleting.spec.ts",
+        "line": 63,
+        "column": 25
+      }
+    },
+    {
+      "id": "f73fd5a5ff4cf30-a4a868c3fe0940b",
+      "title": "Delete transform deletes a batch transform with latest configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/actions/deleting.spec.ts",
+        "line": 63,
+        "column": 25
+      }
+    },
+    {
+      "id": "f73fd5a5ff4cf30-77c11fb6c9b7e02",
+      "title": "Delete transform deletes a continuous transform with pivot configuration after stopping it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/actions/deleting.spec.ts",
+        "line": 75,
+        "column": 15
+      }
+    },
+    {
+      "id": "9cf62e39a9783dc-29ef7bbded434f6",
+      "title": "Reauthorize transform a manager reauthorizes a batch pivot transform created by viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/actions/reauthorizing.spec.ts",
+        "line": 118,
+        "column": 5
+      }
+    },
+    {
+      "id": "9cf62e39a9783dc-6640a61b0693547",
+      "title": "Reauthorize transform a manager reauthorizes a continuous pivot transform created by viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/actions/reauthorizing.spec.ts",
+        "line": 118,
+        "column": 5
+      }
+    },
+    {
+      "id": "9cf62e39a9783dc-7f3679d9621fb56",
+      "title": "Reauthorize transform a viewer can't act on a continuous pivot transform created by viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/actions/reauthorizing.spec.ts",
+        "line": 136,
+        "column": 15
+      }
+    },
+    {
+      "id": "9cf62e39a9783dc-4e6d71e47507737",
+      "title": "Reauthorize transform a viewer can't act on a continuous latest transform created by manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/actions/reauthorizing.spec.ts",
+        "line": 136,
+        "column": 15
+      }
+    },
+    {
+      "id": "811dd977198b655-00bcc684637cba8",
+      "title": "Reset transform resets a batch transform with pivot configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/actions/resetting.spec.ts",
+        "line": 68,
+        "column": 25
+      }
+    },
+    {
+      "id": "811dd977198b655-a34aa909c1bfc43",
+      "title": "Reset transform resets a batch transform with latest configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/actions/resetting.spec.ts",
+        "line": 68,
+        "column": 25
+      }
+    },
+    {
+      "id": "811dd977198b655-578305535a9dbad",
+      "title": "Reset transform resets a continuous transform with pivot configuration after stopping it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/actions/resetting.spec.ts",
+        "line": 80,
+        "column": 15
+      }
+    },
+    {
+      "id": "4f610a822b3ebd3-a88191fdccd7b85",
+      "title": "Start transform starts a batch transform with pivot configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/actions/starting.spec.ts",
+        "line": 131,
+        "column": 23
+      }
+    },
+    {
+      "id": "4f610a822b3ebd3-0a97c2848a5d637",
+      "title": "Start transform starts a batch transform with latest configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/actions/starting.spec.ts",
+        "line": 131,
+        "column": 23
+      }
+    },
+    {
+      "id": "4f610a822b3ebd3-7821b6ba2e8b0ba",
+      "title": "Start transform starts a continuous transform with pivot configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/actions/starting.spec.ts",
+        "line": 147,
+        "column": 48
+      }
+    },
+    {
+      "id": "4f610a822b3ebd3-90a2409bf4b5975",
+      "title": "Start transform starts a non healthy continuous transform with pivot configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/actions/starting.spec.ts",
+        "line": 147,
+        "column": 48
+      }
+    },
+    {
+      "id": "4f610a822b3ebd3-e69b085db1e9c91",
+      "title": "Start transform starts a continuous transform with latest configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/actions/starting.spec.ts",
+        "line": 147,
+        "column": 48
+      }
+    },
+    {
+      "id": "46dc787c8106c1e-ede724e894afec4",
+      "title": "Create continuous transform creates, stops, resets and restarts a continuous pivot transform",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/creation/continuous_transform.spec.ts",
+        "line": 219,
+        "column": 51
+      }
+    },
+    {
+      "id": "46dc787c8106c1e-f767dfde2e801c2",
+      "title": "Create continuous transform creates, stops, resets and restarts a continuous latest transform",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/creation/continuous_transform.spec.ts",
+        "line": 271,
+        "column": 7
+      }
+    },
+    {
+      "id": "ae568f2117093a5-590e28e9f27aaae",
+      "title": "Create latest transform from a data view creates a batch transform with the latest function",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/creation/creation_index_pattern_latest.spec.ts",
+        "line": 36,
+        "column": 23
+      }
+    },
+    {
+      "id": "e39039896add6fc-324a13a56b71f4e",
+      "title": "Create pivot transform from a data view creates a batch transform with terms+date_histogram groups and avg agg",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/creation/creation_index_pattern_pivot.spec.ts",
+        "line": 178,
+        "column": 17
+      }
+    },
+    {
+      "id": "e39039896add6fc-fde4c22fbf01c16",
+      "title": "Create pivot transform from a data view creates a batch transform with terms group and percentiles agg",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/creation/creation_index_pattern_pivot.spec.ts",
+        "line": 178,
+        "column": 17
+      }
+    },
+    {
+      "id": "e39039896add6fc-114bb823107a353",
+      "title": "Create pivot transform from a data view creates a batch transform with terms group and terms agg",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/creation/creation_index_pattern_pivot.spec.ts",
+        "line": 178,
+        "column": 17
+      }
+    },
+    {
+      "id": "f078ca79ea45ed9-2db18349d44b709",
+      "title": "Create transform with runtime mappings creates a pivot transform grouped by a runtime field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/creation/creation_runtime_mappings.spec.ts",
+        "line": 118,
+        "column": 97
+      }
+    },
+    {
+      "id": "f078ca79ea45ed9-d956f05a39ff9a2",
+      "title": "Create transform with runtime mappings creates a latest transform with a runtime field as unique key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/creation/creation_runtime_mappings.spec.ts",
+        "line": 201,
+        "column": 13
+      }
+    },
+    {
+      "id": "1378839ee1ef6a0-7cad06b6d10dbb8",
+      "title": "Create transform from a saved search creates a pivot transform from the filtered saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/creation/creation_saved_search.spec.ts",
+        "line": 180,
+        "column": 13
+      }
+    },
+    {
+      "id": "1378839ee1ef6a0-72bcd9dbf5b2208",
+      "title": "Create transform from a saved search creates a latest transform from the filtered saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/creation/creation_saved_search.spec.ts",
+        "line": 215,
+        "column": 13
+      }
+    },
+    {
+      "id": "a8bd8adc115e53b-e358d7b0da4c04c",
+      "title": "Clone transform clones a transform with pivot configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/edit_clone/cloning.spec.ts",
+        "line": 296,
+        "column": 16
+      }
+    },
+    {
+      "id": "a8bd8adc115e53b-60c831714ac145e",
+      "title": "Clone transform clones a transform with runtime mappings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/edit_clone/cloning.spec.ts",
+        "line": 296,
+        "column": 16
+      }
+    },
+    {
+      "id": "a8bd8adc115e53b-1a916e5baa8cf6f",
+      "title": "Clone transform clones a transform with filter aggregations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/edit_clone/cloning.spec.ts",
+        "line": 296,
+        "column": 16
+      }
+    },
+    {
+      "id": "a8bd8adc115e53b-2e4fbe639729ae6",
+      "title": "Clone transform clones a transform with latest configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/edit_clone/cloning.spec.ts",
+        "line": 341,
+        "column": 13
+      }
+    },
+    {
+      "id": "fb564af15bbbf20-9adbee5d4933c09",
+      "title": "Edit transform edits a transform with pivot configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/edit_clone/editing.spec.ts",
+        "line": 102,
+        "column": 65
+      }
+    },
+    {
+      "id": "fb564af15bbbf20-f66f7033debfd3c",
+      "title": "Edit transform edits a transform with latest configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/edit_clone/editing.spec.ts",
+        "line": 111,
+        "column": 7
+      }
+    },
+    {
+      "id": "b81650a915a77ce-77f67212b7191bf",
+      "title": "Transform list renders the list and opens the creation wizard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/list/transform_list.spec.ts",
+        "line": 13,
+        "column": 8
+      }
+    },
+    {
+      "id": "b81650a915a77ce-1b6e652b0b7b3e5",
+      "title": "Transform list is found through the global search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/list/transform_list.spec.ts",
+        "line": 24,
+        "column": 13
+      }
+    },
+    {
+      "id": "ff04c8de8396902-c1f2035d4d80ab3",
+      "title": "Transform list for a user with full access shows the transform with its actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/permissions/full_transform_access.spec.ts",
+        "line": 25,
+        "column": 58
+      }
+    },
+    {
+      "id": "1f5a1403d2291cb-9a572f97eb80626",
+      "title": "Transform list for a read-only user shows the transform with disabled actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/permissions/read_transform_access.spec.ts",
+        "line": 17,
+        "column": 56
+      }
+    },
+    {
+      "id": "d21df207fc37fe4-ba1f0c1dbe2f6b1",
+      "title": "Remove transform source data views",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}
