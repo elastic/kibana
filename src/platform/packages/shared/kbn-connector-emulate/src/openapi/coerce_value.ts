@@ -139,9 +139,10 @@ export const coerceValue = (
   if (isRecord(value)) {
     return Object.fromEntries(
       Object.entries(value).map(([key, item]) => {
-        const property = findSubschema(schema, document, ({ properties }) =>
-          isRecord(properties) ? properties[key] : undefined
-        );
+        const property =
+          findSubschema(schema, document, ({ properties }) =>
+            isRecord(properties) ? properties[key] : undefined
+          ) ?? findSubschema(schema, document, ({ additionalProperties }) => additionalProperties);
         return [key, coerceValue(item, property, document)];
       })
     );

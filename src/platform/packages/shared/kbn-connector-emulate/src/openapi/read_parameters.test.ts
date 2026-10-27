@@ -92,6 +92,27 @@ describe('readParameters', () => {
     });
   });
 
+  it('reads form-exploded objects from the query keys no other parameter takes', () => {
+    const parameters = [
+      { name: 'limit', in: 'query', schema: { type: 'integer' } },
+      {
+        name: 'labels',
+        in: 'query',
+        schema: { type: 'object', additionalProperties: { type: 'integer' } },
+      },
+    ];
+    const query = { limit: '5', env: '1', team: '2', 'contract-mock-page': '3' };
+
+    expect(read(parameters, { query })).toEqual({
+      'query.limit': 5,
+      'query.labels': { env: 1, team: 2 },
+    });
+    expect(read(parameters, { query: { limit: '5' } })).toEqual({
+      'query.limit': 5,
+      'query.labels': undefined,
+    });
+  });
+
   it.each([
     ['simple', false, '3,4'],
     ['label', false, '.3,4'],

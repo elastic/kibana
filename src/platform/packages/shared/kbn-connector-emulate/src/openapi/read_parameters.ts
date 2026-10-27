@@ -10,6 +10,9 @@
 import { coerceValue, getSchemaTypes } from './coerce_value';
 import type { ContractOperation, OperationParameter } from './types';
 
+/** The query parameter that selects the page in opaque next-page URLs the mock issues. */
+export const MOCK_PAGE_PARAM = 'contract-mock-page';
+
 export interface ParameterInput {
   readonly query: Readonly<Record<string, string | string[]>>;
   /** Header names are lowercase. */
@@ -62,11 +65,34 @@ const splitValue = (
   return value;
 };
 
-const readQuery = (
-  { name, style, explode }: OperationParameter,
-  query: ParameterInput['query'],
+/** Query keys that aren't operation parameters: the mock's page and API keys sent in the query. */
+export const nonParameterQueryKeys = ({ security }: ContractOperation): Set<string> =>
+  new Set([
+    MOCK_PAGE_PARAM,
+    ...security
+      .flat()
+      .flatMap(({ credential }) => (credential?.in === 'query' ? [credential.name] : [])),
+  ]);
+
+/** Whether a query parameter is an object sent as one query key per property (form, exploded). */
+export const spreadsQueryKeys = (
+  { in: location, style, explode }: OperationParameter,
   types: Set<string>
+): boolean =>
+  location === 'query' && style === 'form' && explode && types.has('object') && !types.has('array');
+
+const readQuery = (
+  parameter: OperationParameter,
+  query: ParameterInput['query'],
+  types: Set<string>,
+  claimed: ReadonlySet<string>
 ): unknown => {
+  const { name, style, explode } = parameter;
+  if (spreadsQueryKeys(parameter, types)) {
+    // The parameter's name isn't sent; every query key no other parameter claims is a property.
+    const entries = Object.entries(query).filter(([key]) => key === name || !claimed.has(key));
+    return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+  }
   if (style === 'deepObject') {
     const prefix = `${name}[`;
     const entries = Object.entries(query)
@@ -107,10 +133,15 @@ const parseCookies = (header = ''): Record<string, string> =>
       .filter(Boolean)
   );
 
-const readRaw = (parameter: OperationParameter, input: ParameterInput, types: Set<string>) => {
+const readRaw = (
+  parameter: OperationParameter,
+  input: ParameterInput,
+  types: Set<string>,
+  claimed: ReadonlySet<string>
+) => {
   const { name, in: location, explode } = parameter;
   if (location === 'query') {
-    return readQuery(parameter, input.query, types);
+    return readQuery(parameter, input.query, types, claimed);
   }
   if (location === 'path') {
     const value = input.pathParameters[name];
@@ -133,12 +164,22 @@ const readRaw = (parameter: OperationParameter, input: ParameterInput, types: Se
  * to its `style` and `explode` and converting it to the types of its schema.
  */
 export const readParameters = (
-  { parameters, spec: { document } }: ContractOperation,
+  operation: ContractOperation,
   input: ParameterInput
-): ReadParameter[] =>
-  parameters.map((parameter) => {
+): ReadParameter[] => {
+  const {
+    parameters,
+    spec: { document },
+  } = operation;
+  // Query keys with a meaning of their own, which form-exploded objects don't take.
+  const claimed = new Set([
+    ...nonParameterQueryKeys(operation),
+    ...parameters.flatMap(({ in: location, name }) => (location === 'query' ? [name] : [])),
+  ]);
+  return parameters.map((parameter) => {
     const schema = parameter.schema?.schema;
     const types = getSchemaTypes(schema, document);
-    const raw = readRaw(parameter, input, types);
+    const raw = readRaw(parameter, input, types, claimed);
     return { parameter, value: raw === undefined ? undefined : coerceValue(raw, schema, document) };
   });
+};
