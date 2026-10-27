@@ -16,7 +16,7 @@ export type Unit = StreamsUnit.GetResponse;
 
 export interface UnitRepository {
   load: () => Promise<Unit>;
-  persist: (unit: Unit) => Promise<Unit>;
+  persist: (unit: Unit, secrets?: StreamsUnit.Secrets) => Promise<Unit>;
 }
 
 const DEFAULT_SOURCE_ID = 'nop-input';
@@ -85,11 +85,11 @@ export const createUnitRepository = ({
       throw error;
     }
   },
-  persist: async (unit) => {
+  persist: async (unit, secrets) => {
     const response = await streamsRepositoryClient.fetch('PUT /internal/streams/unit/{id}', {
       params: {
         path: { id: unitId },
-        body: unit,
+        body: secrets ? { ...unit, secrets } : unit,
       },
       signal: null,
     });

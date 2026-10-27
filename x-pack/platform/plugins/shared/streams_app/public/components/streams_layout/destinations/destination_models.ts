@@ -16,9 +16,10 @@ import {
   AUTO_INDEX_PATTERNS,
   type AutoWritePatternValidationError,
   type DestinationSignal,
-  type DestinationType,
   type DestinationViewModel,
   type ElasticsearchDestinationFormData,
+  type ElasticsearchDestinationViewModel,
+  type S3DestinationViewModel,
   type StaticIndexValidationError,
 } from './types';
 
@@ -28,7 +29,7 @@ const MAX_INDEX_NAME_BYTES = 255;
 
 export type UnitDestination = NonNullable<StreamsUnit.Configuration['destinations']>[number];
 
-const LOCAL_ELASTICSEARCH_TYPE: DestinationType = 'elasticsearch';
+const LOCAL_ELASTICSEARCH_TYPE = 'elasticsearch' as const;
 
 export const DESTINATION_SIGNALS: DestinationSignal[] = ['logs', 'metrics', 'traces'];
 
@@ -195,7 +196,10 @@ export const getDestinationCreateSpecs = (
 };
 
 export const getDestinationWritePatterns = (
-  destination: Pick<DestinationViewModel, 'signals' | 'mode' | 'index' | 'indexPatterns'>
+  destination: Pick<
+    ElasticsearchDestinationViewModel,
+    'signals' | 'mode' | 'index' | 'indexPatterns'
+  >
 ): string[] => {
   if (destination.mode === 'auto' || !destination.index) {
     if (destination.indexPatterns?.length) {
@@ -206,9 +210,22 @@ export const getDestinationWritePatterns = (
   return [destination.index];
 };
 
+export const toS3DestinationViewModel = (destination: UnitDestination): S3DestinationViewModel => ({
+  id: destination.id,
+  name: destination.name ?? destination.id,
+  type: 's3',
+  signals: readDestinationSignals(destination),
+  bucket: readConfigString(destination, 'bucket') ?? '',
+  region: readConfigString(destination, 'region') ?? '',
+  prefix: readConfigString(destination, 'prefix'),
+});
+
 export const toDestinationViewModel = (
   destination: UnitDestination
 ): DestinationViewModel | undefined => {
+  if (destination.type === 's3') {
+    return toS3DestinationViewModel(destination);
+  }
   if (destination.type !== LOCAL_ELASTICSEARCH_TYPE) {
     return undefined;
   }
