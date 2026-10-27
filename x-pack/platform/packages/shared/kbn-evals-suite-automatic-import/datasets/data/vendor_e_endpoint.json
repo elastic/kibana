@@ -1,0 +1,771 @@
+{
+  "id": "vendor_e_endpoint",
+  "title": "Vendor E endpoint",
+  "description": "CyberArk Endpoint Privilege Manager raw events as JSON. Each event describes an application that ran or was blocked on an endpoint, with the file, hash, publisher, user, and the policy that applied.",
+  "cohort": "recent",
+  "format": "json",
+  "samples": [
+    {
+      "line": "{\"fileName\":\"java.exe\",\"originalFileName\":\"java.exe\",\"displayName\":\"Java(TM) Platform SE binary (java.exe)\",\"policyName\":null,\"hash\":\"B3F2AE7945E98A998D998E58771C649A7A8A6591\",\"publisher\":\"Oracle America, Inc.\",\"eventType\":\"Ransomware\",\"sourceType\":\"OldApplication\",\"sourceName\":\"Old Application\",\"lastEventDate\":\"2024-11-28T16:30:17.493Z\",\"firstEventDate\":\"2024-11-28T16:30:17.493Z\",\"userName\":\"NT SERVICE\\\\OracleServiceOEMREP\",\"justification\":null,\"justificationEmail\":null,\"fileSize\":207704,\"threatProtectionAction\":\"ALL\",\"threatProtectionActionId\":0,\"packageName\":\"Java(TM) Platform SE binary (java.exe)\",\"company\":\"Oracle Corporation\",\"filePath\":\"C:\\\\Oracle\\\\Database\\\\jdk\\\\bin\\\\java.exe\",\"filePathWithoutFilename\":\"C:\\\\Oracle\\\\Database\\\\jdk\\\\bin\\\\\",\"fileDescription\":\"Java(TM) Platform SE binary\",\"productName\":\"Java(TM) Platform SE 8\",\"productVersion\":\"8.0.201.9\",\"bundleName\":null,\"bundleVersion\":null,\"bundleId\":null,\"applicationSubType\":null,\"interpreter\":null,\"runAsUsername\":null,\"workingDirectory\":null,\"originUserUID\":null,\"fileAccessPermission\":null,\"symLink\":null,\"fileVersion\":\"8.0.201.9\",\"modificationTime\":\"2024-11-22T09:23:49.653Z\",\"userIsAdmin\":false,\"agentEventCount\":1,\"skippedCount\":0,\"eventCount\":1,\"accessAction\":\"true\",\"accessTargetType\":\"ransomware\",\"accessTargetName\":\"C:\\\\Oracle\\\\Database\\\\rdbms\\\\log\\\\opatch\\\\opatch_history.txt\",\"processCommandLine\":\"-cp \\\"\\\"C:\\\\Oracle\\\\Database\\\\OPatch\\\\ocm\\\\lib\\\\emocmclnt.jar;C:\\\\Oracle\\\\Database\\\\oui\\\\lib\\\\emCfg.jar;\\\"C:\\\\Oracle\\\\Database\\\\oui\\\\lib\\\\OraInstaller.jar;C:\\\\Oracle\\\\Database\\\\oui\\\\lib\\\\OraPrereq.jar;C:\\\\Oracle\\\\Database\\\\oui\\\\lib\\\\share.jar;C:\\\\Oracle\\\\Database\\\\oui\\\\lib\\\\orai18n-mapping.jar;C:\\\\Oracle\\\\Database\\\\oui\\\\lib\\\\xmlparserv2.jar;C:\\\\Oracle\\\\Database\\\\oui\\\\lib\\\\emCfg.jar;C:\\\\Oracle\\\\Database\\\\oui\\\\lib\\\\ojmisc.jar\\\";C:\\\\Oracle\\\\Database\\\\OPatch\\\\jlib\\\\opatch.jar;C:\\\\Oracle\\\\Database\\\\OPatch\\\\oplan\\\\jlib\\\\automation.jar;C:\\\\Oracle\\\\Database\\\\OPatch\\\\oplan\\\\jlib\\\\a\",\"sourceProcessCommandLine\":null,\"sourceProcessUsername\":null,\"sourceProcessHash\":null,\"sourceProcessPublisher\":null,\"sourceProcessSigner\":null,\"evidences\":null,\"exposedUsers\":null,\"owner\":\"BUILTIN\\\\Administrators\",\"fileQualifier\":\"-6278588088048327011\",\"sourceProcessCertificateIssuer\":null,\"processCertificateIssuer\":null,\"operatingSystemType\":\"Windows\",\"arrivalTime\":\"2024-11-28T17:00:19.381Z\",\"policyCategory\":null,\"deceptionType\":0,\"lureUser\":null,\"sourceWSName\":null,\"fatherProcess\":null,\"sourceWSIp\":null,\"winEventType\":0,\"winEventRecordId\":0,\"logonAttemptTypeId\":2,\"logonStatusId\":0,\"productCode\":null,\"upgradeCode\":null,\"authorizationRights\":null,\"agentId\":\"109f521d-2ee1-450b-9f71-3cc56d8ebf37\",\"computerName\":\"ELASTICTEST\"}",
+      "expected": {
+        "@timestamp": "2024-11-28T17:00:19.381Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "file": {
+          "directory": "C:\\Oracle\\Database\\jdk\\bin\\",
+          "hash": {
+            "sha1": "B3F2AE7945E98A998D998E58771C649A7A8A6591"
+          },
+          "mtime": "2024-11-22T09:23:49.653Z",
+          "name": "java.exe",
+          "owner": "Administrators",
+          "path": "C:\\Oracle\\Database\\jdk\\bin\\java.exe",
+          "size": 207704
+        },
+        "host": {
+          "name": "ELASTICTEST",
+          "os": {
+            "type": "windows"
+          }
+        },
+        "observer": {
+          "product": "Endpoint Privilege Manager",
+          "vendor": "CyberArk"
+        },
+        "organization": {
+          "name": "Oracle Corporation"
+        },
+        "package": {
+          "checksum": "B3F2AE7945E98A998D998E58771C649A7A8A6591",
+          "name": "Java(TM) Platform SE binary (java.exe)",
+          "size": 207704,
+          "version": "8.0.201.9"
+        },
+        "related": {
+          "hash": [
+            "B3F2AE7945E98A998D998E58771C649A7A8A6591"
+          ],
+          "hosts": [
+            "ELASTICTEST"
+          ],
+          "user": [
+            "Administrators",
+            "OracleServiceOEMREP"
+          ]
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "user": {
+          "domain": "NT SERVICE",
+          "name": "OracleServiceOEMREP"
+        },
+        "event": {
+          "action": "all",
+          "category": [
+            "malware"
+          ],
+          "end": "2024-11-28T16:30:17.493Z",
+          "kind": "event",
+          "start": "2024-11-28T16:30:17.493Z",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"fileName\":\"java.exe\",\"originalFileName\":\"java.exe\",\"displayName\":\"Java(TM) Platform SE binary (java.exe)\",\"policyName\":null,\"hash\":\"B3F2AE7945E98A998D998E58771C649A7A8A6591\",\"publisher\":\"Oracle America, Inc.\",\"eventType\":\"Launch\",\"sourceType\":\"OldApplication\",\"sourceName\":\"Old Application\",\"lastEventDate\":\"2024-11-28T16:30:14.078Z\",\"firstEventDate\":\"2024-11-28T16:30:14.078Z\",\"userName\":\"NT SERVICE\\\\OracleServiceOEMREP\",\"justification\":null,\"justificationEmail\":null,\"fileSize\":207704,\"threatProtectionAction\":\"ALL\",\"threatProtectionActionId\":0,\"packageName\":\"Java(TM) Platform SE binary (java.exe)\",\"company\":\"Oracle Corporation\",\"filePath\":\"C:\\\\Oracle\\\\Database\\\\jdk\\\\bin\\\\java.exe\",\"filePathWithoutFilename\":\"C:\\\\Oracle\\\\Database\\\\jdk\\\\bin\\\\\",\"fileDescription\":\"Java(TM) Platform SE binary\",\"productName\":\"Java(TM) Platform SE 8\",\"productVersion\":\"8.0.201.9\",\"bundleName\":null,\"bundleVersion\":null,\"bundleId\":null,\"applicationSubType\":null,\"interpreter\":null,\"runAsUsername\":null,\"workingDirectory\":null,\"originUserUID\":null,\"fileAccessPermission\":null,\"symLink\":null,\"fileVersion\":\"8.0.201.9\",\"modificationTime\":\"2024-11-22T09:23:49.653Z\",\"userIsAdmin\":false,\"agentEventCount\":1,\"skippedCount\":0,\"eventCount\":1,\"accessAction\":\"false\",\"accessTargetType\":\"Internet\",\"accessTargetName\":null,\"processCommandLine\":\"-cp \\\"\\\"C:\\\\Oracle\\\\Database\\\\OPatch\\\\ocm\\\\lib\\\\emocmclnt.jar;C:\\\\Oracle\\\\Database\\\\oui\\\\lib\\\\emCfg.jar;\\\"C:\\\\Oracle\\\\Database\\\\oui\\\\lib\\\\OraInstaller.jar;C:\\\\Oracle\\\\Database\\\\oui\\\\lib\\\\OraPrereq.jar;C:\\\\Oracle\\\\Database\\\\oui\\\\lib\\\\share.jar;C:\\\\Oracle\\\\Database\\\\oui\\\\lib\\\\orai18n-mapping.jar;C:\\\\Oracle\\\\Database\\\\oui\\\\lib\\\\xmlparserv2.jar;C:\\\\Oracle\\\\Database\\\\oui\\\\lib\\\\emCfg.jar;C:\\\\Oracle\\\\Database\\\\oui\\\\lib\\\\ojmisc.jar\\\";C:\\\\Oracle\\\\Database\\\\OPatch\\\\jlib\\\\opatch.jar;C:\\\\Oracle\\\\Database\\\\OPatch\\\\oplan\\\\jlib\\\\automation.jar;C:\\\\Oracle\\\\Database\\\\OPatch\\\\oplan\\\\jlib\\\\a\",\"sourceProcessCommandLine\":null,\"sourceProcessUsername\":null,\"sourceProcessHash\":null,\"sourceProcessPublisher\":null,\"sourceProcessSigner\":null,\"evidences\":null,\"exposedUsers\":null,\"owner\":\"BUILTIN\\\\Administrators\",\"fileQualifier\":\"-6278588088048327011\",\"sourceProcessCertificateIssuer\":null,\"processCertificateIssuer\":null,\"operatingSystemType\":\"Windows\",\"arrivalTime\":\"2024-11-28T16:30:15.882Z\",\"policyCategory\":null,\"deceptionType\":0,\"lureUser\":null,\"sourceWSName\":null,\"fatherProcess\":null,\"sourceWSIp\":null,\"winEventType\":0,\"winEventRecordId\":0,\"logonAttemptTypeId\":3,\"logonStatusId\":0,\"productCode\":null,\"upgradeCode\":null,\"authorizationRights\":null,\"agentId\":\"109f521d-2ee1-450b-9f71-3cc56d8ebf37\",\"computerName\":\"ELASTICTEST\"}",
+      "expected": {
+        "@timestamp": "2024-11-28T16:30:15.882Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "file": {
+          "directory": "C:\\Oracle\\Database\\jdk\\bin\\",
+          "hash": {
+            "sha1": "B3F2AE7945E98A998D998E58771C649A7A8A6591"
+          },
+          "mtime": "2024-11-22T09:23:49.653Z",
+          "name": "java.exe",
+          "owner": "Administrators",
+          "path": "C:\\Oracle\\Database\\jdk\\bin\\java.exe",
+          "size": 207704
+        },
+        "host": {
+          "name": "ELASTICTEST",
+          "os": {
+            "type": "windows"
+          }
+        },
+        "observer": {
+          "product": "Endpoint Privilege Manager",
+          "vendor": "CyberArk"
+        },
+        "organization": {
+          "name": "Oracle Corporation"
+        },
+        "package": {
+          "checksum": "B3F2AE7945E98A998D998E58771C649A7A8A6591",
+          "name": "Java(TM) Platform SE binary (java.exe)",
+          "size": 207704,
+          "version": "8.0.201.9"
+        },
+        "related": {
+          "hash": [
+            "B3F2AE7945E98A998D998E58771C649A7A8A6591"
+          ],
+          "hosts": [
+            "ELASTICTEST"
+          ],
+          "user": [
+            "Administrators",
+            "OracleServiceOEMREP"
+          ]
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "user": {
+          "domain": "NT SERVICE",
+          "name": "OracleServiceOEMREP"
+        },
+        "event": {
+          "action": "all",
+          "category": [
+            "process"
+          ],
+          "end": "2024-11-28T16:30:14.078Z",
+          "kind": "event",
+          "start": "2024-11-28T16:30:14.078Z",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"fileName\":\"conhost.exe\",\"originalFileName\":\"CONHOST.EXE\",\"displayName\":\"Console Window Host (conhost.exe)\",\"policyName\":null,\"hash\":\"C09AA822157967C4A27728F5C33D0226C2889954\",\"publisher\":\"Microsoft Windows\",\"eventType\":\"DetectAccess\",\"sourceType\":\"Windows\",\"sourceName\":\"Microsoft Windows\",\"lastEventDate\":\"2024-11-28T16:30:12.725Z\",\"firstEventDate\":\"2024-11-28T16:30:12.725Z\",\"userName\":\"NT SERVICE\\\\OracleServiceOEMREP\",\"justification\":null,\"justificationEmail\":null,\"fileSize\":823296,\"threatProtectionAction\":\"ALL\",\"threatProtectionActionId\":0,\"packageName\":\"Console Window Host (conhost.exe)\",\"company\":\"Microsoft Corporation\",\"filePath\":\"C:\\\\Windows\\\\System32\\\\conhost.exe\",\"filePathWithoutFilename\":\"C:\\\\Windows\\\\System32\\\\\",\"fileDescription\":\"Console Window Host\",\"productName\":\"Microsoft® Windows® Operating System\",\"productVersion\":\"10.0.17763.4840\",\"bundleName\":null,\"bundleVersion\":null,\"bundleId\":null,\"applicationSubType\":null,\"interpreter\":null,\"runAsUsername\":null,\"workingDirectory\":null,\"originUserUID\":null,\"fileAccessPermission\":null,\"symLink\":null,\"fileVersion\":\"10.0.17763.4840\",\"modificationTime\":\"2024-10-29T16:30:15.31Z\",\"userIsAdmin\":false,\"agentEventCount\":1,\"skippedCount\":0,\"eventCount\":1,\"accessAction\":\"true\",\"accessTargetType\":\"ProcessMemory\",\"accessTargetName\":\"C:\\\\Windows\\\\System32\\\\cmd.exe\",\"processCommandLine\":\"0xffffffff -ForceV1\",\"sourceProcessCommandLine\":null,\"sourceProcessUsername\":null,\"sourceProcessHash\":null,\"sourceProcessPublisher\":null,\"sourceProcessSigner\":null,\"evidences\":null,\"exposedUsers\":null,\"owner\":\"NT SERVICE\\\\TrustedInstaller\",\"fileQualifier\":\"7071500510605240154\",\"sourceProcessCertificateIssuer\":null,\"processCertificateIssuer\":null,\"operatingSystemType\":\"Windows\",\"arrivalTime\":\"2024-11-28T16:30:15.366Z\",\"policyCategory\":null,\"deceptionType\":0,\"lureUser\":null,\"sourceWSName\":null,\"fatherProcess\":null,\"sourceWSIp\":null,\"winEventType\":0,\"winEventRecordId\":0,\"logonAttemptTypeId\":3,\"logonStatusId\":3221225692,\"productCode\":null,\"upgradeCode\":null,\"authorizationRights\":null,\"agentId\":\"109f521d-2ee1-450b-9f71-3cc56d8ebf37\",\"computerName\":\"ELASTICTEST\"}",
+      "expected": {
+        "@timestamp": "2024-11-28T16:30:15.366Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "file": {
+          "directory": "C:\\Windows\\System32\\",
+          "hash": {
+            "sha1": "C09AA822157967C4A27728F5C33D0226C2889954"
+          },
+          "mtime": "2024-10-29T16:30:15.310Z",
+          "name": "conhost.exe",
+          "owner": "TrustedInstaller",
+          "path": "C:\\Windows\\System32\\conhost.exe",
+          "size": 823296
+        },
+        "host": {
+          "name": "ELASTICTEST",
+          "os": {
+            "type": "windows"
+          }
+        },
+        "observer": {
+          "product": "Endpoint Privilege Manager",
+          "vendor": "CyberArk"
+        },
+        "organization": {
+          "name": "Microsoft Corporation"
+        },
+        "package": {
+          "checksum": "C09AA822157967C4A27728F5C33D0226C2889954",
+          "name": "Console Window Host (conhost.exe)",
+          "size": 823296,
+          "version": "10.0.17763.4840"
+        },
+        "related": {
+          "hash": [
+            "C09AA822157967C4A27728F5C33D0226C2889954"
+          ],
+          "hosts": [
+            "ELASTICTEST"
+          ],
+          "user": [
+            "TrustedInstaller",
+            "OracleServiceOEMREP"
+          ]
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "user": {
+          "domain": "NT SERVICE",
+          "name": "OracleServiceOEMREP"
+        },
+        "event": {
+          "action": "all",
+          "category": [
+            "iam"
+          ],
+          "end": "2024-11-28T16:30:12.725Z",
+          "kind": "event",
+          "start": "2024-11-28T16:30:12.725Z",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"fileName\":\"setup_em13200p1_win64.exe\",\"originalFileName\":\"ouiSFX.EXE\",\"displayName\":\"GUI self extractor (setup_em13200p1_win64.exe)\",\"policyName\":\"test-rule3\",\"hash\":\"E110E5B6E1E9D27BCA13EE6793B228A9D2AFEB4B\",\"publisher\":\"\",\"eventType\":\"Ransomware\",\"sourceType\":\"OldApplication\",\"sourceName\":\"Old Application\",\"lastEventDate\":\"2024-11-28T05:36:15.907Z\",\"firstEventDate\":\"2024-11-28T05:36:15.907Z\",\"userName\":\"TEST-PC\\\\Administrator\",\"justification\":null,\"justificationEmail\":null,\"fileSize\":444756247,\"threatProtectionAction\":\"ALL\",\"threatProtectionActionId\":0,\"packageName\":\"GUI self extractor (setup_em13200p1_win64.exe)\",\"company\":\"Oracle, Inc.\",\"filePath\":\"C:\\\\Oracle_OEM\\\\setup_em13200p1_win64.exe\",\"filePathWithoutFilename\":\"C:\\\\Oracle_OEM\\\\\",\"fileDescription\":\"GUI self extractor\",\"productName\":\"ouiSFX\",\"productVersion\":\"1.0.0.1\",\"bundleName\":null,\"bundleVersion\":null,\"bundleId\":null,\"applicationSubType\":null,\"interpreter\":null,\"runAsUsername\":null,\"workingDirectory\":null,\"originUserUID\":null,\"fileAccessPermission\":null,\"symLink\":null,\"fileVersion\":\"1.0.0.1\",\"modificationTime\":\"2024-11-18T05:54:15.41Z\",\"userIsAdmin\":true,\"agentEventCount\":1,\"skippedCount\":0,\"eventCount\":1,\"accessAction\":\"true\",\"accessTargetType\":\"ransomware\",\"accessTargetName\":\"C:\\\\Users\\\\TEMP\\\\AppData\\\\Local\\\\Temp\\\\2\\\\sfx9D4B.tmp\\\\Disk1\\\\stage\\\\Components\\\\oracle.rcu.doc\",\"processCommandLine\":null,\"sourceProcessCommandLine\":null,\"sourceProcessUsername\":null,\"sourceProcessHash\":null,\"sourceProcessPublisher\":null,\"sourceProcessSigner\":null,\"evidences\":null,\"exposedUsers\":null,\"owner\":\"BUILTIN\\\\Administrators\",\"fileQualifier\":\"8641449963969277268\",\"sourceProcessCertificateIssuer\":null,\"processCertificateIssuer\":null,\"operatingSystemType\":\"Windows\",\"arrivalTime\":\"2024-11-28T05:54:09.754Z\",\"policyCategory\":null,\"deceptionType\":0,\"lureUser\":null,\"sourceWSName\":null,\"fatherProcess\":null,\"sourceWSIp\":null,\"winEventType\":0,\"winEventRecordId\":0,\"logonAttemptTypeId\":4,\"logonStatusId\":3221225692,\"productCode\":null,\"upgradeCode\":null,\"authorizationRights\":null,\"agentId\":\"109f521d-2ee1-450b-9f71-3cc56d8ebf37\",\"computerName\":\"TEST-PC\"}",
+      "expected": {
+        "@timestamp": "2024-11-28T05:54:09.754Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "file": {
+          "directory": "C:\\Oracle_OEM\\",
+          "hash": {
+            "sha1": "E110E5B6E1E9D27BCA13EE6793B228A9D2AFEB4B"
+          },
+          "mtime": "2024-11-18T05:54:15.410Z",
+          "name": "setup_em13200p1_win64.exe",
+          "owner": "Administrators",
+          "path": "C:\\Oracle_OEM\\setup_em13200p1_win64.exe",
+          "size": 444756247
+        },
+        "host": {
+          "name": "TEST-PC",
+          "os": {
+            "type": "windows"
+          }
+        },
+        "observer": {
+          "product": "Endpoint Privilege Manager",
+          "vendor": "CyberArk"
+        },
+        "organization": {
+          "name": "Oracle, Inc."
+        },
+        "package": {
+          "checksum": "E110E5B6E1E9D27BCA13EE6793B228A9D2AFEB4B",
+          "name": "GUI self extractor (setup_em13200p1_win64.exe)",
+          "size": 444756247,
+          "version": "1.0.0.1"
+        },
+        "related": {
+          "hash": [
+            "E110E5B6E1E9D27BCA13EE6793B228A9D2AFEB4B"
+          ],
+          "hosts": [
+            "TEST-PC"
+          ],
+          "user": [
+            "Administrators",
+            "Administrator"
+          ]
+        },
+        "rule": {
+          "name": "test-rule3"
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "user": {
+          "domain": "TEST-PC",
+          "name": "Administrator"
+        },
+        "event": {
+          "action": "all",
+          "category": [
+            "malware"
+          ],
+          "end": "2024-11-28T05:36:15.907Z",
+          "kind": "event",
+          "start": "2024-11-28T05:36:15.907Z",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"fileName\":\"rundll32.exe\",\"originalFileName\":\"RUNDLL32.EXE\",\"displayName\":\"Windows host process (Rundll32) (rundll32.exe)\",\"policyName\":\"test-rule2\",\"hash\":\"A40886F98905F3D9DBDD61DA1D59CCB4F4854758\",\"publisher\":\"Microsoft Windows\",\"eventType\":\"Launch\",\"sourceType\":\"Windows\",\"sourceName\":\"Microsoft Windows\",\"lastEventDate\":\"2024-11-28T05:03:10.094Z\",\"firstEventDate\":\"2024-11-28T05:03:10.094Z\",\"userName\":\"TEST-PC\\\\Administrator\",\"justification\":null,\"justificationEmail\":null,\"fileSize\":71168,\"threatProtectionAction\":\"ALL\",\"threatProtectionActionId\":0,\"packageName\":\"Windows host process (Rundll32) (rundll32.exe)\",\"company\":\"Microsoft Corporation\",\"filePath\":\"C:\\\\Windows\\\\System32\\\\rundll32.exe\",\"filePathWithoutFilename\":\"C:\\\\Windows\\\\System32\\\\\",\"fileDescription\":\"Windows host process (Rundll32)\",\"productName\":\"Microsoft® Windows® Operating System\",\"productVersion\":\"10.0.17763.1697\",\"bundleName\":null,\"bundleVersion\":null,\"bundleId\":null,\"applicationSubType\":null,\"interpreter\":null,\"runAsUsername\":null,\"workingDirectory\":null,\"originUserUID\":null,\"fileAccessPermission\":null,\"symLink\":null,\"fileVersion\":\"10.0.17763.1697\",\"modificationTime\":\"2024-10-29T05:24:15.618Z\",\"userIsAdmin\":true,\"agentEventCount\":1,\"skippedCount\":0,\"eventCount\":1,\"accessAction\":\"false\",\"accessTargetType\":\"Internet\",\"accessTargetName\":null,\"processCommandLine\":\"Startupscan.dll,SusRunTask\",\"sourceProcessCommandLine\":null,\"sourceProcessUsername\":null,\"sourceProcessHash\":null,\"sourceProcessPublisher\":null,\"sourceProcessSigner\":null,\"evidences\":null,\"exposedUsers\":null,\"owner\":\"NT SERVICE\\\\TrustedInstaller\",\"fileQualifier\":\"-6929158130464282036\",\"sourceProcessCertificateIssuer\":null,\"processCertificateIssuer\":null,\"operatingSystemType\":\"Windows\",\"arrivalTime\":\"2024-11-28T05:24:15.693Z\",\"policyCategory\":null,\"deceptionType\":0,\"lureUser\":null,\"sourceWSName\":null,\"fatherProcess\":null,\"sourceWSIp\":null,\"winEventType\":0,\"winEventRecordId\":0,\"logonAttemptTypeId\":5,\"logonStatusId\":3221225779,\"productCode\":null,\"upgradeCode\":null,\"authorizationRights\":null,\"agentId\":\"109f521d-2ee1-450b-9f71-3cc56d8ebf37\",\"computerName\":\"TEST-PC\"}",
+      "expected": {
+        "@timestamp": "2024-11-28T05:24:15.693Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "file": {
+          "directory": "C:\\Windows\\System32\\",
+          "hash": {
+            "sha1": "A40886F98905F3D9DBDD61DA1D59CCB4F4854758"
+          },
+          "mtime": "2024-10-29T05:24:15.618Z",
+          "name": "rundll32.exe",
+          "owner": "TrustedInstaller",
+          "path": "C:\\Windows\\System32\\rundll32.exe",
+          "size": 71168
+        },
+        "host": {
+          "name": "TEST-PC",
+          "os": {
+            "type": "windows"
+          }
+        },
+        "observer": {
+          "product": "Endpoint Privilege Manager",
+          "vendor": "CyberArk"
+        },
+        "organization": {
+          "name": "Microsoft Corporation"
+        },
+        "package": {
+          "checksum": "A40886F98905F3D9DBDD61DA1D59CCB4F4854758",
+          "name": "Windows host process (Rundll32) (rundll32.exe)",
+          "size": 71168,
+          "version": "10.0.17763.1697"
+        },
+        "related": {
+          "hash": [
+            "A40886F98905F3D9DBDD61DA1D59CCB4F4854758"
+          ],
+          "hosts": [
+            "TEST-PC"
+          ],
+          "user": [
+            "TrustedInstaller",
+            "Administrator"
+          ]
+        },
+        "rule": {
+          "name": "test-rule2"
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "user": {
+          "domain": "TEST-PC",
+          "name": "Administrator"
+        },
+        "event": {
+          "action": "all",
+          "category": [
+            "process"
+          ],
+          "end": "2024-11-28T05:03:10.094Z",
+          "kind": "event",
+          "start": "2024-11-28T05:03:10.094Z",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"fileName\":\"cat\",\"originalFileName\":\"\",\"displayName\":\"cat\",\"policyName\":\"test-rule2\",\"hash\":\"11476a8d71be2c4af52fc895f818075889fdef49\",\"publisher\":\"\",\"eventType\":\"ElevationRequest\",\"sourceType\":\"LocalDisk\",\"sourceName\":\"/usr/bin/cat\",\"lastEventDate\":\"2024-11-26T07:03:45.652Z\",\"firstEventDate\":\"2024-11-26T07:03:45.652Z\",\"userName\":\"serviceuser\",\"justification\":null,\"justificationEmail\":null,\"fileSize\":35288,\"threatProtectionAction\":\"ALL\",\"threatProtectionActionId\":0,\"packageName\":\"cat\",\"company\":null,\"filePath\":\"/usr/bin/cat\",\"filePathWithoutFilename\":\"/usr/bin/\",\"fileDescription\":\"cat\",\"productName\":null,\"productVersion\":null,\"bundleName\":null,\"bundleVersion\":null,\"bundleId\":null,\"applicationSubType\":null,\"interpreter\":\"\",\"runAsUsername\":\"root\",\"workingDirectory\":\"/opt/jb\",\"originUserUID\":\"1000\",\"fileAccessPermission\":\"-rwxr-xr-x\",\"symLink\":\"\",\"fileVersion\":null,\"modificationTime\":\"2024-10-27T07:27:52.935Z\",\"userIsAdmin\":false,\"agentEventCount\":1,\"skippedCount\":0,\"eventCount\":1,\"accessAction\":\"false\",\"accessTargetType\":\"Internet\",\"accessTargetName\":null,\"processCommandLine\":\"response.xml\",\"sourceProcessCommandLine\":null,\"sourceProcessUsername\":null,\"sourceProcessHash\":null,\"sourceProcessPublisher\":null,\"sourceProcessSigner\":null,\"evidences\":null,\"exposedUsers\":null,\"owner\":\"root\",\"fileQualifier\":\"-7546146239871812252\",\"sourceProcessCertificateIssuer\":null,\"processCertificateIssuer\":null,\"operatingSystemType\":\"Linux\",\"arrivalTime\":\"2024-11-26T07:27:53.002Z\",\"policyCategory\":null,\"deceptionType\":0,\"lureUser\":null,\"sourceWSName\":null,\"fatherProcess\":null,\"sourceWSIp\":null,\"winEventType\":0,\"winEventRecordId\":0,\"logonAttemptTypeId\":8,\"logonStatusId\":3221225584,\"productCode\":null,\"upgradeCode\":null,\"authorizationRights\":null,\"agentId\":\"48b4bf28-5257-4460-a384-9aac70fb7db2\",\"computerName\":\"k8sworker1-50-2-19\"}",
+      "expected": {
+        "@timestamp": "2024-11-26T07:27:53.002Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "file": {
+          "directory": "/usr/bin/",
+          "hash": {
+            "sha1": "11476a8d71be2c4af52fc895f818075889fdef49"
+          },
+          "mode": "755",
+          "mtime": "2024-10-27T07:27:52.935Z",
+          "name": "cat",
+          "owner": "root",
+          "path": "/usr/bin/cat",
+          "size": 35288
+        },
+        "host": {
+          "name": "k8sworker1-50-2-19",
+          "os": {
+            "type": "linux"
+          }
+        },
+        "observer": {
+          "product": "Endpoint Privilege Manager",
+          "vendor": "CyberArk"
+        },
+        "package": {
+          "checksum": "11476a8d71be2c4af52fc895f818075889fdef49",
+          "name": "cat",
+          "size": 35288
+        },
+        "process": {
+          "working_directory": "/opt/jb"
+        },
+        "related": {
+          "hash": [
+            "11476a8d71be2c4af52fc895f818075889fdef49"
+          ],
+          "hosts": [
+            "k8sworker1-50-2-19"
+          ],
+          "user": [
+            "1000",
+            "root",
+            "serviceuser"
+          ]
+        },
+        "rule": {
+          "name": "test-rule2"
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "user": {
+          "id": "1000",
+          "name": "serviceuser"
+        },
+        "event": {
+          "action": "all",
+          "category": [
+            "iam"
+          ],
+          "end": "2024-11-26T07:03:45.652Z",
+          "kind": "event",
+          "start": "2024-11-26T07:03:45.652Z",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"fileName\":\"lesspipe\",\"originalFileName\":\"\",\"displayName\":\"lesspipe\",\"policyName\":\"test-rule1\",\"hash\":\"5629b219107447a0bd948100e5eafd82180eba4b\",\"publisher\":\"\",\"eventType\":\"ElevationRequest\",\"sourceType\":\"LocalDisk\",\"sourceName\":\"/usr/bin/lesspipe\",\"lastEventDate\":\"2024-11-25T10:37:10.854Z\",\"firstEventDate\":\"2024-11-25T10:37:10.854Z\",\"userName\":\"serviceuser\",\"justification\":null,\"justificationEmail\":null,\"fileSize\":9047,\"threatProtectionAction\":\"ALL\",\"threatProtectionActionId\":0,\"packageName\":\"lesspipe\",\"company\":null,\"filePath\":\"/usr/bin/lesspipe\",\"filePathWithoutFilename\":\"/usr/bin/\",\"fileDescription\":\"lesspipe\",\"productName\":null,\"productVersion\":null,\"bundleName\":null,\"bundleVersion\":null,\"bundleId\":null,\"applicationSubType\":null,\"interpreter\":\"/bin/sh\",\"runAsUsername\":\"root\",\"workingDirectory\":\"/home/serviceuser\",\"originUserUID\":\"1000\",\"fileAccessPermission\":\"-rwxr-xr-x\",\"symLink\":\"\",\"fileVersion\":null,\"modificationTime\":\"2024-10-26T10:57:52.471Z\",\"userIsAdmin\":false,\"agentEventCount\":1,\"skippedCount\":0,\"eventCount\":1,\"accessAction\":\"false\",\"accessTargetType\":\"Internet\",\"accessTargetName\":null,\"processCommandLine\":null,\"sourceProcessCommandLine\":null,\"sourceProcessUsername\":null,\"sourceProcessHash\":null,\"sourceProcessPublisher\":null,\"sourceProcessSigner\":null,\"evidences\":null,\"exposedUsers\":null,\"owner\":\"root\",\"fileQualifier\":\"6438490242212027651\",\"sourceProcessCertificateIssuer\":null,\"processCertificateIssuer\":null,\"operatingSystemType\":\"Linux\",\"arrivalTime\":\"2024-11-25T10:57:52.532Z\",\"policyCategory\":null,\"deceptionType\":0,\"lureUser\":null,\"sourceWSName\":null,\"fatherProcess\":null,\"sourceWSIp\":null,\"winEventType\":0,\"winEventRecordId\":0,\"logonAttemptTypeId\":10,\"logonStatusId\":3221225583,\"productCode\":null,\"upgradeCode\":null,\"authorizationRights\":null,\"agentId\":\"48b4bf28-5257-4460-a384-9aac70fb7db2\",\"computerName\":\"k8sworker1-50-2-19\"}",
+      "expected": {
+        "@timestamp": "2024-11-25T10:57:52.532Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "file": {
+          "directory": "/usr/bin/",
+          "hash": {
+            "sha1": "5629b219107447a0bd948100e5eafd82180eba4b"
+          },
+          "mode": "755",
+          "mtime": "2024-10-26T10:57:52.471Z",
+          "name": "lesspipe",
+          "owner": "root",
+          "path": "/usr/bin/lesspipe",
+          "size": 9047
+        },
+        "host": {
+          "name": "k8sworker1-50-2-19",
+          "os": {
+            "type": "linux"
+          }
+        },
+        "observer": {
+          "product": "Endpoint Privilege Manager",
+          "vendor": "CyberArk"
+        },
+        "package": {
+          "checksum": "5629b219107447a0bd948100e5eafd82180eba4b",
+          "name": "lesspipe",
+          "size": 9047
+        },
+        "process": {
+          "working_directory": "/home/serviceuser"
+        },
+        "related": {
+          "hash": [
+            "5629b219107447a0bd948100e5eafd82180eba4b"
+          ],
+          "hosts": [
+            "k8sworker1-50-2-19"
+          ],
+          "user": [
+            "1000",
+            "root",
+            "serviceuser"
+          ]
+        },
+        "rule": {
+          "name": "test-rule1"
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "user": {
+          "id": "1000",
+          "name": "serviceuser"
+        },
+        "event": {
+          "action": "all",
+          "category": [
+            "iam"
+          ],
+          "end": "2024-11-25T10:37:10.854Z",
+          "kind": "event",
+          "start": "2024-11-25T10:37:10.854Z",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"fileName\":\"vim.basic\",\"originalFileName\":\"\",\"displayName\":\"vi\",\"policyName\":\"elastic-test\",\"hash\":\"f9768088a3fa037ba980693e06f0be2e00436e32\",\"publisher\":\"\",\"eventType\":\"ElevationRequest\",\"sourceType\":\"LocalDisk\",\"sourceName\":\"/usr/bin/vim.basic\",\"lastEventDate\":\"2024-11-26T11:38:51.138Z\",\"firstEventDate\":\"2024-11-26T11:38:36.785Z\",\"userName\":\"devuser\",\"justification\":null,\"justificationEmail\":null,\"fileSize\":3787824,\"threatProtectionAction\":\"ALL\",\"threatProtectionActionId\":0,\"packageName\":\"vi (vim.basic)\",\"company\":null,\"filePath\":\"/usr/bin/vim.basic\",\"filePathWithoutFilename\":\"/usr/bin/\",\"fileDescription\":\"vi\",\"productName\":null,\"productVersion\":null,\"bundleName\":null,\"bundleVersion\":null,\"bundleId\":null,\"applicationSubType\":null,\"interpreter\":\"\",\"runAsUsername\":\"root\",\"workingDirectory\":\"/home/devuser\",\"originUserUID\":\"1001\",\"fileAccessPermission\":\"-rwxr-xr-x\",\"symLink\":\"vi\",\"fileVersion\":null,\"modificationTime\":\"2024-10-27T11:58:47.333Z\",\"userIsAdmin\":false,\"agentEventCount\":2,\"skippedCount\":0,\"eventCount\":2,\"accessAction\":\"false\",\"accessTargetType\":\"Internet\",\"accessTargetName\":null,\"processCommandLine\":\"jb\",\"sourceProcessCommandLine\":null,\"sourceProcessUsername\":null,\"sourceProcessHash\":null,\"sourceProcessPublisher\":null,\"sourceProcessSigner\":null,\"evidences\":null,\"exposedUsers\":null,\"owner\":\"root\",\"fileQualifier\":\"-855626846772433102\",\"sourceProcessCertificateIssuer\":null,\"processCertificateIssuer\":null,\"operatingSystemType\":\"Linux\",\"arrivalTime\":\"2024-11-26T11:58:47.53Z\",\"policyCategory\":null,\"deceptionType\":0,\"lureUser\":null,\"sourceWSName\":null,\"fatherProcess\":null,\"sourceWSIp\":null,\"winEventType\":0,\"winEventRecordId\":0,\"logonAttemptTypeId\":8,\"logonStatusId\":3221225581,\"productCode\":null,\"upgradeCode\":null,\"authorizationRights\":null,\"agentId\":\"4f5d03a7-0b42-455c-8afd-226423cc34b1\",\"computerName\":\"k8smaster-50-2-72\"}",
+      "expected": {
+        "@timestamp": "2024-11-26T11:58:47.530Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "file": {
+          "directory": "/usr/bin/",
+          "hash": {
+            "sha1": "f9768088a3fa037ba980693e06f0be2e00436e32"
+          },
+          "mode": "755",
+          "mtime": "2024-10-27T11:58:47.333Z",
+          "name": "vim.basic",
+          "owner": "root",
+          "path": "/usr/bin/vim.basic",
+          "size": 3787824,
+          "target_path": "vi"
+        },
+        "host": {
+          "name": "k8smaster-50-2-72",
+          "os": {
+            "type": "linux"
+          }
+        },
+        "observer": {
+          "product": "Endpoint Privilege Manager",
+          "vendor": "CyberArk"
+        },
+        "package": {
+          "checksum": "f9768088a3fa037ba980693e06f0be2e00436e32",
+          "name": "vi (vim.basic)",
+          "size": 3787824
+        },
+        "process": {
+          "working_directory": "/home/devuser"
+        },
+        "related": {
+          "hash": [
+            "f9768088a3fa037ba980693e06f0be2e00436e32"
+          ],
+          "hosts": [
+            "k8smaster-50-2-72"
+          ],
+          "user": [
+            "1001",
+            "root",
+            "devuser"
+          ]
+        },
+        "rule": {
+          "name": "elastic-test"
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "user": {
+          "id": "1001",
+          "name": "devuser"
+        },
+        "event": {
+          "action": "all",
+          "category": [
+            "iam"
+          ],
+          "end": "2024-11-26T11:38:51.138Z",
+          "kind": "event",
+          "start": "2024-11-26T11:38:36.785Z",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"fileName\":\"epmcli\",\"originalFileName\":\"\",\"displayName\":\"epmcli\",\"policyName\":\"elastic-test\",\"hash\":\"370e5e8d7b69d40987abc081107a2f9692f37eb2\",\"publisher\":\"\",\"eventType\":\"ElevationRequest\",\"sourceType\":\"LocalDisk\",\"sourceName\":\"/opt/cyberark/epm/bin/epmcli\",\"lastEventDate\":\"2024-11-26T06:27:33.292Z\",\"firstEventDate\":\"2024-11-26T06:27:33.292Z\",\"userName\":\"serviceuser\",\"justification\":null,\"justificationEmail\":null,\"fileSize\":25071456,\"threatProtectionAction\":\"ALL\",\"threatProtectionActionId\":0,\"packageName\":\"epmcli\",\"company\":null,\"filePath\":\"/opt/cyberark/epm/bin/epmcli\",\"filePathWithoutFilename\":\"/opt/cyberark/epm/bin/\",\"fileDescription\":\"epmcli\",\"productName\":null,\"productVersion\":null,\"bundleName\":null,\"bundleVersion\":null,\"bundleId\":null,\"applicationSubType\":null,\"interpreter\":\"\",\"runAsUsername\":\"root\",\"workingDirectory\":\"/home/serviceuser\",\"originUserUID\":\"1000\",\"fileAccessPermission\":\"-r-x-----x\",\"symLink\":\"epmcli\",\"fileVersion\":null,\"modificationTime\":\"2024-10-27T06:28:46.476Z\",\"userIsAdmin\":false,\"agentEventCount\":1,\"skippedCount\":0,\"eventCount\":1,\"accessAction\":\"false\",\"accessTargetType\":\"Internet\",\"accessTargetName\":null,\"processCommandLine\":\"--status\",\"sourceProcessCommandLine\":null,\"sourceProcessUsername\":null,\"sourceProcessHash\":null,\"sourceProcessPublisher\":null,\"sourceProcessSigner\":null,\"evidences\":null,\"exposedUsers\":null,\"owner\":\"root\",\"fileQualifier\":\"7066875711815115493\",\"sourceProcessCertificateIssuer\":null,\"processCertificateIssuer\":null,\"operatingSystemType\":\"Linux\",\"arrivalTime\":\"2024-11-26T06:28:46.558Z\",\"policyCategory\":null,\"deceptionType\":0,\"lureUser\":null,\"sourceWSName\":null,\"fatherProcess\":null,\"sourceWSIp\":null,\"winEventType\":0,\"winEventRecordId\":0,\"logonAttemptTypeId\":9,\"logonStatusId\":3221225581,\"productCode\":null,\"upgradeCode\":null,\"authorizationRights\":null,\"agentId\":\"4f5d03a7-0b42-455c-8afd-226423cc34b1\",\"computerName\":\"k8smaster-50-2-72\"}",
+      "expected": {
+        "@timestamp": "2024-11-26T06:28:46.558Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "file": {
+          "directory": "/opt/cyberark/epm/bin/",
+          "hash": {
+            "sha1": "370e5e8d7b69d40987abc081107a2f9692f37eb2"
+          },
+          "mode": "501",
+          "mtime": "2024-10-27T06:28:46.476Z",
+          "name": "epmcli",
+          "owner": "root",
+          "path": "/opt/cyberark/epm/bin/epmcli",
+          "size": 25071456,
+          "target_path": "epmcli"
+        },
+        "host": {
+          "name": "k8smaster-50-2-72",
+          "os": {
+            "type": "linux"
+          }
+        },
+        "observer": {
+          "product": "Endpoint Privilege Manager",
+          "vendor": "CyberArk"
+        },
+        "package": {
+          "checksum": "370e5e8d7b69d40987abc081107a2f9692f37eb2",
+          "name": "epmcli",
+          "size": 25071456
+        },
+        "process": {
+          "working_directory": "/home/serviceuser"
+        },
+        "related": {
+          "hash": [
+            "370e5e8d7b69d40987abc081107a2f9692f37eb2"
+          ],
+          "hosts": [
+            "k8smaster-50-2-72"
+          ],
+          "user": [
+            "1000",
+            "root",
+            "serviceuser"
+          ]
+        },
+        "rule": {
+          "name": "elastic-test"
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "user": {
+          "id": "1000",
+          "name": "serviceuser"
+        },
+        "event": {
+          "action": "all",
+          "category": [
+            "iam"
+          ],
+          "end": "2024-11-26T06:27:33.292Z",
+          "kind": "event",
+          "start": "2024-11-26T06:27:33.292Z",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"policyName\":null,\"hash\":\"943E0A8C840430E53D8D641CF4CDC1660C75FFE0\",\"publisher\":\"\",\"eventType\":\"Launch\",\"sourceType\":\"LocalDisk\",\"sourceName\":\"Windows Explorer\",\"lastEventDate\":\"2022-02-28T11:28:16.069Z\",\"firstEventDate\":\"2022-02-28T11:28:16.069Z\",\"userName\":\"WIN10AGENT\\\\caadmin\",\"justification\":null,\"fileName\":\"inbox_tester.exe\",\"originalFileName\":\"tester.exe\",\"fileSize\":11264,\"threatProtectionAction\":\"ALL\",\"packageName\":\"tester\",\"company\":\"test_company_string\",\"filePath\":\"C:\\\\Automation\\\\sanity\\\\inbox_tester.exe\",\"fileDescription\":\"tester\",\"productName\":\"tester\",\"productVersion\":\"1.0.0.0\",\"bundleName\":null,\"bundleVersion\":null,\"bundleId\":null,\"applicationSubType\":null,\"fileVersion\":\"1.0.0.0\",\"modificationTime\":\"2020-04-16T12:54:54.164Z\",\"userIsAdmin\":true,\"agentEventCount\":1,\"skippedCount\":0,\"accessAction\":\"false\",\"accessTargetType\":\"Internet\",\"accessTargetName\":null,\"processCommandLine\":null,\"sourceProcessCommandLine\":null,\"sourceProcessUsername\":null,\"sourceProcessHash\":null,\"sourceProcessPublisher\":null,\"sourceProcessSigner\":null,\"displayName\":\"tester (inbox_tester.exe)\",\"evidences\":[{\"evidenceCounter\":1,\"datetimeUTC\":\"28/02/2022 11:22:33.123\",\"evidenceAction\":\"DETECTION\",\"accessedObject\":{\"name\":\"C:\\\\Users\\\\SOMEUSERID\\\\AppData\\\\Local\\\\Google\\\\Chrome\\\\User Data\\\\Local State\"}},{\"evidenceCounter\":2,\"datetimeUTC\":\"28/02/2022 11:22:34.123\",\"evidenceAction\":\"DETECTION\",\"accessedObject\":{\"name\":\"SOMEOBJECT\"}}],\"owner\":\"WIN10AGENT\\\\caadmin\",\"deceptionType\":0,\"lureUser\":null,\"sourceWSName\":null,\"fatherProcess\":null,\"sourceWSIp\":null,\"winEventType\":0,\"winEventRecordId\":0,\"logonAttemptTypeId\":0,\"logonStatusId\":0,\"workingDirectory\":null,\"runAsUsername\":null,\"originUserUID\":null,\"commandInfo\":null,\"fileAccessPermission\":null,\"agentId\":\"78350d3c-5960-4f39-975a-ed07b53924a4\",\"exposedUsers\":[{\"accountName\":\"SOMENAME\",\"domain\":\"SOMEDOMAIN\",\"username\":\"USERNAME\"}],\"symLink\":\"\",\"authorizationRight\":\"com.apple.AOSNotification.FindMyMac.modify\"}",
+      "expected": {
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "file": {
+          "hash": {
+            "sha1": "943E0A8C840430E53D8D641CF4CDC1660C75FFE0"
+          },
+          "mtime": "2020-04-16T12:54:54.164Z",
+          "name": "inbox_tester.exe",
+          "owner": "caadmin",
+          "path": "C:\\Automation\\sanity\\inbox_tester.exe",
+          "size": 11264
+        },
+        "observer": {
+          "product": "Endpoint Privilege Manager",
+          "vendor": "CyberArk"
+        },
+        "organization": {
+          "name": "test_company_string"
+        },
+        "package": {
+          "checksum": "943E0A8C840430E53D8D641CF4CDC1660C75FFE0",
+          "name": "tester",
+          "size": 11264,
+          "version": "1.0.0.0"
+        },
+        "related": {
+          "hash": [
+            "943E0A8C840430E53D8D641CF4CDC1660C75FFE0"
+          ],
+          "user": [
+            "USERNAME",
+            "caadmin"
+          ]
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "user": {
+          "domain": "WIN10AGENT",
+          "name": "caadmin"
+        },
+        "event": {
+          "action": "all",
+          "category": [
+            "process"
+          ],
+          "end": "2022-02-28T11:28:16.069Z",
+          "kind": "event",
+          "start": "2022-02-28T11:28:16.069Z",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    }
+  ]
+}

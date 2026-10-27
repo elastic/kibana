@@ -35,7 +35,7 @@ import {
   doAllChangesMatch,
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
-import { cpsTests, renderSteps } from '#pipeline-utils/step-library';
+import { prBaseEnv, prBaseSteps, cpsTests, renderSteps } from '#pipeline-utils/step-library';
 
 const prConfigs =
   loadBuildkiteJson<typeof import('../../../pull_requests.json')>('pull_requests.json');
@@ -147,7 +147,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     await runPreBuild();
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+    pipeline.push(renderSteps(prBaseSteps(), { header: true, env: prBaseEnv }));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/local_check.yml', {}));
 
     // Gated together: check_api_contracts depends_on check_oas_snapshot.
@@ -158,8 +158,8 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
     }
 
-    // Register steps from base.yml that should still be canceled on gate failure.
-    // base.yml itself is not loaded with cancelOnGateFailure because it contains the gate steps.
+    // Register steps from the base steps that should still be canceled on gate failure.
+    // The base steps are not rendered with cancelOnGateFailure because they contain the gate steps.
     registerCancelKeys([
       'pick_test_group_run_order',
       'build_scout_tests',
@@ -691,6 +691,8 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/solutions\/security\/plugins\/security_solution\/common\/endpoint/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/scripts\/endpoint/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/lib\/detection_engine\/rule_response_actions/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/fleet_integration\/fleet_integration\.ts/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/lib\/detection_engine\/prebuilt_rules\/logic\/integrations\/install_endpoint_security_prebuilt_rule\.ts/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/detection_engine\/rule_response_actions/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout_v2\/document\/tools\/response/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout_v2\/document\/main\/components\/response_section/,

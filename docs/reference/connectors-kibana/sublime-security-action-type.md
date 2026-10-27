@@ -69,7 +69,7 @@ List mailboxes
 
 Quarantine message groups
 :   Quarantine one or more message groups, removing the messages from user mailboxes and catching late-arriving copies. Requires a Sublime Enterprise plan. Returns a `task_id`.
-    - `messageGroupIds` (required): Canonical IDs of the groups to quarantine (1-500).
+    - `messageGroupIds` (required): Canonical IDs of the groups to quarantine (1-10,000).
     - `classification` (optional): For example, `malicious`. `reportLabel` (optional): For example, `phishing`.
     - `reviewComment` (optional): Comment recorded in the Sublime audit trail.
 

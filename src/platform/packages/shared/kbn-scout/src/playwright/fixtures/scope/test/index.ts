@@ -10,7 +10,7 @@
 export { browserAuthFixture } from './browser_auth';
 export type { BrowserAuthFixture } from './browser_auth';
 export { scoutPageFixture, scoutPageParallelFixture } from './scout_page';
-export type { ScoutPage } from './scout_page';
+export type { GotoAppOptions, ScoutPage } from './scout_page';
 export { validateTagsFixture } from './validate_tags';
 export { pageObjectsFixture, pageObjectsParallelFixture } from './page_objects';
 export type { PageObjects } from './page_objects';
