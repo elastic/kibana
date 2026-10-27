@@ -128,7 +128,7 @@ The `getAttachmentList` children receive `onRemove` and `isRemoving`. Cases owns
 - Call `onRemove({ attachmentIds })` to remove referenced ids, e.g. alert ids or file ids. Grouped attachments keep their other ids. File ids also remove a file whose attachment was never created.
 - Pass `{ onSuccess }` as the second argument to clear a selection after removal.
 - Set `getCountLabel` so the modal and activity entry name the type.
-- For an alerts table, `getRemoveFromCaseActions({ onRemove, key, label })` returns the bulk action and the row callback. Pass the bulk action in a new panel on each render: the alerts table appends its default actions to the first panel in place.
+- For an alerts table, `getRemoveFromCaseActions({ onRemove, key, label })` returns the bulk action and the row callback.
 
 ## Schema
 
