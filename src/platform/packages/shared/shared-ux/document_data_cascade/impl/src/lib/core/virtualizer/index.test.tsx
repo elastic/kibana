@@ -281,13 +281,38 @@ describe('virtualizer', () => {
       jest.useRealTimers();
     });
 
-    it('should not scroll when itemIndex is 0', () => {
+    it('should not scroll when no anchor is provided', () => {
       const virtualizer = createMockVirtualizer();
 
-      renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, 0));
+      renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, undefined));
 
       expect(virtualizer.options.scrollToFn).not.toHaveBeenCalled();
       expect(virtualizer.calculateRange).not.toHaveBeenCalled();
+    });
+
+    it('restores the first nested item and corrects changes to its scroll margin', () => {
+      const measurementsCache = buildMeasurementsCache([65, 65, 65], 2000);
+      const stabilizedRef = { current: false };
+      const virtualizer = createMockVirtualizer({
+        scrollMargin: 2000,
+        scrollOffset: 1920,
+        measurementsCache,
+      });
+
+      renderHook(() =>
+        useAnchorVirtualizerToItemIndex(virtualizer, 0, {
+          hasStabilizedRef: stabilizedRef,
+        })
+      );
+
+      expect(virtualizer.scrollOffset).toBe(2000);
+      measurementsCache[0].start = 2106;
+      flushRaf();
+
+      expect(virtualizer.scrollOffset).toBe(2106);
+      expect(stabilizedRef.current).toBe(false);
+      flushRaf();
+      expect(stabilizedRef.current).toBe(true);
     });
 
     it('should not scroll when the provided ref is already true and corrections are skipped', () => {
