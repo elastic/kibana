@@ -130,4 +130,30 @@ describe('RuleTemplatesApi', () => {
       );
     });
   });
+
+  describe('upsertInstallRuleTemplate', () => {
+    it('sends a PUT request with the rule payload to the template install path for the rule id', async () => {
+      http.put.mockResolvedValue({ id: 'pre-assigned-id' });
+
+      await expect(
+        api.upsertInstallRuleTemplate('template-1', 'pre-assigned-id', {} as CreateRuleData)
+      ).resolves.toEqual({ id: 'pre-assigned-id' });
+
+      expect(http.put).toHaveBeenCalledWith(
+        `${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/template-1/_install/pre-assigned-id`,
+        { body: JSON.stringify({}) }
+      );
+    });
+
+    it('encodes the template id and rule id in the path', async () => {
+      http.put.mockResolvedValue({ id: 'rule 1' });
+
+      await api.upsertInstallRuleTemplate('nginx/error rate', 'rule 1', {} as CreateRuleData);
+
+      expect(http.put).toHaveBeenCalledWith(
+        `${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/nginx%2Ferror%20rate/_install/rule%201`,
+        expect.any(Object)
+      );
+    });
+  });
 });

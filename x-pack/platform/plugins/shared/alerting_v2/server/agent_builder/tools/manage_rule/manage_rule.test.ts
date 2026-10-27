@@ -65,10 +65,15 @@ const createLogger = (): jest.Mocked<
 describe('manageRuleTool', () => {
   let logger: ReturnType<typeof createLogger>;
   let tool: ReturnType<typeof manageRuleTool>;
+  let getRuleTemplate: jest.Mock;
 
   beforeEach(() => {
     logger = createLogger();
-    tool = manageRuleTool({ logger: logger as unknown as LoggerServiceContract });
+    getRuleTemplate = jest.fn();
+    tool = manageRuleTool({
+      logger: logger as unknown as LoggerServiceContract,
+      getRuleTemplatesClient: () => ({ getRuleTemplate }),
+    });
   });
 
   it('describes operations from the schema helpers', () => {
@@ -121,6 +126,42 @@ describe('manageRuleTool', () => {
       const addCall = ctx.attachments.add.mock.calls[0][0] as { data: { id?: string } };
       expect(addCall.data.id).toBeDefined();
       expect(addCall.data.id).toBe(results[0].data?.ruleAttachment?.ruleId);
+    });
+
+    it('seeds a new attachment from a rule template and reports the template id', async () => {
+      const ctx = createContext();
+      getEsqlQueryMock(ctx).mockResolvedValueOnce({
+        columns: [{ name: 'host.name', type: 'keyword' }],
+        values: [],
+      });
+      mockResolvableTimeField(ctx);
+      getRuleTemplate.mockResolvedValue({
+        id: 'tpl-nginx',
+        engine: 'v2',
+        rule: {
+          kind: 'alert',
+          metadata: { name: 'Nginx errors' },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: { base: 'FROM logs-nginx.access-* | STATS c = COUNT(*) BY host.name' },
+        },
+      });
+
+      const result = await tool.handler(
+        { operations: [{ operation: 'apply_template', template_id: 'tpl-nginx' }] },
+        ctx
+      );
+
+      expect(getRuleTemplate).toHaveBeenCalledWith({ id: 'tpl-nginx' });
+      const addCall = ctx.attachments.add.mock.calls[0][0] as {
+        data: { template_id?: string; metadata?: { name: string } };
+      };
+      expect(addCall.data.template_id).toBe('tpl-nginx');
+      expect(addCall.data.metadata?.name).toBe('Nginx errors');
+      const { results } = result as {
+        results: Array<{ data?: { ruleAttachment?: { templateId?: string } } }>;
+      };
+      expect(results[0].data?.ruleAttachment?.templateId).toBe('tpl-nginx');
     });
 
     it('passes esClient to executeRuleOperations for query validation', async () => {

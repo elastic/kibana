@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { lazySchema, type z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { optionalWithDescription as opt } from './common';
+import { ID_MAX_LENGTH } from './constants';
 import { ruleResponseSchema } from './rule_data_schema';
 
 export const RULE_ATTACHMENT_TYPE = 'platform.alerting.rule' as const;
@@ -37,6 +38,10 @@ export const RULE_ATTACHMENT_TYPE = 'platform.alerting.rule' as const;
  * `metadata.owner` and `metadata.version` were removed still resolve. Unlike the
  * strictness itself, `.strip()` does not cascade, so the nested metadata needs
  * its own.
+ *
+ * `template_id` is attachment-only: it records the rule template a proposed
+ * rule was started from so the rule is installed from that template when
+ * saved. It is not part of the rule payload.
  */
 
 export const ruleAttachmentDataSchema = lazySchema(() => {
@@ -50,6 +55,12 @@ export const ruleAttachmentDataSchema = lazySchema(() => {
       created_at: opt(shape.created_at),
       updated_at: opt(shape.updated_at),
       metadata: shape.metadata.strip(),
+      template_id: z
+        .string()
+        .min(1)
+        .max(ID_MAX_LENGTH)
+        .optional()
+        .describe('The rule template this proposed rule was started from.'),
     })
     .strip();
 });

@@ -1926,9 +1926,12 @@ export class RulesClient {
   public async upsertRule({
     id,
     data,
+    template,
   }: {
     id: string;
     data: PutRuleData;
+    /** Recorded only when the rule is created; a replaced rule keeps its existing template. */
+    template?: { id: string };
   }): Promise<{ rule: RuleResponse; created: boolean }> {
     const parsed = this.parseRuleData(putRuleDataSchema, data, 'upsert');
     this.artifactTypeRegistry.validate(parsed.artifacts);
@@ -1937,7 +1940,10 @@ export class RulesClient {
 
     if (!exists) {
       const { enabled, ...createData } = parsed;
-      const rule = await this.createRule({ data: createData, options: { id, enabled } });
+      const rule = await this.createRule({
+        data: createData,
+        options: { id, enabled, ...(template ? { template } : {}) },
+      });
       return { rule, created: true };
     }
 

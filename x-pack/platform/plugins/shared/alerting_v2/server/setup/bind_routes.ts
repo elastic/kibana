@@ -75,6 +75,7 @@ import { FindRuleTemplatesRoute } from '../routes/rule_templates/find_rule_templ
 import { GetRuleTemplateTagsRoute } from '../routes/rule_templates/get_rule_template_tags_route';
 import { GetRuleTemplateRoute } from '../routes/rule_templates/get_rule_template_route';
 import { InstallRuleTemplateRoute } from '../routes/rule_templates/install_rule_template_route';
+import { UpsertInstallRuleTemplateRoute } from '../routes/rule_templates/upsert_install_rule_template_route';
 
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateRuleRoute);
@@ -146,4 +147,5 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(GetRuleTemplateTagsRoute);
   bind(Route).toConstantValue(GetRuleTemplateRoute);
   bind(Route).toConstantValue(InstallRuleTemplateRoute);
+  bind(Route).toConstantValue(UpsertInstallRuleTemplateRoute);
 }

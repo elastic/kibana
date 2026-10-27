@@ -8,6 +8,7 @@
 import type {
   CreateRuleData,
   FindRuleTemplatesSortField,
+  PutRuleData,
   RuleTemplateData,
 } from '@kbn/alerting-v2-schemas';
 
@@ -35,4 +36,10 @@ export interface GetRuleTemplateArgs {
 export interface InstallRuleTemplateArgs {
   id: string;
   data: CreateRuleData;
+}
+
+export interface UpsertInstallRuleTemplateArgs {
+  id: string;
+  ruleId: string;
+  data: PutRuleData;
 }

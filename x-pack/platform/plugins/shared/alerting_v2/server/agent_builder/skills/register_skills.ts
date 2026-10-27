@@ -13,11 +13,13 @@ import {
 } from '@kbn/alerting-v2-constants';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
+import type { FindRuleTemplatesToolDeps } from '../tools/find_rule_templates';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import { createActionPolicyAuthoringSkill } from './action_policy_authoring_skill';
 import { createRuleAuthoringSkill } from './rule_authoring_skill';
 
 export type RegisterSkillsDeps = ManageRuleToolDeps &
+  FindRuleTemplatesToolDeps &
   ManageActionPolicyToolDeps & {
     availability: AvailabilityConfig;
   };

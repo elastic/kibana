@@ -104,6 +104,7 @@ export {
   getRuleTemplateTagsUrl,
   getRuleTemplateUrl,
   getInstallRuleTemplateUrl,
+  getUpsertInstallRuleTemplateUrl,
 } from '../../urls';
 export {
   ACTION_POLICY_PER_PAGE_MAX,

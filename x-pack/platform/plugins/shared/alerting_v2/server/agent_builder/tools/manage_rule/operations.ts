@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { lazySchema, z } from '@kbn/zod/v4';
 import { omit } from 'lodash';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -18,8 +19,9 @@ import {
   RUNBOOK_ARTIFACT_TYPE,
   RUNBOOK_CONTENT_LIMIT,
 } from '@kbn/alerting-v2-constants';
-import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
+import type { RuleAttachmentData, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import {
+  ID_MAX_LENGTH,
   createRuleDataSchema,
   metadataSchema,
   ruleKindSchema,
@@ -253,6 +255,21 @@ export const setRunbookOperationSchema = lazySchema(() =>
     )
 );
 
+export const applyTemplateOperationSchema = lazySchema(() =>
+  z
+    .object({
+      operation: z.literal('apply_template'),
+      template_id: z
+        .string()
+        .min(1)
+        .max(ID_MAX_LENGTH)
+        .describe('The rule template `id` returned by the find rule templates tool.'),
+    })
+    .describe(
+      'Use `apply_template` to start a new rule from an installed rule template: it copies the template name, kind, schedule, query, grouping and lifecycle settings, and records the template so the saved rule is attributed to it. Only allowed as the first operation when creating a new rule. Follow it with other operations to apply the user changes.'
+    )
+);
+
 export const validateOperationSchema = lazySchema(() =>
   z
     .object({
@@ -267,6 +284,7 @@ export const validateOperationSchema = lazySchema(() =>
 
 export const ruleOperationSchema = lazySchema(() =>
   z.discriminatedUnion('operation', [
+    applyTemplateOperationSchema,
     setMetadataOperationSchema,
     setKindOperationSchema,
     setScheduleOperationSchema,
@@ -397,19 +415,138 @@ const warnOnBackingIndices = (
   }
 };
 
+/**
+ * Validates `query` against Elasticsearch, resolves the rule's time field from
+ * its source index, and returns the draft with the query applied.
+ */
+const applyQuery = async (
+  next: Partial<RuleAttachmentData>,
+  query: RuleAttachmentData['query'],
+  esClient: IScopedClusterClient | undefined,
+  warnings: string[],
+  previousQuery?: RuleAttachmentData['query']
+): Promise<{ data: Partial<RuleAttachmentData>; queryColumns?: EsqlColumn[] }> => {
+  const rootQuery = getRootEsqlQuery(query);
+
+  warnOnBackingIndices(
+    warnings,
+    rootQuery,
+    'The rule query',
+    previousQuery ? getRootEsqlQuery(previousQuery) : undefined
+  );
+
+  let queryColumns: EsqlColumn[] | undefined;
+  let resolvedTimeField: string | null | undefined;
+  if (esClient) {
+    queryColumns = await validateEsqlQuery(esClient, rootQuery);
+
+    resolvedTimeField = await resolveTimeFieldForQuery(esClient, rootQuery, next.time_field);
+    const sourceIndex = getIndexPatternFromESQLQuery(rootQuery);
+    const wasTimeFieldReplaced =
+      Boolean(next.time_field) &&
+      Boolean(resolvedTimeField) &&
+      resolvedTimeField !== next.time_field;
+    if (wasTimeFieldReplaced) {
+      warnings.push(
+        `The current time_field "${next.time_field}" was not found as a \`date\` or ` +
+          `\`date_nanos\` field on ${
+            sourceIndex ? `"${sourceIndex}"` : 'the source index'
+          }, so "${resolvedTimeField}" was auto-selected instead. ` +
+          `Use \`set_time_field\` if a different date field is needed.`
+      );
+    }
+    if (resolvedTimeField === null) {
+      if (next.time_field) {
+        warnings.push(
+          `The current time_field "${next.time_field}" was not found as a \`date\` or ` +
+            `\`date_nanos\` field on ${sourceIndex ? `"${sourceIndex}"` : 'the source index'}. ` +
+            `The rule may fail at execution time. Use \`set_time_field\` to correct it, ` +
+            `or verify the field exists on the target index.`
+        );
+      } else {
+        throw new RuleOperationValidationError(
+          `Could not determine a time field for the query: the source index ` +
+            `${sourceIndex ? `"${sourceIndex}"` : ''} has no \`date\` or \`date_nanos\` field ` +
+            `(and no \`@timestamp\`), which is required for the rule's lookback window. ` +
+            `Add a date field to the data, or use \`set_time_field\` to specify one.`
+        );
+      }
+    }
+    if (resolvedTimeField === undefined && !next.time_field) {
+      throw new RuleOperationValidationError(
+        `Could not determine a time field for the query and none is set. A \`date\` or ` +
+          `\`date_nanos\` field is required for the rule's lookback window; use ` +
+          `\`set_time_field\` to specify one.`
+      );
+    }
+  }
+
+  return {
+    data: {
+      ...next,
+      query,
+      ...(resolvedTimeField ? { time_field: resolvedTimeField } : {}),
+    },
+    queryColumns,
+  };
+};
+
+const loadRuleTemplate = async (
+  getRuleTemplate: ((id: string) => Promise<RuleTemplateResponse>) | undefined,
+  templateId: string
+): Promise<RuleTemplateResponse> => {
+  if (!getRuleTemplate) {
+    throw new RuleOperationValidationError('Rule templates are not available.');
+  }
+  try {
+    return await getRuleTemplate(templateId);
+  } catch (err) {
+    if (Boom.isBoom(err) && err.output.statusCode === 404) {
+      throw new RuleOperationValidationError(
+        `Rule template "${templateId}" not found. Use the find rule templates tool to look up a valid template id.`
+      );
+    }
+    throw err;
+  }
+};
+
+export interface ExecuteRuleOperationsOptions {
+  isNew?: boolean;
+  /** Loads a rule template by id for `apply_template`; the operation is rejected when omitted. */
+  getRuleTemplate?: (id: string) => Promise<RuleTemplateResponse>;
+}
+
 export const executeRuleOperations = async (
   data: Partial<RuleAttachmentData>,
   operations: RuleOperation[],
   esClient: IScopedClusterClient | undefined,
   savedObjectsClient: SavedObjectsClientContract,
-  { isNew = false }: { isNew?: boolean } = {}
+  { isNew = false, getRuleTemplate }: ExecuteRuleOperationsOptions = {}
 ): Promise<RuleOperationsResult> => {
   let next = { ...data };
   let lastQueryColumns: EsqlColumn[] | undefined;
   const warnings: string[] = [];
 
-  for (const op of operations) {
+  for (const [index, op] of operations.entries()) {
     switch (op.operation) {
+      case 'apply_template': {
+        if (!isNew || index !== 0) {
+          throw new RuleOperationValidationError(
+            '`apply_template` is only allowed as the first operation when creating a new rule.'
+          );
+        }
+        const template = await loadRuleTemplate(getRuleTemplate, op.template_id);
+        const result = await applyQuery(
+          { ...next, ...template.rule, template_id: template.id },
+          template.rule.query,
+          esClient,
+          warnings
+        );
+        next = result.data;
+        lastQueryColumns = result.queryColumns;
+        break;
+      }
+
       case 'set_metadata': {
         const mergedName = op.name ?? next.metadata?.name ?? '';
         next = {
@@ -455,68 +592,9 @@ export const executeRuleOperations = async (
       }
 
       case 'set_query': {
-        const rootQuery = getRootEsqlQuery(op.query);
-
-        warnOnBackingIndices(
-          warnings,
-          rootQuery,
-          'The rule query',
-          next.query ? getRootEsqlQuery(next.query) : undefined
-        );
-
-        let resolvedTimeField: string | null | undefined;
-        if (esClient) {
-          lastQueryColumns = await validateEsqlQuery(esClient, rootQuery);
-
-          resolvedTimeField = await resolveTimeFieldForQuery(esClient, rootQuery, next.time_field);
-          const sourceIndex = getIndexPatternFromESQLQuery(rootQuery);
-          const wasTimeFieldReplaced =
-            Boolean(next.time_field) &&
-            Boolean(resolvedTimeField) &&
-            resolvedTimeField !== next.time_field;
-          if (wasTimeFieldReplaced) {
-            warnings.push(
-              `The current time_field "${next.time_field}" was not found as a \`date\` or ` +
-                `\`date_nanos\` field on ${
-                  sourceIndex ? `"${sourceIndex}"` : 'the source index'
-                }, so "${resolvedTimeField}" was auto-selected instead. ` +
-                `Use \`set_time_field\` if a different date field is needed.`
-            );
-          }
-          if (resolvedTimeField === null) {
-            if (next.time_field) {
-              warnings.push(
-                `The current time_field "${next.time_field}" was not found as a \`date\` or ` +
-                  `\`date_nanos\` field on ${
-                    sourceIndex ? `"${sourceIndex}"` : 'the source index'
-                  }. ` +
-                  `The rule may fail at execution time. Use \`set_time_field\` to correct it, ` +
-                  `or verify the field exists on the target index.`
-              );
-            } else {
-              throw new RuleOperationValidationError(
-                `Could not determine a time field for the query: the source index ` +
-                  `${
-                    sourceIndex ? `"${sourceIndex}"` : ''
-                  } has no \`date\` or \`date_nanos\` field ` +
-                  `(and no \`@timestamp\`), which is required for the rule's lookback window. ` +
-                  `Add a date field to the data, or use \`set_time_field\` to specify one.`
-              );
-            }
-          }
-          if (resolvedTimeField === undefined && !next.time_field) {
-            throw new RuleOperationValidationError(
-              `Could not determine a time field for the query and none is set. A \`date\` or ` +
-                `\`date_nanos\` field is required for the rule's lookback window; use ` +
-                `\`set_time_field\` to specify one.`
-            );
-          }
-        }
-        next = {
-          ...next,
-          query: op.query,
-          ...(resolvedTimeField ? { time_field: resolvedTimeField } : {}),
-        };
+        const result = await applyQuery(next, op.query, esClient, warnings, next.query);
+        next = result.data;
+        lastQueryColumns = result.queryColumns ?? lastQueryColumns;
         break;
       }
 

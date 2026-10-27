@@ -22,6 +22,8 @@ const createDeps = () => ({
     error: jest.fn(),
     forSubsystem: jest.fn(),
   } as unknown as LoggerServiceContract,
+  getRuleTemplatesClient: jest.fn(),
+  getPrivilegeChecker: jest.fn(),
   availability: createAlertingV2Availability({
     getActiveSpace: jest.fn().mockResolvedValue({}),
   }),
@@ -64,14 +66,28 @@ describe('createRuleAuthoringSkill', () => {
     expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
-  it('exposes only the manage rule inline tool', async () => {
+  it('exposes the manage rule and find rule templates inline tools', async () => {
     const skill = createRuleAuthoringSkill(createDeps());
 
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineToolIds = inlineTools.map((tool) => tool.id);
 
-    expect(inlineToolIds).toEqual([ALERTING_TOOL_IDS.manageRule]);
+    expect(inlineToolIds).toEqual([
+      ALERTING_TOOL_IDS.manageRule,
+      ALERTING_TOOL_IDS.findRuleTemplates,
+    ]);
     expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.manageActionPolicy);
+  });
+
+  it('guides template discovery and application', () => {
+    const skill = createRuleAuthoringSkill(createDeps());
+
+    expect(skill.description).toContain('rule templates');
+    expect(skill.content).toContain('## Rule Templates');
+    expect(skill.content).toContain(ALERTING_TOOL_IDS.findRuleTemplates);
+    expect(skill.content).toContain('apply_template');
+    expect(skill.content).toContain('has_data: false');
+    expect(skill.referencedContent?.map(({ name }) => name)).toContain('rule-templates');
   });
 
   it('defers notification and action policy setup to the action-policy-authoring skill', () => {

@@ -90,6 +90,9 @@ export const getRuleTemplateUrl = (id: string) =>
 
 export const getInstallRuleTemplateUrl = (id: string) => `${getRuleTemplateUrl(id)}/_install`;
 
+export const getUpsertInstallRuleTemplateUrl = (id: string, ruleId: string) =>
+  `${getInstallRuleTemplateUrl(id)}/${encodeURIComponent(ruleId)}`;
+
 export const getFindRuleTemplatesUrl = (
   query?: Record<string, string | number | string[] | undefined>
 ): string => {
