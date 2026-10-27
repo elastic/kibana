@@ -8,22 +8,21 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
-import { FlyoutTemplate, type FlyoutFooterMenuPanel } from '@kbn/flyout-template';
+import {
+  FlyoutTemplate,
+  type FlyoutFooterMenuItem,
+  type FlyoutFooterMenuPanel,
+} from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import { useInvestigation } from '@kbn/investigation-output';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
-import { useQueryClient } from '@kbn/react-query';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import { DetectionFlyout } from '../detection/detection_flyout';
 import { DetectionsList } from './detections_list';
-import { EventInvestigation } from './event_investigation';
+import { EventInvestigationCard } from './event_investigation_card';
+import { EventTimeline } from './event_timeline';
 import { TruncatableSummary } from '../../../common/truncatable_summary';
 import { SIGNIFICANT_EVENT_SEVERITY } from '../../ui/severity_badge';
-import {
-  getInvestigationWorkflowStatusLabel,
-  isInvestigationInvestigated,
-  isInvestigationTerminalFailure,
-} from '../../../common/investigation_progress_status';
 import { useFlyoutShareUrlCustomAction } from '../../../common/flyout_share_url_button';
 import { buildNightshiftEventFlyoutShareUrl } from '../../../common/url_params';
 import {
@@ -33,11 +32,9 @@ import {
 import { useFormatTimestamp } from '../../../common/format_timestamp';
 import { useFetchDetectionOccurrences } from '../../../hooks/use_fetch_detection_occurrences';
 import { useFetchEventLifecycle } from '../../../hooks/use_fetch_event_lifecycle';
-import { markEventInvestigationCompleteInCache } from '../../../hooks/use_fetch_significant_events';
 import { useFetchInvestigationStatuses } from '../../../hooks/use_fetch_investigation_statuses';
 import { findDetectionSignal } from '../detection/resolve_detection_signal';
 import {
-  getInvestigationStatusLabel,
   getStatusColor,
   isInvestigationRunning,
   isNeedsActionStatus,
@@ -55,9 +52,25 @@ import { setFlyoutMenuCloseButtonEbtProps } from '../../../common/flyout_close_e
 import { MarkSignificantEventInactiveModal } from './mark_significant_event_inactive_modal';
 
 const EVENT_FLYOUT_HISTORY_KEY = Symbol('nightshiftEventFlyout');
-const INVESTIGATION_MENU_TITLE_MAX_LENGTH = 48;
-const SUMMARY_TITLE = i18n.translate('xpack.nightshift.flyout.summaryTitle', {
-  defaultMessage: 'Summary',
+const OVERVIEW_TAB_ID = 'overview';
+const TIMELINE_TAB_ID = 'timeline';
+const TIMELINE_TITLE = i18n.translate('xpack.nightshift.flyout.timelineTabLabel', {
+  defaultMessage: 'Timeline',
+});
+const TABS = [
+  {
+    id: OVERVIEW_TAB_ID,
+    label: i18n.translate('xpack.nightshift.flyout.overviewTabLabel', {
+      defaultMessage: 'Overview',
+    }),
+  },
+  {
+    id: TIMELINE_TAB_ID,
+    label: TIMELINE_TITLE,
+  },
+];
+const SUMMARY_TITLE = i18n.translate('xpack.nightshift.flyout.whatHappenedTitle', {
+  defaultMessage: 'What happened?',
 });
 const DETECTIONS_TITLE = i18n.translate('xpack.nightshift.flyout.detectionsTitle', {
   defaultMessage: 'Detections',
@@ -65,9 +78,15 @@ const DETECTIONS_TITLE = i18n.translate('xpack.nightshift.flyout.detectionsTitle
 const INVESTIGATION_TITLE = i18n.translate('xpack.nightshift.flyout.investigationTitle', {
   defaultMessage: 'Investigation',
 });
-const OPEN_IN_CHAT_LABEL = i18n.translate('xpack.nightshift.flyout.openInChatButtonLabel', {
-  defaultMessage: 'Open in chat',
+const ACTIONS_LABEL = i18n.translate('xpack.nightshift.flyout.actionsButtonLabel', {
+  defaultMessage: 'Actions',
 });
+const OPEN_INVESTIGATION_CHAT_LABEL = i18n.translate(
+  'xpack.nightshift.flyout.openInvestigationChatButtonLabel',
+  {
+    defaultMessage: 'Open investigation in chat',
+  }
+);
 const NEW_CHAT_ITEM_LABEL = i18n.translate(
   'xpack.nightshift.flyout.openInChatNewConversationItem',
   {
@@ -78,15 +97,6 @@ const INVESTIGATION_CHAT_UNAVAILABLE_LABEL = i18n.translate(
   'xpack.nightshift.flyout.openInChatInvestigationUnavailable',
   {
     defaultMessage: 'Investigation chat is still loading',
-  }
-);
-const CHAT_MENU_ARIA_LABEL = i18n.translate('xpack.nightshift.flyout.openInChatMenuAriaLabel', {
-  defaultMessage: 'Open in chat options',
-});
-const INVESTIGATIONS_MENU_TITLE = i18n.translate(
-  'xpack.nightshift.flyout.openInChatInvestigationsMenuTitle',
-  {
-    defaultMessage: 'Investigations',
   }
 );
 const IN_PROGRESS_CHAT_TOOLTIP = i18n.translate(
@@ -111,28 +121,23 @@ const FOLLOW_UP_INVESTIGATION_TOOLTIP = i18n.translate(
       'An investigation is already running. This queues a follow-up that starts when it finishes.',
   }
 );
-const MARK_INACTIVE_LABEL = i18n.translate('xpack.nightshift.flyout.markInactiveActionLabel', {
-  defaultMessage: 'Mark significant event inactive',
+const MARK_INACTIVE_LABEL = i18n.translate('xpack.nightshift.flyout.markInactiveButtonLabel', {
+  defaultMessage: 'Mark inactive',
 });
 
-const truncateForMenu = (text: string): string =>
-  text.length <= INVESTIGATION_MENU_TITLE_MAX_LENGTH
-    ? text
-    : `${text.slice(0, INVESTIGATION_MENU_TITLE_MAX_LENGTH - 1)}…`;
-
 export interface EventFlyoutProps {
-  event: SignificantEvent;
+  event: SignificantEventResponse;
   onClose: () => void;
 }
 
 export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactElement {
   const formatTimestamp = useFormatTimestamp();
   const { euiTheme } = useEuiTheme();
-  const queryClient = useQueryClient();
   const { agentBuilder, application, http } = useKibana().services;
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [selectedDetectionId, setSelectedDetectionId] = useState<string>();
+  const [selectedTabId, setSelectedTabId] = useState(OVERVIEW_TAB_ID);
   const [isMarkInactiveModalOpen, setIsMarkInactiveModalOpen] = useState(false);
   const lifecycleQuery = useFetchEventLifecycle(event.event_id);
   const { triggerInvestigation, triggeringEventId } = useTriggerEventInvestigation({
@@ -159,11 +164,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   const availableInvestigation = investigationNotFound ? undefined : latestInvestigation;
 
   // The recorded id is the investigation (Agent Builder conversation) id.
-  const {
-    investigation: investigationDetails,
-    error: investigationError,
-    status: investigationStatus,
-  } = useInvestigation({
+  const { investigation: investigationDetails, status: investigationStatus } = useInvestigation({
     http,
     investigationId: availableInvestigation?.workflow_execution_id,
   });
@@ -171,20 +172,8 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
 
   useEffect(() => {
     setSelectedDetectionId(undefined);
+    setSelectedTabId(OVERVIEW_TAB_ID);
   }, [event.event_id]);
-
-  useEffect(() => {
-    if (latestInvestigation == null || latestInvestigation.completed_at != null) {
-      return;
-    }
-
-    if (
-      isInvestigationInvestigated(investigationStatus) ||
-      isInvestigationTerminalFailure(investigationStatus)
-    ) {
-      markEventInvestigationCompleteInCache(queryClient, event.event_id);
-    }
-  }, [event.event_id, investigationStatus, latestInvestigation, queryClient]);
 
   useEffect(() => {
     if (
@@ -225,27 +214,9 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
     [event.event_id]
   );
   const shareUrlCustomAction = useFlyoutShareUrlCustomAction(getShareUrl);
-  const markInactiveAction = useMemo(
-    () => ({
-      iconType: 'eyeSlash' as const,
-      'aria-label': MARK_INACTIVE_LABEL,
-      onClick: () => setIsMarkInactiveModalOpen(true),
-      ...getEbtProps({
-        action: NIGHTSHIFT_EBT_ACTIONS.CLOSE_SIGNIFICANT_EVENT,
-        element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
-        detail: NIGHTSHIFT_EBT_DETAILS.NEEDS_ACTION,
-      }),
-    }),
-    []
-  );
   const flyoutMenuProps = useMemo(
-    () => ({
-      trailingActions: [
-        ...(canManage && isNeedsActionStatus(event.status) ? [markInactiveAction] : []),
-        shareUrlCustomAction,
-      ],
-    }),
-    [canManage, event.status, markInactiveAction, shareUrlCustomAction]
+    () => ({ trailingActions: [shareUrlCustomAction] }),
+    [shareUrlCustomAction]
   );
   const openNewChat = useCallback(() => {
     agentBuilder?.openChat(buildNewSignificantEventChatOptions(event));
@@ -256,69 +227,92 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
     }
   }, [agentBuilder, conversationId]);
   const latestInvestigationInProgress =
-    availableInvestigation != null &&
-    availableInvestigation.completed_at == null &&
-    investigationStatus !== 'complete';
+    availableInvestigation != null && availableInvestigation.completed_at == null;
   const investigationRunning = isInvestigationRunning(event) || latestInvestigationInProgress;
-  const investigationActionProps = {
-    label: investigationRunning ? FOLLOW_UP_INVESTIGATION_LABEL : RUN_INVESTIGATION_LABEL,
-    iconType: 'inspect' as const,
-    tooltip:
-      activityBlockTooltip ?? (investigationRunning ? FOLLOW_UP_INVESTIGATION_TOOLTIP : undefined),
-    onClick: () => triggerInvestigation(event.event_id),
-    isDisabled: blocksActivity || triggeringEventId != null,
-    isLoading: triggeringEventId === event.event_id,
-    'data-test-subj': 'nightshiftEventFlyoutRunInvestigationButton',
-    ...getEbtProps({
-      action: NIGHTSHIFT_EBT_ACTIONS.START_INVESTIGATION,
-      element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
-      detail: isNeedsActionStatus(event.status)
-        ? NIGHTSHIFT_EBT_DETAILS.NEEDS_ACTION
-        : NIGHTSHIFT_EBT_DETAILS.RESOLVED,
-    }),
-  };
-  const chatMenuPanels = useMemo<FlyoutFooterMenuPanel[]>(
-    () => [
-      {
-        id: 0,
-        title: INVESTIGATIONS_MENU_TITLE,
-        items: [
-          {
-            name: truncateForMenu(event.title),
-            icon: 'comment',
-            disabled: !conversationId,
-            toolTipContent: conversationId ? undefined : INVESTIGATION_CHAT_UNAVAILABLE_LABEL,
-            onClick: openInvestigationChat,
-            'data-test-subj': 'nightshiftEventFlyoutOpenInvestigationChatItem',
-            ...getEbtProps({
-              action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
-              element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
-              detail: NIGHTSHIFT_EBT_DETAILS.EXISTING_CONVERSATION,
-            }),
-          },
-          { isSeparator: true },
-          {
-            name: NEW_CHAT_ITEM_LABEL,
-            icon: 'productAgent',
-            onClick: openNewChat,
-            'data-test-subj': 'nightshiftEventFlyoutStartNewChatItem',
-            ...getEbtProps({
-              action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
-              element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
-              detail: NIGHTSHIFT_EBT_DETAILS.NEW_CONVERSATION,
-            }),
-          },
-        ],
-      },
-    ],
-    [conversationId, event.title, openInvestigationChat, openNewChat]
-  );
-  const investigationBadgeLabel =
-    availableInvestigation == null
-      ? undefined
-      : investigationStatus
-      ? getInvestigationWorkflowStatusLabel(investigationStatus)
-      : getInvestigationStatusLabel(event);
+  const actionMenuPanels = useMemo<FlyoutFooterMenuPanel[]>(() => {
+    const items: FlyoutFooterMenuItem[] = [];
+    if (canManage) {
+      items.push({
+        name: investigationRunning ? FOLLOW_UP_INVESTIGATION_LABEL : RUN_INVESTIGATION_LABEL,
+        icon: 'inspect',
+        toolTipContent:
+          activityBlockTooltip ??
+          (investigationRunning ? FOLLOW_UP_INVESTIGATION_TOOLTIP : undefined),
+        onClick: () => triggerInvestigation(event.event_id),
+        disabled: blocksActivity || triggeringEventId != null,
+        hasAriaDisabled: true,
+        'data-test-subj': 'nightshiftEventFlyoutRunInvestigationButton',
+        ...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.START_INVESTIGATION,
+          element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
+          detail: isNeedsActionStatus(event.status)
+            ? NIGHTSHIFT_EBT_DETAILS.NEEDS_ACTION
+            : NIGHTSHIFT_EBT_DETAILS.RESOLVED,
+        }),
+      });
+    }
+    if (agentBuilder && availableInvestigation) {
+      if (!latestInvestigationInProgress) {
+        items.push({
+          name: OPEN_INVESTIGATION_CHAT_LABEL,
+          icon: 'comment',
+          disabled: !conversationId,
+          hasAriaDisabled: true,
+          toolTipContent: conversationId ? undefined : INVESTIGATION_CHAT_UNAVAILABLE_LABEL,
+          onClick: openInvestigationChat,
+          'data-test-subj': 'nightshiftEventFlyoutOpenInvestigationChatItem',
+          ...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
+            element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
+            detail: NIGHTSHIFT_EBT_DETAILS.EXISTING_CONVERSATION,
+          }),
+        });
+      }
+      items.push({
+        name: NEW_CHAT_ITEM_LABEL,
+        icon: 'productAgent',
+        onClick: openNewChat,
+        toolTipContent: latestInvestigationInProgress ? IN_PROGRESS_CHAT_TOOLTIP : undefined,
+        'data-test-subj': 'nightshiftEventFlyoutStartNewChatItem',
+        ...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
+          element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
+          detail: NIGHTSHIFT_EBT_DETAILS.NEW_CONVERSATION,
+        }),
+      });
+    }
+    if (canManage && isNeedsActionStatus(event.status)) {
+      items.push(
+        { isSeparator: true },
+        {
+          name: MARK_INACTIVE_LABEL,
+          icon: 'eyeSlash',
+          onClick: () => setIsMarkInactiveModalOpen(true),
+          ...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.CLOSE_SIGNIFICANT_EVENT,
+            element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
+            detail: NIGHTSHIFT_EBT_DETAILS.NEEDS_ACTION,
+          }),
+        }
+      );
+    }
+    return items.length ? [{ id: 0, items }] : [];
+  }, [
+    activityBlockTooltip,
+    agentBuilder,
+    availableInvestigation,
+    blocksActivity,
+    canManage,
+    conversationId,
+    event.event_id,
+    event.status,
+    investigationRunning,
+    latestInvestigationInProgress,
+    openInvestigationChat,
+    openNewChat,
+    triggerInvestigation,
+    triggeringEventId,
+  ]);
 
   return (
     <>
@@ -330,6 +324,9 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
         historyKey={EVENT_FLYOUT_HISTORY_KEY}
         resizable
         flyoutMenuProps={flyoutMenuProps}
+        tabs={TABS}
+        selectedTabId={selectedTabId}
+        onTabChange={setSelectedTabId}
         data-test-subj="nightshiftEventFlyout"
         onClickCapture={(clickEvent: React.MouseEvent<HTMLElement>) =>
           setFlyoutMenuCloseButtonEbtProps(clickEvent, NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT)
@@ -337,83 +334,81 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
       >
         <FlyoutTemplate.Header
           title={event.title}
-          description={i18n.translate('xpack.nightshift.flyout.lastUpdatedDescription', {
-            defaultMessage: 'Last updated {timestamp}',
-            values: { timestamp: formatTimestamp(event['@timestamp']) },
-          })}
+          description={formatTimestamp(event.created_at ?? event['@timestamp'])}
         >
           <FlyoutTemplate.Header.Badge
             color={euiTheme.colors.severity[SIGNIFICANT_EVENT_SEVERITY[event.severity].color]}
           >
-            {SIGNIFICANT_EVENT_SEVERITY[event.severity].label}
+            {i18n.translate('xpack.nightshift.flyout.severityLabel', {
+              defaultMessage: '{severity} severity',
+              values: { severity: SIGNIFICANT_EVENT_SEVERITY[event.severity].label },
+            })}
+          </FlyoutTemplate.Header.Badge>
+          <FlyoutTemplate.Header.Badge
+            color="hollow"
+            toolTipContent={i18n.translate('xpack.nightshift.flyout.confidenceTooltip', {
+              defaultMessage:
+                'How confident Nightshift is that this is correct, based on evidence strength and consistency.',
+            })}
+          >
+            {i18n.translate('xpack.nightshift.flyout.confidenceLabel', {
+              defaultMessage: 'Confidence {percent}%',
+              values: { percent: Math.round(event.confidence * 100) },
+            })}
           </FlyoutTemplate.Header.Badge>
           <FlyoutTemplate.Header.Badge color={getStatusColor(event.status)}>
             {SIGNIFICANT_EVENT_STATUS_LABELS[event.status]}
           </FlyoutTemplate.Header.Badge>
-          {investigationBadgeLabel ? (
-            <FlyoutTemplate.Header.Badge color="hollow">
-              {investigationBadgeLabel}
-            </FlyoutTemplate.Header.Badge>
-          ) : null}
         </FlyoutTemplate.Header>
         <FlyoutTemplate.Body>
-          <FlyoutTemplate.Body.Section title={SUMMARY_TITLE}>
-            <TruncatableSummary summary={event.summary} />
-          </FlyoutTemplate.Body.Section>
-          <FlyoutTemplate.Body.Section title={DETECTIONS_TITLE}>
-            <DetectionsList
-              event={event}
-              eventId={event.event_id}
-              lifecycleQuery={lifecycleQuery}
-              occurrencesByRuleUuid={occurrencesQuery.data}
-              isLoadingOccurrences={occurrencesQuery.isLoading}
-              selectedDetectionId={selectedDetectionId}
-              onDetectionClick={(detection) => handleDetectionClick(detection.detection_id)}
-            />
-          </FlyoutTemplate.Body.Section>
-          <FlyoutTemplate.Body.Section title={INVESTIGATION_TITLE}>
-            <EventInvestigation
-              investigation={availableInvestigation}
-              status={investigationStatus}
-              details={investigationDetails}
-              error={investigationError}
-            />
-          </FlyoutTemplate.Body.Section>
+          <FlyoutTemplate.Body.TabPanel tabId={OVERVIEW_TAB_ID}>
+            <FlyoutTemplate.Body.Section title={SUMMARY_TITLE}>
+              <TruncatableSummary summary={event.summary} />
+            </FlyoutTemplate.Body.Section>
+            {availableInvestigation ? (
+              <FlyoutTemplate.Body.Section title={INVESTIGATION_TITLE}>
+                <EventInvestigationCard
+                  event={event}
+                  investigation={investigationDetails}
+                  status={investigationStatus}
+                />
+              </FlyoutTemplate.Body.Section>
+            ) : null}
+            {lifecycleQuery.isLoading ||
+            lifecycleQuery.isError ||
+            lifecycleQuery.data?.detections.length ? (
+              <FlyoutTemplate.Body.Section title={DETECTIONS_TITLE}>
+                <DetectionsList
+                  event={event}
+                  eventId={event.event_id}
+                  lifecycleQuery={lifecycleQuery}
+                  occurrencesByRuleUuid={occurrencesQuery.data}
+                  isLoadingOccurrences={occurrencesQuery.isLoading}
+                  selectedDetectionId={selectedDetectionId}
+                  onDetectionClick={(detection) => handleDetectionClick(detection.detection_id)}
+                />
+              </FlyoutTemplate.Body.Section>
+            ) : null}
+          </FlyoutTemplate.Body.TabPanel>
+          <FlyoutTemplate.Body.TabPanel tabId={TIMELINE_TAB_ID}>
+            <FlyoutTemplate.Body.Section title={TIMELINE_TITLE}>
+              <EventTimeline
+                event={event}
+                lifecycleQuery={lifecycleQuery}
+                selectedDetectionId={selectedDetectionId}
+                onDetectionClick={handleDetectionClick}
+                onEventClick={() => setSelectedTabId(OVERVIEW_TAB_ID)}
+              />
+            </FlyoutTemplate.Body.Section>
+          </FlyoutTemplate.Body.TabPanel>
         </FlyoutTemplate.Body>
-        {canManage || (agentBuilder && availableInvestigation) ? (
-          <FlyoutTemplate.Footer>
-            {canManage ? (
-              agentBuilder && availableInvestigation ? (
-                <FlyoutTemplate.Footer.SecondaryAction {...investigationActionProps} />
-              ) : (
-                <FlyoutTemplate.Footer.PrimaryAction {...investigationActionProps} />
-              )
-            ) : null}
-            {agentBuilder && availableInvestigation ? (
-              latestInvestigationInProgress ? (
-                <FlyoutTemplate.Footer.PrimaryAction
-                  label={OPEN_IN_CHAT_LABEL}
-                  iconType="productAgent"
-                  tooltip={IN_PROGRESS_CHAT_TOOLTIP}
-                  onClick={openNewChat}
-                  data-test-subj="nightshiftEventFlyoutChatButton"
-                  {...getEbtProps({
-                    action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
-                    element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
-                    detail: NIGHTSHIFT_EBT_DETAILS.NEW_CONVERSATION,
-                  })}
-                />
-              ) : (
-                <FlyoutTemplate.Footer.PrimaryActionMenu
-                  label={OPEN_IN_CHAT_LABEL}
-                  panels={chatMenuPanels}
-                  aria-label={CHAT_MENU_ARIA_LABEL}
-                  data-test-subj="nightshiftEventFlyoutChatButton"
-                />
-              )
-            ) : null}
-          </FlyoutTemplate.Footer>
-        ) : null}
+        <FlyoutTemplate.Footer>
+          <FlyoutTemplate.Footer.PrimaryActionMenu
+            label={ACTIONS_LABEL}
+            panels={actionMenuPanels}
+            data-test-subj="nightshiftEventFlyoutActionsButton"
+          />
+        </FlyoutTemplate.Footer>
       </FlyoutTemplate>
       {isMarkInactiveModalOpen ? (
         <MarkSignificantEventInactiveModal

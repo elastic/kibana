@@ -60,7 +60,6 @@ describe('getEpisodeHeaderBadges', () => {
         lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
         lastSnoozeAction: null,
         snoozedUntil: null,
-        tags: [],
         lastSnoozeActor: null,
         lastDeactivateActor: null,
       },
@@ -72,7 +71,7 @@ describe('getEpisodeHeaderBadges', () => {
     });
   });
 
-  it('remaps high severity risk color to warning', () => {
+  it('renders high severity as a custom soft badge', () => {
     const badges = getEpisodeHeaderBadges({
       status: undefined,
       severity: 'high',
@@ -83,8 +82,8 @@ describe('getEpisodeHeaderBadges', () => {
     expect(badges).toEqual([
       expect.objectContaining({
         label: 'High',
-        color: 'warning',
         'data-test-subj': 'alertingV2EpisodeSeverityBadge-high',
+        renderCustomBadge: expect.any(Function),
       }),
     ]);
   });
@@ -109,7 +108,6 @@ describe('getEpisodeHeaderBadges', () => {
         lastDeactivateAction: null,
         lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
         snoozedUntil: '3035-05-08T12:00:00.000Z',
-        tags: [],
         lastSnoozeActor: null,
         lastDeactivateActor: null,
       },
@@ -135,17 +133,18 @@ describe('getEpisodeHeaderBadges', () => {
     const badges = getEpisodeHeaderBadges({
       status: undefined,
       severity: undefined,
-      episodeAction: undefined,
-      groupAction: {
-        groupHash: 'group-1',
+      episodeAction: {
+        episodeId: 'ep-1',
         ruleId: 'rule-1',
+        groupHash: 'group-1',
+        lastAckAction: null,
+        lastAssigneeUid: null,
+        lastAckActor: null,
         lastDeactivateAction: null,
-        lastSnoozeAction: null,
-        snoozedUntil: null,
-        tags: ['tag-a', 'tag-b'],
-        lastSnoozeActor: null,
         lastDeactivateActor: null,
+        tags: ['tag-a', 'tag-b'],
       },
+      groupAction: undefined,
     });
 
     expect(badges).toEqual([]);

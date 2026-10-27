@@ -36,7 +36,8 @@
     "@kbn/licensing-types",
     "@kbn/es-query",
     "@kbn/scout",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/core-http-browser"
   ],
   "exclude": ["target/**/*"]
 }

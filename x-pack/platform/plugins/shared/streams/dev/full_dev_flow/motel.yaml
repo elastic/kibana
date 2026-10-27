@@ -38,8 +38,15 @@ data:
           input_routes:
             namespace: inputs
           targets:
-            - path: /inputs/otlphttp/{source_id}/v1/logs
+            # UI-generated managed OTLP source: {managed_otlp.url}/inputs/otlp/{sourceId}/v1/{signal}
+            - path: /inputs/otlp/{source_id}/v1/logs
               backend_path: /v1/logs
+              endpoint: :4318
+            - path: /inputs/otlp/{source_id}/v1/metrics
+              backend_path: /v1/metrics
+              endpoint: :4318
+            - path: /inputs/otlp/{source_id}/v1/traces
+              backend_path: /v1/traces
               endpoint: :4318
     receivers:
       otlp:

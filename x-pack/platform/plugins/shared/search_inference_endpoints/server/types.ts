@@ -7,12 +7,18 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import type { InferenceConnector } from '@kbn/inference-common';
-import type { ApiInferenceConnector } from './lib/merge_connectors';
+import type { ApiInferenceConnector, InferenceConnector } from '@kbn/inference-common';
 
 export type { InferenceTaskType, InferenceConnector };
+
+export interface RecommendedEndpoint {
+  id: string;
+  parameters?: ApiInferenceConnector['parameters'];
+}
+
+export type RecommendedEndpointInput = string | RecommendedEndpoint;
 
 export interface InferenceFeatureConfig {
   featureId: string;
@@ -21,7 +27,7 @@ export interface InferenceFeatureConfig {
   featureDescription: string;
   taskType: InferenceTaskType;
   maxNumberOfEndpoints?: number;
-  recommendedEndpoints: string[];
+  recommendedEndpoints: RecommendedEndpointInput[];
   isTechPreview?: boolean;
   isBeta?: boolean;
   ignoreGlobalDefault?: boolean;
@@ -37,6 +43,10 @@ export interface InferenceFeatureConfig {
   };
 }
 
+export type RegisteredInferenceFeature = Omit<InferenceFeatureConfig, 'recommendedEndpoints'> & {
+  recommendedEndpoints: RecommendedEndpoint[];
+};
+
 export type RegisterResult = { ok: true } | { ok: false; error: string };
 
 export interface InferenceFeatureRegistryContract {
@@ -44,9 +54,9 @@ export interface InferenceFeatureRegistryContract {
 }
 
 export interface InferenceFeatureRegistryStartContract extends InferenceFeatureRegistryContract {
-  getAll: () => InferenceFeatureConfig[];
-  get: (featureId: string) => InferenceFeatureConfig | undefined;
-  updateRecommendedEndpoints: (featureId: string, endpoints: string[]) => void;
+  getAll: () => RegisteredInferenceFeature[];
+  get: (featureId: string) => RegisteredInferenceFeature | undefined;
+  updateRecommendedEndpoints: (featureId: string, endpoints: RecommendedEndpointInput[]) => void;
 }
 
 export interface SearchInferenceEndpointsPluginSetup {
@@ -54,7 +64,7 @@ export interface SearchInferenceEndpointsPluginSetup {
 }
 
 export interface ResolvedInferenceEndpoints {
-  endpoints: InferenceConnector[];
+  endpoints: Array<Omit<ApiInferenceConnector, 'isRecommended'>>;
   warnings: string[];
   soEntryFound: boolean;
 }
@@ -99,6 +109,7 @@ export interface SearchInferenceEndpointsPluginStartDependencies {
 
 export interface SearchInferenceEndpointsPluginSetupDependencies {
   features: FeaturesPluginSetup;
+  inference: InferenceServerSetup;
 }
 
 export * from '../common/types';

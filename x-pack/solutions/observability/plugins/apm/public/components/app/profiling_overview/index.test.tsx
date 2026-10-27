@@ -9,6 +9,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ProfilingSchema } from '@kbn/profiling-utils';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
+import { ProfilingCpsCallout } from '../../shared/profiling/cps_callout';
 import { ProfilingFlamegraph } from '../../shared/profiling/flamegraph';
 import { ProfilingSchemaSelector } from '../../shared/profiling/schema_selector';
 import { ProfilingHostsFlamegraph } from './profiling_hosts_flamegraph';
@@ -28,7 +30,7 @@ jest.mock('../../../hooks/use_apm_params', () => ({
   }),
 }));
 jest.mock('../../../hooks/use_profiling_plugin', () => ({
-  useProfilingPlugin: () => ({ isProfilingAvailable: true, isLoading: false }),
+  useProfilingPlugin: jest.fn(),
 }));
 jest.mock('../../../hooks/use_time_range', () => ({
   useTimeRange: () => ({ start: '2023-10-30T00:00:00.000Z', end: '2023-10-30T00:15:00.000Z' }),
@@ -54,6 +56,9 @@ jest.mock('./profiling_hosts_flamegraph', () => ({
 }));
 jest.mock('./profiling_hosts_top_functions', () => ({ ProfilingHostsTopNFunctions: () => null }));
 jest.mock('./profiling_hosts_callout', () => ({ ProfilingHostsCallout: () => null }));
+jest.mock('../../shared/profiling/cps_callout', () => ({
+  ProfilingCpsCallout: jest.fn(() => null),
+}));
 
 const mockAgent = (agentName: string) =>
   jest.mocked(useApmServiceContext).mockReturnValue({
@@ -61,9 +66,50 @@ const mockAgent = (agentName: string) =>
     transactionType: 'request',
   } as ReturnType<typeof useApmServiceContext>);
 
+const mockProfilingPlugin = ({
+  isProfilingAvailable,
+  isLoading,
+}: {
+  isProfilingAvailable: boolean;
+  isLoading: boolean;
+}) =>
+  jest.mocked(useProfilingPlugin).mockReturnValue({
+    isProfilingAvailable,
+    isLoading,
+  } as ReturnType<typeof useProfilingPlugin>);
+
 describe('ProfilingOverview', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockProfilingPlugin({ isProfilingAvailable: true, isLoading: false });
+  });
+
+  describe('CPS callout', () => {
+    beforeEach(() => {
+      mockAgent('nodejs');
+    });
+
+    it('is rendered when profiling has data', () => {
+      render(<ProfilingOverview />);
+
+      expect(ProfilingCpsCallout).toHaveBeenCalled();
+    });
+
+    it('is rendered when profiling has no data', () => {
+      mockProfilingPlugin({ isProfilingAvailable: false, isLoading: false });
+
+      render(<ProfilingOverview />);
+
+      expect(ProfilingCpsCallout).toHaveBeenCalled();
+    });
+
+    it('is not rendered while the profiling status loads', () => {
+      mockProfilingPlugin({ isProfilingAvailable: false, isLoading: true });
+
+      render(<ProfilingOverview />);
+
+      expect(ProfilingCpsCallout).not.toHaveBeenCalled();
+    });
   });
 
   it('checks the schemas with data of the hosts of the service in the hosts views', () => {

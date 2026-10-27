@@ -38,8 +38,21 @@ import { create } from './create';
 import { deleteCases } from './delete';
 import { search } from './search';
 import { find } from './find';
-import type { CasesByAlertIDParams, GetParams } from './get';
-import { get, resolve, getCasesByAlertID, getReporters, getTags, getCategories } from './get';
+import type {
+  CasesByAlertIDParams,
+  CasesByAttachmentIDsRequest,
+  GetCaseIDsByAttachmentIDsResponse,
+  GetParams,
+} from './get';
+import {
+  get,
+  resolve,
+  getCasesByAlertID,
+  getCasesByAttachmentIDs,
+  getReporters,
+  getTags,
+  getCategories,
+} from './get';
 import type { PushParams } from './push';
 import { push } from './push';
 import { bulkUpdate } from './bulk_update';
@@ -132,6 +145,12 @@ export interface CasesSubClient {
    */
   getCasesByAlertID(params: CasesByAlertIDParams): Promise<GetRelatedCasesByAlertResponse>;
   /**
+   * Retrieves, per attachment ID (the ID an attachment points at), the IDs of the cases it is attached to
+   */
+  getCasesByAttachmentIDs(
+    params: CasesByAttachmentIDsRequest
+  ): Promise<GetCaseIDsByAttachmentIDsResponse>;
+  /**
    * Replace custom field with specific customFieldId and CaseId
    */
   replaceCustomField(params: ReplaceCustomFieldArgs): Promise<CaseCustomField>;
@@ -187,6 +206,7 @@ const usageCounterByMethod = {
   getCategories: null,
   getReporters: null,
   getCasesByAlertID: null,
+  getCasesByAttachmentIDs: null,
   replaceCustomField: 'replace_custom_field',
   similar: null,
   addObservable: 'add_observable',
@@ -237,6 +257,8 @@ export const createCasesSubClient = (
     getCategories: (params: AllCategoriesFindRequest) => getCategories(params, clientArgs),
     getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
     getCasesByAlertID: (params: CasesByAlertIDParams) => getCasesByAlertID(params, clientArgs),
+    getCasesByAttachmentIDs: (params: CasesByAttachmentIDsRequest) =>
+      getCasesByAttachmentIDs(params, clientArgs),
     replaceCustomField: withUsageCounter(
       usageCounterByMethod.replaceCustomField,
       clientArgs,
