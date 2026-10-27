@@ -7,7 +7,7 @@
 
 import { encode } from '@kbn/rison';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
-import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
+import { formatPageFilterSearchParam } from '@kbn/securitysolution-alerts-page-url';
 import { assertFilterControlsWithFilterObject } from '../../../../tasks/alerts_page_filters';
 import { getNewRule } from '../../../../objects/rule';
 import {
