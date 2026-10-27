@@ -634,6 +634,96 @@ steps:
     expect(result.steps['case-b-step'].branchKey).toBe('cases[1].steps');
   });
 
+  it('records the document path of every step', () => {
+    const yaml = `
+name: test
+steps:
+  - name: first
+    type: http
+  - name: loop
+    type: foreach
+    foreach: "{{ items }}"
+    steps:
+      - name: inner
+        type: http
+        on-failure:
+          fallback:
+            - name: recover
+              type: console
+  - name: router
+    type: switch
+    cases:
+      - match: "a"
+        steps:
+          - name: case-a-step
+            type: http
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const { steps } = buildWorkflowLookup(yamlDocument, lineCounter);
+
+    expect(
+      Object.fromEntries(Object.values(steps).map(({ stepId, path }) => [stepId, path]))
+    ).toEqual({
+      first: ['steps', 0],
+      loop: ['steps', 1],
+      inner: ['steps', 1, 'steps', 0],
+      recover: ['steps', 1, 'steps', 0, 'on-failure', 'fallback', 0],
+      router: ['steps', 2],
+      'case-a-step': ['steps', 2, 'cases', 0, 'steps', 0],
+    });
+  });
+
+  it('includes the workflow-level fallback steps from settings', () => {
+    const yaml = `
+name: test
+settings:
+  on-failure:
+    fallback:
+      - name: notify
+        type: console
+steps:
+  - name: first
+    type: http
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const { steps, stepsLineStart } = buildWorkflowLookup(yamlDocument, lineCounter);
+
+    expect(steps.notify).toMatchObject({
+      path: ['settings', 'on-failure', 'fallback', 0],
+      branchKey: 'on-failure.fallback',
+      parentStepId: undefined,
+    });
+    expect(stepsLineStart).toBe(steps.first.lineStart);
+  });
+
+  it('does not treat step-shaped data under step properties as steps', () => {
+    const yaml = `
+name: test
+steps:
+  - name: search
+    type: elasticsearch.esql.query
+    with:
+      query: FROM logs-*
+  - name: post
+    type: http
+    with:
+      body:
+        name: search
+        type: example
+    retry:
+      name: retry-config
+      type: fixed
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const { steps } = buildWorkflowLookup(yamlDocument, lineCounter);
+
+    expect(Object.keys(steps)).toEqual(['search', 'post']);
+    expect(steps.search.stepType).toBe('elasticsearch.esql.query');
+  });
+
   it('should not treat inputs as steps', () => {
     const yaml = `
 name: test

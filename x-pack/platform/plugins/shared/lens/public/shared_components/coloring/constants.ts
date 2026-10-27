@@ -28,3 +28,8 @@ export const defaultPaletteParams: RequiredPaletteParamTypes = {
   colorStops: [],
   continuity: DEFAULT_CONTINUITY,
 };
+
+/**
+ * Editor only cap on how many color ranges the custom palette UI allows.
+ */
+export const LENS_PALETTE_MAX_COLOR_RANGES = 5;

@@ -14,7 +14,7 @@ import type { MouseEventHandler, ReactElement, ReactNode } from 'react';
 export interface CuratedTile {
   id: string;
   title: string;
-  description: string;
+  description: ReactNode;
   icon: ReactElement;
   href?: string;
   /** Anchor `target`, for example `_blank` for external destinations. */

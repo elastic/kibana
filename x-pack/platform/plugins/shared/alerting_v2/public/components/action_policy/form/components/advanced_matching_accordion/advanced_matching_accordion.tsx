@@ -50,7 +50,7 @@ export const AdvancedMatchingAccordion = ({
       >
         <MatcherInput
           value={matcher?.expression ?? ''}
-          onChange={(expr) => onChange({ ...matcher, expression: expr || null })}
+          onChange={(expr) => onChange({ ...matcher, expression: expr || undefined })}
           fullWidth
           data-test-subj="matcherInput"
           dataFieldNames={dataFieldNames}

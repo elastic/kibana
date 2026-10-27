@@ -53,6 +53,19 @@ this.logger.error({
 });
 ```
 
+## Who a failure is attributed to
+
+`RULE_EXECUTION_STEP_FAILED` carries the label `error_source`:
+
+| Value       | Meaning                                                                                                                 |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `user`      | The step tagged the error as a user error (for example an invalid rule query). Task Manager counts it in `user_errors`. |
+| `framework` | Every other failure. Task Manager counts it in `framework_errors`.                                                      |
+
+The value comes from the error source Task Manager already holds for the error, so
+it always agrees with those counters. Filter on `labels.error_source: framework` to
+leave out failures that the rule's owner has to fix.
+
 ## Subsystem loggers
 
 `forSubsystem(name)` returns a service whose records carry
@@ -83,7 +96,7 @@ per-call labels are both emitted under ECS `labels.*`.
 | -------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `ruleExecutor` | `RuleExecutorTaskRunner` once per task; `rule_kind` re-bound after `fetch_rule`; `step` on pipeline/middleware | `rule_id`, `space_id`, `task_id`, `execution_id`, `rule_kind`, `step`                                                 |
 | `dispatcher`   | `DispatcherTaskRunner` once per tick; `step` in pipeline/steps; entity labels on concrete log calls            | `task_id`, `step`, plus `rule_id` / `space_id` / `policy_id` / `group_id` / `workflow_id` / `execution_id` when known |
-| `director`     | `DirectorService.run` once per run                                                                             | `rule_id`, `rule_kind`, `space_id` (and `group_hash` / `episode_id` on transition debug)                              |
+| `director`     | `DirectorService.run` once per run                                                                             | `rule_id`, `rule_kind`, `space_id` (and `group_hash` / `alert_id` on transition debug)                              |
 
 Pass the bound logger through pipeline `input` / `state` (or a local `const`
 in director). Steps should log via `state.logger.withLabels({ step })`, not the

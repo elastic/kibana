@@ -10,6 +10,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
@@ -121,6 +122,7 @@ describe('bulkScheduleWorkflow', () => {
     const initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
       eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+      storage: { source: 'plain_index', dataRetention: '90d' },
     });
     plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
 
@@ -135,6 +137,8 @@ describe('bulkScheduleWorkflow', () => {
     mockIsWorkflowEnabledRealtime.mockReset().mockResolvedValue(true);
     mockDiscardUnstartedExecution.mockReset().mockResolvedValue(undefined);
     taskManager = taskManagerMock.createStart();
+    taskManager.schedule.mockImplementation(async (task) => task as any);
+    taskManager.bulkSchedule.mockImplementation(async (tasks) => tasks as any);
     pluginStart = plugin.start(coreStart, {
       taskManager,
       actions: {} as any,
@@ -746,6 +750,7 @@ describe('bulkScheduleWorkflow', () => {
       expect.any(Object),
       expect.objectContaining({ request, cloneApiKey: true })
     );
+    expect(taskManager.schedule.mock.calls[0][0].priority).toBe(TaskPriority.Standard);
   });
 
   it('fails a single execution without scheduling when no identity is attached', async () => {

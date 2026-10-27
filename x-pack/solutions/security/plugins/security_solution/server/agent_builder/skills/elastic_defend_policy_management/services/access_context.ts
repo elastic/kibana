@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import type { EndpointInternalFleetServicesInterface } from '../../../../endpoint/services/fleet/endpoint_fleet_services_factory';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
@@ -15,7 +15,6 @@ import {
   type EndpointAuthzRequirement,
 } from '../../../../../common/endpoint/service/authz';
 import { EndpointAuthorizationError } from '../../../../endpoint/errors';
-import { createRequestScopedSoClient } from './create_request_scoped_so_client';
 
 export type PolicyAccessContext = Readonly<{
   spaceId: string;
@@ -37,21 +36,18 @@ export function createPolicyAccessContext(
   endpointAppContextService: EndpointAppContextService,
   input: Readonly<{ request: KibanaRequest; spaceId: string }>,
   requiredAuthz: EndpointAuthzRequirement,
-  getStartServices: StartServicesAccessor,
   mode?: 'read'
 ): Promise<PolicyAccessContext>;
 export function createPolicyAccessContext(
   endpointAppContextService: EndpointAppContextService,
   input: Readonly<{ request: KibanaRequest; spaceId: string }>,
   requiredAuthz: EndpointAuthzRequirement,
-  getStartServices: StartServicesAccessor,
   mode: 'write'
 ): Promise<PolicyWriteAccessContext>;
 export async function createPolicyAccessContext(
   endpointAppContextService: EndpointAppContextService,
   input: Readonly<{ request: KibanaRequest; spaceId: string }>,
   requiredAuthz: EndpointAuthzRequirement,
-  getStartServices: StartServicesAccessor,
   mode: PolicyAccessMode = 'read'
 ): Promise<PolicyAccessContextResult> {
   const authz: EndpointAuthz = await endpointAppContextService.getEndpointAuthz(input.request);
@@ -63,8 +59,7 @@ export async function createPolicyAccessContext(
   }
 
   const fleet = endpointAppContextService.getInternalFleetServices(input.spaceId);
-  const requestScopedSoClient = await createRequestScopedSoClient({
-    getStartServices,
+  const requestScopedSoClient = endpointAppContextService.savedObjects.createRequestScopedSoClient({
     request: input.request,
     readonly: mode === 'read',
   });

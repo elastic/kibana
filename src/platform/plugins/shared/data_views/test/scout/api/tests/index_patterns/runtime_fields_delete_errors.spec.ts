@@ -72,7 +72,7 @@ apiTest.describe(
     });
 
     apiTest('returns error when ID is too long', async ({ apiClient }) => {
-      const longId = 'x'.repeat(1100);
+      const longId = 'x'.repeat(1759);
 
       const response = await apiClient.delete(
         `${DATA_VIEW_PATH_LEGACY}/${longId}/runtime_field/foo`,
@@ -86,7 +86,9 @@ apiTest.describe(
       );
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toContain('must have a maximum length of [1000]');
+      expect(response.body.message).toBe(
+        '[request params.id]: value has length [1759] but it must have a maximum length of [1000].'
+      );
     });
   }
 );

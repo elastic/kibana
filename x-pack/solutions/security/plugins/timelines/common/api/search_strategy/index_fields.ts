@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-const indexFieldsRequestBase = z.object({
-  onlyCheckIfIndicesExist: z.boolean().optional(),
-  includeUnmapped: z.boolean().optional(),
-});
+const indexFieldsRequestBase = lazySchema(() =>
+  z.object({
+    onlyCheckIfIndicesExist: z.boolean().optional(),
+    includeUnmapped: z.boolean().optional(),
+  })
+);
 
-export const indexFieldsRequestSchema = z.union([
-  indexFieldsRequestBase.extend({
-    indices: z.array(z.string()),
-  }),
-  indexFieldsRequestBase.extend({ dataViewId: z.string() }),
-]);
+export const indexFieldsRequestSchema = lazySchema(() =>
+  z.union([
+    indexFieldsRequestBase.extend({
+      indices: z.array(z.string()),
+    }),
+    indexFieldsRequestBase.extend({ dataViewId: z.string() }),
+  ])
+);
 
 export type IndexFieldsRequestInput = z.input<typeof indexFieldsRequestSchema>;
 

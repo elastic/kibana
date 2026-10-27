@@ -7,13 +7,11 @@
 
 import type { FetchAdapterType } from '../../../common/threat_intel';
 import { rssAdapter } from './rss/rss_adapter';
-import { textIndicatorListAdapter } from './text_indicator_list/text_indicator_list_adapter';
 import { kevAdapter } from './kev/kev_adapter';
 import type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } from './types';
 
 const ADAPTERS: Record<FetchAdapterType, FetchAdapter> = {
   rss: rssAdapter,
-  text_indicator_list: textIndicatorListAdapter,
   kev: kevAdapter,
 };
 

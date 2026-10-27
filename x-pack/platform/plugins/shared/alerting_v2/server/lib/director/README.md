@@ -11,11 +11,13 @@ It runs inside the rule executor as [`DirectorStep`](../rule_executor/steps/dire
 - Mapping an incoming alert event plus prior alert state to the next episode state
 - Assigning or reusing the episode id (`alert.id`)
 - Encapsulating lifecycle rules behind transition strategies
+- Returning the prior state it loaded (`previousAlertStateByGroupHash`) so downstream write-policy steps can compare against it without a second round trip
 
 ## What the director does not own
 
 - Running ES|QL
 - Deciding recovery semantics
+- Deciding whether an enriched event is worth persisting — that is write policy, owned by `SuppressRedundantNoDataEventsStep` in the rule executor
 - Sending notifications
 - Persisting actions to `.alert-actions`
 
@@ -75,6 +77,8 @@ The director creates a new episode id when:
 
 Otherwise it preserves the existing episode id so the lifecycle stays correlated across runs.
 
+A new episode id is **deterministic** (uuid v5), seeded from `rule.id | group_hash | scheduled_timestamp`, not a random uuid. This matters because the director runs once per streamed batch and a single-series (ungrouped) rule emits one event per returned row — many events sharing one `group_hash` within a run, spread across batches the director processes independently against the same (empty, for a new series) prior state. A random id per event would split that one series into many episodes; seeding from the run's scheduled timestamp collapses every new-episode event of a run to the same id (within and across batches, with no shared state), while a later run that reopens the series gets a different id because the timestamp differs. A series opens at most one episode per run, so distinct episodes never collide, and the id is idempotent across task retries of the same run.
+
 ## Lifecycle concepts
 
 ### Input event status
@@ -130,6 +134,17 @@ The director writes one of these episode statuses:
 
 For `'resolve'`, the episode resolves directly to `inactive` on the first no-data run. `'ignore'` never produces a `no_data` event to begin with.
 
+#### Held groups write one marker
+
+The executor re-synthesizes a `no_data` event for every active group that is absent from the breach set and has no data, on every run. For a held group (`'keep_last'`, or a user `activate` lock) that would persist one identical event per run for as long as the group stays absent.
+
+The director does **not** drop those events — it stays a pure 1:1 state function and returns every enriched event. Instead it threads the prior state it loaded onto `state.previousAlertStateByGroupHash`, and [`SuppressRedundantNoDataEventsStep`](../rule_executor/steps/suppress_redundant_no_data_events_step.ts) (the step right after `DirectorStep`) drops a `no_data` event when the previous persisted event for the group was also `no_data` **and** the resolved episode id, `alert.status` and `alert.status_count` match the persisted state. The effect:
+
+- The first `no_data` after a `breached` / `recovered` event is the **transition marker** and is always written. Its `alert.status` carries the held status, so `LAST(alert.status, @timestamp)` readers keep seeing it. (Raw `status` is `no_data` on that marker — readers that want the held status must read `alert.status`.)
+- While the group stays absent nothing further is written. The held alert is **sparse**: time-windowed queries stop seeing it once the marker leaves their window.
+- `breached` / `recovered` events are never dropped, so a group that resumes reporting resumes normal event writing through them.
+- The strategy still runs every tick; only the director's output is compared. A rule edited from `'keep_last'` to `'resolve'` while a group is absent therefore resolves on the next run.
+
 ### `CountTimeframeStrategy`
 
 `CountTimeframeStrategy` extends the basic state machine with threshold gating for:
@@ -145,7 +160,7 @@ It supports:
 - timeframe only
 - count + timeframe with `AND` / `OR`
 
-For timeframe evaluation, it compares the director run time (`evaluatedAt`) with the last stored episode timestamp; the current event has no `@timestamp` yet, since ES sets it at ingest.
+For timeframe evaluation, it compares the director run time (`evaluatedAt`) with the timestamp the phase was entered; the current event has no `@timestamp` yet, since ES sets it at ingest.
 
 #### Count semantics
 
@@ -162,7 +177,13 @@ A count of `N` is the number of evaluations the episode spends in the phase. The
 
 A count of `0` skips the phase, unless a `timeframe` is combined with it using `and`: then the timeframe still has to elapse, so `{ count: 0, timeframe: '5m', operator: 'and' }` holds the phase until the timeframe is met. With `or`, the count alone is enough and the phase is skipped.
 
-**Caveat:** elapsed time for an `and`-combined `timeframe` is measured against the previous evaluation's stored timestamp, not against when the phase was entered (see above), so it never accumulates past roughly one schedule interval. An `and`-combined `timeframe` therefore only resolves reliably when the rule's schedule interval is >= the timeframe; on a shorter schedule it holds the phase indefinitely. This applies to any count, not just `0`.
+#### Timeframe semantics
+
+Elapsed time for a `timeframe` is measured against the timestamp the phase was entered. That timestamp is not persisted as its own field; it is **derived** by `getLatestAlertEventStateQuery` as `MAX(@timestamp)` over the episode's `status_count == 1` events. `status_count` resets to `1` on every phase entry and increments while the phase is held, so the latest `status_count == 1` event marks the start of the current run (`last_episode_phase_started_at`).
+
+Elapsed time therefore accumulates across evaluations, so an `and`-combined `timeframe` resolves once cumulative elapsed time exceeds it regardless of how the rule's schedule interval compares to the timeframe (a 5m timeframe on a 1m schedule resolves after ~5 evaluations). This holds for any count.
+
+> **Note:** the derivation reads the phase-entry event back from the `.rule-events` data stream, so the entry event can be missing when a `timeframe` outlives the stream's retention, or when `state_transition` is configured while an episode is already mid-phase. In that case `last_episode_phase_started_at` is `null` and elapsed time falls back to `last_episode_timestamp` (the previous evaluation), so the phase keeps advancing instead of stalling at 0 until the signal flaps. Phase durations are expected to be well within retention, where the exact phase-entry timestamp is used.
 
 ## When to add a new strategy
 

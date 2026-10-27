@@ -20,7 +20,9 @@ export type { AttachMlInferencePipelineResponse };
 export const attachMlInferencePipeline = async (
   args: AttachMlInferencePipelineApiLogicArgs
 ): Promise<AttachMlInferencePipelineResponse> => {
-  const route = `/internal/enterprise_search/indices/${args.indexName}/ml_inference/pipeline_processors/attach`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(
+    args.indexName
+  )}/ml_inference/pipeline_processors/attach`;
   const params = {
     pipeline_name: args.pipelineName,
   };

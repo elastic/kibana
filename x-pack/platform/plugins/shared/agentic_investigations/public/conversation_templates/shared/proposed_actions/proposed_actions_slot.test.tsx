@@ -27,6 +27,8 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
   useDismissProposal: jest.fn(),
   useIsApprovingProposal: jest.fn(),
   useIsDecliningProposal: jest.fn(),
+  useReopenProposal: jest.fn(() => ({ mutateAsync: jest.fn() })),
+  useIsReopeningProposal: jest.fn(() => false),
 }));
 
 jest.mock('../../../user_profiles', () => ({
@@ -68,7 +70,11 @@ const mockProposal: ProposalWithMetadata = {
   confidence: 'high',
   origin: 'alertzero',
   createdAt: '2024-01-01T00:00:00Z',
-  action: { name: 'Isolate cfo-mbp-14 — host isolation', category: 'Response action' },
+  action: {
+    name: 'Isolate cfo-mbp-14 — host isolation',
+    category: 'Response action',
+    approvalPolicy: 'always-gate',
+  },
 };
 
 const decidedProposal: ProposalWithMetadata = {
@@ -79,7 +85,11 @@ const decidedProposal: ProposalWithMetadata = {
   decidedBy: { fullName: 'Bonnie Fishel', username: 'bfishel', email: null },
   decidedAt: '2024-01-01T17:20:00.000Z',
   title: 'After-hours domain admin logins — fin-dc-01',
-  action: { name: 'After-hours domain admin logins — fin-dc-01', category: 'Response action' },
+  action: {
+    name: 'After-hours domain admin logins — fin-dc-01',
+    category: 'Response action',
+    approvalPolicy: 'always-gate',
+  },
 };
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -166,6 +176,48 @@ describe('ProposedActionsSlot', () => {
 
     expect(screen.getByText('Isolate cfo-mbp-14 — host isolation')).toBeInTheDocument();
     expect(screen.getByText('After-hours domain admin logins — fin-dc-01')).toBeInTheDocument();
+  });
+
+  it('keeps the order the API returned, so paging and display agree', () => {
+    const pending = { ...mockProposal, id: 'pending' };
+    const decidedLast = { ...decidedProposal, id: 'decided-last' };
+    const decidedFirst = { ...decidedProposal, id: 'decided-first' };
+    mockConversationProposalsPage([pending, decidedLast, decidedFirst]);
+    renderSlot();
+
+    const rows = screen.getAllByTestId(/^investigationFlyoutProposedAction-/);
+    expect(rows.map((row) => row.getAttribute('data-test-subj'))).toEqual([
+      'investigationFlyoutProposedAction-pending',
+      'investigationFlyoutProposedAction-decided-last',
+      'investigationFlyoutProposedAction-decided-first',
+    ]);
+  });
+
+  it('renders every proposal as a row of the one bordered list', () => {
+    mockConversationProposalsPage([mockProposal, decidedProposal]);
+
+    renderSlot();
+
+    const list = screen.getByTestId('investigationFlyoutProposedActionsList');
+    expect(within(list).getAllByRole('listitem')).toHaveLength(2);
+    expect(
+      within(list).getByTestId('investigationFlyoutProposedAction-proposal-1')
+    ).toBeInTheDocument();
+    expect(
+      within(list).getByTestId('investigationFlyoutProposedAction-proposal-2')
+    ).toBeInTheDocument();
+  });
+
+  it('keeps Show more outside the list, so the last row still closes the card', () => {
+    mockConversationProposalsPage([mockProposal], { hasNextPage: true, fetchNextPage: jest.fn() });
+
+    renderSlot();
+
+    const list = screen.getByTestId('investigationFlyoutProposedActionsList');
+    expect(
+      within(list).queryByTestId('investigationFlyoutProposedActionsShowMore')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('investigationFlyoutProposedActionsShowMore')).toBeInTheDocument();
   });
 
   it('renders a decided proposal as a closed record, but still opens a read-only modal for it', () => {
@@ -256,6 +308,26 @@ describe('ProposedActionsSlot', () => {
     expect(
       screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-confirm')
     ).toBeInTheDocument();
+  });
+
+  it('keeps the modal open when a failed action is replaced by its retry proposal', () => {
+    mockConversationProposalsPage([{ ...mockProposal, rootProposalId: 'proposal-1' }]);
+    const { rerender } = renderSlot();
+    fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-1'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    // The failed proposal is superseded, so the next fetch returns its retry under a new id.
+    mockConversationProposalsPage([
+      {
+        ...mockProposal,
+        id: 'proposal-3',
+        rootProposalId: 'proposal-1',
+        previousExecutionError: 'Suspend process failed.',
+      },
+    ]);
+    rerender(<ProposedActionsSlot conversationId="conversation-1" />);
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
   it('shows the reason form in the same modal instead of dismissing directly', () => {

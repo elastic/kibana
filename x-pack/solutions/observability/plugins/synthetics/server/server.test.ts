@@ -52,11 +52,15 @@ describe('initSyntheticsServer', () => {
       {} as any
     );
 
-    expect(mockPost).toHaveBeenCalledWith({
-      access: 'public',
-      security: undefined,
-      path: '/api/synthetics/test-bulk-create',
-      options: { body: { maxBytes: 100 * 1024 * 1024 } },
-    });
+    expect(mockPost).toHaveBeenCalledWith(
+      expect.objectContaining({
+        access: 'public',
+        path: '/api/synthetics/test-bulk-create',
+        options: expect.objectContaining({
+          body: { maxBytes: 100 * 1024 * 1024 },
+          tags: ['oas-tag:synthetics'],
+        }),
+      })
+    );
   });
 });

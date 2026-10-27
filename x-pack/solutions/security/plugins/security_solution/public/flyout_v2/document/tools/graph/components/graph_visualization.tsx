@@ -35,7 +35,9 @@ import { PREFIX } from '../../../../../flyout/shared/test_ids';
 import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../../common/utils/normalize_time_range';
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
+import { useGraphTelemetry } from '../../../../shared/hooks/use_graph_telemetry';
 import { extractTimelineCapabilities } from '../../../../../common/utils/timeline_capabilities';
+import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/scope_time_ranges';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -47,6 +49,8 @@ export const GRAPH_VISUALIZATION_TEST_ID = `${PREFIX}GraphVisualization` as cons
 export const GRAPH_ID = 'graph-visualization' as const;
 
 const MAX_DOCUMENTS_TO_LOAD = 50;
+/** Initial window of the entity graph when the enclosing entity flyout did not pin one. */
+const DEFAULT_ENTITY_GRAPH_TIME_RANGE = { from: 'now-30d', to: 'now' } as const;
 
 /**
  * Node-click callbacks. This component interprets the clicked node and routes it to the
@@ -145,9 +149,12 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
   }, [cps?.cpsManager]);
 
   const toasts = useToasts();
+  const { onTelemetryEvent } = useGraphTelemetry();
 
   const { dataView, status } = useDataView(PageScope.default);
   const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
+  // Entity mode only: a scope that pins a time range seeds the graph's picker.
+  const entityGraphTimeRange = getScopeFlyoutTimeRange(scopeId) ?? DEFAULT_ENTITY_GRAPH_TIME_RANGE;
 
   // Interpret the clicked node and route it to the appropriate consumer-provided preview opener.
   const onOpenEventPreview = useCallback(
@@ -176,13 +183,11 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
             entity: doc.entity,
             id: doc.id,
             icon: node.icon,
+            risk: doc.entity.riskScore,
           }));
         onShowGrouped({ docMode, entityItems, documentIds: [], dataViewId: undefined });
       } else if (docMode === 'grouped-events' && documentsData.length > 0) {
-        const documentIds = documentsData
-          .slice(0, MAX_DOCUMENTS_TO_LOAD)
-          .map((doc) => doc.event?.id)
-          .filter((id): id is string => id !== undefined);
+        const documentIds = documentsData.slice(0, MAX_DOCUMENTS_TO_LOAD).map((doc) => doc.id);
         onShowGrouped({
           docMode,
           documentIds,
@@ -269,8 +274,8 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
                     dataView,
                     entityIds: [{ id: props.entityId, isOrigin: true }],
                     timeRange: {
-                      from: 'now-30d',
-                      to: 'now',
+                      from: entityGraphTimeRange.from,
+                      to: entityGraphTimeRange.to,
                     },
                     projectRouting,
                   }
@@ -280,6 +285,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
             onInvestigateInTimeline={openTimelineCallback}
             onOpenEventPreview={onOpenEventPreview}
             onOpenNetworkPreview={onShowNetwork}
+            onTelemetryEvent={onTelemetryEvent}
           />
         </React.Suspense>
       )}

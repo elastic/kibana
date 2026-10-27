@@ -7,6 +7,9 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { EffortLevels } from '@kbn/agent-builder-common/model_provider';
 import type {
   ModelProvider,
@@ -30,6 +33,9 @@ import {
 } from '@kbn/agent-builder-common/constants';
 import type { TrackingService } from '../../../telemetry';
 import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
+import { getCurrentTraceId } from '../../../tracing';
+import { getCurrentSpaceId } from '../../../utils/spaces';
+import { getUserFromRequest } from '../../utils';
 
 export interface CreateModelProviderOpts {
   inference: InferenceServerStart;
@@ -41,6 +47,9 @@ export interface CreateModelProviderOpts {
   telemetryMetadata?: ConnectorTelemetryMetadata;
   maxContentLength?: number;
   reasoningLevel?: ChatCompletionReasoningEffort;
+  spaces?: SpacesPluginStart;
+  security?: SecurityServiceStart;
+  elasticsearch?: ElasticsearchServiceStart;
 }
 
 export type CreateModelProviderFactoryFn = (
@@ -99,8 +108,39 @@ export const createModelProvider = ({
   telemetryMetadata,
   maxContentLength,
   reasoningLevel,
+  spaces,
+  security,
+  elasticsearch,
 }: CreateModelProviderOpts): ModelProvider => {
-  const resolvedTelemetryMetadata = telemetryMetadata ?? MODEL_TELEMETRY_METADATA;
+  const getResolvedTelemetryMetadata = memoizeAsync(
+    async (): Promise<ConnectorTelemetryMetadata> => {
+      const traceId = getCurrentTraceId();
+      const spaceId = spaces ? getCurrentSpaceId({ request, spaces }) : undefined;
+      // Only forward an actual profile UID: toStableUserId() falls back to a
+      // `realm:[type,name,username]` synthetic id (used internally for ownership checks) when
+      // the user has no activated profile, and that string embeds the raw username.
+      const resolvedUserId =
+        security && elasticsearch
+          ? (
+              await getUserFromRequest({
+                request,
+                security,
+                esClient: elasticsearch.client.asScoped(request).asCurrentUser,
+              })
+            ).id
+          : undefined;
+      const userId =
+        resolvedUserId && !resolvedUserId.startsWith('realm:') ? resolvedUserId : undefined;
+
+      return {
+        ...MODEL_TELEMETRY_METADATA,
+        ...(traceId ? { traceId } : {}),
+        ...(spaceId ? { spaceId } : {}),
+        ...(userId ? { userId } : {}),
+        ...telemetryMetadata,
+      };
+    }
+  );
   const getDefaultConnectorId = memoizeAsync(async () => {
     const resolvedConnectorId =
       defaultConnectorId ??
@@ -188,6 +228,8 @@ export const createModelProvider = ({
       }
     };
 
+    const resolvedTelemetryMetadata = await getResolvedTelemetryMetadata();
+
     const chatModel = await inference.getChatModel({
       request,
       connectorId,
@@ -205,7 +247,7 @@ export const createModelProvider = ({
       request,
       bindTo: {
         connectorId,
-        ...(telemetryMetadata ? { metadata: { connectorTelemetry: telemetryMetadata } } : {}),
+        metadata: { connectorTelemetry: resolvedTelemetryMetadata },
       },
       callbacks: {
         complete: [completionCallback],

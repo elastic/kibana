@@ -12,7 +12,7 @@ import { Route } from '@kbn/shared-ux-router';
 import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
 import type { Container } from 'inversify';
 import type { InternalPageProps } from './composable_pages';
-import { createAlertingV2HostApp } from '../locators';
+import { createAlertingV2HostApp } from '../../common/locators';
 
 const ALL_CAPABILITIES = {
   alerting_v2_rules: { read: true, all: true },
@@ -59,8 +59,8 @@ jest.mock('../pages/rule_library_page/rule_library_page', () => ({
   RuleLibraryPage: () => <div data-test-subj="ruleLibraryPage">library</div>,
 }));
 
-jest.mock('../pages/alert_episodes_list_page/alert_episodes_list_page', () => ({
-  AlertEpisodesListPage: () => <div data-test-subj="episodesListPage">episodes</div>,
+jest.mock('../pages/alert_episodes_list_page/alerts_list_page', () => ({
+  AlertsListPage: () => <div data-test-subj="episodesListPage">episodes</div>,
 }));
 
 jest.mock('../pages/episode_details_page/episode_details_page', () => ({

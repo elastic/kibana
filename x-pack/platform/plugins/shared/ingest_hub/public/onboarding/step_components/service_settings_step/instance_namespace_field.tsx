@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -28,52 +28,63 @@ export const getNamespaceError = (namespace: string): string | undefined => {
 interface InstanceNamespaceFieldProps {
   namespace: string;
   onChange: (namespace: string) => void;
-  /** True once the instance has a deployed policy; the namespace is then read-only. */
-  isLocked?: boolean;
+  /** Extra note under the field, e.g. what a change means for services that are already deployed. */
+  note?: string;
+  /**
+   * For a duplicate, whose empty namespace is the global one, so the tooltip says so instead of
+   * describing the default or the agent policy's namespace.
+   */
+  emptyUsesGlobal?: boolean;
+  /** What an empty value resolves to, shown in the empty field. Defaults to `default`. */
+  placeholder?: string;
+  fullWidth?: boolean;
+  compressed?: boolean;
+  'data-test-subj'?: string;
 }
 
 export const InstanceNamespaceField = ({
   namespace,
   onChange,
-  isLocked = false,
+  note,
+  emptyUsesGlobal = false,
+  placeholder = INHERITED_NAMESPACE_PLACEHOLDER,
+  fullWidth = false,
+  compressed = false,
+  'data-test-subj': dataTestSubj = 'serviceSettings-namespaceField',
 }: InstanceNamespaceFieldProps) => {
   const { services } = useKibana<CoreStart>();
-
-  if (isLocked) {
-    return (
-      <EuiFormRow
-        label={i18n.translate('xpack.ingestHub.serviceSettingsStep.namespace.label', {
-          defaultMessage: 'Namespace',
-        })}
-        helpText={i18n.translate('xpack.ingestHub.serviceSettingsStep.namespace.lockedHelp', {
-          defaultMessage: 'The namespace cannot be changed after the service is deployed.',
-        })}
-      >
-        <EuiFieldText
-          value={namespace}
-          // The deployed policy may sit on an existing agent policy, whose namespace is not always `default`.
-          placeholder={i18n.translate(
-            'xpack.ingestHub.serviceSettingsStep.namespace.lockedInheritedPlaceholder',
-            { defaultMessage: 'Inherited from the agent policy' }
-          )}
-          disabled
-          data-test-subj="serviceSettings-namespaceField-locked"
-        />
-      </EuiFormRow>
-    );
-  }
-
   const error = getNamespaceError(namespace);
 
   return (
-    <NamespaceComboBox
-      namespace={namespace}
-      placeholder={INHERITED_NAMESPACE_PLACEHOLDER}
-      isEditPage={false}
-      validationError={error ? [error] : null}
-      docLinks={services.docLinks}
-      onNamespaceChange={onChange}
-      data-test-subj="serviceSettings-namespaceField"
-    />
+    <>
+      <NamespaceComboBox
+        namespace={namespace}
+        placeholder={placeholder}
+        isEditPage={false}
+        validationError={error ? [error] : null}
+        docLinks={services.docLinks}
+        onNamespaceChange={onChange}
+        fullWidth={fullWidth}
+        compressed={compressed}
+        helpTextAsTooltip
+        tooltipContent={
+          emptyUsesGlobal
+            ? i18n.translate(
+                'xpack.ingestHub.serviceSettingsStep.namespace.globalFallbackTooltip',
+                {
+                  defaultMessage:
+                    "Sets the namespace in the integration's data stream name. Leave empty to use the global namespace.",
+                }
+              )
+            : undefined
+        }
+        data-test-subj={dataTestSubj}
+      />
+      {note && (
+        <EuiText size="xs" color="subdued" data-test-subj={`${dataTestSubj}-note`}>
+          {note}
+        </EuiText>
+      )}
+    </>
   );
 };

@@ -11,13 +11,14 @@ import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
 import type { GetScopedClients } from '../../routes/types';
+import type { SignificantEventsServer } from '../../types';
 import { createKIQueryGenerationSkill } from './ki_query_generation';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
+import { nightshiftSourcesManagementSkill } from './nightshift_sources_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
 import { featureIdentificationSkill } from './feature_identification';
 import { significantEventsManagementSkill } from './significant_events_management';
 import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
-import { streamsInvestigationManagementSkill } from './investigation_management';
 
 type SignificantEventsSkill = Parameters<AgentBuilderPluginStart['skills']['register']>[0];
 
@@ -27,6 +28,7 @@ interface RegisterSignificantEventsSkillsOptions {
   streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   maintenanceService?: SignificantEventsMaintenanceService;
   getScopedClients: GetScopedClients;
+  server: Pick<SignificantEventsServer, 'security'>;
   logger: Logger;
   isAvailable: () => Promise<boolean>;
   /**
@@ -61,6 +63,7 @@ export const registerSignificantEventsSkills = async ({
   streamsKIsOnboardingClient,
   maintenanceService,
   getScopedClients,
+  server,
   logger,
   isAvailable,
   availability,
@@ -69,20 +72,22 @@ export const registerSignificantEventsSkills = async ({
 
   const getCoreSkills = (): SignificantEventsSkill[] => [
     knowledgeIndicatorsManagementSkill,
-    createKIQueryGenerationSkill({ getScopedClients, logger }),
+    nightshiftSourcesManagementSkill,
+    createKIQueryGenerationSkill({ getScopedClients, server, logger }),
     significantEventsKIGroundingSkill,
     significantEventsManagementSkill,
     featureIdentificationSkill,
     ...(streamsKIsOnboardingClient && maintenanceService
       ? [
           createKiIdentificationManagementSkill({
+            server,
             telemetry,
             streamsKIsOnboardingClient,
             maintenanceService,
+            getScopedClients,
           }),
         ]
       : []),
-    streamsInvestigationManagementSkill,
   ];
 
   // Registers only the skills not registered yet. Already-registered skills are skipped (a second

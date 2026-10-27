@@ -11,9 +11,9 @@ export type SearchKnowledgeIndicatorsKind = 'feature' | 'query';
 
 export interface SearchKnowledgeIndicatorsInput {
   /**
-   * Optional: if omitted, search across all accessible streams.
+   * Optional: if omitted, search across all accessible sources.
    */
-  stream_names?: string[];
+  source_ids?: string[];
 
   /**
    * Optional: free-text search (best-effort across stored fields).
@@ -72,5 +72,5 @@ export interface KnowledgeIndicatorQuery {
     backed: boolean;
     id: string;
   };
-  stream_name: string;
+  source_id: string;
 }

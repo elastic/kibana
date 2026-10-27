@@ -12,7 +12,7 @@ import { ALERTING_V2_INTERNAL_ACTION_POLICY_MATCH_API_PATH } from '@kbn/alerting
 
 interface UseMatchedActionPoliciesParams {
   http: HttpStart;
-  tags?: string[];
+  routingTags?: string[];
 }
 
 /** Prefix for every matched-policy query. Invalidate this after a policy mutation. */
@@ -35,7 +35,7 @@ const shouldRetry = (failureCount: number, error: unknown): boolean => {
 
 export interface UseMatchedActionPoliciesResult {
   isLoading: boolean;
-  /** True while `keepPreviousData` is still showing matches for the previous tags. */
+  /** True while `keepPreviousData` is still showing matches for the previous routing tags. */
   isPreviousData: boolean;
   error: Error | null;
   items: MatchedActionPolicy[];
@@ -45,12 +45,12 @@ export interface UseMatchedActionPoliciesResult {
 
 export const useMatchedActionPolicies = ({
   http,
-  tags,
+  routingTags,
 }: UseMatchedActionPoliciesParams): UseMatchedActionPoliciesResult => {
-  const body = { rule: tags?.length ? { tags } : {} };
+  const body = { rule: routingTags?.length ? { routing_tags: routingTags } : {} };
 
   const { isLoading, isPreviousData, error, data } = useQuery({
-    queryKey: [...matchedActionPoliciesQueryKey, tags],
+    queryKey: [...matchedActionPoliciesQueryKey, routingTags],
     queryFn: () =>
       http.fetch<MatchActionPoliciesResponse>(ALERTING_V2_INTERNAL_ACTION_POLICY_MATCH_API_PATH, {
         method: 'POST',

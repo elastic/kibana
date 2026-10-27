@@ -11,7 +11,6 @@ import React from 'react';
 import { DateRangeRedirect } from '../app_root/date_range_redirect';
 import { SignificantEventsAppPageTemplate } from '../components/page_template';
 import { RedirectTo } from '../components/redirect_to';
-import { SettingsPage } from '../pages/settings/page';
 import { SignificantEventsPage } from '../pages/significant_events/page';
 
 /**
@@ -29,10 +28,7 @@ const significantEventsAppRoutes = {
     ),
     children: {
       '/': {
-        element: <RedirectTo path="/{tab}" params={{ path: { tab: 'streams' } }} />,
-      },
-      '/settings': {
-        element: <SettingsPage />,
+        element: <RedirectTo path="/{tab}" params={{ path: { tab: 'queries' } }} />,
       },
       '/{tab}': {
         element: (
@@ -55,6 +51,8 @@ const significantEventsAppRoutes = {
               severity: t.union([t.string, t.array(t.string)]),
               type: t.union([t.string, t.array(t.string)]),
               subtype: t.union([t.string, t.array(t.string)]),
+              source: t.union([t.string, t.array(t.string)]),
+              // Old name of `source`, still read so earlier links keep their filter.
               stream: t.union([t.string, t.array(t.string)]),
               service: t.union([t.string, t.array(t.string)]),
               showComputed: t.string,

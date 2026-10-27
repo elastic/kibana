@@ -14,6 +14,7 @@ import type {
 export interface AgentPermissions {
   update_agent: boolean;
   update_access_control: boolean;
+  update_approvals: boolean;
 }
 
 export type AgentDefinitionWithPermissions = AgentDefinition & {
@@ -63,6 +64,19 @@ export interface ListAgentAiIndicesResponse {
 export interface GetAgentAiIndicesResponse {
   ai_indices: AgentAiIndexEntry[];
   warnings?: AgentAiIndicesWarning[];
+}
+
+export type AgentModelSource = 'agent_feature' | 'default';
+
+export interface AgentModelConnector {
+  id: string;
+  name: string;
+}
+
+export interface GetAgentModelResponse {
+  inference_feature_id?: string;
+  connector?: AgentModelConnector;
+  source: AgentModelSource;
 }
 
 /**

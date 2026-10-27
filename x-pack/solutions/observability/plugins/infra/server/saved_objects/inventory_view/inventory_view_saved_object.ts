@@ -76,7 +76,7 @@ export const inventoryViewSavedObjectType: SavedObjectsType = {
     defaultSearchField: 'name',
     displayName: 'inventory view',
     getTitle: getInventoryViewTitle,
-    icon: 'metricsApp',
+    icon: 'chartWaffle',
     importableAndExportable: true,
   },
   mappings: {

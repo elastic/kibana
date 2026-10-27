@@ -9,7 +9,13 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { KIND } from '@kbn/apm-types/es_fields';
 import { ENVIRONMENT_ALL_VALUE } from '../../../common/environment_filter_values';
-import { PROCESSOR_EVENT, SERVICE_NAME } from '../../../common/es_fields/apm';
+import {
+  PROCESSOR_EVENT,
+  RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+} from '../../../common/es_fields/apm';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { getServiceSchemaType } from './get_service_schema_type';
 
 const start = 1_700_000_000_000;
@@ -148,19 +154,17 @@ describe('getServiceSchemaType', () => {
         ...baseParams,
         environment: ENVIRONMENT_ALL_VALUE,
       });
-      const filters = getFilterClauses(esClient, 0);
-      const hasEnvFilter = filters.some(
-        (f: Record<string, unknown>) => 'term' in f && 'service.environment' in (f.term as object)
-      );
-      expect(hasEnvFilter).toBe(false);
+      const serializedFilters = JSON.stringify(getFilterClauses(esClient, 0));
+      expect(serializedFilters).not.toContain(SERVICE_ENVIRONMENT);
+      expect(serializedFilters).not.toContain(RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME);
     });
 
-    it('adds a term filter for a specific environment', async () => {
+    it('adds an environment filter for a specific environment', async () => {
       const esClient = makeEsClient();
       await getServiceSchemaType({ esClient, ...baseParams, environment: 'production' });
-      expect(getFilterClauses(esClient, 0)).toContainEqual({
-        term: { 'service.environment': 'production' },
-      });
+      expect(getFilterClauses(esClient, 0)).toEqual(
+        expect.arrayContaining(environmentQuery('production'))
+      );
     });
   });
 });

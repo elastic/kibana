@@ -15,7 +15,9 @@ export interface StartSyncArgs {
 }
 
 export const startSync = async ({ connectorId }: StartSyncArgs) => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/start_sync`;
+  const route = `/internal/enterprise_search/connectors/${encodeURIComponent(
+    connectorId
+  )}/start_sync`;
   return await HttpLogic.values.http.post(route);
 };
 

@@ -149,6 +149,51 @@ describe('applyKiLifecycle', () => {
     );
   });
 
+  it('keeps the filters when a lifecycle field is only displayed', () => {
+    expect(
+      flat(applyKiLifecycle('FROM ai-index-idx-support | KEEP title, expires_at', dests))
+    ).toBe(`FROM ai-index-idx-support | ${LIFECYCLE} | KEEP title, expires_at`);
+
+    expect(
+      flat(
+        applyKiLifecycle(
+          'FROM ai-index-idx-support | KEEP title, governance.lifecycle.status',
+          dests
+        )
+      )
+    ).toBe(
+      `FROM ai-index-idx-support | ${STATUS} | ${EXPIRY} | KEEP title, governance.lifecycle.status`
+    );
+
+    expect(flat(applyKiLifecycle('FROM ai-index-idx-support | SORT expires_at', dests))).toBe(
+      `FROM ai-index-idx-support | ${LIFECYCLE} | SORT expires_at`
+    );
+
+    expect(
+      flat(
+        applyKiLifecycle(
+          'FROM ai-index-idx-support | STATS count = COUNT(*) BY governance.lifecycle.status',
+          dests
+        )
+      )
+    ).toBe(
+      `FROM ai-index-idx-support | ${STATUS} | ${EXPIRY} | STATS count = COUNT(*) BY governance.lifecycle.status`
+    );
+  });
+
+  it('keeps the filters for a WHERE inside a FORK branch', () => {
+    const result = flat(
+      applyKiLifecycle(
+        'FROM ai-index-idx-support | FORK (WHERE expires_at < NOW()) (WHERE title == "x")',
+        dests
+      )
+    );
+
+    expect(result).toContain(STATUS);
+    expect(result).toContain(EXPIRY);
+    expect(Parser.parse(result).errors).toEqual([]);
+  });
+
   it('still collapses revisions for a data stream query that names every lifecycle field', () => {
     const own =
       'FROM ai-index-ds-support | WHERE governance.lifecycle.status == "deleted" AND expires_at IS NULL | KEEP id';

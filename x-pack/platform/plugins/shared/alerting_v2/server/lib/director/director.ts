@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { v4 as uuidV4 } from 'uuid';
+import { v5 as uuidV5 } from 'uuid';
 import { inject, injectable } from 'inversify';
 import { ALERT_EPISODE_ACTION_TYPE, type RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import { LoggerServiceToken } from '../services/logger_service/logger_service';
-import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import { getLatestAlertEventStateQuery, type LatestAlertEventState } from './queries';
@@ -23,6 +22,46 @@ import {
 import { TransitionStrategyFactory } from './strategies/strategy_resolver';
 import type { ITransitionStrategy, StateTransitionResult } from './strategies/types';
 import type { ExecutionContext } from '../execution_context';
+
+/**
+ * Namespace for deterministic (uuid v5) episode ids.
+ *
+ * uuid v5 requires the namespace itself to be a UUID, so it cannot be a readable
+ * string; the readable part of the identity is the seed (see
+ * {@link buildNewEpisodeId}). A dedicated namespace (rather than the RFC 4122
+ * `DNS`/`URL` ones) guarantees our ids never collide with any other v5 user
+ * hashing the same seed. Its value is arbitrary but must never change, or
+ * previously generated episode ids would stop reproducing.
+ */
+const EPISODE_ID_NAMESPACE = '17969019-52cb-4d0f-b663-ffdf1b44f3eb';
+
+/**
+ * Deterministic id for a newly opened episode, derived from the rule, the group,
+ * and the run's scheduled timestamp.
+ *
+ * Episode identity must be one-per-`(run, group_hash)`. A single-series
+ * (ungrouped) rule emits one rule event per returned row — many events sharing
+ * one `group_hash` within a run, spread across streamed batches the director
+ * processes independently. A random id per event would split that one series
+ * into many episodes. Seeding from `ruleId | group_hash | scheduledTimestamp`
+ * makes every new-episode event of a run collapse to the same id (within and
+ * across batches, with no shared state), while a later run that reopens the
+ * series gets a different id because the scheduled timestamp differs. A series
+ * opens at most one episode per run, so distinct episodes never collide. As a
+ * bonus the id is idempotent across task retries of the same run.
+ *
+ * Grouped rules emit one event per group per run, so this is behaviorally a
+ * no-op for them beyond swapping a random uuid for a deterministic one.
+ */
+const buildNewEpisodeId = ({
+  ruleId,
+  groupHash,
+  scheduledTimestamp,
+}: {
+  ruleId: string;
+  groupHash: string;
+  scheduledTimestamp: string;
+}): string => uuidV5(`${ruleId}|${groupHash}|${scheduledTimestamp}`, EPISODE_ID_NAMESPACE);
 
 interface RunDirectorParams {
   rule: RuleResponse;
@@ -43,6 +82,9 @@ interface CalculateNextStateParams {
 interface ResolveEpisodeIdParams {
   previousAlertEvent?: LatestAlertEventState;
   nextStatus: AlertEpisodeStatus;
+  ruleId: string;
+  groupHash: string;
+  scheduledTimestamp: string;
 }
 
 interface ResolveEpisodeIdResult {
@@ -57,6 +99,12 @@ export interface DirectorRunStats {
 export interface DirectorRunResult {
   readonly alertEvents: AlertEventDocument[];
   readonly stats: DirectorRunStats;
+  /**
+   * Latest persisted lifecycle state per `group_hash`, as loaded for this batch.
+   * Exposed so downstream write-policy steps can compare each enriched event
+   * against what is already persisted without a second round trip.
+   */
+  readonly previousAlertStateByGroupHash: ReadonlyMap<string, LatestAlertEventState>;
 }
 
 @injectable()
@@ -75,7 +123,11 @@ export class DirectorService {
     spaceId,
   }: RunDirectorParams): Promise<DirectorRunResult> {
     if (alertEvents.length === 0) {
-      return { alertEvents: [], stats: { newEpisodeIds: [] } };
+      return {
+        alertEvents: [],
+        stats: { newEpisodeIds: [] },
+        previousAlertStateByGroupHash: new Map(),
+      };
     }
 
     const logger = this.logger.forSubsystem('director').withLabels({
@@ -96,50 +148,35 @@ export class DirectorService {
     executionContext: ExecutionContext,
     logger: LoggerServiceContract
   ): Promise<DirectorRunResult> {
-    const scope = executionContext.createScope();
     const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
-    const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
+    const previousAlertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
       rule,
       groupHashes,
       executionContext
     );
 
-    scope.add(() => alertStateByGroupHash.clear());
+    executionContext.throwIfAborted();
 
-    try {
-      executionContext.throwIfAborted();
-
-      const newEpisodeIds: string[] = [];
-      const evaluatedAt = new Date().toISOString();
-      const processed = alertEvents.map((currentAlertEvent) => {
-        const { alertEvent, isNewEpisode } = this.getAlertEventWithNextEpisode({
-          rule,
-          currentAlertEvent,
-          previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
-          strategy,
-          evaluatedAt,
-          logger,
-        });
-
-        if (isNewEpisode && alertEvent.alert) {
-          newEpisodeIds.push(alertEvent.alert.id);
-        }
-
-        return alertEvent;
+    const newEpisodeIds: string[] = [];
+    const evaluatedAt = new Date().toISOString();
+    const processed = alertEvents.map((currentAlertEvent) => {
+      const { alertEvent, isNewEpisode } = this.getAlertEventWithNextEpisode({
+        rule,
+        currentAlertEvent,
+        previousAlertEvent: previousAlertStateByGroupHash.get(currentAlertEvent.group_hash),
+        strategy,
+        evaluatedAt,
+        logger,
       });
 
-      return { alertEvents: processed, stats: { newEpisodeIds } };
-    } finally {
-      try {
-        await scope.disposeAll();
-      } catch (error) {
-        logger.warn({
-          message: 'Failed to release alert state cache',
-          error,
-          code: ALERTING_LOG_CODES.DIRECTOR_CLEANUP_FAILED,
-        });
+      if (isNewEpisode && alertEvent.alert) {
+        newEpisodeIds.push(alertEvent.alert.id);
       }
-    }
+
+      return alertEvent;
+    });
+
+    return { alertEvents: processed, stats: { newEpisodeIds }, previousAlertStateByGroupHash };
   }
 
   private async fetchLatestAlertStateByGroupHash(
@@ -202,6 +239,11 @@ export class DirectorService {
     const { episodeId, isNew } = this.resolveEpisodeId({
       previousAlertEvent,
       nextStatus: result.status,
+      ruleId: rule.id,
+      groupHash: currentAlertEvent.group_hash,
+      // Breach/recovery/no-data events from the executor always carry a
+      // scheduled_timestamp; `evaluatedAt` is a type-level safety net only.
+      scheduledTimestamp: currentAlertEvent.scheduled_timestamp ?? evaluatedAt,
     });
 
     if (currentStatus !== result.status) {
@@ -209,7 +251,7 @@ export class DirectorService {
         message: 'Episode status transition',
         labels: {
           group_hash: currentAlertEvent.group_hash,
-          episode_id: episodeId,
+          alert_id: episodeId,
           resource: `${currentStatus ?? 'unknown'}->${result.status}`,
         },
       });
@@ -268,16 +310,21 @@ export class DirectorService {
   private resolveEpisodeId({
     previousAlertEvent,
     nextStatus,
+    ruleId,
+    groupHash,
+    scheduledTimestamp,
   }: ResolveEpisodeIdParams): ResolveEpisodeIdResult {
+    const newEpisodeId = () => buildNewEpisodeId({ ruleId, groupHash, scheduledTimestamp });
+
     if (!previousAlertEvent) {
-      return { episodeId: uuidV4(), isNew: true };
+      return { episodeId: newEpisodeId(), isNew: true };
     }
 
     const currentEpisodeStatus = previousAlertEvent.last_episode_status;
     const currentEpisodeId = previousAlertEvent.last_episode_id;
 
     if (currentEpisodeStatus == null) {
-      return { episodeId: uuidV4(), isNew: true };
+      return { episodeId: newEpisodeId(), isNew: true };
     }
 
     const isNewLifecycle =
@@ -285,11 +332,11 @@ export class DirectorService {
       nextStatus !== alertEpisodeStatus.inactive;
 
     if (isNewLifecycle) {
-      return { episodeId: uuidV4(), isNew: true };
+      return { episodeId: newEpisodeId(), isNew: true };
     }
 
     if (currentEpisodeId == null) {
-      return { episodeId: uuidV4(), isNew: true };
+      return { episodeId: newEpisodeId(), isNew: true };
     }
 
     return { episodeId: currentEpisodeId, isNew: false };

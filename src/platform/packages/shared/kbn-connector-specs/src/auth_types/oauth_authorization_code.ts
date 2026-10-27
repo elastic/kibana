@@ -9,7 +9,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
-import type { AuthContext, AuthTypeSpec } from '../connector_spec';
+import type { AuthContext, AuthTypeSpec, OAuthGetTokenOpts } from '../connector_spec';
 import { normalizeAuthorizationHeaderValue } from './oauth_authz_code_and_ears_helpers';
 import { isConnectorAuthorizationError } from '../errors';
 import * as i18n from './translations';
@@ -55,6 +55,41 @@ const authSchema = lazySchema(() =>
 );
 
 type AuthSchemaType = z.infer<typeof authSchema>;
+
+const buildGetTokenOpts = (secret: AuthSchemaType): OAuthGetTokenOpts => ({
+  authType: 'oauth',
+  tokenUrl: secret.tokenUrl,
+  scope: secret.scope,
+  clientId: secret.clientId,
+  clientSecret: secret.clientSecret,
+  tokenEndpointAuthMethod:
+    secret.useBasicAuth ?? true ? 'client_secret_basic' : 'client_secret_post',
+  accessTokenPath: secret.accessTokenPath,
+  tokenTypePath: secret.tokenTypePath,
+  tokenType: secret.tokenType,
+});
+
+const resolveAccessToken = async (ctx: AuthContext, secret: AuthSchemaType): Promise<string> => {
+  let token;
+  try {
+    token = await ctx.getToken(buildGetTokenOpts(secret));
+  } catch (error) {
+    if (isConnectorAuthorizationError(error)) {
+      throw error;
+    }
+    throw new Error(
+      `Unable to retrieve/refresh the access token. User may need to re-authorize: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+
+  if (!token) {
+    throw new Error(`No access token available. User must complete OAuth authorization flow.`);
+  }
+
+  return normalizeAuthorizationHeaderValue(token);
+};
 
 /**
  * OAuth2 Authorization Code Flow with PKCE
@@ -111,39 +146,15 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
   ): Promise<AxiosInstance> => {
-    // For authorization code flow, tokens are managed separately via callback routes
-    // The getToken() method will retrieve already-stored tokens and auto-refresh if needed
-    // For this auth spec, getToken() calls getOAuthAuthorizationCodeAccessToken()
-    let token;
-    try {
-      token = await ctx.getToken({
-        authType: 'oauth',
-        tokenUrl: secret.tokenUrl,
-        scope: secret.scope,
-        clientId: secret.clientId,
-        clientSecret: secret.clientSecret,
-        tokenEndpointAuthMethod:
-          secret.useBasicAuth ?? true ? 'client_secret_basic' : 'client_secret_post',
-        accessTokenPath: secret.accessTokenPath,
-        tokenTypePath: secret.tokenTypePath,
-        tokenType: secret.tokenType,
-      });
-    } catch (error) {
-      if (isConnectorAuthorizationError(error)) {
-        throw error;
-      }
-      throw new Error(
-        `Unable to retrieve/refresh the access token. User may need to re-authorize: ${error.message}`
-      );
-    }
-
-    if (!token) {
-      throw new Error(`No access token available. User must complete OAuth authorization flow.`);
-    }
-
-    // set global defaults
-    axiosInstance.defaults.headers.common.Authorization = normalizeAuthorizationHeaderValue(token);
-
+    axiosInstance.defaults.headers.common.Authorization = await resolveAccessToken(ctx, secret);
     return axiosInstance;
+  },
+  getAuthHeaders: async (
+    ctx: AuthContext,
+    secret: AuthSchemaType
+  ): Promise<Record<string, string>> => {
+    return {
+      Authorization: await resolveAccessToken(ctx, secret),
+    };
   },
 };

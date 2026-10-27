@@ -31,7 +31,9 @@ import { FlyoutMetadataCard } from '../../../../components/flyout_components/fly
 import { FlyoutToolbarHeader } from '../../../../components/flyout_components/flyout_toolbar_header';
 import { InfoPanel } from '../../../../components/info_panel';
 import { useFetchDetectionHistory } from '../../../../hooks/use_fetch_detections';
+import { useSourcesById } from '../../../../hooks/use_sources_by_id';
 import { formatTimestamp } from '../../../../util/formatters';
+import { DetectionDiscoveryStatus } from './detection_discovery_status';
 import { changeTypeLabel } from '../shared/translations';
 
 const formatPValue = (pValue?: number | string): string => {
@@ -60,16 +62,9 @@ interface DetectionFlyoutProps {
 
 export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'detectionFlyoutTitle' });
+  const { getSourceTitle } = useSourcesById();
   const { data: historyData, isLoading: isHistoryLoading } = useFetchDetectionHistory(
     detection.rule_uuid
-  );
-
-  const status = useMemo(
-    () =>
-      detection.processed
-        ? { label: STATUS_PROCESSED_LABEL, color: 'success' as const }
-        : { label: STATUS_PENDING_LABEL, color: 'hollow' as const },
-    [detection.processed]
   );
 
   const generalInfoItems = useMemo(() => {
@@ -132,18 +127,22 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
         <EuiFlexGroup gutterSize="s" responsive={false} wrap>
           <EuiFlexItem>
             <FlyoutMetadataCard title={STATUS_LABEL}>
-              <EuiToolTip content={STATUS_TOOLTIP}>
-                <EuiBadge color={status.color} tabIndex={0}>
-                  {status.label}
-                </EuiBadge>
-              </EuiToolTip>
+              {detection.skip ? (
+                <DetectionDiscoveryStatus detection={detection} />
+              ) : (
+                <EuiToolTip content={STATUS_TOOLTIP}>
+                  <span tabIndex={0}>
+                    <DetectionDiscoveryStatus detection={detection} />
+                  </span>
+                </EuiToolTip>
+              )}
             </FlyoutMetadataCard>
           </EuiFlexItem>
-          {detection.stream_name && (
+          {detection.source_id && (
             <EuiFlexItem>
               <FlyoutMetadataCard title={STREAM_LABEL}>
-                <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
-                  {detection.stream_name}
+                <EuiBadge color="hollow" iconType="database" iconSide="left">
+                  {getSourceTitle(detection.source_id)}
                 </EuiBadge>
               </FlyoutMetadataCard>
             </EuiFlexItem>
@@ -211,9 +210,7 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
                       <EuiBadge color="hollow">{entryLabel}</EuiBadge>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiBadge color={entry.processed ? 'success' : 'hollow'}>
-                        {entry.processed ? STATUS_PROCESSED_LABEL : STATUS_PENDING_LABEL}
-                      </EuiBadge>
+                      <DetectionDiscoveryStatus detection={entry} />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
@@ -249,9 +246,10 @@ const STATUS_TOOLTIP = i18n.translate('xpack.significantEventsApp.detectionFlyou
   defaultMessage: 'Whether the discovery pipeline has ingested this detection.',
 });
 
-const STREAM_LABEL = i18n.translate('xpack.significantEventsApp.detectionFlyout.streamLabel', {
-  defaultMessage: 'Stream',
-});
+const STREAM_LABEL = i18n.translate(
+  'xpack.significantEventsApp.sources.detectionFlyout.sourceLabel',
+  { defaultMessage: 'Source' }
+);
 
 const TIMESTAMP_LABEL = i18n.translate(
   'xpack.significantEventsApp.detectionFlyout.timestampLabel',
@@ -267,18 +265,4 @@ const CHANGE_LABEL = i18n.translate('xpack.significantEventsApp.detectionFlyout.
 const STATISTICAL_SIGNIFICANCE_LABEL = i18n.translate(
   'xpack.significantEventsApp.detectionFlyout.statisticalSignificanceLabel',
   { defaultMessage: 'Statistical significance' }
-);
-
-const STATUS_PROCESSED_LABEL = i18n.translate(
-  'xpack.significantEventsApp.detectionFlyout.status.processed',
-  {
-    defaultMessage: 'Processed',
-  }
-);
-
-const STATUS_PENDING_LABEL = i18n.translate(
-  'xpack.significantEventsApp.detectionFlyout.status.pending',
-  {
-    defaultMessage: 'Pending',
-  }
 );

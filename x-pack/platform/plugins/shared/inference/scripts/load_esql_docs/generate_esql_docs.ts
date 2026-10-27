@@ -17,10 +17,15 @@ import yargs from 'yargs';
 import fetch from 'node-fetch';
 import pLimit from 'p-limit';
 import { createHash } from 'crypto';
-import { connectorIdOption, elasticsearchOption, kibanaOption } from '../util/cli_options';
-import { getServiceUrls } from '../util/get_service_urls';
+import {
+  connectorIdOption,
+  elasticsearchOption,
+  inferenceIdOption,
+  kibanaOption,
+  resolveInferenceId,
+} from '../util/cli_options';
+import { assertChatCompletionInferenceEndpoint, getServiceUrls } from '../util/get_service_urls';
 import { KibanaClient } from '../util/kibana_client';
-import { selectConnector } from '../util/select_connector';
 import { rewriteFunctionPagePrompt } from './prompts';
 import { bindOutput } from './utils/output_executor';
 import { enrichDocumentation } from './enrich_documentation';
@@ -43,38 +48,61 @@ async function downloadFile(url: string, filePath: string): Promise<void> {
 }
 
 function extractYamlCodeBlocks(content: string): string {
-  // Match ```yaml ... ``` code blocks and everything after
-  const yamlBlockRegex = /```yaml\n([\s\S]*?)```([\s\S]*)/;
-  const match = content.match(yamlBlockRegex);
+  // Published pages are UTF-8 with a leading BOM.
+  const normalized = content.replace(/^\uFEFF/, '');
 
-  if (!match) {
+  // Older docs pages embed availability metadata in a fenced ```yaml block,
+  // followed by the command markdown.
+  const yamlBlockRegex = /```yaml\n([\s\S]*?)```([\s\S]*)/;
+  const match = normalized.match(yamlBlockRegex);
+
+  if (match) {
+    const yamlContent = match[1]?.trim() || '';
+    const contentAfterYaml = match[2]?.trim() || '';
+
+    // Combine YAML content and everything after the YAML block
+    let combined = '';
+    if (yamlContent && contentAfterYaml) {
+      combined = `${yamlContent}\n\n${contentAfterYaml}`;
+    } else if (yamlContent) {
+      combined = yamlContent;
+    } else if (contentAfterYaml) {
+      combined = contentAfterYaml;
+    }
+
+    // Remove the first 3 lines, which mark GA or Preview
+    if (combined) {
+      const lines = combined.split('\n');
+      if (lines.length > 3) {
+        return lines.slice(3).join('\n');
+      }
+      return '';
+    }
+
     return '';
   }
 
-  const yamlContent = match[1]?.trim() || '';
-  const contentAfterYaml = match[2]?.trim() || '';
+  // Current docs pages (including PROMQL) use YAML frontmatter instead of a fenced block.
+  return extractFrontmatterBody(normalized);
+}
 
-  // Combine YAML content and everything after the YAML block
-  let combined = '';
-  if (yamlContent && contentAfterYaml) {
-    combined = `${yamlContent}\n\n${contentAfterYaml}`;
-  } else if (yamlContent) {
-    combined = yamlContent;
-  } else if (contentAfterYaml) {
-    combined = contentAfterYaml;
+/**
+ * Returns the markdown body of a docs page that starts with `---` frontmatter.
+ * Drops the page title and the leading availability banner so the command
+ * write-up can be reorganized like the older fenced pages.
+ */
+function extractFrontmatterBody(content: string): string {
+  const frontmatterMatch = content.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?([\s\S]*)$/);
+  const body = frontmatterMatch?.[1]?.trim();
+  if (!body) {
+    return '';
   }
 
-  // Remove the first 3 lines, which mark GA or Preview
-  if (combined) {
-    const lines = combined.split('\n');
-    if (lines.length > 3) {
-      return lines.slice(3).join('\n');
-    } else {
-      return '';
-    }
-  }
-
-  return '';
+  return body
+    .replace(/^# .+\r?\n+/, '')
+    .replace(/^<applies-to>[\s\S]*?<\/applies-to>\s*/, '')
+    .replace(/<\/?(?:note|tip|warning|important)>/gi, '')
+    .trim();
 }
 
 function getCommandName(fileName: string): string {
@@ -154,31 +182,33 @@ function rewriteSyntaxSection(content: string, functionName: string): string {
 }
 
 function stripMarkdownTables(content: string): string {
-  // Strip markdown tables: rows with pipes and separator rows with dashes
-  // Pattern: | col1 | col2 |\n|------|------|\n| val1 | val2 |
+  // Keep table cell text and drop separator rows. Output schemas (for example
+  // PROMQL result columns) are only documented in these tables.
   const lines = content.split('\n');
   const result: string[] = [];
-  let inTable = false;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+  for (const line of lines) {
     const trimmedLine = line.trim();
-
     const isTableRow = trimmedLine.startsWith('|') && trimmedLine.endsWith('|');
-
-    // Check if this is a separator row (contains | and dashes like |---|---|)
     const isSeparatorRow = isTableRow && /^[\|\s\-:]+$/.test(trimmedLine);
 
-    if (isTableRow || isSeparatorRow) {
-      inTable = true;
+    if (isSeparatorRow) {
       continue;
-    } else {
-      if (inTable) {
-        inTable = false;
-      }
-      // Add the line (it's not part of a table)
-      result.push(line);
     }
+
+    if (isTableRow) {
+      const cells = trimmedLine
+        .slice(1, -1)
+        .split('|')
+        .map((cell) => cell.trim())
+        .filter((cell) => cell.length > 0);
+      if (cells.length > 0) {
+        result.push(cells.join(' | '));
+      }
+      continue;
+    }
+
+    result.push(line);
   }
 
   return result.join('\n');
@@ -635,36 +665,41 @@ yargs(process.argv.slice(2))
         })
         .option('kibana', kibanaOption)
         .option('elasticsearch', elasticsearchOption)
-        .option('connectorId', connectorIdOption),
+        .option('inferenceId', inferenceIdOption)
+        .option('connectorId', {
+          ...connectorIdOption,
+          describe: 'Deprecated alias for --inferenceId',
+        }),
     (argv) => {
       run(
         async ({ log }) => {
-          // Set up inference client if connectorId is provided
+          // LLM rewrite is optional. Without an inference endpoint the script only extracts docs.
           let inferenceClient: ReturnType<KibanaClient['createInferenceClient']> | undefined;
+          const inferenceId = resolveInferenceId({
+            inferenceId: argv.inferenceId,
+            connectorId: argv.connectorId,
+            log,
+          });
 
-          if (argv.connectorId) {
+          if (inferenceId) {
             const serviceUrls = await getServiceUrls({
               log,
               elasticsearch: argv.elasticsearch,
               kibana: argv.kibana,
             });
 
+            await assertChatCompletionInferenceEndpoint({
+              esUrl: serviceUrls.esUrl,
+              inferenceId,
+            });
+
             const kibanaClient = new KibanaClient(log, serviceUrls.kibanaUrl);
-
-            const connectors = await kibanaClient.getConnectors();
-            if (!connectors.length) {
-              throw new Error('No connectors found');
-            }
-            const connector = await selectConnector({
-              connectors,
-              preferredId: argv.connectorId,
-              log,
-            });
-            log.info(`Using connector ${connector.connectorId}`);
-
+            // chat_complete still names this field connectorId; an inference endpoint id is routed
+            // to the Elasticsearch inference adapter.
             inferenceClient = kibanaClient.createInferenceClient({
-              connectorId: connector.connectorId,
+              connectorId: inferenceId,
             });
+            log.info(`Using inference endpoint ${inferenceId}`);
 
             try {
               const callOutput = bindOutput({
@@ -676,9 +711,9 @@ yargs(process.argv.slice(2))
                 system:
                   'You are a helpful assistant. Respond with "OK" to confirm you are working.',
               });
-              log.success(`✅ Connected to connector ${connector.connectorId} ${resp}`);
+              log.success(`✅ Connected to inference endpoint ${inferenceId} ${resp}`);
             } catch (error) {
-              log.error(`❌ Unable to connect to connector ${connector.connectorId}: ${error}`);
+              log.error(`❌ Unable to connect to inference endpoint ${inferenceId}: ${error}`);
               throw error;
             }
           }
@@ -856,7 +891,7 @@ yargs(process.argv.slice(2))
                 };
                 cacheUpdated = true;
               } else {
-                log.warning(`No YAML code blocks found in ${mdFile}, skipping`);
+                log.warning(`No command documentation found in ${mdFile}, skipping`);
               }
             }
             if (docFiles.length > 0) {
@@ -1013,7 +1048,7 @@ yargs(process.argv.slice(2))
               log.warning(`Functions-operators directory not found at ${functionsOperatorsDir}`);
             }
 
-            // Use LLM to rewrite documentation if connectorId is provided
+            // Use LLM to rewrite documentation when an inference endpoint id was provided
             let finalDocFiles = docFiles;
             if (inferenceClient) {
               // Capture inferenceClient in a const for TypeScript narrowing

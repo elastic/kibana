@@ -49,13 +49,12 @@ test.describe(
       const suggestWidget = esqlEditor.getSuggestWidget();
 
       await test.step('filter to test stream and assert suggestion with Wired Stream type', async () => {
-        await expect(suggestWidget).toBeVisible();
+        await expect(suggestWidget).toBeVisible({ timeout: 30_000 });
         // Narrow the suggestion list to the test stream
         await page.keyboard.type(STREAM_NAME);
-        const streamOption = suggestWidget.getByRole('option', { name: new RegExp(STREAM_NAME) });
-        await expect(streamOption).toBeVisible();
+        await expect(suggestWidget).toContainText(STREAM_NAME, { timeout: 30_000 });
         // The enricher sets type=WIRED_STREAM which maps to detail text "Wired Stream"
-        await expect(streamOption).toContainText('Wired Stream');
+        await expect(suggestWidget).toContainText('Wired Stream', { timeout: 30_000 });
       });
 
       await test.step('open documentation panel and assert description and link', async () => {

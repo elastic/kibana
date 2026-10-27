@@ -11,8 +11,8 @@ import type { AlertingOasOperationObject } from '../../oas_types';
 
 export const BULK_ASSIGN_EPISODE_ACTION_REQUEST: BulkAssignEpisodeActionBody = {
   items: [
-    { alert_id: 'episode-1', assignee_uid: 'u_abc123' },
-    { alert_id: 'episode-2', assignee_uid: null },
+    { alert_id: 'alert-1', assignee_uid: 'u_abc123' },
+    { alert_id: 'alert-2', assignee_uid: null },
   ],
 };
 
@@ -30,13 +30,13 @@ const INVALID_BULK_ASSIGN_EPISODE_ACTION_RESPONSE = invalidResponseExample({
 export const bulkAssignEpisodeActionOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
-      name: 'bulkAssignEpisodeActionRequest',
-      summary: 'Assign one episode and clear the assignee of another',
+      name: 'bulkAssignAlertActionRequest',
+      summary: 'Assign one alert and clear the assignee of another',
       value: BULK_ASSIGN_EPISODE_ACTION_REQUEST,
     },
     responses: {
       200: {
-        name: 'bulkAssignEpisodeActionResponse',
+        name: 'bulkAssignAlertActionResponse',
         summary: 'All actions created',
         value: BULK_ASSIGN_EPISODE_ACTION_RESPONSE,
       },

@@ -134,6 +134,29 @@ describe('setupSavedObjects - onImport', () => {
   });
 });
 
+describe('setupSavedObjects - isExportable', () => {
+  it('excludes connectors whose type publishes keys from exports', () => {
+    const savedObjectsSetup = {
+      registerType: jest.fn(),
+    } as unknown as jest.Mocked<SavedObjectsServiceSetup>;
+
+    setupSavedObjects(
+      savedObjectsSetup,
+      encryptedSavedObjectsMock.createSetup(),
+      actionTypeRegistryMock.create() as unknown as ActionTypeRegistry,
+      '.kibana_task_manager',
+      [],
+      () => undefined as unknown as ISavedObjectsRepository
+    );
+    const isExportable = savedObjectsSetup.registerType.mock.calls[0][0].management!.isExportable!;
+    const connector = (actionTypeId: string) =>
+      ({ type: 'action', id: '1', attributes: { actionTypeId }, references: [] } as SavedObject);
+
+    expect(isExportable(connector('.ssf'))).toBe(false);
+    expect(isExportable(connector('.webhook'))).toBe(true);
+  });
+});
+
 describe('setupSavedObjects - encrypted action type', () => {
   it('registers V3 encryption for secrets and last-saver identity keys', () => {
     const savedObjectsSetup = {

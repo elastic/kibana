@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import type {
-  InvestigationHypothesis,
-  InvestigationImpact,
-  InvestigationRecommendation,
-  Severity,
-} from '@kbn/significant-events-schema';
-import type { InvestigationSubjectType, InvestigationTriggerType } from './workflows/triggers';
+import type { Severity } from '@kbn/significant-events-schema';
+import type { InvestigationTriggerType } from './workflows/triggers';
 
-/**
- * Re-exported so consumers of these responses do not need their own dependency on
- * `@kbn/significant-events-schema`. Investigations rate themselves on the same severity tier scale
- * significant events use, so a tier added there widens these responses too.
- */
 export type { Severity } from '@kbn/significant-events-schema';
+
+export { MAX_RULE_NAMES, MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from './automation_limits';
+export { parsePresetSchedule, presetScheduleSchema } from './automation_schedule';
+export type { PresetSchedule } from './automation_schedule';
 
 export {
   INVESTIGATION_SUBJECT_TYPES,
@@ -28,178 +22,121 @@ export {
   type InvestigationTriggerType,
 } from './workflows/triggers';
 
-/**
- * The alert-facing types are derived from the zod schemas in `./schemas`, so the validation a
- * caller is held to and the type the code is written against cannot disagree.
- */
 export type {
   AlertInvestigationContext,
   AlertSnapshot,
   AlertSnapshotEvaluation,
   AlertSnapshotGroup,
+  InvestigationAlertSnapshot,
   InvestigationContext,
+  InvestigationNotificationDestination,
   InvestigationSubject,
+  V2AlertSnapshot,
 } from './schemas';
 
 export {
   alertInvestigationContextSchema,
   alertSnapshotSchema,
   freeFormContextSchema,
+  investigationAlertSnapshotSchema,
+  investigationNotificationDestinationSchema,
+  investigationNotificationDestinationsSchema,
   investigationSubjectSchema,
   MAX_ALERTS_PER_INVESTIGATION,
+  MAX_INVESTIGATION_NOTIFICATIONS,
+  v2AlertSnapshotSchema,
 } from './schemas';
 
 import type {
   AlertInvestigationContext,
   InvestigationContext,
+  InvestigationNotificationDestination,
   InvestigationSubject,
 } from './schemas';
 
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;
   /**
-   * Human-readable headline shown in the investigations list and the details flyout from the
-   * moment the record exists. Seeded by the caller (significant event title, alert rule name,
-   * chat-supplied headline) and refined by the agent's structured output on completion.
+   * Optional headline from the caller (significant event title, alert rule name). Accepted for
+   * compatibility and passed to the investigation workflow as its `title` input, but not stored
+   * as the investigation's title: Agent Builder generates that from the investigation's first
+   * round, and UIs name the investigation after its first subject until then.
    */
-  title: string;
+  title?: string;
   /** What initiated the investigation. */
   trigger_type: InvestigationTriggerType;
-  /**
-   * Caller-supplied prompt for the investigation agent. Falls back to a generic
-   * message derived from the subject when omitted.
-   */
   message?: string;
+  /** Optional upper bound for this investigation workflow run, in seconds. */
+  timeout_seconds?: number;
   /**
-   * Stream names the investigation should scope its signal search to.
+   * Nightshift source ids the investigation should scope its queries to. The
+   * investigation workflow resolves them to slug and ES|QL view.
    */
-  stream_names?: string[];
+  source_ids?: string[];
   /** Optional chat model connector or inference endpoint id for this run. */
   connector_id?: string;
-  /**
-   * Caller-supplied key for concurrency control. Passed to the workflow engine as
-   * `concurrency_key`, which maps to `concurrencyGroupKey` in the execution index.
-   * Two starts with the same key cancel-and-replace the in-flight run (cancel-in-progress
-   * strategy). Use a stable, unique caller-side ID — e.g. the alert _id or event UUID.
-   */
-  concurrency_key?: string;
   context?: InvestigationContext | AlertInvestigationContext;
+  /** Destinations receiving investigation lifecycle messages. */
+  notificationDestinations?: InvestigationNotificationDestination[];
+  /** The Slack thread the investigation is about, so a reply in it continues the investigation. */
+  slack_thread?: SlackThreadReference;
 }
 
+/** A Slack thread, by the workspace and channel ids and the thread's root message ts. */
+export interface SlackThreadReference {
+  workspace: string;
+  channel: string;
+  thread_ts: string;
+  /** The Relay's key for the thread, when the event or post came through the Relay. */
+  external_conversation_id?: string;
+}
+
+/**
+ * The key the Relay and Agent Builder identify a Slack thread's conversation by
+ * (`origin.external_conversation_id`), which is also the thread's subject id.
+ * Channel ids are only unique within a workspace.
+ */
+export const toSlackThreadKey = ({
+  workspace,
+  channel,
+  threadTs,
+}: {
+  workspace: string;
+  channel: string;
+  threadTs: string;
+}): string => ['slack', workspace, channel, threadTs].map(encodeURIComponent).join(':');
+
+/**
+ * The thread's subject id: the Relay's key when given, otherwise the same key built from the
+ * thread's ids.
+ */
+export const toSlackThreadSubjectId = ({
+  workspace,
+  channel,
+  thread_ts: threadTs,
+  external_conversation_id: externalConversationId,
+}: SlackThreadReference): string =>
+  externalConversationId || toSlackThreadKey({ workspace, channel, threadTs });
+
 export interface StartInvestigationResponse {
+  /**
+   * The investigation, which is an Agent Builder conversation with this id. A start whose
+   * subjects overlap an open investigation continues that one, so the id can be an existing
+   * investigation's. The investigation workflow creates the conversation, so for a few seconds
+   * after a first start the id may not resolve yet.
+   */
   investigation_id: string;
 }
 
 export const NIGHTSHIFT_INVESTIGATION_AGENT_ID = 'nightshift.investigation';
 
+/** Answers one telemetry question from the sandbox without running an investigation. */
+export const NIGHTSHIFT_ASSISTANT_AGENT_ID = 'nightshift.assistant';
+
 /** Bound for investigation ids, concurrency keys, and other keyword-sized strings. */
 export const MAX_KEYWORD_LENGTH = 500;
 
-/** Subject id a manual investigation persists under when the caller supplies none. */
 export const DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID = 'manual';
-
-export const INVESTIGATION_STATUSES = [
-  'pending',
-  'running',
-  'completed',
-  'failed',
-  'cancelled',
-] as const;
-export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
-
-export const UPDATABLE_INVESTIGATION_STATUSES = [
-  'running',
-  'completed',
-  'failed',
-  'cancelled',
-] as const;
-export type UpdatableInvestigationStatus = (typeof UPDATABLE_INVESTIGATION_STATUSES)[number];
-
-export interface InvestigationStructuredOutput {
-  summary?: string;
-  conclusion?: string;
-  severity?: Severity;
-  hypotheses?: InvestigationHypothesis[];
-  recommendations?: InvestigationRecommendation[];
-  impact?: InvestigationImpact;
-}
-
-/** Body of PATCH /internal/nightshift/investigations/{id}. */
-export interface UpdateInvestigationRequest extends InvestigationStructuredOutput {
-  status: UpdatableInvestigationStatus;
-  /** Agent-refined headline; leaves the seeded title in place when omitted. */
-  title?: string;
-  error?: string;
-  conversation_id?: string;
-}
-
-export interface GetInvestigationResponse extends InvestigationStructuredOutput {
-  investigation_id: string;
-  title: string;
-  subject: InvestigationSubject;
-  trigger_type?: InvestigationTriggerType;
-  status: InvestigationStatus;
-  created_at: string;
-  /** Unset until the run leaves `pending`, so it can lag `created_at` by minutes. */
-  started_at?: string;
-  completed_at?: string;
-  concurrency_key?: string;
-  executed_by?: string;
-  error?: string;
-  conversation_id?: string;
-}
-
-export interface InvestigationStatusEvent {
-  type: 'investigation_status';
-  investigation_id: string;
-  status: InvestigationStatus;
-}
-
-export interface ListInvestigationsRequest {
-  statuses?: InvestigationStatus[];
-  severities?: Severity[];
-  subject_types?: InvestigationSubjectType[];
-  /**
-   * Full-text query matched against title, subject_summary, summary, and conclusion.
-   */
-  query?: string;
-  concurrency_key?: string;
-  created_after?: string;
-  created_before?: string;
-  started_after?: string;
-  started_before?: string;
-  completed_after?: string;
-  completed_before?: string;
-  sort_field?: 'created_at' | 'completed_at' | 'severity';
-  sort_order?: 'asc' | 'desc';
-  page?: number;
-  size?: number;
-}
-
-export type ListInvestigationItem = Pick<
-  GetInvestigationResponse,
-  | 'investigation_id'
-  | 'title'
-  | 'status'
-  | 'created_at'
-  | 'started_at'
-  | 'completed_at'
-  | 'severity'
-  | 'concurrency_key'
-  | 'executed_by'
-  | 'subject'
-  | 'summary'
-  | 'impact'
->;
-
-export interface PaginatedResponse<T> {
-  results: T[];
-  page: number;
-  size: number;
-  total: number;
-}
-
-export type ListInvestigationsResponse = PaginatedResponse<ListInvestigationItem>;
 
 /** Counts of investigations at each severity tier, zero-filled for all four tiers. */
 export type SeverityCounts = Record<Severity, number>;
@@ -247,6 +184,36 @@ export {
 } from './sandbox_secrets';
 
 export {
+  CUSTOM_CONTEXT_API_PATH,
+  MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH,
+  MAX_CUSTOM_CONTEXT_SNIPPETS,
+  MAX_CUSTOM_CONTEXT_TOTAL_LENGTH,
+  MAX_CUSTOM_CONTEXT_SNIPPET_ID_LENGTH,
+  MAX_CUSTOM_CONTEXT_AUTHOR_NAME_LENGTH,
+  MAX_CUSTOM_CONTEXT_VERSION_LENGTH,
+  formatCustomContextInstructions,
+  type CustomContextSnippet,
+  type CustomContextSnippetInput,
+  type GetCustomContextResponse,
+  type PutCustomContextRequest,
+  type PutCustomContextResponse,
+} from './custom_context';
+
+export {
+  ONBOARDING_SUGGESTION_SOURCES,
+  MAX_ONBOARDING_SUGGESTIONS,
+  MAX_ONBOARDING_SUGGESTION_TITLE_LENGTH,
+  MAX_ONBOARDING_SUGGESTION_PROMPT_LENGTH,
+  MAX_ONBOARDING_SUGGESTION_RATIONALE_LENGTH,
+  type OnboardingSuggestion,
+  type OnboardingSuggestionSource,
+  type OnboardingSuggestionsStatus,
+  type OnboardingSuggestionsExecution,
+  type GetOnboardingResponse,
+  type StartOnboardingSuggestionsResponse,
+} from './onboarding';
+
+export {
   DECISION_TREE_AI_INDEX_ID,
   DECISION_TREE_AI_INDEX_DEST,
   DECISION_TREE_DOC_TYPES,
@@ -265,6 +232,28 @@ export {
 } from './decision_trees';
 
 export {
+  MEMORY_INDEX,
+  MEMORY_ARCHIVE_REASONS,
+  MEMORY_FILTERS,
+  type MemoryArchiveReason,
+  type MemoryFilter,
+  type MemoryPage,
+  type MemoryPageSummary,
+  type MemoryStats,
+  type ListMemoryPagesResponse,
+  type GetMemoryPageResponse,
+  type MemoryPageRevision,
+  type StoredMemoryPage,
+} from './memory';
+
+export {
+  canonicalizeTag,
+  canonicalizeTags,
+  MAX_MEMORY_TAG_LENGTH,
+  MAX_MEMORY_TAGS_PER_PAGE,
+} from './memory_tags';
+
+export {
   INVESTIGATION_STARTED_TRIGGER_ID,
   INVESTIGATION_COMPLETED_TRIGGER_ID,
   INVESTIGATION_FAILED_TRIGGER_ID,
@@ -274,3 +263,15 @@ export {
   type InvestigationCompletedTriggerPayload,
   type InvestigationFailedTriggerPayload,
 } from './workflows/triggers';
+
+export {
+  KNOWLEDGE_PURGE_CONFIRMATION,
+  KNOWLEDGE_PURGE_SCOPES,
+  MAX_PURGE_INVESTIGATIONS,
+  emptyPurgeCounts,
+  type KnowledgePurgeCounts,
+  type KnowledgePurgeInvestigation,
+  type KnowledgePurgePreview,
+  type KnowledgePurgeResult,
+  type KnowledgePurgeScope,
+} from './purge';

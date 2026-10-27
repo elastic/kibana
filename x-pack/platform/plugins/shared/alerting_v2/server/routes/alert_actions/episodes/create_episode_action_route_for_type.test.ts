@@ -24,11 +24,13 @@ describe('createEpisodeActionRouteForType', () => {
       pathSuffix: suffix,
       summary,
       bodySchema: createAssignEpisodeActionBodySchema,
+      availability: { stability: 'stable', since: '9.7.0' },
     });
 
     expect(RouteClass.method).toBe('post');
     expect(RouteClass.path).toBe(`/api/alerting/v2/alerts/{id}/${suffix}`);
     expect(RouteClass.options?.summary).toBe(summary);
+    expect(RouteClass.options?.availability).toEqual({ stability: 'stable', since: '9.7.0' });
     expect(RouteClass.validate).toBeDefined();
     expect(RouteClass.validate).toEqual(
       expect.objectContaining({

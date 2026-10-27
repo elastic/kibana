@@ -389,10 +389,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Access with custom roles', async () => {
-      this.afterEach(async () => {
-        // force logout to prevent the next test from failing
-        await cspSecurity.logout();
+    describe('Access with custom roles', () => {
+      afterEach(async () => {
+        await cspSecurity.restoreDefaultUser();
       });
 
       it('Access with valid user role', async () => {

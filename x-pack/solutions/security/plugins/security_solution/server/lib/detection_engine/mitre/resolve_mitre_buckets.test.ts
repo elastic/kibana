@@ -6,7 +6,12 @@
  */
 
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
-import { resolveMitreBuckets, resetResolveMitreBucketsCache } from './resolve_mitre_buckets';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  resolveMitreBuckets,
+  resolveMitreBucketsByFramework,
+  resetResolveMitreBucketsCache,
+} from './resolve_mitre_buckets';
 
 // Minimal fixture that satisfies the legacy blob shape so the real
 // transformLegacyMitreData adapter can be exercised without loading the full blob.
@@ -60,16 +65,42 @@ describe('resolveMitreBuckets — managed path', () => {
     expect(result.techniques[0]).toMatchObject({ id: 'T9001', name: 'Managed Technique' });
   });
 
-  it('caches a non-empty result so list() is called only once across two calls', async () => {
+  it('defaults to the enterprise framework', async () => {
     const { client, mockList } = makeClient();
 
     await resolveMitreBuckets(client);
-    await resolveMitreBuckets(client);
 
-    expect(mockList).toHaveBeenCalledTimes(1);
+    expect(mockList).toHaveBeenCalledWith({ framework: 'enterprise' });
   });
 
-  it('rejects with "not initialized" and does not cache an empty result, so list() is retried on the next call', async () => {
+  it('forwards the framework to list()', async () => {
+    const { client, mockList } = makeClient();
+
+    await resolveMitreBuckets(client, 'atlas');
+
+    expect(mockList).toHaveBeenCalledWith({ framework: 'atlas' });
+  });
+
+  it('includes the framework in the "not initialized" error', async () => {
+    const { client } = makeClient(true);
+
+    await expect(resolveMitreBuckets(client, 'atlas')).rejects.toThrow(
+      'Managed MITRE data is not initialized (framework: atlas)'
+    );
+  });
+
+  it('calls list() on every invocation so runtime data changes are always visible', async () => {
+    const { client, mockList } = makeClient();
+
+    const first = await resolveMitreBuckets(client);
+    const second = await resolveMitreBuckets(client);
+
+    expect(mockList).toHaveBeenCalledTimes(2);
+    expect(first.tactics[0]).toMatchObject({ id: 'TA0099' });
+    expect(second.tactics[0]).toMatchObject({ id: 'TA0099' });
+  });
+
+  it('rejects with "not initialized" when the managed collection is empty', async () => {
     const { client, mockList } = makeClient(true /* empty */);
 
     await expect(resolveMitreBuckets(client)).rejects.toThrow(
@@ -79,11 +110,11 @@ describe('resolveMitreBuckets — managed path', () => {
       'Managed MITRE data is not initialized'
     );
 
-    // Cache must have been cleared after each rejection so each call re-queries.
+    // Each call goes to list() because managed results are never cached.
     expect(mockList).toHaveBeenCalledTimes(2);
   });
 
-  it('does not poison the cache when list() throws, and retries on the next call', async () => {
+  it('propagates list() errors and succeeds on a subsequent call', async () => {
     const mockList = jest
       .fn()
       .mockRejectedValueOnce(new Error('SO unavailable'))
@@ -114,20 +145,92 @@ describe('resolveMitreBuckets — legacy fallback path', () => {
     expect(result.techniques).toHaveLength(1);
     expect(result.techniques[0]).toMatchObject({ id: 'T1078', name: 'Valid Accounts' });
   });
+
+  it('rejects for frameworks other than enterprise', async () => {
+    await expect(resolveMitreBuckets(undefined, 'atlas')).rejects.toThrow(
+      'Legacy MITRE data source only provides the enterprise framework (requested: atlas)'
+    );
+  });
 });
 
-describe('resolveMitreBuckets — separate cache keys', () => {
-  it('managed and legacy results do not share a cache entry', async () => {
-    const { client: managedClient, mockList } = makeClient();
+describe('resolveMitreBucketsByFramework', () => {
+  const makeFrameworkClient = (
+    atlasResult: 'ok' | 'reject'
+  ): { client: MitreAttackDataClient; mockList: jest.Mock } => {
+    const mockList = jest
+      .fn()
+      .mockImplementation(async ({ framework }: { framework?: string } = {}) => {
+        if (framework === 'atlas') {
+          if (atlasResult === 'reject') {
+            throw new Error('atlas unavailable');
+          }
+          return {
+            framework: 'atlas' as const,
+            tactics: [{ id: 'AML.TA0000', name: 'Atlas Tactic' }],
+            techniques: [],
+            subtechniques: [],
+          };
+        }
+        return {
+          framework: 'enterprise' as const,
+          tactics: [{ id: 'TA0099', name: 'Managed Tactic' }],
+          techniques: [],
+          subtechniques: [],
+        };
+      });
+    return { client: { list: mockList, getById: jest.fn() }, mockList };
+  };
 
-    // Populate managed cache.
-    const managedResult = await resolveMitreBuckets(managedClient);
-    // Legacy path is independent.
-    const legacyResult = await resolveMitreBuckets();
+  it('returns buckets for both frameworks when both resolve', async () => {
+    const { client } = makeFrameworkClient('ok');
 
-    expect(mockList).toHaveBeenCalledTimes(1);
-    // Managed has TA0099; legacy has TA0001 — they are different datasets.
-    expect(managedResult.tactics[0].id).toBe('TA0099');
-    expect(legacyResult.tactics[0].id).toBe('TA0001');
+    const result = await resolveMitreBucketsByFramework(client, ['enterprise', 'atlas']);
+
+    expect(result.enterprise?.tactics[0]).toMatchObject({ id: 'TA0099' });
+    expect(result.atlas?.tactics[0]).toMatchObject({ id: 'AML.TA0000' });
   });
+
+  it('omits a rejected framework, keeps the other, and logs at debug', async () => {
+    const { client } = makeFrameworkClient('reject');
+    const logger = loggingSystemMock.createLogger();
+
+    const result = await resolveMitreBucketsByFramework(client, ['enterprise', 'atlas'], logger);
+
+    expect(Object.keys(result)).toEqual(['enterprise']);
+    expect(logger.debug).toHaveBeenCalledTimes(1);
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('atlas'));
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('atlas unavailable'));
+  });
+
+  it('resolves enterprise only and never attempts atlas when no client is given', async () => {
+    const logger = loggingSystemMock.createLogger();
+
+    const result = await resolveMitreBucketsByFramework(undefined, ['enterprise', 'atlas'], logger);
+
+    expect(Object.keys(result)).toEqual(['enterprise']);
+    expect(logger.debug).not.toHaveBeenCalled();
+  });
+
+  it('returns an empty record when every framework rejects', async () => {
+    const mockList = jest.fn().mockRejectedValue(new Error('SO unavailable'));
+    const client: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+
+    const result = await resolveMitreBucketsByFramework(client, ['enterprise', 'atlas']);
+
+    expect(result).toEqual({});
+  });
+});
+
+// Managed results are never cached, so they cannot bleed into legacy reads or vice versa.
+it('managed results are never served from the legacy cache', async () => {
+  const { client: managedClient, mockList } = makeClient();
+
+  const managedResult = await resolveMitreBuckets(managedClient);
+  const legacyResult = await resolveMitreBuckets();
+
+  // list() is called for the managed read; legacy comes from the static blob.
+  expect(mockList).toHaveBeenCalledTimes(1);
+  // Managed has TA0099; legacy has TA0001 — they are different datasets.
+  expect(managedResult.tactics[0].id).toBe('TA0099');
+  expect(legacyResult.tactics[0].id).toBe('TA0001');
 });

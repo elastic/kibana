@@ -310,6 +310,87 @@ describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate
   });
 });
 
+describe('PackagePolicyService deferred revision bumps', () => {
+  const scalableUpdate = (id: string): UpdatePackagePolicyWithId => ({
+    ...policy({ condition: "agent.id == 'agent-1'" }),
+    id,
+  });
+
+  it('does not wait for the bump per write, then bumps each agent policy once', async () => {
+    const { server, fleetBulkUpdate, bumpRevision } = makeServer();
+    fleetBulkUpdate.mockImplementation(async (_client, _esClient, policies) => ({
+      updatedPolicies: policies,
+      failedPolicies: [],
+    }));
+    const service = new PackagePolicyService(server);
+    const deferredBumps = new Set<string>();
+
+    // Sequential pages, each awaited like the maintenance-window sync does. With
+    // no timers advanced, a page that waited for its own bump would hang here.
+    await service.bulkUpdate({
+      policiesToUpdate: [scalableUpdate('monitor-1-policyId')],
+      spaceId: DEFAULT_SPACE_ID,
+      deferredBumps,
+    });
+    await service.bulkUpdate({
+      policiesToUpdate: [scalableUpdate('monitor-2-policyId')],
+      spaceId: DEFAULT_SPACE_ID,
+      deferredBumps,
+    });
+
+    expect(fleetBulkUpdate).toHaveBeenCalledTimes(2);
+    expect(fleetBulkUpdate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ bumpRevision: false })
+    );
+    expect(deferredBumps).toEqual(new Set(['policyId']));
+    expect(bumpRevision).not.toHaveBeenCalled();
+
+    const flush = service.scheduleRevisionBumps(deferredBumps);
+    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await flush;
+
+    expect(bumpRevision).toHaveBeenCalledTimes(1);
+    expect(bumpRevision).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'policyId', {
+      asyncDeploy: true,
+    });
+    expect(deferredBumps.size).toBe(0);
+  });
+
+  it('defers creates and deletes too', async () => {
+    const { server, fleetBulkCreate, fleetDelete, fleetGetByIDs, bumpRevision } = makeServer();
+    const created = policy({ id: 'monitor-1-policyId', condition: "agent.id == 'agent-1'" });
+    const deleted = policy({ id: 'monitor-2-policyId', condition: "agent.id == 'agent-1'" });
+    fleetBulkCreate.mockResolvedValue({ created: [created], failed: [] });
+    fleetGetByIDs.mockResolvedValue([deleted]);
+    fleetDelete.mockResolvedValue([
+      { id: deleted.id, success: true, policy_ids: ['otherPolicyId'] },
+    ]);
+    const service = new PackagePolicyService(server);
+    const deferredBumps = new Set<string>();
+
+    await service.bulkCreate({ newPolicies: [created], spaceId: DEFAULT_SPACE_ID, deferredBumps });
+    await service.bulkDelete({
+      policyIdsToDelete: [deleted.id as string],
+      spaceId: DEFAULT_SPACE_ID,
+      deferredBumps,
+    });
+
+    expect(deferredBumps).toEqual(new Set(['policyId', 'otherPolicyId']));
+    expect(bumpRevision).not.toHaveBeenCalled();
+  });
+
+  it('does nothing when no bumps were collected', async () => {
+    const { server, bumpRevision } = makeServer();
+
+    await new PackagePolicyService(server).scheduleRevisionBumps(new Set());
+
+    expect(bumpRevision).not.toHaveBeenCalled();
+  });
+});
+
 describe('PackagePolicyService revision batcher sharing', () => {
   it('coalesces writes made through separate service instances on one server', async () => {
     const { server, fleetBulkCreate, bumpRevision } = makeServer();

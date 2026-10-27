@@ -26,6 +26,7 @@ import type { AttachmentPersistedAttributes } from '../../common/types/attachmen
 import type { UnifiedAttachmentAttributes } from '../../common/types/attachments_v2';
 import type { PartialField } from '../../types';
 import type { IndexRefresh } from '../types';
+import type { AttachmentSavedObjectType } from '../user_actions/types';
 import type { ConfigType } from '../../config';
 
 export type MixSavedObjectResponse =
@@ -62,6 +63,21 @@ export interface GetAttachmentArgs {
   savedObjectId: string;
 }
 
+/**
+ * A stored attachment read for deletion; `attributes` is absent when the row fails to decode and
+ * `owner` when the stored owner is not a non-empty string.
+ */
+export interface AttachmentForDeletion {
+  id: string;
+  type: AttachmentSavedObjectType;
+  owner?: string;
+  references: SavedObjectReference[];
+  /** The file of a file attachment, read from the stored fields whether or not they decode. */
+  fileId?: string;
+  attributes?: AttachmentAttributesV2;
+  version?: string;
+}
+
 export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'> & {
   error?: SavedObjectError;
 };
@@ -96,6 +112,14 @@ export interface GetUnifiedAttachmentsByTypesArgs {
 
 export interface AlertIdsAggsResult {
   alertIds: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+}
+
+export interface AttackIdsAggsResult {
+  attackIds: {
     buckets: Array<{
       key: string;
     }>;
@@ -158,4 +182,42 @@ export type UpdateAttachmentArgs = UpdateArgs;
 export interface BulkUpdateAttachmentArgs extends IndexRefresh {
   comments: UpdateArgs[];
   requestWithoutType?: boolean;
+}
+
+export interface GetCaseIdsByAttachmentIdsArgs {
+  type: string;
+  attachmentIds: string[];
+  /**
+   * Authorization + owner filter scoped to the unified `cases-attachments` saved object type.
+   */
+  unifiedFilter?: KueryNode;
+  /**
+   * The same filter, scoped to the legacy `cases-comments` saved object type.
+   */
+  legacyFilter?: KueryNode;
+}
+
+/** The cases one attachment id is attached to, with their owners for authorization. */
+export interface CasesWithOwnerOfAttachment {
+  attachmentId: string;
+  cases: Array<{ id: string; owner: string }>;
+}
+
+export interface GetCaseIdsByAttachmentIdsAggs {
+  attachmentIds: {
+    buckets: Array<{
+      key: string;
+      references: {
+        cases: {
+          caseIds: {
+            sum_other_doc_count: number;
+            buckets: Array<{
+              key: string;
+              attachment: { owner: { buckets: Array<{ key: string }> } };
+            }>;
+          };
+        };
+      };
+    }>;
+  };
 }

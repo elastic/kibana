@@ -32,6 +32,7 @@ import type {
   CellDecorationFillConfig,
   CellDecorationValueRange,
 } from '@kbn/lens-common';
+import { LENS_DATATABLE_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import {
   DEFAULT_PROGRESS_BAR_COLOR,
@@ -887,6 +888,7 @@ export function ProgressBarControls({
           paletteService={paletteService}
           panelRef={panelRef}
           dataBounds={currentDomain}
+          defaultBandCount={LENS_DATATABLE_DEFAULT_COLOR_STEPS}
         />
       )}
 

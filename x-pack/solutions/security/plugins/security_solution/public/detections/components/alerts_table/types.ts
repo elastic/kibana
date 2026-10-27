@@ -78,6 +78,14 @@ export interface SecurityAlertsTableContext {
   leadingControlColumn: ControlColumnProps;
   userProfiles: AlertsUserProfilesData;
   pageScope: PageScope;
+  /**
+   * Stable callback from `usePaginatedFlyout` that opens the document at the
+   * given absolute index. Passed here so `ActionsCell` can dispatch row-expand
+   * actions without accessing the store directly.
+   */
+  openDocumentFlyout: (documentIndex: number) => void;
+  /** Adds a "Remove from case" item to each row's more actions menu. */
+  onRemoveFromCase?: (alertId: string) => void;
 }
 
 export type SecurityAlertsTableProps = AlertsTablePropsWithRef<SecurityAlertsTableContext>;

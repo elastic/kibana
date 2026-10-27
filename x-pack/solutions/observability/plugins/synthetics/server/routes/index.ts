@@ -7,7 +7,14 @@
 
 import { syncParamsSettingsParamsRoute } from './settings/params/sync_global_params_settings';
 import { syncParamsSyntheticsParamsRoute } from './settings/params/sync_global_params';
+import {
+  getSecretConnectionsRoute,
+  saveSecretConnectionRoute,
+  deleteSecretConnectionRoute,
+} from './settings/secret_connection/secret_connection';
+import { getFleetSecretStorageStatusRoute } from './settings/secret_connection/fleet_secret_storage';
 import { cleanupPrivateLocationRoute } from './settings/private_locations/cleanup_private_locations';
+import { resetPrivateLocationRoute } from './settings/private_locations/reset_private_location';
 import { getSyntheticsTriggerTaskRun } from './tasks/trigger_task_run';
 import { syntheticsInspectStatusRuleRoute } from './rules/inspect_status_rule';
 import { syntheticsInspectTLSRuleRoute } from './rules/inspect_tls_rule';
@@ -25,7 +32,7 @@ import {
   createGetMultiSpaceSettingsRoute,
   createPutMultiSpaceSettingsRoute,
 } from './settings/multi_space_settings';
-import { getSyntheticsParamsRoute } from './settings/params/params';
+import { getSyntheticsParamRoute, getSyntheticsParamsRoute } from './settings/params/params';
 import { editSyntheticsParamsRoute } from './settings/params/edit_param';
 import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
 import { getActionConnectorsRoute } from './default_alerts/get_action_connectors';
@@ -45,7 +52,10 @@ import { updateDefaultAlertingRoute } from './default_alerts/update_default_aler
 import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
-import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
+import {
+  deleteSyntheticsMonitorRoute,
+  deleteSyntheticsMonitorsRoute,
+} from './monitor_cruds/delete_monitor';
 import { resetSyntheticsMonitorRoute } from './monitor_cruds/reset_monitor';
 import { resetSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/reset_monitor_bulk';
 import {
@@ -74,15 +84,22 @@ import { createNetworkEventsRoute } from './network_events';
 import { addPrivateLocationRoute } from './settings/private_locations/add_private_location';
 import { deletePrivateLocationRoute } from './settings/private_locations/delete_private_location';
 import { editPrivateLocationRoute } from './settings/private_locations/edit_private_location';
-import { getPrivateLocationsRoute } from './settings/private_locations/get_private_locations';
+import {
+  getPrivateLocationRoute,
+  getPrivateLocationsRoute,
+} from './settings/private_locations/get_private_locations';
 import { getPrivateLocationAgentStats } from './settings/private_locations/get_agent_stats';
 import { getOutdatedMwAgentLocations } from './settings/private_locations/get_outdated_mw_agents';
+import { getMissingCompleteAgentLocations } from './settings/private_locations/get_missing_complete_agents';
 import { getMonitorAgentAssignment } from './settings/private_locations/get_monitor_agent_assignment';
 import { getSyntheticsFilters } from './filters/filters';
 import { getAllSyntheticsMonitorRoute } from './monitor_cruds/get_monitors_list';
 import { getLocationMonitors } from './settings/private_locations/get_location_monitors';
 import { addSyntheticsParamsRoute } from './settings/params/add_param';
-import { deleteSyntheticsParamsRoute } from './settings/params/delete_param';
+import {
+  deleteSyntheticsParamRoute,
+  deleteSyntheticsParamsRoute,
+} from './settings/params/delete_param';
 import { createOverviewTrendsRoute } from './overview_trends/overview_trends';
 import { getMonitorsHealthRoute } from './monitor_health/get_monitor_health';
 import { getMonitorHealthRoute } from './monitor_health/get_monitor_health_single';
@@ -140,7 +157,12 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   resetSyntheticsMonitorRoute,
   resetSyntheticsMonitorBulkRoute,
   cleanupPrivateLocationRoute,
+  resetPrivateLocationRoute,
   syncParamsSyntheticsParamsRoute,
+  getSecretConnectionsRoute,
+  saveSecretConnectionRoute,
+  deleteSecretConnectionRoute,
+  getFleetSecretStorageStatusRoute,
   syncParamsSettingsParamsRoute,
   getMonitorsHealthRoute,
   getMonitorHealthRoute,
@@ -150,24 +172,29 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getSyntheticsDiagnosticsRoute,
   getPrivateLocationAgentStats,
   getOutdatedMwAgentLocations,
+  getMissingCompleteAgentLocations,
   getMonitorAgentAssignment,
   getMaintenanceWindowsRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getSyntheticsParamsRoute,
+  getSyntheticsParamRoute,
   editSyntheticsParamsRoute,
   addSyntheticsParamsRoute,
+  deleteSyntheticsParamRoute,
   deleteSyntheticsParamsRoute,
   addPrivateLocationRoute,
   deletePrivateLocationRoute,
   editPrivateLocationRoute,
   getPrivateLocationsRoute,
+  getPrivateLocationRoute,
   getAllSyntheticsMonitorRoute,
   getSyntheticsMonitorRoute,
   addSyntheticsMonitorRoute,
   editSyntheticsMonitorRoute,
   deleteSyntheticsMonitorRoute,
+  deleteSyntheticsMonitorsRoute,
   deleteSyntheticsMonitorBulkRoute,
   createSyntheticsMonitorBulkRoute,
   updateSyntheticsMonitorBulkRoute,

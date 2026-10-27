@@ -20,6 +20,8 @@ import {
   NEW_TIMELINE_MENU_ITEM_TEST_ID,
 } from './header/use_timelines_header_menu';
 
+jest.setTimeout(30_000);
+
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
 

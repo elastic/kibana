@@ -70,6 +70,14 @@ describe('validateToolId', () => {
     expect(validateToolId({ toolId, builtIn: true })).toBeUndefined();
   });
 
+  test('reserves the proposals namespace for built-in tools', () => {
+    const toolId = 'proposals.create';
+    expect(validateToolId({ toolId, builtIn: false })).toBe(
+      'Tool id is using a protected namespace.'
+    );
+    expect(validateToolId({ toolId, builtIn: true })).toBeUndefined();
+  });
+
   test('allows built-in tool to use a protected namespace', () => {
     const protectedNamespaceName = protectedNamespaces[0];
     const toolId = `${protectedNamespaceName}.internal_tool`;

@@ -501,6 +501,28 @@ describe('createPackRoute', () => {
       expect(isRight(decode({ name: 'p', queries: {}, min_osquery_version: 'x'.repeat(65) }))).toBe(
         false
       );
+      // Format validation: non-numeric strings are rejected
+      expect(isRight(decode({ name: 'p', queries: {}, min_osquery_version: 'latest' }))).toBe(
+        false
+      );
+      expect(isRight(decode({ name: 'p', queries: {}, min_osquery_version: '5.x' }))).toBe(false);
+      // Valid numeric versions are accepted
+      expect(isRight(decode({ name: 'p', queries: {}, min_osquery_version: '5.19.0' }))).toBe(true);
+      expect(isRight(decode({ name: 'p', queries: {}, min_osquery_version: '5.12' }))).toBe(true);
+      // Per-query version: empty string is valid (no constraint), valid numeric passes
+      expect(
+        isRight(decode({ name: 'p', queries: { q1: { query: 'SELECT 1', version: '' } } }))
+      ).toBe(true);
+      expect(
+        isRight(decode({ name: 'p', queries: { q1: { query: 'SELECT 1', version: '5.19.0' } } }))
+      ).toBe(true);
+      // Per-query version: non-numeric strings are rejected
+      expect(
+        isRight(decode({ name: 'p', queries: { q1: { query: 'SELECT 1', version: 'latest' } } }))
+      ).toBe(false);
+      expect(
+        isRight(decode({ name: 'p', queries: { q1: { query: 'SELECT 1', version: '5.x' } } }))
+      ).toBe(false);
       expect(
         isRight(
           decode({

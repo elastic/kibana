@@ -113,3 +113,34 @@ describe('createRegExpPatternFrom should create a regular expression starting fr
     expect('cluster1:logs-*,    cluster2:logs-*').not.toMatch(regExpPattern);
   });
 });
+
+describe('createRegExpPatternFrom with allowPrefix: false', () => {
+  const regExpPattern = createRegExpPatternFrom('traces', 'data', { allowPrefix: false });
+
+  it('matches index names that start with the base pattern', () => {
+    expect('traces').toMatch(regExpPattern);
+    expect('traces-*').toMatch(regExpPattern);
+    expect('traces-apm*').toMatch(regExpPattern);
+    expect('traces-*.otel-*').toMatch(regExpPattern);
+  });
+
+  it('does not match when the base pattern is not at the start', () => {
+    expect('shipping-traces').not.toMatch(regExpPattern);
+    expect('stack-traces').not.toMatch(regExpPattern);
+    expect('apm.traces').not.toMatch(regExpPattern);
+    expect('mytraces').not.toMatch(regExpPattern);
+  });
+
+  it('matches data stream backing indices of names that start with the base pattern', () => {
+    expect('.ds-traces-apm-default-2026.10.14-000001').toMatch(regExpPattern);
+    expect('cluster1:.ds-traces-apm-default-2026.10.14-000001').toMatch(regExpPattern);
+    expect('.ds-shipping-traces-default-2026.10.14-000001').not.toMatch(regExpPattern);
+  });
+
+  it('still resolves remote clusters, the data selector, and comma-separated lists', () => {
+    expect('cluster1:traces-*').toMatch(regExpPattern);
+    expect('traces-*::data').toMatch(regExpPattern);
+    expect('traces-*,cluster1:traces-apm*').toMatch(regExpPattern);
+    expect('traces-*,shipping-traces').not.toMatch(regExpPattern);
+  });
+});

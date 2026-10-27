@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { monaco } from '@kbn/monaco';
+import { monaco, jsonDefaults } from '@kbn/monaco';
 import { createInitializedObject } from '../utils/create_initialized_object';
 import { safeJsonParse } from '../utils/safe_json_parse';
 import { useFunctions } from './use_functions';
 
-const { editor, languages, Uri } = monaco;
+const { editor, Uri } = monaco;
 
 export const useJsonEditorModel = ({
   functionName,
@@ -47,7 +47,7 @@ export const useJsonEditorModel = ({
       ? JSON.stringify(createInitializedObject(functionDefinition.parameters), null, 4)
       : '';
 
-    languages.json.jsonDefaults.setDiagnosticsOptions({
+    jsonDefaults.setDiagnosticsOptions({
       validate: true,
       schemas: [
         {

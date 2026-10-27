@@ -6,26 +6,43 @@
  */
 
 import { parse } from 'yaml';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
   RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_IDS,
 } from '@kbn/alertzero-common';
-import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
+import {
+  getManagedWorkflowDefinition,
+  SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import { ThreatIntelSupplyService } from '../threat_intel_supply';
+import type { SupplyDocumentStates } from '../threat_intel_supply/keyed_supply_store.mock';
+import {
+  createHardGateEsClient,
+  createKeyedSupplyStore,
+} from '../threat_intel_supply/keyed_supply_store.mock';
+import {
+  ThreatIntelSupplyHardGateError,
+  ThreatIntelSupplyNotInstalledError,
+} from '../threat_intel_supply';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import { WorkersService } from './workers_service';
+import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
 
 const TRIAGE = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
 const ATTACK_DISCOVERY = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
 const FORENSICS = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
+const HUNT = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
 const SPACE = 'default';
 const request = {} as KibanaRequest;
 const WORKERS_WITHOUT_FORENSIC_SKILL = SYSTEM_SECURITY_WORKER_IDS.filter((id) => id !== FORENSICS);
@@ -65,54 +82,6 @@ const storedIdFromReport = (workflowId: string) =>
   workflowId.startsWith('opaque:')
     ? workflowId.slice('opaque:'.length).replace(':', '-')
     : workflowId;
-
-/** In-memory rule-attachment service: attaching moves ids to attached, detaching moves them back. */
-const makeAttachmentService = (
-  opts: {
-    notAttachedIds?: string[];
-    attachedIds?: string[];
-    pageSize?: number;
-    skippedRuleCount?: number;
-  } = {}
-) => {
-  const notAttached = new Set(opts.notAttachedIds ?? ['rule-1', 'rule-2']);
-  const attached = new Set(opts.attachedIds ?? []);
-  const pageSize = opts.pageSize ?? Number.MAX_SAFE_INTEGER;
-  return {
-    getRuleAttachmentSelection: jest.fn(
-      async ({ attachmentFilter }: { search: string; attachmentFilter: string }) =>
-        attachmentFilter === 'not_attached'
-          ? {
-              ruleIds: [...notAttached].slice(0, pageSize),
-              attachedRuleIds: [],
-              skippedRuleCount: opts.skippedRuleCount,
-            }
-          : {
-              ruleIds: [],
-              attachedRuleIds: [...attached].slice(0, pageSize),
-              skippedRuleCount: opts.skippedRuleCount,
-            }
-    ),
-    updateRuleAttachments: jest.fn(
-      async ({
-        attachRuleIds,
-        detachRuleIds,
-      }: {
-        attachRuleIds: string[];
-        detachRuleIds: string[];
-      }) => {
-        for (const id of attachRuleIds) {
-          notAttached.delete(id);
-          attached.add(id);
-        }
-        for (const id of detachRuleIds) {
-          attached.delete(id);
-          notAttached.add(id);
-        }
-      }
-    ),
-  };
-};
 
 const createPersistentHarness = () => {
   const documents = new Map<string, PersistentWorkerDocument>();
@@ -213,17 +182,19 @@ const createPersistentHarness = () => {
     managedWorkflows,
     scheduledTasks,
     updateWorkflow,
-    createService: (agentBuilder?: AgentBuilderPluginStart) => {
-      const attachmentService = makeAttachmentService();
+    createService: (
+      agentBuilder?: AgentBuilderPluginStart,
+      getBlockingReasons: GetWorkerBlockingReasons = async () => []
+    ) => {
       return new WorkersService(
         management,
         Promise.resolve(managedWorkflows),
         loggingSystemMock.createLogger() as Logger,
         { agentBuilder },
-        { getAttachmentService: async () => attachmentService },
         async (_request, registration, options) => {
           await install(registration.id, options);
-        }
+        },
+        getBlockingReasons
       );
     },
   };
@@ -241,6 +212,15 @@ describe('WorkersService', () => {
           !enabled && settingsRevision === null && workflowId === null
       )
     ).toBe(true);
+  });
+
+  it('does not check Alert Analysis dependencies while listing Workers', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+
+    const response = await service.list(request, SPACE);
+    expect(response.workers.find(({ id }) => id === TRIAGE)?.enabled).toBe(false);
+    expect(harness.management.getWorkflow).not.toHaveBeenCalled();
   });
 
   it('rejects enabling a worker that has no service account', async () => {
@@ -354,8 +334,8 @@ describe('WorkersService', () => {
       Promise.resolve(harness.managedWorkflows),
       loggingSystemMock.createLogger() as Logger,
       {},
-      { getAttachmentService: async () => makeAttachmentService() },
-      installWorkerForRequest
+      installWorkerForRequest,
+      async () => []
     );
 
     const result = await service.update(
@@ -701,6 +681,38 @@ describe('WorkersService', () => {
     ).toBe(true);
   });
 
+  it('lists a Worker whose stored settings contain an unknown key as unavailable', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    await service.update(
+      RULE_TUNING,
+      {
+        enabled: true,
+        settings: { serviceAccountId: 'sa-1' },
+        settingsRevision: null,
+      },
+      SPACE,
+      request
+    );
+    const document = harness.documents.get(`${RULE_TUNING}-${SPACE}`);
+    if (!document) throw new Error('Expected the Rule Tuning document to be installed');
+    document.values = {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '2h',
+      extras: { ...RULE_TUNING_DEFAULT_EXTRAS, retiredField: 1 },
+    };
+
+    const { workers } = await service.list(request, SPACE);
+    const ruleTuning = workers.find(({ id }) => id === RULE_TUNING);
+
+    expect(ruleTuning).toMatchObject({
+      state: 'unavailable',
+      stateReason: 'Worker settings could not be read from durable storage',
+      settingsRevision: null,
+    });
+  });
+
   it('installs on enable and leaves the per-space document in place on disable', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
@@ -1022,9 +1034,9 @@ describe('WorkersService', () => {
 
     it('rejects a schedule interval on a Worker that owns no schedule, naming it', async () => {
       const result = await createPersistentHarness()
-        .createService()
+        .createService(agentBuilderWithSkill(true))
         .update(
-          TRIAGE,
+          FORENSICS,
           { settings: { scheduleInterval: '15m' }, settingsRevision: null },
           SPACE,
           request
@@ -1034,137 +1046,51 @@ describe('WorkersService', () => {
       if (result.outcome !== 'invalid') throw new Error('Expected an invalid outcome');
       expect(result.message).toContain('scheduleInterval');
     });
+
+    it('accepts a schedule interval on the alert triage Worker, which sweeps on a schedule', async () => {
+      const result = await createPersistentHarness()
+        .createService()
+        .update(
+          TRIAGE,
+          { settings: { scheduleInterval: '15m' }, settingsRevision: null },
+          SPACE,
+          request
+        );
+
+      expect(result.outcome).not.toBe('invalid');
+    });
   });
 
-  describe('alert triage worker opts', () => {
-    const makeService = (
-      harness: ReturnType<typeof createPersistentHarness>,
-      attachment: ReturnType<typeof makeAttachmentService> | null,
-      isAlertAnalysisRuntimeEnabled?: () => Promise<boolean>
-    ) => {
-      const getAttachmentServiceMock = attachment
-        ? (jest.fn(async () => attachment) as any)
-        : undefined;
+  describe('alert triage worker', () => {
+    const makeService = (harness: ReturnType<typeof createPersistentHarness>) => {
       const service = new WorkersService(
         harness.management,
         Promise.resolve(harness.managedWorkflows),
         loggingSystemMock.createLogger() as Logger,
         {},
-        {
-          getAttachmentService: getAttachmentServiceMock,
-          isAlertAnalysisRuntimeEnabled,
-        },
         async (_request, registration, options) => {
           await harness.install(registration.id, options);
-        }
+        },
+        async () => []
       );
-      return { service, getAttachmentServiceMock };
+      return { service };
     };
 
-    // A combined settings-and-enable PATCH (one Watch Save) must not persist the settings half
-    // when the enable half is refused: the preflight check has to run, and fail, before the
-    // settings write, or the operator is left with a bumped revision and a Worker that still
-    // is not enabled — a state its own optimistic UI overlay cannot recover from without a
-    // second, separate save.
-    it('combined settings+enable PATCH: does not persist settings when the enable is blocked', async () => {
+    // Alert analysis is a per-Worker prerequisite: the Watch page callout warns about it and
+    // each Triage run fails with its own message, so the enable goes through.
+    it.each([
+      ['disabled', { enabled: false }],
+      ['missing', null],
+    ])('enables when the Alert Analysis workflow is %s', async (_state, alertAnalysisWorkflow) => {
       const harness = createPersistentHarness();
-      (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce({ enabled: false });
-      const attachment = makeAttachmentService();
-      const { service } = makeService(harness, attachment);
-
-      const result = await service.update(
-        TRIAGE,
-        {
-          settings: { extras: { autoCloseConfidenceScoreMinThreshold: 0.5 } },
-          settingsRevision: null,
-          enabled: true,
-        },
-        SPACE,
-        request
+      const getWorkflow = harness.management.getWorkflow as jest.Mock;
+      const defaultGetWorkflow = getWorkflow.getMockImplementation();
+      getWorkflow.mockImplementation(async (workflowId: string, ...rest: unknown[]) =>
+        workflowId === SECURITY_ALERT_ANALYSIS_WORKFLOW_ID
+          ? alertAnalysisWorkflow
+          : defaultGetWorkflow?.(workflowId, ...rest)
       );
-
-      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
-      expect(harness.documents.has(`${TRIAGE}-${SPACE}`)).toBe(false);
-      expect(harness.install).not.toHaveBeenCalled();
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
-    });
-
-    it('preflight fail: blocks with a reason and does not enable the Worker', async () => {
-      const harness = createPersistentHarness();
-      (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce({ enabled: false });
-      const attachment = makeAttachmentService();
-      const { service } = makeService(harness, attachment);
-
-      const result = await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-
-      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
-      expect(harness.management.getWorkflow).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.any(String),
-        request
-      );
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
-    });
-
-    // getWorkflow returns null for an absent workflow, distinct from a present-but-disabled
-    // one; both must refuse the enable the same way, or a missing sub-workflow lets every rule
-    // fire into a `workflow.execute` that has nothing to execute.
-    it('preflight fail: blocks the enable when the Alert Analysis workflow is missing entirely', async () => {
-      const harness = createPersistentHarness();
-      (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce(null);
-      const attachment = makeAttachmentService();
-      const { service } = makeService(harness, attachment);
-
-      const result = await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-
-      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
-    });
-
-    it('attachment service unavailable: blocks the enable instead of enabling unwired', async () => {
-      const harness = createPersistentHarness();
-      const { service } = makeService(harness, null);
-
-      const result = await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-
-      expect(result).toEqual({ outcome: 'blocked', reason: 'ruleAttachmentUnavailable' });
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
-    });
-
-    it('attaches in repeated passes until every rule is covered', async () => {
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService({
-        notAttachedIds: ['r1', 'r2', 'r3', 'r4', 'r5'],
-        pageSize: 2,
-      });
-      const { service } = makeService(harness, attachment);
+      const { service } = makeService(harness);
 
       const result = await service.update(
         TRIAGE,
@@ -1178,179 +1104,6 @@ describe('WorkersService', () => {
       );
 
       expect(result.outcome).toBe('updated');
-      expect(
-        attachment.updateRuleAttachments.mock.calls.map(([args]) => args.attachRuleIds)
-      ).toEqual([['r1', 'r2'], ['r3', 'r4'], ['r5']]);
-    });
-
-    it('reports how many rules the caller could not attach to', async () => {
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService({ skippedRuleCount: 4 });
-      const { service } = makeService(harness, attachment);
-
-      const result = await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-
-      expect(result).toEqual({
-        outcome: 'updated',
-        response: expect.objectContaining({ skippedRuleCount: 4 }),
-      });
-    });
-
-    it('omits skippedRuleCount when every rule could be attached', async () => {
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService();
-      const { service } = makeService(harness, attachment);
-
-      const result = await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-
-      expect(result.outcome === 'updated' && 'skippedRuleCount' in result.response).toBe(false);
-    });
-
-    it('attach that makes no progress fails the enable rather than looping', async () => {
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService({ notAttachedIds: ['stuck'] });
-      attachment.updateRuleAttachments.mockResolvedValue(undefined);
-      const { service } = makeService(harness, attachment);
-
-      await expect(
-        service.update(
-          TRIAGE,
-          {
-            enabled: true,
-            settings: { serviceAccountId: 'sa-1' },
-            settingsRevision: null,
-          },
-          SPACE,
-          request
-        )
-      ).rejects.toThrow('made no progress');
-      expect(harness.updateWorkflow).not.toHaveBeenCalledWith(
-        expect.anything(),
-        { enabled: true },
-        SPACE,
-        request
-      );
-    });
-
-    // The preflight check must not be gated on getAttachmentService being present.
-    // In environments where securitySolution plugin is absent the attachment service
-    // is undefined, but the runtime config guard must still block the enable.
-    it('runtime config off: blocks even when attachment service is absent', async () => {
-      const harness = createPersistentHarness();
-      const { service } = makeService(harness, null, async () => false);
-
-      const result = await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-
-      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisRuntimeDisabled' });
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
-    });
-
-    // The workflow's `enabled` flag is not sufficient on its own. It installs enabled, but
-    // `securitySolution:alertAnalysisWorkflowEnabled` now defaults to false, and with that off
-    // the workflow's own guard short-circuits: it completes having classified nothing, so the
-    // Worker reports success while triaging no alerts. Enabling into that state is worse than
-    // refusing, because nothing anywhere reports a problem.
-    it('runtime config off: blocks even though the workflow itself is enabled', async () => {
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService();
-      const { service } = makeService(harness, attachment, async () => false);
-
-      const result = await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-
-      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisRuntimeDisabled' });
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
-      expect(attachment.updateRuleAttachments).not.toHaveBeenCalled();
-    });
-
-    // An unreadable setting must not make the Worker permanently un-enableable: a failed read
-    // is not evidence that analysis is off.
-    it('runtime config unreadable: falls through to the remaining checks', async () => {
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService();
-      const { service } = makeService(harness, attachment, async () => {
-        throw new Error('uiSettings unavailable');
-      });
-
-      expect(
-        (
-          await service.update(
-            TRIAGE,
-            {
-              enabled: true,
-              settings: { serviceAccountId: 'sa-1' },
-              settingsRevision: null,
-            },
-            SPACE,
-            request
-          )
-        ).outcome
-      ).toBe('updated');
-    });
-
-    it('attach-then-enable: passes installed workflow ID (with space suffix) to the attachment service', async () => {
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService();
-      const { service, getAttachmentServiceMock } = makeService(harness, attachment);
-
-      const result = await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-
-      expect(result.outcome).toBe('updated');
-      // The attachment service must receive the ID the install reported, not the bare
-      // registration constant and not a rebuilt `<worker>-<space>` — the workflow executor
-      // looks up by exact ID, and the harness reports an opaque one to prove we pass it through.
-      expect(getAttachmentServiceMock).toHaveBeenCalledWith(
-        request,
-        reportedWorkflowId(TRIAGE, SPACE)
-      );
-      expect(attachment.updateRuleAttachments).toHaveBeenCalledWith({
-        attachRuleIds: ['rule-1', 'rule-2'],
-        detachRuleIds: [],
-      });
       expect(harness.updateWorkflow).toHaveBeenCalledWith(
         reportedWorkflowId(TRIAGE, SPACE),
         { enabled: true },
@@ -1359,263 +1112,203 @@ describe('WorkersService', () => {
       );
     });
 
-    it('attach fails: Worker stays disabled (updateWorkflow not called)', async () => {
+    // The Worker is a scheduled sweep, so enabling it no longer attaches an action to every rule.
+    // There is nothing to attach and nothing to roll back: enable is the workflow update and
+    // nothing else, and no rule-attachment service is consulted at all.
+    it('enable: switches the Worker on and reports nothing about rules', async () => {
       const harness = createPersistentHarness();
-      const attachment = makeAttachmentService();
-      attachment.updateRuleAttachments.mockRejectedValueOnce(new Error('bulk edit failed'));
-      const { service } = makeService(harness, attachment);
-
-      await expect(
-        service.update(
-          TRIAGE,
-          {
-            enabled: true,
-            settings: { serviceAccountId: 'sa-1' },
-            settingsRevision: null,
-          },
-          SPACE,
-          request
-        )
-      ).rejects.toThrow('bulk edit failed');
-      expect(harness.updateWorkflow).not.toHaveBeenCalledWith(
-        expect.anything(),
-        { enabled: true },
-        SPACE,
-        request
-      );
-    });
-
-    it('attach fails partway through: rolls back only the rules this attempt attached, not rules already attached', async () => {
-      const harness = createPersistentHarness();
-      // 'existing-rule' was attached by a previous enable (or a manual attachment); r1/r2 are
-      // the rules this attempt selects to attach. A rollback must leave existing-rule alone.
-      const attachment = makeAttachmentService({
-        notAttachedIds: ['r1', 'r2'],
-        attachedIds: ['existing-rule'],
-        pageSize: 1,
-      });
-      const realUpdateRuleAttachments = attachment.updateRuleAttachments.getMockImplementation();
-      // Pass 1 (attach r1) succeeds for real; pass 2 (attach r2) fails.
-      attachment.updateRuleAttachments
-        .mockImplementationOnce(realUpdateRuleAttachments!)
-        .mockRejectedValueOnce(new Error('bulk edit failed on pass 2'));
-      const { service } = makeService(harness, attachment);
-
-      await expect(
-        service.update(
-          TRIAGE,
-          {
-            enabled: true,
-            settings: { serviceAccountId: 'sa-1' },
-            settingsRevision: null,
-          },
-          SPACE,
-          request
-        )
-      ).rejects.toThrow('bulk edit failed on pass 2');
-
-      expect(harness.updateWorkflow).not.toHaveBeenCalledWith(
-        expect.anything(),
-        { enabled: true },
-        SPACE,
-        request
-      );
-      // The compensating rollback detaches only r1, the rule the failed pass's predecessor
-      // attached, so no rule this attempt touched is left carrying the action.
-      expect(attachment.updateRuleAttachments).toHaveBeenCalledWith({
-        attachRuleIds: [],
-        detachRuleIds: ['r1'],
-      });
-      // existing-rule predates this attempt and must survive the rollback untouched — a
-      // rollback that detached every currently-attached rule would wipe it too.
-      expect(
-        (await attachment.getRuleAttachmentSelection({ search: '', attachmentFilter: 'attached' }))
-          .attachedRuleIds
-      ).toEqual(['existing-rule']);
-    });
-
-    it('attach fails and the rollback detach also fails: original attach error still surfaces', async () => {
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService({ notAttachedIds: ['r1', 'r2'], pageSize: 1 });
-      const realUpdateRuleAttachments = attachment.updateRuleAttachments.getMockImplementation();
-      // Pass 1 (attach r1) succeeds for real, so there is something to roll back; pass 2
-      // (attach r2) fails, and the compensating rollback detach fails too.
-      attachment.updateRuleAttachments
-        .mockImplementationOnce(realUpdateRuleAttachments!)
-        .mockRejectedValueOnce(new Error('bulk edit failed on pass 2'))
-        .mockRejectedValueOnce(new Error('rollback also failed'));
-      const { service } = makeService(harness, attachment);
-
-      await expect(
-        service.update(
-          TRIAGE,
-          {
-            enabled: true,
-            settings: { serviceAccountId: 'sa-1' },
-            settingsRevision: null,
-          },
-          SPACE,
-          request
-        )
-      ).rejects.toThrow('bulk edit failed on pass 2');
-      expect(harness.updateWorkflow).not.toHaveBeenCalledWith(
-        expect.anything(),
-        { enabled: true },
-        SPACE,
-        request
-      );
-    });
-
-    it('disable: detaches all attached rules after disabling the Worker', async () => {
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService({ notAttachedIds: ['r1'], attachedIds: ['r1'] });
-      const { service } = makeService(harness, attachment);
-      await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-      attachment.updateRuleAttachments.mockClear();
-      attachment.getRuleAttachmentSelection.mockClear();
-
-      const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
-
-      expect(result.outcome).toBe('updated');
-      expect(attachment.getRuleAttachmentSelection).toHaveBeenCalledWith({
-        search: '',
-        attachmentFilter: 'attached',
-      });
-      expect(attachment.updateRuleAttachments).toHaveBeenCalledWith({
-        attachRuleIds: [],
-        detachRuleIds: ['r1'],
-      });
-    });
-
-    it('disable: reports how many rules the caller could not detach from', async () => {
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService({
-        notAttachedIds: ['r1'],
-        attachedIds: ['r1'],
-        skippedRuleCount: 3,
-      });
-      const { service } = makeService(harness, attachment);
-      await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-
-      const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
-
-      expect(result).toEqual({
-        outcome: 'updated',
-        response: expect.objectContaining({ skippedRuleCount: 3 }),
-      });
-      if (result.outcome !== 'updated') throw new Error();
-      expect(result.response.worker.enabled).toBe(false);
-    });
-
-    it('disable: omits skippedRuleCount when every rule could be detached', async () => {
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService({ notAttachedIds: ['r1'], attachedIds: ['r1'] });
-      const { service } = makeService(harness, attachment);
-      await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-
-      const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
-
-      expect(result.outcome === 'updated' && 'skippedRuleCount' in result.response).toBe(false);
-    });
-
-    it('idempotent enable: skips attachment when all rules are already attached', async () => {
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService({ notAttachedIds: [] });
-      const { service } = makeService(harness, attachment);
+      const { service } = makeService(harness);
 
       const result = await service.update(
         TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
+        { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
         SPACE,
         request
       );
 
       expect(result.outcome).toBe('updated');
-      expect(attachment.getRuleAttachmentSelection).toHaveBeenCalledWith({
-        search: '',
-        attachmentFilter: 'not_attached',
+      expect(result.outcome === 'updated' && 'skippedRuleCount' in result.response).toBe(false);
+      expect(harness.updateWorkflow).toHaveBeenCalledWith(
+        reportedWorkflowId(TRIAGE, SPACE),
+        { enabled: true },
+        SPACE,
+        request
+      );
+    });
+
+    it('disable: switches the Worker off and reports nothing about rules', async () => {
+      const harness = createPersistentHarness();
+      const { service } = makeService(harness);
+      await service.update(
+        TRIAGE,
+        { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+        SPACE,
+        request
+      );
+      harness.updateWorkflow.mockClear();
+
+      const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
+
+      expect(result.outcome).toBe('updated');
+      expect(result.outcome === 'updated' && 'skippedRuleCount' in result.response).toBe(false);
+      expect(harness.updateWorkflow).toHaveBeenCalledTimes(1);
+      expect(harness.updateWorkflow).toHaveBeenCalledWith(
+        reportedWorkflowId(TRIAGE, SPACE),
+        { enabled: false },
+        SPACE,
+        request
+      );
+    });
+  });
+
+  describe('no-model block', () => {
+    const createToggleableSpaceModel = (available: boolean) => {
+      const model = { available };
+      const getBlockingReasons: GetWorkerBlockingReasons = jest.fn(async () =>
+        model.available ? [] : ['no_model' as const]
+      );
+      return { model, getBlockingReasons };
+    };
+
+    it('reports no_model on every Worker when the user has no model', async () => {
+      const { getBlockingReasons } = createToggleableSpaceModel(false);
+      const service = createPersistentHarness().createService(undefined, getBlockingReasons);
+
+      const { workers } = await service.list(request, SPACE);
+
+      expect(workers.map(({ blockingReasons }) => blockingReasons)).toEqual(
+        WORKERS_WITHOUT_FORENSIC_SKILL.map(() => ['no_model'])
+      );
+      expect((await service.get(TRIAGE, request, SPACE))?.blockingReasons).toEqual(['no_model']);
+    });
+
+    it('reports no reasons when the user has a model', async () => {
+      const { getBlockingReasons } = createToggleableSpaceModel(true);
+      const service = createPersistentHarness().createService(undefined, getBlockingReasons);
+
+      const { workers } = await service.list(request, SPACE);
+
+      expect(workers.every(({ blockingReasons }) => blockingReasons.length === 0)).toBe(true);
+      expect((await service.get(TRIAGE, request, SPACE))?.blockingReasons).toEqual([]);
+    });
+
+    it('refuses enabling without installing or writing anything', async () => {
+      const { getBlockingReasons } = createToggleableSpaceModel(false);
+      const harness = createPersistentHarness();
+
+      const result = await harness
+        .createService(undefined, getBlockingReasons)
+        .update(
+          ATTACK_DISCOVERY,
+          { enabled: true, settings: { scheduleInterval: '12h' }, settingsRevision: null },
+          SPACE,
+          request
+        );
+
+      expect(result).toEqual({ outcome: 'blocked', reason: 'noModel' });
+      expect(harness.install).not.toHaveBeenCalled();
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+      expect(harness.documents.has(`${ATTACK_DISCOVERY}-${SPACE}`)).toBe(false);
+    });
+
+    it('refuses enabling before checking the settings revision', async () => {
+      const { getBlockingReasons } = createToggleableSpaceModel(false);
+
+      const result = await createPersistentHarness()
+        .createService(undefined, getBlockingReasons)
+        .update(
+          ATTACK_DISCOVERY,
+          { enabled: true, settings: { scheduleInterval: '12h' }, settingsRevision: 999 },
+          SPACE,
+          request
+        );
+
+      expect(result).toEqual({ outcome: 'blocked', reason: 'noModel' });
+    });
+
+    it('reports a hidden Worker as not found rather than blocked', async () => {
+      const { getBlockingReasons } = createToggleableSpaceModel(false);
+
+      const result = await createPersistentHarness()
+        .createService(agentBuilderWithSkill(false), getBlockingReasons)
+        .update(FORENSICS, { enabled: true }, SPACE, request);
+
+      expect(result).toEqual({ outcome: 'not-found' });
+    });
+
+    it('still accepts switching a running Worker off and saving its settings while blocked', async () => {
+      const { model, getBlockingReasons } = createToggleableSpaceModel(true);
+      const harness = createPersistentHarness();
+      const service = harness.createService(undefined, getBlockingReasons);
+      const enabled = await service.update(
+        ATTACK_DISCOVERY,
+        { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+        SPACE,
+        request
+      );
+      if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
+      model.available = false;
+
+      const saved = await service.update(
+        ATTACK_DISCOVERY,
+        {
+          settings: { scheduleInterval: '12h' },
+          settingsRevision: enabled.response.worker.settingsRevision,
+        },
+        SPACE,
+        request
+      );
+      expect(saved.outcome).toBe('updated');
+      if (saved.outcome !== 'updated') throw new Error('Expected settings save to succeed');
+      expect(saved.response.worker.blockingReasons).toEqual(['no_model']);
+      expect(harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.yaml).toContain('every: "12h"');
+
+      const disabled = await service.update(ATTACK_DISCOVERY, { enabled: false }, SPACE, request);
+      expect(disabled.outcome).toBe('updated');
+      expect(harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.enabled).toBe(false);
+    });
+
+    it('keeps the stored enabled value across the block and accepts enabling once a model exists', async () => {
+      const { model, getBlockingReasons } = createToggleableSpaceModel(true);
+      const harness = createPersistentHarness();
+      const service = harness.createService(undefined, getBlockingReasons);
+      await service.update(
+        TRIAGE,
+        { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+        SPACE,
+        request
+      );
+      await service.update(ATTACK_DISCOVERY, { enabled: false }, SPACE, request);
+
+      model.available = false;
+      const blocked = await service.list(request, SPACE);
+      expect(blocked.workers.find(({ id }) => id === TRIAGE)).toMatchObject({
+        enabled: true,
+        blockingReasons: ['no_model'],
       });
-      expect(attachment.updateRuleAttachments).not.toHaveBeenCalled();
-    });
+      expect(await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request)).toEqual({
+        outcome: 'blocked',
+        reason: 'noModel',
+      });
+      expect(harness.documents.get(`${TRIAGE}-${SPACE}`)?.enabled).toBe(true);
+      expect(harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.enabled).toBe(false);
 
-    it('detach error does not fail the disable operation', async () => {
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService({ notAttachedIds: ['r1'], attachedIds: ['r1'] });
-      const { service } = makeService(harness, attachment);
-      await service.update(
-        TRIAGE,
+      model.available = true;
+      const reopened = await service.list(request, SPACE);
+      const attackDiscovery = reopened.workers.find(({ id }) => id === ATTACK_DISCOVERY);
+      expect(attackDiscovery).toMatchObject({ enabled: false, blockingReasons: [] });
+      const enabled = await service.update(
+        ATTACK_DISCOVERY,
         {
           enabled: true,
           settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
+          settingsRevision: attackDiscovery?.settingsRevision ?? null,
         },
         SPACE,
         request
       );
-      attachment.updateRuleAttachments.mockRejectedValueOnce(new Error('network error'));
-
-      const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
-
-      expect(result.outcome).toBe('updated');
-      if (result.outcome !== 'updated') throw new Error();
-      expect(result.response.worker.enabled).toBe(false);
-    });
-
-    it('disable: a rejecting getAttachmentService does not fail the disable operation', async () => {
-      // The provider builds scoped rules/actions clients and calculates rule authorization
-      // (see security_solution/server/plugin.ts), so resolving it can throw independently of
-      // the detach call itself; that failure must be as best-effort as detachment is.
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService();
-      const { service, getAttachmentServiceMock } = makeService(harness, attachment);
-      await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-      getAttachmentServiceMock.mockRejectedValueOnce(new Error('failed to build rules client'));
-
-      const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
-
-      expect(result.outcome).toBe('updated');
-      if (result.outcome !== 'updated') throw new Error();
-      expect(result.response.worker.enabled).toBe(false);
+      expect(enabled.outcome).toBe('updated');
+      expect(harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.enabled).toBe(true);
     });
   });
 
@@ -1651,6 +1344,485 @@ describe('WorkersService', () => {
         outcome: 'not-found',
       });
       expect(harness.documents.has(`${FORENSICS}-${SPACE}`)).toBe(false);
+    });
+  });
+
+  describe('Hunt Watch threat intel supply', () => {
+    const makeThreatIntelSupply = () =>
+      ({
+        assertHardGate: jest.fn(async () => undefined),
+        ensureSupplyForSpace: jest.fn(async () => undefined),
+        teardownSupplyForSpace: jest.fn(async () => undefined),
+      } as unknown as ThreatIntelSupplyService & {
+        assertHardGate: jest.Mock;
+        ensureSupplyForSpace: jest.Mock;
+        teardownSupplyForSpace: jest.Mock;
+      });
+
+    const makeHuntService = (
+      harness: ReturnType<typeof createPersistentHarness>,
+      threatIntelSupply: ThreatIntelSupplyService
+    ) =>
+      new WorkersService(
+        harness.management,
+        Promise.resolve(harness.managedWorkflows),
+        loggingSystemMock.createLogger() as Logger,
+        {},
+        async (_request, registration, options) => {
+          await harness.install(registration.id, options);
+        },
+        async () => [],
+        threatIntelSupply
+      );
+
+    it('returns huntSupplyPrerequisitesUnmet when the hard-gate fails', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      threatIntelSupply.assertHardGate.mockRejectedValue(
+        new ThreatIntelSupplyHardGateError(['embedding_endpoint_unavailable'])
+      );
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      expect(
+        await service.update(
+          HUNT,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        )
+      ).toEqual({ outcome: 'blocked', reason: 'huntSupplyPrerequisitesUnmet' });
+    });
+
+    it('returns huntSupplyReportsIndexUnmanaged when the hard-gate names a template-free reports index', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      threatIntelSupply.assertHardGate.mockRejectedValue(
+        new ThreatIntelSupplyHardGateError(['reports_index_unmanaged'])
+      );
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      expect(
+        await service.update(
+          HUNT,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        )
+      ).toEqual({ outcome: 'blocked', reason: 'huntSupplyReportsIndexUnmanaged' });
+    });
+
+    // A combined settings-and-enable PATCH (one Watch Save) must not persist the settings half
+    // when the enable half is refused, or the operator is left with a bumped revision and a
+    // Worker that still is not enabled — a state its own optimistic UI overlay cannot recover
+    // from without a second, separate save.
+    it('combined settings+enable PATCH: does not persist settings when the enable is blocked', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      threatIntelSupply.assertHardGate.mockRejectedValue(
+        new ThreatIntelSupplyHardGateError(['embedding_endpoint_unavailable'])
+      );
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      const result = await service.update(
+        HUNT,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
+
+      expect(result).toEqual({ outcome: 'blocked', reason: 'huntSupplyPrerequisitesUnmet' });
+      expect(harness.documents.has(`${HUNT}-${SPACE}`)).toBe(false);
+      expect(harness.install).not.toHaveBeenCalled();
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('does not ensure supply when the hard-gate fails', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      threatIntelSupply.assertHardGate.mockRejectedValue(
+        new ThreatIntelSupplyHardGateError(['embedding_endpoint_unavailable'])
+      );
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      await service.update(
+        HUNT,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
+
+      expect(threatIntelSupply.ensureSupplyForSpace).not.toHaveBeenCalled();
+    });
+
+    it('returns huntSupplyNotInstalled when TI docs are missing', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      threatIntelSupply.ensureSupplyForSpace.mockRejectedValue(
+        new ThreatIntelSupplyNotInstalledError('system-security-threat-intel-ingest-feeds')
+      );
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      expect(
+        await service.update(
+          HUNT,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        )
+      ).toEqual({ outcome: 'blocked', reason: 'huntSupplyNotInstalled' });
+    });
+
+    it('ensures TI supply before enabling Hunt', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      await service.update(
+        HUNT,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
+
+      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+    });
+
+    it('re-ensures TI supply after Hunt enable so a concurrent teardown can be repaired', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      await service.update(
+        HUNT,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
+
+      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenCalledTimes(2);
+      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenNthCalledWith(1, SPACE, request);
+      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenNthCalledWith(2, SPACE, request);
+    });
+
+    it('tears down TI supply when Hunt enable fails after ensure', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      const service = makeHuntService(harness, threatIntelSupply);
+      harness.updateWorkflow.mockRejectedValueOnce(new Error('enable write failed'));
+
+      await expect(
+        service.update(
+          HUNT,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        )
+      ).rejects.toThrow('enable write failed');
+
+      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenCalled();
+      expect(threatIntelSupply.teardownSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+    });
+
+    it('does not ensure TI supply when enable is rejected for a missing service account', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      expect(await service.update(HUNT, { enabled: true }, SPACE, request)).toEqual({
+        outcome: 'rejected',
+        what: 'a worker that is enabled without a service account',
+      });
+      expect(threatIntelSupply.ensureSupplyForSpace).not.toHaveBeenCalled();
+    });
+
+    it('tears down TI supply when disabling Hunt', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      await service.update(
+        HUNT,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
+      threatIntelSupply.teardownSupplyForSpace.mockClear();
+
+      await service.update(HUNT, { enabled: false }, SPACE, request);
+
+      expect(threatIntelSupply.teardownSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+    });
+
+    it('does not call TI supply when enabling a non-Hunt worker', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      await service.update(
+        ATTACK_DISCOVERY,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
+
+      expect(threatIntelSupply.assertHardGate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Hunt Watch threat intel supply end state with a real supply service', () => {
+    const SPACE_A = 'space-a';
+    const SPACE_B = 'space-b';
+    const ENABLE = {
+      enabled: true,
+      settings: { serviceAccountId: 'sa-1' },
+      settingsRevision: null,
+    } as const;
+    const tiOff: SupplyDocumentStates = {
+      ingest: false,
+      enrich: false,
+      attrA: false,
+      attrB: false,
+    };
+
+    interface Row {
+      name: string;
+      seed: SupplyDocumentStates;
+      /** Space B already hunts. */
+      bHunts?: boolean;
+      hardGateOk?: boolean;
+      /** Hunt is turned on in A first, then `operation` runs. */
+      operation: 'enable' | 'disable' | 'disableWithForbiddenGlobal';
+      enableWritesFail?: boolean;
+      expectedResult: string;
+      expectedDocs: Record<string, boolean | undefined>;
+    }
+
+    const rows: Row[] = [
+      {
+        name: 'enable A with B off: all supply turns on and Hunt is on',
+        seed: tiOff,
+        operation: 'enable',
+        expectedResult: 'updated',
+        expectedDocs: {
+          ingest: true,
+          enrich: true,
+          attrA: true,
+          attrB: false,
+          cthA: true,
+          cthB: false,
+        },
+      },
+      {
+        name: 'enable A while B hunts: globals stay on and Hunt is on in both',
+        seed: { ...tiOff, ingest: true, enrich: true, attrB: true },
+        bHunts: true,
+        operation: 'enable',
+        expectedResult: 'updated',
+        expectedDocs: {
+          ingest: true,
+          enrich: true,
+          attrA: true,
+          attrB: true,
+          cthA: true,
+          cthB: true,
+        },
+      },
+      {
+        name: 'enable A with the hard gate blocked: nothing is written and Hunt stays off',
+        seed: tiOff,
+        hardGateOk: false,
+        operation: 'enable',
+        expectedResult: 'blocked: huntSupplyPrerequisitesUnmet',
+        expectedDocs: {
+          ingest: false,
+          enrich: false,
+          attrA: false,
+          attrB: false,
+          cthA: false,
+          cthB: false,
+        },
+      },
+      {
+        name: 'enable A with enrich missing: nothing is left changed and Hunt stays off',
+        seed: { ingest: false, attrA: false, attrB: false },
+        operation: 'enable',
+        expectedResult: 'blocked: huntSupplyNotInstalled',
+        expectedDocs: { ingest: false, attrA: false, attrB: false, cthA: false, cthB: false },
+      },
+      {
+        name: 'enable A when the Hunt write fails: supply is torn down again',
+        seed: tiOff,
+        operation: 'enable',
+        enableWritesFail: true,
+        expectedResult: 'throws: enable write failed',
+        expectedDocs: {
+          ingest: false,
+          enrich: false,
+          attrA: false,
+          attrB: false,
+          cthA: false,
+          cthB: false,
+        },
+      },
+      {
+        name: 'disable A with B off: all supply and Hunt turn off',
+        seed: tiOff,
+        operation: 'disable',
+        expectedResult: 'updated',
+        expectedDocs: {
+          ingest: false,
+          enrich: false,
+          attrA: false,
+          attrB: false,
+          cthA: false,
+          cthB: false,
+        },
+      },
+      {
+        name: 'disable A while B hunts: only attribute-A and Hunt-A turn off',
+        seed: { ...tiOff, ingest: true, enrich: true, attrB: true },
+        bHunts: true,
+        operation: 'disable',
+        expectedResult: 'updated',
+        expectedDocs: {
+          ingest: true,
+          enrich: true,
+          attrA: false,
+          attrB: true,
+          cthA: false,
+          cthB: true,
+        },
+      },
+      {
+        name: 'disable A when the global update is forbidden: Hunt-A is off and the disable still succeeds',
+        seed: tiOff,
+        operation: 'disableWithForbiddenGlobal',
+        expectedResult: 'updated',
+        expectedDocs: {
+          ingest: true,
+          enrich: true,
+          attrA: false,
+          attrB: false,
+          cthA: false,
+          cthB: false,
+        },
+      },
+    ];
+
+    const run = async (row: Row) => {
+      const harness = createPersistentHarness();
+      const huntDocument = (spaceId: string) => harness.documents.get(`${HUNT}-${spaceId}`);
+      if (row.bHunts) {
+        harness.documents.set(`${HUNT}-${SPACE_B}`, {
+          id: `${HUNT}-${SPACE_B}`,
+          enabled: true,
+          values: null,
+          yaml: '',
+          version: 1,
+        });
+      }
+      const fake = createKeyedSupplyStore({
+        seed: row.seed,
+        getHuntEnabled: (spaceId) => huntDocument(spaceId)?.enabled === true,
+      });
+      const supply = new ThreatIntelSupplyService({
+        management: fake.management,
+        managedWorkflows: Promise.resolve(fake.managedWorkflows),
+        logger: loggingSystemMock.createLogger() as Logger,
+        getEsClient: async () => createHardGateEsClient(row.hardGateOk !== false),
+        enumerateSpaceIds: async () => ['default', SPACE_A, SPACE_B],
+        getInference: () => ({ getDefaultConnector: jest.fn() } as unknown as InferenceServerStart),
+        getUiSettingsClient: () => ({ get: jest.fn() } as unknown as IUiSettingsClient),
+      });
+      const service = new WorkersService(
+        harness.management,
+        Promise.resolve(harness.managedWorkflows),
+        loggingSystemMock.createLogger() as Logger,
+        {},
+        async (_request, registration, options) => {
+          await harness.install(registration.id, options);
+        },
+        async () => [],
+        supply
+      );
+
+      if (row.operation !== 'enable') {
+        await service.update(HUNT, ENABLE, SPACE_A, request);
+      }
+      if (row.operation === 'disableWithForbiddenGlobal') {
+        fake.forbid('ingest');
+      }
+      if (row.enableWritesFail) {
+        harness.updateWorkflow.mockRejectedValueOnce(new Error('enable write failed'));
+      }
+
+      const result = await (row.operation === 'enable'
+        ? service.update(HUNT, ENABLE, SPACE_A, request)
+        : service.update(HUNT, { enabled: false }, SPACE_A, request)
+      ).then(
+        (outcome) =>
+          outcome.outcome === 'blocked' ? `blocked: ${outcome.reason}` : outcome.outcome,
+        (error: Error) => `throws: ${error.message}`
+      );
+
+      return {
+        result,
+        docs: {
+          ...fake.snapshot(),
+          cthA: huntDocument(SPACE_A)?.enabled ?? false,
+          cthB: huntDocument(SPACE_B)?.enabled ?? false,
+        },
+      };
+    };
+
+    describe.each(rows)('$name', (row) => {
+      it('leaves the documents in the expected end state', async () => {
+        expect((await run(row)).docs).toEqual(row.expectedDocs);
+      });
+
+      it('returns the expected result', async () => {
+        expect((await run(row)).result).toEqual(row.expectedResult);
+      });
     });
   });
 });

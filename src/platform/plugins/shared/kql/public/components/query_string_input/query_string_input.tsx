@@ -31,7 +31,6 @@ import type { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
 import type { Query, Filter } from '@kbn/es-query';
 import { getQueryLog } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { type DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   getFieldSubtypeNested,
@@ -42,6 +41,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { buildQueryFromFilters } from '@kbn/es-query';
+import type { FilterableSource } from '@kbn/data-source';
 import { matchPairs } from './match_pairs';
 import { toUser } from './to_user';
 import { fromUser } from './from_user';
@@ -102,7 +102,7 @@ export interface QueryStringInputDependencies {
 }
 
 export interface QueryStringInputProps {
-  indexPatterns: Array<DataView | string | DataViewByIdOrTitle>;
+  indexPatterns: Array<FilterableSource | string | DataViewByIdOrTitle>;
   query: Query;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -165,7 +165,7 @@ interface State {
   suggestionLimit: number;
   selectionStart: number | null;
   selectionEnd: number | null;
-  indexPatterns: DataView[];
+  indexPatterns: FilterableSource[];
 
   /**
    * Part of state because passed down to child components
@@ -229,8 +229,8 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
   private fetchIndexPatterns = debounce(async () => {
     const [objectPatterns = [], stringPatterns = []] = partition<
       QueryStringInputProps['indexPatterns'][number],
-      DataView
-    >(this.props.indexPatterns || [], (indexPattern): indexPattern is DataView => {
+      FilterableSource
+    >(this.props.indexPatterns || [], (indexPattern): indexPattern is FilterableSource => {
       return (
         typeof indexPattern === 'object' &&
         Object.hasOwn(indexPattern, 'fields') &&

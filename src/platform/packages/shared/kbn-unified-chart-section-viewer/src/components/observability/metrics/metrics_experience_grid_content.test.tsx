@@ -133,7 +133,7 @@ describe('MetricsExperienceGridContent', () => {
       metricsSort: METRICS_GRID_SORT_DEFAULTS,
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
-      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramVisualization: 'lnsHeatmap' },
       recentlyExploredMetrics: [],
       onGridSettingsChange: jest.fn(),
     });
@@ -204,7 +204,7 @@ describe('MetricsExperienceGridContent', () => {
       metricsSort: METRICS_GRID_SORT_DEFAULTS,
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
-      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramVisualization: 'lnsHeatmap' },
       recentlyExploredMetrics: [],
       onGridSettingsChange: jest.fn(),
     });
@@ -284,6 +284,15 @@ describe('MetricsExperienceGridContent', () => {
         profileId: 'test-profile-id',
       })
     );
+
+    const { MetricsGrid } = jest.requireMock('./metrics_grid');
+    expect(MetricsGrid).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        histogramBounds: expect.any(Map),
+        histogramBoundsLoading: false,
+      }),
+      expect.anything()
+    );
   });
 
   it('builds the histogram bounds fetch from the loaded fetch params, not the in-flight ones', () => {
@@ -334,6 +343,19 @@ describe('MetricsExperienceGridContent', () => {
 
     expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: true })
+    );
+  });
+
+  it('skips the histogram bounds fetch when a percentile is selected', () => {
+    useMetricsExperienceStateMock.mockReturnValue({
+      ...useMetricsExperienceStateMock(),
+      gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramPercentile: 'p95' },
+    });
+
+    render(<MetricsExperienceGridContent {...defaultProps} />, { wrapper: IntlProvider });
+
+    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: false })
     );
   });
 

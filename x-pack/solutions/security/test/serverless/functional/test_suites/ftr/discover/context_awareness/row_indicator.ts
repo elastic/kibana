@@ -32,9 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         describe('DataView mode', () => {
           it('should have row indicator for both event and alert', async () => {
-            await PageObjects.common.navigateToActualUrl('discover', undefined, {
-              ensureCurrentUrl: false,
-            });
+            await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
             await PageObjects.discover.selectIndexPattern(SECURITY_SOLUTION_DATA_VIEW);
 
             await queryBar.clickQuerySubmitButton();

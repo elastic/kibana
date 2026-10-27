@@ -11,19 +11,19 @@ import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_anomalies_query';
-import type { TimeRange } from '../../use_time_range_param';
 import {
-  getEntityFilterESQL,
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
-} from '../../use_entity_filters_param';
+  type TimeRange,
+} from '../../entities_grid/common';
+import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
+import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 
 const esqlSearch = async (
   searchService: ReturnType<typeof useKibana>['services']['data']['search'],
@@ -48,43 +48,49 @@ export const useEntitiesWithAnomaliesCount = ({
   entityFilters?: EntityFilters;
 }) => {
   const { data } = useKibana().services;
-  const euidApi = useEntityStoreEuidApi();
   const {
     data: resolvedIndex,
     isLoading: isIndexLoading,
+    entityFilterClauses,
     error: indexError,
-  } = useResolvedLatestEntitiesIndexName(spaceId);
-  const { jobIds, loading: isJobsLoading } = useInstalledSecurityJobsIds();
+  } = useTileQueryInputs(spaceId, entityFilters);
+  const {
+    jobIds,
+    loading: isJobsLoading,
+    isMlUser,
+    isLicensed,
+    isError: isJobsError,
+  } = useInstalledSecurityJobsIds();
 
   const isEnabled =
     !skip &&
     !isIndexLoading &&
     !isJobsLoading &&
     jobIds.length > 0 &&
-    Boolean(euidApi) &&
     Boolean(resolvedIndex?.indexName);
 
   const query = useMemo(() => {
-    if (!euidApi || !resolvedIndex?.indexName) return null;
+    if (!resolvedIndex?.indexName) return null;
     return buildEntitiesWithAnomaliesCountQuery(
-      euidApi.euid,
       resolvedIndex.indexName,
       timeRange,
-      getEntityFilterESQL(entityFilters),
+      entityFilterClauses,
       jobIds
     );
-  }, [euidApi, resolvedIndex?.indexName, timeRange, entityFilters, jobIds]);
+  }, [resolvedIndex?.indexName, timeRange, entityFilterClauses, jobIds]);
 
   const {
     data: queryResult,
-    isLoading,
+    isInitialLoading: isLoading,
     isFetching,
     error,
   } = useQuery<{ count: number; entityIds: string[] }, SecurityAppError>(
     ['entitiesWithAnomaliesCount', query],
     async ({ signal }) => {
       if (!query) return { count: 0, entityIds: [] };
-      const raw = await esqlSearch(data.search, query, signal);
+      const raw = await runWithTileTimeout(signal, (tileSignal) =>
+        esqlSearch(data.search, query, tileSignal)
+      );
       const row = raw.values?.[0];
       const valueIndex = raw.columns?.findIndex((c) => c.name === 'value') ?? 0;
       const entityIdsIndex = raw.columns?.findIndex((c) => c.name === 'entity_ids') ?? -1;
@@ -100,9 +106,9 @@ export const useEntitiesWithAnomaliesCount = ({
     {
       enabled: isEnabled && Boolean(query),
       keepPreviousData: true,
-      staleTime: 5 * 60_000,
+      ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
-      retry: 1,
+      retry: retryUnlessTimedOut,
     }
   );
 
@@ -110,17 +116,36 @@ export const useEntitiesWithAnomaliesCount = ({
     ? undefined
     : (error as SecurityAppError | undefined);
 
+  // The inputs can time out too (the group filter overrides). Either way the tile says so, and a
+  // timed-out refetch does not leave the last count on show as if it were current.
+  const isTimedOut = isTileQueryTimeout(error) || isTileQueryTimeout(indexError);
+  const shownResult = isTimedOut ? undefined : queryResult;
+
   useErrorToast(
     i18n.translate('xpack.securitySolution.entityAnalytics.home.entitiesWithAnomalies.queryError', {
       defaultMessage: 'There was an error loading entities with anomalies count',
     }),
-    filteredError ?? indexError
+    // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
+    isTimedOut ? undefined : filteredError ?? indexError
   );
 
   return {
-    count: queryResult?.count ?? 0,
-    entityIds: isFetching ? EMPTY_ENTITY_IDS : queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
-    isLoading: isJobsLoading || isIndexLoading || isLoading || isFetching,
+    count: shownResult?.count ?? 0,
+    entityIds: isFetching ? EMPTY_ENTITY_IDS : shownResult?.entityIds ?? EMPTY_ENTITY_IDS,
+    // A query that can never run (skipped, no index, no job) is not loading: react-query reports a
+    // disabled query with no data as loading for ever.
+    isLoading:
+      isJobsLoading || isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
+    // True while the count is on its way, not when its query can never run (skipped, no index, no job).
+    isCountPending:
+      isJobsLoading || isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
+    /**
+     * No security ML job is installed, so the tile has nothing to count. Not when the jobs could not
+     * be asked for (no ML permission or licence, or the ML capabilities are still loading) or their
+     * fetch failed: then the list is empty too.
+     */
+    isMissingJobs: isMlUser && isLicensed && !isJobsError && !isJobsLoading && jobIds.length === 0,
     error: filteredError ?? indexError,
+    isTimedOut,
   };
 };

@@ -7,13 +7,13 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  BoundOptions,
-  InferenceClient,
-  AnonymizationRule,
-  InferenceCallbacks,
-} from '@kbn/inference-common';
+import type { BoundOptions, InferenceClient, InferenceCallbacks } from '@kbn/inference-common';
+import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
+  InferenceAnonymizationOptions,
+  RegexWorkerService,
+} from '@kbn/ai-anonymization-server';
 import type { ActionsClientProvider } from '../types';
 import { createChatCompleteApi } from '../chat_complete';
 import { createOutputApi } from '../../common/output/create_output_api';
@@ -22,9 +22,7 @@ import { getConnectorById } from '../util/get_connector_by_id';
 import { getConnectorList } from '../util/get_connector_list';
 import { createPromptApi } from '../prompt';
 import { createChatCompleteCallbackApi } from '../chat_complete/callback_api';
-import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 import { createCallbackManager } from './callback_manager';
-import type { InferenceAnonymizationOptions } from './anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import type { TokenUsageLogger } from '../token_usage';
 
@@ -45,6 +43,7 @@ export function createInferenceClient({
   isDefaultConnectorOnly,
   getDefaultConnectorId,
   resolveConnectorId,
+  shouldStreamInferenceEndpoint,
 }: {
   request: KibanaRequest;
   namespace: string;
@@ -62,6 +61,7 @@ export function createInferenceClient({
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
   resolveConnectorId?: (connectorId: string) => Promise<string>;
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
 }): InferenceClient {
   const callbackManager = createCallbackManager(callbacks);
 
@@ -87,6 +87,7 @@ export function createInferenceClient({
     isDefaultConnectorOnly,
     getDefaultConnectorId,
     resolveConnectorId,
+    shouldStreamInferenceEndpoint,
   });
 
   const chatComplete = createChatCompleteApi({

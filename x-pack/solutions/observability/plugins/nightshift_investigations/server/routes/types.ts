@@ -6,14 +6,19 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { NightshiftInvestigationsClient } from '../client/investigations_client';
 import type { CortexPageStore } from '../cortex/page_store';
 import type { SandboxSecretsClient } from '../sandbox_secrets';
+import type { CustomContextClient } from '../custom_context';
+import type { OnboardingClient } from '../onboarding/onboarding_client';
 import type { DecisionTreeStore } from '../decision_trees/store';
+import type { MemoryPageStore } from '../memory/page_store';
+import type { KnowledgePurgeClient } from '../purge/purge_client';
 import type { GetTriggerEmitter } from '../types';
 
 export type GetInvestigationsClient = (
@@ -22,6 +27,15 @@ export type GetInvestigationsClient = (
 ) => NightshiftInvestigationsClient;
 
 export type GetAlertsClient = (request: KibanaRequest) => Promise<AlertsClient> | undefined;
+
+export type GetEpisodeLookup = (
+  request: KibanaRequest,
+  spaceId?: string
+) => {
+  esClient: ElasticsearchClient;
+  getRulesClient?: () => Promise<RulesClientApi>;
+  spaceId: string;
+};
 
 export type GetAutomationsSoClient = (
   request: KibanaRequest,
@@ -34,16 +48,27 @@ export type GetCortexPageStore = (request: KibanaRequest) => CortexPageStore;
 
 export type GetDecisionTreeStore = (request: KibanaRequest) => DecisionTreeStore;
 
+/** Request-scoped store: reads and writes run as the caller's Elasticsearch user. */
+export type GetMemoryPageStore = (request: KibanaRequest) => MemoryPageStore;
+
+export type GetKnowledgePurgeClient = (request: KibanaRequest) => KnowledgePurgeClient;
+
 export interface NightshiftInvestigationsRouteHandlerResources
   extends DefaultRouteHandlerResources {
   getInvestigationsClient: GetInvestigationsClient;
   getTriggerEmitter: GetTriggerEmitter;
   getAlertsClient: GetAlertsClient;
+  getEpisodeLookup: GetEpisodeLookup;
   getAutomationsSoClient: GetAutomationsSoClient;
   getWorkflowsManagement: GetWorkflowsManagement;
   getCortexPageStore: GetCortexPageStore;
   isCortexEnabled: () => boolean;
   sandboxSecretsClient: SandboxSecretsClient;
+  customContextClient: CustomContextClient;
+  onboardingClient: OnboardingClient;
   getDecisionTreeStore: GetDecisionTreeStore;
   isDecisionTreesEnabled: () => boolean;
+  getMemoryPageStore: GetMemoryPageStore;
+  isMemoryEnabled: () => boolean;
+  getKnowledgePurgeClient: GetKnowledgePurgeClient;
 }

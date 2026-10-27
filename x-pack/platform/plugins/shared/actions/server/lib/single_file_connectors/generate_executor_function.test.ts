@@ -20,7 +20,7 @@ import type { GetAxiosInstanceWithAuthFn, GetCredentialFn } from '../get_axios_i
 import { LeasePool } from '../lease_pool';
 import { createConnectorNetworkSettings } from './create_connector_network_settings';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
-import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 describe('generateExecutorFunction', () => {
@@ -110,6 +110,24 @@ describe('generateExecutorFunction', () => {
       expect(result).toEqual({ status: 'ok', data: { result: 'ok' }, actionId: connectorId });
     });
 
+    it('passes the connector type to the axios instance factory for auth metrics', async () => {
+      const executor = generateExecutorFunction({
+        connectorTypeId: '.test_connector',
+        actions: makeActions(mockHandler),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+      });
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      expect(mockGetAxiosInstanceWithAuth).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorTypeId: '.test_connector' })
+      );
+    });
+
     it('passes subActionParams to the handler', async () => {
       const executor = makeExecutor();
 
@@ -174,6 +192,41 @@ describe('generateExecutorFunction', () => {
       await executor({ ...opts, secrets: { authType: 'bearer', token: 'secret' } });
 
       expect(mockHandler.mock.calls[0][0]).toHaveProperty('relay', undefined);
+    });
+
+    it('passes the connector JWT signer, and returns a signer failure as an action error', async () => {
+      const signJwt = jest.fn().mockRejectedValue(new Error('This connector has no signing key.'));
+      const getJwtSigner = jest.fn().mockReturnValue(signJwt);
+      const handler = jest.fn(async (ctx) => ctx.signJwt({ aud: 'receiver' }));
+      const executor = generateExecutorFunction({
+        actions: makeActions(handler),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+        getJwtSigner,
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+
+      expect(getJwtSigner).toHaveBeenCalledWith(connectorId);
+      expect(signJwt).toHaveBeenCalledWith({ aud: 'receiver' });
+      expect(result).toMatchObject({
+        status: 'error',
+        message: 'This connector has no signing key.',
+        actionId: connectorId,
+      });
+    });
+
+    it('leaves the JWT signer undefined when the spec does not publish keys', async () => {
+      const executor = makeExecutor();
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      expect(mockHandler.mock.calls[0][0]).toHaveProperty('signJwt', undefined);
     });
 
     it('leaves the Relay client undefined when no Relay is configured', async () => {
@@ -1296,6 +1349,176 @@ describe('generateExecutorFunction', () => {
           contentLengthBytes: 20 * 1024 * 1024,
           estimatedOutputBytes: 28 * 1024 * 1024,
         },
+      });
+    });
+
+    describe('HTTP status and retry date', () => {
+      const now = Date.parse('2026-10-23T12:00:00Z');
+      const inSeconds = (seconds: number) => new Date(now + seconds * 1000);
+
+      const makeHttpError = (
+        status: number,
+        headers: Record<string, string> = {}
+      ): Error & { response: { status: number; headers: Record<string, string> } } =>
+        Object.assign(new Error(`Request failed with status code ${status}`), {
+          response: { status, headers },
+        });
+
+      const executeWithError = async (error: unknown) => {
+        mockHandler.mockRejectedValue(error);
+        return makeExecutor()(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+      };
+
+      let dateNowSpy: jest.SpyInstance<number, []>;
+
+      beforeEach(() => {
+        dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(now);
+      });
+
+      afterEach(() => {
+        dateNowSpy.mockRestore();
+      });
+
+      it('returns the status code and retries at Retry-After seconds for a 429', async () => {
+        const result = await executeWithError(makeHttpError(429, { 'Retry-After': '30' }));
+
+        expect(result).toEqual({
+          status: 'error',
+          message: 'Request failed with status code 429',
+          actionId: connectorId,
+          errorMeta: { statusCode: 429 },
+          retry: inSeconds(30),
+        });
+      });
+
+      it('retries at an HTTP-date Retry-After', async () => {
+        const retryAt = new Date(now + 90_000).toUTCString();
+
+        const result = await executeWithError(makeHttpError(503, { 'retry-after': retryAt }));
+
+        expect(result.retry).toEqual(inSeconds(90));
+      });
+
+      it('retries now for an HTTP-date Retry-After in the past', async () => {
+        const retryAt = new Date(now - 60_000).toUTCString();
+
+        const result = await executeWithError(makeHttpError(429, { 'retry-after': retryAt }));
+
+        expect(result.retry).toEqual(new Date(now));
+      });
+
+      it('falls back to a delta-seconds ratelimit-reset header', async () => {
+        const result = await executeWithError(makeHttpError(429, { 'ratelimit-reset': '12' }));
+
+        expect(result.retry).toEqual(inSeconds(12));
+      });
+
+      it('falls back to an epoch-seconds x-ratelimit-reset header', async () => {
+        const resetAt = String(now / 1000 + 45);
+
+        const result = await executeWithError(makeHttpError(403, { 'x-ratelimit-reset': resetAt }));
+
+        expect(result).toMatchObject({ errorMeta: { statusCode: 403 }, retry: inSeconds(45) });
+      });
+
+      it('uses the reset header when the quota is exhausted', async () => {
+        const result = await executeWithError(
+          makeHttpError(403, {
+            'x-ratelimit-remaining': '0',
+            'x-ratelimit-reset': String(now / 1000 + 45),
+          })
+        );
+
+        expect(result.retry).toEqual(inSeconds(45));
+      });
+
+      it('ignores the reset header on a 403 while quota remains', async () => {
+        const result = await executeWithError(
+          makeHttpError(403, {
+            'x-ratelimit-remaining': '4999',
+            'x-ratelimit-reset': String(now / 1000 + 45),
+          })
+        );
+
+        expect(result).toMatchObject({ errorMeta: { statusCode: 403 } });
+        expect(result).not.toHaveProperty('retry');
+      });
+
+      it('ignores a Retry-After too large to be a valid date', async () => {
+        const result = await executeWithError(
+          makeHttpError(429, { 'retry-after': '8640000000000' })
+        );
+
+        expect(result).toMatchObject({ errorMeta: { statusCode: 429 } });
+        expect(result).not.toHaveProperty('retry');
+      });
+
+      it('ignores a reset header too large to be a valid date', async () => {
+        const result = await executeWithError(
+          makeHttpError(429, { 'x-ratelimit-reset': '9000000000000' })
+        );
+
+        expect(result).not.toHaveProperty('retry');
+      });
+
+      it('prefers Retry-After over rate-limit reset headers', async () => {
+        const result = await executeWithError(
+          makeHttpError(429, { 'retry-after': '5', 'x-ratelimit-reset': '60' })
+        );
+
+        expect(result.retry).toEqual(inSeconds(5));
+      });
+
+      it('returns only the status code when no retry header is present', async () => {
+        const result = await executeWithError(makeHttpError(400));
+
+        expect(result.errorMeta).toEqual({ statusCode: 400 });
+        expect(result).not.toHaveProperty('retry');
+      });
+
+      it('ignores an unparseable Retry-After', async () => {
+        const result = await executeWithError(makeHttpError(429, { 'retry-after': 'soon' }));
+
+        expect(result.errorMeta).toEqual({ statusCode: 429 });
+        expect(result).not.toHaveProperty('retry');
+      });
+
+      it('keeps retry false for errors classified as user errors', async () => {
+        const error = createTaskRunError(
+          makeHttpError(429, { 'retry-after': '30' }),
+          TaskErrorSource.USER
+        );
+
+        const result = await executeWithError(error);
+
+        expect(result).toMatchObject({ retry: false, errorSource: TaskErrorSource.USER });
+      });
+
+      it('keeps connector-provided metadata alongside the status code', async () => {
+        const error = makeHttpError(413, { 'content-length': '2048' });
+        setConnectorActionErrorMeta(error, { estimatedOutputBytes: 4096 });
+
+        const result = await executeWithError(error);
+
+        expect(result.errorMeta).toEqual({
+          contentLengthBytes: 2048,
+          estimatedOutputBytes: 4096,
+          statusCode: 413,
+        });
+      });
+
+      it('adds neither to errors without a response status', async () => {
+        const error = Object.assign(new Error('socket hang up'), {
+          response: { headers: { 'retry-after': '30' } },
+        });
+
+        const result = await executeWithError(error);
+
+        expect(result).toEqual({
+          status: 'error',
+          message: 'socket hang up',
+          actionId: connectorId,
+        });
       });
     });
 

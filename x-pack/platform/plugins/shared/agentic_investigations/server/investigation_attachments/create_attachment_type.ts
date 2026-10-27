@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
@@ -13,6 +13,7 @@ import type {
   InvestigationAttachmentDocument,
   StoredInvestigationAttachment,
 } from '../../common/investigation_attachments';
+import type { AssertCanReadConversation } from './assert_can_read_conversation';
 import type { InvestigationAttachmentDocService } from './attachment_doc_service';
 import { sameInvestigationAttachmentDocument } from './same_document';
 
@@ -24,6 +25,18 @@ export interface InvestigationAttachmentTypeOptions<
   /** Full stored document, including documents written by earlier schema versions. */
   schema: z.ZodType<InvestigationAttachmentDocument<TStored>>;
   getService: () => InvestigationAttachmentDocService<TStored>;
+  /**
+   * Throws when the caller may not read the entity. `resolve` and `isStale` read the index as the
+   * internal user by an origin the caller supplies (the public attachment route accepts an
+   * origin without data), so they check it before reading.
+   */
+  assertCanRead: (request: KibanaRequest) => Promise<void>;
+  /**
+   * Throws when the caller may not read the conversation a document belongs to. Document ids are
+   * derived from the conversation id, so without it an origin could expose another
+   * conversation's document.
+   */
+  assertCanReadConversation: AssertCanReadConversation;
   logger: Logger;
   /** Text the LLM sees for this attachment. */
   format: (document: InvestigationAttachmentDocument<TStored>) => string;
@@ -59,6 +72,8 @@ export const createInvestigationAttachmentType = <
   type,
   schema,
   getService,
+  assertCanRead,
+  assertCanReadConversation,
   logger,
   format,
   agentDescription,
@@ -80,7 +95,13 @@ export const createInvestigationAttachmentType = <
   },
   resolve: async (origin, context) => {
     try {
-      return await getService().get(origin, context.spaceId);
+      await assertCanRead(context.request);
+      const document = await getService().get(origin, context.spaceId);
+      if (!document) {
+        return undefined;
+      }
+      await assertCanReadConversation(context.request, document.conversationId);
+      return document;
     } catch (error) {
       logger.warn(`Failed to resolve ${type} for origin "${origin}": ${error}`);
       return undefined;
@@ -92,10 +113,12 @@ export const createInvestigationAttachmentType = <
       if (!latest) {
         return false;
       }
+      await assertCanRead(context.request);
       const current = await getService().get(attachment.origin, context.spaceId);
       if (!current) {
         return false;
       }
+      await assertCanReadConversation(context.request, current.conversationId);
       return isStale(latest.data, current);
     } catch (error) {
       logger.warn(`Failed to check staleness for ${type} "${attachment.origin}": ${error}`);

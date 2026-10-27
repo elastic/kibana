@@ -530,6 +530,7 @@ Always raise `resetTaskTimeoutMinutes` first if you raise `resetPageDelayMs` —
 | `/state.active_reset.status: "running"` for hours | Backfill task is mid-walk on a large tenant | Wait. Raise `resetTaskTimeoutMinutes` in `kibana.yml` if it exceeds your tolerance window (see "Tuning /reset at scale") |
 | `Event loop utilization exceeded threshold` from `/internal/cases/_analyticsV2/reset` | A runner page is slower than expected on this hardware | Raise `resetPageDelayMs` to 50–100 to throttle further |
 | `Case Analytics` data view missing in Discover / Lens after `/reset` | Lazy recreation hasn't fired in that space yet — `/reset` deletes every per-space data view, and they recreate on the next cases request per space | Open the Cases UI in the affected space, or run `curl /s/<spaceId>/api/cases/_find?perPage=1` to pre-warm. See "Per-space data views after /reset" above. |
+| Analytics docs whose `space_id` names a deleted space | Deleting a space removes the cases SOs by namespace, bypassing the cases delete cascade | Handled automatically — each reconciliation tick deletes the analytics docs of spaces that no longer exist. |
 | `extended_fields` missing from `.cases` after a templates migration, no case edits since | The migration backfill wrote `extended_fields` via a raw SO update, which never bumped the case-domain `attributes.updated_at` incremental reconciliation filters on | Handled automatically — see "Templates migration coupling" below. Manual fallback: POST /reset. |
 
 ### Templates migration coupling
@@ -743,7 +744,8 @@ cases_analytics_v2/
 │
 ├── reconciliation/
 │   ├── index.ts             periodic task type registration + scheduling
-│   │                        (cases → activity → attachments per tick;
+│   │                        (cases → activity → attachments → deleted
+│   │                        spaces sweep per tick;
 │   │                        independent cursors; per-surface error
 │   │                        isolation via taskRunError; maxAttempts: 1)
 │   ├── runner.ts            walks cases by `updated_at > last_run_at OR
@@ -755,6 +757,8 @@ cases_analytics_v2/
 │   │                        `find` opt into `namespaces: ['*']` — the
 │   │                        unscoped internal SO client otherwise silently
 │   │                        scopes to `default`.
+│   ├── deleted_spaces_sweep.ts  deletes analytics docs whose `space_id` no
+│   │                        longer names an existing space.
 │   ├── activity_runner.ts      walks user-actions by `created_at > last_run_at`
 │   │                           (immutable SOs — no `updated_at` branch needed).
 │   ├── attachments_runner.ts   walks cases-comments + cases-attachments (both unconditionally)

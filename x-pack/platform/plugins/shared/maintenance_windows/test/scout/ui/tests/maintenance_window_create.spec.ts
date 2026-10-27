@@ -158,7 +158,9 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
     await page.testSubj.locator('recurringScheduleAfterXOccurenceInput').fill('5');
 
     await page.testSubj.click(SUBMIT_BUTTON);
-    // Alerts defaults ON so the MW is created immediately without the confirmation modal.
+
+    // Alerts is on with no filter, so the "apply to all alerts" confirmation modal appears.
+    await page.testSubj.click('confirmModalConfirmButton');
 
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
       `Created maintenance window '${name}'`
@@ -237,10 +239,13 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
     // Enter a KQL episode filter. The QueryStringInput renders with the supplied dataTestSubj
     // directly on the text input element (it replaces the default 'queryInput' test-subj).
     const episodeInput = page.testSubj.locator('maintenanceWindowAlertingV2FilterInput');
-    await episodeInput.fill('episode_id: "test-episode"');
+    await episodeInput.fill('alert_id: "test-alert"');
     await episodeInput.press('Enter');
 
     await page.testSubj.click(SUBMIT_BUTTON);
+
+    // Alerts (v1) is still on with no filter, so the "apply to all alerts" modal appears.
+    await page.testSubj.click('confirmModalConfirmButton');
 
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
       `Created maintenance window '${name}'`
@@ -254,7 +259,7 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
 
     // Episodes KQL must be restored.
     await expect(page.testSubj.locator('maintenanceWindowAlertingV2FilterInput')).toHaveValue(
-      'episode_id: "test-episode"'
+      'alert_id: "test-alert"'
     );
   });
 });

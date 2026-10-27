@@ -13,10 +13,12 @@ import type { ScoutTestChannel } from '@kbn/scout-info';
 import { ScoutTestTarget } from '@kbn/scout-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { findPackageForPath } from '@kbn/repo-packages';
+import { TestTrack } from '../execution/test_track';
 import {
   msToHuman,
   identifyTestLoads,
   buildTrack,
+  combineShortLanes,
   type ScoutCIConfig,
   type ScoutCITestLoad,
 } from './create_test_tracks';
@@ -90,6 +92,7 @@ const createStatsEntry = (
   ({
     path: configPath,
     test_target: testTarget,
+    target_attributes: [],
     runCount: 10,
     runtime: {
       avg: estimate,
@@ -598,6 +601,216 @@ describe('identifyTestLoads', () => {
         expect(loads).toHaveLength(1);
       });
     });
+
+    describe('kind: "targetAttributes" (test limit scope)', () => {
+      const createConfigWithTests = (
+        configPath: string,
+        tests: Array<{ id: string; tags: string[] }>
+      ) =>
+        createMockConfig({
+          path: configPath,
+          manifest: {
+            path: `${configPath}.meta.json`,
+            exists: true,
+            sha1: 'abc',
+            testChannels: [],
+            tests: tests.map(({ id, tags }) => ({
+              id,
+              title: id,
+              expectedStatus: 'passed',
+              tags,
+              location: { file: 'test.spec.ts', line: 1, column: 1 },
+            })),
+          },
+        });
+
+      it('excludes configs whose only tests for the target are limited out', () => {
+        mockTestConfigs = [
+          createConfigWithTests('plugin-a/config.ts', [
+            { id: 'fips-only', tags: ['@local-stateful-classic', '@limit/only-fips'] },
+          ]),
+        ];
+
+        expect(
+          identifyTestLoads(
+            ciConfig,
+            stats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set() }],
+            log
+          )
+        ).toHaveLength(0);
+
+        expect(
+          identifyTestLoads(
+            ciConfig,
+            stats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          )
+        ).toHaveLength(1);
+      });
+
+      it('keeps configs that still have an unlimited test for the target', () => {
+        mockTestConfigs = [
+          createConfigWithTests('plugin-a/config.ts', [
+            { id: 'fips-only', tags: ['@local-stateful-classic', '@limit/only-fips'] },
+            { id: 'agnostic', tags: ['@local-stateful-classic'] },
+          ]),
+        ];
+
+        expect(
+          identifyTestLoads(
+            ciConfig,
+            stats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set() }],
+            log
+          )
+        ).toHaveLength(1);
+      });
+
+      it('evaluates limits against the same test that carries the target tag', () => {
+        // The only test for the requested target is limited out; the unlimited test
+        // belongs to a different target and must not keep the config alive.
+        mockTestConfigs = [
+          createConfigWithTests('plugin-a/config.ts', [
+            { id: 'fips-only', tags: ['@local-stateful-classic', '@limit/only-fips'] },
+            { id: 'other-target', tags: ['@local-serverless-search'] },
+          ]),
+        ];
+
+        expect(
+          identifyTestLoads(
+            ciConfig,
+            stats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set() }],
+            log
+          )
+        ).toHaveLength(0);
+      });
+
+      it('excludes except-fips-only configs when fips is declared', () => {
+        mockTestConfigs = [
+          createConfigWithTests('plugin-a/config.ts', [
+            { id: 'non-fips', tags: ['@local-stateful-classic', '@limit/except-fips'] },
+          ]),
+        ];
+
+        expect(
+          identifyTestLoads(
+            ciConfig,
+            stats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          )
+        ).toHaveLength(0);
+      });
+
+      describe('runtime statistics', () => {
+        const attributeStats = new ScoutTestConfigStats({
+          lastUpdated: new Date(),
+          lookbackDays: 1,
+          buildkite: {},
+          configs: [
+            createStatsEntry('plugin-a/config.ts', testTarget, 60000),
+            {
+              ...createStatsEntry('plugin-a/config.ts', testTarget, 300000),
+              target_attributes: ['fips'],
+            } as ScoutTestConfigStatsEntry,
+          ],
+        });
+
+        beforeEach(() => {
+          mockTestConfigs = [
+            createConfigWithTests('plugin-a/config.ts', [
+              { id: 'agnostic', tags: ['@local-stateful-classic'] },
+            ]),
+          ];
+        });
+
+        it('picks the statistics recorded without attributes for an attribute-less run', () => {
+          const loads = identifyTestLoads(
+            ciConfig,
+            attributeStats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set() }],
+            log
+          );
+
+          expect(loads[0].stats?.runtime.estimate).toBe(60000);
+        });
+
+        it('picks the fips statistics when fips is declared', () => {
+          const loads = identifyTestLoads(
+            ciConfig,
+            attributeStats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          );
+
+          expect(loads[0].stats?.runtime.estimate).toBe(300000);
+        });
+
+        const withoutFipsStats = () =>
+          new ScoutTestConfigStats({
+            lastUpdated: new Date(),
+            lookbackDays: 1,
+            buildkite: {},
+            configs: [createStatsEntry('plugin-a/config.ts', testTarget, 60000)],
+          });
+
+        it('falls back to attribute-blind statistics when the attribute has no history', () => {
+          const loads = identifyTestLoads(
+            ciConfig,
+            withoutFipsStats(),
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          );
+
+          // Without this fallback every config would land on `buildTrack`'s whole-lane
+          // estimate, opening one lane per config on the very first run under a new attribute.
+          expect(loads[0].stats?.runtime.estimate).toBe(60000);
+          expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('falling back'));
+        });
+
+        it('does not warn about a fallback when the attribute set matches exactly', () => {
+          identifyTestLoads(
+            ciConfig,
+            attributeStats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          );
+
+          expect(log.warning).not.toHaveBeenCalledWith(expect.stringContaining('falling back'));
+        });
+
+        it('reports no statistics when the config has no history at all', () => {
+          const unrelatedStats = new ScoutTestConfigStats({
+            lastUpdated: new Date(),
+            lookbackDays: 1,
+            buildkite: {},
+            configs: [createStatsEntry('plugin-z/config.ts', testTarget, 60000)],
+          });
+
+          const loads = identifyTestLoads(
+            ciConfig,
+            unrelatedStats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          );
+
+          expect(loads[0].stats).toBeUndefined();
+        });
+      });
+    });
   });
 
   it('returns empty array and logs warning when no configs match', () => {
@@ -688,5 +901,105 @@ describe('buildTrack', () => {
     // so we expect 2 lanes: lane 1 gets [large, small], lane 2 gets [medium]
     expect(track.laneCount).toBe(2);
     expect(track.lanes[0].loads[0].id).toBe('large.ts');
+  });
+});
+
+describe('combineShortLanes', () => {
+  const testTarget = new ScoutTestTarget('local', 'stateful', 'classic');
+  // Lanes shorter than half of the runtime target are considered short
+  const runtimeTarget = 1000;
+  const shortLaneThreshold = runtimeTarget / 2;
+  const laneSetupDuration = 100;
+  let log: ToolingLog;
+
+  beforeEach(() => {
+    log = createMockLog();
+  });
+
+  const createTrack = (
+    configSet: string,
+    loadEstimates: number[],
+    { agentQueue = 'n2-4-spot', target = testTarget } = {}
+  ): TestTrack => {
+    const track = new TestTrack({ runtimeTarget, estimatedLaneSetupDuration: laneSetupDuration });
+    track.metadata.testTarget = target;
+    track.metadata.server = { configSet };
+
+    loadEstimates.forEach((estimate, index) => {
+      const lane = track.addLane();
+      lane.loads.push({
+        id: `${configSet}-${index}.ts`,
+        stats: {
+          runCount: 1,
+          runtime: { avg: 0, median: 0, pc95th: 0, pc99th: 0, max: 0, estimate },
+        },
+        metadata: {},
+      });
+      lane.metadata.buildkite = { agentQueue };
+    });
+
+    return track;
+  };
+
+  it('moves short lanes into a combined track and keeps the other lanes in place', () => {
+    const defaultTrack = createTrack('default', [700, 100]);
+    const tracks = combineShortLanes(
+      [defaultTrack, createTrack('config_a', [150]), createTrack('config_b', [200])],
+      shortLaneThreshold,
+      log
+    );
+
+    expect(tracks).toHaveLength(2);
+    expect(tracks[0]).toBe(defaultTrack);
+    expect(defaultTrack.lanes.map((lane) => [lane.number, lane.loads[0].id])).toEqual([
+      [1, 'default-0.ts'],
+    ]);
+
+    const [combinedLane] = tracks[1].lanes;
+    expect(tracks[1].metadata.testTarget).toBe(testTarget);
+    expect(tracks[1].laneCount).toBe(1);
+    expect(combinedLane.metadata.buildkite.agentQueue).toBe('n2-4-spot');
+    // Each group restarts the server, so every combined lane keeps its setup duration
+    expect(combinedLane.estimatedSetupDuration).toBe(3 * laneSetupDuration);
+    expect(combinedLane.runtimeEstimate).toBe(750);
+    expect(tracks[1].specification.lanes[0].metadata.loadGroups).toEqual([
+      { configSet: 'config_b', loads: ['config_b-0.ts'] },
+      { configSet: 'config_a', loads: ['config_a-0.ts'] },
+      { configSet: 'default', loads: ['default-1.ts'] },
+    ]);
+  });
+
+  it('does not combine lanes with different agent queues or test targets', () => {
+    const tracks = [
+      createTrack('config_a', [100]),
+      createTrack('config_b', [100], { agentQueue: 'n2-8-spot' }),
+      createTrack('config_c', [100], {
+        target: new ScoutTestTarget('local', 'serverless', 'search'),
+      }),
+    ];
+
+    expect(combineShortLanes([...tracks], shortLaneThreshold, log)).toEqual(tracks);
+    tracks.forEach((track) => expect(track.laneCount).toBe(1));
+  });
+
+  it('places the longest short lanes first and opens a new lane when the runtime target is exceeded', () => {
+    const tracks = combineShortLanes(
+      [
+        createTrack('config_a', [100]),
+        createTrack('config_b', [300]),
+        createTrack('config_c', [300]),
+        createTrack('config_d', [300]),
+      ],
+      shortLaneThreshold,
+      log
+    );
+
+    expect(tracks).toHaveLength(1);
+    expect(
+      tracks[0].lanes.map((lane) =>
+        lane.metadata.loadGroups.map(({ configSet }: { configSet: string }) => configSet)
+      )
+    ).toEqual([['config_b', 'config_c', 'config_a'], ['config_d']]);
+    tracks[0].lanes.forEach((lane) => expect(lane.isCongested).toBe(false));
   });
 });

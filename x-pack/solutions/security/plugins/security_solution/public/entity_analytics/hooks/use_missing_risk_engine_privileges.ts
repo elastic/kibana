@@ -13,14 +13,15 @@ import type {
   MissingPrivileges,
   RiskEngineIndexPrivilege,
 } from '../../../common/entity_analytics/risk_engine';
-export type RiskEngineMissingPrivilegesResponse =
+export type RiskEngineMissingPrivilegesResponse = (
   | { isLoading: true }
   | { isLoading: false; hasAllRequiredPrivileges: true }
   | {
       isLoading: false;
       missingPrivileges: MissingPrivileges;
       hasAllRequiredPrivileges: false;
-    };
+    }
+) & { isError?: boolean };
 
 interface UseMissingRiskEnginePrivilegesParams {
   /**
@@ -31,12 +32,14 @@ interface UseMissingRiskEnginePrivilegesParams {
 export const useMissingRiskEnginePrivileges = (
   { readonly }: UseMissingRiskEnginePrivilegesParams = { readonly: false }
 ): RiskEngineMissingPrivilegesResponse => {
-  const { data: privilegesResponse, isLoading } = useRiskEnginePrivileges();
+  const { data: privilegesResponse, isLoading, isError } = useRiskEnginePrivileges();
 
   return useMemo<RiskEngineMissingPrivilegesResponse>(() => {
     if (isLoading || !privilegesResponse) {
       return {
         isLoading: true,
+        // TODO: give a failed check its own state; until then it also reads as loading, so only callers that check isError stop waiting.
+        isError,
       };
     }
 
@@ -57,17 +60,19 @@ export const useMissingRiskEnginePrivileges = (
     ) {
       return {
         isLoading: false,
+        isError,
         hasAllRequiredPrivileges: true,
       };
     }
 
     return {
       isLoading: false,
+      isError,
       hasAllRequiredPrivileges: false,
       missingPrivileges: {
         indexPrivileges,
         clusterPrivileges: readonly ? { enable: [], run: [] } : clusterPrivileges, // cluster privileges are not required for readonly
       },
     };
-  }, [isLoading, privilegesResponse, readonly]);
+  }, [isLoading, isError, privilegesResponse, readonly]);
 };
