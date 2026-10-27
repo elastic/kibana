@@ -19,7 +19,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
+import type { IsomerPluginSetup, IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
@@ -73,6 +73,7 @@ export interface AgentBuilderSetupDependencies {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
   agentBuilderSml: AgentBuilderSmlPluginSetup;
   files: FilesSetup;
+  isomer: IsomerPluginSetup;
 }
 
 export interface AgentBuilderStartDependencies {

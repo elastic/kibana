@@ -1,0 +1,71 @@
+{
+  "id": "lens-xy-checkout-latency",
+  "type": "lens",
+  "attributes": {
+    "title": "Checkout latency by region",
+    "description": "p95 latency split by region over the last 24h.",
+    "visualizationType": "lnsXY",
+    "state": {
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "layer-1": {
+              "indexPatternId": "logs-*",
+              "columns": {
+                "col-time": {
+                  "operationType": "date_histogram",
+                  "sourceField": "@timestamp",
+                  "isBucketed": true,
+                  "dataType": "date",
+                  "params": { "interval": "1h" },
+                  "label": "@timestamp per hour"
+                },
+                "col-region": {
+                  "operationType": "terms",
+                  "sourceField": "region",
+                  "isBucketed": true,
+                  "dataType": "string",
+                  "params": { "size": 5, "orderDirection": "desc" },
+                  "label": "Top 5 region"
+                },
+                "col-p95": {
+                  "operationType": "percentile",
+                  "sourceField": "transaction.duration.us",
+                  "isBucketed": false,
+                  "dataType": "number",
+                  "params": { "percentile": 95 },
+                  "label": "p95 of transaction.duration.us"
+                }
+              },
+              "columnOrder": ["col-time", "col-region", "col-p95"]
+            }
+          }
+        }
+      },
+      "visualization": {
+        "preferredSeriesType": "line",
+        "xTitle": "Time",
+        "yTitle": "p95 (µs)",
+        "layers": [
+          {
+            "layerId": "layer-1",
+            "layerType": "data",
+            "seriesType": "line",
+            "xAccessor": "col-time",
+            "accessors": ["col-p95"],
+            "splitAccessor": "col-region"
+          }
+        ]
+      },
+      "filters": [],
+      "query": { "query": "", "language": "kuery" }
+    }
+  },
+  "references": [
+    {
+      "id": "logs-data-view",
+      "name": "indexpattern-datasource-layer-layer-1",
+      "type": "index-pattern"
+    }
+  ]
+}

@@ -336,3 +336,40 @@ describe('table', () => {
     ).toEqual(['table']);
   });
 });
+
+describe('table colors and widths', () => {
+  const colored: TableNode = {
+    type: 'table',
+    columns: [
+      { label: 'City', width: 120 },
+      { label: 'Delay', color: { mode: 'cell', values: ['#fcdedc', '#07101f', null] } },
+    ],
+    rows: [
+      ['Duluth', 0.5],
+      ['Erie', 1],
+      ['Tampa', 0.1],
+    ],
+    sort: { column: 1, direction: 'desc' },
+  };
+
+  it('needs one color per row', () => {
+    const { errors } = view({
+      ...colored,
+      columns: [
+        colored.columns[0],
+        { label: 'Delay', color: { mode: 'text', values: ['#ffffff'] } },
+      ],
+    });
+    expect(errors.map(({ path }) => path)).toEqual(['body[0].columns[1].color.values']);
+  });
+
+  it('fills cells with contrasting text, keeps each color with its row when sorted, and sizes columns', () => {
+    expect(view(colored).errors).toEqual([]);
+    const { html } = surfaces.html.render({ type: 'view', body: [colored] });
+    const cells = html.match(/<td[^>]*>[^<]*<\/td>/g) ?? [];
+    expect(cells[1]).toMatch(/background-color:#07101f;color:#FFFFFF">1</);
+    expect(cells[3]).toMatch(/background-color:#fcdedc;color:#07101F">0.5</);
+    expect(cells[5]).not.toMatch(/style=/);
+    expect(html).toMatch(/<th[^>]*style="width:120px;min-width:120px;max-width:120px"/);
+  });
+});

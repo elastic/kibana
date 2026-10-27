@@ -8,6 +8,7 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { createKibanaIsomerRuntime } from '@kbn/isomer';
 import type { MarkdownNode } from '@kbn/isomer-components';
+import { vegaExample, type VegaNode } from '@kbn/isomer-primitives-vega';
 import { IsomerPlugin } from './plugin';
 
 jest.mock('@kbn/isomer', () => {
@@ -16,13 +17,22 @@ jest.mock('@kbn/isomer', () => {
 });
 
 const startPlugin = () => {
-  const plugin = new IsomerPlugin(coreMock.createPluginInitializerContext({}));
-  plugin.setup();
+  const plugin = new IsomerPlugin(
+    coreMock.createPluginInitializerContext({ charts: { serverDraw: false } })
+  );
+  plugin.setup(coreMock.createSetup());
   return plugin.start();
 };
 
 const markdown: MarkdownNode = { type: 'markdown', text: 'There are **3** open alerts.' };
 const composition = { type: 'view' as const, body: [markdown] };
+
+const vegaComposition = { type: 'view' as const, body: [vegaExample] };
+
+const fetching: VegaNode = {
+  ...vegaExample,
+  spec: { ...vegaExample.spec, data: { url: 'https://example.com' } },
+};
 
 describe('IsomerPlugin', () => {
   beforeEach(() => {
@@ -62,5 +72,26 @@ describe('IsomerPlugin', () => {
     expect(surfaces.text.render(composition)).toContain('There are **3** open alerts.');
     expect(surfaces.markdown.render(composition)).toContain('There are **3** open alerts.');
     expect(JSON.stringify(surfaces.slack.render(composition).blocks)).toContain('open alerts');
+  });
+
+  it('starts a runtime that validates vega nodes', async () => {
+    const runtime = await startPlugin().getRuntime();
+    expect(runtime.validate(vegaComposition).errors).toEqual([]);
+    const { errors } = runtime.validate({ type: 'view', body: [fetching] });
+    expect(errors.map(({ path }) => path)).toEqual(['body[0].spec.data.url']);
+  });
+
+  it('renders a vega node on html, text, markdown, and Slack', async () => {
+    const { surfaces } = await startPlugin().getRuntime();
+    expect(surfaces.html.render(vegaComposition).html).toContain('<svg');
+    expect(surfaces.text.render(vegaComposition)).toContain(vegaExample.caption);
+    expect(surfaces.markdown.render(vegaComposition)).toContain('| day | errors |');
+    expect(JSON.stringify(surfaces.slack.render(vegaComposition).blocks)).toContain(
+      vegaExample.caption
+    );
+  });
+
+  it('rejects getDrawing while server drawing is off', async () => {
+    await expect(startPlugin().getDrawing()).rejects.toThrow('Server drawing is off');
   });
 });

@@ -15,11 +15,19 @@ import type { TableNode } from './table';
 export type TableAlign = 'left' | 'center' | 'right';
 
 /** A table as every surface draws it: labels, formatted rows in order, and the note when rows were cut. */
+/** A cell's colors: a fill and the text that contrasts with it, or a text color. */
+export interface CellStyle {
+  background?: string;
+  color?: string;
+}
+
 export interface TableView {
-  columns: ReadonlyArray<{ label: string; align: TableAlign }>;
+  columns: ReadonlyArray<{ label: string; align: TableAlign; width?: number }>;
   rows: ReadonlyArray<readonly string[]>;
   /** Each shown row's unformatted cells, in the same order as `rows`, for sorting in the browser. */
   cells: ReadonlyArray<readonly Cell[]>;
+  /** Each shown row's cell colors, in the same order as `rows`; absent for a table without colors. */
+  styles?: ReadonlyArray<ReadonlyArray<CellStyle | undefined>>;
   /** "Showing N of M rows", when fewer rows are shown than the source had. */
   note?: string;
 }
@@ -76,8 +84,33 @@ export const sortOrder = (
     .map(({ index }) => index);
 };
 
-const sortedRows = ({ rows, sort }: TableNode): ReadonlyArray<readonly Cell[]> =>
-  sort ? sortOrder(rows, sort.column, sort.direction).map((index) => rows[index]) : rows;
+const rowOrder = ({ rows, sort }: TableNode): number[] =>
+  sort ? sortOrder(rows, sort.column, sort.direction) : rows.map((_row, index) => index);
+
+/** EUI's `isColorDark`: relative luminance at most 0.179. */
+const isColorDark = (hex: string): boolean => {
+  const [r, g, b] = [1, 3, 5]
+    .map((start) => parseInt(hex.slice(start, start + 2), 16) / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)));
+  return 0.2126 * r! + 0.7152 * g! + 0.0722 * b! <= 0.179;
+};
+
+// EUI's ink and ghost text, as Lens's `getContrastColor` picks between them over a cell's fill.
+const INK = '#07101F';
+const GHOST = '#FFFFFF';
+
+const cellStyle = (
+  color: TableNode['columns'][number]['color'],
+  row: number
+): CellStyle | undefined => {
+  const value = color?.values[row];
+  if (!color || !value) {
+    return undefined;
+  }
+  return color.mode === 'cell'
+    ? { background: value, color: isColorDark(value) ? GHOST : INK }
+    : { color: value };
+};
 
 const defaultAlign = (
   { format }: TableNode['columns'][number],
@@ -113,12 +146,14 @@ export const noRowsNote = (): string =>
 /** `node` sorted, capped at `maxRows` and at `limit`, and formatted. */
 export const tableView = (node: TableNode, limit = Infinity): TableView => {
   const { columns, maxRows, totalRows } = node;
-  const sorted = sortedRows(node);
-  const shown = sorted.slice(0, Math.min(maxRows ?? Infinity, limit));
+  const order = rowOrder(node).slice(0, Math.min(maxRows ?? Infinity, limit));
+  const shown = order.map((index) => node.rows[index]!);
+  const colored = columns.some(({ color }) => color);
   const total = Math.max(totalRows ?? 0, node.rows.length);
   return {
     columns: columns.map((column, index) => ({
       label: oneLine(column.label),
+      ...(column.width ? { width: column.width } : {}),
       align:
         column.align ??
         defaultAlign(
@@ -130,6 +165,9 @@ export const tableView = (node: TableNode, limit = Infinity): TableView => {
       columns.map((column, index) => formatCell(row[index] ?? null, column))
     ),
     cells: shown.map((row) => columns.map((_column, index) => row[index] ?? null)),
+    ...(colored
+      ? { styles: order.map((row) => columns.map(({ color }) => cellStyle(color, row))) }
+      : {}),
     ...(shown.length < total ? { note: rowsNote(shown.length, total) } : {}),
   };
 };

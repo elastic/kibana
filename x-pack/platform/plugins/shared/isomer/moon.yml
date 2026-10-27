@@ -17,9 +17,23 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: x-pack/platform/plugins/shared/isomer
 dependsOn:
+  - '@kbn/charts-plugin'
+  - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/isomer'
+  - '@kbn/isomer-charts-elastic'
+  - '@kbn/isomer-charts-elastic-node'
   - '@kbn/isomer-components'
+  - '@kbn/isomer-lowering'
+  - '@kbn/isomer-primitives-charts'
+  - '@kbn/isomer-primitives-dashboard'
+  - '@kbn/isomer-primitives-maps'
+  - '@kbn/isomer-primitives-vega'
+  - '@kbn/isomer-theme'
+  - '@kbn/maps-ems-plugin'
+  - '@kbn/react-kibana-context-render'
+  - '@kbn/repo-info'
+  - '@kbn/setup-node-env'
 tags:
   - plugin
   - prod
@@ -28,6 +42,8 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
+    - public/**/*
+    - scripts/**/*
     - server/**/*
     - '!target/**/*'
 tasks: {}

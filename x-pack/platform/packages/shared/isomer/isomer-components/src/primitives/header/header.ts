@@ -11,7 +11,16 @@ import { fromTextChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
 import { SLACK_LIMITS, clampSlackText } from '@elastic/isomer-sdk/slack';
 
-import { componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
+import {
+  componentIcon,
+  definePrimitive,
+  oneLine,
+  plainText,
+  SIZE,
+  TEXT,
+  snapshotMetrics,
+  textHeight,
+} from '../../lib';
 import { headerReactRenderer } from './header_react';
 
 const schema = z.object({
@@ -28,6 +37,8 @@ export type HeaderNode = z.infer<typeof schema> & PrimitiveNode;
 
 /** A composition's own title is depth 1, so a level 1 header sits one below it. */
 export const HEADING_DEPTH = { 1: 2, 2: 3, 3: 4, 4: 5 } as const;
+
+const HEADER_TEXT = { 1: TEXT.xl, 2: TEXT.l, 3: TEXT.m, 4: TEXT.s } as const;
 
 const example: HeaderNode = { type: 'header', text: 'Impact', level: 3 };
 
@@ -64,6 +75,10 @@ export const header = definePrimitive<HeaderNode, typeof schema>({
       })
     ),
   ],
+  metrics: snapshotMetrics<HeaderNode>(
+    'header',
+    ({ text, level = 1 }) => textHeight(oneLine(text), HEADER_TEXT[level]) + SIZE.l
+  ),
   renderers: {
     react: headerReactRenderer,
     text: ({ text }) => oneLine(text),

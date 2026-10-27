@@ -3,11 +3,26 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["server/**/*"],
+  "include": ["public/**/*", "scripts/**/*", "server/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/charts-plugin",
+    "@kbn/config-schema",
     "@kbn/core",
+    "@kbn/core-plugins-server",
     "@kbn/isomer",
-    "@kbn/isomer-components"
+    "@kbn/isomer-charts-elastic",
+    "@kbn/isomer-charts-elastic-node",
+    "@kbn/isomer-components",
+    "@kbn/isomer-lowering",
+    "@kbn/isomer-primitives-charts",
+    "@kbn/isomer-primitives-dashboard",
+    "@kbn/isomer-primitives-maps",
+    "@kbn/isomer-primitives-vega",
+    "@kbn/isomer-theme",
+    "@kbn/maps-ems-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/repo-info",
+    "@kbn/setup-node-env"
   ]
 }

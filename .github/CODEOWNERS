@@ -1082,7 +1082,14 @@ x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_manag
 x-pack/platform/packages/shared/index-management/index_management_shared_types @elastic/kibana-management
 x-pack/platform/packages/shared/ingest-pipelines @elastic/kibana-management
 x-pack/platform/packages/shared/isomer/isomer @elastic/appex-sharedux
+x-pack/platform/packages/shared/isomer/isomer-charts-elastic @elastic/appex-sharedux
+x-pack/platform/packages/shared/isomer/isomer-charts-elastic-node @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-components @elastic/appex-sharedux
+x-pack/platform/packages/shared/isomer/isomer-lowering @elastic/appex-sharedux
+x-pack/platform/packages/shared/isomer/isomer-primitives-charts @elastic/appex-sharedux
+x-pack/platform/packages/shared/isomer/isomer-primitives-dashboard @elastic/appex-sharedux
+x-pack/platform/packages/shared/isomer/isomer-primitives-maps @elastic/appex-sharedux
+x-pack/platform/packages/shared/isomer/isomer-primitives-vega @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-theme @elastic/appex-sharedux
 x-pack/platform/packages/shared/kbn-agentic-investigations-common @elastic/security-solution
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-ml-ux @elastic/nightshift-context-and-research-team
@@ -1218,6 +1225,7 @@ x-pack/platform/plugins/private/grokdebugger @elastic/kibana-management
 x-pack/platform/plugins/private/index_lifecycle_management @elastic/kibana-management
 x-pack/platform/plugins/private/indices_metadata @elastic/security-solution
 x-pack/platform/plugins/private/intercepts @elastic/appex-sharedux
+x-pack/platform/plugins/private/isomer_dashboards @elastic/appex-sharedux
 x-pack/platform/plugins/private/license_api_guard @elastic/kibana-management
 x-pack/platform/plugins/private/logstash @elastic/logstash
 x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring

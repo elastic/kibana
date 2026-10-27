@@ -12,7 +12,16 @@ import { fromChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
-import { componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
+import {
+  componentIcon,
+  definePrimitive,
+  oneLine,
+  plainText,
+  SIZE,
+  TEXT,
+  snapshotMetrics,
+  textHeight,
+} from '../../lib';
 import { contextSlackRenderer } from './context_slack';
 
 const itemSchema = z
@@ -79,6 +88,10 @@ export const context = definePrimitive<ContextNode, typeof contextSchema>({
   },
   icon,
   examples: [example, { type: 'context', items: [{ text: 'Updated 5 minutes ago' }] }],
+  metrics: snapshotMetrics<ContextNode>(
+    'context',
+    (node) => textHeight(joined(node, SEPARATOR), TEXT.xs) + SIZE.s
+  ),
   renderers: {
     react: (node, { context: renderContext }) => (
       <p {...nodeAnchor(renderContext, node)} className={classNames(renderContext, handles.root)}>

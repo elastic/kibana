@@ -1285,7 +1285,14 @@ packages:
   - 'x-pack/platform/packages/shared/index-management/index_management_shared_types'
   - 'x-pack/platform/packages/shared/ingest-pipelines'
   - 'x-pack/platform/packages/shared/isomer/isomer'
+  - 'x-pack/platform/packages/shared/isomer/isomer-charts-elastic'
+  - 'x-pack/platform/packages/shared/isomer/isomer-charts-elastic-node'
   - 'x-pack/platform/packages/shared/isomer/isomer-components'
+  - 'x-pack/platform/packages/shared/isomer/isomer-lowering'
+  - 'x-pack/platform/packages/shared/isomer/isomer-primitives-charts'
+  - 'x-pack/platform/packages/shared/isomer/isomer-primitives-dashboard'
+  - 'x-pack/platform/packages/shared/isomer/isomer-primitives-maps'
+  - 'x-pack/platform/packages/shared/isomer/isomer-primitives-vega'
   - 'x-pack/platform/packages/shared/isomer/isomer-theme'
   - 'x-pack/platform/packages/shared/kbn-agentic-investigations-common'
   - 'x-pack/platform/packages/shared/kbn-ai-assistant'
@@ -1421,6 +1428,7 @@ packages:
   - 'x-pack/platform/plugins/private/index_lifecycle_management'
   - 'x-pack/platform/plugins/private/indices_metadata'
   - 'x-pack/platform/plugins/private/intercepts'
+  - 'x-pack/platform/plugins/private/isomer_dashboards'
   - 'x-pack/platform/plugins/private/license_api_guard'
   - 'x-pack/platform/plugins/private/logstash'
   - 'x-pack/platform/plugins/private/monitoring'
@@ -1717,6 +1725,12 @@ packages:
   - 'x-pack/solutions/vectordb/plugins/serverless_vectordb'
   - 'x-pack/solutions/vectordb/test'
 # END GENERATED PACKAGES
+
+# Dependency patches, each with a one-line reason.
+patchedDependencies:
+  # Resolve the browser build under `node`: the Node build's top-level `await import('canvas')` cannot be
+  # required from CommonJS, and headless SVG rendering needs no canvas.
+  vega-canvas@2.0.0: patches/vega-canvas@2.0.0.patch
 
 # Keep a last field entry, because a trailing comment might be removed by some parsers.
 lockfile: true

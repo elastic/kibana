@@ -322,6 +322,9 @@ overrides:
 
 pnpmfileChecksum: sha256-JL9Z/8IecLxwanP1rhrhbsvFTvupuyak+iLixXT5Rmk=
 
+patchedDependencies:
+  vega-canvas@2.0.0: 07903a19a2a84dcbe414f36c41134c9ab10453995219a04ea0a7a983022b895f
+
 importers:
 
   .:
@@ -384,8 +387,8 @@ importers:
         specifier: 5.0.3
         version: 5.0.3(moment@2.31.0)
       '@elastic/distillate':
-        specifier: 0.2.0
-        version: 0.2.0
+        specifier: 0.2.1-main.20261023235757.gc185494
+        version: 0.2.1-main.20261023235757.gc185494
       '@elastic/ebt':
         specifier: 1.4.1
         version: 1.4.1
@@ -416,12 +419,15 @@ importers:
       '@elastic/filesaver':
         specifier: 1.1.2
         version: 1.1.2
+      '@elastic/isomer-image-takumi':
+        specifier: 0.4.1-main.20261027024454.gfb5c3f7
+        version: 0.4.1-main.20261027024454.gfb5c3f7(csstype@3.0.7)(react@18.2.0)
       '@elastic/isomer-runtime':
-        specifier: 0.4.0
-        version: 0.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
+        specifier: 0.4.1-main.20261027024454.gfb5c3f7
+        version: 0.4.1-main.20261027024454.gfb5c3f7(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
       '@elastic/isomer-sdk':
-        specifier: 0.4.0
-        version: 0.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
+        specifier: 0.4.1-main.20261027024454.gfb5c3f7
+        version: 0.4.1-main.20261027024454.gfb5c3f7(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
       '@elastic/kibana-d3-color':
         specifier: 2.0.1
         version: 2.0.1
@@ -2519,12 +2525,36 @@ importers:
       '@kbn/isomer':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer
+      '@kbn/isomer-charts-elastic':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-charts-elastic
+      '@kbn/isomer-charts-elastic-node':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-charts-elastic-node
       '@kbn/isomer-components':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer-components
+      '@kbn/isomer-dashboards-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/isomer_dashboards
+      '@kbn/isomer-lowering':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-lowering
       '@kbn/isomer-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/isomer
+      '@kbn/isomer-primitives-charts':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-primitives-charts
+      '@kbn/isomer-primitives-dashboard':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-primitives-dashboard
+      '@kbn/isomer-primitives-maps':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-primitives-maps
+      '@kbn/isomer-primitives-vega':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-primitives-vega
       '@kbn/isomer-theme':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer-theme
@@ -4223,6 +4253,9 @@ importers:
       '@moonrepo/cli':
         specifier: 2.6.2
         version: 2.6.2
+      '@napi-rs/canvas':
+        specifier: 1.0.11
+        version: 1.0.11
       '@openfeature/core':
         specifier: 1.12.0
         version: 1.12.0
@@ -9038,7 +9071,21 @@ importers:
 
   x-pack/platform/packages/shared/isomer/isomer: {}
 
+  x-pack/platform/packages/shared/isomer/isomer-charts-elastic: {}
+
+  x-pack/platform/packages/shared/isomer/isomer-charts-elastic-node: {}
+
   x-pack/platform/packages/shared/isomer/isomer-components: {}
+
+  x-pack/platform/packages/shared/isomer/isomer-lowering: {}
+
+  x-pack/platform/packages/shared/isomer/isomer-primitives-charts: {}
+
+  x-pack/platform/packages/shared/isomer/isomer-primitives-dashboard: {}
+
+  x-pack/platform/packages/shared/isomer/isomer-primitives-maps: {}
+
+  x-pack/platform/packages/shared/isomer/isomer-primitives-vega: {}
 
   x-pack/platform/packages/shared/isomer/isomer-theme: {}
 
@@ -9309,6 +9356,8 @@ importers:
   x-pack/platform/plugins/private/indices_metadata: {}
 
   x-pack/platform/plugins/private/intercepts: {}
+
+  x-pack/platform/plugins/private/isomer_dashboards: {}
 
   x-pack/platform/plugins/private/license_api_guard: {}
 
@@ -11066,8 +11115,8 @@ packages:
     peerDependencies:
       moment: ^2.24.0
 
-  '@elastic/distillate@0.2.0':
-    resolution: {integrity: sha512-MT6/KONPeYj/y+v16KjzjY8t7DozXFrEVykJrd7YOFPnJOxZCPtVMe+jtQxl0niWfHnoMn9Rbgy1t+bwh5HrnQ==}
+  '@elastic/distillate@0.2.1-main.20261023235757.gc185494':
+    resolution: {integrity: sha512-cNLSoNaCIQcXdUxzjVOgDcAAJk1FDbrRBAZDMyBNinShM1LvUubRPMtcxClJdpwUWM48GZuVkb5jHcZxIBgjDw==}
     engines: {node: '>=20'}
 
   '@elastic/ebt@1.4.1':
@@ -11173,16 +11222,19 @@ packages:
   '@elastic/filesaver@1.1.2':
     resolution: {integrity: sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==}
 
-  '@elastic/isomer-runtime@0.4.0':
-    resolution: {integrity: sha512-4joLm1LFziM+OGUwQmpCb6QL/X7jw5K1xWiL+9I14QWamnPJbX/eVfb7Wc428pq/HMnL7INwhYQqaucOXIeNBw==}
+  '@elastic/isomer-image-takumi@0.4.1-main.20261027024454.gfb5c3f7':
+    resolution: {integrity: sha512-XKbEU9nxS7kB8c3zxssLmDqfjAEHyDBZLYS3yG0CvtmHpiyvD2NBdz1Y7r6AayZYX4ysfGSFnzkD7Ueykxcd8Q==}
+
+  '@elastic/isomer-runtime@0.4.1-main.20261027024454.gfb5c3f7':
+    resolution: {integrity: sha512-JPOEK0nixDcCHxsXD1O4e7+uTd/JAXYDfTiLYW+hJa3EbwYXXlhTdKGmaqADau1970S3fYinpMkjk2XrP1kHyg==}
     engines: {node: '>=22.13.0'}
     peerDependencies:
       react: '>=18 <20'
       react-dom: '>=18 <20'
       zod: 4.6.5
 
-  '@elastic/isomer-sdk@0.4.0':
-    resolution: {integrity: sha512-HLz1hxKb1/rc2XfBSRTli4jGNd4ROjv6yP7HkRKaXoakhH3r6zgCGZVAl0dpW5CAA2KbDRRphgwcI44bdVbUig==}
+  '@elastic/isomer-sdk@0.4.1-main.20261027024454.gfb5c3f7':
+    resolution: {integrity: sha512-XfEkAQ1A5tYzXlwvrJYiMlxq+a/K0fVFnZ5uWYSgOz0yCuCPUMpdN2yAU2VljqMJ1PF7PfhbZR/PWaW/3OR9dw==}
     engines: {node: '>=22.13.0'}
     peerDependencies:
       react: '>=18 <20'
@@ -12827,6 +12879,81 @@ packages:
   '@mswjs/interceptors@0.41.6':
     resolution: {integrity: sha512-qmDvJIjcNsZ6tXWy2G9yuCgMPTTn35GMA3dPpSLm7QJVpbQzYdw0ALy1bKoivXnEM3U93/OrK+/M719b+fg84Q==}
     engines: {node: '>=18'}
+
+  '@napi-rs/canvas-android-arm64@1.0.11':
+    resolution: {integrity: sha512-dtJS4FQEfH9OwSYLtMrEnj7T8DzBbJc/97LI/OkiWOYpW/iW5t6R/gcxVrUXS8l45gCVpwMufgucRe/pe0ISqA==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [android]
+
+  '@napi-rs/canvas-darwin-arm64@1.0.11':
+    resolution: {integrity: sha512-J/JylWoJTG8OQqZaiqly4IODyAxNofUlZo0wtSBJtHk6AdymbdIkPynAM1JvQaZpPaG5h+msk9QuK8y4i1ooqw==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@napi-rs/canvas-darwin-x64@1.0.11':
+    resolution: {integrity: sha512-nlecCk3xy06eAGC7krZtzNDm9UNTHKuHQYK8ZYegdjzgSL8anGt/eLJZm86OWaNgZkwQwvDqfSmG8Nqe6MPZNQ==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@napi-rs/canvas-linux-arm-gnueabihf@1.0.11':
+    resolution: {integrity: sha512-DKImmG+sTPolE0kGPsYPBxTtOjb3INALp32O2lW2CfSr0bAzSEKKuu+GrQbtilClyoPOahUErS3OrznFDraoWA==}
+    engines: {node: '>= 10'}
+    cpu: [arm]
+    os: [linux]
+
+  '@napi-rs/canvas-linux-arm64-gnu@1.0.11':
+    resolution: {integrity: sha512-55sykACGENj5j1rhj+81AO8JbR9HYgGjRZ7/H+pNr4VE1DvINKYNMTcutk8ZmWxk276jAQvUKJ3+Kdj9GXU3lQ==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@napi-rs/canvas-linux-arm64-musl@1.0.11':
+    resolution: {integrity: sha512-6Jz6jys17yXydO+WdJgu7JhoB4K7/w9sWHByzzTmLjQghUx3TDMWvLv+UcCdnWhg4oprET67EMymnrETdeGNAg==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@napi-rs/canvas-linux-riscv64-gnu@1.0.11':
+    resolution: {integrity: sha512-lf2XeEebWiUYVOVEjLXxF7dfXrBBSEOBn9AqBh39VYXrPt5cDqI+1t58IFSjn8npqkg5jIOs8TQbjKABbFW1gQ==}
+    engines: {node: '>= 10'}
+    cpu: [riscv64]
+    os: [linux]
+    libc: [glibc]
+
+  '@napi-rs/canvas-linux-x64-gnu@1.0.11':
+    resolution: {integrity: sha512-iDapw7nFSE5tsmQxcH2+KotJhyfVPmHd6vUOQN/Em+8WNbkZJwJ/rDowlJMFnMl0SYSDSfgKCNUGi6Sn5++Smg==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@napi-rs/canvas-linux-x64-musl@1.0.11':
+    resolution: {integrity: sha512-26q26AyITo3CGZX4HWFIMgBMA1lu3YN07gxzBm4tW6Hglq/OVyTP50kDrmWuKybCX6dh3m8Ly+c7YhI+sqCgCQ==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@napi-rs/canvas-win32-arm64-msvc@1.0.11':
+    resolution: {integrity: sha512-cUO96IdsfvIj2S+2PNcDSkTcLhjPj8pIOEWRV1Kj70MOP4wnE9zSk7N4C1EKHlFGRcgdR5AkbnBZj0dfHK9nbQ==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@napi-rs/canvas-win32-x64-msvc@1.0.11':
+    resolution: {integrity: sha512-DFYp/ZQRdKunI/LPc0UkRXG1vlNjJKOJf8O8Ctb8+wm2Nt2ELg9Eamc31D2VoakkfGo8L+z0Iejz6WtFbQwyGw==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [win32]
+
+  '@napi-rs/canvas@1.0.11':
+    resolution: {integrity: sha512-vt5tog1cr+QKadIddGe+3LrcX0EmjEd0izF717Uwf92mBmgYfq2XRmL2r4bZU40spB69exxhrBn9I91HYEr/7w==}
+    engines: {node: '>= 10'}
 
   '@napi-rs/nice-android-arm-eabi@1.1.1':
     resolution: {integrity: sha512-kjirL3N6TnRPv5iuHw36wnucNqXAO46dzK9oPb0wj076R5Xm8PfUVA9nAFB5ZNMmfJQJVKACAPd/Z2KYMppthw==}
@@ -14925,6 +15052,79 @@ packages:
 
   '@swc/types@0.1.28':
     resolution: {integrity: sha512-V6Mnml8v09QALx6K0elJ7o9K/MkVDtW3t6L+7Ou/JcWtb3xwId2AH4FeOceySd2JaO87IMw4+6vSZxLm34LPbw==}
+
+  '@takumi-rs/core-darwin-arm64@2.18.1':
+    resolution: {integrity: sha512-stC9L6PlJtFo9FQGjSHZwQeIksKwqqcagHfeE+oHyFf8Jlm4jWiiOLsWMs9TjujZhphheh4+vjqnQuxIKfzTbw==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@takumi-rs/core-darwin-x64@2.18.1':
+    resolution: {integrity: sha512-OC5J7mAiTyHy5PwvHS7bJ6zCieNgLFJwgoHM5vhqumAwQjB3/tgTUAsNBgp/WvlJae4q4AsJ8y5T0JyyF1zNgg==}
+    engines: {node: '>=18'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@takumi-rs/core-linux-arm64-gnu@2.18.1':
+    resolution: {integrity: sha512-EM4F2r8Ycbfqve40OQO0ktbDCa2eovzhsfdlmsCq0/ZPOngWSBwbd2jbMvaVpTtEEfc24wOJzQjYauJ8Yan9kg==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@takumi-rs/core-linux-arm64-musl@2.18.1':
+    resolution: {integrity: sha512-mj/wING8VQ0OmrGN64x2biGGLisqoCJJnfL2ld+GYHTiZMzxI3A2p3MF1eRSRAqqaK39AMokWiWK0UaxOMdnuA==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@takumi-rs/core-linux-x64-gnu@2.18.1':
+    resolution: {integrity: sha512-eBcFMD8uBnre8tHQfDLhkzZfEq5orqcYuCRRmKXl1hYnr7CVrgg9w/0ZugrP8F18/eD9oWVn4JpJ3yPhRywZTw==}
+    engines: {node: '>=18'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@takumi-rs/core-linux-x64-musl@2.18.1':
+    resolution: {integrity: sha512-YNKZ0tW7/OVgyMBX0vXy3VHNwgh+X16hTP/HV0YfoL7EpGDuK195BUJbDDsL38JJ+EDsR0p4oiUFok0tIWxdaw==}
+    engines: {node: '>=18'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@takumi-rs/core-win32-arm64-msvc@2.18.1':
+    resolution: {integrity: sha512-wiETLpqyIHHJLG28fSbfdg/7AtWMB9zBT4wDtWX4zf7Rhsa+X8L4VDqfDk1ziulciBhCddFfUArETOeUZtIoIw==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@takumi-rs/core-win32-x64-msvc@2.18.1':
+    resolution: {integrity: sha512-/63/xcPYtB4Q7JQdAIM05kMv/MyEcglPVniuVpCKgiYKpN4M22GJrH7MqG9dUN8n+j31QTpFFNNcmp7NUgTyRw==}
+    engines: {node: '>=18'}
+    cpu: [x64]
+    os: [win32]
+
+  '@takumi-rs/core@2.18.1':
+    resolution: {integrity: sha512-JiKzlQ8teYSRi7TIsJCuFr6Q+KGY7W3pnXspNIJfLNm1D4nw2RZaUjtXMPc+QXSZaspbKHkBorziHqaGqjbTYQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      csstype: '*'
+    peerDependenciesMeta:
+      csstype:
+        optional: true
+
+  '@takumi-rs/helpers@2.18.1':
+    resolution: {integrity: sha512-Fi1hEDYyt+I+QsI8pZNy1RvCsvfW2JEBkX0iD/I0zP/gGnLvaaZG+8K+ZmL48+U2MaE3SxgcevxxZLhSs7ZNqQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      preact: ^10.0.0 || ^11.0.0
+      react: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      preact:
+        optional: true
+      react:
+        optional: true
 
   '@tanstack/match-sorter-utils@8.19.4':
     resolution: {integrity: sha512-Wo1iKt2b9OT7d+YGhvEPD3DXvPv2etTusIMhMUoG7fbhmxcXCtIjJDEygy91Y2JFlwGyjqiBPRozme7UD8hoqg==}
@@ -24689,6 +24889,15 @@ packages:
     resolution: {integrity: sha512-yEFYrVhod+hdNyx7g5Bnkkb0G6si8HJurOoOEgC8B/O0uXLHlaey/65KRv6cuWBNhBgHKAROVpc7QyYqE5gFng==}
     engines: {node: '>=20'}
 
+  takumi-pdf@0.18.3:
+    resolution: {integrity: sha512-4n8LfsiFtunoOzF8s7s/SgW9MuUnYwpHDc9dQsaaDPP4GIc6yvuBCk6oy+1MDezRLyHWpPKUxlW5hIxtVAvIrQ==}
+    engines: {node: '>=20.19'}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      react:
+        optional: true
+
   tapable@2.3.3:
     resolution: {integrity: sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A==}
     engines: {node: '>=6'}
@@ -27749,7 +27958,7 @@ snapshots:
       moment: 2.31.0
       tslib: 1.14.1
 
-  '@elastic/distillate@0.2.0':
+  '@elastic/distillate@0.2.1-main.20261023235757.gc185494':
     dependencies:
       stylis: 4.4.0
 
@@ -27945,16 +28154,26 @@ snapshots:
 
   '@elastic/filesaver@1.1.2': {}
 
-  '@elastic/isomer-runtime@0.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
+  '@elastic/isomer-image-takumi@0.4.1-main.20261027024454.gfb5c3f7(csstype@3.0.7)(react@18.2.0)':
     dependencies:
-      '@elastic/isomer-sdk': 0.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
+      '@takumi-rs/core': 2.18.1(csstype@3.0.7)(react@18.2.0)
+      '@takumi-rs/helpers': 2.18.1(react@18.2.0)
+      takumi-pdf: 0.18.3(react@18.2.0)
+    transitivePeerDependencies:
+      - csstype
+      - preact
+      - react
+
+  '@elastic/isomer-runtime@0.4.1-main.20261027024454.gfb5c3f7(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
+    dependencies:
+      '@elastic/isomer-sdk': 0.4.1-main.20261027024454.gfb5c3f7(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       zod: 4.6.5
     transitivePeerDependencies:
       - supports-color
 
-  '@elastic/isomer-sdk@0.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
+  '@elastic/isomer-sdk@0.4.1-main.20261027024454.gfb5c3f7(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
     dependencies:
       acorn: 8.18.0
       mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)
@@ -29992,6 +30211,53 @@ snapshots:
       is-node-process: 1.2.0
       outvariant: 1.4.3
       strict-event-emitter: 0.5.1
+
+  '@napi-rs/canvas-android-arm64@1.0.11':
+    optional: true
+
+  '@napi-rs/canvas-darwin-arm64@1.0.11':
+    optional: true
+
+  '@napi-rs/canvas-darwin-x64@1.0.11':
+    optional: true
+
+  '@napi-rs/canvas-linux-arm-gnueabihf@1.0.11':
+    optional: true
+
+  '@napi-rs/canvas-linux-arm64-gnu@1.0.11':
+    optional: true
+
+  '@napi-rs/canvas-linux-arm64-musl@1.0.11':
+    optional: true
+
+  '@napi-rs/canvas-linux-riscv64-gnu@1.0.11':
+    optional: true
+
+  '@napi-rs/canvas-linux-x64-gnu@1.0.11':
+    optional: true
+
+  '@napi-rs/canvas-linux-x64-musl@1.0.11':
+    optional: true
+
+  '@napi-rs/canvas-win32-arm64-msvc@1.0.11':
+    optional: true
+
+  '@napi-rs/canvas-win32-x64-msvc@1.0.11':
+    optional: true
+
+  '@napi-rs/canvas@1.0.11':
+    optionalDependencies:
+      '@napi-rs/canvas-android-arm64': 1.0.11
+      '@napi-rs/canvas-darwin-arm64': 1.0.11
+      '@napi-rs/canvas-darwin-x64': 1.0.11
+      '@napi-rs/canvas-linux-arm-gnueabihf': 1.0.11
+      '@napi-rs/canvas-linux-arm64-gnu': 1.0.11
+      '@napi-rs/canvas-linux-arm64-musl': 1.0.11
+      '@napi-rs/canvas-linux-riscv64-gnu': 1.0.11
+      '@napi-rs/canvas-linux-x64-gnu': 1.0.11
+      '@napi-rs/canvas-linux-x64-musl': 1.0.11
+      '@napi-rs/canvas-win32-arm64-msvc': 1.0.11
+      '@napi-rs/canvas-win32-x64-msvc': 1.0.11
 
   '@napi-rs/nice-android-arm-eabi@1.1.1':
     optional: true
@@ -32204,6 +32470,51 @@ snapshots:
   '@swc/types@0.1.28':
     dependencies:
       '@swc/counter': 0.1.3
+
+  '@takumi-rs/core-darwin-arm64@2.18.1':
+    optional: true
+
+  '@takumi-rs/core-darwin-x64@2.18.1':
+    optional: true
+
+  '@takumi-rs/core-linux-arm64-gnu@2.18.1':
+    optional: true
+
+  '@takumi-rs/core-linux-arm64-musl@2.18.1':
+    optional: true
+
+  '@takumi-rs/core-linux-x64-gnu@2.18.1':
+    optional: true
+
+  '@takumi-rs/core-linux-x64-musl@2.18.1':
+    optional: true
+
+  '@takumi-rs/core-win32-arm64-msvc@2.18.1':
+    optional: true
+
+  '@takumi-rs/core-win32-x64-msvc@2.18.1':
+    optional: true
+
+  '@takumi-rs/core@2.18.1(csstype@3.0.7)(react@18.2.0)':
+    dependencies:
+      '@takumi-rs/helpers': 2.18.1(react@18.2.0)
+    optionalDependencies:
+      '@takumi-rs/core-darwin-arm64': 2.18.1
+      '@takumi-rs/core-darwin-x64': 2.18.1
+      '@takumi-rs/core-linux-arm64-gnu': 2.18.1
+      '@takumi-rs/core-linux-arm64-musl': 2.18.1
+      '@takumi-rs/core-linux-x64-gnu': 2.18.1
+      '@takumi-rs/core-linux-x64-musl': 2.18.1
+      '@takumi-rs/core-win32-arm64-msvc': 2.18.1
+      '@takumi-rs/core-win32-x64-msvc': 2.18.1
+      csstype: 3.0.7
+    transitivePeerDependencies:
+      - preact
+      - react
+
+  '@takumi-rs/helpers@2.18.1(react@18.2.0)':
+    optionalDependencies:
+      react: 18.2.0
 
   '@tanstack/match-sorter-utils@8.19.4':
     dependencies:
@@ -44002,6 +44313,14 @@ snapshots:
 
   tagged-tag@1.0.0: {}
 
+  takumi-pdf@0.18.3(react@18.2.0):
+    dependencies:
+      '@takumi-rs/helpers': 2.18.1(react@18.2.0)
+    optionalDependencies:
+      react: 18.2.0
+    transitivePeerDependencies:
+      - preact
+
   tapable@2.3.3: {}
 
   tar-fs@2.1.5:
@@ -44764,7 +45083,7 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vega-canvas@2.0.0: {}
+  vega-canvas@2.0.0(patch_hash=07903a19a2a84dcbe414f36c41134c9ab10453995219a04ea0a7a983022b895f): {}
 
   vega-crossfilter@5.1.0:
     dependencies:
@@ -44826,7 +45145,7 @@ snapshots:
       d3-array: 3.2.4
       d3-color: 3.1.0
       d3-geo: 3.1.1
-      vega-canvas: 2.0.0
+      vega-canvas: 2.0.0(patch_hash=07903a19a2a84dcbe414f36c41134c9ab10453995219a04ea0a7a983022b895f)
       vega-dataflow: 6.1.0
       vega-projection: 2.1.0
       vega-statistics: 2.0.0
@@ -44844,7 +45163,7 @@ snapshots:
 
   vega-label@2.1.0:
     dependencies:
-      vega-canvas: 2.0.0
+      vega-canvas: 2.0.0(patch_hash=07903a19a2a84dcbe414f36c41134c9ab10453995219a04ea0a7a983022b895f)
       vega-dataflow: 6.1.0
       vega-scenegraph: 5.1.0
       vega-util: 2.1.0
@@ -44905,7 +45224,7 @@ snapshots:
     dependencies:
       d3-path: 3.1.0
       d3-shape: 3.2.0
-      vega-canvas: 2.0.0
+      vega-canvas: 2.0.0(patch_hash=07903a19a2a84dcbe414f36c41134c9ab10453995219a04ea0a7a983022b895f)
       vega-loader: 5.1.0
       vega-scale: 8.1.0
       vega-util: 2.1.0
@@ -44976,7 +45295,7 @@ snapshots:
 
   vega-wordcloud@5.1.0:
     dependencies:
-      vega-canvas: 2.0.0
+      vega-canvas: 2.0.0(patch_hash=07903a19a2a84dcbe414f36c41134c9ab10453995219a04ea0a7a983022b895f)
       vega-dataflow: 6.1.0
       vega-scale: 8.1.0
       vega-statistics: 2.0.0

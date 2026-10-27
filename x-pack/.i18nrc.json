@@ -98,6 +98,7 @@
     "xpack.inferenceWorkflows": "platform/plugins/shared/inference_workflows",
     "xpack.investigationOutput": "solutions/observability/packages/kbn-investigation-output",
     "xpack.isomer": "platform/packages/shared/isomer",
+    "xpack.isomerDashboards": "platform/plugins/private/isomer_dashboards",
     "xpack.inventory": "solutions/observability/plugins/inventory",
     "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
     "xpack.lens": [

@@ -210,11 +210,133 @@ const { handles } = isomerDistillery.createStyleModule(
   })
 );
 
+// The legacy Markdown visualization's stylesheet (`kibana_react` `markdownStyles`): every size in `em` of the panel's
+// font size, headings light, and EUI's ink (`fullShade`) at 5% and 15% for code and rules.
+const INK_LIGHTEST = 'rgba(7, 16, 31, 0.05)';
+const INK_LIGHT = 'rgba(7, 16, 31, 0.15)';
+const em = (px: number) => `${px / 14}em`;
+const legacy = isomerDistillery.createStyleModule(
+  'componentsMarkdownLegacy',
+  ({ css, tokens: { color, font, size } }) => ({
+    root: css`
+      padding: ${size.s};
+      color: ${color.text.paragraph};
+      font-family: ${font.family.sans};
+      overflow-wrap: break-word;
+      & > *:first-child {
+        margin-top: 0 !important;
+      }
+      & > *:last-child {
+        margin-bottom: 0 !important;
+      }
+      & :is(p, blockquote, ul, ol, dl, table, pre) {
+        margin-top: 0;
+        margin-bottom: ${em(16)};
+        line-height: 1.5em;
+      }
+      & strong {
+        font-weight: 600;
+      }
+      & a,
+      & a:is(:link, :visited) {
+        color: inherit;
+        text-decoration: underline;
+      }
+      & :is(h1, h2, h3, h4, h5, h6) {
+        margin-top: 0;
+        margin-bottom: ${em(8)};
+        color: inherit;
+        letter-spacing: normal;
+      }
+      & h1 {
+        font-size: ${em(36)};
+        line-height: 1.333333em;
+        font-weight: 300;
+      }
+      & h2 {
+        font-size: ${em(28)};
+        line-height: 1.428571em;
+        font-weight: 300;
+      }
+      & h3 {
+        font-size: ${em(20)};
+        line-height: 1.6em;
+        font-weight: 600;
+      }
+      & h4 {
+        font-size: ${em(16)};
+        line-height: 1.5em;
+        font-weight: 600;
+      }
+      & h5 {
+        font-size: ${em(14)};
+        line-height: 1.142857em;
+        font-weight: 700;
+      }
+      & h6 {
+        font-size: ${em(12)};
+        line-height: 1.333333em;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      & blockquote {
+        padding: 0 1em;
+        border-left: ${em(4)} solid ${INK_LIGHT};
+      }
+      & hr {
+        height: 2px;
+        margin: ${em(24)} 0;
+        border: 0;
+        background-color: ${INK_LIGHT};
+      }
+      & :is(ul, ol) {
+        padding-left: ${em(24)};
+        margin-top: 0;
+        margin-bottom: ${em(16)};
+      }
+      & ul {
+        list-style-type: disc;
+      }
+      & ol {
+        list-style-type: decimal;
+      }
+      & li + li {
+        margin-top: ${em(4)};
+      }
+      & :is(code, pre) {
+        margin-bottom: ${em(8)};
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+        font-size: ${em(12)};
+      }
+      & code {
+        padding: ${em(4)} 0;
+        margin: 0;
+        background-color: ${INK_LIGHTEST};
+        border-radius: ${em(4)};
+      }
+      & :is(th, td) {
+        padding: ${em(4)} ${em(12)};
+        border-top: 1px solid ${INK_LIGHT};
+        border-bottom: 1px solid ${INK_LIGHT};
+      }
+    `,
+  })
+);
+
 export const markdownReactRenderer = (
   node: MarkdownNode,
   { context }: { context: StyledRenderContext }
-) => (
-  <div {...nodeAnchor(context, node)} className={classNames(context, handles.root)}>
-    {renderMarkdownContent(md.authored(node.text))}
-  </div>
-);
+) =>
+  node.appearance === 'kibanaLegacy' ? (
+    <div
+      {...nodeAnchor(context, node)}
+      className={classNames(context, legacy.handles.root)}
+      style={{ fontSize: node.fontSize ?? 14 }}
+    >
+      {renderMarkdownContent(md.authored(node.text))}
+    </div>
+  ) : (
+    <div {...nodeAnchor(context, node)} className={classNames(context, handles.root)}>
+      {renderMarkdownContent(md.authored(node.text))}
+    </div>
+  );
