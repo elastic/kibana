@@ -39,6 +39,28 @@ const KEEP_COLUMNS = '_ea_entity_id, `kibana.alert.severity`';
 /** The column that holds the bucket of an alert when `bucketExpression` is given. */
 export const ALERT_BUCKET_COLUMN = 'bucket';
 
+const isPresent = (field: string): string => `${field} IS NOT NULL AND ${field} != ""`;
+
+const anyPresent = (fields: readonly string[]): string => fields.map(isPresent).join(' OR ');
+
+/**
+ * Alerts that carry an identity field of any allowed type. It mirrors the entity store's
+ * `documentsFilter` (a failed outcome does not count for users), but names the fields as they are,
+ * with no `TO_STRING` cast: the alerts and the entity index map them the same way, and a cast would
+ * keep ES|QL from pushing the filter down to Lucene. A test keeps it equal to the entity store's.
+ */
+export const ANY_ENTITY_IDENTITY_CONDITION = [
+  `(event.outcome IS NULL OR event.outcome != "failure") AND (${anyPresent([
+    'user.email',
+    'user.id',
+    'user.name',
+  ])})`,
+  anyPresent(['host.id', 'host.name', 'host.hostname']),
+  `(${isPresent('service.name')})`,
+]
+  .map((condition) => `(${condition})`)
+  .join(' OR ');
+
 export interface AlertEuidPipelineOptions {
   /**
    * Condition both alert branches add, when the FROM also reads the entity index. Rows of the other
@@ -60,7 +82,12 @@ export const buildAlertEuidPipeline = (
   const keepColumns = bucketExpression ? `${KEEP_COLUMNS}, @timestamp` : KEEP_COLUMNS;
   const guard = alertBranchCondition ? [`(${alertBranchCondition})`] : [];
   const derivedSteps = [
-    `WHERE ${[...guard, '`kibana.alert.entity.id` IS NULL'].join(' AND ')}`,
+    // Its own conjunct, so ES|QL can push it down and skip alerts with no identity before the EVALs.
+    `WHERE ${[
+      ...guard,
+      '`kibana.alert.entity.id` IS NULL',
+      `(${ANY_ENTITY_IDENTITY_CONDITION})`,
+    ].join(' AND ')}`,
     ...buildPerTypeEuidEvals(),
     evalGuardedTypedEuids('_ea_entity_id'),
     `| KEEP ${keepColumns}`,
