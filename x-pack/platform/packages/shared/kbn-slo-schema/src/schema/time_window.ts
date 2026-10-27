@@ -5,26 +5,37 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
+
 import { durationType } from './duration';
 
-const rollingTimeWindowTypeSchema = t.literal('rolling');
-const rollingTimeWindowSchema = t.type({
-  duration: durationType,
-  type: rollingTimeWindowTypeSchema,
+const rollingTimeWindowTypeSchema = z.literal('rolling');
+const rollingTimeWindowSchema = z.object({
+  duration: durationType.describe(
+    'the duration formatted as {duration}{unit}. Accepted values for rolling: 7d, 30d, 90d'
+  ),
+  type: rollingTimeWindowTypeSchema.describe(
+    'Indicates weither the time window is a rolling or a calendar aligned time window.'
+  ),
 });
 
-const calendarAlignedTimeWindowTypeSchema = t.literal('calendarAligned');
-const calendarAlignedTimeWindowSchema = t.type({
-  duration: durationType,
-  type: calendarAlignedTimeWindowTypeSchema,
+const calendarAlignedTimeWindowTypeSchema = z.literal('calendarAligned');
+const calendarAlignedTimeWindowSchema = z.object({
+  duration: durationType.describe(
+    'the duration formatted as {duration}{unit}. Accepted values for calendar aligned: 1w (weekly) or 1M (monthly)'
+  ),
+  type: calendarAlignedTimeWindowTypeSchema.describe(
+    'Indicates weither the time window is a rolling or a calendar aligned time window.'
+  ),
 });
 
-const timeWindowTypeSchema = t.union([
+const timeWindowTypeSchema = z.union([
   rollingTimeWindowTypeSchema,
   calendarAlignedTimeWindowTypeSchema,
 ]);
-const timeWindowSchema = t.union([rollingTimeWindowSchema, calendarAlignedTimeWindowSchema]);
+const timeWindowSchema = z
+  .discriminatedUnion('type', [rollingTimeWindowSchema, calendarAlignedTimeWindowSchema])
+  .meta({ id: 'SLOTimeWindow', description: 'Defines properties for the SLO time window' });
 
 export {
   rollingTimeWindowSchema,
