@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Fs = require('fs');
 const Path = require('path');
-const Crypto = require('crypto');
 
 const chalk = require('chalk');
 const LmdbStore = require('lmdb');
 
 const { utf8StringKeyEncoder } = require('./lmdb_key_encoder');
+const { getHashCacheKey, getMetadataCacheKey } = require('./keys');
 
 const GLOBAL_ATIME = new Date().setHours(0, 0, 0, 0);
 const MINUTE = 1000 * 60;
@@ -53,51 +52,6 @@ const getCodeKey = (key) => `${CODE_KEY_PREFIX}${key}`;
  * @param {string} key
  */
 const getMapKey = (key) => `${MAP_KEY_PREFIX}${key}`;
-
-/**
- * @param {string} prefix
- * @param {string} path
- * @param {string} source
- * @returns {string}
- */
-const getHashCacheKey = (prefix, path, source) =>
-  `${prefix}:${Crypto.createHash('sha256').update(path).update(source).digest('hex')}`;
-
-/**
- * @param {bigint | number} value
- * @returns {string | undefined}
- */
-const getStatValue = (value) => {
-  if (typeof value === 'bigint') {
-    return value.toString();
-  }
-
-  return Number.isFinite(value) ? String(value) : undefined;
-};
-
-/**
- * @param {string} prefix
- * @param {string} path
- * @returns {string | undefined}
- */
-const getMetadataCacheKey = (prefix, path) => {
-  let stat;
-  try {
-    stat = Fs.statSync(path, { bigint: true });
-  } catch {
-    return undefined;
-  }
-
-  const keyParts = [stat.dev, stat.ino, stat.mode, stat.size, stat.mtimeNs, stat.ctimeNs].map(
-    getStatValue
-  );
-
-  if (keyParts.some((part) => part === undefined)) {
-    return undefined;
-  }
-
-  return `${prefix}:stat:${keyParts.join(':')}:${Path.resolve(path)}`;
-};
 
 /**
  * @implements {CacheInterface}
