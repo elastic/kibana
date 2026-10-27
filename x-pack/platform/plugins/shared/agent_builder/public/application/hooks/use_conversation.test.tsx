@@ -20,6 +20,7 @@ import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
 import { ConversationStreamService } from '../../services/events/conversation_stream_service';
 import { queryKeys } from '../query_keys';
+import { useKibana } from './use_kibana';
 import { useConversation, useConversationReadOnly } from './use_conversation';
 
 jest.mock('../context/conversation/use_conversation_id', () => ({
@@ -45,12 +46,17 @@ jest.mock('./use_last_agent_id', () => ({
   useLastAgentId: () => ({ agentId: undefined }),
 }));
 
+jest.mock('./use_kibana', () => ({
+  useKibana: jest.fn(),
+}));
+
 const stubConversationStreamService = new ConversationStreamService({
   getChatEvents$: () => NEVER,
   getStreamEnded$: () => NEVER,
   getStreamStarted$: () => NEVER,
 });
 
+const mockUseKibana = jest.mocked(useKibana);
 const mockUseConversationId = jest.mocked(useConversationId);
 const mockUseStreamingContext = jest.mocked(useStreamingContext);
 const mockUseStreamRecord = jest.mocked(useStreamRecord);
@@ -277,11 +283,21 @@ describe('useConversation polling', () => {
   });
 });
 
+const capabilitiesFor = (manageInvestigations: boolean) =>
+  ({
+    services: {
+      application: {
+        capabilities: { agenticInvestigations: { manageInvestigations } },
+      },
+    },
+  } as unknown as ReturnType<typeof useKibana>);
+
 describe('useConversationReadOnly', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseConversationId.mockReturnValue(conversationId);
     mockUseStreamRecord.mockReturnValue({});
+    mockUseKibana.mockReturnValue(capabilitiesFor(true));
   });
 
   const setStreaming = (isStreaming: boolean) =>
@@ -303,6 +319,54 @@ describe('useConversationReadOnly', () => {
     const { result } = renderHook(() => useConversationReadOnly(), { wrapper: Wrapper });
 
     await waitFor(() => expect(result.current.isLoading).toBe(true));
+    queryClient.clear();
+  });
+
+  it('treats an investigation as read-only when the user cannot change investigations', async () => {
+    setStreaming(false);
+    mockUseKibana.mockReturnValue(capabilitiesFor(false));
+    mockGet.mockResolvedValue({
+      ...createFetchedConversation(publicAcl),
+      template_id: 'investigation',
+      read_only: false,
+    });
+    const { queryClient, Wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useConversationReadOnly(), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.isReadOnly).toBe(true));
+    queryClient.clear();
+  });
+
+  it('keeps an investigation writable for a user who can change investigations', async () => {
+    setStreaming(false);
+    mockGet.mockResolvedValue({
+      ...createFetchedConversation(publicAcl),
+      template_id: 'investigation',
+      read_only: false,
+    });
+    const { queryClient, Wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useConversationReadOnly(), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.isReadOnly).toBe(false);
+    queryClient.clear();
+  });
+
+  it('keeps a non-investigation conversation writable when the user cannot change investigations', async () => {
+    setStreaming(false);
+    mockUseKibana.mockReturnValue(capabilitiesFor(false));
+    mockGet.mockResolvedValue({
+      ...createFetchedConversation(publicAcl),
+      read_only: false,
+    });
+    const { queryClient, Wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useConversationReadOnly(), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.isReadOnly).toBe(false);
     queryClient.clear();
   });
 });

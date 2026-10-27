@@ -13,6 +13,7 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { validateReasoningEffort, type InferenceConnector } from '@kbn/inference-common';
 import type {
@@ -77,6 +78,10 @@ import {
   createConversationUpdatedEvent,
 } from './utils/events';
 import { userMessageActor } from '../conversation/client/rounds_to_events';
+import {
+  assertCanChangeInvestigation,
+  INVESTIGATION_TEMPLATE_ID,
+} from './assert_investigation_post_access';
 
 /** The still-recorded parent execution that spawned a sub-agent execution. */
 interface ParentExecution {
@@ -87,6 +92,7 @@ export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
+  securityPlugin?: SecurityPluginStart;
   attachmentsService: AttachmentServiceStart;
   callbackDeliveryService: CallbackDeliveryService;
 }
@@ -150,6 +156,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         : undefined;
     const conversationParams = resolvedConversation?.validatedParams;
     const conversation = resolvedConversation?.conversation;
+    await this.assertInvestigationPostAccess(conversation, request, spaceId);
     const validatedParams = conversationParams ?? (await this.validateAttachments(params, request));
     const receivedAt = resolvedConversation?.receivedAt ?? new Date();
     const agentId = conversationParams?.agentId ?? this.requestedAgentId(params);
@@ -350,14 +357,17 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     }
 
     const conversationClient = await this.deps.conversationService.getScopedClient({ request });
+    const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
     const { validatedParams, conversation, receivedAt } = await this.resolveConversationRequest({
       params,
       request,
       conversationClient,
-      spaceId: getCurrentSpaceId({ request, spaces: this.deps.spaces }),
+      spaceId,
     });
 
     const created = conversation.operation === 'CREATE';
+
+    await this.assertInvestigationPostAccess(conversation, request, spaceId);
 
     await this.writeUserMessage({
       conversation,
@@ -799,6 +809,21 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
    * continues the conversation its origin resolves to, if any; otherwise the conversation is the
    * one it names, or a new one.
    */
+  private async assertInvestigationPostAccess(
+    conversation: ConversationWithOperation | undefined,
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<void> {
+    if (conversation?.template_id !== INVESTIGATION_TEMPLATE_ID) {
+      return;
+    }
+    await assertCanChangeInvestigation({
+      request,
+      spaceId,
+      security: this.deps.securityPlugin,
+    });
+  }
+
   private async resolveConversationRequest({
     params,
     request,

@@ -16,6 +16,10 @@ import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useLastAgentId } from './use_last_agent_id';
 import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';
+import { useKibana } from './use_kibana';
+
+/** Matches the investigations template id without importing that plugin. */
+const INVESTIGATION_TEMPLATE_ID = 'investigation';
 
 const POLL_INTERVAL_MS = 5_000;
 
@@ -129,9 +133,18 @@ export const useConversationTitle = () => {
 export const useConversationReadOnly = () => {
   const conversationId = useConversationId();
   const { conversation, isFetching } = useConversation();
+  const {
+    services: { application },
+  } = useKibana();
+  const canChangeInvestigation =
+    application.capabilities.agenticInvestigations?.manageInvestigations === true;
+  // The stored `read_only` flag applies to every participant. A viewer can still read a shared
+  // investigation, but posting would change it, so the composer stays closed for that template.
+  const lacksInvestigationAccess =
+    conversation?.template_id === INVESTIGATION_TEMPLATE_ID && !canChangeInvestigation;
 
   return {
-    isReadOnly: conversation?.read_only ?? false,
+    isReadOnly: (conversation?.read_only ?? false) || lacksInvestigationAccess,
     // Not `isLoading`: v4 reports it for disabled queries too.
     isLoading: Boolean(conversationId) && !conversation && isFetching,
   };
