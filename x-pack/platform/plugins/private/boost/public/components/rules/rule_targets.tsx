@@ -36,15 +36,16 @@ export const getRuleTargets = (
   const isPattern =
     patterns.length === 1 && (firstPattern.includes('*') || !existingNames.has(firstPattern));
 
+  // One element, so the label and pattern stay inline in a flex box, such as a table cell.
   return isDefaultRule ? (
     getAllUnmatchedLabel(type)
   ) : isPattern ? (
-    <>
+    <span>
       {i18n.translate('xpack.boost.ruleDetails.patternTarget', {
         defaultMessage: 'Index pattern',
       })}{' '}
       <EuiCode>{firstPattern}</EuiCode>
-    </>
+    </span>
   ) : (
     i18n.translate('xpack.boost.ruleDetails.selectedTargets', {
       defaultMessage: 'Selected {targets}',

@@ -54,8 +54,8 @@ const WithBadges = ({ children, badges }: { children: ReactNode; badges: readonl
     <>{children}</>
   );
 
-const APPLIES_BADGE_LABEL = i18n.translate('xpack.boost.indexManagement.appliesBadge', {
-  defaultMessage: 'Applies',
+const APPLIED_BADGE_LABEL = i18n.translate('xpack.boost.indexManagement.appliedBadge', {
+  defaultMessage: 'Applied',
 });
 
 const isBuiltinProfile = (profileName: string) =>
@@ -92,7 +92,7 @@ export const RuleLink = ({
     <WithBadges
       badges={[
         ...(isDefault ? [{ label: DEFAULT_BADGE_LABEL }] : []),
-        ...(isApplied ? [{ label: APPLIES_BADGE_LABEL, color: 'success' }] : []),
+        ...(isApplied ? [{ label: APPLIED_BADGE_LABEL, color: 'success' }] : []),
       ]}
     >
       <EuiLink {...link} data-test-subj="boostExplanationRule">

@@ -35,7 +35,15 @@ export const MatchingRules = ({ matches, profilesByName, dataSources }: Matching
     {
       field: 'rank',
       name: i18n.translate('xpack.boost.matchingRules.rankColumn', { defaultMessage: 'Rank' }),
-      width: '5em',
+      nameTooltip: {
+        icon: 'info',
+        content: i18n.translate('xpack.boost.matchingRules.rankTip', {
+          defaultMessage:
+            'Elasticsearch ranks matching rules by priority, highest first. Among rules with the same priority, exact names rank above other patterns, and those above *. The first rule applies.',
+        }),
+      },
+      width: '6em',
+      align: 'right',
     },
     {
       name: i18n.translate('xpack.boost.matchingRules.ruleColumn', {

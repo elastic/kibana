@@ -227,7 +227,7 @@ describe('Index Management extensions', () => {
         .slice(1);
       expect(matchingRows.map((row) => row.textContent)).toEqual([
         expect.stringMatching(
-          /^1.*storefront-coreApplies.*storefront-search.*10.*Selected 1 index$/
+          /^1.*storefront-coreApplied.*storefront-search.*10.*Selected 1 index$/
         ),
         expect.stringMatching(
           /^2.*_default-indicesDefault.*_performantManaged.*-1.*All unmatched indices$/

@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../../../common/constants';
 import { getMatchingRules } from '../../../common/resolution';
@@ -192,19 +192,10 @@ export const BoostIndexDetails = ({ indexName, dataStream }: BoostIndexDetailsPr
         <DetailsBand hasDivider={false}>
           <DetailsSection
             title={i18n.translate('xpack.boost.indexTab.matchingRulesTitle', {
-              defaultMessage: 'Matching rules',
+              defaultMessage: 'All matching rules',
             })}
             data-test-subj="boostIndexTabMatchingRulesSection"
           >
-            <EuiText size="s" color="subdued">
-              <p>
-                {i18n.translate('xpack.boost.indexTab.matchingRulesDescription', {
-                  defaultMessage:
-                    'Every rule that matches, ranked as Elasticsearch ranks them: highest priority first, then exact names before other patterns, and those before *. The first applies.',
-                })}
-              </p>
-            </EuiText>
-            <EuiSpacer size="m" />
             <MatchingRules
               matches={matches}
               profilesByName={profilesByName}
