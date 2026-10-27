@@ -22,8 +22,7 @@ export type IpOptions = TypeOptions<string> & {
 
 export class IpType extends Type<string> {
   constructor(options: IpOptions = { versions: ['ipv4', 'ipv6'] }) {
-    const schema = internals.string().ip({ version: options.versions, cidr: 'forbidden' });
-    super(schema, options);
+    super(() => internals.string().ip({ version: options.versions, cidr: 'forbidden' }), options);
   }
 
   protected handleError(type: string, { value, version }: Record<string, any>) {

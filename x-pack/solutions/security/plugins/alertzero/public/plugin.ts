@@ -37,6 +37,7 @@ import React from 'react';
 import { getSubscriptionAvailability, type SubscriptionAvailability } from '../common/availability';
 import { getAlertZeroDeepLinks } from './deep_links';
 import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
+import { registerAlertZeroPublicStepDefinitions } from './step_types';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -76,6 +77,7 @@ export class AlertZeroPublicPlugin
    * after capabilities become available, without re-registering the application.
    */
   private readonly appUpdater$ = new Subject<AppUpdater>();
+  private uiEventsRegistered = false;
 
   constructor(context: PluginInitializerContext<AlertZeroClientConfig>) {
     this.config = context.config.get();
@@ -85,11 +87,13 @@ export class AlertZeroPublicPlugin
 
   public setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPublicStart>,
-    _setupDeps: AlertZeroSetupDependencies
+    { workflowsExtensions }: AlertZeroSetupDependencies
   ): AlertZeroPublicSetup {
     if (!this.config.enabled) {
       return { enabled: false };
     }
+
+    registerAlertZeroPublicStepDefinitions(workflowsExtensions);
 
     coreSetup.application.register({
       id: ALERTZERO_APP_ID,
@@ -109,7 +113,16 @@ export class AlertZeroPublicPlugin
       updater$: this.appUpdater$,
       mount: async (params) => {
         const [coreStart, startDeps] = await coreSetup.getStartServices();
-        const { renderApp } = await import('./application');
+        const [{ renderApp }, { registerAlertZeroUiEvents }] = await Promise.all([
+          import('./application'),
+          import('./telemetry/register_ui_events'),
+        ]);
+        // Every AlertZero UI event is reported from inside the app, so registering on its first
+        // mount keeps the event schemas out of the page-load bundle. Registering twice throws.
+        if (!this.uiEventsRegistered) {
+          registerAlertZeroUiEvents(coreSetup.analytics);
+          this.uiEventsRegistered = true;
+        }
         return renderApp({
           coreStart,
           startDeps,

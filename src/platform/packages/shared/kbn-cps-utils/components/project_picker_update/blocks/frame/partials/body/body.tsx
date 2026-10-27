@@ -176,7 +176,7 @@ export function ProjectPickerFrameBody({
     <EuiFlexGroup
       direction="column"
       gutterSize="none"
-      css={css([styles.bodyContainer, { maxHeight }])}
+      css={css([styles.bodyContainer, styles.scrollContainer, { maxHeight }])}
       ref={scrollContainerRef}
     >
       {state.controlsState !== 'hidden' && (

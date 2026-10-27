@@ -35,6 +35,12 @@ export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
 export const agentBuilderDefaultAiIndexId = 'elastic';
 
 /**
+ * ID of the Context Engine retrieval skill. Agent Builder grants it at runtime to any agent that
+ * can reach an AI Index; it is never part of the agent's own configuration.
+ */
+export const kiRetrievalSkillId = 'ki-retrieval';
+
+/**
  * Definition of a agentBuilder agent.
  */
 export interface AgentDefinition {
@@ -60,6 +66,12 @@ export interface AgentDefinition {
    * Built-in agents are readonly, user-created agent are not.
    */
   readonly: boolean;
+  /**
+   * When true, the agent is hidden from UI listings (agent picker, management page) by default.
+   * Built-in agents must set this explicitly during registration; it defaults to false.
+   * Persisted agents derive it automatically: system-created non-chat agents are hidden.
+   */
+  hidden?: boolean;
   /**
    * Access control controls who can read, run, write, delete, and manage this agent.
    */

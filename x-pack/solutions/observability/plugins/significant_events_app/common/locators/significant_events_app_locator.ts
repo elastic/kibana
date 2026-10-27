@@ -12,12 +12,7 @@ import {
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 
-export type SignificantEventsAppTab =
-  | 'sources'
-  | 'knowledge_indicators'
-  | 'queries'
-  | 'detections'
-  | 'significant_events';
+export type SignificantEventsAppTab = 'queries' | 'detections' | 'significant_events';
 
 /**
  * Builds locations for Significant Events management tabs.
@@ -52,7 +47,7 @@ export class SignificantEventsAppLocatorDefinition
   public readonly id = SIGNIFICANT_EVENTS_APP_LOCATOR_ID;
 
   public readonly getLocation = async ({
-    tab = 'sources',
+    tab = 'queries',
     ...query
   }: SignificantEventsAppLocatorParams) => {
     const searchParams = new URLSearchParams();

@@ -478,7 +478,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
       tags: attrs.metadata.tags,
       routing_tags: attrs.metadata.routing_tags,
       builder: attrs.metadata.builder_type ? { type: attrs.metadata.builder_type } : undefined,
-      template: attrs.metadata.template,
+      // `metadata.template` stays in storage but is not part of the public response.
     },
     time_field: attrs.time_field,
     schedule: {

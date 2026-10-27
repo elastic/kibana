@@ -136,6 +136,10 @@ export const useRuleIndexPattern = ({
   const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
     useFetchIndex(index);
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
+  // Loading from the first render for a rule that already has a data view, before the effect runs.
+  const [isDataViewLoading, setIsDataViewLoading] = useState(
+    () => dataSourceType === DataSourceType.DataView && dataViewId != null && dataViewId !== ''
+  );
   // Why do we need this? to ensure the query bar auto-suggest gets the latest updates
   // when the index pattern changes
   // when we select new dataView
@@ -148,6 +152,7 @@ export const useRuleIndexPattern = ({
     if (dataSourceType === DataSourceType.DataView) {
       const fetchDataView = async () => {
         if (dataViewId != null && dataViewId !== '') {
+          setIsDataViewLoading(true);
           // We wrap dataViews.get within a try catch because we've seen errors happening with conflicting ids in the saved object api
           try {
             const dv = await data.dataViews.get(dataViewId);
@@ -157,6 +162,8 @@ export const useRuleIndexPattern = ({
               title: 'Error retrieving data view',
               text: `Error: ${error instanceof Error ? error.message : 'unknown'}`,
             });
+          } finally {
+            setIsDataViewLoading(false);
           }
         }
       };
@@ -164,7 +171,15 @@ export const useRuleIndexPattern = ({
       fetchDataView();
     }
   }, [dataSourceType, isIndexPatternLoading, data, dataViewId, initIndexPattern, notifications]);
-  return { indexPattern, isIndexPatternLoading, browserFields };
+
+  // False while a fetch is in flight or `indexPattern` is behind the fetched one, i.e. it is stale.
+  // True once loading has finished, whether it succeeded or failed.
+  const isIndexPatternSettled =
+    dataSourceType === DataSourceType.DataView
+      ? !isDataViewLoading
+      : !isIndexPatternLoading && indexPattern === initIndexPattern;
+
+  return { indexPattern, isIndexPatternLoading, isIndexPatternSettled, browserFields };
 };
 
 export interface UseRuleFormsErrors {

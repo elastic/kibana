@@ -6,6 +6,6 @@
  */
 
 // TODO:PT move component to this new location and refactor it
-export * from '../../../../running_processes_action_results';
+export * from './running_processes_action_results';
 
 // FIXME:PT component needs to handle error state

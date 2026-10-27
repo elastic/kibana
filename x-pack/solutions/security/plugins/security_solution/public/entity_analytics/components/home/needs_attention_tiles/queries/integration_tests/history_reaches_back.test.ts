@@ -79,7 +79,9 @@ describe('history checks on Elasticsearch', () => {
     }
     await create(getAlertsIndex('empty'), alert);
 
-    // Anomaly records: job_a is old, job_b is young, job_x (not installed) is old.
+    // Anomaly records: job_a is old, job_b is young, job_x (not installed) is old. job_low has only
+    // sub-threshold records before the start and a qualifying one now, job_interim and job_bucket
+    // only an interim record and a bucket result before the start.
     await create('.ml-anomalies-shared-history-test', {
       '@timestamp': DATE,
       result_type: KEYWORD,
@@ -87,17 +89,24 @@ describe('history checks on Elasticsearch', () => {
       is_interim: { type: 'boolean' },
       record_score: { type: 'double' },
     });
-    const record = (job: string, days: number) => ({
+    const record = (job: string, days: number, overrides: object = {}) => ({
       '@timestamp': daysAgo(days),
       result_type: 'record',
       job_id: job,
       is_interim: false,
       record_score: 50,
+      ...overrides,
     });
     await index('.ml-anomalies-shared-history-test', [
       record('job_a', 20),
       record('job_b', 10),
       record('job_x', 40),
+      record('job_low', 20, { record_score: 0.5 }),
+      record('job_low', 1),
+      record('job_interim', 20, { is_interim: true }),
+      record('job_interim', 1),
+      record('job_bucket', 20, { result_type: 'bucket' }),
+      record('job_bucket', 1),
     ]);
 
     // Entities: the oldest first_seen.
@@ -160,6 +169,19 @@ describe('history checks on Elasticsearch', () => {
       expect(await reachesBack(buildAnomaliesHistoryReachesBackQuery(RANGE, [...jobs]))).toBe(
         expected
       );
+    });
+
+    it('counts an old record below the tile score threshold: the history is there', async () => {
+      expect(await reachesBack(buildAnomaliesHistoryReachesBackQuery(RANGE, ['job_low']))).toBe(
+        true
+      );
+    });
+
+    it.each([
+      ['an interim record', 'job_interim'],
+      ['a result that is not a record', 'job_bucket'],
+    ])('does not count %s', async (_name, job) => {
+      expect(await reachesBack(buildAnomaliesHistoryReachesBackQuery(RANGE, [job]))).toBe(false);
     });
 
     it('does not count a job that has no record at all', async () => {

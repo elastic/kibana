@@ -207,4 +207,47 @@ describe('useAttackRunWorkflowContextMenuItems', () => {
       expect(result.current.panels).toHaveLength(0);
     });
   });
+
+  describe('origin attack id', () => {
+    it('passes the attack id as a singular origin when exactly one attack is eligible', () => {
+      renderHook(() =>
+        useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: defaultAttacks })
+      );
+
+      expect(mockUseBulkAttackRunWorkflowItems).toHaveBeenCalledWith(
+        expect.objectContaining({ originAttackId: 'attack-1' })
+      );
+    });
+
+    it('leaves the origin plural when more than one attack is eligible', () => {
+      renderHook(() =>
+        useAttackRunWorkflowContextMenuItems({
+          attacksForWorkflowRun: [
+            ...defaultAttacks,
+            {
+              attackId: 'attack-2',
+              attackIndex: '.alerts-security.attack.discovery.alerts-default-000001',
+              relatedAlertIds: [],
+            },
+          ],
+        })
+      );
+
+      expect(mockUseBulkAttackRunWorkflowItems).toHaveBeenCalledWith(
+        expect.objectContaining({ originAttackId: undefined })
+      );
+    });
+
+    it('ignores attacks with no index when deciding the origin', () => {
+      renderHook(() =>
+        useAttackRunWorkflowContextMenuItems({
+          attacksForWorkflowRun: [...defaultAttacks, { attackId: 'attack-2' }],
+        })
+      );
+
+      expect(mockUseBulkAttackRunWorkflowItems).toHaveBeenCalledWith(
+        expect.objectContaining({ originAttackId: 'attack-1' })
+      );
+    });
+  });
 });

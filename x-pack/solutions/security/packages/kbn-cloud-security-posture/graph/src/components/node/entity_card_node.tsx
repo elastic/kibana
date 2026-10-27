@@ -919,8 +919,9 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
           `}
         >
           {/* Toolbar: anchored to the card's own top edge via position:absolute +
-              bottom:100% on this relative wrapper, giving a consistent 4px gap
-              above the card for both single and grouped nodes.  This avoids
+              bottom:100% on this relative wrapper. The offset clears the origin
+              highlight ring (inset -size.s) plus a size.xs gap, and is applied to
+              every node so the toolbar position never shifts.  This avoids
               using ReactFlow's NodeToolbar portal (which positions relative to
               the full 240px NodeShapeContainer, not the card). */}
           {interactive && (toolbarItems.length > 0 || !isGrouped) && (
@@ -931,7 +932,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
               onMouseLeave={handleToolbarMouseLeave}
               extraCss={css`
                 position: absolute;
-                bottom: calc(100% + 4px);
+                bottom: calc(100% + ${euiTheme.size.s} + ${euiTheme.size.xs});
                 left: 50%;
                 transform: translateX(-50%);
                 z-index: ${euiTheme.levels.content};

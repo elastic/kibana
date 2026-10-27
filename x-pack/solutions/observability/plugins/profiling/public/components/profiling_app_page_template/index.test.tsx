@@ -25,7 +25,10 @@ jest.mock('../contexts/profiling_schema/profiling_schema_context', () => ({
   ProfilingSchemaContextProvider: jest.fn(({ children }) => children),
 }));
 jest.mock('../schema_selector', () => ({
-  SchemaSelector: jest.fn(() => null),
+  ProfilingAppSchemaSelector: jest.fn(() => null),
+}));
+jest.mock('../universal_profiling_setup_incomplete_callout', () => ({
+  UniversalProfilingSetupIncompleteCallout: jest.fn(() => null),
 }));
 
 import { useLocation } from 'react-router-dom';
@@ -38,7 +41,8 @@ import { useBackNavigation } from '../contexts/back_navigation/use_back_navigati
 import { useProfilingStatus } from '../contexts/profiling_status/use_profiling_status';
 import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
 import { AsyncStatus } from '../../hooks/use_async';
-import { SchemaSelector } from '../schema_selector';
+import { ProfilingAppSchemaSelector } from '../schema_selector';
+import { UniversalProfilingSetupIncompleteCallout } from '../universal_profiling_setup_incomplete_callout';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 import {
   ProfilingAppPageTemplate,
@@ -199,7 +203,20 @@ describe('ProfilingAppPageTemplate', () => {
       expect(getStorageExplorerItem()).toEqual(expect.objectContaining({ isLoading: true }));
     });
 
-    it('is disabled with a setup hint when Universal Profiling is not set up', () => {
+    it('is enabled when Universal Profiling has data but its setup is incomplete', () => {
+      mockProfilingStatus({ hasSetup: false, hasData: true });
+
+      renderTemplate('');
+
+      expect(getStorageExplorerItem()).toEqual(
+        expect.objectContaining({
+          disableButton: false,
+          tooltipContent: undefined,
+        })
+      );
+    });
+
+    it('is disabled with a setup hint when Universal Profiling is not set up and has no data', () => {
       mockProfilingStatus({ hasSetup: false, hasData: false });
 
       renderTemplate('');
@@ -240,7 +257,7 @@ describe('ProfilingAppPageTemplate', () => {
           kuery: 'host.name:my-host',
         })
       );
-      expect(SchemaSelector).toHaveBeenCalled();
+      expect(ProfilingAppSchemaSelector).toHaveBeenCalled();
     });
 
     it('provides the default time range when the page has none', () => {
@@ -276,7 +293,25 @@ describe('ProfilingAppPageTemplate', () => {
       renderTemplate('?rangeFrom=now-1h&rangeTo=now-10m', { children: <div /> });
 
       expect(ProfilingSchemaContextProvider).not.toHaveBeenCalled();
-      expect(SchemaSelector).not.toHaveBeenCalled();
+      expect(ProfilingAppSchemaSelector).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Universal Profiling setup incomplete callout', () => {
+    it('is rendered on pages with the selector when the Universal Profiling schema is selected', () => {
+      renderTemplate('?schema=ecs', { showSchemaSelector: true });
+
+      expect(UniversalProfilingSetupIncompleteCallout).toHaveBeenCalled();
+    });
+
+    it.each([
+      ['the OpenTelemetry schema is selected', '?schema=otel', { showSchemaSelector: true }],
+      ['no schema is selected yet', '', { showSchemaSelector: true }],
+      ['the page has no selector', '?schema=ecs', {}],
+    ])('is not rendered when %s', (_name, search, props) => {
+      renderTemplate(search, props);
+
+      expect(UniversalProfilingSetupIncompleteCallout).not.toHaveBeenCalled();
     });
   });
 });

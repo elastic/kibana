@@ -39,7 +39,7 @@ describe('escalation conversation event UI definitions', () => {
     );
     expect(screen.getByTestId('escalationEventInvestigationLink')).toHaveAttribute(
       'href',
-      '/app/agent_builder/agents/agent-1/conversations/inv%201?openConversationDetails=true'
+      '/app/agent_builder/agents/agent-1/conversations/inv%201?openConversationDetails=true&sidebarCollapsed=true'
     );
   });
 
@@ -56,7 +56,7 @@ describe('escalation conversation event UI definitions', () => {
 
     expect(screen.getByTestId('escalationEventInvestigationLink')).toHaveAttribute(
       'href',
-      '/app/agent_builder/conversations/inv-1?openConversationDetails=true'
+      '/app/agent_builder/conversations/inv-1?openConversationDetails=true&sidebarCollapsed=true'
     );
   });
 
@@ -66,7 +66,7 @@ describe('escalation conversation event UI definitions', () => {
     fireEvent.click(screen.getByTestId('escalationEventInvestigationLink'));
 
     expect(application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/agents/agent-1/conversations/inv%201?openConversationDetails=true',
+      path: '/agents/agent-1/conversations/inv%201?openConversationDetails=true&sidebarCollapsed=true',
     });
   });
 

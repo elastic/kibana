@@ -20,6 +20,9 @@ import {
 import { isAgentStepAction, isToolResultAction, isValidateAction } from '../actions';
 import type { StateType } from '../state';
 
+const SUPERSEDED_YAML_NOTE =
+  'Superseded by a later edit. The latest tool result has the current workflow YAML.';
+
 /**
  * Reconstruct the LangChain message list from the graph state's actions.
  *
@@ -57,7 +60,13 @@ export const buildMessagesFromActions = (state: StateType): BaseMessage[] => {
     )
   );
 
-  for (const action of state.actions) {
+  // Only the latest edit result carries the full YAML. Older results keep their
+  // diff, so the prompt grows by one diff per edit instead of one full YAML.
+  const latestYamlIndex = state.actions.findLastIndex(
+    (action) => isToolResultAction(action) && action.currentYaml !== undefined
+  );
+
+  for (const [index, action] of state.actions.entries()) {
     if (isAgentStepAction(action)) {
       messages.push(createToolCallMessage(action.toolCalls, action.text));
     } else if (isToolResultAction(action)) {
@@ -68,7 +77,11 @@ export const buildMessagesFromActions = (state: StateType): BaseMessage[] => {
             success: action.success,
             error: action.error,
             data: action.data,
-            currentWorkflowYaml: action.currentYaml,
+            diff: action.diff,
+            currentWorkflowYaml: index === latestYamlIndex ? action.currentYaml : undefined,
+            ...(index !== latestYamlIndex && action.currentYaml !== undefined
+              ? { currentWorkflowYamlOmitted: SUPERSEDED_YAML_NOTE }
+              : {}),
             validation: action.validation,
           },
           wrapToolResult: false,

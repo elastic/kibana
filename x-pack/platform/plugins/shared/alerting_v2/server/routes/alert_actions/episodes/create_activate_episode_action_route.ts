@@ -20,6 +20,7 @@ export const CreateActivateEpisodeActionRoute = createEpisodeActionRouteForType(
   bodySchema: createActivateEpisodeActionBodySchema,
   oasOperationObject: createActivateEpisodeActionOasExamples,
   access: 'public' as const,
+  availability: { stability: 'stable' as const, since: '9.6.0' },
   additionalResponses: {
     409: {
       body: () => errorResponseSchema,

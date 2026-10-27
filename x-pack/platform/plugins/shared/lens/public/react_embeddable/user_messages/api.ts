@@ -19,6 +19,7 @@ import { getRepresentativeQuery, EMPTY_KQL_QUERY } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 import {
   filterAndSortUserMessages,
+  getLoadErrorMessage,
   getApplicationUserMessages,
   handleMessageOverwriteFromConsumer,
 } from '../../app_plugin/get_application_user_messages';
@@ -137,6 +138,12 @@ export function buildUserMessagesHelpers(
       activeData,
     } = getUpdatedState(internalApi.getVisualizationContext, visualizationMap, datasourceMap);
     const userMessages: UserMessage[] = [];
+
+    // The document could not be loaded, so any other message would be about the empty fallback
+    const loadError = internalApi.loadError$.getValue();
+    if (loadError) {
+      return filterAndSortUserMessages([getLoadErrorMessage(loadError)], locationId, filters ?? {});
+    }
 
     userMessages.push(
       ...getApplicationUserMessages({

@@ -23,6 +23,7 @@ export const convertBuiltinSkill = ({
   experimental: skill.experimental ?? false,
   uiSettingRequired: skill.uiSettingRequired,
   excludeFromElasticCapabilities: skill.excludeFromElasticCapabilities ?? false,
+  hidden: skill.hidden ?? false,
   referencedContent: skill.referencedContent,
   referencedContentCount: skill.referencedContent?.length ?? 0,
   basePath: skill.basePath,
