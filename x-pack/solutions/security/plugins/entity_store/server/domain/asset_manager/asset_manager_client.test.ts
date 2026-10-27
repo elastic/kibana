@@ -268,9 +268,19 @@ describe('AssetManagerClient.getStatus privilege-independent probes', () => {
   });
 
   it('propagates non-404 probe errors instead of reporting the component as missing', async () => {
+    const failingInternalEsClient = {
+      indices: {
+        exists: jest.fn().mockResolvedValue(true),
+        getIndexTemplate: jest.fn().mockRejectedValue({ statusCode: 503 }),
+        // 9.4 also probes the updates data stream. Leave it successful so only the
+        // index template rejection is under test.
+        getDataStream: jest.fn().mockResolvedValue({}),
+      },
+      cluster: { getComponentTemplate: jest.fn().mockResolvedValue({}) },
+    } as unknown as ElasticsearchClient;
     const client = buildClient({
       userEsClient: buildEsClient({ templatesExist: true }),
-      internalEsClient: buildEsClient({ templatesExist: true, error: { statusCode: 503 } }),
+      internalEsClient: failingInternalEsClient,
     });
 
     await expect(client.getStatus(true)).rejects.toMatchObject({ statusCode: 503 });
