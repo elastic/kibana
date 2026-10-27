@@ -7,10 +7,10 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
-import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { IndicatorsBarChartWrapper } from '../components/barchart/wrapper';
 import { IndicatorsTable } from '../components/table/table';
 import { useAggregatedIndicators } from '../hooks/use_aggregated_indicators';
@@ -25,6 +25,8 @@ import { IndicatorsFilters } from '../containers/filters';
 import { UpdateStatus } from '../../../components/update_status';
 import { ScreenReaderAnnouncementsProvider } from '../containers/screen_reader_a11y';
 import { useKibana } from '../../../../common/lib/kibana';
+import { INDICATORS } from '../../../constants/translations';
+import { SEARCH_BAR_TEST_ID } from './test_ids';
 
 const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <ScreenReaderAnnouncementsProvider>
@@ -76,13 +78,16 @@ const IndicatorsPageContent: FC = () => {
   });
 
   return (
-    <DefaultPageLayout
-      pageTitle="Indicators"
-      subHeader={<UpdateStatus isUpdating={isFetchingIndicators} updatedAt={dataUpdatedAt} />}
-    >
-      <FiltersGlobal>
-        <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
-      </FiltersGlobal>
+    <DefaultPageLayout pageTitle={INDICATORS}>
+      <SiemSearchBar
+        dataTestSubj={SEARCH_BAR_TEST_ID}
+        dataView={dataView}
+        displayStyle="inPage"
+        id={InputsModelId.global}
+      />
+      <EuiSpacer size="m" />
+      <UpdateStatus isUpdating={isFetchingIndicators} updatedAt={dataUpdatedAt} />
+      <EuiSpacer size="l" />
 
       <IndicatorsBarChartWrapper
         dateRange={dateRange}

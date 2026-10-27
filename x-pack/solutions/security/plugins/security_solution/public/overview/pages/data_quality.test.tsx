@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
@@ -25,8 +25,26 @@ import {
   withIndices,
 } from '../../data_view_manager/hooks/__mocks__/use_data_view';
 import { DataQualityPanel } from '@kbn/ecs-data-quality-dashboard';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+import { DASHBOARDS } from '../../app/translations';
+import { PageScope } from '../../data_view_manager/constants';
+import { DATA_QUALITY_TITLE } from './translations';
 
 const mockedUseKibana = mockUseKibana();
+
+jest.mock('../../data_view_manager/components/data_view_picker', () => ({
+  DataViewPicker: ({ scope }: { scope: string }) => (
+    <div data-test-subj="mockDataViewPicker" data-scope={scope} />
+  ),
+}));
+jest.mock('../../common/components/link_to', () => ({
+  ...jest.requireActual('../../common/components/link_to'),
+  useGetSecuritySolutionUrl:
+    () =>
+    ({ deepLinkId }: { deepLinkId: string }) =>
+      `/app/security/${deepLinkId}`,
+}));
 
 jest.mock('@kbn/ecs-data-quality-dashboard', () => {
   const actual = jest.requireActual('@kbn/ecs-data-quality-dashboard');
@@ -145,6 +163,46 @@ describe('DataQuality', () => {
 
     test('it does NOT render the landing page', () => {
       expect(screen.queryByTestId('empty-prompt')).not.toBeInTheDocument();
+    });
+
+    test('it renders the Data Quality title in the app header', () => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        DATA_QUALITY_TITLE
+      );
+    });
+
+    test('it renders a back button that points to the Dashboards page', () => {
+      const backButton = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
+      expect(backButton).toHaveAttribute('href', '/app/security/dashboards');
+      expect(backButton).toHaveAttribute('aria-label', expect.stringContaining(DASHBOARDS));
+    });
+
+    test('it renders a documentation item that points to the Data Quality documentation', async () => {
+      await openAppMenuOverflow();
+
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toHaveAttribute(
+        'href',
+        'https://www.elastic.co/docs/solutions/security/dashboards/data-quality-dashboard'
+      );
+    });
+
+    test('it renders the data view picker in the summary panel, left of the ILM phases', () => {
+      const filters = screen.getByTestId('dataQualitySummaryFilters');
+      const testIds = Array.from(filters.querySelectorAll('[data-test-subj]'), (element) =>
+        element.getAttribute('data-test-subj')
+      );
+
+      expect(within(filters).getByTestId('mockDataViewPicker')).toHaveAttribute(
+        'data-scope',
+        PageScope.default
+      );
+      expect(testIds.indexOf('mockDataViewPicker')).toBeLessThan(
+        testIds.indexOf('selectIlmPhases')
+      );
+    });
+
+    test('it does NOT render a date picker', () => {
+      expect(screen.queryByTestId('dataQualityDatePicker')).not.toBeInTheDocument();
     });
   });
 
@@ -283,6 +341,13 @@ describe('DataQuality', () => {
     test('it renders the landing page', () => {
       expect(screen.getByTestId('empty-prompt')).toBeInTheDocument();
     });
+
+    test('it still renders the app header and the back button', () => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        DATA_QUALITY_TITLE
+      );
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toBeInTheDocument();
+    });
   });
 
   describe('when indices do NOT exist, but dataview is still loading', () => {
@@ -402,8 +467,11 @@ describe('DataQuality', () => {
       expect(screen.queryByTestId('selectIlmPhases')).not.toBeInTheDocument();
     });
 
-    test('it should render a date picker', () => {
-      expect(screen.getByTestId('dataQualityDatePicker')).toBeInTheDocument();
+    test('it should render the data view picker and the date picker in the summary panel', () => {
+      const filters = screen.getByTestId('dataQualitySummaryFilters');
+
+      expect(within(filters).getByTestId('mockDataViewPicker')).toBeInTheDocument();
+      expect(within(filters).getByTestId('dataQualityDatePicker')).toBeInTheDocument();
     });
   });
 });
