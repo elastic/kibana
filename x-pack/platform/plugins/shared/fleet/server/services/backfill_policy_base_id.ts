@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import {
   AGENT_POLICY_INDEX,
@@ -13,8 +13,6 @@ import {
   AGENT_POLICY_VERSION_SEPARATOR,
   AGENT_POLICY_SENTINEL_VERSION,
 } from '../../common/constants';
-
-import { appContextService } from '.';
 
 // Painless: strip version suffix from policy_id and store as policy_base_id.
 // Mirrors removeVersionSuffixFromPolicyId: only strips when the segment after the last
@@ -45,46 +43,132 @@ export const BACKFILL_SCRIPT = `
   }
 `.trim();
 
-async function runBackfill(esClient: ElasticsearchClient, index: string, label: string) {
-  const logger = appContextService.getLogger();
+// Documents of an index are updated in batches of `maxDocs`, fetched `scrollSize` at a time, so that
+// one batch never holds more than `scrollSize` documents in memory: `.fleet-policies` documents can be
+// several MB each, and the default scroll size of 1000 then fetches GBs of `_source` at once.
+// Each batch is a short request, well below the request timeout, so that a batch does not keep running
+// in Elasticsearch after Kibana stopped waiting for it.
+export interface BackfillTarget {
+  index: string;
+  label: string;
+  scrollSize: number;
+  maxDocs: number;
+}
+
+export const BACKFILL_TARGETS: BackfillTarget[] = [
+  { index: AGENTS_INDEX, label: 'fleet-agents', scrollSize: 500, maxDocs: 5000 },
+  { index: AGENT_POLICY_INDEX, label: 'fleet-policies', scrollSize: 10, maxDocs: 50 },
+];
+
+// Time spent on an index per run. Updated documents are not selected again, so the next run continues
+// where this one stopped. Both indices fit in the timeout of the Fleet setup task.
+export const BACKFILL_TIME_BUDGET_MS = 4 * 60 * 1000;
+
+const BACKFILL_QUERY = {
+  bool: {
+    must: [{ exists: { field: 'policy_id' } }],
+    must_not: [{ exists: { field: 'policy_base_id' } }],
+  },
+};
+
+export type BackfillStatus = 'completed' | 'partial' | 'failed';
+
+export interface BackfillResult {
+  label: string;
+  status: BackfillStatus;
+  updated: number;
+}
+
+interface BackfillOptions {
+  logger: Logger;
+  signal?: AbortSignal;
+  timeBudgetMs?: number;
+}
+
+const countDocumentsToBackfill = async (esClient: ElasticsearchClient, index: string) => {
+  const { count } = await esClient.count({
+    index,
+    ignore_unavailable: true,
+    query: BACKFILL_QUERY,
+  });
+  return count;
+};
+
+export async function backfillIndex(
+  esClient: ElasticsearchClient,
+  { index, label, scrollSize, maxDocs }: BackfillTarget,
+  { logger, signal, timeBudgetMs = BACKFILL_TIME_BUDGET_MS }: BackfillOptions
+): Promise<BackfillResult> {
+  let updated = 0;
   try {
-    const result = await esClient.updateByQuery({
-      index,
-      ignore_unavailable: true,
-      conflicts: 'proceed',
-      script: {
-        lang: 'painless',
-        source: BACKFILL_SCRIPT,
-        params: {
-          separator: AGENT_POLICY_VERSION_SEPARATOR,
-          sentinelVersion: AGENT_POLICY_SENTINEL_VERSION,
+    // Cheap check, so that a setup after a completed backfill does not update anything
+    if ((await countDocumentsToBackfill(esClient, index)) === 0) {
+      logger.debug(`No ${label} documents without policy_base_id to backfill`);
+      return { label, status: 'completed', updated };
+    }
+
+    const deadline = Date.now() + timeBudgetMs;
+    while (!signal?.aborted && Date.now() < deadline) {
+      const result = await esClient.updateByQuery({
+        index,
+        ignore_unavailable: true,
+        conflicts: 'proceed',
+        max_docs: maxDocs,
+        scroll_size: scrollSize,
+        // The next batch must not select the documents of this one again
+        refresh: true,
+        script: {
+          lang: 'painless',
+          source: BACKFILL_SCRIPT,
+          params: {
+            separator: AGENT_POLICY_VERSION_SEPARATOR,
+            sentinelVersion: AGENT_POLICY_SENTINEL_VERSION,
+          },
         },
-      },
-      query: {
-        bool: {
-          must: [{ exists: { field: 'policy_id' } }],
-          must_not: [{ exists: { field: 'policy_base_id' } }],
-        },
-      },
-    });
-    logger.debug(
-      `Backfilled policy_base_id on ${result.updated ?? 0} ${label} documents (${
-        result.noops ?? 0
-      } noops)`
+        query: BACKFILL_QUERY,
+      });
+      const batchUpdated = result.updated ?? 0;
+      updated += batchUpdated;
+      if ((result.total ?? 0) < maxDocs) {
+        logger.info(`Backfilled policy_base_id on ${updated} ${label} documents: completed`);
+        return { label, status: 'completed', updated };
+      }
+      // Stop rather than select the same documents again
+      if (batchUpdated === 0) {
+        break;
+      }
+    }
+
+    const remaining = await countDocumentsToBackfill(esClient, index);
+    logger.info(
+      `Backfilled policy_base_id on ${updated} ${label} documents: partial, ${remaining} remaining for the next Fleet setup`
     );
+    return { label, status: 'partial', updated };
   } catch (err) {
     logger.warn(
-      `Failed to backfill policy_base_id on ${label}: ${
+      `Failed to backfill policy_base_id on ${label} after updating ${updated} documents: ${
         err instanceof Error ? err.message : String(err)
       }`
     );
-    throw err;
+    return { label, status: 'failed', updated };
   }
 }
 
-export async function backfillPolicyBaseId(esClient: ElasticsearchClient) {
-  await Promise.all([
-    runBackfill(esClient, AGENTS_INDEX, 'fleet-agents'),
-    runBackfill(esClient, AGENT_POLICY_INDEX, 'fleet-policies'),
-  ]);
+/**
+ * Sets `policy_base_id` on the documents of `.fleet-agents` and `.fleet-policies` written before it was
+ * added. Never throws: the outcome of every index is logged and returned.
+ */
+export async function backfillPolicyBaseId(
+  esClient: ElasticsearchClient,
+  options: BackfillOptions
+): Promise<BackfillResult[]> {
+  const results: BackfillResult[] = [];
+  // One index after the other, so that the two do not load the nodes at the same time
+  for (const target of BACKFILL_TARGETS) {
+    if (options.signal?.aborted) {
+      break;
+    }
+    results.push(await backfillIndex(esClient, target, options));
+  }
+  return results;
 }
