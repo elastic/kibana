@@ -60,11 +60,13 @@ export interface RoundInput {
    */
   attachments?: Attachment[];
   /**
-   * References to versioned conversation-level attachments.
+   * @deprecated Written before attachment events became the source of truth; read-only, rendered
+   * by the legacy path only.
    */
   attachment_refs?: AttachmentVersionRef[];
   /**
-   * Pre-rendered, immutable prompt context for attachments created/updated in this round
+   * @deprecated Written before attachment events became the source of truth; read-only, rendered
+   * by the legacy path only.
    */
   attachment_context?: string;
 }
@@ -80,13 +82,9 @@ export interface ConverseInput {
   /**
    * Optional attachments to provide to the agent.
    * Use `origin` without `data` for by-reference types that implement `resolve`.
-   * @deprecated Use attachment_refs with conversation-level attachments instead
+   * @deprecated Use conversation-level attachments instead
    */
   attachments?: AttachmentInput[];
-  /**
-   * References to versioned conversation-level attachments.
-   */
-  attachment_refs?: AttachmentVersionRef[];
   /**
    * Response from the user to prompt requests.
    */

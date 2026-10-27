@@ -38,9 +38,11 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type { ProcessedConversation } from './prepare_conversation';
+import { attachmentTypeInstructions } from '../prompts/utils/attachments';
 import {
   T0,
   abortedExec0Timeline,
+  attachmentEventFixture,
   completedRoundTimeline,
   eventsNativeConversation,
   failedExec0Timeline,
@@ -1313,6 +1315,79 @@ describe('prepareMessages', () => {
       expect(result).toHaveLength(3);
       expect(result[0].content).toContain('>one<');
       expect(result[1].content).toContain('>two<');
+    });
+  });
+
+  describe('with attachment events', () => {
+    it('renders a legacy message exactly as before, and its unmarked events not at all', async () => {
+      const legacyTimeline = [
+        ...timelineFromRounds([
+          {
+            id: 'old',
+            input: makeRoundInput('Q', [], {
+              attachment_refs: [{ attachment_id: 'a', version: 1, type: 'text' }],
+              attachment_context: '<attachments>LEGACY</attachments>',
+            }),
+            response: { message: 'A' },
+          },
+        ]),
+        attachmentEventFixture({
+          id: 'old-evt',
+          executionId: 'old::execution',
+          toolCallId: 'x',
+          legacy: true,
+        }),
+        attachmentEventFixture({
+          id: 'old-del',
+          executionId: 'old::execution',
+          kind: 'deleted',
+          legacy: true,
+        }),
+      ];
+      const messages = await prepareMessages({
+        conversation: {
+          timeline: legacyTimeline,
+          nextInput: makeRoundInput('next'),
+          attachmentTypes: [{ type: 'text', description: 'Plain text' }],
+          attachmentStateManager: createAttachmentStateManager([], {
+            getTypeDefinition: () => undefined,
+          }),
+        } as ProcessedConversation,
+      });
+      expect(String(messages[0].content)).toBe(
+        `Q\n\n<attachments>LEGACY</attachments>\n\n\n${attachmentTypeInstructions([
+          { type: 'text', description: 'Plain text' },
+        ])}\n`
+      );
+      expect(JSON.stringify(messages.map((m) => m.content))).not.toContain('conversation_event');
+    });
+
+    it('renders the input events of a standalone message inside it, once', async () => {
+      const linked = attachmentEventFixture({
+        id: 'att',
+        source: 'chat_input',
+        triggerEventId: 'm1',
+      });
+      const message = {
+        id: 'm1',
+        type: TimelineEventType.userMessage,
+        created_at: T0,
+        actor: { type: 'user', id: 'u' },
+        data: { ...makeRoundInput('note'), attachment_events: [linked] },
+      } as unknown as ProcessedTimelineEvent;
+      const messages = await prepareMessages({
+        conversation: {
+          timeline: [message, linked],
+          nextInput: makeRoundInput('next'),
+          attachmentTypes: [],
+          attachmentStateManager: createAttachmentStateManager([], {
+            getTypeDefinition: () => undefined,
+          }),
+        } as ProcessedConversation,
+      });
+      expect(messages).toHaveLength(2);
+      expect(String(messages[0].content)).toContain('note');
+      expect(String(messages[0].content).match(/<conversation_event /g)).toHaveLength(1);
     });
   });
 
