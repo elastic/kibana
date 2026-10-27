@@ -45218,10 +45218,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -45368,10 +45370,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -45483,10 +45487,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -45597,10 +45603,12 @@ paths:
                   anyOf:
                     - items:
                         description: List of collector agent IDs
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
                     - description: KQL query string. Leave empty to target all collectors
+                      maxLength: 500000
                       type: string
                 dryRun:
                   type: boolean
@@ -45716,10 +45724,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -45828,7 +45838,7 @@ paths:
                         type: string
                       maxItems: 10000
                       type: array
-                    - maxLength: 1000000
+                    - maxLength: 500000
                       type: string
                 batchSize:
                   minimum: 1
@@ -45921,10 +45931,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -46036,10 +46048,12 @@ paths:
                   anyOf:
                     - items:
                         description: list of agent IDs
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
                     - description: KQL query string, leave empty to action all agents
+                      maxLength: 500000
                       type: string
                 batchSize:
                   type: number
@@ -46157,10 +46171,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -46279,10 +46295,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -48103,6 +48121,10 @@ paths:
                     type: string
                   maxItems: 10
                   type: array
+                namespace:
+                  description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
+                  maxLength: 100
+                  type: string
                 provider:
                   description: Cloud provider.
                   enum:
@@ -48311,6 +48333,9 @@ paths:
                           type: string
                         maxItems: 10
                         type: array
+                      namespace:
+                        description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
+                        type: string
                       packagePolicyIds:
                         description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
@@ -48664,6 +48689,9 @@ paths:
                           type: string
                         maxItems: 10
                         type: array
+                      namespace:
+                        description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
+                        type: string
                       packagePolicyIds:
                         description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
@@ -48909,6 +48937,11 @@ paths:
                     type: string
                   maxItems: 10
                   type: array
+                namespace:
+                  description: Global data stream namespace from the Service settings step. Omit it to keep the stored value, or send null to clear it. When none is set, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
+                  maxLength: 100
+                  nullable: true
+                  type: string
                 packagePolicyIds:
                   description: Package policy IDs created for this deployment (managed_integration and agent_based).
                   items:
@@ -49086,6 +49119,9 @@ paths:
                           type: string
                         maxItems: 10
                         type: array
+                      namespace:
+                        description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
+                        type: string
                       packagePolicyIds:
                         description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
@@ -49366,6 +49402,9 @@ paths:
                             type: string
                           maxItems: 10
                           type: array
+                        namespace:
+                          description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
+                          type: string
                         packagePolicyIds:
                           description: Package policy IDs created for this deployment (managed_integration and agent_based).
                           items:
@@ -153534,23 +153573,28 @@ components:
               type: string
             groupBy:
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 100
               type: array
             searchConfiguration:
               additionalProperties: false
               type: object
               properties:
                 index:
+                  maxLength: 10000
                   type: string
               required:
                 - index
             threshold:
               items:
                 type: number
+              maxItems: 2
               type: array
             timeSize:
               type: number
             timeUnit:
+              maxLength: 64
               type: string
           required:
             - timeUnit
@@ -160067,6 +160111,11 @@ components:
                               - p95
                               - p99
                             type: string
+                          histogram_visualization:
+                            description: How histogram metrics are drawn. If omitted, Discover uses the percentile chart.
+                            enum:
+                              - lnsXY
+                            type: string
                           row_height:
                             anyOf:
                               - maximum: 20
@@ -162194,6 +162243,11 @@ components:
                       - p90
                       - p95
                       - p99
+                    type: string
+                  histogram_visualization:
+                    description: How histogram metrics are drawn. If omitted, Discover uses the percentile chart.
+                    enum:
+                      - lnsXY
                     type: string
                   id:
                     description: A unique identifier. Must contain only lowercase letters, numbers, hyphens, and underscores.
@@ -175593,12 +175647,16 @@ components:
             excludeTransforms:
               default: null
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 1000
               nullable: true
               type: array
             includeTransforms:
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 1000
               type: array
             testsConfig:
               additionalProperties: false

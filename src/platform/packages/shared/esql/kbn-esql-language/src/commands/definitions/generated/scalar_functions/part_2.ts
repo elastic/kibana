@@ -12200,6 +12200,32 @@ const textEmbeddingDefinition: FunctionDefinition = {
           description:
             'Identifier of an existing inference endpoint that will generate the embeddings. The inference endpoint must have the `text_embedding` task type and should use the same model that was used to embed your indexed data.',
         },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'text',
+          type: 'keyword',
+          optional: false,
+          description:
+            'Text string to generate embeddings from. Must be a non-null literal string value.',
+        },
+        {
+          name: 'inference_id',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'entity',
+            entityType: 'inference_endpoint',
+            constraints: {
+              task_type: 'text_embedding',
+            },
+          },
+          description:
+            'Identifier of an existing inference endpoint that will generate the embeddings. The inference endpoint must have the `text_embedding` task type and should use the same model that was used to embed your indexed data.',
+        },
         {
           name: 'options',
           type: 'function_named_parameters',
