@@ -14,7 +14,7 @@ import {
   contextEngineAutomationTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
-import { chatAgentTypeId } from '@kbn/agent-builder-common';
+import { chatAgentTypeId, relevantSkillsHookId } from '@kbn/agent-builder-common';
 import type { SkillDefinition } from './skills/type_definition';
 import { ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
 
@@ -467,7 +467,7 @@ export const isAllowedBuiltinAttachment = (
  */
 export const AGENT_BUILDER_CYCLE_HOOKS = [
   // Platform
-  'relevant-skills',
+  relevantSkillsHookId,
 ] as const;
 
 export type AgentBuilderCycleHook = (typeof AGENT_BUILDER_CYCLE_HOOKS)[number];

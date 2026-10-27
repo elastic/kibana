@@ -6,6 +6,7 @@
  */
 
 import type { EvaluationResult, Evaluator, TaskOutput } from '@kbn/evals';
+import { relevantSkillsHookId } from '@kbn/agent-builder-common';
 import type { BenchmarkExample } from '../evals/skill_selection/benchmark_dataset';
 
 // Raw step shape returned by the agent-builder converse API.
@@ -128,14 +129,31 @@ export const createShouldNotActivateSkillEvaluator = (skillName: string): Evalua
   },
 });
 
-/** The id the agent builder plugin registers its skill pre-selection cycle hook with. */
-const RELEVANT_SKILLS_HOOK_ID = 'relevant-skills';
-
 interface SurfacedSkill {
   id?: string;
   name?: string;
   path?: string;
 }
+
+interface RelevantSkillsHookStep extends Record<string, unknown> {
+  type: 'injected_context';
+  hook_id: typeof relevantSkillsHookId;
+  data?: { skills?: SurfacedSkill[] };
+}
+
+interface ImplicitRelevantSkillsStep extends Record<string, unknown> {
+  type: 'relevant_skills';
+  source: 'implicit';
+  skills?: SurfacedSkill[];
+}
+
+const isRelevantSkillsHookStep = (step: Record<string, unknown>): step is RelevantSkillsHookStep =>
+  step.type === 'injected_context' && step.hook_id === relevantSkillsHookId;
+
+const isImplicitRelevantSkillsStep = (
+  step: Record<string, unknown>
+): step is ImplicitRelevantSkillsStep =>
+  step.type === 'relevant_skills' && step.source === 'implicit';
 
 /**
  * The skills the implicit pre-selection surfaced, or `undefined` when it produced no step. Today
@@ -145,16 +163,12 @@ interface SurfacedSkill {
 const getImplicitPreSelection = (
   steps: Array<Record<string, unknown>>
 ): SurfacedSkill[] | undefined => {
-  for (const step of steps) {
-    if (step.type === 'injected_context' && step.hook_id === RELEVANT_SKILLS_HOOK_ID) {
-      const data = step.data as { skills?: SurfacedSkill[] } | undefined;
-      return data?.skills ?? [];
-    }
-    if (step.type === 'relevant_skills' && step.source === 'implicit') {
-      return (step.skills as SurfacedSkill[] | undefined) ?? [];
-    }
+  const hookStep = steps.find(isRelevantSkillsHookStep);
+  if (hookStep) {
+    return hookStep.data?.skills ?? [];
   }
-  return undefined;
+  const legacyStep = steps.find(isImplicitRelevantSkillsStep);
+  return legacyStep ? legacyStep.skills ?? [] : undefined;
 };
 
 /**

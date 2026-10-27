@@ -579,12 +579,12 @@ describe('injected context', () => {
     expect(message.content).toContain('remember &lt;this&gt;');
   });
 
-  it('renders in the research phase as in history, and not in the answer phase', async () => {
+  it('renders in both phases of the current run, identically to history', async () => {
     const [history] = await renderHistorySteps({ steps: [note] });
     const [research] = await current([note], {});
-    const answer = await current([note], {}, { phase: 'answer' });
+    const [answer] = await current([note], {}, { phase: 'answer' });
 
     expect(research.toDict()).toEqual(history.toDict());
-    expect(answer.some((message) => message.name === 'injected_context')).toBe(false);
+    expect(answer.toDict()).toEqual(history.toDict());
   });
 });

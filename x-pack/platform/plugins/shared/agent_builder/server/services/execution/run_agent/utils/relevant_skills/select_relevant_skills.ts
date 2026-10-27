@@ -76,6 +76,12 @@ const toRelevantSkill = (
   ...(relevanceNote ? { relevance_note: relevanceNote } : {}),
 });
 
+/** One earlier user message and, when the execution it started answered, that answer. */
+export interface RecentExchange {
+  input?: { message?: string };
+  response?: { message?: string };
+}
+
 /**
  * Builds a bounded, plain-text slice of recent conversation history to give the selector context
  * beyond the current message. Structurally typed so it accepts both raw and processed rounds, and
@@ -87,7 +93,7 @@ const toRelevantSkill = (
  * individually keeps every message represented; the maxChars value acts as a final backstop.
  */
 export const buildRecentContext = (
-  rounds: Array<{ input?: { message?: string }; response?: { message?: string } }>,
+  rounds: RecentExchange[],
   { maxChars = MAX_RECENT_CONTEXT_CHARS, maxRounds = MAX_RECENT_CONTEXT_ROUNDS } = {}
 ): string => {
   const recent = rounds.slice(-maxRounds);

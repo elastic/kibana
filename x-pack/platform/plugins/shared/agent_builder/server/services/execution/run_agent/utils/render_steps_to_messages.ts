@@ -421,9 +421,7 @@ const renderSteps = async (
         messages.push(createPreExecutionWorkflowContextMessage(step.model_context));
       }
     } else if (isInjectedContextStep(step)) {
-      if (current?.phase !== 'answer') {
-        messages.push(createInjectedContextMessage(step));
-      }
+      messages.push(createInjectedContextMessage(step));
     } else if (isToolCallStep(step)) {
       // Only render when we hit the first tool call of a group; the other calls of the group are
       // rendered as part of the same AI message.

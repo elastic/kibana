@@ -165,6 +165,12 @@ export type UserMessageEvent = BaseTimelineEvent<
   UserMessageEventData
 >;
 
+/** Narrows any event shape, raw or processed, to its `user_message` member. */
+export const isUserMessageEvent = <E extends { type: string }>(
+  event: E
+): event is Extract<E, { type: TimelineEventType.userMessage }> =>
+  event.type === TimelineEventType.userMessage;
+
 /** A human's answer to a `prompt_requested` event. Resumes a specific run; does not start one. */
 export interface PromptResponseEventData {
   /** The `prompt_requested` event this answers. */

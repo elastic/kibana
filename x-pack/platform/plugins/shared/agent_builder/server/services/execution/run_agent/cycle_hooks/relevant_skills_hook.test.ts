@@ -7,7 +7,11 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { TimelineEventType, type RelevantSkill } from '@kbn/agent-builder-common';
+import {
+  TimelineEventType,
+  relevantSkillsHookId,
+  type RelevantSkill,
+} from '@kbn/agent-builder-common';
 import type {
   CycleContext,
   CycleHookApi,
@@ -23,7 +27,7 @@ import {
   buildRecentContext,
   selectRelevantSkills,
 } from '../utils/relevant_skills/select_relevant_skills';
-import { RELEVANT_SKILLS_HOOK_ID, createRelevantSkillsCycleHook } from './relevant_skills_hook';
+import { createRelevantSkillsCycleHook } from './relevant_skills_hook';
 
 jest.mock('../utils/relevant_skills/select_relevant_skills', () => ({
   ...jest.requireActual('../utils/relevant_skills/select_relevant_skills'),
@@ -106,7 +110,7 @@ describe('createRelevantSkillsCycleHook', () => {
   it('is a first hook, on the allow list, with a time budget above the selection’s own', () => {
     const { definition } = setup();
 
-    expect(definition.id).toBe(RELEVANT_SKILLS_HOOK_ID);
+    expect(definition.id).toBe(relevantSkillsHookId);
     expect(isAllowedCycleHook(definition.id)).toBe(true);
     expect(definition.when).toBe('first');
     expect(definition.timeout).toBeGreaterThan(RELEVANT_SKILLS_TIMEOUT_MS);
