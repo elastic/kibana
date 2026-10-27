@@ -44,8 +44,8 @@ resolve() {
 
 api_key="$(resolve SANDBOX_API_KEY '.sandbox.apiKey')"
 
-# Selecting the reinforcement micro-eval turns Cortex on so decision trees run. The key is absent
-# otherwise, which keeps an ordinary investigation server's fingerprint unchanged.
+# Selecting the reinforcement micro-eval enables decision trees without turning Cortex on.
+# The key is absent otherwise, which keeps an ordinary investigation server's fingerprint unchanged.
 decision_trees=''
 case ",$(printf '%s' "${NIGHTSHIFT_DATASETS:-}" | tr -d ' ')," in
   *,reinforcement,*) decision_trees=true ;;

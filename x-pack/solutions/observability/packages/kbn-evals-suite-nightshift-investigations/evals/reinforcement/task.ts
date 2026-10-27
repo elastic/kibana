@@ -166,7 +166,13 @@ export const runReinforcementExample = async ({
   }
 
   const reinforce = reinforceStep(execution);
-  const output = reinforce?.output as { submissions_json?: string; skipped?: boolean } | undefined;
+  const output = reinforce?.output as
+    | {
+        submissions_json?: string;
+        skipped?: boolean;
+        trace_id?: string;
+      }
+    | undefined;
   const submittedMarkdown = (await readSubmittedMarkdown(esClient, treeId)) ?? priorMarkdown;
   const finished = isTerminal(execution.status);
   const reinforced = reinforce?.status === ExecutionStatus.COMPLETED && output?.skipped !== true;
@@ -175,11 +181,12 @@ export const runReinforcementExample = async ({
   return {
     ...base,
     execution_id: executionId,
+    ...(output?.trace_id ? { traceId: output.trace_id } : {}),
     workflow_status: execution.status,
     execution_error: failed
       ? execution.error?.message ||
         (output?.skipped || reinforce?.status === ExecutionStatus.SKIPPED
-          ? 'Decision-tree reinforcement was skipped. Select NIGHTSHIFT_DATASETS=reinforcement so Cortex and the sandbox are enabled.'
+          ? 'Decision-tree reinforcement was skipped. Select NIGHTSHIFT_DATASETS=reinforcement so decision trees and the sandbox are enabled.'
           : `Workflow ${execution.status}; reinforce step ${reinforce?.status ?? 'missing'}`)
       : undefined,
     submissions: parseSubmissions(output?.submissions_json),
@@ -410,7 +417,13 @@ export const runCustomer0Reinforcement = async ({
   }
 
   const reinforce = reinforceStep(execution);
-  const output = reinforce?.output as { submissions_json?: string; skipped?: boolean } | undefined;
+  const output = reinforce?.output as
+    | {
+        submissions_json?: string;
+        skipped?: boolean;
+        trace_id?: string;
+      }
+    | undefined;
   const submissions = parseSubmissions(output?.submissions_json);
   const treeIds = treeIdsInSubmission(submissions.at(-1));
   const trees = await treesAfterRun(esClient, treeIds, startedAtMs);
@@ -421,11 +434,12 @@ export const runCustomer0Reinforcement = async ({
     ...base,
     response,
     execution_id: execution.id,
+    ...(output?.trace_id ? { traceId: output.trace_id } : {}),
     workflow_status: execution.status,
     execution_error: failed
       ? execution.error?.message ||
         (output?.skipped || reinforce?.status === ExecutionStatus.SKIPPED
-          ? 'Decision-tree reinforcement was skipped. Select NIGHTSHIFT_DATASETS=reinforcement so Cortex and the sandbox are enabled.'
+          ? 'Decision-tree reinforcement was skipped. Select NIGHTSHIFT_DATASETS=reinforcement so decision trees and the sandbox are enabled.'
           : `Workflow ${execution.status}; reinforce step ${reinforce?.status ?? 'missing'}`)
       : undefined,
     submissions,
