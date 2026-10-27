@@ -6,9 +6,10 @@ How a Security suite gets into the weekly run, and what to verify in a PR. Re-de
 
 - `.buildkite/pipelines/evals/llm_evals.yml` defines one explicit step per weekly suite. Each runs `bash .buildkite/scripts/steps/evals/run_suite.sh` with `EVAL_SUITE_ID` and `EVAL_MODEL_GROUPS`.
 - `.buildkite/pipelines/evals/evals.suites.json` registers the suite: `id`, `configPath`, `ciLabels`, and optionally `serverConfigSet`, `slackChannel`, `weeklyEisModelGroups`, `stepTimeoutInMinutes`, `shards`.
-- `weeklyEisModelGroups` does not schedule anything. It only resolves the `models:weekly-eis-models` PR label for that suite, falling back to `DEFAULT_WEEKLY_EIS_MODELS` in `eval_pipeline.ts`. A suite is weekly only if `llm_evals.yml` has a step for it.
+- A suite is weekly only if `llm_evals.yml` has a step for it. `weeklyEisModelGroups` does not create that step.
+- `weeklyEisModelGroups` still affects what a weekly step runs. `get_fanout_matrix.js` uses it as the default model list for spec files that have no `specModelGroups` override, when `KBN_EVALS_WEEKLY` is set and the suite defines `specModelGroups`. It also resolves the `models:weekly-eis-models` PR label for the suite, falling back to `DEFAULT_WEEKLY_EIS_MODELS` in `eval_pipeline.ts`. Treat a change to it as a change to weekly coverage.
 - `evals_suites_config.test.ts` checks that each `weeklyEisModelGroups` entry is covered by the suite step's `EVAL_MODEL_GROUPS`. It does not check that every suite has a step.
-- `weekly_build_slack_summary.sh` posts failures to the suite's `slackChannel`. A suite without one has no failure destination.
+- `suite_owner_notify.sh` posts a suite's failures to its `slackChannel`. `run_suite.sh` enables it for weekly runs when `KBN_EVALS_WEEKLY` is set, the suite has a `slackChannel`, and the branch is the pipeline's default branch. `weekly_build_slack_summary.sh` posts the build-level summary. A suite without a `slackChannel` has no failure destination.
 
 ## Step template
 
@@ -23,6 +24,7 @@ How a Security suite gets into the weekly run, and what to verify in a PR. Re-de
     EVAL_FANOUT: '1'
     EVAL_INCLUDE_EIS_MODELS: '1'
     EVAL_MODEL_GROUPS: *weekly_eis_core_models
+  # With EVAL_FANOUT, this only bounds the fanout step. Per-model steps use stepTimeoutInMinutes (default 120).
   timeout_in_minutes: 60
   agents:
     image: family/kibana-ubuntu-2404
@@ -45,8 +47,8 @@ How a Security suite gets into the weekly run, and what to verify in a PR. Re-de
 | Models | `weeklyEisModelGroups`, when set, is a subset of the step's `EVAL_MODEL_GROUPS` |
 | Slack | Suite entry has `slackChannel` |
 | Server config | `serverConfigSet` is set when the suite needs a non-default Scout server config |
-| Timeout | `timeout_in_minutes` covers dataset size times models, and the Playwright `timeout` covers one test. Long suites set `stepTimeoutInMinutes` |
-| Config path | `configPath` points at an existing `playwright.config.ts` in the package root |
+| Timeout | The per-model budget is `stepTimeoutInMinutes` in `evals.suites.json` (default 120 in `run_suite.sh`); the step's `timeout_in_minutes` only bounds the fanout step. The budget covers one model's run of the dataset, and the Playwright `timeout` covers one test |
+| Config path | `configPath` points at an existing Playwright config file in the package. Names vary, for example `playwright.v2.config.ts` or `batch.playwright.config.ts` |
 
 ## Suites that are not weekly
 

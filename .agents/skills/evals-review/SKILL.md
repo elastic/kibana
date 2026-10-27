@@ -87,7 +87,7 @@ The suite has a `slackChannel` so weekly failures reach an owner.
 
 ### W4: Environment and timeout
 
-`serverConfigSet` matches what the suite needs (tracing, endpoint, entity analytics, and so on). `timeout_in_minutes` and the Playwright `timeout` fit the dataset size and model count.
+`serverConfigSet` matches what the suite needs (tracing, endpoint, entity analytics, and so on). For fanned-out weekly steps the per-model budget is `stepTimeoutInMinutes` (default 120), not the step's `timeout_in_minutes`. It and the Playwright `timeout` fit the dataset size.
 
 ### W5: Unattended run
 
