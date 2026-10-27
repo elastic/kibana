@@ -503,6 +503,16 @@ export class ProposalsService {
         `Execution [${execution.id}] is not waiting for input (status: ${execution.status})`
       );
     }
+    // The execution keeps reading as waiting until the resumed gate runs, so a
+    // second release would get this far. Resolving the step before writing
+    // refuses one whose gate another resumer already claimed, which would
+    // otherwise bump the version the gate's own decision write is guarded by.
+    const stepExecutionId = findWaitingGateStepId(execution.stepExecutions);
+    if (stepExecutionId === undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] is already being decided: its gate has no unclaimed step waiting`
+      );
+    }
 
     const released = await this.markReleased(
       proposal,
@@ -511,7 +521,7 @@ export class ProposalsService {
     );
 
     try {
-      await this.resumeGate(execution, { spaceId, request, approved });
+      await this.resumeGate(execution.id, stepExecutionId, { spaceId, request, approved });
     } catch (error) {
       // Only a resume the engine turned away is undone, because it is the one
       // failure that proves the gate will never act on this release. Any other
@@ -1383,22 +1393,21 @@ export class ProposalsService {
   }
 
   /**
-   * Releases the parked gate. The waiting step is resolved here and passed
-   * explicitly: the platform's own lookup only matches `waitForInput`, and when
-   * it resolves nothing it resumes without claiming the step or stamping the
-   * audit envelope.
+   * Releases the parked gate. The waiting step is resolved by the caller and
+   * passed explicitly: the platform's own lookup only matches `waitForInput`,
+   * and when it resolves nothing it resumes without claiming the step or
+   * stamping the audit envelope.
    */
   private async resumeGate(
-    execution: WorkflowExecutionDto,
+    executionId: string,
+    stepExecutionId: string,
     { spaceId, request, approved }: { spaceId: string; request: KibanaRequest; approved: boolean }
   ): Promise<void> {
-    const stepExecutionId = findWaitingGateStepId(execution.stepExecutions);
-
     await this.deps
       .getWorkflowsApi()
-      .resumeWorkflowExecution(execution.id, spaceId, { approved }, request, {
+      .resumeWorkflowExecution(executionId, spaceId, { approved }, request, {
         channel: PROPOSALS_RESUME_CHANNEL,
-        ...(stepExecutionId ? { stepExecutionId } : {}),
+        stepExecutionId,
       });
   }
 

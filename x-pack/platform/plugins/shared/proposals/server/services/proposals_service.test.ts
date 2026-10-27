@@ -1189,6 +1189,34 @@ describe('ProposalsService', () => {
       expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
     });
 
+    it('should refuse without writing when another release already claimed the gate step', async () => {
+      const storage = createStorage(baseDocument({ gateReleasedAt: '2026-09-02T00:00:00.000Z' }));
+      const { service, workflowsApi } = createService(storage);
+      // The execution keeps reading as waiting until the resumed gate runs.
+      workflowsApi.getWorkflowExecution.mockResolvedValue({
+        id: EXECUTION_ID,
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        finishedAt: undefined,
+        stepExecutions: [
+          {
+            id: 'step-exec-1',
+            stepType: 'waitForApproval',
+            status: ExecutionStatus.WAITING_FOR_INPUT,
+            startedAt: '2026-09-01T00:01:00.000Z',
+            hitl: { respondedAt: '2026-09-02T00:00:01.000Z' },
+          },
+        ],
+      });
+
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toThrow(
+        /already being decided/
+      );
+
+      // Writing here would move the version the gate's decision write is guarded by.
+      expect(storage.index).not.toHaveBeenCalled();
+      expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
     it('should settle the proposal and refuse the decision when its gate execution has ended', async () => {
       const storage = createStorage(baseDocument());
       const { service, workflowsApi } = createService(storage);
