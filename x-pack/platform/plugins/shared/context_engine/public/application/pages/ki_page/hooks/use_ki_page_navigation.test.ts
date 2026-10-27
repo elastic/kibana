@@ -14,13 +14,13 @@ const mockOnSelectTab = jest.fn();
 const mockOnDiscardConfirmed = jest.fn();
 const mockOnAppLeave = jest.fn();
 
-jest.mock('./use_navigation', () => ({
+jest.mock('../../../hooks/use_navigation', () => ({
   useNavigation: () => ({
     navigateToContextEngine: mockNavigateToContextEngine,
   }),
 }));
 
-jest.mock('./use_kibana', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: { onAppLeave: mockOnAppLeave },
   }),

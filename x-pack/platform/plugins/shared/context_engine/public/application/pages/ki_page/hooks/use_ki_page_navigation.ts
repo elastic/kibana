@@ -8,8 +8,8 @@
 import type { AppMountParameters } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useCallback, useEffect, useState } from 'react';
-import { useKibana } from './use_kibana';
-import { useNavigation } from './use_navigation';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useNavigation } from '../../../hooks/use_navigation';
 
 export type KiPageTabId = 'details' | 'document';
 

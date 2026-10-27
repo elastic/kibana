@@ -15,11 +15,15 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import type { GetKiResponse } from '../../../common/http_api/knowledge_indicators';
-import { uiPrivileges } from '../../../common/features';
-import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
-import { getAiIndexKnowledgeIndicatorsPath, getViewKiPath, CONTEXT_ENGINE_PATHS } from '../paths';
-import { createAppChromeMock } from '../test_utils/app_chrome_mock';
+import type { GetKiResponse } from '../../../../common/http_api/knowledge_indicators';
+import { uiPrivileges } from '../../../../common/features';
+import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../../layout/context_engine_page_header';
+import {
+  getAiIndexKnowledgeIndicatorsPath,
+  getViewKiPath,
+  CONTEXT_ENGINE_PATHS,
+} from '../../paths';
+import { createAppChromeMock } from '../../test_utils/app_chrome_mock';
 import { KiPage } from './ki_page';
 
 const mockUseKi = jest.fn();
@@ -29,12 +33,12 @@ const mockUpdateMutate = jest.fn();
 const mockDeleteMutateAsync = jest.fn();
 const mockRestoreMutateAsync = jest.fn();
 
-jest.mock('../hooks/use_ki', () => ({
+jest.mock('../../hooks/use_ki', () => ({
   useKi: (args: { aiIndexId: string; kiId: string; index: string; enabled?: boolean }) =>
     mockUseKi(args),
 }));
 
-jest.mock('../hooks/use_navigation', () => ({
+jest.mock('../../hooks/use_navigation', () => ({
   useNavigation: () => ({
     createContextEngineUrl: mockCreateContextEngineUrl,
     navigateToContextEngine: mockNavigateToContextEngine,
@@ -63,7 +67,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../hooks/use_ki_mutations', () => ({
+jest.mock('../../hooks/use_ki_mutations', () => ({
   useUpdateKi: () => ({
     mutate: mockUpdateMutate,
     isLoading: false,
