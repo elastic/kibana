@@ -51,6 +51,43 @@ describe('assertEsqlSourcesAllowed', () => {
     });
   });
 
+  it('returns ok for cross-cluster sources the allowlist names, quoted or not', () => {
+    const ccs = ['infosec_zocalo:logs-aws.cloudtrail*', 'infosec_redsector:logs-endpoint.events.*'];
+    expect(
+      assertEsqlSourcesAllowed(
+        'FROM infosec_zocalo:logs-aws.cloudtrail-default*, infosec_redsector:logs-endpoint.events.process-* | LIMIT 1',
+        ccs
+      )
+    ).toEqual({ ok: true });
+    expect(
+      assertEsqlSourcesAllowed('FROM "infosec_zocalo:logs-aws.cloudtrail-default*" | LIMIT 1', ccs)
+    ).toEqual({ ok: true });
+  });
+
+  it('returns ok for a concrete cluster under a wildcard-cluster allowlist', () => {
+    expect(
+      assertEsqlSourcesAllowed('FROM infosec_zocalo:logs-aws.cloudtrail-* | LIMIT 1', ['*:logs-*'])
+    ).toEqual({ ok: true });
+    expect(
+      assertEsqlSourcesAllowed('FROM other:logs-aws.cloudtrail-* | LIMIT 1', ['infosec_*:logs-*'])
+    ).toEqual({ ok: false, reason: expect.stringContaining('other:logs-aws.cloudtrail-*') });
+  });
+
+  it('returns not ok for a cluster or selector the allowlist does not name', () => {
+    const ccs = ['infosec_zocalo:logs-aws.cloudtrail*'];
+    expect(assertEsqlSourcesAllowed('FROM other:logs-aws.cloudtrail-* | LIMIT 1', ccs)).toEqual({
+      ok: false,
+      reason: expect.stringContaining('other:logs-aws.cloudtrail-*'),
+    });
+    expect(assertEsqlSourcesAllowed('FROM *:logs-aws.cloudtrail-* | LIMIT 1', ccs)).toEqual({
+      ok: false,
+      reason: expect.stringContaining('*:logs-aws.cloudtrail-*'),
+    });
+    expect(
+      assertEsqlSourcesAllowed('FROM infosec_zocalo:logs-aws.cloudtrail-*::failures | LIMIT 1', ccs)
+    ).toEqual({ ok: false, reason: expect.stringContaining('::failures') });
+  });
+
   it('returns not ok when the allowlist is empty', () => {
     expect(assertEsqlSourcesAllowed('FROM logs-aws.* | LIMIT 1', [])).toEqual({
       ok: false,

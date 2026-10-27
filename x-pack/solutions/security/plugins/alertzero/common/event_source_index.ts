@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { splitRemoteCluster, stripBackingPrefix } from './remote_cluster';
+
 /**
  * Constrain `source_index` to a concrete, non-hidden, single index that cannot reach across
  * spaces. Event `source_index` values are workflow-authored and flow straight into a
@@ -16,48 +18,46 @@
  * the concrete `.ds-...` backing index), never from the data stream or alias name that was
  * searched. `_index` on a data-stream hit already reports the backing name, so this is a
  * matter of not overriding it.
- */
-
-/**
- * Backing indices of ordinary data streams. A search hit against a data stream reports its
- * concrete backing name in `_index` (e.g. `.ds-logs-endpoint.events.process-default-...`),
- * and the contract says `source_index` carries that concrete source, so these have to be
- * allowed even though they start with a dot. They are still a single concrete index.
- */
-const DATA_STREAM_BACKING_PREFIX = '.ds-';
-
-/**
- * Rejects anything that is not a single concrete index/data-stream name:
  *
- * - wildcards (`*`, `?`) — would fan out past the intended source
- * - comma lists and remote-cluster refs (`,`, `:`) — multiple targets in one expression
+ * This constrains the shape, not the target: neither a local index name nor a `<cluster>:`
+ * alias is checked against the space's hunt scope, so a forged ref can name any index or any
+ * remote cluster configured on the deployment. Opening it still runs as the viewing user, under
+ * their own index and remote-cluster privileges.
+ */
+
+/** Index expression operators and multi-target syntax, for either side of a `<cluster>:`. */
+const isPlainName = (name: string): boolean =>
+  name !== '' && !/[*?,:\s"\\/<>|]/.test(name) && !name.startsWith('-') && !name.startsWith('+');
+
+/**
+ * Rejects anything that is not a single concrete index/data-stream name, optionally on one
+ * named remote cluster (`infosec_zocalo:.ds-logs-aws...`, which is how a cross-cluster hit
+ * reports its `_index`):
+ *
+ * - wildcards (`*`, `?`) — would fan out past the intended source, cluster alias included
+ * - comma lists, a second `:`, and `::` selectors — multiple targets or components in one
+ *   expression
  * - hidden/system indices (leading `.`), except `.ds-` backing indices — includes every
  *   alerts alias variant, since alias names still start with `.` after the `.ds-` strip
  * - `-` exclusions and leading `+` — index-expression operators, not a plain name
  * - path traversal / whitespace — never valid in an index name
  */
 export const isAllowedEventSourceIndex = (value: string): boolean => {
-  const index = value.trim();
-
-  if (!index || index !== value) {
+  if (!value || value.trim() !== value) {
     return false;
   }
 
-  // Index expression operators and multi-target syntax.
-  if (/[*?,:\s"\\/<>|]/.test(index)) {
-    return false;
-  }
-
-  if (index.startsWith('-') || index.startsWith('+')) {
+  const { cluster, index } = splitRemoteCluster(value);
+  if ((cluster !== undefined && !isPlainName(cluster)) || !isPlainName(index)) {
     return false;
   }
 
   const lower = index.toLowerCase();
 
-  // A data stream's backing index is a legitimate concrete source. Strip the prefix and hold
-  // the remainder to the same rules, so `.ds-.alerts-...` is still rejected below.
-  const isDataStreamBacking = lower.startsWith(DATA_STREAM_BACKING_PREFIX);
-  const bare = isDataStreamBacking ? lower.slice(DATA_STREAM_BACKING_PREFIX.length) : lower;
+  // A data stream's backing index is a legitimate concrete source even though it starts with
+  // a dot: a hit reports it in `_index`. Strip the prefix and hold the remainder to the same
+  // rules, so `.ds-.alerts-...` is still rejected below.
+  const bare = stripBackingPrefix(lower);
 
   if (!bare) {
     return false;
@@ -73,4 +73,4 @@ export const isAllowedEventSourceIndex = (value: string): boolean => {
 };
 
 export const EVENT_SOURCE_INDEX_ERROR =
-  'source_index must be a single concrete, non-hidden index (no wildcards, lists, remote clusters, or alerts aliases)';
+  'source_index must be a single concrete, non-hidden index, optionally prefixed by one remote cluster (no wildcards, lists, or alerts aliases)';
