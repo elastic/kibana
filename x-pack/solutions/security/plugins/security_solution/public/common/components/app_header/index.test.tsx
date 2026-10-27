@@ -8,6 +8,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { BehaviorSubject } from 'rxjs';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
@@ -92,6 +95,35 @@ describe('SecurityAppHeader', () => {
     renderWithProvider(<SecurityAppHeader title="My page" />);
 
     expect(screen.queryByTestId('securityAppHeaderAddIntegrations')).not.toBeInTheDocument();
+  });
+
+  it('keeps the documentation link instead of the legacy action menu when there are no menu items', async () => {
+    (useAddIntegrationsMenuItem as jest.Mock).mockReturnValue(undefined);
+    const chrome = chromeServiceMock.createStartContract();
+    const mount: MountPoint = jest.fn(() => () => undefined);
+    const chromeWithLegacyMenu = {
+      ...chrome,
+      componentDeps: {
+        ...chrome.componentDeps,
+        legacyActionMenu$: new BehaviorSubject<MountPoint | undefined>(mount),
+      },
+    };
+
+    render(
+      <MemoryRouter>
+        <MockAppHeaderProvider chrome={chromeWithLegacyMenu}>
+          <SecurityAppHeader title="My page" docLink="https://example.com/docs" />
+        </MockAppHeaderProvider>
+      </MemoryRouter>
+    );
+
+    await openAppMenuOverflow();
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toHaveAttribute(
+      'href',
+      'https://example.com/docs'
+    );
+    expect(mount).not.toHaveBeenCalled();
   });
 
   it('merges the "ML job settings" item and renders its flyout when open, on a detections route', async () => {
