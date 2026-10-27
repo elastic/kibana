@@ -249,21 +249,23 @@ describe('Inbound events HTTP API', () => {
     expect(response.text).toBe('');
     expect(dispatchConnectorEventsMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        eventId: 'slack2.slash_command',
-        connectorId: created.id,
-        connectorTypeId: '.slack2',
-        correlationKey: '13345224609.738474920.8088930838d88f008e0',
-        payload: {
-          workspace: 'T123',
-          channel: 'C123',
-          channelName: 'general',
-          user: 'U123',
-          userName: 'ada',
-          command: '/investigate',
-          text: 'host & cluster=one + café',
-          responseUrl: 'https://hooks.slack.com/commands/T123/1/secret',
-          apiAppId: 'A123',
-        },
+        params: expect.objectContaining({
+          eventId: 'slack2.slash_command',
+          connectorId: created.id,
+          connectorTypeId: '.slack2',
+          correlationKey: '13345224609.738474920.8088930838d88f008e0',
+          payload: {
+            workspace: 'T123',
+            channel: 'C123',
+            channelName: 'general',
+            user: 'U123',
+            userName: 'ada',
+            command: '/investigate',
+            text: 'host & cluster=one + café',
+            responseUrl: 'https://hooks.slack.com/commands/T123/1/secret',
+            apiAppId: 'A123',
+          },
+        }),
       })
     );
   });
