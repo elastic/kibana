@@ -1,5 +1,22 @@
+# -----
+# Copy from internal roles config in elasticsearch-controller
+# -----
+
 # Predefined roles for "Security" "SearchAiLake" (tier) project types
-# Source: https://github.com/elastic/elasticsearch-controller/blob/main/internal/config/roles/security.search_ai_lake.yaml
+
+#-------------------------------------------------------------------------------------------------
+# >>> Ai4DSoC ROLES (and privileges) <<<
+#
+# Updates to predefined roles must also be done in Kibana. The file is currently located here:
+#
+# src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/search_ai_lake/roles.yml
+#
+# Please ensure a PR is opened to update the above as well.
+#
+# Two roles based on requirements:
+# - analyst: Core security operations with read/write access
+# - soc_manager: Full administrative capabilities
+# -------------------------------------------------------------------------------------------------
 
 _search_ai_lake_analyst:
   metadata:
@@ -10,6 +27,7 @@ _search_ai_lake_analyst:
     - "monitor_connector"
     - "monitor_inference"
     - "monitor_ml"
+    - "read_project_routing"
   indices:
     - names:
         - ".alerts-security*"
@@ -47,14 +65,14 @@ _search_ai_lake_analyst:
         - ".threat-intel-indicators-*"
       privileges:
         - "read"
+
   applications:
     - application: "kibana-.kibana"
       privileges:
         - "feature_ml.read"
         - "feature_siemV5.all"
         - "feature_securitySolutionRulesV2.all"
-        - "feature_securitySolutionCasesV2.all"
-        - "feature_securitySolutionCasesV3.cases_manage_templates"
+        - "feature_securitySolutionCasesV3.all"
         - "feature_securitySolutionAssistant.all"
         - "feature_securitySolutionAttackDiscovery.minimal_all"
         - "feature_builtInAlerts.all"
@@ -76,6 +94,7 @@ _search_ai_lake_soc_manager:
     - "monitor_connector"
     - "monitor_inference"
     - "monitor_ml"
+    - "read_project_routing"
   indices:
     - names:
         - "apm-*-transaction*"
@@ -132,6 +151,7 @@ _search_ai_lake_soc_manager:
         - ".threat-intel-indicators-*"
       privileges:
         - "read"
+
   applications:
     - application: "kibana-.kibana"
       privileges:
@@ -140,8 +160,7 @@ _search_ai_lake_soc_manager:
         - "feature_siemV5.workflow_insights_all"
         - "feature_siemV5.soc_management_all"
         - "feature_securitySolutionRulesV2.all"
-        - "feature_securitySolutionCasesV2.all"
-        - "feature_securitySolutionCasesV3.cases_manage_templates"
+        - "feature_securitySolutionCasesV3.all"
         - "feature_securitySolutionAssistant.all"
         - "feature_securitySolutionAttackDiscovery.all"
         - "feature_actions.all"
