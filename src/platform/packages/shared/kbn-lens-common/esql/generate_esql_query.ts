@@ -786,6 +786,9 @@ export function generateEsqlQuery(
             expr: quoteEsqlColumnRef(fieldExpr),
             direction: 'ASC',
           };
+          // DSL's Other request requires the field to exist, so documents without it stay out of
+          // every bucket instead of falling into "Other".
+          queryParts.push(`WHERE ${fieldExpr} IS NOT NULL`);
           queryParts.push(
             buildOuterTopNOtherRemap({
               source,

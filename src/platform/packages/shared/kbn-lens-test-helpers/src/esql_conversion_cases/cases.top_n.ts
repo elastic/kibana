@@ -61,7 +61,9 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     castToString = false,
     ...args
   }: Parameters<typeof outerTopNSubquery>[0] & { castToString?: boolean }) =>
-    `EVAL ${args.field} = CASE(${args.field} IN (${outerTopNSubquery(args)}), ${
+    `WHERE ${args.field} IS NOT NULL | EVAL ${args.field} = CASE(${
+      args.field
+    } IN (${outerTopNSubquery(args)}), ${
       castToString ? `TO_STRING(${args.field})` : args.field
     }, "Other"::KEYWORD)`;
 
