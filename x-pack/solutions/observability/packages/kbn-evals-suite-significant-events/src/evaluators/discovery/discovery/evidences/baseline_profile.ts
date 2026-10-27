@@ -31,7 +31,9 @@ const median = (values: readonly number[]): number => {
 
 /**
  * The per-day counts of an `esql_results` payload that has a `day` and a `count` column, which is the
- * shape of a baseline query's result. Found by its columns, never by the query text or by wording.
+ * shape of a baseline query's result. Found by its columns, never by wording; scoped to the seeded
+ * failure by the query text (see `baselineResults`). `days` counts the rows returned: ES|QL omits
+ * buckets with no rows, so it is the days that have rows.
  */
 const toDayCounts = (data: Record<string, unknown>): DayCount[] | undefined => {
   const { columns, values } = data;
@@ -65,17 +67,26 @@ export const measureBaseline = (rows: readonly DayCount[]): MeasuredBaseline => 
   };
 };
 
-/** The baseline results the agent obtained, in call order. */
-export const baselineResults = (steps: ConverseStep[]): DayCount[][] =>
-  extractOrderedToolCalls(steps).flatMap(({ results }) =>
-    results.flatMap((result) => {
+/**
+ * The baseline results the agent obtained, in call order. With a `phrase`, only results of a query
+ * that contains it count: a per-day count of another scope is not this failure's baseline.
+ */
+export const baselineResults = (steps: ConverseStep[], phrase?: string): DayCount[][] =>
+  extractOrderedToolCalls(steps).flatMap(({ params, results }) => {
+    if (
+      phrase !== undefined &&
+      !(typeof params.query === 'string' && params.query.includes(phrase))
+    ) {
+      return [];
+    }
+    return results.flatMap((result) => {
       const counts =
         isRecord(result) && result.type === 'esql_results' && isRecord(result.data)
           ? toDayCounts(result.data)
           : undefined;
       return counts ? [counts] : [];
-    })
-  );
+    });
+  });
 
 const isWithin = (value: number, [min, max]: readonly [number, number]): boolean =>
   value >= min && value <= max;
@@ -123,12 +134,14 @@ export const baselineProfileEvaluator: DiscoveryEvaluator = {
         explanation: 'The scenario seeds no baseline pattern to compare with',
       });
     }
-    const candidates = baselineResults(output.steps ?? []);
+    const candidates = baselineResults(output.steps ?? [], seeded.phrase);
     if (candidates.length === 0) {
       return Promise.resolve({
         score: 0,
         label: 'not-run',
-        explanation: 'The agent never obtained a baseline result (a per-day count of the failure)',
+        explanation: seeded.phrase
+          ? 'The agent never obtained a per-day count from a query for the seeded failure phrase'
+          : 'The agent never obtained a baseline result (a per-day count of the failure)',
       });
     }
     // A flawed first attempt, or a per-day count of another scope, is not the baseline: any one

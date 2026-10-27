@@ -60,6 +60,20 @@ describe.each(factories.map((factory) => [factory.name, factory] as const))(
       return { result, evaluate };
     };
 
+    it('abstains by default when no event was written', async () => {
+      const { criteriaFn, evaluate } = createJudge();
+      const evaluator = factory({ criteriaFn: criteriaFn as never });
+      const result = await evaluator.evaluate({
+        input: {},
+        output: { significantEvents: [] } as never,
+        expected: { criteria: [] },
+        metadata: null,
+      });
+
+      expect(result.score).toBeNull();
+      expect(evaluate).not.toHaveBeenCalled();
+    });
+
     it('judges the output when an event was written', async () => {
       const { result, evaluate } = run({ significantEvents: [{ event_id: 'e1' }] });
 

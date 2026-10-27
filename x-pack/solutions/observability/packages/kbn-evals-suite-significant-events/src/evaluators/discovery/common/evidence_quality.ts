@@ -88,7 +88,8 @@ const SIGNAL_EVIDENCE_CONSISTENCY_CRITERIA: EvaluationCriterion[] = [
 
 /**
  * Abstains for a run that wrote no event: there are no signals or narrative to judge, and the
- * missing event is already scored by the grouping, status and scenario evaluators.
+ * missing event is already scored 0 by `grouping_correctness`. Scores of the judged evaluators rise
+ * against runs that were judged without an event, so do not read that shift as a prompt improvement.
  */
 export const skipWhenNoSignificantEvents = (output: TaskOutput): string | undefined => {
   const events = (output as { significantEvents?: unknown[] } | null)?.significantEvents;

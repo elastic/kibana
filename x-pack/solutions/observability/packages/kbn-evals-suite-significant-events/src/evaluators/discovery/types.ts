@@ -35,6 +35,8 @@ export interface ExpectedBaseline {
   failed_days: Range;
   days: Range;
   factor?: Range;
+  /** The seeded failure phrase: only a result whose query contains it is the baseline of this failure. */
+  phrase?: string;
 }
 
 export interface DiscoveryAgentOutput extends AgentOutputBase {

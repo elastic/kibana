@@ -27,17 +27,17 @@ export const SIGNIFICANT_EVENTS_ALERT_SOURCE = 'elastic.significant_events' as c
 export const MAX_TIMESTAMP_LENGTH = 64;
 
 /**
- * Content contracts for the free-text narrative fields: the single source of truth for what each
- * field holds. They feed the tool schema descriptions and the eval judge; the discovery prompt
- * refers to the field descriptions and never embeds these strings. Bounded by sentences, not characters.
- */
-/**
  * The event's title, symptom_hypothesis, summary, assessment_note and severity describe one event
  * from different angles, so they have to agree.
  */
 export const NARRATIVE_AGREEMENT_RULE =
   'Agreement: the event’s text fields and its severity describe one event from different angles. They name the same operations and paths, state the same impact and completion, and none contradicts a signal description or another field.';
 
+/**
+ * Content contracts for the free-text narrative fields: the single source of truth for what each
+ * field holds. They feed the tool schema descriptions and the eval judge; the discovery prompt
+ * refers to the field descriptions and never embeds these strings. Bounded by sentences, not characters.
+ */
 export const SYMPTOM_HYPOTHESIS_ROLE_RULE = dedent`
   Reader: the on-call engineer who needs the mechanism, not the symptoms. This is the causal explanation, not the observed-state report.
   At most three sentences. Sentence 1: the deepest evidence-supported failing component or dependency, its concrete failure signature, and how it reaches the affected operation. Sentence 2, when the confirming descriptions name several distinct targets or paths: how they relate, a component they share or independent failures, never only the first path. Sentence 3, only when the descriptions state how the failure ended: that outcome, as stated. For an event grouping several detections, the sentences name the earliest abnormal rule and how the others follow along grounded edges.

@@ -398,7 +398,7 @@ const BALANCE_READER_WEAK_DETECTION_EVENT: Partial<SignificantEvent> = {
 };
 
 const MINUTES_PER_DAY = 24 * 60;
-const daysAgo = (days: number): number => days * MINUTES_PER_DAY;
+const daysToMinutes = (days: number): number => days * MINUTES_PER_DAY;
 
 /**
  * A seeded failure pattern with a known rate over time, graded on the baseline facts the agent
@@ -485,7 +485,7 @@ const baselineScenario = ({
             },
           ]
         : [],
-      ...(expectedBaseline ? { expected_baseline: expectedBaseline } : {}),
+      ...(expectedBaseline ? { expected_baseline: { ...expectedBaseline, phrase } } : {}),
       criteria: [{ id: `baseline-${slug}`, text: criterion, score: 2 }],
     },
     metadata: { difficulty: 'medium', failure_domain: 'baseline-profile', failure_mode: slug },
@@ -505,7 +505,7 @@ const BASELINE_SCENARIOS: DiscoveryScenario[] = [
     ruleUuid: 'b45e11ae-0001-4000-8000-000000000001',
     title: 'Checkout session failures',
     phrase: 'checkout session creation failed: inventory lookup timed out, order not created',
-    segments: [{ from_minutes_ago: daysAgo(8), to_minutes_ago: 0, rate_per_minute: 1 }],
+    segments: [{ from_minutes_ago: daysToMinutes(8), to_minutes_ago: 0, rate_per_minute: 1 }],
     expectedBaseline: { failed_days: [7, 8], days: [7, 8], factor: [0.5, 2] },
     criterion:
       'Describes the failure as long-standing: present on every day of the window at about the same rate, not as a new failure.',
@@ -516,8 +516,8 @@ const BASELINE_SCENARIOS: DiscoveryScenario[] = [
     title: 'Payment authorization failures surging',
     phrase: 'payment authorization request failed: upstream timeout, request not completed',
     segments: [
-      { from_minutes_ago: daysAgo(8), to_minutes_ago: daysAgo(2), rate_per_minute: 1 },
-      { from_minutes_ago: daysAgo(2), to_minutes_ago: 0, rate_per_minute: 20 },
+      { from_minutes_ago: daysToMinutes(8), to_minutes_ago: daysToMinutes(2), rate_per_minute: 1 },
+      { from_minutes_ago: daysToMinutes(2), to_minutes_ago: 0, rate_per_minute: 20 },
     ],
     expectedBaseline: { failed_days: [7, 8], days: [7, 8], factor: [5, 40] },
     expectedSeverity: 'high',
@@ -531,7 +531,7 @@ const BASELINE_SCENARIOS: DiscoveryScenario[] = [
     phrase: 'task nudge poll raised index_not_found_exception: no such index [.demo_task_nudge]',
     level: null,
     attributes: { 'event.name': 'exception', 'error.exception.handled': true },
-    segments: [{ from_minutes_ago: daysAgo(8), to_minutes_ago: 0, rate_per_minute: 1 }],
+    segments: [{ from_minutes_ago: daysToMinutes(8), to_minutes_ago: 0, rate_per_minute: 1 }],
     // The rows name an exception, and carry the cue that the caller handled it: the agent must read both.
     criterion:
       'Any event it writes is rated below high, and says that every matched row is an exception its caller handled instead of reporting the request as blocked.',

@@ -72,14 +72,15 @@ Response: `{ "columns": [{ "name": "..." }], "values": [["..."]] }`. `values` is
 Apply to every `platform_core_execute_esql` call. The Confirm and Profile steps add only what is specific to them.
 
 Placeholders used in the Confirm and Profile steps:
-- `{source}`: the KI query's `FROM` target.
+- `{from_target}`: the KI query's `FROM` target.
 - `{predicate}`: the KI query's `WHERE` condition, without the keyword. Examples always write `WHERE`.
 - `{scope}`: the field conditions that select the operation (the Profile step splits `{predicate}` into
   `{scope}` and `{failure}`).
 - `{failure}`: the rest of `{predicate}`.
 
-1. **Dispatch.** Send the checks of one step in parallel, one call per check, all in one response, at
-   most 10 calls per response. Never run one check and wait before sending the rest of that step.
+1. **Dispatch.** Send the checks within one rule's step in parallel, one call per check, all in one
+   response, at most 10 calls per response. Never run one check and wait before sending the rest of
+   that rule's step. Rules themselves run one after another, as the Confirm step orders.
 2. **Per rule, unconditional.** Every rule gets its own queries, derived from its own KI query. Never
    skip a rule for overlap or grouping reasons, and never reuse another rule's figures. Queries with
    identical bodies and the same `time_range` run once, and the result counts for each rule. A
@@ -287,10 +288,10 @@ Reading `baseline`:
   first `STATS`, and report the failing count without a share.
 
 ```
-Good (spread, isolating scope): FROM {source} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS affected = COUNT(*) WHERE {failure}, total = COUNT(*) BY service.name | EVAL entry = CONCAT(service.name, ": ", TO_STRING(affected)) | STATS failed = SUM(affected), total_lines = SUM(total), services_hit = COUNT(*) WHERE affected > 0, services = COUNT(*), top_services = TOP(affected, 10, "desc", entry) WHERE affected > 0
-Good (spread, no isolating scope; use only when {scope} does not isolate the operation): FROM {source} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {failure} | STATS affected = COUNT(*) BY service.name | EVAL entry = CONCAT(service.name, ": ", TO_STRING(affected)) | STATS failed = SUM(affected), services_hit = COUNT(*), top_services = TOP(affected, 10, "desc", entry)
-Good (trend, buckets):      FROM {source} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | WHERE {failure} | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 50, ?_tstart, ?_tend) | SORT bucket ASC
-Good (baseline):           FROM {source} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS count = COUNT(*) WHERE {failure}, lines = COUNT(*), earliest = MIN(@timestamp) WHERE {failure} BY day = BUCKET(@timestamp, 1 day, ?_tstart, ?_tend) | SORT day ASC
+Good (spread, isolating scope): FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS affected = COUNT(*) WHERE {failure}, total = COUNT(*) BY service.name | EVAL entry = CONCAT(service.name, ": ", TO_STRING(affected)) | STATS failed = SUM(affected), total_lines = SUM(total), services_hit = COUNT(*) WHERE affected > 0, services = COUNT(*), top_services = TOP(affected, 10, "desc", entry) WHERE affected > 0
+Good (spread, no isolating scope; use only when {scope} does not isolate the operation): FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {failure} | STATS affected = COUNT(*) BY service.name | EVAL entry = CONCAT(service.name, ": ", TO_STRING(affected)) | STATS failed = SUM(affected), services_hit = COUNT(*), top_services = TOP(affected, 10, "desc", entry)
+Good (trend, buckets):      FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | WHERE {failure} | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 50, ?_tstart, ?_tend) | SORT bucket ASC
+Good (baseline):           FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS count = COUNT(*) WHERE {failure}, lines = COUNT(*), earliest = MIN(@timestamp) WHERE {failure} BY day = BUCKET(@timestamp, 1 day, ?_tstart, ?_tend) | SORT day ASC
 Avoid: BY {function}({text field}) of unbounded output   -- millions of buckets; a derived key is allowed only when bounded (see "Group by a low-cardinality field")
 ```
 
@@ -325,11 +326,11 @@ search.
    - Resolve a target only when its identity is uniquely supported. If resolution remains ambiguous,
      retain the grounded source and dependency path without inventing a target.
 
-   Example, with placeholders: a confirming signal shows `{source}` unable to reach a store; a fetched
-   dependency has `source: {source}`, `target: {store-technology}`, and connection-timeout evidence; one
-   fetched entity matches `{store-technology}` and is attributed to `{source}`. Activate the path, select
+   Example, with placeholders: a confirming signal shows `{caller}` unable to reach a store; a fetched
+   dependency has `source: {caller}`, `target: {store-technology}`, and connection-timeout evidence; one
+   fetched entity matches `{store-technology}` and is attributed to `{caller}`. Activate the path, select
    that entity as causal, and keep the dependency as blast radius. If several entities match
-   `{store-technology}` without attribution, select no target and use `{source}` as the causal fallback.
+   `{store-technology}` without attribution, select no target and use `{caller}` as the causal fallback.
 
 2. **Build `causal_features`.** Add the entity or infrastructure that the query KI identifies as
    failed, with a confirming row as corroboration or, when the KI identifies none, as the identity.

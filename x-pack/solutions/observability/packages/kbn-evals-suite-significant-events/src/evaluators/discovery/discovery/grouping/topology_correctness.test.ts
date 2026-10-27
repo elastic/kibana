@@ -169,9 +169,18 @@ describe('scoreTopologyCorrectness', () => {
     expect(scoreTopologyCorrectness(actual, expected).score).toBe(1);
   });
 
-  it('does not deflate precision for duplicate feature IDs in actual', () => {
-    // actual has ['svc-a', 'svc-a'] (duplicate) — with raw array length as denominator
-    // precision would be 0.5 even though the unique set is exactly right.
+  it('penalizes padding the topology with many entries beyond the expected set', () => {
+    const actual = [
+      event('e1', ['uuid-1'], ['svc-a', 'x1', 'x2', 'x3', 'x4'], []),
+    ] as unknown as SignificantEvent[];
+    const expected = [event('e1', ['uuid-1'], ['svc-a'], [])];
+
+    const result = scoreTopologyCorrectness(actual, expected);
+    expect(result.score).toBeCloseTo(0.2);
+    expect(result.explanation).toMatch(/beyond the expected set/);
+  });
+
+  it('counts duplicate feature IDs in actual once', () => {
     const actualItem = {
       ...event('e1', ['uuid-1'], [], []),
       causal_features: [feature('svc-a'), feature('svc-a')],

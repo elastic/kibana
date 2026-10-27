@@ -141,12 +141,13 @@ export const seedChronicBackground = async ({
     const operations = timestamps
       .slice(start, start + BULK_CHUNK_DOCS)
       .flatMap((ts) => [{ create: {} }, buildChronicDocument({ config, timestamp: ts })]);
-    const bulkResponse = await esClient.bulk({ index: streamName, operations, refresh: true });
+    const bulkResponse = await esClient.bulk({ index: streamName, operations, refresh: false });
     if (bulkResponse.errors) {
       const firstError = bulkResponse.items.find((item) => item.create?.error)?.create?.error;
       throw new Error(`Chronic background bulk seed failed: ${JSON.stringify(firstError)}`);
     }
   }
+  await esClient.indices.refresh({ index: streamName });
 
   // Clean up any previously seeded KI doc so op_type: 'create' doesn't conflict on repeat runs.
   await esClient

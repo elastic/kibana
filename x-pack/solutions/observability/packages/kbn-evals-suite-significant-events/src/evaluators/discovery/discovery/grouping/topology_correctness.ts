@@ -18,6 +18,9 @@ export interface TopologyScore {
   explanation: string;
 }
 
+/** Entries beyond the expected set that score as recall only (the calling service, a dependency). */
+const MAX_UNPENALIZED_EXTRA_IDS = 2;
+
 const topologyExpectedEvents = (
   expectedEvents: Array<Partial<SignificantEvent>>
 ): Array<Partial<SignificantEvent>> =>
@@ -36,7 +39,16 @@ const scoreIdSet = ({
   actualIds: string[];
   expectedIds: string[];
 }): { score: number; explanation?: string } => {
-  const { recall } = setPrf(actualIds, expectedIds);
+  const { recall, precision } = setPrf(actualIds, expectedIds);
+  const extras = new Set(actualIds.filter((id) => !expectedIds.includes(id))).size;
+  if (extras > MAX_UNPENALIZED_EXTRA_IDS) {
+    return {
+      score: Math.min(recall, precision),
+      explanation: `${field}[${eventLabel}]: ${extras} entries beyond the expected set (more than ${MAX_UNPENALIZED_EXTRA_IDS} are penalized) P=${precision.toFixed(
+        2
+      )} R=${recall.toFixed(2)} expected=[${expectedIds.join(',')}] got=[${actualIds.join(',')}]`,
+    };
+  }
   if (recall >= 1) {
     return { score: recall };
   }
@@ -94,7 +106,9 @@ const scoreTopologyFields = ({
 
 /**
  * Recall over the expected causal_features and blast_radius feature IDs: an entry the agent adds
- * beyond the expected set (for example the calling service) is not penalized.
+ * beyond the expected set (for example the calling service) is not penalized, up to
+ * `MAX_UNPENALIZED_EXTRA_IDS`; beyond that the score is capped by precision. The evaluator name is
+ * unchanged, so runs scored as F1 before this change are not comparable.
  * Each expected event is matched to the actual event with the highest rule UUID overlap in signals.
  * Each actual event can only be claimed by one expected event (no double-counting).
  */

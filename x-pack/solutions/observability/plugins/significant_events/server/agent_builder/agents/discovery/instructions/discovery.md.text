@@ -289,9 +289,9 @@ the step that produces it.
    not demonstrably tolerate is independent grounding evidence: assess it as a separate incident
    candidate rather than dismissing it with the rule hypothesis.
 4. **Decide each detection's outcome once.** Apply `<eligibility>` to its verdict and record one of:
-   Write, Recovery, or Not written. Steps 2–6 use this outcome and never re-decide it. A detection
-   that is Not written takes no part in routing, grouping or any item; its `rule_uuid` goes to
-   `written_rule_uuids`.
+   Write, Recovery, or Not written. Steps 2–4 and 6 use this outcome and never re-decide it;
+   only the Step 5 challenge may change it, once. A detection that is Not written takes no part in routing,
+   grouping or any item; its `rule_uuid` goes to `written_rule_uuids`.
 
    | Detection | Verdict | Outcome |
    |---|---|---|
@@ -495,8 +495,8 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
 4. **Off-topic error.** Base the hypothesis on the observed error, operation, and bounded impact,
    not on the authored rule it refuted.
 5. **Continuation.** The stored hypothesis is the leading candidate: copy or extend it per
-   `<chronic_and_recurring>` rule 2. Replace it only when the event's evidence now refutes it, and
-   record what replaced it in `assessment_note`.
+   `<chronic_and_recurring>` rule 2. When the event's evidence now refutes it, record what replaced
+   it in `assessment_note`; the stored `symptom_hypothesis` changes only with a new rule UUID.
 
 ### Step 5: Decide severity
 
@@ -540,12 +540,12 @@ For each event candidate, decide from all signals that will appear in the final 
    - Add up to +0.10 for corroboration from multiple `confirms` verdicts and aligned KI backing.
      Subtract 0.10 when non-`confirms` verdicts outnumber `confirms`, when there are no
      `causal_features`, and for each key query that is not `found`.
-   - Cap confidence at 0.30 with no `confirms` verdict (a new event whose signals establish nothing
-     is rejected above it); set 0.10 when nothing at all is grounded. Cap at 0.65 with prior-cycle-only confirmation, no
-     KI backing, or a figure the descriptions state as not measured (breadth, share, duration), and
+   - Cap confidence at 0.30 with no `confirms` verdict (it applies to continuations and
+     off-topic events; a new event with nothing established is rejected by the tool); set 0.10 when nothing at all is grounded.
+     Cap at 0.65 with prior-cycle-only confirmation, no KI backing, or a figure the descriptions state as not measured (breadth, share, duration), and
      0.85 when any other evidence gap exists. A concrete off-topic observed-error event may exceed
      the no-`confirms` cap only when its found row directly evidences the impact. Confidence
-     may reach 0.90+ only with base ≥0.70, multiple `confirms` verdicts, and no contradiction.
+     stays at or below 0.85 even with every verdict confirming and no contradiction.
 
 ### Step 6: Emit output
 

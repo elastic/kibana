@@ -103,9 +103,10 @@ describe('baselineProfileEvaluator', () => {
     ['a steady failure where a surge was seeded', steadyDays, SURGE, /1\.0×/],
     [
       'fewer failing days than seeded',
-      [0, 0, 0, 1440, 1440, 1440, 1440, 800],
+      // ES|QL returns no row for a day without failures, so the days are simply absent.
+      [1440, 1440, 1440, 1440, 800],
       STEADY,
-      /5 of 8 days/,
+      /5 of 5 days/,
     ],
   ])('scores 0 for %s', async (_name, days, seeded, explanation) => {
     const result = await evaluate([baselineStep(days)], seeded);
@@ -126,6 +127,22 @@ describe('baselineProfileEvaluator', () => {
 
     expect(result.score).toBe(0);
     expect(result.explanation).toMatch(/first of 2.*20\.0×/);
+  });
+
+  it('ignores a per-day result of a query that does not contain the seeded phrase', async () => {
+    const seeded = { ...STEADY, phrase: 'checkout session creation failed' };
+    const otherScope = baselineStep(steadyDays);
+    const ownScope = {
+      ...baselineStep(steadyDays),
+      params: {
+        query: 'FROM logs | WHERE MATCH_PHRASE(body.text, "checkout session creation failed")',
+      },
+    } as unknown as ConverseStep;
+
+    const unscoped = await evaluate([otherScope], seeded);
+    expect(unscoped.score).toBe(0);
+    expect(unscoped.explanation).toMatch(/seeded failure phrase/);
+    expect((await evaluate([otherScope, ownScope], seeded)).score).toBe(1);
   });
 
   it('scores 0 when the factor is asked for but the window is too short to measure it', async () => {

@@ -44,7 +44,7 @@ import { eventsWriteBulkHandler, type EventsWriteInput } from './handler';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
 import { assignStoredSourceIds } from '../../utils/stored_source_fields';
 import { fillDetectionMetadata } from './detection_metadata';
-import { hasConfirmingSignal } from './event_facts';
+import { hasEventWorthySignal } from './event_facts';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
@@ -136,7 +136,7 @@ export const eventsWriteItemSchema = lazySchema(() =>
           } must carry at least one signal.`,
         });
       } else if (item.event_id === undefined) {
-        if (!hasConfirmingSignal(signals)) {
+        if (!hasEventWorthySignal(signals)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ['signals'],
@@ -355,8 +355,9 @@ export function createEventsWriteTool({
        Write a batch of significant events. Always pass the completed object
       \`{ "items": [ ... ] }\` with at least one event item. Never pass \`{}\` or
       \`{ "items": [] }\`. If that missing-items argument error occurs, submit the
-      already-completed object once. Do not retry a populated payload rejected for
-      ownership or field validation. If a completed item returns \`unknown_event_id\`,
+      already-completed object once. Retry a populated payload rejected with
+      \`tool_validation_error\` once, correcting only the listed fields; do not retry any other
+      rejection, including ownership. If a completed item returns \`unknown_event_id\`,
       do not retry that item in this run. Do not rerun routing, choose another event, reuse the
       rejected ID, or omit the ID to turn it into a new event. Discovery must leave its rules
       unprocessed so the next cycle routes them again from fresh search results.
