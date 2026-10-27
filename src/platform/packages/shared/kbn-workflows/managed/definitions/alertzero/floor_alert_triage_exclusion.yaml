@@ -1,0 +1,106 @@
+version: "1"
+name: Alert Triage proposal exclusion
+description: >
+  Takes an alert out of its open closure proposal when an analyst gives it another verdict.
+  The analyst opens the proposal's alerts on the Alerts page and tags the alert
+  `az:true_positive` or `az:inconclusive`. This workflow then revises the proposal without it,
+  so the reviewer sees the smaller set, and notes it in the proposal's Investigation.
+
+  Nothing here is needed for safety: the close action skips alerts that carry another verdict
+  even if the proposal was approved first.
+enabled: true
+tags:
+  - security
+  - alertzero
+  - alert-triage
+
+# The filter keeps most tag changes out, such as the sweep's `az:false_positive` and its key tags.
+# It still lets through the re-tags of a dismissed or expired proposal and the re-tags this
+# workflow makes. Those start a run that does nothing: the first step ignores every alert that is
+# not in a pending proposal.
+triggers:
+  - type: security.alertTagsChanged
+    on:
+      condition: >-
+        event.tagsAdded: "az:true_positive" or event.tagsAdded: "az:inconclusive"
+        or event.tagsRemoved: "az:false_positive"
+
+consts:
+  author_name: "Alert Triage worker"
+
+steps:
+  # Finds the proposal of each alert by its `az:proposal:<root id>` tag, and revises the live
+  # revision without the excluded alerts. Joins that landed since are kept, because the step
+  # reads the head again before it revises. When the caller cannot revise proposals, or the
+  # revise keeps conflicting, the proposal still lists the alert: `revised` is false for it.
+  - name: exclude_alerts
+    type: alertzero.triage.excludeFromProposal
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      alert_ids: "${{ event.alertIds }}"
+
+  - name: count_excluded
+    type: data.set
+    with:
+      excluded_count: "${{ steps.exclude_alerts.output.excluded_alert_ids | size }}"
+      needs_verdict_count: "${{ steps.exclude_alerts.output.needs_verdict_alert_ids | size }}"
+
+  # An analyst excluded these, so the model's verdict no longer stands. `az:model_fp` goes, as it
+  # does when a proposal is dismissed. `az:false_positive` goes too, in case the analyst left it.
+  # A chunk of 500 ids keeps the number of recorded steps small for a large bulk exclusion.
+  - name: untag_excluded_alerts
+    type: foreach
+    foreach: "${{ steps.exclude_alerts.output.excluded_alert_ids | chunk: 500 | json }}"
+    steps:
+      - name: untag_excluded_chunk
+        type: kibana.SetAlertTags
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+          continue: true
+        with:
+          ids: "${{ foreach.item }}"
+          tags:
+            tags_to_add: []
+            tags_to_remove:
+              - "az:false_positive"
+              - "az:model_fp"
+
+  # An alert with no verdict tag goes back into the sweep, which would analyse it again and could
+  # add it to a proposal. The analyst's exclusion becomes a verdict.
+  - name: give_excluded_alerts_a_verdict
+    type: foreach
+    foreach: "${{ steps.exclude_alerts.output.needs_verdict_alert_ids | chunk: 500 | json }}"
+    steps:
+      - name: give_verdict_chunk
+        type: kibana.SetAlertTags
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+          continue: true
+        with:
+          ids: "${{ foreach.item }}"
+          tags:
+            tags_to_add:
+              - "az:inconclusive"
+            tags_to_remove: []
+
+  - name: note_exclusions
+    type: foreach
+    foreach: "${{ steps.exclude_alerts.output.proposals | json }}"
+    steps:
+      - name: post_comment_exclusion
+        type: ai.conversation.add_user_message
+        on-failure:
+          continue: true
+        with:
+          author_name: "{{ consts.author_name }}"
+          conversation_id: "{{ foreach.item.conversation_id }}"
+          message: >-
+            {{ foreach.item.excluded_count }} alert{% if foreach.item.excluded_count != 1 %}s{% endif %} excluded by an analyst{% if foreach.item.true_positive_count > 0 %}, {{ foreach.item.true_positive_count }} marked true positive. The pattern may be too coarse for one proposal{% endif %}.
+            {% if foreach.item.revised %}The proposal now lists {{ foreach.item.remaining_count }} alert{% if foreach.item.remaining_count != 1 %}s{% endif %} (revision {{ foreach.item.revision }}).{% else %}The proposal could not be revised, so it still lists {% if foreach.item.excluded_count == 1 %}it{% else %}them{% endif %}. {% if foreach.item.excluded_count == 1 %}It{% else %}They{% endif %} will not be closed when the proposal is approved.{% endif %}

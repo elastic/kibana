@@ -25,6 +25,7 @@ import {
   type SummarizeInvestigationStepDependencies,
 } from './summarize_investigation';
 import type { PackageReportStepDependencies } from './package_report/package_report_step';
+import { getTriageExcludeFromProposalStepDefinition } from './alert_triage/exclude_from_proposal_step';
 import {
   getTriageGroupFpCandidatesStepDefinition,
   getTriageJoinProposalStepDefinition,
@@ -97,6 +98,9 @@ export const registerStepDefinitions = ({
     getTriageGroupFpCandidatesStepDefinition(groupingDeps)
   );
   workflowsExtensions.registerStepDefinition(getTriageJoinProposalStepDefinition(groupingDeps));
+  workflowsExtensions.registerStepDefinition(
+    getTriageExcludeFromProposalStepDefinition({ getProposals: grouping.getProposals, logger })
+  );
 };
 
 export { getPackageReportStepDefinition } from './package_report';

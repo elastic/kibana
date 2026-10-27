@@ -62,6 +62,9 @@ const readHistory = async (
   }
 };
 
+/** The most heads one lookup reads: the index's default `max_result_window`. */
+export const MAX_HEADS = 10_000;
+
 export interface GroupProposalsStepDependencies {
   getProposals: () => ProposalsPluginStart;
   getWorkflowsManagement: () => WorkflowExecutionReader | undefined;
@@ -88,7 +91,7 @@ const toApiError = (error: unknown, action: string): ExecutionError =>
         message: error instanceof Error ? error.message : `Failed to ${action}`,
       });
 
-const toHead = (proposal: {
+export const toHead = (proposal: {
   id: string;
   rootProposalId?: string;
   revision?: number;
