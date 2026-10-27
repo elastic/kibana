@@ -12,8 +12,19 @@ jest.mock('uuid', () => ({
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
 import { ACTION_POLICY_ATTACHMENT_TYPE, RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { z } from '@kbn/zod/v4';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { createAttachmentsClient } from './attachments_client';
+
+const ruleData = {
+  kind: 'alert',
+  metadata: { name: 'High CPU' },
+  time_field: '@timestamp',
+  schedule: { every: '5m', lookback: '15m' },
+  query: { base: 'FROM metrics-* | LIMIT 10' },
+};
+
+const dashboardSchema = z.object({ title: z.string() });
 
 const record = (
   id: string,
@@ -82,30 +93,79 @@ describe('createAttachmentsClient', () => {
         record('rule-att', RULE_ATTACHMENT_TYPE, {}),
       ]);
 
-      const dashboards = createAttachmentsClient(attachments).ofType<{ title: string }>(
-        'dashboard'
-      );
+      const dashboards = createAttachmentsClient(attachments).ofType('dashboard', dashboardSchema);
 
       expect(dashboards.type).toBe('dashboard');
       expect(dashboards.list().map(({ id, origin, data }) => ({ id, origin, data }))).toEqual([
         { id: 'dash-att', origin: 'dash-so-id', data: { title: 'Overview' } },
       ]);
     });
+
+    it('keeps workflow payloads that include fields outside yaml, workflowId, and name', () => {
+      const data = {
+        yaml: 'steps: []',
+        workflowId: 'wf-1',
+        clientDiagnostics: [{ severity: 'warning', message: 'unused', source: 'editor' }],
+        readOnlyReason: 'managed',
+      };
+      attachments.getActive.mockReturnValue([
+        record('wf-att', WORKFLOW_YAML_ATTACHMENT_TYPE, data),
+      ]);
+
+      expect(createAttachmentsClient(attachments).workflows.list()).toEqual([
+        expect.objectContaining({ id: 'wf-att', data }),
+      ]);
+    });
+
+    it('skips attachments whose current version has no object payload', () => {
+      attachments.getActive.mockReturnValue([
+        record('wf-att', WORKFLOW_YAML_ATTACHMENT_TYPE, { yaml: 'a' }),
+        {
+          id: 'empty-att',
+          type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+          current_version: 1,
+          versions: [],
+        } as never,
+      ]);
+
+      expect(createAttachmentsClient(attachments).workflows.list().map(({ id }) => id)).toEqual([
+        'wf-att',
+      ]);
+    });
   });
 
   describe('get', () => {
-    it('returns the attachment when it matches the client type', () => {
+    it('returns the attachment when its payload is rule data', () => {
       attachments.getAttachmentRecord.mockReturnValue(
-        record('rule-att', RULE_ATTACHMENT_TYPE, { metadata: { name: 'r' } }, { origin: 'r-1' })
+        record('rule-att', RULE_ATTACHMENT_TYPE, ruleData, { origin: 'r-1' })
       );
 
       expect(createAttachmentsClient(attachments).rules.get('rule-att')).toEqual(
         expect.objectContaining({
           id: 'rule-att',
           origin: 'r-1',
-          data: { metadata: { name: 'r' } },
+          data: ruleData,
         })
       );
+    });
+
+    it('returns undefined when a rule attachment payload is action policy data', () => {
+      attachments.getAttachmentRecord.mockReturnValue(
+        record('rule-att', RULE_ATTACHMENT_TYPE, { name: 'Notify' })
+      );
+
+      expect(createAttachmentsClient(attachments).rules.get('rule-att')).toBeUndefined();
+    });
+
+    it('returns undefined when the current version has no object payload', () => {
+      attachments.getAttachmentRecord.mockReturnValue({
+        id: 'rule-att',
+        type: RULE_ATTACHMENT_TYPE,
+        current_version: 1,
+        versions: [],
+      } as never);
+
+      expect(createAttachmentsClient(attachments).rules.get('rule-att')).toBeUndefined();
     });
 
     it('returns undefined for attachments of another type', () => {
@@ -146,7 +206,11 @@ describe('createAttachmentsClient', () => {
         id: 'existing-id',
         type: ACTION_POLICY_ATTACHMENT_TYPE,
         origin: 'policy-so-id',
-        versions: [{ data: { name: 'Old' } }, { data: { name: 'Latest' } }],
+        current_version: 2,
+        versions: [
+          { version: 1, data: { name: 'Old' } },
+          { version: 2, data: { name: 'Latest' } },
+        ],
       } as never);
 
       expect(createAttachmentsClient(attachments).actionPolicies.getDraft('existing-id')).toEqual({
@@ -154,6 +218,33 @@ describe('createAttachmentsClient', () => {
         isNew: false,
         origin: 'policy-so-id',
         data: { name: 'Latest' },
+      });
+    });
+
+    it('returns partial rule data that is not yet a complete rule', () => {
+      const partialRule = { metadata: { name: 'High CPU' } };
+      attachments.getAttachmentRecord.mockReturnValue(
+        record('rule-att', RULE_ATTACHMENT_TYPE, partialRule)
+      );
+
+      expect(createAttachmentsClient(attachments).rules.getDraft('rule-att').data).toEqual(
+        partialRule
+      );
+    });
+
+    it('returns an empty draft when the current version has no object payload', () => {
+      attachments.getAttachmentRecord.mockReturnValue({
+        id: 'rule-att',
+        type: RULE_ATTACHMENT_TYPE,
+        current_version: 1,
+        versions: [],
+      } as never);
+
+      expect(createAttachmentsClient(attachments).rules.getDraft('rule-att')).toEqual({
+        attachmentId: 'rule-att',
+        isNew: false,
+        origin: undefined,
+        data: {},
       });
     });
 
@@ -215,7 +306,7 @@ describe('createAttachmentsClient', () => {
     });
 
     it('omits the description when no label is configured', async () => {
-      const dashboards = createAttachmentsClient(attachments).ofType('dashboard');
+      const dashboards = createAttachmentsClient(attachments).ofType('dashboard', z.object({}));
 
       await dashboards.saveDraft(dashboards.getDraft(), {});
 

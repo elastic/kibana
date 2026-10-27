@@ -99,13 +99,15 @@ function buildAttachmentIndex(
   const inMemoryWorkflowIdToYaml = new Map<string, string>();
 
   for (const { id, data } of workflowAttachments.list()) {
-    if (data?.workflowId) {
-      inMemoryWorkflowIds.add(data.workflowId);
-      if (data.yaml) {
-        inMemoryWorkflowIdToYaml.set(data.workflowId, data.yaml);
+    const workflowId = typeof data.workflowId === 'string' ? data.workflowId : undefined;
+    const yaml = typeof data.yaml === 'string' ? data.yaml : undefined;
+    if (workflowId) {
+      inMemoryWorkflowIds.add(workflowId);
+      if (yaml) {
+        inMemoryWorkflowIdToYaml.set(workflowId, yaml);
       }
     }
-    attachmentToWorkflowId.set(id, data?.workflowId);
+    attachmentToWorkflowId.set(id, workflowId);
   }
 
   return { inMemoryWorkflowIds, attachmentToWorkflowId, inMemoryWorkflowIdToYaml };

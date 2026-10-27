@@ -17,7 +17,18 @@ describe('AttachmentsService', () => {
         id: 'rule-att',
         type: RULE_ATTACHMENT_TYPE,
         current_version: 1,
-        versions: [{ version: 1, data: { metadata: { name: 'r' } } }],
+        versions: [
+          {
+            version: 1,
+            data: {
+              kind: 'alert',
+              metadata: { name: 'r' },
+              time_field: '@timestamp',
+              schedule: { every: '5m', lookback: '15m' },
+              query: { base: 'FROM metrics-* | LIMIT 10' },
+            },
+          },
+        ],
       } as never,
     ]);
 

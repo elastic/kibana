@@ -6,17 +6,25 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { z } from '@kbn/zod/v4';
+import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ActionPolicyAttachmentData, RuleAttachmentData } from '@kbn/alerting-v2-schemas';
-import { ACTION_POLICY_ATTACHMENT_TYPE, RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import {
+  ACTION_POLICY_ATTACHMENT_TYPE,
+  RULE_ATTACHMENT_TYPE,
+  actionPolicyAttachmentDataSchema,
+  ruleAttachmentDataSchema,
+} from '@kbn/alerting-v2-schemas';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 
-export interface WorkflowYamlAttachmentData {
-  yaml: string;
-  workflowId?: string;
-  name?: string;
-}
+/**
+ * Workflow attachment payloads are owned by the workflows plugin. This client only
+ * checks that the payload is an object, so a schema change there does not drop it.
+ */
+const workflowYamlAttachmentDataSchema = z.looseObject({});
+
+export type WorkflowYamlAttachmentData = Record<string, unknown>;
 
 export interface AttachmentEntry<TData> {
   /**
@@ -47,9 +55,12 @@ export interface AttachmentDraft<TData> {
 
 export interface TypedAttachmentClient<TData> {
   readonly type: string;
-  /** Returns the latest version of an active or inactive attachment, or `undefined` if it is missing or of another type. */
+  /**
+   * Returns the latest version of an active or inactive attachment, or `undefined`
+   * if it is missing, of another type, or its current payload is not that type.
+   */
   get(attachmentId: string): AttachmentEntry<TData> | undefined;
-  /** Returns the latest version of every active attachment of this type. */
+  /** Returns the latest version of every active attachment of this type whose payload matches. */
   list(): Array<AttachmentEntry<TData>>;
   /** Loads an attachment for editing; an unknown or omitted id yields a new, empty draft. */
   getDraft(attachmentId?: string): AttachmentDraft<TData>;
@@ -63,6 +74,11 @@ export interface TypedAttachmentClientOptions<TData> {
   getName?: (data: Partial<TData>) => string | undefined;
 }
 
+interface AttachmentDataSchema<TData> {
+  safeParse(data: unknown): { success: boolean };
+  partial(): { safeParse(data: unknown): { success: boolean } };
+}
+
 export interface AttachmentsClient {
   rules: TypedAttachmentClient<RuleAttachmentData>;
   actionPolicies: TypedAttachmentClient<ActionPolicyAttachmentData>;
@@ -70,83 +86,110 @@ export interface AttachmentsClient {
   /** Creates a client for any other registered attachment type. */
   ofType<TData>(
     type: string,
+    schema: AttachmentDataSchema<TData>,
     options?: TypedAttachmentClientOptions<TData>
   ): TypedAttachmentClient<TData>;
 }
 
-const toEntry = <TData>(record: VersionedAttachment): AttachmentEntry<TData> => {
-  const latest = record.versions.at(-1);
+const parsedBy =
+  <TData>(schema: { safeParse(data: unknown): { success: boolean } }) =>
+  (data: unknown): data is TData =>
+    schema.safeParse(data).success;
+
+const toEntry = <TData>(
+  record: VersionedAttachment,
+  isData: (data: unknown) => data is TData
+): AttachmentEntry<TData> | undefined => {
+  const latest = getLatestVersion(record);
+  if (!latest || !isData(latest.data)) {
+    return undefined;
+  }
   return {
     id: record.id,
     type: record.type,
-    version: latest?.version ?? record.current_version,
+    version: latest.version,
     description: record.description,
     origin: record.origin,
-    data: latest?.data as TData,
+    data: latest.data,
   };
 };
 
 const createTypedAttachmentClient = <TData>(
   attachments: AttachmentStateManager,
   type: string,
+  schema: AttachmentDataSchema<TData>,
   { label, getName }: TypedAttachmentClientOptions<TData> = {}
-): TypedAttachmentClient<TData> => ({
-  type,
-  get: (attachmentId) => {
-    const record = attachments.getAttachmentRecord(attachmentId);
-    return record?.type === type ? toEntry<TData>(record) : undefined;
-  },
-  list: () =>
-    attachments
-      .getActive()
-      .filter((record) => record.type === type)
-      .map((record) => toEntry<TData>(record)),
-  getDraft: (attachmentId) => {
-    const record = attachmentId ? attachments.getAttachmentRecord(attachmentId) : undefined;
-    if (record && record.type !== type) {
-      throw new Error(
-        `Attachment "${attachmentId}" is of type "${record.type}", expected "${type}".`
-      );
-    }
-    return {
-      attachmentId: attachmentId ?? uuidv4(),
-      isNew: !record,
-      origin: record?.origin,
-      data: (record?.versions.at(-1)?.data as Partial<TData> | undefined) ?? {},
-    };
-  },
-  saveDraft: async ({ attachmentId, isNew }, data) => {
-    const description = label ? `${label}: ${getName?.(data) ?? attachmentId}` : undefined;
-    const attachment = isNew
-      ? await attachments.add({ id: attachmentId, type, description, data })
-      : await attachments.update(attachmentId, { data, description });
+): TypedAttachmentClient<TData> => {
+  const isData = parsedBy<TData>(schema);
+  const isDraft = parsedBy<Partial<TData>>(schema.partial());
+  return {
+    type,
+    get: (attachmentId) => {
+      const record = attachments.getAttachmentRecord(attachmentId);
+      return record?.type === type ? toEntry(record, isData) : undefined;
+    },
+    list: () =>
+      attachments.getActive().flatMap((record) => {
+        if (record.type !== type) {
+          return [];
+        }
+        const entry = toEntry(record, isData);
+        return entry ? [entry] : [];
+      }),
+    getDraft: (attachmentId) => {
+      const record = attachmentId ? attachments.getAttachmentRecord(attachmentId) : undefined;
+      if (record && record.type !== type) {
+        throw new Error(
+          `Attachment "${attachmentId}" is of type "${record.type}", expected "${type}".`
+        );
+      }
+      const latest = record ? getLatestVersion(record) : undefined;
+      return {
+        attachmentId: attachmentId ?? uuidv4(),
+        isNew: !record,
+        origin: record?.origin,
+        data: latest && isDraft(latest.data) ? latest.data : {},
+      };
+    },
+    saveDraft: async ({ attachmentId, isNew }, data) => {
+      const description = label ? `${label}: ${getName?.(data) ?? attachmentId}` : undefined;
+      const attachment = isNew
+        ? await attachments.add({ id: attachmentId, type, description, data })
+        : await attachments.update(attachmentId, { data, description });
 
-    if (!attachment) {
-      throw new Error(
-        `Failed to persist ${label?.toLowerCase() ?? type} attachment "${attachmentId}".`
-      );
-    }
-    return attachment;
-  },
-});
+      if (!attachment) {
+        throw new Error(
+          `Failed to persist ${label?.toLowerCase() ?? type} attachment "${attachmentId}".`
+        );
+      }
+      return attachment;
+    },
+  };
+};
 
 /** Creates a typed client for reading and writing conversation attachments of any type. */
 export const createAttachmentsClient = (
   attachments: AttachmentStateManager
 ): AttachmentsClient => ({
-  rules: createTypedAttachmentClient<RuleAttachmentData>(attachments, RULE_ATTACHMENT_TYPE, {
+  rules: createTypedAttachmentClient(attachments, RULE_ATTACHMENT_TYPE, ruleAttachmentDataSchema, {
     label: 'Rule',
     getName: (data) => data.metadata?.name,
   }),
-  actionPolicies: createTypedAttachmentClient<ActionPolicyAttachmentData>(
+  actionPolicies: createTypedAttachmentClient(
     attachments,
     ACTION_POLICY_ATTACHMENT_TYPE,
+    actionPolicyAttachmentDataSchema,
     { label: 'Action Policy', getName: (data) => data.name }
   ),
   workflows: createTypedAttachmentClient<WorkflowYamlAttachmentData>(
     attachments,
     WORKFLOW_YAML_ATTACHMENT_TYPE,
-    { label: 'Workflow', getName: (data) => data.name }
+    workflowYamlAttachmentDataSchema,
+    {
+      label: 'Workflow',
+      getName: (data) => (typeof data.name === 'string' ? data.name : undefined),
+    }
   ),
-  ofType: (type, options) => createTypedAttachmentClient(attachments, type, options),
+  ofType: (type, schema, options) =>
+    createTypedAttachmentClient(attachments, type, schema, options),
 });
