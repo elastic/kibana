@@ -782,7 +782,7 @@ packages:
   - 'src/platform/packages/shared/kbn-esql-composer'
   - 'src/platform/packages/shared/kbn-esql-language'
   - 'src/platform/packages/shared/kbn-esql-resource-browser'
-  - 'src/platform/packages/shared/kbn-esql-resource-browser/.storybook'
+  - 'src/platform/packages/shared/kbn-esql-resource-browser-storybook-config'
   - 'src/platform/packages/shared/kbn-esql-server-utils'
   - 'src/platform/packages/shared/kbn-esql-types'
   - 'src/platform/packages/shared/kbn-esql-utils'

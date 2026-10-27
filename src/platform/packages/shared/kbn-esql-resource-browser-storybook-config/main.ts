@@ -7,4 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-declare module 'borc';
+import { defaultConfig } from '@kbn/storybook';
+
+module.exports = {
+  ...defaultConfig,
+  stories: ['../kbn-esql-resource-browser/src/**/*.stories.+(tsx|mdx)'],
+  reactOptions: {
+    strictMode: true,
+  },
+};
