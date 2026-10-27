@@ -2057,10 +2057,16 @@ describe('Connector metrics', () => {
     expect(connectorExecuteCounter.add).toHaveBeenCalledTimes(1);
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
+      'connector.sub_action': 'default',
       success: true,
     });
     expect(connectorExecuteDuration.record).toHaveBeenCalledWith(expect.any(Number), {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
+      'connector.sub_action': 'default',
       success: true,
     });
   });
@@ -2075,6 +2081,9 @@ describe('Connector metrics', () => {
 
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
+      'connector.sub_action': 'default',
       success: false,
       'error.type': 'other',
       'error.source': 'user',
@@ -2096,6 +2105,8 @@ describe('Connector metrics', () => {
 
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
       success: false,
       'error.type': 'disabled',
       'error.source': 'framework',
@@ -2111,6 +2122,8 @@ describe('Connector metrics', () => {
 
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
       success: false,
       'error.type': 'rate_limited',
       'error.source': 'user',
@@ -2125,6 +2138,8 @@ describe('Connector metrics', () => {
 
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
       success: false,
       'error.type': 'invalid',
       'error.source': 'user',
@@ -2155,6 +2170,9 @@ describe('Connector metrics', () => {
     });
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
+      'connector.sub_action': 'default',
       success: false,
       'error.type': 'auth_failed',
       'error.source': 'user',

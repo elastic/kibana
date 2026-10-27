@@ -12,6 +12,7 @@ export enum ActionExecutionSourceType {
   HTTP_REQUEST = 'HTTP_REQUEST',
   NOTIFICATION = 'NOTIFICATION',
   BACKGROUND_TASK = 'BACKGROUND_TASK',
+  AGENT_BUILDER = 'AGENT_BUILDER',
 }
 
 export const NOTIFICATIONS_REQUESTER_ID = 'notifications';
@@ -29,6 +30,10 @@ export interface BackgroundTaskSource {
   taskType: string;
 }
 export type BackgroundTaskExecutionSource = ActionExecutionSource<BackgroundTaskSource>;
+export interface AgentBuilderSource {
+  toolId: string;
+}
+export type AgentBuilderExecutionSource = ActionExecutionSource<AgentBuilderSource>;
 export interface NotificationSource {
   requesterId: string;
   connectorId: string;
@@ -72,6 +77,15 @@ export function asBackgroundTaskExecutionSource(
 ): BackgroundTaskExecutionSource {
   return {
     type: ActionExecutionSourceType.BACKGROUND_TASK,
+    source,
+  };
+}
+
+export function asAgentBuilderExecutionSource(
+  source: AgentBuilderSource
+): AgentBuilderExecutionSource {
+  return {
+    type: ActionExecutionSourceType.AGENT_BUILDER,
     source,
   };
 }

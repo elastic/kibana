@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { AgentPromptType, AuthorizationStatus } from '@kbn/agent-builder-common/agents';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -293,6 +294,10 @@ describe('createExecuteConnectorSubActionTool', () => {
         subAction: 'searchMessages',
         subActionParams: { query: 'hello' },
       },
+      source: {
+        type: ActionExecutionSourceType.AGENT_BUILDER,
+        source: { toolId: platformCoreTools.executeConnectorSubAction },
+      },
     });
     expect((result as ToolHandlerStandardReturn).results).toHaveLength(1);
     expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
@@ -319,6 +324,10 @@ describe('createExecuteConnectorSubActionTool', () => {
       params: {
         subAction: 'listChannels',
         subActionParams: {},
+      },
+      source: {
+        type: ActionExecutionSourceType.AGENT_BUILDER,
+        source: { toolId: platformCoreTools.executeConnectorSubAction },
       },
     });
   });

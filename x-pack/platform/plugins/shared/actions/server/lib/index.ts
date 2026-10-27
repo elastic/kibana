@@ -32,6 +32,7 @@ export {
   asHttpRequestExecutionSource,
   isHttpRequestExecutionSource,
   asNotificationExecutionSource,
+  asAgentBuilderExecutionSource,
   isNotificationExecutionSource,
   ActionExecutionSourceType,
   NOTIFICATIONS_REQUESTER_ID,
