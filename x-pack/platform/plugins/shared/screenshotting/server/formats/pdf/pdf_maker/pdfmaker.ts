@@ -26,8 +26,10 @@ import { getFont } from './get_font';
 import type { GeneratePdfResponse } from './worker';
 import { GeneratePdfResponseType, type GeneratePdfRequest, type WorkerData } from './worker';
 
-// Ensure that all dependencies are included in the release bundle.
-import './worker_dependencies';
+// Never-invoked reference so dependency scanners still include the worker's
+// dependencies in the release bundle; executing the import here would load
+// pdfmake (+fontkit) into the main thread, which only the worker needs.
+void (() => import('./worker_dependencies'));
 
 export class PdfMaker {
   private title: string;

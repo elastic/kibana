@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { Type, type AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
+import type { Type, AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
 import type { EsqlRow } from '../row_coercion';
 import { coerceRow } from '../row_coercion';
 import type {
@@ -21,19 +21,25 @@ interface ArrowRecordBatch {
   toArray(): Array<{ toJSON(): EsqlRow }>;
 }
 
-export const decodeArrowBatch = (batch: ArrowRecordBatch): EsqlRow[] => {
+export const decodeArrowBatch = (
+  batch: ArrowRecordBatch,
+  timestampTypeId: Type.Timestamp
+): EsqlRow[] => {
   const dateColumns = new Set(
     batch.schema.fields
-      .filter((field) => field.typeId === Type.Timestamp)
+      .filter((field) => field.typeId === timestampTypeId)
       .map((field) => field.name)
   );
 
   return batch.toArray().map((row) => coerceRow(row.toJSON(), dateColumns));
 };
 
-async function* decodeBatches(reader: AsyncRecordBatchStreamReader): AsyncIterable<EsqlRow[]> {
+async function* decodeBatches(
+  reader: AsyncRecordBatchStreamReader,
+  timestampTypeId: Type.Timestamp
+): AsyncIterable<EsqlRow[]> {
   for await (const batch of reader) {
-    yield decodeArrowBatch(batch);
+    yield decodeArrowBatch(batch, timestampTypeId);
   }
 }
 
@@ -52,12 +58,18 @@ export const arrowFormat = {
     request: EsqlFormatRequest,
     options: EsqlFormatRequestOptions
   ): Promise<EsqlRowBatchSource> {
+    // loaded lazily so apache-arrow stays out of memory until an arrow-format
+    // query actually runs
+    const arrow = await import('apache-arrow/Arrow.node');
     const reader = await esClient.helpers.esql(request, options).toArrowReader();
 
     if (!reader) {
       throw new Error('toArrowReader returned undefined');
     }
 
-    return { batches: decodeBatches(reader), close: () => closeReader(reader) };
+    return {
+      batches: decodeBatches(reader, arrow.Type.Timestamp),
+      close: () => closeReader(reader),
+    };
   },
 } satisfies EsqlResponseFormat;

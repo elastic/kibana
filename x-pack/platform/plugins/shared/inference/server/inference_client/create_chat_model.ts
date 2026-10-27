@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { InferenceChatModel, type InferenceChatModelParams } from '@kbn/inference-langchain';
+import type { InferenceChatModel, InferenceChatModelParams } from '@kbn/inference-langchain';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { InferenceCallbacks } from '@kbn/inference-common';
 import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
@@ -62,6 +62,9 @@ export const createChatModel = async ({
   resolveConnectorId,
   shouldStreamInferenceEndpoint,
 }: CreateChatModelOptions): Promise<InferenceChatModel> => {
+  // loaded lazily so the langchain dependency tree stays out of memory until
+  // a chat model is actually requested
+  const { InferenceChatModel } = await import('@kbn/inference-langchain');
   const client = createClient({
     actions,
     request,

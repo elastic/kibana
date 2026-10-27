@@ -7,7 +7,7 @@
 
 import { readFile } from 'fs/promises';
 
-import * as openpgp from 'openpgp';
+import type { Key } from 'openpgp';
 import type { Logger } from '@kbn/logging';
 
 import type { PackageVerificationResult } from '../../../types';
@@ -22,7 +22,7 @@ interface VerificationResult {
   keyId: string;
 }
 
-let cachedKey: openpgp.Key | undefined | null = null;
+let cachedKey: Key | undefined | null = null;
 
 export async function getGpgKeyIdOrUndefined(): Promise<string | undefined> {
   const key = await getGpgKeyOrUndefined();
@@ -32,14 +32,14 @@ export async function getGpgKeyIdOrUndefined(): Promise<string | undefined> {
   return key.getKeyID().toHex();
 }
 
-export async function getGpgKeyOrUndefined(): Promise<openpgp.Key | undefined> {
+export async function getGpgKeyOrUndefined(): Promise<Key | undefined> {
   if (cachedKey !== null) return cachedKey;
 
   cachedKey = await _readGpgKey();
   return cachedKey;
 }
 
-export async function _readGpgKey(): Promise<openpgp.Key | undefined> {
+export async function _readGpgKey(): Promise<Key | undefined> {
   const config = appContextService.getConfig();
   const logger = appContextService.getLogger();
   const gpgKeyPath = config?.packageVerification?.gpgKeyPath;
@@ -57,7 +57,9 @@ export async function _readGpgKey(): Promise<openpgp.Key | undefined> {
   }
   let key;
   try {
-    key = await openpgp.readKey({
+    // loaded lazily so openpgp stays out of memory until verification runs
+    const { readKey } = await import('openpgp');
+    key = await readKey({
       armoredKey: buffer.toString(),
     });
   } catch (e) {
@@ -120,19 +122,20 @@ async function _verifyPackageSignature({
 }: {
   pkgArchiveBuffer: Buffer;
   pkgArchiveSignature: string;
-  verificationKey: openpgp.Key;
+  verificationKey: Key;
   logger: Logger;
 }): Promise<VerificationResult> {
-  const signature = await openpgp.readSignature({
+  const { readSignature, createMessage, verify } = await import('openpgp');
+  const signature = await readSignature({
     armoredSignature: pkgArchiveSignature,
   });
 
-  const message = await openpgp.createMessage({
+  const message = await createMessage({
     binary: pkgArchiveBuffer,
     format: 'binary',
   });
 
-  const verificationResult = await openpgp.verify({
+  const verificationResult = await verify({
     verificationKeys: verificationKey,
     signature,
     message,

@@ -30,23 +30,25 @@ describe('decodeArrowBatch', () => {
   });
 
   it('coerces BigInt columns to Number', () => {
-    expect(decodeArrowBatch(batchOf([{ host: 'host-a', cpu: BigInt(80) }]))).toEqual([
-      { host: 'host-a', cpu: 80 },
-    ]);
+    expect(
+      decodeArrowBatch(batchOf([{ host: 'host-a', cpu: BigInt(80) }]), Type.Timestamp)
+    ).toEqual([{ host: 'host-a', cpu: 80 }]);
   });
 
   it('truncates timestamp columns to integer epoch millis', () => {
-    expect(decodeArrowBatch(batchOf([{ bucket: 1787580092123.4568 }], ['bucket']))).toEqual([
-      { bucket: 1787580092123 },
-    ]);
+    expect(
+      decodeArrowBatch(batchOf([{ bucket: 1787580092123.4568 }], ['bucket']), Type.Timestamp)
+    ).toEqual([{ bucket: 1787580092123 }]);
   });
 
   it('leaves fractional non-timestamp columns untouched', () => {
-    expect(decodeArrowBatch(batchOf([{ ratio: 12.75 }]))).toEqual([{ ratio: 12.75 }]);
+    expect(decodeArrowBatch(batchOf([{ ratio: 12.75 }]), Type.Timestamp)).toEqual([
+      { ratio: 12.75 },
+    ]);
   });
 
   it('returns an empty array for an empty batch', () => {
-    expect(decodeArrowBatch(batchOf([]))).toEqual([]);
+    expect(decodeArrowBatch(batchOf([]), Type.Timestamp)).toEqual([]);
   });
 });
 

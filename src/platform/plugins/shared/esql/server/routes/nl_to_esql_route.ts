@@ -9,7 +9,6 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
-import { generateEsql, generateEsqlCompletion } from '@kbn/agent-builder-genai-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { EsqlServerPluginStart } from '../types';
 import { createScopedModel, resolveConnectorId } from './helpers';
@@ -90,6 +89,11 @@ export const registerNLtoESQLRoute = (
           });
         }
 
+        // loaded lazily so the langchain dependency tree stays out of memory
+        // until an NL-to-ES|QL request arrives
+        const { generateEsql, generateEsqlCompletion } = await import(
+          '@kbn/agent-builder-genai-utils'
+        );
         const model = await createScopedModel({ inference, request, connectorId });
         const trimmedCurrent = currentQuery?.trim();
         const isCompletionRequest = Boolean(isCompletion && trimmedCurrent);
