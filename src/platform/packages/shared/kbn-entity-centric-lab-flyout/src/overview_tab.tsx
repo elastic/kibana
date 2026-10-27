@@ -115,6 +115,13 @@ export const OverviewTab = ({
         </>
       )}
 
+      {overview.goldenSignals.length > 0 ? (
+        <>
+          <GoldenSignalsRow signals={overview.goldenSignals} />
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
+
       {/* Entity details (metadata) — quick-scan section before the heavier charts */}
       <EuiAccordion
         id={detailsAccordionId}
@@ -165,8 +172,6 @@ export const OverviewTab = ({
         paddingSize="s"
         data-test-subj="entityCentricLabOverviewGoldenSignals"
       >
-        <GoldenSignalsRow signals={overview.goldenSignals} />
-
         {metrics && (primaryA || primaryB || primaryC) ? (
           <>
             <EuiSpacer size="s" />

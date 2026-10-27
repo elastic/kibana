@@ -38,7 +38,7 @@ export interface SecondaryMenuItem {
   badgeType?: BadgeType;
   /**
    * (optional) Right-aligned notification count (e.g. active alerts). Values
-   * above 99 render as `99+`. Omit or `0` hides the badge.
+   * from 10,000 render as `10k`; above 10,000 as `10k+`. Omit or `0` hides the badge.
    */
   notificationCount?: number;
   /**

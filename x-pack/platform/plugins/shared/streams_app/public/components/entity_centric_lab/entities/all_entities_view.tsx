@@ -1239,25 +1239,45 @@ const AllEntitiesViewInner = ({
     }
     return list;
   }, [dataset.entities, categoryScope, cloudProviderScope, cloudServiceScope, isElasticOn]);
+  // Match the left-nav category slice: routed scope wins; on All resources
+  // the category combo applies the same narrowing (Cloud → `provider` set).
+  const effectiveInventoryEntities = useMemo(() => {
+    if (categoryScope) {
+      return scopedEntities;
+    }
+    if (isCrossCategoryPage && categoryFilter !== CATEGORY_FILTER_ALL) {
+      if (categoryFilter === 'cloud') {
+        return scopedEntities.filter((entity) => entity.provider != null);
+      }
+      return scopedEntities.filter((entity) => entity.category === categoryFilter);
+    }
+    return scopedEntities;
+  }, [categoryScope, isCrossCategoryPage, categoryFilter, scopedEntities]);
   // Feed the unified search bar's value autocomplete from the visible slice,
   // so suggestions match the facet dropdowns (e.g. `environment:` offers the
   // same environment names). ElasticOn-only; no-op otherwise.
-  useEntityValueSuggestions(isElasticOn, labDataView, scopedEntities);
+  useEntityValueSuggestions(isElasticOn, labDataView, effectiveInventoryEntities);
   // Tag facets must be computed from the visible slice. If we kept them
   // global, a scoped page would show filter options that always empty the
   // grid (e.g. "Team: payments" on the Databases page when no
   // database is tagged with that team).
-  const tagFacets = useMemo(() => getTagFacets(scopedEntities), [scopedEntities]);
+  const tagFacets = useMemo(
+    () => getTagFacets(effectiveInventoryEntities),
+    [effectiveInventoryEntities]
+  );
   // Entity-type-specific "extra" filters (e.g. Hosts → OS / Cloud provider /
   // Service name). Only surfaced when the inventory is scoped to a category
   // that declares them, and only in ElasticOn.
   const extraFilterDefs = useMemo(
-    () => (isElasticOn && categoryScope ? getCategoryExtraFilters(categoryScope) : []),
-    [isElasticOn, categoryScope]
+    () =>
+      isElasticOn && effectiveCategoryScope && effectiveCategoryScope !== 'cloud'
+        ? getCategoryExtraFilters(effectiveCategoryScope)
+        : [],
+    [isElasticOn, effectiveCategoryScope]
   );
   const extraFacets = useMemo(
-    () => getExtraFacets(scopedEntities, extraFilterDefs),
-    [scopedEntities, extraFilterDefs]
+    () => getExtraFacets(effectiveInventoryEntities, extraFilterDefs),
+    [effectiveInventoryEntities, extraFilterDefs]
   );
   const [activeExtraFilters, setActiveExtraFilters] =
     useState<ActiveExtraFilters>(EMPTY_EXTRA_FILTERS);
@@ -1265,7 +1285,7 @@ const AllEntitiesViewInner = ({
   // to avoid a selection from one category silently narrowing another.
   useEffect(() => {
     setActiveExtraFilters(EMPTY_EXTRA_FILTERS);
-  }, [categoryScope, cloudProviderScope, cloudServiceScope]);
+  }, [effectiveCategoryScope, cloudProviderScope, cloudServiceScope]);
 
   const categoryDescriptor = categoryScope ? getCategoryDescriptor(categoryScope) : undefined;
   // Cloud provider / service descriptors resolved from the scope, used
@@ -1409,13 +1429,6 @@ const AllEntitiesViewInner = ({
     const present = new Set(scopedEntities.map((e) => e.category));
     return visibleCategories.filter((c) => present.has(c.id));
   }, [scopedEntities, visibleCategories]);
-  const categoryFilteredEntities = useMemo(
-    () =>
-      isCrossCategoryPage && categoryFilter !== CATEGORY_FILTER_ALL
-        ? scopedEntities.filter((e) => e.category === categoryFilter)
-        : scopedEntities,
-    [isCrossCategoryPage, categoryFilter, scopedEntities]
-  );
 
   // Kubernetes cluster filter lifted to page level when on the K8s
   // category page OR when "Kubernetes" is selected in the top-level
@@ -1437,7 +1450,7 @@ const AllEntitiesViewInner = ({
 
   // When the K8s filters are driven by the top-level category filter
   // (cross-category page), scope them to category-filtered entities.
-  const k8sBaseEntities = categoryFilteredEntities;
+  const k8sBaseEntities = effectiveInventoryEntities;
   const k8sEntitiesForFilters = useMemo(
     () => (showK8sFilters ? filterEntitiesByResourceType(k8sBaseEntities, k8sResourceType) : k8sBaseEntities),
     [showK8sFilters, k8sBaseEntities, k8sResourceType]
@@ -1504,9 +1517,10 @@ const AllEntitiesViewInner = ({
     []
   );
 
-  // Cloud provider filter — shown on the Cloud category page in ElasticOn,
-  // mirrors the K8s cluster filter. Replaces the old CloudSideNav tree.
-  const isCloudCategoryPage = isCloudScoped && isElasticOn;
+  // Cloud provider filter — shown on the Cloud inventory in ElasticOn,
+  // mirrors the K8s cluster filter (category route or All resources + Cloud).
+  const isCloudCategoryPage =
+    effectiveCategoryScope === 'cloud' && isElasticOn && !cloudProviderScope;
   const [cloudProviderFilter, setCloudProviderFilter] = useState<string>(
     CLOUD_PROVIDER_FILTER_ALL
   );
@@ -1533,20 +1547,33 @@ const AllEntitiesViewInner = ({
     () => {
       const scope = effectiveCategoryScope;
       if (!scope || scope === 'kubernetes' || !isElasticOn) return [];
-      return getEntityTypeLabels(isCrossCategoryPage ? categoryFilteredEntities : scopedEntities);
+      return getEntityTypeLabels(
+        categoryScope || (isCrossCategoryPage && categoryFilter !== CATEGORY_FILTER_ALL)
+          ? effectiveInventoryEntities
+          : scopedEntities
+      );
     },
-    [effectiveCategoryScope, isElasticOn, isCrossCategoryPage, categoryFilteredEntities, scopedEntities]
+    [
+      effectiveCategoryScope,
+      isElasticOn,
+      categoryScope,
+      isCrossCategoryPage,
+      categoryFilter,
+      effectiveInventoryEntities,
+      scopedEntities,
+    ]
   );
   const showCategoryTypeFilter = categoryTypeLabels.length >= 2;
 
-  // Reset filter when category changes.
-  const prevCategoryScopeRef = useRef(categoryScope);
+  // Reset category sub-filters when the effective inventory category changes.
+  const prevEffectiveCategoryScopeRef = useRef(effectiveCategoryScope);
   useEffect(() => {
-    if (prevCategoryScopeRef.current !== categoryScope) {
-      prevCategoryScopeRef.current = categoryScope;
+    if (prevEffectiveCategoryScopeRef.current !== effectiveCategoryScope) {
+      prevEffectiveCategoryScopeRef.current = effectiveCategoryScope;
       setCategoryTypeFilter(CATEGORY_RESOURCE_TYPE_ALL);
+      setCloudProviderFilter(CLOUD_PROVIDER_FILTER_ALL);
     }
-  }, [categoryScope]);
+  }, [effectiveCategoryScope]);
 
   // Pending-search consumption: the `search` string can't ride the
   // persisted-state pipeline (it's per-mount `useState`, not
@@ -1872,7 +1899,9 @@ const AllEntitiesViewInner = ({
   const filteredEntitiesAfterCategory = useMemo(
     () =>
       isCrossCategoryPage && categoryFilter !== CATEGORY_FILTER_ALL
-        ? filteredEntitiesBeforeCluster.filter((e) => e.category === categoryFilter)
+        ? categoryFilter === 'cloud'
+          ? filteredEntitiesBeforeCluster.filter((entity) => entity.provider != null)
+          : filteredEntitiesBeforeCluster.filter((e) => e.category === categoryFilter)
         : filteredEntitiesBeforeCluster,
     [filteredEntitiesBeforeCluster, isCrossCategoryPage, categoryFilter]
   );
@@ -2000,7 +2029,7 @@ const AllEntitiesViewInner = ({
     (isElasticOn && alertsFilter !== ALERTS_FILTER_ALL);
 
   // Reset every filter dimension in one click (ElasticOn toolbar).
-  const inventorySummaryScopeKey = categoryScope ?? 'all';
+  const inventorySummaryScopeKey = effectiveCategoryScope ?? 'all';
 
   const handleAlertsFilterChange = useCallback(
     (next: AlertsFilterId) => {
@@ -3205,6 +3234,14 @@ const AllEntitiesViewInner = ({
                         activeFilters={activeExtraFilters}
                         onChange={setActiveExtraFilters}
                         compressed
+                      />
+                    </EuiFlexItem>
+                  ) : null}
+                  {isCloudCategoryPage ? (
+                    <EuiFlexItem grow={false}>
+                      <CloudProviderFilter
+                        value={cloudProviderFilter}
+                        onChange={setCloudProviderFilter}
                       />
                     </EuiFlexItem>
                   ) : null}

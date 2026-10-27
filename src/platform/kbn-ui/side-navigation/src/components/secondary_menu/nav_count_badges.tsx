@@ -8,13 +8,33 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
-const formatAlertTooltip = (count: number): string =>
-  count === 1
-    ? '1 resource with active alerts — click to filter by alerts'
-    : `${count.toLocaleString()} resources with active alerts — click to filter by alerts`;
+/** Compact nav badge counts: full number through 9999, then `10k` / `10k+`. */
+const formatNavCount = (count: number): string => {
+  if (count > 10000) return '10k+';
+  if (count >= 10000) return '10k';
+  return count.toLocaleString();
+};
+
+const alertRatioLabel = (alerting: number, total: number): string =>
+  `${formatNavCount(alerting)}/${formatNavCount(total)}`;
+
+const inventoryTooltip = (total: number): string =>
+  i18n.translate('sideNavigation.navCountBadges.inventoryTooltip', {
+    defaultMessage:
+      '{count, plural, one {# inventoried resource} other {# inventoried resources}}',
+    values: { count: total },
+  });
+
+const alertRatioTooltip = (alerting: number, total: number): string =>
+  i18n.translate('sideNavigation.navCountBadges.alertRatioTooltip', {
+    defaultMessage:
+      '{alerting, plural, one {# resource} other {# resources}} with active alerts out of {total, number} — click to filter by alerts',
+    values: { alerting, total },
+  });
 
 const alertDotHitTargetStyles = css`
   align-items: center;
@@ -31,7 +51,12 @@ const alertDotHitTargetStyles = css`
   padding: 0;
 `;
 
+const badgeButtonStyles = css`
+  cursor: pointer;
+`;
+
 export const NavCountBadges = ({
+  inventoryCount,
   notificationCount,
   notificationHref,
 }: {
@@ -39,20 +64,16 @@ export const NavCountBadges = ({
   notificationCount?: number;
   notificationHref?: string;
 }): JSX.Element | null => {
-  const { euiTheme } = useEuiTheme();
-
-  const alertDotStyles = css`
-    background-color: ${euiTheme.colors.danger};
-    border-radius: 50%;
-    flex-shrink: 0;
-    height: 8px;
-    width: 8px;
-  `;
-
-  const showNotification =
+  const hasInventory =
+    typeof inventoryCount === 'number' && Number.isFinite(inventoryCount);
+  const alerting =
     typeof notificationCount === 'number' &&
     Number.isFinite(notificationCount) &&
-    notificationCount > 0;
+    notificationCount > 0
+      ? notificationCount
+      : 0;
+  const showAlertRatio = alerting > 0 && hasInventory;
+  const showInventoryOnly = hasInventory && !showAlertRatio;
 
   const onAlertIndicatorClick = useCallback(
     (event: React.MouseEvent) => {
@@ -70,33 +91,52 @@ export const NavCountBadges = ({
     event.stopPropagation();
   }, []);
 
-  if (!showNotification) {
+  if (!showAlertRatio && !showInventoryOnly) {
     return null;
   }
 
-  const tooltip = formatAlertTooltip(notificationCount!);
-  const dot = <span css={alertDotStyles} data-test-subj="sideNavAlertIndicator" />;
+  if (showAlertRatio) {
+    const label = alertRatioLabel(alerting, inventoryCount!);
+    const tooltip = alertRatioTooltip(alerting, inventoryCount!);
+    const badge = (
+      <EuiBadge color="danger" data-test-subj="sideNavAlertRatioBadge">
+        {label}
+      </EuiBadge>
+    );
 
-  if (notificationHref) {
+    if (notificationHref) {
+      return (
+        <EuiToolTip content={tooltip} disableScreenReaderOutput>
+          <button
+            type="button"
+            css={[alertDotHitTargetStyles, badgeButtonStyles]}
+            aria-label={tooltip}
+            onClick={onAlertIndicatorClick}
+            onMouseDown={stopNavRowActivation}
+          >
+            {badge}
+          </button>
+        </EuiToolTip>
+      );
+    }
+
     return (
-      <EuiToolTip content={tooltip} disableScreenReaderOutput>
-        <button
-          type="button"
-          css={alertDotHitTargetStyles}
-          aria-label={tooltip}
-          onClick={onAlertIndicatorClick}
-          onMouseDown={stopNavRowActivation}
-        >
-          {dot}
-        </button>
+      <EuiToolTip content={tooltip}>
+        <span css={alertDotHitTargetStyles} aria-label={tooltip}>
+          {badge}
+        </span>
       </EuiToolTip>
     );
   }
 
+  const total = inventoryCount!;
+  const tooltip = inventoryTooltip(total);
   return (
     <EuiToolTip content={tooltip}>
-      <span css={alertDotHitTargetStyles} aria-label={tooltip}>
-        {dot}
+      <span css={css({ flexShrink: 0, lineHeight: 0 })} aria-label={tooltip}>
+        <EuiBadge color="hollow" data-test-subj="sideNavInventoryCountBadge">
+          {formatNavCount(total)}
+        </EuiBadge>
       </span>
     </EuiToolTip>
   );

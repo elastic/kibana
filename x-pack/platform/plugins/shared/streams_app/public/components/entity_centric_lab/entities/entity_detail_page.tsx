@@ -1155,15 +1155,15 @@ const EntityDetailPageInner = () => {
             (dashboardStyleVariation === 'list' ||
               dashboardStyleVariation === 'listWithPreview') ? null : (
               <>
-                <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-                  <EuiFlexItem grow={false}>
+                <EuiFlexGroup responsive={false}>
+                  <EuiFlexItem grow>
                     <EuiSuperDatePicker
                       start={rangeFrom}
                       end={rangeTo}
                       onTimeChange={handleTimeChange}
                       isAutoRefreshOnly={false}
                       compressed
-                      width="auto"
+                      width="full"
                       commonlyUsedRanges={detailCommonlyUsedRanges}
                       updateButtonProps={{ iconOnly: true, fill: false, color: 'text' }}
                       data-test-subj="entityDetailPageTimePicker"

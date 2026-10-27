@@ -40,7 +40,7 @@ export interface SecondaryMenuItem {
   'data-test-subj'?: string;
   /** Optional badge to display next to the label. */
   badgeType?: BadgeType;
-  /** Optional right-aligned notification count (values above 99 render as `99+`). */
+  /** Optional right-aligned notification count (10,000 → `10k`, above → `10k+`). */
   notificationCount?: number;
   /** Optional destination when the notification badge is clicked. */
   notificationHref?: string;

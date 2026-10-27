@@ -80,6 +80,7 @@ import {
   alertHintFromEntity,
   bucketKeyFor,
   effectiveStatForMetric,
+  metricStatSelectionLockHelpText,
   metricStatSelectionLocked,
   ENTITY_ALERTS_METRIC,
   AGGREGATION_TYPES,
@@ -2217,22 +2218,7 @@ const BucketMetricControlsFlyout = ({
             })}
             fullWidth
             helpText={
-              isCategorical
-                ? i18n.translate(
-                    'xpack.streams.entityCentricLab.entities.bucket.controls.statCategoricalTooltip',
-                    {
-                      defaultMessage: 'Categorical metrics are always shown using the last value.',
-                    }
-                  )
-                : statSelectionLocked
-                  ? i18n.translate(
-                      'xpack.streams.entityCentricLab.entities.bucket.controls.statCountTooltip',
-                      {
-                        defaultMessage:
-                          'Count metrics use the last value in the selected time range.',
-                      }
-                    )
-                  : undefined
+              statSelectionLocked ? metricStatSelectionLockHelpText(draftMetric) : undefined
             }
           >
             {/*
@@ -2244,7 +2230,11 @@ const BucketMetricControlsFlyout = ({
               fullWidth
               disabled={statSelectionLocked}
               options={statOptions}
-              value={statSelectionLocked ? 'last' : draftStatId}
+              value={
+                statSelectionLocked
+                  ? effectiveStatForMetric(draftMetric, draftStatId)
+                  : draftStatId
+              }
               onChange={(event) => setDraftStatId(event.target.value as StatId)}
               aria-label={i18n.translate(
                 'xpack.streams.entityCentricLab.entities.bucket.controls.statAriaLabel',

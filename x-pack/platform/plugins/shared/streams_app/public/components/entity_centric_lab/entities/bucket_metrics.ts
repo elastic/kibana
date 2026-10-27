@@ -203,16 +203,65 @@ export const METRIC_LAST_STAT_ONLY = new Set<string>([
   'status-checks',
   'throttles',
   'misscheduled',
+  'failures-24h',
 ]);
 
-export const metricStatSelectionLocked = (metric: MetricDescriptor): boolean =>
-  metric.kind === 'categorical' || METRIC_LAST_STAT_ONLY.has(metric.id);
+/** Numeric metrics whose rollup is fixed (not user-selectable on the hex map). */
+const METRIC_FIXED_STAT: Readonly<Partial<Record<string, StatId>>> = {
+  'avg-duration': 'avg',
+};
 
-export const effectiveStatForMetric = (metric: MetricDescriptor, statId: StatId): StatId => {
-  if (metricStatSelectionLocked(metric)) {
+/** Fixed stat for hex map / list when the metric encodes its own aggregation. */
+export const fixedStatForMetric = (metric: MetricDescriptor): StatId | undefined => {
+  if (metric.kind === 'categorical') {
     return 'last';
   }
-  return statId;
+  if (METRIC_LAST_STAT_ONLY.has(metric.id)) {
+    return 'last';
+  }
+  return METRIC_FIXED_STAT[metric.id];
+};
+
+export const metricStatSelectionLocked = (metric: MetricDescriptor): boolean =>
+  fixedStatForMetric(metric) !== undefined;
+
+export const effectiveStatForMetric = (metric: MetricDescriptor, statId: StatId): StatId =>
+  fixedStatForMetric(metric) ?? statId;
+
+export const metricStatSelectionLockHelpText = (metric: MetricDescriptor): string | undefined => {
+  if (metric.kind === 'categorical') {
+    return i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.controls.statCategoricalTooltip',
+      { defaultMessage: 'Categorical metrics are always shown using the last value.' }
+    );
+  }
+  if (metric.id === 'avg-duration') {
+    return i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.controls.statAvgDurationTooltip',
+      {
+        defaultMessage:
+          'Average duration uses the average value over the selected time range, not a single run.',
+      }
+    );
+  }
+  if (metric.id === 'failures-24h') {
+    return i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.controls.statFailures24hTooltip',
+      {
+        defaultMessage:
+          'Failures (24h) uses the last reading of the rolling 24-hour count in the selected time range.',
+      }
+    );
+  }
+  if (METRIC_LAST_STAT_ONLY.has(metric.id)) {
+    return i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.controls.statCountTooltip',
+      {
+        defaultMessage: 'Count metrics use the last value in the selected time range.',
+      }
+    );
+  }
+  return undefined;
 };
 
 /**
@@ -228,12 +277,8 @@ export const METRIC_COLUMN_OMIT_STAT_SUFFIX = new Set<string>([
 ]);
 
 /** Stat used for the list grid cell value, sparkline, and header suffix. */
-export const inventoryGridStatForMetric = (metric: MetricDescriptor): StatId => {
-  if (metric.id === 'avg-duration') {
-    return 'avg';
-  }
-  return 'last';
-};
+export const inventoryGridStatForMetric = (metric: MetricDescriptor): StatId =>
+  fixedStatForMetric(metric) ?? 'last';
 
 // ---------------------------------------------------------------------------
 // Metric descriptors

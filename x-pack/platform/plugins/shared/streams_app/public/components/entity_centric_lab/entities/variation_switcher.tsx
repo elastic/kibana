@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.15';
+export const PROTOTYPE_VERSION = '1.16';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-10-27',
+    summary:
+      'Infrastructure nav badges, flyout polish, All resources category filters, and K8s hex stat locks.',
+    details:
+      'Left nav shows hollow inventory totals or danger alerting/total badges (10k cap), with click-through to active alerts. Flyout header alerts badge opens Alerts tab; Overview golden signals sit above Resource details; full-width time pickers on flyout and detail page; log document child flyout uses a link icon for copy link. All resources category filter exposes the same sub-filters as left-nav category pages (Hosts extras, K8s strip, type, Cloud provider). CronJob hex stats lock Failures to Last and Avg duration to Avg. Bump to v1.16.',
+  },
   {
     date: '2026-10-27',
     summary:

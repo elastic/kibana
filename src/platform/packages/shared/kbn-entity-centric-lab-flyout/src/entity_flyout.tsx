@@ -1113,6 +1113,71 @@ export const EntityFlyout = ({
     selectTab(tabIntent.tab as TabId);
   }, [tabIntent, visibleTabs, selectTab]);
 
+  const headerAlertsBadgeClickable = useMemo(() => {
+    if (!alertsBadge) return false;
+    if (!visibleTabs.some((tab) => tab.id === 'alerts')) return false;
+    if (alertsActiveCount === null) return false;
+    if (alertsBadge.label === 'No alert set up' || alertsBadge.label === 'N/A') return false;
+    return true;
+  }, [alertsBadge, visibleTabs, alertsActiveCount]);
+
+  const isHeaderAlertsBadge = useCallback(
+    (tag: { label: string; color: string }) =>
+      Boolean(
+        alertsBadge &&
+          tag.label === alertsBadge.label &&
+          tag.color === alertsBadge.color
+      ),
+    [alertsBadge]
+  );
+
+  const renderHeaderTagBadge = useCallback(
+    (tag: { label: string; color: string }, testSubj?: string) => {
+      const navigateToAlerts = headerAlertsBadgeClickable && isHeaderAlertsBadge(tag);
+      const badge = (
+        <EuiBadge
+          color={tag.color}
+          data-test-subj={
+            testSubj ??
+            (navigateToAlerts ? 'entityCentricLabFlyoutHeaderAlertsBadge' : undefined)
+          }
+          {...(navigateToAlerts
+            ? {
+                onClick: () => {
+                  selectTab('alerts');
+                  updateDashboardPreview(null);
+                },
+                onClickAriaLabel: i18n.translate(
+                  'entityCentricLabFlyout.flyout.headerAlertsBadgeAriaLabel',
+                  { defaultMessage: 'View Alerts tab' }
+                ),
+              }
+            : {})}
+        >
+          {tag.label}
+        </EuiBadge>
+      );
+      if (!navigateToAlerts) {
+        return badge;
+      }
+      return (
+        <EuiToolTip
+          content={i18n.translate('entityCentricLabFlyout.flyout.headerAlertsBadgeTooltip', {
+            defaultMessage: 'View Alerts tab',
+          })}
+        >
+          {badge}
+        </EuiToolTip>
+      );
+    },
+    [
+      headerAlertsBadgeClickable,
+      isHeaderAlertsBadge,
+      selectTab,
+      updateDashboardPreview,
+    ]
+  );
+
   return (
     <EuiFlyoutResizable
       // No overlay mask: the flyout stays non-modal so the page behind it
@@ -1260,7 +1325,7 @@ export const EntityFlyout = ({
         <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
           {visibleTags.map((tag) => (
             <EuiFlexItem grow={false} key={tag.label}>
-              <EuiBadge color={tag.color}>{tag.label}</EuiBadge>
+              {renderHeaderTagBadge(tag)}
             </EuiFlexItem>
           ))}
           {kind === 'pod' && podPhaseBadge ? (
@@ -1297,7 +1362,7 @@ export const EntityFlyout = ({
                 <EuiFlexGroup gutterSize="xs" wrap responsive={false} css={css`max-width: 300px;`}>
                   {overflowTags.map((tag) => (
                     <EuiFlexItem grow={false} key={tag.label}>
-                      <EuiBadge color={tag.color}>{tag.label}</EuiBadge>
+                      {renderHeaderTagBadge(tag)}
                     </EuiFlexItem>
                   ))}
                 </EuiFlexGroup>
@@ -1332,15 +1397,15 @@ export const EntityFlyout = ({
       <EuiFlyoutBody>
         {activeTab === 'dashboards' && (dashboardStyle === 'list' || dashboardStyle === 'listWithPreview') ? null : (
           <>
-            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-              <EuiFlexItem grow={false}>
+            <EuiFlexGroup responsive={false}>
+              <EuiFlexItem grow>
                 <EuiSuperDatePicker
                   start={dateStart}
                   end={dateEnd}
                   onTimeChange={handleTimeChange}
                   isAutoRefreshOnly={false}
                   compressed
-                  width="auto"
+                  width="full"
                   commonlyUsedRanges={[
                     { start: 'now/d', end: 'now/d', label: 'Today' },
                     { start: 'now-1m', end: 'now', label: 'Last 1 minute' },

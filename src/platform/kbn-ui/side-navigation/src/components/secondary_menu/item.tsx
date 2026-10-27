@@ -56,6 +56,7 @@ export const SecondaryMenuItemComponent = ({
   isNew = false,
   notificationCount,
   notificationHref,
+  inventoryCount,
   testSubjPrefix,
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
@@ -102,7 +103,9 @@ export const SecondaryMenuItemComponent = ({
     typeof notificationCount === 'number' &&
     Number.isFinite(notificationCount) &&
     notificationCount > 0;
-  const showNavCounts = showNotification;
+  const showInventoryCount =
+    typeof inventoryCount === 'number' && Number.isFinite(inventoryCount);
+  const showNavCounts = showNotification || showInventoryCount;
 
   const getMaxWidth = () => {
     const isInSidePanel = testSubjPrefix?.includes('sidePanel');
@@ -150,7 +153,11 @@ export const SecondaryMenuItemComponent = ({
         </span>
         {getBadge()}
       </div>
-      <NavCountBadges notificationCount={notificationCount} notificationHref={notificationHref} />
+      <NavCountBadges
+        inventoryCount={inventoryCount}
+        notificationCount={notificationCount}
+        notificationHref={notificationHref}
+      />
     </div>
   );
 

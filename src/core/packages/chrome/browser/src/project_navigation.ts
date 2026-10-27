@@ -159,7 +159,7 @@ interface NodeDefinitionBase {
 
   /**
    * (optional) Right-aligned notification count for the side-nav item
-   * (e.g. resources with active alerts). Values above 99 render as `99+`.
+   * (e.g. resources with active alerts). 10,000 renders as `10k`; above as `10k+`.
    */
   notificationCount?: number;
 

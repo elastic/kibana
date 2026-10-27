@@ -32,12 +32,6 @@ import {
 } from './entity_centric_lab_integrations';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
-/** Append "(N)" to a left-nav label — inventoried total lives in the title only. */
-const withNavCount = (label: string, count: number | undefined): string => {
-  if (count == null || !Number.isFinite(count)) return label;
-  return `${label} (${count.toLocaleString()})`;
-};
-
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
   {
@@ -641,38 +635,45 @@ function createNavTree({
   const navCountsReady = Object.keys(entityNavCounts.byCategory).length > 0;
   const categoryCount = (categoryId: string): number | undefined =>
     navCountsReady ? entityNavCounts.byCategory[categoryId] ?? 0 : undefined;
-  const categoryAlertCount = (categoryId: string): number | undefined => {
+  const categoryAlertingCount = (categoryId: string): number | undefined => {
     if (!navCountsReady) return undefined;
-    const count = entityNavCounts.alertingByCategory[categoryId] ?? 0;
-    return count > 0 ? count : undefined;
+    return entityNavCounts.alertingByCategory[categoryId] ?? 0;
   };
 
-  /** Alert indicator props: count (for tooltip) + link to filter active alerts. */
-  const alertBadgeProps = (path: string, count: number | undefined) =>
-    count != null && count > 0
-      ? {
-          notificationCount: count,
-          notificationHref: toAbsoluteHref(`${path}?alertsFilter=active`),
-        }
-      : {};
+  /** Right-aligned nav badge: hollow total, or danger alerting/total with alert filter link. */
+  const inventoryNavBadgeProps = (
+    path: string,
+    total: number | undefined,
+    alerting: number | undefined
+  ) => {
+    if (total == null || !Number.isFinite(total)) return {};
+    const alertCount = alerting ?? 0;
+    return {
+      inventoryCount: total,
+      ...(alertCount > 0
+        ? {
+            notificationCount: alertCount,
+            notificationHref: toAbsoluteHref(`${path}?alertsFilter=active`),
+          }
+        : {}),
+    };
+  };
 
   const latestEntitiesAllSection = {
     children: [
       {
         id: 'entityCentricLab-entitiesAll',
         link: 'streams:entitiesAll' as const,
-        title: withNavCount(
-          elasticOnEnabled
-            ? i18n.translate('xpack.observability.obltNav.elasticOn.allResources', {
-                defaultMessage: 'All resources',
-              })
-            : i18n.translate('xpack.observability.obltNav.latest.allEntities', {
-                defaultMessage: 'All entities',
-              }),
-          navCountsReady ? entityNavCounts.all : undefined
-        ),
-        ...alertBadgeProps(
+        title: elasticOnEnabled
+          ? i18n.translate('xpack.observability.obltNav.elasticOn.allResources', {
+              defaultMessage: 'All resources',
+            })
+          : i18n.translate('xpack.observability.obltNav.latest.allEntities', {
+              defaultMessage: 'All entities',
+            }),
+        ...inventoryNavBadgeProps(
           '/app/streams/entities',
+          navCountsReady ? entityNavCounts.all : undefined,
           navCountsReady ? entityNavCounts.alertingAll : undefined
         ),
         getIsActive: categoryGetIsActive('/app/streams/entities', true),
@@ -686,64 +687,66 @@ function createNavTree({
     {
       id: 'entityCentricLab-entitiesHosts',
       link: 'streams:entitiesHosts' as const,
-      title: withNavCount(
-        i18n.translate('xpack.observability.obltNav.latest.hosts', {
-          defaultMessage: 'Hosts',
-        }),
-        categoryCount('hosts')
+      title: i18n.translate('xpack.observability.obltNav.latest.hosts', {
+        defaultMessage: 'Hosts',
+      }),
+      ...inventoryNavBadgeProps(
+        '/app/streams/entities/hosts',
+        categoryCount('hosts'),
+        categoryAlertingCount('hosts')
       ),
-      ...alertBadgeProps('/app/streams/entities/hosts', categoryAlertCount('hosts')),
       getIsActive: categoryGetIsActive('/app/streams/entities/hosts'),
     },
     {
       id: 'entityCentricLab-entitiesKubernetes',
       link: 'streams:entitiesKubernetes' as const,
-      title: withNavCount(
-        i18n.translate('xpack.observability.obltNav.latest.kubernetes', {
-          defaultMessage: 'Kubernetes',
-        }),
-        categoryCount('kubernetes')
-      ),
-      ...alertBadgeProps(
+      title: i18n.translate('xpack.observability.obltNav.latest.kubernetes', {
+        defaultMessage: 'Kubernetes',
+      }),
+      ...inventoryNavBadgeProps(
         '/app/streams/entities/kubernetes',
-        categoryAlertCount('kubernetes')
+        categoryCount('kubernetes'),
+        categoryAlertingCount('kubernetes')
       ),
       getIsActive: categoryGetIsActive('/app/streams/entities/kubernetes'),
     },
     {
       id: 'entityCentricLab-entitiesDatabases',
       link: 'streams:entitiesDatabases' as const,
-      title: withNavCount(
-        i18n.translate('xpack.observability.obltNav.latest.databases', {
-          defaultMessage: 'Databases',
-        }),
-        categoryCount('databases')
+      title: i18n.translate('xpack.observability.obltNav.latest.databases', {
+        defaultMessage: 'Databases',
+      }),
+      ...inventoryNavBadgeProps(
+        '/app/streams/entities/databases',
+        categoryCount('databases'),
+        categoryAlertingCount('databases')
       ),
-      ...alertBadgeProps('/app/streams/entities/databases', categoryAlertCount('databases')),
       getIsActive: categoryGetIsActive('/app/streams/entities/databases'),
     },
     {
       id: 'entityCentricLab-entitiesStorage',
       link: 'streams:entitiesStorage' as const,
-      title: withNavCount(
-        i18n.translate('xpack.observability.obltNav.latest.storage', {
-          defaultMessage: 'Storage',
-        }),
-        categoryCount('storage')
+      title: i18n.translate('xpack.observability.obltNav.latest.storage', {
+        defaultMessage: 'Storage',
+      }),
+      ...inventoryNavBadgeProps(
+        '/app/streams/entities/storage',
+        categoryCount('storage'),
+        categoryAlertingCount('storage')
       ),
-      ...alertBadgeProps('/app/streams/entities/storage', categoryAlertCount('storage')),
       getIsActive: categoryGetIsActive('/app/streams/entities/storage'),
     },
     {
       id: 'entityCentricLab-entitiesFunctions',
       link: 'streams:entitiesFunctions' as const,
-      title: withNavCount(
-        i18n.translate('xpack.observability.obltNav.latest.functions', {
-          defaultMessage: 'Functions',
-        }),
-        categoryCount('functions')
+      title: i18n.translate('xpack.observability.obltNav.latest.functions', {
+        defaultMessage: 'Functions',
+      }),
+      ...inventoryNavBadgeProps(
+        '/app/streams/entities/functions',
+        categoryCount('functions'),
+        categoryAlertingCount('functions')
       ),
-      ...alertBadgeProps('/app/streams/entities/functions', categoryAlertCount('functions')),
       getIsActive: categoryGetIsActive('/app/streams/entities/functions'),
     },
   ].filter((child) => matchesLatestSearch(child.title));
@@ -752,13 +755,14 @@ function createNavTree({
     {
       id: 'entityCentricLab-entitiesNetworking',
       link: 'streams:entitiesNetworking' as const,
-      title: withNavCount(
-        i18n.translate('xpack.observability.obltNav.latest.networking', {
-          defaultMessage: 'Networking',
-        }),
-        categoryCount('networking')
+      title: i18n.translate('xpack.observability.obltNav.latest.networking', {
+        defaultMessage: 'Networking',
+      }),
+      ...inventoryNavBadgeProps(
+        '/app/streams/entities/networking',
+        categoryCount('networking'),
+        categoryAlertingCount('networking')
       ),
-      ...alertBadgeProps('/app/streams/entities/networking', categoryAlertCount('networking')),
       getIsActive: categoryGetIsActive('/app/streams/entities/networking'),
     },
   ].filter((child) => matchesLatestSearch(child.title));
@@ -767,37 +771,40 @@ function createNavTree({
     {
       id: 'entityCentricLab-entitiesMiddlewares',
       link: 'streams:entitiesMiddlewares' as const,
-      title: withNavCount(
-        i18n.translate('xpack.observability.obltNav.latest.middlewares', {
-          defaultMessage: 'Messaging',
-        }),
-        categoryCount('middlewares')
+      title: i18n.translate('xpack.observability.obltNav.latest.middlewares', {
+        defaultMessage: 'Messaging',
+      }),
+      ...inventoryNavBadgeProps(
+        '/app/streams/entities/middlewares',
+        categoryCount('middlewares'),
+        categoryAlertingCount('middlewares')
       ),
-      ...alertBadgeProps('/app/streams/entities/middlewares', categoryAlertCount('middlewares')),
       getIsActive: categoryGetIsActive('/app/streams/entities/middlewares'),
     },
     {
       id: 'entityCentricLab-entitiesLlms',
       link: 'streams:entitiesLlms' as const,
-      title: withNavCount(
-        i18n.translate('xpack.observability.obltNav.latest.llms', {
-          defaultMessage: 'AI/ML',
-        }),
-        categoryCount('llms')
+      title: i18n.translate('xpack.observability.obltNav.latest.llms', {
+        defaultMessage: 'AI/ML',
+      }),
+      ...inventoryNavBadgeProps(
+        '/app/streams/entities/llms',
+        categoryCount('llms'),
+        categoryAlertingCount('llms')
       ),
-      ...alertBadgeProps('/app/streams/entities/llms', categoryAlertCount('llms')),
       getIsActive: categoryGetIsActive('/app/streams/entities/llms'),
     },
     {
       id: 'entityCentricLab-entitiesOther',
       link: 'streams:entitiesOther' as const,
-      title: withNavCount(
-        i18n.translate('xpack.observability.obltNav.latest.other', {
-          defaultMessage: 'Other',
-        }),
-        categoryCount('other')
+      title: i18n.translate('xpack.observability.obltNav.latest.other', {
+        defaultMessage: 'Other',
+      }),
+      ...inventoryNavBadgeProps(
+        '/app/streams/entities/other',
+        categoryCount('other'),
+        categoryAlertingCount('other')
       ),
-      ...alertBadgeProps('/app/streams/entities/other', categoryAlertCount('other')),
       getIsActive: categoryGetIsActive('/app/streams/entities/other'),
     },
   ].filter((child) => matchesLatestSearch(child.title));
@@ -808,13 +815,14 @@ function createNavTree({
     {
       id: 'entityCentricLab-entitiesServices',
       link: 'streams:entitiesServices' as const,
-      title: withNavCount(
-        i18n.translate('xpack.observability.obltNav.latest.services', {
-          defaultMessage: 'APM Services',
-        }),
-        categoryCount('services')
+      title: i18n.translate('xpack.observability.obltNav.latest.services', {
+        defaultMessage: 'APM Services',
+      }),
+      ...inventoryNavBadgeProps(
+        '/app/streams/entities/services',
+        categoryCount('services'),
+        categoryAlertingCount('services')
       ),
-      ...alertBadgeProps('/app/streams/entities/services', categoryAlertCount('services')),
       getIsActive: categoryGetIsActive('/app/streams/entities/services'),
     },
   ].filter((child) => matchesLatestSearch(child.title));

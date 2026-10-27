@@ -33,6 +33,7 @@ import {
   EuiTabs,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -175,11 +176,21 @@ export const LogDocumentFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="pin"
-                  color="text"
-                  aria-label="Pin"
-                />
+                <EuiToolTip
+                  content={i18n.translate('entityCentricLabFlyout.flyout.logDoc.copyLinkTooltip', {
+                    defaultMessage: 'Copy link',
+                  })}
+                >
+                  <EuiButtonIcon
+                    iconType="link"
+                    color="text"
+                    aria-label={i18n.translate(
+                      'entityCentricLabFlyout.flyout.logDoc.copyLinkAriaLabel',
+                      { defaultMessage: 'Copy link' }
+                    )}
+                    data-test-subj="entityCentricLabLogDocumentFlyoutCopyLink"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
