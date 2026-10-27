@@ -174,9 +174,7 @@ export class NightshiftInvestigationsPlugin
     }
 
     this.decisionTreesEnabled =
-      this.ctx.config.get().decision_trees.enabled &&
-      this.cortexEnabled &&
-      Boolean(plugins.sandbox?.isAvailable);
+      this.ctx.config.get().decision_trees.enabled && Boolean(plugins.sandbox?.isAvailable);
     if (this.decisionTreesEnabled) {
       registerDecisionTreeAiIndex(plugins.contextEngine, this.logger.get('decision_trees'));
     }
@@ -427,8 +425,8 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           composeHydrateNotificationsStepDefinition()
         );
-        // Registered unconditionally: the combined materialize workflow installs with Cortex
-        // or Memory, so a trees-off install would otherwise reference an unknown step type.
+        // Registered unconditionally: the combined materialize workflow installs with Cortex,
+        // Memory, or decision trees, so a trees-off install would otherwise reference an unknown step type.
         // The handler no-ops on the flag instead, matching cortex/memory above.
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreeHydrateStepDefinition({
@@ -460,8 +458,8 @@ export class NightshiftInvestigationsPlugin
           })
         );
         // Registered unconditionally for the same reason as the tree hydrate above: the
-        // combined optimize workflow installs with Cortex or Memory and now runs the
-        // reinforcement phase too. The handler no-ops on the flag.
+        // combined optimize workflow installs with Cortex, Memory, or decision trees and now
+        // runs the reinforcement phase too. The handler no-ops on the flag.
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreePrepareStepDefinition({
             getTelemetryConnectorId: () => this.ctx.config.get().sandbox?.telemetry_connector_id,
@@ -778,7 +776,7 @@ export class NightshiftInvestigationsPlugin
     await client.install(NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
-    if (this.cortexEnabled || this.memoryEnabled) {
+    if (this.cortexEnabled || this.memoryEnabled || this.decisionTreesEnabled) {
       await installSandboxMaterializeWorkspaceWorkflow({ client });
       await installAgentOptimizationsWorkflow({ client });
     }

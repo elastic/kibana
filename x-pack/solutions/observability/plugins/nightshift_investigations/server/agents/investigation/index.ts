@@ -151,10 +151,11 @@ export const buildNightshiftAgentConfiguration = ({
       // Decision trees are no longer a separate before-agent hook: they hydrate as a third
       // parallel branch of the combined materialize workflow, which already carries the
       // sandbox_id they need. The reinforcement agent keeps its own hydrate workflow because
-      // it runs in a different conversation. `decisionTreesEnabled` implies `cortexEnabled`,
-      // so it adds nothing to either gate below.
+      // it runs in a different conversation. Trees do not require Cortex or Memory, so either
+      // of those or decision trees is enough to attach the combined workflows.
+      const contextWorkflows = cortexEnabled || memoryEnabled || decisionTreesEnabled;
       const beforeAgentWorkflowIds =
-        sandboxEnabled && (cortexEnabled || memoryEnabled)
+        sandboxEnabled && contextWorkflows
           ? [NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID]
           : [];
       return beforeAgentWorkflowIds.length ? { workflow_ids: beforeAgentWorkflowIds } : {};
@@ -162,7 +163,7 @@ export const buildNightshiftAgentConfiguration = ({
     // One post-hook. Decision-tree reinforcement is the tail phase of the combined optimize
     // workflow, so listing the reinforce workflow here as well would reinforce every round
     // twice — two ai.agent runs, up to 900s each, writing the same trees.
-    ...(cortexEnabled || memoryEnabled
+    ...(cortexEnabled || memoryEnabled || decisionTreesEnabled
       ? { post_execution_workflow_ids: [NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID] }
       : {}),
   } satisfies AgentBaseConfiguration;

@@ -9,9 +9,9 @@
  * What the managed investigation and combined workflows reference must exist in the step registry of every install
  * that gets them, whatever the feature flags say.
  *
- * The combined materialize workflow installs with Cortex or Memory, and the combined optimize
- * workflow now also carries the reinforcement phase, so both reference `nightshift.*` steps on
- * installs where the corresponding feature is off. If one of those steps were only registered
+ * The combined materialize and optimize workflows install with Cortex, Memory, or decision trees,
+ * and the optimize workflow carries the reinforcement phase, so both reference `nightshift.*` steps
+ * on installs where the corresponding feature is off. If one of those steps were only registered
  * under its own flag, the install would resolve a step type the engine does not know. The check
  * runs against the YAML the definitions actually ship, and against the ids `plugin.ts` really
  * registers for each feature combination.
@@ -88,6 +88,7 @@ const registeredStepIds = (flags: {
 const FEATURE_MATRIX = [
   { name: 'cortex only', cortexEnabled: true, memoryEnabled: false, decisionTreesEnabled: false },
   { name: 'memory only', cortexEnabled: false, memoryEnabled: true, decisionTreesEnabled: false },
+  { name: 'trees only', cortexEnabled: false, memoryEnabled: false, decisionTreesEnabled: true },
   {
     name: 'cortex, memory and trees',
     cortexEnabled: true,
@@ -97,7 +98,7 @@ const FEATURE_MATRIX = [
 ];
 
 describe('combined workflows only reference registered step types', () => {
-  // The combined workflows install whenever Cortex or Memory is on, whatever the tree flag, so
+  // The combined workflows install whenever Cortex, Memory, or decision trees are on, so
   // these are exactly the installs that can resolve them.
   it.each(FEATURE_MATRIX)('with $name', ({ ...flags }) => {
     const registered = registeredStepIds(flags);

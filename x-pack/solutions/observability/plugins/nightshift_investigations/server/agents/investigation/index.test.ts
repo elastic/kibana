@@ -122,6 +122,22 @@ describe('Nightshift investigation agent type', () => {
     expect(base.instructions).not.toContain('{{decision_trees_section}}');
   });
 
+  it('hydrates and reinforces decision trees when Cortex and Memory are off', () => {
+    const base = staticBase(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: false,
+        memoryEnabled: false,
+        decisionTreesEnabled: true,
+        ...ALL_PLUGINS,
+      })
+    );
+
+    expect(base.workflow_ids).toEqual(['system-nightshift-sandbox-materialize-workspace']);
+    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
+    expect(base.instructions).toContain('/workspace/decision-trees/monitors.md');
+  });
+
   it('drops both cortex workflows when cortex is disabled', () => {
     const base = staticBase(
       getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: false, ...ALL_PLUGINS })

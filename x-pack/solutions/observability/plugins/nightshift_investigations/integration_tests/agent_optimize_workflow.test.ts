@@ -202,8 +202,8 @@ describe('agent optimize workflow, an eligible investigator round', () => {
 
 describe('agent optimize workflow, rounds that must not reinforce', () => {
   // `prepare_turn` is the eligibility gate: it answers `skipped`, and both agent steps read that
-  // answer. The workflow still installs with Cortex or Memory alone, so this runs on installs that
-  // have no decision trees at all.
+  // answer. The workflow still installs with Cortex, Memory, or decision trees, so this runs on
+  // installs that have no decision trees at all.
   it.each([
     ['the decision-tree feature is off', { decisionTreesEnabled: false }, ELIGIBLE_ROUND_INPUTS],
     [

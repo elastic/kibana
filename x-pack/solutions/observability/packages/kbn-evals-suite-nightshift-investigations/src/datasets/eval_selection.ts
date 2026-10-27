@@ -22,8 +22,8 @@ const EVAL_IDS: readonly string[] = [
 ];
 
 /**
- * `NIGHTSHIFT_DATASETS` id for the reinforcement micro-eval. Opt-in: it enables Cortex so decision
- * trees run, which the default investigation server leaves off.
+ * `NIGHTSHIFT_DATASETS` id for the reinforcement micro-eval. Opt-in: it enables decision trees
+ * without turning Cortex on. Unset and `all` never select it.
  */
 export const REINFORCEMENT_DATASET_ID = 'reinforcement';
 

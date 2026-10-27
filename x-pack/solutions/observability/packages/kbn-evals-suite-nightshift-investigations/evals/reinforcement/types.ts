@@ -83,6 +83,8 @@ export interface ReinforcementExample {
 export interface ReinforcementTaskOutput {
   case_id: string;
   execution_id?: string;
+  /** Agent Builder trace of the reinforcement run. The eval UI opens this, not the task span. */
+  traceId?: string;
   workflow_status?: string;
   execution_error?: string;
   /** Submit calls, in order. Empty when the agent never submitted. */

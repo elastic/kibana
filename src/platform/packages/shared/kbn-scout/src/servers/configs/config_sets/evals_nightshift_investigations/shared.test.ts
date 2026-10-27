@@ -113,7 +113,7 @@ describe.each([
     );
   });
 
-  it('turns cortex on only when the reinforcement hook exported NIGHTSHIFT_DECISION_TREES', () => {
+  it('enables decision trees only when the reinforcement hook exported NIGHTSHIFT_DECISION_TREES', () => {
     const off = loadServers(configPath, {
       SANDBOX_KIBANA_CONFIG,
       NIGHTSHIFT_DATASETS: 'reinforcement',
@@ -121,12 +121,18 @@ describe.each([
     expect(off.kbnTestServer.serverArgs).toContain(
       '--xpack.nightshift_investigations.cortex.enabled=false'
     );
+    expect(off.kbnTestServer.serverArgs).toContain(
+      '--xpack.nightshift_investigations.decision_trees.enabled=false'
+    );
     const on = loadServers(configPath, {
       SANDBOX_KIBANA_CONFIG,
       NIGHTSHIFT_DECISION_TREES: 'true',
     });
     expect(on.kbnTestServer.serverArgs).toContain(
-      '--xpack.nightshift_investigations.cortex.enabled=true'
+      '--xpack.nightshift_investigations.cortex.enabled=false'
+    );
+    expect(on.kbnTestServer.serverArgs).toContain(
+      '--xpack.nightshift_investigations.decision_trees.enabled=true'
     );
   });
 

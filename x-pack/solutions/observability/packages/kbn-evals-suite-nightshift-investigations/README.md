@@ -346,8 +346,11 @@ investigator response confirms a cause and those edges carry ✅, and that decla
 agree with the tree before the run and the tree after it. An LLM judge scores whether those merges
 and paths match the investigation. The spec fails when that reinforce step does not finish or when
 the code score is below 1. It is not part of an unset or `all` run: selecting it exports
-`NIGHTSHIFT_DECISION_TREES`, which turns Cortex on so decision trees are enabled. Restart Scout
-when switching to or from it.
+`NIGHTSHIFT_DECISION_TREES`, which enables decision trees without turning Cortex on. Restart Scout
+when switching to or from it. Each example's trace is the reinforcement agent's Agent Builder
+trace, which shows the system prompt and the submit tool schema. It is not the eval task span.
+The system prompt does not yet ask the agent to report traversals; those fields are on the submit
+tool. Asking for them in the prompt is a follow-up.
 
 ```bash
 NIGHTSHIFT_DATASETS=reinforcement \
@@ -567,7 +570,7 @@ against.
 
 | Variable                               | Effect |
 | -------------------------------------- | ------ |
-| `NIGHTSHIFT_DATASETS`                  | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all`, `trace-only`, or `reinforcement` fails before any test runs, even when Scout is reused. `reinforcement` selects the Customer-0 reinforcement micro-eval and turns Cortex on; unset and `all` never include it. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
+| `NIGHTSHIFT_DATASETS`                  | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all`, `trace-only`, or `reinforcement` fails before any test runs, even when Scout is reused. `reinforcement` selects the Customer-0 reinforcement micro-eval and enables decision trees without turning Cortex on; unset and `all` never include it. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
 | `NIGHTSHIFT_PROBE_EXAMPLES_FILE`       | Examples file for `connector-probe`; required when it is selected. See [connector probes](#connector-probes). |
 | `NIGHTSHIFT_PROBE_TIME_BUDGET_S`       | Seconds a probe may take before `within_time_budget` scores 0 (default 30). |
 | `NIGHTSHIFT_REINFORCEMENT_DATASET`     | When set, the micro-eval runs the first examples of this Customer-0 investigation dataset instead of replaying the committed rounds. A new tree from that path cannot declare merges. |

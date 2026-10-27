@@ -15,4 +15,16 @@ describe('Nightshift investigations configuration', () => {
   it('preserves an explicit Cortex opt-out', () => {
     expect(config.schema.validate({ cortex: { enabled: false } }).cortex.enabled).toBe(false);
   });
+
+  it('enables decision trees by default without requiring Cortex', () => {
+    const validated = config.schema.validate({ cortex: { enabled: false }, decision_trees: {} });
+    expect(validated.decision_trees.enabled).toBe(true);
+    expect(validated.cortex.enabled).toBe(false);
+  });
+
+  it('preserves an explicit decision-tree opt-out', () => {
+    expect(
+      config.schema.validate({ decision_trees: { enabled: false } }).decision_trees.enabled
+    ).toBe(false);
+  });
 });

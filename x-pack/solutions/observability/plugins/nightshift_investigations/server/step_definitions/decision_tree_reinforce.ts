@@ -28,6 +28,14 @@ import {
 const MAX_INPUT_CHARS = 100_000;
 const SUBMIT_ARGUMENTS_JSON_LIMIT = 100_000;
 
+/** The reinforcement round's Agent Builder trace, when tracing recorded one. */
+export const agentTraceId = (traceId: string | string[] | undefined): string | undefined => {
+  const ids = (typeof traceId === 'string' ? [traceId] : traceId ?? []).filter(
+    (id) => id.length > 0
+  );
+  return ids.at(-1);
+};
+
 /** Arguments of each submit call, so a micro-eval can grade them without a persisted conversation. */
 export const submitArgumentsJson = (
   steps: readonly ConversationRoundStep[] | undefined
@@ -74,6 +82,16 @@ export const decisionTreeReinforceStepDefinition = ({
     outputSchema: z.object({
       message: z.string().describe("The reinforcement agent's final response."),
       skipped: z.boolean().optional(),
+      conversation_id: z
+        .string()
+        .max(MAX_KEYWORD_LENGTH)
+        .optional()
+        .describe('Conversation that holds this reinforcement run.'),
+      trace_id: z
+        .string()
+        .max(MAX_KEYWORD_LENGTH)
+        .optional()
+        .describe('Agent Builder trace of this reinforcement run, when tracing recorded one.'),
       submissions_json: z
         .string()
         .describe(
@@ -96,7 +114,7 @@ export const decisionTreeReinforceStepDefinition = ({
       const {
         prompt,
         response,
-        conversation_id: conversationId,
+        conversation_id: inputConversationId,
         round_id: roundId,
         round_index: roundIndex,
         message,
@@ -109,7 +127,7 @@ export const decisionTreeReinforceStepDefinition = ({
       const loadedRound = await loadInvestigationRound({
         agentBuilder,
         request,
-        conversationId: conversationId || undefined,
+        conversationId: inputConversationId || undefined,
         roundId: roundId || undefined,
         roundIndex,
         fallbackToolCalls: (toolCalls ?? []) as InvestigationToolCall[],
@@ -129,8 +147,9 @@ export const decisionTreeReinforceStepDefinition = ({
         startedAt: loadedRound.startedAt ?? now,
       });
       // A fresh id per run: the beforeAgent hydrate namespaces the sandbox by conversation id.
+      const conversationId = uuidv4();
       const conversation = buildInvestigationConversation({
-        conversationId: uuidv4(),
+        conversationId,
         agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
         round,
         now,
@@ -162,9 +181,12 @@ export const decisionTreeReinforceStepDefinition = ({
         },
       });
 
+      const traceId = agentTraceId(result.round.trace_id);
       return {
         output: {
           message: result.round.response.message,
+          conversation_id: conversationId,
+          ...(traceId ? { trace_id: traceId } : {}),
           submissions_json: submitArgumentsJson(result.round.steps),
         },
       };
