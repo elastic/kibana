@@ -140,9 +140,11 @@ describe('decisionTreeReinforceStepDefinition', () => {
 
     const output = await run({});
 
-    expect(output.output.trace_id).toBe('agent-trace');
-    expect(output.output.conversation_id).toBe(
-      runAgent.mock.calls[0][0].agentParams.conversation.id
+    expect(output.output).toEqual(
+      expect.objectContaining({
+        trace_id: 'agent-trace',
+        conversation_id: runAgent.mock.calls[0][0].agentParams.conversation.id,
+      })
     );
   });
 
