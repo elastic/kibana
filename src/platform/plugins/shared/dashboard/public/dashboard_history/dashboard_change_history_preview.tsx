@@ -11,6 +11,7 @@ import React, { lazy, Suspense } from 'react';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
 import { ChangeHistoryPreview } from '@kbn/change-history-ui';
 
@@ -22,18 +23,12 @@ const LazyDashboardPreview = lazy(async () => {
   return { default: DashboardPreview };
 });
 
-const contentStyles = css({
-  height: '100%',
-  width: '100%',
-  overflow: 'auto',
-});
-
 type PreviewProps = Parameters<ChangeHistoryPreviewRenderFn>[0];
 
 export interface DashboardChangeHistoryPreviewProps {
   previewProps: PreviewProps;
   setPreviewTitle: (title: string) => void;
-  inheritedTimeRange: React.ComponentProps<typeof LazyDashboardPreview>['inheritedTimeRange'];
+  inheritedTimeRange: DashboardState['time_range'];
   /** Id of the change whose comparison was requested from the timeline. */
   comparisonChangeId?: string;
 }
@@ -72,3 +67,9 @@ export const DashboardChangeHistoryPreview = ({
     </div>
   );
 };
+
+const contentStyles = css({
+  height: '100%',
+  width: '100%',
+  overflow: 'auto',
+});
