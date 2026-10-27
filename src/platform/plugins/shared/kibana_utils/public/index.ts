@@ -61,12 +61,12 @@ export type {
   PureTransition,
   CreateStateContainerOptions,
 } from '../common/state_containers';
+export { createStateContainer } from '../common/state_containers';
 export {
   createStateContainerReactHelpers,
   useContainerSelector,
   useContainerState,
-  createStateContainer,
-} from '../common/state_containers';
+} from '../common/state_containers/create_state_container_react_helpers';
 export type { IStorageWrapper, IStorage } from './storage';
 export { Storage } from './storage';
 export { hashedItemStore, HashedItemStore } from './storage/hashed_item_store';

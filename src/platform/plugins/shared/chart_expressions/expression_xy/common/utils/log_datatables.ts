@@ -16,7 +16,7 @@ import type {
 } from '@kbn/expressions-plugin/common';
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type { Dimension, LayerDimension } from '@kbn/visualizations-common';
-import { prepareLogTable } from '@kbn/visualizations-common';
+import { prepareLogTable } from '@kbn/visualizations-common/prepare_log_table';
 import { LayerTypes, REFERENCE_LINE } from '../constants';
 import { strings } from '../i18n';
 import type {

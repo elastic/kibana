@@ -11,7 +11,7 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import type { TimeRange } from '@kbn/es-query';
 import { transformType } from '@kbn/embeddable-plugin/server';
 import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/common';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common/constants';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { DEFAULT_TIME_RANGE } from '../../common/lib';
 import { encode, decode } from '../../common/lib/embeddable_dataurl';

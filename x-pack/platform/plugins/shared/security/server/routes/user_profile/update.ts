@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
-import { isValidUserProfileAvatarColor } from '@kbn/user-profile-components';
+import { isValidUserProfileAvatarColor } from '@kbn/user-profile-components/src/user_profile';
 import type { DotKeysOf } from '@kbn/utility-types';
 
 import type { RouteDefinitionParams } from '..';

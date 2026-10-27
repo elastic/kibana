@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fieldConstants } from '../..';
+import * as fieldConstants from '../../field_constants';
 import type { SmartFieldGridColumnOptions } from './types';
 
 export * from '../../field_constants';

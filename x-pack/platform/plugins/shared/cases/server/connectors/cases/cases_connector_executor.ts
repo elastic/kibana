@@ -8,7 +8,7 @@
 import pMap from 'p-map';
 import { get, partition, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
-import { CaseStatuses } from '@kbn/cases-components';
+import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';

@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools/src/performance_metric_events';
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';

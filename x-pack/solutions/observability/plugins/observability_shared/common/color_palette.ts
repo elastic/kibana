@@ -6,7 +6,7 @@
  */
 
 import { difference, first } from 'lodash';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { colorVis } from '@elastic/eui-theme-borealis';
 
 export type Color =
   | 'color0'
@@ -24,7 +24,19 @@ export type Palette = {
   [K in Color]: string;
 };
 
-const euiPalette = euiPaletteColorBlind();
+// Same values as EUI's euiPaletteColorBlind(), without importing @elastic/eui
+const euiPalette = [
+  colorVis.euiColorVis0,
+  colorVis.euiColorVis1,
+  colorVis.euiColorVis2,
+  colorVis.euiColorVis3,
+  colorVis.euiColorVis4,
+  colorVis.euiColorVis5,
+  colorVis.euiColorVis6,
+  colorVis.euiColorVis7,
+  colorVis.euiColorVis8,
+  colorVis.euiColorVis9,
+];
 
 export const defaultPalette: Palette = {
   color0: euiPalette[1], // (blue)

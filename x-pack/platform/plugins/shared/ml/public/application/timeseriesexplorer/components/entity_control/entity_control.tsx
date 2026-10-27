@@ -13,7 +13,8 @@ import { EuiComboBox, EuiFlexItem, EuiFormRow, EuiHealth, EuiHighlight } from '@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { getThemeResolvedSeverityColor, type MlEntityFieldType } from '@kbn/ml-anomaly-utils';
+import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
+import { getThemeResolvedSeverityColor } from '@kbn/ml-anomaly-utils/use_severity_color';
 
 import type { UiPartitionFieldConfig } from '../series_controls/series_controls';
 

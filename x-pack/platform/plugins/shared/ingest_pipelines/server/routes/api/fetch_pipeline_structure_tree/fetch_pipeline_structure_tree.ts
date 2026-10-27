@@ -6,7 +6,7 @@
  */
 
 import type { PipelineTreeNode } from '@kbn/ingest-pipelines-shared';
-import { MAX_TREE_LEVEL } from '@kbn/ingest-pipelines-shared';
+import { MAX_TREE_LEVEL } from '@kbn/ingest-pipelines-shared/src/components/pipeline_structure_tree/constants';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Processor } from '../../../../common/types';
 

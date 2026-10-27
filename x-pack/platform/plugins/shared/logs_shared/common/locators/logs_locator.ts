@@ -6,7 +6,7 @@
  */
 
 import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { getAllLogsDataViewSpec } from '@kbn/discover-utils/src';
+import { getAllLogsDataViewSpec } from '@kbn/discover-utils/src/data_types/logs/utils/get_all_logs_data_view_spec';
 import type { TimeRange } from '@kbn/es-query';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { LocatorDefinition } from '@kbn/share-plugin/common';

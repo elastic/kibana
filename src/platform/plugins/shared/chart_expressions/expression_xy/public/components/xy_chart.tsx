@@ -58,8 +58,8 @@ import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/pu
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
 import type { PersistedState } from '@kbn/visualizations-common';
+import { ChartTooltipFooterMessage } from '@kbn/chart-expressions-common/components/chart_tooltip_footer_message';
 import {
-  ChartTooltipFooterMessage,
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
   getLegendLayout,

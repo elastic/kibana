@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { Dimension } from '@kbn/visualizations-common';
 import { validateAccessor, ChartLayoutDirection } from '@kbn/chart-expressions-common';
-import { prepareLogTable } from '@kbn/visualizations-common';
+import { prepareLogTable } from '@kbn/visualizations-common/prepare_log_table';
 import type { MetricVisRenderConfig } from '../types';
 import { visType } from '../types';
 import type { MetricVisExpressionFunctionDefinition } from '../types';

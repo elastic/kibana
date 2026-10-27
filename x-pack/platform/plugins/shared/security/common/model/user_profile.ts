@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { VISUALIZATION_COLORS } from '@elastic/eui';
+import { colorVis } from '@elastic/eui-theme-borealis';
 
 import type {
   AuthenticatedUser,
@@ -30,6 +30,20 @@ export interface GetUserProfileResponse<D extends UserProfileData = UserProfileD
 
 export const USER_AVATAR_FALLBACK_CODE_POINT = 97; // code point for lowercase "a"
 export const USER_AVATAR_MAX_INITIALS = 2;
+
+// Same values as EUI's VISUALIZATION_COLORS, without importing @elastic/eui
+const VISUALIZATION_COLORS = [
+  colorVis.euiColorVis0,
+  colorVis.euiColorVis1,
+  colorVis.euiColorVis2,
+  colorVis.euiColorVis3,
+  colorVis.euiColorVis4,
+  colorVis.euiColorVis5,
+  colorVis.euiColorVis6,
+  colorVis.euiColorVis7,
+  colorVis.euiColorVis8,
+  colorVis.euiColorVis9,
+];
 
 /**
  * Determines the color for the provided user profile.

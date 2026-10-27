@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
-
 /** Log rate analysis settings */
 export const LOG_RATE_ANALYSIS_SETTINGS = {
   /**
@@ -32,15 +30,6 @@ export const LOG_RATE_ANALYSIS_SETTINGS = {
  * In future versions we might use a user specific seed or let the user customise it.
  */
 export const RANDOM_SAMPLER_SEED = 3867412;
-
-/** Highlighting color for charts */
-export const useLogRateAnalysisBarColors = () => {
-  const { euiTheme } = useEuiTheme();
-  return {
-    barColor: euiTheme.colors.vis.euiColorVis0,
-    barHighlightColor: euiTheme.colors.vis.euiColorVis8,
-  };
-};
 
 //
 // Do not change constant value - part of public REST APIs

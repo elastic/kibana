@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { Dimension } from '@kbn/visualizations-common';
 import { validateAccessor } from '@kbn/chart-expressions-common';
-import { prepareLogTable } from '@kbn/visualizations-common';
+import { prepareLogTable } from '@kbn/visualizations-common/prepare_log_table';
 import type { TagCloudRendererParams } from '../types';
 import type { ExpressionTagcloudFunction } from '../types';
 import { EXPRESSION_NAME, ScaleOptions, Orientation } from '../constants';

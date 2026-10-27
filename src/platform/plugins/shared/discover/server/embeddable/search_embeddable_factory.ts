@@ -8,7 +8,7 @@
  */
 
 import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils/src/constants';
 
 export const createSearchEmbeddableFactory = (): EmbeddableRegistryDefinition => ({
   id: SEARCH_EMBEDDABLE_TYPE,

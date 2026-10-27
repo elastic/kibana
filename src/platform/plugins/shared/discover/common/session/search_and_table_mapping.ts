@@ -18,7 +18,7 @@ import type { AsCodeQuery } from '@kbn/as-code-shared-schemas';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { extractReferences, type SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { isLegacySort, type SortOrder } from '@kbn/discover-utils';
+import { isLegacySort, type SortOrder } from '@kbn/discover-utils/src/utils/sorting/get_sort';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
 import { safeJsonParse } from '@kbn/std';

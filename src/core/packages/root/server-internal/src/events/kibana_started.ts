@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools/src/performance_metric_events';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-server';
 
 const KIBANA_STARTED_EVENT_NAME = 'kibana_started';

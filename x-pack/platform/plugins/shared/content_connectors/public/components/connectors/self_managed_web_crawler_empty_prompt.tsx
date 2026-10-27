@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DecorativeHorizontalStepper } from '@kbn/search-connectors';
+import { DecorativeHorizontalStepper } from '@kbn/search-connectors/components';
 import { GithubIcon } from '../icons/github_icon';
 import { SearchEmptyPrompt } from '../search_empty_prompt';
 
