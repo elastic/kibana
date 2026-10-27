@@ -153636,72 +153636,76 @@ components:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
-              - additionalProperties: false
-                type: object
-                properties:
-                  alignment:
-                    default: right
-                    description: Alignment of the columns.
-                    enum:
-                      - left
-                      - center
-                      - right
-                    type: string
-                  apply_color_to:
-                    anyOf:
-                      - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
-                        enum:
-                          - value
-                          - background
-                        type: string
-                      - enum:
-                          - badge
-                        type: string
-                    description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
-                  color:
-                    anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
-                    description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
-                  summary:
-                    additionalProperties: false
-                    description: Summary row configuration
+              - discriminator:
+                  propertyName: apply_color_to
+                oneOf:
+                  - additionalProperties: false
                     type: object
                     properties:
-                      label:
-                        description: Summary row label.
+                      alignment:
+                        default: right
+                        description: Alignment of the columns.
+                        enum:
+                          - left
+                          - center
+                          - right
                         type: string
-                      type:
+                      apply_color_to:
                         anyOf:
-                          - enum:
-                              - sum
+                          - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                            enum:
+                              - value
+                              - background
                             type: string
                           - enum:
-                              - avg
+                              - badge
                             type: string
-                          - enum:
-                              - count
+                        description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
+                      color:
+                        anyOf:
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                        default:
+                          type: auto
+                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                      summary:
+                        additionalProperties: false
+                        description: Summary row configuration
+                        type: object
+                        properties:
+                          label:
+                            description: Summary row label.
                             type: string
-                          - enum:
-                              - min
-                            type: string
-                          - enum:
-                              - max
-                            type: string
-                        description: Type of summary function to apply to the column.
-                    required:
-                      - type
-                  visible:
-                    default: true
-                    description: When `false`, hides the column from the datatable.
-                    type: boolean
-                  width:
-                    description: Column width in pixels.
-                    minimum: 0
-                    type: number
+                          type:
+                            anyOf:
+                              - enum:
+                                  - sum
+                                type: string
+                              - enum:
+                                  - avg
+                                type: string
+                              - enum:
+                                  - count
+                                type: string
+                              - enum:
+                                  - min
+                                type: string
+                              - enum:
+                                  - max
+                                type: string
+                            description: Type of summary function to apply to the column.
+                        required:
+                          - type
+                      visible:
+                        default: true
+                        description: When `false`, hides the column from the datatable.
+                        type: boolean
+                      width:
+                        description: Column width in pixels.
+                        minimum: 0
+                        type: number
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBar'
           maxItems: 1000
           minItems: 1
           type: array
@@ -178201,66 +178205,74 @@ components:
         metrics:
           description: Array of metrics to display as columns in the datatable
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetric'
+            discriminator:
+              propertyName: apply_color_to
+            oneOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetric'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBar'
           maxItems: 1000
           minItems: 1
           type: array
         rows:
           description: Array of operations to split the datatable rows by
           items:
-            type: object
-            properties:
-              alignment:
-                default: left
-                description: Alignment of the rows.
-                enum:
-                  - left
-                  - center
-                  - right
-                type: string
-              apply_color_to:
-                anyOf:
-                  - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+            discriminator:
+              propertyName: apply_color_to
+            oneOf:
+              - type: object
+                properties:
+                  alignment:
+                    default: left
+                    description: Alignment of the rows.
                     enum:
-                      - value
-                      - background
+                      - left
+                      - center
+                      - right
                     type: string
-                  - enum:
-                      - badge
+                  apply_color_to:
+                    anyOf:
+                      - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                        enum:
+                          - value
+                          - background
+                        type: string
+                      - enum:
+                          - badge
+                        type: string
+                    description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
+                  click_filter:
+                    default: false
+                    description: When `true`, enables one-click filtering on cell values.
+                    type: boolean
+                  collapse_by:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+                  color:
+                    anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                    default:
+                      type: auto
+                    description: Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                  column:
+                    description: Column to use
                     type: string
-                description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
-              click_filter:
-                default: false
-                description: When `true`, enables one-click filtering on cell values.
-                type: boolean
-              collapse_by:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
-              color:
-                anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
-                description: Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
-              column:
-                description: Column to use
-                type: string
-              format:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
-              label:
-                description: Label for the operation
-                type: string
-              visible:
-                default: true
-                description: When `false`, hides the column from the datatable.
-                type: boolean
-              width:
-                description: Column width in pixels.
-                minimum: 0
-                type: number
-            required:
-              - column
+                  format:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+                  label:
+                    description: Label for the operation
+                    type: string
+                  visible:
+                    default: true
+                    description: When `false`, hides the column from the datatable.
+                    type: boolean
+                  width:
+                    description: Column width in pixels.
+                    minimum: 0
+                    type: number
+                required:
+                  - column
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBar'
           maxItems: 50
           minItems: 1
           type: array
@@ -178380,6 +178392,458 @@ components:
         - column
       title: Datatable Metric (ES|QL)
       type: object
+    Kibana_HTTP_APIs_visDatatableESQLMetricProgressBar:
+      discriminator:
+        mapping:
+          gradient: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarGradient'
+          single: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSingle'
+          solid: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSolid'
+        propertyName: fill_mode
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSingle'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSolid'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarGradient'
+      title: Datatable metric progress bar (ES|QL)
+    Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarGradient:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Alignment of the value beside the bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          description: Reveals the palette along the bar.
+          enum:
+            - gradient
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+        - fill_mode
+      title: Datatable metric progress bar (ES|QL) (gradient fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSingle:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Alignment of the value beside the bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+          default:
+            type: auto
+          description: Bar color.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          description: Fills the bar with one fixed color.
+          enum:
+            - single
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+        - fill_mode
+      title: Datatable metric progress bar (ES|QL) (single fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSolid:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Alignment of the value beside the bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          description: Fills the bar with the palette color of the band the value falls in.
+          enum:
+            - solid
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+        - fill_mode
+      title: Datatable metric progress bar (ES|QL) (solid fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableESQLRowProgressBar:
+      discriminator:
+        mapping:
+          gradient: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarGradient'
+          single: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSingle'
+          solid: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSolid'
+        propertyName: fill_mode
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSingle'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSolid'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarGradient'
+      title: Datatable row progress bar (ES|QL)
+    Kibana_HTTP_APIs_visDatatableESQLRowProgressBarGradient:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Alignment of the value beside the bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        click_filter:
+          default: false
+          description: When `true`, enables one-click filtering on cell values.
+          type: boolean
+        collapse_by:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          description: Reveals the palette along the bar.
+          enum:
+            - gradient
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+        - fill_mode
+      title: Datatable row progress bar (ES|QL) (gradient fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSingle:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Alignment of the value beside the bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        click_filter:
+          default: false
+          description: When `true`, enables one-click filtering on cell values.
+          type: boolean
+        collapse_by:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+          default:
+            type: auto
+          description: Bar color.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          description: Fills the bar with one fixed color.
+          enum:
+            - single
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+        - fill_mode
+      title: Datatable row progress bar (ES|QL) (single fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSolid:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Alignment of the value beside the bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        click_filter:
+          default: false
+          description: When `true`, enables one-click filtering on cell values.
+          type: boolean
+        collapse_by:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          description: Fills the bar with the palette color of the band the value falls in.
+          enum:
+            - solid
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+        - fill_mode
+      title: Datatable row progress bar (ES|QL) (solid fill)
+      type: object
     Kibana_HTTP_APIs_visDatatableMetricCounterRate:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
     Kibana_HTTP_APIs_visDatatableMetricCountMetric:
@@ -178445,72 +178909,76 @@ components:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
-              - additionalProperties: false
-                type: object
-                properties:
-                  alignment:
-                    default: right
-                    description: Alignment of the columns.
-                    enum:
-                      - left
-                      - center
-                      - right
-                    type: string
-                  apply_color_to:
-                    anyOf:
-                      - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
-                        enum:
-                          - value
-                          - background
-                        type: string
-                      - enum:
-                          - badge
-                        type: string
-                    description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
-                  color:
-                    anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
-                    description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
-                  summary:
-                    additionalProperties: false
-                    description: Summary row configuration
+              - discriminator:
+                  propertyName: apply_color_to
+                oneOf:
+                  - additionalProperties: false
                     type: object
                     properties:
-                      label:
-                        description: Summary row label.
+                      alignment:
+                        default: right
+                        description: Alignment of the columns.
+                        enum:
+                          - left
+                          - center
+                          - right
                         type: string
-                      type:
+                      apply_color_to:
                         anyOf:
-                          - enum:
-                              - sum
+                          - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                            enum:
+                              - value
+                              - background
                             type: string
                           - enum:
-                              - avg
+                              - badge
                             type: string
-                          - enum:
-                              - count
+                        description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
+                      color:
+                        anyOf:
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                        default:
+                          type: auto
+                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                      summary:
+                        additionalProperties: false
+                        description: Summary row configuration
+                        type: object
+                        properties:
+                          label:
+                            description: Summary row label.
                             type: string
-                          - enum:
-                              - min
-                            type: string
-                          - enum:
-                              - max
-                            type: string
-                        description: Type of summary function to apply to the column.
-                    required:
-                      - type
-                  visible:
-                    default: true
-                    description: When `false`, hides the column from the datatable.
-                    type: boolean
-                  width:
-                    description: Column width in pixels.
-                    minimum: 0
-                    type: number
+                          type:
+                            anyOf:
+                              - enum:
+                                  - sum
+                                type: string
+                              - enum:
+                                  - avg
+                                type: string
+                              - enum:
+                                  - count
+                                type: string
+                              - enum:
+                                  - min
+                                type: string
+                              - enum:
+                                  - max
+                                type: string
+                            description: Type of summary function to apply to the column.
+                        required:
+                          - type
+                      visible:
+                        default: true
+                        description: When `false`, hides the column from the datatable.
+                        type: boolean
+                      width:
+                        description: Column width in pixels.
+                        minimum: 0
+                        type: number
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBar'
           maxItems: 1000
           minItems: 1
           type: array
@@ -178606,6 +179074,272 @@ components:
         - metrics
       title: Datatable (DSL)
       type: object
+    Kibana_HTTP_APIs_visDatatableProgressBar:
+      discriminator:
+        mapping:
+          gradient: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarGradient'
+          single: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSingle'
+          solid: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSolid'
+        propertyName: fill_mode
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSingle'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSolid'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarGradient'
+      title: Datatable metric progress bar
+    Kibana_HTTP_APIs_visDatatableProgressBarGradient:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Alignment of the value beside the bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        fill_mode:
+          description: Reveals the palette along the bar.
+          enum:
+            - gradient
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - apply_color_to
+        - fill_mode
+      title: Datatable metric progress bar (gradient fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableProgressBarSingle:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Alignment of the value beside the bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+          default:
+            type: auto
+          description: Bar color.
+        fill_mode:
+          description: Fills the bar with one fixed color.
+          enum:
+            - single
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - apply_color_to
+        - fill_mode
+      title: Datatable metric progress bar (single fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableProgressBarSolid:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Alignment of the value beside the bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        fill_mode:
+          description: Fills the bar with the palette color of the band the value falls in.
+          enum:
+            - solid
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - apply_color_to
+        - fill_mode
+      title: Datatable metric progress bar (solid fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableProgressBarValueRange:
+      description: The numeric span the progress bar represents
+      discriminator:
+        propertyName: type
+      oneOf:
+        - additionalProperties: false
+          description: The bar spans the minimum to the maximum of the loaded values.
+          type: object
+          properties:
+            type:
+              enum:
+                - auto
+              type: string
+          required:
+            - type
+        - additionalProperties: false
+          description: Custom explicit bounds.
+          type: object
+          properties:
+            max:
+              description: Value at which the bar is full.
+              type: number
+            min:
+              description: Value at which the bar is empty.
+              type: number
+            type:
+              enum:
+                - custom
+              type: string
+          required:
+            - type
+            - min
+            - max
+      title: Datatable progress bar value range
     Kibana_HTTP_APIs_visDatatableRowDateHistogram:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
     Kibana_HTTP_APIs_visDatatableRowFilters:
