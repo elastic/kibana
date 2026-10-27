@@ -60,7 +60,14 @@ export interface ProcessingNodeData extends Record<string, unknown> {
   title: string;
   processorCount: number;
   editable: boolean;
+  /**
+   * What the output handle allows: `connect` starts new lines, `reconnect`
+   * only moves the node's existing lines, and `fixed` allows neither.
+   */
+  output: ProcessingNodeOutput;
 }
+
+export type ProcessingNodeOutput = 'connect' | 'reconnect' | 'fixed';
 
 /** Edge data for lines derived from the unit's pipelines. */
 export interface UnitEdgeData extends Record<string, unknown> {
@@ -69,6 +76,8 @@ export interface UnitEdgeData extends Record<string, unknown> {
   forwarding?: UnitEdgeForwarding;
   /** The slot "Add processing" writes to; unset when the line leads to a read-only node. */
   processingTarget?: UnitEdgeProcessingTarget;
+  /** Lines into a routing node or out of one of its rules. */
+  routing?: boolean;
 }
 
 export type SourceNode = Node<SourceNodeData, typeof SOURCE_NODE_TYPE>;

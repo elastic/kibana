@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import { EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { PROCESSING_SLOT_KIND } from '../../../../../services/unit_graph';
 import type { ProcessingNode as ProcessingNodeType } from '../types';
 import { PROCESSING_NODE_HEIGHT, PROCESSING_NODE_WIDTH } from '../canvas_constants';
 import { ConnectionHandle, NODE_HANDLE_CLASS } from './connection_handle';
@@ -55,21 +54,23 @@ export function ProcessingNode({ data, selected, dragging }: NodeProps<Processin
           <div>{countLabel}</div>
         </EuiText>
       </EuiPanel>
-      {data.ref.kind === PROCESSING_SLOT_KIND.pipeline ? (
-        <ConnectionHandle
-          type="source"
-          position={Position.Right}
-          isConnectable={true}
-          connectAriaLabel={i18n.translate('xpack.streams.canvas.processingNode.connectAriaLabel', {
-            defaultMessage: 'Drag to send processed data to a destination',
-          })}
-        />
-      ) : (
+      {data.output === 'fixed' ? (
         <Handle
           type="source"
           position={Position.Right}
           isConnectable={false}
           className={NODE_HANDLE_CLASS}
+        />
+      ) : (
+        <ConnectionHandle
+          type="source"
+          position={Position.Right}
+          isConnectable={true}
+          // A route's processing keeps the lines of its rule, which can be moved but not added to.
+          isConnectableStart={data.output === 'connect'}
+          connectAriaLabel={i18n.translate('xpack.streams.canvas.processingNode.connectAriaLabel', {
+            defaultMessage: 'Drag to send processed data to a destination',
+          })}
         />
       )}
     </>

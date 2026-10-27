@@ -5,17 +5,24 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import {
-  canConnectSourceToDestination,
+  canMoveUnitConnection,
   connectRouteToTarget,
-  connectSourceToDestination,
+  connectToDestination,
+  disconnectFromDestination,
   disconnectRouteFromTarget,
-  disconnectSourceFromDestination,
   moveRouteConnection,
   moveUnitConnection,
   type RouteRuleRef,
   type RouteTarget,
+  type UnitConnectionOrigin,
 } from '../../../../services/unit_connections';
+import {
+  GRAPH_ENDPOINT_KIND,
+  PROCESSING_SLOT_KIND,
+  type ProcessingNodeRef,
+} from '../../../../services/unit_graph';
 import type { Unit } from '../../../../services/unit_repository';
 import {
   readConfiguredDestinationId,
@@ -26,17 +33,23 @@ import {
 
 export type { RouteTarget };
 
+/** Processing node ids on the canvas, mapped to the slot each one draws. */
+export type ProcessingRefsByNodeId = ReadonlyMap<string, ProcessingNodeRef>;
+
 /**
- * Where a drawn line starts: a source node, which wires its direct pipeline, or
- * one rule handle of a routing node, which wires that rule.
+ * Where a drawn line starts: a source node or a pipeline's processing, which
+ * wire straight to destinations, or one rule of a routing node (its handle, or
+ * the rule's processing), which wires that rule.
  */
 export type ConnectionOrigin =
   | { kind: 'source'; sourceId: string }
+  | { kind: 'processing'; ref: ProcessingNodeRef }
   | { kind: 'route'; rule: RouteRuleRef };
 
 export const readConnectionOrigin = (
   nodeId: string | null | undefined,
-  handleId: string | null | undefined
+  handleId: string | null | undefined,
+  processingRefs: ProcessingRefsByNodeId = new Map()
 ): ConnectionOrigin | undefined => {
   const sourceId = readConfiguredSourceId(nodeId);
   if (sourceId) {
@@ -47,19 +60,48 @@ export const readConnectionOrigin = (
   if (pipelineId && ruleIndex !== undefined) {
     return { kind: 'route', rule: { pipelineId, ruleIndex } };
   }
-  return undefined;
+  const ref = nodeId ? processingRefs.get(nodeId) : undefined;
+  if (!ref) {
+    return undefined;
+  }
+  return ref.kind === PROCESSING_SLOT_KIND.route
+    ? { kind: 'route', rule: { pipelineId: ref.pipelineId, ruleIndex: ref.routeIndex } }
+    : { kind: 'processing', ref };
 };
 
-/** Where a drawn line ends: a configured destination, or a routing node's pipeline. */
+/**
+ * Where a drawn line ends: a configured destination, or a routing pipeline,
+ * drawn as its routing node or the processing in front of it.
+ */
 export const readConnectionTarget = (
-  nodeId: string | null | undefined
+  nodeId: string | null | undefined,
+  processingRefs: ProcessingRefsByNodeId = new Map(),
+  routingIds: ReadonlySet<string> = new Set()
 ): RouteTarget | undefined => {
   const destinationId = readConfiguredDestinationId(nodeId);
   if (destinationId) {
     return { kind: 'destination', id: destinationId };
   }
   const pipelineId = readConfiguredRoutingId(nodeId);
-  return pipelineId ? { kind: 'pipeline', id: pipelineId } : undefined;
+  if (pipelineId) {
+    return { kind: 'pipeline', id: pipelineId };
+  }
+  const ref = nodeId ? processingRefs.get(nodeId) : undefined;
+  return ref?.kind === PROCESSING_SLOT_KIND.pipeline && routingIds.has(ref.pipelineId)
+    ? { kind: 'pipeline', id: ref.pipelineId }
+    : undefined;
+};
+
+/** Sources and pipeline processing are the origins the unit graph wires to destinations. */
+const toUnitConnectionOrigin = (origin: ConnectionOrigin): UnitConnectionOrigin | undefined => {
+  switch (origin.kind) {
+    case 'source':
+      return { kind: GRAPH_ENDPOINT_KIND.source, id: origin.sourceId };
+    case 'processing':
+      return { kind: GRAPH_ENDPOINT_KIND.processing, ref: origin.ref };
+    case 'route':
+      return undefined;
+  }
 };
 
 export const canConnectOrigin = (
@@ -68,14 +110,14 @@ export const canConnectOrigin = (
   target: RouteTarget
 ): boolean => connectOrigin(unit, origin, target) !== unit;
 
-/** Sources only wire straight to destinations. Rules take destinations or pipelines. */
+/** Sources and processing only wire straight to destinations. Rules take destinations or pipelines. */
 export const connectOrigin = (unit: Unit, origin: ConnectionOrigin, target: RouteTarget): Unit => {
   if (origin.kind === 'route') {
     return connectRouteToTarget(unit, origin.rule, target);
   }
-  return target.kind === 'destination' &&
-    canConnectSourceToDestination(unit, origin.sourceId, target.id)
-    ? connectSourceToDestination(unit, origin.sourceId, target.id)
+  const unitOrigin = toUnitConnectionOrigin(origin);
+  return unitOrigin && target.kind === 'destination'
+    ? connectToDestination(unit, unitOrigin, target.id)
     : unit;
 };
 
@@ -87,8 +129,9 @@ export const disconnectOrigin = (
   if (origin.kind === 'route') {
     return disconnectRouteFromTarget(unit, origin.rule, target);
   }
-  return target.kind === 'destination'
-    ? disconnectSourceFromDestination(unit, origin.sourceId, target.id)
+  const unitOrigin = toUnitConnectionOrigin(origin);
+  return unitOrigin && target.kind === 'destination'
+    ? disconnectFromDestination(unit, unitOrigin, target.id)
     : unit;
 };
 
@@ -99,20 +142,15 @@ export interface OriginConnectionMove {
   target: RouteTarget;
 }
 
+/** Whether the move puts the line back where it started. */
+const isSameLine = ({ previousOrigin, previousTarget, origin, target }: OriginConnectionMove) =>
+  isEqual(previousOrigin, origin) && isEqual(previousTarget, target);
+
 /** Moves an existing line. Returns `unit` unchanged when the move is not allowed. */
-export const moveOriginConnection = (
-  unit: Unit,
-  { previousOrigin, previousTarget, origin, target }: OriginConnectionMove
-): Unit => {
-  if (previousOrigin.kind === 'source' && origin.kind === 'source') {
-    return previousTarget.kind === 'destination' && target.kind === 'destination'
-      ? moveUnitConnection(unit, {
-          previousSourceId: previousOrigin.sourceId,
-          previousDestinationId: previousTarget.id,
-          sourceId: origin.sourceId,
-          destinationId: target.id,
-        })
-      : unit;
+export const moveOriginConnection = (unit: Unit, move: OriginConnectionMove): Unit => {
+  const { previousOrigin, previousTarget, origin, target } = move;
+  if (isSameLine(move)) {
+    return unit;
   }
   if (previousOrigin.kind === 'route' && origin.kind === 'route') {
     return moveRouteConnection(unit, {
@@ -122,6 +160,42 @@ export const moveOriginConnection = (
       target,
     });
   }
+  const previousUnitOrigin = toUnitConnectionOrigin(previousOrigin);
+  const unitOrigin = toUnitConnectionOrigin(origin);
+  if (previousUnitOrigin && unitOrigin) {
+    return previousTarget.kind === 'destination' && target.kind === 'destination'
+      ? moveUnitConnection(unit, {
+          previousOrigin: previousUnitOrigin,
+          previousDestinationId: previousTarget.id,
+          origin: unitOrigin,
+          destinationId: target.id,
+        })
+      : unit;
+  }
   const connected = connectOrigin(unit, origin, target);
   return connected === unit ? unit : disconnectOrigin(connected, previousOrigin, previousTarget);
+};
+
+/** Whether a moved line can be dropped there. Dropping it back where it started is allowed. */
+export const canMoveOriginConnection = (unit: Unit, move: OriginConnectionMove): boolean => {
+  if (isSameLine(move)) {
+    return true;
+  }
+  const { previousOrigin, previousTarget, origin, target } = move;
+  const previousUnitOrigin = toUnitConnectionOrigin(previousOrigin);
+  const unitOrigin = toUnitConnectionOrigin(origin);
+  if (
+    previousUnitOrigin &&
+    unitOrigin &&
+    previousTarget.kind === 'destination' &&
+    target.kind === 'destination'
+  ) {
+    return canMoveUnitConnection(unit, {
+      previousOrigin: previousUnitOrigin,
+      previousDestinationId: previousTarget.id,
+      origin: unitOrigin,
+      destinationId: target.id,
+    });
+  }
+  return moveOriginConnection(unit, move) !== unit;
 };
