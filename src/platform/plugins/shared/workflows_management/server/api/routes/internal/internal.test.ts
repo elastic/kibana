@@ -50,6 +50,7 @@ describe('Internal Routes', () => {
       (spaceId: string, request: unknown) => Promise<unknown>
     >;
     getHistoryForWorkflow: jest.Mock;
+    getReadableWorkflowIds: jest.Mock;
     restoreWorkflowVersion: jest.Mock;
   };
   let mockAudit: {
@@ -102,6 +103,7 @@ describe('Internal Routes', () => {
     mockApi = {
       disableAllWorkflows: jest.fn(),
       getHistoryForWorkflow: jest.fn(),
+      getReadableWorkflowIds: jest.fn(),
       restoreWorkflowVersion: jest.fn(),
     };
     mockAudit = {
@@ -205,6 +207,22 @@ describe('Internal Routes', () => {
     expect(response.ok).toHaveBeenCalledWith({
       body: { eventDrivenExecutionEnabled: false },
     });
+  });
+
+  it('returns the workflow ids readable in the request space', async () => {
+    mockApi.getReadableWorkflowIds.mockResolvedValue(['a', 'b']);
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest();
+
+    await routeHandlers['GET:/internal/workflows/readable_workflow_ids'].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.getReadableWorkflowIds).toHaveBeenCalledWith('default', request);
+    expect(response.ok).toHaveBeenCalledWith({ body: { workflowIds: ['a', 'b'] } });
   });
 
   it('should register the disable route handler', () => {
