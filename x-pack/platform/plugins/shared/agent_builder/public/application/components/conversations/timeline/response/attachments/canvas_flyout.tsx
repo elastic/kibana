@@ -169,6 +169,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         title={title}
         subtitle={header?.subtitle}
         badges={header?.badges}
+        color={header?.color}
         actionButtons={canvasHeaderActionButtons}
         onClose={closeCanvas}
         previewBadgeState="preview_available"

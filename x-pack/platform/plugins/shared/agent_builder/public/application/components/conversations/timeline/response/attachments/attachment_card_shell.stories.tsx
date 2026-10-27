@@ -10,10 +10,11 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiCallOut, EuiSplitPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { HeaderBadge } from '@kbn/agent-builder-browser/attachments';
+import type { HeaderBadge, HeaderColor } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { AttachmentHeader } from './attachment_header';
+import { AttachmentCard } from './attachment_card';
 import { AttachmentLoadingSkeleton } from './attachment_loading_skeleton';
 import { TimelineRenderErrorBoundary } from '../../timeline_render_error_boundary';
 
@@ -22,6 +23,7 @@ interface ShellArgs {
   title: string;
   subtitle?: string;
   badges?: HeaderBadge[];
+  color?: HeaderColor;
   body: React.ReactNode;
   actionButtons?: React.ComponentProps<typeof AttachmentHeader>['actionButtons'];
   previewBadgeState?: React.ComponentProps<typeof AttachmentHeader>['previewBadgeState'];
@@ -32,25 +34,18 @@ const Shell: React.FC<ShellArgs> = ({
   title,
   subtitle,
   badges,
+  color,
   body,
   actionButtons,
   previewBadgeState,
 }) => (
-  <EuiSplitPanel.Outer
-    grow
-    hasShadow={false}
-    hasBorder={true}
-    css={css`
-      overflow: visible;
-      border-radius: ${AB_PANEL_RADIUS}px;
-      max-width: 820px;
-    `}
-  >
+  <AttachmentCard color={color} maxWidth={820}>
     <AttachmentHeader
       icon={icon}
       title={title}
       subtitle={subtitle}
       badges={badges}
+      color={color}
       actionButtons={actionButtons}
       previewBadgeState={previewBadgeState}
       onClosePreview={action('close preview')}
@@ -69,7 +64,7 @@ const Shell: React.FC<ShellArgs> = ({
     >
       <TimelineRenderErrorBoundary>{() => body}</TimelineRenderErrorBoundary>
     </EuiSplitPanel.Inner>
-  </EuiSplitPanel.Outer>
+  </AttachmentCard>
 );
 
 const bodyPlaceholder = (
@@ -179,6 +174,25 @@ export const WithOverflowActions: Story = {
     ],
     body: bodyPlaceholder,
   },
+};
+
+const COLOR_VARIANTS: HeaderColor[] = ['primary', 'danger', 'warning', 'accent', 'success'];
+
+export const ColorVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {COLOR_VARIANTS.map((color) => (
+        <Shell
+          key={color}
+          icon="document"
+          title={`Color variant: ${color}`}
+          color={color}
+          actionButtons={defaultActions}
+          body={bodyPlaceholder}
+        />
+      ))}
+    </div>
+  ),
 };
 
 export const EmptyState: Story = {

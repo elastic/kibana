@@ -21,13 +21,18 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ActionButton, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
+import type {
+  ActionButton,
+  HeaderBadge,
+  HeaderColor,
+} from '@kbn/agent-builder-browser/attachments';
 import { i18n } from '@kbn/i18n';
 import type { IconType } from '@elastic/eui';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { AttachmentActions } from './attachment_actions';
+import { useHeaderColorTokens } from './header_color';
 
 const PREVIEW_ONLY_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.previewOnly', {
   defaultMessage: 'Read-only preview',
@@ -50,6 +55,8 @@ interface AttachmentHeaderProps {
   subtitle?: string;
   /** Optional badges rendered alongside the title. */
   badges?: HeaderBadge[];
+  /** Optional color variant tinting the header background, border, title and icon. */
+  color?: HeaderColor;
   actionButtons?: ActionButton[];
   onClose?: () => void;
   onClosePreview?: () => void;
@@ -73,6 +80,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   title,
   subtitle,
   badges,
+  color,
   actionButtons,
   onClose,
   onClosePreview,
@@ -86,7 +94,10 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   const { width: headerWidth } = useResizeObserver(measureRef.current);
   const isCompact = headerWidth > 0 && headerWidth <= COMPACT_WIDTH_THRESHOLD;
 
+  const colorTokens = useHeaderColorTokens(color);
+
   const textStyles = css`
+    ${colorTokens.text ? `color: ${colorTokens.text};` : ''}
     font-weight: ${euiTheme.font.weight.semiBold};
     overflow: hidden;
     white-space: nowrap;
@@ -111,7 +122,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     ${!isHeaderOnly
       ? `
       border-bottom: ${euiTheme.border.thin};
-      border-color: ${euiTheme.colors.borderBaseSubdued};
+      border-color: ${colorTokens.border};
     `
       : ''}
     border-radius: ${headerBorderRadius};
@@ -136,7 +147,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
 
   return (
     <div ref={measureRef} style={{ width: '100%' }}>
-      <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="m">
+      <EuiSplitPanel.Inner color={color ?? 'subdued'} css={headerStyles} paddingSize="m">
         {previewBadgeState === 'preview_available' && (
           <EuiBadge iconType="readOnly" css={badgeStyles}>
             {PREVIEW_ONLY_LABEL}
@@ -160,7 +171,12 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
             >
               {icon && (
                 <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-                  <EuiIcon type={icon} color="subdued" size="l" aria-hidden={true} />
+                  <EuiIcon
+                    type={icon}
+                    color={colorTokens.text ?? 'subdued'}
+                    size="l"
+                    aria-hidden={true}
+                  />
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={true} style={{ minWidth: 0 }}>

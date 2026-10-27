@@ -19,6 +19,7 @@ import { useConversationContext } from '../../../../../context/conversation/conv
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
+import { AttachmentCard } from './attachment_card';
 import { TimelineRenderErrorBoundary } from '../../timeline_render_error_boundary';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
@@ -157,21 +158,13 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   const isHeaderOnly = !uiDefinition.renderInlineContent;
 
   return (
-    <EuiSplitPanel.Outer
-      grow
-      hasShadow={false}
-      hasBorder={true}
-      css={css`
-        overflow: visible; // allow vis actions to overflow
-        border-radius: ${AB_PANEL_RADIUS}px;
-        ${maxWidth !== undefined ? `max-width: ${maxWidth}px;` : ''}
-      `}
-    >
+    <AttachmentCard color={header?.color} maxWidth={maxWidth}>
       <AttachmentHeader
         icon={header?.icon}
         title={title}
         subtitle={header?.subtitle}
         badges={header?.badges}
+        color={header?.color}
         actionButtons={inlineActionButtons}
         previewBadgeState={resolvedPreviewBadgeState}
         onClosePreview={closeCanvas}
@@ -214,7 +207,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
           </TimelineRenderErrorBoundary>
         </EuiSplitPanel.Inner>
       )}
-    </EuiSplitPanel.Outer>
+    </AttachmentCard>
   );
 };
 
