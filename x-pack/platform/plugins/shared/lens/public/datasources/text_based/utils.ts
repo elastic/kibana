@@ -73,7 +73,9 @@ export const getAllColumns = (
  * Rebinds existing layer columns (and their dimension mappings) to the columns
  * returned by a changed layer query, so configured dimensions survive query edits.
  *
- * Tie-breaking order per query column, each existing column used at most once:
+ * Exact matches are reserved across all query columns before applying fallbacks,
+ * so an earlier same-type output cannot consume a later output's field binding.
+ * Each existing column is used at most once, with this matching priority:
  * 1. exact match — same `fieldName` as the query column id/name
  * 2. positional match — existing column at the same index, if the meta type matches
  * 3. first unused existing column with the same meta type (best-effort: with
@@ -101,7 +103,7 @@ export const reconcileQueryColumns = (
       (column) => preferredColumnIds.has(column.columnId) && predicate(column)
     ) ?? existingColumns.find(predicate);
 
-  const queryColumns = columnsFromQuery.map((queryColumn, index) => {
+  const exactMatches = columnsFromQuery.map((queryColumn) => {
     const queryFieldName = queryColumn.variable ? `??${queryColumn.variable}` : queryColumn.id;
     const exactMatch = findPreferredFirst(
       (column) =>
@@ -110,6 +112,15 @@ export const reconcileQueryColumns = (
           column.fieldName === queryColumn.id ||
           column.fieldName === queryColumn.name)
     );
+    if (exactMatch) {
+      usedColumnIds.add(exactMatch.columnId);
+    }
+    return exactMatch;
+  });
+
+  const queryColumns = columnsFromQuery.map((queryColumn, index) => {
+    const queryFieldName = queryColumn.variable ? `??${queryColumn.variable}` : queryColumn.id;
+    const exactMatch = exactMatches[index];
     const positionalMatch = existingColumns[index];
     // A positional match must not shadow an unused dimension-bound column of the
     // same type (e.g. on a duplicated layer, an orphan duplicate at the query

@@ -45,6 +45,56 @@ describe('Text based languages utils', () => {
         { columnId: 'value', fieldName: 'value', label: 'value', meta: { type: 'number' } },
       ]);
     });
+    it('preserves a sparse reference-line binding to a later exact query output', () => {
+      const existingColumns: TextBasedLayerColumn[] = [
+        { columnId: 'reference-upper', fieldName: 'upper', meta: { type: 'number' } },
+      ];
+      const queryColumns: DatatableColumn[] = [
+        { id: 'lower', name: 'lower', meta: { type: 'number' } },
+        { id: 'upper', name: 'upper', meta: { type: 'number' } },
+      ];
+      const accessors = new Set(['reference-upper']);
+
+      const result = reconcileQueryColumns(existingColumns, queryColumns, accessors);
+
+      expect(result).toEqual([
+        { columnId: 'lower', fieldName: 'lower', label: 'lower', meta: { type: 'number' } },
+        {
+          columnId: 'reference-upper',
+          fieldName: 'upper',
+          label: 'upper',
+          meta: { type: 'number' },
+        },
+      ]);
+      expect(result.filter(({ columnId }) => accessors.has(columnId))).toEqual([result[1]]);
+    });
+
+    it('reserves later exact matches before rebinding earlier renamed outputs', () => {
+      const existingColumns: TextBasedLayerColumn[] = [
+        { columnId: 'metric-upper', fieldName: 'upper', meta: { type: 'number' } },
+        { columnId: 'metric-lower', fieldName: 'lower', meta: { type: 'number' } },
+      ];
+      const queryColumns: DatatableColumn[] = [
+        { id: 'renamed_lower', name: 'renamed_lower', meta: { type: 'number' } },
+        { id: 'upper', name: 'upper', meta: { type: 'number' } },
+      ];
+
+      expect(reconcileQueryColumns(existingColumns, queryColumns)).toEqual([
+        {
+          columnId: 'metric-lower',
+          fieldName: 'renamed_lower',
+          label: 'renamed_lower',
+          meta: { type: 'number' },
+        },
+        {
+          columnId: 'metric-upper',
+          fieldName: 'upper',
+          label: 'upper',
+          meta: { type: 'number' },
+        },
+      ]);
+    });
+
     it('preserves configured column IDs when compatible query fields change', () => {
       const existingColumns: TextBasedLayerColumn[] = [
         {
