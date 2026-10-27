@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type {
+  DataStreamAction,
   DataStreamDetail,
   Index,
   IndexDetailsTab,
@@ -105,6 +106,7 @@ const setup = ({ canEdit = true } = {}) => {
   const cards: IndexOverviewCard[] = [];
   const tabs: IndexDetailsTab[] = [];
   const details: DataStreamDetail[] = [];
+  const actions: DataStreamAction[] = [];
   registerIndexManagementExtensions(core, {
     share: {
       url: { locators: { get: () => indexManagementLocator } },
@@ -114,10 +116,11 @@ const setup = ({ canEdit = true } = {}) => {
         addIndexOverviewCard: (card: IndexOverviewCard) => cards.push(card),
         addIndexDetailsTab: (tab: IndexDetailsTab) => tabs.push(tab),
         addDataStreamDetail: (detail: DataStreamDetail) => details.push(detail),
+        addDataStreamAction: (action: DataStreamAction) => actions.push(action),
       },
     } as unknown as IndexManagementPluginStart,
   });
-  return { core, card: cards[0], tab: tabs[0], details };
+  return { core, card: cards[0], tab: tabs[0], details, actions };
 };
 
 const renderInIntl = (children: ReactNode) =>
@@ -147,14 +150,17 @@ beforeEach(() => {
 });
 
 describe('Index Management extensions', () => {
-  it('adds a card, a tab after the overview, and two data stream details, except for system indices', () => {
-    const { card, tab, details } = setup();
+  it('adds a card, a tab after the overview, and a data stream detail and action, except for system indices', () => {
+    const { card, tab, details, actions } = setup();
 
     expect(card.title).toBe('Search boost');
     expect([tab.id, tab.name, tab.order]).toEqual(['boost', 'Search boost', 15]);
     // The tab's dividers meet the tabs' own, as on the boost app's details pages.
     expect(tab.hasTopSpacing).toBe(false);
-    expect(details.map(({ name }) => name)).toEqual(['Boost profile', 'Boost rule']);
+    expect(details.map(({ name }) => name)).toEqual(['Search boost']);
+    expect(actions.map(({ name, icon }) => [name, icon])).toEqual([
+      ['Edit boost rule', 'chartGauge'],
+    ]);
     // The boost server marks system indices, which Elasticsearch doesn't boost.
     expect(card.shouldRenderCard?.({ index: { name: '.kibana_1', isBoostable: false } })).toBe(
       false
@@ -287,23 +293,45 @@ describe('Index Management extensions', () => {
     });
   });
 
-  it("adds a data stream's profile and rule to its details, marking built-in ones", async () => {
-    const { details } = setup();
+  describe('data stream details', () => {
+    it("adds a data stream's rule, then the profile it uses, marking built-in ones", async () => {
+      const {
+        details: [detail],
+      } = setup();
 
-    renderInIntl(
-      details.map(({ id, renderContent }) => (
-        <div key={id} data-test-subj={id}>
-          {renderContent({ dataStreamName: 'logs-app', getUrlForApp: jest.fn() })}
-        </div>
-      ))
-    );
+      renderInIntl(detail.renderContent({ dataStreamName: 'logs-app', getUrlForApp: jest.fn() }));
 
-    const profile = within(screen.getByTestId('boostProfile'));
-    expect(await profile.findByTestId('boostExplanationProfile')).toHaveAttribute(
-      'href',
-      '/app/management/data/boost/profiles/_last-7-days'
-    );
-    expect(screen.getByTestId('boostProfile')).toHaveTextContent('_last-7-daysManaged');
-    expect(screen.getByTestId('boostRule')).toHaveTextContent('_default-data-streamsDefault');
+      expect(await screen.findByTestId('boostExplanationProfile')).toHaveAttribute(
+        'href',
+        '/app/management/data/boost/profiles/_last-7-days'
+      );
+      // The rule first, then the profile beneath it, as on the index overview card.
+      expect(document.body).toHaveTextContent(
+        '_default-data-streamsDefaultUsing profile_last-7-daysManaged'
+      );
+    });
+
+    it("edits the data stream's rule from the details flyout's menu", async () => {
+      const {
+        actions: [action],
+      } = setup();
+      const onClose = jest.fn();
+
+      renderInIntl(action.renderContent({ dataStreamName: 'logs-app', onClose }));
+
+      // The default rule applies, so it's edited as its project default, starting from its saved
+      // profile once the boost state loads, which nothing else on the page may have loaded yet.
+      expect(await screen.findByTestId('boostProjectDefaultSave')).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('boostProjectDefaultPreset-_last-7-days')).getByRole('radio')
+      ).toBeChecked();
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it("doesn't offer to edit the rule without the privilege to", () => {
+      const { actions } = setup({ canEdit: false });
+
+      expect(actions).toEqual([]);
+    });
   });
 });

@@ -22,6 +22,11 @@ export const NO_RULE_LABEL = i18n.translate('xpack.boost.indexManagement.noRule'
   defaultMessage: 'No boost rule applies',
 });
 
+/** Comes before the name of the profile the rule that applies uses. */
+export const USING_PROFILE_LABEL = i18n.translate('xpack.boost.indexManagement.usingProfile', {
+  defaultMessage: 'Using profile',
+});
+
 /** Says what applies couldn't load, in Index Management's own warning color for that. */
 export const ExplanationError = () => (
   <EuiTextColor color="warning" data-test-subj="boostExplanationError">

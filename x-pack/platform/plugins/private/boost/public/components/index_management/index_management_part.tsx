@@ -10,21 +10,21 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { BoostServices } from '../../types';
 import { BoostIndexDetails } from './boost_tab';
-import { DataStreamBoostDetail } from './data_stream_details';
+import { DataStreamBoostDetail, EditDataStreamRule } from './data_stream_details';
 import { CardActions, CardProfile, CardRule } from './overview_card';
 
 /**
  * A part of what Index Management shows of an index's or data stream's boost: the index overview
  * card's rule, actions, and profile; the index's Search boost tab; or the data stream flyout's
- * profile and rule.
+ * detail, and the rule flyout its menu opens.
  */
 export type IndexManagementPart =
   | 'cardRule'
   | 'cardActions'
   | 'cardProfile'
   | 'tab'
-  | 'dataStreamProfile'
-  | 'dataStreamRule';
+  | 'dataStream'
+  | 'dataStreamEditRule';
 
 export interface IndexManagementPartProps {
   services: BoostServices;
@@ -33,6 +33,8 @@ export interface IndexManagementPartProps {
   name: string;
   /** An index's data stream, when it's a backing index, whose boost applies to it. */
   dataStream?: string;
+  /** Closes a part that opens over Index Management, such as a flyout. */
+  onClose?: () => void;
 }
 
 // Index Management renders each part on its own, so they share one client, and with it each request.
@@ -40,7 +42,7 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } },
 });
 
-const Part = ({ part, name, dataStream }: Omit<IndexManagementPartProps, 'services'>) => {
+const Part = ({ part, name, dataStream, onClose }: Omit<IndexManagementPartProps, 'services'>) => {
   switch (part) {
     case 'cardRule':
       return <CardRule indexName={name} />;
@@ -50,10 +52,10 @@ const Part = ({ part, name, dataStream }: Omit<IndexManagementPartProps, 'servic
       return <CardProfile indexName={name} />;
     case 'tab':
       return <BoostIndexDetails indexName={name} dataStream={dataStream} />;
-    case 'dataStreamProfile':
-      return <DataStreamBoostDetail dataStreamName={name} detail="profile" />;
-    case 'dataStreamRule':
-      return <DataStreamBoostDetail dataStreamName={name} detail="rule" />;
+    case 'dataStream':
+      return <DataStreamBoostDetail dataStreamName={name} />;
+    case 'dataStreamEditRule':
+      return <EditDataStreamRule dataStreamName={name} onClose={onClose ?? (() => {})} />;
   }
 };
 

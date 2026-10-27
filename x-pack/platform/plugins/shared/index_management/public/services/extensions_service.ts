@@ -14,6 +14,7 @@ import type {
   IndexContent,
   IndexOverviewCard,
   DataStreamDetail,
+  DataStreamAction,
   ExtensionsSetup,
 } from '@kbn/index-management-shared-types';
 import type { IndexDetailsTab } from '../../common/constants';
@@ -51,6 +52,7 @@ export class ExtensionsService {
   private _indexOverviewContent: IndexContent | null = null;
   private _indexOverviewCards: IndexOverviewCard[] = [];
   private _dataStreamDetails: DataStreamDetail[] = [];
+  private _dataStreamActions: DataStreamAction[] = [];
   private service?: ExtensionsSetup;
 
   public setup(): ExtensionsSetup {
@@ -66,6 +68,7 @@ export class ExtensionsService {
       setIndexOverviewContent: this.setIndexOverviewContent.bind(this),
       addIndexOverviewCard: this.addIndexOverviewCard.bind(this),
       addDataStreamDetail: this.addDataStreamDetail.bind(this),
+      addDataStreamAction: this.addDataStreamAction.bind(this),
     };
 
     return this.service;
@@ -123,6 +126,10 @@ export class ExtensionsService {
     this._dataStreamDetails.push(detail);
   }
 
+  private addDataStreamAction(action: DataStreamAction) {
+    this._dataStreamActions.push(action);
+  }
+
   public get actions() {
     return this._actions;
   }
@@ -165,5 +172,9 @@ export class ExtensionsService {
 
   public get dataStreamDetails() {
     return this._dataStreamDetails;
+  }
+
+  public get dataStreamActions() {
+    return this._dataStreamActions;
   }
 }

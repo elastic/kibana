@@ -124,6 +124,58 @@ describe('DataStreamDetailPanel', () => {
     });
   });
 
+  describe('extension actions', () => {
+    afterEach(() => mockAppContext.services.extensionsService.dataStreamActions.splice(0));
+
+    it('adds the actions that other plugins add before Delete, showing each in place of the flyout', async () => {
+      mockAppContext.services.extensionsService.dataStreamActions.push({
+        id: 'test',
+        name: 'Test action',
+        icon: 'gear',
+        renderContent: ({ dataStreamName, onClose }) => (
+          <div data-test-subj="testActionContent">
+            {dataStreamName}
+            <button onClick={onClose}>Done</button>
+          </div>
+        ),
+      });
+      mockUseLoadDataStream.mockReturnValue({
+        data: createMockDataStream(),
+        isLoading: false,
+        error: null,
+        resendRequest: jest.fn(),
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
+
+      const { getByTestId, queryByTestId, getByRole } = renderWithI18n(
+        <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
+      );
+      await waitFor(() => expect(getByTestId('manageDataStreamButton')).toBeInTheDocument());
+      await userEvent.click(getByTestId('manageDataStreamButton'));
+
+      await waitFor(() => expect(getByTestId('dataStreamAction-test')).toBeInTheDocument());
+      const actions = Array.from(
+        document.querySelectorAll(
+          '[data-test-subj="editDataLifecycleButton"], [data-test-subj="dataStreamAction-test"], [data-test-subj="deleteDataStreamButton"]'
+        )
+      ).map((item) => item.getAttribute('data-test-subj'));
+      expect(actions).toEqual([
+        'editDataLifecycleButton',
+        'dataStreamAction-test',
+        'deleteDataStreamButton',
+      ]);
+
+      await userEvent.click(getByTestId('dataStreamAction-test'));
+      expect(getByTestId('testActionContent')).toHaveTextContent('test-data-stream');
+      expect(queryByTestId('dataStreamDetailPanel')).not.toBeInTheDocument();
+
+      // Once it closes, the flyout is back.
+      await userEvent.click(getByRole('button', { name: 'Done' }));
+      expect(queryByTestId('testActionContent')).not.toBeInTheDocument();
+      expect(getByTestId('dataStreamDetailPanel')).toBeInTheDocument();
+    });
+  });
+
   describe('failed ingest lifecycle', () => {
     it('displays "Disabled" when failure store is not enabled', async () => {
       const dataStream = createMockDataStream({

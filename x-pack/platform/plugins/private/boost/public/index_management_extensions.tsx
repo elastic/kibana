@@ -9,6 +9,7 @@ import React, { Suspense, lazy } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Index, IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import { PLUGIN_ID } from '../common/constants';
 import { BOOST_INDEX_DETAILS_TAB_ID } from './components/index_management/constants';
 import type { IndexManagementPart } from './components/index_management/index_management_part';
 import { BOOST_APP_TITLE } from './translations';
@@ -26,20 +27,26 @@ const isBoostable = ({ index }: { index: Index }) => index.isBoostable !== false
 
 /**
  * Shows the boost rule and profile that apply to each index and data stream in Index Management: on
- * an index's overview, and in its own tab, and in a data stream's details.
+ * an index's overview, and in its own tab, and in a data stream's details, whose menu edits the rule
+ * for those who can.
  */
 export const registerIndexManagementExtensions = (
   core: CoreStart,
   deps: BoostStartDependencies & { indexManagement: IndexManagementPluginStart }
 ) => {
   const services = { ...core, ...deps };
-  const renderPart = (part: IndexManagementPart, name: string, dataStream?: string) => (
+  const renderPart = (
+    part: IndexManagementPart,
+    name: string,
+    { dataStream, onClose }: { dataStream?: string; onClose?: () => void } = {}
+  ) => (
     <Suspense fallback={null}>
       <LazyIndexManagementPart
         services={services}
         part={part}
         name={name}
         dataStream={dataStream}
+        onClose={onClose}
       />
     </Suspense>
   );
@@ -64,29 +71,31 @@ export const registerIndexManagementExtensions = (
     hasTopSpacing: false,
     shouldRenderTab: isBoostable,
     renderTabContent: ({ index: { name, data_stream: dataStream } }) =>
-      renderPart('tab', name, dataStream),
+      renderPart('tab', name, { dataStream }),
   });
 
+  // One detail, like the index overview card: the rule that applies, and the profile it uses.
   extensionsService.addDataStreamDetail({
-    id: 'boostProfile',
-    name: i18n.translate('xpack.boost.dataStreamDetails.profile', {
-      defaultMessage: 'Boost profile',
-    }),
-    toolTip: i18n.translate('xpack.boost.dataStreamDetails.profileTip', {
-      defaultMessage: "Sets how the data stream's data is kept ready for search as it ages.",
-    }),
-    renderContent: ({ dataStreamName }) => renderPart('dataStreamProfile', dataStreamName),
-  });
-
-  extensionsService.addDataStreamDetail({
-    id: 'boostRule',
-    name: i18n.translate('xpack.boost.dataStreamDetails.rule', {
-      defaultMessage: 'Boost rule',
-    }),
-    toolTip: i18n.translate('xpack.boost.dataStreamDetails.ruleTip', {
+    id: 'boost',
+    name: BOOST_APP_TITLE,
+    toolTip: i18n.translate('xpack.boost.dataStreamDetails.tip', {
       defaultMessage:
-        'The highest-ranked boost rule that matches the data stream, which applies its boost profile.',
+        "The highest-ranked boost rule that matches the data stream, and the boost profile it uses, which sets how the data stream's data is kept ready for search as it ages.",
     }),
-    renderContent: ({ dataStreamName }) => renderPart('dataStreamRule', dataStreamName),
+    renderContent: ({ dataStreamName }) => renderPart('dataStream', dataStreamName),
   });
+
+  // Every rule can change, unlike Elastic-managed profiles, so the menu edits the rule, as the
+  // index overview card does.
+  if (core.application.capabilities[PLUGIN_ID]?.save === true) {
+    extensionsService.addDataStreamAction({
+      id: 'boostEditRule',
+      name: i18n.translate('xpack.boost.dataStreamDetails.editRule', {
+        defaultMessage: 'Edit boost rule',
+      }),
+      icon: 'chartGauge',
+      renderContent: ({ dataStreamName, onClose }) =>
+        renderPart('dataStreamEditRule', dataStreamName, { onClose }),
+    });
+  }
 };

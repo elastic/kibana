@@ -8,6 +8,7 @@
 import React from 'react';
 import { getDefaultRuleType } from '../../../common/presets';
 import type { BoostRule } from '../../../common/types';
+import { useBoostState } from '../../hooks/use_boost_state';
 import { ProjectDefaultFlyout } from '../project_defaults/project_default_flyout';
 import { RuleFlyout } from '../rules/rule_flyout';
 
@@ -16,8 +17,16 @@ interface EditRuleFlyoutProps {
   onClose: () => void;
 }
 
-/** Edits a rule, or a default rule as its project default, as the boost app does. */
+/**
+ * Edits a rule, or a default rule as its project default, as the boost app does. Each form starts
+ * from the boost state, which the boost app always has, but Index Management may not have loaded
+ * yet, so the form waits for it.
+ */
 export const EditRuleFlyout = ({ rule, onClose }: EditRuleFlyoutProps) => {
+  const { data: state } = useBoostState();
+  if (!state) {
+    return null;
+  }
   const defaultType = rule.is_builtin ? getDefaultRuleType(rule.name) : undefined;
   return defaultType ? (
     <ProjectDefaultFlyout type={defaultType} onClose={onClose} />

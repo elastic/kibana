@@ -88,6 +88,7 @@ export const createMockAppContext = (): AppDependencies =>
     services: {
       extensionsService: {
         dataStreamDetails: [],
+        dataStreamActions: [],
       },
       notificationService: {
         showDangerToast: jest.fn(),

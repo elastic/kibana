@@ -7,7 +7,7 @@
 
 import type { FunctionComponent, ReactNode } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { EuiBadgeProps } from '@elastic/eui';
+import type { EuiBadgeProps, IconType } from '@elastic/eui';
 import type { IndexDetailsTab } from '../home_sections';
 import type { Index } from '../types';
 
@@ -71,6 +71,15 @@ export interface DataStreamDetail {
   }) => ReactNode;
 }
 
+export interface DataStreamAction {
+  // identifies the action, such as in its test subject
+  id: string;
+  name: string;
+  icon: IconType;
+  // what the action opens, such as a flyout, shown in place of the details flyout until it closes
+  renderContent: (args: { dataStreamName: string; onClose: () => void }) => ReactNode;
+}
+
 export interface ExtensionsSetup {
   // adds an option to the "manage index" menu
   addAction(action: any): void;
@@ -94,4 +103,6 @@ export interface ExtensionsSetup {
   addIndexOverviewCard(card: IndexOverviewCard): void;
   // adds a detail to the data stream details flyout, after the built-in details
   addDataStreamDetail(detail: DataStreamDetail): void;
+  // adds an option to the data stream details flyout's "manage" menu, before "Delete"
+  addDataStreamAction(action: DataStreamAction): void;
 }

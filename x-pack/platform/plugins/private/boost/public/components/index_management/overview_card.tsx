@@ -22,7 +22,12 @@ import { useBoostServices } from '../../hooks/use_boost_services';
 import { useBoostExplanation } from '../../hooks/use_boost_state';
 import { ProfileLink } from './boost_page_links';
 import { EditRuleFlyout } from './edit_rule_flyout';
-import { ExplanationError, LOADING_LABEL, NO_RULE_LABEL } from './explanation_status';
+import {
+  ExplanationError,
+  LOADING_LABEL,
+  NO_RULE_LABEL,
+  USING_PROFILE_LABEL,
+} from './explanation_status';
 
 interface CardPartProps {
   /** The index, whose boost a backing index's data stream decides. */
@@ -120,11 +125,7 @@ export const CardProfile = ({ indexName }: CardPartProps) => {
         <EuiIcon type="chartGauge" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiTextColor color="default">
-          {i18n.translate('xpack.boost.indexCard.profileLabel', {
-            defaultMessage: 'Using profile',
-          })}
-        </EuiTextColor>
+        <EuiTextColor color="default">{USING_PROFILE_LABEL}</EuiTextColor>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <ProfileLink profileName={explanation.boost_profile} />

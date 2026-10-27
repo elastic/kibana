@@ -25,7 +25,10 @@ import {
   EuiContextMenu,
 } from '@elastic/eui';
 
-import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import type {
+  DataStreamAction,
+  IndexManagementLocatorParams,
+} from '@kbn/index-management-shared-types';
 import { InspectIlmPolicyFlyout } from '@kbn/data-lifecycle-phases';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import { Streams, isIlmLifecycle as isStreamsIlmLifecycle } from '@kbn/streams-schema';
@@ -70,6 +73,8 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
 }) => {
   const [isActionsPopOverOpen, setActionsPopOverOpen] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  // An action other plugins add, whose content shows in place of this flyout until it closes.
+  const [openAction, setOpenAction] = useState<DataStreamAction>();
   const [streamsGetResponse, setStreamsGetResponse] = useState<
     Streams.ingest.all.GetResponse | undefined
   >(undefined);
@@ -211,6 +216,19 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       });
     }
 
+    extensionsService.dataStreamActions.forEach((action) => {
+      items.push({
+        key: action.id,
+        name: action.name,
+        'data-test-subj': `dataStreamAction-${action.id}`,
+        icon: <EuiIcon type={action.icon} size="m" aria-hidden={true} />,
+        onClick: () => {
+          closePopover();
+          setOpenAction(action);
+        },
+      });
+    });
+
     if (dataStream?.privileges?.delete_index) {
       items.push({
         key: 'deleteDataStream',
@@ -236,6 +254,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     dataStream?.privileges?.delete_index,
     dataStream?.privileges?.manage,
     dataStream?.privileges?.manage_data_stream_lifecycle,
+    extensionsService.dataStreamActions,
     openEditFlyout,
   ]);
 
@@ -266,7 +285,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
 
   return (
     <>
-      {!isEditingDataLifecycle && (
+      {!isEditingDataLifecycle && !openAction && (
         <EuiFlyout
           onClose={() => onClose()}
           data-test-subj="dataStreamDetailPanel"
@@ -373,6 +392,8 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           </EuiFlyoutFooter>
         </EuiFlyout>
       )}
+
+      {openAction?.renderContent({ dataStreamName, onClose: () => setOpenAction(undefined) })}
 
       {isDeleting && (
         <DeleteDataStreamConfirmationModal
