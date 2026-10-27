@@ -28,7 +28,8 @@ import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigati
 import type { NightshiftInvestigationsConfig } from './config';
 import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
-import { createIsNightshiftEnabled } from './is_nightshift_enabled';
+import { createIsNightshiftEnabledSync } from './is_nightshift_enabled';
+import { createGatedSandboxStart } from './sandbox_gate';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
@@ -156,8 +157,16 @@ export class NightshiftInvestigationsPlugin
       new InvestigationLocatorDefinition()
     );
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
-    const isNightshiftEnabled = createIsNightshiftEnabled(core.getStartServices);
-    plugins.alerting?.enableAlertStatusChanged({ isEnabled: isNightshiftEnabled });
+    const isNightshiftEnabledSync = createIsNightshiftEnabledSync(core.getStartServices);
+    plugins.alerting?.enableAlertStatusChanged({
+      isEnabled: async () => isNightshiftEnabledSync(),
+    });
+    // Single choke point for sandbox access: tools and workflow steps resolve the sandbox through
+    // this, so nothing can reach the sandbox service while `nightshift.enabled` is off.
+    const getGatedSandboxStart = createGatedSandboxStart({
+      getSandboxStart: () => this.sandboxStart,
+      isNightshiftEnabled: isNightshiftEnabledSync,
+    });
     const telemetry = setupNightshiftTelemetry({
       analytics: core.analytics,
       logger: this.logger.get('telemetry'),
@@ -271,7 +280,7 @@ export class NightshiftInvestigationsPlugin
         const sandboxLogger = this.logger.get('sandbox');
 
         // Tools are registered in setup() but only run after start(), so read start deps lazily.
-        const getSandboxStart = () => this.sandboxStart;
+        const getSandboxStart = getGatedSandboxStart;
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
           getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
           telemetryConnectorId,
@@ -404,13 +413,13 @@ export class NightshiftInvestigationsPlugin
         // of failing on an unknown step type, and obtain runs first to hand both writers a sandbox.
         plugins.workflowsExtensions.registerStepDefinition(
           obtainSandboxStepDefinition({
-            getSandboxStart: () => this.sandboxStart,
+            getSandboxStart: getGatedSandboxStart,
             logger: this.logger.get('sandbox'),
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
           cortexHydrateStepDefinition({
-            getSandboxStart: () => this.sandboxStart,
+            getSandboxStart: getGatedSandboxStart,
             analytics: core.analytics,
             logger: this.logger.get('cortex'),
             isEnabled: () => this.cortexEnabled,
@@ -418,7 +427,7 @@ export class NightshiftInvestigationsPlugin
         );
         plugins.workflowsExtensions.registerStepDefinition(
           memoryMaterializeToSandboxStepDefinition({
-            getSandboxStart: () => this.sandboxStart,
+            getSandboxStart: getGatedSandboxStart,
             logger: this.logger.get('memory'),
             isEnabled: () => this.memoryEnabled,
             telemetry,
@@ -432,7 +441,7 @@ export class NightshiftInvestigationsPlugin
         // The handler no-ops on the flag instead, matching cortex/memory above.
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreeHydrateStepDefinition({
-            getSandboxStart: () => this.sandboxStart,
+            getSandboxStart: getGatedSandboxStart,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
           })
