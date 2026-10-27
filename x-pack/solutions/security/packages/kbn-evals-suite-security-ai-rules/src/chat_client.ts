@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ReferenceRule } from '../datasets/sample_rules';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import type { ReferenceRule } from '../datasets/sample_rules';
 
 // These string literals mirror the constants defined in security_solution/common/constants.
 // They are inlined here to avoid a package→plugin import boundary violation.
