@@ -65,7 +65,8 @@ export const openConversationDetailsFlyout = async ({
       session: 'start',
       historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
       title: FLYOUT_TITLE,
-      size: 's',
+      // Conversations are dense to read at 's'; users resized almost every time.
+      size: 'm',
       flyoutMenuDisplayMode: 'always',
       flyoutMenuProps: { trailingActions },
       type: 'push',
