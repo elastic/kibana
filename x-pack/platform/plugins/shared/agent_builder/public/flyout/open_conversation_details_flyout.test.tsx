@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiFlyoutMenuAction } from '@elastic/eui';
+import type { EuiFlyoutMenuAction, EuiFlyoutSize } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
@@ -24,14 +24,20 @@ describe('openConversationDetailsFlyout', () => {
 
     const open = ({
       onClose,
+      size,
       trailingActions,
-    }: { onClose?: () => void; trailingActions?: EuiFlyoutMenuAction[] } = {}) =>
+    }: {
+      onClose?: () => void;
+      size?: EuiFlyoutSize;
+      trailingActions?: EuiFlyoutMenuAction[];
+    } = {}) =>
       openConversationDetailsFlyout({
         core,
         conversationsService: { get: jest.fn() } as unknown as ConversationsService,
         conversationTemplatesService: new ConversationTemplatesService(),
         conversationId: 'conversation',
         onClose,
+        size,
         trailingActions,
       });
 
@@ -68,6 +74,17 @@ describe('openConversationDetailsFlyout', () => {
       expect.anything(),
       expect.objectContaining({ flyoutMenuProps: { trailingActions: [copyLink] } })
     );
+  });
+
+  it('opens at the size the caller asks for, and small by default', async () => {
+    const { core, open } = setup();
+
+    await open({ size: 'm' });
+    await open();
+
+    const [[, wideOptions], [, defaultOptions]] = core.overlays.openSystemFlyout.mock.calls;
+    expect(wideOptions?.size).toBe('m');
+    expect(defaultOptions?.size).toBe('s');
   });
 
   it('renders no menu actions by default', async () => {

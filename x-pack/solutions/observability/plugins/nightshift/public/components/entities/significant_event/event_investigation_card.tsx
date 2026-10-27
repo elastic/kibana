@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { InvestigationStatus } from '@kbn/investigation-output';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { INVESTIGATION_FLYOUT_SIZE } from '../../../common/constants';
 import {
   INVESTIGATION_VIEW_SOURCES,
   reportNightshiftInvestigationViewed,
@@ -55,7 +56,10 @@ export const EventInvestigationCard = ({
       source: INVESTIGATION_VIEW_SOURCES.CLICK,
       investigation,
     });
-    void agentBuilder.openConversationDetails({ conversationId });
+    void agentBuilder.openConversationDetails({
+      conversationId,
+      size: INVESTIGATION_FLYOUT_SIZE,
+    });
   }, [agentBuilder, analytics, conversationId, investigation]);
   const latestInvestigation = getLatestInvestigation(event);
   const investigationState = getInvestigationState({
