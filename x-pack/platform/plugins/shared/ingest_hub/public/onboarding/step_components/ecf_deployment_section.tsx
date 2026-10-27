@@ -429,11 +429,23 @@ export const useEcfDeployment = ({
       updatedIds[family] = currentServiceIdsByFamily[family];
       updatedConfigs[family] = currentConfigsByFamily[family];
     }
-    setPersistedLaunchStep({
+    const advanced: PersistedEcfLaunchStep = {
       ...persistedLaunchStep,
       launchedServiceIds: updatedIds,
       launchedConfigs: updatedConfigs,
-    });
+    };
+    setPersistedLaunchStep(advanced);
+    // useSessionStorage persists in an effect after the next render, and the caller navigates
+    // away right after this, which can unmount the step first and drop the write. Persist now so
+    // coming back to the step does not show the stack as stale again.
+    try {
+      sessionStorage.setItem(
+        getOnboardingSessionKey('aws', ECF_LAUNCH_STEP_SESSION_KEY),
+        JSON.stringify(advanced)
+      );
+    } catch {
+      // sessionStorage unavailable (private mode, quota exceeded, etc.) — keep the in-memory state.
+    }
   };
 
   // Deep-links to the CFN update wizard, pre-filled with the stack ARN and latest template URL.

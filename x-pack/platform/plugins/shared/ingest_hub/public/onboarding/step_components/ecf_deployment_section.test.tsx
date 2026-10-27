@@ -1195,6 +1195,55 @@ describe('useEcfDeployment staleness', () => {
       expect(persisted.launchedConfigs?.unified).toEqual(snapshot([arnB]).unified);
     });
 
+    it('is no longer stale after the snapshot advances and the step is remounted', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([cfg([arnB])]);
+      let state: Record<string, unknown> = {
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+        launchedConfigs: snapshot([arnA]),
+      };
+      mockUseSessionStorage.mockImplementation(() => [
+        state,
+        (next: Record<string, unknown>) => {
+          state = next;
+        },
+      ]);
+      const first = renderEcfHook();
+      expect(first.result.current.sectionProps.isStaleByFamily.unified).toBe(true);
+      act(() => {
+        first.result.current.sectionProps.onUpdateOpened('unified');
+      });
+      act(() => {
+        first.result.current.advanceStaleSnapshots();
+      });
+      first.unmount();
+
+      // Back from the next step: a fresh mount reads the persisted state.
+      const second = renderEcfHook();
+      expect(second.result.current.sectionProps.isStaleByFamily.unified).toBe(false);
+    });
+
+    it('advanceStaleSnapshots persists to session storage immediately, before any re-render', () => {
+      sessionStorage.clear();
+      mockGetEcfServiceConfigs.mockReturnValue([cfg([arnB])]);
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+        launchedConfigs: snapshot([arnA]),
+      });
+      const { result } = renderEcfHook();
+      act(() => {
+        result.current.sectionProps.onUpdateOpened('unified');
+      });
+      act(() => {
+        result.current.advanceStaleSnapshots();
+      });
+      // The mocked hook never writes storage itself, so this proves the direct write.
+      const stored = JSON.parse(sessionStorage.getItem('onboarding.aws.ecfLaunchStep') ?? 'null');
+      expect(stored.launchedConfigs.unified).toEqual(snapshot([arnB]).unified);
+      expect(stored.launchedServiceIds.unified).toEqual(['cloudtrail']);
+    });
+
     it('advanceStaleSnapshots leaves the settings snapshot alone until the update was opened', () => {
       mockGetEcfServiceConfigs.mockReturnValue([cfg([arnB])]);
       const setter = makeSessionStorageMock({
