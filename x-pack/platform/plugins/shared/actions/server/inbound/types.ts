@@ -17,6 +17,8 @@ export interface ConnectorEventEmitParams {
   correlationKey?: string;
   /** Last-saver identity. Required for emit; never a space-only request. */
   request: KibanaRequest;
+  /** Principal authenticated on ingress; supplied only for resolved service-account bearers. */
+  authenticatedUser?: string;
 }
 
 /**

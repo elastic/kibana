@@ -178,15 +178,54 @@ describe('WorkflowExecutionList', () => {
       );
     });
 
-    it('hides unresolved executor labels on Serverless', () => {
+    it('hides unresolved profile UIDs on Serverless', () => {
       const services = createStartServicesMock();
       services.cloud.isCloudEnabled = true;
       services.cloud.isServerlessEnabled = true;
+      const profileUid = 'u_mGBROF_q5bm_A5E_0';
 
-      renderComponent({ showExecutor: true }, services);
+      renderComponent(
+        {
+          showExecutor: true,
+          executions: {
+            ...mockExecutions,
+            results: [
+              { ...mockExecutions.results[0], executedBy: profileUid },
+              mockExecutions.results[1],
+            ],
+          },
+        },
+        services
+      );
 
       expect(screen.getAllByTestId('workflowExecutionListItem')[0]).not.toHaveAttribute(
         'data-executed-by-label'
+      );
+    });
+
+    it('shows a service account id on Serverless', () => {
+      const services = createStartServicesMock();
+      services.cloud.isCloudEnabled = true;
+      services.cloud.isServerlessEnabled = true;
+      const serviceAccountId = 'sa-nightshift-relay';
+
+      renderComponent(
+        {
+          showExecutor: true,
+          executions: {
+            ...mockExecutions,
+            results: [
+              { ...mockExecutions.results[0], executedBy: serviceAccountId },
+              mockExecutions.results[1],
+            ],
+          },
+        },
+        services
+      );
+
+      expect(screen.getAllByTestId('workflowExecutionListItem')[0]).toHaveAttribute(
+        'data-executed-by-label',
+        serviceAccountId
       );
     });
 

@@ -216,7 +216,11 @@ export interface PluginScopedManagedWorkflowsApi
  */
 export interface WorkflowsClient {
   isWorkflowsAvailable: boolean;
-  emitEvent: (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
+  emitEvent: (
+    triggerId: string,
+    payload: Record<string, unknown>,
+    options?: { authenticatedUser?: string }
+  ) => Promise<void>;
   managedWorkflows: ManagedWorkflowsApi;
 }
 
