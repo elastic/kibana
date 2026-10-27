@@ -19,6 +19,9 @@ export type FieldType =
 export interface FieldConstraints {
   readonly minimum?: number;
   readonly maximum?: number;
+  /** The bound is excluded from the range (`< 100`, `> 0`). */
+  readonly exclusiveMinimum?: boolean;
+  readonly exclusiveMaximum?: boolean;
   readonly minLength?: number;
   readonly maxLength?: number;
   readonly minItems?: number;

@@ -46,7 +46,7 @@ export type MarkdownReferenceFormat = keyof typeof FORMATS;
 export const MARKDOWN_REFERENCE_FORMATS = Object.keys(FORMATS) as MarkdownReferenceFormat[];
 
 export const isMarkdownReferenceFormat = (format: string): format is MarkdownReferenceFormat =>
-  format in FORMATS;
+  Object.hasOwn(FORMATS, format);
 
 export interface MarkdownReferenceOptions {
   readonly format: MarkdownReferenceFormat;
@@ -88,7 +88,8 @@ export const convertMarkdownReference = ({
   });
 };
 
-const LINK = /\[[^\]]*\]\(([^)\s]+\.md)\)/g;
+// Neither the text nor the target may contain `[`, so a failed match never rescans what follows.
+const LINK = /\[[^\][]*\]\(([^)\s[]+\.md)\)/g;
 
 /**
  * The Markdown pages an `llms.txt` index links to (https://llmstxt.org), as absolute URLs

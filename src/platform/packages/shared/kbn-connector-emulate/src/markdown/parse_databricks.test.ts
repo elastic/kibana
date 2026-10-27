@@ -229,6 +229,41 @@ describe('convertMarkdownReference: databricks-markdown', () => {
     });
   });
 
+  it('keeps strict bounds exclusive, and moves length and count bounds by one', () => {
+    const page = [
+      '# List things',
+      '',
+      '`GET /api/2.0/things`',
+      '',
+      '## Query parameters',
+      '',
+      '- `ratio` (double, optional)',
+      '  Constraints: `> 0`, `< 1`',
+      '- `limit` (int32, optional)',
+      '  Constraints: `>= 1`, `<= 100`',
+      '- `name` (string, optional)',
+      '  Constraints: `> 0 characters`, `< 64 characters`',
+      '- `ids` (array of string, optional)',
+      '  Constraints: `> 1 items`, `<= 10 items`',
+    ].join('\n');
+    const [operation] = loadContractOperations(convert([['things/v2/list-things', page]]));
+
+    expect(operation.parameters.map(({ name, schema }) => [name, schema?.schema])).toEqual([
+      [
+        'ratio',
+        {
+          type: 'number',
+          format: 'double',
+          exclusiveMinimum: 0,
+          exclusiveMaximum: 1,
+        },
+      ],
+      ['limit', { type: 'integer', format: 'int32', minimum: 1, maximum: 100 }],
+      ['name', { type: 'string', minLength: 1, maxLength: 63 }],
+      ['ids', { type: 'array', items: { type: 'string' }, minItems: 2, maxItems: 10 }],
+    ]);
+  });
+
   it('reads query parameters with their bounds and patterns, and arrays of objects', () => {
     const document = convert([['alerts/v1/list-alerts', listAlerts]]);
     const [operation] = loadContractOperations(document);

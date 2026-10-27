@@ -84,6 +84,8 @@ describe('convertMarkdownReference', () => {
   it('names the supported formats', () => {
     expect(isMarkdownReferenceFormat('brave-markdown')).toBe(true);
     expect(isMarkdownReferenceFormat('markdown')).toBe(false);
+    expect(isMarkdownReferenceFormat('constructor')).toBe(false);
+    expect(isMarkdownReferenceFormat('__proto__')).toBe(false);
   });
 });
 
@@ -106,5 +108,15 @@ describe('readLlmsIndex', () => {
       'https://docs.databricks.com/api/jobs/v2/run/object.md',
       'https://api-dashboard.search.brave.com/api-reference/web/search/get/index.html.md',
     ]);
+  });
+
+  it('reads a long run of unclosed links in linear time', () => {
+    const text = `${'[](!'.repeat(50_000)}\n- [Run](run.md)`;
+    const start = Date.now();
+
+    expect(readLlmsIndex(text, 'https://example.com/llms.txt')).toEqual([
+      'https://example.com/run.md',
+    ]);
+    expect(Date.now() - start).toBeLessThan(1000);
   });
 });

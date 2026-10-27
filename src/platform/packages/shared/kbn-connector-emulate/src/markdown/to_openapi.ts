@@ -99,10 +99,16 @@ const toTypeSchema = (type: FieldType, field: ReferenceField): JsonSchema => {
         ...(type.format ? { format: type.format } : {}),
         ...(field.enum ? { enum: field.enum.map((value) => toLiteral(value, type)) } : {}),
         ...(type.kind !== 'boolean' && constraints.minimum !== undefined
-          ? { minimum: constraints.minimum }
+          ? {
+              minimum: constraints.minimum,
+              ...(constraints.exclusiveMinimum ? { exclusiveMinimum: true } : {}),
+            }
           : {}),
         ...(type.kind !== 'boolean' && constraints.maximum !== undefined
-          ? { maximum: constraints.maximum }
+          ? {
+              maximum: constraints.maximum,
+              ...(constraints.exclusiveMaximum ? { exclusiveMaximum: true } : {}),
+            }
           : {}),
       };
   }

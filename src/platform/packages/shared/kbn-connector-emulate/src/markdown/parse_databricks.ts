@@ -70,13 +70,20 @@ const toConstraints = (text: string): FieldConstraints =>
       const [, low, high, operator, limit, unit] = bound;
       const minimum = low ?? (operator?.startsWith('>') ? limit : undefined);
       const maximum = high ?? (operator?.startsWith('<') ? limit : undefined);
+      // Lengths and counts are integers, so a strict bound moves by one; other values keep it
+      // as an excluded bound.
+      const strictMinimum = operator === '>';
+      const strictMaximum = operator === '<';
+      const step = unit === undefined ? 0 : 1;
       return {
         ...constraints,
         ...toBounds(
-          minimum === undefined ? undefined : Number(minimum),
-          maximum === undefined ? undefined : Number(maximum),
+          minimum === undefined ? undefined : Number(minimum) + (strictMinimum ? step : 0),
+          maximum === undefined ? undefined : Number(maximum) - (strictMaximum ? step : 0),
           unit
         ),
+        ...(unit === undefined && strictMinimum ? { exclusiveMinimum: true } : {}),
+        ...(unit === undefined && strictMaximum ? { exclusiveMaximum: true } : {}),
       };
     }
     return value.startsWith('^') ? { ...constraints, pattern: value } : constraints;
