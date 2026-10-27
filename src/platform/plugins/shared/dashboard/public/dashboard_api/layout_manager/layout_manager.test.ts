@@ -8,7 +8,7 @@
  */
 
 import { pick } from 'lodash';
-import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 
 import {
@@ -30,6 +30,7 @@ import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
 import { deserializeLayout } from './deserialize_layout';
 import { initializeLayoutManager } from './layout_manager';
+import { diffDashboardStates } from '../compare_dashboard_state';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('54321'),
@@ -631,7 +632,7 @@ describe('layout manager', () => {
     });
   });
 
-  describe('startComparing', () => {
+  describe('unsaved changes', () => {
     const lastSavedState = getSampleDashboardState({
       panels: [panel1],
       pinned_panels: pinnedControls,
@@ -643,50 +644,50 @@ describe('layout manager', () => {
     const getChanges = (
       layoutManager: ReturnType<typeof initializeLayoutManager>,
       lastSaved: DashboardState = lastSavedState
-    ) => {
-      layoutManager.internalApi.setLastSavedState(lastSaved);
-      return firstValueFrom(
-        layoutManager.internalApi.startComparing(new BehaviorSubject(lastSaved))
+    ) =>
+      diffDashboardStates(
+        lastSaved,
+        { ...lastSaved, ...layoutManager.internalApi.serializeLayout() },
+        layoutManager.api.children$.getValue()
       );
-    };
 
-    test('reports no changes when the layout matches the last saved state', async () => {
-      expect(await getChanges(createLayoutManager())).toEqual({});
+    test('reports no changes when the layout matches the last saved state', () => {
+      expect(getChanges(createLayoutManager())).toEqual({});
     });
 
-    test('reports the panels when a panel is moved or resized', async () => {
+    test('reports the panels when a panel is moved or resized', () => {
       const layoutManager = createLayoutManager();
       const movedGrid = { w: 2, h: 3, x: 1, y: 0 };
       layoutManager.api.setLayout(PANEL_ONE_ID, { type: panel1.type, grid: movedGrid });
 
-      expect(await getChanges(layoutManager)).toEqual({
+      expect(getChanges(layoutManager)).toEqual({
         panels: [{ ...panel1, grid: movedGrid }],
       });
     });
 
-    test('reports the panels when a panel reports unsaved changes', async () => {
+    test('reports the panels when a panel reports a change', () => {
       const layoutManager = createLayoutManager();
       layoutManager.api.registerChildApi({
         ...panel1Api,
-        hasUnsavedChanges$: new BehaviorSubject(true),
+        compareSerializedState: () => false,
       } as DefaultEmbeddableApi);
 
-      expect(await getChanges(layoutManager)).toEqual({ panels: [panel1] });
+      expect(getChanges(layoutManager)).toEqual({ panels: [panel1] });
     });
 
-    test('reports the pinned panels when a pinned panel changes', async () => {
+    test('reports the pinned panels when a pinned panel changes', () => {
       const layoutManager = createLayoutManager();
       const [control1] = pinnedControls ?? [];
       const controlId = control1.id ?? '';
       const { pinnedPanels } = layoutManager.api.layout$.getValue();
       layoutManager.api.setLayout(controlId, { ...pinnedPanels[controlId], width: 'large' });
 
-      const changes = await getChanges(layoutManager);
+      const changes = getChanges(layoutManager);
       expect(Object.keys(changes)).toEqual(['pinned_panels']);
       expect(changes.pinned_panels?.[0]).toEqual({ ...control1, width: 'large' });
     });
 
-    test('reports the pinned panels when a pinned panel reports unsaved changes', async () => {
+    test('reports the pinned panels when a pinned panel reports a change', () => {
       const layoutManager = createLayoutManager();
       const [control1] = pinnedControls ?? [];
       layoutManager.api.registerChildApi({
@@ -694,13 +695,13 @@ describe('layout manager', () => {
         type: control1.type,
         uuid: control1.id,
         latestState$: of(control1.config),
-        hasUnsavedChanges$: new BehaviorSubject(true),
+        compareSerializedState: () => false,
       } as DefaultEmbeddableApi);
 
-      expect(Object.keys(await getChanges(layoutManager))).toEqual(['pinned_panels']);
+      expect(Object.keys(getChanges(layoutManager))).toEqual(['pinned_panels']);
     });
 
-    test('reports the panels when a section is collapsed', async () => {
+    test('reports the panels when a section is collapsed', () => {
       const layoutManager = initializeLayoutManager(
         viewModeManagerMock,
         [section1],
@@ -713,9 +714,9 @@ describe('layout manager', () => {
         sections: { section1: { ...layout.sections.section1, collapsed: true } },
       });
 
-      expect(
-        await getChanges(layoutManager, getSampleDashboardState({ panels: [section1] }))
-      ).toEqual({ panels: [{ ...section1, collapsed: true }] });
+      expect(getChanges(layoutManager, getSampleDashboardState({ panels: [section1] }))).toEqual({
+        panels: [{ ...section1, collapsed: true }],
+      });
     });
   });
 });

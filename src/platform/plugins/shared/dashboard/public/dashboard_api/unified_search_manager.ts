@@ -26,14 +26,12 @@ import {
   Subject,
   Subscription,
   combineLatest,
-  combineLatestWith,
   debounceTime,
   distinctUntilChanged,
   finalize,
   map,
   merge,
   skip,
-  startWith,
   switchMap,
   tap,
 } from 'rxjs';
@@ -43,8 +41,6 @@ import { logger } from '../services/logger';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 import type { DashboardApi, DashboardCreationOptions } from './types';
 import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
-
-export const COMPARE_DEBOUNCE = 100;
 
 type UnifiedSearchState = Pick<
   DashboardState,
@@ -327,26 +323,6 @@ export function initializeUnifiedSearchManager(
     internalApi: {
       anyStateChange$,
       unifiedSearchFilters$,
-      startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return anyStateChange$.pipe(
-          // anyStateChange$ does not emit on subscribe
-          // use startWith to compare unsaved changes on subscribe
-          startWith(undefined),
-          debounceTime(COMPARE_DEBOUNCE),
-          map(() => {
-            return {
-              filters: asCodeFilters$.getValue(),
-              query: asCodeQuery$.getValue(),
-              refresh_interval: refreshInterval$.getValue(),
-              time_range: timeRange$.getValue(),
-            };
-          }),
-          combineLatestWith(lastSavedState$),
-          map(([latestState, lastSavedState]) =>
-            diffUnifiedSearchState(lastSavedState, latestState, timeRestore$.value)
-          )
-        );
-      },
       reset: (lastSavedState: DashboardState) => {
         setUnifiedSearchFilters([
           ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),

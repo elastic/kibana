@@ -13,7 +13,6 @@ import { cloneDeep, filter, map as lodashMap, max, pick } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
-  combineLatestWith,
   debounceTime,
   distinctUntilChanged,
   map,
@@ -45,10 +44,7 @@ import {
   apiHasSerializableState,
   apiPublishesTitle,
   childrenLatestState$,
-  childrenUnsavedChanges$,
   getTitle,
-  logStateDiff,
-  shouldLogStateDiff,
   UNSAVED_CHANGES_DEBOUNCE,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
@@ -71,7 +67,6 @@ import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
 import { areLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
-import { getLayoutChanges } from './get_layout_changes';
 import { serializeLayout } from './serialize_layout';
 import {
   isDashboardLayoutPanel,
@@ -126,7 +121,6 @@ export function initializeLayoutManager(
   );
 
   const latestChildrenState$ = childrenLatestState$(children$);
-  const childrenChanges$ = childrenUnsavedChanges$(children$);
   const stateChangedSubscription = latestChildrenState$.subscribe((childrenState) => {
     for (const { uuid, latestState } of childrenState) {
       currentChildState[uuid] = latestState;
@@ -152,7 +146,6 @@ export function initializeLayoutManager(
     distinctUntilChanged()
   );
 
-  let lastSavedLayout = initialLayout;
   let lastSavedChildState = initialChildState;
 
   const resetLayout = async (state: DashboardState) => {
@@ -537,7 +530,7 @@ export function initializeLayoutManager(
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       setLastSavedState: (lastSavedState: DashboardState) => {
-        ({ layout: lastSavedLayout, childState: lastSavedChildState } = deserializeLayout(
+        ({ childState: lastSavedChildState } = deserializeLayout(
           lastSavedState.panels,
           lastSavedState.pinned_panels
         ));
@@ -546,53 +539,6 @@ export function initializeLayoutManager(
       childrenLoading$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
-
-      startComparing: (
-        lastSavedState$: BehaviorSubject<DashboardState>
-      ): Observable<{
-        panels?: DashboardState['panels'];
-        pinned_panels?: DashboardState['pinned_panels'];
-      }> => {
-        return combineLatest([layout$, childrenChanges$]).pipe(
-          debounceTime(100),
-          combineLatestWith(lastSavedState$),
-          map(([[currentLayout, childrenChanges]]) => {
-            const changedPanelIds = new Set(
-              childrenChanges
-                .filter(({ hasUnsavedChanges }) => hasUnsavedChanges)
-                .map(({ uuid }) => uuid)
-            );
-            const { hasPanelChanges, hasPinnedPanelChanges } = getLayoutChanges(
-              lastSavedLayout,
-              currentLayout,
-              (panelId) => changedPanelIds.has(panelId)
-            );
-
-            if (!hasPanelChanges && !hasPinnedPanelChanges) {
-              return {};
-            }
-
-            const { pinned_panels, panels } = serializeLayout(currentLayout, currentChildState);
-            if (shouldLogStateDiff()) {
-              const { pinned_panels: oldPinnedPanels, panels: oldPanels } = serializeLayout(
-                lastSavedLayout,
-                lastSavedChildState
-              );
-              if (hasPanelChanges) {
-                logStateDiff('dashboard panels', oldPanels, panels);
-              }
-              if (hasPinnedPanelChanges) {
-                logStateDiff('dashboard pinned panels', oldPinnedPanels, pinned_panels);
-              }
-            }
-
-            return {
-              ...(hasPanelChanges ? { panels } : {}),
-              ...(hasPinnedPanelChanges ? { pinned_panels } : {}),
-            };
-          })
-        );
-      },
 
       isSectionCollapsed,
     },

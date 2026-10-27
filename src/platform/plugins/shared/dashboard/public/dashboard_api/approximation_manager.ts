@@ -9,7 +9,7 @@
 
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatestWith, debounceTime, map, skip, startWith } from 'rxjs';
+import { BehaviorSubject, map, skip } from 'rxjs';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 type ApproximationState = Pick<DashboardState, 'esql_approximation'>;
@@ -54,17 +54,6 @@ export function initializeApproximationManager(initialState: DashboardState) {
     },
     internalApi: {
       anyStateChange$,
-      startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return anyStateChange$.pipe(
-          startWith(undefined),
-          debounceTime(100),
-          map(() => getState()),
-          combineLatestWith(lastSavedState$),
-          map(([latestState, lastSavedState]) =>
-            diffApproximationState(lastSavedState, latestState)
-          )
-        );
-      },
       comparators: approximationComparators,
       getState,
       reset: (lastSavedState: DashboardState) => {

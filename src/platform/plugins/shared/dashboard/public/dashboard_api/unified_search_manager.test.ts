@@ -7,142 +7,102 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Subject, take } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { initializeUnifiedSearchManager } from './unified_search_manager';
+import { diffUnifiedSearchState, initializeUnifiedSearchManager } from './unified_search_manager';
 
 describe('initializeUnifiedSearchManager', () => {
-  describe('startComparing', () => {
-    test('Should return no changes when there are no changes', (done) => {
-      const lastSavedState$ = new BehaviorSubject<DashboardState>(
-        getSampleDashboardState({
-          filters: [
-            {
-              type: 'condition',
-              condition: {
-                field: 'status',
-                operator: 'is',
-                value: 'active',
-              },
-            },
-          ],
-        })
-      );
-      const unifiedSearchManager = initializeUnifiedSearchManager(
-        lastSavedState$.value,
-        new BehaviorSubject<boolean>(false),
+  describe('diffUnifiedSearchState', () => {
+    const initManager = (lastSavedState: DashboardState, timeRestore$: BehaviorSubject<boolean>) =>
+      initializeUnifiedSearchManager(
+        lastSavedState,
+        timeRestore$,
         new Subject<void>(),
-        () => lastSavedState$.value,
+        () => lastSavedState,
         new Subject(),
         {
           useUnifiedSearchIntegration: false,
         }
       );
-      unifiedSearchManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
-        expect(changes).toMatchInlineSnapshot(`Object {}`);
-        done();
+
+    const getChanges = (
+      lastSavedState: DashboardState,
+      unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>
+    ) => {
+      const currentState = unifiedSearchManager.internalApi.getState();
+      return diffUnifiedSearchState(lastSavedState, currentState, Boolean(currentState.time_range));
+    };
+
+    test('Should return no changes when there are no changes', () => {
+      const lastSavedState = getSampleDashboardState({
+        filters: [
+          {
+            type: 'condition',
+            condition: {
+              field: 'status',
+              operator: 'is',
+              value: 'active',
+            },
+          },
+        ],
       });
+      const unifiedSearchManager = initManager(lastSavedState, new BehaviorSubject(false));
+      expect(getChanges(lastSavedState, unifiedSearchManager)).toMatchInlineSnapshot(`Object {}`);
     });
 
     describe('timeRange', () => {
-      test('Should not return timeRanage change when timeRestore is false', (done) => {
-        const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
-        const unifiedSearchManager = initializeUnifiedSearchManager(
-          lastSavedState$.value,
-          new BehaviorSubject<boolean>(false),
-          new Subject<void>(),
-          () => lastSavedState$.value,
-          new Subject(),
-          {
-            useUnifiedSearchIntegration: false,
-          }
-        );
-        unifiedSearchManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
-          expect(changes).toMatchInlineSnapshot(`Object {}`);
-          done();
-        });
+      test('Should not return timeRanage change when timeRestore is false', () => {
+        const lastSavedState = getSampleDashboardState();
+        const unifiedSearchManager = initManager(lastSavedState, new BehaviorSubject(false));
 
         unifiedSearchManager.api.setTimeRange({
           to: 'now',
           from: 'now-30m',
         });
+
+        expect(getChanges(lastSavedState, unifiedSearchManager)).toMatchInlineSnapshot(`Object {}`);
       });
 
-      test('Should return timeRanage change when timeRestore is true', (done) => {
-        const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
-        const unifiedSearchManager = initializeUnifiedSearchManager(
-          lastSavedState$.value,
-          new BehaviorSubject<boolean>(true),
-          new Subject<void>(),
-          () => lastSavedState$.value,
-          new Subject(),
-          {
-            useUnifiedSearchIntegration: false,
-          }
-        );
-        unifiedSearchManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
-          expect(changes).toMatchInlineSnapshot(`
-            Object {
-              "time_range": Object {
-                "from": "now-30m",
-                "to": "now",
-              },
-            }
-          `);
-          done();
-        });
+      test('Should return timeRanage change when timeRestore is true', () => {
+        const lastSavedState = getSampleDashboardState();
+        const unifiedSearchManager = initManager(lastSavedState, new BehaviorSubject(true));
 
         unifiedSearchManager.api.setTimeRange({
           to: 'now',
           from: 'now-30m',
         });
+
+        expect(getChanges(lastSavedState, unifiedSearchManager)).toMatchInlineSnapshot(`
+          Object {
+            "time_range": Object {
+              "from": "now-30m",
+              "to": "now",
+            },
+          }
+        `);
       });
 
-      test('Should not return timeRanage change when timeRestore resets to false', (done) => {
-        const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
-        const timeRestore$ = new BehaviorSubject<boolean>(false);
-        const unifiedSearchManager = initializeUnifiedSearchManager(
-          lastSavedState$.value,
-          timeRestore$,
-          new Subject<void>(),
-          () => lastSavedState$.value,
-          new Subject(),
-          {
-            useUnifiedSearchIntegration: false,
-          }
-        );
-        let emitCount = 0;
-        unifiedSearchManager.internalApi
-          .startComparing(lastSavedState$)
-          .pipe(take(2))
-          .subscribe((changes) => {
-            emitCount++;
+      test('Should not return timeRanage change when timeRestore resets to false', () => {
+        const lastSavedState = getSampleDashboardState();
+        const timeRestore$ = new BehaviorSubject<boolean>(true);
+        const unifiedSearchManager = initManager(lastSavedState, timeRestore$);
 
-            if (emitCount === 1) {
-              expect(changes).toMatchInlineSnapshot(`
-              Object {
-                "time_range": Object {
-                  "from": "now-30m",
-                  "to": "now",
-                },
-              }
-            `);
-              // reset timeRestore to false
-              timeRestore$.next(false);
-            }
-
-            if (emitCount === 2) {
-              expect(changes).toMatchInlineSnapshot(`Object {}`);
-              done();
-            }
-          });
-
-        timeRestore$.next(true);
         unifiedSearchManager.api.setTimeRange({
           to: 'now',
           from: 'now-30m',
         });
+        expect(getChanges(lastSavedState, unifiedSearchManager)).toMatchInlineSnapshot(`
+          Object {
+            "time_range": Object {
+              "from": "now-30m",
+              "to": "now",
+            },
+          }
+        `);
+
+        timeRestore$.next(false);
+        expect(getChanges(lastSavedState, unifiedSearchManager)).toMatchInlineSnapshot(`Object {}`);
       });
     });
   });

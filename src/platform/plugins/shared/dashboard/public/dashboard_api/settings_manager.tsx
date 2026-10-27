@@ -10,7 +10,6 @@
 import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
 import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { combineLatestWith, debounceTime, map, startWith } from 'rxjs';
 import type { DashboardState, DashboardOptions } from '@kbn/as-code-dashboard-schema';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 import { coreServices, screenshotModeService } from '../services/kibana_services';
@@ -155,17 +154,6 @@ export function initializeSettingsManager(initialState: DashboardState) {
     internalApi: {
       anyStateChange$: stateManager.anyStateChange$,
       serializeSettings,
-      startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return stateManager.anyStateChange$.pipe(
-          // anyStateChange$ does not emit on subscribe
-          // use startWith to compare unsaved changes on subscribe
-          startWith(undefined),
-          debounceTime(100),
-          map(() => stateManager.getLatestState()),
-          combineLatestWith(lastSavedState$.pipe(map((lastSaved) => deserializeState(lastSaved)))),
-          map(([latestState, lastSavedState]) => diffSettings(lastSavedState, latestState))
-        );
-      },
       reset: (lastSavedState: DashboardState) => {
         stateManager.reinitializeState(deserializeState(lastSavedState));
       },
