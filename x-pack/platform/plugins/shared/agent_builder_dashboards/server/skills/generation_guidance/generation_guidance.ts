@@ -57,9 +57,13 @@ Choose the first panel type that fits:
 
 ## Custom Content Panels
 
-Set \`esql\` yourself whenever a custom content panel shows live data. Omitting it renders static content with no data; the query is not generated for you. Build it with \`${platformCoreTools.generateEsql}\` rather than writing it directly, or use one the user supplied verbatim. The server runs the query to sample its schema before generating the template, so a query Elasticsearch rejects fails that panel with the reason: correct the query and retry.
+A custom content panel with live data does not need a query from you. Always set \`hasData\` when you create one, since there is no default: \`hasData: true\` (and \`index\` when you know it) and the server generates the query from \`query\`, then samples its schema before generating the template. \`hasData: false\` makes a static panel with no query — use that for banners, legends and notes, and never invent a query for them. Do not write the query yourself; pass \`esql\` only when the user supplied one verbatim. If the server cannot generate a query, the panel fails with an error naming the reason — fix the \`index\` or the description and retry rather than proceeding.
 
-On an edit, omit \`esql\` to keep the current query, pass a new one to replace it, or pass \`null\` to remove it. Other panel types never take \`esql\` unless it came from \`${platformCoreTools.generateEsql}\` or the user pasted it: their query is generated from \`query\`.
+To create one, set \`query\` to a concise description of what to display; the HTML template is generated server-side from it.
+
+To edit one, list its id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\`. Set \`query\` to the requested change; layout, copy and style edits keep the current query. When the edit changes what the panel shows, also set \`regenerateESQL: true\`: the server regenerates the query from \`query\`, keeping what the request does not change. \`hasData: true\` gives a static panel a query; \`hasData: false\` (or \`esql: null\`) removes it. The server refines the existing template.
+
+Other panel types never take \`esql\` unless it came from \`${platformCoreTools.generateEsql}\` or the user pasted it: their query is generated from \`query\`.
 
 ## Chart Type Guidance
 
