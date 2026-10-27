@@ -18,6 +18,8 @@ project:
   sourceRoot: x-pack/platform/packages/shared/isomer/isomer-theme
 dependsOn:
   - '@kbn/dev-cli-runner'
+  - '@kbn/oxfmt'
+  - '@kbn/repo-info'
   - '@kbn/zod'
 tags:
   - shared-common

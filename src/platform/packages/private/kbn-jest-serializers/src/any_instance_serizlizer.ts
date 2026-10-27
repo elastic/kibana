@@ -13,6 +13,6 @@ export function createAnyInstanceSerializer(
 ) {
   return {
     test: (v: any) => v instanceof Class,
-    serialize: (v: any) => `<${typeof name === 'function' ? name(v) : name ?? Class.name}>`,
+    serialize: (v: any) => `<${typeof name === 'function' ? name(v) : (name ?? Class.name)}>`,
   };
 }

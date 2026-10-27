@@ -39,7 +39,7 @@ const makeHit = (index: string, flattened: DataTableRecord['flattened'] = {}): D
     raw: { _index: index },
     flattened: { _index: index, ...flattened },
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const renderCallout = (hit: DataTableRecord) =>
   render(

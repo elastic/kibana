@@ -46,7 +46,7 @@ export const isSelectedActionEnabled = (
  * Unset (`null`/`undefined`) returns all actions; specific mode (`string[]`) returns the allowlist.
  */
 export const filterActionsBySelection = <
-  T extends { isTool?: boolean; description?: string; scope?: ActionScope }
+  T extends { isTool?: boolean; description?: string; scope?: ActionScope },
 >(
   actions: Record<string, T>,
   selectedActions: SelectedActions,

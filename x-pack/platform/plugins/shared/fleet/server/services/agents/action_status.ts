@@ -176,10 +176,10 @@ async function getActionResults(
       status: cancelledAction
         ? 'CANCELLED'
         : errorCount > 0 && complete
-        ? 'FAILED'
-        : complete
-        ? 'COMPLETE'
-        : action.status,
+          ? 'FAILED'
+          : complete
+            ? 'COMPLETE'
+            : action.status,
       nbAgentsActioned,
       cancellationTime: cancelledAction?.timestamp,
       completionTime,
@@ -248,52 +248,55 @@ async function getActions(
   });
 
   return Object.values(
-    res.hits.hits.reduce((acc, hit) => {
-      if (!hit._source || !hit._source.action_id) {
+    res.hits.hits.reduce(
+      (acc, hit) => {
+        if (!hit._source || !hit._source.action_id) {
+          return acc;
+        }
+
+        const source = hit._source!;
+
+        const newPolicyId = source.data?.policy_id as string;
+
+        if (hasVersionSuffix(newPolicyId)) {
+          // skip version specific policy actions
+          return acc;
+        }
+
+        if (!acc[source.action_id!]) {
+          const isExpired =
+            source.expiration && source.type !== 'UPGRADE'
+              ? Date.parse(source.expiration) < Date.now()
+              : false;
+          acc[hit._source.action_id] = {
+            actionId: hit._source.action_id,
+            nbAgentsActionCreated: 0,
+            nbAgentsAck: 0,
+            version: hit._source.data?.version as string,
+            startTime: source.start_time,
+            type: (source.data?.rollback === true ? 'ROLLBACK' : source.type) as AgentActionType,
+            nbAgentsActioned: source.total ?? 0,
+            status: isExpired
+              ? 'EXPIRED'
+              : hasRolloutPeriodPassed(source)
+                ? 'ROLLOUT_PASSED'
+                : 'IN_PROGRESS',
+            expiration: source.expiration,
+            newPolicyId,
+            creationTime: source['@timestamp']!,
+            nbAgentsFailed: 0,
+            hasRolloutPeriod: !!source.rollout_duration_seconds,
+            is_automatic: source.is_automatic,
+            policyId: source.policyId,
+          };
+        }
+
+        acc[hit._source.action_id].nbAgentsActionCreated += hit._source.agents?.length ?? 0;
+
         return acc;
-      }
-
-      const source = hit._source!;
-
-      const newPolicyId = source.data?.policy_id as string;
-
-      if (hasVersionSuffix(newPolicyId)) {
-        // skip version specific policy actions
-        return acc;
-      }
-
-      if (!acc[source.action_id!]) {
-        const isExpired =
-          source.expiration && source.type !== 'UPGRADE'
-            ? Date.parse(source.expiration) < Date.now()
-            : false;
-        acc[hit._source.action_id] = {
-          actionId: hit._source.action_id,
-          nbAgentsActionCreated: 0,
-          nbAgentsAck: 0,
-          version: hit._source.data?.version as string,
-          startTime: source.start_time,
-          type: (source.data?.rollback === true ? 'ROLLBACK' : source.type) as AgentActionType,
-          nbAgentsActioned: source.total ?? 0,
-          status: isExpired
-            ? 'EXPIRED'
-            : hasRolloutPeriodPassed(source)
-            ? 'ROLLOUT_PASSED'
-            : 'IN_PROGRESS',
-          expiration: source.expiration,
-          newPolicyId,
-          creationTime: source['@timestamp']!,
-          nbAgentsFailed: 0,
-          hasRolloutPeriod: !!source.rollout_duration_seconds,
-          is_automatic: source.is_automatic,
-          policyId: source.policyId,
-        };
-      }
-
-      acc[hit._source.action_id].nbAgentsActionCreated += hit._source.agents?.length ?? 0;
-
-      return acc;
-    }, {} as { [k: string]: ActionStatus })
+      },
+      {} as { [k: string]: ActionStatus }
+    )
   );
 }
 
@@ -406,7 +409,7 @@ async function getPolicyChangeActions(
   // excluded in the query without an expensive query, so keep reading pages until the limit of base
   // policy docs is reached. Otherwise they would crowd the base policy changes out of the limit.
   const basePolicyHits: Array<{ _source?: unknown }> = [];
-  for (let from = 0; basePolicyHits.length < limit && from + limit <= MAX_RESULT_WINDOW; ) {
+  for (let from = 0; basePolicyHits.length < limit && from + limit <= MAX_RESULT_WINDOW;) {
     const agentPoliciesRes = await esClient.search({
       index: AGENT_POLICY_INDEX,
       ignore_unavailable: true,
@@ -442,17 +445,20 @@ async function getPolicyChangeActions(
 
   const agentPolicies: { [key: string]: AgentPolicyRevision } = basePolicyHits
     .slice(0, limit)
-    .reduce((acc, curr) => {
-      const hit = curr._source! as any;
-      acc[`${hit.policy_id}:${hit.revision_idx}`] = {
-        policyId: hit.policy_id,
-        revision: hit.revision_idx,
-        timestamp: hit['@timestamp'],
-        agentsAssignedToPolicy: 0,
-        agentsOnAtLeastThisRevision: 0,
-      };
-      return acc;
-    }, {} as { [key: string]: AgentPolicyRevision });
+    .reduce(
+      (acc, curr) => {
+        const hit = curr._source! as any;
+        acc[`${hit.policy_id}:${hit.revision_idx}`] = {
+          policyId: hit.policy_id,
+          revision: hit.revision_idx,
+          timestamp: hit['@timestamp'],
+          agentsAssignedToPolicy: 0,
+          agentsOnAtLeastThisRevision: 0,
+        };
+        return acc;
+      },
+      {} as { [key: string]: AgentPolicyRevision }
+    );
 
   const basePolicyIds = [...new Set(Object.values(agentPolicies).map((p) => p.policyId))];
   if (basePolicyIds.length === 0) {

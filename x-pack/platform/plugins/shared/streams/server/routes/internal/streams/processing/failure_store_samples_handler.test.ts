@@ -42,7 +42,7 @@ const makeAncestor = (
       settings: {},
       failure_store: { enabled: false },
     },
-  } as unknown as Streams.WiredStream.Definition);
+  }) as unknown as Streams.WiredStream.Definition;
 
 const makeEsSearchResponse = (sources: FlattenRecord[]) => ({
   hits: {

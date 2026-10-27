@@ -59,7 +59,7 @@ export type StorageClientSearchRequest = Omit<SearchRequest, 'index'> & {
 
 export type StorageClientSearchResponse<
   TDocument,
-  TSearchRequest extends Omit<SearchRequest, 'index'>
+  TSearchRequest extends Omit<SearchRequest, 'index'>,
 > = InferSearchResponseOf<TDocument, TSearchRequest>;
 
 /**
@@ -126,7 +126,7 @@ export type StorageClientGetRequest = Omit<GetRequest & SearchRequest, 'index'>;
 export type StorageClientGetResponse<TDocument extends { _id?: string }> = GetResponse<TDocument>;
 
 export type StorageClientSearch<TDocumentType = never> = <
-  TSearchRequest extends StorageClientSearchRequest
+  TSearchRequest extends StorageClientSearchRequest,
 >(
   request: TSearchRequest,
   transportOptions?: StorageTransportOptions
@@ -238,10 +238,11 @@ type MissingKeysError<T extends string> = Error &
 // will cause a type error in the consuming code.
 export type IStorageClient<
   TSchema extends IndexStorageSettings,
-  TApplicationType extends StorageDocumentOf<TSchema>
-> = Exact<TApplicationType, StorageDocumentOf<TSchema>> extends true
-  ? InternalIStorageClient<TApplicationType>
-  : MissingKeysError<Exclude<UnionKeys<TApplicationType>, UnionKeys<StorageDocumentOf<TSchema>>>>;
+  TApplicationType extends StorageDocumentOf<TSchema>,
+> =
+  Exact<TApplicationType, StorageDocumentOf<TSchema>> extends true
+    ? InternalIStorageClient<TApplicationType>
+    : MissingKeysError<Exclude<UnionKeys<TApplicationType>, UnionKeys<StorageDocumentOf<TSchema>>>>;
 
 export type SimpleIStorageClient<TStorageSettings extends IndexStorageSettings> = IStorageClient<
   TStorageSettings,

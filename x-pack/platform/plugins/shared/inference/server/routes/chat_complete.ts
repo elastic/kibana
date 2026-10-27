@@ -95,7 +95,7 @@ export function registerChatCompleteRoute({
         });
       } catch (e) {
         return response.custom({
-          statusCode: isInferenceError(e) ? e.meta?.status ?? 500 : 500,
+          statusCode: isInferenceError(e) ? (e.meta?.status ?? 500) : 500,
           bypassErrorFormat: true,
           body: {
             type: InferenceTaskEventType.error,

@@ -68,9 +68,10 @@ const createSourcesClient = (
   });
 };
 
-export class NightshiftSourcesPlugin
-  implements Plugin<NightshiftSourcesServerSetup, NightshiftSourcesServerStart>
-{
+export class NightshiftSourcesPlugin implements Plugin<
+  NightshiftSourcesServerSetup,
+  NightshiftSourcesServerStart
+> {
   private readonly logger: Logger;
   private readonly isDev: boolean;
   private readonly sourceChangeEmitter: SourceChangeEmitter;

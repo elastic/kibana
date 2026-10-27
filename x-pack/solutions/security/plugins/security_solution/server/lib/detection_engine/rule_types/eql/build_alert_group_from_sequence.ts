@@ -401,7 +401,7 @@ export const objectPairIntersection = (a: object | undefined, b: object | undefi
     const [target, aObj, bObj] = stack.pop() as [
       Record<string, unknown>,
       Record<string, unknown>,
-      Record<string, unknown>
+      Record<string, unknown>,
     ];
     for (const [key, aVal] of Object.entries(aObj)) {
       if (key in bObj) {

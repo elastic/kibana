@@ -61,9 +61,9 @@ describe('DateFormatEditor', () => {
       screen.getByText((_, element) =>
         Boolean(
           element?.tagName === 'LABEL' &&
-            element?.textContent?.includes(
-              'Moment.js format pattern (Default: MMMM Do YYYY, HH:mm:ss.SSS)'
-            )
+          element?.textContent?.includes(
+            'Moment.js format pattern (Default: MMMM Do YYYY, HH:mm:ss.SSS)'
+          )
         )
       )
     ).toBeVisible();

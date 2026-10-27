@@ -43,16 +43,16 @@ describe('package_report step wiring', () => {
     const logger = loggingSystemMock.createLogger();
     const request = {};
     const definition = getPackageReportStepDefinition({
-      getActionsService: () => ({ list: jest.fn() } as never),
+      getActionsService: () => ({ list: jest.fn() }) as never,
       getConversations: () =>
         ({
           getScopedClient: async () => ({ get: async () => ({ attachments: [] }) }),
-        } as never),
+        }) as never,
       getHuntServices: () =>
         ({
           getProposalsService: () => proposalsService,
           getProposalPrivileges: () => ({ canManage: async () => true }),
-        } as never),
+        }) as never,
       isContextEngineEnabled: async () => false,
       logger,
     });
@@ -100,16 +100,16 @@ describe('package_report step wiring', () => {
     const logger = loggingSystemMock.createLogger();
     const request = {};
     const definition = getPackageReportStepDefinition({
-      getActionsService: () => ({ list: jest.fn() } as never),
+      getActionsService: () => ({ list: jest.fn() }) as never,
       getConversations: () =>
         ({
           getScopedClient: async () => ({ get: async () => ({ attachments: [] }) }),
-        } as never),
+        }) as never,
       getHuntServices: () =>
         ({
           getProposalsService: () => proposalsService,
           getProposalPrivileges: () => privileges,
-        } as never),
+        }) as never,
       isContextEngineEnabled: async () => false,
       logger,
     });

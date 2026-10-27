@@ -232,7 +232,7 @@ export const describeSkip = (
   const state =
     reasonState === undefined
       ? undefined
-      : (skip.stored_verdict ? VERDICT_STATES[skip.stored_verdict] : undefined) ?? reasonState;
+      : ((skip.stored_verdict ? VERDICT_STATES[skip.stored_verdict] : undefined) ?? reasonState);
   const lines: string[] = [];
   if (skip.reason === 'already_reviewed') {
     lines.push(

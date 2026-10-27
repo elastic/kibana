@@ -35,11 +35,13 @@ const panelContainerStyles = (isProjectStyle: boolean) => (theme: UseEuiTheme) =
     overflow: hidden; // Force children to respect border radius and shadow
     border-radius: ${layoutVar('sidebar.borderRadius', '0px')};
 
-    ${isProjectStyle &&
-    css`
-      outline: ${getHighContrastBorder(theme)};
-      ${euiShadow(theme, 'xs', { border: 'none' })};
-    `}
+    ${
+      isProjectStyle &&
+      css`
+        outline: ${getHighContrastBorder(theme)};
+        ${euiShadow(theme, 'xs', { border: 'none' })};
+      `
+    }
   `;
 
 export interface SidebarPanelProps {

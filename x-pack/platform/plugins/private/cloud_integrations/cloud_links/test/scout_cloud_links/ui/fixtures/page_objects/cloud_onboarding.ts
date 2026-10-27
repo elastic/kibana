@@ -16,7 +16,10 @@ export interface OnboardingParams {
 }
 
 export class CloudOnboardingPageObject {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {}
 
   async navigateWithParams({ token, securityDetails, resourceData, next, hash }: OnboardingParams) {
     const params = new URLSearchParams();

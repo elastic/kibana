@@ -268,14 +268,14 @@ export function NightshiftAppHeader({
         page === 'automations'
           ? automationsLabel
           : isDetectionPage
-          ? DETECTION_PAGE_TITLE
-          : page === 'knowledge'
-          ? KNOWLEDGE_PAGE_TITLE
-          : page === 'settings'
-          ? SETTINGS_PAGE_TITLE
-          : page === 'sources'
-          ? SOURCES_PAGE_TITLE
-          : nightshiftPageTitle
+            ? DETECTION_PAGE_TITLE
+            : page === 'knowledge'
+              ? KNOWLEDGE_PAGE_TITLE
+              : page === 'settings'
+                ? SETTINGS_PAGE_TITLE
+                : page === 'sources'
+                  ? SOURCES_PAGE_TITLE
+                  : nightshiftPageTitle
       }
       back={back}
       tabs={tabs}

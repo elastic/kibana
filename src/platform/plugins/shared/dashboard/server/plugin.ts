@@ -75,9 +75,12 @@ export interface StartDeps {
   spaces?: SpacesPluginStartApi;
 }
 
-export class DashboardPlugin
-  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
-{
+export class DashboardPlugin implements Plugin<
+  DashboardPluginSetup,
+  DashboardPluginStart,
+  SetupDeps,
+  StartDeps
+> {
   private readonly logger: Logger;
   private apiUsageCounter?: UsageCounter;
   private readonly currentKibanaVersion: string;

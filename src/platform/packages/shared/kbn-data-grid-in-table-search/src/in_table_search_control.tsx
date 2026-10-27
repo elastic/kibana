@@ -38,8 +38,10 @@ const inputWrapperCss = css`
   }
 `;
 
-export interface UseInTableSearchControlProps
-  extends Omit<UseFindMatchesProps, 'onScrollToActiveMatch'> {
+export interface UseInTableSearchControlProps extends Omit<
+  UseFindMatchesProps,
+  'onScrollToActiveMatch'
+> {
   enabled?: boolean;
   pageSize: number | null;
   getColumnIndexFromId: (columnId: string) => number;

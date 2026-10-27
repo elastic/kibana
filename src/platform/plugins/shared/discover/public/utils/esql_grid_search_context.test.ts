@@ -17,7 +17,7 @@ import { getEsqlDatatableFromDocuments } from './get_esql_datatable_from_documen
 import { FetchStatus } from '../application/types';
 
 const asEsqlRow = (id: string, raw: Record<string, unknown>): DataTableRecord =>
-  ({ id, raw, flattened: raw } as unknown as DataTableRecord);
+  ({ id, raw, flattened: raw }) as unknown as DataTableRecord;
 
 describe('buildDatatableFromTextBasedGrid', () => {
   it('preserves ES|QL column names for aliases and CHANGE_POINT BY columns', () => {

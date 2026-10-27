@@ -21,7 +21,7 @@ interface GetSummarizedAlertsOpts<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
   queryOptions: GetSummarizedAlertsParams;
@@ -32,7 +32,7 @@ export const getSummarizedAlerts = async <
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 >({
   alertsClient,
   queryOptions,

@@ -952,7 +952,7 @@ describe('WatchDetailPage', () => {
   it('blocks Save while the Worker reload has failed, asks before Discard, and allows the retry with the original revision', async () => {
     const installed = detectionWorkers.map((worker) => ({ ...worker, settingsRevision: 1 }));
     const workersQuery = (error: Error | null) =>
-      ({ data: { workers: installed }, isLoading: false, error, refetch: jest.fn() } as never);
+      ({ data: { workers: installed }, isLoading: false, error, refetch: jest.fn() }) as never;
     mockUseWatch.mockReturnValue({
       data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_DETECTION_ID) },
       isLoading: false,
@@ -1305,7 +1305,7 @@ describe('WatchDetailPage', () => {
         refetch: jest.fn(),
       } as never);
       const workersQuery = (workers: Worker[]) =>
-        ({ data: { workers }, isLoading: false, error: null, refetch: jest.fn() } as never);
+        ({ data: { workers }, isLoading: false, error: null, refetch: jest.fn() }) as never;
       mockUseWorkers.mockReturnValue(workersQuery(detectionWorkers));
       const mutateAsync = jest.fn();
       mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
@@ -1973,9 +1973,10 @@ describe('WatchDetailPage', () => {
     });
 
     it('still asks before turning off a blocked Continuous Threat Hunt while Rule Coverage is enabled', () => {
-      const workers = allWorkers([HUNT, RULE_COVERAGE]).map(
-        (worker): Worker => ({ ...worker, blockingReasons: ['no_model'] })
-      );
+      const workers = allWorkers([HUNT, RULE_COVERAGE]).map((worker): Worker => ({
+        ...worker,
+        blockingReasons: ['no_model'],
+      }));
       renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, workers);
 
       expect(enabledSwitch(HUNT)).toBeEnabled();
@@ -2054,7 +2055,7 @@ describe('WatchDetailPage', () => {
           isLoading: false,
           error: null,
           refetch: jest.fn(),
-        } as never);
+        }) as never;
       mockUseWatch.mockReturnValue(watchQuery(SYSTEM_SECURITY_WATCH_DETECTION_ID));
       const history = createMemoryHistory({
         initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_DETECTION_ID}`],

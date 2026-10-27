@@ -50,7 +50,7 @@ const makeResponse = (
       total: { value: total, relation: 'eq' },
       hits: [],
     },
-  } as any);
+  }) as any;
 
 /** A search client that returns the given responses in order. */
 const createClient = (...responses: unknown[]) => {
@@ -62,7 +62,7 @@ const createClient = (...responses: unknown[]) => {
 const INDEX = 'metrics-*,metricbeat-*';
 
 /** Minimal logger stub; only `warn` is asserted on. */
-const createLogger = () => ({ warn: jest.fn() } as unknown as Logger & { warn: jest.Mock });
+const createLogger = () => ({ warn: jest.fn() }) as unknown as Logger & { warn: jest.Mock };
 
 describe('hasData (metrics source probe)', () => {
   let logger: Logger & { warn: jest.Mock };

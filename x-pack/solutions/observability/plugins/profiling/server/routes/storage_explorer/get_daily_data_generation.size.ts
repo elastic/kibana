@@ -80,7 +80,7 @@ export async function getDailyDataGenerationSize({
   });
 
   const estimatedIncrementalSize = allIndicesStats
-    ? response.aggregations?.indices.buckets.reduce((prev, curr) => {
+    ? (response.aggregations?.indices.buckets.reduce((prev, curr) => {
         return (
           prev +
           getEstimatedSizeForDocumentsInIndex({
@@ -89,7 +89,7 @@ export async function getDailyDataGenerationSize({
             numberOfDocs: curr.number_of_documents.value,
           })
         );
-      }, 0) ?? 0
+      }, 0) ?? 0)
     : 0;
 
   const durationAsDays = (timeTo - timeFrom) / 60 / 60 / 24;

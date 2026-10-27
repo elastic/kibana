@@ -12,8 +12,8 @@ export function RemoteClustersPageProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   enum ConnectionType {
-    'cert' = 'setupTrustCertMode',
-    'api' = 'setupTrustApiMode',
+    cert = 'setupTrustCertMode',
+    api = 'setupTrustApiMode',
   }
 
   return {

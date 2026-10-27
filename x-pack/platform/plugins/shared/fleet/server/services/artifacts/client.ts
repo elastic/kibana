@@ -37,7 +37,10 @@ import {
  * Exposes an interface for access artifacts from within the context of a single integration (`packageName`)
  */
 export class FleetArtifactsClient implements ArtifactsClientInterface {
-  constructor(private esClient: ElasticsearchClient, private packageName: string) {
+  constructor(
+    private esClient: ElasticsearchClient,
+    private packageName: string
+  ) {
     if (!packageName) {
       throw new ArtifactsClientError('packageName is required');
     }

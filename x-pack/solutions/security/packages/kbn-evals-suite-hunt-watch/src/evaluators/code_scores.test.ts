@@ -58,7 +58,7 @@ const CLEAN_HUNT_RESULT: HuntResult = {
 const RUN_STARTED_AT = '2026-01-01T12:00:00.000Z';
 
 const proposalAt = (createdAt: string, status: ProposalWithMetadata['status']) =>
-  ({ id: `p-${createdAt}`, status, createdAt } as ProposalWithMetadata);
+  ({ id: `p-${createdAt}`, status, createdAt }) as ProposalWithMetadata;
 
 const buildArtifacts = (report: Partial<HuntReportArtifacts> = {}): HuntArtifacts => ({
   spaceId: 'default',
@@ -384,7 +384,7 @@ const actionedProposal = (
       criticality_level: 'extreme_impact',
     },
     ...overrides,
-  } as ProposalWithMetadata);
+  }) as ProposalWithMetadata;
 
 describe('scoreProposalConvergence', () => {
   const multiExpected: HuntExpected = {

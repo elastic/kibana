@@ -490,9 +490,9 @@ export class WorkflowCrudService {
       warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
     });
     const profileId = params.request
-      ? (await this.deps
+      ? ((await this.deps
           .getCoreStart()
-          .userProfile.getCurrentProfileId({ request: params.request })) ?? undefined
+          .userProfile.getCurrentProfileId({ request: params.request })) ?? undefined)
       : undefined;
     if (profileId) {
       prepared.workflowData.owner_id = profileId;
@@ -956,7 +956,7 @@ export class WorkflowCrudService {
       ? await this.deps.validationService.getWorkflowZodSchema({ loose: false }, spaceId, request)
       : undefined;
     const triggerDefinitions = workflowYaml
-      ? this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? []
+      ? (this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [])
       : undefined;
     const yamlResult =
       workflowYaml && zodSchema && triggerDefinitions
@@ -1145,7 +1145,7 @@ export class WorkflowCrudService {
     request?: KibanaRequest
   ): Promise<DeleteWorkflowsResponse> {
     const profileId = request
-      ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
+      ? ((await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined)
       : undefined;
     const isAdmin =
       options?.force === true &&
@@ -1450,7 +1450,7 @@ export class WorkflowCrudService {
     failures: Array<{ id: string; error: string }>;
   }> {
     const profileId = request
-      ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
+      ? ((await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined)
       : undefined;
     let canModifyBoundWorkflows = !request;
     if (request && this.deps.getServiceAccountBindings?.()?.isEnabled()) {

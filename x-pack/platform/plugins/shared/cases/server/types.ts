@@ -120,7 +120,7 @@ export type RegisterActionType = <
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
-  ExecutorResultData = void
+  ExecutorResultData = void,
 >(
   actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
 ) => void;

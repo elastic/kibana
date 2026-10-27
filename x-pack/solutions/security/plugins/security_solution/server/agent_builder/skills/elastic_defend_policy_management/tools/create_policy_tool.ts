@@ -70,7 +70,7 @@ export const POLICY_TOOL_ERROR_MESSAGES: Readonly<Record<PolicyToolErrorClass, s
 
 interface CreatePolicyToolOptions<
   TSchema extends z.ZodObject<z.ZodRawShape>,
-  TResult extends Record<string, unknown>
+  TResult extends Record<string, unknown>,
 > {
   endpointAppContextService: EndpointAppContextService;
   id: string;
@@ -273,7 +273,7 @@ const toPolicyErrorResult = (error: unknown, logger: Logger, toolId: string) => 
 
 export const createPolicyTool = <
   TSchema extends z.ZodObject<z.ZodRawShape>,
-  TResult extends Record<string, unknown>
+  TResult extends Record<string, unknown>,
 >({
   endpointAppContextService,
   id,

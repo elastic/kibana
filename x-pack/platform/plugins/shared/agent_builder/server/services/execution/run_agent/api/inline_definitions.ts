@@ -77,7 +77,7 @@ const schemaChildrenOf = (node: Schema): SchemaChild[] => {
 
 const mapSchemaChildren = (node: Schema, replacements: Map<Schema, Schema>): Schema => {
   const replace = (value: unknown): unknown =>
-    isRecord(value) ? replacements.get(value) ?? value : value;
+    isRecord(value) ? (replacements.get(value) ?? value) : value;
   const mapped: Schema = { ...node };
 
   for (const keyword of SCHEMA_MAP_KEYWORDS) {

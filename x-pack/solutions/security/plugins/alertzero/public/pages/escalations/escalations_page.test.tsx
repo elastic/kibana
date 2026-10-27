@@ -569,7 +569,7 @@ describe('EscalationsPage', () => {
               data: {
                 results: rows,
                 pagination: {
-                  total: !entity && status === 'open' ? openTotal ?? rows.length : rows.length,
+                  total: !entity && status === 'open' ? (openTotal ?? rows.length) : rows.length,
                   page: 1,
                   per_page: 50,
                 },

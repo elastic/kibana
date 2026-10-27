@@ -24,10 +24,10 @@ export const WindowValueExpression = ({ ruleParams, setRuleParams }: Props) => {
   const { condition } = ruleParams;
   const timeWindow =
     condition && 'time' in condition.window
-      ? condition.window.time ?? {
+      ? (condition.window.time ?? {
           size: 5,
           unit: 'm',
-        }
+        })
       : null;
 
   const timeWindowSize = timeWindow?.size ?? 5;

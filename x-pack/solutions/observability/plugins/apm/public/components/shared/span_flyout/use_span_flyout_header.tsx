@@ -216,7 +216,7 @@ export function useSpanFlyoutHeader({
             {transactionName}
           </TransactionDetailLink>
         ) : (
-          transactionName ?? NOT_AVAILABLE_LABEL
+          (transactionName ?? NOT_AVAILABLE_LABEL)
         )}
       </InfoBlock>
     );

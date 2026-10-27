@@ -41,15 +41,12 @@ const VISIBLE_LOCATIONS: readonly AppDeepLinkLocations[] = [
   'globalSearch',
 ];
 
-export class ContextEnginePlugin
-  implements
-    Plugin<
-      ContextEnginePluginSetup,
-      ContextEnginePluginStart,
-      ContextEngineSetupDependencies,
-      ContextEngineStartDependencies
-    >
-{
+export class ContextEnginePlugin implements Plugin<
+  ContextEnginePluginSetup,
+  ContextEnginePluginStart,
+  ContextEngineSetupDependencies,
+  ContextEngineStartDependencies
+> {
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> =
     Promise.resolve(undefined);
   private appChromeAdapter: ContextEngineAppChromeAdapter | undefined;
@@ -98,12 +95,9 @@ export class ContextEnginePlugin
       updater$: from(startServices).pipe(
         switchMap(([coreStart]) =>
           coreStart.uiSettings.get$<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false).pipe(
-            map(
-              (settingEnabled): AppUpdater =>
-                () => ({
-                  status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
-                })
-            )
+            map((settingEnabled): AppUpdater => () => ({
+              status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
+            }))
           )
         )
       ),

@@ -169,11 +169,11 @@ export const RulePicker = ({
     view === 'tags'
       ? tagCounts.filter(({ tag }) => matches(tag)).map(({ tag, count }) => tagOption(tag, count))
       : view === 'selected'
-      ? buildSelectedOptions()
-      : catalog
-          .filter((rule) => !tagFilter || rule.tags.includes(tagFilter))
-          .filter((rule) => matches(rule.name, ...rule.tags))
-          .map(({ name, tags: ruleTagsOfRule }) => ruleOption(name, ruleTagsOfRule));
+        ? buildSelectedOptions()
+        : catalog
+            .filter((rule) => !tagFilter || rule.tags.includes(tagFilter))
+            .filter((rule) => matches(rule.name, ...rule.tags))
+            .map(({ name, tags: ruleTagsOfRule }) => ruleOption(name, ruleTagsOfRule));
 
   const shownRuleNames =
     view === 'rules'
@@ -216,21 +216,21 @@ export const RulePicker = ({
     view === 'tags'
       ? rulePickerLabels.searchTags(tagCounts.length)
       : view === 'selected'
-      ? rulePickerLabels.searchSelected
-      : rulePickerLabels.searchRules(totalRules);
+        ? rulePickerLabels.searchSelected
+        : rulePickerLabels.searchRules(totalRules);
 
   const emptyMessage =
     isError && view !== 'selected'
       ? rulePickerLabels.loadError
       : view === 'selected' && !q
-      ? rulePickerLabels.nothingSelected
-      : view === 'rules' && tagFilter && !q
-      ? rulePickerLabels.noRulesWithTag(tagFilter)
-      : rulePickerLabels.noMatch(
-          view === 'tags' ? 'tags' : 'rules',
-          trimmedQuery,
-          view === 'rules' ? tagFilter : ''
-        );
+        ? rulePickerLabels.nothingSelected
+        : view === 'rules' && tagFilter && !q
+          ? rulePickerLabels.noRulesWithTag(tagFilter)
+          : rulePickerLabels.noMatch(
+              view === 'tags' ? 'tags' : 'rules',
+              trimmedQuery,
+              view === 'rules' ? tagFilter : ''
+            );
 
   const tabs: Array<{ id: PickerView; label: string; count?: number }> = [
     { id: 'rules', label: rulePickerLabels.rulesTab, count: isError ? undefined : totalRules },

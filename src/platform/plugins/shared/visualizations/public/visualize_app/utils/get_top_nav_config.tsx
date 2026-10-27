@@ -306,12 +306,12 @@ export const getTopNavConfig = (
           defaultMessage: 'Save to library',
         })
       : isOriginatingFromDashboardPanel && savedVis.id
-      ? i18n.translate('visualizations.topNavMenu.saveVisualizationAsButtonLabel', {
-          defaultMessage: 'Save as',
-        })
-      : i18n.translate('visualizations.topNavMenu.saveVisualizationButtonLabel', {
-          defaultMessage: 'Save',
-        });
+        ? i18n.translate('visualizations.topNavMenu.saveVisualizationAsButtonLabel', {
+            defaultMessage: 'Save as',
+          })
+        : i18n.translate('visualizations.topNavMenu.saveVisualizationButtonLabel', {
+            defaultMessage: 'Save',
+          });
 
   const showSaveButton =
     visualizeCapabilities.save ||
@@ -735,8 +735,8 @@ export const getTopNavConfig = (
     ...(showSaveButton && !isOriginatingFromDashboardPanel
       ? { primaryActionItem: saveMenuItem }
       : isOriginatingFromDashboardPanel
-      ? { primaryActionItem: saveAndReturnItem }
-      : {}),
+        ? { primaryActionItem: saveAndReturnItem }
+        : {}),
   };
 
   const shareAction: AppHeaderShareAction | undefined = share

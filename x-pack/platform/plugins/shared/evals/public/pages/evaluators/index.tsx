@@ -298,8 +298,8 @@ export const EvaluatorsPage: React.FC = () => {
                     {!showCreateFirstPrompt
                       ? i18n.NO_RESULTS_DESCRIPTION
                       : canManage
-                      ? i18n.NO_USER_DEFINED_DESCRIPTION
-                      : i18n.NO_USER_DEFINED_READ_ONLY_DESCRIPTION}
+                        ? i18n.NO_USER_DEFINED_DESCRIPTION
+                        : i18n.NO_USER_DEFINED_READ_ONLY_DESCRIPTION}
                   </p>
                 }
                 actions={[

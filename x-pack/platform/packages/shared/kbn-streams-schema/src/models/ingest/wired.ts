@@ -93,7 +93,7 @@ type OmitWiredStreamUpsertProps<
     ingest: Omit<WiredIngest, 'processing'> & {
       processing: Omit<WiredIngest['processing'], 'updated_at'> & { updated_at?: string };
     };
-  }
+  },
 > = Omit<T, 'ingest'> & {
   ingest: Omit<WiredIngest, 'processing'> & {
     processing: StreamlangIngestStreamProcessingUpsert;
@@ -191,9 +191,9 @@ WiredStream.Definition.is = (
 ): stream is WiredStream.Definition =>
   Boolean(
     'ingest' in stream &&
-      typeof stream.ingest === 'object' &&
-      stream.ingest &&
-      'wired' in stream.ingest
+    typeof stream.ingest === 'object' &&
+    stream.ingest &&
+    'wired' in stream.ingest
   );
 
 // Optimized implementation for GetResponse check - avoids full DeepStrict Zod parse

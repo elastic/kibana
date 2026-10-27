@@ -151,7 +151,7 @@ const createMockWorkflowsManagement = ({
       ) => lookups.map(() => ({ status: 'fulfilled' as const, value: workflows }))
     ),
     getClient: jest.fn(() => ({ bulkScheduleWorkflow })),
-  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
+  }) as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
 
 function buildDispatcherService(deps: {
   queryService: QueryServiceContract;

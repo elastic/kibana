@@ -19,7 +19,7 @@ const createMockDataView = (id = 'test-dv-id'): DataView =>
       filter: jest.fn().mockReturnValue([]),
       length: 0,
     },
-  } as unknown as DataView);
+  }) as unknown as DataView;
 
 describe('useResultsFiltering', () => {
   const resetPagination = jest.fn();

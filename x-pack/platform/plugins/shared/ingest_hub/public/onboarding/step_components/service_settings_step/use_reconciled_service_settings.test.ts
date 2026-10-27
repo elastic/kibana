@@ -21,7 +21,7 @@ const mockUseOnboardingFlow = useOnboardingFlow as jest.MockedFunction<typeof us
 const mockUseSessionStorage = useSessionStorage as jest.MockedFunction<typeof useSessionStorage>;
 
 const makeService = (id: string) =>
-  ({ id, name: `${id} name`, showInUI: true } as unknown as AwsServiceMatrixEntry);
+  ({ id, name: `${id} name`, showInUI: true }) as unknown as AwsServiceMatrixEntry;
 
 const servicesMap = new Map([
   ['svc_a', makeService('svc_a')],

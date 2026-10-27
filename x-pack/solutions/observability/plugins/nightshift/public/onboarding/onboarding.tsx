@@ -99,8 +99,8 @@ export function NightshiftOnboarding({
     !isConnected || stepOverride === 'connect'
       ? 'connect'
       : latestInvestigation && stepOverride !== 'investigate'
-      ? 'automate'
-      : 'investigate';
+        ? 'automate'
+        : 'investigate';
 
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
@@ -168,12 +168,12 @@ export function NightshiftOnboarding({
         step !== 'connect'
           ? undefined
           : hasSecret
-          ? i18n.translate('xpack.nightshift.onboarding.steps.connectOptionalHint', {
-              defaultMessage: 'Slack and hints are optional',
-            })
-          : i18n.translate('xpack.nightshift.onboarding.steps.connectSecretRequiredHint', {
-              defaultMessage: 'Save at least one credential',
-            }),
+            ? i18n.translate('xpack.nightshift.onboarding.steps.connectOptionalHint', {
+                defaultMessage: 'Slack and hints are optional',
+              })
+            : i18n.translate('xpack.nightshift.onboarding.steps.connectSecretRequiredHint', {
+                defaultMessage: 'Save at least one credential',
+              }),
     },
     investigate: {
       status: step === 'investigate' ? 'current' : latestInvestigation ? 'complete' : 'disabled',

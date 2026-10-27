@@ -12,7 +12,7 @@ import { ALERT_RULE_TYPE_ID, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@k
 import { isAlertDocument, isAttackDocument, isEventDocument } from './is_alert_document';
 
 const buildRecord = (fields: Record<string, unknown>): DataTableRecord =>
-  ({ flattened: fields, raw: {}, id: 'test-id' } as unknown as DataTableRecord);
+  ({ flattened: fields, raw: {}, id: 'test-id' }) as unknown as DataTableRecord;
 
 describe('isEventDocument', () => {
   it('returns false for signal events', () => {

@@ -32,7 +32,7 @@ const buildConversation = (attachments?: VersionedAttachment[]) =>
     title: 'Escalation',
     metadata: { linked_investigations: ['investigation-1'] },
     attachments,
-  } as unknown as Conversation);
+  }) as unknown as Conversation;
 
 const renderSlot = ({
   attachments,
@@ -95,7 +95,7 @@ describe('HeaderSlot', () => {
       template_id: 'investigation',
       created_at: '2026-09-01T10:00:00.000Z',
       metadata,
-    } as unknown as Conversation);
+    }) as unknown as Conversation;
 
   it('renders the severity picker for an investigation with a severity', () => {
     const renderSeverity = jest.fn(() => <div>Severity picker</div>);

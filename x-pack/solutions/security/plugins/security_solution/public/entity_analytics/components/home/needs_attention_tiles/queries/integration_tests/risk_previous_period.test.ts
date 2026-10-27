@@ -238,15 +238,13 @@ const loadFixture = async (client: Client, withStartHistory: boolean) => {
       properties: {
         '@timestamp': DATE,
         ...Object.fromEntries(
-          ['host', 'user', 'service'].flatMap(
-            (type): Array<[string, MappingProperty]> => [
-              [`${type}.risk.id_field`, KEYWORD],
-              [`${type}.risk.id_value`, KEYWORD],
-              [`${type}.risk.calculated_score_norm`, FLOAT],
-              [`${type}.risk.calculated_level`, KEYWORD],
-              [`${type}.risk.score_type`, KEYWORD],
-            ]
-          )
+          ['host', 'user', 'service'].flatMap((type): Array<[string, MappingProperty]> => [
+            [`${type}.risk.id_field`, KEYWORD],
+            [`${type}.risk.id_value`, KEYWORD],
+            [`${type}.risk.calculated_score_norm`, FLOAT],
+            [`${type}.risk.calculated_level`, KEYWORD],
+            [`${type}.risk.score_type`, KEYWORD],
+          ])
         ),
       },
     },

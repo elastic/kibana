@@ -1680,7 +1680,7 @@ describe('SyntheticsPrivateLocation', () => {
           ...dummyBrowserConfig,
           id: 'browser-id',
           locations: [mockPrivateLocation],
-        } as unknown as HeartbeatConfig);
+        }) as unknown as HeartbeatConfig;
       const makeLocation = (agents: unknown[], { shardingOff = false } = {}) =>
         new SyntheticsPrivateLocation({
           ...serverMock,

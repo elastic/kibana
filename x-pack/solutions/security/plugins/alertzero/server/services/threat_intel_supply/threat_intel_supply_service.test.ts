@@ -124,8 +124,8 @@ describe('ThreatIntelSupplyService', () => {
       enumerateSpaceIds: async () => spaceIds,
       getWorkflowInstaller: opts?.withInstaller === false ? undefined : () => ensureInstaller,
       getSearchInferenceEndpoints: () => opts?.searchInferenceEndpoints,
-      getInference: () => ({ getDefaultConnector: jest.fn() } as unknown as InferenceServerStart),
-      getUiSettingsClient: () => ({ get: jest.fn() } as unknown as IUiSettingsClient),
+      getInference: () => ({ getDefaultConnector: jest.fn() }) as unknown as InferenceServerStart,
+      getUiSettingsClient: () => ({ get: jest.fn() }) as unknown as IUiSettingsClient,
     });
 
   const seedAllTiWorkflows = (enabled: boolean) => {
@@ -793,8 +793,8 @@ describe('ThreatIntelSupplyService end state by space', () => {
       getEsClient: async () => gateEsClient,
       enumerateSpaceIds: async () => ['default', SPACE_A, SPACE_B],
       getWorkflowInstaller: row.installer ? () => fake.installer : undefined,
-      getInference: () => ({ getDefaultConnector: jest.fn() } as unknown as InferenceServerStart),
-      getUiSettingsClient: () => ({ get: jest.fn() } as unknown as IUiSettingsClient),
+      getInference: () => ({ getDefaultConnector: jest.fn() }) as unknown as InferenceServerStart,
+      getUiSettingsClient: () => ({ get: jest.fn() }) as unknown as IUiSettingsClient,
     });
 
     const operations: Record<Operation, () => Promise<unknown>> = {
@@ -829,8 +829,8 @@ describe('ThreatIntelSupplyService end state by space', () => {
         logger: loggingSystemMock.createLogger() as Logger,
         getEsClient: async () => esClient,
         enumerateSpaceIds: async () => ['default', SPACE_A, SPACE_B],
-        getInference: () => ({ getDefaultConnector: jest.fn() } as unknown as InferenceServerStart),
-        getUiSettingsClient: () => ({ get: jest.fn() } as unknown as IUiSettingsClient),
+        getInference: () => ({ getDefaultConnector: jest.fn() }) as unknown as InferenceServerStart,
+        getUiSettingsClient: () => ({ get: jest.fn() }) as unknown as IUiSettingsClient,
       }).getSupplyStatus(SPACE_A, request);
     };
 

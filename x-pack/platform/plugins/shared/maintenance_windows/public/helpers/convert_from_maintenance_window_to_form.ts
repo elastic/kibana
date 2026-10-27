@@ -41,11 +41,11 @@ export const convertFromMaintenanceWindowToForm = (
     ? isV1Selected && (rawAlerting?.kql || rawAlerting?.filters?.length)
       ? { kql: rawAlerting!.kql ?? '', filters: rawAlerting!.filters ?? [] }
       : isV1Selected
-      ? null // selected but no filter
-      : undefined
+        ? null // selected but no filter
+        : undefined
     : legacyScopedQuery != null
-    ? { kql: legacyScopedQuery.kql ?? '', filters: legacyScopedQuery.filters ?? [] }
-    : legacyScopedQuery; // null or undefined
+      ? { kql: legacyScopedQuery.kql ?? '', filters: legacyScopedQuery.filters ?? [] }
+      : legacyScopedQuery; // null or undefined
 
   const scopeAlertingV2 = isV2Selected ? maintenanceWindow.scope!.alertingV2 : undefined;
 
@@ -73,8 +73,8 @@ export const convertFromMaintenanceWindowToForm = (
   const ends = rRule.until
     ? RecurrenceEnd.ON_DATE
     : rRule.count
-    ? RecurrenceEnd.AFTER_X
-    : RecurrenceEnd.NEVER;
+      ? RecurrenceEnd.AFTER_X
+      : RecurrenceEnd.NEVER;
 
   const recurringSchedule: RecurringSchedule = {
     frequency: isCustomFrequency ? 'CUSTOM' : frequency,

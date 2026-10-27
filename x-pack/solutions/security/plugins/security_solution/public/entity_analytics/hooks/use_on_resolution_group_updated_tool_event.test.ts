@@ -27,7 +27,7 @@ const toolUiEvent = (customEvent: string): ChatEvent =>
       custom_event: customEvent,
       data: {},
     },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 describe('useOnResolutionGroupUpdatedToolEvent', () => {
   const makeAgentBuilder = () => {

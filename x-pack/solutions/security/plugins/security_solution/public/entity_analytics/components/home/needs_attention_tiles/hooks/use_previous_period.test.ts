@@ -206,7 +206,7 @@ describe('usePreviousPeriod', () => {
 
 describe('parseReachesBack', () => {
   const response = (columns: string[], values: unknown[][]) =>
-    ({ columns: columns.map((name) => ({ name })), values } as unknown as ESQLSearchResponse);
+    ({ columns: columns.map((name) => ({ name })), values }) as unknown as ESQLSearchResponse;
 
   it('reads the boolean of the reaches_back column', () => {
     expect(parseReachesBack(response(['reaches_back'], [[true]]))).toBe(true);

@@ -22,12 +22,10 @@ import { parseSearch } from './url_codec';
 import { useContentListSort } from '../sorting';
 
 describe('ContentListUrlSync', () => {
-  const mockFindItems = jest.fn(
-    async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-      items: [],
-      total: 0,
-    })
-  );
+  const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+    items: [],
+    total: 0,
+  }));
 
   /** A sort field that only offers descending order, like "Recently viewed". */
   const descOnlySorting: ContentListFeatures['sorting'] = {

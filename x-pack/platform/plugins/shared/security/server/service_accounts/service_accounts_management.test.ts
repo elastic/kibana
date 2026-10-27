@@ -57,7 +57,7 @@ const coordinatesOf = ({
 }: ServiceAccountWorkloadBinding) => ({ pluginId, workloadType, workloadId, spaceId });
 
 const clusterPrivilegesResponse = (authorized: boolean) =>
-  ({ hasAllRequested: authorized } as unknown as CheckPrivilegesResponse);
+  ({ hasAllRequested: authorized }) as unknown as CheckPrivilegesResponse;
 
 describe('ServiceAccountsManagement', () => {
   let management: ServiceAccountsManagement;
@@ -248,8 +248,8 @@ describe('ServiceAccountsManagement', () => {
     it('lists the verified bound workloads after checking `manage_security`, without their spaces', async () => {
       const bindings = [binding(), binding({ workloadId: 'workflow-2', spaceId: 'other' })];
       store.findByServiceAccountId.mockResolvedValue(bindings);
-      store.getVerified.mockImplementation(
-        async ({ workloadId }) => bindings.find((candidate) => candidate.workloadId === workloadId)!
+      store.getVerified.mockImplementation(async ({ workloadId }) =>
+        bindings.find((candidate) => candidate.workloadId === workloadId)!
       );
 
       const workloads = await management.listWorkloads(request, SERVICE_ACCOUNT_ID);

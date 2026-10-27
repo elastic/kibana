@@ -123,8 +123,8 @@ export const bulkCreateActions = async (
     const status = responseItems.every((item) => item.create?.error)
       ? 'failed'
       : responseItems.some((item) => item.create?.error)
-      ? 'mixed'
-      : 'success';
+        ? 'mixed'
+        : 'success';
 
     return {
       status,

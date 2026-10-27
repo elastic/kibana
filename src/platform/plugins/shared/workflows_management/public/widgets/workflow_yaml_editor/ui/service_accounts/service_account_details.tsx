@@ -71,7 +71,7 @@ export const ServiceAccountDetails = ({
         defaultMessage: 'This deployment',
       });
   const icon = environment.isServerless
-    ? projectIcons[environment.projectType ?? ''] ?? 'logoElastic'
+    ? (projectIcons[environment.projectType ?? ''] ?? 'logoElastic')
     : 'logoKibana';
   return (
     <EuiText

@@ -40,7 +40,7 @@ export const BidirectionalIntegrationsBanner = memo<BidirectionalIntegrationsBan
     const { docLinks, storage } = useKibana<FleetStartServices>().services;
     const storageKey = SUPPORTED_INTEGRATIONS_STORAGE_KEY[integrationPackageName];
     const [showBanner, setShowBanner] = useState(
-      storageKey ? storage.get(storageKey) ?? true : false
+      storageKey ? (storage.get(storageKey) ?? true) : false
     );
 
     const onDismissHandler = useCallback(() => {

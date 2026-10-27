@@ -47,9 +47,8 @@ export const registerTaskManagerGetRoute = (
       const { taskId } = req.params as { taskId: string };
 
       try {
-        const { id, taskType, status, runAt, scheduledAt, attempts } = await startContract.get(
-          taskId
-        );
+        const { id, taskType, status, runAt, scheduledAt, attempts } =
+          await startContract.get(taskId);
         // Omits credentials such as `apiKey` and `userScope`.
         return res.ok({ body: { id, taskType, status, runAt, scheduledAt, attempts } });
       } catch (err) {

@@ -67,7 +67,7 @@ const hostRecord = (id: string, criticality?: string): EntityStoreRecord =>
     entity: { id, name: id, type: 'host' },
     host: { name: id },
     ...(criticality ? { asset: { criticality } } : {}),
-  } as unknown as EntityStoreRecord);
+  }) as unknown as EntityStoreRecord;
 
 beforeEach(() => {
   jest.clearAllMocks();

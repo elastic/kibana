@@ -88,8 +88,8 @@ export function usePersistHoverContentWidget() {
 
         return Boolean(
           contentWidget.isFocused ||
-            contentWidget.isResizing ||
-            (isSticky && contentWidget.isVisibleFromKeyboard)
+          contentWidget.isResizing ||
+          (isSticky && contentWidget.isVisibleFromKeyboard)
         );
       };
 

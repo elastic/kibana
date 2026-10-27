@@ -30,7 +30,7 @@ const createDataSetRow = ({
     data_source: dataSource,
     resource: 'bucket/*',
     description: '',
-  } as DataSetWithName);
+  }) as DataSetWithName;
 
 interface DiscoverLocatorMock {
   navigateSync: jest.Mock;

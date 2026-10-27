@@ -27,7 +27,7 @@ import {
 const logger = { warn: jest.fn(), debug: jest.fn() } as unknown as Logger;
 
 const other = (id: string): ToolResult =>
-  ({ type: ToolResultType.other, tool_result_id: id, data: { v: 'x' } } as ToolResult);
+  ({ type: ToolResultType.other, tool_result_id: id, data: { v: 'x' } }) as ToolResult;
 
 const store = (entries: Record<string, number>): ToolResultStore =>
   ({
@@ -36,7 +36,7 @@ const store = (entries: Record<string, number>): ToolResultStore =>
         ? { path: `/tool_x_call/${id}.json`, metadata: { token_count: entries[id] } }
         : undefined
     ),
-  } as unknown as ToolResultStore);
+  }) as unknown as ToolResultStore;
 
 beforeEach(() => {
   jest.clearAllMocks();

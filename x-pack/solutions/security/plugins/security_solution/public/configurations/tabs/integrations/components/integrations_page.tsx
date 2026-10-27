@@ -58,8 +58,8 @@ export const IntegrationsPage = React.memo<IntegrationsGridProps>(
                 view === IntegrationsFacets.available
                   ? availableIntegrations
                   : view === IntegrationsFacets.installed
-                  ? installedIntegrations
-                  : []
+                    ? installedIntegrations
+                    : []
               }
               scrollElementId={'integrations-scroll-container'}
               selectedCategory={'security'}

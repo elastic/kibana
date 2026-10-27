@@ -50,7 +50,7 @@ const makeDeps = () => {
         getInference: () => inference,
         getSearchInferenceEndpoints: () => undefined,
         mitreDataClient,
-      } as unknown as ReturnType<RouteDependencies['getHuntServices']>),
+      }) as unknown as ReturnType<RouteDependencies['getHuntServices']>,
   } as unknown as RouteDependencies);
 
   const asCurrentUser = { search: jest.fn() };

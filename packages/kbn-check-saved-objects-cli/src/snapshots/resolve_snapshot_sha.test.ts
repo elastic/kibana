@@ -98,12 +98,10 @@ describe('resolveSnapshotSha', () => {
   });
 
   it('throws on terminal HTTP errors without walking to a parent commit', async () => {
-    const snapshotExistsFn = jest.fn(
-      async (): Promise<SnapshotCheckResult> => ({
-        outcome: 'terminal_error',
-        statusCode: 403,
-      })
-    );
+    const snapshotExistsFn = jest.fn(async (): Promise<SnapshotCheckResult> => ({
+      outcome: 'terminal_error',
+      statusCode: 403,
+    }));
     const getParentCommitShaFn = jest.fn(() => parentSha);
 
     await expect(
@@ -164,11 +162,9 @@ describe('resolveSnapshotSha', () => {
   });
 
   it('attempts up to 4 SHAs with 3 tries each before failing', async () => {
-    const snapshotExistsFn = jest.fn(
-      async (): Promise<SnapshotCheckResult> => ({
-        outcome: 'not_found',
-      })
-    );
+    const snapshotExistsFn = jest.fn(async (): Promise<SnapshotCheckResult> => ({
+      outcome: 'not_found',
+    }));
     const getParentCommitShaFn = jest
       .fn<string, [string]>()
       .mockImplementationOnce(() => 'cccccccccccccccccccccccccccccccccccccccc')

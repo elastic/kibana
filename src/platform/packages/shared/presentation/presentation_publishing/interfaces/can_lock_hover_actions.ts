@@ -20,8 +20,8 @@ export interface CanLockHoverActions {
 export const apiCanLockHoverActions = (api: unknown): api is CanLockHoverActions => {
   return Boolean(
     api &&
-      (api as CanLockHoverActions).hasLockedHoverActions$ &&
-      (api as CanLockHoverActions).lockHoverActions &&
-      typeof (api as CanLockHoverActions).lockHoverActions === 'function'
+    (api as CanLockHoverActions).hasLockedHoverActions$ &&
+    (api as CanLockHoverActions).lockHoverActions &&
+    typeof (api as CanLockHoverActions).lockHoverActions === 'function'
   );
 };

@@ -129,15 +129,13 @@ export const toStartSubjects = ({
     return [primary, ...thread];
   }
 
-  const fromAlerts = alerts.map(
-    (snapshot): WorkflowSubjectInput => ({
-      type: 'alert',
-      id: snapshot.id,
-      triggerType,
-      snapshot,
-      ...(snapshot.id === subject.id && summary ? { summary } : {}),
-    })
-  );
+  const fromAlerts = alerts.map((snapshot): WorkflowSubjectInput => ({
+    type: 'alert',
+    id: snapshot.id,
+    triggerType,
+    snapshot,
+    ...(snapshot.id === subject.id && summary ? { summary } : {}),
+  }));
   return [
     ...(fromAlerts.some(({ id }) => id === subject.id) ? fromAlerts : [primary, ...fromAlerts]),
     ...thread,

@@ -44,7 +44,7 @@ describe('supportsIntegrationSettings', () => {
   const service = (methods: string[]) =>
     ({
       deploymentMethods: methods.map((method) => ({ method })),
-    } as unknown as AwsServiceMatrixEntry);
+    }) as unknown as AwsServiceMatrixEntry;
 
   it('is false for ECF-only services, which create no package policy', () => {
     expect(supportsIntegrationSettings(service(['ecf']))).toBe(false);

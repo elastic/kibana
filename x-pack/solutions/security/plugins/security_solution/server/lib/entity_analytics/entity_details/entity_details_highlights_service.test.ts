@@ -69,7 +69,7 @@ const makeEnrichedEntity = ({
     })),
     vulnerabilities: [],
     vulnerabilitiesTotal,
-  } as unknown as EnrichedEntity);
+  }) as unknown as EnrichedEntity;
 
 const target = makeEnrichedEntity({
   id: 'user:carol',

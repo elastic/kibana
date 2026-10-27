@@ -44,8 +44,9 @@ interface LogContext {
   logTags: { tags: string[] };
 }
 
-export interface ReconcileTrackedAlertsWithStateParams<AlertData extends RuleAlertData>
-  extends LogContext {
+export interface ReconcileTrackedAlertsWithStateParams<
+  AlertData extends RuleAlertData,
+> extends LogContext {
   ruleId: string;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
@@ -53,8 +54,9 @@ export interface ReconcileTrackedAlertsWithStateParams<AlertData extends RuleAle
   search: TrackedAlertsSearch<AlertData>;
 }
 
-export interface ReconcileTrackedAlertsWithStateResult<AlertData extends RuleAlertData>
-  extends RestoreStateFromTrackedAlertsResult {
+export interface ReconcileTrackedAlertsWithStateResult<
+  AlertData extends RuleAlertData,
+> extends RestoreStateFromTrackedAlertsResult {
   trackedAlerts: TrackedAADAlerts<AlertData>;
 }
 
@@ -148,8 +150,9 @@ async function fetchTrackedAlertsMissingFromIndex<AlertData extends RuleAlertDat
   }
 }
 
-export interface RestoreStateFromTrackedAlertsParams<AlertData extends RuleAlertData>
-  extends LogContext {
+export interface RestoreStateFromTrackedAlertsParams<
+  AlertData extends RuleAlertData,
+> extends LogContext {
   trackedAlerts: TrackedAADAlerts<AlertData>;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;

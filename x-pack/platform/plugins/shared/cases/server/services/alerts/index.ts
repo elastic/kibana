@@ -337,7 +337,7 @@ export class AlertService {
 
   private async updateByQuery([index, statusAndReasonBuckets]: [
     string,
-    StatusAndReasonBuckets
+    StatusAndReasonBuckets,
   ]): Promise<number> {
     const statusBuckets = Array.from(statusAndReasonBuckets.entries());
     const updateRequests = statusBuckets.flatMap(([status, reasonToAlerts]) =>

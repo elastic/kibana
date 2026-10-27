@@ -1131,7 +1131,7 @@ describe('WorkflowExecutionQueryService', () => {
           channel: { buckets: channelBuckets },
           respondedBy: { buckets: respondedByBuckets },
         },
-      } as any);
+      }) as any;
 
     it('issues a size:0 aggregation with the listing baseline scope and NO user filters', async () => {
       mockEsClient.search.mockResolvedValueOnce(aggResponse([], []));
@@ -1243,7 +1243,7 @@ describe('WorkflowExecutionQueryService', () => {
         spaceId,
         workflowId: 'workflow-1',
         status: ExecutionStatus.CANCELLED,
-      } as EsWorkflowExecution);
+      }) as EsWorkflowExecution;
 
     it('should read each execution once in a single projected multi-get', async () => {
       mockWorkflowDataClient.getByIds.mockResolvedValue(

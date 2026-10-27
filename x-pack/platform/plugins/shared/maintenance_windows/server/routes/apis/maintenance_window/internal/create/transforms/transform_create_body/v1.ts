@@ -47,11 +47,11 @@ export const transformCreateBody = (
           },
         }
       : scopedQuery != null
-      ? {
-          scope: {
-            alerting: { enabled: true, kql: scopedQuery.kql, filters: scopedQuery.filters },
-          },
-        }
-      : {}),
+        ? {
+            scope: {
+              alerting: { enabled: true, kql: scopedQuery.kql, filters: scopedQuery.filters },
+            },
+          }
+        : {}),
   };
 };

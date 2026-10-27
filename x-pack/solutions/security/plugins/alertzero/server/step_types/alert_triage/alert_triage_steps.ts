@@ -59,8 +59,8 @@ export const getTriageHeadroomStepDefinition = ({ getTaskManager }: AlertTriageS
             headroom.status === 'ok'
               ? { status: 'ok' as const, in_flight: headroom.inFlight, slots: headroom.slots }
               : headroom.status === 'behind'
-              ? { status: 'behind' as const, lag_ms: headroom.lagMs }
-              : { status: 'unknown' as const },
+                ? { status: 'behind' as const, lag_ms: headroom.lagMs }
+                : { status: 'unknown' as const },
         };
       } catch (error) {
         throw toApiError(error, 'read triage headroom');
@@ -79,8 +79,8 @@ export const getTriagePlanSweepStepDefinition = () =>
           given.status === 'ok' && given.slots !== undefined
             ? { status: 'ok', inFlight: given.in_flight ?? 0, slots: given.slots }
             : given.status === 'behind'
-            ? { status: 'behind', lagMs: given.lag_ms ?? 0 }
-            : { status: 'unknown' };
+              ? { status: 'behind', lagMs: given.lag_ms ?? 0 }
+              : { status: 'unknown' };
 
         const now = Date.now();
         const filters = {

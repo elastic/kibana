@@ -1702,8 +1702,7 @@ describe('Response actions', () => {
       testSetup = createHttpApiTestSetupMock();
 
       // @ts-expect-error
-      testSetup.endpointAppContextMock.experimentalFeatures.responseActionsEndpointMemoryDump =
-        true;
+      testSetup.endpointAppContextMock.experimentalFeatures.responseActionsEndpointMemoryDump = true;
 
       ({ httpHandlerContextMock, httpResponseMock } = testSetup);
       httpRequestMock = testSetup.createRequestMock();
@@ -1745,8 +1744,7 @@ describe('Response actions', () => {
 
     it('should error if feature flag is disabled', async () => {
       // @ts-expect-error
-      testSetup.endpointAppContextMock.experimentalFeatures.responseActionsEndpointMemoryDump =
-        false;
+      testSetup.endpointAppContextMock.experimentalFeatures.responseActionsEndpointMemoryDump = false;
       await callHandler();
 
       expect(httpResponseMock.customError).toHaveBeenCalledWith({

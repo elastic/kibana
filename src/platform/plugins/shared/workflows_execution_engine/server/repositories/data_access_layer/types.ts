@@ -151,13 +151,15 @@ interface BulkPlainItemBase<TDocument extends { id: string }> {
   updater?: never;
 }
 
-export interface BulkCreateItem<TDocument extends { id: string }>
-  extends BulkPlainItemBase<TDocument> {
+export interface BulkCreateItem<
+  TDocument extends { id: string },
+> extends BulkPlainItemBase<TDocument> {
   operation: 'create';
 }
 
-export interface BulkUpdateOrUpsertItem<TDocument extends { id: string }>
-  extends BulkPlainItemBase<TDocument> {
+export interface BulkUpdateOrUpsertItem<
+  TDocument extends { id: string },
+> extends BulkPlainItemBase<TDocument> {
   operation: 'update' | 'upsert';
   retryOnConflict?: number;
 }
@@ -168,7 +170,7 @@ export type BulkPlainItem<TDocument extends { id: string }> =
 
 export interface BulkUpdaterItem<
   TDocument extends { id: string },
-  K extends keyof TDocument & string = keyof TDocument & string
+  K extends keyof TDocument & string = keyof TDocument & string,
 > {
   document?: never;
   operation: 'update';
@@ -187,7 +189,7 @@ export function isBulkUpdaterItem<TDocument extends { id: string }>(
 /** Preserves `K` at array boundaries where `BulkItem` union inference would widen it. */
 export function bulkUpdaterItem<
   TDocument extends { id: string },
-  K extends keyof TDocument & string
+  K extends keyof TDocument & string,
 >(item: BulkUpdaterItem<TDocument, K>): BulkUpdaterItem<TDocument, K> {
   return item;
 }

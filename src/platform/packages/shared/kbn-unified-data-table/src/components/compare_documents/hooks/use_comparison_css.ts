@@ -55,26 +55,28 @@ export const useComparisonCss = ({
       background-color: ${baseCellBackgroundColor};
     }
 
-    ${diffMode === 'basic' &&
-    css`
-      .${MATCH_CELL_CLASS} {
-        .${CELL_CLASS} {
-          &,
-          & * {
-            color: ${euiTheme.colors.textSuccess} !important;
+    ${
+      diffMode === 'basic' &&
+      css`
+        .${MATCH_CELL_CLASS} {
+          .${CELL_CLASS} {
+            &,
+            & * {
+              color: ${euiTheme.colors.textSuccess} !important;
+            }
           }
         }
-      }
 
-      .${DIFF_CELL_CLASS} {
-        .${CELL_CLASS} {
-          &,
-          & * {
-            color: ${euiTheme.colors.textDanger} !important;
+        .${DIFF_CELL_CLASS} {
+          .${CELL_CLASS} {
+            &,
+            & * {
+              color: ${euiTheme.colors.textDanger} !important;
+            }
           }
         }
-      }
-    `}
+      `
+    }
 
     .${SEGMENT_CLASS} {
       position: relative;
@@ -90,40 +92,46 @@ export const useComparisonCss = ({
       color: ${euiTheme.colors.textDanger};
     }
 
-    ${(diffMode === 'chars' || diffMode === 'words') &&
-    showDiffDecorations &&
-    css`
-      .${ADDED_SEGMENT_CLASS} {
-        text-decoration: underline;
-      }
-
-      .${REMOVED_SEGMENT_CLASS} {
-        text-decoration: line-through;
-      }
-    `}
-
-    ${diffMode === 'lines' &&
-    css`
-      .${SEGMENT_CLASS} {
-        padding-left: calc(${euiTheme.size.xs} / 2);
-      }
-
-      ${showDiffDecorations &&
+    ${
+      (diffMode === 'chars' || diffMode === 'words') &&
+      showDiffDecorations &&
       css`
-        .${ADDED_SEGMENT_CLASS}:before {
-          content: '+';
-          ${indicatorCss}
-          background-color: ${euiTheme.colors.success};
-          color: ${euiTheme.colors.lightestShade};
+        .${ADDED_SEGMENT_CLASS} {
+          text-decoration: underline;
         }
 
-        .${REMOVED_SEGMENT_CLASS}:before {
-          content: '-';
-          ${indicatorCss}
-          background-color: ${euiTheme.colors.backgroundFilledDanger};
-          color: ${euiTheme.colors.lightestShade};
+        .${REMOVED_SEGMENT_CLASS} {
+          text-decoration: line-through;
         }
-      `}
-    `}
+      `
+    }
+
+    ${
+      diffMode === 'lines' &&
+      css`
+        .${SEGMENT_CLASS} {
+          padding-left: calc(${euiTheme.size.xs} / 2);
+        }
+
+        ${
+          showDiffDecorations &&
+          css`
+            .${ADDED_SEGMENT_CLASS}:before {
+              content: '+';
+              ${indicatorCss}
+              background-color: ${euiTheme.colors.success};
+              color: ${euiTheme.colors.lightestShade};
+            }
+
+            .${REMOVED_SEGMENT_CLASS}:before {
+              content: '-';
+              ${indicatorCss}
+              background-color: ${euiTheme.colors.backgroundFilledDanger};
+              color: ${euiTheme.colors.lightestShade};
+            }
+          `
+        }
+      `
+    }
   `;
 };

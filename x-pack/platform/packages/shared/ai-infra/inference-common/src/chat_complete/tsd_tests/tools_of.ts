@@ -101,7 +101,7 @@ expectAssignable<WeatherToolCall | StockToolCall>(call);
 /**
  * ToolCallOfToolOptions
  */
-type NoneChoice = typeof import('../tools')['ToolChoiceType']['none'];
+type NoneChoice = (typeof import('../tools'))['ToolChoiceType']['none'];
 type CallNone = ToolCallOfToolOptions<{ tools: MyTools; toolChoice: NoneChoice }>;
 declare const callNone: CallNone;
 expectType<never>(callNone);

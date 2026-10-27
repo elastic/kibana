@@ -59,9 +59,9 @@ export function useKnowledgeIndicatorsUrlState({
   const selectedKnowledgeIndicator = useMemo(
     () =>
       query.selectedItem
-        ? knowledgeIndicators.find(
+        ? (knowledgeIndicators.find(
             (ki) => getKnowledgeIndicatorItemId(ki) === query.selectedItem
-          ) ?? null
+          ) ?? null)
         : null,
     [knowledgeIndicators, query.selectedItem]
   );

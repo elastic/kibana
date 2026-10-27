@@ -36,7 +36,9 @@ export const HistoryPanelSlide = ({
         grid-template-rows: ${isOpen ? '1fr' : '0fr'};
         visibility: ${isOpen ? 'visible' : 'hidden'};
         @media (prefers-reduced-motion: no-preference) {
-          transition: grid-template-rows ${transition}, visibility ${transition};
+          transition:
+            grid-template-rows ${transition},
+            visibility ${transition};
         }
       `}
     >

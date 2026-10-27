@@ -391,8 +391,8 @@ const reconcileSkip = ({
 
   const unseenReason: NeedsAgentReason | undefined = isUnjudged
     ? 'unjudged_member'
-    : changeReason({ observed: baseline, judged: judgedAtVerdict }) ??
-      (isSeriesTooOld({ memberships, now, maxSkipAgeMs }) ? 'series_too_old' : undefined);
+    : (changeReason({ observed: baseline, judged: judgedAtVerdict }) ??
+      (isSeriesTooOld({ memberships, now, maxSkipAgeMs }) ? 'series_too_old' : undefined));
   const changeSinceReview =
     freshReviewAt === undefined
       ? undefined
@@ -523,8 +523,10 @@ export interface ClassifyBatchParams {
 }
 
 /** What `classifyBatch` knows of one rule when it decides on a row. */
-interface RowContext
-  extends Pick<ClassifyBatchParams, 'maxSkipAgeMs' | 'now' | 'probeSpanBuckets' | 'reviewFreshMs'> {
+interface RowContext extends Pick<
+  ClassifyBatchParams,
+  'maxSkipAgeMs' | 'now' | 'probeSpanBuckets' | 'reviewFreshMs'
+> {
   joiningEventIds: ReadonlySet<string>;
 }
 

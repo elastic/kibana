@@ -67,7 +67,7 @@ export const ManagementLandingPage = ({
   };
   const hasCloudConnectPermission = Boolean(
     coreStart.application.capabilities.cloudConnect?.show ||
-      coreStart.application.capabilities.cloudConnect?.configure
+    coreStart.application.capabilities.cloudConnect?.configure
   );
 
   useEffect(() => {

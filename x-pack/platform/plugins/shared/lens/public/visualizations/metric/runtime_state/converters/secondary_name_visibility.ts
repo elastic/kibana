@@ -33,7 +33,7 @@ export const convertSecondaryNameVisibility = (
     secondaryNameVisibility:
       secondaryLabel === ''
         ? 'hidden'
-        : newState.secondaryNameVisibility ?? secondaryLabelPosition ?? 'before',
+        : (newState.secondaryNameVisibility ?? secondaryLabelPosition ?? 'before'),
   };
 
   return newState;

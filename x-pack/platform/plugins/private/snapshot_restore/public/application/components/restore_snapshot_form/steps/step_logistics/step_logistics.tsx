@@ -105,39 +105,35 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     EuiSelectableOption[]
   >(() =>
     orderDataStreamsAndIndices({
-      dataStreams: snapshotDataStreams.map(
-        (dataStream): EuiSelectableOption => ({
-          label: dataStream,
-          // Prevent NVDA from reading the label twice: EUI sets title={label} on the
-          // list item, which screen readers announce in addition to the accessible name.
-          title: '',
-          append: <DataStreamBadge />,
-          checked:
-            isAllIndicesAndDataStreams ||
-            // If indices is a string, we default to custom input mode, so we mark individual indices
-            // as selected if user goes back to list mode
-            typeof restoreIndices === 'string' ||
-            (Array.isArray(restoreIndices) && restoreIndices.includes(dataStream))
-              ? 'on'
-              : undefined,
-        })
-      ),
-      indices: snapshotIndices.map(
-        (index): EuiSelectableOption => ({
-          label: index,
-          // Prevent NVDA from reading the label twice: EUI sets title={label} on the
-          // list item, which screen readers announce in addition to the accessible name.
-          title: '',
-          checked:
-            isAllIndicesAndDataStreams ||
-            // If indices is a string, we default to custom input mode, so we mark individual indices
-            // as selected if user goes back to list mode
-            typeof restoreIndices === 'string' ||
-            (Array.isArray(restoreIndices) && restoreIndices.includes(index))
-              ? 'on'
-              : undefined,
-        })
-      ),
+      dataStreams: snapshotDataStreams.map((dataStream): EuiSelectableOption => ({
+        label: dataStream,
+        // Prevent NVDA from reading the label twice: EUI sets title={label} on the
+        // list item, which screen readers announce in addition to the accessible name.
+        title: '',
+        append: <DataStreamBadge />,
+        checked:
+          isAllIndicesAndDataStreams ||
+          // If indices is a string, we default to custom input mode, so we mark individual indices
+          // as selected if user goes back to list mode
+          typeof restoreIndices === 'string' ||
+          (Array.isArray(restoreIndices) && restoreIndices.includes(dataStream))
+            ? 'on'
+            : undefined,
+      })),
+      indices: snapshotIndices.map((index): EuiSelectableOption => ({
+        label: index,
+        // Prevent NVDA from reading the label twice: EUI sets title={label} on the
+        // list item, which screen readers announce in addition to the accessible name.
+        title: '',
+        checked:
+          isAllIndicesAndDataStreams ||
+          // If indices is a string, we default to custom input mode, so we mark individual indices
+          // as selected if user goes back to list mode
+          typeof restoreIndices === 'string' ||
+          (Array.isArray(restoreIndices) && restoreIndices.includes(index))
+            ? 'on'
+            : undefined,
+      })),
     })
   );
 

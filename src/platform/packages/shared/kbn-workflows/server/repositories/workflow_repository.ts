@@ -180,11 +180,11 @@ export class WorkflowRepository {
       const source = response._source;
       return Boolean(
         source &&
-          (source.spaceId === spaceId || source.spaceId === GLOBAL_WORKFLOW_SPACE_ID) &&
-          source.enabled === true &&
-          source.managed === true &&
-          source.valid === true &&
-          !source.deleted_at
+        (source.spaceId === spaceId || source.spaceId === GLOBAL_WORKFLOW_SPACE_ID) &&
+        source.enabled === true &&
+        source.managed === true &&
+        source.valid === true &&
+        !source.deleted_at
       );
     } catch (error) {
       if (error.statusCode === 404) return false;

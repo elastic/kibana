@@ -99,13 +99,13 @@ export const buildWorkflowExecutionDocument = (
     ...(inheritedIdentity
       ? { effectiveIdentity: inheritedIdentity }
       : workflow.definition?.settings?.run_as
-      ? {
-          effectiveIdentity: {
-            type: 'service_account' as const,
-            id: workflow.definition.settings.run_as,
-          },
-        }
-      : {}),
+        ? {
+            effectiveIdentity: {
+              type: 'service_account' as const,
+              id: workflow.definition.settings.run_as,
+            },
+          }
+        : {}),
     triggeredBy,
     ...(missingIdentity
       ? {

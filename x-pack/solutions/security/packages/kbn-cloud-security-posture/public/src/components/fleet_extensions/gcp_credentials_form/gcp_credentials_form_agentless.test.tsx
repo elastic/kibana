@@ -174,7 +174,7 @@ const createMockGcpAgentlessPackageInfo = (): PackageInfo =>
     ],
     data_streams: [],
     assets: [],
-  } as unknown as PackageInfo);
+  }) as unknown as PackageInfo;
 
 const createMockGcpAgentlessPolicy = (input: NewPackagePolicyInput): NewPackagePolicy => ({
   name: 'gcp-agentless-test',

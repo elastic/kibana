@@ -41,9 +41,9 @@ export class RuleGroupEditor extends Component<Props, {}> {
     return (
       <EuiPanel
         css={({ euiTheme }) => css`
-          background-color: ${this.props.ruleDepth % 2
-            ? euiTheme.colors.emptyShade
-            : euiTheme.colors.lightestShade};
+          background-color: ${
+            this.props.ruleDepth % 2 ? euiTheme.colors.emptyShade : euiTheme.colors.lightestShade
+          };
         `}
         hasBorder={true}
         hasShadow={false}

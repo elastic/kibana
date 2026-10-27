@@ -50,7 +50,7 @@ const createRequest = (overrides: Partial<KibanaRequest> = {}): KibanaRequest =>
     },
     url: new URL('https://source.example/base/s/my-space/internal/source/private-source-id'),
     ...overrides,
-  } as KibanaRequest);
+  }) as KibanaRequest;
 
 const createFakeRequest = (headers: Record<string, string> = {}, spaceId?: string): KibanaRequest =>
   mockRouter.createFakeKibanaRequest({ headers, spaceId });
@@ -568,7 +568,7 @@ describe('InternalHttpSelfScopedClient', () => {
             rejectUnauthorized: clientAuthenticationRequired,
           },
           selfHttp: { ssl: { verificationMode: 'full' } },
-        } as HttpConfig)
+        }) as HttpConfig
     );
     const { self } = createClient({ publicBaseUrl: null, getHttpConfig });
     const scoped = self.asScoped(createFakeRequest());
@@ -770,7 +770,7 @@ describe('InternalHttpSelfScopedClient', () => {
         ({
           ssl: { enabled: true, requestCert: false, certificate: localCertificate },
           selfHttp: { ssl: { verificationMode: 'full' } },
-        } as HttpConfig)
+        }) as HttpConfig
     );
     const local = createClient({
       publicBaseUrl: null,

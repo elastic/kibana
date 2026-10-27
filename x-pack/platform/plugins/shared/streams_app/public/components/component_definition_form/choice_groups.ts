@@ -25,7 +25,7 @@ export const getSelectedChoice = (
   if (present) {
     return present;
   }
-  return group.min_selected === 1 ? group.default_field ?? group.fields[0] : undefined;
+  return group.min_selected === 1 ? (group.default_field ?? group.fields[0]) : undefined;
 };
 
 /** Whether the field is a member of a choice group that has another member selected. */

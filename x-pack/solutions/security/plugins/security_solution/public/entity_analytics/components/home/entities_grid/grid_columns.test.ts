@@ -30,9 +30,8 @@ const RESOLVED_ENTITY_VALUES: Row = {
 
 /** Answers the read of the values of the resolved entities, and the sort query otherwise. */
 const createContext = () => {
-  const runQuery = jest.fn(
-    async (steps: readonly string[]): Promise<Row[]> =>
-      steps.join('\n').includes('alias_rank') ? [RESOLVED_ENTITY_VALUES] : [SORTED_ROW]
+  const runQuery = jest.fn(async (steps: readonly string[]): Promise<Row[]> =>
+    steps.join('\n').includes('alias_rank') ? [RESOLVED_ENTITY_VALUES] : [SORTED_ROW]
   );
   return { runQuery, ctx: { runQuery } };
 };

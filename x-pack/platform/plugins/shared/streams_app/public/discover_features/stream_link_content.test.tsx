@@ -14,7 +14,7 @@ import { StreamLinkContent } from './stream_link_content';
 const buildLocator = (href = '/app/streams/details'): StreamsAppLocator =>
   ({
     getRedirectUrl: jest.fn().mockReturnValue(href),
-  } as unknown as StreamsAppLocator);
+  }) as unknown as StreamsAppLocator;
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 

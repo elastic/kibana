@@ -188,7 +188,7 @@ const decideStatuses = ({
       SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.some((status) => status === latest.status);
     const signals =
       input.event_id === undefined || !isLive
-        ? input.signals ?? []
+        ? (input.signals ?? [])
         : mergeSignalsLatestPerRule(priorDocs, input.signals ?? [], timestamp);
     const outcome = assessMembers(signals);
     const decision = decideLifecycle({

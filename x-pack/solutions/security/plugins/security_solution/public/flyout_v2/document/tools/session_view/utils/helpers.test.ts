@@ -12,14 +12,14 @@ import { isCustomProcess, isProcess } from './helpers';
 const createProcess = (): Process =>
   ({
     getAlerts: jest.fn(),
-  } as unknown as Process);
+  }) as unknown as Process;
 
 const createCustomProcess = (): CustomProcess =>
   ({
     id: 'custom-process-id',
     details: {},
     endTime: '2023-01-01T00:00:00.000Z',
-  } as CustomProcess);
+  }) as CustomProcess;
 
 describe('isProcess', () => {
   it('returns true when the value is a Process', () => {

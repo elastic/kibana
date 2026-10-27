@@ -120,9 +120,11 @@ describe('observeMatchSeries', () => {
   });
 
   it('observes nothing when the query fails', async () => {
-    const run = jest.fn(
-      async (): Promise<StoredQueryResult> => ({ status: 'timeout', values: [], durationMs: 1 })
-    );
+    const run = jest.fn(async (): Promise<StoredQueryResult> => ({
+      status: 'timeout',
+      values: [],
+      durationMs: 1,
+    }));
 
     expect(await observeMatchSeries({ query: FILTER_QUERY, now, run, ...shape })).toBeUndefined();
   });

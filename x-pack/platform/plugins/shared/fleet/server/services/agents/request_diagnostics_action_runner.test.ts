@@ -45,7 +45,7 @@ const makeAgent = (id: string, policyId: string) =>
     policy_id: policyId,
     policy_base_id: policyId,
     local_metadata: { elastic: { agent: { version: '9.2.0' } } },
-  } as unknown as Agent);
+  }) as unknown as Agent;
 
 describe('requestDiagnosticsBatch', () => {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;

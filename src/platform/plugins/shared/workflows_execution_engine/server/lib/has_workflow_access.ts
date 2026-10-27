@@ -56,7 +56,7 @@ export const hasWorkflowAccess = async (
   const originalRequest = getWorkflowOriginalRequest(request);
   const profileId =
     workflow.access_control?.access_mode === 'private'
-      ? (await core.userProfile.getCurrentProfileId({ request: originalRequest })) ?? undefined
+      ? ((await core.userProfile.getCurrentProfileId({ request: originalRequest })) ?? undefined)
       : undefined;
   return checkWorkflowAccess(
     workflow,

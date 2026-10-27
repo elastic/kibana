@@ -13,7 +13,7 @@ import { translations as i8n } from './connector_selector.translations';
 
 /** Props for the `ConnectorSelectableComponent` */
 export interface ConnectorSelectableComponentProps<
-  T extends { value: string } = { value: string }
+  T extends { value: string } = { value: string },
 > {
   /** Pre-configured connectors to display in the selector */
   preConfiguredConnectors: (EuiSelectableLIOption<T> & { key?: undefined; checked?: undefined })[];

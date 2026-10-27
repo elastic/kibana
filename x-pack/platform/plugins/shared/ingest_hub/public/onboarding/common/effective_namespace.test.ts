@@ -27,7 +27,7 @@ describe('getEffectiveNamespace', () => {
 
 describe('deploysAsPolicy', () => {
   const service = (deploymentMethods: unknown[]) =>
-    ({ deploymentMethods } as unknown as AwsServiceMatrixEntry);
+    ({ deploymentMethods }) as unknown as AwsServiceMatrixEntry;
 
   it('is true for every service under agent-based', () => {
     expect(deploysAsPolicy(service([{ method: 'ecf' }]), 'agent_based')).toBe(true);

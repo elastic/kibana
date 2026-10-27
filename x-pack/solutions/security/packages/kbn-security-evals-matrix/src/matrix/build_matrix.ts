@@ -137,8 +137,8 @@ function* columnEvaluators(
   const datasetSet = column.examplePrefixes
     ? new Set(column.examplePrefixes.map((prefix) => `prefix:${prefix}`))
     : column.datasetIds
-    ? new Set(column.datasetIds)
-    : undefined;
+      ? new Set(column.datasetIds)
+      : undefined;
 
   for (const suite of modelScores.suites) {
     if (suiteSet.has(suite.suiteId)) {
@@ -159,8 +159,8 @@ const columnErroredOutEvaluators = (
   const datasetSet = column.examplePrefixes
     ? new Set(column.examplePrefixes.map((prefix) => `prefix:${prefix}`))
     : column.datasetIds
-    ? new Set(column.datasetIds)
-    : undefined;
+      ? new Set(column.datasetIds)
+      : undefined;
 
   const names = new Set<string>();
   for (const suite of modelScores.suites) {
@@ -276,8 +276,8 @@ const columnSelfJudged = (
   const columnDatasetIds = column.examplePrefixes
     ? new Set(column.examplePrefixes.map((prefix) => `prefix:${prefix}`))
     : column.datasetIds
-    ? new Set(column.datasetIds)
-    : undefined;
+      ? new Set(column.datasetIds)
+      : undefined;
   const columnSuitesAll = modelScores.suites.filter((suite) =>
     new Set(column.suites).has(suite.suiteId)
   );
@@ -456,22 +456,18 @@ const buildDisplayColumns = (config: MatrixConfig): MatrixDisplayColumn[] => {
         throw new Error(`Matrix config "layout" references unknown column/composite id: "${id}"`);
       })
     : [
-        ...config.columns.map(
-          (column): MatrixDisplayColumn => ({
-            id: column.id,
-            label: column.label,
-            group: column.group,
-            kind: 'base',
-          })
-        ),
-        ...config.composites.map(
-          (composite): MatrixDisplayColumn => ({
-            id: composite.id,
-            label: composite.label,
-            group: composite.group,
-            kind: 'composite',
-          })
-        ),
+        ...config.columns.map((column): MatrixDisplayColumn => ({
+          id: column.id,
+          label: column.label,
+          group: column.group,
+          kind: 'base',
+        })),
+        ...config.composites.map((composite): MatrixDisplayColumn => ({
+          id: composite.id,
+          label: composite.label,
+          group: composite.group,
+          kind: 'composite',
+        })),
       ];
   // A duplicate layout id would publish the same score twice in CSV/Markdown/HTML;
   // column and composite declarations already reject duplicates, so layout must too.
@@ -631,8 +627,8 @@ const buildMatrixRow = (
     const columnDatasetIds = column.examplePrefixes
       ? new Set(column.examplePrefixes.map((prefix) => `prefix:${prefix}`))
       : column.datasetIds
-      ? new Set(column.datasetIds)
-      : undefined;
+        ? new Set(column.datasetIds)
+        : undefined;
     const columnSuitesAll = modelScores.suites.filter((suite) => columnSuites.has(suite.suiteId));
     const perDataset = (
       pick: (entry: { excludedSelfJudged?: number; excludedNonEis?: number }) => number

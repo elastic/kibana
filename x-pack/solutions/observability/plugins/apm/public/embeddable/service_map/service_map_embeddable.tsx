@@ -232,8 +232,8 @@ export function ServiceMapEmbeddable({
     optional: true,
   });
   const hasBadgesRange = badgesRangeFrom != null && badgesRangeTo != null;
-  const badgesStart = hasBadgesRange ? resolvedBadgesStart ?? badgesRangeFrom : start;
-  const badgesEnd = hasBadgesRange ? resolvedBadgesEnd ?? badgesRangeTo : end;
+  const badgesStart = hasBadgesRange ? (resolvedBadgesStart ?? badgesRangeFrom) : start;
+  const badgesEnd = hasBadgesRange ? (resolvedBadgesEnd ?? badgesRangeTo) : end;
 
   const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
     useSloOverviewFlyout();

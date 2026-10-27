@@ -8,7 +8,7 @@
 import { uniqueBySeries, readBulkOutcome, createBulkActionError } from './helpers';
 
 const ep = (series_id: string | null | undefined, id = 'e', group_hash = 'g1') =>
-  ({ series_id, group_hash, 'episode.id': id } as any);
+  ({ series_id, group_hash, 'episode.id': id }) as any;
 
 describe('uniqueBySeries', () => {
   it('dedupes by series_id', () => {

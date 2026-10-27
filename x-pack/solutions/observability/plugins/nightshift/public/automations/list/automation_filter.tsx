@@ -53,7 +53,7 @@ export const AutomationFilter = ({
           </EuiText>
         ),
         checked: selected.includes(option) ? 'on' : undefined,
-      } as EuiSelectableOption<string>)
+      }) as EuiSelectableOption<string>
   );
   const handleChange = (nextOptions: Array<EuiSelectableOption<string>>) =>
     onChange(

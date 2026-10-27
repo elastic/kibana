@@ -21,8 +21,7 @@ import { useNavigation } from '../application/hooks/use_navigation';
 import { appPaths } from '../application/utils/app_paths';
 import type { EmbeddableConversationCallbacks } from './types';
 
-export interface EmbeddableConversationInputInternalProps
-  extends PublicEmbeddableConversationInputProps {
+export interface EmbeddableConversationInputInternalProps extends PublicEmbeddableConversationInputProps {
   services: AgentBuilderInternalService;
   coreStart: CoreStart;
 }

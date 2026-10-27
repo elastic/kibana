@@ -71,9 +71,11 @@ export const buildColumns = (
     ...groupingFields
       .filter((name) => name !== ENTITY_ID_COLUMN)
       .map((name): OutputColumn => ({ name, kind: 'identity' })),
-    ...[...attributeColumns].map(
-      ([name, fieldByPlan]): OutputColumn => ({ name, kind: 'attribute', fieldByPlan })
-    ),
+    ...[...attributeColumns].map(([name, fieldByPlan]): OutputColumn => ({
+      name,
+      kind: 'attribute',
+      fieldByPlan,
+    })),
     { name: LAST_SEEN_COLUMN, kind: 'last_seen' },
   ];
 };

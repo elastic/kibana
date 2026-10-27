@@ -27,7 +27,7 @@ const makeExecution = (
     duration: 300000,
     concurrencyGroupKey: `nightshift-source-onboarding-${slugFor(sourceId)}:${sourceId}`,
     ...overrides,
-  } as WorkflowExecutionListItemDto);
+  }) as WorkflowExecutionListItemDto;
 
 const makeSource = (
   id: string,

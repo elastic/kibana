@@ -112,14 +112,14 @@ export const DecorateWithKibanaContext: Decorator = (story) => {
       },
     },
     uiSettings: {
-      get: () => ({ key: 'mock', defaultOverride: undefined } as any),
+      get: () => ({ key: 'mock', defaultOverride: undefined }) as any,
     },
     triggersActionsUi: {
       getAlertSummaryWidget: () => <></>,
     },
     charts: {
       theme: {
-        useChartsBaseTheme: () => ({} as Theme),
+        useChartsBaseTheme: () => ({}) as Theme,
       },
     },
     settings: {
@@ -153,8 +153,8 @@ export const DecorateWithKibanaContext: Decorator = (story) => {
                   getRedirectUrl: (args: any) => {
                     action('share.url.locators.useUrl.getRedirectUrl')(args);
                   },
-                } as unknown as LocatorPublic<any>),
-            } as unknown as LocatorPublic<any>),
+                }) as unknown as LocatorPublic<any>,
+            }) as unknown as LocatorPublic<any>,
         },
       },
     },

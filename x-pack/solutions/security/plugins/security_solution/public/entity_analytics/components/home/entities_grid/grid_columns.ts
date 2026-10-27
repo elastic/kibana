@@ -148,5 +148,5 @@ export const getPageEnrichers = (
   columnIds: readonly string[]
 ): readonly PageEnricher[] =>
   ROWS_MODE_COLUMNS[rowsMode].flatMap(({ id }) =>
-    columnIds.includes(id) ? getQuerySpec(id)?.enricher ?? [] : []
+    columnIds.includes(id) ? (getQuerySpec(id)?.enricher ?? []) : []
   );

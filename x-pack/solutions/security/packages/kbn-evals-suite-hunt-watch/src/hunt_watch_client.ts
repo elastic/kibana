@@ -33,7 +33,10 @@ export interface HuntWatchRunResult {
 export class HuntWatchClient {
   private readonly pendingExecutions: Array<{ spaceId: string; workflowExecutionId: string }> = [];
 
-  constructor(private readonly fetch: HttpHandler, private readonly log: ToolingLog) {}
+  constructor(
+    private readonly fetch: HttpHandler,
+    private readonly log: ToolingLog
+  ) {}
 
   private executionPath(spaceId: string, workflowExecutionId: string, suffix = ''): string {
     return spacePath(

@@ -43,8 +43,8 @@ export const ChromeAppHeader = ({ menu, share, tabsBar }: ChromeAppHeaderProps) 
   const sessionTitle = persistedDiscoverSession?.title ?? pendingSessionTitle;
   const canRenameSession = Boolean(
     capabilities.discover_v2.save &&
-      !persistedDiscoverSession?.managed &&
-      !embeddableEditor.isEmbeddedEditor()
+    !persistedDiscoverSession?.managed &&
+    !embeddableEditor.isEmbeddedEditor()
   );
 
   const title = useMemo((): AppHeaderTitle => {

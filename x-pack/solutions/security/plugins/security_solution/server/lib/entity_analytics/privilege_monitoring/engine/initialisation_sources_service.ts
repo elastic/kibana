@@ -73,9 +73,8 @@ export const createInitialisationSourcesService = (deps: {
       const requiresUpsert = shouldUpsertManagedSources(requiredInitSources, installedByName);
 
       if (requiresUpsert) {
-        const { created, updated, results } = await deps.descriptorClient.bulkUpsert(
-          requiredInitSources
-        );
+        const { created, updated, results } =
+          await deps.descriptorClient.bulkUpsert(requiredInitSources);
         logger.log(
           'debug',
           `Privilege Monitoring sources upsert - created: ${created}, updated: ${updated}, processed: ${results.length}.`

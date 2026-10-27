@@ -15,6 +15,7 @@ import {
 } from 'jest-snapshot';
 import path from 'path';
 import { once } from 'lodash';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { SyncExpectationResult } from 'expect';
 import type { Lifecycle } from '../lifecycle';
 import type { Suite, Test } from '../../fake_mocha_types';
@@ -164,7 +165,10 @@ function getSnapshotState(file: string, updateSnapshot: SnapshotUpdateState) {
     path.join(rootDir, filename.replace(path.extname(filename), '.snap')),
     {
       updateSnapshot,
-      prettierPath: require.resolve('prettier'),
+      prettierPath: path.resolve(
+        REPO_ROOT,
+        'src/platform/packages/shared/kbn-jest/src/oxfmt_prettier.js'
+      ),
       snapshotFormat: { escapeString: true, printBasicPrototype: true },
       rootDir,
     }

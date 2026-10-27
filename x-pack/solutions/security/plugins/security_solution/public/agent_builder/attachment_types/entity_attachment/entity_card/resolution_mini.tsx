@@ -72,8 +72,8 @@ export const ResolutionMini: React.FC<ResolutionMiniProps> = ({
   }
 
   const targetEntityId = group?.target
-    ? (group.target as { entity?: { id?: string } }).entity?.id ??
-      String((group.target as Record<string, unknown>)['entity.id'] ?? '')
+    ? ((group.target as { entity?: { id?: string } }).entity?.id ??
+      String((group.target as Record<string, unknown>)['entity.id'] ?? ''))
     : undefined;
 
   return (

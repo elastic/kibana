@@ -73,7 +73,7 @@ export function NoData(props) {
   };
   const hasCloudConnectPermission = Boolean(
     services.application.capabilities.cloudConnect?.show ||
-      services.application.capabilities.cloudConnect?.configure
+    services.application.capabilities.cloudConnect?.configure
   );
 
   async function startSetup() {

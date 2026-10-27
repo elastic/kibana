@@ -25,9 +25,12 @@ interface StartDeps {
   security: SecurityPluginStart;
 }
 
-export class PageRenderScreenshottingPlugin
-  implements Plugin<void, PageRenderScreenshottingStart, {}, StartDeps>
-{
+export class PageRenderScreenshottingPlugin implements Plugin<
+  void,
+  PageRenderScreenshottingStart,
+  {},
+  StartDeps
+> {
   private readonly logger: Logger;
   /** Kept current so dynamic overrides of `kibanaBaseUrl` take effect without a restart. */
   private config: PluginConfig;

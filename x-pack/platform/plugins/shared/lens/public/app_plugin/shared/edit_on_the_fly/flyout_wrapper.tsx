@@ -66,8 +66,8 @@ export const FlyoutWrapper = ({
         [data-managed-flyout-layout-mode='side-by-side'][data-managed-flyout-level='child']
       ) {
       clip-path: inset(
-        0 0 0 -${DRAG_DROP_EXTRA_TARGETS_PADDING}px round 0 ${euiTheme.border.radius.frame} ${euiTheme
-            .border.radius.frame} 0
+        0 0 0 -${DRAG_DROP_EXTRA_TARGETS_PADDING}px round 0 ${euiTheme.border.radius.frame}
+          ${euiTheme.border.radius.frame} 0
       ) !important;
     }
   `;
@@ -208,10 +208,12 @@ export const FlyoutWrapper = ({
             -webkit-mask-image: none;
             padding-left: inherit;
             margin-left: inherit;
-            ${!isScrollable &&
-            `
+            ${
+              !isScrollable &&
+              `
                 overflow-y: hidden;
-              `}
+              `
+            }
             > * {
               pointer-events: auto;
             }

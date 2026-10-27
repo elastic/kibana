@@ -396,8 +396,8 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
     endpointStatus === 'failed' || endpointStatus === 'unhealthy'
       ? 'error'
       : endpointStatus === 'degraded'
-      ? 'degraded'
-      : 'online';
+        ? 'degraded'
+        : 'online';
 
   await clients.internalEsClient.index({
     index: '.fleet-agents',

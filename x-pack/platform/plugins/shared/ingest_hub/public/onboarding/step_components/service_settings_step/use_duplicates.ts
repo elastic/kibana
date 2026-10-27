@@ -49,10 +49,10 @@ export function useDuplicates({
   const [sourceInstanceId, setSourceInstanceId] = useState<string | null>(null);
 
   const sourceInstance = sourceInstanceId
-    ? instances.find((i) => i.instanceId === sourceInstanceId) ?? null
+    ? (instances.find((i) => i.instanceId === sourceInstanceId) ?? null)
     : null;
   const sourceService = sourceInstance
-    ? awsServicesMap?.get(sourceInstance.serviceId) ?? null
+    ? (awsServicesMap?.get(sourceInstance.serviceId) ?? null)
     : null;
 
   const getBaseName = useCallback(

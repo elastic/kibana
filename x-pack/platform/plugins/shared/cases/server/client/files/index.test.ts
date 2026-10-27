@@ -104,7 +104,7 @@ describe('server files', () => {
           fileKind: constructFileKindIdByOwner(SECURITY_SOLUTION_OWNER),
           meta: { caseIds, owner: [SECURITY_SOLUTION_OWNER] },
         },
-      } as unknown as File);
+      }) as unknown as File;
 
     beforeEach(() => {
       jest.clearAllMocks();

@@ -24,10 +24,12 @@ const RENDERERS: Readonly<Record<GeneratedFileGroup, ReadonlyArray<() => Generat
   documentation: [renderCommandDocs, renderFunctionDocs],
 };
 
-/** Renders the final (license header + prettier formatted) files of the given groups. */
+/** Renders the final (license header + oxfmt formatted) files of the given groups. */
 export const renderGeneratedFiles = (
   groups: readonly GeneratedFileGroup[] = GENERATED_FILE_GROUPS
-): GeneratedFile[] =>
-  groups
-    .flatMap((group) => RENDERERS[group].flatMap((render) => render()))
-    .map(formatGeneratedFile);
+): Promise<GeneratedFile[]> =>
+  Promise.all(
+    groups
+      .flatMap((group) => RENDERERS[group].flatMap((render) => render()))
+      .map(formatGeneratedFile)
+  );

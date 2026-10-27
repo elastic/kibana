@@ -33,7 +33,7 @@ const isClarifyingQuestion = (prompt: unknown): boolean =>
  */
 export function createVisualizationRefusalEvaluator<
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(config: {
   visualizationExtractor: (output: TTaskOutput) => ExtractedVisualization[];
   messagesExtractor: (output: TTaskOutput) => string[];
@@ -74,20 +74,20 @@ export function createVisualizationRefusalEvaluator<
       const label = !refused
         ? 'drew-anyway'
         : !explained
-        ? 'silent-refusal'
-        : message.length > 0
-        ? 'refused'
-        : 'asked-clarification';
+          ? 'silent-refusal'
+          : message.length > 0
+            ? 'refused'
+            : 'asked-clarification';
       return {
         score,
         label,
         explanation: !refused
           ? `Expected a refusal (${refusal.reason}) but ${visualizations.length} visualization(s) were produced.`
           : label === 'asked-clarification'
-          ? `Declined (${refusal.reason}) by asking the user a clarifying question.`
-          : explained
-          ? `Refused (${refusal.reason}) with an explanation.`
-          : `Refused (${refusal.reason}) but returned no message to the user.`,
+            ? `Declined (${refusal.reason}) by asking the user a clarifying question.`
+            : explained
+              ? `Refused (${refusal.reason}) with an explanation.`
+              : `Refused (${refusal.reason}) but returned no message to the user.`,
         metadata: {
           reason: refusal.reason,
           producedVisualizations: visualizations.length,

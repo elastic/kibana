@@ -22,8 +22,8 @@ export const InvestigationTitle: React.FC<TitleSlotRenderProps> = ({ conversatio
   const text = !isInvestigationTitlePending(title)
     ? title
     : data
-    ? getInvestigationDisplayTitle(data)
-    : NEW_INVESTIGATION_TITLE;
+      ? getInvestigationDisplayTitle(data)
+      : NEW_INVESTIGATION_TITLE;
 
   return <EuiTextTruncate text={text} data-test-subj="investigationFlyoutTitle" />;
 };

@@ -788,8 +788,7 @@ const renderEnrichedSections = ({
   return <SectionStack>{sections}</SectionStack>;
 };
 
-export interface ThreatAttachmentInlineContentProps
-  extends AttachmentRenderProps<ThreatAttachment> {
+export interface ThreatAttachmentInlineContentProps extends AttachmentRenderProps<ThreatAttachment> {
   http: HttpStart;
   navigation: AttachmentNavigationDeps;
 }
@@ -864,16 +863,16 @@ const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContent
         defaultMessage: 'You do not have access to this report.',
       })
     : liveIsEmpty
-    ? i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.liveEmpty', {
-        defaultMessage: 'This report has no details to show yet.',
-      })
-    : hasAnyField
-    ? i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.captured', {
-        defaultMessage: 'Showing captured fields. The live report could not be resolved.',
-      })
-    : i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.unavailable', {
-        defaultMessage: 'Report unavailable',
-      });
+      ? i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.liveEmpty', {
+          defaultMessage: 'This report has no details to show yet.',
+        })
+      : hasAnyField
+        ? i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.captured', {
+            defaultMessage: 'Showing captured fields. The live report could not be resolved.',
+          })
+        : i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.unavailable', {
+            defaultMessage: 'Report unavailable',
+          });
 
   return (
     <EuiPanel

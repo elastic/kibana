@@ -175,11 +175,10 @@ export enum WorkflowExecutionTelemetryEventTypes {
  * suppression is for event-driven executions, not sub-workflow composition. Includes optional `eventChainDepth` when
  * persisted on the execution.
  */
-export interface EventDrivenExecutionSuppressedParams
-  extends Omit<
-    BaseWorkflowExecutionTelemetryParams,
-    'compositionDepth' | 'parentWorkflowId' | 'parentWorkflowInvocation' | 'executionChain'
-  > {
+export interface EventDrivenExecutionSuppressedParams extends Omit<
+  BaseWorkflowExecutionTelemetryParams,
+  'compositionDepth' | 'parentWorkflowId' | 'parentWorkflowInvocation' | 'executionChain'
+> {
   eventName: string;
   logTriggerEventsEnabled: boolean;
 }
@@ -188,8 +187,7 @@ export interface EventDrivenExecutionSuppressedParams
  * Parameters for workflow execution completed event
  */
 export interface WorkflowExecutionCompletedParams
-  extends BaseWorkflowExecutionTelemetryParams,
-    OutputSizeTelemetryFields {
+  extends BaseWorkflowExecutionTelemetryParams, OutputSizeTelemetryFields {
   eventName: string;
   /**
    * Timestamp when the execution started (ISO string)
@@ -319,8 +317,7 @@ export interface WorkflowExecutionCompletedParams
  * Parameters for workflow execution failed event
  */
 export interface WorkflowExecutionFailedParams
-  extends BaseWorkflowExecutionTelemetryParams,
-    OutputSizeTelemetryFields {
+  extends BaseWorkflowExecutionTelemetryParams, OutputSizeTelemetryFields {
   eventName: string;
   /**
    * Timestamp when the execution started (ISO string)
@@ -462,8 +459,7 @@ export interface WorkflowExecutionFailedParams
  * Parameters for workflow execution cancelled event
  */
 export interface WorkflowExecutionCancelledParams
-  extends BaseWorkflowExecutionTelemetryParams,
-    OutputSizeTelemetryFields {
+  extends BaseWorkflowExecutionTelemetryParams, OutputSizeTelemetryFields {
   eventName: string;
   /**
    * Timestamp when the execution started (ISO string)

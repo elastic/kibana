@@ -35,7 +35,7 @@ const stepDoc = (id: string): EsWorkflowStepExecution =>
     stepId: id,
     status: 'completed',
     globalExecutionIndex: 0,
-  } as EsWorkflowStepExecution);
+  }) as EsWorkflowStepExecution;
 
 describe('getExecutionStepExecutions', () => {
   let mockWorkflowDataClient: jest.Mocked<WorkflowExecutionsDataClient>;

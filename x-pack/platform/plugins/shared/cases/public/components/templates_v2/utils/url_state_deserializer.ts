@@ -44,8 +44,8 @@ export const templatesUrlStateDeserializer = (
       rawIsEnabled === true || rawIsEnabled === 'true'
         ? true
         : rawIsEnabled === false || rawIsEnabled === 'false'
-        ? false
-        : undefined;
+          ? false
+          : undefined;
   }
 
   return sanitizeState(parsed);

@@ -66,10 +66,13 @@ export const createBuiltinToolProvider = ({
 }): ReadonlyToolProvider => {
   const definitionMap = toolTypes
     .filter((def) => !isDisabledDefinition(def))
-    .reduce((map, def) => {
-      map[def.toolType] = def as ToolTypeDefinition | BuiltinToolTypeDefinition;
-      return map;
-    }, {} as Record<ToolType, ToolTypeDefinition | BuiltinToolTypeDefinition>);
+    .reduce(
+      (map, def) => {
+        map[def.toolType] = def as ToolTypeDefinition | BuiltinToolTypeDefinition;
+        return map;
+      },
+      {} as Record<ToolType, ToolTypeDefinition | BuiltinToolTypeDefinition>
+    );
 
   const context = { spaceId: space, request };
   let schemaContext: ToolSchemaContext | undefined;

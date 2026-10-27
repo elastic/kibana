@@ -107,7 +107,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       const maintenanceWindowRefs = formattedConfig?.[ConfigKey.MAINTENANCE_WINDOWS];
       const maintenanceWindows = maintenanceWindowRefs?.length
-        ? (await routeContext.syntheticsMonitorClient.getMaintenanceWindows(spaceId)) ?? []
+        ? ((await routeContext.syntheticsMonitorClient.getMaintenanceWindows(spaceId)) ?? [])
         : [];
 
       const monitorWithDefaults = await addMonitorAPI.normalizeMonitor(

@@ -169,8 +169,8 @@ export async function executor(
         typeof rawResponseMessage === 'string'
           ? rawResponseMessage
           : rawResponseMessage != null
-          ? safeJsonStringify(rawResponseMessage)
-          : undefined;
+            ? safeJsonStringify(rawResponseMessage)
+            : undefined;
       const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
       const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
       logger.error(`error on ${actionId} webhook event: ${message}`);

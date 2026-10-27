@@ -82,7 +82,7 @@ export const resolveInheritedWorkflowIdentity = (
     }
   );
   const mode = identityChoice?.success
-    ? identityChoice.data['run-as-mode'] ?? 'default'
+    ? (identityChoice.data['run-as-mode'] ?? 'default')
     : 'default';
   if (!identityChoice?.success || mode === 'default') {
     throw Boom.forbidden(

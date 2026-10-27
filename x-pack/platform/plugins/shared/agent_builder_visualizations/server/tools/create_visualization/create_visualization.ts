@@ -246,9 +246,9 @@ const readTarget = (target: CreateVisualizationTarget) => ({
   esql: target.esql || undefined,
   hasData:
     target.type === 'custom_content' || target.type === 'attachment'
-      ? target.has_data ?? undefined
+      ? (target.has_data ?? undefined)
       : undefined,
-  regenerateEsql: target.type === 'attachment' ? target.regenerate_esql ?? undefined : undefined,
+  regenerateEsql: target.type === 'attachment' ? (target.regenerate_esql ?? undefined) : undefined,
 });
 
 const NO_QUERY_HINT =
@@ -319,7 +319,7 @@ Ground first: make sure the target index exists and every field you reference is
         // otherwise the target type names it.
         const renderer: VisualizationRenderer = existingData
           ? getEffectiveRenderer(existingData)
-          : requestedRenderer ?? 'lens';
+          : (requestedRenderer ?? 'lens');
 
         // Step 3: Generate the spec/config for the chosen renderer and assemble the
         // unified attachment data.

@@ -98,8 +98,10 @@ export class MonitoringElasticsearchConfig extends ElasticsearchConfig {
 // Build MonitoringConfig type based on MonitoringConfigSchema (config input) but with ui.elasticsearch as a MonitoringElasticsearchConfig (instantiated class)
 type MonitoringConfigTypeOverriddenUI = Omit<MonitoringConfigSchema, 'ui'>;
 
-interface MonitoringConfigTypeOverriddenUIElasticsearch
-  extends Omit<MonitoringConfigSchema['ui'], 'elasticsearch'> {
+interface MonitoringConfigTypeOverriddenUIElasticsearch extends Omit<
+  MonitoringConfigSchema['ui'],
+  'elasticsearch'
+> {
   elasticsearch: MonitoringElasticsearchConfig;
 }
 

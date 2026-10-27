@@ -54,7 +54,7 @@ describe('decisionTreeHydrateStepDefinition', () => {
       abortSignal: new AbortController().signal,
       stepId: 'hydrate_decision_trees',
       stepType: 'nightshift.decisionTreeHydrate',
-    } as never);
+    }) as never;
 
   it('hydrates the sandbox handed to it by obtain_sandbox', async () => {
     const sandboxStart = makeSandboxStart();

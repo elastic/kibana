@@ -449,9 +449,8 @@ describe('AutomaticImportSavedObjectService', () => {
         );
 
         // Verify 3 data streams exist
-        const dataStreamsBefore = await savedObjectService.findAllDataStreamsByIntegrationId(
-          integrationId
-        );
+        const dataStreamsBefore =
+          await savedObjectService.findAllDataStreamsByIntegrationId(integrationId);
         expect(dataStreamsBefore.total).toBe(3);
 
         const result = await savedObjectService.deleteIntegration(integrationId);
@@ -518,9 +517,8 @@ describe('AutomaticImportSavedObjectService', () => {
         expect(result.attributes.metadata?.created_at).toBeDefined();
         expect(result.attributes.metadata?.version).toBe('0.0.0');
 
-        const ds = await savedObjectService.findAllDataStreamsByIntegrationId(
-          'test-ds-integration-1'
-        );
+        const ds =
+          await savedObjectService.findAllDataStreamsByIntegrationId('test-ds-integration-1');
         expect(ds.total).toBe(1);
 
         await savedObjectsClient.delete(

@@ -22,7 +22,7 @@ import {
 export const clientLogoSchema = schema.object({
   media_type: schema.oneOf(
     OAUTH_CLIENT_LOGO_MEDIA_TYPES.map((type) => schema.literal(type)) as [
-      Type<OAuthClientLogoMediaType>
+      Type<OAuthClientLogoMediaType>,
     ]
   ),
   data: schema.string({ minLength: 1, maxLength: OAUTH_CLIENT_LOGO_MAX_DATA_LENGTH }),

@@ -164,8 +164,8 @@ export function useFleetServerHostsForm(
   const hostUrlsDefaultValue = fleetServerHost?.host_urls?.length
     ? fleetServerHost.host_urls
     : isServerless
-    ? defaultFleetServerHost?.host_urls || []
-    : [];
+      ? defaultFleetServerHost?.host_urls || []
+      : [];
 
   const hostUrlsDisabled = isEditDisabled || isServerless;
   const hostUrlsInput = useComboInput(

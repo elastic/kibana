@@ -19,7 +19,7 @@ const unit = (id: string, type: 'input' | 'output', status: string) => ({
 });
 
 const agentWith = (units: Array<ReturnType<typeof unit>>): Agent =>
-  ({ components: [{ id: 'c1', type: 'x', status: 'HEALTHY', message: '', units }] } as never);
+  ({ components: [{ id: 'c1', type: 'x', status: 'HEALTHY', message: '', units }] }) as never;
 
 describe('getComponentAlertLevel', () => {
   it('is null when the agent reports no components', () => {

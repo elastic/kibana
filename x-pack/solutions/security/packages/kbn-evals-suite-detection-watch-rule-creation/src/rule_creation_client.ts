@@ -82,7 +82,10 @@ export interface RuleCreationResult {
 export class RuleCreationClient {
   private readonly pendingExecutionIds: string[] = [];
 
-  constructor(private readonly fetch: HttpHandler, private readonly log: ToolingLog) {}
+  constructor(
+    private readonly fetch: HttpHandler,
+    private readonly log: ToolingLog
+  ) {}
 
   private async pollExecution({
     workflowExecutionId,

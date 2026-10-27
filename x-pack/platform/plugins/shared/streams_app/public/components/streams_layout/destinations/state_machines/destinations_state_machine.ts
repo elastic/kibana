@@ -437,7 +437,7 @@ export const destinationsStateMachine = setup({
           signals: spec.signals,
           index: spec.index,
           unitPatterns: spec.patterns,
-          patterns: spec.index ? [spec.index] : spec.patterns ?? [...AUTO_INDEX_PATTERNS],
+          patterns: spec.index ? [spec.index] : (spec.patterns ?? [...AUTO_INDEX_PATTERNS]),
         });
       }
       return {
@@ -604,10 +604,10 @@ export const destinationsStateMachine = setup({
     canCreateDestination: ({ context }) =>
       Boolean(
         context.creationContext &&
-          canSubmitDestinationForm({
-            formData: context.creationContext.formData,
-            unitDefinition: context.unitDefinition,
-          })
+        canSubmitDestinationForm({
+          formData: context.creationContext.formData,
+          unitDefinition: context.unitDefinition,
+        })
       ),
     isCreatedDestination: ({ context, event }) => {
       const createdDestinationIds = context.creationContext?.createdDestinations?.map(
@@ -626,9 +626,9 @@ export const destinationsStateMachine = setup({
       (event.type === 'unit.loaded' || event.type === 'unit.persisted') &&
       Boolean(
         context.selectedDestinationId &&
-          !getConfiguredDestinations(event.unitDefinition).some(
-            ({ id }) => id === context.selectedDestinationId
-          )
+        !getConfiguredDestinations(event.unitDefinition).some(
+          ({ id }) => id === context.selectedDestinationId
+        )
       ),
     isExternalStorage: ({ context }) =>
       context.creationContext?.formData.storageKind === 'external_storage',

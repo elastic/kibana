@@ -67,7 +67,7 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
     abortSignal: new AbortController().signal,
     stepId: 'create_proposal',
     stepType: 'proposals.createProposal',
-  } as unknown as StepHandlerContext<never, never>);
+  }) as unknown as StepHandlerContext<never, never>;
 
 describe('proposals.createProposal input schema', () => {
   it.each(['', null])('should treat %p as an absent proposalId', (blank) => {
@@ -262,7 +262,7 @@ describe('proposals.createProposal step', () => {
 
   const createDefinition = (create: jest.Mock, privileges = allowAll()) => ({
     definition: getCreateProposalStepDefinition({
-      getProposalsService: () => ({ create } as unknown as ProposalsService),
+      getProposalsService: () => ({ create }) as unknown as ProposalsService,
       resolveUser,
       resolveWorkerUser,
       privileges,
@@ -557,7 +557,7 @@ describe('proposals.updateProposal step', () => {
 
   const updateDefinition = (update: jest.Mock, privileges = allowAll()) =>
     getUpdateProposalStepDefinition({
-      getProposalsService: () => ({ update } as unknown as ProposalsService),
+      getProposalsService: () => ({ update }) as unknown as ProposalsService,
       resolveUser,
       resolveWorkerUser,
       privileges,
@@ -811,7 +811,7 @@ describe('proposals.getProposal step', () => {
 
   const getDefinition = (get: jest.Mock, privileges = allowAll()) =>
     getGetProposalStepDefinition({
-      getProposalsService: () => ({ get } as unknown as ProposalsService),
+      getProposalsService: () => ({ get }) as unknown as ProposalsService,
       privileges,
     });
 
@@ -920,7 +920,7 @@ describe('proposals.cloneProposal step', () => {
 
   const cloneDefinition = (clone: jest.Mock, privileges = allowAll()) =>
     getCloneProposalStepDefinition({
-      getProposalsService: () => ({ clone } as unknown as ProposalsService),
+      getProposalsService: () => ({ clone }) as unknown as ProposalsService,
       privileges,
     });
 

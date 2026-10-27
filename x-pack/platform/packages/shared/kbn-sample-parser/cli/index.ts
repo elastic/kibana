@@ -90,10 +90,10 @@ export function cli() {
         level: options.silent
           ? 'silent'
           : options.debug
-          ? 'debug'
-          : options.verbose
-          ? 'verbose'
-          : 'info',
+            ? 'debug'
+            : options.verbose
+              ? 'verbose'
+              : 'info',
         writeTo: process.stdout,
       });
 

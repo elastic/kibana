@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { findMissingTimeFilterError } from './validate_time_filter';
 
-const createEsClient = (fieldCaps: jest.Mock) => ({ fieldCaps } as unknown as ElasticsearchClient);
+const createEsClient = (fieldCaps: jest.Mock) => ({ fieldCaps }) as unknown as ElasticsearchClient;
 
 const mockDateFields = (fieldNames: string[]) =>
   createEsClient(

@@ -28,7 +28,7 @@ const signal = (metadata: Record<string, unknown>): SignalInputEntry =>
     verdict: 'inconclusive',
     evidence: { esql_query: 'FROM logs', result: 'empty' },
     metadata,
-  } as SignalInputEntry);
+  }) as SignalInputEntry;
 
 const fill = (signals: SignalInputEntry[], hits: Detection[] = [stored]) =>
   fillDetectionMetadata({

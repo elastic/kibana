@@ -47,7 +47,7 @@ const createMockEsClient = (mappingsByIndex: Record<string, Record<string, unkno
       })),
       putMapping: jest.fn().mockResolvedValue({ acknowledged: true }),
     },
-  } as unknown as Client);
+  }) as unknown as Client;
 
 const metricsSource = (generation: string) =>
   `snapshot-loader-temp-.ds-metrics-app.otel-2026-04-19-2026.04.19-${generation}`;

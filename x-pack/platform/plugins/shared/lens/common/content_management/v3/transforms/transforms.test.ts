@@ -33,7 +33,7 @@ const getXYAttributes = ({
         ...(areaFill ? { areaFill } : {}),
       },
     },
-  } as unknown as LensAttributesV2);
+  }) as unknown as LensAttributesV2;
 
 const getAreaFill = (attributes: { state?: unknown }) =>
   (attributes.state as { visualization: XYVisualizationState }).visualization.areaFill;
@@ -69,7 +69,7 @@ describe('transformToV2LensSavedObjectFromV3', () => {
       id: 'lens-1',
       type: 'lens',
       attributes: getXYAttributes({ version: 3, ...options }),
-    } as unknown as LensSavedObjectV3);
+    }) as unknown as LensSavedObjectV3;
 
   it.each<[string, XYAttributesOptions, XYVisualizationState['areaFill']]>([
     ['pins unset areaFill to gradient on area charts', {}, 'gradient'],

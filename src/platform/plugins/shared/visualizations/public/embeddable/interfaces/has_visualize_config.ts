@@ -20,7 +20,7 @@ export type HasVisualizeConfig = HasType<typeof VISUALIZE_EMBEDDABLE_TYPE> & {
 export const apiHasVisualizeConfig = (api: unknown): api is HasVisualizeConfig => {
   return Boolean(
     api &&
-      (api as HasType)?.type === VISUALIZE_EMBEDDABLE_TYPE &&
-      typeof (api as HasVisualizeConfig).getVis === 'function'
+    (api as HasType)?.type === VISUALIZE_EMBEDDABLE_TYPE &&
+    typeof (api as HasVisualizeConfig).getVis === 'function'
   );
 };

@@ -45,15 +45,12 @@ export interface SetupContract {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartContract {}
 
-export class ImageEmbeddablePlugin
-  implements
-    Plugin<
-      SetupContract,
-      StartContract,
-      ImageEmbeddableSetupDependencies,
-      ImageEmbeddableStartDependencies
-    >
-{
+export class ImageEmbeddablePlugin implements Plugin<
+  SetupContract,
+  StartContract,
+  ImageEmbeddableSetupDependencies,
+  ImageEmbeddableStartDependencies
+> {
   constructor() {}
 
   public setup(

@@ -50,8 +50,8 @@ const getFilters = (
     const timeRange = params.timeRange
       ? params.timeRange
       : savedSearch.timeRange
-      ? (savedSearch.timeRange as TimeRange)
-      : null;
+        ? (savedSearch.timeRange as TimeRange)
+        : null;
 
     if (timeRange) {
       filters.push({

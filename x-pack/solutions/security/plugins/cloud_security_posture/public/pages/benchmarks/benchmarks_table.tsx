@@ -41,7 +41,8 @@ export const EMPTY_EVALUATION_TEST_SUBJECT = 'benchmark-not-evaluated-account';
 export const EMPTY_SCORE_TEST_SUBJECT = 'benchmark-score-no-findings';
 
 interface BenchmarksTableProps
-  extends Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage' | 'sorting'>,
+  extends
+    Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage' | 'sorting'>,
     Pagination {
   benchmarks: Benchmark[];
   setQuery(pagination: CriteriaWithPagination<Benchmark>): void;

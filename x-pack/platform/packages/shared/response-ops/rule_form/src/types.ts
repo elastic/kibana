@@ -77,7 +77,7 @@ export interface RuleFormPlugins {
 
 export interface RuleFormState<
   Params extends RuleTypeParams = RuleTypeParams,
-  MetaData = RuleTypeMetaData
+  MetaData = RuleTypeMetaData,
 > {
   id?: string;
   formData: RuleFormData<Params>;

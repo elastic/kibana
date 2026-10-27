@@ -357,8 +357,8 @@ const describeOutcome = (
         ? 'Tier 2 derived behaviors from the report text but none matched live activity.'
         : 'Tier 2 derived no executable behaviors from the report text.'
       : result.tier2_skipped_reason
-      ? describeTier2Skip(result.tier2_skipped_reason, result.unavailable_model_tiers)
-      : '';
+        ? describeTier2Skip(result.tier2_skipped_reason, result.unavailable_model_tiers)
+        : '';
     return {
       heading: 'Hunt Watch confirmed a hit',
       summary:
@@ -396,8 +396,8 @@ export const buildHuntHeadline = (result: HuntCoordinatorCoreResult): string => 
     tier1.status === 'no_searchable_terms'
       ? 'Tier 1 had nothing to search'
       : tier1.counts.total_hits === 0
-      ? 'Tier 1 found no matches'
-      : `Tier 1 matched ${plural(tier1.counts.total_hits, 'document')}`;
+        ? 'Tier 1 found no matches'
+        : `Tier 1 matched ${plural(tier1.counts.total_hits, 'document')}`;
   let tier2Part: string;
   if (tier2) {
     const confirmed = tier2Confirmed(result).length;

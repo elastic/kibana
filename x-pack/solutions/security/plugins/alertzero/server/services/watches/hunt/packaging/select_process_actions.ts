@@ -94,8 +94,8 @@ export const attributedTechniqueIds = (selector: ProcessSelector): string[] =>
   selector.techniqueIds?.length
     ? selector.techniqueIds
     : selector.techniqueId
-    ? [selector.techniqueId]
-    : [];
+      ? [selector.techniqueId]
+      : [];
 
 /**
  * The first of `techniqueIds` that is in `techniques` and confirmed by Tier 2, comparing roots on

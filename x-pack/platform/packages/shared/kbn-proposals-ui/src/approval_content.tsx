@@ -244,8 +244,8 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const approvalPhase: ApprovalPhase = isReplaced
       ? 'pending'
       : decision
-      ? decision.status
-      : isSubmitting ?? 'pending';
+        ? decision.status
+        : (isSubmitting ?? 'pending');
 
     // A replaced card stays 'pending' for the footer and banner (see `approvalPhase`), but a failed
     // attempt still has to say how it ended; replaced revisions keep no badge, since their

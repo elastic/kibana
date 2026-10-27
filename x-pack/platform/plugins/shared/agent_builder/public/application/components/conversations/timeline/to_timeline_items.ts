@@ -183,9 +183,8 @@ export const groupTimelineEvents = (
     }
   }
 
-  return ordered.map(
-    (entry): GroupedItem =>
-      'executionId' in entry ? accumulatorToItem(entry, eventsById, awaitingPromptEventId) : entry
+  return ordered.map((entry): GroupedItem =>
+    'executionId' in entry ? accumulatorToItem(entry, eventsById, awaitingPromptEventId) : entry
   );
 };
 

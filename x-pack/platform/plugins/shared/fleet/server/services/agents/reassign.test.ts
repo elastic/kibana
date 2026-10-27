@@ -400,7 +400,7 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
         () =>
           ({
             runActionAsyncTask: jest.fn().mockResolvedValue({ actionId: 'async-action-id' }),
-          } as any)
+          }) as any
       );
   });
 

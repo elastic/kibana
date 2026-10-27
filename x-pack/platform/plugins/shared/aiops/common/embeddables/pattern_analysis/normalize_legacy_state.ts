@@ -96,7 +96,7 @@ export const normalizePatternAnalysisLegacyFields = (
       state.random_sampler_probability !== undefined
         ? state.random_sampler_probability
         : state.randomSamplerProbability !== undefined
-        ? state.randomSamplerProbability
-        : null,
+          ? state.randomSamplerProbability
+          : null,
   };
 };

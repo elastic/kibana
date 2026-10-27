@@ -133,7 +133,7 @@ const getRulePreviewAlertsTool = (): BuiltinAttachmentBoundedTool<
     const total =
       typeof searchResult.hits.total === 'number'
         ? searchResult.hits.total
-        : searchResult.hits.total?.value ?? 0;
+        : (searchResult.hits.total?.value ?? 0);
 
     return {
       results: [

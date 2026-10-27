@@ -77,8 +77,8 @@ export function addMessages({
             isSearchSourceRule(params.searchType)
               ? 'data view'
               : index.length === 1
-              ? 'index'
-              : 'indices'
+                ? 'index'
+                : 'indices'
           }`
         : '',
     },

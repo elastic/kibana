@@ -27,7 +27,7 @@ describe('drilldown registry', () => {
     });
 
     function resolveAnyOf(items: z.core.JSONSchema.JSONSchema['items']) {
-      return !Array.isArray(items) && typeof items === 'object' ? items.anyOf ?? [] : [];
+      return !Array.isArray(items) && typeof items === 'object' ? (items.anyOf ?? []) : [];
     }
 
     function getMatches({ items }: z.core.JSONSchema.JSONSchema) {

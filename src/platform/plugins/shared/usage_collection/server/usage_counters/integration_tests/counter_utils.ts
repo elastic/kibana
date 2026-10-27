@@ -24,7 +24,7 @@ export type CounterAttributes = [
   string,
   UsageCounters.v1.CounterEventSource,
   number,
-  string?
+  string?,
 ];
 
 export function toCounterMetric(counter: CounterAttributes): UsageCounters.v1.CounterMetric {

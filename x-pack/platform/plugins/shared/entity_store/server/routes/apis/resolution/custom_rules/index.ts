@@ -39,7 +39,7 @@ import {
 const CUSTOM_RULES_ROUTE_MIDDLEWARES = [enterpriseLicenseMiddleware] as const;
 
 const routeConfig = (authz: AuthzEnabled) =>
-  ({ access: 'internal', security: { authz }, enableQueryVersion: true } as const);
+  ({ access: 'internal', security: { authz }, enableQueryVersion: true }) as const;
 
 const READ_ROUTE_CONFIG = routeConfig(RESOLUTION_ENTITY_STORE_PERMISSIONS);
 const MANAGE_ROUTE_CONFIG = routeConfig(RESOLUTION_ENTITY_STORE_MANAGE_PERMISSIONS);

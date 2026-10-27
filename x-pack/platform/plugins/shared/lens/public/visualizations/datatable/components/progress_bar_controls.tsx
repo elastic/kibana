@@ -747,7 +747,7 @@ export function ProgressBarControls({
 
     const adjustedRange =
       focusedRangeInput != null
-        ? getAdjustedRangeForInputChange(focusedRangeInput, rangeInputValues) ?? nextParsedRange
+        ? (getAdjustedRangeForInputChange(focusedRangeInput, rangeInputValues) ?? nextParsedRange)
         : nextParsedRange;
     const nextPrecisionUnit = getPrecisionUnit(
       Math.max(

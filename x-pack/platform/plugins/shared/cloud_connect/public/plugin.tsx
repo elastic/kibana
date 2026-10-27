@@ -29,15 +29,12 @@ import { createUseCloudConnectStatusHook } from './hooks';
 
 export type { CloudConnectedPluginSetup, CloudConnectedPluginStart };
 
-export class CloudConnectedPlugin
-  implements
-    Plugin<
-      CloudConnectedPluginSetup,
-      CloudConnectedPluginStart,
-      CloudConnectedSetupDeps,
-      CloudConnectedStartDeps
-    >
-{
+export class CloudConnectedPlugin implements Plugin<
+  CloudConnectedPluginSetup,
+  CloudConnectedPluginStart,
+  CloudConnectedSetupDeps,
+  CloudConnectedStartDeps
+> {
   private readonly config: CloudConnectConfig;
   private readonly telemetry = new CloudConnectTelemetryService();
   private homeSetup?: HomePublicPluginSetup;

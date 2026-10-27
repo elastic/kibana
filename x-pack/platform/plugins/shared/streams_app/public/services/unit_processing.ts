@@ -57,7 +57,7 @@ const findPipeline = (unit: Unit, pipelineId: string): UnitPipeline | undefined 
 const slotProcessorIds = (pipeline: UnitPipeline, ref: ProcessingNodeRef): string[] =>
   ref.kind === PROCESSING_SLOT_KIND.pipeline
     ? readEntryIds(pipeline.config, PIPELINE_ENTRY.processors)
-    : readRoutes(pipeline.config)[ref.routeIndex]?.processors ?? [];
+    : (readRoutes(pipeline.config)[ref.routeIndex]?.processors ?? []);
 
 /** The route at a slot's `routeIndex`, with the selector of the `routes` entry it sits in. */
 const findRoute = (
@@ -127,7 +127,7 @@ export const getSharedProcessorIds = (unit: Unit, ref: ProcessingNodeRef): Set<s
   const elsewhere = unit.unit.pipelines.flatMap(({ id, config }) => [
     ...(isOwnSlot(id) ? [] : readEntryIds(config, PIPELINE_ENTRY.processors)),
     ...readRoutes(config).flatMap((route, routeIndex) =>
-      isOwnSlot(id, routeIndex) ? [] : route.processors ?? []
+      isOwnSlot(id, routeIndex) ? [] : (route.processors ?? [])
     ),
   ]);
   return new Set(elsewhere.filter((id) => own.has(id)));

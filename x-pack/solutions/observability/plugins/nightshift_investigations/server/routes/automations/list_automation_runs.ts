@@ -115,12 +115,12 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
     const runs = executions.results.map((exec) => {
       const step =
         (exec.triggeredBy === 'alerting.v1.alertStatusChanged'
-          ? alertSteps.get(exec.id) ??
+          ? (alertSteps.get(exec.id) ??
             legacyAlertSteps.get(exec.id) ??
-            recoveredAlertSteps.get(exec.id)
+            recoveredAlertSteps.get(exec.id))
           : exec.triggeredBy === 'slack2.message'
-          ? slackSteps.get(exec.id)
-          : undefined) ?? defaultSteps.get(exec.id);
+            ? slackSteps.get(exec.id)
+            : undefined) ?? defaultSteps.get(exec.id);
       const input =
         step?.input && !Array.isArray(step.input) && typeof step.input === 'object'
           ? step.input
@@ -150,8 +150,8 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         skipReason: dailyLimitReached
           ? 'daily_limit'
           : noOpenInvestigation
-          ? 'no_open_investigation'
-          : null,
+            ? 'no_open_investigation'
+            : null,
         dailyLimit:
           typeof output['daily_limit'] === 'number'
             ? output['daily_limit']

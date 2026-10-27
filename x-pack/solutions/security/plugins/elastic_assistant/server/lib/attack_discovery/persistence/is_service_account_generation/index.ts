@@ -28,7 +28,7 @@ export const isServiceAccountGeneration = async ({
     getServiceAccountGenerationQuery({ eventLogIndex, executionUuid, spaceId })
   );
 
-  const total = typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
+  const total = typeof hits.total === 'number' ? hits.total : (hits.total?.value ?? 0);
 
   return total > 0;
 };

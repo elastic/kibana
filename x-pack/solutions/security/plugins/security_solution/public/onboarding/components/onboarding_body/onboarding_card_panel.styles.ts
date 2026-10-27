@@ -25,9 +25,9 @@ export const useCardPanelStyles = () => {
     .onboardingCardIcon {
       padding: ${euiTheme.size.m};
       border-radius: 50%;
-      background-color: ${isDarkMode
-        ? euiTheme.colors.lightShade
-        : euiTheme.colors.backgroundBaseSubdued};
+      background-color: ${
+        isDarkMode ? euiTheme.colors.lightShade : euiTheme.colors.backgroundBaseSubdued
+      };
       display: flex;
       align-items: center;
     }
@@ -42,7 +42,8 @@ export const useCardPanelStyles = () => {
       display: grid;
       visibility: collapse;
       grid-template-rows: 0fr;
-      transition: grid-template-rows ${HEIGHT_ANIMATION_DURATION}ms ease-in,
+      transition:
+        grid-template-rows ${HEIGHT_ANIMATION_DURATION}ms ease-in,
         visibility ${euiTheme.animation.normal} ${euiTheme.animation.resistance};
     }
     .onboardingCardContent {

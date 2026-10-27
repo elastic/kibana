@@ -1290,9 +1290,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       const workflowsExtensions = plugins.workflowsExtensions;
       const tiLogger = this.logger.get('threatIntel');
       plugins.alertzero.registerThreatIntelSupplyWorkflowInstaller(async ({ spaceId }) => {
-        const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(
-          workflowsExtensions
-        );
+        const managedWorkflowsClient =
+          await initSecurityManagedWorkflowsClient(workflowsExtensions);
         await ensureThreatIntelSupplyWorkflowsForSpace({
           managedWorkflowsClient,
           spaceId,

@@ -177,7 +177,7 @@ type ActionCompletionInfo = Pick<
 
 export const getActionCompletionInfo = <
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TResponseMeta extends {} = {}
+  TResponseMeta extends {} = {},
 >(
   /** The normalized action request */
   action: NormalizedActionRequest,
@@ -331,7 +331,7 @@ export const getActionStatus = ({
 
 interface NormalizedAgentActionResponse<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TResponseMeta extends {} = {}
+  TResponseMeta extends {} = {},
 > {
   isCompleted: boolean;
   completedAt: undefined | string;
@@ -351,7 +351,7 @@ type ActionResponseByAgentId = Record<string, NormalizedAgentActionResponse>;
  */
 const mapActionResponsesByAgentId = <
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TResponseMeta extends {} = {}
+  TResponseMeta extends {} = {},
 >(
   actionResponses: FetchActionResponsesResult<TOutputContent, TResponseMeta>
 ): ActionResponseByAgentId => {
@@ -637,13 +637,16 @@ export const getAgentHostNamesWithIds = async ({
     .catch(catchAndWrapError);
   const agentDocById = keyBy(agentFound, 'id');
 
-  const hostNames = agentIds.reduce((acc, id) => {
-    const agentHostInfo = agentDocById[id]?.local_metadata?.host;
+  const hostNames = agentIds.reduce(
+    (acc, id) => {
+      const agentHostInfo = agentDocById[id]?.local_metadata?.host;
 
-    acc[id] = agentHostInfo?.name || agentHostInfo?.hostname || '';
+      acc[id] = agentHostInfo?.name || agentHostInfo?.hostname || '';
 
-    return acc;
-  }, {} as { [agentId: string]: string });
+      return acc;
+    },
+    {} as { [agentId: string]: string }
+  );
 
   if (!scoped?.isCpsRead()) {
     return hostNames;

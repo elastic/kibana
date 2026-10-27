@@ -158,8 +158,8 @@ const toInteger = (value: unknown): number | undefined => {
     typeof value === 'number'
       ? value
       : typeof value === 'string' && value !== ''
-      ? Number(value)
-      : NaN;
+        ? Number(value)
+        : NaN;
   return Number.isInteger(number) ? number : undefined;
 };
 
@@ -170,7 +170,7 @@ const requestOf = (pagination: PaginationDescriptor): NextUrlRequest & Located =
 const parameterLocation = (pagination: PaginationDescriptor): PaginationParameterLocation =>
   pagination.style === 'link' || pagination.style === 'next_url'
     ? 'query'
-    : requestOf(pagination).in ?? 'query';
+    : (requestOf(pagination).in ?? 'query');
 
 const readPageSize = (
   pagination: PaginationDescriptor,
@@ -198,7 +198,7 @@ const readStart = (
       return 0;
     }
     return typeof cursor === 'string'
-      ? recordedPositions?.get(cursor) ?? decodeCursor(cursor)
+      ? (recordedPositions?.get(cursor) ?? decodeCursor(cursor))
       : undefined;
   }
   if ('offsetParam' in request) {
@@ -276,8 +276,8 @@ const readRecordedNext = (
     return nextIn === 'header'
       ? header(nextPath)
       : isRecord(body)
-      ? get(body, nextPath)
-      : undefined;
+        ? get(body, nextPath)
+        : undefined;
   } else if (pagination.style === 'link') {
     url = LINK_NEXT.exec(header('link') ?? '')?.[1];
   } else if (pagination.style === 'next_url') {
@@ -431,7 +431,8 @@ const paginate = (
     itemsPath === '' || !isRecord(body) ? items : set(cloneDeep(body), itemsPath, items);
   const inBody = !Array.isArray(page);
   const next = start + size < collection.length ? start + size : undefined;
-  const cursor = next === undefined ? undefined : recorded?.cursors.get(next) ?? encodeCursor(next);
+  const cursor =
+    next === undefined ? undefined : (recorded?.cursors.get(next) ?? encodeCursor(next));
   const nextUrl =
     next === undefined || cursor === undefined
       ? undefined

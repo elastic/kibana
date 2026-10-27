@@ -61,12 +61,12 @@ const createRes = () =>
     notFound: jest.fn(({ body }) => ({ status: 404, payload: body })),
     forbidden: jest.fn(({ body }) => ({ status: 403, payload: body })),
     badRequest: jest.fn(({ body }) => ({ status: 400, payload: body })),
-  } as unknown as KibanaResponseFactory);
+  }) as unknown as KibanaResponseFactory;
 
 type EngineConfigRequest = Parameters<typeof handleEngineConfig>[1];
 
 const createReq = (body: object, entityType = 'user') =>
-  ({ params: { entityType }, body } as unknown as EngineConfigRequest);
+  ({ params: { entityType }, body }) as unknown as EngineConfigRequest;
 
 describe('handleEngineConfig', () => {
   it('writes both override layers', async () => {

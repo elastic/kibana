@@ -277,9 +277,9 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   const selectedFieldsGroup = fieldListGroupedProps.fieldGroups[FieldsGroupNames.SelectedFields];
   const isSelectedFieldsReorderingEnabled = Boolean(
     onMoveFieldInWorkspace &&
-      !onSelectedFieldFilter &&
-      !alwaysShowActionButton &&
-      !stateService.creationOptions.disableFieldListItemDragAndDrop
+    !onSelectedFieldFilter &&
+    !alwaysShowActionButton &&
+    !stateService.creationOptions.disableFieldListItemDragAndDrop
   );
   // Only when all selected fields are visible (no name search or type filter), their positions match the workspace
   const canReorderSelectedFields =

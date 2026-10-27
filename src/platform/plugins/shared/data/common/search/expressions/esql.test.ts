@@ -36,7 +36,7 @@ const createExecutionContext = (): ExecutionContext =>
     getKibanaRequest: jest.fn(),
     getSearchSessionId: jest.fn(),
     getExecutionContext: jest.fn(),
-  } as unknown as ExecutionContext);
+  }) as unknown as ExecutionContext;
 
 const getMockSearchService = (): MockTypedSearchService => ({
   esql: jest.fn().mockResolvedValue({

@@ -307,7 +307,7 @@ const describeFailure = (check: BindingCheck): string => {
  */
 export function createColumnBindingIntegrityEvaluator<
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(config: {
   /** Executes ES|QL; share one runner across evaluators so each query runs once. */
   runQuery: EsqlQueryRunner;

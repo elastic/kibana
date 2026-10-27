@@ -21,15 +21,12 @@ import type {
   ServerlessObservabilityPublicStartDependencies,
 } from './types';
 
-export class ServerlessObservabilityPlugin
-  implements
-    Plugin<
-      ServerlessObservabilityPublicSetup,
-      ServerlessObservabilityPublicStart,
-      ServerlessObservabilityPublicSetupDependencies,
-      ServerlessObservabilityPublicStartDependencies
-    >
-{
+export class ServerlessObservabilityPlugin implements Plugin<
+  ServerlessObservabilityPublicSetup,
+  ServerlessObservabilityPublicStart,
+  ServerlessObservabilityPublicSetupDependencies,
+  ServerlessObservabilityPublicStartDependencies
+> {
   private managementCardsSubscription?: Subscription;
 
   public setup(

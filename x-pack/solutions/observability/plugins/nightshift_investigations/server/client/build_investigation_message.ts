@@ -270,8 +270,8 @@ export function buildAlertRecoveredFollowUpMessage({
   const tags = ruleTags?.length
     ? ruleTags
     : Array.isArray(snapshot?.rule_tags)
-    ? snapshot.rule_tags.filter(isString)
-    : [];
+      ? snapshot.rule_tags.filter(isString)
+      : [];
   if (tags.length > 0) lines.push(`Rule tags: ${tags.map(sanitize).join(', ')}`);
 
   return [

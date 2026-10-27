@@ -261,7 +261,7 @@ export const mdToHtml = (md: string): string => {
 
 /** Skill entries are either bare strings or `{ id, name, ... }` objects. */
 const skillLabel = (skill: string | { id?: string; name?: string }): string =>
-  typeof skill === 'string' ? skill : skill?.name ?? skill?.id ?? '';
+  typeof skill === 'string' ? skill : (skill?.name ?? skill?.id ?? '');
 
 const stepHtml = (step: ReportStep, index: number): string => {
   if (step.kind === 'tool') {

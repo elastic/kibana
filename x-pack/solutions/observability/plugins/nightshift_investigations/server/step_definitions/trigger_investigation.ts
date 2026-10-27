@@ -253,8 +253,8 @@ export const triggerInvestigationStepDefinition = (
         context: alerts
           ? { alerts }
           : input.scope_query && input.subject_type === 'manual'
-          ? { ...input.context, scope_query: input.scope_query }
-          : input.context,
+            ? { ...input.context, scope_query: input.scope_query }
+            : input.context,
         timeout_seconds: input.timeout_seconds,
         notificationDestinations: input.notificationDestinations,
         slack_thread: input.slack_thread,

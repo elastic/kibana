@@ -54,15 +54,12 @@ const getInferenceSettingsClient = (
   return namespace ? internalClient.asScopedToNamespace(namespace) : internalClient;
 };
 
-export class SearchInferenceEndpointsPlugin
-  implements
-    Plugin<
-      SearchInferenceEndpointsPluginSetup,
-      SearchInferenceEndpointsPluginStart,
-      SearchInferenceEndpointsPluginSetupDependencies,
-      SearchInferenceEndpointsPluginStartDependencies
-    >
-{
+export class SearchInferenceEndpointsPlugin implements Plugin<
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+  SearchInferenceEndpointsPluginSetupDependencies,
+  SearchInferenceEndpointsPluginStartDependencies
+> {
   private readonly logger: Logger;
   private readonly featureRegistry: InferenceFeatureRegistry;
 

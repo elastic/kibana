@@ -12,9 +12,10 @@ import { InstallationService } from './services/installation';
 import { isSampleIndex } from './services/utils';
 import { MINIMUM_LICENSE_TYPE } from '../common';
 
-export class SampleDataIngestPlugin
-  implements Plugin<SampleDataIngestPluginSetup, SampleDataIngestPluginStart>
-{
+export class SampleDataIngestPlugin implements Plugin<
+  SampleDataIngestPluginSetup,
+  SampleDataIngestPluginStart
+> {
   logger: Logger;
 
   constructor(context: PluginInitializerContext) {

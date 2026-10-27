@@ -412,7 +412,7 @@ const failuresRow = (
 };
 
 const latestOf = (a: Date | undefined, b: Date | undefined): Date | undefined =>
-  a && b ? (a > b ? a : b) : a ?? b;
+  a && b ? (a > b ? a : b) : (a ?? b);
 
 /** The branches where every setup skips every test of the suite. */
 const branchSkips = (suite: FlakySuite): Map<string, BranchSkip> => {

@@ -186,8 +186,8 @@ export class DashboardApp {
       slashIndex === -1
         ? queryIndex
         : queryIndex === -1
-        ? slashIndex
-        : Math.min(slashIndex, queryIndex);
+          ? slashIndex
+          : Math.min(slashIndex, queryIndex);
     return idSubstring.substring(0, endIndex);
   }
 

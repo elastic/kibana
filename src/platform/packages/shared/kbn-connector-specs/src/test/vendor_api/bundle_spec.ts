@@ -142,8 +142,8 @@ export const bundleSpec = async (
       tokens[0] === 'components' && tokens.length === 3
         ? [tokens[1], tokens[2]]
         : tokens[0] === 'definitions' && tokens.length === 2
-        ? ['schemas', tokens[1]]
-        : [sectionFor(trail), tokens[tokens.length - 1]];
+          ? ['schemas', tokens[1]]
+          : [sectionFor(trail), tokens[tokens.length - 1]];
     const directory = fileStem(target.url, true);
     const name =
       token === undefined

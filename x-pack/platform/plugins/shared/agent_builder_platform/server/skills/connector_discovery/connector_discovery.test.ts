@@ -76,10 +76,10 @@ const makeContext = (connectorIds?: string[]) =>
   ({
     request: {},
     agentConfiguration: connectorIds !== undefined ? { connector_ids: connectorIds } : undefined,
-  } as unknown as ToolHandlerContext);
+  }) as unknown as ToolHandlerContext;
 
 const makeContextWithConfiguration = (agentConfiguration: { connector_ids?: string[] }) =>
-  ({ request: {}, agentConfiguration } as unknown as ToolHandlerContext);
+  ({ request: {}, agentConfiguration }) as unknown as ToolHandlerContext;
 
 describe('connector-discovery inline tools', () => {
   beforeEach(() => {

@@ -32,7 +32,7 @@ const DEFAULT_OUTPUT_PRECISION = 2;
 
 function parseInputAsDuration(val: number, inputFormat: string) {
   const convertsToSeconds = INPUT_FORMATS_CONVERTED_TO_SECONDS.has(inputFormat);
-  const ratio = convertsToSeconds ? getDurationUnitInSeconds(inputFormat) ?? 1 : 1;
+  const ratio = convertsToSeconds ? (getDurationUnitInSeconds(inputFormat) ?? 1) : 1;
   const kind = (convertsToSeconds ? 'seconds' : inputFormat) as unitOfTime.DurationConstructor;
   return moment.duration(val * ratio, kind);
 }

@@ -35,7 +35,10 @@ const collectSecretLeaves = (value: unknown): string[] => {
 };
 
 export class SandboxConnectorRedactionError extends Error {
-  constructor(public readonly connectorId: string | undefined, cause: Error) {
+  constructor(
+    public readonly connectorId: string | undefined,
+    cause: Error
+  ) {
     super(
       connectorId === undefined
         ? `Connectors assigned to this agent cannot be listed for output redaction: ${cause.message}`

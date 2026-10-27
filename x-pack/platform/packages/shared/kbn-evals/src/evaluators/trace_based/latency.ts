@@ -54,8 +54,8 @@ export function createSpanLatencyEvaluator({
   const spanFilter = spanName
     ? `name == "${spanName}"`
     : spanNamePattern
-    ? `name LIKE "${spanNamePattern}"`
-    : `attributes.gen_ai.operation.name == "${operationName}"`;
+      ? `name LIKE "${spanNamePattern}"`
+      : `attributes.gen_ai.operation.name == "${operationName}"`;
 
   return createTraceBasedEvaluator({
     traceEsClient,

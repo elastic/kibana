@@ -325,9 +325,9 @@ const ArtifactViewFlyoutBody = memo<{
 
     const infoBlockCss = css`
       display: grid;
-      grid-template-columns: ${showEnabledSwitch
-        ? 'minmax(0, 1fr) auto minmax(0, 1fr)'
-        : 'repeat(2, minmax(0, 1fr))'};
+      grid-template-columns: ${
+        showEnabledSwitch ? 'minmax(0, 1fr) auto minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))'
+      };
       column-gap: ${euiTheme.size.s};
       padding: ${euiTheme.size.m};
       border-radius: ${euiTheme.size.xs};

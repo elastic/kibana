@@ -879,9 +879,9 @@ export const sourcesStateMachine = setup({
       (event.type === 'unit.loaded' || event.type === 'unit.persisted') &&
       Boolean(
         context.selectedSourceId &&
-          !getConfiguredSources(event.unitDefinition).some(
-            ({ id }) => id === context.selectedSourceId
-          )
+        !getConfiguredSources(event.unitDefinition).some(
+          ({ id }) => id === context.selectedSourceId
+        )
       ),
     targetsViewedSource: ({ context, event }) =>
       (event.type === 'apiKey.generate' || event.type === 'apiKey.delete') &&

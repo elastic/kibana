@@ -16,15 +16,12 @@ export interface ResolverTestPluginSetupDependencies {
 }
 export interface ResolverTestPluginStartDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
-export class ResolverTestPlugin
-  implements
-    Plugin<
-      ResolverTestPluginSetup,
-      ResolverTestPluginStart,
-      ResolverTestPluginSetupDependencies,
-      ResolverTestPluginStartDependencies
-    >
-{
+export class ResolverTestPlugin implements Plugin<
+  ResolverTestPluginSetup,
+  ResolverTestPluginStart,
+  ResolverTestPluginSetupDependencies,
+  ResolverTestPluginStartDependencies
+> {
   public setup(
     core: CoreSetup<ResolverTestPluginStartDependencies, ResolverTestPluginStart>,
     setupDependencies: ResolverTestPluginSetupDependencies

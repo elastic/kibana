@@ -26,19 +26,19 @@ export const ActionHostStatusMessage = memo<ActionHostStatusMessageProps>(
       let hostStatusMessage: string = !agentActionState.isCompleted
         ? OUTPUT_MESSAGES.isPending(consoleCommandName)
         : agentActionState.wasCanceled
-        ? OUTPUT_MESSAGES.wasCanceled(consoleCommandName)
-        : agentActionState.wasSuccessful
-        ? OUTPUT_MESSAGES.wasSuccessful(consoleCommandName)
-        : action.isExpired
-        ? OUTPUT_MESSAGES.hasExpired(consoleCommandName)
-        : OUTPUT_MESSAGES.hasFailed(consoleCommandName);
+          ? OUTPUT_MESSAGES.wasCanceled(consoleCommandName)
+          : agentActionState.wasSuccessful
+            ? OUTPUT_MESSAGES.wasSuccessful(consoleCommandName)
+            : action.isExpired
+              ? OUTPUT_MESSAGES.hasExpired(consoleCommandName)
+              : OUTPUT_MESSAGES.hasFailed(consoleCommandName);
       const hostStatusMessageColor: EuiTextColorProps['color'] = !agentActionState.isCompleted
         ? 'warning'
         : agentActionState.wasCanceled
-        ? 'default'
-        : agentActionState.wasSuccessful
-        ? 'success'
-        : 'danger';
+          ? 'default'
+          : agentActionState.wasSuccessful
+            ? 'success'
+            : 'danger';
 
       // CrowdStrike specific status override: Isolate/Release actions shows "submitted" only to the user
       if (

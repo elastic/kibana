@@ -40,7 +40,7 @@ const makeHandlerParams = (): HandlerParams =>
       uiSettingsClient: { get: jest.fn().mockResolvedValue(true) },
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
     }),
-  } as unknown as HandlerParams);
+  }) as unknown as HandlerParams;
 
 describe('eligibleStreamsRoute', () => {
   beforeEach(() => {

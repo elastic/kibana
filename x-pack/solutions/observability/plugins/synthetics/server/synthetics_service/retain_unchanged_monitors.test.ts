@@ -25,9 +25,9 @@ describe('readDecryptedMonitors', () => {
   const clientReading = (read: (id: string) => unknown) =>
     ({
       getDecryptedAsInternalUser: jest.fn(async (_type: string, id: string) => read(id)),
-    } as unknown as EncryptedSavedObjectsClient & {
+    }) as unknown as EncryptedSavedObjectsClient & {
       getDecryptedAsInternalUser: jest.Mock;
-    });
+    };
 
   beforeEach(() => {
     jest.clearAllMocks();

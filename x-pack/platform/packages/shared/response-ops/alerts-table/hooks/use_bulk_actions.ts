@@ -209,7 +209,7 @@ export const useBulkAddToCaseActions = ({
                 getAttachments: ({ theCase }) => {
                   if (theCase == null) {
                     return alerts && caseOwner
-                      ? casesService?.helpers.groupAlertsByRule(alerts, caseOwner) ?? []
+                      ? (casesService?.helpers.groupAlertsByRule(alerts, caseOwner) ?? [])
                       : [];
                   }
 

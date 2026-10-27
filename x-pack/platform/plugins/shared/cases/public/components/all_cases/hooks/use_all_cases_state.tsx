@@ -186,7 +186,7 @@ const isURLStateEmpty = (urlState: AllCasesURLState) => {
 
 const useAllCasesLocalStorage = (): [
   AllCasesTableState | undefined,
-  (item: AllCasesTableState | undefined) => void
+  (item: AllCasesTableState | undefined) => void,
 ] => {
   const [state, setState] = useCasesLocalStorage<AllCasesTableState | undefined>(
     LOCAL_STORAGE_KEYS.casesTableState,

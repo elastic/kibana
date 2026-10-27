@@ -40,10 +40,10 @@ export const ProposalStatusBadge = ({
   const phase: ApprovalPhase = decision
     ? decision.status
     : isApproving
-    ? 'applying'
-    : isDeclining
-    ? 'declining'
-    : 'pending';
+      ? 'applying'
+      : isDeclining
+        ? 'declining'
+        : 'pending';
   // `undefined` for `pending`: the badge's own defaults read "Needs review".
   const badge = getApprovalOutcomeBadge(phase);
 

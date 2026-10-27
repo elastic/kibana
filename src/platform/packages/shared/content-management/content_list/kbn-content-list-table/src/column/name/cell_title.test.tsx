@@ -17,26 +17,23 @@ import {
 } from '@kbn/content-list-provider';
 import { NameCellTitle } from './cell_title';
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-    items: [],
-    total: 0,
-  })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: [],
+  total: 0,
+}));
 
 const createWrapper =
   (options?: { getHref?: (item: ContentListItem) => string }) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <ContentListProvider
-        id="test-list"
-        labels={{ entity: 'item', entityPlural: 'items' }}
-        dataSource={{ findItems: mockFindItems }}
-        item={options?.getHref ? { getHref: options.getHref } : undefined}
-      >
-        {children}
-      </ContentListProvider>
-    );
+  ({ children }: { children: React.ReactNode }) => (
+    <ContentListProvider
+      id="test-list"
+      labels={{ entity: 'item', entityPlural: 'items' }}
+      dataSource={{ findItems: mockFindItems }}
+      item={options?.getHref ? { getHref: options.getHref } : undefined}
+    >
+      {children}
+    </ContentListProvider>
+  );
 
 const createItem = (overrides?: Partial<ContentListItem>): ContentListItem => ({
   id: '1',

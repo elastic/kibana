@@ -79,8 +79,8 @@ const setup = ({
   roles?: RoleEntry[];
 } = {}) => {
   // Pages answer the account listings in order; role lookups answer by URL.
-  const get = jest.fn(
-    async (url: string): Promise<unknown> => (isRoleUrl(url) ? lookupRole(roles, url) : undefined)
+  const get = jest.fn(async (url: string): Promise<unknown> =>
+    isRoleUrl(url) ? lookupRole(roles, url) : undefined
   );
   pages.forEach((page) => get.mockResolvedValueOnce(page));
   const put = jest.fn().mockResolvedValue({});

@@ -16,7 +16,7 @@ const policies = {
 } as unknown as Record<string, AgentPolicy>;
 
 const makeAgent = (policyId: string, extra: Partial<Agent> = {}) =>
-  ({ id: 'agent-1', active: true, policy_id: policyId, ...extra } as Agent);
+  ({ id: 'agent-1', active: true, policy_id: policyId, ...extra }) as Agent;
 
 describe('isAgentSelectable', () => {
   it('returns true for an active agent on a regular policy', () => {

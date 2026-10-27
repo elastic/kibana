@@ -76,7 +76,7 @@ const makeContext = (pool: unknown, config = makeConfig()): ActionContext =>
     config,
     log: { info: jest.fn(), debug: jest.fn(), error: jest.fn() },
     getClient: jest.fn().mockResolvedValue(pool),
-  } as unknown as ActionContext);
+  }) as unknown as ActionContext;
 
 const rowsOf = (count: number) => Array.from({ length: count }, (_, id) => ({ id }));
 

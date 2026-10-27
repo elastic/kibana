@@ -16,7 +16,7 @@ const createLog = (): ToolingLog =>
     error: jest.fn(),
     debug: jest.fn(),
     warning: jest.fn(),
-  } as unknown as ToolingLog);
+  }) as unknown as ToolingLog;
 
 const createDocuments = (count: number): ExtractedDocument[] =>
   Array.from({ length: count }, (_, i) => ({

@@ -120,10 +120,10 @@ describe('customIncompatibleAntivirusEvaluator', () => {
     });
   });
   describe('customIncompatibleAntivirusEvaluator', () => {
-    const buildRun = (insights: unknown) => ({ outputs: { insights } } as unknown as Run);
+    const buildRun = (insights: unknown) => ({ outputs: { insights } }) as unknown as Run;
 
     const buildExample = (results: ExampleOutput['results']) =>
-      ({ outputs: { results } } as unknown as Example);
+      ({ outputs: { results } }) as unknown as Example;
 
     const evaluatorFunction = customIncompatibleAntivirusEvaluator as Function;
 

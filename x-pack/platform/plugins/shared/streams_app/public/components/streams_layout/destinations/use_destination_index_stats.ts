@@ -43,10 +43,13 @@ const toCountMap = (rows: Array<{ stream: string; count: number }> | undefined) 
   if (!rows) {
     return EMPTY_COUNTS;
   }
-  return rows.reduce((acc, { stream, count }) => {
-    acc[stream] = count;
-    return acc;
-  }, {} as Record<string, number>);
+  return rows.reduce(
+    (acc, { stream, count }) => {
+      acc[stream] = count;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 };
 
 export interface IndexFailureStoreState {
@@ -118,7 +121,7 @@ export const useDestinationIndexStats = ({
       return calculateDataQuality({
         totalDocs: docsByIndex[indexName] ?? 0,
         degradedDocs: degradedByIndex[indexName] ?? 0,
-        failedDocs: failureStore.enabled ? failedByIndex[indexName] ?? 0 : 0,
+        failedDocs: failureStore.enabled ? (failedByIndex[indexName] ?? 0) : 0,
       });
     },
     [

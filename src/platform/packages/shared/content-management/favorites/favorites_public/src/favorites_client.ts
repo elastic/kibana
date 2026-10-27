@@ -17,8 +17,9 @@ import type {
 } from '@kbn/content-management-favorites-server';
 import { firstValueFrom } from 'rxjs';
 
-export interface GetFavoritesResponse<Metadata extends object | void = void>
-  extends GetFavoritesResponseServer {
+export interface GetFavoritesResponse<
+  Metadata extends object | void = void,
+> extends GetFavoritesResponseServer {
   /**
    * When the client is instantiated without metadata (`Metadata = void`), we still return an empty
    * record for `favoriteMetadata` so callers can treat the response shape consistently, while
@@ -42,9 +43,9 @@ export interface FavoritesClientPublic<Metadata extends object | void = void> {
   reportRemoveFavoriteClick(): void;
 }
 
-export class FavoritesClient<Metadata extends object | void = void>
-  implements FavoritesClientPublic<Metadata>
-{
+export class FavoritesClient<
+  Metadata extends object | void = void,
+> implements FavoritesClientPublic<Metadata> {
   constructor(
     private readonly appName: string,
     private readonly favoriteObjectType: string,

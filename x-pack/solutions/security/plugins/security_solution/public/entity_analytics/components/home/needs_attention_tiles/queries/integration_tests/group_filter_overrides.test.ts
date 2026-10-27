@@ -145,8 +145,8 @@ describe('tile entity filters judged by the group, on Elasticsearch', () => {
 
   const runQuery: EsqlRunner = async (steps) => {
     const { columns, values } = await client.esql.query({ query: steps.join('\n') });
-    return values.map(
-      (row): Row => Object.fromEntries(columns.map(({ name }, i) => [name, row[i]]))
+    return values.map((row): Row =>
+      Object.fromEntries(columns.map(({ name }, i) => [name, row[i]]))
     );
   };
 

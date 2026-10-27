@@ -12,8 +12,9 @@ import type { BulkItem, BulkItemResponse, BulkPlainItem, BulkRequestOptions } fr
 
 export type SharedBulkItem<TExecution extends { id: string }> = BulkPlainItem<TExecution>;
 
-export interface SharedBulkRequestOptions<TExecution extends { id: string }>
-  extends BulkRequestOptions<TExecution> {
+export interface SharedBulkRequestOptions<
+  TExecution extends { id: string },
+> extends BulkRequestOptions<TExecution> {
   items: SharedBulkItem<TExecution>[];
 }
 

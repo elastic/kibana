@@ -43,9 +43,8 @@ export const getServiceAccountPickerComponent = async (
   isServerless: boolean,
   roleManagementEnabled: boolean
 ): Promise<React.FC<ServiceAccountPickerProps>> => {
-  const { ServiceAccountPicker } = await import(
-    '../management/service_accounts/service_account_picker'
-  );
+  const { ServiceAccountPicker } =
+    await import('../management/service_accounts/service_account_picker');
   return (props) => (
     <ServiceAccountPicker
       {...props}

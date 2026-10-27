@@ -83,15 +83,15 @@ export const ApprovalActorTime = ({
         outcome
           ? 'xpack.proposals.approvalActorTime.outcomeLabel'
           : executed
-          ? 'xpack.proposals.approvalActorTime.executedLabel'
-          : 'xpack.proposals.approvalActorTime.label'
+            ? 'xpack.proposals.approvalActorTime.executedLabel'
+            : 'xpack.proposals.approvalActorTime.label'
       }
       defaultMessage={
         outcome
           ? '{outcome, select, approved {Approved} applied {Applied} declined {Declined} other {Executed}} by {actorName} at {time}'
           : executed
-          ? 'executed by {actorName} at {time}'
-          : 'by {actorName} at {time}'
+            ? 'executed by {actorName} at {time}'
+            : 'by {actorName} at {time}'
       }
       values={{
         outcome,

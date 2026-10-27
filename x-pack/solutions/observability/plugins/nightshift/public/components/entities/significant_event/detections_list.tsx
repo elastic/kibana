@@ -126,12 +126,15 @@ function DetectionCard({
       onClick={onClick ? handleClick : undefined}
       onKeyDown={onClick ? handleKeyDown : undefined}
       css={css`
-        background: ${isSelected
-          ? euiTheme.colors.backgroundBaseInteractiveSelect
-          : euiTheme.colors.backgroundBasePlain};
+        background: ${
+          isSelected
+            ? euiTheme.colors.backgroundBaseInteractiveSelect
+            : euiTheme.colors.backgroundBasePlain
+        };
         padding: ${euiTheme.size.m};
-        ${onClick
-          ? `
+        ${
+          onClick
+            ? `
         cursor: pointer;
         transition: ${nightshiftBackgroundTransition(euiTheme)};
 
@@ -148,7 +151,8 @@ function DetectionCard({
           outline-offset: ${euiTheme.border.width.thin};
         }
         `
-          : ''}
+            : ''
+        }
       `}
     >
       <EuiFlexGroup
@@ -500,7 +504,7 @@ export function DetectionsList({
               key={detection.detection_id}
               detection={detection}
               occurrences={filterOccurrencesForDetection(
-                detection.rule_uuid ? occurrencesByRuleUuid?.get(detection.rule_uuid) ?? [] : [],
+                detection.rule_uuid ? (occurrencesByRuleUuid?.get(detection.rule_uuid) ?? []) : [],
                 detection['@timestamp']
               )}
               impactedServiceLabels={impactedServiceLabels}

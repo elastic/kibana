@@ -277,7 +277,7 @@ describe('entity_explore_navigation', () => {
     const buildApplicationMock = (): jest.Mocked<ApplicationStart> =>
       ({
         navigateToApp: jest.fn(),
-      } as unknown as jest.Mocked<ApplicationStart>);
+      }) as unknown as jest.Mocked<ApplicationStart>;
 
     const buildSearchSessionMock = (): jest.Mocked<Pick<ISessionService, 'clear'>> => ({
       clear: jest.fn(),
@@ -286,7 +286,7 @@ describe('entity_explore_navigation', () => {
     const buildChromeMock = (sidebarAppId: string | null = 'agentBuilder') =>
       ({
         sidebar: { getCurrentAppId: () => sidebarAppId },
-      } as never);
+      }) as never;
 
     const buildAgentBuilderNavigationMock = (): jest.Mocked<
       Pick<AgentBuilderPluginStart, 'toggleChat' | 'openChat'>

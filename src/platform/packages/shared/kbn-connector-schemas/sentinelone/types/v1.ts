@@ -104,8 +104,7 @@ export type SentinelOneGetRemoteScriptStatusParams = z.infer<
 >;
 
 export interface SentinelOneGetRemoteScriptStatusApiResponse
-  extends SentinelOnePagination,
-    SentinelOneErrors {
+  extends SentinelOnePagination, SentinelOneErrors {
   data: SentinelOneRemoteScriptExecutionStatus[];
 }
 

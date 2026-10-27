@@ -23,7 +23,10 @@ export abstract class AssetDetailsTab {
   public abstract readonly tabName: AssetDetailsPageTabName;
   public abstract readonly tab: Locator;
 
-  constructor(protected readonly page: ScoutPage, protected readonly kbnUrl: KibanaUrl) {}
+  constructor(
+    protected readonly page: ScoutPage,
+    protected readonly kbnUrl: KibanaUrl
+  ) {}
 
   public getTab(): Locator {
     return this.tab;

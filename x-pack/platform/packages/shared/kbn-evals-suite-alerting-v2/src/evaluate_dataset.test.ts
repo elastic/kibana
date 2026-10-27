@@ -22,13 +22,13 @@ const askUserQuestion = (id: string, questionCount = 1): PromptRequest =>
       options: [{ label: 'Alerting V2' }, { label: 'Security detection rules' }],
       multi_select: false,
     })),
-  } as PromptRequest);
+  }) as PromptRequest;
 
 const confirmation = (id: string): PromptRequest =>
-  ({ type: AgentPromptType.confirmation, id } as PromptRequest);
+  ({ type: AgentPromptType.confirmation, id }) as PromptRequest;
 
 const authorization = (id: string): PromptRequest =>
-  ({ type: AgentPromptType.authorization, id } as PromptRequest);
+  ({ type: AgentPromptType.authorization, id }) as PromptRequest;
 
 const converseResult = (
   overrides: Partial<AgentBuilderClientResponse> = {}
@@ -44,7 +44,7 @@ const round = (userMessage: string, assistantMessage: string): ConversationRound
   ({
     input: { message: userMessage },
     response: { message: assistantMessage },
-  } as ConversationRound);
+  }) as ConversationRound;
 
 const conversationResult = (overrides: Partial<Conversation> = {}): Conversation =>
   ({
@@ -52,7 +52,7 @@ const conversationResult = (overrides: Partial<Conversation> = {}): Conversation
     rounds: [round('hello', 'agent reply')],
     attachments: [],
     ...overrides,
-  } as Conversation);
+  }) as Conversation;
 
 /**
  * Client stub that returns a scripted response per `converse` call and records the

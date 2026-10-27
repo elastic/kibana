@@ -97,8 +97,8 @@ export function agentAuditEvent({
   const message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
-    ? `User is ${progressive} ${doc}`
-    : `User has ${past} ${doc}`;
+      ? `User is ${progressive} ${doc}`
+      : `User has ${past} ${doc}`;
 
   const type = eventTypes[action];
 
@@ -133,8 +133,8 @@ export function skillAuditEvent({
   const message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
-    ? `User is ${progressive} ${doc}`
-    : `User has ${past} ${doc}`;
+      ? `User is ${progressive} ${doc}`
+      : `User has ${past} ${doc}`;
 
   const type = eventTypes[action];
 
@@ -178,8 +178,8 @@ export function toolAuditEvent({
   const message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
-    ? `User is ${progressive} ${doc}`
-    : `User has ${past} ${doc}`;
+      ? `User is ${progressive} ${doc}`
+      : `User has ${past} ${doc}`;
 
   const type = eventTypes[action];
 
@@ -216,8 +216,8 @@ export function conversationAuditEvent({
   const message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
-    ? `User is ${progressive} ${doc}`
-    : `User has ${past} ${doc}`;
+      ? `User is ${progressive} ${doc}`
+      : `User has ${past} ${doc}`;
 
   const type = eventTypes[action];
 

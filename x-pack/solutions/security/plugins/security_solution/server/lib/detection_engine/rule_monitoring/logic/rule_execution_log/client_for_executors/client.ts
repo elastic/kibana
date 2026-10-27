@@ -223,7 +223,7 @@ export function createRuleExecutionLogClientForExecutors(
   };
 
   const writeExceptionToConsole = (e: unknown, message: string, logMeta: ExtMeta): void => {
-    const logReason = e instanceof Error ? e.stack ?? e.message : String(e);
+    const logReason = e instanceof Error ? (e.stack ?? e.message) : String(e);
     writeMessageToConsole(`${message}. Reason: ${logReason}`, LogLevelEnum.error, logMeta);
   };
 

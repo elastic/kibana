@@ -53,8 +53,10 @@ export const EMPTY_EXECUTION_LOG_RESULT = {
   data: [],
 };
 
-interface IActionExecution
-  extends estypes.AggregationsTermsAggregateBase<{ key: string; doc_count: number }> {
+interface IActionExecution extends estypes.AggregationsTermsAggregateBase<{
+  key: string;
+  doc_count: number;
+}> {
   buckets: Array<{ key: string; doc_count: number }>;
 }
 
@@ -592,16 +594,16 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const version = outcomeMessageAndMaintenanceWindow.kibana?.version ?? '';
 
   const ruleId = outcomeMessageAndMaintenanceWindow
-    ? outcomeMessageAndMaintenanceWindow?.rule?.id ?? ''
+    ? (outcomeMessageAndMaintenanceWindow?.rule?.id ?? '')
     : '';
   const spaceIds = outcomeMessageAndMaintenanceWindow
-    ? outcomeMessageAndMaintenanceWindow?.kibana?.space_ids ?? []
+    ? (outcomeMessageAndMaintenanceWindow?.kibana?.space_ids ?? [])
     : [];
   const maintenanceWindowIds = outcomeMessageAndMaintenanceWindow
-    ? outcomeMessageAndMaintenanceWindow.kibana?.alert?.maintenance_window_ids ?? []
+    ? (outcomeMessageAndMaintenanceWindow.kibana?.alert?.maintenance_window_ids ?? [])
     : [];
   const ruleName = outcomeMessageAndMaintenanceWindow
-    ? outcomeMessageAndMaintenanceWindow.rule?.name ?? ''
+    ? (outcomeMessageAndMaintenanceWindow.rule?.name ?? '')
     : '';
   return {
     id: bucket?.key ? `${bucket.key}` : '', // `key` can be a number, this way we stringify it.

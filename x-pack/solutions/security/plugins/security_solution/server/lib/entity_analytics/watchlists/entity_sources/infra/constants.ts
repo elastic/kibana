@@ -24,7 +24,7 @@ export const RuleBasedSourceType = {
 export type RuleBasedSourceType = (typeof RuleBasedSourceType)[keyof typeof RuleBasedSourceType];
 export const RULE_BASED_SOURCE_TYPES = Object.values(RuleBasedSourceType) as [
   RuleBasedSourceType,
-  ...RuleBasedSourceType[]
+  ...RuleBasedSourceType[],
 ];
 
 export const STREAM_INDEX_PATTERNS: Record<IntegrationType, (namespace: string) => string> = {

@@ -184,17 +184,16 @@ export function CellActionsPopover({
   );
 }
 
-export interface FieldBadgeWithActionsProps
-  extends Pick<
-    CellActionsPopoverProps,
-    | 'onFilter'
-    | 'name'
-    | 'property'
-    | 'formattedValue'
-    | 'textValue'
-    | 'rawValue'
-    | 'renderFormattedValue'
-  > {
+export interface FieldBadgeWithActionsProps extends Pick<
+  CellActionsPopoverProps,
+  | 'onFilter'
+  | 'name'
+  | 'property'
+  | 'formattedValue'
+  | 'textValue'
+  | 'rawValue'
+  | 'renderFormattedValue'
+> {
   icon?: EuiBadgeProps['iconType'];
   color?: string;
   truncateTitle?: boolean;

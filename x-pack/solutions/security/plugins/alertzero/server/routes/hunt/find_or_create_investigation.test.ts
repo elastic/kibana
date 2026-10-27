@@ -46,9 +46,9 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
     logger,
     getSpaceId: () => spaceId,
     getAgentBuilderConversations: () =>
-      ({ getScopedClient } as unknown as ReturnType<
+      ({ getScopedClient }) as unknown as ReturnType<
         RouteDependencies['getAgentBuilderConversations']
-      >),
+      >,
     reportTelemetryEvent,
   } as unknown as RouteDependencies);
 

@@ -20,7 +20,7 @@ jest.mock('./kbn_client_with_retries', () => ({
 const createMockKbnClient = (): jest.Mocked<KbnClient> =>
   ({
     request: jest.fn().mockResolvedValue({}),
-  } as unknown as jest.Mocked<KbnClient>);
+  }) as unknown as jest.Mocked<KbnClient>;
 
 const log = {
   debug: jest.fn(),

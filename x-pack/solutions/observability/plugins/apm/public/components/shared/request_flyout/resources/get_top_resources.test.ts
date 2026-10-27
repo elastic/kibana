@@ -26,7 +26,7 @@ const dependency = (dependencyName: string, totalTime: number, impact: number) =
       impact,
     },
     previousStats: null,
-  } as unknown as ServiceDependenciesResponse[number]);
+  }) as unknown as ServiceDependenciesResponse[number];
 
 describe('getTopResources', () => {
   const grouped = [{ resource: 'redis-1' }, { resource: 'redis-2' }, { resource: 'redis-3' }];

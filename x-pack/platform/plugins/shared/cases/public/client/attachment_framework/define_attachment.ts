@@ -66,9 +66,8 @@ type ReferenceDataFromSchema<S extends z.ZodType> =
     : ReferenceData;
 
 /** Data passed to value renderers. */
-type ValueDataFromSchema<S extends z.ZodType> = ValuePayloadFromSchema<S> extends { data: infer D }
-  ? D
-  : never;
+type ValueDataFromSchema<S extends z.ZodType> =
+  ValuePayloadFromSchema<S> extends { data: infer D } ? D : never;
 
 /** Data passed to hybrid renderers. */
 type HybridDataFromSchema<S extends z.ZodType> =
@@ -76,26 +75,28 @@ type HybridDataFromSchema<S extends z.ZodType> =
   | ReferenceDataFromSchema<S>;
 
 /** Renderer props are inferred from the full payload schema passed at registration. */
-type UnifiedAttachmentTypeFromSchema<S extends z.ZodType> = HasReferenceSchema<S> extends true
-  ? HasValueSchema<S> extends true
-    ? UnifiedHybridAttachmentType<
-        HybridDataFromSchema<S>,
-        ReferencePayloadFromSchema<S> extends { metadata?: infer M } ? M : never,
-        ReferencePayloadFromSchema<S> extends { attachmentId: infer A } ? A : never
-      >
-    : UnifiedReferenceAttachmentType<
-        ReferencePayloadFromSchema<S> extends { metadata?: infer M } ? M : never,
-        ReferencePayloadFromSchema<S> extends { attachmentId: infer A } ? A : never,
-        ReferenceDataFromSchema<S>
-      >
-  : UnifiedValueAttachmentType<ValueDataFromSchema<S>>;
+type UnifiedAttachmentTypeFromSchema<S extends z.ZodType> =
+  HasReferenceSchema<S> extends true
+    ? HasValueSchema<S> extends true
+      ? UnifiedHybridAttachmentType<
+          HybridDataFromSchema<S>,
+          ReferencePayloadFromSchema<S> extends { metadata?: infer M } ? M : never,
+          ReferencePayloadFromSchema<S> extends { attachmentId: infer A } ? A : never
+        >
+      : UnifiedReferenceAttachmentType<
+          ReferencePayloadFromSchema<S> extends { metadata?: infer M } ? M : never,
+          ReferencePayloadFromSchema<S> extends { attachmentId: infer A } ? A : never,
+          ReferenceDataFromSchema<S>
+        >
+    : UnifiedValueAttachmentType<ValueDataFromSchema<S>>;
 
 /** Registry consumers need the broad attachment type to avoid renderer prop intersections. */
-type UnifiedAttachmentTypeForRegistry<S extends z.ZodType> = HasReferenceSchema<S> extends true
-  ? HasValueSchema<S> extends true
-    ? UnifiedHybridAttachmentType
-    : UnifiedReferenceAttachmentType
-  : UnifiedValueAttachmentType;
+type UnifiedAttachmentTypeForRegistry<S extends z.ZodType> =
+  HasReferenceSchema<S> extends true
+    ? HasValueSchema<S> extends true
+      ? UnifiedHybridAttachmentType
+      : UnifiedReferenceAttachmentType
+    : UnifiedValueAttachmentType;
 
 export const defineAttachment = <S extends z.ZodType>(
   attachmentType: UnifiedAttachmentTypeFromSchema<S> & { schema: S }

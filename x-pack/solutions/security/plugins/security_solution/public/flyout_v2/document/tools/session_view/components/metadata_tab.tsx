@@ -29,23 +29,23 @@ export const MetadataTab = memo(({ selectedProcess }: MetadataTabProps) => {
   const processHost = isProcess(selectedProcess)
     ? selectedProcess.getDetails().host
     : isCustomProcess(selectedProcess)
-    ? selectedProcess.details.host
-    : undefined;
+      ? selectedProcess.details.host
+      : undefined;
   const processContainer = isProcess(selectedProcess)
     ? selectedProcess.getDetails().container
     : isCustomProcess(selectedProcess)
-    ? selectedProcess.details.container
-    : undefined;
+      ? selectedProcess.details.container
+      : undefined;
   const processOrchestrator = isProcess(selectedProcess)
     ? selectedProcess.getDetails().orchestrator
     : isCustomProcess(selectedProcess)
-    ? selectedProcess.details.orchestrator
-    : undefined;
+      ? selectedProcess.details.orchestrator
+      : undefined;
   const processCloud = isProcess(selectedProcess)
     ? selectedProcess.getDetails().cloud
     : isCustomProcess(selectedProcess)
-    ? selectedProcess.details.cloud
-    : undefined;
+      ? selectedProcess.details.cloud
+      : undefined;
 
   return (
     <EuiPanel

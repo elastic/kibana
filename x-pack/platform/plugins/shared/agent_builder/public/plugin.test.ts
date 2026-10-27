@@ -122,7 +122,7 @@ const createMockInitializerContext = (): PluginInitializerContext<ConfigSchema> 
         error: jest.fn(),
       })),
     },
-  } as unknown as PluginInitializerContext<ConfigSchema>);
+  }) as unknown as PluginInitializerContext<ConfigSchema>;
 
 const createMockSidebarApp = () => {
   const isOpen$ = new BehaviorSubject(false);
@@ -148,7 +148,7 @@ const createMockCoreSetup = (): CoreSetup<AgentBuilderStartDependencies, AgentBu
     chrome: {
       sidebar: { registerApp: jest.fn() },
     },
-  } as unknown as CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart>);
+  }) as unknown as CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart>;
 
 const createMockCoreStart = (sidebarApp: ReturnType<typeof createMockSidebarApp>): CoreStart =>
   ({
@@ -175,7 +175,7 @@ const createMockCoreStart = (sidebarApp: ReturnType<typeof createMockSidebarApp>
       get$: jest.fn(() => new BehaviorSubject(false)),
     },
     analytics: { reportEvent: jest.fn() },
-  } as unknown as CoreStart);
+  }) as unknown as CoreStart;
 
 const createMockSetupDeps = (): AgentBuilderSetupDependencies =>
   ({
@@ -185,14 +185,14 @@ const createMockSetupDeps = (): AgentBuilderSetupDependencies =>
     share: {},
     workflowsExtensions: {},
     files: { registerFileKind: jest.fn() },
-  } as unknown as AgentBuilderSetupDependencies);
+  }) as unknown as AgentBuilderSetupDependencies;
 
 const createMockStartDeps = (): AgentBuilderStartDependencies =>
   ({
     licensing: {},
     inference: {},
     files: { filesClientFactory: { asScoped: jest.fn().mockReturnValue({}) } },
-  } as unknown as AgentBuilderStartDependencies);
+  }) as unknown as AgentBuilderStartDependencies;
 
 const createMockAttachmentGroup = (overrides: Partial<AttachmentGroup> = {}): AttachmentGroup => ({
   type: 'group',
@@ -228,7 +228,7 @@ describe('AgentBuilderPlugin', () => {
             hasRequiredLicense: true,
             hasLlmConnector: true,
           }),
-        } as unknown as AgentBuilderAccessChecker)
+        }) as unknown as AgentBuilderAccessChecker
     );
   });
 
@@ -239,7 +239,7 @@ describe('AgentBuilderPlugin', () => {
         hasLlmConnector: true,
       });
       MockAgentBuilderAccessChecker.mockImplementation(
-        () => ({ getAgentBuilderAccess } as unknown as AgentBuilderAccessChecker)
+        () => ({ getAgentBuilderAccess }) as unknown as AgentBuilderAccessChecker
       );
 
       const sidebarApp = createMockSidebarApp();
@@ -264,7 +264,7 @@ describe('AgentBuilderPlugin', () => {
     it('returns denied access without calling getAgentBuilderAccess when show privilege is missing', async () => {
       const getAgentBuilderAccess = jest.fn();
       MockAgentBuilderAccessChecker.mockImplementation(
-        () => ({ getAgentBuilderAccess } as unknown as AgentBuilderAccessChecker)
+        () => ({ getAgentBuilderAccess }) as unknown as AgentBuilderAccessChecker
       );
 
       const sidebarApp = createMockSidebarApp();
@@ -287,7 +287,7 @@ describe('AgentBuilderPlugin', () => {
         hasLlmConnector: false,
       });
       MockAgentBuilderAccessChecker.mockImplementation(
-        () => ({ getAgentBuilderAccess } as unknown as AgentBuilderAccessChecker)
+        () => ({ getAgentBuilderAccess }) as unknown as AgentBuilderAccessChecker
       );
 
       const sidebarApp = createMockSidebarApp();

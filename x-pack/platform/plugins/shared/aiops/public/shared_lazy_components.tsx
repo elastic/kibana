@@ -61,9 +61,7 @@ export const LogCategorization: FC<LogCategorizationAppStateProps> = (props) => 
 
 const LogCategorizationForDiscoverLazy = React.lazy(
   () =>
-    import(
-      './components/log_categorization/log_categorization_for_embeddable/log_categorization_for_discover_wrapper'
-    )
+    import('./components/log_categorization/log_categorization_for_embeddable/log_categorization_for_discover_wrapper')
 );
 
 /**

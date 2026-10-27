@@ -15,7 +15,7 @@ import type { LogsRepository } from '../repositories/logs_repository';
 const createLoggerMock = () =>
   ({
     error: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('WorkflowEventLoggerFactory', () => {
   it('returns contextual logger instances from convenience factories', () => {

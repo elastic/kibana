@@ -18,15 +18,12 @@ import { ContentClient } from './content_client';
 import { ContentTypeRegistry } from './registry';
 import { RpcClient } from './rpc_client';
 
-export class ContentManagementPlugin
-  implements
-    Plugin<
-      ContentManagementPublicSetup,
-      ContentManagementPublicStart,
-      SetupDependencies,
-      StartDependencies
-    >
-{
+export class ContentManagementPlugin implements Plugin<
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+  SetupDependencies,
+  StartDependencies
+> {
   private contentTypeRegistry: ContentTypeRegistry;
 
   constructor() {

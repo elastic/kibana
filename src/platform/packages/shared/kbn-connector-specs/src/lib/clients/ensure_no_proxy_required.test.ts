@@ -15,7 +15,7 @@ const MESSAGE = 'cannot be proxied';
 const makeCtx = (proxySettings: unknown): BuildContext =>
   ({
     networkSettings: { getProxySettings: jest.fn().mockReturnValue(proxySettings) },
-  } as unknown as BuildContext);
+  }) as unknown as BuildContext;
 
 const target = (hostname: string): HostTarget => ({ hostname, port: 1433 });
 

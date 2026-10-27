@@ -20,7 +20,10 @@ import * as indexTemplates from './index_templates';
 export class ScoutReportDataStream {
   private log: ToolingLog;
 
-  constructor(private es: ESClient, log?: ToolingLog) {
+  constructor(
+    private es: ESClient,
+    log?: ToolingLog
+  ) {
     this.log = log || new ToolingLog();
   }
 

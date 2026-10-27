@@ -113,8 +113,8 @@ const readConversation = async (
 const isPersisted = (conversation: { rounds: ConversationRound[] } | undefined): boolean =>
   Boolean(
     conversation &&
-      conversation.rounds.length > 0 &&
-      conversation.rounds.every(({ status }) => status !== ConversationRoundStatus.inProgress)
+    conversation.rounds.length > 0 &&
+    conversation.rounds.every(({ status }) => status !== ConversationRoundStatus.inProgress)
   );
 
 /**
@@ -219,7 +219,9 @@ export const runInvestigation = async (
     }
     output.conversation_round_count = conversation.rounds.length;
     output.traceId = conversation.rounds
-      .flatMap(({ trace_id: traceId }) => (typeof traceId === 'string' ? [traceId] : traceId ?? []))
+      .flatMap(({ trace_id: traceId }) =>
+        typeof traceId === 'string' ? [traceId] : (traceId ?? [])
+      )
       .filter(Boolean)
       .at(-1);
     const accessedTrees = extractAccessedDecisionTrees(conversation.rounds);

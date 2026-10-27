@@ -111,14 +111,14 @@ export const getContinuityTool = (
         categorizedItems.length === 0
           ? ('noData' as const)
           : failingCount > 0
-          ? ('actionsRequired' as const)
-          : ('healthy' as const);
+            ? ('actionsRequired' as const)
+            : ('healthy' as const);
       const filteredSummary =
         filteredStatus === 'noData'
           ? 'No ingest pipeline statistics available for categorized indices.'
           : failingCount > 0
-          ? `${failingCount} of ${categorizedItems.length} active pipelines have critical failure rates.`
-          : `All ${categorizedItems.length} active ingest pipelines are functioning properly, with no document failures.`;
+            ? `${failingCount} of ${categorizedItems.length} active pipelines have critical failure rates.`
+            : `All ${categorizedItems.length} active ingest pipelines are functioning properly, with no document failures.`;
 
       return {
         results: [

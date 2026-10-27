@@ -103,10 +103,10 @@ export const TryInConsoleButton = ({
     'data-test-subj': dataTestSubj
       ? dataTestSubj
       : type === 'link'
-      ? 'tryInConsoleLink'
-      : type === 'contextMenuItem'
-      ? 'tryInConsoleContextMenuItem'
-      : 'tryInConsoleButton',
+        ? 'tryInConsoleLink'
+        : type === 'contextMenuItem'
+          ? 'tryInConsoleContextMenuItem'
+          : 'tryInConsoleButton',
     'aria-label': getAriaLabel(),
     'data-telemetry-id': telemetryId,
     onClick,

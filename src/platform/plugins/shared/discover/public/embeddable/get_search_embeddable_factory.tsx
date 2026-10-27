@@ -417,7 +417,7 @@ export const getSearchEmbeddableFactory = ({
           }, []);
 
           const selectedTabIdForDisplay = isInlineEditing
-            ? draftSelectedTabId ?? selectedTabId
+            ? (draftSelectedTabId ?? selectedTabId)
             : selectedTabId;
           const isSelectedTabDeletedForDisplay = isTabDeleted(selectedTabIdForDisplay, tabs);
           const hasPendingInlineTabChanges = isInlineEditing && isInlineEditDirty;

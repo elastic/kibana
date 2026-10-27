@@ -88,8 +88,8 @@ export function useServiceMapEdgeFlyoutProps({
     const dependencies = resources?.length
       ? resources.slice(0, MAX_CONNECTION_RESOURCES)
       : dependencyName
-      ? [dependencyName]
-      : [];
+        ? [dependencyName]
+        : [];
 
     return {
       sourceServiceName,

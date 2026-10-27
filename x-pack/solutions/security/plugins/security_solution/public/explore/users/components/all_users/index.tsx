@@ -69,7 +69,7 @@ export type UsersTableColumns = [
   Columns<User['lastSeen']>,
   Columns<User['domain']>,
   Columns<RiskSeverity>?,
-  Columns<CriticalityLevelWithUnassigned>?
+  Columns<CriticalityLevelWithUnassigned>?,
 ];
 
 const rowItems: ItemsPerRow[] = [

@@ -18,8 +18,10 @@ import type { ManifestOperation } from './manifest';
 
 const SAFE_METHODS = new Set(['get', 'head', 'options']);
 
-export interface RecordActionsOptions
-  extends Omit<ContractContextOptions, 'specs' | 'fixtures' | 'recordings'> {
+export interface RecordActionsOptions extends Omit<
+  ContractContextOptions,
+  'specs' | 'fixtures' | 'recordings'
+> {
   /** The vendor specs by source name, as in the manifest's `sources`. */
   readonly specs: Readonly<Record<string, OpenApiDocument>>;
   readonly fixtures?: VendorApiFixtures;

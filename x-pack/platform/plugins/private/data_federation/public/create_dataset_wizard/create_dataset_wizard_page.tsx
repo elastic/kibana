@@ -267,8 +267,8 @@ export function CreateDatasetWizardPage({
                     index === activeStepIndex
                       ? 'current'
                       : index < activeStepIndex
-                      ? 'complete'
-                      : 'incomplete',
+                        ? 'complete'
+                        : 'incomplete',
                   disabled: isStepDisabled(index),
                   onClick: () => goToStep(index),
                   'data-test-subj': `createDatasetWizardStep-${id}`,
@@ -332,8 +332,8 @@ export function CreateDatasetWizardPage({
                       ? isSaving
                         ? createDatasetWizardStrings.savingButton
                         : isEditMode
-                        ? createDatasetWizardStrings.saveButton
-                        : createDatasetWizardStrings.addDatasetButton
+                          ? createDatasetWizardStrings.saveButton
+                          : createDatasetWizardStrings.addDatasetButton
                       : createDatasetWizardStrings.nextButton}
                   </EuiButton>
                 </EuiFlexItem>

@@ -65,33 +65,35 @@ function SignificantEventStatusCard({
         box-sizing: border-box;
         padding: ${euiTheme.size.m};
 
-        ${isInteractive
-          ? css`
-              && {
-                box-shadow: none;
-                cursor: pointer;
-                transform: none;
-                transition: ${nightshiftStatusCardTransition(euiTheme)};
-              }
+        ${
+          isInteractive
+            ? css`
+                && {
+                  box-shadow: none;
+                  cursor: pointer;
+                  transform: none;
+                  transition: ${nightshiftStatusCardTransition(euiTheme)};
+                }
 
-              &&:hover,
-              &&:focus {
-                background: ${euiTheme.colors.backgroundBasePlain};
-                border-color: ${euiTheme.border.color};
-                transform: none;
-                ${euiShadowHover(euiThemeContext, 's')}
-              }
+                &&:hover,
+                &&:focus {
+                  background: ${euiTheme.colors.backgroundBasePlain};
+                  border-color: ${euiTheme.border.color};
+                  transform: none;
+                  ${euiShadowHover(euiThemeContext, 's')}
+                }
 
-              &&:focus {
-                outline: none;
-              }
+                &&:focus {
+                  outline: none;
+                }
 
-              &&:focus-visible {
-                outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
-                outline-offset: ${euiTheme.border.width.thin};
-              }
-            `
-          : ''}
+                &&:focus-visible {
+                  outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+                  outline-offset: ${euiTheme.border.width.thin};
+                }
+              `
+            : ''
+        }
       `}
       data-test-subj={testSubj}
       {...ebtProps}

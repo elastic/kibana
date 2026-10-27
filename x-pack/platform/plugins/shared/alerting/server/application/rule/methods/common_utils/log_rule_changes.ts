@@ -160,7 +160,7 @@ export async function logRuleChanges({
       const changeTimestamp =
         timestamp != null
           ? new Date(timestamp).toISOString()
-          : ruleSO.updated_at ?? fallbackChangeTimestamp;
+          : (ruleSO.updated_at ?? fallbackChangeTimestamp);
 
       changes.push({
         timestamp: changeTimestamp,

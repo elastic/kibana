@@ -11,7 +11,7 @@ import type { StartTransformsResponseSchema } from '../../api_schemas/start_tran
 
 import { startTransforms } from './start_transforms';
 
-const createEsClient = (startTransform: jest.Mock) => ({ transform: { startTransform } } as any);
+const createEsClient = (startTransform: jest.Mock) => ({ transform: { startTransform } }) as any;
 
 describe('startTransforms', () => {
   it('returns per-transform timeout results and stops the loop when a request times out', async () => {

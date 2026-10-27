@@ -152,7 +152,7 @@ describe('saved_object/helpers', () => {
         type,
         attachmentId,
         metadata: { title: `${type}-title`, soType },
-      } as unknown as AttachmentUIV2);
+      }) as unknown as AttachmentUIV2;
 
     it('returns an empty set when there are no comments', () => {
       expect(getAttachedSavedObjectKeys([])).toEqual(new Set());

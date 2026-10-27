@@ -300,7 +300,7 @@ type BulkItemIdKey = 'alert_id' | 'series_id';
  */
 const makeBulkActionBodySchema = <
   TIdKey extends BulkItemIdKey,
-  TItem extends z.ZodType<Record<TIdKey, string>>
+  TItem extends z.ZodType<Record<TIdKey, string>>,
 >(
   itemSchema: TItem,
   verb: string,

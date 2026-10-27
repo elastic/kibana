@@ -1006,7 +1006,7 @@ describe('buildContextOverrideFromExecution', () => {
       yaml: '',
       context: {},
       ...overrides,
-    } as WorkflowExecutionDto);
+    }) as WorkflowExecutionDto;
 
   const createStepExecution = (
     overrides: Partial<EsWorkflowStepExecution>
@@ -1025,7 +1025,7 @@ describe('buildContextOverrideFromExecution', () => {
       globalExecutionIndex: 0,
       stepExecutionIndex: 0,
       ...overrides,
-    } as EsWorkflowStepExecution);
+    }) as EsWorkflowStepExecution;
 
   it('should resolve inputs.* from workflow execution context', () => {
     const workflow = {

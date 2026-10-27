@@ -181,7 +181,7 @@ export const Content = ({
     <>
       {!noEntityInStore && (
         <EntityHighlightsAccordion
-          entityIdentifier={entityRecord ? entityRecord.entity?.id ?? hostName : hostName}
+          entityIdentifier={entityRecord ? (entityRecord.entity?.id ?? hostName) : hostName}
           entityType={EntityType.host}
           entityRecord={entityRecord}
           refetchEntityRecord={refetchEntityRecord}

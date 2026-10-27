@@ -128,18 +128,16 @@ const seedPool = async (ctx: ScenarioContext): Promise<void> => {
   await bulkSeedEntities({
     esClient: ctx.esClient,
     entities: [
-      ...CONFIDENT_FILLER_EUIDS.map(
-        (euid): SeedEntityOptions => ({
-          euid,
-          type: 'user',
-          firstSeen: SIX_MONTHS_AGO,
-          managed: true,
-          mfaEnabled: true,
-          riskLevel: 'Critical',
-          riskScoreNorm: 95,
-          watchlists: ['privileged-user-monitoring-watchlist-id-default'],
-        })
-      ),
+      ...CONFIDENT_FILLER_EUIDS.map((euid): SeedEntityOptions => ({
+        euid,
+        type: 'user',
+        firstSeen: SIX_MONTHS_AGO,
+        managed: true,
+        mfaEnabled: true,
+        riskLevel: 'Critical',
+        riskScoreNorm: 95,
+        watchlists: ['privileged-user-monitoring-watchlist-id-default'],
+      })),
       // Newly observed + governance gap (unmanaged, no MFA, privileged) — a
       // single-module combination the promotion prompt names explicitly.
       {

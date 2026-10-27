@@ -63,15 +63,12 @@ import type {
   AgenticInvestigationsStartDependencies,
 } from './types';
 
-export class AgenticInvestigationsPlugin
-  implements
-    Plugin<
-      AgenticInvestigationsPluginSetup,
-      AgenticInvestigationsPluginStart,
-      AgenticInvestigationsSetupDependencies,
-      AgenticInvestigationsStartDependencies
-    >
-{
+export class AgenticInvestigationsPlugin implements Plugin<
+  AgenticInvestigationsPluginSetup,
+  AgenticInvestigationsPluginStart,
+  AgenticInvestigationsSetupDependencies,
+  AgenticInvestigationsStartDependencies
+> {
   private readonly logger: Logger;
   private readonly escalationsEnabled: boolean;
   private impactService?: ImpactService;

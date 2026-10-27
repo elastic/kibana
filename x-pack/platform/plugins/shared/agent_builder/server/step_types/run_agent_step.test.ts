@@ -1218,7 +1218,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       });
 
     const createServiceManager = (execution: ReturnType<typeof createExecutionMock>) =>
-      ({ internalStart: { execution } } as unknown as ServiceManager);
+      ({ internalStart: { execution } }) as unknown as ServiceManager;
 
     const runStep = async (input: Record<string, unknown>) => {
       const execution = createExecutionMock(roundCompleteEvents());

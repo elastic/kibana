@@ -82,9 +82,9 @@ export const cardinalityOperation: OperationDefinition<
 
     return Boolean(
       newField &&
-        supportedTypes.has(newField.type) &&
-        newField.aggregatable &&
-        (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
+      supportedTypes.has(newField.type) &&
+      newField.aggregatable &&
+      (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
     );
   },
   shiftable: true,

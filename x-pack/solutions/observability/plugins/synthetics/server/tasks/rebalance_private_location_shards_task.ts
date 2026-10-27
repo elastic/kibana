@@ -143,8 +143,8 @@ export class RebalancePrivateLocationShardsTask {
       const mode: PrivateLocationShardingMode = !isSwitchOn
         ? 'switch_off'
         : licenseStatus === 'licensed'
-        ? 'active'
-        : 'unlicensed';
+          ? 'active'
+          : 'unlicensed';
       currentMode = mode;
       this.reportModeChange(taskInstance, mode);
       if (licenseStatus === 'unlicensed') {

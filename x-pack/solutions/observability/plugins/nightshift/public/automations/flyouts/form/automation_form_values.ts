@@ -149,36 +149,36 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
           ruleTags: row.tags ?? [],
         }
       : row?.kind === 'slack'
-      ? {
-          kind: SLACK_EVENT_TO_FORM_KIND[row.event],
-          channels: row.channels ?? [],
-          users: row.users ?? [],
-          bots: row.bots ?? [],
-          messageFilter: row.messageFilter ?? '',
-        }
-      : preset
-      ? {
-          kind: 'every',
-          unit:
-            preset.schedulePreset === 'hourly'
-              ? 'hour'
-              : preset.schedulePreset === 'weekly'
-              ? 'week'
-              : 'day',
-          time: preset.schedulePreset === 'hourly' ? '09:00' : preset.time,
-          daysOfWeek: preset.schedulePreset === 'weekly' ? preset.daysOfWeek : WEEKDAYS,
-          betweenHours: preset.schedulePreset === 'hourly' && preset.hourWindow !== undefined,
-          startTime:
-            preset.schedulePreset === 'hourly' && preset.hourWindow
-              ? `${String(preset.hourWindow.start).padStart(2, '0')}:00`
-              : '09:00',
-          endTime:
-            preset.schedulePreset === 'hourly' && preset.hourWindow
-              ? `${String(preset.hourWindow.end).padStart(2, '0')}:00`
-              : '17:00',
-          timezone: preset.timezone ?? DEFAULT_TIMEZONE,
-        }
-      : undefined;
+        ? {
+            kind: SLACK_EVENT_TO_FORM_KIND[row.event],
+            channels: row.channels ?? [],
+            users: row.users ?? [],
+            bots: row.bots ?? [],
+            messageFilter: row.messageFilter ?? '',
+          }
+        : preset
+          ? {
+              kind: 'every',
+              unit:
+                preset.schedulePreset === 'hourly'
+                  ? 'hour'
+                  : preset.schedulePreset === 'weekly'
+                    ? 'week'
+                    : 'day',
+              time: preset.schedulePreset === 'hourly' ? '09:00' : preset.time,
+              daysOfWeek: preset.schedulePreset === 'weekly' ? preset.daysOfWeek : WEEKDAYS,
+              betweenHours: preset.schedulePreset === 'hourly' && preset.hourWindow !== undefined,
+              startTime:
+                preset.schedulePreset === 'hourly' && preset.hourWindow
+                  ? `${String(preset.hourWindow.start).padStart(2, '0')}:00`
+                  : '09:00',
+              endTime:
+                preset.schedulePreset === 'hourly' && preset.hourWindow
+                  ? `${String(preset.hourWindow.end).padStart(2, '0')}:00`
+                  : '17:00',
+              timezone: preset.timezone ?? DEFAULT_TIMEZONE,
+            }
+          : undefined;
 
   return {
     name: automation.name,

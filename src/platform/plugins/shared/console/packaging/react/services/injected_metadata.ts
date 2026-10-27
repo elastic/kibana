@@ -83,7 +83,7 @@ export function createInjectedMetadata(
     getCspConfig: () =>
       ({
         warnLegacyBrowsers: true,
-      } as unknown as ReturnType<InternalInjectedMetadataSetup['getCspConfig']>),
+      }) as unknown as ReturnType<InternalInjectedMetadataSetup['getCspConfig']>,
     getTheme: () =>
       ({
         darkMode: themeDarkMode,
@@ -93,7 +93,7 @@ export function createInjectedMetadata(
           default: [],
           dark: [],
         },
-      } as unknown as ReturnType<InternalInjectedMetadataSetup['getTheme']>),
+      }) as unknown as ReturnType<InternalInjectedMetadataSetup['getTheme']>,
     getExternalUrlConfig: () => ({
       policy: [
         {

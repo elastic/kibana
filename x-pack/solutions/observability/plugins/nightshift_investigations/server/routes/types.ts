@@ -53,8 +53,7 @@ export type GetMemoryPageStore = (request: KibanaRequest) => MemoryPageStore;
 
 export type GetKnowledgePurgeClient = (request: KibanaRequest) => KnowledgePurgeClient;
 
-export interface NightshiftInvestigationsRouteHandlerResources
-  extends DefaultRouteHandlerResources {
+export interface NightshiftInvestigationsRouteHandlerResources extends DefaultRouteHandlerResources {
   getInvestigationsClient: GetInvestigationsClient;
   getTriggerEmitter: GetTriggerEmitter;
   getAlertsClient: GetAlertsClient;

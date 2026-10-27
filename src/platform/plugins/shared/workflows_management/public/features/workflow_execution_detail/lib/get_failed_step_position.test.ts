@@ -25,13 +25,13 @@ const step = (
     stepExecutionIndex: 0,
     topologicalIndex: 0,
     ...partial,
-  } as WorkflowStepExecutionDto);
+  }) as WorkflowStepExecutionDto;
 
 const definition = (names: string[]): WorkflowYaml =>
   ({
     name: 'wf',
     steps: names.map((name) => ({ name, type: 'console' })),
-  } as WorkflowYaml);
+  }) as WorkflowYaml;
 
 describe('getFailedStepPosition', () => {
   it('returns null for non-failed executions', () => {

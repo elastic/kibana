@@ -68,7 +68,7 @@ const registerAndCollect = (
       update: jest.fn(),
       get: jest.fn(),
       delete: jest.fn(),
-    } as never),
+    }) as never,
   getConversationClient: ImpactRouteDependencies['getConversationClient'] = async () =>
     ownerConversation as never,
   {
@@ -97,7 +97,7 @@ const registerAndCollect = (
         ...service,
         attach,
         getByConversationId: service.getByConversationId ?? impactReadsAfterAttach(attach),
-      } as unknown as ImpactService),
+      }) as unknown as ImpactService,
     getImpactPillsService: () => pills as ImpactPillsService,
     escalationsEnabled,
     getSpaceId: () => 'default',
@@ -221,7 +221,7 @@ describe('investigation impact routes', () => {
     };
     const { posts } = registerAndCollect(
       { attach },
-      async () => ({ create } as never),
+      async () => ({ create }) as never,
       async () => conversations as never
     );
     const response = httpServerMock.createResponseFactory();
@@ -256,13 +256,13 @@ describe('investigation impact routes', () => {
     // the write path relies on that instead of a separate permission check.
     const { posts } = registerAndCollect(
       { attach },
-      async () => ({ create: jest.fn() } as never),
+      async () => ({ create: jest.fn() }) as never,
       async () =>
         ({
           get: jest
             .fn()
             .mockRejectedValue(createConversationNotFoundError({ conversationId: 'conv-1' })),
-        } as never)
+        }) as never
     );
     const response = httpServerMock.createResponseFactory();
 

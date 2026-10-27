@@ -38,7 +38,7 @@ const createSecurityStart = (withSystemIdentity: boolean) =>
         ? { createEphemeralToken: jest.fn(async () => 'token') }
         : undefined,
     },
-  } as unknown as SecurityPluginStart);
+  }) as unknown as SecurityPluginStart;
 
 const setupPlugin = (
   config: PluginConfig,

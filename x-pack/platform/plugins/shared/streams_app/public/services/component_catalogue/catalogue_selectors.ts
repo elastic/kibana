@@ -67,8 +67,8 @@ export const resolvePathOptions = (
   const candidates = location
     ? pathSet.locations[location]
     : context
-    ? pathSet.contexts[context]
-    : undefined;
+      ? pathSet.contexts[context]
+      : undefined;
   const seen = new Set<string>();
   return (candidates ?? []).filter((option) => {
     if (seen.has(option.path) || !supportsAnySignal(option.supported_telemetry, telemetry)) {

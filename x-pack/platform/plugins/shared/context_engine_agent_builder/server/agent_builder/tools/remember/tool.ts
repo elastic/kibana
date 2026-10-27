@@ -230,7 +230,7 @@ export const createRememberTool = ({
 
       const document: StoredKi = {
         '@timestamp':
-          aiIndex.dest.type === 'data_stream' ? now : existingDocument?.['@timestamp'] ?? now,
+          aiIndex.dest.type === 'data_stream' ? now : (existingDocument?.['@timestamp'] ?? now),
         id: logicalId,
         type: params.type,
         title: params.title,

@@ -503,8 +503,8 @@ export class DestinationValidator {
         warnings.length === 0
           ? ''
           : warnings.length === 1
-          ? ', 1 warning'
-          : `, ${warnings.length} warnings`;
+            ? ', 1 warning'
+            : `, ${warnings.length} warnings`;
       const header = `Destination validation failed (${errorCount}${warningCount}):`;
       const formatted = this.diagnostics.map((d, i) => `[${i + 1}] [${d.severity}] ${d.message}`);
       throw new ActionPolicyOperationValidationError(`${header}\n\n${formatted.join('\n\n')}`);

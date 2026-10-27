@@ -61,7 +61,7 @@ const makeDeps = (
           elasticsearch: {
             client: { asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }) },
           },
-        } as any),
+        }) as any,
       licensing: licensingMock.createStart(),
       logger: loggingSystemMock.createLogger(),
     },

@@ -303,7 +303,7 @@ export function normalizeDate(amount: number, unit: Unit): { amount: number; uni
 
 function isDateInRange(date: string | number): boolean {
   try {
-    const epoch = typeof date === 'string' ? datemathToEpochMillis(date) ?? -1 : date;
+    const epoch = typeof date === 'string' ? (datemathToEpochMillis(date) ?? -1) : date;
     return epoch >= 0 && epoch <= JS_MAX_DATE;
   } catch {
     return false;

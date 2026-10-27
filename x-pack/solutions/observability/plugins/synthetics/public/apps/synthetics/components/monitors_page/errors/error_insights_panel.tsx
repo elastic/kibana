@@ -200,8 +200,8 @@ const MonitorTypeCard = ({
           t.errorRate >= 0.5
             ? euiTheme.colors.danger
             : t.errorRate >= 0.2
-            ? euiTheme.colors.warning
-            : euiTheme.colors.success;
+              ? euiTheme.colors.warning
+              : euiTheme.colors.success;
         return (
           <EuiToolTip
             key={t.monitorType}
@@ -217,9 +217,11 @@ const MonitorTypeCard = ({
               css={css`
                 ${clickableRow};
                 margin-bottom: 6px;
-                ${isSelected
-                  ? `background: ${euiTheme.colors.lightestShade}; outline: 1px solid ${euiTheme.colors.primary};`
-                  : ''}
+                ${
+                  isSelected
+                    ? `background: ${euiTheme.colors.lightestShade}; outline: 1px solid ${euiTheme.colors.primary};`
+                    : ''
+                }
               `}
               onClick={() => onFilter(t.monitorType)}
               onKeyDown={(e) => {
@@ -414,10 +416,10 @@ const TagBreakdownCard = ({
           const badgeColor = isSelected
             ? 'primary'
             : t.errorRate >= 0.5
-            ? 'danger'
-            : t.errorRate >= 0.2
-            ? 'warning'
-            : 'hollow';
+              ? 'danger'
+              : t.errorRate >= 0.2
+                ? 'warning'
+                : 'hollow';
           return (
             <EuiFlexItem key={t.tag} grow={false}>
               <EuiToolTip
@@ -506,9 +508,11 @@ const StatusCodesCard = ({
               css={css`
                 ${clickableRow};
                 margin-bottom: 6px;
-                ${isSelected
-                  ? `background: ${euiTheme.colors.lightestShade}; outline: 1px solid ${euiTheme.colors.primary};`
-                  : ''}
+                ${
+                  isSelected
+                    ? `background: ${euiTheme.colors.lightestShade}; outline: 1px solid ${euiTheme.colors.primary};`
+                    : ''
+                }
               `}
               onClick={() => onFilter(String(c.statusCode))}
               onKeyDown={(e) => {
@@ -536,11 +540,13 @@ const StatusCodesCard = ({
                     css={css`
                       height: 100%;
                       width: ${pct}%;
-                      background: ${codeColor === 'danger'
-                        ? euiTheme.colors.danger
-                        : codeColor === 'warning'
-                        ? euiTheme.colors.warning
-                        : euiTheme.colors.mediumShade};
+                      background: ${
+                        codeColor === 'danger'
+                          ? euiTheme.colors.danger
+                          : codeColor === 'warning'
+                            ? euiTheme.colors.warning
+                            : euiTheme.colors.mediumShade
+                      };
                       border-radius: ${euiTheme.border.radius.small};
                     `}
                   />

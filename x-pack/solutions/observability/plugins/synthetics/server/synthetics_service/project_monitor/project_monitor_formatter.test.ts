@@ -167,7 +167,7 @@ describe('ProjectMonitorFormatter', () => {
       ({
         publicLocations,
         privateLocations,
-      } as any)
+      }) as any
   );
 
   it('should return validation errors errors', async () => {

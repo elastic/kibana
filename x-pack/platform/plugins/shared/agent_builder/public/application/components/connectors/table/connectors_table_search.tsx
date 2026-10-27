@@ -41,7 +41,7 @@ const getConnectorsTableSearchConfig = ({
       multiSelect: 'or',
       options: Object.keys(matchesByType).map((actionTypeId) => {
         const typeName = actionTypeRegistry.has(actionTypeId)
-          ? actionTypeRegistry.get(actionTypeId).actionTypeTitle ?? actionTypeId
+          ? (actionTypeRegistry.get(actionTypeId).actionTypeTitle ?? actionTypeId)
           : actionTypeId;
         return {
           value: actionTypeId,

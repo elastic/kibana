@@ -32,7 +32,7 @@ export const buildRouteValidationWithExcess =
       | GenericIntersectionC
       | rt.PartialType<rt.Props>
       | rt.ExactC<any>,
-    A = rt.TypeOf<T>
+    A = rt.TypeOf<T>,
   >(
     schema: T
   ): RouteValidationFunction<A> =>
@@ -56,7 +56,7 @@ export const excess = <
     | rt.InterfaceType<rt.Props>
     | GenericIntersectionC
     | rt.PartialType<rt.Props>
-    | rt.ExactC<any>
+    | rt.ExactC<any>,
 >(
   codec: C
 ): C => {

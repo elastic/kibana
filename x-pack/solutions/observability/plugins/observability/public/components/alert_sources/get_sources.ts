@@ -23,13 +23,15 @@ export const getSources = (alert: TopAlert): Group[] => {
   if (alert.fields[ALERT_GROUP]) return alert.fields[ALERT_GROUP] as Group[];
 
   // when `kibana.alert.group` is flattened (for alert flyout)
-  const groupsFromGroupFields = alert.fields[ALERT_GROUP_FIELD]?.map((field, index) => {
-    const values = alert.fields[ALERT_GROUP_VALUE];
-    if (values?.length && values[index]) {
-      const group: Group = { field, value: values[index] };
-      return group;
-    }
-  }).filter(isGroup);
+  const groupsFromGroupFields = alert.fields[ALERT_GROUP_FIELD]
+    ?.map((field, index) => {
+      const values = alert.fields[ALERT_GROUP_VALUE];
+      if (values?.length && values[index]) {
+        const group: Group = { field, value: values[index] };
+        return group;
+      }
+    })
+    .filter(isGroup);
 
   if (groupsFromGroupFields?.length) return groupsFromGroupFields;
 

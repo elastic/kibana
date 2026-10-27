@@ -10,7 +10,7 @@ import { getEditRulePermissions } from './get_edit_rule_permissions';
 
 const ruleTypeWithConsumers = (
   authorizedConsumers: RuleTypeWithDescription['authorizedConsumers']
-) => ({ authorizedConsumers } as RuleTypeWithDescription);
+) => ({ authorizedConsumers }) as RuleTypeWithDescription;
 
 describe('getEditRulePermissions', () => {
   const allOnAlerts = ruleTypeWithConsumers({ alerts: { read: true, all: true } });

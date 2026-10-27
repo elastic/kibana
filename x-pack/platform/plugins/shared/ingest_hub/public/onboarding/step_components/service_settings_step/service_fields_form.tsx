@@ -100,7 +100,7 @@ function VarField({
   const value = toTyped(draft[activeInput]?.[fieldName], meta);
 
   if (fieldName === 'data_stream.type') {
-    const selected = typeof value === 'string' ? value : (meta.def.default as string) ?? 'logs';
+    const selected = typeof value === 'string' ? value : ((meta.def.default as string) ?? 'logs');
     return (
       <div data-test-subj={`serviceSettingsFlyout-${activeInput}-field-${fieldName}`}>
         <DataStreamTypeSelector
@@ -150,7 +150,7 @@ function VarField({
                 next !== null &&
                 typeof next === 'object' &&
                 !Array.isArray(next)
-                  ? (next as { dataset?: unknown }).dataset ?? ''
+                  ? ((next as { dataset?: unknown }).dataset ?? '')
                   : next;
               const nextDraft = toDraft(raw);
               // Compare against the effective displayed value (toTyped materializes manifest
@@ -237,7 +237,7 @@ function InputVarFields({
   const draft = varsByInput[activeInput] ?? {};
   const anyRequiredEmpty = requiredTextFields.some((f) => {
     const meta = resolveFieldMeta(service, activeInput, f);
-    const effective = meta ? toTyped(draft[f], meta) : draft[f] ?? '';
+    const effective = meta ? toTyped(draft[f], meta) : (draft[f] ?? '');
     if (Array.isArray(effective)) return effective.length === 0;
     return typeof effective === 'string' && !effective.trim();
   });
@@ -488,7 +488,7 @@ export function ServiceFieldsForm({
           : (dsInfo?.defaultEnabledInputs ?? []).includes(input);
         const label =
           dsInputs.length === 1
-            ? dsInfo?.title ?? getInputDisplayLabel(input, service.inputTitles)
+            ? (dsInfo?.title ?? getInputDisplayLabel(input, service.inputTitles))
             : `${dsInfo?.title ?? dsId} — ${getInputDisplayLabel(input, service.inputTitles)}`;
         return (
           <React.Fragment key={`${dsId}-${input}`}>

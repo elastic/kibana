@@ -704,8 +704,8 @@ function StreamsCanvasInner() {
     flyoutName && flyoutKind === 'index'
       ? flyoutName
       : flyoutName && !flyoutKind && !flyoutDestination
-      ? flyoutName
-      : undefined;
+        ? flyoutName
+        : undefined;
 
   return (
     <div css={canvasColumnStyles}>
@@ -957,10 +957,10 @@ export const buildConfiguredDestinationNode = (
       subtitle: !hasConnectedSource
         ? noSourceLabel
         : destination.mode === 'auto'
-        ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.autoLabel', {
-            defaultMessage: 'Auto',
-          })
-        : destination.index,
+          ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.autoLabel', {
+              defaultMessage: 'Auto',
+            })
+          : destination.index,
     },
   };
 };

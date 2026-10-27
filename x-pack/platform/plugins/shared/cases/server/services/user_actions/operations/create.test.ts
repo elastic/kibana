@@ -105,7 +105,7 @@ describe('UserActionPersister', () => {
         user: { email: '', full_name: '', username: '' },
         ...overrides,
       },
-    } as CreateUserActionArgs<T>);
+    }) as CreateUserActionArgs<T>;
 
   const getBulkCreateAttachmentRequest = (): BulkCreateAttachmentUserAction => ({
     caseId: 'test',

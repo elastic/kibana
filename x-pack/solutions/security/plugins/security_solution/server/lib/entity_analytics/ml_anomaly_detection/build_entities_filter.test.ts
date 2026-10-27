@@ -24,7 +24,7 @@ const record = (name?: string, { withId = true }: { withId?: boolean } = {}): En
   ({
     entity: withId ? { id: `user:${name ?? 'unknown'}` } : undefined,
     user: name ? { name } : {},
-  } as unknown as Entity);
+  }) as unknown as Entity;
 
 const namedFilter = (name: string) => ({
   bool: { filter: [{ term: { 'user.name': name } }], _name: `user:${name}` },

@@ -29,7 +29,7 @@ const makeCurrentRule = (
     status: 'pending',
     created_by: 'user',
     '@timestamp': '2024-01-01T00:00:00.000Z',
-  } as unknown as RuleMigrationRule);
+  }) as unknown as RuleMigrationRule;
 
 describe('getEsqlQueryUpdatePatch', () => {
   const mockLogger = loggingSystemMock.createLogger();

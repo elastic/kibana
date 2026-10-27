@@ -59,7 +59,7 @@ describe('createMlChartsTool', () => {
       attachments: {
         add: attachmentsAdd.mockResolvedValue({ id: 'att-1', current_version: 1 }),
       },
-    } as any);
+    }) as any;
 
   it('has the correct ID and type', () => {
     expect(createMlChartsToolInstance.id).toBe(CREATE_ML_CHARTS_TOOL_ID);

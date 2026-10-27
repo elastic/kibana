@@ -85,10 +85,13 @@ export const getPendingActionsSummary = async (
         if (!endpointMetadataLastUpdated) {
           endpointMetadataLastUpdated = (
             await metadataService.findHostMetadataForFleetAgents(agentIDs)
-          ).reduce((acc, endpointMetadata) => {
-            acc[endpointMetadata.elastic.agent.id] = new Date(endpointMetadata.event.created);
-            return acc;
-          }, {} as Record<string, Date>);
+          ).reduce(
+            (acc, endpointMetadata) => {
+              acc[endpointMetadata.elastic.agent.id] = new Date(endpointMetadata.event.created);
+              return acc;
+            },
+            {} as Record<string, Date>
+          );
         }
 
         const lastEndpointMetadataEventTimestamp = endpointMetadataLastUpdated[agentID];

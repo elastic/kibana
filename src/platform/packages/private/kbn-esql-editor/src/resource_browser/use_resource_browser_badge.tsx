@@ -51,7 +51,8 @@ export const useSourcesBadge = ({
       color: ${euiTheme.colors.primary} !important;
       background-color: ${euiTheme.colors.backgroundBasePrimary} !important;
       box-sizing: border-box;
-      transition: background-color ${euiTheme.animation.fast} ease-in-out,
+      transition:
+        background-color ${euiTheme.animation.fast} ease-in-out,
         box-shadow ${euiTheme.animation.fast} ease-in-out;
     }
 

@@ -43,7 +43,7 @@ describe('reuseUnchangedItems', () => {
     const [message, turn, streaming] = rebuild(previous) as [
       TimelineItem,
       TimelineItem,
-      AgentTurnItem
+      AgentTurnItem,
     ];
 
     const next = reuseUnchangedItems(previous, [

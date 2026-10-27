@@ -43,14 +43,14 @@ interface ConfigDiscriminator<Type extends string> {
 /** Declares a by-value panel kind. The content schema must carry the kind's `type` literal. */
 export const defineConfigPanelKind = <
   const Type extends string,
-  Shape extends ConfigDiscriminator<Type> & z.ZodRawShape
+  Shape extends ConfigDiscriminator<Type> & z.ZodRawShape,
 >(kind: {
   type: Type;
   embeddableType: string;
   label: string;
   contentSchema: z.ZodObject<Shape>;
   toEmbeddableConfig?: ConfigPanelKind['toEmbeddableConfig'];
-}) => ({ source: 'config', ...kind } as const satisfies ConfigPanelKind);
+}) => ({ source: 'config', ...kind }) as const satisfies ConfigPanelKind;
 
 /** Lens is the default renderer, so its `renderer` field may be optional. */
 type RendererField<Renderer extends string> =
@@ -65,10 +65,10 @@ interface RequestDiscriminator<Renderer extends string> {
 /** Declares a server-side generated panel kind. The content schema must carry the kind's `renderer` literal. */
 export const defineRequestPanelKind = <
   const Renderer extends string,
-  Shape extends RequestDiscriminator<Renderer> & z.ZodRawShape
+  Shape extends RequestDiscriminator<Renderer> & z.ZodRawShape,
 >(kind: {
   renderer: Renderer;
   embeddableType: string;
   label: string;
   contentSchema: z.ZodObject<Shape>;
-}) => ({ source: 'request', ...kind } as const satisfies RequestPanelKind);
+}) => ({ source: 'request', ...kind }) as const satisfies RequestPanelKind;

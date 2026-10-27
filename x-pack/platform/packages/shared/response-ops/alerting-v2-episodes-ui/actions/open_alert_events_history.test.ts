@@ -21,7 +21,7 @@ const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode =>
     last_timestamp: '2026-04-23T01:00:00Z',
     duration: 3_600_000,
     ...overrides,
-  } as AlertEpisode);
+  }) as AlertEpisode;
 
 const makeDeps = () => {
   const spaces = spacesPluginMock.createStartContract();

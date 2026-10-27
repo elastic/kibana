@@ -178,7 +178,7 @@ export const RuleActionsNotifyWhen = ({
 
   const onNotifyWhenValueChange = useCallback(
     (newValue: RuleNotifyWhenType) => {
-      const newThrottle = newValue === RuleNotifyWhen.THROTTLE ? throttle ?? 1 : null;
+      const newThrottle = newValue === RuleNotifyWhen.THROTTLE ? (throttle ?? 1) : null;
       onChange({
         ...frequency,
         notifyWhen: newValue,

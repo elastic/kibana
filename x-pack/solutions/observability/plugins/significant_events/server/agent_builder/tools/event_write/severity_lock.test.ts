@@ -43,7 +43,7 @@ const makeEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
       },
     ],
     ...overrides,
-  } as SignificantEvent);
+  }) as SignificantEvent;
 
 const lock = (
   overrides: Partial<Parameters<typeof lockSeverityForCompletedInvestigation>[0]> = {}

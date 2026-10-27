@@ -52,7 +52,7 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
         error: latest.error,
       };
     }),
-    getDataSetVariables: jest.fn(() => ({} as Record<string, unknown>)),
+    getDataSetVariables: jest.fn(() => ({}) as Record<string, unknown>),
     getOutputSizeStats: jest.fn(() => {
       let totalBytes = 0;
       for (const bytes of sizes.values()) totalBytes += bytes;

@@ -41,7 +41,7 @@ export interface AddToCaseModalOptions<TAttachment = unknown> {
  */
 export interface AddToCaseCasesService<
   TPermissions extends CasesPermissions = CasesPermissions,
-  TAttachment = unknown
+  TAttachment = unknown,
 > {
   ui: {
     getCasesContext(): ComponentType<
@@ -65,7 +65,7 @@ export interface AddToCaseCasesService<
 
 export interface OpenAddToCaseModalDeps<
   TPermissions extends CasesPermissions = CasesPermissions,
-  TAttachment = unknown
+  TAttachment = unknown,
 > {
   cases: AddToCaseCasesService<TPermissions, TAttachment>;
   owner: CasesOwner;

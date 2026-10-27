@@ -34,7 +34,7 @@ const createRequestCtx = (): RequestHandlerContext =>
     resolve: jest.fn().mockResolvedValue({
       core: { savedObjects: { client: {} } },
     }),
-  } as unknown as RequestHandlerContext);
+  }) as unknown as RequestHandlerContext;
 
 describe('dashboard search sort options', () => {
   beforeEach(() => {

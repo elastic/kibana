@@ -230,7 +230,7 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
       {isLoading ? (
         <EuiLoadingSpinner size="s" data-test-subj="connectorSelectorLoading" />
       ) : (
-        displayFancy?.(buttonLabel, selectedOrDefaultConnector) ?? buttonLabel
+        (displayFancy?.(buttonLabel, selectedOrDefaultConnector) ?? buttonLabel)
       )}
     </EuiButton>
   );

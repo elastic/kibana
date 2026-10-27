@@ -366,8 +366,8 @@ export function generateFieldDiscoveryData({
         rand < serviceConfig.errorRate
           ? 'error'
           : rand < serviceConfig.errorRate + 0.2
-          ? 'warn'
-          : 'info';
+            ? 'warn'
+            : 'info';
 
       const message = generateLogMessage(level);
 

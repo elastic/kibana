@@ -99,12 +99,15 @@ export function SignificantEventItem({
       onClick={onClick ? handleClick : undefined}
       onKeyDown={onClick ? handleKeyDown : undefined}
       css={css`
-        background: ${isSelected
-          ? euiTheme.colors.backgroundBaseInteractiveSelect
-          : euiTheme.colors.backgroundBasePlain};
+        background: ${
+          isSelected
+            ? euiTheme.colors.backgroundBaseInteractiveSelect
+            : euiTheme.colors.backgroundBasePlain
+        };
         padding: ${euiTheme.size.m};
-        ${onClick
-          ? `
+        ${
+          onClick
+            ? `
         cursor: pointer;
         transition: ${nightshiftBackgroundTransition(euiTheme)};
 
@@ -116,7 +119,8 @@ export function SignificantEventItem({
           };
         }
         `
-          : ''}
+            : ''
+        }
       `}
     >
       <EuiFlexGroup alignItems="stretch" direction="column" gutterSize="xs" responsive={false}>
@@ -133,8 +137,8 @@ export function SignificantEventItem({
                 investigationRunStatus === null
                   ? null
                   : investigationRunStatus
-                  ? toInvestigationStatus(investigationRunStatus)
-                  : undefined
+                    ? toInvestigationStatus(investigationRunStatus)
+                    : undefined
               }
             />
           </EuiFlexItem>

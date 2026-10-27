@@ -458,39 +458,39 @@ export const ALERTZERO_WORKER_INVESTIGATION_REOPENED_EVENT: EventTypeOpts<AlertZ
 
 /** A required count field. */
 const countField = (description: string) =>
-  ({ type: 'long', _meta: { description, optional: false } } as const);
+  ({ type: 'long', _meta: { description, optional: false } }) as const;
 
 /** A required boolean field. */
 const flagField = (description: string) =>
-  ({ type: 'boolean', _meta: { description, optional: false } } as const);
+  ({ type: 'boolean', _meta: { description, optional: false } }) as const;
 
 /** A required keyword field holding one value of a closed vocabulary, which it lists. */
 const vocabularyField = (description: string, values: readonly string[]) =>
   ({
     type: 'keyword',
     _meta: { description: `${description}: ${formatVocabulary(values)}`, optional: false },
-  } as const);
+  }) as const;
 
 /** An optional keyword field holding one value of a closed vocabulary, which it lists. */
 const optionalVocabularyField = (description: string, values: readonly string[]) =>
   ({
     type: 'keyword',
     _meta: { description: `${description}: ${formatVocabulary(values)}`, optional: true },
-  } as const);
+  }) as const;
 
 /** The Investigation id a Worker item event always carries. */
 const investigationIdField = (description: string) =>
   ({
     type: 'keyword',
     _meta: { description: `${description}. ${INVESTIGATION_ID_DESCRIPTION}`, optional: false },
-  } as const);
+  }) as const;
 
 /** The Investigation id a Worker item event carries except in the one case its description names. */
 const optionalInvestigationIdField = (description: string) =>
   ({
     type: 'keyword',
     _meta: { description: `${description}. ${INVESTIGATION_ID_DESCRIPTION}`, optional: true },
-  } as const);
+  }) as const;
 
 export const ALERTZERO_WORKER_RUN_COMPLETED_EVENT: EventTypeOpts<AlertZeroWorkerRunCompletedPayload> =
   {

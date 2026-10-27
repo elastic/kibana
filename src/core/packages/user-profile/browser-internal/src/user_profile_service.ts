@@ -16,9 +16,10 @@ import type {
 } from './internal_contracts';
 import { getDefaultUserProfileImplementation, convertUserProfileAPI } from './utils';
 
-export class UserProfileService
-  implements CoreService<InternalUserProfileServiceSetup, InternalUserProfileServiceStart>
-{
+export class UserProfileService implements CoreService<
+  InternalUserProfileServiceSetup,
+  InternalUserProfileServiceStart
+> {
   private readonly log: Logger;
   private delegate?: CoreUserProfileDelegateContract;
 

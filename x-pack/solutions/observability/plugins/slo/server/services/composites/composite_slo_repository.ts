@@ -22,7 +22,10 @@ export interface CompositeSLORepository {
 }
 
 export class DefaultCompositeSLORepository implements CompositeSLORepository {
-  constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
+  constructor(
+    private soClient: SavedObjectsClientContract,
+    private logger: Logger
+  ) {}
 
   async create(compositeSlo: CompositeSLODefinition): Promise<CompositeSLODefinition> {
     const existingResponse = await this.soClient.find<StoredCompositeSLODefinition>({

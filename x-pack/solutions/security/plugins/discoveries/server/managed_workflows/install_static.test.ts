@@ -29,7 +29,7 @@ const createMockLifecycleClient = () => ({
 const createMockWorkflowsExtensionsStart = (lifecycleClient = createMockLifecycleClient()) =>
   ({
     initManagedWorkflowsClient: jest.fn().mockResolvedValue(lifecycleClient),
-  } as unknown as WorkflowsExtensionsServerPluginStart);
+  }) as unknown as WorkflowsExtensionsServerPluginStart;
 
 describe('installStatic', () => {
   // Guards against reintroducing the legacy, non-prefixed workflow-id duplicates

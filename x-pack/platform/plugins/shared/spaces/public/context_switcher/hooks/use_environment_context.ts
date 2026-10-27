@@ -37,7 +37,7 @@ export const useEnvironmentContext = ({
   const isCloud = cloud?.isCloudEnabled ?? false;
 
   const [environmentName, setEnvironmentName] = useState<string>(() =>
-    isServerless ? cloud?.serverless.projectName ?? '' : ''
+    isServerless ? (cloud?.serverless.projectName ?? '') : ''
   );
 
   useEffect(() => {

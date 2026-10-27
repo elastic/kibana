@@ -13,7 +13,7 @@ const buildAgent = (skillIds?: string[]): AgentDefinition =>
   ({
     id: 'agent-1',
     configuration: { tools: [], skill_ids: skillIds },
-  } as unknown as AgentDefinition);
+  }) as unknown as AgentDefinition;
 
 describe('createPublicAgentsContract - addSkillToAgent', () => {
   it('appends the skill id to the existing skill_ids and updates the agent', async () => {

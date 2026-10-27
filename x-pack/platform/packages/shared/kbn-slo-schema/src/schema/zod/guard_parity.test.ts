@@ -116,9 +116,11 @@ const queryCases = ({ string, object }: { string: boolean; object: boolean }): G
 ];
 
 const indicatorCases = (fixture: (typeof allWireIndicators)[number]): GuardCase[] => [
-  ...allWireIndicators.map(
-    (indicator): GuardCase => [indicator.type, indicator, indicator === fixture]
-  ),
+  ...allWireIndicators.map((indicator): GuardCase => [
+    indicator.type,
+    indicator,
+    indicator === fixture,
+  ]),
   [
     `${fixture.type} with extra param key`,
     { ...fixture, params: { ...fixture.params, extra: 'value' } },

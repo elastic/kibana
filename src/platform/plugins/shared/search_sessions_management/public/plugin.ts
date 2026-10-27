@@ -18,15 +18,12 @@ import type {
   SearchSessionsManagementStartDependencies,
 } from './types';
 
-export class SearchSessionsManagementPlugin
-  implements
-    Plugin<
-      void,
-      SearchSessionsManagementPluginStart,
-      SearchSessionsManagementSetupDependencies,
-      SearchSessionsManagementStartDependencies
-    >
-{
+export class SearchSessionsManagementPlugin implements Plugin<
+  void,
+  SearchSessionsManagementPluginStart,
+  SearchSessionsManagementSetupDependencies,
+  SearchSessionsManagementStartDependencies
+> {
   private readonly kibanaVersion: string;
   private searchSetup!: ISearchSetup;
   private backgroundSearchNotifier?: BackgroundSearchNotifier;

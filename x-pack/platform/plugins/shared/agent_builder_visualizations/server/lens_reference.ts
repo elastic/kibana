@@ -41,7 +41,9 @@ export const toLensApiConfig = (attributes: LensAttributes): LensApiConfig =>
  * `chart_type` rather than store a value the tool / dashboard schemas (typed as
  * `SupportedChartType`) would later reject.
  */
-export const toSupportedChartType = (apiType: string | undefined): SupportedChartType | undefined =>
+export const toSupportedChartType = (
+  apiType: string | undefined
+): SupportedChartType | undefined =>
   apiType && SUPPORTED_CHART_TYPES.has(apiType) ? (apiType as SupportedChartType) : undefined;
 
 /** Extract the ES|QL query embedded in a text-based Lens visualization, if any. */

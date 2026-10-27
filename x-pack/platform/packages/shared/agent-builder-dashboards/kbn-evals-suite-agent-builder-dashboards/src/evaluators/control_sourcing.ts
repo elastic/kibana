@@ -179,8 +179,8 @@ const checkSourcing = (
       detail: substitute
         ? `${name} is filtered on ${substitute}`
         : acknowledged
-        ? `the reply names the ${name} filter alongside controls`
-        : `no control for ${name}, and the reply does not account for it`,
+          ? `the reply names the ${name} filter alongside controls`
+          : `no control for ${name}, and the reply does not account for it`,
     });
   }
 

@@ -9,9 +9,10 @@
 
 import type { Plugin, CoreSetup } from '@kbn/core/public';
 
-export class CorePluginChromelessPlugin
-  implements Plugin<CorePluginChromelessPluginSetup, CorePluginChromelessPluginStart>
-{
+export class CorePluginChromelessPlugin implements Plugin<
+  CorePluginChromelessPluginSetup,
+  CorePluginChromelessPluginStart
+> {
   public setup(core: CoreSetup, deps: {}) {
     core.application.register({
       id: 'chromeless',

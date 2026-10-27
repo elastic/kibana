@@ -68,7 +68,7 @@ export const buildUpdatedAtColumn = (
   const supportsSorting = context.supports?.sorting ?? true;
 
   // Default sortable to `true` for the updatedAt field, when sorting is supported.
-  const sortable = supportsSorting ? sortableProp ?? true : false;
+  const sortable = supportsSorting ? (sortableProp ?? true) : false;
 
   const resolvedWidth = pickAttribute(attributes, 'width', DEFAULT_UPDATED_AT_WIDTH);
 

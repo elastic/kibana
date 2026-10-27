@@ -247,8 +247,8 @@ export const resolveTier2Targets = async ({
   const intentExpanded = !boundedIntent.fits
     ? []
     : boundedIntent.collapsed
-    ? constrainToUniverse(boundedIntent.patterns)
-    : boundedIntent.patterns;
+      ? constrainToUniverse(boundedIntent.patterns)
+      : boundedIntent.patterns;
   // Universe narrowing can trade a collapsed dataset pattern back for its streams, so the bound
   // is checked again, as it is for `tier2_targets`. The route and the packaging step both cap
   // this list, so one that no longer fits would make the whole coordinator result invalid.

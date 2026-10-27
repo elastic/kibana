@@ -45,7 +45,7 @@ describe('registerServices', () => {
     [
       string,
       (params: { abortSignal?: AbortSignal; schema?: ProfilingSchema }) => Promise<unknown>,
-      jest.Mock
+      jest.Mock,
     ]
   > = [
     [

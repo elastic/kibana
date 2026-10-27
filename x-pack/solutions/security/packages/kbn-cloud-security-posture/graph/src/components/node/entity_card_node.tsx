@@ -106,7 +106,9 @@ const EntityCardWrapper = styled.div<{
     `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`};
   border-radius: ${NODE_BORDER_RADIUS}px;
   overflow: hidden;
-  transition: border-color 0.2s ease, border-style 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    border-style 0.2s ease;
 
   /* Show dashed primary border on hover (interactive only) */
   .react-flow__node:not(.non-interactive) ${NodeShapeContainer}:hover & {

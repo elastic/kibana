@@ -64,7 +64,7 @@ const toStreamsDownsample = (
     return undefined;
   }
 
-  const after = phaseName === 'hot' ? '0ms' : phaseMinAge ?? '0ms';
+  const after = phaseName === 'hot' ? '0ms' : (phaseMinAge ?? '0ms');
   return { after, fixed_interval: fixedInterval };
 };
 

@@ -89,7 +89,7 @@ const getKibanaAuthAndUrl = () => {
     process.env.KIBANA_USERNAME ??
     (config.elasticsearch?.username === 'kibana_system_user'
       ? 'elastic'
-      : config.elasticsearch?.username ?? 'elastic');
+      : (config.elasticsearch?.username ?? 'elastic'));
   const password = process.env.KIBANA_PASSWORD ?? config.elasticsearch?.password ?? 'changeme';
   const baseUrl = `${protocol}://${resolvedHost}:${port}${basePath}`;
   return { username, password, baseUrl };

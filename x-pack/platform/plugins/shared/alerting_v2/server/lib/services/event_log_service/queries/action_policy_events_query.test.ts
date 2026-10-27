@@ -227,7 +227,7 @@ describe('action policy events queries', () => {
             (shouldClause) =>
               Boolean(
                 shouldClause?.terms &&
-                  'kibana.alerting_v2.dispatcher.rule_ids' in (shouldClause.terms as object)
+                'kibana.alerting_v2.dispatcher.rule_ids' in (shouldClause.terms as object)
               )
           )
         );

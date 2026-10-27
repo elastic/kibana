@@ -1690,9 +1690,8 @@ export class TaskStore {
 
       const versionMap = this.createVersionMap(tasks);
       const concreteTasks = this.filterTasks(tasks);
-      const tasksWithDecryptedApiKeys = await this.bulkGetAndMergeTasksWithDecryptedApiKey(
-        concreteTasks
-      );
+      const tasksWithDecryptedApiKeys =
+        await this.bulkGetAndMergeTasksWithDecryptedApiKey(concreteTasks);
 
       return {
         docs: tasksWithDecryptedApiKeys,

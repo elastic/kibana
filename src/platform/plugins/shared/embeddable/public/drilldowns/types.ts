@@ -21,7 +21,7 @@ export type DrilldownDefinition<
   // Drilldown action execution context, i.e. context from on_filter trigger
   ExecutionContext extends object = object,
   // Drilldown setup context, i.e. context from open_context_menu trigger
-  SetupContext extends object = object
+  SetupContext extends object = object,
 > = {
   /**
    * Drilldown type display name. i.e. "Go to dashboard"
@@ -120,7 +120,7 @@ export type DrilldownRegistryEntry = [string, () => Promise<DrilldownDefinition>
  */
 export interface DrilldownEditorProps<
   TDrilldownState extends DrilldownState = DrilldownState,
-  SetupContext extends object = object
+  SetupContext extends object = object,
 > {
   /**
    * Current (latest) state.

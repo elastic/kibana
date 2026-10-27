@@ -273,14 +273,14 @@ export const LocalElasticsearchFields = ({
           values: { pattern: `${indexScope}-*-*` },
         })
     : indexScope === ALL_SCOPE
-    ? i18n.translate('xpack.streams.destinations.allSignalsIndexHelpDescription', {
-        defaultMessage:
-          'The same name is applied to logs, metrics, and traces as type-dataset-namespace.',
-      })
-    : i18n.translate('xpack.streams.destinations.signalIndexHelpDescription', {
-        defaultMessage: 'Optional. Leave blank to skip this signal. Must match {pattern}.',
-        values: { pattern: `${indexScope}-*-*` },
-      });
+      ? i18n.translate('xpack.streams.destinations.allSignalsIndexHelpDescription', {
+          defaultMessage:
+            'The same name is applied to logs, metrics, and traces as type-dataset-namespace.',
+        })
+      : i18n.translate('xpack.streams.destinations.signalIndexHelpDescription', {
+          defaultMessage: 'Optional. Leave blank to skip this signal. Must match {pattern}.',
+          values: { pattern: `${indexScope}-*-*` },
+        });
 
   return (
     <>

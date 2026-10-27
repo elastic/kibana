@@ -16,9 +16,12 @@ import { getDeleteFieldProvider } from './components/delete_field_provider';
 import { getFieldDeleteModalOpener } from './open_delete_modal';
 import { initApi } from './lib/api';
 
-export class IndexPatternFieldEditorPlugin
-  implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins>
-{
+export class IndexPatternFieldEditorPlugin implements Plugin<
+  PluginSetup,
+  PluginStart,
+  SetupPlugins,
+  StartPlugins
+> {
   private readonly formatEditorService = new FormatEditorService();
 
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {

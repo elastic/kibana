@@ -23,7 +23,10 @@ const MEMORY_REFERENCE_RE = /\bMEM_\d+\b/;
 
 /** Raised when a submitted tree fails a guardrail. Carries the tree id for the caller's message. */
 export class DecisionTreeValidationError extends Error {
-  constructor(public readonly treeId: string, message: string) {
+  constructor(
+    public readonly treeId: string,
+    message: string
+  ) {
     super(message);
     this.name = 'DecisionTreeValidationError';
   }

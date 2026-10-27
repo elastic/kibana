@@ -26,9 +26,8 @@ export const checkForRegistryNamingCollision = async (
   savedObjectsClient: SavedObjectsClientContract,
   integrationName: string
 ) => {
-  const registryOrBundledPackage = await Registry.fetchFindLatestPackageOrUndefined(
-    integrationName
-  );
+  const registryOrBundledPackage =
+    await Registry.fetchFindLatestPackageOrUndefined(integrationName);
   if (registryOrBundledPackage) {
     const registryConflictMessage = i18n.translate(
       'xpack.fleet.customIntegrations.namingCollisionError.registryOrBundle',

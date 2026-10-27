@@ -182,7 +182,7 @@ describe('GET role', () => {
         getRole.mockResponseImplementation((() => ({ body: apiResponse() })) as any);
       }
       if (queryResponse) {
-        queryRole.mockResponseImplementation(() => ({ body: queryResponse() } as any));
+        queryRole.mockResponseImplementation(() => ({ body: queryResponse() }) as any);
       }
 
       defineGetRolesRoutes(mockRouteDefinitionParams);

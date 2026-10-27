@@ -19,7 +19,7 @@ export interface Plugin<
   TSetup = void,
   TStart = void,
   TPluginsSetup extends Record<string, any> = never,
-  TPluginsStart extends Record<string, any> = never
+  TPluginsStart extends Record<string, any> = never,
 > {
   setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
 

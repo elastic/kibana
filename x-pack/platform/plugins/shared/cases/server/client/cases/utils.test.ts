@@ -148,7 +148,7 @@ describe('utils', () => {
         action,
         comment_id: attachment.id,
         payload: { comment: attachment },
-      } as unknown as UserAction);
+      }) as unknown as UserAction;
 
     const buildUnifiedAlert = (id: string, attachmentId: string | string[]): AttachmentV2 =>
       ({
@@ -156,7 +156,7 @@ describe('utils', () => {
         id,
         type: 'security.alert',
         attachmentId,
-      } as unknown as AttachmentV2);
+      }) as unknown as AttachmentV2;
 
     const unifiedAlertSingle = buildUnifiedAlert('unified-alert-1', 'alert-id-3');
     const unifiedAlertMulti = buildUnifiedAlert('unified-alert-2', ['alert-id-4', 'alert-id-5']);

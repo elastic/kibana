@@ -26,7 +26,7 @@ const mockUiSettings = (): UiSettingsCommon =>
       if (key === 'courier:ignoreFilterIfFieldNotInIndex') return false;
       return undefined;
     }),
-  } as unknown as UiSettingsCommon);
+  }) as unknown as UiSettingsCommon;
 
 const createExecutionContext = (inspectorAdapter?: RequestAdapter): ExecutionContext =>
   ({
@@ -37,7 +37,7 @@ const createExecutionContext = (inspectorAdapter?: RequestAdapter): ExecutionCon
     getKibanaRequest: jest.fn(),
     getSearchSessionId: jest.fn(),
     getExecutionContext: jest.fn(),
-  } as unknown as ExecutionContext);
+  }) as unknown as ExecutionContext;
 
 const getMockSearchService = (
   rawResponse: any = { hits: { hits: [] } }

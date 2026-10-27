@@ -57,15 +57,12 @@ import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
 import { registerDeductiveAgent } from './services/execution/run_agent/deductive/register_deductive_agent';
 import { getDeploymentInfo } from './utils/deployment_info';
 
-export class AgentBuilderPlugin
-  implements
-    Plugin<
-      AgentBuilderPluginSetup,
-      AgentBuilderPluginStart,
-      AgentBuilderSetupDependencies,
-      AgentBuilderStartDependencies
-    >
-{
+export class AgentBuilderPlugin implements Plugin<
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  AgentBuilderSetupDependencies,
+  AgentBuilderStartDependencies
+> {
   private logger: Logger;
   private config: AgentBuilderConfig;
   private readonly env: PluginInitializerContext['env'];

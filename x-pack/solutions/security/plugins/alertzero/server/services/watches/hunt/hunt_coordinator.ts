@@ -1047,8 +1047,8 @@ const huntCoordinatorCore = async (
           ? `Behaviors proposed, but ${gaps.length} part(s) of this hunt did not run: ` +
             `${gaps.map(({ detail }) => detail).join(' ')}`
           : hasConfirmedHit
-          ? 'Behaviors proposed; at least one tier confirmed an environment hit.'
-          : 'Behaviors proposed for Investigation staging.'
+            ? 'Behaviors proposed; at least one tier confirmed an environment hit.'
+            : 'Behaviors proposed for Investigation staging.'
         : 'No behavioral candidates survived catalog validation.',
     has_confirmed_hit: hasConfirmedHit,
     completeness,

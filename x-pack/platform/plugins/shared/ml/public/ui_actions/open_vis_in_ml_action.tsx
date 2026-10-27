@@ -81,16 +81,14 @@ export function createVisToADJobAction(
             return false;
           }
 
-          const { getChartInfoFromVisualization, isCompatibleVisualizationType } = await import(
-            '../application/jobs/new_job/job_from_lens'
-          );
+          const { getChartInfoFromVisualization, isCompatibleVisualizationType } =
+            await import('../application/jobs/new_job/job_from_lens');
 
           const chartInfo = await getChartInfoFromVisualization(lens, vis);
           return isCompatibleVisualizationType(chartInfo);
         } else if (isMapApi(embeddable)) {
-          const { isCompatibleMapVisualization } = await import(
-            '../application/jobs/new_job/job_from_map'
-          );
+          const { isCompatibleMapVisualization } =
+            await import('../application/jobs/new_job/job_from_map');
 
           return isCompatibleMapVisualization(embeddable);
         }

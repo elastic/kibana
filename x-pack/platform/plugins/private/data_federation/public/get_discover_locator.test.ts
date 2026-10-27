@@ -15,7 +15,7 @@ const get = jest.fn(() => locator);
 const share = { url: { locators: { get } } } as unknown as SharePluginStart;
 
 const withDiscover = (show?: boolean) =>
-  ({ discover_v2: show === undefined ? undefined : { show } } as unknown as Capabilities);
+  ({ discover_v2: show === undefined ? undefined : { show } }) as unknown as Capabilities;
 
 describe('getDiscoverLocator', () => {
   beforeEach(() => get.mockClear());

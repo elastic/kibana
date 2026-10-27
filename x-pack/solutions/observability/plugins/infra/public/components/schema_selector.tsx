@@ -176,15 +176,15 @@ export const SchemaSelector = ({
             ...options,
           ]
         : options.length === 0
-        ? [
-            {
-              inputDisplay: i18n.translate('xpack.infra.schemaSelector.noSchemaAvailable', {
-                defaultMessage: 'No schema available',
-              }),
-              value: 'unknown',
-            },
-          ]
-        : options,
+          ? [
+              {
+                inputDisplay: i18n.translate('xpack.infra.schemaSelector.noSchemaAvailable', {
+                  defaultMessage: 'No schema available',
+                }),
+                value: 'unknown',
+              },
+            ]
+          : options,
     [isInvalid, options, value]
   );
 
@@ -231,7 +231,7 @@ export const SchemaSelector = ({
         id="infraSchemaSelectorSelect"
         options={displayOptions}
         compressed
-        valueOfSelected={isInvalid ? 'unknown' : value ?? DEFAULT_SCHEMA}
+        valueOfSelected={isInvalid ? 'unknown' : (value ?? DEFAULT_SCHEMA)}
         onChange={onSelect}
         isLoading={isLoading}
         fullWidth

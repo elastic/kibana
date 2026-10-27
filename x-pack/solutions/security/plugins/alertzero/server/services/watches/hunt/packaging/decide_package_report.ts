@@ -220,8 +220,8 @@ export const buildProposalSummaryBullets = (
     const host = p.hostName
       ? ` on \`${truncate(p.hostName, MAX_SUMMARY_HOST_NAME_CHARS)}\``
       : p.subject
-      ? ` for ${p.subject.kind} \`${truncate(p.subject.value, MAX_SUMMARY_HOST_NAME_CHARS)}\``
-      : '';
+        ? ` for ${p.subject.kind} \`${truncate(p.subject.value, MAX_SUMMARY_HOST_NAME_CHARS)}\``
+        : '';
     const action = p.actionWorkflowId
       ? `: runs \`${p.actionWorkflowId}\` on approval`
       : ': recommendation only';

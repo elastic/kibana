@@ -35,21 +35,19 @@ describe('runRulesInBatches', () => {
   });
 
   it('records per-rule errors of a successful batch and treats missing rules as already gone', async () => {
-    const run = jest.fn(
-      async (): Promise<BulkResponse> => ({
-        affected_count: 1,
-        errors: [
-          {
-            id: 'rule-missing',
-            error: { code: ALERTING_ERROR_CODES.RULE_NOT_FOUND, message: 'Rule not found' },
-          },
-          {
-            id: 'rule-conflict',
-            error: { code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT, message: 'Conflict' },
-          },
-        ],
-      })
-    );
+    const run = jest.fn(async (): Promise<BulkResponse> => ({
+      affected_count: 1,
+      errors: [
+        {
+          id: 'rule-missing',
+          error: { code: ALERTING_ERROR_CODES.RULE_NOT_FOUND, message: 'Rule not found' },
+        },
+        {
+          id: 'rule-conflict',
+          error: { code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT, message: 'Conflict' },
+        },
+      ],
+    }));
 
     const result = await runRulesInBatches(['rule-ok', 'rule-missing', 'rule-conflict'], run);
 

@@ -55,7 +55,7 @@ const makeSourcesClient = (sources: NightshiftSource[]): SourcesClient =>
       page: 1,
       per_page: 100,
     }),
-  } as unknown as SourcesClient);
+  }) as unknown as SourcesClient;
 
 const makeKiClient = (reconcileIds: string[] = [], ownedRuleIds: string[] = reconcileIds) => ({
   setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),

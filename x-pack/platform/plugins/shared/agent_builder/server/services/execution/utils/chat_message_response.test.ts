@@ -39,13 +39,13 @@ const executionTerminated = (outcome: ExecutionOutcome) =>
       time_to_last_token: 2,
       outcome,
     },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 const toolResult = (toolId: string, results: ToolResult[]) =>
   ({
     type: ChatEventType.toolResult,
     data: { tool_call_id: `call-${toolId}`, tool_id: toolId, results },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 const declined = (message: string, metadata: Record<string, unknown> = {}): ToolResult => ({
   tool_result_id: 'abc123',

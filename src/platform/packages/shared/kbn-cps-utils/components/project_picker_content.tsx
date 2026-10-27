@@ -25,7 +25,8 @@ import type { ProjectsData } from '../types';
 import { useFetchProjects } from './use_fetch_projects';
 
 interface ProjectPickerContentBaseProps
-  extends Pick<ProjectPickerStateProviderProps, 'projectRoutingStrategy'>,
+  extends
+    Pick<ProjectPickerStateProviderProps, 'projectRoutingStrategy'>,
     Pick<ComponentProps<typeof ProjectPickerFrame>, 'showHeader'> {
   projectRouting?: ProjectRouting;
   /**

@@ -24,9 +24,12 @@ export interface LocatorExamplesSetup {
   locator: HelloLocator;
 }
 
-export class LocatorExamplesPlugin
-  implements Plugin<LocatorExamplesSetup, void, SetupDeps, StartDeps>
-{
+export class LocatorExamplesPlugin implements Plugin<
+  LocatorExamplesSetup,
+  void,
+  SetupDeps,
+  StartDeps
+> {
   public setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     const locator = plugins.share.url.locators.create(new HelloLocatorDefinition());
 

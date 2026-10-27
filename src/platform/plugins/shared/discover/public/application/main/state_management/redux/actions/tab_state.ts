@@ -163,8 +163,8 @@ export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload
     // Compare identities rather than references, since a shared link may omit the routing.
     const isSameDocument = Boolean(
       expandedDoc &&
-        appState.expandedDoc &&
-        matchesExpandedDocRef(expandedDoc, appState.expandedDoc)
+      appState.expandedDoc &&
+      matchesExpandedDocRef(expandedDoc, appState.expandedDoc)
     );
 
     dispatch(
@@ -656,7 +656,7 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
     TabActionPayload<{
       payload: { dateRange: TimeRange; query?: Query | AggregateQuery };
       isUpdate?: boolean;
-    }>
+    }>,
   ]
 > = ({ tabId, payload, isUpdate }) =>
   function onQuerySubmitThunkFn(

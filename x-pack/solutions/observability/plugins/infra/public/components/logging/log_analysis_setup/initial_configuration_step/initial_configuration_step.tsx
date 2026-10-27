@@ -179,7 +179,7 @@ const partitionValidationErrors = (validationErrors: ValidationUIError[]) =>
       ValidationIndicesError[],
       TimeRangeValidationError[],
       ProjectRoutingValidationError[],
-      ValidationUIError[]
+      ValidationUIError[],
     ]
   >(
     ([indicesErrors, timeRangeErrors, projectRoutingErrors, otherErrors], error) => {

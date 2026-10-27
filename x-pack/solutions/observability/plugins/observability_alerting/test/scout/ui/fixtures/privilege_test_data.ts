@@ -80,7 +80,7 @@ export const waitForV1RuleAlert = async (
       },
       { ignore: [404] }
     );
-    const hits = 'hits' in result ? result.hits?.hits ?? [] : [];
+    const hits = 'hits' in result ? (result.hits?.hits ?? []) : [];
     if (hits.length > 0) {
       const alertIds = hits
         .map((h) => h._source?.['kibana.alert.uuid'])

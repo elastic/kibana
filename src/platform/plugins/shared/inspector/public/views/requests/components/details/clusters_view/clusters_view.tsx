@@ -29,8 +29,8 @@ export class ClustersView extends Component<DetailViewProps, State> {
       : Boolean(
           (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse
             ?._shards ||
-            (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse
-              ?._clusters
+          (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse
+            ?._clusters
         );
 
   constructor(props: DetailViewProps) {

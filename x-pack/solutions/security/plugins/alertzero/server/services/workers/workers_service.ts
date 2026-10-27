@@ -276,7 +276,7 @@ export class WorkersService {
     const nextAccount =
       requestedAccount === undefined
         ? readServiceAccountId(currentState?.templateValues)
-        : requestedAccount ?? undefined;
+        : (requestedAccount ?? undefined);
     const nextEnabled = patch.enabled ?? Boolean(status.enabled);
     if (nextEnabled && !nextAccount) {
       return { outcome: 'rejected', what: 'a worker that is enabled without a service account' };

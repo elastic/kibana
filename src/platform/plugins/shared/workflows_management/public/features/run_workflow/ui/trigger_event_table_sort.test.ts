@@ -11,7 +11,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { sortTriggerEventRows } from './trigger_event_table_sort';
 
 const row = (id: string, flattened: Record<string, unknown>) =>
-  ({ id, raw: { _id: id }, flattened } as DataTableRecord);
+  ({ id, raw: { _id: id }, flattened }) as DataTableRecord;
 
 describe('sortTriggerEventRows', () => {
   const rows = [

@@ -33,10 +33,10 @@ const observedChecks = (world: FpTpWorld): Record<string, string> => {
   const entityRole = !host
     ? 'skipped'
     : subType === undefined
-    ? 'neutral'
-    : subType === 'employee_workstation'
-    ? 'supports'
-    : 'contradicts';
+      ? 'neutral'
+      : subType === 'employee_workstation'
+        ? 'supports'
+        : 'contradicts';
 
   const sources = eventSources(world);
   const parents = sources
@@ -48,12 +48,12 @@ const observedChecks = (world: FpTpWorld): Record<string, string> => {
     sources.length === 0
       ? 'skipped'
       : byUser && byManagement
-      ? 'conflicting'
-      : byManagement
-      ? 'contradicts'
-      : byUser
-      ? 'supports'
-      : 'neutral';
+        ? 'conflicting'
+        : byManagement
+          ? 'contradicts'
+          : byUser
+            ? 'supports'
+            : 'neutral';
 
   const domains = sources
     .filter(({ event }) => event?.category?.includes('network'))
@@ -63,12 +63,12 @@ const observedChecks = (world: FpTpWorld): Record<string, string> => {
     sources.length === 0
       ? 'skipped'
       : domains.length === 0
-      ? 'neutral'
-      : vendor === domains.length
-      ? 'contradicts'
-      : vendor === 0
-      ? 'supports'
-      : 'conflicting';
+        ? 'neutral'
+        : vendor === domains.length
+          ? 'contradicts'
+          : vendor === 0
+            ? 'supports'
+            : 'conflicting';
 
   return { entityRole, processParent, networkDestination };
 };

@@ -56,17 +56,16 @@ export const createParser = () => {
     number = function () {
       var number,
         string = '';
-      for ('-' === ch && ((string = '-'), next('-')); ch >= '0' && '9' >= ch; )
-        (string += ch), next();
-      if ('.' === ch) for (string += '.'; next() && ch >= '0' && '9' >= ch; ) string += ch;
+      for ('-' === ch && ((string = '-'), next('-')); ch >= '0' && '9' >= ch;)
+        ((string += ch), next());
+      if ('.' === ch) for (string += '.'; next() && ch >= '0' && '9' >= ch;) string += ch;
       if ('e' === ch || 'E' === ch)
         for (
           string += ch, next(), ('-' === ch || '+' === ch) && ((string += ch), next());
           ch >= '0' && '9' >= ch;
-
         )
-          (string += ch), next();
-      return (number = +string), isNaN(number) ? (error('Bad number'), void 0) : number;
+          ((string += ch), next());
+      return ((number = +string), isNaN(number) ? (error('Bad number'), void 0) : number);
     },
     stringLiteral = function () {
       let quotes = '"""';
@@ -93,8 +92,8 @@ export const createParser = () => {
         string = '';
 
       if ('"' === ch) {
-        for (; next(); ) {
-          if ('"' === ch) return next(), string;
+        for (; next();) {
+          if ('"' === ch) return (next(), string);
           if ('\\' === ch)
             if ((next(), 'u' === ch)) {
               for (uffff = 0, i = 0; 4 > i && ((hex = parseInt(next(), 16)), isFinite(hex)); i += 1)
@@ -111,26 +110,26 @@ export const createParser = () => {
       error('Bad string');
     },
     white = function () {
-      for (; ch && ' ' >= ch; ) next();
+      for (; ch && ' ' >= ch;) next();
     },
     word = function () {
       switch (ch) {
         case 't':
-          return next('t'), next('r'), next('u'), next('e'), !0;
+          return (next('t'), next('r'), next('u'), next('e'), !0);
         case 'f':
-          return next('f'), next('a'), next('l'), next('s'), next('e'), !1;
+          return (next('f'), next('a'), next('l'), next('s'), next('e'), !1);
         case 'n':
-          return next('n'), next('u'), next('l'), next('l'), null;
+          return (next('n'), next('u'), next('l'), next('l'), null);
       }
       error("Unexpected '" + ch + "'");
     },
     array = function () {
       var array: any[] = [];
       if ('[' === ch) {
-        if ((next('['), white(), ']' === ch)) return next(']'), array;
-        for (; ch; ) {
-          if ((array.push(value()), white(), ']' === ch)) return next(']'), array;
-          next(','), white();
+        if ((next('['), white(), ']' === ch)) return (next(']'), array);
+        for (; ch;) {
+          if ((array.push(value()), white(), ']' === ch)) return (next(']'), array);
+          (next(','), white());
         }
       }
       error('Bad array');
@@ -139,8 +138,8 @@ export const createParser = () => {
       var key,
         object: any = {};
       if ('{' === ch) {
-        if ((next('{'), white(), '}' === ch)) return next('}'), object;
-        for (; ch; ) {
+        if ((next('{'), white(), '}' === ch)) return (next('}'), object);
+        for (; ch;) {
           let latchKeyStart = at;
           if (
             ((key = string()),
@@ -152,8 +151,8 @@ export const createParser = () => {
             white(),
             '}' === ch)
           )
-            return next('}'), object;
-          next(','), white();
+            return (next('}'), object);
+          (next(','), white());
         }
       }
       error('Bad object');

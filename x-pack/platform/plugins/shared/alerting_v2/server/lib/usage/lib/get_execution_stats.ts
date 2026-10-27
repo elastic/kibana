@@ -69,7 +69,7 @@ export async function getExecutionStats(
   const total =
     typeof ruleExecutorResponse.hits.total === 'number'
       ? ruleExecutorResponse.hits.total
-      : ruleExecutorResponse.hits.total?.value ?? 0;
+      : (ruleExecutorResponse.hits.total?.value ?? 0);
 
   const aggs = ruleExecutorResponse.aggregations as unknown as
     | ExecutionStatsAggregations

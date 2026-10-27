@@ -147,7 +147,7 @@ describe('executionSteps', () => {
         actor: agentActor,
         execution_id: 'exec-sched',
         data: { sequence, step: { type: ConversationRoundStepType.reasoning, reasoning } },
-      } as unknown as TimelineEvent);
+      }) as unknown as TimelineEvent;
 
     expect(executionSteps([started, step(1, 'second'), step(0, 'first'), terminated])).toEqual([
       { type: ConversationRoundStepType.reasoning, reasoning: 'first' },

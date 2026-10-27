@@ -306,7 +306,7 @@ export const useEntityGrouping = ({
     : isNonResolutionFetching;
 
   const targetMetadata: TargetMetadataMap = isResolutionGrouping
-    ? activeResolutionResult.data?.targetMetadata ?? EMPTY_TARGET_METADATA
+    ? (activeResolutionResult.data?.targetMetadata ?? EMPTY_TARGET_METADATA)
     : EMPTY_TARGET_METADATA;
 
   const groupData = useMemo((): ParsedGroupingAggregation<EntitiesGroupingAggregation> => {

@@ -22,11 +22,10 @@ import {
 } from '../../../doc_viewer_table/table_cell_actions';
 import type { AttributeField } from './attributes_overview';
 
-interface AttributesTableProps
-  extends Pick<
-    DocViewRenderProps,
-    'hit' | 'dataView' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
-  > {
+interface AttributesTableProps extends Pick<
+  DocViewRenderProps,
+  'hit' | 'dataView' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
+> {
   dataSource: DataSource | undefined;
   fields: AttributeField[];
   searchTerm: string;

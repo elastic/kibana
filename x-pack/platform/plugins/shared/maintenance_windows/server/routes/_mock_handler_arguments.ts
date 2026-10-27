@@ -24,7 +24,7 @@ export function mockHandlerArguments(
 ): [
   MaintenanceWindowRequestHandlerContext,
   KibanaRequest<unknown, unknown, unknown>,
-  KibanaResponseFactory
+  KibanaResponseFactory,
 ] {
   return [
     {

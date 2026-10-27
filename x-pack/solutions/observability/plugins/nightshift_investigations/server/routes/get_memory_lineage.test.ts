@@ -30,7 +30,7 @@ const memory = (id: string, mergedFrom: string[] = []): MemoryPage =>
       conversions: 5,
       last_impression_time: '2026-01-01T00:00:00.000Z',
     },
-  } as unknown as MemoryPage);
+  }) as unknown as MemoryPage;
 
 /** Serves the route from a graph of `id -> merged_from`, and reports only the ids it can resolve. */
 const run = (root: MemoryPage | undefined, graph: Record<string, string[]>, enabled = true) => {

@@ -133,14 +133,18 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
         /* Same as ConversationCard: 24px on three sides; 16px on the right so 32px icon
            buttons' glyphs land at 24px from the edge. */
         padding: ${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l};
-        background: ${isSelected
-          ? euiTheme.colors.backgroundBaseInteractiveSelect
-          : euiTheme.colors.backgroundBasePlain};
-        ${isInteractive && !isSelected
-          ? `&:has([data-test-subj='investigationCardButton']:hover) {
+        background: ${
+          isSelected
+            ? euiTheme.colors.backgroundBaseInteractiveSelect
+            : euiTheme.colors.backgroundBasePlain
+        };
+        ${
+          isInteractive && !isSelected
+            ? `&:has([data-test-subj='investigationCardButton']:hover) {
               background: ${euiTheme.colors.backgroundBaseSubdued};
             }`
-          : ''}
+            : ''
+        }
       `}
     >
       {/*

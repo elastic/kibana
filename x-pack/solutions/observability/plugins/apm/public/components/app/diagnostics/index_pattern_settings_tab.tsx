@@ -42,8 +42,8 @@ export function DiagnosticsIndexPatternSettings() {
           const text = priority
             ? `(Priority: ${priority})`
             : isNonStandard
-            ? `(legacy template)`
-            : '';
+              ? `(legacy template)`
+              : '';
           return (
             <EuiToolTip key={templateName} content={`${templateIndexPatterns.join(', ')} ${text}`}>
               <EuiBadge

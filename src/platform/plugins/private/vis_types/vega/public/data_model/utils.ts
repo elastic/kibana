@@ -94,7 +94,7 @@ export const VegaThemeColors = {
 };
 
 export function getVegaThemeColors<
-  T extends 'grid' | 'title' | 'label' | 'text' | 'default' | 'visColors'
+  T extends 'grid' | 'title' | 'label' | 'text' | 'default' | 'visColors',
 >(theme: CoreTheme, colorToken: T) {
   const colorMode = theme.darkMode ? 'dark' : 'light';
   return VegaThemeColors[theme.name as keyof typeof VegaThemeColors]?.[colorMode][colorToken] as

@@ -42,11 +42,10 @@ import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
 import { UnresolvedDocument, type RequestStateMeta } from './unresolved_document';
 
-export interface UnifiedDocViewerFlyoutProps
-  extends Pick<
-    DocViewerProps,
-    'initialTabId' | 'onUpdateSelectedTabId' | 'initialShareableState' | 'onShareableStateChange'
-  > {
+export interface UnifiedDocViewerFlyoutProps extends Pick<
+  DocViewerProps,
+  'initialTabId' | 'onUpdateSelectedTabId' | 'initialShareableState' | 'onShareableStateChange'
+> {
   docViewerRef?: DocViewerProps['ref'];
   'data-test-subj'?: string;
   flyoutTitle?: string;

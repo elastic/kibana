@@ -124,8 +124,8 @@ export const emitFromStepResult = async (
   const caseIds = data.case
     ? [data.case.id]
     : Array.isArray(data.cases)
-    ? data.cases.map(({ id }) => id)
-    : [];
+      ? data.cases.map(({ id }) => id)
+      : [];
   if (caseIds.length > 0) {
     events.sendUiEvent<typeof CASES_UPDATED_UI_EVENT, CasesUpdatedUiEventData>(
       CASES_UPDATED_UI_EVENT,

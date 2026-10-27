@@ -157,7 +157,7 @@ const getAttachedAlertIds = (attachments: readonly FoundCaseAttachment[]): strin
   attachments
     .filter(({ type }) => type === SECURITY_ALERT_ATTACHMENT_TYPE)
     .flatMap(({ attachmentId }) =>
-      typeof attachmentId === 'string' ? [attachmentId] : attachmentId ?? []
+      typeof attachmentId === 'string' ? [attachmentId] : (attachmentId ?? [])
     )
     .sort();
 

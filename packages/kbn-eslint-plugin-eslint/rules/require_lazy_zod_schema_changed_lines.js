@@ -39,7 +39,7 @@ const parseChangedFiles = (status) => {
   const baseSourceFiles = new Set();
   const renamedFiles = new Map();
   const entries = status.split('\0');
-  for (let index = 0; index < entries.length - 1; ) {
+  for (let index = 0; index < entries.length - 1;) {
     const code = entries[index++];
     const oldPath = entries[index++];
     if (code.startsWith('R') || code.startsWith('C')) {
@@ -191,7 +191,7 @@ const touchesChangedLine = (ranges, node) =>
   ranges === null ||
   Boolean(
     node.loc &&
-      ranges.some(({ start, end }) => start <= node.loc.end.line && end >= node.loc.start.line)
+    ranges.some(({ start, end }) => start <= node.loc.end.line && end >= node.loc.start.line)
   );
 
 /**
@@ -240,7 +240,7 @@ const getRemovedSourceChunks = (base, files) => {
  */
 const isDeclarationInRemovedSource = (declaration, removedSourceChunks) =>
   removedSourceChunks.some((chunk) => {
-    for (let index = chunk.indexOf(declaration); index !== -1; ) {
+    for (let index = chunk.indexOf(declaration); index !== -1;) {
       const prefix = chunk.slice(chunk.lastIndexOf('\n', index - 1) + 1, index);
       // Reject an indented `const`, which is a function-local declaration, not a module-level one.
       if (/^(?:export\s+)?(?:const\s+)?$|^\s*$/.test(prefix)) {

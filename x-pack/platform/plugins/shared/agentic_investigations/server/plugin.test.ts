@@ -51,7 +51,7 @@ const createContext = ({ escalationsEnabled = true }: { escalationsEnabled?: boo
     config: {
       get: () => ({ enabled: true, escalations: { enabled: escalationsEnabled } }),
     },
-  } as unknown as ConstructorParameters<typeof AgenticInvestigationsPlugin>[0]);
+  }) as unknown as ConstructorParameters<typeof AgenticInvestigationsPlugin>[0];
 
 const setupPlugin = ({ escalationsEnabled }: { escalationsEnabled?: boolean } = {}) => {
   const plugin = new AgenticInvestigationsPlugin(createContext({ escalationsEnabled }));

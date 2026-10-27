@@ -231,8 +231,8 @@ export const termsOperation: OperationDefinition<
 
     return Boolean(
       allFields.length &&
-        invalidFields.length === 0 &&
-        (!column.params.otherBucket || !newIndexPattern.hasRestrictions)
+      invalidFields.length === 0 &&
+      (!column.params.otherBucket || !newIndexPattern.hasRestrictions)
     );
   },
   buildColumn({ layer, field, indexPattern }, columnParams) {
@@ -343,7 +343,7 @@ export const termsOperation: OperationDefinition<
               sortField:
                 status.status === 'missing-with-default'
                   ? status.defaultField
-                  : lastValueOrderAgg.params?.sortField ?? '',
+                  : (lastValueOrderAgg.params?.sortField ?? ''),
             },
           };
           resolvedOrderAggColumn = resolvedOrderAgg;

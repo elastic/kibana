@@ -207,12 +207,12 @@ const MinimapStepRow = React.memo(
                         defaultMessage: 'contains steps with errors',
                       })
                   : severityInfo.isOwn
-                  ? i18n.translate('workflows.stepMinimap.stepHasWarnings', {
-                      defaultMessage: 'has warnings',
-                    })
-                  : i18n.translate('workflows.stepMinimap.stepContainsWarnings', {
-                      defaultMessage: 'contains steps with warnings',
-                    })}
+                    ? i18n.translate('workflows.stepMinimap.stepHasWarnings', {
+                        defaultMessage: 'has warnings',
+                      })
+                    : i18n.translate('workflows.stepMinimap.stepContainsWarnings', {
+                        defaultMessage: 'contains steps with warnings',
+                      })}
               </span>
             </EuiScreenReaderOnly>
           </>

@@ -478,68 +478,73 @@ export const tasks: TelemetryTask[] = [
         TIME_RANGES.map((timeRange) => ({ processorEvent, timeRange }))
       );
 
-      const allData = await jobs.reduce((prevJob, current) => {
-        return prevJob.then(async (data) => {
-          const { processorEvent, timeRange } = current;
+      const allData = await jobs.reduce(
+        (prevJob, current) => {
+          return prevJob.then(async (data) => {
+            const { processorEvent, timeRange } = current;
 
-          const totalHitsResponse = await telemetryClient.search({
-            index: indicesByProcessorEvent[processorEvent],
-            size: 0,
-            track_total_hits: true,
-            timeout,
-            query: {
-              bool: {
-                filter: [
-                  { term: { [PROCESSOR_EVENT]: processorEvent } },
-                  ...(timeRange === '1d' ? [range1d] : []),
-                ],
+            const totalHitsResponse = await telemetryClient.search({
+              index: indicesByProcessorEvent[processorEvent],
+              size: 0,
+              track_total_hits: true,
+              timeout,
+              query: {
+                bool: {
+                  filter: [
+                    { term: { [PROCESSOR_EVENT]: processorEvent } },
+                    ...(timeRange === '1d' ? [range1d] : []),
+                  ],
+                },
               },
-            },
-          });
+            });
 
-          const retainmentResponse =
-            timeRange === 'all'
-              ? await telemetryClient.search({
-                  index: indicesByProcessorEvent[processorEvent],
-                  size: 10,
-                  track_total_hits: false,
-                  timeout,
-                  query: {
-                    bool: {
-                      filter: [{ term: { [PROCESSOR_EVENT]: processorEvent } }],
+            const retainmentResponse =
+              timeRange === 'all'
+                ? await telemetryClient.search({
+                    index: indicesByProcessorEvent[processorEvent],
+                    size: 10,
+                    track_total_hits: false,
+                    timeout,
+                    query: {
+                      bool: {
+                        filter: [{ term: { [PROCESSOR_EVENT]: processorEvent } }],
+                      },
                     },
-                  },
-                  sort: {
-                    [AT_TIMESTAMP]: 'asc',
-                  },
-                  fields: [AT_TIMESTAMP],
-                })
-              : null;
-
-          const event = retainmentResponse?.hits.hits[0]?.fields as
-            | {
-                [AT_TIMESTAMP]: number[];
-              }
-            | undefined;
-
-          return merge({}, data, {
-            counts: {
-              [processorEvent]: {
-                [timeRange]: totalHitsResponse.hits.total.value,
-              },
-            },
-            ...(event
-              ? {
-                  retainment: {
-                    [processorEvent]: {
-                      ms: new Date().getTime() - new Date(event[AT_TIMESTAMP][0]).getTime(),
+                    sort: {
+                      [AT_TIMESTAMP]: 'asc',
                     },
-                  },
+                    fields: [AT_TIMESTAMP],
+                  })
+                : null;
+
+            const event = retainmentResponse?.hits.hits[0]?.fields as
+              | {
+                  [AT_TIMESTAMP]: number[];
                 }
-              : {}),
+              | undefined;
+
+            return merge({}, data, {
+              counts: {
+                [processorEvent]: {
+                  [timeRange]: totalHitsResponse.hits.total.value,
+                },
+              },
+              ...(event
+                ? {
+                    retainment: {
+                      [processorEvent]: {
+                        ms: new Date().getTime() - new Date(event[AT_TIMESTAMP][0]).getTime(),
+                      },
+                    },
+                  }
+                : {}),
+            });
           });
-        });
-      }, Promise.resolve({} as Record<string, { counts: Record<ProcessorEvent, Record<TimeRange, number>> }>));
+        },
+        Promise.resolve(
+          {} as Record<string, { counts: Record<ProcessorEvent, Record<TimeRange, number>> }>
+        )
+      );
 
       return allData;
     },

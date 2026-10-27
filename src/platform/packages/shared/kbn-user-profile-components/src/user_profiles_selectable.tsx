@@ -35,17 +35,18 @@ const NULL_OPTION_KEY = 'null';
 /**
  * Props of {@link UserProfilesSelectable} component
  */
-export interface UserProfilesSelectableProps<Option extends UserProfileWithAvatar | null>
-  extends Pick<
-    EuiSelectableProps,
-    | 'height'
-    | 'singleSelection'
-    | 'loadingMessage'
-    | 'noMatchesMessage'
-    | 'emptyMessage'
-    | 'errorMessage'
-    | 'data-test-subj'
-  > {
+export interface UserProfilesSelectableProps<
+  Option extends UserProfileWithAvatar | null,
+> extends Pick<
+  EuiSelectableProps,
+  | 'height'
+  | 'singleSelection'
+  | 'loadingMessage'
+  | 'noMatchesMessage'
+  | 'emptyMessage'
+  | 'errorMessage'
+  | 'data-test-subj'
+> {
   /**
    * List of users to be rendered as suggestions.
    */

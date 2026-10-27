@@ -21,9 +21,7 @@ export interface SnapshotRestoreLocatorDefinitionDependencies {
   managementAppLocator: ManagementAppLocator;
 }
 
-export class SnapshotRestoreLocatorDefinition
-  implements LocatorDefinition<SnapshotRestoreLocatorParams>
-{
+export class SnapshotRestoreLocatorDefinition implements LocatorDefinition<SnapshotRestoreLocatorParams> {
   constructor(protected readonly deps: SnapshotRestoreLocatorDefinitionDependencies) {}
 
   public readonly id = SNAPSHOT_RESTORE_LOCATOR_ID;

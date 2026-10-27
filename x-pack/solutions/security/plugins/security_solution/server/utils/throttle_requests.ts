@@ -12,7 +12,7 @@ import type { SecuritySolutionRequestHandlerContext } from '../types';
 type RouteHandlerParams = [
   context: SecuritySolutionRequestHandlerContext,
   request: KibanaRequest,
-  response: KibanaResponseFactory
+  response: KibanaResponseFactory,
 ];
 
 interface ThrottleOptions {

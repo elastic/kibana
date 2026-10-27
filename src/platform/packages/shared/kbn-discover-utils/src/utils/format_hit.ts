@@ -28,7 +28,7 @@ import { MAX_RENDERED_FIELD_VALUE_LENGTH } from './truncate_field_value';
 type PartialHitReactPair = [
   fieldDisplayName: string,
   formattedValue: ReactNode | undefined,
-  fieldName: string | null
+  fieldName: string | null,
 ];
 
 interface FormatHitReactOptions {

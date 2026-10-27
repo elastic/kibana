@@ -14,8 +14,10 @@ import type { ListResult } from '@kbn/fleet-plugin/common';
 import type { FetchAllArtifactsOptions } from '@kbn/fleet-plugin/server/services';
 import type { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 
-export interface EndpointArtifactClientInterface
-  extends Pick<ArtifactsClientInterface, 'fetchAll'> {
+export interface EndpointArtifactClientInterface extends Pick<
+  ArtifactsClientInterface,
+  'fetchAll'
+> {
   getArtifact(id: string): Promise<InternalArtifactCompleteSchema | undefined>;
 
   createArtifact(artifact: InternalArtifactCompleteSchema): Promise<InternalArtifactCompleteSchema>;

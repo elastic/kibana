@@ -108,8 +108,8 @@ export function isRacAlertsApiForbiddenError(error: unknown): boolean {
     typeof e.body?.message === 'string'
       ? e.body.message
       : typeof e.message === 'string'
-      ? e.message
-      : '';
+        ? e.message
+        : '';
 
   return (
     msg.includes('privileges [rac]') ||

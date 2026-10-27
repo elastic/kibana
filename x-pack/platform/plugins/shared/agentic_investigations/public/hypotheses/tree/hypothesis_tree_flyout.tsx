@@ -219,8 +219,8 @@ const HypothesisTreeCanvas = ({ input }: { input: HypothesisTreeInput }): React.
         const stroke = isHappyPath
           ? euiTheme.colors.borderStrongSuccess
           : isHighlighted
-          ? euiTheme.colors.borderStrongPrimary
-          : euiTheme.colors.borderBaseProminent;
+            ? euiTheme.colors.borderStrongPrimary
+            : euiTheme.colors.borderBaseProminent;
         return {
           id,
           source,

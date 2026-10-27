@@ -64,5 +64,5 @@ export function useResolvedApmIndices({
     return indicesSource.indices;
   }
 
-  return loading ? undefined : fetchedIndices ?? null;
+  return loading ? undefined : (fetchedIndices ?? null);
 }

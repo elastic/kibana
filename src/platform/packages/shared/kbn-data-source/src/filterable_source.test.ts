@@ -24,7 +24,7 @@ const makeColumn = (name: string, type: string, esType?: string, isComputedColum
     name,
     meta: { type, esType },
     ...(isComputedColumn ? { isComputedColumn: true } : {}),
-  } as DatatableColumn);
+  }) as DatatableColumn;
 
 const datasetColumns = [
   makeColumn('@timestamp', 'date', 'date'),

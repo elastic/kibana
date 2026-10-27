@@ -17,7 +17,7 @@ const featureId = 'alertzero_frontier';
 const registryReturning = (result: unknown) =>
   ({
     endpoints: { getForFeature: jest.fn().mockResolvedValue(result) },
-  } as unknown as SearchInferenceEndpointsPluginStart);
+  }) as unknown as SearchInferenceEndpointsPluginStart;
 
 const deployment = ({
   genAiDefault,

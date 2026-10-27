@@ -291,8 +291,8 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       invalidFields.length === 0
         ? i18n.REQUIRED_FIELDS_ERROR
         : invalidFields.length === 1 && nextFieldErrors.scores === i18n.INVALID_LABELS_ERROR
-        ? i18n.INVALID_LABELS_ERROR
-        : i18n.HIGHLIGHTED_FIELDS_ERROR
+          ? i18n.INVALID_LABELS_ERROR
+          : i18n.HIGHLIGHTED_FIELDS_ERROR
     );
     return undefined;
   };

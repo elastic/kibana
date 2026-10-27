@@ -84,9 +84,9 @@ export const SecondaryMenuItemComponent = ({
       color: ${iconSide === 'right' ? euiTheme.colors.textDisabled : 'inherit'};
     }
 
-    --high-contrast-hover-indicator-color: ${isHighlighted
-      ? euiTheme.colors.textPrimary
-      : euiTheme.colors.textParagraph};
+    --high-contrast-hover-indicator-color: ${
+      isHighlighted ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph
+    };
     ${highContrastModeStyles};
   `;
 

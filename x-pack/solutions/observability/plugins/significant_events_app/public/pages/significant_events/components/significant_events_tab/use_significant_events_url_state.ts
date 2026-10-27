@@ -134,7 +134,7 @@ export const useSignificantEventsUrlState = () => {
         stream: legacyStream,
         service: currentService,
         ...rest
-      } = keepSelectedEvent ? queryRef.current ?? {} : omitSelectedEvent(queryRef.current);
+      } = keepSelectedEvent ? (queryRef.current ?? {}) : omitSelectedEvent(queryRef.current);
       const nextSource = source ?? parseValuesParam(currentSource ?? legacyStream);
       const nextService = service ?? parseValuesParam(currentService);
       write('replace', {

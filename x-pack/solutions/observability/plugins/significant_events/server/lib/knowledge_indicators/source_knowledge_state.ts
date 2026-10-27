@@ -184,18 +184,19 @@ export const createSourceKnowledgeStateClient = ({
     }
     const lease = { owner: randomUUID(), expiresAt: Date.now() + WRITE_LEASE_MS };
     let state: SourceKnowledgeState = { ...stored?.attributes, lease };
-    const locked = await (stored
-      ? repository.update<SourceKnowledgeState>(
-          SOURCE_KNOWLEDGE_STATE_TYPE,
-          sourceId,
-          { lease },
-          { namespace: space, version: stored.version }
-        )
-      : repository.create<SourceKnowledgeState>(SOURCE_KNOWLEDGE_STATE_TYPE, state, {
-          id: sourceId,
-          namespace: space,
-          overwrite: false,
-        })
+    const locked = await (
+      stored
+        ? repository.update<SourceKnowledgeState>(
+            SOURCE_KNOWLEDGE_STATE_TYPE,
+            sourceId,
+            { lease },
+            { namespace: space, version: stored.version }
+          )
+        : repository.create<SourceKnowledgeState>(SOURCE_KNOWLEDGE_STATE_TYPE, state, {
+            id: sourceId,
+            namespace: space,
+            overwrite: false,
+          })
     ).catch(rethrowConflictAsLeaseHeld);
     let version = locked.version;
     const serializeCheckpoint = pLimit(1);

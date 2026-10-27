@@ -118,9 +118,9 @@ describe('getParentPipelineSeriesFormula', () => {
         Metric,
         Metric[],
         Metric,
-        { metaValue?: number; reducedTimeRange?: string; timeShift?: string }
+        { metaValue?: number; reducedTimeRange?: string; timeShift?: string },
       ],
-      string | null
+      string | null,
     ]
   >([
     [

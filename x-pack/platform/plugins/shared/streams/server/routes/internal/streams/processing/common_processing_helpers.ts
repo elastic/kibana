@@ -24,13 +24,12 @@ import { NoLLMSuggestionsError } from './no_llm_suggestions_error';
  * Extracts the tool call arguments type from a Prompt.
  * This gives us the properly typed arguments from the tool call.
  */
-type ToolCallArgumentsOfPrompt<TPrompt extends Prompt> = ToolCallOfToolDefinitions<
-  NonNullable<TPrompt['versions'][number]['tools']>
-> extends {
-  function: { arguments: infer TArgs };
-}
-  ? TArgs
-  : never;
+type ToolCallArgumentsOfPrompt<TPrompt extends Prompt> =
+  ToolCallOfToolDefinitions<NonNullable<TPrompt['versions'][number]['tools']>> extends {
+    function: { arguments: infer TArgs };
+  }
+    ? TArgs
+    : never;
 
 /**
  * Determines whether OTEL field names should be used for a given stream.
@@ -54,7 +53,7 @@ export async function callInferenceWithPrompt<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     any,
     Array<Omit<PromptVersion, 'toolChoice'> & { toolChoice: CustomToolChoice }>
-  >
+  >,
 >(
   inferenceClient: InferenceClient,
   connectorId: string,
@@ -117,5 +116,5 @@ export function normalizeFieldName(
     : ecsField;
 
   // Make sure otel field names are translated/prefixed correctly
-  return useOtelFieldNames ? fieldMetadata[name]?.otel_equivalent ?? prefixOTelField(name) : name;
+  return useOtelFieldNames ? (fieldMetadata[name]?.otel_equivalent ?? prefixOTelField(name)) : name;
 }

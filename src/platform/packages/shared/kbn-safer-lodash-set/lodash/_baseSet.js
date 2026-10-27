@@ -5,7 +5,7 @@
  * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.
  */
 
-/* eslint-disable one-var,prettier/prettier,no-var,eqeqeq,no-nested-ternary */
+/* eslint-disable one-var,no-var,eqeqeq,no-nested-ternary */
 
 var assignValue = require('lodash/_assignValue'),
     castPath = require('lodash/_castPath'),

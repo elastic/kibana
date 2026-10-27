@@ -13,7 +13,7 @@ import { listAllSources } from './list_all_sources';
 const source = (id: string): NightshiftSource =>
   ({
     id,
-  } as NightshiftSource);
+  }) as NightshiftSource;
 
 describe('listAllSources', () => {
   it('returns the page when it covers the reported total', async () => {

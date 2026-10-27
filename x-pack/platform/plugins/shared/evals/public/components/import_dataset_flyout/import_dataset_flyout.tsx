@@ -201,7 +201,7 @@ export const ImportDatasetFlyout = ({ onClose, initialDataset }: ImportDatasetFl
     const mapped = applyMapping(parsed.rows, state.mapping);
     const blockingErrors: string[] = [];
     const existingExamples =
-      state.datasetMode === 'existing' ? selectedDataset?.examplesCount ?? 0 : 0;
+      state.datasetMode === 'existing' ? (selectedDataset?.examplesCount ?? 0) : 0;
     if (existingExamples + mapped.examples.length > MAX_EXAMPLES_PER_DATASET) {
       blockingErrors.push(translations.getDatasetCapacityError(MAX_EXAMPLES_PER_DATASET));
     }

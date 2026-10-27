@@ -11,9 +11,10 @@ import { DEFAULT_APP_VISIBILITY } from '@kbn/core-application-browser-internal';
 import type { Plugin, CoreSetup } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
-export class CorePluginDeepLinksPlugin
-  implements Plugin<CorePluginDeepLinksPluginSetup, CorePluginDeepLinksPluginStart>
-{
+export class CorePluginDeepLinksPlugin implements Plugin<
+  CorePluginDeepLinksPluginSetup,
+  CorePluginDeepLinksPluginStart
+> {
   public setup(core: CoreSetup, deps: {}) {
     core.application.register({
       id: 'deeplinks',

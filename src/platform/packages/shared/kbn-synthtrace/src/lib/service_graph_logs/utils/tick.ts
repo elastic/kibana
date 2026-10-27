@@ -409,8 +409,8 @@ export function collectNoiseDocs({
     rawRate === undefined
       ? serviceGraph.services.length
       : typeof rawRate === 'function'
-      ? rawRate(timestamp)
-      : rawRate;
+        ? rawRate(timestamp)
+        : rawRate;
 
   const jitter = volume?.jitter ?? 0.5;
   const prng = mulberry32(resolveEffectiveSeed(seed, index, timestamp));

@@ -24,7 +24,7 @@ import { ADD_TO_CASE_EPISODE_ACTION_ID } from './add_to_case_action_id';
 
 export interface AddToCaseActionDeps<
   TPermissions extends CasesPermissions = CasesPermissions,
-  TAttachment = unknown
+  TAttachment = unknown,
 > {
   cases: AddToCaseCasesService<TPermissions, TAttachment>;
   /** Cases owner the attachments are created under unless an existing case dictates another. */

@@ -216,7 +216,9 @@ export const executionSteps = <E extends AnyTimelineEvent>(
   const terminal = events.find((event): event is E & ExecutionTerminalEvent =>
     isExecutionTerminalEvent(event)
   );
-  return terminal?.type === TimelineEventType.executionTerminated ? terminal.data.steps ?? [] : [];
+  return terminal?.type === TimelineEventType.executionTerminated
+    ? (terminal.data.steps ?? [])
+    : [];
 };
 
 /**

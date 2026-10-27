@@ -45,7 +45,7 @@ jest.mock(
 );
 
 const makeItem = (id: string): TimelineItem =>
-  ({ _id: id, data: [], ecs: { _id: id, _index: '' } } as unknown as TimelineItem);
+  ({ _id: id, data: [], ecs: { _id: id, _index: '' } }) as unknown as TimelineItem;
 
 const dataView: DataView = createStubDataView({ spec: {} });
 const packages: PackageListItem[] = [

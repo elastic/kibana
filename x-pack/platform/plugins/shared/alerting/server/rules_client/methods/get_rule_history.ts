@@ -52,8 +52,9 @@ export interface GetRuleHistoryParams {
  * into a `SanitizedRule` shape so callers don't have to deal with the raw
  * stored `object.snapshot` directly.
  */
-export interface RuleChangeHistoryDocument<Params extends RuleParams = RuleParams>
-  extends ChangeHistoryDocument {
+export interface RuleChangeHistoryDocument<
+  Params extends RuleParams = RuleParams,
+> extends ChangeHistoryDocument {
   rule: Rule<Params>;
 }
 

@@ -86,7 +86,7 @@ export const streamWithReattach = <TResponse>({
               return;
             }
             subscriber.error(
-              isReattach && isNotFoundError(error) ? disconnectError ?? error : error
+              isReattach && isNotFoundError(error) ? (disconnectError ?? error) : error
             );
           },
           complete: () => {

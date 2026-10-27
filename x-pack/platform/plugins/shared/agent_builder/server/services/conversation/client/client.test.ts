@@ -178,7 +178,7 @@ describe('ConversationClient', () => {
           entries,
         },
       },
-    } as Document);
+    }) as Document;
 
   const mockGetDocumentResponse = (doc: Document) => {
     mockRawEsClient.get.mockResolvedValue({
@@ -1865,7 +1865,7 @@ describe('ConversationClient', () => {
           time_to_last_token: 1,
           outcome: { type: 'responded', response: { message: 'ok' } },
         },
-      } as ConversationEvent);
+      }) as ConversationEvent;
 
     it('stores vote, chips, and comment on the conversation doc via OCC write', async () => {
       mockGetDocumentResponse(
@@ -2079,7 +2079,7 @@ describe('ConversationClient', () => {
         ...(templateVersion !== undefined ? { template_version: templateVersion } : {}),
         ...(Object.keys(metadata).length ? { metadata } : {}),
       },
-    } as Document);
+    }) as Document;
 
   describe('template metadata response conversion', () => {
     const template = makeTemplate('template-1', {
@@ -3941,7 +3941,7 @@ describe('ConversationClient', () => {
           render_inline: false,
           source: 'http_api',
         },
-      } as TimelineEvent);
+      }) as TimelineEvent;
 
     const userMessageEvent = (id: string): TimelineEvent => ({
       id,
@@ -4138,7 +4138,7 @@ describe('ConversationClient', () => {
         actor: { type: EventActorType.agent, id: 'agent-1' },
         execution_id: executionId,
         data: {},
-      } as TimelineEvent);
+      }) as TimelineEvent;
 
     let emitConversationUpdated: jest.Mock;
     let clientWithCb: ConversationClient;
@@ -4718,7 +4718,7 @@ describe('ConversationClient', () => {
         execution_id: `${roundId}::execution`,
         trigger_event_id: `${roundId}::user_message`,
         data: { step: { type: 'reasoning', reasoning: `step ${sequence}` }, sequence },
-      } as TimelineEvent);
+      }) as TimelineEvent;
 
     const completedTimelineEvents = (roundId: string): TimelineEvent[] =>
       roundToEvents(
@@ -4778,7 +4778,7 @@ describe('ConversationClient', () => {
             time_to_last_token: 1,
             outcome: { type: 'responded', response: { message: 'ok' } },
           },
-        } as TimelineEvent);
+        }) as TimelineEvent;
       const failed = (roundId: string): TimelineEvent =>
         ({
           id: `${roundId}::execution_failed`,
@@ -4788,7 +4788,7 @@ describe('ConversationClient', () => {
           execution_id: `${roundId}::execution`,
           trigger_event_id: `${roundId}::user_message`,
           data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
-        } as TimelineEvent);
+        }) as TimelineEvent;
 
       it('replaceRoundEvents skips the write and returns the stored document when a terminal exists for the execution', async () => {
         const stored = [...startTimelineEvents('round-1'), terminated('round-1')];

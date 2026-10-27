@@ -14,11 +14,11 @@ import {
 } from './use_resolved_definition_name';
 
 const buildClient = (fetchImpl: jest.Mock): StreamsRepositoryClient =>
-  ({ fetch: fetchImpl } as unknown as StreamsRepositoryClient);
+  ({ fetch: fetchImpl }) as unknown as StreamsRepositoryClient;
 
 describe('adaptDocToResolverInputs', () => {
   const buildDoc = (raw: Record<string, unknown>, flattened: Record<string, unknown>) =>
-    ({ raw, flattened } as unknown as DataTableRecord);
+    ({ raw, flattened }) as unknown as DataTableRecord;
 
   it('extracts the index from the raw record', () => {
     expect(adaptDocToResolverInputs(buildDoc({ _index: 'logs-foo-default' }, {}))).toEqual({

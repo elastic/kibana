@@ -26,7 +26,10 @@ const commonPrefix = (values: string[]) => {
 };
 
 export class IndexManagement extends AbstractPageObject {
-  constructor(page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     super(page);
   }
 

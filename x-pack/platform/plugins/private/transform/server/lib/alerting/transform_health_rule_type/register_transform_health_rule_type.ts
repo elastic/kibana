@@ -192,9 +192,8 @@ export function getTransformHealthRuleType(
         throw new AlertsClientError();
       }
 
-      const fieldFormatsRegistry = await getFieldFormatsStart().fieldFormatServiceFactory(
-        uiSettingsClient
-      );
+      const fieldFormatsRegistry =
+        await getFieldFormatsStart().fieldFormatServiceFactory(uiSettingsClient);
 
       const transformHealthService = transformHealthServiceProvider({
         esClient: scopedClusterClient.asCurrentUser,

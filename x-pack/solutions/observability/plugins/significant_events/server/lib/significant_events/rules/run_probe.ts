@@ -55,7 +55,7 @@ const toRequest = ({ query, tail, window }: { query: string; tail: string; windo
     // A new line before the pipe, so a stored query ending in a `//` comment cannot swallow it.
     query: `${query.trimEnd()}\n| ${tail}`,
     params: [{ _tstart: window.from }, { _tend: window.to }],
-  } as unknown as EsqlQueryRequest);
+  }) as unknown as EsqlQueryRequest;
 
 /**
  * Re-runs a rule's stored verification query over `window`, with `tail` as its last command, and

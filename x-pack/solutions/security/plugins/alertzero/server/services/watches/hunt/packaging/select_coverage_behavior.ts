@@ -83,8 +83,8 @@ export const selectCoverageBehavior = ({
     esqlStatus: best.hit
       ? 'executed_hit'
       : best.inconclusiveReason
-      ? 'executed_inconclusive'
-      : 'executed_no_rows',
+        ? 'executed_inconclusive'
+        : 'executed_no_rows',
     behavior: best,
   };
 };

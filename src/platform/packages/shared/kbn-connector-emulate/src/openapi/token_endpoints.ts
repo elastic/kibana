@@ -232,7 +232,7 @@ const refresh = (grant: string[] | undefined, requested: string[]): TokenExchang
       'scope',
     ]);
   }
-  const scopes = requested.length > 0 ? requested : grant ?? [];
+  const scopes = requested.length > 0 ? requested : (grant ?? []);
   return issued({
     access_token: withScopes(ACCESS_TOKEN, scopes),
     token_type: 'Bearer',

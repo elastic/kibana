@@ -151,7 +151,7 @@ export const useMatchedAlertsCount = ({
     const totalHits =
       typeof dslData.hits.total === 'number'
         ? dslData.hits.total
-        : dslData.hits.total?.value ?? null;
+        : (dslData.hits.total?.value ?? null);
 
     if (totalHits == null) {
       return null;

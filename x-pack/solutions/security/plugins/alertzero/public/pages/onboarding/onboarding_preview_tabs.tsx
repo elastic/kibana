@@ -57,15 +57,18 @@ export const OnboardingPreviewTabs: React.FC<Props> = ({ activeIndex, onSelect }
                 css={css`
                   block-size: ${euiTheme.size.s};
                   inline-size: ${selected ? euiTheme.size.l : euiTheme.size.s};
-                  transition: inline-size 0.25s cubic-bezier(0.32, 0.72, 0, 1),
+                  transition:
+                    inline-size 0.25s cubic-bezier(0.32, 0.72, 0, 1),
                     background-color 0.25s cubic-bezier(0.32, 0.72, 0, 1);
                   border-radius: ${euiTheme.size.s};
                   border: none;
                   padding: 0;
                   cursor: pointer;
-                  background-color: ${selected
-                    ? euiTheme.colors.primary
-                    : transparentize(euiTheme.colors.primary, 0.2)};
+                  background-color: ${
+                    selected
+                      ? euiTheme.colors.primary
+                      : transparentize(euiTheme.colors.primary, 0.2)
+                  };
                 `}
               />
             </EuiFlexItem>

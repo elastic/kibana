@@ -273,7 +273,7 @@ export const createTooltipHold = (): TooltipHold => {
         pointer = {
           origin,
           tooltip,
-          trigger: triggerOf(tooltip) ?? (towards ? origin : focused?.trigger ?? null),
+          trigger: triggerOf(tooltip) ?? (towards ? origin : (focused?.trigger ?? null)),
           held: [],
           closest: distanceFrom(area, point),
           ignoreSelectors,

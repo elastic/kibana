@@ -470,7 +470,7 @@ describe('buildPackageInputs', () => {
 
 describe('buildStreamVars — collect_s3_logs', () => {
   const def = (name: string, extra: object = {}) =>
-    ({ name, type: 'text', title: name, show_user: true, ...extra } as any);
+    ({ name, type: 'text', title: name, show_user: true, ...extra }) as any;
   const s3Service = makeService({
     inputs: ['aws-s3'],
     requiredConfig: ['bucket_arn'],

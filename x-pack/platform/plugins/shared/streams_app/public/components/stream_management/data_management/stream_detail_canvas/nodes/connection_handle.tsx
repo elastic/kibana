@@ -62,10 +62,10 @@ export function ConnectionHandle({
       aria-label={
         type === 'source'
           ? canStart
-            ? connectAriaLabel ??
+            ? (connectAriaLabel ??
               i18n.translate('xpack.streams.canvas.connectionHandle.connectAriaLabel', {
                 defaultMessage: 'Drag to connect this source',
-              })
+              }))
             : undefined
           : i18n.translate('xpack.streams.canvas.connectionHandle.receiveAriaLabel', {
               defaultMessage: 'Drop to connect a source',
