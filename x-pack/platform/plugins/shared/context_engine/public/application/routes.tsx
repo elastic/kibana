@@ -16,7 +16,11 @@ import { CONTEXT_ENGINE_PATHS } from './paths';
 export const ContextEngineRoutes = () => (
   <Routes>
     <Route path={CONTEXT_ENGINE_PATHS.create} exact component={CreateAiIndexPage} />
-    <Route path={CONTEXT_ENGINE_PATHS.viewKi} exact component={KiPage} />
+    <Route
+      path={[CONTEXT_ENGINE_PATHS.viewKi, CONTEXT_ENGINE_PATHS.viewKiDocument]}
+      exact
+      component={KiPage}
+    />
     <Route
       path={[CONTEXT_ENGINE_PATHS.detail, CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators]}
       exact

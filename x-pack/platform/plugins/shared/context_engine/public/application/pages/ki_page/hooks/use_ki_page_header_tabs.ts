@@ -10,18 +10,21 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
-import type { KiPageTabId } from './use_ki_page_navigation';
+
+export type KiPageTabId = 'details' | 'document';
 
 interface UseKiPageHeaderTabsArgs {
   showHeaderTabs: boolean;
   selectedTab: KiPageTabId;
-  onSelectTab: (tab: KiPageTabId) => void;
+  detailsTabHref: string;
+  documentTabHref: string;
 }
 
 export const useKiPageHeaderTabs = ({
   showHeaderTabs,
   selectedTab,
-  onSelectTab,
+  detailsTabHref,
+  documentTabHref,
 }: UseKiPageHeaderTabsArgs): AppHeaderTab[] | undefined =>
   useMemo((): AppHeaderTab[] | undefined => {
     if (!showHeaderTabs) {
@@ -35,7 +38,7 @@ export const useKiPageHeaderTabs = ({
           defaultMessage: 'Content',
         }),
         isSelected: selectedTab === 'details',
-        onClick: () => onSelectTab('details'),
+        href: detailsTabHref,
         'data-test-subj': 'contextViewKiTab-details',
         ...getEbtProps({
           element: CONTEXT_ENGINE_UI_EBT.element.viewKiPage,
@@ -48,7 +51,7 @@ export const useKiPageHeaderTabs = ({
           defaultMessage: 'Document',
         }),
         isSelected: selectedTab === 'document',
-        onClick: () => onSelectTab('document'),
+        href: documentTabHref,
         'data-test-subj': 'contextViewKiTab-document',
         ...getEbtProps({
           element: CONTEXT_ENGINE_UI_EBT.element.viewKiPage,
@@ -56,4 +59,4 @@ export const useKiPageHeaderTabs = ({
         }),
       },
     ];
-  }, [onSelectTab, selectedTab, showHeaderTabs]);
+  }, [detailsTabHref, documentTabHref, selectedTab, showHeaderTabs]);

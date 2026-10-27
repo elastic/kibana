@@ -9,7 +9,9 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean } from '@kbn/react-hooks';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { useRouteMatch } from 'react-router-dom';
 import { readKiDocumentLifecycleStatus } from '../../../../common/ki_lifecycle_status';
 import type { KiContentPanelSaveFields } from '../../components/ki/view/content/ki_content_panel';
 import { ViewKiRawJsonPanel } from '../../components/ki/view/content/view_ki_raw_json_panel';
@@ -26,16 +28,18 @@ import {
   ContextEnginePageSection,
   ContextEnginePageTemplate,
 } from '../../layout/context_engine_page_template';
-import { getAiIndexKnowledgeIndicatorsPath } from '../../paths';
+import {
+  CONTEXT_ENGINE_PATHS,
+  getAiIndexKnowledgeIndicatorsPath,
+  getViewKiDocumentPath,
+  getViewKiPath,
+} from '../../paths';
 import { getKiPageTitle } from './helpers';
 import { KiDeleteConfirmModal } from './ki_delete_confirm_modal';
-import { KiDiscardEditsConfirmModal } from './ki_discard_edits_confirm_modal';
 import { KiRestoreConfirmModal } from './ki_restore_confirm_modal';
 import { useKiPageDeleteRestoreActions } from './hooks/use_ki_page_delete_restore_actions';
 import { useKiPageHeaderMenu } from './hooks/use_ki_page_header_menu';
-import { useKiPageHeaderTabs } from './hooks/use_ki_page_header_tabs';
-import type { KiPageTabId } from './hooks/use_ki_page_navigation';
-import { useKiPageNavigation } from './hooks/use_ki_page_navigation';
+import { useKiPageHeaderTabs, type KiPageTabId } from './hooks/use_ki_page_header_tabs';
 import { useKiPageRouteParams } from './hooks/use_ki_page_route_params';
 
 export const KiPage = () => {
@@ -50,16 +54,18 @@ export const KiPage = () => {
 
   const resolvedKiId = ki?.id ?? kiId;
   const canWrite = useCanWriteContextEngine();
-  const { createContextEngineUrl } = useNavigation();
+  const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const {
-    services: { notifications },
+    services: { notifications, history, http, overlays, application },
   } = useKibana();
 
   const updateKiMutation = useUpdateKi({ aiIndexId, kiId: resolvedKiId, index });
   const deleteKiMutation = useDeleteKi({ aiIndexId, kiId: resolvedKiId, index });
   const restoreKiMutation = useRestoreKi({ aiIndexId, kiId: resolvedKiId, index });
 
-  const [selectedTab, setSelectedTab] = useState<KiPageTabId>('details');
+  const isDocumentTab =
+    useRouteMatch({ path: CONTEXT_ENGINE_PATHS.viewKiDocument, exact: true }) !== null;
+  const selectedTab: KiPageTabId = isDocumentTab ? 'document' : 'details';
   const [isEditing, { on: startContentEditing, off: exitContentEditing }] = useBoolean(false);
 
   const { deleteAction, restoreAction } = useKiPageDeleteRestoreActions({
@@ -75,19 +81,49 @@ export const KiPage = () => {
     exitContentEditing();
   }, [kiId, exitContentEditing]);
 
-  const {
-    handleSelectTab,
-    handleBackClick,
-    isDiscardEditsConfirmOpen,
-    closeDiscardEditsConfirm,
-    completePendingNavigation,
-  } = useKiPageNavigation({
-    backPath,
-    selectedTab,
-    onSelectTab: setSelectedTab,
-    shouldBlockNavigation: isEditing,
-    onDiscardConfirmed: exitContentEditing,
+  const handleBackClick = useCallback(
+    (event: { preventDefault: () => void }) => {
+      event.preventDefault();
+      navigateToContextEngine(backPath);
+    },
+    [backPath, navigateToContextEngine]
+  );
+
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: isEditing,
+    history,
+    http,
+    openConfirm: overlays.openConfirm,
+    navigateToUrl: application.navigateToUrl,
+    titleText: i18n.translate('xpack.contextEngine.viewKi.discardEditsModal.title', {
+      defaultMessage: 'Discard unsaved changes?',
+    }),
+    messageText: i18n.translate('xpack.contextEngine.viewKi.discardEditsModal.body', {
+      defaultMessage: 'Your edits to this Knowledge Indicator will be lost.',
+    }),
+    cancelButtonText: i18n.translate('xpack.contextEngine.viewKi.discardEditsModal.cancelButton', {
+      defaultMessage: 'Keep editing',
+    }),
+    confirmButtonText: i18n.translate(
+      'xpack.contextEngine.viewKi.discardEditsModal.confirmButton',
+      {
+        defaultMessage: 'Discard changes',
+      }
+    ),
   });
+
+  const kiTabQueryParams = useMemo(
+    () => (index.length > 0 ? { index } : undefined),
+    [index]
+  );
+  const detailsTabHref = useMemo(
+    () => createContextEngineUrl(getViewKiPath(aiIndexId, kiId), kiTabQueryParams),
+    [aiIndexId, createContextEngineUrl, kiId, kiTabQueryParams]
+  );
+  const documentTabHref = useMemo(
+    () => createContextEngineUrl(getViewKiDocumentPath(aiIndexId, kiId), kiTabQueryParams),
+    [aiIndexId, createContextEngineUrl, kiId, kiTabQueryParams]
+  );
 
   useContextEngineBreadcrumbs([{ text: aiIndexId, path: backPath }, { text: pageTitle }]);
 
@@ -106,7 +142,8 @@ export const KiPage = () => {
   const headerTabs = useKiPageHeaderTabs({
     showHeaderTabs,
     selectedTab,
-    onSelectTab: handleSelectTab,
+    detailsTabHref,
+    documentTabHref,
   });
 
   const showContentEditAction = canEditContent && selectedTab === 'details' && !isEditing;
@@ -239,12 +276,6 @@ export const KiPage = () => {
           onClose={restoreAction.close}
           onConfirm={restoreAction.confirm}
           isLoading={restoreAction.isLoading}
-        />
-      ) : null}
-      {isDiscardEditsConfirmOpen ? (
-        <KiDiscardEditsConfirmModal
-          onClose={closeDiscardEditsConfirm}
-          onConfirm={completePendingNavigation}
         />
       ) : null}
     </ContextEnginePageTemplate>

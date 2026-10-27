@@ -41,25 +41,10 @@ export const useKiPageHeaderMenu = ({
       return undefined;
     }
 
-    const menuItems = showContentEditAction
-      ? [
-          {
-            id: 'editContent',
-            label: i18n.translate('xpack.contextEngine.viewKi.editButton', {
-              defaultMessage: 'Edit',
-            }),
-            iconType: 'pencil',
-            overflow: true,
-            order: 10,
-            run: onStartContentEditing,
-            testId: 'contextViewKiEditButton',
-            ebt: {
-              action: CONTEXT_ENGINE_UI_EBT.action.editKi.EDIT,
-              detail: CONTEXT_ENGINE_UI_EBT.element.viewKiPage,
-            },
-          },
-        ]
-      : [];
+    const deleteEbt = {
+      action: CONTEXT_ENGINE_UI_EBT.action.viewKi.DELETE,
+      detail: CONTEXT_ENGINE_UI_EBT.element.viewKiPage,
+    };
 
     if (canRestore) {
       return {
@@ -77,7 +62,41 @@ export const useKiPageHeaderMenu = ({
             detail: CONTEXT_ENGINE_UI_EBT.element.viewKiPage,
           },
         },
-        items: menuItems.length > 0 ? menuItems : undefined,
+      };
+    }
+
+    if (showContentEditAction) {
+      return {
+        primaryActionItem: {
+          id: 'editContent',
+          label: i18n.translate('xpack.contextEngine.viewKi.editButton', {
+            defaultMessage: 'Edit',
+          }),
+          iconType: 'pencil',
+          run: onStartContentEditing,
+          testId: 'contextViewKiEditButton',
+          ebt: {
+            action: CONTEXT_ENGINE_UI_EBT.action.editKi.EDIT,
+            detail: CONTEXT_ENGINE_UI_EBT.element.viewKiPage,
+          },
+        },
+        items: canDelete
+          ? [
+              {
+                id: 'delete',
+                label: i18n.translate('xpack.contextEngine.viewKi.deleteButton', {
+                  defaultMessage: 'Delete',
+                }),
+                iconType: 'trash',
+                overflow: true,
+                isDestructive: true,
+                run: onOpenDeleteConfirm,
+                isLoading: isDeleteLoading,
+                testId: 'contextViewKiDeleteButton',
+                ebt: deleteEbt,
+              },
+            ]
+          : undefined,
       };
     }
 
@@ -92,18 +111,8 @@ export const useKiPageHeaderMenu = ({
           run: onOpenDeleteConfirm,
           isLoading: isDeleteLoading,
           testId: 'contextViewKiDeleteButton',
-          ebt: {
-            action: CONTEXT_ENGINE_UI_EBT.action.viewKi.DELETE,
-            detail: CONTEXT_ENGINE_UI_EBT.element.viewKiPage,
-          },
+          ebt: deleteEbt,
         },
-        items: menuItems.length > 0 ? menuItems : undefined,
-      };
-    }
-
-    if (menuItems.length > 0) {
-      return {
-        items: menuItems,
       };
     }
 

@@ -43,7 +43,7 @@ describe('useKiPageHeaderMenu', () => {
     expect(result.current).toBeUndefined();
   });
 
-  it('exposes delete as primary action when canDelete', () => {
+  it('exposes delete as primary action when canDelete and edit is not shown', () => {
     const { result } = renderHook(() => useKiPageHeaderMenu(defaultArgs));
 
     expect(result.current?.primaryActionItem?.id).toBe('delete');
@@ -61,7 +61,7 @@ describe('useKiPageHeaderMenu', () => {
     expect(result.current?.primaryActionItem?.id).toBe('restore');
   });
 
-  it('includes edit in overflow when showContentEditAction', () => {
+  it('exposes edit as primary and delete in overflow when showContentEditAction', () => {
     const { result } = renderHook(() =>
       useKiPageHeaderMenu({
         ...defaultArgs,
@@ -69,6 +69,8 @@ describe('useKiPageHeaderMenu', () => {
       })
     );
 
-    expect(result.current?.items?.[0]?.id).toBe('editContent');
+    expect(result.current?.primaryActionItem?.id).toBe('editContent');
+    expect(result.current?.items?.[0]?.id).toBe('delete');
+    expect(result.current?.items?.[0]?.isDestructive).toBe(true);
   });
 });

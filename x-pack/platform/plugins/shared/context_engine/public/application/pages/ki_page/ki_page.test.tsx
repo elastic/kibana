@@ -8,7 +8,7 @@
 import { EuiProvider } from '@elastic/eui';
 import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
-import { coreMock } from '@kbn/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -20,6 +20,7 @@ import { uiPrivileges } from '../../../../common/features';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../../layout/context_engine_page_header';
 import {
   getAiIndexKnowledgeIndicatorsPath,
+  getViewKiDocumentPath,
   getViewKiPath,
   CONTEXT_ENGINE_PATHS,
 } from '../../paths';
@@ -28,7 +29,10 @@ import { KiPage } from './ki_page';
 
 const mockUseKi = jest.fn();
 const mockNavigateToContextEngine = jest.fn();
-const mockCreateContextEngineUrl = jest.fn((path: string) => path);
+const mockCreateContextEngineUrl = jest.fn((path: string, params?: Record<string, string>) => {
+  const queryParams = new URLSearchParams(params);
+  return queryParams.size ? `${path}?${queryParams}` : path;
+});
 const mockUpdateMutate = jest.fn();
 const mockDeleteMutateAsync = jest.fn();
 const mockRestoreMutateAsync = jest.fn();
@@ -113,12 +117,16 @@ const renderKiPage = (initialEntry: string, { canWrite = false }: { canWrite?: b
             services={{
               ...services,
               appChrome: createAppChromeMock(),
+              history: scopedHistoryMock.create(),
               onAppLeave: jest.fn(),
             }}
           >
             <QueryClientProvider client={queryClient}>
               <MemoryRouter initialEntries={[initialEntry]}>
-                <Route path={CONTEXT_ENGINE_PATHS.viewKi} component={KiPage} />
+                <Route
+                  path={[CONTEXT_ENGINE_PATHS.viewKi, CONTEXT_ENGINE_PATHS.viewKiDocument]}
+                  component={KiPage}
+                />
               </MemoryRouter>
             </QueryClientProvider>
           </KibanaContextProvider>
@@ -245,21 +253,30 @@ describe('KiPage', () => {
       error: undefined,
     });
 
-    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
-
-    fireEvent.click(screen.getByTestId('contextViewKiTab-document'));
+    renderKiPage(`${getViewKiDocumentPath('sample-ki', 'ki-1')}?index=ai-index-idx-sample-ki`);
 
     expect(screen.getByTestId('contextViewKiRawJsonLoading')).toBeInTheDocument();
     expect(screen.queryByTestId('contextViewKiContentLayout')).not.toBeInTheDocument();
   });
 
-  it('renders details tab by default and switches to raw JSON on document tab click', () => {
+  it('renders details tab by default and links the document tab to the document path', () => {
     renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
 
     expect(screen.getByTestId('contextViewKiContentLayout')).toBeInTheDocument();
     expect(screen.queryByTestId('contextViewKiRawJsonPanel')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('contextViewKiTab-document'));
+    expect(screen.getByTestId('contextViewKiTab-document')).toHaveAttribute(
+      'href',
+      `${getViewKiDocumentPath('sample-ki', 'ki-1')}?index=ai-index-idx-sample-ki`
+    );
+    expect(screen.getByTestId('contextViewKiTab-details')).toHaveAttribute(
+      'href',
+      `${getViewKiPath('sample-ki', 'ki-1')}?index=ai-index-idx-sample-ki`
+    );
+  });
+
+  it('renders the raw JSON panel on the document tab route', () => {
+    renderKiPage(`${getViewKiDocumentPath('sample-ki', 'ki-1')}?index=ai-index-idx-sample-ki`);
 
     expect(screen.getByTestId('contextViewKiRawJsonPanel')).toBeInTheDocument();
     expect(screen.queryByTestId('contextViewKiContentLayout')).not.toBeInTheDocument();
@@ -337,15 +354,15 @@ describe('KiPage', () => {
     expect(screen.queryByTestId('contextViewKiEditButton')).not.toBeInTheDocument();
   });
 
-  it('shows delete primary action and edit overflow when user can write', async () => {
+  it('shows edit primary action and delete overflow when user can write', async () => {
     renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
       canWrite: true,
     });
 
-    expect(await screen.findByTestId('contextViewKiDeleteButton')).toBeInTheDocument();
+    expect(await screen.findByTestId('contextViewKiEditButton')).toBeInTheDocument();
 
     await openHeaderOverflowMenu();
-    expect(screen.getByTestId('contextViewKiEditButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextViewKiDeleteButton')).toBeInTheDocument();
   });
 
   it('opens delete confirm modal and calls delete mutation on confirm', async () => {
@@ -353,7 +370,8 @@ describe('KiPage', () => {
       canWrite: true,
     });
 
-    fireEvent.click(await screen.findByTestId('contextViewKiDeleteButton'));
+    await openHeaderOverflowMenu();
+    fireEvent.click(screen.getByTestId('contextViewKiDeleteButton'));
     expect(screen.getByTestId('contextViewKiDeleteConfirmModal')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
@@ -394,8 +412,7 @@ describe('KiPage', () => {
       canWrite: true,
     });
 
-    await openHeaderOverflowMenu();
-    fireEvent.click(screen.getByTestId('contextViewKiEditButton'));
+    fireEvent.click(await screen.findByTestId('contextViewKiEditButton'));
 
     fireEvent.change(screen.getByTestId('contextViewKiContentField'), {
       target: { value: 'Updated from page' },
@@ -438,67 +455,37 @@ describe('KiPage', () => {
     });
   });
 
-  it('prompts before switching tabs while editing content, and keeps editing on cancel', async () => {
+  it('keeps document tab href while editing content', async () => {
     renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
       canWrite: true,
     });
 
-    await openHeaderOverflowMenu();
-    fireEvent.click(screen.getByTestId('contextViewKiEditButton'));
+    fireEvent.click(await screen.findByTestId('contextViewKiEditButton'));
 
-    fireEvent.click(screen.getByTestId('contextViewKiTab-document'));
-
-    expect(screen.getByTestId('contextViewKiDiscardEditsConfirmModal')).toBeInTheDocument();
-    expect(screen.getByTestId('contextViewKiContentEditing')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
-
-    expect(screen.queryByTestId('contextViewKiDiscardEditsConfirmModal')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextViewKiContentEditing')).toBeInTheDocument();
+    expect(screen.getByTestId('contextViewKiTab-document')).toHaveAttribute(
+      'href',
+      `${getViewKiDocumentPath('sample-ki', 'ki-1')}?index=ai-index-idx-sample-ki`
+    );
   });
 
-  it('switches tabs and exits edit mode when discard is confirmed', async () => {
+  it('navigates back via context engine routing when back is clicked', async () => {
     renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
       canWrite: true,
     });
-
-    await openHeaderOverflowMenu();
-    fireEvent.click(screen.getByTestId('contextViewKiEditButton'));
-
-    fireEvent.click(screen.getByTestId('contextViewKiTab-document'));
-    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-
-    expect(screen.queryByTestId('contextViewKiDiscardEditsConfirmModal')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextViewKiRawJsonPanel')).toBeInTheDocument();
-  });
-
-  it('prompts before navigating back while editing content', async () => {
-    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
-      canWrite: true,
-    });
-
-    await openHeaderOverflowMenu();
-    fireEvent.click(screen.getByTestId('contextViewKiEditButton'));
 
     fireEvent.click(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ));
-
-    expect(screen.getByTestId('contextViewKiDiscardEditsConfirmModal')).toBeInTheDocument();
-    expect(mockNavigateToContextEngine).not.toHaveBeenCalled();
-
-    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(mockNavigateToContextEngine).toHaveBeenCalledWith(
       getAiIndexKnowledgeIndicatorsPath('sample-ki')
     );
   });
 
-  it('enters content edit mode from the header overflow menu and hides the delete action', async () => {
+  it('enters content edit mode from the header edit action and hides the delete action', async () => {
     renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
       canWrite: true,
     });
 
-    await openHeaderOverflowMenu();
-    fireEvent.click(screen.getByTestId('contextViewKiEditButton'));
+    fireEvent.click(await screen.findByTestId('contextViewKiEditButton'));
 
     expect(screen.getByTestId('contextViewKiContentEditing')).toBeInTheDocument();
     expect(screen.queryByTestId('contextViewKiDeleteButton')).not.toBeInTheDocument();
