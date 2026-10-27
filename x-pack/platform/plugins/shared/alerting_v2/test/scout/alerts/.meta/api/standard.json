@@ -1,5 +1,5 @@
 {
-  "sha1": "de2183c842c5ac5be419b3467951eb934da6fdf4",
+  "sha1": "42b1fc5b9cb7e05afa75a9e19b032195faeaedfb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2005,8 +2005,8 @@
       }
     },
     {
-      "id": "4eb3bed707d0e38-ba33912223e4b1e",
-      "title": "Create tag episode action API tag: an empty tags array clears the tags and returns 204",
+      "id": "4eb3bed707d0e38-1b73a560d2b22f7",
+      "title": "Create tag episode action API tag: null clears the tags and returns 204",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2021,6 +2021,22 @@
       }
     },
     {
+      "id": "4eb3bed707d0e38-6b18172a9c14ea0",
+      "title": "Create tag episode action API tag: an empty tags array is rejected with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 106,
+        "column": 7
+      }
+    },
+    {
       "id": "4eb3bed707d0e38-c08dcfa6d44e9f2",
       "title": "Create tag episode action API tag: repeating the current set returns 409 regardless of order",
       "expectedStatus": "passed",
@@ -2032,8 +2048,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 108,
-        "column": 9
+        "line": 115,
+        "column": 12
       }
     },
     {
@@ -2048,8 +2064,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 153,
-        "column": 23
+        "line": 157,
+        "column": 95
       }
     },
     {
@@ -2064,7 +2080,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 200,
+        "line": 205,
         "column": 29
       }
     },
@@ -2080,8 +2096,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 247,
-        "column": 12
+        "line": 251,
+        "column": 71
       }
     },
     {
@@ -2096,8 +2112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 254,
-        "column": 13
+        "line": 258,
+        "column": 22
       }
     },
     {
@@ -2112,8 +2128,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 263,
-        "column": 13
+        "line": 267,
+        "column": 22
       }
     },
     {
@@ -2128,8 +2144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 272,
-        "column": 33
+        "line": 277,
+        "column": 16
       }
     },
     {
@@ -2144,8 +2160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 281,
-        "column": 30
+        "line": 286,
+        "column": 16
       }
     },
     {
@@ -2160,8 +2176,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 290,
-        "column": 22
+        "line": 295,
+        "column": 16
       }
     },
     {
@@ -2176,8 +2192,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 299,
-        "column": 36
+        "line": 305,
+        "column": 13
       }
     },
     {
@@ -2192,8 +2208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 309,
-        "column": 13
+        "line": 314,
+        "column": 25
       }
     },
     {
@@ -2208,8 +2224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 322,
-        "column": 43
+        "line": 328,
+        "column": 23
       }
     },
     {
@@ -2224,8 +2240,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 401,
-        "column": 27
+        "line": 337,
+        "column": 3
       }
     },
     {
@@ -2816,7 +2832,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 72,
+        "line": 71,
         "column": 16
       }
     },
@@ -2833,7 +2849,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
         "line": 109,
-        "column": 78
+        "column": 18
       }
     },
     {
@@ -2848,8 +2864,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 130,
-        "column": 14
+        "line": 125,
+        "column": 10
       }
     },
     {
@@ -2864,8 +2880,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 137,
-        "column": 7
+        "line": 134,
+        "column": 16
       }
     },
     {
@@ -2880,8 +2896,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 143,
-        "column": 82
+        "line": 141,
+        "column": 76
       }
     },
     {
@@ -2896,8 +2912,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 151,
-        "column": 69
+        "line": 149,
+        "column": 11
       }
     },
     {
@@ -2912,8 +2928,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 155,
-        "column": 12
+        "line": 152,
+        "column": 7
       }
     },
     {
@@ -2928,8 +2944,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 160,
-        "column": 22
+        "line": 157,
+        "column": 82
       }
     },
     {
@@ -2944,8 +2960,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 169,
-        "column": 16
+        "line": 166,
+        "column": 22
       }
     },
     {
@@ -2960,8 +2976,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 178,
-        "column": 96
+        "line": 176,
+        "column": 80
       }
     },
     {
@@ -2976,8 +2992,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 211,
-        "column": 49
+        "line": 209,
+        "column": 41
       }
     },
     {
@@ -2992,8 +3008,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 243,
-        "column": 90
+        "line": 241,
+        "column": 82
       }
     },
     {
@@ -3008,7 +3024,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 256,
+        "line": 253,
         "column": 16
       }
     },
@@ -3093,7 +3109,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
         "line": 151,
-        "column": 18
+        "column": 83
       }
     },
     {
@@ -3232,7 +3248,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_identity_collision.spec.ts",
-        "line": 100,
+        "line": 102,
         "column": 51
       }
     },
@@ -3246,7 +3262,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_identity_collision.spec.ts",
-        "line": 145,
+        "line": 147,
         "column": 16
       }
     },
@@ -3260,7 +3276,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_identity_collision.spec.ts",
-        "line": 169,
+        "line": 171,
         "column": 20
       }
     },
@@ -3274,7 +3290,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_identity_collision.spec.ts",
-        "line": 195,
+        "line": 197,
         "column": 79
       }
     },
@@ -3288,7 +3304,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_identity_collision.spec.ts",
-        "line": 222,
+        "line": 224,
         "column": 25
       }
     },

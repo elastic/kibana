@@ -620,9 +620,9 @@ describe('getCreateKiStepDefinition', () => {
       expect(esClient.index).toHaveBeenCalledTimes(1);
     });
 
-    it('skips the write when verification fails', async () => {
+    it('writes the KI as verification_failed when verification fails', async () => {
       verifyKi.mockResolvedValue(failed);
-      const esClient = { index: jest.fn() };
+      const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
       const context = createMockStepContext({
         input: { ai_index_id: 'my-ai-index', ki: kiInput, verifiers },
         esClient,
@@ -639,13 +639,13 @@ describe('getCreateKiStepDefinition', () => {
       });
       const result = await handler(context);
 
-      expect(result).toEqual({ output: { verification: failed } });
-      expect(service.get).not.toHaveBeenCalled();
-      expect(esClient.index).not.toHaveBeenCalled();
-      expect(telemetry.analyticsService.reportKiWrite).not.toHaveBeenCalled();
-      expect(telemetry.logger.debug).toHaveBeenCalledWith(
-        "KI create skipped in AI index 'my-ai-index'"
-      );
+      expect(result).toEqual({ output: { id: expect.any(String), verification: failed } });
+      expect(esClient.index).toHaveBeenCalledTimes(1);
+      expect(esClient.index.mock.calls[0][0].document.governance).toEqual({
+        provenance: { created_by: mockKiWriter, updated_by: mockKiWriter },
+        lifecycle: { status: 'verification_failed' },
+      });
+      expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledTimes(1);
     });
 
     it('checks the write privilege before running verifiers', async () => {

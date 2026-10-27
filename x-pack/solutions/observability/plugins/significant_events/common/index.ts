@@ -8,6 +8,7 @@
 export { QUERY_STATUSES } from './queries';
 export type { QueryStatus } from './queries';
 export type { PaginatedResponse } from './pagination';
+export type { DetectionEntity, DetectionEntitiesResponse } from './detection_entities';
 export {
   isSignificantEventsSortField,
   MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH,
@@ -62,6 +63,8 @@ export {
 
 export {
   SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
+  toLifecycleDetection,
+  type LifecycleDetectionInput,
   type SignificantEventDetectionAttachment,
 } from './significant_event_detection_attachment';
 

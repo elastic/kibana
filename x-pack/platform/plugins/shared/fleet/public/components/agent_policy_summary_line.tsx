@@ -18,9 +18,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo } from 'react';
 import { css } from '@emotion/css';
-import satisfies from 'semver/functions/satisfies';
 
 import type { AgentPolicy, Agent } from '../../common/types';
+import { getIncompatibleIntegrations } from '../../common/services';
 import { useLink } from '../hooks';
 
 const MIN_WIDTH = css`
@@ -52,16 +52,10 @@ export const AgentPolicySummaryLine = memo<{
     const isOutdated = agent?.policy_revision && policy.revision > agent.policy_revision;
 
     const agentVersion: string | undefined = agent?.local_metadata?.elastic?.agent?.version;
-    const incompatibleIntegrations =
-      agentVersion && policy.package_agent_version_conditions
-        ? policy.package_agent_version_conditions.filter(({ version_condition }) => {
-            try {
-              return !satisfies(agentVersion, version_condition);
-            } catch {
-              return false;
-            }
-          })
-        : [];
+    const incompatibleIntegrations = getIncompatibleIntegrations({
+      agentVersion,
+      conditions: policy.package_agent_version_conditions,
+    });
     const showIncompatibilityBadge =
       incompatibleIntegrations.length > 0 && Boolean(policy.min_agent_version);
 

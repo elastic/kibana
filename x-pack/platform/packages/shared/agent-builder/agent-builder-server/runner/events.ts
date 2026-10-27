@@ -29,7 +29,38 @@ export type InternalToolUiEvent<TEvent = string, TData extends object = object> 
   InternalToolUiEventData<TEvent, TData>
 >;
 
-export type AgentBuilderToolEvent = InternalToolProgressEvent | InternalToolUiEvent;
+export const DYNAMIC_TOOL_EVENT_TYPE = 'dynamic_tool_event' as const;
+
+/**
+ * An event emitted by a tool run through `execute_dynamic_tool`, tagged with the inner tool it
+ * belongs to. The meta-tool wraps its inner tool's events this way so they are attributed to the
+ * inner tool, not to the meta-tool, when converted to chat events. Never leaves the server.
+ */
+export interface DynamicToolEvent {
+  type: typeof DYNAMIC_TOOL_EVENT_TYPE;
+  data: {
+    /** Id of the inner tool that emitted `event`. */
+    tool_id: string;
+    event: InternalToolProgressEvent | InternalToolUiEvent;
+  };
+}
+
+export type AgentBuilderToolEvent =
+  | InternalToolProgressEvent
+  | InternalToolUiEvent
+  | DynamicToolEvent;
+
+export const isDynamicToolEvent = (event: AgentBuilderToolEvent): event is DynamicToolEvent =>
+  event.type === DYNAMIC_TOOL_EVENT_TYPE;
+
+/** Tags `event` with the inner tool it came from; an already tagged event is returned as is. */
+export const toDynamicToolEvent = (
+  toolId: string,
+  event: AgentBuilderToolEvent
+): DynamicToolEvent =>
+  isDynamicToolEvent(event)
+    ? event
+    : { type: DYNAMIC_TOOL_EVENT_TYPE, data: { tool_id: toolId, event } };
 
 /**
  * Event handler function to listen to run events during execution of tools, agents or other agentBuilder primitives.
