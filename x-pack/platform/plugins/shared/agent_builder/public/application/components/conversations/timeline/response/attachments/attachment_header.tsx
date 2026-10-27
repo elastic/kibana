@@ -46,7 +46,10 @@ const CLOSE_BUTTON_ARIA_LABEL = i18n.translate('xpack.agentBuilder.attachmentHea
   defaultMessage: 'Close',
 });
 
-export const HEADER_HEIGHT = 72;
+/** Min height of the header when rendered inline in the conversation. */
+export const INLINE_HEADER_HEIGHT = 48;
+/** Min height of the header when rendered as the canvas flyout header. */
+export const CANVAS_HEADER_HEIGHT = 72;
 
 interface AttachmentHeaderProps {
   icon?: IconType;
@@ -126,7 +129,9 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     `
       : ''}
     border-radius: ${headerBorderRadius};
-    min-height: ${HEADER_HEIGHT}px;
+    min-height: ${isCanvas ? CANVAS_HEADER_HEIGHT : INLINE_HEADER_HEIGHT}px;
+    padding: ${isCanvas ? euiTheme.size.base : euiTheme.size.s} ${euiTheme.size.s}
+      ${isCanvas ? euiTheme.size.base : euiTheme.size.s} ${euiTheme.size.base};
   `;
 
   const badgeStyles = css`
@@ -147,7 +152,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
 
   return (
     <div ref={measureRef} style={{ width: '100%' }}>
-      <EuiSplitPanel.Inner color={color ?? 'subdued'} css={headerStyles} paddingSize="m">
+      <EuiSplitPanel.Inner color={color ?? 'subdued'} css={headerStyles} paddingSize="none">
         {previewBadgeState === 'preview_available' && (
           <EuiBadge iconType="readOnly" css={badgeStyles}>
             {PREVIEW_ONLY_LABEL}

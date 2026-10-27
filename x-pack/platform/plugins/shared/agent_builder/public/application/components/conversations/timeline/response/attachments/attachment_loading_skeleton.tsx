@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
-import { HEADER_HEIGHT, COMPACT_WIDTH_THRESHOLD } from './attachment_header';
+import { INLINE_HEADER_HEIGHT, COMPACT_WIDTH_THRESHOLD } from './attachment_header';
 
 /**
  * Loading skeleton for an attachment card, shown during streaming before the
@@ -31,7 +31,8 @@ export const AttachmentLoadingSkeleton: React.FC = () => {
   const isCompact = headerWidth > 0 && headerWidth <= COMPACT_WIDTH_THRESHOLD;
 
   const headerStyles = css`
-    min-height: ${isCompact ? 'auto' : `${HEADER_HEIGHT}px`};
+    min-height: ${isCompact ? 'auto' : `${INLINE_HEADER_HEIGHT}px`};
+    padding: ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.base};
   `;
 
   return (
@@ -44,7 +45,7 @@ export const AttachmentLoadingSkeleton: React.FC = () => {
       `}
     >
       <div ref={headerRef} style={{ width: '100%' }}>
-        <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="m">
+        <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="none">
           <EuiFlexGroup
             responsive={false}
             justifyContent="spaceBetween"
@@ -63,15 +64,15 @@ export const AttachmentLoadingSkeleton: React.FC = () => {
               <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiSkeletonRectangle
-                    width={euiTheme.size.xxl}
-                    height={euiTheme.size.xxl}
+                    width={euiTheme.size.xl}
+                    height={euiTheme.size.xl}
                     borderRadius="m"
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiSkeletonRectangle
-                    width={euiTheme.size.xxl}
-                    height={euiTheme.size.xxl}
+                    width={euiTheme.size.xl}
+                    height={euiTheme.size.xl}
                     borderRadius="m"
                   />
                 </EuiFlexItem>

@@ -24,6 +24,7 @@ interface ShellArgs {
   subtitle?: string;
   badges?: HeaderBadge[];
   color?: HeaderColor;
+  isCanvas?: boolean;
   body: React.ReactNode;
   actionButtons?: React.ComponentProps<typeof AttachmentHeader>['actionButtons'];
   previewBadgeState?: React.ComponentProps<typeof AttachmentHeader>['previewBadgeState'];
@@ -35,6 +36,7 @@ const Shell: React.FC<ShellArgs> = ({
   subtitle,
   badges,
   color,
+  isCanvas,
   body,
   actionButtons,
   previewBadgeState,
@@ -46,6 +48,7 @@ const Shell: React.FC<ShellArgs> = ({
       subtitle={subtitle}
       badges={badges}
       color={color}
+      isCanvas={isCanvas}
       actionButtons={actionButtons}
       previewBadgeState={previewBadgeState}
       onClosePreview={action('close preview')}
@@ -125,6 +128,16 @@ export const Default: Story = {
     icon: 'document',
     title: 'workflow.yaml',
     actionButtons: defaultActions,
+    body: bodyPlaceholder,
+  },
+};
+
+export const CanvasHeader: Story = {
+  args: {
+    icon: 'document',
+    title: 'workflow.yaml',
+    actionButtons: defaultActions,
+    isCanvas: true,
     body: bodyPlaceholder,
   },
 };
