@@ -1,0 +1,68 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "96273257bffb784-589e9ccfc4b94cd",
+      "title": "Ingest ES data needed for Visualizations tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 14,
+        "column": 24
+      }
+    },
+    {
+      "id": "e4fdafe4e6597c2-292b31e9fab9fec",
+      "title": "Dashboard filtering filtering on bytes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/dashboard_filtering.spec.ts",
+        "line": 112,
+        "column": 24
+      }
+    },
+    {
+      "id": "e4fdafe4e6597c2-fb6b3404ca01548",
+      "title": "Dashboard filtering nested filtering",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/dashboard_filtering.spec.ts",
+        "line": 163,
+        "column": 7
+      }
+    }
+  ]
+}

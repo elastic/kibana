@@ -22,6 +22,7 @@ let emptyDashboardId = '';
 let pieDashboardId = '';
 let badFiltersDashboardId = '';
 
+// Focus: how the filter bar behaves: its visibility, its field list, and how filters persist and load
 spaceTest.describe('Dashboard filter bar', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
     await scoutSpace.savedObjects.cleanStandardList();

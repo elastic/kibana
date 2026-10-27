@@ -94,6 +94,8 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/cps-utils'
   - '@kbn/std'
+  - '@kbn/scout'
+  - '@kbn/field-formats-common'
 tags:
   - plugin
   - prod
@@ -105,5 +107,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks: {}

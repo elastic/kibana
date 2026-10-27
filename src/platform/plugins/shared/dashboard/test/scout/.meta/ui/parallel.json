@@ -1,5 +1,5 @@
 {
-  "sha1": "67e1f9a73059e13afb31489bbded4ff8a6e68560",
+  "sha1": "c781a1779850a01e3dbc04029b6977886a560521",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -141,6 +141,106 @@
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_esql_no_data.spec.ts",
         "line": 36,
         "column": 33
+      }
+    },
+    {
+      "id": "8326f3dd704ad28-2085a20b13d714f",
+      "title": "Dashboard filter bar shows the filter bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_filter_bar.spec.ts",
+        "line": 59,
+        "column": 46
+      }
+    },
+    {
+      "id": "8326f3dd704ad28-d066d50591eb81b",
+      "title": "Dashboard filter bar filter editor field list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_filter_bar.spec.ts",
+        "line": 69,
+        "column": 5
+      }
+    },
+    {
+      "id": "8326f3dd704ad28-99ab7c4c0027dcd",
+      "title": "Dashboard filter bar filter pills",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_filter_bar.spec.ts",
+        "line": 86,
+        "column": 74
+      }
+    },
+    {
+      "id": "8326f3dd704ad28-6f6cfb8f00871a7",
+      "title": "Dashboard filter bar saved search filtering",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_filter_bar.spec.ts",
+        "line": 163,
+        "column": 18
+      }
+    },
+    {
+      "id": "8326f3dd704ad28-8c0e76bd32e370c",
+      "title": "Dashboard filter bar bad filters are loaded properly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_filter_bar.spec.ts",
+        "line": 176,
+        "column": 11
       }
     },
     {
@@ -392,6 +492,26 @@
       }
     },
     {
+      "id": "84f3c0e81a5eb9a-f9a9e96e7dd37dd",
+      "title": "Dashboard embeddable filtering lens chart is filtered by the dashboard filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/embeddable_filtering.spec.ts",
+        "line": 48,
+        "column": 60
+      }
+    },
+    {
       "id": "5e171a4b43c007d-66f4628503ab8f5",
       "title": "Empty dashboard supports empty-state widget and add-panel flows",
       "expectedStatus": "passed",
@@ -409,6 +529,26 @@
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/empty_dashboard.spec.ts",
         "line": 23,
         "column": 51
+      }
+    },
+    {
+      "id": "a0c057380922533-0bbeb210bf4018f",
+      "title": "Dashboard full screen mode full screen mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/full_screen_mode.spec.ts",
+        "line": 28,
+        "column": 46
       }
     },
     {

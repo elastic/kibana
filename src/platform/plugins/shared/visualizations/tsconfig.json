@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "test/scout/**/*",
+    "../../../../../typings/**/*"
+  ],
   "kbn_references": [
     "@kbn/app-header",
     "@kbn/core",
@@ -81,7 +87,9 @@
     "@kbn/cps",
     "@kbn/kql",
     "@kbn/cps-utils",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/scout",
+    "@kbn/field-formats-common"
   ],
   "exclude": ["target/**/*"]
 }

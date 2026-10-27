@@ -23,7 +23,7 @@ import {
   filterOnPieSlice,
   POLL_OPTIONS,
 } from '../../utils/chart_debug';
-import { findImportedSavedObjectId } from '../../utils/migration_smoke_helpers';
+import { findImportedSavedObjectId } from '../../utils/saved_objects';
 
 const ANIMAL_SOUNDS_PIE_TITLE = 'Rendering Test: animal sounds pie';
 
@@ -104,6 +104,7 @@ const addFilterAndRefresh = async ({
 let bytesDashboardId = '';
 let nestedDashboardId = '';
 
+// Focus: whether filters and queries change what the charts render
 spaceTest.describe('Dashboard filtering', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
@@ -141,6 +142,7 @@ spaceTest.describe('Dashboard filtering', { tag: tags.deploymentAgnostic }, () =
     const unfiltered = await spaceTest.step('capture the unfiltered charts', () =>
       getStableSnapshot(page)
     );
+
     const chartKeys = Object.keys(unfiltered) as Array<keyof ChartSnapshot>;
 
     await spaceTest.step('adding a filter that excludes all data', async () => {
