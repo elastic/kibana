@@ -2863,13 +2863,8 @@ steps:
         });
       });
 
-      it.each([
-        ['WorkflowExecutionNotFoundError', new WorkflowExecutionNotFoundError('run-1')],
-        [
-          'WorkflowExecutionInvalidStatusError',
-          new WorkflowExecutionInvalidStatusError('run-1', 'completed', 'waiting_for_input'),
-        ],
-      ])('releases the claim and rethrows a %s', async (_name, engineError) => {
+      it('releases the claim and rethrows a WorkflowExecutionNotFoundError', async () => {
+        const engineError = new WorkflowExecutionNotFoundError('run-1');
         mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockRejectedValue(engineError);
 
         await expect(resume()).rejects.toBe(engineError);
@@ -2884,6 +2879,27 @@ steps:
           channel: 'inbox',
           error: engineError,
           claimReleased: true,
+        });
+      });
+
+      it.each([
+        ['is not waiting for input', 'completed'],
+        ['has already finished', 'waiting_for_input (already finished at 2026-10-20T15:55:00Z)'],
+      ])('keeps the claim when the execution %s', async (_case, status) => {
+        const engineError = new WorkflowExecutionInvalidStatusError(
+          'run-1',
+          status,
+          'waiting_for_input'
+        );
+        mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockRejectedValue(engineError);
+
+        await expect(resume()).rejects.toBe(engineError);
+
+        expect(mockWorkflowsService.releaseHitlStepClaim).not.toHaveBeenCalled();
+        expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+          executionId: 'run-1',
+          channel: 'inbox',
+          error: engineError,
         });
       });
 

@@ -9,18 +9,19 @@
 
 import type { Logger } from '@kbn/core/server';
 import {
-  WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
   WorkflowResumeNotAppliedError,
 } from '@kbn/workflows/common/errors';
 import type { WorkflowsService } from './workflows_management_service';
 import type { HitlStepClaim } from '../services/mark_step_as_responded_updater';
 
-/** Whether a failed engine resume left nothing pending, so the step claim can be released. */
+/**
+ * Whether a failed engine resume left nothing pending, so the step claim can be released.
+ * An execution that is no longer waiting for input keeps the claim, so its step does not come back
+ * as answerable.
+ */
 export const isResumeNotPendingError = (error: unknown): boolean =>
-  error instanceof WorkflowExecutionNotFoundError ||
-  error instanceof WorkflowExecutionInvalidStatusError ||
-  error instanceof WorkflowResumeNotAppliedError;
+  error instanceof WorkflowExecutionNotFoundError || error instanceof WorkflowResumeNotAppliedError;
 
 /** Unwraps the engine's original resume error so callers keep their error-to-status mapping. */
 export const unwrapResumeError = (error: unknown): unknown =>
