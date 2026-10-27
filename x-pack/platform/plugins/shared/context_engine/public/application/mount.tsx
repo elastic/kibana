@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreStart, ScopedHistory } from '@kbn/core/public';
+import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
@@ -27,7 +27,6 @@ export const mountApp = async ({
   plugins,
   element,
   history,
-  onAppLeave,
   getChatOpener,
   appChrome,
   getAgentBuilderIntegration,
@@ -36,7 +35,6 @@ export const mountApp = async ({
   plugins: ContextEngineStartDependencies;
   element: HTMLElement;
   history: ScopedHistory;
-  onAppLeave: AppMountParameters['onAppLeave'];
   getChatOpener?: () => ChatOpener | undefined;
   appChrome?: ContextEngineAppChromeAdapter;
   getAgentBuilderIntegration?: () => AgentBuilderIntegration | undefined;
@@ -51,7 +49,6 @@ export const mountApp = async ({
     getChatOpener,
     appChrome,
     history,
-    onAppLeave,
     getAgentBuilderIntegration,
   };
 

@@ -118,7 +118,6 @@ const renderKiPage = (initialEntry: string, { canWrite = false }: { canWrite?: b
               ...services,
               appChrome: createAppChromeMock(),
               history: scopedHistoryMock.create(),
-              onAppLeave: jest.fn(),
             }}
           >
             <QueryClientProvider client={queryClient}>

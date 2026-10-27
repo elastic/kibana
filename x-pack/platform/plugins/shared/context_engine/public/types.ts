@@ -87,7 +87,6 @@ export interface ContextEngineStartDependencies {
 
 export interface ContextEngineServicesContextDeps {
   history: AppMountParameters['history'];
-  onAppLeave: AppMountParameters['onAppLeave'];
   appChrome?: ContextEngineAppChromeAdapter;
 }
 

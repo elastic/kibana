@@ -124,7 +124,6 @@ export class ContextEnginePlugin
           plugins: pluginsStart,
           element: params.element,
           history: params.history,
-          onAppLeave: params.onAppLeave,
           getChatOpener: () => chatOpener,
           appChrome,
           getAgentBuilderIntegration,
