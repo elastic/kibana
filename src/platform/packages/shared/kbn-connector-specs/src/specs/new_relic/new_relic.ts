@@ -182,6 +182,10 @@ export const NewRelic: ConnectorSpec = {
     ],
   },
 
+  sandbox: {
+    hosts: ['api.newrelic.com', 'api.eu.newrelic.com', 'api.jp.newrelic.com'],
+  },
+
   schema: lazySchema(() =>
     z.object({
       accountId: z

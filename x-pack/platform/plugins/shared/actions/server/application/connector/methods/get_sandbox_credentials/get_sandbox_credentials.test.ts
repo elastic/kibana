@@ -128,6 +128,11 @@ const inMemoryConnectors = [
   }),
 ];
 
+const getTestSandboxHosts = ({ config }: { config: Record<string, unknown> }): string[] => {
+  const url = config.apiUrl ?? config.url;
+  return typeof url === 'string' ? [new URL(url).hostname] : ['fallback.example.com'];
+};
+
 describe('getSandboxCredentials()', () => {
   let actionsClient: ActionsClient;
   let actionTypeRegistry: ActionTypeRegistry;
@@ -181,6 +186,7 @@ describe('getSandboxCredentials()', () => {
     actionTypeRegistry.register(
       getConnectorType({
         id: defaultConnectorTypeId,
+        getSandboxHosts: getTestSandboxHosts,
         sandboxSupportedAuthTypes: ['basic', 'oauth_authorization_code'],
         validate: {
           config: { schema: z.object({ apiUrl: z.string().optional() }).passthrough() },
@@ -207,6 +213,7 @@ describe('getSandboxCredentials()', () => {
       actionTypeId: defaultConnectorTypeId,
       config: { apiUrl: 'https://example.com' },
       headers: { Authorization: basicAuthorization },
+      hosts: ['example.com'],
     });
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       ACTION_SAVED_OBJECT_TYPE,
@@ -234,6 +241,7 @@ describe('getSandboxCredentials()', () => {
     actionTypeRegistry.register(
       getConnectorType({
         id: inMemoryConnectorTypeId,
+        getSandboxHosts: getTestSandboxHosts,
         sandboxSupportedAuthTypes: ['basic'],
         validate: {
           config: { schema: z.object({ apiUrl: z.string().optional() }).passthrough() },
@@ -250,6 +258,7 @@ describe('getSandboxCredentials()', () => {
       actionTypeId: inMemoryConnectorTypeId,
       config: { apiUrl: 'https://preconfigured.example.com' },
       headers: { Authorization: basicAuthorization },
+      hosts: ['preconfigured.example.com'],
     });
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
@@ -260,6 +269,7 @@ describe('getSandboxCredentials()', () => {
     actionTypeRegistry.register(
       getConnectorType({
         id: inMemoryConnectorTypeId,
+        getSandboxHosts: getTestSandboxHosts,
         sandboxSupportedAuthTypes: ['basic'],
         validate: {
           config: { schema: z.object({ apiUrl: z.string().optional() }).passthrough() },
@@ -286,6 +296,7 @@ describe('getSandboxCredentials()', () => {
     actionTypeRegistry.register(
       getConnectorType({
         id: inMemoryConnectorTypeId,
+        getSandboxHosts: getTestSandboxHosts,
         sandboxSupportedAuthTypes: ['basic'],
         validate: {
           config: { schema: z.object({ apiUrl: z.string().optional() }).passthrough() },
@@ -353,6 +364,7 @@ describe('getSandboxCredentials()', () => {
       actionTypeRegistry.register(
         getConnectorType({
           id: newActionTypeId,
+          getSandboxHosts: getTestSandboxHosts,
           validate: {
             config: { schema: z.object({}).passthrough() },
             secrets: { schema: z.object({ foobar: z.string() }) },
@@ -397,6 +409,7 @@ describe('getSandboxCredentials()', () => {
       actionTypeRegistry.register(
         getConnectorType({
           id: inMemoryConnectorTypeId,
+          getSandboxHosts: getTestSandboxHosts,
           isSystemActionType: true,
           sandboxSupportedAuthTypes: ['basic'],
           validate: {
@@ -431,6 +444,42 @@ describe('getSandboxCredentials()', () => {
     });
   });
 
+  describe('sandbox hosts', () => {
+    const registerWithHosts = (getSandboxHosts?: () => string[]) =>
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: inMemoryConnectorTypeId,
+          ...(getSandboxHosts ? { getSandboxHosts } : {}),
+          sandboxSupportedAuthTypes: ['basic'],
+          validate: {
+            config: { schema: z.object({ apiUrl: z.string().optional() }).passthrough() },
+            secrets: secretsSchema,
+          },
+          executor: undefined,
+        })
+      );
+
+    it('lowercases, trims, and deduplicates the hosts', async () => {
+      registerWithHosts(() => [' API.example.com ', 'api.example.com', 'other.example.com']);
+
+      const result = await actionsClient.getSandboxCredentials({ id: inMemoryConnectorId });
+
+      expect(result.hosts).toEqual(['api.example.com', 'other.example.com']);
+    });
+
+    it.each([
+      ['the action type has no getSandboxHosts hook', undefined],
+      ['getSandboxHosts returns no hosts', () => []],
+      ['getSandboxHosts only returns empty or wildcard hosts', () => ['', ' ', '*']],
+    ])('fails closed when %s', async (_name, getSandboxHosts) => {
+      registerWithHosts(getSandboxHosts);
+
+      await expect(
+        actionsClient.getSandboxCredentials({ id: inMemoryConnectorId })
+      ).rejects.toThrow(/the connector declares no sandbox hosts/);
+    });
+  });
+
   describe('stack connector sandbox hooks', () => {
     const httpConnectorTypeId = 'test.http-sandbox';
 
@@ -449,6 +498,7 @@ describe('getSandboxCredentials()', () => {
       actionTypeRegistry.register(
         getConnectorType({
           id: httpConnectorTypeId,
+          getSandboxHosts: getTestSandboxHosts,
           isSandboxCapable: ({ config }: { config: Record<string, unknown> }) =>
             config.authType !== 'webhook-authentication-ssl',
           getSandboxAuthHeaders: ({ secrets }: { secrets: Record<string, unknown> }) =>
@@ -504,6 +554,7 @@ describe('getSandboxCredentials()', () => {
       actionTypeRegistry.register(
         getConnectorType({
           id: asyncTypeId,
+          getSandboxHosts: getTestSandboxHosts,
           isSandboxCapable: () => true,
           getSandboxAuthHeaders,
           validate: {

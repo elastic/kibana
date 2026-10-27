@@ -11,7 +11,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { SandboxPluginStart, SandboxSession, SecretEnvKey } from '@kbn/sandbox-plugin/server';
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import { redactSecrets } from './connector_credentials';
 import { getConversationId, getSandboxCallContext } from './tool_utils';
@@ -174,6 +174,7 @@ export const createSandboxBashTool = ({
     // Connector credentials are resolved in Kibana and scoped to this one command's environment.
     // The sandbox never holds a credential-retrieval primitive of its own.
     let credentialEnv: Record<string, string> = {};
+    let secretEnvKeys: SecretEnvKey[] = [];
     let secretValues: readonly string[] = [];
     if (connector_id) {
       if (!resolveConnectorCredentials) {
@@ -193,6 +194,7 @@ export const createSandboxBashTool = ({
         };
       }
       credentialEnv = resolved.env;
+      secretEnvKeys = resolved.secretEnvKeys;
       secretValues = resolved.secretValues;
     }
 
@@ -234,6 +236,7 @@ export const createSandboxBashTool = ({
         command,
         directory: working_directory,
         env: mergedEnv,
+        ...(secretEnvKeys.length > 0 ? { secret_env_keys: secretEnvKeys } : {}),
         timeout_seconds:
           timeout_seconds && timeout_seconds > 0
             ? Math.min(timeout_seconds, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS)

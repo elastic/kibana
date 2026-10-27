@@ -195,6 +195,18 @@ describe('sandbox credentials', () => {
     expect(await getHeaders(config, testSecrets)).toEqual(expected);
   });
 
+  test.each([
+    [
+      'the host of the configured URL',
+      { url: 'https://API.example.com:8443/v1/items' },
+      ['api.example.com'],
+    ],
+    ['no hosts without a URL', {}, []],
+    ['no hosts for an invalid URL', { url: 'not a url' }, []],
+  ])('getSandboxHosts: %s', (_name, config, expected) => {
+    expect(connectorType.getSandboxHosts?.({ config })).toEqual(expected);
+  });
+
   test('isSandboxCapable: true when secretQueryParams is set', () => {
     expect(
       connectorType.isSandboxCapable?.({

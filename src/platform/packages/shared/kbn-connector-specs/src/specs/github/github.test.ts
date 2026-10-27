@@ -9,6 +9,7 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
+import { getSandboxHosts } from '../../get_sandbox_hosts';
 import { GithubConnector } from './github';
 
 // Mock withMcpClient so action handlers don't need a real MCP transport.
@@ -75,6 +76,16 @@ describe('GithubConnector', () => {
           overrides: expect.objectContaining({ label: 'Personal Access Token (PAT)' }),
         })
       );
+    });
+
+    it('declares the GitHub API hosts and the configured MCP server host as sandbox hosts', () => {
+      expect(getSandboxHosts(GithubConnector.sandbox, {})).toEqual([
+        'api.github.com',
+        'api.githubcopilot.com',
+      ]);
+      expect(
+        getSandboxHosts(GithubConnector.sandbox, { serverUrl: 'https://mcp.ghe.example.com/mcp/' })
+      ).toEqual(['api.github.com', 'api.githubcopilot.com', 'mcp.ghe.example.com']);
     });
 
     it('existing connectors with bearer auth still pass schema validation', () => {

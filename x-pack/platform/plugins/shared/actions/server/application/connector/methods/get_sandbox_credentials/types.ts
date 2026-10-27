@@ -14,4 +14,6 @@ export interface ResolvedSandboxCredentials {
   actionTypeId: string;
   config: Record<string, unknown>;
   headers: Record<string, string>;
+  /** Hosts the headers may be sent to; never empty. */
+  hosts: string[];
 }

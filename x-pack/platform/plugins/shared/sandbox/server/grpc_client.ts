@@ -109,11 +109,18 @@ function collectNestedBuffers(buf: Buffer, fieldNumber: number): Buffer[] {
   return results;
 }
 
+/** Marks an env key as a secret that the credential proxy only sends to `allowed_hosts`. */
+export interface SecretEnvKey {
+  key: string;
+  allowed_hosts: string[];
+}
+
 export interface RunCommandParams {
   command: string;
   directory?: string;
   env?: Record<string, string>;
   timeout_seconds?: number;
+  secret_env_keys?: SecretEnvKey[];
 }
 
 export interface RunCommandResult {
@@ -129,15 +136,26 @@ interface RunCommandRequestProto {
   directory: string;
   timeout_seconds: number;
   task_group_id: string;
+  secret_env_keys: SecretEnvKey[];
 }
 
-function serializeRunCommandRequest(req: RunCommandRequestProto): Buffer {
+function serializeSecretEnvKey({ key, allowed_hosts: allowedHosts }: SecretEnvKey): Buffer {
+  return Buffer.concat([
+    encodeStringField(1, key),
+    ...allowedHosts.map((host) => encodeStringField(2, host)),
+  ]);
+}
+
+export function serializeRunCommandRequest(req: RunCommandRequestProto): Buffer {
   return Buffer.concat([
     encodeStringField(1, req.command),
     encodeMapField(2, req.env),
     encodeStringField(3, req.directory),
     encodeDoubleField(4, req.timeout_seconds),
     encodeStringField(5, req.task_group_id),
+    ...req.secret_env_keys.map((secretEnvKey) =>
+      encodeNestedMessage(6, serializeSecretEnvKey(secretEnvKey))
+    ),
   ]);
 }
 
@@ -508,6 +526,7 @@ export class SandboxApiClient {
         env: params.env ?? {},
         timeout_seconds: params.timeout_seconds ?? 0,
         task_group_id: '',
+        secret_env_keys: params.secret_env_keys ?? [],
       },
       this.metadata(conversationId),
       this.callOptions(timeoutSeconds * 1_000 + COMMAND_DEADLINE_MARGIN_MS)

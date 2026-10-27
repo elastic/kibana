@@ -25,6 +25,7 @@ export {
 
 export { getConnectorSpec } from './src/get_connector_spec';
 export { getSandboxSupportedAuthTypeIds } from './src/get_sandbox_supported_auth_type_ids';
+export { getSandboxHosts } from './src/get_sandbox_hosts';
 export {
   connectorSpecHasEvents,
   connectorTypeHasInboundEvents,

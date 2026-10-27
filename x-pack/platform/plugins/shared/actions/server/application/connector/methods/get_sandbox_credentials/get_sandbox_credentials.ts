@@ -62,6 +62,20 @@ export async function getSandboxCredentials(
     );
   }
 
+  // Fail closed: the credential proxy sends a secret with no hosts to any host.
+  const hosts = [
+    ...new Set(
+      (actionType.getSandboxHosts?.({ config }) ?? [])
+        .map((host) => host.trim().toLowerCase())
+        .filter((host) => host.length > 0 && host !== '*')
+    ),
+  ];
+  if (hosts.length === 0) {
+    throw new Error(
+      `Unable to get sandbox credentials for ${actionTypeId}: the connector declares no sandbox hosts`
+    );
+  }
+
   const configurationUtilities = context.actionTypeRegistry.getUtils();
   const getCredential = getCredentialWithAuth({
     authTypeRegistry: context.authTypeRegistry,
@@ -97,5 +111,6 @@ export async function getSandboxCredentials(
     actionTypeId,
     config,
     headers,
+    hosts,
   };
 }
