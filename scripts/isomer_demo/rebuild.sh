@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# Restacks the Isomer demo lane. Demo only: never PR'd, never pushed to elastic/kibana.
+# Restacks the Isomer demo lane. Demo only: shared as a draft PR on elastic/kibana, never merged.
 #
-#   scripts/isomer_demo/rebuild.sh [--base <ref>] [--bootstrap] [--fork <remote>]
+#   scripts/isomer_demo/rebuild.sh [--base <ref>] [--bootstrap] [--push <remote>]
 #
 # The demo is a linear stack of isomer/demo/* branches on the PR lane head; its top, isomer/demo/latest, holds these
 # docs and is the branch to run.
@@ -10,7 +10,8 @@
 # 1. Resolves the PR lane head: the highest Isomer stack branch pushed to `upstream`.
 # 2. Restacks the isomer/demo/* branches: onto the head when it has moved, and each onto the branch below when that
 #    changed (rerere is on, so a conflict resolved once stays resolved). To fix a lower branch, commit to it and re-run.
-# 3. With --fork, force-pushes every isomer/demo/* branch to that remote.
+# 3. With --push, force-pushes (with lease) isomer/demo/latest to that remote, such as upstream. The layers below it
+#    stay local.
 #
 # Run it from a worktree on an isomer/demo/* branch. Git can't rebase a branch checked out in another worktree.
 #
@@ -54,12 +55,12 @@ fi
 
 base=''
 bootstrap=0
-fork=''
+push=''
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --base) base="$2"; shift 2 ;;
     --bootstrap) bootstrap=1; shift ;;
-    --fork) fork="$2"; shift 2 ;;
+    --push) push="$2"; shift 2 ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
 done
@@ -71,10 +72,6 @@ unmerged() { git diff --name-only --diff-filter=U; }
 
 current="$(git branch --show-current)"
 [[ "$current" == isomer/demo/* ]] || die "run from a worktree on an isomer/demo/* branch (on '$current')"
-if [[ -n "$fork" ]]; then
-  fork_url="$(git remote get-url "$fork")"
-  [[ "$fork_url" != *elastic/kibana* ]] || die "refusing to push to '$fork' ($fork_url)"
-fi
 
 git config rerere.enabled true
 git config rerere.autoupdate true
@@ -115,7 +112,6 @@ present=()
 for topic in "${TOPICS[@]}"; do
   if exists "refs/heads/$topic"; then
     present+=("$topic")
-    git config "branch.$topic.pushRemote" no-push
   fi
 done
 [[ ${#present[@]} -gt 0 ]] || die "no isomer/demo/* branches exist"
@@ -167,7 +163,7 @@ git switch --quiet "$current"
 if [[ $bootstrap -eq 1 ]]; then
   node scripts/kbn bootstrap
 fi
-if [[ -n "$fork" ]]; then
-  git push --force "$fork" "${present[@]}"
+if [[ -n "$push" ]]; then
+  git push --force-with-lease "$push" "$TOP"
 fi
 echo "$TOP is $(git rev-parse --short "$TOP") on $base"
