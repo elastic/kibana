@@ -58,6 +58,7 @@ export type { ContentListUrlState } from './src/playwright/page_objects';
 export type {
   ScoutPlaywrightOptions,
   ScoutTestOptions,
+  GotoAppOptions,
   ScoutPage,
   PageObjects,
   ScoutTestFixtures,
