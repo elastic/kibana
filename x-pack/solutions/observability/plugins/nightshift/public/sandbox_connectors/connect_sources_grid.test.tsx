@@ -10,17 +10,13 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ActionType } from '@kbn/actions-types';
-import { fetchConnectorTypes } from '@kbn/alerts-ui-shared/src/common/apis/fetch_connector_types';
 import { useKibana } from '../hooks/use_kibana';
 import { ConnectSourcesGrid } from './connect_sources_grid';
 
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_connector_types', () => ({
-  fetchConnectorTypes: jest.fn(),
-}));
 
 const mockUseKibana = useKibana as jest.Mock;
-const mockFetchConnectorTypes = fetchConnectorTypes as jest.Mock;
+const mockFetchConnectorTypes = jest.fn();
 
 const type = (id: string, overrides: Partial<ActionType> = {}): ActionType => ({
   id,
@@ -72,7 +68,13 @@ const setup = ({
         capabilities: { actions: { save: canSave }, agentBuilder: { manageAgents: true } },
       },
       nightshiftInvestigations: {
-        investigationsClient: { fetch: jest.fn().mockResolvedValue({ connectors: [] }) },
+        investigationsClient: {
+          fetch: jest.fn(async (endpoint: string) =>
+            endpoint === 'GET /internal/nightshift/sandbox_connector_types'
+              ? { connector_types: await mockFetchConnectorTypes() }
+              : { connectors: [] }
+          ),
+        },
       },
       triggersActionsUi: {
         getAddConnectorFlyout,
@@ -97,13 +99,10 @@ const setup = ({
 const githubCard = () => screen.findByRole('button', { name: /Type \.github/ });
 
 describe('ConnectSourcesGrid', () => {
-  it('asks for sandbox-capable types only and renders the flyout card per type', async () => {
+  it('renders a card per sandbox-capable type from the Nightshift API', async () => {
     setup({ types: [type('.github'), type('.http')] });
 
     await screen.findByTestId('nightshiftConnectSourcesGrid');
-    expect(mockFetchConnectorTypes).toHaveBeenCalledWith(
-      expect.objectContaining({ sandboxCapableOnly: true })
-    );
     expect(screen.getByTestId('.github-card')).toHaveTextContent('Type .github');
     expect(screen.getByTestId('.github-card')).toHaveTextContent('Repos');
     expect(screen.getByTestId('.http-card')).toHaveTextContent('Type .http');

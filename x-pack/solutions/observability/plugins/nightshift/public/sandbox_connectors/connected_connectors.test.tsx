@@ -19,21 +19,6 @@ jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_connector', () => ({
   fetchConnector: jest.fn(),
 }));
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_connector_types', () => ({
-  fetchConnectorTypes: jest.fn().mockResolvedValue([
-    {
-      id: '.http',
-      name: 'HTTP',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: [],
-      isSystemActionType: false,
-      isDeprecated: false,
-    },
-  ]),
-}));
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockFetchConnector = fetchConnector as jest.Mock;

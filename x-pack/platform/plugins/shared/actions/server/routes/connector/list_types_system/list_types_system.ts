@@ -45,7 +45,6 @@ export const listTypesWithSystemRoute = (
         const connectorTypes = await actionsClient.listTypes({
           featureId: query?.feature_id,
           includeSystemActionTypes: true,
-          sandboxCapableOnly: query?.sandbox_capable_only,
         });
 
         const responseBody: GetAllConnectorTypesResponseV1 =

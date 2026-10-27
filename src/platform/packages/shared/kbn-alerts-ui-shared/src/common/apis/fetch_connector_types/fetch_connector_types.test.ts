@@ -56,16 +56,6 @@ describe('loadActionTypes', () => {
     `);
   });
 
-  test('asks for sandbox-capable types only when requested', async () => {
-    http.get.mockResolvedValueOnce([]);
-
-    await fetchConnectorTypes({ http, featureId: 'alerting', sandboxCapableOnly: true });
-
-    expect(http.get).toHaveBeenCalledWith('/api/actions/connector_types', {
-      query: { feature_id: 'alerting', sandbox_capable_only: true },
-    });
-  });
-
   test('should call list types API with query parameter if specified', async () => {
     const apiResponseValue = [
       {

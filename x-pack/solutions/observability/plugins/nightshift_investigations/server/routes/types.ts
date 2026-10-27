@@ -13,7 +13,10 @@ import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { NightshiftInvestigationsClient } from '../client/investigations_client';
 import type { CortexPageStore } from '../cortex/page_store';
-import type { ListSandboxConnectors } from '../lib/list_sandbox_connectors';
+import type {
+  ListSandboxConnectors,
+  ListSandboxConnectorTypes,
+} from '../lib/list_sandbox_connectors';
 import type { CustomContextClient } from '../custom_context';
 import type { OnboardingClient } from '../onboarding/onboarding_client';
 import type { DecisionTreeStore } from '../decision_trees/store';
@@ -64,6 +67,7 @@ export interface NightshiftInvestigationsRouteHandlerResources
   getCortexPageStore: GetCortexPageStore;
   isCortexEnabled: () => boolean;
   listSandboxConnectors: ListSandboxConnectors;
+  listSandboxConnectorTypes: ListSandboxConnectorTypes;
   customContextClient: CustomContextClient;
   onboardingClient: OnboardingClient;
   getDecisionTreeStore: GetDecisionTreeStore;

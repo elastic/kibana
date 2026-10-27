@@ -15,23 +15,20 @@ import { useKibana } from '../hooks/use_kibana';
 import { InvestigationAgentAddConnectorMenu } from './add_connector_menu';
 
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_connector_types', () => ({
-  fetchConnectorTypes: jest.fn().mockResolvedValue([
-    {
-      id: '.http',
-      name: 'HTTP',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: [],
-      isSystemActionType: false,
-      isDeprecated: false,
-    },
-  ]),
-}));
 
 const mockUseKibana = useKibana as jest.Mock;
+
+const httpType = {
+  id: '.http',
+  name: 'HTTP',
+  enabled: true,
+  enabledInConfig: true,
+  enabledInLicense: true,
+  minimumLicenseRequired: 'basic',
+  supportedFeatureIds: [],
+  isSystemActionType: false,
+  isDeprecated: false,
+};
 
 const connector = (id: string): SandboxConnector => ({
   id,
@@ -78,7 +75,13 @@ const setup = ({
       getUrlForApp: (app: string, { path }: { path: string }) => `/app/${app}${path}`,
     },
     nightshiftInvestigations: {
-      investigationsClient: { fetch: jest.fn().mockResolvedValue({ connectors }) },
+      investigationsClient: {
+        fetch: jest.fn(async (endpoint: string) =>
+          endpoint === 'GET /internal/nightshift/sandbox_connector_types'
+            ? { connector_types: [httpType] }
+            : { connectors }
+        ),
+      },
     },
     triggersActionsUi: {
       getAddConnectorFlyout,

@@ -55,6 +55,7 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/rule-registry-plugin'
   - '@kbn/actions-plugin'
+  - '@kbn/actions-types'
   - '@kbn/alerting-plugin'
   - '@kbn/sandbox-plugin'
   - '@kbn/context-engine-plugin'

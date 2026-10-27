@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { ActionType } from '@kbn/actions-types';
 import type { ConnectorResponse } from '@kbn/actions-plugin/common/routes/connector/response';
 
 export const SANDBOX_CONNECTORS_API_PATH = '/internal/nightshift/sandbox_connectors';
+export const SANDBOX_CONNECTOR_TYPES_API_PATH = '/internal/nightshift/sandbox_connector_types';
 
 /** A Kibana connector the investigation agent can use from its sandbox */
 export type SandboxConnector = Pick<
@@ -17,4 +19,10 @@ export type SandboxConnector = Pick<
 
 export interface GetSandboxConnectorsResponse {
   connectors: SandboxConnector[];
+}
+
+export type SandboxConnectorType = ActionType;
+
+export interface GetSandboxConnectorTypesResponse {
+  connector_types: SandboxConnectorType[];
 }

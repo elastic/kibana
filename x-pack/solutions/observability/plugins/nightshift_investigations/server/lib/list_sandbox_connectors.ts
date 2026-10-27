@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { SandboxConnector } from '../../common/sandbox_connectors';
+import type { SandboxConnector, SandboxConnectorType } from '../../common/sandbox_connectors';
 
 /**
  * The connectors the investigation agent could use from its sandbox: every sandbox-capable
@@ -32,4 +32,23 @@ export const createListSandboxConnectors =
       connector_type_id: connector.actionTypeId,
       is_preconfigured: connector.isPreconfigured,
     }));
+  };
+
+/**
+ * The connector types the investigation agent could use from its sandbox: the ones whose
+ * connectors can hand their credentials to it, which the actions plugin decides.
+ */
+export type ListSandboxConnectorTypes = (request: KibanaRequest) => Promise<SandboxConnectorType[]>;
+
+export const createListSandboxConnectorTypes =
+  ({
+    getActions,
+  }: {
+    getActions: () => ActionsPluginStart | undefined;
+  }): ListSandboxConnectorTypes =>
+  async (request) => {
+    const actions = getActions();
+    if (!actions) return [];
+    const actionsClient = await actions.getActionsClientWithRequest(request);
+    return actionsClient.listTypes({ includeSystemActionTypes: false, sandboxCapableOnly: true });
   };

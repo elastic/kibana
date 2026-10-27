@@ -16,23 +16,21 @@ export const fetchConnectorTypes = async ({
   http,
   featureId,
   includeSystemActions = false,
-  sandboxCapableOnly = false,
 }: {
   http: HttpSetup;
   featureId?: string;
   includeSystemActions?: boolean;
-  sandboxCapableOnly?: boolean;
 }): Promise<ActionType[]> => {
   const path = includeSystemActions
     ? `${INTERNAL_BASE_ACTION_API_PATH}/connector_types`
     : `${BASE_ACTION_API_PATH}/connector_types`;
-  const query = {
-    ...(featureId ? { feature_id: featureId } : {}),
-    ...(sandboxCapableOnly ? { sandbox_capable_only: true } : {}),
-  };
-  const res = await http.get<Parameters<typeof transformConnectorTypesResponse>[0]>(
-    path,
-    Object.keys(query).length > 0 ? { query } : {}
-  );
+
+  const res = featureId
+    ? await http.get<Parameters<typeof transformConnectorTypesResponse>[0]>(path, {
+        query: {
+          feature_id: featureId,
+        },
+      })
+    : await http.get<Parameters<typeof transformConnectorTypesResponse>[0]>(path, {});
   return transformConnectorTypesResponse(res);
 };

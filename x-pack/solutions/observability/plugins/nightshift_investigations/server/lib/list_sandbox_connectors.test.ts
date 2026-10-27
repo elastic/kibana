@@ -6,7 +6,10 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { createListSandboxConnectors } from './list_sandbox_connectors';
+import {
+  createListSandboxConnectors,
+  createListSandboxConnectorTypes,
+} from './list_sandbox_connectors';
 
 const connector = (
   id: string,
@@ -81,5 +84,51 @@ describe('createListSandboxConnectors', () => {
     });
 
     await expect(listSandboxConnectors(request)).rejects.toThrow('boom');
+  });
+});
+
+describe('createListSandboxConnectorTypes', () => {
+  const setupTypes = (listTypes = jest.fn().mockResolvedValue([{ id: '.http', name: 'HTTP' }])) => {
+    const actions = {
+      getActionsClientWithRequest: jest.fn().mockResolvedValue({ listTypes }),
+    };
+    return {
+      listSandboxConnectorTypes: createListSandboxConnectorTypes({
+        getActions: () => actions as never,
+      }),
+      listTypes,
+      request: httpServerMock.createKibanaRequest(),
+    };
+  };
+
+  it('lists the sandbox-capable connector types', async () => {
+    const { listSandboxConnectorTypes, listTypes, request } = setupTypes();
+
+    await expect(listSandboxConnectorTypes(request)).resolves.toEqual([
+      { id: '.http', name: 'HTTP' },
+    ]);
+    // The actions plugin decides sandbox capability; the lister only asks for capable ones.
+    expect(listTypes).toHaveBeenCalledWith({
+      includeSystemActionTypes: false,
+      sandboxCapableOnly: true,
+    });
+  });
+
+  it('returns no types when the actions plugin is not available', async () => {
+    const listSandboxConnectorTypes = createListSandboxConnectorTypes({
+      getActions: () => undefined,
+    });
+
+    await expect(listSandboxConnectorTypes(httpServerMock.createKibanaRequest())).resolves.toEqual(
+      []
+    );
+  });
+
+  it('fails when listing fails, rather than reporting no types', async () => {
+    const { listSandboxConnectorTypes, request } = setupTypes(
+      jest.fn().mockRejectedValue(new Error('boom'))
+    );
+
+    await expect(listSandboxConnectorTypes(request)).rejects.toThrow('boom');
   });
 });

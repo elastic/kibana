@@ -168,8 +168,11 @@ export {
 
 export {
   SANDBOX_CONNECTORS_API_PATH,
+  SANDBOX_CONNECTOR_TYPES_API_PATH,
   type SandboxConnector,
   type GetSandboxConnectorsResponse,
+  type SandboxConnectorType,
+  type GetSandboxConnectorTypesResponse,
 } from './sandbox_connectors';
 export {
   CUSTOM_CONTEXT_API_PATH,

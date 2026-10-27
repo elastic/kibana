@@ -513,12 +513,6 @@ paths:
           schema:
             maxLength: 100
             type: string
-        - description: A filter to limit the retrieved connector types to those whose connectors can hand their credentials to an AI agent sandbox.
-          in: query
-          name: sandbox_capable_only
-          required: false
-          schema:
-            type: boolean
       responses:
         '200':
           content:

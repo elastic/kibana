@@ -97,7 +97,10 @@ import {
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
 import { createOnboardingClient } from './onboarding/onboarding_client';
-import { createListSandboxConnectors } from './lib/list_sandbox_connectors';
+import {
+  createListSandboxConnectors,
+  createListSandboxConnectorTypes,
+} from './lib/list_sandbox_connectors';
 import { createCustomContextClient } from './custom_context';
 import type {
   InvestigationQuotaCallback,
@@ -213,6 +216,9 @@ export class NightshiftInvestigationsPlugin
     });
 
     const listSandboxConnectors = createListSandboxConnectors({
+      getActions: () => this.actionsStart,
+    });
+    const listSandboxConnectorTypes = createListSandboxConnectorTypes({
       getActions: () => this.actionsStart,
     });
 
@@ -485,6 +491,7 @@ export class NightshiftInvestigationsPlugin
           getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
           listSandboxConnectors,
+          listSandboxConnectorTypes,
           customContextClient,
           onboardingClient,
           getCortexPageStore: (request: KibanaRequest) => {
