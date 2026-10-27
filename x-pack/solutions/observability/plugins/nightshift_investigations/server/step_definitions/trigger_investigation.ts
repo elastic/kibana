@@ -33,7 +33,7 @@ import type {
 import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../lib/automations/types';
-import { consumeAutomationBudget, hasAutomationBudget } from '../lib/automations/automation_budget';
+import { createAutomationBudget } from '../lib/automations/automation_budget';
 import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
 import type { AutomationBudget } from '../types';
 
@@ -227,19 +227,11 @@ export const triggerInvestigationStepDefinition = (
         if (automation.attributes.workflowId !== workflow.id) {
           throw new Error('The automation does not belong to this workflow.');
         }
-        const dailyLimit = automation.attributes.runtime.dailyDispatchLimit;
-        automationBudget = {
-          check: async () => {
-            if (!(await hasAutomationBudget(soClient, automationId, dailyLimit))) {
-              throw new AutomationDailyLimitReachedError(dailyLimit);
-            }
-          },
-          consume: async () => {
-            if (!(await consumeAutomationBudget(soClient, automationId, dailyLimit))) {
-              throw new AutomationDailyLimitReachedError(dailyLimit);
-            }
-          },
-        };
+        automationBudget = createAutomationBudget(
+          soClient,
+          automationId,
+          automation.attributes.runtime.dailyDispatchLimit
+        );
       }
       const client = getInvestigationsClient(request, spaceId);
       const alerts =
@@ -278,9 +270,15 @@ export const triggerInvestigationStepDefinition = (
         return { output: result };
       } catch (error) {
         if (error instanceof AutomationDailyLimitReachedError) {
+          context.logger.info(
+            `Skipped investigation of ${input.subject_type}/${subjectId} for automation ${input.automation_id}: daily limit of ${error.limit} reached`
+          );
           return { output: { skip_reason: 'daily_limit' as const, daily_limit: error.limit } };
         }
         if (error instanceof InvestigationQuotaDeniedError) {
+          context.logger.info(
+            `Skipped investigation of ${input.subject_type}/${subjectId}: global investigation limit reached`
+          );
           return { output: { skip_reason: 'investigation_limit' as const } };
         }
         throw error;

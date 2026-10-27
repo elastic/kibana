@@ -29,7 +29,10 @@ import type { StartInvestigationRequest } from '../../common';
 import { freeFormContextSchema } from '../../common/schemas';
 import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
+import { createAutomationBudget, readAutomationUsage } from '../lib/automations/automation_budget';
+import { createBudgetRepository } from '../lib/automations/automation_budget.mock';
 import {
+  AutomationDailyLimitReachedError,
   InvalidInvestigationContextError,
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
@@ -151,8 +154,6 @@ const mockLogger = {
 const mockRequest = {} as KibanaRequest;
 const mockAgentAvailability = { cacheMode: 'space' as const, handler: jest.fn() };
 const investigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
-const consumedQuotaCount = () =>
-  investigationQuotaCallback.mock.calls.filter(([options]) => options.consume).length;
 const getConnectorById = jest.fn(async (connectorId: string) => ({ connectorId }));
 const mockInference = {
   getConnectorById,
@@ -439,7 +440,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(await client.start(request)).toEqual({ investigation_id: 'inv-one' });
     expect(await client.start(request)).toEqual({ investigation_id: 'inv-two' });
     expect(agenticInvestigationsClient.findOpenBySubjects).not.toHaveBeenCalled();
-    expect(consumedQuotaCount()).toBe(2);
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(2);
   });
 
   it('labels a manual run with its prompt so it does not read as "manual" while running', async () => {
@@ -579,11 +580,11 @@ describe('NightshiftInvestigationsClient.start()', () => {
       expect.anything(),
       'nightshift-investigations'
     );
-    expect(consumedQuotaCount()).toBe(1);
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
     expect(mockManagement.getWorkflow.mock.invocationCallOrder[0]).toBeLessThan(
       investigationQuotaCallback.mock.invocationCallOrder[0]
     );
-    expect(investigationQuotaCallback.mock.invocationCallOrder[1]).toBeLessThan(
+    expect(investigationQuotaCallback.mock.invocationCallOrder[0]).toBeLessThan(
       installInvestigationAgentMock.mock.invocationCallOrder[0]
     );
   });
@@ -758,7 +759,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       trigger_type: 'automatic',
     });
 
-    expect(consumedQuotaCount()).toBe(2);
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(2);
   });
 
   it('does not consume again when workflow launch fails after admission', async () => {
@@ -773,7 +774,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       })
     ).rejects.toThrow('Workflow launch failed');
 
-    expect(consumedQuotaCount()).toBe(1);
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
   });
 
   it('does not consume again when agent installation fails after admission', async () => {
@@ -788,7 +789,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       })
     ).rejects.toThrow('Agent installation failed');
 
-    expect(consumedQuotaCount()).toBe(1);
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });
 
@@ -1226,11 +1227,11 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
   it('charges the automatic quota after matching and before claiming a new investigation', async () => {
     await startAlerts('alert-1');
 
-    expect(consumedQuotaCount()).toBe(1);
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
     expect(agenticInvestigationsClient.findOpenBySubjects.mock.invocationCallOrder[0]).toBeLessThan(
       investigationQuotaCallback.mock.invocationCallOrder[0]
     );
-    expect(investigationQuotaCallback.mock.invocationCallOrder[1]).toBeLessThan(
+    expect(investigationQuotaCallback.mock.invocationCallOrder[0]).toBeLessThan(
       subjectsClient.claimSubjects.mock.invocationCallOrder[0]
     );
   });
@@ -1244,105 +1245,100 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });
 
-  const budget = () => ({
-    check: jest.fn().mockResolvedValue(undefined),
-    consume: jest.fn().mockResolvedValue(undefined),
-  });
-  const startAutomaticAlert = (automationBudget: ReturnType<typeof budget>) =>
-    makeClient().start(
-      {
-        subject: { type: 'alert', id: 'alert-1' },
-        trigger_type: 'automatic',
-        context: { alerts: [makeAlert('alert-1')] },
-      },
-      { automationBudget }
-    );
+  describe('with an automation budget', () => {
+    let repository: ReturnType<typeof createBudgetRepository>;
+    const startWithBudget = (
+      dailyLimit: number,
+      triggerType: StartInvestigationRequest['trigger_type'] = 'automatic'
+    ) =>
+      makeClient().start(
+        {
+          subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: triggerType,
+          context: { alerts: [makeAlert('alert-1')] },
+        },
+        { automationBudget: createAutomationBudget(repository, 'a1', dailyLimit) }
+      );
+    const usage = () => readAutomationUsage(repository, 'a1');
 
-  it('charges the automation budget and the global quota only after both checks pass', async () => {
-    const automationBudget = budget();
+    beforeEach(() => {
+      repository = createBudgetRepository();
+    });
 
-    await startAutomaticAlert(automationBudget);
+    it('charges the automation budget before the global quota', async () => {
+      await startWithBudget(1);
 
-    expect(investigationQuotaCallback.mock.calls.map(([options]) => options)).toEqual([
-      { consume: false },
-      { consume: true },
-    ]);
-    expect(automationBudget.check.mock.invocationCallOrder[0]).toBeLessThan(
-      automationBudget.consume.mock.invocationCallOrder[0]
-    );
-    expect(investigationQuotaCallback.mock.invocationCallOrder[0]).toBeLessThan(
-      automationBudget.check.mock.invocationCallOrder[0]
-    );
-    expect(automationBudget.consume.mock.invocationCallOrder[0]).toBeLessThan(
-      investigationQuotaCallback.mock.invocationCallOrder[1]
-    );
-  });
+      expect(await usage()).toBe(1);
+      expect(repository.create.mock.invocationCallOrder[0]).toBeLessThan(
+        investigationQuotaCallback.mock.invocationCallOrder[0]
+      );
+    });
 
-  it('does not charge the automation budget or consume the global quota when the global quota denies the start', async () => {
-    investigationQuotaCallback.mockResolvedValue({ allowed: false });
-    const automationBudget = budget();
+    it('releases the automation budget when the global quota denies the start', async () => {
+      investigationQuotaCallback.mockResolvedValue({ allowed: false });
 
-    await expect(startAutomaticAlert(automationBudget)).rejects.toBeInstanceOf(
-      InvestigationQuotaDeniedError
-    );
+      await expect(startWithBudget(1)).rejects.toBeInstanceOf(InvestigationQuotaDeniedError);
 
-    expect(automationBudget.check).not.toHaveBeenCalled();
-    expect(automationBudget.consume).not.toHaveBeenCalled();
-    expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
-    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
-  });
+      expect(await usage()).toBe(0);
+      expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
+    });
 
-  it('denies the start when the global quota allows the peek but denies the charge', async () => {
-    investigationQuotaCallback.mockImplementation(async ({ consume }) => ({ allowed: !consume }));
-    const automationBudget = budget();
+    it('does not charge the global quota when the automation budget denies the start', async () => {
+      await expect(startWithBudget(0)).rejects.toBeInstanceOf(AutomationDailyLimitReachedError);
 
-    await expect(startAutomaticAlert(automationBudget)).rejects.toBeInstanceOf(
-      InvestigationQuotaDeniedError
-    );
+      expect(investigationQuotaCallback).not.toHaveBeenCalled();
+      expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
+    });
 
-    expect(automationBudget.consume).toHaveBeenCalledTimes(1);
-    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
-    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
-  });
+    it('admits one of two starts racing for the last slot', async () => {
+      const results = await Promise.allSettled([startWithBudget(1), startWithBudget(1)]);
 
-  it('does not consume the global quota when the automation budget denies the start', async () => {
-    const error = new Error('own limit');
-    const automationBudget = { check: jest.fn().mockRejectedValue(error), consume: jest.fn() };
+      expect(results.filter(({ status }) => status === 'fulfilled')).toHaveLength(1);
+      expect(results).toContainEqual({
+        status: 'rejected',
+        reason: expect.any(AutomationDailyLimitReachedError),
+      });
+      expect(await usage()).toBe(1);
+      expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
+    });
 
-    await expect(startAutomaticAlert(automationBudget)).rejects.toBe(error);
+    it('releases the automation budget when the start loses the claim and continues the holder', async () => {
+      subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-holder' });
+      withConversations(makeConversation({ id: 'inv-holder' }));
 
-    expect(automationBudget.consume).not.toHaveBeenCalled();
-    expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
-    expect(investigationQuotaCallback).toHaveBeenCalledWith({ consume: false });
-    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
-  });
+      await expect(startWithBudget(1)).resolves.toEqual({ investigation_id: 'inv-holder' });
 
-  it('does not use the automation budget for a start that continues an open investigation', async () => {
-    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
-    withConversations(makeConversation({ id: 'inv-1' }));
-    subjectsClient.listByConversationIds.mockResolvedValue([makeStoredSubject()]);
-    const automationBudget = budget();
+      expect(await usage()).toBe(0);
+    });
 
-    await startAutomaticAlert(automationBudget);
+    it.each([
+      [
+        'the workflow launch',
+        () => mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed')),
+      ],
+      [
+        'the agent installation',
+        () => installInvestigationAgentMock.mockRejectedValueOnce(new Error('failed')),
+      ],
+    ])('releases the automation budget when %s fails', async (_step, fail) => {
+      fail();
 
-    expect(automationBudget.check).not.toHaveBeenCalled();
-    expect(automationBudget.consume).not.toHaveBeenCalled();
-  });
+      await expect(startWithBudget(1)).rejects.toThrow('failed');
 
-  it('does not use the automation budget for a manual start', async () => {
-    const automationBudget = budget();
+      expect(await usage()).toBe(0);
+    });
 
-    await makeClient().start(
-      {
-        subject: { type: 'alert', id: 'alert-1' },
-        trigger_type: 'manual',
-        context: { alerts: [makeAlert('alert-1')] },
-      },
-      { automationBudget }
-    );
+    it('does not use the automation budget for a follow-up or a manual start', async () => {
+      agenticInvestigationsClient.findOpenBySubjects.mockResolvedValueOnce([{ id: 'inv-1' }]);
+      withConversations(makeConversation({ id: 'inv-1' }));
+      subjectsClient.listByConversationIds.mockResolvedValue([makeStoredSubject()]);
 
-    expect(automationBudget.check).not.toHaveBeenCalled();
-    expect(automationBudget.consume).not.toHaveBeenCalled();
+      await expect(startWithBudget(1)).resolves.toEqual({ investigation_id: 'inv-1' });
+      await startWithBudget(0, 'manual');
+
+      expect(repository.create).not.toHaveBeenCalled();
+      expect(repository.update).not.toHaveBeenCalled();
+    });
   });
 
   it('describes the alerts again when every alert is already part of the investigation', async () => {

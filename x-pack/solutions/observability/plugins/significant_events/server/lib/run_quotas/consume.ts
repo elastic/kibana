@@ -6,7 +6,7 @@
  */
 
 import type { RunQuotaConsumeResponse, RunQuotaGroup } from '../../../common/run_quotas';
-import { mutateRunQuotaLedger, readRunQuotaLedger, readRunQuotaSettings } from './repository';
+import { mutateRunQuotaLedger, readRunQuotaSettings } from './repository';
 import { dayKey, resolveDailyWindow } from './window';
 import type { RunQuotaSavedObjectsRepository } from './repository';
 
@@ -36,21 +36,4 @@ export const consumeRunQuota = async ({
       };
     },
   });
-};
-
-export const peekRunQuota = async ({
-  internalRepository,
-  group,
-}: {
-  internalRepository: RunQuotaSavedObjectsRepository;
-  group: RunQuotaGroup;
-}): Promise<RunQuotaConsumeResponse> => {
-  const date = dayKey(resolveDailyWindow());
-  const [settings, ledger] = await Promise.all([
-    readRunQuotaSettings(internalRepository),
-    readRunQuotaLedger(internalRepository, date, group),
-  ]);
-  const limit = settings.limits[group];
-
-  return { allowed: !(settings.enabled && limit > 0 && ledger.count >= limit) };
 };

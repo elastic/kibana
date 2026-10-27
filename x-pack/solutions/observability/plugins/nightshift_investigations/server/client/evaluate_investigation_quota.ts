@@ -15,11 +15,9 @@ const ALLOWED: InvestigationQuotaResult = { allowed: true };
 export const evaluateInvestigationQuota = async ({
   callback,
   logger,
-  consume = true,
 }: {
   callback?: InvestigationQuotaCallback;
   logger: Logger;
-  consume?: boolean;
 }): Promise<InvestigationQuotaResult> => {
   if (!callback) {
     logger.warn(
@@ -30,7 +28,7 @@ export const evaluateInvestigationQuota = async ({
 
   try {
     const result = await withTimeout({
-      promise: Promise.resolve().then(() => callback({ consume })),
+      promise: Promise.resolve().then(callback),
       timeoutMs: INVESTIGATION_QUOTA_TIMEOUT_MS,
     });
 

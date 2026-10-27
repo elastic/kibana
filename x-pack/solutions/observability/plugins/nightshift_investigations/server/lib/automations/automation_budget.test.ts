@@ -6,68 +6,67 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import type { NightshiftAutomationBudgetAttributes } from './types';
+import { AutomationDailyLimitReachedError } from '../../client/errors';
 import {
   consumeAutomationBudget,
-  hasAutomationBudget,
+  createAutomationBudget,
   readAutomationUsage,
+  releaseAutomationBudget,
 } from './automation_budget';
+import { createBudgetRepository as createRepository } from './automation_budget.mock';
 
-const createRepository = () => {
-  const documents = new Map<
-    string,
-    { attributes: NightshiftAutomationBudgetAttributes; version: number }
-  >();
-  const soClient = savedObjectsClientMock.create();
-  soClient.get.mockImplementation(async (type, id) => {
-    const document = documents.get(id);
-    if (!document) throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    return {
-      id,
-      type,
-      references: [],
-      attributes: { ...document.attributes },
-      version: String(document.version),
-    };
-  });
-  soClient.create.mockImplementation(async (type, attributes, options) => {
-    const id = options?.id ?? '';
-    if (documents.has(id)) throw SavedObjectsErrorHelpers.createConflictError(type, id);
-    documents.set(id, {
-      attributes: { ...(attributes as NightshiftAutomationBudgetAttributes) },
-      version: 1,
-    });
-    return { id, type, references: [], attributes, version: '1' };
-  });
-  soClient.update.mockImplementation(async (type, id, attributes, options) => {
-    const current = documents.get(id);
-    if (!current) throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    if (options?.version !== String(current.version))
-      throw SavedObjectsErrorHelpers.createConflictError(type, id);
-    const next = {
-      attributes: { ...current.attributes, ...attributes },
-      version: current.version + 1,
-    };
-    documents.set(id, next);
-    return { id, type, references: [], attributes: next.attributes, version: String(next.version) };
-  });
-  return soClient;
-};
+const TODAY = '2026-10-19';
+const TOMORROW = '2026-10-20';
 
 describe('automation daily dispatch budget', () => {
   beforeEach(() => jest.useFakeTimers().setSystemTime(new Date('2026-10-19T23:59:00.000Z')));
   afterEach(() => jest.useRealTimers());
 
-  it('reports whether budget is left without using any', async () => {
+  it('releases one dispatch of the day it was charged', async () => {
     const repository = createRepository();
+    await consumeAutomationBudget(repository, 'a1', 2);
+    await consumeAutomationBudget(repository, 'a1', 2);
 
-    expect(await hasAutomationBudget(repository, 'a1', undefined)).toBe(true);
-    expect(await hasAutomationBudget(repository, 'a1', 1)).toBe(true);
-    await consumeAutomationBudget(repository, 'a1', 1);
-    expect(await hasAutomationBudget(repository, 'a1', 1)).toBe(false);
-    expect(await hasAutomationBudget(repository, 'a1', undefined)).toBe(true);
+    await releaseAutomationBudget(repository, 'a1', TODAY);
+
     expect(await readAutomationUsage(repository, 'a1')).toBe(1);
+  });
+
+  it('leaves usage untouched when releasing a charge of an earlier day or with nothing used', async () => {
+    const repository = createRepository();
+    await releaseAutomationBudget(repository, 'a1', TODAY);
+    expect(repository.update).not.toHaveBeenCalled();
+
+    await consumeAutomationBudget(repository, 'a1', 1);
+    jest.setSystemTime(new Date(`${TOMORROW}T00:00:00.000Z`));
+    await consumeAutomationBudget(repository, 'a1', 1);
+    await releaseAutomationBudget(repository, 'a1', TODAY);
+
+    expect(await readAutomationUsage(repository, 'a1')).toBe(1);
+  });
+
+  it('releases only what the start charged, once', async () => {
+    const repository = createRepository();
+    await consumeAutomationBudget(repository, 'a1', 2);
+    const budget = createAutomationBudget(repository, 'a1', 2);
+
+    await budget.release();
+    expect(await readAutomationUsage(repository, 'a1')).toBe(1);
+
+    await budget.consume();
+    await budget.release();
+    await budget.release();
+    expect(await readAutomationUsage(repository, 'a1')).toBe(1);
+  });
+
+  it('denies a start over the limit without charging it', async () => {
+    const repository = createRepository();
+    const budget = createAutomationBudget(repository, 'a1', 0);
+
+    await expect(budget.consume()).rejects.toBeInstanceOf(AutomationDailyLimitReachedError);
+    await budget.release();
+
+    expect(await readAutomationUsage(repository, 'a1')).toBe(0);
   });
 
   it('admits exactly the limit under concurrent first creates and updates', async () => {
@@ -92,11 +91,11 @@ describe('automation daily dispatch budget', () => {
 
   it('resets usage at midnight UTC and reuses the same document', async () => {
     const repository = createRepository();
-    expect(await consumeAutomationBudget(repository, 'a1', 1)).toBe(true);
-    expect(await consumeAutomationBudget(repository, 'a1', 1)).toBe(false);
-    jest.setSystemTime(new Date('2026-10-20T00:00:00.000Z'));
+    expect(await consumeAutomationBudget(repository, 'a1', 1)).toBe(TODAY);
+    expect(await consumeAutomationBudget(repository, 'a1', 1)).toBeUndefined();
+    jest.setSystemTime(new Date(`${TOMORROW}T00:00:00.000Z`));
     expect(await readAutomationUsage(repository, 'a1')).toBe(0);
-    expect(await consumeAutomationBudget(repository, 'a1', 1)).toBe(true);
+    expect(await consumeAutomationBudget(repository, 'a1', 1)).toBe(TOMORROW);
     expect(await readAutomationUsage(repository, 'a1')).toBe(1);
     expect(repository.create).toHaveBeenCalledTimes(1);
   });
@@ -104,19 +103,19 @@ describe('automation daily dispatch budget', () => {
   it('keeps automations independent and applies an edited limit to existing usage', async () => {
     const repository = createRepository();
     expect(await readAutomationUsage(repository, 'a1')).toBe(0);
-    expect(await consumeAutomationBudget(repository, 'a1', 1)).toBe(true);
-    expect(await consumeAutomationBudget(repository, 'a1', 1)).toBe(false);
-    expect(await consumeAutomationBudget(repository, 'a2', 1)).toBe(true);
-    expect(await consumeAutomationBudget(repository, 'a1', 2)).toBe(true);
-    expect(await consumeAutomationBudget(repository, 'a1', 2)).toBe(false);
+    expect(await consumeAutomationBudget(repository, 'a1', 1)).toBe(TODAY);
+    expect(await consumeAutomationBudget(repository, 'a1', 1)).toBeUndefined();
+    expect(await consumeAutomationBudget(repository, 'a2', 1)).toBe(TODAY);
+    expect(await consumeAutomationBudget(repository, 'a1', 2)).toBe(TODAY);
+    expect(await consumeAutomationBudget(repository, 'a1', 2)).toBeUndefined();
   });
 
   it('allows an omitted limit while recording usage and treats zero as no dispatches', async () => {
     const repository = createRepository();
-    expect(await consumeAutomationBudget(repository, 'a1', undefined)).toBe(true);
-    expect(await consumeAutomationBudget(repository, 'a1', undefined)).toBe(true);
+    expect(await consumeAutomationBudget(repository, 'a1', undefined)).toBe(TODAY);
+    expect(await consumeAutomationBudget(repository, 'a1', undefined)).toBe(TODAY);
     expect(await readAutomationUsage(repository, 'a1')).toBe(2);
-    expect(await consumeAutomationBudget(repository, 'a2', 0)).toBe(false);
+    expect(await consumeAutomationBudget(repository, 'a2', 0)).toBeUndefined();
     expect(await readAutomationUsage(repository, 'a2')).toBe(0);
   });
 

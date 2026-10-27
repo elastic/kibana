@@ -7,7 +7,7 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { consumeRunQuota, createRunQuotaInternalRepository, peekRunQuota } from './lib/run_quotas';
+import { consumeRunQuota, createRunQuotaInternalRepository } from './lib/run_quotas';
 import { knowledgeIndicatorsDataStream } from './lib/knowledge_indicators';
 import { detectionsDataStream } from './lib/significant_events/detections';
 import type { SignificantEventsPluginSetupDependencies } from './types';
@@ -15,14 +15,12 @@ import { SignificantEventsPlugin } from './plugin';
 
 jest.mock('./lib/run_quotas', () => ({
   consumeRunQuota: jest.fn(),
-  peekRunQuota: jest.fn(),
   createRunQuotaInternalRepository: jest.fn(),
 }));
 
 jest.mock('./routes', () => ({ significantEventsRouteRepository: {} }));
 
 const consumeRunQuotaMock = jest.mocked(consumeRunQuota);
-const peekRunQuotaMock = jest.mocked(peekRunQuota);
 const createRunQuotaInternalRepositoryMock = jest.mocked(createRunQuotaInternalRepository);
 
 const createPlugin = () => new SignificantEventsPlugin(coreMock.createPluginInitializerContext());
@@ -58,7 +56,6 @@ describe('SignificantEventsPlugin setup', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     consumeRunQuotaMock.mockResolvedValue({ allowed: true });
-    peekRunQuotaMock.mockResolvedValue({ allowed: true });
   });
 
   it('supports the investigations plugin being absent', () => {
@@ -115,9 +112,7 @@ describe('SignificantEventsPlugin setup', () => {
     plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
     const [callback] = registerInvestigationQuota.mock.calls[0];
 
-    await expect(callback({ consume: true })).rejects.toThrow(
-      'Significant Events start services are unavailable'
-    );
+    await expect(callback()).rejects.toThrow('Significant Events start services are unavailable');
     expect(createRunQuotaInternalRepositoryMock).not.toHaveBeenCalled();
   });
 
@@ -134,32 +129,13 @@ describe('SignificantEventsPlugin setup', () => {
     server.core = coreMock.createStart();
     const [callback] = registerInvestigationQuota.mock.calls[0];
 
-    await expect(callback({ consume: true })).resolves.toEqual({ allowed: true });
+    await expect(callback()).resolves.toEqual({ allowed: true });
 
     expect(createRunQuotaInternalRepositoryMock).toHaveBeenCalledWith(server);
     expect(consumeRunQuotaMock).toHaveBeenCalledWith({
       internalRepository,
       group: 'investigation',
     });
-    expect(peekRunQuotaMock).not.toHaveBeenCalled();
-  });
-
-  it('only reads the investigation quota when invoked without consuming', async () => {
-    const registerInvestigationQuota = jest.fn();
-    const internalRepository = {} as ReturnType<typeof createRunQuotaInternalRepository>;
-    createRunQuotaInternalRepositoryMock.mockReturnValue(internalRepository);
-    const plugin = createPlugin();
-    plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
-    if (!plugin.server) {
-      throw new Error('Expected Significant Events server');
-    }
-    plugin.server.core = coreMock.createStart();
-    const [callback] = registerInvestigationQuota.mock.calls[0];
-
-    await expect(callback({ consume: false })).resolves.toEqual({ allowed: true });
-
-    expect(peekRunQuotaMock).toHaveBeenCalledWith({ internalRepository, group: 'investigation' });
-    expect(consumeRunQuotaMock).not.toHaveBeenCalled();
   });
 });
 

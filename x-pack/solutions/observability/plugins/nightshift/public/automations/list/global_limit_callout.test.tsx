@@ -12,14 +12,25 @@ import type { RunQuotasResponse } from '@kbn/significant-events-plugin/common';
 import { GlobalLimitCallout } from './global_limit_callout';
 import { isGlobalInvestigationLimitReached } from '../utils/filter_automations';
 
-const quotas = (
-  overrides: Partial<Pick<RunQuotasResponse, 'enabled'>> & { limit?: number; used?: number }
-) =>
-  ({
-    enabled: overrides.enabled ?? true,
-    limits: { investigation: overrides.limit ?? 3 },
-    counts: { investigation: overrides.used ?? 3 },
-  } as RunQuotasResponse);
+const quotas = ({
+  enabled = true,
+  limit = 3,
+  used = 3,
+}: {
+  enabled?: boolean;
+  limit?: number;
+  used?: number;
+}): RunQuotasResponse => ({
+  enabled,
+  limits: { detection: 0, ki_extraction: 0, investigation: limit },
+  counts: { detection: 0, ki_extraction: 0, investigation: used },
+  window: {
+    start: '2026-09-03T00:00:00.000Z',
+    resetsAt: '2026-09-04T00:00:00.000Z',
+    timezone: 'UTC',
+  },
+  canManage: true,
+});
 
 describe('GlobalLimitCallout', () => {
   it('renders the paused title', () => {

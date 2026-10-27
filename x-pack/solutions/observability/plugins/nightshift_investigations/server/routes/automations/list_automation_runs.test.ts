@@ -401,9 +401,6 @@ it('reports global investigation-limit denials as skipped with their own reason'
   });
 
   const result = await call('auto-1');
-  expect(result.runs[0]).toMatchObject({
-    status: 'skipped',
-    skipReason: 'investigation_limit',
-    dailyLimit: 10,
-  });
+  expect(result.runs[0]).toMatchObject({ status: 'skipped', skipReason: 'investigation_limit' });
+  expect(result.runs[0].dailyLimit).toBeUndefined();
 });

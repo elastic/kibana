@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { MAX_ARRAY_LENGTH, MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { InvestigationQuotaDeniedError } from '../client/errors';
@@ -21,9 +21,11 @@ jest.mock('@kbn/workflows-extensions/server', () => ({
 }));
 
 const request = {} as KibanaRequest;
+const logger = loggingSystemMock.createLogger();
 const createContext = (input: Record<string, unknown>) =>
   ({
     input,
+    logger,
     contextManager: {
       getFakeRequest: jest.fn().mockReturnValue(request),
       getContext: jest.fn().mockReturnValue({ workflow: { id: 'wf-1', spaceId: 'test-space' } }),
@@ -329,6 +331,9 @@ describe('triggerInvestigationStepDefinition', () => {
       )
     ).toEqual({ output: { skip_reason: 'investigation_limit' } });
     expect(start).toHaveBeenCalledTimes(1);
+    expect(logger.info).toHaveBeenCalledWith(
+      'Skipped investigation of significant_event/event-1: global investigation limit reached'
+    );
   });
 });
 
@@ -402,7 +407,6 @@ describe('automation budget enforcement before dispatch', () => {
     async (subjectType) => {
       const { start, definition, soClient } = setup(2, 2);
       start.mockImplementation(async (_request, { automationBudget }) => {
-        await automationBudget.check();
         await automationBudget.consume();
         return { investigation_id: 'inv-1' };
       });
@@ -414,14 +418,15 @@ describe('automation budget enforcement before dispatch', () => {
         output: { skip_reason: 'daily_limit', daily_limit: 2 },
       });
       expect(soClient.update).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('for automation a1: daily limit of 2 reached')
+      );
     }
   );
 
   it('charges the budget only when the client opens a new investigation', async () => {
     const { start, definition, soClient } = setup(2, 1);
     start.mockImplementation(async (_request, { automationBudget }) => {
-      await automationBudget.check();
-      expect(soClient.update).not.toHaveBeenCalled();
       await automationBudget.consume();
       expect(soClient.update).toHaveBeenCalledWith(
         'nightshift-automation-budget',

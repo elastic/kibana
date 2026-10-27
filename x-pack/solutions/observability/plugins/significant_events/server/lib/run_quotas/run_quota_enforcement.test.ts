@@ -7,7 +7,7 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RunQuotaGroup } from '../../../common/run_quotas';
-import { consumeRunQuota, peekRunQuota } from './consume';
+import { consumeRunQuota } from './consume';
 import {
   getRunQuotaLedgerId,
   patchRunQuotaSettings,
@@ -194,27 +194,6 @@ describe('run quota admission behavior', () => {
     ).resolves.toEqual({ allowed: false });
 
     await expect(repository.count('2026-08-31', 'detection')).resolves.toBe(2);
-  });
-
-  it('peeks at a finite limit without incrementing', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
-    const repository = createRepository();
-    await patchRunQuotaSettings(repository.client, {
-      enabled: true,
-      limits: { investigation: 1 },
-    });
-
-    await expect(
-      peekRunQuota({ internalRepository: repository.client, group: 'investigation' })
-    ).resolves.toEqual({ allowed: true });
-    await expect(repository.count('2026-08-31', 'investigation')).resolves.toBe(0);
-
-    await consumeRunQuota({ internalRepository: repository.client, group: 'investigation' });
-
-    await expect(
-      peekRunQuota({ internalRepository: repository.client, group: 'investigation' })
-    ).resolves.toEqual({ allowed: false });
-    await expect(repository.count('2026-08-31', 'investigation')).resolves.toBe(1);
   });
 
   it('denies investigations at a finite limit without incrementing', async () => {

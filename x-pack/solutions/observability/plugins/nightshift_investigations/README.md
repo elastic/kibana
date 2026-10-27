@@ -22,16 +22,18 @@ The Investigate/Ask selector does not select a different execution path.
 `runtime.dailyDispatchLimit` caps the new investigations an automation opens, per space and UTC day.
 Attempts that continue an open investigation and starts with the `manual` trigger type do not count
 and are never blocked, even at a limit of zero. For an automatic attempt that would open a new
-investigation, the investigation client first checks the global automatic-investigation quota and
-the automation budget without using either, then charges the budget and the quota. An attempt denied
-by either limit creates no investigation, does not increase today's usage, and appears as skipped in
-automation history: with reason `investigation_limit` when the global quota denies it, and with
-reason `daily_limit` when the automation limit denies it. The global limit wins when both are
-reached. A charged attempt counts even if starting or running the investigation fails afterwards. The
-budget slot is reserved atomically; overlapping runs across Kibana instances cannot exceed the limit.
-A concurrent attempt can still take the last global slot between the check and the charge, which
-wastes one unit of the automation budget. An omitted limit allows unlimited new investigations; a
-limit of zero blocks all new investigations. Changing the limit takes effect on the next attempt.
+investigation, the investigation client charges the automation budget, then the global
+automatic-investigation quota. Each charge is the check: the budget slot is reserved atomically, so
+overlapping runs across Kibana instances cannot exceed the limit. An attempt denied by either limit
+creates no investigation and appears as skipped in automation history: with reason `daily_limit`
+when the automation limit denies it, and with reason `investigation_limit` when the global quota
+denies it. The automation limit is checked first, so `daily_limit` wins when both are reached. When
+the global quota denies an attempt, the client gives back the automation slot. The client also gives
+it back when the attempt loses the subject claim to a concurrent start and continues that
+investigation instead, or when starting the investigation workflow fails. The global quota has no
+refund, so those last two cases still count against it. A failure while the investigation runs does
+not give back either slot. An omitted limit allows unlimited new investigations; a limit of zero
+blocks all new investigations. Changing the limit takes effect on the next attempt.
 
 The API-only `scopeQuery` field is forwarded as `scope_query` guidance in the investigation context.
 It guides the agent's telemetry filters; it is not an enforced data-access boundary. The optional

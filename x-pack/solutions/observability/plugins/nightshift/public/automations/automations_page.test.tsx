@@ -428,6 +428,19 @@ describe('AutomationsPage', () => {
       expect(screen.queryByTestId('automationsRateLimitBanner')).not.toBeInTheDocument();
     });
 
+    it('hides the global callout and keeps the page working when the limit cannot be loaded', () => {
+      mockUseRunQuotas.mockReturnValue({
+        data: undefined,
+        error: new Error('Forbidden'),
+        refetch: jest.fn(),
+      });
+      renderPage();
+
+      expect(screen.queryByTestId('automationsGlobalLimitBanner')).not.toBeInTheDocument();
+      expect(screen.getByTestId('automationsRateLimitBanner')).toBeInTheDocument();
+      expect(screen.getByText('Triage incoming alerts')).toBeInTheDocument();
+    });
+
     it('shows the paused callout only when the global investigation limit is reached', () => {
       const quotas = (used: number) => ({
         data: { enabled: true, limits: { investigation: 3 }, counts: { investigation: used } },

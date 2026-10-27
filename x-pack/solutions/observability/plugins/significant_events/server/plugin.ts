@@ -50,7 +50,6 @@ import { SlackAppService } from './lib/slack_app/service';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
 import {
   consumeRunQuota,
-  peekRunQuota,
   createRunQuotaInternalRepository,
   runQuotaLedgerSavedObjectType,
   runQuotaSettingsSavedObjectType,
@@ -186,12 +185,11 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
-    plugins.nightshiftInvestigations?.registerInvestigationQuota(async ({ consume }) => {
+    plugins.nightshiftInvestigations?.registerInvestigationQuota(async () => {
       if (!this.server?.core) {
         throw new Error('Significant Events start services are unavailable');
       }
-      const quota = consume ? consumeRunQuota : peekRunQuota;
-      return quota({
+      return consumeRunQuota({
         internalRepository: createRunQuotaInternalRepository(this.server),
         group: 'investigation',
       });

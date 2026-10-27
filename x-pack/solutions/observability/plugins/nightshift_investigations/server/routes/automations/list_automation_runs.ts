@@ -146,10 +146,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         message: getString(input['message']),
         investigationId: getString(output['investigation_id']),
         skipReason: skipReason ?? null,
-        dailyLimit:
-          typeof output['daily_limit'] === 'number'
-            ? output['daily_limit']
-            : so.attributes.runtime.dailyDispatchLimit,
+        dailyLimit: typeof output['daily_limit'] === 'number' ? output['daily_limit'] : undefined,
       };
     });
 
