@@ -290,13 +290,14 @@ export const addUninstallTokenToPolicy = async (
   return savedObject.id;
 };
 
-const POLICY_BASE_ID_BACKFILL_TASK_ID = 'task:fleet:setup:backfillPolicyBaseId';
+export const TASK_MANAGER_INDEX = '.kibana_task_manager';
+export const POLICY_BASE_ID_BACKFILL_TASK_ID = 'task:fleet:setup:backfillPolicyBaseId';
 
-export async function getPolicyBaseIdBackfillTask(providerContext: FtrProviderContext) {
+async function getPolicyBaseIdBackfillTask(providerContext: FtrProviderContext) {
   const res = await providerContext
     .getService('es')
     .get<{ task: { status: string } }>(
-      { index: '.kibana_task_manager', id: POLICY_BASE_ID_BACKFILL_TASK_ID },
+      { index: TASK_MANAGER_INDEX, id: POLICY_BASE_ID_BACKFILL_TASK_ID },
       { ignore: [404] }
     );
   return res.found ? res._source : undefined;

@@ -11,10 +11,15 @@ import { AGENT_POLICY_INDEX, AGENTS_INDEX } from '@kbn/fleet-plugin/common/const
 
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import {
-  getPolicyBaseIdBackfillTask,
+  POLICY_BASE_ID_BACKFILL_TASK_ID,
+  TASK_MANAGER_INDEX,
   skipIfNoDockerRegistry,
   waitForPolicyBaseIdBackfill,
 } from '../helpers';
+
+interface TaskDoc {
+  task: { taskType: string; params: string; enabled?: boolean; runAt: string };
+}
 
 interface SeededDoc {
   index: string;
@@ -26,17 +31,69 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
+  const retry = getService('retry');
 
   describe('policy_base_id backfill', () => {
     skipIfNoDockerRegistry(providerContext);
 
     let agentPolicyId: string;
     let docs: SeededDoc[];
+    let taskTemplate: TaskDoc;
 
     const fleetSetup = () => supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
-    const getTaskDoc = () => getPolicyBaseIdBackfillTask(providerContext);
     const waitForTaskRemoved = () => waitForPolicyBaseIdBackfill(providerContext);
+
+    const getTaskDoc = () =>
+      es.get<TaskDoc>({ index: TASK_MANAGER_INDEX, id: POLICY_BASE_ID_BACKFILL_TASK_ID });
+
+    // Task Manager does not claim disabled tasks, and the setup does not schedule the task
+    // again while it exists, so that the backfill only runs once the task is released
+    const holdTask = async () => {
+      await waitForTaskRemoved();
+      const now = new Date().toISOString();
+      await es.index({
+        index: TASK_MANAGER_INDEX,
+        id: POLICY_BASE_ID_BACKFILL_TASK_ID,
+        refresh: true,
+        document: {
+          ...taskTemplate,
+          updated_at: now,
+          task: {
+            ...taskTemplate.task,
+            enabled: false,
+            status: 'idle',
+            attempts: 0,
+            runAt: now,
+            scheduledAt: now,
+            retryAt: null,
+            startedAt: null,
+            ownerId: null,
+          },
+        },
+      });
+      return (await getTaskDoc())._version;
+    };
+
+    const releaseTask = () =>
+      es.update({
+        index: TASK_MANAGER_INDEX,
+        id: POLICY_BASE_ID_BACKFILL_TASK_ID,
+        refresh: true,
+        doc: { task: { enabled: true, runAt: new Date().toISOString() } },
+      });
+
+    const getBackfillTaskIds = async () => {
+      await es.indices.refresh({ index: TASK_MANAGER_INDEX });
+      const res = await es.search<TaskDoc>({
+        index: TASK_MANAGER_INDEX,
+        size: 100,
+        query: { term: { 'task.taskType': 'fleet:setup' } },
+      });
+      return res.hits.hits
+        .filter((hit) => JSON.parse(hit._source!.task.params).type === 'backfillPolicyBaseId')
+        .map((hit) => hit._id);
+    };
 
     const getDocs = async (seeded: SeededDoc[] = docs) => {
       const res = await es.mget<{ policy_id: unknown; policy_base_id?: string }>({
@@ -91,7 +148,12 @@ export default function (providerContext: FtrProviderContext) {
     before(async () => {
       // Creates the Fleet settings, which an earlier suite may have deleted: a policy created
       // before them is stored with another saved object type than the one Fleet uses after
-      await fleetSetup();
+      // The task document scheduled by the setup, to hold the task in the tests. The setup is
+      // retried in case the task already ran.
+      taskTemplate = await retry.try(async () => {
+        await fleetSetup();
+        return (await getTaskDoc())._source!;
+      });
       const { body } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -143,15 +205,16 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('backfills in the setup task, after the setup response', async () => {
+      await holdTask();
+
       const { body } = await fleetSetup();
       expect(body.nonFatalErrors ?? []).to.eql([]);
-
-      // The task runs a few seconds after the setup, which does not wait for it
+      // The setup does not backfill itself
       for (const doc of await getDocs()) {
         expect(doc.policyBaseId).to.be(undefined);
       }
-      expect((await getTaskDoc())?.task.status).to.be('idle');
 
+      await releaseTask();
       await waitForTaskRemoved();
       // The version suffix and the sentinel are stripped
       await expectBackfilled();
@@ -206,11 +269,20 @@ export default function (providerContext: FtrProviderContext) {
       await expectBackfilled();
     });
 
-    it('updates every document once with concurrent setups', async () => {
+    it('runs the backfill once with concurrent setups', async () => {
       await removePolicyBaseId();
       const versions = await getDocs();
+      const taskVersion = await holdTask();
 
       await Promise.all(Array.from({ length: 5 }, () => fleetSetup()));
+      // The setups neither backfill nor schedule another task
+      expect(await getBackfillTaskIds()).to.eql([POLICY_BASE_ID_BACKFILL_TASK_ID]);
+      expect((await getTaskDoc())._version).to.be(taskVersion);
+      for (const doc of await getDocs()) {
+        expect(doc.policyBaseId).to.be(undefined);
+      }
+
+      await releaseTask();
       await waitForTaskRemoved();
 
       await expectBackfilled();
