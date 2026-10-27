@@ -9,7 +9,7 @@ The `alerting:v2:enabled` advanced setting (every alerting_v2 route returns 503 
 | Namespace | API | UI | Notes |
 |---|---|---|---|
 | `rules` | Rule HTTP CRUD, rule-template read APIs, error-envelope contract, matcher-value suggestions | Rules list, builder, Discover flyout, Agent Builder rule attachment canvas | API: `API_ENGINE_TAG`, except the custom-role-auth suites (`find_rules`, `match_rules`, `matcher_value_suggestions`), which stay `@local-stateful-classic` until ECH supports custom roles. The canvas spec tags itself local stateful classic and local serverless Observability complete. |
-| `action_policies` | Action-policy HTTP CRUD | Policy create/edit and privileges, Agent Builder action policy attachment canvas | API: `API_ENGINE_TAG`. The canvas spec is `LLM_PROXY_UI_TAG`. |
+| `action_policies` | Action-policy HTTP CRUD | Policy create/edit and privileges, Agent Builder action policy attachment canvas | API: `API_ENGINE_TAG`. The canvas spec tags itself local stateful classic and local serverless Observability complete. |
 | `alerts` | Alert actions, execution history, rule-event field suggestions | Alert episodes, Discover compose, execution-history smoke | API: `API_ENGINE_TAG`, except the custom-role-auth suites (`create_ack_episode_action`, `create_tag_episode_action`, `rule_event_fields_suggestions`, `user_profiles_suggestions`), which stay `@local-stateful-classic` until ECH supports custom roles. |
 | `engine` | End-to-end, telemetry, implicit index privileges, SML types access, rule history | — | `API_ENGINE_TAG`, except `implicit_index_privileges`, which is `tags.stateful.classic` because it creates native ES users. API-only. |
 | `engine_director` | Director | — | Split out of `engine` to cut CI wall-time. `API_ENGINE_TAG`. API-only. |
@@ -73,7 +73,7 @@ Each namespace category has `playwright.config.ts` (`testDir: './tests'`) and a 
 
 ## Agent Builder canvases
 
-Canvas specs use `agentChatTest`, which adds a worker-scoped LLM proxy and a `.gen-ai` connector pointing at it. The proxy listens on the test runner's loopback, which a Cloud Kibana cannot reach, so these specs run only on local stateful classic and local serverless Observability complete (`LLM_PROXY_UI_TAG`).
+Canvas specs use `agentChatTest`, which adds a worker-scoped LLM proxy and a `.gen-ai` connector pointing at it. The proxy listens on the test runner's loopback, which a Cloud Kibana cannot reach, so a canvas spec tags itself with `getPlaywrightTagsFor('stateful', 'classic', 'local')` and `getPlaywrightTagsFor('serverless', 'observability_complete', 'local')`.
 
 `common/ui/fixtures/llm_mocks.ts` scripts the Agent Builder turns shared by the rule and action-policy canvases (title, `load_skill`, a tool-result call, and `<render_attachment>`). A namespace adds only its tool and attachment key, as `rules/ui/fixtures/llm_mocks.ts` does for `manage_rule` / `ruleAttachment` and `action_policies/ui/fixtures/llm_mocks.ts` does for `manage_action_policy` / `actionPolicyAttachment`.
 

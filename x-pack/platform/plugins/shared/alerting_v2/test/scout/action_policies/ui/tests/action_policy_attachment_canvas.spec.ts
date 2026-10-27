@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import { getPlaywrightTagsFor, type ScoutPage } from '@kbn/scout';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { ACTION_POLICY_AUTHORING_SKILL_ID } from '@kbn/alerting-v2-constants';
 import { expect } from '@kbn/scout/ui';
@@ -15,7 +15,6 @@ import {
   mockLoadSkill,
   mockManageActionPolicy,
   mockTitleGeneration,
-  testData,
   type AlertingPageObjects,
 } from '../fixtures';
 
@@ -57,7 +56,13 @@ const getConversationIdFromUrl = (page: ScoutPage): string | undefined =>
 
 test.describe(
   'Action policy attachment canvas in Agent Builder',
-  { tag: testData.LLM_PROXY_UI_TAG },
+  // Local-only: the LLM proxy binds to the runner's loopback, unreachable from a Cloud Kibana.
+  {
+    tag: [
+      ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
+      ...getPlaywrightTagsFor('serverless', 'observability_complete', 'local'),
+    ],
+  },
   () => {
     let workflowId: string;
     let workflowName: string;
