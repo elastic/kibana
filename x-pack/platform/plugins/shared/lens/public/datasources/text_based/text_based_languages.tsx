@@ -502,7 +502,15 @@ export function getTextBasedDatasource({
               updatedQuery = { esql: trendlineQueryResult.query };
             }
           } catch {
-            // If the query can't be parsed, keep the existing query unchanged
+            // Empty columns prevent execution and rendering of an obsolete trendline.
+            newState = {
+              ...newState,
+              layers: {
+                ...newState.layers,
+                [link.to.layerId]: { ...toLayer, query: undefined, columns: [] },
+              },
+            };
+            continue;
           }
         }
 
