@@ -10,7 +10,7 @@
 /* eslint @elastic/eui/href-or-on-click:0 */
 
 import * as React from 'react';
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core/public';
@@ -38,17 +38,26 @@ export const OptInStatusNoticeBanner: React.FC<Props> = ({
   });
 
   return (
-    <EuiCallOut title={bannerTitle}>
+    <EuiCallOut
+      title={bannerTitle}
+      actionProps={{
+        primary: {
+          children: (
+            <FormattedMessage
+              id="telemetry.telemetryOptedInDismissMessage"
+              defaultMessage="Dismiss"
+            />
+          ),
+          onClick: onSeenBanner,
+        },
+      }}
+    >
       <OptInMessage
         telemetryConstants={telemetryConstants}
         telemetryService={telemetryService}
         addBasePath={addBasePath}
         onClick={onSeenBanner}
       />
-      <EuiSpacer size="s" />
-      <EuiButton size="s" onClick={onSeenBanner}>
-        <FormattedMessage id="telemetry.telemetryOptedInDismissMessage" defaultMessage="Dismiss" />
-      </EuiButton>
     </EuiCallOut>
   );
 };
