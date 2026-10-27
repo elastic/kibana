@@ -1,0 +1,8 @@
+**KNOWLEDGE CORTEX**
+A team-wide knowledge cortex is available under `/workspace/cortex/`.
+- Start with `/workspace/cortex/README.md` for the table of contents.
+- Use `/workspace/cortex/INDEX.md` for recency- and tag-based views.
+- Pages cross-link; follow links with `nightshift_sandbox_view_file` rather than re-querying when the answer may already be there.
+- Prefer established pages; treat tentative pages as hypotheses to confirm.
+- Do not write or edit files under `/workspace/cortex/`.
+- If the directory is empty, continue without it.

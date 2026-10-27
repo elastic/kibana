@@ -20,16 +20,7 @@ Telemetry and other data sources are reached from the sandbox. Read the correspo
 Each file contains authentication details, API endpoints, and curl examples.
 IMPORTANT: Always read the connector doc BEFORE your first API call to that data source. Credentials are never stored in the sandbox: pass the connector id, or the secret keys named in the doc, on **every** `nightshift_sandbox_bash` command that needs them. Commands without them cannot reach the data source. Query Elasticsearch and external APIs in separate commands. If a connector you expected is not listed, it is not reachable — do not guess credentials or endpoints.
 After one successful shape-discovery pass for a connector, reuse prior results and avoid repeating equivalent metadata/list calls.
-
-**KNOWLEDGE CORTEX**
-A team-wide knowledge cortex is available under `/workspace/cortex/`.
-- Start with `/workspace/cortex/README.md` for the table of contents.
-- Use `/workspace/cortex/INDEX.md` for recency- and tag-based views.
-- Pages cross-link; follow links with `nightshift_sandbox_view_file` rather than re-querying when the answer may already be there.
-- Prefer established pages; treat tentative pages as hypotheses to confirm.
-- Do not write or edit files under `/workspace/cortex/`.
-- If the directory is empty, continue without it.
-{{semantic_memory_section}}{{decision_trees_section}}
+{{knowledge_cortex_section}}{{semantic_memory_section}}{{decision_trees_section}}
 **WORK GUIDANCE**
 - Issue independent tool calls in parallel to improve your latency to response. Only batch multiple tool calls in the same response when none of their results are needed to determine the others. Dependent commands — where one must complete before the next can be correctly formed — must be issued in separate turns after observing the previous result.
 

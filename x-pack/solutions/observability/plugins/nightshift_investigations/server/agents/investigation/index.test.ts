@@ -66,6 +66,9 @@ describe('Nightshift investigation agent type', () => {
     expect(base.instructions).toContain('/workspace/elastic.md');
     expect(base.instructions).not.toContain('platform_core_execute_esql');
     expect(base.instructions).not.toContain('/workspace/decision-trees/monitors.md');
+    expect(base.instructions).toContain('KNOWLEDGE CORTEX');
+    expect(base.instructions).toContain('/workspace/cortex/README.md');
+    expect(base.instructions).not.toContain('{{knowledge_cortex_section}}');
   });
 
   it('adds Semantic Memory context and workflows when memory is enabled', () => {
@@ -109,6 +112,9 @@ describe('Nightshift investigation agent type', () => {
 
     expect(base.workflow_ids).toBeUndefined();
     expect(base.post_execution_workflow_ids).toBeUndefined();
+    expect(base.instructions).not.toContain('/workspace/cortex/');
+    expect(base.instructions).not.toContain('KNOWLEDGE CORTEX');
+    expect(base.instructions).not.toContain('{{knowledge_cortex_section}}');
   });
 
   it('drops the pre-execution workflow when cortex is on but the sandbox is not configured', () => {

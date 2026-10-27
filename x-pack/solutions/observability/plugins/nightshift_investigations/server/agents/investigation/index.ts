@@ -25,6 +25,7 @@ import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
 import { TIME_CONVERTER_TOOL_ID } from '../../tools/time_converter/tool';
+import knowledgeCortexSection from './instructions/knowledge_cortex.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
@@ -59,13 +60,19 @@ Memories are observations from past tasks — they help steer your investigation
 `;
 
 const fillContextInstructions = ({
+  includeCortex,
   includeDecisionTrees,
   includeMemory,
 }: {
+  includeCortex: boolean;
   includeDecisionTrees: boolean;
   includeMemory: boolean;
 }): string =>
   instructions
+    .replace(
+      '{{knowledge_cortex_section}}',
+      includeCortex ? `\n${knowledgeCortexSection.trimEnd()}\n` : ''
+    )
     .replace('{{semantic_memory_section}}', includeMemory ? SEMANTIC_MEMORY_SECTION : '')
     .replace(
       '{{decision_trees_section}}',
@@ -201,6 +208,7 @@ export const getInvestigationAgentType = ({
     ...options,
     standalone: true,
     instructions: fillContextInstructions({
+      includeCortex: options.sandboxEnabled && options.cortexEnabled,
       includeDecisionTrees: options.sandboxEnabled && decisionTreesEnabled,
       includeMemory: options.sandboxEnabled && (options.memoryEnabled ?? false),
     }),
