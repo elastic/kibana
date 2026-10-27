@@ -269,6 +269,19 @@ describe('ruleJustifyingVerdict', () => {
       )
     ).toBe(POWERSHELL);
   });
+
+  it('carries credit across a same-subject conjunction', () => {
+    // "and" keeps the subject, so the coverage verb still belongs to the rule named before
+    // it. Splitting at every "and" left both mentions uncredited and the fallback picked
+    // Office — passing the wrong-sibling answer the near-miss eval exists to trap.
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled: ${OFFICE_CMD} only shares T1059. ${POWERSHELL} is enabled and covers this behaviour.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(POWERSHELL);
+  });
 });
 
 describe('claimsMutation', () => {
@@ -311,6 +324,14 @@ describe('claimsMutation', () => {
         'Once the rule has been enabled, it will detect SMB lateral movement. In the meantime, I have enabled the SMB rule for you.'
       )
     ).toBe(true);
+  });
+
+  it('still flags a completed change after an introductory clause', () => {
+    // The conditional exemption must not cross a comma: "After checking coverage, …" is an
+    // introductory clause, and the passive that follows it is a completed change claim.
+    expect(claimsMutation('After checking coverage, the rule has been enabled for you.')).toBe(
+      true
+    );
   });
 });
 

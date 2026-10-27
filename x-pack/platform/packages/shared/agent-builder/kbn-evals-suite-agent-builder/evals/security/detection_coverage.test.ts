@@ -166,10 +166,12 @@ describe('detection coverage near-miss evals', () => {
 
   it('allows conditional enable guidance through the mutation guard', async () => {
     // "Once the rule has been enabled, it will detect …" is read-only enable guidance, not a
-    // fabricated change; pre-fix it tripped claimsMutation inside the disabled-SMB eval.
+    // fabricated change; pre-fix it tripped claimsMutation inside this eval, which asserts
+    // the guard (the RDP near-miss never reaches it).
     await runVerdictTest(
-      nearMissNames[2],
-      'no_coverage. Once the rule has been enabled, it will detect SMB lateral movement.'
+      'a disabled exact match returns covered_disabled and points at the rule page',
+      'covered_disabled. Once the rule has been enabled, it will detect SMB lateral movement. ' +
+        `Enable ${COVERAGE_RULE_NAMES.smb} from its rule page.`
     );
   });
 

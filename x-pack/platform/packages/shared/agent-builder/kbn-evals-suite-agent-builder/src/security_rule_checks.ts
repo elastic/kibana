@@ -94,25 +94,34 @@ interface Span {
   end: number;
 }
 
+/** Contrastive boundaries: what starts talk about a different thing than the rule before it. */
+const CONTRASTIVE_BREAK = /:|—|–|\b(?:but|while|whereas|although|though)\b/;
+
 /**
- * Sub-clauses of a statement, split at `CLAUSE_BREAK` boundaries.
+ * The maximal span around a rule mention that still talks about that rule.
  *
- * Credit language scopes to the rule's own clause, not the whole statement:
- * "`<a>` only shares T1059, while `<b>` covers this behaviour" would otherwise credit both
- * rules statement-wide and pick `<a>` for standing nearer the verdict — crediting the wrong
- * sibling in exactly the shape this check exists to catch.
+ * Bounded by a contrastive boundary (colon, dash, "but"/"while"/…) or by another rule's
+ * mention — but not by a plain comma or "and"/"or", whose subject carries over:
+ * "`<x>` is enabled and covers this behaviour" credits `<x>`, while "`<x>` only shares
+ * T1059, while `<y>` covers this" credits only `<y>`.
  */
-const clauseAt = (
+const creditRegionOf = (
   statementText: string,
-  indexInStatement: number
+  indexInStatement: number,
+  otherMentions: { start: number; end: number }[]
 ): { start: number; end: number } => {
-  const breaks = new RegExp(CLAUSE_BREAK, 'g');
-  let start = 0;
+  const bounds: { start: number; end: number }[] = [...otherMentions];
+  const breaks = new RegExp(CONTRASTIVE_BREAK, 'g');
   for (let match = breaks.exec(statementText); match; match = breaks.exec(statementText)) {
-    if (match.index > indexInStatement) return { start, end: match.index };
-    start = match.index + match[0].length;
+    bounds.push({ start: match.index, end: match.index + match[0].length });
   }
-  return { start, end: statementText.length };
+  let start = 0;
+  let end = statementText.length;
+  for (const bound of bounds) {
+    if (bound.end <= indexInStatement) start = Math.max(start, bound.end);
+    else if (bound.start > indexInStatement) end = Math.min(end, bound.start);
+  }
+  return { start, end };
 };
 
 /**
@@ -218,15 +227,22 @@ export const ruleJustifyingVerdict = (
     const statement = statements[statementIndex];
     const statementText = haystack.slice(statement.start, statement.end);
     // Credit language may introduce the rule ("the covering rule is X") or follow it
-    // ("X covers this"), but both live in the rule's own clause — not anywhere in the
-    // statement. A denial stays as it is: only a cue right beside the name, and nearer to
-    // it than to any other rule, is about that name.
-    const clause = clauseAt(statementText, mention.at - statement.start);
+    // ("X covers this"), but both live in the rule's own region — bounded by a contrastive
+    // boundary or another rule's mention, not anywhere in the statement. A denial stays as
+    // it is: only a cue right beside the name, and nearer to it than to any other rule, is
+    // about that name.
+    const others = mentions
+      .filter((_, other) => other !== index)
+      .map((other) => ({
+        start: other.at - statement.start,
+        end: other.end - statement.start,
+      }));
+    const region = creditRegionOf(statementText, mention.at - statement.start, others);
     return {
       ...mention,
       statementIndex,
       denied: denied.get(mention) ?? false,
-      credited: COVERAGE_CREDIT.test(statementText.slice(clause.start, clause.end)),
+      credited: COVERAGE_CREDIT.test(statementText.slice(region.start, region.end)),
     };
   });
 
@@ -250,9 +266,11 @@ const PASSIVE_VERBS_WITH_MARKER = '(?:installed|created)';
 const AGENT_MARKER = '(?:for\\s+you|by\\s+me|on\\s+your\\s+behalf)';
 // Conditional frames exempt the passive from being the speaker's own act: read-only enable
 // guidance legitimately says "once the rule has been enabled, it will detect …", describing
-// what happens after the user acts — not an action the assistant performed.
+// what happens after the user acts — not an action the assistant performed. The gap cannot
+// cross a comma: "After checking coverage, the rule has been enabled" is an introductory
+// clause followed by a completed change, not a conditional, and must still be flagged.
 const CONDITIONAL_INTRO =
-  '(?:after|once|when|if)\\b[^.;\\n]{0,60}?\\b(?:has|have|had)?\\s?been\\s+(?:enabled|installed|created|activated)\\b';
+  '(?:after|once|when|if)\\b[^,.;\\n]{0,60}?\\b(?:has|have|had)?\\s?been\\s+(?:enabled|installed|created|activated)\\b';
 
 /**
  * Does the answer claim the assistant itself changed something? The coverage skill has no
