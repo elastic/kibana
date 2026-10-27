@@ -23,14 +23,14 @@ const makeResult = (overrides: Partial<DispatcherPipelineResult>): DispatcherPip
 });
 
 describe('computeNextWatermark', () => {
-  describe('aborted before StoreActionsStep (recordedAlerts undefined)', () => {
+  describe('aborted', () => {
     it('does not advance the watermark', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
           completed: false,
           haltReason: 'aborted',
-          finalState: { input: BASE_INPUT }, // recordedAlerts undefined
+          finalState: { input: BASE_INPUT },
         }),
       });
 
@@ -48,28 +48,11 @@ describe('computeNextWatermark', () => {
             scan: AlertScan.of({
               alerts: [createAlert({ last_event_timestamp: '2026-01-22T07:34:00.000Z' })],
             }),
-            // recordedAlerts still undefined — StoreActionsStep not reached
           },
         }),
       });
 
       expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
-    });
-  });
-
-  describe('aborted after StoreActionsStep (recordedAlerts defined)', () => {
-    it('advances to windowEnd when some alerts were recorded', () => {
-      const result = computeNextWatermark({
-        input: BASE_INPUT,
-        result: makeResult({
-          completed: false,
-          haltReason: 'aborted',
-          finalState: { input: BASE_INPUT, recordedAlerts: 5 },
-        }),
-      });
-
-      // Not truncated, not no_alerts/no_actions — falls through to windowEnd
-      expect(result.toISOString()).toBe('2026-01-22T07:35:00.000Z');
     });
   });
 
@@ -91,6 +74,17 @@ describe('computeNextWatermark', () => {
           haltReason: 'inline_stats_too_large',
           finalState: { input: BASE_INPUT },
         }),
+      });
+
+      expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+    });
+  });
+
+  describe('commit_failed halt', () => {
+    it('does not advance the watermark', () => {
+      const result = computeNextWatermark({
+        input: BASE_INPUT,
+        result: makeResult({ completed: false, haltReason: 'commit_failed' }),
       });
 
       expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
@@ -184,7 +178,6 @@ describe('computeNextWatermark', () => {
           finalState: {
             input: BASE_INPUT,
             scan: AlertScan.of({ alerts: [createAlert()] }),
-            recordedAlerts: 1,
           },
         }),
       });

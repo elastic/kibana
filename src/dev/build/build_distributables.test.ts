@@ -66,6 +66,7 @@ const minimalGenericFoldersOptions: BuildOptions = {
   dockerTag: null,
   dockerTagQualifier: null,
   downloadFreshNode: false,
+  forceNodePointerCompression: false,
   downloadCloudDependencies: false,
   initialize: false,
   createGenericFolders: true,
