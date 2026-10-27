@@ -65,26 +65,48 @@ export const deriveLastHuntStatus = ({
  * appended) element, never the whole element: `evidence` is shared with the Attribute Alerts task,
  * which sets a disjoint set of keys (`alert_hits*`) on the same per-space element. A blind replace
  * here would erase that space's alert-attribution fields.
+ *
+ * Two groups of keys with different lifetimes. The stamp (`last_hunt_*`) is written only when
+ * `params.stamp` is true: it is the hunt-once gate and a run that must be retried has to leave it
+ * unset. The coverage ledger (`hunted_technique_ids`, `coverage_pending`) is written on every run:
+ * ids are unioned with what earlier runs recorded, so a later run can skip them, and the cap keeps
+ * the array within the contract's bound.
  */
 const EVIDENCE_SCRIPT = `
 if (!(ctx._source.evidence instanceof List)) { ctx._source.evidence = new ArrayList(); }
 boolean found = false;
 for (int i = 0; i < ctx._source.evidence.size(); i++) {
   if (ctx._source.evidence[i].space_id == params.space_id) {
-    ctx._source.evidence[i].last_hunted_at = params.last_hunted_at;
-    ctx._source.evidence[i].last_hunt_status = params.last_hunt_status;
-    ctx._source.evidence[i].last_hunt_run_id = params.last_hunt_run_id;
-    ctx._source.evidence[i].last_hunt_event_hit_count = params.last_hunt_event_hit_count;
+    def el = ctx._source.evidence[i];
+    if (params.stamp) {
+      el.last_hunted_at = params.last_hunted_at;
+      el.last_hunt_status = params.last_hunt_status;
+      el.last_hunt_run_id = params.last_hunt_run_id;
+      el.last_hunt_event_hit_count = params.last_hunt_event_hit_count;
+    }
+    Set ids = new LinkedHashSet();
+    if (el.hunted_technique_ids instanceof List) { ids.addAll(el.hunted_technique_ids); }
+    ids.addAll(params.searched_technique_ids);
+    List capped = new ArrayList();
+    for (def id : ids) { if (capped.size() < params.max_ids) { capped.add(id); } }
+    el.hunted_technique_ids = capped;
+    el.coverage_pending = params.coverage_pending;
     found = true;
   }
 }
 if (!found) {
   Map el = new HashMap();
   el.space_id = params.space_id;
-  el.last_hunted_at = params.last_hunted_at;
-  el.last_hunt_status = params.last_hunt_status;
-  el.last_hunt_run_id = params.last_hunt_run_id;
-  el.last_hunt_event_hit_count = params.last_hunt_event_hit_count;
+  if (params.stamp) {
+    el.last_hunted_at = params.last_hunted_at;
+    el.last_hunt_status = params.last_hunt_status;
+    el.last_hunt_run_id = params.last_hunt_run_id;
+    el.last_hunt_event_hit_count = params.last_hunt_event_hit_count;
+  }
+  List capped = new ArrayList();
+  for (def id : params.searched_technique_ids) { if (capped.size() < params.max_ids) { capped.add(id); } }
+  el.hunted_technique_ids = capped;
+  el.coverage_pending = params.coverage_pending;
   ctx._source.evidence.add(el);
 }
 `.trim();
@@ -97,19 +119,52 @@ export interface WriteHuntEvidenceParams {
   completeness: HuntCompleteness;
   /** Tier 1's total-hits count for this run; `0` says the run searched and found nothing. */
   totalHits: number;
+  /** Techniques this run searched, unioned into the report's per-space coverage ledger. */
+  searchedTechniqueIds?: string[];
 }
 
+/** Most technique ids the ledger keeps per report and space; matches the mapping consumers' bound. */
+export const MAX_LEDGER_TECHNIQUE_IDS = 100;
+
 /**
- * Stamps the space's hunt-once gate (`last_hunted_at` and siblings) on a report. Internal user:
- * `.kibana-threat-reports` is plugin-owned and hidden, and Kibana feature privileges grant no
- * Elasticsearch privileges on it, so the calling user's client fails for every non-superuser.
- * Update, not upsert: the caller only reaches this after loading the report by this same id, so a
- * missing doc must fail loudly rather than materialize a partial row.
+ * Whether a run settles the report's hunt-once gate. A confirmed hit always does, whatever the
+ * completeness: the hit is a finding, and a report that has produced one is not unhunted. A run
+ * that found nothing settles it only when repeating it could not cover more, i.e. anything but
+ * `incomplete_retryable`.
+ */
+export const shouldStampHunt = ({
+  hasConfirmedHit,
+  completeness,
+}: {
+  hasConfirmedHit: boolean;
+  completeness: HuntCompleteness;
+}): boolean => hasConfirmedHit || completeness !== 'incomplete_retryable';
+
+/**
+ * Records a hunt run on a report's per-space evidence: stamps the hunt-once gate (`last_hunted_at`
+ * and siblings) when {@link shouldStampHunt} says the run settles it, and always updates the
+ * coverage ledger. Internal user: `.kibana-threat-reports` is plugin-owned and hidden, and Kibana
+ * feature privileges grant no Elasticsearch privileges on it, so the calling user's client fails
+ * for every non-superuser. Update, not upsert: the caller only reaches this after loading the
+ * report by this same id, so a missing doc must fail loudly rather than materialize a partial row.
  */
 export const writeHuntEvidence = async (
   esClient: ElasticsearchClient,
-  { spaceId, reportId, runId, hasConfirmedHit, completeness, totalHits }: WriteHuntEvidenceParams
+  {
+    spaceId,
+    reportId,
+    runId,
+    hasConfirmedHit,
+    completeness,
+    totalHits,
+    searchedTechniqueIds = [],
+  }: WriteHuntEvidenceParams
 ): Promise<void> => {
+  const stamp = shouldStampHunt({ hasConfirmedHit, completeness });
+  // A retryable run that found nothing and searched nothing (a blocked scope, no model) has
+  // nothing to record: no stamp, and a ledger with no ids says nothing a later run could use.
+  if (!stamp && searchedTechniqueIds.length === 0) return;
+
   await esClient.update({
     index: HUNT_REPORTS_INDEX,
     id: reportId,
@@ -119,10 +174,14 @@ export const writeHuntEvidence = async (
       source: EVIDENCE_SCRIPT,
       params: {
         space_id: spaceId,
+        stamp,
         last_hunted_at: new Date().toISOString(),
         last_hunt_status: deriveLastHuntStatus({ hasConfirmedHit, completeness }),
         last_hunt_run_id: runId,
         last_hunt_event_hit_count: totalHits,
+        searched_technique_ids: searchedTechniqueIds,
+        coverage_pending: completeness === 'incomplete_retryable',
+        max_ids: MAX_LEDGER_TECHNIQUE_IDS,
       },
     },
   });
