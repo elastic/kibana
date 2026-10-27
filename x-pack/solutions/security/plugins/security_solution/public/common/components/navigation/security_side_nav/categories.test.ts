@@ -41,6 +41,16 @@ describe('getNavCategories', () => {
     });
   });
 
+  it('lists Agents after Detections for the Agent chat experience', () => {
+    const linkIds = getNavCategories(AIChatExperience.Agent, true).flatMap(
+      ({ linkIds: ids }) => ids
+    );
+
+    expect(linkIds.indexOf(SecurityPageName.externalLinkAgentBuilder)).toBeGreaterThan(
+      linkIds.indexOf(SecurityPageName.alertDetections)
+    );
+  });
+
   it('lists the legacy Attack Discovery page when alignment is not provided', () => {
     expect(getAllLinkIds()).toContain(SecurityPageName.attackDiscovery);
   });

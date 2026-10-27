@@ -73,7 +73,6 @@ describe('Security Side Nav', () => {
     expect(mockedCreateAiNavigationTree).toHaveBeenCalledWith(
       services,
       AIChatExperience.Classic,
-      false,
       false
     );
     expect(mockedCreateNavigationTree).not.toHaveBeenCalled();
@@ -120,8 +119,7 @@ describe('Security Side Nav', () => {
     expect(mockedCreateAiNavigationTree).toHaveBeenCalledWith(
       services,
       AIChatExperience.Classic,
-      true,
-      false
+      true
     );
   });
 });
