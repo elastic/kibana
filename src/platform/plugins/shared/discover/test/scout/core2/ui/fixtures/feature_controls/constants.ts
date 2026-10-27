@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { tags } from '@kbn/scout';
 import type { KibanaRole } from '@kbn/scout';
 
 export {
@@ -15,11 +16,7 @@ export {
   DISCOVER_READ_URL_CREATE_ROLE,
 } from '../../../../common/feature_controls/roles';
 
-/**
- * Limits custom-role UI specs to local stateful runs — `browserAuth.loginWithCustomRole`
- * is not yet supported on Elastic Cloud Hosted (ECH).
- */
-export const FEATURE_CONTROLS_UI_TAG = '@local-stateful-classic';
+export const FEATURE_CONTROLS_UI_TAG = tags.stateful.classic;
 
 export const DISCOVER_ONLY_DATA_VIEWS_ROLE = (aliasName: string): KibanaRole => ({
   elasticsearch: {

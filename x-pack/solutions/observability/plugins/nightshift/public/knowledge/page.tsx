@@ -10,7 +10,7 @@ import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { Redirect, useHistory, useParams } from 'react-router-dom';
-import { NightshiftAppHeader, type NightshiftAppHeaderProps } from '../app/app_header';
+import { NightshiftAppHeader } from '../app/app_header';
 import { useKibana } from '../hooks/use_kibana';
 import { useKnowledgeTabsAvailability } from './hooks/use_knowledge_tabs_availability';
 import {
@@ -38,17 +38,7 @@ const nightshiftLabel = i18n.translate('xpack.nightshift.knowledgePage.backToNig
   defaultMessage: 'Nightshift',
 });
 
-export type KnowledgePageHeaderProps = Pick<
-  NightshiftAppHeaderProps,
-  | 'onManagementClick'
-  | 'managementHref'
-  | 'onSourcesClick'
-  | 'sourcesHref'
-  | 'onSettingsClick'
-  | 'settingsHref'
-  | 'onAutomationsClick'
-  | 'automationsHref'
->;
+export type KnowledgePageHeaderProps = Record<string, never>;
 
 const KnowledgeLoadingSpinner = () => (
   <EuiLoadingSpinner size="xl" data-test-subj="nightshiftKnowledgePageLoading" />

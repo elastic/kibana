@@ -15,6 +15,7 @@ import {
   buildRegisteredTriggerOptions,
   getTriggerNamespace,
 } from './build_trigger_options';
+import { getConnectorEventTriggerDefinitions } from '../../../../common/triggers/connector_event_triggers';
 import { getExtensionStability } from '../../../widgets/workflow_yaml_editor/lib/get_stability_note';
 import { isActionGroup, isActionOption } from '../types';
 
@@ -191,6 +192,47 @@ describe('build_trigger_options', () => {
       if (group && isActionGroup(group)) {
         expect(group.label).toBe('My Plugin');
         expect(group.description).toBe('Run workflows when My Plugin events occur');
+      }
+    });
+
+    it('groups connector events under the connector display name', () => {
+      const triggers = getConnectorEventTriggerDefinitions({ inboundEventsEnabled: true }).map(
+        (definition) => mockTrigger(definition)
+      );
+      const result = buildRegisteredTriggerOptions(triggers, mockEuiTheme);
+      const namespacedTriggers = triggers.flatMap((trigger) => {
+        const namespace = getTriggerNamespace(trigger.id);
+        return namespace === undefined ? [] : [{ namespace, trigger }];
+      });
+      const triggersByNamespace = new Map<string, PublicTriggerDefinition[]>();
+
+      expect(namespacedTriggers).toHaveLength(triggers.length);
+      for (const { namespace, trigger } of namespacedTriggers) {
+        const namespaceTriggers = triggersByNamespace.get(namespace) ?? [];
+        namespaceTriggers.push(trigger);
+        triggersByNamespace.set(namespace, namespaceTriggers);
+      }
+
+      expect(triggersByNamespace.size).toBeGreaterThan(0);
+
+      for (const [namespace, namespaceTriggers] of triggersByNamespace) {
+        const [firstTrigger] = namespaceTriggers;
+        const displayName = firstTrigger?.title.split(' - ')[0];
+        expect(displayName).toEqual(expect.any(String));
+        expect(displayName?.length).toBeGreaterThan(0);
+        expect(
+          namespaceTriggers.every((trigger) => trigger.title.startsWith(`${displayName} - `))
+        ).toBe(true);
+
+        if (namespaceTriggers.length === 1 && firstTrigger) {
+          const option = result.find((candidate) => candidate.id === firstTrigger.id);
+          expect(option && isActionOption(option) ? option.label : undefined).toBe(
+            firstTrigger.title
+          );
+        } else {
+          const option = result.find((candidate) => candidate.id === `triggers.${namespace}`);
+          expect(option && isActionGroup(option) ? option.label : undefined).toBe(displayName);
+        }
       }
     });
 

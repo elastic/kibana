@@ -31,7 +31,7 @@ import { RulesApi } from './services/rules_api';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
 import { useCreateActionPolicyDisabledReason } from './hooks/use_create_action_policy_disabled_reason';
 import { getAlertingV2Locators } from './application/bind_locators_to_host';
-import { OBSERVABILITY_ALERTING_HOST } from './observability_alerting_host';
+import { OBSERVABILITY_ALERTING_HOST } from '../common/locators';
 
 export interface CreateRuleOptionsFlyoutLegacyItem {
   id: string;
