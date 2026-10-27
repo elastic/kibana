@@ -7,6 +7,7 @@
 
 import type { Capabilities, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { createLocation } from 'history';
 import {
   getAlertsNavPanel,
   getObservabilityAlertsLinkTitle,
@@ -132,7 +133,7 @@ describe('getAlertsNavPanel', () => {
       expect.objectContaining({
         title: 'Rule Management',
         children: [
-          { link: 'observabilityAlerting:rules-v2' },
+          { link: 'observabilityAlerting:rules-v2', getIsActive: expect.any(Function) },
           { link: 'observabilityAlerting:rule-library' },
           { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
         ],
@@ -270,7 +271,7 @@ describe('getAlertsNavPanel', () => {
       setCapabilities(core, { alerting_v2_rules: { read: true } });
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
-        { link: 'observabilityAlerting:rules-v2' },
+        { link: 'observabilityAlerting:rules-v2', getIsActive: expect.any(Function) },
         { link: 'observabilityAlerting:rule-library' },
         { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
       ]);
@@ -280,10 +281,50 @@ describe('getAlertsNavPanel', () => {
       setCapabilities(core, { alerting_v2_rules: { all: true } });
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
-        { link: 'observabilityAlerting:rules-v2' },
+        { link: 'observabilityAlerting:rules-v2', getIsActive: expect.any(Function) },
         { link: 'observabilityAlerting:rule-library' },
         { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
       ]);
+    });
+
+    describe('active state of the v2 Rules link', () => {
+      const isRulesLinkActive = (pathNameSerialized: string, prepend = (path: string) => path) => {
+        setCapabilities(core, { alerting_v2_rules: { read: true } });
+        const rulesLink = getSectionByTitle(core, 'Rule Management')?.children?.find(
+          ({ link }) => link === 'observabilityAlerting:rules-v2'
+        );
+        return rulesLink?.getIsActive?.({
+          pathNameSerialized,
+          prepend,
+          location: createLocation(pathNameSerialized),
+        });
+      };
+
+      it.each([
+        '/app/observability/alerting/rules/universal',
+        '/app/observability/alerting/rules/classic',
+        '/app/observability/alerting/rules/classic/logs',
+        '/app/observability/alerting/rules/classic/settings',
+      ])('is active on %s', (path) => {
+        expect(isRulesLinkActive(path)).toBe(true);
+      });
+
+      it.each([
+        '/app/observability/alerting/rule-library',
+        '/app/observability/alerting/alerts',
+        '/app/observability/overview',
+      ])('is not active on %s', (path) => {
+        expect(isRulesLinkActive(path)).toBe(false);
+      });
+
+      it('takes the base path into account', () => {
+        const prepend = (path: string) => `/s/my-space${path}`;
+
+        expect(
+          isRulesLinkActive('/s/my-space/app/observability/alerting/rules/classic/logs', prepend)
+        ).toBe(true);
+        expect(isRulesLinkActive('/app/observability/alerting/rules/classic', prepend)).toBe(false);
+      });
     });
 
     it('shows a visible v1 Rules link when the user only has v1 rules read', () => {
@@ -303,7 +344,7 @@ describe('getAlertsNavPanel', () => {
       });
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
-        { link: 'observabilityAlerting:rules-v2' },
+        { link: 'observabilityAlerting:rules-v2', getIsActive: expect.any(Function) },
         { link: 'observabilityAlerting:rule-library' },
         { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
       ]);
