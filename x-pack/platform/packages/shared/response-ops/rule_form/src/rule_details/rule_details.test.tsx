@@ -111,20 +111,45 @@ describe('RuleDetails', () => {
     });
   });
 
-  test('Should suggest existing tags and allow selecting one', async () => {
-    useGetRuleTagsQuery.mockReturnValue({ tags: ['existing-a', 'existing-b'], isLoading: false });
+  test('Should suggest existing tags and filter suggestions locally with case-insensitive substring matching', async () => {
+    useGetRuleTagsQuery.mockReturnValue({
+      tags: ['Production', 'team-prod', 'staging'],
+      isLoading: false,
+    });
     render(<RuleDetails />);
 
-    await userEvent.click(
-      within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput')
+    await userEvent.type(
+      within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput'),
+      'prod'
     );
-    expect(await screen.findByText('existing-a')).toBeInTheDocument();
-    expect(screen.getByText('existing-b')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByText('existing-b'));
+    expect(await screen.findByText('Production')).toBeInTheDocument();
+    expect(screen.getByText('team-prod')).toBeInTheDocument();
+    expect(screen.queryByText('staging')).not.toBeInTheDocument();
+    // Filtering is client-side: the request must not be narrowed by the typed text.
+    expect(useGetRuleTagsQuery).not.toHaveBeenCalledWith(
+      expect.objectContaining({ search: expect.anything() })
+    );
+
+    await userEvent.click(screen.getByRole('option', { name: 'Production' }));
+
     expect(mockOnChange).toHaveBeenCalledWith({
       type: 'setTags',
-      payload: ['existing-b'],
+      payload: ['Production'],
+    });
+  });
+
+  test('Should still allow creating a tag that is not among the suggestions', async () => {
+    useGetRuleTagsQuery.mockReturnValue({ tags: ['existing-a'], isLoading: false });
+    render(<RuleDetails />);
+
+    await userEvent.type(
+      within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput'),
+      'brand-new{enter}'
+    );
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setTags',
+      payload: ['brand-new'],
     });
   });
 
