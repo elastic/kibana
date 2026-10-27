@@ -189,6 +189,18 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
+    // A failed test must not leave the task held, which no setup would replace
+    afterEach(async () => {
+      const res = await es.get<TaskDoc>(
+        { index: TASK_MANAGER_INDEX, id: POLICY_BASE_ID_BACKFILL_TASK_ID },
+        { ignore: [404] }
+      );
+      if (res.found && res._source?.task.enabled === false) {
+        await releaseTask();
+        await waitForTaskRemoved();
+      }
+    });
+
     after(async () => {
       await es.deleteByQuery({
         index: AGENTS_INDEX,
