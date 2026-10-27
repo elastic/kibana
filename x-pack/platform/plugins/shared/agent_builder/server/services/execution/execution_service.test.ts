@@ -98,7 +98,6 @@ jest.mock('./task/heartbeat_reporter', () => ({
 }));
 
 const mockTaskManagerSchedule = jest.fn();
-const mockTaskManagerEnsureScheduled = jest.fn();
 const mockTaskManagerRunSoon = jest.fn();
 
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -111,7 +110,6 @@ describe('AgentExecutionService', () => {
   const elasticsearch = elasticsearchServiceMock.createStart();
   const taskManager = {
     schedule: mockTaskManagerSchedule,
-    ensureScheduled: mockTaskManagerEnsureScheduled,
     runSoon: mockTaskManagerRunSoon,
   } as any;
 
@@ -248,7 +246,7 @@ describe('AgentExecutionService', () => {
         })
       );
 
-      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalledWith(
+      expect(mockTaskManagerSchedule).toHaveBeenCalledWith(
         expect.objectContaining({
           taskType: 'agent-builder:run-agent',
           params: { executionId: result.executionId },
@@ -277,7 +275,7 @@ describe('AgentExecutionService', () => {
         requestImmediateClaim: true,
       });
       expect(mockTaskManagerRunSoon.mock.invocationCallOrder[0]).toBeGreaterThan(
-        mockTaskManagerEnsureScheduled.mock.invocationCallOrder[0]
+        mockTaskManagerSchedule.mock.invocationCallOrder[0]
       );
     });
 
@@ -345,7 +343,7 @@ describe('AgentExecutionService', () => {
           useTaskManager: true,
         })
       ).rejects.toThrow('Execution with id exec-1 already exists');
-      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
     });
   });
 
@@ -381,7 +379,7 @@ describe('AgentExecutionService', () => {
       );
 
       // Should NOT have scheduled a TM task
-      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
 
       // Should have updated status to running
       expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
@@ -629,7 +627,7 @@ describe('AgentExecutionService', () => {
 
       expect(result.executionId).toBeDefined();
       // Should NOT schedule a TM task
-      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
       // Should have updated status to running (local path)
       expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
         result.executionId,
@@ -649,7 +647,7 @@ describe('AgentExecutionService', () => {
 
       expect(result.executionId).toBeDefined();
       // Should have scheduled a TM task
-      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).toHaveBeenCalled();
       // Should NOT have called handleAgentExecution (remote path)
       expect(mockHandleAgentExecution).not.toHaveBeenCalled();
     });
@@ -667,7 +665,7 @@ describe('AgentExecutionService', () => {
 
       expect(result.executionId).toBeDefined();
       // Should have scheduled a TM task despite fakeRequest
-      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).toHaveBeenCalled();
     });
 
     it('should honour explicit useTaskManager=false for a regular request', async () => {
@@ -685,7 +683,7 @@ describe('AgentExecutionService', () => {
 
       expect(result.executionId).toBeDefined();
       // Should NOT schedule a TM task
-      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
       // Should have run locally
       expect(mockHandleAgentExecution).toHaveBeenCalled();
     });
@@ -1094,7 +1092,7 @@ describe('AgentExecutionService', () => {
       expect(conversationClient.create).not.toHaveBeenCalled();
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
       expect(mockExecutionClient.create).not.toHaveBeenCalled();
-      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
     });
 
     it('validates the model of the agent the origin resolves to', async () => {
@@ -1203,7 +1201,7 @@ describe('AgentExecutionService', () => {
         expect(mockExecutionClient.create).not.toHaveBeenCalled();
       });
 
-      it('returns and reschedules the existing execution on replay without validating', async () => {
+      it('returns the existing execution on replay without validating', async () => {
         const existing = { status: ExecutionStatus.scheduled, eventCount: 0 };
         mockExecutionClient.peek.mockResolvedValueOnce(existing).mockResolvedValueOnce(existing);
         mockExecutionClient.create.mockRejectedValueOnce(conflictError());
@@ -1212,10 +1210,6 @@ describe('AgentExecutionService', () => {
 
         expect(inference.getConnectorById).not.toHaveBeenCalled();
         expect(result.executionId).toBe('exec-1');
-        expect(mockTaskManagerEnsureScheduled).toHaveBeenCalledWith(
-          expect.objectContaining({ id: 'agent-exec-1' }),
-          expect.anything()
-        );
       });
     });
   });
@@ -1278,7 +1272,7 @@ describe('AgentExecutionService', () => {
 
       expect(result.executionId).toBe('exec-1');
       expect(result.events$).toBeDefined();
-      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
     });
 
     it('reports the conversation the existing execution stored, not the one the replay resolved', async () => {
@@ -1294,7 +1288,7 @@ describe('AgentExecutionService', () => {
       expect(result.conversationId).toBe('conversation-from-first-request');
     });
 
-    it('re-issues the schedule on replay when the existing execution never got a task', async () => {
+    it('leaves dispatch to the original delivery when the existing execution is still scheduled', async () => {
       mockExecutionClient.create.mockRejectedValueOnce(conflictError());
       mockExecutionClient.peek.mockResolvedValueOnce({
         status: ExecutionStatus.scheduled,
@@ -1304,21 +1298,14 @@ describe('AgentExecutionService', () => {
       const result = await executeWithKey('Ev123');
 
       expect(result.executionId).toBe('exec-1');
-      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'agent-exec-1',
-          taskType: 'agent-builder:run-agent',
-          params: { executionId: 'exec-1' },
-        }),
-        expect.anything()
-      );
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
     });
 
     it('rethrows create errors that are not duplicate-execution errors', async () => {
       mockExecutionClient.create.mockRejectedValueOnce(new Error('boom'));
 
       await expect(executeWithKey('Ev123')).rejects.toThrow('boom');
-      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
     });
   });
 
@@ -1926,7 +1913,7 @@ describe('AgentExecutionService', () => {
         ExecutionStatus.failed,
         expect.anything()
       );
-      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
       expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
     });
 
@@ -1960,12 +1947,12 @@ describe('AgentExecutionService', () => {
         ExecutionStatus.failed,
         expect.anything()
       );
-      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
     });
 
     it('releases the active execution when scheduling fails after setting it', async () => {
       const scheduleError = new Error('task manager unavailable');
-      mockTaskManagerEnsureScheduled.mockRejectedValueOnce(scheduleError);
+      mockTaskManagerSchedule.mockRejectedValueOnce(scheduleError);
 
       const error = await converse().catch((thrown) => thrown);
 
@@ -1984,7 +1971,7 @@ describe('AgentExecutionService', () => {
 
     it('rethrows the scheduling error when releasing the active execution fails', async () => {
       const scheduleError = new Error('task manager unavailable');
-      mockTaskManagerEnsureScheduled.mockRejectedValueOnce(scheduleError);
+      mockTaskManagerSchedule.mockRejectedValueOnce(scheduleError);
       conversationClient.update.mockRejectedValueOnce(new Error('ES unavailable'));
 
       const error = await converse().catch((thrown) => thrown);
@@ -1994,7 +1981,7 @@ describe('AgentExecutionService', () => {
     });
 
     it('does not release when scheduling fails without an active execution', async () => {
-      mockTaskManagerEnsureScheduled.mockRejectedValueOnce(new Error('task manager unavailable'));
+      mockTaskManagerSchedule.mockRejectedValueOnce(new Error('task manager unavailable'));
 
       await converse({ storeConversation: false }).catch(() => undefined);
 
@@ -2027,7 +2014,7 @@ describe('AgentExecutionService', () => {
 
       expect(isConversationBusyError(refused)).toBe(true);
       expect(mockExecutionClient.delete).toHaveBeenCalledWith('exec-1');
-      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
 
       const result = await keyed();
 
@@ -2037,7 +2024,7 @@ describe('AgentExecutionService', () => {
       expect(conversationClient.appendEvents.mock.calls[1][0].activeExecution).toMatchObject({
         executionId: 'exec-1',
       });
-      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalledTimes(1);
+      expect(mockTaskManagerSchedule).toHaveBeenCalledTimes(1);
     });
 
     it("sets the active execution with the round's user message", async () => {

@@ -213,16 +213,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             `Duplicate idempotency key detected, returning existing execution ${executionId}`
           );
 
-          // Repairs executions left in `scheduled` when the original delivery
-          // failed before scheduling the task.
+          // Only the original delivery dispatches the run, so a duplicate never starts it before
+          // the conversation is written.
           const existing = await executionClient.peek(executionId);
-
-          if (existing?.status === ExecutionStatus.scheduled) {
-            await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
-              request,
-              cloneApiKey: true,
-            });
-          }
 
           // The replay's own conversation may be an unwritten placeholder.
           return {
@@ -553,9 +546,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     requestImmediateClaim: boolean;
   }): Promise<ExecuteAgentResult> {
     const task = this.buildRunAgentTask(executionId);
-    // ensureScheduled tolerates the task already existing: a concurrent idempotent
-    // replay may have re-issued this schedule while repairing a stuck execution.
-    await this.deps.taskManager.ensureScheduled(task, {
+    await this.deps.taskManager.schedule(task, {
       request,
       cloneApiKey: true,
     });
