@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE } from '@kbn/management-settings-ids';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { test } from '../fixtures';
 
@@ -39,14 +40,18 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth }) => {
+    test.beforeEach(async ({ browserAuth, kbnClient }) => {
+      await kbnClient.uiSettings.update({
+        [OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE]: false,
+      });
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ apiServices, config }) => {
+    test.afterAll(async ({ apiServices, config, kbnClient }) => {
       if (config.isCloud) {
         return;
       }
+      await kbnClient.uiSettings.unset(OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE);
       await apiServices.core.settings({
         'feature_flags.overrides': {
           [NIGHTSHIFT_ENABLED_FLAG]: null,
@@ -69,6 +74,19 @@ test.describe(
       await page.getByTestId('nightshiftSettingsTab-investigations').click();
       await expect(page).toHaveURL(/\/app\/nightshift\/settings\/investigations/);
       await expect(page.getByTestId('nightshiftRunLimitEnabledSwitch-investigation')).toBeVisible();
+    });
+
+    test('opens Detections on Events and hides Signals outside developer mode', async ({ page }) => {
+      await page.gotoApp('nightshift/detections');
+      await expect(page).toHaveURL(/\/app\/nightshift\/detections\/events/, {
+        timeout: NIGHTSHIFT_PAGE_LOAD_TIMEOUT,
+      });
+      await expect(page.getByTestId('nightshiftDetectionPage')).toBeVisible();
+      await expect(page.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Detections');
+      await expect(page.getByTestId('nightshiftDetectionOverview')).toBeVisible();
+      await expect(page.getByTestId('nightshiftDetectionTab-events')).toBeVisible();
+      await expect(page.getByTestId('nightshiftDetectionTab-rules')).toBeVisible();
+      await expect(page.getByTestId('nightshiftDetectionTab-signals')).toHaveCount(0);
     });
   }
 );
