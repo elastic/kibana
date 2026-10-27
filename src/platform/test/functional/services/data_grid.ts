@@ -923,24 +923,37 @@ export class DataGridService extends FtrService {
   }
 
   public async openComparisonSettingsMenu() {
-    if (await this.testSubjects.exists('unifiedDataTableComparisonSettingsMenu')) {
-      return;
-    }
-    await this.testSubjects.click('unifiedDataTableComparisonSettings');
     await this.retry.try(async () => {
-      return await this.testSubjects.exists('unifiedDataTableComparisonSettingsMenu');
+      if (!(await this.testSubjects.exists('unifiedDataTableComparisonSettingsMenu'))) {
+        await this.testSubjects.click('unifiedDataTableComparisonSettings');
+      }
+      await this.testSubjects.existOrFail('unifiedDataTableComparisonSettingsMenu', {
+        timeout: 2500,
+      });
+    });
+  }
+
+  public async closeComparisonSettingsMenu() {
+    // End on the menu being gone so the next open starts from a known state
+    await this.retry.try(async () => {
+      if (await this.testSubjects.exists('unifiedDataTableComparisonSettingsMenu')) {
+        await this.testSubjects.click('unifiedDataTableComparisonSettings');
+      }
+      await this.testSubjects.missingOrFail('unifiedDataTableComparisonSettingsMenu');
     });
   }
 
   public async toggleShowDiffSwitch() {
     await this.openComparisonSettingsMenu();
     await this.testSubjects.click('unifiedDataTableShowDiffSwitch');
+    await this.closeComparisonSettingsMenu();
   }
 
   public async selectComparisonDiffMode(diffMode: 'basic' | 'chars' | 'words' | 'lines') {
     await this.openComparisonSettingsMenu();
     const menuEntry = await this.testSubjects.find(`unifiedDataTableDiffMode-${diffMode}`);
     await menuEntry.click();
+    await this.closeComparisonSettingsMenu();
   }
 
   public async getComparisonDiffSegments(rowIndex: number, cellIndex: number) {
@@ -965,22 +978,27 @@ export class DataGridService extends FtrService {
 
   public async showAllFieldsSwitchExists() {
     await this.openComparisonSettingsMenu();
-    return await this.testSubjects.exists('unifiedDataTableDiffOptionSwitch-showAllFields');
+    const exists = await this.testSubjects.exists('unifiedDataTableDiffOptionSwitch-showAllFields');
+    await this.closeComparisonSettingsMenu();
+    return exists;
   }
 
   public async toggleShowAllFieldsSwitch() {
     await this.openComparisonSettingsMenu();
     await this.testSubjects.click('unifiedDataTableDiffOptionSwitch-showAllFields');
+    await this.closeComparisonSettingsMenu();
   }
 
   public async toggleShowMatchingValuesSwitch() {
     await this.openComparisonSettingsMenu();
     await this.testSubjects.click('unifiedDataTableDiffOptionSwitch-showMatchingValues');
+    await this.closeComparisonSettingsMenu();
   }
 
   public async toggleShowDiffDecorationsSwitch() {
     await this.openComparisonSettingsMenu();
     await this.testSubjects.click('unifiedDataTableDiffOptionSwitch-showDiffDecorations');
+    await this.closeComparisonSettingsMenu();
   }
 
   public async exitComparisonMode() {
