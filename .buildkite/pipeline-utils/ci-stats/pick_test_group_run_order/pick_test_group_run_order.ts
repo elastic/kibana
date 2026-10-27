@@ -20,6 +20,11 @@ import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const.ts';
 import { loadRunOrderConfig } from './env_config.ts';
 import { ftrManifest } from './ftr_manifests.ts';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs.ts';
+import {
+  queryMoonJestUnitSelection,
+  queryMoonTestSelection,
+} from '../../affected-packages/moon_test_tasks.ts';
+import type { MoonTestSelection } from '../../affected-packages/moon_test_tasks.ts';
 import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups.ts';
 import { getFtrRelevantModules, shouldSkipFtrTests } from './selective_ftr.ts';
 import { isScoutPathOnlyDiff } from './selective_scout.ts';
@@ -49,8 +54,6 @@ export async function pickTestGroupRunOrder() {
     ? resolveSelectiveTestingChanges(config.selectionBase, config.isMergeQueue)
     : null;
 
-  // A diff containing only Scout test files cannot affect any Jest unit/integration
-  // or FTR config, so skip those steps.
   if (selectiveChangedFiles !== null && isScoutPathOnlyDiff(selectiveChangedFiles)) {
     console.log('Scout-test-tree-only diff detected — skipping Jest/FTR test steps');
     bk.setAnnotation(
@@ -109,12 +112,29 @@ export async function pickTestGroupRunOrder() {
     const selectiveCtx = await resolveSelectiveTestingContext(selectiveChangedFiles);
     if (selectiveCtx !== null) {
       if (unitIncluded) {
-        jestUnitConfigs = filterJestUnitConfigsByAffected(jestUnitConfigs, selectiveCtx);
+        try {
+          const moonSelection = queryMoonJestUnitSelection(selectiveChangedFiles);
+          jestUnitConfigs = filterJestUnitConfigsByAffected(
+            jestUnitConfigs,
+            selectiveCtx,
+            moonSelection
+          );
+        } catch (error) {
+          console.error('Moon Jest unit comparison failed; using package selection', error);
+          jestUnitConfigs = filterJestUnitConfigsByAffected(jestUnitConfigs, selectiveCtx);
+        }
       }
       if (integrationIncluded) {
+        let moonSelection: MoonTestSelection | undefined;
+        try {
+          moonSelection = queryMoonTestSelection(selectiveChangedFiles, 'jest-integration-tests');
+        } catch (error) {
+          console.error('Moon Jest integration comparison failed; using package selection', error);
+        }
         jestIntegrationConfigs = filterJestIntegrationConfigsByAffected(
           jestIntegrationConfigs,
-          selectiveCtx
+          selectiveCtx,
+          moonSelection
         );
       }
     }
