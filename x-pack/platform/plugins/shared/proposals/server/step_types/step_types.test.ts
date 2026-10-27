@@ -581,56 +581,25 @@ describe('proposals.updateProposal step', () => {
     });
   });
 
-  it('should record the executing user, profile included, when it is the gate responder', async () => {
+  it('should resolve the decider from the execution request, not the passed username', async () => {
     const update = jest
       .fn()
       .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' });
-    const approver = {
-      username: 'analyst',
-      fullName: 'Alice Analyst',
-      email: 'alice@example.com',
-      profileUid: 'u_analyst',
-    };
-    resolveUser.mockResolvedValueOnce(approver);
 
-    // The gate resolves the answer in a child that runs as the approver, so
-    // the request carries their profile.
     await updateDefinition(update).handler(
       createContext({
         proposalId: 'proposal-1',
         decision: 'approved',
         status: 'executing',
-        decidedBy: 'analyst',
+        decidedBy: 'someone-else',
       })
     );
 
-    expect(update).toHaveBeenCalledWith(expect.objectContaining({ decidedBy: approver }), SPACE_ID);
-  });
-
-  it('should record only the responder when the executing user is someone else', async () => {
-    const update = jest
-      .fn()
-      .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' });
-    // A resume that lands while the task is still running keeps the key the
-    // previous approver claimed it with.
-    resolveUser.mockResolvedValueOnce({ ...resolvedUser, username: 'previous-approver' });
-    const context = createContext({
-      proposalId: 'proposal-1',
-      decision: 'approved',
-      status: 'executing',
-      decidedBy: 'analyst',
-    });
-
-    await updateDefinition(update).handler(context);
-
+    // The gate resolves the answer in a child that runs as the approver, so
+    // the request is the better attribution, and any workflow can pass a name.
     expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        decidedBy: { username: 'analyst', fullName: null, email: null },
-      }),
+      expect.objectContaining({ decidedBy: resolvedUser }),
       SPACE_ID
-    );
-    expect(context.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('"previous-approver" is not the gate responder "analyst"')
     );
   });
 

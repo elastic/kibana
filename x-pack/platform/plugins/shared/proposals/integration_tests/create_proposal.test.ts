@@ -208,7 +208,7 @@ describe('create-investigation-proposal workflow execution', () => {
       profileUid: 'u_analyst',
     };
 
-    it('should record the profile of the user the resolution runs as, when that user answered', async () => {
+    it('should record the profile of the user the resolution runs as', async () => {
       await fixture.start();
       fixture.setExecutingUser(approver);
 
@@ -217,9 +217,9 @@ describe('create-investigation-proposal workflow execution', () => {
       expect(fixture.onlyProposal().decidedBy).toEqual(approver);
     });
 
-    it('should record only the responder when the resolution runs as someone else', async () => {
+    it('should fall back to the responder when the resolution runs as no user', async () => {
       await fixture.start();
-      fixture.setExecutingUser({ ...approver, username: 'previous-approver' });
+      fixture.setExecutingUser(undefined);
 
       await fixture.resume(true, 'analyst');
 

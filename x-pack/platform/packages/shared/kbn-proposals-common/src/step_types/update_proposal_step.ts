@@ -26,7 +26,7 @@ export const updateProposalStepInputSchema = z.object({
     'What the human concluded. Write-once: a proposal that already carries a decision rejects another.'
   ),
   decidedBy: optionalStepInput(z.string()).describe(
-    'Username of whoever answered the gate. The executing user is recorded, profile included, when it is this same user; otherwise only this username is. Blank attributes the decision to the Worker running the step.'
+    'Username of the approver, used only when the execution itself yields no identity.'
   ),
   dismissReason: optionalStepInput(dismissReasonSchema).describe(
     'Structured reason, when the decision is a dismissal.'
