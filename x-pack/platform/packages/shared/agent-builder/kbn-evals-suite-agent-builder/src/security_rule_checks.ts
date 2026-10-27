@@ -97,13 +97,17 @@ interface Span {
 /** Contrastive boundaries: what starts talk about a different thing than the rule before it. */
 const CONTRASTIVE_BREAK = /:|—|–|\b(?:but|while|whereas|although|though)\b/;
 
+/** Language that introduces the rule the verdict leans on ("the covering rule is X"). */
+const CREDIT_INTRODUCTION = /\b(?:the\s+)?(?:covering|matching)\s+rule\s+is\b/;
+
 /**
  * The maximal span around a rule mention that still talks about that rule.
  *
- * Bounded by a contrastive boundary (colon, dash, "but"/"while"/…) or by another rule's
- * mention — but not by a plain comma or "and"/"or", whose subject carries over:
- * "`<x>` is enabled and covers this behaviour" credits `<x>`, while "`<x>` only shares
- * T1059, while `<y>` covers this" credits only `<y>`.
+ * Bounded by a contrastive boundary (colon, dash, "but"/"while"/…), by another rule's
+ * mention, or by a credit introduction — the phrase "the covering rule is" talks about the
+ * rule it introduces, not the one before it, so it must not leak credit backwards across a
+ * conjunction. Plain commas and "and"/"or" do not bound: "`<x>` is enabled and covers this
+ * behaviour" credits `<x>` because the subject carries over.
  */
 const creditRegionOf = (
   statementText: string,
@@ -114,6 +118,18 @@ const creditRegionOf = (
   const breaks = new RegExp(CONTRASTIVE_BREAK, 'g');
   for (let match = breaks.exec(statementText); match; match = breaks.exec(statementText)) {
     bounds.push({ start: match.index, end: match.index + match[0].length });
+  }
+  // A credit introduction only bounds the region of a rule *before* it: the introduced
+  // rule keeps the phrase inside its own region, since the phrase is what credits it.
+  const introductions = new RegExp(CREDIT_INTRODUCTION, 'g');
+  for (
+    let match = introductions.exec(statementText);
+    match;
+    match = introductions.exec(statementText)
+  ) {
+    if (match.index > indexInStatement) {
+      bounds.push({ start: match.index, end: match.index + match[0].length });
+    }
   }
   let start = 0;
   let end = statementText.length;
@@ -267,10 +283,13 @@ const AGENT_MARKER = '(?:for\\s+you|by\\s+me|on\\s+your\\s+behalf)';
 // Conditional frames exempt the passive from being the speaker's own act: read-only enable
 // guidance legitimately says "once the rule has been enabled, it will detect …", describing
 // what happens after the user acts — not an action the assistant performed. The gap cannot
-// cross a comma: "After checking coverage, the rule has been enabled" is an introductory
-// clause followed by a completed change, not a conditional, and must still be flagged.
+// cross a comma that introduces a new subject: "After checking coverage, the rule has been
+// enabled" is an introductory clause followed by a completed change, not a conditional, and
+// must still be flagged. A comma that opens a relative-clause parenthetical stays inside the
+// conditional subject — "Once the rule, which is currently disabled, has been enabled, …" —
+// so the gap may span a comma only when that comma opens a "which/that/who/where" clause.
 const CONDITIONAL_INTRO =
-  '(?:after|once|when|if)\\b[^,.;\\n]{0,60}?\\b(?:has|have|had)?\\s?been\\s+(?:enabled|installed|created|activated)\\b';
+  '(?:after|once|when|if)\\b(?:[^,.;\\n]|,\\s*(?:which|that|who|where)\\b[^,.;\\n]{0,80},\\s*){0,80}?(?:has|have|had)?\\s?been\\s+(?:enabled|installed|created|activated)\\b';
 
 /**
  * Does the answer claim the assistant itself changed something? The coverage skill has no

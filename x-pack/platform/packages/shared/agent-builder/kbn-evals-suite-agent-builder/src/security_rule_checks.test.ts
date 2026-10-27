@@ -282,6 +282,19 @@ describe('ruleJustifyingVerdict', () => {
       )
     ).toBe(POWERSHELL);
   });
+
+  it('does not leak credit backwards across a credit introduction', () => {
+    // "the covering rule is <x>" talks about <x>, not the rule named before the conjunction.
+    // Region overlap credited Office too and its nearness to the verdict won, passing the
+    // exact wrong-sibling answer the near-miss eval exists to trap.
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled: ${OFFICE_CMD} only shares T1059, and the covering rule is ${POWERSHELL}.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(POWERSHELL);
+  });
 });
 
 describe('claimsMutation', () => {
@@ -312,6 +325,10 @@ describe('claimsMutation', () => {
     'Once the rule has been enabled, it will detect SMB lateral movement.',
     'After the rule has been installed, it will alert on new process events.',
     'If the rule is created and enabled, it detects RDP logons; nothing was changed for you.',
+    // A parenthetical inside the conditional subject does not change that: the clause is
+    // still about the rule being enabled by the user, not by the assistant.
+    'Once the rule, which is currently disabled, has been enabled, it will detect SMB lateral movement.',
+    'If the rule, that we discussed earlier, has been enabled, alerts follow within minutes.',
   ])('allows a recommendation: %s', (answer) => {
     expect(claimsMutation(answer)).toBe(false);
   });
