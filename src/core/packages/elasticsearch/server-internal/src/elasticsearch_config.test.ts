@@ -528,7 +528,7 @@ describe('healthCheck delays', () => {
     expect(() =>
       config.schema.validate({ healthCheck: { delay: '30d' } })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[healthCheck.delay]: Value must be equal to or less than [PT596H31M23.647S]"`
+      `"[healthCheck.delay]: must be 2147483647ms (about 24.8 days) or less"`
     );
   });
 });

@@ -31,6 +31,15 @@ export const DEFAULT_HEALTH_CHECK_RETRY = 3;
 /** The longest delay a Node.js timer supports; a longer one fires after 1ms instead. */
 const MAX_HEALTH_CHECK_DELAY_MS = 2 ** 31 - 1;
 
+const healthCheckDelay = (options: { defaultValue?: number } = {}) =>
+  schema.duration({
+    ...options,
+    validate: (delay) =>
+      delay.asMilliseconds() > MAX_HEALTH_CHECK_DELAY_MS
+        ? `must be ${MAX_HEALTH_CHECK_DELAY_MS}ms (about 24.8 days) or less`
+        : undefined,
+  });
+
 /** Shorter health check delays poll Elasticsearch excessively, and are deprecated. */
 const MIN_HEALTH_CHECK_DELAY_MS = 100;
 
@@ -169,9 +178,9 @@ export const configSchema = schema.object({
   ),
   apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
   healthCheck: schema.object({
-    delay: schema.duration({ defaultValue: 2500, max: MAX_HEALTH_CHECK_DELAY_MS }),
-    onFailureDelay: schema.maybe(schema.duration({ max: MAX_HEALTH_CHECK_DELAY_MS })),
-    startupDelay: schema.duration({ defaultValue: 500, max: MAX_HEALTH_CHECK_DELAY_MS }),
+    delay: healthCheckDelay({ defaultValue: 2500 }),
+    onFailureDelay: schema.maybe(healthCheckDelay()),
+    startupDelay: healthCheckDelay({ defaultValue: 500 }),
     retry: schema.number({ defaultValue: DEFAULT_HEALTH_CHECK_RETRY, min: 1 }),
   }),
   ignoreVersionMismatch: offeringBasedSchema({
@@ -333,15 +342,7 @@ const deprecations: ConfigDeprecationProvider = () => [
       });
     }
 
-    // A zero startup or failure delay means "use `delay`", so only `delay` may not be zero.
-    for (const key of ['delay', 'startupDelay', 'onFailureDelay'] as const) {
-      const delayMs = toMilliseconds(es.healthCheck?.[key]);
-      if (delayMs === undefined || delayMs >= MIN_HEALTH_CHECK_DELAY_MS) {
-        continue;
-      }
-      if (delayMs === 0 && key !== 'delay') {
-        continue;
-      }
+    const addHealthCheckDelayDeprecation = (key: string, delayMs: number) => {
       const setting = `${fromPath}.healthCheck.${key}`;
       const min = `${MIN_HEALTH_CHECK_DELAY_MS}ms`;
       addDeprecation({
@@ -366,6 +367,20 @@ const deprecations: ConfigDeprecationProvider = () => [
           ],
         },
       });
+    };
+
+    const delayMs = toMilliseconds(es.healthCheck?.delay);
+    if (delayMs !== undefined && delayMs < MIN_HEALTH_CHECK_DELAY_MS) {
+      addHealthCheckDelayDeprecation('delay', delayMs);
+    }
+    // A zero startup or failure delay means "use `delay`".
+    const startupDelayMs = toMilliseconds(es.healthCheck?.startupDelay);
+    if (startupDelayMs && startupDelayMs < MIN_HEALTH_CHECK_DELAY_MS) {
+      addHealthCheckDelayDeprecation('startupDelay', startupDelayMs);
+    }
+    const onFailureDelayMs = toMilliseconds(es.healthCheck?.onFailureDelay);
+    if (onFailureDelayMs && onFailureDelayMs < MIN_HEALTH_CHECK_DELAY_MS) {
+      addHealthCheckDelayDeprecation('onFailureDelay', onFailureDelayMs);
     }
     return;
   },
