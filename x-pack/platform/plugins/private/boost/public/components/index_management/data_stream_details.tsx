@@ -59,14 +59,20 @@ export const DataStreamBoostDetail = ({ dataStreamName }: DataStreamBoostProps) 
 };
 
 interface EditDataStreamRuleProps extends DataStreamBoostProps {
+  /** The details' flyout history, which the rule's flyout opens in, so Back returns to them. */
+  historyKey?: symbol;
   onClose: () => void;
 }
 
 /**
- * Edits the rule that applies to a data stream, from its details flyout's menu, in place of the
+ * Edits the rule that applies to a data stream, from its details flyout's menu, on top of the
  * flyout. When the rule can't load, it says so and closes again.
  */
-export const EditDataStreamRule = ({ dataStreamName, onClose }: EditDataStreamRuleProps) => {
+export const EditDataStreamRule = ({
+  dataStreamName,
+  historyKey,
+  onClose,
+}: EditDataStreamRuleProps) => {
   const { data: explanation, error } = useBoostExplanation(dataStreamName);
   useCloseOnError(error, onClose);
   const [rule] = explanation?.matches ?? [];
@@ -78,5 +84,5 @@ export const EditDataStreamRule = ({ dataStreamName, onClose }: EditDataStreamRu
       onClose();
     }
   }, [hasNothingToEdit, onClose]);
-  return rule ? <EditRuleFlyout rule={rule} onClose={onClose} /> : null;
+  return rule ? <EditRuleFlyout rule={rule} historyKey={historyKey} onClose={onClose} /> : null;
 };

@@ -35,6 +35,8 @@ export interface IndexManagementPartProps {
   dataStream?: string;
   /** Closes a part that opens over Index Management, such as a flyout. */
   onClose?: () => void;
+  /** The flyout history a flyout opens in, on top of the Index Management flyout that opened it. */
+  historyKey?: symbol;
 }
 
 // Index Management renders each part on its own, so they share one client, and with it each request.
@@ -42,7 +44,13 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } },
 });
 
-const Part = ({ part, name, dataStream, onClose }: Omit<IndexManagementPartProps, 'services'>) => {
+const Part = ({
+  part,
+  name,
+  dataStream,
+  onClose,
+  historyKey,
+}: Omit<IndexManagementPartProps, 'services'>) => {
   switch (part) {
     case 'cardRule':
       return <CardRule indexName={name} />;
@@ -55,7 +63,13 @@ const Part = ({ part, name, dataStream, onClose }: Omit<IndexManagementPartProps
     case 'dataStream':
       return <DataStreamBoostDetail dataStreamName={name} />;
     case 'dataStreamEditRule':
-      return <EditDataStreamRule dataStreamName={name} onClose={onClose ?? (() => {})} />;
+      return (
+        <EditDataStreamRule
+          dataStreamName={name}
+          historyKey={historyKey}
+          onClose={onClose ?? (() => {})}
+        />
+      );
   }
 };
 

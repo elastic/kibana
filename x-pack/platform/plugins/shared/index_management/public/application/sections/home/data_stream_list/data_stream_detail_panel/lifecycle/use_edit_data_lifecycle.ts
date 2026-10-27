@@ -76,7 +76,8 @@ const throwIfRequestError = (result: { error?: unknown } | undefined, message: s
 interface UseEditDataLifecycleArgs {
   dataStream: DataStream | null | undefined;
   resolvedLifecycle: ResolvedDataStreamLifecycle;
-  onClose: (shouldReload?: boolean) => void;
+  /** Called once a save persists anything, so the details reload to show what did. */
+  onSaved: () => void;
 }
 
 /**
@@ -106,7 +107,7 @@ interface FlyoutSeed {
 export const useEditDataLifecycle = ({
   dataStream,
   resolvedLifecycle,
-  onClose,
+  onSaved,
 }: UseEditDataLifecycleArgs) => {
   const { config, core, plugins, services, url } = useAppContext();
   const locator = url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID);
@@ -434,6 +435,12 @@ export const useEditDataLifecycle = ({
     void run();
   }, [dataStream, loadDefaultSnapshotRepository, loadIlmPolicies, locator, resolvedLifecycle]);
 
+  // A save returns to the details, from the policy being inspected too, which applies one.
+  const finishSave = useCallback(() => {
+    setInspectedIlmPolicyName(undefined);
+    onSaved();
+  }, [onSaved]);
+
   const applyDataLifecycle = useCallback(
     async ({ successfulData, failedData }: EditDataLifecycleFlyoutOnApplyArgs) => {
       if (!dataStream) {
@@ -546,7 +553,7 @@ export const useEditDataLifecycle = ({
 
             setIsEditingDataLifecycle(false);
             showSaveSuccessToast();
-            onClose(true);
+            finishSave();
             return;
           }
         }
@@ -770,7 +777,7 @@ export const useEditDataLifecycle = ({
 
         if (!successfulFailed && !failedFailed) {
           showSaveSuccessToast();
-          onClose(true);
+          finishSave();
           return;
         }
 
@@ -819,7 +826,7 @@ export const useEditDataLifecycle = ({
         }
 
         // Reload so the flyout no longer shows stale values for the part that did persist.
-        onClose(true);
+        finishSave();
       } catch (error) {
         services.notificationService.showDangerToast(
           i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.saveErrorTitle', {
@@ -829,7 +836,7 @@ export const useEditDataLifecycle = ({
         );
       }
     },
-    [services.notificationService, dataStream, onClose, config.isServerless]
+    [services.notificationService, dataStream, finishSave, config.isServerless]
   );
 
   const closeEditFlyout = useCallback(() => setIsEditingDataLifecycle(false), []);

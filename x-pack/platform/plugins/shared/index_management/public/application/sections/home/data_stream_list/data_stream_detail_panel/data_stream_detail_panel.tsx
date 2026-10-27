@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
@@ -23,6 +24,8 @@ import {
   EuiIcon,
   EuiPopover,
   EuiContextMenu,
+  getFlyoutManagerStore,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type {
@@ -67,19 +70,62 @@ export const ConditionalWrap = ({
   children: JSX.Element;
 }): JSX.Element => (condition ? wrap(children) : children);
 
+interface ReturnsToDetailsProps {
+  historyKey: symbol;
+  detailsFlyoutId: string;
+  children: ReactNode;
+}
+
+/**
+ * Wraps a flyout opened on top of the details in their history, so closing it goes back to the
+ * details, as its Back button does. EUI closes every flyout in a history when the one on top
+ * unmounts, the details included, so this goes back first: React cleans up a component before the
+ * ones it renders.
+ */
+const ReturnsToDetails = ({ historyKey, detailsFlyoutId, children }: ReturnsToDetailsProps) => {
+  useLayoutEffect(
+    () => () => {
+      const store = getFlyoutManagerStore();
+      // Each step back takes one flyout off, so there are never more steps than flyouts.
+      for (let steps = store.getState().flyouts.length; steps > 0; steps--) {
+        const { sessions } = store.getState();
+        const top = sessions[sessions.length - 1];
+        if (!top || top.historyKey !== historyKey || top.mainFlyoutId === detailsFlyoutId) {
+          return;
+        }
+        store.goBack();
+      }
+    },
+    [historyKey, detailsFlyoutId]
+  );
+  return <>{children}</>;
+};
+
 export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   dataStreamName,
   onClose,
 }) => {
   const [isActionsPopOverOpen, setActionsPopOverOpen] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
-  // An action other plugins add, whose content shows in place of this flyout until it closes.
+  // An action other plugins add, whose flyout opens on top of this one until it closes.
   const [openAction, setOpenAction] = useState<DataStreamAction>();
+  // The details, and the flyouts that edit them on top, share a history, so each editor's Back
+  // button returns to the details.
+  const [historyKey] = useState(() => Symbol('dataStreamDetails'));
+  const detailsFlyoutId = useGeneratedHtmlId({ prefix: 'dataStreamDetailPanel' });
+  // Whether a change was saved, so the list reloads once the details close.
+  const [hasSaved, setHasSaved] = useState(false);
+  const closeDetails = () => (hasSaved ? onClose(true) : onClose());
   const [streamsGetResponse, setStreamsGetResponse] = useState<
     Streams.ingest.all.GetResponse | undefined
   >(undefined);
 
-  const { error, data: dataStream, isLoading } = useLoadDataStream(dataStreamName);
+  const {
+    error,
+    data: dataStream,
+    isLoading,
+    resendRequest: reloadDataStream,
+  } = useLoadDataStream(dataStreamName);
 
   const resolvedLifecycle = useResolvedDataStreamLifecycle({ dataStream, streamsGetResponse });
 
@@ -94,7 +140,14 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     inspectedIlmPolicyName,
     inspectedIlmPolicy,
     closeInspectFlyout,
-  } = useEditDataLifecycle({ dataStream, resolvedLifecycle, onClose });
+  } = useEditDataLifecycle({
+    dataStream,
+    resolvedLifecycle,
+    onSaved: () => {
+      setHasSaved(true);
+      reloadDataStream();
+    },
+  });
 
   const {
     url,
@@ -148,7 +201,8 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     };
   }, [dataStream]);
 
-  if (isLoading) {
+  // Once loaded, the details stay while they reload, such as after a save.
+  if (isLoading && !dataStream) {
     content = (
       <SectionLoading>
         {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.loadingDataStreamDescription', {
@@ -282,115 +336,123 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
 
   return (
     <>
-      {!isEditingDataLifecycle && !openAction && (
-        <EuiFlyout
-          onClose={() => onClose()}
-          data-test-subj="dataStreamDetailPanel"
-          aria-labelledby="dataStreamDetailPanelTitle"
-          size={400}
+      {/* The details stay open, behind the flyouts that edit them. */}
+      <EuiFlyout
+        id={detailsFlyoutId}
+        session="start"
+        historyKey={historyKey}
+        flyoutMenuProps={{ title: dataStreamName }}
+        onClose={closeDetails}
+        data-test-subj="dataStreamDetailPanel"
+        aria-labelledby="dataStreamDetailPanelTitle"
+        size={400}
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="s">
+            <h2 id="dataStreamDetailPanelTitle" data-test-subj="dataStreamDetailPanelTitle">
+              {dataStreamName}
+              {dataStream && <DataStreamsBadges dataStream={dataStream} />}
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+
+        <EuiFlyoutBody
+          data-test-subj="content"
+          banner={
+            dataStream && dataStream.hidden !== true ? (
+              <StreamsPromotion dataStreamName={dataStreamName} />
+            ) : undefined
+          }
         >
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="s">
-              <h2 id="dataStreamDetailPanelTitle" data-test-subj="dataStreamDetailPanelTitle">
-                {dataStreamName}
-                {dataStream && <DataStreamsBadges dataStream={dataStream} />}
-              </h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
+          {content}
+        </EuiFlyoutBody>
 
-          <EuiFlyoutBody
-            data-test-subj="content"
-            banner={
-              dataStream && dataStream.hidden !== true ? (
-                <StreamsPromotion dataStreamName={dataStreamName} />
-              ) : undefined
-            }
-          >
-            {content}
-          </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                flush="left"
+                size="s"
+                onClick={closeDetails}
+                data-test-subj="closeDetailsButton"
+                aria-label={i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel', {
+                  defaultMessage: 'Close',
+                })}
+              >
+                {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel', {
+                  defaultMessage: 'Close',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
 
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  flush="left"
-                  size="s"
-                  onClick={() => onClose()}
-                  data-test-subj="closeDetailsButton"
+            <EuiFlexItem grow={false}>
+              {hasActions ? (
+                <EuiPopover
                   aria-label={i18n.translate(
-                    'xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel',
-                    {
-                      defaultMessage: 'Close',
-                    }
+                    'xpack.idxMgmt.dataStreamDetailPanel.actionsMenuAriaLabel',
+                    { defaultMessage: 'Data stream actions menu' }
                   )}
+                  button={
+                    <EuiSplitButton size="s">
+                      <EuiSplitButton.ActionPrimary
+                        iconType="discoverApp"
+                        onClick={viewInDiscover}
+                        isDisabled={!discoverLocator}
+                        data-test-subj="viewInDiscoverButton"
+                      >
+                        {viewInDiscoverLabel}
+                      </EuiSplitButton.ActionPrimary>
+
+                      <EuiSplitButton.ActionSecondary
+                        iconType="gear"
+                        tooltipProps={{
+                          content: i18n.translate(
+                            'xpack.idxMgmt.dataStreamDetailPanel.actionsButtonToolTip',
+                            { defaultMessage: 'Actions' }
+                          ),
+                          disableScreenReaderOutput: true,
+                        }}
+                        aria-label={i18n.translate(
+                          'xpack.idxMgmt.dataStreamDetailPanel.actionsButtonAriaLabel',
+                          { defaultMessage: 'Open data stream actions menu' }
+                        )}
+                        onClick={() => setActionsPopOverOpen((open) => !open)}
+                        data-test-subj="manageDataStreamButton"
+                      />
+                    </EuiSplitButton>
+                  }
+                  isOpen={isActionsPopOverOpen}
+                  closePopover={closePopover}
+                  panelPaddingSize="none"
+                  anchorPosition="upLeft"
                 >
-                  {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel', {
-                    defaultMessage: 'Close',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
+                  <EuiContextMenu initialPanelId={0} panels={panels} />
+                </EuiPopover>
+              ) : (
+                <EuiButton
+                  iconType="discoverApp"
+                  size="s"
+                  onClick={viewInDiscover}
+                  isDisabled={!discoverLocator}
+                  data-test-subj="viewInDiscoverButton"
+                >
+                  {viewInDiscoverLabel}
+                </EuiButton>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
 
-              <EuiFlexItem grow={false}>
-                {hasActions ? (
-                  <EuiPopover
-                    aria-label={i18n.translate(
-                      'xpack.idxMgmt.dataStreamDetailPanel.actionsMenuAriaLabel',
-                      { defaultMessage: 'Data stream actions menu' }
-                    )}
-                    button={
-                      <EuiSplitButton size="s">
-                        <EuiSplitButton.ActionPrimary
-                          iconType="discoverApp"
-                          onClick={viewInDiscover}
-                          isDisabled={!discoverLocator}
-                          data-test-subj="viewInDiscoverButton"
-                        >
-                          {viewInDiscoverLabel}
-                        </EuiSplitButton.ActionPrimary>
-
-                        <EuiSplitButton.ActionSecondary
-                          iconType="gear"
-                          tooltipProps={{
-                            content: i18n.translate(
-                              'xpack.idxMgmt.dataStreamDetailPanel.actionsButtonToolTip',
-                              { defaultMessage: 'Actions' }
-                            ),
-                            disableScreenReaderOutput: true,
-                          }}
-                          aria-label={i18n.translate(
-                            'xpack.idxMgmt.dataStreamDetailPanel.actionsButtonAriaLabel',
-                            { defaultMessage: 'Open data stream actions menu' }
-                          )}
-                          onClick={() => setActionsPopOverOpen((open) => !open)}
-                          data-test-subj="manageDataStreamButton"
-                        />
-                      </EuiSplitButton>
-                    }
-                    isOpen={isActionsPopOverOpen}
-                    closePopover={closePopover}
-                    panelPaddingSize="none"
-                    anchorPosition="upLeft"
-                  >
-                    <EuiContextMenu initialPanelId={0} panels={panels} />
-                  </EuiPopover>
-                ) : (
-                  <EuiButton
-                    iconType="discoverApp"
-                    size="s"
-                    onClick={viewInDiscover}
-                    isDisabled={!discoverLocator}
-                    data-test-subj="viewInDiscoverButton"
-                  >
-                    {viewInDiscoverLabel}
-                  </EuiButton>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </EuiFlyout>
+      {openAction && (
+        <ReturnsToDetails historyKey={historyKey} detailsFlyoutId={detailsFlyoutId}>
+          {openAction.renderContent({
+            dataStreamName,
+            onClose: () => setOpenAction(undefined),
+            historyKey,
+          })}
+        </ReturnsToDetails>
       )}
-
-      {openAction?.renderContent({ dataStreamName, onClose: () => setOpenAction(undefined) })}
 
       {isDeleting && (
         <DeleteDataStreamConfirmationModal
@@ -406,26 +468,29 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       )}
 
       {isEditingDataLifecycle && dataStream && (
-        <EditDataLifecycleFlyout
-          onClose={closeEditFlyout}
-          onApply={applyDataLifecycle}
-          isServerless={config.isServerless}
-          successfulData={{
-            ...flyoutSuccessfulData,
-            notice: isSuccessfulDataLifecycleNotApplicable ? (
-              <LookupLifecycleWarningCallout
-                description={
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreamDetailPanel.lookupLifecycleWarningDescription"
-                    defaultMessage="Elasticsearch skips indices with the lookup index mode when running the data stream lifecycle, so these settings are not applied to this data stream's data. The failed data lifecycle still applies."
-                  />
-                }
-              />
-            ) : undefined,
-          }}
-          failedData={flyoutFailedData}
-          container={flyoutContainer}
-        />
+        <ReturnsToDetails historyKey={historyKey} detailsFlyoutId={detailsFlyoutId}>
+          <EditDataLifecycleFlyout
+            historyKey={historyKey}
+            onClose={closeEditFlyout}
+            onApply={applyDataLifecycle}
+            isServerless={config.isServerless}
+            successfulData={{
+              ...flyoutSuccessfulData,
+              notice: isSuccessfulDataLifecycleNotApplicable ? (
+                <LookupLifecycleWarningCallout
+                  description={
+                    <FormattedMessage
+                      id="xpack.idxMgmt.dataStreamDetailPanel.lookupLifecycleWarningDescription"
+                      defaultMessage="Elasticsearch skips indices with the lookup index mode when running the data stream lifecycle, so these settings are not applied to this data stream's data. The failed data lifecycle still applies."
+                    />
+                  }
+                />
+              ) : undefined,
+            }}
+            failedData={flyoutFailedData}
+            container={flyoutContainer}
+          />
+        </ReturnsToDetails>
       )}
 
       {inspectedIlmPolicyName && inspectedIlmPolicy && (

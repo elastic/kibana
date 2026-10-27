@@ -63,6 +63,8 @@ export interface EditDataLifecycleFlyoutProps {
   onApply: (args: EditDataLifecycleFlyoutOnApplyArgs) => void;
   initialTabId?: TabId;
   container?: EuiFlyoutProps['container'];
+  /** The flyout history it joins, on top of the flyout that opened it, whose Back returns there. */
+  historyKey?: symbol;
   /**
    * When true, only the Delete phase is shown in the DLM phase selector.
    * The Frozen phase and Hot phase are hidden (Serverless deployments).
@@ -122,6 +124,7 @@ export const EditDataLifecycleFlyout = ({
   onApply,
   initialTabId,
   container,
+  historyKey,
   isServerless = false,
   successfulData,
   failedData,
@@ -367,6 +370,7 @@ export const EditDataLifecycleFlyout = ({
       size={400}
       type="overlay"
       container={container}
+      historyKey={historyKey}
     >
       {(selectedTabId) => (
         <>

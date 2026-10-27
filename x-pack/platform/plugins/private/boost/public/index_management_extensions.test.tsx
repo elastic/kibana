@@ -324,7 +324,9 @@ describe('Index Management extensions', () => {
       } = setup();
       const onClose = jest.fn();
 
-      renderInIntl(action.renderContent({ dataStreamName: 'logs-app', onClose }));
+      renderInIntl(
+        action.renderContent({ dataStreamName: 'logs-app', onClose, historyKey: Symbol('details') })
+      );
 
       // The default rule applies, so it's edited as its project default, starting from its saved
       // profile once the boost state loads, which nothing else on the page may have loaded yet.
@@ -335,6 +337,25 @@ describe('Index Management extensions', () => {
       expect(onClose).not.toHaveBeenCalled();
     });
 
+    it('opens the profile form on top of the rule, which stays open behind it to go back to', async () => {
+      const {
+        actions: [action],
+      } = setup();
+      const onClose = jest.fn();
+
+      renderInIntl(
+        action.renderContent({ dataStreamName: 'logs-app', onClose, historyKey: Symbol('details') })
+      );
+      await userEvent.click(await screen.findByTestId('boostProjectDefaultCreateProfile'));
+
+      const profileFlyout = await screen.findByTestId('boostProjectDefaultProfileFlyout');
+      expect(screen.getByTestId('boostProjectDefaultFlyout')).toBeInTheDocument();
+      await userEvent.click(within(profileFlyout).getByRole('button', { name: 'Cancel' }));
+      expect(screen.queryByTestId('boostProjectDefaultProfileFlyout')).not.toBeInTheDocument();
+      expect(screen.getByTestId('boostProjectDefaultFlyout')).toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
     it("says why it closes when the data stream's rule can't load", async () => {
       const {
         core,
@@ -342,7 +363,9 @@ describe('Index Management extensions', () => {
       } = setup();
       const onClose = jest.fn();
 
-      renderInIntl(action.renderContent({ dataStreamName: 'missing', onClose }));
+      renderInIntl(
+        action.renderContent({ dataStreamName: 'missing', onClose, historyKey: Symbol('details') })
+      );
 
       await waitFor(() => expect(onClose).toHaveBeenCalled());
       expect(core.notifications.toasts.addError).toHaveBeenCalledWith(expect.any(Error), {

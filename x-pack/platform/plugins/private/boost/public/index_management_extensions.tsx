@@ -53,7 +53,11 @@ export const registerIndexManagementExtensions = (
   const renderPart = (
     part: IndexManagementPart,
     name: string,
-    { dataStream, onClose }: { dataStream?: string; onClose?: () => void } = {}
+    {
+      dataStream,
+      onClose,
+      historyKey,
+    }: { dataStream?: string; onClose?: () => void; historyKey?: symbol } = {}
   ) => (
     <Suspense fallback={null}>
       <LazyIndexManagementPart
@@ -62,6 +66,7 @@ export const registerIndexManagementExtensions = (
         name={name}
         dataStream={dataStream}
         onClose={onClose}
+        historyKey={historyKey}
       />
     </Suspense>
   );
@@ -111,8 +116,8 @@ export const registerIndexManagementExtensions = (
       }),
       icon: 'chartGauge',
       shouldRender: isBoostableDataStream,
-      renderContent: ({ dataStreamName, onClose }) =>
-        renderPart('dataStreamEditRule', dataStreamName, { onClose }),
+      renderContent: ({ dataStreamName, onClose, historyKey }) =>
+        renderPart('dataStreamEditRule', dataStreamName, { onClose, historyKey }),
     });
   }
 };

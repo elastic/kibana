@@ -58,7 +58,8 @@ import type { TargetPreview } from './pattern_matches';
 import { PatternMatches, getPartialPattern } from './pattern_matches';
 import { FLYOUT_WIDTH } from '../flyout_width';
 import { HiddenBadge } from '../hidden_data';
-import { ProfileFlyoutContent } from '../profiles/profile_flyout';
+import { CREATE_PROFILE_TITLE, ProfileFlyoutContent } from '../profiles/profile_flyout';
+import { FlyoutOnTop, getFlyoutHistoryProps } from '../flyout_history';
 import { useBoostState, useCreateRule, useUpdateRule } from '../../hooks/use_boost_state';
 import { PROFILE_TYPE_LABELS } from '../format';
 import type { RuleDraft, RuleDraftErrors } from './rule_draft';
@@ -83,6 +84,11 @@ import {
 interface RuleFlyoutProps {
   /** The rule to edit. Names can't change, and default rules can only change their profile. */
   rule?: BoostRule;
+  /**
+   * The flyout history it opens in, on top of the flyout that opened it, such as Index Management's
+   * details, which its Back button returns to. The profile form then opens on top of it in turn.
+   */
+  historyKey?: symbol;
   /** A custom rule to copy into a new rule, which keeps its type. Ignored when editing. */
   duplicateOf?: BoostRule;
   /** Prefills the profile when creating, such as right after creating the profile. */
@@ -179,11 +185,18 @@ const getInitialDraft = (
 };
 
 /** Creates a custom boost rule, from scratch or a copy, or edits a custom or default one. */
-export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: RuleFlyoutProps) => {
+export const RuleFlyout = ({
+  rule,
+  historyKey,
+  duplicateOf,
+  initialProfileName,
+  onClose,
+}: RuleFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const { notifications } = useBoostServices();
   const { data: state } = useBoostState();
   const titleId = useGeneratedHtmlId();
+  const profileTitleId = useGeneratedHtmlId();
   const modeIdPrefix = useGeneratedHtmlId({ prefix: 'ruleTargetMode' });
   const [draft, setDraft] = useState<RuleDraft>(() =>
     getInitialDraft(rule, duplicateOf, initialProfileName, state)
@@ -646,7 +659,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
         defaultMessage: 'Create boost rule',
       });
 
-  // Both views share one flyout, so switching between them doesn't open another.
+  // On its own, both views share one flyout, so switching between them doesn't open another.
   const flyoutProps = {
     onClose,
     size: FLYOUT_WIDTH,
@@ -654,31 +667,36 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
     'aria-labelledby': titleId,
     ownFocus: true,
     'data-test-subj': 'boostRuleFlyout',
+    ...getFlyoutHistoryProps(historyKey, title),
   } as const;
 
-  if (isCreatingProfile) {
+  const renderProfileForm = (formTitleId: string) => (
+    <ProfileFlyoutContent
+      forRule={{
+        ruleName: draft.name || undefined,
+        type,
+        isProjectDefault: false,
+        estimate: estimateWithNewProfile,
+        onCreate: onProfileCreate,
+      }}
+      takenNames={profiles.map(({ name }) => name)}
+      titleId={formTitleId}
+      onClose={closeProfileForm}
+    />
+  );
+
+  if (isCreatingProfile && !historyKey) {
     return (
       <EuiFlyout
         {...flyoutProps}
         flyoutMenuProps={{ showBackButton: true, backButtonProps: { onClick: closeProfileForm } }}
       >
-        <ProfileFlyoutContent
-          forRule={{
-            ruleName: draft.name || undefined,
-            type,
-            isProjectDefault: false,
-            estimate: estimateWithNewProfile,
-            onCreate: onProfileCreate,
-          }}
-          takenNames={profiles.map(({ name }) => name)}
-          titleId={titleId}
-          onClose={closeProfileForm}
-        />
+        {renderProfileForm(titleId)}
       </EuiFlyout>
     );
   }
 
-  return (
+  const ruleFlyout = (
     <EuiFlyout {...flyoutProps}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
@@ -912,5 +930,26 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
+  );
+
+  // In a history, the profile form opens on top of the rule, which stays open behind it.
+  return historyKey ? (
+    <>
+      {ruleFlyout}
+      {isCreatingProfile && (
+        <FlyoutOnTop
+          historyKey={historyKey}
+          title={CREATE_PROFILE_TITLE}
+          onClose={closeProfileForm}
+          size={FLYOUT_WIDTH}
+          aria-labelledby={profileTitleId}
+          data-test-subj="boostRuleProfileFlyout"
+        >
+          {renderProfileForm(profileTitleId)}
+        </FlyoutOnTop>
+      )}
+    </>
+  ) : (
+    ruleFlyout
   );
 };

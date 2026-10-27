@@ -88,8 +88,14 @@ export interface DataStreamAction {
   icon: IconType;
   // whether the action applies to the data stream; it always does without this
   shouldRender?: (args: { dataStream: DataStreamAttributes }) => boolean;
-  // what the action opens, such as a flyout, shown in place of the details flyout until it closes
-  renderContent: (args: { dataStreamName: string; onClose: () => void }) => ReactNode;
+  // what the action opens: a flyout on top of the details flyout, which joins their history by
+  // opening with `session="start"` and `historyKey`, so its Back button returns to the details, as
+  // closing it does
+  renderContent: (args: {
+    dataStreamName: string;
+    onClose: () => void;
+    historyKey: symbol;
+  }) => ReactNode;
 }
 
 export interface ExtensionsSetup {

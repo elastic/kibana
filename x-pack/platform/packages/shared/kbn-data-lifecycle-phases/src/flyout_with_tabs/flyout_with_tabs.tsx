@@ -49,6 +49,11 @@ export interface FlyoutWithTabsProps<TId extends string> {
   type?: EuiFlyoutProps['type'];
   container?: EuiFlyoutProps['container'];
   ownFocus?: EuiFlyoutProps['ownFocus'];
+  /**
+   * The flyout history it joins, on top of the flyout that opened it, which EUI's Back button in
+   * its menu returns to.
+   */
+  historyKey?: symbol;
   children: (selectedTabId: TId) => React.ReactNode;
 }
 
@@ -65,6 +70,7 @@ export const FlyoutWithTabs = <TId extends string>({
   type = 'push',
   container,
   ownFocus = true,
+  historyKey,
   children,
 }: FlyoutWithTabsProps<TId>) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'flyoutWithTabs' });
@@ -101,6 +107,10 @@ export const FlyoutWithTabs = <TId extends string>({
       paddingSize="none"
       type={type}
       container={container}
+      // In a history, its title names it in the menu of where Back goes.
+      session={historyKey ? 'start' : undefined}
+      historyKey={historyKey}
+      flyoutMenuProps={historyKey ? { title } : undefined}
       data-test-subj="flyoutWithTabs"
       {...focusProps}
     >

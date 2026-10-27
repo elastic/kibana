@@ -57,6 +57,10 @@ import { PROFILE_NAME_ERROR_MESSAGES } from './profile_messages';
 import { getCopyName } from '../copy_name';
 import { CostEstimate } from '../cost_estimate';
 
+export const CREATE_PROFILE_TITLE = i18n.translate('xpack.boost.profileForm.createTitle', {
+  defaultMessage: 'Create boost profile',
+});
+
 /**
  * A new profile created from a rule's flyout or a project default's, which shows this form in place
  * of its own.
@@ -294,9 +298,7 @@ export const ProfileFlyoutContent = ({
               ? i18n.translate('xpack.boost.profileForm.createForNewRuleTitle', {
                   defaultMessage: 'Create boost profile for new rule',
                 })
-              : i18n.translate('xpack.boost.profileForm.createTitle', {
-                  defaultMessage: 'Create boost profile',
-                })}
+              : CREATE_PROFILE_TITLE}
           </h2>
         </EuiTitle>
         {/* The name and type can't change after creation, so editing shows them read-only here. */}

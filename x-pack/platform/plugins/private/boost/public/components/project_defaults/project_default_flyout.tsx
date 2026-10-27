@@ -39,7 +39,8 @@ import { CardLabel } from '../card_label';
 import { CostEstimate } from '../cost_estimate';
 import { FLYOUT_WIDTH } from '../flyout_width';
 import { DEFAULT_PRESET_OPTIONS } from '../preset_options';
-import { ProfileFlyoutContent } from '../profiles/profile_flyout';
+import { CREATE_PROFILE_TITLE, ProfileFlyoutContent } from '../profiles/profile_flyout';
+import { FlyoutOnTop, getFlyoutHistoryProps } from '../flyout_history';
 
 // Stands in for a profile being created in the profile form, so its cost can be estimated.
 const NEW_PROFILE_NAME = '<new profile>';
@@ -59,6 +60,11 @@ const DEFAULT_BADGE_LABEL = i18n.translate('xpack.boost.projectDefaultForm.defau
 
 interface ProjectDefaultFlyoutProps {
   type: BoostProfileType;
+  /**
+   * The flyout history it opens in, on top of the flyout that opened it, such as Index Management's
+   * details, which its Back button returns to. The profile form then opens on top of it in turn.
+   */
+  historyKey?: symbol;
   onClose: () => void;
 }
 
@@ -66,10 +72,11 @@ interface ProjectDefaultFlyoutProps {
  * Edits a project default: an Elastic-managed preset, or a custom profile of the same type, which
  * can be created here. Its footer estimates the default rule's cost with the choice.
  */
-export const ProjectDefaultFlyout = ({ type, onClose }: ProjectDefaultFlyoutProps) => {
+export const ProjectDefaultFlyout = ({ type, historyKey, onClose }: ProjectDefaultFlyoutProps) => {
   const { notifications } = useBoostServices();
   const { data: state } = useBoostState();
   const titleId = useGeneratedHtmlId();
+  const profileTitleId = useGeneratedHtmlId();
   const groupName = useGeneratedHtmlId({ prefix: 'projectDefault' });
   const savedProfileName = state?.settings.default_profiles[DEFAULT_PROFILE_KEYS[type]] ?? '';
   const presets = DEFAULT_PRESET_OPTIONS[type];
@@ -152,7 +159,7 @@ export const ProjectDefaultFlyout = ({ type, onClose }: ProjectDefaultFlyoutProp
       }
     );
 
-  // Both views share one flyout, so creating a profile doesn't open another.
+  // On its own, both views share one flyout, so creating a profile doesn't open another.
   const flyoutProps = {
     onClose,
     size: FLYOUT_WIDTH,
@@ -160,9 +167,31 @@ export const ProjectDefaultFlyout = ({ type, onClose }: ProjectDefaultFlyoutProp
     'aria-labelledby': titleId,
     ownFocus: true,
     'data-test-subj': 'boostProjectDefaultFlyout',
+    ...getFlyoutHistoryProps(historyKey, TITLES[type]),
   } as const;
 
-  if (isCreatingProfile) {
+  const renderProfileForm = (formTitleId: string) => (
+    <ProfileFlyoutContent
+      forRule={{
+        type,
+        isProjectDefault: true,
+        estimate: (profile: BoostProfileInput) =>
+          estimate(NEW_PROFILE_NAME, [
+            ...profiles,
+            { ...profile, name: NEW_PROFILE_NAME, is_builtin: false },
+          ]),
+        onCreate: (name) => {
+          chooseCustom(name);
+          setIsCreatingProfile(false);
+        },
+      }}
+      takenNames={profiles.map(({ name }) => name)}
+      titleId={formTitleId}
+      onClose={() => setIsCreatingProfile(false)}
+    />
+  );
+
+  if (isCreatingProfile && !historyKey) {
     return (
       <EuiFlyout
         {...flyoutProps}
@@ -171,29 +200,12 @@ export const ProjectDefaultFlyout = ({ type, onClose }: ProjectDefaultFlyoutProp
           backButtonProps: { onClick: () => setIsCreatingProfile(false) },
         }}
       >
-        <ProfileFlyoutContent
-          forRule={{
-            type,
-            isProjectDefault: true,
-            estimate: (profile: BoostProfileInput) =>
-              estimate(NEW_PROFILE_NAME, [
-                ...profiles,
-                { ...profile, name: NEW_PROFILE_NAME, is_builtin: false },
-              ]),
-            onCreate: (name) => {
-              chooseCustom(name);
-              setIsCreatingProfile(false);
-            },
-          }}
-          takenNames={profiles.map(({ name }) => name)}
-          titleId={titleId}
-          onClose={() => setIsCreatingProfile(false)}
-        />
+        {renderProfileForm(titleId)}
       </EuiFlyout>
     );
   }
 
-  return (
+  const defaultFlyout = (
     <EuiFlyout {...flyoutProps}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
@@ -355,5 +367,26 @@ export const ProjectDefaultFlyout = ({ type, onClose }: ProjectDefaultFlyoutProp
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
+  );
+
+  // In a history, the profile form opens on top of the default, which stays open behind it.
+  return historyKey ? (
+    <>
+      {defaultFlyout}
+      {isCreatingProfile && (
+        <FlyoutOnTop
+          historyKey={historyKey}
+          title={CREATE_PROFILE_TITLE}
+          onClose={() => setIsCreatingProfile(false)}
+          size={FLYOUT_WIDTH}
+          aria-labelledby={profileTitleId}
+          data-test-subj="boostProjectDefaultProfileFlyout"
+        >
+          {renderProfileForm(profileTitleId)}
+        </FlyoutOnTop>
+      )}
+    </>
+  ) : (
+    defaultFlyout
   );
 };

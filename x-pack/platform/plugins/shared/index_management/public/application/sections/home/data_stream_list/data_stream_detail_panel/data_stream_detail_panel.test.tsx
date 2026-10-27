@@ -47,6 +47,8 @@ const mockUpdateIndexSettings = jest.mocked(updateIndexSettings);
 
 describe('DataStreamDetailPanel', () => {
   const onCloseMock = jest.fn();
+  // A save returns to the details, which reload to show it.
+  const reloadDataStreamMock = jest.fn();
   let mockAppContext: AppDependencies;
 
   beforeEach(() => {
@@ -72,7 +74,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -103,7 +105,7 @@ describe('DataStreamDetailPanel', () => {
         data: createMockDataStream(),
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -136,7 +138,7 @@ describe('DataStreamDetailPanel', () => {
         data: createMockDataStream({ system: true }),
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -152,23 +154,27 @@ describe('DataStreamDetailPanel', () => {
   describe('extension actions', () => {
     afterEach(() => mockAppContext.services.extensionsService.dataStreamActions.splice(0));
 
-    it('adds the actions that other plugins add before Delete, showing each in place of the flyout', async () => {
+    it('adds the actions that other plugins add before Delete, opening each on top of the flyout', async () => {
+      let actionHistoryKey: symbol | undefined;
       mockAppContext.services.extensionsService.dataStreamActions.push({
         id: 'test',
         name: 'Test action',
         icon: 'gear',
-        renderContent: ({ dataStreamName, onClose }) => (
-          <div data-test-subj="testActionContent">
-            {dataStreamName}
-            <button onClick={onClose}>Done</button>
-          </div>
-        ),
+        renderContent: ({ dataStreamName, onClose, historyKey }) => {
+          actionHistoryKey = historyKey;
+          return (
+            <div data-test-subj="testActionContent">
+              {dataStreamName}
+              <button onClick={onClose}>Done</button>
+            </div>
+          );
+        },
       });
       mockUseLoadDataStream.mockReturnValue({
         data: createMockDataStream(),
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -192,12 +198,14 @@ describe('DataStreamDetailPanel', () => {
 
       await userEvent.click(getByTestId('dataStreamAction-test'));
       expect(getByTestId('testActionContent')).toHaveTextContent('test-data-stream');
-      expect(queryByTestId('dataStreamDetailPanel')).not.toBeInTheDocument();
+      // The details stay open beneath it, and it joins their flyout history, so its Back returns.
+      expect(getByTestId('dataStreamDetailPanel')).toBeInTheDocument();
+      expect(typeof actionHistoryKey).toBe('symbol');
 
-      // Once it closes, the flyout is back.
       await userEvent.click(getByRole('button', { name: 'Done' }));
       expect(queryByTestId('testActionContent')).not.toBeInTheDocument();
       expect(getByTestId('dataStreamDetailPanel')).toBeInTheDocument();
+      expect(onCloseMock).not.toHaveBeenCalled();
     });
 
     it("leaves out actions that don't apply to the data stream", async () => {
@@ -212,7 +220,7 @@ describe('DataStreamDetailPanel', () => {
         data: createMockDataStream({ system: true }),
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -237,7 +245,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -259,7 +267,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -286,7 +294,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -321,7 +329,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -358,7 +366,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -383,7 +391,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -408,7 +416,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -434,7 +442,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -459,7 +467,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -489,7 +497,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -526,7 +534,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -570,7 +578,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
       mockSendRequest.mockResolvedValue({ data: undefined } as any);
@@ -602,7 +610,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -632,7 +640,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -715,7 +723,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
       mockSendRequest.mockImplementation(async ({ path }: any) => {
@@ -743,7 +751,7 @@ describe('DataStreamDetailPanel', () => {
       await userEvent.click(getByTestId('editFailedDataLifecycle-enableFailureStoreCheckbox'));
       await userEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
 
-      await waitFor(() => expect(onCloseMock).toHaveBeenCalledWith(true));
+      await waitFor(() => expect(reloadDataStreamMock).toHaveBeenCalled());
       expect(mockUpdateDSFailureStore).toHaveBeenCalledTimes(1);
       expect(mockUpdateDataLifecycle).not.toHaveBeenCalled();
       expect(mockUpdateDataStreamSettings).not.toHaveBeenCalled();
@@ -788,7 +796,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
       mockSendRequest.mockImplementation(async ({ path }: any) => {
@@ -839,7 +847,7 @@ describe('DataStreamDetailPanel', () => {
       // Stay on the default (successful_data) tab and apply without changes.
       await userEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
 
-      await waitFor(() => expect(onCloseMock).toHaveBeenCalledWith(true));
+      await waitFor(() => expect(reloadDataStreamMock).toHaveBeenCalled());
       expect(mockUpdateDataLifecycle).toHaveBeenCalledWith(['test-data-stream'], {
         enabled: false,
       });
@@ -901,7 +909,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
       mockSendRequest.mockImplementation(async ({ path }: any) => {
@@ -949,7 +957,7 @@ describe('DataStreamDetailPanel', () => {
 
       await userEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
 
-      await waitFor(() => expect(onCloseMock).toHaveBeenCalledWith(true));
+      await waitFor(() => expect(reloadDataStreamMock).toHaveBeenCalled());
       expect(mockUpdateDataLifecycle).toHaveBeenCalledWith(['test-data-stream'], {
         enabled: false,
       });
@@ -1012,7 +1020,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
       mockSendRequest.mockImplementation(async ({ path }: any) => {
@@ -1056,7 +1064,7 @@ describe('DataStreamDetailPanel', () => {
 
       await userEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
 
-      await waitFor(() => expect(onCloseMock).toHaveBeenCalledWith(true));
+      await waitFor(() => expect(reloadDataStreamMock).toHaveBeenCalled());
       expect(mockUpdateDataLifecycle).toHaveBeenCalledWith(['test-data-stream'], {
         enabled: false,
       });
@@ -1115,7 +1123,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
       mockSendRequest.mockImplementation(async ({ path }: any) => {
@@ -1158,7 +1166,7 @@ describe('DataStreamDetailPanel', () => {
 
       await userEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
 
-      await waitFor(() => expect(onCloseMock).toHaveBeenCalledWith(true));
+      await waitFor(() => expect(reloadDataStreamMock).toHaveBeenCalled());
       expect(mockUpdateDataStreamSettings).toHaveBeenCalledWith(
         ['test-data-stream'],
         expect.objectContaining({
@@ -1253,7 +1261,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
       mockLookupTemplateIlmRequests({ templatePolicy: 'template-policy' });
@@ -1281,7 +1289,7 @@ describe('DataStreamDetailPanel', () => {
 
       await userEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
 
-      await waitFor(() => expect(onCloseMock).toHaveBeenCalledWith(true));
+      await waitFor(() => expect(reloadDataStreamMock).toHaveBeenCalled());
       expect(mockUpdateDataLifecycle).toHaveBeenCalledWith(
         ['test-data-stream'],
         expect.objectContaining({ enabled: true, dataRetention: '30d' })
@@ -1330,7 +1338,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
       mockLookupTemplateIlmRequests({
@@ -1359,7 +1367,7 @@ describe('DataStreamDetailPanel', () => {
 
       await userEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
 
-      await waitFor(() => expect(onCloseMock).toHaveBeenCalledWith(true));
+      await waitFor(() => expect(reloadDataStreamMock).toHaveBeenCalled());
       expect(mockUpdateIndexSettings).toHaveBeenCalledTimes(1);
       expect(mockUpdateIndexSettings).toHaveBeenCalledWith(
         'historical-index',
@@ -1398,7 +1406,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
       mockLookupTemplateIlmRequests({ templatePolicy: 'template-policy' });
@@ -1459,7 +1467,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
       mockSendRequest.mockImplementation(async ({ path }: any) => {
@@ -1509,7 +1517,7 @@ describe('DataStreamDetailPanel', () => {
 
       await userEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
 
-      await waitFor(() => expect(onCloseMock).toHaveBeenCalledWith(true));
+      await waitFor(() => expect(reloadDataStreamMock).toHaveBeenCalled());
       expect(mockUpdateDataLifecycle).toHaveBeenCalledWith(['test-data-stream'], {
         enabled: false,
       });
@@ -1556,7 +1564,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1617,7 +1625,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1677,7 +1685,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1740,7 +1748,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1792,7 +1800,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1833,7 +1841,7 @@ describe('DataStreamDetailPanel', () => {
       });
     });
 
-    it('shows a success toast and closes the flyout after saving', async () => {
+    it('shows a success toast and returns to the reloaded details after saving', async () => {
       mockAppContext = createMockAppContext();
       mockAppContext.config.isServerless = true;
       mockUseAppContext.mockReturnValue(mockAppContext);
@@ -1857,7 +1865,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1869,7 +1877,7 @@ describe('DataStreamDetailPanel', () => {
         },
       } as any);
 
-      const { getByTestId } = renderWithI18n(
+      const { getByTestId, queryByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
       );
 
@@ -1879,12 +1887,19 @@ describe('DataStreamDetailPanel', () => {
       await userEvent.click(getByTestId('editDataLifecycleButton'));
       await userEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
 
-      await waitFor(() => expect(onCloseMock).toHaveBeenCalledWith(true));
+      await waitFor(() => expect(reloadDataStreamMock).toHaveBeenCalled());
       expect(mockAppContext.services.notificationService.showSuccessToast).toHaveBeenCalledTimes(1);
       expect(mockAppContext.services.notificationService.showDangerToast).not.toHaveBeenCalled();
+      // The details stay open, and once they close, the list reloads to show the change.
+      expect(queryByTestId('flyoutWithTabs')).not.toBeInTheDocument();
+      expect(onCloseMock).not.toHaveBeenCalled();
+      await userEvent.click(
+        within(getByTestId('dataStreamDetailPanel')).getByTestId('euiFlyoutCloseButton')
+      );
+      expect(onCloseMock).toHaveBeenCalledWith(true);
     });
 
-    it('shows a tailored error toast and still closes when only one request fails', async () => {
+    it('shows a tailored error toast and still returns to the reloaded details when only one request fails', async () => {
       mockAppContext = createMockAppContext();
       mockAppContext.config.isServerless = true;
       mockUseAppContext.mockReturnValue(mockAppContext);
@@ -1908,7 +1923,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1939,7 +1954,7 @@ describe('DataStreamDetailPanel', () => {
       await userEvent.click(getByTestId('flyoutTab-failed_data'));
       await userEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
 
-      await waitFor(() => expect(onCloseMock).toHaveBeenCalledWith(true));
+      await waitFor(() => expect(reloadDataStreamMock).toHaveBeenCalled());
       expect(mockAppContext.services.notificationService.showSuccessToast).not.toHaveBeenCalled();
       expect(mockAppContext.services.notificationService.showDangerToast).toHaveBeenCalledWith(
         'The successful data lifecycle was saved, but the failed data lifecycle could not be saved',
@@ -1971,7 +1986,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1998,7 +2013,7 @@ describe('DataStreamDetailPanel', () => {
       await userEvent.click(getByTestId('flyoutTab-failed_data'));
       await userEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
 
-      await waitFor(() => expect(onCloseMock).toHaveBeenCalledWith(true));
+      await waitFor(() => expect(reloadDataStreamMock).toHaveBeenCalled());
       expect(mockUpdateDataLifecycle).not.toHaveBeenCalled();
       expect(mockAppContext.services.notificationService.showSuccessToast).not.toHaveBeenCalled();
       expect(mockAppContext.services.notificationService.showDangerToast).toHaveBeenCalledWith(
@@ -2036,7 +2051,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -2087,7 +2102,7 @@ describe('DataStreamDetailPanel', () => {
       data: dataStream,
       isLoading: false,
       error: null,
-      resendRequest: jest.fn(),
+      resendRequest: reloadDataStreamMock,
       isInitialRequest: false,
     } as unknown as ReturnType<typeof useLoadDataStream>);
     mockSendRequest.mockResolvedValue({
@@ -2127,7 +2142,7 @@ describe('DataStreamDetailPanel', () => {
       data: dataStream,
       isLoading: false,
       error: null,
-      resendRequest: jest.fn(),
+      resendRequest: reloadDataStreamMock,
       isInitialRequest: false,
     } as unknown as ReturnType<typeof useLoadDataStream>);
     mockSendRequest.mockResolvedValue({
@@ -2177,7 +2192,7 @@ describe('DataStreamDetailPanel', () => {
       data: dataStream,
       isLoading: false,
       error: null,
-      resendRequest: jest.fn(),
+      resendRequest: reloadDataStreamMock,
       isInitialRequest: false,
     } as unknown as ReturnType<typeof useLoadDataStream>);
     mockSendRequest.mockResolvedValue({
@@ -2285,7 +2300,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
       const streamsGetResponse = createWiredStreamsGetResponse({
@@ -2321,7 +2336,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -2370,7 +2385,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -2410,9 +2425,7 @@ describe('DataStreamDetailPanel', () => {
 
       await userEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
 
-      await waitFor(() => {
-        expect(onCloseMock).toHaveBeenCalledWith(true);
-      });
+      await waitFor(() => expect(reloadDataStreamMock).toHaveBeenCalled());
 
       // Persisted through the Streams ingest API, carrying both lifecycle and failure store.
       expect(putCalls).toHaveLength(1);
@@ -2440,7 +2453,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -2485,7 +2498,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -2575,7 +2588,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -2635,7 +2648,7 @@ describe('DataStreamDetailPanel', () => {
         }),
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
     };
@@ -2666,7 +2679,7 @@ describe('DataStreamDetailPanel', () => {
         data: createMockDataStream({ indexMode: 'lookup' }),
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -2703,7 +2716,7 @@ describe('DataStreamDetailPanel', () => {
         }),
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
       mockSendRequest.mockImplementation(async ({ path }: any) => {
@@ -2775,7 +2788,7 @@ describe('DataStreamDetailPanel', () => {
         }),
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -2797,7 +2810,7 @@ describe('DataStreamDetailPanel', () => {
         data: createMockDataStream({ indexMode: 'standard' }),
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -2839,7 +2852,7 @@ describe('DataStreamDetailPanel', () => {
         data: createMockDataStream({ indexMode: 'lookup' }),
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -2873,7 +2886,7 @@ describe('DataStreamDetailPanel', () => {
         }),
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -2898,7 +2911,7 @@ describe('DataStreamDetailPanel', () => {
         data: undefined,
         isLoading: true,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -2919,7 +2932,7 @@ describe('DataStreamDetailPanel', () => {
         data: undefined,
         isLoading: false,
         error,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -2941,7 +2954,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -2968,7 +2981,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -2994,7 +3007,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -3016,7 +3029,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -3038,7 +3051,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -3060,7 +3073,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: reloadDataStreamMock,
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 

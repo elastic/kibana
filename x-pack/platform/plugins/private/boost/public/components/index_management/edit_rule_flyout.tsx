@@ -17,6 +17,8 @@ import { EXPLANATION_ERROR_LABEL } from './explanation_status';
 
 interface EditRuleFlyoutProps {
   rule: BoostRule;
+  /** The flyout history it opens in, such as a data stream's details, which Back returns to. */
+  historyKey?: symbol;
   onClose: () => void;
 }
 
@@ -36,7 +38,7 @@ export const useCloseOnError = (error: IHttpFetchError | null, onClose: () => vo
  * from the boost state, which the boost app always has, but Index Management may not have loaded
  * yet, so the form waits for it.
  */
-export const EditRuleFlyout = ({ rule, onClose }: EditRuleFlyoutProps) => {
+export const EditRuleFlyout = ({ rule, historyKey, onClose }: EditRuleFlyoutProps) => {
   const { data: state, error } = useBoostState();
   useCloseOnError(error, onClose);
   if (!state) {
@@ -44,8 +46,8 @@ export const EditRuleFlyout = ({ rule, onClose }: EditRuleFlyoutProps) => {
   }
   const defaultType = rule.is_builtin ? getDefaultRuleType(rule.name) : undefined;
   return defaultType ? (
-    <ProjectDefaultFlyout type={defaultType} onClose={onClose} />
+    <ProjectDefaultFlyout type={defaultType} historyKey={historyKey} onClose={onClose} />
   ) : (
-    <RuleFlyout rule={rule} onClose={onClose} />
+    <RuleFlyout rule={rule} historyKey={historyKey} onClose={onClose} />
   );
 };
