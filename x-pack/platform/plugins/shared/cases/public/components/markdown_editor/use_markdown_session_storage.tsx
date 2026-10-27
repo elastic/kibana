@@ -9,12 +9,12 @@ import { useRef, useState } from 'react';
 import { isEmpty } from 'lodash';
 import useDebounce from 'react-use/lib/useDebounce';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { MarkdownValueControl } from './types';
 
 const STORAGE_DEBOUNCE_TIME = 500;
 
 export interface SessionStorageType {
-  field: FieldHook<string>;
+  field: MarkdownValueControl;
   sessionKey: string;
   initialValue: string | undefined;
 }

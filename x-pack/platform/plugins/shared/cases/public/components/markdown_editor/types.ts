@@ -24,3 +24,12 @@ export interface EditorBaseProps {
   disabledUiPlugins?: string[];
   errors?: Array<string | Error>;
 }
+
+/**
+ * The slice of a form field the markdown editors need. Satisfied by a hook_form_lib `FieldHook<string>`
+ * and by the react-hook-form based `MarkdownField`.
+ */
+export interface MarkdownValueControl {
+  value: string;
+  setValue: (value: string) => void;
+}
