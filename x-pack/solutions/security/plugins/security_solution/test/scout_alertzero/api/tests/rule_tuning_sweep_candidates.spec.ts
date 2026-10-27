@@ -541,7 +541,7 @@ apiTest.describe.serial(
       '20 deleted rules with more false positives than two enabled rules do not crowd them out',
       async ({ apiClient, esClient }) => {
         apiTest.setTimeout(TEST_TIMEOUT_MS);
-        const deleted = Array.from({ length: 20 }, () => randomUUID());
+        const deleted: string[] = Array.from({ length: 20 }, () => randomUUID());
         const enabled = await seedStarvation(apiClient, esClient, 'deleted', deleted);
 
         const execution = await sweep(apiClient);
