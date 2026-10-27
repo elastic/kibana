@@ -12,7 +12,7 @@ import type { FlyoutGroupedAttachmentRendererProps } from '@kbn/agentic-investig
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
-import { APP_UI_ID, DEFAULT_ALERTS_INDEX, SecurityPageName } from '../../../../common/constants';
+import { ALERTS_PATH, APP_UI_ID, DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { FLYOUT_DESCRIPTOR_KIND } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import { ALERT_SUBTITLE, FlyoutRow, alertsTitle, useSpaceId } from '../grouped_attachments';
@@ -93,9 +93,10 @@ export const createAlertsGroupRenderer = ({
       );
     }
 
+    // Pass the alerts path directly. Without the Alerts privilege that deep link
+    // is omitted, and getUrlForApp would leave the Security app root.
     const href = application.getUrlForApp(APP_UI_ID, {
-      deepLinkId: SecurityPageName.alerts,
-      path: buildAlertsPagePath(ids, createdAt ?? new Date().toISOString()),
+      path: `${ALERTS_PATH}${buildAlertsPagePath(ids, createdAt ?? new Date().toISOString())}`,
     });
 
     return (
