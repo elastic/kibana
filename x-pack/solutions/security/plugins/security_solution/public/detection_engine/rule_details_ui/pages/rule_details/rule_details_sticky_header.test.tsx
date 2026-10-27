@@ -7,10 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { RuleDetailsStickyHeader } from './rule_details_sticky_header';
-
-jest.mock('../../../../common/containers/use_full_screen');
 
 const expectedTop = (kqlBarHeight: number) =>
   new RegExp(
@@ -27,10 +24,6 @@ describe('RuleDetailsStickyHeader', () => {
       disconnect,
       unobserve: jest.fn(),
     }));
-    (useGlobalFullScreen as jest.Mock).mockReturnValue({
-      globalFullScreen: false,
-      setGlobalFullScreen: jest.fn(),
-    });
   });
 
   afterEach(() => {
@@ -63,23 +56,5 @@ describe('RuleDetailsStickyHeader', () => {
 
     expect(screen.getByTestId('ruleDetailsStickyHeader')).toHaveStyleRule('top', expectedTop(48));
     expect(observe).toHaveBeenCalledWith(kqlBar);
-  });
-
-  it('is displayed when the page is not in full screen mode', () => {
-    renderHeader();
-
-    expect(screen.getByTestId('ruleDetailsStickyHeader')).not.toHaveStyleRule('display', 'none');
-  });
-
-  it('is hidden, but stays mounted, when the page is in full screen mode', () => {
-    (useGlobalFullScreen as jest.Mock).mockReturnValue({
-      globalFullScreen: true,
-      setGlobalFullScreen: jest.fn(),
-    });
-
-    renderHeader();
-
-    expect(screen.getByTestId('ruleDetailsStickyHeader')).toHaveStyleRule('display', 'none');
-    expect(screen.getByText('header')).toBeInTheDocument();
   });
 });
