@@ -387,7 +387,7 @@ export const create = async (
     });
 
     // The create_case user action payload does not carry `template` or `extended_fields`
-    // (CreateCaseUserActionRt strips them), so dedicated entries are needed for the activity log
+    // (CreateCaseUserActionSchema strips them), so dedicated entries are needed for the activity log
     // to reflect what was actually persisted: which template (if any) the case came from, and
     // which extended_fields values differ from resolved defaults. Pairing and default injection
     // both run independently of the templates flag (addendum A1), so this must too — a plain
