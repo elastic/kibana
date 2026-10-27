@@ -100,7 +100,7 @@ describe('registerConnectorEventTriggers', () => {
     expect(registerTriggerDefinition).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'dual.received',
-        title: 'Dual received',
+        title: 'Dual - Dual received',
         description: 'A dual connector event',
         stability: 'tech_preview',
         requiresConnectorId: true,

@@ -506,13 +506,11 @@
       "groupName": "@elastic/fleet dependencies",
       "matchDepNames": [
         "exponential-backoff",
-        "js-search",
         "openpgp",
         "remark-gfm",
         "rehype-raw",
         "rehype-sanitize",
-        "yaml",
-        "@types/js-search"
+        "yaml"
       ],
       "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
@@ -1368,8 +1366,8 @@
       "enabled": true
     },
     {
-      "groupName": "borc",
-      "matchDepNames": ["borc"],
+      "groupName": "cbor2",
+      "matchDepNames": ["cbor2"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

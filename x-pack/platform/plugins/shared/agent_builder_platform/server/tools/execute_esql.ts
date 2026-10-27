@@ -15,6 +15,7 @@ import {
   buildTimeRangeParams,
   interpolateEsqlQuery,
 } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -74,6 +75,8 @@ const createExecuteEsqlToolSchema = memoize((includeFrozenByDefault: boolean) =>
 
 type ExecuteEsqlToolSchema = ReturnType<typeof createExecuteEsqlToolSchema>;
 
+const generateEsqlTool = sanitizeToolId(platformCoreTools.generateEsql);
+
 export const executeEsqlTool = (): DynamicSchemaBuiltinToolDefinition<ExecuteEsqlToolSchema> => {
   return {
     id: platformCoreTools.executeEsql,
@@ -82,16 +85,19 @@ export const executeEsqlTool = (): DynamicSchemaBuiltinToolDefinition<ExecuteEsq
 
 ## Usage
 
-**IMPORTANT**: This tool only **runs** queries; it does not write them.
-Think of this as the final step after a query has been prepared.
+This tool runs an ES|QL query; it does not write one.
 
-You **must** get the query from one of two sources before calling this tool:
-1.  The output of the \`${platformCoreTools.generateEsql}\` tool (if the tool is available).
-2.  A verbatim query provided directly by the user.
+### Where the query comes from
 
-Under no circumstances should you invent, guess, or modify a query yourself for this tool.
-If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.
-Adapting an earlier query to a new question, such as another metric or field, counts as writing it yourself: call \`${platformCoreTools.generateEsql}\` again for each new question.
+By default, when you need a new query, use the \`${generateEsqlTool}\` tool rather than writing it yourself: it inspects the target data and applies ES|QL guidance that is easy to get wrong when writing a query from memory.
+Adapting an earlier query to a new question, such as another metric or field, counts as writing a new query: call \`${generateEsqlTool}\` again for each new question.
+
+You can run a query as-is when it comes from:
+- the user,
+- your instructions or a skill you loaded, such as a query template,
+- the result of another tool, or an attachment.
+
+These are default guidelines. If your instructions or a skill you loaded tell you to write ES|QL queries yourself and run them with this tool, do so. Do the same if the \`${generateEsqlTool}\` tool is not available to you.
 
 ### Using a limit
 

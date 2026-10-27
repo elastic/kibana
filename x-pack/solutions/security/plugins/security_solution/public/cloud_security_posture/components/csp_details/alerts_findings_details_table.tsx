@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { encode } from '@kbn/rison';
 import { capitalize } from 'lodash';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import {
@@ -35,10 +34,10 @@ import {
   OPEN_IN_ALERTS_TITLE_STATUS,
   OPEN_IN_ALERTS_TITLE_USERNAME,
 } from '../../../overview/components/detection_response/translations';
-import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useNavigateToAlertsPageWithFilters } from '../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import { useAlertTimeRange } from '../../../entity_analytics/hooks/use_alert_time_range';
+import { encodeGlobalTimerangeUrlParam } from '../../../common/utils/global_timerange_url_param';
 import { useUiSetting } from '../../../common/lib/kibana';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
@@ -157,15 +156,6 @@ export const AlertsDetailsTable = memo(
     };
 
     const { from, to } = useAlertTimeRange(scopeId);
-    const timerange = encode({
-      global: {
-        [URL_PARAM_KEY.timerange]: {
-          kind: 'absolute',
-          from,
-          to,
-        },
-      },
-    });
 
     const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
     const entityTypeResolved: 'host' | 'user' =
@@ -428,9 +418,10 @@ export const AlertsDetailsTable = memo(
             },
           ],
           true,
-          timerange
+          // Encoded on click so relative bounds (e.g. `now-30d`) resolve against the current time.
+          encodeGlobalTimerangeUrlParam({ from, to })
         ),
-      [field, openAlertsPageWithFilters, timerange, value]
+      [field, from, openAlertsPageWithFilters, to, value]
     );
 
     return (

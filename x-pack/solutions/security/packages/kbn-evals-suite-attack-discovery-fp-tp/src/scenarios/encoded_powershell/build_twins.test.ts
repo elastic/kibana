@@ -179,12 +179,17 @@ describe('encoded-powershell FP/TP twins', () => {
     expect(tp.attack).toEqual(buildEncodedPowershellAttack());
   });
 
-  it('returns raw events that all fall within two hours of the attack timestamp', () => {
-    const attackMs = Date.parse(tp.attack['@timestamp'] as string);
-    const offsets = tp.events.map((event) =>
-      Math.abs(Date.parse(event.source['@timestamp'] as string) - attackMs)
+  it('returns raw events inside the analysis window around the cited alerts', () => {
+    const originalTimes = tp.alerts.map((alert) =>
+      Date.parse(String(alert.source['kibana.alert.original_time']))
     );
-    expect(Math.max(...offsets)).toBeLessThanOrEqual(2 * 60 * 60 * 1000);
+    const start = Math.min(...originalTimes) - 2 * 60 * 60 * 1000;
+    const end = Math.max(...originalTimes) + 2 * 60 * 60 * 1000;
+    const outside = tp.events.filter((event) => {
+      const time = Date.parse(event.source['@timestamp'] as string);
+      return time < start || time > end;
+    });
+    expect(outside).toEqual([]);
   });
 
   it('returns different alert ids for a different run marker', () => {
