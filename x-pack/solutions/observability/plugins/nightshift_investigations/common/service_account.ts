@@ -73,6 +73,19 @@ export interface NightshiftBoundWorkflowStatus {
 }
 
 /**
+ * An automation `_enable` could not bind to the automations account. It keeps running as the user
+ * who created it until it is saved again, or until setup runs again.
+ */
+export interface NightshiftUnboundAutomation {
+  /** Saved object id of the automation. */
+  id: string;
+  /** Its name, when the saved object has one. */
+  name?: string;
+  /** Why binding it failed. */
+  error: string;
+}
+
+/**
  * Whether Nightshift is set up in a space. A space is set up once its investigation entry point
  * is installed, enabled and bound to the Nightshift agent service account.
  */
@@ -97,4 +110,9 @@ export interface InvestigatorServiceAccountStatus {
   serviceAccounts: NightshiftServiceAccountInfo[];
   /** Every workflow `_enable` binds in the space, entry point included. */
   boundWorkflows: NightshiftBoundWorkflowStatus[];
+  /**
+   * Automations the setup could not bind, which still run as their author. Only `_enable` reports
+   * them, for the run that tried: reads of the status do not re-check every automation.
+   */
+  unboundAutomations?: NightshiftUnboundAutomation[];
 }

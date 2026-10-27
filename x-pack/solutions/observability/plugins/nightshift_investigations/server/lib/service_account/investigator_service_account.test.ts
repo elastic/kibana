@@ -326,11 +326,27 @@ describe('createInvestigatorServiceAccountService', () => {
       );
     });
 
-    it('keeps setting the space up when an automation cannot be bound', async () => {
-      const { service, updateWorkflow } = setup({ automations: [automation('a-1')] });
-      updateWorkflow.mockRejectedValue(new Error('invalid'));
+    it('keeps setting the space up when an automation cannot be bound, and reports it', async () => {
+      const { service, updateWorkflow } = setup({
+        automations: [automation('a-1'), automation('a-2')],
+      });
+      updateWorkflow.mockImplementation(async (workflowId: string) => {
+        if (workflowId === 'wf-a-1') throw new Error('invalid');
+        return {};
+      });
 
-      await expect(service.enable(request, SPACE_ID, IDS)).resolves.toMatchObject({ bound: true });
+      await expect(service.enable(request, SPACE_ID, IDS)).resolves.toMatchObject({
+        bound: true,
+        unboundAutomations: [{ id: 'a-1', name: 'a-1', error: 'invalid' }],
+      });
+    });
+
+    it('reports no unbound automations when every one of them binds', async () => {
+      const { service } = setup({ automations: [automation('a-1')] });
+
+      await expect(service.enable(request, SPACE_ID, IDS)).resolves.not.toHaveProperty(
+        'unboundAutomations'
+      );
     });
 
     it('runs automations as the automations account', async () => {

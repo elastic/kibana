@@ -269,6 +269,7 @@ export {
   type NightshiftServiceAccountIds,
   type NightshiftServiceAccountInfo,
   type NightshiftServiceAccountKind,
+  type NightshiftUnboundAutomation,
 } from './service_account';
 export {
   createHttpServiceAccountsApi,

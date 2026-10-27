@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { NotificationsStart } from '@kbn/core/public';
 import {
   useMutation,
   useQuery,
@@ -52,6 +53,39 @@ const toError = (error: unknown, { isServerless }: { isServerless: boolean }): E
     );
   }
   return error instanceof Error ? error : new Error(String(error));
+};
+
+/** How many unbound automations the warning names before it counts the rest. */
+const MAX_LISTED_UNBOUND_AUTOMATIONS = 3;
+
+/**
+ * Warns about automations the setup could not bind. They keep running as the user who created
+ * them, so they stop working once that user loses access, and an admin has to save them again.
+ */
+const warnAboutUnboundAutomations = (
+  { unboundAutomations }: InvestigatorServiceAccountStatus,
+  notifications: NotificationsStart
+): void => {
+  if (!unboundAutomations?.length) {
+    return;
+  }
+  const listed = unboundAutomations
+    .slice(0, MAX_LISTED_UNBOUND_AUTOMATIONS)
+    .map(({ name, id }) => name || id)
+    .join(', ');
+  const remaining = unboundAutomations.length - MAX_LISTED_UNBOUND_AUTOMATIONS;
+  notifications.toasts.addWarning({
+    title: i18n.translate('xpack.nightshift.serviceAccount.unboundAutomationsToastTitle', {
+      defaultMessage:
+        '{count, plural, one {# automation still runs as its author} other {# automations still run as their authors}}',
+      values: { count: unboundAutomations.length },
+    }),
+    text: i18n.translate('xpack.nightshift.serviceAccount.unboundAutomationsToastText', {
+      defaultMessage:
+        'Nightshift is set up, but {listed}{remaining, plural, =0 {} one { and # more} other { and # more}} could not be moved to the Nightshift automations account. Open each automation and save it, or enable Nightshift again.',
+      values: { listed, remaining: Math.max(remaining, 0) },
+    }),
+  });
 };
 
 /** Reads whether Nightshift is set up with its service account in the current space. */
@@ -111,6 +145,7 @@ export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
     },
     onSuccess: (status) => {
       queryClient.setQueryData(QUERY_KEY, status);
+      warnAboutUnboundAutomations(status, notifications);
     },
     onError: (error) => {
       // A failed setup may have done part of its work; read the status again.

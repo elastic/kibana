@@ -25,6 +25,7 @@ import {
   type NightshiftBoundWorkflowStatus,
   type NightshiftServiceAccountIds,
   type NightshiftServiceAccountInfo,
+  type NightshiftUnboundAutomation,
 } from '../../../common';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from '../managed_workflows/constants';
 import { BOUND_WORKFLOW_IDS, type BoundWorkflowId } from './bound_workflows';
@@ -234,14 +235,16 @@ export const createInvestigatorServiceAccountService = ({
   /**
    * Binds every automation's workflow in the space to the automations account, as the admin
    * setting the space up, so automations created before setup stop running as their authors. A
-   * failure is logged per automation, not fatal.
+   * failure is not fatal: it is logged and returned, so setup can report the automations that
+   * still run as their author instead of leaving them unbound silently.
    */
   const bindAutomations = async (
     request: KibanaRequest,
     spaceId: string,
     automationsServiceAccountId: string
-  ): Promise<void> => {
-    if (!getAutomationsSoClient || !workflowsManagement) return;
+  ): Promise<NightshiftUnboundAutomation[]> => {
+    const unbound: NightshiftUnboundAutomation[] = [];
+    if (!getAutomationsSoClient || !workflowsManagement) return unbound;
     const soClient = getAutomationsSoClient(request, spaceId);
     const finder = soClient.createPointInTimeFinder<NightshiftAutomationAttributes>({
       type: NIGHTSHIFT_AUTOMATION_SO_TYPE,
@@ -274,12 +277,18 @@ export const createInvestigatorServiceAccountService = ({
             logger.warn(
               `Nightshift setup in space [${spaceId}] could not bind automation [${id}] to [${automationsServiceAccountId}]: ${error}`
             );
+            unbound.push({
+              id,
+              ...(attributes.name ? { name: attributes.name } : {}),
+              error: error instanceof Error ? error.message : String(error),
+            });
           }
         }
       }
     } finally {
       await finder.close();
     }
+    return unbound;
   };
 
   const assertSpaceExists = async (request: KibanaRequest, spaceId: string): Promise<void> => {
@@ -403,7 +412,11 @@ export const createInvestigatorServiceAccountService = ({
     await assertSpaceExists(request, spaceId);
 
     await installBoundWorkflows(request, spaceId, serviceAccountIds);
-    await bindAutomations(request, spaceId, serviceAccountIds.automations);
+    const unboundAutomations = await bindAutomations(
+      request,
+      spaceId,
+      serviceAccountIds.automations
+    );
 
     let status = await getStatus(request, spaceId);
     if (await enableDisabledWorkflows(request, spaceId, status)) {
@@ -413,7 +426,16 @@ export const createInvestigatorServiceAccountService = ({
     logger.info(
       `Nightshift in space [${spaceId}] is set up with service accounts [${serviceAccountIds.agent}] and [${serviceAccountIds.automations}]`
     );
-    return status;
+    if (unboundAutomations.length > 0) {
+      logger.warn(
+        `Nightshift setup in space [${spaceId}] left ${
+          unboundAutomations.length
+        } automation(s) running as their author: ${unboundAutomations
+          .map(({ id }) => id)
+          .join(', ')}`
+      );
+    }
+    return unboundAutomations.length > 0 ? { ...status, unboundAutomations } : status;
   };
 
   /**
