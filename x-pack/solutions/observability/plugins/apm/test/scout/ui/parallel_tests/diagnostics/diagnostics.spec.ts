@@ -97,7 +97,7 @@ test.describe(
       await browserAuth.loginAsViewer();
       await diagnosticsPage.goto();
 
-      const tabs = page.getByTestId('apmDiagnosticsTemplate').locator('.euiTabs .euiTab');
+      const tabs = page.getByTestId('apmDiagnosticsTemplate').getByRole('tab');
       await expect(tabs).toHaveText(['Summary', 'Documents', 'Import/Export'], {
         timeout: EXTENDED_TIMEOUT,
       });
