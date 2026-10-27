@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -22,6 +22,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
+import { useDebounceFn } from '@kbn/react-hooks';
+import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
 import {
   RULE_INVESTIGATION_GUIDE_LABEL,
   RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT,
@@ -38,10 +40,13 @@ import { LabelWithTooltip } from './label_with_tooltip';
 
 export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
+const TAG_SUGGESTIONS_PER_PAGE = 50;
+const TAG_SEARCH_DEBOUNCE_OPTIONS = { wait: 300 };
+
 export const RuleDetails = () => {
   const { euiTheme } = useEuiTheme();
   const { formData, baseErrors, plugins } = useRuleFormState();
-  const { uiActions } = plugins;
+  const { uiActions, http, notifications } = plugins;
 
   const dispatch = useRuleFormDispatch();
 
@@ -50,6 +55,25 @@ export const RuleDetails = () => {
   const tagsOptions = useMemo(() => {
     return tags.map((tag: string) => ({ label: tag }));
   }, [tags]);
+
+  const [tagSearch, setTagSearch] = useState('');
+  const { run: onTagSearchChange } = useDebounceFn(
+    (value: string) => setTagSearch(value),
+    TAG_SEARCH_DEBOUNCE_OPTIONS
+  );
+
+  const { tags: existingTags, isLoading: isLoadingTagSuggestions } = useGetRuleTagsQuery({
+    http,
+    toasts: notifications.toasts,
+    search: tagSearch || undefined,
+    perPage: TAG_SUGGESTIONS_PER_PAGE,
+    enabled: true,
+  });
+
+  const suggestedTagsOptions = useMemo(
+    () => existingTags.map((tag: string) => ({ label: tag })),
+    [existingTags]
+  );
 
   const onNameChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -207,9 +231,11 @@ export const RuleDetails = () => {
             <EuiComboBox
               isInvalid={!!baseErrors?.tags?.length}
               fullWidth
-              noSuggestions
               placeholder={RULE_TAG_PLACEHOLDER}
               data-test-subj="ruleDetailsTagsInput"
+              options={suggestedTagsOptions}
+              isLoading={isLoadingTagSuggestions}
+              onSearchChange={onTagSearchChange}
               selectedOptions={tagsOptions}
               onCreateOption={onAddTag}
               onChange={onSetTag}

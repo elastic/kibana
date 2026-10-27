@@ -18,7 +18,14 @@ jest.mock('../hooks', () => ({
   useRuleFormDispatch: jest.fn(),
 }));
 
+jest.mock('@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query', () => ({
+  useGetRuleTagsQuery: jest.fn(),
+}));
+
 const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
+const { useGetRuleTagsQuery } = jest.requireMock(
+  '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query'
+);
 
 const render = (toRender: React.ReactElement) =>
   rtlRender(toRender, {
@@ -32,6 +39,8 @@ describe('RuleDetails', () => {
     useRuleFormState.mockReturnValue({
       plugins: {
         contentManagement: {} as ContentManagementPublicStart,
+        http: {},
+        notifications: { toasts: {} },
       },
       formData: {
         name: 'test',
@@ -39,6 +48,7 @@ describe('RuleDetails', () => {
       },
     });
     useRuleFormDispatch.mockReturnValue(mockOnChange);
+    useGetRuleTagsQuery.mockReturnValue({ tags: [], isLoading: false });
   });
 
   afterEach(() => {
@@ -55,6 +65,8 @@ describe('RuleDetails', () => {
     useRuleFormState.mockReturnValue({
       plugins: {
         contentManagement: {} as ContentManagementPublicStart,
+        http: {},
+        notifications: { toasts: {} },
         uiActions: uiActionsPluginMock.createStartContract(),
       },
       formData: {
@@ -96,6 +108,23 @@ describe('RuleDetails', () => {
     expect(mockOnChange).toHaveBeenCalledWith({
       type: 'setTags',
       payload: ['tag'],
+    });
+  });
+
+  test('Should suggest existing tags and allow selecting one', async () => {
+    useGetRuleTagsQuery.mockReturnValue({ tags: ['existing-a', 'existing-b'], isLoading: false });
+    render(<RuleDetails />);
+
+    await userEvent.click(
+      within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput')
+    );
+    expect(await screen.findByText('existing-a')).toBeInTheDocument();
+    expect(screen.getByText('existing-b')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByText('existing-b'));
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setTags',
+      payload: ['existing-b'],
     });
   });
 
@@ -148,6 +177,8 @@ describe('RuleDetails', () => {
     useRuleFormState.mockReturnValue({
       plugins: {
         contentManagement: {} as ContentManagementPublicStart,
+        http: {},
+        notifications: { toasts: {} },
       },
       formData: {
         name: 'test',
@@ -163,6 +194,8 @@ describe('RuleDetails', () => {
     useRuleFormState.mockReturnValue({
       plugins: {
         contentManagement: {} as ContentManagementPublicStart,
+        http: {},
+        notifications: { toasts: {} },
       },
       formData: {
         name: 'test',
@@ -183,6 +216,8 @@ describe('RuleDetails', () => {
     useRuleFormState.mockReturnValue({
       plugins: {
         contentManagement: {} as ContentManagementPublicStart,
+        http: {},
+        notifications: { toasts: {} },
       },
       formData: {
         id: 'test-id',
