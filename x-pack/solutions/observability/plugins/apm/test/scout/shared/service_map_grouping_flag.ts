@@ -18,6 +18,8 @@ type CoreApiServices = Pick<ApiServicesFixture, 'core'>;
  * Turns the service map grouping feature flag on for the whole Kibana server.
  * Be mindful of using it in parallel suites where it might affect other tests, and always pair it with
  * `removeServiceMapGroupingOverride` in teardown to avoid polluting the environment for other suites when running in lanes.
+ * Local servers only: `PUT /internal/core/_settings` needs `coreApp.allowDynamicConfigOverrides`, which Cloud
+ * deployments don't set, so tag suites with the `@local-*` tags.
  */
 export const enableServiceMapGrouping = async ({ core }: CoreApiServices): Promise<void> => {
   await core.settings({
