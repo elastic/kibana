@@ -742,7 +742,7 @@ describe('Rule Coverage outcome reports', () => {
       steps,
       'report_review_completed',
       'rule_coverage_review_completed',
-      'emit_result'
+      'emit_failure'
     );
     describeReportStep(
       declinedArm,

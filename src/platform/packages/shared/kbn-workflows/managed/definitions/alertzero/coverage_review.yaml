@@ -154,7 +154,7 @@ steps:
   # proposal attaches its decision, including the drafted rule on the no_coverage path.
   # Public so anyone in the space can pick it up. It opens before the check, because
   # the manual entry gate needs it. If the check returns no verdict, the investigation
-  # stays open without a proposal, and `emit_result` reports `check_error`. No on-failure:
+  # stays open with a note on why, and `emit_failure` fails the run. No on-failure:
   # without an investigation there is nowhere to propose, so the review fails and the
   # indicator stays pending.
   - name: create_investigation
@@ -352,8 +352,8 @@ steps:
     timeout: "10m"
     # Runs only when the read found the indicator and it has content.
     if: "${{ steps.gap.output.ready == true }}"
-    # A failed check must not kill the run: with no verdict, no route below matches, no
-    # investigation opens and `emit_result` reports it. Never fall through into an action.
+    # A failed check must not kill the run here: with no verdict, no route below matches,
+    # and `note_failure` tells the analyst why. Never fall through into an action.
     on-failure:
       continue: true
     create-conversation: true
@@ -802,8 +802,8 @@ steps:
                 confidence: low
 
     default:
-      # Unknown verdicts only. A check that produced no verdict asked nobody; the
-      # investigation was not opened and `emit_result` carries `check_error`.
+      # Unknown verdicts only. A check that produced no verdict asked nobody;
+      # `note_failure` reports it on the investigation.
       - name: report_unknown_verdict
         type: workflow.execute
         if: >-
@@ -1058,6 +1058,54 @@ steps:
           status: invalid
           invalid_reason: The indicator has no content.
 
+  # A check without a verdict, or a failed rule-creation run, leaves the gap pending.
+  # `note` tells the analyst why, and is empty when no investigation exists.
+  - name: resolve_failure
+    type: data.set
+    with:
+      # Three different failures. The read found no indicator, so the check never ran.
+      # Or the indicator has no content, so `mark_invalid` retires it without a check.
+      # Or the check ran and returned no verdict. In each case nobody was asked about a fix.
+      check_error: >-
+        {% if steps.read_ki.output.hits.total.value == 0 %}knowledge indicator not found in this space{% elsif steps.gap.output.ready != true %}knowledge indicator has no content{% elsif steps.coverage_check.output.structured_output.verdict == null or steps.coverage_check.output.structured_output.verdict == '' %}coverage_check produced no verdict{% if steps.coverage_check.error != null %}: {{ steps.coverage_check.error.message }}{% endif %}{% endif %}
+      # Set when the rule-creation run failed. The indicator then stays pending and the next
+      # sweep opens a new review; this is the only record of why.
+      creation_error: >-
+        {% if steps.run_rule_creation.error != null %}rule creation failed: {{ steps.run_rule_creation.error.message }}{% endif %}
+      # Errors are cut to 2000 characters: `system-alertzero-journal-note` rejects messages over 8000.
+      note: |-
+        {%- assign verdict = steps.coverage_check.output.structured_output.verdict -%}
+        {%- assign cause = steps.coverage_check.error.message | default: steps.run_rule_creation.error.message -%}
+        {%- if steps.create_investigation.output.conversation_id != null -%}
+        {%- if verdict == null or verdict == '' -%}
+        **Coverage check failed:** {{ steps.coverage_check.error.message | default: 'the check returned no verdict.' | truncate: 2000 }}
+
+        Nothing was proposed.
+        {%- elsif steps.run_rule_creation.error != null -%}
+        **Rule creation failed:** {{ steps.run_rule_creation.error.message | truncate: 2000 }}
+        {%- endif -%}
+        {%- if cause contains 'No connector available' %}
+
+        Choose an AI model in Stack Management > Feature Settings.
+        {%- endif -%}
+        {%- endif -%}
+
+  - name: note_failure
+    type: workflow.execute
+    if: "${{ steps.resolve_failure.output.note != '' }}"
+    on-failure:
+      continue: true
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        author_name: "{{ consts.author_name }}"
+        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+        message: |-
+          {{ steps.resolve_failure.output.note }}
+
+          The gap stays pending, and the next sweep retries it.
+
   # Telemetry: the review's outcome. Free-text outputs are sent only as flags.
   - name: report_review_completed
     type: alertzero.reportWorkerOutcome
@@ -1130,6 +1178,22 @@ steps:
         {%- endif -%}
       investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
 
+  # Same outputs as `emit_result`, but the run shows as failed. A missing indicator opens
+  # no investigation and stays a completed run.
+  - name: emit_failure
+    type: workflow.output
+    status: failed
+    if: "${{ steps.resolve_failure.output.note != '' }}"
+    with:
+      message: "{{ steps.resolve_failure.output.check_error | default: steps.resolve_failure.output.creation_error }}"
+      verdict: "{{ steps.coverage_check.output.structured_output.verdict }}"
+      investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      check_error: "{{ steps.resolve_failure.output.check_error }}"
+      creation_error: "{{ steps.resolve_failure.output.creation_error }}"
+      ki_id: "{{ inputs.ki_id }}"
+      ki_processed: "${{ steps.mark_processed.output.result != null }}"
+      entry_decision: "{{ steps.propose_entry.output.decision }}"
+
   - name: emit_result
     type: workflow.output
     status: completed
@@ -1154,17 +1218,11 @@ steps:
       # true flag here also means the indicator is still pending.
       enable_approved_not_applied: "${{ steps.resolve_outcome.output.enable_approved_not_applied }}"
       install_approved_not_applied: "${{ steps.resolve_outcome.output.install_approved_not_applied }}"
-      # Two different failures. The read found no indicator, so the check never ran. Or
-      # the check ran and returned no verdict. In both cases nobody was asked about a fix.
-      check_error: >-
-        {% if steps.read_ki.output.hits.total.value == 0 %}knowledge indicator not found in this space{% elsif steps.gap.output.ready != true %}knowledge indicator has no content{% elsif steps.coverage_check.output.structured_output.verdict == null or steps.coverage_check.output.structured_output.verdict == '' %}coverage_check produced no verdict{% endif %}
+      check_error: "{{ steps.resolve_failure.output.check_error }}"
       # Rule-creation path only.
       rule_created: "${{ steps.run_rule_creation.output.created == true }}"
       created_rule_name: "{{ steps.run_rule_creation.output.rule_name }}"
-      # Set when the rule-creation run failed. The indicator then stays pending and the next
-      # sweep opens a new review; this is the only record of why.
-      creation_error: >-
-        {% if steps.run_rule_creation.error != null %}rule creation failed: {{ steps.run_rule_creation.error.message }}{% endif %}
+      creation_error: "{{ steps.resolve_failure.output.creation_error }}"
       # Set when the rule-creation run completed without proposing a rule, for example
       # because no data source exists for the gap. The indicator stays pending.
       creation_skip_reason: "{{ steps.run_rule_creation.output.skip_reason }}"
