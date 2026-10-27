@@ -12,24 +12,26 @@ import type {
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import {
-  SESSIONS_FREQUENCY,
+  SESSIONS_DEFAULT_FREQUENCY,
   SESSIONS_INDEX,
   SESSIONS_INDEX_PATTERN,
   SESSIONS_INDEX_TEMPLATE_NAME,
   SESSIONS_JOURNEY_SIZE,
   SESSIONS_LOOKBACK_DAYS,
+  SESSIONS_MAX_PAGE_SEARCH_SIZE,
   SESSIONS_MANAGED_BY,
   SESSIONS_PIPELINE_NAME,
   SESSIONS_SOURCE_INDICES,
   SESSIONS_SYNC_DELAY,
-  SESSIONS_TRANSFORM_ID,
   SESSIONS_VERSION,
   SOURCE_SERVICE_NAME_FIELD,
   SOURCE_SESSION_ID_FIELD,
   SOURCE_URL_FIELD,
   WEB_VITAL_NAMES,
+  sessionsTransformId,
   type WebVitalName,
 } from '../../common/sessions';
+import { partitionFilters, type SessionsPartition } from './partitions';
 
 const SESSIONS_META = { managed_by: SESSIONS_MANAGED_BY, version: SESSIONS_VERSION };
 
@@ -358,9 +360,17 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
   ],
 };
 
-export const buildSessionsTransform = (): TransformPutTransformRequest => ({
-  transform_id: SESSIONS_TRANSFORM_ID,
-  description: 'Summarizes Digital Experience sessions by service.name and session.id.',
+export const buildSessionsTransform = ({
+  frequency = SESSIONS_DEFAULT_FREQUENCY,
+  partition = { index: 0, count: 1 },
+}: { frequency?: string; partition?: SessionsPartition } = {}): TransformPutTransformRequest => ({
+  transform_id: sessionsTransformId(partition.index, partition.count),
+  description:
+    partition.count > 1
+      ? `Summarizes Digital Experience sessions by service.name and session.id (partition ${
+          partition.index + 1
+        } of ${partition.count}).`
+      : 'Summarizes Digital Experience sessions by service.name and session.id.',
   source: {
     index: [...SESSIONS_SOURCE_INDICES],
     query: {
@@ -369,18 +379,24 @@ export const buildSessionsTransform = (): TransformPutTransformRequest => ({
           { range: { '@timestamp': { gte: `now-${SESSIONS_LOOKBACK_DAYS}d/d` } } },
           { exists: { field: SOURCE_SESSION_ID_FIELD } },
           { exists: { field: SOURCE_SERVICE_NAME_FIELD } },
+          ...partitionFilters(partition),
         ],
       },
     },
   },
   dest: { index: SESSIONS_INDEX, pipeline: SESSIONS_PIPELINE_NAME },
-  frequency: SESSIONS_FREQUENCY,
+  frequency,
   sync: { time: { field: '@timestamp', delay: SESSIONS_SYNC_DELAY } },
-  retention_policy: {
-    time: { field: 'end_time', max_age: `${SESSIONS_LOOKBACK_DAYS + 1}d` },
-  },
-  settings: { unattended: true, max_page_search_size: 1000 },
-  _meta: SESSIONS_META,
+  // Partitions share the dest index, so one retention policy covers them all.
+  ...(partition.index === 0
+    ? {
+        retention_policy: {
+          time: { field: 'end_time', max_age: `${SESSIONS_LOOKBACK_DAYS + 1}d` },
+        },
+      }
+    : {}),
+  settings: { unattended: true, max_page_search_size: SESSIONS_MAX_PAGE_SEARCH_SIZE },
+  _meta: { ...SESSIONS_META, partition: partition.index, partitions: partition.count },
   pivot: {
     group_by: {
       'service.name': { terms: { field: SOURCE_SERVICE_NAME_FIELD } },

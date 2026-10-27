@@ -17,6 +17,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { DigitalExperienceConfig } from './config';
 import { registerDigitalExperienceFeature } from './register_feature';
 import { registerSessionsRoutes } from './routes/sessions_routes';
 import {
@@ -37,16 +38,24 @@ export class Plugin
   implements PluginType<void, void, DigitalExperienceSetupDeps, DigitalExperienceStartDeps>
 {
   private readonly logger: Logger;
+  private readonly config: DigitalExperienceConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get<DigitalExperienceConfig>();
   }
 
   public setup(core: CoreSetup, plugins: DigitalExperienceSetupDeps) {
     registerDigitalExperienceFeature(plugins.features);
-    registerSessionsRoutes({ router: core.http.createRouter(), logger: this.logger });
+    const settings = this.config.sessions;
+    registerSessionsRoutes({ router: core.http.createRouter(), logger: this.logger, settings });
     if (plugins.taskManager) {
-      registerSessionsHealthTask({ core, logger: this.logger, taskManager: plugins.taskManager });
+      registerSessionsHealthTask({
+        core,
+        logger: this.logger,
+        taskManager: plugins.taskManager,
+        settings,
+      });
     }
   }
 

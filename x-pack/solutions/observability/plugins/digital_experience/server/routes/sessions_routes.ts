@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import { DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../common/feature';
+import type { SessionsSettings } from '../../common/sessions';
 import { getSession } from '../sessions/get_session';
 import { listSessions } from '../sessions/list_sessions';
 import {
@@ -34,9 +35,11 @@ const serviceParams = schema.object({ serviceName: boundedString(1024) });
 export const registerSessionsRoutes = ({
   router,
   logger,
+  settings,
 }: {
   router: IRouter;
   logger: Logger;
+  settings: SessionsSettings;
 }): void => {
   router.get(
     {
@@ -48,7 +51,7 @@ export const registerSessionsRoutes = ({
     async (context, _request, response) => {
       const { elasticsearch } = await context.core;
       // Transform metadata only; no session data is read with the internal user.
-      const status = await getSessionsStatus(elasticsearch.client.asInternalUser);
+      const status = await getSessionsStatus(elasticsearch.client.asInternalUser, { settings });
       return response.ok({ body: status });
     }
   );
@@ -63,7 +66,7 @@ export const registerSessionsRoutes = ({
     async (context, _request, response) => {
       const { elasticsearch } = await context.core;
       try {
-        await enableSessions({ esClient: elasticsearch.client, logger });
+        await enableSessions({ esClient: elasticsearch.client, logger, settings });
       } catch (error) {
         if (error instanceof SessionsPrivilegesError) {
           return response.forbidden({
@@ -75,7 +78,7 @@ export const registerSessionsRoutes = ({
         }
         throw error;
       }
-      const status = await getSessionsStatus(elasticsearch.client.asInternalUser);
+      const status = await getSessionsStatus(elasticsearch.client.asInternalUser, { settings });
       return response.ok({ body: status });
     }
   );

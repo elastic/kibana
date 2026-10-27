@@ -11,30 +11,35 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { SessionsSettings } from '../../common/sessions';
 import { getSessionsStatus } from './sessions_setup';
 
 export const SESSIONS_HEALTH_TASK_TYPE = 'digital_experience:sessions-health';
 export const SESSIONS_HEALTH_TASK_ID = 'digital_experience:sessions-health:1.0.0';
-const SESSIONS_HEALTH_TASK_INTERVAL = '1h';
+const SESSIONS_HEALTH_TASK_INTERVAL = '5m';
 
 /**
- * Registers a task that only reports sessions transform health and version. It never
- * creates or updates the transform: doing that as the internal user would let the
- * transform read every source index regardless of the readers' privileges.
+ * Registers a task that only reports sessions transform health, version and lag. It never
+ * creates or updates a transform: any transform update re-stamps the transform with the
+ * updater's privileges, and doing that as the internal user would let it read every source
+ * index regardless of the readers' privileges.
  */
 export const registerSessionsHealthTask = ({
   core,
   logger,
   taskManager,
+  settings,
 }: {
   core: CoreSetup;
   logger: Logger;
   taskManager: TaskManagerSetupContract;
+  settings: SessionsSettings;
 }): void => {
   taskManager.registerTaskDefinitions({
     [SESSIONS_HEALTH_TASK_TYPE]: {
       title: 'Digital Experience sessions health check',
-      description: 'Reports the health and version of the Digital Experience sessions transform.',
+      description:
+        'Reports the health, version and lag of the Digital Experience sessions transforms.',
       timeout: '1m',
       maxAttempts: 1,
       cost: TaskCost.Tiny,
@@ -43,17 +48,19 @@ export const registerSessionsHealthTask = ({
         run: async () => {
           const [coreStart] = await core.getStartServices();
           const status = await getSessionsStatus(coreStart.elasticsearch.client.asInternalUser, {
+            settings,
             signal,
           });
-          if (status.needsUpdate) {
+          if (status.health === 'degraded' || status.health === 'lagging') {
             logger.warn(
-              `Sessions transform is at version ${status.installedVersion}, expected ${status.currentVersion}. A user with the manage_digital_experience privilege must enable sessions again to update it.`
-            );
-          } else if (status.health === 'degraded') {
-            logger.warn(
-              `Sessions transform is unhealthy (state: ${status.state}): ${
+              `Sessions transforms are ${status.health} (state: ${status.state}): ${
                 status.reason ?? 'unknown reason'
               }`
+            );
+          }
+          if (status.needsUpdate) {
+            logger.warn(
+              `${status.reason} A user with the manage_digital_experience privilege must enable sessions again.`
             );
           }
           return { state: {} };

@@ -8,6 +8,7 @@
 import {
   SESSIONS_INDEX,
   SESSIONS_INDEX_PATTERN,
+  SESSIONS_MAX_PAGE_SEARCH_SIZE,
   SESSIONS_JOURNEY_SIZE,
   SESSIONS_MANAGED_BY,
   SESSIONS_PIPELINE_NAME,
@@ -35,6 +36,46 @@ describe('sessions transform spec', () => {
     expect(transform.dest).toEqual({ index: SESSIONS_INDEX, pipeline: SESSIONS_PIPELINE_NAME });
     expect(transform.sync?.time?.field).toBe('@timestamp');
     expect(transform.retention_policy?.time?.field).toBe('end_time');
+  });
+
+  it('uses the default frequency and a 5000 page size', () => {
+    expect(transform.frequency).toBe('1m');
+    expect(transform.settings?.max_page_search_size).toBe(SESSIONS_MAX_PAGE_SEARCH_SIZE);
+    expect(SESSIONS_MAX_PAGE_SEARCH_SIZE).toBe(5000);
+    expect(buildSessionsTransform({ frequency: '5m' }).frequency).toBe('5m');
+  });
+
+  it('builds partitions that split session ids and share the dest index', () => {
+    const partitions = [0, 1, 2, 3].map((index) =>
+      buildSessionsTransform({ partition: { index, count: 4 } })
+    );
+
+    expect(partitions.map(({ transform_id: id }) => id)).toEqual([
+      `${SESSIONS_TRANSFORM_ID}-p0of4`,
+      `${SESSIONS_TRANSFORM_ID}-p1of4`,
+      `${SESSIONS_TRANSFORM_ID}-p2of4`,
+      `${SESSIONS_TRANSFORM_ID}-p3of4`,
+    ]);
+    expect(partitions.map(({ source }) => source.query?.bool?.filter)).toEqual(
+      [{ lt: '40' }, { gte: '40', lt: '80' }, { gte: '80', lt: 'c0' }, { gte: 'c0' }].map((range) =>
+        expect.arrayContaining([{ range: { [SOURCE_SESSION_ID_FIELD]: range } }])
+      )
+    );
+    expect(new Set(partitions.map(({ dest }) => dest.index))).toEqual(new Set([SESSIONS_INDEX]));
+    // One retention policy is enough for the shared dest index.
+    expect(partitions.map(({ retention_policy: retention }) => Boolean(retention))).toEqual([
+      true,
+      false,
+      false,
+      false,
+    ]);
+    expect(partitions[2]._meta).toEqual(expect.objectContaining({ partition: 2, partitions: 4 }));
+  });
+
+  it('adds no session id filter for a single partition', () => {
+    expect(JSON.stringify(transform.source.query)).not.toContain(
+      '"range":{"attributes.session.id"'
+    );
   });
 
   it('only summarizes events that carry both service.name and session.id', () => {
@@ -89,7 +130,7 @@ describe('sessions transform spec', () => {
 
   it('stamps managed_by and version so setup and health checks can find it', () => {
     const meta = { managed_by: SESSIONS_MANAGED_BY, version: SESSIONS_VERSION };
-    expect(transform._meta).toEqual(meta);
+    expect(transform._meta).toEqual({ ...meta, partition: 0, partitions: 1 });
     expect(sessionsDestPipeline._meta).toEqual(meta);
     expect(sessionsIndexTemplate._meta).toEqual(meta);
   });

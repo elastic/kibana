@@ -43,7 +43,11 @@ type Method = 'get' | 'post';
 
 const setup = () => {
   const router = httpServiceMock.createRouter();
-  registerSessionsRoutes({ router, logger: loggingSystemMock.createLogger() });
+  registerSessionsRoutes({
+    router,
+    logger: loggingSystemMock.createLogger(),
+    settings: { frequency: '1m', partitions: 1 },
+  });
   const coreContext = coreMock.createRequestHandlerContext();
   const context = { core: Promise.resolve(coreContext) } as unknown as RequestHandlerContext;
 

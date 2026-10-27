@@ -33,12 +33,40 @@ before anything is written:
 - `traces-*.otel-*`, `logs-*.otel-*`: `read`, `view_index_metadata`
 - `digital-experience-sessions-*`: `read`, `index`, `create_index`, `delete`, `delete_index`
 
-Enabling again is safe: it refreshes the transform's stored credentials to the enabling user,
-restarts a failed transform, and replaces a transform left over from a previous version.
+Enabling again is safe. It refreshes the transforms' stored credentials to the enabling user,
+restarts failed transforms, replaces transforms left over from a previous version, and applies a
+changed `frequency` or partition count.
 
-A background task (`digital_experience:sessions-health`) only reads transform health and version
-and logs when the transform is unhealthy or needs an update. It never creates or updates the
-transform.
+### Scaling and freshness
+
+Each checkpoint re-aggregates every session that received new events over its full history, so
+cost grows with active sessions × events per session. Two settings trade cost for freshness and
+throughput:
+
+```yaml
+xpack.digital_experience.sessions:
+  frequency: 1m   # 1s–1h. Longer means fewer re-aggregations of each active session: cheaper, but staler.
+  partitions: 1   # 1–32. Splits sessions by session.id range across that many transforms.
+```
+
+- **`frequency`**: an active session is re-read and rewritten once per checkpoint. Going from `1m`
+  to `2m`–`5m` cuts background work roughly 2–5× for long sessions, and adds about the same time to
+  the session list's lag. Session detail always reads raw events, so it stays current.
+- **`partitions`**: transforms run one request at a time, so partitions are how the work spreads
+  across transform nodes. They share the sessions index, document ids depend only on
+  `service.name` + `session.id`, and a single retention policy (partition 0) covers them all, so
+  changing the count rewrites documents in place without emptying the list. EDOT Browser session
+  ids are random UUIDs, so the slices are even.
+
+Settings changes take effect after a user with `manage_digital_experience` enables sessions again.
+The status route reports the drift until then.
+
+A background task (`digital_experience:sessions-health`, every 5 minutes) only reads transform
+health, version and lag. It logs when transforms are degraded, lagging (more than three missed
+checkpoints plus the sync delay behind, at least 5 minutes) or need an update. It never creates or
+updates a transform: an update re-stamps the transform with the updater's privileges, which as the
+internal user would bypass the enabling user's index privileges. If transforms fall behind under
+peak traffic, they lag and then catch up; no data is lost.
 
 > **Security note:** the sessions index contains summaries of everything the enabling user could
 > read in the source indices, regardless of the document- and field-level security or index

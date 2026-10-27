@@ -5,23 +5,29 @@
  * 2.0.
  */
 
-import type { TransformGetTransformTransformSummary } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  TransformGetTransformStatsTransformStats,
+  TransformGetTransformTransformSummary,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
 import {
+  SESSIONS_DEFAULT_FREQUENCY,
   SESSIONS_INDEX_PATTERN,
   SESSIONS_MANAGED_BY,
   SESSIONS_SOURCE_INDICES,
-  SESSIONS_TRANSFORM_ID,
+  SESSIONS_TRANSFORM_PATTERN,
   SESSIONS_VERSION,
+  sessionsLagThresholdSeconds,
+  type SessionsSettings,
   type SessionsStatus,
+  type SessionsTransformHealth,
+  type SessionsTransformStatus,
 } from '../../common/sessions';
 import {
   buildSessionsTransform,
   sessionsDestPipeline,
   sessionsIndexTemplate,
 } from './sessions_spec';
-
-const SESSIONS_TRANSFORM_PATTERN = 'digital-experience-sessions-*';
 
 export const REQUIRED_CLUSTER_PRIVILEGES = [
   'manage_transform',
@@ -87,17 +93,25 @@ const versionOf = (transform: TransformGetTransformTransformSummary): number | n
   return Number.isFinite(version) ? version : null;
 };
 
+/** One transform per configured partition, all writing to the same dest index. */
+export const buildSessionsTransforms = ({ frequency, partitions }: SessionsSettings) =>
+  Array.from({ length: partitions }, (_, index) =>
+    buildSessionsTransform({ frequency, partition: { index, count: partitions } })
+  );
+
 /**
- * Installs or refreshes the sessions transform, its dest pipeline, and the dest index
- * template as the requesting user (secondary auth), so the transform only reads what
- * that user can read. Safe to call repeatedly.
+ * Installs or refreshes the sessions transforms, their dest pipeline, and the dest index
+ * template as the requesting user (secondary auth), so the transforms only read what that
+ * user can read. Safe to call repeatedly; also applies a changed frequency or partition count.
  */
 export const enableSessions = async ({
   esClient,
   logger,
+  settings,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
+  settings: SessionsSettings;
 }): Promise<void> => {
   const missingPrivileges = await getMissingSessionsPrivileges(esClient.asCurrentUser);
   if (missingPrivileges.length > 0) {
@@ -108,82 +122,195 @@ export const enableSessions = async ({
   await client.ingest.putPipeline(sessionsDestPipeline);
   await client.indices.putIndexTemplate(sessionsIndexTemplate);
 
+  const desired = buildSessionsTransforms(settings);
+  const desiredIds = new Set(desired.map(({ transform_id: id }) => id));
   const installed = await managedTransforms(client);
-  for (const previous of installed.filter(({ id }) => id !== SESSIONS_TRANSFORM_ID)) {
-    logger.info(`Removing previous sessions transform [${previous.id}]`);
+
+  // Same-version transforms share the dest index and write the same document ids, so a
+  // repartition keeps the index; a previous version's dest index is dropped once.
+  const droppedDestIndices = new Set<string>();
+  for (const stale of installed.filter(({ id }) => !desiredIds.has(id))) {
+    const destIndex = stale.dest.index;
+    const dropDest = versionOf(stale) !== SESSIONS_VERSION && !droppedDestIndices.has(destIndex);
+    logger.info(
+      `Removing sessions transform [${stale.id}]${dropDest ? ' and its dest index' : ''}`
+    );
     await client.transform.deleteTransform({
-      transform_id: previous.id,
+      transform_id: stale.id,
       force: true,
-      delete_dest_index: true,
+      delete_dest_index: dropDest,
     });
+    if (dropDest) {
+      droppedDestIndices.add(destIndex);
+    }
   }
 
-  const current = installed.find(({ id }) => id === SESSIONS_TRANSFORM_ID);
-  if (current) {
-    // Re-enabling refreshes the stored credentials to the enabling user.
-    const { description, _meta } = buildSessionsTransform();
+  for (const transform of desired) {
+    const transformId = transform.transform_id;
+    if (!installed.some(({ id }) => id === transformId)) {
+      await client.transform.putTransform(transform);
+      continue;
+    }
+    // Updating also refreshes the stored credentials to the enabling user.
+    const { description, frequency, _meta } = transform;
     await client.transform.updateTransform({
-      transform_id: SESSIONS_TRANSFORM_ID,
+      transform_id: transformId,
       description,
+      frequency,
       _meta,
     });
-    const { transforms } = await client.transform.getTransformStats({
-      transform_id: SESSIONS_TRANSFORM_ID,
-    });
+    const { transforms } = await client.transform.getTransformStats({ transform_id: transformId });
     if (transforms[0]?.state === 'failed') {
-      await client.transform.stopTransform({ transform_id: SESSIONS_TRANSFORM_ID, force: true });
+      await client.transform.stopTransform({ transform_id: transformId, force: true });
     }
-  } else {
-    await client.transform.putTransform(buildSessionsTransform());
   }
 
-  await client.transform.startTransform({ transform_id: SESSIONS_TRANSFORM_ID }, { ignore: [409] });
+  await Promise.all(
+    desired.map(({ transform_id: transformId }) =>
+      client.transform.startTransform({ transform_id: transformId }, { ignore: [409] })
+    )
+  );
+};
+
+const HEALTH_RANK: Record<SessionsTransformHealth, number> = {
+  healthy: 0,
+  outdated: 1,
+  lagging: 2,
+  degraded: 3,
+  missing: 4,
 };
 
 /**
- * Reads transform state and version only. Never creates or updates the transform, so it
- * is safe to call with the internal user (status route, background health task).
+ * How stale the sessions index is for one transform, in seconds. While a checkpoint runs, the
+ * index is as fresh as the last completed checkpoint; while idle, as fresh as the last check
+ * for changes.
+ */
+export const lagSecondsOf = (
+  stats: TransformGetTransformStatsTransformStats | undefined,
+  now: number
+): number | null => {
+  const checkpointing = stats?.checkpointing;
+  const reference = checkpointing?.next
+    ? checkpointing.last?.time_upper_bound_millis
+    : checkpointing?.last_search_time;
+  return typeof reference === 'number' ? Math.max(0, Math.round((now - reference) / 1000)) : null;
+};
+
+const transformStatus = (
+  transform: TransformGetTransformTransformSummary,
+  stats: TransformGetTransformStatsTransformStats | undefined,
+  now: number
+): SessionsTransformStatus => {
+  const version = versionOf(transform);
+  const frequency = transform.frequency ?? SESSIONS_DEFAULT_FREQUENCY;
+  const state = stats?.state ?? null;
+  const lagSeconds = lagSecondsOf(stats, now);
+  const healthStatus = stats?.health?.status?.toLowerCase();
+  const degraded =
+    state === 'failed' || state === 'stopped' || (healthStatus != null && healthStatus !== 'green');
+  const lagging = lagSeconds != null && lagSeconds > sessionsLagThresholdSeconds(frequency);
+  const partition = Number(transform._meta?.partition);
+
+  let health: SessionsTransformHealth = 'healthy';
+  let reason = stats?.reason ?? stats?.health?.issues?.[0]?.issue ?? null;
+  if (degraded) {
+    health = 'degraded';
+  } else if (lagging) {
+    health = 'lagging';
+    reason = `${Math.round(
+      (lagSeconds ?? 0) / 60
+    )} minutes behind; the transform can't keep up with session traffic`;
+  } else if (version !== SESSIONS_VERSION) {
+    health = 'outdated';
+  }
+
+  return {
+    id: transform.id,
+    partition: Number.isInteger(partition) ? partition : null,
+    version,
+    frequency,
+    state,
+    health,
+    lagSeconds,
+    reason,
+  };
+};
+
+/**
+ * Reads transform state, version and lag only. Never creates or updates a transform, so it is
+ * safe to call with the internal user (status route, background health task).
  */
 export const getSessionsStatus = async (
   client: ElasticsearchClient,
-  { signal }: { signal?: AbortSignal } = {}
+  {
+    settings,
+    signal,
+    now = Date.now(),
+  }: { settings: SessionsSettings; signal?: AbortSignal; now?: number }
 ): Promise<SessionsStatus> => {
   const installed = await managedTransforms(client, signal);
-  const latest = installed
-    .map((transform) => ({ transform, version: versionOf(transform) }))
-    .sort((a, b) => (b.version ?? 0) - (a.version ?? 0))[0];
+  const base = { currentVersion: SESSIONS_VERSION, configured: settings };
 
-  if (!latest) {
+  if (installed.length === 0) {
     return {
+      ...base,
       installed: false,
       health: 'missing',
       state: null,
       installedVersion: null,
-      currentVersion: SESSIONS_VERSION,
       needsUpdate: false,
       reason: null,
+      lagSeconds: null,
+      installedPartitions: 0,
+      transforms: [],
     };
   }
 
-  const { transforms } = await client.transform.getTransformStats(
-    { transform_id: latest.transform.id },
+  const { transforms: allStats } = await client.transform.getTransformStats(
+    { transform_id: installed.map(({ id }) => id).join(','), allow_no_match: true },
     { signal }
   );
-  const stats = transforms[0];
-  const state = stats?.state ?? null;
-  const needsUpdate = latest.version !== SESSIONS_VERSION;
-  const healthStatus = stats?.health?.status?.toLowerCase();
-  const issue = stats?.health?.issues?.[0];
-  const degraded =
-    state === 'failed' || state === 'stopped' || (healthStatus != null && healthStatus !== 'green');
+  const statuses = installed
+    .map((transform) =>
+      transformStatus(
+        transform,
+        allStats.find(({ id }) => id === transform.id),
+        now
+      )
+    )
+    .sort((a, b) => (a.partition ?? 0) - (b.partition ?? 0));
+  const current = statuses.filter(({ version }) => version === SESSIONS_VERSION);
+  const worst = statuses.reduce((a, b) => (HEALTH_RANK[b.health] > HEALTH_RANK[a.health] ? b : a));
+  const versions = statuses.map(({ version }) => version).filter((v): v is number => v != null);
+  const installedVersion = versions.length > 0 ? Math.max(...versions) : null;
+  const lags = statuses
+    .map(({ lagSeconds }) => lagSeconds)
+    .filter((lag): lag is number => lag != null);
+
+  const outdated = current.length !== statuses.length;
+  const configDrift =
+    current.length !== settings.partitions ||
+    current.some(({ frequency }) => frequency !== settings.frequency);
+  const needsUpdate = outdated || configDrift;
+  const updateReason = outdated
+    ? `Sessions transforms are from version ${installedVersion}; enable sessions again to update them to version ${SESSIONS_VERSION}.`
+    : configDrift
+    ? `Configured ${settings.partitions} partition(s) at ${settings.frequency}, installed ${current.length}; enable sessions again to apply.`
+    : null;
 
   return {
+    ...base,
     installed: true,
-    health: needsUpdate ? 'outdated' : degraded ? 'degraded' : 'healthy',
-    state,
-    installedVersion: latest.version,
-    currentVersion: SESSIONS_VERSION,
+    health: worst.health === 'healthy' && needsUpdate ? 'outdated' : worst.health,
+    state: worst.state,
+    installedVersion,
     needsUpdate,
-    reason: stats?.reason ?? issue?.issue ?? null,
+    reason:
+      worst.health === 'degraded' || worst.health === 'lagging'
+        ? worst.reason
+        : updateReason ?? worst.reason,
+    lagSeconds: lags.length > 0 ? Math.max(...lags) : null,
+    installedPartitions: current.length,
+    transforms: statuses,
   };
 };
