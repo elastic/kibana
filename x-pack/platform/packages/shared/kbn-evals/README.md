@@ -207,6 +207,14 @@ When the labels match, PR CI triggers the dedicated
 surface on the PR as a separate `kibana-evals` commit status — open its build for per-suite/per-model
 results and triage.
 
+Every run logs a link to its experiments in the evals UI
+(`/app/management/ai/evals/experiments/<experiment-id>?execution_id=<execution-id>`) after the
+score table. The link points at the Kibana that received the scores: `EVAL_KBN_URL` when set
+(by CI, `--evaluations-kbn-url`, or the datasets profile's `evaluationsKbn.url`; `dev-vault` and a
+synced `config.json` point it at the golden cluster), otherwise the Kibana Scout ran against. On Buildkite (PR, weekly and on-demand builds) the same
+links are added to a `kbn-evals-experiments-<suite>` build annotation, one row per model and
+shard, so they show at the top of the build. Logged URLs never include credentials.
+
 #### Per-spec model groups
 
 The weekly run normally runs every model in a suite against every spec. To run a spec against
