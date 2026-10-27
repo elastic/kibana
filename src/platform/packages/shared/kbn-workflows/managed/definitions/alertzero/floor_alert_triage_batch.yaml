@@ -768,14 +768,14 @@ steps:
           message: |-
             Proposing to close **{{ steps.process_mints.item.alert_ids.size }} alert{% if steps.process_mints.item.alert_ids.size != 1 %}s{% endif %}** from rule **{{ inputs.rule_name }}** as false positives.
 
-            Every one was classified as a false positive with confidence of at least {{ inputs.confidence_floor }}, and they share one pattern.
+            Every one was classified as a false positive with confidence of at least {{ inputs.confidence_floor }}{% if steps.process_mints.item.kind == 'keyed' or steps.process_mints.item.kind == 'overflow' or steps.process_mints.item.kind == 'failed_join' %}, and they share one pattern{% else %}. They do not necessarily share a pattern{% endif %}.
             {%- assign shown = 0 -%}
             {%- for v in steps.classify_alerts.output.verdicts -%}{%- if shown < 1 and steps.process_mints.item.alert_ids contains v.alert_id %}
 
             **Why:** {{ v.rationale }}
             {%- assign shown = shown | plus: 1 -%}{%- endif -%}{%- endfor %}
 
-            If more alerts match this pattern while the proposal is open, they are added here and noted in a separate message.
+            {% if steps.process_mints.item.kind == 'keyed' %}If more alerts match this pattern while the proposal is open, they are added here and noted in a separate message.{% endif %}
 
             [View execution]({{ execution.url }})
 
