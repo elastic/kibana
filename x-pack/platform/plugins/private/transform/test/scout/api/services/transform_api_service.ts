@@ -82,15 +82,8 @@ export function getTransformApiService(esClient: Client): TransformApiService {
       options?: { ignoreErrors?: boolean }
     ) {
       try {
-        // Stop the transform first
-        await esClient.transform.stopTransform({
-          ...request,
-          force: true,
-          wait_for_completion: true,
-        });
-
-        // Then delete it
-        await esClient.transform.deleteTransform(request);
+        // A forced delete works in any state, so there's no need to stop the transform first.
+        await esClient.transform.deleteTransform({ ...request, force: true });
       } catch (error) {
         if (options?.ignoreErrors) {
           return;

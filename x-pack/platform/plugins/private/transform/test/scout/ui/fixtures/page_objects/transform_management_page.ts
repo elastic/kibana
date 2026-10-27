@@ -150,9 +150,10 @@ export class TransformManagementPage {
   }
 
   getExpandedRowTabContent(tab: ExpandedRowTab): Locator {
-    // The preview renders its data-test-subj twice when it shows an error (e.g. no source access).
+    // The preview renders its data-test-subj twice when it shows an error (e.g. no source access),
+    // so match the tab panel labelled by the Preview tab, which only exists once it's selected.
     return tab === 'Preview'
-      ? this.expandedRow.getByRole('tabpanel')
+      ? this.expandedRow.getByRole('tabpanel', { name: 'Preview' })
       : this.expandedRow.getByTestId(EXPANDED_ROW_TAB_CONTENT[tab]);
   }
 
