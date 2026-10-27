@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
-const BASE_URL = 'https://api.1password.com/v1';
-// The Users API returns at most 1000 users per page.
+const BASE_URL = 'https://api.1password.com/v1beta1';
+// https://www.1password.dev/users-api/list-users: "up to 1000"
 const MAX_PAGE_SIZE = 1000;
 
 // So we get something like: 1Password API error (403): {"code":7,"message":"no_owner_remain","details":[]}
@@ -47,7 +47,7 @@ export const OnePasswordConnector: ConnectorSpec = {
       {
         type: 'oauth_client_credentials',
         defaults: {
-          tokenUrl: `${BASE_URL}/oauth/token`,
+          tokenUrl: `${BASE_URL}/users/oauth2/token`,
           scope: 'openid',
           tokenEndpointAuthMethod: 'client_secret_basic',
         },
@@ -125,8 +125,8 @@ export const OnePasswordConnector: ConnectorSpec = {
           const response = await ctx.client.get(`${BASE_URL}/accounts/${accountUuid}/users`, {
             params: {
               ...(typedInput.filter && { filter: typedInput.filter }),
-              ...(typedInput.maxPageSize && { maxPageSize: typedInput.maxPageSize }),
-              ...(typedInput.pageToken && { pageToken: typedInput.pageToken }),
+              ...(typedInput.maxPageSize && { max_page_size: typedInput.maxPageSize }),
+              ...(typedInput.pageToken && { page_token: typedInput.pageToken }),
             },
           });
           return response.data;
@@ -234,7 +234,7 @@ export const OnePasswordConnector: ConnectorSpec = {
       const { accountUuid } = ctx.config as { accountUuid: string };
       try {
         await ctx.client.get(`${BASE_URL}/accounts/${accountUuid}/users`, {
-          params: { maxPageSize: 1 },
+          params: { max_page_size: 1 },
         });
       } catch (error) {
         throwWithApiError(error);
