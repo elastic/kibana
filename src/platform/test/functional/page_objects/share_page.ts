@@ -16,14 +16,19 @@ export class SharePageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
 
   /**
-   * @description attempt to close the share modal, if it's open
+   * @description close the share modal if it's open, ending on the modal being gone
    */
   async closeShareModal() {
-    if (await this.isShareModalOpen()) {
-      await this.find.clickByCssSelector(
-        '[data-test-subj="shareContextModal"] button[aria-label*="Close"]'
-      );
-    }
+    // The modal may still be rendering when this runs, so retry until it is gone and its overlay
+    // mask no longer blocks clicks in the next step
+    await this.retry.try(async () => {
+      if (await this.isShareModalOpen()) {
+        await this.find.clickByCssSelector(
+          '[data-test-subj="shareContextModal"] button[aria-label*="Close"]'
+        );
+      }
+      await this.testSubjects.missingOrFail('shareContextModal');
+    });
   }
 
   async clickTab(content: string) {
