@@ -11,6 +11,11 @@ import { parse } from 'yaml';
 import { ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from '.';
 import { ALERTZERO_HUNT_CHILD_WORKFLOW_IDS } from '..';
 import { managedWorkflowDefinitions } from '../../..';
+import {
+  THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
+  THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
+  THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
+} from '../../threat_intel';
 
 const renderWorkflowYaml = (definition: (typeof managedWorkflowDefinitions)[number]): string =>
   'yaml' in definition
@@ -74,5 +79,23 @@ describe('Hunt Watch: registry-wide checks', () => {
 
     expect(referencedIds.length).toBeGreaterThan(0);
     expect(referencedIds.filter((id) => !registeredIds.has(id))).toEqual([]);
+  });
+});
+
+// Metering reads the persisted `billable` flag, so a regression here silently stops metering
+// Hunt Watch and the threat-intel supply workflows that feed it.
+describe('Hunt Watch and threat-intel supply: billable', () => {
+  const billableIds = [
+    ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+    ...ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
+    THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
+    THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
+    THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
+  ];
+
+  it.each(billableIds)('%s is billable', (id) => {
+    const definition = managedWorkflowDefinitions.find((candidate) => candidate.id === id);
+
+    expect(definition?.billable).toBe(true);
   });
 });

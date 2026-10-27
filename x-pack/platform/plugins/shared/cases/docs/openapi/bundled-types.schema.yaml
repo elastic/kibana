@@ -2256,6 +2256,7 @@ components:
       description: An Elasticsearch simple_query_string query that filters the objects in the response.
       schema:
         type: string
+        maxLength: 30000
       example: Case title 1
     searchFields:
       in: query

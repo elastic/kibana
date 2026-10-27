@@ -742,7 +742,7 @@ describe('Rule Coverage outcome reports', () => {
       steps,
       'report_review_completed',
       'rule_coverage_review_completed',
-      'emit_result'
+      'emit_failure'
     );
     describeReportStep(
       declinedArm,
@@ -1002,7 +1002,7 @@ describe('Rule Tuning and Rule Coverage managed versions', () => {
     [ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.id, ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.version, 30],
     [ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.id, ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.version, 32],
     [ALERTZERO_COVERAGE_WORKER_WORKFLOW.id, ALERTZERO_COVERAGE_WORKER_WORKFLOW.version, 5],
-    [ALERTZERO_COVERAGE_REVIEW_WORKFLOW.id, ALERTZERO_COVERAGE_REVIEW_WORKFLOW.version, 6],
+    [ALERTZERO_COVERAGE_REVIEW_WORKFLOW.id, ALERTZERO_COVERAGE_REVIEW_WORKFLOW.version, 7],
   ])('bumps %s to the version that carries its reports', (_id, version, expected) => {
     expect(version).toBe(expected);
   });

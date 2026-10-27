@@ -27,11 +27,15 @@ describe('putAttachmentRoute', () => {
     },
   };
 
-  const callHandler = () =>
-    putAttachmentRoute.handler({ context, request, response } as unknown as HandlerArgs);
+  const callHandler = (body: object = request.body) =>
+    putAttachmentRoute.handler({
+      context,
+      request: { ...request, body },
+      response,
+    } as unknown as HandlerArgs);
 
-  const getHandlerError = () =>
-    callHandler().then(
+  const getHandlerError = (body?: object) =>
+    callHandler(body).then(
       () => {
         throw new Error('Expected the handler to throw');
       },
@@ -54,6 +58,18 @@ describe('putAttachmentRoute', () => {
     expect(response.ok).toHaveBeenCalledWith({
       body: expect.objectContaining({ id: attachmentSO.id, type: 'comment' }),
     });
+  });
+
+  it('rejects a file attachment with a 400 before calling the client', async () => {
+    const error = await getHandlerError({
+      type: 'file',
+      attachmentId: 'file-1',
+      owner: 'securitySolution',
+      version: '1',
+    });
+
+    expect(error.boomify().output.statusCode).toBe(400);
+    expect(casesClientMock.attachments.update).not.toHaveBeenCalled();
   });
 
   it('throws a 500 when the replaced attachment is missing from the case', async () => {

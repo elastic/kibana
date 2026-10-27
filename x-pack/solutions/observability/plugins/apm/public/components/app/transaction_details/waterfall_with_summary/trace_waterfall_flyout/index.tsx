@@ -111,6 +111,10 @@ export function TraceWaterfallFlyout({
     [logsIndexPattern, apmIndices?.transaction, apmIndices?.error]
   );
 
+  // The doc flyout defaults to the global time filter, which belongs to the host page when the
+  // map is embedded (AI Agent chat) and can exclude the trace: pass the waterfall's own window.
+  const docTimeRange = useMemo(() => ({ from: start, to: end }), [start, end]);
+
   const onNodeClick = useCallback((nodeSpanId: string) => {
     setActiveFlyoutType('span');
     setActiveSection(undefined);
@@ -202,6 +206,7 @@ export function TraceWaterfallFlyout({
           dataTestSubj="apmTraceWaterfallSpanDetailFlyout"
           size="fill"
           historyKey={historyKey}
+          timeRange={docTimeRange}
         />
       )}
     </EuiFlyout>
