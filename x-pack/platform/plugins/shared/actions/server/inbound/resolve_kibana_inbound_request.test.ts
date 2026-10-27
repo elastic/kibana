@@ -57,8 +57,8 @@ describe('resolveKibanaInboundRequest', () => {
     const client = createClient();
     const request = await resolve(`ApiKey ${apiKey}`, client);
 
-    expect(request?.headers.authorization).toBe(`ApiKey ${apiKey}`);
-    expect(request && isExternalUiamCredential(request)).toBe(false);
+    expect(request?.request.headers.authorization).toBe(`ApiKey ${apiKey}`);
+    expect(request && isExternalUiamCredential(request.request)).toBe(false);
     expect(authenticate(client)).toHaveBeenCalledTimes(1);
   });
 
@@ -66,8 +66,8 @@ describe('resolveKibanaInboundRequest', () => {
     const client = createClient();
     const request = await resolve('ApiKey essu_install_key', client);
 
-    expect(request?.headers.authorization).toBe('ApiKey essu_install_key');
-    expect(request && isExternalUiamCredential(request)).toBe(true);
+    expect(request?.request.headers.authorization).toBe('ApiKey essu_install_key');
+    expect(request && isExternalUiamCredential(request.request)).toBe(true);
     expect(authenticate(client)).toHaveBeenCalledTimes(1);
   });
 
@@ -76,8 +76,8 @@ describe('resolveKibanaInboundRequest', () => {
     const envelope = Buffer.from('es-id:essu_granted_key').toString('base64');
     const request = await resolve(`ApiKey ${envelope}`, client);
 
-    expect(request?.headers.authorization).toBe('ApiKey essu_granted_key');
-    expect(request && isExternalUiamCredential(request)).toBe(true);
+    expect(request?.request.headers.authorization).toBe('ApiKey essu_granted_key');
+    expect(request && isExternalUiamCredential(request.request)).toBe(true);
     expect(authenticate(client)).toHaveBeenCalledTimes(1);
   });
 
@@ -86,8 +86,8 @@ describe('resolveKibanaInboundRequest', () => {
     authenticate(client).mockRejectedValueOnce(unauthorized(401));
     const request = await resolve('ApiKey essu_granted_key', client);
 
-    expect(request?.headers.authorization).toBe('ApiKey essu_granted_key');
-    expect(request && isExternalUiamCredential(request)).toBe(false);
+    expect(request?.request.headers.authorization).toBe('ApiKey essu_granted_key');
+    expect(request && isExternalUiamCredential(request.request)).toBe(false);
     expect(authenticate(client)).toHaveBeenCalledTimes(2);
   });
 
@@ -199,12 +199,13 @@ describe('resolveKibanaInboundRequest', () => {
       expect(inboundRequest.isFakeRequest).toBe(false);
       expect(client.asScoped).toHaveBeenCalledWith(inboundRequest);
       expect(getKibanaRequestAccess).toHaveBeenCalledWith(inboundRequest);
-      expect(request).not.toBe(inboundRequest);
-      expect(request?.headers.authorization).toBe(authorization);
-      expect(request?.headers[ES_CLIENT_AUTHENTICATION_HEADER]).toBe(clientAuthentication);
-      expect(request?.isFakeRequest).toBe(true);
-      expect(request?.spaceId).toBe('default');
-      expect(request && isExternalUiamCredential(request)).toBe(false);
+      expect(request?.request).not.toBe(inboundRequest);
+      expect(request?.request.headers.authorization).toBe(authorization);
+      expect(request?.request.headers[ES_CLIENT_AUTHENTICATION_HEADER]).toBe(clientAuthentication);
+      expect(request?.request.isFakeRequest).toBe(true);
+      expect(request?.request.spaceId).toBe('default');
+      expect(request && isExternalUiamCredential(request.request)).toBe(false);
+      expect(request?.authenticatedUser).toBe('sa-id');
       expect(authenticate(client)).toHaveBeenCalledTimes(1);
     });
 

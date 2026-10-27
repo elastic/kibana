@@ -202,15 +202,18 @@ export async function ingestInboundEvent({
   }
 
   let kibanaScheduleRequest: KibanaRequest | undefined;
+  let authenticatedUser: string | undefined;
   // In-memory events-on connectors have no ingest token. A saved identity stays on the token path.
   if (connectorEventsEnabled && connector.hasInboundEventIdentity !== true) {
     try {
-      kibanaScheduleRequest = await resolveKibanaInboundRequest({
+      const resolvedInboundRequest = await resolveKibanaInboundRequest({
         inboundRequest: request,
         spaceId,
         elasticsearchClient: await getElasticsearchClient(),
         getKibanaRequestAccess,
       });
+      kibanaScheduleRequest = resolvedInboundRequest?.request;
+      authenticatedUser = resolvedInboundRequest?.authenticatedUser;
     } catch (error) {
       logInboundIngressOutcome(logger, {
         ...baseLog,
@@ -393,6 +396,7 @@ export async function ingestInboundEvent({
           connectorTypeId,
           correlationKey: event.correlationKey,
           request: scheduleRequest,
+          ...(authenticatedUser ? { authenticatedUser } : {}),
         });
         // HTTP stays 202; ingest logs a single emit_partial outcome.
         if (!emitResult.ok) {

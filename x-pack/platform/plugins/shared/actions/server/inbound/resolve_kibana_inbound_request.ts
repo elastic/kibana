@@ -157,7 +157,7 @@ const resolveServiceAccountBearer = async ({
   spaceId: string;
   elasticsearchClient: IClusterClient;
   getKibanaRequestAccess: (request: KibanaRequest) => Promise<boolean>;
-}): Promise<KibanaRequest | undefined> => {
+}): Promise<{ request: KibanaRequest; authenticatedUser?: string } | undefined> => {
   if (
     authorization.credentials.length === 0 ||
     authorization.credentials.length > MAX_API_KEY_CREDENTIAL_LENGTH
@@ -173,11 +173,13 @@ const resolveServiceAccountBearer = async ({
   }
 
   let authenticationRealmType: string | undefined;
+  let authenticatedUser: string | undefined;
   try {
     const user = await elasticsearchClient
       .asScoped(inboundRequest)
       .asCurrentUser.security.authenticate();
     authenticationRealmType = user.authentication_realm?.type;
+    authenticatedUser = user.username;
   } catch (error) {
     if (isUnauthorizedError(error)) {
       return undefined;
@@ -189,6 +191,9 @@ const resolveServiceAccountBearer = async ({
   if (authenticationRealmType !== CLOUD_SERVICE_ACCOUNT_REALM_TYPE) {
     return undefined;
   }
+  if (!authenticatedUser) {
+    return undefined;
+  }
 
   const allowed = await getKibanaRequestAccess(inboundRequest);
   if (!allowed) {
@@ -197,12 +202,15 @@ const resolveServiceAccountBearer = async ({
 
   // The schedule request carries the same pair the grant reads. It is not used to
   // decide admission: asScoped on this object would classify the call as internal.
-  return kibanaBearerRequest(authorization.toString(), clientAuthentication, spaceId);
+  return {
+    request: kibanaBearerRequest(authorization.toString(), clientAuthentication, spaceId),
+    authenticatedUser,
+  };
 };
 
 /**
- * Builds a Kibana request when Elasticsearch accepts the caller's ApiKey or UIAM service-account
- * bearer and that credential can access the space. A 401 or a failed space check returns undefined.
+ * Resolves the scheduling request when Elasticsearch accepts the caller's credential and it can
+ * access the space. Service-account bearers also return the authenticated principal.
  */
 export const resolveKibanaInboundRequest = async ({
   inboundRequest,
@@ -214,7 +222,7 @@ export const resolveKibanaInboundRequest = async ({
   spaceId: string;
   elasticsearchClient: IClusterClient;
   getKibanaRequestAccess: (request: KibanaRequest) => Promise<boolean>;
-}): Promise<KibanaRequest | undefined> => {
+}): Promise<{ request: KibanaRequest; authenticatedUser?: string } | undefined> => {
   const inbound = readInboundAuthorization(inboundRequest.headers);
   if (!inbound) {
     return undefined;
@@ -240,7 +248,7 @@ export const resolveKibanaInboundRequest = async ({
     }
     if (await elasticsearchAccepts(elasticsearchClient, request)) {
       const allowed = await getKibanaRequestAccess(request);
-      return allowed ? request : undefined;
+      return allowed ? { request } : undefined;
     }
   }
   return undefined;
