@@ -41,6 +41,28 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 
 ## 9.6.0 [kibana-9.6.0-breaking-changes]
 
+$$$kibana-291514$$$
+::::{dropdown} Stop using the Playground app, which {{kib}} no longer includes
+**Details**<br> {{kib}} no longer includes the Playground app (`searchPlayground`), which was deprecated for several releases. When you upgrade, {{kib}} deletes the saved playgrounds. The `xpack.searchPlayground` settings are no longer valid. If you leave an `xpack.searchPlayground.*` key in `kibana.yml`, {{kib}} ignores it, logs a deprecation warning, and keeps starting.
+
+**Impact**<br> Saved playgrounds, including their prompts, queries, index selections, and connector settings, are inaccessible after the upgrade and you can't export them.
+
+**Action**<br> Before you upgrade, copy any prompts, queries, and settings that you want to keep. After you upgrade, remove the `xpack.searchPlayground.*` settings from `kibana.yml`.
+
+View [#291514]({{kib-pull}}291514).
+::::
+
+$$$kibana-287729$$$
+::::{dropdown} Update clients that read the `actions` attachment type in the Cases API
+**Details**<br> The Cases API now returns attachments of the legacy `actions` type, which the API reference doesn't document, in the same shape as the `endpoint` type that replaced it in 2024. This applies to attachments that already exist and to new attachments, in API responses (`GET`, `_find`, `POST`, and `PATCH`) and in recorded user actions. {{kib}} doesn't change the stored attachments. The `user` and `alert` attachment types don't change.
+
+**Impact**<br> Clients that inspect `actions` attachments in Cases API responses receive the `endpoint` shape instead.
+
+**Action**<br> Update clients that read `actions` attachments to handle the `endpoint` shape.
+
+View [#287729]({{kib-pull}}287729).
+::::
+
 $$$kibana-285645$$$
 ::::{dropdown} Workflow execution detail routes now require the `read` privilege in addition to `readExecution`
 **Details**<br> The following Workflows API routes previously accepted callers holding only the `workflowsManagement:readExecution` privilege (the **Read Workflow Execution** sub-feature privilege, `workflow_execution_read`). Execution documents include a YAML snapshot of the workflow definition, so those callers could retrieve a workflow definition without holding the `workflowsManagement:read` privilege (**Read**, `workflow_read`). Reading execution data now requires both privileges. This applies to every execution read route, including the list and search routes:
@@ -58,6 +80,39 @@ $$$kibana-285645$$$
 **Action**<br> In any role that customizes Workflows sub-feature privileges, add **Read** (`workflow_read`) under **Analytics → Workflows → Workflows Actions** alongside **Read Workflow Execution** (`workflow_execution_read`). Roles that grant `All` or `Read` on **Analytics → Workflows** already include both privileges and need no change.
 
 View [#285645]({{kib-pull}}285645).
+::::
+
+$$$kibana-283150$$$
+::::{dropdown} Verify TLS certificates for email connectors that send through HTTPS proxies
+**Details**<br> {{kib}} now includes nodemailer 9, which validates the TLS certificate of an HTTPS server when the email connector fetches remote content. This includes OAuth 2.0 token endpoints and HTTP or HTTPS proxy connections. Earlier versions skipped that check.
+
+**Impact**<br> Email connectors that send mail through an HTTPS proxy, or that use a token endpoint, with a self-signed, expired, or hostname-mismatched certificate fail instead of sending the message.
+
+**Action**<br> Use certificates that a trusted certificate authority signed for these servers. For SMTP servers, you can relax verification with the `ssl.verificationMode` setting in `xpack.actions.customHostSettings`.
+
+View [#283150]({{kib-pull}}283150).
+::::
+
+$$$kibana-282404$$$
+::::{dropdown} Update `additional_datastreams_permissions` values to the `<type>-<suffix>` format
+**Details**<br> {{fleet}} now validates the `additional_datastreams_permissions` field of a package policy against the documented `<type>-<suffix>` data stream format, for example `logs-nginx-*`. Before, the validation accepted values that only started with, contained, or ended with a valid type.
+
+**Impact**<br> {{fleet}} rejects values that don't start with a valid data stream type followed by a hyphen and a non-empty suffix, for example `logs*`.
+
+**Action**<br> Update any `additional_datastreams_permissions` values to the `<type>-<suffix>` format.
+
+View [#282404]({{kib-pull}}282404).
+::::
+
+$$$kibana-280959$$$
+::::{dropdown} Stop using the package policy and agent policy APIs to manage agentless integrations
+**Details**<br> {{fleet}} turns on the `disableAgentlessLegacyAPI` feature flag. The package policy and agent policy APIs no longer create, update, upgrade, or copy managed integrations.
+
+**Impact**<br> Clients that create, update, upgrade, or copy managed integrations through the package policy and agent policy APIs receive a `400` error.
+
+**Action**<br> Use the Managed integrations API (`/api/fleet/managed_integrations`) instead.
+
+View [#280959]({{kib-pull}}280959).
 ::::
 
 ## 9.5.2 [kibana-9.5.2-breaking-changes]

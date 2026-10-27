@@ -37,6 +37,30 @@ Review the deprecated functionality for Kibana. While deprecations have no immed
 % DEPRECATIONS
 % Paste in deprecations.md
 
+## 9.6.0 [kibana-9.6.0-deprecations]
+
+$$$kibana-298197$$$
+::::{dropdown} Migrate from `event.attachmentIds` to `event.ids` in the Cases attachment workflow triggers
+**Details**<br> The `event.attachmentIds` field on the `cases.attachmentsAdded` and `cases.attachmentsDeleted` workflow triggers is deprecated. The triggers now also send the same values in `event.ids`.
+
+**Impact**<br> Workflows that read `event.attachmentIds` in conditions or templates keep working, because the triggers send both fields with the same values. A future release will remove `event.attachmentIds`.
+
+**Action**<br> Update your workflows to read `event.ids` instead of `event.attachmentIds`.
+
+View [#298197]({{kib-pull}}298197).
+::::
+
+$$$kibana-292914$$$
+::::{dropdown} Migrate from Cases `customFields` and legacy templates to `extended_fields`
+**Details**<br> The Cases `customFields` fields and the `templates` setting in the case configuration are deprecated in favor of `extended_fields`. The case APIs now document `extended_fields` and return `extended_fields_labels`, a read-only map from each storage key to a readable label.
+
+**Impact**<br> `customFields` and legacy `templates` keep working as before. The API reference marks them as deprecated.
+
+**Action**<br> Use `extended_fields` in new integrations, and migrate existing clients and workflows that use `customFields` or legacy templates.
+
+View [#292914]({{kib-pull}}292914).
+::::
+
 ## 9.5.0 [kibana-9.5.0-deprecations]
 
 $$$kibana-276925$$$
