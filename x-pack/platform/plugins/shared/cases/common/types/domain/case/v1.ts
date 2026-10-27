@@ -153,6 +153,9 @@ export const CaseAttributesSchema = CaseBasicSchema.extend({
   time_to_resolve: z.number().nullable().optional(),
   template: CaseTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
+});
+
+export const CaseSchema = CaseAttributesSchema.extend({
   // Populated at response time by enrichCasesWithFieldLabels — not persisted to the SO.
   // Maps storage keys (e.g. `priority_as_keyword`) to user-facing labels (e.g. "Priority").
   [CASE_EXTENDED_FIELDS_LABELS]: z.record(z.string(), z.string()).optional(),
@@ -161,9 +164,6 @@ export const CaseAttributesSchema = CaseBasicSchema.extend({
   // parsing (user picker, checkbox group, toggle) can be rendered correctly wherever a case is
   // displayed without threading full field definitions through every consumer.
   [CASE_EXTENDED_FIELDS_CONTROLS]: z.record(z.string(), z.string()).optional(),
-});
-
-export const CaseSchema = CaseAttributesSchema.extend({
   id: z.string(),
   totalComment: z.number(),
   totalAlerts: z.number(),
