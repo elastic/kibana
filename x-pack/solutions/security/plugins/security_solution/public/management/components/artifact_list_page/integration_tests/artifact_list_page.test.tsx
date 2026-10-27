@@ -356,6 +356,19 @@ describe('When using the ArtifactListPage component', () => {
         expect(queryByTestId('formMock')).not.toBeInTheDocument();
       });
 
+      it('should pass the policy assignment info tooltip to the view flyout', async () => {
+        history.push('somepage?show=view&itemId=123');
+
+        const { findByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          policyAssignmentInfoTooltip: 'Some assignment info',
+        });
+
+        expect(
+          await findByTestId('testPage-viewFlyout-policyAssignmentInfoTooltip')
+        ).toBeInTheDocument();
+      });
+
       it('should not open the view flyout when show=view has no itemId', async () => {
         history.push('somepage?show=view');
 

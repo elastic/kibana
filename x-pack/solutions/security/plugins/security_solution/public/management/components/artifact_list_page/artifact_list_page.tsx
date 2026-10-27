@@ -120,6 +120,11 @@ interface ArtifactListPageWithSimpleTableProps {
    * Receives the full artifact item.
    */
   ViewModeComponent: React.ComponentType<ArtifactViewModeComponentProps>;
+  /**
+   * When set, an info icon next to the policy assignment title in the view flyout
+   * shows this text in a tooltip.
+   */
+  policyAssignmentInfoTooltip?: string;
 }
 
 export type ArtifactListPageProps = ArtifactListPageBaseProps &
@@ -149,6 +154,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     showAsSimpleTable = false,
     showEnabledColumn = false,
     ViewModeComponent,
+    policyAssignmentInfoTooltip,
   }) => {
     const areEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
       'endpointExceptionsMovedUnderManagement'
@@ -508,6 +514,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               onEnabledChangeRefresh={handleEnabledChangeRefresh}
               onClose={handleArtifactViewFlyoutOnClose}
               ViewModeComponent={ViewModeComponent}
+              policyAssignmentInfoTooltip={policyAssignmentInfoTooltip}
               data-test-subj={getTestId('viewFlyout')}
             />
           ) : (
@@ -521,6 +528,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               onTakeAction={handleOnCardActionClick}
               onClose={handleArtifactViewFlyoutOnClose}
               ViewModeComponent={ViewModeComponent}
+              policyAssignmentInfoTooltip={policyAssignmentInfoTooltip}
               data-test-subj={getTestId('viewFlyout')}
             />
           ))}

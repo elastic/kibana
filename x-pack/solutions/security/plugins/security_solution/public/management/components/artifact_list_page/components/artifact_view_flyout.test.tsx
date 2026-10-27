@@ -60,6 +60,7 @@ type ArtifactViewFlyoutRenderProps = {
   allowCardEditAction?: boolean;
   allowCardDeleteAction?: boolean;
   onTakeAction?: ArtifactViewFlyoutTakeAction;
+  policyAssignmentInfoTooltip?: string;
 } & (
   | {
       showEnabledSwitch?: false;
@@ -129,6 +130,7 @@ describe('ArtifactViewFlyout', () => {
           ? { allowCardDeleteAction: props.allowCardDeleteAction }
           : {}),
         ...(props.onTakeAction ? { onTakeAction: props.onTakeAction } : {}),
+        policyAssignmentInfoTooltip: props.policyAssignmentInfoTooltip,
         allowCardEditAction: props.allowCardEditAction ?? true,
       };
 
@@ -169,6 +171,17 @@ describe('ArtifactViewFlyout', () => {
     expect(renderResult.getByTestId('viewFlyout-policyAssignment-global')).toHaveTextContent(
       'Applied globally.'
     );
+    expect(
+      renderResult.queryByTestId('viewFlyout-policyAssignmentInfoTooltip')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the policy assignment info tooltip when policyAssignmentInfoTooltip is set', async () => {
+    render({ policyAssignmentInfoTooltip: 'Some assignment info' });
+
+    fireEvent.mouseOver(renderResult.getByTestId('viewFlyout-policyAssignmentInfoTooltip'));
+
+    expect(await renderResult.findByText('Some assignment info')).toBeInTheDocument();
   });
 
   it('shows the enabled switch before Updated by when showEnabledSwitch is true', () => {

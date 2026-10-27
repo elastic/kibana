@@ -8,6 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import type { ArtifactListPageLabels } from '../../components/artifact_list_page';
 
+export const POLICY_ASSIGNMENT_INFO_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.customYaraSignatures.policyAssignmentInfoTooltip',
+  {
+    defaultMessage:
+      'Endpoints will apply these signatures once custom YARA signatures are turned on in their policy, under Memory threat protections.',
+  }
+);
+
 export const CUSTOM_YARA_SIGNATURES_PAGE_LABELS: ArtifactListPageLabels = {
   pageTitle: i18n.translate('xpack.securitySolution.customYaraSignatures.list.pageTitle', {
     defaultMessage: 'Custom YARA signatures',
