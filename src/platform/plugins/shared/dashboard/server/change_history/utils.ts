@@ -25,6 +25,7 @@ import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { getDashboardStateSchema } from '../api/dashboard_state_schemas';
+import type { DashboardRequestServices } from '../api/types';
 import { transformDashboardOut } from '../api/transforms';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { logger, securityService, spacesService } from '../kibana_services';
@@ -126,7 +127,7 @@ export const getNextHistorySequence = async ({
     : (await getHistorySequences({ spaceId, dashboardId })).next;
 
 export const addToHistory = async ({
-  ctx,
+  services,
   spaceId = 'default',
   dashboardId,
   snapshot,
@@ -136,7 +137,7 @@ export const addToHistory = async ({
   restoredFrom,
   type = 'update',
 }: {
-  ctx: RequestHandlerContext;
+  services: Pick<DashboardRequestServices, 'security'>;
   spaceId: string | undefined;
   dashboardId: string;
   snapshot: DashboardState;
@@ -147,9 +148,8 @@ export const addToHistory = async ({
   restoredFrom?: number;
   type?: 'update' | 'create' | 'delete';
 }) => {
-  const core = await ctx.core;
   // getCurrentUser() returns null when security is disabled; attribute those changes to the system actor
-  const user = core.security.authc.getCurrentUser();
+  const user = services.security.authc.getCurrentUser();
   let client;
   try {
     client = await getChangeHistoryClient();

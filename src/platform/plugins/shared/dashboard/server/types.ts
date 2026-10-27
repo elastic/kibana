@@ -7,9 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { ScanDashboardsResult } from './scan_dashboards';
-import type { DashboardReadResponseBody } from './api';
+import type {
+  DashboardCreateResponseBody,
+  DashboardReadResponseBody,
+  DashboardUpdateResponseBody,
+} from './api';
+
+interface DashboardWriteOptions {
+  /** Takes the dashboard the way the Dashboard app saves it, keeping panels that can't be converted to the as-code API format. */
+  isDashboardAppRequest?: boolean;
+}
 
 /**
  * Client interface for dashboard CRUD operations
@@ -23,6 +33,25 @@ export interface DashboardServerClient {
       isDashboardAppRequest?: boolean;
     }
   ): Promise<DashboardReadResponseBody>;
+  /**
+   * Creates a dashboard as the user of the request, in the request's space, without validating it.
+   * The change history records the user.
+   */
+  create(
+    request: KibanaRequest,
+    dashboardState: DashboardState,
+    options?: DashboardWriteOptions
+  ): Promise<DashboardCreateResponseBody>;
+  /**
+   * Upserts a dashboard by id as the user of the request, in the request's space, without
+   * validating it. The change history records the user.
+   */
+  update(
+    request: KibanaRequest,
+    id: string,
+    dashboardState: DashboardState,
+    options?: DashboardWriteOptions
+  ): Promise<DashboardCreateResponseBody | DashboardUpdateResponseBody>;
 }
 
 /** The setup contract for the Dashboard plugin on the server. */

@@ -7,9 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreRequestHandlerContext } from '@kbn/core/server';
 import type { z } from '@kbn/zod';
 import type { warningsSchema } from './warnings_schema';
 
 export type Warnings = z.output<typeof warningsSchema>;
 
 export type Operation = 'create' | 'read' | 'update' | 'search';
+
+/**
+ * The request-scoped core services that dashboard writes use. A route passes its core request
+ * handler context; the server client builds them from the request.
+ */
+export interface DashboardRequestServices {
+  savedObjects: Pick<CoreRequestHandlerContext['savedObjects'], 'client' | 'typeRegistry'>;
+  security: { authc: Pick<CoreRequestHandlerContext['security']['authc'], 'getCurrentUser'> };
+}

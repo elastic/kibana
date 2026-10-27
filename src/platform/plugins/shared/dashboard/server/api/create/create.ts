@@ -8,12 +8,12 @@
  */
 
 import type { RequestTiming } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
+import type { DashboardRequestServices } from '../types';
 import type { DashboardCreateResponseBody } from './types';
 import {
   addToHistory,
@@ -30,12 +30,11 @@ export interface CreateOptions {
 }
 
 export async function create(
-  requestCtx: RequestHandlerContext,
+  services: DashboardRequestServices,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardState,
   { id, serverTiming, spaceId, isDashboardAppRequest = false }: CreateOptions = {}
 ): Promise<DashboardCreateResponseBody> {
-  const { core } = await requestCtx.resolve(['core']);
   const { access_control: accessControl, ...restOfData } = createBody;
 
   const { attributes: soAttributes, references: soReferences } = transformDashboardIn(
@@ -44,7 +43,7 @@ export async function create(
     serverTiming
   );
 
-  const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
+  const supportsAccessControl = services.savedObjects.typeRegistry.supportsAccessControl(
     DASHBOARD_SAVED_OBJECT_TYPE
   );
 
@@ -53,7 +52,7 @@ export async function create(
     ? await getNextHistorySequence({ spaceId, dashboardId: id, currentSequence: undefined })
     : INITIAL_HISTORY_SEQUENCE;
 
-  const savedObject = await core.savedObjects.client.create(
+  const savedObject = await services.savedObjects.client.create(
     DASHBOARD_SAVED_OBJECT_TYPE,
     { ...soAttributes, historySequence },
     {
@@ -77,7 +76,7 @@ export async function create(
   });
   if (snapshot) {
     await addToHistory({
-      ctx: requestCtx,
+      services,
       dashboardId: savedObject.id,
       snapshot,
       spaceId,

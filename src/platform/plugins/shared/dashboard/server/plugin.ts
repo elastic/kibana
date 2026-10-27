@@ -24,6 +24,7 @@ import type {
   CoreStart,
   Plugin,
   Logger,
+  KibanaRequest,
   SavedObjectsClientContract,
   UiSettingsParams,
 } from '@kbn/core/server';
@@ -44,16 +45,17 @@ import {
   TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
 import { capabilitiesProvider } from './capabilities_provider';
-import type { DashboardPluginSetup, DashboardPluginStart } from './types';
+import type { DashboardPluginSetup, DashboardPluginStart, DashboardServerClient } from './types';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
-import { registerRoutes, read } from './api';
+import { registerRoutes, create, read, update } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
 import { registerDashboardDrilldown } from './dashboard_drilldown/register_dashboard_drilldown';
 import { getDashboardStateSchema } from './api/dashboard_state_schemas';
+import type { DashboardRequestServices } from './api/types';
 import { startChangeHistoryClient } from './change_history/change_history_service';
 
 export const DEFER_BELOW_FOLD = `labs:dashboard:deferBelowFold` as const;
@@ -216,29 +218,52 @@ export class DashboardPlugin
       startChangeHistoryClient(this.changeHistoryClient, core, this.logger);
     }
 
+    const getRequestServices = (request: KibanaRequest): DashboardRequestServices => ({
+      savedObjects: {
+        client: core.savedObjects.getScopedClient(request),
+        typeRegistry: core.savedObjects.getTypeRegistry(),
+      },
+      security: { authc: { getCurrentUser: () => core.security.authc.getCurrentUser(request) } },
+    });
+
+    const client: DashboardServerClient = {
+      read: async (savedObjectsClient, id, options) =>
+        (
+          await read(
+            savedObjectsClient,
+            getCachedDashboardStateSchema(),
+            id,
+            undefined,
+            options?.isDashboardAppRequest
+          )
+        ).body,
+      create: async (request, dashboardState, options) =>
+        create(getRequestServices(request), getCachedDashboardStateSchema(), dashboardState, {
+          spaceId: plugins.spaces?.spacesService.getSpaceId(request),
+          isDashboardAppRequest: options?.isDashboardAppRequest,
+        }),
+      update: async (request, id, dashboardState, options) => {
+        const { body } = await update(
+          getRequestServices(request),
+          getCachedDashboardStateSchema(),
+          id,
+          dashboardState,
+          {
+            spaceId: plugins.spaces?.spacesService.getSpaceId(request),
+            isDashboardAppRequest: options?.isDashboardAppRequest,
+          }
+        );
+        return body;
+      },
+    };
+
     return {
       scanDashboards: (
         savedObjectsClient: SavedObjectsClientContract,
         page: number,
         perPage: number
       ) => scanDashboards(savedObjectsClient, page, perPage, getCachedDashboardStateSchema()),
-      client: {
-        read: async (
-          savedObjectsClient: SavedObjectsClientContract,
-          id: string,
-          options?: { isDashboardAppRequest?: boolean }
-        ) => {
-          return (
-            await read(
-              savedObjectsClient,
-              getCachedDashboardStateSchema(),
-              id,
-              undefined,
-              options?.isDashboardAppRequest
-            )
-          ).body;
-        },
-      },
+      client,
     };
   }
 }

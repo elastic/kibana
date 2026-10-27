@@ -8,21 +8,31 @@
  */
 
 import { DashboardPlugin } from './plugin';
-import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { AuthenticatedUser } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { asSpaceId } from '@kbn/core-spaces-common';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
+import { DEFAULT_DASHBOARD_STATE } from '../common/default_dashboard_state';
 import { scheduleDashboardTelemetry, TASK_ID } from './usage/dashboard_telemetry_collection_task';
-import { read } from './api';
+import { create, read, update } from './api';
 
 jest.mock('./usage/dashboard_telemetry_collection_task', () => ({
   scheduleDashboardTelemetry: jest.fn().mockResolvedValue('ok'),
   TASK_ID: 'mockTaskID',
 }));
 
-jest.mock('./api', () => ({
-  ...jest.requireActual('./api'),
-  read: jest.fn().mockResolvedValue({ body: {} }),
-}));
+jest.mock('./api', () => {
+  const actual = jest.requireActual('./api');
+  return {
+    ...actual,
+    read: jest.fn().mockResolvedValue({ body: {} }),
+    create: jest.fn(actual.create),
+    update: jest.fn(actual.update),
+  };
+});
 
 const mockEmbeddable = createEmbeddableStartMock();
 
@@ -84,6 +94,100 @@ describe('DashboardPlugin', () => {
         undefined,
         true
       );
+    });
+
+    describe('client writes', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const user = { username: 'elastic' } as AuthenticatedUser;
+      let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+
+      const savedDashboard = (id: string, title: string) => ({
+        id,
+        type: 'dashboard',
+        attributes: { title, panelsJSON: '[]', optionsJSON: '{}' },
+        references: [],
+      });
+
+      const startClient = () => {
+        const spaces = spacesMock.createStart();
+        spaces.spacesService.getSpaceId.mockReturnValue(asSpaceId('my-space'));
+        return new DashboardPlugin(initContext).start(mockCoreStart, {
+          embeddable: mockEmbeddable,
+          taskManager: mockTaskManager,
+          spaces,
+        }).client;
+      };
+
+      beforeEach(() => {
+        savedObjectsClient = savedObjectsClientMock.create();
+        mockCoreStart.savedObjects.getScopedClient.mockReturnValue(savedObjectsClient);
+        jest.mocked(mockCoreStart.security.authc.getCurrentUser).mockReturnValue(user);
+      });
+
+      test('create writes as the user of the request, in its space', async () => {
+        savedObjectsClient.create.mockResolvedValue(savedDashboard('new-id', 'My dashboard'));
+
+        const body = await startClient().create(
+          request,
+          { ...DEFAULT_DASHBOARD_STATE, title: 'My dashboard' },
+          { isDashboardAppRequest: true }
+        );
+
+        expect(mockCoreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request);
+        expect(savedObjectsClient.create).toHaveBeenCalledWith(
+          'dashboard',
+          expect.objectContaining({ title: 'My dashboard' }),
+          expect.anything()
+        );
+        const [services, , , options] = jest.mocked(create).mock.calls[0];
+        expect(services.security.authc.getCurrentUser()).toBe(user);
+        expect(mockCoreStart.security.authc.getCurrentUser).toHaveBeenCalledWith(request);
+        expect(options).toEqual({ spaceId: 'my-space', isDashboardAppRequest: true });
+        expect(body).toMatchObject({ id: 'new-id', data: { title: 'My dashboard' } });
+      });
+
+      test('update overwrites the dashboard as the user of the request, in its space', async () => {
+        savedObjectsClient.get
+          .mockResolvedValueOnce(savedDashboard('existing-id', 'Old title'))
+          .mockResolvedValueOnce(savedDashboard('existing-id', 'New title'));
+        savedObjectsClient.update.mockResolvedValue(savedDashboard('existing-id', 'New title'));
+
+        const body = await startClient().update(request, 'existing-id', {
+          ...DEFAULT_DASHBOARD_STATE,
+          title: 'New title',
+        });
+
+        expect(savedObjectsClient.update).toHaveBeenCalledWith(
+          'dashboard',
+          'existing-id',
+          expect.objectContaining({ title: 'New title' }),
+          expect.objectContaining({ mergeAttributes: false })
+        );
+        expect(savedObjectsClient.create).not.toHaveBeenCalled();
+        const [services, , , , options] = jest.mocked(update).mock.calls[0];
+        expect(services.security.authc.getCurrentUser()).toBe(user);
+        expect(options).toEqual({ spaceId: 'my-space', isDashboardAppRequest: undefined });
+        expect(body).toMatchObject({ id: 'existing-id', data: { title: 'New title' } });
+      });
+
+      test('update creates the dashboard when the id does not exist', async () => {
+        savedObjectsClient.get.mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError('dashboard', 'missing-id')
+        );
+        savedObjectsClient.create.mockResolvedValue(savedDashboard('missing-id', 'Fresh'));
+
+        const body = await startClient().update(request, 'missing-id', {
+          ...DEFAULT_DASHBOARD_STATE,
+          title: 'Fresh',
+        });
+
+        expect(savedObjectsClient.create).toHaveBeenCalledWith(
+          'dashboard',
+          expect.objectContaining({ title: 'Fresh' }),
+          expect.objectContaining({ id: 'missing-id' })
+        );
+        expect(body).toMatchObject({ id: 'missing-id', data: { title: 'Fresh' } });
+      });
     });
   });
 });

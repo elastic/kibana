@@ -141,6 +141,7 @@ dependsOn:
   - '@kbn/change-history-ui'
   - '@kbn/spaces-plugin'
   - '@kbn/core-http-server-mocks'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

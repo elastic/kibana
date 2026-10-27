@@ -56,8 +56,9 @@ export const registerRestoreChangeRoute = (router: IRouter<RequestHandlerContext
         return res.notFound();
       }
 
+      const core = await ctx.core;
       const result = await update(
-        ctx,
+        core,
         getDashboardStateSchema(true, true),
         req.params.id,
         item.object.snapshot as DashboardState,

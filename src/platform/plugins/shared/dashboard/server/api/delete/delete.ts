@@ -54,7 +54,7 @@ export async function deleteDashboard(
       currentSequence: savedObject.attributes.historySequence,
     });
     await addToHistory({
-      ctx: requestCtx,
+      services: core,
       dashboardId: id,
       snapshot,
       spaceId,

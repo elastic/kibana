@@ -91,8 +91,9 @@ export function registerUpdateRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
+          const { core } = await ctx.resolve(['core']);
           const { body, operation } = await update(
-            ctx,
+            core,
             getCachedDashboardStateSchema(),
             req.params.id,
             req.body,

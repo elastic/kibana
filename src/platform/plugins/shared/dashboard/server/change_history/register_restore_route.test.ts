@@ -74,7 +74,8 @@ describe('restore route', () => {
       body: { data: { title: 'Old title' } },
       operation: 'update',
     } as never);
-    const ctx = {} as never;
+    const core = {};
+    const ctx = { core: Promise.resolve(core) } as never;
     const res = httpServerMock.createResponseFactory();
 
     await getHandler()(ctx, request(), res);
@@ -83,7 +84,7 @@ describe('restore route', () => {
       additionalFilters: [{ term: { 'event.id': 'c2' } }],
       size: 1,
     });
-    expect(mockedUpdate).toHaveBeenCalledWith(ctx, expect.anything(), 'dash-1', snapshot, {
+    expect(mockedUpdate).toHaveBeenCalledWith(core, expect.anything(), 'dash-1', snapshot, {
       spaceId: 'my-space',
       isDashboardAppRequest: true,
       restoredFrom: 2,
