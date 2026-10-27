@@ -118,6 +118,9 @@ outputs:
     - verdict
     - summary_markdown
 consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Attack Discovery worker"
   # Enforced by `require_supported_verdict`. `failed` is absent deliberately: it is
   # an execution state the review derives, not a classification.
   supported_verdicts:
@@ -410,6 +413,7 @@ steps:
     create-conversation: true
     timeout: "8m"
     with:
+      author_name: "{{ consts.author_name }}"
       configuration_overrides:
         enable_elastic_capabilities: false
         tools: []
