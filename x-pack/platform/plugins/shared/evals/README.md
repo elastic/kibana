@@ -77,10 +77,10 @@ node scripts/edot_collector
 
 | Mode | Loads |
 | --- | --- |
-| `runtime` (default) | Only what other plugins need to run evaluators in-process. No HTTP routes, `evals` feature or privileges, data streams, app, management section, or `ai.evals.*` workflow steps. |
-| `full` | Also everything runtime mode leaves out: the evals UI and API that the `@kbn/evals` CLI, in-tool experiments, and the Agent Builder evals skills use. |
+| `runtime` | Only what other plugins need to run evaluators in-process. No HTTP routes, `evals` feature or privileges, data streams, app, management section, or `ai.evals.*` workflow steps. |
+| `full` (default) | Also everything runtime mode leaves out: the evals UI and API that the `@kbn/evals` CLI, in-tool experiments, and the Agent Builder evals skills use. |
 
-Runtime mode is for deployments that run evaluators in the background without exposing evals to users. Anything that uses the evals UI or API, including local development, Scout and FTR configs, and the golden cluster, sets `xpack.evals.mode: full`. Against a runtime-mode Kibana, the `@kbn/evals` CLI reports that the evals API is not available.
+Runtime mode is for deployments that run evaluators in the background without exposing evals to users. The default will move to `runtime`, so anything that uses the evals UI or API, including local development, Scout and FTR configs, and the golden cluster, sets `xpack.evals.mode: full` explicitly. Against a runtime-mode Kibana, the `@kbn/evals` CLI reports that the evals API is not available.
 
 ### Prerequisite data
 

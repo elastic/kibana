@@ -546,7 +546,7 @@ describe('EvalsClient', () => {
     const client = new EvalsClient(kbnClient, log);
 
     await expect(client.assertPluginEnabled()).rejects.toThrow(
-      'The evals API is not available on the target Kibana. Ensure xpack.evals.enabled=true and xpack.evals.mode=full are set in the Kibana configuration; runtime mode (the default) loads no evals routes.'
+      'The evals API is not available on the target Kibana. Ensure xpack.evals.enabled=true and xpack.evals.mode=full are set in the Kibana configuration; runtime mode loads no evals routes.'
     );
   });
 

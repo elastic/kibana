@@ -122,7 +122,7 @@ export interface BaselineExperiment {
 // A disabled plugin and runtime mode both leave the evals routes unregistered, so a 404 can't
 // tell them apart.
 const EVALS_PLUGIN_DISABLED_MESSAGE =
-  'The evals API is not available on the target Kibana. Ensure xpack.evals.enabled=true and xpack.evals.mode=full are set in the Kibana configuration; runtime mode (the default) loads no evals routes.';
+  'The evals API is not available on the target Kibana. Ensure xpack.evals.enabled=true and xpack.evals.mode=full are set in the Kibana configuration; runtime mode loads no evals routes.';
 
 const SPACES_URL = '/api/spaces/space';
 // Serverless turns away a public api call that doesn't say which version it
