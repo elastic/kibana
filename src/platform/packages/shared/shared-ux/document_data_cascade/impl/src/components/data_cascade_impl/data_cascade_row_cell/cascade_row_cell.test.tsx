@@ -166,7 +166,7 @@ describe('CascadeRowCellPrimitive', () => {
         randomField: 'randomValue',
       });
 
-      renderComponent({
+      const { container } = renderComponent({
         cascadeGroups,
         initialGroupColumn: [cascadeGroups[0]],
         row: {
@@ -188,6 +188,9 @@ describe('CascadeRowCellPrimitive', () => {
         getVirtualizer: mockVirtualizerGetter,
       });
 
+      const cell = container.querySelector('[data-cascade-row-loading]');
+      expect(cell).toHaveAttribute('data-cascade-row-loading', 'true');
+
       await waitFor(() => {
         expect(childPropsSpy).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -203,6 +206,8 @@ describe('CascadeRowCellPrimitive', () => {
           })
         );
       });
+
+      expect(cell).toHaveAttribute('data-cascade-row-loading', 'false');
     });
 
     it('should provide virtualizerController from the virtualizer childController', async () => {
