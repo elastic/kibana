@@ -218,8 +218,8 @@ export class AlertZeroPlugin
     });
     if (agentBuilder && proposals && agenticInvestigations) {
       const assertAlertZeroAccess = createAssertAlertZeroAccess(async () => {
-        const [core, { security }] = await coreSetup.getStartServices();
-        return { core, security };
+        const [core, { security, spaces }] = await coreSetup.getStartServices();
+        return { core, security, spaces, isServerless: this.isServerless };
       });
       registerAgentType(agentBuilder);
       registerAttachments(agentBuilder);
