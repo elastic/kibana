@@ -8,6 +8,7 @@
  */
 
 import type { Optional } from 'utility-types';
+import { EUI_VIS_COLOR_STORE } from '@elastic/eui';
 import type { KbnBasePaletteConfig } from './palette';
 import { KbnBasePalette } from './palette';
 import type { IKbnPalette, KbnPaletteType } from './types';
@@ -30,6 +31,10 @@ export class KbnColorFnPalette extends KbnBasePalette implements IKbnPalette {
 
   #colorFn: (n: number) => string[];
   #defaultNumberOfColors: number;
+  // Generated colors per requested count; EUI palette functions read the current theme's vis colors,
+  // so the cache is only valid for the vis colors it was built with
+  #colorsByCount = new Map<number, string[]>();
+  #cachedVisColors = EUI_VIS_COLOR_STORE.visColors;
 
   constructor({
     type,
@@ -47,6 +52,17 @@ export class KbnColorFnPalette extends KbnBasePalette implements IKbnPalette {
   }
 
   public colors = (n: number = this.#defaultNumberOfColors) => {
-    return this.#colorFn(n === undefined ? n : Math.max(1, n));
+    const count = n === undefined ? n : Math.max(1, n);
+    if (this.#cachedVisColors !== EUI_VIS_COLOR_STORE.visColors) {
+      this.#cachedVisColors = EUI_VIS_COLOR_STORE.visColors;
+      this.#colorsByCount.clear();
+    }
+    let colors = this.#colorsByCount.get(count);
+    if (!colors) {
+      colors = this.#colorFn(count);
+      this.#colorsByCount.set(count, colors);
+    }
+    // Copy so callers can't mutate the cached colors
+    return [...colors];
   };
 }
