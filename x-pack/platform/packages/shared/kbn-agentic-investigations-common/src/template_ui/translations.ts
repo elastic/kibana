@@ -21,6 +21,9 @@ export const TEMPLATE_UI_LABELS = Object.freeze({
   status: i18n.translate('xpack.alertzero.templateUi.status', {
     defaultMessage: 'Status',
   }),
+  severity: i18n.translate('xpack.alertzero.templateUi.severity', {
+    defaultMessage: 'Severity',
+  }),
   assignees: i18n.translate('xpack.alertzero.templateUi.assignees', {
     defaultMessage: 'Assignees',
   }),
@@ -66,6 +69,11 @@ export const TIMELINE_EVENT_LABELS = Object.freeze({
   attachmentDeleted: (type: string) =>
     i18n.translate('xpack.alertzero.templateUi.timeline.attachmentDeleted', {
       defaultMessage: 'Removed a {type} attachment',
+      values: { type },
+    }),
+  attachmentRestored: (type: string) =>
+    i18n.translate('xpack.alertzero.templateUi.timeline.attachmentRestored', {
+      defaultMessage: 'Restored a {type} attachment',
       values: { type },
     }),
 });

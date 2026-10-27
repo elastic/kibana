@@ -110,6 +110,24 @@ describe('generateExecutorFunction', () => {
       expect(result).toEqual({ status: 'ok', data: { result: 'ok' }, actionId: connectorId });
     });
 
+    it('passes the connector type to the axios instance factory for auth metrics', async () => {
+      const executor = generateExecutorFunction({
+        connectorTypeId: '.test_connector',
+        actions: makeActions(mockHandler),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+      });
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      expect(mockGetAxiosInstanceWithAuth).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorTypeId: '.test_connector' })
+      );
+    });
+
     it('passes subActionParams to the handler', async () => {
       const executor = makeExecutor();
 

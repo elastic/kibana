@@ -93,7 +93,7 @@ export const SecretConfigurationSchemaValidation = {
       return;
     }
 
-    return i18n.translate('xpack.stackConnectors.webhook.invalidSecrets', {
+    return i18n.translate('connectors.webhook.invalidSecrets', {
       defaultMessage:
         'must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)',
     });

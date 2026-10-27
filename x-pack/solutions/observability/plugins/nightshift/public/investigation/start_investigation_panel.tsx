@@ -8,13 +8,16 @@
 import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
-  EuiPanel,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiSpacer,
+  EuiText,
   EuiTextArea,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
@@ -25,16 +28,19 @@ import { useStartInvestigation } from '../hooks/use_start_investigation';
 
 export const START_INVESTIGATION_PANEL_ID = 'nightshiftStartInvestigationPanel';
 
+const MODAL_MAX_WIDTH_PX = 480;
+
 const SUBMIT_SHORTCUT_LABEL = isMac ? '⌘ + Enter' : 'Ctrl + Enter';
 
 export interface StartInvestigationPanelProps {
   onClose: () => void;
 }
 
-/** Collects a free-form question and starts a deductive investigation for it. */
+/** Modal that collects a free-form question and starts a deductive investigation for it. */
 export function StartInvestigationPanel({
   onClose,
 }: StartInvestigationPanelProps): React.ReactElement {
+  const titleId = useGeneratedHtmlId({ prefix: 'nightshiftStartInvestigationTitle' });
   const [message, setMessage] = useState('');
   const { startInvestigation, isStarting } = useStartInvestigation({ onStarted: onClose });
 
@@ -50,87 +56,90 @@ export function StartInvestigationPanel({
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        onClose();
-        return;
-      }
       if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
         handleSubmit();
       }
     },
-    [handleSubmit, onClose]
+    [handleSubmit]
   );
 
   return (
-    <EuiPanel
-      id={START_INVESTIGATION_PANEL_ID}
+    <EuiModal
+      aria-labelledby={titleId}
       data-test-subj="nightshiftStartInvestigationPanel"
-      hasBorder
-      paddingSize="m"
+      id={START_INVESTIGATION_PANEL_ID}
+      maxWidth={MODAL_MAX_WIDTH_PX}
+      onClose={onClose}
+      outsideClickCloses
     >
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('xpack.nightshift.startInvestigation.inputLabel', {
-          defaultMessage: 'What should be investigated?',
-        })}
-        helpText={i18n.translate('xpack.nightshift.startInvestigation.inputHelpText', {
-          defaultMessage: 'Press {keyboardShortcut} to start the investigation.',
-          values: { keyboardShortcut: SUBMIT_SHORTCUT_LABEL },
-        })}
-      >
-        <EuiTextArea
-          autoFocus
-          data-test-subj="nightshiftStartInvestigationInput"
-          disabled={isStarting}
-          fullWidth
-          maxLength={MAX_TEXT_LENGTH}
-          onChange={(event) => setMessage(event.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={i18n.translate('xpack.nightshift.startInvestigation.inputPlaceholder', {
-            defaultMessage: 'For example: Why did checkout latency spike in the last hour?',
+      <EuiModalHeader>
+        <EuiModalHeaderTitle id={titleId}>
+          {i18n.translate('xpack.nightshift.startInvestigation.modalTitle', {
+            defaultMessage: 'Investigate',
           })}
-          resize="vertical"
-          rows={3}
-          value={message}
-        />
-      </EuiFormRow>
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
 
-      <EuiSpacer size="m" />
+      <EuiModalBody>
+        <EuiText size="s">
+          <p>
+            {i18n.translate('xpack.nightshift.startInvestigation.description', {
+              defaultMessage:
+                'Describe the problem you want to look at. Any additional information about your system is helpful.',
+            })}
+          </p>
+        </EuiText>
 
-      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="nightshiftStartInvestigationCancelButton"
+        <EuiSpacer size="m" />
+
+        <EuiFormRow
+          fullWidth
+          helpText={i18n.translate('xpack.nightshift.startInvestigation.inputHelpText', {
+            defaultMessage: 'Press {keyboardShortcut} to start the investigation.',
+            values: { keyboardShortcut: SUBMIT_SHORTCUT_LABEL },
+          })}
+        >
+          <EuiTextArea
+            autoFocus
+            aria-label={i18n.translate('xpack.nightshift.startInvestigation.inputAriaLabel', {
+              defaultMessage: 'What should be investigated?',
+            })}
+            data-test-subj="nightshiftStartInvestigationInput"
             disabled={isStarting}
-            onClick={onClose}
-            size="s"
-          >
-            {i18n.translate('xpack.nightshift.startInvestigation.cancelButtonText', {
-              defaultMessage: 'Cancel',
+            fullWidth
+            maxLength={MAX_TEXT_LENGTH}
+            onChange={(event) => setMessage(event.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={i18n.translate('xpack.nightshift.startInvestigation.inputPlaceholder', {
+              defaultMessage:
+                "For example, why is checkout latency up? Or what caused last night's error spike?",
             })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="nightshiftStartInvestigationSubmitButton"
-            disabled={!canSubmit}
-            fill
-            isLoading={isStarting}
-            onClick={handleSubmit}
-            size="s"
-            {...getEbtProps({
-              action: NIGHTSHIFT_EBT_ACTIONS.START_INVESTIGATION,
-              element: NIGHTSHIFT_EBT_ELEMENTS.START_INVESTIGATION_PANEL,
-            })}
-          >
-            {i18n.translate('xpack.nightshift.startInvestigation.submitButtonText', {
-              defaultMessage: 'Investigate',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+            resize="vertical"
+            rows={3}
+            value={message}
+          />
+        </EuiFormRow>
+      </EuiModalBody>
+
+      <EuiModalFooter>
+        <EuiButton
+          data-test-subj="nightshiftStartInvestigationSubmitButton"
+          disabled={!canSubmit}
+          fill
+          isLoading={isStarting}
+          onClick={handleSubmit}
+          size="s"
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.START_INVESTIGATION,
+            element: NIGHTSHIFT_EBT_ELEMENTS.START_INVESTIGATION_PANEL,
+          })}
+        >
+          {i18n.translate('xpack.nightshift.startInvestigation.submitButtonText', {
+            defaultMessage: 'Investigate',
+          })}
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 }

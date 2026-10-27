@@ -36,6 +36,7 @@ export const createMockWorkflowApi = (): MockWorkflowApi =>
     testWorkflow: jest.fn(),
     testStep: jest.fn(),
     getWorkflowExecutions: jest.fn(),
+    searchExecutions: jest.fn(),
     getWorkflowStepExecutions: jest.fn(),
     getExecution: jest.fn(),
     cancelExecution: jest.fn(),

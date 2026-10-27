@@ -14,7 +14,12 @@ import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_rel
 
 // Mock the hooks that depend on Kibana context — keep the component under test
 // isolated so we can drive its UI purely through controlled bindings.
-jest.mock('./use_relay_app_bindings');
+jest.mock('./use_relay_app_bindings', () => ({
+  ...jest.requireActual('./use_relay_app_bindings'),
+  useRelayAppBindings: jest.fn(),
+  useBindChannel: jest.fn(),
+  useUnbindChannel: jest.fn(),
+}));
 const mockDisconnectWorkspace = jest.fn().mockResolvedValue(undefined);
 const mockConnectWorkspace = jest.fn().mockResolvedValue(undefined);
 const mockConfirmWorkspace = jest.fn().mockResolvedValue(undefined);
@@ -45,7 +50,11 @@ function makeBindings(bindings: SlackChannelBinding[], nextCursor?: string) {
     isFetching: false,
     nextCursor,
   });
-  mockUseBindChannel.mockReturnValue({ bind: bindChannel, isLoading: false });
+  mockUseBindChannel.mockReturnValue({
+    bind: bindChannel,
+    isLoading: false,
+    clearFailure: jest.fn(),
+  });
   mockUseUnbindChannel.mockReturnValue({ unbind: unbindChannel, isLoading: false });
 }
 
@@ -209,11 +218,11 @@ describe('AppsSection', () => {
     // Empty input keeps the button disabled.
     expect(bindBtn).toBeDisabled();
 
-    fireEvent.change(input, { target: { value: '  C789  ' } });
+    fireEvent.change(input, { target: { value: '  C0123456789  ' } });
     expect(bindBtn).toBeEnabled();
 
     fireEvent.click(bindBtn);
-    expect(bindChannel).toHaveBeenCalledWith('C789');
+    expect(bindChannel).toHaveBeenCalledWith('C0123456789');
 
     // The field is cleared once the bind resolves.
     await waitFor(() => expect(input).toHaveValue(''));
@@ -292,13 +301,54 @@ describe('AppsSection', () => {
     );
   });
 
+  it('keeps the Bind button disabled for input that is not a channel id or link', async () => {
+    makeBindings([]);
+    setup();
+    revealChannels();
+
+    const input = await screen.findByTestId('streamsSlackAppChannelIdInput');
+    fireEvent.change(input, { target: { value: '#general' } });
+
+    expect(screen.getByTestId('streamsSlackAppBindChannelButton')).toBeDisabled();
+    expect(screen.getByTestId('streamsSlackAppChannelInputHelp')).toHaveTextContent(
+      'Enter a channel ID'
+    );
+  });
+
+  it('offers to reconnect Slack when private channel access is missing', async () => {
+    makeBindings([]);
+    mockUseBindChannel.mockReturnValue({
+      bind: bindChannel,
+      isLoading: false,
+      clearFailure: jest.fn(),
+      failure: { reason: 'private_channel_access_required', message: 'ignored' },
+    });
+    setup();
+    revealChannels();
+
+    expect(await screen.findByTestId('streamsSlackAppBindFailure')).toHaveTextContent(
+      'Reconnect Slack and allow it'
+    );
+    expect(screen.getByTestId('streamsSlackAppBindFailureReconnect')).toBeInTheDocument();
+    expect(screen.getByTestId('streamsSlackAppBindFailureRetry')).toBeInTheDocument();
+  });
+
+  it('shows a private channel as an accessible lock icon with its id and no name', async () => {
+    makeBindings([{ channel: 'G0123456789', visibility: 'private', status: 'bound_to_self' }]);
+    setup();
+    revealChannels();
+
+    expect(await screen.findByTestId('slackPrivateChannelIcon')).toBeInTheDocument();
+    expect(screen.getByText('G0123456789')).toBeInTheDocument();
+  });
+
   it('disables the Bind and Unbind controls when canEdit is false', async () => {
     makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
     setup(false /* canEdit = false */);
     revealChannels();
 
     const input = await screen.findByTestId('streamsSlackAppChannelIdInput');
-    fireEvent.change(input, { target: { value: 'C789' } });
+    fireEvent.change(input, { target: { value: 'C0123456789' } });
 
     expect(input).toBeDisabled();
     expect(screen.getByTestId('streamsSlackAppBindChannelButton')).toBeDisabled();

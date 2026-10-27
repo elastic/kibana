@@ -344,6 +344,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
         ) : (
           <ServicePanelContent
             entityRecord={entityFromStoreResult.entityRecord ?? undefined}
+            isEntityRecordLoading={entityFromStoreResult.isLoading}
             serviceName={serviceName}
             observedService={observedService}
             riskScoreState={riskScoreState}
@@ -359,6 +360,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             onShowEntity={onShowRelatedEntityFromResolution}
             riskScoreQueryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
             isGroupView={isGroupView}
+            mode={mode}
             hideHeaderIcons
           />
         )}

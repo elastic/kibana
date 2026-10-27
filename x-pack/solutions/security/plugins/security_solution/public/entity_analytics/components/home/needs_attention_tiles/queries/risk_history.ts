@@ -31,23 +31,25 @@ export const groupMarkerEval = (indent: string): string =>
   `${indent}| EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == "resolution", 1, 0)`;
 
 /**
- * Returns the stages that turn the docs of one moment into one value per entity, in
+ * Returns the stages that turn the docs of one moment into one value per entity (`key`), in
  * `outputColumn`: the last value of the group (resolution) docs if the entity has any, else the
  * last value of its own (base) docs. The last value of each type is taken first, with the type
  * as a grouping key, because LAST() does not skip nulls: a LAST over a column that is null for the
- * other type returns null when that type's doc is the latest.
+ * other type returns null when that type's doc is the latest. A `LAST(...) WHERE` per type would
+ * drop groups on multi-shard indices (elastic/elasticsearch#162505).
  */
-const pickGroupValueFirst = (
+export const pickGroupValueFirst = (
   indent: string,
+  key: string,
   valueColumn: string,
   outputColumn: string
 ): string[] => [
   groupMarkerEval(indent),
-  `${indent}| STATS last_value = LAST(${valueColumn}, @timestamp) BY entity_euid, is_group`,
+  `${indent}| STATS last_value = LAST(${valueColumn}, @timestamp) BY ${key}, is_group`,
   `${indent}| EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)`,
-  `${indent}| STATS group_value = MAX(group_part), own_value = MAX(own_part) BY entity_euid`,
+  `${indent}| STATS group_value = MAX(group_part), own_value = MAX(own_part) BY ${key}`,
   `${indent}| EVAL ${outputColumn} = COALESCE(group_value, own_value)`,
-  `${indent}| KEEP entity_euid, ${outputColumn}`,
+  `${indent}| KEEP ${key}, ${outputColumn}`,
 ];
 
 // Nested single-condition CASEs: ES|QL evaluates a multi-condition CASE one row at a time.
@@ -107,7 +109,7 @@ export const buildRiskScoreHistoryBranch = (
   `  FROM ${riskScoreIndex}`,
   `  | WHERE @timestamp >= ${at} - ${BOUNDARY_WINDOW_HOURS} hours AND @timestamp <= ${at}`,
   ...buildRiskScoreEvals('  '),
-  ...pickGroupValueFirst('  ', 'risk_score', outputColumn),
+  ...pickGroupValueFirst('  ', 'entity_euid', 'risk_score', outputColumn),
   `  | RENAME entity_euid AS \`entity.id\``,
 ];
 
@@ -123,6 +125,6 @@ export const buildRiskLevelHistoryBranch = (
   `  FROM ${riskScoreIndex}`,
   `  | WHERE @timestamp >= ${at} - ${BOUNDARY_WINDOW_HOURS} hours AND @timestamp <= ${at}`,
   ...buildRiskLevelEvals('  '),
-  ...pickGroupValueFirst('  ', 'level_num', outputColumn),
+  ...pickGroupValueFirst('  ', 'entity_euid', 'level_num', outputColumn),
   `  | RENAME entity_euid AS \`entity.id\``,
 ];

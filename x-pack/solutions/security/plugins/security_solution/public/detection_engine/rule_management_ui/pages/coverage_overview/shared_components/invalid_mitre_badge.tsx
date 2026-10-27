@@ -15,7 +15,7 @@ export interface InvalidMitreBadgeProps {
 }
 
 /**
- * A warning-colored badge for a MITRE ATT&CK® ID that is no longer present in the
+ * A warning-colored badge for a MITRE ID that is no longer present in the
  * currently bundled dataset. Links out to the MITRE reference page when the ID
  * maps to a resolvable URL.
  */

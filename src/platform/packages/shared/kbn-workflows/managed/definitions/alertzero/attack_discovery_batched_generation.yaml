@@ -39,7 +39,9 @@ triggers:
             Maximum alerts per Attack Discovery run. Also sets the retrieval
             ceiling at `batch_size * 100`, because the engine caps a parallel
             fan-out at 100 branches — a smaller batch buys less total coverage,
-            not more.
+            not more. A prompt-template connector analyzes at most 100 alerts
+            per batch; a larger batch reports that count and logs how many
+            alerts were omitted.
           maximum: 1000
           minimum: 50
           type: integer
@@ -65,6 +67,18 @@ steps:
     type: elasticsearch.esql.query
     timeout: "5m"
     with:
+      # Alerts the review already retired: a true-positive or inconclusive attack
+      # tags its alerts `az:ad_correlated` (`consts.ad_correlated_tag` in
+      # attack_discovery_review.yaml; keep the two in sync), so correlating them again
+      # would only persist a near-duplicate attack. A DSL `must_not` rather than a
+      # `| WHERE`: it is pushed down to Lucene, and it handles an untagged alert and a
+      # multi-valued tag field without the null arm an ES|QL comparison would need.
+      filter:
+        bool:
+          must_not:
+            - terms:
+                kibana.alert.workflow_tags:
+                  - az:ad_correlated
       # The `IS NULL` arm is load-bearing: `!=` alone is null-valued, and so
       # false, for an alert with no closing reason. Kept as its own `| WHERE`
       # pipe (pipes are ANDed) so the `OR` cannot widen the clauses above it.
@@ -145,10 +159,14 @@ steps:
           connector_id: "{{ inputs.connector_id }}"
           # Stated on the leaf step rather than threaded down from the Worker: the
           # tier is a property of the call, not of the caller. Only consulted when
-          # `connector_id` is empty, and ignored when AlertZero is disabled and the
-          # tier is therefore unregistered. Keep in sync with
-          # ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
-          feature_id: alertzero_frontier
+          # `connector_id` is empty. An unset cyber-domain row resolves to nothing
+          # (it recommends no endpoints), so the frontier tier stays in charge.
+          # Ignored when AlertZero is disabled and the ids are therefore
+          # unregistered. Keep in sync with ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID
+          # and ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+          feature_id:
+            - alertzero_template_models
+            - alertzero_frontier
           # No ground-truth gate: each generated attack goes to a review whose FP/TP
           # analysis owns the false-positive decision. The gate corroborates the
           # alerts against the same entities and raw events and hands its

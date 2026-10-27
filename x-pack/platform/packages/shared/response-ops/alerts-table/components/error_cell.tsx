@@ -41,7 +41,7 @@ export const ErrorCell = ({ error }: { error: Error }) => (
         >
           <strong>
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertTable.viewError"
+              id="xpack.responseOpsAlertsTable.sections.alertTable.viewError"
               defaultMessage="An error occurred"
             />
           </strong>

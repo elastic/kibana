@@ -9,7 +9,6 @@ import type { PresetSchedule } from '../../../common/automation_schedule';
 
 export type AutomationType = 'custom' | 'managed';
 
-export type AlertStatus = 'active' | 'inactive' | 'any';
 export type RuleNameMatchMode = 'substring' | 'regex';
 export type SlackTriggerEvent = 'message';
 export type OverlapPolicy = 'drop' | 'cancel_in_progress' | 'queue';
@@ -23,7 +22,6 @@ export type NightshiftTriggerRow =
       ruleNamePattern?: string;
       ruleNames?: string[];
       ruleNameMatchMode?: RuleNameMatchMode;
-      alertStatus?: AlertStatus;
       tags?: string[];
     }
   | (PresetSchedule & { kind: 'schedule'; scopeQuery?: string })
@@ -32,6 +30,7 @@ export type NightshiftTriggerRow =
       event: SlackTriggerEvent;
       channels?: string[];
       users?: string[];
+      bots?: string[];
       messageFilter?: string;
     };
 

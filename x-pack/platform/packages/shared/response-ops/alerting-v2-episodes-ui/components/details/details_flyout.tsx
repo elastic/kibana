@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -42,7 +42,7 @@ import { AlertEpisodeRunbookSection } from './runbook_section';
 import { AlertEpisodeTimelineSection } from './timeline_section';
 import { AlertEpisodeMetadataSection } from './metadata_section';
 import { DOC_VIEWER_FLEX_HEIGHT_SENTINEL } from './metadata_layout';
-import { EpisodeFooterActionMenu } from './footer_action_menu';
+import { buildEpisodeMenuPanels } from './build_episode_menu_panels';
 import { EMPTY_VALUE } from '../../constants';
 import { getConnectorSource, useEpisodeSource } from '../../source_labels';
 import { formatDateTime } from '../../utils/format_date_time';
@@ -179,6 +179,7 @@ export const AlertEpisodeDetailsFlyout = ({
     severity,
     episodeAction,
     groupAction,
+    isActionStateLoaded,
     isFlapping,
   } = useEpisodeDetailsHeaderData({ episodeId, groupHash, services });
   const { label: systemLabel, icon: systemIcon } = useEpisodeSource(sourceId);
@@ -192,24 +193,43 @@ export const AlertEpisodeDetailsFlyout = ({
   // Related episodes are matched by rule or external source. Until the episode loads the
   // section renders its own loading or error state, so the panel stays.
   const showRelated = !episode || Boolean(episode['rule.id']) || connectorSource !== undefined;
-  const episodes = useMemo(() => (episode ? [episode] : []), [episode]);
+  // The actions depend on the action state, so they wait for it to load.
+  const episodes = useMemo(
+    () => (episode && isActionStateLoaded ? [episode] : []),
+    [episode, isActionStateLoaded]
+  );
   const compatibleActions = useMemo(
     () => (actions && episodes.length ? actions.filter((a) => a.isCompatible({ episodes })) : []),
+    [actions, episodes]
+  );
+  const menuActions = useMemo(
+    () =>
+      actions && episodes.length
+        ? actions.filter(
+            (action) =>
+              action.isCompatible({ episodes }) || Boolean(action.showWhenDisabled?.({ episodes }))
+          )
+        : [],
     [actions, episodes]
   );
 
   const initialWidth = useAlertDetailsFlyoutWidth();
 
-  // Footer "Take action" popover anchor, captured from the PrimaryAction button's onClick.
-  const menuAnchorRef = useRef<HTMLButtonElement | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const viewDetailsHref = getEpisodeDetailsHref(episodeId);
+  const takeActionPanels = useMemo(
+    () =>
+      buildEpisodeMenuPanels({
+        actions: menuActions,
+        episodes,
+        viewDetailsHref,
+        onSuccess: invalidateEpisodeQueries,
+      }),
+    [menuActions, episodes, viewDetailsHref, invalidateEpisodeQueries]
+  );
   const [isRunbookOpen, setIsRunbookOpen] = useState(false);
 
   const handleTabChange = (tabId: string) => {
     setTab(tabId as TabId);
-    // Close the action menu when switching tabs so its anchor cannot
-    // be removed while the popover is still open.
-    setIsMenuOpen(false);
   };
 
   // Metadata tab is only available when the rule is loaded.
@@ -242,7 +262,7 @@ export const AlertEpisodeDetailsFlyout = ({
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isResolved = episodeAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
-  const tags = groupAction?.tags ?? [];
+  const tags = episodeAction?.tags ?? [];
 
   // Header title: show skeleton while loading, fall back to generic label if rule not found.
   const ruleName = isRuleLoaded(ruleState) ? ruleState.rule.metadata.name : undefined;
@@ -259,7 +279,7 @@ export const AlertEpisodeDetailsFlyout = ({
 
   // Info block values
   const durationMs = episode?.duration;
-  const assigneeUid = episode?.last_assignee_uid ?? undefined;
+  const assigneeUid = episodeAction?.lastAssigneeUid ?? undefined;
   const episodeData = parseEpisodeDataJson(episode?.episode_data);
   const rawAlertUrl =
     typeof episodeData.alert_url === 'string' && episodeData.alert_url.length > 0
@@ -520,7 +540,8 @@ export const AlertEpisodeDetailsFlyout = ({
           <FlyoutTemplate.Body.TabPanel tabId="timeline">
             <AlertEpisodeTimelineSection
               episodeId={episodeId}
-              groupHash={groupHash}
+              seriesId={episode ? episode.series_id ?? null : undefined}
+              groupHash={episode?.group_hash}
               services={services}
             />
           </FlyoutTemplate.Body.TabPanel>
@@ -555,15 +576,11 @@ export const AlertEpisodeDetailsFlyout = ({
             onClick={onClose}
             data-test-subj="alertingV2EpisodeFlyoutCloseButton"
           />
-          <FlyoutTemplate.Footer.PrimaryAction
+          <FlyoutTemplate.Footer.PrimaryActionMenu
             label={i18n.FLYOUT_TAKE_ACTION}
-            iconType={isMenuOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
-            iconSide="right"
+            aria-label={i18n.FLYOUT_TAKE_ACTION}
+            panels={takeActionPanels}
             data-test-subj="alertingV2EpisodeFlyoutTakeActionButton"
-            onClick={(event) => {
-              menuAnchorRef.current = event.currentTarget as HTMLButtonElement;
-              setIsMenuOpen((prev) => !prev);
-            }}
           />
         </FlyoutTemplate.Footer>
       </FlyoutTemplate>
@@ -590,20 +607,6 @@ export const AlertEpisodeDetailsFlyout = ({
             <AlertEpisodeRunbookSection episodeId={episodeId} services={services} />
           </FlyoutTemplate.Body>
         </FlyoutTemplate>
-      )}
-
-      {/* The menu is rendered as a sibling of FlyoutTemplate so EuiWrappingPopover portals
-          outside the flyout's stacking context (preventing it rendering behind the flyout). */}
-      {menuAnchorRef.current && (
-        <EpisodeFooterActionMenu
-          anchor={menuAnchorRef.current}
-          isOpen={isMenuOpen}
-          onClose={() => setIsMenuOpen(false)}
-          actions={compatibleActions}
-          episodes={episodes}
-          viewDetailsHref={getEpisodeDetailsHref(episodeId)}
-          onSuccess={invalidateEpisodeQueries}
-        />
       )}
     </>
   );

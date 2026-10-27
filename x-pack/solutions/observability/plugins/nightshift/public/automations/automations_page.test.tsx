@@ -38,6 +38,15 @@ jest.mock('./hooks/use_automations', () => ({
 }));
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+jest.mock('../settings/components/apps_section/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../settings/components/apps_section/use_relay_app_bindings'),
+  useAllRelayAppBindings: () => ({
+    bindings: [],
+    isLoading: false,
+    isError: false,
+    isComplete: true,
+  }),
+}));
 jest.mock('./flyouts/create_flyout/create_automation_flyout', () => ({
   CreateAutomationFlyout: () => <div data-test-subj="createAutomationFlyoutStub">new</div>,
 }));
@@ -51,6 +60,11 @@ const mockUseFetchAutomations = useFetchAutomations as jest.Mock;
 const mockUseToggleAutomation = useToggleAutomation as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 
+const uiSettingsValues: Record<string, string> = {
+  'dateFormat:tz': 'Browser',
+  'dateFormat:dow': 'Sunday',
+};
+
 describe('AutomationsPage', () => {
   beforeAll(() => {
     Element.prototype.scrollIntoView = jest.fn();
@@ -62,6 +76,9 @@ describe('AutomationsPage', () => {
         application: { capabilities: { nightshift: { manage: true } }, navigateToUrl: jest.fn() },
         http: { basePath: { prepend: (path: string) => path } },
         charts: { theme: { useChartsBaseTheme: () => ({}), useSparklineOverrides: () => ({}) } },
+        uiSettings: {
+          get: jest.fn((key: string) => uiSettingsValues[key]),
+        },
       },
     });
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
@@ -416,7 +433,12 @@ describe('AutomationsPage', () => {
 
     it('hides management actions for read-only users', () => {
       mockUseKibana.mockReturnValue({
-        services: { application: { capabilities: { nightshift: {} } } },
+        services: {
+          application: { capabilities: { nightshift: {} } },
+          uiSettings: {
+            get: jest.fn((key: string) => uiSettingsValues[key]),
+          },
+        },
       });
       renderPage();
 

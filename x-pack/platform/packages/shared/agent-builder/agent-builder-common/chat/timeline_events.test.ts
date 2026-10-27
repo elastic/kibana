@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import type { ConversationEvent } from './timeline_events';
+import type { AttachmentTimelineEvent, ConversationEvent } from './timeline_events';
 import {
+  ATTACHMENT_EVENT_FORMAT,
   BUILT_IN_CONVERSATION_EVENT_TYPES,
   ConversationActivityEventType,
   EventActorType,
   TimelineEventType,
   answeredPromptRequestIds,
   assertValidConversationEventType,
+  getEventActorDisplayName,
   interruptionOfTerminal,
   isActivityEvent,
   isAttachmentEvent,
   isBuiltInConversationEventType,
+  isCurrentFormatAttachmentEvent,
   isCustomConversationEvent,
   isExecutionTerminalEvent,
   isTimelineEvent,
@@ -281,6 +284,30 @@ describe('interruptionOfTerminal', () => {
   });
 });
 
+describe('attachment events', () => {
+  const restored: AttachmentTimelineEvent = {
+    id: 'e1',
+    type: TimelineEventType.attachmentRestored,
+    created_at: '2026-01-01T00:00:00.000Z',
+    actor: { type: EventActorType.user, id: 'u1' },
+    data: { attachment_id: 'a1', attachment_type: 'text', current_version: 2, source: 'http_api' },
+  };
+
+  it('treats attachment_restored as an attachment event', () => {
+    expect(isAttachmentEvent(restored)).toBe(true);
+  });
+
+  it('tells events written in the current format from older ones', () => {
+    expect(isCurrentFormatAttachmentEvent(restored)).toBe(false);
+    expect(
+      isCurrentFormatAttachmentEvent({
+        ...restored,
+        data: { ...restored.data, format: ATTACHMENT_EVENT_FORMAT },
+      })
+    ).toBe(true);
+  });
+});
+
 describe('timelineExecutionId', () => {
   it('names the initial run of a round', () => {
     expect(timelineExecutionId('round-1', 0)).toBe('round-1::execution');
@@ -300,5 +327,28 @@ describe('timelineExecutionId', () => {
       roundId: 'round-1',
       index: 3,
     });
+  });
+});
+
+describe('getEventActorDisplayName', () => {
+  it('prefers the full name', () => {
+    expect(
+      getEventActorDisplayName({
+        type: EventActorType.user,
+        id: 'u1',
+        username: 'jdoe',
+        full_name: 'Jane Doe',
+      })
+    ).toBe('Jane Doe');
+  });
+
+  it('falls back to the username', () => {
+    expect(
+      getEventActorDisplayName({ type: EventActorType.user, id: 'u1', username: 'jdoe' })
+    ).toBe('jdoe');
+  });
+
+  it('returns undefined when the actor has no name', () => {
+    expect(getEventActorDisplayName({ type: EventActorType.system, id: 'kibana' })).toBeUndefined();
   });
 });

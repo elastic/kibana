@@ -441,7 +441,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.malware.max_file_size_bytes',
       {
         defaultMessage:
-          'Control the maximum file size in bytes that should be evaluated for malware. Default: 78643200.',
+          'Control the maximum file size in bytes that should be evaluated for malware. For Defend 9.6 and later, default: 157286400. For earlier versions, default: 78643200.',
       }
     ),
   },
@@ -506,7 +506,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.populate_file_data',
       {
         defaultMessage:
-          'Enable collection of entropy and header bytes on file events. Default: false.',
+          'Enable collection of entropy and header bytes on file events. For Defend 9.6 and later, default: true.',
       }
     ),
   },
@@ -769,7 +769,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.malware.max_file_size_bytes',
       {
         defaultMessage:
-          'Control the maximum file size in bytes that should be evaluated for malware. Default: 78643200.',
+          'Control the maximum file size in bytes that should be evaluated for malware. For Defend 9.6 and later, default: 157286400. For earlier versions, default: 78643200.',
       }
     ),
   },
@@ -1049,7 +1049,18 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.malware.max_file_size_bytes',
       {
         defaultMessage:
-          'Control the maximum file size in bytes that should be evaluated for malware. Default: 78643200.',
+          'Control the maximum file size in bytes that should be evaluated for malware. For Defend 9.6 and later, default: 157286400. For earlier versions, default: 78643200.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.malware.elf_model',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.malware.elf_model',
+      {
+        defaultMessage:
+          'Enable the machine learning model for ELF files. When disabled (false), blocklist, exceptionlist, and YARA scanning of ELF files continue. Default: true.',
       }
     ),
   },

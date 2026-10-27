@@ -13,13 +13,13 @@ import React from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import type { APIReturnType } from '@kbn/apm-api-shared';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { isEdge } from './utils';
 import type { ContentsProps } from './popover_content';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
+import { usePopoverFetchOptions } from './popover_fetch_options_context';
 
 type DependencyReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
@@ -37,10 +37,10 @@ export function DependencyContents({ selection, environment, start, end }: Conte
     '/mobile-services/{serviceName}/transactions/view'
   );
   const { offset, comparisonEnabled } = query;
+  const { showToastOnError } = usePopoverFetchOptions();
   const apmRouter = useApmRouter();
 
-  const isNode = !isEdge(selection);
-  const dependencyName = isNode ? selection.data.label : undefined;
+  const dependencyName = selection.data.label;
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -58,15 +58,12 @@ export function DependencyContents({ selection, environment, start, end }: Conte
         });
       }
     },
-    [environment, dependencyName, start, end, offset, comparisonEnabled]
+    [environment, dependencyName, start, end, offset, comparisonEnabled],
+    { showToastOnError }
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
   const trackEvent = useUiTracker();
-
-  if (!isNode) {
-    return null;
-  }
 
   const detailsUrl = dependencyName
     ? apmRouter.link('/dependencies/overview', {
@@ -80,7 +77,11 @@ export function DependencyContents({ selection, environment, start, end }: Conte
   return (
     <>
       <EuiFlexItem>
-        <StatsList data={data} isLoading={isLoading} />
+        <StatsList
+          data={data}
+          isLoading={isLoading}
+          hasFailed={!showToastOnError && status === FETCH_STATUS.FAILURE}
+        />
       </EuiFlexItem>
       <EuiSpacer size="s" />
       <EuiFlexItem>

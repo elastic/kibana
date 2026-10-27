@@ -84,7 +84,7 @@ describe('useWorkflowsSolutionNav', () => {
       expect(getLinks(result).map((link) => link.name)).toEqual([
         'Workflows',
         'Executions',
-        'Template Library',
+        'Template library',
       ]);
     });
 

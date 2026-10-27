@@ -25,34 +25,33 @@ const renderLiveState = (severity?: string) =>
   );
 
 describe('InvestigationLiveState', () => {
-  it('shows the severity the agent set mid-run and the running indicator', () => {
+  it('shows the running indicator while a worker runs, but not the severity', () => {
     mockUseInvestigation.mockReturnValue({
       data: { in_progress: true, metadata: { status: 'open', severity: 'critical' } },
     });
 
     renderLiveState('low');
 
-    expect(screen.getByTestId('investigationFlyoutSeverity')).toHaveTextContent('Critical');
     expect(screen.getByTestId('investigationRunningState')).toHaveTextContent('Investigating…');
+    // The severity picker in the header blocks shows it.
+    expect(screen.queryByTestId('investigationFlyoutSeverity')).not.toBeInTheDocument();
   });
 
-  it("falls back to the conversation's severity before the investigation is read", () => {
+  it('shows nothing before the investigation is read', () => {
     mockUseInvestigation.mockReturnValue({ data: undefined });
 
     renderLiveState('high');
 
-    expect(screen.getByTestId('investigationFlyoutSeverity')).toHaveTextContent('High');
     expect(screen.queryByTestId('investigationRunningState')).not.toBeInTheDocument();
   });
 
-  it('shows nothing for an unrated investigation nothing works on', () => {
+  it('shows nothing for an investigation nothing works on', () => {
     mockUseInvestigation.mockReturnValue({
       data: { in_progress: false, metadata: { status: 'open' } },
     });
 
     renderLiveState();
 
-    expect(screen.queryByTestId('investigationFlyoutSeverity')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationRunningState')).not.toBeInTheDocument();
   });
 });
