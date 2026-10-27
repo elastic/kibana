@@ -73,8 +73,9 @@ const sortEnvironments = (environments: Set<string>): string[] => {
 };
 
 /**
- * Merges the applications of each source; a source that fails is left out and listed in
- * `unavailableSources`, unless every source fails.
+ * Merges the applications of each source; a source whose search fails is left out and listed in
+ * `unavailableSources`, unless every source fails. Elasticsearch skips the indices of a wildcard
+ * the user can't read instead of failing, so partial index access returns fewer rows, unreported.
  */
 export const getApplications = async ({
   getOtelApplications,

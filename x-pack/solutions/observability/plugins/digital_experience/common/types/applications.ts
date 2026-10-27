@@ -72,7 +72,11 @@ export interface ApplicationsResponse {
   environments: string[];
   /** Page loads over the time range in the selected environment, per source. */
   pageLoadsOverTime: PageLoadsOverTime;
-  /** Sources that failed to load while others did, so their rows are missing; empty when none. */
+  /**
+   * Sources whose search failed while others loaded, so their rows are missing; empty when none.
+   * Indices the user can't read are left out of the search rather than failing it, so partial
+   * index access is not reported here.
+   */
   unavailableSources: ApplicationSource[];
 }
 
