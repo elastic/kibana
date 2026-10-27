@@ -64,29 +64,41 @@ function getHumanizedNodeName(node: NodeInfo) {
   return 'v' + node.version + ' @ ' + publishAddress + '(' + node.ip + ')';
 }
 
-export function mapNodesVersionCompatibility(
-  nodesInfoResponse: NodesInfo & { nodesInfoRequestError?: Error },
+/** The outcome of a nodes info request: the nodes it returned, or the error it failed with. */
+export type NodesInfoResult = { ok: true; value: NodesInfo } | { ok: false; error: Error };
+
+const UNABLE_TO_RETRIEVE = 'Unable to retrieve version information from Elasticsearch nodes.';
+
+/** The compatibility of the cluster a nodes info request reported on; a failed request is incompatible. */
+export function compatibilityFromNodesInfo(
+  result: NodesInfoResult,
   kibanaVersion: string,
   ignoreVersionMismatch: boolean
 ): NodesVersionCompatibility {
-  if (Object.keys(nodesInfoResponse.nodes ?? {}).length === 0) {
-    // Note: If the a nodesInfoRequestError is present, the message contains the nodesInfoRequestError.message as a suffix
-    let message = `Unable to retrieve version information from Elasticsearch nodes.`;
-    if (nodesInfoResponse.nodesInfoRequestError) {
-      message = message + ` ${nodesInfoResponse.nodesInfoRequestError.message}`;
-    }
+  if (!result.ok) {
     return {
       isCompatible: false,
-      message,
+      message: `${UNABLE_TO_RETRIEVE} ${result.error.message}`,
       incompatibleNodes: [],
       warningNodes: [],
       kibanaVersion,
-      nodesInfoRequestError: nodesInfoResponse.nodesInfoRequestError,
+      nodesInfoRequestError: result.error,
     };
   }
 
-  const nodes = Object.keys(nodesInfoResponse.nodes)
-    .map((key) => nodesInfoResponse.nodes[key])
+  const nodesInfo = result.value;
+  if (Object.keys(nodesInfo.nodes ?? {}).length === 0) {
+    return {
+      isCompatible: false,
+      message: UNABLE_TO_RETRIEVE,
+      incompatibleNodes: [],
+      warningNodes: [],
+      kibanaVersion,
+    };
+  }
+
+  const nodes = Object.keys(nodesInfo.nodes)
+    .map((key) => nodesInfo.nodes[key])
     .map((node) => Object.assign({}, node, { name: getHumanizedNodeName(node) }))
     .sort(compareNodes); // stable order, so `sameCompatibility` can compare positionally
 
