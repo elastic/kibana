@@ -1238,7 +1238,21 @@ describe('SourcesClient', () => {
         type: 'updated',
         source,
         previous: makeSource(),
-        onboardImmediately: true,
+        onboardImmediately: false,
+      });
+    });
+
+    it('reports an enable without asking for an onboarding run', async () => {
+      const { client, soClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject(makeAttributes({ enabled: false })));
+
+      const source = await client.setEnabled('source-1', true);
+
+      expect(onChange).toHaveBeenCalledWith({
+        type: 'updated',
+        source,
+        previous: makeSource({ enabled: false }),
+        onboardImmediately: false,
       });
     });
 

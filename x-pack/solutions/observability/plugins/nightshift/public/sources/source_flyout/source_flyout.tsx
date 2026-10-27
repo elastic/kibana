@@ -40,6 +40,7 @@ import { hasSameEsql } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useKibana } from '../../hooks/use_kibana';
+import { useBlocksNewActivity } from '../../data/maintenance/use_significant_events_maintenance';
 import { useSourcesApi } from '../../data/sources/use_sources_api';
 import { getFormattedError } from '../../common/errors';
 import { ConfirmSourceActionModal } from '../confirm_source_action_modal';
@@ -72,6 +73,8 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
     notifications: { toasts },
   } = useKibana().services;
   const { createSource, updateSource } = useSourcesApi();
+  // Only a known pause: while the state loads or fails, the server may still start the run.
+  const { isBlocked: isPaused } = useBlocksNewActivity();
   const titleId = useGeneratedHtmlId();
   const onboardImmediatelyId = useGeneratedHtmlId();
   // Only the query the user ran is previewed, so typing does not search on every keystroke.
@@ -101,8 +104,10 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
     enabled: !readOnly && !isQueryUnchanged,
   });
   const canSave = isQueryUnchanged || queryValidation.status === 'valid';
-  // Saving only starts onboarding for a new source or a new query, so the choice is hidden otherwise.
-  const canChooseOnboarding = !readOnly && !isQueryUnchanged;
+  // Saving only starts onboarding for a new source or a new query, of an enabled source, in a space
+  // that is not paused. The choice is hidden otherwise, and in the read-only view.
+  const canChooseOnboarding =
+    !readOnly && !isQueryUnchanged && !isPaused && source?.enabled !== false;
 
   const persist = async ({
     title,

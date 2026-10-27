@@ -83,10 +83,12 @@ describe('reconcileSourceRoute', () => {
     sources = [SOURCE],
     getDetectionClient,
     onboardImmediately = true,
+    sourceRevision,
   }: {
     sources?: Array<typeof SOURCE>;
     getDetectionClient?: jest.Mock;
     onboardImmediately?: boolean;
+    sourceRevision?: string;
   } = {}) => {
     const scheduleSourceOnboarding = jest.fn().mockResolvedValue(true);
     const kiClient = {
@@ -106,7 +108,7 @@ describe('reconcileSourceRoute', () => {
     const handlerParams = {
       params: {
         path: { sourceId: SOURCE.id },
-        body: { sourceSlug: SOURCE.slug, onboardImmediately },
+        body: { sourceSlug: SOURCE.slug, onboardImmediately, sourceRevision },
       },
       request: {},
       logger,
@@ -141,6 +143,29 @@ describe('reconcileSourceRoute', () => {
   it('does not schedule onboarding when the writer opted out, but still resets replaced knowledge', async () => {
     const { handlerParams, scheduleSourceOnboarding, kiClient } = makeReconcileParams({
       onboardImmediately: false,
+    });
+
+    await expect(reconcileSource.handler(handlerParams)).resolves.toEqual({ reconciled: true });
+
+    expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+    expect(kiClient.deleteIndicators).toHaveBeenCalledWith(SOURCE.id);
+  });
+
+  it('schedules onboarding while the source is still at the revision its write produced', async () => {
+    const { handlerParams, scheduleSourceOnboarding } = makeReconcileParams({
+      sourceRevision: SOURCE.esql_updated_at,
+    });
+
+    await reconcileSource.handler(handlerParams);
+
+    expect(scheduleSourceOnboarding).toHaveBeenCalledWith(SOURCE, {
+      ignoreContinuousSetting: true,
+    });
+  });
+
+  it('leaves a newer revision to the write that produced it, but still resets replaced knowledge', async () => {
+    const { handlerParams, scheduleSourceOnboarding, kiClient } = makeReconcileParams({
+      sourceRevision: 'rev-1',
     });
 
     await expect(reconcileSource.handler(handlerParams)).resolves.toEqual({ reconciled: true });

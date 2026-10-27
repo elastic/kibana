@@ -30,6 +30,10 @@ jest.mock('../../data/sources/use_sources_api', () => ({
     updateSource: { mutateAsync: mockUpdateSource, isLoading: false },
   }),
 }));
+let mockIsPaused = false;
+jest.mock('../../data/maintenance/use_significant_events_maintenance', () => ({
+  useBlocksNewActivity: () => ({ isBlocked: mockIsPaused }),
+}));
 jest.mock('./source_preview', () => ({ SourcePreview: () => null }));
 jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: ({
@@ -155,6 +159,7 @@ describe('SourceFlyout onboard immediately', () => {
     mockFetch.mockReset();
     mockCreateSource.mockReset();
     mockUpdateSource.mockReset();
+    mockIsPaused = false;
     mockFetch.mockResolvedValue({ valid: true, type: 'logs', index_exists: true });
   });
 
@@ -228,6 +233,20 @@ describe('SourceFlyout onboard immediately', () => {
         body: expect.objectContaining({ esql: 'FROM logs-other', onboard_immediately: false }),
       })
     );
+  });
+
+  it('is hidden for a disabled source, which no save onboards', () => {
+    renderFlyout({ source: { ...source, enabled: false } });
+    typeQuery('FROM logs-other');
+
+    expect(queryCheckbox()).not.toBeInTheDocument();
+  });
+
+  it('is hidden in a paused space, which starts no run', () => {
+    mockIsPaused = true;
+    renderFlyout();
+
+    expect(queryCheckbox()).not.toBeInTheDocument();
   });
 
   it('is hidden when the flyout is read only', () => {

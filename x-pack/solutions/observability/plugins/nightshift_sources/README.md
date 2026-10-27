@@ -129,11 +129,16 @@ source and no read returns it. It travels with the `created` and `updated` event
 `onboardImmediately`, so the engine skips the onboarding run of that one write and nothing else:
 a replaced query still resets the source's knowledge, and later writes, the sync sweep and
 continuous onboarding behave as before. `_enable` and `_disable` have no such option and report
-`onboardImmediately: true`.
+`onboardImmediately: false`: toggling a source applies its rules and cancels a run on disable, but
+never starts one. A source that was never onboarded stays that way until someone onboards it, or
+until the sync sweep does with continuous onboarding on.
 
-Reconciles are queued per source and each one reads the source as it is when it runs, not as it was
-when it was queued. A query change that opts out, made while an earlier write that did not opt out
-is still queued, can therefore be onboarded by that earlier run.
+Reconciles are queued per source and each one reads the source when it runs, not as it was when it
+was queued. So each one carries the `esql_updated_at` its write produced and starts a run only while
+the source is still at that revision. If write A (on) is queued and write B (off) arrives, A's
+reconcile sees B's revision and starts nothing; B's own reconcile decides, and it opted out. A
+reconcile without a revision, such as one queued before this existed, starts a run for whatever
+revision the source has.
 
 ## Elasticsearch privileges
 

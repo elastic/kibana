@@ -535,6 +535,7 @@ export class SignificantEventsPlugin
       ? new WorkflowExecutionService<{
           sourceId: string;
           sourceSlug: string;
+          sourceRevision: string;
           onboardImmediately: boolean;
         }>({
           managementApi: plugins.workflowsManagement.management,
@@ -544,13 +545,19 @@ export class SignificantEventsPlugin
       : undefined;
     plugins.nightshiftSources.onSourceChange(
       createSourceChangeListener({
-        enqueueReconciliation: async ({ sourceId, sourceSlug, onboardImmediately, request }) => {
+        enqueueReconciliation: async ({
+          sourceId,
+          sourceSlug,
+          sourceRevision,
+          onboardImmediately,
+          request,
+        }) => {
           if (!sourceReconciliation) {
             throw new Error('Workflows management is required to reconcile source knowledge');
           }
           await sourceReconciliation.execute({
             executionSpaceId: request.spaceId,
-            inputs: { sourceId, sourceSlug, onboardImmediately },
+            inputs: { sourceId, sourceSlug, sourceRevision, onboardImmediately },
             request,
           });
         },

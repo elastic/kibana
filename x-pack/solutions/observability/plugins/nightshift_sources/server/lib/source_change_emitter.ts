@@ -11,7 +11,7 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 /**
  * A committed catalog write, as `SourcesClient` reports it. `onboardImmediately` is what the
  * writer asked for this one write; it is not stored on the source. `_enable` and `_disable` do
- * not take the option and report `true`.
+ * not take the option and report `false`: toggling a source never starts an onboarding run.
  */
 export type SourceChange =
   | { type: 'created'; source: NightshiftSource; onboardImmediately: boolean }

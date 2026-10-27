@@ -397,11 +397,12 @@ export class SourcesClient {
       version: so.version,
     });
     const source = toSource(id, attributes);
+    // Toggling a source applies its rules and runs; it never starts a new onboarding run.
     await this.deps.onChange({
       type: 'updated',
       source,
       previous: toSource(id, so.attributes),
-      onboardImmediately: true,
+      onboardImmediately: false,
     });
     return source;
   }

@@ -653,6 +653,7 @@ describe('createSourceChangeListener', () => {
     expect(enqueueReconciliation).toHaveBeenCalledWith({
       sourceId: source.id,
       sourceSlug: source.slug,
+      sourceRevision: event.source.esql_updated_at,
       onboardImmediately: true,
       request: otherRequest,
     });
