@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   DEFAULT_PAGINATION_MODE,
   renderCustomToolbar,
@@ -114,7 +115,20 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         );
       }
 
-      return additionalControls.length ? additionalControls : undefined;
+      if (!additionalControls.length) {
+        return undefined;
+      }
+
+      // Each control needs its own flex item, otherwise they stack vertically in the toolbar
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          {additionalControls.map((control, index) => (
+            <EuiFlexItem key={index} grow={false}>
+              {control}
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      );
     }, [
       cascadedDocumentsContext,
       customExternalAdditionalControls,
