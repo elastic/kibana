@@ -46,11 +46,11 @@ allowBuilds:
 # deprecated `$@elastic/esql` override syntax). Must match `@elastic/esql` in
 # package.json; the renovate `esql-js` group bumps them together.
 catalog:
-  '@elastic/esql-definitions': '4.33.0'
-  '@elastic/esql-grammar': '4.33.0'
-  '@elastic/esql-promql-grammar': '4.33.0'
-  '@elastic/esql-types': '4.33.0'
-  '@elastic/pretty-printer': '4.33.0'
+  '@elastic/esql-definitions': '4.34.0'
+  '@elastic/esql-grammar': '4.34.0'
+  '@elastic/esql-promql-grammar': '4.34.0'
+  '@elastic/esql-types': '4.34.0'
+  '@elastic/pretty-printer': '4.34.0'
 overrides:
   # Generated from package.json#resolutions by `kbn bootstrap` — edit
   # resolutions, not this block (yarn keys are mapped: `**/a` -> `a`, `a/b` -> `a>b`).
@@ -87,7 +87,7 @@ overrides:
   'baseline-browser-mapping': '2.9.14'
   'cheerio': '1.0.0-rc.12'
   'chokidar': '3.5.3'
-  'dompurify': '3.4.14'
+  'dompurify': '3.4.17'
   'esbuild': '0.28.1'
   'fast-xml-parser': '5.5.7'
   'flatted': '3.4.2'
@@ -234,6 +234,8 @@ packages:
   - 'examples/partial_results_example'
   - 'examples/portable_dashboards_example'
   - 'examples/preboot_example'
+  - 'examples/pubsub-example-topic'
+  - 'examples/pubsub_example'
   - 'examples/resizable_layout_examples'
   - 'examples/response_stream'
   - 'examples/routing_example'
@@ -1316,6 +1318,7 @@ packages:
   - 'x-pack/platform/packages/shared/kbn-evals-extensions'
   - 'x-pack/platform/packages/shared/kbn-evals-runner'
   - 'x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2'
+  - 'x-pack/platform/packages/shared/kbn-evals-suite-automatic-import'
   - 'x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests'
   - 'x-pack/platform/packages/shared/kbn-evals-suite-streams'
   - 'x-pack/platform/packages/shared/kbn-event-stacktrace'
@@ -1674,6 +1677,7 @@ packages:
   - 'x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot'
   - 'x-pack/solutions/security/packages/kbn-security-evals-matrix'
   - 'x-pack/solutions/security/packages/kbn-security-evals-workflow-traces'
+  - 'x-pack/solutions/security/packages/kbn-securitysolution-alerts-page-url'
   - 'x-pack/solutions/security/packages/kbn-securitysolution-autocomplete'
   - 'x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common'
   - 'x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components'

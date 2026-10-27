@@ -228,12 +228,12 @@ export const isCloudSecurityPosturePath = (pathname: string): boolean =>
   });
 
 /**
- * Matches the Shared Exception Lists page, whose app header owns the page actions.
+ * Matches the Shared Exception Lists and Exception list details pages, whose app headers own the page actions.
  */
-export const isSharedExceptionListsPath = (pathname: string): boolean =>
+export const isExceptionsPath = (pathname: string): boolean =>
   !!matchPath(pathname, {
     path: EXCEPTIONS_PATH,
-    exact: true,
+    exact: false,
     strict: false,
   });
 
