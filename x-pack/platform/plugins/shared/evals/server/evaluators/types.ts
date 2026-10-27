@@ -10,7 +10,7 @@ import type { Direction } from '@kbn/evals-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
-import type { EvidenceRound } from './evidence/types';
+import type { EvidenceRound, TranscriptMessage } from './evidence/types';
 
 export interface TraceAccessor {
   traceId: string;
@@ -18,9 +18,14 @@ export interface TraceAccessor {
 }
 
 export interface EvaluatorContext<ReferenceData = Record<string, unknown>> {
-  trace: TraceAccessor;
+  /** Absent when the round was passed in memory rather than read from a trace. */
+  trace?: TraceAccessor;
   round: EvidenceRound;
   referenceData?: ReferenceData;
+  /** The whole conversation, when the caller passed one with in-memory evidence. */
+  transcript?: TranscriptMessage[];
+  /** Evaluator-specific inputs passed with in-memory evidence, checked against `contextSchema`. */
+  context?: Record<string, unknown>;
   inferenceClient?: BoundInferenceClient;
   log: Logger;
 }
@@ -52,6 +57,11 @@ export interface EvaluatorDefinition<ReferenceData = Record<string, unknown>> {
   description: string;
   direction: Direction;
   referenceDataSchema?: z.ZodType<ReferenceData>;
+  /**
+   * Inputs the evaluator needs beyond the round and reference data, such as a decision tree.
+   * An evaluation whose `context` doesn't match is refused before any evaluator runs.
+   */
+  contextSchema?: z.ZodType<Record<string, unknown>>;
   evidenceSchema?: z.ZodType<Partial<EvidenceRound>>;
   evaluate(ctx: EvaluatorContext<ReferenceData>): Promise<EvaluatorResult>;
 }

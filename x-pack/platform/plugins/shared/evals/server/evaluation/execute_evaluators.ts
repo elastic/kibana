@@ -16,9 +16,10 @@ import { z } from '@kbn/zod/v4';
 import { mapWithConcurrency } from '@kbn/evals-runner';
 import { withEvaluatorNameBaggage } from '../evaluators/evaluator_tracing_context';
 import { formatEvidenceSchemaIssues } from '../evaluators/evidence/schema_issues';
-import { createTraceAccessor } from '../evaluators/trace_accessor';
+import { createTraceAccessor, type TraceAccessorWithSearch } from '../evaluators/trace_accessor';
 import { awaitTraceReady, TraceReadinessError } from '../evaluators/trace_readiness';
-import type { EvaluatorDefinition } from '../evaluators/types';
+import type { EvidenceRound, TranscriptMessage } from '../evaluators/evidence/types';
+import type { EvaluatorDefinition, TraceAccessor } from '../evaluators/types';
 import { resolveConnectorModel } from '../lib/resolve_connector_model';
 import { EvaluationExecutionError } from './evaluation_execution_error';
 
@@ -30,79 +31,91 @@ export interface ResolvedEvaluator {
   connectorId?: string;
 }
 
-interface ExecuteEvaluatorsOptions {
+/** A round the caller already holds, graded as is. */
+export interface InMemoryEvidence {
+  round: EvidenceRound;
+  referenceData?: Record<string, unknown>;
+  transcript?: TranscriptMessage[];
+  context?: Record<string, unknown>;
+}
+
+/**
+ * Checks one input against each evaluator's schema for it, so a mismatch is refused before any
+ * evaluator runs. Evaluators without a schema get the input as passed.
+ */
+const parseForEvaluators = ({
+  evaluators,
+  input,
+  inputName,
+  getSchema,
+}: {
+  evaluators: ResolvedEvaluator[];
+  input: Record<string, unknown> | undefined;
+  inputName: 'reference_data' | 'context';
+  getSchema: (definition: EvaluatorDefinition) => z.ZodType | undefined;
+}): Map<EvaluatorDefinition, Record<string, unknown> | undefined> => {
+  const parsedByDefinition = new Map<EvaluatorDefinition, Record<string, unknown> | undefined>();
+  for (const { definition } of evaluators) {
+    const schema = getSchema(definition);
+    if (!schema) {
+      parsedByDefinition.set(definition, input);
+      continue;
+    }
+
+    const parsed = schema.safeParse(input);
+    if (!parsed.success) {
+      throw new EvaluationExecutionError(
+        `Invalid ${inputName} for evaluator "${definition.name}": ${z.prettifyError(parsed.error)}`,
+        'badRequest'
+      );
+    }
+    parsedByDefinition.set(definition, parsed.data as Record<string, unknown>);
+  }
+  return parsedByDefinition;
+};
+
+interface ExecuteEvaluatorsBaseOptions {
   /** Binds the judge's inference client and resolves its connector's model. */
   request: KibanaRequest;
-  subject: EvaluationSubject;
   evaluators: ResolvedEvaluator[];
   logger: Logger;
   getInferenceStart?: () => Promise<InferenceServerStart>;
+}
+
+/** Grades the round reconstructed from a trace, once the trace has finished exporting. */
+interface TraceSubjectOptions extends ExecuteEvaluatorsBaseOptions {
+  subject: EvaluationSubject;
   /**
    * Identity the trace and log documents are read under. Callers that let the requester
    * choose both the trace and the prompt must pass `asCurrentUser`, because the judge's
    * explanation can quote back whatever it was shown.
    */
   traceReader: ElasticsearchClient;
+  evidence?: never;
 }
 
-export const executeEvaluators = async ({
-  request,
+/** Grades in-memory evidence. No trace is read, so evaluators that need one fail. */
+interface InMemoryEvidenceOptions extends ExecuteEvaluatorsBaseOptions {
+  evidence: InMemoryEvidence;
+  subject?: never;
+  traceReader?: never;
+}
+
+export type ExecuteEvaluatorsOptions = TraceSubjectOptions | InMemoryEvidenceOptions;
+
+const readRoundFromTrace = async ({
+  traceAccessor,
   subject,
-  evaluators,
   logger,
-  getInferenceStart,
-  traceReader,
-}: ExecuteEvaluatorsOptions): Promise<EvaluateResponse['results']> => {
-  if (subject.mode === 'multi-turn') {
-    throw new EvaluationExecutionError('multi-turn evaluation is not yet supported', 'badRequest');
-  }
-
-  for (const { definition, connectorId } of evaluators) {
-    if (definition.kind === 'llm' && !connectorId) {
-      throw new EvaluationExecutionError(
-        `connector_id is required for llm evaluator "${definition.name}"`,
-        'badRequest'
-      );
-    }
-  }
-
-  const [{ trace_id: traceId, reference_data: referenceData }] = subject.traces;
-  if (!isValidTraceId(traceId)) {
-    throw new EvaluationExecutionError(
-      'Invalid trace_id: must be a 32-character hex string',
-      'badRequest'
-    );
-  }
-
-  const parsedReferenceData = new Map<EvaluatorDefinition, Record<string, unknown> | undefined>();
-  for (const { definition } of evaluators) {
-    if (!definition.referenceDataSchema) {
-      parsedReferenceData.set(definition, referenceData);
-      continue;
-    }
-
-    const parsed = definition.referenceDataSchema.safeParse(referenceData);
-    if (!parsed.success) {
-      throw new EvaluationExecutionError(
-        `Invalid reference_data for evaluator "${definition.name}": ${z.prettifyError(
-          parsed.error
-        )}`,
-        'badRequest'
-      );
-    }
-    parsedReferenceData.set(definition, parsed.data as Record<string, unknown>);
-  }
-
-  const traceAccessor = createTraceAccessor({ traceId, esClient: traceReader });
-  const activeProfile = subject.instrumentation?.profile ?? 'elastic-inference';
-
-  let round: Awaited<ReturnType<typeof awaitTraceReady>>['round'];
+}: {
+  traceAccessor: TraceAccessorWithSearch;
+  subject: EvaluationSubject;
+  logger: Logger;
+}): Promise<EvidenceRound> => {
+  const profile = subject.instrumentation?.profile ?? 'elastic-inference';
   try {
-    ({ round } = await awaitTraceReady(
-      traceAccessor,
-      { mode: 'complete', profile: activeProfile },
-      logger
-    ));
+    const { round } = await awaitTraceReady(traceAccessor, { mode: 'complete', profile }, logger);
+    return round;
   } catch (error) {
     if (error instanceof TraceReadinessError) {
       throw new EvaluationExecutionError(error.message, 'notFound');
@@ -115,6 +128,63 @@ export const executeEvaluators = async ({
     }
     throw error;
   }
+};
+
+export const executeEvaluators = async (
+  options: ExecuteEvaluatorsOptions
+): Promise<EvaluateResponse['results']> => {
+  const { request, evaluators, logger, getInferenceStart } = options;
+  if (options.subject?.mode === 'multi-turn') {
+    throw new EvaluationExecutionError('multi-turn evaluation is not yet supported', 'badRequest');
+  }
+
+  for (const { definition, connectorId } of evaluators) {
+    if (definition.kind === 'llm' && !connectorId) {
+      throw new EvaluationExecutionError(
+        `connector_id is required for llm evaluator "${definition.name}"`,
+        'badRequest'
+      );
+    }
+  }
+
+  let referenceData: Record<string, unknown> | undefined;
+  // Deferred so every input is validated before a trace is polled, which can take seconds.
+  let readRound: () => Promise<{ round: EvidenceRound; traceAccessor?: TraceAccessor }>;
+  if (options.evidence) {
+    const { round } = options.evidence;
+    ({ referenceData } = options.evidence);
+    readRound = async () => ({ round });
+  } else {
+    const { subject, traceReader } = options;
+    const [{ trace_id: traceId, reference_data: traceReferenceData }] = subject.traces;
+    if (!isValidTraceId(traceId)) {
+      throw new EvaluationExecutionError(
+        'Invalid trace_id: must be a 32-character hex string',
+        'badRequest'
+      );
+    }
+    referenceData = traceReferenceData;
+    const traceAccessor = createTraceAccessor({ traceId, esClient: traceReader });
+    readRound = async () => ({
+      round: await readRoundFromTrace({ traceAccessor, subject, logger }),
+      traceAccessor,
+    });
+  }
+
+  const parsedReferenceData = parseForEvaluators({
+    evaluators,
+    input: referenceData,
+    inputName: 'reference_data',
+    getSchema: ({ referenceDataSchema }) => referenceDataSchema,
+  });
+  const parsedContext = parseForEvaluators({
+    evaluators,
+    input: options.evidence?.context,
+    inputName: 'context',
+    getSchema: ({ contextSchema }) => contextSchema,
+  });
+
+  const { round, traceAccessor } = await readRound();
 
   let inferenceStartPromise: Promise<InferenceServerStart> | undefined;
   const getInference = (): Promise<InferenceServerStart> | undefined => {
@@ -212,6 +282,8 @@ export const executeEvaluators = async ({
           trace: traceAccessor,
           round,
           referenceData: parsedReferenceData.get(definition),
+          transcript: options.evidence?.transcript,
+          context: parsedContext.get(definition),
           inferenceClient,
           log: logger,
         })

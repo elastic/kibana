@@ -20,6 +20,17 @@ export interface EvidenceRound {
   response: { message: string };
 }
 
+/**
+ * One message of a conversation as a judge reads it. Unlike a round's `steps`, a transcript
+ * keeps the assistant's messages between tool calls and spans every round.
+ */
+export interface TranscriptMessage {
+  role: 'user' | 'assistant' | 'tool';
+  content: string;
+  /** The tool that produced a `tool` message. */
+  tool_id?: string;
+}
+
 export type EvidenceSource = 'traces' | 'logs';
 export type EvidenceMessageSelectMode = 'first' | 'last';
 export type EvidenceMessageParseMode = 'string' | 'genai_messages' | 'anthropic_message';
