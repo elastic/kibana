@@ -8,6 +8,7 @@
  */
 
 import {
+  ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
@@ -18,7 +19,8 @@ import { managedWorkflowDefinitions } from '../..';
 
 // Metering reads the persisted `billable` flag, so a regression here silently stops metering
 // the Attack Discovery worker and the workflows it runs. Journal notes stay out of this list:
-// `ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS` includes that shared helper.
+// `ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS` includes that shared helper. The handoff is the
+// action the review's proposal runs after approval.
 describe('Attack Discovery Worker: billable', () => {
   const billableIds = [
     ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
@@ -26,6 +28,7 @@ describe('Attack Discovery Worker: billable', () => {
     ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
     ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
     ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
+    ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
   ];
 
   it.each(billableIds)('%s is billable', (id) => {
