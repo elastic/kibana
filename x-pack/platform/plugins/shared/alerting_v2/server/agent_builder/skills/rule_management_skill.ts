@@ -120,6 +120,7 @@ ${generateRuleOperationsDoc()}
 - Do **not** include time range filters in the query — the lookback window is applied automatically.
 - The query must return rows for an alert to fire. Use \`| WHERE ...\` to filter for breach conditions.
 - Prefer \`FROM <index-pattern> | STATS ... BY <group-field> | WHERE <condition>\` for threshold-based alerting.
+- For non-aggregating (match-based) queries, declare \`METADATA _id, _index, _version\` on the \`FROM\` so that a source document re-matched by overlapping lookback windows produces a single rule event instead of one per run. If the query uses \`KEEP\`, list those three columns in it. Example: \`FROM logs-* METADATA _id, _index, _version | WHERE event.action == "login_failed"\`. Aggregating (\`STATS\`) queries do not need this.
 - **Never** use backtick quoting around index names or field names in ES|QL. Standard index patterns (letters, digits, dashes, dots, underscores, wildcards, and colons for CCS) do not require backticks. Backticks break cross-cluster search and are almost never needed in practice. Write \`FROM remote_cluster:metrics-system.cpu-default\`, not \`FROM \\\`remote_cluster:metrics-system.cpu-default\\\`\`.
 - The \`set_schedule\` lookback should be >= the execution interval (\`every\`).
 - The \`set_query\` operation validates the query against Elasticsearch automatically.

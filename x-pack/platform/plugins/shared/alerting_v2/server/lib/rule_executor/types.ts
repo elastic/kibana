@@ -8,7 +8,7 @@
 import type { SpaceId } from '@kbn/core-spaces-common';
 
 import type { QueryPayload } from './get_query_payload';
-import type { DeduplicationQueryPlan } from './deduplication_query';
+import type { DeduplicationPlan } from './deduplication_query';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/datastreams/alert_events';
 import type { ExecutionContext } from '../execution_context';
@@ -38,12 +38,14 @@ export interface RulePipelineState {
   readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;
   /**
    * Rule-event deduplication decision for this run, derived once from the
-   * breach query by `ExecuteRuleQueryStep`. `FilterDuplicateEventsStep` and
-   * `StoreAlertEventsStep` only assign deterministic ids when `eligible`;
-   * `mvExpandFields` are folded into those ids. Absent (e.g. before the
-   * query step ran) is treated as not eligible.
+   * breach query by `ExecuteRuleQueryStep` (eligible only when the author
+   * declared `METADATA _id, _index, _version` on a non-aggregating query).
+   * `FilterDuplicateEventsStep` and `StoreAlertEventsStep` only assign
+   * deterministic ids when `eligible`; `mvExpandFields` are folded into
+   * those ids. Absent (e.g. before the query step ran) is treated as not
+   * eligible.
    */
-  readonly deduplication?: Pick<DeduplicationQueryPlan, 'eligible' | 'mvExpandFields'>;
+  readonly deduplication?: DeduplicationPlan;
   readonly newEpisodeIds?: ReadonlyArray<string>;
   readonly activeGroups?: ReadonlyArray<ActiveAlertGroupHash>;
 }

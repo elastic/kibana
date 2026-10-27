@@ -94,7 +94,7 @@ describe('ExecuteRuleQueryStep', () => {
     expect(results[0].type).toBe('continue');
     expect(results[0].state.queryPayload).toBeDefined();
     expect(results[0].state.esqlRowBatch).toEqual([{ 'host.name': 'host-a' }]);
-    expect(results[0].state.deduplication).toEqual({ eligible: true, mvExpandFields: [] });
+    expect(results[0].state.deduplication).toEqual({ eligible: false, mvExpandFields: [] });
     expect(mockLogger.debug).toHaveBeenCalledWith(
       'Executing ES|QL query',
       expect.objectContaining({
@@ -121,7 +121,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: `FROM logs-* METADATA _id, _index, _version | LIMIT 10\n| LIMIT ${NON_STREAMING_MAX_ROWS}`,
+        query: `FROM logs-* | LIMIT 10\n| LIMIT ${NON_STREAMING_MAX_ROWS}`,
         drop_null_columns: true,
       }),
       expect.objectContaining({ signal: abortController.signal })
@@ -183,7 +183,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: `FROM logs-* METADATA _id, _index, _version\n| LIMIT ${NON_STREAMING_MAX_ROWS}`,
+        query: `FROM logs-*\n| LIMIT ${NON_STREAMING_MAX_ROWS}`,
       }),
       expect.any(Object)
     );
@@ -201,7 +201,7 @@ describe('ExecuteRuleQueryStep', () => {
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM logs-* METADATA _id, _index, _version\n| LIMIT 500' }),
+      expect.objectContaining({ query: 'FROM logs-*\n| LIMIT 500' }),
       expect.objectContaining({ signal: state.input.executionContext.signal })
     );
   });
@@ -221,35 +221,13 @@ describe('ExecuteRuleQueryStep', () => {
     // smaller LIMIT still wins - appending the configured max is always safe.
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: 'FROM logs-* METADATA _id, _index, _version | LIMIT 10\n| LIMIT 500',
+        query: 'FROM logs-* | LIMIT 10\n| LIMIT 500',
       }),
       expect.objectContaining({ signal: state.input.executionContext.signal })
     );
   });
 
-  it('does not inject deduplication metadata into aggregating queries', async () => {
-    step = createStep(500);
-    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
-
-    const rule = createRuleResponse({
-      query: {
-        format: 'standalone',
-        breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
-      },
-    });
-    const state = createRulePipelineState({ rule });
-
-    await collectStreamResults(step.executeStream(createPipelineStream([state])));
-
-    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: 'FROM logs-* | STATS count = COUNT(*) BY host.name\n| LIMIT 500',
-      }),
-      expect.any(Object)
-    );
-  });
-
-  it('keeps user-declared METADATA and carries the fields through KEEP', async () => {
+  it('sends a partially declared METADATA query unchanged and marks it not eligible', async () => {
     step = createStep(500);
     mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
@@ -261,13 +239,49 @@ describe('ExecuteRuleQueryStep', () => {
     });
     const state = createRulePipelineState({ rule });
 
-    await collectStreamResults(step.executeStream(createPipelineStream([state])));
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
+    expect(results[0].state.deduplication).toEqual({ eligible: false, mvExpandFields: [] });
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({
-        query:
-          'FROM logs-* METADATA _id, _index, _version | KEEP _id, host.name, _index, _version\n| LIMIT 500',
+        query: 'FROM logs-* METADATA _id | KEEP _id, host.name\n| LIMIT 500',
       }),
+      expect.any(Object)
+    );
+  });
+
+  it('marks a query that declares the identity METADATA as eligible without rewriting it', async () => {
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
+
+    const query = 'FROM logs-* METADATA _id, _index, _version | WHERE host.name IS NOT NULL';
+    const rule = createRuleResponse({
+      query: { format: 'standalone', breach: { query } },
+    });
+    const state = createRulePipelineState({ rule });
+
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(results[0].state.deduplication).toEqual({ eligible: true, mvExpandFields: [] });
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ query: `${query}\n| LIMIT ${NON_STREAMING_MAX_ROWS}` }),
+      expect.any(Object)
+    );
+  });
+
+  it('does not inject METADATA into a query that omits it', async () => {
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
+
+    const query = 'FROM logs-* | WHERE host.name IS NOT NULL';
+    const rule = createRuleResponse({
+      query: { format: 'standalone', breach: { query } },
+    });
+    const state = createRulePipelineState({ rule });
+
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(results[0].state.deduplication).toEqual({ eligible: false, mvExpandFields: [] });
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ query: `${query}\n| LIMIT ${NON_STREAMING_MAX_ROWS}` }),
       expect.any(Object)
     );
   });
@@ -278,7 +292,10 @@ describe('ExecuteRuleQueryStep', () => {
     const rule = createRuleResponse({
       query: {
         format: 'standalone',
-        breach: { query: 'FROM logs-* | MV_EXPAND host.ip | WHERE host.ip IS NOT NULL' },
+        breach: {
+          query:
+            'FROM logs-* METADATA _id, _index, _version | MV_EXPAND host.ip | WHERE host.ip IS NOT NULL',
+        },
       },
     });
     const state = createRulePipelineState({ rule });
@@ -297,7 +314,9 @@ describe('ExecuteRuleQueryStep', () => {
     const rule = createRuleResponse({
       query: {
         format: 'standalone',
-        breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+        breach: {
+          query: 'FROM logs-* METADATA _id, _index, _version | STATS count = COUNT(*) BY host.name',
+        },
       },
     });
     const state = createRulePipelineState({ rule });
@@ -541,7 +560,7 @@ describe('ExecuteRuleQueryStep', () => {
 
       expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: `FROM logs-* METADATA _id, _index, _version\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}`,
+          query: `FROM logs-*\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}`,
         }),
         expect.any(Object)
       );

@@ -5,21 +5,8 @@
  * 2.0.
  */
 
-import type {
-  ESQLAstCommand,
-  ESQLAstItem,
-  ESQLAstQueryExpression,
-  ESQLCommand,
-  ESQLFunction,
-} from '@elastic/esql/types';
-import {
-  BasicPrettyPrinter,
-  Builder,
-  Parser,
-  isColumn,
-  isFunctionExpression,
-  mutate,
-} from '@elastic/esql';
+import type { ESQLAstCommand, ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
+import { Parser, isColumn, isFunctionExpression, mutate } from '@elastic/esql';
 
 /**
  * Source-document metadata columns that identify a rule event for
@@ -27,8 +14,10 @@ import {
  * hashes (`_id`, `_version`, `_index`) so both engines agree on what "the same
  * source document" means.
  *
- * `resolveRuleEventId` in `build_alert_events.ts` reads these columns back out
- * of each row to build the deterministic `.rule-events` `_id`.
+ * The rule author opts into deduplication by declaring all three in the
+ * query's `METADATA` clause; `resolveRuleEventId` in `build_alert_events.ts`
+ * reads them back out of each row to build the deterministic `.rule-events`
+ * `_id`.
  */
 export const DEDUPLICATION_METADATA_FIELDS = ['_id', '_index', '_version'] as const;
 
@@ -38,9 +27,7 @@ export const DEDUPLICATION_METADATA_FIELDS = ['_id', '_index', '_version'] as co
  * `FilterDuplicateEventsStep` and `StoreAlertEventsStep` never have to infer
  * eligibility from the shape of individual rows.
  */
-export interface DeduplicationQueryPlan {
-  /** The query to execute: rewritten when `eligible`, otherwise the input verbatim. */
-  readonly query: string;
+export interface DeduplicationPlan {
   /**
    * Whether rule events produced by this query may receive a deterministic
    * `_id`. `false` means every event is written with an Elasticsearch-
@@ -55,67 +42,66 @@ export interface DeduplicationQueryPlan {
   readonly mvExpandFields: readonly string[];
 }
 
-const notEligible = (query: string): DeduplicationQueryPlan => ({
-  query,
-  eligible: false,
-  mvExpandFields: [],
-});
+const NOT_ELIGIBLE: DeduplicationPlan = { eligible: false, mvExpandFields: [] };
 
 /**
- * Decides whether a breach query is eligible for rule-event deduplication
- * and, if so, rewrites it so every result row carries the identity needed.
+ * Decides whether a breach query is eligible for rule-event deduplication.
  *
- * Mirrors what the detection engine's ES|QL rule type supports: only
- * non-aggregating `FROM` queries whose rows are still source documents
- * deduplicate; everything else keeps append-per-run behaviour. Concretely a
- * query is **not eligible**, and is returned untouched, when:
+ * This is a read-only inspection of the query: the executor never rewrites
+ * the author's ES|QL. Deduplication is opt-in by declaring
+ * `METADATA _id, _index, _version` on the `FROM`, and the check here only
+ * confirms that the declared identity survives to the result. A query is
+ * **eligible** when all of the following hold:
  *
- * - it aggregates (`STATS`) — rows are not documents, and authors are not
- *   expected to group by `_id` / `_index` / `_version`;
- * - its source is not `FROM` (`ROW`, `TS`) — there is nothing to attach
- *   `METADATA` to;
- * - any command manipulates a metadata column — `DROP` (including any
+ * - its source is `FROM` and it declares every column in
+ *   {@link DEDUPLICATION_METADATA_FIELDS} in its `METADATA` clause;
+ * - it does not aggregate (`STATS`) — rows are not documents, and authors
+ *   are not expected to group by `_id` / `_index` / `_version`;
+ * - no command manipulates a metadata column — `DROP` (including any
  *   wildcard, see {@link hasColumnMatching}), `RENAME`, or `EVAL` assignment —
  *   because the column would no longer be the source document's value and
  *   hashing it could silently merge distinct documents;
- * - any command after an `MV_EXPAND` manipulates the expanded column, for
+ * - every `KEEP` lists the metadata columns (or uses a wildcard, see
+ *   {@link keepsField}), so the identity is not projected away;
+ * - no command after an `MV_EXPAND` manipulates the expanded column, for
  *   the same reason applied to the fan-out identity.
  *
+ * Everything else, including any non-aggregating query that simply omits
+ * the `METADATA` clause, keeps the append-per-run behaviour. Eligibility is
+ * decided from the query rather than from rows so that an aggregating query
+ * or one that reassigns `_id` is never deduplicated no matter what its rows
+ * contain. Within an eligible run a row may still lack a column (for
+ * example an ES|QL view that does not declare `_id` returns `null`), and
+ * `resolveRuleEventId` then falls back to an Elasticsearch-generated id for
+ * that row.
+ *
  * `MV_EXPAND` is the only fan-out command whose rows receive a distinct
- * identity, again matching the detection engine. A one-to-many `LOOKUP JOIN`
- * (or `FORK`) still qualifies, and its rows share the source document's
+ * identity, matching the detection engine. A one-to-many `LOOKUP JOIN` (or
+ * `FORK`) still qualifies, and its rows share the source document's
  * identity, so only the first is persisted and the rest are counted as
  * deduplicated. Handling those requires a row identity ES|QL does not expose
  * today and is a known, documented limitation rather than an oversight.
  *
- * When eligible, `FROM … METADATA _id, _index, _version` is upserted (fields
- * the author already declared are kept) and the metadata columns are
- * appended to every `KEEP` so they survive projection; see
- * {@link addFieldsToKeepCommands}. Expanded columns are deliberately *not*
- * added to `KEEP`, matching the detection engine: a `KEEP` may precede the
- * `EVAL` that creates the expanded column, so injecting it there would make
- * the query invalid. If an author projects an expanded column away, rows
- * arrive without its value and `resolveRuleEventId` falls back to an
- * Elasticsearch-generated id for them — no deduplication, but no lost rows.
- *
- * Called by `ExecuteRuleQueryStep` before the row limit is appended. The
- * stored rule is never modified. Throws only if `@elastic/esql` fails while
- * mutating or printing the AST (the parser is error-tolerant); the caller
- * logs `RULE_EXECUTION_DEDUP_METADATA_INJECTION_FAILED` and falls back to a
- * not-eligible plan for the original query, so a failure here degrades to
- * "no deduplication for this run" rather than a failed rule execution.
+ * Never throws for a parseable query; the parser is error-tolerant, and an
+ * unparseable query simply fails the `FROM` check.
  */
-export const planDeduplicationQuery = (query: string): DeduplicationQueryPlan => {
+export const planDeduplication = (query: string): DeduplicationPlan => {
   const { root } = Parser.parse(query);
   const { commands } = root;
 
   if (commands[0]?.name !== 'from' || isAggregating(commands)) {
-    return notEligible(query);
+    return NOT_ELIGIBLE;
   }
 
-  const mvExpandFields = getMvExpandFields(commands);
+  const declaresIdentity = DEDUPLICATION_METADATA_FIELDS.every(
+    (field) => mutate.commands.from.metadata.find(root, field) !== undefined
+  );
+  if (!declaresIdentity) {
+    return NOT_ELIGIBLE;
+  }
+
   const metadataInvalidated = DEDUPLICATION_METADATA_FIELDS.some((field) =>
-    commands.some((command) => invalidatesField(command, field))
+    commands.some((command) => invalidatesField(command, field) || projectsAway(command, field))
   );
   const expansionInvalidated = commands.some(
     (command, index) =>
@@ -127,15 +113,10 @@ export const planDeduplicationQuery = (query: string): DeduplicationQueryPlan =>
   );
 
   if (metadataInvalidated || expansionInvalidated) {
-    return notEligible(query);
+    return NOT_ELIGIBLE;
   }
 
-  DEDUPLICATION_METADATA_FIELDS.forEach((field) =>
-    mutate.commands.from.metadata.upsert(root, field)
-  );
-  addFieldsToKeepCommands(root, DEDUPLICATION_METADATA_FIELDS);
-
-  return { query: BasicPrettyPrinter.print(root), eligible: true, mvExpandFields };
+  return { eligible: true, mvExpandFields: getMvExpandFields(commands) };
 };
 
 /**
@@ -167,52 +148,34 @@ const getExpandedField = (command: ESQLAstCommand): string | undefined => {
 };
 
 /**
- * Keeps the injected metadata columns from being projected away by the
- * author's own `KEEP` commands.
- *
- * `METADATA` only makes a column available; a later `KEEP host.name` would
- * drop it and the row would reach the executor without an `_id`, silently
- * disabling deduplication for that rule. Each field is therefore appended to
- * every `KEEP` that does not already list it. Because
- * {@link planDeduplicationQuery} has already rejected any pipeline that
- * drops, renames or reassigns these fields, there are no stop conditions
- * here — every `KEEP` in an eligible query may safely carry them.
- *
- * Columns are built from their dotted parts so a dotted name is printed as a
- * field path rather than a single backtick-quoted identifier.
- *
- * Only the metadata columns are passed here. They exist from the `FROM`
- * onward, so every `KEEP` in the pipeline can safely list them; the same is
- * not true of `MV_EXPAND`ed columns, which is why those are left alone (see
- * {@link planDeduplicationQuery}).
- *
- * Mutates `root` in place. Has no effect when the pipeline has no `KEEP`.
- */
-function addFieldsToKeepCommands(root: ESQLAstQueryExpression, fields: readonly string[]): void {
-  root.commands.filter(isKeepCommand).forEach((command) => {
-    fields
-      .filter((field) => !listsColumn(command.args, field))
-      .forEach((field) => command.args.push(Builder.expression.column(field.split('.'))));
-  });
-}
-
-/** Narrows the command union to `KEEP`, whose `args` are plain column items. */
-const isKeepCommand = (command: ESQLAstCommand): command is ESQLCommand<'keep'> =>
-  command.name === 'keep';
-
-/**
  * Whether `command` changes what `field` refers to for everything after it,
  * which makes the query ineligible for deduplication. See
- * {@link planDeduplicationQuery}.
+ * {@link planDeduplication}.
  */
 const invalidatesField = (command: ESQLAstCommand, field: string): boolean =>
   (command.name === 'drop' && hasColumnMatching(command.args, field)) ||
   (command.name === 'rename' && hasRenameOf(command.args, field)) ||
   (command.name === 'eval' && hasAssignmentTo(command.args, field));
 
-/** Whether the argument list names `field` exactly, e.g. `KEEP a, _id`. */
-const listsColumn = (args: readonly ESQLAstItem[], field: string): boolean =>
-  args.some((arg) => isColumn(arg) && arg.name === field);
+/**
+ * Whether a `KEEP` projects `field` away, which makes the query ineligible:
+ * the row would reach the executor without its identity. See
+ * {@link keepsField}.
+ */
+const projectsAway = (command: ESQLAstCommand, field: string): boolean =>
+  command.name === 'keep' && !keepsField(command.args, field);
+
+/**
+ * Whether a `KEEP` argument list retains `field`.
+ *
+ * An exact listing (`KEEP host.name, _id`) retains it. Any wildcard
+ * (`KEEP *`, `KEEP _*`, but also `KEEP host.*`) is also treated as retaining
+ * it: proving that a pattern cannot match `_id` would need glob semantics,
+ * and the row-level check in `resolveRuleEventId` falls back to an
+ * Elasticsearch-generated id for any row that arrives without the column.
+ */
+const keepsField = (args: readonly ESQLAstItem[], field: string): boolean =>
+  args.some((arg) => isColumn(arg) && (arg.name === field || arg.name.includes('*')));
 
 /**
  * Whether a `DROP` argument list names `field`, or contains a wildcard.

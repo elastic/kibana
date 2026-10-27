@@ -8,12 +8,14 @@
 /**
  * Rule-event deduplication for non-aggregating ES|QL rules.
  *
- * The executor injects `METADATA _id, _index, _version` into non-aggregating
- * queries and derives a deterministic `.rule-events` `_id` from the source
- * document identity, so a source document that is re-matched on consecutive,
- * overlapping lookback windows produces exactly one rule event. This spec
+ * A non-aggregating query that declares `METADATA _id, _index, _version`
+ * opts into deduplication: the executor derives a deterministic
+ * `.rule-events` `_id` from the source document identity, so a source
+ * document that is re-matched on consecutive, overlapping lookback windows
+ * produces exactly one rule event. The executor never rewrites the query, so
+ * a query that omits the clause writes an event on every run. This spec
  * drives the executor through several runs, including a disable/enable
- * cycle, and asserts the single-event invariant holds.
+ * cycle, and asserts both behaviours.
  *
  * We exclude `@kbn/eslint/scout_require_api_client_in_api_test` because the
  * subject is the executor's persisted output, not an HTTP endpoint.
@@ -40,6 +42,9 @@ const SOURCE_INDEX = `test-alerting-v2-rule-event-deduplication-${Date.now().toS
  * "only one event" assertion would pass without exercising deduplication.
  */
 const LOOKBACK_WINDOW = '10m';
+
+/** The clause a rule author adds to opt a non-aggregating query into deduplication. */
+const IDENTITY_METADATA = 'METADATA _id, _index, _version';
 
 apiTest.describe('Rule executor - rule-event deduplication', { tag: tags.stateful.classic }, () => {
   apiTest.beforeAll(async ({ apiServices }) => {
@@ -75,7 +80,9 @@ apiTest.describe('Rule executor - rule-event deduplication', { tag: tags.statefu
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           query: {
             format: 'standalone',
-            breach: { query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}"` },
+            breach: {
+              query: `FROM ${SOURCE_INDEX} ${IDENTITY_METADATA} | WHERE host.name == "${host}"`,
+            },
           },
         })
       );
@@ -120,6 +127,46 @@ apiTest.describe('Rule executor - rule-event deduplication', { tag: tags.statefu
   );
 
   apiTest(
+    'writes a breach event on every run for a non-aggregating query that omits the identity METADATA',
+    async ({ apiServices }) => {
+      const host = 'host-dedup-no-metadata';
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [{ '@timestamp': new Date().toISOString(), 'host.name': host, severity: 'high' }],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-dedup-no-metadata' },
+          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+          query: {
+            format: 'standalone',
+            breach: { query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}"` },
+          },
+        })
+      );
+
+      // The executor does not inject METADATA, so without the author's
+      // declaration there is no source identity to hash and the same
+      // document produces a new breach event on every overlapping run.
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 3, { status: 'breached' });
+
+      const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+      expect(breachEvents.length).toBeGreaterThanOrEqual(3);
+
+      for (const event of breachEvents) {
+        expect(event.data['host.name']).toBe(host);
+        expect('_id' in event.data).toBe(false);
+        expect('_index' in event.data).toBe(false);
+        expect('_version' in event.data).toBe(false);
+      }
+    }
+  );
+
+  apiTest(
     'writes a breach event on every run for an aggregating (STATS BY) query',
     async ({ apiServices }) => {
       const host = 'host-dedup-stats';
@@ -142,10 +189,10 @@ apiTest.describe('Rule executor - rule-event deduplication', { tag: tags.statefu
         })
       );
 
-      // Aggregated rows are not source documents, so no METADATA is injected
-      // and no deterministic `_id` is derived. The same document therefore
-      // produces a new breach event on every overlapping run, as it did
-      // before deduplication existed.
+      // Aggregated rows are not source documents, so no deterministic `_id`
+      // is derived even though the query could declare METADATA. The same
+      // document therefore produces a new breach event on every overlapping
+      // run, as it did before deduplication existed.
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 3, { status: 'breached' });
 
       const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
@@ -191,7 +238,7 @@ apiTest.describe('Rule executor - rule-event deduplication', { tag: tags.statefu
           query: {
             format: 'standalone',
             breach: {
-              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | MV_EXPAND host.ip`,
+              query: `FROM ${SOURCE_INDEX} ${IDENTITY_METADATA} | WHERE host.name == "${host}" | MV_EXPAND host.ip`,
             },
           },
         })

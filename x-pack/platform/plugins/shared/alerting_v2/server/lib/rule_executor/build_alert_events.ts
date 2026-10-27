@@ -116,17 +116,19 @@ export function buildRuleEventId({
  * Resolves the deterministic `_id` for a rule event, or `undefined` when
  * Elasticsearch should generate one.
  *
- * Callers must only invoke this for runs whose query
- * `planDeduplicationQuery` judged eligible (`state.deduplication.eligible`);
- * eligibility is a property of the query, not of a row, and is decided
- * upstream so that an aggregating query or one that reassigns `_id` is never
- * deduplicated no matter what its rows contain. Within an eligible run an
- * event still qualifies only when it is a `breached` event carrying the
- * complete injected identity — a string `_id`, a string `_index` and a
- * `_version` — plus a value for every `mvExpandFields` column. Anything
- * short of that (`recovered` / `no_data` / continued-breach events, or a row
- * unexpectedly missing a column) falls back to an Elasticsearch-generated id
- * and is written exactly as before deduplication existed.
+ * Callers must only invoke this for runs whose query `planDeduplication`
+ * judged eligible (`state.deduplication.eligible`): a non-aggregating query
+ * whose author declared `METADATA _id, _index, _version` and kept the columns
+ * through to the result. Eligibility is a property of the query, not of a
+ * row, and is decided upstream so that an aggregating query or one that
+ * reassigns `_id` is never deduplicated no matter what its rows contain.
+ * Within an eligible run an event still qualifies only when it is a
+ * `breached` event carrying the complete declared identity — a string
+ * `_id`, a string `_index` and a `_version` — plus a value for every
+ * `mvExpandFields` column. Anything short of that (`recovered` / `no_data` /
+ * continued-breach events, or a row missing a column, as happens for an
+ * ES|QL view that does not expose `_id`) falls back to an Elasticsearch-
+ * generated id and is written exactly as before deduplication existed.
  *
  * `mvExpandFields` (from `state.deduplication`) names the columns whose
  * per-row values are folded into the id so `MV_EXPAND`ed rows from one

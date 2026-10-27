@@ -32,8 +32,9 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
       logger.debug({ message: 'Storing alert events batch' });
 
       // Second deduplication layer: only when the query step judged this run
-      // eligible do events get a deterministic `_id`, so a re-match the
-      // pre-check could not see collides here instead of being appended.
+      // eligible (the author's query declares the identity METADATA) do
+      // events get a deterministic `_id`, so a re-match the pre-check could
+      // not see collides here instead of being appended.
       const { deduplication } = state;
       const bulkResult = await this.storageService.bulkIndexDocs({
         index: ALERT_EVENTS_DATA_STREAM,

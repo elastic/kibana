@@ -38,7 +38,9 @@ const IDS_QUERY_CHUNK_SIZE = 10_000;
  * `ruleEventsDeduplicated` counter with disjoint counts.
  *
  * Runs only when `state.deduplication.eligible` is set by
- * `ExecuteRuleQueryStep`; otherwise the batch passes through untouched.
+ * `ExecuteRuleQueryStep`, i.e. the author's query declares
+ * `METADATA _id, _index, _version` and is not aggregating; otherwise the
+ * batch passes through untouched.
  *
  * Failure of the Elasticsearch lookup is not fatal: the affected events are
  * kept and the second layer deduplicates them at write time.
