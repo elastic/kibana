@@ -107,3 +107,10 @@ export const CANCEL = i18n.translate(
     defaultMessage: 'Cancel',
   }
 );
+
+export const RULE_UPDATED_IN_BACKGROUND = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.ruleUpdatedInBackgroundToastTitle',
+  {
+    defaultMessage: 'Rules was updated in background. Please edit the query again',
+  }
+);

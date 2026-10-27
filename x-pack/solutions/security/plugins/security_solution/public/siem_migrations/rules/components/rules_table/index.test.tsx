@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import React, { useCallback } from 'react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { ChatEventType } from '@kbn/agent-builder-common';
 import { MigrationRulesTable } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -29,6 +31,13 @@ import { migrationRules } from '../../__mocks__/migration_rules';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { MigrationSource } from '../../../common/types';
+import { SIEM_MIGRATION_RULE_UPDATED_TOOL_EVENT } from '../../../../../common/siem_migrations/rules/events';
+import { getRulesEqlSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
+import {
+  getMigrationRules,
+  getRuleMigrationsPrebuiltRules,
+  getRuleMigrationTranslationStats,
+} from '../../api';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_app_toasts');
@@ -41,6 +50,7 @@ jest.mock('../../logic/use_update_migration_rule');
 jest.mock('../../logic/use_update_index_pattern');
 jest.mock('../../logic/use_start_migration');
 jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
+jest.mock('../../api');
 
 const mockRule = migrationRules[0];
 const mockMigrationStats = getRuleMigrationStatsMock();
@@ -536,6 +546,226 @@ describe('MigrationRulesTable', () => {
         expect(screen.getByTestId('flyoutPrevNextNavPreviousButton')).toBeDisabled();
         expect(screen.getByTestId('flyoutPrevNextNavNextButton')).toBeDisabled();
         expect(getHighlightedRuleId()).toBe('rule-2');
+      });
+    });
+  });
+
+  describe('when the Elastic AI Agent updates a rule while its details flyout is open', () => {
+    const firstRule = makeTranslatedRule('rule-1', 'First Rule');
+    const secondRule = makeTranslatedRule('rule-2', 'Second Rule');
+    const thirdRule = makeTranslatedRule('rule-3', 'Third Rule');
+    const fourthRule = makeTranslatedRule('rule-4', 'Fourth Rule');
+    const updatedThirdRule: RuleMigrationRule = {
+      ...thirdRule,
+      elastic_rule: { ...thirdRule.elastic_rule, title: 'Third Rule (updated)' },
+    };
+    const prebuiltRule = { ...getRulesEqlSchemaMock(), id: 'prebuilt-1', name: 'Prebuilt Rule' };
+
+    interface ServerState {
+      /** Rules returned for the table page the user is looking at */
+      page: RuleMigrationRule[];
+      /** All rules stored for the migration, returned when fetching by ids */
+      stored: RuleMigrationRule[];
+      prebuiltRules?: Record<string, { target: typeof prebuiltRule }>;
+    }
+
+    let chatEvents$: Subject<unknown>;
+    let server: ServerState;
+
+    // Real query hooks and cache invalidation; only the HTTP API is mocked.
+    const { useGetMigrationRules: actualUseGetMigrationRules, useInvalidateGetMigrationRules } =
+      jest.requireActual('../../logic/use_get_migration_rules');
+    const {
+      useGetMigrationPrebuiltRules: actualUseGetMigrationPrebuiltRules,
+      useInvalidateGetMigrationPrebuiltRules,
+    } = jest.requireActual('../../logic/use_get_migration_prebuilt_rules');
+    const { useGetMigrationTranslationStats: actualUseGetMigrationTranslationStats } =
+      jest.requireActual('../../logic/use_get_migration_translation_stats');
+
+    /** Mirrors the migration page: `refetchData` invalidates the rules and prebuilt rules queries */
+    const MigrationRulesTableWithRefetch = () => {
+      const invalidateRules = useInvalidateGetMigrationRules();
+      const invalidatePrebuiltRules = useInvalidateGetMigrationPrebuiltRules();
+      const refetchData = useCallback(() => {
+        invalidateRules(mockMigrationStats.id);
+        invalidatePrebuiltRules(mockMigrationStats.id);
+      }, [invalidateRules, invalidatePrebuiltRules]);
+      return <MigrationRulesTable migrationStats={mockMigrationStats} refetchData={refetchData} />;
+    };
+
+    beforeEach(() => {
+      chatEvents$ = new Subject();
+      server = {
+        page: [firstRule, secondRule, thirdRule],
+        stored: [firstRule, secondRule, thirdRule],
+      };
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          siemMigrations: {
+            rules: { getMissingCapabilities: jest.fn().mockReturnValue([]) },
+          },
+          agentBuilder: {
+            events: {
+              ui: { activeConversation$: new BehaviorSubject({ id: 'conversation-1' }) },
+              getChatEvents$: jest.fn().mockReturnValue(chatEvents$),
+            },
+          },
+        },
+      });
+      (useGetMigrationRules as jest.Mock).mockImplementation(actualUseGetMigrationRules);
+      (useGetMigrationPrebuiltRules as jest.Mock).mockImplementation(
+        actualUseGetMigrationPrebuiltRules
+      );
+      (getMigrationRules as jest.Mock).mockImplementation(
+        async ({ filters }: { filters?: { ids?: string[] } }) => {
+          const ids = filters?.ids;
+          const data = ids ? server.stored.filter((rule) => ids.includes(rule.id)) : server.page;
+          return { data, total: data.length };
+        }
+      );
+      (getRuleMigrationsPrebuiltRules as jest.Mock).mockImplementation(
+        async () => server.prebuiltRules ?? {}
+      );
+      (useGetMigrationTranslationStats as jest.Mock).mockImplementation(
+        actualUseGetMigrationTranslationStats
+      );
+      (getRuleMigrationTranslationStats as jest.Mock).mockResolvedValue(
+        getRuleMigrationTranslationStatsMock()
+      );
+    });
+
+    const openFlyoutWhenLoaded = async (title: string) => {
+      fireEvent.click(await screen.findByText(title));
+    };
+
+    /** The agent updates a rule on the server, then emits the tool UI event */
+    const applyAgentUpdate = (ruleId: string, serverAfterUpdate: ServerState) => {
+      server = serverAfterUpdate;
+      act(() => {
+        chatEvents$.next({
+          type: ChatEventType.toolUi,
+          data: {
+            tool_id: 'update-translated-rule',
+            tool_call_id: 'call-1',
+            custom_event: SIEM_MIGRATION_RULE_UPDATED_TOOL_EVENT,
+            data: { migrationId: mockMigrationStats.id, ruleId },
+          },
+        });
+      });
+    };
+
+    const renderTableWithRefetch = () =>
+      render(<MigrationRulesTableWithRefetch />, { wrapper: TestProviders });
+
+    const moveThirdRuleToAnotherPage = (): ServerState => ({
+      page: [firstRule, secondRule, fourthRule],
+      stored: [firstRule, secondRule, updatedThirdRule, fourthRule],
+    });
+
+    it('should keep showing the updated rule when the update moves it to another page', async () => {
+      renderTableWithRefetch();
+      await openFlyoutWhenLoaded('Third Rule');
+
+      applyAgentUpdate('rule-3', moveThirdRuleToAnotherPage());
+      await screen.findByText('Fourth Rule');
+
+      await waitFor(() => {
+        expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Third Rule (updated)');
+      });
+    });
+
+    it('should disable the previous and next arrows when the updated rule is no longer on the current page', async () => {
+      renderTableWithRefetch();
+      await openFlyoutWhenLoaded('Third Rule');
+
+      applyAgentUpdate('rule-3', moveThirdRuleToAnotherPage());
+      await screen.findByText('Fourth Rule');
+
+      expect(screen.getByTestId('flyoutPrevNextNavPreviousButton')).toBeDisabled();
+      expect(screen.getByTestId('flyoutPrevNextNavNextButton')).toBeDisabled();
+    });
+
+    it('should close the flyout when the opened rule no longer exists', async () => {
+      renderTableWithRefetch();
+      await openFlyoutWhenLoaded('Third Rule');
+
+      applyAgentUpdate('rule-3', {
+        page: [firstRule, secondRule],
+        stored: [firstRule, secondRule],
+      });
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('ruleMigrationDetailsFlyout')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should not reopen the flyout when a rule that disappeared shows up on the page again', async () => {
+      renderTableWithRefetch();
+      await openFlyoutWhenLoaded('Third Rule');
+      applyAgentUpdate('rule-3', {
+        page: [firstRule, secondRule],
+        stored: [firstRule, secondRule],
+      });
+      await waitFor(() => {
+        expect(screen.getAllByTestId('ruleName')).toHaveLength(2);
+      });
+
+      applyAgentUpdate('rule-3', {
+        page: [firstRule, secondRule, thirdRule],
+        stored: [firstRule, secondRule, thirdRule],
+      });
+      await waitFor(() => {
+        expect(screen.getAllByTestId('ruleName')).toHaveLength(3);
+      });
+
+      expect(screen.queryByTestId('ruleMigrationDetailsFlyout')).not.toBeInTheDocument();
+    });
+
+    describe('and the user is editing the translated query', () => {
+      const matchFirstRuleToPrebuiltRule = (): ServerState => {
+        const matchedFirstRule: RuleMigrationRule = {
+          ...firstRule,
+          elastic_rule: {
+            ...firstRule.elastic_rule,
+            title: 'First Rule',
+            prebuilt_rule_id: 'prebuilt-1',
+          },
+        };
+        return {
+          page: [matchedFirstRule, secondRule, thirdRule],
+          stored: [matchedFirstRule, secondRule, thirdRule],
+          prebuiltRules: { 'prebuilt-1': { target: prebuiltRule } },
+        };
+      };
+
+      const startEditingFirstRule = async () => {
+        await openFlyoutWhenLoaded('First Rule');
+        fireEvent.click(screen.getByTestId('editTranslatedRuleButton'));
+        await screen.findByTestId('ruleMigrationTranslationTab');
+      };
+
+      it('should close the query editor when the agent matches the rule to a prebuilt rule', async () => {
+        renderTableWithRefetch();
+        await startEditingFirstRule();
+
+        applyAgentUpdate('rule-1', matchFirstRuleToPrebuiltRule());
+
+        await waitFor(() => {
+          expect(screen.queryByTestId('ruleMigrationTranslationTab')).not.toBeInTheDocument();
+        });
+      });
+
+      it('should warn the user that the rule was updated in the background', async () => {
+        renderTableWithRefetch();
+        await startEditingFirstRule();
+
+        applyAgentUpdate('rule-1', matchFirstRuleToPrebuiltRule());
+
+        await waitFor(() => {
+          expect(appToastsMock.addWarning).toHaveBeenCalledWith({
+            title: 'Rules was updated in background. Please edit the query again',
+          });
+        });
       });
     });
   });
