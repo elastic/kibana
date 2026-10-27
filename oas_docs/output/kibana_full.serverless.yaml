@@ -2291,12 +2291,6 @@ paths:
                 name:
                   description: Updated display name for the agent.
                   type: string
-                service_account_id:
-                  description: Service account the agent runs as for every conversation; null removes the binding. Requires the manage_security privilege.
-                  maxLength: 1024
-                  minLength: 1
-                  nullable: true
-                  type: string
       responses:
         '200':
           content:
