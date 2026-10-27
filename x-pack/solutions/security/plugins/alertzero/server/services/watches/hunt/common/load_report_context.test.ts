@@ -698,4 +698,73 @@ describe('loadReportHuntContext', () => {
       loadReportHuntContext({ esClient, spaceId: 'hunt-b', reportId: 'rpt-1' })
     ).resolves.toBeNull();
   });
+  describe('the coverage ledger from earlier hunts', () => {
+    const withEvidence = (evidence: unknown) =>
+      respond([{ ...reportHit, _source: { ...reportHit._source, evidence } }]);
+
+    it('carries the techniques this space already searched', async () => {
+      esClient.search.mockResolvedValue(
+        withEvidence([{ space_id: 'hunt-a', hunted_technique_ids: ['T1078.004', 'T1098.001'] }])
+      );
+
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+
+      expect(context?.already_searched_technique_ids).toEqual(['T1078.004', 'T1098.001']);
+    });
+
+    it("never reads another space's ledger", async () => {
+      esClient.search.mockResolvedValue(
+        withEvidence([
+          { space_id: 'hunt-b', hunted_technique_ids: ['T1078.004'] },
+          { space_id: 'hunt-a', hunted_technique_ids: ['T1098.001'] },
+        ])
+      );
+
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+
+      expect(context?.already_searched_technique_ids).toEqual(['T1098.001']);
+    });
+
+    it('is empty when the report has no evidence or no ledger in this space', async () => {
+      const read = () => loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+
+      expect((await read())?.already_searched_technique_ids).toEqual([]);
+
+      esClient.search.mockResolvedValue(withEvidence([{ space_id: 'hunt-a' }]));
+      expect((await read())?.already_searched_technique_ids).toEqual([]);
+    });
+
+    it('drops ledger entries that are not valid technique ids', async () => {
+      esClient.search.mockResolvedValue(
+        withEvidence([
+          { space_id: 'hunt-a', hunted_technique_ids: ['T1078.004', '', 'T'.repeat(33)] },
+        ])
+      );
+
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+
+      expect(context?.already_searched_technique_ids).toEqual(['T1078.004']);
+    });
+
+    it('asks the index for the ledger fields', async () => {
+      await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+      const source = (esClient.search as unknown as jest.Mock).mock.calls[0][0]._source;
+
+      expect(source).toEqual(
+        expect.arrayContaining(['evidence.space_id', 'evidence.hunted_technique_ids'])
+      );
+    });
+  });
 });
