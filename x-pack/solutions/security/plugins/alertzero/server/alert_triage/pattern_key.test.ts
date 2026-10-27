@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildPatternKeys } from './pattern_key';
+import { buildPatternKeys, describePatternKey } from './pattern_key';
 
 const RULE = { 'kibana.alert.rule.uuid': 'rule-1', 'kibana.alert.rule.revision': 1 };
 const WINDOWS = { host: { os: { type: 'windows' } } };
@@ -250,5 +250,30 @@ describe('buildPatternKeys', () => {
       expect(wideOf(cloud('r', 'a'))).toBe(wideOf(cloud('r', 'b')));
       expect(wideOf(cloud('r', 'a'))).not.toBe(wideOf(cloud('r2', 'a')));
     });
+  });
+});
+
+describe('describePatternKey', () => {
+  it('reads back the rule, revision, detection and condition of a strict key', () => {
+    const strict = strictOf(processAlert('C:\\Tools\\A.EXE'))!;
+
+    expect(describePatternKey(strict)).toEqual({
+      ruleId: 'rule-1',
+      ruleRevision: 1,
+      detection: '',
+      kind: 'process',
+      values: [
+        ['process.code_signature.subject_name', 'Acme'],
+        ['process.executable', 'c:\\tools\\a.exe'],
+      ],
+    });
+  });
+
+  it('has no condition for the wide key of an alert with no identifying field', () => {
+    const wide = wideOf({ ...RULE, user: { name: 'u' } });
+
+    expect(describePatternKey(wide)).toEqual(
+      expect.objectContaining({ ruleId: 'rule-1', kind: '', values: [] })
+    );
   });
 });
