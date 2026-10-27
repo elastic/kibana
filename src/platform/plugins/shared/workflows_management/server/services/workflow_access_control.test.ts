@@ -16,6 +16,7 @@ import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import {
   assertWorkflowOperation,
   EPHEMERAL_WORKFLOW_ID,
+  INTERNAL_TEST_WORKFLOW_ID,
   WorkflowAccessControlService,
 } from './workflow_access_control';
 import { WorkflowAccessDeniedError } from './workflow_access_denied_error';
@@ -882,7 +883,7 @@ describe('WorkflowAccessControlService', () => {
       });
     });
 
-    it('lists the readable workflows and the unsaved-run id when some are hidden', async () => {
+    it('lists the readable workflows and the unsaved-run ids when some are hidden', async () => {
       jest.mocked(core.elasticsearch.client.asInternalUser.search).mockResolvedValue(
         searchResponse([
           { id: 'legacy', source: {} },
@@ -895,6 +896,7 @@ describe('WorkflowAccessControlService', () => {
         'legacy',
         'public',
         EPHEMERAL_WORKFLOW_ID,
+        INTERNAL_TEST_WORKFLOW_ID,
       ]);
     });
 

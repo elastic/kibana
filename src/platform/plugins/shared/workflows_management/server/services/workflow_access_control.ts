@@ -51,6 +51,9 @@ export const WORKFLOW_READ_ACCESS_QUERY = {
 /** Workflow id stored on the executions of an unsaved workflow run from the editor. */
 export const EPHEMERAL_WORKFLOW_ID = 'ephemeral-workflow';
 
+/** Workflow id stored on the executions of an unsaved workflow test run from the editor. */
+export const INTERNAL_TEST_WORKFLOW_ID = 'internal-test-workflow';
+
 const READABLE_WORKFLOW_IDS_LIMIT = 10000;
 
 const rolePrivileges = {
@@ -264,7 +267,7 @@ export class WorkflowAccessControlService {
     if (!access || access.hidden.length === 0) return undefined;
     // Past this size the id list no longer fits in a request body, so the scope is dropped.
     if (access.readable.length > READABLE_WORKFLOW_IDS_LIMIT) return undefined;
-    return [...access.readable, EPHEMERAL_WORKFLOW_ID];
+    return [...access.readable, EPHEMERAL_WORKFLOW_ID, INTERNAL_TEST_WORKFLOW_ID];
   }
 
   private async buildExecutionFilter(

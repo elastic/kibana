@@ -98,6 +98,7 @@ import { updateWorkflowYamlFields } from '../../common/lib/yaml/update_workflow_
 import {
   EPHEMERAL_WORKFLOW_ID,
   getWorkflowDeleteOperation,
+  INTERNAL_TEST_WORKFLOW_ID,
 } from '../services/workflow_access_control';
 import type { BulkCreateWorkflowsResult } from '../services/workflow_crud_service';
 import type {
@@ -108,8 +109,6 @@ import type {
 } from '../services/workflow_execution_query_service';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
-
-const INTERNAL_TEST_WORKFLOW_ID = 'internal-test-workflow';
 
 const isEnablementOnlyUpdate = (workflow: Partial<EsWorkflow>): boolean => {
   const fields = Object.keys(workflow);
