@@ -7,7 +7,6 @@
 
 import type { Unit } from '../../../../services/unit_repository';
 import {
-  canMoveOriginConnection,
   connectOrigin,
   moveOriginConnection,
   readConnectionOrigin,
@@ -101,37 +100,5 @@ describe('connection origin', () => {
       id: 'p-routed',
     });
     expect(readConnectionTarget('configured-source-otlp')).toBeUndefined();
-  });
-
-  it('lets a connected source move its line but not onto a routing node', () => {
-    const direct: Unit = {
-      ...unit,
-      unit: {
-        ...unit.unit,
-        pipelines: [
-          {
-            id: 'p-bulk',
-            supported_telemetry: ['logs'],
-            config: [
-              { name: 'sources', value: ['bulk'] },
-              { name: 'destinations', value: ['es-a'] },
-            ],
-          },
-          ...unit.unit.pipelines,
-        ],
-      },
-    };
-    const move = {
-      previousOrigin: { kind: 'source', sourceId: 'bulk' },
-      previousTarget: { kind: 'destination', id: 'es-a' },
-      origin: { kind: 'source', sourceId: 'bulk' },
-    } as const;
-
-    expect(
-      canMoveOriginConnection(direct, { ...move, target: { kind: 'destination', id: 'es-c' } })
-    ).toBe(true);
-    expect(
-      canMoveOriginConnection(direct, { ...move, target: { kind: 'pipeline', id: 'p-routed' } })
-    ).toBe(false);
   });
 });

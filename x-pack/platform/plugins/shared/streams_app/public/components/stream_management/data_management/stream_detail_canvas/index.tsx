@@ -113,7 +113,6 @@ import {
 } from '../../../../services/unit_connections';
 import {
   canConnectOrigin,
-  canMoveOriginConnection,
   connectOrigin,
   disconnectOrigin,
   moveOriginConnection,
@@ -434,9 +433,7 @@ function StreamsCanvasInner() {
   const canDropConnection = useCallback(
     (origin: ConnectionOrigin, target: RouteTarget): boolean => {
       const reconnecting = reconnectingRef.current;
-      return reconnecting
-        ? canMoveOriginConnection(unitDefinition, { ...reconnecting, origin, target })
-        : canConnectOrigin(unitDefinition, origin, target);
+      return reconnecting ? true : canConnectOrigin(unitDefinition, origin, target);
     },
     [unitDefinition]
   );
@@ -473,16 +470,13 @@ function StreamsCanvasInner() {
         setConnectionTargetIds(null);
         return;
       }
-      setConnectionTargetIds(
-        new Set(
-          graph.nodes
-            .map(({ id }) => id)
-            .filter((id) => {
-              const target = readConnectionTarget(id);
-              return target && canDropConnection(origin, target);
-            })
-        )
-      );
+      const targets = graph.nodes
+        .map(({ id }) => id)
+        .filter((id) => {
+          const target = readConnectionTarget(id);
+          return target && canDropConnection(origin, target);
+        });
+      setConnectionTargetIds(new Set(targets));
     },
     [canDropConnection, graph.nodes]
   );

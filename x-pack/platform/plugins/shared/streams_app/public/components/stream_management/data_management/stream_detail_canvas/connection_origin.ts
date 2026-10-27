@@ -125,6 +125,3 @@ export const moveOriginConnection = (
   const connected = connectOrigin(unit, origin, target);
   return connected === unit ? unit : disconnectOrigin(connected, previousOrigin, previousTarget);
 };
-
-export const canMoveOriginConnection = (unit: Unit, move: OriginConnectionMove): boolean =>
-  moveOriginConnection(unit, move) !== unit;
