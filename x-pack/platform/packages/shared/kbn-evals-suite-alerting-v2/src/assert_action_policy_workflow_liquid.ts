@@ -253,10 +253,6 @@ interface StatusBranches {
   ungatedConnectorSteps: string[];
 }
 
-/**
- * A notification gate selects `active` or `inactive` alerts only: it does not negate the status
- * or name `pending` / `recovering`, either of which would let those alerts through.
- */
 const isNotificationGate = (condition: string): boolean =>
   (ACTIVE_STATUS_PATTERN.test(condition) || INACTIVE_STATUS_PATTERN.test(condition)) &&
   !SILENT_STATUS_PATTERN.test(condition) &&
