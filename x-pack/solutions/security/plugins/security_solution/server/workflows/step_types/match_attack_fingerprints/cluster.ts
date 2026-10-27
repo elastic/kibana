@@ -143,6 +143,23 @@ export const timeClose = (left: AttackMatchFields, right: AttackMatchFields): bo
 /** The user as seen on that host. Service accounts stay qualified, so `root` on two hosts is not one user. */
 export const hostUserPair = (host: string, user: string): string => `${user}@${host}`;
 
+const sharedValues = (left: readonly string[], right: readonly string[]): string[] => {
+  const rightSet = new Set(right);
+  return [...new Set(left)].filter((value) => rightSet.has(value));
+};
+
+/**
+ * A directory user id is `user.name`. A local user id is `user.name@host.name`, the same
+ * string as the pair. The host is the segment after the last `@`.
+ */
+const userInPair = (userId: string, pair: string): boolean => {
+  if (userId === pair) {
+    return true;
+  }
+  const splitAt = pair.lastIndexOf('@');
+  return splitAt > 0 && pair.slice(0, splitAt) === userId;
+};
+
 /**
  * A shared host and the user seen on that host, within the chain window.
  * Tactics are allowed to differ: a later phase is a continuation, not a new attack.
@@ -157,14 +174,20 @@ export const entityMatch = (
   const leftPairs = left.entityPairs ?? [];
   const rightPairs = right.entityPairs ?? [];
   if (leftPairs.length > 0 && rightPairs.length > 0) {
-    const sharePair = timeClose(left, right) && intersectionSize(leftPairs, rightPairs) >= 1;
-    if (!sharePair) {
+    if (!timeClose(left, right)) {
+      return false;
+    }
+    const pairs = sharedValues(leftPairs, rightPairs);
+    if (pairs.length === 0) {
       return false;
     }
     // A local `Administrator@host` and a directory `Administrator` build the same
-    // raw pair. The normalized user ids still differ, so both are required.
+    // raw pair. The shared normalized user has to be one of those pair's users.
+    // Another user who appears somewhere in both attacks does not vouch for the pair.
     if (left.userEntityIds.length > 0 && right.userEntityIds.length > 0) {
-      return intersectionSize(left.userEntityIds, right.userEntityIds) >= 1;
+      return sharedValues(left.userEntityIds, right.userEntityIds).some((userId) =>
+        pairs.some((pair) => userInPair(userId, pair))
+      );
     }
     return true;
   }

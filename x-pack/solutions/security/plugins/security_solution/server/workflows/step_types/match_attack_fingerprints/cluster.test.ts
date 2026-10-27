@@ -175,6 +175,44 @@ describe('entityMatch', () => {
     ).toBe(true);
   });
 
+  it('returns false when the shared user is not the user on the shared pair', () => {
+    expect(
+      entityMatch(
+        attack({
+          hostEntityIds: ['h1', 'h2'],
+          userEntityIds: ['Administrator@h1', 'bob'],
+          entityPairs: ['Administrator@h1', 'bob@h2'],
+        }),
+        attack({
+          hostEntityIds: ['h1', 'h3'],
+          userEntityIds: ['Administrator', 'bob'],
+          entityPairs: ['Administrator@h1', 'bob@h3'],
+          alertIds: ['c1', 'c2'],
+        }),
+        false
+      )
+    ).toBe(false);
+  });
+
+  it('returns true when a shared user was seen on a shared pair', () => {
+    expect(
+      entityMatch(
+        attack({
+          hostEntityIds: ['h1', 'h2'],
+          userEntityIds: ['Administrator@h1', 'bob'],
+          entityPairs: ['Administrator@h1', 'bob@h2'],
+        }),
+        attack({
+          hostEntityIds: ['h1', 'h2'],
+          userEntityIds: ['Administrator', 'bob'],
+          entityPairs: ['Administrator@h1', 'bob@h2'],
+          alertIds: ['c1', 'c2'],
+        }),
+        false
+      )
+    ).toBe(true);
+  });
+
   it('returns false when a local user and a directory user share only the raw name', () => {
     expect(
       entityMatch(

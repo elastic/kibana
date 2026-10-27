@@ -540,6 +540,7 @@ describe('Attack Discovery worker chain', () => {
         summary_markdown: 'A **summary**',
         related_investigation_id: '',
         sibling_alert_ids: ['alert-3'],
+        sibling_attack_discovery_ids: ['attack-hash-2'],
       };
 
       const render = (template: unknown) =>
@@ -559,6 +560,7 @@ describe('Attack Discovery worker chain', () => {
         ['title', 'Suspicious lateral movement'],
         ['alert_ids', '["alert-1","alert-2"]'],
         ['sibling_alert_ids', '["alert-3"]'],
+        ['sibling_attack_discovery_ids', '["attack-hash-2"]'],
         ['summary_markdown', 'A **summary**'],
         ['attack_discovery_id', 'attack-hash-1'],
       ])('resolves %s against a persisted attack document', async (field, expected) => {
@@ -1673,8 +1675,10 @@ describe('Attack Discovery worker chain', () => {
         expect(stepIn(reviewSteps, name)?.with?.update_related_alerts).toBe(false);
       });
 
-      it.each(closes)('closes by the persisted document id in %s', (name) => {
-        expect(stepIn(reviewSteps, name)?.with?.ids).toEqual(['{{ inputs.attack_discovery_id }}']);
+      it.each(closes)('closes the canonical attack and its same-run siblings in %s', (name) => {
+        expect(stepIn(reviewSteps, name)?.with?.ids).toBe(
+          '${{ inputs.sibling_attack_discovery_ids | default: consts.no_alert_ids | push: inputs.attack_discovery_id }}'
+        );
       });
     });
 
@@ -3548,8 +3552,8 @@ describe('Attack Discovery worker chain', () => {
 
     describe('managed versions', () => {
       // Fixed `yaml` definitions roll out through the hash; the bump is the signal.
-      it('bumps the runner to version 8 so a matcher failure still reviews every attack', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(8);
+      it('bumps the runner to version 9 so the review receives sibling discovery ids', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(9);
       });
 
       it('continues when fingerprint matching fails', () => {
@@ -3566,8 +3570,8 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('bumps the review to version 12 so it tags the sibling alerts', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(12);
+      it('bumps the review to version 13 so a close covers sibling discoveries', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(13);
       });
     });
 

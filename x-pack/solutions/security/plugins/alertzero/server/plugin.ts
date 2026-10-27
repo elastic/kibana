@@ -155,8 +155,11 @@ export class AlertZeroPlugin
     this.threatIntelSupplyWorkflowInstaller = installer;
   };
 
-  private readonly alertZeroStartContract = (): AlertZeroPluginStart => ({
+  private readonly alertZeroStartContract = (
+    attackFingerprintWritesAllowed = true
+  ): AlertZeroPluginStart => ({
     registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
+    attackFingerprintWritesAllowed,
   });
 
   setup(
@@ -329,7 +332,7 @@ export class AlertZeroPlugin
     return { isEnabled: true, setServerlessTierAvailable: this.setServerlessTierAvailable };
   }
 
-  start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
+  async start(core: CoreStart, plugins: AlertZeroStartDependencies): Promise<AlertZeroPluginStart> {
     this.spaces = plugins.spaces;
     this.taskManager = plugins.taskManager;
     this.coreStart = core;
@@ -344,7 +347,12 @@ export class AlertZeroPlugin
       return this.alertZeroStartContract();
     }
 
-    void ensureFingerprintIndexMapping(core.elasticsearch.client.asInternalUser, this.logger);
+    // Finish before this start resolves. Task manager does not run a worker until every
+    // plugin start has settled, so the first fingerprint write sees this template.
+    const attackFingerprintWritesAllowed = await ensureFingerprintIndexMapping(
+      core.elasticsearch.client.asInternalUser,
+      this.logger
+    );
 
     this.serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
 
@@ -353,7 +361,7 @@ export class AlertZeroPlugin
     // Service accounts are required the same way: with the flag off the plugin stays mounted
     // for the unavailable screen and does not install or schedule workers.
     if (!agentBuilder || !proposals || !agenticInvestigations || !this.serviceAccountsEnabled) {
-      return this.alertZeroStartContract();
+      return this.alertZeroStartContract(attackFingerprintWritesAllowed);
     }
     void ensureAgentSafe({ agentBuilder, spaceId: DEFAULT_SPACE_ID, logger: this.logger });
 
@@ -439,7 +447,7 @@ export class AlertZeroPlugin
       mitreDataClient,
     };
 
-    return this.alertZeroStartContract();
+    return this.alertZeroStartContract(attackFingerprintWritesAllowed);
   }
 
   private requireStarted<T>(value: T | undefined, name: string): T {

@@ -183,6 +183,7 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { setFingerprintCreateAllowed } from './workflows/step_types/match_attack_fingerprints/match_attack_fingerprints';
 import {
   registerSecurityManagedWorkflowOwner,
   initSecurityManagedWorkflowsClient,
@@ -929,6 +930,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
+    if (plugins.alertzero?.attackFingerprintWritesAllowed === false) {
+      setFingerprintCreateAllowed(false);
+    }
+
     const { config, logger, productFeaturesService } = this;
 
     initializeEndpointExceptionsPerPolicyOptInStatus(

@@ -10,6 +10,7 @@ import {
   matchAttackFingerprintsInputSchema,
   matchAttackFingerprintsStepCommonDefinition,
 } from '../../../../common/workflows/step_types/match_attack_fingerprints/match_attack_fingerprints_step_common';
+import { FingerprintIndexUnscopedError } from './fingerprint_index_unscoped_error';
 import {
   FingerprintIndexUnreadError,
   matchAttackFingerprints,
@@ -44,9 +45,14 @@ export const matchAttackFingerprintsStepDefinition = createServerStepDefinition(
       }
       // A read that never happened must not write a fingerprint. Generation will
       // not hand these discoveries to a later run, so this run still reviews them.
-      if (error instanceof FingerprintIndexUnreadError) {
+      if (
+        error instanceof FingerprintIndexUnreadError ||
+        error instanceof FingerprintIndexUnscopedError
+      ) {
         context.logger.error(
-          'Attack fingerprint index was not read; reviewing every attack and writing no fingerprint',
+          error instanceof FingerprintIndexUnscopedError
+            ? 'Attack fingerprint index is not space-scoped; reviewing every attack and writing no fingerprint'
+            : 'Attack fingerprint index was not read; reviewing every attack and writing no fingerprint',
           error
         );
         return { output: reviewsWhenMatchFails(parsed.data.attacks) };

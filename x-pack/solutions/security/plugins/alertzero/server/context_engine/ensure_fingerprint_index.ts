@@ -111,10 +111,11 @@ const fingerprintMappings = (baseProperties: MappingTypeMapping['properties']) =
  * cannot create this index or change its mapping, so an existing index with the wrong
  * mapping has to be recreated. The worker's first write then auto-creates it from this template.
  */
+/** True when the fingerprint template is installed. A false result must not auto-create the index. */
 export const ensureFingerprintIndexMapping = async (
   esClient: ElasticsearchClient,
   logger: Logger
-): Promise<void> => {
+): Promise<boolean> => {
   const base = await readBaseTemplate(esClient);
   try {
     await esClient.indices.putIndexTemplate({
@@ -129,7 +130,7 @@ export const ensureFingerprintIndexMapping = async (
     });
   } catch (error) {
     logger.warn(`Attack fingerprint index template was not installed: ${errorText(error)}`);
-    return;
+    return false;
   }
 
   try {
@@ -156,4 +157,5 @@ export const ensureFingerprintIndexMapping = async (
   } catch (error) {
     logger.warn(`Attack fingerprint index mapping was not read: ${errorText(error)}`);
   }
+  return true;
 };

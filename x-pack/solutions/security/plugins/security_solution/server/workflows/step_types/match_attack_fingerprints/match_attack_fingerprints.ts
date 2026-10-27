@@ -16,6 +16,7 @@ import { MAX_ALERT_IDS } from '../../../../common/workflows/step_types/common/co
 import { DEFAULT_MAX_ENTITIES } from '../../../../common/workflows/step_types/get_alert_entities_step/get_alert_entities_step_common';
 import { getAlertEntities } from '../get_alert_entities_step/get_alert_entities';
 import type { AttackSignals, Disposition, InvestigationMeta, StoredFingerprint } from './cluster';
+import { FingerprintIndexUnscopedError } from './fingerprint_index_unscoped_error';
 import {
   FINGERPRINT_TTL_MS,
   STORED_ALERT_ID_CAP,
@@ -63,7 +64,18 @@ export interface MatchReview {
   summary_markdown: string;
   related_investigation_id: string;
   sibling_alert_ids: string[];
+  sibling_attack_discovery_ids: string[];
 }
+
+/**
+ * Set from AlertZero startup. False when the fingerprint template was not installed, so the
+ * worker's first write must not auto-create the index from the generic template.
+ */
+let fingerprintCreateAllowed = true;
+
+export const setFingerprintCreateAllowed = (allowed: boolean): void => {
+  fingerprintCreateAllowed = allowed;
+};
 
 export interface MatchAttachment {
   attack_discovery_id: string;
@@ -688,7 +700,8 @@ const readInvestigation = async (
 const reviewOf = (
   attack: AttackSignals,
   relatedInvestigationId: string,
-  siblingIds: readonly string[]
+  siblingIds: readonly string[],
+  siblingDiscoveryIds: readonly string[]
 ): MatchReview => ({
   attack_discovery_id: attack.attackId.slice(0, 512),
   title: attack.title.slice(0, 1024),
@@ -696,6 +709,7 @@ const reviewOf = (
   summary_markdown: attack.summaryMarkdown.slice(0, 8000),
   related_investigation_id: relatedInvestigationId.slice(0, 256),
   sibling_alert_ids: siblingIds.slice(0, MAX_ALERT_IDS),
+  sibling_attack_discovery_ids: siblingDiscoveryIds.slice(0, MAX_ALERT_IDS),
 });
 
 /** Every parsed attack as its own review. Used when matching itself fails. */
@@ -705,7 +719,7 @@ export const reviewsWhenMatchFails = (
   reviews: attacks
     .map((raw) => parseAttack(raw))
     .filter((item): item is AttackSignals => item !== undefined)
-    .map((attack) => reviewOf(attack, '', [])),
+    .map((attack) => reviewOf(attack, '', [], [])),
   attachments: [],
 });
 
@@ -727,6 +741,69 @@ const siblingAlertIds = (group: readonly AttackSignals[]): string[] => {
     }
   }
   return ids;
+};
+
+const siblingDiscoveryIds = (group: readonly AttackSignals[]): string[] =>
+  group.slice(1, MAX_ALERT_IDS + 1).map((member) => member.attackId.slice(0, 512));
+
+const privilegesMappingType = (
+  mapping: Record<string, unknown> | undefined
+): string | undefined => {
+  const properties = mapping?.properties as Record<string, unknown> | undefined;
+  const permissions = properties?.permissions as
+    | { properties?: Record<string, unknown> }
+    | undefined;
+  const kibana = permissions?.properties?.kibana as
+    | { properties?: Record<string, unknown> }
+    | undefined;
+  const privileges = kibana?.properties?.privileges as { type?: string } | undefined;
+  return privileges?.type;
+};
+
+/**
+ * The worker cannot create this index or read index templates. A missing index is safe to
+ * auto-create only after AlertZero has installed the nested template. An existing index whose
+ * privilege field is not nested cannot be repaired, and another write would keep leaking it.
+ */
+const assertFingerprintWritesAllowed = async (
+  esClient: ElasticsearchClient,
+  abortSignal: AbortSignal | undefined,
+  logger: StepHandlerContext['logger']
+): Promise<void> => {
+  try {
+    const exists = await esClient.indices.exists(
+      { index: ATTACK_FINGERPRINT_INDEX },
+      { signal: abortSignal }
+    );
+    if (exists !== true) {
+      if (!fingerprintCreateAllowed) {
+        throw new FingerprintIndexUnscopedError();
+      }
+      return;
+    }
+
+    const response = await esClient.indices.getMapping(
+      { index: ATTACK_FINGERPRINT_INDEX },
+      { signal: abortSignal }
+    );
+    const current = Object.values(response)[0]?.mappings as Record<string, unknown> | undefined;
+    if (privilegesMappingType(current) !== 'nested') {
+      throw new FingerprintIndexUnscopedError();
+    }
+  } catch (error) {
+    if (error instanceof FingerprintIndexUnscopedError) {
+      logger.warn(
+        'Attack fingerprint index is not space-scoped; reviewing every attack and writing no fingerprint'
+      );
+      throw error;
+    }
+    logger.warn(
+      `Attack fingerprint index mapping was not read; reviewing every attack and writing no fingerprint: ${errorText(
+        error
+      )}`
+    );
+    throw new FingerprintIndexUnscopedError();
+  }
 };
 
 const attachmentOf = (
@@ -766,7 +843,14 @@ const applyDecision = (
 
   // The review tags the later attacks' alerts with its own when the verdict
   // escalates. A false positive leaves the whole batch untagged.
-  reviews.push(reviewOf(group[0], decision.relatedInvestigationId, siblingAlertIds(group)));
+  reviews.push(
+    reviewOf(
+      group[0],
+      decision.relatedInvestigationId,
+      siblingAlertIds(group),
+      siblingDiscoveryIds(group)
+    )
+  );
   for (const member of group.slice(1)) {
     attachments.push(attachmentOf(member, decision.investigationId, false, false));
   }
@@ -801,6 +885,8 @@ export const matchAttackFingerprints = async ({
   if (parsed.length === 0) {
     return { reviews: [], attachments: [] };
   }
+
+  await assertFingerprintWritesAllowed(esClient, abortSignal, logger);
 
   const enriched = await mapPool(parsed, ENRICH_CONCURRENCY, (attack) =>
     enrichAttack(attack, esClient, spaceId, abortSignal, logger)

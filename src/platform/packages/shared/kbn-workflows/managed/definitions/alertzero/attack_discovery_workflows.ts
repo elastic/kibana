@@ -44,13 +44,16 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID =
  * Version 8 reviews every generated attack when fingerprint matching fails, so
  * one matcher error does not drop the run. The YAML change rolls out through
  * `definitionHash`; the bump is the deliberate signal.
+ *
+ * Version 9 passes the discovery ids of same-run siblings so the review can close
+ * them with the canonical attack.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 8,
+  version: 9,
   yaml: ATTACK_DISCOVERY_RUNNER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -74,13 +77,16 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
  * matched on entities only, and tags and acknowledges `sibling_alert_ids` with
  * the review's own alerts when the verdict escalates, so a later run skips the
  * whole batch.
+ *
+ * Version 13 closes `sibling_attack_discovery_ids` with the canonical attack when
+ * the verdict is a false positive or the analyst declines escalation.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 12,
+  version: 13,
   yaml: ATTACK_DISCOVERY_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

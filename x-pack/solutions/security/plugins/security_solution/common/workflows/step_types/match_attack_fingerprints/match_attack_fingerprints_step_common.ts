@@ -42,6 +42,7 @@ export const matchAttackFingerprintsOutputSchema = lazySchema(() =>
           ...attackFields(),
           related_investigation_id: z.string().max(256),
           sibling_alert_ids: z.array(z.string().max(MAX_ALERT_ID_LENGTH)).max(MAX_ALERT_IDS),
+          sibling_attack_discovery_ids: z.array(z.string().max(512)).max(MAX_ALERT_IDS),
         })
       )
       .describe('Attacks that open an Investigation and run FP/TP analysis'),

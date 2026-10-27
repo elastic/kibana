@@ -124,6 +124,16 @@ triggers:
             Investigation, excluding ids already in `alert_ids`. A true-positive or
             inconclusive verdict tags and acknowledges them with `alert_ids`. Empty
             when this attack has no siblings.
+        sibling_attack_discovery_ids:
+          type: array
+          maxItems: 1000
+          items:
+            type: string
+            maxLength: 512
+          description: >-
+            Attack Discovery ids of the same-run attacks attached to this
+            Investigation. A false positive or a declined escalation closes them
+            with this attack. Empty when this attack has no siblings.
       # The attack's identity is required: without the persisted document id there
       # is nothing to attach by reference and nothing to close. Everything else
       # defaults from `consts` so the worker and this workflow can be upgraded
@@ -765,8 +775,9 @@ steps:
           - name: close_attack_false_positive
             type: security.setAttackStatus
             with:
-              ids:
-                - "{{ inputs.attack_discovery_id }}"
+              # Same-run siblings are attached and never reviewed, so this close is
+              # the only transition their discovery documents get.
+              ids: "${{ inputs.sibling_attack_discovery_ids | default: consts.no_alert_ids | push: inputs.attack_discovery_id }}"
               status: closed
               reason: false_positive
               update_related_alerts: false
@@ -1268,8 +1279,7 @@ steps:
     type: security.setAttackStatus
     if: "${{ steps.record_decision.output.declined == true }}"
     with:
-      ids:
-        - "{{ inputs.attack_discovery_id }}"
+      ids: "${{ inputs.sibling_attack_discovery_ids | default: consts.no_alert_ids | push: inputs.attack_discovery_id }}"
       status: closed
       update_related_alerts: false
     on-failure:

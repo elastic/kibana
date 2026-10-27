@@ -10,11 +10,13 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { getAlertEntities } from '../get_alert_entities_step/get_alert_entities';
+import { FingerprintIndexUnscopedError } from './fingerprint_index_unscoped_error';
 import {
   ATTACK_FINGERPRINT_INDEX,
   FingerprintIndexUnreadError,
   matchAttackFingerprints,
   reviewsWhenMatchFails,
+  setFingerprintCreateAllowed,
 } from './match_attack_fingerprints';
 import { matchAttackFingerprintsStepDefinition } from './match_attack_fingerprints_step';
 
@@ -70,6 +72,8 @@ const createHarness = ({
   index = jest.fn().mockResolvedValue({ result: 'created' }),
   get = jest.fn(),
   update = jest.fn().mockResolvedValue({ result: 'updated' }),
+  exists = jest.fn().mockResolvedValue(false),
+  getMapping = jest.fn(),
   conversation = { metadata: { status: 'open', close_reason: '', verdict: '' } },
 } = {}) => {
   const search = jest.fn(async (params: { index?: string; size?: number }) => {
@@ -87,13 +91,20 @@ const createHarness = ({
     };
   });
   const callKibanaApi = jest.fn(async () => ({ body: conversation }));
-  const esClient = { search, index, get, update } as unknown as ElasticsearchClient;
+  const esClient = {
+    search,
+    index,
+    get,
+    update,
+    indices: { exists, getMapping },
+  } as unknown as ElasticsearchClient;
   const contextManager = { callKibanaApi } as unknown as StepHandlerContext['contextManager'];
   return { callKibanaApi, esClient, contextManager, index, search, update };
 };
 
 describe('matchAttackFingerprints', () => {
   beforeEach(() => {
+    setFingerprintCreateAllowed(true);
     getAlertEntitiesMock.mockResolvedValue({
       entities: [
         { id: 'host-1', type: 'host' },
@@ -313,9 +324,56 @@ describe('matchAttackFingerprints', () => {
 
     expect(output.reviews.map((review) => review.attack_discovery_id)).toEqual([ATTACK_ID]);
     expect(output.reviews[0]?.sibling_alert_ids).toEqual(['a3']);
+    expect(output.reviews[0]?.sibling_attack_discovery_ids).toEqual([OTHER_ATTACK_ID]);
     expect(output.attachments[0]?.journal_alerts_retired).toBe(false);
     expect(output.attachments[0]?.tag_correlated_alerts).toBe(false);
     expect(index).toHaveBeenCalledTimes(1);
+  });
+
+  it('reviews every attack when the fingerprint index is not nested', async () => {
+    const { esClient, contextManager, index } = createHarness({
+      exists: jest.fn().mockResolvedValue(true),
+      getMapping: jest.fn().mockResolvedValue({
+        [ATTACK_FINGERPRINT_INDEX]: {
+          mappings: {
+            properties: {
+              permissions: {
+                properties: { kibana: { properties: { privileges: { type: 'object' } } } },
+              },
+            },
+          },
+        },
+      }),
+    });
+
+    await expect(
+      matchAttackFingerprints({
+        attacks: [attackDocument(ATTACK_ID, ['a1', 'a2'])],
+        contextManager,
+        esClient,
+        logger,
+        now: new Date('2026-10-21T12:00:00.000Z'),
+        spaceId: 'default',
+      })
+    ).rejects.toBeInstanceOf(FingerprintIndexUnscopedError);
+    expect(index).not.toHaveBeenCalled();
+  });
+
+  it('reviews every attack when the template was not installed and the index is missing', async () => {
+    setFingerprintCreateAllowed(false);
+    const { esClient, contextManager, index } = createHarness();
+
+    await expect(
+      matchAttackFingerprints({
+        attacks: [attackDocument(ATTACK_ID, ['a1', 'a2'])],
+        contextManager,
+        esClient,
+        logger,
+        now: new Date('2026-10-21T12:00:00.000Z'),
+        spaceId: 'default',
+      })
+    ).rejects.toBeInstanceOf(FingerprintIndexUnscopedError);
+    expect(index).not.toHaveBeenCalled();
   });
 
   it('returns an attachment when the fingerprint create conflicts', async () => {
@@ -467,6 +525,7 @@ describe('matchAttackFingerprints', () => {
       index: jest.fn(),
       get: jest.fn(),
       update: jest.fn().mockResolvedValue({ result: 'updated' }),
+      indices: { exists: jest.fn().mockResolvedValue(false), getMapping: jest.fn() },
     } as unknown as ElasticsearchClient;
     const contextManager = {
       callKibanaApi: jest.fn(async () => ({
@@ -870,7 +929,13 @@ describe('matchAttackFingerprints', () => {
       input: { attacks: [attackDocument(ATTACK_ID, ['a1', 'a2'])] },
       logger,
       contextManager: {
-        getScopedEsClient: () => ({ search, index, get: jest.fn(), update: jest.fn() }),
+        getScopedEsClient: () => ({
+          search,
+          index,
+          get: jest.fn(),
+          update: jest.fn(),
+          indices: { exists: jest.fn().mockResolvedValue(false), getMapping: jest.fn() },
+        }),
         callKibanaApi: async () => ({ body: { id: 'default' } }),
         getContext: () => ({ workflow: { spaceId: 'default' } }),
       },

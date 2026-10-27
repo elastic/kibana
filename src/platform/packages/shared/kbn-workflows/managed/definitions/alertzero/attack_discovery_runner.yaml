@@ -289,6 +289,9 @@ steps:
                 # Investigation. The review tags them with its own when the verdict
                 # escalates.
                 sibling_alert_ids: "${{ foreach.item.sibling_alert_ids }}"
+                # Discovery ids of the attached same-run attacks. The review closes
+                # them with its own when the verdict is a false positive or declined.
+                sibling_attack_discovery_ids: "${{ foreach.item.sibling_attack_discovery_ids }}"
                 # `${{ }}` so the editor does not type-check the template source
                 # against the child's enum.
                 autonomy: "${{ inputs.autonomy }}"
@@ -326,6 +329,7 @@ steps:
                 summary_markdown: "{{ foreach.item['kibana.alert.attack_discovery.summary_markdown'] }}"
                 related_investigation_id: ""
                 sibling_alert_ids: "${{ consts.no_discoveries }}"
+                sibling_attack_discovery_ids: "${{ consts.no_discoveries }}"
                 autonomy: "${{ inputs.autonomy }}"
                 parent_run_id: "{{ execution.id }}"
 
