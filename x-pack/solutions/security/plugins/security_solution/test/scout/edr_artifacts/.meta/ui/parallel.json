@@ -1,5 +1,5 @@
 {
-  "sha1": "b128f893cc4368cfdb98bd68030f3c6afc85b420",
+  "sha1": "aeae583af9b422bb5b21ca555828efe389b09288",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -221,6 +221,38 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/blocklist_operator_suite.ts",
         "line": 104,
         "column": 15
+      }
+    },
+    {
+      "id": "f5f998c6b345b96-d5d6b888321cf60",
+      "title": "Blocklist Match (wildcard) operator creates a blocklist item with the Match operator for the Path field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/blocklist_match_operator_suite.ts",
+        "line": 52,
+        "column": 9
+      }
+    },
+    {
+      "id": "f5f998c6b345b96-f18805c6040a899",
+      "title": "Blocklist Match (wildcard) operator creates a blocklist item with the Match operator for the File Name field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/blocklist_match_operator_suite.ts",
+        "line": 52,
+        "column": 9
       }
     },
     {

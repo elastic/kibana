@@ -146,6 +146,29 @@ describe('registerCandidatesRoute', () => {
     );
   });
 
+  it('forwards lookback_days as lookbackDays', async () => {
+    const { handler, context } = makeDeps();
+
+    await handler(
+      context,
+      requestFor({ lookback_days: 14 }),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(buildCandidateQueryMock.mock.calls[0][2]).toEqual(
+      expect.objectContaining({ lookbackDays: 14 })
+    );
+  });
+
+  // The mock bypasses zod, so the schema default never applies here; the builder owns its own.
+  it('leaves lookbackDays undefined when the body omits it', async () => {
+    const { handler, context } = makeDeps();
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+    expect(buildCandidateQueryMock.mock.calls[0][2].lookbackDays).toBeUndefined();
+  });
+
   it('returns a not_usable skip that the response schema accepts', async () => {
     const { handler, context } = makeDeps();
     buildCandidateQueryMock.mockResolvedValue({

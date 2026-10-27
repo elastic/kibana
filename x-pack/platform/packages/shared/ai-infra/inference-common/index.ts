@@ -35,6 +35,7 @@ export {
   type ChatCompleteTemplate,
   parseTemplateJson,
   type ChatCompleteCompositeResponse,
+  chatCompletionReasoningEfforts,
   type ChatCompletionReasoning,
   type ChatCompletionReasoningEffort,
   type ChatCompletionTokenCountEvent,

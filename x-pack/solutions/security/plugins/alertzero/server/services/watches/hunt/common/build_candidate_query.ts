@@ -19,6 +19,11 @@ export interface CandidateQueryParams {
   spaceId: string;
   /** 1-10, default 10. */
   limit?: number;
+  /**
+   * Default 30; applies only when no report ids are named. Not clamped here: the route schema
+   * (1 to 3650) is the only caller's gate.
+   */
+  lookbackDays?: number;
 }
 
 export interface CandidateQueryResult {
@@ -33,6 +38,9 @@ export interface CandidateQueryResult {
 
 /** Injected rather than imported so the route owns the proposals-service wiring and tests can stub it. */
 export type OpenProposalConversationIdsReader = (spaceId: string) => Promise<Set<string>>;
+
+/** The route schema owns the bounds and default; this only covers callers that bypass it. */
+const DEFAULT_CANDIDATE_LOOKBACK_DAYS = 30;
 
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 10;
@@ -94,6 +102,7 @@ export const buildCandidateQuery = async (
 ): Promise<CandidateQueryResult> => {
   const { trigger, report_ids, spaceId, limit: rawLimit } = params;
   const limit = Math.min(rawLimit ?? DEFAULT_LIMIT, MAX_LIMIT);
+  const lookbackDays = params.lookbackDays ?? DEFAULT_CANDIDATE_LOOKBACK_DAYS;
 
   const namedIds =
     trigger === 'manual' && report_ids && report_ids.length > 0 ? report_ids : undefined;
@@ -132,6 +141,27 @@ export const buildCandidateQuery = async (
                   ],
                 },
               },
+            },
+          },
+        ],
+      },
+    });
+
+    // Publish-date lookback. `should` with `minimum_should_match: 1` lets a report with
+    // `content.published_at` be judged on it alone, while a report without one falls back
+    // to ingest time. The fallback is permanent, not a migration shim: it covers documents
+    // ingested before the field existed and RSS entries whose feed gave no date, which
+    // never get the field. Named ids skip this clause so an analyst can replay an old report.
+    const lookbackRange = { gte: `now-${lookbackDays}d` };
+    filterClauses.push({
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          { range: { 'content.published_at': lookbackRange } },
+          {
+            bool: {
+              filter: [{ range: { '@timestamp': lookbackRange } }],
+              must_not: [{ exists: { field: 'content.published_at' } }],
             },
           },
         ],

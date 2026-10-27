@@ -32,11 +32,17 @@ import {
   type RoundCompleteEvent,
   type RoundInterruptedEvent,
   type RoundStartedEvent,
+  type UserIdAndName,
   CONVERSATION_SCHEMA_VERSION,
   ConversationRoundStatus,
   DEFAULT_CONVERSATION_TITLE,
+  ExecutionStatus,
 } from '@kbn/agent-builder-common';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type {
+  ConversationAgentExecution,
+  StoredConversationExecutionParams,
+} from '@kbn/agent-builder-server';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { UserAttributes } from '@kbn/inference-tracing';
 import { collectAndWriteEvents, handleAgentExecution, setUserAttributes } from './execution_runner';
 import {
@@ -816,8 +822,48 @@ describe('handleAgentExecution', () => {
   });
 
   describe('round author attribution', () => {
-    it('attributes the round to the user the execution was created for', async () => {
-      const author = { id: 'test-user-id', username: 'test_user' };
+    const createConversationExecution = ({
+      owner,
+      agentParams,
+    }: {
+      owner: UserIdAndName;
+      agentParams?: Partial<StoredConversationExecutionParams>;
+    }): ConversationAgentExecution => ({
+      executionId: 'execution-1',
+      '@timestamp': '2024-01-01T00:00:00.000Z',
+      status: ExecutionStatus.running,
+      agentId: 'test-agent',
+      spaceId: 'default',
+      owner,
+      eventCount: 0,
+      events: [],
+      executionMode: AgentExecutionMode.conversation,
+      agentParams: {
+        agentId: 'test-agent',
+        conversationId: 'conversation-1',
+        roundId: 'round-1',
+        conversationOperation: 'UPDATE',
+        receivedAt: '2024-01-01T00:00:00.000Z',
+        nextInput: { message: 'Hello' },
+        ...agentParams,
+      },
+    });
+
+    /**
+     * Runs one round to completion for `owner`, optionally with a stored author decoration and
+     * with the author the conversation client should resolve to. Returns the mocks to assert on.
+     */
+    const runRound = async ({
+      owner,
+      requestAuthor,
+      resolvedAuthor,
+      exposeConversationClient = true,
+    }: {
+      owner: UserIdAndName;
+      requestAuthor?: StoredConversationExecutionParams['author'];
+      resolvedAuthor?: ReturnType<ReturnType<typeof createConversationClientMock>['getAuthor']>;
+      exposeConversationClient?: boolean;
+    }) => {
       const conversation = createEmptyConversation({
         id: 'conversation-1',
         agent_id: 'test-agent',
@@ -825,7 +871,9 @@ describe('handleAgentExecution', () => {
       const conversationClient = createConversationClientMock();
       conversationClient.get.mockResolvedValue(conversation);
       conversationClient.update.mockResolvedValue(conversation);
-      conversationClient.getAuthor.mockReturnValue(author);
+      if (resolvedAuthor) {
+        conversationClient.getAuthor.mockReturnValue(resolvedAuthor);
+      }
 
       executeAgentMock.mockReturnValue(
         of({
@@ -834,7 +882,7 @@ describe('handleAgentExecution', () => {
         } as RoundCompleteEvent)
       );
       resolveServicesMock.mockResolvedValue({
-        conversationClient,
+        ...(exposeConversationClient ? { conversationClient } : {}),
         selectedConnectorId: 'connector-1',
         modelProvider: createModelProviderMock(),
       } as never);
@@ -842,27 +890,45 @@ describe('handleAgentExecution', () => {
       const deps = createDeps({ conversationClient });
 
       const events$ = await handleAgentExecution({
-        execution: {
-          executionId: 'execution-1',
-          executionMode: AgentExecutionMode.conversation,
-          owner: author,
-          agentParams: {
-            agentId: 'test-agent',
-            conversationId: 'conversation-1',
-            roundId: 'round-1',
-            conversationOperation: 'UPDATE',
-            receivedAt: '2024-01-01T00:00:00.000Z',
-            nextInput: { message: 'Hello' },
-          },
-        } as never,
+        execution: createConversationExecution({
+          owner,
+          agentParams: requestAuthor ? { author: requestAuthor } : {},
+        }),
         deps,
-        request: { headers: {} } as never,
+        request: httpServerMock.createKibanaRequest(),
         abortSignal: new AbortController().signal,
       });
-
       await lastValueFrom(events$.pipe(toArray()));
 
+      return { conversationClient, deps };
+    };
+
+    it('attributes the round to the user the execution was created for', async () => {
+      const author = { id: 'test-user-id', username: 'test_user' };
+
+      await runRound({ owner: author, resolvedAuthor: author });
+
       expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ author }));
+    });
+
+    it('passes the stored author decoration to the conversation client', async () => {
+      const owner = {
+        id: 'service_account:kibana/alertzero-workers',
+        username: 'kibana/alertzero-workers',
+        type: 'service_account' as const,
+      };
+      const decoration = { full_name: 'Attack Discovery Review' };
+
+      const { conversationClient } = await runRound({
+        owner,
+        requestAuthor: decoration,
+        resolvedAuthor: { ...owner, ...decoration },
+      });
+
+      expect(conversationClient.getAuthor).toHaveBeenCalledWith(undefined, decoration);
+      expect(executeAgentMock).toHaveBeenCalledWith(
+        expect.objectContaining({ author: { ...owner, ...decoration } })
+      );
     });
 
     it('acts as the execution owner, keeping a service account typed', async () => {
@@ -871,44 +937,8 @@ describe('handleAgentExecution', () => {
         username: 'kibana/automation',
         type: 'service_account' as const,
       };
-      const conversation = createEmptyConversation({
-        id: 'conversation-1',
-        agent_id: 'test-agent',
-      });
-      const conversationClient = createConversationClientMock();
-      conversationClient.get.mockResolvedValue(conversation);
-      conversationClient.update.mockResolvedValue(conversation);
-      executeAgentMock.mockReturnValue(
-        of({
-          type: ChatEventType.roundComplete,
-          data: { round: createRound({}) },
-        } as RoundCompleteEvent)
-      );
-      resolveServicesMock.mockResolvedValue({
-        selectedConnectorId: 'connector-1',
-        modelProvider: createModelProviderMock(),
-      } as never);
-      const deps = createDeps({ conversationClient });
 
-      const events$ = await handleAgentExecution({
-        execution: {
-          executionId: 'execution-1',
-          executionMode: AgentExecutionMode.conversation,
-          owner,
-          agentParams: {
-            agentId: 'test-agent',
-            conversationId: 'conversation-1',
-            roundId: 'round-1',
-            conversationOperation: 'UPDATE',
-            receivedAt: '2024-01-01T00:00:00.000Z',
-            nextInput: { message: 'Hello' },
-          },
-        } as never,
-        deps,
-        request: { headers: {} } as never,
-        abortSignal: new AbortController().signal,
-      });
-      await lastValueFrom(events$.pipe(toArray()));
+      const { deps } = await runRound({ owner, exposeConversationClient: false });
 
       const { conversationService } = deps as unknown as {
         conversationService: { getScopedClientAsUser: jest.Mock };
