@@ -49,12 +49,14 @@ function isEndpointMalwarePolicyValidForLicense(policy: PolicyConfig, license: I
 }
 
 function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
-  // Linux ransomware is optional: a policy that predates it, or where it is gated off, has none.
+  const macRansomware = policy.mac?.ransomware;
+  const macRansomwarePopup = policy.mac?.popup?.ransomware;
   const linuxRansomware = policy.linux?.ransomware;
   const linuxRansomwarePopup = policy.linux?.popup?.ransomware;
 
-  // A present but malformed Linux ransomware value cannot be validated, so fail closed.
   if (
+    (macRansomware !== undefined && !isPlainObject(macRansomware)) ||
+    (macRansomwarePopup !== undefined && !isPlainObject(macRansomwarePopup)) ||
     (linuxRansomware !== undefined && !isPlainObject(linuxRansomware)) ||
     (linuxRansomwarePopup !== undefined && !isPlainObject(linuxRansomwarePopup))
   ) {
@@ -67,7 +69,8 @@ function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license
     // only platinum or higher may enable ransomware protection
     if (
       policy.windows.ransomware.supported !== defaults.windows.ransomware.supported ||
-      policy.mac.ransomware.supported !== defaults.mac.ransomware.supported ||
+      (macRansomware !== undefined &&
+        macRansomware.supported !== defaults.mac.ransomware.supported) ||
       (linuxRansomware !== undefined &&
         linuxRansomware.supported !== defaults.linux.ransomware?.supported)
     ) {
@@ -83,7 +86,8 @@ function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license
 
   if (
     policy.windows.ransomware.supported !== defaults.windows.ransomware.supported ||
-    policy.mac.ransomware.supported !== defaults.mac.ransomware.supported ||
+    (macRansomware !== undefined &&
+      macRansomware.supported !== defaults.mac.ransomware.supported) ||
     (linuxRansomware !== undefined &&
       linuxRansomware.supported !== defaults.linux.ransomware?.supported)
   ) {
@@ -92,7 +96,7 @@ function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license
 
   if (
     policy.windows.ransomware.mode !== defaults.windows.ransomware.mode ||
-    policy.mac.ransomware.mode !== defaults.mac.ransomware.mode ||
+    (macRansomware !== undefined && macRansomware.mode !== defaults.mac.ransomware.mode) ||
     (linuxRansomware !== undefined && linuxRansomware.mode !== defaults.linux.ransomware?.mode)
   ) {
     return false;
@@ -100,7 +104,8 @@ function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license
 
   if (
     policy.windows.popup.ransomware.enabled !== defaults.windows.popup.ransomware.enabled ||
-    policy.mac.popup.ransomware.enabled !== defaults.mac.popup.ransomware.enabled ||
+    (macRansomwarePopup !== undefined &&
+      macRansomwarePopup.enabled !== defaults.mac.popup.ransomware.enabled) ||
     (linuxRansomwarePopup !== undefined &&
       linuxRansomwarePopup.enabled !== defaults.linux.popup.ransomware?.enabled)
   ) {
@@ -110,8 +115,9 @@ function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license
   if (
     (policy.windows.popup.ransomware.message !== '' &&
       policy.windows.popup.ransomware.message !== DefaultPolicyNotificationMessage) ||
-    (policy.mac.popup.ransomware.message !== '' &&
-      policy.mac.popup.ransomware.message !== DefaultPolicyNotificationMessage) ||
+    (macRansomwarePopup !== undefined &&
+      macRansomwarePopup.message !== '' &&
+      macRansomwarePopup.message !== DefaultPolicyNotificationMessage) ||
     (linuxRansomwarePopup !== undefined &&
       linuxRansomwarePopup.message !== '' &&
       linuxRansomwarePopup.message !== DefaultPolicyNotificationMessage)

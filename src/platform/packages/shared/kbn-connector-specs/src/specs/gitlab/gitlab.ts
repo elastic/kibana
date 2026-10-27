@@ -118,7 +118,7 @@ export const Gitlab: ConnectorSpec = {
   metadata: {
     id: '.gitlab',
     displayName: 'GitLab',
-    description: i18n.translate('core.kibanaConnectorSpecs.gitlab.metadata.description', {
+    description: i18n.translate('connectorSpecs.gitlab.metadata.description', {
       defaultMessage:
         'Search projects, manage issues and merge requests, browse repository files, and trigger CI/CD pipelines in GitLab.',
     }),
@@ -149,7 +149,7 @@ export const Gitlab: ConnectorSpec = {
         type: 'bearer',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.gitlab.auth.bearer.label', {
+          label: i18n.translate('connectorSpecs.gitlab.auth.bearer.label', {
             defaultMessage: 'Access Token',
           }),
         },
@@ -165,11 +165,11 @@ export const Gitlab: ConnectorSpec = {
           'GitLab API base URL. Use the default for GitLab.com, or your self-managed instance URL (e.g. https://gitlab.example.com/api/v4).'
         )
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.gitlab.config.apiUrl.label', {
+          label: i18n.translate('connectorSpecs.gitlab.config.apiUrl.label', {
             defaultMessage: 'GitLab API URL',
           }),
           placeholder: GITLAB_COM_API,
-          helpText: i18n.translate('core.kibanaConnectorSpecs.gitlab.config.apiUrl.helpText', {
+          helpText: i18n.translate('connectorSpecs.gitlab.config.apiUrl.helpText', {
             defaultMessage:
               'For GitLab.com leave the default. For a self-managed instance enter your API base URL, e.g. https://gitlab.example.com/api/v4.',
           }),
@@ -1034,7 +1034,7 @@ export const Gitlab: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.gitlab.test.description', {
+    description: i18n.translate('connectorSpecs.gitlab.test.description', {
       defaultMessage: 'Verifies connectivity by fetching the current authenticated user profile.',
     }),
     handler: async (ctx) => {

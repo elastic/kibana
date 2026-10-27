@@ -64,6 +64,55 @@ export const pickCurrentRevision = <T extends SearchHitForRevision>(hits: T[]): 
     .reduce((current, hit) => ((hit._id ?? '') > (current._id ?? '') ? hit : current));
 };
 
+export interface KiSearchOptions {
+  esClient: ElasticsearchClient;
+  dest: AiIndexDest;
+  kiId: string;
+  /** Pins the search to one physical backing index (ignored for data streams). */
+  backingIndex?: string;
+  /** Fetches the full `_source` for an index-type dest instead of just `id`/`governance`. */
+  includeSource?: boolean;
+  abortSignal?: AbortSignal;
+}
+
+/**
+ * Searches for every hit matching a KI id, scoped to a dest and (optionally) pinned to one
+ * backing index, sized and sorted to resolve the current revision when more than one physical
+ * document could match. Shared by `getKi` and `findKiRevision`.
+ */
+export const findKiHits = async <T>({
+  esClient,
+  dest,
+  kiId,
+  backingIndex,
+  includeSource,
+  abortSignal,
+}: KiSearchOptions): Promise<{
+  hits: estypes.SearchHit<T>[];
+  resolveNewestRevision: boolean;
+}> => {
+  const isDataStream = dest.type === 'data_stream';
+  const useBackingIndexFilter = !isDataStream && backingIndex !== undefined;
+  const resolveNewestRevision = isDataStream || useBackingIndexFilter;
+  const response = await esClient.search<T>(
+    {
+      index: dest.value,
+      ...LENIENT_INDEX_OPTIONS,
+      query: useBackingIndexFilter
+        ? { bool: { filter: [kiIdQuery(kiId), { term: { _index: backingIndex } }] } }
+        : kiIdQuery(kiId),
+      ...(resolveNewestRevision && {
+        sort: [{ '@timestamp': { order: 'desc' as const, unmapped_type: 'date' as const } }],
+      }),
+      size: resolveNewestRevision ? REVISION_TIE_WINDOW : 2,
+      seq_no_primary_term: true,
+      _source: isDataStream || includeSource ? true : ['id', 'governance'],
+    },
+    { signal: abortSignal }
+  );
+  return { hits: response.hits.hits, resolveNewestRevision };
+};
+
 export interface GetKiOptions {
   aiIndexId: string;
   dest: AiIndexDest;
@@ -78,22 +127,16 @@ export const getKi = async (
   esClient: ElasticsearchClient,
   { aiIndexId, dest, index, kiId, lifecycleStatuses }: GetKiOptions
 ): Promise<GetKiResponse> => {
-  const response = await esClient.search<KiDocument>({
-    index: dest.value,
-    ...LENIENT_INDEX_OPTIONS,
-    query: {
-      bool: {
-        filter: [
-          kiIdQuery(kiId),
-          ...(dest.type === 'data_stream' ? [] : [{ term: { _index: index } }]),
-        ],
-      },
-    },
-    sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
-    size: dest.type === 'data_stream' ? REVISION_TIE_WINDOW : 1,
+  const { hits, resolveNewestRevision } = await findKiHits<KiDocument>({
+    esClient,
+    dest,
+    kiId,
+    backingIndex: index,
+    includeSource: true,
   });
 
-  const { _id, _source: document } = pickCurrentRevision(response.hits.hits) ?? {};
+  const hit = resolveNewestRevision ? pickCurrentRevision(hits) : hits[0];
+  const { _id, _source: document } = hit ?? {};
   if (
     _id === undefined ||
     document === undefined ||

@@ -6,6 +6,7 @@
  */
 
 import { stringify } from 'yaml';
+import { IF_CONDITION_MAX_LENGTH } from '@kbn/workflows';
 import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID } from '../../../common';
 import { parsePresetSchedule } from '../../../common/automation_schedule';
 import type { InvestigationNotificationDestination } from '../../../common';
@@ -28,23 +29,19 @@ const SLACK_MESSAGE_EXCLUSIONS = [
   '(not event.subtype:* or event.subtype:bot_message or event.subtype:file_share)',
 ];
 
-// One investigation per message, so concurrent messages in a channel do not share a subject.
-const SLACK_SUBJECT_ID = '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}';
-
-// The message's thread, which the managed Slack thread workflow looks the investigation up by when
-// someone replies. Only recorded for an automation that already reports in that thread: it makes
-// a reply there report the investigation, which a silent or channel-mode automation does not do.
-// The trigger condition guarantees a workspace.
+// The message's thread, keyed by the Relay's thread key so a later reply or mention in it continues
+// the investigation. Only top-level messages trigger, so each message is its own thread.
 const SLACK_THREAD = {
   workspace: '{{ event.workspace }}',
   channel: '{{ event.channel }}',
   thread_ts: '{{ event.messageId }}',
+  external_conversation_id: '{{ event.externalConversationId }}',
 };
 
 // See MAX_PROMPT_TEMPLATE_LENGTH: the template and this text share the step's message limit.
 export const SLACK_MESSAGE_TEXT_LIMIT = 4000;
 
-const SLACK_MESSAGE_PROMPT = `Slack message from {{ event.sender }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: ${SLACK_MESSAGE_TEXT_LIMIT} }}`;
+const SLACK_MESSAGE_PROMPT = `Slack message from {{ event.botName | default: event.sender | default: event.botId }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: ${SLACK_MESSAGE_TEXT_LIMIT} }}`;
 
 type AlertRow = Extract<NightshiftTriggerRow, { kind: 'alert' }>;
 type SlackRow = Extract<NightshiftTriggerRow, { kind: 'slack' }>;
@@ -144,6 +141,7 @@ function generateAlertWorkflow(
       {
         name: hasMultipleTriggers ? 'trigger_investigation_alert' : 'trigger_investigation',
         type: 'nightshift.triggerInvestigation',
+        ...(alertRows.length > 0 ? { if: ALERT_ACTIVE_STEP_CONDITION } : {}),
         with: {
           automation_id: automationId,
           subject_type: alertRows.length > 0 ? 'alert' : 'manual',
@@ -161,9 +159,35 @@ function generateAlertWorkflow(
           ...(notificationDestinations ? { notificationDestinations } : {}),
         },
       },
+      ...(alertRows.length > 0 ? [RECOVERED_ALERT_STEP] : []),
     ],
   };
 }
+
+const ALERT_ACTIVE_STEP_CONDITION = "${{ event.alert.status == 'active' }}";
+
+/**
+ * Continues the open investigation that holds a recovered alert with the recovery brief, or does
+ * nothing when no open investigation holds it. It never starts an investigation, so it does not
+ * consume the automation's daily limit.
+ */
+const RECOVERED_ALERT_STEP = {
+  name: 'follow_up_recovered_alert',
+  type: 'nightshift.followUpRecoveredAlert',
+  if: "${{ event.alert.status == 'recovered' }}",
+  with: {
+    alert_uuid: '{{ event.alert.uuid }}',
+    alert_id: '${{ event.alert.id }}',
+    alert_start: '${{ event.alert.start }}',
+    // Stamped when the event is dispatched to workflows, after the rule run that found the alert
+    // recovered has saved its state.
+    recovered_at: '{{ event.timestamp }}',
+    rule_id: '{{ event.rule.id }}',
+    rule_name: '${{ event.rule.name }}',
+    rule_type_id: '{{ event.rule.ruleTypeId }}',
+    rule_tags: '${{ event.rule.tags }}',
+  },
+};
 
 function buildAlertContext() {
   return {
@@ -228,9 +252,11 @@ type TriggerKind = 'alert' | 'slack' | 'schedule';
 
 /**
  * One investigation per alert and per Slack message, so a new one does not cancel or drop the
- * previous one. Scheduled runs have no event payload and share one concurrency key per automation.
+ * previous one. An alert's recovery is keyed apart from its activation, so it is not dropped while
+ * the activation's run is still in progress. Scheduled runs have no event payload and share one
+ * concurrency key per automation.
  */
-const ALERT_CONCURRENCY_SUFFIX = '{{ event.alert.uuid }}';
+const ALERT_CONCURRENCY_SUFFIX = '{{ event.alert.uuid }}-{{ event.alert.status }}';
 const SLACK_CONCURRENCY_SUFFIX = '{{ event.channel }}-{{ event.messageId }}';
 
 function buildConcurrencyKey(
@@ -275,7 +301,6 @@ function generateSlackWorkflow(
   hasMultipleTriggers: boolean
 ) {
   const notificationDestinations = buildNotificationDestinations(automationId, automation, 'slack');
-  const repliesInMessageThread = notificationDestinations?.some(({ params }) => params.thread_ts);
   const condition = buildSlackCondition(slackRows);
   // One trigger combines all Slack rows so a message matching several rows starts only one run.
   return {
@@ -293,9 +318,8 @@ function generateSlackWorkflow(
         type: 'nightshift.triggerInvestigation',
         with: {
           automation_id: automationId,
-          subject_type: 'manual',
-          subject_id: SLACK_SUBJECT_ID,
-          ...(repliesInMessageThread ? { slack_thread: SLACK_THREAD } : {}),
+          subject_type: 'slack_thread',
+          slack_thread: SLACK_THREAD,
           title: automation.name,
           summary: automation.name,
           trigger_type: 'automatic',
@@ -372,9 +396,9 @@ function buildMessage(
  * KQL over the `slack2.message` event payload: the fixed exclusions, then the row filters.
  *
  * `channels` and `users` are matched against `event.channel` and `event.sender`, which are Slack
- * ids, so a channel name never matches. The message filter is a case sensitive contains check, see
- * `buildMessageFilterTerms`. A row with no filters matches every message the exclusions let
- * through.
+ * ids, so a channel name never matches. `bots` are matched by app id, bot id or bot name. The
+ * message filter is a case sensitive contains check, see `buildMessageFilterTerms`. A row with no
+ * filters matches every message the exclusions let through.
  */
 function buildSlackCondition(rows: SlackRow[]): string {
   const exclusions = SLACK_MESSAGE_EXCLUSIONS.join(' and ');
@@ -382,7 +406,12 @@ function buildSlackCondition(rows: SlackRow[]): string {
   if (rowConditions.some((c) => c === '')) return exclusions;
   const rowFilter =
     rowConditions.length === 1 ? rowConditions[0] : rowConditions.map((c) => `(${c})`).join(' or ');
-  return `${exclusions} and (${rowFilter})`;
+  const condition = `${exclusions} and (${rowFilter})`;
+  // The workflow API saves a longer condition as an invalid, disabled workflow without an error.
+  if (condition.length > IF_CONDITION_MAX_LENGTH) {
+    throw new Error('The Slack filters are too long. Remove some channels, users or apps.');
+  }
+  return condition;
 }
 
 function buildSlackRowCondition(row: SlackRow): string {
@@ -398,12 +427,26 @@ function buildSlackRowCondition(row: SlackRow): string {
     parts.push(kqlOneOf('event.sender', users));
   }
 
+  const bots = cleanValues(row.bots);
+  if (bots.length > 0) {
+    parts.push(buildBotCondition(bots));
+  }
+
   const messageFilter = row.messageFilter?.trim();
   if (messageFilter) {
     parts.push(buildMessageFilterTerms(messageFilter));
   }
 
   return parts.join(' and ');
+}
+
+/**
+ * Matches a post from any of the given apps or bots. Each value is compared with the app id, the
+ * bot id and the bot name, so the user can enter whichever one they have.
+ */
+function buildBotCondition(bots: string[]): string {
+  const fields = ['event.appId', 'event.botId', 'event.botName'];
+  return `(${fields.map((field) => kqlOneOf(field, bots)).join(' or ')})`;
 }
 
 /**
@@ -449,10 +492,10 @@ function buildCondition(rows: Array<Extract<NightshiftTriggerRow, { kind: 'alert
   return rowConditions.map((c) => `(${c})`).join(' OR ');
 }
 
-const ACTIVE_ALERT_CONDITION = 'event.alert.status: "active"';
+const ALERT_STATUS_CONDITION = '(event.alert.status: "active" OR event.alert.status: "recovered")';
 
 function buildRowCondition(row: Extract<NightshiftTriggerRow, { kind: 'alert' }>): string {
-  const parts: string[] = [ACTIVE_ALERT_CONDITION];
+  const parts: string[] = [ALERT_STATUS_CONDITION];
 
   if (row.ruleNamePattern) {
     parts.push(`event.rule.name: *${escapeKqlWildcardTerm(row.ruleNamePattern)}*`);

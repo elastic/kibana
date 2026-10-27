@@ -72,7 +72,8 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
 }) => {
   const authz = useAuthz();
   const { docLinks } = useStartServices();
-  const isDisabled = !authz.fleet.allAgentPolicies;
+  // agentless policies are managed by Elastic: their settings are read-only
+  const isDisabled = !authz.fleet.allAgentPolicies || !!agentPolicy?.supports_agentless;
   const { enableIncludeTagsInEvents } = ExperimentalFeaturesService.get();
   const agentPolicyAdvancedSettings = getAgentPolicyAdvancedSettings(docLinks.links.fleet).map(
     (setting) =>
@@ -200,9 +201,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
               <EuiSpacer size="m" />
               <ConfiguredSettings
                 configuredSettings={agentPolicyAdvancedSettings}
-                disabled={
-                  isDisabled || !!agentPolicy?.supports_agentless || !!agentPolicy?.is_managed
-                }
+                disabled={isDisabled || !!agentPolicy?.is_managed}
               />
             </>
             <EuiSpacer size="xl" />

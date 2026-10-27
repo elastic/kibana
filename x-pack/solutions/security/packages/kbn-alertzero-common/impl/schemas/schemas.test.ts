@@ -10,6 +10,7 @@ import { createCatalogWatchPlaceholder } from '../watches/watch_helpers';
 import { RULE_TUNING_DEFAULT_EXTRAS } from '../worker_settings';
 import type { Watch } from '.';
 import {
+  CandidatesRequestBody,
   GetWatchResponse,
   ListWatchesResponse,
   RuleTuningWorkerExtras,
@@ -22,6 +23,20 @@ import {
 // The catalog placeholders are what the watches routes actually return for a not-installed
 // Watch, so they are the right input for the response schemas.
 const CATALOG_WATCHES = SYSTEM_SECURITY_WATCH_IDS.map(createCatalogWatchPlaceholder);
+
+describe('CandidatesRequestBody', () => {
+  it('defaults lookback_days to 30', () => {
+    expect(CandidatesRequestBody.parse({}).lookback_days).toBe(30);
+  });
+
+  it('keeps an explicit lookback_days', () => {
+    expect(CandidatesRequestBody.parse({ lookback_days: 14 }).lookback_days).toBe(14);
+  });
+
+  it.each([0, 3651])('rejects lookback_days %d', (lookbackDays) => {
+    expect(CandidatesRequestBody.safeParse({ lookback_days: lookbackDays }).success).toBe(false);
+  });
+});
 
 describe('AlertZero schema smoke tests', () => {
   it('parses catalog watches through ListWatchesResponse', () => {

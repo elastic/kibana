@@ -15,8 +15,6 @@ import { spaceTest, testData } from '../fixtures';
  * Maps and Visualize. The popover behaviour itself is covered by the CRUD and
  * read-only specs in Discover; this guards against an app changing its top-nav
  * layout in a way that hides the menu trigger.
- *
- * Custom-role auth is local-stateful only (no ECH support yet for `loginWithCustomRole`).
  */
 spaceTest.describe('Saved query menu — cross-app smoke', { tag: testData.SQM_UI_TAG }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {

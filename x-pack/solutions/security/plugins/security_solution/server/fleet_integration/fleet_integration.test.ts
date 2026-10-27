@@ -791,6 +791,24 @@ describe('Fleet integrations', () => {
         licenseEmitter.next(Enterprise); // set license level to enterprise
       });
 
+      it('resolves an update with absent macOS ransomware settings', async () => {
+        const mockPolicy = policyFactory();
+        Reflect.deleteProperty(mockPolicy.mac, 'ransomware');
+        Reflect.deleteProperty(mockPolicy.mac.popup, 'ransomware');
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        await expect(
+          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+        ).resolves.toBeDefined();
+      });
+
       it('should throw if endpointProtectionUpdates productFeature is disabled and user modifies global_manifest_version', async () => {
         productFeaturesService = createProductFeaturesServiceMock(
           ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_protection_updates')

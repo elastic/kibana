@@ -16,6 +16,7 @@ jest.mock('@kbn/agent-builder-genai-utils/tools', () => ({
 
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import { searchTool } from './search';
+import { resolveToolSchema } from './test_utils';
 
 const runSearchToolMock = runSearchTool as jest.MockedFunction<typeof runSearchTool>;
 
@@ -31,6 +32,18 @@ const createHandlerContext = () => {
   return context;
 };
 
+const run = async ({
+  includeFrozen,
+  includeFrozenByDefault = false,
+}: { includeFrozen?: boolean; includeFrozenByDefault?: boolean } = {}) => {
+  const tool = createTool();
+  const schema = await resolveToolSchema(tool, includeFrozenByDefault);
+  await tool.handler(
+    schema.parse({ query: 'failed logins', include_frozen: includeFrozen }),
+    createHandlerContext()
+  );
+};
+
 describe('searchTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -38,7 +51,7 @@ describe('searchTool', () => {
   });
 
   it('excludes frozen tier indices by default', async () => {
-    await createTool().handler({ query: 'failed logins' }, createHandlerContext());
+    await run();
 
     expect(runSearchToolMock).toHaveBeenCalledWith(
       expect.objectContaining({ includeFrozen: false })
@@ -46,13 +59,26 @@ describe('searchTool', () => {
   });
 
   it('includes frozen tier indices when opted in', async () => {
-    await createTool().handler(
-      { query: 'failed logins', include_frozen: true },
-      createHandlerContext()
-    );
+    await run({ includeFrozen: true });
 
     expect(runSearchToolMock).toHaveBeenCalledWith(
       expect.objectContaining({ includeFrozen: true })
+    );
+  });
+
+  it('includes frozen tier indices by default when the space setting is enabled', async () => {
+    await run({ includeFrozenByDefault: true });
+
+    expect(runSearchToolMock).toHaveBeenCalledWith(
+      expect.objectContaining({ includeFrozen: true })
+    );
+  });
+
+  it('lets the agent override the default', async () => {
+    await run({ includeFrozen: false, includeFrozenByDefault: true });
+
+    expect(runSearchToolMock).toHaveBeenCalledWith(
+      expect.objectContaining({ includeFrozen: false })
     );
   });
 });
