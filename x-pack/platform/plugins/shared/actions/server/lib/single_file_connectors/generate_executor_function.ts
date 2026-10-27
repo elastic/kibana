@@ -42,6 +42,7 @@ interface FetchOptions {
 
 const DEFAULT_RESPONSE_SIZE_HEADER = 'content-length';
 const RATE_LIMIT_RESET_HEADERS = ['x-ratelimit-reset', 'ratelimit-reset'] as const;
+const RATE_LIMIT_REMAINING_HEADERS = ['x-ratelimit-remaining', 'ratelimit-remaining'] as const;
 // Reset headers above this are epoch seconds (e.g. GitHub's `x-ratelimit-reset`), not a delay.
 const MIN_EPOCH_SECONDS = 1_000_000_000;
 
@@ -78,12 +79,24 @@ const getHttpStatus = (error: unknown): number | undefined => {
   return typeof status === 'number' ? status : undefined;
 };
 
-// A time in the past means the service can be called again now.
-const notBeforeNow = (epochMs: number): Date => new Date(Math.max(epochMs, Date.now()));
+// A time in the past means the service can be called again now. Dates beyond the JS range are
+// dropped: they would make `retry.toISOString()` throw downstream.
+const toRetryDate = (epochMs: number): Date | undefined => {
+  const date = new Date(Math.max(epochMs, Date.now()));
+  return Number.isNaN(date.getTime()) ? undefined : date;
+};
+
+// Reset headers (GitHub sends them on every response) only mean "wait" once the quota is used up.
+const hasQuotaRemaining = (error: unknown): boolean =>
+  RATE_LIMIT_REMAINING_HEADERS.some((headerName) => {
+    const remaining = Number(getErrorHeaderValue({ error, headerName }));
+    return Number.isFinite(remaining) && remaining > 0;
+  });
 
 /**
  * When the service says it can be called again, from `Retry-After` (delta-seconds or an HTTP
- * date), else from a rate-limit reset header, for errors that carry an HTTP response.
+ * date), else from a rate-limit reset header while no quota remains, for errors that carry an
+ * HTTP response.
  */
 const getRetryDate = (error: unknown): Date | undefined => {
   if (getHttpStatus(error) === undefined) return undefined;
@@ -91,17 +104,19 @@ const getRetryDate = (error: unknown): Date | undefined => {
   const retryAfter = getErrorHeaderValue({ error, headerName: 'retry-after' });
   if (typeof retryAfter === 'string' && retryAfter.trim() !== '') {
     const seconds = getFinitePositiveNumber(retryAfter.trim());
-    if (seconds !== undefined) return new Date(Date.now() + seconds * 1000);
+    if (seconds !== undefined) return toRetryDate(Date.now() + seconds * 1000);
     const dateMs = Date.parse(retryAfter);
-    if (!Number.isNaN(dateMs)) return notBeforeNow(dateMs);
+    if (!Number.isNaN(dateMs)) return toRetryDate(dateMs);
   }
+
+  if (hasQuotaRemaining(error)) return undefined;
 
   for (const headerName of RATE_LIMIT_RESET_HEADERS) {
     const reset = getFinitePositiveNumber(getErrorHeaderValue({ error, headerName }));
     if (reset !== undefined) {
       return reset >= MIN_EPOCH_SECONDS
-        ? notBeforeNow(reset * 1000)
-        : new Date(Date.now() + reset * 1000);
+        ? toRetryDate(reset * 1000)
+        : toRetryDate(Date.now() + reset * 1000);
     }
   }
 

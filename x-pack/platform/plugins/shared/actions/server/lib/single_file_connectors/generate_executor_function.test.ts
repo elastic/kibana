@@ -1421,6 +1421,46 @@ describe('generateExecutorFunction', () => {
         expect(result).toMatchObject({ errorMeta: { statusCode: 403 }, retry: inSeconds(45) });
       });
 
+      it('uses the reset header when the quota is exhausted', async () => {
+        const result = await executeWithError(
+          makeHttpError(403, {
+            'x-ratelimit-remaining': '0',
+            'x-ratelimit-reset': String(now / 1000 + 45),
+          })
+        );
+
+        expect(result.retry).toEqual(inSeconds(45));
+      });
+
+      it('ignores the reset header on a 403 while quota remains', async () => {
+        const result = await executeWithError(
+          makeHttpError(403, {
+            'x-ratelimit-remaining': '4999',
+            'x-ratelimit-reset': String(now / 1000 + 45),
+          })
+        );
+
+        expect(result).toMatchObject({ errorMeta: { statusCode: 403 } });
+        expect(result).not.toHaveProperty('retry');
+      });
+
+      it('ignores a Retry-After too large to be a valid date', async () => {
+        const result = await executeWithError(
+          makeHttpError(429, { 'retry-after': '8640000000000' })
+        );
+
+        expect(result).toMatchObject({ errorMeta: { statusCode: 429 } });
+        expect(result).not.toHaveProperty('retry');
+      });
+
+      it('ignores a reset header too large to be a valid date', async () => {
+        const result = await executeWithError(
+          makeHttpError(429, { 'x-ratelimit-reset': '9000000000000' })
+        );
+
+        expect(result).not.toHaveProperty('retry');
+      });
+
       it('prefers Retry-After over rate-limit reset headers', async () => {
         const result = await executeWithError(
           makeHttpError(429, { 'retry-after': '5', 'x-ratelimit-reset': '60' })
