@@ -157,6 +157,23 @@ describe('Nightshift investigation agent type', () => {
     expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
   });
 
+  it('allow-lists a PagerDuty connector beside telemetry', () => {
+    const base = staticBase(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: true,
+        telemetryConnectorId: 'elasticsearch-telemetry',
+        pagerdutyConnectorId: 'nightshift-evals-pagerduty',
+        ...ALL_PLUGINS,
+      })
+    );
+
+    expect(base.connector_ids).toEqual([
+      'elasticsearch-telemetry',
+      'nightshift-evals-pagerduty',
+    ]);
+  });
+
   it('offers the investigation and proposal tools only when their plugins are enabled', () => {
     const base = staticBase(
       getInvestigationAgentType({

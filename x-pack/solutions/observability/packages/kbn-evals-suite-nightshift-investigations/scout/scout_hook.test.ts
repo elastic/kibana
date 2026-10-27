@@ -312,6 +312,29 @@ describe('nightshift-investigations scout hook', () => {
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain('requires sandbox credentials');
   });
+
+  it('exports a PagerDuty REST token from the profile without putting it on argv', () => {
+    const { output } = runHook({
+      sandbox: SANDBOX,
+      nightshift: { pagerduty: { apiKey: 'pd-user-token' } },
+    });
+    expect(output.env).toMatchObject({
+      NIGHTSHIFT_PAGERDUTY_API_KEY: 'pd-user-token',
+      NIGHTSHIFT_PAGERDUTY_KIBANA_CONFIG: Path.join(__dirname, 'kibana.pagerduty.yml'),
+    });
+  });
+
+  it('leaves PagerDuty unset when the profile has no token', () => {
+    expect(runHook({ sandbox: SANDBOX }).output.env).not.toHaveProperty(
+      'NIGHTSHIFT_PAGERDUTY_API_KEY'
+    );
+  });
+
+  it('requires sandbox credentials when a PagerDuty token is configured', () => {
+    const result = runHook({ nightshift: { pagerduty: { apiKey: 'pd-user-token' } } });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('PagerDuty requires sandbox credentials');
+  });
 });
 
 describe('ORCA CI shard', () => {

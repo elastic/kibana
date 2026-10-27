@@ -1,0 +1,18 @@
+# PagerDuty REST token from the scout hook environment. `.http` with secretHeaders is what
+# sandbox credential injection can expose to a command. This is a REST API token
+# (`Token token=...`), not an Events API v2 routing key. The value is never committed.
+xpack.actions.preconfigured.nightshift-evals-pagerduty:
+  name: PagerDuty
+  actionTypeId: .http
+  config:
+    url: https://api.pagerduty.com
+    hasAuth: false
+    authType: null
+    headers:
+      Accept: application/vnd.pagerduty+json;version=2
+  secrets:
+    secretHeaders:
+      Authorization: "Token token=${NIGHTSHIFT_PAGERDUTY_API_KEY}"
+
+xpack.nightshift_investigations.sandbox:
+  pagerduty_connector_id: nightshift-evals-pagerduty

@@ -125,6 +125,16 @@ if [[ -n "$telemetry_url$telemetry_key$readable_indices" ]]; then
   telemetry_config="$script_dir/kibana.telemetry.yml"
 fi
 
+pagerduty_key="$(resolve NIGHTSHIFT_PAGERDUTY_API_KEY '.nightshift.pagerduty.apiKey')"
+pagerduty_config=''
+if [[ -n "$pagerduty_key" ]]; then
+  if [[ -z "$api_key" ]]; then
+    echo "nightshift-investigations scout hook: PagerDuty requires sandbox credentials" >&2
+    exit 1
+  fi
+  pagerduty_config="$script_dir/kibana.pagerduty.yml"
+fi
+
 if [[ -z "$api_key" ]]; then
   partial=()
   for name in host port certificate key ca; do
@@ -167,6 +177,8 @@ HOOK_HOST="$host" \
   HOOK_TELEMETRY_KEY="$telemetry_key" \
   HOOK_READABLE_INDICES="$readable_indices" \
   HOOK_TELEMETRY_CONFIG="$telemetry_config" \
+  HOOK_PAGERDUTY_KEY="$pagerduty_key" \
+  HOOK_PAGERDUTY_CONFIG="$pagerduty_config" \
   HOOK_KIBANA_CONFIG="$script_dir/kibana.sandbox.yml" \
   jq -n '{
     env: ((if $ENV.HOOK_ORCA == "true" then {
@@ -186,5 +198,8 @@ HOOK_HOST="$host" \
       NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: $ENV.HOOK_TELEMETRY_KEY,
       NIGHTSHIFT_SANDBOX_READABLE_INDICES: $ENV.HOOK_READABLE_INDICES,
       NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: $ENV.HOOK_TELEMETRY_CONFIG
+    } else {} end) + (if $ENV.HOOK_PAGERDUTY_CONFIG != "" then {
+      NIGHTSHIFT_PAGERDUTY_API_KEY: $ENV.HOOK_PAGERDUTY_KEY,
+      NIGHTSHIFT_PAGERDUTY_KIBANA_CONFIG: $ENV.HOOK_PAGERDUTY_CONFIG
     } else {} end))
   }'

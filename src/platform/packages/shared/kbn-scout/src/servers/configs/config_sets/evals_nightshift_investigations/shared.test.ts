@@ -149,6 +149,24 @@ describe.each([
     );
   });
 
+  it('loads the optional PagerDuty YAML', () => {
+    const pagerdutyConfig = join(SANDBOX_KIBANA_CONFIG, '../kibana.pagerduty.yml');
+    const servers = loadServers(configPath, {
+      SANDBOX_KIBANA_CONFIG,
+      NIGHTSHIFT_PAGERDUTY_KIBANA_CONFIG: pagerdutyConfig,
+    });
+    expect(servers.kbnTestServer.serverArgs).toContain(`--config=${pagerdutyConfig}`);
+  });
+
+  it('fails fast when the PagerDuty YAML is missing', () => {
+    expect(() =>
+      loadServers(configPath, {
+        SANDBOX_KIBANA_CONFIG,
+        NIGHTSHIFT_PAGERDUTY_KIBANA_CONFIG: '/missing-pagerduty.yml',
+      })
+    ).toThrow('NIGHTSHIFT_PAGERDUTY_KIBANA_CONFIG references a missing file');
+  });
+
   it('fails fast when the telemetry YAML is missing', () => {
     expect(() =>
       loadServers(configPath, {

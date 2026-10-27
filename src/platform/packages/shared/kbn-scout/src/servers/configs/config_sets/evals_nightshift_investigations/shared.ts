@@ -51,6 +51,13 @@ const createInvestigationConfig = (
     );
   }
 
+  const pagerdutyConfig = process.env.NIGHTSHIFT_PAGERDUTY_KIBANA_CONFIG;
+  if (pagerdutyConfig && !existsSync(pagerdutyConfig)) {
+    throw new Error(
+      `NIGHTSHIFT_PAGERDUTY_KIBANA_CONFIG references a missing file: ${pagerdutyConfig}`
+    );
+  }
+
   return {
     ...safeTracing,
     kbnTestServer: {
@@ -67,6 +74,7 @@ const createInvestigationConfig = (
         '--xpack.nightshift_investigations.memory.enabled=false',
         `--config=${sandboxKibanaConfig}`,
         ...(telemetryConfig ? [`--config=${telemetryConfig}`] : []),
+        ...(pagerdutyConfig ? [`--config=${pagerdutyConfig}`] : []),
         '--uiSettings.overrides.workflows:ui:enabled=true',
         '--uiSettings.overrides.workflows:aiAgent:enabled=true',
         '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',

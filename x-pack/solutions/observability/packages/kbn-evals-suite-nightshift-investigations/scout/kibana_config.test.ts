@@ -81,3 +81,38 @@ it('resolves credentials from the environment and preserves other preconfigured 
     rmSync(directory, { recursive: true, force: true });
   }
 });
+
+it('resolves the PagerDuty REST token into a preconfigured HTTP connector', () => {
+  const originalEnv = process.env;
+  process.env = {
+    ...originalEnv,
+    NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://telemetry.example.com',
+    NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'remote-key',
+    NIGHTSHIFT_SANDBOX_READABLE_INDICES: 'remote:logs-*',
+    NIGHTSHIFT_PAGERDUTY_API_KEY: 'pd-user-token',
+  };
+  try {
+    const config = getConfigFromFiles([
+      Path.join(__dirname, 'kibana.telemetry.yml'),
+      Path.join(__dirname, 'kibana.pagerduty.yml'),
+    ]);
+    expect(config.xpack.actions.preconfigured['nightshift-evals-pagerduty']).toEqual({
+      name: 'PagerDuty',
+      actionTypeId: '.http',
+      config: {
+        url: 'https://api.pagerduty.com',
+        hasAuth: false,
+        authType: null,
+        headers: { Accept: 'application/vnd.pagerduty+json;version=2' },
+      },
+      secrets: { secretHeaders: { Authorization: 'Token token=pd-user-token' } },
+    });
+    expect(config.xpack.nightshift_investigations.sandbox).toEqual({
+      telemetry_connector_id: 'nightshift-evals-telemetry',
+      telemetry_readable_indices: 'remote:logs-*',
+      pagerduty_connector_id: 'nightshift-evals-pagerduty',
+    });
+  } finally {
+    process.env = originalEnv;
+  }
+});
