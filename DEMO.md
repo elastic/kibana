@@ -21,7 +21,7 @@ The demo is a linear stack of `isomer/demo/*` branches on the PR lane head, the 
 | `isomer/demo/dashboard-export` | the `isomerDashboards` plugin: **Export, PDF (Isomer)** in the Dashboard share menu, which downloads the PDF or opens the mobile view |
 | `isomer/demo/render-composition` | Agent Builder's `platform.isomer.render_composition` tool, over MCP |
 | `isomer/demo/render-host` | `createRenderHost`: PNGs drawn in a forked render process (charts in its main thread, no PDF, heap cap, idle exit), so Kibana's process keeps none of the drawing memory |
-| `isomer/demo/latest` | this file, `ISOMER_REQUESTS.md` and the rebuild script |
+| `isomer/demo/latest` | this file, `ISOMER_REQUESTS.md` and the rebuild script; then isomer@next and distillate@next, and the demo workarounds they replace removed (requests 25 and 27) |
 
 To fix a layer, commit to its branch, then restack everything above it from a worktree on `isomer/demo/latest`:
 
