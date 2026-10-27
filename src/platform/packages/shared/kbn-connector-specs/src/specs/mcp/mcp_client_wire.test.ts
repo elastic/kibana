@@ -1,3 +1,8 @@
+/**
+ * @jest-environment node
+ */
+
+/* eslint-disable @kbn/eslint/require-license-header */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
@@ -5,10 +10,6 @@
  * Public License v 1"; you may not use this file except in compliance with, at
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
-/**
- * @jest-environment node
  */
 
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
