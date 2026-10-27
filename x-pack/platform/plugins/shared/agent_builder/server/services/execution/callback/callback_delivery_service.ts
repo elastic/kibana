@@ -10,6 +10,8 @@ import type { Logger } from '@kbn/core/server';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
 import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import type {
+  CallbackAdmissionCheck,
+  CallbackAdmissionContext,
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbacksSetup,
@@ -37,6 +39,7 @@ export class CallbackDeliveryService {
   private readonly logger: Logger;
   private readonly transports: CallbackTransportDefinition[];
   private readonly conversationResolvers: CallbackConversationResolver[] = [];
+  private readonly admissionChecks: CallbackAdmissionCheck[] = [];
 
   constructor({ actions, logger }: { actions: ActionsPluginSetup; logger: Logger }) {
     this.actions = actions;
@@ -48,6 +51,9 @@ export class CallbackDeliveryService {
     return {
       registerConversationResolver: (resolver) => {
         this.conversationResolvers.push(resolver);
+      },
+      registerAdmissionCheck: (check) => {
+        this.admissionChecks.push(check);
       },
       registerTransport: (transport) => {
         this.transports.push(transport);
@@ -91,6 +97,13 @@ export class CallbackDeliveryService {
     });
 
     return conversation ? { conversationId: conversation.id } : undefined;
+  }
+
+  /** Runs the registered admission checks in order; the first that throws refuses the execution. */
+  async admitNewConversation(context: CallbackAdmissionContext): Promise<void> {
+    for (const check of this.admissionChecks) {
+      await check(context);
+    }
   }
 
   validateCallbackUrl(callbackUrl: string): void {

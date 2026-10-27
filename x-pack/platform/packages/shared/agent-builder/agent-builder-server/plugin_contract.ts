@@ -9,7 +9,11 @@ import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentCreateRequest, ConversationTemplate } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from './conversations';
-import type { CallbackConversationResolver, CallbackTransportDefinition } from './callbacks';
+import type {
+  CallbackAdmissionCheck,
+  CallbackConversationResolver,
+  CallbackTransportDefinition,
+} from './callbacks';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition, AttachmentPublicClient } from './attachments';
 import type { RendererTypeDefinition } from './renderers';
@@ -279,6 +283,12 @@ export interface CallbacksSetup {
    * its own agent, and one the caller cannot converse in is skipped.
    */
   registerConversationResolver(resolver: CallbackConversationResolver): void;
+  /**
+   * Registers a check for an execution whose origin no conversation continues, run before the new
+   * conversation or its message is written. Checks run in registration order; one that throws
+   * refuses the execution with its error.
+   */
+  registerAdmissionCheck(check: CallbackAdmissionCheck): void;
   /** Registers a callback transport. The first registered transport that handles a URL delivers to it. */
   registerTransport(transport: CallbackTransportDefinition): void;
 }
