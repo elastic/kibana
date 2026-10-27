@@ -12,6 +12,7 @@ import { ChromeHeaderLogo } from './header_logo';
 import { SearchButton } from '../shared/search_button';
 import { AiButtonSlot } from '../shared/ai_button_slot';
 import { HelpButton } from '../shared/help_button';
+import { MotionRefreshButton } from '../shared/motion_refresh_button';
 import { ChromeHeaderShell } from './header_shell';
 import {
   useContextSwitcher,
@@ -30,6 +31,7 @@ export const ChromeHeader = React.memo(() => {
         search={<SearchButton />}
         actions={<AiButtonSlot />}
         help={<HelpButton />}
+        motion={<MotionRefreshButton />}
         switcher={useContextSwitcher()}
         projectPicker={useProjectPicker()}
         subscriptionBadge={useSubscriptionBadge()}

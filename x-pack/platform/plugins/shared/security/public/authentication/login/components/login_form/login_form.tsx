@@ -123,6 +123,49 @@ const assistanceCss = (theme: UseEuiTheme) => css`
   }
 `;
 
+const loginPanelCss = ({ euiTheme }: UseEuiTheme) => css`
+  width: 400px;
+  max-width: 100%;
+`;
+
+const loginMarkCss = css`
+  position: relative;
+  width: 105px;
+  height: 36px;
+`;
+
+const loginGlyphCss = css`
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 36px;
+  height: 36px;
+`;
+
+const loginWordCss = ({ colorMode }: UseEuiTheme) => css`
+  position: absolute;
+  left: 41px;
+  top: 8px;
+  width: 64px;
+  height: 20px;
+  filter: ${colorMode === 'DARK' ? 'brightness(0) invert(1)' : 'none'};
+`;
+
+const loginFieldsCss = ({ euiTheme }: UseEuiTheme) => css`
+  display: flex;
+  flex-direction: column;
+  gap: ${euiTheme.size.base};
+  margin-top: ${euiTheme.size.xl};
+`;
+
+const loginFieldRowCss = css`
+  margin-block-end: 0;
+`;
+
+const loginActionsCss = ({ euiTheme }: UseEuiTheme) => css`
+  margin-top: ${euiTheme.size.xl};
+`;
+
 export class LoginForm extends Component<LoginFormProps, State> {
   private readonly noProvidersMessage = i18n.translate('xpack.security.noAuthProvidersForDomain', {
     defaultMessage: 'No authentication providers have been configured for this origin ({origin}).',
@@ -230,6 +273,11 @@ export class LoginForm extends Component<LoginFormProps, State> {
     }
   }
 
+  private loginAsset = (file: string) => {
+    const path = `/ui/login_screen/${file}`;
+    return this.props.http.basePath?.prepend(path) ?? path;
+  };
+
   private renderLoginForm = () => {
     const loginSelectorLink = this.showLoginSelector() ? (
       <EuiFlexItem grow={false}>
@@ -247,61 +295,90 @@ export class LoginForm extends Component<LoginFormProps, State> {
     ) : null;
 
     return (
-      <EuiPanel data-test-subj="loginForm" color="plain">
+      <EuiPanel
+        data-test-subj="loginForm"
+        color="plain"
+        paddingSize="l"
+        hasBorder={false}
+        hasShadow
+        css={loginPanelCss}
+      >
         <form onSubmit={this.submitLoginForm}>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.security.login.basicLoginForm.usernameFormRowLabel"
-                defaultMessage="Username"
-              />
-            }
-            {...this.validator.validateUsername(this.state.username)}
-          >
-            <EuiFieldText
-              autoComplete="off"
-              id="username"
-              name="username"
-              data-test-subj="loginUsername"
-              value={this.state.username}
-              onChange={this.onUsernameChange}
-              disabled={!this.isLoadingState(LoadingStateType.None)}
-              isInvalid={false}
-              aria-required={true}
-              inputRef={this.setUsernameInputRef}
+          <div css={loginMarkCss} aria-hidden={true}>
+            <img
+              css={loginGlyphCss}
+              src={this.loginAsset('elastic_glyph.svg')}
+              width="36"
+              height="36"
+              alt=""
             />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.security.login.basicLoginForm.passwordFormRowLabel"
-                defaultMessage="Password"
-              />
-            }
-            {...this.validator.validatePassword(this.state.password)}
-          >
-            <EuiFieldPassword
-              autoComplete="off"
-              id="password"
-              name="password"
-              data-test-subj="loginPassword"
-              type={'dual'}
-              value={this.state.password}
-              onChange={this.onPasswordChange}
-              disabled={!this.isLoadingState(LoadingStateType.None)}
-              isInvalid={false}
-              aria-required={true}
+            <img
+              css={loginWordCss}
+              src={this.loginAsset('elastic_wordmark.svg')}
+              width="64"
+              height="20"
+              alt=""
             />
-          </EuiFormRow>
+          </div>
+          <div css={loginFieldsCss}>
+            <EuiFormRow
+              css={loginFieldRowCss}
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.security.login.basicLoginForm.usernameFormRowLabel"
+                  defaultMessage="Username"
+                />
+              }
+              {...this.validator.validateUsername(this.state.username)}
+            >
+              <EuiFieldText
+                autoComplete="off"
+                id="username"
+                name="username"
+                data-test-subj="loginUsername"
+                value={this.state.username}
+                onChange={this.onUsernameChange}
+                disabled={!this.isLoadingState(LoadingStateType.None)}
+                isInvalid={false}
+                aria-required={true}
+                fullWidth
+                inputRef={this.setUsernameInputRef}
+              />
+            </EuiFormRow>
 
-          <EuiSpacer />
+            <EuiFormRow
+              css={loginFieldRowCss}
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.security.login.basicLoginForm.passwordFormRowLabel"
+                  defaultMessage="Password"
+                />
+              }
+              {...this.validator.validatePassword(this.state.password)}
+            >
+              <EuiFieldPassword
+                autoComplete="off"
+                id="password"
+                name="password"
+                data-test-subj="loginPassword"
+                type="dual"
+                prepend={<EuiIcon type="lock" aria-hidden={true} />}
+                value={this.state.password}
+                onChange={this.onPasswordChange}
+                disabled={!this.isLoadingState(LoadingStateType.None)}
+                isInvalid={false}
+                aria-required={true}
+                fullWidth
+              />
+            </EuiFormRow>
+          </div>
 
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-            <EuiFlexItem>
+          <EuiFlexGroup css={loginActionsCss} responsive={false} alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                fullWidth
                 type="submit"
                 color="primary"
                 onClick={this.submitLoginForm}

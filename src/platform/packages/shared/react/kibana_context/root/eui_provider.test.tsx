@@ -70,6 +70,8 @@ describe('KibanaEuiProvider', () => {
     expect(euiTheme!.colorMode).toEqual('DARK');
     expect(euiTheme!.euiTheme.breakpoint.xxl).toEqual(1600);
     expect(consoleWarnMock).not.toHaveBeenCalled();
+    expect(document.getElementById('kbn-motion-prototype')).toBeNull();
+    expect(document.documentElement.getAttribute('data-kbn-motion-prototype')).toBeNull();
   });
 
   it('propagates changes of the coreTheme observable', async () => {

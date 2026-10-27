@@ -48,6 +48,12 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
     window.console.log(\\"^ A single error about an inline script not firing due to content security policy is expected!\\");
   }
   var loadingMessage = document.getElementById('kbn_loading_message');
+  // Same key as LOGIN_SCREEN_STORAGE_KEY in motion_settings.ts. Missing means on.
+  try {
+    if (window.localStorage.getItem('kbnMotionLoginScreen') !== 'false') {
+      loadingMessage.setAttribute('data-kbn-login-screen', 'on');
+    }
+  } catch (e) {}
   loadingMessage.style.display = 'flex';
 
   // The IIFE executes immediately -- safe because this script is at the bottom
@@ -217,6 +223,12 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
     window.console.log(\\"^ A single error about an inline script not firing due to content security policy is expected!\\");
   }
   var loadingMessage = document.getElementById('kbn_loading_message');
+  // Same key as LOGIN_SCREEN_STORAGE_KEY in motion_settings.ts. Missing means on.
+  try {
+    if (window.localStorage.getItem('kbnMotionLoginScreen') !== 'false') {
+      loadingMessage.setAttribute('data-kbn-login-screen', 'on');
+    }
+  } catch (e) {}
   loadingMessage.style.display = 'flex';
 
   // The IIFE executes immediately -- safe because this script is at the bottom
