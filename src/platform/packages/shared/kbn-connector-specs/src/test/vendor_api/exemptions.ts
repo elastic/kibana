@@ -9,17 +9,30 @@
 
 import { z } from '@kbn/zod/v4';
 
-/** Connector `metadata.id` to why it has no `vendor_api` folder. */
+/**
+ * Connector `metadata.id` to why it can't have a `vendor_api` folder, such as talking to a
+ * database driver instead of an HTTP API.
+ */
 export const vendorApiExemptionsSchema = z.record(z.string().startsWith('.'), z.string().min(1));
 
 export type VendorApiExemptions = z.infer<typeof vendorApiExemptionsSchema>;
 
+/** Whether a connector had `vendor_api` artifacts at the merge base, or didn't exist yet. */
+export type CoverageAtBase = 'recorded' | 'unrecorded' | 'new';
+
+export interface ConnectorCoverage {
+  readonly id: string;
+  readonly recorded: boolean;
+  readonly exempt: boolean;
+  readonly atBase: CoverageAtBase;
+}
+
 /**
- * The exemptions added since `previous` for connectors that already existed: the list only
- * shrinks, except for new connectors, whose exemption is reviewed with them.
+ * The connectors whose vendor API coverage shrank since the merge base: recorded ones must stay
+ * recorded, and new ones need artifacts unless they're exempt.
  */
-export const findAddedExemptions = (
-  previous: VendorApiExemptions,
-  current: VendorApiExemptions,
-  isNewConnector: (id: string) => boolean
-): string[] => Object.keys(current).filter((id) => !(id in previous) && !isNewConnector(id));
+export const findLostCoverage = (connectors: readonly ConnectorCoverage[]): ConnectorCoverage[] =>
+  connectors.filter(
+    ({ recorded, exempt, atBase }) =>
+      !recorded && (atBase === 'recorded' || (atBase === 'new' && !exempt))
+  );

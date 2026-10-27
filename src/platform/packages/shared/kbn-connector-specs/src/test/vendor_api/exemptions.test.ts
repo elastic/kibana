@@ -7,26 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { findAddedExemptions, vendorApiExemptionsSchema } from './exemptions';
+import type { ConnectorCoverage } from './exemptions';
+import { findLostCoverage, vendorApiExemptionsSchema } from './exemptions';
 
-describe('findAddedExemptions', () => {
-  const previous = { '.mysql': 'Driver protocol', '.slack': 'Not recorded yet' };
-  const isNewConnector = (id: string) => id === '.brand_new';
+describe('findLostCoverage', () => {
+  const coverage = (
+    atBase: ConnectorCoverage['atBase'],
+    recorded: boolean,
+    exempt = false
+  ): ConnectorCoverage => ({ id: '.connector', atBase, recorded, exempt });
 
-  it('allows removals and new connectors', () => {
-    expect(
-      findAddedExemptions(
-        previous,
-        { '.mysql': 'Driver protocol', '.brand_new': 'No spec' },
-        isNewConnector
-      )
-    ).toEqual([]);
+  it.each([
+    ['recorded connectors', coverage('recorded', true)],
+    ['connectors that were not recorded at the merge base', coverage('unrecorded', false)],
+    ['new recorded connectors', coverage('new', true)],
+    ['new exempt connectors', coverage('new', false, true)],
+  ])('accepts %s', (_, connector) => {
+    expect(findLostCoverage([connector])).toEqual([]);
   });
 
-  it('reports exemptions added for existing connectors', () => {
-    expect(
-      findAddedExemptions(previous, { ...previous, '.github': 'Not recorded yet' }, isNewConnector)
-    ).toEqual(['.github']);
+  it.each([
+    ['connectors whose artifacts were removed', coverage('recorded', false)],
+    ['connectors whose artifacts were replaced by an exemption', coverage('recorded', false, true)],
+    ['new connectors without artifacts or an exemption', coverage('new', false)],
+  ])('reports %s', (_, connector) => {
+    expect(findLostCoverage([connector])).toEqual([connector]);
   });
 });
 

@@ -11,7 +11,8 @@ import { execFileSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { findAddedExemptions, vendorApiExemptionsSchema } from './test/vendor_api/exemptions';
+import type { CoverageAtBase } from './test/vendor_api/exemptions';
+import { findLostCoverage, vendorApiExemptionsSchema } from './test/vendor_api/exemptions';
 import type { FoundConnector } from './test/vendor_api/find_connector';
 import { listConnectors } from './test/vendor_api/find_connector';
 import { updateVendorApi } from './test/vendor_api/update_vendor_api';
@@ -36,11 +37,16 @@ const git = (...args: string[]): string | undefined => {
 };
 
 // CI sets GITHUB_PR_MERGE_BASE on pull requests; locally, the merge base with main is used.
-const mergeBase =
-  process.env.GITHUB_PR_MERGE_BASE?.trim() ||
-  ['upstream/main', 'origin/main']
-    .map((ref) => git('merge-base', 'HEAD', ref))
-    .find((base) => base !== undefined);
+const findMergeBase = (): string | undefined => {
+  const base =
+    process.env.GITHUB_PR_MERGE_BASE?.trim() ||
+    ['upstream/main', 'origin/main']
+      .map((ref) => git('merge-base', 'HEAD', ref))
+      .find((found) => found !== undefined);
+  // Without the commit, as in a shallow clone, every connector would look new.
+  return base && git('cat-file', '-e', `${base}^{commit}`) !== undefined ? base : undefined;
+};
+const mergeBase = findMergeBase();
 
 const existsAtBase = (base: string, file: string) =>
   git('cat-file', '-e', `${base}:${relative(file)}`) !== undefined;
@@ -54,20 +60,15 @@ describe('vendor API contract', () => {
     exemptions = readExemptions(fs.readFileSync(EXEMPTIONS, 'utf8'));
   });
 
-  it('has vendor_api artifacts or an exemption for every connector, never both', () => {
-    const failures = connectors.flatMap((found) => {
-      const { id } = found.connector.metadata;
-      if (hasManifest(found) === id in exemptions) {
-        return hasManifest(found)
-          ? [`${id}: has ${relative(found.directory)} and an exemption; remove the exemption`]
-          : [
-              `${id}: has no ${relative(
-                found.directory
-              )}/manifest.json; run ${SCRIPT} --connector ${id} --source <name>=<url>, or exempt it in vendor_api_exemptions.json with a reason`,
-            ];
-      }
-      return [];
-    });
+  it('never has both vendor_api artifacts and an exemption, or exempts unknown connectors', () => {
+    const both = connectors
+      .filter((found) => hasManifest(found) && found.connector.metadata.id in exemptions)
+      .map(
+        ({ connector, directory }) =>
+          `${connector.metadata.id}: has ${relative(
+            directory
+          )} and an exemption; remove the exemption`
+      );
     const ids = new Set(connectors.map(({ connector }) => connector.metadata.id));
     const unknown = Object.keys(exemptions)
       .filter((id) => !ids.has(id))
@@ -75,27 +76,33 @@ describe('vendor API contract', () => {
         (id) => `${id}: is exempted in vendor_api_exemptions.json, but no connector has that id`
       );
 
-    expect([...failures, ...unknown]).toEqual([]);
+    expect([...both, ...unknown]).toEqual([]);
   });
 
   (mergeBase ? it : it.skip)(
-    'only exempts connectors that were exempted at the merge base, or are new',
+    'keeps vendor API coverage from shrinking since the merge base',
     () => {
       const base = mergeBase as string;
-      // The list is seeded along with this test, so it only ratchets once the test is in main.
-      const before = existsAtBase(base, __filename)
-        ? git('show', `${base}:${relative(EXEMPTIONS)}`)
-        : undefined;
-      const previous = before === undefined ? exemptions : readExemptions(before);
-      const isNewConnector = (id: string) => {
-        const found = connectors.find(({ connector }) => connector.metadata.id === id);
-        return found !== undefined && !existsAtBase(base, path.dirname(found.directory));
+      const atBase = ({ directory }: FoundConnector): CoverageAtBase => {
+        if (existsAtBase(base, path.join(directory, 'manifest.json'))) {
+          return 'recorded';
+        }
+        return existsAtBase(base, path.dirname(directory)) ? 'unrecorded' : 'new';
       };
+      const lost = findLostCoverage(
+        connectors.map((found) => ({
+          id: found.connector.metadata.id,
+          recorded: hasManifest(found),
+          exempt: found.connector.metadata.id in exemptions,
+          atBase: atBase(found),
+        }))
+      );
 
       expect(
-        findAddedExemptions(previous, exemptions, isNewConnector).map(
-          (id) =>
-            `${id}: was added to vendor_api_exemptions.json, which may only shrink for existing connectors; record its artifacts with ${SCRIPT} --connector ${id} instead`
+        lost.map(({ id, atBase: before }) =>
+          before === 'recorded'
+            ? `${id}: had vendor_api artifacts at the merge base; restore them, since coverage may only grow`
+            : `${id}: is a new connector without vendor_api artifacts; run ${SCRIPT} --connector ${id} --source <name>=<url>, or exempt it in vendor_api_exemptions.json if it doesn't call an HTTP API`
         )
       ).toEqual([]);
     }
