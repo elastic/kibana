@@ -20362,7 +20362,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Deletes all attachments from a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+        Deletes all attachments from a case. Attached files are also deleted. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
       operationId: deleteCaseAttachmentsDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_kbn_xsrf'
@@ -20387,7 +20387,7 @@ paths:
                   $ref: '#/components/examples/Cases_response_403'
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
-          description: The user does not have the required privileges for the case owner.
+          description: You don't have the required privileges for this case.
         '404':
           content:
             application/json:
@@ -20396,7 +20396,7 @@ paths:
                   $ref: '#/components/examples/Cases_response_404_no_attachments'
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
-          description: The case has no attachments.
+          description: The case doesn't exist or has no attachments.
       summary: Delete all case attachments
       tags:
         - cases
@@ -20488,7 +20488,8 @@ paths:
                   $ref: '#/components/examples/Cases_get_unified_attachment_response'
               schema:
                 $ref: '#/components/schemas/Cases_unified_attachment_response'
-          description: Indicates a successful call. Returns the created attachment.
+          description: |
+            Indicates a successful call. Returns the new attachment, or the existing one if the alert or event was already attached.
         '400':
           content:
             application/json:
@@ -20498,7 +20499,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: |
-            The request body is invalid, the attachment type is not registered or is `file`, the owner does not match the case, or a case limit was exceeded.
+            The request failed for one of these reasons:
+            - The request body is invalid.
+            - The attachment type isn't registered, or is `file`.
+            - The owner doesn't match the case owner.
+            - A case limit was exceeded.
         '401':
           content:
             application/json:
@@ -20516,7 +20521,7 @@ paths:
                   $ref: '#/components/examples/Cases_response_403'
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
-          description: The user does not have the required privileges for the case owner.
+          description: You don't have the required privileges for this case.
         '404':
           content:
             application/json:
@@ -20542,7 +20547,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Deletes a single attachment from a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+        Deletes a single attachment from a case. If it's a file, the file is also deleted. If it's an attack (`security.attack`), the alerts it added are also removed from the case, unless they're attached separately or by another attack. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
       operationId: deleteCaseAttachmentDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_kbn_xsrf'
@@ -20568,7 +20573,7 @@ paths:
                   $ref: '#/components/examples/Cases_response_403'
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
-          description: The user does not have the required privileges for the attachment owner.
+          description: You don't have the required privileges for this case.
         '404':
           content:
             application/json:
@@ -20625,7 +20630,7 @@ paths:
                   $ref: '#/components/examples/Cases_response_403'
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
-          description: The user does not have the required privileges for the attachment owner.
+          description: You don't have the required privileges for this case.
         '404':
           content:
             application/json:
@@ -20671,7 +20676,7 @@ paths:
             application/json:
               examples:
                 replaceAttachmentResponse:
-                  $ref: '#/components/examples/Cases_get_unified_attachment_response'
+                  $ref: '#/components/examples/Cases_replace_unified_attachment_response'
               schema:
                 $ref: '#/components/schemas/Cases_unified_attachment_response'
           description: Indicates a successful call. Returns the replaced attachment.
@@ -20684,7 +20689,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: |
-            The request body is invalid, the attachment type is `file`, or the body changes the attachment type or owner.
+            The request failed for one of these reasons:
+            - The request body is invalid.
+            - The attachment type is `file`.
+            - The request changes the attachment type or owner.
         '401':
           content:
             application/json:
@@ -20702,7 +20710,7 @@ paths:
                   $ref: '#/components/examples/Cases_response_403'
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
-          description: The user does not have the required privileges for the attachment owner.
+          description: You don't have the required privileges for this case.
         '404':
           content:
             application/json:
@@ -141382,6 +141390,29 @@ components:
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           username: elastic
         version: WzE3NjgsM10=
+    Cases_replace_unified_attachment_response:
+      summary: A replaced comment attachment.
+      value:
+        created_at: '2026-09-30T19:32:13.104Z'
+        created_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        data:
+          content: An updated comment.
+        id: 8048b460-fe2b-11ec-b15d-779a7c8bbcc3
+        owner: cases
+        pushed_at: null
+        pushed_by: null
+        type: comment
+        updated_at: '2026-10-01T08:45:21.512Z'
+        updated_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        version: WzI0LDFd
     Cases_response_400_invalid_attachment:
       summary: The attachment payload is invalid.
       value:
@@ -144308,7 +144339,7 @@ components:
           - $ref: '#/components/schemas/Cases_string_array'
     Cases_attachment_id:
       description: |
-        The identifier for the attachment. To retrieve attachment IDs, use the find case attachments API.
+        The ID of the attachment, which is its `id` field, not `attachmentId`. To get it, use the find case attachments API.
       in: path
       name: attachmentId
       required: true
@@ -144317,7 +144348,7 @@ components:
         maxLength: 512
         type: string
     Cases_attachment_sort_order:
-      description: Determines the sort order of the attachments by creation date.
+      description: 'Sorts attachments by creation date: `asc` (oldest first) or `desc` (newest first).'
       example: asc
       in: query
       name: sortOrder
@@ -147603,7 +147634,7 @@ components:
       x-state: Technical preview
     Cases_unified_attachment_attachment_id:
       description: |
-        The ID or IDs of the referenced entities, such as alert document IDs. Required for reference attachment types, such as alerts and events.
+        The ID of the attached item, such as an alert or a dashboard. To attach several alerts, use an array. This isn't the attachment's own ID (`id`).
       example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
       oneOf:
         - type: string
@@ -147613,7 +147644,7 @@ components:
     Cases_unified_attachment_data:
       additionalProperties: true
       description: |
-        Type-specific content for the attachment. Required for value attachment types, such as comments. For the `comment` type, this is an object with a `content` string of up to 30,000 characters.
+        The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters).
       example:
         content: A new comment.
       nullable: true
@@ -147621,7 +147652,7 @@ components:
     Cases_unified_attachment_metadata:
       additionalProperties: true
       description: |
-        Type-specific metadata for the attachment. For alert types, this includes the alert `index` and the `rule` that generated the alert.
+        Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`.
       nullable: true
       type: object
     Cases_unified_attachment_put_request:
@@ -147731,6 +147762,8 @@ components:
         owner:
           $ref: '#/components/schemas/Cases_owner'
         pushed_at:
+          description: |
+            When this attachment was last pushed to an external system, such as Jira. Is `null` if it hasn't been pushed.
           example: null
           format: date-time
           nullable: true
@@ -147747,7 +147780,7 @@ components:
         updated_by:
           $ref: '#/components/schemas/Cases_case_response_updated_by_properties'
         version:
-          description: The attachment version. Use it to replace the attachment.
+          description: The attachment's current version. Include it when you replace the attachment.
           example: WzIwNDMxLDFd
           type: string
       required:
@@ -147763,7 +147796,7 @@ components:
         - version
     Cases_unified_attachment_type:
       description: |
-        The attachment type. The type must be registered in Kibana and determines the accepted shape of `attachmentId`, `data`, and `metadata`. Common types include `comment`, `security.alert`, `observability.alert`, `stack.alert`, `security.event`, `file`, `lens`, and `dashboard`. Legacy attachment types such as `user` or `alert` are not accepted. You can read and delete `file` attachments, but you can't create or replace them with this API. To attach a file, use `POST /api/cases/{caseId}/files`.
+        The attachment type, such as `comment`, `security.alert`, `observability.alert`, `stack.alert`, `security.event`, `lens`, `dashboard`, or `file`. `security.*` types only work on Security cases, `observability.*` on Observability cases, and `stack.*` on Stack Management cases. Use `comment` (not the legacy `user` type) and a `*.alert` type (not `alert`). You can't add or replace file attachments with this API. To add a file, use `POST /api/cases/{caseId}/files`.
       example: comment
       type: string
     Cases_unified_attachment_version:
@@ -147790,7 +147823,7 @@ components:
           type: integer
         total:
           description: |
-            The total number of attachments that match the query. It includes attachments that can't be read. Those are left out of `data`, so a page can have fewer items than `per_page`.
+            The total number of matching attachments you can access. Attachments with invalid or unsupported data are counted but not returned, so a page can have fewer than `per_page` items.
           example: 1
           type: integer
       required:
