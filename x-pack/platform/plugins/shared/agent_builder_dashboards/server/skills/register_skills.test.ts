@@ -47,16 +47,9 @@ describe('registerSkills', () => {
   });
 
   it('treats by-reference panels as unknown content that can only be rearranged', () => {
-    expect(skill.content).toContain('so its content is unknown');
-    expect(skill.content).toContain('Do not look it up with any tool or API');
-    expect(skill.content).toContain('It can be moved, resized, or removed, but not edited.');
-    expect(enhanceGuidance()).toContain('Unsupported panels, including by-reference panels,');
-    expect(skill.content).toContain(
-      'only when its title makes clear that it is the panel the user means and what it shows; otherwise ask the user'
-    );
-    expect(enhanceGuidance()).toContain(
-      'replace a by-reference panel only when its title makes clear what it shows; otherwise keep it'
-    );
+    expect(skill.content).toContain('by-reference panels (');
+    expect(skill.content).toContain('do not look it up with any tool or API');
+    expect(enhanceGuidance()).toContain('keep by-reference panels');
   });
 
   it('inlines the dashboard design guidance directly in the skill body', () => {

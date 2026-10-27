@@ -36,8 +36,7 @@ For a new dashboard, set both \`title\` and \`description\`.
 For an existing dashboard:
 - Edit a panel by its id with \`content\` of the same kind rather than removing and re-adding it. Reorganizing or enhancing a dashboard does not require replacing panels. Edits work for ES|QL Lens, Vega, and custom content panels (\`source: "request"\` with the panel's \`renderer\`), and for markdown and ML anomaly panels (\`source: "config"\` with the panel's \`type\`).
 - For focused edits, pass only the requested change in the \`query\` (e.g. "make the error series blue"). The chart author preserves unrelated presentation settings.
-- A by-reference panel (\`config.savedObjectId\` or \`config.ref_id\`) only references a saved object, so its content is unknown. Do not look it up with any tool or API; its title is the only hint. It can be moved, resized, or removed, but not edited. Replace it, as for a non-ES|QL Lens panel below, only when its title makes clear that it is the panel the user means and what it shows; otherwise ask the user.
-- DSL-based, form-based, and other non-ES|QL Lens panels cannot be edited. When the user asks to change one, say so, propose replacing it with a new ES|QL-based Lens panel, and wait for explicit confirmation before replacing it.
+- These panels cannot be edited, only moved, resized, or removed: DSL-based, form-based, and other non-ES|QL Lens panels, and by-reference panels (\`config.savedObjectId\` or \`config.ref_id\`). A by-reference panel's content is unknown: do not look it up with any tool or API; its title is the only hint. When the user asks to change one of these panels, say so, propose replacing it with a new ES|QL-based Lens panel, and wait for explicit confirmation before replacing it.
 
 ## Panel Inputs
 
