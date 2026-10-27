@@ -576,7 +576,7 @@ describe('Continuous Threat Hunt managed versions', () => {
       ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW.version,
       7,
     ],
-    [ALERTZERO_HUNT_WORKFLOW.id, ALERTZERO_HUNT_WORKFLOW.version, 3],
+    [ALERTZERO_HUNT_WORKFLOW.id, ALERTZERO_HUNT_WORKFLOW.version, 4],
     [ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW.id, ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW.version, 3],
     [ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW.id, ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW.version, 3],
   ])('bumps %s to the version that carries its reports', (_id, version, expected) => {

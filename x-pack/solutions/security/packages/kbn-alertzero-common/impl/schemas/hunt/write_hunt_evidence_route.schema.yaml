@@ -9,12 +9,16 @@ paths:
       x-labels: [ess, serverless]
       operationId: WriteHuntEvidence
       description: >-
-        Stamps the space's hunt-once gate (`last_hunted_at` and siblings) on a
-        report, called only after `run_hunt_coordinator` reports
-        `completed_successfully`. Kept as its own route rather than folded
-        into the coordinator's response path, so a coordinator call the
-        engine times out or truncates never reaches this write -- a failed
-        hunt must never consume the hunt-once gate.
+        Records a finished hunt on a report, called after
+        `run_hunt_coordinator` returns a result. A confirmed hit is stamped on
+        the space's evidence (`last_hunted_at` and siblings) whatever the
+        completeness; a run that found nothing is stamped only when repeating
+        it could not cover more, so a retryable run leaves the report
+        eligible. The techniques the run searched are recorded either way.
+        Kept as its own route rather than folded into the coordinator's
+        response path, so a coordinator call the engine times out or
+        truncates never reaches this write -- a failed hunt must never consume
+        the hunt-once gate.
       summary: Write the hunt-once evidence stamp for a report
       tags:
         - AlertZero API
