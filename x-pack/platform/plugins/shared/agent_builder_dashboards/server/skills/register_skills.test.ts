@@ -109,6 +109,9 @@ describe('registerSkills', () => {
     expect(guidance).toContain(
       'replace non-ES|QL panels with new ES|QL Lens panels without asking again'
     );
+    expect(guidance).toContain(
+      '3 to 5 `options_list_control` controls on useful categorical fields'
+    );
     expect(guidance).toContain('Keep the existing time range');
     expect(guidance).toContain('In content mode, confirm the resulting panel set');
   });
