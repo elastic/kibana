@@ -45,7 +45,7 @@ export const EvidenceView: React.FC<EvidenceViewProps> = ({
       {hasDescription && <EuiMarkdownFormat textSize="s">{description ?? ''}</EuiMarkdownFormat>}
       {hasReferences && (
         <>
-          {(chart || hasDescription) && <EuiSpacer size="xs" />}
+          {(chart || hasDescription) && <EuiSpacer size="m" />}
           <EvidenceReferences references={references} />
         </>
       )}
