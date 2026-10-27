@@ -63,7 +63,6 @@ import {
 } from './execution_runner';
 import {
   getPendingResumeRound,
-  isExecutionLive,
   resolveExecutionConnectorId,
   serializeExecutionError,
 } from './utils';
@@ -249,8 +248,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       const claim: ConversationClaim = {
         executionId,
         triggerEventId: roundUserMessageEventId(pendingResumeRound?.id ?? roundId),
-        isHolderLive: async (holderExecutionId) =>
-          isExecutionLive(await executionClient.peek(holderExecutionId)),
       };
 
       try {

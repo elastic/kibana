@@ -321,7 +321,6 @@ describe('conversations utils', () => {
     const claim: ConversationClaim = {
       executionId: 'exec-1',
       triggerEventId: 'round-1::user_message',
-      isHolderLive: async () => false,
     };
 
     it('passes the claim to create on CREATE', async () => {

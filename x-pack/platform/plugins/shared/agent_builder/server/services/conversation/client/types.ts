@@ -55,8 +55,6 @@ export type ConversationCreateRequest = Omit<
 export interface ConversationClaim {
   executionId: string;
   triggerEventId: string;
-  /** Whether the execution currently holding the lock is still running. */
-  isHolderLive: (executionId: string) => Promise<boolean>;
 }
 
 export type ConversationUpdatableFields = Pick<Conversation, 'id'> &

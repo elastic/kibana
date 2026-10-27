@@ -26,7 +26,6 @@ export { convertErrors, toClientError } from './convert_errors';
 export { serializeExecutionError, getHttpStatusFromError } from './serialize_execution_error';
 export { resolveServices } from './resolve_services';
 export { resolveExecutionConnectorId } from './resolve_execution_connector_id';
-export { isExecutionLive } from './execution_liveness';
 export { executionStartedEvents$ } from './execution_started';
 export {
   trackExecutionInterruption,

@@ -374,19 +374,23 @@ const isWriteSkipped = (value: unknown): value is WriteSkipped =>
   typeof value === 'object' && value !== null && WRITE_SKIPPED in value;
 
 /**
- * Thrown from inside an OCC `fields` callback when the run lock changed hands after the claim's
- * liveness check, so the claim re-reads the conversation and decides again.
+ * Thrown from inside an OCC `fields` callback when another execution holds the run lock. The busy
+ * error itself carries a 409, which `OccWriter` would mistake for a version conflict and retry.
  */
-const HOLDER_CHANGED = Symbol('conversation run lock holder changed');
-interface HolderChanged {
-  [HOLDER_CHANGED]: true;
+const CONVERSATION_BUSY = Symbol('conversation busy');
+interface ConversationBusy {
+  [CONVERSATION_BUSY]: true;
+  activeExecutionId: string;
 }
-const holderChanged = (): HolderChanged => ({ [HOLDER_CHANGED]: true });
-const isHolderChanged = (value: unknown): value is HolderChanged =>
-  typeof value === 'object' && value !== null && HOLDER_CHANGED in value;
+const conversationBusy = (activeExecutionId: string): ConversationBusy => ({
+  [CONVERSATION_BUSY]: true,
+  activeExecutionId,
+});
+const isConversationBusy = (value: unknown): value is ConversationBusy =>
+  typeof value === 'object' && value !== null && CONVERSATION_BUSY in value;
 
-/** How many times a claim re-reads the conversation after its holder changed mid-write. */
-const CLAIM_MAX_RETRIES = 3;
+/** How long a claim holds the run lock before another execution may take it over. */
+const ACTIVE_EXECUTION_TTL_MS = 5 * 60 * 1000;
 
 const toActiveExecution = ({
   executionId,
@@ -396,6 +400,24 @@ const toActiveExecution = ({
   trigger_event_id: triggerEventId,
   started_at: new Date().toISOString(),
 });
+
+/** Takes the run lock for `claim`, refusing while another execution claimed it within the TTL. */
+const takeActiveExecution = (
+  current: NormalizedConversation,
+  claim: ConversationClaim
+): Pick<ConversationUpdatableFields, 'active_execution'> => {
+  const { active_execution: held } = current;
+
+  if (
+    held &&
+    held.execution_id !== claim.executionId &&
+    Date.now() - Date.parse(held.started_at) < ACTIVE_EXECUTION_TTL_MS
+  ) {
+    throw conversationBusy(held.execution_id);
+  }
+
+  return { active_execution: toActiveExecution(claim) };
+};
 
 /** Clears the run lock when `releaseExecutionId` still holds it; leaves a newer holder alone. */
 const releaseActiveExecution = (
@@ -1845,13 +1867,7 @@ class ConversationClientImpl implements ConversationClient {
    * `fields` is replayed per attempt against the freshly read conversation, so it must be free of side effects.
    */
   private async writeConversation(params: WriteConversationParams): Promise<Conversation> {
-    const { claim } = params;
-
-    if (claim) {
-      return this.writeWithClaim({ ...params, claim });
-    }
-
-    const { conversationId, access, fields, maxRetries = 5, refresh, ...emission } = params;
+    const { conversationId, access, fields, maxRetries = 5, refresh, claim, ...emission } = params;
     const writer = this.createWriter({ access, maxRetries, refresh });
     // `mutate` may run more than once on OCC retry; the last run is the one that was written.
     // Typed through `as` so the assignment inside the closure does not narrow it to `undefined`.
@@ -1864,7 +1880,11 @@ class ConversationClientImpl implements ConversationClient {
           before = current;
           return updateConversation({
             conversation: current,
-            update: { id: conversationId, ...fields(current) },
+            update: {
+              id: conversationId,
+              ...fields(current),
+              ...(claim && takeActiveExecution(current, claim)),
+            },
             updateDate: new Date(),
             space: this.space,
           });
@@ -1894,6 +1914,11 @@ class ConversationClientImpl implements ConversationClient {
           resolveTemplate: getTemplate,
         });
       }
+      if (isConversationBusy(error)) {
+        const { activeExecutionId } = error;
+
+        throw createConversationBusyError({ conversationId, activeExecutionId });
+      }
       // retries are exhausted
       if (isElasticsearchWriteConflict(error)) {
         this.logger.warn(
@@ -1905,59 +1930,6 @@ class ConversationClientImpl implements ConversationClient {
 
       throw error;
     }
-  }
-
-  /**
-   * Runs the write with the run lock claimed. Refuses with `conversationBusy` while another live
-   * execution holds the lock, and re-reads when the holder changes between the liveness check and
-   * the write, since liveness cannot be checked inside the synchronous OCC `fields`.
-   */
-  private async writeWithClaim({
-    claim,
-    fields,
-    ...write
-  }: WriteConversationParams & { claim: ConversationClaim }): Promise<Conversation> {
-    const { conversationId, access } = write;
-
-    for (let attempt = 0; attempt <= CLAIM_MAX_RETRIES; attempt++) {
-      const document = await this.getDocumentWithAccess({ conversationId, access });
-      const holder = document._source.active_execution?.execution_id;
-
-      if (
-        holder !== undefined &&
-        holder !== claim.executionId &&
-        (await claim.isHolderLive(holder))
-      ) {
-        throw createConversationBusyError({ conversationId, activeExecutionId: holder });
-      }
-
-      try {
-        return await this.writeConversation({
-          ...write,
-          fields: (current) => {
-            const storedHolder = current.active_execution?.execution_id;
-
-            if (
-              storedHolder !== undefined &&
-              storedHolder !== holder &&
-              storedHolder !== claim.executionId
-            ) {
-              throw holderChanged();
-            }
-
-            return { ...fields(current), active_execution: toActiveExecution(claim) };
-          },
-        });
-      } catch (error) {
-        if (!isHolderChanged(error)) {
-          throw error;
-        }
-      }
-    }
-
-    this.logger.warn(`The run lock of conversation ${conversationId} kept changing hands`);
-
-    throw createConversationWriteConflictError({ conversationId });
   }
 
   private createWriter({

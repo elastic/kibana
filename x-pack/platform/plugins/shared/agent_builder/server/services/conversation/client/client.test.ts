@@ -5955,15 +5955,20 @@ describe('ConversationClient', () => {
       data: { message: 'hello' },
     } as ConversationEvent;
 
-    const activeExecution = (executionId: string) => ({
+    const STALE_STARTED_AT = '2026-10-26T09:00:00.000Z';
+
+    const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60_000).toISOString();
+
+    const activeExecution = (executionId: string, startedAt = STALE_STARTED_AT) => ({
       execution_id: executionId,
       trigger_event_id: `${executionId}-trigger`,
-      started_at: '2026-10-26T09:00:00.000Z',
+      started_at: startedAt,
     });
 
     const documentWithHolder = (
       executionId?: string,
-      overrides: Parameters<typeof createConversationDocument>[0] = {}
+      overrides: Parameters<typeof createConversationDocument>[0] = {},
+      startedAt?: string
     ): Document => {
       const document = createConversationDocument({
         schemaVersion: CONVERSATION_SCHEMA_VERSION,
@@ -5975,14 +5980,14 @@ describe('ConversationClient', () => {
         ? document
         : {
             ...document,
-            _source: { ...document._source, active_execution: activeExecution(executionId) },
+            _source: {
+              ...document._source,
+              active_execution: activeExecution(executionId, startedAt),
+            },
           };
     };
 
-    const createClaim = (
-      executionId: string,
-      isHolderLive: jest.Mock<Promise<boolean>, [string]> = jest.fn().mockResolvedValue(true)
-    ) => ({ executionId, triggerEventId: 't2', isHolderLive });
+    const createClaim = (executionId: string) => ({ executionId, triggerEventId: 't2' });
 
     const indexedSource = (call = 0) =>
       (mockEsClient.index.mock.calls[call][0] as { document: Document['_source'] }).document;
@@ -6001,80 +6006,46 @@ describe('ConversationClient', () => {
         trigger_event_id: 't2',
         started_at: expect.any(String),
       });
-      expect(claim.isHolderLive).not.toHaveBeenCalled();
     });
 
-    it('appendEvents with a claim throws conversationBusy when the stored holder is live', async () => {
-      mockGetDocumentResponse(documentWithHolder('e1'));
-      const claim = createClaim('e2', jest.fn().mockResolvedValue(true));
+    it('appendEvents with a claim throws conversationBusy while another claim is within the TTL', async () => {
+      mockGetDocumentResponse(documentWithHolder('e1', {}, minutesAgo(4)));
 
-      const error = await appendWithClaim(claim).catch((caught: unknown) => caught);
+      const error = await appendWithClaim(createClaim('e2')).catch((caught: unknown) => caught);
 
       expect(isConversationBusyError(error)).toBe(true);
       expect((error as { meta: { activeExecutionId: string } }).meta.activeExecutionId).toBe('e1');
-      expect(claim.isHolderLive).toHaveBeenCalledWith('e1');
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
-    it('appendEvents with a claim takes over a holder that is not live', async () => {
-      mockGetDocumentResponse(documentWithHolder('e1'));
-      const claim = createClaim('e2', jest.fn().mockResolvedValue(false));
+    it('appendEvents with a claim takes over a claim older than the TTL', async () => {
+      mockGetDocumentResponse(documentWithHolder('e1', {}, minutesAgo(6)));
 
-      await appendWithClaim(claim);
+      await appendWithClaim(createClaim('e2'));
 
-      expect(claim.isHolderLive).toHaveBeenCalledWith('e1');
       expect(indexedSource().active_execution).toMatchObject({
         execution_id: 'e2',
         trigger_event_id: 't2',
       });
     });
 
-    it('appendEvents with a claim re-reads when the holder changes between peek and write', async () => {
-      mockGetDocumentResponse(documentWithHolder('e3'));
-      mockGetDocumentResponseOnce(documentWithHolder('e1'));
-      const claim = createClaim(
-        'e2',
-        jest.fn(async (executionId: string) => executionId === 'e3')
-      );
+    it('appendEvents with a claim refuses when a concurrent claim wins the version conflict', async () => {
+      mockGetDocumentResponse(documentWithHolder('e3', {}, minutesAgo(0)));
+      mockGetDocumentResponseOnce(documentWithHolder());
+      mockEsClient.index.mockRejectedValueOnce(createConflictError());
 
-      const error = await appendWithClaim(claim).catch((caught: unknown) => caught);
+      const error = await appendWithClaim(createClaim('e2')).catch((caught: unknown) => caught);
 
       expect(isConversationBusyError(error)).toBe(true);
       expect((error as { meta: { activeExecutionId: string } }).meta.activeExecutionId).toBe('e3');
-      expect(claim.isHolderLive.mock.calls).toEqual([['e1'], ['e3']]);
-      expect(mockEsClient.index).not.toHaveBeenCalled();
-    });
-
-    it('appendEvents with a claim gives up with a write conflict when the holder keeps changing', async () => {
-      let reads = 0;
-      mockRawEsClient.get.mockImplementation(async () => {
-        reads += 1;
-        const document = documentWithHolder(`e-${reads}`);
-
-        return {
-          _id: document._id,
-          _index: TEST_CONVERSATION_INDEX,
-          _source: document._source,
-          _seq_no: document._seq_no,
-          _primary_term: document._primary_term,
-          found: true,
-        };
-      });
-      const claim = createClaim('e2', jest.fn().mockResolvedValue(false));
-
-      const error = await appendWithClaim(claim).catch((caught: unknown) => caught);
-
-      expect(isConversationWriteConflictError(error)).toBe(true);
-      expect(mockEsClient.index).not.toHaveBeenCalled();
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
     });
 
     it('appendEvents with a claim keeps its own claim', async () => {
-      mockGetDocumentResponse(documentWithHolder('e2'));
-      const claim = createClaim('e2');
+      mockGetDocumentResponse(documentWithHolder('e2', {}, minutesAgo(1)));
 
-      await appendWithClaim(claim);
+      await appendWithClaim(createClaim('e2'));
 
-      expect(claim.isHolderLive).not.toHaveBeenCalled();
       expect(indexedSource().active_execution).toMatchObject({ execution_id: 'e2' });
     });
 
@@ -6095,7 +6066,6 @@ describe('ConversationClient', () => {
         started_at: expect.any(String),
       });
       expect(indexed).not.toHaveProperty('claim');
-      expect(claim.isHolderLive).not.toHaveBeenCalled();
       expect(result.active_execution).toMatchObject({ execution_id: 'e2' });
     });
 

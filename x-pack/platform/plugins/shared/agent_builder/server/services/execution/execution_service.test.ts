@@ -2035,28 +2035,13 @@ describe('AgentExecutionService', () => {
       expect(mockTaskManagerEnsureScheduled).toHaveBeenCalledTimes(1);
     });
 
-    it("passes a claim that checks the holder's liveness", async () => {
+    it("passes a claim for the round's user message", async () => {
       await converse();
 
       const claim = appendedClaim();
-      const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
-      const [{ agentParams }] = mockExecutionClient.create.mock.calls[0];
+      const [{ executionId, agentParams }] = mockExecutionClient.create.mock.calls[0];
       const { roundId } = agentParams as { roundId?: string };
-      expect(claim).toMatchObject({ executionId, triggerEventId: `${roundId}::user_message` });
-
-      mockExecutionClient.peek.mockResolvedValueOnce({
-        status: ExecutionStatus.running,
-        lastHeartbeat: new Date().toISOString(),
-        eventCount: 0,
-      });
-      await expect(claim?.isHolderLive('e1')).resolves.toBe(true);
-      expect(mockExecutionClient.peek).toHaveBeenLastCalledWith('e1');
-
-      mockExecutionClient.peek.mockResolvedValueOnce({
-        status: ExecutionStatus.completed,
-        eventCount: 3,
-      });
-      await expect(claim?.isHolderLive('e1')).resolves.toBe(false);
+      expect(claim).toEqual({ executionId, triggerEventId: `${roundId}::user_message` });
     });
 
     it('claims with claimActiveExecution on a HITL resume', async () => {
