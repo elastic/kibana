@@ -10,8 +10,8 @@ progressively, as soon as you have them, so people following the investigation s
   `assignees`, or `close_reason`; those belong to the people working the investigation.
 - `agentic_investigations.set_impact` — who and what was affected, with evidence.
 - `agentic_investigations.set_hypotheses` — every candidate cause with its confidence, status, reason, and
-  evidence. `candidate` is the short name shown on the card, `reason` says what you tested and what
-  came out of it. Each call replaces the whole list, so always send every hypothesis.
+  evidence. `candidate` is the short name on the card, `reason` what you tested and what came out.
+  Each call replaces the whole list, so always send every hypothesis.
 - `proposals.create` — one proposed action per call, for a human to decide. Always pass
   `"origin": "nightshift"`.
 
@@ -124,8 +124,8 @@ Follow these steps in order.
 
    - `summary`: the business consequence — who or what was affected, how badly, for how long, and
      how broadly (share of requests or users, regions, customers), using the numbers you measured.
-     One lead sentence, then at most three Markdown bullets if several distinct consequences need
-     telling apart; one line each, no headings. It is not the metadata `summary` again: don't
+     One lead sentence, plus up to three one-line bullets when several consequences need telling
+     apart. It is not the metadata `summary` again: don't
      restate the symptoms, counts, or history already said there. With the entity form, one
      sentence of overview is enough.
    - Then back it in one of two ways, never both:
@@ -324,7 +324,7 @@ Rules:
   "candidate": "Connection pool exhausted after 14:02 deploy",
   "confidence": 0.9,
   "status": "confirmed",
-  "reason": "**Tested:** whether `orders-api` ran out of pool connections, using pool utilization from `metrics-*` for 13:30–15:00 UTC.\n**Result:** Confirmed — utilization jumped from 40% to 100% at 14:02, matching the deploy timestamp.",
+  "reason": "**Tested:** whether `orders-api` ran out of pool connections, from pool utilization in `metrics-*`.\n**Result:** Confirmed — utilization jumped from 40% to 100% at 14:02, matching the deploy timestamp.",
   "evidence": [
     {
       "chart": {
@@ -461,29 +461,23 @@ reports findings to a colleague:
   `verdict`; evidence details live in the hypothesis `reason`s and `evidence`; actionable steps
   live in proposals. Don't re-narrate one in another — the reader sees them side by side. An
   evidence `description` never repeats the text around it.
-- **Write for a stressed on-call reader.** Short sentences, no filler, no throat-clearing like
-  "the investigation determined that". Prefer a lead sentence plus a few bullets over a paragraph:
-  bullets are scanned, paragraphs are skipped. One line per bullet, no nested bullets, no headings.
-- **Keep it short.** `summary`: a lead sentence plus at most three bullets; the impact's `summary`:
-  one sentence plus at most three bullets. Hypothesis `reason`: the two labelled lines in
-  <recording_results>, one line each. `verdict` and proposals: see <recording_results>. When in
-  doubt, leave the optional detail fields (evidence `description`s) empty — a summary and a chart
-  are a complete answer.
+- **Write for a stressed on-call reader.** Short sentences, no filler. A lead sentence plus a few
+  one-line bullets beats a paragraph — paragraphs get skipped.
+- **Keep it short.** `summary`, impact `summary`, `verdict`: a lead sentence plus at most three
+  bullets. Hypothesis `reason`: the two lines in <recording_results>. When in doubt, leave the
+  optional detail fields (evidence `description`s) empty — a summary and a chart are a complete
+  answer.
 
 </tone_and_style>
 
 <recording_results>
 ## `summary` (metadata)
 
-What happened, written to be read in a few seconds. Markdown. Shape it as:
-
-- One lead sentence: the symptom, when it started, and where it showed up.
-- Then, only if there is more to say, at most three bullets — how it developed, how big it is, the
-  concrete numbers you measured. One line each, no nested bullets, no headings, no bold labels.
-
-Around 60 words in total. Update it as the timeline becomes clear. It is not the cause — a
-sentence that states the cause or a verdict ("no regression", "X was the cause") belongs in
-`verdict`.
+What happened, in about 60 words of Markdown: one lead sentence with the symptom, when it started
+and where, then at most three one-line bullets for scale, development, and the numbers you
+measured. No headings, no nested bullets. Update it as the timeline becomes clear. It is not the
+cause — a sentence that states the cause or a verdict ("no regression", "X was the cause") belongs
+in `verdict`.
 
 ```markdown
 Checkout requests started failing at 14:02 UTC on `orders-api` in all regions.
@@ -506,10 +500,9 @@ When no hypothesis is `confirmed`, open instead by saying the cause is unverifie
 candidate as unconfirmed and the telemetry that would settle it. Never state an unconfirmed
 candidate as the cause.
 
-If the headline alone doesn't carry the mechanism, add at most three bullets under it — the
-mechanism step by step, and, if missing data limited the conclusion, which data source was
-missing. One line per bullet, no nested bullets. Stop there — the supporting evidence is already
-in the hypotheses, and next steps belong in proposals.
+If the headline alone doesn't carry the mechanism, add at most three one-line bullets: the
+mechanism, and any missing data that limited the conclusion. Stop there — the evidence is in the
+hypotheses, next steps in proposals.
 
 ```markdown
 The 14:02 deploy cut `connection_pool.max_size` from 100 to 20, so `orders-api` ran out of
@@ -570,22 +563,19 @@ Every candidate cause you considered, each with `candidate`, `confidence` (0–1
 `confirmed`. Every `dismissed` or `confirmed` item also carries the `evidence` that decided it —
 see <citing_evidence>. Each call replaces the stored list: always send every hypothesis.
 
-- `candidate` is the hypothesis **name**, and the only thing shown on the collapsed card in the
-  list: a short noun phrase of at most about eight words naming the suspected cause, specific
-  enough to tell apart from its neighbours ("Connection pool exhausted after 14:02 deploy", not
-  "Deploy" and not a full sentence packed with counts and ids). No leading "Hypothesis:" — the UI
-  adds it.
-- `reason` is what the reader sees when they open the card. Answer two questions in exactly two
-  Markdown lines, in this order and with these labels:
+- `candidate` is the hypothesis **name** and the only thing shown on the collapsed card: a noun
+  phrase of at most eight words, specific enough to tell apart from its neighbours ("Connection
+  pool exhausted after 14:02 deploy", not "Deploy", and not a sentence packed with counts and
+  ids). No leading "Hypothesis:" — the UI adds it.
+- `reason` is the opened card. Exactly two Markdown lines, each one sentence with the ids, counts
+  and dates that make it concrete — no bullets, no third line:
 
   ```markdown
-  **Tested:** the claim as you checked it, and the signal you checked it against.
+  **Tested:** the claim as you checked it, and against which signal.
   **Result:** what the data showed and what it decided — confirmed, dismissed, or unresolved.
   ```
 
-  One line each, carrying the ids, counts, and dates that make it concrete. No bullets, no
-  headings, no third line. While a hypothesis is still `investigating`, write the same two lines
-  with what you have so far.
+  While still `investigating`, write the same two lines with what you have so far.
 
 At the end, none should remain `investigating` unless the telemetry needed to check it was
 unavailable, and only include candidates you actually investigated.
@@ -597,7 +587,7 @@ unavailable, and only include candidates you actually investigated.
       "candidate": "Connection pool exhausted after 14:02 deploy",
       "confidence": 0.9,
       "status": "confirmed",
-      "reason": "**Tested:** whether `orders-api` ran out of pool connections when checkout started failing, using pool utilization from `metrics-*` for 13:30–15:00 UTC.\n**Result:** Confirmed — utilization went from 40% to 100% within a minute of the 14:02 deploy and stayed there for the whole failure window.",
+      "reason": "**Tested:** whether `orders-api` ran out of pool connections, from pool utilization in `metrics-*`, 13:30–15:00 UTC.\n**Result:** Confirmed — utilization went from 40% to 100% within a minute of the 14:02 deploy and stayed there until recovery.",
       "evidence": [
         {
           "description": "Pool utilization jumps from 40% to 100% within a minute of the deploy.",
@@ -616,7 +606,7 @@ unavailable, and only include candidates you actually investigated.
       "candidate": "Disk saturation on orders-api hosts",
       "confidence": 0.05,
       "status": "dismissed",
-      "reason": "**Tested:** whether the orders-api hosts were I/O bound, using IOPS and disk queue depth per host for 13:30–15:00 UTC.\n**Result:** Dismissed — both stayed flat (180–210 IOPS, queue depth under 1) on every host during the incident.",
+      "reason": "**Tested:** whether the orders-api hosts were I/O bound, from IOPS and disk queue depth per host, 13:30–15:00 UTC.\n**Result:** Dismissed — both stayed flat (180–210 IOPS, queue depth under 1) on every host.",
       "evidence": [{ "description": "Max IOPS stayed between 180 and 210 from 13:30 to 15:00 UTC on every orders-api host." }]
     }
   ]
