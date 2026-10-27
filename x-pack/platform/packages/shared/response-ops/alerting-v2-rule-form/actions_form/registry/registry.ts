@@ -9,16 +9,23 @@ import { i18n } from '@kbn/i18n';
 import type { InlineActionStepType } from '../types';
 import type { InlineActionStepDefinition } from './types';
 import { SlackChannelSelectorWrapper } from '../components/slack_channel_selector';
+import { EMAIL_PARAMS_SCHEMA, SLACK2_PARAMS_SCHEMA } from './params_schemas';
 
 const EMAIL_PARAMS_TEMPLATE = `to: 
   - ""
 subject: ""
-message: ""
+message: |
+  {% for alert in inputs.payload.alerts %}
+  - {{ inputs.payload.rules[alert.rule_id].name | default: "Alert" }} ({{ alert.alert_status }}): {{ alert.alert_url }}
+  {% endfor %}
 `;
 
 // ToDo: add a channel selector to the Slack (v2) step form
 const SLACK2_PARAMS_TEMPLATE = `channel: ""
-text: ""
+text: |
+  {% for alert in inputs.payload.alerts %}
+  - {{ inputs.payload.rules[alert.rule_id].name | default: "Alert" }} ({{ alert.alert_status }}): <{{ alert.alert_url }}|View alert>
+  {% endfor %}
 `;
 
 export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition[] = [
@@ -36,6 +43,7 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
     iconType: 'mail',
     connectorTypeId: '.email',
     paramsTemplate: EMAIL_PARAMS_TEMPLATE,
+    paramsSchema: EMAIL_PARAMS_SCHEMA,
   },
   {
     id: 'slack2.sendMessage',
@@ -52,6 +60,7 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
     connectorTypeId: '.slack2',
     connectorTypeSubAction: 'sendMessage',
     paramsTemplate: SLACK2_PARAMS_TEMPLATE,
+    paramsSchema: SLACK2_PARAMS_SCHEMA,
     CustomComponent: SlackChannelSelectorWrapper,
   },
 ];

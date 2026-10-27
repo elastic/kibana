@@ -42,6 +42,7 @@ import {
   enableInvestigatorServiceAccountRoute,
   getInvestigatorServiceAccountRoute,
 } from './investigator_service_account';
+import { previewKnowledgePurgeRoute, purgeKnowledgeRoute } from './purge_knowledge';
 
 export const nightshiftInvestigationsRouteRepository = {
   ...startInvestigationRoute,
@@ -78,6 +79,8 @@ export const nightshiftInvestigationsRouteRepository = {
   ...getInvestigatorServiceAccountRoute,
   ...enableInvestigatorServiceAccountRoute,
   ...disableInvestigatorServiceAccountRoute,
+  ...previewKnowledgePurgeRoute,
+  ...purgeKnowledgeRoute,
 };
 
 export type NightshiftInvestigationsRouteRepository =

@@ -441,7 +441,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.malware.max_file_size_bytes',
       {
         defaultMessage:
-          'Control the maximum file size in bytes that should be evaluated for malware. Default: 78643200.',
+          'Control the maximum file size in bytes that should be evaluated for malware. For Defend 9.6 and later, default: 157286400. For earlier versions, default: 78643200.',
       }
     ),
   },
@@ -769,7 +769,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.malware.max_file_size_bytes',
       {
         defaultMessage:
-          'Control the maximum file size in bytes that should be evaluated for malware. Default: 78643200.',
+          'Control the maximum file size in bytes that should be evaluated for malware. For Defend 9.6 and later, default: 157286400. For earlier versions, default: 78643200.',
       }
     ),
   },
@@ -1049,7 +1049,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.malware.max_file_size_bytes',
       {
         defaultMessage:
-          'Control the maximum file size in bytes that should be evaluated for malware. Default: 78643200.',
+          'Control the maximum file size in bytes that should be evaluated for malware. For Defend 9.6 and later, default: 157286400. For earlier versions, default: 78643200.',
       }
     ),
   },

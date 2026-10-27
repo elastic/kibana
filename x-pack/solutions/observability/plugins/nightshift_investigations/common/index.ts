@@ -27,20 +27,24 @@ export type {
   AlertSnapshot,
   AlertSnapshotEvaluation,
   AlertSnapshotGroup,
+  InvestigationAlertSnapshot,
   InvestigationContext,
   InvestigationNotificationDestination,
   InvestigationSubject,
+  V2AlertSnapshot,
 } from './schemas';
 
 export {
   alertInvestigationContextSchema,
   alertSnapshotSchema,
   freeFormContextSchema,
+  investigationAlertSnapshotSchema,
   investigationNotificationDestinationSchema,
   investigationNotificationDestinationsSchema,
   investigationSubjectSchema,
   MAX_ALERTS_PER_INVESTIGATION,
   MAX_INVESTIGATION_NOTIFICATIONS,
+  v2AlertSnapshotSchema,
 } from './schemas';
 
 import type {
@@ -286,3 +290,15 @@ export {
   ensureNightshiftServiceAccountRoles,
   NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES,
 } from './service_account_roles';
+
+export {
+  KNOWLEDGE_PURGE_CONFIRMATION,
+  KNOWLEDGE_PURGE_SCOPES,
+  MAX_PURGE_INVESTIGATIONS,
+  emptyPurgeCounts,
+  type KnowledgePurgeCounts,
+  type KnowledgePurgeInvestigation,
+  type KnowledgePurgePreview,
+  type KnowledgePurgeResult,
+  type KnowledgePurgeScope,
+} from './purge';

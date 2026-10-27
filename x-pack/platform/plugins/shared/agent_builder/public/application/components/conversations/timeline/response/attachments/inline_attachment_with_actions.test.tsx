@@ -219,15 +219,26 @@ describe('InlineAttachmentWithActions', () => {
       });
     });
 
-    it('does not invoke openSidebarConversationInternal when rendered inside the sidebar', () => {
+    it('invokes openSidebarConversationInternal when triggered from inline content inside the sidebar', () => {
       renderWithFakeContent({ isSidebar: true });
 
-      // The action button is gated off entirely when openSidebarConversation is undefined.
-      expect(screen.queryByRole('button', { name: ACTION_TRIGGER })).toBeNull();
-
-      // The inline trigger is still rendered, but clicking it is a no-op.
       fireEvent.click(screen.getByRole('button', { name: INLINE_TRIGGER }));
-      expect(mockOpenSidebarConversation).not.toHaveBeenCalled();
+
+      expect(mockOpenSidebarConversation).toHaveBeenCalledTimes(1);
+      expect(mockOpenSidebarConversation).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+      });
+    });
+
+    it('invokes openSidebarConversationInternal when triggered from an action button inside the sidebar', () => {
+      renderWithFakeContent({ isSidebar: true });
+
+      fireEvent.click(screen.getByRole('button', { name: ACTION_TRIGGER }));
+
+      expect(mockOpenSidebarConversation).toHaveBeenCalledTimes(1);
+      expect(mockOpenSidebarConversation).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+      });
     });
   });
 
