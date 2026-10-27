@@ -16,8 +16,6 @@ import {
   DASHBOARD_ARTIFACT_TYPE,
   RUNBOOK_ARTIFACT_TYPE,
 } from '@kbn/alerting-v2-constants';
-import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
-import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import {
   ruleOperationSchema,
   executeRuleOperations,
@@ -26,6 +24,7 @@ import {
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import { generateRuleOperationsUsageList } from '../../skills/schema_to_skill_docs';
+import type { AttachmentsServiceContract } from '../../../lib/services/attachments_service';
 
 const manageRuleSchema = lazySchema(() =>
   z.object({
@@ -41,10 +40,12 @@ const manageRuleSchema = lazySchema(() =>
 
 export interface ManageRuleToolDeps {
   logger: LoggerServiceContract;
+  attachmentsService: AttachmentsServiceContract;
 }
 
 export const manageRuleTool = ({
   logger,
+  attachmentsService,
 }: ManageRuleToolDeps): BuiltinSkillBoundedTool<typeof manageRuleSchema> => ({
   id: ALERTING_TOOL_IDS.manageRule,
   type: ToolType.builtin,
@@ -64,16 +65,10 @@ ${generateRuleOperationsUsageList()}`,
   ) => {
     let ruleId: string | undefined;
     try {
-      const currentAttachment = previousAttachmentId
-        ? attachments.getAttachmentRecord(previousAttachmentId)
-        : undefined;
-
-      const isNew = !currentAttachment;
-      const attachmentId = previousAttachmentId ?? uuidv4();
-
-      const currentData: Partial<RuleAttachmentData> =
-        currentAttachment?.versions.at(-1)?.data ?? {};
-      ruleId = currentAttachment?.origin;
+      const { rules } = attachmentsService.getClient(attachments);
+      const draft = rules.getDraft(previousAttachmentId);
+      const { isNew, data: currentData } = draft;
+      ruleId = draft.origin;
 
       const {
         data: updatedData,
@@ -100,23 +95,7 @@ ${generateRuleOperationsUsageList()}`,
         (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
       );
 
-      const attachmentInput = {
-        id: attachmentId,
-        type: RULE_ATTACHMENT_TYPE,
-        description: `Rule: ${updatedData.metadata?.name ?? attachmentId}`,
-        data: updatedData,
-      };
-
-      const attachment = isNew
-        ? await attachments.add(attachmentInput)
-        : await attachments.update(attachmentId, {
-            data: updatedData,
-            description: attachmentInput.description,
-          });
-
-      if (!attachment) {
-        throw new Error(`Failed to persist rule attachment "${attachmentId}".`);
-      }
+      const attachment = await rules.saveDraft(draft, updatedData);
 
       logger.debug({
         message: () => (isNew ? 'Rule attachment created' : 'Rule attachment updated'),

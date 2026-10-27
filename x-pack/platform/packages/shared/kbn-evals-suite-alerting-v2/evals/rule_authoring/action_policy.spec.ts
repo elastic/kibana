@@ -78,8 +78,13 @@ evaluate.describe(
                   // notification workflow before the policy is wired up.
                   expectedToolIds: [
                     ALERTING_TOOL_IDS.manageActionPolicy,
-                    ALERTING_TOOL_IDS.manageRule,
                     WORKFLOW_GENERATION_TOOL_ID,
+                  ],
+                  // The routing tag can be written by either link tool or set on the rule directly.
+                  expectedAnyOfToolIds: [
+                    ALERTING_TOOL_IDS.manageRule,
+                    ALERTING_TOOL_IDS.linkRuleToActionPolicy,
+                    ALERTING_TOOL_IDS.linkActionPolicyToRule,
                   ],
                   expectRenderAttachment: [
                     RULE_ATTACHMENT_TYPE,
