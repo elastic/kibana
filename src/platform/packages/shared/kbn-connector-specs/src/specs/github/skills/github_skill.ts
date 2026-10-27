@@ -11,8 +11,8 @@ import { buildSkill } from '../../../connector_spec';
 import { buildGithubResources } from './github_resources';
 
 export const githubSkillFile = buildSkill(({ bt, fence }) => ({
-  id: 'github',
-  name: 'github',
+  id: 'connector-github',
+  name: 'connector-github',
   description:
     'Search and list GitHub issues and pull requests with compact, context-friendly results (no bodies, avatars, or URL clutter).',
   content: `

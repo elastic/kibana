@@ -70,7 +70,7 @@ exec_tool platform_core_execute_connector_sub_action \\
   --connectorId <connectorId> \\
   --subAction browseSchedules \\
   --args='{"params":{"request":{"action":"list","query":"<schedule name>"}}}' \\
-| jq '.response | [.[] | {id: .id, name: .name, kind: .kind}]'
+| jq '{truncated, response: [.response[] | {id, name, kind}]}'
 ${fence}
 
 Step 2 — get on-call for that schedule ID:
@@ -111,7 +111,7 @@ exec_tool platform_core_execute_connector_sub_action \\
   --connectorId <connectorId> \\
   --subAction browseIncidents \\
   --args='{"params":{"request":{"action":"list","limit":20,"statuses":["triggered","acknowledged"]}}}' \\
-| jq '.response | [.[] | {
+| jq '{truncated, response: [.response[] | {
     id:              .id,
     incident_number: .incident_number,
     title:           .title,
@@ -133,7 +133,7 @@ exec_tool platform_core_execute_connector_sub_action \\
     created_at:      .created_at,
     updated_at:      .updated_at,
     resolved_at:     .resolved_at
-  }]'
+  }]}'
 ${fence}
 
 ## List/search escalation policies
@@ -153,13 +153,13 @@ exec_tool platform_core_execute_connector_sub_action \\
   --connectorId <connectorId> \\
   --subAction browseEscalationPolicies \\
   --args='{"params":{"request":{"action":"list","limit":20,"include":["services","teams"]}}}' \\
-| jq '.response | [.[] | {
+| jq '{truncated, response: [.response[] | {
     id:          .id,
     name:        .name,
     description: .description,
     teams:       [(.teams // [])[] | .summary],
     services:    [(.services // [])[] | .summary]
-  }]'
+  }]}'
 ${fence}
 `.trim(),
   },
@@ -184,7 +184,7 @@ exec_tool platform_core_execute_connector_sub_action \\
   --connectorId <connectorId> \\
   --subAction browseUsers \\
   --args='{"params":{"request":{"action":"list","query":"<name or email>","limit":20}}}' \\
-| jq '.response | [.[] | {id, name, email, role}]'
+| jq '{truncated, response: [.response[] | {id, name, email, role}]}'
 ${fence}
 
 The current user (the account that owns the API key) is ${bt}browseUsers${bt} with ${bt}action: "get"${bt} and no other fields.

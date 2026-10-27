@@ -11,8 +11,8 @@ import { buildSkill } from '../../../connector_spec';
 import { buildPagerdutyResources } from './pagerduty_resources';
 
 export const pagerdutySkillFile = buildSkill(({ bt, fence }) => ({
-  id: 'pagerduty',
-  name: 'pagerduty',
+  id: 'connector-pagerduty',
+  name: 'connector-pagerduty',
   description:
     'Access PagerDuty incidents, on-call assignments, schedules, escalation policies, users, and teams.',
   content: `

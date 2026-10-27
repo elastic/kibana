@@ -19,6 +19,14 @@ import { useListConnectors } from '../tools/use_mcp_connectors';
 import { useToasts } from '../use_toasts';
 import { agentHasConnector, getEffectiveConnectorIds } from './connector_ids_utils';
 
+interface AgentConnectorsUpdate {
+  connectorIds?: string[];
+  skillIds?: string[];
+}
+
+const isAlreadyExistsError = (reason: unknown): boolean =>
+  (reason as IHttpFetchError)?.response?.status === 409;
+
 export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
   const { agent } = useAgentBuilderAgentById(agentId);
   const { connectors: allConnectors, isLoading } = useListConnectors({});
@@ -43,23 +51,37 @@ export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
     return currentAgent ? getEffectiveConnectorIds(currentAgent) : [];
   }, [queryClient, agentQueryKey]);
 
-  const updateConnectorsMutation = useMutation({
-    mutationFn: (newConnectorIds: string[]) =>
+  const getCurrentSkillIds = useCallback((): string[] => {
+    const currentAgent = queryClient.getQueryData<AgentDefinition>(agentQueryKey);
+    return currentAgent?.configuration?.skill_ids ?? [];
+  }, [queryClient, agentQueryKey]);
+
+  // Connector and skill ids are saved in one request: separate requests each replace the stored
+  // agent document and can overwrite each other.
+  const updateAgentMutation = useMutation({
+    mutationFn: ({ connectorIds, skillIds }: AgentConnectorsUpdate) =>
       agentService.update(agentId, {
-        configuration: { connector_ids: newConnectorIds },
+        configuration: {
+          ...(connectorIds ? { connector_ids: connectorIds } : {}),
+          ...(skillIds ? { skill_ids: skillIds } : {}),
+        },
       }),
-    onMutate: async (newConnectorIds: string[]) => {
+    onMutate: async ({ connectorIds, skillIds }: AgentConnectorsUpdate) => {
       await queryClient.cancelQueries({ queryKey: agentQueryKey });
       const previousAgent = queryClient.getQueryData<AgentDefinition>(agentQueryKey);
       if (previousAgent) {
         queryClient.setQueryData<AgentDefinition>(agentQueryKey, {
           ...previousAgent,
-          configuration: { ...previousAgent.configuration, connector_ids: newConnectorIds },
+          configuration: {
+            ...previousAgent.configuration,
+            ...(connectorIds ? { connector_ids: connectorIds } : {}),
+            ...(skillIds ? { skill_ids: skillIds } : {}),
+          },
         });
       }
       return { previousAgent };
     },
-    onError: (_err, _newConnectorIds, context) => {
+    onError: (_err, _update, context) => {
       if (context?.previousAgent) {
         queryClient.setQueryData<AgentDefinition>(agentQueryKey, context.previousAgent);
       }
@@ -74,42 +96,43 @@ export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
     },
   });
 
-  const getCurrentSkillIds = useCallback((): string[] => {
-    const currentAgent = queryClient.getQueryData<AgentDefinition>(agentQueryKey);
-    return currentAgent?.configuration?.skill_ids ?? [];
-  }, [queryClient, agentQueryKey]);
-
-  const updateSkillsMutation = useMutation({
-    mutationFn: (newSkillIds: string[]) =>
-      agentService.update(agentId, { configuration: { skill_ids: newSkillIds } }),
-    onMutate: async (newSkillIds: string[]) => {
-      await queryClient.cancelQueries({ queryKey: agentQueryKey });
-      const previousAgent = queryClient.getQueryData<AgentDefinition>(agentQueryKey);
-      if (previousAgent) {
-        queryClient.setQueryData<AgentDefinition>(agentQueryKey, {
-          ...previousAgent,
-          configuration: { ...previousAgent.configuration, skill_ids: newSkillIds },
-        });
-      }
-      return { previousAgent };
-    },
-    onError: (_err, _newSkillIds, context) => {
-      if (context?.previousAgent) {
-        queryClient.setQueryData<AgentDefinition>(agentQueryKey, context.previousAgent);
-      }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: agentQueryKey });
-    },
-  });
-
   const assign = useCallback(
     (connector: Pick<ConnectorItem, 'id' | 'name' | 'actionTypeId'>) => {
-      const spec = getConnectorSpec(connector.actionTypeId);
-      const skillFiles = spec?.skillFiles ?? [];
-      const connectorSkillIds = skillFiles.map((s) => s.name);
+      const skillFiles = getConnectorSpec(connector.actionTypeId)?.skillFiles ?? [];
 
-      // Always create skills for the connector type — idempotent; 409 (already exists) is safe.
+      const save = (installedSkillIds: string[]) => {
+        const currentConnectorIds = getCurrentConnectorIds();
+        const currentSkillIds = getCurrentSkillIds();
+        const connectorIds = currentConnectorIds.includes(connector.id)
+          ? undefined
+          : [...currentConnectorIds, connector.id];
+        const missingSkillIds = installedSkillIds.filter((id) => !currentSkillIds.includes(id));
+        const skillIds =
+          missingSkillIds.length > 0 ? [...currentSkillIds, ...missingSkillIds] : undefined;
+        if (!connectorIds && !skillIds) return;
+
+        updateAgentMutation.mutate(
+          { connectorIds, skillIds },
+          {
+            onSuccess: () => {
+              if (!connectorIds) return;
+              addSuccessToast({
+                title: i18n.translate('xpack.agentBuilder.agentConnectors.assignSuccessToast', {
+                  defaultMessage: '{name} added',
+                  values: { name: connector.name },
+                }),
+              });
+            },
+          }
+        );
+      };
+
+      if (skillFiles.length === 0) {
+        save([]);
+        return;
+      }
+
+      // Create the connector type's skills; a 409 means a skill with that id already exists.
       Promise.allSettled(
         skillFiles.map((skill) =>
           skillsService.create({
@@ -126,10 +149,15 @@ export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
           })
         )
       ).then((results) => {
-        const anyUnexpectedFailure = results.some(
-          (r) => r.status === 'rejected' && (r.reason as IHttpFetchError)?.response?.status !== 409
-        );
-        if (anyUnexpectedFailure) {
+        // Only link skills that exist, so the agent never points at a skill that failed to create.
+        const installedSkillIds = skillFiles
+          .filter((_, index) => {
+            const result = results[index];
+            return result.status === 'fulfilled' || isAlreadyExistsError(result.reason);
+          })
+          .map((skill) => skill.name);
+
+        if (installedSkillIds.length < skillFiles.length) {
           addErrorToast({
             title: i18n.translate('xpack.agentBuilder.agentConnectors.skillCreateErrorToast', {
               defaultMessage: 'Connector added, but its skill could not be created.',
@@ -137,37 +165,13 @@ export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
           });
         }
 
-        // Always link skill IDs to the agent, even if connector was already visible.
-        if (connectorSkillIds.length > 0) {
-          const currentSkillIds = getCurrentSkillIds();
-          const newSkillIds = [
-            ...currentSkillIds,
-            ...connectorSkillIds.filter((id) => !currentSkillIds.includes(id)),
-          ];
-          updateSkillsMutation.mutate(newSkillIds);
-        }
-
-        // Only update connector_ids if the connector isn't already explicitly linked.
-        const currentIds = getCurrentConnectorIds();
-        if (currentIds.includes(connector.id)) return;
-
-        updateConnectorsMutation.mutate([...currentIds, connector.id], {
-          onSuccess: () => {
-            addSuccessToast({
-              title: i18n.translate('xpack.agentBuilder.agentConnectors.assignSuccessToast', {
-                defaultMessage: '{name} added',
-                values: { name: connector.name },
-              }),
-            });
-          },
-        });
+        save(installedSkillIds);
       });
     },
     [
       getCurrentConnectorIds,
       getCurrentSkillIds,
-      updateConnectorsMutation,
-      updateSkillsMutation,
+      updateAgentMutation,
       addSuccessToast,
       addErrorToast,
       skillsService,
@@ -177,8 +181,8 @@ export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
   const unassign = useCallback(
     (connector: ConnectorItem) => {
       const currentIds = getCurrentConnectorIds();
-      updateConnectorsMutation.mutate(
-        currentIds.filter((id) => id !== connector.id),
+      updateAgentMutation.mutate(
+        { connectorIds: currentIds.filter((id) => id !== connector.id) },
         {
           onSuccess: () =>
             addSuccessToast({
@@ -190,7 +194,7 @@ export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
         }
       );
     },
-    [getCurrentConnectorIds, updateConnectorsMutation, addSuccessToast]
+    [getCurrentConnectorIds, updateAgentMutation, addSuccessToast]
   );
 
   return {
@@ -198,7 +202,7 @@ export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
     allConnectors,
     activeConnectorIdSet,
     isLoading,
-    isAssigning: updateConnectorsMutation.isLoading,
+    isAssigning: updateAgentMutation.isLoading,
     assign,
     unassign,
   };
