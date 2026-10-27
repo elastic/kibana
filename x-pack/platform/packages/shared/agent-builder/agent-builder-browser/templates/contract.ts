@@ -6,7 +6,7 @@
  */
 
 import type { ComponentType } from 'react';
-import type { EuiFlyoutMenuAction, IconType } from '@elastic/eui';
+import type { EuiFlyoutMenuAction, EuiFlyoutProps, IconType } from '@elastic/eui';
 import type {
   Conversation,
   ConversationWithoutRoundsWithPermissions,
@@ -86,6 +86,11 @@ export interface ConversationTemplateUIDefinition {
   briefCard?: ComponentType<ConversationTemplateBriefCardRenderProps>;
   /** Optional flyout content; capture capabilities from the template registration context. */
   detailsFlyout?: {
+    /**
+     * Width of the in-chat details flyout. Defaults to `'s'`. Use a wider size for templates
+     * whose content is hard to read in the default width.
+     */
+    size?: EuiFlyoutProps['size'];
     /** Replaces the default title above the tabs, inside Agent Builder's EuiFlyoutHeader. */
     header?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
     /** Rendered inside Agent Builder's EuiFlyoutFooter when provided. */

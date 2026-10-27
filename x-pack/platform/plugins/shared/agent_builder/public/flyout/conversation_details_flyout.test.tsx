@@ -25,6 +25,7 @@ import {
   ConversationDetailsFlyout,
   ConversationDetailsFlyoutContent,
   ConversationDetailsFlyoutSnapshot,
+  DEFAULT_FLYOUT_SIZE,
 } from './conversation_details_flyout';
 
 jest.mock('../application/hooks/use_conversation');
@@ -370,5 +371,41 @@ describe('ConversationDetailsFlyout', () => {
     const [{ flyoutMenuProps }] = jest.mocked(EuiFlyout).mock.lastCall ?? [{}];
     expect(trailingActions).toHaveBeenCalledWith({ conversation });
     expect(flyoutMenuProps?.trailingActions).toEqual(trailingActions.mock.results[0].value);
+  });
+
+  it.each([
+    ['uses the size requested by the template', { size: 'm' as const }, 'm'],
+    ['falls back to the default size', {}, DEFAULT_FLYOUT_SIZE],
+  ])('%s', (_name, detailsFlyout, expectedSize) => {
+    const conversationTemplatesService = new ConversationTemplatesService();
+    createPublicConversationTemplatesContract({
+      conversationTemplatesService,
+      context: {
+        attachmentsService: createPublicAttachmentContract({
+          attachmentsService: new AttachmentsService({
+            http: httpServiceMock.createSetupContract(),
+          }),
+        }),
+        openSidebarConversation: jest.fn(),
+        openFullscreenConversation: jest.fn(),
+        getConversationUrl: jest.fn(),
+      },
+    }).registerTemplateUIDefinition('test', () => ({
+      name: 'Test',
+      tabs: [],
+      detailsFlyout,
+    }));
+    jest.mocked(useConversation).mockReturnValue({
+      conversation: createConversation(),
+      isLoading: false,
+    } as ReturnType<typeof useConversation>);
+    jest.mocked(useAgentBuilderServices).mockReturnValue({
+      conversationTemplatesService,
+    } as ReturnType<typeof useAgentBuilderServices>);
+
+    render(<ConversationDetailsFlyout onClose={jest.fn()} />, { wrapper: EuiProvider });
+
+    const [{ size }] = jest.mocked(EuiFlyout).mock.lastCall ?? [{}];
+    expect(size).toBe(expectedSize);
   });
 });

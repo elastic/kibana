@@ -45,6 +45,9 @@ const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.
 
 const POLL_INTERVAL_MS = 5_000;
 
+/** Width used when a conversation template does not ask for a wider details flyout. */
+export const DEFAULT_FLYOUT_SIZE = 's' as const;
+
 const isNotFoundError = (error: IHttpFetchError | null): boolean => error?.response?.status === 404;
 
 type ResolvedTab = ConversationTemplateTabDefinition & { id: string };
@@ -283,15 +286,19 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
   const { conversation, isLoading } = useConversation();
   const { conversationTemplatesService } = useAgentBuilderServices();
 
-  const trailingActions = useMemo(() => {
-    if (!conversation?.template_id) {
-      return undefined;
-    }
-    const definition = conversationTemplatesService.getTemplateUIDefinition(
-      conversation.template_id
-    );
-    return definition?.detailsFlyout?.trailingActions?.({ conversation });
-  }, [conversation, conversationTemplatesService]);
+  const detailsFlyoutDefinition = useMemo(
+    () =>
+      conversation?.template_id
+        ? conversationTemplatesService.getTemplateUIDefinition(conversation.template_id)
+            ?.detailsFlyout
+        : undefined,
+    [conversation?.template_id, conversationTemplatesService]
+  );
+
+  const trailingActions = useMemo(
+    () => (conversation ? detailsFlyoutDefinition?.trailingActions?.({ conversation }) : undefined),
+    [conversation, detailsFlyoutDefinition]
+  );
 
   return (
     <EuiFlyout
@@ -300,7 +307,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
       historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
       flyoutMenuDisplayMode="always"
       flyoutMenuProps={{ title: FLYOUT_TITLE, trailingActions }}
-      size="s"
+      size={detailsFlyoutDefinition?.size ?? DEFAULT_FLYOUT_SIZE}
       type="push"
       paddingSize="m"
       css={flyoutMenuRowStyles}

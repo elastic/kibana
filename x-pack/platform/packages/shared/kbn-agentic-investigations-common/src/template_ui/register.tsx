@@ -56,6 +56,9 @@ export const getInvestigationTabIds = (templateId: string): readonly string[] =>
   `${templateId}.overview`,
 ];
 
+/** Width of the in-chat investigation and escalation details flyouts. */
+const INVESTIGATION_DETAILS_FLYOUT_SIZE = 'm' as const;
+
 export interface RegisterAgenticInvestigationTemplateUIOptions {
   conversationTemplates: ConversationTemplateServiceStartContract;
   /** Solution-owned conversation template id. Agent Builder throws if it is already registered. */
@@ -185,6 +188,9 @@ export const registerAgenticInvestigationTemplateUI = ({
       tabs: [overviewTabId],
       ...(briefCard && { briefCard }),
       detailsFlyout: {
+        // Investigation content (summaries, evidence, attachments) is hard to read in the default
+        // narrow flyout, so the in-chat flyout opens wider.
+        size: INVESTIGATION_DETAILS_FLYOUT_SIZE,
         trailingActions: ({ conversation }) => [
           getCopyLinkFlyoutAction(() =>
             onCopyLink(
@@ -342,6 +348,7 @@ export const registerEscalationTemplateUI = ({
     icon,
     tabs: [overviewTabId],
     detailsFlyout: {
+      size: INVESTIGATION_DETAILS_FLYOUT_SIZE,
       trailingActions: ({ conversation }) => [
         getCopyLinkFlyoutAction(() =>
           onCopyLink(
