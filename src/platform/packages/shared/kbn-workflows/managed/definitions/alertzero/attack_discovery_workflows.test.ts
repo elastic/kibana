@@ -2467,21 +2467,17 @@ describe('Attack Discovery worker chain', () => {
 
   describe('the Investigation journal helper', () => {
     const append = stepIn(journalNoteSteps, 'append_note');
-    const request = append?.with as { body?: { trigger_mode?: string }; path?: string } | undefined;
 
-    it('POSTs the chat converse route, not the agent_builder converse route', () => {
-      expect(request?.path).toContain('/api/chat/converse');
+    it('persists a user_message without running the agent, named after the calling Worker', () => {
+      expect(append?.type).toBe('ai.conversation.add_user_message');
+      expect(append?.with).toEqual({
+        conversation_id: '{{ inputs.conversation_id }}',
+        message: '{{ inputs.message }}',
+        author_name: '{{ inputs.author_name | default: workflow.name }}',
+      });
     });
 
-    it('prefixes the converse path with the executing space', () => {
-      expect(request?.path).toContain('/s/{{ workflow.spaceId }}/');
-    });
-
-    it('persists a user_message without running the agent', () => {
-      expect(request?.body?.trigger_mode).toBe('never');
-    });
-
-    it('continues when the converse call fails', () => {
+    it('continues when the note fails', () => {
       expect(append?.['on-failure']?.continue).toBe(true);
     });
 
