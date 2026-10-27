@@ -60,8 +60,93 @@ interface IndexedTreeDoc {
   source: Record<string, unknown>;
 }
 
+const VERSION_PAGE_SIZE = 100;
+
+const errorType = (error: unknown): string | undefined => {
+  const candidate = (error ?? {}) as {
+    meta?: { body?: { error?: { type?: string } } };
+    body?: { error?: { type?: string } };
+  };
+  return candidate.meta?.body?.error?.type ?? candidate.body?.error?.type;
+};
+
+const statusCodeOf = (error: unknown): number | undefined => {
+  const candidate = (error ?? {}) as {
+    statusCode?: number;
+    status?: number;
+    meta?: { statusCode?: number };
+  };
+  return candidate.statusCode ?? candidate.meta?.statusCode ?? candidate.status;
+};
+
+/** A missing index is an empty snapshot. Any other search failure must abort the replay. */
+const isIndexNotFound = (error: unknown): boolean => {
+  const type = errorType(error);
+  if (type) return type === 'index_not_found_exception';
+  return statusCodeOf(error) === 404;
+};
+
+/** A missing head document is not a failed snapshot. */
+const isMissingHead = (error: unknown): boolean => {
+  const type = errorType(error);
+  if (type === 'index_not_found_exception' || type === 'document_missing_exception') return true;
+  return statusCodeOf(error) === 404 && type === undefined;
+};
+
+/**
+ * Every version document for one tree. Pages to completion in version order so a later cleanup
+ * cannot delete a version this snapshot never saw.
+ */
+const listVersionDocs = async (esClient: Client, treeId: string): Promise<IndexedTreeDoc[]> => {
+  const docs: IndexedTreeDoc[] = [];
+  let searchAfter: Array<string | number> | undefined;
+  for (;;) {
+    let versions;
+    try {
+      versions = await esClient.search<Record<string, unknown>>({
+        index: DECISION_TREE_AI_INDEX_DEST,
+        size: VERSION_PAGE_SIZE,
+        track_total_hits: false,
+        sort: [
+          { 'attributes.version': { order: 'asc', unmapped_type: 'long' } },
+          { '@timestamp': { order: 'asc', unmapped_type: 'date' } },
+        ],
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+        query: {
+          bool: {
+            filter: [
+              { term: { type: 'decision_tree_version' } },
+              { term: { 'attributes.tree_id': treeId } },
+              { term: { 'attributes.space_id': SPACE_ID } },
+            ],
+          },
+        },
+      });
+    } catch (error) {
+      if (docs.length === 0 && isIndexNotFound(error)) return [];
+      throw error;
+    }
+
+    const hits = versions.hits.hits;
+    for (const hit of hits) {
+      if (hit._id && hit._source) {
+        docs.push({ id: hit._id, source: hit._source });
+      }
+    }
+    if (hits.length < VERSION_PAGE_SIZE) return docs;
+
+    const cursor = hits[hits.length - 1]?.sort;
+    if (!cursor || cursor.length === 0) {
+      throw new Error(
+        `Decision tree version search for ${treeId} returned a full page without a cursor`
+      );
+    }
+    searchAfter = cursor as Array<string | number>;
+  }
+};
+
 /** Head and version documents for one tree, so a replay can put the space back afterward. */
-const snapshotDecisionTree = async (
+export const snapshotDecisionTree = async (
   esClient: Client,
   treeId: string
 ): Promise<IndexedTreeDoc[]> => {
@@ -74,37 +159,16 @@ const snapshotDecisionTree = async (
     if (head.found && head._source) {
       docs.push({ id: headId(treeId), source: head._source });
     }
-  } catch {
-    // The tree is not in this space yet.
+  } catch (error) {
+    if (!isMissingHead(error)) throw error;
   }
 
-  try {
-    const versions = await esClient.search<Record<string, unknown>>({
-      index: DECISION_TREE_AI_INDEX_DEST,
-      size: 100,
-      query: {
-        bool: {
-          filter: [
-            { term: { type: 'decision_tree_version' } },
-            { term: { 'attributes.tree_id': treeId } },
-            { term: { 'attributes.space_id': SPACE_ID } },
-          ],
-        },
-      },
-    });
-    for (const hit of versions.hits.hits) {
-      if (hit._id && hit._source) {
-        docs.push({ id: hit._id, source: hit._source });
-      }
-    }
-  } catch {
-    // The index may not exist on a fresh server.
-  }
+  docs.push(...(await listVersionDocs(esClient, treeId)));
   return docs;
 };
 
 /** Deletes what the replay wrote for `treeId` and puts the previous documents back. */
-const restoreDecisionTree = async (
+export const restoreDecisionTree = async (
   esClient: Client,
   treeId: string,
   snapshot: readonly IndexedTreeDoc[]

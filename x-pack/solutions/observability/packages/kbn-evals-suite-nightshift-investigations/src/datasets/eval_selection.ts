@@ -15,17 +15,17 @@ export const INVESTIGATION_DATASET_ID = 'trace-only';
  */
 export const CONNECTOR_PROBE_DATASET_ID = 'connector-probe';
 
-const EVAL_IDS: readonly string[] = [
-  INVESTIGATION_DATASET_ID,
-  CONNECTOR_PROBE_DATASET_ID,
-  REINFORCEMENT_DATASET_ID,
-];
-
 /**
  * `NIGHTSHIFT_DATASETS` id for the reinforcement micro-eval. Opt-in: it enables decision trees
  * without turning Cortex on. Unset and `all` never select it.
  */
 export const REINFORCEMENT_DATASET_ID = 'reinforcement';
+
+const EVAL_IDS: readonly string[] = [
+  INVESTIGATION_DATASET_ID,
+  CONNECTOR_PROBE_DATASET_ID,
+  REINFORCEMENT_DATASET_ID,
+];
 
 export interface EvalSelection {
   runSmoke: boolean;
