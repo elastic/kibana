@@ -12,6 +12,10 @@ import {
   ALERTING_TOOL_IDS,
   ALERTING_V2_ENABLED_SETTING_ID,
 } from '@kbn/alerting-v2-constants';
+import { attachActionPolicyTool } from '../tools/attach_action_policy';
+import type { AttachActionPolicyToolDeps } from '../tools/attach_action_policy';
+import { findActionPoliciesTool } from '../tools/find_action_policies';
+import type { FindActionPoliciesToolDeps } from '../tools/find_action_policies';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import {
@@ -38,9 +42,11 @@ export {
   WORKFLOW_DISPATCH_PAYLOAD_SKILL_REF,
 };
 
-type ActionPolicyAuthoringSkillDeps = ManageActionPolicyToolDeps & {
-  availability: AvailabilityConfig;
-};
+type ActionPolicyAuthoringSkillDeps = ManageActionPolicyToolDeps &
+  FindActionPoliciesToolDeps &
+  AttachActionPolicyToolDeps & {
+    availability: AvailabilityConfig;
+  };
 
 export const createActionPolicyAuthoringSkill = (deps: ActionPolicyAuthoringSkillDeps) =>
   defineSkillType({
@@ -252,5 +258,9 @@ When the user asks how a notification gets from a rule firing to email/Slack, co
 
 ### Workflow Dispatch Payload
 When choosing Liquid variables for a notification workflow, including query-specific \`alert.data.*\` fields, consult the [workflow-dispatch-payload reference](./references/workflow-dispatch-payload.md).`,
-    getInlineTools: () => [manageActionPolicyTool(deps)],
+    getInlineTools: () => [
+      manageActionPolicyTool(deps),
+      findActionPoliciesTool(deps),
+      attachActionPolicyTool(deps),
+    ],
   });

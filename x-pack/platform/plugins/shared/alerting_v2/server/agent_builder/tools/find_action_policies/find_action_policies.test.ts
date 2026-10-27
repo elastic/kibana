@@ -47,6 +47,10 @@ describe('findActionPoliciesTool', () => {
     });
   };
 
+  type HandlerResult = Awaited<ReturnType<ReturnType<typeof createTool>['handler']>>;
+  const firstResult = (result: HandlerResult) =>
+    'results' in result ? result.results[0] : undefined;
+
   const run = (params: { search?: string; page?: number; perPage?: number } = {}, tool = createTool()) =>
     tool.handler(params, agentBuilderMocks.tools.createHandlerContext());
 
@@ -132,7 +136,7 @@ describe('findActionPoliciesTool', () => {
 
       const result = await run();
 
-      expect(result.results[0]).toEqual({
+      expect(firstResult(result)).toEqual({
         type: ToolResultType.other,
         data: expect.objectContaining({
           items: [
@@ -154,7 +158,7 @@ describe('findActionPoliciesTool', () => {
 
       expect(canRead).toHaveBeenCalledWith('actionPolicies');
       expect(findActionPolicies).not.toHaveBeenCalled();
-      expect(result.results[0]).toEqual(
+      expect(firstResult(result)).toEqual(
         expect.objectContaining({
           type: ToolResultType.error,
           data: expect.objectContaining({
@@ -169,7 +173,7 @@ describe('findActionPoliciesTool', () => {
 
       const result = await run();
 
-      expect(result.results[0]).toEqual({
+      expect(firstResult(result)).toEqual({
         type: ToolResultType.error,
         data: { message: 'Failed to find action policies: boom' },
       });

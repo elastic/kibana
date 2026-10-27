@@ -15,6 +15,8 @@ import {
   ALERTING_V2_ENABLED_SETTING_ID,
   RULE_AUTHORING_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
+import type { AttachRuleToolDeps } from '../tools/attach_rule';
+import { attachRuleTool } from '../tools/attach_rule';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
 import {
@@ -27,7 +29,8 @@ import {
   generateNotificationsOverviewDoc,
 } from './schema_to_skill_docs';
 
-type RuleAuthoringSkillDeps = ManageRuleToolDeps & { availability: AvailabilityConfig };
+type RuleAuthoringSkillDeps = ManageRuleToolDeps &
+  AttachRuleToolDeps & { availability: AvailabilityConfig };
 
 export const createRuleAuthoringSkill = (deps: RuleAuthoringSkillDeps) =>
   defineSkillType({
@@ -207,5 +210,5 @@ When the user asks what happens if data stops arriving (missing metrics, heartbe
 
 ### Notifications
 When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).`,
-    getInlineTools: () => [manageRuleTool(deps)],
+    getInlineTools: () => [manageRuleTool(deps), attachRuleTool(deps)],
   });

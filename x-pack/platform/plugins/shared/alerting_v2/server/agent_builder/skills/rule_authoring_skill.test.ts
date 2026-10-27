@@ -24,6 +24,8 @@ const createDeps = () => ({
     error: jest.fn(),
     forSubsystem: jest.fn(),
   } as unknown as LoggerServiceContract,
+  getRulesClient: jest.fn(),
+  getPrivilegeChecker: jest.fn(),
   availability: createAlertingV2Availability({
     getActiveSpace: jest.fn().mockResolvedValue({}),
   }),
@@ -66,13 +68,13 @@ describe('createRuleAuthoringSkill', () => {
     expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
-  it('exposes only the manage rule inline tool', async () => {
+  it('exposes only the rule inline tools to manage and attach rules', async () => {
     const skill = createRuleAuthoringSkill(createDeps());
 
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineToolIds = inlineTools.map((tool) => tool.id);
 
-    expect(inlineToolIds).toEqual([ALERTING_TOOL_IDS.manageRule]);
+    expect(inlineToolIds).toEqual([ALERTING_TOOL_IDS.manageRule, ALERTING_TOOL_IDS.attachRule]);
     expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.manageActionPolicy);
   });
 

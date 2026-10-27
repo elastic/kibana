@@ -48,6 +48,10 @@ describe('attachActionPolicyTool', () => {
     });
   };
 
+  type HandlerResult = Awaited<ReturnType<ReturnType<typeof createTool>['handler']>>;
+  const firstResult = (result: HandlerResult) =>
+    'results' in result ? result.results[0] : undefined;
+
   beforeEach(() => {
     ({ loggerService, mockLogger } = createLoggerService());
     getActionPolicy = jest.fn().mockResolvedValue(policy);
@@ -108,7 +112,7 @@ describe('attachActionPolicyTool', () => {
 
       expect(getActionPolicy).not.toHaveBeenCalled();
       expect(ctx.attachments.add).not.toHaveBeenCalled();
-      expect(result.results[0]).toEqual({
+      expect(firstResult(result)).toEqual({
         type: ToolResultType.other,
         data: expect.objectContaining({ success: true, attachment_id: 'existing-1' }),
       });
@@ -120,7 +124,7 @@ describe('attachActionPolicyTool', () => {
       expect(canRead).toHaveBeenCalledWith('actionPolicies');
       expect(getActionPolicy).not.toHaveBeenCalled();
       expect(ctx.attachments.add).not.toHaveBeenCalled();
-      expect(result.results[0]).toEqual(
+      expect(firstResult(result)).toEqual(
         expect.objectContaining({
           type: ToolResultType.error,
           data: expect.objectContaining({
@@ -135,7 +139,7 @@ describe('attachActionPolicyTool', () => {
 
       const result = await createTool().handler({ policyId: 'policy-1' }, ctx);
 
-      expect(result.results[0]).toEqual({
+      expect(firstResult(result)).toEqual({
         type: ToolResultType.error,
         data: { message: 'Action policy "policy-1" was not found.' },
       });
@@ -148,7 +152,7 @@ describe('attachActionPolicyTool', () => {
 
       const result = await createTool().handler({ policyId: 'policy-1' }, ctx);
 
-      expect(result.results[0]).toEqual({
+      expect(firstResult(result)).toEqual({
         type: ToolResultType.error,
         data: { message: 'Failed to attach action policy "policy-1": boom' },
       });

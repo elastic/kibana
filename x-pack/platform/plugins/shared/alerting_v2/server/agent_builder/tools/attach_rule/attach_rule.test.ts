@@ -50,6 +50,10 @@ describe('attachRuleTool', () => {
     });
   };
 
+  type HandlerResult = Awaited<ReturnType<ReturnType<typeof createTool>['handler']>>;
+  const firstResult = (result: HandlerResult) =>
+    'results' in result ? result.results[0] : undefined;
+
   beforeEach(() => {
     ({ loggerService, mockLogger } = createLoggerService());
     getRule = jest.fn().mockResolvedValue(rule);
@@ -110,7 +114,7 @@ describe('attachRuleTool', () => {
 
       expect(getRule).not.toHaveBeenCalled();
       expect(ctx.attachments.add).not.toHaveBeenCalled();
-      expect(result.results[0]).toEqual({
+      expect(firstResult(result)).toEqual({
         type: ToolResultType.other,
         data: expect.objectContaining({ success: true, attachment_id: 'existing-1' }),
       });
@@ -122,7 +126,7 @@ describe('attachRuleTool', () => {
       expect(canRead).toHaveBeenCalledWith('rules');
       expect(getRule).not.toHaveBeenCalled();
       expect(ctx.attachments.add).not.toHaveBeenCalled();
-      expect(result.results[0]).toEqual(
+      expect(firstResult(result)).toEqual(
         expect.objectContaining({
           type: ToolResultType.error,
           data: expect.objectContaining({
@@ -137,7 +141,7 @@ describe('attachRuleTool', () => {
 
       const result = await createTool().handler({ ruleId: 'rule-1' }, ctx);
 
-      expect(result.results[0]).toEqual({
+      expect(firstResult(result)).toEqual({
         type: ToolResultType.error,
         data: { message: 'Rule "rule-1" was not found.' },
       });
@@ -150,7 +154,7 @@ describe('attachRuleTool', () => {
 
       const result = await createTool().handler({ ruleId: 'rule-1' }, ctx);
 
-      expect(result.results[0]).toEqual({
+      expect(firstResult(result)).toEqual({
         type: ToolResultType.error,
         data: { message: 'Failed to attach rule "rule-1": boom' },
       });
