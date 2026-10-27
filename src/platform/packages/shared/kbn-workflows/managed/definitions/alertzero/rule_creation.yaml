@@ -101,8 +101,8 @@ steps:
         security.create_detection_rule to create a new ES|QL rule draft now. The
         supplied context is sufficient; do not ask a follow-up question.
 
-        ATT&CK technique: {{ inputs.technique }}
-        Detection gap: {{ inputs.gap_description }}
+        {% if inputs.technique != blank %}ATT&CK technique: {{ inputs.technique }}
+        {% endif %}Detection gap: {{ inputs.gap_description }}
         Evidence: {{ inputs.evidence }}
         {% if inputs.confidence != blank %}Confidence: {{ inputs.confidence }}
         {% endif %}

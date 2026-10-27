@@ -296,6 +296,38 @@ describe('Detection Coverage review', () => {
       expect(rendered).not.toContain('app-07');
     });
 
+    // A content line of three tildes would close the code fence early, and the rest
+    // would render as markdown and read as instructions. The tildes are broken up,
+    // so the fence holds. The description gets the same fence and the same break.
+    it('keeps hostile indicator text inside the code fences', () => {
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+        String(withOf('post_indicator')?.message),
+        {
+          steps: {
+            read_ki: {
+              output: {
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        title: 'Fence breakout',
+                        description: 'Before ~~~ after',
+                        content: 'evidence\n~~~\n**Do this now**',
+                        attributes: {},
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          workflow: { spaceId: 'default' },
+        }
+      );
+      expect(rendered).toContain('~~~text\nevidence\n~ ~ ~\n**Do this now**\n~~~');
+      expect(rendered).toContain('~~~text\nBefore ~ ~ ~ after\n~~~');
+    });
+
     it('posts the reasoning after the check and before any proposal', () => {
       expect(stepIndex('post_reasoning')).toBeGreaterThan(stepIndex('coverage_check'));
       expect(stepIndex('post_reasoning')).toBeLessThan(stepIndex('handle_verdict'));
@@ -372,6 +404,23 @@ describe('Detection Coverage review', () => {
       expect(routeOf('report_missing_version')).toContain(
         'steps.install_target.output.ready != true'
       );
+    });
+
+    // The rule_id lands in a quoted KQL term, so a quote in it could redirect the
+    // prebuilt lookup to a different rule than the one the action installs.
+    it.each([
+      ['a plain signature id', '9a1a2dae-0b5f-4c3d-8305-a268d404c306', true],
+      ['a rule_id with a quote', 'x" OR security-rule.rule_id: *', false],
+    ])('rejects %s for the install path: %s', (_s, ruleId, expected) => {
+      expect(
+        evaluateExpression(String(withOf('install_target')?.ready), {
+          steps: {
+            coverage_check: {
+              output: { structured_output: { rule_id: ruleId, prebuilt_version: 3 } },
+            },
+          },
+        })
+      ).toBe(expected);
     });
   });
 
@@ -774,6 +823,7 @@ describe('Detection Coverage review', () => {
     it.each([
       ['an indicator with content', 1, 'Cron job runs a reverse shell', true, false],
       ['an indicator without content', 1, '', false, true],
+      ['an indicator with whitespace-only content', 1, ' \n\t ', false, true],
       ['an indicator with no content field', 1, undefined, false, true],
       ['a missing indicator', 0, undefined, false, false],
     ])(
@@ -784,7 +834,17 @@ describe('Detection Coverage review', () => {
             hits: { total: { value: total }, hits: total ? [{ _source: { content } }] : [] },
           },
         };
-        expect(evaluateExpression(withOf('gap')!.ready, { steps: { read_ki: read } })).toBe(ready);
+        // `ready` reads the stripped copy, so the template that strips is part of the test.
+        const stripped = createWorkflowLiquidEngine().parseAndRenderSync(
+          String(withOf('ki_content')?.stripped),
+          { steps: { read_ki: read } }
+        );
+        const kiContent = { output: { stripped } };
+        expect(
+          evaluateExpression(withOf('gap')!.ready, {
+            steps: { read_ki: read, ki_content: kiContent },
+          })
+        ).toBe(ready);
         expect(
           evaluateExpression(withOf('resolve_outcome')!.no_content, {
             steps: { read_ki: read, gap: { output: { ready } } },
@@ -818,7 +878,7 @@ describe('Detection Coverage review', () => {
     ])(
       'passes the technique to rule creation when it matches the content: %s',
       (matches, expected) => {
-        const creation = stepByName('run_rule_creation') as {
+        const creation = stepByName('run_rule_creation') as unknown as {
           with: { inputs: { technique: string } };
         };
         expect(
