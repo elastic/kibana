@@ -695,8 +695,8 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
       });
     });
 
-    // The key a rule gets depends on the request that writes it, not on who owned the previous key.
-    describe('ownership follows the current request', () => {
+    // A declared borrowed key is cloned even when the rule currently runs on a user owned key.
+    describe('declared borrowed key on a user managed rule', () => {
       it('clones a declared borrowed key on bulk edit of a user managed rule instead of persisting it', async () => {
         const ruleId = await createRule(apiKey, 'test_borrowed_over_user_managed');
         objectRemover.add(SuperuserAtSpace1.space.id, ruleId, 'rule', 'alerting');
@@ -747,47 +747,6 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         expect(response.status).to.eql(200);
         expect(response.body.api_key_created_by_user).to.eql(false);
         await expectApiKeyToExist('test.noop', 'test_borrowed_over_user_managed_update');
-      });
-
-      it('takes ownership with an undeclared API key on update of a framework managed rule', async () => {
-        const testRuleData = getTestRuleData({ name: 'test_user_key_over_framework_managed' });
-        const createResponse = await supertest
-          .post(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(testRuleData);
-        expect(createResponse.status).to.eql(200);
-        const ruleId = createResponse.body.id;
-        objectRemover.add(SuperuserAtSpace1.space.id, ruleId, 'rule', 'alerting');
-        expect(createResponse.body.api_key_created_by_user).to.eql(false);
-
-        const response = await superTestWithoutAuth
-          .put(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule/${ruleId}`)
-          .set('kbn-xsrf', 'foo')
-          .set('Authorization', `ApiKey ${apiKey}`)
-          .send({
-            name: 'test_user_key_over_framework_managed_updated',
-            tags: ['bar'],
-            params: { foo: true },
-            schedule: { interval: '12s' },
-            actions: [],
-            throttle: '1m',
-            notify_when: 'onThrottleInterval',
-          });
-
-        expect(response.status).to.eql(200);
-        expect(response.body.api_key_created_by_user).to.eql(true);
-
-        await checkAAD({
-          supertest,
-          spaceId: SuperuserAtSpace1.space.id,
-          type: RULE_SAVED_OBJECT_TYPE,
-          id: ruleId,
-        });
-
-        // The rule runs on the caller's key; no framework key is generated for the new name
-        expect(
-          await apiKeyExists('test.noop', 'test_user_key_over_framework_managed_updated')
-        ).to.eql(false);
       });
     });
   });

@@ -228,6 +228,7 @@ async function prepareApiKeys(
     profileUid,
     shouldUpdateApiKey: attributes.enabled || hasUpdateApiKeyOperation,
     errorMessage: 'Error updating rule: could not create API key',
+    apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
     refresh: false,
   });
 
