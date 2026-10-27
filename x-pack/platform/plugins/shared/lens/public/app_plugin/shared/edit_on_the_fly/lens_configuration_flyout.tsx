@@ -427,7 +427,6 @@ export function LensEditConfigurationFlyout({
     visualizationState: visualization.state,
     framePublicAPI,
   });
-  const showSuggestions = !textBasedMode || !hasMultipleVisibleLayers;
   const selectedLayerType =
     selectedLayerId && visualization.state
       ? activeVisualization?.getLayerType(selectedLayerId, visualization.state)
@@ -435,6 +434,8 @@ export function LensEditConfigurationFlyout({
   const isReferenceLineOrAnnotationLayer =
     selectedLayerType === LENS_LAYER_TYPES.REFERENCELINE ||
     selectedLayerType === LENS_LAYER_TYPES.ANNOTATIONS;
+  const showSuggestions =
+    !isReferenceLineOrAnnotationLayer && (!textBasedMode || !hasMultipleVisibleLayers);
 
   const showConvertToEsqlButton = useMemo(() => {
     return getLensFeatureFlags().enableEsqlConversion && !textBasedMode;

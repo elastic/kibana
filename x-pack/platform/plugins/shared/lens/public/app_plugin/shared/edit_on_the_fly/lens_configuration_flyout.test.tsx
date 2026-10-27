@@ -262,6 +262,7 @@ describe('LensEditConfigurationFlyout', () => {
           );
           expect(screen.queryByText('Visualization parameters')).not.toBeInTheDocument();
           expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
+          expect(screen.queryByTestId('InlineEditingSuggestions')).not.toBeInTheDocument();
         } finally {
           getLayerTypeMock.mockImplementation(originalImplementation!);
         }
@@ -272,6 +273,7 @@ describe('LensEditConfigurationFlyout', () => {
   it('retains the visualization parameters accordion for data layers', async () => {
     await renderConfigFlyout();
     expect(screen.getByText('Visualization parameters')).toBeInTheDocument();
+    expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
   });
 
   it('should display the header and the link to editor if necessary props are given', async () => {
