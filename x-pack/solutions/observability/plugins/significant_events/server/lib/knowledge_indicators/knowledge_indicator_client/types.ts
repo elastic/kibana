@@ -11,6 +11,7 @@ import type { FeatureUpsert, StreamQuery } from '@kbn/significant-events-schema'
 import type { knowledgeIndicatorsMappings } from '../data_stream';
 import type { StoredKnowledgeIndicator } from '../data_stream';
 import type { KnowledgeIndicatorType } from '../fields';
+import type { SearchEmbeddingModelResolver } from './search_embedding_model';
 
 export type RuleUnbackedFilter = 'exclude' | 'include' | 'only';
 
@@ -48,6 +49,8 @@ export interface KnowledgeIndicatorClientDeps {
   logger: Logger;
   /** Kibana space every read is filtered by and every write is stamped with. */
   space: string;
+  /** Test seam for the `search_embedding` model lookup. */
+  searchEmbeddingModelResolver?: SearchEmbeddingModelResolver;
   /**
    * Serializes final source writes with query invalidation. `allowDisabled` marks writes that only
    * remove knowledge, which a disabled source still accepts. `waitForLease: false` fails at once
