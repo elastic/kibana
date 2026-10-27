@@ -30,19 +30,13 @@ spaceTest.describe(
       await teardownLogsExperience(scoutSpace);
     });
 
-    spaceTest('should hide the Alerts menu', async ({ page, pageObjects }) => {
-      const { appMenu, logsExperience } = pageObjects;
+    spaceTest('should hide the Alerts menu', async ({ pageObjects }) => {
+      const { logsExperience } = pageObjects;
 
       await logsExperience.gotoEsqlQuery(LOGS.SYNTH_CONTEXT_ESQL_QUERY);
+      await logsExperience.revealAllAppMenuItems();
 
-      // Reveal a menu item a viewer does have, so the menu is known to have finished rendering, and
-      // open the overflow when there is one: collapsed items are not mounted until it opens.
-      await appMenu.revealItem('discoverNewButton');
-      if (await appMenu.overflowButton.isVisible()) {
-        await appMenu.openOverflow();
-      }
-
-      await expect(page.testSubj.locator('discoverAlertsButton')).toHaveCount(0);
+      await expect(logsExperience.alertsMenuButton).toHaveCount(0);
     });
   }
 );

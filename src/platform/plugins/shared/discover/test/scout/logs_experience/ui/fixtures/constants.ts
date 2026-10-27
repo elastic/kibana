@@ -64,11 +64,8 @@ export const LOGS = {
   NON_LOGS_HOST: 'synth-metrics-host-01',
   NON_LOGS_ESQL_QUERY: 'from synth-metrics* | sort @timestamp desc',
 
-  // A non-logs index whose documents carry the very fields the logs data source profile renders
-  // specially, so the cell-renderer, row-indicator and summary negatives fail only when the profile
-  // wrongly resolves, not merely because the field is absent. Kept apart from `NON_LOGS_INDEX`:
-  // in an Observability space any record with a `log.*` field matches the log document profile, so
-  // these documents do get a Log overview tab and cannot serve as the doc viewer negative case.
+  // Non-logs index carrying the fields the logs profile renders specially. Its `log.*` fields match
+  // the log document profile, so it cannot be the doc viewer negative case.
   NON_LOGS_FIELDS_INDEX: 'synth-nonlogs-fields',
   NON_LOGS_FIELDS_DATA_VIEW: 'synth-nonlogs-fields*',
   NON_LOGS_FIELDS_ESQL_QUERY: 'from synth-nonlogs-fields* | sort @timestamp desc',

@@ -37,7 +37,7 @@ spaceTest.describe(
 
     spaceTest(
       'should render the Log overview tab for a logs source in ES|QL mode',
-      async ({ page, pageObjects }) => {
+      async ({ pageObjects }) => {
         const { docViewer, logsExperience } = pageObjects;
 
         await logsExperience.gotoEsqlQuery(LOGS.SYNTH_CONTEXT_ESQL_QUERY);
@@ -47,7 +47,7 @@ spaceTest.describe(
         await expect(docViewer.getTab(LOGS.LOGS_OVERVIEW_TAB)).toBeVisible();
 
         await docViewer.openTab(LOGS.LOGS_OVERVIEW_TAB);
-        await expect(page.testSubj.locator(LOGS.LOGS_OVERVIEW_HEADER)).toBeVisible();
+        await expect(logsExperience.logsOverviewHeader).toBeVisible();
       }
     );
 
@@ -67,7 +67,7 @@ spaceTest.describe(
 
     spaceTest(
       'should render the Log overview tab for a logs data view',
-      async ({ page, pageObjects }) => {
+      async ({ pageObjects }) => {
         const { docViewer, logsExperience } = pageObjects;
 
         await logsExperience.gotoDataView(LOGS.SYNTH_CONTEXT_DATA_VIEW);
@@ -77,7 +77,7 @@ spaceTest.describe(
         await expect(docViewer.getTab(LOGS.LOGS_OVERVIEW_TAB)).toBeVisible();
 
         await docViewer.openTab(LOGS.LOGS_OVERVIEW_TAB);
-        await expect(page.testSubj.locator(LOGS.LOGS_OVERVIEW_HEADER)).toBeVisible();
+        await expect(logsExperience.logsOverviewHeader).toBeVisible();
       }
     );
 

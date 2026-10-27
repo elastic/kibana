@@ -67,7 +67,7 @@ spaceTest.describe(
         await expect(docViewer.getTab(LOGS.LOGS_OVERVIEW_TAB)).toBeVisible();
 
         await docViewer.openTab(LOGS.LOGS_OVERVIEW_TAB);
-        await expect(page.testSubj.locator(LOGS.LOGS_OVERVIEW_HEADER)).toBeVisible();
+        await expect(logsExperience.logsOverviewHeader).toBeVisible();
       }
     );
 
@@ -101,13 +101,13 @@ spaceTest.describe(
         await expect(page).toHaveURL(/#\/doc/);
 
         await page.reload();
-        await page.testSubj.locator('doc-hit').waitFor({ state: 'visible' });
+        await logsExperience.waitForSingleDocument();
 
         await expect(docViewer.getTab(LOGS.TABLE_TAB)).toBeVisible();
         await expect(docViewer.getTab(LOGS.LOGS_OVERVIEW_TAB)).toBeVisible();
 
         await docViewer.openTab(LOGS.LOGS_OVERVIEW_TAB);
-        await expect(page.testSubj.locator(LOGS.LOGS_OVERVIEW_HEADER)).toBeVisible();
+        await expect(logsExperience.logsOverviewHeader).toBeVisible();
       }
     );
 
@@ -121,7 +121,7 @@ spaceTest.describe(
         await expect(page).toHaveURL(/#\/doc/);
 
         await page.reload();
-        await page.testSubj.locator('doc-hit').waitFor({ state: 'visible' });
+        await logsExperience.waitForSingleDocument();
 
         await expect(docViewer.getTab(LOGS.TABLE_TAB)).toBeVisible();
         await expect(docViewer.getTab(LOGS.LOGS_OVERVIEW_TAB)).toBeHidden();

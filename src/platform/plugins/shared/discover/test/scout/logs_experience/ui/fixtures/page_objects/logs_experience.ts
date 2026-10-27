@@ -32,7 +32,18 @@ const LOG_LEVEL_BADGE_PREFIX = 'logLevelBadgeCell-';
 const SERVICE_NAME_CELL = 'dataTableCellActionsPopover_service.name';
 const SUMMARY_MESSAGE_VALUE = 'discoverDataTableMessageValue';
 
+const ALERTS_MENU_BUTTON = 'discoverAlertsButton';
+
 export class LogsExperiencePage {
+  /** Header of the Log overview tab's content, rendered once that tab is selected. */
+  public readonly logsOverviewHeader: Locator;
+
+  /** `singlePage` footer reporting the sample size, and its link to fetch the next sample. */
+  public readonly sampleSizeFooter: Locator;
+  public readonly loadMoreLink: Locator;
+
+  public readonly alertsMenuButton: Locator;
+
   /** Log overview accordion containers. Absent from the DOM while another tab is selected. */
   public readonly qualityIssuesSection: Locator;
   public readonly stacktraceSection: Locator;
@@ -59,8 +70,13 @@ export class LogsExperiencePage {
   constructor(
     private readonly page: ScoutPage,
     private readonly dataGrid: PageObjects['dataGrid'],
-    private readonly discover: PageObjects['discover']
+    private readonly discover: PageObjects['discover'],
+    private readonly appMenu: PageObjects['appMenu']
   ) {
+    this.logsOverviewHeader = page.testSubj.locator(LOGS.LOGS_OVERVIEW_HEADER);
+    this.sampleSizeFooter = page.testSubj.locator('unifiedDataTableFooter');
+    this.loadMoreLink = page.testSubj.locator('dscGridSampleSizeFetchMoreLink');
+    this.alertsMenuButton = page.testSubj.locator(ALERTS_MENU_BUTTON);
     this.qualityIssuesSection = page.testSubj.locator(QUALITY_ISSUES_ACCORDION);
     this.stacktraceSection = page.testSubj.locator(STACKTRACE_ACCORDION);
     this.qualityIssuesAccordion = this.qualityIssuesSection.getByRole('button', {
@@ -137,28 +153,51 @@ export class LogsExperiencePage {
   }
 
   /**
-   * Scrolls the virtualized grid to its last row. The logs profile paginates in `singlePage` mode,
-   * where the footer only renders once the bottom has been reached. Auto-height rows are measured
-   * as they render, which grows the scroll height, so a single scroll can land short of the end.
-   * The scroll container exposes no test subject, so its EUI class is the only handle.
+   * Scrolls the virtualized grid to its last row with the grid's Ctrl+End shortcut. The logs profile
+   * paginates in `singlePage` mode, where the footer only renders once the bottom has been reached.
+   * Auto-height rows grow the scroll height as they render, so the shortcut is repeated until the
+   * last row stays in view.
    */
   public async scrollGridToBottom() {
-    const scrollContainer = this.page.testSubj
-      .locator('discoverDocTable')
-      .locator('.euiDataGrid__virtualized');
+    const grid = this.page.testSubj.locator('discoverDocTable').getByRole('grid');
 
     await expect(async () => {
-      await scrollContainer.evaluate((element) => element.scrollTo(0, element.scrollHeight));
-      const isAtBottom = await scrollContainer.evaluate(
-        (element) =>
-          new Promise<boolean>((resolve) =>
-            requestAnimationFrame(() =>
-              resolve(element.scrollTop + element.clientHeight >= element.scrollHeight - 1)
-            )
-          )
-      );
-      expect(isAtBottom).toBe(true);
+      const rowCount = Number(await grid.getAttribute('aria-rowcount'));
+      // The shortcut is only handled while a cell has focus; the sticky header is always mounted.
+      await this.colorIndicatorHeader.focus();
+      await this.page.keyboard.press('Control+End');
+      await expect(this.dataGrid.getCell(rowCount - 1, COLOR_INDICATOR_COLUMN_ID)).toBeInViewport();
     }).toPass();
+  }
+
+  /** Fetches the next sample from the `singlePage` footer, which must already be in view. */
+  public async loadMore() {
+    await this.loadMoreLink.click();
+    // The grid grows past the viewport, hiding the footer until the new bottom is reached.
+    await expect(this.sampleSizeFooter).toBeHidden();
+  }
+
+  /** Waits for the Single document page to render its document. */
+  public async waitForSingleDocument() {
+    await this.page.testSubj.locator('doc-hit').waitFor({ state: 'visible' });
+  }
+
+  /** Opens the Alerts app menu and clicks one of its items. */
+  public async clickAlertsMenuItem(itemTestSubj: string) {
+    await this.discover.clickAppMenuItem(ALERTS_MENU_BUTTON);
+    await this.page.testSubj.locator(itemTestSubj).click();
+  }
+
+  /**
+   * Mounts every app menu item. Items collapse into the overflow popover on narrow viewports and are
+   * not rendered until it opens, so an absence check is only meaningful once it has been opened.
+   */
+  public async revealAllAppMenuItems() {
+    // A menu item every role has, so the menu is known to have finished rendering.
+    await this.appMenu.revealItem('discoverNewButton');
+    if (await this.appMenu.overflowButton.isVisible()) {
+      await this.appMenu.openOverflow();
+    }
   }
 
   /**

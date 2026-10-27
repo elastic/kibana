@@ -49,8 +49,7 @@ spaceTest.describe(
     spaceTest(
       'should open the custom threshold rule form from the Alerts menu',
       async ({ page, pageObjects }) => {
-        await pageObjects.discover.clickAppMenuItem('discoverAlertsButton');
-        await page.testSubj.locator('discoverAppMenuCustomThresholdRule').click();
+        await pageObjects.logsExperience.clickAlertsMenuItem('discoverAppMenuCustomThresholdRule');
 
         await expect(page.testSubj.locator('ruleDefinitionHeaderRuleTypeName')).toHaveText(
           'Custom threshold'
@@ -61,8 +60,7 @@ spaceTest.describe(
     spaceTest(
       'should open the Create SLO flyout from the Alerts menu',
       async ({ page, pageObjects }) => {
-        await pageObjects.discover.clickAppMenuItem('discoverAlertsButton');
-        await page.testSubj.locator('discoverAppMenuCreateSlo').click();
+        await pageObjects.logsExperience.clickAlertsMenuItem('discoverAppMenuCreateSlo');
 
         await expect(page.testSubj.locator('addSLOFlyoutTitle')).toHaveText('Create SLO');
       }
