@@ -62,6 +62,17 @@ describe('renderSteps', () => {
     expect(parse(renderSteps([], { header: true }))).toEqual({ steps: [] });
   });
 
+  it('renders the top-level env in the document header', () => {
+    expect(parse(renderSteps([step('a')], { header: true, env: { FOO: 'bar' } }))).toEqual({
+      env: { FOO: 'bar' },
+      steps: [step('a')],
+    });
+  });
+
+  it('rejects env without the header', () => {
+    expect(() => renderSteps([step('a')], { env: { FOO: 'bar' } })).toThrow('requires `header');
+  });
+
   it('keeps integer and wildcard exit statuses, colons in labels and multi-line commands', () => {
     const s = step('k', {
       command: 'echo one\necho two\n',

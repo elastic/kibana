@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 
-export const DependencyRT = t.type({
-  ruleId: t.string,
-  actionGroupsToSuppressOn: t.array(t.string),
+export const dependencySchema = z.object({
+  ruleId: z.string(),
+  actionGroupsToSuppressOn: z.array(z.string()),
 });
 
-export type Dependency = t.OutputOf<typeof DependencyRT>;
+export type Dependency = z.input<typeof dependencySchema>;

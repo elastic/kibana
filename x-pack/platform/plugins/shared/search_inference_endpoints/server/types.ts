@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ApiInferenceConnector, InferenceConnector } from '@kbn/inference-common';
 
@@ -109,6 +109,7 @@ export interface SearchInferenceEndpointsPluginStartDependencies {
 
 export interface SearchInferenceEndpointsPluginSetupDependencies {
   features: FeaturesPluginSetup;
+  inference: InferenceServerSetup;
 }
 
 export * from '../common/types';

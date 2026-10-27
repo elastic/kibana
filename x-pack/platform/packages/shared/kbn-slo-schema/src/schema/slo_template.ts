@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
+
+import { indicatorSchema } from './indicators';
 import {
   budgetingMethodSchema,
   dashboardsWithIdSchema,
@@ -14,27 +16,22 @@ import {
   tagsSchema,
 } from './slo';
 import { timeWindowSchema } from './time_window';
-import { indicatorSchema } from './indicators';
 
-const sloTemplateSchema = t.intersection([
-  t.type({
-    templateId: t.string,
-  }),
-  t.partial({
-    name: t.string,
-    description: t.string,
-    indicator: indicatorSchema,
-    budgetingMethod: budgetingMethodSchema,
-    objective: objectiveSchema,
-    timeWindow: timeWindowSchema,
-    tags: tagsSchema,
-    settings: optionalSettingsSchema,
-    groupBy: t.array(t.string),
-    artifacts: dashboardsWithIdSchema,
-  }),
-]);
+const sloTemplateSchema = z.object({
+  templateId: z.string(),
+  name: z.string().optional(),
+  description: z.string().optional(),
+  indicator: indicatorSchema.optional(),
+  budgetingMethod: budgetingMethodSchema.optional(),
+  objective: objectiveSchema.optional(),
+  timeWindow: timeWindowSchema.optional(),
+  tags: tagsSchema.optional(),
+  settings: optionalSettingsSchema.optional(),
+  groupBy: z.array(z.string()).optional(),
+  artifacts: dashboardsWithIdSchema.optional(),
+});
 
-// We really can't control what the integration are pushing into the saved object...
-const storedSloTemplateSchema = t.record(t.string, t.unknown);
+// Permissive catch-all — integrations may push arbitrary data into the stored object
+const storedSloTemplateSchema = z.record(z.string(), z.unknown());
 
 export { sloTemplateSchema, storedSloTemplateSchema };
