@@ -519,6 +519,27 @@ describe('Detection Coverage review', () => {
       }
     );
 
+    // Without an action there is no action name to fall back on, so a proposal without
+    // its own title shows in the queue as the gate's generic "Proposed action".
+    it.each([
+      ['propose_entry', 'Review detection gap'],
+      ['propose_confirm', 'Confirm rule coverage'],
+      ...REPORT_STEPS.map((name) => [name, 'Coverage check needs follow-up']),
+    ])('%s is titled "%s"', (name, title) => {
+      expect(inputsOf(stepByName(name)).title).toBe(title);
+    });
+
+    it('gives every proposal without an action a literal title', () => {
+      const untitled = GATE_STEPS.filter((name) => {
+        const { actionWorkflowId, title } = inputsOf(stepByName(name));
+        return (
+          actionWorkflowId === undefined &&
+          (typeof title !== 'string' || title.trim() === '' || title.includes('{{'))
+        );
+      });
+      expect(untitled).toEqual([]);
+    });
+
     it.each(REPORT_STEPS)('%s renders the shared report body', (name) => {
       expect(String(inputsOf(stepByName(name)).comment)).toContain(
         '{{ steps.compose_report.output.body }}'
