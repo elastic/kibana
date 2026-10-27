@@ -825,7 +825,7 @@ describe('bulkScheduleWorkflow', () => {
         workflowId: workflow.id,
         executedBy: authenticatedUser,
       }),
-      { refresh: 'wait_for' }
+      { refresh: false }
     );
     expect(taskManager.schedule).toHaveBeenCalledTimes(1);
     expect(getAuthenticatedUser).not.toHaveBeenCalled();
