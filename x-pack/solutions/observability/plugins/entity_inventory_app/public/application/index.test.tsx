@@ -12,19 +12,8 @@ import { createMemoryHistory } from 'history';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
-import type { CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { EntityInventoryShell } from '.';
-
-const share = {
-  url: { locators: { get: () => ({ getRedirectUrl: () => '/app/observabilityOnboarding/' }) } },
-} as unknown as SharePluginStart;
-
-const application = {
-  getUrlForApp: () => '/app/integrations/browse',
-} as unknown as CoreStart['application'];
 
 const PageTemplate = (({ children }: { children: React.ReactNode }) => (
   <div>{children}</div>
@@ -37,11 +26,9 @@ const renderShell = (path: string) => {
     <I18nProvider>
       <EuiProvider>
         <MockAppHeaderProvider>
-          <KibanaContextProvider services={{ share, application }}>
-            <Router history={history}>
-              <EntityInventoryShell PageTemplate={PageTemplate} />
-            </Router>
-          </KibanaContextProvider>
+          <Router history={history}>
+            <EntityInventoryShell PageTemplate={PageTemplate} />
+          </Router>
         </MockAppHeaderProvider>
       </EuiProvider>
     </I18nProvider>
@@ -49,23 +36,22 @@ const renderShell = (path: string) => {
 };
 
 describe('EntityInventoryShell', () => {
-  it.each([
-    ['/all-resources', 'all'],
-    ['/hosts', 'hosts'],
-    ['/kubernetes', 'kubernetes'],
-  ])('shows the no data state of the page %s', (path, entityCategory) => {
-    renderShell(path);
+  it.each(['/all-resources', '/hosts', '/kubernetes'])(
+    'renders the content of the page %s',
+    (path) => {
+      renderShell(path);
 
-    expect(screen.getByTestId('entityInventoryNoData')).toBeInTheDocument();
-    expect(screen.getByTestId('entityInventoryNoDataAddDataButton')).toHaveAttribute(
-      'data-ebt-detail',
-      entityCategory
-    );
-  });
+      expect(
+        screen.getByRole('heading', { name: 'Entity Inventory content here.' })
+      ).toBeInTheDocument();
+    }
+  );
 
-  it('redirects the root path to all resources and shows the no data state', () => {
+  it('redirects the root path to all resources', () => {
     renderShell('/');
 
-    expect(screen.getByTestId('entityInventoryNoData')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Entity Inventory content here.' })
+    ).toBeInTheDocument();
   });
 });
