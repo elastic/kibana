@@ -9,6 +9,7 @@ import type { KibanaUrl, PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 import { ActionPoliciesListPage } from './action_policies_list_page';
 import { ActionPolicyFormPage } from './action_policy_form_page';
+import { AgentChatPage } from './agent_chat_page';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
 import { AlertingNavigation } from './alerting_navigation';
 import { OBSERVABILITY_MOUNT_CONFIG } from './alerting_mount_config';
@@ -25,6 +26,7 @@ import { ThresholdBuilderPage } from './threshold_builder_page';
 
 export { ActionPoliciesListPage } from './action_policies_list_page';
 export { ActionPolicyFormPage } from './action_policy_form_page';
+export { AgentChatPage } from './agent_chat_page';
 export { AlertEpisodesListPage } from './alert_episodes_list_page';
 export { AlertingNavigation } from './alerting_navigation';
 export { ComposeDiscoverPage } from './compose_discover_page';
@@ -43,6 +45,7 @@ export type { AlertingMountConfig } from './alerting_mount_config';
 export type AlertingPageObjects = PageObjects & {
   actionPoliciesList: ActionPoliciesListPage;
   actionPolicyForm: ActionPolicyFormPage;
+  agentChat: AgentChatPage;
   alertEpisodesList: AlertEpisodesListPage;
   alertingNavigation: AlertingNavigation;
   composeDiscover: ComposeDiscoverPage;
@@ -69,6 +72,7 @@ export const extendPageObjects = (
     ...pageObjects,
     actionPoliciesList: createLazyPageObject(ActionPoliciesListPage, page, mountConfig),
     actionPolicyForm: createLazyPageObject(ActionPolicyFormPage, page, mountConfig),
+    agentChat: createLazyPageObject(AgentChatPage, page),
     alertEpisodesList: createLazyPageObject(AlertEpisodesListPage, page, mountConfig),
     alertingNavigation: createLazyPageObject(AlertingNavigation, page, mountConfig),
     composeDiscover: createLazyPageObject(ComposeDiscoverPage, page),

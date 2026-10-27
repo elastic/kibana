@@ -4106,7 +4106,8 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: translate('searchConnectors.nativeConnectors.outlook.domain.tooltip', {
-          defaultMessage: 'Domain name such as gmail.com, outlook.com',
+          defaultMessage:
+            'Active Directory domain name, used to look up users. E.g. corp.example.com',
         }),
         type: STRING,
         ui_restrictions: [],

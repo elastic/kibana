@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/stack-management-usage-test-plugin",
-  "owner": "@elastic/kibana-management",
+  "owner": "@elastic/kibana-core",
   "group": "platform",
   "visibility": "private",
   "plugin": {

@@ -14,8 +14,11 @@ import type { VisualizeApi } from './types';
 import { visualizeEmbeddableFactory } from './visualize_embeddable';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
 import { BehaviorSubject } from 'rxjs';
+import type { CoreTheme } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 import type { SerializedVis } from '../vis';
+import { setTheme } from '../services';
 
 jest.mock('./get_expression_renderer_props', () => ({
   getExpressionRendererProps: jest.fn(async () => ({
@@ -58,6 +61,8 @@ jest.mock('./create_vis_instance', () => {
     }),
   };
 });
+
+setTheme(coreMock.createStart().theme);
 
 describe('visualizeEmbeddable', () => {
   let embeddableApi: VisualizeApi;
@@ -245,6 +250,52 @@ describe('visualizeEmbeddable', () => {
           expect.objectContaining({ esqlVariables })
         );
       });
+    });
+  });
+
+  describe('theme changes', () => {
+    const lightTheme: CoreTheme = { darkMode: false, name: 'borealis' };
+
+    afterEach(() => {
+      setTheme(coreMock.createStart().theme);
+    });
+
+    test('rebuilds the expression when dark mode changes, but not for an unchanged dark mode', async () => {
+      const theme$ = new BehaviorSubject<CoreTheme>(lightTheme);
+      const coreTheme = coreMock.createStart().theme;
+      setTheme({ ...coreTheme, theme$: theme$.asObservable(), getTheme: () => theme$.getValue() });
+      const uuid = 'theme-vis-panel';
+      const parentApi = {};
+
+      await visualizeEmbeddableFactory.buildEmbeddable({
+        initializeDrilldownsManager,
+        initialState: {
+          savedVis: {
+            title: 'theme test',
+            type: 'metric',
+            data: { aggs: [], searchSource: {} },
+            params: {},
+          },
+        },
+        finalizeApi: (api: any) => ({
+          ...api,
+          uuid,
+          parentApi,
+          type: VISUALIZE_EMBEDDABLE_TYPE,
+          phase$: new BehaviorSubject(undefined),
+        }),
+        uuid,
+        parentApi,
+      });
+      await waitFor(() => expect(mockGetExpressionRendererProps).toHaveBeenCalled());
+      const initialCalls = mockGetExpressionRendererProps.mock.calls.length;
+
+      theme$.next({ ...lightTheme });
+      theme$.next({ ...lightTheme, darkMode: true });
+
+      await waitFor(() =>
+        expect(mockGetExpressionRendererProps).toHaveBeenCalledTimes(initialCalls + 1)
+      );
     });
   });
 });
