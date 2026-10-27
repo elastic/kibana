@@ -10,6 +10,10 @@ description: >
   decision. A resumer who lacks the privilege to decide, and an action that
   fails and is re-offered, both need the proposal parked again rather than
   settled.
+
+  Each answer is applied by `system-resolve-proposal`, which runs as whoever
+  decided. This run may execute as the caller's service account, and a step
+  here would authorize and attribute that account instead of the decider.
 enabled: true
 tags:
   - proposals
@@ -176,9 +180,6 @@ steps:
       # reaches keeps every deadline check a single comparison.
       expires_epoch: "${{ steps.create_proposal.output.expiresAt | default: '2999-01-01' | date: '%s' | plus: 0 }}"
       action_workflow_id: '{{ inputs.actionWorkflowId }}'
-      # The trigger's input until the gate answers; the adopt steps below
-      # replace it with the live revision's own value.
-      action_input: '${{ inputs.actionInput }}'
       decided_by: ''
       # Any one of these holds the decision for a human: the caller's autonomy
       # did not permit running unattended; there is no action to run, since
@@ -290,48 +291,14 @@ steps:
               # Nobody was asked, so there is nobody to authorize.
               gate_answered: false
 
-      # Keyed on `gate_answered` rather than `needs_gate`, which skips both the
-      # autonomy path and a timed-out gate. Neither has a decider: the only
-      # principal is the Worker or the workflow runner, and the check could
-      # only ever pass. Each write below asserts its own privilege regardless;
-      # what is skipped here is the *decide* check.
-      - name: authorize_decision
-        type: if
-        condition: '${{ variables.gate_answered == true }}'
-        steps:
-          # Ordering is load-bearing: after the gate, before any write. A write
-          # that came first and threw would leave the gate claimed and spent,
-          # stranding the proposal with no way for a privileged approver to
-          # retry.
-          - name: check_privileges
-            type: proposals.checkDecidePrivileges
-            with:
-              proposalId: '{{ variables.current_proposal_id }}'
-              # An external resume carries no request, so the execution wakes
-              # under the workflow runner's key, which always holds the
-              # privilege. `respondedBy` is the only thing that distinguishes
-              # that from a human.
-              respondedBy: '{{ variables.decided_by }}'
-
-          - name: reject_unprivileged
-            type: if
-            condition: '${{ steps.check_privileges.output.canDecide != true }}'
-            steps:
-              # Nothing has been written, so re-parking leaves the proposal
-              # exactly as a privileged approver will find it.
-              - name: park_for_privileged
-                type: loop.continue
-
-      # Timeout before the YAML adopt. `getLatestRevision` asserts read under
-      # the resumer's API key; after a denied resume that key may lack it, and
-      # failing here would strand the parent on a `failed` execution even though
-      # the workflow-level fallback can still expire the record.
-      # `settleIncompleteProposal` adopts the live head itself and skips both
-      # manage and read checks.
+      # Settled here rather than by the resolution below, which needs a
+      # decider: nobody answered. `settleIncompleteProposal` adopts the live
+      # head itself and skips both manage and read checks, so it settles
+      # whatever identity woke the run.
       #
-      # Must precede `handle_dismissal`: a timed-out gate answers blank,
-      # leaving `gate_approved` false, which that branch would otherwise record
-      # as a dismissal nobody made.
+      # Must precede the resolution: a timed-out gate answers blank, leaving
+      # `gate_approved` false, which it would otherwise record as a dismissal
+      # nobody made.
       - name: handle_gate_timeout
         type: if
         condition: '${{ variables.gate_timed_out == true }}'
@@ -352,207 +319,187 @@ steps:
           - name: break_gate_expiry
             type: loop.break
 
-      # The answered path's only adopt, and the reason every branch below reads
-      # as a plain sequence: a revision appended while the gate was parked moves
-      # the chain head, and `updateProposal` refuses a superseded row.
+      # Keyed on whether someone answered, since only then is there a decider to
+      # run as; a timed-out gate never gets here, so the else is the autonomy
+      # path alone.
       #
-      # Placement carries the invariant. After `authorize_decision`, so an
-      # unprivileged resumer re-parks before this reads the chain; after the
-      # timeout branch, so a denied resumer's key never hits `assertCanRead` on
-      # expiry; before every answered-path write, so they all settle the live head.
-      - name: get_last_revision
-        type: proposals.getLatestRevision
-        with:
-          proposalId: '{{ variables.current_proposal_id }}'
-
-      - name: adopt_last_revision
-        type: data.set
-        with:
-          current_proposal_id: '{{ steps.get_last_revision.output.proposalId }}'
-          # The revision's own input, not the trigger's: an analyst who
-          # approved a corrected revision approved those parameters.
-          action_input: '${{ steps.get_last_revision.output.actionInput }}'
-
-      - name: handle_dismissal
+      # `run-as-mode` has to be literal — the engine reads the identity choice
+      # from the saved definition, never from a rendered value — so each
+      # identity has its own step. Each adopts its result in its own branch,
+      # because a step that did not run this pass still returns its previous
+      # value.
+      - name: resolve_by_approval_mode
         type: if
-        condition: '${{ variables.gate_approved != true }}'
+        condition: '${{ variables.gate_answered == true }}'
         steps:
-          - name: record_dismissal
-            type: proposals.updateProposal
+          # Default mode, so the child runs as whoever answered the gate.
+          - name: resolve_as_approver
+            type: workflow.execute
+            on-failure:
+              # A failure is recovered below rather than settling the proposal:
+              # an answer that never landed is still waiting for a human.
+              continue: true
             with:
-              proposalId: '{{ variables.current_proposal_id }}'
-              decision: dismissed
-              decidedBy: '{{ variables.decided_by }}'
-              # The dismiss reason and rationale are written by the route
-              # before it releases the gate, because `waitForApproval` reduces
-              # its resume payload to a bare boolean.
-              status: no_action
-          - name: complete_dismissed
+              workflow-id: system-resolve-proposal
+              inputs:
+                proposalId: '{{ variables.current_proposal_id }}'
+                actionWorkflowId: '{{ variables.action_workflow_id }}'
+                approved: '${{ variables.gate_approved }}'
+                decidedBy: '{{ variables.decided_by }}'
+                autoApproved: false
+
+          - name: adopt_approver_resolution
             type: data.set
             with:
-              completed: true
-              final_status: no_action
-              final_decision: dismissed
-          - name: break_dismissed
-            type: loop.break
-
-      # Decision and status are written together, one call per branch:
-      # `approved` + `pending` is not a legal pair, so a decision-only write
-      # would leave the record claiming an approval with no outcome. Both are
-      # known here.
-      #
-      # Each branch carries the full condition rather than nesting under a
-      # shared one, so no condition mixes `and` with `or`.
-      - name: approve_without_action
-        type: if
-        # No action means the analyst carries it out themselves, so the
-        # approval is the whole lifecycle.
-        condition: '${{ variables.gate_approved == true and variables.action_workflow_id == blank }}'
-        steps:
-          - name: record_approval_no_action
-            type: proposals.updateProposal
+              # Blank when the child failed, which `failed` stands for below.
+              resolution: "{{ steps.resolve_as_approver.output.resolution | default: 'failed' }}"
+              resolved_proposal_id: '{{ steps.resolve_as_approver.output.proposalId }}'
+              resolved_status: '{{ steps.resolve_as_approver.output.status }}'
+              resolved_decision: '{{ steps.resolve_as_approver.output.decision }}'
+              resolution_error: '{{ steps.resolve_as_approver.error.message }}'
+        else:
+          # Inherits the caller's service account, which the child passes on to
+          # the action.
+          - name: resolve_as_worker
+            type: workflow.execute
+            on-failure:
+              # Same reason as `resolve_as_approver`.
+              continue: true
             with:
-              proposalId: '{{ variables.current_proposal_id }}'
-              decision: approved
-              decidedBy: '{{ variables.decided_by }}'
-              status: no_action
-          - name: complete_no_action
+              workflow-id: system-resolve-proposal
+              run-as-mode: inherit
+              inputs:
+                proposalId: '{{ variables.current_proposal_id }}'
+                actionWorkflowId: '{{ variables.action_workflow_id }}'
+                approved: true
+                decidedBy: ''
+                autoApproved: true
+
+          - name: adopt_worker_resolution
             type: data.set
             with:
-              completed: true
-              final_status: no_action
-              final_decision: approved
-          - name: break_no_action
-            type: loop.break
+              # Same as `adopt_approver_resolution`.
+              resolution: "{{ steps.resolve_as_worker.output.resolution | default: 'failed' }}"
+              resolved_proposal_id: '{{ steps.resolve_as_worker.output.proposalId }}'
+              resolved_status: '{{ steps.resolve_as_worker.output.status }}'
+              resolved_decision: '{{ steps.resolve_as_worker.output.decision }}'
+              resolution_error: '{{ steps.resolve_as_worker.error.message }}'
 
-      - name: approve_with_action
+      # A failed child reports nothing, so how far it got is read off the live
+      # revision, as this run's own identity. Nothing decided means the answer
+      # never landed, and the proposal waits for a human whoever answered. An
+      # approval caught mid-action is recorded as failed and re-offered like
+      # any failed action. Anything else had already settled, and only the
+      # report was lost.
+      - name: handle_resolution_failure
         type: if
-        condition: '${{ variables.gate_approved == true and variables.action_workflow_id != blank }}'
+        condition: "${{ variables.resolution == 'failed' }}"
         steps:
-          - name: record_approval_executing
-            type: proposals.updateProposal
+          - name: get_unresolved_revision
+            type: proposals.getLatestRevision
             with:
               proposalId: '{{ variables.current_proposal_id }}'
-              decision: approved
-              decidedBy: '{{ variables.decided_by }}'
-              status: executing
 
-          # Split by approval mode so each path runs under the right identity.
-          # Each outcome is recorded by a `data.set` in the same branch: a step
-          # that did not run this pass still returns its previous value, so
-          # after a failed auto-approved attempt the other branch's stale error
-          # would otherwise fail the human-approved retry.
-          - name: execute_by_approval_mode
+          - name: adopt_unresolved_revision
+            type: data.set
+            with:
+              resolution: settled
+              resolved_proposal_id: '{{ steps.get_unresolved_revision.output.proposalId }}'
+              resolved_status: '{{ steps.get_unresolved_revision.output.status }}'
+              resolved_decision: '{{ steps.get_unresolved_revision.output.decision }}'
+
+          - name: handle_unanswered_revision
             type: if
-            condition: '${{ variables.needs_gate == true }}'
+            condition: '${{ steps.get_unresolved_revision.output.decision == blank }}'
             steps:
-              # Human-approved: default mode, so it runs as the approver (the
-              # original caller after resume).
-              - name: execute_as_approver
-                type: workflow.execute
-                on-failure:
-                  # Keeps the failure inside the loop so the clone branch below
-                  # can re-offer it; without this the workflow-level handler
-                  # settles the proposal and stops.
-                  #
-                  # `WorkflowExecuteStepSchema` does not model this key — same
-                  # lightweight-validation caveat and schema gap as the gate's
-                  # handler above (elastic/security-team#19315).
-                  continue: true
-                with:
-                  workflow-id: '{{ variables.action_workflow_id }}'
-                  inputs:
-                    # Every action workflow takes one `actionInput` object, so
-                    # this workflow never needs to know an action's parameter
-                    # names.
-                    #
-                    # From variables, not `inputs`: a revision may have
-                    # corrected the input while the gate was parked, and the
-                    # trigger value would execute parameters the analyst never
-                    # approved.
-                    actionInput: '${{ variables.action_input }}'
-
-              - name: adopt_approver_result
+              - name: adopt_unanswered_revision
                 type: data.set
                 with:
-                  action_failed: '${{ steps.execute_as_approver.error != blank }}'
-                  action_error_message: '{{ steps.execute_as_approver.error.message }}'
-            else:
-              # Auto-approved: run as the caller's service account.
-              - name: execute_as_worker
-                type: workflow.execute
-                on-failure:
-                  # Same reason as `execute_as_approver`.
-                  continue: true
-                with:
-                  workflow-id: '{{ variables.action_workflow_id }}'
-                  run-as-mode: inherit
-                  # Only action workflows may inherit the service account. The
-                  # gate already holds back `always-gate` actions, so this only
-                  # stops a target that is not an action at all: it fails this
-                  # step without starting, the failure is recorded, and the
-                  # clone below parks for a human.
-                  allowed-workflow-tags:
-                    - action
-                  inputs:
-                    # Same as `execute_as_approver`.
-                    actionInput: '${{ variables.action_input }}'
+                  resolution: unresolved
 
-              - name: adopt_worker_result
-                type: data.set
-                with:
-                  action_failed: '${{ steps.execute_as_worker.error != blank }}'
-                  action_error_message: '{{ steps.execute_as_worker.error.message }}'
-
-          - name: handle_action_success
+          - name: handle_interrupted_action
             type: if
-            condition: '${{ variables.action_failed != true }}'
+            condition: "${{ steps.get_unresolved_revision.output.status == 'executing' }}"
             steps:
-              - name: record_success
+              - name: record_interrupted_action
                 type: proposals.updateProposal
                 with:
-                  proposalId: '{{ variables.current_proposal_id }}'
-                  status: succeeded
-              - name: complete_succeeded
-                type: data.set
-                with:
-                  completed: true
-                  final_status: succeeded
-                  final_decision: approved
-              - name: break_succeeded
-                type: loop.break
-
-          - name: handle_action_failure
-            type: if
-            condition: '${{ variables.action_failed == true }}'
-            steps:
-              - name: record_action_failure
-                type: proposals.updateProposal
-                with:
-                  proposalId: '{{ variables.current_proposal_id }}'
+                  proposalId: '{{ variables.resolved_proposal_id }}'
                   status: failed
-                  executionError: '{{ variables.action_error_message }}'
-
-              # The failed proposal has settled, so the retry is a new record
-              # against the same still-parked gate execution. It inherits the
-              # deadline and creation time, so a chain of failures cannot
-              # outlive the deadline the queue showed.
-              - name: clone_proposal
-                type: proposals.cloneProposal
-                with:
-                  proposalId: '{{ variables.current_proposal_id }}'
-
-              # Assigned inside the branch that produced the id, because a step
-              # that did not run this pass still returns its previous value.
-              - name: adopt_clone
+                  executionError: '{{ variables.resolution_error }}'
+              - name: adopt_interrupted_action
                 type: data.set
                 with:
-                  current_proposal_id: '{{ steps.clone_proposal.output.proposalId }}'
-                  # A human should see that the action failed, even if the
-                  # first attempt ran under autonomy.
-                  needs_gate: true
-              - name: park_on_clone
-                type: loop.continue
+                  resolution: action_failed
+
+          # The child recorded the failure but did not get to report it.
+          - name: handle_unreported_failure
+            type: if
+            condition: "${{ steps.get_unresolved_revision.output.status == 'failed' }}"
+            steps:
+              - name: adopt_unreported_failure
+                type: data.set
+                with:
+                  resolution: action_failed
+
+      - name: handle_settled
+        type: if
+        condition: "${{ variables.resolution == 'settled' }}"
+        steps:
+          - name: complete_settled
+            type: data.set
+            with:
+              completed: true
+              current_proposal_id: '{{ variables.resolved_proposal_id }}'
+              final_status: '{{ variables.resolved_status }}'
+              final_decision: '{{ variables.resolved_decision }}'
+          - name: break_settled
+            type: loop.break
+
+      - name: handle_action_failure
+        type: if
+        condition: "${{ variables.resolution == 'action_failed' }}"
+        steps:
+          # The failed proposal has settled, so the retry is a new record
+          # against this same still-parked gate execution: the clone copies the
+          # original's `workflowExecutionId`, which is this run's, never the
+          # child's. It inherits the deadline and creation time, so a chain of
+          # failures cannot outlive the deadline the queue showed.
+          #
+          # Cloned here rather than in the child: until this run parks again,
+          # approving the clone is refused as not waiting for input, and that
+          # window should stay one step long.
+          - name: clone_proposal
+            type: proposals.cloneProposal
+            with:
+              proposalId: '{{ variables.resolved_proposal_id }}'
+
+          # Assigned inside the branch that produced the id, because a step
+          # that did not run this pass still returns its previous value.
+          - name: adopt_clone
+            type: data.set
+            with:
+              current_proposal_id: '{{ steps.clone_proposal.output.proposalId }}'
+              # A human should see that the action failed, even if the
+              # first attempt ran under autonomy.
+              needs_gate: true
+          - name: park_on_clone
+            type: loop.continue
+
+      # Nothing was written: the decider was refused, or the child failed before
+      # it decided anything. The same proposal waits for another answer, from a
+      # human even when the attempt ran under autonomy.
+      - name: handle_unapplied_answer
+        type: if
+        condition: "${{ variables.resolution == 'refused' or variables.resolution == 'unresolved' }}"
+        steps:
+          - name: adopt_unapplied_answer
+            type: data.set
+            with:
+              current_proposal_id: '{{ variables.resolved_proposal_id }}'
+              needs_gate: true
+          - name: park_again
+            type: loop.continue
 
   # The loop can also end without settling anything: `on-limit: continue` exits
   # cleanly once `max-iterations` is spent, and nothing in the body wrote a

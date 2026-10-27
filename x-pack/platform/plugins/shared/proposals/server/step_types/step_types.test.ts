@@ -581,25 +581,56 @@ describe('proposals.updateProposal step', () => {
     });
   });
 
-  it('should resolve the decider from the execution request, not the passed username', async () => {
+  it('should record the executing user, profile included, when it is the gate responder', async () => {
     const update = jest
       .fn()
       .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' });
+    const approver = {
+      username: 'analyst',
+      fullName: 'Alice Analyst',
+      email: 'alice@example.com',
+      profileUid: 'u_analyst',
+    };
+    resolveUser.mockResolvedValueOnce(approver);
 
+    // The gate resolves the answer in a child that runs as the approver, so
+    // the request carries their profile.
     await updateDefinition(update).handler(
       createContext({
         proposalId: 'proposal-1',
         decision: 'approved',
         status: 'executing',
-        decidedBy: 'someone-else',
+        decidedBy: 'analyst',
       })
     );
 
-    // Post-gate the execution runs as the approver, so the request is the
-    // better attribution.
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ decidedBy: approver }), SPACE_ID);
+  });
+
+  it('should record only the responder when the executing user is someone else', async () => {
+    const update = jest
+      .fn()
+      .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' });
+    // A resume that lands while the task is still running keeps the key the
+    // previous approver claimed it with.
+    resolveUser.mockResolvedValueOnce({ ...resolvedUser, username: 'previous-approver' });
+    const context = createContext({
+      proposalId: 'proposal-1',
+      decision: 'approved',
+      status: 'executing',
+      decidedBy: 'analyst',
+    });
+
+    await updateDefinition(update).handler(context);
+
     expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ decidedBy: resolvedUser }),
+      expect.objectContaining({
+        decidedBy: { username: 'analyst', fullName: null, email: null },
+      }),
       SPACE_ID
+    );
+    expect(context.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('"previous-approver" is not the gate responder "analyst"')
     );
   });
 
@@ -635,7 +666,7 @@ describe('proposals.updateProposal step', () => {
     const update = jest
       .fn()
       .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' });
-    // The gate still runs as the Worker's service account, so its request names no person.
+    // A service account's request names no person.
     resolveUser.mockResolvedValueOnce(undefined);
 
     await updateDefinition(update).handler(

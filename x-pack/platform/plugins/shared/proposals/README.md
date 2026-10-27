@@ -44,7 +44,7 @@ Conflating these is how proposal authorization goes wrong, so each is enforced s
 | Question | Principal | Enforced by | On refusal |
 | --- | --- | --- | --- |
 | May this HTTP caller decide? | The request | `requiredPrivileges` on the route | Synchronous `403` — the only place a human can be told |
-| May this resumer decide *this* proposal? | The approver, which post-gate is the execution identity | `proposals.checkDecidePrivileges`, **after the gate and before any write** | Returns `false`; the gate workflow re-parks for someone who can |
+| May this resumer decide *this* proposal? | The approver, whom `system-resolve-proposal` runs as | `proposals.checkDecidePrivileges`, **after the gate and before any write** | Returns `false`; the gate workflow re-parks for someone who can |
 | May this execution write proposals at all? | The Worker running the step | An assert **inside each writing step** | Fails the step; a Worker without the privilege is a misconfiguration, not something to retry |
 
 **Ordering is load-bearing.** The boolean check must precede every write inside the decision loop. If a write came first and failed instead, the gate would already be claimed and spent, the workflow would fail, and the proposal would strand with no way for a privileged approver to retry.
@@ -53,7 +53,7 @@ All checks **fail closed**, including when the `security` plugin is absent entir
 
 **Not in the service.** The service is reached from routes (already gated declaratively), from steps (principal is an execution), and from other plugins through the start contract — in-process and trusted, which is how AlertZero's `ConversationProposalsService` calls `list`. Request-based authz there would mean threading a request through every call and standing up a second mechanism beside the routes'. The service stays the invariant layer instead: terminal guards, decision immutability, valid-pair enforcement, action-input validation.
 
-**The principal differs by surface, and one of them cannot be checked.** An authenticated resume runs the post-gate steps under a clone of the resumer's API key, so the check evaluates the human. An **external-token resume carries no request**, so the engine wakes the pre-scheduled task under the *workflow runner's* key instead — and that identity necessarily holds `manage_proposals`, because it had to in order to create the proposal. Checking it would therefore authorize every click on a magic link, as the Worker, and record the Worker as the decider.
+**The principal differs by surface, and one of them cannot be checked.** An authenticated resume clones the resumer's API key onto the gate's task. The gate itself may still run as the caller's service account — AlertZero starts it with `run-as-mode: inherit` — so everything that acts on the answer runs in `system-resolve-proposal`, a child the gate starts with the default `run-as-mode`, which runs it under the resumer's key. The check therefore evaluates the human, and the decision is attributed to them, profile included. An **external-token resume carries no request**, so the engine wakes the pre-scheduled task under the *workflow runner's* key instead — and that identity necessarily holds `manage_proposals`, because it had to in order to create the proposal. Checking it would therefore authorize every click on a magic link, as the Worker, and record the Worker as the decider.
 
 `hitlExternalResume.enabled` defaults to `true` and `external_resume_service.ts` handles `waitForApproval` explicitly, so this is reachable rather than theoretical. `proposals.checkDecidePrivileges` therefore takes the gate's own `respondedBy` and refuses any principal prefixed `external_resume:` outright, without consulting the privilege service — there is nothing it could usefully ask. The loop re-parks, so an authenticated approver can still decide. Enabling external channels for proposal gates needs the platform to propagate the responder's identity, not just their answer.
 
@@ -215,6 +215,7 @@ flowchart TB
         api["Internal HTTP API<br/>/internal/proposals"]
         service["ProposalsService<br/><i>the only writer</i>"]
         gate["system-create-proposal<br/><i>managed gate workflow</i>"]
+        resolve["system-resolve-proposal<br/><i>runs as the decider</i>"]
     end
 
     subgraph platform["Workflows platform"]
@@ -230,16 +231,18 @@ flowchart TB
     agent -->|"structured output"| worker
     worker -->|"workflow.execute"| gate
     gate --> steps
+    gate -->|"workflow.execute<br/>per answer"| resolve
+    resolve --> steps
     steps --> service
     ui -->|"read / approve / dismiss"| api
     api --> service
     service --> index
     api -->|"release the gate"| engine
     service -->|"reads consts.actionMetadata"| catalog
-    gate -->|"workflow.execute"| catalog
+    resolve -->|"workflow.execute"| catalog
 ```
 
-Three boundaries are worth stating outright. `ProposalsService` is the **only** writer of the index — the steps and the routes both go through it, and there is no second path. The solution plugin owns no storage: it contributes a Worker and a UI, and reaches the record only through the HTTP API. And **the gate workflow is the only writer of a decision**: the routes release the gate, and the steps behind it record what was decided.
+Three boundaries are worth stating outright. `ProposalsService` is the **only** writer of the index — the steps and the routes both go through it, and there is no second path. The solution plugin owns no storage: it contributes a Worker and a UI, and reaches the record only through the HTTP API. And **the gate workflow is the only writer of a decision**: the routes release the gate, and the child it resolves each answer in records what was decided.
 
 That last one is the point of the design. Every resume surface — this API, the platform's own resume route, the Inbox, Agent Builder — funnels through the same parked gate, so a check and a write placed behind it cover all of them at once. Writing the decision in the approve route instead would mean only that one route ever recorded it.
 
@@ -251,6 +254,7 @@ The Agent is where the action is chosen. A Worker spawns it with an `ai.agent` s
 sequenceDiagram
     participant W as Worker workflow
     participant G as Gate workflow
+    participant R as Resolve workflow
     participant S as ProposalsService
     participant I as Index
     participant A as Analyst
@@ -266,16 +270,19 @@ sequenceDiagram
     Note over S,I: Writes nothing but the rationale.<br/>Nothing durable, so nothing to roll back.
     S->>G: resume(approved: true), as the analyst
 
-    G->>S: proposals.checkDecidePrivileges
-    Note over G,S: Before any read or write. A denial re-parks<br/>rather than spending the gate.
-    G->>S: proposals.getLatestRevision
-    Note over G,S: A revision may have landed during the park,<br/>so the decision settles the chain's live head.
-    G->>S: proposals.updateProposal(approved + executing)
-    S->>I: decision=approved, decidedBy=<analyst>
-    G->>AW: workflow.execute(actionInput)
+    G->>R: workflow.execute(answer), default run-as-mode
+    Note over G,R: The gate may run as the Worker's service account;<br/>the child runs as the analyst.
+    R->>S: proposals.checkDecidePrivileges
+    Note over R,S: Before any read or write. A denial re-parks<br/>rather than spending the gate.
+    R->>S: proposals.getLatestRevision
+    Note over R,S: A revision may have landed during the park,<br/>so the decision settles the chain's live head.
+    R->>S: proposals.updateProposal(approved + executing)
+    S->>I: decision=approved, decidedBy=<analyst, with profile>
+    R->>AW: workflow.execute(actionInput)
     Note over AW: Runs under the analyst's API key,<br/>so the result is attributed to them.
-    AW-->>G: output
-    G->>S: proposals.updateProposal(succeeded)
+    AW-->>R: output
+    R->>S: proposals.updateProposal(succeeded)
+    R-->>G: resolution: settled
 ```
 
 Dismissal follows the same shape down the gate's negative branch, so no action runs, and settles at `dismissed` + `no_action`.
@@ -288,13 +295,17 @@ The gate sits inside a `while` loop, because releasing a gate is not the same th
 
 1. **Park on the gate** for whatever is left of the deadline, under a step-level `on-failure: continue` so a timeout stays inside the loop instead of reaching the workflow-level handler — which is what makes an unanswered proposal end the run as `completed` with an output, instead of `failed`. The remaining time is computed here, in the only branch that needs it; the autonomy path never waits. The key is honoured by the engine but unmodelled by `WaitForApprovalStepSchema` — see "Known limitations" and [#19315](https://github.com/elastic/security-team/issues/19315).
 2. **Copy the gate outcome into variables immediately**, inside the iteration that produced it — `waitForApproval` is not exempt from output eviction, and a step output resolves to its latest execution, so a later iteration that skipped the gate would read this pass's values. Whether the gate timed out travels the same way, because the branch that handles it runs past the point where `steps.await_decision` is still readable.
-3. **Check the resumer's privilege**, and `loop.continue` when denied. Nothing has been written at this point. Skipped unless someone actually answered: the autonomy path has no resumer, and neither does a gate that timed out.
-4. **Settle `expired` if the gate timed out**, via `settleIncompleteProposal` (adopts the live head itself, no privilege check). Placed before the YAML adopt: `getLatestRevision` asserts read under the resumer's API key, and after a denied resume that key may lack it — failing there would leave the parent on a `failed` execution even though the record can still be expired. A proposal that reaches the gate already past its deadline — a cloned retry after a long action — parks for a second (`at_least: 1`) and times out into the same branch. It comes before the dismissal branch, because a timed-out gate answers blank and that branch would otherwise record a decision nobody made. Budget exhaustion settles the same way after the loop exits.
-5. **Adopt the chain's live head** on the answered path, once. Everything below writes, a revision appended during the park would have superseded the carried id, and `updateProposal` refuses a superseded row. Placement is the whole invariant — after the privilege check so a denied resumer re-parks before this reads the chain, after the timeout branch so expiry never hits `assertCanRead`, and before every answered-path write.
-6. **Record the decision**, together with the status it implies — never on its own, because `approved` + `pending` is not a legal pair, and a decision-only write would leave the record claiming an approval with no outcome.
-7. On an action failure, **clone** the proposal, adopt the new id, and loop; the clone inherits the deadline so a chain of retries cannot outlive it. Cloning a proposal that already carries `supersededBy` is refused, because overwriting the pointer would orphan the first clone.
+3. **Settle `expired` if the gate timed out**, via `settleIncompleteProposal` (adopts the live head itself, no privilege check), so expiry needs no decider and settles whatever identity woke the run. A proposal that reaches the gate already past its deadline — a cloned retry after a long action — parks for a second (`at_least: 1`) and times out into the same branch. It comes before the resolution, because a timed-out gate answers blank and the child would otherwise record a dismissal nobody made. Budget exhaustion settles the same way after the loop exits.
+4. **Resolve the answer in `system-resolve-proposal`**, as whoever answered (`run-as-mode: default`), or as the caller's service account when its autonomy approved (`run-as-mode: inherit`). `run-as-mode` has to be literal, so these are two steps, each adopting only its own result. The child, in order:
+   1. checks the resumer's privilege and reports `refused` when denied, having written nothing — skipped on the autonomy path, which has no resumer;
+   2. adopts the chain's live head, because a revision appended during the park would have superseded the carried id and `updateProposal` refuses a superseded row;
+   3. records the decision together with the status it implies — never on its own, because `approved` + `pending` is not a legal pair;
+   4. runs the action, with the same identity split, and reports `settled` or `action_failed`.
+5. **Recover a failed child**, which reports nothing, by reading the live head as the gate's own identity. Undecided means the answer never landed: the proposal waits for a human, even when the attempt ran under autonomy. An approval caught at `executing` is recorded as `failed` and re-offered. Anything already settled completes the loop.
+6. On `action_failed`, **clone** the proposal in the gate, adopt the new id, and loop; the clone inherits the deadline so a chain of retries cannot outlive it, and the gate's execution id, so approving it resumes this run. Cloning here rather than in the child keeps the window in which the clone is pending but the gate not yet waiting to a single step. Cloning a proposal that already carries `supersededBy` is refused, because overwriting the pointer would orphan the first clone.
+7. On `refused`, or a failure that decided nothing, **park again** on the same proposal, for a human.
 
-The chain is read explicitly once in the loop on the answered path (step 5). Incomplete settles — gate expiry, attempt-budget exhaustion, and the workflow-level failure handler — adopt inside `proposals.settleIncompleteProposal` instead (and timeout must not reach the YAML read, which asserts `read_proposals`).
+The child reads the chain explicitly once per answer. Incomplete settles — gate expiry, attempt-budget exhaustion, and the workflow-level failure handler — adopt inside `proposals.settleIncompleteProposal` instead.
 
 Three invariants the loop depends on:
 
@@ -372,7 +383,7 @@ The flag is a request, not a guarantee. The gate skips the human decision only w
 
 An action declaring `always-gate` therefore overrides any autonomy the caller resolved: a Worker cannot auto-approve it by mistake, and the action's own declaration is what enforces that rather than the caller's good behaviour. When the gate is skipped the proposal is still recorded, and the action still runs.
 
-**An auto-approved action runs as the caller's service account.** With no approver to run as, `execute_as_worker` inherits the calling execution's identity (`run-as-mode: inherit`, restricted to workflows tagged `action`). `autoApprove: true` therefore needs a caller that is itself running as a service account: otherwise `execute_as_worker` fails, the failure is recorded, and the clone parks for a human like any other failed action.
+**An auto-approved action runs as the caller's service account.** With no approver to run as, the gate resolves the approval with `run-as-mode: inherit`, and the child runs the action the same way (`execute_as_worker`, restricted to workflows tagged `action`). `autoApprove: true` therefore needs a caller that is itself running as a service account: otherwise the resolution fails before deciding anything, and the proposal waits for a human.
 
 **The calling workflow must itself be managed.** An unmanaged parent can neither execute a managed child nor see globally-installed definitions, so a Worker registered outside `@kbn/workflows/managed` cannot reach the gate.
 
@@ -463,12 +474,12 @@ What follows from settling on read:
 
 ### Invariants worth preserving
 
-- **The decision is written behind the gate, by the workflow.** Every resume surface funnels through the gate, so one write there covers them all; a write in the approve route would only ever cover that route.
+- **The decision is written behind the gate, by the child that runs as the decider.** Every resume surface funnels through the gate, so one write there covers them all; a write in the approve route would only ever cover that route. Written by the gate itself, it would check and attribute the gate's identity, which may be the caller's service account.
 - **Nothing durable is written before the resume**, so a failed resume needs no rollback. The exceptions are the dismiss reason, which the gate cannot carry, and settling a proposal whose gate is gone, which is refused rather than resumed.
 - **The privilege check precedes every read and write on the answered path.** The chain resolve reads the proposal on the resumer's behalf, so it waits for the check too; an unauthorized resumer is re-parked before anything is read for it. Gate timeout, attempt-budget exhaustion, and the workflow-level fallback settle through `settleIncompleteProposal`, which skips the privilege check so a denied resumer's API key cannot strand the record. On the answered path, a write that failed before the check would leave the gate spent and the proposal stranded.
 - **A settled status cannot move and a decision cannot be overwritten.** Two independent guards, because the two axes settle independently.
 - **The gate step is resolved explicitly.** The platform's waiting-step lookup only matches `waitForInput`; for a `waitForApproval` gate it returns nothing and would resume *without* claiming the step or stamping the audit envelope. `resumeGate` finds the step itself and passes `stepExecutionId`.
-- **The decision actor is server-derived.** Never accepted from a request body. `createdBy` and `decidedBy` store `{ username, fullName, email, profileUid? }`, the shape Cases established: the profile uid is the stable identity a UI resolves an avatar from, and the names are stored rather than looked up so attribution survives a missing profile. The uid is genuinely often absent — security disabled, a `run-as` proxy, a session without a profile, or an API key whose creator has no activated profile, which is exactly what the resume path runs under.
+- **The decision actor is server-derived.** Never accepted from a request body. `createdBy` and `decidedBy` store `{ username, fullName, email, profileUid? }`, the shape Cases established: the profile uid is the stable identity a UI resolves an avatar from, and the names are stored rather than looked up so attribution survives a missing profile. The uid is genuinely often absent — security disabled, a `run-as` proxy, a session without a profile, or an API key whose creator has no activated profile. A decider is recorded from the user the resolution runs as, profile included, only when that user is the gate's `respondedBy`; otherwise only the `respondedBy` username is, since a resume landing while the task is still running keeps the previous approver's key.
 - **Approval carries the action input the approver was shown**, so an approval that no longer matches the record is refused with a conflict.
 - **Action metadata is resolved on read** from the action workflow's `consts.actionMetadata`, never copied onto the proposal, so a catalog change is picked up rather than going stale. `impact` is the exception: it is snapshotted at creation, as `params.impact ?? metadata.impact ?? 'low'`. The caller wins because it knows the situation the proposal came out of, which the action's own metadata cannot; the `low` floor exists because `ranks.impact` is the queue's primary sort key and must always have a value.
 - **`previousExecutionError` is a deliberate denormalisation.** It holds the `executionError` of the attempt the proposal re-offers: copied from the predecessor when a failed proposal is cloned, then carried through revisions untouched, since revising runs nothing. It therefore names the last attempt that actually ran and failed, which sits further back than `supersedes` once a clone has been revised. The queue answers "did the last attempt fail, and how" on every row it renders, and deriving it through the chain would cost one extra fetch per row. It holds one failure only — "failed three times" is `revision` plus a chain query — and it is absent while nothing in the chain has run and failed, which a consumer must not read as "the previous attempt succeeded".
@@ -491,7 +502,7 @@ Registering the owner is not optional. The startup sweep `cleanupUnregisteredOrp
 
 Three layers, because no single one reaches the whole thing.
 
-**YAML shape** — `kbn-workflows/managed/definitions/proposals/create_proposal.test.ts` parses the definition and asserts how the loop is wired: that the privilege check precedes every write, that each settle branch breaks, that no condition mixes `and` with `or`. Cheap and fast, but it only sees structure.
+**YAML shape** — `create_proposal.test.ts` and `resolve_proposal.test.ts` in `kbn-workflows/managed/definitions/proposals/` parse the two definitions and assert how they are wired: that the privilege check precedes every write, that each identity is a literal `run-as-mode`, that the gate handles every resolution the child reports, that no condition mixes `and` with `or`. Cheap and fast, but they only see structure.
 
 **Loop behaviour** — `integration_tests/create_proposal.test.ts` runs the **shipped YAML through the real execution engine**, with Elasticsearch replaced by a Map and the real `ProposalsService` behind it:
 
@@ -499,7 +510,7 @@ Three layers, because no single one reaches the whole thing.
 node scripts/jest_integration --config x-pack/platform/plugins/shared/proposals/integration_tests/jest.integration.config.js
 ```
 
-It uses `WorkflowRunFixture` from `@kbn/workflows-execution-engine/test_helpers`, which drives `runWorkflow`/`resumeWorkflow` against mocked repositories — real graph builder, real node implementations, real Liquid, no stack, a few seconds. Custom steps are injected by stubbing `hasStepDefinition` **and** `getStepDefinition` on the extensions mock; stubbing only the getter makes `nodes_factory` skip the branch and read `proposals.createProposal` as a connector.
+It uses `WorkflowRunFixture` from `@kbn/workflows-execution-engine/test_helpers`, which drives `runWorkflow`/`resumeWorkflow` against mocked repositories — real graph builder, real node implementations, real Liquid, no stack, a few seconds. Custom steps are injected by stubbing `hasStepDefinition` **and** `getStepDefinition` on the extensions mock; stubbing only the getter makes `nodes_factory` skip the branch and read `proposals.createProposal` as a connector. `system-resolve-proposal` runs for real in a second fixture, sharing the same storage, and the gate is woken from `waiting_for_child` the way the child's completion wakes it in production.
 
 This is the layer that covers what a shape test cannot see: that the gate re-parks on a *new* step execution so a second answer can be claimed, that a privilege denial writes nothing, that `data.set` variables survive a park and resume, that an action failure clones with an inherited deadline and re-parks, and — the bug class that actually bit during development — that every decision/status pair the workflow writes is one the service accepts.
 
@@ -530,11 +541,11 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 
 **Steps:**
 
-1. Start Kibana. On start this plugin installs `system-create-proposal` globally, and `alertzero` installs `system-alertzero-action-create-rule` and `system-alertzero-action-edit-rule`. Confirm all three appear in Workflows management, and that the log contains no `orphan_cleanup` deletion for them.
+1. Start Kibana. On start this plugin installs `system-create-proposal` and `system-resolve-proposal` globally, and `alertzero` installs `system-alertzero-action-create-rule` and `system-alertzero-action-edit-rule`. Confirm all four appear in Workflows management, and that the log contains no `orphan_cleanup` deletion for them.
 2. Trigger the gate workflow directly with `conversationId`, `actionWorkflowId: system-alertzero-action-create-rule`, and an `actionInput` carrying `name`, `description`, `query` and `index`.
 3. Confirm the record: `GET .kibana-proposals/_search` should show `status: pending` with **no `decision` field**, `category: tune`, the `actionWorkflowId`, and a `workflowExecutionId` pointing at a gate execution that is `waiting_for_input`.
 4. Approve from the AlertZero app (`/app/alertzero`) — under "Awaiting your decision" on the landing page, or the investigation's Proposals tab.
-5. Assert the outcome: the proposal reaches `decision: approved` with `status: succeeded`; a **disabled** rule with that name exists (`security.createRule` always creates rules disabled); **`created_by` on the rule is the approver**, not whoever triggered the gate; and the `waitForApproval` step execution carries `hitl.respondedBy`.
+5. Assert the outcome: the proposal reaches `decision: approved` with `status: succeeded`, and `decidedBy` carries the approver's `profileUid` and `fullName`; a **disabled** rule with that name exists (`security.createRule` always creates rules disabled); **`created_by` on the rule is the approver**, not whoever triggered the gate; and the `waitForApproval` step execution carries `hitl.respondedBy`.
 6. Repeat in a non-default space. Space scoping is invisible in `default`: every query filters on `spaceId`, and a missing filter would only show up elsewhere.
 
 **Also worth exercising:**
