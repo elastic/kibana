@@ -25,15 +25,14 @@ import {
   type Instruction,
 } from '@atlaskit/pragmatic-drag-and-drop-hitbox/list-item';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
-import { collectDescendantStepIds } from '../state_management/utils';
-import type { InteractiveModeContext } from '../state_management/interactive_mode_machine';
 
 interface DraggableStepWrapperProps {
   stepId: string;
   index: number;
   level: number;
   children: ReactNode;
-  stepRefs: InteractiveModeContext['stepRefs'];
+  /** Ids of the steps nested under this one, which it can't be dropped into. Flat lists omit it. */
+  getDescendantIds?: () => readonly string[];
   isBlocked?: boolean;
   hasChildren?: boolean;
   isDragEnabled?: boolean;
@@ -127,7 +126,7 @@ export const DraggableStepWrapper = ({
   index,
   level,
   children,
-  stepRefs,
+  getDescendantIds,
   isBlocked = false,
   hasChildren = false,
   isDragEnabled = true,
@@ -146,10 +145,6 @@ export const DraggableStepWrapper = ({
       setInstruction(null);
     };
 
-    // Get descendant IDs for this step
-    const steps = stepRefs.map((stepRef) => stepRef.getSnapshot().context.step);
-    const descendantIds = collectDescendantStepIds(steps, stepId);
-
     const cleanup = combine(
       draggable({
         element: el,
@@ -158,7 +153,7 @@ export const DraggableStepWrapper = ({
           stepId,
           index,
           level,
-          descendantIds: Array.from(descendantIds),
+          descendantIds: [...(getDescendantIds?.() ?? [])],
         }),
       }),
       dropTargetForElements({
@@ -199,7 +194,7 @@ export const DraggableStepWrapper = ({
     );
 
     return cleanup;
-  }, [stepId, index, level, stepRefs, isBlocked, hasChildren, isDragEnabled]);
+  }, [stepId, index, level, getDescendantIds, isBlocked, hasChildren, isDragEnabled]);
 
   const wrapperStyles = css`
     position: relative;
