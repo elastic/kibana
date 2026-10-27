@@ -9,4 +9,8 @@ module.exports = {
   preset: '@kbn/jest/jest_integration',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/public'],
+  testPathIgnorePatterns: [
+    '/detection_engine/rule_creation_ui/components/step_define_rule/integration_tests/',
+    '/detection_engine/rule_management_ui/pages/rule_management/integration_tests/',
+  ],
 };
