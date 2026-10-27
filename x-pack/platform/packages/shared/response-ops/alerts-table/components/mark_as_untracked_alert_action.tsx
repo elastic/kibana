@@ -48,7 +48,7 @@ export const MarkAsUntrackedAlertAction = typedMemo(
         key="untrackAlert"
         onClick={handleUntrackAlert}
       >
-        {i18n.translate('xpack.triggersActionsUI.alertsTable.actions.untrack', {
+        {i18n.translate('xpack.responseOpsAlertsTable.alertsTable.actions.untrack', {
           defaultMessage: 'Mark as untracked',
         })}
       </EuiContextMenuItem>
