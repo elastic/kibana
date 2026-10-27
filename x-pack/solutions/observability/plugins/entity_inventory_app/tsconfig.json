@@ -7,7 +7,11 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-chrome-browser",
     "@kbn/config-schema",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/observability-shared-plugin",
+    "@kbn/app-header",
+    "@kbn/shared-ux-router"
   ]
 }
