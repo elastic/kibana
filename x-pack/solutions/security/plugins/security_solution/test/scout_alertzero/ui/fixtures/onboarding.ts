@@ -7,8 +7,8 @@
 
 import type { ApiClientFixture, EsClient } from '@kbn/scout-security';
 import type { KbnClient } from '@kbn/kbn-client';
+import { buildServiceAccountUrl } from '@kbn/alertzero-common';
 import {
-  buildServiceAccountUrl,
   createApi,
   createApiFromKbnClient,
   listWorkers,
