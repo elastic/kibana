@@ -42,20 +42,24 @@ const createApi = ({
       };
     }),
     roleExists: jest.fn(async (role: string) => roles.includes(role)),
-    createServiceAccount: jest.fn(async ({ name }: { name: string; roles: string[] }) => {
-      if (createError) throw createError;
-      // UIAM-like ids: generated, unrelated to the name.
-      const id = `uiam-${nextId++}`;
-      listed.push({ id, name, enabled: true, assumable: true });
-      return { id };
-    }),
+    createServiceAccount: jest.fn(
+      async ({ name, roles: assigned }: { name: string; roles: string[] }) => {
+        if (createError) throw createError;
+        // UIAM-like ids: generated, unrelated to the name.
+        const id = `uiam-${nextId++}`;
+        listed.push({ id, name, roles: assigned, enabled: true, assumable: true });
+        return { id };
+      }
+    ),
     isConflict: (error: unknown) => (error as { status?: number })?.status === 409,
   } satisfies NightshiftServiceAccountsApi;
   return { api, listed };
 };
 
+/** Defaults to the stateful role of the same name, which most cases reuse. */
 const account = (overrides: Partial<ListedServiceAccount> & { name: string }) => ({
   id: `id-${overrides.name}`,
+  roles: [overrides.name],
   enabled: true,
   assumable: true,
   ...overrides,
@@ -105,9 +109,14 @@ describe('ensureNightshiftServiceAccounts', () => {
   it('prefers an account Kibana can run as when several share the name', async () => {
     const { api } = createApi({
       accounts: [
-        account({ name: 'nightshift_agent', id: 'unusable', assumable: false }),
-        account({ name: 'nightshift_agent', id: 'usable' }),
-        account({ name: 'nightshift_automations' }),
+        account({
+          name: 'nightshift_agent',
+          id: 'unusable',
+          roles: ['_nightshift_agent'],
+          assumable: false,
+        }),
+        account({ name: 'nightshift_agent', id: 'usable', roles: ['_nightshift_agent'] }),
+        account({ name: 'nightshift_automations', roles: ['_nightshift_automations'] }),
       ],
     });
 
@@ -116,9 +125,41 @@ describe('ensureNightshiftServiceAccounts', () => {
     );
   });
 
+  it('takes the account that holds the role when the name is shared', async () => {
+    const { api } = createApi({
+      accounts: [
+        account({ name: 'nightshift_agent', id: 'someone-elses', roles: ['viewer'] }),
+        account({ name: 'nightshift_agent', id: 'ours', roles: ['_nightshift_agent'] }),
+        account({ name: 'nightshift_automations', roles: ['_nightshift_automations'] }),
+      ],
+    });
+
+    await expect(ensureNightshiftServiceAccounts(api, { isServerless: true })).resolves.toEqual(
+      expect.objectContaining({ agent: 'ours' })
+    );
+    expect(api.createServiceAccount).not.toHaveBeenCalled();
+  });
+
+  it('refuses an account that took the name without holding the role', async () => {
+    const { api } = createApi({
+      accounts: [account({ name: 'nightshift_agent', roles: ['viewer'] })],
+    });
+
+    await expect(ensureNightshiftServiceAccounts(api, { isServerless: false })).rejects.toEqual(
+      expect.objectContaining({
+        code: 'role_mismatch',
+        details: expect.objectContaining({ kind: 'agent', role: 'nightshift_agent' }),
+      })
+    );
+    // Creating a second account with that name would not help: the name is taken.
+    expect(api.createServiceAccount).not.toHaveBeenCalled();
+  });
+
   it('refuses an existing account Kibana cannot run as', async () => {
     const { api } = createApi({
-      accounts: [account({ name: 'nightshift_agent', enabled: false })],
+      accounts: [
+        account({ name: 'nightshift_agent', roles: ['nightshift_agent'], enabled: false }),
+      ],
     });
 
     await expect(ensureNightshiftServiceAccounts(api, { isServerless: false })).rejects.toEqual(
@@ -147,7 +188,7 @@ describe('ensureNightshiftServiceAccounts', () => {
     const { api, listed } = createApi({ createError: conflict });
     api.createServiceAccount.mockImplementation(
       async ({ name }: { name: string; roles: string[] }) => {
-        listed.push(account({ name, id: `concurrent-${name}` }));
+        listed.push(account({ name, id: `concurrent-${name}`, roles: [name] }));
         throw conflict;
       }
     );
