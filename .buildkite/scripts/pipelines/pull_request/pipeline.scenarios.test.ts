@@ -154,6 +154,54 @@ const SCENARIOS: Scenario[] = [
       'x-pack/solutions/security/plugins/security_solution/public/asset_inventory/index.ts',
     ],
   },
+  {
+    name: 'security solution ai4dsoc step path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/ai4dsoc.ts'],
+  },
+  {
+    name: 'security solution ai_assistant step path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/ai_assistant.ts'],
+  },
+  {
+    name: 'security solution asset_inventory step path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/asset_inventory.ts'],
+  },
+  {
+    name: 'security solution cloud_security_posture step path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/cloud_security_posture.ts'],
+  },
+  {
+    name: 'security solution cypress_burn step path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/cypress_burn.ts'],
+  },
+  {
+    name: 'security solution defend_workflows step path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/defend_workflows.ts'],
+  },
+  {
+    name: 'security solution detection_engine step path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/detection_engine.ts'],
+  },
+  {
+    name: 'security solution entity_analytics step path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/entity_analytics.ts'],
+  },
+  {
+    name: 'security solution explore step path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/explore.ts'],
+  },
+  {
+    name: 'security solution investigations step path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/investigations.ts'],
+  },
+  {
+    name: 'security solution osquery_cypress step path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/osquery_cypress.ts'],
+  },
+  {
+    name: 'security solution rule_management step path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/rule_management.ts'],
+  },
   { name: 'edr real fleet path', changedFiles: ['fleet_packages.json'] },
   {
     name: 'prompt change path',
