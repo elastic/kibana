@@ -35,7 +35,7 @@ export class MatchActionPoliciesRoute extends BaseAlertingRoute {
     access: 'internal' as const,
     summary: 'Match action policies',
     description:
-      "Returns the action policies that apply to a rule, based on the rule's tags. Each result includes a `category` with the reason it matched. This endpoint does not evaluate `matcher.expression`, because those queries need alert data that is only available once an alert exists. As a result, policies that match only by an expression are not returned, and a returned policy might not match every alert from the rule.",
+      "Returns the action policies that apply to a rule, based on the rule's routing tags. Each result includes a `category` with the reason it matched. This endpoint does not evaluate `matcher.expression`, because those queries need alert data that is only available once an alert exists. As a result, policies that match only by an expression are not returned, and a returned policy might not match every alert from the rule.",
     oasOperationObject: matchActionPoliciesOasExamples,
   } as const;
   static schemas = {
@@ -69,7 +69,7 @@ export class MatchActionPoliciesRoute extends BaseAlertingRoute {
   protected async execute() {
     const { rule } = this.request.body ?? {};
     const result = await this.actionPolicyClient.matchActionPolicies({
-      ruleTags: rule?.tags,
+      routingTags: rule?.routing_tags,
     });
     return this.ctx.response.ok({ body: result });
   }

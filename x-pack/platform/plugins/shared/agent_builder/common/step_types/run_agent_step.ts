@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
 import type { ApiTarget } from '@kbn/agent-builder-common';
 import { apiSelectorsByTarget } from '@kbn/agent-builder-common/apis/known_apis';
+import { authorNameSchema } from '../workflows/author_name_schema';
 import {
   CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
@@ -58,6 +59,31 @@ export const InputSchema = z.object({
    */
   message: z.string().describe('The user input message to send to the agent.'),
   /**
+   * EIS prompt template id. Used only when the resolved connector's
+   * `capabilities.templates.policy` is `required`. Otherwise the step ignores
+   * these fields and runs the agent with `message`. The id starts with a dot.
+   */
+  template_id: z
+    .string()
+    .max(128)
+    .optional()
+    .describe(
+      'Pinned EIS prompt template id, including the leading dot. Sent instead of the message when the connector requires templates.'
+    ),
+  template_version: z
+    .number()
+    .int()
+    .positive()
+    .max(1_000_000)
+    .optional()
+    .describe(
+      'Pinned EIS prompt template version. Required with template_id when the connector requires templates.'
+    ),
+  template_variables: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .describe('Variables for template_id. Ignored when the connector does not require a template.'),
+  /**
    * Optional attachments to provide to the agent.
    */
   attachments: z
@@ -99,6 +125,7 @@ export const InputSchema = z.object({
     .string()
     .optional()
     .describe('Optional existing conversation ID to continue a previous conversation.'),
+  author_name: authorNameSchema,
   /**
    * Optional arbitrary key-value tags stored with the underlying agent execution, searchable
    * via the execution service's findExecutions. Lets a caller that doesn't yet know the
@@ -131,7 +158,7 @@ export const InputSchema = z.object({
     })
     .optional()
     .describe(
-      'Actions pre-approved for this step, which the agent may then take without a user confirmation. The grant covers this step execution and the sub-agents it spawns.'
+      "Actions pre-approved for this step, which the agent may then take without a user confirmation. The grant covers this step execution and the sub-agents it spawns, and adds to any defaults stored in the agent's configuration."
     ),
   /**
    * Optional runtime overrides for the agent configuration. These replace the corresponding
@@ -188,7 +215,7 @@ export const OutputSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Conversation ID associated with this step execution. Present when create_conversation is enabled or conversation_id is provided.'
+      'Conversation ID associated with this step execution. Present when the step created or updated a conversation.'
     ),
   metadata: z
     .object({
@@ -217,6 +244,13 @@ export const OutputSchema = z.object({
  */
 export const AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE =
   '`aggregate-by` can only be set when `plugin-id` is also set.';
+
+/**
+ * Validation message shown when `ephemeral` is combined with `create-conversation`: a run that
+ * stores nothing cannot create a conversation.
+ */
+export const EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE =
+  '`ephemeral` cannot be combined with `create-conversation`.';
 
 /**
  * Config schema for the run agent step.
@@ -249,14 +283,16 @@ export const ConfigSchema = z
         'The inference endpoint ID to use. Mutually exclusive with `connector-id`; defaults apply when both are omitted.'
       ),
     /**
-     * Model Management > Feature settings feature id to resolve the connector from.
-     * Mutually exclusive with `connector-id` and `inference-id`.
+     * Model Management feature id, or a priority list of them.
+     * A single id is mutually exclusive with `connector-id` and `inference-id`.
+     * In a list, an unregistered id is skipped. A listed feature conflicts with
+     * an explicit connector only when it resolves one.
      */
     'connector-id-by-feature': z
-      .string()
+      .union([z.string().max(255), z.array(z.string().max(255)).max(8)])
       .optional()
       .describe(
-        'The Model Management feature id whose configured connector should be used. Mutually exclusive with `connector-id` and `inference-id`.'
+        'A Model Management feature id, or an ordered list of them. An id that is not registered is skipped. Each id contributes a connector only when one is configured for it; otherwise the next id is tried. A configured connector is mutually exclusive with `connector-id` and `inference-id`. A list where every id misses is not a conflict.'
       ),
     /**
      * When true, create/persist a conversation and associate it with the executing user.
@@ -276,6 +312,16 @@ export const ConfigSchema = z
       .optional()
       .describe(
         'When true, newly created conversations are public to users who can use the agent. Defaults to private. Ignored when continuing an existing conversation.'
+      ),
+    /**
+     * When true, the run writes nothing to a conversation. With `conversation_id`, the conversation
+     * is loaded as context but not modified.
+     */
+    ephemeral: z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, the run writes nothing to a conversation: no conversation is created and, with conversation_id, the conversation is loaded as context but not modified (no message, round, metadata or workspace change). Defaults to false.'
       ),
     /**
      * Connector telemetry feature id used to attribute this step's LLM calls for billing
@@ -337,7 +383,13 @@ export const ConfigSchema = z
   .superRefine((cfg, ctx) => {
     const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
     const inference = normalizeOptionalConnectorOrInferenceParam(cfg['inference-id']);
-    const connectorByFeature = normalizeOptionalStringParam(cfg['connector-id-by-feature']);
+    // A list may sit beside connector-id. Whether an id conflicts is decided at
+    // runtime, and only when that feature actually resolves a connector.
+    const connectorByFeatureRaw = cfg['connector-id-by-feature'];
+    const connectorByFeature =
+      typeof connectorByFeatureRaw === 'string'
+        ? normalizeOptionalStringParam(connectorByFeatureRaw)
+        : undefined;
     if (connector !== undefined && inference !== undefined) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -357,6 +409,13 @@ export const ConfigSchema = z
         code: z.ZodIssueCode.custom,
         message: AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
         path: ['aggregate-by'],
+      });
+    }
+    if (cfg.ephemeral === true && cfg['create-conversation'] === true) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE,
+        path: ['ephemeral'],
       });
     }
   });
@@ -443,6 +502,17 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
     message: "Continue from the previous analysis and complete any missing steps."
 \`\`\``,
 
+      `## Name the writer when the workflow runs as a service account
+A workflow running as a service account has no display name, so the chat would show the raw account id. \`author_name\` is recorded as the display name on the user message; it is ignored when an interactive user runs the workflow.
+\`\`\`yaml
+- name: journal_note
+  type: ${RunAgentStepTypeId}
+  with:
+    conversation_id: "{{ inputs.conversation_id }}"
+    author_name: "{{ workflow.name }}"
+    message: "Investigation note: {{ event.summary }}"
+\`\`\``,
+
       `## Create a public conversation
 \`\`\`yaml
 - name: shared_analysis
@@ -456,6 +526,23 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
 
 Public conversations are visible to other users who can use the underlying agent.
 This setting only applies when the step creates a new conversation.`,
+
+      `## Summarize an existing conversation without modifying it
+\`\`\`yaml
+- name: summarize
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-summarizer"
+  ephemeral: true
+  with:
+    conversation_id: "{{ event.conversationId }}"
+    message: "Summarize this conversation in five bullet points."
+\`\`\`
+
+With \`ephemeral: true\`, the agent sees the conversation's history, attachments and workspace files,
+but nothing from the run is written back: no message, round, metadata or workspace change. The step
+output carries the agent's answer and no \`conversation_id\`. Runs can overlap with each other and with
+regular executions of the same conversation. \`ephemeral\` cannot be combined with
+\`create-conversation\`.`,
 
       `## Get structured output using a JSON schema
 \`\`\`yaml
@@ -545,8 +632,10 @@ When a schema is provided, the agent's response will be available in \`output.st
 \`\`\`
 
 A destructive API normally requires the user to confirm the call, which a workflow cannot do.
-Listing an API here pre-approves it for this step and for any sub-agents it spawns. Every other
-destructive API is still refused, and omitting the field keeps that stricter behavior for all of them.
+Listing an API here pre-approves it for this step and for any sub-agents it spawns. The grant adds
+to the auto-approved APIs stored in the agent's configuration, which apply to every run of the
+agent. Every other destructive API is still refused, and omitting the field leaves only the
+agent's stored defaults.
 
 An entry can also be a namespace wildcard, or \`*\` for every API on that backend. Prefer the
 narrowest grant that works: \`indices.*\` includes \`indices.delete\`, and \`*\` lets the agent

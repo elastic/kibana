@@ -7,10 +7,10 @@
 
 import { inject, injectable } from 'inversify';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import type { AlertEventDocument } from '../../../resources/datastreams/alert_events';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
-import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 import { resolveRuleEventId } from '../build_alert_events';
 import { guardedMapStep } from '../stream_utils';
 
@@ -41,7 +41,7 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
         docs: state.alertEventsBatch,
         ...(deduplication?.eligible
           ? {
-              getDocumentId: (doc: AlertEvent) =>
+              getDocumentId: (doc: AlertEventDocument) =>
                 resolveRuleEventId(doc, deduplication.mvExpandFields),
             }
           : {}),

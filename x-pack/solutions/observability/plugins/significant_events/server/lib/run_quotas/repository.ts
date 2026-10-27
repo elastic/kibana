@@ -7,7 +7,12 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DEFAULT_RUN_QUOTA_SETTINGS, type RunQuotaGroup } from '../../../common/run_quotas';
+import {
+  DEFAULT_RUN_QUOTA_SETTINGS,
+  RUN_QUOTA_GROUPS,
+  type RunQuotaGroup,
+  type RunQuotaSettingsUpdate,
+} from '../../../common/run_quotas';
 import {
   RUN_QUOTA_LEDGER_SO_TYPE,
   RUN_QUOTA_SETTINGS_SO_ID,
@@ -32,28 +37,44 @@ export const createRunQuotaInternalRepository = (
     RUN_QUOTA_LEDGER_SO_TYPE,
   ]);
 
-export interface RunQuotaSettingsPatch {
-  enabled?: boolean;
-  limits?: Partial<Record<RunQuotaGroup, number>>;
-}
+export type RunQuotaSettingsPatch = RunQuotaSettingsUpdate;
 
 export const createDefaultRunQuotaSettingsAttributes = (): RunQuotaSettingsAttributes => ({
   enabled: DEFAULT_RUN_QUOTA_SETTINGS.enabled,
   limits: { ...DEFAULT_RUN_QUOTA_SETTINGS.limits },
 });
 
-const mergeSettingsPatch = (
+const mergeStoredSettings = (
+  defaults: RunQuotaSettingsAttributes,
+  stored: RunQuotaSettingsAttributes
+): RunQuotaSettingsAttributes => ({
+  ...defaults,
+  ...stored,
+  limits: {
+    ...defaults.limits,
+    ...stored.limits,
+  },
+});
+
+const applySettingsPatch = (
   current: RunQuotaSettingsAttributes,
   patch: RunQuotaSettingsPatch
 ): RunQuotaSettingsAttributes => {
-  const { limits, ...topLevelPatch } = patch;
+  const { activateLimits, limits, ...topLevelPatch } = patch;
+  const normalizedLegacyLimits =
+    activateLimits && !current.enabled
+      ? Object.fromEntries(RUN_QUOTA_GROUPS.map((group) => [group, 0]))
+      : {};
 
   return {
     ...current,
     ...topLevelPatch,
+    ...(activateLimits ? { enabled: true } : {}),
     limits: {
       ...current.limits,
+      ...normalizedLegacyLimits,
       ...(limits ?? {}),
+      ...(activateLimits ?? {}),
     },
   };
 };
@@ -66,7 +87,7 @@ export const readRunQuotaSettings = async (
       RUN_QUOTA_SETTINGS_SO_TYPE,
       RUN_QUOTA_SETTINGS_SO_ID
     );
-    return mergeSettingsPatch(createDefaultRunQuotaSettingsAttributes(), savedObject.attributes);
+    return mergeStoredSettings(createDefaultRunQuotaSettingsAttributes(), savedObject.attributes);
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
       return createDefaultRunQuotaSettingsAttributes();
@@ -94,12 +115,12 @@ export const patchRunQuotaSettings = async (
     }
 
     const current = currentSavedObject
-      ? mergeSettingsPatch(
+      ? mergeStoredSettings(
           createDefaultRunQuotaSettingsAttributes(),
           currentSavedObject.attributes as RunQuotaSettingsAttributes
         )
       : createDefaultRunQuotaSettingsAttributes();
-    const next = mergeSettingsPatch(current, patch);
+    const next = applySettingsPatch(current, patch);
 
     try {
       const savedObject = currentSavedObject
@@ -107,7 +128,7 @@ export const patchRunQuotaSettings = async (
             RUN_QUOTA_SETTINGS_SO_TYPE,
             RUN_QUOTA_SETTINGS_SO_ID,
             {
-              ...patch,
+              enabled: next.enabled,
               limits: next.limits,
             },
             { version: currentSavedObject.version }

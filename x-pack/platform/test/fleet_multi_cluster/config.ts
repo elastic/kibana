@@ -7,7 +7,12 @@
 
 import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
-import { getKibanaCliLoggers } from '@kbn/test';
+import {
+  defineDockerServersConfig,
+  dockerRegistryPort,
+  getKibanaCliLoggers,
+  packageRegistryDocker,
+} from '@kbn/test';
 import { RemoteEsArchiverProvider } from './services/remote_es/remote_es_archiver';
 import { RemoteEsProvider } from './services/remote_es/remote_es';
 
@@ -19,6 +24,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...xpackFunctionalConfig.getAll(),
     testFiles: [resolve(__dirname, './apps/fleet/sync_integrations_flow')],
+    dockerServers: defineDockerServersConfig({
+      registry: packageRegistryDocker,
+    }),
     junit: {
       reportName: 'X-Pack Fleet Multi Cluster Tests',
     },
@@ -38,6 +46,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         `--xpack.fleet.syncIntegrations.taskInterval=5s`,
+        ...(dockerRegistryPort
+          ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+          : []),
+        `--xpack.fleet.internal.registry.kibanaVersionCheckEnabled=false`,
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xpackFunctionalConfig.get('kbnTestServer.serverArgs')),
 

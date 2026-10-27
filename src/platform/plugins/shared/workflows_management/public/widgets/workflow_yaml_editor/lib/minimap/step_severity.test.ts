@@ -21,6 +21,7 @@ const makeStep = (lineStart: number, lineEnd: number, stepId = 'step'): StepInfo
   stepId,
   stepType: 'wait',
   stepYamlNode: new YAML.YAMLMap(),
+  path: ['steps', 0],
   propInfos: {},
   lineStart,
   lineEnd,
@@ -107,6 +108,34 @@ describe('buildStepSeverityMap', () => {
     const info = map.get('parent');
     expect(info?.severity).toBe('error'); // roll-up: still shows severity
     expect(info?.isOwn).toBe(false); // but it is inherited from a descendant
+  });
+
+  it('marks isOwn=false when only an own warning is outranked by an inherited error', () => {
+    // parent spans 1–10, effectiveLineEnd=3. Warning at line 2 is own, error at line 7 is inherited.
+    // The reported severity is 'error', but the parent itself has no own error.
+    const entries: Array<[string, StepInfo]> = [['parent', makeStep(1, 10, 'parent')]];
+    const effectiveLineEnd = new Map([['parent', 3]]);
+    const errors = [makeError(2, 'warning'), makeError(7, 'error')];
+    const info = buildStepSeverityMap(entries, errors, effectiveLineEnd).get('parent');
+    expect(info?.severity).toBe('error');
+    expect(info?.isOwn).toBe(false);
+  });
+
+  it('marks isOwn=true when an own error outranks an inherited warning', () => {
+    const entries: Array<[string, StepInfo]> = [['parent', makeStep(1, 10, 'parent')]];
+    const effectiveLineEnd = new Map([['parent', 3]]);
+    const errors = [makeError(2, 'error'), makeError(7, 'warning')];
+    const info = buildStepSeverityMap(entries, errors, effectiveLineEnd).get('parent');
+    expect(info?.severity).toBe('error');
+    expect(info?.isOwn).toBe(true);
+  });
+
+  it('marks isOwn=false when the step has no markers at all', () => {
+    const entries: Array<[string, StepInfo]> = [['parent', makeStep(1, 10, 'parent')]];
+    const effectiveLineEnd = new Map([['parent', 3]]);
+    const info = buildStepSeverityMap(entries, [], effectiveLineEnd).get('parent');
+    expect(info?.severity).toBeNull();
+    expect(info?.isOwn).toBe(false);
   });
 
   it('roll-up: a child error makes every ancestor show severity (isOwn=false)', () => {

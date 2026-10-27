@@ -123,13 +123,15 @@ globalTeardownHook(
     await kbnClient.uiSettings.unset('discover:searchOnPageLoad');
     await kbnClient.uiSettings.updateGlobal({ hideAnnouncements: false });
 
-    // Revert feature-flag overrides flipped via apiServices.core.settings(...).
+    // Restore the previous configured feature-flag value (false in this example).
     await apiServices.core.settings({
       'feature_flags.overrides': { 'discover.isEsqlDefault': false },
     });
   }
 );
 ```
+
+The feature-flag example assumes the previous configured value was `false`. If the test introduced an override where none existed, use `null` to remove it instead. Preserve existing configured values and unrelated overrides; see [Feature flags](./feature-flags.md#scout-feature-flags-runtime).
 
 ### Available fixtures
 

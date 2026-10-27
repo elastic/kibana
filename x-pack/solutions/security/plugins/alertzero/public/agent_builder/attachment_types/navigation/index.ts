@@ -5,6 +5,16 @@
  * 2.0.
  */
 
-export { buildDiscoverEsqlUrl, buildDiscoverThreatReportNestedIocUrl } from './discover_urls';
-export { buildThreatReportLookupEsql } from './esql_queries';
+export {
+  buildAlertDetailsUrl,
+  buildDiscoverEsqlUrl,
+  buildDiscoverThreatReportNestedIocUrl,
+  buildSecurityEntityUrl,
+} from './discover_urls';
+export {
+  buildAlertsLookupEsql,
+  buildEntityLookupEsql,
+  buildEventLookupEsql,
+  buildEventsLookupEsql,
+} from './esql_queries';
 export type { AttachmentNavigationDeps } from './types';

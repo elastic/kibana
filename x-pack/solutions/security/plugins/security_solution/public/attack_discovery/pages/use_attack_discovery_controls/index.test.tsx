@@ -162,4 +162,44 @@ describe('useAttackDiscoveryControls', () => {
       start: 'now-24h',
     });
   });
+
+  describe('when multiple connectors are available', () => {
+    const multipleConnectors: unknown[] = [
+      { id: 'connector-1', name: 'Connector 1', actionTypeId: '.inference' },
+      { id: 'connector-2', name: 'Connector 2', actionTypeId: '.inference' },
+    ];
+
+    beforeEach(() => {
+      (useLoadConnectors as jest.Mock).mockReturnValue({
+        isFetched: true,
+        data: multipleConnectors,
+      });
+    });
+
+    it('defaults to the first (highest-priority) connector when none is selected', () => {
+      (useLocalStorage as jest.Mock).mockImplementation((key: string) => {
+        if (key.endsWith('connectorId')) {
+          return [undefined, jest.fn()];
+        }
+        return ['test-id', jest.fn()];
+      });
+
+      const { result } = renderHook(() => useAttackDiscoveryControls());
+
+      expect(result.current.connectorId).toBe('connector-1');
+    });
+
+    it('does not override an existing selected connectorId', () => {
+      (useLocalStorage as jest.Mock).mockImplementation((key: string) => {
+        if (key.endsWith('connectorId')) {
+          return ['connector-2', jest.fn()];
+        }
+        return ['test-id', jest.fn()];
+      });
+
+      const { result } = renderHook(() => useAttackDiscoveryControls());
+
+      expect(result.current.connectorId).toBe('connector-2');
+    });
+  });
 });

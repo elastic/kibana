@@ -31,8 +31,8 @@ export const subsectionPart = sectionAssembly.definePart<
 
 /** Declarative body subsection, exposed through Section and Accordion. */
 export const Subsection = subsectionPart.createComponent<FlyoutBodySubsectionProps>({
-  resolve: ({ id, title, children, 'data-test-subj': dataTestSubj }, { hasBorder }) => (
-    <FlyoutSubsection id={id} title={title} hasBorder={hasBorder} data-test-subj={dataTestSubj}>
+  resolve: ({ children, ...subsectionProps }, { hasBorder }) => (
+    <FlyoutSubsection {...subsectionProps} hasBorder={hasBorder}>
       {children}
     </FlyoutSubsection>
   ),

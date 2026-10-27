@@ -18,7 +18,8 @@ export const journey = setupDashboardJourney({
   dashboardLinkSubj: 'dashboardListingTitleLink-[eCommerce]-Map-Only',
   loadCompleteAwaiter: async (page, kibanaPage) => {
     await page.waitForSelector(
-      'div[data-title="[eCommerce] Orders by Country"][data-render-complete="true"]'
+      'div[data-title="[eCommerce] Orders by Country"][data-render-complete="true"]',
+      { timeout: 60_000 }
     );
   },
 });

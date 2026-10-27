@@ -87,11 +87,11 @@ describe('GET /internal/entity_details/ai_summary - entityDetailsGetAiSummaryRou
     jest.clearAllMocks();
   });
 
-  const buildRequest = (entityId = 'user:alice@local', entityType = 'user') =>
+  const buildRequest = (entityId = 'user:alice@local', entityType = 'user', mode?: string) =>
     requestMock.create({
       method: 'get',
       path: ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL,
-      query: { entityId, entityType },
+      query: { entityId, entityType, ...(mode ? { mode } : {}) },
     });
 
   it('returns the persisted summary mapped from the metadata doc with canRead: true', async () => {
@@ -145,7 +145,46 @@ describe('GET /internal/entity_details/ai_summary - entityDetailsGetAiSummaryRou
     expect(mockGetLatestByEntityId).toHaveBeenCalledWith({
       entityId: 'host:server-1',
       eventAction: 'ai_summary_generated',
+      filter: [{ bool: { must_not: { exists: { field: 'Ai_summary.variant_id' } } } }],
     });
+  });
+
+  it('excludes variant-tagged docs when mode is omitted (single-entity summary is untagged)', async () => {
+    mockGetLatestByEntityId.mockResolvedValue(null);
+    await server.inject(buildRequest('host:server-1', 'host', 'single'), context);
+
+    expect(mockGetLatestByEntityId).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: [{ bool: { must_not: { exists: { field: 'Ai_summary.variant_id' } } } }],
+      })
+    );
+  });
+
+  it('reads only the resolution-group variant when mode is resolved', async () => {
+    mockGetLatestByEntityId.mockResolvedValue({
+      ...STORED_DOC,
+      'Ai_summary.variant_id': 'resolved',
+    });
+    const response = await server.inject(
+      buildRequest('host:server-1', 'host', 'resolved'),
+      context
+    );
+
+    expect(mockGetLatestByEntityId).toHaveBeenCalledWith({
+      entityId: 'host:server-1',
+      eventAction: 'ai_summary_generated',
+      filter: [{ term: { 'Ai_summary.variant_id': 'resolved' } }],
+    });
+    expect(response.body.summary.variant_id).toBe('resolved');
+  });
+
+  it('rejects an unknown mode', async () => {
+    const result = server.validate(buildRequest('host:server-1', 'host', 'group'));
+
+    expect(result.badRequest).toHaveBeenCalledWith(
+      'mode: Invalid option: expected one of "single"|"resolved"'
+    );
+    expect(mockGetLatestByEntityId).not.toHaveBeenCalled();
   });
 
   it('falls back to { summary: null, canRead: false } on a 403 (no metadata read access)', async () => {

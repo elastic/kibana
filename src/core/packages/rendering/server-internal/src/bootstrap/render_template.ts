@@ -107,7 +107,12 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   // window.onload, this avoids blocking on font/favicon downloads before
   // starting bundle loads.
   (function () {
-    function failure() {
+    function failure(event) {
+      var failedTarget = event && event.target ? event.target : {};
+      if (window.console) {
+        window.console.error('Kibana bootstrap failed: could not load ' + (failedTarget.src || failedTarget.href || 'a required asset'));
+      }
+
       // make subsequent calls to failure() noop
       failure = function () {};
 
@@ -117,18 +122,27 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
 
       var err = document.createElement('div');
       err.style.textAlign = 'center';
-      err.style.padding = '120px 20px';
+      err.style.padding = 'min(240px, 20vh) 20px';
       err.style.fontFamily = 'Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif';
+      err.style.maxInlineSize = '420px';
+      err.style.margin = '0 auto';
 
       var errorTitleEl = document.createElement('h1');
       errorTitleEl.className = 'kbnBootstrapErrorTitle';
       errorTitleEl.innerText = errorTitle;
-      errorTitleEl.style.margin = '20px';
+      errorTitleEl.style.fontSize = '24px';
+      errorTitleEl.style.fontWeight = '600';
+      errorTitleEl.style.lineHeight = '2rem';
+      errorTitleEl.style.letterSpacing = '-0.2px';
+      errorTitleEl.style.margin = '0 0 8px';
 
       var errorTextEl = document.createElement('p');
       errorTextEl.className = 'kbnBootstrapErrorText';
       errorTextEl.innerText = errorText;
-      errorTextEl.style.margin = '20px';
+      errorTextEl.style.fontSize = '14px';
+      errorTextEl.style.fontWeight = '400';
+      errorTextEl.style.lineHeight = '1.5';
+      errorTextEl.style.margin = '0 auto 24px';
 
       var errorReloadEl = document.createElement('button');
       errorReloadEl.className = 'kbnBootstrapErrorButton';
@@ -137,7 +151,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
         location.reload();
       };
       errorReloadEl.setAttribute('style',
-       'cursor: pointer; padding-inline: 12px; block-size: 40px; font-size: 1rem; line-height: 1.4286rem; border-radius: 6px; min-inline-size: 112px; outline-color: rgb(0, 0, 0); border:none'
+       'cursor: pointer; padding-inline: 12px; block-size: 40px; font-size: 14px; font-weight: 450; line-height: 40px; border-radius: 8px; border:none'
       );
 
       err.appendChild(errorTitleEl);

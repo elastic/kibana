@@ -26,7 +26,7 @@ export function ViewInDiscoverButton({
       color="text"
       data-test-subj={`streamsDiscoverActionButton-${stream.name}`}
       href={discoverLink}
-      iconType="discoverApp"
+      iconType="productDiscover"
       size="s"
     >
       {i18n.translate('xpack.streams.flyout.openInDiscoverBadgeLabel', {

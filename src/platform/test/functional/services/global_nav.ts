@@ -34,7 +34,7 @@ export class GlobalNavService extends FtrService {
   public async getPageTitle(): Promise<string> {
     const legacyTitleSelector = '.euiPageHeader h1.euiTitle';
     return await this.retry.try(async () => {
-      if (await this.testSubjects.exists('appHeaderTitle', { timeout: 0 })) {
+      if (await this.testSubjects.exists('appHeaderTitle')) {
         return await this.testSubjects.getVisibleText('appHeaderTitle');
       }
       if (await this.find.existsByCssSelector(legacyTitleSelector, 0)) {
@@ -54,10 +54,10 @@ export class GlobalNavService extends FtrService {
    */
   public async isProjectChrome(): Promise<boolean> {
     const detectHeader = async (): Promise<boolean | undefined> => {
-      if (await this.testSubjects.exists(CHROME_HEADER_TEST_SUBJECTS.root, { timeout: 0 })) {
+      if (await this.testSubjects.exists(CHROME_HEADER_TEST_SUBJECTS.root)) {
         return true;
       }
-      if (await this.testSubjects.exists('headerGlobalNav', { timeout: 0 })) {
+      if (await this.testSubjects.exists('headerGlobalNav')) {
         return false;
       }
       return undefined;
@@ -107,7 +107,7 @@ export class GlobalNavService extends FtrService {
   }
 
   public async clickNewsfeed(): Promise<void> {
-    if (!(await this.testSubjects.exists('helpMenuWhatsNewButton', { timeout: 0 }))) {
+    if (!(await this.testSubjects.exists('helpMenuWhatsNewButton'))) {
       await this.testSubjects.click(CHROME_HEADER_TEST_SUBJECTS.helpButton);
     }
     await this.testSubjects.click('helpMenuWhatsNewButton');

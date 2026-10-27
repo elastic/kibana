@@ -36,8 +36,8 @@ export function MobileServiceOverviewServiceMapSection() {
     kuery,
   });
 
-  // Seed the service flyout with the page's filters so its charts match the
-  // mobile service overview charts.
+  // Chart filters only. The flyout copies the embeddable's resolved start/end
+  // when it opens and keeps that window across Refresh.
   const flyoutOptions = useMemo(
     () => ({
       transactionType,

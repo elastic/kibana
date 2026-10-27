@@ -13,14 +13,12 @@ import {
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
-  LATEST_INDEX,
-  UPDATES_INDEX,
   ENTRA_SOURCE_INDEX,
 } from '../../../common/fixtures/constants';
-import { RESOLUTION_RULE_IDS, FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
+import { RESOLUTION_RULE_IDS } from '../../../../../common';
 import {
   assertNotResolved,
-  clearEntityStoreIndices,
+  clearInstalledEntityStoreDocuments,
   seedEntityAnalyticsSource,
   seedUserEntity,
   triggerMaintainerRun,
@@ -35,7 +33,7 @@ apiTest.describe(
     let defaultHeaders: Record<string, string>;
     let internalHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiClient, esClient, kbnClient, samlAuth }) => {
+    apiTest.beforeAll(async ({ esClient, samlAuth }) => {
       const credentials = await samlAuth.asInteractiveUser('admin');
       defaultHeaders = {
         ...credentials.cookieHeader,
@@ -45,32 +43,8 @@ apiTest.describe(
         ...credentials.cookieHeader,
         ...INTERNAL_HEADERS,
       };
-
-      await kbnClient.uiSettings.update({
-        [FF_ENABLE_ENTITY_STORE_V2]: true,
-      });
-
-      await esClient.indices.delete({
-        index: [LATEST_INDEX, UPDATES_INDEX, ENTRA_SOURCE_INDEX],
-        ignore_unavailable: true,
-      });
-
-      const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
-      expect([200, 201]).toContain(installResponse.statusCode);
-
-      const initResponse = await apiClient.post(
-        ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
-        {
-          headers: internalHeaders,
-          responseType: 'json',
-          body: {},
-        }
-      );
-      expect([200, 201]).toContain(initResponse.statusCode);
+      await clearInstalledEntityStoreDocuments(esClient);
+      await esClient.indices.delete({ index: ENTRA_SOURCE_INDEX, ignore_unavailable: true });
     });
 
     apiTest.beforeEach(async ({ apiClient, esClient }) => {
@@ -95,13 +69,17 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
-      expect(response.statusCode).toBe(200);
-      await clearEntityStoreIndices(esClient);
+      const disable = await apiClient.put(
+        ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_DISABLE(
+          RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION
+        ),
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+        }
+      );
+      expect(disable.statusCode).toBe(200);
+
       await esClient.indices.delete({ index: ENTRA_SOURCE_INDEX, ignore_unavailable: true });
     });
 

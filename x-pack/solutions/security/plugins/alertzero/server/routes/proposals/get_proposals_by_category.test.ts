@@ -8,6 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RouteDependencies } from '../register_routes';
+import { createRouteContextMock } from '../route_context.mock';
 import { registerGetProposalsByCategoryRoute } from './get_proposals_by_category';
 
 const makeDeps = (conversationProposalsService: unknown) => {
@@ -40,13 +41,31 @@ const makeDeps = (conversationProposalsService: unknown) => {
 };
 
 describe('registerGetProposalsByCategoryRoute', () => {
+  it('returns 404 when the per-space setting is off', async () => {
+    const listByCategory = jest.fn();
+    const { handler } = makeDeps({ listByCategory });
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(
+      createRouteContextMock({ settingEnabled: false }),
+      httpServerMock.createKibanaRequest({
+        params: { category: 'respond' },
+        query: { size: '10', from: '0' },
+      }),
+      response
+    );
+
+    expect(response.notFound).toHaveBeenCalled();
+    expect(listByCategory).not.toHaveBeenCalled();
+  });
+
   it('delegates to listByCategory with the correct category, size, from, and spaceId', async () => {
     const listByCategory = jest.fn().mockResolvedValue({ proposals: [], total: 0 });
     const { handler } = makeDeps({ listByCategory });
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({
         path: '/internal/alertzero/proposals/category/respond',
         params: { category: 'respond' },
@@ -62,6 +81,16 @@ describe('registerGetProposalsByCategoryRoute', () => {
     expect(response.ok).toHaveBeenCalledWith({ body: { proposals: [], total: 0 } });
   });
 
+  it('accepts an entity filter and bounds it', () => {
+    const { validateQuery } = makeDeps({ listByCategory: jest.fn() });
+
+    expect(validateQuery({ entity: 'host-1' })).toEqual({
+      value: { size: 10, from: 0, entity: 'host-1' },
+    });
+    expect(validateQuery({ entity: '' })).toHaveProperty('error');
+    expect(validateQuery({ entity: 'x'.repeat(257) })).toHaveProperty('error');
+  });
+
   it('accepts size=0, so a collapsed accordion can read the total without the rows', () => {
     const { validateQuery } = makeDeps({ listByCategory: jest.fn() });
 
@@ -74,7 +103,7 @@ describe('registerGetProposalsByCategoryRoute', () => {
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({
         params: { category: 'respond' },
         query: { size: 0, from: 0 },
@@ -98,7 +127,7 @@ describe('registerGetProposalsByCategoryRoute', () => {
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({
         params: { category: 'respond' },
         query: { size: '10', from: '0' },

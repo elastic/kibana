@@ -20,7 +20,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { openSourceModal } from '../services/source_modal';
 
 import type { GraphStore } from '../state_management';
-import { setDatasource, submitSearchSaga } from '../state_management';
+import { registerWorkspaceListeners, setDatasource } from '../state_management';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
 
@@ -91,8 +91,7 @@ const SearchBarHarness = (props: SearchBarProps) => {
   );
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/229631
-describe.skip('search_bar', () => {
+describe('search_bar', () => {
   let dispatchSpy: jest.Mock;
   let store: GraphStore;
   const defaultProps: SearchBarProps = {
@@ -147,7 +146,7 @@ describe.skip('search_bar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     store = createMockGraphStore({
-      sagas: [submitSearchSaga],
+      listeners: [registerWorkspaceListeners],
     }).store;
 
     store.dispatch(

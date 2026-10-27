@@ -41,6 +41,10 @@ interface CaseRouteHandlerArguments<P, Q, B> {
   response: KibanaResponseFactory;
   logger: Logger;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  /**
+   * Counts created attachments per type under this route's usage counter name.
+   */
+  incrementAttachmentTypeCounters: (types: string[]) => void;
 }
 
 export interface CaseRoute<P = unknown, Q = unknown, B = unknown> {

@@ -33,7 +33,11 @@ export const registerGetProposalRoute = ({
       },
       async (_context, request, response) => {
         try {
-          const body = await getProposalsService().get(request.params.id, getSpaceId(request));
+          const body = await getProposalsService().get(
+            request.params.id,
+            getSpaceId(request),
+            request
+          );
           return response.ok({ body });
         } catch (error) {
           return handleRouteError(error, response, logger);

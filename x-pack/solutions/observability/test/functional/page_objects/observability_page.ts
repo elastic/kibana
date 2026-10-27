@@ -12,7 +12,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export function ObservabilityPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const textValue = 'Foobar';
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
 
   return {
     async clickSolutionNavigationEntry(appId: string, navId: string) {
@@ -64,7 +64,7 @@ export function ObservabilityPageProvider({ getService, getPageObjects }: FtrPro
     },
 
     async getDatePickerRangeText() {
-      if (await testSubjects.exists('dateRangePickerControlButton', { timeout: 2000 })) {
+      if (await PageObjects.timePicker.isNewDateRangePicker()) {
         // New DateRangePicker renders the humanised range as the control button's
         // visible text (the `dateRangePickerValueDisplay` node), e.g. "Last 15
         // minutes". The button has no `value` attribute.

@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import {
@@ -32,7 +32,7 @@ import { NonEmptyString } from '../../model/primitives.gen';
 export const RulePreviewParams = lazySchema(() =>
   z.object({
     invocationCount: z.number().int(),
-    timeframeEnd: z.string().datetime(),
+    timeframeEnd: isoDateTime(),
   })
 );
 export type RulePreviewParams = z.infer<typeof RulePreviewParams>;

@@ -5,6 +5,7 @@ skip_labels:
   - 'reviewer:skip-ai'
 draft_bypass_labels:
   - 'ci:draft-checks'
+  - 'libra:enable-draft'
 paths:
   exclude:
     - '.github/workflows/*.lock.yml'
@@ -12,3 +13,4 @@ paths:
     - '**/.meta/**'
     - '**/moon.yml'
     - 'oas_docs/output/**'
+    - 'src/platform/packages/private/kbn-workflow-step-schema-cli/generated/**'

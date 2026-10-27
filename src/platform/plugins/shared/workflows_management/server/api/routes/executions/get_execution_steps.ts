@@ -77,7 +77,8 @@ export function registerGetExecutionStepsRoute({ router, api, spaces }: RouteDep
                 page,
                 size,
               },
-              spaceId
+              spaceId,
+              request
             );
           assertCanReadManagedWorkflowExecution(request, workflowExecution);
 

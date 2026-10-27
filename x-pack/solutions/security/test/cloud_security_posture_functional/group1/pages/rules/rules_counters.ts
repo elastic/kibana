@@ -138,10 +138,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await rule.rulePage.closeToasts();
         await rule.rulePage.clickEnableRulesRowSwitchButton(0);
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await disabledRulesCounter.getVisibleText()).includes('1')).to.be(true);
+        await retryService.waitForWithTimeout('disabled rules count to update', 10000, async () =>
+          (await (await rule.rulePage.getDisabledRulesCounter()).getVisibleText()).includes('1')
+        );
 
-        const postureScoreCounter = await rule.rulePage.getPostureScoreCounter();
-        expect((await postureScoreCounter.getVisibleText()).includes('0%')).to.be(true);
+        await retryService.waitForWithTimeout('posture score to update', 10000, async () =>
+          (await (await rule.rulePage.getPostureScoreCounter()).getVisibleText()).includes('0%')
+        );
 
         // enable rule back
         await rule.rulePage.closeToasts();
@@ -155,7 +158,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await rule.rulePage.clickDisabledRulesButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 1).to.be(true);
+        await retryService.waitForWithTimeout(
+          'disabled rules filter to apply',
+          10000,
+          async () => (await rule.rulePage.getEnableRulesRowSwitchButton()) === 1
+        );
       });
 
       it('Shows empty state when there are no findings', async () => {

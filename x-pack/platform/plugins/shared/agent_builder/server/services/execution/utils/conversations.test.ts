@@ -15,7 +15,9 @@ import type {
   ConversationRoundAuthor,
   ConversationRoundStep,
   RoundCompleteEvent,
+  TimelineEvent,
 } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import {
   AgentBuilderErrorCode,
   ChatEventType,
@@ -30,6 +32,8 @@ import {
   createConversationNotFoundError,
   createRequestAbortedError,
   isAttachmentEvent,
+  resumeExecutionId,
+  roundUserMessageEventId,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import {
@@ -37,13 +41,14 @@ import {
   createRound,
   createConversationClientMock,
 } from '../../../test_utils';
+import { nextResumeIndex } from '../../conversation/client/rounds_to_events';
 import type { ConversationWithOperation } from './conversations';
 import {
   appendResumeExecution$,
   appendRoundTerminated$,
   getConversation,
   persistExecutionInterruption,
-  persistRoundInput,
+  persistUserMessage,
 } from './conversations';
 import { userMessageEvent } from '../../conversation/client/rounds_to_events';
 
@@ -81,16 +86,11 @@ describe('conversations utils', () => {
         expect(result.operation).toBe('CREATE');
       });
 
-      it('returns UPDATE operation when no conversationId is provided and origin matches an existing conversation', async () => {
+      it('creates a conversation with the origin without looking it up, which the execution service did', async () => {
         const conversationClient = createConversationClientMock();
         const origin = {
           external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
         };
-        const existingConversation = createEmptyConversation({
-          id: 'existing-conversation',
-          origin,
-        });
-        conversationClient.getByOrigin.mockResolvedValue(existingConversation);
 
         const result = await getConversation({
           agentId: 'test-agent',
@@ -99,9 +99,9 @@ describe('conversations utils', () => {
           origin,
         });
 
-        expect(result.operation).toBe('UPDATE');
-        expect(result.id).toBe('existing-conversation');
-        expect(conversationClient.getByOrigin).toHaveBeenCalledWith(origin);
+        expect(result.operation).toBe('CREATE');
+        expect(result.origin).toEqual(origin);
+        expect(conversationClient.getByOrigin).not.toHaveBeenCalled();
       });
 
       it('defaults access control to private for new conversation placeholders', async () => {
@@ -276,7 +276,7 @@ describe('conversations utils', () => {
     });
   });
 
-  describe('persistRoundInput (receipt-time input write)', () => {
+  describe('persistUserMessage', () => {
     const withOperation = (
       conversation: Conversation,
       operation: 'CREATE' | 'UPDATE'
@@ -285,26 +285,32 @@ describe('conversations utils', () => {
     const runReceipt = async ({
       conversation,
       conversationClient,
-      roundId = 'round-1',
+      eventId = 'round-1::user_message',
       receivedAt = new Date('2024-01-01T00:00:00.000Z'),
       input = { message: 'hi' },
       author,
+      additionalEvents,
+      attachments,
     }: {
       conversation: ConversationWithOperation;
       conversationClient: ReturnType<typeof createConversationClientMock>;
-      roundId?: string;
+      eventId?: string;
       receivedAt?: Date;
       input?: { message?: string };
       author?: ConversationRoundAuthor;
+      additionalEvents?: TimelineEvent[];
+      attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
     }) => {
       conversationClient.appendEvents.mockResolvedValue(conversation);
-      await persistRoundInput({
+      return persistUserMessage({
         conversation,
         conversationClient,
-        roundId,
+        eventId,
         receivedAt,
         input,
         author,
+        additionalEvents,
+        attachments,
       });
     };
 
@@ -350,6 +356,48 @@ describe('conversations utils', () => {
       expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
     });
 
+    it('passes appendRefresh to the append on UPDATE, and leaves the default otherwise', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE');
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+
+      const persist = (appendRefresh?: false) =>
+        persistUserMessage({
+          conversation,
+          conversationClient,
+          eventId: 'round-1::user_message',
+          receivedAt: new Date(),
+          input: { message: 'hi' },
+          appendRefresh,
+        });
+
+      await persist(false);
+      await persist();
+
+      const [[, withRefresh], [, withDefault]] = conversationClient.appendEvents.mock.calls;
+      expect(withRefresh).toEqual({ access: 'converse', source: 'execution', refresh: false });
+      expect(withDefault).toEqual({ access: 'converse', source: 'execution' });
+    });
+
+    it('ignores appendRefresh on CREATE: the create still refreshes', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
+
+      await persistUserMessage({
+        conversation,
+        conversationClient,
+        eventId: 'round-1::user_message',
+        receivedAt: new Date(),
+        input: { message: 'hi' },
+        appendRefresh: false,
+      });
+
+      expect(conversationClient.create).toHaveBeenCalledWith(expect.anything(), {
+        source: 'execution',
+      });
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
+
     it('falls back to appendEvents when CREATE races another writer (conversationAlreadyExists)', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
@@ -376,15 +424,43 @@ describe('conversations utils', () => {
       conversationClient.create.mockRejectedValueOnce(boom);
 
       await expect(
-        persistRoundInput({
+        persistUserMessage({
           conversation,
           conversationClient,
-          roundId: 'round-1',
+          eventId: 'round-1::user_message',
           receivedAt: new Date(),
           input: { message: 'hi' },
         })
       ).rejects.toBe(boom);
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
+
+    it('forwards the caller-supplied activity to create, and no attribution otherwise', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
+      const receipt = {
+        conversation,
+        conversationClient,
+        eventId: 'round-1::user_message',
+        receivedAt: new Date(),
+        input: { message: 'hi' },
+      };
+      const activity = {
+        actor: { type: EventActorType.agent, id: 'parent-agent' },
+        execution_id: 'parent-round::execution',
+      };
+
+      await persistUserMessage({ ...receipt, activity });
+      expect(conversationClient.create).toHaveBeenLastCalledWith(
+        expect.objectContaining({ id: 'conv-1' }),
+        { source: 'execution', activity }
+      );
+
+      await persistUserMessage(receipt);
+      expect(conversationClient.create).toHaveBeenLastCalledWith(
+        expect.objectContaining({ id: 'conv-1' }),
+        { source: 'execution' }
+      );
     });
 
     it('defaults an undefined message to an empty string so the receipt-time snapshot is a valid RoundInput', async () => {
@@ -427,25 +503,47 @@ describe('conversations utils', () => {
       );
     };
 
-    it('appends attachment_events after the projected round events in the same write', async () => {
+    it('writes attachment_events where they happened among the projected round events', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE');
-      const round = createRound({ id: 'round-1', status: ConversationRoundStatus.completed });
-      const attachmentEvent = attachmentAddedEvent();
+      const round = createRound({
+        id: 'round-1',
+        status: ConversationRoundStatus.completed,
+        steps: [
+          {
+            type: ConversationRoundStepType.toolCall,
+            tool_call_id: 'call-1',
+            tool_id: 'my.tool',
+            params: {},
+            results: [],
+            progression: [],
+          },
+          { type: ConversationRoundStepType.reasoning, reasoning: 'done' },
+        ],
+      });
+      const input = { ...attachmentAddedEvent('input'), trigger_event_id: 'round-1::user_message' };
+      const produced = attachmentAddedEvent('produced');
+      produced.data = { ...produced.data, source: 'execution', tool_call_id: 'call-1' };
 
       await runEnd({
         conversation,
         conversationClient,
         roundCompleteEvent: {
           type: ChatEventType.roundComplete,
-          data: { round, resumed: false, attachment_events: [attachmentEvent] },
+          data: { round, resumed: false, attachment_events: [input, produced] },
         },
       });
 
       const [args] = conversationClient.replaceRoundEvents.mock.calls[0];
-      const ids = args.events.map((e: { id: string }) => e.id);
-      expect(ids[ids.length - 1]).toBe('att-evt-1');
-      expect(ids).toContain('round-1::execution_terminated');
+      expect(args.events.map((e: { id: string }) => e.id)).toEqual([
+        'round-1::user_message',
+        'input',
+        'round-1::execution_started',
+        'round-1::step::0',
+        'produced',
+        'round-1::step::1',
+        'round-1::execution_terminated',
+      ]);
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
 
@@ -738,6 +836,19 @@ describe('conversations utils', () => {
       ] as never,
     });
 
+    it('derives the same execution index telemetry reports, so the two cannot drift', () => {
+      // `nextResumeIndex` is the single source of the index: this write path stamps it into
+      // the event ids, and `buildExecutionTelemetry` reports it. A divergence would silently
+      // mislabel which execution a billing record belongs to.
+      const conversation = pausedConversation();
+
+      expect(nextResumeIndex(conversation, 'round-1')).toBe(1);
+      expect(resumeExecutionId('round-1', nextResumeIndex(conversation, 'round-1'))).toBe(
+        'round-1::execution::1'
+      );
+      expect(nextResumeIndex(conversation, 'some-other-round')).toBe(0);
+    });
+
     const followUpRound = () => ({
       ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
       started_at: '2024-01-01T00:05:00.000Z',
@@ -746,7 +857,7 @@ describe('conversations utils', () => {
         { type: ConversationRoundStepType.reasoning, reasoning: 'done' } as ConversationRoundStep,
       ],
       response: { message: 'ok' },
-      input: { message: 'resume msg', attachment_refs: [{ attachment_id: 'att-2', version: 1 }] },
+      input: { message: 'resume msg' },
     });
 
     const run = (
@@ -763,11 +874,16 @@ describe('conversations utils', () => {
         }).pipe(toArray())
       );
 
-    it('appends attachment_events re-stamped with the resume execution id', async () => {
+    it('writes attachment_events re-stamped with the resume execution id, inputs after the prompt_response', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = pausedConversation();
       conversationClient.appendEvents.mockResolvedValue(conversation);
-      const attachmentEvent = attachmentAddedEvent();
+      const input = {
+        ...attachmentAddedEvent('input'),
+        trigger_event_id: 'round-1::prompt_response::1',
+      };
+      const leftover = attachmentAddedEvent('leftover');
+      leftover.data = { ...leftover.data, source: 'execution' };
 
       await run(conversation, conversationClient, {
         type: ChatEventType.roundComplete,
@@ -775,13 +891,20 @@ describe('conversations utils', () => {
           round: createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
           resumed: true,
           resume_execution: { follow_up_round: followUpRound() },
-          attachment_events: [attachmentEvent],
+          attachment_events: [input, leftover],
         },
       });
 
       const [args] = conversationClient.appendEvents.mock.calls[0];
-      const last = args.events[args.events.length - 1];
-      expect(last).toEqual({ ...attachmentEvent, execution_id: 'round-1::execution::1' });
+      expect(args.events.map((e: { id: string }) => e.id)).toEqual([
+        'round-1::prompt_response::1',
+        'input',
+        'round-1::execution::1::execution_started',
+        'round-1::execution::1::step::0',
+        'leftover',
+        'round-1::execution::1::execution_terminated',
+      ]);
+      expect(args.events[1]).toEqual({ ...input, execution_id: 'round-1::execution::1' });
     });
 
     it('resumes a legacy (non events-native) paused conversation through the same append-only path', async () => {
@@ -843,7 +966,7 @@ describe('conversations utils', () => {
       expect(promptResponse.data).toMatchObject({
         prompt_requested_event_id: 'round-1::execution_terminated',
         responses: { 'tools.my_tool.confirmation': { allow: true } },
-        input: { message: 'resume msg', attachment_refs: [{ attachment_id: 'att-2', version: 1 }] },
+        input: { message: 'resume msg' },
       });
       expect(emitted.map((event) => event.type)).toEqual([
         TimelineEventType.executionTerminated,
@@ -1022,7 +1145,7 @@ describe('conversations utils', () => {
       operation: 'UPDATE',
       events: [
         userMessageEvent(
-          { id: 'r1', input: { message: 'hi' }, started_at: T0 },
+          { id: 'r1::user_message', input: { message: 'hi' }, createdAt: T0 },
           createEmptyConversation({ id: 'c1' })
         ),
       ],
@@ -1085,7 +1208,8 @@ describe('conversations utils', () => {
         'r1::step::0',
         'r1::execution_failed',
       ]);
-      expect(call.events[0].data).toEqual({ message: 'hi', attachment_refs: [ref] }); // processed input wins
+      // the received message, never the processed input the interruption carries
+      expect(call.events[0].data).toEqual({ message: 'hi' });
       expect(call.events[0].created_at).toBe(T0);
       // an interrupted round is `completed` (with an `interruption`); it carries no resume state
       expect(call.status).toBe(ConversationRoundStatus.completed);
@@ -1122,7 +1246,7 @@ describe('conversations utils', () => {
       expect(written.map((e) => e.type)).toEqual([TimelineEventType.executionAborted]);
     });
 
-    it('fresh round: the processed attachment_context is persisted on the rewritten user_message', async () => {
+    it('fresh round: a processed attachment_context never reaches the rewritten user_message', async () => {
       const conversationClient = createConversationClientMock();
       echoWrite(conversationClient);
 
@@ -1135,20 +1259,20 @@ describe('conversations utils', () => {
       });
 
       const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
-      expect(call.events[0].data).toMatchObject({ attachment_context: '<attachments/>' });
+      expect(call.events[0].data).toEqual({ message: 'hi' });
     });
 
-    it('fresh round: the rebuilt user_message equals what persistRoundInput wrote', async () => {
+    it('fresh round: the rebuilt user_message equals what persistUserMessage wrote', async () => {
       const receiptClient = createConversationClientMock();
       const conversation = freshConversation();
       const author: ConversationRoundAuthor = { id: 'slack-U1', username: 'bob' };
       const origin = { type: ConversationOriginType.Slack };
-      await persistRoundInput({
+      await persistUserMessage({
         conversation,
         conversationClient: receiptClient,
-        roundId: 'r1',
+        eventId: roundUserMessageEventId('r1'),
         receivedAt,
-        input: { message: 'hi', attachment_refs: [ref] },
+        input: { message: 'hi' },
         author,
         origin,
       });
@@ -1159,7 +1283,8 @@ describe('conversations utils', () => {
       await persistExecutionInterruption({
         ...baseParams(conversationClient),
         conversation,
-        input: { message: 'hi', attachment_refs: [ref] },
+        input: { message: 'hi' },
+        interrupted: interruptedData(),
         author,
         origin,
         error: new Error('boom'),
@@ -1177,6 +1302,7 @@ describe('conversations utils', () => {
         ...attachmentAddedEvent('att-in'),
         actor: { type: EventActorType.user, id: 'u1' },
         execution_id: 'r1::execution',
+        trigger_event_id: 'r1::user_message',
       } as AttachmentTimelineEvent;
       const produced = {
         ...attachmentAddedEvent('att-out'),
@@ -1204,14 +1330,14 @@ describe('conversations utils', () => {
         [TimelineEventType.attachmentAdded, EventActorType.user, 'r1::execution'],
         [TimelineEventType.attachmentUpdated, EventActorType.agent, 'r1::execution'],
       ]);
-      // the terminal precedes the attachment events, after the steps
+      // the input right after its message, the leftover change right before the terminal
       expect(call.events.map((e) => e.type)).toEqual([
         TimelineEventType.userMessage,
+        TimelineEventType.attachmentAdded,
         TimelineEventType.executionStarted,
         TimelineEventType.executionStep,
-        TimelineEventType.executionFailed,
-        TimelineEventType.attachmentAdded,
         TimelineEventType.attachmentUpdated,
+        TimelineEventType.executionFailed,
       ]);
     });
 
@@ -1397,7 +1523,9 @@ describe('conversations utils', () => {
         error: new Error('boom'),
         interrupted: interruptedData({
           attachments,
-          attachment_events: [attachmentAddedEvent('att-evt-1')],
+          attachment_events: [
+            { ...attachmentAddedEvent('att-evt-1'), trigger_event_id: 'r1::prompt_response::1' },
+          ],
           workspace_id: 'ws-1',
         }),
       });
@@ -1407,6 +1535,10 @@ describe('conversations utils', () => {
       expect(call.workspaceId).toBe('ws-1');
       const attachmentEvent = call.events.find((e) => e.id === 'att-evt-1');
       expect(attachmentEvent?.execution_id).toBe('r1::execution::1');
+      expect(call.events.map((e) => e.id).slice(0, 2)).toEqual([
+        'r1::prompt_response::1',
+        'att-evt-1',
+      ]);
     });
 
     it('returns [] and logs at debug when the client skipped the write (terminal already present)', async () => {
@@ -1476,7 +1608,7 @@ describe('conversations utils', () => {
         'r1::step::0',
         'r1::execution_failed',
       ]);
-      expect(call.events[0].data).toEqual({ message: 'processed', attachment_refs: [ref] });
+      expect(call.events[0].data).toEqual({ message: 'hi' });
       expect(call.events[2].data).toEqual({ step, sequence: 0 });
       expect(call.events[3].data).toMatchObject({
         time_to_last_token: 42,
@@ -1488,10 +1620,51 @@ describe('conversations utils', () => {
       expect(call.attachments).toEqual({ snapshot: [], produced: [{ id: 'a1' }] });
     });
 
+    it('resume, success write failed: the prompt_response gets the follow-up input, never the folded round refs', async () => {
+      const conversationClient = createConversationClientMock();
+      echoWrite(conversationClient);
+      const foldedRound = {
+        ...createRound({ id: 'r1', status: ConversationRoundStatus.completed }),
+        started_at: T0,
+        steps: [step],
+        input: {
+          message: 'hi',
+          attachment_refs: [ref],
+          attachment_context: '<attachments>legacy</attachments>',
+        },
+      };
+      const followUpRound = {
+        ...createRound({ id: 'runner-round-id', status: ConversationRoundStatus.completed }),
+        started_at: T0,
+        input: { message: 'resume msg' },
+      };
+
+      await persistExecutionInterruption({
+        ...baseParams(conversationClient),
+        conversation: pausedConversation(),
+        roundId: 'runner-round-id',
+        input: { message: 'resume msg', prompts: {} },
+        error: new Error('write failed'),
+        completed: {
+          round: foldedRound,
+          resume_execution: { follow_up_round: followUpRound },
+        },
+      });
+
+      const [call] = conversationClient.appendEvents.mock.calls[0];
+      expect(call.events[0].id).toBe('r1::prompt_response::1');
+      expect(call.events[0].data).toEqual(
+        expect.objectContaining({ input: { message: 'resume msg' } })
+      );
+    });
+
     it('fresh round, aborted: persists the abort reason carried by the error as aborted_by', async () => {
       const conversationClient = createConversationClientMock();
       echoWrite(conversationClient);
-      const abortReason = { source: 'api', actor: { id: 'u1', username: 'alice' } };
+      const abortReason = {
+        source: 'api',
+        actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+      };
 
       await persistExecutionInterruption({
         ...baseParams(conversationClient),
@@ -1504,6 +1677,97 @@ describe('conversations utils', () => {
         time_to_last_token: 5,
         model_usage: usage,
         aborted_by: abortReason,
+      });
+    });
+
+    describe('compaction summary', () => {
+      const compactionSummary = {
+        summarized_up_to: { round_id: 'round-1', tool_call_id: 'call-1' },
+        summarized_round_count: 0,
+        covered_round_ids: [],
+        created_at: T0,
+        token_count: 10,
+        structured_data: {
+          discussion_summary: 's',
+          user_intent: 'i',
+          key_topics: [],
+          entities: [],
+          outcomes_and_decisions: [],
+          unanswered_questions: [],
+          agent_actions: [],
+          tool_calls_summary: [],
+        },
+      };
+      const storedState: NonNullable<ConversationWithOperation['state']> = { subagents: {} };
+
+      it('fresh round: persists the summary of a compaction that ran before the interruption, keeping the rest of the state', async () => {
+        const conversationClient = createConversationClientMock();
+        echoWrite(conversationClient);
+
+        await persistExecutionInterruption({
+          ...baseParams(conversationClient),
+          conversation: { ...freshConversation(), state: storedState },
+          error: new Error('boom'),
+          interrupted: interruptedData({ compaction_summary: compactionSummary }),
+        });
+
+        const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+        expect(call.state).toEqual({ ...storedState, compaction_summary: compactionSummary });
+      });
+
+      it('resume: persists the summary with the appended execution', async () => {
+        const conversationClient = createConversationClientMock();
+        echoWrite(conversationClient);
+
+        await persistExecutionInterruption({
+          ...baseParams(conversationClient),
+          conversation: pausedConversation(),
+          input: { prompts: {} },
+          error: new Error('boom'),
+          interrupted: interruptedData({ compaction_summary: compactionSummary }),
+        });
+
+        const [call] = conversationClient.appendEvents.mock.calls[0];
+        expect(call.state).toEqual({ compaction_summary: compactionSummary });
+      });
+
+      it('leaves the state untouched when the summary is the stored one', async () => {
+        const conversationClient = createConversationClientMock();
+        echoWrite(conversationClient);
+
+        await persistExecutionInterruption({
+          ...baseParams(conversationClient),
+          conversation: {
+            ...freshConversation(),
+            state: { ...storedState, compaction_summary: compactionSummary },
+          },
+          error: new Error('boom'),
+          interrupted: interruptedData({ compaction_summary: { ...compactionSummary } }),
+        });
+
+        const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+        expect(call).not.toHaveProperty('state');
+      });
+
+      it('uses the completed conversation state when the success write failed', async () => {
+        const conversationClient = createConversationClientMock();
+        echoWrite(conversationClient);
+        const round = {
+          ...createRound({ id: 'r1', status: ConversationRoundStatus.completed }),
+          started_at: T0,
+        };
+
+        await persistExecutionInterruption({
+          ...baseParams(conversationClient),
+          error: new Error('write failed'),
+          completed: {
+            round,
+            conversation_state: { compaction_summary: compactionSummary },
+          },
+        });
+
+        const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+        expect(call.state).toEqual({ compaction_summary: compactionSummary });
       });
     });
   });

@@ -12,6 +12,7 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { RunWorkflowPanelProps } from '@kbn/workflows-ui';
 import {
+  AlertWorkflowsPanel,
   useRunAlertWorkflowPanel,
   RUN_WORKFLOW_PANEL_ID,
   type UseRunAlertWorkflowPanelProps,
@@ -21,6 +22,17 @@ import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_re
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../translations';
+
+const GENERIC_RUN_PROPS = {
+  runWorkflow: undefined,
+  showSuccessToast: true,
+};
+const mockUseCaseAttachmentWorkflowRun = jest.fn();
+const mockUseCaseAttachmentWorkflowRouting = jest.fn();
+jest.mock('@kbn/cases-plugin/public', () => ({
+  useCaseAttachmentWorkflowRun: (params: unknown) => mockUseCaseAttachmentWorkflowRun(params),
+  useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
+}));
 
 const mockMutate = jest.fn();
 const mockUseRunWorkflow = jest.fn(() => ({ mutate: mockMutate }));
@@ -157,6 +169,8 @@ const renderContextMenu = (
 describe('useRunAlertWorkflowPanel', () => {
   beforeEach(() => {
     mockRunWorkflowPanelProps.length = 0;
+    mockUseCaseAttachmentWorkflowRun.mockReturnValue(GENERIC_RUN_PROPS);
+    mockUseCaseAttachmentWorkflowRouting.mockReturnValue('outside');
     mockUseRunWorkflow.mockReturnValue({ mutate: mockMutate });
     mockUseWorkflowsCapabilities.mockReturnValue({
       canCreateWorkflow: true,
@@ -249,6 +263,28 @@ describe('useRunAlertWorkflowPanel', () => {
       expect(result.current.runWorkflowMenuItem).toEqual([]);
       expect(result.current.runAlertWorkflowPanel).toEqual([]);
     });
+
+    it('returns empty lists inside a case where Cases workflow runs are unavailable', () => {
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('unavailable');
+
+      const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.runWorkflowMenuItem).toEqual([]);
+      expect(result.current.runAlertWorkflowPanel).toEqual([]);
+    });
+
+    it('returns the menu item inside a case where Cases workflow runs are available', () => {
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
+
+      const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.runWorkflowMenuItem).toHaveLength(1);
+      expect(result.current.runAlertWorkflowPanel).toHaveLength(1);
+    });
   });
 
   describe('panel content', () => {
@@ -295,7 +331,191 @@ describe('useRunAlertWorkflowPanel', () => {
         unmanagedManualWorkflow,
       ]);
     });
+
+    it('passes runWorkflow as undefined when outside a case (falls back to generic Workflows API)', async () => {
+      mockUseCaseAttachmentWorkflowRun.mockReturnValue(GENERIC_RUN_PROPS);
+
+      const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
+        wrapper: TestProviders,
+      });
+      const items = result.current.runWorkflowMenuItem;
+      const panels = result.current.runAlertWorkflowPanel;
+      renderContextMenu(items, panels);
+
+      await waitFor(() => {
+        const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+        expect(panelProps?.runWorkflow).toBeUndefined();
+        expect(panelProps?.showSuccessToast).toBe(true);
+      });
+    });
+
+    it('passes the Cases executor as runWorkflow when inside a case', async () => {
+      const mockExecutor = jest.fn();
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
+      mockUseCaseAttachmentWorkflowRun.mockReturnValue({
+        runWorkflow: mockExecutor,
+        showSuccessToast: false,
+      });
+
+      const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
+        wrapper: TestProviders,
+      });
+      const items = result.current.runWorkflowMenuItem;
+      const panels = result.current.runAlertWorkflowPanel;
+      renderContextMenu(items, panels);
+
+      await waitFor(() => {
+        const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+        expect(panelProps?.runWorkflow).toBe(mockExecutor);
+        expect(panelProps?.showSuccessToast).toBe(false);
+      });
+    });
+
+    it('calls the generic attachment hook with the row alert target', async () => {
+      const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
+        wrapper: TestProviders,
+      });
+      const items = result.current.runWorkflowMenuItem;
+      const panels = result.current.runAlertWorkflowPanel;
+      renderContextMenu(items, panels);
+
+      await waitFor(() => {
+        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attachmentType: 'security.alert',
+            target: { attachmentId: 'alert-123' },
+          })
+        );
+      });
+    });
+
+    it('uses a bulk attachment origin for a multi-alert panel', async () => {
+      render(
+        <AlertWorkflowsPanel
+          alertIds={[
+            { _id: 'alert-1', _index: '.alerts' },
+            { _id: 'alert-2', _index: '.alerts' },
+          ]}
+          onClose={jest.fn()}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      await waitFor(() => {
+        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attachmentType: 'security.alert',
+            target: { attachmentIds: ['alert-1', 'alert-2'] },
+          })
+        );
+      });
+    });
+    it('forwards an explicit attachment type to the attachment hook', async () => {
+      render(
+        <AlertWorkflowsPanel
+          alertIds={[{ _id: 'attack-1', _index: '.internal.alerts' }]}
+          attachmentType="security.attack"
+          onClose={jest.fn()}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      await waitFor(() => {
+        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attachmentType: 'security.attack',
+            target: { attachmentIds: ['attack-1'] },
+          })
+        );
+      });
+    });
   });
 });
+describe('AlertWorkflowsPanel run telemetry', () => {
+  const alertIds = [
+    { _id: 'alert-1', _index: '.alerts' },
+    { _id: 'alert-2', _index: '.alerts' },
+  ];
+  const lastPanelProps = () => mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+
+  beforeEach(() => {
+    mockRunWorkflowPanelProps.length = 0;
+    // Outside a case the hook reports the fallback telemetry.
+    mockUseCaseAttachmentWorkflowRun.mockImplementation(({ fallbackTelemetry }) => ({
+      ...GENERIC_RUN_PROPS,
+      telemetry: fallbackTelemetry,
+    }));
+    mockUseCaseAttachmentWorkflowRouting.mockReturnValue('outside');
+    useKibanaMock.mockReturnValue(createMockKibana());
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('reports a row action as a single alert run', async () => {
+    render(
+      <AlertWorkflowsPanel alertIds={[alertIds[0]]} originAlertId="alert-1" onClose={jest.fn()} />,
+      { wrapper: TestProviders }
+    );
+
+    await waitFor(() =>
+      expect(lastPanelProps()?.telemetry).toEqual({
+        origin: 'alert',
+        itemCount: 1,
+        owner: 'securitySolution',
+      })
+    );
+  });
+
+  it('reports a bulk selection as a bulk alert run over the selected alerts', async () => {
+    render(<AlertWorkflowsPanel alertIds={alertIds} isBulk onClose={jest.fn()} />, {
+      wrapper: TestProviders,
+    });
+
+    await waitFor(() =>
+      expect(lastPanelProps()?.telemetry).toEqual({
+        origin: 'alert_bulk',
+        itemCount: 2,
+        owner: 'securitySolution',
+      })
+    );
+  });
+
+  it('reports the surface supplied by the caller', async () => {
+    render(
+      <AlertWorkflowsPanel
+        alertIds={alertIds}
+        telemetrySurface="attack"
+        isBulk
+        onClose={jest.fn()}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    await waitFor(() => expect(lastPanelProps()?.telemetry?.origin).toBe('attack_bulk'));
+  });
+
+  it('reports the telemetry returned by Cases when the run is routed through Cases', async () => {
+    const caseTelemetry = {
+      origin: 'cases.attachments',
+      attachmentType: 'security.alert',
+      itemCount: 2,
+      owner: 'securitySolution',
+    };
+    mockUseCaseAttachmentWorkflowRun.mockReturnValue({
+      runWorkflow: jest.fn(),
+      showSuccessToast: false,
+      telemetry: caseTelemetry,
+    });
+
+    render(<AlertWorkflowsPanel alertIds={alertIds} onClose={jest.fn()} />, {
+      wrapper: TestProviders,
+    });
+
+    await waitFor(() => expect(lastPanelProps()?.telemetry).toEqual(caseTelemetry));
+  });
+});
+
 // Full RunWorkflowPanel behavior (mutate, toasts, manual inputs) is covered by:
 //   src/platform/packages/shared/kbn-workflows-ui/src/components/run_workflow_panel/run_workflow_panel.test.tsx

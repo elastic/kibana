@@ -35,6 +35,12 @@ interface YamlStep {
   if?: string;
   with?: Record<string, unknown>;
   'on-failure'?: { continue?: boolean; retry?: Record<string, unknown> };
+  'agent-id'?: string;
+  'connector-id-by-feature'?: string | string[];
+  'create-conversation'?: boolean;
+  'plugin-id'?: string;
+  'aggregate-by'?: string;
+  timeout?: string;
 }
 
 interface YamlWorkflow {
@@ -110,11 +116,8 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(Object.keys(properties).sort()).toEqual(['attack_discovery_id', 'investigation_id']);
     });
 
-    it('requires both', () => {
-      expect((trigger?.inputs?.required ?? []).slice().sort()).toEqual([
-        'attack_discovery_id',
-        'investigation_id',
-      ]);
+    it('requires the attack and accepts a run with no Investigation', () => {
+      expect(trigger?.inputs?.required).toEqual(['attack_discovery_id']);
     });
 
     it('rejects anything else the caller sends', () => {
@@ -176,8 +179,14 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(JSON.stringify(stepIn('emit_result')?.with)).not.toContain('failed');
     });
 
-    it('never sets failed as a classification anywhere in the workflow', () => {
-      expect(JSON.stringify(stepIn('analyze')?.with)).not.toContain('failed');
+    // The prompt says "query failed", so the agent's message is the wrong place to
+    // scan for the classification. The enum the agent is allowed to return is.
+    it('does not let the agent return the review-derived failed state', () => {
+      const schema = stepIn('analyze')?.with?.schema as {
+        properties?: { verdict?: { enum?: string[] } };
+      };
+
+      expect(schema?.properties?.verdict?.enum).not.toContain('failed');
     });
 
     // The only terminal step, so the failure path cannot reach it: a failed run
@@ -191,7 +200,7 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     // `## Rationale` section.
     it('keeps an absent rationale absent rather than empty', () => {
       expect(stepIn('emit_result')?.with?.rationale_markdown).toBe(
-        '${{ steps.analyze.output.rationale_markdown }}'
+        "${{ steps.keep_model_writeup.output.rows | where: 'keep', true | map: 'rationale_markdown' | first }}"
       );
     });
 
@@ -294,7 +303,11 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
       const payloadValid = evaluate(stepIn('check_payload')?.with?.payload_valid, {
         consts: analysis.consts,
-        steps: { analyze: { output: { verdict, summary_markdown: summaryMarkdown } } },
+        steps: {
+          analyze: {
+            output: { structured_output: { verdict, summary_markdown: summaryMarkdown } },
+          },
+        },
       });
 
       return evaluate(guard?.if, {
@@ -368,6 +381,12 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       );
     });
 
+    // A missing privilege must fail the search. `ignore_unavailable` would turn
+    // that 403 into zero hits and `require_attack_discovery` would report not-found.
+    it('fails the run when the discovery search is not authorized', () => {
+      expect(loadAttack?.with?.ignore_unavailable).toBeUndefined();
+    });
+
     // The persisted document is indexed UNDER `kibana.alert.uuid`, so `_id` is the
     // same value and needs no mapping to be queryable.
     it('reads it by the id it was given', () => {
@@ -380,12 +399,34 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(stepIn('load_investigation')?.type).toBe('ai.conversation.metadata.read');
     });
 
-    // A metadata READ, and nothing else against this conversation: posting to it, or
-    // running `ai.agent` against it, wakes the Investigation agent.
-    it('writes nothing to the Investigation', () => {
+    // A test can start from the attack alone. The review still passes the id when
+    // it opened a conversation, and that read stays a required source.
+    it.each([
+      ['reads the Investigation when the caller names one', 'inv-1', true],
+      ['skips the Investigation when the caller names none', undefined, false],
+      ['skips the Investigation when the caller names a blank one', '', false],
+    ] as const)('%s', (_label, investigationId, reads) => {
+      const condition = String(stepIn('load_investigation')?.if)
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim();
+
       expect(
-        steps.filter((step) => step.type.startsWith('ai.') && step.name !== 'load_investigation')
-      ).toEqual([]);
+        createWorkflowLiquidEngine().evalValueSync(condition, {
+          inputs: { investigation_id: investigationId },
+        })
+      ).toBe(reads);
+    });
+
+    // A metadata READ of the Investigation, and the analysis agent on its own
+    // conversation. Posting to the Investigation, or running `ai.agent` against it,
+    // wakes the Investigation agent.
+    it('does not post to the Investigation', () => {
+      expect(
+        steps
+          .filter((step) => step.type.startsWith('ai.') && step.name !== 'load_investigation')
+          .map((step) => step.name)
+      ).toEqual(['analyze']);
     });
 
     // A required source, so a failure fails the run. Guessing a classification from
@@ -452,7 +493,7 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     });
 
     it('bounds how long an analysis may run', () => {
-      expect(analysis.settings?.timeout).toBeDefined();
+      expect(analysis.settings?.timeout).toBe('10m');
     });
 
     // A dropped run hands its synchronous caller an empty output, which the review
@@ -463,43 +504,629 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     });
   });
 
-  // #19282 replaces this with the analysis proper: the deterministic
-  // pre-computation, the agent reasoning over those facts, and the deterministic
-  // check on the claim it asserted. Until #19280 settles the criteria, the
-  // placeholder returns the one classification that asserts nothing.
-  describe('the placeholder analysis body', () => {
+  describe('the analysis body', () => {
     const analyze = stepIn('analyze');
 
-    it('returns inconclusive until the real analysis lands', () => {
-      expect(analyze?.with?.verdict).toBe('inconclusive');
-    });
-
-    it('returns a classification the analysis is allowed to return', () => {
-      expect(CLASSIFICATIONS).toContain(analyze?.with?.verdict);
-    });
-
-    // The attachment requires a summary, so an analyst is not left to infer that an
-    // `inconclusive` verdict reflects analysis that ran.
-    it('says the analysis has not been implemented', () => {
-      expect(String(analyze?.with?.summary_markdown)).toContain('19282');
-    });
-
-    // The summary is capped at 8k by the attachment schema. The placeholder is
-    // static, so this is measurable rather than a guess.
-    it('stays inside the summary cap', () => {
-      expect(String(analyze?.with?.summary_markdown).length).toBeLessThanOrEqual(8000);
-    });
-
-    // No rationale key at all: there is no reasoning to record, and the field is
-    // optional.
-    it('produces no rationale it cannot justify', () => {
-      expect(analyze?.with?.rationale_markdown).toBeUndefined();
-    });
-
-    // Unlike the console stub it replaces, this one is part of the contract: the
-    // review reads the payload back, so the shell has to produce a real one.
     it('is not a console stub', () => {
       expect(steps.filter((step) => step.type === 'console')).toEqual([]);
+    });
+
+    it('gathers the cited alerts before the agent runs', () => {
+      expect(stepNames.indexOf('require_cited_alerts')).toBeLessThan(stepNames.indexOf('analyze'));
+    });
+
+    it('fails the run when a cited alert is missing', () => {
+      expect(stepIn('require_cited_alerts')?.type).toBe('workflow.fail');
+    });
+
+    // A missing privilege must fail the search. `ignore_unavailable` would turn
+    // that 403 into zero hits and `require_cited_alerts` would report missing alerts.
+    it('fails the run when the alerts search is not authorized', () => {
+      expect(stepIn('load_alerts')?.with?.ignore_unavailable).toBeUndefined();
+    });
+
+    it.each([
+      'load_attack_discovery',
+      'load_alerts',
+      'load_entities',
+      'load_events_by_host_id',
+      'load_events_by_host_name',
+    ] as const)('projects %s so the template payload stays inside the gateway cap', (name) => {
+      expect(stepIn(name)?.with?._source).toEqual(expect.any(Array));
+    });
+
+    it('returns the entity fields the entity_role check reads', () => {
+      expect(stepIn('load_entities')?.with?._source).toEqual(
+        expect.arrayContaining([
+          'entity.sub_type',
+          'entity.name',
+          'asset.environment',
+          'asset.name',
+          'asset.model',
+          'asset.owner',
+          'asset.vendor',
+        ])
+      );
+    });
+
+    it('keeps the alert fields the workflow expressions read', () => {
+      expect(stepIn('load_alerts')?.with?._source).toEqual(
+        expect.arrayContaining(['host.id', 'user.name', 'kibana.alert.original_time'])
+      );
+      expect(stepIn('load_attack_discovery')?.with?._source).toEqual(
+        expect.arrayContaining(['@timestamp', 'kibana.alert.attack_discovery.alert_ids'])
+      );
+    });
+
+    it.each(['load_entities', 'load_events_by_host_id', 'load_events_by_host_name'] as const)(
+      'continues when optional source %s fails',
+      (name) => {
+        expect(stepIn(name)?.['on-failure']?.continue).toBe(true);
+      }
+    );
+
+    it('runs the agent on its own conversation', () => {
+      expect(analyze?.['create-conversation']).toBe(true);
+    });
+
+    it('does not point the agent at the Investigation', () => {
+      expect(JSON.stringify(analyze?.with)).not.toContain('investigation_id');
+    });
+
+    it('gives the agent no tools', () => {
+      const overrides = analyze?.with?.configuration_overrides as { tools?: unknown[] };
+
+      expect(overrides?.tools).toEqual([]);
+    });
+
+    it('prefers a saved template-row model, then the AlertZero frontier feature', () => {
+      expect(analyze?.['connector-id-by-feature']).toEqual([
+        'alertzero_template_models',
+        'alertzero_frontier',
+      ]);
+    });
+
+    it('uses the thin agent', () => {
+      expect(analyze?.['agent-id']).toBe('alertzero-thin-agent');
+    });
+
+    it('finishes the agent inside the workflow timeout', () => {
+      expect(analyze?.timeout).toBe('8m');
+    });
+
+    // The eval suite's verdict_rules.test.ts locks this block to FP_TP_VERDICT_RULES.
+    it('keeps the managed verdict rules', () => {
+      const message = String(analyze?.with?.message);
+      const [, rules = ''] =
+        /Choose the verdict by the first rule that matches:\n([\s\S]*?)\n\s*\n/.exec(message) ?? [];
+
+      expect(rules.replace(/\s+/g, ' ').trim()).toBe(
+        `
+        1. inconclusive — world checks both support and contradict; or you cannot cite
+           an id from the hits below.
+        2. false_positive — at least one world check contradicts, none supports, and
+           both the entity store and the raw events have hits. Missing evidence cannot
+           clear an alert: if either source is empty or its query failed, the verdict
+           is inconclusive.
+        3. true_positive — process_parent or network_destination supports and no world
+           check contradicts. An empty or failed entity store does not block this.
+           entity_role and alert_linkage corroborate but are never enough on their own.
+        4. inconclusive — anything else: every world check is skipped or neutral, or
+           only entity_role or alert_linkage supports.
+        `
+          .replace(/\s+/g, ' ')
+          .trim()
+      );
+    });
+
+    it('tells the agent a truncated entity or event list cannot clear the attack', () => {
+      expect(String(analyze?.with?.message)).toContain(
+        'A truncated entity or raw-event list is missing evidence and cannot clear an attack.'
+      );
+    });
+
+    it('judges every network destination instead of one callout', () => {
+      expect(String(analyze?.with?.message)).toContain(
+        'One known-good callout does not cancel the rest.'
+      );
+    });
+
+    it('does not treat a management role as a contradiction by itself', () => {
+      expect(String(analyze?.with?.message)).toContain(
+        'A management server, MDM, jump box, or service account is neutral, not contradicts'
+      );
+    });
+
+    it('weighs the process parent with the cited alert severity', () => {
+      expect(String(analyze?.with?.message)).toContain(
+        'A risk score or severity on a cited alert weighs how strong that parent is.'
+      );
+    });
+
+    it('accepts a path of pivots as alert linkage', () => {
+      expect(String(analyze?.with?.message)).toContain(
+        'Report the strongest pivot; it does not decide the verdict.'
+      );
+    });
+
+    it('allows agent.id and source.ip on the alert-link claim', () => {
+      const schema = analyze?.with?.schema as {
+        properties: {
+          claims: {
+            properties: { alert_link: { properties: { field: { enum: string[] } } } };
+          };
+        };
+      };
+
+      expect((analyze?.with?.schema as { required: string[] }).required).not.toContain('claims');
+
+      expect(schema.properties.claims.properties.alert_link.properties.field.enum).toEqual([
+        'user.name',
+        'user.id',
+        'host.id',
+        'host.name',
+        'process.entity_id',
+        'process.pid',
+        'agent.id',
+        'source.ip',
+      ]);
+    });
+  });
+
+  describe('the raw-event window', () => {
+    const render = (field: 'events_from' | 'events_to', context: Record<string, unknown>): string =>
+      createWorkflowLiquidEngine().parseAndRenderSync(
+        String(stepIn('count_alerts')?.with?.[field]),
+        context
+      );
+
+    const alertsContext = (
+      earliest: string | undefined,
+      latest: string | undefined,
+      discoveryAt: string
+    ) => ({
+      steps: {
+        load_alerts: {
+          output: {
+            aggregations: {
+              earliest_original_time: { value_as_string: earliest },
+              latest_original_time: { value_as_string: latest },
+            },
+          },
+        },
+        load_attack_discovery: {
+          output: { hits: { hits: [{ _source: { '@timestamp': discoveryAt } }] } },
+        },
+      },
+    });
+
+    it('returns the earliest cited alert original time as the window start', () => {
+      expect(
+        render(
+          'events_from',
+          alertsContext(
+            '2026-10-14T03:22:00.000Z',
+            '2026-10-14T17:42:00.000Z',
+            '2026-10-14T21:00:02.000Z'
+          )
+        )
+      ).toBe('2026-10-14T03:22:00.000Z');
+    });
+
+    it('returns the latest cited alert original time as the window end', () => {
+      expect(
+        render(
+          'events_to',
+          alertsContext(
+            '2026-10-14T03:22:00.000Z',
+            '2026-10-14T17:42:00.000Z',
+            '2026-10-14T21:00:02.000Z'
+          )
+        )
+      ).toBe('2026-10-14T17:42:00.000Z');
+    });
+
+    it('returns the discovery timestamp when the alerts have no original time', () => {
+      expect(
+        render('events_from', alertsContext(undefined, undefined, '2026-10-14T21:00:02.000Z'))
+      ).toBe('2026-10-14T21:00:02.000Z');
+    });
+
+    it('searches host.id when the cited alerts have one', () => {
+      expect(stepIn('load_events_by_host_id')?.if).toBe(
+        '${{ (steps.count_alerts.output.host_ids | size) > 0 }}'
+      );
+    });
+
+    it('searches host.name only when the cited alerts have no host.id', () => {
+      expect(stepIn('load_events_by_host_name')?.if).toBe(
+        '${{ (steps.count_alerts.output.host_ids | size) == 0 }}'
+      );
+    });
+
+    it('applies the alert window as date math on the host.id search', () => {
+      expect(JSON.stringify(stepIn('load_events_by_host_id')?.with?.query)).toContain(
+        '{{ steps.count_alerts.output.events_from }}||-2h'
+      );
+    });
+
+    it('applies the alert window as date math on the host.name search', () => {
+      expect(JSON.stringify(stepIn('load_events_by_host_name')?.with?.query)).toContain(
+        '{{ steps.count_alerts.output.events_to }}||+2h'
+      );
+    });
+
+    it('tells the agent the window follows the cited alerts', () => {
+      expect(String(stepIn('analyze')?.with?.message)).toContain(
+        'Raw events from 2 hours before the earliest cited alert to 2 hours after the latest'
+      );
+    });
+
+    const hitsExpression = String(stepIn('load_events')?.with?.hits)
+      .replace(/^\$\{\{/, '')
+      .replace(/\}\}$/, '')
+      .trim();
+
+    it('returns the host.id hits when that search ran', () => {
+      expect(
+        createWorkflowLiquidEngine().evalValueSync(hitsExpression, {
+          steps: {
+            load_events_by_host_id: { output: { hits: { total: { value: 3 }, hits: [] } } },
+            load_events_by_host_name: { output: { hits: { total: { value: 9 }, hits: [] } } },
+          },
+        })
+      ).toEqual({ total: { value: 3 }, hits: [] });
+    });
+
+    it('returns the host.name hits when the host.id search was skipped', () => {
+      expect(
+        createWorkflowLiquidEngine().evalValueSync(hitsExpression, {
+          steps: {
+            load_events_by_host_name: { output: { hits: { total: { value: 2 }, hits: [] } } },
+          },
+        })
+      ).toEqual({ total: { value: 2 }, hits: [] });
+    });
+  });
+
+  describe('the truncation clear', () => {
+    const contextFor = (
+      events: number | undefined,
+      entities: number | undefined,
+      verdict: string,
+      summary: string
+    ) => ({
+      steps: {
+        ...(events === undefined
+          ? {}
+          : { load_events: { output: { hits: { total: { value: events } } } } }),
+        ...(entities === undefined
+          ? {}
+          : { load_entities: { output: { hits: { total: { value: entities } } } } }),
+        analyze: { output: { structured_output: { verdict, summary_markdown: summary } } },
+      },
+    });
+
+    const render = (
+      field: string,
+      events: number | undefined,
+      entities: number | undefined,
+      verdict: string,
+      summary: string
+    ): string =>
+      createWorkflowLiquidEngine().parseAndRenderSync(
+        String(stepIn('block_truncated_clear')?.with?.[field]),
+        contextFor(events, entities, verdict, summary)
+      );
+
+    const evaluate = (
+      events: number | undefined,
+      entities: number | undefined,
+      verdict: string
+    ): unknown => {
+      const expression = String(stepIn('block_truncated_clear')?.with?.downgraded)
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim();
+
+      return createWorkflowLiquidEngine().evalValueSync(
+        expression,
+        contextFor(events, entities, verdict, 'Cleared.')
+      );
+    };
+
+    it('returns inconclusive when a truncated event page would clear the attack', () => {
+      expect(render('verdict', 51, 10, 'false_positive', 'Cleared.')).toBe('inconclusive');
+    });
+
+    it('returns inconclusive when a truncated entity page would clear the attack', () => {
+      expect(render('verdict', 10, 51, 'false_positive', 'Cleared.')).toBe('inconclusive');
+    });
+
+    it('keeps false_positive when every matched event and entity is shown', () => {
+      expect(render('verdict', 50, 50, 'false_positive', 'Cleared.')).toBe('false_positive');
+    });
+
+    it('keeps true_positive when the event page is truncated', () => {
+      expect(render('verdict', 51, 10, 'true_positive', 'Escalate.')).toBe('true_positive');
+    });
+
+    it('keeps true_positive when the entity page is truncated', () => {
+      expect(render('verdict', 10, 51, 'true_positive', 'Escalate.')).toBe('true_positive');
+    });
+
+    it('keeps false_positive when the entity query failed', () => {
+      expect(
+        createWorkflowLiquidEngine().parseAndRenderSync(
+          String(stepIn('block_truncated_clear')?.with?.verdict),
+          {
+            steps: {
+              load_events: { output: { hits: { total: { value: 10 } } } },
+              load_entities: { error: { message: 'failed' } },
+              analyze: {
+                output: {
+                  structured_output: { verdict: 'false_positive', summary_markdown: 'Cleared.' },
+                },
+              },
+            },
+          }
+        )
+      ).toBe('false_positive');
+    });
+
+    it('marks a truncated clear as downgraded', () => {
+      expect(evaluate(10, 51, 'false_positive')).toBe(true);
+    });
+
+    it('does not mark a complete clear as downgraded', () => {
+      expect(evaluate(50, 50, 'false_positive')).toBe(false);
+    });
+
+    it('replaces the summary when truncation blocks a clear', () => {
+      expect(render('summary_markdown', 51, 10, 'false_positive', 'Cleared.')).toBe(
+        'Evidence was truncated, so this cannot be cleared as a false positive.'
+      );
+    });
+
+    it('keeps the model summary when the clear stands', () => {
+      expect(render('summary_markdown', 50, 50, 'false_positive', 'Cleared.')).toBe('Cleared.');
+    });
+
+    it('runs after the payload guard and before emit', () => {
+      expect(
+        stepNames.slice(
+          stepNames.indexOf('require_supported_verdict'),
+          stepNames.indexOf('emit_result') + 1
+        )
+      ).toEqual([
+        'require_supported_verdict',
+        'block_truncated_clear',
+        'check_claim_grounding',
+        'block_ungrounded_claims',
+        'keep_model_writeup',
+        'emit_result',
+      ]);
+    });
+
+    const writeup = (keep: boolean, rationale: string | undefined) => ({
+      steps: {
+        keep_model_writeup: {
+          output: {
+            rows: [
+              {
+                keep,
+                ...(rationale === undefined ? {} : { rationale_markdown: rationale }),
+                checks: [{ name: 'process_parent', result: 'contradicts' }],
+                claims: { world: [{ id: 'event-1' }] },
+              },
+            ],
+          },
+        },
+      },
+    });
+
+    const emitted = (field: string, keep: boolean, rationale?: string): unknown => {
+      const expression = String(stepIn('emit_result')?.with?.[field])
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim();
+
+      return createWorkflowLiquidEngine().evalValueSync(expression, writeup(keep, rationale));
+    };
+
+    it('emits the model rationale when the clear stands', () => {
+      expect(emitted('rationale_markdown', true, 'Parent is a scheduler.')).toBe(
+        'Parent is a scheduler.'
+      );
+    });
+
+    it('omits the rationale when the clear was downgraded', () => {
+      expect(emitted('rationale_markdown', false, 'Parent is a scheduler.')).toBeUndefined();
+    });
+
+    it('omits checks when the clear was downgraded', () => {
+      expect(emitted('checks', false, 'Parent is a scheduler.')).toBeUndefined();
+    });
+
+    it('omits claims when the clear was downgraded', () => {
+      expect(emitted('claims', false, 'Parent is a scheduler.')).toBeUndefined();
+    });
+
+    it('omits the payload rationale on the same path as the attachment', () => {
+      const payload = stepIn('emit_result')?.with?.payload as { rationale_markdown?: string };
+
+      expect(payload.rationale_markdown).toBe(stepIn('emit_result')?.with?.rationale_markdown);
+    });
+  });
+
+  describe('ungrounded world claims', () => {
+    const engine = createWorkflowLiquidEngine();
+
+    const groundingContext = ({
+      world,
+      eventIds,
+      entityIds,
+      verdict,
+    }: {
+      world?: Array<{ source: string; id: string }>;
+      eventIds: string[];
+      entityIds: string[];
+      verdict: string;
+    }) => ({
+      consts: { no_rows: [] as unknown[] },
+      steps: {
+        analyze: {
+          output: {
+            structured_output: {
+              ...(world === undefined ? {} : { claims: { world } }),
+            },
+          },
+        },
+        load_events: {
+          output: { hits: { hits: eventIds.map((id) => ({ _id: id })) } },
+        },
+        load_entities: {
+          output: {
+            hits: { hits: entityIds.map((id) => ({ _source: { entity: { id } } })) },
+          },
+        },
+        block_truncated_clear: {
+          output: { verdict, summary_markdown: 'Model summary.' },
+        },
+      },
+    });
+
+    const downgraded = (context: Record<string, unknown>): string =>
+      engine.parseAndRenderSync(String(stepIn('check_claim_grounding')?.with?.downgraded), context);
+
+    it('returns false when the cited raw-event id is in the hits', () => {
+      expect(
+        downgraded(
+          groundingContext({
+            world: [{ source: 'raw_event', id: 'event-1' }],
+            eventIds: ['event-1'],
+            entityIds: [],
+            verdict: 'true_positive',
+          })
+        )
+      ).toBe('false');
+    });
+
+    it('returns true when a true positive cites a raw-event id that was not returned', () => {
+      expect(
+        downgraded(
+          groundingContext({
+            world: [{ source: 'raw_event', id: 'copied-from-the-alert' }],
+            eventIds: [],
+            entityIds: [],
+            verdict: 'true_positive',
+          })
+        )
+      ).toBe('true');
+    });
+
+    const realEntityContext = (citedId: string, verdict: string) => {
+      const context = groundingContext({
+        world: [{ source: 'entity_store', id: citedId }],
+        eventIds: ['event-1'],
+        entityIds: [],
+        verdict,
+      });
+      (context.steps.load_entities.output.hits as { hits: unknown[] }).hits = [
+        { _id: 'cc6e7258465a02d8e5f9389f2e020dc4', _source: { entity: { id: 'host:host-1' } } },
+      ];
+      return context;
+    };
+
+    it('returns false when a true positive cites an entity hit by its entity.id', () => {
+      expect(downgraded(realEntityContext('host:host-1', 'true_positive'))).toBe('false');
+    });
+
+    it('returns false when a true positive cites an entity hit by its document _id', () => {
+      expect(
+        downgraded(realEntityContext('cc6e7258465a02d8e5f9389f2e020dc4', 'true_positive'))
+      ).toBe('false');
+    });
+
+    it('returns true when a true positive cites an entity id that matches neither', () => {
+      expect(downgraded(realEntityContext('host:invented', 'true_positive'))).toBe('true');
+    });
+
+    it('returns true when a false positive cites an entity id that was not returned', () => {
+      expect(
+        downgraded(
+          groundingContext({
+            world: [{ source: 'entity_store', id: 'missing-entity' }],
+            eventIds: ['event-1'],
+            entityIds: ['entity-1'],
+            verdict: 'false_positive',
+          })
+        )
+      ).toBe('true');
+    });
+
+    it('returns false when the model cited no world claims', () => {
+      expect(
+        downgraded(
+          groundingContext({
+            eventIds: [],
+            entityIds: [],
+            verdict: 'true_positive',
+          })
+        )
+      ).toBe('false');
+    });
+
+    it('returns false when the verdict is already inconclusive', () => {
+      expect(
+        downgraded(
+          groundingContext({
+            world: [{ source: 'raw_event', id: 'copied-from-the-alert' }],
+            eventIds: [],
+            entityIds: [],
+            verdict: 'inconclusive',
+          })
+        )
+      ).toBe('false');
+    });
+
+    it('returns inconclusive when the grounding check downgrades the verdict', () => {
+      expect(
+        engine.parseAndRenderSync(String(stepIn('block_ungrounded_claims')?.with?.verdict), {
+          steps: {
+            check_claim_grounding: { output: { downgraded: 'true' } },
+            block_truncated_clear: { output: { verdict: 'true_positive' } },
+          },
+        })
+      ).toBe('inconclusive');
+    });
+
+    it('returns the ungrounded summary when the grounding check downgrades the verdict', () => {
+      expect(
+        engine.parseAndRenderSync(
+          String(stepIn('block_ungrounded_claims')?.with?.summary_markdown),
+          {
+            steps: {
+              check_claim_grounding: { output: { downgraded: 'true' } },
+              block_truncated_clear: { output: { summary_markdown: 'Model summary.' } },
+            },
+          }
+        )
+      ).toBe('A cited world-check id is not in the evidence, so this cannot be classified.');
+    });
+
+    it('returns the model summary when every cited id was returned', () => {
+      expect(
+        engine.parseAndRenderSync(
+          String(stepIn('block_ungrounded_claims')?.with?.summary_markdown),
+          {
+            steps: {
+              check_claim_grounding: { output: { downgraded: 'false' } },
+              block_truncated_clear: { output: { summary_markdown: 'Model summary.' } },
+            },
+          }
+        )
+      ).toBe('Model summary.');
     });
   });
 });

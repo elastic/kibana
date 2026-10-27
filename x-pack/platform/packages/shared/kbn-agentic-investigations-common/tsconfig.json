@@ -22,7 +22,6 @@
     "@kbn/ui-ai-components",
     "@kbn/user-profile-components",
     "@kbn/proposals-ui",
-    "@kbn/proposals-common",
     "@kbn/ui-ai-components",
   ]
 }

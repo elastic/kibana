@@ -17,6 +17,13 @@ import type {
   InvestigationClosePreviewResponse,
   ClosePreviewProposal,
 } from '../../../common/investigations/status';
+import {
+  INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE,
+  type InvestigationSeverityChangedEventData,
+  type SetInvestigationSeverityRequest,
+  type SetInvestigationSeverityResponse,
+} from '../../../common/investigations/severity_change';
+import { isInvestigationSeverity } from '../../../common/investigations/severity';
 import { MissingDismissReasonError } from './errors';
 import { CloseTargetsChangedError } from './close_targets_changed_error';
 import { ProposalDismissFailedError } from './proposal_dismiss_failed_error';
@@ -26,10 +33,10 @@ export { MissingDismissReasonError, CloseTargetsChangedError, ProposalDismissFai
 /**
  * Determines how to classify a `releaseGate` failure for a single proposal.
  *
- * - `ProposalExpiredError` or `ProposalNotFoundError` → the proposal is gone; skip it.
- * - `ProposalConflictError` → ambiguous: could be "already decided" (skippable) or an OCC /
- *   execution race where the proposal is still `pending` (retry-able). We re-read the proposal
- *   to find out.
+ * - `ProposalNotFoundError` → the proposal is gone; skip it.
+ * - `ProposalConflictError` → ambiguous: could be "already decided or expired" (skippable) or an
+ *   Optimistic Concurrency Control (OCC) / execution race where the proposal is still `pending` (retry-able).
+ *   We re-read the proposal to find out.
  * - Anything else → treat as a real failure.
  *
  * We match by `error.name` because cross-plugin class imports are forbidden and the proposals
@@ -46,30 +53,32 @@ async function classifyReleaseGateError(
   proposalsService: {
     get: (
       id: string,
-      spaceId: string
-    ) => Promise<{ decision?: unknown; status: string; expired: boolean }>;
+      spaceId: string,
+      request: KibanaRequest
+    ) => Promise<{ decision?: unknown; status: string }>;
   },
-  spaceId: string
+  spaceId: string,
+  request: KibanaRequest
 ): Promise<'skipped' | 'retry' | 'failed'> {
   if (!(err instanceof Error)) return 'failed';
 
-  if (err.name === 'ProposalExpiredError' || err.name === 'ProposalNotFoundError') {
+  if (err.name === 'ProposalNotFoundError') {
     return 'skipped';
   }
 
   if (err.name === 'ProposalConflictError') {
     // Re-read the proposal to determine its actual state.
-    let proposal: { decision?: unknown; status: string; expired: boolean };
+    let proposal: { decision?: unknown; status: string };
     try {
-      proposal = await proposalsService.get(proposalId, spaceId);
+      proposal = await proposalsService.get(proposalId, spaceId, request);
     } catch (readErr) {
       if (readErr instanceof Error && readErr.name === 'ProposalNotFoundError') {
         return 'skipped';
       }
       return 'failed';
     }
-    const isSettled =
-      proposal.decision !== undefined || proposal.status !== 'pending' || proposal.expired;
+    // `expired` is itself a non-`pending` status, so the status check alone already covers it.
+    const isSettled = proposal.decision !== undefined || proposal.status !== 'pending';
     return isSettled ? 'skipped' : 'retry';
   }
 
@@ -134,7 +143,8 @@ export class InvestigationStatusService {
    */
   async listPendingProposals(
     conversationId: string,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<ClosePreviewProposal[]> {
     const proposals = this.getProposals();
     if (!proposals) return [];
@@ -155,7 +165,8 @@ export class InvestigationStatusService {
           size,
           from,
         },
-        spaceId
+        spaceId,
+        request
       );
       allProposals.push(
         ...page.proposals.map((p) => ({
@@ -169,6 +180,34 @@ export class InvestigationStatusService {
     }
 
     return allProposals;
+  }
+
+  /**
+   * Counts the approved proposals whose action is still running (`executing`, not superseded).
+   * An executing proposal keeps the deadline it was approved under, so the deadline is not
+   * applied. Returns 0 when the proposals plugin is absent or disabled.
+   */
+  async countRunningProposals(
+    conversationId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<number> {
+    const proposals = this.getProposals();
+    if (!proposals) return 0;
+
+    const { total } = await proposals.getProposalsService().list(
+      {
+        conversationId,
+        status: 'executing',
+        excludeSuperseded: true,
+        excludeExpired: false,
+        size: 1,
+        from: 0,
+      },
+      spaceId,
+      request
+    );
+    return total;
   }
 
   /**
@@ -187,7 +226,7 @@ export class InvestigationStatusService {
       await proposals.getProposalPrivileges().assertCanRead(request);
     }
     const spaceId = this.getSpaceId(request);
-    return this.listPendingProposals(conversationId, spaceId);
+    return this.listPendingProposals(conversationId, spaceId, request);
   }
 
   async getPreview(
@@ -201,7 +240,60 @@ export class InvestigationStatusService {
     }
 
     const pending = await this.listPendingProposalsForRequest(conversationId, request);
-    return { pending_proposal_count: pending.length, pending_proposals: pending };
+    const running = await this.countRunningProposals(
+      conversationId,
+      this.getSpaceId(request),
+      request
+    );
+    return {
+      pending_proposal_count: pending.length,
+      pending_proposals: pending,
+      running_proposal_count: running,
+    };
+  }
+
+  /**
+   * Sets the severity a user chose and records the change on the timeline, so the agent continuing
+   * the investigation sees it was a human judgement. Setting the current severity again is a no-op.
+   */
+  async setSeverity(
+    request: KibanaRequest,
+    conversationId: string,
+    { severity }: SetInvestigationSeverityRequest
+  ): Promise<SetInvestigationSeverityResponse> {
+    const client = await this.getConversationClient(request);
+    const conversation = await client.get(conversationId);
+    if (conversation.template_id !== INVESTIGATION_TEMPLATE_ID) {
+      throw new WrongTemplateError(conversationId, INVESTIGATION_TEMPLATE_ID);
+    }
+
+    const current = conversation.metadata?.severity;
+    const previousSeverity = isInvestigationSeverity(current) ? current : undefined;
+    if (previousSeverity === severity) {
+      return { conversation_id: conversationId, severity, previous_severity: previousSeverity };
+    }
+
+    await client.patchMetadata(conversationId, { severity }, { access: 'converse' });
+
+    const data: InvestigationSeverityChangedEventData = {
+      severity,
+      ...(previousSeverity && { previous_severity: previousSeverity }),
+    };
+    // Best-effort: the severity is already written, and a missing note must not fail the change.
+    try {
+      await client.addEvents({
+        conversationId,
+        events: [{ type: INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE, data }],
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Failed to record the severity change of investigation ${conversationId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+
+    return { conversation_id: conversationId, severity, previous_severity: previousSeverity };
   }
 
   async setStatus(
@@ -256,7 +348,8 @@ export class InvestigationStatusService {
                   firstErr,
                   p.id,
                   proposalsService,
-                  spaceId
+                  spaceId,
+                  request
                 );
                 if (classification === 'skipped') {
                   return { id: p.id, outcome: 'skipped' as const };

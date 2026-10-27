@@ -6,76 +6,74 @@
  */
 
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ProfilingStatus } from '@kbn/profiling-utils';
-import { areCloudResourcesSetup } from '../../../common/cloud_setup';
-import { areResourcesSetup } from '../../../common/setup';
+import type {
+  EnabledProfilingSchemasStatus,
+  ProfilingSchemasStatus,
+  UniversalProfilingSchemaStatus,
+  UniversalProfilingStatus,
+} from '@kbn/profiling-utils';
+import { createGetOtelStatusService } from '../../otel/services/status';
+import { createGetStatusService as createGetUniversalProfilingStatusService } from '../../universal_profiling/services/status';
+import { isServerless } from '../../utils/is_serverless';
 import type { RegisterServicesParams } from '../register_services';
-import { getSetupState } from '../setup_state';
-import { areServerlessResourcesSetup } from '../../../common/serverless_setup';
 
-export interface HasSetupParams {
+export interface ProfilingStatusParams {
   soClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
   spaceId?: string;
-  isServerless?: boolean;
+  abortSignal?: AbortSignal;
 }
 
-export function createGetStatusService(params: RegisterServicesParams) {
+const toUniversalProfilingSchemaStatus = ({
+  has_setup: hasSetup,
+  has_data: hasData,
+  pre_8_9_1_data: hasLegacyData,
+}: UniversalProfilingStatus): UniversalProfilingSchemaStatus => ({
+  isAvailable: true,
+  hasSetup,
+  hasData,
+  hasLegacyData,
+});
+
+const UNAVAILABLE_UNIVERSAL_PROFILING_SCHEMA_STATUS: UniversalProfilingSchemaStatus = {
+  isAvailable: false,
+  hasSetup: false,
+  hasData: false,
+  hasLegacyData: false,
+};
+
+export function createGetProfilingStatusService(params: RegisterServicesParams) {
+  const { buildFlavor, createProfilingEsClient, logger } = params;
+  const getOtelStatus = createGetOtelStatusService(params);
+  const getUniversalProfilingStatus = createGetUniversalProfilingStatusService(params);
+  const isUniversalProfilingAvailable = !isServerless(buildFlavor);
+
   return async ({
     esClient,
     soClient,
     spaceId,
-    isServerless,
-  }: HasSetupParams): Promise<ProfilingStatus> => {
-    try {
-      const { type, setupState } = await getSetupState({
-        ...params,
-        esClient,
-        soClient,
-        spaceId,
-        isServerless,
-      });
+    abortSignal,
+  }: ProfilingStatusParams): Promise<ProfilingSchemasStatus> => {
+    const client = createProfilingEsClient({ esClient: esClient.asInternalUser, abortSignal });
+    const { profiling } = await client.universalProfiling.status();
 
-      params.logger.debug(
-        () => `Set up state for: ${type}: ${JSON.stringify(setupState, null, 2)}`
-      );
-
-      let hasSetup = false;
-      switch (type) {
-        case 'cloud':
-          hasSetup = areCloudResourcesSetup(setupState);
-          break;
-        case 'self-managed':
-          hasSetup = areResourcesSetup(setupState);
-          break;
-        case 'serverless':
-          hasSetup = areServerlessResourcesSetup(setupState);
-          break;
-      }
-
-      return {
-        type,
-        profiling_enabled: setupState.profiling.enabled,
-        has_setup: hasSetup,
-        has_data: setupState.data.available,
-        pre_8_9_1_data: setupState.resources.pre_8_9_1_data,
-      };
-    } catch (error) {
-      // We cannot fully check the status of all resources
-      // to make sure Profiling has been set up and has data
-      // for users with monitor privileges. This privileges
-      // is needed to call the profiling ES plugin for example.
-      if (error?.meta?.statusCode === 403 || error?.originalError?.meta?.statusCode === 403) {
-        return {
-          profiling_enabled: true,
-          has_setup: true,
-          pre_8_9_1_data: false,
-          has_data: true,
-          unauthorized: true,
-        };
-      }
-
-      throw error;
+    if (!profiling.enabled) {
+      return { isEnabled: false };
     }
+
+    const universalProfilingPromise = isUniversalProfilingAvailable
+      ? getUniversalProfilingStatus({ esClient, soClient, spaceId, abortSignal }).then(
+          toUniversalProfilingSchemaStatus
+        )
+      : Promise.resolve(UNAVAILABLE_UNIVERSAL_PROFILING_SCHEMA_STATUS);
+
+    const [otel, universalProfiling] = await Promise.all([
+      getOtelStatus({ esClient, abortSignal }),
+      universalProfilingPromise,
+    ]);
+
+    const status: EnabledProfilingSchemasStatus = { isEnabled: true, otel, universalProfiling };
+    logger.debug(() => `Profiling status: ${JSON.stringify(status, null, 2)}`);
+    return status;
   };
 }

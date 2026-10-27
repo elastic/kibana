@@ -23,9 +23,9 @@ it('resolves credentials from the environment and preserves other preconfigured 
   process.env = {
     ...originalEnv,
     SANDBOX_API_KEY: 'sandbox-key',
-    SANDBOX_CLIENT_CERT: 'certificate',
-    SANDBOX_CLIENT_KEY: 'private-key',
-    SANDBOX_CA_CERT: '',
+    SANDBOX_CLIENT_CERT_PATH: '/certs/tls.crt',
+    SANDBOX_CLIENT_KEY_PATH: '/certs/tls.key',
+    SANDBOX_CA_CERT_PATH: '',
     NIGHTSHIFT_TRACING_EXPORTERS: JSON.stringify(exporters),
     NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://telemetry.example.com',
     NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'remote-key',
@@ -36,7 +36,7 @@ it('resolves credentials from the environment and preserves other preconfigured 
       existingConfig,
       Path.join(
         REPO_ROOT,
-        'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_nightshift_investigations/stateful/kibana.tracing.yml'
+        'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_nightshift_investigations/kibana.tracing.yml'
       ),
       Path.join(__dirname, 'kibana.sandbox.yml'),
       Path.join(__dirname, 'kibana.telemetry.yml'),
@@ -45,10 +45,9 @@ it('resolves credentials from the environment and preserves other preconfigured 
       existing: { name: 'Existing connector' },
       'nightshift-evals-telemetry': {
         name: 'Remote Elasticsearch telemetry',
-        actionTypeId: '.webhook',
+        actionTypeId: '.http',
         config: {
           url: 'https://telemetry.example.com',
-          method: 'post',
           hasAuth: false,
           authType: null,
         },
@@ -56,6 +55,11 @@ it('resolves credentials from the environment and preserves other preconfigured 
       },
     });
     expect(config.xpack.sandbox.api_key).toBe('sandbox-key');
+    expect(config.xpack.sandbox.ssl).toEqual({
+      certificate: '/certs/tls.crt',
+      key: '/certs/tls.key',
+      certificate_authorities: '',
+    });
     expect(config.xpack.nightshift_investigations.sandbox).toEqual({
       telemetry_connector_id: 'nightshift-evals-telemetry',
       telemetry_readable_indices: 'remote:logs-*',

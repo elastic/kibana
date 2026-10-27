@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod';
 
-import { markdownStateSchema } from '../embeddable/schemas';
+import { markdownStateSchema } from '@kbn/dashboard-markdown-schemas';
 
 export const markdownLibraryItemSchema = z
   .object({

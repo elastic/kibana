@@ -26,15 +26,13 @@ import {
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import { confirmCreateWithUnsaved } from './confirm_overlays';
-import { getDashboardBackupService } from '../services/dashboard_api_services';
 import type {
   DashboardListingProps,
   DashboardListingTab,
   DashboardSavedObjectUserContent,
 } from './types';
 
-type GetDashboardListingTabsParams = Pick<
+export type GetDashboardListingTabsParams = Pick<
   DashboardListingProps,
   'goToDashboard' | 'getDashboardUrl' | 'useSessionStorageIntegration' | 'initialFilter' | 'getTabs'
 > & {
@@ -127,19 +125,8 @@ export const getDashboardListingTabs = ({
     getTableList: (parentProps) => (
       <DashboardsTabContent {...commonProps} parentProps={parentProps} />
     ),
-    createAction: () => {
-      if (useSessionStorageIntegration && getDashboardBackupService().dashboardHasUnsavedEdits()) {
-        confirmCreateWithUnsaved(() => {
-          getDashboardBackupService().clearState();
-          goToDashboard();
-        }, goToDashboard);
-        return;
-      }
-      goToDashboard();
-    },
   };
 
-  // Additional tabs (e.g., visualizations and annotation groups)
   const additionalTabs = getTabs ? getTabs() : [];
 
   return [dashboardsTab, ...additionalTabs];

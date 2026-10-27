@@ -261,7 +261,13 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
   const isDownloadButtonDisable = isEmpty(serviceStatisticsItems) || loadingSummaryStats;
 
   return (
-    <EuiPanel hasShadow={false} paddingSize="none" css={{ position: 'relative' }}>
+    <EuiPanel
+      hasShadow={false}
+      hasBorder={false}
+      borderRadius="none"
+      paddingSize="none"
+      css={{ position: 'relative' }}
+    >
       {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>

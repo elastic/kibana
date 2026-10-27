@@ -14,14 +14,16 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // All schemas use lazySchema(). All z.string() fields have .max(N).
 // =============================================================================
 
-const pageTokenField = z
-  .string()
-  .max(2000)
-  .optional()
-  .describe(
-    'Pagination token for fetching the next page of results. ' +
-      'Pass the nextPageToken value from the previous response. Omit on the first call.'
-  );
+const pageTokenField = lazySchema(() =>
+  z
+    .string()
+    .max(2000)
+    .optional()
+    .describe(
+      'Pagination token for fetching the next page of results. ' +
+        'Pass the nextPageToken value from the previous response. Omit on the first call.'
+    )
+);
 
 export const SearchInputSchema = lazySchema(() =>
   z
@@ -101,15 +103,17 @@ export const ListRecentFilesInputSchema = lazySchema(() =>
 );
 export type ListRecentFilesInput = z.infer<typeof ListRecentFilesInputSchema>;
 
-const driveIdField = z
-  .string()
-  .max(1024)
-  .optional()
-  .describe(
-    'Drive ID that owns the item. Required for items from listSharedWithMe or listRecentFiles ' +
-      'that have a remoteItem — use the remoteItem.parentReference.driveId value. ' +
-      'Omit for items from your own drive (search, getItemChildren results).'
-  );
+const driveIdField = lazySchema(() =>
+  z
+    .string()
+    .max(1024)
+    .optional()
+    .describe(
+      'Drive ID that owns the item. Required for items from listSharedWithMe or listRecentFiles ' +
+        'that have a remoteItem — use the remoteItem.parentReference.driveId value. ' +
+        'Omit for items from your own drive (search, getItemChildren results).'
+    )
+);
 
 export const GetFileMetadataInputSchema = lazySchema(() =>
   z.object({

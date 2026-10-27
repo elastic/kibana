@@ -7,12 +7,19 @@
 
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 
+type StoredEndpointIntegrationConfig = Readonly<{
+  endpointConfig?: Readonly<{
+    preset?: string | number | boolean | null;
+  }>;
+}>;
+
 export type EndpointPolicyIdentity = Readonly<{
   id: string;
   name: string;
   description: string;
   revision: number;
   version: string;
+  creationPreset?: string;
   updatedAt?: string;
   updatedBy?: string;
   packageVersion?: string;
@@ -28,17 +35,32 @@ const uniqueNonemptyAssignmentIds = (
   policyIds: PackagePolicy['policy_ids'] | undefined
 ): readonly string[] => [...new Set((policyIds ?? []).filter((policyId) => policyId.length > 0))];
 
-export const createEndpointPolicySnapshot = (source: PackagePolicy): EndpointPolicySnapshot => ({
-  identity: {
-    id: source.id,
-    name: source.name,
-    description: source.description ?? '',
-    revision: source.revision,
-    version: typeof source.version === 'string' ? source.version : '',
-    ...(source.updated_at !== undefined ? { updatedAt: source.updated_at } : {}),
-    ...(source.updated_by !== undefined ? { updatedBy: source.updated_by } : {}),
-    ...(source.package?.version !== undefined ? { packageVersion: source.package.version } : {}),
-  },
-  agentPolicyIds: uniqueNonemptyAssignmentIds(source.policy_ids),
-  source,
-});
+const extractCreationPreset = (source: PackagePolicy): string | undefined => {
+  const endpointInput = source.inputs.find((input) => input.type === 'endpoint');
+  const integrationConfig = endpointInput?.config?.integration_config?.value as
+    | StoredEndpointIntegrationConfig
+    | undefined;
+  const preset = integrationConfig?.endpointConfig?.preset;
+
+  return typeof preset === 'string' ? preset : undefined;
+};
+
+export const createEndpointPolicySnapshot = (source: PackagePolicy): EndpointPolicySnapshot => {
+  const creationPreset = extractCreationPreset(source);
+
+  return {
+    identity: {
+      id: source.id,
+      name: source.name,
+      description: source.description ?? '',
+      revision: source.revision,
+      version: typeof source.version === 'string' ? source.version : '',
+      ...(creationPreset !== undefined ? { creationPreset } : {}),
+      ...(source.updated_at !== undefined ? { updatedAt: source.updated_at } : {}),
+      ...(source.updated_by !== undefined ? { updatedBy: source.updated_by } : {}),
+      ...(source.package?.version !== undefined ? { packageVersion: source.package.version } : {}),
+    },
+    agentPolicyIds: uniqueNonemptyAssignmentIds(source.policy_ids),
+    source,
+  };
+};

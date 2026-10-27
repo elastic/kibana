@@ -10,9 +10,17 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { AuthorizationStatus, isAuthorizationMethod } from '@kbn/agent-builder-common/agents';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import {
+  getToolResultId,
+  createErrorResult,
+  resolveAllowedConnectorIds,
+} from '@kbn/agent-builder-server';
+import {
+  getConnectorSpec,
+  isSelectedActionEnabled,
+  isToolAction,
+  type SelectedActions,
+} from '@kbn/connector-specs';
 import type { ConnectorToolsOptions } from './types';
 
 const connectorIdValidationMessage =
@@ -49,6 +57,44 @@ export const executeConnectorSubActionArgsSchema = z
   })
   .strict();
 
+const invalidRequestHint =
+  'Check the connector attachment for the correct sub-action names and required parameters.';
+
+const getNumber = (value: unknown): number | undefined =>
+  typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+
+const getErrorHint = ({
+  statusCode,
+  retryAfterSeconds,
+}: {
+  statusCode?: number;
+  retryAfterSeconds?: number;
+}): string => {
+  if (statusCode === 401 || statusCode === 403) {
+    return (
+      "The service rejected the connector's credentials or they lack the required permissions or scopes. " +
+      "Do not retry or change the parameters; tell the user to check the connector's credentials."
+    );
+  }
+  if (statusCode === 429) {
+    const retry =
+      retryAfterSeconds !== undefined
+        ? `Wait ${retryAfterSeconds} seconds before retrying this sub-action.`
+        : 'Retry at most once after a short wait.';
+    return (
+      `The service is rate limiting this connector. ${retry} ` +
+      'Do not change the parameters or switch to other sub-actions; if it still fails, tell the user.'
+    );
+  }
+  if (statusCode !== undefined && statusCode >= 500) {
+    return (
+      'The service failed to handle the request. Retry at most once; if it still fails, tell the user the service is unavailable. ' +
+      'Do not change the parameters or switch to other sub-actions.'
+    );
+  }
+  return invalidRequestHint;
+};
+
 /**
  * Creates the execute_connector_sub_action tool.
  *
@@ -78,25 +124,15 @@ export const createExecuteConnectorSubActionTool = ({
     idempotentHint: false,
     openWorldHint: true,
   },
-  availability: {
-    cacheMode: 'global',
-    handler: async ({ uiSettings }) => {
-      const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-      return enabled
-        ? { status: 'available' }
-        : {
-            status: 'unavailable',
-            reason: 'Connector tools require Agent Builder experimental features to be enabled',
-          };
-    },
-  },
   handler: async ({ connectorId, subAction, params }, context) => {
-    const allowedIds = context.agentConfiguration?.connector_ids;
-    if (allowedIds !== undefined && !allowedIds.includes(connectorId)) {
+    // Runtime-imposed scoping: the connector allow-list comes from the resolved agent
+    // configuration (undefined only when there is no agent context at all).
+    const allowedIds = resolveAllowedConnectorIds(context.agentConfiguration);
+    if (allowedIds && !allowedIds.includes(connectorId)) {
       return {
         results: [
           createErrorResult({
-            message: `Connector '${connectorId}' is not available to this agent. Use list_connectors to see available connectors.`,
+            message: `Connector '${connectorId}' is not available to this agent because it is not assigned to it. Do not retry; tell the user the connector must be added to this agent's connectors.`,
             metadata: { connectorId, subAction },
           }),
         ],
@@ -108,9 +144,11 @@ export const createExecuteConnectorSubActionTool = ({
 
     // Resolve the connector type from the connector ID
     let connectorType: string;
+    let selectedActions: SelectedActions;
     try {
       const connector = await actionsClient.get({ id: connectorId });
       connectorType = connector.actionTypeId;
+      selectedActions = connector.config?.selectedActions as SelectedActions;
     } catch (error) {
       return {
         results: [
@@ -137,14 +175,28 @@ export const createExecuteConnectorSubActionTool = ({
       };
     }
 
-    // Validate that the sub-action is marked as a tool in the connector spec
+    // Reject workflow-only actions — isTool: false actions are not callable by agents.
     if (!isToolAction(spec, subAction)) {
       return {
         results: [
           createErrorResult({
             message:
-              `Sub-action '${subAction}' is not available as a tool on connector type '${connectorType}'. ` +
-              'Read the connector attachment to find the correct sub-action names.',
+              `Sub-action '${subAction}' is not available as an agent tool for connector '${connectorId}'. ` +
+              'It can only be called from a workflow.',
+            metadata: { connectorId, connectorType, subAction },
+          }),
+        ],
+      };
+    }
+
+    // Enforce instance allowlist / recommended-mode rules.
+    if (!isSelectedActionEnabled(subAction, selectedActions)) {
+      return {
+        results: [
+          createErrorResult({
+            message:
+              `Sub-action '${subAction}' is not enabled for connector '${connectorId}'. ` +
+              'Read the connector attachment to find the allowed sub-action names.',
             metadata: { connectorId, connectorType, subAction },
           }),
         ],
@@ -217,8 +269,8 @@ export const createExecuteConnectorSubActionTool = ({
     }
 
     if (executeResult.status === 'error') {
+      const { errorMeta } = executeResult;
       if (executeResult.errorName === 'ConnectorAuthorizationError') {
-        const { errorMeta } = executeResult;
         const connectorName =
           typeof errorMeta?.connectorName === 'string' ? errorMeta.connectorName : undefined;
         const authResult = resolveAuthorizationResult({
@@ -229,18 +281,20 @@ export const createExecuteConnectorSubActionTool = ({
           return authResult;
         }
       }
+      const statusCode = getNumber(errorMeta?.statusCode);
+      const retryAfterSeconds = getNumber(errorMeta?.retryAfterSeconds);
       return {
         results: [
           createErrorResult({
-            message:
-              `Connector sub-action '${subAction}' returned an error: ${
-                executeResult.message ?? 'Unknown error'
-              }` +
-              ' — Check the connector attachment for the correct sub-action names and required parameters.',
+            message: `Connector sub-action '${subAction}' returned an error: ${
+              executeResult.message ?? 'Unknown error'
+            } — ${getErrorHint({ statusCode, retryAfterSeconds })}`,
             metadata: {
               connectorId,
               subAction,
               serviceMessage: executeResult.serviceMessage,
+              ...(statusCode !== undefined ? { statusCode } : {}),
+              ...(retryAfterSeconds !== undefined ? { retryAfterSeconds } : {}),
             },
           }),
         ],

@@ -20,9 +20,6 @@ const TEXT_MAX_HEIGHT = 250;
 /** The tooltip plugin is left out: it edits in a modal, which the layer's popovers sit above. */
 const uiPlugins = getDefaultEuiMarkdownUiPlugins({ exclude: ['tooltip'] });
 
-/** Marks the rendered preview, for the styles below to find the box it is in. */
-const PREVIEW_CLASS = 'devCommentsEditorPreview';
-
 export interface CommentEditorProps {
   value: string;
   onChange: (value: string) => void;
@@ -34,11 +31,7 @@ export interface CommentEditorProps {
   'data-test-subj'?: string;
 }
 
-/**
- * Markdown editor for comments and replies, sized for the layer's popovers:
- * a few lines of text, the toolbar wrapping to the width available, no footer.
- * The preview renders the text the way the comment will be shown.
- */
+/** Markdown editor for comments and replies, sized for the layer's popovers: a few lines of text, no footer, no preview. */
 export const CommentEditor = ({
   value,
   onChange,
@@ -69,14 +62,11 @@ export const CommentEditor = ({
       readOnly={readOnly}
       placeholder={placeholder}
       aria-label={ariaLabel}
-      markdownFormatProps={{ className: PREVIEW_CLASS }}
+      toolbarProps={{ right: <></> }}
       css={css`
-        /* EUI keeps the text, the box around it and the preview at least 150px tall; the popovers
-           have less room. Named by what they are, not by EUI's class names: the editor's one
-           textarea, the box it is in, and the box the preview (marked above) is in. */
+        /* EUI keeps the text and the box around it at least 150px tall; the popovers have less room. */
         textarea,
-        div:has(> textarea),
-        div:has(> .${PREVIEW_CLASS}) {
+        div:has(> textarea) {
           min-block-size: ${TEXT_HEIGHT}px;
         }
         /* Without the footer, the text closes the box. */

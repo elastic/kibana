@@ -56,8 +56,7 @@ test.describe(
       await pageObjects.streams.gotoPartitioningTab(INGEST_PARENT_STREAM_NAME);
       await pageObjects.streams.selectChildStreamType('Query');
       await pageObjects.streams.openCreateChildQueryStreamForm();
-      const initialChildEsqlQuery =
-        await pageObjects.streams.kibanaMonacoEditor.getCodeEditorValue();
+      const initialChildEsqlQuery = await pageObjects.esqlEditor.getQuery();
       expect(initialChildEsqlQuery).toBe(`FROM $.${INGEST_PARENT_STREAM_NAME}`);
       await pageObjects.streams.fillChildQueryStreamForm(
         CHILD_STREAM_NAME,
@@ -70,8 +69,7 @@ test.describe(
       await pageObjects.streams.gotoPartitioningTab(CHILD_FULL_NAME);
       await pageObjects.streams.selectChildStreamType('Query');
       await pageObjects.streams.openCreateChildQueryStreamForm();
-      const initialGrandchildEsqlQuery =
-        await pageObjects.streams.kibanaMonacoEditor.getCodeEditorValue();
+      const initialGrandchildEsqlQuery = await pageObjects.esqlEditor.getQuery();
       expect(initialGrandchildEsqlQuery).toBe(`FROM $.${CHILD_FULL_NAME}`);
       await pageObjects.streams.fillChildQueryStreamForm(
         GRANDCHILD_STREAM_NAME,

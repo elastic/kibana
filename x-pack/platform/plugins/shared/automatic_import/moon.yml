@@ -80,6 +80,4 @@ fileGroups:
     - common/**/*.ts
     - test/scout_automatic_import/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

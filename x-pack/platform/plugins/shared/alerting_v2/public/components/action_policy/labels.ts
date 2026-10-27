@@ -9,7 +9,7 @@ import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import {
   AGGREGATE_STRATEGIES,
   needsInterval,
-  PER_EPISODE_STRATEGIES,
+  PER_ALERT_STRATEGIES,
 } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { GROUPING_MODE_OPTIONS } from './form/constants';
@@ -59,7 +59,7 @@ export const getFrequencyLabel = (
   const strategy = throttle?.strategy;
   if (strategy == null || mode == null) return NOT_CONFIGURED_LABEL;
 
-  const allowed = mode === 'per_episode' ? PER_EPISODE_STRATEGIES : AGGREGATE_STRATEGIES;
+  const allowed = mode === 'per_alert' ? PER_ALERT_STRATEGIES : AGGREGATE_STRATEGIES;
   if (!allowed.has(strategy)) return NOT_CONFIGURED_LABEL;
 
   const interval = formatInterval(throttle?.interval ?? '');

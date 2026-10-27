@@ -8,7 +8,7 @@
 import type { ActionMetadata } from '@kbn/workflows';
 import { actionCategorySchema, actionImpactSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { MAX_CHARTS_SUMMARY_BUCKETS } from './constants';
+import { MAX_CHARTS_SUMMARY_BUCKETS, PROPOSAL_CATEGORY_TODO } from './constants';
 
 /**
  * What a human concluded. Absent until someone decides, which is what makes
@@ -45,7 +45,32 @@ export type ProposalImpact = z.infer<typeof proposalImpactSchema>;
 export const proposalConfidenceSchema = z.enum(['low', 'medium', 'high']);
 export type ProposalConfidence = z.infer<typeof proposalConfidenceSchema>;
 
-export const proposalOriginSchema = z.enum(['worker', 'analyst']);
+/**
+ * Which feature produced the proposal, so a queue can show its own and not
+ * another's. Deliberately not "machine or human" — `createdBy` already records
+ * the actor behind it.
+ *
+ * Closed, unlike `category`, because the two fail differently. A typo'd
+ * category still appears, as a group with a silly name; a typo'd origin matches
+ * no queue's filter and the proposal is never seen by anyone. Consumers filter
+ * on exact equality, so this is a routing key every producer and consumer has
+ * to agree on character for character — which is what an enum enforces and an
+ * open vocabulary cannot.
+ *
+ * One member per producing feature. The members below that nothing writes yet
+ * are declared intent: adding a producer is a deliberate change here, reviewed
+ * alongside the queue-visibility consequences it carries.
+ *
+ * Required, and fixed for the whole revision chain: `revise()` and `clone()`
+ * inherit it, and no update path can move it.
+ */
+export const proposalOriginSchema = z.enum([
+  'alertzero',
+  'nightshift',
+  'context_engine',
+  /** The standalone chat surface, owned by no solution feature. */
+  'agent_builder',
+]);
 export type ProposalOrigin = z.infer<typeof proposalOriginSchema>;
 
 /**
@@ -57,12 +82,13 @@ export const proposalCategorySchema = actionCategorySchema;
 export type ProposalCategory = z.infer<typeof proposalCategorySchema>;
 
 export const dismissReasonSchema = z.enum([
-  'wrong',
+  /** The default: an analyst can decline without picking a specific reason at all. */
+  'no_reason',
   'duplicate',
-  'insufficient_evidence',
-  'low_value',
-  'out_of_scope',
-  'already_handled',
+  'false_positive',
+  /** Covers what were previously two separate reasons: `out_of_scope` and `already_handled`. */
+  'handled_elsewhere',
+  'risk_accepted',
   'other',
 ]);
 export type DismissReason = z.infer<typeof dismissReasonSchema>;
@@ -73,9 +99,20 @@ export type DismissReason = z.infer<typeof dismissReasonSchema>;
  */
 const MAX_ID_LENGTH = 256;
 const MAX_NAME_LENGTH = 256;
+/** One line in a queue row, and written by a worker's LLM, so it is kept short. */
+export const MAX_TITLE_LENGTH = 256;
+
+/**
+ * Names a proposal whose caller supplied no title and whose action declares no
+ * name — including one carrying no action at all, where the comment describes
+ * something the analyst performs themselves. Stamped on write rather than
+ * resolved per viewer, and so deliberately untranslated: the `comment` beside
+ * it is stored English too.
+ */
+export const DEFAULT_PROPOSAL_TITLE = 'Proposed action';
 /** Markdown shown to a human, so it needs room without being unbounded. */
 export const MAX_COMMENT_LENGTH = 8192;
-const MAX_RATIONALE_LENGTH = 4096;
+export const MAX_RATIONALE_LENGTH = 4096;
 const MAX_ERROR_LENGTH = 4096;
 /** ISO 8601 timestamps; generous enough for any offset notation. */
 const MAX_TIMESTAMP_LENGTH = 64;
@@ -112,6 +149,13 @@ export const proposalSchema = z.object({
   spaceId: z.string().max(MAX_ID_LENGTH),
   /** Conversation this proposal belongs to. The reverse link lives on the conversation. */
   conversationId: z.string().max(MAX_ID_LENGTH),
+  /**
+   * Short label naming what is proposed. Plain text, not markdown: `comment` is
+   * already the body. Required like `comment`, and resolved on write — the
+   * caller's own title, else the action's name, else `DEFAULT_PROPOSAL_TITLE` —
+   * so every reader renders this field instead of re-deriving a fallback chain.
+   */
+  title: z.string().max(MAX_TITLE_LENGTH),
   /** Markdown explaining what is being proposed. Every proposal carries one. */
   comment: z.string().max(MAX_COMMENT_LENGTH),
 
@@ -156,6 +200,21 @@ export const proposalSchema = z.object({
   dismissReason: dismissReasonSchema.optional(),
   rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
   executionError: z.string().max(MAX_ERROR_LENGTH).optional(),
+  /**
+   * The `executionError` of the attempt this proposal re-offers: copied from
+   * the predecessor when a failed proposal is cloned, then carried through
+   * revisions untouched, since revising runs nothing. It therefore names the
+   * last attempt that actually ran and failed, which sits further back than
+   * `supersedes` once a clone has been revised. Absent while nothing in the
+   * chain has run and failed — a consumer must not read absence as "the
+   * previous attempt succeeded".
+   *
+   * A deliberate denormalisation of something the chain can already derive.
+   * The queue answers "did the last attempt fail, and how" on every row it
+   * renders, and deriving it would cost one extra fetch per row. It holds one
+   * failure only: "failed three times" is `revision` plus a chain query.
+   */
+  previousExecutionError: z.string().max(MAX_ERROR_LENGTH).optional(),
 
   /** Gating execution to resume. Absent when no workflow is waiting. */
   workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
@@ -165,14 +224,20 @@ export const proposalSchema = z.object({
 });
 export type Proposal = z.infer<typeof proposalSchema>;
 
-/** Catalog metadata resolved on read, plus the expiry evaluated at request time. */
+/** Catalog metadata resolved on read. */
 export interface ProposalWithMetadata extends Proposal {
   action?: ActionMetadata;
-  expired: boolean;
 }
 
 export const createProposalRequestSchema = z.object({
   conversationId: z.string().max(MAX_ID_LENGTH),
+  /**
+   * Short plain-text label. Same precedence as `category` — the caller wins,
+   * because it knows the situation the proposal came out of, which the action's
+   * own metadata cannot. Optional here only: omitting it stores the action's
+   * name, or `DEFAULT_PROPOSAL_TITLE` when the action has none either.
+   */
+  title: z.string().max(MAX_TITLE_LENGTH).optional(),
   comment: z.string().max(MAX_COMMENT_LENGTH),
   actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
   actionInput: boundedActionInput.optional(),
@@ -189,9 +254,30 @@ export const createProposalRequestSchema = z.object({
    */
   category: proposalCategorySchema.optional(),
   confidence: proposalConfidenceSchema.default('medium'),
-  origin: proposalOriginSchema.default('worker'),
+  /**
+   * Required, and undefaulted on purpose: a default would attribute every
+   * caller that forgot it to whichever system the default named, and the queue
+   * filtering on it would show another solution's proposals as its own.
+   */
+  origin: proposalOriginSchema,
   expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
   workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * The id to create the proposal under, instead of a random one. For a caller
+   * that derives the id from what it is proposing, so that two calls for the same
+   * thing meet at the same id and Elasticsearch's `op_type: 'create'` — not a
+   * check-then-create in application code — decides which one creates it.
+   *
+   * An id that already exists is refused with `ProposalAlreadyExistsError`; the
+   * service reads and returns nothing. What a duplicate means, and whether a
+   * settled proposal should be followed by a new one under another id, is the
+   * caller's to decide.
+   *
+   * The index is shared across spaces and the service does not scope the id, so
+   * the caller must put the space (and its own producer) into whatever the id is
+   * derived from. Omitting `id` mints a random one, exactly as before.
+   */
+  id: z.uuid().optional(),
 });
 export type CreateProposalRequest = z.infer<typeof createProposalRequestSchema>;
 
@@ -234,6 +320,12 @@ export const proposalFiltersSchema = z.object({
   status: proposalStatusSchema.optional(),
   decision: proposalDecisionSchema.optional(),
   conversationId: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * Restricts the read to one producing system. A queue that serves a single
+   * solution passes its own constant, so another solution's proposals — which
+   * share the index — do not appear in it.
+   */
+  origin: proposalOriginSchema.optional(),
   /** Drops proposals that were replaced, so a chain shows only its live head. */
   excludeSuperseded: z.stringbool().default(false),
   /**
@@ -252,6 +344,12 @@ export const listProposalsQuerySchema = proposalFiltersSchema.extend({
   category: proposalCategorySchema.optional(),
   /** Bounds the closed queue to a recency window rather than all decided history. */
   decidedWithinHours: z.coerce.number().int().min(1).max(168).optional(),
+  /**
+   * `priority` (the default) ranks by impact, confidence and deadline, for a queue of open
+   * proposals. `newest` orders a conversation's history by when each proposal was decided, with
+   * an undecided one first, so paging stays consistent with the order shown.
+   */
+  order: z.enum(['priority', 'newest']).optional(),
   size: z.coerce.number().int().min(1).max(MAX_PROPOSALS_PAGE_SIZE).default(50),
   from: z.coerce.number().int().min(0).max(MAX_PROPOSALS_PAGE_OFFSET).default(0),
 });
@@ -268,6 +366,12 @@ export const proposalChartsSummaryQuerySchema = z
     windowHours: z.coerce.number().int().min(1).max(168).default(24),
     /** The 5 minute floor bounds the response size. */
     bucketMinutes: z.coerce.number().int().min(5).max(1440).default(30),
+    /**
+     * Scopes the counts to one producing feature, matching what its queues
+     * already filter on. Absent counts every producer in the space, which is
+     * only right for a consumer that shows them all.
+     */
+    origin: proposalOriginSchema.optional(),
   })
   /**
    * The two bounds are independently valid but not jointly: 168h at 5-minute
@@ -313,6 +417,16 @@ export const isAwaitingDecision = (proposal: Pick<Proposal, 'status'>): boolean 
   proposal.status === 'pending';
 
 /**
+ * A to-do for a human: something the analyst carries out themselves, so approving it records that
+ * they did. Decision surfaces present it as "I've applied" rather than Approve/Decline, and as
+ * "Applied" once marked. Keyed on the category rather than on the absence of an action, so a
+ * producer states it explicitly, and a proposal without an action that still asks for permission
+ * (to run an analysis, say) keeps Approve/Decline.
+ */
+export const isTodoProposal = (proposal: Pick<Proposal, 'category'>): boolean =>
+  proposal.category === PROPOSAL_CATEGORY_TODO;
+
+/**
  * Approved, but the action it triggers has not finished running yet — `executing`, or briefly
  * still `pending` while the gate workflow's post-gate write is catching up with an approve call
  * that already returned. Declining has no action to run, so a decline never reads this; it
@@ -326,10 +440,54 @@ export const isProposalSettling = (proposal: Pick<Proposal, 'decision' | 'status
   proposal.decision === 'approved' &&
   (proposal.status === 'pending' || proposal.status === 'executing');
 
-export const isExpired = (proposal: Pick<Proposal, 'expiresAt'>, now = Date.now()): boolean => {
-  if (!proposal.expiresAt) {
-    return false;
-  }
-  const deadline = Date.parse(proposal.expiresAt);
-  return Number.isFinite(deadline) && deadline <= now;
-};
+/**
+ * The action failed and its retry does not exist yet. Poll until the original is superseded.
+ */
+export const isAwaitingRetry = (
+  proposal: Pick<Proposal, 'decision' | 'status' | 'supersededBy'>
+): boolean =>
+  proposal.decision === 'approved' &&
+  proposal.status === 'failed' &&
+  proposal.supersededBy === undefined;
+
+/** Settled by a deadline rather than a person.
+ * `pending` reads as live even past `expiresAt` until the gate workflow sweeps it,
+ * so this is not a substitute for comparing `expiresAt` to `now`. */
+export const isExpired = (proposal: Pick<Proposal, 'status'>): boolean =>
+  proposal.status === 'expired';
+
+/**
+ * Gives the phase of each status. It is a `Record` over every `ProposalStatus`. If you add a
+ * status and do not place it here, the compiler reports an error. The groups below come from this
+ * map, so they cannot drift from it.
+ *
+ * - `open`: can still change. `pending` waits for a decision. `executing` is approved and running.
+ * - `settled`: the result is known. Nothing runs again.
+ * - `replaced`: not decided, but it cannot change. A superseded proposal is not the live
+ *   revision. A caller can still hold its id (a stale workflow variable or a retried step).
+ *   That caller must not revive it through `update()`.
+ */
+const PROPOSAL_STATUS_PHASE = {
+  pending: 'open',
+  executing: 'open',
+  succeeded: 'settled',
+  failed: 'settled',
+  expired: 'settled',
+  no_action: 'settled',
+  superseded: 'replaced',
+} as const satisfies Record<ProposalStatus, 'open' | 'settled' | 'replaced'>;
+
+type ProposalStatusPhase = (typeof PROPOSAL_STATUS_PHASE)[ProposalStatus];
+
+const statusesInPhase = (phase: ProposalStatusPhase): ProposalStatus[] =>
+  proposalStatusSchema.options.filter((status) => PROPOSAL_STATUS_PHASE[status] === phase);
+
+/** Statuses that can still change: waiting for a decision, or approved and running. */
+export const OPEN_PROPOSAL_STATUSES = statusesInPhase('open');
+
+/** Statuses with a known result. `superseded` is not here: its successor represents it. */
+export const SETTLED_PROPOSAL_STATUSES = statusesInPhase('settled');
+
+/** Returns true for a settled or replaced status. Only `pending` and `executing` return false. */
+export const isTerminal = (status: ProposalStatus): boolean =>
+  PROPOSAL_STATUS_PHASE[status] !== 'open';

@@ -10,11 +10,12 @@ import type { SpaceId } from '@kbn/core-spaces-common';
 import type { QueryPayload } from './get_query_payload';
 import type { DeduplicationPlan } from './deduplication_query';
 import type { RuleResponse } from '../rules_client';
-import type { AlertEvent } from '../../resources/datastreams/alert_events';
+import type { AlertEventDocument } from '../../resources/datastreams/alert_events';
 import type { ExecutionContext } from '../execution_context';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type { RuleExecutionCounter } from './metrics/counters';
 import type { ActiveAlertGroupHash } from './queries';
+import type { LatestAlertEventState } from '../director/queries';
 
 export interface RuleExecutorTaskParams {
   ruleId: string;
@@ -35,7 +36,7 @@ export interface RulePipelineState {
   readonly rule?: RuleResponse;
   readonly queryPayload?: QueryPayload;
   readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
-  readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;
+  readonly alertEventsBatch?: ReadonlyArray<AlertEventDocument>;
   /**
    * Rule-event deduplication decision for this run, derived once from the
    * breach query by `ExecuteRuleQueryStep` (eligible only when the author
@@ -48,6 +49,7 @@ export interface RulePipelineState {
   readonly deduplication?: DeduplicationPlan;
   readonly newEpisodeIds?: ReadonlyArray<string>;
   readonly activeGroups?: ReadonlyArray<ActiveAlertGroupHash>;
+  readonly previousAlertStateByGroupHash?: ReadonlyMap<string, LatestAlertEventState>;
 }
 
 export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';

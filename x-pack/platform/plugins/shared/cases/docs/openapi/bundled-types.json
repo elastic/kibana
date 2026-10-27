@@ -469,7 +469,8 @@
                       },
                       "customFields": {
                         "type": "array",
-                        "description": "Custom fields configuration details.",
+                        "deprecated": true,
+                        "description": "Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n",
                         "items": {
                           "type": "object",
                           "properties": {
@@ -559,11 +560,26 @@
                           }
                         }
                       },
+                      "extractObservables": {
+                        "type": "boolean",
+                        "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n",
+                        "example": true
+                      },
                       "owner": {
                         "$ref": "#/components/schemas/owner"
                       },
                       "templates": {
                         "$ref": "#/components/schemas/templates"
+                      },
+                      "workflowTags": {
+                        "type": "array",
+                        "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+                        "maxItems": 100,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 1024
+                        }
                       },
                       "updated_at": {
                         "type": "string",
@@ -729,7 +745,8 @@
                     },
                     "customFields": {
                       "type": "array",
-                      "description": "Custom fields configuration details.",
+                      "deprecated": true,
+                      "description": "Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n",
                       "items": {
                         "type": "object",
                         "properties": {
@@ -819,11 +836,26 @@
                         }
                       }
                     },
+                    "extractObservables": {
+                      "type": "boolean",
+                      "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n",
+                      "example": true
+                    },
                     "owner": {
                       "$ref": "#/components/schemas/owner"
                     },
                     "templates": {
                       "$ref": "#/components/schemas/templates"
+                    },
+                    "workflowTags": {
+                      "type": "array",
+                      "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1024
+                      }
                     },
                     "updated_at": {
                       "type": "string",
@@ -993,7 +1025,8 @@
                     },
                     "customFields": {
                       "type": "array",
-                      "description": "Custom fields configuration details.",
+                      "deprecated": true,
+                      "description": "Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n",
                       "items": {
                         "type": "object",
                         "properties": {
@@ -1083,11 +1116,26 @@
                         }
                       }
                     },
+                    "extractObservables": {
+                      "type": "boolean",
+                      "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n",
+                      "example": true
+                    },
                     "owner": {
                       "$ref": "#/components/schemas/owner"
                     },
                     "templates": {
                       "$ref": "#/components/schemas/templates"
+                    },
+                    "workflowTags": {
+                      "type": "array",
+                      "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1024
+                      }
                     },
                     "updated_at": {
                       "type": "string",
@@ -2706,7 +2754,7 @@
       "delete": {
         "summary": "Delete all case comments and alerts",
         "operationId": "deleteCaseCommentsDefaultSpace",
-        "description": "Deletes all comments and alerts from a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
+        "description": "Deletes all comments and alerts from a case. The files of any file attachments are also deleted. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
         "tags": [
           "cases"
         ],
@@ -2875,7 +2923,7 @@
       "delete": {
         "summary": "Delete a case comment or alert",
         "operationId": "deleteCaseCommentDefaultSpace",
-        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
+        "description": "Deletes a comment or alert from a case. If it is a file attachment, its file is also deleted. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
         "tags": [
           "cases"
         ],
@@ -3684,6 +3732,7 @@
               "alert",
               "assignees",
               "attachment",
+              "bulkAttachments",
               "comment",
               "connector",
               "create_case",
@@ -4116,9 +4165,9 @@
             "example": true
           },
           "extractObservables": {
-            "description": "When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. Optional; defaults to false when omitted.\n",
+            "description": "When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.\n",
             "type": "boolean",
-            "example": false
+            "example": true
           }
         }
       },
@@ -4155,11 +4204,16 @@
         "title": "Case extended fields",
         "type": "object",
         "x-state": "Technical preview; added in 9.5.0",
-        "description": "Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).\n",
+        "description": "Case field values keyed by storage key (for example, `priority_as_keyword`). Keys are validated against the fields exposed by the case's active template and global field library. On update, provided keys are merged into the stored map; unlisted keys are left untouched. Template-linked fields require the `xpack.cases.templates.enabled` setting (enabled by default); global fields are always available. Use the get case fields API to discover valid keys.\n",
         "maxProperties": 500,
         "additionalProperties": {
           "type": "string",
           "maxLength": 30000
+        },
+        "example": {
+          "priority_as_keyword": "high",
+          "ticket_number_as_integer": "4287",
+          "escalated_as_boolean": "true"
         }
       },
       "create_case_request": {
@@ -4226,7 +4280,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.\n",
+            "deprecated": true,
+            "description": "Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.\n",
             "minItems": 0,
             "maxItems": 10,
             "items": {
@@ -4701,6 +4756,16 @@
           }
         }
       },
+      "case_extended_fields_labels": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "A read-only, response-only map from active field definition storage keys to their human-readable labels. Entries reflect currently applicable global and template field definitions — not every stored `extended_fields` key is guaranteed a label, because values retained after switching templates may have no matching current definition. Only populated by the get case and search cases endpoints; absent on create, update, push, and comment responses. Including this field in a write request returns a 400 error.\n",
+        "example": {
+          "priority_as_keyword": "Priority"
+        }
+      },
       "external_service": {
         "type": "object",
         "nullable": true,
@@ -4929,7 +4994,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom field values for the case.",
+            "deprecated": true,
+            "description": "Deprecated. Use `extended_fields` instead. Custom field values for the case.",
             "items": {
               "type": "object",
               "properties": {
@@ -4961,6 +5027,9 @@
                 }
               }
             }
+          },
+          "extended_fields_labels": {
+            "$ref": "#/components/schemas/case_extended_fields_labels"
           },
           "description": {
             "type": "string",
@@ -5147,7 +5216,8 @@
                 },
                 "customFields": {
                   "type": "array",
-                  "description": "Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.\n",
+                  "deprecated": true,
+                  "description": "Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.\n",
                   "minItems": 0,
                   "maxItems": 10,
                   "items": {
@@ -5184,6 +5254,27 @@
                           }
                         ]
                       }
+                    }
+                  }
+                },
+                "template": {
+                  "type": "object",
+                  "nullable": true,
+                  "x-state": "Technical preview",
+                  "description": "The case template to apply, clear, or leave unchanged. Requires the `xpack.cases.templates.enabled` setting. Omit to keep the current template; set to `null` to clear it; set to `{ id, version }` to switch. Switching is an explicit versioned action: both `id` and `version` are required. If `extended_fields` is also provided in the same request, those values are validated against the new template's fields. Use the get case fields API to see what fields the new template exposes.\n",
+                  "required": [
+                    "id",
+                    "version"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The template identifier. Retrieve template ids with `GET /api/cases/templates`."
+                    },
+                    "version": {
+                      "type": "integer",
+                      "description": "The template version to apply. Required on update: switching a template is an explicit versioned action, so the version must be specified.\n",
+                      "minimum": 1
                     }
                   }
                 },
@@ -5358,7 +5449,9 @@
       },
       "templates": {
         "type": "array",
+        "deprecated": true,
         "x-state": "Technical preview",
+        "description": "Configuration-embedded templates. Deprecated: use the templates API (`GET /api/cases/templates`) and case `extended_fields` instead.\n",
         "items": {
           "type": "object",
           "properties": {
@@ -5507,7 +5600,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom fields case configuration.",
+            "deprecated": true,
+            "description": "Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n",
             "minItems": 0,
             "maxItems": 10,
             "items": {
@@ -5557,11 +5651,25 @@
               }
             }
           },
+          "extractObservables": {
+            "type": "boolean",
+            "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.\n"
+          },
           "owner": {
             "$ref": "#/components/schemas/owner"
           },
           "templates": {
             "$ref": "#/components/schemas/templates"
+          },
+          "workflowTags": {
+            "type": "array",
+            "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
           }
         }
       },
@@ -5608,7 +5716,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom fields case configuration.",
+            "deprecated": true,
+            "description": "Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n",
             "items": {
               "type": "object",
               "required": [
@@ -5656,8 +5765,22 @@
               }
             }
           },
+          "extractObservables": {
+            "type": "boolean",
+            "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n"
+          },
           "templates": {
             "$ref": "#/components/schemas/templates"
+          },
+          "workflowTags": {
+            "type": "array",
+            "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
           },
           "version": {
             "description": "The version of the connector. To retrieve the version value, use the get configuration API.\n",
@@ -6230,7 +6353,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom field values for the case.",
+            "deprecated": true,
+            "description": "Deprecated. Use `extended_fields` instead. Custom field values for the case.",
             "items": {
               "type": "object",
               "properties": {
@@ -6262,6 +6386,17 @@
                 }
               }
             }
+          },
+          "extended_fields": {
+            "type": "object",
+            "x-state": "Technical preview; added in 9.5.0",
+            "description": "The case's stored field values, keyed by storage key (for example `priority_as_keyword`).\n",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "extended_fields_labels": {
+            "$ref": "#/components/schemas/case_extended_fields_labels"
           },
           "description": {
             "type": "string",
@@ -6721,6 +6856,34 @@
         "properties": {
           "assignees": {
             "$ref": "#/components/schemas/assignees"
+          }
+        }
+      },
+      "payload_bulk_attachments": {
+        "type": "object",
+        "description": "The payload for a bulk attachments user action, recorded when a user removes one or more attachments of the same type from a case in a single action.",
+        "required": [
+          "bulkAttachments"
+        ],
+        "properties": {
+          "bulkAttachments": {
+            "type": "object",
+            "required": [
+              "attachmentType",
+              "count"
+            ],
+            "properties": {
+              "attachmentType": {
+                "type": "string",
+                "description": "The attachment type, such as `security.alert` or `file`.",
+                "example": "security.alert"
+              },
+              "count": {
+                "type": "integer",
+                "description": "The number of attachments of this type.",
+                "example": 3
+              }
+            }
           }
         }
       },
@@ -7273,6 +7436,9 @@
                 "$ref": "#/components/schemas/payload_assignees"
               },
               {
+                "$ref": "#/components/schemas/payload_bulk_attachments"
+              },
+              {
                 "$ref": "#/components/schemas/payload_connector"
               },
               {
@@ -7319,6 +7485,7 @@
             "description": "The type of action.",
             "enum": [
               "assignees",
+              "bulkAttachments",
               "category",
               "comment",
               "connector",
@@ -7674,6 +7841,10 @@
               }
             ],
             "observableTypes": [],
+            "extractObservables": true,
+            "workflowTags": [
+              "soc-triage"
+            ],
             "owner": "cases",
             "created_at": "2024-07-01T17:07:17.767Z",
             "created_by": {
@@ -7745,6 +7916,9 @@
             "fields": null
           },
           "closure_type": "close-by-user",
+          "workflowTags": [
+            "soc-triage"
+          ],
           "customFields": [
             {
               "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
@@ -7829,6 +8003,10 @@
               ]
             }
           ],
+          "extractObservables": true,
+          "workflowTags": [
+            "soc-triage"
+          ],
           "owner": "cases",
           "created_at": "2024-07-01T17:07:17.767Z",
           "created_by": {
@@ -7883,6 +8061,10 @@
             "fields": null
           },
           "closure_type": "close-by-user",
+          "workflowTags": [
+            "soc-triage",
+            "enrichment"
+          ],
           "customFields": [
             {
               "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
@@ -7918,6 +8100,11 @@
               "required": false,
               "type": "toggle"
             }
+          ],
+          "extractObservables": true,
+          "workflowTags": [
+            "soc-triage",
+            "enrichment"
           ],
           "owner": "cases",
           "created_at": "2024-07-01T17:07:17.767Z",

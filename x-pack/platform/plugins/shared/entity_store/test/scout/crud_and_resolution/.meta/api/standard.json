@@ -1,9 +1,20 @@
 {
-  "sha1": "5239ef3dfe495a54345bef2222df46973ec5123d",
+  "sha1": "8550672434e233246b38018574d66b9dda482b50",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "10fb9ae82735fb7-d4d8cfea3b99ae9",
+      "title": "Install Entity Store once for CRUD and resolution API suite",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
     {
       "id": "1f74745923a4dea-85b893dcdf56a8f",
       "title": "Automated resolution integration tests Basic email matching — two entities with same email",
@@ -16,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 86,
-        "column": 7
+        "line": 67,
+        "column": 5
       }
     },
     {
@@ -32,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 107,
-        "column": 8
+        "line": 85,
+        "column": 94
       }
     },
     {
@@ -48,8 +59,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 140,
-        "column": 8
+        "line": 119,
+        "column": 13
       }
     },
     {
@@ -64,8 +75,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 161,
-        "column": 13
+        "line": 144,
+        "column": 88
       }
     },
     {
@@ -80,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 200,
-        "column": 26
+        "line": 181,
+        "column": 50
       }
     },
     {
@@ -96,8 +107,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 247,
-        "column": 7
+        "line": 226,
+        "column": 20
       }
     },
     {
@@ -112,8 +123,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 290,
-        "column": 9
+        "line": 270,
+        "column": 16
       }
     },
     {
@@ -128,8 +139,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 338,
-        "column": 23
+        "line": 318,
+        "column": 47
       }
     },
     {
@@ -144,8 +155,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 379,
-        "column": 57
+        "line": 360,
+        "column": 59
       }
     },
     {
@@ -160,8 +171,56 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 433,
-        "column": 14
+        "line": 415,
+        "column": 18
+      }
+    },
+    {
+      "id": "1f74745923a4dea-23bb3b511e53790",
+      "title": "Automated resolution integration tests Email links local entities on several hosts together with Okta onto the Active Directory user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 429,
+        "column": 18
+      }
+    },
+    {
+      "id": "1f74745923a4dea-2ca8b4e39ed8ffa",
+      "title": "Automated resolution integration tests Email declines two Active Directory users sharing a mailbox, even next to local users",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 470,
+        "column": 24
+      }
+    },
+    {
+      "id": "1f74745923a4dea-8add584a71d8c7f",
+      "title": "Automated resolution integration tests Email links local entities before the Active Directory user arrives, then retargets onto it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 534,
+        "column": 15
       }
     },
     {
@@ -176,8 +235,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 445,
-        "column": 63
+        "line": 561,
+        "column": 26
+      }
+    },
+    {
+      "id": "1f74745923a4dea-3a999d5d73138c7",
+      "title": "Automated resolution integration tests Windows SID bridge links several local entities on different hosts to Active Directory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 582,
+        "column": 16
+      }
+    },
+    {
+      "id": "1f74745923a4dea-0fa4804426d08fc",
+      "title": "Automated resolution integration tests Windows SID bridge links two local entities sharing a domain SID before the Active Directory user arrives",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 629,
+        "column": 14
       }
     },
     {
@@ -192,13 +283,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 464,
-        "column": 17
+        "line": 691,
+        "column": 14
       }
     },
     {
-      "id": "1f74745923a4dea-e6f67952fd801be",
-      "title": "Automated resolution integration tests CrowdStrike SID bridge links CrowdStrike to Active Directory",
+      "id": "1f74745923a4dea-63fb87dfe1dd85d",
+      "title": "Automated resolution integration tests CrowdStrike SID bridge does not link leftover crowdstrike-namespace entities when left at the default (disabled)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -208,13 +299,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 485,
-        "column": 13
+        "line": 710,
+        "column": 11
       }
     },
     {
-      "id": "1f74745923a4dea-8da26b1670c058e",
-      "title": "Automated resolution integration tests UPN cross-field bridge links microsoft_365 user.id to entra_id user.name",
+      "id": "1f74745923a4dea-84d8b9e1d155351",
+      "title": "Automated resolution integration tests CrowdStrike SID bridge links leftover crowdstrike-namespace entities to Active Directory when enabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -224,8 +315,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 504,
-        "column": 18
+        "line": 733,
+        "column": 9
+      }
+    },
+    {
+      "id": "1f74745923a4dea-19236124134cf26",
+      "title": "Automated resolution integration tests UPN cross-field bridge does not link when left at the default (disabled)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 771,
+        "column": 21
+      }
+    },
+    {
+      "id": "1f74745923a4dea-a58935b54b01e80",
+      "title": "Automated resolution integration tests UPN cross-field bridge links microsoft_365 user.id to entra_id user.name when enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 796,
+        "column": 24
       }
     },
     {
@@ -240,8 +363,56 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 527,
-        "column": 23
+        "line": 835,
+        "column": 21
+      }
+    },
+    {
+      "id": "1f74745923a4dea-6f5281fdef4c5a8",
+      "title": "Automated resolution integration tests Well-known SIDs on local entities are not bridged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 861,
+        "column": 72
+      }
+    },
+    {
+      "id": "1f74745923a4dea-5221402b802e04e",
+      "title": "Automated resolution integration tests Linux UID values on local entities do not enter the SID match",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 886,
+        "column": 11
+      }
+    },
+    {
+      "id": "1f74745923a4dea-a60a5ba89574fb1",
+      "title": "Automated resolution integration tests SID bridge links a local entity created by extraction to Active Directory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 909,
+        "column": 11
       }
     },
     {
@@ -256,8 +427,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 552,
-        "column": 23
+        "line": 996,
+        "column": 17
+      }
+    },
+    {
+      "id": "1f74745923a4dea-2adfe4b4235e482",
+      "title": "Automated resolution integration tests Security all can enable and disable built-in rules; Security read cannot",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 1032,
+        "column": 21
+      }
+    },
+    {
+      "id": "1f74745923a4dea-f80727652f69918",
+      "title": "Automated resolution integration tests A maintainer run by a Security all user honours a built-in rule an admin disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 1073,
+        "column": 10
       }
     },
     {
@@ -272,8 +475,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 46,
-        "column": 55
+        "line": 27,
+        "column": 22
       }
     },
     {
@@ -288,8 +491,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 67,
-        "column": 12
+        "line": 46,
+        "column": 52
       }
     },
     {
@@ -304,8 +507,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 84,
-        "column": 21
+        "line": 65,
+        "column": 12
       }
     },
     {
@@ -320,8 +523,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 107,
-        "column": 22
+        "line": 88,
+        "column": 15
       }
     },
     {
@@ -336,8 +539,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 125,
-        "column": 13
+        "line": 109,
+        "column": 14
       }
     },
     {
@@ -352,8 +555,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 156,
-        "column": 12
+        "line": 137,
+        "column": 31
       }
     },
     {
@@ -368,8 +571,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 205,
-        "column": 20
+        "line": 188,
+        "column": 15
       }
     },
     {
@@ -384,8 +587,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 245,
-        "column": 40
+        "line": 226,
+        "column": 18
       }
     },
     {
@@ -400,8 +603,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 286,
-        "column": 15
+        "line": 265,
+        "column": 8
       }
     },
     {
@@ -416,8 +619,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 334,
-        "column": 22
+        "line": 316,
+        "column": 16
       }
     },
     {
@@ -432,8 +635,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 351,
-        "column": 10
+        "line": 334,
+        "column": 16
       }
     },
     {
@@ -448,8 +651,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 389,
-        "column": 94
+        "line": 370,
+        "column": 15
       }
     },
     {
@@ -464,8 +667,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 435,
-        "column": 22
+        "line": 416,
+        "column": 15
       }
     },
     {
@@ -480,8 +683,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 487,
-        "column": 73
+        "line": 468,
+        "column": 13
       }
     },
     {
@@ -496,8 +699,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 516,
-        "column": 23
+        "line": 497,
+        "column": 13
       }
     },
     {
@@ -512,8 +715,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 559,
-        "column": 16
+        "line": 540,
+        "column": 12
       }
     },
     {
@@ -528,8 +731,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 576,
-        "column": 73
+        "line": 557,
+        "column": 20
       }
     },
     {
@@ -544,8 +747,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 610,
-        "column": 18
+        "line": 590,
+        "column": 25
       }
     },
     {
@@ -560,8 +763,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 627,
-        "column": 22
+        "line": 608,
+        "column": 23
       }
     },
     {
@@ -576,8 +779,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 645,
-        "column": 24
+        "line": 630,
+        "column": 6
       }
     },
     {
@@ -592,8 +795,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 680,
-        "column": 23
+        "line": 662,
+        "column": 12
       }
     },
     {
@@ -608,8 +811,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 709,
-        "column": 25
+        "line": 691,
+        "column": 14
       }
     },
     {
@@ -624,8 +827,56 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
-        "line": 720,
-        "column": 33
+        "line": 701,
+        "column": 10
+      }
+    },
+    {
+      "id": "ddd5b28c53d0781-79f59ef964bafc1",
+      "title": "Custom resolution rules Security all can manage rules, and enabling one needs write on the entity index; Security read can list them but not write",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/custom_resolution_rules.spec.ts",
+        "line": 110,
+        "column": 5
+      }
+    },
+    {
+      "id": "ddd5b28c53d0781-6aca8d0c60f925e",
+      "title": "Custom resolution rules rejects invalid rules with a clear error and saves nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/custom_resolution_rules.spec.ts",
+        "line": 214,
+        "column": 98
+      }
+    },
+    {
+      "id": "ddd5b28c53d0781-c77d58aee342dfb",
+      "title": "Custom resolution rules previews, links local users to AD, stops on disable, resumes on enable, and cleans up on delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/custom_resolution_rules.spec.ts",
+        "line": 282,
+        "column": 16
       }
     },
     {
@@ -640,8 +891,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/history_snapshot.spec.ts",
-        "line": 59,
-        "column": 38
+        "line": 70,
+        "column": 10
+      }
+    },
+    {
+      "id": "19c1c7c5e6ccaf3-cfa314913d63e61",
+      "title": "Entity Store History Snapshot history snapshot: deletes indices older than retention using the date in the index name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/history_snapshot.spec.ts",
+        "line": 225,
+        "column": 28
       }
     },
     {
@@ -656,8 +923,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/related_user_alias_resolution.spec.ts",
-        "line": 105,
-        "column": 46
+        "line": 71,
+        "column": 42
       }
     },
     {
@@ -672,8 +939,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/related_user_alias_resolution.spec.ts",
-        "line": 201,
-        "column": 19
+        "line": 170,
+        "column": 22
       }
     },
     {
@@ -688,8 +955,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/related_user_alias_resolution.spec.ts",
-        "line": 234,
-        "column": 10
+        "line": 199,
+        "column": 11
       }
     },
     {
@@ -704,8 +971,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
-        "line": 56,
-        "column": 14
+        "line": 27,
+        "column": 22
       }
     },
     {
@@ -720,8 +987,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
-        "line": 86,
-        "column": 23
+        "line": 56,
+        "column": 12
       }
     },
     {
@@ -736,8 +1003,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
-        "line": 117,
-        "column": 73
+        "line": 89,
+        "column": 11
       }
     },
     {
@@ -752,8 +1019,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
-        "line": 153,
-        "column": 22
+        "line": 123,
+        "column": 21
       }
     },
     {
@@ -768,7 +1035,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
-        "line": 180,
+        "line": 150,
         "column": 22
       }
     },
@@ -784,8 +1051,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
-        "line": 194,
-        "column": 86
+        "line": 166,
+        "column": 71
       }
     },
     {
@@ -800,8 +1067,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
-        "line": 243,
-        "column": 21
+        "line": 214,
+        "column": 16
       }
     },
     {
@@ -816,8 +1083,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
-        "line": 260,
-        "column": 26
+        "line": 232,
+        "column": 13
       }
     },
     {
@@ -832,8 +1099,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
-        "line": 270,
-        "column": 86
+        "line": 242,
+        "column": 63
       }
     },
     {
@@ -848,8 +1115,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
-        "line": 279,
-        "column": 24
+        "line": 255,
+        "column": 22
       }
     },
     {
@@ -864,8 +1131,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
-        "line": 311,
-        "column": 24
+        "line": 281,
+        "column": 22
       }
     },
     {
@@ -880,8 +1147,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
-        "line": 333,
-        "column": 7
+        "line": 304,
+        "column": 46
       }
     },
     {
@@ -896,14 +1163,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
-        "line": 349,
-        "column": 3
+        "line": 320,
+        "column": 5
       }
     },
     {
       "id": "fc8fec24ce63075-f8c198fdf451522",
       "title": "Entity Store Status API tests hides non-priority internal config and cursor state from the public response",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -912,8 +1179,51 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/status_api.spec.ts",
-        "line": 42,
-        "column": 16
+        "line": 61,
+        "column": 12
+      }
+    },
+    {
+      "id": "fc8fec24ce63075-e6c43c81299ce12",
+      "title": "Entity Store Status API tests reports a nonPriority block only for types that run one",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/status_api.spec.ts",
+        "line": 77,
+        "column": 14
+      }
+    },
+    {
+      "id": "fc8fec24ce63075-e600f4f5de93468",
+      "title": "Entity Store Status API tests reports a null nonPriority block with the dual-process flag off",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/status_api.spec.ts",
+        "line": 103,
+        "column": 5
+      }
+    },
+    {
+      "id": "0dd8e09dd2acde4-7370b5c105259bf",
+      "title": "Uninstall Entity Store for CRUD and resolution API suite",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

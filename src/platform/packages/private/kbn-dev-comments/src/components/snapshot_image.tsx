@@ -23,11 +23,7 @@ export interface SnapshotState {
   failed: boolean;
 }
 
-/**
- * Loads the comment's screenshot once `enabled` and keeps it for the component's
- * lifetime; a load that failed is made again the next time it is enabled (the
- * screenshot hidden and shown again), a failure being as likely passing as not.
- */
+/** Loads the comment's screenshot once `enabled` and keeps it; a load that failed is made again the next time it is enabled. */
 export const useSnapshot = (commentId: string, enabled: boolean): SnapshotState => {
   const { services } = useComments();
   const [state, setState] = useState<SnapshotState>({ src: null, loading: false, failed: false });
@@ -72,7 +68,7 @@ export const SnapshotImage = ({
     values: { author: comment.author.displayName },
   });
 
-  // If the thread closes while the full-screen view is open, the view goes with it.
+  // The full-screen view goes with the thread.
   useEffect(() => () => controller.setOverlayOpen(false), [controller]);
 
   if (failed) {

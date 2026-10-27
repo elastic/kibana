@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Investigation } from '../../types';
+import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 import { ConversationCardCompact } from './conversation_card_compact';
 
 const investigation: Investigation = {
@@ -16,9 +17,8 @@ const investigation: Investigation = {
   template_id: 'investigation',
   title: 'Compromised API key — billing-svc',
   createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-  updatedAt: new Date().toISOString(),
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
+  proposalDecidedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+  worker_execution_ids: ['exec-1'],
   pendingProposalCount: 0,
   assignees: [],
   recommendedAction: 'closed',
@@ -32,10 +32,10 @@ const renderRow = (props: Partial<React.ComponentProps<typeof ConversationCardCo
   renderWithKibanaRenderContext(
     <ConversationCardCompact
       investigation={investigation}
-      hasBorder={false}
       outcome="Approved by Maya Chen"
       onClickCard={onClickCard}
       onClickAction={jest.fn()}
+      onCopyLink={jest.fn()}
       onOpenChat={jest.fn()}
       onClickRecommendedAction={jest.fn()}
       {...props}
@@ -49,7 +49,8 @@ describe('ConversationCardCompact', () => {
     renderRow();
 
     const row = screen.getByRole('button', { name: investigation.title });
-    expect(row).toHaveTextContent('4 hours ago');
+    expect(row).toHaveTextContent('1 hour ago');
+    expect(row).not.toHaveTextContent('4 hours ago');
     expect(row).toHaveTextContent(investigation.title);
     expect(row).toHaveTextContent('Rotate the Stripe key');
     expect(row).toHaveTextContent('Approved by Maya Chen');
@@ -64,9 +65,19 @@ describe('ConversationCardCompact', () => {
   it('offers no decision, since the row is already decided', () => {
     renderRow();
 
-    // A decided row with no escalation capability has no available actions — the trigger
-    // must not render at all rather than opening an empty popover.
-    expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
+
+    // Only the read-only Copy link remains.
+    expect(screen.getByText('Copy link')).toBeInTheDocument();
+    expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
+  });
+
+  it('shows no age rather than the creation age when there is no decision time', () => {
+    renderRow({ investigation: { ...investigation, proposalDecidedAt: undefined } });
+
+    expect(screen.getByRole('button', { name: investigation.title })).not.toHaveTextContent(
+      '4 hours ago'
+    );
   });
 
   it('still opens the flyout on click', () => {
@@ -83,6 +94,21 @@ describe('ConversationCardCompact', () => {
     fireEvent.keyDown(screen.getByRole('button', { name: investigation.title }), { key: 'Enter' });
 
     expect(onClickCard).toHaveBeenCalledWith('inv-1');
+  });
+
+  it('is inert and disables the chat control while the row is unavailable', () => {
+    const { onClickCard } = renderRow({ canOpenInvestigationDetails: false });
+
+    fireEvent.click(screen.getByText('Rotate the Stripe key'));
+
+    expect(onClickCard).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'Rotate the Stripe key' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Open in chat' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', {
+        name: ACTIONS_TRANSLATIONS.tooltips.proposalsAgentBuilderPrivilegeRequired,
+      })
+    ).toBeDisabled();
   });
 
   it('leaves the keyboard to the nested controls, which the row would otherwise swallow', () => {

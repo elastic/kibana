@@ -9,6 +9,8 @@ applies_to:
 
 The AbuseIPDB connector communicates with the AbuseIPDB API to check IP reputation and report abusive IPs.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-abuseipdb-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:
@@ -38,7 +40,7 @@ Report IP
     - **IP** (required): IPv4 address to report.  
     - {applies_to}`serverless:` {applies_to}`stack: ga 9.6+` IPv6 addresses are also accepted.  
     - **Categories** (required): Array of abuse category IDs (1-30 entries).  
-    - **Comment** (optional): Additional details about the observed activity (max 1024 characters).  
+    - **Comment** (optional): Additional details about the observed activity (max 1024 bytes UTF-8).  
 
 Get IP Info
 :   Get detailed (verbose) information about an IP address including geolocation, allowlist status (`isWhitelisted`), and domain.  
@@ -55,7 +57,7 @@ Bulk Check
 Get Blacklist {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Fetch the most-reported IPs from the AbuseIPDB `/blacklist` endpoint for blocklist generation or enrichment. Prefer a high confidence minimum (75-100) for deny-list use.  
     - **Confidence Minimum** (optional): Minimum abuse confidence score (25-100, default 100).  
-    - **Limit** (optional): Maximum number of IPs to return (1-10000, default 10). Defaults low so workflow execution outputs stay small; raise explicitly for larger feeds. AbuseIPDB may truncate further based on subscription tier.  
+    - **Limit** (optional): Maximum number of IPs to return (1-500000, default 10). Defaults low so workflow execution outputs stay small; raise explicitly for larger feeds. AbuseIPDB may truncate further based on subscription tier.  
 
 ## Connector networking configuration [abuseipdb-connector-networking-configuration]
 

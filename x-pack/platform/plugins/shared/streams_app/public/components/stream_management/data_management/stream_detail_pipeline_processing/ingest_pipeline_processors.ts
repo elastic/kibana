@@ -139,15 +139,16 @@ const toEditableProcessorStep = (
         ...base,
         ...rest,
       } as PipelineProcessorDefinitionWithUIAttributes;
-    case 'registered_domain':
+    case 'registered_domain': {
+      const { target_field: targetField, ...registeredDomainRest } = rest;
       return {
         action: 'registered_domain',
         ...base,
         expression: typeof field === 'string' ? field : '',
-        prefix: typeof rest.target_field === 'string' ? rest.target_field : 'domain',
-        ignore_missing: rest.ignore_missing,
-        ignore_failure: rest.ignore_failure,
+        prefix: typeof targetField === 'string' ? targetField : 'domain',
+        ...registeredDomainRest,
       } as PipelineProcessorDefinitionWithUIAttributes;
+    }
     default:
       throw new Error(`Cannot render unsupported ingest processor type "${processorType}".`);
   }
@@ -222,6 +223,11 @@ const processorStepToNativeProcessor = (
     description,
     ignore_failure: ignoreFailure,
   };
+
+  if (typeof config.if === 'string') {
+    const condition = config.if.trim();
+    config.if = condition.length > 0 ? condition : undefined;
+  }
 
   if (action === 'registered_domain') {
     const { expression, prefix, ...registeredDomainConfig } = config;

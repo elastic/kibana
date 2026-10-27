@@ -1,0 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import SLACK_THREAD_WORKFLOW_YAML from './slack_thread_workflow.yaml';
+import type { ManagedWorkflowDefinition } from '../../../types';
+import { removeRunAs } from '../render_bound_yaml';
+
+export const NIGHTSHIFT_SLACK_THREAD_WORKFLOW_ID = 'system-nightshift-slack-thread';
+
+export const NIGHTSHIFT_SLACK_THREAD_WORKFLOW = {
+  id: NIGHTSHIFT_SLACK_THREAD_WORKFLOW_ID,
+  pluginId: 'nightshiftInvestigations',
+  version: 1,
+  billable: false,
+  yaml: removeRunAs(SLACK_THREAD_WORKFLOW_YAML),
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'restorable',
+  },
+} as const satisfies ManagedWorkflowDefinition;

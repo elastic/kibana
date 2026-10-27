@@ -556,6 +556,45 @@ describe('get()', () => {
       expect(result.isInboundEventsEnabled).toBe(false);
     });
 
+    test('reports inbound events on for an in-memory connector with events enabled', async () => {
+      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.slack2'
+      );
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.slack2'
+      );
+      const inMemoryConnector: InMemoryConnector = {
+        id: 'elastic-apps-slack',
+        actionTypeId: '.slack2',
+        name: 'Slack (Elastic app)',
+        isPreconfigured: true,
+        isSystemAction: false,
+        isDeprecated: false,
+        isConnectorTypeDeprecated: false,
+        config: {},
+        secrets: {},
+        isDynamic: true,
+        isInboundEventsEnabled: true,
+      };
+      connectorFromInMemoryConnectorMock.mockReturnValueOnce({
+        id: 'elastic-apps-slack',
+        actionTypeId: '.slack2',
+        name: 'Slack (Elastic app)',
+        isPreconfigured: true,
+        isSystemAction: false,
+        isDeprecated: false,
+        isConnectorTypeDeprecated: false,
+      });
+
+      const result = await get({
+        context: { ...mockContext, inMemoryConnectors: [inMemoryConnector] },
+        id: 'elastic-apps-slack',
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(true);
+      expect(getConnectorSoMock).not.toHaveBeenCalled();
+    });
+
     test('gets a connector with authMode "shared"', async () => {
       getConnectorSoMock.mockResolvedValueOnce({
         id: '1',

@@ -41,6 +41,14 @@ export const BULK_FILTER_MAX_RESOURCES = 10_000;
  */
 export const ID_MAX_LENGTH = 150;
 
+/**
+ * Maximum length for an alert series id. A series id is base64url of a payload
+ * holding a space id, an owner (up to `ID_MAX_LENGTH` characters) and a 64
+ * character hash, so even a multi-byte external `source` stays far below this.
+ * Space ids have no length limit of their own, hence the headroom.
+ */
+export const SERIES_ID_MAX_LENGTH = 2048;
+
 /** Maximum length for KQL/filter query strings (e.g. action policy matcher, bulk operation filter). */
 export const MAX_KQL_LENGTH = 4096;
 
@@ -104,12 +112,6 @@ export const MAX_ARTIFACT_DATA_LENGTH = MAX_ARTIFACT_DATA_BYTES;
 
 /** Maximum number of destinations per action policy. */
 export const ACTION_POLICY_MAX_DESTINATIONS = 10;
-
-/**
- * Maximum length for the `version` field. Used by the optimistic concurrency control check on `PATCH /{id}`
- * and `PUT /{id}`.
- */
-export const VERSION_MAX_LENGTH = 256;
 
 /** Maximum number of items any list endpoint returns per page. */
 export const MAX_PER_PAGE = 100;

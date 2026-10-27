@@ -14,9 +14,18 @@ export type {
   FakeRequestUserFields,
 } from './src/authc';
 export type { CoreAuditService } from './src/audit';
-export type { CoreServiceAccountsService } from './src/service_accounts';
+export type {
+  CoreServiceAccountsService,
+  CreateServiceAccountServerParams,
+  DeleteServiceAccountOptions,
+  DeleteServiceAccountResult,
+  ServiceAccountPlatformAssumer,
+} from './src/service_accounts';
 export type {
   CoreServiceAccountsSetup,
+  ServiceAccountWorkloadDetails,
+  ServiceAccountWorkloadLocator,
+  ServiceAccountWorkloadResolver,
   ServiceAccountWorkloadTypeRegistration,
 } from './src/service_account_workloads';
 export {
@@ -27,6 +36,7 @@ export {
   SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX,
 } from './src/service_account_workloads';
 export type {
+  AuthenticatedPrincipal,
   ServiceAccount,
   CreateServiceAccountParams,
   ServiceAccountWorkloadBinder,
@@ -34,12 +44,18 @@ export type {
   BindServiceAccountWorkloadParams,
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadCoordinates,
+  ServiceAccountWorkloadRequestParams,
+  ServiceAccountBoundWorkload,
 } from '@kbn/core-security-common';
 export type {
   CoreSecurityDelegateContract,
   AuthenticationServiceContract,
   AuditServiceContract,
   ServiceAccountsServiceContract,
+  CoreSecurityDelegateHandle,
+  CoreSecurityDelegateServiceAccounts,
+  ResolvedServiceAccountWorkload,
+  ServiceAccountBoundWorkloadRef,
 } from './src/api_provider';
 export type {
   SecurityRequestHandlerContext,
@@ -73,6 +89,7 @@ export {
   deriveInternalCallerAttestation,
   markExternalUiamCredential,
   isExternalUiamCredential,
+  resolveUiamClientAuthentication,
 } from './src/uiam';
 export type { CoreFipsService } from './src/fips';
 export {
@@ -83,4 +100,4 @@ export {
   flattenSecurityPrivileges,
 } from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';
-export type { UiamProjectType } from './src/uiam';
+export type { UiamProjectType, UiamClientAuthenticationParams } from './src/uiam';

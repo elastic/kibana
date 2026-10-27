@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '../../../common/constants';
+
 // --- Shared primitives ---
 
 const EcfFamilySchema = schema.oneOf(
@@ -26,6 +28,19 @@ const EcfStackSchema = schema.object({
     maxLength: 32,
     meta: { description: 'ECF semantic version resolved at launch time, e.g. "1.10.0".' },
   }),
+  stackArn: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 2048,
+      meta: { description: 'CloudFormation stack ARN pasted by the user post-launch.' },
+    })
+  ),
+  serviceIds: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1, maxLength: 128 }), {
+      maxSize: 1000,
+      meta: { description: 'Service IDs active when the stack was last launched or updated.' },
+    })
+  ),
 });
 
 const CloudOnboardingDeploymentProviderSchema = schema.oneOf(
@@ -120,25 +135,60 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       },
     })
   ),
-  dataFormat: schema.maybe(DataFormatSchema),
-  authMethod: schema.maybe(
-    schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')], {
-      meta: { description: 'Authentication method for managed integrations.' },
-    })
-  ),
-  agentPolicyId: schema.maybe(
+  integrationName: schema.maybe(
     schema.string({
       meta: {
         description:
-          'Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.',
+          'Integration name as entered in the Service settings step, before any per-package suffix is applied.',
+      },
+    })
+  ),
+  description: schema.maybe(
+    schema.string({
+      meta: { description: 'Integration description from the Service settings step.' },
+    })
+  ),
+  namespace: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
+      },
+    })
+  ),
+  dataFormat: schema.maybe(DataFormatSchema),
+  authMethod: schema.maybe(
+    schema.oneOf(
+      [
+        schema.literal('identity_federation'),
+        schema.literal('static_keys'),
+        schema.literal('temporary_keys'),
+        schema.literal('shared_credentials'),
+        schema.literal('assume_role'),
+      ],
+      {
+        meta: {
+          description:
+            'Authentication method. Allowed values depend on the delivery mechanism:\n\n- managed_integration: identity_federation | static_keys\n- agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role',
+        },
+      }
+    )
+  ),
+  agentPolicyIds: schema.maybe(
+    schema.arrayOf(schema.string(), {
+      maxSize: 1000,
+      meta: {
+        description:
+          'Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.',
       },
     })
   ),
   packagePolicyIds: schema.maybe(
     schema.arrayOf(schema.string(), {
-      maxSize: 100,
+      maxSize: 1000,
       meta: {
-        description: 'Package policy IDs created for managed_integration services.',
+        description:
+          'Package policy IDs created for this deployment (managed_integration and agent_based).',
       },
     })
   ),
@@ -205,10 +255,55 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         meta: { description: 'Global AWS region from the Service Settings step.' },
       })
     ),
+    integrationName: schema.maybe(
+      schema.string({
+        maxLength: CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
+        meta: {
+          description:
+            'Integration name as entered in the Service settings step, before any per-package suffix is applied.',
+        },
+      })
+    ),
+    description: schema.maybe(
+      schema.string({
+        maxLength: 2048,
+        meta: { description: 'Integration description from the Service settings step.' },
+      })
+    ),
+    namespace: schema.maybe(
+      schema.string({
+        maxLength: 100,
+        meta: {
+          description:
+            'Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
+        },
+      })
+    ),
     dataFormat: schema.maybe(DataFormatSchema),
     authMethod: schema.maybe(
-      schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')], {
-        meta: { description: 'Authentication method for managed integrations.' },
+      schema.oneOf(
+        [
+          schema.literal('identity_federation'),
+          schema.literal('static_keys'),
+          schema.literal('temporary_keys'),
+          schema.literal('shared_credentials'),
+          schema.literal('assume_role'),
+        ],
+        {
+          meta: {
+            description:
+              'Authentication method. Allowed values depend on the delivery mechanism:\n\n- managed_integration: identity_federation | static_keys\n- agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role',
+          },
+        }
+      )
+    ),
+    agentPolicyIds: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 255 }), {
+        maxSize: 1000,
+        meta: {
+          description:
+            'Agent policy IDs for agent_based existing-policy deploys. Provided on create so that a mid-deploy tab-close leaves a record that hydrates back into existing mode.',
+        },
       })
     ),
   }),
@@ -226,6 +321,7 @@ export const GetCloudOnboardingDeploymentsByConnectorIdRequestSchema = {
   params: schema.object({
     connectorId: schema.string({
       minLength: 1,
+      maxLength: 255,
       meta: { description: 'The fleet-cloud-connector ID to list deployments for.' },
     }),
   }),
@@ -255,20 +351,88 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       })
     ),
     deploymentName: schema.maybe(schema.string({ maxLength: 255 })),
-    services: schema.maybe(
-      schema.arrayOf(schema.string({ minLength: 1, maxLength: 255 }), {
-        minSize: 1,
-        maxSize: 1000,
-        meta: { description: 'Updated service list. Replaces the stored services array.' },
+    integrationName: schema.maybe(
+      schema.string({
+        maxLength: CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
+        meta: {
+          description:
+            'Integration name used by the last deploy, before any per-package suffix. Refreshed on each deploy because an unedited default name follows the service selection.',
+        },
       })
     ),
+    description: schema.maybe(
+      schema.nullable(
+        schema.string({
+          maxLength: 2048,
+          meta: {
+            description:
+              'Integration description from the Service settings step. Send null to clear it.',
+          },
+        })
+      )
+    ),
+    namespace: schema.maybe(
+      schema.nullable(
+        schema.string({
+          maxLength: 100,
+          meta: {
+            description:
+              'Global data stream namespace from the Service settings step. Omit it to keep the stored value, or send null to clear it. When none is set, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
+          },
+        })
+      )
+    ),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
+    services: schema.maybe(
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
+        minSize: 1,
+        maxSize: 1000,
+        meta: {
+          description:
+            'Current service set for this deployment. Refreshed on each successful deploy so resume after an incremental service addition restores all deployed services.',
+        },
+      })
+    ),
     attemptCount: schema.maybe(
       schema.number({ min: 1, meta: { description: 'Incremented by callers performing a retry.' } })
     ),
-    agentPolicyId: schema.maybe(schema.string({ maxLength: 255 })),
+    connectorId: schema.maybe(schema.nullable(schema.string({ maxLength: 255 }))),
+    authMethod: schema.maybe(
+      schema.nullable(
+        schema.oneOf(
+          [
+            schema.literal('identity_federation'),
+            schema.literal('static_keys'),
+            schema.literal('temporary_keys'),
+            schema.literal('shared_credentials'),
+            schema.literal('assume_role'),
+          ],
+          {
+            meta: {
+              description:
+                'Authentication method. Refreshed on each successful deploy so a credential-method change between deploys is reflected on resume.',
+            },
+          }
+        )
+      )
+    ),
+    agentPolicyIds: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 255 }), {
+        maxSize: 1000,
+        meta: {
+          description:
+            'Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.',
+        },
+      })
+    ),
     packagePolicyIds: schema.maybe(
-      schema.arrayOf(schema.string({ maxLength: 255 }), { maxSize: 100 })
+      schema.arrayOf(schema.string({ maxLength: 255 }), {
+        maxSize: 1000,
+        meta: {
+          description:
+            'Package policy IDs created for this deployment (managed_integration and agent_based).',
+        },
+      })
     ),
     policyIdsByInstance: schema.maybe(
       schema.recordOf(schema.string({ maxLength: 255 }), schema.string({ maxLength: 255 }), {
@@ -293,12 +457,6 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
         maxSize: 10,
         meta: { description: 'ECF CloudFormation stacks to record for this deployment.' },
       })
-    ),
-    connectorId: schema.maybe(schema.nullable(schema.string({ maxLength: 255 }))),
-    authMethod: schema.maybe(
-      schema.nullable(
-        schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')])
-      )
     ),
   }),
 };

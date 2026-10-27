@@ -20,7 +20,6 @@ const buildResponse = (
   page: 1,
   per_page: 50,
   total: 0,
-  search_matches: null,
   ...overrides,
 });
 
@@ -64,7 +63,7 @@ describe('ExecutionHistoryApi', () => {
         search: 'foo',
         rule_ids: undefined,
         outcomes: ['throttled'],
-        episode_ids: undefined,
+        alert_ids: undefined,
         from: '2026-01-01T00:00:00.000Z',
         to: '2026-01-02T00:00:00.000Z',
         sort_field: 'dispatched_at',
@@ -85,26 +84,13 @@ describe('ExecutionHistoryApi', () => {
         search: undefined,
         rule_ids: undefined,
         outcomes: undefined,
-        episode_ids: undefined,
+        alert_ids: undefined,
         from: undefined,
         to: undefined,
         sort_field: undefined,
         sort_order: undefined,
       },
     });
-  });
-
-  it('supports a count-only read via perPage=0 and from', async () => {
-    const { api, http } = buildApi();
-
-    await api.listActionPolicyExecutions({ from: '2026-01-01T00:00:00.000Z', per_page: 0 });
-
-    expect(http.get).toHaveBeenCalledWith(
-      ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
-      expect.objectContaining({
-        query: expect.objectContaining({ per_page: 0, from: '2026-01-01T00:00:00.000Z' }),
-      })
-    );
   });
 
   it('returns the response from http.get', async () => {

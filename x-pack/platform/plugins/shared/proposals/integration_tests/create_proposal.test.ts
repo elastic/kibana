@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { ProposalGateFixture } from './proposal_gate_fixture';
 import { createProposalGateFixture } from './proposal_gate_fixture';
@@ -21,6 +22,15 @@ const ACTION_WORKFLOW_ID = 'system-alertzero-action-create-rule';
  * step execution, that `data.set` variables survive a resume, and that every
  * decision/status pair the workflow writes is one the service will accept.
  */
+/**
+ * Hours between `from` and the proposal's recorded deadline. Approximate by
+ * construction: the service stamps `expiresAt` from its own clock a few
+ * milliseconds after the caller reads one, so assertions compare to a
+ * precision, not to an exact boundary.
+ */
+const hoursUntilDeadline = (fixture: ProposalGateFixture, from: number): number =>
+  (Date.parse(fixture.onlyProposal().expiresAt!) - from) / 3_600_000;
+
 describe('create-investigation-proposal workflow execution', () => {
   let fixture: ProposalGateFixture;
 
@@ -44,6 +54,43 @@ describe('create-investigation-proposal workflow execution', () => {
       expect(fixture.onlyProposal().expiresAt).toEqual(expect.any(String));
     });
 
+    it('should default that deadline to 72h when the caller does not ask for one', async () => {
+      const before = Date.now();
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+
+      expect(hoursUntilDeadline(fixture, before)).toBeCloseTo(72, 1);
+    });
+
+    it('should honour a deadline the caller does ask for', async () => {
+      // The gate parks against whatever this resolves to, so a worker that
+      // knows its decision is urgent can shorten the window without the queue
+      // and the gate disagreeing about when it expires.
+      const before = Date.now();
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, expiresIn: '4h' });
+
+      expect(hoursUntilDeadline(fixture, before)).toBeCloseTo(4, 1);
+    });
+
+    it('should park the gate for that deadline, not for the default', async () => {
+      // The recorded `expiresAt` and the duration the gate is actually held
+      // for are two different values, and only the second one decides when an
+      // unanswered proposal expires. This reads the rendered `dynamicTimeout`
+      // the engine froze at wait-entry, which is what the idle wake-up and the
+      // resume check both consult.
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, expiresIn: '4h' });
+
+      const parkedSeconds = Number(String(fixture.gateTimeout()).replace(/s$/, ''));
+      expect(parkedSeconds).toBeGreaterThan(3.9 * 3600);
+      expect(parkedSeconds).toBeLessThanOrEqual(4 * 3600);
+    });
+
+    it('should expire at that deadline rather than holding for 72h', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, expiresIn: '4h' });
+      await fixture.timeOutGate(5 * 60 * 60 * 1000);
+
+      expect(fixture.onlyProposal().status).toBe('expired');
+    });
+
     it('should record the execution so approving resumes the run that created it', async () => {
       await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
 
@@ -63,6 +110,71 @@ describe('create-investigation-proposal workflow execution', () => {
       expect(proposal.category).toBe('tune');
       expect(proposal.impact).toBe('low');
       expect(proposal.confidence).toBe('medium');
+    });
+  });
+
+  describe('a caller-supplied proposalId', () => {
+    const ID = '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50';
+
+    it('should create the proposal under that id and park on it', async () => {
+      await fixture.start({ proposalId: ID });
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.onlyProposal().id).toBe(ID);
+    });
+
+    it.each([
+      ['live', undefined],
+      ['dismissed', false],
+    ])(
+      'should fail the run, gate nothing and touch nothing when the id belongs to a %s proposal',
+      async (_label, answer) => {
+        // The service refuses a duplicate id and says nothing more, and the
+        // workflow does not interpret it. It fails at the create step, before any
+        // proposal id is held, so the failure handler has nothing to settle and
+        // no gate is ever parked.
+        await fixture.start({ proposalId: ID });
+        if (answer !== undefined) {
+          await fixture.resume(answer);
+        }
+        const existing = fixture.onlyProposal();
+        const cardsBefore = fixture.attachedProposalIds().length;
+
+        await fixture.start({ proposalId: ID });
+
+        expect(fixture.executionStatus()).toBe(ExecutionStatus.FAILED);
+        expect(fixture.proposals()).toHaveLength(1);
+        expect(fixture.onlyProposal()).toEqual(existing);
+        expect(fixture.attachedProposalIds()).toHaveLength(cardsBefore);
+      }
+    );
+
+    it('should refuse an id another execution already created, without parking', async () => {
+      await fixture.seedProposal({ id: ID });
+
+      await fixture.start({ proposalId: ID });
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.FAILED);
+      expect(fixture.stepExecutions('await_decision')).toHaveLength(0);
+      expect(fixture.onlyProposal().status).toBe('pending');
+    });
+
+    it('should create and park normally under a different id', async () => {
+      await fixture.seedProposal({ id: '0c5d1b9e-3a47-5f2b-8d61-9e4a7c2b1f08' });
+
+      await fixture.start({ proposalId: ID });
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.proposals()).toHaveLength(2);
+    });
+
+    it('should leave a proposal with no id unaffected: every run mints its own', async () => {
+      await fixture.seedProposal({});
+
+      await fixture.start({});
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.proposals()).toHaveLength(2);
     });
   });
 
@@ -170,7 +282,7 @@ describe('create-investigation-proposal workflow execution', () => {
       await fixture.revise({ actionInput: { name: 'analyst-corrected-name' } });
       await fixture.resume(true);
 
-      const executions = fixture.stepExecutions('execute_action', 'workflow.execute');
+      const executions = fixture.stepExecutions('execute_as_approver', 'workflow.execute');
       expect(executions).toHaveLength(1);
       // The trigger's static `inputs.actionInput` still reads `original-name`;
       // asserting on the executed step's own recorded input, not on the
@@ -188,9 +300,32 @@ describe('create-investigation-proposal workflow execution', () => {
       await fixture.resume(true);
 
       const [supersededOriginal, revision] = fixture.proposals();
+      expect(fixture.attachedProposalIds()).toEqual(fixture.proposals().map(({ id }) => id));
       expect(supersededOriginal.id).toBe(original.id);
       expect(supersededOriginal.status).toBe('superseded');
       expect(supersededOriginal.supersededBy).toBe(revision.id);
+      expect(revision.decision).toBe('approved');
+    });
+
+    // The loop no longer re-checks the clock after the gate. The engine's own
+    // timeout task settles anything the deadline caught, and the release route
+    // refuses an expired decision, so the only thing that reached the old
+    // post-gate check was a resume landing in the seconds before Task Manager
+    // claimed the timeout task. That decision is now honoured, and — the part
+    // worth pinning — it is honoured against the revision, not the row it
+    // replaced.
+    it('honours a decision resumed after the deadline, against the live revision', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      const original = fixture.onlyProposal();
+
+      await fixture.revise({ comment: 'clarified per analyst request' });
+      await fixture.resumeAfterDeadline(true);
+
+      const [predecessor, revision] = fixture.proposals();
+      expect(predecessor.id).toBe(original.id);
+      // Untouched: the decision has to land on the head, not resurrect the row
+      // it replaced.
+      expect(predecessor.status).toBe('superseded');
       expect(revision.decision).toBe('approved');
     });
   });
@@ -257,6 +392,7 @@ describe('create-investigation-proposal workflow execution', () => {
       await fixture.resume(true);
 
       const [original, clone] = fixture.proposals();
+      expect(fixture.attachedProposalIds()).toEqual([original.id, clone.id]);
       expect(clone).toBeDefined();
       expect(original.supersededBy).toBe(clone.id);
       expect(clone.decision).toBeUndefined();
@@ -298,6 +434,52 @@ describe('create-investigation-proposal workflow execution', () => {
     });
   });
 
+  // A failed auto-approved attempt is re-offered to a human, and the retry runs from
+  // the other execute step. A step that did not run on a pass keeps its previous
+  // output, so the retry must settle on its own result, never the worker's stale one.
+  // This harness has no workflow registry, so both attempts fail; each error names the
+  // step that ran, which is what shows whose result was adopted.
+  describe('an auto-approved action that fails, then a human retry', () => {
+    beforeEach(async () => {
+      fixture.setActionMetadata({
+        name: 'Close alerts',
+        category: 'respond',
+        approvalPolicy: 'autonomy-dependent',
+      });
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
+    });
+
+    it('runs the first attempt as the worker and parks the clone for a human', () => {
+      const [first, clone] = fixture.proposals();
+
+      expect(fixture.stepExecutions('execute_as_worker', 'workflow.execute')).toHaveLength(1);
+      expect(fixture.stepExecutions('execute_as_approver', 'workflow.execute')).toHaveLength(0);
+      expect(first.status).toBe('failed');
+      expect(first.executionError).toContain('"execute_as_worker"');
+      expect(clone.status).toBe('pending');
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+    });
+
+    it('runs the retry as the approver without re-running the worker step', async () => {
+      await fixture.resume(true);
+
+      expect(fixture.stepExecutions('execute_as_worker', 'workflow.execute')).toHaveLength(1);
+      expect(fixture.stepExecutions('execute_as_approver', 'workflow.execute')).toHaveLength(1);
+      // Only the first pass adopted a worker result.
+      expect(fixture.stepExecutions('adopt_worker_result', 'data.set')).toHaveLength(1);
+    });
+
+    it("settles the retry on the approver's own result, not the worker's stale error", async () => {
+      await fixture.resume(true);
+
+      const [, retry] = fixture.proposals();
+      expect(retry.decision).toBe('approved');
+      expect(retry.status).toBe('failed');
+      expect(retry.executionError).toContain('"execute_as_approver"');
+      expect(retry.executionError).not.toContain('"execute_as_worker"');
+    });
+  });
+
   describe('a gate nobody answers', () => {
     it('should settle as expired once the gate times out', async () => {
       await fixture.start();
@@ -336,6 +518,59 @@ describe('create-investigation-proposal workflow execution', () => {
       await fixture.timeOutGate();
 
       expect(fixture.onlyProposal().executionError).toContain('timeout');
+    });
+  });
+
+  // A cancelled gate runs no handler, so the workflow never settles its record;
+  // the service has to, the next time the proposal is read or decided.
+  describe('a cancelled gate', () => {
+    const SPACE_ID = 'fake_space_id';
+
+    it('should settle the proposal as expired on the next read', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      fixture.cancelGate();
+
+      const proposal = await fixture.service.get(
+        fixture.onlyProposal().id,
+        SPACE_ID,
+        httpServerMock.createKibanaRequest()
+      );
+
+      expect(proposal.status).toBe('expired');
+      expect(fixture.onlyProposal()).toMatchObject({
+        status: 'expired',
+        executionError: expect.stringContaining('cancelled'),
+      });
+      expect(fixture.onlyProposal().decision).toBeUndefined();
+    });
+
+    it('should refuse a decision on it and settle the proposal instead', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      fixture.cancelGate();
+
+      await expect(
+        fixture.service.releaseGate(fixture.onlyProposal().id, {
+          approved: true,
+          spaceId: SPACE_ID,
+          request: httpServerMock.createKibanaRequest(),
+        })
+      ).rejects.toThrow(/can no longer be decided/);
+
+      expect(fixture.onlyProposal().status).toBe('expired');
+      expect(fixture.stepExecutions('execute_action', 'workflow.execute')).toHaveLength(0);
+    });
+
+    it('should leave a proposal whose gate is still parked to the gate', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+
+      await fixture.service.get(
+        fixture.onlyProposal().id,
+        SPACE_ID,
+        httpServerMock.createKibanaRequest()
+      );
+
+      expect(fixture.onlyProposal().status).toBe('pending');
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
     });
   });
 
@@ -396,9 +631,20 @@ describe('create-investigation-proposal workflow execution', () => {
 
       await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
 
-      // Declaring the policy explicitly must behave like declaring nothing;
-      // only `always-gate` overrides the caller.
+      // Only `always-gate` overrides the caller.
       expect(fixture.proposals()[0].decision).toBe('approved');
+    });
+
+    it('should gate an action that declares no approval policy', async () => {
+      fixture.setActionMetadata({ name: 'Create rule', category: 'tune' });
+
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
+
+      // The policy is required, so metadata without one is invalid and reads
+      // as unresolved: an action whose author never said it may run unattended
+      // waits for a human.
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.onlyProposal().decision).toBeUndefined();
     });
   });
 });

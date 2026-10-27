@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/alerts-ui-shared'
   - '@kbn/core-notifications-browser'
+  - '@kbn/core-rendering-browser-mocks'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/rule-registry-plugin'
   - '@kbn/alerts-grouping'
@@ -154,7 +155,6 @@ dependsOn:
   - '@kbn/fleet-plugin'
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
-  - '@kbn/alerting-v2-utils'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-evals'
   - '@kbn/observability-agent-builder-plugin'
@@ -173,6 +173,11 @@ dependsOn:
   - '@kbn/global-search-plugin'
   - '@kbn/nightshift-investigations-plugin'
   - '@kbn/ui-callout'
+  - '@kbn/alerting-v2-utils'
+  - '@kbn/alerting-v2-constants'
+  - '@kbn/agentic-investigations-plugin'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/slo-constants'
 tags:
   - plugin
   - prod
@@ -187,6 +192,4 @@ fileGroups:
     - server/**/*
     - test/scout*/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

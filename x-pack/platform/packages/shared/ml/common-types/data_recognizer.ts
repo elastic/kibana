@@ -7,8 +7,8 @@
 
 export interface JobStat {
   id: string;
-  earliestTimestampMs: number;
-  latestTimestampMs: number;
+  earliestTimestampMs: number | undefined;
+  latestTimestampMs: number | undefined;
   latestResultsTimestampMs: number | undefined;
 }
 

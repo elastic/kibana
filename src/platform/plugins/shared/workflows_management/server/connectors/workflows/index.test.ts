@@ -57,10 +57,27 @@ describe('Workflows Connector', () => {
     const mockRequest = {} as KibanaRequest;
 
     it('should schedule workflow successfully', async () => {
-      const mockScheduleWorkflowService = jest.fn().mockResolvedValue('workflow-run-123');
-      const deps: GetWorkflowsConnectorTypeArgs = {
-        getScheduleWorkflowService: jest.fn().mockResolvedValue(mockScheduleWorkflowService),
-      };
+      jest.mocked(mockWorkflowsManagementApi.getWorkflow).mockResolvedValue({
+        id: 'test-workflow-id',
+        name: 'Private workflow',
+        yaml: 'name: Private workflow',
+        enabled: true,
+        valid: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        createdBy: 'owner',
+        lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+        lastUpdatedBy: 'owner',
+        definition: {
+          version: '1',
+          name: 'Private workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [],
+        },
+      });
+      jest
+        .mocked(mockWorkflowsManagementApi.scheduleWorkflow)
+        .mockResolvedValue('workflow-run-123');
 
       const execOptions = {
         actionId: 'test-action-id',
@@ -96,7 +113,9 @@ describe('Workflows Connector', () => {
         request: mockRequest,
       };
 
-      const result = await executor(execOptions, deps);
+      const connector = getConnectorType(mockWorkflowsManagementApi);
+      if (!connector.executor) throw new Error('Workflows connector executor is missing');
+      const result = await connector.executor(execOptions);
 
       expect(result).toEqual({
         status: 'ok',
@@ -107,8 +126,13 @@ describe('Workflows Connector', () => {
         actionId: 'test-action-id',
       });
 
-      expect(mockScheduleWorkflowService).toHaveBeenCalledWith(
+      expect(mockWorkflowsManagementApi.getWorkflow).toHaveBeenCalledWith(
         'test-workflow-id',
+        'default',
+        mockRequest
+      );
+      expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'test-workflow-id' }),
         'default',
         {
           event: {
@@ -125,8 +149,8 @@ describe('Workflows Connector', () => {
             spaceId: 'default',
           },
         },
-        'alert',
-        mockRequest
+        mockRequest,
+        'alert'
       );
     });
 

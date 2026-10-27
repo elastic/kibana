@@ -27,6 +27,8 @@ export const installInvestigationAgent = async ({
   await agentBuilder.agents.ensure({
     spaceId,
     availability,
+    // Unlike the other Nightshift agents, users chat with the investigator directly.
+    hidden: false,
     agent: {
       id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
       type: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,

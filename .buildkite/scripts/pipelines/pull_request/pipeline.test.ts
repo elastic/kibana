@@ -262,6 +262,133 @@ describe('pull_request pipeline generation', () => {
     expect(output).toContain('security_serverless_explore.sh');
   });
 
+  it.each([
+    'x-pack/platform/plugins/shared/fleet/server/tasks/version_specific_policy_assignment_task.ts',
+    'x-pack/platform/plugins/shared/fleet/server/services/utils/sentinel_policy_version.ts',
+    'x-pack/platform/plugins/shared/fleet/common/services/version_specific_policies_utils.ts',
+    'x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/sentinel_policy_version.spec.ts',
+    'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/fleet_real_agent/stateful/classic.stateful.config.ts',
+  ])('triggers Scout Fleet real agent for %s', async (filename) => {
+    const changes = [{ filename }];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    jest.spyOn(console, 'warn').mockImplementation();
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('scout-fleet-real-agent');
+  });
+
+  it('does not trigger Scout Fleet real agent for an unrelated Fleet plugin change', async () => {
+    const changes = [
+      { filename: 'x-pack/platform/plugins/shared/fleet/server/services/agents/agent.ts' },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).not.toContain('scout-fleet-real-agent');
+  });
+
+  it('does not trigger Scout EDR real Fleet for a Fleet plugin-only change', async () => {
+    const changes = [
+      { filename: 'x-pack/platform/plugins/shared/fleet/server/services/agents/agent.ts' },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).not.toContain('scout-edr-real-fleet');
+  });
+
+  it('triggers Scout EDR real Fleet for a fleet_packages.json change', async () => {
+    const changes = [{ filename: 'fleet_packages.json' }];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('scout-edr-real-fleet');
+  });
+
+  it('triggers Scout EDR real Fleet for a flyout Response section change', async () => {
+    const changes = [
+      {
+        filename:
+          'x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/components/response_section_content.tsx',
+      },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    jest.spyOn(console, 'warn').mockImplementation();
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('scout-edr-real-fleet');
+  });
+
+  it('triggers Scout EDR real Fleet for a suite-only diff', async () => {
+    const changes = [
+      {
+        filename:
+          'x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/tests/automated_response_actions.spec.ts',
+      },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    jest.spyOn(console, 'warn').mockImplementation();
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('scout-edr-real-fleet');
+  });
+
+  it('does not trigger Scout EDR real Fleet for an unrelated Security Scout change', async () => {
+    const changes = [
+      {
+        filename:
+          'x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ui/parallel_tests/timeline_creation.spec.ts',
+      },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    jest.spyOn(console, 'warn').mockImplementation();
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).not.toContain('scout-edr-real-fleet');
+  });
+
   it('still triggers Scout suites for a Scout-tests-only diff', async () => {
     const changes = [
       {

@@ -30,13 +30,11 @@ import {
 import { selectValidationErrors } from '../../../state_management/stream_enrichment_state_machine/selectors';
 import { isPipelineProcessorStep } from '../../../types';
 import { getStepPanelColour } from '../../../utils';
-import { BlockDisableOverlay } from '../block_disable_overlay';
+import { BlockDisableOverlay, DragHandle } from '../../../../../../draggable_steps';
 import { StepContextMenu } from '../context_menu';
 import { ProcessorMetricBadges } from './processor_metrics';
 import { ProcessorStatusIndicator } from './processor_status_indicator';
 import { getStepDescription } from './utils';
-import { DragHandle } from '../../draggable_step_wrapper';
-
 export const ActionBlockListItem = (props: ActionBlockProps) => {
   const { euiTheme } = useEuiTheme();
   const { stepRef, level, processorMetrics, readOnly = false } = props;
@@ -74,6 +72,7 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
 
   const stepDescription = getStepDescription(step);
   const actionDisplayName = step.action.toUpperCase();
+  const condition = typeof step.if === 'string' && step.if.trim().length > 0 ? step.if : undefined;
 
   const handleTitleClick = () => {
     stepRef.send({ type: 'step.edit' });
@@ -199,9 +198,38 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            {(processorMetrics || hasValidationErrors || isUnsaved || !readOnly) && (
+            {(condition || processorMetrics || hasValidationErrors || isUnsaved || !readOnly) && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="xs">
+                  {condition && (
+                    <EuiFlexItem>
+                      <EuiToolTip
+                        content={
+                          <span
+                            css={css`
+                              font-family: ${euiTheme.font.familyCode};
+                              overflow-wrap: anywhere;
+                              white-space: pre-wrap;
+                            `}
+                          >
+                            {condition}
+                          </span>
+                        }
+                      >
+                        <EuiBadge
+                          tabIndex={0}
+                          color="hollow"
+                          iconType="filter"
+                          data-test-subj="streamsAppProcessorConditionBadge"
+                        >
+                          {i18n.translate(
+                            'xpack.streams.streamDetailView.managementTab.enrichment.processorConditionBadge',
+                            { defaultMessage: 'Condition' }
+                          )}
+                        </EuiBadge>
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  )}
                   {processorMetrics && (
                     <EuiFlexItem>
                       <ProcessorMetricBadges {...processorMetrics} />

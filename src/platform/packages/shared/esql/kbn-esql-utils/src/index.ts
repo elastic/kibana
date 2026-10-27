@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adhoc_dataview';
+export {
+  getESQLAdHocDataview,
+  getESQLAdHocDataviewId,
+  getIndexForESQLQuery,
+} from './utils/get_esql_adhoc_dataview';
 export { getESQLTimeField } from './utils/get_time_field';
 export {
   getESQLSourceInfo,
   clearESQLSourceInfoCache,
+  ESQL_SOURCE_INFO_CACHE_TTL,
   buildEsqlSourceCacheKey,
 } from './utils/get_source_info';
 export type { ESQLSourceInfo, ESQLSourceInfoColumn } from './utils/get_source_info';
@@ -20,6 +25,7 @@ export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
 export {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
+  hasAggregatingCommand,
   hasTransformationalCommand,
   parseTimeFieldFromESQLQuery,
   prettifyQuery,
@@ -54,6 +60,7 @@ export {
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
   getSourceCommandFromESQLQuery,
+  getSourceCommandQueryFromESQLQuery,
   getAnySourceCommandFromESQLQuery,
 } from './utils/get_index_pattern_from_query';
 export type { ESQLIndexPatterns } from './utils/get_index_pattern_from_query';
@@ -78,12 +85,14 @@ export {
   getStartEndParams,
   hasStartEndParams,
   getNamedParams,
+  getEsqlSearchParams,
 } from './utils/run_query';
 export {
   isESQLColumnSortable,
   isESQLColumnGroupable,
   isESQLFieldGroupable,
 } from './utils/esql_fields_utils';
+export { getEsqlInspectorStats } from './utils/get_esql_inspector_stats';
 export { sanitazeESQLInput } from './utils/sanitaze_input';
 export { escapeEsqlColumnName } from '@kbn/esql-language';
 export { replaceESQLQueryIndexPattern } from './utils/replace_index_pattern';
@@ -100,13 +109,19 @@ export {
   getFieldParamDefinition,
 } from './utils/cascaded_documents_helpers/utils';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
-export { isComputedColumn, getQuerySummary } from './utils/get_query_summary';
+export { isComputedColumn, getQuerySummary, resolveSourceField } from './utils/get_query_summary';
 export {
   createEsqlViewsManagementClient,
+  ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
   EsqlViewsClientError,
+  getViewEsqlQuery,
+  MAX_ESQL_VIEW_DESCRIPTION_LENGTH,
+  MAX_ESQL_VIEW_NAME_LENGTH,
+  MAX_ESQL_VIEW_QUERY_LENGTH,
+  validateEsqlViewName,
+  type EsqlViewNameValidationError,
   type EsqlViewsClient,
-} from './utils/esql_views_client';
-export { getEsqlControls, getAllEsqlControls, getVariableNamePrefix } from './utils/controls';
+} from './utils/views';
 export {
   getColumnsWithHighlights,
   type ESQLColumnsWithHighlights,

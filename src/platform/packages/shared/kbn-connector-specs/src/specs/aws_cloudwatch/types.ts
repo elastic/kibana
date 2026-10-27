@@ -9,6 +9,11 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
+const GET_METRIC_DATA_MAX_QUERIES = 500;
+// https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_SetAlarmState.html
+const STATE_REASON_DATA_MAX_LENGTH = 4000;
+
 // ============================================================================
 // Shared building blocks
 // ============================================================================
@@ -110,13 +115,15 @@ export const MetricDataQuerySchema = lazySchema(() =>
 );
 export type MetricDataQuery = z.infer<typeof MetricDataQuerySchema>;
 
-const AlarmActionArnSchema = z
-  .string()
-  .min(1)
-  .max(1024)
-  .describe(
-    'An Amazon Resource Name (ARN) to notify or invoke, e.g. an SNS topic ("arn:aws:sns:region:account-id:topic-name") or Lambda function ARN.'
-  );
+const AlarmActionArnSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(1024)
+    .describe(
+      'An Amazon Resource Name (ARN) to notify or invoke, e.g. an SNS topic ("arn:aws:sns:region:account-id:topic-name") or Lambda function ARN.'
+    )
+);
 
 export const MetricDimensionFilterSchema = lazySchema(() =>
   z.object({
@@ -191,9 +198,9 @@ export const GetMetricDataInputSchema = lazySchema(() =>
     metricDataQueries: z
       .array(MetricDataQuerySchema)
       .min(1)
-      .max(100)
+      .max(GET_METRIC_DATA_MAX_QUERIES)
       .describe(
-        'The metrics and/or metric math expressions to retrieve (up to 100 per call; AWS allows up to 500).'
+        `The metrics and/or metric math expressions to retrieve (up to ${GET_METRIC_DATA_MAX_QUERIES} per call).`
       ),
     startTime: z
       .string()
@@ -244,8 +251,8 @@ export const SetAlarmStateInputSchema = lazySchema(() =>
       ),
     stateReasonData: z
       .record(z.string().max(200), z.unknown())
-      .refine((value) => Object.keys(value).length <= 50, {
-        message: 'stateReasonData may have at most 50 entries.',
+      .refine((value) => JSON.stringify(value).length <= STATE_REASON_DATA_MAX_LENGTH, {
+        message: `stateReasonData must serialize to at most ${STATE_REASON_DATA_MAX_LENGTH} characters of JSON.`,
       })
       .optional()
       .describe(
@@ -634,7 +641,7 @@ export const StartLogsQueryInputSchema = lazySchema(() =>
         .max(10000)
         .optional()
         .describe(
-          'Maximum number of log events the query should return. Keep this modest (e.g. 20-100) to avoid overwhelming results; AWS allows up to 100000.'
+          'Maximum number of log events the query should return. Keep this modest (e.g. 20-100) to avoid overwhelming results. Capped at 10000 because getLogsQueryResults returns at most 10000 events per call.'
         ),
     })
     .describe(

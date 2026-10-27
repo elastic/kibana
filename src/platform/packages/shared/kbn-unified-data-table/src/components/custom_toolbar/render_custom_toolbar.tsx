@@ -30,6 +30,7 @@ interface RenderCustomToolbarProps extends UnifiedDataTableRenderCustomToolbarPr
   saveToDashboardButton?: React.ReactElement;
   leftSide?: React.ReactElement;
   bottomSection?: React.ReactElement;
+  wrap?: boolean;
 }
 
 export const internalRenderCustomToolbar = (
@@ -39,6 +40,7 @@ export const internalRenderCustomToolbar = (
     saveToDashboardButton,
     leftSide,
     bottomSection,
+    wrap = true,
     toolbarProps: {
       hasRoomForGridControls,
       columnControl,
@@ -89,7 +91,7 @@ export const internalRenderCustomToolbar = (
         className="unifiedDataTableToolbar"
         css={styles.toolbar}
         data-test-subj="unifiedDataTableToolbar"
-        wrap
+        wrap={wrap}
       >
         <EuiFlexItem grow={false}>
           {leftSide || (
@@ -148,10 +150,12 @@ export const getRenderCustomToolbarWithElements = ({
   saveToDashboardButton,
   leftSide,
   bottomSection,
+  wrap = true,
 }: {
   saveToDashboardButton?: React.ReactElement;
   leftSide?: React.ReactElement;
   bottomSection?: React.ReactElement;
+  wrap?: boolean;
 }): UnifiedDataTableRenderCustomToolbar => {
   const reservedSpace = <></>;
   return (props) =>
@@ -160,6 +164,7 @@ export const getRenderCustomToolbarWithElements = ({
       leftSide: leftSide || reservedSpace,
       bottomSection,
       saveToDashboardButton,
+      wrap,
     });
 };
 
@@ -174,7 +179,7 @@ export const styles = {
           '.euiDataGridToolbarControl': {
             blockSize: euiTheme.size.xl,
             border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.backgroundBaseFormsControlDisabled}`,
-            borderRadius: euiTheme.border.radius.small,
+            borderRadius: euiTheme.border.radius.control,
 
             // making the icons larger than the default size
             '& svg': {
@@ -190,7 +195,7 @@ export const styles = {
       ? css({
           position: 'relative',
           overflow: 'hidden',
-          borderRadius: euiTheme.border.radius.small,
+          borderRadius: euiTheme.border.radius.control,
           display: 'inline-flex',
           alignItems: 'stretch',
           flexDirection: 'row',

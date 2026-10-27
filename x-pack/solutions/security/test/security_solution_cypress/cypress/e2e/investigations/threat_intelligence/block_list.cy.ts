@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   closeFlyout,
   navigateToBlocklist,
   openFlyout,
   openFlyoutTakeAction,
   openIndicatorsTableMoreActions,
-  waitForViewToBeLoaded,
+  visitIndicatorsWithTimeRange,
 } from '../../../tasks/threat_intelligence/common';
 import {
   fillBlocklistForm,
@@ -28,8 +27,6 @@ import {
   SAVED_BLOCK_LIST_NAME,
 } from '../../../screens/threat_intelligence/blocklist';
 
-const URL = '/app/security/threat_intelligence/indicators';
-
 const FIRST_BLOCK_LIST_NEW_NAME = 'first blocklist entry';
 const FIRST_BLOCK_LIST_NEW_DESCRIPTION = 'the first description';
 const SECOND_BLOCK_LIST_NEW_NAME = 'second blocklist entry';
@@ -42,8 +39,7 @@ describe('Block list with invalid indicators', { tags: ['@ess'] }, () => {
 
   beforeEach(() => {
     login();
-    visitWithTimeRange(URL);
-    waitForViewToBeLoaded();
+    visitIndicatorsWithTimeRange();
   });
 
   it('should disabled blocklist in the indicators table context menu item and flyout context menu items', () => {
@@ -63,8 +59,7 @@ describe('Block list interactions', { tags: ['@ess'] }, () => {
 
   beforeEach(() => {
     login();
-    visitWithTimeRange(URL);
-    waitForViewToBeLoaded();
+    visitIndicatorsWithTimeRange();
   });
 
   it('should add to block list from the indicators table and from flyout', () => {
@@ -86,12 +81,7 @@ describe('Block list interactions', { tags: ['@ess'] }, () => {
       .eq(0)
       .should('have.text', FIRST_BLOCK_LIST_NEW_DESCRIPTION);
 
-    // navigateToBlocklist above is a full page load, which drops the global time range set by
-    // visitWithTimeRange. Going back through the navbar would land on Threat Intelligence with the
-    // default time range, where the archived indicators fall outside of it and the table never
-    // renders. Re-visit with the time range instead.
-    visitWithTimeRange(URL);
-    waitForViewToBeLoaded();
+    visitIndicatorsWithTimeRange();
 
     // second indicator is a valid indicator for add to blocklist feature
     const secondIndicatorId = 'd4ba36cfa7e4191199836b228f6d79bd74e86793bc183563b78591f508b066ed';

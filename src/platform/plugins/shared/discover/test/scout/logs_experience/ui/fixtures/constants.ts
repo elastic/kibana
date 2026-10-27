@@ -27,6 +27,10 @@ const SYNTH_LOGS_DATA_VIEW = `logs-${SYNTH_LOGS_DATASET}-*`;
 const SYNTH_DOCVIEWER_DATASET = 'synth.docviewer';
 const SYNTH_DOCVIEWER_DATA_VIEW = `logs-${SYNTH_DOCVIEWER_DATASET}-*`;
 
+// Documents without any message-like field, which is what hides the Log overview tab.
+const SYNTH_NO_MESSAGE_DATASET = 'synth.nomessage';
+const SYNTH_NO_MESSAGE_DATA_VIEW = `logs-${SYNTH_NO_MESSAGE_DATASET}-*`;
+
 export const LOGS = {
   // Fixed rather than moment-relative: global setup seeds this range once, and each worker
   // sets it as the default time, so both must resolve to the same window.
@@ -51,6 +55,9 @@ export const LOGS = {
   SYNTH_DOCVIEWER_DATASET,
   SYNTH_DOCVIEWER_DATA_VIEW,
 
+  SYNTH_NO_MESSAGE_DATASET,
+  SYNTH_NO_MESSAGE_DATA_VIEW,
+
   // `log.level` is a keyword with `ignore_above: 1024`, so a longer value puts the document in
   // `_ignored` — which is what renders the quality-issue control and fills its accordion.
   OVERSIZED_LOG_LEVEL: 'x'.repeat(1025),
@@ -59,4 +66,6 @@ export const LOGS = {
   STACK_TRACE: 'Error: synthetic failure\n    at handler (index.js:1:1)',
 
   JSON_TAB: 'doc_view_source',
+  TABLE_TAB: 'doc_view_table',
+  LOGS_OVERVIEW_TAB: 'doc_view_logs_overview',
 } as const;

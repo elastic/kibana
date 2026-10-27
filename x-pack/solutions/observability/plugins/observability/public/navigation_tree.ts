@@ -12,12 +12,12 @@ import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import type { Location } from 'history';
 import { NightshiftNavigationIcon } from '@kbn/observability-shared-plugin/public';
+import { getAlertsNavPanel, shouldIncludeStackManagementRules } from './nav/get_alerts_nav_panel';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
 const title = i18n.translate(
@@ -96,10 +96,7 @@ function createNavTree({
         icon: 'flask',
       },
       ...getWorkflowsNavPanel(coreStart),
-      {
-        link: 'observability-overview:alerts',
-        icon: 'warning',
-      },
+      ...getAlertsNavPanel(coreStart),
       {
         link: 'observability-overview:cases',
         children: [
@@ -172,6 +169,12 @@ function createNavTree({
                 link: 'ux',
                 title: i18n.translate('xpack.observability.obltNav.apm.ux', {
                   defaultMessage: 'User experience',
+                }),
+              },
+              {
+                link: 'digital_experience',
+                title: i18n.translate('xpack.observability.obltNav.apm.digitalExperience', {
+                  defaultMessage: 'Digital experience',
                 }),
               },
             ],
@@ -261,7 +264,7 @@ function createNavTree({
           {
             id: 'profiling',
             title: i18n.translate('xpack.observability.obltNav.infrastructure.universalProfiling', {
-              defaultMessage: 'Universal Profiling',
+              defaultMessage: 'Profiling',
             }),
             children: [
               {
@@ -522,6 +525,9 @@ function createNavTree({
                 link: 'management:index_management',
               },
               {
+                link: 'management:data_federation',
+              },
+              {
                 link: 'management:index_lifecycle_management',
               },
               {
@@ -532,9 +538,6 @@ function createNavTree({
               },
               {
                 link: 'management:rollup_jobs',
-              },
-              {
-                link: 'management:data_federation',
               },
               {
                 link: 'management:esql_views',
@@ -581,16 +584,19 @@ function createNavTree({
                   ]),
             ],
           },
-          ...getAlertingV2ManagementNavPanel(coreStart),
           {
             id: 'alerts_and_insights',
             title: i18n.translate('xpack.observability.obltNav.alertsAndInsights', {
               defaultMessage: 'Alerts and Insights',
             }),
             children: [
-              {
-                link: 'management:triggersActions',
-              },
+              ...(shouldIncludeStackManagementRules(coreStart)
+                ? [
+                    {
+                      link: 'management:triggersActions' as const,
+                    },
+                  ]
+                : []),
               {
                 link: 'management:triggersActionsConnectors',
               },
@@ -649,6 +655,7 @@ function createNavTree({
             }),
             children: [
               { link: 'management:genAiSettings' },
+              { link: 'management:aiAnonymizationSettings' },
               { link: 'management:aiAssistantManagementSelection' },
             ],
           },
@@ -669,6 +676,9 @@ function createNavTree({
               },
               {
                 link: 'management:role_mappings',
+              },
+              {
+                link: 'management:service_accounts',
               },
             ],
           },

@@ -206,10 +206,25 @@ export interface WorkflowValidationRules {
     defaultSeverity: 'warning';
     values: { stepType: string };
   };
+  ignoredFetcherSetting: {
+    owner: 'deprecated-step-validation';
+    defaultSeverity: 'warning';
+    values: { stepName: string };
+  };
 
   // -- es|ql --------------------------------------------------------------------
   /** A diagnostic forwarded from the ES|QL validator. */
   esqlDiagnostic: {
+    owner: 'esql-validation';
+    defaultSeverity: 'error';
+    values: { reason: string };
+  };
+  /**
+   * The ES|QL validator found no index, alias or data stream for a source. Kept
+   * apart from `esqlDiagnostic` because the source can still exist where and
+   * when the workflow runs, so callers like workflow generation may accept it.
+   */
+  esqlUnknownSource: {
     owner: 'esql-validation';
     defaultSeverity: 'error';
     values: { reason: string };
@@ -283,8 +298,10 @@ export const WORKFLOW_VALIDATION_RULES: {
   invalidParallelMode: { owner: 'parallel-mode-validation', defaultSeverity: 'error' },
 
   deprecatedStepType: { owner: 'deprecated-step-validation', defaultSeverity: 'warning' },
+  ignoredFetcherSetting: { owner: 'deprecated-step-validation', defaultSeverity: 'warning' },
 
   esqlDiagnostic: { owner: 'esql-validation', defaultSeverity: 'error' },
+  esqlUnknownSource: { owner: 'esql-validation', defaultSeverity: 'error' },
 };
 
 /** Every registered rule ID, sorted. Stable ordering keeps the snapshot test readable. */

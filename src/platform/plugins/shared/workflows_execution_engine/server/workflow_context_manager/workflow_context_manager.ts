@@ -10,7 +10,7 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KQLSyntaxError } from '@kbn/es-query';
-import { evaluateKql } from '@kbn/eval-kql';
+import { decodeKqlTemplateValues, evaluateKql, parseKqlTemplate } from '@kbn/eval-kql';
 import {
   type EsWorkflowStepExecution,
   type SerializedError,
@@ -141,6 +141,7 @@ export class WorkflowContextManager {
       node: this.node,
       predecessorsResolver: () => this.predecessors,
       consumerId: this.consumerExecutionId,
+      stackFrames: this.stackFrames,
     });
   }
 
@@ -231,6 +232,29 @@ export class WorkflowContextManager {
     return this.templateEngine.render(obj, { ...context, ...additionalContext });
   }
 
+  /**
+   * Renders a condition that is going to be evaluated as KQL. Values interpolated with `{{ }}`
+   * can only be literals in the condition; see `WorkflowTemplatingEngine.renderCondition`.
+   */
+  public renderConditionWithContext<T>(
+    condition: T,
+    context: Record<string, unknown>,
+    additionalContext?: Record<string, unknown>
+  ): T {
+    return this.templateEngine.renderCondition(condition, { ...context, ...additionalContext });
+  }
+
+  public renderConditionAccordingToContext<T>(
+    condition: T,
+    additionalContext?: Record<string, unknown>
+  ): T {
+    return this.renderConditionWithContext(
+      condition,
+      this.getRenderingContext(condition),
+      additionalContext
+    );
+  }
+
   public evaluateExpressionInContext(template: string): unknown {
     const context = this.getContext();
     return this.templateEngine.evaluateExpression(template, context);
@@ -240,7 +264,7 @@ export class WorkflowContextManager {
     condition: string | boolean | undefined,
     additionalContext?: Record<string, unknown>
   ): boolean {
-    const renderedCondition = this.renderValueAccordingToContext(condition, additionalContext);
+    const renderedCondition = this.renderConditionAccordingToContext(condition, additionalContext);
 
     if (typeof renderedCondition === 'boolean') {
       return renderedCondition;
@@ -251,13 +275,13 @@ export class WorkflowContextManager {
 
     if (typeof renderedCondition === 'string') {
       try {
-        return evaluateKql(renderedCondition, this.getContext());
+        return evaluateKql(parseKqlTemplate(renderedCondition), this.getContext());
       } catch (error) {
         if (error instanceof KQLSyntaxError) {
           throw new Error(
-            `Syntax error in condition "${condition}" for step ${this.node.stepId}: ${String(
-              error
-            )}`
+            `Syntax error in condition "${condition}" for step ${
+              this.node.stepId
+            }: ${decodeKqlTemplateValues(String(error))}`
           );
         }
         throw error;
@@ -328,7 +352,7 @@ export class WorkflowContextManager {
    * Steps are processed in execution order to ensure consistent variable assignment.
    */
   public getVariables(): Record<string, unknown> {
-    return this.stepIoService.getDataSetVariables();
+    return this.stepIoService.getDataSetVariables(this.stackFrames);
   }
 
   /**
@@ -546,10 +570,13 @@ export class WorkflowContextManager {
         buildStepExecutionId(executionId, topFrame.stepId, scopeStack.stackFrames)
       );
       scopeEntries.push({ topFrame, stepExecution });
-      // Parallel branches expose the same {{ foreach.item }} / {{ foreach.index }}
+      // Dynamic parallel branches expose the same {{ foreach.item }} / {{ foreach.index }}
       // context as a sequential foreach: each branch scope carries the item it
       // is processing, derived from the persisted index + re-evaluated list.
-      if (stepExecution?.stepType === 'foreach' || stepExecution?.stepType === 'parallel') {
+      // Static `branches` have no item, so they must not shadow an outer foreach.
+      const isDynamicParallel =
+        stepExecution?.stepType === 'parallel' && stepExecution.state?.static !== true;
+      if (stepExecution?.stepType === 'foreach' || isDynamicParallel) {
         foreachEntries.push({ topFrame, stepExecution });
       }
       if (stepExecution?.stepType === 'while') {
@@ -632,9 +659,10 @@ export class WorkflowContextManager {
   }
 
   /**
-   * Builds the foreach context by combining the persisted state (index, total)
-   * with items derived by re-evaluating the foreach expression at resolution time.
-   * This avoids storing the entire items array in the step execution state on every iteration.
+   * Builds the foreach context from persisted step state (index, total) and the
+   * list snapshotted on `input.items` at loop entry. Older executions that only
+   * stored the foreach expression re-evaluate it so {{foreach.item}} still
+   * resolves.
    */
   private parseScopeIndex(scopeId: string | undefined): number | undefined {
     if (scopeId == null) return undefined;
@@ -652,17 +680,13 @@ export class WorkflowContextManager {
       indexOverride ?? (typeof foreachState.index === 'number' ? foreachState.index : 0);
     const total = typeof foreachState.total === 'number' ? foreachState.total : 0;
 
-    // Re-evaluate the foreach expression (stored in the step input at entry
-    // time) to derive the full items array and current item without
-    // persisting them in state. Input lives in `StepIoService` (lifecycle
-    // metadata vs IO data are owned separately); a foreach is non-terminal
-    // while iterating, so its input is never evicted by post-flush input
-    // eviction — the service read is safe here.
+    // Prefer the list snapshotted onto input at enter. Re-evaluate the
+    // expression only for older executions that never stored `items`.
     const foreachInput = this.stepIoService.getStepInput(stepExecution.id);
     const foreachExpression = this.extractForeachExpression(foreachInput);
-    const items = foreachExpression
-      ? this.resolveForeachItems(foreachExpression, stepContext)
-      : undefined;
+    const items =
+      this.extractPersistedForeachItems(foreachInput) ??
+      (foreachExpression ? this.resolveForeachItems(foreachExpression, stepContext) : undefined);
 
     const availableItems = items ?? [];
 
@@ -690,6 +714,21 @@ export class WorkflowContextManager {
       return typeof expression === 'string' ? expression : undefined;
     }
     return undefined;
+  }
+
+  /**
+   * Evaluated list snapshotted onto foreach `input.items` at loop entry.
+   * Missing on older executions that only stored the foreach expression.
+   */
+  private extractPersistedForeachItems(
+    input: EsWorkflowStepExecution['input']
+  ): unknown[] | undefined {
+    if (input === null || typeof input !== 'object' || Array.isArray(input)) {
+      return undefined;
+    }
+
+    const { items } = input as { items?: unknown };
+    return Array.isArray(items) ? items : undefined;
   }
 
   /**
@@ -733,11 +772,14 @@ export class WorkflowContextManager {
         stepState: Record<string, unknown> | undefined;
       }
     | undefined {
-    const io = this.stepIoService.getLatestStepIO(stepId);
+    const io = this.stepIoService.getLatestStepIO(stepId, this.stackFrames);
     if (!io) {
       return;
     }
-    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
+    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(
+      stepId,
+      this.stackFrames
+    );
     return {
       runStepResult: {
         input: io.input,

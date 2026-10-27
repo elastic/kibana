@@ -9,11 +9,26 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
+import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../../../../../common/experimental_features';
+import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpoint/service/artifacts/constants';
 import { GET_ENDPOINT_ARTIFACTS_TOOL_ID } from '../..';
 import { fromKueryExpression } from '@kbn/es-query';
 import { getEndpointArtifactsTool, classifyArtifactError, buildArtifactFilter } from '.';
+
+const customYaraSignaturesDisabled: ExperimentalFeatures = {
+  ...allowedExperimentalValues,
+  customYaraSignaturesEnabled: false,
+};
+
+const customYaraSignaturesEnabled: ExperimentalFeatures = {
+  ...allowedExperimentalValues,
+  customYaraSignaturesEnabled: true,
+};
 
 const mockLogger = {
   error: jest.fn(),
@@ -96,7 +111,10 @@ describe('getEndpointArtifactsTool', () => {
 
   describe('tool definition', () => {
     it('returns a valid builtin tool definition', () => {
-      const tool = getEndpointArtifactsTool(mockEndpointAppContextService);
+      const tool = getEndpointArtifactsTool(
+        mockEndpointAppContextService,
+        customYaraSignaturesDisabled
+      );
       expect(tool.type).toBe(ToolType.builtin);
       expect(tool.id).toBe(GET_ENDPOINT_ARTIFACTS_TOOL_ID);
       expect(tool.description).toContain('endpoint artifacts');
@@ -113,7 +131,7 @@ describe('getEndpointArtifactsTool', () => {
     let tool: ReturnType<typeof getEndpointArtifactsTool>;
 
     beforeEach(() => {
-      tool = getEndpointArtifactsTool(mockEndpointAppContextService);
+      tool = getEndpointArtifactsTool(mockEndpointAppContextService, customYaraSignaturesDisabled);
     });
 
     it('returns counts for all artifact types when no artifactType specified', async () => {
@@ -197,7 +215,7 @@ describe('getEndpointArtifactsTool', () => {
     let tool: ReturnType<typeof getEndpointArtifactsTool>;
 
     beforeEach(() => {
-      tool = getEndpointArtifactsTool(mockEndpointAppContextService);
+      tool = getEndpointArtifactsTool(mockEndpointAppContextService, customYaraSignaturesDisabled);
     });
 
     it('returns trimmed items for a specific artifact type', async () => {
@@ -287,7 +305,7 @@ describe('getEndpointArtifactsTool', () => {
     let tool: ReturnType<typeof getEndpointArtifactsTool>;
 
     beforeEach(() => {
-      tool = getEndpointArtifactsTool(mockEndpointAppContextService);
+      tool = getEndpointArtifactsTool(mockEndpointAppContextService, customYaraSignaturesDisabled);
     });
 
     it('truncates large match_any value arrays', async () => {
@@ -447,6 +465,163 @@ describe('getEndpointArtifactsTool', () => {
         expect(nested.value_total).toBe(100);
         expect(data.items[0].entries_summary).toContain('1 truncated');
       }
+    });
+  });
+
+  describe('custom YARA signatures', () => {
+    const yaraListId = ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id;
+
+    const createMockYaraSignature = (ruleText: string) =>
+      createMockExceptionItem({
+        id: 'yara-so-id',
+        item_id: 'yara-item-id',
+        list_id: yaraListId,
+        name: 'Suspicious loader',
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: ruleText,
+          },
+        ] as ExceptionListItemSchema['entries'],
+      });
+
+    describe('when the feature flag is disabled', () => {
+      let tool: ReturnType<typeof getEndpointArtifactsTool>;
+
+      beforeEach(() => {
+        tool = getEndpointArtifactsTool(
+          mockEndpointAppContextService,
+          customYaraSignaturesDisabled
+        );
+      });
+
+      it('does not mention custom YARA signatures in the tool description', () => {
+        expect(tool.description).not.toMatch(/yara/i);
+      });
+
+      it('rejects the custom_yara_signatures artifact type', () => {
+        expect(tool.schema.safeParse({ artifactType: 'custom_yara_signatures' }).success).toBe(
+          false
+        );
+      });
+
+      it('does not query the custom YARA signatures list in summary mode', async () => {
+        mockScopedClient.findEndpointArtifactListItems.mockResolvedValue({
+          data: [],
+          total: 1,
+          page: 1,
+          per_page: 1,
+        });
+
+        const result = await tool.handler({}, mockContext);
+
+        expect(mockScopedClient.findEndpointArtifactListItems).not.toHaveBeenCalledWith(
+          expect.objectContaining({ listId: yaraListId })
+        );
+        if ('results' in result) {
+          expect(result.results[0].data).not.toHaveProperty('custom_yara_signatures');
+        }
+      });
+    });
+
+    describe('when the feature flag is enabled', () => {
+      let tool: ReturnType<typeof getEndpointArtifactsTool>;
+
+      beforeEach(() => {
+        tool = getEndpointArtifactsTool(mockEndpointAppContextService, customYaraSignaturesEnabled);
+      });
+
+      it('mentions custom YARA signatures in the tool description', () => {
+        expect(tool.description).toContain('custom YARA signatures');
+        expect(tool.description).toContain('`rule.custom_yara_signature.entry_id`');
+        expect(tool.description).toContain('truncated preview');
+        expect(tool.description).toContain(
+          'When a rule entry has `string_truncated: true`, do not explain why the signature matches or does not match'
+        );
+        expect(tool.description).toContain('only treat items whose `name` matches it');
+      });
+
+      it('includes custom YARA signatures in summary mode', async () => {
+        mockScopedClient.findEndpointArtifactListItems.mockResolvedValue({
+          data: [],
+          total: 2,
+          page: 1,
+          per_page: 1,
+        });
+
+        const result = await tool.handler({}, mockContext);
+
+        expect(mockScopedClient.findEndpointArtifactListItems).toHaveBeenCalledWith(
+          expect.objectContaining({ listId: yaraListId })
+        );
+        if ('results' in result) {
+          const data = result.results[0].data as Record<string, { total: number }>;
+          expect(Object.keys(data)).toHaveLength(7);
+          expect(data.custom_yara_signatures).toEqual({ total: 2 });
+        }
+      });
+
+      it('returns custom YARA signatures with their saved object id', async () => {
+        mockScopedClient.findEndpointArtifactListItems.mockResolvedValue({
+          data: [createMockYaraSignature('rule Example { condition: true }')],
+          total: 1,
+          page: 1,
+          per_page: 20,
+        });
+
+        const result = await tool.handler({ artifactType: 'custom_yara_signatures' }, mockContext);
+
+        expect(mockScopedClient.findEndpointArtifactListItems).toHaveBeenCalledWith(
+          expect.objectContaining({ listId: yaraListId })
+        );
+        if ('results' in result) {
+          const data = result.results[0].data as { items: Array<Record<string, unknown>> };
+          expect(data.items[0]).toEqual(
+            expect.objectContaining({
+              id: 'yara-so-id',
+              item_id: 'yara-item-id',
+              name: 'Suspicious loader',
+            })
+          );
+        }
+      });
+
+      it('does not add the saved object id to other artifact types', async () => {
+        mockScopedClient.findEndpointArtifactListItems.mockResolvedValue({
+          data: [createMockExceptionItem()],
+          total: 1,
+          page: 1,
+          per_page: 20,
+        });
+
+        const result = await tool.handler({ artifactType: 'trusted_apps' }, mockContext);
+
+        if ('results' in result) {
+          const data = result.results[0].data as { items: Array<Record<string, unknown>> };
+          expect(data.items[0]).not.toHaveProperty('id');
+        }
+      });
+
+      it('truncates long YARA rule text', async () => {
+        mockScopedClient.findEndpointArtifactListItems.mockResolvedValue({
+          data: [createMockYaraSignature(`rule Long { strings: $a = "${'x'.repeat(1000)}" }`)],
+          total: 1,
+          page: 1,
+          per_page: 20,
+        });
+
+        const result = await tool.handler({ artifactType: 'custom_yara_signatures' }, mockContext);
+
+        if ('results' in result) {
+          const data = result.results[0].data as {
+            items: Array<{ entries: Array<{ value: string; string_truncated?: boolean }> }>;
+          };
+          expect(data.items[0].entries[0].value).toHaveLength(512);
+          expect(data.items[0].entries[0].string_truncated).toBe(true);
+        }
+      });
     });
   });
 });

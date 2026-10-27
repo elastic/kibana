@@ -9,7 +9,7 @@ import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'svlCommonPage']);
+  const PageObjects = getPageObjects(['common', 'discover', 'svlCommonPage', 'context']);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
@@ -54,9 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render logs overview tab for logs data source', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
         await PageObjects.discover.waitUntilTabIsLoaded();
         // Closes tabPreview_contentPanel to prevent intercepting clicks to reduce flakiness
         await browser.pressKeys(browser.keys.ESCAPE);
@@ -71,8 +69,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const [, surroundingActionEl] = await dataGrid.getRowActions();
         await surroundingActionEl.click();
         await PageObjects.discover.waitUntilTabIsLoaded();
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
         await browser.refresh(); // To make sure context awareness even works when a page is refreshed
         await PageObjects.discover.waitUntilTabIsLoaded();
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
 
         await dataGrid.clickRowToggle({ isAnchorRow: true });
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
@@ -94,9 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not render logs overview tab for non-logs data source', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
         await PageObjects.discover.waitUntilTabIsLoaded();
         // Closes tabPreview_contentPanel to prevent intercepting clicks to reduce flakiness
         await browser.pressKeys(browser.keys.ESCAPE);
@@ -110,8 +108,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const [, surroundingActionEl] = await dataGrid.getRowActions();
         await surroundingActionEl.click();
         await PageObjects.discover.waitUntilTabIsLoaded();
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
         await browser.refresh(); // To make sure context awareness even works when a page is refreshed
         await PageObjects.discover.waitUntilTabIsLoaded();
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
 
         await dataGrid.clickRowToggle({ isAnchorRow: true });
         await testSubjects.existOrFail('docViewerTab-doc_view_table');

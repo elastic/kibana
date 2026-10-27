@@ -357,7 +357,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
     >
       {(list, search) => (
         <>
-          <EuiPanel hasShadow={false} paddingSize="s">
+          <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
             {search}
             {!singleSelection ? (
               <>

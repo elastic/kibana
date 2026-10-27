@@ -10,8 +10,17 @@ import { EuiText, EuiPanel } from '@elastic/eui';
 import type { Meta, StoryObj } from '@storybook/react';
 import { css } from '@emotion/react';
 import { Graph } from './graph/graph';
-import type { NodeViewModel, EdgeViewModel } from './types';
+import type { NodeViewModel, EdgeViewModel, NodeProps } from './types';
 import { GlobalStylesStorybookDecorator } from '../../.storybook/decorators';
+
+/** Static toolbar items used in Storybook to preview the entity node toolbar. */
+const storybookToolbarItems = (_node: NodeProps) => [
+  { iconType: 'cluster', label: 'Show entity relationships', onClick: () => {} },
+  { iconType: 'sortRight', label: "Show this entity's actions", onClick: () => {} },
+  { iconType: 'sortLeft', label: 'Show actions done to this entity', onClick: () => {} },
+  { iconType: 'analyzeEvent', label: 'Show related events', onClick: () => {} },
+  { iconType: 'maximize', label: 'Show entity details', onClick: () => {} },
+];
 
 type GraphCenteringStoryProps = React.ComponentProps<typeof Graph> & {
   title?: string;
@@ -74,17 +83,19 @@ const createEntityNode = ({
   id,
   shape = 'ellipse',
   color = 'primary',
+  isOrigin = false,
 }: {
   id: string;
   shape?: NodeViewModel['shape'];
   color?: NodeViewModel['color'];
+  isOrigin?: boolean;
 }): NodeViewModel =>
   ({
     id,
     label: `Entity ${id}`,
     color,
     shape,
-    isOrigin: false,
+    isOrigin,
     isOriginAlert: false,
     icon:
       shape === 'ellipse'
@@ -94,6 +105,7 @@ const createEntityNode = ({
         : shape === 'diamond'
         ? 'globe'
         : 'globe',
+    toolbarItemsFn: storybookToolbarItems,
   } as NodeViewModel);
 
 const createRelationshipStoryNode = ({
@@ -205,7 +217,7 @@ export const SingleOriginEntity: Story = {
       'Graph with one origin entity that has two relationship nodes to two targets. Each target has another relationship to a further target. Relationship nodes connected to the origin entity are marked as origin for centering.',
     nodes: [
       // Origin entity
-      createEntityNode({ id: 'originEntity', shape: 'ellipse' }),
+      createEntityNode({ id: 'originEntity', shape: 'ellipse', isOrigin: true }),
 
       // First-level targets
       createEntityNode({ id: 'target1', shape: 'hexagon' }),

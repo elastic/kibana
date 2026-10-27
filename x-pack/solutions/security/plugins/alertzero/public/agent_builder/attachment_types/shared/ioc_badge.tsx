@@ -18,6 +18,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+export const OPEN_ENTITY_PAGE_LABEL = i18n.translate(
+  'xpack.alertzero.agentBuilder.attachments.shared.iocBadgeOpenEntityPage',
+  { defaultMessage: 'Open entity page' }
+);
+
+export const OPEN_ALERT_DETAILS_LABEL = i18n.translate(
+  'xpack.alertzero.agentBuilder.attachments.shared.iocBadgeOpenAlertDetails',
+  { defaultMessage: 'Open alert details' }
+);
+
 const OPEN_IN_DISCOVER_LABEL = i18n.translate(
   'xpack.alertzero.agentBuilder.attachments.shared.iocBadgeOpenInDiscover',
   { defaultMessage: 'Open in Discover' }

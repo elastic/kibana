@@ -105,6 +105,14 @@ export interface PartialFieldsMetadataClient {
   }>;
 }
 
+/**
+ * Marks a column that a full-text condition of an earlier WHERE targets, so that a HIGHLIGHT
+ * without a query can reuse it. `field`: a condition targets this text column. `all`: a
+ * condition that names no field (QSTR, KQL) applies, so every text column is a target; every
+ * column carries it, so it survives while any of them does.
+ */
+export type ESQLFullTextMatch = 'field' | 'all';
+
 export interface ESQLFieldWithMetadata {
   name: string;
   type: EsqlFieldType;
@@ -113,6 +121,7 @@ export interface ESQLFieldWithMetadata {
   hasConflict?: boolean;
   originalTypes?: string[];
   isUnmappedField?: boolean;
+  fullTextMatch?: ESQLFullTextMatch;
   metadata?: {
     description?: string;
   };

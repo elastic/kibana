@@ -52,6 +52,7 @@ export const App = ({ core, plugins }: { core: CoreStart; plugins: StartDependen
               onTextLangQuerySubmit={async () => {
                 setQuerySubmitted(true);
               }}
+              editorIsInline
               hasOutline
             />
           </EuiPanel>

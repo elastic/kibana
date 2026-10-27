@@ -11,6 +11,8 @@ export const AGENT_TYPE_PERMANENT = 'PERMANENT';
 export const AGENT_TYPE_EPHEMERAL = 'EPHEMERAL';
 export const AGENT_TYPE_TEMPORARY = 'TEMPORARY';
 export const AGENT_TYPE_OPAMP = 'OPAMP';
+// Excludes OpAMP collectors from a kuery on the agents
+export const NOT_OPAMP_AGENT_KUERY = `not type:${AGENT_TYPE_OPAMP}`;
 
 export const AGENT_POLLING_REQUEST_TIMEOUT_MS = 300000; // 5 minutes
 export const AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS = 20000; // 20s

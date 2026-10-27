@@ -6,3 +6,13 @@
  */
 
 export { ServiceAccountsAPIClient } from './service_accounts_api_client';
+export type {
+  DeleteServiceAccountConflictAttributes,
+  DeleteServiceAccountOptions,
+  DeleteServiceAccountResponse,
+  ListServiceAccountsParams,
+  ListServiceAccountWorkloadsResponse,
+  ListServiceAccountsResponse,
+  ServiceAccountDirectoryCreator,
+  ServiceAccountDirectoryEntry,
+} from './service_accounts_api_client';

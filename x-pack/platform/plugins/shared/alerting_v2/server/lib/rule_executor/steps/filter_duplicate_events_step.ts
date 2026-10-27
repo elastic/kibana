@@ -9,7 +9,7 @@ import { inject, injectable } from 'inversify';
 import { chunk } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import type { AlertEvent } from '../../../resources/datastreams/alert_events';
+import type { AlertEventDocument } from '../../../resources/datastreams/alert_events';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { EsServiceInternalToken } from '../../services/es_service/tokens';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
@@ -68,7 +68,8 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
       }
 
       const existingIds = await this.fetchExistingIds([...candidateIds.values()], logger);
-      const isDuplicate = (event: AlertEvent) => existingIds.has(candidateIds.get(event) ?? '');
+      const isDuplicate = (event: AlertEventDocument) =>
+        existingIds.has(candidateIds.get(event) ?? '');
       const alertEventsBatch = state.alertEventsBatch.filter((event) => !isDuplicate(event));
       const removedCount = state.alertEventsBatch.length - alertEventsBatch.length;
 
@@ -142,9 +143,9 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
  * pass through the step untouched.
  */
 const resolveCandidateIds = (
-  events: readonly AlertEvent[],
+  events: readonly AlertEventDocument[],
   mvExpandFields: readonly string[]
-): ReadonlyMap<AlertEvent, string> =>
+): ReadonlyMap<AlertEventDocument, string> =>
   new Map(
     events.flatMap((event) => {
       const id = resolveRuleEventId(event, mvExpandFields);

@@ -18,8 +18,8 @@ const makeEntry = (
   _id: 'action-1',
   '@timestamp': '2026-07-02T10:00:00.000Z',
   action_type: 'ack',
-  actor: 'user-1',
-  episode_id: 'episode-1',
+  actor: { type: 'user', profile_uid: 'user-1' },
+  alert_id: 'episode-1',
   group_hash: 'group-1',
   tags: [],
   assignee_uid: null,
@@ -47,21 +47,31 @@ const renderComment = (
 
 describe('AlertEpisodeTimelineActionComment', () => {
   it('renders the actor avatar when the actor profile is resolved', () => {
-    renderComment(makeEntry({ actor: 'user-1' }), new Map([['user-1', mockProfile]]));
+    renderComment(
+      makeEntry({ actor: { type: 'user', profile_uid: 'user-1' } }),
+      new Map([['user-1', mockProfile]])
+    );
 
     expect(screen.getByTestId('alertingV2TimelineActorAvatar')).toBeInTheDocument();
     expect(screen.getByText('Jane Doe')).toBeInTheDocument();
   });
 
   it('does not render an avatar when the actor has no resolved profile', () => {
-    renderComment(makeEntry({ actor: 'user-1' }), new Map());
+    renderComment(makeEntry({ actor: { type: 'user', profile_uid: 'user-1' } }), new Map());
 
     expect(screen.queryByTestId('alertingV2TimelineActorAvatar')).not.toBeInTheDocument();
     expect(screen.getByText('user-1')).toBeInTheDocument();
   });
 
-  it('falls back to the system label with no avatar when there is no actor', () => {
-    renderComment(makeEntry({ actor: null }), new Map());
+  it('falls back to the system label with no avatar for an internal actor', () => {
+    renderComment(makeEntry({ actor: { type: 'internal', profile_uid: null } }), new Map());
+
+    expect(screen.queryByTestId('alertingV2TimelineActorAvatar')).not.toBeInTheDocument();
+    expect(screen.getByText('system')).toBeInTheDocument();
+  });
+
+  it('falls back to the system label for a user actor without a profile uid', () => {
+    renderComment(makeEntry({ actor: { type: 'user', profile_uid: null } }), new Map());
 
     expect(screen.queryByTestId('alertingV2TimelineActorAvatar')).not.toBeInTheDocument();
     expect(screen.getByText('system')).toBeInTheDocument();

@@ -126,6 +126,7 @@ dependsOn:
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/ui-callout'
   - '@kbn/zod'
+  - '@kbn/zod-helpers'
 tags:
   - plugin
   - prod
@@ -140,6 +141,4 @@ fileGroups:
     - test/**/*
     - __mocks__/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

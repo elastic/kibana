@@ -15,7 +15,7 @@ import { getKibanaDir } from '#pipeline-utils';
 /**
  * IMPORTANT: this is a lightweight re-implementation of the empty-config
  * detection in
- * `src/platform/packages/shared/kbn-test/src/jest/configs/get_jest_configs.ts`
+ * `src/platform/packages/shared/kbn-jest/src/configs/get_jest_configs.ts`
  * (`parseJestConfig` / `matchesJestRules`). It lives here because the Buildkite
  * pipeline-utils workspace does not import from `@kbn/test` at runtime, and this
  * step runs before the whole repo is built. If you change how "a jest config has

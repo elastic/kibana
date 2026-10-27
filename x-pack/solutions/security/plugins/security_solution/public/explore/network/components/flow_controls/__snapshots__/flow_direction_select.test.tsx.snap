@@ -11,7 +11,7 @@ exports[`Select Flow Direction rendering it renders the basic group button for u
   >
     <button
       aria-pressed="true"
-      class="euiButton euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-base-text-euiFilterButton-hasActiveFilters-toggle-isSelected"
+      class="euiButton euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-isToggle emotion-euiButtonDisplay-s-base-text-euiFilterButton-hasActiveFilters-toggle-isSelected"
       data-test-subj="uniDirectional"
       id="filter-button_generated-id"
       type="button"
@@ -34,7 +34,7 @@ exports[`Select Flow Direction rendering it renders the basic group button for u
   >
     <button
       aria-pressed="false"
-      class="euiButton euiFilterButton euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-base-text-euiFilterButton-toggle"
+      class="euiButton euiFilterButton euiFilterButton-isToggle emotion-euiButtonDisplay-s-base-text-euiFilterButton-toggle"
       data-test-subj="biDirectional"
       id="filter-button_generated-id"
       type="button"

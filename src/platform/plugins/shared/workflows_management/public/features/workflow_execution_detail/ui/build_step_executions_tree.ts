@@ -155,17 +155,28 @@ function isVisibleStepType(stepType: string): boolean {
  * @param stackFrames - Array of stack frames representing the execution hierarchy
  * @returns A string array representing the deterministic step path
  */
+const RUNTIME_STEP_NODE_TYPES = new Set([
+  'enter-foreach',
+  'enter-foreach-iteration',
+  'enter-iteration',
+]);
+
 export function flattenStackFrames(stackFrames: StackFrame[]): string[] {
   return stackFrames.flatMap((stackFrame) => {
-    const scopeWithSubScope = stackFrame.nestedScopes
+    const scopeIds = stackFrame.nestedScopes
       .filter((scopeEntry) => scopeEntry.scopeId)
-      .map((scopeEntry) => scopeEntry.scopeId!);
+      .map((scopeEntry) => scopeEntry.scopeId as string);
 
-    if (!scopeWithSubScope.length) {
-      return [];
+    // scopeId-based: foreach/if/retry still nest as stepId > "0" / "true" / "1-attempt"
+    if (scopeIds.length) {
+      return [stackFrame.stepId, ...scopeIds];
     }
 
-    return [stackFrame.stepId, ...scopeWithSubScope];
+    // runtime-step-based: real iteration steps have no scopeId; nest under the stepId
+    const isRuntimeStep = stackFrame.nestedScopes.some((scope) =>
+      RUNTIME_STEP_NODE_TYPES.has(scope.nodeType)
+    );
+    return isRuntimeStep ? [stackFrame.stepId] : [];
   });
 }
 
@@ -364,21 +375,21 @@ const ATTEMPT_ID_REGEX = /^(\d+)-attempt$/;
  * - 1 attempt → hoist the leaf; zero retry chrome (config alone is not history)
  * - 2+ attempts → parent is the step itself (real name + step-type); children are attempts
  *
- * Fallback / on-failure branch steps are out of scope until we confirm how those
- * results are recorded; they should hang off this same parent via the shared node
- * pattern when added.
+ * Other children of the same step (e.g. its `fallback` scope) stay after the attempts.
  */
 function transformRetryAttempts(nodes: StepExecutionTreeItem[]): StepExecutionTreeItem[] {
   return nodes.map((node) => {
-    const allChildrenAreAttempts =
-      node.children.length > 0 && node.children.every((c) => ATTEMPT_ID_REGEX.test(c.stepId));
+    const attemptNodes = node.children.filter((c) => ATTEMPT_ID_REGEX.test(c.stepId));
+    const otherChildren = transformRetryAttempts(
+      node.children.filter((c) => !ATTEMPT_ID_REGEX.test(c.stepId))
+    );
 
-    if (allChildrenAreAttempts) {
-      const attemptCount = node.children.length;
+    if (attemptNodes.length > 0) {
+      const attemptCount = attemptNodes.length;
       const builtAttempts: StepExecutionTreeItem[] = [];
 
-      for (let attemptIdx = 0; attemptIdx < node.children.length; attemptIdx++) {
-        const attemptNode = node.children[attemptIdx];
+      for (let attemptIdx = 0; attemptIdx < attemptNodes.length; attemptIdx++) {
+        const attemptNode = attemptNodes[attemptIdx];
         const match = attemptNode.stepId.match(ATTEMPT_ID_REGEX);
         const attemptNumber = match ? parseInt(match[1], 10) : attemptIdx + 1;
         const isFinalAttempt = attemptIdx === attemptCount - 1;
@@ -419,7 +430,7 @@ function transformRetryAttempts(nodes: StepExecutionTreeItem[]): StepExecutionTr
           isFinalAttempt: undefined,
           isRetryAttempt: undefined,
           retryAttemptCount: undefined,
-          children: only.children,
+          children: [...only.children, ...otherChildren],
         };
       }
 
@@ -439,11 +450,11 @@ function transformRetryAttempts(nodes: StepExecutionTreeItem[]): StepExecutionTr
         status: tip?.status ?? node.status,
         retryAttemptCount: attemptCount,
         retryRecovered: Boolean(tipSucceeded && earlierFailed),
-        children: builtAttempts,
+        children: [...builtAttempts, ...otherChildren],
       };
     }
 
-    return { ...node, children: transformRetryAttempts(node.children) };
+    return { ...node, children: otherChildren };
   });
 }
 

@@ -13,6 +13,8 @@ import { useUserProfiles } from '../../../../hooks/use_user_profiles';
 import { UserMessage } from './user_message';
 import { ResponseActions } from '../response/response_actions';
 import { UserMessageImages } from './user_message_images';
+import { useUserMessageThumbnails } from './use_user_message_thumbnails';
+import type { UserMessageThumbnail } from './use_user_message_thumbnails';
 
 jest.mock('../../../../hooks/use_current_user', () => ({
   useCurrentUser: jest.fn(),
@@ -30,14 +32,29 @@ jest.mock('../attachments/attachment_references', () => ({
   AttachmentReferences: () => <div data-test-subj="agentBuilderUserMessageAttachments" />,
 }));
 
+jest.mock('../../../../context/conversation/conversation_context', () => ({
+  useConversationContext: jest.fn(() => ({ isEmbeddedContext: false })),
+}));
+
 jest.mock('./user_message_images', () => ({
   UserMessageImages: jest.fn(() => <div data-test-subj="agentBuilderUserMessageImages" />),
 }));
 
+jest.mock('./use_user_message_thumbnails');
+
 const mockUseCurrentUser = jest.mocked(useCurrentUser);
+const mockUseUserMessageThumbnails = jest.mocked(useUserMessageThumbnails);
 const mockUseUserProfiles = jest.mocked(useUserProfiles);
 const MockResponseActions = jest.mocked(ResponseActions);
 const MockUserMessageImages = jest.mocked(UserMessageImages);
+
+const thumbnail: UserMessageThumbnail = {
+  key: 'img1-v1',
+  attachmentId: 'img1',
+  thumbnailUrl: 'data:image/png;base64,abc',
+  label: 'photo.png',
+  name: 'photo.png',
+};
 
 const currentUser = {
   uid: 'current-user',
@@ -57,6 +74,7 @@ describe('UserMessage', () => {
   beforeEach(() => {
     MockResponseActions.mockClear();
     MockUserMessageImages.mockClear();
+    mockUseUserMessageThumbnails.mockReturnValue([]);
     mockUseCurrentUser.mockReturnValue({
       currentUser,
       isLoading: false,
@@ -130,5 +148,60 @@ describe('UserMessage', () => {
 
     const [props] = MockUserMessageImages.mock.calls[0];
     expect(props.hoveredImageName).toBeNull();
+  });
+
+  describe('when the message has no text', () => {
+    const renderMessage = (input: string) =>
+      render(
+        <UserMessage
+          input={input}
+          isPendingCurrentRound={false}
+          startedAt="2026-01-01T00:00:00.000Z"
+          attachmentRefs={[{ attachment_id: 'txt1', version: 1 }]}
+        />
+      );
+
+    it.each([
+      ['an empty string', ''],
+      ['only whitespace', '  \n '],
+    ])('hides the bubble and the copy button when the text is %s', (_, input) => {
+      renderMessage(input);
+
+      expect(screen.queryByLabelText('User input')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('agentBuilderUserMessageImages')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('agentBuilderUserMessageActions')).not.toBeInTheDocument();
+    });
+
+    it('still renders the avatar, the author header and the attachments', () => {
+      renderMessage('');
+
+      expect(screen.getByTestId('agentBuilderUserMessageAvatar')).toBeInTheDocument();
+      expect(screen.getByTestId('agentBuilderUserMessageAttachments')).toBeInTheDocument();
+    });
+
+    it('keeps the bubble with the images when there are image thumbnails', () => {
+      mockUseUserMessageThumbnails.mockReturnValue([thumbnail]);
+
+      renderMessage('');
+
+      expect(screen.getByLabelText('User input')).toBeInTheDocument();
+      expect(screen.getByTestId('agentBuilderUserMessageImages')).toBeInTheDocument();
+      expect(screen.queryByTestId('agentBuilderUserMessageActions')).not.toBeInTheDocument();
+    });
+  });
+
+  it('passes the thumbnails to UserMessageImages', () => {
+    mockUseUserMessageThumbnails.mockReturnValue([thumbnail]);
+
+    render(
+      <UserMessage
+        input="hello"
+        isPendingCurrentRound={false}
+        startedAt="2026-01-01T00:00:00.000Z"
+      />
+    );
+
+    const [props] = MockUserMessageImages.mock.calls[0];
+    expect(props.thumbnails).toEqual([thumbnail]);
   });
 });

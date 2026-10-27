@@ -15,6 +15,7 @@ import {
   resolveConnectorIdStepType,
   resolveConnectorIdTriggerType,
 } from './resolve_connector_id_step_type';
+import { getCachedInferenceConnectorInstances } from '../../../../../../../common/schema';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
 export function getConnectorIdSuggestions({
@@ -51,7 +52,8 @@ export function getConnectorIdSuggestions({
   const suggestions = getConnectorIdSuggestionsItems(
     stepConnectorType,
     replacementRange,
-    dynamicConnectorTypes
+    dynamicConnectorTypes,
+    getCachedInferenceConnectorInstances()
   );
 
   if (!triggerConnectorType) {

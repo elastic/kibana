@@ -16,6 +16,7 @@ import { getCheckDecidePrivilegesStepDefinition } from './check_decide_privilege
 import { getCloneProposalStepDefinition } from './clone_proposal_step';
 import { getCreateProposalStepDefinition } from './create_proposal_step';
 import { getGetProposalStepDefinition } from './get_proposal_step';
+import { getSettleIncompleteProposalStepDefinition } from './settle_incomplete_proposal_step';
 import { getUpdateProposalStepDefinition } from './update_proposal_step';
 
 const EXECUTION_ID = 'exec-1';
@@ -30,6 +31,15 @@ const resolvedUser = {
   profileUid: 'worker-uid',
 };
 const resolveUser = jest.fn().mockResolvedValue(resolvedUser);
+/** Nobody is a Worker by default: the request's own user is the actor. */
+const resolveWorkerUser = jest.fn().mockResolvedValue(undefined);
+
+/** A service account has no stored user, so the Worker is built from its principal. */
+const workerUser = {
+  username: 'kibana/alertzero_alert_triage',
+  fullName: 'Alert Triage worker',
+  email: null,
+};
 
 /** Allows everything by default; a test overrides the one call it exercises. */
 const allowAll = (): jest.Mocked<ProposalPrivilegesChecker> => ({
@@ -60,29 +70,86 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
   } as unknown as StepHandlerContext<never, never>);
 
 describe('proposals.createProposal input schema', () => {
+  it.each(['', null])('should treat %p as an absent proposalId', (blank) => {
+    const parsed = createProposalStepInputSchema.parse({
+      conversationId: 'conv-1',
+      comment: 'Tune the noisy rule',
+      origin: 'alertzero',
+      proposalId: blank,
+    });
+
+    expect(parsed.proposalId).toBeUndefined();
+  });
+
+  it('should keep a supplied proposalId, and refuse one that is not a UUID', () => {
+    const base = { conversationId: 'conv-1', comment: 'c', origin: 'alertzero' };
+
+    expect(
+      createProposalStepInputSchema.parse({
+        ...base,
+        proposalId: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+      }).proposalId
+    ).toBe('6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50');
+    // Every proposal id is a UUID, and routes and cards assume it.
+    expect(createProposalStepInputSchema.safeParse({ ...base, proposalId: 'host-1' }).success).toBe(
+      false
+    );
+  });
+
   // Liquid renders a template for an absent workflow input as `''`, so the
   // schema — not just the service — has to treat a blank as an omission.
   it.each(['', null])('should treat %p as absent for the non-string optional inputs', (blank) => {
     const parsed = createProposalStepInputSchema.parse({
       conversationId: 'conv-1',
       comment: 'Tune the noisy rule',
+      origin: 'alertzero',
       actionInput: blank,
       expiresIn: blank,
     });
 
-    expect(parsed).toEqual({ conversationId: 'conv-1', comment: 'Tune the noisy rule' });
+    expect(parsed).toEqual({
+      conversationId: 'conv-1',
+      comment: 'Tune the noisy rule',
+      origin: 'alertzero',
+    });
   });
 
   it.each(['', null])('should treat %p as absent for the enum inputs', (blank) => {
     const parsed = createProposalStepInputSchema.parse({
       conversationId: 'conv-1',
       comment: 'Tune the noisy rule',
+      origin: 'alertzero',
       impact: blank,
       confidence: blank,
-      origin: blank,
     });
 
-    expect(parsed).toEqual({ conversationId: 'conv-1', comment: 'Tune the noisy rule' });
+    expect(parsed).toEqual({
+      conversationId: 'conv-1',
+      comment: 'Tune the noisy rule',
+      origin: 'alertzero',
+    });
+  });
+
+  // `origin` is the one input a blank cannot mean "absent" for: it has no
+  // default to fall back to, and storing `''` would produce a proposal no
+  // queue's filter ever matches.
+  it.each(['', '   '])('should reject %p as an origin rather than storing it', (blank) => {
+    expect(
+      createProposalStepInputSchema.safeParse({
+        conversationId: 'conv-1',
+        comment: 'Tune the noisy rule',
+        origin: blank,
+      }).success
+    ).toBe(false);
+  });
+
+  it('should require an origin, since no default could name the caller correctly', () => {
+    expect(
+      createProposalStepInputSchema.safeParse({
+        conversationId: 'conv-1',
+        comment: 'Tune the noisy rule',
+      }).success
+    ).toBe(false);
   });
 
   it('should still reject a value the optional input does not allow', () => {
@@ -90,6 +157,7 @@ describe('proposals.createProposal input schema', () => {
       createProposalStepInputSchema.safeParse({
         conversationId: 'conv-1',
         comment: 'Tune the noisy rule',
+        origin: 'alertzero',
         impact: 'nope',
       }).success
     ).toBe(false);
@@ -104,7 +172,9 @@ describe('proposals.createProposal input schema', () => {
   it('should still pass real values through', () => {
     const parsed = createProposalStepInputSchema.parse({
       conversationId: 'conv-1',
+      title: 'Tune noisy rule',
       comment: 'Tune the noisy rule',
+      origin: 'alertzero',
       actionInput: { name: 'Suspicious PowerShell' },
       expiresIn: '24h',
       impact: 'high',
@@ -112,7 +182,9 @@ describe('proposals.createProposal input schema', () => {
 
     expect(parsed).toEqual({
       conversationId: 'conv-1',
+      title: 'Tune noisy rule',
       comment: 'Tune the noisy rule',
+      origin: 'alertzero',
       actionInput: { name: 'Suspicious PowerShell' },
       expiresIn: '24h',
       impact: 'high',
@@ -130,7 +202,7 @@ describe('proposals.createProposal input schema', () => {
     expect(Object.keys(jsonSchema.properties)).toEqual(
       Object.keys(createProposalStepInputSchema.shape)
     );
-    expect(jsonSchema.required).toEqual(['conversationId', 'comment']);
+    expect(jsonSchema.required).toEqual(['conversationId', 'comment', 'origin']);
   });
 });
 
@@ -192,6 +264,7 @@ describe('proposals.createProposal step', () => {
     definition: getCreateProposalStepDefinition({
       getProposalsService: () => ({ create } as unknown as ProposalsService),
       resolveUser,
+      resolveWorkerUser,
       privileges,
     }),
     privileges,
@@ -210,6 +283,7 @@ describe('proposals.createProposal step', () => {
     const result = await definition.handler(
       createContext({
         conversationId: 'conv-1',
+        origin: 'alertzero',
         comment: 'Tune the noisy rule',
         actionWorkflowId: 'system-alertzero-action-create-rule',
         // A caller cannot smuggle in a different execution to resume.
@@ -233,6 +307,69 @@ describe('proposals.createProposal step', () => {
     });
   });
 
+  it('should attribute the proposal to the Worker when a service account is creating it', async () => {
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending' });
+    resolveWorkerUser.mockResolvedValueOnce(workerUser);
+    const { definition } = createDefinition(create);
+
+    await definition.handler(
+      createContext({ conversationId: 'conv-1', origin: 'alertzero', comment: 'Tune' })
+    );
+
+    expect(resolveWorkerUser).toHaveBeenCalledWith({
+      executionId: EXECUTION_ID,
+      spaceId: SPACE_ID,
+      request: FAKE_REQUEST,
+    });
+    // A service account's request carries no stored user, so there is nothing else to ask.
+    expect(resolveUser).not.toHaveBeenCalled();
+    expect(create).toHaveBeenCalledWith(expect.anything(), {
+      spaceId: SPACE_ID,
+      request: FAKE_REQUEST,
+      user: workerUser,
+    });
+  });
+
+  it('should use the request user when no service account is creating the proposal', async () => {
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending' });
+    const { definition } = createDefinition(create);
+
+    await definition.handler(
+      createContext({ conversationId: 'conv-1', origin: 'alertzero', comment: 'Tune' })
+    );
+
+    expect(resolveWorkerUser).toHaveBeenCalledTimes(1);
+    expect(create).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ user: resolvedUser })
+    );
+  });
+
+  it('should hand the proposalId to the service as its id', async () => {
+    const create = jest.fn().mockResolvedValue({
+      id: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+      status: 'pending',
+      category: 'respond',
+      action: { name: 'Isolate host' },
+    });
+    const { definition } = createDefinition(create);
+
+    await definition.handler(
+      createContext({
+        conversationId: 'conv-2',
+        origin: 'alertzero',
+        comment: 'Isolate the host',
+        actionWorkflowId: 'system-alertzero-action-isolate',
+        proposalId: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+      })
+    );
+
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({ id: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50' }),
+      expect.anything()
+    );
+  });
+
   it('should report alwaysGate when the action refuses to be auto-approved', async () => {
     const create = jest.fn().mockResolvedValue({
       id: 'p',
@@ -244,6 +381,7 @@ describe('proposals.createProposal step', () => {
     const result = await definition.handler(
       createContext({
         conversationId: 'conv-1',
+        origin: 'alertzero',
         comment: 'Isolate the host',
         actionWorkflowId: 'system-alertzero-action-isolate-host',
       })
@@ -252,18 +390,20 @@ describe('proposals.createProposal step', () => {
     expect(result.output?.alwaysGate).toBe(true);
   });
 
-  it.each([
-    ['autonomy-dependent', { name: 'Create rule', approvalPolicy: 'autonomy-dependent' }],
-    ['no declared policy', { name: 'Create rule' }],
-  ])('should leave alwaysGate false for an action with %s', async (_label, action) => {
-    // Only `always-gate` overrides the caller; a resolved action that declares
-    // anything else leaves the decision to the autonomy already resolved.
-    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending', action });
+  it('should leave alwaysGate false for an autonomy-dependent action', async () => {
+    // Only `always-gate` overrides the caller; an autonomy-dependent action
+    // leaves the decision to the autonomy already resolved.
+    const create = jest.fn().mockResolvedValue({
+      id: 'p',
+      status: 'pending',
+      action: { name: 'Create rule', approvalPolicy: 'autonomy-dependent' },
+    });
     const { definition } = createDefinition(create);
 
     const result = await definition.handler(
       createContext({
         conversationId: 'conv-1',
+        origin: 'alertzero',
         comment: 'Tune the noisy rule',
         actionWorkflowId: 'system-alertzero-action-create-rule',
       })
@@ -283,6 +423,7 @@ describe('proposals.createProposal step', () => {
     const result = await definition.handler(
       createContext({
         conversationId: 'conv-1',
+        origin: 'alertzero',
         comment: 'Tune the noisy rule',
         actionWorkflowId: 'system-alertzero-action-create-rule',
       })
@@ -304,6 +445,7 @@ describe('proposals.createProposal step', () => {
     await definition.handler(
       createContext({
         conversationId: 'conv-1',
+        origin: 'alertzero',
         comment: 'Tune the noisy rule',
         actionWorkflowId: '',
         impact: '',
@@ -331,7 +473,11 @@ describe('proposals.createProposal step', () => {
     const { definition } = createDefinition(create);
 
     const result = await definition.handler(
-      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
+      createContext({
+        conversationId: 'conv-1',
+        origin: 'alertzero',
+        comment: 'Tune the noisy rule',
+      })
     );
 
     expect(result.output?.expiresAt).toBe('2026-09-04T00:00:00.000Z');
@@ -342,11 +488,16 @@ describe('proposals.createProposal step', () => {
     const { definition } = createDefinition(create);
 
     await definition.handler(
-      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule', impact: 'high' })
+      createContext({
+        conversationId: 'conv-1',
+        origin: 'alertzero',
+        comment: 'Tune the noisy rule',
+        impact: 'high',
+      })
     );
 
     expect(create).toHaveBeenCalledWith(
-      expect.objectContaining({ impact: 'high', confidence: 'medium', origin: 'worker' }),
+      expect.objectContaining({ impact: 'high', confidence: 'medium', origin: 'alertzero' }),
       expect.anything()
     );
   });
@@ -356,7 +507,11 @@ describe('proposals.createProposal step', () => {
     const { definition } = createDefinition(create);
 
     await definition.handler(
-      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
+      createContext({
+        conversationId: 'conv-1',
+        origin: 'alertzero',
+        comment: 'Tune the noisy rule',
+      })
     );
 
     // The service resolves the fallback chain; the step must not pre-empt it
@@ -374,7 +529,9 @@ describe('proposals.createProposal step', () => {
     const { definition } = createDefinition(create, privileges);
 
     await expect(
-      definition.handler(createContext({ conversationId: 'conv-1', comment: 'Tune' }))
+      definition.handler(
+        createContext({ conversationId: 'conv-1', origin: 'alertzero', comment: 'Tune' })
+      )
     ).rejects.toMatchObject({ type: 'PermissionError' });
     expect(create).not.toHaveBeenCalled();
   });
@@ -386,7 +543,9 @@ describe('proposals.createProposal step', () => {
     // A distinct type is the only thing a workflow can branch on, since
     // ExecutionError carries nothing else to tell failures apart.
     await expect(
-      definition.handler(createContext({ conversationId: 'conv-1', comment: 'Tune' }))
+      definition.handler(
+        createContext({ conversationId: 'conv-1', origin: 'alertzero', comment: 'Tune' })
+      )
     ).rejects.toMatchObject({ type: 'ApiError', message: 'index unavailable' });
   });
 });
@@ -400,6 +559,7 @@ describe('proposals.updateProposal step', () => {
     getUpdateProposalStepDefinition({
       getProposalsService: () => ({ update } as unknown as ProposalsService),
       resolveUser,
+      resolveWorkerUser,
       privileges,
     });
 
@@ -443,6 +603,59 @@ describe('proposals.updateProposal step', () => {
     );
   });
 
+  it('should record the Worker as the decider when a service account auto-approved', async () => {
+    const update = jest
+      .fn()
+      .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' });
+    resolveWorkerUser.mockResolvedValueOnce(workerUser);
+
+    // The gate passes no username when nobody answered, so without the Worker the
+    // decision would have no decider at all.
+    await updateDefinition(update).handler(
+      createContext({
+        proposalId: 'proposal-1',
+        decision: 'approved',
+        status: 'executing',
+        decidedBy: '',
+      })
+    );
+
+    expect(resolveWorkerUser).toHaveBeenCalledWith({
+      executionId: EXECUTION_ID,
+      spaceId: SPACE_ID,
+      request: FAKE_REQUEST,
+    });
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ decidedBy: workerUser }),
+      SPACE_ID
+    );
+  });
+
+  it('should keep the person who answered the gate as the decider, not the Worker running it', async () => {
+    const update = jest
+      .fn()
+      .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' });
+    // The gate still runs as the Worker's service account, so its request names no person.
+    resolveUser.mockResolvedValueOnce(undefined);
+
+    await updateDefinition(update).handler(
+      createContext({
+        proposalId: 'proposal-1',
+        decision: 'approved',
+        status: 'executing',
+        decidedBy: 'analyst',
+      })
+    );
+
+    expect(resolveWorkerUser).not.toHaveBeenCalled();
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        decidedBy: { username: 'analyst', fullName: null, email: null },
+      }),
+      SPACE_ID
+    );
+  });
+
   it('should fall back to the gate username when the request yields no identity', async () => {
     const update = jest
       .fn()
@@ -478,6 +691,7 @@ describe('proposals.updateProposal step', () => {
       SPACE_ID
     );
     expect(resolveUser).not.toHaveBeenCalled();
+    expect(resolveWorkerUser).not.toHaveBeenCalled();
   });
 
   it('should return the decision so the workflow can read back what it wrote', async () => {
@@ -620,7 +834,7 @@ describe('proposals.getProposal step', () => {
 
     const result = await getDefinition(get).handler(createContext({ proposalId: 'proposal-1' }));
 
-    expect(get).toHaveBeenCalledWith('proposal-1', SPACE_ID);
+    expect(get).toHaveBeenCalledWith('proposal-1', SPACE_ID, FAKE_REQUEST);
     expect(result.output).toEqual({
       status: 'failed',
       decision: 'approved',
@@ -633,7 +847,40 @@ describe('proposals.getProposal step', () => {
       supersededBy: 'proposal-2',
       expiresAt: '2026-09-04T00:00:00.000Z',
       actionWorkflowId: 'system-alertzero-action-create-rule',
+      dismissReason: undefined,
+      rationale: undefined,
     });
+  });
+
+  it('should return dismissReason and rationale when a proposal is dismissed', async () => {
+    const get = jest.fn().mockResolvedValue({
+      status: 'failed',
+      decision: 'dismissed',
+      decidedBy: { username: 'analyst', fullName: 'Alice Analyst', email: null },
+      dismissReason: 'wrong',
+      rationale: 'The alert fired on a known-good admin script, not a real intrusion.',
+    });
+
+    const result = await getDefinition(get).handler(createContext({ proposalId: 'proposal-1' }));
+
+    expect(result.output).toMatchObject({
+      decision: 'dismissed',
+      dismissReason: 'wrong',
+      rationale: 'The alert fired on a known-good admin script, not a real intrusion.',
+    });
+  });
+
+  it('should return dismissReason without rationale when rationale was not supplied', async () => {
+    const get = jest.fn().mockResolvedValue({
+      status: 'failed',
+      decision: 'dismissed',
+      dismissReason: 'low_value',
+    });
+
+    const result = await getDefinition(get).handler(createContext({ proposalId: 'proposal-1' }));
+
+    expect(result.output?.dismissReason).toBe('low_value');
+    expect(result.output?.rationale).toBeUndefined();
   });
 
   it('should leave decidedBy undefined when the stored proposal has no decider', async () => {
@@ -686,7 +933,8 @@ describe('proposals.cloneProposal step', () => {
 
     expect(clone).toHaveBeenCalledWith(
       { id: 'proposal-1', executionError: 'action exploded' },
-      SPACE_ID
+      SPACE_ID,
+      FAKE_REQUEST
     );
     expect(result.output).toEqual({ proposalId: 'proposal-2' });
   });
@@ -700,5 +948,123 @@ describe('proposals.cloneProposal step', () => {
       cloneDefinition(clone, privileges).handler(createContext({ proposalId: 'proposal-1' }))
     ).rejects.toMatchObject({ type: 'PermissionError' });
     expect(clone).not.toHaveBeenCalled();
+  });
+});
+
+describe('proposals.settleIncompleteProposal step', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const settleDefinition = (service: {
+    getLatestRevision: jest.Mock;
+    get: jest.Mock;
+    update: jest.Mock;
+  }) =>
+    getSettleIncompleteProposalStepDefinition({
+      getProposalsService: () => service as unknown as ProposalsService,
+    });
+
+  it('should adopt the live head before writing', async () => {
+    const service = {
+      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 }),
+      get: jest.fn().mockResolvedValue({ id: 'proposal-2', status: 'pending' }),
+      update: jest.fn().mockResolvedValue({ id: 'proposal-2', status: 'expired' }),
+    };
+
+    const result = await settleDefinition(service).handler(
+      createContext({
+        proposalId: 'proposal-1',
+        status: 'expired',
+        executionError: 'timed out',
+      })
+    );
+
+    expect(service.getLatestRevision).toHaveBeenCalledWith('proposal-1', SPACE_ID);
+    expect(service.get).toHaveBeenCalledWith('proposal-2', SPACE_ID, FAKE_REQUEST);
+    expect(service.update).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'proposal-2', status: 'expired', executionError: 'timed out' }),
+      SPACE_ID
+    );
+    expect(result.output).toEqual({
+      proposalId: 'proposal-2',
+      status: 'expired',
+      decision: undefined,
+    });
+  });
+
+  it('should expire an undecided proposal when status is omitted', async () => {
+    const service = {
+      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
+      get: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending' }),
+      update: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'expired' }),
+    };
+
+    await settleDefinition(service).handler(
+      createContext({ proposalId: 'proposal-1', executionError: 'workflow failed' })
+    );
+
+    expect(service.update).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'expired' }),
+      SPACE_ID
+    );
+  });
+
+  it('should fail a decided proposal when status is omitted', async () => {
+    const service = {
+      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
+      get: jest
+        .fn()
+        .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' }),
+      update: jest
+        .fn()
+        .mockResolvedValue({ id: 'proposal-1', status: 'failed', decision: 'approved' }),
+    };
+
+    const result = await settleDefinition(service).handler(
+      createContext({ proposalId: 'proposal-1', executionError: 'clone threw' })
+    );
+
+    expect(service.update).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'failed' }),
+      SPACE_ID
+    );
+    expect(result.output?.status).toBe('failed');
+    expect(result.output?.decision).toBe('approved');
+  });
+
+  it('should honour an explicit status over discrimination', async () => {
+    const service = {
+      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
+      get: jest
+        .fn()
+        .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' }),
+      update: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'failed' }),
+    };
+
+    await settleDefinition(service).handler(
+      createContext({ proposalId: 'proposal-1', status: 'failed', executionError: 'forced' })
+    );
+
+    expect(service.update).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'failed' }),
+      SPACE_ID
+    );
+  });
+
+  it('should not check manage privileges', async () => {
+    const service = {
+      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
+      get: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending' }),
+      update: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'expired' }),
+    };
+
+    // No privileges object is injected — a denied resumer's key on the task
+    // must still be able to leave the record terminal.
+    await settleDefinition(service).handler(
+      createContext({ proposalId: 'proposal-1', status: 'expired' })
+    );
+
+    expect(service.update).toHaveBeenCalled();
   });
 });

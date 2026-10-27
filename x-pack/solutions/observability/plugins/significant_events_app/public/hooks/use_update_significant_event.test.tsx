@@ -21,6 +21,8 @@ describe('useUpdateSignificantEvent', () => {
   const fetch = jest.fn();
   const addSuccess = jest.fn();
   const addError = jest.fn();
+  const addWarning = jest.fn();
+  const addInfo = jest.fn();
 
   const wrapper = ({ children }: { children: React.ReactNode }) => {
     const queryClient = new QueryClient({
@@ -33,9 +35,11 @@ describe('useUpdateSignificantEvent', () => {
     fetch.mockReset();
     addSuccess.mockReset();
     addError.mockReset();
-    fetch.mockResolvedValue({ event_uuid: 'event-1', updated: 1, ignored: 0, status: 'dismissed' });
+    addWarning.mockReset();
+    addInfo.mockReset();
+    fetch.mockResolvedValue({ updated: 1, ignored: 0, status: 'inactive' });
     mockUseKibana.mockReturnValue({
-      core: { notifications: { toasts: { addSuccess, addError } } },
+      core: { notifications: { toasts: { addSuccess, addError, addWarning, addInfo } } },
       dependencies: {
         start: {
           significantEvents: { significantEventsRepositoryClient: { fetch } },
@@ -44,16 +48,16 @@ describe('useUpdateSignificantEvent', () => {
     } as never);
   });
 
-  it('omits assessment_note when the caller does not pass a note', async () => {
+  it('omits assessment_note when an active status is requested', async () => {
     const { result } = renderHook(() => useUpdateSignificantEvent(), { wrapper });
 
     act(() => {
-      result.current.updateEventStatus({ eventUuid: 'event-1', status: 'closed' });
+      result.current.updateEventStatus({ eventId: 'event-1', status: 'active' });
     });
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith('POST /internal/significant_events/events/{id}/update', {
-        params: { path: { id: 'event-1' }, body: { status: 'closed' } },
+        params: { path: { id: 'event-1' }, body: { status: 'active' } },
         signal: null,
       });
     });
@@ -64,8 +68,8 @@ describe('useUpdateSignificantEvent', () => {
 
     act(() => {
       result.current.updateEventStatus({
-        eventUuid: 'event-1',
-        status: 'dismissed',
+        eventId: 'event-1',
+        status: 'inactive',
         assessmentNote: 'known noise',
       });
     });
@@ -74,10 +78,47 @@ describe('useUpdateSignificantEvent', () => {
       expect(fetch).toHaveBeenCalledWith('POST /internal/significant_events/events/{id}/update', {
         params: {
           path: { id: 'event-1' },
-          body: { status: 'dismissed', assessment_note: 'known noise' },
+          body: { status: 'inactive', assessment_note: 'known noise' },
         },
         signal: null,
       });
     });
+  });
+
+  it('keeps the caller open and warns when the update was superseded', async () => {
+    fetch.mockResolvedValue({ updated: 0, ignored: 1, status: 'active', reason: 'superseded' });
+    const onUpdateSuccess = jest.fn();
+    const { result } = renderHook(() => useUpdateSignificantEvent({ onUpdateSuccess }), {
+      wrapper,
+    });
+
+    act(() => {
+      result.current.updateEventStatus({ eventId: 'event-1', status: 'inactive' });
+    });
+
+    await waitFor(() => expect(addWarning).toHaveBeenCalledTimes(1));
+    expect(onUpdateSuccess).not.toHaveBeenCalled();
+    expect(addInfo).not.toHaveBeenCalled();
+  });
+
+  it('closes the caller with an info toast on an ordinary no-op', async () => {
+    fetch.mockResolvedValue({
+      updated: 0,
+      ignored: 1,
+      status: 'inactive',
+      reason: 'already_in_state',
+    });
+    const onUpdateSuccess = jest.fn();
+    const { result } = renderHook(() => useUpdateSignificantEvent({ onUpdateSuccess }), {
+      wrapper,
+    });
+
+    act(() => {
+      result.current.updateEventStatus({ eventId: 'event-1', status: 'inactive' });
+    });
+
+    await waitFor(() => expect(onUpdateSuccess).toHaveBeenCalledTimes(1));
+    expect(addInfo).toHaveBeenCalledTimes(1);
+    expect(addWarning).not.toHaveBeenCalled();
   });
 });

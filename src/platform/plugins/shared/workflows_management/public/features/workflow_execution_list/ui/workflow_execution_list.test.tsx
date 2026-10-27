@@ -145,7 +145,7 @@ describe('WorkflowExecutionList', () => {
       expect(table).toBeInTheDocument();
       expect(screen.getByText('Status')).toBeInTheDocument();
       expect(screen.getByText('Started')).toBeInTheDocument();
-      expect(screen.getByText('Executed by')).toBeInTheDocument();
+      expect(screen.getByText('Triggered by')).toBeInTheDocument();
       expect(screen.getByText('Duration')).toBeInTheDocument();
       expect(screen.getAllByTestId('workflowExecutionListItem')).toHaveLength(2);
     });

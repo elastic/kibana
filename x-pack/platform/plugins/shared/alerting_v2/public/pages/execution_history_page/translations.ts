@@ -30,7 +30,7 @@ export const COLUMN_RULES = i18n.translate('xpack.alertingV2.executionHistory.co
 export const COLUMN_EPISODES = i18n.translate(
   'xpack.alertingV2.executionHistory.columns.episodes',
   {
-    defaultMessage: 'Episodes',
+    defaultMessage: 'Alerts',
   }
 );
 

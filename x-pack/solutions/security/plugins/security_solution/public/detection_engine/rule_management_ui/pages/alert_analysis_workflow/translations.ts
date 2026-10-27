@@ -113,6 +113,27 @@ export const CREATE_CONVERSATION_HIDDEN_LABEL = i18n.translate(
   }
 );
 
+export const USE_PROMPT_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.usePromptAriaLabel',
+  {
+    defaultMessage: 'Use a prompt instead of an agent to classify alerts',
+  }
+);
+
+export const USE_PROMPT_HIDDEN_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.usePromptHiddenLabel',
+  {
+    defaultMessage: 'Use a prompt instead of an agent to classify alerts',
+  }
+);
+
+export const NOT_USED_WITH_PROMPT_HELP = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.notUsedWithPromptHelp',
+  {
+    defaultMessage: 'Not used while alerts are classified with a prompt.',
+  }
+);
+
 export const AUTO_CLOSE_ENABLED_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.autoCloseEnabledAriaLabel',
   {

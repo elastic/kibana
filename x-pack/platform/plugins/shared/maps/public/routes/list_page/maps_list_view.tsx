@@ -190,7 +190,7 @@ const MapsListViewComp = ({ history }: Props) => {
     >
       <KibanaContentListPage data-test-subj={PAGE_DATA_TEST_SUBJ}>
         <AppHeader title={APP_NAME} menu={menu} />
-        <KibanaContentListPage.Section>
+        <KibanaContentListPage.Section aria-label={APP_NAME}>
           <MapList />
         </KibanaContentListPage.Section>
       </KibanaContentListPage>

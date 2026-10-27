@@ -9,7 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { appContextService } from '../../app_context';
 
-import { checkNamespaceConflict } from './namespace_template_utils';
+import { checkNamespaceConflict, isOtelDataStream } from './namespace_template_utils';
 
 jest.mock('../../app_context');
 jest.mock('../elasticsearch/retry', () => ({
@@ -381,5 +381,68 @@ describe('checkNamespaceConflict', () => {
       { name: DEFAULT_ARGS.indexName },
       { signal }
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// isOtelDataStream
+// ---------------------------------------------------------------------------
+
+describe('isOtelDataStream', () => {
+  const OTEL_PACKAGE_INFO = {
+    policy_templates: [
+      { name: 'otel', title: 'OTel', description: '', inputs: [{ type: 'otelcol' }] },
+    ],
+  } as any;
+  const MAPPINGS_ONLY_PACKAGE_INFO = { policy_templates: [] } as any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+      enableOtelIntegrations: true,
+    } as any);
+  });
+
+  it('returns true for a data stream with use_otel_suffix and no streams', () => {
+    expect(
+      isOtelDataStream({ ...BASE_DATA_STREAM, use_otel_suffix: true }, MAPPINGS_ONLY_PACKAGE_INFO)
+    ).toBe(true);
+    expect(
+      isOtelDataStream(
+        { ...BASE_DATA_STREAM, use_otel_suffix: true, streams: [] },
+        MAPPINGS_ONLY_PACKAGE_INFO
+      )
+    ).toBe(true);
+  });
+
+  it('returns false for a data stream with use_otel_suffix when enableOtelIntegrations is off', () => {
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+      enableOtelIntegrations: false,
+    } as any);
+
+    expect(
+      isOtelDataStream({ ...BASE_DATA_STREAM, use_otel_suffix: true }, MAPPINGS_ONLY_PACKAGE_INFO)
+    ).toBe(false);
+  });
+
+  it('ignores use_otel_suffix on a data stream that defines a non-otelcol stream', () => {
+    expect(
+      isOtelDataStream(
+        { ...BASE_DATA_STREAM, use_otel_suffix: true, streams: [{ input: 'logfile' }] },
+        OTEL_PACKAGE_INFO
+      )
+    ).toBe(false);
+  });
+
+  it('keeps returning true for a data stream with an otelcol stream', () => {
+    expect(
+      isOtelDataStream({ ...BASE_DATA_STREAM, streams: [{ input: 'otelcol' }] }, OTEL_PACKAGE_INFO)
+    ).toBe(true);
+  });
+
+  it('returns false for a data stream with neither use_otel_suffix nor an otelcol stream', () => {
+    expect(
+      isOtelDataStream({ ...BASE_DATA_STREAM, streams: [{ input: 'logfile' }] }, OTEL_PACKAGE_INFO)
+    ).toBe(false);
   });
 });

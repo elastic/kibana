@@ -14,7 +14,6 @@ import {
   EuiText,
   EuiPanel,
   EuiButton,
-  EuiLink,
   useEuiTheme,
   EuiButtonEmpty,
 } from '@elastic/eui';
@@ -144,13 +143,16 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
               )}
 
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty>
-                  <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
-                    <FormattedMessage
-                      id="xpack.fleet.agentActivityFlyout.guideLink"
-                      defaultMessage="Learn more"
-                    />
-                  </EuiLink>
+                <EuiButtonEmpty
+                  href={docLinks.links.fleet.upgradeElasticAgent}
+                  target="_blank"
+                  iconType="external"
+                  iconSide="right"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.agentActivityFlyout.guideLink"
+                    defaultMessage="Learn more"
+                  />
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>

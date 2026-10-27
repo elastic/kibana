@@ -6,7 +6,12 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import type { WatchAutonomyLevel, WorkerScheduleInterval, WorkerSettingsExtras } from '../schemas';
+import type {
+  WatchAutonomyLevel,
+  WorkerScheduleInterval,
+  WorkerSettings,
+  WorkerSettingsExtras,
+} from '../schemas';
 
 /**
  * The one declaration a Worker makes about its settings. Everything else — the complete read/write
@@ -22,11 +27,26 @@ export interface WorkerSettingsDeclaration<
    * rejects any other. Manual is the default for a fresh install when allowed, otherwise the first.
    */
   allowedAutonomyLevels: readonly [WatchAutonomyLevel, ...WatchAutonomyLevel[]];
-  /** Present only for schedule-driven Workers; its presence is what renders the interval control. */
-  scheduleInterval?: { defaultValue: WorkerScheduleInterval };
+  /**
+   * Present only for schedule-driven Workers; its presence is what renders the interval control.
+   * When `readOnly` is true the UI locks the control and the server rejects schedule patches.
+   */
+  scheduleInterval?: { defaultValue: WorkerScheduleInterval; readOnly?: boolean };
   /**
    * Worker-specific settings, owned by the Worker's Watch team. The schema is the closed, complete
    * `extras` object: it is validated whole on every write and every read.
    */
   extras?: { schema: z.ZodType<TExtras>; defaultValue: TExtras };
+  /**
+   * Rules that span fields, such as an extras value that is only valid for a given schedule. Checked
+   * only when settings are written, never when they are read: the settings contract check cannot
+   * compare a refinement in the schema, and a rule applied on read could make a stored document
+   * unreadable after an upgrade.
+   */
+  crossFieldIssues?: (settings: WorkerSettings) => readonly WorkerSettingsIssue[];
+}
+
+export interface WorkerSettingsIssue {
+  path: readonly string[];
+  message: string;
 }

@@ -10,7 +10,11 @@
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
-import { DISCOVER_TABS_LOCAL_STORAGE_KEY } from '../constants';
+import {
+  DISCOVER_TABS_LOCAL_STORAGE_KEY,
+  METRICS_TEST_INDEX_NAME,
+  RECENTLY_EXPLORED_METRICS_STORAGE_KEY_PREFIX,
+} from '../constants';
 import type { PaginationLocators } from './pagination';
 import { createGridPagination } from './pagination';
 import type { MetricsFlyout } from './flyout';
@@ -262,5 +266,57 @@ export class MetricsExperiencePage {
       },
       [DISCOVER_TABS_LOCAL_STORAGE_KEY, field] as const
     );
+  }
+
+  /**
+   * Returns the key the "Recently explored" sort records for `metricName`. Mirrors
+   * `getMetricUniqueKey` in `@kbn/unified-chart-section-viewer`.
+   */
+  public getRecentlyExploredMetricKey(
+    metricName: string,
+    indexName: string = METRICS_TEST_INDEX_NAME
+  ): string {
+    return `${indexName}::${metricName}`;
+  }
+
+  /**
+   * Reads this browser's "Recently explored" metric keys, most recent first. Requires the page to
+   * be on a Kibana app route (see `getRecentlyExploredStorageKey`).
+   */
+  public getRecentlyExploredMetrics(): Promise<string[]> {
+    const storageKey = this.getRecentlyExploredStorageKey();
+    return this.page.evaluate((key) => {
+      const raw = window.localStorage.getItem(key);
+      return raw ? (JSON.parse(raw) as string[]) : [];
+    }, storageKey);
+  }
+
+  /**
+   * Replaces this browser's "Recently explored" metric keys. The grid reads them when it mounts,
+   * so reload the page afterwards. Requires the page to be on a Kibana app route (see
+   * `getRecentlyExploredStorageKey`).
+   */
+  public async setRecentlyExploredMetrics(metricKeys: string[]): Promise<void> {
+    const storageKey = this.getRecentlyExploredStorageKey();
+    await this.page.evaluate(
+      ([key, keys]) => window.localStorage.setItem(key, JSON.stringify(keys)),
+      [storageKey, metricKeys] as const
+    );
+  }
+
+  /**
+   * Resolves the "Recently explored" storage key the way the Discover plugin does, from the
+   * space-aware base path: on an app route that is everything in the path before `/app/`.
+   */
+  private getRecentlyExploredStorageKey(): string {
+    const { pathname } = new URL(this.page.url());
+    const appPathIndex = pathname.indexOf('/app/');
+    if (appPathIndex === -1) {
+      throw new Error(`Expected a Kibana app URL to resolve the base path, got ${pathname}`);
+    }
+    const basePath = pathname.slice(0, appPathIndex);
+    return `${RECENTLY_EXPLORED_METRICS_STORAGE_KEY_PREFIX}-${Buffer.from(basePath).toString(
+      'base64'
+    )}`;
   }
 }

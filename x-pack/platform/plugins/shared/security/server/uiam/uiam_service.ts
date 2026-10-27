@@ -10,10 +10,13 @@ import { readFileSync } from 'fs';
 import { chunk, partition } from 'lodash';
 import { Agent } from 'undici';
 
+import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   deriveInternalCallerAttestation,
   HTTPAuthorizationHeader,
+  isExternalUiamCredential,
+  resolveUiamClientAuthentication,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import type {
@@ -22,6 +25,7 @@ import type {
   UiamOAuthClientResponse,
   UiamOAuthClientType,
   UiamOAuthConnectionResponse,
+  UiamProjectType,
   UiamResolvedUsersResponse,
   UpdateUiamOAuthClientParams,
   UpdateUiamOAuthConnectionParams,
@@ -35,11 +39,15 @@ import {
   getUiamClientAuthentication,
   type UiamClientAuthentication,
 } from './get_client_authentication';
-import { getUiamCredentialsFromRequest } from './get_uiam_credentials';
+import {
+  getUiamAuthorizationHeaderFromRequest,
+  getUiamCredentialsFromRequest,
+} from './get_uiam_credentials';
+import { getProtectedResource } from './oauth_protected_resource';
 import type {
   ServiceAccountAssumableBy,
-  ServiceAccountRoleAssignments,
   UiamListServiceAccountsResponse,
+  UiamRoleAssignments,
   UiamServiceAccount,
   UiamServiceAccountDetails,
 } from './service_account_types';
@@ -56,8 +64,14 @@ interface CreateServiceAccountRequestBody {
   organization_id: string;
   /** A descriptive name for the service account. */
   name: string;
-  /** Roles granted to the service account, referenced by name. */
-  role_assignments: ServiceAccountRoleAssignments;
+  /** Free text of 1 to 1,000 characters. UIAM refuses an empty string. */
+  description?: string;
+  /** Type of the project the account belongs to. */
+  project_type: UiamProjectType;
+  /** ID of the project the account belongs to. */
+  project_id: string;
+  /** The roles asked for; see {@link UiamRoleAssignments}. */
+  role_assignments: UiamRoleAssignments;
   /** Principals allowed to exchange the service account's credentials for a token. */
   assumable_by: ServiceAccountAssumableBy[];
 }
@@ -70,7 +84,7 @@ export interface GrantUiamApiKeyRequestBody {
   description: string;
   /** Indicates whether this is an internal API key. */
   internal: boolean;
-  /** Optional expiration time for the API key (e.g., '1d', '7d'). */
+  /** Optional expiration time for the API key as an ISO-8601 duration (e.g., 'PT4H', 'P7D'). */
   expiration?: string;
   /** Role assignments that define access and resource limits for the API key. */
   role_assignments: {
@@ -244,9 +258,10 @@ export interface UiamServicePublic {
    * Exchanges an OAuth access token for an ephemeral UIAM token. Validates that the audience
    * returned by UIAM matches the expected Kibana server audience and throws if there is a mismatch.
    * @param accessToken The OAuth access token.
+   * @param spacePrefix The request's space prefix (e.g. `/s/marketing`), or an empty string.
    * @returns The ephemeral token.
    */
-  exchangeOAuthToken(accessToken: string): Promise<string>;
+  exchangeOAuthToken(accessToken: string, spacePrefix: string): Promise<string>;
 
   /**
    * Revokes a UIAM API key by its ID. Authenticates the call with the request's own UIAM
@@ -296,6 +311,15 @@ export interface UiamServicePublic {
    * `assumable_by` policy names this Kibana's project.
    */
   getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails>;
+
+  /**
+   * Revokes one service account via the UIAM service. Authorized against the account's
+   * `assumable_by` policy, the same way as {@link getServiceAccount}.
+   *
+   * Revoking is a soft delete, and revoking an account again while UIAM still holds its record
+   * succeeds. Tokens exchanged before the revoke stay valid until they expire.
+   */
+  revokeServiceAccount(serviceAccountId: string): Promise<void>;
 
   /**
    * Exchanges a service account ID for an ephemeral access token via the UIAM service.
@@ -459,7 +483,7 @@ export class UiamService implements UiamServicePublic {
     this.#userAgentHeader = `Kibana/${options.kibanaVersion}`;
 
     // Destructure existing config and re-create it again after validation to make TypeScript can infer the proper types.
-    const { enabled, url, sharedSecret, ssl } = config;
+    const { enabled, url, sharedSecret, ssl, unsafe = {} } = config;
     if (!enabled) {
       throw new Error('UIAM is not enabled.');
     }
@@ -472,7 +496,13 @@ export class UiamService implements UiamServicePublic {
       throw new Error('UIAM shared secret is not configured.');
     }
 
-    this.#config = { enabled, url, sharedSecret, ssl };
+    this.#config = { enabled, url, sharedSecret, ssl, unsafe };
+
+    if (unsafe.grantedApiKeyDefaultExpiration) {
+      this.#logger.warn(
+        `\`xpack.security.uiam.unsafe.grantedApiKeyDefaultExpiration\` is set to [${unsafe.grantedApiKeyDefaultExpiration.toISOString()}]: internal API keys granted without an explicit expiration will expire. This setting is intended only for short-lived test projects and must not be used in production or long-lived projects, as rules and other background tasks relying on these API keys will fail once the keys expire.`
+      );
+    }
     this.#dispatcher = this.#createFetchDispatcher();
   }
 
@@ -495,15 +525,28 @@ export class UiamService implements UiamServicePublic {
     };
   }
 
-  /**
-   * Builds the `Authorization` and client authentication headers for a UIAM call made on behalf of
-   * the given request: the request's own UIAM access token, plus the client authentication that
-   * rode in with it, or Kibana's own shared secret when none was supplied.
-   */
   #getRequestAuthenticationHeaders(request: KibanaRequest): Record<string, string> {
+    const credential = getUiamAuthorizationHeaderFromRequest(request);
+    const clientAuthentication = resolveUiamClientAuthentication(
+      this.#config.sharedSecret,
+      request.isFakeRequest
+        ? {
+            credentialSource: isExternalUiamCredential(request) ? 'external' : 'internal',
+            credential,
+          }
+        : {
+            credentialSource: 'inbound',
+            credential,
+            relayedClientAuthentication: request.headers[ES_CLIENT_AUTHENTICATION_HEADER],
+            requestHeaders: request.headers,
+          }
+    );
+
     return {
-      ...this.#getClientAuthenticationHeaders(getUiamClientAuthentication(request)),
-      Authorization: `Bearer ${getUiamCredentialsFromRequest(request)}`,
+      ...(typeof clientAuthentication === 'string'
+        ? { [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication }
+        : {}),
+      Authorization: credential.toString(),
     };
   }
 
@@ -605,10 +648,10 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.exchangeOAuthToken}.
    */
-  async exchangeOAuthToken(accessToken: string): Promise<string> {
+  async exchangeOAuthToken(accessToken: string, spacePrefix: string): Promise<string> {
     this.#logger.debug('Attempting to exchange OAuth access token for ephemeral token.');
 
-    const expectedAudience = this.#kibanaServerResourceURL;
+    const expectedAudience = getProtectedResource(this.#kibanaServerResourceURL, spacePrefix);
     const url = new URL(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`);
     url.searchParams.set('include_token', 'true');
     url.searchParams.set('audience', expectedAudience);
@@ -668,10 +711,13 @@ export class UiamService implements UiamServicePublic {
     );
 
     try {
+      const expiration = params.expiration
+        ? schema.duration().validate(params.expiration)
+        : this.#config.unsafe.grantedApiKeyDefaultExpiration;
       const body: GrantUiamApiKeyRequestBody = {
         description: params.name,
         internal: true,
-        ...(params.expiration ? { expiration: params.expiration } : {}),
+        ...(expiration ? { expiration: expiration.toISOString() } : {}),
         role_assignments: {
           // currently required  to downscope privileges
           limit: {
@@ -799,7 +845,8 @@ export class UiamService implements UiamServicePublic {
           ...this.#getClientAuthenticationHeaders(clientAuthentication),
           Authorization: authorization.toString(),
         },
-        body: JSON.stringify({ ...body, type: 'project' }),
+        // Kibana only creates organization service accounts scoped to its own project.
+        body: JSON.stringify({ ...body, type: 'organization', scope: 'project' }),
         dispatcher: this.#dispatcher,
       };
       const response = await UiamService.#parseUiamResponse(
@@ -879,6 +926,39 @@ export class UiamService implements UiamServicePublic {
       return response;
     } catch (err) {
       this.#logger.error(() => `Failed to get service account: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.revokeServiceAccount}.
+   */
+  async revokeServiceAccount(serviceAccountId: string): Promise<void> {
+    try {
+      this.#logger.debug(`Attempting to revoke service account [${serviceAccountId}].`);
+
+      await UiamService.#parseUiamResponse(
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/service-accounts/${encodeURIComponent(
+            serviceAccountId
+          )}`,
+          {
+            method: 'DELETE',
+            // No credential headers on purpose, for the same reason as `listServiceAccounts`.
+            headers: { 'User-Agent': this.#userAgentHeader },
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
+      );
+
+      this.#logger.debug(`Successfully revoked service account [${serviceAccountId}].`);
+    } catch (err) {
+      this.#logger.error(
+        () =>
+          `Failed to revoke service account [${serviceAccountId}]: ${getDetailedErrorMessage(err)}`
+      );
 
       throw err;
     }

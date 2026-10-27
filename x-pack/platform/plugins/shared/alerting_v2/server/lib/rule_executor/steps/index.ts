@@ -13,3 +13,4 @@ export { ExecuteRuleQueryStep } from './execute_rule_query_step';
 export { CreateAlertEventsStep } from './create_alert_events_step';
 export { ClassifyAbsentGroupsStep } from './classify_absent_groups_step';
 export { FilterDuplicateEventsStep } from './filter_duplicate_events_step';
+export { SuppressRedundantNoDataEventsStep } from './suppress_redundant_no_data_events_step';

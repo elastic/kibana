@@ -38,8 +38,11 @@ interface SuggestionsComponentProps {
   inputContainer: HTMLElement | null;
 }
 
+export type SuggestionsAbstractionType = 'alerts' | 'rules' | 'cases' | 'endpoints' | 'alerting/v2';
+
 export interface SuggestionsAbstraction {
-  type: 'alerts' | 'rules' | 'cases' | 'endpoints' | 'alerting/v2';
+  type: SuggestionsAbstractionType;
+  valueSuggestionTypeByField?: Record<string, SuggestionsAbstractionType>;
   fields: Record<
     string,
     {
@@ -314,8 +317,8 @@ const suggestionsStyles: EmotionStyles = {
         '&.kbnTypeahead__popover--top': css([
           euiShadowFlat(context, { border: 'none' }),
           {
-            borderTopLeftRadius: context.euiTheme.border.radius.medium,
-            borderTopRightRadius: context.euiTheme.border.radius.medium,
+            borderTopLeftRadius: context.euiTheme.border.radius.control,
+            borderTopRightRadius: context.euiTheme.border.radius.control,
             // Clips the shadow so it doesn't show above the input (below)
             clipPath: `polygon(-50px -50px, calc(100% + 50px) -50px, calc(100% + 50px) 100%, -50px 100%)`,
           },
@@ -323,8 +326,8 @@ const suggestionsStyles: EmotionStyles = {
         '&.kbnTypeahead__popover--bottom': css([
           euiShadow(context, 'l', { border: 'none' }),
           {
-            borderBottomLeftRadius: context.euiTheme.border.radius.medium,
-            borderBottomRightRadius: context.euiTheme.border.radius.medium,
+            borderBottomLeftRadius: context.euiTheme.border.radius.control,
+            borderBottomRightRadius: context.euiTheme.border.radius.control,
             // Clips the shadow so it doesn't show above the input (top)
             clipPath: `polygon(-50px 1px, calc(100% + 50px) 1px, calc(100% + 50px) calc(100% + 50px), -50px calc(100% + 50px))`,
           },

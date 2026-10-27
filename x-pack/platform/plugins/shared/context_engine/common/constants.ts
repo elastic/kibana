@@ -19,6 +19,7 @@ export const AI_INDEX_KI_SUMMARY_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexI
 export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/feedback_analysis`;
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
 export const AI_INDEX_KI_BY_ID_PATH = `${AI_INDEX_KI_LIST_PATH}/{kiId}`;
+export const AI_INDEX_KI_RESTORE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_restore`;
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;
@@ -27,6 +28,7 @@ export const MAX_KI_PAGE_SIZE = 100;
 export const KI_SUMMARY_PAGE_SIZE = 0;
 
 export const MAX_KI_TYPE_FILTER_LENGTH = 256;
+export const MAX_KI_SEARCH_QUERY_LENGTH = 256;
 
 /** Read-only Signals routes (internal): a preaggregated grouped list and a per-group fetch. */
 export const SIGNAL_GROUPS_PATH = `${INTERNAL_API_PATH}/signals/groups`;
@@ -34,18 +36,6 @@ export const SIGNALS_PATH = `${INTERNAL_API_PATH}/signals`;
 
 /** Version of the internal Signals API, shared between route registration and the browser client. */
 export const SIGNALS_INTERNAL_API_VERSION = '1';
-
-/** Read-only internal route for searching data streams, backing the AI index trace picker. */
-export const DATA_STREAMS_SEARCH_PATH = `${INTERNAL_API_PATH}/data_streams`;
-
-/** Version of the internal data streams search API, shared between route registration and the browser client. */
-export const DATA_STREAMS_SEARCH_INTERNAL_API_VERSION = '1';
-
-/** Cap on the number of data streams returned by the search API (applied after filtering hidden/managed streams out). */
-export const MAX_DATA_STREAM_SEARCH_RESULTS = 50;
-
-/** Bound on the free-text `search` query param, to prevent unbounded-input DoS. */
-export const MAX_DATA_STREAM_SEARCH_LENGTH = 256;
 
 /** Max number of tag groups returned by the grouped Signals list. */
 export const MAX_SIGNAL_GROUPS = 100;

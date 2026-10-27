@@ -161,8 +161,8 @@ exports[`UrlFormatEditor should render normally 1`] = `
         id="generated-id-help-0"
       >
         <a
-          class="euiLink emotion-euiLink-primary"
-          href="https://www.elastic.co/docs/explore-analyze/find-and-organize/data-views#string-field-formatters"
+          class="euiLink emotion-euiLink-text"
+          href="https://www.elastic.co/docs/explore-analyze/find-and-organize/data-views/field-formatters#string-field-formatters"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -221,8 +221,8 @@ exports[`UrlFormatEditor should render normally 1`] = `
         id="generated-id-help-0"
       >
         <a
-          class="euiLink emotion-euiLink-primary"
-          href="https://www.elastic.co/docs/explore-analyze/find-and-organize/data-views#string-field-formatters"
+          class="euiLink emotion-euiLink-text"
+          href="https://www.elastic.co/docs/explore-analyze/find-and-organize/data-views/field-formatters#string-field-formatters"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -264,7 +264,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         id="generated-id"
       >
         <div
-          class="emotion-euiContainerCSS"
+          class="euiTable__wrapper emotion-euiContainerCSS"
         >
           <table
             class="euiTable emotion-euiTable-fixed-compressed-hasBackground-desktop"

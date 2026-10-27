@@ -1,0 +1,88 @@
+{
+  "sha1": "ad625bee4740af91d9f12838213c16b611c30ff9",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "e23a8ec56b511ca-1d9024c691a8b8d",
+      "title": "Data Usage data streams API privileges returns all data streams for indices with the required privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout/api/tests/data_streams_privileges.spec.ts",
+        "line": 51,
+        "column": 5
+      }
+    },
+    {
+      "id": "e23a8ec56b511ca-f4b80f81bd05c84",
+      "title": "Data Usage data streams API privileges returns only the data streams the role has privileges for",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout/api/tests/data_streams_privileges.spec.ts",
+        "line": 59,
+        "column": 43
+      }
+    },
+    {
+      "id": "e23a8ec56b511ca-2a35d3d86990378",
+      "title": "Data Usage data streams API privileges returns 403 without the required privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout/api/tests/data_streams_privileges.spec.ts",
+        "line": 69,
+        "column": 50
+      }
+    },
+    {
+      "id": "e23a8ec56b511ca-495a4cf10f76431",
+      "title": "Data Usage data streams API privileges returns 404 when the role has no matching data streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout/api/tests/data_streams_privileges.spec.ts",
+        "line": 79,
+        "column": 76
+      }
+    },
+    {
+      "id": "d0a68287b828706-4e8d5944315154d",
+      "title": "Data Usage data streams API returns data streams without storage only when requested",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout/api/tests/data_streams.spec.ts",
+        "line": 26,
+        "column": 11
+      }
+    }
+  ]
+}
