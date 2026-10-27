@@ -136,6 +136,41 @@ describe('ProcessorEditor', () => {
     expect(screen.queryByTestId('streamsProcessingFlyoutEditorDelete')).toBeNull();
   });
 
+  it('does not warn about sharing for a processor only this slot applies', () => {
+    renderEditor({ step: savedStep });
+    expect(screen.queryByTestId('streamsProcessingFlyoutSharedProcessor')).toBeNull();
+  });
+
+  it('warns that edits to a shared processor apply everywhere it is used', () => {
+    renderEditor({ step: savedStep, isShared: true });
+    expect(screen.getByTestId('streamsProcessingFlyoutSharedProcessor')).toBeTruthy();
+  });
+
+  it('enables every supported signal for a new processor with fixed telemetry', async () => {
+    const fixedCatalogue: ComponentCatalogue = {
+      ...catalogue,
+      components: catalogue.components.map((component) =>
+        component.type === 'add_fields' ? { ...component, telemetry_selection: 'fixed' } : component
+      ),
+    };
+    const { onCommit } = renderEditor({ catalogue: fixedCatalogue });
+    await userEvent.type(
+      screen.getByTestId('componentDefinitionFormPath-path').querySelector('input') ??
+        document.body,
+      'team{enter}'
+    );
+    fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
+      target: { value: 'core' },
+    });
+    await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
+
+    expect(onCommit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        supported_telemetry: ['logs', 'metrics', 'traces', 'docs', 'profiles'],
+      })
+    );
+  });
+
   it('deletes an existing processor once confirmed', async () => {
     mockOpenConfirm.mockResolvedValue(true);
     const onDelete = jest.fn();

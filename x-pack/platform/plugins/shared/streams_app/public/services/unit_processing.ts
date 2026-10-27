@@ -112,6 +112,27 @@ export const getProcessingNodeProcessors = (
   });
 };
 
+/** Ids of a slot's processors that other slots also apply, so editing one changes those slots too. */
+export const getSharedProcessorIds = (unit: Unit, ref: ProcessingNodeRef): Set<string> => {
+  const pipeline = findPipeline(unit, ref.pipelineId);
+  if (!pipeline) {
+    return new Set();
+  }
+  const own = new Set(slotProcessorIds(pipeline, ref));
+  const isOwnSlot = (pipelineId: string, routeIndex?: number) =>
+    pipelineId === ref.pipelineId &&
+    (ref.kind === PROCESSING_SLOT_KIND.pipeline
+      ? routeIndex === undefined
+      : routeIndex === ref.routeIndex);
+  const elsewhere = unit.unit.pipelines.flatMap(({ id, config }) => [
+    ...(isOwnSlot(id) ? [] : readEntryIds(config, PIPELINE_ENTRY.processors)),
+    ...readRoutes(config).flatMap((route, routeIndex) =>
+      isOwnSlot(id, routeIndex) ? [] : route.processors ?? []
+    ),
+  ]);
+  return new Set(elsewhere.filter((id) => own.has(id)));
+};
+
 const updatePipeline = (
   unit: Unit,
   pipelineId: string,

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -38,7 +37,6 @@ interface ProcessorCardProps {
   onDuplicate: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
-  onChangeDescription: (description: string) => void;
 }
 
 /** A configured processor in the list, laid out like the processing tab's action block. */
@@ -54,45 +52,11 @@ export function ProcessorCard({
   onDuplicate,
   onMoveUp,
   onMoveDown,
-  onChangeDescription,
 }: ProcessorCardProps) {
   const { euiTheme } = useEuiTheme();
   const isDragEnabled = useDragHandle() !== null;
-  const [isEditingDescription, setIsEditingDescription] = useState(false);
-  const [editValue, setEditValue] = useState('');
-  const inputRef = useRef<HTMLInputElement | null>(null);
   const title = displayName.toUpperCase();
   const description = step.processor.description ?? summarizeProcessor(step.processor);
-
-  useEffect(() => {
-    if (isEditingDescription && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
-  }, [isEditingDescription]);
-
-  const startEditingDescription = () => {
-    if (editable) {
-      setEditValue(description);
-      setIsEditingDescription(true);
-    }
-  };
-  const saveDescription = () => {
-    const trimmed = editValue.trim();
-    if (trimmed !== description) {
-      onChangeDescription(trimmed);
-    }
-    setIsEditingDescription(false);
-  };
-  const onDescriptionKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      saveDescription();
-    } else if (event.key === 'Escape') {
-      event.preventDefault();
-      setIsEditingDescription(false);
-    }
-  };
 
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
@@ -213,60 +177,19 @@ export function ProcessorCard({
             padding: ${euiTheme.size.xs} ${euiTheme.size.s};
           `}
         >
-          {isEditingDescription ? (
-            <EuiFieldText
-              compressed
-              fullWidth
-              aria-label={i18n.translate(
-                'xpack.streams.processingFlyout.card.descriptionInputLabel',
-                { defaultMessage: 'Processor description' }
-              )}
-              inputRef={inputRef}
-              value={editValue}
-              onChange={(event) => setEditValue(event.target.value)}
-              onBlur={saveDescription}
-              onKeyDown={onDescriptionKeyDown}
-              css={css`
-                font-family: ${euiTheme.font.familyCode};
-              `}
-              data-test-subj="streamsProcessingFlyoutStepDescriptionInput"
-            />
-          ) : (
-            <EuiToolTip
-              content={
-                editable
-                  ? i18n.translate('xpack.streams.processingFlyout.card.editDescription', {
-                      defaultMessage: 'Edit processor description',
-                    })
-                  : undefined
-              }
-              display="block"
-            >
-              <EuiButtonEmpty
-                onClick={startEditingDescription}
-                color="text"
-                size="xs"
-                isDisabled={!editable}
-                css={css`
-                  max-width: 100%;
-                `}
-              >
-                <EuiText
-                  size="xs"
-                  color="subdued"
-                  component="span"
-                  css={css`
-                    font-style: italic;
-                    font-family: ${euiTheme.font.familyCode};
-                    ${euiTextTruncate()}
-                  `}
-                  data-test-subj="streamsProcessingFlyoutStepSummary"
-                >
-                  {description}
-                </EuiText>
-              </EuiButtonEmpty>
-            </EuiToolTip>
-          )}
+          <EuiText
+            size="xs"
+            color="subdued"
+            title={description}
+            css={css`
+              font-style: italic;
+              font-family: ${euiTheme.font.familyCode};
+              ${euiTextTruncate()}
+            `}
+            data-test-subj="streamsProcessingFlyoutStepSummary"
+          >
+            {description}
+          </EuiText>
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

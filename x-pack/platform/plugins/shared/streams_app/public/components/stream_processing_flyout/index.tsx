@@ -30,7 +30,7 @@ import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { useSelector } from '@xstate/react';
 import { useDiscardConfirm } from '../../hooks/use_discard_confirm';
 import { useComponentCatalogue } from '../../services/component_catalogue';
-import type { DraftProcessor } from '../../services/unit_processing';
+import { getSharedProcessorIds, type DraftProcessor } from '../../services/unit_processing';
 import type { ComponentReferenceOption } from '../component_definition_form';
 import {
   useCanvasEvents,
@@ -80,17 +80,16 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
     ],
     [unit]
   );
+  const sharedProcessorIds = useMemo(
+    () => getSharedProcessorIds(unit, flyout.slot),
+    [unit, flyout.slot]
+  );
 
   const createStep = useCallback(() => ref.send({ type: 'step.create' }), [ref]);
   const editStep = useCallback((key: string) => ref.send({ type: 'step.edit', key }), [ref]);
   const deleteStep = useCallback((key: string) => ref.send({ type: 'step.delete', key }), [ref]);
   const duplicateStep = useCallback(
     (key: string) => ref.send({ type: 'step.duplicate', key }),
-    [ref]
-  );
-  const changeDescription = useCallback(
-    (key: string, description: string) =>
-      ref.send({ type: 'step.changeDescription', key, description }),
     [ref]
   );
   const moveStep = useCallback(
@@ -152,12 +151,12 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
         editable={editable && !isSaving}
         telemetry={telemetry}
         diagnostics={diagnostics}
+        sharedProcessorIds={sharedProcessorIds}
         componentRefs={componentRefs}
         onCreate={createStep}
         onEdit={editStep}
         onDelete={deleteStep}
         onDuplicate={duplicateStep}
-        onChangeDescription={changeDescription}
         onMove={moveStep}
         onCommit={commitStep}
         onCancel={cancelStep}

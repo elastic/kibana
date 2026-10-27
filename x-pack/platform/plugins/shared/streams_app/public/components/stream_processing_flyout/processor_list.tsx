@@ -77,12 +77,13 @@ interface ProcessorListProps {
   editable: boolean;
   telemetry: readonly UnitSignal[];
   diagnostics: readonly ProcessingDiagnostic[];
+  /** Ids of processors that other processing slots also apply. */
+  sharedProcessorIds: ReadonlySet<string>;
   componentRefs: readonly ComponentReferenceOption[];
   onCreate: () => void;
   onEdit: (key: string) => void;
   onDelete: (key: string) => void;
   onDuplicate: (key: string) => void;
-  onChangeDescription: (key: string, description: string) => void;
   onMove: (from: number, to: number) => void;
   onCommit: (processor: DraftProcessor) => void;
   onCancel: () => void;
@@ -98,12 +99,12 @@ export function ProcessorList({
   editable,
   telemetry,
   diagnostics,
+  sharedProcessorIds,
   componentRefs,
   onCreate,
   onEdit,
   onDelete,
   onDuplicate,
-  onChangeDescription,
   onMove,
   onCommit,
   onCancel,
@@ -153,6 +154,9 @@ export function ProcessorList({
                   <ProcessorEditor
                     catalogue={catalogue}
                     step={step}
+                    isShared={
+                      step.processor.id !== undefined && sharedProcessorIds.has(step.processor.id)
+                    }
                     telemetry={telemetry}
                     componentRefs={componentRefs}
                     onCommit={onCommit}
@@ -172,9 +176,6 @@ export function ProcessorList({
                     onDuplicate={() => onDuplicate(step.key)}
                     onMoveUp={() => onMove(index, index - 1)}
                     onMoveDown={() => onMove(index, index + 1)}
-                    onChangeDescription={(description) =>
-                      onChangeDescription(step.key, description)
-                    }
                   />
                 )}
               </ProcessorBlock>

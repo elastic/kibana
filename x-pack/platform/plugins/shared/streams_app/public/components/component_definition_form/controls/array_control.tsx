@@ -24,7 +24,7 @@ import { FieldControl } from '../field_control';
 import { toControlId } from '../field_helpers';
 import { FieldList } from '../field_list';
 import { useDefinitionFormContext } from '../form_context';
-import { createInitialItem, ITEM_TELEMETRY_KEY } from '../serialize';
+import { allowsItemTelemetry, createInitialItem, ITEM_TELEMETRY_KEY } from '../serialize';
 import { useRowKeys } from '../use_row_keys';
 import { isObjectValue, joinPointer, type FormValue } from '../values';
 import { RemoveButton } from './remove_button';
@@ -89,8 +89,7 @@ export function ArrayControl({ field, value, onChange, pointer }: ArrayControlPr
   const canRemove = items.length > (field.min_items ?? 0);
   const maxItems = field.max_items ?? DEFAULT_MAX_ARRAY_ITEMS;
   const canAdd = items.length < maxItems;
-  const showItemTelemetry =
-    field.allow_item_telemetry && field.items.type === 'object' && context.telemetry.length > 1;
+  const showItemTelemetry = allowsItemTelemetry(field) && context.telemetry.length > 1;
 
   const setItem = (index: number, item: FormValue | undefined) =>
     onChange(items.map((current, position) => (position === index ? item ?? '' : current)));

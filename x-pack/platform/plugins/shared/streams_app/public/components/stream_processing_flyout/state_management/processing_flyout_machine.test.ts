@@ -140,18 +140,6 @@ describe('processingFlyoutMachine', () => {
     expect(context.hasChanges).toBe(true);
   });
 
-  it('sets and clears a step description', () => {
-    const { flyout } = startFlyout();
-    flyout.send({ type: 'step.changeDescription', key: 'step-0', description: 'Tag the team' });
-    expect(flyout.getSnapshot().context.steps[0]).toMatchObject({
-      status: 'updated',
-      processor: { description: 'Tag the team' },
-    });
-
-    flyout.send({ type: 'step.changeDescription', key: 'step-0', description: '' });
-    expect(flyout.getSnapshot().context.steps[0].processor).not.toHaveProperty('description');
-  });
-
   it('asks the canvas to save and finishes when it succeeds', () => {
     const { flyout, requests } = startFlyout();
     flyout.send({ type: 'flyout.save' });

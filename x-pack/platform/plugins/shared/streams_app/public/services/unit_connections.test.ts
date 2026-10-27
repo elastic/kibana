@@ -224,6 +224,42 @@ describe('unit connections', () => {
     expect(routes?.value).toEqual([{ destinations: ['es-logs', 'es-metrics'] }]);
   });
 
+  it('refuses a line that would join a catch-all route with its own processors', () => {
+    const routed = unitWith([
+      {
+        id: 'main',
+        supported_telemetry: ['logs'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'processors', value: ['enrich'] },
+          { name: 'routes', value: [{ processors: ['tag'], destinations: ['es-logs'] }] },
+        ],
+      },
+    ]);
+    routed.unit.processors = [
+      { id: 'enrich', type: 'add_fields', supported_telemetry: ['logs'] },
+      { id: 'tag', type: 'add_fields', supported_telemetry: ['logs'] },
+    ];
+    const unprocessed = unitWith([
+      {
+        id: 'main',
+        supported_telemetry: ['logs'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'routes', value: [{ processors: ['tag'], destinations: ['es-logs'] }] },
+        ],
+      },
+    ]);
+    unprocessed.unit.processors = [
+      { id: 'tag', type: 'add_fields', supported_telemetry: ['logs'] },
+    ];
+
+    expect(canConnectToDestination(routed, processing('main'), 'debug-out')).toBe(false);
+    expect(connectToDestination(routed, processing('main'), 'debug-out')).toBe(routed);
+    expect(canConnectSourceToDestination(unprocessed, 'otlp-input', 'debug-out')).toBe(false);
+    expect(connectSourceToDestination(unprocessed, 'otlp-input', 'debug-out')).toBe(unprocessed);
+  });
+
   it('unhooks one destination from a route and keeps the other rule', () => {
     const routed = unitWith([
       {

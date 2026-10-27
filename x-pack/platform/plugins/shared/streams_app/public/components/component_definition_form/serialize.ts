@@ -6,6 +6,7 @@
  */
 
 import type {
+  CatalogueArrayField,
   CatalogueChoiceGroup,
   CatalogueFieldDefinition,
   CatalogueMetadata,
@@ -23,6 +24,10 @@ export type ConfigEntry = NonNullable<UnitComponent['config']>[number];
 
 /** Array items carry this key when the array allows per-item telemetry. */
 export const ITEM_TELEMETRY_KEY = 'telemetry';
+
+/** Whether each item of an array may carry its own telemetry scope. */
+export const allowsItemTelemetry = (field: CatalogueArrayField): boolean =>
+  field.items.type === 'object' && field.items.telemetry_selection === 'configurable';
 
 export interface FormContextValues {
   metadata: CatalogueMetadata;
@@ -118,7 +123,7 @@ export const canonicalValue = (
       const items = value.flatMap((item) => {
         if (field.items.type === 'object' && isObjectValue(item)) {
           const extra = [
-            ...(field.allow_item_telemetry ? [ITEM_TELEMETRY_KEY] : []),
+            ...(allowsItemTelemetry(field) ? [ITEM_TELEMETRY_KEY] : []),
             ...(field.items.allow_additional_fields ? Object.keys(item) : []),
           ];
           return [

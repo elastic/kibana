@@ -103,10 +103,17 @@ const routeDestinationIds = (route: RouteRule): readonly string[] =>
 const isCatchAllDestinationRoute = (route: RouteRule): boolean =>
   route.when === undefined && !isDelegatingRoute(route);
 
-/** A catch-all that delegates to child pipelines already consumes every record. */
+/**
+ * A new line on a routed pipeline joins its catch-all. That is refused when the
+ * catch-all delegates to child pipelines, or when it has processors the new
+ * destination would then also receive. A second catch-all would never match.
+ */
 const catchAllBlocksDestination = (routes: readonly RouteRule[]): boolean => {
   const catchAll = routes.find((route) => route.when === undefined);
-  return catchAll !== undefined && isDelegatingRoute(catchAll);
+  return (
+    catchAll !== undefined &&
+    (isDelegatingRoute(catchAll) || (catchAll.processors?.length ?? 0) > 0)
+  );
 };
 
 const routesIncludeDestination = (routes: readonly RouteRule[], destinationId: string): boolean =>

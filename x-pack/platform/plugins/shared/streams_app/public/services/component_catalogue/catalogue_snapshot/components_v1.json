@@ -1633,6 +1633,7 @@
           "required": true,
           "items": {
             "type": "object",
+            "telemetry_selection": "configurable",
             "fields": [
               {
                 "name": "location",
@@ -1765,7 +1766,6 @@
               }
             ]
           },
-          "allow_item_telemetry": true,
           "min_items": 1
         }
       ],

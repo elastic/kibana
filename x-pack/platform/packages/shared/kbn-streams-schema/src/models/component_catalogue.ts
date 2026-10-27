@@ -120,6 +120,8 @@ interface CatalogueFieldBase {
   required?: boolean;
   required_when?: CatalogueCondition;
   available_when?: CatalogueCondition;
+  /** Whether the field's value may carry a telemetry scope. Omitted means `fixed`. */
+  telemetry_selection?: CatalogueTelemetrySelection;
   ui?: CatalogueUiHints;
 }
 
@@ -185,7 +187,6 @@ export interface CatalogueArrayField extends CatalogueFieldBase {
   type: 'array';
   default?: CatalogueLiteralValue[];
   items: CatalogueFieldDefinition;
-  allow_item_telemetry?: boolean;
   min_items?: number;
   max_items?: number;
   unique_items?: boolean;

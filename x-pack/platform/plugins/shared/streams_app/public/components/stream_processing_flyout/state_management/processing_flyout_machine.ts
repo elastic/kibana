@@ -64,7 +64,6 @@ export type ProcessingFlyoutEvent =
   | { type: 'step.delete'; key: string }
   | { type: 'step.deleteAll' }
   | { type: 'step.duplicate'; key: string }
-  | { type: 'step.changeDescription'; key: string; description: string }
   | { type: 'step.reorder'; from: number; to: number }
   | { type: 'flyout.save' }
   | { type: 'save.succeeded' }
@@ -170,27 +169,6 @@ export const processingFlyoutMachine = setup({
       });
       return { steps, nextKey: context.nextKey + 1, hasChanges: true };
     }),
-    changeDescription: assign(({ context, event }) => {
-      if (event.type !== 'step.changeDescription') {
-        return {};
-      }
-      return {
-        steps: context.steps.map((step) => {
-          if (step.key !== event.key) {
-            return step;
-          }
-          const processor = omit(step.processor, 'description');
-          return {
-            ...step,
-            processor: event.description
-              ? { ...processor, description: event.description }
-              : processor,
-            status: step.status === 'new' ? ('new' as const) : ('updated' as const),
-          };
-        }),
-        hasChanges: true,
-      };
-    }),
     reorderStep: assign(({ context, event }) => {
       if (event.type !== 'step.reorder' || event.from === event.to) {
         return {};
@@ -280,10 +258,6 @@ export const processingFlyoutMachine = setup({
         'step.duplicate': {
           guard: ({ context }) => context.editable,
           actions: 'duplicateStep',
-        },
-        'step.changeDescription': {
-          guard: ({ context }) => context.editable,
-          actions: 'changeDescription',
         },
         'step.reorder': { actions: 'reorderStep' },
         'flyout.save': {

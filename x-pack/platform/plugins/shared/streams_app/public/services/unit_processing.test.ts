@@ -10,6 +10,7 @@ import {
   applyProcessingDraft,
   getProcessingNodeProcessors,
   getProcessingSlotTelemetry,
+  getSharedProcessorIds,
   type DraftProcessor,
   type ProcessingDraftResult,
 } from './unit_processing';
@@ -332,6 +333,45 @@ describe('getProcessingSlotTelemetry', () => {
       },
     ]);
     expect(getProcessingSlotTelemetry(unit, routeSlot('main', 0))).toEqual(['metrics']);
+  });
+});
+
+describe('getSharedProcessorIds', () => {
+  const sharedUnit = () =>
+    baseUnit(
+      [
+        {
+          id: 'p-1',
+          supported_telemetry: ['logs'],
+          config: [
+            { name: 'sources', value: ['src'] },
+            { name: 'processors', value: ['shared', 'own'] },
+            { name: 'destinations', value: ['es'] },
+          ],
+        },
+        {
+          id: 'p-2',
+          supported_telemetry: ['logs'],
+          config: [
+            { name: 'sources', value: ['src'] },
+            { name: 'routes', value: [{ processors: ['shared'], destinations: ['other'] }] },
+          ],
+        },
+      ],
+      [
+        { id: 'shared', type: 'add_fields', supported_telemetry: ['logs'] },
+        { id: 'own', type: 'add_fields', supported_telemetry: ['logs'] },
+      ]
+    );
+
+  it('lists the processors of a slot that another slot also applies', () => {
+    expect(getSharedProcessorIds(sharedUnit(), pipelineSlot('p-1'))).toEqual(new Set(['shared']));
+    expect(getSharedProcessorIds(sharedUnit(), routeSlot('p-2', 0))).toEqual(new Set(['shared']));
+  });
+
+  it('lists nothing when only the slot itself applies its processors', () => {
+    expect(getSharedProcessorIds(routedUnit(), routeSlot('main', 0))).toEqual(new Set());
+    expect(getSharedProcessorIds(sharedUnit(), pipelineSlot('missing'))).toEqual(new Set());
   });
 });
 

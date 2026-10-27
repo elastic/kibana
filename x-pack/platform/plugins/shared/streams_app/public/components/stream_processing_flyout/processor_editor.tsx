@@ -60,10 +60,18 @@ const processorLabel = i18n.translate('xpack.streams.processingFlyout.editor.pro
 const processorTelemetry = (
   component: CatalogueComponentSummary | undefined,
   targetTelemetry: readonly UnitSignal[]
-): UnitSignal[] =>
-  component
-    ? targetTelemetry.filter((signal) => component.supported_telemetry.includes(signal))
-    : [...targetTelemetry];
+): UnitSignal[] => {
+  if (!component) {
+    return [...targetTelemetry];
+  }
+  const flowing = targetTelemetry.filter((signal) =>
+    component.supported_telemetry.includes(signal)
+  );
+  // An instance of a `fixed` component must enable every signal the component supports.
+  return component.telemetry_selection === 'fixed' && flowing.length > 0
+    ? [...component.supported_telemetry]
+    : flowing;
+};
 
 const toOption = (component: CatalogueComponentSummary): EuiComboBoxOptionOption<string> => ({
   label: component.display_name,
@@ -78,6 +86,8 @@ interface ProcessorEditorProps {
   catalogue: ComponentCatalogue;
   /** The step being edited; `undefined` when creating a processor. */
   step?: ProcessingStep;
+  /** Whether other processing slots also apply the processor being edited. */
+  isShared?: boolean;
   telemetry: readonly UnitSignal[];
   componentRefs: readonly ComponentReferenceOption[];
   onCommit: (processor: DraftProcessor) => void;
@@ -89,6 +99,7 @@ interface ProcessorEditorProps {
 export function ProcessorEditor({
   catalogue,
   step,
+  isShared = false,
   telemetry,
   componentRefs,
   onCommit,
@@ -187,6 +198,21 @@ export function ProcessorEditor({
       <EuiFlexGroup gutterSize="s" direction="column">
         <strong>{title}</strong>
         <EuiFlexItem>
+          {isShared ? (
+            <>
+              <KbnWarningCallout
+                size="s"
+                title={i18n.translate('xpack.streams.processingFlyout.editor.sharedTitle', {
+                  defaultMessage: 'This processor is also used by other processing nodes',
+                })}
+                text={i18n.translate('xpack.streams.processingFlyout.editor.sharedBody', {
+                  defaultMessage: 'Changes to it apply everywhere it is used.',
+                })}
+                data-test-subj="streamsProcessingFlyoutSharedProcessor"
+              />
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
           <EuiForm fullWidth>
             <EuiFormRow
               fullWidth
