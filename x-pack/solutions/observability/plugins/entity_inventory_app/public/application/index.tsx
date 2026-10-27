@@ -5,54 +5,94 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
+import { EuiBetaBadge, EuiPageSection, EuiText } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderBadge } from '@kbn/app-header';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { EntityInventoryAppProps, EntityInventoryAppStartDependencies } from '../types';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { Redirect, useLocation } from 'react-router-dom';
+import type { EntityInventoryAppStartDependencies, EntityInventoryEntityType } from '../types';
 import { EntityInventoryPageShell } from './components/entity_inventory_page_shell';
-import { DEFAULT_ENTITY_TYPE } from './constants';
-import { ENTITY_LIST_PLACEHOLDER } from './translations';
+import { DEFAULT_ENTITY_PAGE_PATH, ENTITY_PAGES } from './constants';
+import {
+  ENTITY_INVENTORY_TITLE,
+  ENTITY_LIST_PLACEHOLDER,
+  ENTITY_PAGE_TITLES,
+  TECH_PREVIEW_BADGE_LABEL,
+  TECH_PREVIEW_BADGE_TOOLTIP,
+} from './translations';
 
-export interface EntityInventoryAppDeps {
+const TECH_PREVIEW_BADGES: AppHeaderBadge[] = [
+  {
+    label: TECH_PREVIEW_BADGE_LABEL,
+    renderCustomBadge: () => (
+      <EuiBetaBadge
+        label={TECH_PREVIEW_BADGE_LABEL}
+        color="hollow"
+        size="s"
+        iconType="flask"
+        tooltipContent={TECH_PREVIEW_BADGE_TOOLTIP}
+      />
+    ),
+  },
+];
+
+const EntityInventoryPage = ({ entityType }: { entityType: EntityInventoryEntityType }) => (
+  <EntityInventoryPageShell entityType={entityType}>
+    <EuiText color="subdued" data-test-subj="entityInventoryPlaceholder">
+      <p>{ENTITY_LIST_PLACEHOLDER}</p>
+    </EuiText>
+  </EntityInventoryPageShell>
+);
+
+export interface EntityInventoryAppProps {
   core: CoreStart;
   plugins: EntityInventoryAppStartDependencies;
 }
 
-export const EntityInventoryApp = ({
-  core,
-  plugins,
-  entityType = DEFAULT_ENTITY_TYPE,
-}: EntityInventoryAppDeps & EntityInventoryAppProps) => {
+/** Routed entity inventory app. Must render inside a `Router`. */
+export const EntityInventoryApp = ({ core, plugins }: EntityInventoryAppProps) => {
   const services = useMemo(() => ({ ...core, ...plugins }), [core, plugins]);
+  const { PageTemplate } = plugins.observabilityShared.navigation;
+  const { pathname } = useLocation();
+  const currentPage = ENTITY_PAGES.find(({ path }) => path === pathname);
+  const title = currentPage ? ENTITY_PAGE_TITLES[currentPage.entityType] : ENTITY_INVENTORY_TITLE;
 
   return (
     <KibanaContextProvider services={services}>
-      <EntityInventoryPageShell entityType={entityType}>
-        <EuiText color="subdued" data-test-subj="entityInventoryPlaceholder">
-          <p>{ENTITY_LIST_PLACEHOLDER}</p>
-        </EuiText>
-      </EntityInventoryPageShell>
+      <PageTemplate isPageDataLoaded={true} pageSectionProps={{ paddingSize: 'none' }}>
+        <AppHeader title={title} badges={TECH_PREVIEW_BADGES} menu={{}} spacing="standard" />
+        <EuiPageSection paddingSize="m" grow restrictWidth={false}>
+          <Routes>
+            {ENTITY_PAGES.map(({ entityType, path }) => (
+              <Route
+                key={path}
+                path={path}
+                render={() => <EntityInventoryPage entityType={entityType} />}
+              />
+            ))}
+            <Redirect from="/" to={DEFAULT_ENTITY_PAGE_PATH} />
+          </Routes>
+        </EuiPageSection>
+      </PageTemplate>
     </KibanaContextProvider>
   );
 };
 
-/** Binds the app to the plugin's start services so a host app can render it with props only. */
-export const createBoundEntityInventoryApp = (deps: EntityInventoryAppDeps) => {
-  const BoundEntityInventoryApp = (props: EntityInventoryAppProps) => (
-    <EntityInventoryApp {...deps} {...props} />
-  );
-  return BoundEntityInventoryApp;
-};
-
-export const renderApp = async (
-  element: HTMLElement,
-  getStartServices: StartServicesAccessor<EntityInventoryAppStartDependencies>
+export const renderApp = (
+  core: CoreStart,
+  plugins: EntityInventoryAppStartDependencies,
+  { element, history }: AppMountParameters
 ) => {
-  const [core, plugins] = await getStartServices();
   ReactDOM.render(
-    core.rendering.addContext(<EntityInventoryApp core={core} plugins={plugins} />),
+    core.rendering.addContext(
+      <Router history={history}>
+        <EntityInventoryApp core={core} plugins={plugins} />
+      </Router>
+    ),
     element
   );
   return () => ReactDOM.unmountComponentAtNode(element);

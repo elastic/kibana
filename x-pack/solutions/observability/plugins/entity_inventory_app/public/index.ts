@@ -8,7 +8,6 @@
 import type { PluginInitializer } from '@kbn/core/public';
 import { EntityInventoryAppPlugin } from './plugin';
 import type {
-  EntityInventoryAppProps,
   EntityInventoryAppPublicSetup,
   EntityInventoryAppPublicStart,
   EntityInventoryAppSetupDependencies,
@@ -17,12 +16,10 @@ import type {
 } from './types';
 
 export type {
-  EntityInventoryAppProps,
   EntityInventoryAppPublicSetup,
   EntityInventoryAppPublicStart,
   EntityInventoryEntityType,
 };
-export { INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY } from '../common/ui_settings_keys';
 
 export const plugin: PluginInitializer<
   EntityInventoryAppPublicSetup,

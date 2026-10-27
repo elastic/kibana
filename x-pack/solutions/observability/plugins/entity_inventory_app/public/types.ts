@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import type React from 'react';
+import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
+import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 export type EntityInventoryEntityType = 'all' | 'hosts' | 'kubernetes';
-
-export interface EntityInventoryAppProps {
-  entityType?: EntityInventoryEntityType;
-}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityInventoryAppSetupDependencies {}
 
 export interface EntityInventoryAppStartDependencies {
+  observabilityShared: ObservabilitySharedPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
@@ -28,5 +26,5 @@ export type EntityInventoryAppServices = CoreStart & EntityInventoryAppStartDepe
 export interface EntityInventoryAppPublicSetup {}
 
 export interface EntityInventoryAppPublicStart {
-  getAppComponent: () => React.ComponentType<EntityInventoryAppProps>;
+  navTreeChildren: NodeDefinition[];
 }

@@ -46,3 +46,33 @@ export const ENTITY_LIST_PLACEHOLDER = i18n.translate(
   'xpack.entityInventoryApp.pageShell.entityListPlaceholder',
   { defaultMessage: 'Entity list coming soon' }
 );
+
+export const ENTITY_INVENTORY_TITLE = i18n.translate(
+  'xpack.entityInventoryApp.entityInventoryTitle',
+  { defaultMessage: 'Entity Inventory' }
+);
+
+export const ENTITY_PAGE_TITLES: Readonly<Record<EntityInventoryEntityType, string>> = {
+  all: i18n.translate('xpack.entityInventoryApp.allResourcesTitle', {
+    defaultMessage: 'All resources',
+  }),
+  hosts: i18n.translate('xpack.entityInventoryApp.hostsTitle', {
+    defaultMessage: 'Hosts',
+  }),
+  kubernetes: i18n.translate('xpack.entityInventoryApp.kubernetesTitle', {
+    defaultMessage: 'Kubernetes',
+  }),
+};
+
+export const TECH_PREVIEW_BADGE_LABEL = i18n.translate(
+  'xpack.entityInventoryApp.techPreviewBadgeLabel',
+  { defaultMessage: 'Technical preview' }
+);
+
+export const TECH_PREVIEW_BADGE_TOOLTIP = i18n.translate(
+  'xpack.entityInventoryApp.techPreviewBadgeTooltip',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed in a future release.',
+  }
+);

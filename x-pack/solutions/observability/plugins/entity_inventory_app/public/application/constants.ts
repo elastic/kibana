@@ -14,4 +14,16 @@ export const ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS = 3;
 
 export const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-15m', to: 'now' };
 
-export const DEFAULT_ENTITY_TYPE: EntityInventoryEntityType = 'all';
+export interface EntityInventoryPage {
+  entityType: EntityInventoryEntityType;
+  path: string;
+}
+
+/** One routed page per entity type. Paths match the deep links registered in `plugin.tsx`. */
+export const ENTITY_PAGES: readonly EntityInventoryPage[] = [
+  { entityType: 'all', path: '/all-resources' },
+  { entityType: 'hosts', path: '/hosts' },
+  { entityType: 'kubernetes', path: '/kubernetes' },
+];
+
+export const DEFAULT_ENTITY_PAGE_PATH = ENTITY_PAGES[0].path;
