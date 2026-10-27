@@ -503,6 +503,13 @@ export class NightshiftInvestigationsClient {
       await this.releaseAutomationBudget(automationBudget);
     }
 
+    // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
+    // agent exists wherever an investigation runs. This narrower install stays because the run
+    // below executes the *stored* workflow definition, which predates that step until the managed
+    // install has upgraded it — and that install is fire-and-forget. Deliberately without the
+    // step's visibility retry: the workflow owns that, and this request path should not pay for it.
+    await this.installAgents(agentBuilder, spaceId);
+
     const newSubjects = withoutRecordedSubjects(subjects, recorded);
     const newAlertIds = new Set(newSubjects.map(({ id }) => id));
 
@@ -534,19 +541,12 @@ export class NightshiftInvestigationsClient {
       },
     };
 
-    let executionId: string;
-    try {
-      // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
-      // agent exists wherever an investigation runs. This narrower install stays because the run
-      // below executes the *stored* workflow definition, which predates that step until the managed
-      // install has upgraded it — and that install is fire-and-forget. Deliberately without the
-      // step's visibility retry: the workflow owns that, and this request path should not pay for it.
-      await this.installAgents(agentBuilder, spaceId);
-      executionId = await this.runInvestigationWorkflow(workflow, spaceId, inputs, timeout_seconds);
-    } catch (error) {
-      await this.releaseAutomationBudget(automationBudget);
-      throw error;
-    }
+    const executionId = await this.runInvestigationWorkflow(
+      workflow,
+      spaceId,
+      inputs,
+      timeout_seconds
+    );
 
     if (!isFollowUp) {
       await this.createAcceptedInvestigation({ conversations, investigationId, executionId });

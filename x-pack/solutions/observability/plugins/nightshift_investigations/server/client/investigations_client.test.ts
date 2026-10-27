@@ -1320,12 +1320,23 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
         'the agent installation',
         () => installInvestigationAgentMock.mockRejectedValueOnce(new Error('failed')),
       ],
-    ])('releases the automation budget when %s fails', async (_step, fail) => {
+    ])('keeps the automation slot with the claim when %s fails', async (_step, fail) => {
       fail();
 
       await expect(startWithBudget(1)).rejects.toThrow('failed');
 
-      expect(await usage()).toBe(0);
+      expect(await usage()).toBe(1);
+    });
+
+    it('counts once an investigation a retry opens on the claim of a failed start', async () => {
+      mockNewInvestigationId.mockReturnValueOnce('inv-failed');
+      mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed'));
+      await expect(startWithBudget(2)).rejects.toThrow('failed');
+      subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-failed' });
+
+      await expect(startWithBudget(2)).resolves.toEqual({ investigation_id: 'inv-failed' });
+
+      expect(await usage()).toBe(1);
     });
 
     it('does not use the automation budget for a follow-up or a manual start', async () => {
