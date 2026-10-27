@@ -33316,8 +33316,6 @@
     "xpack.ml.newJob.wizard.summaryStep.trueLabel": "Verdadeiro",
     "xpack.ml.newJob.wizard.summaryStep.viewResultsButton": "Ver resultados",
     "xpack.ml.newJob.wizard.timeRangeStep.fullTimeRangeError": "Ocorreu um erro ao obter o intervalo de tempo para o índice. Defina os horários desejados de início e fim.",
-    "xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.endDateLabel": "Data de término",
-    "xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.startDateLabel": "Data de início",
     "xpack.ml.newJob.wizard.validateJob.asyncGroupNameAlreadyExists": "O ID de grupo já existe. Um ID de grupo não pode ser igual ao de um grupo ou tarefa existente.",
     "xpack.ml.newJob.wizard.validateJob.asyncJobNameAlreadyExists": "O ID do trabalho já existe. Um ID de tarefa não pode ser igual ao de uma tarefa ou grupo existente.",
     "xpack.ml.newJob.wizard.validateJob.bucketSpanMustBeSetErrorMessage": "O intervalo do bucket deve ser configurado",

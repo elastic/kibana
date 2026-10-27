@@ -6,14 +6,20 @@
  */
 
 import type { FC } from 'react';
-import React, { Fragment, useEffect, useState } from 'react';
-import type { Moment } from 'moment';
-import moment from 'moment';
-import { i18n } from '@kbn/i18n';
-import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  DateRangePicker,
+  type DateRangePickerOnChangeProps,
+  type DateRangePickerSettings,
+} from '@kbn/date-range-picker';
 import { useMlKibana } from '../../../../contexts/kibana';
 
 const WIDTH = '512px';
+
+const DEFAULT_DATE_RANGE_PICKER_SETTINGS: DateRangePickerSettings = {
+  roundRelativeTime: false,
+  timePrecision: 'none',
+};
 
 export interface TimeRange {
   start: number;
@@ -27,88 +33,51 @@ interface Props {
 
 export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
   const {
-    services: { uiSettings },
+    services: { uiSettings, http },
   } = useMlKibana();
-  // TODO should use fieldFormats instead
   const dateFormat: string = uiSettings.get('dateFormat');
+  const timeZone: string = uiSettings.get('dateFormat:tz');
+  const inputDateFormats = useMemo(() => [dateFormat], [dateFormat]);
 
-  const [startMoment, setStartMoment] = useState<Moment | undefined>(moment(timeRange.start));
-  const [endMoment, setEndMoment] = useState<Moment | undefined>(moment(timeRange.end));
+  const [isInvalid, setIsInvalid] = useState(false);
+  const [settings, setSettings] = useState<DateRangePickerSettings>(
+    DEFAULT_DATE_RANGE_PICKER_SETTINGS
+  );
 
-  function handleChangeStart(date: Moment | null) {
-    setStartMoment(date || undefined);
-  }
+  // The job needs absolute bounds, so the parent's epoch times are shown as an absolute range.
+  const value = `${new Date(timeRange.start).toISOString()} to ${new Date(
+    timeRange.end
+  ).toISOString()}`;
 
-  function handleChangeEnd(date: Moment | null) {
-    setEndMoment(date || undefined);
-  }
+  const onChange = useCallback(
+    ({ startDate, endDate, isInvalid: isRangeInvalid }: DateRangePickerOnChangeProps) => {
+      setIsInvalid(isRangeInvalid);
+      if (isRangeInvalid || startDate === null || endDate === null) return;
+      // Relative input such as "last 7 days" is resolved to absolute times when applied.
+      setTimeRange({ start: startDate.getTime(), end: endDate.getTime() });
+    },
+    [setTimeRange]
+  );
 
-  // update the parent start and end if the timepicker changes
-  useEffect(() => {
-    if (startMoment !== undefined && endMoment !== undefined) {
-      setTimeRange({
-        start: startMoment.valueOf(),
-        end: endMoment.valueOf(),
-      });
-    }
-  }, [startMoment, endMoment, setTimeRange]);
-
-  // update our local start and end moment objects if
-  // the parent start and end updates.
-  // this happens if the use full data button is pressed.
-  useEffect(() => {
-    setStartMoment(moment(timeRange.start));
-    setEndMoment(moment(timeRange.end));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(timeRange)]);
+  const onInputChange = useCallback(() => {
+    setIsInvalid(false);
+  }, []);
 
   return (
-    <Fragment>
-      <div style={{ minWidth: WIDTH }} data-test-subj={`mlJobWizardDateRange`}>
-        <EuiDatePickerRange
-          fullWidth={true}
-          startDateControl={
-            <EuiDatePicker
-              popperProps={{
-                'data-test-subj': 'mlJobWizardDatePickerRangeStartDate',
-              }}
-              selected={startMoment}
-              onChange={handleChangeStart}
-              startDate={startMoment}
-              endDate={endMoment}
-              aria-label={i18n.translate(
-                'xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.startDateLabel',
-                {
-                  defaultMessage: 'Start date',
-                }
-              )}
-              showTimeSelect
-              dateFormat={dateFormat}
-              maxDate={endMoment}
-            />
-          }
-          endDateControl={
-            <EuiDatePicker
-              popperProps={{
-                'data-test-subj': 'mlJobWizardDatePickerRangeEndDate',
-              }}
-              selected={endMoment}
-              onChange={handleChangeEnd}
-              startDate={startMoment}
-              endDate={endMoment}
-              aria-label={i18n.translate(
-                'xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.endDateLabel',
-                {
-                  defaultMessage: 'End date',
-                }
-              )}
-              showTimeSelect
-              dateFormat={dateFormat}
-              minDate={startMoment}
-            />
-          }
-        />
-      </div>
-    </Fragment>
+    <div style={{ minWidth: WIDTH }} data-test-subj="mlJobWizardDateRange">
+      <DateRangePicker
+        value={value}
+        onChange={onChange}
+        onInputChange={onInputChange}
+        isInvalid={isInvalid}
+        width="full"
+        compressed={false}
+        settings={settings}
+        onSettingsChange={setSettings}
+        inputDateFormats={inputDateFormats}
+        timeZone={timeZone}
+        prependBasePath={http.basePath.prepend}
+      />
+    </div>
   );
 };

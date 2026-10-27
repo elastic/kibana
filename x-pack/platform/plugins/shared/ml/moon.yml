@@ -164,6 +164,7 @@ dependsOn:
   - '@kbn/core-rendering-browser'
   - '@kbn/app-header'
   - '@kbn/ui-callout'
+  - '@kbn/date-range-picker'
 tags:
   - plugin
   - prod

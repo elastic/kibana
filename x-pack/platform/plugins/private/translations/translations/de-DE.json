@@ -33226,8 +33226,6 @@
     "xpack.ml.newJob.wizard.summaryStep.trueLabel": "Wahr",
     "xpack.ml.newJob.wizard.summaryStep.viewResultsButton": "Ergebnisse anzeigen",
     "xpack.ml.newJob.wizard.timeRangeStep.fullTimeRangeError": "Beim Abrufen des Zeitbereichs für den Index ist ein Fehler aufgetreten. Bitte legen Sie die gewünschten Start- und Endzeiten fest.",
-    "xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.endDateLabel": "Enddatum",
-    "xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.startDateLabel": "Startdatum",
     "xpack.ml.newJob.wizard.validateJob.asyncGroupNameAlreadyExists": "Die Gruppen-ID existiert bereits. Eine Gruppen-ID darf nicht mit einer bestehenden Gruppe oder einem bestehenden Auftrag identisch sein.",
     "xpack.ml.newJob.wizard.validateJob.asyncJobNameAlreadyExists": "Die Job-ID existiert bereits. Eine Job-ID darf nicht mit einer bestehenden Aufgabe oder Gruppe identisch sein.",
     "xpack.ml.newJob.wizard.validateJob.bucketSpanMustBeSetErrorMessage": "Die Bucket-Spanne muss festgelegt werden",

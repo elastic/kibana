@@ -33331,8 +33331,6 @@
     "xpack.ml.newJob.wizard.summaryStep.trueLabel": "True",
     "xpack.ml.newJob.wizard.summaryStep.viewResultsButton": "結果を表示",
     "xpack.ml.newJob.wizard.timeRangeStep.fullTimeRangeError": "インデックスの時間範囲の取得中にエラーが発生しました。任意の開始時刻と終了時刻を設定してください。",
-    "xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.endDateLabel": "終了日",
-    "xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.startDateLabel": "開始日",
     "xpack.ml.newJob.wizard.validateJob.asyncGroupNameAlreadyExists": "グループ ID がすでに存在します。グループIDは既存のジョブやグループと同じにできません。",
     "xpack.ml.newJob.wizard.validateJob.asyncJobNameAlreadyExists": "ジョブIDがすでに存在します。ジョブ ID は既存のジョブやグループと同じにできません。",
     "xpack.ml.newJob.wizard.validateJob.bucketSpanMustBeSetErrorMessage": "バケットスパンを設定する必要があります",

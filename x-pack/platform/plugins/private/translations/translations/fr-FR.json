@@ -33138,8 +33138,6 @@
     "xpack.ml.newJob.wizard.summaryStep.trueLabel": "Vrai",
     "xpack.ml.newJob.wizard.summaryStep.viewResultsButton": "Afficher les résultats",
     "xpack.ml.newJob.wizard.timeRangeStep.fullTimeRangeError": "Une erreur s'est produite lors de l'obtention de la plage temporelle de l'index. Veuillez définir l'heure de début et l'heure de fin souhaitées.",
-    "xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.endDateLabel": "Date de fin",
-    "xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.startDateLabel": "Date de début",
     "xpack.ml.newJob.wizard.validateJob.asyncGroupNameAlreadyExists": "L'ID de groupe existe déjà. Un ID de groupe ne peut pas être identique à celui d'un groupe ou d'une tâche existants.",
     "xpack.ml.newJob.wizard.validateJob.asyncJobNameAlreadyExists": "L'ID de tâche existe déjà. Un ID de tâche ne peut pas être identique à celui d'une tâche ou d'un groupe existants.",
     "xpack.ml.newJob.wizard.validateJob.bucketSpanMustBeSetErrorMessage": "L’étendue du compartiment doit être définie",

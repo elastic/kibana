@@ -33339,8 +33339,6 @@
     "xpack.ml.newJob.wizard.summaryStep.trueLabel": "True",
     "xpack.ml.newJob.wizard.summaryStep.viewResultsButton": "查看结果",
     "xpack.ml.newJob.wizard.timeRangeStep.fullTimeRangeError": "获取索引的时间范围时出错。请设置所需开始和结束时间。",
-    "xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.endDateLabel": "结束日期",
-    "xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.startDateLabel": "开始日期",
     "xpack.ml.newJob.wizard.validateJob.asyncGroupNameAlreadyExists": "组 ID 已存在。组 ID 不能与现有组或作业相同。",
     "xpack.ml.newJob.wizard.validateJob.asyncJobNameAlreadyExists": "作业 ID 已存在。作业 ID 不能与现有作业或组相同。",
     "xpack.ml.newJob.wizard.validateJob.bucketSpanMustBeSetErrorMessage": "必须设置存储桶跨度",
