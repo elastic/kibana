@@ -11,12 +11,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { EuiButtonEmpty } from '@elastic/eui';
 
-import {
-  ChangeHistoryListItem,
-  ChangeHistoryModal,
-  ChangeHistoryProvider,
-  ChangeHistoryProviderProps,
-} from '@kbn/change-history-ui';
+import type { ChangeHistoryListItem, ChangeHistoryProviderProps } from '@kbn/change-history-ui';
+import { ChangeHistoryModal, ChangeHistoryProvider } from '@kbn/change-history-ui';
 import { i18n } from '@kbn/i18n';
 
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
