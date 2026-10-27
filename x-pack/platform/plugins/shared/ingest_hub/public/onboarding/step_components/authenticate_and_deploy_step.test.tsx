@@ -17,6 +17,7 @@ jest.mock('../onboarding_flow_context', () => ({
 
 jest.mock('./authenticate_and_deploy_step/use_deploy', () => ({
   useDeploy: jest.fn(),
+  toSOServiceVars: jest.fn((vars: Record<string, unknown>) => vars),
 }));
 
 jest.mock('./authenticate_and_deploy_step/deployment_method_card', () => ({
@@ -1140,6 +1141,9 @@ describe('AuthenticateAndDeployStep', () => {
         'existing-dep-id',
         expect.objectContaining({
           ecfStacks: [expect.objectContaining({ family: 'unified', serviceConfigs })],
+          // The settings baseline must be saved with the snapshot, or a resumed session would
+          // compare the old settings against the new snapshot and report the stack stale.
+          serviceVars: expect.any(Object),
         })
       );
     });

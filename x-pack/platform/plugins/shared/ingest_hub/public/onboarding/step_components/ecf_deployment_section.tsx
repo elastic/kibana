@@ -38,6 +38,7 @@ import {
   buildEcfStackUpdateUrl,
   buildEcfTemplateUrl,
   isEcfStackArnValid,
+  normaliseLogGroupArn,
   ECF_UNIFIED_STACK_NAME,
   ECF_OTEL_STACK_NAME,
   ECF_CROWDSTRIKE_STACK_NAME,
@@ -73,13 +74,17 @@ type EcfStaleReason = 'services' | 'settings';
 /** The per-service values that end up in a family's stack parameters, in a comparable form. */
 type EcfConfigSnapshot = Array<Pick<EcfServiceConfig, 'serviceId' | 'bucketArns' | 'logGroupArns'>>;
 
-/** Order-independent snapshot of the stack parameters a family's services contribute. */
+/**
+ * Order-independent snapshot of the stack parameters a family's services contribute. Log group
+ * ARNs are normalized the way the CloudFormation URLs send them, so an optional `:*` suffix does
+ * not count as a change.
+ */
 const toEcfConfigSnapshot = (configs: EcfServiceConfig[]): EcfConfigSnapshot =>
   configs
     .map(({ serviceId, bucketArns, logGroupArns }) => ({
       serviceId,
       bucketArns: [...bucketArns].sort(),
-      logGroupArns: [...logGroupArns].sort(),
+      logGroupArns: logGroupArns.map(normaliseLogGroupArn).sort(),
     }))
     .sort((a, b) => a.serviceId.localeCompare(b.serviceId));
 

@@ -475,7 +475,17 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         // still holds the old MI service list. Without this, reopening the deployment URL
         // restores the wrong service selection.
         services: selectedServiceIds,
-        ...(!ecfStacksUnchanged ? { ecfStacks } : {}),
+        // serviceVars travel with ecfStacks so the settings baseline restored on resume matches
+        // the snapshot just written; create writes them itself, update otherwise would not.
+        ...(!ecfStacksUnchanged
+          ? {
+              ecfStacks,
+              serviceVars: toSOServiceVars(serviceVars, awsServicesMap ?? new Map()) as Record<
+                string,
+                Record<string, unknown>
+              >,
+            }
+          : {}),
       });
       setIsSavingSO(false);
       if (!writeSucceeded) {
@@ -518,7 +528,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     advanceStaleSnapshots();
     onContinue();
     if (!ecfStacksUnchanged && detectAndReviewStep.onboardingDeploymentId) {
-      await updateDeployment(detectAndReviewStep.onboardingDeploymentId, { ecfStacks });
+      await updateDeployment(detectAndReviewStep.onboardingDeploymentId, {
+        ecfStacks,
+        serviceVars: toSOServiceVars(serviceVars, awsServicesMap ?? new Map()) as Record<
+          string,
+          Record<string, unknown>
+        >,
+      });
       updateDetectAndReviewStep({ ecfStacks });
     }
     // A previously-failed service that was deselected from Step 1 never acquired a policy ID,
@@ -545,6 +561,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   }, [
     ecfStacks,
     ecfStacksUnchanged,
+    serviceVars,
+    awsServicesMap,
     detectAndReviewStep.onboardingDeploymentId,
     deployGroups,
     failedInstances,

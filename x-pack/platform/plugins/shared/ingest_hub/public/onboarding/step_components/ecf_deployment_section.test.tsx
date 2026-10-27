@@ -27,6 +27,7 @@ jest.mock('../ecf_cloudformation', () => ({
   buildEcfTemplateUrl: jest.fn(
     (_file: string, version: string) => `https://s3.amazonaws.com/ecf/${version}/template.yaml`
   ),
+  normaliseLogGroupArn: (arn: string) => (arn.endsWith(':*') ? arn : `${arn}:*`),
   isEcfStackArnValid: jest.fn((arn: string) =>
     /^arn:aws(?:-us-gov|-cn)?:cloudformation:[a-z0-9-]+:\d+:stack\//.test(arn.trim())
   ),
@@ -1124,6 +1125,17 @@ describe('useEcfDeployment staleness', () => {
         launchedFamilies: ['unified'],
         launchedServiceIds: { unified: ['cloudtrail'] },
         launchedConfigs: snapshot([arnA, arnB]),
+      });
+      const { result } = renderEcfHook();
+      expect(result.current.sectionProps.isStaleByFamily.unified).toBe(false);
+    });
+
+    it('is not stale when a log group ARN only gains or loses the optional :* suffix', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([cfg([], ['arn:aws:logs:us-east-1:1:log-group:a'])]);
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+        launchedConfigs: snapshot([], ['arn:aws:logs:us-east-1:1:log-group:a:*']),
       });
       const { result } = renderEcfHook();
       expect(result.current.sectionProps.isStaleByFamily.unified).toBe(false);
