@@ -6,7 +6,7 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { pickBy } from 'lodash';
+import { mapValues, pickBy } from 'lodash';
 import type { StatsWindow } from '../../../services/unit_stats_client/types';
 import type { ComponentRecord, StatsComponentState, StatsWindows, StatsWindowState } from './types';
 
@@ -101,6 +101,17 @@ const pruneUnusedKind = <TStats>(record: ComponentRecord<TStats>): ComponentReco
 const isWindowEmpty = ({ destination, processor }: StatsWindowState): boolean =>
   Object.keys(destination).length === 0 && Object.keys(processor).length === 0;
 
+/** Removes every component that has nothing to keep, then every window left with nothing. */
+export const pruneUnusedWindows = (windows: StatsWindows): StatsWindows =>
+  pickBy(
+    mapValues(windows, (windowState) => ({
+      ...windowState,
+      destination: pruneUnusedKind(windowState.destination),
+      processor: pruneUnusedKind(windowState.processor),
+    })),
+    (windowState) => !isWindowEmpty(windowState)
+  );
+
 /**
  * Removes the interest of one registrant. A value that was fetched stays cached, so a node that
  * comes back shows it at once. A window left with nothing is removed.
@@ -115,16 +126,10 @@ export const unregisterComponent = (
   const windowState = windows[windowKey];
   if (!windowState) return windows;
 
-  const updated = withComponentRegistrants(windowState, ref, removeRegistrant(registrant));
-  const pruned: StatsWindowState = {
-    ...updated,
-    destination: pruneUnusedKind(updated.destination),
-    processor: pruneUnusedKind(updated.processor),
-  };
-
-  return isWindowEmpty(pruned)
-    ? pickBy(windows, (_windowState, key) => key !== windowKey)
-    : { ...windows, [windowKey]: pruned };
+  return pruneUnusedWindows({
+    ...windows,
+    [windowKey]: withComponentRegistrants(windowState, ref, removeRegistrant(registrant)),
+  });
 };
 
 /** Whether any consumer still shows this component in this window. */
