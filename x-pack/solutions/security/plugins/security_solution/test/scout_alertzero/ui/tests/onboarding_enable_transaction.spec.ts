@@ -167,12 +167,17 @@ spaceTest.describe(
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
+        // The account is cluster-scoped and survives space deletion, so its
+        // cleanup must run even when a step below fails — hence the chained
+        // finally, not a trailing call on the success path only.
+        let accountCleanup: (() => Promise<void>) | undefined;
         try {
           // Seed one enabled worker via the same API shape the UI's save uses.
           const workerId = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
           const workers = await listWorkers(space.api, space.spaceId);
           const target = workers.find((w) => w.id === workerId) ?? workers[0];
           const account = await createWorkerServiceAccount(space.api, target.id);
+          accountCleanup = account.cleanup;
           ok(
             await patchWorker(space.api, space.spaceId, target.id, {
               enabled: true,
@@ -209,8 +214,8 @@ spaceTest.describe(
           const after = await listWorkers(space.api, space.spaceId);
           const disabled = after.find((w) => w.id === target.id);
           expect(disabled?.enabled).toBe(false);
-          await account.cleanup();
         } finally {
+          await accountCleanup?.().catch(() => undefined);
           await space.cleanup();
         }
       }

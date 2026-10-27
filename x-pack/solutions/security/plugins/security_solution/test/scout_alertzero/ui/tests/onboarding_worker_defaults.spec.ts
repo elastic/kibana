@@ -20,8 +20,10 @@ import {
  * Toggle state is client-only (`useWorkerSelection` initializes every catalog
  * worker on and never syncs from the server), so leaving the page without
  * clicking "Enable and run" must persist nothing. The minimum-one guard
- * (`toggleWorker` early-returns at `enabledCount <= 1`) keeps the last toggle
- * on even against `force` clicks.
+ * (`toggleWorker` early-returns at `enabledCount <= 1`) is client-only too and
+ * is covered by the Jest/RTL tests (`use_worker_selection.test.ts`,
+ * `onboarding_page.test.tsx` "disables a toggle when it is the last enabled
+ * worker") rather than a browser test.
  */
 spaceTest.describe(
   'AlertZero onboarding - worker defaults and no-save',
@@ -101,41 +103,6 @@ spaceTest.describe(
           const serverWorkers = await listWorkers(space.api, space.spaceId);
           expect(serverWorkers.filter((w) => w.enabled)).toStrictEqual([]);
           void second;
-        } finally {
-          await space.cleanup();
-        }
-      }
-    );
-
-    spaceTest(
-      'the minimum-one guard keeps the last worker selected',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices }) => {
-        const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
-          withStubModel: true,
-        });
-        try {
-          const workers = await listWorkers(space.api, space.spaceId);
-          await browserAuth.loginAsAdmin();
-          await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
-          await advanceToWorkers(page);
-
-          // Turn all but one off.
-          for (const worker of workers.slice(1)) {
-            await page.testSubj.locator(`alertZeroOnboardingWorkerToggle-${worker.id}`).click();
-            await expect(
-              page.testSubj.locator(`alertZeroOnboardingWorkerToggle-${worker.id}`)
-            ).not.toBeChecked();
-          }
-          const last = workers[0];
-          const lastToggle = page.testSubj.locator(`alertZeroOnboardingWorkerToggle-${last.id}`);
-
-          // The toggle is disabled, and even a forced click cannot clear it.
-          await expect(lastToggle).toBeDisabled();
-          await lastToggle.click({ force: true });
-          await expect(lastToggle).toBeChecked();
-          await expect(page.testSubj.locator('alertZeroOnboardingSelectedCount')).toHaveText(
-            `1 of ${workers.length} Workers selected`
-          );
         } finally {
           await space.cleanup();
         }

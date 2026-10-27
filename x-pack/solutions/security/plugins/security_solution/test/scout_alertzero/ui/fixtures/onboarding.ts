@@ -8,6 +8,7 @@
 import type { ApiClientFixture, EsClient } from '@kbn/scout-security';
 import type { KbnClient } from '@kbn/kbn-client';
 import {
+  buildServiceAccountUrl,
   createApi,
   createApiFromKbnClient,
   listWorkers,
@@ -70,6 +71,9 @@ export const createOnboardingSpace = async (
         }
       };
       await step('disable workers', () => resetOnboardingState(api, spaceId));
+      await step('delete worker service accounts', () =>
+        deleteWorkerServiceAccounts(api, spaceId)
+      );
       if (stub) await step('stub model cleanup', stub.cleanup);
       await step(`delete space ${spaceId}`, () => spaces.delete(spaceId));
       if (failures.length > 0) {
@@ -110,6 +114,9 @@ export const createUiOnboardingSpace = async (
         }
       };
       await step('disable workers', () => resetOnboardingState(api, spaceId));
+      await step('delete worker service accounts', () =>
+        deleteWorkerServiceAccounts(api, spaceId)
+      );
       if (stub) await step('stub model cleanup', stub.cleanup);
       await step(`delete space ${spaceId}`, () => spaces.delete(spaceId));
       if (failures.length > 0) {
@@ -121,21 +128,68 @@ export const createUiOnboardingSpace = async (
 
 /**
  * Drives the space back to "onboarding shown": every enabled worker disabled.
- * 404-tolerant — reset runs against partial states by design.
+ * Reset runs against partial states by design, so an already-gone worker (404)
+ * is tolerated — but every other failure surfaces: the API adapters resolve
+ * non-2xx as values, so a swallowed list/PATCH failure would otherwise let
+ * cleanup report a successful reset that disabled nothing (e.g. leaving
+ * deployment-scoped Hunt supply workflows enabled).
  */
 export const resetOnboardingState = async (api: AlertZeroApi, spaceId: string): Promise<void> => {
-  const workers = await listWorkers(api, spaceId).catch(() => [] as WorkerInfoLike[]);
+  const workers = await listWorkers(api, spaceId);
+  const failures: string[] = [];
   for (const worker of workers) {
     if (worker.enabled) {
-      await patchWorker(api, spaceId, worker.id, { enabled: false }).catch(() => undefined);
+      const result = await patchWorker(api, spaceId, worker.id, { enabled: false });
+      if (result.statusCode !== 200 && result.statusCode !== 404) {
+        failures.push(
+          `disable ${worker.id}: ${result.statusCode} ${JSON.stringify(result.body)}`
+        );
+      }
     }
+  }
+  if (failures.length > 0) {
+    throw new Error(`Reset of ${spaceId} failed:\n${failures.join('\n')}`);
   }
 };
 
-interface WorkerInfoLike {
-  id: string;
-  enabled: boolean;
-}
+
+/**
+ * Deletes the service accounts referenced by this space's workers. Service
+ * accounts and their credentials are cluster-scoped and survive space deletion,
+ * so without this step every enable (whether driven by the onboarding UI or the
+ * API fixtures) leaks a uniquely named global account. The space is throwaway,
+ * so any account a worker references here was created by this run — deleting by
+ * the referenced IDs can never touch a pre-existing account.
+ */
+const deleteWorkerServiceAccounts = async (
+  api: AlertZeroApi,
+  spaceId: string
+): Promise<void> => {
+  const workers = await listWorkers(api, spaceId);
+  const accountIds = [
+    ...new Set(
+      workers
+        .map((worker) => worker.settings?.serviceAccountId)
+        .filter((id): id is string => Boolean(id))
+    ),
+  ];
+  const failures: string[] = [];
+  for (const accountId of accountIds) {
+    const deleted = await api.internal(
+      'DELETE',
+      `${buildServiceAccountUrl(accountId)}?force=true`
+    );
+    // 404 = another run (or the spec's own account cleanup) already removed it.
+    if (deleted.statusCode !== 200 && deleted.statusCode !== 204 && deleted.statusCode !== 404) {
+      failures.push(
+        `delete service account ${accountId}: ${deleted.statusCode} ${JSON.stringify(deleted.body)}`
+      );
+    }
+  }
+  if (failures.length > 0) {
+    throw new Error(`Service account cleanup failed:\n${failures.join('\n')}`);
+  }
+};
 
 /** Backing index and alias of the shared proposals store (`@kbn/proposals-common`). */
 const PROPOSALS_INDEX = '.kibana-proposals';

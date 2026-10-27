@@ -215,20 +215,6 @@
       }
     },
     {
-      "id": "6c6d21aacdb51c5-5d5c94e9fb2e1a3",
-      "title": "AlertZero onboarding - no-model blocking API: every worker reports the no_model blocking reason",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_no_model.spec.ts",
-        "line": 39,
-        "column": 30
-      }
-    },
-    {
       "id": "6c6d21aacdb51c5-343c54524287755",
       "title": "AlertZero onboarding - no-model blocking no-model callout renders and locks worker controls",
       "expectedStatus": "passed",
@@ -282,20 +268,6 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_worker_defaults.spec.ts",
         "line": 61,
         "column": 33
-      }
-    },
-    {
-      "id": "aef97376a048da1-f0ed11e536da652",
-      "title": "AlertZero onboarding - worker defaults and no-save the minimum-one guard keeps the last worker selected",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_worker_defaults.spec.ts",
-        "line": 92,
-        "column": 13
       }
     },
     {

@@ -63,29 +63,34 @@ apiTest.describe(
           }
 
           // Dirty: enable two workers with throwaway accounts (the UI flow's API shape).
+          // The accounts are cluster-scoped and survive space deletion, so their cleanup
+          // runs from a finally even when a step below fails — not off the success path.
           const targets = workers.slice(0, 2);
           const accounts: Array<() => Promise<void>> = [];
-          for (const worker of targets) {
-            const account = await createWorkerServiceAccount(space.api, worker.id);
-            accounts.push(account.cleanup);
-            ok(
-              await patchWorker(space.api, space.spaceId, worker.id, {
-                enabled: true,
-                settingsRevision: worker.settingsRevision ?? null,
-                settings: { serviceAccountId: account.id },
-              }),
-              `enable ${worker.id}`
-            );
+          try {
+            for (const worker of targets) {
+              const account = await createWorkerServiceAccount(space.api, worker.id);
+              accounts.push(account.cleanup);
+              ok(
+                await patchWorker(space.api, space.spaceId, worker.id, {
+                  enabled: true,
+                  settingsRevision: worker.settingsRevision ?? null,
+                  settings: { serviceAccountId: account.id },
+                }),
+                `enable ${worker.id}`
+              );
+            }
+            let after = await listWorkers(space.api, space.spaceId);
+            expect(after.filter((w) => w.enabled).length).toBeGreaterThanOrEqual(2);
+
+            // Reset.
+            await resetOnboardingState(space.api, space.spaceId);
+
+            after = await listWorkers(space.api, space.spaceId);
+            expect(after.filter((w) => w.enabled)).toStrictEqual([]);
+          } finally {
+            for (const cleanupAccount of accounts) await cleanupAccount().catch(() => undefined);
           }
-          let after = await listWorkers(space.api, space.spaceId);
-          expect(after.filter((w) => w.enabled).length).toBeGreaterThanOrEqual(2);
-
-          // Reset.
-          await resetOnboardingState(space.api, space.spaceId);
-
-          after = await listWorkers(space.api, space.spaceId);
-          expect(after.filter((w) => w.enabled)).toStrictEqual([]);
-          for (const cleanupAccount of accounts) await cleanupAccount();
         } finally {
           await space.cleanup();
         }

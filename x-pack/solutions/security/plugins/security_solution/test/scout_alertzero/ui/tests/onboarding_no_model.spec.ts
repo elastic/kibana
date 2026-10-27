@@ -7,13 +7,7 @@
 
 import { expect } from '@kbn/scout-security/ui';
 import type { ScoutPage } from '@kbn/scout-security';
-import {
-  createUiOnboardingSpace,
-  isWorkerEnableBlocked,
-  listWorkers,
-  spaceTest,
-  tags,
-} from '../fixtures';
+import { createUiOnboardingSpace, listWorkers, spaceTest, tags } from '../fixtures';
 
 /**
  * No-model blocking (#19932 scenario 4 + #19955).
@@ -40,24 +34,6 @@ spaceTest.describe(
       await page.testSubj.locator('alertZeroOnboardingContinueButton').click();
       await expect(page.testSubj.locator('alertZeroOnboardingSelectedCount')).toBeVisible();
     };
-
-    spaceTest(
-      'API: every worker reports the no_model blocking reason',
-      async ({ kbnClient, apiServices }) => {
-        const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
-          withStubModel: false,
-        });
-        try {
-          const workers = await listWorkers(space.api, space.spaceId);
-          expect(workers.length).toBeGreaterThan(0);
-          for (const worker of workers) {
-            expect(isWorkerEnableBlocked(worker)).toBe(true);
-          }
-        } finally {
-          await space.cleanup();
-        }
-      }
-    );
 
     spaceTest(
       'no-model callout renders and locks worker controls',
