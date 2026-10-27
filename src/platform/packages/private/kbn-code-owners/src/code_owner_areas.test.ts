@@ -66,7 +66,6 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/obs-docs',
     'elastic/obs-exploration-team',
     'elastic/obs-knowledge-team',
-    'elastic/obs-onboarding-team',
     'elastic/obs-signals-traces-team',
     'elastic/observability-bi',
     'elastic/observability-design',
