@@ -394,8 +394,9 @@ steps:
 
         Write the rationale as a markdown list, in ASD-STE100 Simplified Technical
         English: one item for each search or finding, and a last item with the
-        conclusion. Also write the conclusion alone as one sentence in
-        rationale_summary.
+        conclusion. Also write rationale_summary: one or two sentences that say why
+        this rule is the right fix for this gap, naming the behavior both share.
+        With no_coverage, say instead why no rule detects the gap.
       schema:
         type: object
         properties:
@@ -426,8 +427,9 @@ steps:
           rationale_summary:
             type: string
             description: >-
-              The conclusion of the rationale as one sentence of 25 words or less:
-              which rule covers the gap, or why no rule matches.
+              One or two sentences, 50 words or less in total: why this rule is the
+              right fix for this gap, naming the behavior the rule detects and the
+              gap reports. With no_coverage, why no rule detects the gap.
           technique_matches:
             type: boolean
             description: >-
@@ -691,7 +693,6 @@ steps:
                   term: 'security-rule.rule_id: "{{ steps.coverage_check.output.structured_output.rule_id }}"'
                 fields:
                   - description
-                  - query
                   - language
                   - severity
                   - risk_score
@@ -714,13 +715,10 @@ steps:
                   {{ steps.compose_evidence.output.summary_line }}
                   {% if steps.fetch_prebuilt_rule.output.rules[0].severity != blank %}**Severity:** {{ steps.fetch_prebuilt_rule.output.rules[0].severity }}. **Risk score:** {{ steps.fetch_prebuilt_rule.output.rules[0].risk_score }}.
                   {% endif %}
+                  {% if steps.fetch_prebuilt_rule.output.rules[0].language != blank %}**Language:** {{ steps.fetch_prebuilt_rule.output.rules[0].language }}
+                  {% endif %}
                   {% if steps.fetch_prebuilt_rule.output.rules[0].description != blank %}
                   {{ steps.fetch_prebuilt_rule.output.rules[0].description }}
-                  {% endif %}
-                  {% if steps.fetch_prebuilt_rule.output.rules[0].query != blank %}
-                  ~~~{{ steps.fetch_prebuilt_rule.output.rules[0].language }}
-                  {{ steps.fetch_prebuilt_rule.output.rules[0].query }}
-                  ~~~
                   {% endif %}
                   {{ steps.compose_evidence.output.gap_block }}
 

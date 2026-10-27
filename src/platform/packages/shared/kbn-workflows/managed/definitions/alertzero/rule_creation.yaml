@@ -282,20 +282,22 @@ steps:
 
           **Rule:** {{ steps.draft_creation.output.structured_output.rule.name }}
           **Recommended action:** Create the rule in the disabled state
+          {% if inputs.review_context != blank %}{{ inputs.review_context }}
+          {% else %}**Detection gap**
+          {% if inputs.technique != null and inputs.technique != '' %}ATT&CK technique: {{ inputs.technique }}
+          {% endif %}{{ inputs.gap_description }}
+          {% endif %}
+          **Proposed rule**
+          **Severity:** {{ steps.draft_creation.output.structured_output.rule.severity }}. **Risk score:** {{ steps.draft_creation.output.structured_output.rule.risk_score }}.
           {{ steps.draft_creation.output.structured_output.rule.description }}
 
           ```esql
           {{ steps.draft_creation.output.structured_output.rule.query }}
           ```
 
-          {% if inputs.review_context != blank %}{{ inputs.review_context }}
-          {% else %}**Detection gap**
-          {% if inputs.technique != null and inputs.technique != '' %}ATT&CK technique: {{ inputs.technique }}
-          {% endif %}{{ inputs.gap_description }}
-          {% endif %}
-          **Preview:** {% if steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs{% else %}inconclusive{% endif %}{% if steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
-          Preview errors: {{ steps.preview_creation.output.error_text }}{% endif %}
-          **Severity:** {{ steps.draft_creation.output.structured_output.rule.severity }}. **Risk score:** {{ steps.draft_creation.output.structured_output.rule.risk_score }}.
+          **Backtest**
+          {% if steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs.{% else %}Inconclusive.{% endif %}{% if steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
+          Backtest errors: {{ steps.preview_creation.output.error_text }}{% endif %}
 
           **On approval**
           If you approve, the agent creates the rule in the disabled state under your identity. Review the rule and enable it on the rules page. If you dismiss, the agent discards the draft.
