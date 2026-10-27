@@ -15,17 +15,11 @@ import { i18n } from '@kbn/i18n';
 import { WorkflowExecutionsPageContent } from './workflow_executions_page_content';
 import { useTelemetry } from '../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
+import { WORKFLOWS_EXPERIMENTAL_BADGE_LABEL } from '../../shared/translations/experimental_badge_label';
 
 const executionsPageTitle = i18n.translate('workflows.executionsPage.pageTitle', {
   defaultMessage: 'Executions',
 });
-
-const executionsPageExperimentalBadgeLabel = i18n.translate(
-  'workflows.executionsPage.experimentalBadge',
-  {
-    defaultMessage: 'EXPERIMENTAL',
-  }
-);
 
 export function WorkflowExecutionsPage() {
   const { euiTheme } = useEuiTheme();
@@ -36,7 +30,7 @@ export function WorkflowExecutionsPage() {
   const headerBadges = useMemo<AppHeaderBadge[]>(
     () => [
       {
-        label: executionsPageExperimentalBadgeLabel,
+        label: WORKFLOWS_EXPERIMENTAL_BADGE_LABEL,
         color: 'hollow',
         'data-test-subj': 'workflowExecutionsExperimentalBadge',
       },
