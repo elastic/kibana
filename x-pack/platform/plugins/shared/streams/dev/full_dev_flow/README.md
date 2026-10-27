@@ -72,8 +72,9 @@ Docker Desktop must be running. Collector pods reach ES via `host.docker.interna
 
 - Give Docker Desktop at least 16 GB of memory (Settings -> Resources). At 8 GB
   the kind API server stops responding and ES can be killed mid-write.
-- Turn off Docker Desktop's own Kubernetes (Settings -> Kubernetes). When it is
-  on, every Docker restart switches the current kube context to `docker-desktop`.
+- Always pass `--context kind-streams` to `tilt up` and `tilt down`. If Docker
+  Desktop's own Kubernetes is on, every Docker restart switches the current kube
+  context to `docker-desktop`.
 - Use a recent kind. Old kind releases create a Kubernetes version that
   cert-manager rejects (see Troubleshooting).
 
@@ -267,7 +268,7 @@ reset.
 # Ctrl-C the ES and Kibana terminals
 # Ctrl-C both Tilt UIs, then:
 cd /path/to/streams-config-distributor && tilt down --context kind-streams
-cd /path/to/streams-controller && tilt down
+cd /path/to/streams-controller && tilt down --context kind-streams
 make kind-delete    # from either repo
 ```
 
