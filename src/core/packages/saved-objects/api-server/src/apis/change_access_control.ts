@@ -46,4 +46,6 @@ export interface SavedObjectsChangeAccessControlResponseObject {
   id: string;
   type: string;
   error?: SavedObjectError;
+  /** The updated version of the object. Only set when the change succeeded. */
+  version?: string;
 }
