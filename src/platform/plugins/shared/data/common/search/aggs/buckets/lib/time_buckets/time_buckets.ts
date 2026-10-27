@@ -75,8 +75,9 @@ function toPickerInterval(
   let expression = fromDuration.expression;
   if (originalInterval) {
     try {
-      parseEsInterval(originalInterval);
-      expression = originalInterval;
+      const parsed = parseEsInterval(originalInterval);
+      // parseEsInterval allows '1 h' and ' 20m '; the picker requires a compact expression.
+      expression = `${parsed.value}${parsed.unit}`;
     } catch {
       // setInterval accepts unit-only strings such as 'ms'; the picker needs a numeric ES expression.
     }
@@ -314,7 +315,12 @@ export class TimeBuckets {
     };
 
     if (!isDurationInterval(this._i)) {
-      if (!this.hasBounds() || this._lb == null || this._ub == null) {
+      if (
+        !this.hasBounds() ||
+        this._lb == null ||
+        this._ub == null ||
+        this._lb.valueOf() >= this._ub.valueOf()
+      ) {
         return decorateInterval(moment.duration(0));
       }
       const picked = pickDateRounding(
@@ -326,7 +332,13 @@ export class TimeBuckets {
       return decoratePicked(picked);
     }
 
-    if (useNormalizedEsInterval && this.hasBounds() && this._lb != null && this._ub != null) {
+    if (
+      useNormalizedEsInterval &&
+      this.hasBounds() &&
+      this._lb != null &&
+      this._ub != null &&
+      this._lb.valueOf() < this._ub.valueOf()
+    ) {
       const range = toZonedRange(this._lb, this._ub, this._timeBucketConfig['dateFormat:tz']);
       const maxBars = this._timeBucketConfig['histogram:maxBars'];
       const manual = toPickerInterval(this._i, this._originalInterval);

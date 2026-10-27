@@ -87,6 +87,27 @@ describe('TimeBuckets', () => {
     expect(interval.expression).toEqual('1w');
   });
 
+  test('setInterval/getInterval - spaced interval strings still fit-check with bounds', () => {
+    const timeBuckets = new TimeBuckets({
+      ...timeBucketConfig,
+      'histogram:maxBars': 1000,
+    });
+    timeBuckets.setBounds({
+      min: moment.utc('2024-01-01T00:00:00.000Z'),
+      max: moment.utc('2024-01-01T03:00:00.000Z'),
+    });
+    timeBuckets.setInterval('1 h');
+
+    const spacedHour = timeBuckets.getInterval();
+    expect(spacedHour.expression).toEqual('1h');
+    expect(spacedHour.scaled).toBeFalsy();
+
+    timeBuckets.setInterval(' 20m ');
+    const spacedMinutes = timeBuckets.getInterval();
+    expect(spacedMinutes.expression).toEqual('20m');
+    expect(spacedMinutes.scaled).toBeFalsy();
+  });
+
   test('setInterval/getInterval - intreval is a string and bounds is defined', () => {
     const timeBuckets = new TimeBuckets(timeBucketConfig);
     const bounds = {
@@ -123,6 +144,22 @@ describe('TimeBuckets', () => {
     expect(interval.esValue).toEqual(0);
     expect(interval.esUnit).toEqual('ms');
     expect(interval.expression).toEqual('0ms');
+  });
+
+  test('setInterval/getInterval - auto with equal bounds is 0ms, not a picker throw', () => {
+    const timeBuckets = new TimeBuckets(timeBucketConfig);
+    const instant = moment.utc('2024-01-01T00:00:00.000Z');
+    timeBuckets.setBounds({ min: instant, max: instant.clone() });
+    timeBuckets.setInterval(autoInterval);
+
+    const interval = timeBuckets.getInterval();
+
+    expect(interval.expression).toEqual('0ms');
+    expect(interval.esValue).toEqual(0);
+    expect(interval.esUnit).toEqual('ms');
+
+    timeBuckets.setInterval('20m');
+    expect(timeBuckets.getInterval().expression).toEqual('20m');
   });
 
   test('setInterval/getInterval - interval is a "auto" (useNormalizedEsInterval is false)', () => {
