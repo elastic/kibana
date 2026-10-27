@@ -307,7 +307,6 @@ export class AgenticInvestigationsPlugin
             spaceId: this.getSpaceId(request),
             logger: this.logger,
           }),
-        resolveUser: (request) => this.requireUserResolver()(request),
         getLinkActor: (request) =>
           resolveLinkActor({
             request,
