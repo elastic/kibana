@@ -460,6 +460,17 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       }
     }
 
+    // ES|QL ranges (e.g. "500.0..550.0") can't be sorted by the chart, which only knows numeric
+    // and alphabetical sorting, so rows are sorted by the range lower bound and kept in data order.
+    // Largest range on top (desc) by default, like a numeric y-axis.
+    const isRangeY = yAxisColumn?.meta.type === 'number_range';
+    if (isRangeY) {
+      const direction = args.gridConfig.ySortPredicate === 'asc' ? 1 : -1;
+      const lowerBound = (row: (typeof chartData)[number]) =>
+        parseFloat(String(row[yAxisColumn.id]));
+      chartData = chartData.toSorted((a, b) => direction * (lowerBound(a) - lowerBound(b)));
+    }
+
     const xScaleType = isTimeBasedX ? ScaleType.Time : args.gridConfig.xScaleType;
 
     const { scale: xScale, intervalMs: xIntervalMs } = computeXScale(
@@ -1011,7 +1022,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                   : undefined
               }
               ySortPredicate={
-                yAxisColumn && getSortPredicate(yAxisColumn, args.gridConfig.ySortPredicate)
+                yAxisColumn &&
+                (isRangeY
+                  ? 'dataIndex'
+                  : getSortPredicate(yAxisColumn, args.gridConfig.ySortPredicate))
               }
               xAxisLabelName={xAxisColumn?.name || ''}
               yAxisLabelName={yAxisColumn?.name || ''}
