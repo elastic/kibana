@@ -69,6 +69,21 @@ const scheduleOptionsToStoreApiKeyOptions = (
 const VERSION_CONFLICT_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
 const BULK_ACTION_SIZE = 100;
+
+// A conflict means another writer already updated the task and a missing task was removed in the
+// meantime (a one-off task is deleted when its run completes); neither is an error for an
+// idempotent "make sure this exists" call. The caller's next interaction with the task (for example
+// `runSoon`) surfaces a removed task as not found.
+const throwUnlessConflictOrMissing = (result: BulkUpdateTaskResult, action: string): void => {
+  const [firstError] = result.errors;
+  if (
+    firstError &&
+    firstError.error.statusCode !== VERSION_CONFLICT_STATUS &&
+    firstError.error.statusCode !== NOT_FOUND_STATUS
+  ) {
+    throw new Error(`Tried to ${action} but failed with error: ${firstError.error.message}`);
+  }
+};
 export interface TaskSchedulingOpts {
   logger: Logger;
   taskStore: TaskStore;
@@ -460,6 +475,11 @@ export class TaskScheduling {
   /**
    * Schedules a task with an Id
    *
+   * When the task already exists its credential is left as stored, unless `options.regenerateApiKey`
+   * is true: then the key of an idle task is replaced with one granted (or cloned) from
+   * `options.request`, so the next claim runs as the current caller. Schedule and `runAt` are not
+   * changed by that replacement. A claimed task keeps its key; call again once it is idle.
+   *
    * @param task - The task being scheduled.
    * @returns {Promise<TaskInstanceWithId>}
    */
@@ -493,26 +513,51 @@ export class TaskScheduling {
   ): Promise<TaskInstanceWithId> {
     await this.ensureExistingCredentialMatchesRunAs(taskInstance);
 
+    const regenerateApiKey = options?.regenerateApiKey === true;
+
     // check if task specifies a schedule interval
     // if so,try to update the just the schedule
     // only works for interval schedule
     if (taskInstance.schedule && taskInstance.schedule.interval) {
+      // Also regenerates the API key of an idle task when `options.regenerateApiKey` is set.
       const result = await this.bulkUpdateSchedules(
         [taskInstance.id],
         taskInstance.schedule,
         options
       );
-      if (
-        result.errors.length &&
-        result.errors[0].error.statusCode !== VERSION_CONFLICT_STATUS &&
-        result.errors[0].error.statusCode !== NOT_FOUND_STATUS
-      ) {
-        throw new Error(
-          `Tried to update schedule for existing task "${taskInstance.id}" but failed with error: ${result.errors[0].error.message}`
-        );
-      }
+      throwUnlessConflictOrMissing(
+        result,
+        `update schedule for existing task "${taskInstance.id}"`
+      );
+    } else if (regenerateApiKey) {
+      const result = await this.regenerateApiKeyOfExistingTask(taskInstance.id, options);
+      throwUnlessConflictOrMissing(
+        result,
+        `regenerate API key of existing task "${taskInstance.id}"`
+      );
     }
     return taskInstance;
+  }
+
+  /**
+   * Replaces the stored API key of an idle one-off task, leaving every other attribute as stored.
+   * The store queues the previous key for invalidation. A claimed task is skipped: a one-off task
+   * is deleted once its run completes, so a new key would be thrown away with it. Version conflicts
+   * are retried by `retryableBulkUpdate`.
+   */
+  private async regenerateApiKeyOfExistingTask(
+    taskId: string,
+    options?: ScheduleOptions
+  ): Promise<BulkUpdateTaskResult> {
+    return retryableBulkUpdate({
+      taskIds: [taskId],
+      store: this.store,
+      getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
+      filter: (task) => task.status === TaskStatus.Idle,
+      map: (task) => task,
+      validate: false,
+      options: scheduleOptionsToStoreApiKeyOptions(options),
+    });
   }
 
   // A task's identity is only set when it is created, so a different `runAs` can't be applied to an

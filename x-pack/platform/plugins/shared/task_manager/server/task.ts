@@ -813,6 +813,12 @@ export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTa
 
 export interface ApiKeyOptions {
   request?: KibanaRequest;
+  /**
+   * When true with a request, replace the API key of tasks that already exist with one granted (or
+   * cloned, see `cloneApiKey`) from this request, and queue the previous key for invalidation.
+   * Honored by `bulkUpdateSchedules` and by `ensureScheduled` when the task is already scheduled;
+   * `ensureScheduled` only replaces the key of an idle task.
+   */
   regenerateApiKey?: boolean;
   /**
    * When true with a request that includes an API key, clone the caller's credentials into a

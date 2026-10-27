@@ -381,6 +381,195 @@ describe('TaskScheduling', () => {
     expect(mockTaskStore.schedule).toHaveBeenCalled();
   });
 
+  describe('ensureScheduled with regenerateApiKey', () => {
+    const oneOffTask = (overrides = {}) =>
+      getTask({ id: 'resume-task', schedule: undefined, ...overrides });
+    const mockRequest = httpServerMock.createKibanaRequest();
+    const options = { request: mockRequest, cloneApiKey: true, regenerateApiKey: true };
+
+    test('replaces the key of an existing one-off task without touching its other attributes', async () => {
+      const existing = oneOffTask();
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      mockTaskStore.taskExists.mockResolvedValue(true);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(existing)]);
+      mockTaskStore.bulkUpdate.mockResolvedValue([asOk(existing)]);
+
+      const result = await taskScheduling.ensureScheduled(
+        { id: existing.id, taskType: 'foo', params: {}, state: {} },
+        options
+      );
+
+      expect(result.id).toEqual(existing.id);
+      expect(mockTaskStore.schedule).not.toHaveBeenCalled();
+      expect(mockTaskStore.bulkUpdate).toHaveBeenCalledTimes(1);
+      // The task doc is written back as read; only the store's key regeneration changes it.
+      expect(mockTaskStore.bulkUpdate).toHaveBeenCalledWith([existing], {
+        validate: false,
+        mergeAttributes: undefined,
+        options: { request: mockRequest, cloneApiKey: true, regenerateApiKey: true },
+      });
+    });
+
+    test('does not write an existing one-off task when regenerateApiKey is not set', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      mockTaskStore.taskExists.mockResolvedValue(true);
+
+      await taskScheduling.ensureScheduled(
+        { id: 'resume-task', taskType: 'foo', params: {}, state: {} },
+        { request: mockRequest, cloneApiKey: true }
+      );
+
+      expect(mockTaskStore.bulkGet).not.toHaveBeenCalled();
+      expect(mockTaskStore.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    test.each([TaskStatus.Claiming, TaskStatus.Running, TaskStatus.Failed])(
+      'leaves a task in status %s alone',
+      async (status) => {
+        const existing = oneOffTask({ status });
+        const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+        mockTaskStore.taskExists.mockResolvedValue(true);
+        mockTaskStore.bulkGet.mockResolvedValue([asOk(existing)]);
+        mockTaskStore.bulkUpdate.mockResolvedValue([]);
+
+        await taskScheduling.ensureScheduled(
+          { id: existing.id, taskType: 'foo', params: {}, state: {} },
+          options
+        );
+
+        expect(mockTaskStore.bulkUpdate.mock.calls[0][0]).toEqual([]);
+      }
+    );
+
+    test('also replaces the key when the task is found through the version conflict on schedule', async () => {
+      const existing = oneOffTask();
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      // The task is created by another writer between the existence check and the write.
+      mockTaskStore.taskExists.mockResolvedValue(false);
+      mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(existing)]);
+      mockTaskStore.bulkUpdate.mockResolvedValue([asOk(existing)]);
+
+      await taskScheduling.ensureScheduled(
+        { id: existing.id, taskType: 'foo', params: {}, state: {} },
+        options
+      );
+
+      expect(mockTaskStore.bulkUpdate).toHaveBeenCalledWith([existing], {
+        validate: false,
+        mergeAttributes: undefined,
+        options: { request: mockRequest, cloneApiKey: true, regenerateApiKey: true },
+      });
+    });
+
+    test('retries the key replacement on a version conflict', async () => {
+      const existing = oneOffTask();
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      mockTaskStore.taskExists.mockResolvedValue(true);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(existing)]);
+      mockTaskStore.bulkUpdate
+        .mockResolvedValueOnce([
+          {
+            tag: 'err',
+            error: {
+              type: 'task',
+              id: existing.id,
+              error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
+            },
+          },
+        ])
+        .mockResolvedValueOnce([asOk(existing)]);
+
+      await expect(
+        taskScheduling.ensureScheduled(
+          { id: existing.id, taskType: 'foo', params: {}, state: {} },
+          options
+        )
+      ).resolves.toEqual(expect.objectContaining({ id: existing.id }));
+
+      expect(mockTaskStore.bulkUpdate).toHaveBeenCalledTimes(2);
+    });
+
+    test('tolerates the task being removed before the key replacement', async () => {
+      const existing = oneOffTask();
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      mockTaskStore.taskExists.mockResolvedValue(true);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(existing)]);
+      mockTaskStore.bulkUpdate.mockResolvedValue([
+        {
+          tag: 'err',
+          error: {
+            type: 'task',
+            id: existing.id,
+            error: { statusCode: 404, error: 'Not Found', message: 'gone' },
+          },
+        },
+      ]);
+
+      await expect(
+        taskScheduling.ensureScheduled(
+          { id: existing.id, taskType: 'foo', params: {}, state: {} },
+          options
+        )
+      ).resolves.toEqual(expect.objectContaining({ id: existing.id }));
+    });
+
+    test('throws when the key replacement fails for another reason', async () => {
+      const existing = oneOffTask();
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      mockTaskStore.taskExists.mockResolvedValue(true);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(existing)]);
+      mockTaskStore.bulkUpdate.mockResolvedValue([
+        {
+          tag: 'err',
+          error: {
+            type: 'task',
+            id: existing.id,
+            error: { statusCode: 500, error: 'Internal', message: 'key grant failed' },
+          },
+        },
+      ]);
+
+      await expect(
+        taskScheduling.ensureScheduled(
+          { id: existing.id, taskType: 'foo', params: {}, state: {} },
+          options
+        )
+      ).rejects.toThrow(
+        'Tried to regenerate API key of existing task "resume-task" but failed with error: key grant failed'
+      );
+    });
+
+    test('regenerates the key of an existing recurring task through the schedule update', async () => {
+      const existing = getTask();
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      mockTaskStore.taskExists.mockResolvedValue(true);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(existing)]);
+      mockTaskStore.bulkUpdate.mockResolvedValue([asOk(existing)]);
+
+      await taskScheduling.ensureScheduled(existing, options);
+
+      // The schedule is unchanged, so only the key changes and the task is written as read.
+      expect(mockTaskStore.bulkUpdate).toHaveBeenCalledWith([existing], {
+        validate: false,
+        mergeAttributes: false,
+        options: { request: mockRequest, cloneApiKey: true, regenerateApiKey: true },
+      });
+    });
+
+    test('does not regenerate the key of a claimed recurring task', async () => {
+      const existing = getTask({ status: TaskStatus.Running });
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      mockTaskStore.taskExists.mockResolvedValue(true);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(existing)]);
+      mockTaskStore.bulkUpdate.mockResolvedValue([]);
+
+      await taskScheduling.ensureScheduled(existing, options);
+
+      expect(mockTaskStore.bulkUpdate.mock.calls[0][0]).toEqual([]);
+    });
+  });
+
   test('does not try to update schedule for tasks that have already been scheduled if no schedule is provided', async () => {
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
     const bulkUpdateScheduleSpy = jest.spyOn(taskScheduling, 'bulkUpdateSchedules');
