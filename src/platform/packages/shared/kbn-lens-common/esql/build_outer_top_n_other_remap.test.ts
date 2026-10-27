@@ -9,12 +9,13 @@
 
 import {
   OTHER_BUCKET_ESQL_LITERAL,
+  buildOtherBucketLabelFragment,
   buildOtherBucketNamedFlagFragment,
   buildOuterTopNOtherRemap,
 } from './build_outer_top_n_other_remap';
 
 describe('buildOuterTopNOtherRemap', () => {
-  it('remaps non-top values to Other within the main query time range', () => {
+  it('keeps top-N values in a typed key within the main query time range', () => {
     expect(
       buildOuterTopNOtherRemap({
         source: 'kibana_sample_data_logs',
@@ -23,9 +24,10 @@ describe('buildOuterTopNOtherRemap', () => {
         scoreFragment: 'AVG(bytes)',
         sortClause: '`AVG(bytes)` DESC',
         size: 3,
+        keyAlias: 'key_host_keyword',
       })
     ).toBe(
-      'EVAL host.keyword = CASE(host.keyword IN (FROM kibana_sample_data_logs | WHERE timestamp >= ?_tstart AND timestamp <= ?_tend | WHERE host.keyword IS NOT NULL | STATS AVG(bytes) BY host.keyword | SORT `AVG(bytes)` DESC | LIMIT 3 | KEEP host.keyword), host.keyword, "Other"::KEYWORD)'
+      'EVAL key_host_keyword = CASE(host.keyword IN (FROM kibana_sample_data_logs | WHERE timestamp >= ?_tstart AND timestamp <= ?_tend | WHERE host.keyword IS NOT NULL | STATS AVG(bytes) BY host.keyword | SORT `AVG(bytes)` DESC | LIMIT 3 | KEEP host.keyword), host.keyword, NULL)'
     );
   });
 
@@ -37,24 +39,10 @@ describe('buildOuterTopNOtherRemap', () => {
         scoreFragment: 'COUNT(*)',
         sortClause: 'category.keyword ASC',
         size: 5,
+        keyAlias: 'key_category_keyword',
       })
     ).toBe(
-      'EVAL category.keyword = CASE(category.keyword IN (FROM ft_ecommerce | WHERE category.keyword IS NOT NULL | STATS COUNT(*) BY category.keyword | SORT category.keyword ASC | LIMIT 5 | KEEP category.keyword), category.keyword, "Other"::KEYWORD)'
-    );
-  });
-
-  it('casts kept values to keyword for non-string fields so CASE branches share a type', () => {
-    expect(
-      buildOuterTopNOtherRemap({
-        source: 'kibana_sample_data_logs',
-        groupExpr: 'clientip',
-        scoreFragment: 'COUNT(*)',
-        sortClause: 'clientip ASC',
-        size: 3,
-        castToString: true,
-      })
-    ).toBe(
-      'EVAL clientip = CASE(clientip IN (FROM kibana_sample_data_logs | WHERE clientip IS NOT NULL | STATS COUNT(*) BY clientip | SORT clientip ASC | LIMIT 3 | KEEP clientip), TO_STRING(clientip), "Other"::KEYWORD)'
+      'EVAL key_category_keyword = CASE(category.keyword IN (FROM ft_ecommerce | WHERE category.keyword IS NOT NULL | STATS COUNT(*) BY category.keyword | SORT category.keyword ASC | LIMIT 5 | KEEP category.keyword), category.keyword, NULL)'
     );
   });
 });
@@ -64,10 +52,16 @@ describe('buildOtherBucketNamedFlagFragment', () => {
     expect(
       buildOtherBucketNamedFlagFragment({
         flagAlias: 'named_host_keyword',
-        groupExpr: 'host.keyword',
+        keyAlias: 'key_host_keyword',
       })
-    ).toBe(
-      `named_host_keyword = CASE(host.keyword == ${OTHER_BUCKET_ESQL_LITERAL}, 0::LONG, 1::LONG)`
+    ).toBe('named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG)');
+  });
+});
+
+describe('buildOtherBucketLabelFragment', () => {
+  it('restores the field as keyword labels with Other for the null key', () => {
+    expect(buildOtherBucketLabelFragment({ groupExpr: 'clientip', keyAlias: 'key_clientip' })).toBe(
+      `clientip = COALESCE(TO_STRING(key_clientip), ${OTHER_BUCKET_ESQL_LITERAL})`
     );
   });
 });

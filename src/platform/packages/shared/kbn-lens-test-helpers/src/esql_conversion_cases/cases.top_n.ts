@@ -55,24 +55,30 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
   const outerTopNFilter = (args: Parameters<typeof outerTopNSubquery>[0]) =>
     `WHERE ${args.field} IN (${outerTopNSubquery(args)})`;
 
-  // Remaps non-top-N keys to "Other" (single Top values + Other; nested outer Other is a follow-up).
-  // Type casts use uppercase to match `esql(...).print('basic')`.
-  const outerTopNOtherRemap = ({
-    castToString = false,
+  // Single Top values + Other (nested outer Other is a follow-up): groups by a typed key that is
+  // null for non-top-N values, sorts "Other" last, then restores the field as keyword labels.
+  // `rankSort` is the chart sort after the named flag. Type casts use uppercase to match
+  // `esql(...).print('basic')`.
+  const otherBucketQuery = ({
+    stats,
+    rankSort,
     ...args
-  }: Parameters<typeof outerTopNSubquery>[0] & { castToString?: boolean }) =>
-    `WHERE ${args.field} IS NOT NULL | EVAL ${args.field} = CASE(${
-      args.field
-    } IN (${outerTopNSubquery(args)}), ${
-      castToString ? `TO_STRING(${args.field})` : args.field
-    }, "Other"::KEYWORD)`;
-
-  // Sorts "Other" last, after the chart's own sort keys are applied.
-  const otherNamedFlag = (field: string) =>
-    `EVAL named_${field.replace(
-      /[^A-Za-z0-9_]/g,
-      '_'
-    )} = CASE(${field} == "Other"::KEYWORD, 0::LONG, 1::LONG)`;
+  }: Parameters<typeof outerTopNSubquery>[0] & { stats: string; rankSort: string }) => {
+    const { field, size } = args;
+    const suffix = field.replace(/[^A-Za-z0-9_]/g, '_');
+    const key = `key_${suffix}`;
+    const named = `named_${suffix}`;
+    return [
+      `WHERE ${field} IS NOT NULL`,
+      `EVAL ${key} = CASE(${field} IN (${outerTopNSubquery(args)}), ${field}, NULL)`,
+      `STATS ${stats} BY ${key}`,
+      `EVAL ${named} = CASE(${key} IS NULL, 0::LONG, 1::LONG)`,
+      `SORT ${named} DESC, ${rankSort}`,
+      `LIMIT ${size + 1}`,
+      `EVAL ${field} = COALESCE(TO_STRING(${key}), "Other"::KEYWORD)`,
+      `DROP ${named}, ${key}`,
+    ].join(' | ');
+  };
 
   return [
     {
@@ -199,14 +205,14 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${logsFrom} | ${logsWhere} | ${outerTopNOtherRemap({
+        esql: `${logsFrom} | ${logsWhere} | ${otherBucketQuery({
           field: 'host.keyword',
           score: 'COUNT(*)',
           sort: 'host.keyword ASC',
           size: 3,
-        })} | STATS AVG(bytes) BY host.keyword | ${otherNamedFlag(
-          'host.keyword'
-        )} | SORT named_host_keyword DESC, host.keyword ASC | LIMIT 4 | DROP named_host_keyword`,
+          stats: 'AVG(bytes)',
+          rankSort: 'key_host_keyword ASC',
+        })}`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
         // The dataset has 4 hosts, so size 3 yields an Other row; "Other" sorts before the
@@ -225,14 +231,14 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${logsFrom} | ${logsWhere} | ${outerTopNOtherRemap({
+        esql: `${logsFrom} | ${logsWhere} | ${otherBucketQuery({
           field: 'host.keyword',
           score: 'COUNT(*)',
           sort: 'host.keyword DESC',
           size: 3,
-        })} | STATS AVG(bytes) BY host.keyword | ${otherNamedFlag(
-          'host.keyword'
-        )} | SORT named_host_keyword DESC, host.keyword DESC | LIMIT 4 | DROP named_host_keyword`,
+          stats: 'AVG(bytes)',
+          rankSort: 'key_host_keyword DESC',
+        })}`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
         expectedLastRow: { 'host.keyword': 'Other' },
@@ -254,14 +260,14 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${logsFrom} | ${logsWhere} | ${outerTopNOtherRemap({
+        esql: `${logsFrom} | ${logsWhere} | ${otherBucketQuery({
           field: 'host.keyword',
           score: 'rank_host_keyword = AVG(bytes)',
           sort: 'rank_host_keyword DESC, host.keyword ASC',
           size: 3,
-        })} | STATS AVG(bytes) BY host.keyword | ${otherNamedFlag(
-          'host.keyword'
-        )} | SORT named_host_keyword DESC, \`AVG(bytes)\` DESC, host.keyword ASC | LIMIT 4 | DROP named_host_keyword`,
+          stats: 'AVG(bytes)',
+          rankSort: '`AVG(bytes)` DESC, key_host_keyword ASC',
+        })}`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
         expectedLastRow: { 'host.keyword': 'Other' },
@@ -283,14 +289,14 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${logsFrom} | ${logsWhere} | ${outerTopNOtherRemap({
+        esql: `${logsFrom} | ${logsWhere} | ${otherBucketQuery({
           field: 'host.keyword',
           score: 'rank_host_keyword = AVG(bytes)',
           sort: 'rank_host_keyword ASC, host.keyword ASC',
           size: 3,
-        })} | STATS AVG(bytes) BY host.keyword | ${otherNamedFlag(
-          'host.keyword'
-        )} | SORT named_host_keyword DESC, \`AVG(bytes)\` ASC, host.keyword ASC | LIMIT 4 | DROP named_host_keyword`,
+          stats: 'AVG(bytes)',
+          rankSort: '`AVG(bytes)` ASC, key_host_keyword ASC',
+        })}`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
         expectedLastRow: { 'host.keyword': 'Other' },
@@ -299,7 +305,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     {
       group: 'top_n',
       dataset: logs,
-      description: 'single terms on an ip field with other bucket casts kept values to keyword',
+      description: 'single terms on an ip field with other bucket groups by the typed ip key',
       columns: {
         col1: terms(
           'clientip',
@@ -316,15 +322,14 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${logsFrom} | ${logsWhere} | ${outerTopNOtherRemap({
+        esql: `${logsFrom} | ${logsWhere} | ${otherBucketQuery({
           field: 'clientip',
           score: 'rank_clientip = AVG(bytes)',
           sort: 'rank_clientip DESC, clientip ASC',
           size: 9,
-          castToString: true,
-        })} | STATS AVG(bytes) BY clientip | ${otherNamedFlag(
-          'clientip'
-        )} | SORT named_clientip DESC, \`AVG(bytes)\` DESC, clientip ASC | LIMIT 10 | DROP named_clientip`,
+          stats: 'AVG(bytes)',
+          rankSort: '`AVG(bytes)` DESC, key_clientip ASC',
+        })}`,
         columnNames: ['AVG(bytes)', 'clientip'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], clientip: ['col1'] },
         expectedLastRow: { clientip: 'Other' },

@@ -16,37 +16,42 @@ import { buildOuterTopNSubquery, type OuterTopNFilterInput } from './build_outer
 export const OTHER_BUCKET_ESQL_LITERAL = '"Other"::KEYWORD';
 
 export interface OuterTopNOtherRemapInput extends OuterTopNFilterInput {
-  /**
-   * Casts kept values to keyword for non-string fields (number, ip, …), since a `CASE`
-   * cannot mix the field type with the `"Other"` keyword.
-   */
-  castToString?: boolean;
+  keyAlias: string;
 }
 
 /**
- * Remaps values outside the top-N set to `"Other"` before aggregation, so Convert to ES|QL can
- * keep the remaining-values bucket that classic esaggs builds with a post-flight filters agg.
+ * Keeps top-N values in a key column with the field's own type and nulls the rest, so Convert to
+ * ES|QL can rebuild the remaining-values bucket that classic esaggs builds with a post-flight
+ * filters agg. Grouping and sorting on the typed key keep DSL key order for number, ip and
+ * version fields; the `"Other"` label is only applied to the output rows.
  */
 export const buildOuterTopNOtherRemap = ({
-  castToString = false,
+  keyAlias,
   ...input
 }: OuterTopNOtherRemapInput): string => {
   const { groupExpr } = input;
-  const keptValue = castToString ? `TO_STRING(${groupExpr})` : groupExpr;
-  return `EVAL ${groupExpr} = CASE(${groupExpr} IN (${buildOuterTopNSubquery(
+  return `EVAL ${keyAlias} = CASE(${groupExpr} IN (${buildOuterTopNSubquery(
     input
-  )}), ${keptValue}, ${OTHER_BUCKET_ESQL_LITERAL})`;
+  )}), ${groupExpr}, NULL)`;
 };
 
 /**
- * Long flag for ordering: named values are `1`, `"Other"` is `0`. Sorting this `DESC` then by
- * the chart metric keeps Other last without mixing `long` and `double` in one `CASE` (AVG/SUM
- * are double; COUNT is long — ES|QL requires CASE branches to share a type).
+ * Long flag for ordering: named values are `1`, Other (null key) is `0`. Sorting this `DESC`
+ * then by the chart metric keeps Other last without mixing `long` and `double` in one `CASE`.
  */
 export const buildOtherBucketNamedFlagFragment = ({
   flagAlias,
-  groupExpr,
+  keyAlias,
 }: {
   flagAlias: string;
+  keyAlias: string;
+}): string => `${flagAlias} = CASE(${keyAlias} IS NULL, 0::LONG, 1::LONG)`;
+
+/** Restores the field column as keyword labels, with `"Other"` for the null key. */
+export const buildOtherBucketLabelFragment = ({
+  groupExpr,
+  keyAlias,
+}: {
   groupExpr: string;
-}): string => `${flagAlias} = CASE(${groupExpr} == ${OTHER_BUCKET_ESQL_LITERAL}, 0::LONG, 1::LONG)`;
+  keyAlias: string;
+}): string => `${groupExpr} = COALESCE(TO_STRING(${keyAlias}), ${OTHER_BUCKET_ESQL_LITERAL})`;

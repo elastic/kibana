@@ -27,6 +27,7 @@ import { resolveTimeShift } from './time_shift';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 import { buildOuterTopNFilter } from './build_outer_top_n_filter';
 import {
+  buildOtherBucketLabelFragment,
   buildOtherBucketNamedFlagFragment,
   buildOuterTopNOtherRemap,
 } from './build_outer_top_n_other_remap';
@@ -192,6 +193,10 @@ const getOuterRankAlias = (sourceField: string): string =>
 /** Long 0/1 flag used to sort `"Other"` last under DESC without typing the chart metric. */
 const getOtherBucketNamedFlagAlias = (sourceField: string): string =>
   `named_${sourceField.replace(/[^A-Za-z0-9_]/g, '_')}`;
+
+/** Typed group key for Top values + Other: the field value for top-N rows, null for Other. */
+const getOtherBucketKeyAlias = (sourceField: string): string =>
+  `key_${sourceField.replace(/[^A-Za-z0-9_]/g, '_')}`;
 
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
@@ -789,6 +794,7 @@ export function generateEsqlQuery(
           // DSL's Other request requires the field to exist, so documents without it stay out of
           // every bucket instead of falling into "Other".
           queryParts.push(`WHERE ${fieldExpr} IS NOT NULL`);
+          const keyAlias = getOtherBucketKeyAlias(innerTermsBucket.col.sourceField);
           queryParts.push(
             buildOuterTopNOtherRemap({
               source,
@@ -801,34 +807,35 @@ export function generateEsqlQuery(
                   : [{ expr: quoteEsqlColumnRef(fieldExpr), direction: orderDirectionUpper }]
               ),
               size,
-              castToString: innerTermsBucket.col.dataType !== 'string',
+              keyAlias,
             })
           );
-
-          const statsClause = buildStatsClause();
-          if (statsClause) {
-            queryParts.push(statsClause);
-          }
+          queryParts.push(
+            validMetrics.length > 0
+              ? `STATS ${validMetrics.join(', ')} BY ${keyAlias}`
+              : `STATS BY ${keyAlias}`
+          );
 
           // named=1 / Other=0 so SORT named DESC keeps Other last like DSL, for both metric and
-          // alphabetical ranking. Metric ranking also breaks ties by the field (DSL key order).
+          // alphabetical ranking. Metric ranking also breaks ties by the key (DSL key order).
           // A single CASE(metric) cannot mix 0::LONG with AVG (double) or similar.
           const namedFlagAlias = getOtherBucketNamedFlagAlias(innerTermsBucket.col.sourceField);
+          const keySortKey: EsqlSortKey = { expr: keyAlias, direction: 'ASC' };
           queryParts.push(
-            `EVAL ${buildOtherBucketNamedFlagFragment({
-              flagAlias: namedFlagAlias,
-              groupExpr: fieldExpr,
-            })}`
+            `EVAL ${buildOtherBucketNamedFlagFragment({ flagAlias: namedFlagAlias, keyAlias })}`
           );
           queryParts.push(
             `SORT ${formatSortKeys([
               { expr: namedFlagAlias, direction: 'DESC' },
-              innerSortKey,
-              ...(rankAlias ? [fieldSortKey] : []),
+              rankAlias ? innerSortKey : { ...keySortKey, direction: orderDirectionUpper },
+              ...(rankAlias ? [keySortKey] : []),
             ])}`
           );
           queryParts.push(`LIMIT ${size + 1}`);
-          queryParts.push(`DROP ${namedFlagAlias}`);
+          queryParts.push(
+            `EVAL ${buildOtherBucketLabelFragment({ groupExpr: fieldExpr, keyAlias })}`
+          );
+          queryParts.push(`DROP ${namedFlagAlias}, ${keyAlias}`);
         } else {
           // Filters run before STATS so the aggregation only sees the kept outer values.
           queryParts.push(...outerTopNFilters, ...outerRankStats);
