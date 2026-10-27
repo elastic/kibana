@@ -3504,9 +3504,6 @@ importers:
       dompurify:
         specifier: 3.4.14
         version: 3.4.14
-      dotenv:
-        specifier: 17.2.4
-        version: 17.2.4
       elastic-apm-node:
         specifier: 4.18.0
         version: 4.18.0(supports-color@8.1.1)
@@ -15801,10 +15798,6 @@ packages:
 
   dotenv@16.5.0:
     resolution: {integrity: sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg==}
-    engines: {node: '>=12'}
-
-  dotenv@17.2.4:
-    resolution: {integrity: sha512-mudtfb4zRB4bVvdj0xRo+e6duH1csJRM8IukBqfTRvHotn9+LBXB8ynAidP9zHqoRC/fsllXgk4kCKlR21fIhw==}
     engines: {node: '>=12'}
 
   dotignore@0.1.2:
@@ -32931,8 +32924,6 @@ snapshots:
       type-fest: 4.26.1
 
   dotenv@16.5.0: {}
-
-  dotenv@17.2.4: {}
 
   dotignore@0.1.2:
     dependencies:
