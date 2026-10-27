@@ -82,6 +82,12 @@ const DataTableSourceColumnHeaderMemoized = React.memo(UnifiedDataTableSourceCol
 
 const EMPTY_CELL_ACTIONS: EuiDataGridColumnCellAction[] = [];
 
+/** Keeps the cell actions of a column while what they are built from stays the same. */
+export type CellActionsCache = Map<
+  string,
+  { deps: unknown[]; cellActions: EuiDataGridColumnCellAction[] }
+>;
+
 export const OPEN_DETAILS = 'openDetails';
 export const SELECT_ROW = 'select';
 
@@ -140,6 +146,7 @@ function buildEuiGridColumn({
   dataGridRef,
   hideFilteringOnComputedColumns,
   documentsDisplayMode,
+  cellActionsCache,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -171,6 +178,7 @@ function buildEuiGridColumn({
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
   hideFilteringOnComputedColumns?: boolean;
   documentsDisplayMode: DocumentsDisplayMode;
+  cellActionsCache?: CellActionsCache;
 }) {
   const dataViewField = getDataViewFieldFromDataSource({
     dataView,
@@ -212,45 +220,73 @@ function buildEuiGridColumn({
 
   const isSorted = sortedColumns?.some((column) => column.id === columnName);
 
-  let cellActions: EuiDataGridColumnCellAction[];
-
-  if (disableCellActions) {
-    cellActions = EMPTY_CELL_ACTIONS;
-  } else {
-    if (columnCellActions?.length && cellActionsHandling === 'replace') {
-      cellActions = columnCellActions;
-    } else {
-      // The summary column represents the whole document. It is not backed by a data view
-      // field in every data view, e.g. an ES|QL one, so it has its own cell actions.
-      if (columnName === SOURCE_COLUMN) {
-        cellActions = buildSummaryColumnCellActions(
-          toastNotifications,
-          valueToStringConverter,
-          documentsDisplayMode,
-          dataGridRef,
-          uiActions,
-          dataView
-        );
-      } else {
-        cellActions = dataViewField
-          ? buildCellActions(
-              dataViewField,
-              toastNotifications,
-              valueToStringConverter,
-              documentsDisplayMode,
-              onFilter,
-              dataGridRef,
-              hideFilteringOnComputedColumns,
-              uiActions,
-              dataView
-            )
-          : EMPTY_CELL_ACTIONS;
-      }
-
-      if (columnCellActions?.length && cellActionsHandling === 'append') {
-        cellActions.push(...columnCellActions);
-      }
+  const computeCellActions = (): EuiDataGridColumnCellAction[] => {
+    if (disableCellActions) {
+      return EMPTY_CELL_ACTIONS;
     }
+    if (columnCellActions?.length && cellActionsHandling === 'replace') {
+      return columnCellActions;
+    }
+
+    // The summary column represents the whole document. It is not backed by a data view
+    // field in every data view, e.g. an ES|QL one, so it has its own cell actions.
+    const defaultCellActions =
+      columnName === SOURCE_COLUMN
+        ? buildSummaryColumnCellActions(
+            toastNotifications,
+            valueToStringConverter,
+            documentsDisplayMode,
+            dataGridRef,
+            uiActions,
+            dataView
+          )
+        : dataViewField
+        ? buildCellActions(
+            dataViewField,
+            toastNotifications,
+            valueToStringConverter,
+            documentsDisplayMode,
+            onFilter,
+            dataGridRef,
+            hideFilteringOnComputedColumns,
+            uiActions,
+            dataView
+          )
+        : EMPTY_CELL_ACTIONS;
+
+    return columnCellActions?.length && cellActionsHandling === 'append'
+      ? [...defaultCellActions, ...columnCellActions]
+      : defaultCellActions;
+  };
+
+  // The actions are components: building them anew for a sort or a width remounts them and makes
+  // the cells render again. They only depend on these.
+  const cellActionsDeps = [
+    disableCellActions,
+    columnCellActions,
+    cellActionsHandling,
+    columnName,
+    dataViewField,
+    toastNotifications,
+    valueToStringConverter,
+    documentsDisplayMode,
+    onFilter,
+    dataGridRef,
+    hideFilteringOnComputedColumns,
+    uiActions,
+    dataView,
+  ];
+  const cachedCellActions = cellActionsCache?.get(columnName);
+  let cellActions: EuiDataGridColumnCellAction[];
+  if (
+    cachedCellActions &&
+    cachedCellActions.deps.length === cellActionsDeps.length &&
+    cachedCellActions.deps.every((dep, index) => dep === cellActionsDeps[index])
+  ) {
+    cellActions = cachedCellActions.cellActions;
+  } else {
+    cellActions = computeCellActions();
+    cellActionsCache?.set(columnName, { deps: cellActionsDeps, cellActions });
   }
 
   const columnType = dataViewField?.type;
@@ -413,6 +449,7 @@ export function getEuiGridColumns({
   dataGridRef,
   hideFilteringOnComputedColumns,
   documentsDisplayMode,
+  cellActionsCache,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -445,6 +482,7 @@ export function getEuiGridColumns({
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
   hideFilteringOnComputedColumns?: boolean;
   documentsDisplayMode: DocumentsDisplayMode;
+  cellActionsCache?: CellActionsCache;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
   const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
@@ -482,6 +520,7 @@ export function getEuiGridColumns({
       dataGridRef,
       hideFilteringOnComputedColumns,
       documentsDisplayMode,
+      cellActionsCache,
     })
   );
 }

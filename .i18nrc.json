@@ -222,6 +222,7 @@
     "unifiedHistogram": "src/platform/packages/shared/kbn-unified-histogram",
     "unifiedDataTable": "src/platform/packages/shared/kbn-unified-data-table",
     "unifiedTabs": "src/platform/packages/shared/kbn-unified-tabs",
+    "kbnDataGrid": "src/platform/packages/shared/kbn-data-grid",
     "dataGridInTableSearch": "src/platform/packages/shared/kbn-data-grid-in-table-search",
     "unsavedChangesBadge": "src/platform/packages/private/kbn-unsaved-changes-badge",
     "unsavedChangesPrompt": "src/platform/packages/shared/kbn-unsaved-changes-prompt",

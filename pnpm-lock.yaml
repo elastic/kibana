@@ -1823,6 +1823,9 @@ importers:
       '@kbn/data-forge':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-data-forge
+      '@kbn/data-grid':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-data-grid
       '@kbn/data-grid-in-table-search':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-data-grid-in-table-search
@@ -8066,6 +8069,8 @@ importers:
   src/platform/packages/shared/kbn-cypress-test-helper: {}
 
   src/platform/packages/shared/kbn-dag-layout: {}
+
+  src/platform/packages/shared/kbn-data-grid: {}
 
   src/platform/packages/shared/kbn-data-grid-in-table-search: {}
 

@@ -13,6 +13,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { buildServices } from './build_services';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
+  KBN_DATA_GRID_ENABLED_FEATURE_FLAG_KEY,
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
 } from './constants';
 
@@ -53,7 +54,8 @@ describe('discoverFeatureFlags', () => {
       of(
         flagName === CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY
           ? false
-          : flagName === IS_ESQL_DEFAULT_FEATURE_FLAG_KEY
+          : flagName === IS_ESQL_DEFAULT_FEATURE_FLAG_KEY ||
+            flagName === KBN_DATA_GRID_ENABLED_FEATURE_FLAG_KEY
           ? true
           : fallback
       )
@@ -61,6 +63,7 @@ describe('discoverFeatureFlags', () => {
 
     expect(services.discoverFeatureFlags.getCascadeLayoutEnabled()).toBe(false);
     expect(services.discoverFeatureFlags.getIsEsqlDefault()).toBe(true);
+    expect(services.discoverFeatureFlags.getKbnDataGridEnabled()).toBe(true);
   });
 
   it('returns the fallback when the observable emits after subscribe returns', () => {

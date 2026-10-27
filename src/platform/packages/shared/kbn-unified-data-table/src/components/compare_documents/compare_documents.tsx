@@ -17,6 +17,7 @@ import type {
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import { EuiDataGrid, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiDataGridAdapter } from '@kbn/data-grid';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -48,6 +49,8 @@ export interface CompareDocumentsProps {
   docMap: DocMap;
   replaceSelectedDocs: (docIds: string[]) => void;
   setIsCompareActive: (isCompareActive: boolean) => void;
+  /** Renders the table with `@kbn/data-grid`, which keeps the first columns in view. */
+  isKbnDataGridEnabled?: boolean;
 }
 
 const COMPARISON_ROW_HEIGHT: EuiDataGridRowHeightsOptions = { defaultHeight: 'auto' };
@@ -77,6 +80,7 @@ const CompareDocuments = ({
   docMap: originalDocMap,
   replaceSelectedDocs: originalReplaceSelectedDocs,
   setIsCompareActive,
+  isKbnDataGridEnabled,
 }: CompareDocumentsProps) => {
   // Snapshot docMap and selectedDocIds to ensure we don't lose access to the comparison docs
   // or their selection state if, for example, a time range change or auto refresh changes them.
@@ -211,22 +215,32 @@ const CompareDocuments = ({
     showDiffDecorations,
   });
 
+  const gridProps = {
+    id,
+    'aria-describedby': ariaDescribedBy,
+    'aria-labelledby': ariaLabelledBy,
+    gridStyle: COMPARISON_GRID_STYLE,
+    toolbarVisibility: comparisonToolbarVisibility,
+    columns: comparisonColumns,
+    columnVisibility: comparisonColumnVisibility,
+    rowCount: comparisonFields.length,
+    rowHeightsOptions: COMPARISON_ROW_HEIGHT,
+    renderCellValue,
+    renderCustomToolbar: renderCustomToolbarFn,
+    'data-test-subj': 'unifiedDataTableCompareDocuments',
+  };
+
+  if (isKbnDataGridEnabled) {
+    // EuiDataGrid cannot keep columns in view while the others scroll: the field names and the
+    // pinned document, which the others are compared with, stay.
+    return <EuiDataGridAdapter {...gridProps} stickyColumnCount={2} css={comparisonCss} />;
+  }
+
   return (
     <EuiDataGrid
-      id={id}
-      aria-describedby={ariaDescribedBy}
-      aria-labelledby={ariaLabelledBy}
-      gridStyle={COMPARISON_GRID_STYLE}
-      toolbarVisibility={comparisonToolbarVisibility}
-      columns={comparisonColumns}
-      columnVisibility={comparisonColumnVisibility}
-      rowCount={comparisonFields.length}
-      rowHeightsOptions={COMPARISON_ROW_HEIGHT}
+      {...gridProps}
       inMemory={COMPARISON_IN_MEMORY}
       schemaDetectors={schemaDetectors}
-      renderCellValue={renderCellValue}
-      renderCustomToolbar={renderCustomToolbarFn}
-      data-test-subj="unifiedDataTableCompareDocuments"
       css={comparisonCss}
     />
   );
