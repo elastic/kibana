@@ -7,30 +7,46 @@
 
 import type { RiskScorePerformanceEvent } from './events';
 
-type StageSummary = Pick<
-  RiskScorePerformanceEvent,
-  'entityType' | 'stage' | 'status' | 'durationMs'
->;
-
-/** Fits risk-score stage summaries within Task Manager's custom-event budget. */
+/** Retains the longest stage prefix that fits Task Manager's custom-event budget. */
 export const buildRiskScoreTaskEvent = (
   calculationRunId: string,
   status: RiskScorePerformanceEvent['status'],
   durationMs: number,
   stages: readonly StageSummary[]
-) => {
-  const identity = { calculationRunId, status, durationMs };
-  let included = stages.length;
-  let event = { ...identity, stages: stages.slice(0, included), omittedStages: 0 };
-  while (included > 0 && Buffer.byteLength(JSON.stringify(event)) > TASK_EVENT_BYTE_BUDGET) {
-    included -= 1;
-    event = {
-      ...identity,
-      stages: stages.slice(0, included),
-      omittedStages: stages.length - included,
-    };
-  }
-  return event;
+): TaskEvent =>
+  stages.reduce(appendStageWithinBudget, {
+    calculationRunId,
+    status,
+    durationMs,
+    stages: [],
+    omittedStages: stages.length,
+  });
+
+const appendStageWithinBudget = (
+  event: TaskEvent,
+  stage: StageSummary,
+  index: number
+): TaskEvent => {
+  if (event.stages.length < index) return event;
+  const candidate = {
+    ...event,
+    stages: [...event.stages, stage],
+    omittedStages: event.omittedStages - 1,
+  };
+  return Buffer.byteLength(JSON.stringify(candidate)) <= TASK_EVENT_BYTE_BUDGET ? candidate : event;
 };
 
 const TASK_EVENT_BYTE_BUDGET = 3500;
+
+type StageSummary = Pick<
+  RiskScorePerformanceEvent,
+  'entityType' | 'stage' | 'status' | 'durationMs'
+>;
+
+interface TaskEvent {
+  calculationRunId: string;
+  status: RiskScorePerformanceEvent['status'];
+  durationMs: number;
+  stages: StageSummary[];
+  omittedStages: number;
+}

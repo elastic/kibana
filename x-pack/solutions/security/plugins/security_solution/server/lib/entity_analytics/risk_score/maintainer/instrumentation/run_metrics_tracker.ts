@@ -130,10 +130,7 @@ export const createRunMetricsTracker = () => {
     }),
 
     toAggregateSummary: (context: AggregateSummaryContext) => {
-      const aggregate = emptyMetrics();
-      for (const run of runs) {
-        for (const key of METRIC_KEYS) aggregate[key] += run[key];
-      }
+      const aggregate = aggregateRunMetrics(runs);
       return {
         ...context,
         scoresWrittenRiskIndexTotal: scoresWrittenRiskIndexTotal(aggregate),
@@ -143,6 +140,15 @@ export const createRunMetricsTracker = () => {
     },
   };
 };
+
+const aggregateRunMetrics = (runs: readonly RunMetrics[]): RunMetrics =>
+  METRIC_KEYS.reduce(
+    (totals, key) => ({
+      ...totals,
+      [key]: runs.reduce((sum, run) => sum + run[key], 0),
+    }),
+    emptyMetrics()
+  );
 
 const METRIC_KEYS: ReadonlyArray<keyof RunMetrics> = [
   'scoresWrittenRiskIndexBase',
