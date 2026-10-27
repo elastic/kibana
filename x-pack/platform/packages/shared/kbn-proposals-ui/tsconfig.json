@@ -14,7 +14,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/core-application-browser",
+    "@kbn/core-http-browser",
     "@kbn/core-spaces-common",
     "@kbn/proposals-common",
     "@kbn/i18n-react",

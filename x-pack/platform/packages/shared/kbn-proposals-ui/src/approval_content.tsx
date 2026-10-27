@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { type EuiButtonColor, useGeneratedHtmlId } from '@elastic/eui';
 import { isTodoProposal, type DismissReason } from '@kbn/proposals-common';
+import type { IBasePath } from '@kbn/core-http-browser';
 import { ApprovalContentHeader } from './approval_content_header';
 import { ApprovalActorTime } from './approval_actor_time';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
@@ -28,13 +29,7 @@ import {
   isProposalExpired,
 } from './proposal_helpers';
 import { ProposalCaption } from './proposal_caption';
-import type {
-  ApprovalAction,
-  AlwaysAllowOption,
-  DeclineParams,
-  ApprovalProposal,
-  GetUrlForApp,
-} from './types';
+import type { ApprovalAction, AlwaysAllowOption, DeclineParams, ApprovalProposal } from './types';
 
 export interface ApprovalContentProps {
   /**
@@ -94,11 +89,11 @@ export interface ApprovalContentProps {
   /** Whether this proposal's `onReopen` is in flight, from the host's mutation cache. */
   isReopening?: boolean;
   /**
-   * `core.application.getUrlForApp`, so the comment's in-app links (`/app/security/...`) resolve
-   * through core with the server base path and current space. Without it they render as
-   * authored, which breaks under `server.basePath`.
+   * `core.http.basePath`, so the comment's in-app links (`/app/security/...`) resolve with the
+   * server base path and the current space. Without it they render as authored, which breaks
+   * under `server.basePath`.
    */
-  getUrlForApp?: GetUrlForApp;
+  basePath?: IBasePath;
   'data-test-subj'?: string;
 }
 
@@ -137,7 +132,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     onDismiss,
     onReopen,
     isReopening = false,
-    getUrlForApp,
+    basePath,
     'data-test-subj': dataTestSubj,
   }) => {
     const generatedTitleId = useGeneratedHtmlId({ prefix: 'ApprovalContent' });
@@ -344,7 +339,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           banner={banner}
           bannerSuffix={bannerSuffix}
           actionError={actionError}
-          getUrlForApp={getUrlForApp}
+          basePath={basePath}
           data-test-subj={dataTestSubj}
         />
 

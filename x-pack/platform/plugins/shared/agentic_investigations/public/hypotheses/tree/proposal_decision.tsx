@@ -35,7 +35,7 @@ export const ProposalDecision = ({
 }: ProposalDecisionProps): React.ReactElement => {
   const queryClient = useQueryClient();
   const {
-    services: { application },
+    services: { http },
   } = useKibana<CoreStart>();
   const { data: proposal, isLoading } = useProposal(proposalId);
   const { readOnly, isSubmitting, currentActorName, approve, dismiss, reopen, isReopening } =
@@ -95,7 +95,7 @@ export const ProposalDecision = ({
       onDismiss={handleDismiss}
       onReopen={handleReopen}
       isReopening={isReopening}
-      getUrlForApp={application.getUrlForApp}
+      basePath={http.basePath}
       data-test-subj={`investigationHypothesisTreeProposal-${proposalId}`}
     />
   );

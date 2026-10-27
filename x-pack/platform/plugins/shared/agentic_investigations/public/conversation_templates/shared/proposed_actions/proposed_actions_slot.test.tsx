@@ -58,9 +58,7 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
 const dismissMutateAsync = jest.fn().mockResolvedValue(undefined);
 const addDanger = jest.fn();
-const getUrlForApp = jest.fn(
-  (appId: string, options?: { path?: string }) => `/kbn/app/${appId}${options?.path ?? ''}`
-);
+const basePath = { serverBasePath: '/kbn', prepend: (path: string) => `/kbn${path}` };
 
 const mockProposal: ProposalWithMetadata = {
   id: 'proposal-1',
@@ -146,14 +144,14 @@ describe('ProposedActionsSlot', () => {
             alertzero: { show: true, write: false },
             proposals: { decideProposals: true },
           },
-          getUrlForApp,
         },
+        http: { basePath },
         notifications: { toasts: { addDanger } },
       },
     } as unknown as ReturnType<typeof useKibana>);
   });
 
-  it('resolves in-app links in a proposal comment through core, so they survive a base path', () => {
+  it('resolves in-app links in a proposal comment against the base path, so they survive server.basePath', () => {
     mockConversationProposalsPage([
       { ...mockProposal, comment: '**Rule:** [Noisy rule](/s/default/app/security/rules/id/abc)' },
     ]);
@@ -174,6 +172,7 @@ describe('ProposedActionsSlot', () => {
             proposals: { decideProposals: false },
           },
         },
+        http: { basePath },
         notifications: { toasts: { addDanger } },
       },
     } as ReturnType<typeof useKibana>);

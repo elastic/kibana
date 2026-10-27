@@ -49,7 +49,10 @@ const setup = ({
   data = proposal as Record<string, unknown>,
 } = {}) => {
   (useKibana as jest.Mock).mockReturnValue({
-    services: { application: { capabilities: { proposals: { decideProposals: canDecide } } } },
+    services: {
+      application: { capabilities: { proposals: { decideProposals: canDecide } } },
+      http: { basePath: { serverBasePath: '', prepend: (path: string) => path } },
+    },
   });
   (useProposal as jest.Mock).mockReturnValue({
     data: isMissing ? undefined : data,

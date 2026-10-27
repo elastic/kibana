@@ -15,9 +15,9 @@ import {
   useEuiTheme,
   type IconType,
 } from '@elastic/eui';
+import type { IBasePath } from '@kbn/core-http-browser';
 import type { ApprovalOutcomeBanner } from './approval_outcome';
 import { createMarkdownLink } from './markdown_link';
-import type { GetUrlForApp } from './types';
 
 interface ApprovalContentBodyProps {
   /** Hidden while `'declining'`: `DeclineReasonForm` takes this space instead. */
@@ -30,21 +30,21 @@ interface ApprovalContentBodyProps {
   bannerSuffix?: React.ReactNode;
   /** A rejected `primaryAction`/`onDismiss` call, surfaced here rather than thrown away. */
   actionError?: string;
-  /** See `GetUrlForApp`. */
-  getUrlForApp?: GetUrlForApp;
+  /** See `ApprovalContentProps.basePath`. */
+  basePath?: IBasePath;
   'data-test-subj'?: string;
 }
 
 /**
  * EUI's default processing plugins with the `a` component swapped for one that resolves in-app
- * links through `getUrlForApp`. Built per resolver: the default list is a module-level singleton,
+ * links against `basePath`. Built per base path: the default list is a module-level singleton,
  * and `getDefaultEuiMarkdownProcessingPlugins` returns a fresh copy each call, so this never
  * mutates anything shared with other markdown on the page.
  */
-const buildProcessingPluginList = (getUrlForApp?: GetUrlForApp) => {
+const buildProcessingPluginList = (basePath?: IBasePath) => {
   const plugins = getDefaultEuiMarkdownProcessingPlugins({ linkProps: { target: '_blank' } });
   // The rehype-react plugin sits at index 1; its options carry the component map.
-  plugins[1][1].components.a = createMarkdownLink(getUrlForApp);
+  plugins[1][1].components.a = createMarkdownLink(basePath);
   return plugins;
 };
 
@@ -64,14 +64,11 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
     banner,
     bannerSuffix,
     actionError,
-    getUrlForApp,
+    basePath,
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
-    const processingPluginList = useMemo(
-      () => buildProcessingPluginList(getUrlForApp),
-      [getUrlForApp]
-    );
+    const processingPluginList = useMemo(() => buildProcessingPluginList(basePath), [basePath]);
 
     return (
       <div

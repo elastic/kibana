@@ -290,7 +290,7 @@ const ConversationsPageContent: React.FC = () => {
   );
 
   const {
-    services: { application, notifications },
+    services: { application, http, notifications },
   } = useKibana<CoreStart>();
 
   const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
@@ -508,7 +508,7 @@ const ConversationsPageContent: React.FC = () => {
         onConfirmApproval={confirmApproval}
         isSubmitting={isSubmittingSelected}
         currentActorName={currentActorName}
-        getUrlForApp={application.getUrlForApp}
+        basePath={http.basePath}
         onDismissApproval={dismissApproval}
         renderCloseModal={canManageInvestigations ? renderCloseModal : undefined}
         renderDismissModal={renderDismissModal}

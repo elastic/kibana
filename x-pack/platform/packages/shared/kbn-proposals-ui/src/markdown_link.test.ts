@@ -5,70 +5,69 @@
  * 2.0.
  */
 
+import type { IBasePath } from '@kbn/core-http-browser';
 import { resolveAppHref } from './markdown_link';
-import type { GetUrlForApp } from './types';
 
-// Stands in for core: prepends the server base path and current space, as the real one does.
-const getUrlForApp: GetUrlForApp = jest.fn(
-  (appId, options) => `/kbn/s/soc/app/${appId}${options?.path ?? ''}`
-);
+/** Stands in for the page's base path: served under `/kbn`, viewed in space `soc`. */
+const basePath = {
+  serverBasePath: '/kbn',
+  prepend: jest.fn((path: string) => `/kbn/s/soc${path}`),
+} as unknown as IBasePath;
+
+/** The same page in the default space, with no server base path. */
+const bareBasePath = {
+  serverBasePath: '',
+  prepend: jest.fn((path: string) => path),
+} as unknown as IBasePath;
 
 describe('resolveAppHref', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('resolves an authored in-app link through getUrlForApp', () => {
-    expect(resolveAppHref('/s/soc/app/security/rules/id/abc', getUrlForApp)).toBe(
-      '/kbn/s/soc/app/security/rules/id/abc'
+  it('prepends the base path and current space to a link authored without a space', () => {
+    expect(resolveAppHref('/app/agent_builder/conversations/c1', basePath)).toBe(
+      '/kbn/s/soc/app/agent_builder/conversations/c1'
     );
-    expect(getUrlForApp).toHaveBeenCalledWith('security', { path: '/rules/id/abc' });
+    expect(basePath.prepend).toHaveBeenCalledWith('/app/agent_builder/conversations/c1');
   });
 
   it('keeps an explicitly authored space instead of swapping in the current one', () => {
-    expect(resolveAppHref('/s/other/app/dashboards#/view/d1', getUrlForApp)).toBe(
+    expect(resolveAppHref('/s/other/app/dashboards#/view/d1', basePath)).toBe(
       '/kbn/s/other/app/dashboards#/view/d1'
     );
+    expect(basePath.prepend).not.toHaveBeenCalled();
   });
 
   it('writes an explicitly authored default space with no prefix, as core does', () => {
-    expect(resolveAppHref('/s/default/app/security/rules/id/abc', getUrlForApp)).toBe(
+    expect(resolveAppHref('/s/default/app/security/rules/id/abc', basePath)).toBe(
       '/kbn/app/security/rules/id/abc'
     );
   });
 
-  it('keeps an authored space when there is no server base path', () => {
-    const noBasePath: GetUrlForApp = jest.fn(
-      (appId, options) => `/app/${appId}${options?.path ?? ''}`
+  it('keeps query and hash on the path', () => {
+    expect(resolveAppHref('/s/soc/app/security/alerts?query=a#top', basePath)).toBe(
+      '/kbn/s/soc/app/security/alerts?query=a#top'
     );
-    expect(resolveAppHref('/s/other/app/security/alerts', noBasePath)).toBe(
+  });
+
+  it('resolves without a server base path', () => {
+    expect(resolveAppHref('/s/other/app/security/alerts', bareBasePath)).toBe(
       '/s/other/app/security/alerts'
     );
-    expect(resolveAppHref('/s/default/app/security/alerts', noBasePath)).toBe(
+    expect(resolveAppHref('/s/default/app/security/alerts', bareBasePath)).toBe(
       '/app/security/alerts'
     );
+    expect(resolveAppHref('/app/security/alerts', bareBasePath)).toBe('/app/security/alerts');
   });
 
-  it('resolves a link authored without a space prefix into the current space', () => {
-    expect(resolveAppHref('/app/agent_builder/conversations/c1', getUrlForApp)).toBe(
-      '/kbn/s/soc/app/agent_builder/conversations/c1'
-    );
-  });
+  it.each(['https://example.com/runbook', '//example.com/x', 'mailto:soc@example.com'])(
+    'leaves %s untouched',
+    (href) => {
+      expect(resolveAppHref(href, basePath)).toBe(href);
+      expect(basePath.prepend).not.toHaveBeenCalled();
+    }
+  );
 
-  it('keeps query and hash on the path', () => {
-    resolveAppHref('/app/security/alerts?query=a#top', getUrlForApp);
-    expect(getUrlForApp).toHaveBeenCalledWith('security', { path: '/alerts?query=a#top' });
-  });
-
-  it.each([
-    'https://example.com/runbook',
-    '//example.com/x',
-    'mailto:soc@example.com',
-    '/kbn/other',
-  ])('leaves %s untouched', (href) => {
-    expect(resolveAppHref(href, getUrlForApp)).toBe(href);
-    expect(getUrlForApp).not.toHaveBeenCalled();
-  });
-
-  it('renders as authored when the host supplies no resolver', () => {
+  it('renders as authored when the host supplies no base path', () => {
     expect(resolveAppHref('/app/security/rules/id/abc')).toBe('/app/security/rules/id/abc');
   });
 });

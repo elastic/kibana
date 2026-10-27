@@ -25,7 +25,6 @@ export {
   getProposalTone,
   isProposalExpired,
 } from './src/proposal_helpers';
-export type { GetUrlForApp } from './src/types';
 export type {
   ApprovalProposal,
   ApprovalAction,

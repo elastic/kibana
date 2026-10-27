@@ -145,9 +145,8 @@ jest.mock('@kbn/proposals-ui', () => {
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
     services: {
-      application: {
-        getUrlForApp: (appId: string, options?: { path?: string }) =>
-          `/app/${appId}${options?.path ?? ''}`,
+      http: {
+        basePath: { serverBasePath: '', prepend: (path: string) => path },
       },
     },
   }),

@@ -26,8 +26,8 @@ import {
   type ApprovalPhase,
   type ApprovalProposal,
   type DeclineParams,
-  type GetUrlForApp,
 } from '@kbn/proposals-ui';
+import type { IBasePath } from '@kbn/core-http-browser';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { getEmptyValue } from '../helpers';
 import { useIsTextTruncated } from '../use_is_text_truncated';
@@ -56,10 +56,10 @@ export interface ProposedActionButtonProps {
   onReopen?: () => Promise<void>;
   isReopening?: boolean;
   /**
-   * See `ApprovalModalProps.getUrlForApp`. Supplied by the caller: flyout slots render outside a
-   * `KibanaContextProvider`, so this package cannot read `core.application` itself.
+   * See `ApprovalModalProps.basePath`. Supplied by the caller: flyout slots render outside a
+   * `KibanaContextProvider`, so this package cannot read `core.http` itself.
    */
-  getUrlForApp?: GetUrlForApp;
+  basePath?: IBasePath;
   'data-test-subj'?: string;
 }
 
@@ -153,7 +153,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     currentActorName,
     onReopen,
     isReopening,
-    getUrlForApp,
+    basePath,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -250,7 +250,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             currentActorName={currentActorName}
             onReopen={onReopen}
             isReopening={isReopening}
-            getUrlForApp={getUrlForApp}
+            basePath={basePath}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-modal` : undefined}
           />
         )}

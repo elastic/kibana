@@ -19,7 +19,6 @@ import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { ProposedActionButton, ProposedActionsList } from '@kbn/agentic-investigations-common';
-import type { GetUrlForApp } from '@kbn/proposals-ui';
 import { decisionErrorMessage } from './decision_errors';
 import { useProposalDecision } from './use_proposal_decision';
 import {
@@ -35,7 +34,7 @@ export interface ProposedActionsSlotProps {
 interface ProposedActionRowProps {
   proposal: ProposalWithMetadata;
   onDecisionError: (err: unknown) => void;
-  getUrlForApp: GetUrlForApp;
+  basePath: CoreStart['http']['basePath'];
 }
 
 /**
@@ -43,7 +42,7 @@ interface ProposedActionRowProps {
  * own proposal id — are called a fixed number of times per render, rather than a variable number
  * inside the list's `.map`.
  */
-const ProposedActionRow = ({ proposal, onDecisionError, getUrlForApp }: ProposedActionRowProps) => {
+const ProposedActionRow = ({ proposal, onDecisionError, basePath }: ProposedActionRowProps) => {
   const { readOnly, isSubmitting, currentActorName, approve, dismiss, reopen, isReopening } =
     useProposalDecision(proposal.id);
 
@@ -78,7 +77,7 @@ const ProposedActionRow = ({ proposal, onDecisionError, getUrlForApp }: Proposed
       }}
       isReopening={isReopening}
       currentActorName={currentActorName}
-      getUrlForApp={getUrlForApp}
+      basePath={basePath}
       data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
     />
   );
@@ -94,7 +93,7 @@ const ProposedActionRow = ({ proposal, onDecisionError, getUrlForApp }: Proposed
  */
 export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps) => {
   const {
-    services: { application, notifications },
+    services: { http, notifications },
   } = useKibana<CoreStart>();
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useConversationProposals(conversationId);
@@ -139,7 +138,7 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
               key={proposal.id}
               proposal={proposal}
               onDecisionError={onDecisionError}
-              getUrlForApp={application.getUrlForApp}
+              basePath={http.basePath}
             />
           ))}
         </ProposedActionsList>
