@@ -21,3 +21,7 @@ export {
   type EventLoopWatchdogSetupDeps,
   type EventLoopWatchdogStartDeps,
 } from './src/event_loop_watchdog/event_loop_watchdog_service';
+export {
+  EventLoopWatchdog,
+  type EventLoopWatchdogParams,
+} from './src/event_loop_watchdog/event_loop_watchdog';
