@@ -8,7 +8,7 @@
  */
 
 import { buildSkill } from '../../../connector_spec';
-import { buildGithubResources } from './github-resources';
+import { buildGithubResources } from './github_resources';
 
 export const githubSkillFile = buildSkill(({ bt, fence }) => ({
   id: 'github',

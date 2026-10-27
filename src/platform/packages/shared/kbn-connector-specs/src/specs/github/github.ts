@@ -20,7 +20,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import { githubEvents } from './events';
-import { githubSkillFile } from './skills/github-skill';
+import { githubSkillFile } from './skills/github_skill';
 import type {
   AddAssigneeInput,
   AddIssueCommentInput,

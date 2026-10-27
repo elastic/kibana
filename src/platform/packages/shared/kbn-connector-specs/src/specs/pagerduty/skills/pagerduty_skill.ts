@@ -8,7 +8,7 @@
  */
 
 import { buildSkill } from '../../../connector_spec';
-import { buildPagerdutyResources } from './pagerduty-resources';
+import { buildPagerdutyResources } from './pagerduty_resources';
 
 export const pagerdutySkillFile = buildSkill(({ bt, fence }) => ({
   id: 'pagerduty',

@@ -18,7 +18,7 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
-import { pagerdutySkillFile } from './skills/pagerduty-skill';
+import { pagerdutySkillFile } from './skills/pagerduty_skill';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type {
   AcknowledgeIncidentInput,
