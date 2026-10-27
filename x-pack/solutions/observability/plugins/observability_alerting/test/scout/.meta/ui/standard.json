@@ -220,7 +220,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 103,
+        "line": 104,
         "column": 25
       }
     },
@@ -236,7 +236,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 114,
+        "line": 115,
         "column": 12
       }
     },
@@ -252,7 +252,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 103,
+        "line": 104,
         "column": 25
       }
     },
@@ -268,7 +268,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 114,
+        "line": 115,
         "column": 12
       }
     },
@@ -284,7 +284,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 103,
+        "line": 104,
         "column": 25
       }
     },
@@ -300,7 +300,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 114,
+        "line": 115,
         "column": 12
       }
     },
@@ -316,7 +316,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 103,
+        "line": 104,
         "column": 25
       }
     },
@@ -332,7 +332,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 114,
+        "line": 115,
         "column": 12
       }
     },
@@ -348,7 +348,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 103,
+        "line": 104,
         "column": 25
       }
     },
@@ -364,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 114,
+        "line": 115,
         "column": 12
       }
     },
@@ -380,7 +380,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 103,
+        "line": 104,
         "column": 25
       }
     },
@@ -396,7 +396,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 114,
+        "line": 115,
         "column": 12
       }
     },
@@ -412,7 +412,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 127,
+        "line": 128,
         "column": 15
       }
     },
@@ -428,7 +428,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 157,
+        "line": 158,
         "column": 15
       }
     },
@@ -444,7 +444,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 182,
+        "line": 183,
         "column": 11
       }
     },
@@ -460,7 +460,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 202,
+        "line": 203,
         "column": 15
       }
     },
@@ -476,7 +476,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 221,
+        "line": 222,
         "column": 13
       }
     },
@@ -492,7 +492,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 240,
+        "line": 241,
         "column": 15
       }
     },
@@ -508,13 +508,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 260,
+        "line": 261,
         "column": 21
       }
     },
     {
-      "id": "648c81c97fb0579-3200306d454ad51",
-      "title": "Observability Alerting URLs settings flyout does not leave Observability Alerting",
+      "id": "648c81c97fb0579-da3e9492e872e0a",
+      "title": "Observability Alerting URLs settings page does not leave Observability Alerting",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -524,7 +524,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 290,
+        "line": 291,
         "column": 65
       }
     },
@@ -540,7 +540,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 303,
+        "line": 304,
         "column": 15
       }
     },
@@ -556,13 +556,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 310,
+        "line": 311,
         "column": 71
       }
     },
     {
-      "id": "648c81c97fb0579-c8f03d58511bccc",
-      "title": "Observability Alerting URLs settings from logs does not leave Observability Alerting",
+      "id": "648c81c97fb0579-c9d4c6da5c29c1b",
+      "title": "Observability Alerting URLs settings from logs stays under Observability Alerting",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -572,7 +572,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 360,
+        "line": 361,
         "column": 13
       }
     },
@@ -588,7 +588,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 383,
+        "line": 384,
         "column": 68
       }
     },

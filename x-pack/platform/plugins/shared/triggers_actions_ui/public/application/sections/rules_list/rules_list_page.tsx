@@ -44,7 +44,7 @@ export const RulesListContainer = () => {
   });
   const {
     openCreateRuleModal,
-    openSettingsFlyout,
+    navigateToSettings,
     navigateToCreateRuleForm,
     navigateToCreateRuleFromTemplateForm,
     navigateToEditRuleForm,
@@ -99,7 +99,7 @@ export const RulesListContainer = () => {
       canShowSettings,
       extraItems,
       onCreateRule: openCreateRuleModal,
-      onOpenSettings: openSettingsFlyout,
+      onOpenSettings: navigateToSettings,
     });
   }, [
     mode,
@@ -108,7 +108,7 @@ export const RulesListContainer = () => {
     canShowSettings,
     history,
     openCreateRuleModal,
-    openSettingsFlyout,
+    navigateToSettings,
   ]);
 
   return (
