@@ -12,6 +12,7 @@ import path from 'path';
 import { parse } from 'yaml';
 import { renderSteps } from './render.ts';
 import { normalizeSemantics } from './semantic_normalization.ts';
+import { prBaseEnv, prBaseSteps } from './steps/pull_request_base.ts';
 import { cpsTests } from './steps/cps_testing.ts';
 import type { Step } from './types.ts';
 import { getKibanaDir } from '#pipeline-utils/get_kibana_dir';
@@ -23,6 +24,8 @@ export interface Fragment {
   yamlPath: string;
   // Set once the fragment is ported to TypeScript.
   steps?: () => readonly Step[];
+  // The document's top-level `env`, for a fragment that sets one.
+  env?: Readonly<Record<string, string>>;
 }
 
 const yamlFragment = (name: string): Fragment => ({
@@ -35,7 +38,7 @@ export const FRAGMENTS: readonly Fragment[] = [
   yamlFragment('pull_request/agent_builder_smoke_tests'),
   yamlFragment('pull_request/ai_infra_gen_ai'),
   yamlFragment('pull_request/api_contracts'),
-  yamlFragment('pull_request/base'),
+  { ...yamlFragment('pull_request/base'), steps: prBaseSteps, env: prBaseEnv },
   yamlFragment('pull_request/build_cloud_fips_image'),
   yamlFragment('pull_request/build_cloud_image'),
   yamlFragment('pull_request/build_project'),
@@ -87,6 +90,6 @@ export const FRAGMENTS: readonly Fragment[] = [
 export const loadFragmentDocument = (fragment: Fragment): unknown =>
   normalizeSemantics(
     fragment.steps
-      ? parse(renderSteps(fragment.steps(), { header: true }))
+      ? parse(renderSteps(fragment.steps(), { header: true, env: fragment.env }))
       : parse(fs.readFileSync(path.join(getKibanaDir(), fragment.yamlPath), 'utf8'))
   );
