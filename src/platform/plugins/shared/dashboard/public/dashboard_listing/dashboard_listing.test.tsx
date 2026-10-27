@@ -8,25 +8,16 @@
  */
 
 import React from 'react';
+import type { ReactElement } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import { render, waitFor, act } from '@testing-library/react';
-/**
- * Mock Tabbed Table List view. This dashboard component is a wrapper around the shared UX tabbed table List view. We
- * need to ensure we're passing down the correct props, but the tabbed table list view itself doesn't need to be rendered
- * in our tests because it is covered in its package.
- */
-import { TabbedTableListView } from '@kbn/content-management-tabbed-table-list-view';
+import { KibanaContentListPage } from '@kbn/content-list-page';
+import { render, waitFor, act, screen } from '@testing-library/react';
 
 import { coreServices } from '../services/kibana_services';
 import { DashboardListing } from './dashboard_listing';
 import type { DashboardListingProps, DashboardListingTab } from './types';
-
-jest.mock('@kbn/content-management-tabbed-table-list-view', () => ({
-  __esModule: true,
-  TabbedTableListView: jest.fn().mockReturnValue(null),
-}));
 
 const mockAppHeader = jest.fn().mockReturnValue(null);
 jest.mock('@kbn/app-header', () => ({
@@ -35,6 +26,20 @@ jest.mock('@kbn/app-header', () => ({
     return mockAppHeader;
   },
 }));
+
+jest.mock('@kbn/shared-ux-error-boundary', () => ({
+  __esModule: true,
+  KibanaSectionErrorBoundary: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+/**
+ * Mock the active-tab renderer because these tests verify Dashboard listing shell wiring.
+ * Rendering the real component would mount the complete Dashboard table, which is covered
+ * independently by its component tests.
+ */
+const mockActiveTab = jest
+  .spyOn(KibanaContentListPage, 'ActiveTab')
+  .mockReturnValue(<div>ActiveTab</div>);
 
 const renderDashboardListing = (
   props: Partial<DashboardListingProps> = {},
@@ -55,23 +60,60 @@ const renderDashboardListing = (
     </I18nProvider>
   );
 
-const mockTabbedTableListView = TabbedTableListView as jest.Mock;
-
 beforeEach(() => {
   jest.clearAllMocks();
   (coreServices.application.capabilities as any).dashboard_v2.createNew = true;
 });
 
-test('renders TabbedTableListView with correct title and dashboards tab', () => {
+test('renders the Content List shell with the correct title and dashboards tab', () => {
   renderDashboardListing();
 
-  expect(mockTabbedTableListView).toHaveBeenCalledTimes(1);
-  const props = mockTabbedTableListView.mock.calls[0][0];
-  expect(props).toMatchObject({
-    headingId: 'dashboardListingHeading',
+  expect(mockActiveTab).toHaveBeenCalledTimes(1);
+  const props = mockActiveTab.mock.calls[0][0];
+
+  expect(props.activeTabId).toBe('dashboards');
+
+  const dashboardTab = props.tabs[0];
+  expect(dashboardTab.id).toBe('dashboards');
+  expect(dashboardTab.render).toBeDefined();
+  expect(dashboardTab.load).toBeUndefined();
+
+  expect(mockAppHeader).toHaveBeenCalledTimes(1);
+  const appHeaderProps = mockAppHeader.mock.calls[0][0];
+  expect(appHeaderProps.title).toBe('Dashboards');
+  expect(appHeaderProps.tabs[0]).toMatchObject({
+    id: 'dashboards',
+    label: 'Dashboards',
+    isSelected: true,
   });
-  expect(props.tabs[0]).toMatchObject({ id: 'dashboards', title: 'Dashboards' });
-  expect(props.tabs.length).toBe(1);
+
+  expect(screen.getByRole('region', { name: 'Dashboards' })).toBeInTheDocument();
+});
+
+test('supplies tab props when rendering the dashboards tab', () => {
+  const goToDashboard = jest.fn();
+  const getDashboardUrl = jest.fn();
+
+  renderDashboardListing({
+    goToDashboard,
+    getDashboardUrl,
+    initialFilter: 'my-filter',
+    useSessionStorageIntegration: true,
+  });
+
+  const dashboardTab = mockActiveTab.mock.calls[0][0].tabs[0];
+
+  // Builds the element without mounting the real Dashboard table.
+  const element = dashboardTab.render?.() as ReactElement;
+
+  expect(element.props).toMatchObject({
+    goToDashboard,
+    getDashboardUrl,
+    initialFilter: 'my-filter',
+    useSessionStorageIntegration: true,
+    refreshListBouncer: false,
+  });
+  expect(element.props.parentProps.showCreateButton).toBe(false);
 });
 
 test('works without getTabs (for embedded use cases)', () => {
@@ -85,8 +127,8 @@ test('works without getTabs (for embedded use cases)', () => {
     </I18nProvider>
   );
 
-  expect(mockTabbedTableListView).toHaveBeenCalledTimes(1);
-  const props = mockTabbedTableListView.mock.calls[0][0];
+  expect(mockActiveTab).toHaveBeenCalledTimes(1);
+  const props = mockActiveTab.mock.calls[0][0];
   expect(props.tabs).toHaveLength(1);
   expect(props.tabs[0].id).toBe('dashboards');
 });
@@ -97,26 +139,62 @@ test('reads activeTab from URL path param when tab exists', () => {
     { initialEntries: ['/list/custom-tab'] }
   );
 
-  expect(mockTabbedTableListView).toHaveBeenCalledTimes(1);
-  const props = mockTabbedTableListView.mock.calls[0][0];
+  expect(mockActiveTab).toHaveBeenCalledTimes(1);
+  const props = mockActiveTab.mock.calls[0][0];
   expect(props.activeTabId).toBe('custom-tab');
 });
 
-test('appends additional tabs after built-in tabs and preserves getTableList', () => {
-  const mockGetTableList = jest.fn();
-  const mockAdditionalTab: DashboardListingTab = {
+test('appends additional tabs to the content and header tabs', () => {
+  const tab: DashboardListingTab = {
     id: 'annotations',
     title: 'Annotations',
-    getTableList: mockGetTableList,
+    getTableList: jest.fn(),
   };
 
-  renderDashboardListing({ getTabs: () => [mockAdditionalTab] });
+  renderDashboardListing({ getTabs: () => [tab] });
 
-  expect(mockTabbedTableListView).toHaveBeenCalledTimes(1);
-  const props = mockTabbedTableListView.mock.calls[0][0];
-  const lastTab = props.tabs[props.tabs.length - 1];
-  expect(lastTab).toMatchObject({ id: 'annotations', title: 'Annotations' });
-  expect(lastTab.getTableList).toBe(mockGetTableList);
+  const contentTab = mockActiveTab.mock.calls[0][0].tabs[1];
+  expect(contentTab.id).toBe('annotations');
+  expect(contentTab.load).toBeDefined();
+  expect(contentTab.render).toBeUndefined();
+
+  const appHeaderProps = mockAppHeader.mock.calls[0][0];
+  expect(appHeaderProps.tabs[1]).toMatchObject({
+    id: 'annotations',
+    label: 'Annotations',
+  });
+});
+
+test('supplies legacy parent props when loading a registered tab', async () => {
+  const getTableList = jest.fn();
+
+  renderDashboardListing({
+    getTabs: () => [{ id: 'annotations', title: 'Annotations', getTableList }],
+  });
+
+  const tab = mockActiveTab.mock.calls[0][0].tabs[1];
+
+  const load = tab.load;
+
+  expect(load).toBeDefined();
+
+  await act(async () => {
+    await load?.();
+  });
+
+  expect(getTableList).toHaveBeenCalledTimes(1);
+
+  const parentProps = getTableList.mock.calls[0][0];
+
+  expect(parentProps.showCreateButton).toBe(false);
+  expect(parentProps.getBreadcrumbs?.('dashboard')?.[0].text).toBe('Dashboards');
+  expect(parentProps.onFetchSuccess()).toBeUndefined();
+
+  act(() => {
+    parentProps.setPageDataTestSubject('registeredTabLandingPage');
+  });
+
+  expect(screen.getByTestId('registeredTabLandingPage')).toBeInTheDocument();
 });
 
 test('changeActiveTab updates route to show new tab', async () => {
@@ -127,27 +205,29 @@ test('changeActiveTab updates route to show new tab', async () => {
   };
 
   renderDashboardListing({ getTabs: () => [mockTab] });
+  const appHeaderProps = mockAppHeader.mock.calls[0][0];
+  const customHeaderTab = appHeaderProps.tabs.find(
+    (tab: { id: string }) => tab.id === 'custom-tab'
+  );
 
-  expect(mockTabbedTableListView).toHaveBeenCalledTimes(1);
-  const { changeActiveTab } = mockTabbedTableListView.mock.calls[0][0];
+  expect(customHeaderTab).toBeDefined();
 
   await act(async () => {
-    changeActiveTab('custom-tab');
+    customHeaderTab.onClick();
   });
 
   // Verify the route change caused a re-render with the new activeTabId
   await waitFor(() => {
-    const callCount = mockTabbedTableListView.mock.calls.length;
-    const props = mockTabbedTableListView.mock.calls[callCount - 1][0];
-    expect(props.activeTabId).toBe('custom-tab');
+    const lastCall = mockActiveTab.mock.calls[mockActiveTab.mock.calls.length - 1][0];
+    expect(lastCall.activeTabId).toBe('custom-tab');
   });
 });
 
 test('falls back to dashboards tab when URL has invalid activeTab', () => {
   renderDashboardListing({}, { initialEntries: ['/list/invalid-tab'] });
 
-  expect(mockTabbedTableListView).toHaveBeenCalledTimes(1);
-  const props = mockTabbedTableListView.mock.calls[0][0];
+  expect(mockActiveTab).toHaveBeenCalledTimes(1);
+  const props = mockActiveTab.mock.calls[0][0];
   expect(props.activeTabId).toBe('dashboards');
 });
 

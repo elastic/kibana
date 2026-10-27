@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
 import { coreServices, dataService, serverlessService } from '../../services/kibana_services';
 import { getDashboardBreadcrumb } from '../_dashboard_app_strings';
@@ -112,6 +113,20 @@ export const DashboardListingPage = ({
     };
   }, [title, redirectTo, kbnUrlStateStorage]);
 
+  // Memoized so `DashboardListing` can keep its tab definitions referentially stable across re-renders.
+  const goToDashboard = useCallback(
+    (id?: string, viewMode?: ViewMode) => {
+      redirectTo({ destination: 'dashboard', id, editMode: viewMode === 'edit' });
+    },
+    [redirectTo]
+  );
+
+  const getDashboardUrl = useCallback(
+    (id: string, timeRestore: boolean) =>
+      getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore),
+    [kbnUrlStateStorage]
+  );
+
   const titleFilter = title ? `${title}` : '';
 
   if (showNoDataPage === undefined) {
@@ -127,12 +142,8 @@ export const DashboardListingPage = ({
         <DashboardListing
           useSessionStorageIntegration={true}
           initialFilter={initialFilter ?? titleFilter}
-          goToDashboard={(id, viewMode) => {
-            redirectTo({ destination: 'dashboard', id, editMode: viewMode === 'edit' });
-          }}
-          getDashboardUrl={(id, timeRestore) => {
-            return getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore);
-          }}
+          goToDashboard={goToDashboard}
+          getDashboardUrl={getDashboardUrl}
           getTabs={getListingTabs}
         />
       )}
