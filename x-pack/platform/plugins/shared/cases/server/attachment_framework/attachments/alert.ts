@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { StackAlertAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/alert/v2';
+import { StackAlertAttachmentPayloadSchema } from '../../../common/types/domain/attachment/alert/v2';
 import type { UnifiedAttachmentTypeSetup } from '../types';
 import { STACK_ALERT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 
