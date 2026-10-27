@@ -1,5 +1,5 @@
 {
-  "sha1": "7e69b33aa802972b576655f4bcb4f94c79112c61",
+  "sha1": "6a25074896041a16eb70822a904b5a9678f7d35a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/alerts/api/tests/ebt_telemetry.spec.ts",
-        "line": 44,
+        "line": 54,
         "column": 11
       }
     },
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/alerts/api/tests/ebt_telemetry.spec.ts",
-        "line": 72,
-        "column": 18
+        "line": 84,
+        "column": 13
       }
     }
   ]

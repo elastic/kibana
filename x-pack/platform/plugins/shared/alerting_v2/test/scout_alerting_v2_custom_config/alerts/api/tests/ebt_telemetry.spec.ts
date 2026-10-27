@@ -10,6 +10,7 @@
  * requests go through `apiClient`; alert events are seeded through `apiServices`.
  */
 
+import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ALERT_ACK_ACTION_APPLIED_EBT_EVENT_TYPE } from '../../../../../server/lib/telemetry/alert_action_ebt_schema';
@@ -17,13 +18,26 @@ import {
   ALERTING_V2_ALERTS_ALL_ROLE,
   apiTest,
   buildAlertEvent,
+  buildGroupHash,
   BULK_ACK_EPISODE_ACTION_URL,
   getAckEpisodeActionUrl,
   testData,
+  type AlertingApiServicesFixture,
 } from '../fixtures';
 
 // The API key request is not a browser request, so it is reported on the `api` channel with no app.
 const API_ORIGIN = { actor: 'user', channel: 'api' } as const;
+
+// Rule ids are created inside each test. The analytics buffer keeps events for a
+// rule id across runs, and these hooks delete only the ids this file created.
+const createdRuleIds: string[] = [];
+
+const cleanCreatedRules = async (apiServices: AlertingApiServicesFixture) => {
+  for (const ruleId of createdRuleIds) {
+    await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId });
+    await apiServices.alertingV2.alertActionsEvents.cleanUp({ ruleId });
+  }
+};
 
 apiTest.describe('Alert action EBT telemetry', { tag: ['@local-stateful-classic'] }, () => {
   let writerHeaders: Record<string, string>;
@@ -37,26 +51,25 @@ apiTest.describe('Alert action EBT telemetry', { tag: ['@local-stateful-classic'
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActionsEvents.cleanUp();
+    await cleanCreatedRules(apiServices);
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
     try {
-      await apiServices.alertingV2.ruleEvents.cleanUp();
-      await apiServices.alertingV2.alertActionsEvents.cleanUp();
+      await cleanCreatedRules(apiServices);
     } finally {
       await apiServices.alertingV2.ebt.optOut();
     }
   });
 
   apiTest('reports a single ack', async ({ apiClient, apiServices }) => {
-    const ruleId = 'ebt-ack-rule';
-    const episodeId = 'ebt-ack-episode';
+    const ruleId = `ebt-ack-rule-${randomUUID()}`;
+    createdRuleIds.push(ruleId);
+    const episodeId = `ebt-ack-episode-${randomUUID()}`;
     await apiServices.alertingV2.ruleEvents.seed([
       buildAlertEvent({
         rule: { id: ruleId, version: 1 },
-        group_hash: 'ebt-ack-group',
+        group_hash: buildGroupHash(episodeId),
         alert: { id: episodeId, status: 'active' },
       }),
     ]);
@@ -82,18 +95,19 @@ apiTest.describe('Alert action EBT telemetry', { tag: ['@local-stateful-classic'
   });
 
   apiTest('reports a bulk ack as one event for the rule', async ({ apiClient, apiServices }) => {
-    const ruleId = 'ebt-bulk-ack-rule';
-    const episodeIdOne = 'ebt-bulk-ack-episode-one';
-    const episodeIdTwo = 'ebt-bulk-ack-episode-two';
+    const ruleId = `ebt-bulk-ack-rule-${randomUUID()}`;
+    createdRuleIds.push(ruleId);
+    const episodeIdOne = `ebt-bulk-ack-episode-one-${randomUUID()}`;
+    const episodeIdTwo = `ebt-bulk-ack-episode-two-${randomUUID()}`;
     await apiServices.alertingV2.ruleEvents.seed([
       buildAlertEvent({
         rule: { id: ruleId, version: 1 },
-        group_hash: 'ebt-bulk-ack-group-one',
+        group_hash: buildGroupHash(episodeIdOne),
         alert: { id: episodeIdOne, status: 'active' },
       }),
       buildAlertEvent({
         rule: { id: ruleId, version: 1 },
-        group_hash: 'ebt-bulk-ack-group-two',
+        group_hash: buildGroupHash(episodeIdTwo),
         alert: { id: episodeIdTwo, status: 'active' },
       }),
     ]);
