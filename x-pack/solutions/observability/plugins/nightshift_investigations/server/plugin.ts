@@ -36,6 +36,10 @@ import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_de
 import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
 import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
+import {
+  createInvestigatorServiceAccountService,
+  type InvestigatorServiceAccountService,
+} from './lib/service_account/investigator_service_account';
 import { installAssistantAgent } from './lib/install_assistant_agent';
 import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
@@ -109,6 +113,10 @@ import type {
   NightshiftInvestigationsStartDeps,
 } from './types';
 
+type ManagedWorkflowsClient = Awaited<
+  ReturnType<WorkflowsExtensionsServerPluginStart['initManagedWorkflowsClient']>
+>;
+
 export class NightshiftInvestigationsPlugin
   implements
     Plugin<
@@ -137,6 +145,10 @@ export class NightshiftInvestigationsPlugin
   private encryptedSavedObjectsStart?: NightshiftInvestigationsStartDeps['encryptedSavedObjects'];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
+  private coreStart?: CoreStart;
+  private investigatorServiceAccountService?: InvestigatorServiceAccountService;
+  /** The managed workflows client of this plugin, shared by startup installs and setup. */
+  private managedWorkflowsClient?: Promise<ManagedWorkflowsClient>;
   private notificationRoutingService?: InvestigationAttachmentDocService<StoredNotificationRouting>;
   private investigationAvailability?: AvailabilityConfig;
   private cortexEnabled = false;
@@ -526,6 +538,9 @@ export class NightshiftInvestigationsPlugin
             });
           },
           isMemoryEnabled: () => this.memoryEnabled,
+          getInvestigatorServiceAccountService: this.getInvestigatorServiceAccountService,
+          getSpaceId: (request: KibanaRequest) =>
+            this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
           getMemoryPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
               throw new Error(
@@ -594,6 +609,7 @@ export class NightshiftInvestigationsPlugin
     this.encryptedSavedObjectsStart = plugins.encryptedSavedObjects;
     this.securityStart = plugins.security;
     this.security = coreStart.security;
+    this.coreStart = coreStart;
     this.notificationRoutingService = notificationRoutingAttachment.createService({
       esClient: coreStart.elasticsearch.client.asInternalUser,
       logger: this.logger,
@@ -621,7 +637,10 @@ export class NightshiftInvestigationsPlugin
     }
 
     if (plugins.workflowsExtensions) {
-      this.installManagedWorkflows(plugins.workflowsExtensions).catch((err) => {
+      this.managedWorkflowsClient = plugins.workflowsExtensions.initManagedWorkflowsClient(
+        NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
+      );
+      this.installManagedWorkflows(this.managedWorkflowsClient).catch((err) => {
         this.logger.error(
           `Failed to install nightshift investigations managed workflows: ${err.message}`
         );
@@ -723,6 +742,29 @@ export class NightshiftInvestigationsPlugin
     });
   };
 
+  /** One instance, so setups of a space queue behind each other across requests. */
+  private getInvestigatorServiceAccountService = (): InvestigatorServiceAccountService => {
+    if (this.investigatorServiceAccountService) {
+      return this.investigatorServiceAccountService;
+    }
+    if (!this.coreStart || !this.workflowsExtensionsStart) {
+      throw new Error('workflowsExtensions is not available — plugin start() has not been called');
+    }
+    this.investigatorServiceAccountService = createInvestigatorServiceAccountService({
+      core: this.coreStart,
+      workflowsExtensions: this.workflowsExtensionsStart,
+      workflowsManagement: this.workflowsManagement,
+      getInstalledWorkflowState: async (workflowId, spaceId) => {
+        const client = await this.managedWorkflowsClient;
+        return client ? client.getInstalledWorkflowState(workflowId, spaceId) : null;
+      },
+      spaces: this.spaces,
+      isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
+      logger: this.logger.get('service_account'),
+    });
+    return this.investigatorServiceAccountService;
+  };
+
   private getNotificationRoutingService =
     (): InvestigationAttachmentDocService<StoredNotificationRouting> => {
       if (!this.notificationRoutingService) {
@@ -793,11 +835,9 @@ export class NightshiftInvestigationsPlugin
    * platform can reconcile (prune orphans / apply upgrades) for this plugin's workflows.
    */
   private async installManagedWorkflows(
-    workflowsExtensions: WorkflowsExtensionsServerPluginStart
+    managedWorkflowsClient: Promise<ManagedWorkflowsClient>
   ): Promise<void> {
-    const client = await workflowsExtensions.initManagedWorkflowsClient(
-      NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
-    );
+    const client = await managedWorkflowsClient;
     await installInvestigationWorkflow({ client });
     await client.install(NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,

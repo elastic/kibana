@@ -8,10 +8,12 @@
     "server/**/*",
     "public/**/*",
     "integration_tests/**/*",
+    "scripts/**/*",
     "test/scout*/**/*"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/dev-cli-runner",
     "@kbn/share-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/nightshift-decision-trees",

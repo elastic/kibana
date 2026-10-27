@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTING_V2_EPISODES_STATUS_ALL } from '@kbn/alerting-v2-constants';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import type { TimeRange } from '@kbn/es-query';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -14,7 +15,7 @@ import { isArray, isEqual, isNil, isPlainObject, isString, sortBy } from 'lodash
 export const ALERTS_LIST_APP_STATE_KEY = 'alertsList' as const;
 
 /** Serialized in `_a` so “all statuses” survives reload (distinct from default Active) */
-export const EPISODES_LIST_STATUS_URL_ALL = 'all' as const;
+export const EPISODES_LIST_STATUS_URL_ALL = ALERTING_V2_EPISODES_STATUS_ALL;
 
 /** Default list filters (Active episodes, no rule/tags/search/assignee). */
 export const DEFAULT_EPISODES_LIST_FILTER: EpisodesFilterState = { status: ['active'] };

@@ -1097,6 +1097,69 @@ describe('AlertsDataGrid bulk actions', () => {
             });
           });
 
+          describe('and the action is disabled on query', () => {
+            const renderWithQueryDisabledAction = ({ alertsCount }: { alertsCount: number }) => {
+              const mockOnClick = jest.fn();
+              render(
+                <TestComponent
+                  {...dataGridPropsWithBulkActions}
+                  initialBulkActionsState={{
+                    ...createDefaultBulkActionsState(),
+                    isAllSelected: true,
+                    rowSelection: new Map([
+                      [0, { isLoading: false }],
+                      [1, { isLoading: false }],
+                    ]),
+                  }}
+                  renderContext={{ alertsCount }}
+                  additionalBulkActions={[
+                    {
+                      id: 0,
+                      items: [
+                        {
+                          label: 'Query Disabled Bulk Action',
+                          key: 'queryDisabledBulkAction',
+                          'data-test-subj': 'query-disabled-bulk-action',
+                          disableOnQuery: true,
+                          onClick: mockOnClick,
+                        },
+                      ],
+                    },
+                  ]}
+                />
+              );
+              return { mockOnClick };
+            };
+
+            it('disables the action when some matching alerts are not loaded', async () => {
+              const { mockOnClick } = renderWithQueryDisabledAction({
+                alertsCount: alerts.length + 1,
+              });
+
+              await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+              await waitForEuiPopoverOpen();
+
+              const action = screen.getByTestId('query-disabled-bulk-action');
+              expect(action).toBeDisabled();
+              await userEvent.click(action);
+              expect(mockOnClick).not.toHaveBeenCalled();
+            });
+
+            it('keeps the action enabled when every matching alert is loaded', async () => {
+              const { mockOnClick } = renderWithQueryDisabledAction({
+                alertsCount: alerts.length,
+              });
+
+              await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+              await waitForEuiPopoverOpen();
+
+              const action = screen.getByTestId('query-disabled-bulk-action');
+              expect(action).not.toBeDisabled();
+              await userEvent.click(action);
+              expect(mockOnClick.mock.calls[0][0]).toHaveLength(alerts.length);
+            });
+          });
+
           it('should first set all to loading, then clears the selection', async () => {
             const props = {
               ...dataGridPropsWithBulkActions,
