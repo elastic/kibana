@@ -118,7 +118,7 @@ recreate.
 
 ```sh
 cd /path/to/streams-controller
-tilt up --port 10351
+tilt up --context kind-streams --port 10351
 ```
 
 Open http://localhost:10351 and wait until the controller and WarpStream are ready.
@@ -282,5 +282,5 @@ make kind-delete    # from either repo
 | Collector `x509` / unknown authority | Saving Map republishes the unit and drops the local TLS patch. Re-run `seed` or `test_ui_flow` (they re-apply it). |
 | No `telemetry.yaml` on the unit ConfigMap | Controller patch did not land; check `STREAMS_CONTROLLER` and Tilt rebuild. |
 | Motel `502` / TLS handshake | Motel ingress must stay `scheme: http`. |
-| Empty data after ~2 minutes | `kubectl --context kind-streams -n project-dev logs deploy/default --since=10m` |
+| Empty data after ~2 minutes | `kubectl --context kind-streams -n project-dev logs deploy/streams-default --since=10m` |
 | Logs in, `metrics-streams.otel-default` empty | Index collector is missing or cannot reach ES. Re-run `setup` / `seed`. Logs: `kubectl --context kind-streams -n motel-index-collector logs deploy/motel-index-collector --since=10m` |

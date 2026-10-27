@@ -226,7 +226,7 @@ cmd_status() {
   if kubectl_ctx -n streams-controller get deploy streams-controller >/dev/null 2>&1; then
     ok "controller Deployment"
   else
-    missing "controller  →  cd streams-controller && tilt up --port 10351"
+    missing "controller  →  cd streams-controller && tilt up --context kind-streams --port 10351"
   fi
   if [[ -n "$ES" ]]; then
     ok "Elasticsearch $ES ($ES_USER)"
@@ -632,10 +632,10 @@ dst.write_text("".join(out))
 PY
   kubectl_ctx -n "$UNIT_NS" patch "streamunit/$UNIT_ID" --type=merge \
     -p "{\"spec\":{\"artifact\":$(jq -Rs . < "$patched")}}" >/dev/null
-  log "waiting for collector Deployment $UNIT_NS/$UNIT_ID rollout"
-  if ! kubectl_ctx -n "$UNIT_NS" rollout status "deployment/$UNIT_ID" --timeout=180s; then
+  log "waiting for collector Deployment $UNIT_NS/streams-$UNIT_ID rollout"
+  if ! kubectl_ctx -n "$UNIT_NS" rollout status "deployment/streams-$UNIT_ID" --timeout=180s; then
     warn "collector did not become ready. Recent logs:"
-    kubectl_ctx -n "$UNIT_NS" logs "deploy/$UNIT_ID" --tail=30 || true
+    kubectl_ctx -n "$UNIT_NS" logs "deploy/streams-$UNIT_ID" --tail=30 || true
     die "collector rollout failed (unknown otlp_http: image is too old; set STREAMS_COLLECTOR_TAG)"
   fi
 }
@@ -681,7 +681,7 @@ wait_for_marker_docs() {
     sleep 5
   done
   warn "marker did not appear. Collector errors:"
-  kubectl_ctx -n "$UNIT_NS" logs "deploy/$UNIT_ID" --since=5m \
+  kubectl_ctx -n "$UNIT_NS" logs "deploy/streams-$UNIT_ID" --since=5m \
     | grep -E '"log.level":"(warn|error)"' | tail -20 || true
   return 1
 }
@@ -804,7 +804,7 @@ wait_for_data() {
     return 0
   fi
   warn "no demo documents yet. Collector logs:"
-  kubectl_ctx -n "$UNIT_NS" logs "deploy/$UNIT_ID" --since=5m \
+  kubectl_ctx -n "$UNIT_NS" logs "deploy/streams-$UNIT_ID" --since=5m \
     | grep -E '"log.level":"(warn|error)"' | tail -20 || true
   die "demo data did not appear (see above)"
 }
@@ -870,7 +870,7 @@ artifact_has_es_tls() {
 }
 
 collector_dropping_tls() {
-  kubectl_ctx -n "$UNIT_NS" logs "deploy/$UNIT_ID" --since=3m 2>/dev/null \
+  kubectl_ctx -n "$UNIT_NS" logs "deploy/streams-$UNIT_ID" --since=3m 2>/dev/null \
     | grep -q 'certificate is valid for host.docker.internal'
 }
 
@@ -1029,7 +1029,7 @@ Start these yourself and leave them running:
   pnpm es serverless --projectType=observability
   pnpm serverless-oblt
   cd streams-config-distributor && tilt up --context kind-streams -- --port 18443
-  cd streams-controller && tilt up --port 10351
+  cd streams-controller && tilt up --context kind-streams --port 10351
 
 Then from the Kibana checkout:
 
