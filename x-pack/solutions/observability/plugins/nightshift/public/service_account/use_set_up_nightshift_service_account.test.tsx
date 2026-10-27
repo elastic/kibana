@@ -56,7 +56,13 @@ describe('useSetUpNightshiftServiceAccount', () => {
       url === '/internal/security/service_account'
         ? {
             serviceAccounts: [
-              { id: 'uiam-agent-1', name: 'nightshift_agent', enabled: true, assumable: true },
+              {
+                id: 'uiam-agent-1',
+                name: 'nightshift_agent',
+                roles: ['_nightshift_agent'],
+                enabled: true,
+                assumable: true,
+              },
             ],
           }
         : { name: '_nightshift_automations' }

@@ -29,6 +29,15 @@ const QUERY_KEY = ['nightshift.investigatorServiceAccount'] as const;
 const toError = (error: unknown, { isServerless }: { isServerless: boolean }): Error => {
   if (error instanceof NightshiftServiceAccountSetupError) {
     const { name, role } = error.details;
+    if (error.code === 'role_mismatch') {
+      return new Error(
+        i18n.translate('xpack.nightshift.serviceAccount.roleMismatchError', {
+          defaultMessage:
+            'The service account {name} exists, but does not hold the {role} role Nightshift needs. Give it that role, or delete it and set Nightshift up again.',
+          values: { name, role },
+        })
+      );
+    }
     if (error.code === 'account_unusable') {
       return new Error(
         i18n.translate('xpack.nightshift.serviceAccount.accountUnusableError', {
