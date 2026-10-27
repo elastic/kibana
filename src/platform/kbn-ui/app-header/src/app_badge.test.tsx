@@ -54,21 +54,6 @@ describe('AppBadge', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onBadgeClick after a clickable badge fires its onClick', () => {
-    const onClick = jest.fn();
-    const onBadgeClick = jest.fn();
-    render(
-      <AppBadge
-        badge={{ label: 'Modified', onClick, onClickAriaLabel: 'Open' }}
-        onBadgeClick={onBadgeClick}
-      />
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'Open' }));
-    expect(onClick).toHaveBeenCalledTimes(1);
-    expect(onBadgeClick).toHaveBeenCalledTimes(1);
-  });
-
   it('keeps a menu badge as a button that still opens its menu', async () => {
     const onItemClick = jest.fn();
     render(

@@ -35,4 +35,17 @@ describe('AppBadges', () => {
       expect(screen.queryByRole('button', { name: 'Open three' })).not.toBeInTheDocument()
     );
   });
+
+  it('keeps a hidden badge without onClick non-clickable', async () => {
+    render(
+      <AppBadges
+        badges={[{ label: 'One' }, { label: 'Two' }, { label: 'Three' }, { label: 'Four' }]}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.badgesOverflow));
+
+    expect(await screen.findByText('Three')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Three/ })).not.toBeInTheDocument();
+  });
 });
