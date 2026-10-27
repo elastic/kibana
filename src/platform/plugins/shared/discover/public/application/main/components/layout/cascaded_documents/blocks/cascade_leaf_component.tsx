@@ -522,6 +522,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
           renderCustomGridBody={CustomCascadeGridBodyMemoized}
           onFullScreenChange={setIsCellInFullScreenMode}
           externalCustomRenderers={externalCustomRenderers}
+          isPaginationEnabled={false}
           paginationMode="infinite"
           sampleSizeState={cellData.length}
           initialState={initialGridState}
