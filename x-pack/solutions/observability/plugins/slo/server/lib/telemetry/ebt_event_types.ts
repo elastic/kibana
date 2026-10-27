@@ -5,23 +5,12 @@
  * 2.0.
  */
 
-import type { EventOrigin } from './event_origin';
-
 export const SLO_CREATED_EBT_EVENT_TYPE = 'slo_created' as const;
 export const SLO_UPDATED_EBT_EVENT_TYPE = 'slo_updated' as const;
 export const SLO_DELETED_EBT_EVENT_TYPE = 'slo_deleted' as const;
 export const SLO_RESET_EBT_EVENT_TYPE = 'slo_reset' as const;
 export const SLO_BULK_DELETED_EBT_EVENT_TYPE = 'slo_bulk_deleted' as const;
 export const SLO_ROLLUP_DATA_PURGED_EBT_EVENT_TYPE = 'slo_rollup_data_purged' as const;
-
-export const SLO_EBT_EVENT_TYPES = [
-  SLO_CREATED_EBT_EVENT_TYPE,
-  SLO_UPDATED_EBT_EVENT_TYPE,
-  SLO_DELETED_EBT_EVENT_TYPE,
-  SLO_RESET_EBT_EVENT_TYPE,
-  SLO_BULK_DELETED_EBT_EVENT_TYPE,
-  SLO_ROLLUP_DATA_PURGED_EBT_EVENT_TYPE,
-] as const;
 
 export const SLO_CHANGED_FIELDS = [
   'name',
@@ -93,5 +82,3 @@ export interface SloEbtEventMap {
 }
 
 export type SloEbtEventType = keyof SloEbtEventMap;
-
-export type WithOrigin<T> = T & { origin: EventOrigin };

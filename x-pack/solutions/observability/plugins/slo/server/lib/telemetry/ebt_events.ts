@@ -15,7 +15,6 @@ import type {
   SloEbtEventType,
   SloRollupDataPurgedEbtData,
   SloUpdatedEbtData,
-  WithOrigin,
 } from './ebt_event_types';
 import {
   SLO_BULK_DELETED_EBT_EVENT_TYPE,
@@ -25,6 +24,12 @@ import {
   SLO_ROLLUP_DATA_PURGED_EBT_EVENT_TYPE,
   SLO_UPDATED_EBT_EVENT_TYPE,
 } from './ebt_event_types';
+
+type WithOrigin<T> = T & { origin: EventOrigin };
+
+type SloEbtEventTypeOpts<EventType extends SloEbtEventType> = EventTypeOpts<
+  WithOrigin<SloEbtEventMap[EventType]>
+>;
 
 const eventOriginEbtSchema: SchemaObject<EventOrigin> = {
   properties: {
@@ -56,7 +61,7 @@ const eventOriginEbtSchema: SchemaObject<EventOrigin> = {
   },
 };
 
-const sloDefinitionEbtSchema: RootSchema<SloDefinitionEbtData> = {
+const sloDefinitionEbtSchema: RootSchema<WithOrigin<SloDefinitionEbtData>> = {
   slo_id: {
     type: 'keyword',
     _meta: { description: 'The id of the SLO.' },
@@ -147,6 +152,7 @@ const sloDefinitionEbtSchema: RootSchema<SloDefinitionEbtData> = {
     },
     _meta: { description: 'The SLO settings.' },
   },
+  origin: eventOriginEbtSchema,
 };
 
 const sloUpdatedEbtSchema: RootSchema<WithOrigin<SloUpdatedEbtData>> = {
@@ -168,7 +174,6 @@ const sloUpdatedEbtSchema: RootSchema<WithOrigin<SloUpdatedEbtData>> = {
     },
     _meta: { description: 'The SLO fields changed by the update.' },
   },
-  origin: eventOriginEbtSchema,
 };
 
 const sloDeletedEbtSchema: RootSchema<WithOrigin<SloDeletedEbtData>> = {
@@ -177,7 +182,6 @@ const sloDeletedEbtSchema: RootSchema<WithOrigin<SloDeletedEbtData>> = {
     type: 'boolean',
     _meta: { description: 'Whether the SLO was deleted as part of a bulk deletion.' },
   },
-  origin: eventOriginEbtSchema,
 };
 
 const sloBulkDeletedEbtSchema: RootSchema<WithOrigin<SloBulkDeletedEbtData>> = {
@@ -214,38 +218,34 @@ const sloRollupDataPurgedEbtSchema: RootSchema<WithOrigin<SloRollupDataPurgedEbt
   origin: eventOriginEbtSchema,
 };
 
-const sloDefinitionWithOriginEbtSchema: RootSchema<WithOrigin<SloDefinitionEbtData>> = {
-  ...sloDefinitionEbtSchema,
-  origin: eventOriginEbtSchema,
+export const sloCreatedEbtEvent: SloEbtEventTypeOpts<typeof SLO_CREATED_EBT_EVENT_TYPE> = {
+  eventType: SLO_CREATED_EBT_EVENT_TYPE,
+  schema: sloDefinitionEbtSchema,
 };
 
-export type SloEbtEventTypeOpts = {
-  [EventType in SloEbtEventType]: EventTypeOpts<WithOrigin<SloEbtEventMap[EventType]>>;
+export const sloUpdatedEbtEvent: SloEbtEventTypeOpts<typeof SLO_UPDATED_EBT_EVENT_TYPE> = {
+  eventType: SLO_UPDATED_EBT_EVENT_TYPE,
+  schema: sloUpdatedEbtSchema,
 };
 
-export const sloEbtEventTypeOpts: SloEbtEventTypeOpts = {
-  [SLO_CREATED_EBT_EVENT_TYPE]: {
-    eventType: SLO_CREATED_EBT_EVENT_TYPE,
-    schema: sloDefinitionWithOriginEbtSchema,
-  },
-  [SLO_UPDATED_EBT_EVENT_TYPE]: {
-    eventType: SLO_UPDATED_EBT_EVENT_TYPE,
-    schema: sloUpdatedEbtSchema,
-  },
-  [SLO_DELETED_EBT_EVENT_TYPE]: {
-    eventType: SLO_DELETED_EBT_EVENT_TYPE,
-    schema: sloDeletedEbtSchema,
-  },
-  [SLO_RESET_EBT_EVENT_TYPE]: {
-    eventType: SLO_RESET_EBT_EVENT_TYPE,
-    schema: sloDefinitionWithOriginEbtSchema,
-  },
-  [SLO_BULK_DELETED_EBT_EVENT_TYPE]: {
-    eventType: SLO_BULK_DELETED_EBT_EVENT_TYPE,
-    schema: sloBulkDeletedEbtSchema,
-  },
-  [SLO_ROLLUP_DATA_PURGED_EBT_EVENT_TYPE]: {
-    eventType: SLO_ROLLUP_DATA_PURGED_EBT_EVENT_TYPE,
-    schema: sloRollupDataPurgedEbtSchema,
-  },
+export const sloDeletedEbtEvent: SloEbtEventTypeOpts<typeof SLO_DELETED_EBT_EVENT_TYPE> = {
+  eventType: SLO_DELETED_EBT_EVENT_TYPE,
+  schema: sloDeletedEbtSchema,
+};
+
+export const sloResetEbtEvent: SloEbtEventTypeOpts<typeof SLO_RESET_EBT_EVENT_TYPE> = {
+  eventType: SLO_RESET_EBT_EVENT_TYPE,
+  schema: sloDefinitionEbtSchema,
+};
+
+export const sloBulkDeletedEbtEvent: SloEbtEventTypeOpts<typeof SLO_BULK_DELETED_EBT_EVENT_TYPE> = {
+  eventType: SLO_BULK_DELETED_EBT_EVENT_TYPE,
+  schema: sloBulkDeletedEbtSchema,
+};
+
+export const sloRollupDataPurgedEbtEvent: SloEbtEventTypeOpts<
+  typeof SLO_ROLLUP_DATA_PURGED_EBT_EVENT_TYPE
+> = {
+  eventType: SLO_ROLLUP_DATA_PURGED_EBT_EVENT_TYPE,
+  schema: sloRollupDataPurgedEbtSchema,
 };

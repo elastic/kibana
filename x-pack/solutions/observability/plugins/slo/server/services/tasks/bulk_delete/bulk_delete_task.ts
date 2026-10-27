@@ -10,6 +10,7 @@ import type { BulkDeleteParams, BulkDeleteStatusResponse } from '@kbn/slo-schema
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { IndicatorTypes } from '../../../domain/models';
 import type { EventOrigin, SloTelemetryService } from '../../../lib/telemetry';
+import { toEventOrigin } from '../../../lib/telemetry';
 import type { SLOPluginStartDependencies } from '../../../types';
 import { DeleteSLO } from '../../delete_slo';
 import { DefaultSLODefinitionRepository } from '../../slo_definition_repository';
@@ -87,7 +88,7 @@ export class BulkDeleteTask {
 
               const params = taskInstance.params as BulkDeleteTaskParams;
               const telemetry = this.telemetryService.getReporter(
-                params.origin ?? { actor: 'user', channel: 'system' }
+                params.origin ?? toEventOrigin(fakeRequest)
               );
 
               const deleteSLO = new DeleteSLO(

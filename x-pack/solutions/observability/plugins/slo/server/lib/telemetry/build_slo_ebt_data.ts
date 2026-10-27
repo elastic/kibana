@@ -23,10 +23,8 @@ export const toSloDefinitionEbtData = (slo: SLODefinition): SloDefinitionEbtData
     time_window_type: timeWindow.type,
     time_window_duration: timeWindow.duration.format(),
     objective_target: objective.target,
-    ...(objective.timesliceTarget !== undefined
-      ? { timeslice_target: objective.timesliceTarget }
-      : {}),
-    ...(objective.timesliceWindow ? { timeslice_window: objective.timesliceWindow.format() } : {}),
+    timeslice_target: objective.timesliceTarget,
+    timeslice_window: objective.timesliceWindow?.format(),
     group_by_count: [slo.groupBy].flat().filter((field) => field !== ALL_VALUE).length,
     tags_count: slo.tags.length,
     dashboards_count: slo.artifacts?.dashboards?.length ?? 0,

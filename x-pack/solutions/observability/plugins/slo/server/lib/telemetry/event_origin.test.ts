@@ -17,31 +17,29 @@ const UI_HEADERS = {
 
 const executionContextHeader = (context: object) => encodeURIComponent(JSON.stringify(context));
 
-const createRequest = (
-  headers: Record<string, string> = {},
-  { isFakeRequest = false }: { isFakeRequest?: boolean } = {}
-): KibanaRequest => ({
-  ...httpServerMock.createKibanaRequest({ headers }),
-  isFakeRequest,
-});
+const createRequest = (headers: Record<string, string> = {}): KibanaRequest =>
+  httpServerMock.createKibanaRequest({ headers });
+
+const createFakeRequest = (headers: Record<string, string> = {}): KibanaRequest =>
+  httpServerMock.createFakeKibanaRequest({ headers });
 
 describe('toEventOrigin', () => {
   describe('channel', () => {
     it('is `system` for a fake request', () => {
-      expect(toEventOrigin('user', createRequest({}, { isFakeRequest: true }))).toEqual({
+      expect(toEventOrigin(createFakeRequest())).toEqual({
         actor: 'user',
         channel: 'system',
       });
     });
 
     it('is `system` for a fake request even when it carries the UI headers', () => {
-      const request = createRequest(UI_HEADERS, { isFakeRequest: true });
+      const request = createFakeRequest(UI_HEADERS);
 
-      expect(toEventOrigin('user', request).channel).toBe('system');
+      expect(toEventOrigin(request).channel).toBe('system');
     });
 
     it('is `ui` when kbn-version, referer, and x-elastic-internal-origin are all present', () => {
-      expect(toEventOrigin('user', createRequest(UI_HEADERS)).channel).toBe('ui');
+      expect(toEventOrigin(createRequest(UI_HEADERS)).channel).toBe('ui');
     });
 
     it.each(Object.keys(UI_HEADERS))('is `api` when %s is missing', (missingHeader) => {
@@ -49,11 +47,11 @@ describe('toEventOrigin', () => {
         Object.entries(UI_HEADERS).filter(([header]) => header !== missingHeader)
       );
 
-      expect(toEventOrigin('user', createRequest(headers)).channel).toBe('api');
+      expect(toEventOrigin(createRequest(headers)).channel).toBe('api');
     });
 
     it('is `api` for a request with no UI headers', () => {
-      expect(toEventOrigin('user', createRequest({ authorization: 'ApiKey abc' }))).toEqual({
+      expect(toEventOrigin(createRequest({ authorization: 'ApiKey abc' }))).toEqual({
         actor: 'user',
         channel: 'api',
       });
@@ -67,7 +65,7 @@ describe('toEventOrigin', () => {
         'x-kbn-context': executionContextHeader({ name: 'slo', type: 'application' }),
       });
 
-      expect(toEventOrigin('user', request)).toEqual({
+      expect(toEventOrigin(request)).toEqual({
         actor: 'user',
         channel: 'ui',
         app: 'slo',
@@ -79,13 +77,13 @@ describe('toEventOrigin', () => {
         'x-kbn-context': executionContextHeader({ name: 'slo' }),
       });
 
-      expect(toEventOrigin('user', request)).toEqual({ actor: 'user', channel: 'api' });
+      expect(toEventOrigin(request)).toEqual({ actor: 'user', channel: 'api' });
     });
 
     it('is omitted when the execution context header is malformed', () => {
       const request = createRequest({ ...UI_HEADERS, 'x-kbn-context': '%not-json' });
 
-      expect(toEventOrigin('user', request)).toEqual({ actor: 'user', channel: 'ui' });
+      expect(toEventOrigin(request)).toEqual({ actor: 'user', channel: 'ui' });
     });
 
     it('is omitted when the execution context name is not a valid app id', () => {
@@ -94,7 +92,7 @@ describe('toEventOrigin', () => {
         'x-kbn-context': executionContextHeader({ name: 'not a valid app!' }),
       });
 
-      expect(toEventOrigin('user', request)).toEqual({ actor: 'user', channel: 'ui' });
+      expect(toEventOrigin(request)).toEqual({ actor: 'user', channel: 'ui' });
     });
 
     it('is omitted when the execution context name is too long', () => {
@@ -103,7 +101,7 @@ describe('toEventOrigin', () => {
         'x-kbn-context': executionContextHeader({ name: 'a'.repeat(65) }),
       });
 
-      expect(toEventOrigin('user', request)).toEqual({ actor: 'user', channel: 'ui' });
+      expect(toEventOrigin(request)).toEqual({ actor: 'user', channel: 'ui' });
     });
   });
 });

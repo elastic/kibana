@@ -270,7 +270,7 @@ export class SLOPlugin
             transformManager,
             summaryTransformManager,
             racClient,
-            telemetry: telemetryService.getReporter(toEventOrigin('user', request)),
+            telemetry: telemetryService.getReporter(toEventOrigin(request)),
           };
         },
       },

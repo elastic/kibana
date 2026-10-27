@@ -6,18 +6,23 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
-import type { SloEbtEventType } from './ebt_event_types';
-import { SLO_EBT_EVENT_TYPES } from './ebt_event_types';
-import { sloEbtEventTypeOpts } from './ebt_events';
-
-type EventTypeRegistry = Pick<AnalyticsServiceSetup, 'registerEventType'>;
-
-const registerEventType = <EventType extends SloEbtEventType>(
-  analytics: EventTypeRegistry,
-  eventType: EventType
-) => analytics.registerEventType(sloEbtEventTypeOpts[eventType]);
+import {
+  sloBulkDeletedEbtEvent,
+  sloCreatedEbtEvent,
+  sloDeletedEbtEvent,
+  sloResetEbtEvent,
+  sloRollupDataPurgedEbtEvent,
+  sloUpdatedEbtEvent,
+} from './ebt_events';
 
 /** Registers every SLO EBT event type with Core analytics. */
-export const registerSloEbtEvents = (analytics: EventTypeRegistry): void => {
-  SLO_EBT_EVENT_TYPES.forEach((eventType) => registerEventType(analytics, eventType));
+export const registerSloEbtEvents = (
+  analytics: Pick<AnalyticsServiceSetup, 'registerEventType'>
+): void => {
+  analytics.registerEventType(sloCreatedEbtEvent);
+  analytics.registerEventType(sloUpdatedEbtEvent);
+  analytics.registerEventType(sloDeletedEbtEvent);
+  analytics.registerEventType(sloResetEbtEvent);
+  analytics.registerEventType(sloBulkDeletedEbtEvent);
+  analytics.registerEventType(sloRollupDataPurgedEbtEvent);
 };

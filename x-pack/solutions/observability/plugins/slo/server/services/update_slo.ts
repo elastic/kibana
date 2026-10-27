@@ -133,7 +133,7 @@ export class UpdateSLO {
         throw err;
       }
 
-      this.reportUpdated(originalSlo, updatedSlo, false);
+      this.reportUpdated(originalSlo, updatedSlo);
 
       return this.toResponse(updatedSlo);
     }
@@ -216,19 +216,15 @@ export class UpdateSLO {
 
     await this.deleteOriginalSLO(originalSlo);
 
-    this.reportUpdated(originalSlo, updatedSlo, true);
+    this.reportUpdated(originalSlo, updatedSlo);
 
     return this.toResponse(updatedSlo);
   }
 
-  private reportUpdated(
-    originalSlo: SLODefinition,
-    updatedSlo: SLODefinition,
-    revisionBumped: boolean
-  ) {
+  private reportUpdated(originalSlo: SLODefinition, updatedSlo: SLODefinition) {
     this.telemetry.report(SLO_UPDATED_EBT_EVENT_TYPE, {
       ...toSloDefinitionEbtData(updatedSlo),
-      revision_bumped: revisionBumped,
+      revision_bumped: updatedSlo.revision !== originalSlo.revision,
       changed_fields: getChangedFields(originalSlo, updatedSlo),
     });
   }

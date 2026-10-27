@@ -29,7 +29,7 @@ export const bulkDeleteSLORoute = createSloServerRoute({
     const taskId = v4();
     const taskParams: BulkDeleteTaskParams = {
       ...params.body,
-      origin: toEventOrigin('user', request),
+      origin: toEventOrigin(request),
     };
     await taskManager.ensureScheduled(
       {

@@ -6,19 +6,14 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 
-export type EventOriginActor = 'user' | 'internal';
-
-export type EventOriginChannel = 'system' | 'ui' | 'api';
+type EventOriginChannel = 'system' | 'ui' | 'api';
 
 export interface EventOrigin {
-  actor: EventOriginActor;
+  actor: 'user';
   channel: EventOriginChannel;
   app?: string;
 }
-
-const UI_REQUEST_HEADERS = ['kbn-version', 'referer', X_ELASTIC_INTERNAL_ORIGIN_REQUEST] as const;
 
 const EXECUTION_CONTEXT_HEADER = 'x-kbn-context';
 
@@ -29,7 +24,9 @@ const getChannel = (request: KibanaRequest): EventOriginChannel => {
     return 'system';
   }
 
-  const isUiRequest = UI_REQUEST_HEADERS.every((header) => Boolean(request.headers[header]));
+  const { headers } = request;
+  const isUiRequest =
+    request.isInternalApiRequest && Boolean(headers['kbn-version']) && Boolean(headers.referer);
   return isUiRequest ? 'ui' : 'api';
 };
 
@@ -48,10 +45,13 @@ const getAppFromExecutionContext = (request: KibanaRequest): string | undefined 
   }
 };
 
-/** Resolves who made a change and through which channel and app, from the request. */
-export const toEventOrigin = (actor: EventOriginActor, request: KibanaRequest): EventOrigin => {
+/** Resolves the channel and app of a user request, mirroring alerting_v2 `lib/event_origin/event_origin.ts`. */
+export const toEventOrigin = (request: KibanaRequest): EventOrigin => {
   const channel = getChannel(request);
-  const app = channel === 'ui' ? getAppFromExecutionContext(request) : undefined;
 
-  return { actor, channel, ...(app ? { app } : {}) };
+  return {
+    actor: 'user',
+    channel,
+    app: channel === 'ui' ? getAppFromExecutionContext(request) : undefined,
+  };
 };

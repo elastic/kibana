@@ -59,8 +59,8 @@ describe('toSloDefinitionEbtData', () => {
   it('omits the timeslice objective for an occurrences SLO', () => {
     const data = toSloDefinitionEbtData(createSLO());
 
-    expect(data).not.toHaveProperty('timeslice_target');
-    expect(data).not.toHaveProperty('timeslice_window');
+    expect(data.timeslice_target).toBeUndefined();
+    expect(data.timeslice_window).toBeUndefined();
   });
 
   it('reports the calendar aligned time window', () => {
