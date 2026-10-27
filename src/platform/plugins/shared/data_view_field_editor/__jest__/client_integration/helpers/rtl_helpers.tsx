@@ -153,6 +153,12 @@ export const createRtlHelpers = (user: UserEvent) => {
   const createFieldEditorFields = ({
     getTypeValue = (value: string) => value,
   }: FieldEditorFieldsOptions = {}) => {
+    const updateCustomLabel = async (value: string) => {
+      await setInputValue('customLabelRow.input', value);
+
+      await flushFormValidation();
+    };
+
     const updateName = async (value: string) => {
       await setInputValue('nameField.input', value);
 
@@ -178,6 +184,7 @@ export const createRtlHelpers = (user: UserEvent) => {
     };
 
     return {
+      updateCustomLabel,
       updateName,
       updatePopularity,
       updateScript,

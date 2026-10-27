@@ -13,7 +13,7 @@ import type {
   SnapshotResult,
   SnapshotSummary,
 } from '@kbn/slo-schema';
-import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { groupBy, partition } from 'lodash';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { DateRange, SLODefinition } from '../domain/models';
@@ -212,7 +212,7 @@ const toTimeWindowKey = (slo: SLODefinition): string =>
   `${slo.timeWindow.type}_${slo.timeWindow.duration.format()}`;
 
 const buildMetricAggs = (slo: SLODefinition) =>
-  timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+  slo.budgetingMethod === 'timeslices'
     ? {
         good: { sum: { field: 'slo.isGoodSlice' } },
         total: { value_count: { field: 'slo.isGoodSlice' } },
@@ -239,7 +239,7 @@ const toSnapshotSummary = (
   sliceRange: DateRange
 ): SnapshotSummary => {
   const sliValue =
-    timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && slo.objective.timesliceWindow
+    slo.budgetingMethod === 'timeslices' && slo.objective.timesliceWindow
       ? computeSLI(good, total, getSlicesFromDateRange(sliceRange, slo.objective.timesliceWindow))
       : computeSLI(good, total);
 

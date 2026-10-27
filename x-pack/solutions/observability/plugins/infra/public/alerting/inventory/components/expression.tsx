@@ -118,7 +118,8 @@ export const defaultExpression = {
 } as InventoryMetricConditions;
 
 export const Expressions: React.FC<ExpressionsProps> = (props) => {
-  const { setRuleParams, ruleParams, errors, metadata } = props;
+  const { id: ruleId, setRuleParams, ruleParams, errors, metadata } = props;
+  const isExistingRule = Boolean(ruleId);
   const { source } = useSourceContext();
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar>('m');
@@ -210,6 +211,8 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
 
       if (!isSchemaSelectableForInventoryRule(nt)) {
         setRuleParams('schema', undefined);
+      } else if (!ruleParams.schema && !isExistingRule) {
+        setRuleParams('schema', DEFAULT_SCHEMA);
       }
 
       setRuleParams(
@@ -220,7 +223,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
         }))
       );
     },
-    [setRuleParams, ruleParams.criteria]
+    [setRuleParams, ruleParams.criteria, ruleParams.schema, isExistingRule]
   );
 
   const updateSchema = useCallback(
@@ -276,10 +279,8 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
       }
     }
 
-    if (!ruleParams.schema) {
-      if (md && md.schema && canSelectSchema) {
-        setRuleParams('schema', md.schema);
-      }
+    if (!ruleParams.schema && canSelectSchema && !isExistingRule) {
+      setRuleParams('schema', md?.schema ?? DEFAULT_SCHEMA);
     }
 
     if (ruleParams.criteria && ruleParams.criteria.length) {
@@ -352,7 +353,11 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
             <div css={NonCollapsibleExpressionCss}>
               <ExpressionDropDown
                 options={schemaOptions}
-                value={ruleParams.schema ?? DEFAULT_SCHEMA}
+                // A saved rule without a schema evaluates on ECS fields and aggregations,
+                // so show ECS without writing it to the rule params.
+                value={
+                  ruleParams.schema ?? (isExistingRule ? DataSchemaFormatEnum.ECS : DEFAULT_SCHEMA)
+                }
                 onChange={updateSchema}
                 description={i18n.translate(
                   'xpack.infra.metrics.alertFlyout.expression.schema.descriptionLabel',

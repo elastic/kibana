@@ -44,7 +44,10 @@ export interface UseWorkflowExecutionsSearchParams {
  */
 const extractFilterValues = (filters: Filter[], fieldKey: string): string[] => {
   const values: string[] = [];
-  const relevant = filters.filter((f) => !f.meta.disabled && f.meta.key === fieldKey);
+  // Negated filters can't be expressed as an include list; they are sent through KQL instead.
+  const relevant = filters.filter(
+    (f) => !f.meta.disabled && !f.meta.negate && f.meta.key === fieldKey
+  );
   for (const f of relevant) {
     if (f.meta.type === 'phrases' && Array.isArray(f.meta.params)) {
       // Multi-select from OptionsListControl or search bar
@@ -87,10 +90,12 @@ export const useWorkflowExecutionsSearch = ({
   );
   const executedBy = useMemo(() => extractFilterValues(filters, 'executedBy'), [filters]);
 
-  // Remaining filters (e.g. workflowId, triggeredBy) go through KQL.
+  // Remaining filters (e.g. workflowId, triggeredBy) and negated structured filters go through KQL.
   const remainingFiltersKql = useMemo(() => {
     const STRUCTURED_FIELDS = new Set(['status', 'executedBy']);
-    const remaining = filters.filter((f) => !STRUCTURED_FIELDS.has(f.meta.key ?? ''));
+    const remaining = filters.filter(
+      (f) => f.meta.negate || !STRUCTURED_FIELDS.has(f.meta.key ?? '')
+    );
     return filtersToKql(remaining);
   }, [filters]);
 

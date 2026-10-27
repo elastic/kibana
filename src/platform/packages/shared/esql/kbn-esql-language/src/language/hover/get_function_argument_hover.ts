@@ -14,10 +14,10 @@ import { getFunctionDefinition } from '../../commands/definitions/utils';
 import { fromCache, setToCache } from './hover_cache';
 
 const TIME_SYSTEM_DESCRIPTIONS = {
-  '?_tstart': i18n.translate('kbn-esql-language.esql.autocomplete.timeSystemParamStart', {
+  '?_tstart': i18n.translate('esqlLanguage.esql.autocomplete.timeSystemParamStart', {
     defaultMessage: 'The start time from the date picker',
   }),
-  '?_tend': i18n.translate('kbn-esql-language.esql.autocomplete.timeSystemParamEnd', {
+  '?_tend': i18n.translate('esqlLanguage.esql.autocomplete.timeSystemParamEnd', {
     defaultMessage: 'The end time from the date picker',
   }),
 };

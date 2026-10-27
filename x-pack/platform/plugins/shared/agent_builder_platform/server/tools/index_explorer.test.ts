@@ -14,8 +14,21 @@ jest.mock('@kbn/agent-builder-genai-utils', () => ({
 
 import { indexExplorer } from '@kbn/agent-builder-genai-utils';
 import { indexExplorerTool } from './index_explorer';
+import { resolveToolSchema } from './test_utils';
 
 const indexExplorerMock = indexExplorer as jest.MockedFunction<typeof indexExplorer>;
+
+const run = async ({
+  includeFrozen,
+  includeFrozenByDefault = false,
+}: { includeFrozen?: boolean; includeFrozenByDefault?: boolean } = {}) => {
+  const tool = indexExplorerTool();
+  const schema = await resolveToolSchema(tool, includeFrozenByDefault);
+  await tool.handler(
+    schema.parse({ query: 'security alerts', include_frozen: includeFrozen }),
+    agentBuilderMocks.tools.createHandlerContext()
+  );
+};
 
 describe('indexExplorerTool', () => {
   beforeEach(() => {
@@ -24,10 +37,7 @@ describe('indexExplorerTool', () => {
   });
 
   it('excludes frozen tier indices by default', async () => {
-    await indexExplorerTool().handler(
-      { query: 'security alerts' },
-      agentBuilderMocks.tools.createHandlerContext()
-    );
+    await run();
 
     expect(indexExplorerMock).toHaveBeenCalledWith(
       expect.objectContaining({ includeFrozen: false })
@@ -35,13 +45,26 @@ describe('indexExplorerTool', () => {
   });
 
   it('includes frozen tier indices when opted in', async () => {
-    await indexExplorerTool().handler(
-      { query: 'security alerts', include_frozen: true },
-      agentBuilderMocks.tools.createHandlerContext()
-    );
+    await run({ includeFrozen: true });
 
     expect(indexExplorerMock).toHaveBeenCalledWith(
       expect.objectContaining({ includeFrozen: true })
+    );
+  });
+
+  it('includes frozen tier indices by default when the space setting is enabled', async () => {
+    await run({ includeFrozenByDefault: true });
+
+    expect(indexExplorerMock).toHaveBeenCalledWith(
+      expect.objectContaining({ includeFrozen: true })
+    );
+  });
+
+  it('lets the agent override the default', async () => {
+    await run({ includeFrozen: false, includeFrozenByDefault: true });
+
+    expect(indexExplorerMock).toHaveBeenCalledWith(
+      expect.objectContaining({ includeFrozen: false })
     );
   });
 });

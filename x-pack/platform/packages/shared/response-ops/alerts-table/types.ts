@@ -726,6 +726,7 @@ export type BulkActionGroupId =
   | 'status'
   | 'assignees'
   | 'cases'
+  | 'caseRemoval'
   | 'tags'
   | 'timeline'
   | 'custom'
@@ -740,6 +741,11 @@ export interface BulkActionsConfig {
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;
+  /**
+   * Caps how many alerts the action accepts. When more are selected, counting every matching
+   * alert under a "select all", the item is disabled and `reason` is shown as its tooltip.
+   */
+  selectionLimit?: { max: number; reason: string };
   onClick?: (
     selectedIds: TimelineItem[],
     isAllSelected: boolean,
