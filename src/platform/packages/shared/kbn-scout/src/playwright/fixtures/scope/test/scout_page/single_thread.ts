@@ -13,11 +13,18 @@ import type { Page, TestInfo } from '@playwright/test';
 import { test as base } from '@playwright/test';
 import {
   EuiBasicTableObject,
+  EuiCallOutObject,
+  EuiColorPickerObject,
   EuiDataGridObject,
   EuiDraggableObject,
+  EuiFieldSearchObject,
   EuiGlobalToastListObject,
+  EuiPaginationObject,
+  EuiSearchBarObject,
   EuiSelectableObject,
+  EuiSideNavObject,
   EuiSuperSelectObject,
+  EuiTableObject,
 } from '../../../../eui_components';
 import type { ScoutPage } from '.';
 import { attachBrowserConsoleErrors, collectBrowserConsoleErrors } from './browser_console_errors';
@@ -117,8 +124,21 @@ function extendPageWithComponents(page: Page): ScoutPage['components'] {
       new EuiSelectableObject(scope ?? page, testSubj),
     basicTable: (testSubj: string, scope?: ObjectScope) =>
       new EuiBasicTableObject(scope ?? page, testSubj),
+    table: (testSubj: string, scope?: ObjectScope) => new EuiTableObject(scope ?? page, testSubj),
     draggable: (testSubj: string, scope?: ObjectScope) =>
       new EuiDraggableObject(scope ?? page, testSubj),
+    callOut: (testSubj: string, scope?: ObjectScope) =>
+      new EuiCallOutObject(scope ?? page, testSubj),
+    colorPicker: (testSubj: string, scope?: ObjectScope) =>
+      new EuiColorPickerObject(scope ?? page, testSubj),
+    fieldSearch: (testSubj: string, scope?: ObjectScope) =>
+      new EuiFieldSearchObject(scope ?? page, testSubj),
+    pagination: (testSubj: string, scope?: ObjectScope) =>
+      new EuiPaginationObject(scope ?? page, testSubj),
+    searchBar: (testSubj: string, scope?: ObjectScope) =>
+      new EuiSearchBarObject(scope ?? page, testSubj),
+    sideNav: (testSubj: string, scope?: ObjectScope) =>
+      new EuiSideNavObject(scope ?? page, testSubj),
     toast: (testSubj: string = 'globalToastList', scope?: ObjectScope) =>
       new EuiGlobalToastListObject(scope ?? page, testSubj),
   };

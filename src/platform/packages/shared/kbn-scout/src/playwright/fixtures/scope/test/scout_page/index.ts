@@ -11,11 +11,18 @@ import type { EuiComboBoxObject, ObjectScope } from '@elastic/eui-test-helpers';
 import type { Page } from '@playwright/test';
 import type {
   EuiBasicTableObject,
+  EuiCallOutObject,
+  EuiColorPickerObject,
   EuiDataGridObject,
   EuiDraggableObject,
+  EuiFieldSearchObject,
   EuiGlobalToastListObject,
+  EuiPaginationObject,
+  EuiSearchBarObject,
   EuiSelectableObject,
+  EuiSideNavObject,
   EuiSuperSelectObject,
+  EuiTableObject,
 } from '../../../../eui_components';
 import type { RunA11yScanOptions } from '../../../../utils';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
@@ -165,7 +172,16 @@ export type ScoutPage = Page & {
     superSelect: (testSubj: string, scope?: ObjectScope) => EuiSuperSelectObject;
     selectable: (testSubj: string, scope?: ObjectScope) => EuiSelectableObject;
     basicTable: (testSubj: string, scope?: ObjectScope) => EuiBasicTableObject;
+    /** Plain `EuiTable`, positional rows and cells. Use `basicTable` for field based columns. */
+    table: (testSubj: string, scope?: ObjectScope) => EuiTableObject;
     draggable: (testSubj: string, scope?: ObjectScope) => EuiDraggableObject;
+    callOut: (testSubj: string, scope?: ObjectScope) => EuiCallOutObject;
+    colorPicker: (testSubj: string, scope?: ObjectScope) => EuiColorPickerObject;
+    fieldSearch: (testSubj: string, scope?: ObjectScope) => EuiFieldSearchObject;
+    pagination: (testSubj: string, scope?: ObjectScope) => EuiPaginationObject;
+    /** The search bar's `box['data-test-subj']`, same API as `fieldSearch`. */
+    searchBar: (testSubj: string, scope?: ObjectScope) => EuiSearchBarObject;
+    sideNav: (testSubj: string, scope?: ObjectScope) => EuiSideNavObject;
     /**
      * Drives the global toast list (`EuiGlobalToastListObject`); `testSubj`
      * defaults to `globalToastList`, the subj Kibana core sets on the list.

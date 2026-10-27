@@ -27,11 +27,11 @@ export class FileDataVisualizer {
 
   constructor(private readonly page: ScoutPage) {
     this.fileLoadingIndicator = this.page.testSubj.locator('dataVisualizerPageFileLoading');
-    // The subj is compound (`… fileTooLarge`), so match the token and exclude the
-    // `…__message`, `…__content` and `…__actions` children EUI derives from it.
-    this.fileUploadErrorCallout = this.page.locator(
-      '[data-test-subj~="dataVisualizerFileUploadErrorCallout"]:not([data-test-subj$="__message"]):not([data-test-subj$="__content"]):not([data-test-subj$="__actions"])'
-    );
+    // The subj is compound (`… fileTooLarge`), the helper matches the token and keeps to
+    // the call out element itself.
+    this.fileUploadErrorCallout = this.page.components.callOut(
+      'dataVisualizerFileUploadErrorCallout'
+    ).locator;
     this.fileInput = this.page.locator('input[type="file"]');
     this.importButton = this.page.testSubj.locator('fileUploadImportButton');
     this.createDataViewSwitch = this.page.testSubj.locator('dataVisualizerCreateDataViewSwitch');

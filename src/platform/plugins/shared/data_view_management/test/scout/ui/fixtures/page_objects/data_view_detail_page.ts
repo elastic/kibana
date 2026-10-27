@@ -336,8 +336,10 @@ export class DataViewDetailPage {
     await this.page.testSubj.click('colorEditorAddColor');
     // The editor starts with a default rule at index 0; the rule is configured in place.
     await this.page.testSubj.fill('colorEditorKeyPattern 0', pattern);
-    await this.pickColor('Select a text color for item 0', textColor);
-    await this.pickColor('Select a background color for item 0', backgroundColor);
+    await this.page.components.colorPicker('colorEditorColorPicker 0').setColor(textColor);
+    await this.page.components
+      .colorPicker('colorEditorBackgroundPicker 0')
+      .setColor(backgroundColor);
   }
 
   /** Saves and confirms the "change field type" modal, then waits for the flyout to close. */
@@ -387,15 +389,5 @@ export class DataViewDetailPage {
 
   private async toggleFlyoutRow(rowTestSubj: string): Promise<void> {
     await this.page.testSubj.locator(rowTestSubj).locator('[data-test-subj="toggle"]').click();
-  }
-
-  private async pickColor(buttonName: string, hex: string): Promise<void> {
-    const button = this.page.getByRole('button', { name: buttonName });
-    const input = this.page.locator('[data-test-subj~="euiColorPickerInput_bottom"]');
-    await button.click();
-    await input.fill(hex);
-    // Close the popover so only one picker input is in the DOM at a time
-    await button.click();
-    await input.waitFor({ state: 'hidden' });
   }
 }
