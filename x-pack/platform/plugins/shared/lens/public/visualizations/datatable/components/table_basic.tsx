@@ -708,8 +708,28 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
 const datatableContainerStyles = css`
   height: 100%;
-  overflow: auto hidden;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  // DataGrid owns scrolling. A competing overflow:auto wrapper steals width when a
+  // scrollbar appears and feeds back into EUI's column-width ResizeObserver loop
+  // (https://github.com/elastic/kibana/issues/208426).
+  overflow: hidden;
   user-select: text;
+
+  .euiDataGrid,
+  .euiDataGrid__focusWrap,
+  .euiDataGrid__content {
+    min-width: 0;
+  }
+
+  .euiDataGrid__virtualized {
+    // Keep a vertical scrollbar so clientWidth cannot change when rows overflow.
+    // EUI sizes columns from that width; a toggling Y-bar is what made the X-bar
+    // flicker (https://github.com/elastic/kibana/issues/208426).
+    // !important: react-window sets overflow:auto as an inline style.
+    overflow-y: scroll !important;
+  }
 
   .lnsTableCell--multiline {
     white-space: pre-wrap;

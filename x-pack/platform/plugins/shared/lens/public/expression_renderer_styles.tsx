@@ -31,7 +31,26 @@ export const lnsExpressionRendererStyle = (euiThemeContext: UseEuiTheme) => {
     height: 100%;
     display: flex;
     overflow: auto;
+    min-width: 0;
+    min-height: 0;
     ${lnsNumericFontStyles(euiThemeContext)}
+
+    > * {
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .expExpressionRenderer__expression {
+      min-width: 0;
+      min-height: 0;
+    }
+
+    // Tables must not share a scroller with this wrapper. Flex min-width:auto plus
+    // overflow:auto makes the wrapper scrollbar appear/disappear as EUI DataGrid
+    // recomputes column widths (https://github.com/elastic/kibana/issues/208426).
+    &:has([data-test-subj='lnsDataTable']) {
+      overflow: hidden;
+    }
   `;
 };
 
