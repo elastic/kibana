@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { loadDataView } from './resolve_data_view';
+import { getInitialDataViewTarget, loadDataView } from './resolve_data_view';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock as services } from '../../../../__mocks__/services';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 describe('Resolve data view tests', () => {
   test('returns valid data for an existing data view', async () => {
@@ -35,5 +36,28 @@ describe('Resolve data view tests', () => {
     expect(result.loadedDataView).toEqual(dataViewMock);
     expect(result.requestedDataViewFound).toBe(false);
     expect(result.requestedDataViewId).toBe(dataViewId);
+  });
+
+  describe('getInitialDataViewTarget', () => {
+    const initialAdHocDataViewSpec = { id: 'inline-data-view', title: 'logs-*' };
+
+    test.each([
+      ['the initial state', undefined, undefined, 'inline-data-view'],
+      ['the saved tab over the initial state', undefined, dataViewMock, dataViewMock.id],
+      [
+        'the URL over the saved tab',
+        createDataViewDataSource({ dataViewId: 'url-data-view' }),
+        dataViewMock,
+        'url-data-view',
+      ],
+    ])('targets %s', (_, dataSource, currentDataView, expectedDataViewId) => {
+      expect(
+        getInitialDataViewTarget({
+          dataSource,
+          initialDataViewIdOrSpec: initialAdHocDataViewSpec,
+          currentDataView,
+        })
+      ).toEqual({ dataViewId: expectedDataViewId, initialAdHocDataViewSpec });
+    });
   });
 });

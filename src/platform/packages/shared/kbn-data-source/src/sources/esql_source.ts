@@ -110,6 +110,7 @@ interface EsqlSourceConstructorArgs {
   timeFieldName: string | undefined;
   projectRouting: string | undefined;
   resultColumns: readonly DatatableColumn[];
+  areColumnsAvailable: boolean;
 }
 
 /**
@@ -159,6 +160,9 @@ export class EsqlSource implements DataSourceBase {
    */
   public readonly resultColumns: readonly DatatableColumn[];
 
+  /** Whether column information was fetched successfully or supplied, even if the list is empty. */
+  public readonly areColumnsAvailable: boolean;
+
   private readonly columns: readonly Column[];
   private filterableSource?: FilterableSource;
   private readonly columnsByName: ReadonlyMap<string, Column>;
@@ -171,6 +175,7 @@ export class EsqlSource implements DataSourceBase {
     timeFieldName,
     projectRouting,
     resultColumns,
+    areColumnsAvailable,
   }: EsqlSourceConstructorArgs) {
     this.id = id;
     this.datasetId = datasetId;
@@ -181,6 +186,7 @@ export class EsqlSource implements DataSourceBase {
     this.references = [{ type: 'index-pattern', id, name: 'data-source' }];
 
     this.resultColumns = resultColumns;
+    this.areColumnsAvailable = areColumnsAvailable;
     this.columns = resultColumns.map(columnFromDatatableColumn);
     this.columnsByName = new Map(this.columns.map((c) => [c.name, c]));
     this.fields = this.columns.map(columnToFieldBase);
@@ -231,25 +237,26 @@ export class EsqlSource implements DataSourceBase {
     const shouldResolveSchema = Boolean(http) && args.resultColumns === undefined;
 
     if (http && (shouldResolveTimeField || shouldResolveSchema)) {
-      const [resolvedTimeField, info] = await Promise.all([
-        shouldResolveTimeField
-          ? getESQLTimeField({
-              query,
-              http,
-              projectRouting: args.projectRouting,
-            })
-          : Promise.resolve(timeFieldName),
-        shouldResolveSchema
-          ? getESQLSourceInfo({
-              query,
-              http,
-              projectRouting: args.projectRouting,
-              timeRange: args.timeRange,
-              timeFieldName: args.timeFieldName,
-              esqlVariables: cleanVariables,
-            }).catch(() => null)
-          : Promise.resolve(null),
-      ]);
+      const timeFieldRequest = shouldResolveTimeField
+        ? getESQLTimeField({
+            query,
+            http,
+            projectRouting: args.projectRouting,
+          })
+        : Promise.resolve(timeFieldName);
+
+      const schemaRequest = shouldResolveSchema
+        ? getESQLSourceInfo({
+            query,
+            http,
+            projectRouting: args.projectRouting,
+            timeRange: args.timeRange,
+            timeFieldName: args.timeFieldName,
+            esqlVariables: cleanVariables,
+          }).catch(() => null)
+        : Promise.resolve(null);
+
+      const [resolvedTimeField, info] = await Promise.all([timeFieldRequest, schemaRequest]);
 
       timeFieldName = resolvedTimeField;
       if (shouldResolveSchema) {
@@ -271,6 +278,8 @@ export class EsqlSource implements DataSourceBase {
       sha256(hashInput),
       getESQLAdHocDataviewId({ indexPattern: title, timeFieldName, projectRouting }),
     ]);
+    const areColumnsAvailable =
+      args.resultColumns !== undefined || (shouldResolveSchema && discoveredSchema !== null);
     const instance = new EsqlSource({
       id: `esql-${hash}`,
       datasetId,
@@ -279,13 +288,12 @@ export class EsqlSource implements DataSourceBase {
       timeFieldName,
       projectRouting,
       resultColumns,
+      areColumnsAvailable,
     });
 
     // Only cache a known schema: given columns or a successful lookup. A failed lookup
     // (`info === null`) or a create without `http` or columns is retried by a later create.
-    const isSchemaKnown =
-      args.resultColumns !== undefined || (shouldResolveSchema && discoveredSchema !== null);
-    if (isSchemaKnown) {
+    if (areColumnsAvailable) {
       EsqlSource.instanceCache.set(instanceKey, instance);
     }
     return instance;
@@ -340,6 +348,7 @@ export class EsqlSource implements DataSourceBase {
       timeFieldName: this.timeFieldName,
       projectRouting: this.projectRouting,
       resultColumns,
+      areColumnsAvailable: true,
     });
   }
 
