@@ -93,9 +93,9 @@ Follow existing patterns in the target area first; below are common defaults.
 - Run `node scripts/i18n_check --fix` to check for and fix errors.
 
 ## Documentation
-- Public docs under `docs/**` are cumulative for 9.x and serverless. Use [`applies_to`](https://www.elastic.co/docs/contribute-docs/how-to/cumulative-docs/reference) for version or deployment differences.
+- Public docs under `docs/**` are cumulative for 9.x and serverless. Use `applies_to` badges for version or deployment differences.
 - When adding or changing a `kibana.yml` or Advanced Setting, update its reference source under `docs/reference/configuration-reference/` or `docs/reference/advanced-settings-*.yml`.
-- Public HTTP APIs (`access: 'public'`) are documented in route code. Add `summary`, `description`, `options.availability` (including `since` and any non-stable `stability`), and a description for every schema field (`meta.description` or Zod `.describe()`).
+- Public HTTP APIs (`access: 'public'`) are documented in route code. Add `summary`, `description`, `options.availability` (including explicit `since` and `stability`), and a description for every schema field. Before finishing a public API change, apply `.agents/skills/api-docs-review/SKILL.md` to the changed routes and schemas.
 
 ## CI
 - Use the `bk` CLI when interacting with Buildkite.
