@@ -16,14 +16,19 @@ interface Options {
 }
 
 export const getDataViewIdFromESQLQuery = async (query: string, options: Options = {}) => {
-  const preferredDataViews = apiPublishesDataSources(options.parentApi)
+  const preferredSources = apiPublishesDataSources(options.parentApi)
     ? options.parentApi.dataSources$.value
     : undefined;
 
   const indexPattern = getIndexPatternFromESQLQuery(query);
-  const existingDataView = preferredDataViews?.find(({ title }) => title === indexPattern);
-  if (existingDataView?.id) {
-    return existingDataView.id;
+  const publishedSource = preferredSources?.find(({ title }) => title === indexPattern);
+  if (publishedSource?.id) {
+    const publishedDataView = await dataViewsService
+      .get(publishedSource.id, false)
+      .catch(() => undefined);
+    if (publishedDataView?.id) {
+      return publishedDataView.id;
+    }
   }
 
   const [dataView] = await dataViewsService.find(indexPattern);
