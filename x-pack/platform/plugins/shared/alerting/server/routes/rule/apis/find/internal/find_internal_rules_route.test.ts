@@ -132,7 +132,7 @@ describe('findInternalRulesRoute', () => {
 
       expect(rulesClient.find).toHaveBeenCalledWith({
         options: { perPage: 1, page: 1, defaultSearchOperator: 'OR' },
-        allowPartialResults: !!allowPartialResults
+        allowPartialResults: !!allowPartialResults,
       });
     }
   );
