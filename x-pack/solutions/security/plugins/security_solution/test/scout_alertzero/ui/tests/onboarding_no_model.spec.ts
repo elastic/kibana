@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
-import type { ScoutPage } from '@kbn/scout-security';
 import { createUiOnboardingSpace, listWorkers, spaceTest, tags } from '../fixtures';
 
 /**
@@ -26,60 +25,44 @@ spaceTest.describe(
   () => {
     spaceTest.setTimeout(120_000);
 
-    /**
-     * Advances past the intro and waits for the worker-selection step. Call
-     * `page.goto(kbnUrl.app('alertzero', { space }))` before this.
-     */
-    const advanceToWorkers = async (page: ScoutPage): Promise<void> => {
-      await page.testSubj.locator('alertZeroOnboardingContinueButton').click();
-      await expect(page.testSubj.locator('alertZeroOnboardingSelectedCount')).toBeVisible();
-    };
-
     spaceTest(
       'no-model callout renders and locks worker controls',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices }) => {
+      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices }) => {
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: false,
         });
         try {
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
-          await advanceToWorkers(page);
+          const alertZero = pageObjects.alertZeroApp;
+          await alertZero.advanceToWorkerSelection();
 
           // The callout is the page's own statement of the lock; its action
           // opens Feature Settings in a new tab.
-          const callout = page.testSubj.locator('alertZeroOnboardingNoModelCallout');
-          await expect(callout).toBeVisible();
-          await expect(
-            page.testSubj.locator('alertZeroOnboardingNoModelFeatureSettingsButton')
-          ).toBeVisible();
+          await expect(alertZero.noModelCallout).toBeVisible();
+          await expect(alertZero.noModelFeatureSettingsButton).toBeVisible();
 
           // Every worker toggle and the Enable button are locked by `isModelMissing`.
           const workers = await listWorkers(space.api, space.spaceId);
           for (const worker of workers) {
-            await expect(
-              page.testSubj.locator(`alertZeroOnboardingWorkerToggle-${worker.id}`)
-            ).toBeDisabled();
+            await expect(alertZero.workerToggle(worker.id)).toBeDisabled();
           }
-          await expect(page.testSubj.locator('alertZeroOnboardingEnableButton')).toBeDisabled();
+          await expect(alertZero.enableButton).toBeDisabled();
 
-          // NEGATIVE CONTROL (restored): with a model present the same controls
-          // are usable. Run the twin space WITH the stub model and assert the
-          // unlock — proves the lock above is the no-model state, not a generic
-          // disabled state.
+          // With a model present the same controls are usable. Run the twin
+          // space WITH the stub model and assert the unlock — proves the lock
+          // above is the no-model state, not a generic disabled state.
           const withModel = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
             withStubModel: true,
           });
           try {
             await page.goto(kbnUrl.app('alertzero', { space: withModel.spaceId }));
-            await advanceToWorkers(page);
+            await alertZero.advanceToWorkerSelection();
             for (const worker of workers) {
-              await expect(
-                page.testSubj.locator(`alertZeroOnboardingWorkerToggle-${worker.id}`)
-              ).toBeEnabled();
+              await expect(alertZero.workerToggle(worker.id)).toBeEnabled();
             }
-            await expect(page.testSubj.locator('alertZeroOnboardingEnableButton')).toBeEnabled();
-            await expect(page.testSubj.locator('alertZeroOnboardingNoModelCallout')).toBeHidden();
+            await expect(alertZero.enableButton).toBeEnabled();
+            await expect(alertZero.noModelCallout).toBeHidden();
           } finally {
             await withModel.cleanup();
           }
@@ -91,26 +74,24 @@ spaceTest.describe(
 
     spaceTest(
       'feature-settings escape hatch links to the management page',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices }) => {
+      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices }) => {
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: false,
         });
         try {
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
-          await advanceToWorkers(page);
+          const alertZero = pageObjects.alertZeroApp;
+          await alertZero.advanceToWorkerSelection();
 
           // Two surfaces name Feature Settings on this page: the selection
           // description link and the no-model callout action. Both must open
           // Stack Management > Feature Settings (deep link `model_settings`).
-          for (const selector of [
-            'alertZeroOnboardingFeatureSettingsLink',
-            'alertZeroOnboardingNoModelFeatureSettingsButton',
+          for (const link of [
+            alertZero.featureSettingsLink,
+            alertZero.noModelFeatureSettingsButton,
           ]) {
-            await expect(page.testSubj.locator(selector)).toHaveAttribute(
-              'href',
-              /\/management\/.+model_settings/
-            );
+            await expect(link).toHaveAttribute('href', /\/management\/.+model_settings/);
           }
         } finally {
           await space.cleanup();

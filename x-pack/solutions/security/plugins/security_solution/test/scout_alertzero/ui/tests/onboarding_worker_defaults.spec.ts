@@ -13,6 +13,7 @@ import {
   tags,
   type WorkerInfo,
 } from '../fixtures';
+import type { AlertZeroAppPage } from '../fixtures/page_objects/alertzero_app_page';
 
 /**
  * Worker defaults & no-save-until-click (#19932 scenario 1).
@@ -31,27 +32,20 @@ spaceTest.describe(
   () => {
     spaceTest.setTimeout(150_000);
 
-    /** Advances past the intro and waits for the worker-selection step. */
-    const advanceToWorkers = async (page: import('@kbn/scout-security').ScoutPage) => {
-      await page.testSubj.locator('alertZeroOnboardingContinueButton').click();
-      await expect(page.testSubj.locator('alertZeroOnboardingSelectedCount')).toBeVisible();
-    };
-
     const countTogglesOn = async (
-      page: import('@kbn/scout-security').ScoutPage,
+      alertZero: AlertZeroAppPage,
       workers: WorkerInfo[]
     ): Promise<number> => {
       let on = 0;
       for (const worker of workers) {
-        const toggle = page.testSubj.locator(`alertZeroOnboardingWorkerToggle-${worker.id}`);
-        if (await toggle.isChecked()) on += 1;
+        if (await alertZero.workerToggle(worker.id).isChecked()) on += 1;
       }
       return on;
     };
 
     spaceTest(
       'every worker is selected by default',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices }) => {
+      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices }) => {
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
@@ -61,10 +55,11 @@ spaceTest.describe(
 
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
-          await advanceToWorkers(page);
+          const alertZero = pageObjects.alertZeroApp;
+          await alertZero.advanceToWorkerSelection();
 
-          expect(await countTogglesOn(page, workers)).toBe(workers.length);
-          await expect(page.testSubj.locator('alertZeroOnboardingSelectedCount')).toHaveText(
+          expect(await countTogglesOn(alertZero, workers)).toBe(workers.length);
+          await expect(alertZero.selectedCount).toHaveText(
             `${workers.length} of ${workers.length} Workers selected`
           );
         } finally {
@@ -75,34 +70,32 @@ spaceTest.describe(
 
     spaceTest(
       'toggles do not persist when navigating away before Enable',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices }) => {
+      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices }) => {
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
         try {
           const workers = await listWorkers(space.api, space.spaceId);
-          const [first, second] = workers;
+          const [first] = workers;
           expect(workers.length).toBeGreaterThan(1);
 
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
-          await advanceToWorkers(page);
+          const alertZero = pageObjects.alertZeroApp;
+          await alertZero.advanceToWorkerSelection();
 
           // Turn one off, leave without saving, come back.
-          await page.testSubj.locator(`alertZeroOnboardingWorkerToggle-${first.id}`).click();
-          await expect(
-            page.testSubj.locator(`alertZeroOnboardingWorkerToggle-${first.id}`)
-          ).not.toBeChecked();
+          await alertZero.workerToggle(first.id).click();
+          await expect(alertZero.workerToggle(first.id)).not.toBeChecked();
 
           await page.goto(kbnUrl.app('security', { space: space.spaceId }));
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
-          await advanceToWorkers(page);
+          await alertZero.advanceToWorkerSelection();
 
           // Defaults are back — and server state was never touched.
-          expect(await countTogglesOn(page, workers)).toBe(workers.length);
+          expect(await countTogglesOn(alertZero, workers)).toBe(workers.length);
           const serverWorkers = await listWorkers(space.api, space.spaceId);
           expect(serverWorkers.filter((w) => w.enabled)).toStrictEqual([]);
-          void second;
         } finally {
           await space.cleanup();
         }
@@ -111,21 +104,20 @@ spaceTest.describe(
 
     spaceTest(
       'enable footer shows the CTA copy and helper links',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices }) => {
+      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices }) => {
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
         try {
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
-          await advanceToWorkers(page);
+          const alertZero = pageObjects.alertZeroApp;
+          await alertZero.advanceToWorkerSelection();
 
-          await expect(page.testSubj.locator('alertZeroOnboardingEnableButton')).toBeVisible();
-          await expect(page.testSubj.locator('alertZeroOnboardingEnableButton')).toHaveText(
-            'Enable and run'
-          );
-          await expect(page.testSubj.locator('alertZeroOnboardingReadMoreLink')).toBeVisible();
-          await expect(page.testSubj.locator('alertZeroOnboardingWatchSettingsLink')).toBeVisible();
+          await expect(alertZero.enableButton).toBeVisible();
+          await expect(alertZero.enableButton).toHaveText('Enable and run');
+          await expect(alertZero.readMoreLink).toBeVisible();
+          await expect(alertZero.watchSettingsLink).toBeVisible();
         } finally {
           await space.cleanup();
         }

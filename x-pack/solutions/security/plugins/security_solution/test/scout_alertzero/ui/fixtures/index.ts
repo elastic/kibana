@@ -5,7 +5,24 @@
  * 2.0.
  */
 
-export { apiTest, spaceTest, tags } from '@kbn/scout-security';
+import { spaceTest as spaceBaseTest, apiTest, tags } from '@kbn/scout-security';
+import type { ScoutPage, SecurityPageObjects } from '@kbn/scout-security';
+import { extendPageObjects, type AlertZeroPageObjects } from './page_objects';
+
+export interface AlertZeroTestFixtures {
+  pageObjects: AlertZeroPageObjects;
+}
+
+export const spaceTest = spaceBaseTest.extend<AlertZeroTestFixtures>({
+  pageObjects: async (
+    { pageObjects, page }: { pageObjects: SecurityPageObjects; page: ScoutPage },
+    use: (pageObjects: AlertZeroPageObjects) => Promise<void>
+  ) => {
+    await use(extendPageObjects(pageObjects, page));
+  },
+});
+
+export { apiTest, tags };
 export { ALERTZERO_READ_ONLY_ROLE, TI_HEADERS } from './constants';
 export {
   createApi,
@@ -27,6 +44,7 @@ export {
   createOnboardingSpace,
   createUiOnboardingSpace,
   deleteSeededProposals,
+  enableFirstWorker,
   resetOnboardingState,
   seedClosedProposal,
   type OnboardingSpace,

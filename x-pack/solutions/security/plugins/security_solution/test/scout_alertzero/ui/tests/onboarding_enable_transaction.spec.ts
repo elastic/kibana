@@ -31,28 +31,20 @@ spaceTest.describe(
   () => {
     spaceTest.setTimeout(240_000);
 
-    /** Advances past the intro and clicks Enable and run. */
-    const enableAll = async (page: import('@kbn/scout-security').ScoutPage) => {
-      await page.testSubj.locator('alertZeroOnboardingContinueButton').click();
-      await expect(page.testSubj.locator('alertZeroOnboardingSelectedCount')).toBeVisible();
-      await page.testSubj.locator('alertZeroOnboardingEnableButton').click();
-    };
-
     spaceTest(
       'enable and run gives every enabled worker a service account and lands on the queue',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices }) => {
+      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices }) => {
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
         try {
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
-          await enableAll(page);
+          const alertZero = pageObjects.alertZeroApp;
+          await alertZero.enableAll();
 
           // The queue replaces onboarding after the fan-out settles.
-          await expect(page.testSubj.locator('alertZeroProposalsTrendChartRow')).toBeVisible({
-            timeout: 120_000,
-          });
+          await alertZero.waitForQueue();
 
           const workers = await listWorkers(space.api, space.spaceId);
           const enabled = workers.filter((w) => w.enabled);
@@ -68,7 +60,7 @@ spaceTest.describe(
 
     spaceTest(
       'a rapid double click issues exactly one PATCH per worker',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices }) => {
+      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices }) => {
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
@@ -84,16 +76,15 @@ spaceTest.describe(
 
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
-          await page.testSubj.locator('alertZeroOnboardingContinueButton').click();
-          await expect(page.testSubj.locator('alertZeroOnboardingSelectedCount')).toBeVisible();
+          const alertZero = pageObjects.alertZeroApp;
+          await alertZero.advanceToWorkerSelection();
 
-          const enable = page.testSubj.locator('alertZeroOnboardingEnableButton');
-          await enable.click({ noWaitAfter: true });
-          await enable.click({ force: true, noWaitAfter: true }).catch(() => undefined);
+          await alertZero.enableButton.click({ noWaitAfter: true });
+          await alertZero.enableButton
+            .click({ force: true, noWaitAfter: true })
+            .catch(() => undefined);
 
-          await expect(page.testSubj.locator('alertZeroProposalsTrendChartRow')).toBeVisible({
-            timeout: 120_000,
-          });
+          await alertZero.waitForQueue();
 
           expect(patchUrls).toHaveLength(workers.length);
           expect(new Set(patchUrls).size).toBe(patchUrls.length);
@@ -105,7 +96,7 @@ spaceTest.describe(
 
     spaceTest(
       'a failed PATCH fails open: siblings enable and the UI recovers to the queue',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices }) => {
+      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices }) => {
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
@@ -118,15 +109,14 @@ spaceTest.describe(
 
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
-          await enableAll(page);
+          const alertZero = pageObjects.alertZeroApp;
+          await alertZero.enableAll();
 
           // Partial failure deliberately holds the onboarding open: LandingPage keeps
           // savingInProgress=true so a partially-committed state cannot transition to the
           // queue before the user retries or leaves (use_enable_workers.ts).
-          await expect(page.testSubj.locator('alertZeroOnboardingSelectedCount')).toBeVisible({
-            timeout: 120_000,
-          });
-          await expect(page.testSubj.locator('alertZeroProposalsTrendChartRow')).toBeHidden();
+          await expect(alertZero.selectedCount).toBeVisible({ timeout: 120_000 });
+          await expect(alertZero.proposalsTrendChartRow).toBeHidden();
           await expect(page.getByText('Some settings were saved before the error')).toBeVisible({
             timeout: 60_000,
           });
@@ -148,10 +138,8 @@ spaceTest.describe(
           await expect(page.locator('.euiGlobalToastListItem')).toHaveCount(0, {
             timeout: 10_000,
           });
-          await page.testSubj.locator('alertZeroOnboardingEnableButton').click();
-          await expect(page.testSubj.locator('alertZeroProposalsTrendChartRow')).toBeVisible({
-            timeout: 120_000,
-          });
+          await alertZero.enableButton.click();
+          await alertZero.waitForQueue();
 
           const afterRetry = await listWorkers(space.api, space.spaceId);
           expect(afterRetry.filter((w) => w.enabled)).toHaveLength(workers.length);
@@ -163,7 +151,7 @@ spaceTest.describe(
 
     spaceTest(
       'disabling a worker from Watch settings persists off',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices }) => {
+      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices }) => {
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
@@ -172,6 +160,7 @@ spaceTest.describe(
         // finally, not a trailing call on the success path only.
         let accountCleanup: (() => Promise<void>) | undefined;
         try {
+          const alertZero = pageObjects.alertZeroApp;
           // Seed one enabled worker via the same API shape the UI's save uses.
           const workerId = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
           const workers = await listWorkers(space.api, space.spaceId);
@@ -195,7 +184,7 @@ spaceTest.describe(
           );
 
           // The enabled switch sits on the accordion header band, visible while collapsed.
-          const switchEl = page.testSubj.locator(`alertZeroWorkerEnabledSwitch-${target.id}`);
+          const switchEl = alertZero.workerEnabledSwitch(target.id);
           await expect(switchEl).toBeVisible({ timeout: 60_000 });
           await expect(switchEl).toBeChecked();
           // alert-triage has no dependents, so no confirmation modal intervenes.
@@ -204,10 +193,10 @@ spaceTest.describe(
 
           // Watch settings save through an explicit draft; the off state is server-side
           // only after Save.
-          const saveButton = page.testSubj.locator('alertZeroWatchSettingsSave');
+          const saveButton = alertZero.watchSettingsSave;
           await expect(saveButton).toBeEnabled();
           await saveButton.click();
-          await expect(page.testSubj.locator('alertZeroWatchUnsavedChangesBadge')).toBeHidden({
+          await expect(alertZero.watchUnsavedChangesBadge).toBeHidden({
             timeout: 30_000,
           });
 

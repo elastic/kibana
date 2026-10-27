@@ -11,7 +11,9 @@ import { buildServiceAccountUrl } from '@kbn/alertzero-common';
 import {
   createApi,
   createApiFromKbnClient,
+  createWorkerServiceAccount,
   listWorkers,
+  ok,
   patchWorker,
   seedStubModel,
   setAlertZeroEnabledInSpace,
@@ -120,6 +122,26 @@ export const createUiOnboardingSpace = async (
       }
     },
   };
+};
+
+/**
+ * Enables one worker through the same API shape the onboarding UI's save uses
+ * (service account + settingsRevision), so the landing page latches to the
+ * queue instead of the wizard. Returns the service-account cleanup.
+ */
+export const enableFirstWorker = async (space: OnboardingSpace): Promise<() => Promise<void>> => {
+  const workers = await listWorkers(space.api, space.spaceId);
+  const target = workers[0];
+  const account = await createWorkerServiceAccount(space.api, target.id);
+  ok(
+    await patchWorker(space.api, space.spaceId, target.id, {
+      enabled: true,
+      settingsRevision: target.settingsRevision ?? null,
+      settings: { serviceAccountId: account.id },
+    }),
+    `enable ${target.id}`
+  );
+  return account.cleanup;
 };
 
 /**

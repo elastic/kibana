@@ -7,19 +7,14 @@
 
 import { ALERTZERO_WORKERS_URL } from '@kbn/alertzero-common';
 import { expect } from '@kbn/scout-security/ui';
-import type { KibanaRole } from '@kbn/scout-security';
 import {
   ALERTZERO_READ_ONLY_ROLE,
   createApiFromKbnClient,
   createUiOnboardingSpace,
-  createWorkerServiceAccount,
-  listWorkers,
-  ok,
-  patchWorker,
-  spaceUrl,
+  enableFirstWorker,
   spaceTest,
+  spaceUrl,
   tags,
-  type OnboardingSpace,
 } from '../fixtures';
 
 /**
@@ -38,25 +33,9 @@ spaceTest.describe(
   () => {
     spaceTest.setTimeout(150_000);
 
-    /** Enables one worker through the same API shape the onboarding UI's save uses. */
-    const enableFirstWorker = async (space: OnboardingSpace): Promise<() => Promise<void>> => {
-      const workers = await listWorkers(space.api, space.spaceId);
-      const target = workers[0];
-      const account = await createWorkerServiceAccount(space.api, target.id);
-      ok(
-        await patchWorker(space.api, space.spaceId, target.id, {
-          enabled: true,
-          settingsRevision: target.settingsRevision ?? null,
-          settings: { serviceAccountId: account.id },
-        }),
-        `enable ${target.id}`
-      );
-      return account.cleanup;
-    };
-
     spaceTest(
       'all workers off renders onboarding, not the queue or a gate',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices }) => {
+      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices }) => {
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
@@ -64,8 +43,9 @@ spaceTest.describe(
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
 
-          await expect(page.testSubj.locator('alertZeroOnboardingIntroPromo')).toBeVisible();
-          await expect(page.testSubj.locator('alertzeroPrivilegesGate')).toBeHidden();
+          const alertZero = pageObjects.alertZeroApp;
+          await expect(alertZero.introPromo).toBeVisible();
+          await expect(alertZero.privilegesGate).toBeHidden();
           await expect(page.testSubj.locator('appNotFoundPageContent')).toBeHidden();
         } finally {
           await space.cleanup();
@@ -75,7 +55,7 @@ spaceTest.describe(
 
     spaceTest(
       'an enabled worker lands on the queue instead of onboarding',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices }) => {
+      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices }) => {
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
@@ -86,8 +66,9 @@ spaceTest.describe(
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
 
-          await expect(page.testSubj.locator('alertZeroProposalsTrendChartRow')).toBeVisible();
-          await expect(page.testSubj.locator('alertZeroOnboardingIntroPromo')).toBeHidden();
+          const alertZero = pageObjects.alertZeroApp;
+          await expect(alertZero.proposalsTrendChartRow).toBeVisible();
+          await expect(alertZero.introPromo).toBeHidden();
         } finally {
           if (cleanupAccount) await cleanupAccount();
           await space.cleanup();
@@ -97,7 +78,7 @@ spaceTest.describe(
 
     spaceTest(
       'reload keeps the queue once a worker is enabled',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices }) => {
+      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices }) => {
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
@@ -107,12 +88,13 @@ spaceTest.describe(
 
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
-          await expect(page.testSubj.locator('alertZeroProposalsTrendChartRow')).toBeVisible();
+          const alertZero = pageObjects.alertZeroApp;
+          await expect(alertZero.proposalsTrendChartRow).toBeVisible();
 
           await page.reload();
 
-          await expect(page.testSubj.locator('alertZeroProposalsTrendChartRow')).toBeVisible();
-          await expect(page.testSubj.locator('alertZeroOnboardingIntroPromo')).toBeHidden();
+          await expect(alertZero.proposalsTrendChartRow).toBeVisible();
+          await expect(alertZero.introPromo).toBeHidden();
         } finally {
           if (cleanupAccount) await cleanupAccount();
           await space.cleanup();
@@ -122,22 +104,19 @@ spaceTest.describe(
 
     spaceTest(
       'read-only user sees onboarding with Continue disabled and a reason',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices }) => {
+      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices }) => {
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces);
         try {
           // alertzero:read without write — the role has access to the app but
           // cannot advance past the intro step.
-          const role: KibanaRole = ALERTZERO_READ_ONLY_ROLE;
-          await browserAuth.loginWithCustomRole(role);
+          await browserAuth.loginWithCustomRole(ALERTZERO_READ_ONLY_ROLE);
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
 
-          await expect(page.testSubj.locator('alertZeroOnboardingIntroPromo')).toBeVisible();
-          const continueButton = page.testSubj.locator('alertZeroOnboardingContinueButton');
-          await expect(continueButton).toBeVisible();
-          await expect(continueButton).toBeDisabled();
-          await expect(
-            page.testSubj.locator('alertZeroOnboardingContinueDisabledReason')
-          ).toBeVisible();
+          const alertZero = pageObjects.alertZeroApp;
+          await expect(alertZero.introPromo).toBeVisible();
+          await expect(alertZero.continueButton).toBeVisible();
+          await expect(alertZero.continueButton).toBeDisabled();
+          await expect(alertZero.continueDisabledReason).toBeVisible();
         } finally {
           await space.cleanup();
         }

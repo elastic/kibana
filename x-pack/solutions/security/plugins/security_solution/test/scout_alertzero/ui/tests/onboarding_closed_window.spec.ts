@@ -6,18 +6,13 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
-import type { ScoutPage } from '@kbn/scout-security';
 import {
   createUiOnboardingSpace,
-  createWorkerServiceAccount,
   deleteSeededProposals,
-  listWorkers,
-  ok,
-  patchWorker,
+  enableFirstWorker,
   seedClosedProposal,
   spaceTest,
   tags,
-  type OnboardingSpace,
 } from '../fixtures';
 
 /**
@@ -36,38 +31,9 @@ spaceTest.describe(
   () => {
     spaceTest.setTimeout(180_000);
 
-    /**
-     * Enables one worker through the same API shape the onboarding UI's save
-     * uses (service account + settingsRevision), so the landing page latches
-     * to the queue. Returns the service-account cleanup.
-     */
-    const enableFirstWorker = async (space: OnboardingSpace): Promise<() => Promise<void>> => {
-      const workers = await listWorkers(space.api, space.spaceId);
-      const target = workers[0];
-      const account = await createWorkerServiceAccount(space.api, target.id);
-      ok(
-        await patchWorker(space.api, space.spaceId, target.id, {
-          enabled: true,
-          settingsRevision: target.settingsRevision ?? null,
-          settings: { serviceAccountId: account.id },
-        }),
-        `enable ${target.id}`
-      );
-      return account.cleanup;
-    };
-
-    /**
-     * Opens the app root, waits for the queue, expands the closed accordion.
-     * The closed bucket starts collapsed (`useState(id !== CLOSED_GROUP_KEY)`).
-     */
-    const openClosedBucket = async (page: ScoutPage): Promise<void> => {
-      const closedToggle = page.getByRole('button', { name: /Closed Actions/ });
-      await closedToggle.click();
-    };
-
     spaceTest(
       'post-enable app root is the queue, not onboarding',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices }) => {
+      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices }) => {
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
@@ -78,8 +44,9 @@ spaceTest.describe(
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
 
           // The queue (not the onboarding wizard) is the post-enable landing.
-          await expect(page.testSubj.locator('alertZeroProposalsTrendChartRow')).toBeVisible();
-          await expect(page.testSubj.locator('alertZeroOnboardingIntroPromo')).toBeHidden();
+          const alertZero = pageObjects.alertZeroApp;
+          await alertZero.waitForQueue();
+          await expect(alertZero.introPromo).toBeHidden();
         } finally {
           if (cleanupAccount) await cleanupAccount();
           await space.cleanup();
@@ -89,7 +56,7 @@ spaceTest.describe(
 
     spaceTest(
       'closed rows show the decision time',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices, esClient }) => {
+      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices, esClient }) => {
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
@@ -105,10 +72,11 @@ spaceTest.describe(
 
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
-          await openClosedBucket(page);
+          const alertZero = pageObjects.alertZeroApp;
+          await alertZero.openClosedBucket();
 
           // The row is keyed by the proposal id (card `aria-label` = proposal title).
-          const row = page.locator(`[aria-label="${proposal.title}"]`);
+          const row = alertZero.proposalRow(proposal.title);
           await expect(row).toBeVisible();
           // Decision time renders as a relative age of the seeded `decidedAt` (2h ago).
           await expect(row.getByText(/2 hours ago|an hour ago/i)).toBeVisible();
@@ -122,7 +90,7 @@ spaceTest.describe(
 
     spaceTest(
       '72h window: 71h-old decision listed, 73h-old excluded',
-      async ({ page, browserAuth, kbnUrl, kbnClient, apiServices, esClient }) => {
+      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices, esClient }) => {
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
@@ -142,14 +110,15 @@ spaceTest.describe(
 
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
-          await openClosedBucket(page);
+          const alertZero = pageObjects.alertZeroApp;
+          await alertZero.openClosedBucket();
 
           // Positive control first: the 71h row must be there, or the negative
           // below could pass for an unrelated reason (wrong space, fetch failed).
-          await expect(page.locator(`[aria-label="${inWindow.title}"]`)).toBeVisible();
-          // NEGATIVE CONTROL: positive assertion on the must-not-render surface —
-          // `toBeHidden` would pass vacuously during load.
-          await expect(page.locator(`[aria-label="${outOfWindow.title}"]`)).toHaveCount(0);
+          await expect(alertZero.proposalRow(inWindow.title)).toBeVisible();
+          // Negative control on the must-not-render surface: `toBeHidden` would
+          // pass vacuously during load, so assert a count of zero instead.
+          await expect(alertZero.proposalRow(outOfWindow.title)).toHaveCount(0);
         } finally {
           if (cleanupAccount) await cleanupAccount();
           await deleteSeededProposals(esClient, seeded);
