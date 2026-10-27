@@ -11,6 +11,7 @@ import type { Detection, SignificantEvent } from '@kbn/significant-events-schema
 import type { ExistingQuerySummary } from '@kbn/nightshift-ai';
 import type { GcsConfig } from '../data_generators/replay';
 import type { ChronicSeedConfig as ChronicSeedInput } from '../data_generators/seed_chronic_background';
+import type { ExpectedBaseline } from '../evaluators/discovery/types';
 import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
 
 export interface SamplingCriterion extends EvaluationCriterionStructured {
@@ -105,14 +106,16 @@ export interface DiscoveryScenario {
     source_id: string;
     detections: Array<Partial<Detection>>;
     /**
-     * Seeds a synthetic chronic rate-flat failure pattern (steady logs + one backed query KI)
+     * Seeds a synthetic failure pattern with a known rate over time (logs + one backed query KI)
      * instead of relying on snapshot incident data; the detection `@timestamp` is stamped from
-     * the seed's change point. Positive fixture for the grounding skill's rate gate.
+     * the seed's change point. Fixture for the grounding skill's baseline profile.
      */
     chronic_seed?: ChronicSeedInput;
   };
   /** Ordered ground-truth continuation chains by `rule_name`, keyed by continuation path label. */
   continuationChains?: Record<string, string[]>;
+  /** Restricts the continuation paths replayed for this scenario; every path runs when omitted. */
+  continuationPaths?: readonly string[];
   output: {
     criteria: SamplingCriterion[];
     expected_min_evidence_count?: number;
@@ -126,6 +129,8 @@ export interface DiscoveryScenario {
      * `signals[].metadata.rule_uuid`s.
      */
     expected_significant_events: Array<Partial<SignificantEvent>>;
+    /** What a seeded scenario's baseline facts must show (see `baseline_profile`). */
+    expected_baseline?: ExpectedBaseline;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;
