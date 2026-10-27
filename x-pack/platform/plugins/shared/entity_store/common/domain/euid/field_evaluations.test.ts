@@ -323,7 +323,7 @@ describe('applyFieldEvaluations', () => {
 });
 
 describe('shared entity.source field evaluation', () => {
-  const hostSourceEvaluation = getBuiltInEntityDefinition('host').fieldEvaluations ?? [];
+  const hostSourceEvaluation = getBuiltInEntityDefinition('host').extraction.fieldEvaluations ?? [];
 
   it('should prefer event.module over event.dataset and data_stream.dataset', () => {
     expect(
@@ -373,16 +373,18 @@ describe('getFieldEvaluations', () => {
   it('should include shared field evaluations for single-field identities', () => {
     const serviceDefinition = getBuiltInEntityDefinition('service');
 
-    expect(getFieldEvaluations(serviceDefinition)).toEqual(serviceDefinition.fieldEvaluations);
+    expect(getFieldEvaluations(serviceDefinition)).toEqual(
+      serviceDefinition.extraction.fieldEvaluations
+    );
   });
 
   it('should return only shared field evaluations for calculated identities (identity evals are separate)', () => {
     const userDefinition = getBuiltInEntityDefinition('user');
 
     expect(getFieldEvaluations(userDefinition)).toHaveLength(
-      userDefinition.fieldEvaluations?.length ?? 0
+      userDefinition.extraction.fieldEvaluations?.length ?? 0
     );
-    expect(getFieldEvaluations(userDefinition)).toEqual(userDefinition.fieldEvaluations);
+    expect(getFieldEvaluations(userDefinition)).toEqual(userDefinition.extraction.fieldEvaluations);
   });
 });
 

@@ -341,6 +341,88 @@ describe('WorkloadBindingStore', () => {
     });
   });
 
+  describe('#countByServiceAccountIds', () => {
+    const field = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.serviceAccountId`;
+
+    const mockBuckets = (buckets: Array<{ key: string; doc_count: number }>) =>
+      client.find.mockResolvedValue({
+        saved_objects: [],
+        total: buckets.reduce((total, { doc_count: count }) => total + count, 0),
+        page: 1,
+        per_page: 0,
+        aggregations: {
+          byServiceAccount: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets,
+          },
+        },
+      } as never);
+
+    it('counts the bindings of each account with one aggregation across every space', async () => {
+      mockBuckets([
+        { key: 'first-account', doc_count: 3 },
+        { key: 'second-account', doc_count: 1 },
+      ]);
+
+      const counts = await store.countByServiceAccountIds([
+        'first-account',
+        'second-account',
+        'unbound-account',
+      ]);
+
+      expect(counts).toEqual(
+        new Map([
+          ['first-account', 3],
+          ['second-account', 1],
+        ])
+      );
+      expect(client.find).toHaveBeenCalledTimes(1);
+      const [[findOptions]] = client.find.mock.calls;
+      expect(findOptions).toMatchObject({
+        type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+        perPage: 0,
+        namespaces: ['*'],
+        aggs: {
+          byServiceAccount: {
+            terms: {
+              field,
+              include: ['first-account', 'second-account', 'unbound-account'],
+              size: 3,
+            },
+          },
+        },
+      });
+      const filter = JSON.stringify(findOptions.filter);
+      expect(filter).toContain('first-account');
+      expect(filter).toContain('unbound-account');
+    });
+
+    it('does not search when there are no accounts', async () => {
+      expect(await store.countByServiceAccountIds([])).toEqual(new Map());
+      expect(client.find).not.toHaveBeenCalled();
+    });
+
+    it('counts nothing when the search returns no aggregations', async () => {
+      client.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+      });
+
+      expect(await store.countByServiceAccountIds(['first-account'])).toEqual(new Map());
+    });
+
+    it('propagates a failed search', async () => {
+      client.find.mockRejectedValue(new Error('search failed'));
+
+      await expect(store.countByServiceAccountIds(['first-account'])).rejects.toThrowError(
+        'search failed'
+      );
+    });
+  });
+
   /** Stubs the point-in-time finder with the given pages; returns its `close` spy. */
   function mockFinder(pages: Array<Array<Partial<{ id: string; attributes: unknown }>>>) {
     const close = jest.fn();

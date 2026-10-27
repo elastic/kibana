@@ -61,6 +61,7 @@ export function convertErrors<T>({
   modelProvider,
   roundOrigin,
   trackingService,
+  workflowExecutionId,
 }: {
   agentId: string;
   analyticsService?: AnalyticsService;
@@ -70,6 +71,8 @@ export function convertErrors<T>({
   modelProvider: ModelProvider;
   roundOrigin?: ConversationOriginType;
   trackingService?: TrackingService;
+  /** The workflow execution whose `ai.agent` step started the round. */
+  workflowExecutionId?: string;
 }): OperatorFunction<T, T> {
   return ($source) => {
     return $source.pipe(
@@ -91,6 +94,7 @@ export function convertErrors<T>({
           error: err,
           modelProvider,
           roundOrigin,
+          workflowExecutionId,
         });
 
         return throwError(() => toClientError(err));

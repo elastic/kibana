@@ -6,7 +6,12 @@
  */
 
 // Compose Discover flyout — stepped Edit Form + Discover Sandbox
-export { ComposeDiscoverFlyout } from './flyout/compose_discover';
+export {
+  ComposeDiscoverFlyout,
+  STACKED_FLYOUT_SIZE,
+  STACKED_FLYOUT_MIN_WIDTH,
+  useEuiFlyoutReregister,
+} from './flyout/compose_discover';
 export type { ComposeDiscoverFlyoutProps } from './flyout/compose_discover';
 export type { ComposeDiscoverMode } from './flyout/compose_discover/types';
 

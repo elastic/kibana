@@ -49,11 +49,6 @@ export const TriggerPicker = ({
       kind: 'every',
       prepend: <EuiIcon type="calendar" aria-hidden={true} />,
     },
-    {
-      label: triggerLabels.customCron,
-      kind: 'cron',
-      prepend: <EuiIcon type="clock" aria-hidden={true} />,
-    },
   ].map((option) => ({
     ...option,
     checked: 'kind' in option && option.kind === current ? 'on' : undefined,

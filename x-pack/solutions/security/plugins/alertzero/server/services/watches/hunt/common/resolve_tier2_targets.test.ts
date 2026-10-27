@@ -10,7 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
 import { buildMatchesRequired } from './matches_required';
 import { matchDatasetsWithModel } from './match_hunt_datasets';
-import { resolveTier2Targets } from './resolve_tier2_targets';
+import { needsModelDatasetMatch, resolveTier2Targets } from './resolve_tier2_targets';
 import { MAX_SCOPE_TARGETS } from './scope_bounds';
 
 jest.mock('./match_hunt_datasets', () => ({
@@ -40,6 +40,32 @@ const emptyScope = {
 
 const hits = (...indices: string[]) => ({
   per_index: indices.map((index) => ({ index, hit_count: 1, required: true })),
+});
+
+describe('needsModelDatasetMatch', () => {
+  it('is true only when nothing else points at a dataset and there is text to read', () => {
+    expect(
+      needsModelDatasetMatch({
+        scope: emptyScope,
+        tier1: hits(),
+        report: { text: 'Okta session hijack' },
+      })
+    ).toBe(true);
+  });
+
+  it.each([
+    [
+      'the report matched a dataset',
+      { ...emptyScope, report_matches: ['logs-okta.system-*'] },
+      hits(),
+      { text: 'x' },
+    ],
+    ['Tier 1 hit an index', emptyScope, hits('logs-okta.system-default'), { text: 'x' }],
+    ['the report has no text', emptyScope, hits(), { vendor: 'Okta' }],
+    ['there is no report', emptyScope, hits(), undefined],
+  ])('is false when %s', (_label, scope, tier1, report) => {
+    expect(needsModelDatasetMatch({ scope, tier1, report })).toBe(false);
+  });
 });
 
 describe('resolveTier2Targets', () => {

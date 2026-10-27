@@ -33,12 +33,18 @@ import {
   MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
   MAX_INDEX_NAME_BYTES,
   MAX_KI_PAGE_SIZE,
+  MAX_KI_SEARCH_QUERY_LENGTH,
   MAX_KI_TYPE_FILTER_LENGTH,
   MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES,
 } from '../../../common/constants';
 import type { ImprovementAction } from '../../../common/http_api/improvement_actions';
 import { IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_actions';
-import { MAX_KI_ID_LENGTH } from '../../../common/step_types/ki';
+import {
+  KI_LIFECYCLE_STATUSES,
+  MAX_KI_CONTENT_LENGTH,
+  MAX_KI_ID_LENGTH,
+  type KiLifecycleStatus,
+} from '../../../common/step_types/ki';
 import {
   validateAbsoluteSignalWindow,
   validateAiIndexId,
@@ -298,6 +304,30 @@ export const createAiIndexBodySchema = schema.object({
 });
 export const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
 
+const kiLifecycleStatusQuerySchema = schema.oneOf(
+  KI_LIFECYCLE_STATUSES.map((status) => schema.literal(status)) as [Type<KiLifecycleStatus>],
+  {
+    meta: {
+      description: 'Knowledge Indicator governance.lifecycle.status value.',
+    },
+  }
+);
+
+const kiLifecycleStatusesQuerySchema = schema.oneOf(
+  [
+    kiLifecycleStatusQuerySchema,
+    schema.arrayOf(kiLifecycleStatusQuerySchema, {
+      maxSize: KI_LIFECYCLE_STATUSES.length,
+    }),
+  ],
+  {
+    meta: {
+      description:
+        'When set, filter by governance.lifecycle.status (unset counts as active). When omitted, deleted KIs are excluded.',
+    },
+  }
+);
+
 export const listKisQuerySchema = schema.object({
   size: schema.number({
     min: 0,
@@ -311,6 +341,14 @@ export const listKisQuerySchema = schema.object({
       meta: { description: 'When set, return only KIs of this type.' },
     })
   ),
+  lifecycle_status: schema.maybe(kiLifecycleStatusesQuerySchema),
+  query: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: MAX_KI_SEARCH_QUERY_LENGTH,
+      meta: { description: 'When set, fuzzy full-text search over KI title and description.' },
+    })
+  ),
 });
 
 export const getKiQuerySchema = schema.object({
@@ -318,6 +356,29 @@ export const getKiQuerySchema = schema.object({
     minLength: 1,
     maxLength: MAX_INDEX_NAME_BYTES,
     meta: { description: 'The Elasticsearch index that stores the Knowledge Indicator.' },
+  }),
+  lifecycle_status: schema.maybe(kiLifecycleStatusesQuerySchema),
+});
+
+export const updateKiQuerySchema = schema.object({
+  index: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: MAX_INDEX_NAME_BYTES,
+      meta: {
+        description:
+          'The backing Elasticsearch index for this Knowledge Indicator. Only needed when the AI index destination matches more than one physical index; omit it otherwise.',
+      },
+    })
+  ),
+});
+
+export const updateKiBodySchema = schema.object({
+  ki: schema.object({
+    content: schema.string({
+      maxLength: MAX_KI_CONTENT_LENGTH,
+      meta: { description: 'The content for the Knowledge Indicator.' },
+    }),
   }),
 });
 
@@ -573,6 +634,33 @@ export const deleteAiIndexResponseSchema = () =>
     // codeql[js/kibana/unbounded-array-in-schema] Response schema: validates server output, not request input
     errors: schema.arrayOf(schema.string(), {
       meta: { description: 'Best-effort cleanup errors after the entry was deleted, if any.' },
+    }),
+  });
+
+export const updateKiResponseSchema = () =>
+  schema.object({
+    id: schema.string({
+      meta: { description: 'The document ID of the updated Knowledge Indicator.' },
+    }),
+    status: schema.oneOf([schema.literal('updated'), schema.literal('noop')], {
+      meta: { description: 'Whether the update changed the document or was a no-op.' },
+    }),
+  });
+
+export const deleteKiResponseSchema = () =>
+  schema.object({
+    id: schema.string({
+      meta: {
+        description:
+          'The document ID of the deleted Knowledge Indicator. The document is retained and can be restored.',
+      },
+    }),
+  });
+
+export const restoreKiResponseSchema = () =>
+  schema.object({
+    id: schema.string({
+      meta: { description: 'The document ID of the restored Knowledge Indicator.' },
     }),
   });
 

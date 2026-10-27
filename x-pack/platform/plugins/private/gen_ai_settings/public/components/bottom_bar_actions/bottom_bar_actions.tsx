@@ -50,7 +50,7 @@ export const BottomBarActions = ({
           <EuiHealth color="warning" />
           <EuiText>
             <FormattedMessage
-              id="xpack.gen_ai_settings.bottomBarActions.unsavedChanges"
+              id="xpack.genAiSettings.bottomBarActions.unsavedChanges"
               defaultMessage="{unsavedChangesCount, plural, =0{0 unsaved changes} one {1 unsaved change} other {# unsaved changes}}"
               values={{ unsavedChangesCount }}
             />
@@ -65,7 +65,7 @@ export const BottomBarActions = ({
                 onClick={onDiscardChanges}
               >
                 <FormattedMessage
-                  id="xpack.gen_ai_settings.bottomBarActions.discardChangesButtonAriaLabel"
+                  id="xpack.genAiSettings.bottomBarActions.discardChangesButtonAriaLabel"
                   defaultMessage="Discard changes"
                 />
               </EuiButtonEmpty>
@@ -75,7 +75,7 @@ export const BottomBarActions = ({
                 content={
                   areChangesInvalid &&
                   i18n.translate(
-                    'xpack.gen_ai_settings.bottomBarActions.saveButtonTooltipWithInvalidChanges',
+                    'xpack.genAiSettings.bottomBarActions.saveButtonTooltipWithInvalidChanges',
                     {
                       defaultMessage: 'Fix invalid settings before saving.',
                     }

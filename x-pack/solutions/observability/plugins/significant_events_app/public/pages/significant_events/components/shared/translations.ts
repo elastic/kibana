@@ -62,146 +62,10 @@ export const getActivityBlockTooltip = ({
   return undefined;
 };
 
-/** Tooltip when Generate is disabled because no source has been selected. */
-export const GENERATE_NO_STREAM_SELECTED_TOOLTIP = i18n.translate(
-  'xpack.significantEventsApp.sources.generateNoSourceSelectedTooltip',
-  {
-    defaultMessage: 'Select at least one source to generate knowledge indicators.',
-  }
-);
-
-/**
- * Tooltip for the Generate split button when it is disabled.
- * Pause/status always wins, since generation cannot run in that state even with a source selected.
- */
-export const getGenerateDisabledTooltip = ({
-  activityBlockTooltip,
-  hasSelectedStreams,
-}: {
-  activityBlockTooltip: string | undefined;
-  hasSelectedStreams: boolean;
-}): string | undefined => {
-  if (activityBlockTooltip) {
-    return activityBlockTooltip;
-  }
-  if (!hasSelectedStreams) {
-    return GENERATE_NO_STREAM_SELECTED_TOOLTIP;
-  }
-  return undefined;
-};
-
 export const CANCEL_DISCOVERY_LABEL = i18n.translate(
   'xpack.significantEventsApp.cancelDiscoveryLabel',
   {
     defaultMessage: 'Cancel',
-  }
-);
-
-export const GENERATE_FEATURES_BUTTON_LABEL = i18n.translate(
-  'xpack.significantEventsApp.streamsView.generateFeaturesButtonLabel',
-  {
-    defaultMessage: 'Generate KI Features',
-  }
-);
-
-export const GENERATE_QUERIES_BUTTON_LABEL = i18n.translate(
-  'xpack.significantEventsApp.streamsView.generateQueriesButtonLabel',
-  {
-    defaultMessage: 'Generate KI Queries',
-  }
-);
-
-export const CONNECTOR_LOAD_ERROR = i18n.translate(
-  'xpack.significantEventsApp.streamsView.connectorLoadError',
-  {
-    defaultMessage: 'Failed to load connectors',
-  }
-);
-
-export const GENERATE_CONFIG_ARIA_LABEL = i18n.translate(
-  'xpack.significantEventsApp.streamsView.generateConfigAriaLabel',
-  {
-    defaultMessage: 'Configure generation steps and models',
-  }
-);
-
-export const GENERATE_BUTTON_LABEL = i18n.translate(
-  'xpack.significantEventsApp.streamsView.generateButtonLabel',
-  {
-    defaultMessage: 'Generate',
-  }
-);
-
-export const MODEL_SELECTION_PANEL_TITLE = i18n.translate(
-  'xpack.significantEventsApp.streamsView.modelSelectionPanelTitle',
-  {
-    defaultMessage: 'Model selection',
-  }
-);
-
-export const DEFAULT_MODEL_BADGE_LABEL = i18n.translate(
-  'xpack.significantEventsApp.streamsView.defaultModelBadgeLabel',
-  {
-    defaultMessage: 'Default',
-  }
-);
-
-export const MISSING_DEFAULT_MODEL_LABEL = i18n.translate(
-  'xpack.significantEventsApp.streamsView.missingDefaultModelLabel',
-  {
-    defaultMessage: 'Default model unavailable',
-  }
-);
-
-export const MISSING_SELECTED_MODEL_LABEL = i18n.translate(
-  'xpack.significantEventsApp.streamsView.missingSelectedModelLabel',
-  {
-    defaultMessage: 'Selected model unavailable',
-  }
-);
-
-export const SELECT_MODEL_LABEL = i18n.translate(
-  'xpack.significantEventsApp.streamsView.selectModelLabel',
-  {
-    defaultMessage: 'Select a model',
-  }
-);
-
-export const CONFIGURED_DEFAULT_MODEL_CALLOUT_TITLE = i18n.translate(
-  'xpack.significantEventsApp.streamsView.configuredDefaultModelCalloutTitle',
-  {
-    defaultMessage: 'Configured default model only',
-  }
-);
-
-export const CONFIGURED_DEFAULT_MODEL_CALLOUT_DESCRIPTION = i18n.translate(
-  'xpack.significantEventsApp.streamsView.configuredDefaultModelCalloutDescription',
-  {
-    defaultMessage: 'Generation succeeds only with the configured default model.',
-  }
-);
-
-export const GENERATE_FEATURES_TOOLTIP = i18n.translate(
-  'xpack.significantEventsApp.sources.generateFeaturesTooltip',
-  {
-    defaultMessage:
-      'Runs only feature identification on selected sources using the configured model.',
-  }
-);
-
-export const GENERATE_QUERIES_TOOLTIP = i18n.translate(
-  'xpack.significantEventsApp.sources.generateQueriesTooltip',
-  {
-    defaultMessage: 'Runs only query generation on selected sources using the configured model.',
-  }
-);
-
-/** Disclosure shown next to generation triggers when cross-project search is live. */
-export const CROSS_PROJECT_GENERATION_DISCLOSURE = i18n.translate(
-  'xpack.significantEventsApp.streamsView.crossProjectGenerationDisclosure',
-  {
-    defaultMessage:
-      'Generation analyzes data from all projects linked through cross-project search, regardless of the project scope configured for this space.',
   }
 );
 
@@ -235,6 +99,9 @@ export const changeTypeLabel = (type?: string): string =>
 export const SIGNIFICANT_EVENT_STATUS_LABELS: Record<SignificantEventStatus, string> = {
   active: i18n.translate('xpack.significantEventsApp.significantEvent.status.active', {
     defaultMessage: 'Active',
+  }),
+  recovering: i18n.translate('xpack.significantEventsApp.significantEvent.status.recovering', {
+    defaultMessage: 'Recovering',
   }),
   inactive: i18n.translate('xpack.significantEventsApp.significantEvent.status.inactive', {
     defaultMessage: 'Inactive',

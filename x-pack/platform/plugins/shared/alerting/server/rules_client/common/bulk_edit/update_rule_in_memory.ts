@@ -80,9 +80,9 @@ export async function updateRuleInMemory<Params extends RuleParams>(
   }: UpdateRuleInMemoryOpts<Params>
 ): Promise<void> {
   context.logger.info(`Updating rule in memory for rule: ${rule.id}`);
-  if (rule.attributes.apiKey) {
+  if (rule.attributes.apiKey || rule.attributes.uiamApiKey) {
     apiKeysMap.set(rule.id, {
-      oldApiKey: rule.attributes.apiKey,
+      oldApiKey: rule.attributes.apiKey ?? undefined,
       oldApiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser,
       oldUiamApiKey: rule.attributes.uiamApiKey,
     });
@@ -233,12 +233,12 @@ async function prepareApiKeys(
   });
 
   // collect generated API keys
-  if (apiKeyAttributes.apiKey) {
+  if (apiKeyAttributes.apiKey || apiKeyAttributes.uiamApiKey) {
     const { apiKey, apiKeyCreatedByUser, uiamApiKey } = apiKeyAttributes;
 
     apiKeysMap.set(rule.id, {
       ...apiKeysMap.get(rule.id),
-      newApiKey: apiKey,
+      newApiKey: apiKey ?? undefined,
       newApiKeyCreatedByUser: apiKeyCreatedByUser,
       ...(uiamApiKey ? { newUiamApiKey: uiamApiKey } : {}),
     });

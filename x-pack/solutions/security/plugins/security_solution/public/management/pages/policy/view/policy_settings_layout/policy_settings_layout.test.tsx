@@ -48,6 +48,7 @@ describe('When rendering PolicySettingsLayout', () => {
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
+    mockedContext.setExperimentalFlag({ perOsPolicySettings: false });
 
     toasts = mockedContext.coreStart.notifications.toasts;
     apiMocks = allFleetHttpMocks(mockedContext.coreStart.http);

@@ -46,7 +46,9 @@ let onSeverityChange: ((opts: SeverityOption[]) => void) | undefined;
 // ─── Child component mocks ────────────────────────────────────────────────────
 
 jest.mock('@kbn/date-range-picker', () => ({
-  DateRangePicker: () => <div data-test-subj="mock-date-range-picker" />,
+  DateRangePicker: ({ value }: { value: string }) => (
+    <div data-test-subj="mock-date-range-picker" data-value={value} />
+  ),
 }));
 
 // Capture onSelectTactic so tests can drive tactic selection.
@@ -268,6 +270,47 @@ describe('AnomaliesTab', () => {
       expect(mockUseAnomalySummary).toHaveBeenLastCalledWith(
         expect.objectContaining({
           body: expect.objectContaining({ score_ranges: [{ min_score: 50, max_score: 75 }] }),
+        })
+      );
+    });
+  });
+
+  describe('initial time range', () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2024-06-15T12:00:00.000Z'));
+    });
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('defaults to the last 30 days when the scope does not pin a range', () => {
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+
+      expect(screen.getByTestId('mock-date-range-picker')).toHaveAttribute(
+        'data-value',
+        'Last 30 days'
+      );
+      expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          from: new Date('2024-05-16T12:00:00.000Z').valueOf(),
+          to: new Date('2024-06-15T12:00:00.000Z').valueOf(),
+        })
+      );
+    });
+
+    it('opens on the pinned range (matching preset label) when opened from the new Entity Analytics home', () => {
+      render(<AnomaliesTab {...defaultProps} scopeId="entity-analytics-new-entities-table-7d" />, {
+        wrapper: Wrapper,
+      });
+
+      expect(screen.getByTestId('mock-date-range-picker')).toHaveAttribute(
+        'data-value',
+        'Last 7 days'
+      );
+      expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          from: new Date('2024-06-08T12:00:00.000Z').valueOf(),
+          to: new Date('2024-06-15T12:00:00.000Z').valueOf(),
         })
       );
     });

@@ -10,6 +10,7 @@ import { useQuery, type QueryClient } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { EntityType, SearchEntitiesFromEntityStoreResponse } from '@kbn/entity-store/public';
+import type { InspectQuery } from '@kbn/entity-store/common';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type {
   HostEntity,
@@ -17,7 +18,15 @@ import type {
   ServiceEntity,
 } from '../../../../../common/api/entity_analytics';
 import type { HostItem, UserItem } from '../../../../../common/search_strategy';
+import {
+  buildAliasesFilter,
+  buildEntityIdFilter,
+  RESOLUTION_GROUP_RISK_SORT_FIELD,
+  RESOLVED_MODE_MAX_RECORDS,
+} from '../../../../../common/entity_analytics/entity_store/resolution_group';
+import type { FetchEntitiesListParams } from '../../../../entity_analytics/api/api';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export const ENTITY_FROM_STORE_QUERY_KEY = 'ENTITY_FROM_STORE';
 
@@ -44,25 +53,29 @@ export function applyEntityStoreSearchCachePatch(
         query.queryKey[1] === entityType,
     },
     (previous: SearchEntitiesFromEntityStoreResponse | undefined) => {
-      if (previous?.records?.[0]?.entity?.id !== canonicalId) {
+      const matchIndex =
+        previous?.records?.findIndex((record) => record?.entity?.id === canonicalId) ?? -1;
+      if (!previous || matchIndex < 0) {
         return previous;
       }
-      const [, ...rest] = previous.records;
-      return {
-        ...previous,
-        records: [
-          updatedRecord as SearchEntitiesFromEntityStoreResponse['records'][number],
-          ...rest,
-        ],
-      };
+      const records = [...previous.records];
+      records[matchIndex] =
+        updatedRecord as SearchEntitiesFromEntityStoreResponse['records'][number];
+      return { ...previous, records };
     }
   );
 }
 
-const entityIdFilter = (id: string) =>
-  JSON.stringify({
-    bool: { filter: [{ term: { 'entity.id': id } }] },
-  });
+const mergeInspect = (...parts: Array<InspectQuery | undefined>): InspectQuery | undefined => {
+  const defined = parts.filter((part): part is InspectQuery => part != null);
+  if (defined.length === 0) {
+    return undefined;
+  }
+  return {
+    dsl: defined.flatMap((part) => part.dsl),
+    response: defined.flatMap((part) => part.response),
+  };
+};
 
 export function serializeIdentityFieldsForQueryKey(
   fields: Record<string, string> | null | undefined
@@ -119,7 +132,14 @@ export interface UseEntityFromStoreParams {
    */
   entityId?: string;
   /**
-   * When `entityId` is not set, identity field–value pairs for EUID resolution (e.g. `host.name`, `user.name`, `service.name`).
+   * `single` (default) loads the `entityId` record only; `resolved` also loads the records that
+   * resolve to `entityId`, riskiest first and capped at `RESOLVED_MODE_MAX_RECORDS` members.
+   * Only applies when `entityId` is set.
+   */
+  mode?: EntityViewMode;
+  /**
+   * When `entityId` is not set, identity field–value pairs for EUID resolution
+   * (e.g. `host.name`, `user.name`, `service.name`).
    */
   identityFields?: Record<string, string> | null;
   entityType?: string;
@@ -131,8 +151,23 @@ export type EntityStoreRecord = HostEntity | UserEntity | ServiceEntity;
 
 export interface EntityFromStoreResult<T> {
   entity: T | null;
-  /** Raw entity store record (host/user/service) with risk and asset criticality. */
+  /**
+   * Primary raw entity store record (host/user/service) with risk and asset criticality. When
+   * `entityId` is set this is the record whose `entity.id` matches it exactly, or `null` if the
+   * store returned no such record (aliases never stand in for the target). For identity-field
+   * lookups it is the single matching record.
+   */
   entityRecord: EntityStoreRecord | null;
+  /**
+   * In `resolved` mode, the other records that resolve to `entityId` (aliases), excluding
+   * `entityRecord` itself, riskiest first. Always empty in `single` mode.
+   */
+  aliasRecords: EntityStoreRecord[];
+  /**
+   * In `resolved` mode, how many records resolve to `entityId` in total — the store's hit count,
+   * so it stays correct when `aliasRecords` is truncated to the member cap. `0` in `single` mode.
+   */
+  aliasCount: number;
   firstSeen: string | null;
   lastSeen: string | null;
   isLoading: boolean;
@@ -151,9 +186,12 @@ export interface EntityFromStoreResult<T> {
 export function useEntityFromStore(
   params: UseEntityFromStoreParams
 ): EntityFromStoreResult<HostItem | UserItem> {
-  const { entityId, identityFields, entityType, skip, executionContext } = params;
+  const { entityId, mode = 'single', identityFields, entityType, skip, executionContext } = params;
   const euidApi = useEntityStoreEuidApi();
   const { fetchEntitiesListV2 } = useEntityAnalyticsRoutes();
+
+  const hasEntityId = Boolean(entityId);
+  const isResolvedMode = hasEntityId && mode === 'resolved';
 
   const identityDocument = useMemo(() => {
     if (identityFields == null || Object.keys(identityFields).length === 0) {
@@ -205,7 +243,7 @@ export function useEntityFromStore(
 
   const entityStoreFilterKey = useMemo(() => {
     if (entityId) {
-      return `id:${entityId}`;
+      return isResolvedMode ? `resolved:${entityId}` : `id:${entityId}`;
     }
     if (documentFilter) {
       return `euid:${JSON.stringify(documentFilter)}`;
@@ -214,10 +252,10 @@ export function useEntityFromStore(
       return `terms:${JSON.stringify(identityTermsFilter)}`;
     }
     return '';
-  }, [entityId, documentFilter, identityTermsFilter]);
+  }, [entityId, isResolvedMode, documentFilter, identityTermsFilter]);
 
   const stableQueryKey = useMemo(
-    () => entityId ?? serializeIdentityFieldsForQueryKey(identityFields),
+    () => (entityId ? entityId : serializeIdentityFieldsForQueryKey(identityFields)),
     [entityId, identityFields]
   );
 
@@ -231,32 +269,70 @@ export function useEntityFromStore(
       entityId ?? '',
     ],
     queryFn: async ({ signal }) => {
+      // load the entity in its own query to ensure it is always present, even if it is part of a larger resolution group
+      const fetchRecords = (overrides: Partial<FetchEntitiesListParams>) =>
+        fetchEntitiesListV2({
+          signal,
+          params: {
+            entityTypes: [entityType as EntityType],
+            page: 1,
+            perPage: 1,
+            sortField: '@timestamp',
+            sortOrder: 'desc',
+            ...overrides,
+            // The AI summary is loaded separately from the metadata datastream via
+            // useFetchPersistedAiSummary, not from the entity store record.
+          },
+          context: executionContext,
+        });
+
       let filterQuery: string | undefined;
       if (entityId) {
-        filterQuery = entityIdFilter(entityId);
+        filterQuery = JSON.stringify(buildEntityIdFilter(entityId, 'single'));
       } else if (storeFilter) {
         filterQuery = JSON.stringify(storeFilter);
       }
-      return fetchEntitiesListV2({
-        signal,
-        params: {
-          entityTypes: [entityType as EntityType],
-          filterQuery,
-          page: 1,
-          perPage: 1,
-          sortField: '@timestamp',
-          sortOrder: 'desc',
-          // The AI summary is loaded separately from the metadata datastream via
-          // useFetchPersistedAiSummary, not from the entity store record.
-        },
-        context: executionContext,
+
+      const targetResponse = await fetchRecords({ filterQuery });
+      if (!entityId || !isResolvedMode) {
+        return targetResponse;
+      }
+
+      // Aliases come riskiest-first so the cap keeps the riskiest members.
+      const aliasesResponse = await fetchRecords({
+        filterQuery: JSON.stringify(buildAliasesFilter(entityId)),
+        // The target takes one of the member slots.
+        perPage: RESOLVED_MODE_MAX_RECORDS - 1,
+        sortField: RESOLUTION_GROUP_RISK_SORT_FIELD,
+        sortOrder: 'desc',
       });
+      return {
+        ...aliasesResponse,
+        records: [
+          ...targetResponse.records,
+          ...aliasesResponse.records.filter((alias) => alias.entity?.id !== entityId),
+        ],
+        inspect: mergeInspect(targetResponse.inspect, aliasesResponse.inspect),
+      };
     },
-    enabled: !skip && (Boolean(entityId) || Boolean(storeFilter)),
+    enabled: !skip && (hasEntityId || Boolean(storeFilter)),
   });
 
   const { data, isLoading, isInitialLoading, error, refetch } = queryResult;
-  const record = data?.records?.[0] as HostEntity | UserEntity | undefined;
+  const records = useMemo(() => (data?.records ?? []) as EntityStoreRecord[], [data?.records]);
+  // With an `entityId`, only an exact `entity.id` match may be the primary record: in resolved mode
+  // the response also carries aliases, and surfacing one of those as the target would attribute
+  // the wrong entity. Without an `entityId` (identity-field lookup) the single hit is the record.
+  const record = useMemo(
+    () => (entityId ? records.find((r) => r.entity?.id === entityId) : records[0]),
+    [records, entityId]
+  );
+  const aliasRecords = useMemo(
+    () => (isResolvedMode ? records.filter((r) => r !== record) : []),
+    [isResolvedMode, records, record]
+  );
+  // In resolved mode `total` is the aliases lookup's hit count (the target is fetched separately).
+  const aliasCount = isResolvedMode ? Math.max(data?.total ?? 0, aliasRecords.length) : 0;
   const entityField = record?.entity;
 
   const firstSeen = entityField?.lifecycle?.first_seen ?? null;
@@ -280,6 +356,8 @@ export function useEntityFromStore(
     () => ({
       entity: mappedDetails,
       entityRecord: record ?? null,
+      aliasRecords,
+      aliasCount,
       firstSeen,
       lastSeen,
       isLoading,
@@ -291,6 +369,8 @@ export function useEntityFromStore(
     [
       mappedDetails,
       record,
+      aliasRecords,
+      aliasCount,
       firstSeen,
       lastSeen,
       isLoading,

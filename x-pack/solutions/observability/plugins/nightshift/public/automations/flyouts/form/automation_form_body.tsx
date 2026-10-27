@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFieldText, EuiFormRow, EuiSpacer, EuiText, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '@kbn/nightshift-investigations-plugin/common';
 import {
   isSlackTrigger,
   SLACK_THREAD_ACTION,
@@ -147,6 +148,9 @@ export const AutomationFormBody = ({
       </FormSection>
       <FormSection>
         <AutomationInstructions
+          maxLength={
+            values.trigger?.kind === 'every' ? MAX_AUTOMATION_INSTRUCTIONS_LENGTH : undefined
+          }
           instructions={values.instructions}
           mode={values.mode}
           onInstructionsChange={(instructions) => onChange({ instructions })}

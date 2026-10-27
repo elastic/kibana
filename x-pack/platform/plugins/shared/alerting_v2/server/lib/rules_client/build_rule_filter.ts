@@ -34,6 +34,11 @@ export const buildRuleSoFilter = createSoFilterBuilder({
     'metadata.description': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.description`,
     'metadata.tags': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
     'metadata.routing_tags': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.routing_tags`,
+    // Internal-use only, pending the rule-template schema decision: it powers the
+    // rules-list "template" filter but is deliberately NOT in the documented
+    // `filter` field list, and `metadata.template` is not on the rule response.
+    // Do not document it; the public path may change when the shape is settled.
+    'metadata.template.id': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.template.id`,
   },
 });
 

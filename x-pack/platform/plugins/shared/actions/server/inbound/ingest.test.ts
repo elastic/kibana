@@ -8,12 +8,17 @@
 import { errors } from '@elastic/elasticsearch';
 import type { DiagnosticResult, TransportResult } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
-import { buildEventId, MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs';
+import {
+  buildEventId,
+  MAX_CONNECTOR_TYPE_ID_LENGTH,
+  MAX_HANDSHAKE_CHALLENGE_LENGTH,
+} from '@kbn/connector-specs';
 
 import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import { computeIngestTokenHash } from './compute_ingest_token_hash';
@@ -67,7 +72,7 @@ describe('ingestInboundEvent', () => {
   const connectorId = 'connector-1';
   const credentialId = 'cred-1';
   const token = composeIngestToken(credentialId, 'ingest-token-value');
-  const spaceId = 'default';
+  const spaceId = DEFAULT_SPACE_ID;
   const ingestTokenHash = computeIngestTokenHash({
     connectorId,
     spaceId,
@@ -168,7 +173,7 @@ describe('ingestInboundEvent', () => {
     maxBodyBytes?: number;
     connectorTypeId?: string;
     connectorId?: string;
-    spaceId?: string;
+    spaceId?: SpaceId;
     query?: Record<string, unknown>;
     headers?: Record<string, string>;
     emit?: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
@@ -864,6 +869,24 @@ describe('ingestInboundEvent', () => {
     expectOutcome('info', 'http_ack');
   });
 
+  it('forwards a body on a connector HTTP 202 ack', async () => {
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'http',
+          httpResponse: { status: 202, body: { ok: true } },
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run();
+    expect(res.custom).toHaveBeenCalledWith({
+      statusCode: 202,
+      body: { ok: true },
+    });
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('info', 'http_ack');
+  });
+
   it('returns 500 when handleEvents http includes Location', async () => {
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
@@ -1298,6 +1321,82 @@ describe('ingestInboundEvent', () => {
       retryAfterSeconds: expect.any(Number),
     });
     expect(handleEvents).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes bounded query parameters after ingest auth and omits the ingest token', async () => {
+    const handleEvents = jest.fn().mockResolvedValue({ type: 'emit', events: [] });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+
+    await run({ query: { token, echo: 'opaque+/=', note: 'other' } });
+
+    const ctx = handleEvents.mock.calls[0][0];
+    expect(ctx.query).toEqual({ echo: 'opaque+/=', note: 'other' });
+    expect(ctx).not.toHaveProperty('echo');
+    expect(ctx).not.toHaveProperty('secrets');
+    expect(ctx).not.toHaveProperty('token');
+    expect(JSON.stringify(ctx)).not.toContain(token);
+  });
+
+  it('omits an over-cap query value', async () => {
+    const handleEvents = jest.fn().mockResolvedValue({ type: 'emit', events: [] });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+
+    await run({
+      query: { token, echo: 'x'.repeat(MAX_HANDSHAKE_CHALLENGE_LENGTH + 1) },
+    });
+
+    expect(handleEvents.mock.calls[0][0]).not.toHaveProperty('query');
+  });
+
+  it('does not call the spoke when auth fails, even if an extra query parameter is present', async () => {
+    const handleEvents = jest.fn().mockResolvedValue({ type: 'emit', events: [] });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const { result } = await run({ query: { token: 'wrong', echo: 'opaque' } });
+
+    expect(result.status).toBe('not_found');
+    expect(handleEvents).not.toHaveBeenCalled();
+  });
+
+  it('returns a text/plain string ack and a JSON challenge object', async () => {
+    const plainHandle = jest.fn().mockResolvedValue({
+      type: 'http',
+      httpResponse: {
+        status: 200,
+        body: 'ack',
+        headers: { 'content-type': 'text/plain' },
+      },
+    });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(plainHandle) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const plain = await run();
+    expect(plain.response.custom).toHaveBeenCalledWith({
+      statusCode: 200,
+      body: 'ack',
+      headers: { 'content-type': 'text/plain' },
+    });
+    expect(plain.response.accepted).not.toHaveBeenCalled();
+
+    const challengeHandle = jest.fn().mockResolvedValue({
+      type: 'http',
+      httpResponse: { status: 200, body: { challenge: 'abc' } },
+    });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(challengeHandle) as ReturnType<typeof getConnectorSpec>
+    );
+    const challenge = await run();
+    expect(challenge.response.custom).toHaveBeenCalledWith({
+      statusCode: 200,
+      body: { challenge: 'abc' },
+    });
   });
 
   it('ignores a tight limit when rate limiting is disabled', async () => {

@@ -98,6 +98,7 @@ export async function persistQueries(
       esql: { query: rewritten },
       severity_score: link.query.severity_score ?? 0,
       features: link.query.features ?? [],
+      ...(link.query.category ? { category: link.query.category } : {}),
       ...(link.query.evidence ? { evidence: link.query.evidence } : {}),
     };
     const expiresAt = resolveExpiresAt(link.query.id);

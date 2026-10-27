@@ -100,14 +100,13 @@ const isThresholdMet = (
 
 /**
  * A count of 0 skips the phase, unless a timeframe is ANDed with it: then the
- * timeframe must still elapse, so the phase is entered.
+ * timeframe must still elapse, so the phase is entered and held until the
+ * timeframe is met.
  *
- * Elapsed time is measured against the previous evaluation's stored timestamp
- * (see `getElapsedMs`), not against when the phase was entered, so it never
- * accumulates past roughly one schedule interval. An ANDed timeframe therefore
- * only resolves once the schedule interval itself is >= the timeframe; on a
- * shorter schedule it holds the phase indefinitely. This is not specific to
- * count 0 — any count combined with an ANDed timeframe has the same ceiling.
+ * Elapsed time is measured against when the phase was entered (the timestamp of
+ * the latest `status_count == 1` event, derived by the query, see `getElapsedMs`),
+ * so an ANDed timeframe accumulates across evaluations and resolves correctly
+ * regardless of how the schedule interval compares to the timeframe.
  */
 const isPhaseSkipped = (phase?: StateTransitionPhase): boolean =>
   phase?.count === 0 && !(phase.timeframe != null && phase.operator === 'and');
@@ -143,9 +142,9 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     const stateTransition = rule.state_transition;
     const currentEpisodeStatus = previousEpisode?.last_episode_status;
     const currentStatusCount = this.getCurrentStatusCount(previousEpisode);
-    const currentEpisodeTimestamp = previousEpisode?.last_episode_timestamp;
-
-    const elapsedMs = this.getElapsedMs(evaluatedAt, currentEpisodeTimestamp);
+    const phaseStartedAt =
+      previousEpisode?.last_episode_phase_started_at ?? previousEpisode?.last_episode_timestamp;
+    const elapsedMs = this.getElapsedMs(evaluatedAt, phaseStartedAt);
 
     // Delegate to the inherited basic state machine to get the "natural" next state.
     const basicResult = super.getNextState(ctx);
@@ -323,18 +322,18 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     }
   }
 
-  private getElapsedMs(evaluatedAt: string, previousTimestamp?: string | null): number {
-    if (!previousTimestamp) {
+  private getElapsedMs(evaluatedAt: string, phaseStartedAt?: string | null): number {
+    if (!phaseStartedAt) {
       return 0;
     }
 
     const currentMs = Date.parse(evaluatedAt);
-    const previousMs = Date.parse(previousTimestamp);
+    const phaseStartedMs = Date.parse(phaseStartedAt);
 
-    if (Number.isNaN(currentMs) || Number.isNaN(previousMs)) {
+    if (Number.isNaN(currentMs) || Number.isNaN(phaseStartedMs)) {
       return 0;
     }
 
-    return Math.max(0, currentMs - previousMs);
+    return Math.max(0, currentMs - phaseStartedMs);
   }
 }

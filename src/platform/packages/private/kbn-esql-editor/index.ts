@@ -15,7 +15,6 @@ export type { ESQLEditorRestorableState } from './src/restorable_state';
 export { QuickSearchVisor } from './src/editor_visor';
 export type { QuickSearchVisorProps, QuickSearchVisorRestorableState } from './src/editor_visor';
 export { VisorMode } from './src/editor_visor/visor_mode';
-export { esqlKeyboardShortcuts } from './src/editor_footer/esql_keyboard_shortcuts';
 export { ESQLMenu } from './src/editor_menu';
 export { EsqlEditorActionsProvider } from './src/editor_actions_context';
 export { EsqlEditorActionsRegister } from './src/editor_actions_register';

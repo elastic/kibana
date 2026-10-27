@@ -1,5 +1,5 @@
 {
-  "sha1": "683822bc62f4e190206d96395dd1b2e10e969d0d",
+  "sha1": "fdb0552013841c1d55731f541d5e67c16de22109",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -100,8 +100,8 @@
       }
     },
     {
-      "id": "e96ccda91442475-c3695aa565e0229",
-      "title": "Security in Discover - Alert document flyout add as column cell action adds the field to the Discover table",
+      "id": "e96ccda91442475-617a04e2eae7fe7",
+      "title": "Security in Discover - Alert document flyout toggle column cell action removes the field from the Discover table",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -123,8 +123,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/security_experience/ui/parallel_tests/document/alert/alert_document.spec.ts",
-        "line": 56,
-        "column": 7
+        "line": 59,
+        "column": 5
       }
     },
     {
@@ -184,8 +184,8 @@
       }
     },
     {
-      "id": "da34149f9274e09-058055c54cb4aa7",
-      "title": "Security in Discover - Profile gated on security solution view does not enhance the alert flyout under the classic solution view",
+      "id": "da34149f9274e09-c35bf4c1e3985da",
+      "title": "Security in Discover - Profile resolution in classic solution view enhances the alert flyout under the classic solution view",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -193,7 +193,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/security_experience/ui/parallel_tests/profile_gating.spec.ts",
-        "line": 34,
+        "line": 33,
         "column": 51
       }
     },

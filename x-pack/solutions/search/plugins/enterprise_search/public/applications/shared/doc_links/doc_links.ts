@@ -48,6 +48,7 @@ class DocLinks {
   public connectorsConfluence: string;
   public connectorsContentExtraction: string;
   public connectorsDropbox: string;
+  public connectorsExchangeServer: string;
   public connectorsGithub: string;
   public connectorsGmail: string;
   public connectorsGoogleCloudStorage: string;
@@ -164,6 +165,7 @@ class DocLinks {
     this.connectorsContentExtraction = '';
     this.connectorsClients = '';
     this.connectorsDropbox = '';
+    this.connectorsExchangeServer = '';
     this.connectorsGithub = '';
     this.connectorsGmail = '';
     this.connectorsGoogleCloudStorage = '';
@@ -280,6 +282,7 @@ class DocLinks {
     this.connectorsContentExtraction = docLinks.links.enterpriseSearch.connectorsContentExtraction;
     this.connectorsClients = docLinks.links.enterpriseSearch.connectorsClients;
     this.connectorsDropbox = docLinks.links.enterpriseSearch.connectorsDropbox;
+    this.connectorsExchangeServer = docLinks.links.enterpriseSearch.connectorsExchangeServer;
     this.connectorsGithub = docLinks.links.enterpriseSearch.connectorsGithub;
     this.connectorsGoogleCloudStorage =
       docLinks.links.enterpriseSearch.connectorsGoogleCloudStorage;

@@ -118,8 +118,8 @@ const createMockRouteContext = () => {
       } as any,
       savedObjectsClient: {} as any,
       syntheticsMonitorClient: {
-        syntheticsService: {
-          getMaintenanceWindows,
+        getMaintenanceWindows,
+        serviceManagedLocations: {
           locations: [
             {
               id: 'us_central',

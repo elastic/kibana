@@ -55,6 +55,12 @@ export interface ScoutTestTrack {
     server?: {
       configSet: string;
     };
+    // Playwright CLI options every lane of the track adds to the ones it sets itself
+    playwright?: {
+      options: {
+        grepInvert?: string;
+      };
+    };
   };
 }
 

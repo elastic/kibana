@@ -67,7 +67,8 @@ export const HomePage = () => {
                   </h1>
                 </EuiTitle>
               </EuiFlexItem>
-              {cloud?.isInTrial() && (
+              {/* Serverless shows the trial badge in the Chrome header instead */}
+              {cloud?.isInTrial() && !cloud.isServerlessEnabled && (
                 <EuiFlexItem grow={false}>
                   <TrialUsageBadge cloud={cloud} />
                 </EuiFlexItem>

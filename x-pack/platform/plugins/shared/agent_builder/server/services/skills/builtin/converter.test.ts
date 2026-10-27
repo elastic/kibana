@@ -129,6 +129,20 @@ describe('convertBuiltinSkill', () => {
     expect(result.uiSettingRequired).toBe('agentBuilder:tracing:enabled');
   });
 
+  it('sets hidden to false when not provided', () => {
+    const skill = createMockSkillDefinition();
+    const result = convertBuiltinSkill({ skill, cache });
+
+    expect(result.hidden).toBe(false);
+  });
+
+  it('carries hidden: true when set on the skill definition', () => {
+    const skill = createMockSkillDefinition({ hidden: true });
+    const result = convertBuiltinSkill({ skill, cache });
+
+    expect(result.hidden).toBe(true);
+  });
+
   it('sets isAvailable to undefined when no availability config is provided', () => {
     const skill = createMockSkillDefinition();
     const result = convertBuiltinSkill({ skill, cache });

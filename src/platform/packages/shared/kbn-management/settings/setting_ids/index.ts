@@ -61,6 +61,8 @@ export const AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID = 'agentBuilder:expe
 export const AGENT_BUILDER_BASH_SUPPORT_SETTING_ID = 'agentBuilder:bashSupport';
 export const AGENT_BUILDER_API_DISCOVERY_SETTING_ID = 'agentBuilder:apiDiscovery';
 export const AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS = 'agentBuilder:prePromptWorkflowIds';
+export const AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID =
+  'agentBuilder:includeFrozenByDefault';
 export const AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID = 'agentBuilder:deductiveEnabled';
 export const AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID = 'agentBuilder:deductiveEndpoint';
 export const AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID = 'agentBuilder:deductiveApiKey';
@@ -159,6 +161,21 @@ export const OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR =
   'observability:apmEnableServiceInventoryTableSearchBar';
 export const OBSERVABILITY_APM_TRACE_LOGS_DEFAULT_COLUMNS_ID =
   'observability:apmTraceLogsDefaultColumns';
+export const OBSERVABILITY_APM_ENABLE_TRANSACTION_PROFILING_ID =
+  'observability:apmEnableTransactionProfiling';
+export const OBSERVABILITY_PROFILING_SHOW_ERROR_FRAMES_ID =
+  'observability:profilingShowErrorFrames';
+export const OBSERVABILITY_PROFILING_PER_VCPU_WATT_X86_ID = 'observability:profilingPerVCPUWattX86';
+export const OBSERVABILITY_PROFILING_PER_VCPU_WATT_ARM64_ID =
+  'observability:profilingPervCPUWattArm64';
+export const OBSERVABILITY_PROFILING_CO2_PER_KWH_ID = 'observability:profilingCo2PerKWH';
+export const OBSERVABILITY_PROFILING_DATACENTER_PUE_ID = 'observability:profilingDatacenterPUE';
+export const OBSERVABILITY_PROFILING_AWS_COST_DISCOUNT_RATE_ID =
+  'observability:profilingAWSCostDiscountRate';
+export const OBSERVABILITY_PROFILING_AZURE_COST_DISCOUNT_RATE_ID =
+  'observability:profilingAzureCostDiscountRate';
+export const OBSERVABILITY_PROFILING_COST_PER_VCPU_PER_HOUR_ID =
+  'observability:profilingCostPervCPUPerHour';
 export const OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID = 'observability:newLogsOverview';
 export const OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID = 'observability:logSources';
 export const OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING =
@@ -169,6 +186,7 @@ export const GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR = 'genAiSettings:defaultAIConn
 export const GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY =
   'genAiSettings:defaultAIConnectorOnly';
 export const GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING = 'genAiSettings:tokenUsageTracking';
+export const GEN_AI_SETTINGS_INFERENCE_STREAMING = 'genAiSettings:inferenceStreaming';
 export const AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE = 'aiAssistant:preferredAIAssistantType';
 export const AI_CHAT_EXPERIENCE_TYPE = 'aiAssistant:preferredChatExperience';
 export const AI_ANONYMIZATION_SETTINGS = 'ai:anonymizationSettings';
@@ -277,6 +295,8 @@ export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID =
   'securitySolution:alertAnalysisWorkflowAgentId' as const;
 export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION =
   'securitySolution:alertAnalysisWorkflowCreateConversation' as const;
+export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_USE_PROMPT =
+  'securitySolution:alertAnalysisWorkflowUsePrompt' as const;
 export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED =
   'securitySolution:alertAnalysisWorkflowEnabled' as const;
 export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX =

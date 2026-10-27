@@ -13,6 +13,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 
 import { createAppContextStartContractMock } from '../mocks';
+import { AgentAlreadyAssignedError, AgentReassignmentError } from '../errors';
 import { agentPolicyService, appContextService, packagePolicyService } from '../services';
 import { fetchAllAgentsByKuery, getAgentsByKuery } from '../services/agents';
 import { reassignAgents } from '../services/agents/reassign';
@@ -169,6 +170,57 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
     return mockTask.runTask(taskInstance, mockCore, new AbortController().signal);
   };
 
+  // The search of phase 1 that tells which agent policies have agents to look at (one per page of
+  // agent policies). By default every agent policy of the page has agents on its plain policy id: pass
+  // the ids to limit them. `agentVersionsByPolicyId` are other policy ids of agents, e.g. variants, with
+  // the versions of their agents. The policy ids are returned in pages of the size of the request, with an
+  // `after_key` whenever a page has buckets, like Elasticsearch does.
+  const mockCandidateAgentPolicies = async ({
+    policyIdsWithCandidates,
+    agentVersionsByPolicyId = {},
+    otherAgentVersions = 0,
+  }: {
+    policyIdsWithCandidates?: string[];
+    agentVersionsByPolicyId?: Record<string, string[]>;
+    otherAgentVersions?: number;
+  } = {}) => {
+    const [coreStart] = await mockCore.getStartServices();
+    const esClient = coreStart.elasticsearch.client.asInternalUser as any;
+    const toBucket = (policyId: string, versions: string[]) => ({
+      key: { policy_id: policyId },
+      agent_versions: {
+        buckets: versions.map((version) => ({ key: version })),
+        sum_other_doc_count: otherAgentVersions,
+      },
+    });
+    esClient.search.mockImplementation(async (request: any) => {
+      if (!request.aggs?.policy_ids) {
+        return {};
+      }
+      const requestedPolicyIds: string[] = request.query.bool.should[1].terms.policy_base_id;
+      const buckets = [
+        ...requestedPolicyIds
+          .filter((id) => !policyIdsWithCandidates || policyIdsWithCandidates.includes(id))
+          .map((id) => toBucket(id, ['8.18.0'])),
+        ...Object.entries(agentVersionsByPolicyId).map(([id, versions]) => toBucket(id, versions)),
+      ];
+      const { size, after } = request.aggs.policy_ids.composite;
+      const start = after
+        ? buckets.findIndex((bucket) => bucket.key.policy_id === after.policy_id) + 1
+        : 0;
+      const page = buckets.slice(start, start + size);
+      return {
+        aggregations: {
+          policy_ids: {
+            buckets: page,
+            ...(page.length > 0 ? { after_key: page[page.length - 1].key } : {}),
+          },
+        },
+      };
+    });
+    return esClient;
+  };
+
   // Configure the .fleet-policies terms aggregation the orphan sweep reads in its first pass.
   // lastWrittenMs defaults to epoch (0) so mocked variants are always outside the 1-hour GRACE
   // window and eligible for deletion. Pass lastWrittenMs: Date.now() to simulate a fresh write.
@@ -213,7 +265,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
   });
 
   describe('Task execution', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
+      await mockCandidateAgentPolicies();
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
@@ -383,6 +436,121 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       );
     });
 
+    it('Should reassign the agents of a version in batches', async () => {
+      const agentPolicies = [
+        { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+      ] as AgentPolicy[];
+      const agents = Array.from({ length: 2500 }, (_, i) => ({
+        id: `agent-${i}`,
+        policy_id: 'policy-1',
+        policy_revision: 1,
+        agent: { version: '8.18.0' },
+      })) as Agent[];
+
+      mockAgentPolicyService.fetchAllAgentPolicies =
+        getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
+      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockedGetAgentsByKuery.mockResolvedValue({
+        total: agents.length,
+        agents,
+        page: 1,
+        perPage: agents.length,
+      });
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+      mockedReassignAgents.mockClear();
+
+      await runTask();
+
+      expect(
+        mockedReassignAgents.mock.calls.map(([, , options]) => (options as any).agentIds.length)
+      ).toEqual([1000, 1000, 500]);
+      for (const [, , , targetPolicyId] of mockedReassignAgents.mock.calls) {
+        expect(targetPolicyId).toBe('policy-1#8.18');
+      }
+    });
+
+    describe.each([
+      [
+        'logs at debug level when the agents are already assigned',
+        new AgentAlreadyAssignedError('x'),
+        false,
+      ],
+      [
+        'logs an error when the agents are hosted',
+        new AgentReassignmentError('No agents to reassign, already assigned or managed agents'),
+        true,
+      ],
+      ['logs an error when the reassignment fails', new Error('boom'), true],
+    ])('Reassignment failure: %s', (_name, reassignError, expectError) => {
+      it('logs with the expected level', async () => {
+        const logFactory = loggingSystemMock.create();
+        const logger = loggingSystemMock.createLogger();
+        logFactory.get.mockReturnValue(logger);
+        const task = new VersionSpecificPolicyAssignmentTask({
+          core: mockCore,
+          taskManager: mockTaskManagerSetup,
+          logFactory,
+          config: { taskInterval: '1m' },
+        });
+        const agents = generateAgents(1, 'policy-1');
+        mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
+          { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+        ] as AgentPolicy[]);
+        mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+        mockedGetAgentsByKuery.mockResolvedValue({
+          total: agents.length,
+          agents,
+          page: 1,
+          perPage: agents.length,
+        });
+        mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+        mockedReassignAgents.mockRejectedValueOnce(reassignError);
+
+        await task.start({ taskManager: tmStartMock() });
+        await task.runTask(MOCK_TASK_INSTANCE, mockCore, new AbortController().signal);
+
+        const isReassignLog = ([message]: unknown[]) =>
+          String(message).includes('Error reassigning agents to policy-1#8.18');
+        expect(logger.error.mock.calls.some(isReassignLog)).toBe(expectError);
+        expect(logger.debug.mock.calls.some(isReassignLog)).toBe(!expectError);
+      });
+    });
+
+    it('Should not reassign more batches once the task is aborted', async () => {
+      const agentPolicies = [
+        { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+      ] as AgentPolicy[];
+      const agents = Array.from({ length: 2500 }, (_, i) => ({
+        id: `agent-${i}`,
+        policy_id: 'policy-1',
+        policy_revision: 1,
+        agent: { version: '8.18.0' },
+      })) as Agent[];
+
+      mockAgentPolicyService.fetchAllAgentPolicies =
+        getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
+      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockedGetAgentsByKuery.mockResolvedValue({
+        total: agents.length,
+        agents,
+        page: 1,
+        perPage: agents.length,
+      });
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+      const abortController = new AbortController();
+      mockedReassignAgents.mockReset();
+      // the task is aborted (e.g. its timeout) while the first batch is being moved
+      mockedReassignAgents.mockImplementationOnce(async () => {
+        abortController.abort();
+        return { actionId: 'action-1' };
+      });
+
+      await mockTask.start({ taskManager: tmStartMock() });
+      await mockTask.runTask(MOCK_TASK_INSTANCE, mockCore, abortController.signal);
+
+      expect(mockedReassignAgents).toHaveBeenCalledTimes(1);
+    });
+
     it('Should skip agents already on correct versioned policy regardless of revision', async () => {
       const agentPolicies = [
         {
@@ -418,6 +586,53 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
       // Should not deploy policies since agent is already correctly assigned
       expect(mockAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
+    });
+
+    it('Should move an agent on an old variant to the matching variant, whenever it upgraded', async () => {
+      const agentPolicies = [
+        { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+      ] as AgentPolicy[];
+
+      // upgraded to 9.5 long ago, still on the 9.4 variant
+      const agents = [
+        {
+          id: 'agent-1',
+          policy_id: 'policy-1#9.4',
+          policy_revision: 5,
+          agent: { version: '9.5.1' },
+          upgraded_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+        },
+      ] as Agent[];
+
+      mockAgentPolicyService.fetchAllAgentPolicies =
+        getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
+      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockedGetAgentsByKuery.mockResolvedValue({ total: 1, agents, page: 1, perPage: 1 });
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+      await mockCandidateAgentPolicies({
+        policyIdsWithCandidates: [],
+        agentVersionsByPolicyId: { 'policy-1#9.4': ['9.5.1'] },
+      });
+
+      await runTask();
+
+      expect(mockedGetAgentsByKuery.mock.calls[0][2].kuery).toContain(
+        '(policy_id:"policy-1#9.4" and agent.version:("9.5.1"))'
+      );
+      expect(mockedGetAgentsByKuery.mock.calls[0][2].kuery).not.toContain('upgraded_at');
+      expect(mockedFetchAllAgentsByKuery.mock.calls[0][2].kuery).not.toContain('upgraded_at');
+      expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalledWith(
+        expect.anything(),
+        ['policy-1'],
+        undefined,
+        expect.objectContaining({ agentVersions: ['9.5'], spaceId: '*' })
+      );
+      expect(mockedReassignAgents).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ agentIds: ['agent-1'] }),
+        'policy-1#9.5'
+      );
     });
 
     it('Should NOT reassign agents on versioned policy with outdated revision - fleet-server handles updates', async () => {
@@ -548,6 +763,304 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       );
     });
 
+    it('Should query only the agent fields it needs, without the status runtime field', async () => {
+      const agentPolicies = [
+        { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+      ] as AgentPolicy[];
+      const agents = generateAgents(2, 'policy-1', '8.18.0');
+      mockAgentPolicyService.fetchAllAgentPolicies =
+        getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
+      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockedGetAgentsByKuery.mockResolvedValue({ total: 2, agents, page: 1, perPage: 2 });
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+
+      await runTask();
+
+      expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ perPage: 0, includeStatusRuntimeField: false })
+      );
+      expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          includeStatusRuntimeField: false,
+          fetchFields: [],
+          _source: ['policy_id', 'agent.version'],
+        })
+      );
+    });
+
+    it('Should not select OpAMP collectors', async () => {
+      const agentPolicies = [
+        { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+      ] as AgentPolicy[];
+      const agents = generateAgents(2, 'policy-1', '8.18.0');
+      mockAgentPolicyService.fetchAllAgentPolicies =
+        getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
+      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockedGetAgentsByKuery.mockResolvedValue({ total: 2, agents, page: 1, perPage: 2 });
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+
+      await runTask();
+
+      const notOpampCollector = 'not type:OPAMP';
+      for (const mocked of [mockedGetAgentsByKuery, mockedFetchAllAgentsByKuery]) {
+        expect(mocked).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ kuery: expect.stringContaining(notOpampCollector) })
+        );
+      }
+    });
+
+    describe('agent policies with agents to look at', () => {
+      const twoAgentPolicies = [
+        { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+        { id: 'policy-2', revision: 5, has_agent_version_conditions: true },
+      ] as AgentPolicy[];
+
+      beforeEach(() => {
+        mockAgentPolicyService.fetchAllAgentPolicies =
+          getMockAgentPolicyFetchAllAgentPolicies(twoAgentPolicies);
+        mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+        mockedGetAgentsByKuery.mockResolvedValue({ total: 1, agents: [], page: 1, perPage: 1 });
+        mockedFetchAllAgentsByKuery.mockImplementation(async (_es, _so, options: any) =>
+          getMockFetchAllAgentsByKuery(
+            generateAgents(1, options.kuery.includes('policy-2') ? 'policy-2' : 'policy-1')
+          )
+        );
+      });
+
+      const policyIdsQueried = () =>
+        mockedGetAgentsByKuery.mock.calls.map(([, , options]) =>
+          ['policy-1', 'policy-2'].filter((id) => options.kuery?.includes(`"${id}"`))
+        );
+
+      it('searches once for all the agent policies of a page', async () => {
+        const esClient = await mockCandidateAgentPolicies();
+
+        await runTask();
+
+        const candidateSearches = esClient.search.mock.calls.filter(
+          ([request]: any) => request.aggs?.policy_ids
+        );
+        // the page with the policy ids is not full: it is the last one
+        expect(candidateSearches).toHaveLength(1);
+        const [[request]] = candidateSearches;
+        expect(request.index).toBe('.fleet-agents');
+        expect(request.size).toBe(0);
+        // the versions of the agents are read per policy id, not the agents
+        expect(request.aggs.policy_ids.composite.sources).toEqual([
+          { policy_id: { terms: { field: 'policy_id' } } },
+        ]);
+        expect(request.aggs.policy_ids.aggs.agent_versions.terms.field).toBe('agent.version');
+        // the buckets of a page stay below the default `search.max_buckets`, or the search fails
+        const { size: policyIdsSize } = request.aggs.policy_ids.composite;
+        const { size: versionsSize } = request.aggs.policy_ids.aggs.agent_versions.terms;
+        expect(policyIdsSize * (1 + versionsSize)).toBeLessThanOrEqual(65536);
+        // agents that are inactive by timeout are active in the stored field, like in the agent queries
+        expect(request.query.bool.filter).toEqual([{ term: { active: true } }]);
+        // OpAMP collectors are never moved between policies
+        expect(request.query.bool.must_not).toEqual([{ term: { type: 'OPAMP' } }]);
+        const [onPolicy, onVariant, withoutBaseId] = request.query.bool.should;
+        // the policy and its #sentinel copy
+        expect(onPolicy).toEqual({
+          terms: { policy_id: ['policy-1', 'policy-2', 'policy-1#sentinel', 'policy-2#sentinel'] },
+        });
+        // a variant of the policies, whenever the agent upgraded
+        expect(onVariant).toEqual({ terms: { policy_base_id: ['policy-1', 'policy-2'] } });
+        // agents without policy_base_id are found by their policy_id, whenever they upgraded
+        expect(withoutBaseId).toEqual({
+          bool: { must_not: [{ exists: { field: 'policy_base_id' } }] },
+        });
+        expect(JSON.stringify(request.query)).not.toContain('upgraded_at');
+      });
+
+      it('only looks at the agent policies that have agents', async () => {
+        await mockCandidateAgentPolicies({ policyIdsWithCandidates: ['policy-2'] });
+
+        await runTask();
+
+        expect(policyIdsQueried().flat()).toEqual(['policy-2']);
+        expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalledTimes(1);
+        expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalledWith(
+          expect.anything(),
+          ['policy-2'],
+          undefined,
+          expect.anything()
+        );
+      });
+
+      it('does not query the agents when no agent policy has agents', async () => {
+        await mockCandidateAgentPolicies({ policyIdsWithCandidates: [] });
+
+        await runTask();
+
+        expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
+        expect(mockedFetchAllAgentsByKuery).not.toHaveBeenCalled();
+        expect(mockAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
+      });
+
+      it('does not query the agents on a variant that all run the version of the variant', async () => {
+        await mockCandidateAgentPolicies({
+          policyIdsWithCandidates: [],
+          agentVersionsByPolicyId: { 'policy-1#9.4': ['9.4.0', '9.4.2'] },
+        });
+
+        await runTask();
+
+        expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
+      });
+
+      it('queries only the agents that run another version than the one of their variant', async () => {
+        await mockCandidateAgentPolicies({
+          policyIdsWithCandidates: [],
+          agentVersionsByPolicyId: {
+            'policy-1#9.4': ['9.4.2', '9.5.0', '9.5.1'],
+            'policy-1#9.3': ['9.3.1'],
+          },
+        });
+
+        await runTask();
+
+        expect(mockedGetAgentsByKuery).toHaveBeenCalledTimes(1);
+        const { kuery } = mockedGetAgentsByKuery.mock.calls[0][2];
+        expect(kuery).toContain(
+          '(policy_id:"policy-1#9.4" and agent.version:("9.5.0" or "9.5.1"))'
+        );
+        expect(kuery).not.toContain('policy-1#9.3');
+        expect(kuery).not.toContain('upgraded_at');
+      });
+
+      it('queries all the agents of a variant when their versions were truncated', async () => {
+        await mockCandidateAgentPolicies({
+          policyIdsWithCandidates: [],
+          agentVersionsByPolicyId: { 'policy-1#9.4': ['9.4.2'] },
+          otherAgentVersions: 5,
+        });
+
+        await runTask();
+
+        const { kuery } = mockedGetAgentsByKuery.mock.calls[0][2];
+        expect(kuery).toContain('policy_id:"policy-1#9.4"');
+        expect(kuery).not.toContain('agent.version');
+      });
+
+      it('finds the agent policy of agents without policy_base_id by their policy_id, also on #sentinel', async () => {
+        await mockCandidateAgentPolicies({
+          policyIdsWithCandidates: [],
+          agentVersionsByPolicyId: { 'policy-1': ['8.18.0'], 'policy-2#sentinel': ['8.18.0'] },
+        });
+
+        await runTask();
+
+        expect(policyIdsQueried().flat().sort()).toEqual(['policy-1', 'policy-2']);
+      });
+
+      it('finds the agent policy of agents without policy_base_id on a mismatched variant', async () => {
+        await mockCandidateAgentPolicies({
+          policyIdsWithCandidates: [],
+          agentVersionsByPolicyId: { 'policy-2#9.4': ['9.5.0'] },
+        });
+
+        await runTask();
+
+        expect(policyIdsQueried().flat()).toEqual(['policy-2']);
+      });
+
+      it('ignores agents of other agent policies', async () => {
+        await mockCandidateAgentPolicies({
+          policyIdsWithCandidates: [],
+          agentVersionsByPolicyId: {
+            'another-policy': ['8.18.0'],
+            'another-policy#9.4': ['9.5.0'],
+          },
+        });
+
+        await runTask();
+
+        expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
+      });
+
+      it('pages through the policy ids of the agents', async () => {
+        // more than a page: the first one is full, the second one is the last
+        const otherPolicyIds = Object.fromEntries(
+          Array.from({ length: 1000 }, (_, i) => [`another-policy-${i}`, ['8.18.0']])
+        );
+        const esClient = await mockCandidateAgentPolicies({
+          policyIdsWithCandidates: [],
+          agentVersionsByPolicyId: {
+            ...otherPolicyIds,
+            'another-policy#9.4': ['9.5.0'],
+            'policy-2#9.4': ['9.5.0'],
+          },
+        });
+
+        await runTask();
+
+        const candidateSearches = esClient.search.mock.calls.filter(
+          ([request]: any) => request.aggs?.policy_ids
+        );
+        expect(candidateSearches).toHaveLength(2);
+        expect(candidateSearches[1][0].aggs.policy_ids.composite.after).toEqual({
+          policy_id: 'another-policy-999',
+        });
+        expect(policyIdsQueried().flat()).toEqual(['policy-2']);
+        expect(mockedGetAgentsByKuery.mock.calls[0][2].kuery).toContain(
+          '(policy_id:"policy-2#9.4" and agent.version:("9.5.0"))'
+        );
+      });
+    });
+
+    describe('package policies of the agent policies', () => {
+      const packagePolicy = (id: string) =>
+        ({ id, name: id, package: { name: 'test-package', version: '1.0.0' } } as PackagePolicy);
+
+      const runWithTwoAgentPolicies = async () => {
+        mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
+          { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+          { id: 'policy-2', revision: 5, has_agent_version_conditions: true },
+        ] as AgentPolicy[]);
+        mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+        mockPackagePolicyService.findAllForAgentPolicy = jest
+          .fn()
+          .mockImplementation(async (_soClient: unknown, agentPolicyId: string) => [
+            packagePolicy(`package-policy-of-${agentPolicyId}`),
+          ]);
+        mockedGetAgentsByKuery.mockResolvedValue({ total: 2, agents: [], page: 1, perPage: 2 });
+        mockedFetchAllAgentsByKuery.mockImplementation(async (_es, _so, options: any) =>
+          getMockFetchAllAgentsByKuery(
+            generateAgents(2, options.kuery.includes('policy-2') ? 'policy-2' : 'policy-1')
+          )
+        );
+
+        await runTask();
+      };
+
+      it('loads a package without an agent version condition only once per run', async () => {
+        mockedHasAgentVersionConditionInInputTemplate.mockReturnValue(false);
+
+        await runWithTwoAgentPolicies();
+
+        expect(mockedGetPackageInfo).toHaveBeenCalledTimes(1);
+        expect(mockedGetAgentTemplateAssetsMap).toHaveBeenCalledTimes(1);
+        expect(mockPackagePolicyService.compilePackagePolicyForVersions).not.toHaveBeenCalled();
+        // the agents of both policies are still assigned
+        expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalledTimes(2);
+      });
+
+      it('compiles a package with an agent version condition for every agent policy', async () => {
+        mockedHasAgentVersionConditionInInputTemplate.mockReturnValue(true);
+
+        await runWithTwoAgentPolicies();
+
+        expect(mockedGetPackageInfo).toHaveBeenCalledTimes(2);
+        expect(mockPackagePolicyService.compilePackagePolicyForVersions).toHaveBeenCalledTimes(2);
+      });
+    });
+
     it('Should not compile version-specific inputs for package policies without agent version conditions', async () => {
       const agentPolicies = [
         {
@@ -600,7 +1113,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
   });
 
   describe('Version extraction', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
+      await mockCandidateAgentPolicies();
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
@@ -685,6 +1199,115 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       jest.restoreAllMocks();
     });
 
+    describe('run metrics', () => {
+      const createTask = (debugEnabled: boolean) => {
+        const logFactory = loggingSystemMock.create();
+        const logger = loggingSystemMock.createLogger();
+        logger.isLevelEnabled.mockReturnValue(debugEnabled);
+        logFactory.get.mockReturnValue(logger);
+        return {
+          logger,
+          task: new VersionSpecificPolicyAssignmentTask({
+            core: mockCore,
+            taskManager: mockTaskManagerSetup,
+            logFactory,
+            config: { taskInterval: '1m' },
+          }),
+        };
+      };
+      const run = async (task: VersionSpecificPolicyAssignmentTask) => {
+        await task.start({ taskManager: tmStartMock() });
+        return task.runTask(MOCK_TASK_INSTANCE, mockCore, new AbortController().signal);
+      };
+      const findMetricsLog = (logger: ReturnType<typeof loggingSystemMock.createLogger>) =>
+        logger.debug.mock.calls
+          .map(([message]) => message as string)
+          .find((message) => message.includes('Run metrics:'));
+
+      beforeEach(() => {
+        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(true);
+      });
+
+      it('logs the duration, the phases and the memory of the run when debug is enabled', async () => {
+        const { task, logger } = createTask(true);
+
+        await run(task);
+
+        const metrics = JSON.parse(findMetricsLog(logger)!.split('Run metrics: ')[1]);
+        expect(metrics).toEqual(
+          expect.objectContaining({
+            sentinelVersionEnabled: true,
+            durationMs: expect.any(Number),
+            heapUsedMbPeak: expect.any(Number),
+            rssMbPeak: expect.any(Number),
+          })
+        );
+        expect(Object.keys(metrics.phaseDurationsMs)).toEqual(
+          expect.arrayContaining(['versionConditionPolicies', 'sentinelAssignment', 'orphanSweep'])
+        );
+      });
+
+      it('does not measure the run when debug is not enabled', async () => {
+        const { task, logger } = createTask(false);
+
+        await run(task);
+
+        expect(findMetricsLog(logger)).toBeUndefined();
+      });
+    });
+
+    describe('sweep throttle', () => {
+      const minutesAgo = (minutes: number) =>
+        new Date(Date.now() - minutes * 60 * 1000).toISOString();
+      const runWithState = (state: Record<string, unknown>) =>
+        runTask({ ...MOCK_TASK_INSTANCE, state });
+
+      beforeEach(() => {
+        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(false);
+        mockedGetVariantPolicyIdsFromAgentsWithoutBaseId.mockClear();
+      });
+
+      it('sweeps on the first run and records when', async () => {
+        const result = await runWithState({});
+
+        expect(mockedGetVariantPolicyIdsFromAgentsWithoutBaseId).toHaveBeenCalledTimes(1);
+        expect(result).toEqual({
+          state: { lastSweepAt: expect.any(String), sentinelVersionEnabled: false },
+        });
+      });
+
+      it('skips the sweep when it ran recently and keeps the time of the last sweep', async () => {
+        const lastSweepAt = minutesAgo(2);
+
+        const result = await runWithState({ lastSweepAt, sentinelVersionEnabled: false });
+
+        expect(mockedGetVariantPolicyIdsFromAgentsWithoutBaseId).not.toHaveBeenCalled();
+        expect(result).toEqual({ state: { lastSweepAt, sentinelVersionEnabled: false } });
+      });
+
+      it('sweeps again once the interval has passed', async () => {
+        const result: any = await runWithState({
+          lastSweepAt: minutesAgo(11),
+          sentinelVersionEnabled: false,
+        });
+
+        expect(mockedGetVariantPolicyIdsFromAgentsWithoutBaseId).toHaveBeenCalledTimes(1);
+        expect(Date.now() - Date.parse(result.state.lastSweepAt)).toBeLessThan(60 * 1000);
+      });
+
+      it('sweeps right away when the sentinel version was turned on or off', async () => {
+        await runWithState({ lastSweepAt: minutesAgo(1), sentinelVersionEnabled: true });
+
+        expect(mockedGetVariantPolicyIdsFromAgentsWithoutBaseId).toHaveBeenCalledTimes(1);
+      });
+
+      it('sweeps when the time of the last sweep is not valid', async () => {
+        await runWithState({ lastSweepAt: 'not a date', sentinelVersionEnabled: false });
+
+        expect(mockedGetVariantPolicyIdsFromAgentsWithoutBaseId).toHaveBeenCalledTimes(1);
+      });
+    });
+
     it('reassigns orphaned agents and deletes stale variant docs when the parent no longer has version conditions', async () => {
       await mockVariantPoliciesInIndex(['policy-1#9.4', 'policy-1#9.3']);
       mockAgentPolicyService.getByIds = jest
@@ -749,12 +1372,16 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        expect.objectContaining({ kuery })
+        // OpAMP collectors are left alone, like in the assignment
+        expect.objectContaining({ kuery: `(${kuery}) and not type:OPAMP` })
       );
       expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        expect.objectContaining({ kuery, includeStatusRuntimeField: false })
+        expect.objectContaining({
+          kuery: `(${kuery}) and not type:OPAMP`,
+          includeStatusRuntimeField: false,
+        })
       );
     });
 
@@ -1024,7 +1651,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       return esClient;
     };
 
-    beforeEach(() => {
+    beforeEach(async () => {
+      await mockCandidateAgentPolicies();
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
@@ -1060,7 +1688,11 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
-          expect.objectContaining({ kuery: 'policy_id:("policy-1")' })
+          // OpAMP collectors are left on the plain policy: they cannot acknowledge a policy, so a
+          // reassigned collector would stay updating
+          expect.objectContaining({
+            kuery: 'policy_id:("policy-1") and not type:OPAMP',
+          })
         );
         expect(mockAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
         expect(mockedReassignAgents).toHaveBeenCalledWith(
@@ -1197,8 +1829,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       });
     });
 
-    describe('policies with version conditions, inactive agents on #sentinel', () => {
-      const inactiveAgents = generateAgents(1, 'policy-1#sentinel', '9.4.1');
+    describe('policies with version conditions, agents on #sentinel that are inactive by timeout', () => {
+      const agentsOnSentinel = generateAgents(1, 'policy-1#sentinel', '9.4.1');
 
       beforeEach(() => {
         mockAgentPolicyService.fetchAllAgentPolicies = getPolicyPages(
@@ -1206,53 +1838,49 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
           []
         );
         mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
-        mockedGetAgentsByKuery.mockImplementation(async (_es, _so, options: any) =>
-          options.kuery.includes('status:inactive')
-            ? { total: 1, agents: inactiveAgents, page: 1, perPage: 0 }
-            : { total: 0, agents: [], page: 1, perPage: 0 }
-        );
-        mockedFetchAllAgentsByKuery.mockImplementation(async (_es, _so, options: any) =>
-          getMockFetchAllAgentsByKuery(
-            options.kuery.includes('status:inactive') ? inactiveAgents : []
-          )
-        );
-      });
-
-      it('moves them to the version specific policy when the sentinel version is disabled', async () => {
-        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(false);
-
-        await runTask();
-
-        expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({
-            kuery: 'policy_id:"policy-1#sentinel" AND active:true AND status:inactive',
-            showInactive: true,
-          })
-        );
-        expect(mockedReassignAgents).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({ agentIds: ['agent-0'], showInactive: true }),
-          'policy-1#9.4'
+        mockedGetAgentsByKuery.mockResolvedValue({
+          total: 1,
+          agents: agentsOnSentinel,
+          page: 1,
+          perPage: 0,
+        });
+        mockedFetchAllAgentsByKuery.mockImplementation(async () =>
+          getMockFetchAllAgentsByKuery(agentsOnSentinel)
         );
       });
 
-      it('leaves them alone while the sentinel version is enabled', async () => {
-        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(true);
+      it.each([true, false])(
+        'are moved once, with the query of the other agents, when the sentinel version is %s',
+        async (sentinelVersionEnabled) => {
+          mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(sentinelVersionEnabled);
 
-        await runTask();
+          await runTask();
 
-        expect(mockedGetAgentsByKuery).not.toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({
-            kuery: expect.stringContaining('status:inactive'),
-          })
-        );
-        expect(mockedReassignAgents).not.toHaveBeenCalled();
-      });
+          // the active agents are selected by the stored `active` field, so those that are inactive by
+          // timeout are in the same query and no query needs the status
+          expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledTimes(1);
+          expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.anything(),
+            expect.objectContaining({
+              kuery: expect.stringContaining('"policy-1#sentinel"'),
+              includeStatusRuntimeField: false,
+            })
+          );
+          const kueries = [
+            ...mockedGetAgentsByKuery.mock.calls.map(([, , options]) => options.kuery),
+            ...mockedFetchAllAgentsByKuery.mock.calls.map(([, , options]) => options.kuery),
+          ];
+          expect(kueries.some((kuery) => kuery?.includes('status'))).toBe(false);
+          expect(mockedReassignAgents).toHaveBeenCalledTimes(1);
+          expect(mockedReassignAgents).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.anything(),
+            expect.objectContaining({ agentIds: ['agent-0'] }),
+            'policy-1#9.4'
+          );
+        }
+      );
     });
 
     describe('orphaned version-specific policy sweep', () => {
@@ -1322,7 +1950,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
           expect.anything(),
           expect.anything(),
           expect.objectContaining({
-            kuery: '(policy_base_id:"policy-1") and not policy_id:"policy-1#sentinel"',
+            kuery:
+              '((policy_base_id:"policy-1") and not policy_id:"policy-1#sentinel") and not type:OPAMP',
           })
         );
         expect(mockedReassignAgents).toHaveBeenCalledWith(

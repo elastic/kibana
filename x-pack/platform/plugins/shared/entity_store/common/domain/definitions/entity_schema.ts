@@ -8,6 +8,10 @@
 import type { Condition } from '@kbn/streamlang';
 import { conditionSchema as streamlangConditionSchema } from '@kbn/streamlang';
 import { z, lazySchema } from '@kbn/zod/v4';
+import { assertDynamicDefinitionRules, dynamicBlockSchema } from './dynamic';
+
+export { dynamicBlockSchema };
+export type { DynamicBlock } from './dynamic';
 
 export type EntityType = z.infer<typeof EntityType>;
 export const EntityType = lazySchema(() => z.enum(['user', 'host', 'service', 'generic']));
@@ -42,6 +46,27 @@ export const ExtractionMode = lazySchema(() => z.enum(['single', 'priority', 'no
 /** Named access to the modes. Use this rather than the string literals, which live only above. */
 export const EXTRACTION_MODE = ExtractionMode.enum;
 
+// DoS guards for the extraction block, which will also accept HTTP input.
+const MAX_FIELD_NAME_LENGTH = 1024;
+const MAX_FIELDS = 2000; // matches the latest index `total_fields.limit`
+const MAX_SET_FIELDS_RULES = 64;
+const MAX_SET_FIELDS_PER_RULE = 64;
+const MAX_COMPOSITION_FIELDS = 32;
+const MAX_LITERAL_LENGTH = 1000;
+const MAX_ENTITY_TYPE_FALLBACK_LENGTH = 256;
+const MAX_DEFINITION_ID_LENGTH = 512;
+const MAX_DEFINITION_NAME_LENGTH = 256;
+const MAX_DEFINITION_DESCRIPTION_LENGTH = 1024;
+
+const entityDefinitionTypeSchema = lazySchema(() =>
+  z.string().superRefine((type, ctx) => {
+    const reason = validateEntityDefinitionType(type);
+    if (reason) {
+      ctx.addIssue({ code: 'custom', message: reason });
+    }
+  })
+);
+
 const mappingSchema = lazySchema(() => z.any());
 
 const retentionOperationSchema = lazySchema(() =>
@@ -53,13 +78,15 @@ const retentionOperationSchema = lazySchema(() =>
   ])
 );
 
+const fieldNameSchema = lazySchema(() => z.string().min(1).max(MAX_FIELD_NAME_LENGTH));
+
 const fieldSchema = lazySchema(() =>
   z.object({
     allowAPIUpdate: z.optional(z.boolean()),
-    destination: z.string(),
+    destination: fieldNameSchema,
     mapping: z.optional(mappingSchema),
     retention: retentionOperationSchema,
-    source: z.string(),
+    source: fieldNameSchema,
   })
 );
 
@@ -147,9 +174,15 @@ export const euidRankingSchema = lazySchema(() =>
 );
 
 // Any field used in the euid calculation must be mapped in the fields array,
-// otherwise we won't have guarantees of field being available
+// otherwise we won't have guarantees of field being available.
+//
+// Both identity variants are strict. Consumers hold the definition object as registered, not the
+// parsed copy, and tell the variants apart by key presence (`isSingleFieldIdentity`). A plain
+// object would let a calculated identity absorb a stray `singleField` by stripping it, so the
+// ranking is what gets validated while the stored object still carries the unvalidated single
+// field. Strictness makes an identity with keys of both variants fail every variant.
 const calculatedIdentityFieldLogicSchema = lazySchema(() =>
-  z.object({
+  z.strictObject({
     // Ranking mechanism for EUID: branches evaluated in order; first matching branch wins.
     // Branch with no `when` always matches (fallback). Used by ESQL, Painless, Memory, DSL.
     euidRanking: euidRankingSchema,
@@ -172,9 +205,10 @@ const calculatedIdentityFieldLogicSchema = lazySchema(() =>
 /**
  * Single-field identity: entity is identified by one field only (e.g. service.name, entity.id).
  * No composition, no field evaluations. ESQL/DSL use a simplified path for this shape.
+ * Strict for the same reason as the calculated variant above.
  */
 export const singleFieldIdentitySchema = lazySchema(() =>
-  z.object({
+  z.strictObject({
     singleField: z.string(),
     // When true, the entity id is not prefixed with the entity type (e.g. output "a" instead of "generic:a").
     skipTypePrepend: z.optional(z.boolean()),
@@ -188,12 +222,12 @@ const identityFieldSchema = lazySchema(() =>
 // Field value: literal string, single source reference, or composition (CONCAT of fields).
 const fieldValueSchema = lazySchema(() =>
   z.union([
-    z.string(),
-    z.object({ source: z.string() }),
+    z.string().max(MAX_LITERAL_LENGTH),
+    z.object({ source: fieldNameSchema }),
     z.object({
       composition: z.object({
-        fields: z.array(z.string()).min(1),
-        sep: z.string(),
+        fields: z.array(fieldNameSchema).min(1).max(MAX_COMPOSITION_FIELDS),
+        sep: z.string().max(MAX_LITERAL_LENGTH),
       }),
     }),
   ])
@@ -205,13 +239,20 @@ export const setFieldsByConditionSchema = lazySchema(() =>
   z.object({
     condition: streamlangConditionSchema,
     fields: z
-      .record(z.string(), fieldValueSchema)
+      .record(fieldNameSchema, fieldValueSchema)
       .refine((value) => Object.keys(value).length > 0, {
         message: 'At least one field override is required',
+      })
+      .refine((value) => Object.keys(value).length <= MAX_SET_FIELDS_PER_RULE, {
+        message: `At most ${MAX_SET_FIELDS_PER_RULE} field overrides are allowed`,
       }),
   })
 );
 export type SetFieldsByCondition = z.infer<typeof setFieldsByConditionSchema>;
+
+const setFieldsByConditionListSchema = lazySchema(() =>
+  z.array(setFieldsByConditionSchema).max(MAX_SET_FIELDS_RULES)
+);
 
 // Definition-owned reasons stay separate so a rule can only report a reason it owns.
 export const creationRejectionReasonSchema = lazySchema(() =>
@@ -254,54 +295,85 @@ export const EntityDefinitionManagedBy = lazySchema(() =>
   ])
 );
 
-export const entitySchema = lazySchema(() =>
-  z.object({
-    id: z.string(),
-    name: z.string(),
-    type: EntityType,
-    filter: z.string().optional(),
-    entityTypeFallback: z.string().optional(),
-    fields: z.array(fieldSchema),
+/**
+ * Everything the entity store's extraction engine, component templates and CRUD API read. Optional
+ * on a definition: its presence does not make the store extract the type, which it only does for
+ * its own built-ins.
+ */
+export const extractionBlockSchema = lazySchema(() =>
+  z.strictObject({
+    // Fields extracted into the store and their retention policy. Drives STATS, the merge EVAL,
+    // the component template mappings and CRUD field validation.
+    fields: z.array(fieldSchema).max(MAX_FIELDS),
     // Optional evaluated fields applied before pre-agg overrides and STATS for all entity types.
     fieldEvaluations: z.optional(z.array(fieldEvaluationSchema)),
-    identityField: identityFieldSchema,
-    indexPatterns: z.array(z.string()),
     // Optional filter (Condition from @kbn/streamlang) applied in ESQL only, right after the
     // LOOKUP JOIN, to filter rows (e.g. keep already-stored entities or IDP-like events). No DSL equivalent.
     postAggFilter: z.optional(streamlangConditionSchema),
+    // Optional: when conditions are true on source docs, set the given fields (EVAL after field evals, before STATS).
+    whenConditionTrueSetFieldsPreAgg: z.optional(setFieldsByConditionListSchema),
+    // Post-STATS EVAL in logs ESQL (recent.* vs plain). Single-doc paths re-apply entries after pre-agg for parity.
+    whenConditionTrueSetFieldsAfterStats: z.optional(setFieldsByConditionListSchema),
+    // Value written to `entity.type` when the source documents carry none.
+    entityTypeFallback: z.string().max(MAX_ENTITY_TYPE_FALLBACK_LENGTH).optional(),
+    // Omission disables single-document creation for the entity type.
+    creatableFromSingleDocument: z.optional(creatableFromSingleDocumentSchema),
     // Optional document-level predicate (Condition from @kbn/streamlang) marking this entity type's
     // high-signal logs. Omission means the type has no priority/non-priority split.
     priorityExtractionGate: z.optional(streamlangConditionSchema),
     // Opts the non-priority process into sampling. Requires priorityExtractionGate; omission means
     // no sampling.
     nonPrioritySampling: z.optional(z.boolean()),
-    // Optional: when conditions are true on source docs, set the given fields (EVAL after field evals, before STATS).
-    whenConditionTrueSetFieldsPreAgg: z.optional(z.array(setFieldsByConditionSchema)),
-    // Post-STATS EVAL in logs ESQL (recent.* vs plain). Single-doc paths re-apply entries after pre-agg for parity.
-    whenConditionTrueSetFieldsAfterStats: z.optional(z.array(setFieldsByConditionSchema)),
-    // Omission disables single-document creation for the entity type.
-    creatableFromSingleDocument: z.optional(creatableFromSingleDocumentSchema),
+  })
+);
+
+/**
+ * The definition's object shape without its whole-definition rules. Derive other schemas from this
+ * one (zod cannot `omit` a refined object) and re-apply `assertDynamicDefinitionRules`.
+ */
+export const entityDefinitionObjectSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(MAX_DEFINITION_ID_LENGTH),
+    type: entityDefinitionTypeSchema,
+    // The type's display name, shown wherever the type is listed.
+    name: z.string().max(MAX_DEFINITION_NAME_LENGTH),
+    // Optional free text on what the entity is and how it is identified.
+    description: z.string().max(MAX_DEFINITION_DESCRIPTION_LENGTH).optional(),
     // Who manages the definition. Optional here; the registry requires it.
     managedBy: z.optional(EntityDefinitionManagedBy),
+    identityField: identityFieldSchema,
+    extraction: z.optional(extractionBlockSchema),
+    dynamic: z.optional(dynamicBlockSchema),
   })
+);
+
+/**
+ * Identity core (`type`, `name`, `description`, `managedBy`, `identityField`) plus the optional
+ * `extraction` and `dynamic` blocks, with the whole-definition rules for `dynamic`.
+ */
+export const entitySchema = lazySchema(() =>
+  entityDefinitionObjectSchema.superRefine(assertDynamicDefinitionRules)
 );
 
 export type EntityField = z.infer<typeof fieldSchema>; // entities fields
 export type CalculatedEntityIdentity = z.infer<typeof calculatedIdentityFieldLogicSchema>; // full identity (euidRanking + documentsFilter + optional fieldEvaluations)
 export type SingleFieldIdentity = z.infer<typeof singleFieldIdentitySchema>;
 export type EntityIdentity = z.infer<typeof identityFieldSchema>; // definition-time identity (full or singleField)
-export type EntityDefinition = z.infer<typeof entitySchema>; // entity with id generated in runtime
+export type EntityDefinition = z.infer<typeof entityDefinitionObjectSchema>; // entity with id generated in runtime
 export type EntityDefinitionWithoutId = Omit<EntityDefinition, 'id'>;
-/**
- * A definition whose type name is not restricted to the built-in `EntityType` values. The id
- * compiler emits `type` verbatim as the `<type>:` id prefix inside ES|QL and Painless string
- * literals, so it must match the registry's type-name pattern (lowercase alphanumerics with `.`,
- * `_` or `-` separators). Definitions read from the registry always do.
- */
-export type EntityDefinitionOfAnyType = Omit<EntityDefinitionWithoutId, 'type'> & {
-  type: EntityDefinitionType;
+/** @deprecated `EntityDefinitionWithoutId` now accepts any valid type name; use it instead. */
+export type EntityDefinitionOfAnyType = EntityDefinitionWithoutId;
+export type ExtractionBlock = z.infer<typeof extractionBlockSchema>;
+/** A definition that carries extraction config, for server code that only runs for materialised types. */
+export type ExtractedEntityDefinition = EntityDefinition & { extraction: ExtractionBlock };
+export type ExtractedEntityDefinitionWithoutId = EntityDefinitionWithoutId & {
+  extraction: ExtractionBlock;
 };
-export type ManagedEntityDefinition = EntityDefinition & { type: EntityType }; // entity with a known 'type'
+/** A built-in definition as registered: extraction config present and `type` one of the store's own. */
+export type ManagedEntityDefinitionWithoutId = ExtractedEntityDefinitionWithoutId & {
+  type: EntityType;
+};
+export type ManagedEntityDefinition = ExtractedEntityDefinition & { type: EntityType }; // built-in entity with a known 'type'
 
 /**
  * A definition resolved for an extraction mode, carrying the predicate that selects which logs that
@@ -325,3 +397,21 @@ export type FieldEvaluation = z.infer<typeof fieldEvaluationSchema>;
 export function isSingleFieldIdentity(identity: EntityIdentity): identity is SingleFieldIdentity {
   return 'singleField' in identity;
 }
+
+type DefinitionWithOptionalExtraction = Pick<EntityDefinitionWithoutId, 'extraction'>;
+
+/** Returns the post-aggregation filter, if the definition declares one. */
+export const getPostAggFilter = (
+  definition: DefinitionWithOptionalExtraction
+): Condition | undefined => definition.extraction?.postAggFilter;
+
+/** Returns the pre-aggregation field overrides, if the definition declares any. */
+export const getPreAggFieldOverrides = (
+  definition: DefinitionWithOptionalExtraction
+): SetFieldsByCondition[] | undefined => definition.extraction?.whenConditionTrueSetFieldsPreAgg;
+
+/** Returns the post-STATS field overrides, if the definition declares any. */
+export const getPostStatsFieldOverrides = (
+  definition: DefinitionWithOptionalExtraction
+): SetFieldsByCondition[] | undefined =>
+  definition.extraction?.whenConditionTrueSetFieldsAfterStats;

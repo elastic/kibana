@@ -133,4 +133,39 @@ describe('alerting v2 telemetry task state', () => {
       expect(() => v4.schema.validate(state)).toThrow();
     });
   });
+
+  describe('v5', () => {
+    const v5 = stateSchemaByVersion[5];
+
+    const v4State = {
+      has_errors: false,
+      runs: 4,
+      count_total: 20,
+      count_agent_builder_assisted: 3,
+      action_policies_count_agent_builder_assisted: 1,
+    };
+
+    it('removes the agent-builder counters from the migrated state', () => {
+      const result = v5.up(cloneDeep(v4State));
+
+      expect(result).not.toHaveProperty('count_agent_builder_assisted');
+      expect(result).not.toHaveProperty('action_policies_count_agent_builder_assisted');
+    });
+
+    it('preserves the counters it does not own', () => {
+      expect(v5.up(cloneDeep(v4State))).toMatchObject({
+        has_errors: false,
+        runs: 4,
+        count_total: 20,
+      });
+    });
+
+    it('produces a state the v5 schema accepts', () => {
+      expect(() => v5.schema.validate(v5.up(cloneDeep(v4State)))).not.toThrow();
+    });
+
+    it('rejects a state that still carries the agent-builder counters', () => {
+      expect(() => v5.schema.validate(v4State)).toThrow();
+    });
+  });
 });

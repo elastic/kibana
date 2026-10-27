@@ -590,6 +590,43 @@ describe('buildWorkflowContext', () => {
     });
   });
 
+  describe('execution chain', () => {
+    const childExecution: EsWorkflowExecution = {
+      ...baseExecution,
+      context: {
+        executionChain: [
+          { executionId: 'root-exec-1', invocation: 'sync', workflowId: 'root-workflow-id' },
+          { executionId: 'parent-exec-1', invocation: 'async', workflowId: 'parent-workflow-id' },
+        ],
+        parentWorkflowExecutionId: 'parent-exec-1',
+        parentWorkflowId: 'parent-workflow-id',
+        parentDepth: 1,
+      },
+    };
+
+    it('should keep the stored chain out of the Liquid render context', () => {
+      const rendered = JSON.stringify(
+        buildWorkflowRenderContext(childExecution, undefined, dependencies)
+      );
+
+      expect({
+        chain: rendered.includes('executionChain'),
+        firstHopExecution: rendered.includes('root-exec-1'),
+        firstHopWorkflow: rendered.includes('root-workflow-id'),
+      }).toEqual({ chain: false, firstHopExecution: false, firstHopWorkflow: false });
+    });
+
+    it('should still expose only the direct parent for a child execution with a stored chain', () => {
+      const context = buildWorkflowRenderContext(childExecution, undefined, dependencies);
+
+      expect(context.parent).toEqual({
+        workflowId: 'parent-workflow-id',
+        executionId: 'parent-exec-1',
+        depth: 2,
+      });
+    });
+  });
+
   describe('metadata context', () => {
     it('should include metadata from execution document when present', () => {
       const execution: EsWorkflowExecution = {

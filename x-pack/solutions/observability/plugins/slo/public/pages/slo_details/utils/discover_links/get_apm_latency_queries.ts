@@ -9,8 +9,9 @@ import { type EsQueryConfig } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/observability-plugin/public';
 import {
   ALL_VALUE,
-  kqlWithFiltersSchema,
   type APMTransactionDurationIndicator,
+  is,
+  kqlWithFiltersSchemaZod,
 } from '@kbn/slo-schema';
 
 export function getApmLatencyQueries(
@@ -44,12 +45,12 @@ export function getApmLatencyQueries(
   }
 
   if (indicator.params.filter) {
-    const filterKuery = kqlWithFiltersSchema.is(indicator.params.filter)
+    const filterKuery = is(kqlWithFiltersSchemaZod, indicator.params.filter)
       ? indicator.params.filter.kqlQuery
       : indicator.params.filter;
     const filter = buildEsQuery({
       kuery: filterKuery,
-      filters: kqlWithFiltersSchema.is(indicator.params.filter)
+      filters: is(kqlWithFiltersSchemaZod, indicator.params.filter)
         ? indicator.params.filter.filters
         : [],
       config: esQueryConfig,

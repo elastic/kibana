@@ -7,7 +7,8 @@
 
 import React, { memo, useMemo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
-import { EndpointActionFailureMessage } from '../../../../endpoint_action_failure_message';
+import type { ExecuteActionHostResponseProps } from './endpoint_execute_action/execute_action_host_response';
+import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { getAgentActionState } from '../../utils';
 import type {
@@ -16,8 +17,7 @@ import type {
   ResponseActionExecuteOutputContent,
   ResponseActionsExecuteParameters,
 } from '../../../../../../../common/endpoint/types';
-import { ExecuteActionHostResponse } from '../../../../endpoint_execute_action';
-import type { ExecuteActionHostResponseProps } from '../../../../endpoint_execute_action/execute_action_host_response';
+import { ExecuteActionHostResponse } from './endpoint_execute_action';
 
 export interface ExecuteResultsProps {
   action: MaybeImmutable<

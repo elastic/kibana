@@ -5,15 +5,32 @@
  * 2.0.
  */
 
-import { CASES_URL } from '@kbn/cases-plugin/common';
-import type { Case } from '@kbn/cases-plugin/common/types/domain';
-import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
+import { CASES_URL, COMMENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import type {
+  Attachment,
+  Case,
+  UnifiedAttachment,
+  UnifiedAttachmentPayload,
+  UserCommentAttachmentPayload,
+} from '@kbn/cases-plugin/common/types/domain';
+import { AttachmentType, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import type {
+  AttachmentRequest,
+  CasePostRequest,
+  UnifiedAttachmentPutRequest,
+  UnifiedAttachmentsFindResponse,
+} from '@kbn/cases-plugin/common/types/api';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import type { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type { RoleCredentials } from '../../../shared/services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
+export interface UnifiedCommentPayload {
+  type: typeof COMMENT_ATTACHMENT_TYPE;
+  data: { content: string };
+  owner: string;
+}
 
 export interface User {
   username: string;
@@ -76,7 +93,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
     },
 
     async deleteComments(): Promise<void> {
-      await kbnServer.savedObjects.clean({ types: ['cases-comments'] });
+      await kbnServer.savedObjects.clean({ types: ['cases-comments', 'cases-attachments'] });
     },
 
     async deleteConfiguration(): Promise<void> {
@@ -192,6 +209,141 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
         .expect(expectedHttpCode);
 
       return theCase;
+    },
+
+    async createComment(
+      {
+        caseId,
+        params,
+        expectedHttpCode = 200,
+      }: { caseId: string; params: AttachmentRequest; expectedHttpCode?: number },
+      roleAuthc: RoleCredentials
+    ): Promise<Case> {
+      const { body: theCase } = await supertestWithoutAuth
+        .post(`${CASES_URL}/${caseId}/comments`)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .send(params)
+        .expect(expectedHttpCode);
+
+      return theCase;
+    },
+
+    async getComment(
+      {
+        caseId,
+        commentId,
+        expectedHttpCode = 200,
+      }: { caseId: string; commentId: string; expectedHttpCode?: number },
+      roleAuthc: RoleCredentials
+    ): Promise<Attachment> {
+      const { body: comment } = await supertestWithoutAuth
+        .get(`${CASES_URL}/${caseId}/comments/${commentId}`)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .expect(expectedHttpCode);
+
+      return comment;
+    },
+
+    async createAttachment(
+      {
+        caseId,
+        params,
+        expectedHttpCode = 201,
+      }: { caseId: string; params: UnifiedAttachmentPayload; expectedHttpCode?: number },
+      roleAuthc: RoleCredentials
+    ): Promise<UnifiedAttachment> {
+      const { body: attachment } = await supertestWithoutAuth
+        .post(`${CASES_URL}/${caseId}/attachments`)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .send(params)
+        .expect(expectedHttpCode);
+
+      return attachment;
+    },
+
+    async getAttachment(
+      {
+        caseId,
+        attachmentId,
+        expectedHttpCode = 200,
+      }: { caseId: string; attachmentId: string; expectedHttpCode?: number },
+      roleAuthc: RoleCredentials
+    ): Promise<UnifiedAttachment> {
+      const { body: attachment } = await supertestWithoutAuth
+        .get(`${CASES_URL}/${caseId}/attachments/${attachmentId}`)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .expect(expectedHttpCode);
+
+      return attachment;
+    },
+
+    async findAttachments(
+      {
+        caseId,
+        query = {},
+        expectedHttpCode = 200,
+      }: { caseId: string; query?: Record<string, unknown>; expectedHttpCode?: number },
+      roleAuthc: RoleCredentials
+    ): Promise<UnifiedAttachmentsFindResponse> {
+      const { body } = await supertestWithoutAuth
+        .get(`${CASES_URL}/${caseId}/attachments`)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .query(query)
+        .expect(expectedHttpCode);
+
+      return body;
+    },
+
+    async updateAttachment(
+      {
+        caseId,
+        attachmentId,
+        req,
+        expectedHttpCode = 200,
+      }: {
+        caseId: string;
+        attachmentId: string;
+        req: UnifiedAttachmentPutRequest;
+        expectedHttpCode?: number;
+      },
+      roleAuthc: RoleCredentials
+    ): Promise<UnifiedAttachment> {
+      const { body: attachment } = await supertestWithoutAuth
+        .put(`${CASES_URL}/${caseId}/attachments/${attachmentId}`)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .send(req)
+        .expect(expectedHttpCode);
+
+      return attachment;
+    },
+
+    async deleteAttachment(
+      {
+        caseId,
+        attachmentId,
+        expectedHttpCode = 204,
+      }: { caseId: string; attachmentId: string; expectedHttpCode?: number },
+      roleAuthc: RoleCredentials
+    ): Promise<void> {
+      await supertestWithoutAuth
+        .delete(`${CASES_URL}/${caseId}/attachments/${attachmentId}`)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .expect(expectedHttpCode);
+    },
+
+    getPostCommentReq(owner: string): UserCommentAttachmentPayload {
+      return { type: AttachmentType.user, comment: 'This is a cool comment', owner };
+    },
+
+    getPostUnifiedCommentReq(owner: string): UnifiedCommentPayload {
+      return { type: COMMENT_ATTACHMENT_TYPE, data: { content: 'This is a cool comment' }, owner };
     },
 
     getFindCasesResp() {

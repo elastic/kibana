@@ -11,7 +11,7 @@ import { TLSRuleExecutor } from './tls_rule_executor';
 import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { SyntheticsService } from '../../synthetics_service/synthetics_service';
+import { ServiceManagedLocations } from '../../synthetics_service/service_managed_locations';
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
 import type { SyntheticsServerSetup } from '../../types';
@@ -57,9 +57,9 @@ describe('tlsRuleExecutor', () => {
     encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as SyntheticsServerSetup;
 
-  const syntheticsService = new SyntheticsService(serverMock);
+  const serviceManagedLocations = new ServiceManagedLocations(serverMock);
 
-  const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
+  const monitorClient = new SyntheticsMonitorClient(serviceManagedLocations, serverMock);
 
   const commonFilter =
     'synthetics-monitor-multi-space.attributes.alert.tls.enabled: true and (synthetics-monitor-multi-space.attributes.type: http or synthetics-monitor-multi-space.attributes.type: tcp)';
