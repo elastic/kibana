@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
@@ -17,6 +18,8 @@ import {
 import type { TrackingService } from '../../../telemetry';
 import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
 import { createModelProvider, createModelProviderFactory } from './model_provider';
+
+const SPACE_ID = 'my-space';
 
 interface EndpointMock {
   connectorId: string;
@@ -56,7 +59,7 @@ const setupDeps = ({
   fastEndpoints?: EndpointMock[];
   defaultConnectorId?: string;
 } = {}) => {
-  const request = httpServerMock.createKibanaRequest();
+  const request = httpServerMock.createKibanaRequest({ spaceId: asSpaceId(SPACE_ID) });
   const logger = loggingSystemMock.createLogger();
   const inference = inferenceMock.createStartContract();
   const searchInferenceEndpoints = createSearchInferenceEndpointsMock({
@@ -130,7 +133,7 @@ describe('createModelProvider', () => {
           request: deps.request,
           bindTo: {
             connectorId: 'default-connector',
-            metadata: { connectorTelemetry: MODEL_TELEMETRY_METADATA },
+            metadata: { connectorTelemetry: { ...MODEL_TELEMETRY_METADATA, spaceId: SPACE_ID } },
           },
         })
       );
@@ -205,7 +208,7 @@ describe('createModelProvider', () => {
         expect.objectContaining({
           bindTo: {
             connectorId: 'specific-connector',
-            metadata: { connectorTelemetry: MODEL_TELEMETRY_METADATA },
+            metadata: { connectorTelemetry: { ...MODEL_TELEMETRY_METADATA, spaceId: SPACE_ID } },
           },
         })
       );
@@ -308,14 +311,16 @@ describe('createModelProvider', () => {
 
       expect(deps.inference.getChatModel).toHaveBeenCalledWith(
         expect.objectContaining({
-          chatModelOptions: { telemetryMetadata: MODEL_TELEMETRY_METADATA },
+          chatModelOptions: {
+            telemetryMetadata: { ...MODEL_TELEMETRY_METADATA, spaceId: SPACE_ID },
+          },
         })
       );
       expect(deps.inference.getClient).toHaveBeenCalledWith(
         expect.objectContaining({
           bindTo: {
             connectorId: 'default-connector',
-            metadata: { connectorTelemetry: MODEL_TELEMETRY_METADATA },
+            metadata: { connectorTelemetry: { ...MODEL_TELEMETRY_METADATA, spaceId: SPACE_ID } },
           },
         })
       );
@@ -334,14 +339,14 @@ describe('createModelProvider', () => {
 
       expect(deps.inference.getChatModel).toHaveBeenCalledWith(
         expect.objectContaining({
-          chatModelOptions: { telemetryMetadata },
+          chatModelOptions: { telemetryMetadata: { ...telemetryMetadata, spaceId: SPACE_ID } },
         })
       );
       expect(deps.inference.getClient).toHaveBeenCalledWith(
         expect.objectContaining({
           bindTo: {
             connectorId: 'default-connector',
-            metadata: { connectorTelemetry: telemetryMetadata },
+            metadata: { connectorTelemetry: { ...telemetryMetadata, spaceId: SPACE_ID } },
           },
         })
       );

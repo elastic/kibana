@@ -104,6 +104,7 @@ describe('registerGenerateRoute', () => {
 
     mockRequest = {
       body: {},
+      spaceId: 'default',
     };
 
     mockCoreStart = {
