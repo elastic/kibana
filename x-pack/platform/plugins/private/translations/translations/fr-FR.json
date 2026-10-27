@@ -43612,7 +43612,6 @@
     "xpack.securitySolution.detections.hostIsolation.impactedCases": "Cette action sera ajoutée aux {cases}.",
     "xpack.securitySolution.detectionsEngine.grouping.inspectTitle": "Requête de regroupement",
     "xpack.securitySolution.documentationLinks.ariaLabelEnding": "cliquez pour ouvrir la documentation dans un nouvel onglet",
-    "xpack.securitySolution.documentationLinks.coverageOverview.text": "En savoir plus.",
     "xpack.securitySolution.documentationLinks.detectionsRequirements.text": "Prérequis et exigences des détections",
     "xpack.securitySolution.documentationLinks.mlJobCompatibility.text": "Compatibilité des tâches de ML",
     "xpack.securitySolution.documentationLinks.solutionRequirements.text": "Exigences système d'Elastic Security",

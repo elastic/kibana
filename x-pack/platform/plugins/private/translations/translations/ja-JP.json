@@ -43929,7 +43929,6 @@
     "xpack.securitySolution.detections.hostIsolation.impactedCases": "このアクションは{cases}に追加されます。",
     "xpack.securitySolution.detectionsEngine.grouping.inspectTitle": "クエリのグループ化",
     "xpack.securitySolution.documentationLinks.ariaLabelEnding": "クリックすると、新しいタブでドキュメントを開きます",
-    "xpack.securitySolution.documentationLinks.coverageOverview.text": "詳細情報",
     "xpack.securitySolution.documentationLinks.detectionsRequirements.text": "検出の前提条件と要件",
     "xpack.securitySolution.documentationLinks.mlJobCompatibility.text": "MLジョブの互換性",
     "xpack.securitySolution.documentationLinks.solutionRequirements.text": "Elasticセキュリティシステム要件",

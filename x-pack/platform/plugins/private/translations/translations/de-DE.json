@@ -43779,7 +43779,6 @@
     "xpack.securitySolution.detections.hostIsolation.impactedCases": "Diese Aktion wird zu {cases} hinzugefügt.",
     "xpack.securitySolution.detectionsEngine.grouping.inspectTitle": "Gruppierungsabfrage",
     "xpack.securitySolution.documentationLinks.ariaLabelEnding": "Klicken, um die Dokumentation in einem neuen Tab zu öffnen",
-    "xpack.securitySolution.documentationLinks.coverageOverview.text": "Weitere Informationen.",
     "xpack.securitySolution.documentationLinks.detectionsRequirements.text": "Voraussetzungen und Anforderungen für Erkennungen",
     "xpack.securitySolution.documentationLinks.mlJobCompatibility.text": "Kompatibilität von ML-Jobs",
     "xpack.securitySolution.documentationLinks.solutionRequirements.text": "Systemanforderungen für Elastic Security",

@@ -43903,7 +43903,6 @@
     "xpack.securitySolution.detections.hostIsolation.impactedCases": "Essa ação será adicionada a {cases}.",
     "xpack.securitySolution.detectionsEngine.grouping.inspectTitle": "Consulta de agrupamento",
     "xpack.securitySolution.documentationLinks.ariaLabelEnding": "clique para abrir a documentação em uma nova aba",
-    "xpack.securitySolution.documentationLinks.coverageOverview.text": "Saiba mais.",
     "xpack.securitySolution.documentationLinks.detectionsRequirements.text": "Pré-requisitos para detecção",
     "xpack.securitySolution.documentationLinks.mlJobCompatibility.text": "Compatibilidade de tarefa de ML",
     "xpack.securitySolution.documentationLinks.solutionRequirements.text": "Requisitos do sistema Elastic Security",

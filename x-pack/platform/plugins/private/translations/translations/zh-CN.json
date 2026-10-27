@@ -43938,7 +43938,6 @@
     "xpack.securitySolution.detections.hostIsolation.impactedCases": "此操作将添加到 {cases}。",
     "xpack.securitySolution.detectionsEngine.grouping.inspectTitle": "正对查询分组",
     "xpack.securitySolution.documentationLinks.ariaLabelEnding": "单击以在新选项卡中打开文档",
-    "xpack.securitySolution.documentationLinks.coverageOverview.text": "了解详情。",
     "xpack.securitySolution.documentationLinks.detectionsRequirements.text": "检测先决条件和要求",
     "xpack.securitySolution.documentationLinks.mlJobCompatibility.text": "ML 作业兼容性",
     "xpack.securitySolution.documentationLinks.solutionRequirements.text": "Elastic Security 系统要求",

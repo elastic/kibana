@@ -11,10 +11,12 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
 import { CoverageOverviewDashboardContextProvider } from './coverage_overview_dashboard_context';
 import { CoverageOverviewDashboard } from './coverage_overview_dashboard';
+import { CoverageOverviewAppHeader } from './coverage_overview_app_header';
 
 export const CoverageOverviewPage = () => (
   <>
     <CoverageOverviewDashboardContextProvider>
+      <CoverageOverviewAppHeader />
       <SecuritySolutionPageWrapper data-test-subj="coverageOverviewPage">
         <CoverageOverviewDashboard />
       </SecuritySolutionPageWrapper>
