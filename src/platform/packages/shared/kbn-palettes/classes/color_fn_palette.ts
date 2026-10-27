@@ -9,11 +9,14 @@
 
 import type { Optional } from 'utility-types';
 import { EUI_VIS_COLOR_STORE } from '@elastic/eui';
+import { LRUCache } from 'lru-cache';
 import type { KbnBasePaletteConfig } from './palette';
 import { KbnBasePalette } from './palette';
 import type { IKbnPalette, KbnPaletteType } from './types';
 
 const DEFAULT_COLOR_COUNT = 10;
+// Palettes are long-lived singletons and requested counts can be data-dependent, so bound the cache
+const MAX_CACHED_COLOR_COUNTS = 16;
 
 export interface KbnColorFnPaletteConfig extends Optional<KbnBasePaletteConfig, 'colorCount'> {
   type: KbnPaletteType;
@@ -33,7 +36,7 @@ export class KbnColorFnPalette extends KbnBasePalette implements IKbnPalette {
   #defaultNumberOfColors: number;
   // Generated colors per requested count; EUI palette functions read the current theme's vis colors,
   // so the cache is only valid for the vis colors it was built with
-  #colorsByCount = new Map<number, string[]>();
+  #colorsByCount = new LRUCache<number, string[]>({ max: MAX_CACHED_COLOR_COUNTS });
   #cachedVisColors = EUI_VIS_COLOR_STORE.visColors;
 
   constructor({

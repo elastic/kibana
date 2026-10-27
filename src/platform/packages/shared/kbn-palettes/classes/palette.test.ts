@@ -128,6 +128,22 @@ describe('KbnColorFnPalette color reuse', () => {
     expect(colorFn).toHaveBeenCalledTimes(2);
   });
 
+  it('keeps a bounded number of color counts, evicting the least recently used', () => {
+    const { palette, colorFn } = createColorFnPalette(5);
+    for (let n = 1; n <= 100; n++) {
+      palette.getColor(0, n);
+      palette.getColor(0, 1); // keep count 1 recently used
+    }
+    colorFn.mockClear();
+
+    palette.getColor(0, 1);
+    palette.getColor(0, 100);
+    expect(colorFn).not.toHaveBeenCalled();
+
+    palette.getColor(0, 2);
+    expect(colorFn).toHaveBeenCalledTimes(1);
+  });
+
   it('regenerates colors after EUI vis colors change', () => {
     const { palette, colorFn } = createColorFnPalette(5);
     palette.getColor(0);
