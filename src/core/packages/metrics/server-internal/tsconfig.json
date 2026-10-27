@@ -29,6 +29,8 @@
     "@kbn/core-http-server",
     "@kbn/safer-lodash-set",
     "@kbn/core-threads-server-internal",
+    "@kbn/core-feature-flags-server",
+    "@kbn/core-status-common",
   ],
   "exclude": [
     "target/**/*",

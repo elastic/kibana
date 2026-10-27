@@ -104,9 +104,15 @@ jest.doMock('@kbn/core-node-server-internal', () => ({
 }));
 
 export const mockMetricsService = metricsServiceMock.create();
+export const mockEventLoopWatchdogService = {
+  setup: jest.fn().mockResolvedValue(undefined),
+  start: jest.fn(),
+  stop: jest.fn().mockResolvedValue(undefined),
+};
 jest.doMock('@kbn/core-metrics-server-internal', () => ({
   ...jest.requireActual('@kbn/core-metrics-server-internal'),
   MetricsService: jest.fn(() => mockMetricsService),
+  EventLoopWatchdogService: jest.fn(() => mockEventLoopWatchdogService),
 }));
 
 export const mockStatusService = statusServiceMock.create();
