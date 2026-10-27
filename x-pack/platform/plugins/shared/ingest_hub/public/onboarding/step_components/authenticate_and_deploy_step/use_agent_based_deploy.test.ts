@@ -493,6 +493,28 @@ describe('useAgentBasedDeploy — SO persistence', () => {
         expect.objectContaining({ status: 'succeeded', instances: expectedInstances })
       );
     });
+
+    it('keeps the instances in the update when the deploy fails, so a retry after resume has them', async () => {
+      mockCreateDeployment.mockResolvedValue('so-id-failing');
+      setUp({
+        detectAndReviewStep: {
+          policyIdsByInstance: {},
+          pendingCleanupPolicyIds: {},
+          onboardingDeploymentId: 'so-id-failing',
+        },
+      });
+      mockDeployToExistingAgentPolicies.mockRejectedValue(new Error('unexpected network failure'));
+
+      const { result } = renderHook(() => useAgentBasedDeploy());
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      expect(mockUpdateDeployment).toHaveBeenCalledWith(
+        'so-id-failing',
+        expect.objectContaining({ status: 'failed', instances: expectedInstances })
+      );
+    });
   });
 
   // catch-path update includes services/serviceVars/authMethod so a resumed-after-error
