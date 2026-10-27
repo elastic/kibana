@@ -150,8 +150,11 @@ export function getCachePercentage(cacheTokens: unknown, inputTokens: unknown): 
     return undefined;
   }
   // 0% and 100% are only shown when exact: a partial share never rounds onto either end.
-  if (cache === 0 || cache === input) {
-    return cache === 0 ? 0 : 100;
+  if (cache === 0) {
+    return 0;
+  }
+  if (cache === input) {
+    return 100;
   }
   return Math.min(99, Math.max(1, Math.round((cache / input) * 100)));
 }
