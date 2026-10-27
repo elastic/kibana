@@ -58,23 +58,34 @@ function deserializeState(state: DashboardState) {
   };
 }
 
-/** Same settings diff the unsaved-changes manager produces, for any two dashboard states. */
-export const diffDashboardSettings = (baseline: DashboardState, current: DashboardState) => {
-  // an empty description is saved as no description
-  const deserializeForDiff = (state: DashboardState) => ({
-    ...deserializeState(state),
-    description: state.description || undefined,
-  });
+type ComparableSettings = ReturnType<typeof deserializeState>;
+
+const getOptions = ({
+  description,
+  tags,
+  time_restore,
+  project_routing_restore,
+  title,
+  ...options
+}: ComparableSettings) => options;
+
+// an empty description is saved as no description
+const withoutEmptyDescription = (settings: ComparableSettings): ComparableSettings => ({
+  ...settings,
+  description: settings.description || undefined,
+});
+
+const diffSettings = (baseline: ComparableSettings, current: ComparableSettings) => {
   const diff = diffComparators(
     comparators,
-    deserializeForDiff(baseline),
-    deserializeForDiff(current),
+    withoutEmptyDescription(baseline),
+    withoutEmptyDescription(current),
     DEFAULT_SETTINGS
   );
   const { description, tags, time_restore, project_routing_restore, title, ...optionDiffs } = diff;
   // options needs to contain all values and not just diffs since is spread into saved state
   const options = Object.keys(optionDiffs).length
-    ? { ...DEFAULT_DASHBOARD_OPTIONS, ...current.options }
+    ? { ...DEFAULT_DASHBOARD_OPTIONS, ...getOptions(current) }
     : undefined;
   return {
     // key presence, not truthiness, so clearing the description or title is still a change
@@ -86,6 +97,10 @@ export const diffDashboardSettings = (baseline: DashboardState, current: Dashboa
     ...(options && { options }),
   };
 };
+
+/** Same settings diff the unsaved-changes manager produces, for any two dashboard states. */
+export const diffDashboardSettings = (baseline: DashboardState, current: DashboardState) =>
+  diffSettings(deserializeState(baseline), deserializeState(current));
 
 export function initializeSettingsManager(initialState: DashboardState) {
   const stateManager = initializeStateManager(
@@ -148,30 +163,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
           debounceTime(100),
           map(() => stateManager.getLatestState()),
           combineLatestWith(lastSavedState$.pipe(map((lastSaved) => deserializeState(lastSaved)))),
-          map(([latestState, lastSavedState]) => {
-            const {
-              description,
-              tags,
-
-              time_restore,
-
-              project_routing_restore,
-              title,
-              ...optionDiffs
-            } = diffComparators(comparators, lastSavedState, latestState, DEFAULT_SETTINGS);
-            // options needs to contain all values and not just diffs since is spread into saved state
-            const options = Object.keys(optionDiffs).length
-              ? { ...serializeSettings().options, ...optionDiffs }
-              : undefined;
-            return {
-              ...(description && { description }),
-              ...(tags && { tags }),
-              ...(title && { title }),
-              ...(typeof time_restore === 'boolean' && { time_restore }),
-              ...(typeof project_routing_restore === 'boolean' && { project_routing_restore }),
-              ...(options && { options }),
-            };
-          })
+          map(([latestState, lastSavedState]) => diffSettings(lastSavedState, latestState))
         );
       },
       reset: (lastSavedState: DashboardState) => {
