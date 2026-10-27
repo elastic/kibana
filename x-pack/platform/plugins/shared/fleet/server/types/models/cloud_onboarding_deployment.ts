@@ -105,6 +105,13 @@ export const CloudOnboardingDeploymentSchemaV3 = CloudOnboardingDeploymentSchema
   description: schema.maybe(schema.string({ maxLength: 2048 })),
 });
 
+// ── V4: namespace ────────────────────────────────────────────────────────────
+// Global data stream namespace from the Service settings step. Not in mappings.properties
+// (dynamic: false), so no mapping change is needed.
+export const CloudOnboardingDeploymentSchemaV4 = CloudOnboardingDeploymentSchemaV3.extends({
+  namespace: schema.maybe(schema.string({ maxLength: 100 })),
+});
+
 // ── V1 ───────────────────────────────────────────────────────────────────────
 export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   provider: ProviderSchema,

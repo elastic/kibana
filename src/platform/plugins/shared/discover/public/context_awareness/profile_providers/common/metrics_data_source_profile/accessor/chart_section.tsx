@@ -47,6 +47,7 @@ const MetricsExperienceGridWrapper = (
       counterAggregation: metricsState.counterAggregation,
       gaugeAggregation: metricsState.gaugeAggregation,
       histogramPercentile: metricsState.histogramPercentile,
+      histogramVisualization: metricsState.histogramVisualization,
       dimensions: metricsState.dimensions,
       searchTerm: metricsState.searchTerm,
     }),
@@ -54,6 +55,7 @@ const MetricsExperienceGridWrapper = (
       metricsState.counterAggregation,
       metricsState.gaugeAggregation,
       metricsState.histogramPercentile,
+      metricsState.histogramVisualization,
       metricsState.dimensions,
       metricsState.searchTerm,
     ]
