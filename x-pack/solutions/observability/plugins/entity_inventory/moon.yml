@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/entity-store'
+  - '@kbn/es-types'
 tags:
   - plugin
   - prod
