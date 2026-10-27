@@ -12,14 +12,17 @@ import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
+  ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW_ID,
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_WORKFLOW_IDS,
   ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ALERTZERO_CLOSE_ATTACK_AND_ALERTS_WORKFLOW_ID,
   ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID,
   ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
+  ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID,
   ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_FORENSICS_WORKFLOW_IDS,
@@ -34,20 +37,27 @@ import {
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
+import ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_YAML from './definitions/alertzero/actions/action_close_attack_discovery_investigation.yaml';
 import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/defend/action_isolate_host.yaml';
 import ACTION_KILL_PROCESS_YAML from './definitions/alertzero/actions/defend/action_kill_process.yaml';
 import ACTION_SUSPEND_PROCESS_YAML from './definitions/alertzero/actions/defend/action_suspend_process.yaml';
+import CLOSE_ATTACK_AND_ALERTS_YAML from './definitions/alertzero/close_attack_and_alerts.yaml';
 import DETECTION_RULE_COVERAGE_YAML from './definitions/alertzero/detection_rule_coverage.yaml';
 import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection_rule_tuning.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './definitions/alertzero/floor_alert_triage.yaml';
 import FLOOR_ALERT_TRIAGE_BATCH_YAML from './definitions/alertzero/floor_alert_triage_batch.yaml';
 import FLOOR_ALERT_TRIAGE_REVIEW_YAML from './definitions/alertzero/floor_alert_triage_review.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alertzero/floor_attack_discovery.yaml';
+import FORENSICS_CLOSE_INVESTIGATION_GATE_YAML from './definitions/alertzero/forensics_close_investigation_gate.yaml';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_endpoint_analysis.yaml';
 import FORENSICS_PROPOSAL_GATE_YAML from './definitions/alertzero/forensics_proposal_gate.yaml';
 import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_run_endpoint_analysis.yaml';
@@ -59,6 +69,7 @@ import {
   RULE_TUNING_WORKER_SETTINGS_DEFAULTS,
   type WorkerSettingsDefaults,
 } from './definitions/alertzero/worker_settings_defaults';
+import SLACK_THREAD_WORKFLOW_YAML from './definitions/nightshift_investigations/slack_thread/slack_thread_workflow.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -81,6 +92,14 @@ type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
 const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID]: { serviceAccountId: 'example-account' },
   [NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_agent' },
+  [NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID]: {
+    serviceAccountId: 'kibana/nightshift_agent',
+  },
+  [NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_agent' },
+  [NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID]: {
+    serviceAccountId: 'kibana/nightshift_agent',
+  },
+  [NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_agent' },
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
   },
@@ -238,25 +257,37 @@ it.each([
     renderInputs(FORENSICS_ENDPOINT_ANALYSIS_YAML, ENDPOINT_ANALYSIS_WORKER_SETTINGS_DEFAULTS),
     '6:4084021c',
   ],
-  [ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID, FORENSICS_PROPOSAL_GATE_YAML, '4:020e6b4e'],
+  [
+    ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID,
+    FORENSICS_CLOSE_INVESTIGATION_GATE_YAML,
+    '1:14389146',
+  ],
+  [ALERTZERO_CLOSE_ATTACK_AND_ALERTS_WORKFLOW_ID, CLOSE_ATTACK_AND_ALERTS_YAML, '1:e7a50b9e'],
+  [
+    ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW_ID,
+    ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_YAML,
+    '1:c95fb7f7',
+  ],
+  [ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID, FORENSICS_PROPOSAL_GATE_YAML, '5:67acf4fc'],
   [
     ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
     FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML,
-    '14:5619153f',
+    '15:225ef405',
   ],
   [
     ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
     renderInputs(DETECTION_RULE_TUNING_YAML, RULE_TUNING_WORKER_SETTINGS_DEFAULTS),
-    '11:8f08f83c',
+    '12:8f08f83c',
   ],
   [
     ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
     renderInputs(DETECTION_RULE_COVERAGE_YAML, RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS),
-    '4:d2801f59',
+    '5:d2801f59',
   ],
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '4:fa71b87b'],
   [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '5:ec92e281'],
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '4:5c86922d'],
+  [NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID, SLACK_THREAD_WORKFLOW_YAML, '1:43e8bba8'],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',
   (workflowId, inputs, expectedFingerprint) => {

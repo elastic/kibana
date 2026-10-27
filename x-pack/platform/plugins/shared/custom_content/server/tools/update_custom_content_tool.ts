@@ -10,7 +10,11 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools/builtin';
-import { customContentPanelUpdateSchema, resolveEsqlQueryEdit } from '@kbn/custom-content-common';
+import {
+  customContentPanelUpdateSchema,
+  resolveCustomContentQuery,
+} from '@kbn/custom-content-common';
+import { generateCustomContentEsql } from '@kbn/agent-builder-visualizations-server';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
@@ -59,16 +63,16 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
   description: `Update the custom content panel from a natural-language prompt and/or a new ES|QL query.
 
 - Provide \`prompt\` to describe what to create or change. The server generates the HTML template.
-- When \`esqlQuery\` is also changing, the server samples the new schema before generating so the template matches the data.
-- When only \`prompt\` is provided (style or layout change, no query change), the server refines the existing template directly — no query sampling, preserving layout and design.
-- Pass \`esqlQuery: null\` to remove the query entirely.
+- When the edit changes what the panel shows, also set \`regenerateEsql: true\` (and \`index\` when known): the server regenerates the ES|QL query from \`prompt\`, keeping the parts the request does not change, and samples the new schema before generating so the template matches the data. Do not write the query yourself.
+- When only \`prompt\` is provided (style or layout change, no query change), the server refines the existing template directly — no query generation or sampling, preserving layout and design.
+- Pass \`esqlQuery\` only when the user supplied a query verbatim; pass \`esqlQuery: null\` to remove the query entirely.
 
 This tool only reaches panels whose context is attached to the conversation — that happens when the user picks "Refine with chat" on a panel. For any other custom content panel on the attached dashboard, use \`${GENERATE_DASHBOARD_TOOL_ID}\` instead, listing the panel's id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\` content; it targets the panel by id and needs no attachment.
 
 On success this returns \`attachment_id\` and \`version\`. You MUST render the updated panel inline as the last part of your response by emitting \`<render_attachment id="{attachment_id}" version="{version}" />\` — without it the user cannot preview or step back through earlier versions of the panel.`,
   schema: updateCustomContentSchema,
   handler: async (
-    { embeddable_id, prompt, esqlQuery },
+    { embeddable_id, prompt, esqlQuery, regenerateEsql, index },
     { attachments, events, logger, esClient, modelProvider }
   ) => {
     const panelAttachments = attachments
@@ -104,10 +108,41 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
 
     const currentData = readPanelContextData(contextAttachment);
 
-    const { query: resolvedQuery, isChanging: isQueryChanging } = resolveEsqlQueryEdit(
-      esqlQuery,
-      currentData?.esql_query
-    );
+    let resolved: Awaited<ReturnType<typeof resolveCustomContentQuery>>;
+    try {
+      resolved = await resolveCustomContentQuery({
+        suppliedQuery: esqlQuery,
+        regenerate: regenerateEsql,
+        existingQuery: currentData?.esql_query,
+        isNewPanel: false,
+        generate: (existingQueries) =>
+          generateCustomContentEsql({
+            nlQuery: prompt ?? '',
+            index,
+            existingQueries,
+            modelProvider,
+            events,
+            logger,
+            esClient,
+            noQueryHint:
+              'Pass an exact "index" and a more specific description, or an "esqlQuery" the user supplied.',
+          }),
+      });
+    } catch (err) {
+      logger.error(`custom_content_update_panel: query generation failed — ${err}`);
+      return {
+        results: [
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.error,
+            data: {
+              message: err instanceof Error ? err.message : String(err),
+            },
+          },
+        ],
+      };
+    }
+    const { query: resolvedQuery, isChanging: isQueryChanging } = resolved;
 
     let resolvedTemplate: string = currentData?.panel_template ?? '';
     if (prompt !== undefined) {
