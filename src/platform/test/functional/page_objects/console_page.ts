@@ -267,18 +267,11 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clickPlayAndWaitForResults() {
-    // Retry the Play click until the request starts. A single click can be a no-op if the editor
-    // hasn't finished registering the current request (see #240147).
-    await this.retry.try(async () => {
-      await this.clickPlay();
-      const started =
-        (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
-        (await this.testSubjects.exists('consoleRequestInProgressBadge')) ||
-        (await this.testSubjects.exists('consoleMonacoOutput'));
-      if (!started) throw new Error('Console request did not start after clicking Play');
-    });
-
-    // Wait for loading indicators to clear and output to be present.
+    // Play lives in an overlay that is only visible once the editor has registered a request under
+    // the cursor (#240147). Clicking moves focus off the editor, which hides the overlay, so the
+    // click must not be retried.
+    await this.testSubjects.existOrFail('sendRequestButton', { timeout: 20_000 });
+    await this.clickPlay();
     await this.waitForRequestToComplete();
   }
 

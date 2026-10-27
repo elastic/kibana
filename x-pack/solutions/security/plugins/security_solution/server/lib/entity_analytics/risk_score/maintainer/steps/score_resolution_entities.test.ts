@@ -66,6 +66,7 @@ describe('score_resolution_entities', () => {
         now: '2026-01-01T00:00:00.000Z',
         calculationRunId: 'run-1',
         watchlistConfigs: new Map(),
+        alertFilters: [],
       })
     );
 
@@ -100,6 +101,7 @@ describe('score_resolution_entities', () => {
         now: '2026-01-01T00:00:00.000Z',
         calculationRunId: 'run-1',
         watchlistConfigs: new Map(),
+        alertFilters: [],
       })
     );
 
@@ -111,6 +113,42 @@ describe('score_resolution_entities', () => {
           },
         },
       })
+    );
+  });
+
+  it('applies the alert filters to the resolution scoring query', async () => {
+    const alertFilters = [
+      { range: { '@timestamp': { gte: 'now-30d', lt: 'now' } } },
+      { bool: { must_not: { terms: { 'kibana.alert.workflow_status': ['closed'] } } } },
+    ];
+    (esClient.search as jest.Mock).mockResolvedValue({
+      aggregations: {
+        by_resolution_target: {
+          buckets: [{ key: { resolution_target_id: 'user:target-1' } }],
+        },
+      },
+    });
+
+    await collectPages(
+      calculateResolutionEntityScores({
+        esClient,
+        crudClient,
+        logger,
+        entityType: EntityType.user,
+        alertsIndex: '.alerts-security.alerts-default',
+        lookupIndex: '.entity_analytics.risk_score.lookup-default',
+        pageSize: 10_000,
+        sampleSize: 1000,
+        now: '2026-01-01T00:00:00.000Z',
+        calculationRunId: 'run-1',
+        watchlistConfigs: new Map(),
+        alertFilters,
+      })
+    );
+
+    expect(esClient.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ filter: { bool: { filter: alertFilters } } }),
+      expect.anything()
     );
   });
 

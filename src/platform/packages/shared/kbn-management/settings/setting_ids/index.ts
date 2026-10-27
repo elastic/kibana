@@ -67,6 +67,8 @@ export const AGENT_BUILDER_BASH_SUPPORT_SETTING_ID = 'agentBuilder:bashSupport';
 export const AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS = 'agentBuilder:prePromptWorkflowIds';
 export const AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID =
   'agentBuilder:uiamOAuthClientManagement';
+export const AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID =
+  'agentBuilder:includeFrozenByDefault';
 export const AGENT_BUILDER_TRACING_ENABLED_SETTING_ID = 'agentBuilder:tracing:enabled';
 export const AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID =
   'agentBuilder:tracing:includeUserPrompts';
