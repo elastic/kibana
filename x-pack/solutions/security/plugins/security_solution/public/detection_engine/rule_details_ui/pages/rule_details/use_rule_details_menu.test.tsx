@@ -21,6 +21,7 @@ import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
+import * as actionI18n from '../../../common/translations';
 import { SecurityAppHeader } from '../../../../common/components/app_header';
 import { TestProviders } from '../../../../common/mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -483,6 +484,162 @@ describe('rule details app menu', () => {
 
       ['duplicateRule', 'exportRule', 'manualRuleRun', 'revertRule', 'deleteRule'].forEach((id) =>
         expect(getMenuItem(result.current, id)).toBeUndefined()
+      );
+    });
+  });
+
+  describe('permissions', () => {
+    const noPrivilege = { read: false, edit: false };
+    const ruleWithActions = () => ({
+      ...mockRule('rule-id'),
+      actions: [
+        { action_type_id: '.email', group: 'default', id: 'action-id', params: {}, uuid: 'uuid' },
+      ],
+    });
+
+    const getEditAction = (menu: ReturnType<typeof useRuleDetailsMenu>) => menu.primaryActionItem;
+
+    describe('edit rule settings', () => {
+      it('is enabled with every privilege', () => {
+        const { result } = renderMenuHook();
+
+        expect(getEditAction(result.current)?.disableButton).toBe(false);
+        expect(getEditAction(result.current)?.tooltipContent).toBeUndefined();
+      });
+
+      it.each([
+        ['rules edit', { rules: { read: true, edit: true } }],
+        [
+          'custom highlighted fields edit',
+          { rules: noPrivilege, customHighlightedFields: { read: true, edit: true } },
+        ],
+        [
+          'investigation guide edit',
+          { rules: noPrivilege, investigationGuide: { read: true, edit: true } },
+        ],
+      ])('is enabled with only the %s privilege', (_name, privileges) => {
+        mockPrivileges(privileges);
+        const { result } = renderMenuHook();
+
+        expect(getEditAction(result.current)?.disableButton).toBe(false);
+      });
+
+      it('is disabled with the rules privilege explanation when no edit privilege is granted', () => {
+        mockPrivileges({
+          rules: noPrivilege,
+          customHighlightedFields: noPrivilege,
+          investigationGuide: noPrivilege,
+        });
+        const { result } = renderMenuHook();
+
+        expect(getEditAction(result.current)?.disableButton).toBe(true);
+        expect(getEditAction(result.current)?.tooltipContent).toBe(
+          actionI18n.LACK_OF_KIBANA_RULES_FEATURE_PRIVILEGES
+        );
+      });
+
+      it('explains the missing actions privilege for a rule with actions', () => {
+        const { result } = renderMenuHook(
+          getMenuProps(ruleWithActions(), false, { hasActionsPrivileges: false })
+        );
+
+        expect(getEditAction(result.current)?.tooltipContent).toBe(
+          actionI18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+        );
+      });
+
+      it('is disabled for a deleted rule', () => {
+        const { result } = renderMenuHook(
+          getMenuProps(undefined, false, { isExistingRule: false })
+        );
+
+        expect(getEditAction(result.current)?.disableButton).toBe(true);
+      });
+    });
+
+    describe('duplicate rule', () => {
+      it('is disabled without the rules edit privilege', () => {
+        mockPrivileges({ rules: { read: true, edit: false } });
+        const { result } = renderMenuHook();
+
+        expect(getMenuItem(result.current, 'duplicateRule')?.disableButton).toBe(true);
+      });
+
+      it('is disabled with an explanation for a rule with actions without the actions privilege', () => {
+        const { result } = renderMenuHook(
+          getMenuProps(ruleWithActions(), false, { hasActionsPrivileges: false })
+        );
+
+        const item = getMenuItem(result.current, 'duplicateRule');
+        expect(item?.disableButton).toBe(true);
+        expect(item?.tooltipContent).toBe(actionI18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES);
+      });
+
+      it('is enabled for a rule without actions even without the actions privilege', () => {
+        const { result } = renderMenuHook(
+          getMenuProps(undefined, false, { hasActionsPrivileges: false })
+        );
+
+        expect(getMenuItem(result.current, 'duplicateRule')?.disableButton).toBe(false);
+      });
+    });
+
+    describe('export rule', () => {
+      it('is disabled without the rules read privilege', () => {
+        mockPrivileges({ rules: noPrivilege });
+        const { result } = renderMenuHook();
+
+        expect(getMenuItem(result.current, 'exportRule')?.disableButton).toBe(true);
+      });
+    });
+
+    describe('manual rule run', () => {
+      it('is disabled with the permissions explanation without the manual run privilege', () => {
+        mockPrivileges({ manualRun: { read: true, edit: false } });
+        const { result } = renderMenuHook();
+
+        const item = getMenuItem(result.current, 'manualRuleRun');
+        expect(item?.disableButton).toBe(true);
+        expect(item?.tooltipContent).toBe(actionI18n.MANUAL_RULE_RUN_PERMISSIONS_TOOLTIP);
+      });
+
+      it('is disabled with the disabled rule explanation when the rule is off', () => {
+        const { result } = renderMenuHook(getMenuProps({ ...mockRule('rule-id'), enabled: false }));
+
+        const item = getMenuItem(result.current, 'manualRuleRun');
+        expect(item?.disableButton).toBe(true);
+        expect(item?.tooltipContent).toBe(actionI18n.MANUAL_RULE_RUN_TOOLTIP);
+      });
+    });
+
+    describe('revert rule', () => {
+      it('is disabled without the rules edit privilege', () => {
+        mockPrivileges({ rules: { read: true, edit: false } });
+        const { result } = renderMenuHook(getMenuProps(customizedPrebuiltRule()));
+
+        expect(getMenuItem(result.current, 'revertRule')?.disableButton).toBe(true);
+      });
+    });
+
+    describe('delete rule', () => {
+      it('is disabled without the rules edit privilege', () => {
+        mockPrivileges({ rules: { read: true, edit: false } });
+        const { result } = renderMenuHook();
+
+        expect(getMenuItem(result.current, 'deleteRule')?.disableButton).toBe(true);
+      });
+    });
+
+    describe('deleted rule', () => {
+      it.each(['duplicateRule', 'exportRule', 'manualRuleRun', 'deleteRule', 'refreshRuleStatus'])(
+        'disables "%s"',
+        (id) => {
+          const { result } = renderMenuHook(
+            getMenuProps(undefined, false, { isExistingRule: false })
+          );
+
+          expect(getMenuItem(result.current, id)?.disableButton).toBe(true);
+        }
       );
     });
   });

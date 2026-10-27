@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { MemoryRouter } from 'react-router-dom';
@@ -22,6 +22,7 @@ import { mockRule } from '../../../rule_management_ui/components/rules_table/__m
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
+import * as actionI18n from '../../../common/translations';
 import { useRuleDetailsBadges } from './use_rule_details_badges';
 
 jest.mock('../../../../common/components/user_privileges');
@@ -50,6 +51,7 @@ interface RuleBadgesProps {
   isExistingRule?: boolean;
   ruleLoading?: boolean;
   snoozeBadge?: AppHeaderBadge;
+  hasActionsPrivileges?: boolean;
 }
 
 const RuleBadges = ({
@@ -57,12 +59,13 @@ const RuleBadges = ({
   isExistingRule = true,
   ruleLoading = false,
   snoozeBadge,
+  hasActionsPrivileges = true,
 }: RuleBadgesProps) => {
   const badges = useRuleDetailsBadges({
     rule,
     ruleLoading,
     isExistingRule,
-    hasActionsPrivileges: true,
+    hasActionsPrivileges,
     onRuleEnabledChange,
     startMlJobsIfNeeded,
     snoozeBadge,
@@ -169,6 +172,39 @@ describe('useRuleDetailsBadges', () => {
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByTestId('ruleDetailsDisableRule')).toBeDisabled();
+  });
+
+  describe('enable/disable permissions', () => {
+    const ruleWithActions = () => ({
+      ...mockRule('rule-id'),
+      actions: [
+        { action_type_id: '.email', group: 'default', id: 'action-id', params: {}, uuid: 'uuid' },
+      ],
+    });
+
+    const openBadgeMenu = async () => {
+      await userEvent.click(screen.getByText('Enabled'));
+      await waitForEuiPopoverOpen();
+    };
+
+    it('is disabled with an explanation for a rule with actions without the actions privilege', async () => {
+      renderHeader({ rule: ruleWithActions(), hasActionsPrivileges: false });
+      await openBadgeMenu();
+
+      const item = await screen.findByTestId('ruleDetailsDisableRule');
+      expect(item).toBeDisabled();
+      fireEvent.mouseOver(item);
+      expect(
+        await screen.findByText(actionI18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES)
+      ).toBeInTheDocument();
+    });
+
+    it('is enabled for a rule without actions even without the actions privilege', async () => {
+      renderHeader({ rule: mockRule('rule-id'), hasActionsPrivileges: false });
+      await openBadgeMenu();
+
+      expect(await screen.findByTestId('ruleDetailsDisableRule')).toBeEnabled();
+    });
   });
 
   it('shows only the "Deleted rule" badge for a deleted rule', () => {
