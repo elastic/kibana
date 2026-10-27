@@ -105,9 +105,11 @@ describe('SearchInferenceEndpointsPlugin', () => {
       const getFeature = jest.fn();
       const getForFeature = jest.fn();
       const getUiSetting = jest.fn();
+      const getConnectorById = jest.fn();
 
       const setupAndGetResolver = async () => {
         const setupWithStart = coreMock.createSetup({
+          pluginStartDeps: { inference: { getConnectorById } },
           pluginStartContract: {
             features: { get: getFeature },
             endpoints: { getForFeature },
@@ -126,6 +128,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
         getFeature.mockReset();
         getForFeature.mockReset();
         getUiSetting.mockReset();
+        getConnectorById.mockReset();
       });
 
       it('registers a resolver with the inference plugin', async () => {
@@ -175,6 +178,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
           soEntryFound: false,
         });
         getUiSetting.mockResolvedValue('global-default');
+        getConnectorById.mockResolvedValue({ connectorId: 'global-default' });
         const resolver = await setupAndGetResolver();
 
         await expect(resolver('my_feature', request)).resolves.toEqual({
@@ -183,6 +187,37 @@ describe('SearchInferenceEndpointsPlugin', () => {
           reasoning: undefined,
         });
         expect(getUiSetting).toHaveBeenCalledWith(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+        expect(getConnectorById).toHaveBeenCalledWith('global-default', request);
+      });
+
+      it('returns the top endpoint when the global default is a stack connector alias for it', async () => {
+        getFeature.mockReturnValue({ featureId: 'my_feature', taskType: 'chat_completion' });
+        getForFeature.mockResolvedValue({
+          endpoints: [{ connectorId: 'my-inference-endpoint' }],
+          soEntryFound: false,
+        });
+        getUiSetting.mockResolvedValue('my-stack-connector');
+        getConnectorById.mockResolvedValue({ connectorId: 'my-inference-endpoint' });
+        const resolver = await setupAndGetResolver();
+
+        await expect(resolver('my_feature', request)).resolves.toEqual({
+          connectorId: 'my-inference-endpoint',
+          temperature: undefined,
+          reasoning: undefined,
+        });
+      });
+
+      it('returns undefined when the global default connector cannot be loaded', async () => {
+        getFeature.mockReturnValue({ featureId: 'my_feature', taskType: 'chat_completion' });
+        getForFeature.mockResolvedValue({
+          endpoints: [{ connectorId: 'first-in-catalog' }],
+          soEntryFound: false,
+        });
+        getUiSetting.mockResolvedValue('missing-connector');
+        getConnectorById.mockRejectedValue(new Error('not found'));
+        const resolver = await setupAndGetResolver();
+
+        await expect(resolver('my_feature', request)).resolves.toBeUndefined();
       });
 
       it('returns undefined when only the connector catalog is available', async () => {
@@ -195,6 +230,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
         const resolver = await setupAndGetResolver();
 
         await expect(resolver('my_feature', request)).resolves.toBeUndefined();
+        expect(getConnectorById).not.toHaveBeenCalled();
       });
 
       it('returns undefined when the feature has no endpoints', async () => {
