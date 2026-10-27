@@ -10,10 +10,11 @@ import { v4 as uuidV4 } from 'uuid';
 import { AGENT_POLICY_INDEX, AGENTS_INDEX } from '@kbn/fleet-plugin/common/constants';
 
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../helpers';
-
-const TASK_INDEX = '.kibana_task_manager';
-const TASK_ID = 'task:fleet:setup:backfillPolicyBaseId';
+import {
+  getPolicyBaseIdBackfillTask,
+  skipIfNoDockerRegistry,
+  waitForPolicyBaseIdBackfill,
+} from '../helpers';
 
 interface SeededDoc {
   index: string;
@@ -25,7 +26,6 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
-  const retry = getService('retry');
 
   describe('policy_base_id backfill', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -35,19 +35,8 @@ export default function (providerContext: FtrProviderContext) {
 
     const fleetSetup = () => supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
-    const getTaskDoc = async () => {
-      const res = await es.get<{ task: { status: string } }>(
-        { index: TASK_INDEX, id: TASK_ID },
-        { ignore: [404] }
-      );
-      return res.found ? res._source : undefined;
-    };
-
-    // The setup task is removed once it ran without throwing
-    const waitForTaskRemoved = () =>
-      retry.tryForTime(60000, async () => {
-        expect(await getTaskDoc()).to.be(undefined);
-      });
+    const getTaskDoc = () => getPolicyBaseIdBackfillTask(providerContext);
+    const waitForTaskRemoved = () => waitForPolicyBaseIdBackfill(providerContext);
 
     const getDocs = async (seeded: SeededDoc[] = docs) => {
       const res = await es.mget<{ policy_id: unknown; policy_base_id?: string }>({
@@ -100,6 +89,9 @@ export default function (providerContext: FtrProviderContext) {
       });
 
     before(async () => {
+      // Creates the Fleet settings, which an earlier suite may have deleted: a policy created
+      // before them is stored with another saved object type than the one Fleet uses after
+      await fleetSetup();
       const { body } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
