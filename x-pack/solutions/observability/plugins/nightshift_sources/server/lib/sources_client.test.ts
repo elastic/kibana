@@ -1019,22 +1019,27 @@ describe('SourcesClient', () => {
       );
     });
 
-    it('searches every word of the title as plain text, next to the enabled filter', async () => {
+    it('searches the words of the title as the index tokenizes them, next to the enabled filter', async () => {
       const { client, soClient } = setup();
       soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 25 });
 
-      await client.list({ page: 1, perPage: 25, search: '  foo +|-"*()~\\ bar  ', enabled: true });
+      await client.list({
+        page: 1,
+        perPage: 25,
+        search: '  nginx +|"*()~\\ checkout-prod v1.2 foo_bar ',
+        enabled: true,
+      });
 
       expect(soClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: 'foo \\+\\|\\-\\"\\*\\(\\)\\~\\\\ bar*',
+          search: 'nginx checkout prod v1.2 foo_bar*',
           searchFields: ['title.text'],
           defaultSearchOperator: 'AND',
           filter: 'nightshift-source.attributes.enabled: true',
         })
       );
 
-      await client.list({ page: 1, perPage: 25, search: '   ' });
+      await client.list({ page: 1, perPage: 25, search: ' - " ' });
 
       expect(soClient.find).toHaveBeenLastCalledWith(
         expect.not.objectContaining({ search: expect.anything() })

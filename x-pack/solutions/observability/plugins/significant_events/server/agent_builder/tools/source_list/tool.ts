@@ -25,7 +25,7 @@ const sourceListSchema = lazySchema(() =>
       .max(MAX_SOURCE_TITLE_LENGTH)
       .optional()
       .describe(
-        'Optional. Return only sources whose title contains all of these words, in any order, ignoring case. The last word may be a partial word. Characters such as `-` or `"` are plain text, not search operators.'
+        'Optional. Return only sources whose title contains all of these words, in any order, ignoring case. The last word may be a partial word. Punctuation such as `-` or `"` only separates words and is not a search operator, so `checkout-prod` is the words `checkout` and `prod`.'
       ),
     enabled: z
       .boolean()

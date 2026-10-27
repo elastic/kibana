@@ -65,8 +65,15 @@ interface SourcesClientDependencies {
   onChange: (change: SourceChange) => Promise<void>;
 }
 
-// Characters `simple_query_string` reads as operators: AND/OR/NOT, phrase, prefix, grouping, fuzziness.
-const SIMPLE_QUERY_STRING_OPERATORS = /[+|\-"*()~\\]/g;
+// Splits on the same Unicode word boundaries as the `standard` analyzer that indexes `title.text`,
+// so every search word is one token of the index. The punctuation is dropped with the spaces, which
+// also leaves no `simple_query_string` operator (`+ | - " * ( ) ~ \`) in the words.
+const wordSegmenter = new Intl.Segmenter(undefined, { granularity: 'word' });
+
+const toSearchWords = (search: string): string[] =>
+  Array.from(wordSegmenter.segment(search))
+    .filter(({ isWordLike }) => isWordLike)
+    .map(({ segment }) => segment);
 
 const toSource = (id: string, attributes: NightshiftSourceAttributes): NightshiftSource => ({
   id,
@@ -282,7 +289,7 @@ export class SourcesClient {
     enabled?: boolean;
     ids?: string[];
   }): Promise<ListSourcesResponse> {
-    const term = search?.trim() || undefined;
+    const words = toSearchWords(search ?? '');
 
     const filters: string[] = [];
     if (ids) {
@@ -301,15 +308,16 @@ export class SourcesClient {
     }
 
     // `search` rather than a KQL filter: KQL splits on whitespace, so it cannot match several words.
-    // The trailing `*` makes the last word a prefix and turns on the saved-object client's
-    // phrase-prefix clause, which is what finds hyphenated titles.
-    const titleSearch = term
-      ? {
-          search: `${term.replace(SIMPLE_QUERY_STRING_OPERATORS, '\\$&')}*`,
-          searchFields: ['title.text'],
-          defaultSearchOperator: 'AND' as const,
-        }
-      : {};
+    // Words are analyzed like the title, so `checkout-prod` is searched as `checkout` and `prod`
+    // and the order of the words does not matter. The trailing `*` makes the last word a prefix.
+    const titleSearch =
+      words.length > 0
+        ? {
+            search: `${words.join(' ')}*`,
+            searchFields: ['title.text'],
+            defaultSearchOperator: 'AND' as const,
+          }
+        : {};
 
     const response = await this.deps.soClient.find<NightshiftSourceAttributes>({
       type: NIGHTSHIFT_SOURCE_SO_TYPE,

@@ -305,7 +305,7 @@ apiTest.describe(
 
     apiTest('searches titles by their words, also among the given ids', async ({ apiClient }) => {
       const base = `${TITLE_PREFIX}-${suffix}`;
-      const [checkout, proxy] = [`${base} Checkout nginx`, `${base} nginx proxy`];
+      const [checkout, proxy] = [`${base} Checkout-prod nginx`, `${base} nginx proxy`];
       const ids: string[] = [];
       for (const title of [checkout, proxy]) {
         const created = await createSource(apiClient, manager.cookieHeader, {
@@ -325,8 +325,11 @@ apiTest.describe(
       };
 
       // Every word has to be in the title, in any order, ignoring case, and the last may be partial.
-      expect(await search(`${suffix} Checkout nginx`)).toStrictEqual([checkoutId]);
-      expect(await search(`nginx checkout ${suffix}`)).toStrictEqual([checkoutId]);
+      // A hyphenated word counts as the words it is made of, wherever it is in the search.
+      expect(await search(`${suffix} Checkout-prod nginx`)).toStrictEqual([checkoutId]);
+      expect(await search(`nginx checkout-prod ${suffix}`)).toStrictEqual([checkoutId]);
+      expect(await search(`${suffix} nginx prod-checkout`)).toStrictEqual([checkoutId]);
+      expect(await search(`${suffix} nginx checkout-pr`)).toStrictEqual([checkoutId]);
       expect(await search(`${suffix} CHECKOUT ngi`)).toStrictEqual([checkoutId]);
       expect(await search(`${suffix} nginx`)).toStrictEqual([checkoutId, proxyId]);
       expect(await search(`${suffix} checkout proxy`)).toStrictEqual([]);
