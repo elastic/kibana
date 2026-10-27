@@ -994,4 +994,28 @@ describe('AwsEks', () => {
       expect(isValid(input)).toBe(expected);
     });
   });
+
+  describe('access entry and policy input bounds', () => {
+    const ref = { clusterName: 'prod-eu', principalArn: PRINCIPAL };
+    const isValid = (action: ActionName, input: Record<string, unknown>) =>
+      AwsEks.actions[action].input.safeParse({ ...ref, ...input }).success;
+    const groups = (count: number) => Array.from({ length: count }, (_, i) => `group-${i}`);
+    const namespaces = (count: number) => Array.from({ length: count }, (_, i) => `ns-${i}`);
+    const namespaceScope = (count: number) => ({
+      policyArn: VIEW_POLICY,
+      accessScopeType: 'namespace',
+      namespaces: namespaces(count),
+    });
+
+    it.each([
+      ['createAccessEntry', { kubernetesGroups: groups(1000) }, true],
+      ['createAccessEntry', { kubernetesGroups: groups(1001) }, false],
+      ['updateAccessEntry', { kubernetesGroups: groups(1000) }, true],
+      ['updateAccessEntry', { kubernetesGroups: groups(1001) }, false],
+      ['associateAccessPolicy', namespaceScope(1000), true],
+      ['associateAccessPolicy', namespaceScope(1001), false],
+    ] as const)('%s at the boundary: %#', (action, input, expected) => {
+      expect(isValid(action, input)).toBe(expected);
+    });
+  });
 });
