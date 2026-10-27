@@ -98,7 +98,7 @@ describe('Elasticsearch connector', () => {
 
       await Elasticsearch.actions.search.handler(mockContext, {
         index: 'logs/2024',
-        query: {},
+        query: { match_all: {} },
         size: 10,
         from: 0,
         timeout: '30s',
@@ -114,7 +114,7 @@ describe('Elasticsearch connector', () => {
 
       await Elasticsearch.actions.search.handler(mockContext, {
         index: ['index-a', 'index-b'],
-        query: {},
+        query: { match_all: {} },
         size: 10,
         from: 0,
         timeout: '30s',
@@ -440,6 +440,14 @@ describe('Elasticsearch connector', () => {
       expect(result.success).toBe(true);
       expect(result.success && result.data.query).toEqual({ match_all: {} });
     });
+
+    it('accepts exactly one top-level query type', () => {
+      const parse = (query: Record<string, unknown>) =>
+        SearchInputSchema.safeParse({ index: 'logs-*', query }).success;
+      expect(parse({ bool: { must: [{ match: { message: 'a' } }] } })).toBe(true);
+      expect(parse({})).toBe(false);
+      expect(parse({ match: { message: 'a' }, term: { 'host.name': 'b' } })).toBe(false);
+    });
   });
 
   describe('RequestInputSchema', () => {
@@ -503,6 +511,14 @@ describe('Elasticsearch connector', () => {
     it('accepts queries up to the 1,000,000-character ES|QL parser limit', () => {
       expect(EsqlInputSchema.safeParse({ query: 'x'.repeat(1_000_000) }).success).toBe(true);
       expect(EsqlInputSchema.safeParse({ query: 'x'.repeat(1_000_001) }).success).toBe(false);
+    });
+
+    it('accepts a filter with exactly one top-level query type', () => {
+      const parse = (filter: Record<string, unknown>) =>
+        EsqlInputSchema.safeParse({ query: 'FROM a', filter }).success;
+      expect(parse({ range: { '@timestamp': { gte: 'now-1h' } } })).toBe(true);
+      expect(parse({})).toBe(false);
+      expect(parse({ range: { '@timestamp': { gte: 'now-1h' } }, term: { a: 'b' } })).toBe(false);
     });
   });
 });
