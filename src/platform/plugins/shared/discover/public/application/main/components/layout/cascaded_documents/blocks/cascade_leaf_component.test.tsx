@@ -233,6 +233,8 @@ describe('ESQLDataCascadeLeafCell', () => {
     expect(unifiedDataTableProps.rows).toEqual(cellData);
     expect(unifiedDataTableProps.dataSource).toBe(cascadedLeafDataSource);
     expect(unifiedDataTableProps.enableComparisonMode).toBe(true);
+    expect(unifiedDataTableProps.isPaginationEnabled).toBe(false);
+    expect(unifiedDataTableProps.paginationMode).toBe('infinite');
     expect(unifiedDataTableProps.renderDocumentView).toBe('external');
     expect(unifiedDataTableProps.expandedDoc).toEqual(expandedDoc);
     expect(unifiedDataTableProps.setExpandedDoc).toBe(ownerBoundSetExpandedDoc);
