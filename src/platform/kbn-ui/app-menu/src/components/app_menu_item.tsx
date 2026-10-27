@@ -38,7 +38,6 @@ export const AppMenuItem = ({
   testId,
   ebt,
   iconType,
-  iconSide = 'left',
   disableButton,
   href,
   target,
@@ -105,7 +104,7 @@ export const AppMenuItem = ({
         target={href ? target : undefined}
         isLoading={isLoading}
         size="s"
-        iconSide={iconSide}
+        iconSide="left"
         iconSize="m"
         color="text"
         aria-haspopup={hasItems ? 'menu' : undefined}

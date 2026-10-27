@@ -96,13 +96,4 @@ describe('AppMenuItem', () => {
 
     expect(screen.getByText('Settings')).toBeInTheDocument();
   });
-
-  it('should render the icon after the label when iconSide is right', () => {
-    render(<AppMenuItem {...buttonProps} iconSide="right" />);
-
-    const icon = screen
-      .getByTestId('test-button')
-      .querySelector('[data-euiicon-type="logoElastic"]');
-    expect(icon?.parentElement?.lastElementChild).toBe(icon);
-  });
 });

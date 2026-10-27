@@ -10,7 +10,11 @@ import type { Clause } from '@elastic/eui/src/components/search_bar/query/ast';
 import type { TransformListRow } from '../../../../common';
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
-import { filterTransforms, transformFilters } from './transform_search_bar_filters';
+import {
+  filterTransforms,
+  getTransformType,
+  transformFilters,
+} from './transform_search_bar_filters';
 
 const createFieldClause = (field: string, value: string): Clause =>
   ({ type: 'field', field, value, match: 'must' } as Clause);
@@ -59,11 +63,11 @@ describe('transform search bar filters', () => {
   });
 
   test('filters by transform type', () => {
+    expect(getTransformType(batchTransform)).toBe('pivot');
+    expect(getTransformType(continuousTransform)).toBe('latest');
+
     expect(
-      filterTransforms(
-        [batchTransform, continuousTransform],
-        [createFieldClause('type', 'latest')]
-      )
+      filterTransforms([batchTransform, continuousTransform], [createFieldClause('type', 'latest')])
     ).toEqual([continuousTransform]);
   });
 });

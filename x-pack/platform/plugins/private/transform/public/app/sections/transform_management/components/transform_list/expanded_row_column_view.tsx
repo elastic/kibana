@@ -37,6 +37,8 @@ interface SectionProps {
 }
 
 export const Section: FC<SectionProps> = ({ section }) => {
+  const { euiTheme } = useEuiTheme();
+
   if (section.items.length === 0) {
     return null;
   }
@@ -47,7 +49,16 @@ export const Section: FC<SectionProps> = ({ section }) => {
         <span>{section.title}</span>
       </EuiTitle>
       <EuiSpacer size="xs" />
-      <EuiDescriptionList compressed type="column" listItems={section.items} />
+      <EuiDescriptionList
+        compressed
+        type="column"
+        listItems={section.items}
+        titleProps={{
+          css: {
+            fontSize: euiTheme.font.scale.xs * euiTheme.base,
+          },
+        }}
+      />
     </section>
   );
 };
@@ -73,6 +84,9 @@ export const ExpandedRowColumnView: FC<ExpandedRowDetailsPaneProps> = ({
       padding-inline-start: ${euiTheme.size.l};
     `,
   };
+  const contentStyles = css`
+    padding-block-start: ${euiTheme.size.s};
+  `;
 
   return (
     <div data-test-subj={dataTestSubj ?? 'transformDetailsTabContent'}>
@@ -91,7 +105,7 @@ export const ExpandedRowColumnView: FC<ExpandedRowDetailsPaneProps> = ({
           />
         </>
       )}
-      <EuiFlexGroup gutterSize="none" responsive={false}>
+      <EuiFlexGroup gutterSize="none" responsive={false} css={contentStyles}>
         <EuiFlexItem css={columnStyles.left}>
           {sections
             .filter((s) => s.position === 'left')

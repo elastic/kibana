@@ -199,8 +199,6 @@ export const TransformManagement: FC = () => {
           defaultMessage: 'Transforms',
         })}
         docLink={esTransform}
-        docLinkIconType="popout"
-        docLinkIconSide="right"
         menu={menu}
         spacing="bleed"
       />

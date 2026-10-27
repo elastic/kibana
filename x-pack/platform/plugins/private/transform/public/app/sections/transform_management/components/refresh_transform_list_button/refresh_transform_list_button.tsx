@@ -7,7 +7,7 @@
 
 import React, { type FC } from 'react';
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface RefreshTransformListButton {
@@ -18,6 +18,7 @@ export const RefreshTransformListButton: FC<RefreshTransformListButton> = ({
   onClick,
   isLoading,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const label = i18n.translate('xpack.transform.transformList.refreshButtonLabel', {
     defaultMessage: 'Refresh transforms',
   });
@@ -32,7 +33,11 @@ export const RefreshTransformListButton: FC<RefreshTransformListButton> = ({
         iconType="refresh"
         isLoading={isLoading}
         onClick={onClick}
-        size="m"
+        size="s"
+        css={{
+          blockSize: euiTheme.size.xl,
+          inlineSize: euiTheme.size.xl,
+        }}
       />
     </EuiToolTip>
   );

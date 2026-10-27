@@ -15,6 +15,7 @@ import {
   TRANSFORM_STATE,
   TRANSFORM_HEALTH_STATUS,
   TRANSFORM_HEALTH_STATUS_COLOR_LABEL,
+  type TransformFunction,
 } from '../../../../../../common/constants';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
 import type { TransformListRow } from '../../../../common';
@@ -22,6 +23,15 @@ import { TransformTaskStateBadge } from './transform_task_state_badge';
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 
 type TransformFilterConfig = Extract<SearchFilterConfig, { type: 'field_value_selection' }>;
+
+export const getTransformType = (transform: TransformListRow): TransformFunction | undefined => {
+  if (isLatestTransform(transform.config)) {
+    return TRANSFORM_FUNCTION.LATEST;
+  }
+  if (isPivotTransform(transform.config)) {
+    return TRANSFORM_FUNCTION.PIVOT;
+  }
+};
 
 export const transformFilters: TransformFilterConfig[] = [
   {
@@ -153,12 +163,7 @@ export const filterTransforms = (transforms: TransformListRow[], clauses: Clause
             return transform.mode === c.value;
           }
           if (c.type === 'field' && c.field === 'type') {
-            if (c.value === TRANSFORM_FUNCTION.PIVOT) {
-              return isPivotTransform(transform.config);
-            }
-            if (c.value === TRANSFORM_FUNCTION.LATEST) {
-              return isLatestTransform(transform.config);
-            }
+            return getTransformType(transform) === c.value;
           }
           return false;
         });

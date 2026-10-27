@@ -56,7 +56,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
       name: i18n.translate(
         'xpack.transform.transformList.transformDetails.tabs.transformStatsLabel',
         {
-          defaultMessage: 'Stats',
+          defaultMessage: 'Statistics',
         }
       ),
       content: <ExpandedRowStatsPane item={item} />,

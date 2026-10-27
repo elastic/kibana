@@ -134,21 +134,6 @@ describe('AppHeader adapter', () => {
     );
   });
 
-  it('supports an opt-in documentation icon', async () => {
-    renderAppHeader(
-      <AppHeaderView
-        title="Workflows"
-        docLink="https://example.com/docs"
-        docLinkIconType="popout"
-        docLinkIconSide="right"
-      />
-    );
-
-    fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
-    const documentationLink = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation);
-    expect(documentationLink.querySelector('[data-euiicon-type="popout"]')).toBeInTheDocument();
-  });
-
   it('falls back to help-extension documentation when docLink is omitted', async () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getHelpExtension$.mockReturnValue(

@@ -65,7 +65,11 @@ import {
 } from '../action_project_scope';
 import { useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
-import { filterTransforms, transformFilters } from './transform_search_bar_filters';
+import {
+  filterTransforms,
+  getTransformType,
+  transformFilters,
+} from './transform_search_bar_filters';
 import { TransformStatsBar } from './transforms_stats_bar';
 import { useTableSettings } from './use_table_settings';
 import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
@@ -175,11 +179,18 @@ export const TransformList: FC<TransformListProps> = ({
     transformsStatsLoading
   );
 
+  const searchableTransforms = useMemo(
+    () => transforms.map((transform) => ({ ...transform, type: getTransformType(transform) })),
+    [transforms]
+  );
+
   const filteredTransforms = useMemo(() => {
     const query = searchQueryText !== '' ? EuiSearchBar.Query.parse(searchQueryText) : undefined;
     const clauses = query?.ast?.clauses ?? [];
-    return clauses.length > 0 ? filterTransforms(transforms, clauses) : transforms;
-  }, [searchQueryText, transforms]);
+    return clauses.length > 0
+      ? filterTransforms(searchableTransforms, clauses)
+      : searchableTransforms;
+  }, [searchQueryText, searchableTransforms]);
 
   if (transforms.length === 0) {
     return (

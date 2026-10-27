@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@kbn/react-query/mock';
@@ -13,6 +13,7 @@ import { QueryClient, QueryClientProvider, type UseQueryResult } from '@kbn/reac
 import * as ReactQuery from '@kbn/react-query';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import type { ListingPageUrlState } from '@kbn/ml-url-state';
 
 import { TransformList } from './transform_list';
 import type { TransformListRow } from '../../../../common';
@@ -89,5 +90,57 @@ describe('Transform: Transform List <TransformList />', () => {
 
     expect(screen.queryByTestId('transformStatsBar')).not.toBeInTheDocument();
     expect(screen.getByTestId('transformBulkActionsMenuButton')).toHaveTextContent('1 selected');
+  });
+
+  test('filters transforms by type', async () => {
+    const pivotTransform = transformListRow as unknown as TransformListRow;
+    const latestTransform = {
+      ...pivotTransform,
+      id: 'latest-transform',
+      config: {
+        ...pivotTransform.config,
+        id: 'latest-transform',
+        latest: {
+          unique_key: ['customer_id'],
+          sort: '@timestamp',
+        },
+      },
+    } as unknown as TransformListRow;
+
+    const TestHarness = () => {
+      const [pageState, setPageState] = useState<ListingPageUrlState>({
+        pageSize: 10,
+        pageIndex: 0,
+        sortField: 'id',
+        sortDirection: 'asc',
+      });
+
+      return (
+        <TransformList
+          isLoading={false}
+          onCreateTransform={jest.fn()}
+          transformNodes={1}
+          transforms={[pivotTransform, latestTransform]}
+          transformsLoading={false}
+          transformsStatsLoading={false}
+          pageState={pageState}
+          updatePageState={(update) => setPageState((current) => ({ ...current, ...update }))}
+        />
+      );
+    };
+
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <TestHarness />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Type Selection' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Latest' }));
+
+    expect(await screen.findByText('latest-transform')).toBeInTheDocument();
+    expect(screen.queryByText(pivotTransform.id)).not.toBeInTheDocument();
   });
 });

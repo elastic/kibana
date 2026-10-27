@@ -19,6 +19,8 @@ const useStyles = () => {
       align-items: center;
       gap: ${euiTheme.size.xs};
       min-height: ${euiTheme.size.xl};
+      margin-block-start: -${euiTheme.size.m};
+      padding-block-end: ${euiTheme.size.l};
     `,
   };
 };
