@@ -43,7 +43,7 @@ export const RuleComposer = ({
   rules,
   variations,
   valueType,
-  app,
+  apps,
   environment,
   depth = 1,
   readOnly,
@@ -53,7 +53,7 @@ export const RuleComposer = ({
   rules: readonly Rule[];
   variations: readonly VariationValue[];
   valueType: ValueType;
-  app?: string;
+  apps: readonly string[];
   environment: string;
   depth?: number;
   readOnly: boolean;
@@ -240,7 +240,7 @@ export const RuleComposer = ({
                     <PercentageRuleEditor
                       rule={rule}
                       variations={variations}
-                      app={app}
+                      apps={apps}
                       environment={environment}
                       readOnly={readOnly}
                       onChange={(next) => updateRule(index, next)}
@@ -249,7 +249,7 @@ export const RuleComposer = ({
                     <MatchRuleEditor
                       rule={rule}
                       variations={variations}
-                      app={app}
+                      apps={apps}
                       environment={environment}
                       depth={depth}
                       ruleIndex={index}
@@ -261,7 +261,7 @@ export const RuleComposer = ({
                             rules={nested}
                             variations={variations}
                             valueType={valueType}
-                            app={app}
+                            apps={apps}
                             environment={environment}
                             depth={depth + 1}
                             readOnly={readOnly}

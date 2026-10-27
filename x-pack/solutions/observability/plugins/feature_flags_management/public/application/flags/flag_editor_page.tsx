@@ -51,6 +51,7 @@ import {
   type FlagFormState,
 } from './flag_form';
 import { rulesHaveValidPercentages } from './rule_composer/rules_model';
+import { TagComboBox } from './tag_combo_box';
 import { VariationFields } from './variation_fields';
 
 const isValueType = (value: string): value is ValueType =>
@@ -79,8 +80,6 @@ export const FlagEditorPage = () => {
   const [jsonBlockedByEnvironment, setJsonBlockedByEnvironment] = useState<Record<string, boolean>>(
     {}
   );
-  const [suggestionApp, setSuggestionApp] = useState('');
-
   useEffect(() => {
     if (flagQuery.data) {
       setForm(flagToForm(flagQuery.data));
@@ -151,7 +150,6 @@ export const FlagEditorPage = () => {
   const percentagesValid = form.environmentKeys.every((environment) =>
     rulesHaveValidPercentages(form.environments[environment]?.rules ?? [])
   );
-  const activeSuggestionApp = form.apps.includes(suggestionApp) ? suggestionApp : form.apps[0];
   const apps = catalog.data?.apps ?? [];
   const environments = catalog.data?.environments ?? [];
 
@@ -444,33 +442,6 @@ export const FlagEditorPage = () => {
             }
           />
         </EuiFormRow>
-        {form.apps.length > 1 && (
-          <EuiFormRow
-            fullWidth
-            label={
-              <FormattedMessage
-                id="xpack.featureFlagsManagement.flags.editor.suggestionAppLabel"
-                defaultMessage="Suggest attributes from"
-              />
-            }
-            helpText={
-              <FormattedMessage
-                id="xpack.featureFlagsManagement.flags.editor.suggestionAppHelp"
-                defaultMessage="Observed context suggestions are scoped to one app and the rule's environment. You can still type any value."
-              />
-            }
-          >
-            <EuiSelect
-              data-ebt-action="changeSelection"
-              data-ebt-element="featureFlagsManagement"
-              data-test-subj="featureFlagsManagementFlagEditorPageSelect"
-              fullWidth
-              value={activeSuggestionApp ?? ''}
-              options={form.apps.map((app) => ({ value: app, text: app }))}
-              onChange={(event) => setSuggestionApp(event.target.value)}
-            />
-          </EuiFormRow>
-        )}
         {form.createdBy && (
           <>
             <EuiText size="s" color="subdued">
@@ -492,22 +463,18 @@ export const FlagEditorPage = () => {
             />
           }
         >
-          <EuiComboBox
-            aria-label={i18n.translate('xpack.featureFlagsManagement.flags.editor.tagsAriaLabel', {
+          <TagComboBox
+            dataTestSubj="featureFlagsManagementFlagEditorTags"
+            ariaLabel={i18n.translate('xpack.featureFlagsManagement.flags.editor.tagsAriaLabel', {
               defaultMessage: 'Tags',
             })}
-            fullWidth
-            isDisabled={readOnly}
-            selectedOptions={form.tags.map((tag) => ({ label: tag }))}
-            onChange={(selected) =>
-              setForm({ ...form, tags: selected.map((option) => option.label) })
-            }
-            onCreateOption={(created) => {
-              const tag = created.trim();
-              if (tag && !form.tags.includes(tag) && form.tags.length < LIMITS.maxTags) {
-                setForm({ ...form, tags: [...form.tags, tag] });
-              }
-            }}
+            placeholder={i18n.translate(
+              'xpack.featureFlagsManagement.flags.editor.tagsPlaceholder',
+              { defaultMessage: 'Find or add a tag' }
+            )}
+            readOnly={readOnly}
+            selected={form.tags}
+            onChange={(tags) => setForm({ ...form, tags })}
           />
         </EuiFormRow>
         <EuiSpacer size="l" />
@@ -577,7 +544,7 @@ export const FlagEditorPage = () => {
               }
               variations={form.variations}
               valueType={form.valueType}
-              suggestionApp={activeSuggestionApp}
+              apps={form.apps}
               currentFlagKey={isCreate ? form.key.trim() : form.key}
               readOnly={readOnly}
               initiallyOpen={environmentIndex === 0}

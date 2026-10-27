@@ -33,6 +33,7 @@ import { deleteButtonLabel, editButtonLabel } from '../labels';
 import { paths } from '../paths';
 import { useAsyncData, useDebouncedValue } from '../use_async_data';
 import { useCatalog } from '../use_catalog';
+import { TagComboBox } from './tag_combo_box';
 
 export const FlagsPage = () => {
   const history = useHistory();
@@ -321,22 +322,22 @@ export const FlagsPage = () => {
               />
             }
           >
-            <EuiFieldText
-              data-test-subj="featureFlagsManagementFlagsPageFieldText"
+            <TagComboBox
+              dataTestSubj="featureFlagsManagementFlagsPageTagFilter"
               compressed
-              fullWidth
+              singleSelection
               placeholder={i18n.translate(
                 'xpack.featureFlagsManagement.flags.list.tagFilterPlaceholder',
-                { defaultMessage: 'Exact tag' }
+                { defaultMessage: 'Any tag' }
               )}
-              value={tag}
-              onChange={(event) => setTag(event.target.value)}
-              aria-label={i18n.translate(
+              ariaLabel={i18n.translate(
                 'xpack.featureFlagsManagement.flags.list.tagFilterAriaLabel',
                 {
                   defaultMessage: 'Filter by an exact tag',
                 }
               )}
+              selected={tag ? [tag] : []}
+              onChange={(tags) => setTag(tags[0] ?? '')}
             />
           </EuiFormRow>
         </EuiFlexItem>

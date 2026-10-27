@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer, Refresh } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ValidationIssue } from '../../common/flag_validation';
 import {
@@ -84,11 +84,31 @@ export class FlagsService {
     return { items: items.map(toFlag), total, page, per_page: perPage };
   }
 
+  /** Existing tags, most used first. `prefix` limits them to tags that start with it. */
+  public async listTags({
+    prefix,
+    size,
+  }: {
+    prefix?: string;
+    size: number;
+  }): Promise<{ items: string[] }> {
+    const trimmed = prefix?.trim();
+    const items = await this.deps.repository.distinctValues('flag', 'flag.tags', {
+      prefix: trimmed || undefined,
+      size,
+    });
+    return { items };
+  }
+
   public async get(key: string): Promise<Flag> {
     return toFlag(await this.deps.repository.getOrThrow('flag', flagId(key)));
   }
 
-  public async create(request: KibanaRequest, definition: FlagDefinition): Promise<Flag> {
+  public async create(
+    request: KibanaRequest,
+    definition: FlagDefinition,
+    refresh?: Refresh
+  ): Promise<Flag> {
     await this.validate(definition, { isNew: true });
     const user = this.deps.getCurrentUser(request);
     const entity = await this.deps.repository.create(
@@ -101,14 +121,15 @@ export class FlagsService {
           : undefined
       )
     );
-    await this.audit(request, 'create', entity);
+    await this.audit(request, 'create', entity, refresh);
     return toFlag(entity);
   }
 
   public async update(
     request: KibanaRequest,
     key: string,
-    { version, ...changes }: Omit<FlagDefinition, 'key'> & { version?: string }
+    { version, ...changes }: Omit<FlagDefinition, 'key'> & { version?: string },
+    refresh?: Refresh
   ): Promise<Flag> {
     const definition: FlagDefinition = { ...changes, key };
     await this.validate(definition, { isNew: false });
@@ -121,8 +142,25 @@ export class FlagsService {
         version,
       }
     );
-    await this.audit(request, 'update', entity);
+    await this.audit(request, 'update', entity, refresh);
     return toFlag(entity);
+  }
+
+  /**
+   * Writes `definition` as the flag's next revision. A deleted flag is created again.
+   * The stored version is read here, so a restore does not depend on a version the client saw.
+   */
+  public async restore(
+    request: KibanaRequest,
+    key: string,
+    { version: _clientVersion, ...changes }: Omit<FlagDefinition, 'key'> & { version?: string }
+  ): Promise<Flag> {
+    const existing = await this.deps.repository.get('flag', flagId(key));
+    // The history page reloads as soon as this returns, so the new entry must be searchable.
+    if (!existing) {
+      return this.create(request, { ...changes, key }, 'wait_for');
+    }
+    return this.update(request, key, { ...changes, version: existing.version }, 'wait_for');
   }
 
   /** Blocked while another flag uses this one as a prerequisite. */
@@ -147,30 +185,34 @@ export class FlagsService {
     key: string,
     { page, perPage }: { page: number; perPage: number }
   ): Promise<FlagHistoryResponse> {
-    const { total, items } = await this.deps.audit.getHistory(
+    const { total, items: events } = await this.deps.audit.getHistory(
       'flags',
       AUDIT_OBJECT_TYPES.flag,
       key,
-      { from: (page - 1) * perPage, size: perPage }
+      // One event past the page is the baseline for the oldest row.
+      { from: (page - 1) * perPage, size: perPage + 1 }
     );
+    // Snapshots may come from other Kibana versions: skip the ones that can't be read.
+    const parsed = events.flatMap((item): FlagHistoryItem[] => {
+      const snapshot = flagSnapshotSchema.safeParse(item.object.snapshot);
+      if (!snapshot.success) {
+        return [];
+      }
+      return [
+        {
+          id: item.event.id,
+          timestamp: item['@timestamp'],
+          action: item.event.action,
+          event_type: item.event.type,
+          user: { name: item.user.name, id: item.user.id, full_name: item.user.full_name },
+          snapshot: snapshot.data,
+        },
+      ];
+    });
+    const older = parsed[perPage];
     return {
-      // Snapshots may come from other Kibana versions: skip the ones that can't be read.
-      items: items.flatMap((item): FlagHistoryItem[] => {
-        const snapshot = flagSnapshotSchema.safeParse(item.object.snapshot);
-        if (!snapshot.success) {
-          return [];
-        }
-        return [
-          {
-            id: item.event.id,
-            timestamp: item['@timestamp'],
-            action: item.event.action,
-            event_type: item.event.type,
-            user: { name: item.user.name, id: item.user.id, full_name: item.user.full_name },
-            snapshot: snapshot.data,
-          },
-        ];
-      }),
+      items: parsed.slice(0, perPage),
+      ...(older ? { older_snapshot: older.snapshot } : {}),
       total,
       page,
       per_page: perPage,
@@ -241,7 +283,8 @@ export class FlagsService {
   private async audit(
     request: KibanaRequest,
     operation: AuditOperation,
-    entity: StoredEntity<'flag'>
+    entity: StoredEntity<'flag'>,
+    refresh?: Refresh
   ) {
     const flag = toFlag(entity);
     const name = flag.name ?? flag.key;
@@ -254,6 +297,7 @@ export class FlagsService {
       snapshot: toSnapshot(flag),
       sequence: entity.revision,
       message: `User ${verb} feature flag "${name}" (id: ${flag.key}).`,
+      ...(refresh ? { refresh } : {}),
     });
   }
 }

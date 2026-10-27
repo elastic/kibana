@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { createFlagRequestSchema, flagSchema, ruleSchema } from './flags';
 import { createEnvironmentRequestSchema } from './environments';
+import { observedAttributesQuerySchema } from './observed_contexts';
 
 describe('feature flags schemas', () => {
   it('parses recursive rules', () => {
@@ -53,6 +54,18 @@ describe('feature flags schemas', () => {
     });
     expect(result.success).toBe(true);
     expect(result.data).not.toHaveProperty('created_at');
+  });
+
+  it('accepts one app or several for attribute suggestions', () => {
+    expect(
+      observedAttributesQuerySchema.safeParse({ app: 'kibana', environment: 'production' }).success
+    ).toBe(true);
+    const combined = observedAttributesQuerySchema.safeParse({
+      app: ['kibana', 'security'],
+      environment: 'production',
+    });
+    expect(combined.success).toBe(true);
+    expect(combined.data?.app).toEqual(['kibana', 'security']);
   });
 
   it('converts to JSON schema with a named recursive rule component', () => {

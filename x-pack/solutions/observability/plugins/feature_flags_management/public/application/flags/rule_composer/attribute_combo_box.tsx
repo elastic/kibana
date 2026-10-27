@@ -12,7 +12,7 @@ import { useAppServices } from '../../app_services';
 import { useAsyncData, useDebouncedValue } from '../../use_async_data';
 
 export const AttributeComboBox = ({
-  app,
+  apps,
   environment,
   selected,
   readOnly,
@@ -20,7 +20,7 @@ export const AttributeComboBox = ({
   placeholder,
   onChange,
 }: {
-  app?: string;
+  apps: readonly string[];
   environment: string;
   selected: string;
   readOnly: boolean;
@@ -32,28 +32,29 @@ export const AttributeComboBox = ({
   const [searchValue, setSearchValue] = useState('');
   const debouncedSearch = useDebouncedValue(searchValue, 250);
   const load = useCallback(() => {
-    if (!app || !environment) {
+    if (apps.length === 0 || !environment) {
       return Promise.resolve([]);
     }
     return api
       .listObservedAttributes({
-        app,
+        app: apps,
         environment,
         prefix: debouncedSearch || undefined,
         size: LIMITS.defaultSuggestions,
       })
       .then((response) => response.items.map((item) => item.name));
-  }, [api, app, environment, debouncedSearch]);
+  }, [api, apps, environment, debouncedSearch]);
   const { data, loading } = useAsyncData(load);
   const options = (data ?? []).map((name) => ({ label: name }));
+  const hasApps = apps.length > 0;
 
   return (
     <EuiComboBox
       aria-label={ariaLabel}
       placeholder={placeholder}
       fullWidth
-      async={Boolean(app && environment)}
-      isLoading={loading && Boolean(app)}
+      async={hasApps && Boolean(environment)}
+      isLoading={loading && hasApps}
       isDisabled={readOnly}
       isClearable
       singleSelection={{ asPlainText: true }}

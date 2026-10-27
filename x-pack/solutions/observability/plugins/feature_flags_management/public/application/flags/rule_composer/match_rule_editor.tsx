@@ -74,7 +74,7 @@ const withNested = (rule: MatchRule, rules: Rule[]): MatchRule => ({
 export const MatchRuleEditor = ({
   rule,
   variations,
-  app,
+  apps,
   environment,
   depth,
   ruleIndex,
@@ -84,7 +84,7 @@ export const MatchRuleEditor = ({
 }: {
   rule: MatchRule;
   variations: readonly VariationValue[];
-  app?: string;
+  apps: readonly string[];
   environment: string;
   depth: number;
   ruleIndex: number;
@@ -109,7 +109,7 @@ export const MatchRuleEditor = ({
         }
       >
         <AttributeComboBox
-          app={app}
+          apps={apps}
           environment={environment}
           selected={rule.attribute}
           readOnly={readOnly}
@@ -184,7 +184,7 @@ export const MatchRuleEditor = ({
         }
       >
         <ValuesComboBox
-          app={app}
+          apps={apps}
           environment={environment}
           attribute={rule.attribute}
           values={rule.values}

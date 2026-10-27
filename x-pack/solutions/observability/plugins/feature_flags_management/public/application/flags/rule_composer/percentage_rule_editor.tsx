@@ -24,14 +24,14 @@ import { equalPercentages, percentageWeightsAreValid, percentageWeightsTotal } f
 export const PercentageRuleEditor = ({
   rule,
   variations,
-  app,
+  apps,
   environment,
   readOnly,
   onChange,
 }: {
   rule: PercentageRule;
   variations: readonly VariationValue[];
-  app?: string;
+  apps: readonly string[];
   environment: string;
   readOnly: boolean;
   onChange: (rule: PercentageRule) => void;
@@ -68,7 +68,7 @@ export const PercentageRuleEditor = ({
         }
       >
         <AttributeComboBox
-          app={app}
+          apps={apps}
           environment={environment}
           selected={rule.per_attribute}
           readOnly={readOnly}

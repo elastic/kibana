@@ -16,6 +16,8 @@ export const FEATURE_FLAGS_EBT_ELEMENT = 'featureFlagsManagement';
 export const FEATURE_FLAGS_EBT_ACTIONS = {
   viewFlag: 'viewFlag',
   viewFlagHistory: 'viewFlagHistory',
+  toggleHistoryChange: 'toggleHistoryChange',
+  restoreFlag: 'restoreFlag',
   createFlag: 'createFlag',
   saveFlag: 'saveFlag',
   deleteFlag: 'deleteFlag',

@@ -17,6 +17,7 @@ import type {
   ObservedContext,
   ObservedValuesResponse,
 } from '../../common/schemas/observed_contexts';
+import { prefixToIncludePattern } from '../lib/lucene_prefix';
 import { OBSERVED_CONTEXTS_INDEX } from '../storage/indices';
 
 /** Stored by Fleet Server; see the observed contexts index in `storage/indices.ts`. */
@@ -32,13 +33,14 @@ export interface ObservedContextDocument {
 }
 
 interface Scope {
-  app: string;
+  apps: readonly string[];
   environment: string;
 }
 
-/** Terms `include` takes a Lucene regular expression, so the prefix must be escaped. */
-export const prefixToIncludePattern = (prefix: string): string =>
-  `${prefix.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (char) => `\\${char}`)}.*`;
+const toScope = (app: string | readonly string[], environment: string): Scope => ({
+  apps: [...new Set(Array.isArray(app) ? app : [app])],
+  environment,
+});
 
 const MAX_TYPES_PER_ATTRIBUTE = 5;
 
@@ -61,14 +63,20 @@ export class ObservedContextsService {
     environment,
     prefix,
     size,
-  }: Scope & { prefix?: string; size: number }): Promise<ObservedAttributesResponse> {
+  }: {
+    app: string | readonly string[];
+    environment: string;
+    prefix?: string;
+    size: number;
+  }): Promise<ObservedAttributesResponse> {
+    const scope = toScope(app, environment);
     // Attribute names come from `attributes`: the keys of a `flattened` field can't be aggregated.
-    const names = await this.terms({ app, environment }, 'attributes', prefix, size);
+    const names = await this.terms(scope, 'attributes', prefix, size);
     if (names.length === 0) {
       return { items: [] };
     }
 
-    const types = await this.aggregate({ app, environment }, (aggs) =>
+    const types = await this.aggregate(scope, (aggs) =>
       names.forEach(({ key }, index) => {
         aggs[`types_${index}`] = {
           terms: { field: `attribute_types.${key}`, size: MAX_TYPES_PER_ATTRIBUTE },
@@ -91,12 +99,19 @@ export class ObservedContextsService {
     attribute,
     prefix,
     size,
-  }: Scope & {
+  }: {
+    app: string | readonly string[];
+    environment: string;
     attribute: string;
     prefix?: string;
     size: number;
   }): Promise<ObservedValuesResponse> {
-    const buckets = await this.terms({ app, environment }, `context.${attribute}`, prefix, size);
+    const buckets = await this.terms(
+      toScope(app, environment),
+      `context.${attribute}`,
+      prefix,
+      size
+    );
     return {
       items: buckets.map(({ key, doc_count: count }) => ({ value: String(key), count })),
     };
@@ -108,7 +123,9 @@ export class ObservedContextsService {
     contextKey,
     page,
     perPage,
-  }: Scope & {
+  }: {
+    app: string;
+    environment: string;
     contextKey?: string;
     page: number;
     perPage: number;
@@ -118,7 +135,7 @@ export class ObservedContextsService {
       index: OBSERVED_CONTEXTS_INDEX,
       ignore_unavailable: true,
       query: this.scopeQuery(
-        { app, environment },
+        toScope(app, environment),
         contextKey ? [{ term: { context_key: contextKey } }] : []
       ),
       sort: [{ last_seen: { order: 'desc', unmapped_type: 'date' } }],
@@ -170,11 +187,13 @@ export class ObservedContextsService {
   }
 
   private scopeQuery(
-    { app, environment }: Scope,
+    { apps, environment }: Scope,
     extra: QueryDslQueryContainer[] = []
   ): QueryDslQueryContainer {
     return {
-      bool: { filter: [{ term: { app } }, { term: { environment } }, ...extra] },
+      bool: {
+        filter: [{ terms: { app: [...apps] } }, { term: { environment } }, ...extra],
+      },
     };
   }
 }

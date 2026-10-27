@@ -21,6 +21,7 @@ import {
   type ListAppsResponse,
   type ListCredentialsResponse,
   type ListEnvironmentsResponse,
+  type ListFlagTagsResponse,
   type ListFlagsResponse,
   type ListObservedContextsResponse,
   type ObservedAttributesResponse,
@@ -41,11 +42,20 @@ export interface ListFlagsFilters {
   perPage?: number;
 }
 
-const definedQuery = (query: Record<string, string | number | undefined>): HttpFetchQuery => {
+const definedQuery = (
+  query: Record<string, string | number | readonly string[] | undefined>
+): HttpFetchQuery => {
   const result: HttpFetchQuery = {};
   for (const [key, value] of Object.entries(query)) {
-    if (value !== undefined && value !== '') {
+    if (value === undefined || value === '') {
+      continue;
+    }
+    if (typeof value === 'string' || typeof value === 'number') {
       result[key] = value;
+      continue;
+    }
+    if (value.length > 0) {
+      result[key] = [...value];
     }
   }
   return result;
@@ -147,6 +157,12 @@ export class FeatureFlagsApiClient {
     return flags;
   }
 
+  public listFlagTags(
+    query: { prefix?: string; size?: number } = {}
+  ): Promise<ListFlagTagsResponse> {
+    return this.get(API_PATHS.flagTags, { prefix: query.prefix, size: query.size });
+  }
+
   public getFlag(key: string): Promise<Flag> {
     return this.get(buildPath(API_PATHS.flag, { key }));
   }
@@ -159,6 +175,11 @@ export class FeatureFlagsApiClient {
     return this.send('put', buildPath(API_PATHS.flag, { key }), body);
   }
 
+  /** Saves `body` as a new revision. A deleted flag is created again. */
+  public restoreFlag(key: string, body: UpdateFlagRequest): Promise<Flag> {
+    return this.send('post', buildPath(API_PATHS.flagRestore, { key }), body);
+  }
+
   public deleteFlag(key: string, version?: string): Promise<void> {
     return this.remove(buildPath(API_PATHS.flag, { key }), version);
   }
@@ -168,7 +189,7 @@ export class FeatureFlagsApiClient {
   }
 
   public listObservedAttributes(query: {
-    app: string;
+    app: string | readonly string[];
     environment: string;
     prefix?: string;
     size?: number;
@@ -177,7 +198,7 @@ export class FeatureFlagsApiClient {
   }
 
   public listObservedValues(query: {
-    app: string;
+    app: string | readonly string[];
     environment: string;
     attribute: string;
     prefix?: string;
@@ -202,7 +223,10 @@ export class FeatureFlagsApiClient {
     });
   }
 
-  private get<T>(path: string, query?: Record<string, string | number | undefined>): Promise<T> {
+  private get<T>(
+    path: string,
+    query?: Record<string, string | number | readonly string[] | undefined>
+  ): Promise<T> {
     return this.request(() =>
       this.http.get<T>(path, {
         version: API_VERSION,

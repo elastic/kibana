@@ -200,6 +200,26 @@ export const listFlagsResponseSchema = lazySchema(() =>
   z.object({ items: z.array(flagSchema) }).extend(paginationSchema.shape)
 );
 
+export const listFlagTagsQuerySchema = lazySchema(() =>
+  z.object({
+    prefix: z
+      .string()
+      .max(LIMITS.tagMaxLength)
+      .optional()
+      .describe('Only tags that start with this prefix.'),
+    size: z.coerce.number().int().min(1).max(LIMITS.maxSuggestions).default(LIMITS.maxSuggestions),
+  })
+);
+
+export const listFlagTagsResponseSchema = lazySchema(() =>
+  z.object({
+    items: z
+      .array(z.string().max(LIMITS.tagMaxLength))
+      .max(LIMITS.maxSuggestions)
+      .describe('Existing flag tags, most used first.'),
+  })
+);
+
 export const flagHistoryQuerySchema = lazySchema(() =>
   z.object({
     page: pageQuerySchema,
@@ -236,7 +256,16 @@ export const flagHistoryItemSchema = lazySchema(() =>
 );
 
 export const flagHistoryResponseSchema = lazySchema(() =>
-  z.object({ items: z.array(flagHistoryItemSchema) }).extend(paginationSchema.shape)
+  z
+    .object({
+      items: z.array(flagHistoryItemSchema),
+      older_snapshot: flagSnapshotSchema
+        .optional()
+        .describe(
+          'The snapshot immediately before the oldest entry on this page, when another change exists. Used to describe that entry.'
+        ),
+    })
+    .extend(paginationSchema.shape)
 );
 
 export type CreatedBy = z.infer<typeof createdBySchema>;
@@ -248,6 +277,8 @@ export type UpdateFlagRequest = z.input<typeof updateFlagRequestSchema>;
 export type Flag = z.infer<typeof flagSchema>;
 export type ListFlagsQuery = z.input<typeof listFlagsQuerySchema>;
 export type ListFlagsResponse = z.infer<typeof listFlagsResponseSchema>;
+export type ListFlagTagsQuery = z.input<typeof listFlagTagsQuerySchema>;
+export type ListFlagTagsResponse = z.infer<typeof listFlagTagsResponseSchema>;
 export type FlagHistoryQuery = z.input<typeof flagHistoryQuerySchema>;
 export type FlagSnapshot = z.infer<typeof flagSnapshotSchema>;
 export type FlagHistoryItem = z.infer<typeof flagHistoryItemSchema>;

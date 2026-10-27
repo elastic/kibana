@@ -7,6 +7,8 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type {
+  AggregationsStringTermsAggregate,
+  AggregationsStringTermsBucket,
   QueryDslQueryContainer,
   SearchHit,
   SortCombinations,
@@ -16,6 +18,7 @@ import type { AppAttributes } from '../../common/schemas/apps';
 import type { EnvironmentAttributes } from '../../common/schemas/environments';
 import type { CreatedBy, FlagDefinition } from '../../common/schemas/flags';
 import { conflictError, notFoundError } from '../errors';
+import { prefixToIncludePattern } from '../lib/lucene_prefix';
 import { DEFINITIONS_INDEX } from './indices';
 import { decodeVersion, encodeVersion } from './version';
 
@@ -327,6 +330,42 @@ export class DefinitionsRepository {
     } finally {
       await this.esClient.closePointInTime({ id: pitId }).catch(() => undefined);
     }
+  }
+
+  /**
+   * Distinct values of a keyword field, most frequent first.
+   * `prefix` keeps values that start with it.
+   */
+  public async distinctValues(
+    type: DefinitionType,
+    field: string,
+    { prefix, size }: { prefix?: string; size: number }
+  ): Promise<string[]> {
+    await this.ensureReady();
+    const result = await this.esClient.search<
+      unknown,
+      { values: AggregationsStringTermsAggregate }
+    >({
+      index: DEFINITIONS_INDEX,
+      size: 0,
+      query: this.scopedQuery(type),
+      aggs: {
+        values: {
+          terms: {
+            field,
+            size,
+            ...(prefix ? { include: prefixToIncludePattern(prefix) } : {}),
+          },
+        },
+      },
+    });
+    const buckets = result.aggregations?.values.buckets;
+    if (!Array.isArray(buckets)) {
+      return [];
+    }
+    return (buckets as AggregationsStringTermsBucket[]).flatMap((bucket) =>
+      typeof bucket.key === 'string' ? [bucket.key] : []
+    );
   }
 
   public async count(type: DefinitionType, query?: QueryDslQueryContainer): Promise<number> {

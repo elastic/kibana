@@ -21,6 +21,7 @@ const READ_ROUTES: Array<[Method, string]> = [
   ['get', API_PATHS.app],
   ['get', API_PATHS.appCredentials],
   ['get', API_PATHS.flags],
+  ['get', API_PATHS.flagTags],
   ['get', API_PATHS.flag],
   ['get', API_PATHS.flagHistory],
   ['get', API_PATHS.observedContexts],
@@ -39,6 +40,7 @@ const MANAGE_ROUTES: Array<[Method, string]> = [
   ['delete', API_PATHS.appCredential],
   ['post', API_PATHS.flags],
   ['put', API_PATHS.flag],
+  ['post', API_PATHS.flagRestore],
   ['delete', API_PATHS.flag],
 ];
 

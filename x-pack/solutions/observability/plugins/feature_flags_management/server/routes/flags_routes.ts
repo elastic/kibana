@@ -14,6 +14,8 @@ import {
   flagHistoryResponseSchema,
   flagParamsSchema,
   flagSchema,
+  listFlagTagsQuerySchema,
+  listFlagTagsResponseSchema,
   listFlagsQuerySchema,
   listFlagsResponseSchema,
   updateFlagRequestSchema,
@@ -53,6 +55,33 @@ export const registerFlagsRoutes = (router: IRouter, getServices: GetServices) =
           const { flags } = await getServices();
           const { per_page: perPage, ...filters } = request.query;
           return response.ok({ body: await flags.list({ ...filters, perPage }) });
+        })
+    );
+
+  router.versioned
+    .get({
+      path: API_PATHS.flagTags,
+      access: 'public',
+      summary: 'Suggest feature flag tags',
+      description:
+        'Returns tags already used by flags, most used first. A prefix keeps tags that start with it.',
+      security: READ_SECURITY,
+      options: ROUTE_OPTIONS,
+    })
+    .addVersion(
+      {
+        version: API_VERSION,
+        validate: {
+          request: { query: listFlagTagsQuerySchema },
+          response: {
+            200: { body: () => listFlagTagsResponseSchema, description: 'The tags.' },
+          },
+        },
+      },
+      async (context, request, response) =>
+        handleErrors(response, async () => {
+          const { flags } = await getServices();
+          return response.ok({ body: await flags.listTags(request.query) });
         })
     );
 
@@ -143,6 +172,36 @@ export const registerFlagsRoutes = (router: IRouter, getServices: GetServices) =
     );
 
   router.versioned
+    .post({
+      path: API_PATHS.flagRestore,
+      access: 'public',
+      summary: 'Restore a feature flag to a previous definition',
+      description: `Saves the given definition as a new revision of the flag. If the flag was deleted, it is created again. ${VALIDATION_RULES_DESCRIPTION} Flags that use this one as a prerequisite must stay valid too.`,
+      security: MANAGE_SECURITY,
+      options: ROUTE_OPTIONS,
+    })
+    .addVersion(
+      {
+        version: API_VERSION,
+        validate: {
+          request: { params: flagParamsSchema, body: updateFlagRequestSchema },
+          response: {
+            200: { body: () => flagSchema, description: 'The restored flag.' },
+            ...ERROR_RESPONSES.validation,
+            ...ERROR_RESPONSES.conflict,
+          },
+        },
+      },
+      async (context, request, response) =>
+        handleErrors(response, async () => {
+          const { flags } = await getServices();
+          return response.ok({
+            body: await flags.restore(request, request.params.key, request.body),
+          });
+        })
+    );
+
+  router.versioned
     .delete({
       path: API_PATHS.flag,
       access: 'public',
@@ -178,7 +237,7 @@ export const registerFlagsRoutes = (router: IRouter, getServices: GetServices) =
       access: 'public',
       summary: 'Get the change history of a feature flag',
       description:
-        'Returns the changes made to a flag, newest first. Each entry has the flag as it was after that change. The history is kept after the flag is deleted.',
+        'Returns the changes made to a flag, newest first. Each entry has the flag as it was after that change. older_snapshot is the flag just before the oldest entry on the page, when another change exists. The history is kept after the flag is deleted.',
       security: READ_SECURITY,
       options: ROUTE_OPTIONS,
     })

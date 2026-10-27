@@ -235,7 +235,9 @@ describe('DefinitionsRepository', () => {
         },
       });
 
-      const items = await repository.findAll('credential', { term: { 'credential.app': 'kibana' } });
+      const items = await repository.findAll('credential', {
+        term: { 'credential.app': 'kibana' },
+      });
 
       expect(items).toHaveLength(1);
       expect(esClient.search).toHaveBeenCalledWith(
@@ -248,6 +250,40 @@ describe('DefinitionsRepository', () => {
         expect.objectContaining({ index: DEFINITIONS_INDEX })
       );
       expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-2' });
+    });
+  });
+
+  describe('distinctValues', () => {
+    it('returns keyword buckets and escapes a prefix for the terms include', async () => {
+      esClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [] },
+        aggregations: {
+          values: {
+            buckets: [
+              { key: 'beta', doc_count: 2 },
+              { key: 'beta.1', doc_count: 1 },
+            ],
+          },
+        },
+      });
+
+      await expect(
+        repository.distinctValues('flag', 'flag.tags', { prefix: 'be.ta', size: 10 })
+      ).resolves.toEqual(['beta', 'beta.1']);
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: DEFINITIONS_INDEX,
+        size: 0,
+        query: { bool: { filter: [{ term: { type: 'flag' } }] } },
+        aggs: {
+          values: {
+            terms: { field: 'flag.tags', size: 10, include: 'be\\.ta.*' },
+          },
+        },
+      });
     });
   });
 });

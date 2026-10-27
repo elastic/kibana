@@ -29,8 +29,17 @@ const suggestionsSizeSchema = lazySchema(() =>
   z.coerce.number().int().min(1).max(LIMITS.maxSuggestions).default(LIMITS.defaultSuggestions)
 );
 
+/** One app, or several. Suggestions combine the observed contexts of every app. */
+const suggestionAppsSchema = lazySchema(() =>
+  z
+    .union([appKeySchema, z.array(appKeySchema).min(1).max(LIMITS.maxApps)])
+    .describe('App key, or repeated to combine several apps.')
+);
+
 export const observedAttributesQuerySchema = lazySchema(() =>
-  scopeQuerySchema.extend({
+  z.object({
+    app: suggestionAppsSchema,
+    environment: environmentKeySchema,
     prefix: prefixSchema,
     size: suggestionsSizeSchema,
   })
@@ -53,7 +62,9 @@ export const observedAttributesResponseSchema = lazySchema(() =>
 );
 
 export const observedValuesQuerySchema = lazySchema(() =>
-  scopeQuerySchema.extend({
+  z.object({
+    app: suggestionAppsSchema,
+    environment: environmentKeySchema,
     attribute: attributeSchema,
     prefix: prefixSchema,
     size: suggestionsSizeSchema,

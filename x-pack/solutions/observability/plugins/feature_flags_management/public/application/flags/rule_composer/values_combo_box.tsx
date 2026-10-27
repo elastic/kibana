@@ -13,7 +13,7 @@ import { useAppServices } from '../../app_services';
 import { useAsyncData, useDebouncedValue } from '../../use_async_data';
 
 export const ValuesComboBox = ({
-  app,
+  apps,
   environment,
   attribute,
   values,
@@ -21,7 +21,7 @@ export const ValuesComboBox = ({
   readOnly,
   onChange,
 }: {
-  app?: string;
+  apps: readonly string[];
   environment: string;
   attribute: string;
   values: readonly VariationValue[];
@@ -33,21 +33,22 @@ export const ValuesComboBox = ({
   const [searchValue, setSearchValue] = useState('');
   const debouncedSearch = useDebouncedValue(searchValue, 250);
   const load = useCallback(() => {
-    if (!app || !environment || !attribute) {
+    if (apps.length === 0 || !environment || !attribute) {
       return Promise.resolve([]);
     }
     return api
       .listObservedValues({
-        app,
+        app: apps,
         environment,
         attribute,
         prefix: debouncedSearch || undefined,
         size: LIMITS.defaultSuggestions,
       })
       .then((response) => response.items.map((item) => item.value));
-  }, [api, app, environment, attribute, debouncedSearch]);
+  }, [api, apps, environment, attribute, debouncedSearch]);
   const { data, loading } = useAsyncData(load);
   const options = (data ?? []).map((value) => ({ label: value, value }));
+  const hasApps = apps.length > 0;
   const selectedOptions: Array<EuiComboBoxOptionOption<VariationValue>> = values.map((value) => ({
     label: String(value),
     value,
@@ -74,8 +75,8 @@ export const ValuesComboBox = ({
         defaultMessage: 'Select or type a value',
       })}
       fullWidth
-      async={Boolean(app && environment && attribute)}
-      isLoading={loading && Boolean(app && attribute)}
+      async={hasApps && Boolean(environment && attribute)}
+      isLoading={loading && hasApps && Boolean(attribute)}
       isDisabled={readOnly}
       singleSelection={singleSelection ? { asPlainText: true } : false}
       options={options}

@@ -20,7 +20,7 @@ export const EnvironmentRulesEditor = ({
   ruleSet,
   variations,
   valueType,
-  suggestionApp,
+  apps,
   currentFlagKey,
   readOnly,
   initiallyOpen,
@@ -32,7 +32,7 @@ export const EnvironmentRulesEditor = ({
   ruleSet: EnvironmentDraft;
   variations: readonly VariationValue[];
   valueType: ValueType;
-  suggestionApp?: string;
+  apps: readonly string[];
   currentFlagKey: string;
   readOnly: boolean;
   initiallyOpen: boolean;
@@ -70,7 +70,7 @@ export const EnvironmentRulesEditor = ({
       rules={ruleSet.rules}
       variations={variations}
       valueType={valueType}
-      app={suggestionApp}
+      apps={apps}
       environment={environment}
       readOnly={readOnly}
       onChange={(rules) => onChange({ ...ruleSet, rules })}

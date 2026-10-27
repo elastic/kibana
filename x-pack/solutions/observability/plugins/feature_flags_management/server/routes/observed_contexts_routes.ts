@@ -27,7 +27,7 @@ export const registerObservedContextsRoutes = (router: IRouter, getServices: Get
       path: API_PATHS.observedContextAttributes,
       access: 'public',
       summary: 'Suggest evaluation context attributes',
-      description: `Returns the most common attribute names in the evaluation contexts of an app and environment, with the JSON types seen for each. ${OBSERVED_CONTEXTS_DESCRIPTION}`,
+      description: `Returns the most common attribute names in the evaluation contexts of one or more apps and an environment, with the JSON types seen for each. Repeat \`app\` to combine apps. ${OBSERVED_CONTEXTS_DESCRIPTION}`,
       security: READ_SECURITY,
       options: ROUTE_OPTIONS,
     })
@@ -53,7 +53,7 @@ export const registerObservedContextsRoutes = (router: IRouter, getServices: Get
       path: API_PATHS.observedContextValues,
       access: 'public',
       summary: 'Suggest evaluation context values',
-      description: `Returns the most common values of one attribute in the evaluation contexts of an app and environment. ${OBSERVED_CONTEXTS_DESCRIPTION}`,
+      description: `Returns the most common values of one attribute in the evaluation contexts of one or more apps and an environment. Repeat \`app\` to combine apps. ${OBSERVED_CONTEXTS_DESCRIPTION}`,
       security: READ_SECURITY,
       options: ROUTE_OPTIONS,
     })

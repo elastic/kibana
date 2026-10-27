@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Refresh } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ChangeHistoryFieldsToMask,
   GetChangeHistoryOptions,
@@ -60,6 +61,8 @@ export interface AuditEvent {
   fieldsToRedact?: ChangeHistoryFieldsToMask;
   /** Only record change history, for changes cascaded from another user action. */
   skipUserActivity?: boolean;
+  /** Makes the new history entry searchable before this call returns. */
+  refresh?: Refresh;
 }
 
 interface AuditServiceStartDeps {
@@ -146,6 +149,7 @@ export class AuditService {
           spaceId: CHANGE_HISTORY_SPACE_ID,
           data: { event: { type: event.eventType } },
           fieldsToRedact: event.fieldsToRedact,
+          refresh: event.refresh,
         }
       );
     } catch (error) {
