@@ -307,7 +307,10 @@ const renderPage = (
   core.application.getUrlForApp.mockImplementation(
     (appId, options) => `/app/${appId}${options?.path ?? ''}`
   );
-  (core.application.capabilities as Record<string, unknown>).agenticInvestigations = capabilities;
+  (core.application.capabilities as Record<string, unknown>).agenticInvestigations = {
+    readInvestigations: true,
+    ...capabilities,
+  };
   // The real hooks behind the details flyout and the assignee picker read these services, and
   // react-query rejects a query function that resolves to undefined.
   core.http.get.mockResolvedValue(proposal);
@@ -343,6 +346,7 @@ const renderPage = (
 const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
 const dismissMutateAsync = jest.fn().mockResolvedValue(undefined);
 const setStatusMutate = jest.fn();
+const setStatusMutateAsync = jest.fn();
 const assignInvestigationMutate = jest.fn().mockResolvedValue({});
 
 beforeEach(() => {
@@ -356,7 +360,12 @@ beforeEach(() => {
   mockUseAssignInvestigation.mockReturnValue({ mutateAsync: assignInvestigationMutate });
   mockUseUserProfiles.mockReturnValue({ data: [], isFetching: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
-  mockUseSetInvestigationStatus.mockReturnValue({ mutate: setStatusMutate, isLoading: false });
+  setStatusMutateAsync.mockReset().mockResolvedValue({});
+  mockUseSetInvestigationStatus.mockReturnValue({
+    mutate: setStatusMutate,
+    mutateAsync: setStatusMutateAsync,
+    isLoading: false,
+  });
   mockUseInvestigationClosePreview.mockReturnValue({
     data: { pending_proposal_count: 0, pending_proposals: [] },
     isLoading: false,
@@ -764,6 +773,58 @@ describe('ConversationsPage decisions', () => {
     });
   });
 
+  describe('reopening a closed investigation', () => {
+    const closedInvestigationProposal = {
+      ...actionProposal,
+      conversationStatus: 'closed' as const,
+    };
+
+    const openMenuOf = () => {
+      mockProposals({ investigate: [closedInvestigationProposal] });
+      const rendered = renderPage('/', { capabilities: { manageInvestigations: true } });
+      fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
+      return rendered;
+    };
+
+    it('offers Open instead of Close for a closed investigation', () => {
+      openMenuOf();
+
+      expect(screen.getByText('Open investigation')).toBeInTheDocument();
+      expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
+    });
+
+    it('reopens the investigation at once, with a success toast and no modal', async () => {
+      const { core } = openMenuOf();
+
+      fireEvent.click(screen.getByText('Open investigation'));
+
+      await waitFor(() =>
+        expect(setStatusMutateAsync).toHaveBeenCalledWith({
+          investigationId: 'inv-1',
+          body: { status: 'open' },
+        })
+      );
+      await waitFor(() =>
+        expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Investigation reopened')
+      );
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('shows an error toast when the reopen fails', async () => {
+      setStatusMutateAsync.mockRejectedValueOnce(new Error('boom'));
+      const { core } = openMenuOf();
+
+      fireEvent.click(screen.getByText('Open investigation'));
+
+      await waitFor(() =>
+        expect(core.notifications.toasts.addDanger).toHaveBeenCalledWith(
+          'Could not reopen the investigation'
+        )
+      );
+      expect(core.notifications.toasts.addSuccess).not.toHaveBeenCalled();
+    });
+  });
+
   it('offers only Copy link for a decided proposal when escalation is not available', async () => {
     // A decided investigation without `canManageEscalations` keeps just the read-only item.
     mockProposals({
@@ -1144,6 +1205,28 @@ describe('ConversationsPage impact pills', () => {
     Object.keys(impactOf).forEach((id) => delete impactOf[id]);
   });
 
+  it('skips the impact request and names the missing privilege without investigations read', () => {
+    renderPage('/', { capabilities: { readInvestigations: false } });
+
+    expect(screen.getByTestId('alertzeroInvestigationsReadGate')).toHaveTextContent(
+      'Agentic Investigations Read'
+    );
+    expect(mockUseProposalImpactPills).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
+    expect(screen.queryByRole('button', { name: /host-1/ })).not.toBeInTheDocument();
+    expect(screen.getByText('Host investigation')).toBeInTheDocument();
+  });
+
+  it('does not show the missing privilege callout with investigations read', () => {
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertzeroInvestigationsReadGate')).not.toBeInTheDocument();
+    expect(mockUseProposalImpactPills).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: true })
+    );
+  });
+
   // Toggling a pill changes the section badges' text; awaiting flushes the resulting
   // MutationObserver update, which would otherwise land outside `act`.
   const togglePill = async (name: string) => {
@@ -1160,6 +1243,7 @@ describe('ConversationsPage impact pills', () => {
       origin: 'alertzero',
       categories: ['respond', 'investigate', 'configure'],
       decidedWithinHours: 72,
+      enabled: true,
     });
   });
 

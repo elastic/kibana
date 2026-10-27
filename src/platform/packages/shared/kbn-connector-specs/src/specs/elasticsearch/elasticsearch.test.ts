@@ -9,7 +9,7 @@
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { Elasticsearch } from './elasticsearch';
-import { RequestInputSchema, SearchInputSchema } from './types';
+import { EsqlInputSchema, RequestInputSchema, SearchInputSchema } from './types';
 
 const CLUSTER_URL = 'https://my-deployment.es.us-east-1.aws.elastic.cloud';
 
@@ -98,7 +98,7 @@ describe('Elasticsearch connector', () => {
 
       await Elasticsearch.actions.search.handler(mockContext, {
         index: 'logs/2024',
-        query: {},
+        query: { match_all: {} },
         size: 10,
         from: 0,
         timeout: '30s',
@@ -114,7 +114,7 @@ describe('Elasticsearch connector', () => {
 
       await Elasticsearch.actions.search.handler(mockContext, {
         index: ['index-a', 'index-b'],
-        query: {},
+        query: { match_all: {} },
         size: 10,
         from: 0,
         timeout: '30s',
@@ -361,14 +361,33 @@ describe('Elasticsearch connector', () => {
   // ============================================================================
 
   describe('SearchInputSchema', () => {
-    it('rejects index strings longer than 512 characters', () => {
-      const longIndex = 'a'.repeat(513);
+    it('rejects index strings longer than 4096 characters', () => {
+      const longIndex = 'a'.repeat(4097);
       const result = SearchInputSchema.safeParse({ index: longIndex });
       expect(result.success).toBe(false);
     });
 
-    it('rejects arrays of more than 10 indices', () => {
-      const tooManyIndices = Array.from({ length: 11 }, (_, i) => `index-${i}`);
+    it('accepts a comma-separated list of several maximum-length index names', () => {
+      const indices = Array.from({ length: 10 }, (_, i) => `${i}`.padEnd(255, 'a')).join(',');
+      const result = SearchInputSchema.safeParse({ index: indices });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts an array of 100 indices', () => {
+      const indices = Array.from({ length: 100 }, (_, i) => `index-${i}`);
+      const result = SearchInputSchema.safeParse({ index: indices });
+      expect(result.success).toBe(true);
+    });
+
+    it('leaves the request line limit to the cluster, which can raise it above 4kb', () => {
+      // 16 x 255 characters + 15 commas is 4095 raw; each comma encodes to %2C.
+      const indices = Array.from({ length: 16 }, (_, i) => `${i}`.padEnd(255, 'a'));
+      expect(SearchInputSchema.safeParse({ index: indices.join(',') }).success).toBe(true);
+      expect(SearchInputSchema.safeParse({ index: indices }).success).toBe(true);
+    });
+
+    it('rejects arrays of more than 100 indices', () => {
+      const tooManyIndices = Array.from({ length: 101 }, (_, i) => `index-${i}`);
       const result = SearchInputSchema.safeParse({ index: tooManyIndices });
       expect(result.success).toBe(false);
     });
@@ -378,10 +397,56 @@ describe('Elasticsearch connector', () => {
       expect(result.success).toBe(true);
     });
 
+    it.each([
+      [{ size: 10_000, from: 0 }, true],
+      [{ size: 0, from: 10_000 }, true],
+      [{ size: 500, from: 9_900 }, true],
+      [{ size: 10_001, from: 0 }, false],
+      [{ size: 0, from: 10_001 }, false],
+    ])(
+      'caps from and size separately, leaving from + size to the index result window: %j valid=%s',
+      (window, expected) => {
+        expect(SearchInputSchema.safeParse({ index: 'logs-*', ...window }).success).toBe(expected);
+      }
+    );
+
+    it('rejects an index that cannot be URL-encoded instead of throwing', () => {
+      expect(SearchInputSchema.safeParse({ index: '\ud800' }).success).toBe(false);
+      expect(SearchInputSchema.safeParse({ index: ['logs', '\ud800'] }).success).toBe(false);
+    });
+
+    it.each([
+      ['sort', (n: number) => Array.from({ length: n }, (_, i) => ({ [`f${i}`]: 'asc' }))],
+      ['_source', (n: number) => Array.from({ length: n }, (_, i) => `f${i}`)],
+      [
+        'aggs',
+        (n: number) => Object.fromEntries(Array.from({ length: n }, (_, i) => [`a${i}`, {}])),
+      ],
+      [
+        'runtimeMappings',
+        (n: number) => Object.fromEntries(Array.from({ length: n }, (_, i) => [`r${i}`, {}])),
+      ],
+    ])('accepts up to 1000 %s entries', (field, build) => {
+      expect(SearchInputSchema.safeParse({ index: 'logs-*', [field]: build(1000) }).success).toBe(
+        true
+      );
+      expect(SearchInputSchema.safeParse({ index: 'logs-*', [field]: build(1001) }).success).toBe(
+        false
+      );
+    });
+
     it('defaults query to match_all when omitted', () => {
       const result = SearchInputSchema.safeParse({ index: 'logs-*' });
       expect(result.success).toBe(true);
       expect(result.success && result.data.query).toEqual({ match_all: {} });
+    });
+
+    it('accepts exactly one top-level query type', () => {
+      const parse = (query: Record<string, unknown>) =>
+        SearchInputSchema.safeParse({ index: 'logs-*', query }).success;
+      expect(parse({ bool: { must: [{ match: { message: 'a' } }] } })).toBe(true);
+      expect(parse({})).toBe(false);
+      expect(parse({ match: { message: 'a' }, term: { 'host.name': 'b' } })).toBe(false);
     });
   });
 
@@ -399,6 +464,49 @@ describe('Elasticsearch connector', () => {
     it('rejects a path that could redirect requests to another host', () => {
       const result = RequestInputSchema.safeParse({ path: '@evil.com/_search' });
       expect(result.success).toBe(false);
+    });
+
+    it('leaves the request line limit to the cluster, which can raise it above 4kb', () => {
+      const queryParams = { q: 'x'.repeat(2048), filter_path: 'x'.repeat(2048) };
+      expect(RequestInputSchema.safeParse({ path: '/_search', queryParams }).success).toBe(true);
+      // Each 'é' is sent as %C3%A9, six bytes on the wire.
+      expect(RequestInputSchema.safeParse({ path: `/_search?q=${'é'.repeat(700)}` }).success).toBe(
+        true
+      );
+    });
+
+    it('rejects paths longer than 4096 characters', () => {
+      expect(RequestInputSchema.safeParse({ path: `/${'a'.repeat(4095)}` }).success).toBe(true);
+      expect(RequestInputSchema.safeParse({ path: `/${'a'.repeat(4096)}` }).success).toBe(false);
+    });
+
+    it('rejects an unparsable path instead of throwing', () => {
+      expect(RequestInputSchema.safeParse({ path: ':bad' }).success).toBe(false);
+    });
+  });
+
+  describe('EsqlInputSchema', () => {
+    it('accepts up to 1000 params', () => {
+      const params = (n: number) => Array.from({ length: n }, (_, i) => i);
+      expect(EsqlInputSchema.safeParse({ query: 'FROM a', params: params(1000) }).success).toBe(
+        true
+      );
+      expect(EsqlInputSchema.safeParse({ query: 'FROM a', params: params(1001) }).success).toBe(
+        false
+      );
+    });
+
+    it('accepts queries up to the 1,000,000-character ES|QL parser limit', () => {
+      expect(EsqlInputSchema.safeParse({ query: 'x'.repeat(1_000_000) }).success).toBe(true);
+      expect(EsqlInputSchema.safeParse({ query: 'x'.repeat(1_000_001) }).success).toBe(false);
+    });
+
+    it('accepts a filter with exactly one top-level query type', () => {
+      const parse = (filter: Record<string, unknown>) =>
+        EsqlInputSchema.safeParse({ query: 'FROM a', filter }).success;
+      expect(parse({ range: { '@timestamp': { gte: 'now-1h' } } })).toBe(true);
+      expect(parse({})).toBe(false);
+      expect(parse({ range: { '@timestamp': { gte: 'now-1h' } }, term: { a: 'b' } })).toBe(false);
     });
   });
 });
