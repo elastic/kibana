@@ -245,25 +245,13 @@ function createNavTree({
                 title: i18n.translate('xpack.observability.infrastructure.inventory', {
                   defaultMessage: 'Infrastructure inventory',
                 }),
-                getIsActive: ({
-                  pathNameSerialized,
-                  prepend,
-                }: {
-                  pathNameSerialized: string;
-                  prepend: (p: string) => string;
-                }) => {
+                getIsActive: ({ pathNameSerialized, prepend }) => {
                   return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
                 },
               },
               {
                 link: 'metrics:hosts',
-                getIsActive: ({
-                  pathNameSerialized,
-                  prepend,
-                }: {
-                  pathNameSerialized: string;
-                  prepend: (p: string) => string;
-                }) => {
+                getIsActive: ({ pathNameSerialized, prepend }) => {
                   return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
                 },
               },
@@ -271,7 +259,9 @@ function createNavTree({
                 link: 'metrics:metrics-explorer',
                 title: i18n.translate(
                   'xpack.observability.obltNav.infrastructure.metricsExplorer',
-                  { defaultMessage: 'Metrics explorer' }
+                  {
+                    defaultMessage: 'Metrics explorer',
+                  }
                 ),
               },
             ],
