@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CloudOnboardingDeploymentSchemaV3, CloudOnboardingDeploymentSchemaV4 } from '../models';
+import { CloudOnboardingDeploymentSchemaV4, CloudOnboardingDeploymentSchemaV5 } from '../models';
 
 import {
   CreateCloudOnboardingDeploymentRequestSchema,
@@ -118,24 +118,30 @@ describe('saved object model versions', () => {
     attemptCount: 1,
   };
 
-  it('V4 stores the instances', () => {
+  it('V5 stores the instances', () => {
     expect(
-      CloudOnboardingDeploymentSchemaV4.validate({ ...record, instances: [original, duplicate] })
+      CloudOnboardingDeploymentSchemaV5.validate({ ...record, instances: [original, duplicate] })
     ).toEqual(expect.objectContaining({ instances: [original, duplicate] }));
   });
 
-  it('V4 still accepts a record without instances, as saved by V3', () => {
-    expect(() => CloudOnboardingDeploymentSchemaV4.validate(record)).not.toThrow();
+  it('V5 still accepts a record without instances, as saved by V4', () => {
+    expect(() => CloudOnboardingDeploymentSchemaV5.validate(record)).not.toThrow();
   });
 
-  it('V3 does not know the instances, which is why the new field needs its own model version', () => {
+  it('V5 keeps the namespace of V4', () => {
+    expect(
+      CloudOnboardingDeploymentSchemaV5.validate({ ...record, namespace: 'prod', instances: [] })
+    ).toEqual(expect.objectContaining({ namespace: 'prod' }));
+  });
+
+  it('V4 does not know the instances, which is why the new field needs its own model version', () => {
     expect(() =>
-      CloudOnboardingDeploymentSchemaV3.validate({ ...record, instances: [original] })
+      CloudOnboardingDeploymentSchemaV4.validate({ ...record, instances: [original] })
     ).toThrow();
   });
 
-  it('V4 reads a document from a newer version, ignoring fields it does not know', () => {
-    const forwardCompatible = CloudOnboardingDeploymentSchemaV4.extends({}, { unknowns: 'ignore' });
+  it('V5 reads a document from a newer version, ignoring fields it does not know', () => {
+    const forwardCompatible = CloudOnboardingDeploymentSchemaV5.extends({}, { unknowns: 'ignore' });
 
     expect(forwardCompatible.validate({ ...record, somethingNewer: true })).not.toHaveProperty(
       'somethingNewer'

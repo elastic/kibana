@@ -415,6 +415,8 @@ export interface CloudOnboardingDeploymentSOAttributes {
   integrationName?: string;
   /** Integration description as entered in the Service settings step. Set on every package policy created by the deploy. */
   description?: string;
+  /** Global data stream namespace from the Service settings step. Absent or empty means each policy inherits its agent policy's namespace. */
+  namespace?: string;
   /** The service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume so duplicates and their names come back. */
   instances?: CloudOnboardingInstance[];
   /** Data format selected in the Services step: 'ecs' or 'otel'. Used to hydrate the services step on resume so service filtering is consistent. */

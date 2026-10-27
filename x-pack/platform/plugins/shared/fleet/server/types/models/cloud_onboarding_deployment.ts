@@ -105,7 +105,14 @@ export const CloudOnboardingDeploymentSchemaV3 = CloudOnboardingDeploymentSchema
   description: schema.maybe(schema.string({ maxLength: 2048 })),
 });
 
-// ── V4: instances ────────────────────────────────────────────────────────────
+// ── V4: namespace ────────────────────────────────────────────────────────────
+// Global data stream namespace from the Service settings step. Not in mappings.properties
+// (dynamic: false), so no mapping change is needed.
+export const CloudOnboardingDeploymentSchemaV4 = CloudOnboardingDeploymentSchemaV3.extends({
+  namespace: schema.maybe(schema.string({ maxLength: 100 })),
+});
+
+// ── V5: instances ────────────────────────────────────────────────────────────
 // The service instances (originals and duplicates) of the last deploy, so a resumed onboarding
 // rebuilds the Service settings rows. Not in mappings.properties (dynamic: false), so no mapping
 // change is needed.
@@ -116,7 +123,7 @@ const PersistedInstanceSchema = schema.object({
   isDuplicate: schema.boolean(),
 });
 
-export const CloudOnboardingDeploymentSchemaV4 = CloudOnboardingDeploymentSchemaV3.extends({
+export const CloudOnboardingDeploymentSchemaV5 = CloudOnboardingDeploymentSchemaV4.extends({
   instances: schema.maybe(schema.arrayOf(PersistedInstanceSchema, { maxSize: 1000 })),
 });
 

@@ -10,7 +10,9 @@
       "status": "succeeded",
       "attemptCount": 1,
       "serviceVars": {
-        "aws.cloudtrail": { "bucket_arn": "arn:aws:s3:::my-bucket" }
+        "aws.cloudtrail": {
+          "bucket_arn": "arn:aws:s3:::my-bucket"
+        }
       },
       "globalRegion": "us-east-1",
       "integrationName": "aws-production",
@@ -36,7 +38,9 @@
       "authMethod": "assume_role",
       "agentPolicyIds": ["agent-policy-id-1"],
       "packagePolicyIds": ["pkg-policy-id-3"],
-      "policyIdsByInstance": { "aws.cloudtrail": "pkg-policy-id-3" }
+      "policyIdsByInstance": {
+        "aws.cloudtrail": "pkg-policy-id-3"
+      }
     }
   ],
   "10.4.0": [
@@ -50,25 +54,13 @@
       "status": "succeeded",
       "attemptCount": 1,
       "serviceVars": {
-        "aws.cloudtrail": { "bucket_arn": "arn:aws:s3:::my-bucket" }
+        "aws.cloudtrail": {
+          "bucket_arn": "arn:aws:s3:::my-bucket"
+        }
       },
       "globalRegion": "us-east-1",
       "integrationName": "aws-production",
       "description": "Production AWS account",
-      "instances": [
-        {
-          "instanceId": "aws.cloudtrail",
-          "serviceId": "aws.cloudtrail",
-          "name": "AWS CloudTrail",
-          "isDuplicate": false
-        },
-        {
-          "instanceId": "aws.vpcflow",
-          "serviceId": "aws.vpcflow",
-          "name": "Amazon VPC Flow Logs",
-          "isDuplicate": false
-        }
-      ],
       "dataFormat": "ecs",
       "authMethod": "static_keys",
       "packagePolicyIds": ["pkg-policy-id-1", "pkg-policy-id-2"],
@@ -86,27 +78,12 @@
       "attemptCount": 1,
       "globalRegion": "us-east-1",
       "integrationName": "aws-1",
-      "instances": [
-        {
-          "instanceId": "aws.cloudtrail",
-          "serviceId": "aws.cloudtrail",
-          "name": "AWS CloudTrail",
-          "isDuplicate": false
-        },
-        {
-          "instanceId": "aws.cloudtrail__dup-1",
-          "serviceId": "aws.cloudtrail",
-          "name": "CloudTrail prod",
-          "isDuplicate": true
-        }
-      ],
       "dataFormat": "otel",
       "authMethod": "assume_role",
       "agentPolicyIds": ["agent-policy-id-1"],
-      "packagePolicyIds": ["pkg-policy-id-3", "pkg-policy-id-4"],
+      "packagePolicyIds": ["pkg-policy-id-3"],
       "policyIdsByInstance": {
-        "aws.cloudtrail": "pkg-policy-id-3",
-        "aws.cloudtrail__dup-1": "pkg-policy-id-4"
+        "aws.cloudtrail": "pkg-policy-id-3"
       }
     }
   ]
