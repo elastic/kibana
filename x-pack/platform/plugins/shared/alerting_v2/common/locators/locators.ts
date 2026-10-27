@@ -56,6 +56,8 @@ export interface AlertingV2EpisodesLocatorParams extends SerializableRecord {
     groupHash?: string;
     status?: string;
     groupingValues?: Record<string, string | null>;
+    /** KQL for the list's search bar, in the episode field vocabulary (`alert.id`, `rule.id`, …). */
+    queryString?: string;
   };
   timeRange?: { from: string; to: string };
   host: LocatorHost;

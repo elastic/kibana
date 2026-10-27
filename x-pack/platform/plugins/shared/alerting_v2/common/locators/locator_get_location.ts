@@ -66,6 +66,7 @@ export const getEpisodesLocation = (params: AlertingV2EpisodesLocatorParams): Ki
         ruleId: params.filters?.ruleId,
         groupHash: params.filters?.groupHash,
         status: params.filters?.status,
+        queryString: params.filters?.queryString,
         groupingValues:
           params.filters?.groupingValues && Object.keys(params.filters.groupingValues).length > 0
             ? params.filters.groupingValues
