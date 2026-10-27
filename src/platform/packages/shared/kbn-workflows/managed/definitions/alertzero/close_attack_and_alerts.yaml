@@ -107,6 +107,7 @@ steps:
     with:
       index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}"
       ignore_unavailable: true
+      allow_partial_search_results: false
       size: 0
       query:
         bool:
@@ -129,6 +130,22 @@ steps:
       retry:
         max-attempts: 3
         delay: 5s
+
+  # A search can answer 200 with failed shards or `timed_out`, and the aggregation
+  # is then only part of the exclusion list: an alert whose other open attack sat
+  # on the missing shard would be closed. `allow_partial_search_results: false`
+  # makes the search error instead; this also rejects a partial response that gets
+  # through. Fails the run before anything is written.
+  - name: require_complete_shared_read
+    type: workflow.fail
+    if: >-
+      ${{ steps.resolve_attack.output.has_alerts == true
+        and (steps.find_shared_alerts.output.timed_out == true
+          or steps.find_shared_alerts.output._shards.failed > 0) }}
+    with:
+      message: >-
+        The attack's alerts could not be checked against other open attacks: the search
+        timed out or did not reach every shard. Nothing was closed.
 
   # An empty list means the read found nothing shared. Skipped when the attack
   # has no alerts; nothing below reads it then.
@@ -189,7 +206,6 @@ steps:
   # Reads the alerts back. The write refreshes the index, so this sees it. The
   # shared alerts are left out, as in the write: they stay open on purpose, so
   # counting them would report a close that did not land.
-  # Best-effort: the note below says when the read failed.
   - name: verify_alerts
     type: elasticsearch.search
     if: "${{ steps.resolve_attack.output.has_alerts == true }}"
@@ -235,12 +251,54 @@ steps:
       shared: "${{ steps.resolve_shared_alerts.output.count | default: 0 }}"
       attack_closed: "${{ steps.close_attack.output.success == true }}"
 
+  # Whether the alerts end up closed, for the failure below. The alerts left out as
+  # shared are not counted: they stay open on purpose. An unread back is only a
+  # failure when the write also failed, since then nothing confirms the close.
+  - name: resolve_unclosed
+    type: data.set
+    with:
+      count: "${{ steps.resolve_alerts_closed.output.open | plus: steps.resolve_alerts_closed.output.acknowledged }}"
+
+  - name: resolve_close_outcome
+    type: data.set
+    with:
+      incomplete: >-
+        ${{ steps.resolve_attack.output.has_alerts == true
+          and ((steps.resolve_alerts_closed.output.read == true
+              and steps.resolve_unclosed.output.count > 0)
+            or (steps.resolve_alerts_closed.output.read != true
+              and steps.close_alerts.error != null)) }}
+
+  # `close_alerts` continues on failure so the read-back and the counts still run,
+  # but the run must not then complete: the action would close the Investigation
+  # and the proposal would show `succeeded`, so the bridge would never offer the
+  # analyst a retry. Fails the run with the counts; the attack is already closed,
+  # and closing it again on the retry is harmless. The message carries counts only,
+  # never a write's error text.
+  - name: emit_failure
+    type: workflow.output
+    status: failed
+    if: "${{ steps.resolve_close_outcome.output.incomplete == true }}"
+    with:
+      message: >-
+        The attack was closed, but {{ steps.resolve_unclosed.output.count }}
+        of its {{ steps.resolve_alerts_closed.output.requested }} detection alert(s) could not be confirmed closed.
+        Approve again to retry.
+      attack_found: "${{ steps.resolve_attack.output.found == true }}"
+      attack_closed: "${{ steps.resolve_alerts_closed.output.attack_closed == true }}"
+      alerts_requested: "${{ steps.resolve_alerts_closed.output.requested }}"
+      alerts_read: "${{ steps.resolve_alerts_closed.output.read == true }}"
+      alerts_closed: "${{ steps.resolve_alerts_closed.output.closed }}"
+      alerts_open: "${{ steps.resolve_alerts_closed.output.open }}"
+      alerts_kept: "${{ steps.resolve_alerts_closed.output.shared }}"
+
   # What was read back, never a write's error message: the caller puts this in a
   # journal a later agent round reads as user input. The execution history keeps
   # the errors.
   - name: emit_result
     type: workflow.output
     status: completed
+    if: "${{ steps.resolve_close_outcome.output.incomplete != true }}"
     with:
       attack_found: "${{ steps.resolve_attack.output.found == true }}"
       attack_closed: "${{ steps.resolve_alerts_closed.output.attack_closed == true }}"

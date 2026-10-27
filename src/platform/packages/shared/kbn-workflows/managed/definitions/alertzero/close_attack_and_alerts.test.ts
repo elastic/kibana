@@ -196,6 +196,31 @@ describe('Close attack and alerts', () => {
       expect(names.indexOf('find_shared_alerts')).toBeLessThan(names.indexOf('close_attack'));
     });
 
+    it('refuses partial results, so an incomplete exclusion list never reaches a write', () => {
+      expect(find?.with?.allow_partial_search_results).toBe(false);
+
+      const guard = stepIn('require_complete_shared_read');
+      const fails = (output: Record<string, unknown>, hasAlerts = true) =>
+        evaluate(guard?.if as string, {
+          steps: {
+            resolve_attack: { output: { has_alerts: hasAlerts } },
+            find_shared_alerts: { output },
+          },
+        });
+
+      expect(guard?.type).toBe('workflow.fail');
+      expect(fails({ timed_out: false, _shards: { failed: 0 } })).toBe(false);
+      expect(fails({ timed_out: true, _shards: { failed: 0 } })).toBe(true);
+      expect(fails({ timed_out: false, _shards: { failed: 1 } })).toBe(true);
+      expect(fails({ timed_out: true, _shards: { failed: 1 } }, false)).toBe(false);
+      expect(names.indexOf('require_complete_shared_read')).toBeGreaterThan(
+        names.indexOf('find_shared_alerts')
+      );
+      expect(names.indexOf('require_complete_shared_read')).toBeLessThan(
+        names.indexOf('close_attack')
+      );
+    });
+
     it('resolves the shared ids from the aggregation, empty when nothing is shared', () => {
       const when = (buckets: Array<{ key: string }>) => ({
         steps: { find_shared_alerts: { output: { aggregations: { shared: { buckets } } } } },
@@ -245,6 +270,59 @@ describe('Close attack and alerts', () => {
         retry: { 'max-attempts': 3, delay: '5s' },
         continue: true,
       });
+    });
+
+    // `close_alerts` continues on failure so the counts still run, but the run must not
+    // complete then: the parent would close the Investigation and the proposal would
+    // read `succeeded`, with no retry card.
+    it('fails the run when alerts stay unclosed or the write failed unconfirmed', () => {
+      const unclosed = stepIn('resolve_unclosed');
+      const outcome = stepIn('resolve_close_outcome');
+      const failure = stepIn('emit_failure');
+      const incomplete = ({
+        read,
+        open = 0,
+        acknowledged = 0,
+        writeError = false,
+        hasAlerts = true,
+      }: {
+        read: boolean;
+        open?: number;
+        acknowledged?: number;
+        writeError?: boolean;
+        hasAlerts?: boolean;
+      }) => {
+        const resolved = { read, open, acknowledged };
+        const count = evaluate(String(unclosed?.with?.count), {
+          steps: { resolve_alerts_closed: { output: resolved } },
+        });
+        return evaluate(String(outcome?.with?.incomplete), {
+          steps: {
+            resolve_attack: { output: { has_alerts: hasAlerts } },
+            resolve_alerts_closed: { output: resolved },
+            resolve_unclosed: { output: { count } },
+            close_alerts: writeError ? { error: { message: 'boom' } } : {},
+          },
+        });
+      };
+
+      expect(incomplete({ read: true })).toBe(false);
+      expect(incomplete({ read: true, open: 1 })).toBe(true);
+      expect(incomplete({ read: true, acknowledged: 2 })).toBe(true);
+      // The write errored but the read-back shows nothing left: the close is confirmed.
+      expect(incomplete({ read: true, writeError: true })).toBe(false);
+      // Unread: only a failed write makes it a failure.
+      expect(incomplete({ read: false })).toBe(false);
+      expect(incomplete({ read: false, writeError: true })).toBe(true);
+      expect(incomplete({ read: true, open: 3, hasAlerts: false })).toBe(false);
+
+      expect(failure?.type).toBe('workflow.output');
+      expect((failure as { status?: string }).status).toBe('failed');
+      expect(failure?.if).toBe('${{ steps.resolve_close_outcome.output.incomplete == true }}');
+      expect(stepIn('emit_result')?.if).toBe(
+        '${{ steps.resolve_close_outcome.output.incomplete != true }}'
+      );
+      expect(JSON.stringify(failure?.with)).not.toContain('.error');
     });
 
     it('closes the attack before its alerts, then reads them back', () => {
