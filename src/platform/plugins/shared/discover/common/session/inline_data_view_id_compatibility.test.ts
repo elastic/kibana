@@ -10,61 +10,73 @@
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { generateInlineDataViewId } from './inline_data_view';
 import { getInlineDataViewIdentity } from './inline_data_view_references';
-import {
-  createInlineDataViewIdMap,
-  withOwnInlineDataViewId,
-} from './inline_data_view_id_compatibility';
+import { createInlineDataViewIdCompatibility } from './inline_data_view_id_compatibility';
 
 const inlineDataView: DataViewSpec = { title: 'logs-*', timeFieldName: '@timestamp' };
 const otherDataView: DataViewSpec = { title: 'metrics-*' };
 const inlineDataViewId = generateInlineDataViewId(inlineDataView);
 const otherDataViewId = generateInlineDataViewId(otherDataView);
+const identify = (index: DataViewSpec) => getInlineDataViewIdentity({ index });
 
-describe('createInlineDataViewIdMap', () => {
-  it('maps each previous ID that refers to a single spec', () => {
-    const idMap = createInlineDataViewIdMap([
-      getInlineDataViewIdentity({ index: { ...inlineDataView, id: 'first-id' } }),
-      getInlineDataViewIdentity({ index: { ...inlineDataView, id: 'second-id' } }),
-      getInlineDataViewIdentity({ index: inlineDataView }),
-      undefined,
-    ]);
+describe('createInlineDataViewIdCompatibility', () => {
+  describe('shared', () => {
+    it('maps each previous ID that refers to a single spec', () => {
+      const { shared } = createInlineDataViewIdCompatibility({
+        views: [
+          identify({ ...inlineDataView, id: 'first-id' }),
+          identify({ ...inlineDataView, id: 'second-id' }),
+          identify(inlineDataView),
+          undefined,
+        ],
+      });
 
-    expect(Object.fromEntries(idMap)).toEqual({
-      'first-id': inlineDataViewId,
-      'second-id': inlineDataViewId,
+      expect(Object.fromEntries(shared)).toEqual({
+        'first-id': inlineDataViewId,
+        'second-id': inlineDataViewId,
+      });
+    });
+
+    it('leaves out previous IDs that refer to different specs', () => {
+      const { shared } = createInlineDataViewIdCompatibility({
+        views: [
+          identify({ ...inlineDataView, id: 'shared-id' }),
+          identify({ ...otherDataView, id: 'shared-id' }),
+        ],
+      });
+
+      expect(shared.size).toBe(0);
+    });
+
+    it('treats a derived ID used by another spec as ambiguous', () => {
+      const { shared } = createInlineDataViewIdCompatibility({
+        views: [
+          identify({ ...inlineDataView, id: inlineDataViewId }),
+          identify({ ...otherDataView, id: inlineDataViewId }),
+        ],
+      });
+
+      expect(shared.has(inlineDataViewId)).toBe(false);
     });
   });
 
-  it('leaves out previous IDs that refer to different specs', () => {
-    const idMap = createInlineDataViewIdMap([
-      getInlineDataViewIdentity({ index: { ...inlineDataView, id: 'shared-id' } }),
-      getInlineDataViewIdentity({ index: { ...otherDataView, id: 'shared-id' } }),
-    ]);
+  describe('forView', () => {
+    it('adds the own previous ID even when it is ambiguous elsewhere', () => {
+      const identity = identify({ ...otherDataView, id: 'shared-id' });
+      const { forView } = createInlineDataViewIdCompatibility({
+        views: [identify({ ...inlineDataView, id: 'shared-id' }), identity],
+      });
 
-    expect(idMap.size).toBe(0);
+      expect(forView(identity).get('shared-id')).toBe(otherDataViewId);
+    });
+
+    it('returns the shared map when the view has no previous ID', () => {
+      const { shared, forView } = createInlineDataViewIdCompatibility({
+        views: [identify({ ...otherDataView, id: 'legacy-id' })],
+      });
+
+      expect(forView(identify(inlineDataView))).toBe(shared);
+      expect(forView(undefined)).toBe(shared);
+    });
   });
 
-  it('treats a derived ID used by another spec as ambiguous', () => {
-    const idMap = createInlineDataViewIdMap([
-      getInlineDataViewIdentity({ index: { ...inlineDataView, id: inlineDataViewId } }),
-      getInlineDataViewIdentity({ index: { ...otherDataView, id: inlineDataViewId } }),
-    ]);
-
-    expect(idMap.has(inlineDataViewId)).toBe(false);
-  });
-});
-
-describe('withOwnInlineDataViewId', () => {
-  it('adds the own previous ID even when it is ambiguous elsewhere', () => {
-    const identity = getInlineDataViewIdentity({ index: { ...otherDataView, id: 'shared-id' } });
-
-    expect(withOwnInlineDataViewId(identity, new Map()).get('shared-id')).toBe(otherDataViewId);
-  });
-
-  it('returns the same map when the representation has no previous ID', () => {
-    const idMap = new Map([['legacy-id', inlineDataViewId]]);
-    const identity = getInlineDataViewIdentity({ index: inlineDataView });
-
-    expect(withOwnInlineDataViewId(identity, idMap)).toBe(idMap);
-  });
 });

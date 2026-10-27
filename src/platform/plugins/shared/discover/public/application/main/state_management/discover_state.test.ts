@@ -637,6 +637,26 @@ describe('Discover state', () => {
       expectLoadedFilters(services, apiDataViewId);
     });
 
+    it('opens an HTTP session URL created before its inline view lost the stored ID', async () => {
+      const services = createServices([
+        '/#?_tab=(tabId:inline-tab)&_a=(dataSource:(dataViewId:stored-inline-id,type:dataView))',
+      ]);
+      const state = createState(services);
+
+      await state.initializeTabs({
+        persistedDiscoverSession: fromDiscoverSessionApiResponse(cloneDeep(response)),
+      });
+      const tabId = state.getCurrentTab().id;
+      expect(state.stateStorageContainer.get(APP_STATE_URL_KEY)).toEqual({
+        dataSource: createDataViewDataSource({ dataViewId: apiDataViewId }),
+      });
+
+      await state.initializeSingleTab({ tabId });
+
+      expect(getCurrentDataViewId(state, tabId)).toBe(apiDataViewId);
+      expectLoadedFilters(services, apiDataViewId);
+    });
+
     it('keeps a CM session clean when stored filters omit their boolean defaults', async () => {
       const services = createServices();
       const storedSession = cloneDeep(legacySession);

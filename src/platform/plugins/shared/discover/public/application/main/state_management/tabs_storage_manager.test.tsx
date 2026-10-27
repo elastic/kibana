@@ -527,7 +527,9 @@ describe('TabsStorageManager', () => {
       ...inlineSpec,
       id: inlineId,
     });
-    expect(loadedProps.inlineDataViewIds.dataViewIdMap.get('legacy-id')).toBe(inlineId);
+    expect(loadedProps.inlineDataViewIds.loadCompatibility.ids.shared.get('legacy-id')).toBe(
+      inlineId
+    );
     expect(loadedProps.allTabs).toHaveLength(1);
     expect(loadedProps.selectedTabId).toBe(loadedProps.allTabs[0].id);
   });

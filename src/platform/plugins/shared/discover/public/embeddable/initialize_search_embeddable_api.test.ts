@@ -107,10 +107,34 @@ describe('initializeSearchEmbeddableApi inline views', () => {
     expect(first.api.filters$.getValue()).toStrictEqual([
       createFilter(inlineId),
       foreignFilter,
-      pinnedFilter,
+      { ...createFilter(inlineId), $state: { store: FilterStateStore.GLOBAL_STATE } },
     ]);
     expect(session).toStrictEqual(originalSession);
     expect(clearInstanceCache).not.toHaveBeenCalled();
+  });
+
+  it('remaps parent filters that reference the panel view by its previous ID', async () => {
+    const { initialize } = setup();
+    const embeddable = await initialize({
+      serializedSearchSource: { index: { ...inlineSpec, id: 'legacy-id' } },
+    });
+    const { remapParentFilters } = embeddable.internalApi;
+
+    expect(remapParentFilters(undefined)).toBeUndefined();
+    expect(remapParentFilters([createFilter('legacy-id'), foreignFilter])).toStrictEqual([
+      createFilter(inlineId),
+      foreignFilter,
+    ]);
+
+    const otherSpec = { ...inlineSpec, title: 'other-logs-*', id: 'other-legacy-id' };
+    await embeddable.reinitializeState({ serializedSearchSource: { index: otherSpec } });
+
+    expect(remapParentFilters([createFilter('legacy-id')])).toStrictEqual([
+      createFilter('legacy-id'),
+    ]);
+    expect(remapParentFilters([createFilter('other-legacy-id')])).toStrictEqual([
+      createFilter(generateInlineDataViewId(otherSpec)),
+    ]);
   });
 
   it('normalizes a tab switch and restores the original instance from a snapshot', async () => {

@@ -19,10 +19,13 @@ import {
   getInlineDataView,
   type InlineDataViewIdentity,
 } from './inline_data_view';
-import { withOwnInlineDataViewId, type DataViewIdMap } from './inline_data_view_id_compatibility';
+import type {
+  DataViewIdMap,
+  InlineDataViewIdCompatibility,
+} from './inline_data_view_id_compatibility';
 
 export interface InlineDataViewReferenceContext {
-  sharedIdMap: DataViewIdMap;
+  idCompatibility: InlineDataViewIdCompatibility;
   documentSearchSource?: SerializedSearchSourceFields;
 }
 
@@ -74,6 +77,12 @@ export const remapFilterDataViewIds = (
 
   return isUnchanged ? filters : translatedFilters;
 };
+
+/** Remaps filter references that are not owned by a specific inline view. */
+export const remapSharedFilterDataViewIds = (
+  filters: Filter[],
+  { shared }: InlineDataViewIdCompatibility
+): Filter[] => remapFilterDataViewIds(filters, shared);
 
 /** Binds unreferenced app filters recursively, inheriting group references and skipping pinned trees. */
 export const bindUnreferencedAppFilters = (filters: Filter[], dataViewId: string): Filter[] => {
@@ -184,15 +193,14 @@ export const normalizeInlineAppState = <T extends DataViewReferenceState>(
   {
     searchSource,
     documentSearchSource,
-    sharedIdMap,
+    idCompatibility,
   }: InlineDataViewReferenceContext & {
     searchSource: SerializedSearchSourceFields | undefined;
   }
 ): T => {
   const identity = getInlineDataViewIdentity(searchSource);
   const documentIdentity = getImplicitDocumentIdentity(documentSearchSource);
-  const ownIdMap = withOwnInlineDataViewId(identity, sharedIdMap);
-  const normalized = remapDataViewReferences(state, ownIdMap);
+  const normalized = remapDataViewReferences(state, idCompatibility.forView(identity));
   const { dataSource } = normalized;
   if (dataSource !== undefined && !isDataViewSource(dataSource)) {
     return normalized;
@@ -213,21 +221,21 @@ export const normalizeInlineAppState = <T extends DataViewReferenceState>(
   return filters === normalized.filters ? normalized : { ...normalized, filters };
 };
 
-/** Normalizes an inline definition and its own filters, using shared reference context when supplied. */
+/** Normalizes an inline definition and its own filters with the maps of its load. */
 export const normalizeInlineSearchSource = (
   searchSource: SerializedSearchSourceFields,
-  // Without shared context, remap this source's own filters and leave shared references alone.
-  { sharedIdMap, documentSearchSource }: InlineDataViewReferenceContext = {
-    sharedIdMap: new Map(),
-  }
+  { idCompatibility, documentSearchSource }: InlineDataViewReferenceContext
 ): SerializedSearchSourceFields => {
   const identity = getInlineDataViewIdentity(searchSource);
   const documentIdentity = getImplicitDocumentIdentity(documentSearchSource);
-  const ownIdMap = withOwnInlineDataViewId(identity, sharedIdMap);
   const normalized = { ...searchSource };
 
   if (normalized.filter) {
-    normalized.filter = remapFilterDataViewIds(normalized.filter, ownIdMap, sharedIdMap);
+    normalized.filter = remapFilterDataViewIds(
+      normalized.filter,
+      idCompatibility.forView(identity),
+      idCompatibility.shared
+    );
     normalized.filter = bindInlineAppFilters({
       filters: normalized.filter,
       identity,

@@ -478,7 +478,9 @@ export const initializeTabs = createInternalStateAsyncThunk(
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
-    const savedDataViewIds = getState().savedDataViews.map(({ id }) => id);
+    const savedDataViewIds = loadDataViewList.rejected.match(dataViewListResult)
+      ? undefined
+      : getState().savedDataViews.map(({ id }) => id);
     const { inlineDataViewIds, outdatedSelectedTab, hasNewSavedVersion, ...initialTabsState } =
       tabsStorageManager.loadLocally({
         userId,

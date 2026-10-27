@@ -14,9 +14,20 @@ export type DataViewIdMap = ReadonlyMap<string, string>;
 // Load-time compatibility for stored IDs, separate from deriving identity and binding API filters.
 // The caller supplies visible definitions; no aliases are retained beyond this load.
 
-/** Maps previous inline IDs to derived IDs, leaving out IDs that refer to more than one spec. */
-export const createInlineDataViewIdMap = (
-  identities: Array<InlineDataViewIdentity | undefined>
+export interface InlineDataViewIdCompatibilityOptions {
+  /** Every inline definition visible during this load. */
+  views: ReadonlyArray<InlineDataViewIdentity | undefined>;
+}
+
+export interface InlineDataViewIdCompatibility {
+  /** Translates references not owned by a view; IDs that refer to more than one spec are left out. */
+  shared: DataViewIdMap;
+  /** Translates references owned by a view, whose own previous ID always refers to its spec. */
+  forView: (identity: InlineDataViewIdentity | undefined) => DataViewIdMap;
+}
+
+const createSharedIdMap = (
+  identities: ReadonlyArray<InlineDataViewIdentity | undefined>
 ): DataViewIdMap => {
   const targetIdsById = new Map<string, Set<string>>();
   for (const identity of identities) {
@@ -41,15 +52,23 @@ export const createInlineDataViewIdMap = (
   return dataViewIdMap;
 };
 
-/** Adds the previous ID of a representation, which always refers to its own spec. */
-export const withOwnInlineDataViewId = (
-  identity: InlineDataViewIdentity | undefined,
-  dataViewIdMap: DataViewIdMap
-): DataViewIdMap => {
-  const previousId = identity?.dataView.id;
-  if (!identity || previousId === undefined || previousId === identity.id) {
-    return dataViewIdMap;
-  }
+const withEntry = (idMap: DataViewIdMap, [previousId, id]: [string, string]): DataViewIdMap =>
+  new Map([...idMap, [previousId, id]]);
 
-  return new Map([...dataViewIdMap, [previousId, identity.id]]);
+/** Resolves which derived ID each previous inline ID refers to, for every consumer of a load. */
+export const createInlineDataViewIdCompatibility = ({
+  views,
+}: InlineDataViewIdCompatibilityOptions): InlineDataViewIdCompatibility => {
+  const shared = createSharedIdMap(views);
+
+  const forView = (identity: InlineDataViewIdentity | undefined): DataViewIdMap => {
+    const previousId = identity?.dataView.id;
+    if (!identity || previousId === undefined || previousId === identity.id) {
+      return shared;
+    }
+
+    return withEntry(shared, [previousId, identity.id]);
+  };
+
+  return { shared, forView };
 };

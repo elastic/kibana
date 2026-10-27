@@ -89,7 +89,8 @@ interface LoadTabsOptions {
   shouldClearAllTabs?: boolean;
   defaultTab?: DiscoverSessionTab;
   navigationDataViewSpec?: DataViewSpec;
-  savedDataViewIds: readonly string[];
+  /** Undefined when the saved list could not be loaded. */
+  savedDataViewIds: readonly string[] | undefined;
 }
 
 interface LoadedTabs extends TabsInternalStatePayload {

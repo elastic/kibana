@@ -42,6 +42,7 @@ export const applyInlineDataViewLoadState: InternalStateThunkActionCreator<
     );
     const urlGlobalState =
       urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY) ?? undefined;
+    const adHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
     const prepared = prepareInlineDataViewLoadState({
       normalized,
       selectedTab,
@@ -65,7 +66,6 @@ export const applyInlineDataViewLoadState: InternalStateThunkActionCreator<
     await Promise.all(urlUpdates);
 
     if (prepared.dataViewIdsToRemove.length) {
-      const adHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
       const remainingAdHocDataViews = adHocDataViews.filter(
         ({ id }) => id === undefined || !prepared.dataViewIdsToRemove.includes(id)
       );
