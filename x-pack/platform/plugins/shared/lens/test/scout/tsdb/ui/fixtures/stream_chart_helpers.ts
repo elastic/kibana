@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { TsdbScenarioContext } from './tsdb_helpers';
+import type { TsdbScenarioContext, TsdbScenarioTimeRange } from './tsdb_helpers';
+import { offsetPickerTime } from './tsdb_helpers';
+
+export interface StreamChartBar {
+  x: number;
+  y: number;
+}
 
 export const getIncompatibleAverageCount = async ({
   page,
@@ -31,16 +37,23 @@ export const getIncompatibleAverageCount = async ({
   return count;
 };
 
-export const getCountBars = async ({
-  pageObjects,
-}: Pick<TsdbScenarioContext, 'pageObjects'>): Promise<Array<{ y: number }>> => {
+export const getCountBars = async (
+  { pageObjects }: Pick<TsdbScenarioContext, 'pageObjects'>,
+  timeRange: TsdbScenarioTimeRange
+): Promise<StreamChartBar[]> => {
   await pageObjects.lens.workspace.openFullEditor();
+  await pageObjects.datePicker.setAbsoluteRange({
+    from: offsetPickerTime(timeRange.picker.from, 0),
+    to: offsetPickerTime(timeRange.picker.to, 0),
+  });
   await pageObjects.lens.configureDimension({
     dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
     operation: 'date_histogram',
     field: '@timestamp',
     keepOpen: true,
   });
+
+  await pageObjects.lens.dimensions.setDateHistogramInterval('Hour');
 
   // Bar charts disable empty rows by default. Keep empty buckets so the first and last bars cover
   // the complete range before and after the stream rollover.
@@ -57,19 +70,26 @@ export const getCountBars = async ({
   return chartData.bars?.[0]?.bars ?? [];
 };
 
-export const getUpgradeBoundarySeries = async ({
-  pageObjects,
-}: Pick<TsdbScenarioContext, 'pageObjects'>): Promise<{
-  counterBars: Array<{ y: number }>;
-  countBars: Array<{ y: number }>;
+export const getUpgradeBoundarySeries = async (
+  { pageObjects }: Pick<TsdbScenarioContext, 'pageObjects'>,
+  timeRange: TsdbScenarioTimeRange
+): Promise<{
+  counterBars: StreamChartBar[];
+  countBars: StreamChartBar[];
 }> => {
   await pageObjects.lens.workspace.openFullEditor();
+  await pageObjects.datePicker.setAbsoluteRange({
+    from: offsetPickerTime(timeRange.picker.from, 0),
+    to: offsetPickerTime(timeRange.picker.to, 0),
+  });
   await pageObjects.lens.configureDimension({
     dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
     operation: 'date_histogram',
     field: '@timestamp',
     keepOpen: true,
   });
+
+  await pageObjects.lens.dimensions.setDateHistogramInterval('Hour');
 
   // Bar charts disable empty rows by default. Keep empty buckets so the first and last bars
   // cover the complete range before and after the stream rollover.
