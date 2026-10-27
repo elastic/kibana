@@ -334,7 +334,6 @@ describe('ExecutionHistoryPage', () => {
             {
               id: 'exec-1',
               rule: { id: 'rule-1' },
-              space_id: 'default',
               started_at: '2026-05-05T10:00:00.000Z',
               ended_at: '2026-05-05T10:00:01.000Z',
               timings: { duration_ms: 1000, scheduled_delay_ms: 0 },

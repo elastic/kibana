@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { AccessControlClient } from './access_control_client';
 
 const createMockHttp = () => ({
@@ -79,4 +80,13 @@ describe('AccessControlClient', () => {
       expect(result).toBe(false);
     });
   });
+});
+
+test('encodes the content type used for global privilege checks', async () => {
+  const http = httpServiceMock.createStartContract();
+  const client = new AccessControlClient({ http });
+  await client.checkGlobalPrivilege('../a?b#c%/café');
+  expect(http.get).toHaveBeenCalledWith(
+    '/internal/access_control/global_access/..%2Fa%3Fb%23c%25%2Fcaf%C3%A9'
+  );
 });

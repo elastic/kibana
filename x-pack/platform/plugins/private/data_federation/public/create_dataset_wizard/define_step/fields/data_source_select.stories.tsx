@@ -48,6 +48,8 @@ const meta: Meta<typeof DataSourceSelect> = {
     onChange: action('onChange'),
     onBlur: action('onBlur'),
     loadDataSources: async () => {},
+    createdDataSourceNames: [],
+    onDataSourceCreated: action('onDataSourceCreated'),
   },
   render: function Render(args) {
     const [, updateArgs] = useArgs<DataSourceSelectProps>();
@@ -55,7 +57,13 @@ const meta: Meta<typeof DataSourceSelect> = {
       args.onChange(value);
       updateArgs({ value });
     };
-    return <DataSourceSelect {...args} onChange={onChange} />;
+    const onDataSourceCreated = (name: string) => {
+      args.onDataSourceCreated(name);
+      updateArgs({ createdDataSourceNames: [...args.createdDataSourceNames, name] });
+    };
+    return (
+      <DataSourceSelect {...args} onChange={onChange} onDataSourceCreated={onDataSourceCreated} />
+    );
   },
 };
 
@@ -66,6 +74,10 @@ export const Empty: Story = {};
 
 export const Selected: Story = {
   args: { value: 'logs-s3' },
+};
+
+export const SelectedCreatedInWizard: Story = {
+  args: { value: 'logs-s3', createdDataSourceNames: ['logs-s3'] },
 };
 
 export const Invalid: Story = {

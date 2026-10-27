@@ -46,12 +46,9 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
   metadata: {
     id: '.google_cloud_storage',
     displayName: 'Google Cloud Storage',
-    description: i18n.translate(
-      'core.kibanaConnectorSpecs.googleCloudStorage.metadata.description',
-      {
-        defaultMessage: 'Search and access files in Google Cloud Storage buckets',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.googleCloudStorage.metadata.description', {
+      defaultMessage: 'Search and access files in Google Cloud Storage buckets',
+    }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
@@ -245,7 +242,7 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.googleCloudStorage.test.description', {
+    description: i18n.translate('connectorSpecs.googleCloudStorage.test.description', {
       defaultMessage: 'Verifies Google Cloud Storage connection by calling the GCS API',
     }),
     handler: async (ctx) => {

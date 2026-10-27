@@ -99,11 +99,7 @@ export const prBaseSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/test/pick_test_group_run_order.sh',
     label: 'Pick Test Group Run Order',
     key: 'pick_test_group_run_order',
-    agents: {
-      provider: 'k8s',
-      image: 'docker.elastic.co/ci-agent-images/kibana/ci-minimal',
-      imageUID: 1000,
-    },
+    agents: { ...onDemandAgent('n2-standard-2'), image: minimalImage },
     timeout_in_minutes: 15,
     env: {
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh',
@@ -112,31 +108,6 @@ export const prBaseSteps = (): readonly Step[] => [
       FTR_CONFIGS_DEPS: 'build',
       FTR_TEST_CHANNELS: 'ci-on-commit',
     },
-    plugins: [
-      {
-        'sparse-checkout#v1.6.0': {
-          no_cone: true,
-          paths: [
-            '/.buildkite/',
-            '/.nvmrc',
-            '/package.json',
-            '/tsconfig.base.json',
-            '/versions.json',
-            '/kibana.jsonc',
-            '**/kibana.jsonc',
-            '**/tsconfig.json',
-            '**/jest.config.js',
-            '**/jest.integration.config.js',
-            '**/*.test.js',
-            '**/*.test.mjs',
-            '**/*.test.ts',
-            '**/*.test.tsx',
-          ],
-          cleanup_sparse_state: true,
-          post_checkout: { unshallow: true },
-        },
-      },
-    ],
     retry: retry.anyOnce,
   }),
   commandStep({

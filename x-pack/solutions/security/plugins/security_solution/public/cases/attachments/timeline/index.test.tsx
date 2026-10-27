@@ -50,6 +50,12 @@ describe('Timeline attachment', () => {
     expect(attachmentType.getLabel()).toBe(TIMELINE_DISPLAY_NAME);
   });
 
+  it('labels a count of timelines', () => {
+    const attachmentType = getTimelineAttachment();
+    expect(attachmentType.getCountLabel?.({ count: 1 })).toBe('1 timeline');
+    expect(attachmentType.getCountLabel?.({ count: 3 })).toBe('3 timelines');
+  });
+
   it('renders the timeline link with title and id', async () => {
     const attachmentType = getTimelineAttachment();
     const creationActivity = attachmentType.getCreationActivity(baseProps);

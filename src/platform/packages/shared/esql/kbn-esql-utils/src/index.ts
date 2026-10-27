@@ -85,12 +85,14 @@ export {
   getStartEndParams,
   hasStartEndParams,
   getNamedParams,
+  getEsqlSearchParams,
 } from './utils/run_query';
 export {
   isESQLColumnSortable,
   isESQLColumnGroupable,
   isESQLFieldGroupable,
 } from './utils/esql_fields_utils';
+export { getEsqlInspectorStats } from './utils/get_esql_inspector_stats';
 export { sanitazeESQLInput } from './utils/sanitaze_input';
 export { escapeEsqlColumnName } from '@kbn/esql-language';
 export { replaceESQLQueryIndexPattern } from './utils/replace_index_pattern';

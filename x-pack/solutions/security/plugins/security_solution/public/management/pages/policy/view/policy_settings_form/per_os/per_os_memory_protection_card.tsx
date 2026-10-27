@@ -37,10 +37,10 @@ import { PerOsProtectionMasterToggle } from './per_os_protection_master_toggle';
 import type { PerOsProtectionModeChangeSideEffectOptions } from './use_protection_mode_change_handler';
 import { useProtectionModeChangeHandler } from './use_protection_mode_change_handler';
 
-export const LOCKED_CARD_MEMORY_TITLE = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.details.memory',
+export const MEMORY_PROTECTION_CARD_TITLE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.memory_protection',
   {
-    defaultMessage: 'Memory Threat',
+    defaultMessage: 'Memory threat',
   }
 );
 
@@ -108,15 +108,16 @@ export const PerOsMemoryProtectionCard = memo(
 
     if (!isPlatinumPlus) {
       return (
-        <SettingLockedCard title={LOCKED_CARD_MEMORY_TITLE} data-test-subj={getTestId('locked')} />
+        <SettingLockedCard
+          title={MEMORY_PROTECTION_CARD_TITLE}
+          data-test-subj={getTestId('locked')}
+        />
       );
     }
 
     return (
       <PerOsSettingCard
-        title={i18n.translate('xpack.securitySolution.endpoint.policy.details.memory_protection', {
-          defaultMessage: 'Memory threat',
-        })}
+        title={MEMORY_PROTECTION_CARD_TITLE}
         description={POLICY_SETTING_SECTION_DESCRIPTIONS.memoryThreat}
         dataTestSubj={getTestId()}
         selected={selected}

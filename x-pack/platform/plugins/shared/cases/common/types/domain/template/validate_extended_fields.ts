@@ -98,15 +98,24 @@ const validateCheckboxGroupOptions = (
   options: string[],
   errors: string[]
 ): void => {
+  const notAnArrayError = `Field "${label}" must be a JSON array of strings, e.g. ["option1","option2"]`;
+
+  let selected: unknown;
   try {
-    const selected: unknown = JSON.parse(value);
-    if (!Array.isArray(selected)) return;
-    const invalid = (selected as unknown[]).filter((v) => !options.includes(String(v)));
-    if (invalid.length > 0) {
-      errors.push(`Field "${label}" contains invalid options: ${invalid.join(', ')}`);
-    }
+    selected = JSON.parse(value);
   } catch {
-    // malformed JSON — skip silently
+    errors.push(notAnArrayError);
+    return;
+  }
+
+  if (!Array.isArray(selected) || selected.some((item) => typeof item !== 'string')) {
+    errors.push(notAnArrayError);
+    return;
+  }
+
+  const invalid = selected.filter((item: string) => !options.includes(item));
+  if (invalid.length > 0) {
+    errors.push(`Field "${label}" contains invalid options: ${invalid.join(', ')}`);
   }
 };
 

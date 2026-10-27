@@ -27,6 +27,7 @@ import {
   processK8sUsernames,
   unflatten,
   processDetectionRuleCustomizations,
+  buildSanitizedInfluencers,
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
@@ -1216,5 +1217,58 @@ describe('processDetectionRuleCustomizations', () => {
       customized_fields: ['query', 'tags'],
       num_functional_fields: 1,
     });
+  });
+});
+
+describe('buildSanitizedInfluencers', () => {
+  const allowlist = { 'process.name': true, 'event.module': true };
+
+  it('returns undefined when influencers is missing', () => {
+    expect(buildSanitizedInfluencers(undefined, allowlist)).toBeUndefined();
+  });
+
+  it('returns undefined when influencers is not an array', () => {
+    expect(buildSanitizedInfluencers('not-an-array', allowlist)).toBeUndefined();
+  });
+
+  it('returns undefined when influencers is an empty array', () => {
+    expect(buildSanitizedInfluencers([], allowlist)).toBeUndefined();
+  });
+
+  it('keeps allowlisted entries with their values', () => {
+    const influencers = [
+      { influencer_field_name: 'process.name', influencer_field_values: ['bash', 'curl'] },
+    ];
+    expect(buildSanitizedInfluencers(influencers, allowlist)).toEqual([
+      { influencer_field_name: 'process.name', influencer_field_values: ['bash', 'curl'] },
+    ]);
+  });
+
+  it('drops non-allowlisted entries entirely', () => {
+    const influencers = [
+      { influencer_field_name: 'user.name', influencer_field_values: ['jsmith'] },
+      { influencer_field_name: 'host.name', influencer_field_values: ['web01', 'web02'] },
+    ];
+    expect(buildSanitizedInfluencers(influencers, allowlist)).toEqual([]);
+  });
+
+  it('keeps only the allowlisted entries from a mix', () => {
+    const influencers = [
+      { influencer_field_name: 'event.module', influencer_field_values: ['auditd'] },
+      { influencer_field_name: 'user.name', influencer_field_values: ['jsmith'] },
+    ];
+    expect(buildSanitizedInfluencers(influencers, allowlist)).toEqual([
+      { influencer_field_name: 'event.module', influencer_field_values: ['auditd'] },
+    ]);
+  });
+
+  it('drops array entries that are not valid influencer objects', () => {
+    const influencers = [
+      'bogus',
+      { influencer_field_name: 'process.name', influencer_field_values: ['bash'] },
+    ];
+    expect(buildSanitizedInfluencers(influencers, allowlist)).toEqual([
+      { influencer_field_name: 'process.name', influencer_field_values: ['bash'] },
+    ]);
   });
 });
