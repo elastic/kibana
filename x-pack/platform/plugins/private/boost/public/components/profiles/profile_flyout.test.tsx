@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
@@ -28,7 +28,8 @@ const savedProfile: BoostProfile = {
   pinned: false,
 };
 
-const mutation = { mutate: jest.fn(), isLoading: false };
+const createMutation = { mutate: jest.fn(), isLoading: false };
+const updateMutation = { mutate: jest.fn(), isLoading: false };
 
 // A rule applies the saved profile to one index.
 const createState = (patterns: string[]): BoostState => ({
@@ -51,8 +52,8 @@ let mockState = createState(['catalog-*']);
 
 jest.mock('../../hooks/use_boost_state', () => ({
   useBoostState: () => ({ data: mockState }),
-  useCreateProfile: () => mutation,
-  useUpdateProfile: () => mutation,
+  useCreateProfile: () => createMutation,
+  useUpdateProfile: () => updateMutation,
 }));
 
 jest.mock('../../hooks/use_boost_services', () => ({
@@ -126,5 +127,94 @@ describe('ProfileFlyout options', () => {
 
     expect(getOption('pinned')).not.toBeChecked();
     expect(getOption('pinned')).toBeDisabled();
+  });
+});
+
+describe('ProfileFlyout saving changes', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockState = createState(['catalog-*']);
+  });
+
+  const changeMaxBoost = async () => {
+    const input = screen.getByTestId('indicesMaxBoost');
+    await userEvent.clear(input);
+    await userEvent.type(input, '6');
+  };
+
+  it('confirms changes to a profile that applies to something, listing what and through which rule', async () => {
+    renderFlyout(savedProfile);
+    await changeMaxBoost();
+    await userEvent.click(screen.getByTestId('boostProfileSave'));
+
+    const modal = screen.getByTestId('boostProfileChangesModal');
+    expect(modal).toHaveTextContent(
+      'Update boost profile "catalog-search"?This profile applies to 1 index, which these changes apply to as well.'
+    );
+    const [, row] = within(modal).getAllByRole('row');
+    expect(row).toHaveTextContent('catalog-fallcatalogs');
+    expect(updateMutation.mutate).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByTestId('boostProfileConfirmSave'));
+    expect(updateMutation.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'catalog-search', max_boost: 6 }),
+      expect.anything()
+    );
+    expect(createMutation.mutate).not.toHaveBeenCalled();
+  });
+
+  it('saves the changes as a new profile instead, under a name no other profile has', async () => {
+    renderFlyout(savedProfile);
+    await changeMaxBoost();
+    await userEvent.click(screen.getByTestId('boostProfileSave'));
+    await userEvent.click(screen.getByTestId('boostProfileSaveAsNew'));
+
+    const name = screen.getByTestId('boostProfileNewName');
+    expect(name).toHaveValue('catalog-search-copy');
+    expect(name).toHaveFocus();
+    await userEvent.clear(name);
+    await userEvent.type(name, 'catalog-search');
+    await userEvent.click(screen.getByTestId('boostProfileSaveAsNewConfirm'));
+    expect(screen.getByTestId('boostProfileChangesModal')).toHaveTextContent(
+      'A boost profile with this name already exists.'
+    );
+    expect(createMutation.mutate).not.toHaveBeenCalled();
+
+    await userEvent.clear(name);
+    await userEvent.type(name, 'catalog-search-fast{Enter}');
+    expect(createMutation.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'catalog-search-fast', max_boost: 6 }),
+      expect.anything()
+    );
+    expect(updateMutation.mutate).not.toHaveBeenCalled();
+  });
+
+  it('goes back from naming a new profile, and cancels without saving', async () => {
+    renderFlyout(savedProfile);
+    await changeMaxBoost();
+    await userEvent.click(screen.getByTestId('boostProfileSave'));
+    await userEvent.click(screen.getByTestId('boostProfileSaveAsNew'));
+    await userEvent.click(screen.getByTestId('boostProfileChangesBack'));
+    expect(screen.getByTestId('boostProfileConfirmSave')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('boostProfileChangesCancel'));
+    expect(screen.queryByTestId('boostProfileChangesModal')).not.toBeInTheDocument();
+    expect(updateMutation.mutate).not.toHaveBeenCalled();
+    expect(createMutation.mutate).not.toHaveBeenCalled();
+  });
+
+  it('saves without asking when nothing changed, or when the profile applies to nothing', async () => {
+    const { unmount } = renderFlyout(savedProfile);
+    await userEvent.click(screen.getByTestId('boostProfileSave'));
+    expect(screen.queryByTestId('boostProfileChangesModal')).not.toBeInTheDocument();
+    expect(updateMutation.mutate).toHaveBeenCalledTimes(1);
+    unmount();
+
+    mockState = createState(['nothing-*']);
+    renderFlyout(savedProfile);
+    await changeMaxBoost();
+    await userEvent.click(screen.getByTestId('boostProfileSave'));
+    expect(screen.queryByTestId('boostProfileChangesModal')).not.toBeInTheDocument();
+    expect(updateMutation.mutate).toHaveBeenCalledTimes(2);
   });
 });

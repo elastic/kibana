@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -33,6 +33,7 @@ import { MAX_BOOST, MIN_BOOST } from '../../../common/constants';
 import type { BoostProfile, BoostProfileInput, BoostProfileType } from '../../../common/types';
 import type { CostImpact } from '../../../common/vcu_estimate';
 import { estimateProfileCost } from '../../../common/vcu_estimate';
+import { getAppliedRules } from '../../../common/resolution';
 import { BOOST_DOCS_URL } from '../../doc_links';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
@@ -53,7 +54,9 @@ import {
   getDraftProfile,
   hasDraftErrors,
 } from './profile_draft';
-import { PROFILE_NAME_ERROR_MESSAGES } from './profile_messages';
+import { PROFILE_NAME_ERROR_MESSAGES, PROFILE_NAME_HELP } from './profile_messages';
+import type { ProfileDataSource } from './profile_changes_modal';
+import { ProfileChangesModal } from './profile_changes_modal';
 import { getCopyName } from '../copy_name';
 import { CostEstimate } from '../cost_estimate';
 
@@ -205,6 +208,25 @@ export const ProfileFlyoutContent = ({
   const { mutate: createProfile, isLoading: isCreating } = useCreateProfile();
   const { mutate: updateProfile, isLoading: isUpdating } = useUpdateProfile();
   const isSaving = isCreating || isUpdating;
+  // Whether saving waits on confirming changes to a profile that applies to something.
+  const [isConfirming, setIsConfirming] = useState(false);
+
+  // What an edited profile applies to now, through the rule that applies it to each, which saving
+  // changes over it would change too.
+  const appliedTo = useMemo<ProfileDataSource[]>(() => {
+    if (!profile || !state) {
+      return [];
+    }
+    const appliedRules = getAppliedRules(state.data_sources, state.rules, state.profiles);
+    return state.data_sources
+      .flatMap(({ name, hidden }) => {
+        const rule = appliedRules.get(name);
+        return rule?.boost_profile === profile.name
+          ? [{ name, isHidden: hidden, ruleName: rule.name }]
+          : [];
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [profile, state]);
 
   const errors = getDraftErrors(draft, isEditing ? [] : takenNames);
   const visibleErrors = showErrors ? errors : {};
@@ -217,12 +239,7 @@ export const ProfileFlyoutContent = ({
       dataStreams: { ...dataStreams, [period]: { ...dataStreams[period], ...changes } },
     });
 
-  const onSave = (createRule: boolean) => {
-    if (hasDraftErrors(errors)) {
-      setShowErrors(true);
-      return;
-    }
-
+  const saveDraft = (createRule = false) => {
     const save = isEditing ? updateProfile : createProfile;
     save(draftToProfileInput(draft), {
       onSuccess: () => {
@@ -243,6 +260,44 @@ export const ProfileFlyoutContent = ({
       },
     });
   };
+
+  const onSave = (createRule: boolean) => {
+    if (hasDraftErrors(errors)) {
+      setShowErrors(true);
+      return;
+    }
+    // Changes to a profile that applies to something are confirmed first, with the choice to save
+    // them as a new profile instead.
+    const hasChanges =
+      profile !== undefined &&
+      JSON.stringify(draftToProfileInput(draft)) !==
+        JSON.stringify(draftToProfileInput(draftFromProfile(profile)));
+    if (hasChanges && appliedTo.length > 0) {
+      setIsConfirming(true);
+      return;
+    }
+    saveDraft(createRule);
+  };
+
+  // The changes go into a new profile, which nothing uses yet, and the edited one stays as it was.
+  const saveAsNew = (name: string) =>
+    createProfile(
+      { ...draftToProfileInput(draft), name },
+      {
+        onSuccess: () => {
+          notifications.toasts.addSuccess({
+            title: i18n.translate('xpack.boost.profileForm.savedToast', {
+              defaultMessage: 'Saved boost profile "{name}"',
+              values: { name },
+            }),
+            text: i18n.translate('xpack.boost.profileForm.savedAsNewToastText', {
+              defaultMessage: 'No boost rules use it yet.',
+            }),
+          });
+          onClose();
+        },
+      }
+    );
 
   const nameError = visibleErrors.name && PROFILE_NAME_ERROR_MESSAGES[visibleErrors.name];
 
@@ -320,9 +375,7 @@ export const ProfileFlyoutContent = ({
               label={i18n.translate('xpack.boost.profileForm.nameLabel', {
                 defaultMessage: 'Name',
               })}
-              helpText={i18n.translate('xpack.boost.profileForm.nameHelp', {
-                defaultMessage: 'Lowercase letters, numbers, hyphens, and underscores.',
-              })}
+              helpText={PROFILE_NAME_HELP}
               isInvalid={Boolean(nameError)}
               error={nameError}
               fullWidth
@@ -630,6 +683,19 @@ export const ProfileFlyoutContent = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
+
+      {isConfirming && profile && (
+        <ProfileChangesModal
+          profileName={profile.name}
+          type={profile.type}
+          affected={appliedTo}
+          takenNames={takenNames}
+          savingAs={isUpdating ? 'overwrite' : isCreating ? 'new' : undefined}
+          onOverwrite={() => saveDraft()}
+          onSaveAsNew={saveAsNew}
+          onCancel={() => setIsConfirming(false)}
+        />
+      )}
     </>
   );
 };

@@ -10,6 +10,10 @@ import { MAX_BOOST, MIN_BOOST } from '../../../common/constants';
 import type { BoostRangeError, MaxAgeError, ProfileNameError } from '../../../common/validation';
 import { MAX_AGE_MAX_DAYS, PROFILE_NAME_MAX_LENGTH } from '../../../common/validation';
 
+export const PROFILE_NAME_HELP = i18n.translate('xpack.boost.profileForm.nameHelp', {
+  defaultMessage: 'Lowercase letters, numbers, hyphens, and underscores.',
+});
+
 export const PROFILE_NAME_ERROR_MESSAGES: Readonly<Record<ProfileNameError, string>> = {
   required: i18n.translate('xpack.boost.profileForm.nameRequired', {
     defaultMessage: 'Enter a name.',
