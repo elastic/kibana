@@ -21,9 +21,6 @@ import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQuery } from '@kbn/react-query';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { getUserDisplayName } from '@kbn/user-profile-components';
 import type { WorkflowExecutionListDto } from '@kbn/workflows';
 import {
   type ExecutedByFilterOption,
@@ -53,39 +50,6 @@ export interface WorkflowExecutionListProps {
 // TODO: use custom table? add pagination and search
 
 const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSize: 'm' };
-const USER_PROFILES_STALE_TIME = 60 * 1000;
-const EMPTY_EXECUTED_BY_USER_PROFILES = new Map<string, UserProfileWithAvatar>();
-
-const profilesToMap = (profiles: UserProfileWithAvatar[]): Map<string, UserProfileWithAvatar> =>
-  profiles.reduce<Map<string, UserProfileWithAvatar>>((acc, profile) => {
-    acc.set(profile.uid, profile);
-    return acc;
-  }, new Map<string, UserProfileWithAvatar>());
-
-const getExecutedByLabel = (
-  profile?: UserProfileWithAvatar,
-  fallbackLabel?: string
-): string | undefined => {
-  if (!profile?.user) return fallbackLabel;
-
-  return getUserDisplayName(profile.user) || fallbackLabel;
-};
-
-const useExecutedByUserProfiles = ({ enabled, uids }: { enabled: boolean; uids: string[] }) => {
-  const { userProfile } = useKibana().services;
-
-  return useQuery<UserProfileWithAvatar[], Error, Map<string, UserProfileWithAvatar>>(
-    ['workflowsExecutionListExecutedByUserProfiles', ...uids],
-    () => userProfile.bulkGet({ uids: new Set(uids), dataPath: 'avatar' }),
-    {
-      enabled: enabled && uids.length > 0,
-      keepPreviousData: true,
-      retry: false,
-      select: profilesToMap,
-      staleTime: USER_PROFILES_STALE_TIME,
-    }
-  );
-};
 
 export const WorkflowExecutionList = ({
   filters,
@@ -117,22 +81,25 @@ export const WorkflowExecutionList = ({
     return Array.from(uniqueUsers).sort();
   }, [executions, filters.executedBy]);
 
-  const { data: executedByUserProfiles = EMPTY_EXECUTED_BY_USER_PROFILES } =
-    useExecutedByUserProfiles({
-      enabled: showExecutor,
-      uids: executedByValuesToResolve,
+  const executedByDisplayNames = useMemo(() => {
+    const names = new Map<string, string>(Object.entries(executions?.executedByDisplayNames ?? {}));
+    executions?.results.forEach((execution) => {
+      if (execution.executedBy && execution.executedByDisplayName) {
+        names.set(execution.executedBy, execution.executedByDisplayName);
+      }
     });
+    return names;
+  }, [executions]);
 
   const availableExecutedByOptions = useMemo<ExecutedByFilterOption[]>(() => {
     return executedByValuesToResolve.flatMap((executedBy) => {
-      const label = getExecutedByLabel(
-        executedByUserProfiles.get(executedBy),
-        showUnresolvedExecutors ? executedBy : undefined
-      );
+      const label =
+        executedByDisplayNames.get(executedBy) ??
+        (showUnresolvedExecutors ? executedBy : undefined);
 
       return label ? [{ label, value: executedBy }] : [];
     });
-  }, [executedByUserProfiles, executedByValuesToResolve, showUnresolvedExecutors]);
+  }, [executedByDisplayNames, executedByValuesToResolve, showUnresolvedExecutors]);
 
   useEffect(() => {
     if (scrollableContentRef.current) {
@@ -213,12 +180,10 @@ export const WorkflowExecutionList = ({
                   isTestRun={execution.isTestRun}
                   startedAt={toValidDate(execution.startedAt)}
                   duration={execution.duration}
-                  executedByProfile={
-                    execution.executedBy
-                      ? executedByUserProfiles.get(execution.executedBy)
-                      : undefined
+                  executedByLabel={
+                    execution.executedByDisplayName ??
+                    (showUnresolvedExecutors ? execution.executedBy : undefined)
                   }
-                  executedByLabel={showUnresolvedExecutors ? execution.executedBy : undefined}
                   triggeredBy={execution.triggeredBy}
                   showExecutor={showExecutor}
                   selected={execution.id === selectedId}

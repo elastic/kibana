@@ -33,7 +33,6 @@ import {
 } from './workflow_execution_list_filters';
 import { WorkflowExecutionListFooter } from './workflow_execution_list_footer';
 import type { ExecutionListFiltersQueryParams } from './workflow_execution_list_stateful';
-import { getExecutedByLabel, useUserProfilesByUid } from '../../../entities/user_profiles';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export interface WorkflowExecutionListProps {
@@ -93,17 +92,21 @@ export const WorkflowExecutionList = ({
     return Array.from(uniqueUsers).sort();
   }, [executions, filters.executedBy]);
 
-  const { data: executedByUserProfiles = EMPTY_EXECUTED_BY_USER_PROFILES } = useUserProfilesByUid({
-    enabled: showExecutor,
-    uids: executedByValuesToResolve,
-  });
+  const executedByDisplayNames = useMemo(() => {
+    const names = new Map<string, string>(Object.entries(executions?.executedByDisplayNames ?? {}));
+    executions?.results.forEach((execution) => {
+      if (execution.executedBy && execution.executedByDisplayName) {
+        names.set(execution.executedBy, execution.executedByDisplayName);
+      }
+    });
+    return names;
+  }, [executions]);
 
   const availableExecutedByOptions = useMemo<ExecutedByFilterOption[]>(() => {
     const options = executedByValuesToResolve.flatMap((executedBy) => {
-      const label = getExecutedByLabel(
-        executedByUserProfiles.get(executedBy),
-        showUnresolvedExecutors ? executedBy : undefined
-      );
+      const label =
+        executedByDisplayNames.get(executedBy) ??
+        (showUnresolvedExecutors ? executedBy : undefined);
 
       return label ? [{ label, value: executedBy }] : [];
     });
@@ -118,27 +121,20 @@ export const WorkflowExecutionList = ({
         return option;
       }
 
-      const profile = executedByUserProfiles.get(option.value);
-      const disambiguator = profile?.user?.username ?? profile?.user?.email ?? option.value;
-
-      if (disambiguator === option.label) {
-        return { ...option, label: `${option.label} (${option.value})` };
-      }
-
-      return { ...option, label: `${option.label} (${disambiguator})` };
+      return { ...option, label: `${option.label} (${option.value})` };
     });
-  }, [executedByUserProfiles, executedByValuesToResolve, showUnresolvedExecutors]);
+  }, [executedByDisplayNames, executedByValuesToResolve, showUnresolvedExecutors]);
 
   const columns = useMemo(
     () =>
       getExecutionHistoryColumns({
         euiTheme,
         showExecutor,
-        executedByUserProfiles,
+        executedByUserProfiles: EMPTY_EXECUTED_BY_USER_PROFILES,
         showUnresolvedExecutors,
         timeZoneSetting,
       }),
-    [euiTheme, showExecutor, executedByUserProfiles, showUnresolvedExecutors, timeZoneSetting]
+    [euiTheme, showExecutor, showUnresolvedExecutors, timeZoneSetting]
   );
 
   const handleRowClick = useCallback(

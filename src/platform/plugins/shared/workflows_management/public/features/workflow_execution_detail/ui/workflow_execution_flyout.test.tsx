@@ -470,9 +470,13 @@ describe('WorkflowExecutionFlyout triggered by', () => {
     return services;
   };
 
-  it('resolves the profile UID to the user display name', async () => {
+  it('shows the server-resolved display name without a client profile lookup', async () => {
     const services = createServices();
-    services.userProfile.bulkGet.mockResolvedValue([profile]);
+    mockPollingResult.workflowExecution = createMockWorkflowExecutionDto({
+      id: 'exec-1',
+      executedBy: profileUid,
+      executedByDisplayName: 'elastic',
+    });
 
     renderFlyout(services);
 
@@ -482,10 +486,7 @@ describe('WorkflowExecutionFlyout triggered by', () => {
     expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).not.toHaveTextContent(
       profileUid
     );
-    expect(services.userProfile.bulkGet).toHaveBeenCalledWith({
-      uids: new Set([profileUid]),
-      dataPath: 'avatar',
-    });
+    expect(services.userProfile.bulkGet).not.toHaveBeenCalled();
   });
 
   it('keeps the raw UID when the profile cannot be resolved', async () => {

@@ -22,6 +22,7 @@ import {
   WorkflowExecutionCollapseFields,
   WorkflowExecutionSortFields,
 } from '@kbn/workflows';
+import { withExecutedByDisplayNames } from '../../lib/resolve_executed_by_display_name';
 import type { SearchWorkflowExecutionsParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
@@ -42,7 +43,13 @@ const executionTypeSchema = schema.oneOf(
 
 const EXECUTION_QUERY_PARAM_AVAILABILITY = { stability: 'stable', since: '9.5.0' } as const;
 
-export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerGetWorkflowExecutionsRoute({
+  router,
+  api,
+  spaces,
+  workflowsService,
+  logger,
+}: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/workflow/{workflowId}/executions',
@@ -248,8 +255,20 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
             sortOrder: request.query.sortOrder,
             searchAfter,
           };
+          const executionsPage = await api.getWorkflowExecutions({ ...params, request }, spaceId);
+          const { userProfile } = await workflowsService.getCoreStart();
           return response.ok({
-            body: await api.getWorkflowExecutions({ ...params, request }, spaceId),
+            body: executionsPage.results
+              ? {
+                  ...executionsPage,
+                  ...(await withExecutedByDisplayNames({
+                    userProfile,
+                    results: executionsPage.results,
+                    additionalExecutedBy: params.executedBy,
+                    logger,
+                  })),
+                }
+              : executionsPage,
           });
         } catch (error) {
           return handleRouteError(response, error);

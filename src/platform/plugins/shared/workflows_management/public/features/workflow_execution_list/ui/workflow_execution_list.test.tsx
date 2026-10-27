@@ -10,6 +10,7 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
+import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { WorkflowExecutionList, type WorkflowExecutionListProps } from './workflow_execution_list';
 import { createStartServicesMock, type StartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
@@ -101,6 +102,25 @@ describe('WorkflowExecutionList', () => {
   it('renders the container with the data-test-subj attribute', () => {
     renderComponent();
     expect(screen.getByTestId('workflowExecutionList')).toBeInTheDocument();
+  });
+
+  it('renders the server-resolved display name without a client profile lookup', () => {
+    const services = createStartServicesMock();
+    services.settings.client.get.mockImplementation((key: string, defaultValue?: unknown) =>
+      key === WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID ? true : defaultValue
+    );
+    renderComponent(
+      {
+        executions: {
+          ...mockExecutions,
+          results: [{ ...mockExecutions.results[0], executedByDisplayName: 'Jane Doe' }],
+        },
+      },
+      services
+    );
+
+    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+    expect(services.userProfile.bulkGet).not.toHaveBeenCalled();
   });
 
   describe('loading state', () => {

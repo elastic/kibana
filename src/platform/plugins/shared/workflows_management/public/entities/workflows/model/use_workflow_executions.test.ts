@@ -112,6 +112,19 @@ describe('useWorkflowExecutions', () => {
     expect(result.current.data).toEqual(executionsPage1);
   });
 
+  it('should preserve executedByDisplayNames in allExecutions data', async () => {
+    mockGetWorkflowExecutions.mockResolvedValue({
+      ...executionsPage1,
+      executedByDisplayNames: { u_1: 'John Doe' },
+    });
+
+    const { result } = renderExecutionsHook({ workflowId: 'wf-1' });
+
+    await waitFor(() => expect(result.current.data).not.toBeNull());
+
+    expect(result.current.data?.executedByDisplayNames).toEqual({ u_1: 'John Doe' });
+  });
+
   it('should pass statuses filter to query params', async () => {
     const statuses: ExecutionStatus[] = [ExecutionStatus.COMPLETED, ExecutionStatus.FAILED];
 

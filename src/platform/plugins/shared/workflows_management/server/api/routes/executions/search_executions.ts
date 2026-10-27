@@ -20,6 +20,7 @@ import {
   ExecutionTypeValues,
   WorkflowExecutionCollapseFields,
 } from '@kbn/workflows';
+import { withExecutedByDisplayNames } from '../../lib/resolve_executed_by_display_name';
 import type { SearchExecutionsViewParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
 import {
@@ -131,7 +132,13 @@ const querySchema = schema.object({
   ),
 });
 
-export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerSearchExecutionsRoute({
+  router,
+  api,
+  spaces,
+  workflowsService,
+  logger,
+}: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/workflow/executions',
@@ -208,8 +215,20 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
             includeManagedExecutions: canReadManagedWorkflowExecutions(request),
           };
 
+          const executionsPage = await api.searchExecutionsView({ ...params, request }, spaceId);
+          const { userProfile } = await workflowsService.getCoreStart();
           return response.ok({
-            body: await api.searchExecutionsView({ ...params, request }, spaceId),
+            body: executionsPage.results
+              ? {
+                  ...executionsPage,
+                  ...(await withExecutedByDisplayNames({
+                    userProfile,
+                    results: executionsPage.results,
+                    additionalExecutedBy: params.executedBy,
+                    logger,
+                  })),
+                }
+              : executionsPage,
           });
         } catch (error) {
           if (error instanceof Error && 'statusCode' in error && error.statusCode === 400) {

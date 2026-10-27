@@ -29,6 +29,8 @@ describe('Execution Routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
   let mockApi: Record<string, jest.Mock>;
   let mockSpaces: { getSpaceId: jest.Mock };
+  let mockBulkGet: jest.Mock;
+  let mockWorkflowsService: { getCoreStart: jest.Mock };
   let mockRouter: IRouter;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
@@ -118,7 +120,10 @@ describe('Execution Routes', () => {
       getChildWorkflowExecutions: jest.fn(),
     };
     mockApi.getWorkflowExecution.mockResolvedValue({ id: 'ex-1', managed: false });
-
+    mockBulkGet = jest.fn().mockResolvedValue([]);
+    mockWorkflowsService = {
+      getCoreStart: jest.fn().mockResolvedValue({ userProfile: { bulkGet: mockBulkGet } }),
+    };
     const createVersionedRoute = (method: string, path: string) => ({
       addVersion: jest
         .fn()
@@ -162,6 +167,7 @@ describe('Execution Routes', () => {
     registerExecutionRoutes({
       router,
       api: mockApi as any,
+      workflowsService: mockWorkflowsService as any,
       logger: mockLogger,
       spaces: mockSpaces as any,
       audit: createWorkflowManagementAuditLogMock(),
@@ -456,6 +462,42 @@ describe('Execution Routes', () => {
       expect(handler('GET', path)).toBeDefined();
     });
 
+    it('should add server-resolved display names to listed executions', async () => {
+      mockApi.getWorkflowExecutions.mockResolvedValue({
+        results: [{ id: 'ex-1', executedBy: 'u_1' }, { id: 'ex-2' }],
+        total: 2,
+      });
+      mockBulkGet.mockResolvedValue([{ uid: 'u_1', user: { username: 'jdoe' } }]);
+      const h = handler('GET', path)!;
+      const request = {
+        params: { workflowId: 'wf-1' },
+        query: { page: 1, size: 10 },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockBulkGet).toHaveBeenCalledWith({ uids: new Set(['u_1']) });
+      expect(result.body.results).toEqual([
+        { id: 'ex-1', executedBy: 'u_1', executedByDisplayName: 'jdoe' },
+        { id: 'ex-2' },
+      ]);
+    });
+
+    it('should resolve display names for executedBy filter values missing from the results', async () => {
+      mockApi.getWorkflowExecutions.mockResolvedValue({ results: [], total: 0 });
+      mockBulkGet.mockResolvedValue([{ uid: 'u_2', user: { username: 'asmith' } }]);
+      const h = handler('GET', path)!;
+      const request = {
+        params: { workflowId: 'wf-1' },
+        query: { page: 1, size: 10, executedBy: 'u_2' },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockBulkGet).toHaveBeenCalledWith({ uids: new Set(['u_2']) });
+      expect(result.body.executedByDisplayNames).toEqual({ u_2: 'asmith' });
+    });
+
     it('should call api.getWorkflowExecutions with search params and space id', async () => {
       mockApi.getWorkflowExecutions.mockResolvedValue({ executions: [] });
       const h = handler('GET', path)!;
@@ -569,6 +611,41 @@ describe('Execution Routes', () => {
 
     it('should register the route handler', () => {
       expect(handler('GET', path)).toBeDefined();
+    });
+
+    it('should add the server-resolved display name for callers without profile privileges', async () => {
+      mockApi.getWorkflowExecution.mockResolvedValue({ id: 'ex-1', executedBy: 'u_1' });
+      mockBulkGet.mockResolvedValue([
+        { uid: 'u_1', user: { username: 'jdoe', full_name: 'John Doe' } },
+      ]);
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { includeInput: false, includeOutput: false },
+        authzResult: defaultAuthzResult,
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockBulkGet).toHaveBeenCalledWith({ uids: new Set(['u_1']) });
+      expect(result).toEqual({
+        type: 'ok',
+        body: { id: 'ex-1', executedBy: 'u_1', executedByDisplayName: 'John Doe' },
+      });
+    });
+
+    it('should still return the execution when the profile cannot be resolved', async () => {
+      mockApi.getWorkflowExecution.mockResolvedValue({ id: 'ex-1', executedBy: 'u_1' });
+      mockBulkGet.mockRejectedValue(new Error('forbidden'));
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { includeInput: false, includeOutput: false },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(result).toEqual({ type: 'ok', body: { id: 'ex-1', executedBy: 'u_1' } });
     });
 
     it('should call api.getWorkflowExecution with execution id, space, and include flags', async () => {

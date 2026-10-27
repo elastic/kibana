@@ -130,6 +130,26 @@ describe('WorkflowExecutionList', () => {
     expect(screen.getByTestId('workflowExecutionList')).toBeInTheDocument();
   });
 
+  it('passes the server-resolved display name to the item without a client profile lookup', () => {
+    const services = createStartServicesMock();
+    renderComponent(
+      {
+        showExecutor: true,
+        executions: {
+          ...mockExecutions,
+          results: [{ ...mockExecutions.results[0], executedByDisplayName: 'Jane Doe' }],
+        },
+      },
+      services
+    );
+
+    expect(screen.getByTestId('workflowExecutionListItem')).toHaveAttribute(
+      'data-executed-by-label',
+      'Jane Doe'
+    );
+    expect(services.userProfile.bulkGet).not.toHaveBeenCalled();
+  });
+
   describe('loading state', () => {
     it('shows loading spinner when isInitialLoading is true', () => {
       renderComponent({ isInitialLoading: true });

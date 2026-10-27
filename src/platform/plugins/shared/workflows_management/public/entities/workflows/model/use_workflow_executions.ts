@@ -178,12 +178,17 @@ export function useWorkflowExecutions(
     const firstPage = data.pages[0];
     const lastPage = data.pages[data.pages.length - 1];
     const allResults = data.pages.flatMap((page) => page.results);
+    const executedByDisplayNames = Object.assign(
+      {},
+      ...data.pages.map((page) => page.executedByDisplayNames)
+    );
 
     return {
       results: allResults,
       page: data.pages.length,
       size: firstPage.size,
       total: firstPage.total,
+      ...(Object.keys(executedByDisplayNames).length > 0 ? { executedByDisplayNames } : {}),
       ...(lastPage.searchAfter ? { searchAfter: lastPage.searchAfter } : {}),
     };
   }, [data]);

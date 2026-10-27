@@ -164,6 +164,9 @@ const getExecutedByDisplayName = (
   if (profile?.user) {
     return getUserDisplayName(profile.user) || undefined;
   }
+  if (execution.executedByDisplayName) {
+    return execution.executedByDisplayName;
+  }
   return ctx.showUnresolvedExecutors ? execution.executedBy : undefined;
 };
 

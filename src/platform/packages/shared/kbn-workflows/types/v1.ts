@@ -317,6 +317,8 @@ export interface WorkflowExecutionDto {
   duration: number | null;
   effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
   executedBy?: string; // User who triggered the workflow
+  /** Display name of `executedBy`, resolved server-side when the profile is found. */
+  executedByDisplayName?: string;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;
@@ -344,6 +346,8 @@ export interface WorkflowExecutionListDto {
   page: number;
   size: number;
   total: number;
+  /** Display names by `executedBy` uid for the results and active `executedBy` filters. */
+  executedByDisplayNames?: Record<string, string>;
   /**
    * Opaque `search_after` sort values for the next window.
    * Absent when there are no further results.

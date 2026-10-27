@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { i18n } from '@kbn/i18n';
 import { WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT } from '../../../../common';
+import { resolveExecutedByDisplayName } from '../../lib/resolve_executed_by_display_name';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -22,7 +23,13 @@ import {
 import { executionIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerGetExecutionRoute({ router, api, spaces }: RouteDependencies) {
+export function registerGetExecutionRoute({
+  router,
+  api,
+  spaces,
+  workflowsService,
+  logger,
+}: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/executions/{executionId}',
@@ -78,7 +85,17 @@ export function registerGetExecutionRoute({ router, api, spaces }: RouteDependen
             return response.notFound();
           }
           assertCanReadManagedWorkflowExecution(request, workflowExecution);
-          return response.ok({ body: workflowExecution });
+          const { userProfile } = await workflowsService.getCoreStart();
+          const executedByDisplayName = await resolveExecutedByDisplayName({
+            userProfile,
+            executedBy: workflowExecution.executedBy,
+            logger,
+          });
+          return response.ok({
+            body: executedByDisplayName
+              ? { ...workflowExecution, executedByDisplayName }
+              : workflowExecution,
+          });
         } catch (error) {
           if (isMaximumResponseSizeExceededError(error)) {
             return response.customError({
