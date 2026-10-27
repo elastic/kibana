@@ -9,4 +9,7 @@ import { createPlaywrightConfig } from '@kbn/scout-oblt';
 
 export default createPlaywrightConfig({
   testDir: './tests',
+  // `global.setup.ts` sets the space up with the Nightshift service accounts, which every
+  // investigation this suite starts runs as.
+  runGlobalSetup: true,
 });

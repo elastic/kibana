@@ -550,6 +550,9 @@ export class NightshiftInvestigationsClient {
       ...(source_ids?.length ? { source_ids } : {}),
       ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
       investigation_id: investigationId,
+      // The entry point caps its investigation step with this, rather than the run overriding
+      // `settings.timeout`: a workflow bound to a service account only runs its saved definition.
+      ...(timeout_seconds === undefined ? {} : { timeout_seconds }),
       subjects: newSubjects,
       ...(parsedNotificationDestinations?.length
         ? { notificationDestinations: parsedNotificationDestinations }
@@ -564,16 +567,9 @@ export class NightshiftInvestigationsClient {
     };
 
     const executionId = await workflowsManagement.management.runWorkflow(
-      {
-        ...workflow,
-        definition:
-          timeout_seconds === undefined
-            ? workflow.definition
-            : {
-                ...workflow.definition,
-                settings: { ...workflow.definition.settings, timeout: `${timeout_seconds}s` },
-              },
-      },
+      // Runs the entry point exactly as it is stored: a workflow bound to a service account only
+      // runs its saved definition, so the per-run timeout travels as an input instead.
+      { ...workflow, definition: workflow.definition },
       spaceId,
       inputs,
       this.request,

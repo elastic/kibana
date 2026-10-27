@@ -35,6 +35,9 @@ export const servers: ScoutServerConfig = {
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.nightshift_investigations.enabled=true',
       '--xpack.nightshift_investigations.memory.enabled=true',
+      // Investigations only run as the Nightshift agent service account, through the entry point
+      // the suite's global setup installs in the space.
+      '--xpack.security.serviceAccounts.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
       '--feature_flags.overrides.nightshift.enabled=true',
