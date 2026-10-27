@@ -47,8 +47,16 @@ export const initializeStateApi = <StateType extends object = object>({
 
   const compareSerializedState = (
     baseline: Partial<StateType> | undefined,
-    current: Partial<StateType> | undefined
-  ) => areComparatorsEqual(getComparators(), normalize(baseline), normalize(current), defaultState);
+    current: Partial<StateType> | undefined,
+    getLogLabel?: (key: string) => string
+  ) =>
+    areComparatorsEqual(
+      getComparators(),
+      normalize(baseline),
+      normalize(current),
+      defaultState,
+      getLogLabel
+    );
 
   const latestState$ = anyStateChange$.pipe(
     debounceTime(0), // combine all state changes
@@ -73,23 +81,17 @@ export const initializeStateApi = <StateType extends object = object>({
   const hasUnsavedChanges$ = latestState$.pipe(
     debounceTime(UNSAVED_CHANGES_DEBOUNCE),
     combineLatestWith(parentApi.lastSavedStateForChild$(uuid)),
-    map(([currentState, lastSavedState]) => {
-      // check state equality
-      return !areComparatorsEqual(
-        getComparators(),
-        lastSavedState,
-        currentState,
-        defaultState,
-        (key: string) => {
+    map(
+      ([currentState, lastSavedState]) =>
+        !compareSerializedState(lastSavedState, currentState, (key: string) => {
           const childApi = (parentApi as Partial<PresentationContainer>).children$?.getValue()[
             uuid
           ];
           const childlTitle = childApi ? getTitle(childApi) : undefined;
           const childLabel = childlTitle ? `"${childlTitle}"` : uuid;
           return `child: ${childLabel}, key: ${key}`;
-        }
-      );
-    })
+        })
+    )
   );
 
   return {
