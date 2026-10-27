@@ -30,13 +30,14 @@ export const toActiveExecution = ({ executionId }: SetActiveExecution): ActiveEx
   started_at: new Date().toISOString(),
 });
 
-/** True when `update` would leave the stored active execution as it is. */
+/** True when `update` would leave the stored active execution as it is, including no update. */
 export const isActiveExecutionUpdateNoop = (
   current: NormalizedConversation,
-  update: ActiveExecutionUpdate
+  update?: ActiveExecutionUpdate
 ): boolean =>
-  'releaseExecutionId' in update &&
-  current.active_execution?.execution_id !== update.releaseExecutionId;
+  !update ||
+  ('releaseExecutionId' in update &&
+    current.active_execution?.execution_id !== update.releaseExecutionId);
 
 /**
  * Sets or releases the active execution. Setting refuses while another execution became active

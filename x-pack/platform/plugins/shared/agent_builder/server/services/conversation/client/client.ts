@@ -1015,10 +1015,7 @@ class ConversationClientImpl implements ConversationClient {
       ...(retryOnConflict ? {} : { maxRetries: 0 }),
       activeExecution,
       fields: (current) => {
-        if (
-          !hasFields &&
-          (!activeExecution || isActiveExecutionUpdateNoop(current, activeExecution))
-        ) {
+        if (!hasFields && isActiveExecutionUpdateNoop(current, activeExecution)) {
           throw skipWrite(current);
         }
 

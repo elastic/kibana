@@ -79,6 +79,10 @@ describe('applyActiveExecutionUpdate', () => {
 });
 
 describe('isActiveExecutionUpdateNoop', () => {
+  it('is true without an update', () => {
+    expect(isActiveExecutionUpdateNoop(heldBy('e1', minutesAgo(1)))).toBe(true);
+  });
+
   it('is true for a release that does not hold the active execution', () => {
     expect(
       isActiveExecutionUpdateNoop(heldBy('e2', minutesAgo(1)), { releaseExecutionId: 'e1' })
