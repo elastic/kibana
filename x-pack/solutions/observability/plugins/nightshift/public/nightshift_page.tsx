@@ -114,7 +114,7 @@ export function NightshiftPage(): React.ReactElement | null {
     path: '/settings',
   });
   const detectionSettingsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
-    path: '/settings/detections',
+    path: '/settings/detections?origin=detections',
   });
   const knowledgeHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/knowledge',
