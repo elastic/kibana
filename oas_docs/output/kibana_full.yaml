@@ -186786,6 +186786,11 @@ components:
                 - gray
               type: string
           description: The name of the palette to apply across the value range.
+        steps:
+          description: Number of color bands the palette is split into. Defaults to the chart's default band count.
+          maximum: 9007199254740991
+          minimum: 1
+          type: integer
         type:
           enum:
             - distributed_palette
@@ -187506,23 +187511,14 @@ components:
         density:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableDensity'
         paging:
-          anyOf:
-            - enum:
-                - 10
-              type: number
-            - enum:
-                - 20
-              type: number
-            - enum:
-                - 30
-              type: number
-            - enum:
-                - 50
-              type: number
-            - enum:
-                - 100
-              type: number
           description: Rows per page. When set, pagination is enabled with the specified number of rows.
+          enum:
+            - 10
+            - 20
+            - 30
+            - 50
+            - 100
+          type: number
         row_numbers:
           additionalProperties: false
           description: Configuration for row numbers
@@ -193320,7 +193316,7 @@ components:
           type: object
           properties:
             visible:
-              default: false
+              default: true
               description: Show partial bucket indicators at time range edges
               type: boolean
     Kibana_HTTP_APIs_visXyStylingPoints:
