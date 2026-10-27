@@ -314,26 +314,43 @@ export const createSubmitOptimizerResultTool = ({
         ...params.symptom_trees.map((submission) => ({
           treeId: submission.tree_id,
           filePath: submission.file_path,
-          persist: () => {
+          persist: async () => {
             const traversal = traversals.get(symptomSlugFromTreeId(submission.tree_id));
             // The file and its merges are already on the head. Replaying them fails once the
-            // merged-away node is gone, so a retry only records a traversal that was not counted.
+            // merged-away node is gone. Skip that replay only when the file is unchanged; a retry
+            // that adds ✅ marks still has to be saved, or the new causal path is checked against
+            // the old unmarked head and rejected forever.
             if (editWasRecorded(submission.tree_id)) {
-              if (!traversal || traversalWasRecorded(submission.tree_id)) {
-                return Promise.resolve({
-                  tree_id: submission.tree_id,
-                  file_path: submission.file_path,
-                  status: 'persisted' as const,
-                  detail: 'edit already saved this turn',
+              const existing = await store.get(submission.tree_id);
+              const submitted = await readSubmittedMarkdown(session, submission.file_path);
+              if (existing !== undefined && submitted === existing.markdown) {
+                if (!traversal || traversalWasRecorded(submission.tree_id)) {
+                  return {
+                    tree_id: submission.tree_id,
+                    file_path: submission.file_path,
+                    status: 'persisted' as const,
+                    detail: 'edit already saved this turn',
+                  };
+                }
+                return persistTraversal({
+                  traversal,
+                  countTraversal: true,
+                  store,
+                  author,
+                  summary: params.summary,
+                  // The saved edit already committed this turn's learnings for the tree.
+                  learnings: [],
+                  now,
                 });
               }
-              return persistTraversal({
+              return persistSubmission({
+                submission: { ...submission, merged_nodes: [] },
                 traversal,
-                countTraversal: true,
+                countTraversal: !traversalWasRecorded(submission.tree_id),
+                session,
                 store,
                 author,
                 summary: params.summary,
-                // The saved edit already committed this turn's learnings for the tree.
                 learnings: [],
                 now,
               });
@@ -547,6 +564,22 @@ const storedCountsOf = (existing: DecisionTreeDetail): StoredTreeCounts => ({
   ),
   counts: existing.counts,
 });
+
+/** The submitted file's text, or undefined when it cannot be read. Validation reports that later. */
+const readSubmittedMarkdown = async (
+  session: SandboxSession,
+  filePath: string
+): Promise<string | undefined> => {
+  try {
+    const [readResult] = await session.readFiles([
+      { path: resolveAbsolutePath(filePath), maxReadBytes: MAX_TREE_FILE_BYTES },
+    ]);
+    if (!readResult?.success) return undefined;
+    return readResult.content.toString('utf8');
+  } catch {
+    return undefined;
+  }
+};
 
 const persistSubmission = async ({
   submission,
