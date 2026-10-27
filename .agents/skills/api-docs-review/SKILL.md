@@ -1,6 +1,6 @@
 ---
 name: api-docs-review
-description: Use when drafting or reviewing public Kibana HTTP API docs for `access: 'public'` routes.
+description: "Use when drafting or reviewing public Kibana HTTP API docs for `access: 'public'` routes."
 ---
 
 # Review Kibana API docs
