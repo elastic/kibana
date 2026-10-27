@@ -37,6 +37,7 @@ export interface EvalsSuiteMetadataEntry {
   scoutDomain?: string;
   weeklyEisModelGroups?: string[];
   defaultModelGroups?: string[] | null;
+  defaultJudge?: string;
   shards?: EvalsSuiteShard[];
   stepTimeoutInMinutes?: number;
   specModelGroups?: EvalsSuiteSpecModelGroup[];
@@ -183,13 +184,11 @@ function toBuildkiteYamlString(value: string): string {
 function buildEvalsYaml({
   selectedSuites,
   resolveModelGroups,
-  evaluationConnectorId,
-  hasEisJudge,
+  resolveJudge,
 }: {
   selectedSuites: EvalsSuiteMetadataEntry[];
   resolveModelGroups: (suite: EvalsSuiteMetadataEntry) => string[];
-  evaluationConnectorId: string | undefined;
-  hasEisJudge: boolean;
+  resolveJudge: (suite: EvalsSuiteMetadataEntry) => EvalJudge;
 }): string {
   const preemptible = isPreemptibleEnabled();
   const suiteSteps = selectedSuites
@@ -197,6 +196,7 @@ function buildEvalsYaml({
       const key = `kbn-evals-${normalizeBuildkiteKey(suite.id)}`;
       const label = suite.name ? `Evals: ${suite.name}` : `Evals: ${suite.id}`;
       const suiteModelGroups = resolveModelGroups(suite);
+      const { evaluationConnectorId, hasEisJudge } = resolveJudge(suite);
       // Label-derived values cross a pipeline boundary; serialize as `$`-safe YAML.
       const modelGroupsEnv =
         suiteModelGroups.length > 0
@@ -265,11 +265,15 @@ function buildEvalsYaml({
   ].join('\n');
 }
 
+interface EvalJudge {
+  evaluationConnectorId: string | undefined;
+  hasEisJudge: boolean;
+}
+
 interface EvalSelection {
   runnableSuites: EvalsSuiteMetadataEntry[];
   resolveModelGroups: (suite: EvalsSuiteMetadataEntry) => string[];
-  evaluationConnectorId: string | undefined;
-  hasEisJudge: boolean;
+  resolveJudge: (suite: EvalsSuiteMetadataEntry) => EvalJudge;
 }
 
 /**
@@ -314,7 +318,7 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
     .find((label) => label.startsWith('models:judge:'))
     ?.slice('models:judge:'.length)
     ?.trim();
-  const evaluationConnectorId = rawEvaluationConnectorId
+  const labelEvaluationConnectorId = rawEvaluationConnectorId
     ? normalizeEvaluationConnectorId(rawEvaluationConnectorId)
     : undefined;
 
@@ -344,8 +348,15 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
     return suite.defaultModelGroups ?? [];
   };
 
-  const hasEisJudge =
-    !!rawEvaluationConnectorId?.startsWith('eis/') || !!evaluationConnectorId?.startsWith('eis-');
+  const resolveJudge = (suite: EvalsSuiteMetadataEntry): EvalJudge => {
+    const evaluationConnectorId = labelEvaluationConnectorId ?? suite.defaultJudge;
+    return {
+      evaluationConnectorId,
+      hasEisJudge:
+        !!rawEvaluationConnectorId?.startsWith('eis/') ||
+        !!evaluationConnectorId?.startsWith('eis-'),
+    };
+  };
 
   if (selectedEvalSuites.length === 0) {
     return null;
@@ -365,8 +376,7 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   return {
     runnableSuites,
     resolveModelGroups,
-    evaluationConnectorId,
-    hasEisJudge,
+    resolveJudge,
   };
 }
 
@@ -385,8 +395,7 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
   return buildEvalsYaml({
     selectedSuites: selection.runnableSuites,
     resolveModelGroups: selection.resolveModelGroups,
-    evaluationConnectorId: selection.evaluationConnectorId,
-    hasEisJudge: selection.hasEisJudge,
+    resolveJudge: selection.resolveJudge,
   });
 }
 
