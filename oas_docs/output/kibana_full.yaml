@@ -47755,7 +47755,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Unenroll a specific agent, optionally revoking its enrollment API key.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Unenroll a specific agent. By default, the agent stops sending data and its API keys are invalidated after it acknowledges the unenroll action. To invalidate the API keys immediately, use `revoke`.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-agentid-unenroll
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -47786,8 +47786,10 @@ paths:
               type: object
               properties:
                 force:
+                  description: Unenrolls the agent even if it is enrolled in a hosted agent policy or a managed integration policy. Does not revoke API keys immediately. To do so, also set `revoke`.
                   type: boolean
                 revoke:
+                  description: Immediately invalidates the API keys of the agent without notifying it. The agent keeps running and can still send data to outputs that do not use these keys, such as Kafka, Logstash, or remote Elasticsearch.
                   type: boolean
       responses:
         '200':
@@ -49279,7 +49281,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Unenroll multiple agents, optionally revoking their enrollment API keys.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Unenroll multiple agents. By default, the agents stop sending data and their API keys are invalidated after they acknowledge the unenroll action. To invalidate the API keys immediately, use `revoke`.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-bulk-unenroll
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -49320,13 +49322,13 @@ paths:
                 dryRun:
                   type: boolean
                 force:
-                  description: Unenrolls hosted agents too
+                  description: Also unenrolls agents enrolled in hosted agent policies or managed integration policies. Does not revoke API keys immediately. To do so, also set `revoke`.
                   type: boolean
                 includeInactive:
                   description: When passing agents by KQL query, unenrolls inactive agents too
                   type: boolean
                 revoke:
-                  description: Revokes API keys of agents
+                  description: Immediately invalidates the API keys of the agents without notifying them. The agents keep running and can still send data to outputs that do not use these keys, such as Kafka, Logstash, or remote Elasticsearch.
                   type: boolean
               required:
                 - agents
