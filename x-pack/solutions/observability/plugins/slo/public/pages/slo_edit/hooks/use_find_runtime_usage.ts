@@ -7,7 +7,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { QuerySchema } from '@kbn/slo-schema';
-import { querySchema } from '@kbn/slo-schema';
+import { is, querySchemaZod } from '@kbn/slo-schema';
 import type { FieldPath } from 'react-hook-form';
 import { useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../types';
@@ -44,7 +44,7 @@ export const useRunTimeFieldBeingUsed = (
     return [];
   }
   const runTimeMappings = dataView.getRuntimeMappings();
-  const filter = querySchema.is(value) ? value : undefined;
+  const filter = is(querySchemaZod, value) ? value : undefined;
   const fieldNames = Object.keys(runTimeMappings).filter((key) => {
     return isFieldBeingUsed(key, filter);
   });

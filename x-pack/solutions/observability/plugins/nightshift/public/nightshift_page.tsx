@@ -12,11 +12,7 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  NIGHTSHIFT_APP_ID,
-  OBSERVABILITY_OVERVIEW_APP_ID,
-  SIGNIFICANT_EVENTS_APP_ID,
-} from '@kbn/deeplinks-observability';
+import { NIGHTSHIFT_APP_ID, OBSERVABILITY_OVERVIEW_APP_ID } from '@kbn/deeplinks-observability';
 import { getNightshiftCapabilities, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftApp } from './app/app';
@@ -29,6 +25,7 @@ import {
 } from './app/app_header';
 import { AutomationsPage } from './automations/automations_page';
 import { useKibana } from './hooks/use_kibana';
+import { useDeveloperMode } from './hooks/use_developer_mode';
 import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
 import { SandboxSecretsFlyout } from './sandbox_secrets/sandbox_secrets_flyout';
 import { CustomContextFlyout } from './custom_context/custom_context_flyout';
@@ -51,15 +48,16 @@ const DetectionPage = React.lazy(() =>
   import('./pages/detection/page').then(({ DetectionPage: Page }) => ({ default: Page }))
 );
 
-const DetectionRoute = ({
+export const DetectionRoute = ({
   headerProps,
 }: {
   headerProps: React.ComponentProps<typeof DetectionPage>['headerProps'];
 }) => {
   const { tab } = useParams<{ tab?: string }>();
   const { search } = useLocation();
+  const { isDeveloperMode } = useDeveloperMode();
 
-  if (!tab || !isDetectionTabId(tab)) {
+  if (!tab || !isDetectionTabId(tab) || (tab === 'signals' && !isDeveloperMode)) {
     return <Redirect to={{ pathname: '/detections/events', search }} />;
   }
 
@@ -91,9 +89,6 @@ export function NightshiftPage(): React.ReactElement | null {
   const knowledgeHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/knowledge',
   });
-  const managementHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
-    path: '/queries',
-  });
   const sourcesHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/sources',
   });
@@ -103,6 +98,13 @@ export function NightshiftPage(): React.ReactElement | null {
   const automationsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/automations',
   });
+  const detectionsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+    path: '/detections/events',
+  });
+  const navigateToDetections = useCallback(
+    () => application.navigateToUrl(detectionsHref),
+    [application, detectionsHref]
+  );
   const navigateToSettings = useCallback(
     () => application.navigateToUrl(settingsHref),
     [application, settingsHref]
@@ -114,10 +116,6 @@ export function NightshiftPage(): React.ReactElement | null {
   const navigateToKnowledge = useCallback(
     () => application.navigateToUrl(knowledgeHref),
     [application, knowledgeHref]
-  );
-  const navigateToManagement = useCallback(
-    () => application.navigateToUrl(managementHref),
-    [application, managementHref]
   );
   const navigateToSources = useCallback(
     () => application.navigateToUrl(sourcesHref),
@@ -235,8 +233,34 @@ export function NightshiftPage(): React.ReactElement | null {
     <ObservabilityPageTemplate
       data-test-subj="nightshiftPage"
       restrictWidth={false}
+      css={
+        isDetectionPage
+          ? css`
+              height: 100%;
+              min-height: 0;
+              overflow: hidden;
+            `
+          : undefined
+      }
       pageSectionProps={{
         paddingSize: 'none',
+        ...(isDetectionPage
+          ? {
+              css: css`
+                min-height: 0;
+                overflow: hidden;
+              `,
+              contentProps: {
+                css: css`
+                  display: flex;
+                  flex: 1 1 auto;
+                  flex-direction: column;
+                  min-height: 0;
+                  height: 100%;
+                `,
+              },
+            }
+          : {}),
         ...(isHomePage
           ? {
               css: css`
@@ -255,18 +279,7 @@ export function NightshiftPage(): React.ReactElement | null {
           <Route path="/settings/:tab?">
             <SettingsPage
               headerProps={{
-                onManagementClick: navigateToManagement,
-                managementHref,
-                onSourcesClick: navigateToSources,
-                sourcesHref,
-                onKnowledgeClick: navigateToKnowledge,
-                knowledgeHref,
-                onSandboxSecretsClick: canManageSandboxSecrets
-                  ? openSandboxSecretsFlyout
-                  : undefined,
                 onCustomContextClick: canViewCustomContext ? openCustomContextFlyout : undefined,
-                onAutomationsClick: canUseAutomations ? navigateToAutomations : undefined,
-                automationsHref: canUseAutomations ? automationsHref : undefined,
               }}
             />
           </Route>
@@ -289,11 +302,6 @@ export function NightshiftPage(): React.ReactElement | null {
                   knowledgeHref,
                   onSettingsClick: canManageAndConfigure ? navigateToDetectionSettings : undefined,
                   settingsHref: canManageAndConfigure ? detectionSettingsHref : undefined,
-                  onSandboxSecretsClick: canManageSandboxSecrets
-                    ? openSandboxSecretsFlyout
-                    : undefined,
-                  onAutomationsClick: canUseAutomations ? navigateToAutomations : undefined,
-                  automationsHref: canUseAutomations ? automationsHref : undefined,
                 }}
               />
             </Route>
@@ -309,21 +317,7 @@ export function NightshiftPage(): React.ReactElement | null {
         >
           <Routes>
             <Route path="/sources/:sourceId?">
-              <SourcesPage
-                headerProps={{
-                  onManagementClick: navigateToManagement,
-                  managementHref,
-                  onKnowledgeClick: navigateToKnowledge,
-                  knowledgeHref,
-                  onSettingsClick: canManageAndConfigure ? navigateToSettings : undefined,
-                  settingsHref: canManageAndConfigure ? settingsHref : undefined,
-                  onSandboxSecretsClick: canManageSandboxSecrets
-                    ? openSandboxSecretsFlyout
-                    : undefined,
-                  onAutomationsClick: canUseAutomations ? navigateToAutomations : undefined,
-                  automationsHref: canUseAutomations ? automationsHref : undefined,
-                }}
-              />
+              <SourcesPage headerProps={{}} />
             </Route>
           </Routes>
         </React.Suspense>
@@ -337,21 +331,7 @@ export function NightshiftPage(): React.ReactElement | null {
         >
           <Routes>
             <Route path="/knowledge/:tab?">
-              <KnowledgePage
-                headerProps={{
-                  onManagementClick: navigateToManagement,
-                  managementHref,
-                  onSourcesClick: navigateToSources,
-                  sourcesHref,
-                  onSettingsClick: canManageAndConfigure ? navigateToSettings : undefined,
-                  settingsHref: canManageAndConfigure ? settingsHref : undefined,
-                  onSandboxSecretsClick: canManageSandboxSecrets
-                    ? openSandboxSecretsFlyout
-                    : undefined,
-                  onAutomationsClick: canUseAutomations ? navigateToAutomations : undefined,
-                  automationsHref: canUseAutomations ? automationsHref : undefined,
-                }}
-              />
+              <KnowledgePage headerProps={{}} />
             </Route>
           </Routes>
         </React.Suspense>
@@ -359,10 +339,6 @@ export function NightshiftPage(): React.ReactElement | null {
         <>
           <NightshiftAppHeader
             page={canUseAutomationsPage ? 'automations' : 'landing'}
-            onManagementClick={navigateToManagement}
-            managementHref={managementHref}
-            onSourcesClick={navigateToSources}
-            sourcesHref={sourcesHref}
             onKnowledgeClick={navigateToKnowledge}
             knowledgeHref={knowledgeHref}
             onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
@@ -372,6 +348,8 @@ export function NightshiftPage(): React.ReactElement | null {
               canUseAutomations && !hidesHeaderActions ? navigateToAutomations : undefined
             }
             automationsHref={canUseAutomations && !hidesHeaderActions ? automationsHref : undefined}
+            onDetectionsClick={!hidesHeaderActions ? navigateToDetections : undefined}
+            detectionsHref={!hidesHeaderActions ? detectionsHref : undefined}
             back={
               canUseAutomationsPage
                 ? {

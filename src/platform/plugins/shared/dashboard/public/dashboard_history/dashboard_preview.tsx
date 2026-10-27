@@ -21,14 +21,39 @@ import type { DashboardApi, DashboardInitializationState } from '..';
 import { DASHBOARD_APP_ID, DashboardRenderer } from '..';
 import { unifiedSearchService } from '../services/kibana_services';
 
+/** prevent dashboard renderer from remounting with every history item selection; instead, we will call `setState` on the API */
+const PreviewRenderer = React.memo(
+  ({
+    initialState,
+    onApiAvailable,
+  }: {
+    initialState: DashboardInitializationState;
+    onApiAvailable: (api: DashboardApi) => void;
+  }) => (
+    <DashboardRenderer
+      getCreationOptions={() =>
+        Promise.resolve({
+          getInitialInput: () => ({ ...initialState, viewMode: 'non-interactive' }),
+        })
+      }
+      onApiAvailable={onApiAvailable}
+    />
+  )
+);
+
+/** `setState` leaves the previous time range in place when the snapshot has none, so fall back to the inherited one */
+const withInheritedTimeRange = (
+  snapshot: DashboardState,
+  inheritedTimeRange: DashboardState['time_range']
+): DashboardState =>
+  snapshot.time_range ? snapshot : { ...snapshot, time_range: inheritedTimeRange };
+
 export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
   setPreviewTitle: (title: string) => void;
   inheritedTimeRange?: DashboardState['time_range'];
 }> = ({ change, setPreviewTitle, inheritedTimeRange }) => {
   const initialState = useRef<DashboardInitializationState>({
-    time_range: inheritedTimeRange,
-    ...change,
-    viewMode: 'view' as const,
+    ...withInheritedTimeRange(change.snapshot as DashboardState, inheritedTimeRange),
   });
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
 
@@ -39,9 +64,7 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
   useEffect(() => {
     if (!dashboardApi) return;
     setPreviewTitle((change.snapshot as DashboardState).title);
-    const snapshot = change.snapshot as DashboardState;
-    /** `setState` leaves the previous time range in place when the snapshot has none, so re-apply the inherited one */
-    const state = snapshot.time_range ? snapshot : { ...snapshot, time_range: inheritedTimeRange };
+    const state = withInheritedTimeRange(change.snapshot as DashboardState, inheritedTimeRange);
     /** `setState` awaits async child state application, so wait for the previous call to avoid overlapping; skip snapshots that were superseded while queued */
     let isStale = false;
     setFailedChange(undefined);
@@ -55,20 +78,6 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
       isStale = true;
     };
   }, [change, dashboardApi, inheritedTimeRange, setPreviewTitle]);
-
-  const memoized = useMemo(() => {
-    /** prevent dashboard renderer from remounting with every history item selection; instead, we will call `setState` on the API */
-    return (
-      <DashboardRenderer
-        getCreationOptions={() =>
-          Promise.resolve({
-            getInitialInput: () => ({ ...initialState.current, viewMode: 'non-interactive' }),
-          })
-        }
-        onApiAvailable={setDashboardApi}
-      />
-    );
-  }, []);
 
   const timeRange = (change.snapshot as DashboardState).time_range ?? inheritedTimeRange;
   const searchBarVisibilityProps = useMemo(() => {
@@ -120,7 +129,7 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
           {...searchBarVisibilityProps}
         />
       )}
-      {memoized}
+      <PreviewRenderer initialState={initialState.current} onApiAvailable={setDashboardApi} />
     </div>
   );
 };

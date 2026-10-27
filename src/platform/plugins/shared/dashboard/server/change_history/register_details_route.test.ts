@@ -86,7 +86,6 @@ describe('details route', () => {
         action: 'dashboard_update',
         snapshot: { title: 'Snapshot c2' },
         isCurrent: true,
-        metadata: { version: 2 },
       },
     });
   });

@@ -11,6 +11,7 @@ import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 
 import { getDashboardStateSchema } from '../api/dashboard_state_schemas';
+import { DASHBOARD_CHANGE_HISTORY_API_PATH } from '../../common/constants';
 import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './utils';
 
 const detailsResponseSchema = z.object({
@@ -23,14 +24,13 @@ const detailsResponseSchema = z.object({
   action: z.string(),
   snapshot: getDashboardStateSchema(true),
   isCurrent: z.boolean(),
-  metadata: z.object({ version: z.number() }),
 });
 export type ChangeDetailsResponse = z.infer<typeof detailsResponseSchema>;
 
 export const registerChangeDetailsRoute = (router: IRouter<RequestHandlerContext>) => {
   router.get(
     {
-      path: '/internal/dashboard/change_history/{id}/{changeId}',
+      path: `${DASHBOARD_CHANGE_HISTORY_API_PATH}/{id}/{changeId}`,
       validate: {
         request: {
           params: z
@@ -71,7 +71,6 @@ export const registerChangeDetailsRoute = (router: IRouter<RequestHandlerContext
           action: item.event.action,
           snapshot: item.object.snapshot,
           isCurrent: currentSequence !== undefined && item.object.sequence === currentSequence,
-          metadata: { version: item.object.sequence },
         },
       });
     }

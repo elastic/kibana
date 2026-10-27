@@ -32,6 +32,10 @@ import { getChangeHistoryClient } from './change_history_service';
 
 export const INITIAL_HISTORY_SEQUENCE = 1;
 
+// Granted by both `all` and `minimal_all`, so editors with customized sub-feature privileges
+// (e.g. without short URLs or search sessions) are not rejected.
+const DASHBOARD_EDIT_ACTION = `saved_object:${DASHBOARD_SAVED_OBJECT_TYPE}/update`;
+
 /**
  * Whether the stored content (attributes or references, ignoring the history sequence) differs between two versions of a dashboard.
  */
@@ -195,7 +199,7 @@ export const CHANGE_HISTORY_ROUTE_SECURITY = {
 } as const;
 
 /**
- * Checks the dashboard "all" privilege and access to the target dashboard saved object, then resolves the change history client and space for a
+ * Checks the privilege to edit dashboards (held by `all` and `minimal_all`) and access to the target dashboard saved object, then resolves the change history client and space for a
  * request, along with the saved dashboard's current history sequence (its stored `historySequence`).
  * Returns the error response to send when the request cannot be served.
  */
@@ -216,7 +220,7 @@ export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
           {
             application: 'kibana-.kibana',
             resources: [`space:${spaceId}`],
-            privileges: ['feature_dashboard_v2.all'],
+            privileges: [DASHBOARD_EDIT_ACTION],
           },
         ],
       });

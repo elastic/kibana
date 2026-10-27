@@ -8,7 +8,7 @@
  */
 
 import { KQLSyntaxError } from '@kbn/es-query';
-import { evaluateKql } from '@kbn/eval-kql';
+import { decodeKqlTemplateValues, evaluateKql, parseKqlTemplate } from '@kbn/eval-kql';
 
 export const evaluateCondition = (
   renderedCondition: string | boolean | undefined,
@@ -24,11 +24,13 @@ export const evaluateCondition = (
 
   if (typeof renderedCondition === 'string') {
     try {
-      return evaluateKql(renderedCondition, context);
+      return evaluateKql(parseKqlTemplate(renderedCondition), context);
     } catch (error) {
       if (error instanceof KQLSyntaxError) {
         throw new Error(
-          `Syntax error in condition "${renderedCondition}" for step ${stepId}: ${String(error)}`
+          `Syntax error in condition "${decodeKqlTemplateValues(
+            renderedCondition
+          )}" for step ${stepId}: ${decodeKqlTemplateValues(String(error))}`
         );
       }
       throw error;

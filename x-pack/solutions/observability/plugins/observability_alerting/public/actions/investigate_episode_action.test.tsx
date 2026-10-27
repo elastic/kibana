@@ -84,6 +84,8 @@ describe('createInvestigateEpisodeAction', () => {
     jest.clearAllMocks();
     mockUseInvestigateAlert.mockReturnValue({
       ...ebtProps,
+      hasInvestigation: false,
+      isStarting: false,
       showInvestigateAction: true,
       showInvestigateButton: true,
       showViewInvestigation: false,
@@ -104,13 +106,13 @@ describe('createInvestigateEpisodeAction', () => {
     expect(action.iconType).toBe('inspect');
   });
 
-  it('isCompatible returns true only for a single classic alert episode', () => {
+  it('isCompatible returns true only for a single episode, classic or v2', () => {
     const action = createInvestigateEpisodeAction();
     const classic = makeClassicEpisode('alert-1');
     const native = makeNativeEpisode('v2-ep-1');
 
     expect(action.isCompatible({ episodes: [classic] })).toBe(true);
-    expect(action.isCompatible({ episodes: [native] })).toBe(false);
+    expect(action.isCompatible({ episodes: [native] })).toBe(true);
     expect(action.isCompatible({ episodes: [classic, makeClassicEpisode('alert-2')] })).toBe(false);
     expect(action.isCompatible({ episodes: [] })).toBe(false);
   });
@@ -121,7 +123,7 @@ describe('createInvestigateEpisodeAction', () => {
     const native = makeNativeEpisode('v2-ep-1');
 
     expect(action.showWhenDisabled?.({ episodes: [classic] })).toBe(true);
-    expect(action.showWhenDisabled?.({ episodes: [native] })).toBe(false);
+    expect(action.showWhenDisabled?.({ episodes: [native] })).toBe(true);
   });
 
   it('renders Investigate button with inspect icon in menu item', () => {
@@ -129,6 +131,8 @@ describe('createInvestigateEpisodeAction', () => {
     const handleInvestigate = jest.fn();
     mockUseInvestigateAlert.mockReturnValue({
       ...ebtProps,
+      hasInvestigation: false,
+      isStarting: false,
       showInvestigateAction: true,
       showInvestigateButton: true,
       showViewInvestigation: false,
@@ -185,6 +189,8 @@ describe('createInvestigateEpisodeAction', () => {
     const action = createInvestigateEpisodeAction();
     mockUseInvestigateAlert.mockReturnValue({
       ...ebtProps,
+      hasInvestigation: true,
+      isStarting: false,
       showInvestigateAction: true,
       showInvestigateButton: false,
       showViewInvestigation: false,
@@ -219,6 +225,8 @@ describe('createInvestigateEpisodeAction', () => {
     const markInvestigationViewed = jest.fn();
     mockUseInvestigateAlert.mockReturnValue({
       ...ebtProps,
+      hasInvestigation: true,
+      isStarting: false,
       showInvestigateAction: true,
       showInvestigateButton: false,
       showViewInvestigation: true,
@@ -250,6 +258,8 @@ describe('createInvestigateEpisodeAction', () => {
     const markInvestigationViewed = jest.fn();
     mockUseInvestigateAlert.mockReturnValue({
       ...ebtProps,
+      hasInvestigation: true,
+      isStarting: false,
       showInvestigateAction: true,
       showInvestigateButton: true,
       showViewInvestigation: true,
@@ -286,6 +296,8 @@ describe('createInvestigateEpisodeAction', () => {
     const action = createInvestigateEpisodeAction();
     mockUseInvestigateAlert.mockReturnValue({
       ...ebtProps,
+      hasInvestigation: false,
+      isStarting: false,
       showInvestigateAction: false,
       showInvestigateButton: false,
       showViewInvestigation: false,

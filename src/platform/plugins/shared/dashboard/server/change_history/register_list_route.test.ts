@@ -96,6 +96,29 @@ describe('list route', () => {
     });
   });
 
+  describe('query validation', () => {
+    const getQuerySchema = () => {
+      const { router } = { router: httpServiceMock.createRouter() };
+      registerHistoryListRoute({ getStartServices: jest.fn() } as never, router);
+      const { validate } = router.get.mock.calls[0][0] as unknown as {
+        validate: { request: { query: { safeParse: (value: unknown) => { success: boolean } } } };
+      };
+      return validate.request.query;
+    };
+
+    it.each([
+      [{ page: 1, per_page: 100 }, true],
+      [{ page: 100, per_page: 100 }, true],
+      [{ page: 101, per_page: 100 }, false],
+      [{ page: 100000, per_page: 100 }, false],
+      [{ page: 0 }, false],
+      [{ page: -1, per_page: 10 }, false],
+      [{ page: 1.5, per_page: 10 }, false],
+    ])('query %j valid=%s', (query, valid) => {
+      expect(getQuerySchema().safeParse(query).success).toBe(valid);
+    });
+  });
+
   it('skips the user profile lookup when no items have a user id', async () => {
     const { bulkGet, res } = await run([getItem('c1', { user: { name: 'system' } })]);
     expect(bulkGet).not.toHaveBeenCalled();

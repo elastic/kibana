@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '../fixtures';
-import { getResponseActionsAccessRole } from '../fixtures/response_actions_access_role';
+import { getResponseActionsAccessRole } from '../../common/response_actions_access_role';
 import {
   seedResponseActionsHistory,
   type SeededResponseActionsHistory,

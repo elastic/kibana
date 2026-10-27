@@ -13,6 +13,7 @@ export {
   modifyStepProperty,
   modifyWorkflowProperty,
   deleteStep,
+  WORKFLOW_PROPERTY_KEYS,
 } from './yaml_edit_utils';
 export type { StepDefinition, EditResult } from './yaml_edit_utils';
 export { getStepNode } from './get_step_node';

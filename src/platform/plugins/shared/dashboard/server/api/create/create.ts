@@ -67,6 +67,8 @@ export async function create(
         }),
     }
   );
+  // Rebuilt from stored attributes, not createBody: restore replays snapshots in dashboard-app format,
+  // and panel IDs are only generated on the way in.
   const snapshot = getHistorySnapshot({
     dashboardId: savedObject.id,
     attributes: soAttributes,

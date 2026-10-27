@@ -1,5 +1,5 @@
 {
-  "sha1": "2860ccb3b81741f24d6e2382ab180a6a49bad31d",
+  "sha1": "6aa1ec50e3a5bfc9517fe002f4b17a96ec6c9d65",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -25,12 +25,13 @@
       "title": "Observability Alerting - add to case for classic alerts adds an alert to a new case from the row action",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
-        "line": 86,
-        "column": 51
+        "line": 84,
+        "column": 19
       }
     },
     {
@@ -38,12 +39,13 @@
       "title": "Observability Alerting - add to case for classic alerts adds an alert to an existing case from the row action",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
-        "line": 99,
-        "column": 18
+        "line": 97,
+        "column": 36
       }
     },
     {
@@ -51,12 +53,13 @@
       "title": "Observability Alerting - add to case for classic alerts adds the selected alerts to a new case from the bulk action",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
-        "line": 109,
-        "column": 10
+        "line": 107,
+        "column": 17
       }
     },
     {
@@ -64,12 +67,13 @@
       "title": "Observability Alerting - add to case for classic alerts adds the selected alerts to an existing case, which is then offered as already attached",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
-        "line": 119,
-        "column": 36
+        "line": 116,
+        "column": 60
       }
     },
     {
@@ -77,12 +81,13 @@
       "title": "Observability Alerting - add to case for classic alerts skips the alerts already attached to the chosen case",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
-        "line": 138,
-        "column": 38
+        "line": 136,
+        "column": 11
       }
     },
     {
@@ -90,12 +95,13 @@
       "title": "Observability Alerting - add to case for classic alerts hides the add to case actions without cases privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
-        "line": 158,
-        "column": 38
+        "line": 156,
+        "column": 11
       }
     },
     {
@@ -151,11 +157,12 @@
       "title": "Observability Alerting - privilege-based page access user with logs read privilege sees the full inbox page",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
-        "line": 279,
+        "line": 276,
         "column": 26
       }
     },
@@ -164,11 +171,12 @@
       "title": "Observability Alerting - privilege-based page access user with logs read privilege and only classic index access sees no error toasts",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
-        "line": 295,
+        "line": 292,
         "column": 77
       }
     },
@@ -177,11 +185,12 @@
       "title": "Observability Alerting - privilege-based page access user with alerting_v2_alerts read privilege sees the full inbox page",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
-        "line": 278,
+        "line": 275,
         "column": 24
       }
     },
@@ -190,11 +199,12 @@
       "title": "Observability Alerting - privilege-based page access user with no alerting privileges is blocked",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
-        "line": 290,
+        "line": 287,
         "column": 24
       }
     },
@@ -210,7 +220,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 104,
+        "line": 103,
         "column": 25
       }
     },
@@ -226,7 +236,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 115,
+        "line": 114,
         "column": 12
       }
     },
@@ -242,7 +252,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 104,
+        "line": 103,
         "column": 25
       }
     },
@@ -258,7 +268,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 115,
+        "line": 114,
         "column": 12
       }
     },
@@ -274,7 +284,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 104,
+        "line": 103,
         "column": 25
       }
     },
@@ -290,7 +300,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 115,
+        "line": 114,
         "column": 12
       }
     },
@@ -306,7 +316,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 104,
+        "line": 103,
         "column": 25
       }
     },
@@ -322,7 +332,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 115,
+        "line": 114,
         "column": 12
       }
     },
@@ -338,7 +348,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 104,
+        "line": 103,
         "column": 25
       }
     },
@@ -354,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 115,
+        "line": 114,
         "column": 12
       }
     },
@@ -370,7 +380,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 104,
+        "line": 103,
         "column": 25
       }
     },
@@ -386,7 +396,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 115,
+        "line": 114,
         "column": 12
       }
     },
@@ -402,7 +412,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 128,
+        "line": 127,
         "column": 15
       }
     },
@@ -418,7 +428,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 158,
+        "line": 157,
         "column": 15
       }
     },
@@ -434,7 +444,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 183,
+        "line": 182,
         "column": 11
       }
     },
@@ -450,7 +460,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 203,
+        "line": 202,
         "column": 15
       }
     },
@@ -466,7 +476,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 222,
+        "line": 221,
         "column": 13
       }
     },
@@ -482,7 +492,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 241,
+        "line": 240,
         "column": 15
       }
     },
@@ -498,7 +508,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 261,
+        "line": 260,
         "column": 21
       }
     },
@@ -514,7 +524,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 291,
+        "line": 290,
         "column": 65
       }
     },
@@ -530,7 +540,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 304,
+        "line": 303,
         "column": 15
       }
     },
@@ -546,7 +556,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 311,
+        "line": 310,
         "column": 71
       }
     },
@@ -562,7 +572,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 361,
+        "line": 360,
         "column": 13
       }
     },
@@ -578,7 +588,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 384,
+        "line": 383,
         "column": 68
       }
     },
