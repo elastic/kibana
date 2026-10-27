@@ -452,7 +452,14 @@ describe('RuleDetailsPage', () => {
     // The filters count what they'd show with the search.
     expect(matched.getByTestId('boostMatchedFilter-applied')).toHaveTextContent('1');
     expect(matched.getByTestId('boostMatchedFilter-outranked')).toHaveTextContent('0');
-    expect(matched.getByTestId('boostMatchedFilter-outranked')).toBeDisabled();
+    // Off, but focusable, so its tooltip can say why.
+    const outranked = matched.getByTestId('boostMatchedFilter-outranked');
+    expect(outranked).toHaveAttribute('aria-disabled', 'true');
+    outranked.focus();
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'No higher-ranked rule outranks this one for any of these matches.'
+    );
+    outranked.blur();
 
     await userEvent.clear(matched.getByRole('searchbox', { name: 'Search indices' }));
     await userEvent.click(matched.getByTestId('boostMatchedFilter-outranked'));
@@ -467,8 +474,12 @@ describe('RuleDetailsPage', () => {
 
     await userEvent.type(matched.getByRole('searchbox', { name: 'Search indices' }), 'products');
     expect(matched.getByText('No indices match your search or filter.')).toBeInTheDocument();
-    // Nothing the rule matches is hidden, so there's nothing to show.
+    // Nothing the rule matches is hidden, so there's nothing to show, as its tooltip says.
     expect(matched.getByTestId('boostMatchedShowHidden')).toBeDisabled();
+    await userEvent.hover(matched.getByText('Show hidden'));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'This rule matches no hidden indices.'
+    );
   });
 
   it('leaves hidden matches out until they are shown, counting them', async () => {

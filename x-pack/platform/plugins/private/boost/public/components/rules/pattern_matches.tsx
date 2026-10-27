@@ -377,6 +377,15 @@ export const PatternMatches = ({
       return renderEmpty(NO_DATA_SOURCES[targetType]);
     }
     const shown = includesHidden ? dataSources : dataSources.filter(({ hidden }) => !hidden);
+    // As in the matching list, only hidden matches are counted, so the note doesn't count others as
+    // matches. With nothing else to list, every hidden data source is counted, without an icon.
+    const hiddenMatchCount = includesHidden
+      ? 0
+      : dataSources.filter(({ name, hidden }) => hidden && matchesByName.has(name)).length;
+    const hiddenNote =
+      shown.length === 0 && hiddenMatchCount === 0
+        ? renderHiddenNote(dataSources.length)
+        : renderHiddenNote(hiddenMatchCount, matchKind);
     return renderList(
       TAB_LABELS.all[targetType],
       // Matches are mixed with everything else here, so their icons say which they are, and each
@@ -394,8 +403,7 @@ export const PatternMatches = ({
             testSubj: 'boostRuleAvailableTarget',
           });
         }),
-        // Lined up with the names, without an icon, as some may not match.
-        renderHiddenNote(dataSources.length - shown.length),
+        hiddenNote,
       ]
     );
   };

@@ -18,6 +18,7 @@ import {
   EuiProgress,
   EuiScreenReaderOnly,
   EuiSpacer,
+  EuiToolTip,
   useEuiTheme,
   useResizeObserver,
 } from '@elastic/eui';
@@ -52,6 +53,26 @@ const STATUS_LABELS: Readonly<Record<MatchStatus, string>> = {
 };
 
 const STATUSES: readonly MatchStatus[] = ['applied', 'outranked'];
+
+// Why a filter is off: it has nothing to show among the matches the search and switch leave.
+const NO_STATUS_TIPS: Readonly<Record<MatchStatus, string>> = {
+  applied: i18n.translate('xpack.boost.matchedTable.noAppliedTip', {
+    defaultMessage: 'This rule applies to none of these matches.',
+  }),
+  outranked: i18n.translate('xpack.boost.matchedTable.noOutrankedTip', {
+    defaultMessage: 'No higher-ranked rule outranks this one for any of these matches.',
+  }),
+};
+
+// Why the switch that shows hidden matches is off.
+const NO_HIDDEN_TIPS: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.matchedTable.noHiddenIndicesTip', {
+    defaultMessage: 'This rule matches no hidden indices.',
+  }),
+  data_streams: i18n.translate('xpack.boost.matchedTable.noHiddenDataStreamsTip', {
+    defaultMessage: 'This rule matches no hidden data streams.',
+  }),
+};
 
 /** A match, with what its columns show and sort by beyond the data source itself. */
 interface MatchedRow extends BoostDataSource {
@@ -411,32 +432,40 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup compressed>
-          {STATUSES.map((item, index) => (
-            <EuiFilterButton
-              key={item}
-              isToggle
-              isSelected={status === item}
-              hasActiveFilters={status === item}
-              numFilters={counts[item]}
-              // A filter with nothing to show is off, unless it's on already.
-              isDisabled={counts[item] === 0 && status !== item}
-              withNext={index < STATUSES.length - 1}
-              onClick={() => setStatus(status === item ? undefined : item)}
-              data-test-subj={`boostMatchedFilter-${item}`}
-            >
-              {STATUS_LABELS[item]}
-            </EuiFilterButton>
-          ))}
+          {STATUSES.map((item, index) => {
+            // A filter with nothing to show is off, unless it's on already. It stays focusable, so
+            // its tooltip can say why.
+            const isDisabled = counts[item] === 0 && status !== item;
+            return (
+              <EuiToolTip key={item} content={isDisabled ? NO_STATUS_TIPS[item] : undefined}>
+                <EuiFilterButton
+                  isToggle
+                  isSelected={status === item}
+                  hasActiveFilters={status === item}
+                  numFilters={counts[item]}
+                  isDisabled={isDisabled}
+                  hasAriaDisabled
+                  withNext={index < STATUSES.length - 1}
+                  onClick={() => setStatus(status === item ? undefined : item)}
+                  data-test-subj={`boostMatchedFilter-${item}`}
+                >
+                  {STATUS_LABELS[item]}
+                </EuiFilterButton>
+              </EuiToolTip>
+            );
+          })}
         </EuiFilterGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {/* Like the filters, it's off while it has nothing to show, unless it's on already. */}
-        <ShowHiddenSwitch
-          checked={includesHidden}
-          onChange={setIncludesHidden}
-          disabled={!hasHidden && !includesHidden}
-          data-test-subj="boostMatchedShowHidden"
-        />
+        <EuiToolTip content={hasHidden ? undefined : NO_HIDDEN_TIPS[type ?? 'indices']}>
+          <ShowHiddenSwitch
+            checked={includesHidden}
+            onChange={setIncludesHidden}
+            disabled={!hasHidden && !includesHidden}
+            data-test-subj="boostMatchedShowHidden"
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

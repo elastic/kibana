@@ -867,6 +867,22 @@ describe('RuleFlyout hidden data sources', () => {
     expect(matches.queryByTestId('boostRuleHiddenNotShown')).not.toBeInTheDocument();
   });
 
+  it('only counts hidden matches among every index, as the matching list does', async () => {
+    renderNewRule();
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'products');
+    await userEvent.click(screen.getByTestId('boostRuleAllTab'));
+
+    // The hidden index doesn't match, so it isn't counted.
+    expect(screen.queryByTestId('boostRuleHiddenNotShown')).not.toBeInTheDocument();
+
+    await userEvent.clear(screen.getByTestId('boostRulePattern'));
+    await userEvent.type(screen.getByTestId('boostRulePattern'), '*');
+
+    expect(screen.getByTestId('boostRuleHiddenNotShown')).toHaveTextContent(
+      '1 hidden index not shown'
+    );
+  });
+
   it('counts a pattern that only matches hidden data sources as matching', async () => {
     renderNewRule();
 
