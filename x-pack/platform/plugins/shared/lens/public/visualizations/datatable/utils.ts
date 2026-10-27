@@ -407,12 +407,15 @@ function resolveExplicitProgressBarPaletteStops(
   }
 
   const rangeType = getProgressBarPaletteRangeType(palette);
+  const lastIndex = explicitStops.length - 1;
   const upperBounds = explicitStops
-    .map(({ color, stop }) => ({
+    .map(({ color, stop }, index) => ({
       color,
-      stop: toDomainStop(stop, domain, rangeType),
+      // The last color covers every value above the previous stop, so its own stop is
+      // never a band boundary (as-code palettes leave it unset for open-ended ranges).
+      stop: index === lastIndex ? Number.POSITIVE_INFINITY : toDomainStop(stop, domain, rangeType),
     }))
-    .filter(({ stop }) => Number.isFinite(stop))
+    .filter(({ stop }, index) => index === lastIndex || Number.isFinite(stop))
     .sort((left, right) => left.stop - right.stop);
 
   if (!upperBounds.length) {
@@ -447,8 +450,8 @@ function toExplicitStopPairs(
       colors?.[index] ??
       (typeof rawStop === 'number' ? undefined : 'color' in rawStop ? rawStop.color : undefined);
 
-    if (color != null && stop != null) {
-      acc.push({ color, stop });
+    if (color != null) {
+      acc.push({ color, stop: stop ?? Number.NaN });
     }
 
     return acc;
