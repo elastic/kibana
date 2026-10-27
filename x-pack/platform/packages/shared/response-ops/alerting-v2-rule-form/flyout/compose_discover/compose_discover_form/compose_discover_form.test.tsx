@@ -19,7 +19,7 @@ import {
   Comparator,
   Aggregation,
   DEFAULT_THRESHOLD_FORM_VALUES,
-} from '../rule_builder/threshold/form_types';
+} from '@kbn/alerting-v2-rule-builders';
 import { BuilderStateProvider } from '../rule_builder/builder_state_context';
 import { RuleFormProvider, type RuleFormServices } from '../../../form/contexts';
 import { createMockServices, createTestQueryClient } from '../../../test_utils';

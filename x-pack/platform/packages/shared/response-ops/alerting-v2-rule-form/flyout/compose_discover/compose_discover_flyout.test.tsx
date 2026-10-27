@@ -132,7 +132,7 @@ jest.mock('./compose_discover_form', () => {
       <>
         <button
           data-test-subj="mockInitBuilder"
-          onClick={() => initStateOnMount({ ...state, recovery: { seeded: true } })}
+          onClick={() => initStateOnMount({ ...state, recovery: { seeded: true, conditions: [] } })}
           type="button"
         >
           Init builder

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { manageRuleTool } from './manage_rule';
-export type { ManageRuleToolDeps } from './manage_rule';
+export { draftCustomRuleTool } from './draft_custom_rule';
+export type { DraftCustomRuleToolDeps } from './draft_custom_rule';

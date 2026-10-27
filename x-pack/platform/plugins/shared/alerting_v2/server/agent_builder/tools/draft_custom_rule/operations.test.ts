@@ -592,6 +592,76 @@ describe('executeRuleOperations', () => {
     });
   });
 
+  describe('builder rules', () => {
+    const query: RuleAttachmentData['query'] = {
+      base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu)',
+      breach: { segment: 'WHERE avg_cpu > 0.9' },
+    };
+    const recovery: NonNullable<RuleAttachmentData['recovery']> = {
+      strategy: 'condition',
+      segment: 'WHERE avg_cpu < 0.5',
+    };
+    const builderRule: Partial<RuleAttachmentData> = {
+      kind: 'alert',
+      metadata: { name: 'High CPU', builder: { type: 'threshold' } },
+      query,
+      recovery,
+    };
+    const conversionWarning = expect.stringContaining(
+      'This rule was created with the "threshold" rule builder.'
+    );
+
+    it('converts the rule to custom ES|QL when set_query changes the query', async () => {
+      const result = await executeRuleOperations(builderRule, [
+        {
+          operation: 'set_query',
+          query: { ...query, breach: { segment: 'WHERE avg_cpu > 0.8' } },
+        },
+      ]);
+
+      expect(result.data.metadata).toEqual({ name: 'High CPU' });
+      expect(result.warnings).toEqual([conversionWarning]);
+    });
+
+    it('converts the rule to custom ES|QL when set_recovery changes the recovery', async () => {
+      const result = await executeRuleOperations(builderRule, [
+        { operation: 'set_recovery', recovery: { strategy: 'no_breach' } },
+      ]);
+
+      expect(result.data.metadata).toEqual({ name: 'High CPU' });
+      expect(result.warnings).toEqual([conversionWarning]);
+    });
+
+    it('keeps the builder when set_query and set_recovery resend the same values', async () => {
+      const result = await executeRuleOperations(builderRule, [
+        { operation: 'set_query', query },
+        { operation: 'set_recovery', recovery },
+      ]);
+
+      expect(result.data.metadata).toEqual(builderRule.metadata);
+      expect(result.warnings).toBeUndefined();
+    });
+
+    it('keeps the builder for operations that do not touch the query or recovery', async () => {
+      const result = await executeRuleOperations(builderRule, [
+        { operation: 'set_schedule', every: '1m' },
+      ]);
+
+      expect(result.data.metadata).toEqual(builderRule.metadata);
+      expect(result.warnings).toBeUndefined();
+    });
+
+    it('warns once when both the query and the recovery change', async () => {
+      const result = await executeRuleOperations(builderRule, [
+        { operation: 'set_query', query: { base: 'FROM metrics-* | WHERE cpu > 0.9' } },
+        { operation: 'set_recovery', recovery: { strategy: 'no_breach' } },
+      ]);
+
+      expect(result.data.metadata).toEqual({ name: 'High CPU' });
+      expect(result.warnings).toEqual([conversionWarning]);
+    });
+  });
+
   describe('set_recovery', () => {
     it('stores a no_breach recovery on the rule data', async () => {
       const ops: RuleOperation[] = [

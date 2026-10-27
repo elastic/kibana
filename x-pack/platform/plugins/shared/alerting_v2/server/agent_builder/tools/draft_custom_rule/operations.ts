@@ -6,7 +6,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
-import { omit } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import {
   isSavedObjectErrorResult,
@@ -375,6 +375,25 @@ const setArtifacts = (
 ): Partial<RuleAttachmentData> =>
   artifacts.length ? { ...data, artifacts } : omit(data, 'artifacts');
 
+/**
+ * Builders generate the query and recovery, so replacing either one leaves a rule the builder can
+ * no longer represent. Dropping `metadata.builder` also satisfies the write API, which rejects a
+ * query change on a builder rule that still carries it.
+ */
+const convertToCustomRule = (
+  data: Partial<RuleAttachmentData>,
+  warnings: string[]
+): Partial<RuleAttachmentData> => {
+  const builderType = data.metadata?.builder?.type;
+  if (!builderType) {
+    return data;
+  }
+  warnings.push(
+    `This rule was created with the "${builderType}" rule builder. Changing its query or recovery converts it to a custom ES|QL rule, so it can no longer be edited with the builder.`
+  );
+  return omit(data, 'metadata.builder');
+};
+
 // ─── Execution ────────────────────────────────────────────────────────────────
 
 const warnOnBackingIndices = (
@@ -512,11 +531,15 @@ export const executeRuleOperations = async (
             );
           }
         }
+        const isQueryChanged = !isEqual(op.query, next.query);
         next = {
           ...next,
           query: op.query,
           ...(resolvedTimeField ? { time_field: resolvedTimeField } : {}),
         };
+        if (isQueryChanged) {
+          next = convertToCustomRule(next, warnings);
+        }
         break;
       }
 
@@ -529,7 +552,11 @@ export const executeRuleOperations = async (
             next.recovery?.strategy === recoveryStrategy.query ? next.recovery.query : undefined
           );
         }
+        const isRecoveryChanged = !isEqual(op.recovery, next.recovery);
         next = { ...next, recovery: op.recovery };
+        if (isRecoveryChanged) {
+          next = convertToCustomRule(next, warnings);
+        }
 
         // A recovering delay is inert under `manual` and the write API rejects
         // the pair, and no operation can remove a phase, so switching to manual

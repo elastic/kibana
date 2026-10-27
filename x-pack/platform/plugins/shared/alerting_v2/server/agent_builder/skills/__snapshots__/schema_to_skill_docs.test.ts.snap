@@ -314,6 +314,12 @@ Alerts are the unit of problem state. Each unique group (by \`group_hash\`) has 
 Only \`kind: alert\` rules produce alerts. \`kind: signal\` rules write raw signal events with no alert tracking."
 `;
 
+exports[`schema_to_skill_docs generateCustomRuleWhenToUse lists every registered rule builder before the custom rule fallback 1`] = `
+"Use only when no rule builder fits the request. Check these builders first:
+- \`draft_threshold_rule\` (Threshold): Use when the user wants to be alerted when a count, average, sum, min, max, distinct count, percentile or ratio of those over one index goes above, below, between or outside fixed values, optionally per host, service or other group.
+Choose this tool when the rule needs ES|QL that no builder can express (e.g. joins, LOOKUP JOIN, multi-stage EVAL/STATS, custom severity CASE logic), when the user supplies a raw ES|QL query, or when an attached rule has no builder type or its builder params cannot be parsed."
+`;
+
 exports[`schema_to_skill_docs generateDispatchFlowDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Dispatch Flow
 
@@ -819,14 +825,14 @@ for example \`notify-high-cpu-prod\`).
 
 ### 1. Add the routing tag to the rule
 
-Call \`manage_rule\` → \`set_metadata\` with \`routing_tags: [<all existing routing tags>, \\"notify-<rule-slug>\\"]\`.
+Call \`draft_custom_rule\` → \`set_metadata\` with \`routing_tags: [<all existing routing tags>, \\"notify-<rule-slug>\\"]\`.
 
 > **Routing tags are replaced wholesale.** Read the current routing tags off the rule
 > attachment first and re-send them alongside the new one. The routing tag cap is 20.
 > If the rule is already at the cap, ask the user which existing routing tag to drop.
 > Do not put the routing tag in \`tags\`; rule tags do not link policies.
 
-> **Save reminder**: \`manage_rule\` only updates the in-memory rule attachment.
+> **Save reminder**: \`draft_custom_rule\` only updates the in-memory rule attachment.
 > The routing tag only exists once the user saves the rule; until then, this policy
 > will not match any alerts (unless another saved rule already carries the tag).
 

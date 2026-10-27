@@ -34,7 +34,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   ...Object.values(observabilityNightshiftSourceTools),
 
   // Alerting
-  `${internalNamespaces.platformAlerting}.manage_rule`,
+  `${internalNamespaces.platformAlerting}.draft_custom_rule`,
 
   // Proposals
   'platform.proposals.revise',

@@ -11,6 +11,7 @@ import {
   MATCHER_CONTEXT_FIELDS,
   POLICY_MATCHER_TAGS_MAX,
 } from '@kbn/alerting-v2-schemas';
+import { RULE_BUILDER_TYPES } from '@kbn/alerting-v2-rule-builders';
 import type {
   ActionPolicyWorkflowPayload,
   ActionPolicyWorkflowPayloadAlert,
@@ -22,6 +23,7 @@ import {
   generateRuleSchemaDoc,
   generateRuleOperationsDoc,
   generateRuleOperationsUsageList,
+  generateCustomRuleWhenToUse,
   generateRuleKindDoc,
   generateAlertLifecycleDoc,
   generateStateTransitionDoc,
@@ -369,7 +371,7 @@ describe('schema_to_skill_docs', () => {
   });
 
   describe('generateRuleOperationsUsageList', () => {
-    it('includes every manage_rule operation describe', () => {
+    it('includes every draft_custom_rule operation describe', () => {
       const doc = generateRuleOperationsUsageList();
       expect(doc).toContain('Use `set_metadata`');
       expect(doc).toContain('Use `set_kind`');
@@ -380,6 +382,19 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('Use `set_dashboards`');
       expect(doc).toContain('Use `set_runbook`');
       expect(doc).toContain('Use `validate`');
+    });
+  });
+
+  describe('generateCustomRuleWhenToUse', () => {
+    it('lists every registered rule builder before the custom rule fallback', () => {
+      expect(generateCustomRuleWhenToUse()).toMatchSnapshot();
+    });
+
+    it('names each registered builder tool', () => {
+      const doc = generateCustomRuleWhenToUse();
+      for (const { toolName } of Object.values(RULE_BUILDER_TYPES)) {
+        expect(doc).toContain(`\`${toolName}\``);
+      }
     });
   });
 
@@ -790,7 +805,7 @@ describe('schema_to_skill_docs', () => {
     it('instructs the link-tag flow and defers shared policies to the multi-rule reference', () => {
       const doc = generateSingleRuleActionPolicyDoc();
       expect(doc).toContain('# Single-rule Action Policies');
-      expect(doc).toContain('manage_rule');
+      expect(doc).toContain('draft_custom_rule');
       expect(doc).toContain('set_metadata');
       expect(doc).toContain('set_destinations');
       expect(doc).toContain('set_matcher');
@@ -885,8 +900,9 @@ describe('schema_to_skill_docs', () => {
     it.each([
       ['zodToJsonSchema via generateRuleSchemaDoc', generateRuleSchemaDoc],
       ['zodToJsonSchema via generateActionPolicySchemaDoc', generateActionPolicySchemaDoc],
-      ['manage_rule operation .describe()', generateRuleOperationsDoc],
-      ['manage_rule operation usage list', generateRuleOperationsUsageList],
+      ['draft_custom_rule operation .describe()', generateRuleOperationsDoc],
+      ['draft_custom_rule operation usage list', generateRuleOperationsUsageList],
+      ['draft_custom_rule when-to-use from the rule builder registry', generateCustomRuleWhenToUse],
       ['manage_action_policy operation .describe()', generateActionPolicyOperationsDoc],
       ['generateEnumTable (alert status from spec)', generateAlertLifecycleDoc],
       ['generateEnumTable (no-data strategy from spec)', generateNoDataStrategyDoc],

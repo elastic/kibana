@@ -78,7 +78,7 @@ evaluate.describe(
                   // notification workflow before the policy is wired up.
                   expectedToolIds: [
                     ALERTING_TOOL_IDS.manageActionPolicy,
-                    ALERTING_TOOL_IDS.manageRule,
+                    ALERTING_TOOL_IDS.draftCustomRule,
                     WORKFLOW_GENERATION_TOOL_ID,
                   ],
                   expectRenderAttachment: [
@@ -171,7 +171,7 @@ evaluate.describe(
                   notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
                   expectedToolIds: [
                     ALERTING_TOOL_IDS.manageActionPolicy,
-                    ALERTING_TOOL_IDS.manageRule,
+                    ALERTING_TOOL_IDS.draftCustomRule,
                     WORKFLOW_GENERATION_TOOL_ID,
                   ],
                   expectRenderAttachment: [

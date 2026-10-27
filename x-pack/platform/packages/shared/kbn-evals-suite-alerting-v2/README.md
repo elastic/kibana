@@ -10,7 +10,7 @@ The rule-authoring skill lets users compose, discover, and modify Alerting V2 ru
 action policies (notification policies) from within an Agent Builder conversation. It is
 backed by two tools:
 
-- `platform.alerting.manage_rule`
+- `platform.alerting.draft_custom_rule`
 - `platform.alerting.manage_action_policy`
 
 This suite drives the skill end-to-end through the `/api/agent_builder/converse` API and

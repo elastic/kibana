@@ -31,10 +31,10 @@ import {
  */
 export type QueryStyle = 'segmented' | 'single';
 
-export const MANAGE_RULE_SKILL_OUTPUT = {
+export const DRAFT_CUSTOM_RULE_SKILL_OUTPUT = {
   expectedSkills: [RULE_AUTHORING_SKILL_ID],
   notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
-  expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
+  expectedToolIds: [ALERTING_TOOL_IDS.draftCustomRule],
   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
 } as const;
 

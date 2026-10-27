@@ -44,7 +44,7 @@ export const getLatestAttachmentData = <T>(
 
 /**
  * All version payloads for the latest attachment of the given type, ordered
- * by version number. Used to assert multi-turn updates (each manage_rule call
+ * by version number. Used to assert multi-turn updates (each draft_custom_rule call
  * appends a version).
  */
 export const getAttachmentVersionData = <T>(

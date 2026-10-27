@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/alerting-v2-rule-builders",
+  "description": "Rule builder types, params schemas and form state converters shared by the Alerting v2 rule form and server.",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "sideEffects": false
+}

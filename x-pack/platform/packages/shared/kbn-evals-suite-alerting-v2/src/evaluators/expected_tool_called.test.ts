@@ -11,7 +11,7 @@ import {
   createExpectedToolCalledEvaluator,
 } from './expected_tool_called';
 
-const MANAGE_RULE = 'platform.alerting.manage_rule';
+const DRAFT_CUSTOM_RULE = 'platform.alerting.draft_custom_rule';
 const MANAGE_ACTION_POLICY = 'platform.alerting.manage_action_policy';
 const INDEX_EXPLORER = 'platform.core.index_explorer';
 const LIST_INDICES = 'platform.core.list_indices';
@@ -33,46 +33,46 @@ describe('createExpectedToolCalledEvaluator', () => {
     });
 
   it('skips when there is no tool-call expectation', async () => {
-    const result = await run(outputWithToolCalls([MANAGE_RULE]), {});
+    const result = await run(outputWithToolCalls([DRAFT_CUSTOM_RULE]), {});
     expect(result.score).toBeNull();
     expect(result.label).toBe('skipped');
   });
 
   it('throws when expectedToolIds is an empty array', async () => {
-    await expect(run(outputWithToolCalls([MANAGE_RULE]), { expectedToolIds: [] })).rejects.toThrow(
-      /non-empty array of tool-ids/i
-    );
+    await expect(
+      run(outputWithToolCalls([DRAFT_CUSTOM_RULE]), { expectedToolIds: [] })
+    ).rejects.toThrow(/non-empty array of tool-ids/i);
   });
 
   it('scores 1 when every expected tool was called', async () => {
-    const result = await run(outputWithToolCalls([MANAGE_RULE, MANAGE_ACTION_POLICY]), {
-      expectedToolIds: [MANAGE_RULE, MANAGE_ACTION_POLICY],
+    const result = await run(outputWithToolCalls([DRAFT_CUSTOM_RULE, MANAGE_ACTION_POLICY]), {
+      expectedToolIds: [DRAFT_CUSTOM_RULE, MANAGE_ACTION_POLICY],
     });
     expect(result.score).toBe(1);
   });
 
   it('scores 0 when any expected tool was not called', async () => {
     const result = await run(outputWithToolCalls([MANAGE_ACTION_POLICY]), {
-      expectedToolIds: [MANAGE_RULE],
+      expectedToolIds: [DRAFT_CUSTOM_RULE],
     });
     expect(result.score).toBe(0);
   });
 
   it('scores 0 when no tools were called but one was expected', async () => {
     const result = await run(outputWithToolCalls([]), {
-      expectedToolIds: [MANAGE_RULE],
+      expectedToolIds: [DRAFT_CUSTOM_RULE],
     });
     expect(result.score).toBe(0);
   });
 
   it('reports the used and missing tool ids in metadata', async () => {
-    const result = await run(outputWithToolCalls([MANAGE_RULE]), {
-      expectedToolIds: [MANAGE_RULE, MANAGE_ACTION_POLICY],
+    const result = await run(outputWithToolCalls([DRAFT_CUSTOM_RULE]), {
+      expectedToolIds: [DRAFT_CUSTOM_RULE, MANAGE_ACTION_POLICY],
     });
     expect(result.metadata).toEqual(
       expect.objectContaining({
-        usedToolIds: [MANAGE_RULE],
-        expectedToolIds: [MANAGE_RULE, MANAGE_ACTION_POLICY],
+        usedToolIds: [DRAFT_CUSTOM_RULE],
+        expectedToolIds: [DRAFT_CUSTOM_RULE, MANAGE_ACTION_POLICY],
         missingToolIds: [MANAGE_ACTION_POLICY],
       })
     );
@@ -89,19 +89,19 @@ describe('createExpectedAnyOfToolIdsEvaluator', () => {
     });
 
   it('skips when there is no any-of expectation', async () => {
-    const result = await run(outputWithToolCalls([MANAGE_RULE]), {});
+    const result = await run(outputWithToolCalls([DRAFT_CUSTOM_RULE]), {});
     expect(result.score).toBeNull();
     expect(result.label).toBe('skipped');
   });
 
   it('throws when expectedAnyOfToolIds is an empty array', async () => {
     await expect(
-      run(outputWithToolCalls([MANAGE_RULE]), { expectedAnyOfToolIds: [] })
+      run(outputWithToolCalls([DRAFT_CUSTOM_RULE]), { expectedAnyOfToolIds: [] })
     ).rejects.toThrow(/non-empty array of tool-ids/i);
   });
 
   it('scores 1 when one alternative was called', async () => {
-    const result = await run(outputWithToolCalls([INDEX_EXPLORER, MANAGE_RULE]), {
+    const result = await run(outputWithToolCalls([INDEX_EXPLORER, DRAFT_CUSTOM_RULE]), {
       expectedAnyOfToolIds: DISCOVERY_ALTERNATIVES,
     });
     expect(result.score).toBe(1);
@@ -115,7 +115,7 @@ describe('createExpectedAnyOfToolIdsEvaluator', () => {
   });
 
   it('scores 0 when none of the alternatives were called', async () => {
-    const result = await run(outputWithToolCalls([MANAGE_RULE]), {
+    const result = await run(outputWithToolCalls([DRAFT_CUSTOM_RULE]), {
       expectedAnyOfToolIds: DISCOVERY_ALTERNATIVES,
     });
     expect(result.score).toBe(0);
@@ -123,7 +123,7 @@ describe('createExpectedAnyOfToolIdsEvaluator', () => {
       expect.objectContaining({
         expectedAnyOfToolIds: DISCOVERY_ALTERNATIVES,
         matchedToolIds: [],
-        usedToolIds: [MANAGE_RULE],
+        usedToolIds: [DRAFT_CUSTOM_RULE],
       })
     );
   });
