@@ -8,7 +8,10 @@
 import type * as http from 'http';
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
-import { CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES } from '@kbn/fleet-plugin/common/constants';
+import {
+  CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES,
+  PROVISIONING_CALLBACK_TOKEN_HEADER,
+} from '@kbn/fleet-plugin/common/constants';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -24,10 +27,11 @@ const PAYLOAD = {
   role_arn: `arn:aws:iam::${ACCOUNT}:role/ElasticWorkloadIdentity-abc`,
   stack_arn: `arn:aws:cloudformation:us-east-1:${ACCOUNT}:stack/elastic-wif/11111111-2222-3333-4444-555555555555`,
 };
+const OTHER_ROLE_ARN = `arn:aws:iam::${ACCOUNT}:role/ElasticWorkloadIdentity-other`;
 
 /**
- * The receive route is what the launched stack's Lambda calls. It is public and only accepts
- * the API key created for the record.
+ * The receive route is what the launched stack's Lambda calls. It is public, not authenticated,
+ * and only accepts the token minted for the record.
  */
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -43,14 +47,15 @@ export default function (providerContext: FtrProviderContext) {
       .set(INTERNAL_ROUTE_HEADERS)
       .send({ provider: 'aws', ...identity })
       .expect(200);
-    return body as { item: { id: string; status: string; expires_at: string }; api_key: string };
+    return body as { item: { id: string; status: string; expires_at: string }; token: string };
   };
 
-  const receive = (id: string, apiKey: string, payload: Record<string, unknown> = PAYLOAD) =>
+  // The route is not authenticated: the record's token, in a header, is all the stack presents.
+  const receive = (id: string, token: string, payload: Record<string, unknown> = PAYLOAD) =>
     supertestWithoutAuth
       .post(receivePath(id))
       .set(PUBLIC_ROUTE_HEADERS)
-      .set('Authorization', `ApiKey ${apiKey}`)
+      .set(PROVISIONING_CALLBACK_TOKEN_HEADER, token)
       .send(payload);
 
   describe('Provisioning callbacks', () => {
@@ -67,27 +72,26 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
-    it('creates a pending record and returns the key exactly once', async () => {
-      const { item, api_key: apiKey } = await createCallback();
+    it('creates a pending record and returns the token exactly once', async () => {
+      const { item, token } = await createCallback();
 
       expect(item.status).to.be('pending');
-      expect(item).to.not.have.property('api_key_id');
-      expect(apiKey).to.be.a('string');
-      // Base64 `id:api_key`, as the Lambda sends it in `Authorization: ApiKey`.
-      expect(Buffer.from(apiKey, 'base64').toString()).to.match(/^.+:.+$/);
+      expect(item).to.not.have.property('token_hash');
+      // 256 random bits as hex, as the Lambda sends them in the token header.
+      expect(token).to.match(/^[0-9a-f]{64}$/);
 
       const { body } = await supertest
         .get(`${CALLBACKS_PATH}/${item.id}`)
         .set(INTERNAL_ROUTE_HEADERS)
         .expect(200);
       expect(body.item.status).to.be('pending');
-      expect(JSON.stringify(body)).to.not.contain(apiKey);
+      expect(JSON.stringify(body)).to.not.contain(token);
     });
 
-    it('receives the values with the bound key, replays idempotently and rejects a different payload', async () => {
-      const { item, api_key: apiKey } = await createCallback();
+    it('receives the values with the bound token, replays idempotently and rejects a different payload', async () => {
+      const { item, token } = await createCallback();
 
-      const first = await receive(item.id, apiKey).expect(200);
+      const first = await receive(item.id, token).expect(200);
       expect(first.body).to.eql({ status: 'received' });
 
       const { body } = await supertest
@@ -110,15 +114,25 @@ export default function (providerContext: FtrProviderContext) {
       expect(created.iac_deployment_id).to.be(PAYLOAD.stack_arn);
       expect(created.name).to.be('ElasticWorkloadIdentity-abc');
 
-      // The first receive invalidated the key, so Kibana now rejects it.
-      await receive(item.id, apiKey).expect(401);
+      // The token has nothing left to do: a retry of the same report, as the Lambda sends on a
+      // retry, gets the same answer and creates nothing, and different values are refused.
+      const again = await receive(item.id, token).expect(200);
+      expect(again.body).to.eql({ status: 'received' });
+      await receive(item.id, token, { ...PAYLOAD, role_arn: OTHER_ROLE_ARN }).expect(409);
+      const after = await supertest
+        .get('/api/fleet/cloud_connectors')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      expect(
+        after.body.items.filter((connector: { id: string }) => connector.id === item.id)
+      ).to.have.length(1);
     });
 
-    it('rejects a key issued for another record without revealing the record', async () => {
+    it('rejects a token issued for another record without revealing the record', async () => {
       const first = await createCallback();
       const second = await createCallback();
 
-      await receive(first.item.id, second.api_key).expect(404);
+      await receive(first.item.id, second.token).expect(404);
 
       const { body } = await supertest
         .get(`${CALLBACKS_PATH}/${first.item.id}`)
@@ -128,25 +142,25 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('rejects a role and a stack from different accounts', async () => {
-      const { item, api_key: apiKey } = await createCallback();
+      const { item, token } = await createCallback();
 
-      await receive(item.id, apiKey, {
+      await receive(item.id, token, {
         ...PAYLOAD,
         role_arn: 'arn:aws:iam::999999999999:role/other',
       }).expect(400);
     });
 
     it('rejects malformed values', async () => {
-      const { item, api_key: apiKey } = await createCallback();
+      const { item, token } = await createCallback();
 
-      await receive(item.id, apiKey, { ...PAYLOAD, stack_arn: 'not-an-arn' }).expect(400);
-      await receive(item.id, apiKey, { ...PAYLOAD, role_arn: 'not-an-arn' }).expect(400);
+      await receive(item.id, token, { ...PAYLOAD, stack_arn: 'not-an-arn' }).expect(400);
+      await receive(item.id, token, { ...PAYLOAD, role_arn: 'not-an-arn' }).expect(400);
     });
 
-    it('answers 404 to a caller that did not authenticate with an API key', async () => {
+    it('answers 404 to a caller that presents no token, whatever else it authenticates with', async () => {
       const { item } = await createCallback();
 
-      // Basic auth is accepted by Kibana but is not the record's key.
+      // Kibana credentials are not the record's token.
       await supertest
         .post(receivePath(item.id))
         .set(PUBLIC_ROUTE_HEADERS)
@@ -154,8 +168,14 @@ export default function (providerContext: FtrProviderContext) {
         .expect(404);
     });
 
+    it('answers 404 to a malformed token', async () => {
+      const { item } = await createCallback();
+
+      await receive(item.id, 'not-a-token').expect(404);
+    });
+
     it('creates the identity with the name, account type and template details sent at create', async () => {
-      const { item, api_key: apiKey } = await createCallback({
+      const { item, token } = await createCallback({
         connector_name: 'provisioning-callback-named',
         account_type: 'single-account',
         iac_key: 'sha256:abc',
@@ -164,7 +184,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       const stackArn = `arn:aws:cloudformation:us-east-1:${ACCOUNT}:stack/elastic-wif/66666666-7777-8888-9999-000000000000`;
 
-      await receive(item.id, apiKey, { ...PAYLOAD, stack_arn: stackArn }).expect(200);
+      await receive(item.id, token, { ...PAYLOAD, stack_arn: stackArn }).expect(200);
 
       const { body } = await supertest
         .get(`${CALLBACKS_PATH}/${item.id}`)
@@ -186,17 +206,17 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('cancels a pending record, so a late report is turned away', async () => {
-      const { item, api_key: apiKey } = await createCallback();
+      const { item, token } = await createCallback();
 
       const { body } = await supertest
         .delete(`${CALLBACKS_PATH}/${item.id}`)
         .set(INTERNAL_ROUTE_HEADERS)
         .expect(200);
       expect(body.item.status).to.be('cancelled');
-      expect(body.item).to.not.have.property('api_key_id');
+      expect(body.item).to.not.have.property('token_hash');
 
-      // The cancel invalidated the key, so the stack can no longer report.
-      await receive(item.id, apiKey).expect(401);
+      // The record is cancelled, so its own token is turned away.
+      await receive(item.id, token).expect(410);
 
       const connectors = await supertest
         .get('/api/fleet/cloud_connectors')
@@ -206,9 +226,9 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('hands back the received record when cancelled after the stack reported', async () => {
-      const { item, api_key: apiKey } = await createCallback({ connector_name: 'cancel-late' });
+      const { item, token } = await createCallback({ connector_name: 'cancel-late' });
       const stackArn = `arn:aws:cloudformation:us-east-1:${ACCOUNT}:stack/elastic-wif/77777777-8888-9999-0000-111111111111`;
-      await receive(item.id, apiKey, { ...PAYLOAD, stack_arn: stackArn }).expect(200);
+      await receive(item.id, token, { ...PAYLOAD, stack_arn: stackArn }).expect(200);
 
       const { body } = await supertest
         .delete(`${CALLBACKS_PATH}/${item.id}`)
@@ -305,11 +325,11 @@ export default function (providerContext: FtrProviderContext) {
         expect(deployment.item.status).to.be('pending');
         expect(deployment.item).to.not.have.property('pendingAgentlessPolicies');
 
-        const { item, api_key: apiKey } = await createCallback({
+        const { item, token } = await createCallback({
           connector_name: 'auto-deploy',
           onboarding_deployment_id: deployment.item.id,
         });
-        await receive(item.id, apiKey).expect(200);
+        await receive(item.id, token).expect(200);
 
         const record = await waitForDeployStage(item.id);
         expect(record.deploy_error).to.be(undefined);
