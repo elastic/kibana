@@ -35,7 +35,20 @@ import {
   doAllChangesMatch,
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
-import { prBaseEnv, prBaseSteps, cpsTests, renderSteps } from '#pipeline-utils/step-library';
+import {
+  buildFipsImage,
+  checkNextDocs,
+  checkOasSnapshot,
+  checkSavedObjects,
+  cpsTests,
+  localCheck,
+  prBaseEnv,
+  prBaseSteps,
+  renderSteps,
+  renovateValidation,
+  storybooks,
+  verifyFipsEnabled,
+} from '#pipeline-utils/step-library';
 
 const prConfigs =
   loadBuildkiteJson<typeof import('../../../pull_requests.json')>('pull_requests.json');
@@ -140,7 +153,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 
     if (await doAllChangesMatch(/^renovate\.json$/)) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
+      pipeline.push(renderSteps(renovateValidation(), { header: true }));
       console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
       emitPipeline(pipeline);
       return;
@@ -148,13 +161,11 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
 
     await runPreBuild();
     pipeline.push(renderSteps(prBaseSteps(), { header: true, env: prBaseEnv }));
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/local_check.yml', {}));
+    pipeline.push(renderSteps(localCheck()));
 
     // Gated together: check_api_contracts depends_on check_oas_snapshot.
     if (!scoutTestsOnly) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/check_oas_snapshot.yml', cancelable)
-      );
+      pipeline.push(renderSteps(checkOasSnapshot(), cancelOnGate));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
     }
 
@@ -167,11 +178,11 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     ]);
 
     if (prHasFIPSLabel()) {
-      pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml', cancelable));
+      pipeline.push(renderSteps(verifyFipsEnabled(), cancelOnGate));
     }
 
     if (await doAnySuiteRelevantChangesMatch([/^renovate\.json$/])) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', cancelable));
+      pipeline.push(renderSteps(renovateValidation(), cancelOnGate));
     }
 
     if (
@@ -328,7 +339,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     if (GITHUB_PR_LABELS.includes('ci:build-docker-fips')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fips.yml', cancelable));
+      pipeline.push(renderSteps(buildFipsImage(), cancelOnGate));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:entity-store-performance')) {
@@ -358,12 +369,12 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     if (
       (await doAnySuiteRelevantChangesMatch([
         /.*stor(ies|y).*/,
-        /^\.buildkite\/pipelines\/pull_request\/storybooks\.yml/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/storybooks\.ts/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:build-storybooks') ||
       (await isStorybookBuildAffected())
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml', cancelable));
+      pipeline.push(renderSteps(storybooks(), cancelOnGate));
     }
 
     if (
@@ -373,14 +384,12 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /\.devdocs\.json$/,
         /\.mdx$/,
         /^dev_docs\/.*(png|gif|jpg|jpeg|webp)$/,
-        /^\.buildkite\/pipelines\/pull_request\/check_next_docs\.yml/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/check_next_docs\.ts/,
       ])) &&
         process.env.GITHUB_PR_TARGET_BRANCH === 'main') ||
       GITHUB_PR_LABELS.includes('ci:build-next-docs')
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/check_next_docs.yml', cancelable)
-      );
+      pipeline.push(renderSteps(checkNextDocs(), cancelOnGate));
     }
 
     if (
@@ -775,9 +784,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
 
     // Run Saved Objects checks systematically
     if (!scoutTestsOnly) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml', cancelable)
-      );
+      pipeline.push(renderSteps(checkSavedObjects(), cancelOnGate));
     }
 
     // Run Workflow Schema OOM prevention test when schema or connector whitelist changes
