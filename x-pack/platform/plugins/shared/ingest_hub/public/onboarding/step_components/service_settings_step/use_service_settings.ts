@@ -22,7 +22,7 @@ import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { reconcileInstances } from './instances';
 import { useOnboardingSO } from '../authenticate_and_deploy_step/use_onboarding_so';
-import { toSOSettingsUpdate } from '../authenticate_and_deploy_step/so_settings';
+import { toSOMetadataUpdate } from '../authenticate_and_deploy_step/so_settings';
 import {
   getMissingSourceGroup,
   getRequiredTextFields,
@@ -36,6 +36,7 @@ import {
   getBareNamePackage,
   isMainPackageName,
 } from '../authenticate_and_deploy_step/deploy_group_helpers';
+import { getNamespaceError } from './instance_namespace_field';
 import {
   getDescriptionError,
   getIntegrationNameError,
@@ -59,7 +60,10 @@ export interface ServiceVars {
    * Per-data-stream var values. Keys are data stream ids (e.g. 'vpcflow', 'ec2_logs').
    */
   varsByDataStream: Record<string, ServiceDataStreamVars>;
-  /** Data stream namespace for this instance's policy. Empty or absent inherits the agent policy's. */
+  /**
+   * Data stream namespace of a duplicate's policy. Originals have none and take the global
+   * namespace; a duplicate with none takes it too.
+   */
   namespace?: string;
 }
 
@@ -89,6 +93,11 @@ export interface ServiceSettingsPersistedState {
   /** The last name the prefill generated. While the name still equals it, it follows the selection. */
   autoName?: string;
   description?: string;
+  /**
+   * Global data stream namespace. Every original instance deploys into it; a duplicate may pick
+   * its own (`ServiceVars.namespace`). Empty or absent inherits the agent policy's.
+   */
+  namespace?: string;
   /** Keyed by instanceId. */
   serviceVars: Record<string, ServiceVars>;
   /** Absent in old sessions — reconciled on read from selectedServiceIds. */
@@ -209,6 +218,18 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
         globalRegion: region,
+      });
+    },
+    [persisted, setPersisted]
+  );
+
+  const namespace = persisted?.namespace ?? '';
+
+  const setNamespace = useCallback(
+    (value: string) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        namespace: value,
       });
     },
     [persisted, setPersisted]
@@ -389,19 +410,26 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       instanceId: string,
       newVarsByDataStream: Record<string, ServiceDataStreamVars>,
       enabledDataStreams: string[],
-      namespace?: string
+      instanceNamespace?: string,
+      /** A new display name for the instance, written in the same update. */
+      newName?: string
     ) => {
       const current = getServiceVars(instanceId);
       const merged = mergeVarsByDataStream(current.varsByDataStream, newVarsByDataStream);
+      // Only a duplicate has a namespace of its own; an original always follows the global one.
+      const isDuplicate = instances.some((i) => i.instanceId === instanceId && i.isDuplicate);
+      const ownNamespace = isDuplicate ? instanceNamespace ?? current.namespace : undefined;
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
-        instances,
+        instances: newName
+          ? instances.map((i) => (i.instanceId === instanceId ? { ...i, name: newName } : i))
+          : instances,
         serviceVars: {
           ...(persisted?.serviceVars ?? {}),
           [instanceId]: {
             enabledDataStreams,
             varsByDataStream: merged,
-            namespace: namespace ?? current.namespace,
+            namespace: ownNamespace,
           },
         },
       });
@@ -415,7 +443,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       newName: string,
       newVarsByDataStream: Record<string, ServiceDataStreamVars>,
       enabledDataStreams: string[],
-      namespace?: string
+      instanceNamespace?: string
     ) => {
       const source = instances.find((i) => i.instanceId === sourceInstanceId);
       if (!source) return;
@@ -447,7 +475,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
               ? enabledDataStreams
               : sourceVars.enabledDataStreams,
             varsByDataStream: mergedByDs,
-            namespace: namespace ?? sourceVars.namespace,
+            namespace: instanceNamespace ?? sourceVars.namespace,
           },
         },
       });
@@ -498,14 +526,16 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
 
   const integrationNameError = getIntegrationNameError(integrationName);
   const descriptionError = getDescriptionError(description);
+  const namespaceError = getNamespaceError(namespace);
 
   const isReady = useMemo(
     () =>
       !!globalRegion.trim() &&
       incompleteInstances.length === 0 &&
       !integrationNameError &&
-      !descriptionError,
-    [globalRegion, incompleteInstances, integrationNameError, descriptionError]
+      !descriptionError &&
+      !namespaceError,
+    [globalRegion, incompleteInstances, integrationNameError, descriptionError, namespaceError]
   );
 
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
@@ -514,10 +544,11 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     setServiceSettingsMethod(deploymentMethod);
     // The name and description stay editable after a deploy, and a later deploy may find nothing
     // to do, so save them to the onboarding record here. Best-effort: the next deploy writes them
-    // again.
+    // again. Not the namespace: a changed one is detected against the saved one and applied by the
+    // next deploy, which saves it.
     const deploymentId = detectAndReviewStep?.onboardingDeploymentId;
     if (deploymentId) {
-      updateDeployment(deploymentId, toSOSettingsUpdate(persisted));
+      updateDeployment(deploymentId, toSOMetadataUpdate(persisted));
     }
     onContinue();
   }, [
@@ -541,6 +572,9 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     description,
     setDescription,
     descriptionError,
+    namespace,
+    setNamespace,
+    namespaceError,
     bareNamePackage,
     instances,
     filteredInstances,

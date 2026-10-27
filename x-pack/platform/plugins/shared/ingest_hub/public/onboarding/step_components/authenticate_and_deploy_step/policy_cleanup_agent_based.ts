@@ -12,6 +12,7 @@ import {
   sendGetPackageInfoByKey,
 } from '@kbn/fleet-plugin/public';
 
+import { getEffectiveNamespace } from '../../common/effective_namespace';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
 import {
@@ -125,6 +126,7 @@ export async function updateAgentBasedPolicy(
     storedServiceVars,
     globalRegion,
     namespace,
+    globalNamespace,
     authenticateAndDeployStep,
     servicesMap,
     selectedAgentPolicyIds,
@@ -236,7 +238,11 @@ export async function updateAgentBasedPolicy(
   }
 
   const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
-  const policyNamespace = existingNamespace ?? namespace;
+  // The namespace the instances now deploy into wins, so a change made while editing a deployed
+  // flow reaches the policy. Without one the policy keeps what it has, which may be inherited.
+  const policyNamespace =
+    getEffectiveNamespace(members[0].instance.instanceId, storedServiceVars, globalNamespace) ||
+    (existingNamespace ?? namespace);
 
   // Simplified-schema PUT: inputs is a record (keyed by `<ptName>-<inputType>`).
   // The legacy schema accepts `enabled` at the top level but requires inputs as an array.

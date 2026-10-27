@@ -148,6 +148,14 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       meta: { description: 'Integration description from the Service settings step.' },
     })
   ),
+  namespace: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
+      },
+    })
+  ),
   dataFormat: schema.maybe(DataFormatSchema),
   authMethod: schema.maybe(
     schema.oneOf(
@@ -262,6 +270,15 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         meta: { description: 'Integration description from the Service settings step.' },
       })
     ),
+    namespace: schema.maybe(
+      schema.string({
+        maxLength: 100,
+        meta: {
+          description:
+            'Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
+        },
+      })
+    ),
     dataFormat: schema.maybe(DataFormatSchema),
     authMethod: schema.maybe(
       schema.oneOf(
@@ -350,6 +367,17 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
           meta: {
             description:
               'Integration description from the Service settings step. Send null to clear it.',
+          },
+        })
+      )
+    ),
+    namespace: schema.maybe(
+      schema.nullable(
+        schema.string({
+          maxLength: 100,
+          meta: {
+            description:
+              'Global data stream namespace from the Service settings step. Omit it to keep the stored value, or send null to clear it. When none is set, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
           },
         })
       )

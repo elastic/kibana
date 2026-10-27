@@ -5,32 +5,53 @@
  * 2.0.
  */
 
+interface SOSettingsSource {
+  integrationName?: string;
+  description?: string;
+  namespace?: string;
+}
+
 /**
- * The integration name and description for a saved-object write. Spread into every create and
- * update that carries the service selection, so resume sees the name the last deploy used (it can
- * change between deploys while it still follows the selection).
+ * The integration name, description and global namespace for a saved-object write. Spread into
+ * every create and update that carries the service selection, so resume sees the settings the last
+ * deploy used (the name can change between deploys while it still follows the selection).
  */
 export const toSOSettings = (
-  serviceSettings: { integrationName?: string; description?: string } | null | undefined
-): { integrationName?: string; description?: string } => {
+  serviceSettings: SOSettingsSource | null | undefined
+): { integrationName?: string; description?: string; namespace?: string } => {
   const integrationName = serviceSettings?.integrationName?.trim();
   const description = serviceSettings?.description?.trim();
+  const namespace = serviceSettings?.namespace?.trim();
   return {
     ...(integrationName ? { integrationName } : {}),
     ...(description ? { description } : {}),
+    ...(namespace ? { namespace } : {}),
   };
 };
 
 /**
- * Same fields for an update: a blank description is sent as `null`, because an omitted field keeps
- * the stored value and the user may just have cleared it.
+ * Same fields for an update: a blank description or namespace is sent as `null`, because an
+ * omitted field keeps the stored value and the user may just have cleared it.
  */
 export const toSOSettingsUpdate = (
-  serviceSettings: { integrationName?: string; description?: string } | null | undefined
-): { integrationName?: string; description: string | null } => {
-  const { integrationName, description } = toSOSettings(serviceSettings);
+  serviceSettings: SOSettingsSource | null | undefined
+): { integrationName?: string; description: string | null; namespace: string | null } => {
+  const { integrationName, description, namespace } = toSOSettings(serviceSettings);
   return {
     ...(integrationName ? { integrationName } : {}),
     description: description ?? null,
+    namespace: namespace ?? null,
   };
+};
+
+/**
+ * The update for settings that need no deploy: the name and description. The namespace is left
+ * out on purpose. It is the last deployed value that drift detection compares the current one
+ * against, so it is saved only together with the policy changes that apply it.
+ */
+export const toSOMetadataUpdate = (
+  serviceSettings: SOSettingsSource | null | undefined
+): { integrationName?: string; description: string | null } => {
+  const { namespace, ...metadata } = toSOSettingsUpdate(serviceSettings);
+  return metadata;
 };

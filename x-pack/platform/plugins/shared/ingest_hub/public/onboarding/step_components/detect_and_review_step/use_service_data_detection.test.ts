@@ -62,6 +62,8 @@ function setup({
   policyIdsByInstance = {},
   agentDetection = NO_AGENTS,
   queryData,
+  entry = CLOUDTRAIL,
+  deploymentMethod = 'agent_based',
 }: {
   serviceSettings: ServiceSettingsPersistedState;
   serviceStatuses?: Record<string, string>;
@@ -69,6 +71,8 @@ function setup({
   policyIdsByInstance?: Record<string, string>;
   agentDetection?: Record<string, unknown>;
   queryData?: { results: Record<string, boolean> };
+  entry?: AwsServiceMatrixEntry;
+  deploymentMethod?: 'managed_integration' | 'agent_based';
 }) {
   const httpGet = jest.fn().mockResolvedValue({ results: {} });
   mockUseKibana.mockReturnValue({ services: { http: { get: httpGet } } });
@@ -79,7 +83,8 @@ function setup({
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds: ['cloudtrail'] },
     detectAndReviewStep: { serviceStatuses, deployErrors, policyIdsByInstance },
-    awsServicesMap: new Map([['cloudtrail', CLOUDTRAIL]]),
+    awsServicesMap: new Map([['cloudtrail', entry]]),
+    deploymentMethod,
     updateDetectAndReviewStep,
   });
   return { httpGet, updateDetectAndReviewStep };
@@ -114,6 +119,86 @@ describe('useServiceDataDetection', () => {
         query: expect.objectContaining({ dataStreams: 'logs-aws.cloudtrail-prod' }),
       })
     );
+  });
+
+  it('polls the global namespace for an original, and a duplicate’s own over it', async () => {
+    const { httpGet } = setup({
+      serviceSettings: {
+        globalRegion: 'us-east-1',
+        namespace: 'prod',
+        instances: [
+          { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'CT', isDuplicate: false },
+          {
+            instanceId: 'cloudtrail__dup-1',
+            serviceId: 'cloudtrail',
+            name: 'CT 2',
+            isDuplicate: true,
+          },
+        ],
+        serviceVars: {
+          'cloudtrail__dup-1': {
+            enabledDataStreams: ['cloudtrail'],
+            varsByDataStream: {},
+            namespace: 'staging',
+          },
+        },
+      },
+    });
+    renderHook(() => useServiceDataDetection());
+
+    await mockUseQuery.mock.calls[0][0].queryFn();
+
+    expect(httpGet.mock.calls[0][1].query.dataStreams).toBe(
+      'logs-aws.cloudtrail-prod,logs-aws.cloudtrail-staging'
+    );
+  });
+
+  it('polls every pattern of an ECF service in any namespace, ignoring the global one', async () => {
+    const ecfEntry = {
+      ...CLOUDTRAIL,
+      deploymentMethods: [{ method: 'ecf' }],
+    } as unknown as AwsServiceMatrixEntry;
+    const { httpGet } = setup({
+      entry: ecfEntry,
+      deploymentMethod: 'managed_integration',
+      serviceSettings: {
+        globalRegion: 'us-east-1',
+        namespace: 'prod',
+        instances: [
+          { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'CT', isDuplicate: false },
+        ],
+        serviceVars: {},
+      },
+    });
+    renderHook(() => useServiceDataDetection());
+
+    await mockUseQuery.mock.calls[0][0].queryFn();
+
+    expect(httpGet.mock.calls[0][1].query.dataStreams).toBe('logs-aws.cloudtrail-*');
+  });
+
+  it('polls the global namespace for a managed integration service that deploys as a policy', async () => {
+    const miEntry = {
+      ...CLOUDTRAIL,
+      deploymentMethods: [{ method: 'managed_integration', preferred: true }, { method: 'ecf' }],
+    } as unknown as AwsServiceMatrixEntry;
+    const { httpGet } = setup({
+      entry: miEntry,
+      deploymentMethod: 'managed_integration',
+      serviceSettings: {
+        globalRegion: 'us-east-1',
+        namespace: 'prod',
+        instances: [
+          { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'CT', isDuplicate: false },
+        ],
+        serviceVars: {},
+      },
+    });
+    renderHook(() => useServiceDataDetection());
+
+    await mockUseQuery.mock.calls[0][0].queryFn();
+
+    expect(httpGet.mock.calls[0][1].query.dataStreams).toBe('logs-aws.cloudtrail-prod');
   });
 
   it('polls one pattern per instance namespace when a duplicate uses another one', async () => {

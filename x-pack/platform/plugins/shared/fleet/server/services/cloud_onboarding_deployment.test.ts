@@ -291,6 +291,42 @@ describe('cloudOnboardingDeploymentService', () => {
     });
   });
 
+  describe('update — namespace', () => {
+    const writtenAttributes = () => soClient.create.mock.calls[0][1] as Record<string, unknown>;
+
+    it('stores a new namespace', async () => {
+      const existing = makeAttributes({});
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { namespace: 'prod' });
+
+      expect(writtenAttributes()).toEqual(expect.objectContaining({ namespace: 'prod' }));
+    });
+
+    it('keeps the stored namespace when an update does not mention it', async () => {
+      const existing = makeAttributes({ namespace: 'prod' });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(writtenAttributes()).toEqual(expect.objectContaining({ namespace: 'prod' }));
+    });
+
+    it('removes the namespace when the update clears it with null', async () => {
+      const existing = makeAttributes({ namespace: 'prod', integrationName: 'my-aws' });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { namespace: null });
+
+      // Not stored as null: the saved object schema has no null for it.
+      expect(writtenAttributes()).not.toHaveProperty('namespace');
+      expect(writtenAttributes()).toEqual(expect.objectContaining({ integrationName: 'my-aws' }));
+    });
+  });
+
   describe('update — full-replace semantics', () => {
     it('removed serviceVars and policyIdsByInstance keys are absent from the written SO', async () => {
       // Initial record has stale keys that the update intentionally omits.
