@@ -25,42 +25,27 @@ const topologyExpectedEvents = (
     (event) => (event.causal_features?.length ?? 0) > 0 || (event.blast_radius?.length ?? 0) > 0
   );
 
-interface TopologyFieldsInput {
-  actual: Partial<SignificantEvent>;
-  expected: Partial<SignificantEvent>;
-  eventLabel: string;
-  /** Score recall only: IDs added beyond `expected` are not penalized. */
-  allowAdditions?: boolean;
-}
-
 const scoreIdSet = ({
   field,
   eventLabel,
   actualIds,
   expectedIds,
-  allowAdditions,
 }: {
   field: 'causal_features' | 'blast_radius';
   eventLabel: string;
   actualIds: string[];
   expectedIds: string[];
-  allowAdditions: boolean;
 }): { score: number; explanation?: string } => {
-  const { score: f1, precision, recall } = setPrf(actualIds, expectedIds);
-  const score = allowAdditions ? recall : f1;
-  if (score >= 1) {
-    return { score };
+  const { recall } = setPrf(actualIds, expectedIds);
+  if (recall >= 1) {
+    return { score: recall };
   }
   const missing = expectedIds.filter((id) => !actualIds.includes(id));
   return {
-    score,
-    explanation: allowAdditions
-      ? `${field}[${eventLabel}]: R=${recall.toFixed(2)} missing=[${missing.join(
-          ','
-        )}] expected=[${expectedIds.join(',')}] got=[${actualIds.join(',')}]`
-      : `${field}[${eventLabel}]: P=${precision.toFixed(2)} R=${recall.toFixed(
-          2
-        )} expected=[${expectedIds.join(',')}] got=[${actualIds.join(',')}]`,
+    score: recall,
+    explanation: `${field}[${eventLabel}]: R=${recall.toFixed(2)} missing=[${missing.join(
+      ','
+    )}] expected=[${expectedIds.join(',')}] got=[${actualIds.join(',')}]`,
   };
 };
 
@@ -68,8 +53,11 @@ const scoreTopologyFields = ({
   actual,
   expected,
   eventLabel,
-  allowAdditions = false,
-}: TopologyFieldsInput): { score: number | null; explanations: string[] } => {
+}: {
+  actual: Partial<SignificantEvent>;
+  expected: Partial<SignificantEvent>;
+  eventLabel: string;
+}): { score: number | null; explanations: string[] } => {
   const hasExpectedTopology =
     (expected.causal_features?.length ?? 0) > 0 || (expected.blast_radius?.length ?? 0) > 0;
 
@@ -91,7 +79,6 @@ const scoreTopologyFields = ({
       eventLabel,
       expectedIds: expectedFeatures.map((f) => f.feature_id),
       actualIds: (actual[field] ?? []).map((f) => f.feature_id),
-      allowAdditions,
     });
     eventScores.push(result.score);
     if (result.explanation) {
@@ -147,7 +134,6 @@ export const scoreTopologyCorrectness = (
       actual: match,
       expected: exp,
       eventLabel: exp.event_id ?? '?',
-      allowAdditions: true,
     });
     if (eventScore === null) {
       continue;
@@ -231,7 +217,6 @@ export const scoreContinuationTopologyStability = (
         actual: followUp,
         expected: establishing,
         eventLabel: establishing.event_id ?? 'establishing-0',
-        allowAdditions: true,
       });
       if (result.score !== null) {
         cycleScores.push(result.score);

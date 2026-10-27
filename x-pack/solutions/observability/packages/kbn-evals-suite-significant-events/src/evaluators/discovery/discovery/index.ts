@@ -77,9 +77,9 @@ export const createDiscoveryEvaluators = (
       criteria,
       skipWhen: skipWhenNoSignificantEvents,
     }),
-    createEvidenceDescriptionEvaluator({ criteriaFn, skipWhen: skipWhenNoSignificantEvents }),
-    createNarrativeFieldsEvaluator({ criteriaFn, skipWhen: skipWhenNoSignificantEvents }),
-    createSignalEvidenceConsistencyEvaluator({ criteriaFn, skipWhen: skipWhenNoSignificantEvents }),
+    createEvidenceDescriptionEvaluator({ criteriaFn }),
+    createNarrativeFieldsEvaluator({ criteriaFn }),
+    createSignalEvidenceConsistencyEvaluator({ criteriaFn }),
     createSeverityCalibrationEvaluator({ criteriaFn }),
     createConfidenceCalibrationEvaluator({ criteriaFn }),
   ];

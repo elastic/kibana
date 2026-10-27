@@ -104,7 +104,7 @@ export const createEvidenceDescriptionEvaluator = <
 >({
   criteriaFn,
   transformOutput,
-  skipWhen,
+  skipWhen = skipWhenNoSignificantEvents,
   criteria = EVIDENCE_DESCRIPTION_CRITERIA,
 }: CreateScenarioCriteriaLlmEvaluatorOptions<TExample, TOutput>): Evaluator<TExample, TOutput> =>
   createScenarioCriteriaLlmEvaluator<TExample, TOutput>({
@@ -122,7 +122,7 @@ export const createNarrativeFieldsEvaluator = <
 >({
   criteriaFn,
   transformOutput,
-  skipWhen,
+  skipWhen = skipWhenNoSignificantEvents,
 }: CreateScenarioCriteriaLlmEvaluatorOptions<TExample, TOutput>): Evaluator<TExample, TOutput> =>
   createScenarioCriteriaLlmEvaluator<TExample, TOutput>({
     name: 'narrative_fields_quality',
@@ -139,7 +139,7 @@ export const createSignalEvidenceConsistencyEvaluator = <
 >({
   criteriaFn,
   transformOutput,
-  skipWhen,
+  skipWhen = skipWhenNoSignificantEvents,
 }: CreateScenarioCriteriaLlmEvaluatorOptions<TExample, TOutput>): Evaluator<TExample, TOutput> =>
   createScenarioCriteriaLlmEvaluator<TExample, TOutput>({
     name: 'signal_evidence_consistency',

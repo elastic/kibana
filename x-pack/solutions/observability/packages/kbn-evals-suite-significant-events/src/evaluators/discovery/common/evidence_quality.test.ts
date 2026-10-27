@@ -60,13 +60,6 @@ describe.each(factories.map((factory) => [factory.name, factory] as const))(
       return { result, evaluate };
     };
 
-    it('abstains without calling the judge when no event was written', async () => {
-      const { result, evaluate } = run({ significantEvents: [] });
-
-      expect(await result).toEqual(expect.objectContaining({ score: null, label: 'unavailable' }));
-      expect(evaluate).not.toHaveBeenCalled();
-    });
-
     it('judges the output when an event was written', async () => {
       const { result, evaluate } = run({ significantEvents: [{ event_id: 'e1' }] });
 
