@@ -36,7 +36,11 @@ export const persistentContextFixture = coreWorkerFixtures.extend<
     async ({ log, debuggingPort }, use) => {
       const userDataDir = os.tmpdir();
       const context = await chromium.launchPersistentContext(userDataDir, {
-        args: [`--remote-debugging-port=${debuggingPort}`],
+        args: [
+          `--remote-debugging-port=${debuggingPort}`,
+          // Same as the Playwright config: Chromium cannot authenticate to Citadel.
+          ...(process.env.USE_CITADEL_PROXY === 'true' ? ['--no-proxy-server'] : []),
+        ],
       });
       log.serviceLoaded(`persistentContext on port [${debuggingPort}]`);
       await use(context);
