@@ -98,9 +98,16 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         serviceSettings?.instances ?? [],
         selectedServiceIds,
         servicesMap ?? new Map(),
-        serviceSettings?.serviceVars ?? {}
+        serviceSettings?.serviceVars ?? {},
+        serviceSettings?.namespace
       ),
-    [serviceSettings?.instances, serviceSettings?.serviceVars, selectedServiceIds, servicesMap]
+    [
+      serviceSettings?.instances,
+      serviceSettings?.serviceVars,
+      serviceSettings?.namespace,
+      selectedServiceIds,
+      servicesMap,
+    ]
   );
 
   // true when every target has a package policy and no cleanup is pending. false on pending
@@ -269,6 +276,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
         const baseOpts = {
           namespace: DEFAULT_NAMESPACE,
+          globalNamespace: serviceSettings?.namespace,
           globalRegion,
           storedServiceVars,
           authenticateAndDeployStep: {
@@ -296,6 +304,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             storedServiceVars,
             globalRegion,
             namespace: DEFAULT_NAMESPACE,
+            globalNamespace: serviceSettings?.namespace,
             authenticateAndDeployStep,
             servicesMap: servicesMap ?? new Map(),
             // Keep the policy's current policy_ids, unless this run also applies a changed agent
@@ -339,6 +348,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             storedServiceVars,
             globalRegion,
             namespace: DEFAULT_NAMESPACE,
+            globalNamespace: serviceSettings?.namespace,
             authenticateAndDeployStep: shared
               ? { ...authenticateAndDeployStep, existingSecretRefs: shared }
               : authenticateAndDeployStep,

@@ -304,7 +304,7 @@ export const bulkCreate = async (
     for (const theCase of casesSOs) {
       userActions.push(createBulkCreateUserActionsRequest({ theCase, user }));
 
-      // The create_case user action payload does not carry `template` (CreateCaseUserActionRt
+      // The create_case user action payload does not carry `template` (CreateCaseUserActionSchema
       // strips it), so a dedicated entry is needed for the activity log to reflect which template
       // (if any) the case was created from — mirrors create.ts's single-case equivalent.
       if (clientArgs.config.templates.enabled && theCase.attributes.template != null) {
