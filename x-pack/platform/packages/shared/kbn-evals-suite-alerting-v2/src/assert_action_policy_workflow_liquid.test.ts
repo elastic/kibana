@@ -6,6 +6,7 @@
  */
 
 import {
+  assertActionPolicyWorkflowBranchesOnAlertStatus,
   assertActionPolicyWorkflowLinksAlertDetails,
   assertActionPolicyWorkflowLiquid,
   isActionPolicyPayloadLiquidPath,
@@ -235,6 +236,94 @@ steps:
   ])('rejects %s', (_label, message) => {
     expect(() => assertActionPolicyWorkflowLinksAlertDetails(toWorkflow(message))).toThrow(
       /does not render an alert details link/
+    );
+  });
+});
+
+describe('assertActionPolicyWorkflowBranchesOnAlertStatus', () => {
+  const emailStep = (name: string, condition?: string) => `
+  - name: ${name}
+    type: email
+    connector-id: conn-1
+    ${condition ? `if: "${condition}"` : ''}
+    with:
+      to:
+        - oncall@example.com
+      subject: "${name}"
+      message: "{{ inputs.payload.alerts[0].alert_url }}"`;
+
+  const toWorkflow = (steps: string) =>
+    assertActionPolicyWorkflowLiquid(`
+version: '1'
+name: Notify
+triggers:
+  - type: manual
+steps:${steps}
+`).workflow;
+
+  const activeCondition =
+    "${{ (inputs.payload.alerts | where: 'alert_status', 'active' | size) > 0 }}";
+  const inactiveCondition =
+    "${{ (inputs.payload.alerts | where: 'alert_status', 'inactive' | size) > 0 }}";
+
+  it('accepts step-level conditions for active and inactive alerts', () => {
+    const workflow = toWorkflow(
+      emailStep('notify_active', activeCondition) + emailStep('notify_resolved', inactiveCondition)
+    );
+    expect(() => assertActionPolicyWorkflowBranchesOnAlertStatus(workflow)).not.toThrow();
+  });
+
+  it('accepts nested if steps gated on alert status', () => {
+    const workflow = toWorkflow(`
+  - name: branch
+    type: if
+    condition: "inputs.payload.alerts[0].alert_status: active"
+    steps:${emailStep('notify_active').replace(/\n/g, '\n    ')}
+    else:
+      - name: resolved_branch
+        type: if
+        condition: "inputs.payload.alerts[0].alert_status: inactive"
+        steps:${emailStep('notify_resolved').replace(/\n/g, '\n        ')}`);
+    expect(() => assertActionPolicyWorkflowBranchesOnAlertStatus(workflow)).not.toThrow();
+  });
+
+  it('rejects a notification step that runs for every alert status', () => {
+    const workflow = toWorkflow(
+      emailStep('notify_active', activeCondition) + emailStep('send_email')
+    );
+    expect(() => assertActionPolicyWorkflowBranchesOnAlertStatus(workflow)).toThrow(
+      /every alert status from step\(s\): send_email/
+    );
+  });
+
+  it('rejects a notification step in an else branch without its own status condition', () => {
+    const workflow = toWorkflow(`
+  - name: branch
+    type: if
+    condition: "inputs.payload.alerts[0].alert_status: active"
+    steps:${emailStep('notify_active').replace(/\n/g, '\n    ')}
+    else:${emailStep('notify_resolved').replace(/\n/g, '\n    ')}`);
+    expect(() => assertActionPolicyWorkflowBranchesOnAlertStatus(workflow)).toThrow(
+      /every alert status from step\(s\): notify_resolved/
+    );
+  });
+
+  it('rejects {{ }} interpolated into a KQL condition', () => {
+    const workflow = toWorkflow(
+      emailStep(
+        'notify_active',
+        "{{ inputs.payload.alerts | where: 'alert_status', 'active' | size }} > 0"
+      ) + emailStep('notify_resolved', inactiveCondition)
+    );
+    expect(() => assertActionPolicyWorkflowBranchesOnAlertStatus(workflow)).toThrow(
+      /interpolate `\{\{ \}\}` into KQL/
+    );
+  });
+
+  it('rejects a workflow without an inactive branch', () => {
+    const workflow = toWorkflow(emailStep('notify_active', activeCondition));
+    expect(() => assertActionPolicyWorkflowBranchesOnAlertStatus(workflow)).toThrow(
+      /does not branch on both `active` and `inactive`/
     );
   });
 });

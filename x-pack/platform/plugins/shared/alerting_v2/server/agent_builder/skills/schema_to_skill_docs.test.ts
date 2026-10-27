@@ -879,6 +879,33 @@ describe('schema_to_skill_docs', () => {
       expect(doc).not.toContain('## Liquid Templates');
       expect(doc).not.toContain('./references/');
     });
+
+    it('branches the example on alert status with active and resolved emails', () => {
+      const doc = generateActionPolicyWorkflowPayloadDoc();
+      expect(doc).toContain('## Status Branching');
+      expect(doc).toContain("where: 'alert_status', 'active'");
+      expect(doc).toContain("where: 'alert_status', 'inactive'");
+      expect(doc).toContain('[Active]');
+      expect(doc).toContain('[Resolved]');
+      expect(doc).toContain('alert.alert_url');
+      expect(doc).not.toContain("where: 'alert_status', 'pending'");
+      expect(doc).not.toContain("where: 'alert_status', 'recovering'");
+    });
+
+    it('writes every example step condition as a ${{ }} expression', () => {
+      const doc = generateActionPolicyWorkflowPayloadDoc();
+      const conditions = doc.split('\n').filter((line) => /^\s+if: /.test(line));
+      expect(conditions).toHaveLength(2);
+      for (const condition of conditions) {
+        expect(condition).toMatch(/^\s+if: "\$\{\{ .+ \}\}"$/);
+      }
+    });
+
+    it('uses literal block scalars for example messages', () => {
+      const doc = generateActionPolicyWorkflowPayloadDoc();
+      expect(doc).toContain('message: |');
+      expect(doc).not.toContain('message: >');
+    });
   });
 
   describe('Universal alerting agent builder start contract', () => {

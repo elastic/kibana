@@ -240,3 +240,90 @@ export const assertActionPolicyWorkflowLinksAlertDetails = (workflow: ParsedWork
     );
   }
 };
+
+const ALERT_STATUS_PATTERN = /\balert_status\b/;
+const ACTIVE_STATUS_PATTERN = /\bactive\b/;
+const INACTIVE_STATUS_PATTERN = /\binactive\b/;
+
+interface StatusBranches {
+  conditions: string[];
+  ungatedConnectorSteps: string[];
+}
+
+const toRecord = (value: unknown): Record<string, unknown> | undefined =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
+
+/**
+ * Collects `alert_status` conditions from step-level `if` and `type: if` `condition`, and the
+ * connector steps not nested under one. An `else` branch is not gated by its parent's condition,
+ * because it also runs for every status the condition excludes.
+ */
+const collectStatusBranches = (steps: unknown, gated: boolean, branches: StatusBranches): void => {
+  if (!Array.isArray(steps)) {
+    return;
+  }
+  for (const value of steps) {
+    const step = toRecord(value);
+    if (!step) {
+      continue;
+    }
+    const statusConditions = [step.if, step.condition].filter(
+      (condition): condition is string =>
+        typeof condition === 'string' && ALERT_STATUS_PATTERN.test(condition)
+    );
+    branches.conditions.push(...statusConditions);
+
+    const isGated = gated || statusConditions.length > 0;
+    if (step['connector-id'] !== undefined && !isGated) {
+      branches.ungatedConnectorSteps.push(String(step.name));
+    }
+    collectStatusBranches(step.steps, isGated, branches);
+    collectStatusBranches(step.else, gated, branches);
+  }
+};
+
+/** A `{{ }}` output in a KQL condition is rendered as a literal value, so it never matches. */
+const isInterpolatedKqlCondition = (condition: string): boolean =>
+  condition.includes('{{') && !condition.trim().startsWith('${{');
+
+/**
+ * Asserts that the notification workflow branches on `alert_status`: every connector step is
+ * gated by an `alert_status` condition, one branch handles `active`, another `inactive`, and no
+ * condition interpolates `{{ }}` into KQL.
+ */
+export const assertActionPolicyWorkflowBranchesOnAlertStatus = (workflow: ParsedWorkflow): void => {
+  const branches: StatusBranches = { conditions: [], ungatedConnectorSteps: [] };
+  collectStatusBranches(workflow.steps, false, branches);
+  const { conditions, ungatedConnectorSteps } = branches;
+
+  if (ungatedConnectorSteps.length > 0) {
+    throw new Error(
+      `Generated workflow sends notifications for every alert status from step(s): ${ungatedConnectorSteps.join(
+        ', '
+      )}. Gate each notification step with an \`alert_status\` condition so pending and ` +
+        'recovering alerts send nothing.'
+    );
+  }
+
+  const interpolatedConditions = conditions.filter(isInterpolatedKqlCondition);
+  if (interpolatedConditions.length > 0) {
+    throw new Error(
+      `Generated workflow condition(s) interpolate \`{{ }}\` into KQL and never match: ${interpolatedConditions.join(
+        '; '
+      )}. Write them as \`\${{ … }}\` expressions.`
+    );
+  }
+
+  const branchesOnActive = conditions.some((condition) => ACTIVE_STATUS_PATTERN.test(condition));
+  const branchesOnInactive = conditions.some((condition) =>
+    INACTIVE_STATUS_PATTERN.test(condition)
+  );
+  if (!branchesOnActive || !branchesOnInactive) {
+    throw new Error(
+      'Generated workflow does not branch on both `active` and `inactive` alert statuses. ' +
+        'Send one notification for active alerts and a distinct one for inactive (resolved) alerts.'
+    );
+  }
+};

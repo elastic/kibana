@@ -95,6 +95,14 @@ describe('createActionPolicyAuthoringSkill', () => {
     expect(skill.content).not.toContain('Building the Workflow YAML');
   });
 
+  it('instructs the default workflow to email only on active and resolved alerts', () => {
+    const skill = createActionPolicyAuthoringSkill(createDeps());
+
+    expect(skill.content).toContain('The workflow must branch on `alert.alert_status`');
+    expect(skill.content).toContain('a distinct `[Resolved]` email for `inactive` alerts');
+    expect(skill.content).toContain('nothing for `pending` or `recovering`');
+  });
+
   it('inlines the action policy operations schema in skill content and defers concepts to When to Load References', () => {
     const skill = createActionPolicyAuthoringSkill(createDeps());
 

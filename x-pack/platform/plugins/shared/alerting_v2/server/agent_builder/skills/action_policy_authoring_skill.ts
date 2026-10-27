@@ -193,7 +193,7 @@ When setting up notifications create a default workflow first (Step 1), then cre
 2. Call \`platform.workflows.get_connectors\` with \`actionTypeId: ".email"\` to find an available email connector.
    - If no email connector exists, tell the user: "No email connector is configured. You can set one up under Stack Management → Connectors, then come back to add notifications."
 3. Generate a unique \`workflowId\` — a UUID (e.g. \`550e8400-e29b-41d4-a716-446655440000\`). Pass it as the \`workflowId\` parameter when calling \`platform.core.generate_workflow\`. This same ID will be used as the persisted workflow ID and must be referenced in the action policy destination. **Do NOT use a human-readable slug** — it would collide across conversations.
-4. Call \`platform.core.generate_workflow\` with the \`workflowId\` and a natural-language description that includes the YAML template tailored to the rule's query columns (paste the template into the \`query\` or \`instructions\` parameter). Consult the [workflow-dispatch-payload reference](./references/workflow-dispatch-payload.md) for the field catalog, \`data\` notes, and example YAML.
+4. Call \`platform.core.generate_workflow\` with the \`workflowId\` and a natural-language description that includes the YAML template tailored to the rule's query columns (paste the template into the \`query\` or \`instructions\` parameter). Consult the [workflow-dispatch-payload reference](./references/workflow-dispatch-payload.md) for the field catalog, \`data\` notes, status branching, and example YAML. The workflow must branch on \`alert.alert_status\`: one email for \`active\` alerts, a distinct \`[Resolved]\` email for \`inactive\` alerts, and nothing for \`pending\` or \`recovering\`.
 5. After creating the workflow, render it inline for user review:
    \`<render_attachment id="{attachmentId}" version="{attachmentVersion}"/>\`
    where \`attachmentId\` and \`attachmentVersion\` come from the \`generate_workflow\` tool result.
@@ -219,6 +219,7 @@ Do not add this reminder for catch-all policies, for policies that route only by
 
 After creating the defaults, briefly mention:
 - They can use a different connector type (Slack, PagerDuty, etc.) — offer to use \`platform.workflows.get_connectors\` to explore.
+- They can also be notified on \`pending\` or \`recovering\` alerts — the policy dispatches every status change, so this only needs another branch in the workflow.
 - They can change throttle or grouping — consult the [action-policy-throttle-strategies reference](./references/action-policy-throttle-strategies.md) and the [action-policy-throttle-grouping-compatibility reference](./references/action-policy-throttle-grouping-compatibility.md).
 - They can share this policy with other rules instead of creating one policy per rule — consult the [multi-rule action policies reference](./references/action-policy-multi-rule.md).
 
