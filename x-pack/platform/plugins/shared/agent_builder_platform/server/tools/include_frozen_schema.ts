@@ -30,3 +30,13 @@ export const createIncludeFrozenSchema = (includeFrozenByDefault: boolean) =>
  */
 export const getIncludeFrozenByDefault = ({ uiSettings }: ToolSchemaContext): Promise<boolean> =>
   uiSettings.get<boolean>(AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID);
+
+/**
+ * Reads the `include_frozen` flag from a built-in tool's input.
+ *
+ * @param params - The tool input. Serverless schemas omit `include_frozen`, since Serverless
+ *   has no frozen tier, in which case frozen tier indices stay excluded.
+ * @returns Whether frozen tier indices are included.
+ */
+export const getIncludeFrozenParam = (params: object): boolean =>
+  'include_frozen' in params && params.include_frozen === true;

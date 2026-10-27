@@ -77,7 +77,6 @@ export const IndexSearchConfiguration = () => {
           )}
         />
       </EuiFormRow>
-      <EuiSpacer size="m" />
       <IncludeFrozenField />
     </>
   );

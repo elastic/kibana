@@ -6,7 +6,11 @@
  */
 
 import { AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID } from '@kbn/management-settings-ids';
-import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
+import {
+  createIncludeFrozenSchema,
+  getIncludeFrozenByDefault,
+  getIncludeFrozenParam,
+} from './include_frozen_schema';
 import { createSchemaContext } from './test_utils';
 
 describe('createIncludeFrozenSchema', () => {
@@ -40,5 +44,15 @@ describe('getIncludeFrozenByDefault', () => {
     expect(context.uiSettings.get).toHaveBeenCalledWith(
       AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID
     );
+  });
+});
+
+describe('getIncludeFrozenParam', () => {
+  it.each([true, false])('returns the include_frozen value (%s)', (value) => {
+    expect(getIncludeFrozenParam({ query: 'logs', include_frozen: value })).toBe(value);
+  });
+
+  it('excludes frozen tier indices when the input has no include_frozen', () => {
+    expect(getIncludeFrozenParam({ query: 'logs' })).toBe(false);
   });
 });
