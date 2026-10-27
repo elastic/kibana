@@ -25,7 +25,9 @@ import {
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
 } from './action_suspend_process';
 import { ALERTZERO_ACTION_WORKFLOW_IDS } from '../..';
+import { createWorkflowLiquidEngine } from '../../../../../common/utils/create_workflow_liquid_engine/create_workflow_liquid_engine';
 import { WorkflowSchema } from '../../../../../spec/schema';
+import { ACTION_NON_RETRYABLE_ERROR_TYPE } from '../../../../action_workflow';
 
 /**
  * These four actions probe Actions-log privilege, dispatch via the
@@ -58,6 +60,7 @@ interface YamlWorkflow {
       subject?: string | string[];
     };
     privilege_probe_action_id?: string;
+    process_not_found_code?: string;
   };
   triggers?: Array<{
     inputs?: {
@@ -265,6 +268,73 @@ describe('AlertZero response-action workflows', () => {
     const body = dispatch?.with?.body as Record<string, string> | undefined;
 
     expect(body?.parameters).toContain('inputs.actionInput.parameters');
+  });
+
+  describe.each([
+    ['kill', ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW, 'ra_kill-process_error_not-found'],
+    ['suspend', ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW, 'ra_suspend-process_error_not-found'],
+    ['memory dump', ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW, 'ra_memory-dump_error_not-found'],
+  ] as const)('%s on a failed action', (_label, workflow, notFoundCode) => {
+    const parsed = parseWorkflow(workflow.yaml);
+    const stepByName = (name: string) => flatten(parsed.steps).find((step) => step.name === name);
+    // Same options as the execution engine's templating engine.
+    const liquid = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
+
+    const renderProcessNotFound = (
+      endpointIds: string[],
+      codesByAgent: Record<string, string>
+    ): string => {
+      const outputs = Object.fromEntries(
+        Object.entries(codesByAgent).map(([agentId, code]) => [
+          agentId,
+          { type: 'json', content: { code } },
+        ])
+      );
+
+      return liquid.parseAndRenderSync(
+        String(stepByName('check_process_not_found')?.with?.process_not_found),
+        {
+          consts: parsed.consts,
+          inputs: { actionInput: { endpoint_ids: endpointIds } },
+          steps: { poll_status: { output: { data: { outputs } } } },
+        }
+      );
+    };
+
+    it('checks for the not-found code Defend reports for this command', () => {
+      expect(parsed.consts?.process_not_found_code).toBe(notFoundCode);
+    });
+
+    it.each([
+      ['true', 'the only endpoint reports not-found', ['a'], { a: notFoundCode }],
+      [
+        'true',
+        'every endpoint reports not-found',
+        ['a', 'b'],
+        { a: notFoundCode, b: notFoundCode },
+      ],
+      [
+        'false',
+        'another endpoint reports a different code',
+        ['a', 'b'],
+        { a: notFoundCode, b: 'other' },
+      ],
+      ['false', 'another endpoint has no output', ['a', 'b'], { a: notFoundCode }],
+      ['false', 'the endpoint reports a different code', ['a'], { a: 'other' }],
+    ])('process_not_found is %s when %s', (expected, _case, endpointIds, codesByAgent) => {
+      expect(renderProcessNotFound(endpointIds, codesByAgent)).toBe(expected);
+    });
+
+    it('fails as non-retryable only when the process was not found', () => {
+      expect(stepByName('emit_failure_by_cause')?.condition).toBe(
+        "${{ variables.process_not_found == 'true' }}"
+      );
+      expect(stepByName('emit_process_not_found')?.type).toBe('workflow.fail');
+      expect(stepByName('emit_process_not_found')?.with?.type).toBe(
+        ACTION_NON_RETRYABLE_ERROR_TYPE
+      );
+      expect(stepByName('emit_failure')?.with?.type).toBeUndefined();
+    });
   });
 
   it('memory dump is process-only, low impact, irreversible, and names Execute Operations as the privilege', () => {
