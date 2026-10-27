@@ -15,11 +15,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApprovalContent } from '@kbn/proposals-ui';
 import type { DeclineParams } from '@kbn/proposals-ui';
 import { getUserDisplayName } from '@kbn/user-profile-components';
-import {
-  isAwaitingDecision,
-  isTodoProposal,
-  PROPOSALS_UI_CAPABILITY_DECIDE,
-} from '@kbn/proposals-common';
+import { isAwaitingDecision, PROPOSALS_UI_CAPABILITY_DECIDE } from '@kbn/proposals-common';
 import {
   useApproveProposal,
   useDismissProposal,
