@@ -185,6 +185,8 @@ export const registerAgenticInvestigationTemplateUI = ({
       tabs: [overviewTabId],
       ...(briefCard && { briefCard }),
       detailsFlyout: {
+        // Investigation reports are read end to end; the default width is too narrow for them.
+        size: 'm',
         trailingActions: ({ conversation }) => [
           getCopyLinkFlyoutAction(() =>
             onCopyLink(

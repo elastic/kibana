@@ -47,6 +47,26 @@ const POLL_INTERVAL_MS = 5_000;
 
 const isNotFoundError = (error: IHttpFetchError | null): boolean => error?.response?.status === 404;
 
+export const DEFAULT_FLYOUT_SIZE = 's' as const;
+
+/** Query key of the snapshot flyout's conversation, so callers can seed it before opening. */
+export const getSnapshotConversationQueryKey = (conversationId: string) => [
+  'conversation-details-flyout-snapshot',
+  conversationId,
+];
+
+/** Initial width the template asks for, falling back to Agent Builder's default. */
+export const getDetailsFlyoutSize = (
+  conversation: Pick<Conversation, 'template_id'> | undefined,
+  conversationTemplatesService: ConversationTemplatesService
+): 's' | 'm' | 'l' => {
+  const templateId = conversation?.template_id;
+  const definition = templateId
+    ? conversationTemplatesService.getTemplateUIDefinition(templateId)
+    : undefined;
+  return definition?.detailsFlyout?.size ?? DEFAULT_FLYOUT_SIZE;
+};
+
 type ResolvedTab = ConversationTemplateTabDefinition & { id: string };
 
 const buildTabs = (
@@ -224,7 +244,7 @@ export const ConversationDetailsFlyoutSnapshot = ({
     isLoading,
     refetch,
   } = useQuery<Conversation, IHttpFetchError>({
-    queryKey: ['conversation-details-flyout-snapshot', conversationId],
+    queryKey: getSnapshotConversationQueryKey(conversationId),
     queryFn: () => conversationsService.get({ conversationId }),
     retry: (failureCount, httpError) => !isNotFoundError(httpError) && failureCount < 3,
     refetchInterval: (data, query) =>
@@ -293,6 +313,8 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
     return definition?.detailsFlyout?.trailingActions?.({ conversation });
   }, [conversation, conversationTemplatesService]);
 
+  const size = getDetailsFlyoutSize(conversation, conversationTemplatesService);
+
   return (
     <EuiFlyout
       onClose={onClose}
@@ -300,7 +322,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
       historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
       flyoutMenuDisplayMode="always"
       flyoutMenuProps={{ title: FLYOUT_TITLE, trailingActions }}
-      size="s"
+      size={size}
       type="push"
       paddingSize="m"
       css={flyoutMenuRowStyles}

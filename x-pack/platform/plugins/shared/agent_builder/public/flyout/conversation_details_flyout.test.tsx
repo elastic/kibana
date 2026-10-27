@@ -371,4 +371,29 @@ describe('ConversationDetailsFlyout', () => {
     expect(trailingActions).toHaveBeenCalledWith({ conversation });
     expect(flyoutMenuProps?.trailingActions).toEqual(trailingActions.mock.results[0].value);
   });
+
+  it.each([
+    ['uses the width the template asks for', 'm' as const, 'm'],
+    ['falls back to the default width', undefined, 's'],
+  ])('%s', (_name, templateSize, expectedSize) => {
+    const conversationTemplatesService = new ConversationTemplatesService();
+    const conversation = createConversation({ template_id: 'test' });
+    conversationTemplatesService.registerTemplateUIDefinition('test', {
+      name: 'Test',
+      tabs: [],
+      detailsFlyout: { ...(templateSize && { size: templateSize }) },
+    });
+    jest.mocked(useConversation).mockReturnValue({
+      conversation,
+      isLoading: false,
+    } as ReturnType<typeof useConversation>);
+    jest.mocked(useAgentBuilderServices).mockReturnValue({
+      conversationTemplatesService,
+    } as ReturnType<typeof useAgentBuilderServices>);
+
+    render(<ConversationDetailsFlyout onClose={jest.fn()} />, { wrapper: EuiProvider });
+
+    const [{ size }] = jest.mocked(EuiFlyout).mock.lastCall ?? [{}];
+    expect(size).toBe(expectedSize);
+  });
 });

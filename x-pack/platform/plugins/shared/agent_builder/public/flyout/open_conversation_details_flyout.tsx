@@ -14,7 +14,12 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
-import { ConversationDetailsFlyoutSnapshot, FLYOUT_TITLE } from './conversation_details_flyout';
+import {
+  ConversationDetailsFlyoutSnapshot,
+  FLYOUT_TITLE,
+  getDetailsFlyoutSize,
+  getSnapshotConversationQueryKey,
+} from './conversation_details_flyout';
 import { flyoutMenuRowStyles } from './flyout_menu_row_styles';
 
 const notFoundMessage = (conversationId: string) =>
@@ -46,6 +51,17 @@ export const openConversationDetailsFlyout = async ({
   const titleId = generateTitleId();
   const queryClient = new QueryClient();
 
+  // The flyout width comes from the conversation's template, so the conversation is fetched before
+  // opening and seeded into the flyout's cache. A failed fetch opens at the default width and lets
+  // the flyout surface the error.
+  const conversation = await Promise.resolve(conversationsService.get({ conversationId })).catch(
+    () => undefined
+  );
+  if (conversation) {
+    queryClient.setQueryData(getSnapshotConversationQueryKey(conversationId), conversation);
+  }
+  const size = getDetailsFlyoutSize(conversation, conversationTemplatesService);
+
   const onNotFound = () => {
     flyoutRef.close();
     core.notifications.toasts.addDanger(notFoundMessage(conversationId));
@@ -65,8 +81,7 @@ export const openConversationDetailsFlyout = async ({
       session: 'start',
       historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
       title: FLYOUT_TITLE,
-      // Conversations are dense to read at 's'; users resized almost every time.
-      size: 'm',
+      size,
       flyoutMenuDisplayMode: 'always',
       flyoutMenuProps: { trailingActions },
       type: 'push',

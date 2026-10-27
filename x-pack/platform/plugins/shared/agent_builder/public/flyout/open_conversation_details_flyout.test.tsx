@@ -13,7 +13,7 @@ import { ConversationTemplatesService } from '../services/conversation_templates
 import { openConversationDetailsFlyout } from './open_conversation_details_flyout';
 
 describe('openConversationDetailsFlyout', () => {
-  const setup = () => {
+  const setup = ({ templateId }: { templateId?: string } = {}) => {
     const core = coreMock.createStart();
     const close = jest.fn();
     let resolveClosed: () => void = () => {};
@@ -22,20 +22,31 @@ describe('openConversationDetailsFlyout', () => {
     });
     core.overlays.openSystemFlyout.mockReturnValue({ close, onClose: onClosed });
 
+    const conversationTemplatesService = new ConversationTemplatesService();
+    const conversationsService = {
+      get: jest.fn().mockResolvedValue({ id: 'conversation', template_id: templateId }),
+    } as unknown as ConversationsService;
+
     const open = ({
       onClose,
       trailingActions,
     }: { onClose?: () => void; trailingActions?: EuiFlyoutMenuAction[] } = {}) =>
       openConversationDetailsFlyout({
         core,
-        conversationsService: { get: jest.fn() } as unknown as ConversationsService,
-        conversationTemplatesService: new ConversationTemplatesService(),
+        conversationsService,
+        conversationTemplatesService,
         conversationId: 'conversation',
         onClose,
         trailingActions,
       });
 
-    return { core, close, open, closeFlyout: () => resolveClosed() };
+    return {
+      core,
+      close,
+      open,
+      conversationTemplatesService,
+      closeFlyout: () => resolveClosed(),
+    };
   };
 
   it('opens a managed flyout in the conversation details history group', async () => {
@@ -77,6 +88,33 @@ describe('openConversationDetailsFlyout', () => {
 
     const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
     expect(options?.flyoutMenuProps?.trailingActions).toBeUndefined();
+  });
+
+  it('opens at the default width when the template asks for no size', async () => {
+    const { core, open } = setup();
+
+    await open();
+
+    expect(core.overlays.openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ size: 's' })
+    );
+  });
+
+  it("opens at the width requested by the conversation's template", async () => {
+    const { core, open, conversationTemplatesService } = setup({ templateId: 'investigation' });
+    conversationTemplatesService.registerTemplateUIDefinition('investigation', {
+      name: 'Investigation',
+      tabs: [],
+      detailsFlyout: { size: 'm' },
+    });
+
+    await open();
+
+    expect(core.overlays.openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ size: 'm' })
+    );
   });
 
   it('notifies the caller once the flyout closes', async () => {
