@@ -40,8 +40,9 @@ export const registerUiSettings = ({
       }),
       description: i18n.translate('xpack.dataFederation.uiSettings.enabled.description', {
         defaultMessage:
-          'Display the ES|QL Data Federation management UI. Disabling this setting does not affect existing data sources or datasets. You can continue to manage them through the API and reference datasets in ES|QL queries. {licenseText} {learnMoreLink}',
+          'Display the ES|QL Data Federation management UI. Disabling this setting does not affect existing data sources or datasets. You can continue to manage them through the API and reference datasets in ES|QL queries. The Elasticsearch config must also have {esSetting}. {licenseText} {learnMoreLink}',
         values: {
+          esSetting: '<code>esql.federation.enabled: true</code>',
           licenseText,
           learnMoreLink: `<a href="${
             docLinks.links.dataFederation.overview
