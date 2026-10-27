@@ -80,9 +80,9 @@ consts:
   # The max number of rules to consider for tuning.
   max_candidate_rules: 20
   # Rules the FP-rate screen hands to the harvest. Applied after aggregation, so
-  # raising it only lengthens the harvest's terms list. Room for the rows the
-  # harvest then drops: older revisions of edited rules, and untagged FPs that
-  # sit below a rule's reviewed watermark.
+  # raising it only lengthens the harvest's terms list. Room for the rows later
+  # steps drop: older revisions of edited rules (dropped before the harvest) and
+  # untagged FPs below a rule's reviewed watermark (dropped by the harvest).
   max_screened_rules: 200
   # Ids handed to the diagnosing agent and tagged once the gate resolves; must
   # match ALERTS_BY_IDS_MAX in the investigate-rule skill (investigate_rule_skill.ts).
@@ -197,6 +197,8 @@ steps:
   # Disabled and deleted rules would otherwise take harvest slots: their alerts
   # outlive them in the index. Scoping the screen to enabled rules handles both.
   # Fails closed: without the list the screen is skipped and the run is flagged.
+  # per_page is the saved-objects result window; a space with more enabled siem
+  # rules than that is screened on the first page only.
   - name: list_enabled_rules
     type: kibana.request
     with:
@@ -258,7 +260,7 @@ steps:
             fp_rate_count = COUNT(*) WHERE is_fp,
             untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}"),
             last_fp_at = MAX(@timestamp) WHERE is_fp,
-            reviewed_watermark = MAX(@timestamp) WHERE MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
+            reviewed_watermark = MAX(@timestamp) WHERE is_fp AND MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
           BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
         | WHERE (reviewed_watermark IS NULL OR last_fp_at > reviewed_watermark)
           AND untagged_fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}

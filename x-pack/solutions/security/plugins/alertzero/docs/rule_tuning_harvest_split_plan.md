@@ -37,7 +37,7 @@ alerts in a 14-day window, 17.6M documents read, 266 CPU-s.
 | Step | Source | Reads | Returns |
 |---|---|---|---|
 | 0 `list_enabled_rules` | alerting `_find` | `id`, `revision` of enabled siem rules | uuids and `uuid@revision` keys |
-| 1 `screen_rule_fp_rates` | alerts of enabled rules in the window | 4 doc-value columns, one pass | rules passing the FP-rate gate, with totals |
+| 1 `screen_rule_fp_rates` | alerts of enabled rules in the window | 6 doc-value columns, one pass | rules passing the FP-rate gate with unreviewed FPs, with totals |
 | 2 `harvest_fp_alerts_by_rule` | FP alerts of the screened rules | doc values only (no `_id`) | unreviewed FP count and newest 100 alert uuids per rule |
 
 Step 0 replaces `collect_candidates`, `list_enabled_candidates` and
@@ -51,9 +51,9 @@ it returns nothing and the sweep stops there. Step 2 runs over a Lucene
 is bounded by the FP volume of the qualifying rules: 0.6–0.9s for 991k rows.
 
 Both gates stay exact. The rate gate uses `fp_rate_count` (all FPs, reviewed or
-not), same as today. `fp_rate_count >= min_fp_count` in step 1 is an upper
-bound on the unreviewed count, so it can only let through rules that step 2
-then rejects, never drop a real candidate.
+not), same as today. `untagged_fp_count >= min_fp_count` in step 1 is an upper
+bound on the unreviewed count (every unreviewed FP is untagged), so it can only
+let through rules that step 2 then rejects, never drop a real candidate.
 
 ## Step 0: `list_enabled_rules`
 
@@ -63,10 +63,11 @@ is passed (its response transform needs the whole rule), and without `fields`
 it is ~1.8 KB per rule.
 
 ```yaml
-# Disabled and deleted rules would otherwise take screen slots (their alerts
-# outlive them in the index). Scoping the screen to enabled rules handles both.
-# Fails closed: without the list the screen is skipped and the run is flagged,
-# same as today's list_enabled_candidates error.
+# Disabled and deleted rules would otherwise take harvest slots: their alerts
+# outlive them in the index. Scoping the screen to enabled rules handles both.
+# Fails closed: without the list the screen is skipped and the run is flagged.
+# per_page is the saved-objects result window; a space with more enabled siem
+# rules than that is screened on the first page only.
 - name: list_enabled_rules
   type: kibana.request
   with:
@@ -98,14 +99,15 @@ rules) plus the enabled-rule `terms`. The in-flight exclusion keeps happening
 before any slot is taken.
 
 ```yaml
-# total_count spans every alert the rule produced in the window; fp_rate_count
-# includes reviewed FPs so processing a batch does not dilute the measured rate.
-# A rule reviewed earlier in the window would otherwise keep passing both gates
-# and hold a screen slot, so rules whose newest FP is not newer than their newest
-# reviewed alert (the harvest's watermark, computed here in the same pass) are
-# dropped, and the rest rank on untagged_fp_count, an upper bound on the
-# unreviewed count the harvest measures. The min_fp_count check on it is a
-# pre-filter, not the gate.
+# `total_count` spans every alert the rule produced in the window. `fp_rate_count`
+# includes reviewed false positives so processing a batch does not dilute the rule's
+# measured FP rate. A rule reviewed earlier in the window would otherwise keep
+# passing both gates and hold a screen slot an unreviewed rule needs, so the screen
+# drops rules whose newest FP is not newer than their newest reviewed alert (the
+# harvest's watermark, computed here in the same pass) and ranks the rest on
+# `untagged_fp_count`, an upper bound on the unreviewed count the harvest measures
+# (every unreviewed FP is untagged). The min_fp_count check on it is a pre-filter,
+# not the gate.
 - name: screen_rule_fp_rates
   type: elasticsearch.esql.query
   if: "${{ steps.resolve_enabled_rules.output.count > 0 }}"
@@ -132,7 +134,7 @@ before any slot is taken.
           fp_rate_count = COUNT(*) WHERE is_fp,
           untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}"),
           last_fp_at = MAX(@timestamp) WHERE is_fp,
-          reviewed_watermark = MAX(@timestamp) WHERE MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
+          reviewed_watermark = MAX(@timestamp) WHERE is_fp AND MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
         BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
       | WHERE (reviewed_watermark IS NULL OR last_fp_at > reviewed_watermark)
         AND untagged_fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
@@ -145,10 +147,12 @@ before any slot is taken.
     continue: true
 
 # Drops rows whose revision is not the rule's current one (a rule edited
-# mid-window) before they reach the harvest.
+# mid-window) before they reach the harvest. No `default` after where_exp: an
+# empty filtered array is legitimate.
 - name: resolve_screened_rules
   type: data.set
   with:
+    rule_revision_keys: "${{ steps.resolve_enabled_rules.output.rule_revision_keys }}"
     rows: "${{ steps.screen_rule_fp_rates.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_enabled_rules.output.rule_revision_keys contains row[3]' }}"
     count: "${{ steps.screen_rule_fp_rates.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_enabled_rules.output.rule_revision_keys contains row[3]' | size }}"
     fanout_limit: "${{ inputs.max_rules_per_sweep | default: consts.max_rules_per_sweep }}"
@@ -261,8 +265,9 @@ Semantics kept:
 Semantics that shift, accepted:
 
 - If an analyst reopens a tagged alert it leaves the FP set and the watermark
-  falls back to the next-newest tagged alert. Each review tags up to 100
-  alerts, so a handful of already-reviewed FPs resurface once.
+  falls back to the next-newest tagged FP, in the screen and the harvest alike
+  (both compute it over FP alerts only, so they agree). Each review tags up to
+  100 alerts, so a handful of already-reviewed FPs resurface once.
 
 ### `_id` equals `kibana.alert.uuid`
 
@@ -366,35 +371,40 @@ Managed version of the worker goes 31 → 32 so the installed copy is replaced.
 `x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts`
 runs the real sweep workflow against seeded alerts and reads the launch list
 from the `resolve_fanout_rows` step, which keeps its name and row shape
-(`row[0]` uuid, `row[1]` fp_count) across the change. Test 1 passed against
-the previous worker too, so it pins the result the rewrite had to keep.
+(`row[0]` uuid, `row[1]` fp_count) across the change. Each test is one sweep
+run and asserts every scenario it seeds in its own named step, so the report
+lists the cases by name.
 
 Setup: admin user, AlertZero on in the default space, alerts index created via
 `POST /api/detection_engine/index`, rules created through the rules API with a
 query that matches nothing, alerts bulk-indexed with `_id = kibana.alert.uuid`
-and a run-unique `kibana.alert.rule.name` prefix (deleted after each test).
-Reviews start under `autonomy_level: manual`, so they park at the analyst gate
-and never call a model.
+and a run-unique `kibana.alert.rule.name` prefix (deleted after each test,
+rules bulk-deleted at the end). Inputs unless a test overrides them:
+`min_fp_count` 10, `min_fp_rate_pct` 50, `analysis_window_days` 7,
+`max_rules_per_sweep` 10, `autonomy_level` manual.
 
-Test 1, parity (passes before and after), thresholds 10 / 50% / 7 days:
+A sweep started through the API runs as the calling user, and the review's
+`run-as-mode: inherit` requires a service-account parent (the scheduled
+per-space worker), so `run_review` is rejected in these runs and no review
+execution exists afterwards. The tests assert what the sweep decided to launch
+(`resolve_fanout_rows`, `emit_result.reviews_requested`), not the children.
+That also rules out a Scout case for the in-flight exclusion (no review can be
+parked); it stays covered by the jest tests on `list_active_reviews` /
+`resolve_active_rules`.
 
-| rule | alerts | expected |
+| test | seeded | expected |
 |---|---|---|
-| all-fp | 12 FP | launched, fp 12 |
-| mixed | 20 FP + 10 open | launched, fp 20 |
-| low-rate | 20 FP + 40 open | no (33%) |
-| few-fp | 5 FP | no |
-| reviewed | 12 FP, all tagged | no (0 unreviewed) |
-| partly-reviewed | 12 tagged (3h ago) + 11 untagged (1h ago) | launched, fp 11 |
-| disabled | 30 FP, rule disabled | no |
-| edited | 30 FP at revision 0, rule now revision 1 | no |
+| starts a review only for enabled rules with enough unreviewed FPs at a high enough rate | all-fp 12 FP; mixed 20 FP + 10 open; low-rate 20 FP + 40 open; few-fp 5 FP; reviewed 12 tagged; partly-reviewed 12 tagged (3h) + 11 untagged (1h); disabled 30 FP, rule off; edited 30 FP at revision 0, rule at 1 | mixed 20, all-fp 12, partly-reviewed 11, in that order; `reviews_requested` 3 |
+| 20 deleted rules with more FPs than two enabled rules do not crowd them out (#20315) | 20 uuids with no rule object, 25 FP each; two enabled rules, 12 FP each | the two enabled rules only |
+| 20 disabled rules … do not crowd them out (#20315) | 20 rules patched off, 25 FP each; two enabled, 12 FP each | the two enabled rules only |
+| 20 already reviewed rules with 150 FPs each do not crowd out two unreviewed rules | 20 rules whose FPs are all tagged; two enabled, 12 FP each | the screen returns only the two, both launched |
+| launches at most `max_rules_per_sweep` reviews, noisiest first | five rules with 50/40/30/20/12 FP, input `max_rules_per_sweep` 3 | the 50, 40 and 30 rules in that order; `reviews_requested` 3 |
+| applies the thresholds passed as inputs | inputs 25 FPs / 80%: strong 30 FP; fewer 20 FP; diluted 30 FP + 20 open | strong only |
+| looks only at alerts inside the analysis window | fresh 15 FP a day old; stale 15 FP ten days old | fresh only |
+| leaves EQL sequence members and building blocks out of the count | plain 15 FP; sequence 15 FP carrying `kibana.alert.group.index` | plain only |
 
-Expected launch order: mixed, all-fp, partly-reviewed.
-
-Test 2, #20315 (failed against the previous worker): 20 uuids with 25 FPs each
-and no rule object, plus two enabled 12-FP rules. Expected: the two rules. Before
-the change the ghosts took all 20 `max_candidate_rules` slots and nothing
-launched.
+The first test passed against the previous worker too, so it pins the result
+the rewrite had to keep; the deleted-rules test failed against it.
 
 Run (the `alertzero` config set turns the plugin on; the default classic
 config leaves it disabled and the managed workflow is then not installed):
@@ -511,7 +521,9 @@ python3 x-pack/solutions/security/plugins/alertzero/scripts/rule_tuning_harvest_
 ```
 
 The password comes from `ES_PASSWORD`, from `~/.netrc` (`--netrc` for another
-file), or a prompt. `--skip-current` skips the slow query, `--days`,
+file), or a prompt. On Cloud the ES host is derived from the Kibana one;
+anywhere else pass it, e.g. `--kibana http://localhost:5601 --es http://localhost:9200`.
+`--skip-current` skips the slow query, `--days`,
 `--min-fp`, `--min-rate` change the inputs, `--disable <uuid>` picks the rule
 to flip instead of the top candidate, and `--out` writes every ES|QL response
 in full (columns, values, alert ids) as JSON. The `--disable-top` check patches

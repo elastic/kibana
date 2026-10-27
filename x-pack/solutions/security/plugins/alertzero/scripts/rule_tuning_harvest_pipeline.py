@@ -12,7 +12,7 @@ import argparse, base64, getpass, json, netrc, os, sys, time, urllib.error, urll
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from rule_tuning_harvest_bench import FP_FILTER, build_queries  # noqa: E402
+from rule_tuning_harvest_bench import FP_FILTER, build_queries, es_url  # noqa: E402
 
 
 def password(args, es_host):
@@ -61,7 +61,7 @@ def main():
     args = p.parse_args()
 
     kb = args.kibana.rstrip("/")
-    es = (args.es or kb.replace(".kb.", ".es.")).rstrip("/")
+    es = es_url(args.es, kb)
     space = f"/s/{args.space}" if args.space != "default" else ""
     auth = "Basic " + base64.b64encode(f"{args.user}:{password(args, urllib.parse.urlparse(es).hostname)}".encode()).decode()
     _, screen_q, harvest_q = build_queries(args.min_fp, args.min_rate)

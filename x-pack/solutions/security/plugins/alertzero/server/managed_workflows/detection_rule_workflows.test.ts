@@ -631,9 +631,10 @@ describe('detection rule workflows', () => {
         );
       });
 
-      // fp_rate_count counts every FP, reviewed or not, so it bounds the unreviewed
-      // count from above: the screen's min_fp_count check can only let through rules
-      // the harvest then rejects, never drop a real candidate.
+      // untagged_fp_count counts every FP without the reviewed tag, and every unreviewed
+      // FP is untagged, so it bounds the unreviewed count from above: the screen's
+      // min_fp_count check can only let through rules the harvest then rejects, never
+      // drop a real candidate.
       it('pre-filters on the FP count without replacing the harvest gate', () => {
         expect(screenQuery).toContain(
           'AND untagged_fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}'
@@ -660,10 +661,12 @@ describe('detection rule workflows', () => {
       // untagged FPs with them. A rule with hundreds of FPs would keep a positive
       // untagged count after its review, so the screen compares the newest FP with
       // the newest reviewed alert, in the same pass, exactly as the harvest does.
+      // The watermark is taken over FP alerts only, as the harvest's is (its DSL filter
+      // keeps FPs only), so a reopened tagged alert moves both the same way.
       it('drops fully reviewed rules in the screen, whatever their size', () => {
         expect(screenQuery).toContain('last_fp_at = MAX(@timestamp) WHERE is_fp');
         expect(screenQuery).toContain(
-          'reviewed_watermark = MAX(@timestamp) WHERE MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")'
+          'reviewed_watermark = MAX(@timestamp) WHERE is_fp AND MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")'
         );
         expect(screenQuery).toContain(
           '| WHERE (reviewed_watermark IS NULL OR last_fp_at > reviewed_watermark)'

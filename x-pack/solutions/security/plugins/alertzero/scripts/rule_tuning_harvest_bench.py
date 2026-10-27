@@ -66,10 +66,19 @@ def build_queries(min_fp, min_rate):
 FP_FILTER = [{"term": {"kibana.alert.workflow_status": "closed"}}, {"term": {"kibana.alert.workflow_reason": "false_positive"}}]
 
 
+def es_url(explicit, kibana):
+    """Cloud hosts differ only by the .kb./.es. label; anywhere else --es is required."""
+    if explicit:
+        return explicit.rstrip("/")
+    if ".kb." in kibana:
+        return kibana.replace(".kb.", ".es.").rstrip("/")
+    raise SystemExit(f"--es is required: cannot derive the Elasticsearch URL from {kibana}")
+
+
 class Cluster:
     def __init__(self, args):
         self.kb = args.kibana.rstrip("/")
-        self.es = (args.es or self.kb.replace(".kb.", ".es.")).rstrip("/")
+        self.es = es_url(args.es, self.kb)
         self.days = args.days
         self.space = f"/s/{args.space}" if args.space != "default" else ""
         self.out = args.out
@@ -191,6 +200,9 @@ def deleted_check(cluster, enabled):
     loose = build_queries(min_fp=1, min_rate=0)[1]
     a = cluster.esql("deleted-check unfiltered", loose)
     b = cluster.esql("deleted-check enabled", loose, [{"terms": {"kibana.alert.rule.uuid": list(enabled)}}])
+    if "error" in a or "error" in b:
+        print("\ndeleted-rule check: skipped,", a.get("error") or b.get("error"))
+        return
     ghosts = [row[0] for row in a["rows"] if row[0] not in enabled]
     print(f"\ndeleted-rule check (gate relaxed to untagged_fp_count >= 1 past the watermark, LIMIT {SCREEN_LIMIT}):")
     print(f"  without enabled filter: {len(a['rows'])} rules, {len(ghosts)} of them have no enabled rule object")

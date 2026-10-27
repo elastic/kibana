@@ -42,7 +42,7 @@ export const waitForExecution = async (
       throw new Error(`Execution ${workflowExecutionId}: status ${res.statusCode}`);
     }
     const execution = res.body as WorkflowExecutionDto;
-    if (isTerminalStatus(execution.status ?? '')) {
+    if (isTerminalStatus(execution.status)) {
       return execution;
     }
     if (Date.now() > deadline) {

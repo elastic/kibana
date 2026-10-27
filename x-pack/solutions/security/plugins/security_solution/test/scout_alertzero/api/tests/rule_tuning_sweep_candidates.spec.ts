@@ -51,6 +51,8 @@ interface AlertSpec {
   count: number;
   falsePositive: boolean;
   reviewed?: boolean;
+  /** An EQL sequence member or building block: carries `kibana.alert.group.index`. */
+  sequenceMember?: boolean;
   hoursAgo: number;
 }
 
@@ -61,6 +63,7 @@ const buildAlerts = ({
   count,
   falsePositive,
   reviewed = false,
+  sequenceMember = false,
   hoursAgo,
 }: AlertSpec) =>
   Array.from({ length: count }, (_, i) => {
@@ -84,6 +87,7 @@ const buildAlerts = ({
         'kibana.alert.workflow_status': falsePositive ? 'closed' : 'open',
         ...(falsePositive && { 'kibana.alert.workflow_reason': 'false_positive' }),
         'kibana.alert.workflow_tags': reviewed ? [REVIEWED_TAG] : [],
+        ...(sequenceMember && { 'kibana.alert.group.index': 0 }),
       },
     };
   });
@@ -151,12 +155,35 @@ const patchRule = async (
   return response.body as { id: string; revision: number };
 };
 
-const launchedRules = (execution: Awaited<ReturnType<typeof waitForExecution>>) => {
+type SweepExecution = Awaited<ReturnType<typeof waitForExecution>>;
+
+const launchedRules = (execution: SweepExecution) => {
   const output = findStepOutput(execution, 'resolve_fanout_rows') as
     | { rows?: unknown[][] }
     | undefined;
   return (output?.rows ?? []).map((row) => ({ uuid: row[0] as string, fpCount: row[1] as number }));
 };
+
+const sweepResult = (execution: SweepExecution) =>
+  findStepOutput(execution, 'emit_result') as {
+    reviews_requested: number;
+    reviews_in_flight: number;
+    harvest_failed: boolean;
+    lookup_failed: boolean;
+  };
+
+/**
+ * The review executions a sweep started, one per `run_review` iteration. A sweep run
+ * through the API executes as the calling user, and the review's `run-as-mode: inherit`
+ * needs a service-account parent (the scheduled per-space worker), so here `run_review`
+ * is rejected and the list is normally empty. The tests therefore read the launch list
+ * from `resolve_fanout_rows`, which the sweep fills before launching.
+ */
+const startedReviews = (execution: SweepExecution) =>
+  execution.stepExecutions
+    .filter((step) => step.stepId === 'run_review' && step.output != null)
+    .map((step) => (step.output as { workflowExecutionId?: string }).workflowExecutionId)
+    .filter((id): id is string => typeof id === 'string');
 
 /**
  * Runs the Rule Tuning sweep against seeded alerts and checks which rules it launches
@@ -171,15 +198,29 @@ apiTest.describe.serial(
     let adminHeaders: Record<string, string>;
     let alertZeroBaseline: boolean | undefined;
     const ruleIds: string[] = [];
+    const reviewExecutionIds: string[] = [];
 
-    const sweep = async (apiClient: ApiClientFixture) => {
+    const sweep = async (
+      apiClient: ApiClientFixture,
+      inputs: Partial<typeof SWEEP_INPUTS> = {}
+    ) => {
       const executionId = await runWorkflow(
         apiClient,
         adminHeaders,
         RULE_TUNING_SWEEP_WORKFLOW_ID,
-        SWEEP_INPUTS
+        {
+          ...SWEEP_INPUTS,
+          ...inputs,
+        }
       );
-      return waitForExecution(apiClient, adminHeaders, executionId, SWEEP_TIMEOUT_MS);
+      const execution = await waitForExecution(
+        apiClient,
+        adminHeaders,
+        executionId,
+        SWEEP_TIMEOUT_MS
+      );
+      reviewExecutionIds.push(...startedReviews(execution));
+      return execution;
     };
 
     const newRule = async (apiClient: ApiClientFixture, scenario: string) => {
@@ -243,6 +284,16 @@ apiTest.describe.serial(
             });
           },
         },
+        // Each review parks at its analyst gate for up to 72h; cancelled so they do not
+        // pile up as in-flight reviews for later runs.
+        ...reviewExecutionIds.map((id) => ({
+          name: `cancel review ${id}`,
+          run: async () => {
+            await apiClient.post(`/api/workflows/executions/${id}/cancel`, {
+              headers: adminHeaders,
+            });
+          },
+        })),
         { name: 'delete seeded alerts', run: () => clearAlerts(esClient) },
         {
           name: 'restore default space AlertZero setting',
@@ -442,6 +493,17 @@ apiTest.describe.serial(
             ]);
           }
         );
+
+        await apiTest.step(
+          'the sweep reports three requested reviews and no failed read',
+          async () => {
+            expect(sweepResult(execution)).toMatchObject({
+              reviews_requested: 3,
+              harvest_failed: false,
+              lookup_failed: false,
+            });
+          }
+        );
       }
     );
 
@@ -557,6 +619,164 @@ apiTest.describe.serial(
 
         await apiTest.step('both unreviewed rules get a review', async () => {
           expect(launched.sort()).toStrictEqual(enabled);
+        });
+      }
+    );
+
+    apiTest(
+      'launches at most max_rules_per_sweep reviews, noisiest rules first',
+      async ({ apiClient, esClient }) => {
+        apiTest.setTimeout(TEST_TIMEOUT_MS);
+        const fpCounts = [50, 40, 30, 20, 12];
+        const rules = await Promise.all(fpCounts.map((fp) => newRule(apiClient, `cap-${fp}-fps`)));
+        await seedAlerts(
+          esClient,
+          rules.map((rule, i) => ({
+            ruleId: rule.id,
+            ruleName: `${namePrefix}-cap-${fpCounts[i]}-fps`,
+            count: fpCounts[i],
+            falsePositive: true,
+            hoursAgo: 1,
+          }))
+        );
+
+        const execution = await sweep(apiClient, { max_rules_per_sweep: 3 });
+        const launched = launchedRules(execution);
+
+        await apiTest.step('only the three noisiest of five qualifying rules launch', async () => {
+          expect(launched).toStrictEqual([
+            { uuid: rules[0].id, fpCount: 50 },
+            { uuid: rules[1].id, fpCount: 40 },
+            { uuid: rules[2].id, fpCount: 30 },
+          ]);
+        });
+
+        await apiTest.step('the sweep reports the three launches', async () => {
+          expect(sweepResult(execution)).toMatchObject({
+            reviews_requested: 3,
+            harvest_failed: false,
+            lookup_failed: false,
+          });
+        });
+      }
+    );
+
+    apiTest('applies the thresholds passed as inputs', async ({ apiClient, esClient }) => {
+      apiTest.setTimeout(TEST_TIMEOUT_MS);
+      const strong = await newRule(apiClient, 'strong');
+      const fewFps = await newRule(apiClient, 'fewer-than-25-fps');
+      const diluted = await newRule(apiClient, 'diluted-to-60-pct');
+      await seedAlerts(esClient, [
+        {
+          ruleId: strong.id,
+          ruleName: `${namePrefix}-strong`,
+          count: 30,
+          falsePositive: true,
+          hoursAgo: 1,
+        },
+        {
+          ruleId: fewFps.id,
+          ruleName: `${namePrefix}-fewer-than-25-fps`,
+          count: 20,
+          falsePositive: true,
+          hoursAgo: 1,
+        },
+        {
+          ruleId: diluted.id,
+          ruleName: `${namePrefix}-diluted-to-60-pct`,
+          count: 30,
+          falsePositive: true,
+          hoursAgo: 1,
+        },
+        {
+          ruleId: diluted.id,
+          ruleName: `${namePrefix}-diluted-to-60-pct`,
+          count: 20,
+          falsePositive: false,
+          hoursAgo: 1,
+        },
+      ]);
+
+      const execution = await sweep(apiClient, { min_fp_count: 25, min_fp_rate_pct: 80 });
+      const launched = launchedRules(execution);
+      const launchedFor = (id: string) => launched.find(({ uuid }) => uuid === id);
+
+      await apiTest.step('30 FPs at 100% clears both raised gates', async () => {
+        expect(launchedFor(strong.id)).toStrictEqual({ uuid: strong.id, fpCount: 30 });
+      });
+
+      await apiTest.step('20 FPs at 100% misses the raised count gate', async () => {
+        expect(launchedFor(fewFps.id)).toBeUndefined();
+      });
+
+      await apiTest.step('30 FPs at 60% misses the raised rate gate', async () => {
+        expect(launchedFor(diluted.id)).toBeUndefined();
+      });
+
+      await apiTest.step('nothing else launches', async () => {
+        expect(launched).toHaveLength(1);
+      });
+    });
+
+    apiTest('looks only at alerts inside the analysis window', async ({ apiClient, esClient }) => {
+      apiTest.setTimeout(TEST_TIMEOUT_MS);
+      const fresh = await newRule(apiClient, 'fresh');
+      const stale = await newRule(apiClient, 'stale');
+      await seedAlerts(esClient, [
+        {
+          ruleId: fresh.id,
+          ruleName: `${namePrefix}-fresh`,
+          count: 15,
+          falsePositive: true,
+          hoursAgo: 24,
+        },
+        {
+          ruleId: stale.id,
+          ruleName: `${namePrefix}-stale`,
+          count: 15,
+          falsePositive: true,
+          hoursAgo: 10 * 24,
+        },
+      ]);
+
+      const execution = await sweep(apiClient, { analysis_window_days: 7 });
+
+      await apiTest.step(
+        '15 FPs from yesterday launch, 15 FPs from 10 days ago do not',
+        async () => {
+          expect(launchedRules(execution)).toStrictEqual([{ uuid: fresh.id, fpCount: 15 }]);
+        }
+      );
+    });
+
+    apiTest(
+      'leaves EQL sequence members and building blocks out of the count',
+      async ({ apiClient, esClient }) => {
+        apiTest.setTimeout(TEST_TIMEOUT_MS);
+        const plain = await newRule(apiClient, 'plain');
+        const sequence = await newRule(apiClient, 'sequence');
+        await seedAlerts(esClient, [
+          {
+            ruleId: plain.id,
+            ruleName: `${namePrefix}-plain`,
+            count: 15,
+            falsePositive: true,
+            hoursAgo: 1,
+          },
+          {
+            ruleId: sequence.id,
+            ruleName: `${namePrefix}-sequence`,
+            count: 15,
+            falsePositive: true,
+            sequenceMember: true,
+            hoursAgo: 1,
+          },
+        ]);
+
+        const execution = await sweep(apiClient);
+
+        await apiTest.step('only the rule with plain alerts launches', async () => {
+          expect(launchedRules(execution)).toStrictEqual([{ uuid: plain.id, fpCount: 15 }]);
         });
       }
     );

@@ -114,15 +114,19 @@ describe('Rule Tuning outcome reports', () => {
     }): Record<string, unknown> => {
       const eligibleKeys = Array.from({ length: eligible }, (_, index) => `rule-${index}@1`);
       const ineligibleKeys = Array.from({ length: ineligible }, (_, index) => `stale-${index}@1`);
-      const harvested =
-        rulesLookupFailed || screenFailed ? [] : [...eligibleKeys, ...ineligibleKeys];
+      const harvested = [...eligibleKeys, ...ineligibleKeys];
       return {
         consts: { no_rows: [] },
         steps: {
           collect_active_rules: { output: { expected: activeReviews } },
-          harvest_fp_alerts_by_rule: harvestFailed
-            ? { error: { message: 'search_phase_execution_exception' } }
-            : { output: { values: harvested.map(harvestRow) } },
+          // Skipped after a failed lookup or screen, so it has no output at all.
+          ...(rulesLookupFailed || screenFailed
+            ? {}
+            : {
+                harvest_fp_alerts_by_rule: harvestFailed
+                  ? { error: { message: 'search_phase_execution_exception' } }
+                  : { output: { values: harvested.map(harvestRow) } },
+              }),
           list_active_reviews: lookupFailed
             ? { error: { message: 'HTTP 500' } }
             : { output: { results: [] } },
@@ -188,7 +192,7 @@ describe('Rule Tuning outcome reports', () => {
         },
       ],
       [
-        // 15 noisy rules, 3 disabled or edited since their alerts, and the fan-out cap of 10:
+        // 15 noisy rules, 3 edited since their alerts, and the fan-out cap of 10:
         // found minus dispatched is exactly what the cap held back.
         'only the rules still eligible for review, of a harvest the cap cut short',
         { eligible: 12, ineligible: 3, requested: 10 },
@@ -243,7 +247,7 @@ describe('Rule Tuning outcome reports', () => {
         },
       ],
       [
-        // The harvest drops rules already under review, so the sweep finds nothing new.
+        // The screen drops rules already under review, so the sweep finds nothing new.
         'nothing new to review while reviews are in flight',
         { activeReviews: 2 },
         {
