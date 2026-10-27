@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { ALERT_BUCKET_COLUMN, buildAlertEuidPipeline } from './alert_euid_pipeline';
+import { getEuidEsqlDocumentsContainsIdFilter } from '@kbn/entity-store/common/domain/euid';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
+import {
+  ALERT_BUCKET_COLUMN,
+  ANY_ENTITY_IDENTITY_CONDITION,
+  buildAlertEuidPipeline,
+} from './alert_euid_pipeline';
 
 const pipelineText = (): string => buildAlertEuidPipeline().join('\n');
 
@@ -30,6 +36,53 @@ describe('buildAlertEuidPipeline', () => {
     expect(derived).toContain('host_euid =');
     expect(derived).toContain('service_euid =');
     expect(derived).toContain('_ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(');
+  });
+
+  describe('unstamped branch identity filter', () => {
+    const unstampedWhere = (): string =>
+      pipelineText()
+        .split('\n')
+        .find((line) => line.includes('`kibana.alert.entity.id` IS NULL')) ?? '';
+
+    it('keeps only alerts that could resolve to a user, host or service EUID', () => {
+      const where = unstampedWhere();
+      expect(where).toContain('user.name IS NOT NULL');
+      expect(where).toContain('host.name IS NOT NULL');
+      expect(where).toContain('service.name IS NOT NULL');
+    });
+
+    it('does not cast the fields, so ES|QL can push the filter down to Lucene', () => {
+      expect(unstampedWhere()).not.toMatch(/\bTO_[A-Z]+\(/);
+    });
+
+    it('skips failed-outcome user alerts, as risk scoring does', () => {
+      expect(unstampedWhere()).toContain('event.outcome != "failure"');
+    });
+
+    it("is the entity store's identity filter, with only the casts removed", () => {
+      const expected = (['user', 'host', 'service'] as const)
+        .map((entityType) => {
+          const filter = getEuidEsqlDocumentsContainsIdFilter(
+            getBuiltInEntityDefinition(entityType)
+          );
+          return `(${filter.replace(/\bTO_[A-Z]+\(([^()]+)\)/g, '$1')})`;
+        })
+        .join(' OR ');
+
+      expect(ANY_ENTITY_IDENTITY_CONDITION).toBe(expected);
+    });
+
+    it('filters before the EUID evals', () => {
+      const query = pipelineText();
+      expect(query.indexOf('user.name IS NOT NULL')).toBeLessThan(query.indexOf('user_euid ='));
+    });
+
+    it('does not filter the stamped branch', () => {
+      const stamped = pipelineText()
+        .split('\n')
+        .find((line) => line.includes('IS NOT NULL'));
+      expect(stamped).toBe('    WHERE `kibana.alert.entity.id` IS NOT NULL');
+    });
   });
 
   it('expands _ea_entity_id, filters nulls, deduplicates, then renames to entity.id for the JOIN', () => {
