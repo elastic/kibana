@@ -11,7 +11,6 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import {
   DISCOVERY_QUERIES_QUERY_KEY,
-  DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY,
   FEATURES_QUERY_KEY,
   SOURCES_QUERY_KEY,
 } from '../query_keys';
@@ -49,7 +48,6 @@ const nginxSource: NightshiftSource = {
 const KNOWLEDGE_PREFIXES = [
   [...FEATURES_QUERY_KEY],
   [...DISCOVERY_QUERIES_QUERY_KEY],
-  [...DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY],
   ['queryOccurrenceStats'],
 ];
 
