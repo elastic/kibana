@@ -92,7 +92,7 @@ export const GridSettingsFlyout = ({
     'metricsExperience.gridSettingsFlyout.dataDisplayGroupTooltip',
     {
       defaultMessage:
-        'Set how data is displayed for each metric type. Changes apply to every metric of that type in this Discover tab.',
+        'Set how data is displayed for histogram type metrics. Changes apply to every histogram metric in this Discover tab.',
     }
   );
 
@@ -106,7 +106,7 @@ export const GridSettingsFlyout = ({
         defaultMessage: 'Percentile',
       })
     : i18n.translate('metricsExperience.gridSettingsFlyout.histogramLabel', {
-        defaultMessage: 'Histogram percentile',
+        defaultMessage: 'Histogram',
       });
   const histogramDisplayLabel = i18n.translate(
     'metricsExperience.gridSettingsFlyout.histogramDisplayLabel',
