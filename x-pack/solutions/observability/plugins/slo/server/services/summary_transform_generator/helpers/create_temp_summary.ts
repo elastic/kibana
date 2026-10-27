@@ -6,9 +6,9 @@
  */
 
 import type { IBasePath } from '@kbn/core-http-server';
-import type { BudgetingMethod, Objective, timeWindowSchema } from '@kbn/slo-schema';
+import type { BudgetingMethod, Objective, timeWindowSchemaZod } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import type * as t from 'io-ts';
+import type { z } from '@kbn/zod';
 import type { Indicator, IndicatorTypes, SLODefinition, Status } from '../../../domain/models';
 
 export interface EsSummaryDocument {
@@ -36,7 +36,7 @@ export interface EsSummaryDocument {
   slo: {
     // >= 8.14: Add indicator.params on the temporary summary as well as real summary through summary pipeline
     indicator: { type: IndicatorTypes } | Indicator;
-    timeWindow: t.OutputOf<typeof timeWindowSchema>;
+    timeWindow: z.input<typeof timeWindowSchemaZod>;
     groupBy: string | string[];
     groupings: Record<string, unknown>;
     instanceId: string;

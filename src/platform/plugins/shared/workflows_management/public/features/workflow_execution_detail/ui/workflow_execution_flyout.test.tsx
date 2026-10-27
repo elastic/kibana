@@ -495,6 +495,21 @@ describe('WorkflowExecutionFlyout triggered by', () => {
     expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent(profileUid);
   });
 
+  it('shows a service account id on serverless when it is not a profile UID', () => {
+    const serviceAccountId = 'sa-nightshift-relay';
+    mockPollingResult.workflowExecution = createMockWorkflowExecutionDto({
+      id: 'exec-1',
+      executedBy: serviceAccountId,
+    });
+
+    renderFlyout(createServices({ isServerless: true }));
+
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent(
+      serviceAccountId
+    );
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedByCopy')).toBeInTheDocument();
+  });
+
   it('hides the unresolved UID on serverless, like the execution list', () => {
     renderFlyout(createServices({ isServerless: true }));
 

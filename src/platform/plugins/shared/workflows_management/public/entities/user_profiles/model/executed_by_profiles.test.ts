@@ -8,7 +8,11 @@
  */
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { getExecutedByLabel, getExecutedByProfiles } from './executed_by_profiles';
+import {
+  executedByFallbackLabel,
+  getExecutedByLabel,
+  getExecutedByProfiles,
+} from './executed_by_profiles';
 
 const createProfile = (user: UserProfileWithAvatar['user']): UserProfileWithAvatar => ({
   uid: 'u_alice',
@@ -54,5 +58,27 @@ describe('getExecutedByProfiles', () => {
     ]);
 
     expect(Array.from(profiles.entries())).toEqual([['u_alice', profile]]);
+  });
+});
+
+describe('executedByFallbackLabel', () => {
+  it('keeps a service account id when unresolved profile UIDs are hidden', () => {
+    expect(executedByFallbackLabel('sa-nightshift-relay', false)).toBe('sa-nightshift-relay');
+  });
+
+  it('hides an unresolved profile UID', () => {
+    expect(executedByFallbackLabel('u_mGBROF_q5bm_A5E_0', false)).toBeUndefined();
+  });
+
+  it('keeps a profile UID when unresolved executors are shown', () => {
+    expect(executedByFallbackLabel('u_mGBROF_q5bm_A5E_0', true)).toBe('u_mGBROF_q5bm_A5E_0');
+  });
+
+  it('hides the missing-identity sentinel when unresolved profile UIDs are hidden', () => {
+    expect(executedByFallbackLabel('unknown', false)).toBeUndefined();
+  });
+
+  it('keeps the missing-identity sentinel when unresolved executors are shown', () => {
+    expect(executedByFallbackLabel('unknown', true)).toBe('unknown');
   });
 });

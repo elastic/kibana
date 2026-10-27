@@ -21,18 +21,18 @@ import { DetectionStatusBadge } from './detection_status_badge';
 import { MetricCell, type MetricCellProps } from './metric_cell';
 import {
   DETECTION_ENGINE_LABEL,
-  getDetectionsLabel,
   getKnowledgeIndicatorsLabel,
   getRulesLabel,
+  getSignalsLabel,
   getSignificantEventsLabel,
-  getSourcesLabel,
+  getEntitiesLabel,
   OVERVIEW_ERROR_MESSAGE,
   OVERVIEW_ERROR_TITLE,
   OVERVIEW_RETRY_LABEL,
 } from './translations';
 
 export interface DetectionOverviewCounts {
-  sources: number;
+  entities: number;
   knowledge_indicators: number;
   active_rules: number;
   detections: number;
@@ -47,6 +47,7 @@ export interface DetectionOverviewProps {
   isCountsLoading: boolean;
   isCountsError: boolean;
   onRetry: () => void;
+  compact?: boolean;
 }
 
 export const DetectionOverview = ({
@@ -57,6 +58,7 @@ export const DetectionOverview = ({
   isCountsLoading,
   isCountsError,
   onRetry,
+  compact = false,
 }: DetectionOverviewProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const metrics: Array<Omit<MetricCellProps, 'isLoading'>> = [
@@ -68,11 +70,11 @@ export const DetectionOverview = ({
       testSubject: 'nightshiftDetectionOverviewKnowledgeIndicators',
     },
     {
-      icon: 'database',
+      icon: 'cube',
       tone: 'neutral',
-      value: counts?.sources,
-      getLabel: getSourcesLabel,
-      testSubject: 'nightshiftDetectionOverviewSources',
+      value: counts?.entities,
+      getLabel: getEntitiesLabel,
+      testSubject: 'nightshiftDetectionOverviewEntities',
     },
     {
       icon: 'radar',
@@ -85,8 +87,8 @@ export const DetectionOverview = ({
       icon: 'moon',
       tone: 'warning',
       value: counts?.detections,
-      getLabel: getDetectionsLabel,
-      testSubject: 'nightshiftDetectionOverviewDetections',
+      getLabel: getSignalsLabel,
+      testSubject: 'nightshiftDetectionOverviewSignals',
     },
     {
       icon: 'warning',
@@ -98,7 +100,15 @@ export const DetectionOverview = ({
   ];
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      grow={false}
+      paddingSize="m"
+      data-test-subj={
+        compact ? 'nightshiftDetectionOverviewCompact' : 'nightshiftDetectionOverview'
+      }
+    >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
@@ -110,48 +120,53 @@ export const DetectionOverview = ({
             status={status}
             isLoading={isStatusLoading}
             isError={isStatusError}
+            data-test-subj={compact ? 'nightshiftDetectionCompactStatus' : undefined}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      {isCountsError ? (
-        <KbnDangerCallout
-          announceOnMount
-          title={OVERVIEW_ERROR_TITLE}
-          text={OVERVIEW_ERROR_MESSAGE}
-          size="s"
-          data-test-subj="nightshiftDetectionOverviewError"
-          actionProps={{
-            primary: {
-              children: OVERVIEW_RETRY_LABEL,
-              iconType: 'refresh',
-              onClick: onRetry,
-              'data-test-subj': 'nightshiftDetectionOverviewRetryButton',
-            },
-          }}
-        />
-      ) : (
-        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap>
-          {metrics.map((metric) => (
-            <EuiFlexItem
-              key={metric.testSubject}
-              grow={false}
-              css={css`
-                padding-inline: ${euiTheme.size.l};
+      {!compact && (
+        <>
+          <EuiSpacer size="m" />
+          {isCountsError ? (
+            <KbnDangerCallout
+              announceOnMount
+              title={OVERVIEW_ERROR_TITLE}
+              text={OVERVIEW_ERROR_MESSAGE}
+              size="s"
+              data-test-subj="nightshiftDetectionOverviewError"
+              actionProps={{
+                primary: {
+                  children: OVERVIEW_RETRY_LABEL,
+                  iconType: 'refresh',
+                  onClick: onRetry,
+                  'data-test-subj': 'nightshiftDetectionOverviewRetryButton',
+                },
+              }}
+            />
+          ) : (
+            <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap>
+              {metrics.map((metric) => (
+                <EuiFlexItem
+                  key={metric.testSubject}
+                  grow={false}
+                  css={css`
+                    padding-inline: ${euiTheme.size.l};
 
-                &:first-of-type {
-                  padding-inline-start: 0;
-                }
+                    &:first-of-type {
+                      padding-inline-start: 0;
+                    }
 
-                &:not(:first-of-type) {
-                  border-inline-start: ${euiTheme.border.thin};
-                }
-              `}
-            >
-              <MetricCell {...metric} isLoading={isCountsLoading} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+                    &:not(:first-of-type) {
+                      border-inline-start: ${euiTheme.border.thin};
+                    }
+                  `}
+                >
+                  <MetricCell {...metric} isLoading={isCountsLoading} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          )}
+        </>
       )}
     </EuiPanel>
   );

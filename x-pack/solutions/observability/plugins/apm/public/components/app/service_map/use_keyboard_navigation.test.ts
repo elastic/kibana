@@ -63,7 +63,7 @@ const defaultProps = {
   edges: [] as ServiceMapEdge[],
   selectedNodeId: null,
   selectedNodeForPopover: null,
-  selectedEdgeForPopover: null,
+  selectedEdgeForFlyout: null,
   onNodeSelect: jest.fn(),
   onEdgeSelect: jest.fn(),
   onPopoverClose: jest.fn(),
@@ -496,14 +496,14 @@ describe('useKeyboardNavigation', () => {
       expect(onPopoverClose).toHaveBeenCalledTimes(1);
     });
 
-    it('calls onPopoverClose when Escape is pressed with open edge popover', () => {
+    it('leaves closing the edge flyout to the flyout itself on Escape', () => {
       const onPopoverClose = jest.fn();
       const selectedEdge = createEdge('a', 'b');
 
       renderHook(() =>
         useKeyboardNavigation({
           ...defaultProps,
-          selectedEdgeForPopover: selectedEdge,
+          selectedEdgeForFlyout: selectedEdge,
           onPopoverClose,
         })
       );
@@ -513,7 +513,7 @@ describe('useKeyboardNavigation', () => {
         document.dispatchEvent(event);
       });
 
-      expect(onPopoverClose).toHaveBeenCalledTimes(1);
+      expect(onPopoverClose).not.toHaveBeenCalled();
     });
 
     it('does not call onPopoverClose when Escape is pressed without open popover', () => {
@@ -704,7 +704,7 @@ describe('useKeyboardNavigation', () => {
         useKeyboardNavigation({
           ...defaultProps,
           edges,
-          selectedEdgeForPopover: edges[0],
+          selectedEdgeForFlyout: edges[0],
           onPopoverClose,
         })
       );

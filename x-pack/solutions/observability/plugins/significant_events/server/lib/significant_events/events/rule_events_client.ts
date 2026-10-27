@@ -35,6 +35,7 @@ import {
   applyLifetimeOverlap,
   applyTimeRange,
   esqlToObjects,
+  escapeEsqlLikePattern,
   executeCountQuery,
   executeEsqlQuery,
   isIndexNotFoundError,
@@ -74,6 +75,9 @@ const isSignificantEventStatus = (status: AlertEpisodeStatus): status is Signifi
 
 const isSignificantEventSeverity = (severity: AlertEventSeverity): severity is Severity =>
   severity === 'critical' || severity === 'high' || severity === 'medium' || severity === 'low';
+
+const eventStatus = (): ESQLAstExpression =>
+  esql.exp`COALESCE(${esql.col('alert.status')}, ${esql.str(ALERT_EPISODE_STATUS.ACTIVE)})`;
 
 type RuleEventsCurrentStateSearchOptions = CommonSearchOptions & EventsFilterOptions;
 
@@ -158,8 +162,7 @@ const withDataJsonProjection = (query: ComposerQuery): ComposerQuery =>
 const buildFreeTextWhere = (search: string | undefined): ESQLAstExpression | undefined => {
   if (!search) return undefined;
 
-  const escaped = search.toLowerCase().replace(/\\/g, '\\\\').replace(/[*?]/g, '\\$&');
-  const pattern = esql.str(`*${escaped}*`);
+  const pattern = esql.str(`*${escapeEsqlLikePattern(search)}*`);
   const dataCol = esql.col('data');
 
   return esql.exp`(TO_LOWER(FIELD_EXTRACT(${dataCol}, ${esql.str(
@@ -265,12 +268,9 @@ const applySort = (
         ['_id', 'ASC']
       );
     case 'status':
-      // A missing alert.status decodes as active (see decodeSignificantEvent).
-      return query.pipe`EVAL ${esql.col(SORT_RANK_COLUMN)} = CASE(${esql.col(
-        'alert.status'
-      )} == ${esql.str(ALERT_EPISODE_STATUS.INACTIVE)}, 1, ${esql.col(
-        'alert.status'
-      )} == ${esql.str(ALERT_EPISODE_STATUS.RECOVERING)}, 2, 3)`.sort(
+      return query.pipe`EVAL ${esql.col(SORT_RANK_COLUMN)} = CASE(${eventStatus()} == ${esql.str(
+        ALERT_EPISODE_STATUS.INACTIVE
+      )}, 1, ${eventStatus()} == ${esql.str(ALERT_EPISODE_STATUS.RECOVERING)}, 2, 3)`.sort(
         [SORT_RANK_COLUMN, direction],
         ['created_at', 'DESC'],
         ['_id', 'ASC']
@@ -388,13 +388,13 @@ export class RuleEventsClient {
       query,
       from: options.from,
       to: options.to,
-      activeWhere: esql.exp`${esql.col(
-        'alert.status'
-      )} IN (${SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.map((status) => esql.str(status))})`,
+      activeWhere: esql.exp`${eventStatus()} IN (${SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.map(
+        (status) => esql.str(status)
+      )})`,
     });
 
     if (options.status?.length) {
-      query = query.where`${esql.col('alert.status')} IN (${options.status.map((status) =>
+      query = query.where`${eventStatus()} IN (${options.status.map((status) =>
         esql.str(status)
       )})`;
     }
@@ -412,8 +412,19 @@ export class RuleEventsClient {
     if (options.ruleUuids?.length) {
       query = query.where`${ruleUuidsIntersects(options.ruleUuids)}`;
     }
-    if (options.topologyFeatureIds?.length) {
-      query = query.where`${topologyFeatureIdsIntersects(options.topologyFeatureIds)}`;
+    const selectedEntities = options.topologyFeatureIds?.length
+      ? topologyFeatureIdsIntersects(options.topologyFeatureIds)
+      : undefined;
+    const unassignedEntities = options.unassignedEntityIds?.length
+      ? esql.exp`NOT (${topologyFeatureIdsIntersects(options.unassignedEntityIds)})`
+      : undefined;
+    const entityFilter =
+      selectedEntities && unassignedEntities
+        ? esql.exp`(${selectedEntities}) OR (${unassignedEntities})`
+        : selectedEntities ?? unassignedEntities;
+    // An empty live-entity set makes every event unassigned, including selected slugs.
+    if (entityFilter && options.unassignedEntityIds?.length !== 0) {
+      query = query.where`${entityFilter}`;
     }
     if (options.investigationStates?.length) {
       query = withInvestigationState(query).where`${esql.col(
@@ -497,11 +508,8 @@ export class RuleEventsClient {
       }),
       countBy({
         esClient,
-        // A missing alert.status decodes as active (see decodeSignificantEvent).
         query: this.buildLatestByCurrentStateQuery({ ...options, status: undefined })
-          .pipe`EVAL event_status = COALESCE(${esql.col('alert.status')}, ${esql.str(
-          ALERT_EPISODE_STATUS.ACTIVE
-        )})`,
+          .pipe`EVAL event_status = ${eventStatus()}`,
         column: 'event_status',
         keys: SIGNIFICANT_EVENT_STATUS_OPTIONS,
       }),
@@ -516,6 +524,46 @@ export class RuleEventsClient {
     ]);
 
     return { severity, status, investigation };
+  }
+
+  async countActiveEventsByEntity(
+    options: Pick<RuleEventsCurrentStateSearchOptions, 'from' | 'to'>,
+    entityIds: string[]
+  ): Promise<{ entities: Record<string, number>; unassigned: number }> {
+    const { esClient } = this.clients;
+    const base = this.buildLatestByCurrentStateQuery({ ...options, status: ['active'] });
+    // CASE preserves events whose causal features or blast radius is absent.
+    const entitiesQuery = base.pipe`EVAL a = FIELD_EXTRACT(data, "causal_features.feature_id"), b = FIELD_EXTRACT(data, "blast_radius.feature_id")`
+      .pipe`EVAL fid = MV_DEDUPE(CASE(a IS NULL, b, b IS NULL, a, MV_APPEND(a, b)))`
+      .pipe`MV_EXPAND fid`;
+    try {
+      const [rows, unassigned] = await Promise.all([
+        entityIds.length
+          ? queryEsql({
+              esClient,
+              query: entitiesQuery.where`fid IN (${entityIds.map((id) => esql.str(id))})`
+                .pipe`STATS n = COUNT(*) BY fid`,
+            }).then((response) => esqlToObjects<{ fid: string; n: number }>(response))
+          : [],
+        executeCountQuery({
+          esClient,
+          query: this.buildLatestByCurrentStateQuery({
+            ...options,
+            status: ['active'],
+            unassignedEntityIds: entityIds,
+          }).pipe`STATS total = COUNT(*)`,
+        }),
+      ]);
+      return {
+        entities: Object.fromEntries(rows.map(({ fid, n }) => [fid, n])),
+        unassigned,
+      };
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return { entities: {}, unassigned: 0 };
+      }
+      throw error;
+    }
   }
 
   async findLatestByCurrentStateBatch(
@@ -562,8 +610,8 @@ export class RuleEventsClient {
 
     query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
 
-    query = query.where`${esql.col('alert.status')} IN (${SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.map(
-      (status) => esql.str(status)
+    query = query.where`${eventStatus()} IN (${SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.map((status) =>
+      esql.str(status)
     )})`;
 
     if (options.sourceIds?.length) {

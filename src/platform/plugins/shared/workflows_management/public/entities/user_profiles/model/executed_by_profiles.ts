@@ -11,6 +11,31 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 
+const USER_PROFILE_UID_PREFIX = 'u_';
+/** Same sentinel as `UNKNOWN_EXECUTION_IDENTITY` on the execution document. */
+const UNKNOWN_EXECUTED_BY = 'unknown';
+
+/**
+ * Label to show when no user profile matches `executedBy`. Serverless hides an unresolved profile
+ * UID and the missing-identity sentinel. A service-account id stays visible.
+ */
+export const executedByFallbackLabel = (
+  executedBy: string | undefined,
+  showUnresolvedExecutors: boolean
+): string | undefined => {
+  const value = executedBy?.trim();
+  if (!value) {
+    return undefined;
+  }
+  if (showUnresolvedExecutors) {
+    return value;
+  }
+  if (value === UNKNOWN_EXECUTED_BY || value.startsWith(USER_PROFILE_UID_PREFIX)) {
+    return undefined;
+  }
+  return value;
+};
+
 export const getExecutedByLabel = (
   profile?: UserProfileWithAvatar,
   fallbackLabel?: string
