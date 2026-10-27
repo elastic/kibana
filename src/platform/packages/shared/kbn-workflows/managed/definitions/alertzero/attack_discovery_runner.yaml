@@ -282,9 +282,11 @@ steps:
                 # DETECTION alert ids, not the Attack Discovery's own id.
                 alert_ids: "${{ foreach.item.alert_ids }}"
                 summary_markdown: "{{ foreach.item.summary_markdown }}"
-                # Set when this attack shares entities with a closed false-positive
-                # Investigation and does not share its alerts. Empty otherwise.
+                # Set when this attack is reviewed on its own. `related_link_reason`
+                # says whether the earlier Investigation is a closed false positive
+                # or the match is only a built-in account. Empty otherwise.
                 related_investigation_id: "{{ foreach.item.related_investigation_id }}"
+                related_link_reason: "{{ foreach.item.related_link_reason }}"
                 # Detection alerts on the same-run attacks attached to this
                 # Investigation. The review tags them with its own when the verdict
                 # escalates.
@@ -328,6 +330,7 @@ steps:
                 alert_ids: "${{ foreach.item['kibana.alert.attack_discovery.alert_ids'] | default: consts.no_discoveries }}"
                 summary_markdown: "{{ foreach.item['kibana.alert.attack_discovery.summary_markdown'] }}"
                 related_investigation_id: ""
+                related_link_reason: ""
                 sibling_alert_ids: "${{ consts.no_discoveries }}"
                 sibling_attack_discovery_ids: "${{ consts.no_discoveries }}"
                 autonomy: "${{ inputs.autonomy }}"

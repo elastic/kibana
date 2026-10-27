@@ -297,6 +297,25 @@ describe('clusterNewAttacks', () => {
     expect(clusterNewAttacks([later, earlier])[0][0].attackId).toBe(earlier.attackId);
   });
 
+  it('returns one group when two phases share only a built-in account', () => {
+    const first = attack({
+      alertIds: ['a1'],
+      userEntityIds: ['SYSTEM'],
+      entityPairs: ['SYSTEM@host-1'],
+      tactics: ['TA0002'],
+    });
+    const second = attack({
+      attackId: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      alertIds: ['b1'],
+      userEntityIds: ['SYSTEM'],
+      entityPairs: ['SYSTEM@host-1'],
+      tactics: ['TA0040'],
+      firstAlertAt: '2026-10-21T18:00:00.000Z',
+    });
+
+    expect(clusterNewAttacks([first, second])).toHaveLength(1);
+  });
+
   it('returns one group for a same-run host with no user', () => {
     const first = attack({
       attackId: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
@@ -484,6 +503,16 @@ describe('disposition', () => {
     expect(decision.kind).toBe('review_linked');
   });
 
+  it('names a closed false positive as the link reason', () => {
+    const decision = disposition(
+      attack({ alertIds: ['c1', 'c2'] }),
+      stored({ alertIds: ['a1', 'a2'] }),
+      { status: 'closed', closeReason: 'false_positive' }
+    );
+
+    expect(decision.relatedLinkReason).toBe('false_positive');
+  });
+
   it('returns the closed investigation id as the related id', () => {
     const decision = disposition(
       attack({ alertIds: ['c1', 'c2'] }),
@@ -601,6 +630,209 @@ describe('disposition', () => {
     const decision = disposition(canonical, stored(), { status: 'closed' });
 
     expect(decision.tagCorrelatedAlerts).toBe(true);
+  });
+
+  it('reviews a later attack that shares only SYSTEM on the same host', () => {
+    const later = attack({
+      attackId: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      alertIds: ['b1'],
+      userEntityIds: ['SYSTEM'],
+      entityPairs: ['SYSTEM@host-1'],
+      tactics: ['TA0040'],
+    });
+    const decision = disposition(
+      later,
+      stored({
+        alertIds: ['a1', 'a2'],
+        userEntityIds: ['SYSTEM'],
+        entityPairs: ['SYSTEM@host-1'],
+        tactics: ['TA0002'],
+        investigationId: 'open-system',
+      }),
+      { status: 'open', verdict: 'In analysis' },
+      [later]
+    );
+
+    expect(decision).toEqual(
+      expect.objectContaining({
+        kind: 'review_linked',
+        relatedInvestigationId: 'open-system',
+        relatedLinkReason: 'builtin_account',
+      })
+    );
+  });
+
+  it('reviews a later attack that shares only a local Administrator', () => {
+    const later = attack({
+      alertIds: ['b1'],
+      userEntityIds: ['Administrator@host-1'],
+      entityPairs: ['Administrator@host-1'],
+    });
+    const decision = disposition(
+      later,
+      stored({
+        alertIds: ['a1', 'a2'],
+        userEntityIds: ['Administrator@host-1'],
+        entityPairs: ['Administrator@host-1'],
+      }),
+      { status: 'open', verdict: '' },
+      [later]
+    );
+
+    expect(decision.kind).toBe('review_linked');
+  });
+
+  it('reviews a later attack that shares only root', () => {
+    const later = attack({
+      alertIds: ['b1'],
+      userEntityIds: ['root'],
+      entityPairs: ['root@host-1'],
+    });
+    const decision = disposition(
+      later,
+      stored({
+        alertIds: ['a1', 'a2'],
+        userEntityIds: ['root'],
+        entityPairs: ['root@host-1'],
+      }),
+      { status: 'open', verdict: '' },
+      [later]
+    );
+
+    expect(decision.kind).toBe('review_linked');
+  });
+
+  it('reviews a later attack that shares NT AUTHORITY\\SYSTEM', () => {
+    const later = attack({
+      alertIds: ['b1'],
+      userEntityIds: ['NT AUTHORITY\\SYSTEM'],
+      entityPairs: ['NT AUTHORITY\\SYSTEM@host-1'],
+    });
+    const decision = disposition(
+      later,
+      stored({
+        alertIds: ['a1', 'a2'],
+        userEntityIds: ['NT AUTHORITY\\SYSTEM'],
+        entityPairs: ['NT AUTHORITY\\SYSTEM@host-1'],
+      }),
+      { status: 'open', verdict: '' },
+      [later]
+    );
+
+    expect(decision.relatedLinkReason).toBe('builtin_account');
+  });
+
+  it('attaches when a built-in account also shares alerts', () => {
+    const later = attack({
+      alertIds: ['a1', 'a2'],
+      userEntityIds: ['SYSTEM'],
+      entityPairs: ['SYSTEM@host-1'],
+    });
+    const decision = disposition(
+      later,
+      stored({
+        alertIds: ['a1', 'a2'],
+        userEntityIds: ['SYSTEM'],
+        entityPairs: ['SYSTEM@host-1'],
+      }),
+      { status: 'open', verdict: '' },
+      [later]
+    );
+
+    expect(decision.kind).toBe('attach');
+  });
+
+  it('attaches when a named user is shared alongside a built-in account', () => {
+    const later = attack({
+      alertIds: ['b1'],
+      userEntityIds: ['SYSTEM', 'bob'],
+      entityPairs: ['SYSTEM@host-1', 'bob@host-1'],
+    });
+    const decision = disposition(
+      later,
+      stored({
+        alertIds: ['a1', 'a2'],
+        userEntityIds: ['SYSTEM', 'bob'],
+        entityPairs: ['SYSTEM@host-1', 'bob@host-1'],
+      }),
+      { status: 'open', verdict: '' },
+      [later]
+    );
+
+    expect(decision.kind).toBe('attach');
+  });
+
+  it('reviews a built-in match while the earlier Investigation is still pending', () => {
+    const now = new Date('2026-10-21T12:00:00.000Z');
+    const later = attack({
+      alertIds: ['b1'],
+      userEntityIds: ['SYSTEM'],
+      entityPairs: ['SYSTEM@host-1'],
+    });
+    const decision = disposition(
+      later,
+      stored({
+        alertIds: ['a1', 'a2'],
+        userEntityIds: ['SYSTEM'],
+        entityPairs: ['SYSTEM@host-1'],
+        writtenAt: now.toISOString(),
+        investigationId: 'pending-system',
+      }),
+      undefined,
+      [later],
+      now
+    );
+
+    expect(decision).toEqual(
+      expect.objectContaining({
+        kind: 'review_linked',
+        relatedInvestigationId: 'pending-system',
+        relatedLinkReason: 'builtin_account',
+      })
+    );
+  });
+
+  it('keeps the false-positive sentence when a built-in match is a closed false positive', () => {
+    const later = attack({
+      alertIds: ['b1'],
+      userEntityIds: ['SYSTEM'],
+      entityPairs: ['SYSTEM@host-1'],
+    });
+    const decision = disposition(
+      later,
+      stored({
+        alertIds: ['a1', 'a2'],
+        userEntityIds: ['SYSTEM'],
+        entityPairs: ['SYSTEM@host-1'],
+      }),
+      { status: 'closed', closeReason: 'false_positive' },
+      [later]
+    );
+
+    expect(decision.relatedLinkReason).toBe('false_positive');
+  });
+
+  it('returns a plain review when a built-in match has no readable Investigation', () => {
+    const now = new Date('2026-10-21T12:00:00.000Z');
+    const later = attack({
+      alertIds: ['b1'],
+      userEntityIds: ['SYSTEM'],
+      entityPairs: ['SYSTEM@host-1'],
+    });
+    const decision = disposition(
+      later,
+      stored({
+        alertIds: ['a1', 'a2'],
+        userEntityIds: ['SYSTEM'],
+        entityPairs: ['SYSTEM@host-1'],
+        writtenAt: '2026-10-21T10:00:00.000Z',
+      }),
+      undefined,
+      [later],
+      now
+    );
+
+    expect(decision.kind).toBe('review');
   });
 
   it('returns attach and does not tag a false-positive close', () => {

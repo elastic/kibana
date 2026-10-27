@@ -63,6 +63,7 @@ export interface MatchReview {
   alert_ids: string[];
   summary_markdown: string;
   related_investigation_id: string;
+  related_link_reason: string;
   sibling_alert_ids: string[];
   sibling_attack_discovery_ids: string[];
 }
@@ -700,6 +701,7 @@ const readInvestigation = async (
 const reviewOf = (
   attack: AttackSignals,
   relatedInvestigationId: string,
+  relatedLinkReason: string,
   siblingIds: readonly string[],
   siblingDiscoveryIds: readonly string[]
 ): MatchReview => ({
@@ -708,6 +710,7 @@ const reviewOf = (
   alert_ids: attack.alertIds.slice(0, MAX_ALERT_IDS),
   summary_markdown: attack.summaryMarkdown.slice(0, 8000),
   related_investigation_id: relatedInvestigationId.slice(0, 256),
+  related_link_reason: relatedLinkReason.slice(0, 32),
   sibling_alert_ids: siblingIds.slice(0, MAX_ALERT_IDS),
   sibling_attack_discovery_ids: siblingDiscoveryIds.slice(0, MAX_ALERT_IDS),
 });
@@ -719,7 +722,7 @@ export const reviewsWhenMatchFails = (
   reviews: attacks
     .map((raw) => parseAttack(raw))
     .filter((item): item is AttackSignals => item !== undefined)
-    .map((attack) => reviewOf(attack, '', [], [])),
+    .map((attack) => reviewOf(attack, '', '', [], [])),
   attachments: [],
 });
 
@@ -847,6 +850,7 @@ const applyDecision = (
     reviewOf(
       group[0],
       decision.relatedInvestigationId,
+      decision.relatedLinkReason,
       siblingAlertIds(group),
       siblingDiscoveryIds(group)
     )
@@ -953,6 +957,7 @@ export const matchAttackFingerprints = async ({
             kind: 'attach',
             investigationId: conflicting.investigationId,
             relatedInvestigationId: '',
+            relatedLinkReason: '',
             journalAlertsRetired: journalAlertsRetired(meta),
             tagCorrelatedAlerts: tagCorrelatedAlerts(meta),
           };

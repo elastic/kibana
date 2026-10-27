@@ -47,13 +47,16 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID =
  *
  * Version 9 passes the discovery ids of same-run siblings so the review can close
  * them with the canonical attack.
+ *
+ * Version 10 passes why a review is linked to an earlier Investigation, so the
+ * journal can tell a built-in account from a closed false positive.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 9,
+  version: 10,
   yaml: ATTACK_DISCOVERY_RUNNER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -80,13 +83,17 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
  *
  * Version 13 closes `sibling_attack_discovery_ids` with the canonical attack when
  * the verdict is a false positive or the analyst declines escalation.
+ *
+ * Version 14 journals a built-in account link separately from a closed false
+ * positive. A match that is only SYSTEM, Administrator, or root on one host
+ * is reviewed on its own.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 13,
+  version: 14,
   yaml: ATTACK_DISCOVERY_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

@@ -75,10 +75,14 @@ export interface InvestigationMeta {
 
 export type DispositionKind = 'review' | 'review_linked' | 'attach';
 
+/** Why a new review is journaled against an earlier Investigation. */
+export type RelatedLinkReason = '' | 'false_positive' | 'builtin_account';
+
 export interface Disposition {
   kind: DispositionKind;
   investigationId: string;
   relatedInvestigationId: string;
+  relatedLinkReason: RelatedLinkReason;
   tagCorrelatedAlerts: boolean;
   journalAlertsRetired: boolean;
 }
@@ -158,6 +162,53 @@ const userInPair = (userId: string, pair: string): boolean => {
   }
   const splitAt = pair.lastIndexOf('@');
   return splitAt > 0 && pair.slice(0, splitAt) === userId;
+};
+
+/**
+ * Accounts that appear on almost every alert from a host. A pair of one of these
+ * and a host is the host alone, so it does not identify an attack across runs.
+ */
+const BUILTIN_ACCOUNT_NAMES = new Set([
+  'system',
+  'local service',
+  'network service',
+  'administrator',
+  'root',
+  's-1-5-18',
+  's-1-5-19',
+  's-1-5-20',
+]);
+
+/** `NT AUTHORITY\\SYSTEM@host` and `SYSTEM@host` both reduce to `system`. */
+const accountName = (value: string): string => {
+  const trimmed = value.trim();
+  const at = trimmed.lastIndexOf('@');
+  const withoutHost = at > 0 ? trimmed.slice(0, at) : trimmed;
+  const leaf = withoutHost.split('\\').pop() ?? withoutHost;
+  return leaf.trim().toLowerCase();
+};
+
+const builtinAccount = (value: string): boolean => BUILTIN_ACCOUNT_NAMES.has(accountName(value));
+
+/**
+ * True when the attacks match across runs only because they share a built-in
+ * account on the same host. Shared alerts or a named user are a real link.
+ */
+export const linksOnlyByBuiltinAccount = (
+  left: AttackMatchFields,
+  right: AttackMatchFields
+): boolean => {
+  if (alertOverlap(left.alertIds, right.alertIds) || !entityMatch(left, right, false)) {
+    return false;
+  }
+  const leftPairs = left.entityPairs ?? [];
+  const rightPairs = right.entityPairs ?? [];
+  if (leftPairs.length > 0 && rightPairs.length > 0) {
+    const pairs = sharedValues(leftPairs, rightPairs);
+    return pairs.length > 0 && pairs.every((pair) => builtinAccount(pair));
+  }
+  const users = sharedValues(left.userEntityIds, right.userEntityIds);
+  return users.length > 0 && users.every((user) => builtinAccount(user));
 };
 
 /**
@@ -386,7 +437,7 @@ export const investigationStillPending = (stored: StoredFingerprint, now: Date):
 
 /**
  * `review` opens a new Investigation and runs FP/TP. `review_linked` does that and
- * journals the closed false-positive it did not join. `attach` skips FP/TP.
+ * journals the earlier Investigation it did not join. `attach` skips FP/TP.
  */
 export const disposition = (
   canonical: AttackSignals,
@@ -403,6 +454,7 @@ export const disposition = (
     kind: 'review' as const,
     investigationId: freshInvestigationId,
     relatedInvestigationId: '',
+    relatedLinkReason: '' as const,
     tagCorrelatedAlerts: false,
     journalAlertsRetired: false,
   };
@@ -411,6 +463,27 @@ export const disposition = (
   if (!matched || stored === undefined) {
     return review;
   }
+
+  const sharesAlerts = group.some((member) => alertOverlap(member.alertIds, stored.alertIds));
+  const onlyBuiltin =
+    !sharesAlerts &&
+    group.every(
+      (member) => !sameAttack(member, stored, false) || linksOnlyByBuiltinAccount(member, stored)
+    );
+  const closedFalsePositive =
+    investigation?.status === 'closed' && investigation.closeReason === 'false_positive';
+  const linkable = investigation !== undefined || investigationStillPending(stored, now);
+  if (onlyBuiltin && linkable) {
+    return {
+      kind: 'review_linked',
+      investigationId: freshInvestigationId,
+      relatedInvestigationId: stored.investigationId,
+      relatedLinkReason: closedFalsePositive ? 'false_positive' : 'builtin_account',
+      tagCorrelatedAlerts: false,
+      journalAlertsRetired: false,
+    };
+  }
+
   if (investigation === undefined) {
     if (!investigationStillPending(stored, now)) {
       return review;
@@ -419,19 +492,18 @@ export const disposition = (
       kind: 'attach',
       investigationId: stored.investigationId,
       relatedInvestigationId: '',
+      relatedLinkReason: '',
       tagCorrelatedAlerts: false,
       journalAlertsRetired: false,
     };
   }
 
-  const closedFalsePositive =
-    investigation?.status === 'closed' && investigation.closeReason === 'false_positive';
-  const sharesAlerts = group.some((member) => alertOverlap(member.alertIds, stored.alertIds));
   if (closedFalsePositive && !sharesAlerts) {
     return {
       kind: 'review_linked',
       investigationId: freshInvestigationId,
       relatedInvestigationId: stored.investigationId,
+      relatedLinkReason: 'false_positive',
       tagCorrelatedAlerts: false,
       journalAlertsRetired: false,
     };
@@ -441,6 +513,7 @@ export const disposition = (
     kind: 'attach',
     investigationId: stored.investigationId,
     relatedInvestigationId: '',
+    relatedLinkReason: '',
     tagCorrelatedAlerts: tagCorrelatedAlerts(investigation),
     journalAlertsRetired: journalAlertsRetired(investigation),
   };

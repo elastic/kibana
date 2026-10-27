@@ -539,6 +539,7 @@ describe('Attack Discovery worker chain', () => {
         alert_ids: ['alert-1', 'alert-2'],
         summary_markdown: 'A **summary**',
         related_investigation_id: '',
+        related_link_reason: '',
         sibling_alert_ids: ['alert-3'],
         sibling_attack_discovery_ids: ['attack-hash-2'],
       };
@@ -561,6 +562,7 @@ describe('Attack Discovery worker chain', () => {
         ['alert_ids', '["alert-1","alert-2"]'],
         ['sibling_alert_ids', '["alert-3"]'],
         ['sibling_attack_discovery_ids', '["attack-hash-2"]'],
+        ['related_link_reason', ''],
         ['summary_markdown', 'A **summary**'],
         ['attack_discovery_id', 'attack-hash-1'],
       ])('resolves %s against a persisted attack document', async (field, expected) => {
@@ -2542,6 +2544,35 @@ describe('Attack Discovery worker chain', () => {
       ).toBe(true);
     });
 
+    it('renders a built-in account link without calling the earlier investigation a false positive', () => {
+      const inputs = stepIn(reviewSteps, 'journal_related_investigation')?.with?.inputs as
+        | { message?: string }
+        | undefined;
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(String(inputs?.message), {
+        inputs: {
+          related_link_reason: 'builtin_account',
+          related_investigation_id: 'inv-1',
+        },
+      });
+
+      expect(rendered.replace(/\s+/g, ' ').trim()).toBe(
+        'This attack shares only a built-in account on the same host with Investigation inv-1 and does not share its alerts. It is reviewed on its own.'
+      );
+    });
+
+    it('renders the closed false-positive note when the link has no built-in reason', () => {
+      const inputs = stepIn(reviewSteps, 'journal_related_investigation')?.with?.inputs as
+        | { message?: string }
+        | undefined;
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(String(inputs?.message), {
+        inputs: { related_link_reason: '', related_investigation_id: 'inv-1' },
+      });
+
+      expect(rendered.replace(/\s+/g, ' ').trim()).toBe(
+        'This attack shares entities with closed false-positive Investigation inv-1 and does not share its alerts. It is reviewed on its own.'
+      );
+    });
+
     it('calls the journal helper at each agreed inflection', () => {
       expect(reviewJournal.map((step) => step.name).filter((name) => !isFailureNote(name))).toEqual(
         [...INFLECTIONS]
@@ -3552,8 +3583,8 @@ describe('Attack Discovery worker chain', () => {
 
     describe('managed versions', () => {
       // Fixed `yaml` definitions roll out through the hash; the bump is the signal.
-      it('bumps the runner to version 9 so the review receives sibling discovery ids', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(9);
+      it('bumps the runner to version 10 so the review receives the link reason', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(10);
       });
 
       it('continues when fingerprint matching fails', () => {
@@ -3570,8 +3601,8 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('bumps the review to version 13 so a close covers sibling discoveries', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(13);
+      it('bumps the review to version 14 so a built-in account link has its own note', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(14);
       });
     });
 

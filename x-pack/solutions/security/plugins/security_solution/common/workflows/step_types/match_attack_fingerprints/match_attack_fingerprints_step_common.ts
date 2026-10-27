@@ -41,6 +41,7 @@ export const matchAttackFingerprintsOutputSchema = lazySchema(() =>
         z.object({
           ...attackFields(),
           related_investigation_id: z.string().max(256),
+          related_link_reason: z.string().max(32),
           sibling_alert_ids: z.array(z.string().max(MAX_ALERT_ID_LENGTH)).max(MAX_ALERT_IDS),
           sibling_attack_discovery_ids: z.array(z.string().max(512)).max(MAX_ALERT_IDS),
         })

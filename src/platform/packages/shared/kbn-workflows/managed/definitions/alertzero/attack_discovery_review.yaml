@@ -109,10 +109,17 @@ triggers:
           type: string
           maxLength: 256
           description: >-
-            Set when this attack shares a host and a user with a closed
-            false-positive Investigation but does not share its alerts. The review
-            still runs FP/TP on a new Investigation and journals the link. Empty
-            when there is nothing to link.
+            Set when this attack is reviewed on its own instead of joining an
+            earlier Investigation. The review still runs FP/TP and journals the
+            link. Empty when there is nothing to link.
+        related_link_reason:
+          type: string
+          maxLength: 32
+          description: >-
+            Why `related_investigation_id` was set. `false_positive` when the
+            earlier Investigation is a closed false positive. `builtin_account`
+            when the only shared user is a built-in account such as SYSTEM,
+            Administrator, or root. Empty when there is no link.
         sibling_alert_ids:
           type: array
           maxItems: 1000
@@ -356,9 +363,8 @@ steps:
     on-failure:
       continue: true
 
-  # A closed false positive stays the match only while the new attack shares its
-  # alerts. Host and user alone, after that close, start a new Investigation; this
-  # note is the link back so the two are not silent strangers.
+  # A closed false positive, or a match that is only a built-in account on the
+  # same host, starts a new Investigation. This note is the link back.
   - name: journal_related_investigation
     type: workflow.execute
     if: "${{ inputs.related_investigation_id != blank }}"
@@ -368,9 +374,15 @@ steps:
       inputs:
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
+          {% if inputs.related_link_reason == 'builtin_account' %}
+          This attack shares only a built-in account on the same host with
+          Investigation {{ inputs.related_investigation_id }} and does not share
+          its alerts. It is reviewed on its own.
+          {% else %}
           This attack shares entities with closed false-positive Investigation
           {{ inputs.related_investigation_id }} and does not share its alerts.
           It is reviewed on its own.
+          {% endif %}
     on-failure:
       continue: true
 
