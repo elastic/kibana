@@ -30,5 +30,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./_tsvb_gauge'));
+    loadTestFile(require.resolve('./_dashboard_filtering_legacy_vis'));
   });
 }

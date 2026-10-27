@@ -28,6 +28,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./full_screen_mode'));
     loadTestFile(require.resolve('./dashboard_filter_bar'));
-    loadTestFile(require.resolve('./dashboard_filtering'));
   });
 }

@@ -16,6 +16,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
  * with nested queries and filters on the visualizations themselves.
  */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
   const queryBar = getService('queryBar');
@@ -58,6 +59,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async () => {
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
@@ -80,6 +87,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await security.testUser.restoreDefaults();
       await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     describe('adding a filter that excludes all data', () => {
