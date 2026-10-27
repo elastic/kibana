@@ -12,6 +12,7 @@ import {
   getModelStatus,
   isModelDeprecated,
   isModelEndOfLifeReached,
+  isModelNearingEndOfLife,
   getGeoDisplayName,
   getRegionDisplayName,
   getRegionPlaceName,
@@ -52,6 +53,45 @@ describe('eis utility functions', function () {
 
     it('returns false when end_of_life_date is in the future', () => {
       expect(isModelEndOfLifeReached(makeMetadata({ end_of_life_date: '2099-01-01' }))).toBe(false);
+    });
+  });
+
+  describe('isModelNearingEndOfLife', function () {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date(2026, 2, 1, 12, 0, 0));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('returns false when metadata is undefined', () => {
+      expect(isModelNearingEndOfLife(undefined)).toBe(false);
+    });
+
+    it('returns false when status is ga and there is no end-of-life date', () => {
+      expect(isModelNearingEndOfLife(makeMetadata({ status: 'ga' }))).toBe(false);
+    });
+
+    it('returns true when status is deprecated', () => {
+      expect(
+        isModelNearingEndOfLife(
+          makeMetadata({ status: 'deprecated', end_of_life_date: '2026-08-01' })
+        )
+      ).toBe(true);
+    });
+
+    it('returns true when end_of_life_date is within 30 days', () => {
+      expect(isModelNearingEndOfLife(makeMetadata({ end_of_life_date: '2026-03-20' }))).toBe(true);
+    });
+
+    it('returns false when end_of_life_date is more than 30 days away', () => {
+      expect(isModelNearingEndOfLife(makeMetadata({ end_of_life_date: '2026-06-01' }))).toBe(false);
+    });
+
+    it('returns false when end_of_life_date has passed', () => {
+      expect(isModelNearingEndOfLife(makeMetadata({ end_of_life_date: '2026-02-01' }))).toBe(false);
     });
   });
 
@@ -364,6 +404,15 @@ describe('getRegionOptions', () => {
 
   it('returns an empty array when there are no endpoints', () => {
     expect(getRegionOptions([])).toEqual([]);
+  });
+
+  it('includes regions from a model blocked by the region policy', () => {
+    const ep = makeEndpoint('blocked', [{ csp: 'aws', region: 'us-east-1', geo: 'us' }]);
+    ep.metadata = { denied_by_region_policy: true, regions: ep.metadata?.regions };
+    expect(getRegionOptions([ep]).map(({ key }) => key)).toEqual([
+      'geo-us',
+      'region-aws-us-east-1',
+    ]);
   });
 
   it('returns an empty array when the endpoint has no region metadata', () => {

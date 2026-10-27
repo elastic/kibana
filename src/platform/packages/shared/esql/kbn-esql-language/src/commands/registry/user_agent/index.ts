@@ -26,8 +26,9 @@ export const userAgentCommand = {
   name: Commands.USER_AGENT,
   methods: userAgentCommandMethods,
   metadata: {
+    docPreserving: true,
     preview: true,
-    description: i18n.translate('kbn-esql-language.esql.definitions.userAgentDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.userAgentDoc', {
       defaultMessage:
         'Parses a user-agent string and extracts its components (name, version, OS, device) into new columns',
     }),

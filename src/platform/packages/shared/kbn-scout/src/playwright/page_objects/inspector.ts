@@ -10,13 +10,7 @@
 import type { Locator } from '@playwright/test';
 import type { ScoutPage } from '..';
 import { AppMenu } from './app_menu';
-
-export type InspectorView = 'Requests' | 'Data';
-
-const VIEW_CHOOSER_TEST_SUBJECTS: Record<InspectorView, string> = {
-  Requests: 'inspectorViewChooserRequests',
-  Data: 'inspectorViewChooserData',
-};
+import { KibanaCodeEditorWrapper } from '../ui_components';
 
 export class InspectorPage {
   private readonly appMenu: AppMenu;
@@ -25,6 +19,7 @@ export class InspectorPage {
   public readonly viewChooser: Locator;
   public readonly tablePaginationPopoverButton: Locator;
   public readonly searchSessionId: Locator;
+  private readonly codeEditor: KibanaCodeEditorWrapper;
 
   public readonly requests: {
     readonly requestChooser: Locator;
@@ -32,12 +27,12 @@ export class InspectorPage {
     readonly statisticsTab: Locator;
     readonly requestTab: Locator;
     readonly responseTab: Locator;
-    readonly timestamp: Locator;
     readonly codeViewer: Locator;
   };
 
   constructor(private readonly page: ScoutPage) {
     this.appMenu = new AppMenu(page);
+    this.codeEditor = new KibanaCodeEditorWrapper(this.page);
     this.panel = page.testSubj.locator('inspectorPanel');
     this.closeButton = page.testSubj.locator('euiFlyoutCloseButton');
     this.viewChooser = page.testSubj.locator('inspectorViewChooser');
@@ -50,11 +45,17 @@ export class InspectorPage {
       statisticsTab: page.testSubj.locator('inspectorRequestDetailStatistics'),
       requestTab: page.testSubj.locator('inspectorRequestDetailRequest'),
       responseTab: page.testSubj.locator('inspectorRequestDetailResponse'),
-      timestamp: page.testSubj.locator('inspector.statistics.requestTimestamp'),
       codeViewer: page.testSubj.locator('inspectorRequestCodeViewerContainer'),
     };
   }
 
+  /**
+   * Opens the inspector panel. Guards against re-opening if already visible.
+   * Handles the overflow menu when the open button is collapsed.
+   *
+   * @param openButtonTestSubj - `data-test-subj` of the button that opens the inspector.
+   *   Defaults to `'openInspectorButton'`.
+   */
   async open(openButtonTestSubj: string = 'openInspectorButton') {
     await this.appMenu.clickItem(openButtonTestSubj);
     await this.panel.waitFor({ state: 'visible' });
@@ -77,22 +78,75 @@ export class InspectorPage {
       .waitFor({ state: 'visible' });
   }
 
-  async close() {
+  /**
+   * Closes the inspector panel. No-ops if already closed.
+   *
+   * @param waitForFocusQuiet - When true, also waits for focus to settle after closing.
+   *   Closing the inspector restores focus to its trigger twice, the second time ~40ms later.
+   *   If that lands while a follow-up action is typing, the remaining keys go to the trigger
+   *   button and a space re-opens the inspector. Defaults to `false`.
+   */
+  async close(waitForFocusQuiet: boolean = false) {
     await this.closeButton.click();
     await this.panel.waitFor({ state: 'hidden' });
+    if (waitForFocusQuiet) {
+      await this.waitForFocusQuiet();
+    }
   }
 
+  private async waitForFocusQuiet() {
+    await this.page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          const onFocus = () => {
+            clearTimeout(timer);
+            timer = setTimeout(done, 150);
+          };
+          const done = () => {
+            document.removeEventListener('focusin', onFocus, true);
+            resolve();
+          };
+          let timer = setTimeout(done, 150);
+          document.addEventListener('focusin', onFocus, true);
+        })
+    );
+  }
+
+  /** Reads the inner text of `statLocator` once the inspector panel is visible. */
+  async getStatistic(statLocator: Locator): Promise<string> {
+    await this.panel.waitFor({ state: 'visible' });
+    return statLocator.innerText();
+  }
+
+  /** Reads the "Request timestamp" value from the open inspector's statistics tab. */
   async getRequestTimestamp(): Promise<string> {
-    await this.panel.waitFor({ state: 'visible' });
-    return this.requests.timestamp.innerText();
+    return this.getStatistic(this.page.testSubj.locator('inspector.statistics.requestTimestamp'));
   }
 
-  async openInspectorView(view: InspectorView) {
+  /** Reads the "Hits" value from the open inspector's statistics tab. */
+  async getHits(): Promise<string> {
+    return this.getStatistic(this.page.testSubj.locator('inspector.statistics.hits'));
+  }
+
+  /**
+   * Opens a specific inspector view by name (e.g. `'Requests'`, `'Data'`).
+   * No-ops when the inspector renders only a single view (no view chooser).
+   */
+  async openInspectorView(viewId: string) {
     await this.panel.waitFor({ state: 'visible' });
+    if (!(await this.viewChooser.isVisible())) {
+      return;
+    }
     await this.viewChooser.click();
-    await this.page.testSubj.click(VIEW_CHOOSER_TEST_SUBJECTS[view]);
+    const item = this.page.testSubj.locator(`inspectorViewChooser${viewId}`);
+    await item.waitFor({ state: 'visible' });
+    await item.click();
   }
 
+  /**
+   * Switches the inspector to its Requests view.
+   * No-ops when the inspector renders only a single view (no view chooser).
+   */
   async openInspectorRequestsView() {
     await this.openInspectorView('Requests');
   }
@@ -115,14 +169,14 @@ export class InspectorPage {
   /**
    * The names of the requests listed by the open inspector's request chooser,
    * in the order they are offered. Leaves the chooser closed, since its open
-   * list covers the request detail tabs.
+   * list covers the request detail tabs. With a single request the chooser has
+   * no list to open, so the selected request is returned instead.
    */
   async getRequestNames(): Promise<string[]> {
-    const names = await this.page.components
-      .comboBox('inspectorRequestChooser')
-      .getAllVisibleOptions();
+    const requestChooser = this.page.components.comboBox('inspectorRequestChooser');
+    const names = await requestChooser.getAllVisibleOptions();
     await this.page.keyboard.press('Escape');
-    return names;
+    return names.length > 0 ? names : requestChooser.getSelectedOptions();
   }
 
   /** The selected request's total time, in milliseconds, as the Requests view reports it. */
@@ -136,6 +190,9 @@ export class InspectorPage {
     await this.requests.statisticsTab.click();
   }
 
+  /**
+   * Returns the table rows as a nested string array. Each inner array is one row's cell texts.
+   */
   async getTableData(): Promise<string[][]> {
     await this.panel.locator('tbody').waitFor({ state: 'visible' });
     const tableRows = this.panel.locator('tbody tr');
@@ -148,5 +205,18 @@ export class InspectorPage {
         })
       )
     );
+  }
+
+  /**
+   * Clicks the Response tab, reads the Monaco editor content, and returns the
+   * parsed JSON response object.
+   */
+  async getResponse(): Promise<Record<string, any>> {
+    await this.page.testSubj.locator('inspectorRequestDetailResponse').click();
+    await this.codeEditor.waitCodeEditorReady('inspectorRequestCodeViewerContainer');
+    const responseString = await this.codeEditor.getCodeEditorValueByTestSubj(
+      'inspectorRequestCodeViewerContainer'
+    );
+    return JSON.parse(responseString);
   }
 }

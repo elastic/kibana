@@ -7,8 +7,11 @@
 
 import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import { i18n } from '@kbn/i18n';
+import { MEMORY_AI_INDEX_ID, MEMORY_INDEX } from '../../common/memory';
 import {
   createInvestigationMemoryTelemetry,
   createOptimizeModel,
@@ -16,6 +19,7 @@ import {
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { previewText } from './log_format';
 import { stepsFromRound, stepsFromToolCalls, type TranscriptStep } from './transcript';
+import { loadInvestigationRound } from '../investigation_round';
 import { materializeMemory, type MaterializeMemoryResult } from './materialize';
 import {
   createLlmProposeMemoryExtractions,
@@ -25,6 +29,30 @@ import {
   type MemoryOptimizeSummary,
 } from './optimize';
 import { createMemoryPageStore, type MemoryPageStore } from './page_store';
+
+/** Registers the AI index so Context Engine manages it; the backing index is created on first write. */
+export const registerMemoryAiIndex = (
+  contextEngine: ContextEnginePluginSetup | undefined,
+  logger: Logger
+): void => {
+  if (!contextEngine) {
+    logger.debug(
+      'contextEngine is not available — Semantic Memory AI index will not be registered'
+    );
+    return;
+  }
+
+  contextEngine.registerAiIndex(MEMORY_AI_INDEX_ID, {
+    description: i18n.translate('xpack.nightshiftInvestigations.memory.aiIndexDescription', {
+      defaultMessage:
+        'Nightshift Semantic Memory — durable lessons the investigator recalls before a run, ranked by usefulness.',
+    }),
+    dest: { type: 'index', value: MEMORY_INDEX },
+    automations: [],
+    sources: [],
+    traces: [],
+  });
+};
 
 export const createMemoryStore = ({
   esClient,
@@ -64,72 +92,38 @@ export const hydrateMemoryWorkspace = async ({
   return materializeMemory({ session, store, logger, query });
 };
 
-/**
- * Agent Builder fires the after-execution hook before it saves the round, so the workflow can
- * reach this step while the round does not exist yet. Waits briefly for it. Kept short: when the
- * workflow's request cannot read the conversation at all (Agent Builder masks that as not found),
- * a long wait would only delay the fallback.
- */
-const ROUND_READ_RETRY_DELAYS_MS = [1_000, 2_000];
-
-const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
-  new Promise((resolve) => {
-    if (signal?.aborted) return resolve();
-    const timer = setTimeout(resolve, ms);
-    signal?.addEventListener('abort', () => {
-      clearTimeout(timer);
-      resolve();
-    });
-  });
-
-/**
- * Reads the completed round's steps (reasoning, tool calls, tool results) through the public
- * Agent Builder conversation client, scoped to the workflow's own user and Space. Returns
- * `undefined` when the round cannot be read; the optimizer then works from tool-call parameters.
- * Never guesses a round: without a round id there is nothing safe to match.
- */
 export const loadRoundSteps = async ({
   agentBuilder,
   request,
   conversationId,
   roundId,
+  roundIndex,
   logger,
   signal,
-  retryDelaysMs = ROUND_READ_RETRY_DELAYS_MS,
+  retryDelaysMs,
 }: {
   agentBuilder: AgentBuilderPluginStart | undefined;
   request: KibanaRequest;
   conversationId?: string;
   roundId?: string;
+  roundIndex?: number;
   logger: Logger;
   signal?: AbortSignal;
   retryDelaysMs?: readonly number[];
 }): Promise<TranscriptStep[] | undefined> => {
-  if (!agentBuilder || !conversationId || !roundId) {
-    return undefined;
-  }
-  let lastProblem = '';
-  for (let attempt = 0; attempt <= retryDelaysMs.length; attempt++) {
-    if (attempt > 0) {
-      await sleep(retryDelaysMs[attempt - 1], signal);
-      if (signal?.aborted) break;
-    }
-    try {
-      const client = await agentBuilder.conversations.getScopedClient({ request });
-      const conversation = await client.get(conversationId);
-      const round = conversation.rounds.find(({ id }) => id === roundId);
-      if (round) {
-        logger.debug(`Memory optimize read the round on attempt ${attempt + 1}`);
-        return stepsFromRound(round.steps as Parameters<typeof stepsFromRound>[0]);
-      }
-      lastProblem = 'round not saved yet';
-    } catch (error) {
-      lastProblem = (error as Error).message;
-    }
-  }
-  logger.warn('Memory optimize could not read the round; using the hook tool calls');
-  logger.debug(`Memory optimize round read gave up: ${lastProblem}`);
-  return undefined;
+  const loaded = await loadInvestigationRound({
+    agentBuilder,
+    request,
+    conversationId,
+    roundId,
+    roundIndex,
+    logger,
+    signal,
+    retryDelaysMs,
+  });
+  return loaded.source === 'persisted_round'
+    ? stepsFromRound(loaded.rawSteps as Parameters<typeof stepsFromRound>[0])
+    : undefined;
 };
 
 export const runMemoryOptimize = async ({
@@ -140,6 +134,7 @@ export const runMemoryOptimize = async ({
   toolCalls,
   conversationId,
   roundId,
+  roundIndex,
   recalledIds,
   esClient,
   spaceId,
@@ -160,6 +155,7 @@ export const runMemoryOptimize = async ({
   toolCalls: InvestigationToolCall[];
   conversationId?: string;
   roundId?: string;
+  roundIndex?: number;
   recalledIds: string[];
   esClient: ElasticsearchClient;
   spaceId: string;
@@ -201,6 +197,7 @@ export const runMemoryOptimize = async ({
       request,
       conversationId,
       roundId,
+      roundIndex,
       logger,
       signal,
     })) ?? stepsFromToolCalls(toolCalls);
@@ -223,6 +220,8 @@ export const runMemoryOptimize = async ({
     assistantMessage,
     toolCalls,
     investigation,
+    agentId,
+    conversationId,
     logger,
     signal,
   });

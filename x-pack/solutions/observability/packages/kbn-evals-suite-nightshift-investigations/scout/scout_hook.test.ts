@@ -24,7 +24,11 @@ writeFileSync(CA, 'CA');
 const runHook = (config: unknown, env: Record<string, string> = {}) => {
   const baseEnv = Object.fromEntries(
     Object.entries(process.env).filter(
-      ([name]) => !name.startsWith('SANDBOX_') && !name.startsWith('NIGHTSHIFT_')
+      ([name]) =>
+        !name.startsWith('SANDBOX_') &&
+        !name.startsWith('NIGHTSHIFT_') &&
+        !name.startsWith('EVAL_SHARD_') &&
+        name !== 'KBN_EVALS_CONFIG_B64'
     )
   );
   const result = spawnSync('bash', [HOOK], {
@@ -39,11 +43,11 @@ const runHook = (config: unknown, env: Record<string, string> = {}) => {
   };
 };
 
-const SANDBOX = {
-  host: 'sandbox.example.com',
-  port: 9443,
-  apiKey: 'key',
-  ssl: { certificate: CERT, key: KEY, certificateAuthorities: CA },
+const SANDBOX = { url: 'https://sandbox.example.com:9443', apiKey: 'key' };
+const MTLS = {
+  SANDBOX_CLIENT_CERT_PATH: CERT,
+  SANDBOX_CLIENT_KEY_PATH: KEY,
+  SANDBOX_CA_CERT_PATH: CA,
 };
 
 describe('nightshift-investigations scout hook', () => {
@@ -63,25 +67,94 @@ describe('nightshift-investigations scout hook', () => {
         SANDBOX_API_HOST: 'sandbox.example.com',
         SANDBOX_API_PORT: '9443',
         SANDBOX_API_KEY: 'key',
-        SANDBOX_CLIENT_CERT_PATH: CERT,
-        SANDBOX_CLIENT_KEY_PATH: KEY,
-        SANDBOX_CA_CERT_PATH: CA,
+        SANDBOX_CLIENT_CERT_PATH: '',
+        SANDBOX_CLIENT_KEY_PATH: '',
+        SANDBOX_CA_CERT_PATH: '',
         SANDBOX_KIBANA_CONFIG: Path.join(__dirname, 'kibana.sandbox.yml'),
       },
     });
   });
 
-  it('exports an empty CA when the sandbox has no private CA, since kibana.sandbox.yml needs it', () => {
-    const { ssl, ...rest } = SANDBOX;
-    const { output } = runHook({ sandbox: { ...rest, ssl: { certificate: CERT, key: KEY } } });
-    expect(output.env.SANDBOX_CA_CERT_PATH).toBe('');
+  it.each([
+    ['https://sandbox.example.com', 'sandbox.example.com', '443'],
+    ['https://sandbox.example.com/', 'sandbox.example.com', '443'],
+    ['http://sandbox.example.com', 'sandbox.example.com', '80'],
+    ['sandbox.example.com:9090', 'sandbox.example.com', '9090'],
+  ])('splits sandbox.url %s into host and port', (url, host, port) => {
+    expect(runHook({ sandbox: { apiKey: 'key', url } }).output.env).toMatchObject({
+      SANDBOX_API_HOST: host,
+      SANDBOX_API_PORT: port,
+    });
+  });
+
+  it('rejects a sandbox.url without a host or with a non-numeric port', () => {
+    for (const url of ['https://', 'https://sandbox.example.com:abc']) {
+      const { status, stderr } = runHook({ sandbox: { apiKey: 'key', url } });
+      expect(status).toBe(1);
+      expect(stderr).toContain('sandbox.url must look like https://host[:port]');
+    }
+  });
+
+  it('ignores profile host and port', () => {
+    const { output } = runHook({
+      sandbox: { apiKey: 'key', host: 'legacy.example.com', port: 9090 },
+    });
+    expect(output.env).not.toHaveProperty('SANDBOX_API_HOST');
+    expect(output.env).not.toHaveProperty('SANDBOX_API_PORT');
+  });
+
+  it("prefers the profile's url over a shell SANDBOX_API_URL", () => {
+    const shell = { SANDBOX_API_URL: 'https://localhost:9090' };
+    expect(runHook({ sandbox: SANDBOX }, shell).output.env).toMatchObject({
+      SANDBOX_API_HOST: 'sandbox.example.com',
+      SANDBOX_API_PORT: '9443',
+    });
+    expect(runHook({ sandbox: { apiKey: 'key' } }, shell).output.env).toMatchObject({
+      SANDBOX_API_HOST: 'localhost',
+      SANDBOX_API_PORT: '9090',
+    });
   });
 
   it('leaves host and port unset so kibana.sandbox.yml defaults them', () => {
-    const { host, port, ...rest } = SANDBOX;
-    const { output } = runHook({ sandbox: rest });
+    const { output } = runHook({ sandbox: { apiKey: 'key' } });
     expect(output.env).not.toHaveProperty('SANDBOX_API_HOST');
     expect(output.env).not.toHaveProperty('SANDBOX_API_PORT');
+  });
+
+  it('reads mTLS file paths from the profile sandbox.ssl block', () => {
+    const { output } = runHook({
+      sandbox: { ...SANDBOX, ssl: { certificate: CERT, key: KEY, certificateAuthorities: CA } },
+    });
+    expect(output.env).toMatchObject(MTLS);
+  });
+
+  it('ignores PEM contents in an older sandbox.ssl block', () => {
+    // Kibana reads certificates from file paths now; configs still carrying PEM contents must not
+    // be mistaken for paths, so the shared sandbox runs on the API key alone.
+    const { status, output } = runHook({
+      sandbox: {
+        ...SANDBOX,
+        ssl: {
+          certificate: '-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----',
+          key: '-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----',
+        },
+      },
+    });
+    expect(status).toBe(0);
+    expect(output.env).toMatchObject({
+      SANDBOX_CLIENT_CERT_PATH: '',
+      SANDBOX_CLIENT_KEY_PATH: '',
+      SANDBOX_CA_CERT_PATH: '',
+    });
+  });
+
+  it('reads optional mTLS file paths from the shell', () => {
+    expect(runHook({ sandbox: SANDBOX }, MTLS).output.env).toMatchObject(MTLS);
+  });
+
+  it('exports an empty CA when the sandbox has no private CA, since kibana.sandbox.yml needs it', () => {
+    const { SANDBOX_CA_CERT_PATH, ...mtls } = MTLS;
+    expect(runHook({ sandbox: SANDBOX }, mtls).output.env.SANDBOX_CA_CERT_PATH).toBe('');
   });
 
   it('falls back to SANDBOX_* exported in the shell, with the config taking precedence', () => {
@@ -93,31 +166,30 @@ describe('nightshift-investigations scout hook', () => {
     expect(runHook({}, shell).output.env).toMatchObject(shell);
     expect(runHook({ sandbox: SANDBOX }, shell).output.env).toMatchObject({
       SANDBOX_API_KEY: 'key',
-      SANDBOX_CLIENT_KEY_PATH: KEY,
+      SANDBOX_CLIENT_KEY_PATH: SHELL_KEY,
     });
   });
 
   it('rejects PEM file paths that cannot be read', () => {
-    const { status, stderr } = runHook({
-      sandbox: { ...SANDBOX, ssl: { ...SANDBOX.ssl, key: '/missing/key' } },
-    });
+    const { status, stderr } = runHook(
+      { sandbox: SANDBOX },
+      { ...MTLS, SANDBOX_CLIENT_KEY_PATH: '/missing/key' }
+    );
     expect(status).toBe(1);
     expect(stderr).toContain('cannot read sandbox PEM file /missing/key');
-    expect(
-      runHook({
-        sandbox: { ...SANDBOX, ssl: { ...SANDBOX.ssl, certificateAuthorities: '/no/ca' } },
-      }).status
-    ).toBe(1);
+    expect(runHook({ sandbox: SANDBOX }, { ...MTLS, SANDBOX_CA_CERT_PATH: '/no/ca' }).status).toBe(
+      1
+    );
   });
 
   it('treats REPLACE_ME placeholders as unset', () => {
-    expect(runHook({ sandbox: { apiKey: 'REPLACE_ME', host: 'REPLACE_ME' } }).output).toEqual({});
+    expect(runHook({ sandbox: { apiKey: 'REPLACE_ME', url: 'REPLACE_ME' } }).output).toEqual({});
   });
 
   it('rejects sandbox settings without an API key instead of silently running only smoke', () => {
-    const { status, stderr } = runHook({ sandbox: { host: 'sandbox.example.com' } });
+    const { status, stderr } = runHook({ sandbox: { url: 'https://sandbox.example.com' } });
     expect(status).toBe(1);
-    expect(stderr).toContain('sandbox host set without an API key');
+    expect(stderr).toContain('sandbox host port set without an API key');
   });
 
   it('exports empty PEM paths without a client certificate, so Kibana uses the API key only', () => {
@@ -131,10 +203,15 @@ describe('nightshift-investigations scout hook', () => {
   });
 
   it('requires the client certificate and key as a pair', () => {
-    const { status, stderr } = runHook({ sandbox: { apiKey: 'key', ssl: { certificate: CERT } } });
+    const { status, stderr } = runHook(
+      { sandbox: { apiKey: 'key' } },
+      { SANDBOX_CLIENT_CERT_PATH: CERT }
+    );
     expect(status).toBe(1);
     expect(stderr).toContain('set both sandbox.ssl.certificate and sandbox.ssl.key');
-    expect(runHook({ sandbox: { apiKey: 'key', ssl: { key: KEY } } }).status).toBe(1);
+    expect(runHook({ sandbox: { apiKey: 'key' } }, { SANDBOX_CLIENT_KEY_PATH: KEY }).status).toBe(
+      1
+    );
   });
 
   it('rejects input that is not a JSON object', () => {
@@ -235,4 +312,86 @@ describe('nightshift-investigations scout hook', () => {
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain('requires sandbox credentials');
   });
+});
+
+describe('ORCA CI shard', () => {
+  const orca = { url: 'https://orca.example:443', apiKey: 'orca-key' };
+  const existing = {
+    sandbox: SANDBOX,
+    nightshift: { telemetry: { url: 'https://customer0.example', apiKey: 'customer0-key' } },
+  };
+  it('replaces only the telemetry target and preserves sandbox authentication', () => {
+    const { status, output, stderr } = runHook(
+      { ...existing, nightshiftOrcaEs: orca },
+      { EVAL_SHARD_ID: 'orcabench' }
+    );
+    expect(status).toBe(0);
+    expect(stderr).not.toContain(orca.apiKey);
+    expect(output.env).toMatchObject({
+      SANDBOX_API_KEY: SANDBOX.apiKey,
+      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: orca.url,
+      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: orca.apiKey,
+      NIGHTSHIFT_DATASETS: 'orcabench',
+      NIGHTSHIFT_ORCA_TELEMETRY: '1',
+    });
+  });
+  it('takes the manifest hint from config, falling back to one that names no incident window', () => {
+    const configured = runHook(
+      { ...existing, nightshiftOrcaEs: { ...orca, readableIndices: 'Read orca indices.' } },
+      { EVAL_SHARD_ID: 'orcabench' }
+    );
+    expect(configured.output.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES).toBe('Read orca indices.');
+    const fallback = runHook(
+      { ...existing, nightshiftOrcaEs: { ...orca, readableIndices: null } },
+      { EVAL_SHARD_ID: 'orcabench' }
+    );
+    expect(fallback.output.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES).toContain(
+      'logs-orcabench.otel-*'
+    );
+    expect(fallback.output.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES).not.toMatch(/2026|April/);
+  });
+  it('ignores a shared evals config, so the suite secret is the only source of the ORCA key', () => {
+    const { status, stderr } = runHook(existing, {
+      EVAL_SHARD_ID: 'orcabench',
+      KBN_EVALS_CONFIG_B64: Buffer.from(JSON.stringify({ nightshiftOrcaEs: orca })).toString(
+        'base64'
+      ),
+    });
+    expect(status).toBe(1);
+    expect(stderr).toContain('ORCA requires nightshiftOrcaEs');
+  });
+  it('keeps Customer-0 telemetry unchanged in the customer0 shard', () => {
+    const { output } = runHook(
+      { ...existing, nightshiftOrcaEs: orca },
+      { EVAL_SHARD_ID: 'customer0' }
+    );
+    expect(output.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL).toBe(existing.nightshift.telemetry.url);
+    expect(output.env).not.toHaveProperty('NIGHTSHIFT_ORCA_TELEMETRY');
+  });
+  it('selects ORCA from NIGHTSHIFT_DATASETS for local runs outside CI', () => {
+    const { output, status } = runHook(
+      { ...existing, nightshiftOrcaEs: orca },
+      { NIGHTSHIFT_DATASETS: 'orcabench' }
+    );
+    expect(status).toBe(0);
+    expect(output.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY).toBe(orca.apiKey);
+  });
+  it.each([
+    undefined,
+    { url: orca.url },
+    { apiKey: orca.apiKey },
+    { ...orca, url: 'https://user:password@orca.example' },
+    { ...orca, readableIndices: '' },
+  ])(
+    'fails without a complete ORCA credential instead of using Customer-0 telemetry: %j',
+    (nightshiftOrcaEs) => {
+      const { status, stderr } = runHook(
+        { ...existing, nightshiftOrcaEs },
+        { EVAL_SHARD_ID: 'orcabench' }
+      );
+      expect(status).toBe(1);
+      expect(stderr).toContain('ORCA requires nightshiftOrcaEs');
+      expect(stderr).not.toContain('customer0-key');
+    }
+  );
 });

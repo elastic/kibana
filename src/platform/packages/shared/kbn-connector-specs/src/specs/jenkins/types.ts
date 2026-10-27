@@ -16,7 +16,7 @@ const MAX_PARAMETERS = 50;
 // bounded by Jetty's default `maxFormContentSize` of 200,000 bytes.
 const MAX_FORM_CONTENT_SIZE = 200_000;
 
-export const HttpMethodSchema = z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
+export const HttpMethodSchema = lazySchema(() => z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']));
 export type HttpMethod = z.infer<typeof HttpMethodSchema>;
 
 export const RequestInputSchema = lazySchema(() =>

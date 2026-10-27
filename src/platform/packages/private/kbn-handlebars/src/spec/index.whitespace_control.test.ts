@@ -85,4 +85,33 @@ describe('whitespace control', () => {
       .withInput({ foo: 'bar' })
       .toCompileTo('barbar bar ');
   });
+
+  describe('performance', () => {
+    // Each template below takes several seconds to compile, and so exceeds the
+    // test timeout, if finding trailing whitespace is not linear in its length.
+    const spaces = new Array(100001).join(' ');
+    const newlines = new Array(100001).join('\n');
+
+    it('should strip whitespace in linear time', () => {
+      expectTemplate(spaces + 'x' + spaces + '{{~foo}}')
+        .withInput({ foo: 'bar' })
+        .toCompileTo(spaces + 'xbar');
+    });
+
+    it('should detect standalone lines in linear time', () => {
+      expectTemplate(newlines + 'x{{foo}}')
+        .withInput({ foo: 'bar' })
+        .toCompileTo(newlines + 'xbar');
+
+      expectTemplate('{{foo}}' + newlines + 'x{{foo}}')
+        .withInput({ foo: 'bar' })
+        .toCompileTo('bar' + newlines + 'xbar');
+    });
+
+    it('should find partial indentation in linear time', () => {
+      expectTemplate(spaces + 'x\n  {{> dude}}\n')
+        .withPartials({ dude: 'bar\n' })
+        .toCompileTo(spaces + 'x\n  bar\n');
+    });
+  });
 });

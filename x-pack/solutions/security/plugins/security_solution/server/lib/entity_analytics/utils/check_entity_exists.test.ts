@@ -7,7 +7,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
-import { checkEntityExists, EntityStoreAccessError } from './check_entity_exists';
+import { checkEntityExists, EntityStoreAccessError, getEntityRecords } from './check_entity_exists';
+import {
+  RESOLUTION_GROUP_RISK_SORT_FIELD,
+  RESOLVED_MODE_MAX_RECORDS,
+  RESOLVED_TO_FIELD,
+} from '../../../../common/entity_analytics/entity_store/resolution_group';
 
 describe('checkEntityExists', () => {
   const listEntities = jest.fn();
@@ -69,6 +74,7 @@ describe('checkEntityExists', () => {
           { term: { 'entity.id': 'user:jane@okta' } },
           { term: { 'entity.EngineMetadata.Type': 'user' } },
         ],
+        size: 1,
       })
     );
   });
@@ -115,5 +121,158 @@ describe('checkEntityExists', () => {
     await expect(
       checkEntityExists({ crudClient, esClient, entityId: 'host:abc123', entityType: 'host' })
     ).rejects.toThrow(error);
+  });
+});
+
+describe('getEntityRecords', () => {
+  const listEntities = jest.fn();
+  const latestIndexName = jest.fn();
+  const hasPrivileges = jest.fn();
+  const crudClient = { listEntities, latestIndexName } as unknown as EntityStoreCRUDClient;
+  const esClient = {
+    security: { hasPrivileges },
+  } as unknown as ElasticsearchClient;
+
+  const target = { entity: { id: 'host:target' } };
+  const aliasA = { entity: { id: 'host:a' } };
+  const aliasB = { entity: { id: 'host:b' } };
+
+  beforeEach(() => {
+    listEntities.mockReset();
+    latestIndexName.mockReset();
+    hasPrivileges.mockReset();
+    latestIndexName.mockResolvedValue('.entities.v2.latest.default-00001');
+    hasPrivileges.mockResolvedValue({ has_all_requested: true });
+  });
+
+  describe('single mode', () => {
+    it('looks up the target record only and defaults to single mode', async () => {
+      listEntities.mockResolvedValue({ entities: [target] });
+
+      const result = await getEntityRecords({
+        crudClient,
+        esClient,
+        entityId: 'host:target',
+        entityType: 'host',
+      });
+
+      expect(result).toEqual([target]);
+      expect(listEntities).toHaveBeenCalledWith({
+        filter: [
+          { term: { 'entity.id': 'host:target' } },
+          { term: { 'entity.EngineMetadata.Type': 'host' } },
+        ],
+        size: 1,
+      });
+    });
+
+    it('returns an empty list when the target is missing', async () => {
+      listEntities.mockResolvedValue({ entities: [] });
+
+      const result = await getEntityRecords({
+        crudClient,
+        esClient,
+        entityId: 'host:missing',
+        entityType: 'host',
+        mode: 'single',
+      });
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('resolved mode', () => {
+    const mockTargetAndGroup = (targetResult: unknown[], groupResult: unknown[]) => {
+      listEntities.mockImplementation(async ({ size }: { size: number }) => ({
+        entities: size === 1 ? targetResult : groupResult,
+      }));
+    };
+
+    it('runs a target lookup followed by a riskiest-first aliases query capped to the group size', async () => {
+      mockTargetAndGroup([target], [target]);
+
+      await getEntityRecords({
+        crudClient,
+        esClient,
+        entityId: 'host:target',
+        entityType: 'host',
+        mode: 'resolved',
+      });
+
+      expect(listEntities).toHaveBeenCalledTimes(2);
+      expect(listEntities).toHaveBeenCalledWith({
+        filter: [
+          { term: { 'entity.id': 'host:target' } },
+          { term: { 'entity.EngineMetadata.Type': 'host' } },
+        ],
+        size: 1,
+      });
+      expect(listEntities).toHaveBeenCalledWith({
+        filter: [
+          { term: { [RESOLVED_TO_FIELD]: 'host:target' } },
+          { term: { 'entity.EngineMetadata.Type': 'host' } },
+        ],
+        size: RESOLVED_MODE_MAX_RECORDS - 1,
+        sort: [{ [RESOLUTION_GROUP_RISK_SORT_FIELD]: 'desc' }],
+      });
+    });
+
+    it('returns the target first followed by its aliases in the order they were returned', async () => {
+      mockTargetAndGroup([target], [aliasA, aliasB]);
+
+      const result = await getEntityRecords({
+        crudClient,
+        esClient,
+        entityId: 'host:target',
+        entityType: 'host',
+        mode: 'resolved',
+      });
+
+      expect(result).toEqual([target, aliasA, aliasB]);
+    });
+
+    it('never lists the target twice if the aliases query returns it', async () => {
+      mockTargetAndGroup([target], [aliasA, target]);
+
+      const result = await getEntityRecords({
+        crudClient,
+        esClient,
+        entityId: 'host:target',
+        entityType: 'host',
+        mode: 'resolved',
+      });
+
+      expect(result).toEqual([target, aliasA]);
+    });
+
+    it('returns an empty list when only aliases match but the target is missing', async () => {
+      mockTargetAndGroup([], [aliasA, aliasB]);
+
+      const result = await getEntityRecords({
+        crudClient,
+        esClient,
+        entityId: 'host:target',
+        entityType: 'host',
+        mode: 'resolved',
+      });
+
+      expect(result).toEqual([]);
+      expect(listEntities).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws EntityStoreAccessError when user lacks read privilege on the index', async () => {
+      hasPrivileges.mockResolvedValue({ has_all_requested: false });
+
+      await expect(
+        getEntityRecords({
+          crudClient,
+          esClient,
+          entityId: 'host:target',
+          entityType: 'host',
+          mode: 'resolved',
+        })
+      ).rejects.toThrow(EntityStoreAccessError);
+      expect(listEntities).not.toHaveBeenCalled();
+    });
   });
 });

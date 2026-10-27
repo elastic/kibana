@@ -1,9 +1,25 @@
 {
-  "sha1": "e8afb2f505b681fcc25286f9672173e86216af90",
+  "sha1": "f82351aae3c1b2fa4e73b1bb31e10f098cd7ba8a",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "cf053daa0eef925-e56c37aa9bfdb56",
+      "title": "Disable alerting v2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/global.setup.ts",
+        "line": 6,
+        "column": 1
+      }
+    },
     {
       "id": "9f547028a12316e-09381f597be5a4a",
       "title": "Edit Rule Flow Edit from rules list: navigate, cancel, and save",
@@ -365,7 +381,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_logs_visibility.spec.ts",
-        "line": 41,
+        "line": 16,
         "column": 14
       }
     },
@@ -378,7 +394,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_logs_visibility.spec.ts",
-        "line": 46,
+        "line": 21,
         "column": 23
       }
     },
@@ -391,7 +407,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_logs_visibility.spec.ts",
-        "line": 60,
+        "line": 35,
         "column": 11
       }
     },
@@ -410,16 +426,17 @@
       }
     },
     {
-      "id": "2aeef73611b17a7-1c516239081bd78",
-      "title": "Rules page heading tabs - alerting v2 privileges shows the V1 and V2 rules tabs when the user can read both surfaces",
+      "id": "2aeef73611b17a7-5abdfaa93aea775",
+      "title": "Rules page heading tabs - alerting v2 privileges hides the V2 rules tab when the user can read both surfaces",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_tabs_privileges.spec.ts",
-        "line": 46,
-        "column": 15
+        "line": 29,
+        "column": 29
       }
     },
     {
@@ -427,12 +444,13 @@
       "title": "Rules page heading tabs - alerting v2 privileges hides all heading tabs when the user cannot read Alerting v2 rules",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_tabs_privileges.spec.ts",
-        "line": 54,
-        "column": 7
+        "line": 38,
+        "column": 11
       }
     },
     {
@@ -461,6 +479,22 @@
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_settings.spec.ts",
         "line": 36,
         "column": 65
+      }
+    },
+    {
+      "id": "768febb4c089c14-a55560dcd95bea7",
+      "title": "Restore the default alerting v2 setting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

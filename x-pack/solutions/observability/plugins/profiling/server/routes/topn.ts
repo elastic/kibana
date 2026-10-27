@@ -12,22 +12,25 @@ import {
   getFieldNameForTopNType,
   groupStackFrameMetadataByStackTrace,
   ProfilingESField,
+  ProfilingSchema,
   TopNType,
 } from '@kbn/profiling-utils';
 import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import type { ProfilingESClient } from '@kbn/profiling-data-access-plugin/server';
 import type { RouteRegisterParameters } from '.';
 import { IDLE_SOCKET_TIMEOUT } from '.';
-import { getRoutePaths, INDEX_EVENTS, MAX_KUERY_LENGTH } from '../../common';
+import { getRoutePaths, MAX_KUERY_LENGTH } from '../../common';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../common/histogram';
 import type { TopNResponse } from '../../common/topn';
 import { createTopNSamples, getTopNAggregationRequest } from '../../common/topn';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
+import { profilingSchemaParam } from './default_api_types';
 import { findDownsampledIndex } from './downsampling';
 import { createCommonFilter } from './query';
 import { searchStackTraces } from './search_stacktraces';
+import { PROFILING_API_PRIVILEGE } from '../feature';
 
 export async function topNElasticSearchQuery({
   client,
@@ -39,6 +42,7 @@ export async function topNElasticSearchQuery({
   kuery,
   showErrorFrames,
   preFilterShardSize,
+  profilingSchema,
 }: {
   client: ProfilingESClient;
   logger: Logger;
@@ -49,6 +53,7 @@ export async function topNElasticSearchQuery({
   kuery: string;
   showErrorFrames: boolean;
   preFilterShardSize?: number;
+  profilingSchema: ProfilingSchema;
 }): Promise<TopNResponse> {
   const filter = createCommonFilter({ timeFrom, timeTo, kuery });
   const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -58,7 +63,7 @@ export async function topNElasticSearchQuery({
   const eventsIndex = await findDownsampledIndex({
     logger,
     client,
-    index: INDEX_EVENTS,
+    schema: profilingSchema,
     filter,
     sampleSize: targetSampleSize,
   });
@@ -146,6 +151,7 @@ export async function topNElasticSearchQuery({
         sampleSize: targetSampleSize,
         durationSeconds: totalSeconds,
         showErrorFrames,
+        schema: profilingSchema,
       });
     }
   );
@@ -181,7 +187,7 @@ export function queryTopNCommon({
       path: pathName,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       options: { timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
@@ -190,11 +196,17 @@ export function queryTopNCommon({
           timeFrom: schema.number(),
           timeTo: schema.number(),
           kuery: schema.string({ maxLength: MAX_KUERY_LENGTH }),
+          schema: profilingSchemaParam,
         }),
       },
     },
     async (context, request, response) => {
-      const { timeFrom, timeTo, kuery } = request.query;
+      const {
+        timeFrom,
+        timeTo,
+        kuery,
+        schema: profilingSchema = ProfilingSchema.ECS,
+      } = request.query;
       const [client, core] = await Promise.all([getClient(context), context.core]);
 
       const showErrorFrames = await core.uiSettings.client.get<boolean>(profilingShowErrorFrames);
@@ -214,6 +226,7 @@ export function queryTopNCommon({
             kuery,
             showErrorFrames,
             preFilterShardSize: isServerless ? undefined : 1,
+            profilingSchema,
           }),
         });
       } catch (error) {

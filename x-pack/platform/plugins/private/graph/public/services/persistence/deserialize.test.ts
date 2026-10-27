@@ -204,7 +204,7 @@ describe('deserialize', () => {
   it('should deserialize nodes and edges', () => {
     callSavedWorkspaceToAppState();
 
-    expect(workspace.blocklistedNodes.length).toEqual(1);
+    expect(workspace.blocklistedNodes).toEqual([expect.objectContaining({ id: 'field1..Z' })]);
     expect(workspace.nodes.length).toEqual(5);
     expect(workspace.edges.length).toEqual(2);
 

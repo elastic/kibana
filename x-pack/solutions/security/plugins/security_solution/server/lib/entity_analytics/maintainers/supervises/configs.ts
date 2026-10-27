@@ -6,7 +6,7 @@
  */
 
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common/domain/entity_index';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { RelationshipIntegrationConfig } from '../engine/types';
 import { COMPOSITE_PAGE_SIZE } from '../engine/constants';
 import { ENGINE_COLUMNS } from '../engine/columns';
@@ -49,6 +49,14 @@ const SUPERVISES_SOURCES: SupervisesSource[] = [
     entitySources: ['entityanalytics_entra_id', 'entityanalytics_entra_id.user'],
     namespace: 'entra_id',
   },
+  {
+    id: 'sailpoint_identity_sc',
+    name: 'SailPoint Identity Security Cloud',
+    // `entity.source` comes from `event.module`, which is the bare package name;
+    // the `.identities` dataset form is listed for the case where it is absent.
+    entitySources: ['sailpoint_identity_sc', 'sailpoint_identity_sc.identities'],
+    namespace: 'sailpoint_identity_sc',
+  },
 ];
 
 /**
@@ -61,6 +69,9 @@ const SUPERVISES_SOURCES: SupervisesSource[] = [
  *    returns null, so each field is appended only when non-null via a CASE guard.
  *    VALUES() in the STATS clause deduplicates identical EUIDs (e.g. when email
  *    and name hold the same value, as is common in Okta where login == email).
+ * 3. Empty-string raw values are dropped right after the expand. A raw `""` is not
+ *    null, so the `IS NOT NULL` gates keep it (SailPoint's CEL emits `""` for a
+ *    report without an email) and it would otherwise reach the EUID build.
  */
 function buildSupervisesEsqlQuery(
   source: SupervisesSource,
@@ -93,6 +104,7 @@ function buildSupervisesEsqlQuery(
 | EVAL rawTargetKey = CASE(${emailField} IS NULL, ${idField}, ${idField} IS NULL, ${emailField}, MV_APPEND(${emailField}, ${idField}))
 | EVAL rawTargetKey = CASE(${nameField} IS NULL, rawTargetKey, rawTargetKey IS NULL, ${nameField}, MV_APPEND(rawTargetKey, ${nameField}))
 | MV_EXPAND rawTargetKey
+| WHERE rawTargetKey != ""
 | EVAL targetEntityId = CONCAT("user:", rawTargetKey, "@${ns}")
 | WHERE COALESCE(targetEntityId, "") != ""
     AND targetEntityId != "user:@${ns}"
@@ -210,9 +222,13 @@ function buildWorkdaySupervisesEsqlQuery(
   // The row's own user is the target, so the canonical helper applies directly —
   // it reproduces the full user EUID ranking and emits the entity.namespace
   // evaluation it depends on.
-  const targetEuidEval = euid.esql.getEuidEvaluation('user', 'targetEntityId', {
-    withTypeId: true,
-  });
+  const targetEuidEval = euid.esql.getEuidEvaluation(
+    getBuiltInEntityDefinition('user'),
+    'targetEntityId',
+    {
+      withTypeId: true,
+    }
+  );
   // Presence of a watermark means this is not the first run: narrow to recently
   // re-synced workers. A fixed window (not `> lastProcessedTimestamp`) so a
   // delayed or skipped run cannot open a gap.

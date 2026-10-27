@@ -13,6 +13,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { BUDGET_PER_HOUR_MAX, LOOKBACK_HOURS_MAX, LOOKBACK_HOURS_MIN } from '@kbn/alertzero-common';
 
 /* -------------------------------------------------------------------------- */
 /* Header                                                                     */
@@ -22,6 +23,108 @@ export const ENABLED_SWITCH_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.enabledSwitch',
   {
     defaultMessage: 'Enabled',
+  }
+);
+
+/* -------------------------------------------------------------------------- */
+/* Threat intel supply (Hunt Watch)                                           */
+/* -------------------------------------------------------------------------- */
+
+export const THREAT_INTEL_SUPPLY_SECTION_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.sectionTitle',
+  { defaultMessage: 'Threat intel supply' }
+);
+
+export const THREAT_INTEL_SUPPLY_SECTION_SUBTITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.sectionSubtitle',
+  {
+    defaultMessage:
+      'These workflows feed Hunt Watch. Ingest and enrich are shared across all spaces.',
+  }
+);
+
+export const THREAT_INTEL_SUPPLY_INGEST_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.ingestLabel',
+  { defaultMessage: 'Ingest' }
+);
+
+export const THREAT_INTEL_SUPPLY_ENRICH_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.enrichLabel',
+  { defaultMessage: 'Enrich' }
+);
+
+export const THREAT_INTEL_SUPPLY_ATTRIBUTE_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.attributeLabel',
+  { defaultMessage: 'Attribute alerts to reports' }
+);
+
+export const THREAT_INTEL_SUPPLY_SCOPE_DEPLOYMENT = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.scopeDeployment',
+  { defaultMessage: 'Deployment' }
+);
+
+export const THREAT_INTEL_SUPPLY_SCOPE_SPACE = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.scopeSpace',
+  { defaultMessage: 'This space' }
+);
+
+export const THREAT_INTEL_SUPPLY_ON = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.on',
+  { defaultMessage: 'On' }
+);
+
+export const THREAT_INTEL_SUPPLY_OFF = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.off',
+  { defaultMessage: 'Off' }
+);
+
+export const THREAT_INTEL_SUPPLY_IN_USE_ELSEWHERE = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.inUseElsewhere',
+  { defaultMessage: 'In use in other spaces' }
+);
+
+export const THREAT_INTEL_SUPPLY_RESTORE_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.restoreLabel',
+  { defaultMessage: 'Restore threat intel supply' }
+);
+
+export const THREAT_INTEL_SUPPLY_DRIFT_MESSAGE = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.driftMessage',
+  {
+    defaultMessage:
+      'Hunt Watch is on, but one or more threat intel supply workflows are off. Restore supply, or turn Hunt off.',
+  }
+);
+
+export const THREAT_INTEL_SUPPLY_HARD_GATE_EMBEDDING = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.hardGateEmbedding',
+  {
+    defaultMessage:
+      'Hunt Watch needs Machine Learning embedding support for threat intel report supply. Finish ML and threat intel setup before turning Hunt on.',
+  }
+);
+
+export const THREAT_INTEL_SUPPLY_HARD_GATE_BLOCKED = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.hardGateBlocked',
+  {
+    defaultMessage:
+      'Threat intel reports are not ready in this deployment. Finish threat intel bootstrap before turning Hunt on.',
+  }
+);
+
+export const THREAT_INTEL_SUPPLY_HARD_GATE_UNMANAGED = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.hardGateUnmanaged',
+  {
+    defaultMessage:
+      'The threat reports index (.kibana-threat-reports) exists without its template. Back up any reports you want to keep (see the Elasticsearch reindex API at https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex), then delete the index and restart Kibana to recreate it before turning Hunt on.',
+  }
+);
+
+export const THREAT_INTEL_SUPPLY_STATUS_ERROR = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.statusError',
+  {
+    defaultMessage:
+      'Unable to check threat intel supply readiness. Retry later, or refresh the page before turning Hunt on.',
   }
 );
 
@@ -56,6 +159,91 @@ export const READ_ONLY_TOOLTIP = i18n.translate(
   }
 );
 
+export const UNSAVED_CHANGES_BADGE_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.unsavedChangesBadgeLabel',
+  { defaultMessage: 'Unsaved changes' }
+);
+
+export const NO_CHANGES_TO_SAVE_TOOLTIP = i18n.translate(
+  'xpack.alertzero.watches.settings.noChangesToSaveTooltip',
+  { defaultMessage: 'No changes to save' }
+);
+
+export const KEEP_EDITING_BUTTON_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.keepEditingButtonLabel',
+  { defaultMessage: 'Keep editing' }
+);
+
+export const LEAVE_PROMPT_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.leavePromptTitle',
+  { defaultMessage: 'Leave without saving?' }
+);
+
+export const LEAVE_PROMPT_DESCRIPTION = i18n.translate(
+  'xpack.alertzero.watches.settings.leavePromptDescription',
+  {
+    defaultMessage:
+      'You have unsaved changes on this Watch. If you leave, those changes will be lost unless you save first.',
+  }
+);
+
+export const LEAVE_PROMPT_CONFIRM_BUTTON_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.leavePromptConfirmButtonLabel',
+  { defaultMessage: 'Leave without saving' }
+);
+
+export const DISCARD_CONFIRM_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.discardConfirmTitle',
+  { defaultMessage: 'Discard unsaved changes?' }
+);
+
+export const DISCARD_CONFIRM_DESCRIPTION = i18n.translate(
+  'xpack.alertzero.watches.settings.discardConfirmDescription',
+  { defaultMessage: 'The following Workers have unsaved changes that will be lost:' }
+);
+
+export const DISCARD_CONFIRM_BUTTON_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.discardConfirmButtonLabel',
+  { defaultMessage: 'Discard' }
+);
+
+/** Shown instead of navigating when managed workflows are hidden in this space. */
+export const MANAGED_WORKFLOWS_DISABLED_POPOVER_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsDisabledPopoverTitle',
+  { defaultMessage: 'Managed workflows are turned off' }
+);
+
+export const MANAGED_WORKFLOWS_DISABLED_BODY = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsDisabledBody',
+  {
+    defaultMessage:
+      'Execution history lives in Managed workflows, which is turned off for this space.',
+  }
+);
+
+export const MANAGED_WORKFLOWS_DISABLED_DISMISS = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsDisabledDismiss',
+  { defaultMessage: 'Not now' }
+);
+
+export const MANAGED_WORKFLOWS_DISABLED_OPEN_SETTINGS = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsDisabledOpenSettings',
+  { defaultMessage: 'Open Advanced Settings' }
+);
+
+/** Read-only spaces get no popover, so the requirement is stated on the link itself. */
+export const MANAGED_WORKFLOWS_REQUIRED_TOOLTIP = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsRequiredTooltip',
+  {
+    defaultMessage: 'Requires Managed workflows. Ask an admin to enable it in Advanced Settings.',
+  }
+);
+
+export const MANAGED_WORKFLOW_EXECUTIONS_PERMISSION_TOOLTIP = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowExecutionsPermissionTooltip',
+  { defaultMessage: 'Requires permission to view managed workflow executions.' }
+);
+
 export const SAVE_WATCH_SETTINGS = i18n.translate(
   'xpack.alertzero.watches.settings.saveWatchSettings',
   { defaultMessage: 'Save' }
@@ -74,6 +262,27 @@ export const WORKER_SETTINGS_SAVE_ERROR = i18n.translate(
 export const WATCH_SETTINGS_INVALID = i18n.translate(
   'xpack.alertzero.watches.settings.invalidDrafts',
   { defaultMessage: 'Fix invalid settings before saving.' }
+);
+
+/* -------------------------------------------------------------------------- */
+/* Models                                                                     */
+/* -------------------------------------------------------------------------- */
+
+export const FEATURE_SETTINGS_LINK = i18n.translate(
+  'xpack.alertzero.watches.settings.featureSettingsLink',
+  { defaultMessage: 'Feature settings' }
+);
+
+export const MODELS_LABEL = i18n.translate('xpack.alertzero.watches.settings.models.label', {
+  defaultMessage: 'Models',
+});
+
+export const NO_MODEL_REASON_PLAIN = i18n.translate(
+  'xpack.alertzero.watches.settings.worker.blockingReason.noModelPlain',
+  {
+    defaultMessage:
+      'Some AI-powered steps in this Worker may not be configured. Check Feature settings below.',
+  }
 );
 
 /* -------------------------------------------------------------------------- */
@@ -160,6 +369,14 @@ export const TRIGGER_HELP_TEXT = i18n.translate(
   { defaultMessage: 'How often this Worker runs. Applies to this Worker only.' }
 );
 
+export const TRIGGER_HELP_READ_ONLY_4H = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.helpTextReadOnly4h',
+  {
+    defaultMessage:
+      'Hunt Watch runs every 4 hours on a fixed schedule. The interval cannot be changed.',
+  }
+);
+
 export const TRIGGER_LABEL = i18n.translate('xpack.alertzero.watches.settings.trigger.label', {
   defaultMessage: 'Trigger',
 });
@@ -184,20 +401,6 @@ export const WORKERS_EMPTY_TITLE = i18n.translate(
 );
 
 /* -------------------------------------------------------------------------- */
-/* Workers section (Watch detail)                                             */
-/* -------------------------------------------------------------------------- */
-
-export const WORKERS_SECTION_TITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.workers.sectionTitle',
-  { defaultMessage: 'Workers' }
-);
-
-export const WORKERS_SECTION_SUBTITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.workers.sectionSubtitle',
-  { defaultMessage: 'Workers tagged as this Watch' }
-);
-
-/* -------------------------------------------------------------------------- */
 /* Alert Triage Worker extras                                                 */
 /* -------------------------------------------------------------------------- */
 
@@ -210,6 +413,147 @@ export const MINIMUM_CONFIDENCE_SCORE_HELP_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreHelpText',
   {
     defaultMessage:
-      'False positive alerts must meet or exceed this confidence score to be surfaced for review or auto-closed. Alerts below the threshold are still tagged with the verdict but require no action. Lower values surface more alerts; higher values are more conservative.',
+      'Lowest confidence at which a false positive is surfaced for review or auto-closed.',
   }
+);
+
+export const MINIMUM_CONFIDENCE_SCORE_DETAIL_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreDetailText',
+  {
+    defaultMessage:
+      'Alerts below the threshold are still tagged with the verdict but require no action. Lower values surface more alerts; higher values are more conservative.',
+  }
+);
+
+export const BUDGET_PER_HOUR_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.budgetPerHourLabel',
+  { defaultMessage: 'Triage budget per hour' }
+);
+
+export const BUDGET_PER_HOUR_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.budgetPerHourHelpText',
+  { defaultMessage: 'How much triage work the worker plans each hour, in cost units.' }
+);
+
+export const getBudgetPerHourDetailText = (min: number): string =>
+  i18n.translate('xpack.alertzero.watches.settings.alertTriage.budgetPerHourDetailText', {
+    defaultMessage:
+      'A batch of alerts costs a fixed overhead plus a cost per alert, so a larger budget triages more alerts and uses more model capacity. The budget is split across runs: a shorter schedule means smaller, more frequent runs, and only raising the budget triages more alerts per hour. Between {min} and {max}; the minimum rises with a shorter schedule so each run can fund at least one batch.',
+    values: { min, max: BUDGET_PER_HOUR_MAX },
+  });
+
+export const BUDGET_PER_HOUR_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.budgetPerHourAriaLabel',
+  { defaultMessage: 'Triage budget per hour' }
+);
+
+export const MINIMUM_SEVERITY_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumSeverityLabel',
+  { defaultMessage: 'Minimum severity' }
+);
+
+export const MINIMUM_SEVERITY_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumSeverityHelpText',
+  { defaultMessage: 'Lowest alert severity that is triaged.' }
+);
+
+export const MINIMUM_SEVERITY_DETAIL_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumSeverityDetailText',
+  {
+    defaultMessage:
+      'Alerts below this severity are never sent to the Worker. Choose Low to triage every alert.',
+  }
+);
+
+export const EXCLUDE_BUILDING_BLOCKS_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.excludeBuildingBlocksLabel',
+  { defaultMessage: 'Exclude building-block alerts' }
+);
+
+export const EXCLUDE_BUILDING_BLOCKS_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.excludeBuildingBlocksHelpText',
+  { defaultMessage: 'Skip alerts from building-block rules.' }
+);
+
+export const EXCLUDE_BUILDING_BLOCKS_DETAIL_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.excludeBuildingBlocksDetailText',
+  {
+    defaultMessage:
+      'Alerts from EQL sequence rules are still triaged: a sequence raises its own alert in addition to its building-block alerts.',
+  }
+);
+
+export const EXCLUDED_RULE_TAGS_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.excludedRuleTagsLabel',
+  { defaultMessage: 'Excluded rule tags' }
+);
+
+export const EXCLUDED_RULE_TAGS_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.excludedRuleTagsHelpText',
+  { defaultMessage: 'Skip alerts from rules that carry any of these tags.' }
+);
+
+export const EXCLUDED_RULE_TAGS_DETAIL_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.excludedRuleTagsDetailText',
+  {
+    defaultMessage:
+      'Press Enter after each tag to add several. Alerts from a rule with any one of the tags are skipped. Tags are matched exactly, including case.',
+  }
+);
+
+export const EXCLUDED_RULE_TAGS_PLACEHOLDER = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.excludedRuleTagsPlaceholder',
+  { defaultMessage: 'Add a rule tag, for example in-development' }
+);
+
+export const excludedRuleTagTooLong = (max: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.alertTriage.excludedRuleTagTooLong', {
+    defaultMessage: 'A tag can be at most {max} characters.',
+    values: { max },
+  });
+
+export const excludedRuleTagsLimitReached = (max: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.alertTriage.excludedRuleTagsLimitReached', {
+    defaultMessage: 'You can exclude at most {max} tags.',
+    values: { max },
+  });
+
+export const SEVERITY_LOW = i18n.translate('xpack.alertzero.watches.settings.severity.low', {
+  defaultMessage: 'Low',
+});
+
+export const SEVERITY_MEDIUM = i18n.translate('xpack.alertzero.watches.settings.severity.medium', {
+  defaultMessage: 'Medium',
+});
+
+export const SEVERITY_HIGH = i18n.translate('xpack.alertzero.watches.settings.severity.high', {
+  defaultMessage: 'High',
+});
+
+export const SEVERITY_CRITICAL = i18n.translate(
+  'xpack.alertzero.watches.settings.severity.critical',
+  { defaultMessage: 'Critical' }
+);
+
+export const LOOKBACK_HOURS_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.lookbackHoursLabel',
+  { defaultMessage: 'Lookback (hours)' }
+);
+
+export const LOOKBACK_HOURS_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.lookbackHoursHelpText',
+  { defaultMessage: 'How many hours back each run looks for alerts to triage.' }
+);
+
+export const LOOKBACK_HOURS_DETAIL_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.lookbackHoursDetailText',
+  {
+    defaultMessage: 'Alerts older than this are not triaged. Between {min} and {max}.',
+    values: { min: LOOKBACK_HOURS_MIN, max: LOOKBACK_HOURS_MAX },
+  }
+);
+
+export const LOOKBACK_HOURS_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.lookbackHoursAriaLabel',
+  { defaultMessage: 'Lookback in hours' }
 );

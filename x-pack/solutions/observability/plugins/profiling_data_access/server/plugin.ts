@@ -52,6 +52,7 @@ export class ProfilingDataAccessPlugin implements Plugin {
     const services = registerServices({
       createProfilingEsClient: createProfilingEsClientWithRedirect,
       logger: this.logger,
+      buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
       deps: {
         fleet: plugins.fleet,
         cloud: plugins.cloud,

@@ -16,14 +16,6 @@ import { emptyDatasetFormValues } from '../dataset_form_initial_values';
 import { StepDataset } from './step_dataset';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 
-jest.mock('@kbn/es-ui-shared-plugin/public', () => ({
-  Forms: {
-    useContent: () => ({
-      updateContent: jest.fn(),
-    }),
-  },
-}));
-
 // Avoid pulling in `DataSourceSelect` (which requires Kibana services) for these tests.
 jest.mock('./create_dataset_details_fields', () => ({
   CreateDatasetDetailsFields: () => null,

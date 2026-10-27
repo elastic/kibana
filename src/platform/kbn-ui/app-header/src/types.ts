@@ -20,7 +20,7 @@
  */
 
 import type { ReactElement, MouseEventHandler } from 'react';
-import type { IconType } from '@elastic/eui';
+import type { IconColor, IconType } from '@elastic/eui';
 import type { AppMenuConfig } from '@kbn/ui-app-menu';
 import type { FavoriteButtonStatus } from '@kbn/ui-favorite-button';
 
@@ -77,6 +77,8 @@ export interface AppHeaderBadgeItem {
 export interface AppHeaderTabIconBadge {
   /** EUI icon type rendered in the tab badge. */
   iconType: string;
+  /** Optional EUI icon color (e.g. `primary` for “new” dots). */
+  color?: IconColor;
   /** Optional tooltip shown when hovering the badge icon. */
   tooltip?: string;
 }
@@ -230,6 +232,8 @@ export interface AppHeaderFavoriteAction {
  * Apps own behavior and menu placement; App Header owns title presentation.
  */
 export interface AppHeaderShareAction {
+  /** Accessible label and default tooltip; defaults to Share. */
+  label?: string;
   onClick: (context: { returnFocus: () => void }) => void | Promise<void>;
   isDisabled?: boolean;
   tooltip?: {

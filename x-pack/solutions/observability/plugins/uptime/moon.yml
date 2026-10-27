@@ -104,6 +104,4 @@ fileGroups:
     - server/**/*
     - server/legacy_uptime/lib/requests/__fixtures__/monitor_charts_mock.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

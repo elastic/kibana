@@ -10,8 +10,7 @@
 import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';
-import type { Rule } from 'eslint';
-import type { Node } from 'estree';
+import type { CreateOnceRule, ESTree } from '@oxlint/plugins';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
 
@@ -180,7 +179,7 @@ const toRepoRelative = (filename: string): string => {
 const isAllowed = (repoRelativePath: string, allowPrefixes: string[]): boolean =>
   allowPrefixes.some((prefix) => repoRelativePath.startsWith(prefix));
 
-export const NoRestrictedPackageImports: Rule.RuleModule = {
+export const NoRestrictedPackageImports: CreateOnceRule = {
   meta: {
     type: 'problem',
     docs: {
@@ -228,27 +227,13 @@ export const NoRestrictedPackageImports: Rule.RuleModule = {
       },
     ],
   },
-  create(context) {
-    const options = context.options[0] as BoundariesConfig | undefined;
-    // Only treat options as the full policy when they list packages. An empty
-    // `{}` / partial options object must not disable the on-disk boundaries.
-    const useInjected = !!options?.packages && Object.keys(options.packages).length > 0;
-    const config = useInjected ? options : loadBoundariesConfig();
+  createOnce(context) {
+    let alwaysAllowed: string[] = [];
+    let packagePolicies: Record<string, PackagePolicy> = {};
+    let restrictedPackageIds = new Set<string>();
+    let repoRelativePath = '';
 
-    if (useInjected) {
-      assertBoundariesConfig(config);
-    }
-
-    const alwaysAllowed = config.alwaysAllowed ?? [];
-    const packagePolicies = config.packages ?? {};
-    const restrictedPackageIds = new Set(Object.keys(packagePolicies));
-
-    const filename = context.getPhysicalFilename
-      ? context.getPhysicalFilename()
-      : context.getFilename();
-    const repoRelativePath = toRepoRelative(filename);
-
-    const checkSource = (request: string | undefined, node: Node) => {
+    const checkSource = (request: string | undefined, node: ESTree.Node) => {
       if (!request) {
         return;
       }
@@ -277,6 +262,22 @@ export const NoRestrictedPackageImports: Rule.RuleModule = {
     };
 
     return {
+      before() {
+        const options = context.options[0] as BoundariesConfig | undefined;
+        // Only treat options as the full policy when they list packages. An empty
+        // `{}` / partial options object must not disable the on-disk boundaries.
+        const useInjected = !!options?.packages && Object.keys(options.packages).length > 0;
+        const config = useInjected ? options : loadBoundariesConfig();
+
+        if (useInjected) {
+          assertBoundariesConfig(config);
+        }
+
+        alwaysAllowed = config.alwaysAllowed ?? [];
+        packagePolicies = config.packages ?? {};
+        restrictedPackageIds = new Set(Object.keys(packagePolicies));
+        repoRelativePath = toRepoRelative(context.physicalFilename);
+      },
       ImportDeclaration(node) {
         checkSource(getStringLiteral(node.source), node);
       },
@@ -289,7 +290,7 @@ export const NoRestrictedPackageImports: Rule.RuleModule = {
         checkSource(getStringLiteral(node.source), node);
       },
       ImportExpression(node) {
-        checkSource(getStringLiteral(node.source), node as unknown as Node);
+        checkSource(getStringLiteral(node.source), node);
       },
       CallExpression(node) {
         const { callee, arguments: args } = node;

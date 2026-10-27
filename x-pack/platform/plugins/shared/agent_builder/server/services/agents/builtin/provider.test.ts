@@ -37,6 +37,15 @@ describe('toInternalDefinition', () => {
     expect(internal.type).toBe('investigation');
   });
 
+  it('keeps the auto-approval defaults declared by the definition', async () => {
+    const approvals = { auto_approved_apis: { elasticsearch: ['indices.delete'] } };
+    const internal = await convert({
+      ...baseDefinition,
+      configuration: { tools: [], approvals },
+    });
+    expect(internal.configuration.approvals).toEqual(approvals);
+  });
+
   describe('enable_elastic_capabilities defaulting', () => {
     it('defaults to true for chat agents when unset', async () => {
       const internal = await convert(baseDefinition);

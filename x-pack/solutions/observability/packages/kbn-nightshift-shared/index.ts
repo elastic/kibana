@@ -23,16 +23,6 @@ export const NIGHTSHIFT_FEATURE_ID = 'nightshift';
  */
 export const NIGHTSHIFT_ENABLED_FLAG = 'nightshift.enabled';
 
-/**
- * Gates whether `EventService.getClient()` (Significant Events) returns the `.rule-events`-backed
- * `RuleEventsClient` instead of the legacy `EventClient`. Read-only; the dual-write to
- * `.rule-events` is unconditional and independent of this flag. Falls back to `false` so reads
- * keep hitting the legacy events data stream until the read migration (nightshift-program#1515)
- * is validated and rolled out.
- */
-export const SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ =
-  'nightshift.significant_events.use_rule_events_read';
-
 /** Saved object type registered by `nightshiftSources` and granted by the Nightshift feature. */
 export const NIGHTSHIFT_SOURCE_SO_TYPE = 'nightshift-source';
 
@@ -45,6 +35,12 @@ export const NIGHTSHIFT_API_PRIVILEGES = {
   configure: 'configure_nightshift',
 } as const;
 
+/** `requiredPrivileges` for settings routes; `configure` is never checked without `manage`. */
+export const NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES = [
+  NIGHTSHIFT_API_PRIVILEGES.manage,
+  NIGHTSHIFT_API_PRIVILEGES.configure,
+];
+
 /** `capabilities.nightshift.*` keys granted by the feature's `ui:` list. */
 export const NIGHTSHIFT_UI_PRIVILEGES = {
   show: 'show',
@@ -55,16 +51,19 @@ export const NIGHTSHIFT_UI_PRIVILEGES = {
 export interface INightshiftCapabilities {
   canShow: boolean;
   canManage: boolean;
-  canConfigure: boolean;
+  /** Settings routes require both the manage and configure API privileges. */
+  canManageAndConfigure: boolean;
 }
 
 export function getNightshiftCapabilities(
   nightshift: Record<string, unknown> | undefined
 ): INightshiftCapabilities {
+  const canManage = nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.manage] === true;
+  const canConfigure = nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.configure] === true;
   return {
     canShow: nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.show] === true,
-    canManage: nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.manage] === true,
-    canConfigure: nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.configure] === true,
+    canManage,
+    canManageAndConfigure: canManage && canConfigure,
   };
 }
 
@@ -79,14 +78,21 @@ export {
 } from './src/sources/view_name';
 
 export {
+  MAX_NIGHTSHIFT_SOURCE_SLUGS,
   MAX_SOURCE_DESCRIPTION_LENGTH,
   MAX_SOURCE_ESQL_LENGTH,
   MAX_SOURCE_TAG_LENGTH,
   MAX_SOURCE_TAGS,
   MAX_SOURCE_TITLE_LENGTH,
+  MAX_SOURCES_PER_PAGE,
   createSourceRequestSchema,
+  nightshiftSourceSlugField,
+  nightshiftSourceSlugSchema,
+  nightshiftSourceSlugsField,
+  nightshiftSourceSlugsSchema,
   listSourcesQuerySchema,
   updateSourceRequestSchema,
+  validateSourceQueryRequestSchema,
   type CreateSourceRequest,
   type DeleteSourceResponse,
   type ListSourcesResponse,
@@ -96,12 +102,20 @@ export {
   type SourceMutationResponse,
   type SourceWithHealth,
   type UpdateSourceRequest,
+  type ValidateSourceQueryRequest,
+  type ValidateSourceQueryResponse,
 } from './src/sources/schema';
 
+export { SOURCE_TYPES, sourceTypeSchema, type SourceType } from './src/sources/source_type';
+
 export {
+  analyzeSourceQuery,
   getSourceCommandQuery,
+  getSourceReadTargets,
   hasMultipleSourceIndices,
   validateSourceQuery,
+  type ISourceReadTargets,
+  type SourceTypeAnalysis,
 } from './src/sources/validate_source_query';
 
 export {
@@ -114,3 +128,11 @@ export {
   NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
   NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
 } from './src/nightshift_usage_ids';
+
+export { conditionToESQLFilterAst } from './src/condition_to_esql_filter';
+
+export {
+  SETTINGS_TAB_IDS,
+  type NightshiftSettingsLocatorParams,
+  type SettingsTabId,
+} from './src/settings';

@@ -103,11 +103,11 @@ describe('Actions Plugin', () => {
       expect(pluginSetup.isEarsEnabled).toBe(false);
     });
 
-    it('returns isInboundEventsEnabled as false when not configured', async () => {
+    it('returns isInboundEventsEnabled as true when not configured', async () => {
       const context = coreMock.createPluginInitializerContext({});
       const plugin = new Plugin(context);
       const pluginSetup = plugin.setup();
-      expect(pluginSetup.isInboundEventsEnabled).toBe(false);
+      expect(pluginSetup.isInboundEventsEnabled).toBe(true);
     });
 
     it('returns isInboundEventsEnabled as false when inboundEvents.enabled is false', async () => {

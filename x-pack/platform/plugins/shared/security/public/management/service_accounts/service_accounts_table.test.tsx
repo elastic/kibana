@@ -40,20 +40,28 @@ describe('ServiceAccountsTable', () => {
   const renderTable = ({
     hasMore = false,
     hasLoadMoreError = false,
+    onDeleteAccount,
+    onViewWorkloads,
+    serviceAccounts = [firstAccount, secondAccount],
   }: {
     hasMore?: boolean;
     hasLoadMoreError?: boolean;
+    onDeleteAccount?: (account: ServiceAccountTableItem) => void;
+    onViewWorkloads?: (account: ServiceAccountTableItem) => void;
+    serviceAccounts?: ServiceAccountTableItem[];
   } = {}) => {
     const onLoadMore = jest.fn();
 
     renderWithI18n(
       <EuiProvider>
         <ServiceAccountsTable
-          serviceAccounts={[firstAccount, secondAccount]}
+          serviceAccounts={serviceAccounts}
           hasMore={hasMore}
           isLoadingMore={false}
           hasLoadMoreError={hasLoadMoreError}
           onLoadMore={onLoadMore}
+          onDeleteAccount={onDeleteAccount}
+          onViewWorkloads={onViewWorkloads}
         />
       </EuiProvider>
     );
@@ -85,6 +93,19 @@ describe('ServiceAccountsTable', () => {
         <TableWithLoadMore />
       </EuiProvider>
     );
+  };
+
+  const openRoleFilter = async () => {
+    fireEvent.click(screen.getByLabelText('Role Selection'));
+    await screen.findByTestId('euiSelectableList');
+  };
+
+  const clickRoleOption = (role: string) =>
+    fireEvent.click(within(screen.getByTestId('euiSelectableList')).getByText(role));
+
+  const closeRoleFilter = async () => {
+    fireEvent.click(screen.getByLabelText('Role Selection'));
+    await waitFor(() => expect(screen.queryByTestId('euiSelectableList')).not.toBeInTheDocument());
   };
 
   it('renders directory metadata without unavailable follow-up actions', () => {
@@ -120,21 +141,18 @@ describe('ServiceAccountsTable', () => {
   it('filters accounts by the selected role and restores them when cleared', async () => {
     renderTable();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Role Selection' }));
-    const viewerOption = await screen.findByRole('option', { name: 'viewer' });
-    await waitFor(() => expect(viewerOption).toBeVisible());
-    fireEvent.click(viewerOption);
+    await openRoleFilter();
+    clickRoleOption('viewer');
 
     expect(screen.getByText('nightshift-relay')).toBeVisible();
     expect(screen.queryByText('incident-responder')).not.toBeInTheDocument();
 
-    fireEvent.click(await screen.findByRole('option', { name: 'viewer' }));
+    clickRoleOption('viewer');
 
     expect(screen.getByText('incident-responder')).toBeVisible();
     expect(screen.getByText('nightshift-relay')).toBeVisible();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Role Selection' }));
-    await waitFor(() => expect(viewerOption).not.toBeVisible());
+    await closeRoleFilter();
   });
 
   it.each([
@@ -158,7 +176,7 @@ describe('ServiceAccountsTable', () => {
     });
   });
 
-  it('explains the unavailable workload count on keyboard focus', async () => {
+  it('explains a workload count that could not be taken on keyboard focus', async () => {
     renderTable();
     const row = screen.getByRole('row', { name: /incident-responder/ });
     const cells = within(row).getAllByRole('cell');
@@ -170,8 +188,53 @@ describe('ServiceAccountsTable', () => {
 
     expect(unavailableCount).toHaveFocus();
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      'Workload associations are not available yet.'
+      'Unable to count the workloads bound to this account.'
     );
+  });
+
+  describe('workload counts', () => {
+    const getWorkloadCell = (name: string) => {
+      const cells = within(screen.getByRole('row', { name: new RegExp(name) })).getAllByRole(
+        'cell'
+      );
+      return cells[cells.length - 1];
+    };
+
+    it('opens the workloads of a bound account from its View link', () => {
+      const onViewWorkloads = jest.fn();
+      renderTable({ onViewWorkloads });
+
+      const workloadCell = getWorkloadCell('nightshift-relay');
+      expect(within(workloadCell).getByTestId('serviceAccountWorkloadCount')).toHaveTextContent(
+        '3'
+      );
+      fireEvent.click(
+        within(workloadCell).getByRole('button', {
+          name: 'View the workloads bound to nightshift-relay',
+        })
+      );
+
+      expect(onViewWorkloads).toHaveBeenCalledWith(firstAccount);
+    });
+
+    it('shows a plain zero, with no View link, for an account with no workloads', () => {
+      renderTable({
+        onViewWorkloads: jest.fn(),
+        serviceAccounts: [{ ...secondAccount, workloadCount: 0 }],
+      });
+
+      const workloadCell = getWorkloadCell('incident-responder');
+      expect(within(workloadCell).getByTestId('serviceAccountWorkloadCount')).toHaveTextContent(
+        '0'
+      );
+      expect(within(workloadCell).queryByTestId('serviceAccountViewWorkloads')).toBeNull();
+    });
+
+    it('shows no View link when viewing is not offered', () => {
+      renderTable();
+
+      expect(screen.queryByTestId('serviceAccountViewWorkloads')).not.toBeInTheDocument();
+    });
   });
 
   it('loads the next cursor page on demand', async () => {
@@ -215,16 +278,13 @@ describe('ServiceAccountsTable', () => {
     renderPaginatedTable();
 
     fireEvent.click(screen.getByTestId('pagination-button-next'));
-    fireEvent.click(screen.getByRole('button', { name: 'Role Selection' }));
-    const editorOption = await screen.findByRole('option', { name: 'editor' });
-    await waitFor(() => expect(editorOption).toBeVisible());
-    fireEvent.click(editorOption);
+    await openRoleFilter();
+    clickRoleOption('editor');
 
     expect(screen.getByText('account-00')).toBeVisible();
     expect(screen.queryByText('account-10')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Role Selection' }));
-    await waitFor(() => expect(editorOption).not.toBeVisible());
+    await closeRoleFilter();
   });
 
   it('offers to retry when loading the next cursor page fails', () => {
@@ -232,5 +292,23 @@ describe('ServiceAccountsTable', () => {
 
     expect(screen.getByText('Unable to load more service accounts.')).toBeVisible();
     expect(screen.getByRole('button', { name: 'Try again' })).toBeVisible();
+  });
+
+  it('starts deleting the account from its row', () => {
+    const onDeleteAccount = jest.fn();
+    renderTable({ onDeleteAccount });
+
+    const [firstRowDelete] = screen.getAllByTestId('serviceAccountsDeleteAction');
+    fireEvent.click(firstRowDelete);
+
+    expect(onDeleteAccount).toHaveBeenCalledTimes(1);
+    expect(onDeleteAccount.mock.calls[0][0]).toMatchObject({ id: expect.any(String) });
+  });
+
+  it('offers no row actions unless deleting is allowed', () => {
+    renderTable();
+
+    expect(screen.queryByTestId('serviceAccountsDeleteAction')).not.toBeInTheDocument();
+    expect(screen.queryByText('Actions')).not.toBeInTheDocument();
   });
 });

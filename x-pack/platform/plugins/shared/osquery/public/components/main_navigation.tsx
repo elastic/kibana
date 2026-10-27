@@ -178,8 +178,8 @@ export const MainNavigation = () => {
 
     if (matchExact(pathname, PAGE_ROUTING_PATHS.pack_add)) {
       return {
-        title: i18n.translate('xpack.osquery.addPack.pageTitle', {
-          defaultMessage: 'Add pack',
+        title: i18n.translate('xpack.osquery.createPack.pageTitle', {
+          defaultMessage: 'Create pack',
         }),
         back: packsBack,
       };

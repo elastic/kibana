@@ -35,9 +35,9 @@ interface SecondaryMenuComponent
 }
 
 const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
-  ({ badgeType, children, footer, title, isNew = false }, ref) => {
+  ({ badgeType, children, footer, title, isNew = false, isPanel = false }, ref) => {
     const { euiTheme } = useEuiTheme();
-    const headerStyle = useMenuHeaderStyle();
+    const headerStyle = useMenuHeaderStyle(isPanel);
     const scrollStyles = useScroll(true);
 
     const titleWithBadgeStyles = css`

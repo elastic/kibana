@@ -13,6 +13,7 @@ import type { MigrationInfoRecord } from '../../types';
 import { RULE_IDS, SavedObjectsCheckError } from '../../findings';
 import {
   validateNewModelVersionSchemas,
+  validateUpdateSchemaContinuity,
   validateModelVersionNumbers,
   validateNoIndexOrEnabledFalse,
   getLatestModelVersion,
@@ -71,6 +72,8 @@ export function validateChangesExistingType({
   }
 
   validateModelVersionNumbers(name, to.modelVersions);
+
+  validateUpdateSchemaContinuity(name, registeredType);
 
   validateNameTitleFieldTypesExistingType(name, to, from, registeredType, log);
 

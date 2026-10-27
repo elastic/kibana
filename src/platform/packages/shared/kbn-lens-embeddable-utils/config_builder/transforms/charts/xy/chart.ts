@@ -10,6 +10,7 @@
 import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { XYPersistedState, XYDataLayerConfig } from '@kbn/lens-common';
+import { DatasourceNotFoundError } from '../../../errors';
 import type { XYConfig, XYConfigNoESQL, XYConfigESQL, XYLayer } from '../../../schema';
 import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
@@ -216,9 +217,7 @@ export function buildVisualizationAPI(
     resolveAxisId
   );
   if (apiLayers.length === 0) {
-    throw new Error(
-      'No layers could be built: datasource layers may be missing or have incompatible types'
-    );
+    throw new DatasourceNotFoundError();
   }
 
   const axis = convertAxisSettingsToAPIFormat(config, layers, usedModes);

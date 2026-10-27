@@ -39,6 +39,7 @@ import { ConversationQueueSkeleton } from './conversation_queue_skeleton';
 import { ConversationCard, type ConversationsActionsGroupProps } from '../conversation_card';
 import { ConversationCardCompact } from '../conversation_card/conversation_card_compact';
 import { type BaseActionsProps } from '../actions';
+import { ShowMoreFooter } from '../show_more_footer';
 
 interface ConversationQueueProps {
   briefingType: RecommendedAction;
@@ -68,6 +69,8 @@ interface ConversationQueueProps {
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
+  /** When false, cards are inert and their chat control and menu are disabled. Defaults to true. */
+  canOpenInvestigationDetails?: boolean;
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   /** A function, not a value: the URL is per-card and only the caller can resolve it. */
   getChatHref?: (id: Investigation['id']) => string | undefined;
@@ -80,11 +83,15 @@ interface ConversationQueueProps {
   canManageEscalations?: boolean;
   /** When true the "Close investigation" action is shown on every card. */
   canCloseInvestigation?: boolean;
+  /** Adds a "Copy link" item to each card's menu. */
+  onCopyLink: BaseActionsProps['onCopyLink'];
   /**
    * Optional: render the assignee picker widget for a non-closed investigation card.
    * Supplied by the page so that hook calls stay outside this package.
    */
   renderAssignees: (investigation: Investigation) => React.ReactNode;
+  /** Optional: render an in-flight approve/decline badge on each full card. */
+  renderInFlightStatus?: (investigation: Investigation) => React.ReactNode;
 }
 
 const StyledAccordion = styled(EuiAccordion)`
@@ -121,12 +128,15 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     onClickCard,
     onClickRecommendedAction,
     onOpenChat,
+    canOpenInvestigationDetails = true,
     getChatHref,
     getOutcomeLabel,
     selectedIds,
     canManageEscalations,
     canCloseInvestigation,
+    onCopyLink,
     renderAssignees,
+    renderInFlightStatus,
   }) => {
     const { euiTheme } = useEuiTheme();
     // Work already finished reads as a list. Pinned to the bucket, not a prop: which
@@ -165,38 +175,60 @@ export const ConversationQueue = memo<ConversationQueueProps>(
       </EuiFlexGroup>
     );
 
+    const hasMoreToShow = loadingRows === 0 && isOpen && remaining > 0 && onShowMore !== undefined;
+
+    // A sibling of the cards in the same group, so the last card is no longer the last
+    // child: it keeps its divider and square corners, with no flag passed down.
+    const showMoreButton = hasMoreToShow ? (
+      <ShowMoreFooter
+        label={showMoreLabel(remaining)}
+        ariaLabel={showMoreAriaLabel(CONVERSATION_QUEUE_LABELS[briefingType], remaining)}
+        onClick={onShowMore}
+        isLoading={isLoadingMore}
+        hasError={hasLoadMoreError}
+        errorMessage={CONVERSATION_QUEUE_ERROR.loadMore}
+        retryLabel={CONVERSATION_QUEUE_ERROR.retry}
+        data-test-subj={`conversationQueueShowMore-${briefingType}`}
+        errorDataTestSubj={`conversationQueueLoadMoreError-${briefingType}`}
+      />
+    ) : null;
+
     const rowList = (
       <EuiFlexGroup direction="column" gutterSize="none">
-        {rows.map((investigation, i) => {
+        {rows.map((investigation) => {
           // Props shared by both card variants (closed compact + open full).
           const sharedProps = {
             investigation,
-            hasBorder: i < rows.length - 1,
             isSelected: selectedIds?.includes(investigation.id),
             onClickAction,
             onClickCard,
             onOpenChat,
+            canOpenInvestigationDetails,
             onClickRecommendedAction,
             chatHref: getChatHref?.(investigation.id),
             canManageEscalations,
             canCloseInvestigation,
+            onCopyLink,
           };
 
-          return (
-            <EuiFlexItem key={investigation.id} grow={false}>
-              {isClosedBucket ? (
-                <ConversationCardCompact
-                  {...sharedProps}
-                  outcome={getOutcomeLabel?.(investigation.id)}
-                />
-              ) : (
-                // renderAssignees is only passed to the full card — decided rows (compact)
-                // do not expose the assignee widget.
-                <ConversationCard {...sharedProps} renderAssignees={renderAssignees} />
-              )}
-            </EuiFlexItem>
+          return isClosedBucket ? (
+            <ConversationCardCompact
+              key={investigation.id}
+              {...sharedProps}
+              outcome={getOutcomeLabel?.(investigation.id)}
+            />
+          ) : (
+            // renderAssignees is only passed to the full card — decided rows (compact)
+            // do not expose the assignee widget.
+            <ConversationCard
+              key={investigation.id}
+              {...sharedProps}
+              renderAssignees={renderAssignees}
+              renderInFlightStatus={renderInFlightStatus}
+            />
           );
         })}
+        {showMoreButton}
       </EuiFlexGroup>
     );
 
@@ -232,7 +264,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     );
 
     const emptyState = (
-      <EuiPanel>
+      <EuiPanel hasBorder={false} hasShadow={false}>
         <EuiText size="xs" color="subdued">
           {isFiltered
             ? EMPTY_CONVERSATION_QUEUE.emptyQueueWithFilter
@@ -260,10 +292,8 @@ export const ConversationQueue = memo<ConversationQueueProps>(
 
     return (
       <EuiPanel
-        borderRadius="none"
         css={{
           cursor: 'pointer',
-          borderRadius: euiTheme.size.s,
         }}
         paddingSize="none"
         hasBorder
@@ -283,51 +313,6 @@ export const ConversationQueue = memo<ConversationQueueProps>(
           }}
         >
           {renderBody()}
-
-          {/* Sits below the rows rather than replacing them, and EuiAccordion has no
-              footer slot, so it is the last child. */}
-          {loadingRows === 0 && isOpen && remaining > 0 && onShowMore ? (
-            <EuiFlexGroup
-              direction="column"
-              alignItems="center"
-              responsive={false}
-              gutterSize="none"
-              css={{
-                borderTop: `1px solid ${euiTheme.colors.disabled}`,
-                // Keeps the hover fill and focus ring off the row's borders.
-                padding: euiTheme.size.xs,
-                cursor: 'default',
-              }}
-            >
-              {/* The rows that did load stay put; only this says the click failed,
-                  and the control below it is the retry. */}
-              {hasLoadMoreError ? (
-                <EuiFlexItem grow={false}>
-                  <EuiText
-                    size="xs"
-                    color="danger"
-                    role="alert"
-                    data-test-subj={`conversationQueueLoadMoreError-${briefingType}`}
-                  >
-                    {CONVERSATION_QUEUE_ERROR.loadMore}
-                  </EuiText>
-                </EuiFlexItem>
-              ) : null}
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  color={hasLoadMoreError ? 'danger' : 'text'}
-                  iconType={hasLoadMoreError ? 'refresh' : 'chevronSingleDown'}
-                  isLoading={isLoadingMore}
-                  onClick={onShowMore}
-                  aria-label={showMoreAriaLabel(CONVERSATION_QUEUE_LABELS[briefingType], remaining)}
-                  data-test-subj={`conversationQueueShowMore-${briefingType}`}
-                >
-                  {hasLoadMoreError ? CONVERSATION_QUEUE_ERROR.retry : showMoreLabel(remaining)}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : null}
         </StyledAccordion>
       </EuiPanel>
     );

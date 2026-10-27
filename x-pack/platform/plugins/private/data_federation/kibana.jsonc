@@ -22,11 +22,12 @@
       "licenseApiGuard"
     ],
     "optionalPlugins": [
-      "cloud"
+      "cloud",
+      "share",
+      "usageCollection"
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "esUiShared"
+      "kibanaReact"
     ]
   }
 }

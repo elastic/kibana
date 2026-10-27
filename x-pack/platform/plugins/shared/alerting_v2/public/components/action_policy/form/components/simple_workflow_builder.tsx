@@ -22,6 +22,7 @@ import {
   INLINE_ACTION_STEP_DEFINITIONS,
   InlineWorkflowEditor,
   getInlineActionStepDefinition,
+  isActionValid,
   type ConnectorCreationConfig,
   type InlineActionStepType,
   type InlineWorkflowActionDraft,
@@ -66,7 +67,12 @@ export const SimpleWorkflowBuilder = ({ connectorCreationConfig }: SimpleWorkflo
     <Controller
       name="inlineActions"
       control={control}
-      render={({ field }) => {
+      rules={{
+        validate: (drafts) => drafts.every(isActionValid),
+        // "At least one destination" also counts the drafts.
+        deps: 'destinations',
+      }}
+      render={({ field, formState: { isSubmitted } }) => {
         const drafts = field.value;
 
         const addDraft = (stepType: InlineActionStepType) => {
@@ -130,6 +136,7 @@ export const SimpleWorkflowBuilder = ({ connectorCreationConfig }: SimpleWorkflo
                             value={draft}
                             onChange={updateDraft}
                             connectorCreationConfig={connectorCreationConfig}
+                            forceShowErrors={isSubmitted}
                           />
                         </EuiPanel>
                       </EuiFlexItem>

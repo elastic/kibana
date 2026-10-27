@@ -11,21 +11,24 @@ import {
   isAssignment,
   isBooleanLiteral,
   isColumn,
+  isFunctionExpression,
   isList,
   isMap,
   isStringLiteral,
   LeafPrinter,
-  Parser,
   Walker,
 } from '@elastic/esql';
 
 import type {
   ESQLAstHighlightCommand,
   ESQLAstQueryExpression,
+  ESQLCommand,
   ESQLFunction,
   ESQLMap,
 } from '@elastic/esql/types';
-import { replaceColumnNamesIfRenamed } from './query_parsing_helpers';
+import { deriveQueryFieldNames } from '@kbn/esql-language';
+import { getArgsFromRenameFunction, replaceColumnNamesIfRenamed } from './query_parsing_helpers';
+import { parseEsqlCached } from './parse_esql_cached';
 
 export const DEFAULT_HIGHLIGHT_PRE_TAG = '<em>';
 export const DEFAULT_HIGHLIGHT_POST_TAG = '</em>';
@@ -83,9 +86,12 @@ export type ESQLColumnsWithHighlights = Record<string, ESQLHighlightTags>;
  *   },
  * }
  */
-export function getColumnsWithHighlights(query: string): ESQLColumnsWithHighlights {
+export function getColumnsWithHighlights(
+  query: string,
+  availableColumnNames: string[] = []
+): ESQLColumnsWithHighlights {
   const columnsWithHighlights: ESQLColumnsWithHighlights = {};
-  const { root } = Parser.parse(query);
+  const { root } = parseEsqlCached(query);
 
   const highlightFunctionsCandidates = Walker.findAll(
     root,
@@ -118,6 +124,15 @@ export function getColumnsWithHighlights(query: string): ESQLColumnsWithHighligh
     };
   }
 
+  const renamedColumnNames = (
+    Walker.findAll(
+      root,
+      (node) => node.type === 'command' && node.name === 'rename'
+    ) as ESQLCommand[]
+  ).flatMap(({ args }) =>
+    args.filter(isFunctionExpression).map((fn) => getArgsFromRenameFunction(fn).original.name)
+  );
+
   const highlightCommands = Walker.findAll(
     root,
     (node) => node.type === 'command' && node.name === 'highlight'
@@ -135,14 +150,46 @@ export function getColumnsWithHighlights(query: string): ESQLColumnsWithHighligh
 
     const prefix = command.prefix?.valueUnquoted ?? HIGHLIGHT_COMMAND_DEFAULT_PREFIX;
 
-    for (const field of command.highlightFields ?? []) {
-      const columnName = `${prefix}${field.name}`;
-      const [resolvedColumnName] = replaceColumnNamesIfRenamed(root, [columnName]);
+    const { highlightFields, queryExpression } = command;
+
+    // The fields the query text names: the ON list, or without ON the fields the query narrows
+    // to. A parameter cannot be resolved here, and a pattern other than `*` is rejected by the
+    // language.
+    const namedFieldNames =
+      highlightFields !== undefined
+        ? highlightFields
+            .filter((field) => isColumn(field) && !field.name.includes('*'))
+            .map(({ name }) => name)
+        : queryExpression && deriveQueryFieldNames(queryExpression);
+
+    for (const fieldName of namedFieldNames ?? []) {
+      const [resolvedColumnName] = replaceColumnNamesIfRenamed(root, [`${prefix}${fieldName}`]);
 
       columnsWithHighlights[resolvedColumnName] = {
         preTag,
         postTag,
       };
+    }
+
+    // `ON *`, or an omitted ON whose fields the query does not name, highlights fields that only
+    // the response tells apart. Their columns are the ones that start with the prefix; an empty
+    // prefix overwrites the source columns, which cannot be told apart from the rest.
+    const highlightsDerivedFields =
+      namedFieldNames === undefined ||
+      Boolean(highlightFields?.some((field) => isColumn(field) && field.name === '*'));
+
+    if (highlightsDerivedFields && prefix !== '') {
+      // The response names are final; only a generated column renamed later needs resolving,
+      // and its original name is only in RENAME.
+      const renamedGeneratedColumnNames = renamedColumnNames
+        .filter((name) => name.startsWith(prefix))
+        .flatMap((name) => replaceColumnNamesIfRenamed(root, [name]));
+
+      for (const columnName of availableColumnNames) {
+        if (columnName.startsWith(prefix) || renamedGeneratedColumnNames.includes(columnName)) {
+          columnsWithHighlights[columnName] = { preTag, postTag };
+        }
+      }
     }
   }
 

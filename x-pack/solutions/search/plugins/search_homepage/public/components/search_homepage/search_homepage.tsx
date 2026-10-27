@@ -70,7 +70,8 @@ export const SearchHomepagePage = () => {
                     })}
               </h3>
             </EuiTitle>
-            {cloud?.isInTrial() ? (
+            {/* Serverless shows the trial badge in the Chrome header instead */}
+            {cloud?.isInTrial() && !cloud.isServerlessEnabled ? (
               <TrialUsageBadge cloud={cloud} />
             ) : !cloud?.isCloudEnabled ? (
               <LicenseBadge />

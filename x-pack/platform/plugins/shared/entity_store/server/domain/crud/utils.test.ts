@@ -37,14 +37,13 @@ const createDefinition = (type: EntityType, fields: EntityField[]): ManagedEntit
   id: `security_${type}_default`,
   name: `${type} definition`,
   type,
-  fields,
   identityField: {
     euidRanking: {
       branches: [{ ranking: [[{ field: 'entity.id' }]] }],
     },
     documentsFilter: isNotEmptyCondition('entity.id'),
   },
-  indexPatterns: ['logs-*'],
+  extraction: { fields },
 });
 
 describe('crud_client utils', () => {

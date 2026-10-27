@@ -171,6 +171,7 @@ export type CasesConfigurationUI = Pick<
   | 'owner'
   | 'observableTypes'
   | 'extractObservables'
+  | 'workflowTags'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
@@ -247,6 +248,8 @@ export interface SimilarCasesProps extends ApiProps {
   caseId: string;
   perPage: number;
   page: number;
+  sortField?: SortFieldCase;
+  sortOrder?: SortOrder;
 }
 
 export interface ApiProps {

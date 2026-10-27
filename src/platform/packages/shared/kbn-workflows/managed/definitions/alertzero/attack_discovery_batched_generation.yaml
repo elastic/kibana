@@ -39,7 +39,9 @@ triggers:
             Maximum alerts per Attack Discovery run. Also sets the retrieval
             ceiling at `batch_size * 100`, because the engine caps a parallel
             fan-out at 100 branches — a smaller batch buys less total coverage,
-            not more.
+            not more. A prompt-template connector analyzes at most 100 alerts
+            per batch; a larger batch reports that count and logs how many
+            alerts were omitted.
           maximum: 1000
           minimum: 50
           type: integer
@@ -65,6 +67,18 @@ steps:
     type: elasticsearch.esql.query
     timeout: "5m"
     with:
+      # Alerts the review already retired: a true-positive or inconclusive attack
+      # tags its alerts `az:ad_correlated` (`consts.ad_correlated_tag` in
+      # attack_discovery_review.yaml; keep the two in sync), so correlating them again
+      # would only persist a near-duplicate attack. A DSL `must_not` rather than a
+      # `| WHERE`: it is pushed down to Lucene, and it handles an untagged alert and a
+      # multi-valued tag field without the null arm an ES|QL comparison would need.
+      filter:
+        bool:
+          must_not:
+            - terms:
+                kibana.alert.workflow_tags:
+                  - az:ad_correlated
       # The `IS NULL` arm is load-bearing: `!=` alone is null-valued, and so
       # false, for an alert with no closing reason. Kept as its own `| WHERE`
       # pipe (pipes are ANDed) so the `OR` cannot widen the clauses above it.
@@ -145,35 +159,28 @@ steps:
           connector_id: "{{ inputs.connector_id }}"
           # Stated on the leaf step rather than threaded down from the Worker: the
           # tier is a property of the call, not of the caller. Only consulted when
-          # `connector_id` is empty, and ignored when AlertZero is disabled and the
-          # tier is therefore unregistered. Keep in sync with
-          # ALERTZERO_REASONING_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
-          feature_id: alertzero_reasoning
+          # `connector_id` is empty. An unset cyber-domain row resolves to nothing
+          # (it recommends no endpoints), so the frontier tier stays in charge.
+          # Ignored when AlertZero is disabled and the ids are therefore
+          # unregistered. Keep in sync with ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID
+          # and ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+          feature_id:
+            - alertzero_template_models
+            - alertzero_frontier
+          # No ground-truth gate: each generated attack goes to a review whose FP/TP
+          # analysis owns the false-positive decision. The gate corroborates the
+          # alerts against the same entities and raw events and hands its
+          # false-positive triage to the generation prompt, so generation dropped
+          # false-positive chains before any review saw them. It also keeps each
+          # batch on its own ids: the gate's additional retrieval could add alerts
+          # from outside this batch, so two batches could build on the same ones.
+          ground_truth_gate_enabled: false
           # The discoveries are read back from the index below instead. They
           # dominate this step's output, and an output above the engine's
           # eviction threshold is dropped from in-memory state before the
           # parallel step aggregates its branches — so returning them inline
           # loses them. Omitting them keeps the branch output ~150 bytes.
           include_attack_discoveries: false
-
-  # Each batch persisted its own discoveries; read them back scoped to this run's
-  # generation uuids. `kibana.alert.rule.execution.uuid` is the `execution_uuid`
-  # the run step returns, so this is exact — no time window, and concurrent runs
-  # cannot bleed into each other.
-  #
-  # It also returns only genuinely new attacks: a re-discovered attack hashes to
-  # an existing document, the bulk create 409s, and that document keeps the
-  # execution uuid of the run that first found it.
-  - name: fetch_discoveries
-    type: elasticsearch.search
-    with:
-      index: .adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
-      # Ceiling on attacks returned per run, above any realistic per-run volume.
-      size: 1000
-      query:
-        terms:
-          kibana.alert.rule.execution.uuid:
-            "${{ steps.generate_batches.output.results | map: 'output' | map: 'execution_uuid' | compact }}"
 
   # A batch delivered only when the branch completed AND the run itself reports
   # `completed`. Both halves matter: the branch can be `failed`, `skipped` or
@@ -237,13 +244,42 @@ steps:
         {%- assign generated = generated | plus: batch_count -%}
         {%- endfor -%}
         {{ generated }}
+      # Empty list used when `fetch_discoveries` is skipped. The template
+      # language has no empty-list literal.
+      no_discoveries: []
+
+  # Each batch persisted its own discoveries; read them back scoped to this run's
+  # generation uuids. `kibana.alert.rule.execution.uuid` is the `execution_uuid`
+  # the run step returns, so this is exact — no time window, and concurrent runs
+  # cannot bleed into each other.
+  #
+  # It also returns only genuinely new attacks: a re-discovered attack hashes to
+  # an existing document, the bulk create 409s, and that document keeps the
+  # execution uuid of the run that first found it.
+  #
+  # Skipped when nothing was generated. Persistence calls getWriter only when
+  # there is something to write, so a zero count searches an index that may not
+  # exist. The search itself is not given `ignore_unavailable`: that flag also
+  # turns an index the caller cannot read into zero hits, and the runner would
+  # skip review of attacks that were persisted.
+  - name: fetch_discoveries
+    type: elasticsearch.search
+    if: "${{ steps.aggregate.output.discoveries_generated > 0 }}"
+    with:
+      index: .adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
+      # Ceiling on attacks returned per run, above any realistic per-run volume.
+      size: 1000
+      query:
+        terms:
+          kibana.alert.rule.execution.uuid:
+            "${{ steps.generate_batches.output.results | map: 'output' | map: 'execution_uuid' | compact }}"
 
   # `| plus: 0` coerces the counted strings above back to numbers.
   - name: emit_result
     type: workflow.output
     status: completed
     with:
-      attack_discoveries: "${{ steps.fetch_discoveries.output.hits.hits | map: '_source' }}"
+      attack_discoveries: "${{ steps.fetch_discoveries.output.hits.hits | default: steps.aggregate.output.no_discoveries | map: '_source' }}"
       batch_errors: "${{ steps.aggregate.output.errors_json | json_parse }}"
       batches_failed: "${{ steps.generate_batches.output.total | minus: steps.aggregate.output.delivered }}"
       batches_succeeded: "${{ steps.aggregate.output.delivered | plus: 0 }}"

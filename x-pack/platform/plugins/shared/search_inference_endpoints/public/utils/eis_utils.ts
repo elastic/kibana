@@ -9,7 +9,10 @@ import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
-import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
+import {
+  isTemplateRequiredConnector,
+  type EisInferenceEndpointMetadata,
+} from '@kbn/inference-common';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { EisInferenceEndpoint, CspRegion } from '../../common/types';
 import { EisModelStatus } from '../../common/types';
@@ -31,6 +34,15 @@ const HIDDEN_EIS_INFERENCE_ID_PREFIXES = ['.gp-llm-v2', '.rainbow-sprinkles'];
 export const isHiddenEisEndpoint = (ep: InferenceAPIConfigResponse): boolean =>
   HIDDEN_EIS_INFERENCE_ID_PREFIXES.some((prefix) => ep.inference_id.startsWith(prefix));
 
+/**
+ * True when the endpoint accepts only a prompt template.
+ * Those endpoints are omitted from the inference management page: a user cannot
+ * call them with messages, so they are not a model someone can choose.
+ */
+export const isTemplateRequiredEisEndpoint = (endpoint: {
+  metadata?: EisInferenceEndpointMetadata;
+}): boolean => isTemplateRequiredConnector(endpoint);
+
 export type TaskTypeCategory = 'LLM' | 'Embedding' | 'Rerank';
 
 export const TASK_TYPE_CATEGORY: Partial<Record<InferenceTaskType, TaskTypeCategory>> = {
@@ -38,6 +50,7 @@ export const TASK_TYPE_CATEGORY: Partial<Record<InferenceTaskType, TaskTypeCateg
   completion: 'LLM',
   text_embedding: 'Embedding',
   sparse_embedding: 'Embedding',
+  embedding: 'Embedding',
   rerank: 'Rerank',
 };
 
@@ -88,6 +101,11 @@ export const getModelCreator = (endpoint: EisInferenceEndpoint): string => {
     return endpoint.metadata.display.model_creator;
   }
   return SERVICE_PROVIDERS[endpoint.service]?.name ?? endpoint.service;
+};
+
+export const getModelTitle = (modelName: string, modelCreator: string): string => {
+  const providerPrefix = `${modelCreator} `;
+  return modelName.startsWith(providerPrefix) ? modelName.slice(providerPrefix.length) : modelName;
 };
 
 export const getModelMetadata = (
@@ -253,6 +271,7 @@ export interface FilterCriteria {
   searchQuery: string;
   selectedTaskTypes: Set<TaskTypeCategory>;
   selectedProviders: string[];
+  selectedRegionOptions?: string[];
   showOutsideRegionPreferences?: boolean;
   showEndOfLifeModels?: boolean;
   showPreviewModels?: boolean;
@@ -264,6 +283,7 @@ export const filterGroupedModels = (
     searchQuery,
     selectedTaskTypes,
     selectedProviders,
+    selectedRegionOptions = [],
     showOutsideRegionPreferences = false,
     showEndOfLifeModels = false,
     showPreviewModels = false,
@@ -284,6 +304,12 @@ export const filterGroupedModels = (
         return false;
       }
       if (selectedProviders.length > 0 && !selectedProviders.includes(m.modelCreator)) {
+        return false;
+      }
+      if (
+        selectedRegionOptions.length > 0 &&
+        !selectedRegionOptions.some((key) => modelMatchesRegionOption(m, key))
+      ) {
         return false;
       }
       if (!showOutsideRegionPreferences) {
@@ -323,6 +349,11 @@ export function isModelEndOfLifeReached(metadata: EisInferenceEndpointMetadata |
   return dateMath.parse('now')?.isSameOrAfter(eolDate) ?? false;
 }
 
+export function isModelNearingEndOfLife(metadata: EisInferenceEndpointMetadata | undefined) {
+  if (!isModelDeprecated(metadata)) return false;
+  return !isModelEndOfLifeReached(metadata);
+}
+
 export function getModelReleaseDate(metadata: EisInferenceEndpointMetadata | undefined) {
   if (!metadata) return undefined;
   if (!metadata.heuristics?.release_date) return undefined;
@@ -346,38 +377,15 @@ export function getModelEOLDate(metadata: EisInferenceEndpointMetadata | undefin
 export function getModelEOLMessage(eolFormattedDate: string | null) {
   return eolFormattedDate
     ? i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.content',
+        'xpack.searchInferenceEndpoints.settings.defaultModel.error.unavailableSince',
         {
-          defaultMessage:
-            "This model's end of life date is {eolFormattedDate}. It is no longer available.",
+          defaultMessage: 'This model has been unavailable since {eolFormattedDate}.',
           values: { eolFormattedDate },
         }
       )
-    : i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.contentNoDate',
-        {
-          defaultMessage: 'This model has reached end of life and is no longer available.',
-        }
-      );
-}
-
-export function getModelDeprecatedMessage(deprecatedFormattedDate: string | null) {
-  return deprecatedFormattedDate
-    ? i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.content',
-        {
-          defaultMessage:
-            'This model will be deprecated on {deprecatedFormattedDate}. We recommend a newer model for optimal results.',
-          values: { deprecatedFormattedDate },
-        }
-      )
-    : i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.contentNoDate',
-        {
-          defaultMessage:
-            'This model is deprecated. We recommend a newer model for optimal results.',
-        }
-      );
+    : i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.error.endOfLife', {
+        defaultMessage: 'This model has reached end of life and is no longer available.',
+      });
 }
 
 const GEO_DISPLAY_NAMES: Record<string, string> = {
@@ -523,3 +531,6 @@ export const getRegionOptions = (endpoints: EisInferenceEndpoint[]): RegionOptio
     return true;
   });
 };
+
+export const modelMatchesRegionOption = (model: GroupedModel, key: string): boolean =>
+  getRegionOptions(model.endpoints).some((option) => option.key === key);

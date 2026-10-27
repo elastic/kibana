@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage, ScoutParallelTestFixtures, PageObjects } from '@kbn/scout';
+import type { ScoutPage, ScoutParallelTestFixtures } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { ContextPage } from './page_objects';
+import type { DiscoverPageObjects } from '../../../common/ui/fixtures';
 import { FILTER_FIELD_GEO_SRC, FILTER_VALUE_GEO_SRC_IN } from './constants';
 
-type ContextPageObjects = PageObjects & { contextPage: ContextPage };
+type ContextPageObjects = DiscoverPageObjects & { contextPage: ContextPage };
 
 /**
  * Adds a filter via the filter bar popover without asserting a single filter badge exists afterward.
@@ -37,8 +38,7 @@ export async function addFilterWithoutStrictCheck(
   await page.testSubj.click('filterOperatorOption-is');
   const filterParamsInput = page.locator('[data-test-subj="filterParams"] input');
   await expect(filterParamsInput).toBeEditable();
-  await filterParamsInput.focus();
-  await page.typeWithDelay('[data-test-subj="filterParams"] input', value);
+  await filterParamsInput.fill(value);
   await page.testSubj.click('saveFilter');
   await expect(page.testSubj.locator('addFilterPopover')).toBeHidden();
 }
@@ -106,7 +106,7 @@ export const loginAndGoToDiscover = async ({
  * and waits for the context view to finish loading.
  */
 export const navigateToFirstDocContext = async (
-  pageObjects: PageObjects & { contextPage: ContextPage }
+  pageObjects: DiscoverPageObjects & { contextPage: ContextPage }
 ) => {
   await pageObjects.dataGrid.openDocumentDetails({ rowIndex: 0 });
   await pageObjects.contextPage.clickRowAction(1);

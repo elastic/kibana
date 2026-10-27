@@ -14,21 +14,27 @@ import {
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
   LATEST_INDEX,
-  UPDATES_INDEX,
 } from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2, RESOLUTION_RULE_IDS } from '../../../../../common';
+import {
+  ENTITY_STORE_CLUSTER_PRIVILEGES,
+  ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
+  ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+  RESOLUTION_RULE_IDS,
+} from '../../../../../common';
 import { hashEuid } from '../../../../../common/domain/euid';
 import {
-  clearEntityStoreIndices,
-  clearResolutionRuleOverrides,
+  clearInstalledEntityStoreDocuments,
   seedUserEntity,
   waitForResolution,
+  assertResolutionGroup,
   assertNotResolved,
   assertSidRuleWatermarked,
   triggerMaintainerRun,
   ingestDoc,
   forceLogExtraction,
   normalizeKeywordList,
+  startEntityTypes,
+  stopEntityTypes,
   setupLogsTestDataStream,
   teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
@@ -37,7 +43,7 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ apiClient, esClient, kbnClient, samlAuth }) => {
+  apiTest.beforeAll(async ({ esClient, samlAuth }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -47,33 +53,7 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
       ...credentials.cookieHeader,
       ...INTERNAL_HEADERS,
     };
-
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
-    await clearResolutionRuleOverrides(kbnClient);
-
-    await esClient.indices.delete({
-      index: [LATEST_INDEX, UPDATES_INDEX],
-      ignore_unavailable: true,
-    });
-
-    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect([200, 201]).toContain(installResponse.statusCode);
-
-    const initResponse = await apiClient.post(
-      ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
-      {
-        headers: internalHeaders,
-        responseType: 'json',
-        body: {},
-      }
-    );
-    expect([200, 201]).toContain(initResponse.statusCode);
+    await clearInstalledEntityStoreDocuments(esClient);
   });
 
   apiTest.beforeEach(async ({ esClient }) => {
@@ -86,15 +66,12 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
     });
   });
 
-  apiTest.afterAll(async ({ apiClient, esClient, kbnClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearResolutionRuleOverrides(kbnClient);
-    await clearEntityStoreIndices(esClient);
+  apiTest.afterAll(async ({ apiClient }) => {
+    const enable = await apiClient.put(
+      ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH),
+      { headers: defaultHeaders, responseType: 'json' }
+    );
+    expect(enable.statusCode).toBe(200);
   });
 
   apiTest(
@@ -485,6 +462,108 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
   });
 
   apiTest(
+    'Email links local entities on several hosts together with Okta onto the Active Directory user',
+    async ({ apiClient, esClient }) => {
+      const email = 'john.smith@email-local.example';
+      const localA = 'user:john.smith@host-a@local';
+      const localB = 'user:john.smith@host-b@local';
+      const adEntity = 'user:john.smith@active_directory';
+      const oktaEntity = 'user:john.smith@okta';
+
+      for (const [entityId, namespace] of [
+        [localA, 'local'],
+        [localB, 'local'],
+        [adEntity, 'active_directory'],
+        [oktaEntity, 'okta'],
+      ]) {
+        await seedUserEntity(esClient, { entityId, namespace, email, userName: 'john.smith' });
+      }
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localA, adEntity);
+      await waitForResolution(esClient, localB, adEntity);
+      await waitForResolution(esClient, oktaEntity, adEntity);
+
+      await assertResolutionGroup(apiClient, defaultHeaders, {
+        targetId: adEntity,
+        aliasIds: [localA, localB, oktaEntity],
+      });
+    }
+  );
+
+  apiTest(
+    'Email declines two Active Directory users sharing a mailbox, even next to local users',
+    async ({ apiClient, esClient }) => {
+      const sharedEmail = 'helpdesk@email-ambiguous.example';
+      const declined = [
+        ['test-ambiguous-ad-a', 'active_directory'],
+        ['test-ambiguous-ad-b', 'active_directory'],
+        ['test-ambiguous-okta', 'okta'],
+        ['user:helpdesk@host-a@local', 'local'],
+        ['user:helpdesk@host-b@local', 'local'],
+      ];
+      for (const [entityId, namespace] of declined) {
+        await seedUserEntity(esClient, { entityId, namespace, email: sharedEmail });
+      }
+
+      // A clean pair in the same run: once it links, the run has processed the declined group.
+      const runCompletedProbeEmail = 'probe@email-ambiguous.example';
+      const runCompletedProbeOkta = 'test-ambiguous-probe-okta';
+      const runCompletedProbeEntra = 'test-ambiguous-probe-entra';
+      await seedUserEntity(esClient, {
+        entityId: runCompletedProbeOkta,
+        namespace: 'okta',
+        email: runCompletedProbeEmail,
+      });
+      await seedUserEntity(esClient, {
+        entityId: runCompletedProbeEntra,
+        namespace: 'entra_id',
+        email: runCompletedProbeEmail,
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+      await waitForResolution(esClient, runCompletedProbeEntra, runCompletedProbeOkta);
+
+      // The run already finished, so each entity after the first needs only a short check.
+      const settledRunCheckMs = 1_000;
+      const [[firstEntityId], ...rest] = declined;
+      await assertNotResolved(esClient, firstEntityId);
+      for (const [entityId] of rest) {
+        await assertNotResolved(esClient, entityId, settledRunCheckMs);
+      }
+    }
+  );
+
+  apiTest(
+    'Email links local entities before the Active Directory user arrives, then retargets onto it',
+    async ({ apiClient, esClient }) => {
+      const email = 'jane.pre-ad@email-local.example';
+      const localA = 'user:jane.pre-ad@host-a@local';
+      const localB = 'user:jane.pre-ad@host-b@local';
+      const adEntity = 'user:jane.pre-ad@active_directory';
+
+      await seedUserEntity(esClient, { entityId: localA, namespace: 'local', email });
+      await seedUserEntity(esClient, { entityId: localB, namespace: 'local', email });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localB, localA);
+
+      await seedUserEntity(esClient, { entityId: adEntity, namespace: 'active_directory', email });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localA, adEntity);
+      await waitForResolution(esClient, localB, adEntity);
+
+      await assertResolutionGroup(apiClient, defaultHeaders, {
+        targetId: adEntity,
+        aliasIds: [localA, localB],
+      });
+    }
+  );
+
+  apiTest(
     'Windows SID bridge links system account-management (IAM) entities to Active Directory',
     async ({ apiClient, esClient }) => {
       const sid = 'S-1-5-21-111-222-333-1001';
@@ -864,6 +943,7 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
   apiTest(
     'SID bridge links a local entity created by extraction to Active Directory',
     async ({ apiClient, esClient }) => {
+      await startEntityTypes(apiClient, defaultHeaders, ['user']);
       // Own stream/template, name outside logs-entity-store-tests-* so this
       // cannot overlap history_snapshot's default template at the same priority
       // (including a leftover wildcard from an older run).
@@ -935,6 +1015,7 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
         await triggerMaintainerRun(apiClient, internalHeaders);
         await waitForResolution(esClient, localEntity, adEntity);
       } finally {
+        await stopEntityTypes(apiClient, defaultHeaders, ['user']);
         await teardownLogsTestDataStream(esClient, sidExtractionLogs);
       }
     }
@@ -968,4 +1049,90 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
       expect(enable.statusCode).toBe(200);
     }
   });
+
+  apiTest(
+    'Security all can enable and disable built-in rules; Security read cannot',
+    async ({ apiClient, samlAuth }) => {
+      const securityRole = (privilege: 'all' | 'read') => ({
+        elasticsearch: {
+          cluster: [],
+          indices: [{ names: ['.entities.v2.*'], privileges: ['read', 'view_index_metadata'] }],
+        },
+        kibana: [{ base: [], feature: { siemV5: [privilege] }, spaces: ['*'] }],
+      });
+      // Scout has one custom role per worker: each asInteractiveUser call
+      // redefines it, so the same session takes on whichever role was set last.
+      const { cookieHeader } = await samlAuth.asInteractiveUser(securityRole('all'));
+      const customRoleHeaders = { ...cookieHeader, ...PUBLIC_HEADERS };
+      const toggleEmailRule = (action: 'ENABLE' | 'DISABLE') =>
+        apiClient.put(
+          ENTITY_STORE_ROUTES.public[`RESOLUTION_RULES_${action}`](
+            RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH
+          ),
+          { headers: customRoleHeaders, responseType: 'json' }
+        );
+
+      await apiTest.step('Security all disables and re-enables a built-in rule', async () => {
+        expect((await toggleEmailRule('DISABLE')).statusCode).toBe(200);
+        expect((await toggleEmailRule('ENABLE')).statusCode).toBe(200);
+      });
+
+      await apiTest.step('Security read can do neither', async () => {
+        await samlAuth.asInteractiveUser(securityRole('read'));
+        for (const action of ['DISABLE', 'ENABLE'] as const) {
+          const response = await toggleEmailRule(action);
+          expect(response.statusCode).toBe(403);
+          // Refused by route authorization, not only by the saved-objects layer.
+          expect(response.body.message).toContain('securitySolution-entity-analytics-manage');
+        }
+      });
+    }
+  );
+
+  apiTest(
+    'A maintainer run by a Security all user honours a built-in rule an admin disabled',
+    async ({ apiClient, esClient, samlAuth }) => {
+      const disable = await apiClient.put(
+        ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_DISABLE(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH),
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(disable.statusCode).toBe(200);
+
+      // Enough to run the maintainer without being a superuser: the entity store's own
+      // privilege check, plus Security `all` for reading the rule overrides.
+      const { cookieHeader } = await samlAuth.asInteractiveUser({
+        elasticsearch: {
+          cluster: ENTITY_STORE_CLUSTER_PRIVILEGES,
+          indices: [
+            { names: ['*'], privileges: ENTITY_STORE_SOURCE_INDICES_PRIVILEGES },
+            {
+              names: ['.entities.v2.*', LATEST_ALIAS],
+              privileges: [
+                ...new Set([
+                  ...ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+                  ...ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
+                ]),
+              ],
+            },
+          ],
+        },
+        kibana: [{ base: [], feature: { siemV5: ['all'] }, spaces: ['*'] }],
+      });
+      const customRoleInternalHeaders = { ...cookieHeader, ...INTERNAL_HEADERS };
+
+      const email = 'non-superuser-disabled@co.com';
+      const oktaEntity = 'non-superuser-okta';
+      const entraEntity = 'non-superuser-entra';
+      await seedUserEntity(esClient, { entityId: oktaEntity, namespace: 'okta', email });
+      await seedUserEntity(esClient, { entityId: entraEntity, namespace: 'entra_id', email });
+
+      // A sync run reads the overrides with the caller's credentials, as the scheduled
+      // task does with the API key of whoever set up the store.
+      await triggerMaintainerRun(apiClient, customRoleInternalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+      await assertNotResolved(esClient, entraEntity);
+      await assertNotResolved(esClient, oktaEntity);
+    }
+  );
 });

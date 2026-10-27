@@ -11,8 +11,6 @@ import { parse } from 'yaml';
 import ACTION_CLOSE_ALERTS_FALSE_POSITIVE_YAML from './actions/action_close_alerts_false_positive.yaml';
 import FLOOR_ALERT_TRIAGE_REVIEW_YAML from './floor_alert_triage_review.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
-import { ConcurrencySettingsSchema } from '../../../spec/schema';
-import { ConcurrencySlotOccupyingExecutionStatuses, ExecutionStatus } from '../../../types/latest';
 
 interface YamlStep {
   name: string;
@@ -27,7 +25,7 @@ interface YamlStep {
 }
 
 interface ParsedReview {
-  settings: { timeout: string; concurrency: { key: string; strategy: string; max: number } };
+  settings: { timeout: string; concurrency?: { key: string; strategy: string; max: number } };
   triggers: Array<{
     type: string;
     inputs?: { properties: Record<string, unknown>; required?: string[] };
@@ -62,7 +60,7 @@ const evalExpr = (expr: string, context: Record<string, unknown>): unknown => {
 };
 
 // ---------------------------------------------------------------------------
-// Inputs and the per-rule limit
+// Inputs
 // ---------------------------------------------------------------------------
 
 describe('floor_alert_triage_review — inputs', () => {
@@ -72,7 +70,7 @@ describe('floor_alert_triage_review — inputs', () => {
     expect(parsed.triggers.map(({ type }) => type)).toEqual(['manual']);
   });
 
-  it('requires what the proposal and the per-rule limit cannot do without', () => {
+  it('requires what the proposal cannot do without', () => {
     expect(trigger?.inputs?.required).toEqual(
       expect.arrayContaining(['conversation_id', 'rule_id', 'fp_candidate_ids', 'confidence_floor'])
     );
@@ -93,57 +91,12 @@ describe('floor_alert_triage_review — inputs', () => {
   });
 });
 
-describe('floor_alert_triage_review — per-rule concurrency', () => {
-  const { concurrency } = parsed.settings;
-
-  it('allows 10 reviews waiting for a decision per rule', () => {
-    expect(concurrency.max).toBe(10);
-  });
-
-  // `queue` holds a batch behind analyst decisions and expires it after 24h. `cancel-in-progress`
-  // cancels a review parked on its proposal, which strands the proposal `pending` forever.
-  it('drops the newest review instead of queueing or cancelling an older one', () => {
-    expect(concurrency.strategy).toBe('drop');
-  });
-
-  it('keys the limit on the rule id input, so two rules never share a limit', () => {
-    expect(concurrency.key).toBe('alert-triage-review-{{ inputs.rule_id }}');
-    expect(renderString(concurrency.key, { inputs: { rule_id: 'rule-a' } })).toBe(
-      'alert-triage-review-rule-a'
-    );
-    expect(renderString(concurrency.key, { inputs: { rule_id: 'rule-b' } })).not.toBe(
-      renderString(concurrency.key, { inputs: { rule_id: 'rule-a' } })
-    );
-  });
-});
-
-// The limit only works if the engine counts what this workflow does. The engine's own tests cover
-// the drop strategy and the skip itself (concurrency_manager.test.ts); these pin the pieces of that
-// contract this definition depends on, so a change on either side fails here and not in production.
-describe('floor_alert_triage_review — what the per-rule limit relies on in the engine', () => {
-  const { concurrency } = parsed.settings;
-
-  it('is a concurrency setting the engine accepts', () => {
-    expect(ConcurrencySettingsSchema.safeParse(concurrency).success).toBe(true);
-  });
-
-  // The review parks in WAITING_FOR_CHILD on its proposal for as long as an analyst takes; if that
-  // status stopped counting, the limit would only ever see the brief pending and running window.
-  it.each([ExecutionStatus.PENDING, ExecutionStatus.RUNNING, ExecutionStatus.WAITING_FOR_CHILD])(
-    'counts a review that is %s against the limit',
-    (status) => {
-      expect(ConcurrencySlotOccupyingExecutionStatuses).toContain(status);
-    }
-  );
-
-  it.each([
-    ExecutionStatus.SKIPPED,
-    ExecutionStatus.COMPLETED,
-    ExecutionStatus.FAILED,
-    ExecutionStatus.CANCELLED,
-    ExecutionStatus.TIMED_OUT,
-  ])('frees the slot of a review that is %s', (status) => {
-    expect(ConcurrencySlotOccupyingExecutionStatuses).not.toContain(status);
+describe('floor_alert_triage_review — no concurrency limit', () => {
+  // A per-rule cap on waiting reviews used to skip further proposals and strand their alerts, which
+  // carry a verdict and are never planned again. It was removed on purpose; noisy rules are to be
+  // identified separately. Adding a concurrency setting back is a product decision, not a tweak.
+  it('does not limit how many reviews wait for a decision', () => {
+    expect(parsed.settings.concurrency).toBeUndefined();
   });
 });
 
@@ -164,6 +117,45 @@ describe('floor_alert_triage_review — proposal comment', () => {
     const comment = renderString(proposalInputs.comment, context);
     expect(comment).toContain('3 alerts from rule "Noisy rule" were classified');
     expect(comment).toContain('(0.85)');
+  });
+
+  it('titles the proposal with the alert count, singular or plural, so the queue card needs no action-specific label', () => {
+    expect(renderString(proposalInputs.title, context)).toBe('Close 3 alerts as false positive');
+    expect(
+      renderString(proposalInputs.title, { ...context, variables: { fp_candidate_count: 1 } })
+    ).toBe('Close 1 alert as false positive');
+  });
+
+  describe('title with the entities behind the alerts', () => {
+    const titleFor = (count: number, entitySummary?: string) =>
+      renderString(proposalInputs.title, {
+        inputs: { ...context.inputs, entity_summary: entitySummary },
+        variables: { fp_candidate_count: count },
+      });
+
+    it('inserts the entity summary between the count and the reason', () => {
+      expect(titleFor(12, 'on build-agent-01, build-agent-02')).toBe(
+        'Close 12 alerts on build-agent-01, build-agent-02 as false positive'
+      );
+      expect(titleFor(6, 'on DC-01 (svc-backup)')).toBe(
+        'Close 6 alerts on DC-01 (svc-backup) as false positive'
+      );
+      expect(titleFor(8, 'for svc-backup, jdoe')).toBe(
+        'Close 8 alerts for svc-backup, jdoe as false positive'
+      );
+    });
+
+    it('drops the number for a single alert that names an entity', () => {
+      expect(titleFor(1, 'on build-agent-01')).toBe(
+        'Close alert on build-agent-01 as false positive'
+      );
+    });
+
+    it("keeps today's title when there is no summary, empty or omitted", () => {
+      expect(titleFor(5, '')).toBe('Close 5 alerts as false positive');
+      expect(titleFor(5, undefined)).toBe('Close 5 alerts as false positive');
+      expect(titleFor(1, undefined)).toBe('Close 1 alert as false positive');
+    });
   });
 
   it('closes exactly the candidate ids it was given', () => {
@@ -211,24 +203,15 @@ describe('floor_alert_triage_review — dismiss mapping', () => {
     expect(evaluateDismissedTag(undefined)).toBe('az:inconclusive');
   });
 
-  it('remove_fp_tag and add_dismissed_tag never share a tag', () => {
-    const removeFp = stepByName('remove_fp_tag')?.with?.tags as {
-      tags_to_remove?: string[];
-      tags_to_add?: string[];
-    };
-    const addDismissed = stepByName('add_dismissed_tag')?.with?.tags as {
+  it('retag_dismissed_chunk never removes the tag it adds', () => {
+    const tags = stepByName('retag_dismissed_chunk')?.with?.tags as {
       tags_to_remove?: string[];
       tags_to_add?: string[];
     };
 
-    expect(removeFp?.tags_to_add).toEqual([]);
-    expect(addDismissed?.tags_to_remove).toEqual([]);
-    const removed = new Set(removeFp?.tags_to_remove ?? []);
-    const added = new Set(addDismissed?.tags_to_add ?? []);
-    // No static overlap (dynamic dismissed_tag is a variable, not a literal here)
-    for (const tag of added) {
-      expect(removed.has(tag)).toBe(false);
-    }
+    expect(tags?.tags_to_remove).toEqual(['az:false_positive']);
+    // dismissed_tag is a variable, so check the value it resolves to.
+    expect(tags?.tags_to_remove).not.toContain(evaluateDismissedTag(undefined));
   });
 });
 
@@ -374,48 +357,137 @@ describe('floor_alert_triage_review — retag_dismissed_alerts failure tracking'
     expect(mapStep?.with?.failed_retag_count).toBe(0);
   });
 
-  it('retries remove_fp_tag and add_dismissed_tag, then continues past a persistent failure', () => {
-    const removeFpTag = stepByName('remove_fp_tag');
-    const addDismissedTag = stepByName('add_dismissed_tag');
+  it('retries retag_dismissed_chunk, then continues past a persistent failure', () => {
+    const retag = stepByName('retag_dismissed_chunk');
 
-    expect(removeFpTag?.['on-failure']?.retry?.['max-attempts']).toBe(3);
-    expect(removeFpTag?.['on-failure']?.continue).toBe(true);
-    expect(addDismissedTag?.['on-failure']?.retry?.['max-attempts']).toBe(3);
-    expect(addDismissedTag?.['on-failure']?.continue).toBe(true);
+    expect(retag?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+    expect(retag?.['on-failure']?.continue).toBe(true);
   });
 
   // `continue: true` on a foreach exits the whole loop at the first inner failure, so the
-  // remaining candidates would never be re-tagged and record_retag_failure would never run.
+  // remaining candidates would never be re-tagged and the shortfall counters would never run.
   it('does not put continue on the loop itself, which would abandon the remaining candidates', () => {
     const loop = stepByName('retag_dismissed_alerts');
 
     expect(loop?.['on-failure']).toBeUndefined();
   });
 
-  it('increments the counter when either tag call recorded an error', () => {
-    const recordFailure = stepByName('record_retag_failure');
+  it('increments the counter when the tag call recorded an error', () => {
+    const recordFailure = stepByName('record_retag_step_failure');
     expect(recordFailure?.type).toBe('data.set');
-    expect(recordFailure?.if).toBe(
-      '${{ steps.remove_fp_tag.error != blank or steps.add_dismissed_tag.error != blank }}'
-    );
+    expect(recordFailure?.if).toBe('${{ steps.retag_dismissed_chunk.error != blank }}');
 
-    const noError = { steps: { remove_fp_tag: {}, add_dismissed_tag: {} } };
-    const removeFailed = {
-      steps: { remove_fp_tag: { error: { message: 'x' } }, add_dismissed_tag: {} },
-    };
-    const addFailed = {
-      steps: { remove_fp_tag: {}, add_dismissed_tag: { error: { message: 'x' } } },
-    };
+    const noError = { steps: { retag_dismissed_chunk: { output: { updated: 1 } } } };
+    const failed = { steps: { retag_dismissed_chunk: { error: { message: 'x' } } } };
 
     expect(evalExpr(recordFailure!.if!, noError)).toBe(false);
-    expect(evalExpr(recordFailure!.if!, removeFailed)).toBe(true);
-    expect(evalExpr(recordFailure!.if!, addFailed)).toBe(true);
+    expect(evalExpr(recordFailure!.if!, failed)).toBe(true);
 
     expect(
       evalExpr(recordFailure!.with!.failed_retag_count as string, {
         variables: { failed_retag_count: 1 },
+        foreach: { item: ['a'] },
       })
     ).toBe(2);
+  });
+
+  it('increments the counter when update-by-query succeeds but updates fewer alerts than requested', () => {
+    const recordPartial = stepByName('record_retag_partial_failure');
+    expect(recordPartial?.type).toBe('data.set');
+
+    const partial = {
+      steps: {
+        retag_dismissed_chunk: {
+          output: { updated: 3, failures: [{ id: 'd' }], version_conflicts: 0 },
+        },
+      },
+      foreach: { item: ['a', 'b', 'c', 'd'] },
+    };
+    const full = {
+      steps: { retag_dismissed_chunk: { output: { updated: 4, failures: [] } } },
+      foreach: { item: ['a', 'b', 'c', 'd'] },
+    };
+    const stepError = {
+      steps: { retag_dismissed_chunk: { error: { message: 'x' }, output: { updated: 2 } } },
+      foreach: { item: ['a', 'b', 'c', 'd'] },
+    };
+
+    expect(evalExpr(recordPartial!.if!, partial)).toBe(true);
+    expect(evalExpr(recordPartial!.if!, full)).toBe(false);
+    // HTTP error is owned by record_retag_step_failure — do not double-count via a stale updated.
+    expect(evalExpr(recordPartial!.if!, stepError)).toBe(false);
+
+    // Accumulator 2 + (4 requested - 3 updated) = 3.
+    expect(
+      evalExpr(recordPartial!.with!.failed_retag_count as string, {
+        variables: { failed_retag_count: 2 },
+        ...partial,
+      })
+    ).toBe(3);
+  });
+
+  it('counts every alert of a failed chunk, so the comment reports alerts rather than calls', () => {
+    const recordFailure = stepByName('record_retag_step_failure');
+    expect(
+      evalExpr(recordFailure?.with?.failed_retag_count as string, {
+        variables: { failed_retag_count: 3 },
+        foreach: { item: Array.from({ length: 500 }, (_, i) => `alert-${i}`) },
+      })
+    ).toBe(503);
+  });
+
+  it('counts only the shortfall when some alerts in the chunk updated', () => {
+    const recordPartial = stepByName('record_retag_partial_failure');
+    expect(
+      evalExpr(recordPartial?.with?.failed_retag_count as string, {
+        variables: { failed_retag_count: 0 },
+        foreach: { item: Array.from({ length: 500 }, (_, i) => `alert-${i}`) },
+        steps: { retag_dismissed_chunk: { output: { updated: 497, failures: [{}] } } },
+      })
+    ).toBe(3);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// retag_dismissed_alerts — candidates are re-tagged in bulk, not one call per alert
+// ---------------------------------------------------------------------------
+
+describe('floor_alert_triage_review — retag_dismissed_alerts chunking', () => {
+  const loop = stepByName('retag_dismissed_alerts');
+  const candidateIds = (count: number): string[] =>
+    Array.from({ length: count }, (_, i) => `alert-${i + 1}`);
+
+  const renderChunks = (ids: string[]): string[][] =>
+    JSON.parse(
+      renderString((loop?.foreach ?? '').replace(/^\$\{\{/, '{{').trim(), {
+        inputs: { fp_candidate_ids: ids },
+      })
+    );
+
+  it('iterates chunks of the candidate list rather than single ids', () => {
+    expect(loop?.type).toBe('foreach');
+    expect(loop?.foreach).toContain('inputs.fp_candidate_ids');
+    expect(loop?.foreach).toContain('chunk: 500');
+  });
+
+  it('passes the whole chunk as the ids of the tag call', () => {
+    expect(stepByName('retag_dismissed_chunk')?.with?.ids).toBe('${{ foreach.item }}');
+  });
+
+  it('makes one call for a typical batch instead of one per alert', () => {
+    expect(renderChunks(candidateIds(50))).toHaveLength(1);
+    expect(renderChunks(candidateIds(500))).toHaveLength(1);
+  });
+
+  it('bounds the loop at 20 iterations for the largest accepted candidate list', () => {
+    const inputs = parsed.triggers.find(({ type }) => type === 'manual')?.inputs?.properties as {
+      fp_candidate_ids: { maxItems: number };
+    };
+    const chunks = renderChunks(candidateIds(inputs.fp_candidate_ids.maxItems));
+
+    expect(chunks).toHaveLength(20);
+    expect(chunks.flat()).toEqual(candidateIds(inputs.fp_candidate_ids.maxItems));
+    chunks.forEach((chunk) => expect(chunk.length).toBeLessThanOrEqual(500));
   });
 });
 

@@ -15,6 +15,10 @@ import { useMissingRiskEnginePrivileges } from '../../../../entity_analytics/hoo
 import { HostRiskScoreQueryId } from '../../../../entity_analytics/common/utils';
 import { useEntityStoreRiskScoreKpi } from '../../../../entity_analytics/api/hooks/use_entity_store_risk_score_kpi';
 import { useEntityStoreRiskScore } from '../../../../entity_analytics/api/hooks/use_entity_store_risk_score';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import { EnableRiskScore } from '../../../../entity_analytics/components/enable_risk_score';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { HostRiskScoreTable } from '../../../../entity_analytics/components/host_risk_score_table';
@@ -28,6 +32,20 @@ import {
   type RiskScoreSortField,
 } from '../../../../../common/search_strategy';
 import type { HostsComponentsQueryProps } from './types';
+
+const HOSTS_RISK_TAB_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_HOSTS_PAGE,
+  'hosts_risk_score'
+);
+const HOSTS_RISK_TAB_KPI_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_HOSTS_PAGE,
+  'hosts_risk_score_kpi'
+);
+// Shared by both hooks so the tab sends a single risk-engine-status request.
+const HOSTS_RISK_TAB_STATUS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_HOSTS_PAGE,
+  'hosts_risk_score_status'
+);
 
 const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 
@@ -51,12 +69,16 @@ const useHostRiskScoreTabData = ({
     skip: querySkip,
     sort,
     timerange,
+    executionContext: HOSTS_RISK_TAB_CONTEXT,
+    statusExecutionContext: HOSTS_RISK_TAB_STATUS_CONTEXT,
   });
 
   const entityStoreKpi = useEntityStoreRiskScoreKpi({
     filterQuery,
     skip: querySkip,
     riskEntity: EntityType.host,
+    executionContext: HOSTS_RISK_TAB_KPI_CONTEXT,
+    statusExecutionContext: HOSTS_RISK_TAB_STATUS_CONTEXT,
   });
 
   return {

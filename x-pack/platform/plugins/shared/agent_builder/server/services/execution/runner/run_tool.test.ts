@@ -25,7 +25,10 @@ import type { AnalyticsService } from '../../../telemetry';
 import { RunnerManager } from './runner';
 import { forkContextForAgentRun } from './utils';
 import { runTool, runInternalTool } from './run_tool';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  ToolResultType,
+  isNonInteractiveDeclinedResult,
+} from '@kbn/agent-builder-common/tools/tool_result';
 import {
   HookLifecycle,
   AgentExecutionMode,
@@ -519,10 +522,13 @@ describe('runInternalTool - confirmation policy', () => {
       });
 
       expect(result.prompt).toBeUndefined();
-      expect(result.results?.[0].type).toBe(ToolResultType.error);
-      expect((result.results?.[0].data as { message: string }).message).toContain(
+      const [declinedResult] = result.results ?? [];
+      expect(declinedResult.type).toBe(ToolResultType.error);
+      expect((declinedResult.data as { message: string }).message).toContain(
         'non-interactive mode'
       );
+      // Tagged so text-only consumers can report the declined prompt without parsing the message.
+      expect(isNonInteractiveDeclinedResult(declinedResult)).toBe(true);
       expect(toolHandler).not.toHaveBeenCalled();
     });
 
@@ -1123,6 +1129,7 @@ describe('runInternalTool - sub-agent HITL blocking', () => {
     expect(result.results![0].data).toEqual(
       expect.objectContaining({ message: expect.stringContaining('non-interactive mode') })
     );
+    expect(isNonInteractiveDeclinedResult(result.results![0])).toBe(true);
     expect(toolHandler).not.toHaveBeenCalled();
   });
 
@@ -1155,6 +1162,7 @@ describe('runInternalTool - sub-agent HITL blocking', () => {
     expect(result.results![0].data).toEqual(
       expect.objectContaining({ message: expect.stringContaining('non-interactive mode') })
     );
+    expect(isNonInteractiveDeclinedResult(result.results![0])).toBe(true);
   });
 
   it('allows HITL prompts when executionMode is undefined', async () => {

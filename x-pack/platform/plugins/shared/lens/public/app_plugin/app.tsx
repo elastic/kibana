@@ -12,6 +12,7 @@ import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { css } from '@emotion/react';
+import { isTextBasedAttributes } from '@kbn/lens-common';
 import type {
   LensAppState,
   LensAppServices,
@@ -47,11 +48,12 @@ import {
 } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
 import { useApplicationUserMessages } from './get_application_user_messages';
-import { trackSaveUiCounterEvents } from '../lens_ui_telemetry';
+import { trackCreateUiCounterEvents, trackSaveUiCounterEvents } from '../lens_ui_telemetry';
 import { saveUpdatedLinkedAnnotationsToLibrary } from '../react_embeddable/helper';
 import {
   getCurrentTitle,
-  isComingFromContainerView,
+  getTelemetrySource,
+  isSaveAndReturn,
   isLegacyEditorEmbeddable,
   setBreadcrumbsTitle,
   useNavigateBackToApp,
@@ -355,7 +357,7 @@ export function App({
             onAppLeave,
             redirectTo,
             switchDatasource,
-            originatingApp: isComingFromContainerView(incomingState)
+            originatingApp: isSaveAndReturn(incomingState)
               ? incomingState?.originatingApp ?? initialContext?.originatingApp
               : undefined,
             textBasedLanguageSave: shouldCloseAndSaveTextBasedQuery,
@@ -364,6 +366,13 @@ export function App({
           saveProps,
           options
         );
+        // Track creation events for new visualizations
+        if (!initialInput?.ref_id || saveProps.newCopyOnSave) {
+          trackCreateUiCounterEvents(
+            isTextBasedAttributes(currentDoc) ? 'esql' : 'dsl',
+            getTelemetrySource(incomingState, saveProps.newCopyOnSave)
+          );
+        }
         if (newState) {
           dispatchSetState(newState);
           setIsSaveModalVisible(false);
@@ -522,7 +531,7 @@ export function App({
         <SaveModalContainer
           lensServices={lensAppServices}
           originatingApp={
-            isComingFromContainerView(incomingState) || legacyEditorAppName
+            isSaveAndReturn(incomingState) || legacyEditorAppName
               ? incomingState?.originatingApp ?? initialContext?.originatingApp
               : undefined
           }

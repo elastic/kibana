@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/file-upload-common'
   - '@kbn/test-jest-helpers'
   - '@kbn/ui-callout'
+  - '@kbn/code-editor-mock'
 tags:
   - plugin
   - prod
@@ -43,6 +44,4 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

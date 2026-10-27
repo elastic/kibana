@@ -13,7 +13,7 @@ import type { UseComparisonFieldsProps } from './use_comparison_fields';
 import { MAX_COMPARISON_FIELDS, useComparisonFields } from './use_comparison_fields';
 import {
   buildDataViewMock,
-  columnsMetaWithCustomField,
+  esqlSourceWithCustomField,
   generateEsHits,
 } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
@@ -52,7 +52,7 @@ const renderFields = ({
   } = renderHook(() =>
     useComparisonFields({
       dataView,
-      columnsMeta: undefined,
+      dataSource: undefined,
       selectedFieldNames: ['message', 'extension', 'bytes'],
       selectedDocIds: ['0', '1', '2'],
       showAllFields: true,
@@ -166,7 +166,7 @@ describe('useComparisonFields', () => {
 
   it('should display computed fields from ES|QL querys (EVALS, RENAMES, etc.)', () => {
     const { comparisonFields, totalFields } = renderFields({
-      props: { columnsMeta: columnsMetaWithCustomField },
+      props: { dataSource: esqlSourceWithCustomField },
       transformHit: (hit) => {
         hit.fields!.custom_esql_field = 'test';
         return hit;

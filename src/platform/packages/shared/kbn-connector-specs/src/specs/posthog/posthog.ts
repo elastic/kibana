@@ -63,7 +63,7 @@ export const PostHog: ConnectorSpec = {
   metadata: {
     id: '.posthog',
     displayName: 'PostHog',
-    description: i18n.translate('core.kibanaConnectorSpecs.posthog.metadata.description', {
+    description: i18n.translate('connectorSpecs.posthog.metadata.description', {
       defaultMessage:
         'Triage PostHog error-tracking issues, run HogQL queries, toggle feature flags, post annotations, and look up session recordings.',
     }),
@@ -82,16 +82,13 @@ export const PostHog: ConnectorSpec = {
         overrides: {
           meta: {
             token: {
-              label: i18n.translate('core.kibanaConnectorSpecs.posthog.auth.bearer.token.label', {
+              label: i18n.translate('connectorSpecs.posthog.auth.bearer.token.label', {
                 defaultMessage: 'Personal API Key',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.posthog.auth.bearer.token.helpText',
-                {
-                  defaultMessage:
-                    'A PostHog personal API key (Settings > Personal API keys), scoped to error_tracking, query, feature_flag, annotation, and session_recording read/write.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.posthog.auth.bearer.token.helpText', {
+                defaultMessage:
+                  'A PostHog personal API key (Settings > Personal API keys), scoped to error_tracking, query, feature_flag, annotation, and session_recording read/write.',
+              }),
             },
           },
         },
@@ -104,16 +101,13 @@ export const PostHog: ConnectorSpec = {
       instanceHost: UISchemas.url('https://us.posthog.com')
         .describe('PostHog instance URL')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.posthog.config.instanceHost.label', {
+          label: i18n.translate('connectorSpecs.posthog.config.instanceHost.label', {
             defaultMessage: 'Instance host',
           }),
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.posthog.config.instanceHost.helpText',
-            {
-              defaultMessage:
-                'Your PostHog instance URL: https://us.posthog.com (US Cloud, default), https://eu.posthog.com (EU Cloud), or your self-managed instance URL.',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.posthog.config.instanceHost.helpText', {
+            defaultMessage:
+              'Your PostHog instance URL: https://us.posthog.com (US Cloud, default), https://eu.posthog.com (EU Cloud), or your self-managed instance URL.',
+          }),
         }),
       projectId: z
         .string()
@@ -121,10 +115,10 @@ export const PostHog: ConnectorSpec = {
         .describe('PostHog project ID that every action runs against')
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.posthog.config.projectId.label', {
+          label: i18n.translate('connectorSpecs.posthog.config.projectId.label', {
             defaultMessage: 'Project ID',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.posthog.config.projectId.helpText', {
+          helpText: i18n.translate('connectorSpecs.posthog.config.projectId.helpText', {
             defaultMessage: 'Found in Project Settings, or via a call to /api/projects/.',
           }),
         }),

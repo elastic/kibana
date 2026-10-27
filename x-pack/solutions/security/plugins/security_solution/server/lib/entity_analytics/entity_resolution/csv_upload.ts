@@ -285,7 +285,9 @@ async function processRow(
   try {
     const { linked, skipped } = await deps.resolutionClient.linkEntities(
       resolvedTo,
-      matchedEntityIds
+      matchedEntityIds,
+      // This runs once per CSV row; the upload reports its own summary event instead.
+      { reportTelemetry: false }
     );
     return {
       status: 'success',

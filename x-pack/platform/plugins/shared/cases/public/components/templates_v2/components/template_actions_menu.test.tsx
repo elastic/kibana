@@ -9,12 +9,17 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@kbn/monaco', () => ({
-  monaco: {
-    KeyMod: { CtrlCmd: 2048 },
-    KeyCode: { KeyK: 41 },
-  },
-}));
+jest.mock('@kbn/monaco', () => {
+  const actual = jest.requireActual('@kbn/monaco');
+
+  return {
+    ...actual,
+    monaco: {
+      KeyMod: { CtrlCmd: 2048 },
+      KeyCode: { KeyK: 41 },
+    },
+  };
+});
 
 const mockUseGetFieldDefinitions = jest.fn();
 jest.mock('../../field_library/hooks/use_get_field_definitions', () => ({

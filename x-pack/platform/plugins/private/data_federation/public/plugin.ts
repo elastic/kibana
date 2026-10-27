@@ -8,6 +8,7 @@
 import type { Subscription } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementApp, ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { DATA_FEDERATION_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SetupDependencies, StartDependencies, DataFederationPluginStart } from './types';
 import { MINIMUM_LICENSE_TYPE, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { buildFederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
@@ -23,34 +24,35 @@ export class DataFederationPlugin
   implements Plugin<void, DataFederationPluginStart, SetupDependencies, StartDependencies>
 {
   private readonly enabled: boolean;
-  private readonly enableFederatedIdentityAuth: boolean;
   private readonly enableGoogleCloudStorageDataSourceType: boolean;
   private readonly enableAzureDataSourceType: boolean;
 
   private readonly workloadIdentityIssuerUrl: string | undefined;
+  private readonly awsCloudFormationTemplateUrl: string;
 
   private registeredApp?: ManagementApp;
   private licenseSubscription?: Subscription;
+  private isManagementUiEnabled = false;
 
   constructor(initializerContext: PluginInitializerContext) {
     const {
       enabled,
-      enableFederatedIdentityAuth,
       enableGoogleCloudStorageDataSourceType,
       enableAzureDataSourceType,
       workloadIdentityIssuerUrl,
+      awsCloudFormationTemplateUrl,
     } = initializerContext.config.get<{
       enabled: boolean;
-      enableFederatedIdentityAuth: boolean;
       enableGoogleCloudStorageDataSourceType: boolean;
       enableAzureDataSourceType: boolean;
       workloadIdentityIssuerUrl?: string;
+      awsCloudFormationTemplateUrl: string;
     }>();
     this.enabled = enabled;
-    this.enableFederatedIdentityAuth = enableFederatedIdentityAuth;
     this.enableGoogleCloudStorageDataSourceType = enableGoogleCloudStorageDataSourceType;
     this.enableAzureDataSourceType = enableAzureDataSourceType;
     this.workloadIdentityIssuerUrl = workloadIdentityIssuerUrl;
+    this.awsCloudFormationTemplateUrl = awsCloudFormationTemplateUrl;
   }
 
   public setup(core: CoreSetup<StartDependencies>, { management, cloud }: SetupDependencies): void {
@@ -58,19 +60,25 @@ export class DataFederationPlugin
       return;
     }
 
-    const enableFederatedIdentityAuth = this.enableFederatedIdentityAuth;
+    this.isManagementUiEnabled = core.settings.globalClient.get<boolean>(
+      DATA_FEDERATION_ENABLED_SETTING_ID,
+      false
+    );
+
     const enableGoogleCloudStorageDataSourceType = this.enableGoogleCloudStorageDataSourceType;
     const enableAzureDataSourceType = this.enableAzureDataSourceType;
-    const cloudInfo = buildFederatedIdentityClusterInfo(cloud, this.workloadIdentityIssuerUrl);
-    const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
+    const cloudInfo = buildFederatedIdentityClusterInfo(cloud, {
+      workloadIdentityIssuerUrl: this.workloadIdentityIssuerUrl,
+      awsCloudFormationTemplateUrl: this.awsCloudFormationTemplateUrl,
+    });
     this.registeredApp = management.sections.section.data.registerApp({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
-      order: 2,
+      order: 1,
       visibleIn: ['globalSearch', 'projectSideNav'],
       async mount(params: ManagementAppMountParams) {
         const { mountManagementSection } = await import('./mount_management_section');
-        const [nextCoreStart] = await core.getStartServices();
+        const [nextCoreStart, { share, usageCollection }] = await core.getStartServices();
 
         const { docTitle } = nextCoreStart.chrome;
         docTitle.change(PLUGIN_NAME);
@@ -80,9 +88,9 @@ export class DataFederationPlugin
 
         const unmountAppCallback = mountManagementSection(nextCoreStart, params, {
           cloudInfo,
-          isCloudEnabled,
+          share,
+          usageCollection,
           featureFlags: {
-            enableFederatedIdentityAuth,
             enableGoogleCloudStorageDataSourceType,
             enableAzureDataSourceType,
           },
@@ -101,7 +109,7 @@ export class DataFederationPlugin
     const canManageFederatedData =
       coreStart.application.capabilities?.[PLUGIN_ID]?.manageFederatedData === true;
 
-    if (!this.registeredApp || !canManageFederatedData) {
+    if (!this.registeredApp || !this.isManagementUiEnabled || !canManageFederatedData) {
       return {};
     }
 

@@ -13,6 +13,8 @@ import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoin
 import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../../../../../../../common/endpoint/service/policy/custom_yara_signatures';
+import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
 import { AntivirusRegistrationModes } from '../../../../../../../common/endpoint/types';
 import {
   expectIsViewOnly,
@@ -51,9 +53,13 @@ describe('PerOsPolicySettingsForm', () => {
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     storageMock = mockedContext.startServices.storage;
-    // trustedDevices is on by default in experimental features; keep it off unless a
-    // test is exercising the device-control gate so card presence stays stable.
-    mockedContext.setExperimentalFlag({ linuxDnsEvents: true, trustedDevices: false });
+    // trustedDevices and custom YARA signatures are on by default; keep them off unless a
+    // test is exercising that gate so card presence stays stable.
+    mockedContext.setExperimentalFlag({
+      linuxDnsEvents: true,
+      trustedDevices: false,
+      customYaraSignaturesEnabled: false,
+    });
 
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
@@ -179,6 +185,64 @@ describe('PerOsPolicySettingsForm', () => {
     }, 15_000);
   });
 
+  describe('custom YARA signatures advanced settings', () => {
+    const renderAndShowAdvancedSettings = async () => {
+      render();
+      await userEvent.click(renderResult.getByTestId(testSubj.advancedSection.showHideButton));
+    };
+    const queryAdvancedSettingRow = (key: string) =>
+      renderResult.queryByTestId(testSubj.advancedSection.settingRowTestSubjects(key).container);
+
+    it('hides the custom YARA rescan interval rows when the experimental flag is off', async () => {
+      await renderAndShowAdvancedSettings();
+
+      for (const key of CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS) {
+        expect(queryAdvancedSettingRow(key)).toBeNull();
+      }
+    });
+
+    describe('and the custom YARA signatures experimental flag is enabled', () => {
+      beforeEach(() => {
+        mockedContext.setExperimentalFlag({
+          linuxDnsEvents: true,
+          trustedDevices: false,
+          customYaraSignaturesEnabled: true,
+        });
+      });
+
+      it('shows the custom YARA rescan interval row for every OS', async () => {
+        await renderAndShowAdvancedSettings();
+
+        for (const key of CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS) {
+          expect(queryAdvancedSettingRow(key)).toBeInTheDocument();
+        }
+      });
+
+      it('hides the custom YARA rescan interval rows when the license is lower than Enterprise', async () => {
+        const licenseServiceMock = createLicenseServiceMock();
+        licenseServiceMock.isEnterprise.mockReturnValue(false);
+        useLicenseMock.mockReturnValue(licenseServiceMock);
+        await renderAndShowAdvancedSettings();
+
+        for (const key of CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS) {
+          expect(queryAdvancedSettingRow(key)).toBeNull();
+        }
+      });
+
+      it('hides the custom YARA rescan interval rows when a serverless PLI upsell message is present', async () => {
+        mockedContext.startServices.upselling.setMessages({
+          endpoint_custom_yara_signatures:
+            'To apply custom YARA signatures, you must add Endpoint Complete to your project.',
+        });
+        await renderAndShowAdvancedSettings();
+
+        for (const key of CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS) {
+          expect(queryAdvancedSettingRow(key)).toBeNull();
+        }
+      });
+    });
+  });
+
   describe('event merging banner', () => {
     it('shows the banner when the storage key is unset', () => {
       storageMock.remove('securitySolution.showEventMergingBanner');
@@ -229,6 +293,65 @@ describe('PerOsPolicySettingsForm', () => {
       render();
 
       expect(renderResult.getByTestId(testSubj.perOsDeviceControl.card)).toBeInTheDocument();
+    });
+  });
+
+  describe('endpointAiDataCollection gate', () => {
+    it('does not render the AI Data Collection card when the flag is off', () => {
+      mockedContext.setExperimentalFlag({
+        linuxDnsEvents: true,
+        trustedDevices: false,
+        endpointAiDataCollection: false,
+      });
+      render();
+
+      expect(
+        renderResult.queryByTestId(testSubj.perOsAiDataCollection.card)
+      ).not.toBeInTheDocument();
+    });
+
+    it('renders the AI Data Collection card when the flag is on', () => {
+      mockedContext.setExperimentalFlag({
+        linuxDnsEvents: true,
+        trustedDevices: false,
+        endpointAiDataCollection: true,
+      });
+      render();
+
+      expect(renderResult.getByTestId(testSubj.perOsAiDataCollection.card)).toBeInTheDocument();
+    });
+
+    it('still renders the AI Data Collection card when the protections upsell is active', () => {
+      mockedContext.setExperimentalFlag({
+        linuxDnsEvents: true,
+        trustedDevices: false,
+        endpointAiDataCollection: true,
+      });
+      useGetProtectionsUnavailableComponentMock.mockReturnValue(() => (
+        <div data-test-subj="paywall">{'pay up!'}</div>
+      ));
+      render();
+
+      expect(renderResult.getByTestId('paywall')).toBeInTheDocument();
+      expect(renderResult.getByTestId(testSubj.perOsAiDataCollection.card)).toBeInTheDocument();
+    });
+
+    it('renders before the Settings section, ahead of the Event collection card', () => {
+      mockedContext.setExperimentalFlag({
+        linuxDnsEvents: true,
+        trustedDevices: false,
+        endpointAiDataCollection: true,
+      });
+      render();
+
+      const aiDataCollectionCard = renderResult.getByTestId(testSubj.perOsAiDataCollection.card);
+      const eventCollectionCard = renderResult.getByTestId(testSubj.perOsEventCollection.card);
+
+      // The Event collection card sits inside the Settings section, so this confirms the
+      // AI Data Collection card renders ahead of that section rather than inside it.
+      expect(aiDataCollectionCard.compareDocumentPosition(eventCollectionCard)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
     });
   });
 

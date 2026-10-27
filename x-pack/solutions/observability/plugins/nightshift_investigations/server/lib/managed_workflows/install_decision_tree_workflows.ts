@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
-  NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
+import { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 
@@ -18,9 +15,6 @@ export const installDecisionTreeWorkflows = async ({
   client: PluginScopedManagedWorkflowsApi;
 }): Promise<void> => {
   await client.install(NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID, {
-    spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-  });
-  await client.install(NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID, {
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   });
 };

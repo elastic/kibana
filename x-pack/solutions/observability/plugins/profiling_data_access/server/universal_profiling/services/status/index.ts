@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ProfilingStatus } from '@kbn/profiling-utils';
+import type { UniversalProfilingStatus } from '@kbn/profiling-utils';
 import { areCloudResourcesSetup } from '../../lib/cloud_setup';
 import type { SetupState } from '../../lib/setup';
 import { areResourcesSetup } from '../../lib/setup';
@@ -20,7 +20,7 @@ export interface HasSetupParams {
   abortSignal?: AbortSignal;
 }
 
-function toProfilingStatus(setupState: SetupState, hasSetup: boolean): ProfilingStatus {
+function toProfilingStatus(setupState: SetupState, hasSetup: boolean): UniversalProfilingStatus {
   return {
     profiling_enabled: setupState.profiling.enabled,
     has_setup: hasSetup,
@@ -35,7 +35,7 @@ export function createGetStatusService(params: RegisterServicesParams) {
     soClient,
     spaceId,
     abortSignal,
-  }: HasSetupParams): Promise<ProfilingStatus> => {
+  }: HasSetupParams): Promise<UniversalProfilingStatus> => {
     const setupStateParams = { ...params, esClient, soClient, spaceId, abortSignal };
 
     if (params.deps.cloud?.isCloudEnabled) {

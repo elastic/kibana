@@ -6,17 +6,15 @@
  */
 
 import React from 'react';
-import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord, RowControlColumn } from '@kbn/discover-utils';
 import { render, renderHook, screen } from '@testing-library/react';
-import type { EsHitRecord } from '@kbn/discover-utils';
 import { mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useTimelineControlColumn } from './use_timeline_control_columns';
 import { TimelineId } from '@kbn/timelines-plugin/public/store/timeline';
-import type { UnifiedTimelineDataGridCellContext } from '../../types';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
-import { useTimelineUnifiedDataTableContext } from '../../unified_components/data_table/use_timeline_unified_data_table_context';
 import { BUTTON_TEST_ID } from '../../../../../common/components/header_actions/pin_event_action';
 
 jest.mock('../../../../../common/hooks/use_license', () => ({
@@ -26,7 +24,6 @@ jest.mock('../../../../../common/hooks/use_license', () => ({
 }));
 const useLicenseMock = useLicense as jest.Mock;
 
-jest.mock('../../unified_components/data_table/use_timeline_unified_data_table_context');
 jest.mock('../../../../../common/components/user_privileges');
 
 const rawEvents = mockTimelineData.map(
@@ -57,7 +54,12 @@ describe('useTimelineControlColumns', () => {
           wrapper: TestProviders,
         }
       );
-      expect(result.current).toMatchSnapshot();
+      expect(result.current).toEqual([
+        expect.objectContaining({
+          id: 'default-timeline-control-column',
+          render: expect.any(Function),
+        }),
+      ]);
     });
     it('should have a width of 124 for 5 actions', () => {
       useLicenseMock.mockReturnValue({
@@ -77,7 +79,7 @@ describe('useTimelineControlColumns', () => {
           wrapper: TestProviders,
         }
       );
-      const controlColumn = result.current[0] as EuiDataGridControlColumn;
+      const controlColumn = result.current[0] as RowControlColumn;
       expect(controlColumn.width).toBe(124);
     });
     it('should have a width of 152 for 6 actions', () => {
@@ -98,52 +100,16 @@ describe('useTimelineControlColumns', () => {
           wrapper: TestProviders,
         }
       );
-      const controlColumn = result.current[0] as EuiDataGridControlColumn;
+      const controlColumn = result.current[0] as RowControlColumn;
       expect(controlColumn.width).toBe(152);
     });
   });
 
   describe('privileges', () => {
-    const defaultProps = {
-      ariaRowindex: 2,
-      checked: false,
-      columnId: '',
-      columnValues: 'abc def',
-      disableExpandAction: false,
-      data: mockTimelineData[0].data,
-      ecsData: mockTimelineData[0].ecs,
-      eventId: 'abc',
-      eventIdToNoteIds: {},
-      index: 2,
-      isEventPinned: false,
-      loadingEventIds: [],
-      onEventDetailsPanelOpened: () => {},
-      onRowSelected: () => {},
-      refetch: () => {},
-      rowIndex: 10,
-      setEventsDeleted: () => {},
-      setEventsLoading: () => {},
-      showCheckboxes: true,
-      timelineId: 'test',
-      toggleShowNotes: () => {},
-      setCellProps: () => {},
-      isExpandable: true,
-      isExpanded: false,
-      isDetails: true,
-      colIndex: 0,
-    };
-
-    type RowCellRendererComponent = (
-      props: EuiDataGridCellValueElementProps & UnifiedTimelineDataGridCellContext
-    ) => React.JSX.Element;
-
     beforeEach(() => {
       useLicenseMock.mockReturnValue({
         isEnterprise: () => true,
         isPlatinumPlus: () => true,
-      });
-      (useTimelineUnifiedDataTableContext as jest.Mock).mockReturnValue({
-        expanded: { id: mockTimelineData[0]._id },
       });
     });
 
@@ -168,11 +134,14 @@ describe('useTimelineControlColumns', () => {
           wrapper: TestProviders,
         }
       );
-      const ControlColumnActions = result.current[0].rowCellRender as RowCellRendererComponent;
-
       render(
         <TestProviders>
-          <ControlColumnActions {...defaultProps} />
+          {result.current[0].render(
+            () => (
+              <></>
+            ),
+            { record: buildDataTableRecord(rawEvents[0]), rowIndex: 0 }
+          )}
         </TestProviders>
       );
 
@@ -201,11 +170,14 @@ describe('useTimelineControlColumns', () => {
           wrapper: TestProviders,
         }
       );
-      const ControlColumnActions = result.current[0].rowCellRender as RowCellRendererComponent;
-
       render(
         <TestProviders>
-          <ControlColumnActions {...defaultProps} />
+          {result.current[0].render(
+            () => (
+              <></>
+            ),
+            { record: buildDataTableRecord(rawEvents[0]), rowIndex: 0 }
+          )}
         </TestProviders>
       );
 

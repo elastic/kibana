@@ -8,6 +8,8 @@
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 import type { Moment } from 'moment';
 
+import type { AlertClosingReason } from '../../../../../common/types';
+
 export interface State {
   exceptionItems: ExceptionsBuilderReturnExceptionItem[];
   exceptionItemMeta: { name: string };
@@ -16,6 +18,7 @@ export interface State {
   bulkCloseAlerts: boolean;
   disableBulkClose: boolean;
   bulkCloseIndex: string[] | undefined;
+  closeAlertsReason: AlertClosingReason | undefined;
   entryErrorExists: boolean;
   expireTime: Moment | undefined;
   expireErrorExists: boolean;
@@ -49,6 +52,10 @@ export type Action =
   | {
       type: 'setBulkCloseIndex';
       bulkCloseIndex: string[] | undefined;
+    }
+  | {
+      type: 'setCloseAlertsReason';
+      reason: AlertClosingReason | undefined;
     }
   | {
       type: 'setExceptionItems';
@@ -132,6 +139,14 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           bulkCloseIndex,
+        };
+      }
+      case 'setCloseAlertsReason': {
+        const { reason } = action;
+
+        return {
+          ...state,
+          closeAlertsReason: reason,
         };
       }
       case 'setExceptionItems': {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,15 +16,15 @@ import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { ACTION_INSPECT_PANEL, type QuickActionIds } from '@kbn/embeddable-plugin/public';
 import {
   DiscoverFlyouts,
-  openAfterDismissingOtherFlyouts,
+  dismissAllFlyoutsExceptFor,
   type MetricsGridSettings,
 } from '@kbn/discover-utils';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { stableStringify } from '@kbn/std';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
+import { buildXySeriesConfig } from '../../chart/build_xy_series_config';
 import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
@@ -35,6 +35,8 @@ import {
   getAggregationLabel,
   getMetricUniqueKey,
 } from '../../../common/utils';
+import type { HistogramBoundsByMetricKey } from './hooks/use_fetch_histogram_bounds';
+import { useHistogramHeatmap } from './hooks/use_histogram_heatmap';
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -43,7 +45,6 @@ import {
 } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
-import { getEsqlQuery } from './utils/get_esql_query';
 import { useFetchExemplars } from './hooks/use_fetch_exemplars';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
@@ -90,6 +91,7 @@ export type MetricsGridProps = Pick<
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   metricItems: ParsedMetricItem[];
   whereStatements?: string[];
+  userSource?: string;
   getUserMessages?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['userMessages'];
   getDescription?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['description'];
   /**
@@ -109,11 +111,17 @@ export type MetricsGridProps = Pick<
    * fetches that should pause while hidden (exemplars) need this flag explicitly.
    */
   isComponentVisible: boolean;
+  /** Min/max fetched for the visible histogram charts. Empty until the heatmaps flag is on. */
+  histogramBounds?: HistogramBoundsByMetricKey;
+  histogramBoundsLoading?: boolean;
 };
+
+const EMPTY_HISTOGRAM_BOUNDS: HistogramBoundsByMetricKey = new Map();
 
 const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
   return `${metricItem.metricName}-${index}`;
 };
+
 export const MetricsGrid = ({
   metricItems,
   onBrushEnd,
@@ -121,6 +129,7 @@ export const MetricsGrid = ({
   actions,
   dimensions,
   whereStatements,
+  userSource,
   services,
   columns,
   fetchParams,
@@ -130,6 +139,8 @@ export const MetricsGrid = ({
   getDescription,
   isTabSelected,
   isComponentVisible,
+  histogramBounds = EMPTY_HISTOGRAM_BOUNDS,
+  histogramBoundsLoading = false,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -138,13 +149,6 @@ export const MetricsGrid = ({
 
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(metricItems.length / gridColumns);
-
-  const userSource = useMemo<string | undefined>(() => {
-    const userEsql = getEsqlQuery(fetchParams.query);
-    if (!userEsql) return undefined;
-    const pattern = getIndexPatternFromESQLQuery(userEsql);
-    return pattern || undefined;
-  }, [fetchParams.query]);
 
   const { focusedCell, handleKeyDown, getRowColFromIndex, handleFocusCell, focusCell } =
     useGridNavigation({
@@ -190,30 +194,16 @@ export const MetricsGrid = ({
     [onFlyoutStateChange]
   );
 
-  const hasFlyoutToOpen = Boolean(flyoutData) && isTabSelected;
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const isFlyoutOpen = Boolean(flyoutData) && isTabSelected;
 
-  // Push flyouts share one inline offset on the app scroll container, so this one only mounts once
-  // the others have unmounted. Keyed on whether a flyout is owed rather than on `flyoutData`, so
-  // switching metrics while the flyout is open does not dismiss and remount it. This covers both
-  // View details and a tab restoring its `flyoutState` when it becomes active.
+  // Keyed on whether the flyout is open rather than on `flyoutData`, so switching metrics while it
+  // is open does not dismiss the other flyouts again. This covers both View details and a tab
+  // restoring its `flyoutState` when it becomes active.
   useEffect(() => {
-    if (!hasFlyoutToOpen) {
-      setIsFlyoutOpen(false);
-      return;
+    if (isFlyoutOpen) {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
     }
-
-    let isCurrent = true;
-    openAfterDismissingOtherFlyouts(DiscoverFlyouts.metricInsights, () => {
-      if (isCurrent) {
-        setIsFlyoutOpen(true);
-      }
-    });
-
-    return () => {
-      isCurrent = false;
-    };
-  }, [hasFlyoutToOpen]);
+  }, [isFlyoutOpen]);
 
   const handleCloseFlyout = useCallback(() => {
     if (!flyoutState) {
@@ -300,6 +290,8 @@ export const MetricsGrid = ({
                   gridSettings={gridSettings}
                   onMetricExplored={onMetricExplored}
                   isComponentVisible={isComponentVisible}
+                  histogramBounds={histogramBounds}
+                  histogramBoundsLoading={histogramBoundsLoading}
                 />
               </EuiFlexItem>
             );
@@ -343,6 +335,8 @@ interface ChartItemProps
   gridSettings: MetricsGridSettings;
   onMetricExplored?: (metricUniqueKey: string) => void;
   isComponentVisible: boolean;
+  histogramBounds: HistogramBoundsByMetricKey;
+  histogramBoundsLoading: boolean;
 }
 
 const ChartItem = React.memo(
@@ -373,6 +367,8 @@ const ChartItem = React.memo(
     gridSettings,
     onMetricExplored,
     isComponentVisible,
+    histogramBounds,
+    histogramBoundsLoading,
   }: ChartItemProps) => {
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
@@ -412,7 +408,22 @@ const ChartItem = React.memo(
     // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
     void exemplars;
 
+    const { shouldRenderHistogram, boundsError, distributionQuery, heatmapConfig } =
+      useHistogramHeatmap({
+        metricItem,
+        applicableDimensions,
+        histogramBounds,
+        histogramBoundsLoading,
+        whereStatements,
+        originalSource: userSource,
+        histogramVisualization: gridSettings.histogramVisualization,
+        description,
+      });
+
     const esqlQuery = useMemo(() => {
+      if (shouldRenderHistogram) {
+        return distributionQuery ?? '';
+      }
       const fieldType = firstNonNullable(metricItem.fieldTypes);
       const isSupported = fieldType !== 'unsigned_long';
       return isSupported
@@ -424,7 +435,15 @@ const ChartItem = React.memo(
             gridSettings,
           })
         : '';
-    }, [metricItem, applicableDimensions, whereStatements, userSource, gridSettings]);
+    }, [
+      shouldRenderHistogram,
+      distributionQuery,
+      metricItem,
+      applicableDimensions,
+      whereStatements,
+      userSource,
+      gridSettings,
+    ]);
 
     const yAxisTitle = useMemo(() => {
       const instrument = firstNonNullable(metricItem.metricTypes);
@@ -438,6 +457,40 @@ const ChartItem = React.memo(
       color,
       gridSettings,
     });
+
+    const lensConfig = useMemo(() => {
+      if (heatmapConfig) {
+        return heatmapConfig;
+      }
+
+      // Bounds are loading or failed. No series yet; the empty XY config keeps the
+      // loader or the bounds error.
+      if (shouldRenderHistogram) {
+        return buildXySeriesConfig({
+          query: '',
+          title: metricItem.metricName,
+          description,
+          chartLayers: [],
+        });
+      }
+
+      return buildXySeriesConfig({
+        query: esqlQuery,
+        title: metricItem.metricName,
+        description,
+        chartLayers,
+        yAxisTitle,
+      });
+    }, [
+      heatmapConfig,
+      shouldRenderHistogram,
+      metricItem.metricName,
+      description,
+      esqlQuery,
+      chartLayers,
+      yAxisTitle,
+    ]);
+
     const handleViewDetailsCallback = useCallback(
       () => onViewDetails(index, esqlQuery, metricItem),
       [index, esqlQuery, metricItem, onViewDetails]
@@ -464,7 +517,10 @@ const ChartItem = React.memo(
         <Chart
           id={metricItem.metricName}
           isSelected={isSelected}
-          esqlQuery={esqlQuery}
+          lensConfig={lensConfig}
+          // Chart does not know which configs are heatmaps. Click-to-filter is
+          // disabled here because ES|QL cannot compare a histogram value to a number.
+          disableClickFilter={lensConfig.chartType === 'heatmap'}
           size={size}
           discoverFetch$={discoverFetch$}
           fetchParams={fetchParams}
@@ -473,10 +529,8 @@ const ChartItem = React.memo(
           onFilter={onFilter}
           onExploreInDiscoverTab={actions.openInNewTab}
           onViewDetails={handleViewDetailsCallback}
-          title={metricItem.metricName}
-          description={description}
-          chartLayers={chartLayers}
-          yAxisTitle={yAxisTitle}
+          isLoading={shouldRenderHistogram && histogramBoundsLoading}
+          error={shouldRenderHistogram ? boundsError : undefined}
           syncCursor
           syncTooltips={false}
           titleHighlight={titleHighlight}

@@ -59,6 +59,7 @@ RuleExecutionPipeline
    +--> CreateAlertEventsStep
    +--> ClassifyAbsentGroupsStep
    +--> DirectorStep
+   +--> SuppressRedundantNoDataEventsStep
    +--> StoreAlertEventsStep
 ```
 
@@ -138,7 +139,7 @@ Recovery and no-data live in sibling objects that each own the ES\|QL they run. 
 | Task timeout | `xpack.alerting_v2.rules.run.timeout`, defaults to `DEFAULT_RULE_EXECUTION_TIMEOUT` (`5m`) | [`task_definition.ts`](task_definition.ts) |
 | Schedule | Per rule | [`schedule.ts`](schedule.ts) |
 | Max alerts per run | `xpack.alerting_v2.rules.run.alerts.max`, default and ceiling `10000` | [`config.ts`](../../config.ts) |
-| Max groups per execution | `xpack.alerting_v2.rules.run.maxGroupsPerExecution`, default `10000`, ceiling tied to `alerts.max` | [`config.ts`](../../config.ts) |
+| Max groups per execution | `xpack.alerting_v2.rules.run.maxGroupsPerExecution`, default and ceiling `10000` (tied to `alerts.max`). Caps the number of distinct groups per execution, not event volume. Already-active groups pass through but count toward the limit. | [`config.ts`](../../config.ts) |
 | Max JSON query rows | Internal `NON_STREAMING_MAX_ROWS` (`1000`), declared as the JSON format's `maxRows`; applied as `LIMIT min(alerts.max, maxRows)` | [`json_format.ts`](../services/query_service/formats/json_format.ts) |
 | ES\|QL response format | `alertingV2.esqlResponseFormat` feature flag; allowed values are the names in the format registry (`json`, `arrow`), falls back to `json` | [`registry.ts`](../services/query_service/formats/registry.ts) |
 
@@ -146,15 +147,17 @@ Recovery and no-data live in sibling objects that each own the ES\|QL they run. 
 
 `ExecuteRuleQueryStep` unconditionally appends `\| LIMIT <max>` to the breach query before execution. The LIMIT is `alerts.max`, further capped by the active format's `maxRows` when it declares one — `alerts.max` on the Arrow path and `min(alerts.max, NON_STREAMING_MAX_ROWS)` on the JSON path, so a transport choice cannot silently change the product-level alerts cap. ES|QL takes the min across multiple `LIMIT` commands, so an author-supplied smaller limit still wins.
 
-`CreateAlertEventsStep` caps the number of distinct `group_hash` values a single execution can produce at `maxGroupsPerExecution`. The batch builder tracks the group set across every streamed batch of one run; once the cap is reached, rows that would introduce a **new** group are dropped (rows for already-seen groups still pass) and a single warning is logged for the run.
+A rule's `grouping.fields` decide how rows map to series. When they are set, `buildGroupHash` derives one `group_hash` per distinct field-value tuple. When `grouping.fields` is **absent or empty**, the rule is a single-series rule: every row the query returns shares one fixed `group_hash` (`UNGROUPED_GROUP_HASH`), i.e. one series. Within a run all those rows map to the same episode (`alert.id`); because the hash is independent of the run and of row content, that series — and its open episode — stay correlated run over run instead of being re-created every run (a `STATS` with no `BY` behaves as one long-running series). The breach, recovery-query, and data-presence paths all go through `buildGroupHash`, so they agree on this hash. A user who wants per-key series opts in by supplying `grouping.fields`.
 
-The cap only ever drops groups that have **no existing episode** — groups that were already active at the start of the run always pass, even past the cap. To do this, `FetchActiveGroupsStep` fetches the rule's active groups up front for every episode-tracked (`kind: 'alert'`) rule and threads them onto `state.activeGroups` so both `CreateAlertEventsStep` (for the cap) and `ClassifyAbsentGroupsStep` reuse the result instead of re-querying.
+`CreateAlertEventsStep` caps the number of distinct `group_hash` values a single execution can produce at `maxGroupsPerExecution`. The cap applies to grouped rules of all kinds (`kind: 'alert'` and `kind: 'signal'`) and bounds distinct groups, not event volume: every row of an admitted group still becomes an event, up to the row limit. The batch builder tracks the group set across every streamed batch of one run; once the cap is reached, rows that would introduce a **new** group are dropped (rows for already-seen groups still pass) and a single warning is logged for the run. Ungrouped rules are a single group, so the cap never applies and is skipped for them (their row volume is already bounded upstream by `alerts.max`).
+
+For `kind: 'alert'` rules, `FetchActiveGroupsStep` fetches the rule's active groups up front and threads them onto `state.activeGroups`; as already-active groups are encountered in the batch, their hashes are added to the set. This means the capacity for **new** groups is `maxGroupsPerExecution − active_groups_encountered`, not the full cap. `ClassifyAbsentGroupsStep` reuses the same pre-fetched result instead of re-querying.
 
 The `alertingV2.esqlResponseFormat` feature flag selects how `QueryService.executeQueryStream` fetches results. `json` (the fallback) runs the single-shot JSON query, materializes the whole response in memory, then yields it in `JSON_STREAM_BATCH_SIZE` (`100`) row slices so downstream steps never copy the full result set at once; `arrow` streams self-contained Arrow record batches.
 
 Which transport the framework uses is an implementation detail rather than something an operator can reason about, so it is a feature flag we roll out and roll back — not a `kibana.yml` setting. [`EsqlResponseFormatService`](../services/esql_response_format_service/esql_response_format_service.ts) subscribes to the flag once per process and resolves it to a registered format; a variation that names no registered format logs `QUERY_ESQL_RESPONSE_FORMAT_UNKNOWN` and falls back to `json`, because flag values are not schema-validated. A deployment with no flag provider attached — or one whose network blocks it — runs on `json`. To force a value locally or in tests, set `feature_flags.overrides` in `kibana.yml`, or `PUT /internal/core/_settings` with `coreApp.allowDynamicConfigOverrides: true`.
 
-Note that the effective row ceiling moves with the flag: `min(alerts.max, NON_STREAMING_MAX_ROWS)` on `json`, `alerts.max` on `arrow`. `rules.run.query.maxResponseSize` only guards the JSON path — Arrow's chunked transfer carries no `Content-Length` for the transport to check, so there `alerts.max` is the sole bound.
+Note that the effective row ceiling moves with the flag: `min(alerts.max, NON_STREAMING_MAX_ROWS)` on `json`, `alerts.max` on `arrow`. `rules.run.query.maxResponseSize` (accepted range `1kb`–`200mb`, default `50mb`) guards only JSON-path queries: the breach query when the flag is `json`, and the recovery and data-presence queries always. Arrow's chunked transfer carries no `Content-Length` for the transport to check, so the Arrow breach query is bounded by `alerts.max` alone.
 
 Formats are strategies under [`services/query_service/formats`](../services/query_service/formats). A format implements one method — `open(esClient, request, options)` returning decoded row batches plus optional cleanup — and optionally declares a `maxRows` cap. `QueryService` owns everything else: the execution context, the abort checks either side of `open` and between batches, dropping empty batches, wrapping decode failures as parse errors, logging, and cleanup. To add a format, create `formats/<name>_format.ts` and register it in [`formats/registry.ts`](../services/query_service/formats/registry.ts), then add its name as a variation of the `alertingV2.esqlResponseFormat` flag with the feature flag provider; the query row limit follows from the registry automatically.
 
@@ -169,7 +172,8 @@ Formats are strategies under [`services/query_service/formats`](../services/quer
 | `queryPayload` | `ExecuteRuleQueryStep` | ES\|QL query/filter/params for the current run. |
 | `esqlRowBatch` | `ExecuteRuleQueryStep` | One streamed batch of ES\|QL rows. |
 | `alertEventsBatch` | Event-creation steps and director | Materialized rule events for the current batch. |
-| `activeGroups` | `FetchActiveGroupsStep` | The rule's active groups, fetched once for every `kind: 'alert'` rule (bounded by `maxGroupsPerExecution`) so the group cap never drops one; reused by `CreateAlertEventsStep` and `ClassifyAbsentGroupsStep`. |
+| `activeGroups` | `FetchActiveGroupsStep` | The rule's active groups, fetched once for every `kind: 'alert'` rule (bounded by `alerts.max`) so the group cap never drops one; reused by `CreateAlertEventsStep` and `ClassifyAbsentGroupsStep`. |
+| `previousAlertStateByGroupHash` | `DirectorStep` | Latest persisted lifecycle state per `group_hash` for the groups in the batch, as loaded by the director. Lets `SuppressRedundantNoDataEventsStep` compare each enriched event against what is already persisted without a second `.rule-events` round trip. |
 
 ## Execution steps
 
@@ -180,14 +184,15 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 | 1 | `WaitForResourcesStep` | Ensure required Elasticsearch resources exist before doing work. |
 | 2 | `FetchRuleStep` | Load the current rule saved object. |
 | 3 | `ValidateRuleStep` | Halt early if the rule cannot run, for example because it is disabled. |
-| 4 | `FetchActiveGroupsStep` | Fetch the rule's active groups once for every `kind: 'alert'` rule (bounded by `maxGroupsPerExecution`) and thread them onto `state.activeGroups`. |
+| 4 | `FetchActiveGroupsStep` | Fetch the rule's active groups once for every `kind: 'alert'` rule (bounded by `alerts.max`) and thread them onto `state.activeGroups`. |
 | 5 | `ExecuteRuleQueryStep` | Build and run ES\|QL, emitting streamed row batches. |
 | 6 | `CreateAlertEventsStep` | Turn a row batch into breached rule events (per batch). |
 | 7 | `ClassifyAbsentGroupsStep` | Forward every breach batch unchanged while accumulating the full-run breach set. Once the stream drains, run the data-presence and recovery queries once and emit recovery / `no_data` / continued-`breached` events for the active groups absent from that set, as a single final batch. No-op for `signal` rules and when `recovery.strategy` is `'manual'` and `no_data.strategy` is `'ignore'`. |
-| 8 | `DirectorStep` | Enrich alert-type events with episode state. |
-| 9 | `StoreAlertEventsStep` | Persist the batch into `.rule-events`. |
+| 8 | `DirectorStep` | Enrich alert-type events with episode state (1:1 — never drops events) and thread the prior state it loaded onto `state.previousAlertStateByGroupHash`. |
+| 9 | `SuppressRedundantNoDataEventsStep` | Write policy: drop director-enriched `no_data` events that carry no lifecycle change for a group already held in no-data (previous persisted event was `no_data` and episode id / `alert.status` / `status_count` are unchanged), so a held group writes one transition marker instead of one event per run. `breached` / `recovered` are never dropped. Pass-through when no prior state was threaded (`signal` rules). |
+| 10 | `StoreAlertEventsStep` | Persist the batch into `.rule-events`. |
 
-The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enabled`). The `alerting:v2:enabled` advanced setting gates only the user-facing surface (UI + APIs), not core engine execution, so rules keep producing events even while the UI and APIs stay hidden.
+The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enabled`). The `alerting:v2:enabled` advanced setting gates only the user-facing surface (UI + APIs), not core engine execution, so rules keep producing events even while the UI and APIs stay hidden. This is intentional: Kibana cannot subscribe to UI setting changes, and a bail-out inside the executor would also stop internally created rules that must always run. The setting's description tells users to disable their rules before turning it off.
 
 ## How recovery and no-data fit together
 
@@ -272,9 +277,9 @@ For a `no_data` event, the director's FSM decides the next episode status. There
 | `no_data.strategy` | Episode status the FSM lands on |
 | --- | --- |
 | `'alert'` | Sets the episode to `'active'` so downstream consumers (dispatcher, actions) keep treating the group as live during the data gap. |
-| `'keep_last'` | Preserves the prior episode status (e.g. an `active` episode stays `active`). |
+| `'keep_last'` | Preserves the prior episode status (e.g. an `active` episode stays `active`). Only the first `no_data` after a `breached` / `recovered` event is persisted; later identical holds are dropped by `SuppressRedundantNoDataEventsStep` (see the director README, "Held groups write one marker"). |
 | `'resolve'` | Mirrors the `'recovered'` FSM transitions, moving the episode toward `inactive` via the normal lifecycle. |
-| `'ignore'` | The presence query is skipped and no `no_data` event is produced; the episode drifts out of lookback windows over time. |
+| `'ignore'` | The presence query is skipped and no `no_data` event is produced; the episode drifts out of lookback windows over time. With `.rule-events` retention enabled and manual, condition or query recovery, an episode with no new events expires once its last event leaves the retention window, without a recovery event or notification. |
 
 ## Severity behavior
 
@@ -321,6 +326,29 @@ For each breached ES\|QL row, the executor:
 | `rule_deleted` | The saved object no longer exists. |
 | `rule_disabled` | The rule is present but disabled. |
 | `state_not_ready` | A step ran without required upstream state. Usually indicates ordering or stream wiring misuse. |
+
+## Reason codes
+
+`kibana.task.data.reason` says why a run did not simply succeed. The vocabulary lives in `execution_outcome/execution_reason.ts` and is a published contract: dashboards and the execution history API filter on these values.
+
+The codes are deliberately not step names or halt reasons. `STEP_EXECUTION_REASONS` and `HALT_EXECUTION_REASONS` translate internal names into published codes, so the pipeline stays free to rename its parts without changing what a run reports.
+
+| Code | Published when |
+| --- | --- |
+| `rule_disabled` | The rule is present but disabled. |
+| `rule_deleted` | The saved object no longer exists. |
+| `state_not_ready` | A step ran without required upstream state. |
+| `query_failed` | `execute_rule_query` threw. |
+| `recovery_query_failed` | The recovery query threw. |
+| `no_data_failed` | The data-presence query threw. |
+| `store_failed` | `store_alert_events` threw. |
+| `director_failed` | `director` threw. |
+| `task_manager_cancelled` | Task Manager aborted the run, whatever was in flight at the time. The abort signal does not say why, so this covers both an expired task timeout and a claim conflict. |
+| `unexpected_error` | A step that owns no code of its own threw. |
+
+For a run that threw, a cancellation outranks everything, then a code tagged at the failing operation via `tagFailureReason`, then the code owned by the step. An error reaching the task runner with no step tag reports no reason at all.
+
+`recovery_query_failed` and `no_data_failed` are finer than a step — both belong to `classify_absent_groups` — so `detectDataPresence` and `executeRecoveryQuery` tag them at the call site instead.
 
 ## Middleware vs decorators
 
@@ -417,7 +445,21 @@ bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();
 
 Binding order is execution order. Match neighboring scope conventions unless you have a clear reason not to.
 
-### Step 4: Add focused tests
+### Step 4: Give it a published reason code
+
+Add an entry to `STEP_EXECUTION_REASONS` in `execution_outcome/execution_reason.ts`, naming the code the event log publishes when the step throws. Reach for `UNEXPECTED_ERROR` unless the failure is worth telling apart from any other.
+
+```typescript
+export const STEP_EXECUTION_REASONS: Readonly<Record<string, RuleExecutionReason>> = {
+  create_alert_events: RULE_EXECUTION_REASONS.UNEXPECTED_ERROR,
+  my_new_step: RULE_EXECUTION_REASONS.UNEXPECTED_ERROR,
+  classify_absent_groups: RULE_EXECUTION_REASONS.UNEXPECTED_ERROR,
+};
+```
+
+`execution_reason.test.ts` fails until the entry exists, and fails again if the step is later renamed without the key moving with it.
+
+### Step 5: Add focused tests
 
 ```typescript
 import { MyNewStep } from './my_new_step';
@@ -515,3 +557,11 @@ Useful coverage points:
 - Prefer `requireState(...)` and explicit halts over assuming a field exists.
 - Keep rule execution focused on event production. If a change is really about lifecycle transitions, move toward the director. If it is really about notifications, move toward the dispatcher.
 - If you change stored event shape, verify the resources schema and downstream readers together.
+
+## Migration from v1
+
+### `minimumScheduleInterval.enforce` removed
+
+Alerting v1 exposed `xpack.alerting.rules.minimumScheduleInterval.enforce` (defaulted to `false`). With `enforce: false`, rules with intervals shorter than `minimumScheduleInterval` produced a warning but were allowed to run. Alerting v2 always enforces the minimum — the `enforce` field does not exist and rules with shorter intervals are rejected at create/update/enable time.
+
+Deployments migrating from a v1 configuration that relied on `enforce: false` (or never set the field, picking up the lenient default) will encounter stricter validation. Rules with short intervals must be updated to a compliant schedule before enabling alerting v2.

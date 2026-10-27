@@ -21,7 +21,7 @@ interface GetDataSetResponse {
 
 test.describe(
   'ES|QL Data Federation — dataset API-only settings passthrough',
-  { tag: tags.stateful.classic },
+  { tag: tags.deploymentAgnostic },
   () => {
     let dataSourceName: string | undefined;
     let dataSetName: string | undefined;
@@ -96,8 +96,7 @@ test.describe(
         await pageObjects.dataFederation.selectTab('Datasets');
         const row = pageObjects.dataFederation.getDataSetRow(createdDataSetName);
         await expect(row).toBeVisible();
-        await row.locator('[data-test-subj="dataSetsSetsEditButton"]').click();
-        await pageObjects.dataFederation.createDatasetWizard.waitFor({ state: 'visible' });
+        await pageObjects.dataFederation.openEditDataSetWizard(createdDataSetName);
       });
 
       await test.step('update only the description and save', async () => {

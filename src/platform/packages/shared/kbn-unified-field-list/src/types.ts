@@ -44,6 +44,15 @@ export type AddFieldFilterHandler = (
   type: '+' | '-'
 ) => void;
 
+/**
+ * Filters on the "Other" top values bucket; `terms` are the displayed top values
+ */
+export type AddOtherFilterHandler = (
+  field: DataViewField,
+  terms: Array<string | number | boolean>,
+  options: { negate: boolean }
+) => void;
+
 export enum ExistenceFetchStatus {
   failed = 'failed',
   succeeded = 'succeeded',

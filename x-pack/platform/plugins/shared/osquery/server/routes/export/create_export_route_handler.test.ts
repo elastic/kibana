@@ -629,6 +629,26 @@ describe('createExportRouteHandler', () => {
     );
   });
 
+  it('forwards a route-supplied actionId to the export search request', async () => {
+    const handler = createExportRouteHandler(createOsqueryContext());
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({ query: { format: 'ndjson' }, body: {} });
+
+    await handler(createContext(), request, response, { ...baseParams, actionId: 'abc' });
+
+    expect(mockExportResultsToStream.mock.calls[0][0].baseRequest.actionId).toBe('abc');
+  });
+
+  it('omits actionId from the export search request when the route does not supply one', async () => {
+    const handler = createExportRouteHandler(createOsqueryContext());
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({ query: { format: 'ndjson' }, body: {} });
+
+    await handler(createContext(), request, response, baseParams);
+
+    expect(mockExportResultsToStream.mock.calls[0][0].baseRequest).not.toHaveProperty('actionId');
+  });
+
   it('sanitizes double-quotes in fileNamePrefix for the Content-Disposition header', async () => {
     const handler = createExportRouteHandler(createOsqueryContext());
     const response = httpServerMock.createResponseFactory();

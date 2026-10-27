@@ -19,16 +19,18 @@ const MAX_PROJECT_ID_LENGTH = 200;
 const MAX_JOB_ID_LENGTH = 1024;
 const MAX_PAGE_TOKEN_LENGTH = 2048;
 
-const QuerySchema = z
-  .string()
-  .min(1)
-  .max(MAX_UNRESOLVED_QUERY_BYTES)
-  .refine((query) => Buffer.byteLength(query, 'utf8') <= MAX_UNRESOLVED_QUERY_BYTES, {
-    message: `Query must not exceed BigQuery's ${MAX_UNRESOLVED_QUERY_BYTES} byte (${MAX_UNRESOLVED_QUERY_MB} MB) unresolved query length limit`,
-  })
-  .describe(
-    `GoogleSQL query text to execute in BigQuery (up to ${MAX_UNRESOLVED_QUERY_MB} MB). Use fully-qualified table names such as \`project.dataset.table\`. Prefer explicit date filters and LIMIT clauses for predictable cost and result size.`
-  );
+const QuerySchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(MAX_UNRESOLVED_QUERY_BYTES)
+    .refine((query) => Buffer.byteLength(query, 'utf8') <= MAX_UNRESOLVED_QUERY_BYTES, {
+      message: `Query must not exceed BigQuery's ${MAX_UNRESOLVED_QUERY_BYTES} byte (${MAX_UNRESOLVED_QUERY_MB} MB) unresolved query length limit`,
+    })
+    .describe(
+      `GoogleSQL query text to execute in BigQuery (up to ${MAX_UNRESOLVED_QUERY_MB} MB). Use fully-qualified table names such as \`project.dataset.table\`. Prefer explicit date filters and LIMIT clauses for predictable cost and result size.`
+    )
+);
 
 const CommonQueryInputSchema = lazySchema(() =>
   z.object({

@@ -36,10 +36,11 @@ The root takes up to three zones as children: `FlyoutTemplate.Header`, `FlyoutTe
 
 ## Root props
 
-The root accepts every `EuiFlyoutProps` prop and any `data-*` attributes, with three exceptions:
+The root accepts every `EuiFlyoutProps` prop and any `data-*` attributes, with four exceptions:
 
 - `children` holds the zones.
 - `flyoutMenuDisplayMode` is always `auto`.
+- `paddingSize` is always `m` (16px), and the footer pads evenly on every side.
 - `ref` is not forwarded.
 
 `size` defaults to `m`, and `session` defaults to `start`.

@@ -36,16 +36,24 @@ export class LensMetric {
     this.secondaryMetricBadge = this.metricRoot().locator('.echBadge__content');
     this.secondaryMetricLabel = this.metricRoot().locator('.echSecondaryMetric__label');
     this.secondaryMetric = this.metricRoot().locator('.echSecondaryMetric');
-    this.secondaryMetricNameTooltip = this.page.testSubj.locator('mtrVisSecondaryNameTooltip');
+    this.secondaryMetricNameTooltip = this.page.getByTestId('mtrVisSecondaryNameTooltip');
     this.metricProgressBar = this.progressBar();
-    this.legacyMetricLabel = this.page.testSubj.locator('metric_label');
-    this.legacyMetricValue = this.page.testSubj.locator('metric_value');
+    this.legacyMetricLabel = this.page.getByTestId('metric_label');
+    this.legacyMetricValue = this.page.getByTestId('metric_value');
     this.trendline = this.metricRoot().locator('.echSingleMetricSparkline');
+  }
+
+  async setBackgroundChart(type: 'none' | 'bar' | 'line'): Promise<void> {
+    const button = this.page.testSubj.locator(`lnsMetric_background_chart_${type}`);
+    await button.click();
+    await button
+      .and(this.page.getByRole('button', { pressed: true }))
+      .waitFor({ state: 'visible' });
   }
 
   /** Root `[data-test-subj="mtrVis"]` locator, optionally limited to a dashboard panel. */
   private metricRoot(scope?: Locator): Locator {
-    return (scope ?? this.page).locator('[data-test-subj="mtrVis"]');
+    return (scope ?? this.page).getByTestId('mtrVis');
   }
 
   /** Metric tiles currently rendered, optionally limited to a dashboard panel. */
@@ -58,7 +66,7 @@ export class LensMetric {
    * pass after `waitForVisualization`; wait on this locator before snapshotting tile data.
    */
   progressBar(scope?: Locator): Locator {
-    return this.metricRoot(scope).locator('.echSingleMetricProgress');
+    return this.metricRoot(scope).getByRole('meter');
   }
 
   /** Returns locators for each Elastic Charts metric tile currently rendered. */

@@ -10,16 +10,19 @@
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
-import { ESQL_TYPE } from '@kbn/data-view-utils';
+import { registerEsqlSourceInDataViewsCache, unregisterFromDataViewsCache } from '@kbn/data-source';
+import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import { internalStateActions, selectTabRuntimeState, selectTab } from '..';
+import {
+  getDataViewOfSource,
+  getTabDataView,
+  internalStateActions,
+  selectTabRuntimeState,
+  selectTab,
+} from '..';
 import { createDataViewDataSource } from '../../../../../../common/data_sources';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
-import {
-  dataViewMock,
-  dataViewMockWithTimeField,
-  buildDataViewMock,
-} from '@kbn/discover-utils/src/__mocks__';
+import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { savedSearchMock } from '../../../../../__mocks__/saved_search';
 import {
   dataViewAdHoc,
@@ -79,33 +82,79 @@ describe('tab_state_data_view actions', () => {
     jest.clearAllMocks();
   });
 
-  describe('setDataView', () => {
-    it('keeps a registered EsqlSource instead of wrapping the shim as DataViewSource', async () => {
-      const { internalState, tabId, runtimeStateManager, services } = await setup();
+  describe('setDataSource', () => {
+    it('publishes an EsqlSource with the DataView shim registered for it', async () => {
+      const { internalState, tabId, runtimeStateManager } = await setup();
       const esqlSource = createMockEsqlSource([], [], '@timestamp', 'FROM logs-*');
-      (esqlSource as { id: string }).id = 'esql-from-logs';
-      services.dataSourceService.registerEsqlSource(esqlSource);
-
-      const shim = buildDataViewMock({
-        id: 'esql-from-logs',
-        title: 'logs-*',
-        type: ESQL_TYPE,
-        timeFieldName: '@timestamp',
-        isPersisted: false,
-      });
-
-      internalState.dispatch(
-        internalStateActions.setDataView({
-          tabId,
-          dataView: shim,
-        })
-      );
-
-      expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.getValue()).toBe(
+      const shim = await registerEsqlSourceInDataViewsCache(
+        createMockDataViewsService(),
         esqlSource
       );
+
+      internalState.dispatch(internalStateActions.setDataSource({ tabId, dataSource: esqlSource }));
+
+      const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+      expect(currentDataSource$.getValue()).toBe(esqlSource);
+      expect(getDataViewOfSource(currentDataSource$.getValue())).toBe(shim);
     });
 
+    it('keeps the DataView of the tab when another tab unregisters the same source', async () => {
+      const { internalState, tabId, runtimeStateManager } = await setup();
+      const esqlSource = createMockEsqlSource([], [], '@timestamp', 'FROM logs-*');
+      const shim = await registerEsqlSourceInDataViewsCache(
+        createMockDataViewsService(),
+        esqlSource
+      );
+      internalState.dispatch(internalStateActions.setDataSource({ tabId, dataSource: esqlSource }));
+
+      unregisterFromDataViewsCache(esqlSource.id);
+
+      expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))).toBe(shim);
+    });
+
+    it('publishes the source again when it gets a new DataView', async () => {
+      const { internalState, tabId, runtimeStateManager } = await setup();
+      const esqlSource = createMockEsqlSource([], [], '@timestamp', 'FROM logs-*');
+      await registerEsqlSourceInDataViewsCache(createMockDataViewsService(), esqlSource);
+      internalState.dispatch(internalStateActions.setDataSource({ tabId, dataSource: esqlSource }));
+      const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+      const emissions = jest.fn();
+      currentDataSource$.subscribe(emissions);
+      emissions.mockClear();
+
+      internalState.dispatch(internalStateActions.setDataSource({ tabId, dataSource: esqlSource }));
+      expect(emissions).not.toHaveBeenCalled();
+
+      const nextShim = await registerEsqlSourceInDataViewsCache(
+        createMockDataViewsService(),
+        esqlSource
+      );
+      internalState.dispatch(internalStateActions.setDataSource({ tabId, dataSource: esqlSource }));
+
+      expect(emissions).toHaveBeenCalledTimes(1);
+      const republishedSource = currentDataSource$.getValue();
+      expect(republishedSource).not.toBe(esqlSource);
+      expect(republishedSource).toMatchObject({
+        id: esqlSource.id,
+        datasetId: esqlSource.datasetId,
+      });
+      expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))).toBe(nextShim);
+    });
+
+    it('throws for an EsqlSource that was not registered', async () => {
+      const { internalState, tabId } = await setup();
+      const esqlSource = createMockEsqlSource([], [], '@timestamp', 'FROM unregistered-*');
+      (esqlSource as { id: string }).id = 'esql-unregistered';
+
+      expect(() =>
+        internalState.dispatch(
+          internalStateActions.setDataSource({ tabId, dataSource: esqlSource })
+        )
+      ).toThrow('ES|QL source esql-unregistered must be registered with resolveEsqlSource');
+    });
+  });
+
+  describe('setDataView', () => {
     it('reuses the existing DataViewSource when setDataView is called with the same DataView', async () => {
       const { internalState, tabId, runtimeStateManager } = await setup();
       const currentDataSource$ = selectTabRuntimeState(
@@ -113,10 +162,7 @@ describe('tab_state_data_view actions', () => {
         tabId
       ).currentDataSource$;
       const existing = currentDataSource$.getValue();
-      const dataView = selectTabRuntimeState(
-        runtimeStateManager,
-        tabId
-      ).currentDataView$.getValue();
+      const dataView = getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId));
 
       internalState.dispatch(
         internalStateActions.setDataView({
@@ -127,61 +173,6 @@ describe('tab_state_data_view actions', () => {
 
       expect(currentDataSource$.getValue()).toBe(existing);
     });
-
-    it('does not wrap an unregistered ES|QL shim as DataViewSource', async () => {
-      const { internalState, tabId, runtimeStateManager } = await setup();
-      const previous = selectTabRuntimeState(
-        runtimeStateManager,
-        tabId
-      ).currentDataSource$.getValue();
-
-      const shim = buildDataViewMock({
-        id: 'esql-unregistered',
-        title: 'logs-*',
-        type: ESQL_TYPE,
-        timeFieldName: '@timestamp',
-        isPersisted: false,
-      });
-
-      internalState.dispatch(
-        internalStateActions.setDataView({
-          tabId,
-          dataView: shim,
-        })
-      );
-
-      const next = selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.getValue();
-      expect(next).toBe(previous);
-      expect(next?.id).not.toBe('esql-unregistered');
-    });
-
-    it('publishes a DataViewSource for an unregistered ES|QL shim when the tab has no source', async () => {
-      const { internalState, tabId, runtimeStateManager } = await setup();
-      const currentDataSource$ = selectTabRuntimeState(
-        runtimeStateManager,
-        tabId
-      ).currentDataSource$;
-      currentDataSource$.next(undefined);
-
-      const shim = buildDataViewMock({
-        id: 'esql-unregistered',
-        title: 'logs-*',
-        type: ESQL_TYPE,
-        timeFieldName: '@timestamp',
-        isPersisted: false,
-      });
-
-      internalState.dispatch(
-        internalStateActions.setDataView({
-          tabId,
-          dataView: shim,
-        })
-      );
-
-      const next = currentDataSource$.getValue();
-      expect(next?.kind).toBe('index-pattern');
-      expect(next?.id).toBe('esql-unregistered');
-    });
   });
 
   describe('assignNextDataView', () => {
@@ -189,7 +180,7 @@ describe('tab_state_data_view actions', () => {
       const { internalState, tabId, runtimeStateManager } = await setup();
       jest.spyOn(internalStateActions, 'pauseAutoRefreshInterval');
 
-      expect(selectTabRuntimeState(runtimeStateManager, tabId)?.currentDataView$?.getValue()).toBe(
+      expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))).toBe(
         dataViewMockWithTimeField
       );
 
@@ -200,12 +191,10 @@ describe('tab_state_data_view actions', () => {
         })
       );
 
-      expect(selectTabRuntimeState(runtimeStateManager, tabId)?.currentDataView$?.getValue()).toBe(
-        dataViewMock
-      );
+      expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))).toBe(dataViewMock);
       expect(internalStateActions.pauseAutoRefreshInterval).toHaveBeenCalledWith({
         tabId,
-        dataView: dataViewMock,
+        dataSource: expect.objectContaining({ kind: 'index-pattern', id: dataViewMock.id }),
       });
     });
   });
@@ -361,7 +350,7 @@ describe('tab_state_data_view actions', () => {
   describe('onDataViewCreated', () => {
     test('onDataViewCreated - persisted data view', async () => {
       const { internalState, tabId, runtimeStateManager } = await setup();
-      expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.getValue()).toBe(
+      expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))).toBe(
         dataViewMockWithTimeField
       );
       await internalState.dispatch(
@@ -377,7 +366,7 @@ describe('tab_state_data_view actions', () => {
 
     test('onDataViewCreated - ad-hoc data view', async () => {
       const { internalState, tabId, runtimeStateManager, services } = await setup();
-      expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.getValue()).toBe(
+      expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))).toBe(
         dataViewMockWithTimeField
       );
       jest
@@ -398,8 +387,8 @@ describe('tab_state_data_view actions', () => {
       expect(selectTab(internalState.getState(), tabId).appState.dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewAdHoc.id! })
       );
-      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-      expect(currentDataView$.getValue()?.id).toBe(dataViewAdHoc.id);
+      const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toBe(dataViewAdHoc.id);
     });
   });
 
@@ -408,15 +397,15 @@ describe('tab_state_data_view actions', () => {
       const { internalState, tabId, runtimeStateManager } = await setup();
       const fetchDataSpy = jest.spyOn(tabStateActions, 'fetchData');
 
-      const selectedDataView$ = selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$;
-      expect(selectedDataView$.getValue()).toEqual(dataViewMockWithTimeField);
+      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+      expect(getTabDataView(tabRuntimeState)).toEqual(dataViewMockWithTimeField);
       await internalState.dispatch(
         internalStateActions.onDataViewEdited({
           tabId,
           editedDataView: dataViewMockWithTimeField,
         })
       );
-      const dataViewAfter = selectedDataView$.getValue();
+      const dataViewAfter = getTabDataView(tabRuntimeState);
       expect(dataViewAfter).not.toEqual(dataViewMockWithTimeField);
       expect(dataViewAfter?.id).toBe(dataViewMockWithTimeField.id);
       expect(fetchDataSpy).toHaveBeenCalledWith({ tabId });
@@ -439,9 +428,9 @@ describe('tab_state_data_view actions', () => {
           editedDataView: dataViewAdHoc,
         })
       );
-      expect(
-        selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.getValue()?.id
-      ).not.toBe(previousId);
+      expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))?.id).not.toBe(
+        previousId
+      );
       expect(fetchDataSpy).toHaveBeenCalledWith({ tabId });
     });
   });

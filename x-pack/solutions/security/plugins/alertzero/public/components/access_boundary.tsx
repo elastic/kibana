@@ -80,9 +80,15 @@ const SubscriptionActions = ({ serverless }: { serverless: boolean }) => {
 /** Prevents feature content and data requests until space, subscription and read access are allowed. */
 export const AccessBoundary = ({
   availability$,
+  serviceAccountsEnabled,
   children,
 }: React.PropsWithChildren<{
   availability$: Observable<SubscriptionAvailability>;
+  /**
+   * From core security, read before the Kibana context replaces `security` with the
+   * security plugin. That plugin contract does not carry this flag.
+   */
+  serviceAccountsEnabled: boolean;
 }>): React.ReactElement => {
   const {
     services: { application, uiSettings, agentBuilder, agenticInvestigations, proposals },
@@ -190,7 +196,7 @@ export const AccessBoundary = ({
       />
     );
   }
-  if (!agentBuilder || !agenticInvestigations || !proposals) {
+  if (!agentBuilder || !agenticInvestigations || !proposals || !serviceAccountsEnabled) {
     return (
       <EuiEmptyPrompt
         iconType="warning"

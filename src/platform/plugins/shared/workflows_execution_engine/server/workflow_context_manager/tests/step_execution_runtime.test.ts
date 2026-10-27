@@ -364,6 +364,7 @@ describe('StepExecutionRuntime', () => {
           startedAt: originalStartedAt,
         })
       );
+      expect(workflowLogger.logInfo).not.toHaveBeenCalled();
     });
   });
 
@@ -843,6 +844,37 @@ describe('StepExecutionRuntime', () => {
         stepName: 'Display name',
         stepExecutionId: fakeStepExecutionId,
       });
+    });
+  });
+
+  describe('getStepTimeoutMs', () => {
+    const createRuntime = (configuration?: Record<string, unknown>) =>
+      new StepExecutionRuntime({
+        node: { ...fakeNode, configuration } as GraphNodeUnion,
+        stackFrames: fakeStackFrames,
+        stepExecutionId: fakeStepExecutionId,
+        contextManager: {
+          renderValueAccordingToContext: jest.fn((value: string) =>
+            value === '{{ inputs.timeout }}' ? '2m' : value
+          ),
+        } as unknown as WorkflowContextManager,
+        workflowExecutionGraph,
+        stepLogger: workflowLogger,
+        workflowExecutionState,
+        stepIoService,
+      });
+
+    it('returns the step timeout in milliseconds', () => {
+      expect(createRuntime({ timeout: '10m' }).getStepTimeoutMs()).toBe(600_000);
+    });
+
+    it('renders a templated step timeout', () => {
+      expect(createRuntime({ timeout: '{{ inputs.timeout }}' }).getStepTimeoutMs()).toBe(120_000);
+    });
+
+    it('returns undefined when the node has no timeout', () => {
+      expect(createRuntime({ name: 'step' }).getStepTimeoutMs()).toBeUndefined();
+      expect(createRuntime().getStepTimeoutMs()).toBeUndefined();
     });
   });
 

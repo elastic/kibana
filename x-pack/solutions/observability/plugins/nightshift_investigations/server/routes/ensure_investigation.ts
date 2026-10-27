@@ -14,12 +14,14 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
   endpoint: 'POST /internal/nightshift/investigations/{id}/_ensure',
   options: {
     access: 'internal',
-    summary: 'Ensure the investigation record for a workflow execution exists',
+    summary: 'Ensure the investigation conversation for a workflow run exists',
     description:
-      'Creates the investigation record for a workflow execution if it does not exist yet. ' +
-      'Called by the investigation workflow (after ensuring the agent exists) so every run is ' +
-      'tracked regardless of how it was triggered. All attributes derive from the execution document, ' +
-      'never from the request.',
+      'Gets or creates the investigation (an Agent Builder `investigation` conversation whose id ' +
+      'is the investigation id) for a live run of the investigation workflow and records the ' +
+      "run's subjects on it, reopening a closed investigation. Called by the investigation " +
+      'workflow, so every write happens as the identity the workflow runs as. The run must name ' +
+      'this investigation: as its `investigation_id` input, or as its own execution id when it ' +
+      'was started without one. Returns the conversation the agent step continues.',
   },
   security: {
     authz: {
@@ -30,14 +32,20 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
     path: z.object({
       id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
     }),
+    body: z
+      .object({
+        /** The calling run's own execution; it differs from the ID when the run continues one. */
+        execution_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+      })
+      .nullish(),
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);
     try {
-      await client.ensureOrCreate(params.path.id);
+      const conversationId = await client.ensureOrCreate(params.path.id, params.body?.execution_id);
+      return { acknowledged: true, conversation_id: conversationId };
     } catch (error) {
       rethrowInvestigationClientError(error);
     }
-    return { acknowledged: true };
   },
 });

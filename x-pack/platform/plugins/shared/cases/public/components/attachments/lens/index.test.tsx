@@ -64,9 +64,17 @@ describe('getVisualizationAttachmentType', () => {
       getCreationActivity: expect.any(Function),
       getRemovalActivity: expect.any(Function),
       getAttachmentList: expect.any(Function),
+      getCountLabel: expect.any(Function),
       schema: expect.any(Object),
       workflowSchema: expect.any(Object),
     });
+  });
+
+  it('counts visualizations', () => {
+    const lensType = getVisualizationAttachmentType();
+
+    expect(lensType.getCountLabel?.({ count: 1 })).toBe('1 visualization');
+    expect(lensType.getCountLabel?.({ count: 2 })).toBe('2 visualizations');
   });
 
   describe('workflowSchema', () => {
@@ -305,6 +313,20 @@ describe('getVisualizationAttachmentType', () => {
       const event = lensType.getRemovalActivity?.(attachmentViewProps);
 
       expect(event).toEqual({ event: 'removed visualization' });
+    });
+
+    it('links the cached title for a saved visualization', () => {
+      const lensType = getVisualizationAttachmentType();
+      const event = lensType.getRemovalActivity?.({
+        ...attachmentViewProps,
+        attachmentId: 'lens-1',
+        metadata: { title: 'My lens', soType: 'lens' },
+      }).event;
+
+      const services = createStartServicesMock();
+      renderWithTestingProviders(<>{event}</>, { wrapperProps: { services } });
+
+      expect(screen.getByText('removed visualization My lens')).toBeInTheDocument();
     });
   });
 });

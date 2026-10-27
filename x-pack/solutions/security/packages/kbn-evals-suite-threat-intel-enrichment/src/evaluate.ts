@@ -12,10 +12,10 @@ import { ThreatIntelClient } from './clients/threat_intel_client';
 // packages expose a single public entry point, and this suite already follows
 // that pattern for the threat_intel routes.
 const INFERENCE_SETTINGS_URL = '/internal/search_inference_endpoints/settings';
-const ALERTZERO_FAST_FEATURE_ID = 'alertzero_fast';
-const ALERTZERO_REASONING_FEATURE_ID = 'alertzero_reasoning';
+const ALERTZERO_EFFICIENT_FEATURE_ID = 'alertzero_efficient';
+const ALERTZERO_FRONTIER_FEATURE_ID = 'alertzero_frontier';
 
-const TIER_FEATURE_IDS = new Set([ALERTZERO_FAST_FEATURE_ID, ALERTZERO_REASONING_FEATURE_ID]);
+const TIER_FEATURE_IDS = new Set([ALERTZERO_EFFICIENT_FEATURE_ID, ALERTZERO_FRONTIER_FEATURE_ID]);
 
 const INTERNAL_API_HEADERS = {
   'elastic-api-version': '1',
@@ -34,7 +34,7 @@ interface InferenceSettingsResponse {
 /**
  * Extends the base `@kbn/evals` fixture with a worker-scoped `ThreatIntelClient`
  * that posts directly to the threat_intel enrichment routes, plus an auto
- * fixture that pins AlertZero Fast/Reasoning Model Settings to the model under
+ * fixture that pins AlertZero Efficient/Frontier Model Settings to the model under
  * test. Everything else (executorClient, inferenceClient, connector, evaluators,
  * log) comes from the base fixture unchanged.
  */
@@ -49,11 +49,11 @@ export const evaluate = base.extend<
     async ({ kbnClient, connector, log }, use) => {
       log.info(
         `[threat-intel-evals] Pinning Model Settings ` +
-          `${ALERTZERO_FAST_FEATURE_ID}/${ALERTZERO_REASONING_FEATURE_ID}=${connector.id}`
+          `${ALERTZERO_EFFICIENT_FEATURE_ID}/${ALERTZERO_FRONTIER_FEATURE_ID}=${connector.id}`
       );
 
       // PUT replaces the whole SO, so read first and merge: keep every other
-      // feature pick (Agentic, Agent Builder, etc.) and only overwrite the two
+      // feature pick (Balanced, Agent Builder, etc.) and only overwrite the two
       // tiers this suite drives.
       const existing = await kbnClient.request<InferenceSettingsResponse>({
         path: INFERENCE_SETTINGS_URL,
@@ -71,11 +71,11 @@ export const evaluate = base.extend<
           features: [
             ...otherFeatures,
             {
-              feature_id: ALERTZERO_FAST_FEATURE_ID,
+              feature_id: ALERTZERO_EFFICIENT_FEATURE_ID,
               endpoints: [{ id: connector.id }],
             },
             {
-              feature_id: ALERTZERO_REASONING_FEATURE_ID,
+              feature_id: ALERTZERO_FRONTIER_FEATURE_ID,
               endpoints: [{ id: connector.id }],
             },
           ],

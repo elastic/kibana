@@ -26,6 +26,7 @@ export {
   builtInTriggerDefinitions,
   getBuiltInTriggerDefinition,
 } from './spec/builtin_trigger_definitions';
+export { getTriggerName } from './common/get_trigger_name';
 export {
   builtinWorkflowInputDefinitions,
   builtinWorkflowInputDefinitionRefValuesForZod,
@@ -120,12 +121,14 @@ export {
   actionCategorySchema,
   actionImpactSchema,
   actionMetadataSchema,
+  actionSubjectKindSchema,
 } from './managed/action_workflow';
 export type {
   ActionApprovalPolicy,
   ActionCategory,
   ActionImpact,
   ActionMetadata,
+  ActionSubjectKind,
 } from './managed/action_workflow';
 
 export {
@@ -144,6 +147,8 @@ export {
   workflowAccessControlSchema,
   storedWorkflowAccessControlSchema,
   getWorkflowPermissions,
+  getWorkflowAccessDecisions,
+  toWorkflowPermissions,
 } from './common/access_control';
 export type {
   WorkflowAccessControl,

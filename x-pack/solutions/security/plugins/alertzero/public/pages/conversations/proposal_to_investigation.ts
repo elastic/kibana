@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isProposalSettling, isTerminal } from '@kbn/proposals-common';
 import type { ProposalConfidence, ProposalImpact } from '@kbn/proposals-common';
 import type { Investigation, RecommendedAction } from '@kbn/agentic-investigations-common';
 import type { ProposalItem } from '../../../common/proposals/list';
@@ -54,65 +55,48 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  * Data gaps — fields that cannot be faithfully mapped from a ProposalItem:
  *
  * - `template_id`      fabricated `'investigation'`; a proposal is not an investigation.
- * - `watch_id`         fabricated `''`; no equivalent on a proposal.
- * - `watch_execution_id` fabricated `''`; no equivalent.
+ * - `worker_execution_ids` empty; no equivalent on a proposal.
  * - `events`           `[]`; proposals have no timeline. The flyout renders an empty list.
- * - `affectedSurface`  first Impact entity id, when hydrated; otherwise undefined.
- * - `entityIds`        from the conversation's Impact document; omitted when none.
- * - `status`           deliberately `undefined`. A proposal's own statuses (`'pending'`,
- *                      `'succeeded'`, …) are not investigation statuses, and mapping them
- *                      across would be inventing a meaning. The bucket carries the part
- *                      the queue actually needs: decided proposals land in `closed`.
+ * - `status`           deliberately `undefined`. A proposal status (`'pending'`, `'succeeded'`, …)
+ *                      is not an investigation status. The bucket gives the queue what it
+ *                      needs: a settled proposal goes to `closed`. An approved proposal that
+ *                      still runs stays in its category. `isProposalSettling` marks it.
+ * - `conversationStatus` the investigation's own status, read from the conversation.
  * - `severity`         lossy 4→3 collapse: `critical` → `'high'` so the danger icon fires.
- * - `updatedAt`        approximated as `decidedAt ?? createdAt`; proposals have no mtime.
+ * - `proposalCreatedAt` / `proposalDecidedAt` the proposal's own timestamps. The decision time
+ *                      dates the closed rows.
  * - `recordId`         repurposed as the proposal id; the page gates dismiss/assign modals
  *                      on `modalState.recordId`, so this must be non-null for the ⋮ menu
  *                      items to work.
- * - `pendingProposalCount` degenerate (1 for pending, 0 for decided); one card IS one proposal.
+ * - `pendingProposalCount` is 1 for a pending proposal and 0 for any other.
  * - `confidence`, `origin`, `dismissReason`, `rationale`, `executionError`,
  *   `workflowExecutionId`, `decidedBy`, `expiresAt` — no destination in Investigation.
  */
-/**
- * Past-tense label for a proposal whose false-positive close actually ran, identified by the
- * close action's input contract. Undefined for anything else (dismissed, expired, failed, or
- * another action) so the caller falls back to the proposal title.
- */
-const closedActionLabel = (proposal: ProposalItem): string | undefined => {
-  if (proposal.status !== 'succeeded') return undefined;
-  const { alertIds, reason } = proposal.actionInput ?? {};
-  if (!Array.isArray(alertIds) || reason !== 'false_positive') return undefined;
-  return i18n.translate('xpack.alertzero.conversationQueue.alertsClosedAsFalsePositiveLabel', {
-    defaultMessage: '{count, plural, one {# alert} other {# alerts}} closed as false positive',
-    values: { count: alertIds.length },
-  });
-};
-
 export const proposalToInvestigation = (proposal: ProposalItem): Investigation => {
-  // Closed detection mirrors groupProposals() server-side: decidedAt wins over category.
-  const isClosed = Boolean(proposal.decidedAt);
+  // A proposal is closed when it settles, not when it is decided. An approved proposal stays in
+  // its category while its action runs. This matches the server, which lists by status.
+  const isClosed = isTerminal(proposal.status);
   const bucket: RecommendedAction = isClosed
     ? CLOSED_GROUP_KEY
     : CATEGORY_TO_BUCKET[proposal.category ?? ''] ?? FALLBACK_BUCKET;
 
   const impactRank = IMPACT_RANK[proposal.impact];
   const confidenceRank = CONFIDENCE_RANK[proposal.confidence];
+  const conversationTitle = proposal.conversationTitle ?? UNTITLED_INVESTIGATION;
 
   return {
     id: proposal.id,
     template_id: 'investigation',
-    // A card is titled by the investigation it belongs to, never by its action: the
-    // action name is already the call to action, and repeating it as the title loses
-    // the only thing that says which incident this decision is about.
-    title: proposal.conversationTitle ?? UNTITLED_INVESTIGATION,
+    title: proposal.title,
     createdAt: proposal.createdAt,
-    // Proposals have no modification timestamp; decidedAt is the closest event.
-    updatedAt: proposal.decidedAt ?? proposal.createdAt,
-    // watch_id and watch_execution_id are required by the type but have no
-    // equivalent on a proposal — fabricated as empty strings.
-    watch_id: '',
-    watch_execution_id: '',
+    proposalCreatedAt: proposal.createdAt,
+    proposalDecidedAt: proposal.decidedAt,
+    // Proposals do not carry worker execution IDs.
+    worker_execution_ids: [],
     // status is deliberately omitted — see the data-gap note above.
-    pendingProposalCount: proposal.decidedAt ? 0 : 1,
+    conversationStatus: proposal.conversationStatus,
+    pendingProposalCount: proposal.status === 'pending' ? 1 : 0,
+    isProposalSettling: isProposalSettling(proposal),
     recommendedAction: bucket,
     // severity collapse: 4-level impact → 3-level severity string.
     // 'critical' maps to 'high' so helpers.tsx's === 'high' check still fires.
@@ -124,19 +108,14 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // The page renders dismiss/assign modals only if modalState.recordId is set.
     recordId: proposal.id,
     conversationId: proposal.conversationId,
-    // The title, not the comment: the card renders this as plain text, so the
-    // comment's markdown came through as literal asterisks and headings.
-    summary: proposal.title,
-    primaryActionLabel: closedActionLabel(proposal) ?? proposal.title,
+    summary: conversationTitle,
+    // Decided rows have no action button, and the compact row prints this after the title.
+    primaryActionLabel: isClosed ? conversationTitle : proposal.title,
     // `conversationAssignees` is an array but `Investigation.assignee` is singular,
     // because the flyout header renders one avatar. First entry wins, as in the
     // conversation adapter.
     assignee: proposal.conversationAssignees[0] ?? null,
     assignees: proposal.conversationAssignees,
     events: [],
-    entityIds: proposal.entityIds,
-    // First id feeds the flyout Overview "Compromised" row until that surface
-    // reads `entityIds` directly. Pills and the queue filter use `entityIds`.
-    affectedSurface: proposal.entityIds?.[0],
   };
 };

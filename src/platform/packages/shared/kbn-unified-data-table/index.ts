@@ -19,7 +19,6 @@ export {
   type RowHeightSettingsProps,
 } from './src/components/row_height_settings';
 export { getDisplayedColumns, SOURCE_COLUMN } from './src/utils/columns';
-export { getTextBasedColumnsMeta } from './src/utils/get_columns_meta';
 export { ROWS_HEIGHT_OPTIONS, DataGridDensity, DEFAULT_PAGINATION_MODE } from './src/constants';
 
 export { JSONCodeEditorCommonMemoized } from './src/components/json_code_editor/json_code_editor_common';
@@ -43,6 +42,7 @@ export {
   renderCustomToolbar,
 } from './src/components/custom_toolbar/render_custom_toolbar';
 
+export { useFindSimilarValues } from './src/hooks/use_find_similar_values';
 export { getDataGridDensity, getDataGridDensityPadding } from './src/hooks/use_data_grid_density';
 export { getRowHeight } from './src/hooks/use_row_height';
 

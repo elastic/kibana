@@ -10,6 +10,7 @@
     "public/**/*",
     "server/**/*",
     "test/scout/**/*",
+    "test/agent_image/**/*",
     "test/scout_synthetics_agent_e2e/**/*",
     "test/scenarios/**/*",
     "../../../../../typings/**/*"
@@ -58,7 +59,6 @@
     "@kbn/es-types",
     "@kbn/core-http-server-mocks",
     "@kbn/utility-types",
-    "@kbn/telemetry-plugin",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-common",
@@ -98,7 +98,6 @@
     "@kbn/core-application-browser",
     "@kbn/dashboard-plugin",
     "@kbn/search-types",
-    "@kbn/slo-schema",
     "@kbn/alerting-types",
     "@kbn/swc-register",
     "@kbn/slo-plugin",
@@ -142,6 +141,8 @@
     "@kbn/ui-callout",
     "@kbn/app-header",
     "@kbn/app-menu",
+    "@kbn/config",
+    "@kbn/slo-constants",
   ],
   "exclude": ["target/**/*"]
 }

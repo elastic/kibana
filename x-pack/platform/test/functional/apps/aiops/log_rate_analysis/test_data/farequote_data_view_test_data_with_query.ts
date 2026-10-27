@@ -206,6 +206,8 @@ export const farequoteDataViewTestDataWithQuery: TestData = {
         },
       },
     },
-    prompt: 'change-point',
+    // With the airline filter applied, the 100 extra docs at 2016-02-09T16:19:59 only add
+    // ~100 to a 2h bucket of ~1,000, which the `change_point` aggregation reports as `stationary`.
+    prompt: 'empty',
   },
 };

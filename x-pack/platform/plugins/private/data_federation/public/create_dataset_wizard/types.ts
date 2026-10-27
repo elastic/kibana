@@ -5,21 +5,9 @@
  * 2.0.
  */
 
-import type { CreateDatasetSettingsFormValues } from './create_dataset_form_state';
-import type { MappingEditorValue } from './mapping_step/mapping_editor';
+export type DatasetWizardStepId = 'dataset' | 'settings' | 'mapping' | 'review';
 
-export interface DatasetWizardDatasetStep {
-  name: string;
-  description: string;
-  data_source: string;
-  resource: string;
-  format: string;
+export interface DatasetWizardStepContent {
+  isValid?: boolean;
+  validate: () => Promise<boolean>;
 }
-
-export interface DatasetWizardContent {
-  dataset: DatasetWizardDatasetStep;
-  settings: CreateDatasetSettingsFormValues;
-  mapping: MappingEditorValue;
-}
-
-export type DatasetWizardSection = keyof DatasetWizardContent | 'mapping' | 'review';

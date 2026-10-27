@@ -8,16 +8,24 @@
 import type { ConversationEvent } from './timeline_events';
 import {
   BUILT_IN_CONVERSATION_EVENT_TYPES,
+  ConversationActivityEventType,
   EventActorType,
   TimelineEventType,
   answeredPromptRequestIds,
   assertValidConversationEventType,
+  getEventActorDisplayName,
   interruptionOfTerminal,
+  isActivityEvent,
   isAttachmentEvent,
   isBuiltInConversationEventType,
+  isCustomConversationEvent,
   isExecutionTerminalEvent,
+  isTimelineEvent,
   lastExecutionTerminal,
+  parseExecutionId,
   pendingPromptRequest,
+  resumeExecutionId,
+  timelineExecutionId,
 } from './timeline_events';
 import { AgentPromptType } from '../agents/prompts';
 
@@ -66,6 +74,45 @@ describe('attachment timeline events', () => {
   );
 });
 
+describe('activity events', () => {
+  const actor = { type: EventActorType.user, id: 'u1' };
+  const activityTypes = Object.values(ConversationActivityEventType);
+
+  it.each(activityTypes)('%s is an activity event and a built-in type', (type) => {
+    const event = { id: 'e1', type, data: {}, created_at: 'now', actor };
+    expect(isActivityEvent(event)).toBe(true);
+    expect(isBuiltInConversationEventType(type)).toBe(true);
+    expect(BUILT_IN_CONVERSATION_EVENT_TYPES).toContain(type);
+  });
+
+  it.each(activityTypes)('%s is neither a timeline event nor a custom event', (type) => {
+    const event = { id: 'e1', type, data: {}, created_at: 'now', actor };
+    expect(isTimelineEvent(event)).toBe(false);
+    expect(isCustomConversationEvent(event)).toBe(false);
+  });
+
+  it('classifies timeline, attachment and custom events', () => {
+    const userMessage = { type: TimelineEventType.userMessage };
+    const custom = { type: 'my_custom_event' };
+
+    expect(isActivityEvent(userMessage)).toBe(false);
+    expect(isCustomConversationEvent(userMessage)).toBe(false);
+    expect(isCustomConversationEvent(custom)).toBe(true);
+    expect(isActivityEvent(custom)).toBe(false);
+  });
+
+  it.each([
+    TimelineEventType.attachmentAdded,
+    TimelineEventType.attachmentUpdated,
+    TimelineEventType.attachmentDeleted,
+  ])('%s is both a timeline event and an activity event', (type) => {
+    const event = { id: 'e1', type, data: {}, created_at: 'now', actor };
+    expect(isTimelineEvent(event)).toBe(true);
+    expect(isActivityEvent(event)).toBe(true);
+    expect(isCustomConversationEvent(event)).toBe(false);
+  });
+});
+
 describe('assertValidConversationEventType', () => {
   it('accepts a valid custom type', () => {
     expect(() => assertValidConversationEventType('my.custom_event')).not.toThrow();
@@ -85,11 +132,9 @@ describe('assertValidConversationEventType', () => {
     expect(() => assertValidConversationEventType('step')).toThrow('reserved');
   });
 
-  it('throws for every built-in timeline event type', () => {
+  it('throws for every built-in event type', () => {
     for (const builtInType of BUILT_IN_CONVERSATION_EVENT_TYPES) {
-      expect(() => assertValidConversationEventType(builtInType)).toThrow(
-        'built-in timeline event type'
-      );
+      expect(() => assertValidConversationEventType(builtInType)).toThrow('built-in event type');
     }
   });
 });
@@ -234,5 +279,50 @@ describe('interruptionOfTerminal', () => {
       type: 'aborted',
       aborted_by: { source: 'api' },
     });
+  });
+});
+
+describe('timelineExecutionId', () => {
+  it('names the initial run of a round', () => {
+    expect(timelineExecutionId('round-1', 0)).toBe('round-1::execution');
+  });
+
+  it('names a resume the same way resumeExecutionId does', () => {
+    expect(timelineExecutionId('round-1', 2)).toBe(resumeExecutionId('round-1', 2));
+    expect(timelineExecutionId('round-1', 2)).toBe('round-1::execution::2');
+  });
+
+  it('round-trips through parseExecutionId', () => {
+    expect(parseExecutionId(timelineExecutionId('round-1', 0))).toEqual({
+      roundId: 'round-1',
+      index: 0,
+    });
+    expect(parseExecutionId(timelineExecutionId('round-1', 3))).toEqual({
+      roundId: 'round-1',
+      index: 3,
+    });
+  });
+});
+
+describe('getEventActorDisplayName', () => {
+  it('prefers the full name', () => {
+    expect(
+      getEventActorDisplayName({
+        type: EventActorType.user,
+        id: 'u1',
+        username: 'jdoe',
+        full_name: 'Jane Doe',
+      })
+    ).toBe('Jane Doe');
+  });
+
+  it('falls back to the username', () => {
+    expect(
+      getEventActorDisplayName({ type: EventActorType.user, id: 'u1', username: 'jdoe' })
+    ).toBe('jdoe');
+  });
+
+  it('returns undefined when the actor has no name', () => {
+    expect(getEventActorDisplayName({ type: EventActorType.system, id: 'kibana' })).toBeUndefined();
   });
 });

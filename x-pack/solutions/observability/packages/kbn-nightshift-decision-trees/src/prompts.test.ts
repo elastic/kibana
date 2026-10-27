@@ -113,6 +113,15 @@ describe('buildReinforcementSystemPrompt', () => {
     );
   });
 
+  // Matches Deductive's runbook reinforcement prompt, which carries no separate size rules.
+  it('omits the abstraction rules the one-shot plan prompt uses', () => {
+    expect(prompt).not.toContain('Keep the Graph Small');
+  });
+
+  it('tells the agent to ignore the tools Agent Builder adds to every run', () => {
+    expect(prompt).toContain('Use only the tools named above.');
+  });
+
   it('does not rewrite Mermaid decision-node shape markers', () => {
     expect(prompt).toContain('`{{label}}`');
     expect(prompt).toContain('D1{{Database-related errors?}}');

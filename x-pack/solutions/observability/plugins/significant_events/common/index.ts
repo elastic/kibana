@@ -7,16 +7,33 @@
 
 export { QUERY_STATUSES } from './queries';
 export type { QueryStatus } from './queries';
-
+export type { PaginatedResponse } from './pagination';
+export type { DetectionEntity, DetectionEntitiesResponse } from './detection_entities';
 export {
-  SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG,
-  STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
-} from './feature_flags';
+  isSignificantEventsSortField,
+  MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH,
+  SIGNIFICANT_EVENT_INVESTIGATION_STATES,
+  SIGNIFICANT_EVENTS_SORT_FIELDS,
+  SIGNIFICANT_EVENTS_SORT_ORDERS,
+} from './events_list';
+export type {
+  SignificantEventInvestigationState,
+  SignificantEventsFacets,
+  SignificantEventsSortField,
+  SignificantEventsSortOrder,
+} from './events_list';
+
+export { SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG } from './feature_flags';
 
 export {
   SIGNIFICANT_EVENTS_APP_ROUTE,
   SIGNIFICANT_EVENT_TIERED_FEATURES,
   SIGNIFICANT_EVENTS_TIERED_FEATURE,
+  SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
+  KI_QUERY_GENERATION_AGENT_ID,
+  FEATURE_IDENTIFICATION_AGENT_ID,
+  SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+  FINALIZE_FEATURES_TOOL_ID,
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
@@ -46,6 +63,8 @@ export {
 
 export {
   SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
+  toLifecycleDetection,
+  type LifecycleDetectionInput,
   type SignificantEventDetectionAttachment,
 } from './significant_event_detection_attachment';
 
@@ -61,10 +80,12 @@ export type {
   RelayAppConnectionStatus,
   SlackAppBindChannelResponse,
   SlackAppBindingsResponse,
+  SlackAppConfirmResponse,
   SlackAppConnectResponse,
   SlackAppDisconnectResponse,
   SlackAppStatusResponse,
   SlackAppUnbindChannelResponse,
+  SlackAppWorkspace,
   SlackChannelBinding,
   SlackChannelBindingStatus,
 } from './slack_app/types';
@@ -83,6 +104,12 @@ export {
   stateBlocksNewActivity,
 } from './maintenance/state_machine';
 export { MAINTENANCE_FEATURE_FLAG_ACTOR } from './maintenance/actors';
+export {
+  getDetectionPausedCalloutBody,
+  getDetectionPausedCalloutTitle,
+  getDetectionPausedSettingsCalloutBody,
+  isPausedByFeatureFlag,
+} from './maintenance/paused_callout_copy';
 export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';
 
 export { DEFAULT_RUN_LIMITS, MAX_RUN_LIMIT, MIN_RUN_LIMIT, RUN_QUOTA_GROUPS } from './run_quotas';

@@ -1,5 +1,5 @@
 {
-  "sha1": "742363c821cef4f4c84734497dedbea2c4fddbd5",
+  "sha1": "4b4736d6afcce344570b6153c09067bb4dbefc8c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,8 +16,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
-        "line": 97,
-        "column": 22
+        "line": 117,
+        "column": 46
+      }
+    },
+    {
+      "id": "05b5ab071a3f4c7-1c078edfd00472e",
+      "title": "Observability Alerting v2 Inbox investigation actions triggers investigation for a native v2 episode using its episode id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
+        "line": 171,
+        "column": 33
       }
     },
     {
@@ -32,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
-        "line": 150,
-        "column": 18
+        "line": 190,
+        "column": 13
       }
     },
     {
@@ -48,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
-        "line": 171,
-        "column": 26
+        "line": 218,
+        "column": 13
       }
     }
   ]

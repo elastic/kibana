@@ -16,9 +16,12 @@ import {
   isNotCondition,
   isAlwaysCondition,
 } from '@kbn/streamlang';
-import type { EntityType, FieldEvaluation } from '../definitions/entity_schema';
-import { isSingleFieldIdentity } from '../definitions/entity_schema';
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import type { EntityDefinitionWithoutId, FieldEvaluation } from '../definitions/entity_schema';
+import {
+  getPostStatsFieldOverrides,
+  getPreAggFieldOverrides,
+  isSingleFieldIdentity,
+} from '../definitions/entity_schema';
 import {
   applyWhenConditionTrueSetFields,
   documentPassesCalculatedIdentityPipelineGate,
@@ -48,26 +51,26 @@ import { applyFieldEvaluations, getSourceMatchSpec } from './field_evaluations';
  *
  * @example
  * // Okta user — includes event.module condition so only okta documents match
- * getEuidKqlFilterBasedOnDocument('user', { 'user.email': 'jane@acme.com', 'entity.namespace': 'okta' })
+ * getEuidKqlFilterBasedOnDocument(userDefinition, { 'user.email': 'jane@acme.com', 'entity.namespace': 'okta' })
  * // → 'user.email: "jane@acme.com" AND (event.module: "okta" OR event.module: "entityanalytics_okta" OR data_stream.dataset: okta* OR data_stream.dataset: entityanalytics_okta*)'
  *
  * @example
  * // Local user — identity fields alone are sufficient
- * getEuidKqlFilterBasedOnDocument('user', { 'user.name': 'jdoe', 'host.id': 'HW-UUID-ABC', 'entity.namespace': 'local' })
+ * getEuidKqlFilterBasedOnDocument(userDefinition, { 'user.name': 'jdoe', 'host.id': 'HW-UUID-ABC', 'entity.namespace': 'local' })
  * // → 'user.name: "jdoe" AND host.id: "HW-UUID-ABC"'
  *
  * @example
  * // Host — single-field identity, no namespace
- * getEuidKqlFilterBasedOnDocument('host', { 'host.id': 'HW-UUID-ABC123' })
+ * getEuidKqlFilterBasedOnDocument(hostDefinition, { 'host.id': 'HW-UUID-ABC123' })
  * // → 'host.id: "HW-UUID-ABC123"'
  *
- * @param entityType - The entity type ('host', 'user', 'service', 'generic')
+ * @param entityDefinition - The entity definition whose identity rules build the filter
  * @param doc - Source document or entity store record. May be flattened, nested, or an ES hit.
  * @returns A KQL filter string, or `undefined` if the document lacks sufficient identity
  *   information or fails the entity's pipeline gate.
  */
 export function getEuidKqlFilterBasedOnDocument(
-  entityType: EntityType,
+  entityDefinition: EntityDefinitionWithoutId,
   doc: any
 ): string | undefined {
   if (!doc) {
@@ -75,7 +78,6 @@ export function getEuidKqlFilterBasedOnDocument(
   }
 
   doc = getDocument(doc);
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
   const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField)) {
@@ -91,11 +93,13 @@ export function getEuidKqlFilterBasedOnDocument(
     const evaluated = applyFieldEvaluations(doc, fieldEvaluations);
     doc = { ...doc, ...evaluated };
   }
-  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
-    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+  const preAggFieldOverrides = getPreAggFieldOverrides(entityDefinition);
+  if (preAggFieldOverrides?.length) {
+    applyWhenConditionTrueSetFields(doc, preAggFieldOverrides);
   }
-  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
-    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsAfterStats);
+  const postStatsFieldOverrides = getPostStatsFieldOverrides(entityDefinition);
+  if (postStatsFieldOverrides?.length) {
+    applyWhenConditionTrueSetFields(doc, postStatsFieldOverrides);
   }
   if (!documentPassesCalculatedIdentityPipelineGate(doc, entityDefinition)) {
     return undefined;

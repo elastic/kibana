@@ -9,6 +9,7 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import Zlib from 'zlib';
 import { loadJsonFile } from '@kbn/utils';
 
 import execa from 'execa';
@@ -84,6 +85,9 @@ describe('scripts/generate_plugin', () => {
     const bundleContent = Fs.readFileSync(Path.resolve(TMP_DIR, mainBundle!), 'utf-8');
     expect(bundleContent).toContain('plugin/fooTestPlugin/public');
     expect(bundleContent).toContain('plugin/fooTestPlugin/common');
+
+    const compressedBundle = Fs.readFileSync(Path.resolve(TMP_DIR, `${mainBundle!}.br`));
+    expect(Zlib.brotliDecompressSync(compressedBundle).toString('utf-8')).toBe(bundleContent);
 
     const serverFiles = files.filter((f) => f.includes('server/'));
     expect(serverFiles.length).toBeGreaterThan(0);

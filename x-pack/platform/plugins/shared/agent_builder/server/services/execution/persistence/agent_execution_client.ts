@@ -48,6 +48,7 @@ export interface ExecutionPeek {
   eventCount: number;
   lastHeartbeat?: string;
   conversationId?: string;
+  agentId?: string;
   owner?: UserIdAndName;
 }
 
@@ -183,10 +184,12 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       metadata: metadata ?? {},
     };
 
+    // Reads by id are real-time GETs, and searches already tolerate the lag on status updates.
     await this.storage.getClient().index({
       id: executionId,
       document,
       op_type: 'create',
+      refresh: false,
     });
 
     return fromEs(document);
@@ -268,6 +271,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
           'event_count',
           'last_heartbeat',
           'agent_params.conversationId',
+          'agent_id',
           'owner',
         ] as string[],
       });
@@ -275,7 +279,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       if (!source) {
         return undefined;
       }
-      const { agent_params: agentParams, owner } = source;
+      const { agent_params: agentParams, agent_id: agentId, owner } = source;
       const conversationId =
         agentParams && 'conversationId' in agentParams ? agentParams.conversationId : undefined;
       return {
@@ -284,6 +288,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
         ...(source.error ? { error: source.error } : {}),
         ...(source.last_heartbeat ? { lastHeartbeat: source.last_heartbeat } : {}),
         ...(conversationId ? { conversationId } : {}),
+        ...(agentId ? { agentId } : {}),
         ...(owner ? { owner } : {}),
       };
     } catch (err) {

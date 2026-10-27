@@ -144,6 +144,10 @@ interface EntityMaintainerRunSummarySource {
   qualified: number;
   /** Source outcome: index_missing | empty | partial | producing | error */
   outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error';
+  /** Entity writes that landed in the store for this source */
+  applied?: number;
+  /** Which step threw. Present only when outcome is "error" */
+  failedStage?: string;
 }
 
 interface EntityMaintainerRunSummaryBreakdown {
@@ -578,6 +582,21 @@ export const ENTITY_MAINTAINER_RUN_SUMMARY_EVENT = {
               description: 'Source outcome: index_missing | empty | partial | producing | error',
             },
           },
+          applied: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description: 'Entity writes that landed in the store for this source',
+            },
+          },
+          failedStage: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description:
+                'Which step threw for this source. Present only when outcome is "error". Currently fetch-actors | fetch-targets | entity-write | metadata-write, but new stages may be added, so group by this field rather than enumerating it',
+            },
+          },
         },
       },
       _meta: {
@@ -940,7 +959,7 @@ interface TelemetryEventMap {
 
 export type TelemetryReporter = ReturnType<typeof createReportEvent>;
 
-export const createReportEvent = (analytics: AnalyticsServiceSetup) => ({
+export const createReportEvent = (analytics: Pick<AnalyticsServiceSetup, 'reportEvent'>) => ({
   reportEvent: <T extends (typeof events)[number]>(
     event: T,
     eventData: TelemetryEventMap[T['eventType']]

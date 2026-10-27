@@ -16,7 +16,7 @@ import type {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiHasAppContext, apiIsPresentationContainer } from '@kbn/presentation-publishing';
-import { getAllEsqlControls } from '@kbn/esql-utils';
+import { getAllEsqlControls } from '@kbn/esql-controls-utils';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DiscoverServices } from '../build_services';
