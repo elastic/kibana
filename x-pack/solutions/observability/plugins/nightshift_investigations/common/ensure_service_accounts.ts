@@ -23,6 +23,8 @@ export const SECURITY_ROLE_API_VERSION = '2023-10-31';
 export interface ListedServiceAccount {
   id: string;
   name: string;
+  /** Role names the account holds. Both backends report them on the listing. */
+  roles: string[];
   enabled: boolean;
   assumable: boolean;
 }
@@ -99,6 +101,8 @@ export const createHttpServiceAccountsApi = ({
 export type NightshiftServiceAccountSetupErrorCode =
   /** The deployment lacks the role the account must hold. */
   | 'role_missing'
+  /** An account with the name exists, but it does not hold the role Nightshift needs. */
+  | 'role_mismatch'
   /** An account with the name exists, but Kibana cannot run as it. */
   | 'account_unusable';
 
@@ -109,9 +113,11 @@ export class NightshiftServiceAccountSetupError extends Error {
     public readonly details: { kind: NightshiftServiceAccountKind; name: string; role: string }
   ) {
     super(
-      code === 'role_missing'
-        ? `The role [${details.role}] for the Nightshift service account [${details.name}] does not exist.`
-        : `The service account [${details.name}] exists, but Kibana cannot run as it.`
+      {
+        role_missing: `The role [${details.role}] for the Nightshift service account [${details.name}] does not exist.`,
+        role_mismatch: `The service account [${details.name}] exists, but does not hold the role [${details.role}].`,
+        account_unusable: `The service account [${details.name}] exists, but Kibana cannot run as it.`,
+      }[code]
     );
     this.name = 'NightshiftServiceAccountSetupError';
   }
@@ -140,10 +146,22 @@ const listAll = async (api: NightshiftServiceAccountsApi): Promise<ListedService
 
 const isUsable = ({ enabled, assumable }: ListedServiceAccount) => enabled && assumable;
 
-/** UIAM allows several accounts with one name, so prefer one Kibana can run as. */
-const findByName = (accounts: ListedServiceAccount[], name: string) => {
-  const matches = accounts.filter((account) => account.name === name);
-  return matches.find(isUsable) ?? matches[0];
+const holdsRole = ({ roles }: ListedServiceAccount, role: string) => (roles ?? []).includes(role);
+
+/**
+ * The account to reuse for a kind. Only an account that holds the kind's role will do: a name is
+ * not a privilege, and an account named after Nightshift but holding something else would run
+ * investigations with the wrong privileges. UIAM allows several accounts with one name, so this
+ * also picks the right one among them, preferring one Kibana can run as.
+ */
+const findForRole = (accounts: ListedServiceAccount[], name: string, role: string) => {
+  const named = accounts.filter((account) => account.name === name);
+  const matching = named.filter((account) => holdsRole(account, role));
+  return {
+    account: matching.find(isUsable) ?? matching[0],
+    /** An account took the name, but none of them holds the role. */
+    nameTaken: named.length > 0,
+  };
 };
 
 /**
@@ -170,8 +188,11 @@ export const ensureNightshiftServiceAccounts = async (
       return account.id;
     };
 
-    const existing = findByName(accounts, name);
+    const { account: existing, nameTaken } = findForRole(accounts, name, role);
     if (existing) return toId(existing);
+    if (nameTaken) {
+      throw new NightshiftServiceAccountSetupError('role_mismatch', { kind, name, role });
+    }
 
     if (!(await api.roleExists(role))) {
       throw new NightshiftServiceAccountSetupError('role_missing', { kind, name, role });
@@ -186,7 +207,7 @@ export const ensureNightshiftServiceAccounts = async (
     } catch (error) {
       // Created concurrently (a name is unique on stateful), for example from another space.
       if (!api.isConflict(error)) throw error;
-      const concurrent = findByName(await listAll(api), name);
+      const { account: concurrent } = findForRole(await listAll(api), name, role);
       if (!concurrent) throw error;
       return toId(concurrent);
     }
