@@ -127,7 +127,7 @@ export const ConversationCard = memo<ConversationCardProps>(
             >
               <EuiFlexItem grow={false}>
                 <ConversationMetaInfo
-                  createdAt={investigation.createdAt}
+                  timestamp={investigation.createdAt}
                   inFlightStatus={renderInFlightStatus?.(investigation)}
                 />
               </EuiFlexItem>

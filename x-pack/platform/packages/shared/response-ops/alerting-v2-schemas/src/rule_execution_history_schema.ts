@@ -13,6 +13,7 @@ import {
   EXECUTION_HISTORY_DEFAULT_PER_PAGE,
   EXECUTION_HISTORY_MAX_RESULT_WINDOW,
   EXECUTION_HISTORY_MAX_RULE_ID_FILTER,
+  MAX_SEARCH_LENGTH,
 } from './constants';
 
 /**
@@ -54,6 +55,15 @@ export const listRuleExecutionsRequestSchema = lazySchema(() =>
   z
     .object({
       rule_ids: ruleIdArraySchema.optional().describe(`Rule id filter. `),
+      search: z
+        .string()
+        .trim()
+        .min(1)
+        .max(MAX_SEARCH_LENGTH)
+        .optional()
+        .describe(
+          'Free-text search. Matches rule name, description or rule ID (case-insensitive). Combined with rule_ids using AND.'
+        ),
       outcomes: outcomeArraySchema.optional().describe('Outcome filter. '),
       from: isoDateTime().optional().describe('Inclusive ISO datetime lower bound on event.start.'),
       to: isoDateTime().optional().describe('Inclusive ISO datetime upper bound on event.start.'),
@@ -130,6 +140,18 @@ export const ruleExecutionViewSchema = lazySchema(() =>
 
 export type RuleExecutionView = z.infer<typeof ruleExecutionViewSchema>;
 
+export const ruleSearchMatchCountsSchema = lazySchema(() =>
+  z.object({
+    rules: z.number().describe(`Rules matching the search. ${ESTIMATED_COUNT_NOTE}`),
+    is_truncated: z
+      .boolean()
+      .describe(
+        'True when more than 500 rules matched the search. Only the executions of the first 500 matching rules are returned, so the results are incomplete. Narrow the search to see the rest.'
+      ),
+  })
+);
+export type RuleSearchMatchCounts = z.infer<typeof ruleSearchMatchCountsSchema>;
+
 export const listRuleExecutionsResponseSchema = lazySchema(() =>
   z
     .object({
@@ -141,6 +163,9 @@ export const listRuleExecutionsResponseSchema = lazySchema(() =>
         .describe(`The number of rule executions matching the query. ${ESTIMATED_COUNT_NOTE}`),
       page: z.number().int().min(1),
       per_page: z.number().int().min(1),
+      search_matches: ruleSearchMatchCountsSchema
+        .optional()
+        .describe('Match counts for the active search. Omitted when no search was provided.'),
     })
     .meta({ id: 'alerting_rule_executions_response' })
 );

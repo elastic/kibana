@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_SIGNAL_DESCRIPTION_LENGTH } from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import {
   searchEventsToolHandler,
   DESCRIPTION_TRUNCATION_SUFFIX,
@@ -268,7 +268,7 @@ describe('searchEventsToolHandler', () => {
   });
 
   it('leaves max-length full-view signal descriptions unchanged', async () => {
-    const description = 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH);
+    const description = 'x'.repeat(MAX_TEXT_LENGTH);
     const result = await searchEventsToolHandler({
       eventSearchClient: makeClient([
         {
@@ -283,7 +283,7 @@ describe('searchEventsToolHandler', () => {
   });
 
   it('truncates oversized full-view signal descriptions', async () => {
-    const description = 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1);
+    const description = 'x'.repeat(MAX_TEXT_LENGTH + 1);
     const result = await searchEventsToolHandler({
       eventSearchClient: makeClient([
         {

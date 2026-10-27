@@ -11,7 +11,7 @@ import { ALERT_EPISODE_STATUS, type BulkActivateEpisodeActionItem } from '@kbn/a
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkActivateEpisodeActions } from './bulk_create_alert_actions';
 import { executeCompositeAction } from './execute_composite_action';
-import { episodeSupportsActions } from '../queries/episodes_query';
+import { episodeSupportsActions, type AlertEpisode } from '../queries/episodes_query';
 import * as i18n from './translations';
 
 export interface UnresolveActionDeps {
@@ -19,22 +19,19 @@ export interface UnresolveActionDeps {
   notifications: NotificationsStart;
 }
 
+const isResolved = (ep: AlertEpisode): boolean =>
+  ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE;
+
+const canUnresolve = (ep: AlertEpisode): boolean => episodeSupportsActions(ep) && isResolved(ep);
+
 export const createUnresolveAction = (deps: UnresolveActionDeps): EpisodeAction => ({
   id: 'ALERTING_V2_UNRESOLVE_EPISODE',
   order: 31,
   displayName: i18n.UNRESOLVE,
   iconType: 'cross',
-  isCompatible: ({ episodes }: EpisodeActionContext) => {
-    const nativeEpisodes = episodes.filter(episodeSupportsActions);
-    return (
-      nativeEpisodes.length > 0 &&
-      nativeEpisodes.some((ep) => ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE)
-    );
-  },
+  isCompatible: ({ episodes }: EpisodeActionContext) => episodes.some(canUnresolve),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const actionable = episodes
-      .filter(episodeSupportsActions)
-      .filter((ep) => ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE);
+    const actionable = episodes.filter(canUnresolve);
     const items: BulkActivateEpisodeActionItem[] = actionable.map((ep) => ({
       alert_id: ep['episode.id'],
       reason: i18n.RESOLVE_ACTION_REASON,
@@ -49,7 +46,10 @@ export const createUnresolveAction = (deps: UnresolveActionDeps): EpisodeAction 
       deps,
     });
   },
-  showWhenDisabled: ({ episodes }: EpisodeActionContext) =>
-    episodes.some((ep) => ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE),
+  showWhenDisabled: ({ episodes }: EpisodeActionContext) => episodes.some(isResolved),
+  getBulkDisabledReason: (episodes) =>
+    episodes.some((ep) => isResolved(ep) && !canUnresolve(ep))
+      ? i18n.UNRESOLVE_NOT_AVAILABLE
+      : undefined,
   disabledTooltip: i18n.UNRESOLVE_NOT_AVAILABLE,
 });

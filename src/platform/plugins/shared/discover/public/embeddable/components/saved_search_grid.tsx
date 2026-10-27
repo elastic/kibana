@@ -54,6 +54,7 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   wrapToolbar?: boolean;
   searchContext?: CellRenderersSearchContext;
   flyoutMenuTrailingActions?: EuiFlyoutMenuAction[];
+  isInteractive: boolean;
 }
 
 const noopSetExpandedDoc: NonNullable<UnifiedDataTableProps['setExpandedDoc']> = () => undefined;
@@ -67,6 +68,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     wrapToolbar = true,
     searchContext,
     flyoutMenuTrailingActions,
+    isInteractive,
     ...gridProps
   } = props;
   const { euiTheme } = useEuiTheme();
@@ -194,7 +196,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       hideFilteringOnComputedColumns={true}
       maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
       renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
-      renderCustomToolbar={renderCustomToolbarWithElements}
+      renderMode={isInteractive ? 'interactive' : 'print'}
+      renderCustomToolbar={isInteractive ? renderCustomToolbarWithElements : undefined}
       externalCustomRenderers={cellRenderers}
       enableComparisonMode
       showColumnTokens

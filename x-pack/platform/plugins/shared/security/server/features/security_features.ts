@@ -112,10 +112,6 @@ const serviceAccountsManagementFeature: ElasticsearchFeatureConfig = {
       requiredClusterPrivileges: ['manage_security'],
       ui: ['save'],
     },
-    {
-      requiredClusterPrivileges: ['read_security'],
-      ui: [],
-    },
   ],
 };
 

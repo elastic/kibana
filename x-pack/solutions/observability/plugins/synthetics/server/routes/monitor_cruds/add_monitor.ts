@@ -33,6 +33,7 @@ import {
   assertCanPerformMonitorBulkActionInAllSpaces,
   validateMonitorPrivateLocationSpaces,
 } from './monitor_locations_utils';
+import { isSecretConnectionsEnabled } from '../../config';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -106,9 +107,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       const maintenanceWindowRefs = formattedConfig?.[ConfigKey.MAINTENANCE_WINDOWS];
       const maintenanceWindows = maintenanceWindowRefs?.length
-        ? (await routeContext.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(
-            spaceId
-          )) ?? []
+        ? (await routeContext.syntheticsMonitorClient.getMaintenanceWindows(spaceId)) ?? []
         : [];
 
       const monitorWithDefaults = await addMonitorAPI.normalizeMonitor(
@@ -121,7 +120,8 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       const validationResult = validateMonitor(
         monitorWithDefaults,
         spaceId,
-        server.cloud?.isServerlessEnabled
+        server.cloud?.isServerlessEnabled,
+        isSecretConnectionsEnabled(server.config)
       );
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {

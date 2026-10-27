@@ -42,7 +42,7 @@ export const TokenUsageBadge = React.memo<TokenUsageBadgeProps>(
       return null;
     }
 
-    const tooltipContent = i18n.translate('workflowsManagement.tokenUsage.breakdownTooltip', {
+    const tooltipContent = i18n.translate('workflows.tokenUsage.breakdownTooltip', {
       defaultMessage: 'Input: {input} · Output: {output}',
       values: {
         input: fullNumberFormatter.format(usage.inputTokens),
@@ -53,7 +53,7 @@ export const TokenUsageBadge = React.memo<TokenUsageBadgeProps>(
     const total = compactNumberFormatter.format(usage.totalTokens);
     const label = compact
       ? total
-      : i18n.translate('workflowsManagement.tokenUsage.totalBadge', {
+      : i18n.translate('workflows.tokenUsage.totalBadge', {
           defaultMessage: '{total} tokens',
           values: { total },
         });

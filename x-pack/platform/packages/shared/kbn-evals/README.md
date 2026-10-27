@@ -332,11 +332,28 @@ A suite whose Scout server needs secrets from the evals config can map them into
   "id": "my-suite",
   "configPath": "x-pack/.../kbn-evals-suite-my-suite/playwright.config.ts",
   "serverConfigSet": "evals_my_suite",
-  "scoutHook": "x-pack/.../kbn-evals-suite-my-suite/scout/scout_hook.sh"
+  "scoutHook": "x-pack/.../kbn-evals-suite-my-suite/scout/scout_hook.sh",
+  "vaultSecret": "my-suite"
 }
 ```
 
-The hook reads the evals config JSON (the `--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI) on stdin and prints `{ "env"?: Record<string, string> }`. `node scripts/evals start`/`run` and `run_suite.sh` export that env to Scout and the Playwright run, so the suite's server config set can read it. Kibana also resolves `${VAR}` references in YAML config files from its environment, so a config set can pass a suite-owned YAML file with `--config` and keep secrets out of files and process arguments. Scout restarts when the hook output changes. Keep suite-specific keys in the evals config; the shared schema allows unknown blocks. See [the Nightshift investigations hook](../../../../solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh) for an example.
+The hook reads a config JSON on stdin and prints `{ "env"?: Record<string, string> }`. `node scripts/evals start`/`run` and `run_suite.sh` export that env to Scout and the Playwright run, so the suite's server config set can read it. Kibana also resolves `${VAR}` references in YAML config files from its environment, so a config set can pass a suite-owned YAML file with `--config` and keep secrets out of files and process arguments. Scout restarts when the hook output changes. See [the Nightshift investigations hook](../../../../solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh) for an example.
+
+Give the suite its own Vault secret with `vaultSecret`, so rotating its credentials never rewrites the general config other suites read. The hook then reads that secret instead of the general config:
+
+| Where                        | Hook input                                                                                    |
+| ---------------------------- | --------------------------------------------------------------------------------------------- |
+| CI (`run_suite.sh`)          | `kv/ci-shared/kbn-evals/<vaultSecret>` in the ci-prod Vault                                   |
+| `--profile dev-vault`        | `secret/kibana-issues/dev/kbn-evals/<vaultSecret>` in the dev Vault                           |
+| `--profile <file profile>`   | `config.<profile>.json`, which holds the suite's blocks next to the general keys              |
+| No `vaultSecret` (any place) | The general config (`--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI)                 |
+
+Manage the secret with the Vault scripts' `--suite` flag, which keeps the local copy in a gitignored `vault/config.json` next to the suite's `playwright.config.ts` (copy `vault/config.example.json` to start):
+
+```bash
+node scripts/vault/retrieve_secrets.js --vault ci-prod --suite my-suite
+node scripts/vault/upload_secrets.js --vault ci-prod --suite my-suite
+```
 
 ### Serverless suites (`scoutArch` / `scoutDomain`)
 
@@ -664,7 +681,7 @@ node scripts/vault/upload_secrets.js --vault ci-prod
 node scripts/vault/get_command.js --vault ci-prod
 ```
 
-Upload writes the whole secret, so always retrieve first. The ci-prod path is KV v2 and keeps previous versions (numbered up by one per upload). To undo a bad upload, retrieve an earlier version and upload it again. Retrieve validates the config and fails before touching `config.json` if the version can't be read:
+Upload writes the whole secret, so always retrieve first. The ci-prod path is KV v2 and keeps previous versions (numbered up by one per upload). To undo a bad upload, retrieve an earlier version and upload it again (add `--suite <id>` to both for a suite's secret). Retrieve validates the config and fails before touching `config.json` if the version can't be read:
 
 ```bash
 node scripts/vault/retrieve_secrets.js --vault ci-prod --version <n>

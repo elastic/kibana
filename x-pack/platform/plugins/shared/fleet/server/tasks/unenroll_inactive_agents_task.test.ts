@@ -171,6 +171,7 @@ describe('UnenrollInactiveAgentsTask', () => {
       ).toISOString();
       expect(mockedUnenrollBatch).toHaveBeenCalledWith(undefined, expect.anything(), agents, {
         force: true,
+        skipAgentlessValidation: true,
         startTime: expectedStartTime,
         actionId: expect.stringContaining(SCHEDULED_UNENROLL_ACTION_ID_PREFIX),
       });

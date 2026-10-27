@@ -7,7 +7,10 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES, RESOLUTION_RULE_IDS } from '../../../../../common';
-import { RESOLUTION_ENTITY_STORE_PERMISSIONS } from '../../../constants';
+import {
+  RESOLUTION_ENTITY_STORE_MANAGE_PERMISSIONS,
+  RESOLUTION_ENTITY_STORE_PERMISSIONS,
+} from '../../../constants';
 import type { EntityStorePluginRouter } from '../../../../types';
 import { wrapMiddlewares } from '../../../middleware';
 import { enterpriseLicenseMiddleware } from '../../../middleware/enterprise_license';
@@ -124,7 +127,7 @@ describe('resolution rules routes', () => {
     expect(route.routeConfig).toMatchObject({
       path: ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE,
       access: 'public',
-      security: { authz: RESOLUTION_ENTITY_STORE_PERMISSIONS },
+      security: { authz: RESOLUTION_ENTITY_STORE_MANAGE_PERMISSIONS },
     });
     expect(route.versionConfig).toMatchObject({ version: API_VERSIONS.public.v1 });
     expect(setEnabled).toHaveBeenCalledWith(
@@ -157,7 +160,7 @@ describe('resolution rules routes', () => {
     expect(route.routeConfig).toMatchObject({
       path: ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_DISABLE,
       access: 'public',
-      security: { authz: RESOLUTION_ENTITY_STORE_PERMISSIONS },
+      security: { authz: RESOLUTION_ENTITY_STORE_MANAGE_PERMISSIONS },
     });
     expect(setEnabled).toHaveBeenCalledWith(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH, false);
     expect(res.ok).toHaveBeenCalledWith({ body: rule });

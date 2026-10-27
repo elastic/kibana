@@ -104,7 +104,13 @@ const buildItem = (overrides: Partial<RuleExecutionView> = {}): RuleExecutionVie
 
 const mockResult = (
   overrides: Partial<{
-    data: { items: RuleExecutionView[]; total: number; page: number; per_page: number };
+    data: {
+      items: RuleExecutionView[];
+      total: number;
+      page: number;
+      per_page: number;
+      search_matches?: { rules: number; is_truncated: boolean };
+    };
     isFetching: boolean;
     isError: boolean;
   }> = {}
@@ -289,6 +295,108 @@ describe('RulesTabContent', () => {
     renderComponent();
 
     expect(screen.getByText('250 ms')).toBeInTheDocument();
+  });
+
+  describe('search', () => {
+    it('sends the trimmed search after the debounce and resets to page 1', async () => {
+      mockResult(withRows([buildItem()]));
+      renderComponent();
+
+      await userEvent.type(screen.getByTestId('ruleExecutionHistorySearch'), '  my rule ');
+
+      await waitFor(() => {
+        expect(mockUseFetchRuleExecutions).toHaveBeenLastCalledWith(
+          expect.objectContaining({ page: 1, search: 'my rule' })
+        );
+      });
+    });
+
+    it('drops the search param when the field is cleared', async () => {
+      mockResult(withRows([buildItem()]));
+      renderComponent();
+
+      const field = screen.getByTestId('ruleExecutionHistorySearch');
+      await userEvent.type(field, 'my rule');
+      await waitFor(() => {
+        expect(mockUseFetchRuleExecutions).toHaveBeenLastCalledWith(
+          expect.objectContaining({ search: 'my rule' })
+        );
+      });
+
+      await userEvent.clear(field);
+
+      await waitFor(() => {
+        expect(mockUseFetchRuleExecutions).toHaveBeenLastCalledWith(
+          expect.objectContaining({ search: undefined })
+        );
+      });
+    });
+
+    it('shows the filtered empty state when a search matches nothing', async () => {
+      mockResult();
+      renderComponent();
+
+      await userEvent.type(screen.getByTestId('ruleExecutionHistorySearch'), 'nothing');
+
+      expect(await screen.findByTestId('executionHistoryFilteredEmptyPrompt')).toBeInTheDocument();
+    });
+
+    it('warns when the search matched more rules than the server could filter on', async () => {
+      mockResult({
+        data: {
+          items: [buildItem()],
+          total: 1,
+          page: 1,
+          per_page: 10,
+          search_matches: { rules: 600, is_truncated: true },
+        },
+      });
+      renderComponent();
+
+      await userEvent.type(screen.getByTestId('ruleExecutionHistorySearch'), 'cpu');
+
+      expect(await screen.findByText(/matched 600 matching rules/i)).toBeInTheDocument();
+    });
+
+    it('warns about a truncated search even when the page has no executions', async () => {
+      mockResult({
+        data: {
+          items: [],
+          total: 0,
+          page: 1,
+          per_page: 10,
+          search_matches: { rules: 600, is_truncated: true },
+        },
+      });
+      renderComponent();
+
+      await userEvent.type(screen.getByTestId('ruleExecutionHistorySearch'), 'cpu');
+
+      expect(await screen.findByText(/matched 600 matching rules/i)).toBeInTheDocument();
+      expect(screen.getByTestId('executionHistoryFilteredEmptyPrompt')).toBeInTheDocument();
+    });
+
+    it('limits the search field to the length the API accepts', () => {
+      mockResult();
+      renderComponent();
+
+      expect(screen.getByTestId('ruleExecutionHistorySearch')).toHaveAttribute('maxlength', '256');
+    });
+
+    it('asks for a rule name or ID when the user can read rules', () => {
+      mockResult();
+      renderComponent();
+
+      expect(screen.getByPlaceholderText('Search by rule name or ID')).toBeInTheDocument();
+    });
+
+    it('asks for a rule ID only when the user cannot read rules', () => {
+      mockCanReadRules = false;
+      mockResult();
+      renderComponent();
+
+      expect(screen.getByPlaceholderText('Search by rule ID')).toBeInTheDocument();
+    });
   });
 
   describe('sorting', () => {

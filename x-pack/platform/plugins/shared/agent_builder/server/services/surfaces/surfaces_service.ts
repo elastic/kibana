@@ -10,6 +10,7 @@ import type {
   RoundCompleteEvent,
   SurfacePayload,
 } from '@kbn/agent-builder-common';
+import type { AttachmentSurfaceCompositionContext } from '@kbn/agent-builder-server/attachments';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
 import { buildComposition } from './composition';
@@ -24,16 +25,13 @@ export interface SurfacesService {
    */
   renderPayload(
     event: RoundCompleteEvent,
-    options: { originType?: ConversationOriginType }
-  ): SurfacePayload | undefined;
+    options: { originType?: ConversationOriginType } & AttachmentSurfaceCompositionContext
+  ): Promise<SurfacePayload | undefined>;
 }
 
 export class SurfacesServiceImpl implements SurfacesService {
-  /** Looks up attachment types, whose `toSurfaceComposition` renders attachments in place of their tags. */
   private readonly attachmentsService: AttachmentServiceStart;
   private readonly logger: Logger;
-
-  /** The surface renderers, one per origin type. */
   private readonly surfaceRenderers: SurfaceRenderer[] = [slackSurface];
 
   constructor({
@@ -47,10 +45,14 @@ export class SurfacesServiceImpl implements SurfacesService {
     this.logger = logger;
   }
 
-  renderPayload(
+  async renderPayload(
     { data: { round, attachments = [] } }: RoundCompleteEvent,
-    { originType }: { originType?: ConversationOriginType }
-  ): SurfacePayload | undefined {
+    {
+      originType,
+      request,
+      spaceId,
+    }: { originType?: ConversationOriginType } & AttachmentSurfaceCompositionContext
+  ): Promise<SurfacePayload | undefined> {
     const renderer = this.surfaceRenderers.find(({ id }) => id === originType);
 
     if (!renderer) {
@@ -58,10 +60,11 @@ export class SurfacesServiceImpl implements SurfacesService {
     }
 
     try {
-      const composition = buildComposition({
+      const composition = await buildComposition({
         round,
         attachments,
         attachmentsService: this.attachmentsService,
+        context: { request, spaceId },
         logger: this.logger,
       });
 

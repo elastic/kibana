@@ -141,6 +141,7 @@
     "@kbn/ui-callout",
     "@kbn/app-header",
     "@kbn/app-menu",
+    "@kbn/config",
   ],
   "exclude": ["target/**/*"]
 }

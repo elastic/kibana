@@ -1,0 +1,125 @@
+{
+  "sha1": "3e30683deb8a6c60aa55c1d340e35e98fa6370b9",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "a3638bcba56f594-b397bbe8061cc08",
+      "title": "Links panel - add from library adds links panel to top of dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/ui/tests/add_from_library.spec.ts",
+        "line": 19,
+        "column": 8
+      }
+    },
+    {
+      "id": "cc846b38a10602d-b227d77ed30de0f",
+      "title": "Links panel - create can create a new by-reference links panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/ui/tests/links_create.spec.ts",
+        "line": 24,
+        "column": 23
+      }
+    },
+    {
+      "id": "cc846b38a10602d-0c1c2767ba7355e",
+      "title": "Links panel - create does not close the flyout when the user cancels the save as modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/ui/tests/links_create.spec.ts",
+        "line": 34,
+        "column": 24
+      }
+    },
+    {
+      "id": "cc846b38a10602d-94e0ed81e90d698",
+      "title": "Links panel - create can create a by-value links panel and move it to and from the library",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/ui/tests/links_create.spec.ts",
+        "line": 41,
+        "column": 24
+      }
+    },
+    {
+      "id": "c8eacb58633a739-a14555d6078579d",
+      "title": "Links panel - dashboard links navigation should disable link if dashboard does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/ui/tests/links_dashboard_navigation.spec.ts",
+        "line": 37,
+        "column": 48
+      }
+    },
+    {
+      "id": "c8eacb58633a739-26e6c0f00ebf150",
+      "title": "Links panel - dashboard links navigation useFilters should pass filter pills and query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/ui/tests/links_dashboard_navigation.spec.ts",
+        "line": 41,
+        "column": 39
+      }
+    },
+    {
+      "id": "c8eacb58633a739-884ff342b9a7098",
+      "title": "Links panel - dashboard links navigation useTimeRange should pass date range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/ui/tests/links_dashboard_navigation.spec.ts",
+        "line": 55,
+        "column": 1
+      }
+    },
+    {
+      "id": "c8eacb58633a739-f53ba9b16f975c2",
+      "title": "Links panel - dashboard links navigation openInNewTab should create an external link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/ui/tests/links_dashboard_navigation.spec.ts",
+        "line": 78,
+        "column": 10
+      }
+    },
+    {
+      "id": "51d69a3d3bb3f22-0dbb3d401909730",
+      "title": "Links panel - edit can reorder, edit and delete links in an existing panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/ui/tests/links_edit.spec.ts",
+        "line": 20,
+        "column": 23
+      }
+    }
+  ]
+}

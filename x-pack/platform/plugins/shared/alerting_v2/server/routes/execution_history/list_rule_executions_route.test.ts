@@ -16,6 +16,7 @@ describe('toListRuleExecutionsArgs', () => {
     expect(
       toListRuleExecutionsArgs({
         rule_ids: ['rule-1'],
+        search: 'cpu',
         outcomes: ['success'],
         from: '2026-01-01T00:00:00.000Z',
         to: '2026-01-02T00:00:00.000Z',
@@ -26,6 +27,7 @@ describe('toListRuleExecutionsArgs', () => {
       })
     ).toEqual({
       ruleIds: ['rule-1'],
+      search: 'cpu',
       outcomes: ['success'],
       from: '2026-01-01T00:00:00.000Z',
       to: '2026-01-02T00:00:00.000Z',
@@ -51,24 +53,30 @@ describe('toListRuleExecutionsResponse', () => {
   };
 
   it('maps the camelCase client result onto the snake_case response body', () => {
-    expect(toListRuleExecutionsResponse({ items: [item], total: 1, page: 2, perPage: 25 })).toEqual(
-      {
-        items: [
-          {
-            id: 'exec-1',
-            rule: { id: 'rule-1', version: 3 },
-            space_id: 'default',
-            started_at: '2026-01-01T00:00:00.000Z',
-            ended_at: '2026-01-01T00:00:01.500Z',
-            timings: { duration_ms: 1500, scheduled_delay_ms: 250 },
-            outcome: 'success',
-          },
-        ],
+    expect(
+      toListRuleExecutionsResponse({
+        items: [item],
         total: 1,
         page: 2,
-        per_page: 25,
-      }
-    );
+        perPage: 25,
+        searchMatches: null,
+      })
+    ).toEqual({
+      items: [
+        {
+          id: 'exec-1',
+          rule: { id: 'rule-1', version: 3 },
+          space_id: 'default',
+          started_at: '2026-01-01T00:00:00.000Z',
+          ended_at: '2026-01-01T00:00:01.500Z',
+          timings: { duration_ms: 1500, scheduled_delay_ms: 250 },
+          outcome: 'success',
+        },
+      ],
+      total: 1,
+      page: 2,
+      per_page: 25,
+    });
   });
 
   it('maps the nested error stack trace', () => {
@@ -77,6 +85,7 @@ describe('toListRuleExecutionsResponse', () => {
       total: 1,
       page: 1,
       perPage: 10,
+      searchMatches: null,
     }).items;
 
     expect(mapped.error).toEqual({ message: 'boom', stack_trace: 'at x' });
@@ -88,6 +97,7 @@ describe('toListRuleExecutionsResponse', () => {
       total: 1,
       page: 1,
       perPage: 10,
+      searchMatches: null,
     }).items;
 
     expect(mapped.reason).toBeUndefined();
@@ -96,11 +106,31 @@ describe('toListRuleExecutionsResponse', () => {
   });
 
   it('returns an empty items array untouched', () => {
-    expect(toListRuleExecutionsResponse({ items: [], total: 0, page: 1, perPage: 10 })).toEqual({
+    expect(
+      toListRuleExecutionsResponse({
+        items: [],
+        total: 0,
+        page: 1,
+        perPage: 10,
+        searchMatches: null,
+      })
+    ).toEqual({
       items: [],
       total: 0,
       page: 1,
       per_page: 10,
     });
+  });
+
+  it('maps the search match counts onto search_matches', () => {
+    expect(
+      toListRuleExecutionsResponse({
+        items: [],
+        total: 0,
+        page: 1,
+        perPage: 10,
+        searchMatches: { rules: 600, isTruncated: true },
+      }).search_matches
+    ).toEqual({ rules: 600, is_truncated: true });
   });
 });

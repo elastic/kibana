@@ -973,6 +973,263 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     }),
     serviceType: 'dropbox',
   },
+  exchange_server: {
+    configuration: {
+      exchange_server: {
+        default_value: null,
+        depends_on: [],
+        display: TEXTBOX,
+        label: translate('searchConnectors.nativeConnectors.exchangeServer.exchange_server.label', {
+          defaultMessage: 'Exchange Server',
+        }),
+        options: [],
+        order: 1,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.exchangeServer.exchange_server.tooltip',
+          {
+            defaultMessage: "Exchange server's IP address. E.g. 127.0.0.1",
+          }
+        ),
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      active_directory_server: {
+        default_value: null,
+        depends_on: [],
+        display: TEXTBOX,
+        label: translate(
+          'searchConnectors.nativeConnectors.exchangeServer.active_directory_server.label',
+          {
+            defaultMessage: 'Active Directory Server',
+          }
+        ),
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.exchangeServer.active_directory_server.tooltip',
+          {
+            defaultMessage: "Active Directory server's IP address. E.g. 127.0.0.1",
+          }
+        ),
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      username: {
+        default_value: null,
+        depends_on: [],
+        display: TEXTBOX,
+        label: translate('searchConnectors.nativeConnectors.exchangeServer.username.label', {
+          defaultMessage: 'Exchange server username',
+        }),
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      password: {
+        default_value: null,
+        depends_on: [],
+        display: TEXTBOX,
+        label: translate('searchConnectors.nativeConnectors.exchangeServer.password.label', {
+          defaultMessage: 'Exchange server password',
+        }),
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      domain: {
+        default_value: null,
+        depends_on: [],
+        display: TEXTBOX,
+        label: translate('searchConnectors.nativeConnectors.exchangeServer.domain.label', {
+          defaultMessage: 'Exchange server domain name',
+        }),
+        options: [],
+        order: 5,
+        required: true,
+        sensitive: false,
+        tooltip: translate('searchConnectors.nativeConnectors.exchangeServer.domain.tooltip', {
+          defaultMessage:
+            'Active Directory domain name, used to look up users. E.g. corp.example.com',
+        }),
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      ssl_enabled: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate('searchConnectors.nativeConnectors.exchangeServer.ssl_enabled.label', {
+          defaultMessage: 'Enable SSL',
+        }),
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      ssl_ca: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'ssl_enabled',
+            value: true,
+          },
+        ],
+        display: TEXTBOX,
+        label: translate('searchConnectors.nativeConnectors.exchangeServer.ssl_ca.label', {
+          defaultMessage: 'SSL certificate',
+        }),
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      sync_all_mail_folders: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.exchangeServer.sync_all_mail_folders.label',
+          {
+            defaultMessage: 'Sync all mail folders',
+          }
+        ),
+        options: [],
+        order: 8,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.exchangeServer.sync_all_mail_folders.tooltip',
+          {
+            defaultMessage:
+              'When enabled, indexes the user mail folders in each mailbox, not only Inbox, Sent, Junk, and Archive. System folders such as Deleted Items, Drafts, Outbox, and search folders are never indexed. Expect longer syncs, more Exchange load, and a larger index.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
+      use_text_extraction_service: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.exchangeServer.use_text_extraction_service.label',
+          {
+            defaultMessage: 'Use text extraction service',
+          }
+        ),
+        options: [],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.exchangeServer.use_text_extraction_service.tooltip',
+          {
+            defaultMessage:
+              'Requires a separate deployment of the Elastic Text Extraction Service. Requires that pipeline settings disable text extraction.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
+      include_full_raw_message: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.exchangeServer.include_full_raw_message.label',
+          {
+            defaultMessage: 'Index full raw email (including headers)',
+          }
+        ),
+        options: [],
+        order: 10,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.exchangeServer.include_full_raw_message.tooltip',
+          {
+            defaultMessage:
+              'When disabled (default), the email body and a small set of headers (such as Subject, From, and To) are indexed. Enable to keep the full raw message including routing and authentication headers - useful for edge cases where body extraction misses content.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 11,
+        required: true,
+        sensitive: false,
+        tooltip: getEnableDocumentLevelSecurityTooltip(
+          translate('searchConnectors.nativeConnectors.exchangeServerTooltip.name', {
+            defaultMessage: 'Exchange Server',
+          })
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+    },
+    features: {
+      [SYNC_RULES]: {
+        advanced: { enabled: false },
+        basic: { enabled: true },
+      },
+      [DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+      [INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
+    name: translate('searchConnectors.nativeConnectors.exchangeServer.name', {
+      defaultMessage: 'Exchange Server',
+    }),
+    serviceType: 'exchange_server',
+  },
   github: {
     configuration: {
       data_source: {
@@ -3659,7 +3916,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 1,
         required: true,
         sensitive: false,
-        tooltip: null,
+        tooltip: translate('searchConnectors.nativeConnectors.outlook.data_source.tooltip', {
+          defaultMessage:
+            'The Outlook Server option is deprecated. For on-premises Exchange, use the Exchange Server connector instead.',
+        }),
         type: STRING,
         ui_restrictions: [],
         validations: [],

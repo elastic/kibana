@@ -8,46 +8,15 @@
 import type { Logger } from '@kbn/logging';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { z } from '@kbn/zod/v4';
-import type { ResolvePanelContent } from './panels';
-import type { OperationFailure } from '../utils';
-import type {
-  InlinePanelOperationType,
-  PanelAuthoringNote,
-  PanelContentAttempt,
-} from '../resolve_panel';
+import type { ResolvePanelContent } from '../panels';
+import type { DashboardFailure } from '../utils';
+import type { PanelAuthoringNote } from '../resolve_panel';
+import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from '../types';
 import type { ResolvedPanelCreationRequest } from './panel_creation';
-
-/**
- * Turns a visualization attachment id into panel content. Injected like the other resolvers so
- * dashboard authoring stays free of store access. Synchronous because the attachment state is in memory.
- */
-export type ResolveAttachmentPanel = (
-  attachmentId: string,
-  operationType: InlinePanelOperationType
-) => PanelContentAttempt;
-
-/** Whether a mapped field can back a `STATS BY` across the whole index, and why not. */
-export type ControlFieldCapability =
-  | { status: 'usable'; type: string }
-  | { status: 'conflicting' }
-  | { status: 'not_aggregatable' };
-
-/** Field capabilities keyed by name. Fields not mapped on the index are absent. */
-export type ControlFieldCapabilities = Map<string, ControlFieldCapability>;
-
-/**
- * Loads the capabilities of the given fields on an index. Injected like the other resolvers so
- * dashboard authoring stays free of Elasticsearch access.
- */
-export type ResolveControlFieldCapabilities = (params: {
-  index: string;
-  fieldNames: readonly string[];
-  projectRouting?: string;
-}) => Promise<ControlFieldCapabilities>;
 
 export interface OperationExecutionContext {
   logger: Logger;
-  failures: OperationFailure[];
+  failures: DashboardFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   sectionIdsByKey: Map<string, string>;

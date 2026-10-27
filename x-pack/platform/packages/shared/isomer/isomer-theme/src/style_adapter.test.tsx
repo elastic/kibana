@@ -40,17 +40,11 @@ describe('isomerStyleAdapter', () => {
     expect(css).toContain(`.${className}{`);
   });
 
-  it('lets the wrapper data-theme choose the color scheme', () => {
+  it('resolves colors with light-dark(), leaving color-scheme to the wrapper', () => {
     const { css } = renderStyles();
 
     expect(css).toContain('light-dark(');
-    expect(css).toContain(".isomer[data-theme='dark']{color-scheme:dark}");
-  });
-
-  it('inherits the host color scheme without data-theme', () => {
-    const { css } = renderStyles();
-
-    expect(css).not.toMatch(/\.isomer\{[^}]*color-scheme/);
+    expect(css).not.toContain('color-scheme');
   });
 
   it('gives the wrapper EUI base typography', () => {
@@ -131,6 +125,7 @@ describe('isomerStyleAdapter', () => {
     const { html, css } = runtime.surfaces.html.render(composition, { theme: 'dark' });
 
     expect(html).toMatch(/<section class="isomer[^"]*"[^>]*data-theme="dark"/);
+    expect(html).toMatch(/<section[^>]*style="color-scheme:dark"/);
     expect(html).toContain('<p class="testNote-root">Healthy.</p>');
     expect(css).toContain('.testNote-root{');
   });

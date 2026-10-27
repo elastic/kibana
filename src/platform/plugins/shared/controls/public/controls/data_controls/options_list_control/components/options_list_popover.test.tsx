@@ -56,7 +56,7 @@ describe('Options list popover', () => {
     overwriteState?: Partial<OptionsListDSLControlState>;
   }): Promise<{
     componentApi: DSLOptionsListComponentApi;
-    displaySettings: OptionsListDisplaySettings;
+    displaySettings: OptionsListDisplaySettings & { isInteractive?: boolean };
   }> => {
     contextSpy.mockClear(); // ensures that we get the up-to-date context
 
@@ -88,7 +88,7 @@ describe('Options list popover', () => {
     displaySettings,
   }: {
     componentApi: OptionsListComponentApi;
-    displaySettings: OptionsListDisplaySettings;
+    displaySettings: OptionsListDisplaySettings & { isInteractive?: boolean };
   }) => {
     return render(
       <OptionsListControlContext.Provider
@@ -346,6 +346,16 @@ describe('Options list popover', () => {
       expect(includeButton).toHaveAttribute('aria-pressed', 'false');
       expect(excludeButton).toHaveAttribute('aria-pressed', 'true');
     });
+
+    test('should disable include/exclude toggle when isInteractive is false', () => {
+      const contextMock = getOptionsListContextMock();
+      const popover = mountComponent({
+        componentApi: contextMock.componentApi,
+        displaySettings: { ...contextMock.displaySettings, isInteractive: false },
+      });
+      const includeButton = popover.getByTestId('optionsList__includeResults');
+      expect(includeButton).toBeDisabled();
+    });
   });
 
   describe('"Exists" option', () => {
@@ -508,7 +518,7 @@ describe('Options list popover', () => {
       testSubject: string;
     }) => {
       const contextMock = getOptionsListContextMock();
-      contextMock.displaySettings = displaySettings;
+      contextMock.displaySettings = { isInteractive: true, ...displaySettings };
       const popover = mountComponent(contextMock);
       const test = popover.queryByTestId(testSubject);
       expect(test).toBeNull();

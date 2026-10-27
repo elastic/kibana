@@ -78,6 +78,7 @@ import {
   useCanvasDestinationsRef,
   useCanvasSourcesRef,
   useCanvasUrlRef,
+  useCanvasRoutingFlyout,
 } from './state_management';
 import {
   useSourceApiKeyGenerationDeps,
@@ -105,6 +106,8 @@ import {
   moveUnitConnection,
   removeComponentFromPipelines,
 } from '../../../../services/unit_connections';
+import { RoutingFlyout } from '../../../stream_routing_flyout';
+import { ProcessingFlyout } from '../../../stream_processing_flyout';
 
 const KEYBOARD_INSTRUCTIONS_ID = 'streamsCanvasKbdInstructions';
 const canvasColumnStyles = css`
@@ -188,6 +191,7 @@ function StreamsCanvasInner() {
   const isInitializing = useCanvasIsInitializing();
   const isUnitUnavailable = useCanvasIsUnitUnavailable();
   const nodePositions = useCanvasNodePositions();
+  const [routingFlyout, mode] = useCanvasRoutingFlyout();
   const nodePositionsRef = useRef(nodePositions);
   useEffect(() => {
     nodePositionsRef.current = nodePositions;
@@ -883,6 +887,10 @@ function StreamsCanvasInner() {
               onClose={closeCreateDestinationModal}
             />
           )}
+          {routingFlyout && mode === 'routing' ? <RoutingFlyout edge={routingFlyout} /> : null}
+          {routingFlyout && mode === 'processing' ? (
+            <ProcessingFlyout edge={routingFlyout} />
+          ) : null}
           <EuiScreenReaderOnly>
             <p id={KEYBOARD_INSTRUCTIONS_ID}>
               {i18n.translate('xpack.streams.canvas.keyboardInstructions', {

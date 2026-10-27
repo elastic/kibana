@@ -139,6 +139,9 @@ export interface AlertTriageWorkerTemplateValues extends ScheduledWorkerTemplate
     autoCloseConfidenceScoreMinThreshold: number;
     budgetPerHour: number;
     lookbackHours: number;
+    minSeverity: 'low' | 'medium' | 'high' | 'critical';
+    excludeBuildingBlocks: boolean;
+    excludedRuleTags: readonly string[];
   };
 }
 
@@ -159,8 +162,9 @@ export const renderAlertTriageWorkerYaml = (
   values: AlertTriageWorkerTemplateValues
 ): string =>
   renderScheduledWorkerYaml(yaml, values)
-    // JSON is a YAML flow mapping, so the whole object lands under consts in one substitution.
-    .replaceAll('__WORKER_EXTRAS__', JSON.stringify(values.extras))
+    // JSON is a YAML flow mapping, so the whole object lands under consts in one substitution. A
+    // function replacement keeps `$` sequences in free-form rule tags (`$$`, `$&`, `$'`) literal.
+    .replaceAll('__WORKER_EXTRAS__', () => JSON.stringify(values.extras))
     .replaceAll(
       '__WORKER_SCHEDULE_INTERVAL_MINUTES__',
       String(scheduleIntervalToMinutes(values.scheduleInterval))

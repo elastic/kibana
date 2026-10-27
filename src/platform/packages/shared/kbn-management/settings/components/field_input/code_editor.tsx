@@ -14,7 +14,7 @@
 // @see src/plugins/advanced_settings/public/management_app/components/field/field_code_editor.tsx
 //
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { monaco } from '@kbn/monaco';
 
 import {
@@ -35,8 +35,48 @@ export interface CodeEditorProps extends Props {
 
 const MIN_DEFAULT_LINES_COUNT = 6;
 const MAX_DEFAULT_LINES_COUNT = 30;
+// Matches the default `lineHeight` of the `@kbn/code-editor` Monaco editor.
+const PLACEHOLDER_LINE_HEIGHT = 21;
+const VISIBILITY_ROOT_MARGIN = '200px';
 
-export const CodeEditor = ({ onChange, type, isReadOnly, name, ...props }: CodeEditorProps) => {
+const getPlaceholderHeight = (value: CodeEditorProps['value']): number => {
+  const lineCount = String(value ?? '').split('\n').length;
+  const clampedLineCount = Math.min(
+    Math.max(lineCount, MIN_DEFAULT_LINES_COUNT),
+    MAX_DEFAULT_LINES_COUNT
+  );
+  return clampedLineCount * PLACEHOLDER_LINE_HEIGHT;
+};
+
+const useHasBeenVisible = (ref: React.RefObject<HTMLElement>): boolean => {
+  const [hasBeenVisible, setHasBeenVisible] = useState(
+    () => typeof IntersectionObserver === 'undefined'
+  );
+
+  useEffect(() => {
+    const { current: element } = ref;
+    if (hasBeenVisible || !element) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some(({ isIntersecting }) => isIntersecting)) {
+          setHasBeenVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: VISIBILITY_ROOT_MARGIN }
+    );
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [ref, hasBeenVisible]);
+
+  return hasBeenVisible;
+};
+
+const VisibleCodeEditor = ({ onChange, type, isReadOnly, name, ...props }: CodeEditorProps) => {
   // setting editor height based on lines height and count to stretch and fit its content
   const setEditorCalculatedHeight = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -107,5 +147,23 @@ export const CodeEditor = ({ onChange, type, isReadOnly, name, ...props }: CodeE
       languageId={type === 'json' ? XJSON_LANG_ID : MARKDOWN_LANG_ID}
       width="100%"
     />
+  );
+};
+
+/**
+ * Renders a Monaco code editor for a setting, deferring mount until it scrolls into view.
+ */
+export const CodeEditor = (props: CodeEditorProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const hasBeenVisible = useHasBeenVisible(containerRef);
+
+  return (
+    <div ref={containerRef}>
+      {hasBeenVisible ? (
+        <VisibleCodeEditor {...props} />
+      ) : (
+        <div aria-hidden={true} style={{ height: getPlaceholderHeight(props.value) }} />
+      )}
+    </div>
   );
 };

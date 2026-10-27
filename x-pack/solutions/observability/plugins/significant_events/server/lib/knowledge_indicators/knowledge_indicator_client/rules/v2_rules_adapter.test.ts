@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { Parser } from '@elastic/esql';
 import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
+import { MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { RulesAdapterV2, type RulesAdapterV2Params } from './v2_rules_adapter';
 import {
@@ -832,6 +833,38 @@ describe('RulesAdapterV2', () => {
       });
       const adapter = makeAdapter(mock);
       await expect(adapter.bulkDeleteRules(['x'])).rejects.toThrow(/V2 bulk delete failed/);
+    });
+
+    it('batches source rule cleanup at the Alerting bulk limit', async () => {
+      const mock = makeRulesClientMock();
+      mock.bulkDeleteRules.mockImplementation(async ({ ids }: { ids: string[] }) => ({
+        affected_count: ids.length,
+        errors: [],
+      }));
+      const ids = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, index) => `rule-${index}`);
+
+      await expect(makeAdapter(mock).bulkDeleteRules(ids)).resolves.toBeUndefined();
+      expect(mock.bulkDeleteRules.mock.calls).toEqual([
+        [{ ids: ids.slice(0, MAX_BULK_ITEMS) }],
+        [{ ids: ids.slice(MAX_BULK_ITEMS) }],
+      ]);
+    });
+
+    it('continues after a rejected batch and throws an error identifying every failed rule', async () => {
+      const mock = makeRulesClientMock();
+      mock.bulkDeleteRules
+        .mockRejectedValueOnce(new Error('Request failed'))
+        .mockResolvedValueOnce({ affected_count: 1, errors: [] });
+      const ids = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, index) => `rule-${index}`);
+      const detail = ids
+        .slice(0, MAX_BULK_ITEMS)
+        .map((id) => `${id}: Request failed`)
+        .join('; ');
+
+      await expect(makeAdapter(mock).bulkDeleteRules(ids)).rejects.toThrow(
+        `V2 bulk delete failed for ${MAX_BULK_ITEMS} rule(s): ${detail}`
+      );
+      expect(mock.bulkDeleteRules).toHaveBeenCalledTimes(2);
     });
   });
 

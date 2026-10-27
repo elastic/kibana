@@ -70,6 +70,29 @@ describe('buildInvestigationSummary', () => {
     );
   });
 
+  it('names the implicated identities and says criticality is left to the analyst', () => {
+    const summary = buildInvestigationSummary({
+      state: state({ services: ['svc-role'] }),
+      decided,
+    });
+    expect(summary).toContain('Services: svc-role');
+    expect(summary).toContain(
+      'Asset criticality: the identities above are involved in this attack. AlertZero does not change asset criticality. Review their ratings in Entity Analytics if they are out of date.'
+    );
+  });
+
+  it('adds no criticality note when nothing was confirmed', () => {
+    expect(
+      buildInvestigationSummary({ state: state({ hasConfirmedHit: false }), decided })
+    ).not.toContain('Asset criticality');
+  });
+
+  it('adds no criticality note when no user or service is implicated', () => {
+    expect(buildInvestigationSummary({ state: state({ users: [] }), decided })).not.toContain(
+      'Asset criticality'
+    );
+  });
+
   it('words the minted actions as proposed', () => {
     expect(buildInvestigationSummary({ state: state(), decided })).toContain(
       'Packaging: proposed 1 action: Isolate host WIN-ANALYST01'

@@ -18,6 +18,7 @@ import { throttle, debounce } from 'lodash';
 
 import dateMath from '@kbn/datemath';
 import { css } from '@emotion/react';
+import { css as cssClassName } from '@emotion/css';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import {
   getAggregateQueryMode,
@@ -33,7 +34,13 @@ import {
   type QuickSearchVisorProps,
   type VisorNlResultHandler,
 } from '@kbn/esql/public';
-import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
+import type {
+  EuiButtonColor,
+  EuiFieldText,
+  EuiIconProps,
+  OnRefreshProps,
+  UseEuiTheme,
+} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -47,13 +54,16 @@ import {
   EuiIconTip,
   EuiSplitButton,
   useEuiTheme,
+  getEuiButtonColorValues,
+  getEuiFilledButtonColorValues,
+  transparentize,
   type EuiTimeZoneDisplayProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
 import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { ESQLControlVariable, ESQLQueryStats } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -109,6 +119,14 @@ export const strings = {
   getSearchButtonLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.searchButton', {
       defaultMessage: 'Search',
+    }),
+  getSearchAgainAriaLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.searchAgainAriaLabel', {
+      defaultMessage: 'Search again',
+    }),
+  getSearchWithUpdatedQueryAriaLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.searchWithUpdatedQueryAriaLabel', {
+      defaultMessage: 'Search with updated query',
     }),
   getDisabledDatePickerLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
@@ -174,7 +192,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   disableAutoFocus?: boolean;
   fillSubmitButton: boolean;
   iconType?: EuiIconProps['type'];
-  indexPatterns?: Array<DataView | string>;
+  indexPatterns?: Array<FilterableSource | string>;
   indicateNoData?: boolean;
   isClearable?: boolean;
   isDirty: boolean;
@@ -362,7 +380,8 @@ export const QueryBarTopRow = React.memo(
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [isSendingToBackground, setIsSendingToBackground] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
-    const { euiTheme } = useEuiTheme();
+    const euiThemeContext = useEuiTheme();
+    const { euiTheme } = euiThemeContext;
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
     const submitButtonIconOnly =
@@ -1070,6 +1089,10 @@ export const QueryBarTopRow = React.memo(
               {buttonLabelCancel}
             </EuiSplitButton.ActionPrimary>
             <EuiSplitButton.ActionSecondary
+              className={getSplitButtonSecondaryActionClassName(euiThemeContext, {
+                color: 'text',
+                fill: false,
+              })}
               isLoading={isSendingToBackground}
               isDisabled={!canSendToBackground}
               onClick={onClickSendToBackground}
@@ -1123,8 +1146,15 @@ export const QueryBarTopRow = React.memo(
 
     const getSubmitButtonProps = () => {
       if (shouldRenderESQLUi) {
-        const label = strings.getSearchButtonLabel();
-        return { icon: undefined, text: label, ariaLabel: label, color: 'primary' as const };
+        return {
+          icon: undefined,
+          text: strings.getSearchButtonLabel(),
+          ariaLabel: props.isDirty
+            ? strings.getSearchWithUpdatedQueryAriaLabel()
+            : strings.getSearchAgainAriaLabel(),
+          color: 'primary' as const,
+          fill: Boolean(props.isDirty),
+        };
       }
 
       if (props.isDirty) {
@@ -1133,6 +1163,7 @@ export const QueryBarTopRow = React.memo(
           text: strings.getUpdateButtonLabel(),
           ariaLabel: strings.getNeedsUpdatingLabel(),
           color: 'success' as const,
+          fill: false,
         };
       }
 
@@ -1141,6 +1172,7 @@ export const QueryBarTopRow = React.memo(
         text: strings.getRefreshButtonLabel(),
         ariaLabel: strings.getRefreshQueryLabel(),
         color: 'primary' as const,
+        fill: false,
       };
     };
 
@@ -1154,21 +1186,30 @@ export const QueryBarTopRow = React.memo(
         text: buttonText,
         ariaLabel: buttonAriaLabel,
         color: buttonColor,
+        fill: buttonFill,
       } = getSubmitButtonProps();
       const submitTooltip = buttonAriaLabel;
       const splitButton = (
-        <EuiSplitButton color={buttonColor} size="s">
+        <EuiSplitButton color={buttonColor} fill={buttonFill} size="s">
           <EuiSplitButton.ActionPrimary
             iconType={buttonIcon}
             isLoading={props.isLoading}
             isDisabled={isSubmitDisabled}
             onClick={onClickSubmitButton}
             aria-label={buttonAriaLabel}
+            tooltipProps={{
+              content: submitTooltip,
+              disableScreenReaderOutput: true,
+            }}
             data-test-subj="querySubmitButton"
           >
             {buttonText}
           </EuiSplitButton.ActionPrimary>
           <EuiSplitButton.ActionSecondary
+            className={getSplitButtonSecondaryActionClassName(euiThemeContext, {
+              color: buttonColor,
+              fill: buttonFill,
+            })}
             iconType="backgroundTask"
             isLoading={isSendingToBackground}
             isDisabled={!canSendToBackground || Boolean(props.disableSubmitAction)}
@@ -1195,7 +1236,7 @@ export const QueryBarTopRow = React.memo(
           onClick={onClickSubmitButton}
           size="s"
           color={buttonColor}
-          fill={false}
+          fill={buttonFill}
           needsUpdate={props.isDirty}
           data-test-subj="querySubmitButton"
           toolTipProps={{
@@ -1525,4 +1566,21 @@ const inputStringStyles = {
         backgroundImage: `linear-gradient(0deg,${euiTheme.colors.danger},${euiTheme.colors.danger} ${euiTheme.size.xxs},#0000 0,#0000)`,
       },
     }),
+};
+
+// Temporary override until implemented in EUI
+const getSplitButtonSecondaryActionClassName = (
+  euiThemeContext: UseEuiTheme,
+  { color, fill }: { color: EuiButtonColor; fill: boolean }
+) => {
+  const { backgroundColor: disabledBackgroundColor } = fill
+    ? getEuiFilledButtonColorValues(euiThemeContext, 'disabled')
+    : getEuiButtonColorValues(euiThemeContext, 'disabled');
+
+  return cssClassName({
+    "&:is(:disabled, [aria-disabled='true'])": {
+      backgroundColor: transparentize(disabledBackgroundColor, 0.2),
+      ...(fill && { color: getEuiFilledButtonColorValues(euiThemeContext, color).color }),
+    },
+  });
 };

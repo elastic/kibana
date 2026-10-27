@@ -23,6 +23,7 @@ import type { GetAgentsOptions } from '.';
 import { getAgentById, getAgentsById, getAgentsByKuery } from './crud';
 import { createAgentAction, createErrorActionResults } from './actions';
 import { openPointInTime } from './crud';
+import { throwIfAgentlessAgentPolicy } from './hosted_agent';
 import { RestartActionRunner, restartBatch } from './restart_action_runner';
 
 export async function restartAgent(
@@ -45,6 +46,7 @@ export async function restartAgent(
         `Cannot restart agent ${agentId} in hosted agent policy ${agentPolicy.id}`
       );
     }
+    throwIfAgentlessAgentPolicy(agentPolicy, `Cannot restart managed agent ${agentId}`);
   }
 
   const currentSpaceId = getCurrentNamespace(soClient);

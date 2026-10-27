@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-export const DASHBOARD_OPERATION_FAILURE_TYPES = {
+export const DASHBOARD_FAILURE_TYPES = {
   addSection: 'add_section',
   addPanels: 'add_panels',
   addControls: 'add_controls',
   editPanels: 'edit_panels',
-  updatePanelLayouts: 'update_panel_layouts',
+  movePanels: 'move_panels',
+  layout: 'layout',
   validateDashboard: 'validate_dashboard',
 } as const;
 
-export type DashboardOperationFailureType =
-  (typeof DASHBOARD_OPERATION_FAILURE_TYPES)[keyof typeof DASHBOARD_OPERATION_FAILURE_TYPES];
+export type DashboardFailureType =
+  (typeof DASHBOARD_FAILURE_TYPES)[keyof typeof DASHBOARD_FAILURE_TYPES];

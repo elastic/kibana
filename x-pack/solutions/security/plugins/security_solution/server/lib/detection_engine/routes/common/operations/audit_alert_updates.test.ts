@@ -8,6 +8,7 @@
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 
 import {
+  auditAlertUpdateAuthorizationFailure,
   auditAlertUpdateFailure,
   auditAlertUpdateIntent,
   auditAlertUpdateResponseFailure,
@@ -18,6 +19,19 @@ import {
 describe('auditAlertUpdates', () => {
   const ids = ['alert-1', 'alert-2'];
   const query = { term: { foo: 'bar' } };
+
+  it('logs authorization denials as bulk alert_update failures', () => {
+    const auditLogger = auditLoggerMock.create();
+
+    auditAlertUpdateAuthorizationFailure(auditLogger);
+
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Failed attempt to update alerts because required privileges were not granted',
+        event: expect.objectContaining({ action: 'alert_update', outcome: 'failure' }),
+      })
+    );
+  });
 
   describe('auditAlertUpdateIntent', () => {
     it('logs one alert_update event per id with outcome unknown', () => {
@@ -214,16 +228,16 @@ describe('auditAlertUpdates', () => {
     );
   });
 
-  it('logs validation failures before an update helper runs', () => {
+  it('logs a precondition failure before an update helper runs', () => {
     const auditLogger = auditLoggerMock.create();
 
-    auditAlertUpdatePreOperationFailure(auditLogger, 'Invalid alert update request');
+    auditAlertUpdatePreOperationFailure(auditLogger, 'Alert update target unavailable');
 
     expect(auditLogger.log).toHaveBeenCalledTimes(1);
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
         event: expect.objectContaining({ action: 'alert_update', outcome: 'failure' }),
-        error: expect.objectContaining({ message: 'Invalid alert update request' }),
+        error: expect.objectContaining({ message: 'Alert update target unavailable' }),
       })
     );
   });

@@ -329,12 +329,6 @@ export const proposalFiltersSchema = z.object({
   /** Drops proposals that were replaced, so a chain shows only its live head. */
   excludeSuperseded: z.stringbool().default(false),
   /**
-   * Drops superseded proposals that were never decided — earlier revisions, whose successor
-   * carries the same ask — while keeping a decided one, such as a failed attempt that a retry
-   * replaced, so the history still shows what ran and how it ended.
-   */
-  excludeUndecidedSuperseded: z.stringbool().default(false),
-  /**
    * Drops proposals whose deadline has passed, by date rather than by status.
    * Distinct from `status: 'expired'`: between the deadline passing and the
    * gate workflow settling the record there is task lag during which it still
@@ -441,3 +435,39 @@ export const isProposalSettling = (proposal: Pick<Proposal, 'decision' | 'status
  * so this is not a substitute for comparing `expiresAt` to `now`. */
 export const isExpired = (proposal: Pick<Proposal, 'status'>): boolean =>
   proposal.status === 'expired';
+
+/**
+ * Gives the phase of each status. It is a `Record` over every `ProposalStatus`. If you add a
+ * status and do not place it here, the compiler reports an error. The groups below come from this
+ * map, so they cannot drift from it.
+ *
+ * - `open`: can still change. `pending` waits for a decision. `executing` is approved and running.
+ * - `settled`: the result is known. Nothing runs again.
+ * - `replaced`: not decided, but it cannot change. A superseded proposal is not the live
+ *   revision. A caller can still hold its id (a stale workflow variable or a retried step).
+ *   That caller must not revive it through `update()`.
+ */
+const PROPOSAL_STATUS_PHASE = {
+  pending: 'open',
+  executing: 'open',
+  succeeded: 'settled',
+  failed: 'settled',
+  expired: 'settled',
+  no_action: 'settled',
+  superseded: 'replaced',
+} as const satisfies Record<ProposalStatus, 'open' | 'settled' | 'replaced'>;
+
+type ProposalStatusPhase = (typeof PROPOSAL_STATUS_PHASE)[ProposalStatus];
+
+const statusesInPhase = (phase: ProposalStatusPhase): ProposalStatus[] =>
+  proposalStatusSchema.options.filter((status) => PROPOSAL_STATUS_PHASE[status] === phase);
+
+/** Statuses that can still change: waiting for a decision, or approved and running. */
+export const OPEN_PROPOSAL_STATUSES = statusesInPhase('open');
+
+/** Statuses with a known result. `superseded` is not here: its successor represents it. */
+export const SETTLED_PROPOSAL_STATUSES = statusesInPhase('settled');
+
+/** Returns true for a settled or replaced status. Only `pending` and `executing` return false. */
+export const isTerminal = (status: ProposalStatus): boolean =>
+  PROPOSAL_STATUS_PHASE[status] !== 'open';

@@ -23,6 +23,11 @@ describe('getSecurityAlertType', () => {
     expect(registration.schema).toBe(SecurityAlertAttachmentPayloadSchema);
   });
 
+  it('labels a count of alerts', () => {
+    expect(registration.getCountLabel?.({ count: 1 })).toBe('1 alert');
+    expect(registration.getCountLabel?.({ count: 3 })).toBe('3 alerts');
+  });
+
   describe('getCreationActivity', () => {
     it('keys AlertEvent by savedObjectId to prevent React fiber reuse across attachments', () => {
       // key={savedObjectId} is the fix for #284799: without it React reuses the AlertEvent

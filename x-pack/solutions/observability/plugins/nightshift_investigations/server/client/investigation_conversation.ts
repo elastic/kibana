@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import pRetry from 'p-retry';
 import {
   ConversationAccessControlMode,
+  isAgentNotFoundError,
   isConversationAlreadyExistsError,
 } from '@kbn/agent-builder-common';
 import type { Conversation, ConversationPermissions } from '@kbn/agent-builder-common';
@@ -99,22 +101,48 @@ export const findInvestigationConversation = async (
 export const getOrCreateInvestigationConversation = async ({
   conversations,
   id,
+  workflowExecutionId,
+  beforeCreate,
 }: {
   conversations: ConversationPublicClient;
   id: string;
+  /**
+   * The run creating it. Recorded in the creating write, so the investigation never reads as not
+   * in progress between its creation and the run being recorded on it.
+   */
+  workflowExecutionId?: string;
+  beforeCreate?: () => Promise<void>;
 }): Promise<InvestigationConversation> => {
   const existing = await findInvestigationConversation(conversations, id);
   if (existing) {
     return existing;
   }
 
+  await beforeCreate?.();
   try {
-    const created = await conversations.create({
-      id,
-      agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
-      templateId: INVESTIGATION_TEMPLATE_ID,
-      accessControl: { access_mode: ConversationAccessControlMode.Public },
-    });
+    const create = () =>
+      conversations.create({
+        id,
+        agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+        templateId: INVESTIGATION_TEMPLATE_ID,
+        accessControl: { access_mode: ConversationAccessControlMode.Public },
+        ...(workflowExecutionId
+          ? { metadata: { workflow_execution_ids: [workflowExecutionId] } }
+          : {}),
+      });
+    // Agent creation can precede its visibility to the conversation API's agent lookup.
+    const created = beforeCreate
+      ? await pRetry(create, {
+          retries: 9,
+          factor: 1,
+          minTimeout: 300,
+          onFailedAttempt: (error) => {
+            if (!isAgentNotFoundError(error)) {
+              throw error;
+            }
+          },
+        })
+      : await create();
     return toInvestigationConversation(created, true);
   } catch (error) {
     if (!isConversationAlreadyExistsError(error)) {

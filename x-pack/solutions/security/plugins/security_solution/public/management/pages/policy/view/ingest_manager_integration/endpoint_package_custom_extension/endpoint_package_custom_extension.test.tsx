@@ -10,22 +10,28 @@ import type { AppContextTestRender } from '../../../../../../common/mock/endpoin
 import { createFleetContextRendererMock, generateFleetPackageInfo } from '../mocks';
 import { EndpointPackageCustomExtension } from './endpoint_package_custom_extension';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
+import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
 import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
 
 jest.mock('../../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+jest.mock('../../../../../../common/hooks/use_license');
+const useLicenseMock = _useLicense as jest.MockedFunction<typeof _useLicense>;
 
 describe('When displaying the EndpointPackageCustomExtension fleet UI extension', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let mockedTestContext: AppContextTestRender;
   const artifactCards = Object.freeze([
-    'trustedApps-fleetCard',
-    'eventFilters-fleetCard',
-    'endpointExceptions-fleetCard',
-    'hostIsolationExceptions-fleetCard',
-    'blocklists-fleetCard',
+    { privilege: 'canReadTrustedApplications', testId: 'trustedApps-fleetCard' },
+    { privilege: 'canReadEventFilters', testId: 'eventFilters-fleetCard' },
+    { privilege: 'canReadEndpointExceptions', testId: 'endpointExceptions-fleetCard' },
+    { privilege: 'canReadHostIsolationExceptions', testId: 'hostIsolationExceptions-fleetCard' },
+    { privilege: 'canReadBlocklist', testId: 'blocklists-fleetCard' },
+    { privilege: 'canReadTrustedDevices', testId: 'trustedDevices-fleetCard' },
+    { privilege: 'canReadCustomYaraSignatures', testId: 'customYaraSignatures-fleetCard' },
   ]);
 
   beforeEach(() => {
@@ -34,7 +40,11 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
     // Mock experimental feature flag
     mockedTestContext.setExperimentalFlag({
       endpointExceptionsMovedUnderManagement: true,
+      customYaraSignaturesEnabled: true,
+      trustedDevices: true,
     });
+
+    useLicenseMock.mockReturnValue(licenseServiceMocked);
 
     render = () => {
       renderResult = mockedTestContext.render(
@@ -52,15 +62,38 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
     useUserPrivilegesMock.mockImplementation(getUserPrivilegesMockDefaultValue);
   });
 
-  it.each([...artifactCards])('should show artifact card: `%s`', (artifactCardtestId) => {
+  it.each([...artifactCards])('should show artifact card: `$testId`', ({ testId }) => {
     render();
 
-    expect(renderResult.getByTestId(artifactCardtestId)).toBeTruthy();
+    expect(renderResult.getByTestId(testId)).toBeInTheDocument();
+  });
+
+  it('should NOT show artifact card if none of the artifact privileges are present', () => {
+    useUserPrivilegesMock.mockReturnValue({
+      ...getUserPrivilegesMockDefaultValue(),
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+        canReadBlocklist: false,
+        canReadEventFilters: false,
+        canReadHostIsolationExceptions: false,
+        canDeleteHostIsolationExceptions: false,
+        canReadTrustedApplications: false,
+        canReadTrustedDevices: false,
+        canReadEndpointExceptions: false,
+        canReadCustomYaraSignatures: false,
+      }),
+    });
+
+    render();
+
+    artifactCards.forEach(({ testId }) => {
+      expect(renderResult.queryByTestId(testId)).not.toBeInTheDocument();
+    });
+    expect(renderResult.queryByTestId('noPrivilegesPage')).toBeInTheDocument();
   });
 
   it.each([...artifactCards])(
-    'should NOT show artifact card if no endpoint management authz: %s',
-    (artifactCardTestId) => {
+    'should show $testId artifact card when only $privilege privilege is present',
+    ({ testId, privilege }) => {
       useUserPrivilegesMock.mockReturnValue({
         ...getUserPrivilegesMockDefaultValue(),
         endpointPrivileges: getEndpointPrivilegesInitialStateMock({
@@ -69,15 +102,23 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
           canReadHostIsolationExceptions: false,
           canDeleteHostIsolationExceptions: false,
           canReadTrustedApplications: false,
+          canReadTrustedDevices: false,
           canReadEndpointExceptions: false,
           canReadCustomYaraSignatures: false,
+
+          [privilege]: true,
         }),
       });
 
       render();
 
-      expect(renderResult.queryByTestId(artifactCardTestId)).toBeNull();
-      expect(renderResult.queryByTestId('noPrivilegesPage')).toBeTruthy();
+      artifactCards.forEach((card) => {
+        if (card.testId === testId) {
+          expect(renderResult.getByTestId(card.testId)).toBeInTheDocument();
+        } else {
+          expect(renderResult.queryByTestId(card.testId)).not.toBeInTheDocument();
+        }
+      });
     }
   );
 
@@ -90,8 +131,8 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
     render();
 
     expect(renderResult.getByTestId('endpointExtensionLoadingSpinner')).toBeInTheDocument();
-    expect(renderResult.queryByTestId('fleetEndpointPackageCustomContent')).toBeNull();
-    expect(renderResult.queryByTestId('noIngestPermissions')).toBeNull();
+    expect(renderResult.queryByTestId('fleetEndpointPackageCustomContent')).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId('noIngestPermissions')).not.toBeInTheDocument();
   });
 
   it('should hide endpoint exceptions card when feature flag is disabled', () => {
@@ -101,7 +142,7 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
     render();
 
     // Verify endpoint exceptions card is not present
-    expect(renderResult.queryByTestId('endpointExceptions-fleetCard')).toBeNull();
+    expect(renderResult.queryByTestId('endpointExceptions-fleetCard')).not.toBeInTheDocument();
 
     // Verify other cards are still visible
     expect(renderResult.getByTestId('trustedApps-fleetCard')).toBeInTheDocument();
@@ -110,42 +151,9 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
     expect(renderResult.getByTestId('blocklists-fleetCard')).toBeInTheDocument();
   });
 
-  it('should show yara signatures card when feature flag is enabled and user can read custom yara signatures', () => {
+  it('should show no privileges when endpoint exceptions is the only artifact privilege and the feature flag is disabled', () => {
     mockedTestContext.setExperimentalFlag({
-      customYaraSignaturesEnabled: true,
-    });
-    render();
-
-    expect(renderResult.getByTestId('customYaraSignatures-fleetCard')).toBeInTheDocument();
-  });
-
-  it('should hide yara signatures card when feature flag is disabled', () => {
-    mockedTestContext.setExperimentalFlag({
-      customYaraSignaturesEnabled: false,
-    });
-    render();
-
-    expect(renderResult.queryByTestId('customYaraSignatures-fleetCard')).toBeNull();
-  });
-
-  it('should hide yara signatures card when feature flag is enabled but user cannot read custom yara signatures', () => {
-    mockedTestContext.setExperimentalFlag({
-      customYaraSignaturesEnabled: true,
-    });
-    useUserPrivilegesMock.mockReturnValue({
-      ...getUserPrivilegesMockDefaultValue(),
-      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
-        canReadCustomYaraSignatures: false,
-      }),
-    });
-
-    render();
-
-    expect(renderResult.queryByTestId('customYaraSignatures-fleetCard')).toBeNull();
-  });
-
-  it('should show only yara signatures card when it is the only artifact privilege and the feature flag is enabled', () => {
-    mockedTestContext.setExperimentalFlag({
+      endpointExceptionsMovedUnderManagement: false,
       customYaraSignaturesEnabled: true,
     });
     useUserPrivilegesMock.mockReturnValue({
@@ -156,20 +164,26 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
         canReadHostIsolationExceptions: false,
         canDeleteHostIsolationExceptions: false,
         canReadTrustedApplications: false,
-        canReadEndpointExceptions: false,
+        canReadEndpointExceptions: true,
         canReadTrustedDevices: false,
-        canReadCustomYaraSignatures: true,
+        canReadCustomYaraSignatures: false,
       }),
     });
 
     render();
 
-    expect(renderResult.getByTestId('fleetEndpointPackageCustomContent')).toBeInTheDocument();
-    expect(renderResult.getByTestId('customYaraSignatures-fleetCard')).toBeInTheDocument();
-    expect(renderResult.queryByTestId('noPrivilegesPage')).toBeNull();
-    artifactCards.forEach((artifactCardTestId) => {
-      expect(renderResult.queryByTestId(artifactCardTestId)).toBeNull();
+    expect(renderResult.queryByTestId('fleetEndpointPackageCustomContent')).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId('endpointExceptions-fleetCard')).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId('noPrivilegesPage')).toBeTruthy();
+  });
+
+  it('should hide yara signatures card when feature flag is disabled', () => {
+    mockedTestContext.setExperimentalFlag({
+      customYaraSignaturesEnabled: false,
     });
+    render();
+
+    expect(renderResult.queryByTestId('customYaraSignatures-fleetCard')).not.toBeInTheDocument();
   });
 
   it('should show no privileges when yara signatures is the only artifact privilege and the feature flag is disabled', () => {
@@ -192,8 +206,8 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
 
     render();
 
-    expect(renderResult.queryByTestId('fleetEndpointPackageCustomContent')).toBeNull();
-    expect(renderResult.queryByTestId('customYaraSignatures-fleetCard')).toBeNull();
+    expect(renderResult.queryByTestId('fleetEndpointPackageCustomContent')).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId('customYaraSignatures-fleetCard')).not.toBeInTheDocument();
     expect(renderResult.queryByTestId('noPrivilegesPage')).toBeTruthy();
   });
 });

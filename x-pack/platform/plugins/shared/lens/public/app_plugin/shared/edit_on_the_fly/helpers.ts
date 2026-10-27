@@ -106,7 +106,7 @@ export const getGridAttrs = async (
   // Resolve the dataset when the spec has no timeFieldName, which detects the time
   // field via HTTP (with a promise cache to avoid redundant requests).
   const dataView = dataViewSpec?.timeFieldName
-    ? await data.dataViews.create(dataViewSpec)
+    ? await data.dataViews.create(dataViewSpec, true)
     : await createEsqlAdHocDataView({
         dataViews: data.dataViews,
         query: query.esql,

@@ -1,5 +1,5 @@
 {
-  "sha1": "fb5e7d8c16d1116d0778c982dc9439ea4cc1d764",
+  "sha1": "58c22b0864fa340b4f51604efd47e4728be9cbb8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -320,8 +320,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/node_details.pod_semconv.spec.ts",
-        "line": 41,
+        "line": 43,
         "column": 7
+      }
+    },
+    {
+      "id": "bc1c963cd55d152-0c1dfb8517d1f17",
+      "title": "Pod Metric Detail - OpenTelemetry kubeletstats shows the node metadata resolved from the OpenTelemetry host record",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/node_details.pod_semconv.spec.ts",
+        "line": 74,
+        "column": 13
       }
     },
     {
@@ -336,8 +352,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/node_details.pod_semconv.spec.ts",
-        "line": 72,
-        "column": 13
+        "line": 95,
+        "column": 22
       }
     },
     {

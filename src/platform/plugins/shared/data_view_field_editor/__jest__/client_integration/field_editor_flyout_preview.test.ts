@@ -968,6 +968,32 @@ describe('Field editor Preview panel', () => {
       expect(screen.queryByTestId('compositeEditor')).toBeVisible();
     });
 
+    it('should preserve the script when switching to and from the composite type', async () => {
+      const script = 'emit("bar", 1)';
+      const {
+        actions: { fields, flushPreviewAndSearchTimers, toggleFormRow },
+      } = await setup();
+
+      await toggleFormRow('value');
+      await fields.updateScript(script);
+
+      await fields.updateType('Composite');
+      await flushPreviewAndSearchTimers();
+      expect(screen.getByTestId('compositeEditor')).toBeVisible();
+      expect(screen.getByTestId('scriptField')).toHaveValue(script);
+
+      await fields.updateType('Keyword');
+      await flushPreviewAndSearchTimers();
+      expect(screen.getByRole('switch', { name: 'Set value' })).toBeChecked();
+      expect(screen.getByTestId('scriptField')).toHaveValue(script);
+
+      // a cleared script must not be restored from a previous type switch
+      await fields.updateScript('');
+      await fields.updateType('Composite');
+      await flushPreviewAndSearchTimers();
+      expect(screen.getByTestId('scriptField')).toHaveValue('');
+    });
+
     it('should show composite field types and update appropriately', async () => {
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: { 'composite_field.a': [1] } });
       const {

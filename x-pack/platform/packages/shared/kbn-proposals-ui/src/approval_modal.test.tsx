@@ -25,7 +25,7 @@ const mockProposal: ApprovalProposal = {
   actionWorkflowId: 'system-alertzero-action-edit-rule',
   // What the server stores when the caller names nothing itself.
   title: 'Apply monitored exception',
-  action: { name: 'Apply monitored exception' },
+  action: { name: 'Apply monitored exception', approvalPolicy: 'always-gate' },
 };
 
 const baseProps: ApprovalModalProps = {

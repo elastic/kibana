@@ -99,6 +99,13 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.isExperimental).toBeUndefined();
   });
 
+  it('keeps a reference to the source spec', () => {
+    const spec = createMockSpec();
+    const result = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+    expect(result.spec).toBe(spec);
+  });
+
   it('builds the connector network from the actions configuration utilities', () => {
     const createConnectorNetworkSettingsSpy = jest.spyOn(
       createConnectorNetworkSettingsModule,

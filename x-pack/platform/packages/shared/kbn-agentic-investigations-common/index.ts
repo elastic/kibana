@@ -69,6 +69,8 @@ export {
   type ProposedActionsListProps,
 } from './src/components/details/proposed_actions_list';
 
+export { ShowMoreFooter } from './src/components/show_more_footer';
+
 export {
   FlyoutGroupedAttachments,
   createFlyoutGroupedAttachmentsRegistry,
@@ -136,15 +138,7 @@ export {
   type ImpactEntityFlyoutType,
   type ImpactEntityTarget,
 } from './src/components/impact/open_impact_entity';
-export {
-  Impact,
-  impactPills,
-  investigationEntityIds,
-  matchesEntityFilter,
-  useEntityFilter,
-  type ImpactFilterable,
-  type ImpactPill,
-} from './src/components/filters/impact';
+export { Impact, useEntityFilter, type ImpactPill } from './src/components/filters/impact';
 
 export { BaseActionModal } from './src/components/modals/base_action_modal';
 export { MODAL_TRANSLATIONS } from './src/components/modals/translations';

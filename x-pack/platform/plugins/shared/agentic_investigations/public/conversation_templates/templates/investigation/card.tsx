@@ -7,33 +7,26 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n-react';
-import { SEVERITY_COLORS, SEVERITY_LABELS } from '@kbn/agentic-investigations-common';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import { ConversationMetaInfo } from '@kbn/agentic-investigations-common';
+import { useAiButtonGradientStyles } from '@kbn/shared-ux-ai-components';
 import type { InvestigationSummary } from '../../../../common';
+import { InvestigatingTypingDots } from './investigating_typing_dots';
 import { getInvestigationDisplayTitle } from './to_view_model';
-import {
-  CLOSED_LABEL,
-  NO_SEVERITY_LABEL,
-  RUNNING_LABEL,
-  moreEntitiesLabel,
-  pendingProposalsLabel,
-} from './translations';
+import { IN_PROGRESS_LABEL, moreEntitiesLabel } from './translations';
 
 const MAX_VISIBLE_ENTITIES = 3;
 
 export interface InvestigationCardProps {
   investigation: InvestigationSummary;
-  /** Makes the card a button; for example to open the conversation details flyout. */
+  /** Makes the main card content a button; for example to open the conversation details flyout. */
   onClick?: (investigation: InvestigationSummary) => void;
   isSelected?: boolean;
+  /**
+   * Trailing controls on the age row (open in chat, overflow menu, …). Rendered as a sibling of
+   * the card button so actions are not nested interactive controls.
+   */
+  actions?: React.ReactNode;
 }
 
 const EntityChips = ({ investigation }: { investigation: InvestigationSummary }) => {
@@ -46,17 +39,21 @@ const EntityChips = ({ investigation }: { investigation: InvestigationSummary })
   return (
     <>
       {visible.map((entity) => (
-        <EuiFlexItem key={entity.id} grow={false}>
-          <EuiBadge color="default" data-test-subj="investigationCardEntity">
+        <EuiFlexItem key={entity.id} grow={false} css={{ display: 'flex', alignItems: 'center' }}>
+          <EuiBadge
+            color="hollow"
+            iconType={() => <EuiIcon type="dot" color="danger" size="s" aria-hidden />}
+            data-test-subj="investigationCardEntity"
+          >
             {entity.name ?? entity.id}
           </EuiBadge>
         </EuiFlexItem>
       ))}
       {overflow > 0 && (
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
+        <EuiFlexItem grow={false} css={{ display: 'flex', alignItems: 'center' }}>
+          <EuiBadge color="hollow" data-test-subj="investigationCardEntityOverflow">
             {moreEntitiesLabel(overflow)}
-          </EuiText>
+          </EuiBadge>
         </EuiFlexItem>
       )}
     </>
@@ -64,21 +61,25 @@ const EntityChips = ({ investigation }: { investigation: InvestigationSummary })
 };
 
 /**
- * A compact investigation card: severity, title, running state, a two-line summary, the impacted
- * entities, and how many proposed actions wait for a decision. Its subjects only name it while
- * Agent Builder has not titled it; the overview lists them. Presentational; the host supplies the
- * investigation (from the list API) and decides what a click does.
+ * A compact investigation card: age on top (with running indicator and optional trailing actions),
+ * title, a two-line summary, and impacted entities. Presentational; the host supplies the
+ * investigation and decides what a click does.
  */
 export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   investigation,
   onClick,
   isSelected = false,
+  actions,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { labelCss: aiLabelCss } = useAiButtonGradientStyles({ variant: 'outlined' });
+  // Same primary→assistance stop colors the AI label gradient uses (dots can't use background-clip).
+  const aiDotsFill = `linear-gradient(135deg, ${euiTheme.colors.textPrimary} 2.98%, ${euiTheme.colors.textAssistance} 66.24%)`;
   const { metadata, in_progress: inProgress, created_at: createdAt } = investigation;
   const title = getInvestigationDisplayTitle(investigation);
-  const { severity, summary, status } = metadata;
-  const pending = investigation.pending_proposal_count ?? 0;
+  const { summary } = metadata;
+  const hasEntities = (investigation.impact?.entities?.length ?? 0) > 0;
+  const isInteractive = onClick != null;
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
@@ -87,108 +88,170 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
     }
   };
 
+  // Card-local middot/status. Negative start margin cancels Meta's gutterSize="s" down to xs.
+  const inProgressStatus = inProgress ? (
+    <span
+      data-test-subj="investigationCardRunning"
+      css={css`
+        display: inline-flex;
+        align-items: center;
+        gap: ${euiTheme.size.xs};
+        margin-inline-start: calc(${euiTheme.size.xs} - ${euiTheme.size.s});
+      `}
+    >
+      <EuiText size="xs" color="subdued" component="span" aria-hidden>
+        •
+      </EuiText>
+      <EuiText
+        size="xs"
+        component="span"
+        css={[
+          aiLabelCss,
+          css`
+            padding: 0;
+            line-height: 1;
+          `,
+        ]}
+      >
+        {IN_PROGRESS_LABEL}
+      </EuiText>
+      <InvestigatingTypingDots color={aiDotsFill} />
+    </span>
+  ) : undefined;
+
+  const hasActions = actions != null;
+
+  // Spacer matching ConversationsActionsGroup / Nightshift card actions: divider margins +
+  // two size="s" (32px) icon buttons + gutters — keeps age text from running under the icons.
+  const actionsSpacerWidth = `calc(${euiTheme.size.xl} * 2 + ${euiTheme.size.l} + ${euiTheme.size.s})`;
+
   return (
     <div
       data-test-subj="investigationCard"
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      aria-pressed={onClick ? isSelected : undefined}
-      onClick={onClick ? () => onClick(investigation) : undefined}
-      onKeyDown={onClick ? handleKeyDown : undefined}
       css={css`
-        padding: ${euiTheme.size.base};
+        position: relative;
+        /* Same as ConversationCard: 24px on three sides; 16px on the right so 32px icon
+           buttons' glyphs land at 24px from the edge. */
+        padding: ${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l};
         background: ${isSelected
           ? euiTheme.colors.backgroundBaseInteractiveSelect
           : euiTheme.colors.backgroundBasePlain};
-        ${onClick ? 'cursor: pointer;' : ''}
-        ${onClick && !isSelected
-          ? `&:hover { background: ${euiTheme.colors.backgroundBaseSubdued}; }`
+        ${isInteractive && !isSelected
+          ? `&:has([data-test-subj='investigationCardButton']:hover) {
+              background: ${euiTheme.colors.backgroundBaseSubdued};
+            }`
           : ''}
       `}
     >
-      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                type="dot"
-                color={severity ? SEVERITY_COLORS[severity] : 'subdued'}
-                content={severity ? SEVERITY_LABELS[severity] : NO_SEVERITY_LABEL}
-                aria-label={severity ? SEVERITY_LABELS[severity] : NO_SEVERITY_LABEL}
-                iconProps={{ 'data-test-subj': 'investigationCardSeverity' }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem css={{ minWidth: 0 }}>
-              <EuiText size="s">
-                <p
-                  className="eui-textTruncate"
-                  title={title}
-                  css={css`
-                    margin: 0;
-                    font-weight: ${euiTheme.font.weight.semiBold};
-                  `}
-                  data-test-subj="investigationCardTitle"
-                >
-                  {title}
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-            {inProgress && (
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  type="dot"
-                  color="primary"
-                  content={RUNNING_LABEL}
-                  aria-label={RUNNING_LABEL}
-                  iconProps={{ 'data-test-subj': 'investigationCardRunning' }}
+      {/*
+        ConversationCard layout: age | actions share the top row (actions overhang by 8px so the
+        age stays on the padding line); title/summary use the full width below. Actions stay a
+        sibling of the card button so interactive controls are not nested.
+      */}
+      <div
+        role={isInteractive ? 'button' : undefined}
+        tabIndex={isInteractive ? 0 : undefined}
+        aria-label={isInteractive ? title : undefined}
+        aria-pressed={isInteractive ? isSelected : undefined}
+        data-test-subj={isInteractive ? 'investigationCardButton' : undefined}
+        onClick={isInteractive ? () => onClick(investigation) : undefined}
+        onKeyDown={isInteractive ? handleKeyDown : undefined}
+        css={css`
+          ${isInteractive ? 'cursor: pointer;' : ''}
+        `}
+      >
+        <EuiFlexGroup gutterSize="xs" responsive={false} direction="column">
+          <EuiFlexItem
+            grow={false}
+            // Actions overhang by 8px; give that back under the row so age-to-title stays put.
+            css={hasActions ? { paddingBlockEnd: euiTheme.size.s } : undefined}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="l"
+              responsive={false}
+              justifyContent="spaceBetween"
+              direction="row"
+            >
+              <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                <ConversationMetaInfo timestamp={createdAt} inFlightStatus={inProgressStatus} />
+              </EuiFlexItem>
+              {hasActions && (
+                <EuiFlexItem
+                  grow={false}
+                  aria-hidden
+                  css={{
+                    marginBlock: `-${euiTheme.size.s}`,
+                    inlineSize: actionsSpacerWidth,
+                    blockSize: euiTheme.size.xl,
+                    flexShrink: 0,
+                  }}
                 />
-              </EuiFlexItem>
-            )}
-            {status === 'closed' && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{CLOSED_LABEL}</EuiBadge>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                <FormattedRelative value={createdAt} />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
 
-        {summary && (
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
+          <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+            <EuiText size="s">
               <p
-                data-test-subj="investigationCardSummary"
+                className="eui-textTruncate"
+                title={title}
                 css={css`
                   margin: 0;
-                  display: -webkit-box;
-                  -webkit-line-clamp: 2;
-                  -webkit-box-orient: vertical;
-                  overflow: hidden;
+                  font-weight: ${euiTheme.font.weight.semiBold};
                 `}
+                data-test-subj="investigationCardTitle"
               >
-                {summary}
+                {title}
               </p>
             </EuiText>
           </EuiFlexItem>
-        )}
 
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-            <EntityChips investigation={investigation} />
-            {pending > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="accent" data-test-subj="investigationCardPendingProposals">
-                  {pendingProposalsLabel(pending)}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          {summary && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <p
+                  data-test-subj="investigationCardSummary"
+                  css={css`
+                    margin: 0;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                  `}
+                >
+                  {summary}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+          )}
+
+          {hasEntities && (
+            <EuiFlexItem
+              grow={false}
+              // Column gutter is xs; add xs more under a summary so badges stay at s (8px).
+              css={summary ? { marginBlockStart: euiTheme.size.xs } : undefined}
+            >
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+                <EntityChips investigation={investigation} />
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </div>
+      {hasActions && (
+        <div
+          css={css`
+            position: absolute;
+            inset-block-start: ${euiTheme.size.l};
+            inset-inline-end: ${euiTheme.size.base};
+            /* 32px icon buttons overhang so age text stays on the padding line. */
+            margin-block: -${euiTheme.size.s};
+          `}
+        >
+          {actions}
+        </div>
+      )}
     </div>
   );
 };

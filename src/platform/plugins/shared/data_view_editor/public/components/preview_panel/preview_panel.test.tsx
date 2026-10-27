@@ -33,6 +33,7 @@ describe('DataViewEditor PreviewPanel', () => {
   const commonProps: Omit<PreviewPanelProps, 'matchedIndices$' | 'title'> = {
     allowHidden: false,
     type: INDEX_PATTERN_TYPE.DEFAULT,
+    matchedIndicesError$: from([undefined]),
   };
 
   it('should render normally by default', async () => {

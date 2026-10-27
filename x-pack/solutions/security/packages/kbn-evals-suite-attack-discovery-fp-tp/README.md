@@ -24,10 +24,13 @@ The dataset is every example of every scenario registered in `src/scenarios/inde
 | `encoded-powershell.fp-entities-missing` | U1 | FP twin, no entity documents | `inconclusive` |
 | `encoded-powershell.tp-events-missing` | U6 | TP twin, no raw events | `inconclusive` |
 | `encoded-powershell.mixed-world` | U1 | FP entities + TP events | `inconclusive` |
+| `encoded-powershell.fp-events-truncated` | U1 | FP twin + 60 benign service starts on the cited host after its own events | `inconclusive` |
 | `encoded-powershell.failed-missing-ad` | U6 | No Attack Discovery document | `failed` |
 | `encoded-powershell.failed-missing-cited-alert` | U6 | The discovery cites an alert that is not seeded | `failed` |
 
 `mimicrat-clickfix` replays the MIMICRAT ClickFix chain from [Elastic Security Labs](https://www.elastic.co/security-labs/threat-command/mimicrat-custom-rat-mimics-c2-frameworks), ported from [#293023](https://github.com/elastic/kibana/pull/293023). Its 15 examples are two base worlds, the replay and a benign mimic, and variants of them, so together they reach every branch of the verdict rules. See [its README](src/scenarios/mimicrat_clickfix/README.md) for the table.
+
+`fp-events-truncated` reaches `inconclusive` deterministically. The analysis reads at most 50 raw events, oldest first, so the FP twin's own events stay on the page and the model still sees a false positive; the extra hits mark the page truncated, and `block_truncated_clear` rewrites `false_positive` to `inconclusive`. It has no `checks`, because the verdict rules do not model truncation.
 
 A missing source is one-sided: it blocks `false_positive` (missing evidence cannot clear an alert) but not `true_positive`, which needs a supporting raw-event check (`process_parent` or `network_destination`). `entity_role` alone never escalates, so `tp-events-missing` stays `inconclusive`.
 
@@ -52,8 +55,12 @@ src/
     registry.test.ts      Invariants every scenario must hold
     encoded_powershell/   One authored scenario: ids, attack, entities, event overlays, gold, examples
     mimicrat_clickfix/    One replayed chain, its benign mimic, and their variants
+  worker_mode/            QA seeder for the AD Worker: plan, seeding, manifest
   workflow_task.ts        Runs the workflow and reads its output
   evaluators.ts
+scripts/
+  load_fp_tp_twin.js      Seeds one twin with its authored attack (Workflows UI runs)
+  seed_ad_worker_fp_tp.js Seeds one example without an attack, for the AD Worker (QA)
 ```
 
 ## Adding a scenario
@@ -87,6 +94,37 @@ node scripts/evals start --suite security-attack-discovery-fp-tp --model <connec
 ```
 
 The suite's stack uses the `evals_attack_discovery_fp_tp` Scout config set, which enables AlertZero (and the `agenticInvestigations` and `proposals` plugins it requires) plus the Workflows UI and agent settings.
+
+## Seeding for the AD Worker (QA)
+
+The eval seeds an authored attack with a fixed id and runs the analysis on it, so it skips generation. To test the Worker end to end ([security-team#19893](https://github.com/elastic/security-team/issues/19893)), `scripts/seed_ad_worker_fp_tp.js` seeds one example's detection alerts, Entity Store entities and raw endpoint events, and no Attack Discovery. The Worker then generates the attack and its review runs the FP/TP analysis. The alerts are the same in every world; the entities and raw events decide the verdict.
+
+```bash
+node x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/scripts/seed_ad_worker_fp_tp.js --space qa-fp --outcome fp
+```
+
+- `--space`: required, a dedicated non-default space, one per scenario. The script creates it if it does not exist. Before seeding, the script deletes every earlier seed's alerts in the space (found by the seed label in `tags`), the raw events on their hosts and the entities on those hosts. Attack Discovery generation reads every open alert in the space, so seeding two worlds into one space mixes them into one attack.
+- `--outcome fp|tp|inconclusive` seeds `encoded-powershell.fp`, `encoded-powershell.tp` or `encoded-powershell.fp-events-truncated`. `--example <id>` seeds any other example whose gold is not `failed`; a `failed` gold needs a hand-made discovery.
+- Every run gets a fresh run marker, so alert, event and host ids are new. The twins share alert ids under one marker, and persistence de-duplicates attacks on a hash of their alert ids, so a reused marker generates no new attack. Host ids must be unique as well, because the analysis reads raw events by `host.id` across every namespace.
+- Setup: the detection alerts index (created by the space's first rule run, so the script keeps an always-on no-match rule, `fptp-seeder-bootstrap-nomatch`, in the space), the `securitySolution:enableAttackDiscoveryWorkflows` Advanced Setting (off in a new space, and generation then fails every batch while the Worker run still completes), the Entity Store installed with log extraction stopped (it stays stopped; run `PUT /s/<space>/api/security/entity_store/start` to resume it), `alertzero_frontier` mapped (`--reasoningConnectorId`, or keep the space's mapping), and the space's anonymization-fields index, which a fresh space lacks until an AI Assistant route runs ([security-team#20129](https://github.com/elastic/security-team/issues/20129)).
+- Timestamps move so the last alert is 5 minutes before the seed. The analysis reads raw events within ±2h of the discovery's `@timestamp`, which is when the Worker generated it, so run the Worker before the printed deadline (about 1h 30m after seeding).
+- The script only seeds data. Then, in the space, enable the Attack Discovery Worker (AlertZero → Watches → Triage Watch → Attack Discovery: Enabled, Autonomy Manual, Save); saving binds the Worker's service account and starts its first run. Read the verdict in the `system-security-attack-discovery-fp-tp-analysis` and `system-security-attack-discovery-review` executions (Workflows, with Show managed workflows on) and in the Investigation's verdict card in Agent Builder. Do not run `system-security-attack-discovery-review` by hand: it fails without the Worker run's service-account parent. Re-running the Worker over the same seed generates no new review, because persistence de-duplicates the attack; seed a new space for each repetition.
+- The manifest (`--manifest`, default `target/ad_worker_fp_tp/<space>-<marker>.json` in this package) records the marker, the seeded ids, the expected outcome and the window deadline.
+
+Live results on a local 9.6 stack from `main` after [#298409](https://github.com/elastic/kibana/pull/298409) turned the ground-truth gate off for the Worker (2026-10-19, `alertzero_frontier` → `.anthropic-claude-5-opus-chat_completion` over EIS, one space per run), and again on an Elastic Cloud Hosted 9.6 deployment (2026-10-20): `--outcome fp`, `tp` and `inconclusive` each reached their expected verdict in 3 of 3 runs on both. Every run generated one attack citing all four seeded alerts. The FP attacks were closed with `workflow_reason: false_positive` and their detection alerts left open. In the inconclusive runs the model itself returned `inconclusive`, so `block_truncated_clear` did not have to downgrade a `false_positive`. Before #298409 the gate dropped the FP and inconclusive worlds during generation, and no review ran. `encoded-powershell.mixed-world` does reach the review, but the analysis returns `true_positive`, not its gold `inconclusive`: the prompt treats an MDM host as `neutral`, not `contradicts`. Do not use it for QA until its world or gold is fixed.
+
+Auth: `--username`/`--password` (default `elastic`/`changeme`), or an API key in the `FP_TP_API_KEY` environment variable (or `--apiKey`, which ends up in shell history). For an Elastic Cloud Hosted deployment, pass both URLs and use a key with the privileges of the `superuser` role: the script writes to the space's alerts index, creates rules and spaces, and changes Advanced Settings.
+
+```bash
+export FP_TP_API_KEY=<encoded API key>
+node x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/scripts/seed_ad_worker_fp_tp.js \
+  --space qa-fp --outcome fp \
+  --kibanaUrl https://<deployment>.kb.<region>.elastic-cloud.com \
+  --elasticsearchUrl https://<deployment>.es.<region>.elastic-cloud.com \
+  --reasoningConnectorId .anthropic-claude-5-opus-chat_completion
+```
+
+Serverless is not supported yet: [#297538](https://github.com/elastic/kibana/pull/297538) adds the space-scoped serverless path (`createLiveKbnRequest` and the space index helpers here come from it).
 
 ## Reproducibility
 

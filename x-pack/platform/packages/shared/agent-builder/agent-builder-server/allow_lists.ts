@@ -226,8 +226,8 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'cases-analytics',
 
   // Platform – Alerting
-  'rule-management',
-  'action-policy-management',
+  'rule-authoring',
+  'action-policy-authoring',
 
   // Platform – Dashboard
   'dashboards',
@@ -395,6 +395,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.alerts',
   'security.entity',
   'security.entity_analytics_dashboard',
+  'security.entity_analytics_ai_brief',
   'security.entity_graph',
   'security.entity_risk_score_history',
   'security.exception',
@@ -417,6 +418,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // gated behind xpack.alertzero.enabled
   'security.threat',
   'security.significant_security_event',
+  // hidden; server-registered only
+  'security.hunt_coordinator_result',
 
   // Observability
   'observability.ai_insight',

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { OperationFailure } from '../utils';
+import type { DashboardFailure } from '../utils';
 import type { InlinePanelOperationType, PanelContent } from '../resolve_panel';
 import type { DashboardOperation } from './registry';
-import type { ResolveAttachmentPanel } from './types';
+import type { ResolveAttachmentPanel } from '../types';
 import {
   buildConfigPanelContent,
+  toCreationResolutionRequest,
   type NewPanelInput,
   type PanelRequestInput,
-  type PanelResolutionRequest,
   type ResolvePanelContent,
-} from './panels';
+} from '../panels';
 
 type ResolvedPanelContent = Awaited<ReturnType<ResolvePanelContent>>;
 
@@ -64,22 +64,6 @@ const collectPanelCreationRequests = (
   }
 
   return requestsByOperationIndex;
-};
-
-/** Maps a new-panel request input onto the resolution request for its renderer. */
-const toCreationResolutionRequest = ({
-  operationType,
-  panelInput,
-}: PanelCreationRequest): PanelResolutionRequest => {
-  const { query, esql } = panelInput;
-  const base = { operationType, identifier: query, nlQuery: query, esql };
-
-  if (panelInput.renderer === 'custom_content') {
-    return { ...base, renderer: panelInput.renderer };
-  }
-
-  const { renderer, index, chartType } = panelInput;
-  return { ...base, renderer, index, chartType };
 };
 
 /**
@@ -143,7 +127,7 @@ export const createPanelInputMaterializer = ({
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   operationIndex: number;
   operationType: InlinePanelOperationType;
-  failures: OperationFailure[];
+  failures: DashboardFailure[];
   resolveAttachmentPanel?: ResolveAttachmentPanel;
 }): ((item: NewPanelInput, panelInputIndex: number) => MaterializedPanelInput | undefined) => {
   const resolvedRequestByInputIndex = new Map(

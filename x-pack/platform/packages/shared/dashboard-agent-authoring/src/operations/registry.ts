@@ -16,14 +16,14 @@ import { removePanelsOperation } from './remove_panels';
 import { removeSectionOperation } from './remove_section';
 import { setMetadataOperation } from './set_metadata';
 import type { OperationExecutionContext } from './types';
-import { updatePanelLayoutsOperation } from './update_panel_layouts';
+import { movePanelsOperation } from './move_panels';
 import { resolvePanelCreationRequests } from './panel_creation';
 
 const operationDefinitions = [
   setMetadataOperation,
   addPanelsOperation,
   editPanelsOperation,
-  updatePanelLayoutsOperation,
+  movePanelsOperation,
   addSectionOperation,
   removeSectionOperation,
   removePanelsOperation,
@@ -97,7 +97,7 @@ const resolveSectionReferences = (
   switch (operation.operation) {
     case 'add_panels':
       return { ...operation, panels: resolvePanelSections(operation.panels) };
-    case 'update_panel_layouts':
+    case 'move_panels':
       return { ...operation, panels: resolvePanelSections(operation.panels) };
     case 'remove_section':
       return { ...operation, id: resolveId(operation.id) };

@@ -104,7 +104,7 @@ const extractLooseMetadataFields = (
  * Validates YAML and builds a WorkflowProperties document ready for indexing.
  * Shared by user-created and managed workflow creation paths.
  */
-export const prepareWorkflowDocumentFromYaml = (params: {
+export const prepareWorkflowDocumentFromYaml = async (params: {
   id?: string;
   yaml: string;
   zodSchema: z.ZodType;
@@ -115,7 +115,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
   nameFallback?: string;
   logger?: Logger;
   warnIgnoredKibanaFetcher?: boolean;
-}): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } => {
+}): Promise<{ id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml }> => {
   const {
     id: providedId,
     yaml,
@@ -143,7 +143,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     valid: false,
   };
 
-  const validation = validateWorkflowYaml(yaml, zodSchema, { triggerDefinitions });
+  const validation = await validateWorkflowYaml(yaml, zodSchema, { triggerDefinitions });
   if (validation.valid && validation.parsedWorkflow) {
     workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
   } else if (validation.parsedWorkflow) {
@@ -192,18 +192,18 @@ export const prepareWorkflowDocumentFromYaml = (params: {
  * Validates YAML update and returns the storage patch + validation errors.
  * Pure function — caller resolves zodSchema and triggerDefinitions before calling.
  */
-export const applyYamlUpdate = (params: {
+export const applyYamlUpdate = async (params: {
   workflowYaml: string;
   zodSchema: z.ZodType;
   triggerDefinitions: Array<{ id: string; eventSchema: z.ZodType }>;
   logger?: Logger;
   warnIgnoredKibanaFetcher?: boolean;
   workflowId?: string;
-}): {
+}): Promise<{
   updatedDataPatch: Partial<WorkflowProperties>;
   validationErrors: string[];
   shouldUpdateScheduler: boolean;
-} => {
+}> => {
   const {
     workflowYaml,
     zodSchema,
@@ -212,7 +212,7 @@ export const applyYamlUpdate = (params: {
     warnIgnoredKibanaFetcher = false,
     workflowId,
   } = params;
-  const validation = validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
+  const validation = await validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
   logIgnoredKibanaFetcherOnPersist({
     logger,
     warnIgnoredKibanaFetcher,
@@ -311,12 +311,13 @@ export const applyFieldUpdates = (
     );
   }
 
-  // Keep definition.enabled in sync with the top-level enabled column so that
-  // any consumer of the parsed definition (e.g. export) always sees the current
-  // value.  The YAML-update path performs this same sync in workflow_crud_service;
-  // mirror it here for the field-only path.
-  if (patch.enabled !== undefined && existingSource?.definition) {
-    patch.definition = { ...existingSource.definition, enabled: patch.enabled };
+  // Keep parsed fields current: delegation checks read tags from the definition.
+  if (existingSource?.definition && (patch.enabled !== undefined || patch.tags !== undefined)) {
+    patch.definition = {
+      ...existingSource.definition,
+      ...(patch.enabled !== undefined ? { enabled: patch.enabled } : {}),
+      ...(patch.tags !== undefined ? { tags: patch.tags } : {}),
+    };
   }
 
   return { patch, validationErrors };

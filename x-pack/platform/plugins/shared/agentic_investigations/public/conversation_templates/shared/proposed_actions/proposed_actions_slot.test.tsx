@@ -68,7 +68,11 @@ const mockProposal: ProposalWithMetadata = {
   confidence: 'high',
   origin: 'alertzero',
   createdAt: '2024-01-01T00:00:00Z',
-  action: { name: 'Isolate cfo-mbp-14 — host isolation', category: 'Response action' },
+  action: {
+    name: 'Isolate cfo-mbp-14 — host isolation',
+    category: 'Response action',
+    approvalPolicy: 'always-gate',
+  },
 };
 
 const decidedProposal: ProposalWithMetadata = {
@@ -79,7 +83,11 @@ const decidedProposal: ProposalWithMetadata = {
   decidedBy: { fullName: 'Bonnie Fishel', username: 'bfishel', email: null },
   decidedAt: '2024-01-01T17:20:00.000Z',
   title: 'After-hours domain admin logins — fin-dc-01',
-  action: { name: 'After-hours domain admin logins — fin-dc-01', category: 'Response action' },
+  action: {
+    name: 'After-hours domain admin logins — fin-dc-01',
+    category: 'Response action',
+    approvalPolicy: 'always-gate',
+  },
 };
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -169,17 +177,17 @@ describe('ProposedActionsSlot', () => {
   });
 
   it('keeps the order the API returned, so paging and display agree', () => {
-    const retry = { ...mockProposal, id: 'retry' };
-    const failedLast = { ...decidedProposal, id: 'failed-last', status: 'failed' as const };
-    const failedFirst = { ...decidedProposal, id: 'failed-first', status: 'failed' as const };
-    mockConversationProposalsPage([retry, failedLast, failedFirst]);
+    const pending = { ...mockProposal, id: 'pending' };
+    const decidedLast = { ...decidedProposal, id: 'decided-last' };
+    const decidedFirst = { ...decidedProposal, id: 'decided-first' };
+    mockConversationProposalsPage([pending, decidedLast, decidedFirst]);
     renderSlot();
 
     const rows = screen.getAllByTestId(/^investigationFlyoutProposedAction-/);
     expect(rows.map((row) => row.getAttribute('data-test-subj'))).toEqual([
-      'investigationFlyoutProposedAction-retry',
-      'investigationFlyoutProposedAction-failed-last',
-      'investigationFlyoutProposedAction-failed-first',
+      'investigationFlyoutProposedAction-pending',
+      'investigationFlyoutProposedAction-decided-last',
+      'investigationFlyoutProposedAction-decided-first',
     ]);
   });
 

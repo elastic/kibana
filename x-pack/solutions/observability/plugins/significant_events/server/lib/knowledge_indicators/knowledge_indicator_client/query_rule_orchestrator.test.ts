@@ -89,6 +89,20 @@ describe('QueryRuleOrchestrator', () => {
       expect(rulesManagementClient.bulkCreateRules).toHaveBeenCalledTimes(1);
     });
 
+    it('preserves category while synchronizing a query with its rule', async () => {
+      const { orchestrator, writer } = createOrchestrator();
+      const newQuery = makeQuery({
+        id: 'categorized',
+        category: 'security',
+        severity_score: 80,
+      });
+
+      await orchestrator.syncQueries(SOURCE, [newQuery]);
+
+      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      expect(bulkOps[0].index.query.category).toBe('security');
+    });
+
     it('skips compensation when bulk create rejects before returning any created ids', async () => {
       const { orchestrator, rulesManagementClient, writer } = createOrchestrator();
       const createError = new Error('bulk create failed');
@@ -416,6 +430,22 @@ describe('QueryRuleOrchestrator', () => {
   });
 
   describe('upsertQuery', () => {
+    it('preserves existing category when the incoming metadata update omits it', async () => {
+      const existing = makeLink({ id: 'q1', category: 'error' });
+      const { orchestrator, writer } = createOrchestrator({ currentLinks: [existing] });
+
+      await orchestrator.upsertQuery(
+        SOURCE,
+        makeQuery({ id: 'q1', expires_at: '2030-01-01T00:00:00.000Z' })
+      );
+
+      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      const op = bulkOps.find(
+        (o: { index?: { query?: { id?: string } } }) => o.index?.query?.id === 'q1'
+      );
+      expect(op?.index?.query?.category).toBe('error');
+    });
+
     it('preserves existing features when the incoming query omits them (durability toggle)', async () => {
       const existing = makeLink({ id: 'q1', features: [{ id: 'feat-1' }] });
       const { orchestrator, writer } = createOrchestrator({ currentLinks: [existing] });

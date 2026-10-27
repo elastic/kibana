@@ -18,8 +18,6 @@ import type {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 
-import type { SearchInferenceEndpointsConfig } from './config';
-import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
 import { getForFeature as getForFeatureFn } from './inference_endpoints';
@@ -33,7 +31,6 @@ import type {
   SearchInferenceEndpointsPluginStartDependencies,
 } from './types';
 import {
-  DYNAMIC_CONNECTORS_POLLING_START_DELAY,
   ELASTIC_INFERENCE_SERVICE_APP_ID,
   INFERENCE_ENDPOINTS_APP_ID,
   INFERENCE_SETTINGS_SO_TYPE,
@@ -67,13 +64,10 @@ export class SearchInferenceEndpointsPlugin
     >
 {
   private readonly logger: Logger;
-  private readonly config: SearchInferenceEndpointsConfig;
-  private dynamicConnectorsPoller?: DynamicConnectorsPoller;
   private readonly featureRegistry: InferenceFeatureRegistry;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.config = initializerContext.config.get<SearchInferenceEndpointsConfig>();
     this.featureRegistry = new InferenceFeatureRegistry(this.logger);
   }
 
@@ -178,22 +172,6 @@ export class SearchInferenceEndpointsPlugin
   }
 
   public start(core: CoreStart, plugins: SearchInferenceEndpointsPluginStartDependencies) {
-    if (this.config.dynamicConnectors.enabled) {
-      this.logger.debug(
-        `dynamic connectors enabled: ${this.config.dynamicConnectors.enabled} - polling ${this.config.dynamicConnectors.pollingIntervalMins} mins`
-      );
-      this.dynamicConnectorsPoller = new DynamicConnectorsPoller(
-        this.logger,
-        plugins.actions,
-        core.elasticsearch.client.asInternalUser,
-        this.config.dynamicConnectors.pollingIntervalMins
-      );
-
-      setTimeout(() => {
-        this.dynamicConnectorsPoller?.start();
-      }, DYNAMIC_CONNECTORS_POLLING_START_DELAY);
-    }
-
     const featureRegistry = this.featureRegistry;
 
     return {
@@ -216,8 +194,11 @@ export class SearchInferenceEndpointsPlugin
             core.savedObjects.getScopedClient(request)
           );
 
+          // `onlyReturnConfigured` has to reach endpoint-id resolution. Otherwise a
+          // feature with no saved row and no recommended endpoints answers with the
+          // platform default, and a caller cannot tell that nothing was configured.
           const resolveFeatureEndpoints = (fId: string) =>
-            getForFeatureFn(featureRegistry, soClient, getConnectorById, fId, this.logger);
+            getForFeatureFn(featureRegistry, soClient, getConnectorById, fId, this.logger, opts);
           const getConnectorList = () => plugins.inference.getConnectorList(request);
           const feature = featureRegistry.get(featureId);
 
@@ -240,13 +221,5 @@ export class SearchInferenceEndpointsPlugin
         },
       },
     };
-  }
-
-  public stop() {
-    if (this.dynamicConnectorsPoller) {
-      const dynamicConnectorsPoller = this.dynamicConnectorsPoller;
-      this.dynamicConnectorsPoller = undefined;
-      dynamicConnectorsPoller.stop();
-    }
   }
 }

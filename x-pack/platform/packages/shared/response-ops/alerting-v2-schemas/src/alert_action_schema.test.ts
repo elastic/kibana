@@ -17,10 +17,13 @@ import {
   episodeAlertActionParamsSchema,
   seriesAlertActionParamsSchema,
 } from './alert_action_schema';
-import { ID_MAX_LENGTH } from './constants';
+import { ID_MAX_LENGTH, SERIES_ID_MAX_LENGTH } from './constants';
 
 const GROUP_HASH = 'a'.repeat(64);
-const OTHER_GROUP_HASH = 'b'.repeat(64);
+const SERIES_ID =
+  'MTo6cnVsZTo6ZGVmYXVsdDo6Y3B1LWhpZ2g6Ojk4MDU4Y2I1NjkwMTdlY2I2YjA4YjU1NGVjYmNiMjUyNGZmN2RkODk3MTgyOGY0ZjJlNTkzOWMxZTY2NjdlNTY';
+const OTHER_SERIES_ID =
+  'MTo6cnVsZTo6ZGVmYXVsdDo6bWVtLWhpZ2g6OjYyYjg2ZWNhNGIxZDFlNmUxZjljMGIwYTJmMmQ0YjdjMWEzZTVmNzA4MTkyODM3NDY1NTY0NzM4MjkxMDMwN2E';
 
 describe('createSeriesAlertActionBodySchema', () => {
   it('accepts every series-level action variant', () => {
@@ -114,23 +117,29 @@ describe('createAckEpisodeActionBodySchema', () => {
 });
 
 describe('seriesAlertActionParamsSchema', () => {
-  it('accepts a group_hash and rejects an empty one', () => {
-    expect(() => seriesAlertActionParamsSchema.parse({ group_hash: GROUP_HASH })).not.toThrow();
-    expect(() => seriesAlertActionParamsSchema.parse({ group_hash: '' })).toThrow();
+  it('accepts a series_id and rejects an empty one', () => {
+    expect(() => seriesAlertActionParamsSchema.parse({ series_id: SERIES_ID })).not.toThrow();
+    expect(() => seriesAlertActionParamsSchema.parse({ series_id: '' })).toThrow();
   });
 
-  it('rejects anything that is not a sha256 digest', () => {
-    expect(() => seriesAlertActionParamsSchema.parse({ group_hash: 'group-1' })).toThrow();
-    expect(() => seriesAlertActionParamsSchema.parse({ group_hash: 'a'.repeat(63) })).toThrow();
-    expect(() => seriesAlertActionParamsSchema.parse({ group_hash: 'a'.repeat(65) })).toThrow();
+  it('rejects anything outside the base64url alphabet', () => {
+    expect(() => seriesAlertActionParamsSchema.parse({ series_id: 'series 1' })).toThrow();
+    expect(() => seriesAlertActionParamsSchema.parse({ series_id: 'series/1' })).toThrow();
+    expect(() => seriesAlertActionParamsSchema.parse({ series_id: `${SERIES_ID}==` })).toThrow();
+  });
+
+  it('bounds the length', () => {
     expect(() =>
-      seriesAlertActionParamsSchema.parse({ group_hash: GROUP_HASH.toUpperCase() })
+      seriesAlertActionParamsSchema.parse({ series_id: 'a'.repeat(SERIES_ID_MAX_LENGTH) })
+    ).not.toThrow();
+    expect(() =>
+      seriesAlertActionParamsSchema.parse({ series_id: 'a'.repeat(SERIES_ID_MAX_LENGTH + 1) })
     ).toThrow();
   });
 
   it('rejects unknown keys (strict mode)', () => {
     expect(() =>
-      seriesAlertActionParamsSchema.parse({ group_hash: GROUP_HASH, foo: 'bar' })
+      seriesAlertActionParamsSchema.parse({ series_id: SERIES_ID, foo: 'bar' })
     ).toThrow();
   });
 });
@@ -157,8 +166,8 @@ describe('verb-specific bulk action body schemas', () => {
     expect(() =>
       bulkSnoozeSeriesActionBodySchema.parse({
         items: [
-          { group_hash: GROUP_HASH, snoozed_until: '2026-08-12T00:00:00.000Z' },
-          { group_hash: OTHER_GROUP_HASH },
+          { series_id: SERIES_ID, snoozed_until: '2026-08-12T00:00:00.000Z' },
+          { series_id: OTHER_SERIES_ID },
         ],
       })
     ).not.toThrow();
@@ -230,11 +239,11 @@ describe('verb-specific bulk action body schemas', () => {
     ).toThrow('Each alert_id can appear at most once per request; [e1] is repeated');
   });
 
-  it('rejects a series envelope that repeats a group_hash', () => {
+  it('rejects a series envelope that repeats a series_id', () => {
     expect(() =>
       bulkSnoozeSeriesActionBodySchema.parse({
-        items: [{ group_hash: GROUP_HASH }, { group_hash: GROUP_HASH }],
+        items: [{ series_id: SERIES_ID }, { series_id: SERIES_ID }],
       })
-    ).toThrow(`Each group_hash can appear at most once per request; [${GROUP_HASH}] is repeated`);
+    ).toThrow(`Each series_id can appear at most once per request; [${SERIES_ID}] is repeated`);
   });
 });

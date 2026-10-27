@@ -21,6 +21,8 @@ xpack.streams.distributor.url: "https://localhost:18443"
 xpack.streams.distributor.ssl.certificate: /tmp/certs/kibana.crt
 xpack.streams.distributor.ssl.key: /tmp/certs/kibana.key
 xpack.streams.distributor.ssl.certificateAuthorities: /tmp/certs/server-ca.crt
+# Needed only to publish units with secrets. See "Credentials".
+xpack.streams.encryptionKey.path: /tmp/streams-encryption-key
 
 uiSettings.overrides:
   observability:streamsEnableCanvas: true
@@ -58,27 +60,72 @@ Important consequences:
 - Types are `hidden: true`. They do **not** appear in Stack Management → Saved Objects.
 - Both types are `namespaceType: 'multiple'` and are written with `initialNamespaces: ['*']`, so every space sees the same unit. That matches config-distributor `PUT /v1/units/default` (one unit per cluster). `multiple-isolated` would hide the object from other spaces while still using a globally unique id, so a second space would 404 then collide.
 - Only `unit_id` is mapped (`keyword`). The configuration saved object id is the unit id (`default` in v1). Do not add mappings unless you actually need to filter/sort on that field; mappings cannot be removed later.
-- `streams-configuration` is an Encrypted Saved Object. `secrets` is encrypted at rest; `unit_id` is in AAD. `unit` is **not** in AAD (canvas edits would re-encrypt on every save). Always overwrite the full document — do not `soClient.update` encrypted or AAD attributes.
+- `streams-configuration` is an Encrypted Saved Object. `secrets` is encrypted at rest. `unit_id` and `sealed_credentials` are in AAD, so the cache stays readable but is authenticated: editing or swapping a cached blob makes `secrets` fail to decrypt, and the next save fails before anything is sent. `unit` is **not** in AAD (canvas edits would re-encrypt on every save). Always overwrite the full document, and do not `soClient.update` encrypted or AAD attributes.
 - v1 uses a single unit id: `default` (`STREAMS_DEFAULT_UNIT_ID`).
-- Unit PUT write order: configuration SO → config distributor → UI metadata. Distributor failure rolls back the configuration SO (including decrypted `secrets`).
+- Unit PUT order: seal credentials → distributor validate → configuration SO → distributor publish → UI metadata. A validation failure writes nothing. A publish failure rolls back the configuration SO (including decrypted `secrets` and `sealed_credentials`).
 - Without `xpack.streams.distributor.url`, validate and publish are no-ops.
 - PUT requires `xpack.encryptedSavedObjects.encryptionKey` (`canEncrypt`). Dev mode configures a static key automatically.
 
 ### Credentials
 
-Plaintext secrets live in the configuration SO `secrets` map (`{ "<name>": "<value>" }`), never inside `unit`. Authored YAML keeps a **name** that keys into that map (for example a destination config value of `es_api_key`).
+Plaintext secrets live in the configuration SO `secrets` map (`{ "<name>": "<value>" }`), never inside `unit`. The unit references a credential by name with a config value of exactly `{ "credential": "<name>" }`, as the streams-spec credential contract defines. A plain string value is never a reference.
+
+Names follow the unit identifier grammar (`^[a-z0-9]([a-z0-9-]*[a-z0-9])?$`, at most 256 characters). The same name is the reference, the key in `secrets`, and the `credentials[].name` sent to the distributor. The UI convention is `<nodeId>-<field>` with `_` turned into `-`, for example `s3-archive-secret-access-key`. That convention can collide (`a-b` + `c` and `a` + `b_c` both give `a-b-c`), so the UI must check before saving. Two nodes that reference the same name share one secret.
+
+A JSON envelope that stores a secret references it from the node and sends the value next to the unit:
+
+```json
+{
+  "unit": {
+    "destinations": [
+      {
+        "id": "es-remote-1",
+        "type": "elasticsearch",
+        "supported_telemetry": ["logs"],
+        "config": [{ "name": "api_key", "value": { "credential": "es-remote-1-api-key" } }]
+      }
+    ]
+  },
+  "secrets": { "es-remote-1-api-key": "<plaintext>" }
+}
+```
 
 | Layer | What is stored |
 | --- | --- |
-| Unit YAML / `unit` attribute | Credential **name** only |
+| Unit YAML / `unit` attribute | `{ credential: <name> }` reference only |
 | SO `secrets` (ESO) | Plaintext, encrypted at rest with Kibana's ESO key |
-| Distributor `PUT /v1/units/{id}` | Authored `unit_yaml` + `credentials: [{ name, ciphertext }]` under the **project public key** |
+| SO `sealed_credentials` (plain, in ESO AAD) | `{ name, target, ciphertext }` from the last save, reused while nothing changed |
+| Distributor `PUT /v1/units/{id}` and `POST /v1/validate` | Authored `unit_yaml` + `credentials: [{ name, ciphertext }]` |
 
-`GET /internal/streams/unit/{id}` omits `secrets`. Canvas saves that omit `secrets` keep the stored bag. A PUT that includes `secrets` **merges** those keys onto what is stored — it does not replace the secrets — because the UI only sends newly entered values. A later runtime fetch can reveal values when an editor actually needs them.
+`GET /internal/streams/unit/{id}` omits `secrets` and `sealed_credentials`. Canvas saves that omit `secrets` keep the stored bag. A PUT that includes `secrets` **merges** those keys onto what is stored instead of replacing them, because the UI only sends newly entered values.
 
-Project-key encryption (`encryptCredentials`) is not wired yet. Publishing a **non-empty** secrets bag without it logs a warning and omits the `credentials` sidecar rather than sending plaintext or failing the unit write. Secrets stay in the configuration saved object. Empty secrets still publish `unit_yaml` + `config_hash` only.
+Only top-level config entries of sources, processors, and destinations are scanned for references. A PUT fails with 400 when its `secrets` contains a name nothing references, or when a reference has neither a request nor a stored secret. Stored secrets and their blobs that are no longer referenced are dropped on every PUT.
 
-`config_hash` is SHA-256 of the authored YAML bytes, plus a credential ciphertext fingerprint when `credentials[]` is present. The distributor stores that hash without recomputing it; including ciphertext means a secret-only change still rolls out instead of matching the previous YAML-only hash and no-op'ing. Validate (`POST /v1/validate`) does not send credentials.
+Each `ciphertext` is `v1.<kid>.<iv>.<ct>`. `kid` names the key from `current-kid` in `xpack.streams.encryptionKey.path` (the mount of the project-controller `streams-encryption-key` Secret). `iv` is 12 random bytes and `ct` is the AES-256-GCM ciphertext with its 16-byte tag, both base64url without padding. The AAD is the UTF-8 `target_id`, which Kibana reads from the DNS SAN of `xpack.streams.distributor.ssl.certificate` exactly as the distributor does, so a blob only opens for the target it was sealed for.
+
+Kibana seals once per save and sends the same `credentials` to validate and publish. It reuses a stored blob while its kid, target and plaintext are unchanged (re-sending the same value counts as unchanged), so a no-op save keeps `config_hash` and does not roll the collector. `config_hash` follows the distributor docs: SHA-256 of the YAML bytes, plus a newline and the JSON array of `[name, ciphertext]` pairs sorted by name when there are credentials.
+
+A save with secrets fails with 503, and nothing is written, when:
+
+- `xpack.streams.encryptionKey.path` is not set,
+- `current-kid` is unreadable or not in the kid grammar (`^[A-Za-z0-9_-]{1,64}$`),
+- something has to be sealed (new or changed value, new kid or target) and its key file is missing or not 32 bytes,
+- no `target_id` resolves: the client certificate has no supported SAN, or no certificate is configured and `xpack.cloud.serverless.project_id` is not set.
+
+To get a local key directory:
+
+```bash
+KID="$(date -u +%Y%m%d_%H%M%S)_$(openssl rand -hex 4)"
+mkdir -p /tmp/streams-encryption-key
+printf '%s' "$KID" > /tmp/streams-encryption-key/current-kid
+openssl rand 32 > "/tmp/streams-encryption-key/streams-encryption-key.$KID"
+```
+
+Without a client certificate (a local fake distributor), set `xpack.cloud.serverless.project_id` explicitly in `kibana.dev.yml` (identifier grammar, at most 32 bytes). The UIAM dev path in `src/cli/serve/serve.js` defaults it to `abcdef12345678901234567890123456`, but not every local start goes through that path.
+
+The distributor's main branch ignores `credentials` on validate and cannot compile `{ credential }` references yet, so a local tilt run with a reference fails validation until the backend catches up (ingest-dev#9480).
+
+Kibana re-seals a unit's secrets only when the unit is saved. A unit that is not saved again after a key rotation keeps blobs under the previous kid, which the collector still accepts while that key stays in the Secret.
 
 ### Reset canvas saved objects
 
@@ -153,9 +200,6 @@ Content-Type: application/json
       "debug-out": { "x": 480, "y": 0 },
       "stale-node": { "x": 999, "y": 999 }
     }
-  },
-  "secrets": {
-    "es_api_key": "<plaintext; Encrypted Saved Objects at rest>"
   }
 }
 
@@ -234,6 +278,14 @@ The distributor (via `transpiler.Compile()`) is the authority on whether a unit 
 
 ## End-to-end testing
 
+The full UI-engineer runbook (kind, two Tilts, serverless ES, Kibana, then one script) is [dev/full_dev_flow/README.md](./dev/full_dev_flow/README.md). Short version once the four long-lived processes are up:
+
+```sh
+./x-pack/platform/plugins/shared/streams/dev/full_dev_flow/streams_full_dev.sh status
+./x-pack/platform/plugins/shared/streams/dev/full_dev_flow/streams_full_dev.sh
+```
+
+Login is `elastic_serverless` / `changeme`.
 
 [These instructions](https://github.com/elastic/ingest-dev/issues/9168#issuecomment-5427844503) can be used for testing source ingestion by running the `hosted-otel-collector` locally.
 

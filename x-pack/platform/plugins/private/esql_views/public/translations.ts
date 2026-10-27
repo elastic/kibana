@@ -55,6 +55,12 @@ export const translations = {
       defaultMessage: 'Actions for {viewName}',
       values: { viewName },
     }),
+  individualItemActionsDisabled: i18n.translate(
+    'xpack.esqlViews.managementPage.individualItemActionsDisabled',
+    {
+      defaultMessage: 'Individual item actions are disabled when rows are being selected.',
+    }
+  ),
   editViewButtonLabel: i18n.translate('xpack.esqlViews.managementPage.editViewButtonLabel', {
     defaultMessage: 'Edit',
   }),
@@ -73,6 +79,15 @@ export const translations = {
   queryColumn: i18n.translate('xpack.esqlViews.managementPage.queryColumn', {
     defaultMessage: 'Query',
   }),
+  reservedBadgeLabel: i18n.translate('xpack.esqlViews.managementPage.reservedBadgeLabel', {
+    defaultMessage: 'Reserved',
+  }),
+  reservedViewsFilterLabel: i18n.translate(
+    'xpack.esqlViews.managementPage.reservedViewsFilterLabel',
+    {
+      defaultMessage: 'Reserved views',
+    }
+  ),
   showFullQueryForView: (viewName: string) =>
     i18n.translate('xpack.esqlViews.managementPage.showFullQueryForView', {
       defaultMessage: 'Show full query for {viewName}',
@@ -129,7 +144,7 @@ export const translations = {
     defaultMessage: 'ES|QL query',
   }),
   viewQueryDescription: i18n.translate('xpack.esqlViews.managementPage.viewQueryDescription', {
-    defaultMessage: 'Write a new query, or select a recently or starred query.',
+    defaultMessage: 'Write a new query, or select a recent or starred query.',
   }),
   previewResultsTitle: i18n.translate('xpack.esqlViews.managementPage.previewResultsTitle', {
     defaultMessage: 'ES|QL query results',
@@ -233,6 +248,18 @@ export const translations = {
   selectRowAriaLabel: i18n.translate('xpack.esqlViews.managementPage.selectRowAriaLabel', {
     defaultMessage: 'Select this row',
   }),
+  reservedViewNotSelectable: i18n.translate(
+    'xpack.esqlViews.managementPage.reservedViewNotSelectable',
+    {
+      defaultMessage: 'Reserved views cannot be deleted.',
+    }
+  ),
+  reservedViewActionsDisabled: i18n.translate(
+    'xpack.esqlViews.managementPage.reservedViewActionsDisabled',
+    {
+      defaultMessage: 'Reserved views cannot be edited or deleted.',
+    }
+  ),
   openInDiscoverButtonLabel: i18n.translate(
     'xpack.esqlViews.managementPage.openInDiscoverButtonLabel',
     {

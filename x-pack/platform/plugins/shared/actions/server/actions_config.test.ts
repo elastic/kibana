@@ -1037,7 +1037,7 @@ describe('isEarsExperimentalEnabled()', () => {
 });
 
 describe('isInboundEventsEnabled()', () => {
-  test('returns false by default', () => {
+  test('returns false when inboundEvents.enabled is false', () => {
     const acu = getActionsConfigurationUtilities(defaultActionsConfig);
     expect(acu.isInboundEventsEnabled()).toBe(false);
   });

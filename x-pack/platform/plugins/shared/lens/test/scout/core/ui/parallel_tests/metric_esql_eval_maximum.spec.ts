@@ -41,7 +41,9 @@ spaceTest.describe('Lens ES|QL metric EVAL maximum', { tag: tags.stateful.classi
         await esqlEditor.setQueryAndRun(
           'FROM logstash-* | STATS usage = AVG(bytes) / AVG(bytes) / 2 | EVAL max = 1'
         );
-        await expect(page.getByTestId('lnsDataTable')).toBeVisible();
+        // The panel is already a datatable, so gate on this query's own columns instead.
+        await expect(lens.datatable.getHeaderLocator('usage')).toBeVisible();
+        await expect(lens.datatable.getHeaderLocator('max')).toBeVisible();
         await lens.switchToVisualization('lnsMetric', { search: 'Metric' });
 
         await expect(lens.dimensions.getDimensionTriggersLocator(primaryPanel)).toHaveText('usage');

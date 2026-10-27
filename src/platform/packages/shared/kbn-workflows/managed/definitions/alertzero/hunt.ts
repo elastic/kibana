@@ -30,6 +30,6 @@ export const ALERTZERO_HUNT_WORKFLOW = {
   id: ALERTZERO_HUNT_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   yaml: HUNT_YAML,
 } as const satisfies ManagedWorkflowDefinition;

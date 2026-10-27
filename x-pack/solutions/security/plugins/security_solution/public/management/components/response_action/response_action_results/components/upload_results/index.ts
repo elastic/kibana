@@ -6,4 +6,4 @@
  */
 
 // TODO:PT move component to this new location and refactor it
-export * from '../../../../endpoint_upload_action_result';
+export * from './endpoint_upload_action_result';

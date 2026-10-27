@@ -47,6 +47,9 @@ export const defaultCanvasUrlState: CanvasUrlInput = {
   query: null,
 };
 
+export type RouteEditModes = 'processing' | 'routing';
+export type RouteEdit = [string, RouteEditModes];
+
 export interface CanvasState {
   urlState: CanvasUrlInput;
   unit: Unit;
@@ -55,6 +58,7 @@ export interface CanvasState {
   savingComponentIds?: string[];
   savingComponentKind?: 'source' | 'destination';
   savingComponentIntent?: 'create' | 'delete' | 'connect';
+  editingRoute: Partial<RouteEdit>;
   nodePositions: Record<string, XYPosition>;
   sourcesRef: SourcesActorRef;
   destinationsRef: DestinationsActorRef;
@@ -97,4 +101,6 @@ export type CanvasUrlEvent =
   | { type: 'flyout.open'; flyoutName: string }
   | { type: 'flyout.tab'; flyoutTab: string }
   | { type: 'flyout.close' }
-  | { type: 'search.change'; query: string };
+  | { type: 'search.change'; query: string }
+  | { type: 'routing.edit.open'; edgeId: string; mode: RouteEditModes }
+  | { type: 'routing.edit.close' };

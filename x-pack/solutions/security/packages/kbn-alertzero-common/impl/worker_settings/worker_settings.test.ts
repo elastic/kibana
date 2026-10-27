@@ -15,7 +15,7 @@ import {
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_IDS,
 } from '../../constants';
-import { WorkerSettings } from '../schemas';
+import { AlertTriageWorkerExtras, WorkerSettings } from '../schemas';
 import {
   applyWorkerSettingsWrite,
   buildCompleteWorkerSettingsSchema,
@@ -26,6 +26,8 @@ import {
 } from './contract';
 import {
   ALERT_TRIAGE_DEFAULT_EXTRAS,
+  EXCLUDED_RULE_TAG_MAX_LENGTH,
+  EXCLUDED_RULE_TAGS_MAX_COUNT,
   RULE_TUNING_DEFAULT_EXTRAS,
   WORKER_SETTINGS_DECLARATIONS,
   createDefaultWorkerSettings,
@@ -81,9 +83,28 @@ describe('Worker settings declarations', () => {
         autoCloseConfidenceScoreMinThreshold: 0.85,
         budgetPerHour: 1300,
         lookbackHours: 24,
+        minSeverity: 'low',
+        excludeBuildingBlocks: false,
+        excludedRuleTags: [],
       },
     });
     expect(createDefaultWorkerSettings(ATTACK_DISCOVERY)).not.toHaveProperty('extras');
+  });
+
+  // The settings page enforces these two limits itself, so they have to match the schema it
+  // validates against, or the page would accept a tag the server then rejects.
+  it('keeps the rule tag limits the page enforces equal to the schema bounds', () => {
+    const withTags = (excludedRuleTags: string[]) =>
+      AlertTriageWorkerExtras.safeParse({
+        ...createDefaultWorkerSettings(TRIAGE).extras,
+        excludedRuleTags,
+      }).success;
+    const tags = (count: number) => Array.from({ length: count }, (_, i) => `tag-${i}`);
+
+    expect(withTags(tags(EXCLUDED_RULE_TAGS_MAX_COUNT))).toBe(true);
+    expect(withTags(tags(EXCLUDED_RULE_TAGS_MAX_COUNT + 1))).toBe(false);
+    expect(withTags(['a'.repeat(EXCLUDED_RULE_TAG_MAX_LENGTH)])).toBe(true);
+    expect(withTags(['a'.repeat(EXCLUDED_RULE_TAG_MAX_LENGTH + 1)])).toBe(false);
   });
 
   it('gives Continuous Threat Hunt a 4h schedule and no extras: only autonomy and schedule are configurable', () => {

@@ -257,7 +257,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
           title={
             <h3>
               <FormattedMessage
-                id="workflowsManagement.executionsPage.errorTitle"
+                id="workflows.executionsPage.errorTitle"
                 defaultMessage="Unable to load executions"
               />
             </h3>
@@ -265,10 +265,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
           body={<p>{errorMessage}</p>}
           actions={
             <EuiButtonEmpty onClick={handleRetry} data-test-subj="workflowExecutionsTableRetry">
-              <FormattedMessage
-                id="workflowsManagement.executionsPage.retry"
-                defaultMessage="Try again"
-              />
+              <FormattedMessage id="workflows.executionsPage.retry" defaultMessage="Try again" />
             </EuiButtonEmpty>
           }
         />
@@ -289,7 +286,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
           <EuiCallOut
             announceOnMount
             color="primary"
-            title={i18n.translate('workflowsManagement.executionsPage.emptyTitle', {
+            title={i18n.translate('workflows.executionsPage.emptyTitle', {
               defaultMessage: 'No executions match your search criteria.',
             })}
           />

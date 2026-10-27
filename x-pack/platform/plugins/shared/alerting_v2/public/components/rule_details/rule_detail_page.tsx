@@ -47,7 +47,7 @@ const getRuleDetailBadges = (rule: RuleApiResponse): AppHeaderBadge[] => {
   const badges: AppHeaderBadge[] = [
     {
       label: i18n.translate('xpack.alertingV2.ruleDetails.universalRulesBadge', {
-        defaultMessage: 'Universal rules',
+        defaultMessage: 'Universal',
       }),
       color: 'hollow',
       'data-test-subj': 'universalRulesBadge',

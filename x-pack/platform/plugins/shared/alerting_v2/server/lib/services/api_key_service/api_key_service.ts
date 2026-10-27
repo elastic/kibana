@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { Logger as PluginLogger } from '@kbn/core-di';
@@ -14,6 +15,8 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import { inject, injectable } from 'inversify';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
+import { getActionPolicyCloudApiKeyNotSupportedMessage } from '../../errors/action_policy_error_messages';
+import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { ApiKeyServiceSavedObjectsClientToken } from './tokens';
 
 export interface ApiKeyAttributes {
@@ -126,6 +129,12 @@ export class ApiKeyService implements ApiKeyServiceContract {
       throw new Error(
         `Failed to extract API key from authorization header for action policy: ${name}`
       );
+    }
+
+    if (isUiamCredential(authorizationHeader)) {
+      throw Boom.badRequest(getActionPolicyCloudApiKeyNotSupportedMessage(name), {
+        code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED,
+      });
     }
 
     const { apiKeyId, apiKeyValue } = this.decodeApiKey(authorizationHeader.credentials);

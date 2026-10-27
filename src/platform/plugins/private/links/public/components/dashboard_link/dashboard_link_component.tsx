@@ -10,7 +10,7 @@
 import classNames from 'classnames';
 import React, { useMemo } from 'react';
 
-import { type UseEuiTheme, EuiListGroupItem } from '@elastic/eui';
+import { EuiListGroupItem, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
@@ -18,7 +18,7 @@ import type { DashboardNavigationOptions } from '@kbn/dashboard-navigation-optio
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { isFilterPinned } from '@kbn/es-query';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, type ViewMode } from '@kbn/presentation-publishing';
 
 import { DASHBOARD_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/constants';
 import type { LinksLayoutType } from '../../../common/types';
@@ -30,10 +30,16 @@ import { DashboardLinkStrings } from './dashboard_link_strings';
 export interface DashboardLinkProps {
   link: ResolvedLink;
   layout: LinksLayoutType;
+  viewMode: ViewMode;
   parentApi: LinksParentApi;
 }
 
-export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLinkProps) => {
+export const DashboardLinkComponent = ({
+  link,
+  layout,
+  viewMode,
+  parentApi,
+}: DashboardLinkProps) => {
   const [
     parentDashboardId,
     parentDashboardTitle,
@@ -162,7 +168,7 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
       }}
       iconType={link.error ? 'warning' : undefined}
       iconProps={{ className: 'dashboardLinkIcon' }}
-      isDisabled={Boolean(link.error)}
+      isDisabled={viewMode === 'non-interactive' || Boolean(link.error)}
       className={classNames('linksPanelLink', {
         linkCurrent: link.destination === parentDashboardId,
         dashboardLinkError: Boolean(link.error),

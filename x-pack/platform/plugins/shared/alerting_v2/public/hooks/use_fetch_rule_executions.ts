@@ -20,6 +20,7 @@ export interface ListRuleExecutionsUiParams {
   page?: number;
   perPage?: number;
   ruleIds?: string[];
+  search?: string;
   outcomes?: RuleExecutionOutcome[];
   from?: string;
   to?: string;
@@ -40,6 +41,7 @@ export const toListRuleExecutionsRequest = ({
   page,
   perPage,
   ruleIds,
+  search,
   outcomes,
   from,
   to,
@@ -52,6 +54,7 @@ export const toListRuleExecutionsRequest = ({
     page,
     per_page: perPage,
     rule_ids: ruleIds,
+    search,
     outcomes,
     from,
     to,

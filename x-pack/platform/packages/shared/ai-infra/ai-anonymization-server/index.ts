@@ -6,6 +6,7 @@
  */
 
 export { anonymizeMessages } from './src/anonymize_messages';
+export { applyStringReplacements, flattenJsonStrings } from './src/flatten_json';
 export { addAnonymizationInstruction } from './src/add_anonymization_instruction';
 export { deanonymizeMessage } from './src/deanonymize_message';
 export { RegexWorkerService } from './src/regex_worker_service';

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CandidatesResponse } from '@kbn/alertzero-common';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { MAX_PROPOSALS_PAGE_OFFSET, MAX_PROPOSALS_PAGE_SIZE } from '@kbn/proposals-common';
@@ -143,6 +144,21 @@ describe('registerCandidatesRoute', () => {
     expect(buildCandidateQueryMock.mock.calls[0][2]).toEqual(
       expect.objectContaining({ trigger: 'manual', report_ids: ['report-1'] })
     );
+  });
+
+  it('returns a not_usable skip that the response schema accepts', async () => {
+    const { handler, context } = makeDeps();
+    buildCandidateQueryMock.mockResolvedValue({
+      ...candidatesResult,
+      skipped: [{ id: 'rpt-pending', reason: 'not_usable' }],
+    });
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor({ report_ids: ['rpt-pending'] }), response);
+
+    expect(response.ok).toHaveBeenCalledTimes(1);
+    const { body } = (response.ok as jest.Mock).mock.calls[0][0];
+    expect(() => CandidatesResponse.parse(body)).not.toThrow();
   });
 
   it.each([

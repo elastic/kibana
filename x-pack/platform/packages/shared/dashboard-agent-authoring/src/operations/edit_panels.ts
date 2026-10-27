@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 import {
   createPanelFailureResult,
@@ -13,83 +12,23 @@ import {
   type PanelContentAttempt,
 } from '../resolve_panel';
 import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
-import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
+import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
 import {
   buildConfigPanelContent,
   CONFIG_PANEL_TYPE_LIST,
   editPanelItemSchema,
-  findConfigPanelType,
-  findPanelRenderer,
   getConfigPanelEditError,
+  toEditResolutionRequest,
   type EditPanelItem,
   type EditPanelRequestInput,
   type PanelResolutionRequest,
-} from './panels';
+} from '../panels';
 import { defineOperation } from './types';
 
 /** An edit that passed validation; request edits carry their resolution request. */
 type ValidEdit =
   | { panelInput: Extract<EditPanelItem, { source: 'config' }> }
   | { panelInput: EditPanelRequestInput; request: PanelResolutionRequest };
-
-const getUneditablePanelError = ({ id, type }: AttachmentPanel): string => {
-  const configPanelType = findConfigPanelType(type);
-  return configPanelType
-    ? `Panel "${id}" is a ${configPanelType.label} panel. Edit it with source: "config", type: "${configPanelType.type}".`
-    : `Panel "${id}" with type "${type}" is not supported for inline editing.`;
-};
-
-/**
- * Builds the resolution request for a request edit. Lens and Vega edits may
- * omit the renderer, which the existing panel then decides. Custom content
- * edits must name it: without it the edit is parsed as a Lens edit, which lacks
- * custom content's fields. An explicit renderer that disagrees with the panel
- * fails instead of being rewritten. This is the only place an edit's renderer is
- * decided; the resolvers trust the one on the request.
- */
-const toEditResolutionRequest = (
-  panelInput: EditPanelRequestInput,
-  existingPanel: AttachmentPanel
-): { request: PanelResolutionRequest } | { error: string } => {
-  const renderer = findPanelRenderer(existingPanel.type);
-  if (!renderer) {
-    return { error: getUneditablePanelError(existingPanel) };
-  }
-  if (panelInput.renderer && panelInput.renderer !== renderer) {
-    return {
-      error: `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited with renderer: "${panelInput.renderer}". Use renderer: "${renderer}".`,
-    };
-  }
-
-  const base = {
-    operationType: 'edit_panels' as const,
-    identifier: panelInput.panelId,
-    existingPanel,
-  };
-
-  if (panelInput.renderer === 'custom_content') {
-    const { query, esql } = panelInput;
-    return { request: { ...base, renderer: panelInput.renderer, nlQuery: query, esql } };
-  }
-  if (renderer === 'custom_content') {
-    return {
-      error: `Panel "${existingPanel.id}" is a custom content panel. Edit it with source: "request", renderer: "custom_content".`,
-    };
-  }
-
-  const { query, esql, chartType, preserveESQL } = panelInput;
-  return {
-    request: {
-      ...base,
-      renderer,
-      nlQuery: query,
-      esql,
-      chartType,
-      preserveESQL,
-      applyChartRules: panelInput.renderer === 'vega' ? undefined : panelInput.applyChartRules,
-    },
-  };
-};
 
 export const editPanelsOperation = defineOperation({
   schema: z
@@ -105,8 +44,7 @@ export const editPanelsOperation = defineOperation({
 
     const recordFailure = (panelId: string, error: string): void => {
       context.failures.push(
-        createPanelFailureResult(DASHBOARD_OPERATION_FAILURE_TYPES.editPanels, panelId, error)
-          .failure
+        createPanelFailureResult(DASHBOARD_FAILURE_TYPES.editPanels, panelId, error).failure
       );
     };
 

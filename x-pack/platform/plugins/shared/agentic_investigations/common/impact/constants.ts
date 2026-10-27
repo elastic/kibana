@@ -16,6 +16,11 @@ export const IMPACT_INDEX_NAME = '.kibana-investigation-impact' as const;
 
 export const IMPACT_INTERNAL_URL = `${AGENTIC_INVESTIGATIONS_INTERNAL_URL}/impact` as const;
 
+/** Entities, with counts, across a whole proposal queue. */
+export const IMPACT_PROPOSAL_SUMMARY_URL = `${IMPACT_INTERNAL_URL}/summary/proposals` as const;
+/** Entities, with counts, across every open and closed escalation. */
+export const IMPACT_ESCALATION_SUMMARY_URL = `${IMPACT_INTERNAL_URL}/summary/escalations` as const;
+
 /** Ceiling on `listByConversationIds` so a caller cannot ask for an unbounded terms query. */
 export const MAX_IMPACT_CONVERSATION_IDS = 1000;
 

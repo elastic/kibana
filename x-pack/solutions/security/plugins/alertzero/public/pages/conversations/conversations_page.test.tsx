@@ -23,6 +23,7 @@ import {
 } from '@kbn/proposals-plugin/public';
 import {
   useAssignInvestigation,
+  useProposalImpactPills,
   useUserProfiles,
   useSuggestUserProfiles,
   useSetInvestigationStatus,
@@ -39,6 +40,11 @@ import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summar
 import { useRunningSummary } from '../../hooks/use_running_summary';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { ConversationsPage } from './conversations_page';
+
+const mockDropDecided = jest.fn();
+jest.mock('./queue/use_drop_decided_proposal', () => ({
+  useDropDecidedProposal: () => mockDropDecided,
+}));
 
 jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
   ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
@@ -59,6 +65,7 @@ jest.mock('@kbn/agentic-investigations-plugin/public', () => {
   return {
     ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
     useCurrentUserProfile: jest.fn(() => ({ data: null })),
+    useProposalImpactPills: jest.fn(),
     useAssignInvestigation: jest.fn(),
     useUserProfiles: jest.fn(),
     useSuggestUserProfiles: jest.fn(),
@@ -137,6 +144,7 @@ const mockUseClosedProposals = useClosedProposals as jest.Mock;
 const mockUseClosedProposalsCount = useClosedProposalsCount as jest.Mock;
 const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
 const mockUseRunningSummary = useRunningSummary as jest.Mock;
+const mockUseProposalImpactPills = useProposalImpactPills as jest.Mock;
 const mockUseApproveProposal = useApproveProposal as jest.Mock;
 const mockUseDismissProposal = useDismissProposal as jest.Mock;
 const mockUseIsApprovingProposal = useIsApprovingProposal as jest.Mock;
@@ -157,13 +165,26 @@ const fetchNextPage: Record<string, jest.Mock> = {};
  * whole bucket and the pages only what was asked for, so the fake keeps them apart.
  */
 const mockProposals = (groups: Record<string, ProposalItem[]>) => {
-  const count = (all: ProposalItem[], enabled: boolean) => ({
-    data: enabled ? { proposals: [], total: all.length } : undefined,
+  // The server applies the entity filter, so the fake narrows the rows the same way.
+  const narrowed = (rows: ProposalItem[], entity?: string | null) =>
+    entity ? rows.filter(({ entityIds }) => entityIds?.includes(entity)) : rows;
+
+  const count = (rows: ProposalItem[], enabled: boolean, entity?: string | null) => ({
+    data: enabled ? { proposals: [], total: narrowed(rows, entity).length } : undefined,
     isLoading: false,
     error: undefined,
   });
 
-  const pages = (bucket: string, all: ProposalItem[], firstPageSize: number, enabled: boolean) => {
+  const pages = (
+    bucket: string,
+    rows: ProposalItem[],
+    {
+      firstPageSize,
+      enabled,
+      entity,
+    }: { firstPageSize: number; enabled: boolean; entity?: string | null }
+  ) => {
+    const all = narrowed(rows, entity);
     // Resolves, like the real one: the caller waits on it to hear that a page failed.
     fetchNextPage[bucket] = fetchNextPage[bucket] ?? jest.fn().mockResolvedValue({});
     if (!enabled) {
@@ -189,20 +210,23 @@ const mockProposals = (groups: Record<string, ProposalItem[]>) => {
     };
   };
 
-  mockUseProposalsByCategoryCount.mockImplementation((category: string, enabled: boolean) =>
-    count(groups[category] ?? [], enabled)
+  mockUseProposalsByCategoryCount.mockImplementation(
+    (category: string, enabled: boolean, entity?: string | null) =>
+      count(groups[category] ?? [], enabled, entity)
   );
-  mockUseClosedProposalsCount.mockImplementation((enabled: boolean) =>
-    count(groups.closed ?? [], enabled)
+  mockUseClosedProposalsCount.mockImplementation((enabled: boolean, entity?: string | null) =>
+    count(groups.closed ?? [], enabled, entity)
   );
 
   mockUseProposalsByCategory.mockImplementation(
-    (category: string, { firstPageSize, enabled }: { firstPageSize: number; enabled: boolean }) =>
-      pages(category, groups[category] ?? [], firstPageSize, enabled)
+    (
+      category: string,
+      options: { firstPageSize: number; enabled: boolean; entity?: string | null }
+    ) => pages(category, groups[category] ?? [], options)
   );
   mockUseClosedProposals.mockImplementation(
-    ({ firstPageSize, enabled }: { firstPageSize: number; enabled: boolean }) =>
-      pages('closed', groups.closed ?? [], firstPageSize, enabled)
+    (options: { firstPageSize: number; enabled: boolean; entity?: string | null }) =>
+      pages('closed', groups.closed ?? [], options)
   );
 };
 
@@ -304,6 +328,7 @@ const setStatusMutate = jest.fn();
 const assignInvestigationMutate = jest.fn().mockResolvedValue({});
 
 beforeEach(() => {
+  mockDropDecided.mockClear();
   approveMutateAsync.mockResolvedValue(undefined);
   dismissMutateAsync.mockResolvedValue(undefined);
   mockUseApproveProposal.mockReturnValue({ mutateAsync: approveMutateAsync });
@@ -320,6 +345,7 @@ beforeEach(() => {
     isFetching: false,
     refetch: jest.fn(),
   });
+  mockUseProposalImpactPills.mockReturnValue({ data: [] });
   mockOpenCount(0);
   mockUseRunningSummary.mockReturnValue({ watchCount: 4, enabledWorkerCount: 6, workerCount: 6 });
 });
@@ -538,7 +564,7 @@ describe('ConversationsPage decisions', () => {
     title: 'Revoke sessions',
     actionWorkflowId: 'system-alertzero-action-revoke-sessions',
     actionInput: { user: 'cfo@corp' },
-    action: { name: 'Revoke sessions' },
+    action: { name: 'Revoke sessions', approvalPolicy: 'always-gate' },
   };
 
   beforeEach(() => {
@@ -571,6 +597,26 @@ describe('ConversationsPage decisions', () => {
         body: { actionInput: { user: 'cfo@corp' } },
       })
     );
+  });
+
+  it('keeps an approved proposal in its category while its action runs', async () => {
+    renderPage('/');
+    openApproval();
+
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
+    await waitFor(() => expect(approveMutateAsync).toHaveBeenCalled());
+
+    expect(mockDropDecided).not.toHaveBeenCalled();
+  });
+
+  it('removes a declined proposal from its category because it closes at once', async () => {
+    renderPage('/');
+    openApproval();
+
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
+
+    await waitFor(() => expect(mockDropDecided).toHaveBeenCalledWith('prop-1'));
   });
 
   it('does not offer proposal decisions without Proposals Manage even with AlertZero All', () => {
@@ -666,7 +712,11 @@ describe('ConversationsPage decisions', () => {
 
   it('offers only Copy link for a decided proposal when escalation is not available', async () => {
     // A decided investigation without `canManageEscalations` keeps just the read-only item.
-    mockProposals({ closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] });
+    mockProposals({
+      closed: [
+        { ...actionProposal, decidedAt: '2024-01-02T00:00:00Z', status: 'succeeded' as const },
+      ],
+    });
 
     renderPage('/');
     await expandClosed();
@@ -679,7 +729,14 @@ describe('ConversationsPage decisions', () => {
   it('counts only undecided proposals as work needing attention', () => {
     mockProposals({
       respond: [actionProposal],
-      closed: [{ ...actionProposal, id: 'prop-2', decidedAt: '2024-01-02T00:00:00Z' }],
+      closed: [
+        {
+          ...actionProposal,
+          id: 'prop-2',
+          decidedAt: '2024-01-02T00:00:00Z',
+          status: 'succeeded' as const,
+        },
+      ],
     });
     mockOpenCount(1);
 
@@ -704,7 +761,11 @@ describe('ConversationsPage decisions', () => {
   });
 
   it('reads as an empty queue when the window holds only decisions already made', () => {
-    mockProposals({ closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] });
+    mockProposals({
+      closed: [
+        { ...actionProposal, decidedAt: '2024-01-02T00:00:00Z', status: 'succeeded' as const },
+      ],
+    });
     mockOpenCount(0);
 
     renderPage('/');
@@ -803,7 +864,9 @@ describe('ConversationsPage idle state', () => {
   });
 
   it('hides the panel when the window holds only closed proposals', () => {
-    mockProposals({ closed: [{ ...proposal, decidedAt: '2024-01-02T00:00:00Z' }] });
+    mockProposals({
+      closed: [{ ...proposal, decidedAt: '2024-01-02T00:00:00Z', status: 'succeeded' as const }],
+    });
     mockOpenCount(0);
 
     renderPage('/');
@@ -813,7 +876,12 @@ describe('ConversationsPage idle state', () => {
 });
 
 describe('ConversationsPage queue sections', () => {
-  const closedProposal = { ...proposal, id: 'prop-c', decidedAt: '2024-01-02T00:00:00Z' };
+  const closedProposal = {
+    ...proposal,
+    id: 'prop-c',
+    decidedAt: '2024-01-02T00:00:00Z',
+    status: 'succeeded' as const,
+  };
   const bucketOf = (size: number, overrides: Partial<ProposalItem> = {}) =>
     Array.from({ length: size }, (_, i) => ({ ...proposal, id: `prop-${i}`, ...overrides }));
 
@@ -878,9 +946,9 @@ describe('ConversationsPage queue sections', () => {
 
     renderPage('/');
 
-    expect(mockUseProposalsByCategoryCount).toHaveBeenCalledWith('respond', false);
+    expect(mockUseProposalsByCategoryCount).toHaveBeenCalledWith('respond', false, null);
     // Collapsed, so nothing else can report it.
-    expect(mockUseClosedProposalsCount).toHaveBeenLastCalledWith(true);
+    expect(mockUseClosedProposalsCount).toHaveBeenLastCalledWith(true, null);
   });
 
   describe('show more', () => {
@@ -916,6 +984,7 @@ describe('ConversationsPage queue sections', () => {
         closed: bucketOf(CLOSED_PAGE_SIZE + 7).map((p) => ({
           ...p,
           decidedAt: '2024-01-02T00:00:00Z',
+          status: 'succeeded' as const,
         })),
       });
 
@@ -1007,9 +1076,14 @@ describe('ConversationsPage impact pills', () => {
     conversationTitle: 'User investigation',
     entityIds: ['user-1'],
   };
+  const pills = [
+    { entityId: 'host-1', count: 1 },
+    { entityId: 'user-1', count: 1 },
+  ];
 
   beforeEach(() => {
     mockProposals({ investigate: [hostProposal, userProposal] });
+    mockUseProposalImpactPills.mockReturnValue({ data: pills });
   });
 
   // Toggling a pill changes the section badges' text; awaiting flushes the resulting
@@ -1021,14 +1095,56 @@ describe('ConversationsPage impact pills', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  it('filters the queue to conversations whose entity ids include the selected pill', async () => {
+  it('reads the pills for the whole queue, not from the loaded rows', () => {
     renderPage('/');
 
-    expect(screen.getByText('Host investigation')).toBeInTheDocument();
-    expect(screen.getByText('User investigation')).toBeInTheDocument();
+    expect(mockUseProposalImpactPills).toHaveBeenCalledWith({
+      origin: 'alertzero',
+      categories: ['respond', 'investigate', 'configure'],
+      decidedWithinHours: 72,
+    });
+  });
+
+  it('keeps the pills when a section holding their entities is collapsed', async () => {
+    mockProposals({
+      respond: [{ ...proposal, id: 'prop-respond', category: 'respond', entityIds: ['host-9'] }],
+      investigate: [hostProposal],
+    });
+    mockUseProposalImpactPills.mockReturnValue({
+      data: [
+        { entityId: 'host-1', count: 1 },
+        { entityId: 'host-9', count: 1 },
+      ],
+    });
+    mockOpenCount(2);
+    renderPage('/');
+
+    fireEvent.click(screen.getByRole('button', { name: /^Respond/ }));
+    await act(async () => {});
+
+    expect(screen.getByRole('button', { name: 'host-9' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'host-1' })).toBeInTheDocument();
+  });
+
+  it('asks every section for the selected entity, so the server filters them all', async () => {
+    renderPage('/');
 
     await togglePill('host-1');
 
+    for (const category of ['respond', 'investigate', 'configure']) {
+      expect(mockUseProposalsByCategory).toHaveBeenCalledWith(
+        category,
+        expect.objectContaining({ entity: 'host-1' })
+      );
+      expect(mockUseProposalsByCategoryCount).toHaveBeenCalledWith(
+        category,
+        expect.any(Boolean),
+        'host-1'
+      );
+    }
+    expect(mockUseClosedProposals).toHaveBeenLastCalledWith(
+      expect.objectContaining({ entity: 'host-1' })
+    );
     expect(screen.getByText('Host investigation')).toBeInTheDocument();
     expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
   });
@@ -1039,11 +1155,13 @@ describe('ConversationsPage impact pills', () => {
     await togglePill('host-1');
     await togglePill('host-1');
 
+    expect(mockUseProposalsByCategory.mock.calls.at(-1)?.[1]).toMatchObject({ entity: null });
     expect(screen.getByText('Host investigation')).toBeInTheDocument();
     expect(screen.getByText('User investigation')).toBeInTheDocument();
   });
 
-  it('hides the pill row when no proposal carries entity ids and leaves the queue unfiltered', () => {
+  it('hides the pill row when the queue has no entities and leaves it unfiltered', () => {
+    mockUseProposalImpactPills.mockReturnValue({ data: [] });
     mockProposals({ investigate: [{ ...proposal, conversationTitle: 'No impact' }] });
     renderPage('/');
 
@@ -1051,13 +1169,13 @@ describe('ConversationsPage impact pills', () => {
     expect(screen.getByText('No impact')).toBeInTheDocument();
   });
 
-  it('clears the filter when the selected entity disappears from the loaded proposals', async () => {
+  it('clears the filter when the selected entity disappears from the pills', async () => {
     const { rerender } = renderPage('/');
 
     await togglePill('host-1');
     expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
 
-    mockProposals({ investigate: [userProposal] });
+    mockUseProposalImpactPills.mockReturnValue({ data: [{ entityId: 'user-1', count: 1 }] });
     rerender();
 
     expect(screen.queryByRole('button', { name: 'host-1' })).not.toBeInTheDocument();
@@ -1065,7 +1183,7 @@ describe('ConversationsPage impact pills', () => {
     expect(screen.queryByText('No events match the current filter.')).not.toBeInTheDocument();
   });
 
-  it('shows the filtered empty state in a section whose rows do not carry the selected entity', async () => {
+  it('shows the filtered empty state in a section the selected entity does not reach', async () => {
     mockProposals({
       investigate: [hostProposal],
       respond: [
@@ -1127,5 +1245,343 @@ describe('ConversationsPage assignee picker', () => {
 
     expect(screen.getByTestId('mock-assignees-readonly-prop-1')).toBeInTheDocument();
     expect(screen.queryByTestId('mock-assign-prop-1')).not.toBeInTheDocument();
+  });
+});
+
+describe('ConversationsPage telemetry', () => {
+  const secondProposal: ProposalItem = {
+    ...proposal,
+    id: 'prop-2',
+    conversationId: 'inv-2',
+    conversationTitle: 'Second investigation',
+    title: 'Second action',
+    status: 'executing',
+    entityIds: ['host-1'],
+  };
+
+  beforeEach(() => {
+    mockProposals({ investigate: [{ ...proposal, entityIds: ['user-1'] }, secondProposal] });
+    // The server builds the Impact pills for the whole queue.
+    mockUseProposalImpactPills.mockReturnValue({
+      data: [
+        { entityId: 'host-1', count: 1 },
+        { entityId: 'user-1', count: 1 },
+      ],
+    });
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  const reportedEvents = (core: ReturnType<typeof renderPage>['core'], eventType: string) =>
+    (core.analytics.reportEvent as jest.Mock).mock.calls.filter(([type]) => type === eventType);
+
+  describe('alertzero_ui_home_opened', () => {
+    it('reports once, with the open count as a range, when the queue data arrives', () => {
+      mockOpenCount(12);
+
+      const { core, rerender } = renderPage('/');
+      // A poll that returns a new count is the same visit.
+      mockOpenCount(60);
+      rerender();
+
+      expect(reportedEvents(core, 'alertzero_ui_home_opened')).toEqual([
+        [
+          'alertzero_ui_home_opened',
+          { default_filters_changed: false, queue_size_bucket: '11_50' },
+        ],
+      ]);
+    });
+
+    it('waits for the queue data', () => {
+      mockUseProposalChartsSummary.mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        error: undefined,
+      });
+
+      const { core, rerender } = renderPage('/');
+      expect(reportedEvents(core, 'alertzero_ui_home_opened')).toEqual([]);
+
+      mockOpenCount(0);
+      rerender();
+      expect(reportedEvents(core, 'alertzero_ui_home_opened')).toEqual([
+        ['alertzero_ui_home_opened', { default_filters_changed: false, queue_size_bucket: '0' }],
+      ]);
+    });
+
+    it('reports an unknown queue size, alongside the error, when the open count fails to load', () => {
+      mockUseProposalChartsSummary.mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: new Error('boom'),
+      });
+
+      const { core } = renderPage('/');
+
+      expect(reportedEvents(core, 'alertzero_ui_home_opened')).toEqual([
+        [
+          'alertzero_ui_home_opened',
+          { default_filters_changed: false, queue_size_bucket: 'unknown' },
+        ],
+      ]);
+      expect(reportedEvents(core, 'alertzero_ui_error_shown')).toEqual([
+        ['alertzero_ui_error_shown', { error_class: 'unknown', surface: 'queue' }],
+      ]);
+    });
+
+    it('reports once under StrictMode, which runs effects twice', () => {
+      mockOpenCount(3);
+      const core = coreMock.createStart();
+      core.application.capabilities = {
+        ...core.application.capabilities,
+        proposals: { showProposals: true, decideProposals: true },
+      };
+
+      render(
+        <React.StrictMode>
+          <I18nProvider>
+            <EuiProvider>
+              <KibanaContextProvider
+                services={{ ...core, agentBuilder: agentBuilderMocks.createStart() }}
+              >
+                <QueryClientProvider client={new QueryClient()}>
+                  <Router history={createMemoryHistory({ initialEntries: ['/'] })}>
+                    <ConversationsPage />
+                  </Router>
+                </QueryClientProvider>
+              </KibanaContextProvider>
+            </EuiProvider>
+          </I18nProvider>
+        </React.StrictMode>
+      );
+
+      expect(reportedEvents(core, 'alertzero_ui_home_opened')).toHaveLength(1);
+    });
+  });
+
+  describe('alertzero_ui_queue_filtered', () => {
+    it('reports picking an Impact filter, without the entity, and not clearing it', () => {
+      const { core } = renderPage('/');
+
+      fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+      fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+
+      expect(reportedEvents(core, 'alertzero_ui_queue_filtered')).toEqual([
+        ['alertzero_ui_queue_filtered', { filter_type: 'impact' }],
+      ]);
+    });
+
+    it('reports switching from one Impact filter to another', () => {
+      const { core } = renderPage('/');
+
+      fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+      fireEvent.click(screen.getByRole('button', { name: 'user-1' }));
+
+      expect(reportedEvents(core, 'alertzero_ui_queue_filtered')).toHaveLength(2);
+    });
+  });
+
+  describe('alertzero_ui_brief_card_clicked', () => {
+    it('reports the card section and position, and whether its proposal is pending', () => {
+      const { core } = renderPage('/');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Second action' }));
+
+      expect(reportedEvents(core, 'alertzero_ui_brief_card_clicked')).toEqual([
+        [
+          'alertzero_ui_brief_card_clicked',
+          {
+            conversation_type: 'investigation',
+            has_pending_proposal: false,
+            position_in_list: 1,
+            section: 'investigate',
+          },
+        ],
+      ]);
+    });
+
+    it('counts the position in the filtered list the analyst sees', () => {
+      const { core } = renderPage('/');
+
+      fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Second action' }));
+
+      expect(reportedEvents(core, 'alertzero_ui_brief_card_clicked')).toEqual([
+        [
+          'alertzero_ui_brief_card_clicked',
+          {
+            conversation_type: 'investigation',
+            has_pending_proposal: false,
+            position_in_list: 0,
+            section: 'investigate',
+          },
+        ],
+      ]);
+    });
+
+    it('does not report a flyout opened from the URL, such as a copied link', async () => {
+      const { agentBuilder, core } = renderPage('/?selectedConversationId=inv-1');
+
+      await waitFor(() => expect(agentBuilder.openConversationDetails).toHaveBeenCalled());
+      expect(reportedEvents(core, 'alertzero_ui_brief_card_clicked')).toEqual([]);
+    });
+  });
+
+  describe('alertzero_ui_error_shown', () => {
+    it('reports a failed queue header once, however often it re-renders', () => {
+      mockUseProposalChartsSummary.mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: new Error('boom'),
+      });
+
+      const { core, rerender } = renderPage('/');
+      rerender();
+      rerender();
+
+      expect(reportedEvents(core, 'alertzero_ui_error_shown')).toEqual([
+        ['alertzero_ui_error_shown', { error_class: 'unknown', surface: 'queue' }],
+      ]);
+    });
+
+    it('reports a failed queue section once', () => {
+      mockUseProposalsByCategory.mockImplementation((category: string) => ({
+        data: undefined,
+        fetchNextPage: jest.fn(),
+        hasNextPage: undefined,
+        isFetchingNextPage: false,
+        isInitialLoading: false,
+        error: category === 'investigate' ? new Error('boom') : undefined,
+      }));
+
+      const { core, rerender } = renderPage('/');
+      rerender();
+
+      expect(reportedEvents(core, 'alertzero_ui_error_shown')).toEqual([
+        ['alertzero_ui_error_shown', { error_class: 'unknown', surface: 'queue' }],
+      ]);
+    });
+
+    it('reports a failing queue header once while polls retry it', () => {
+      const failed = {
+        data: undefined,
+        isLoading: false,
+        isFetching: false,
+        error: new Error('boom'),
+      };
+      mockUseProposalChartsSummary.mockReturnValue(failed);
+      const { core, rerender } = renderPage('/');
+      // A query without data drops its error while it refetches, so the header loads again.
+      mockUseProposalChartsSummary.mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        isFetching: true,
+        error: null,
+      });
+      rerender();
+      mockUseProposalChartsSummary.mockReturnValue(failed);
+      rerender();
+
+      expect(reportedEvents(core, 'alertzero_ui_error_shown')).toHaveLength(1);
+    });
+
+    it('reports a failing queue section once while polls retry it', () => {
+      const failedPage = (isRetrying: boolean) => (category: string) => ({
+        data: undefined,
+        fetchNextPage: jest.fn(),
+        hasNextPage: undefined,
+        isFetchingNextPage: false,
+        isFetching: category === 'investigate' && isRetrying,
+        isInitialLoading: category === 'investigate' && isRetrying,
+        error: category === 'investigate' && !isRetrying ? new Error('boom') : undefined,
+      });
+      // A non-empty queue, so the page never swaps the sections for the idle panel.
+      mockOpenCount(3);
+      mockUseProposalsByCategory.mockImplementation(failedPage(false));
+      const { core, rerender } = renderPage('/');
+      mockUseProposalsByCategory.mockImplementation(failedPage(true));
+      rerender();
+      mockUseProposalsByCategory.mockImplementation(failedPage(false));
+      rerender();
+
+      expect(reportedEvents(core, 'alertzero_ui_error_shown')).toHaveLength(1);
+    });
+
+    it('reports a filtered queue that fails after the unfiltered one failed', () => {
+      const failedPage =
+        (loadingEntity?: string) =>
+        (category: string, { entity }: { entity?: string | null }) => {
+          const isLoading = category === 'investigate' && entity === loadingEntity;
+          return {
+            data: undefined,
+            fetchNextPage: jest.fn(),
+            hasNextPage: undefined,
+            isFetchingNextPage: false,
+            isFetching: isLoading,
+            isInitialLoading: isLoading,
+            error: category === 'investigate' && !isLoading ? new Error('boom') : undefined,
+          };
+        };
+      mockOpenCount(3);
+      mockUseProposalsByCategory.mockImplementation(failedPage());
+      const { core, rerender } = renderPage('/');
+      // The filtered query is on its first load when the pill is picked, then fails too.
+      mockUseProposalsByCategory.mockImplementation(failedPage('host-1'));
+      fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+      mockUseProposalsByCategory.mockImplementation(failedPage());
+      rerender();
+
+      expect(reportedEvents(core, 'alertzero_ui_error_shown')).toHaveLength(2);
+    });
+
+    // More rows than the first page, so the respond section offers Show more.
+    const respondPageAndMore = () =>
+      Array.from({ length: CATEGORY_PAGE_SIZE + 5 }, (_, i) => ({
+        ...proposal,
+        id: `prop-${i}`,
+        category: 'respond' as const,
+      }));
+
+    it('reports a failed Show more, below rows already on screen', async () => {
+      mockProposals({ respond: respondPageAndMore() });
+      const { core } = renderPage('/');
+      fetchNextPage.respond.mockRejectedValueOnce(new Error('boom'));
+
+      fireEvent.click(screen.getByTestId('conversationQueueShowMore-respond'));
+
+      await waitFor(() =>
+        expect(reportedEvents(core, 'alertzero_ui_error_shown')).toEqual([
+          ['alertzero_ui_error_shown', { error_class: 'unknown', surface: 'queue' }],
+        ])
+      );
+    });
+
+    it('reports each Show more the analyst retries that fails again', async () => {
+      mockProposals({ respond: respondPageAndMore() });
+      const { core } = renderPage('/');
+      fetchNextPage.respond
+        .mockRejectedValueOnce(new Error('boom'))
+        .mockRejectedValueOnce(new Error('boom'));
+      fireEvent.click(screen.getByTestId('conversationQueueShowMore-respond'));
+      await waitFor(() => expect(reportedEvents(core, 'alertzero_ui_error_shown')).toHaveLength(1));
+
+      fireEvent.click(screen.getByTestId('conversationQueueShowMore-respond'));
+
+      await waitFor(() => expect(reportedEvents(core, 'alertzero_ui_error_shown')).toHaveLength(2));
+    });
+
+    it('never sends the error message', () => {
+      mockUseProposalChartsSummary.mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: new Error('index [secret-index] not found'),
+      });
+
+      const { core } = renderPage('/');
+
+      expect(JSON.stringify(reportedEvents(core, 'alertzero_ui_error_shown'))).not.toContain(
+        'secret-index'
+      );
+    });
   });
 });

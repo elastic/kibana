@@ -81,6 +81,17 @@ describe('toStoredQuery', () => {
   it('round-trips the source id onto the query link', () => {
     expect(fromStoredQuery(storeQuery(makeQuery())).source_id).toBe(SOURCE_ID);
   });
+
+  it('round-trips category through storage', () => {
+    const stored = storeQuery(makeQuery({ category: 'resource_health' }));
+
+    expect(stored.query.category).toBe('resource_health');
+    expect(fromStoredQuery(stored).query.category).toBe('resource_health');
+  });
+
+  it('reads legacy stored queries without category', () => {
+    expect(fromStoredQuery(storeQuery(makeQuery())).query.category).toBeUndefined();
+  });
 });
 
 describe('toStoredFeature', () => {

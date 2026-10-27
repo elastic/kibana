@@ -24,6 +24,10 @@ export {
   FLEET_SERVER_CERT_PATH,
   FLEET_SERVER_P12_PATH,
   FLEET_SERVER_P12_PASSWORD,
+  RELAY_KEY_PATH,
+  RELAY_CERT_PATH,
+  RELAY_P12_PATH,
+  RELAY_P12_PASSWORD,
 } from './src/certs';
 export * from './src/dev_service_account';
 export * from './src/axios';
