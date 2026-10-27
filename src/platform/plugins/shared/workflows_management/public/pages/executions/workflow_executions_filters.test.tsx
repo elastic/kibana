@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowExecutionsFilters } from './workflow_executions_filters';
@@ -107,13 +107,22 @@ describe('WorkflowExecutionsFilters', () => {
     ]);
   });
 
-  it('keeps the controls hidden when the readable workflows cannot be loaded', async () => {
+  it('shows an error with a retry instead of the controls when the readable workflows cannot be loaded', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
-    getReadableWorkflowIds.mockRejectedValue(new Error('boom'));
+    getReadableWorkflowIds.mockRejectedValueOnce(new Error('boom'));
+    getReadableWorkflowIds.mockResolvedValueOnce({ workflowIds: ['a'] });
 
     renderFilters();
 
-    await waitFor(() => expect(getReadableWorkflowIds).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(screen.getByTestId('workflowExecutionsFiltersError')).toBeInTheDocument()
+    );
     expect(screen.queryByTestId('filterControls')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('workflowExecutionsFiltersRetry'));
+
+    await waitFor(() => expect(screen.getByTestId('filterControls')).toBeInTheDocument());
+    expect(screen.queryByTestId('workflowExecutionsFiltersError')).not.toBeInTheDocument();
+    expect(getReadableWorkflowIds).toHaveBeenCalledTimes(2);
   });
 });
