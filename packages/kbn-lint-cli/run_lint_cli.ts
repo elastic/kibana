@@ -7,19 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'fs';
+import Os from 'os';
 import Path from 'path';
 import Pw from '@parcel/watcher';
+import execa from 'execa';
+import ignore from 'ignore';
 import type { CleanupTask } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { getShardPaths } from './get_shard_paths';
 
 const LINTABLE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.cjs', '.mjs', '.cts', '.mts']);
 
 // `oxlint.config.mjs` with `warn` rules off. Oxlint's `--fix` also fixes warnings and `--quiet`
-// only hides them, so `--fix` runs against this config to fix errors only, as ESLint did.
-const FIX_CONFIG = 'oxlint.fix.config.mjs';
+// only hides them, so `--fix` runs against this config to fix errors only, as ESLint did, and
+// `--quiet` runs use it to skip warn rules whose results would be hidden anyway.
+const ERRORS_ONLY_CONFIG = 'oxlint.fix.config.mjs';
+
+// JS plugin rules run on a single JS thread per oxlint process, so a full-repo run splits the
+// repo across processes. Each process also pays a fixed config/plugin startup cost, so a few
+// multi-threaded shards are faster than one single-threaded shard per core.
+const THREADS_PER_SHARD = 4;
 
 interface LintOptions {
   fix: boolean;
@@ -39,7 +51,7 @@ run(
       await watchAndLintFiles({ procRunner, log, addCleanupTask, options });
     } else {
       log.info('Linting files...');
-      await lintFiles({ procRunner, options });
+      await lintFiles({ procRunner, options, sharded: paths.length === 0 });
       log.success('Linting files completed');
     }
   },
@@ -61,23 +73,100 @@ run(
 async function lintFiles({
   procRunner,
   options: { fix, quiet, paths },
+  sharded = false,
 }: {
   procRunner: ProcRunner;
   options: LintOptions;
+  sharded?: boolean;
 }) {
-  const runOxlint = (args: string[]) =>
-    procRunner.run('oxlint', { cmd: 'oxlint', args, cwd: REPO_ROOT, wait: true });
+  const runOxlint = sharded
+    ? runOxlintShards
+    : (args: string[]) =>
+        procRunner.run('oxlint', { cmd: 'oxlint', args, cwd: REPO_ROOT, wait: true });
 
   if (fix) {
     // The errors-only config reports exactly what `--quiet` shows, so with `--quiet` one run is
     // enough. Errors left after fixing fail this run before warnings are reported.
-    await runOxlint(['--fix', '--quiet', '--config', FIX_CONFIG, ...paths]);
+    await runOxlint(['--fix', '--quiet', '--config', ERRORS_ONLY_CONFIG, ...paths]);
     if (quiet) {
       return;
     }
   }
 
-  await runOxlint([...(quiet ? ['--quiet'] : []), '--config', 'oxlint.config.mjs', ...paths]);
+  await runOxlint(
+    quiet
+      ? ['--quiet', '--config', ERRORS_ONLY_CONFIG, ...paths]
+      : ['--config', 'oxlint.config.mjs', ...paths]
+  );
+}
+
+/** Lints the whole repo with one oxlint process per shard, printing each shard's output whole. */
+async function runOxlintShards(args: string[]) {
+  // `-z` keeps paths with non-ASCII characters unquoted, so they are not dropped by the filter
+  const { stdout } = await execa(
+    'git',
+    ['ls-files', '-z', '--cached', '--others', '--exclude-standard'],
+    {
+      cwd: REPO_ROOT,
+    }
+  );
+  // oxlint only applies `.eslintignore` while walking down from the paths it is given, so a shard
+  // root inside an ignored directory would be linted; drop ignored files before sharding.
+  const eslintIgnore = ignore().add(
+    Fs.readFileSync(Path.resolve(REPO_ROOT, '.eslintignore'), 'utf8')
+  );
+  const files = stdout
+    .split('\0')
+    .filter((file) => LINTABLE_EXTENSIONS.has(Path.extname(file)) && !eslintIgnore.ignores(file));
+  const shardCount = Math.max(1, Math.round(Os.availableParallelism() / THREADS_PER_SHARD));
+
+  const results = await Promise.all(
+    getShardPaths(files, shardCount).map((shardPaths) =>
+      runOxlintShard([...args, `--threads=${THREADS_PER_SHARD}`, ...shardPaths])
+    )
+  );
+
+  for (const result of results) {
+    if (result.all) {
+      process.stdout.write(`${result.all}\n`);
+    }
+    // a shard that failed to start or was killed has no exit code; execa's failure carries the reason
+    if (result.exitCode === undefined && 'shortMessage' in result) {
+      process.stdout.write(`${result.shortMessage}\n`);
+    }
+  }
+  if (results.some(({ exitCode }) => exitCode !== 0)) {
+    throw createFailError('oxlint found errors');
+  }
+}
+
+// oxlint sometimes segfaults in its native code on Linux while exiting, after it has finished
+// linting, so a shard killed by a crash signal is re-run once instead of failing the whole run.
+// Other signals (OOM kills, cancelled jobs) fail right away.
+const CRASH_SIGNALS: Record<string, true> = {
+  SIGSEGV: true,
+  SIGBUS: true,
+  SIGABRT: true,
+  SIGILL: true,
+};
+
+async function runOxlintShard(args: string[]) {
+  for (let attempt = 1; ; attempt++) {
+    const result = await execa('oxlint', args, {
+      cwd: REPO_ROOT,
+      preferLocal: true,
+      reject: false,
+      all: true,
+      // The shards start together and would all write the plugin sources to the same
+      // @kbn/swc-register LMDB cache, which has crashed a shard with `MDB_BAD_TXN`. Transpiling
+      // the plugins without the cache is no slower.
+      env: { DISABLE_SWC_REGISTER_CACHE: 'true' },
+    });
+    if (result.signal === undefined || !CRASH_SIGNALS[result.signal] || attempt === 2) {
+      return result;
+    }
+    process.stdout.write(`An oxlint shard was killed by ${result.signal}, re-running it once\n`);
+  }
 }
 
 async function watchAndLintFiles({

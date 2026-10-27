@@ -214,7 +214,7 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
  * filter a whole area with a prefix: `RULE_*` (rule executor / rules client),
  * `DIRECTOR_*`, `DISPATCH_*`, `POLICY_*`, `EXECUTION_HISTORY_*`, `EVENTS_*`,
  * `STORAGE_*`, `QUERY_*`, `RESOURCES_*`, `MAINTENANCE_WINDOW_*`,
- * `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`, `TASKS_*`.
+ * `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`, `TASKS_*`, `TELEMETRY_*`.
  *
  * The suffix encodes the outcome, from a closed vocabulary:
  * - `warn` (degraded but continued): `_FAILED`, `_SKIPPED`, `_TIMED_OUT`,
@@ -350,6 +350,20 @@ export const ALERTING_LOG_CODES = {
    * the action-type vocabulary grows ahead of the publisher's mapping.
    */
   EVENTS_ALERT_ACTION_TYPE_UNMAPPED: 'EVENTS_ALERT_ACTION_TYPE_UNMAPPED',
+  /**
+   * The action policy client could not read the policies around a bulk write
+   * or a bulk delete. The write already succeeded; its domain events are
+   * published with the policy ids only, so subscribers receive no policy fields.
+   */
+  EVENTS_ACTION_POLICY_READ_FAILED: 'EVENTS_ACTION_POLICY_READ_FAILED',
+
+  // ───────────────────── Event-based telemetry (EBT) ─────────────────────
+  /**
+   * Core analytics refused an EBT event: the event type was not registered or,
+   * in dev mode, the payload did not match its schema. The operation that
+   * produced the event already succeeded; only the telemetry event was lost.
+   */
+  TELEMETRY_EBT_REPORT_FAILED: 'TELEMETRY_EBT_REPORT_FAILED',
 
   // ──────────────────────────── Dispatcher ───────────────────────────
   /**
@@ -370,6 +384,21 @@ export const ALERTING_LOG_CODES = {
   DISPATCH_WORKFLOW_DISABLED: 'DISPATCH_WORKFLOW_DISABLED',
   /** Scheduling a workflow execution for a dispatch group failed. */
   DISPATCH_WORKFLOW_SCHEDULE_FAILED: 'DISPATCH_WORKFLOW_SCHEDULE_FAILED',
+  /**
+   * Writing the `.alert-actions` records of a dispatch commit failed (the
+   * request threw, or Elasticsearch rejected every record), so scheduling
+   * stopped and the tick halts `commit_failed` with the watermark held. The
+   * groups of that commit were dispatched but not recorded, and the next tick
+   * dispatches them again.
+   */
+  DISPATCH_COMMIT_FAILED: 'DISPATCH_COMMIT_FAILED',
+  /**
+   * Elasticsearch rejected some, but not all, records of a dispatch commit;
+   * scheduling continues. Their series are
+   * fetched again on the next tick, and a group whose `notified` record was
+   * rejected can be dispatched again.
+   */
+  DISPATCH_COMMIT_DEGRADED: 'DISPATCH_COMMIT_DEGRADED',
   /**
    * The cluster license does not allow action policies. Alert actions are still
    * recorded, but no workflow is scheduled until the license is upgraded.

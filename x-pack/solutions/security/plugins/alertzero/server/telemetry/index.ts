@@ -36,6 +36,7 @@ export type {
   AlertZeroRuleTuningReviewCompletedPayload,
   AlertZeroTelemetryEventPayloads,
   AlertZeroWorkerInvestigationClosedPayload,
+  AlertZeroWorkerInvestigationReopenedPayload,
   AlertZeroWorkerRunCompletedPayload,
 } from './event_types';
 export { readTelemetryOptIn } from './read_telemetry_opt_in';
@@ -46,6 +47,8 @@ export type {
   AlertZeroTelemetryReporter,
   SafeReportEventParams,
 } from './safe_report_event';
+export { buildWorkerInvestigationReopenedPayload } from './worker_investigation/build_worker_investigation_reopened_payload';
+export type { BuildWorkerInvestigationReopenedPayloadParams } from './worker_investigation/build_worker_investigation_reopened_payload';
 export { buildAlertZeroEnvelope } from './envelope/build_alertzero_envelope';
 export type {
   AlertZeroEnvelopeRoot,

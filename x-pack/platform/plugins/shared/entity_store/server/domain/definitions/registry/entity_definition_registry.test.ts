@@ -564,7 +564,7 @@ describe('EntityDefinitionRegistry', () => {
       expect(registry.register(withStaleId).ok).toBe(false);
     });
 
-    it('registers the built-ins, which carry no dynamic block', () => {
+    it('registers the built-ins', () => {
       const builtIns: RegistrableEntityDefinition[] = [
         userEntityDefinition,
         hostEntityDefinition,
@@ -573,7 +573,6 @@ describe('EntityDefinitionRegistry', () => {
       ];
 
       builtIns.forEach((definition) => {
-        expect(definition.dynamic).toBeUndefined();
         expect(registry.register(definition)).toEqual({ ok: true });
       });
     });
