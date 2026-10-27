@@ -13,15 +13,15 @@ import {
   watchlistNameMismatchError,
 } from '../lookups_file_upload/translations';
 
-/** Keeps resources whose names are in `missingLookups`, using case-sensitive comparison. */
+/** Keeps lookups whose names are in `missingLookups`, using case-sensitive comparison. */
 export const assertMissingLookups = (
-  resources: SiemMigrationResourceData[],
+  uploadedLookups: SiemMigrationResourceData[],
   missingLookups: readonly string[],
   migrationSource: MigrationSource,
   addError: (error: string) => void
 ): SiemMigrationResourceData[] => {
-  const includeName = migrationSource !== MigrationSource.SPLUNK || resources.length > 1;
-  return resources.flatMap((resource) => {
+  const includeName = migrationSource !== MigrationSource.SPLUNK || uploadedLookups.length > 1;
+  return uploadedLookups.flatMap((resource) => {
     const name = resource.name.trim();
     if (!missingLookups.includes(name)) {
       addError(mismatchError(migrationSource, includeName ? name : undefined));

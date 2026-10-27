@@ -106,7 +106,7 @@ describe('LookupsFileUpload', () => {
     await waitFor(() => {
       expect(
         getByText(
-          'Reference set "other_set" must match a name in the list above. The name comes from the export, or from the file name when the export has none.'
+          'Reference set "other_set" must match a name in the list above. See `name` field in reference set export.'
         )
       ).toBeVisible();
     });

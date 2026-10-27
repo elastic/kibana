@@ -23,7 +23,6 @@ import {
   assertMissingLookups,
   convertQradarReferenceSetToLookup,
   convertSentinelWatchlistToResource,
-  lookupNameFromFileName,
 } from '../utils';
 import { MigrationSource } from '../../../../types';
 import { useRuleMigrationVendorCopy } from '../../../../../rules/hooks/use_rule_migration_vendor_copy';
@@ -90,7 +89,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
                   return;
                 }
 
-                const name = lookupNameFromFileName(file.name);
+                const name = file.name.replace(/\.[^/.]+$/, '').trim();
 
                 try {
                   if (migrationSource === MigrationSource.QRADAR) {
