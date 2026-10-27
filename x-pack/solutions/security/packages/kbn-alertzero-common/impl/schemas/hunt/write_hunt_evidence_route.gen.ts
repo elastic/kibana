@@ -32,6 +32,16 @@ export const WriteHuntEvidenceRequestBody = lazySchema(() =>
        * Tier 1's total-hits count for this run.
        */
       totalHits: z.number().int().min(0).describe("Tier 1's total-hits count for this run."),
+      /**
+       * Technique ids this run actually searched, from the coordinator's `searched_technique_ids`. Unioned into the report's per-space ledger so a later run does not spend its behavior budget on them again.
+       */
+      searchedTechniqueIds: z
+        .array(z.string().min(1).max(32))
+        .max(100)
+        .optional()
+        .describe(
+          "Technique ids this run actually searched, from the coordinator's `searched_technique_ids`. Unioned into the report's per-space ledger so a later run does not spend its behavior budget on them again."
+        ),
     })
     .strict()
 );

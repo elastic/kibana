@@ -44,6 +44,18 @@ paths:
                   type: integer
                   minimum: 0
                   description: Tier 1's total-hits count for this run.
+                searchedTechniqueIds:
+                  type: array
+                  maxItems: 100
+                  description: >-
+                    Technique ids this run actually searched, from the
+                    coordinator's `searched_technique_ids`. Unioned into the
+                    report's per-space ledger so a later run does not spend
+                    its behavior budget on them again.
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 32
             examples:
               WriteHuntEvidenceRequestExample:
                 summary: Stamp a clean run as hunted.

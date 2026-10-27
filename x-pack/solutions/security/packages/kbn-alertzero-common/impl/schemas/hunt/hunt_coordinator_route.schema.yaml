@@ -433,6 +433,20 @@ components:
             that writes "clean" off this flag alone will record a clean
             environment for a run that could not search it — use
             `completeness` for that.
+        searched_technique_ids:
+          type: array
+          maxItems: 100
+          description: >-
+            Technique ids this run actually searched in Tier 2: behaviors
+            whose query executed without an inconclusive reason, plus
+            techniques collapsed into an executed sibling. Techniques that
+            were skipped, failed or lost to the behavior budget are not
+            listed. Absent or empty when Tier 2 did not run. The caller
+            records these so a later run can skip them.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 32
         incomplete:
           type: array
           description: >-
