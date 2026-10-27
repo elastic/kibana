@@ -18,6 +18,7 @@ import type { CustomContextClient } from '../custom_context';
 import type { OnboardingClient } from '../onboarding/onboarding_client';
 import type { DecisionTreeStore } from '../decision_trees/store';
 import type { MemoryPageStore } from '../memory/page_store';
+import type { KnowledgePurgeClient } from '../purge/purge_client';
 import type { GetTriggerEmitter } from '../types';
 
 export type GetInvestigationsClient = (
@@ -50,6 +51,8 @@ export type GetDecisionTreeStore = (request: KibanaRequest) => DecisionTreeStore
 /** Request-scoped store: reads and writes run as the caller's Elasticsearch user. */
 export type GetMemoryPageStore = (request: KibanaRequest) => MemoryPageStore;
 
+export type GetKnowledgePurgeClient = (request: KibanaRequest) => KnowledgePurgeClient;
+
 export interface NightshiftInvestigationsRouteHandlerResources
   extends DefaultRouteHandlerResources {
   getInvestigationsClient: GetInvestigationsClient;
@@ -67,4 +70,5 @@ export interface NightshiftInvestigationsRouteHandlerResources
   isDecisionTreesEnabled: () => boolean;
   getMemoryPageStore: GetMemoryPageStore;
   isMemoryEnabled: () => boolean;
+  getKnowledgePurgeClient: GetKnowledgePurgeClient;
 }

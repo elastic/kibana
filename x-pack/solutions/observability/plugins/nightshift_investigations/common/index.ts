@@ -263,3 +263,15 @@ export {
   type InvestigationCompletedTriggerPayload,
   type InvestigationFailedTriggerPayload,
 } from './workflows/triggers';
+
+export {
+  KNOWLEDGE_PURGE_CONFIRMATION,
+  KNOWLEDGE_PURGE_SCOPES,
+  MAX_PURGE_INVESTIGATIONS,
+  emptyPurgeCounts,
+  type KnowledgePurgeCounts,
+  type KnowledgePurgeInvestigation,
+  type KnowledgePurgePreview,
+  type KnowledgePurgeResult,
+  type KnowledgePurgeScope,
+} from './purge';
