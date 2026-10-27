@@ -42,7 +42,9 @@ const resolve = (
   getKibanaRequestAccess: () => Promise<boolean> = async () => true
 ) =>
   resolveKibanaInboundRequest({
-    headers: authorization === undefined ? {} : { authorization },
+    inboundRequest: httpServerMock.createKibanaRequest({
+      headers: authorization === undefined ? {} : { authorization },
+    }),
     spaceId: 'default',
     elasticsearchClient: client,
     getKibanaRequestAccess,
@@ -172,10 +174,9 @@ describe('resolveKibanaInboundRequest', () => {
         [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication,
       },
       getKibanaRequestAccess: (request: KibanaRequest) => Promise<boolean> = async () => true,
-      inboundRequest: KibanaRequest | undefined = inboundRequestFor(extraHeaders)
+      inboundRequest: KibanaRequest = inboundRequestFor(extraHeaders)
     ) =>
       resolveKibanaInboundRequest({
-        headers: { authorization, ...extraHeaders },
         inboundRequest,
         spaceId: 'default',
         elasticsearchClient: client,
@@ -212,24 +213,6 @@ describe('resolveKibanaInboundRequest', () => {
       client.asScoped.mockClear();
 
       await expect(resolveBearer(client, {})).resolves.toBeUndefined();
-      expect(client.asScoped).not.toHaveBeenCalled();
-    });
-
-    it('returns undefined when the route request is missing', async () => {
-      const client = createClient();
-      client.asScoped.mockClear();
-
-      await expect(
-        resolveKibanaInboundRequest({
-          headers: {
-            authorization,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication,
-          },
-          spaceId: 'default',
-          elasticsearchClient: client,
-          getKibanaRequestAccess: async () => true,
-        })
-      ).resolves.toBeUndefined();
       expect(client.asScoped).not.toHaveBeenCalled();
     });
 
@@ -300,7 +283,6 @@ describe('resolveKibanaInboundRequest', () => {
 
       await expect(
         resolveKibanaInboundRequest({
-          headers: inboundRequest.headers,
           inboundRequest,
           spaceId: 'default',
           elasticsearchClient: client,

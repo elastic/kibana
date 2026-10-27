@@ -54,4 +54,12 @@ describe('executedByFallbackLabel', () => {
   it('keeps a profile UID when unresolved executors are shown', () => {
     expect(executedByFallbackLabel('u_mGBROF_q5bm_A5E_0', true)).toBe('u_mGBROF_q5bm_A5E_0');
   });
+
+  it('hides the missing-identity sentinel when unresolved profile UIDs are hidden', () => {
+    expect(executedByFallbackLabel('unknown', false)).toBeUndefined();
+  });
+
+  it('keeps the missing-identity sentinel when unresolved executors are shown', () => {
+    expect(executedByFallbackLabel('unknown', true)).toBe('unknown');
+  });
 });

@@ -194,27 +194,22 @@ const resolveServiceAccountBearer = async ({
  * bearer and that credential can access the space. A 401 or a failed space check returns undefined.
  */
 export const resolveKibanaInboundRequest = async ({
-  headers,
   inboundRequest,
   spaceId,
   elasticsearchClient,
   getKibanaRequestAccess,
 }: {
-  headers: Record<string, string | string[] | undefined>;
-  inboundRequest?: KibanaRequest;
+  inboundRequest: KibanaRequest;
   spaceId: string;
   elasticsearchClient: IClusterClient;
   getKibanaRequestAccess: (request: KibanaRequest) => Promise<boolean>;
 }): Promise<KibanaRequest | undefined> => {
-  const inbound = readInboundAuthorization(headers);
+  const inbound = readInboundAuthorization(inboundRequest.headers);
   if (!inbound) {
     return undefined;
   }
 
   if (inbound.kind === 'bearer') {
-    if (!inboundRequest) {
-      return undefined;
-    }
     return resolveServiceAccountBearer({
       authorization: inbound.authorization,
       inboundRequest,

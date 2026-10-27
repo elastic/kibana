@@ -206,7 +206,6 @@ export async function ingestInboundEvent({
   if (connectorEventsEnabled && connector.hasInboundEventIdentity !== true) {
     try {
       kibanaScheduleRequest = await resolveKibanaInboundRequest({
-        headers,
         inboundRequest: request,
         spaceId,
         elasticsearchClient: await getElasticsearchClient(),

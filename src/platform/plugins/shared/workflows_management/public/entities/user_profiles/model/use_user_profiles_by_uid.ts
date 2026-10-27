@@ -21,10 +21,12 @@ const profilesToMap = (profiles: UserProfileWithAvatar[]): Map<string, UserProfi
   }, new Map<string, UserProfileWithAvatar>());
 
 const USER_PROFILE_UID_PREFIX = 'u_';
+/** Same sentinel as `UNKNOWN_EXECUTION_IDENTITY` on the execution document. */
+const UNKNOWN_EXECUTED_BY = 'unknown';
 
 /**
  * Label to show when no user profile matches `executedBy`. Serverless hides an unresolved profile
- * UID. A service-account id is not a profile UID, so it stays visible.
+ * UID and the missing-identity sentinel. A service-account id stays visible.
  */
 export const executedByFallbackLabel = (
   executedBy: string | undefined,
@@ -34,10 +36,13 @@ export const executedByFallbackLabel = (
   if (!value) {
     return undefined;
   }
-  if (showUnresolvedExecutors || !value.startsWith(USER_PROFILE_UID_PREFIX)) {
+  if (showUnresolvedExecutors) {
     return value;
   }
-  return undefined;
+  if (value === UNKNOWN_EXECUTED_BY || value.startsWith(USER_PROFILE_UID_PREFIX)) {
+    return undefined;
+  }
+  return value;
 };
 
 export const getExecutedByLabel = (
