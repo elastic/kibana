@@ -260,6 +260,10 @@ tags:
     description: |
       Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
     x-displayName: Fleet enrollment API keys
+  - name: Fleet IaC provisioner
+    description: |
+      Fleet infrastructure-as-code (IaC) provisioner APIs, including the CloudFormation callback that reports a created IAM role back to Kibana.
+    x-displayName: Fleet IaC provisioner
   - name: Fleet internals
     description: |
       Fleet internals APIs enable you to manage Fleet internal operations, including checking permissions, monitoring Fleet Server health, managing settings, and initiating Fleet setup.
@@ -48125,6 +48129,31 @@ paths:
                   description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
                   maxLength: 100
                   type: string
+                pendingAgentlessPolicies:
+                  description: Agentless policies to create once the CloudFormation stack launched from this deployment reports back. Each is the body the create-agentless-policy API would receive, without the cloud connector, which the server adds. Requires the same privileges as that API. Never returned.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      id:
+                        maxLength: 256
+                        minLength: 1
+                        type: string
+                      instanceIds:
+                        items:
+                          maxLength: 256
+                          minLength: 1
+                          type: string
+                        maxItems: 100
+                        type: array
+                      request:
+                        $ref: '#/components/schemas/Kibana_HTTP_APIs_create_managed_integration_request'
+                    required:
+                      - id
+                      - instanceIds
+                      - request
+                  maxItems: 100
+                  type: array
                 provider:
                   description: Cloud provider.
                   enum:
@@ -54704,6 +54733,202 @@ paths:
       summary: Check Fleet Server health
       tags:
         - Fleet internals
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/iac_provisioner/callbacks/{callbackId}:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/iac_provisioner/callbacks/{callbackId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. `role_arn` and `stack_arn` must be in the same AWS account. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.
+      operationId: receive-provisioning-callback
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: ID of the callback record, as issued to the stack.
+          in: path
+          name: callbackId
+          required: true
+          schema:
+            maxLength: 128
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              receiveProvisioningCallbackRequestExample:
+                description: The report the launched CloudFormation stack sends once its IAM role exists
+                summary: Report a created IAM role
+                value:
+                  role_arn: arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc123
+                  stack_arn: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-identity/11111111-2222-3333-4444-555555555555
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                role_arn:
+                  description: ARN of the IAM role the stack created.
+                  maxLength: 2048
+                  minLength: 1
+                  type: string
+                stack_arn:
+                  description: ARN (StackId) of the CloudFormation stack.
+                  maxLength: 2048
+                  minLength: 1
+                  type: string
+              required:
+                - role_arn
+                - stack_arn
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                receiveProvisioningCallbackExample:
+                  description: The report was applied and the federated identity exists
+                  summary: Identity created
+                  value:
+                    status: received
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  status:
+                    description: 'State of the callback record. `pending`: waiting for the stack. `receiving`: a report is being applied. `received`: values stored and the identity exists. `cancelled`: the form stopped waiting and the token is refused.'
+                    enum:
+                      - pending
+                      - receiving
+                      - received
+                      - cancelled
+                    type: string
+                required:
+                  - status
+          description: The values were stored, or were already stored
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: The role and the stack are in different AWS accounts
+                  summary: Role and stack accounts differ
+                  value:
+                    error: Bad Request
+                    message: role_arn and stack_arn must be in the same AWS account
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No record has this ID, or the token is not the one issued for it
+                  summary: Unknown callback or token
+                  value:
+                    error: Not Found
+                    message: Callback not found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              examples:
+                conflictExample:
+                  description: A report with different values was already received
+                  summary: Different values already received
+                  value:
+                    error: Conflict
+                    message: Callback already received with different values
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Conflict
+        '410':
+          content:
+            application/json:
+              examples:
+                goneExample:
+                  description: The record expired or was cancelled before the report arrived
+                  summary: Callback expired or cancelled
+                  value:
+                    error: Gone
+                    message: Callback is no longer accepting values
+                    statusCode: 410
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Gone
+      summary: Receive a provisioning callback
+      tags:
+        - Fleet IaC provisioner
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
