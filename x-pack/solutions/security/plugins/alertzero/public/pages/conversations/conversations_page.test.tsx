@@ -287,10 +287,12 @@ const renderPage = (
     capabilities = {},
     proposalsCapabilities = { showProposals: true, decideProposals: true },
     alertZeroWrite = true,
+    agentBuilderShow = true,
   }: {
     capabilities?: Record<string, unknown>;
     proposalsCapabilities?: Record<string, boolean>;
     alertZeroWrite?: boolean;
+    agentBuilderShow?: boolean;
   } = {}
 ) => {
   const core = coreMock.createStart();
@@ -298,6 +300,7 @@ const renderPage = (
     ...core.application.capabilities,
     alertzero: { show: true, write: alertZeroWrite },
     proposals: proposalsCapabilities,
+    agentBuilder: { show: agentBuilderShow },
   };
   // The real service returns a URL; the mock returns undefined, which would silently drop the
   // chat control's href and make the link assertions vacuous.
@@ -340,6 +343,7 @@ const renderPage = (
 const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
 const dismissMutateAsync = jest.fn().mockResolvedValue(undefined);
 const setStatusMutate = jest.fn();
+const setStatusMutateAsync = jest.fn();
 const assignInvestigationMutate = jest.fn().mockResolvedValue({});
 
 beforeEach(() => {
@@ -353,7 +357,12 @@ beforeEach(() => {
   mockUseAssignInvestigation.mockReturnValue({ mutateAsync: assignInvestigationMutate });
   mockUseUserProfiles.mockReturnValue({ data: [], isFetching: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
-  mockUseSetInvestigationStatus.mockReturnValue({ mutate: setStatusMutate, isLoading: false });
+  setStatusMutateAsync.mockReset().mockResolvedValue({});
+  mockUseSetInvestigationStatus.mockReturnValue({
+    mutate: setStatusMutate,
+    mutateAsync: setStatusMutateAsync,
+    isLoading: false,
+  });
   mockUseInvestigationClosePreview.mockReturnValue({
     data: { pending_proposal_count: 0, pending_proposals: [] },
     isLoading: false,
@@ -421,6 +430,42 @@ describe('ConversationsPage details flyout', () => {
         expect.objectContaining({ conversationId: 'inv-1' })
       );
     });
+  });
+
+  describe('without the Agent Builder privilege', () => {
+    it('opens no flyout, warns about the missing privilege and clears the URL', async () => {
+      const { agentBuilder, core, history } = renderPage('/?selectedConversationId=inv-1', {
+        agentBuilderShow: false,
+      });
+
+      await waitFor(() => expect(history.location.search).toBe(''));
+      expect(core.notifications.toasts.addWarning).toHaveBeenCalledWith(
+        expect.stringContaining('Agent Builder Kibana privilege')
+      );
+      expect(agentBuilder.openConversationDetails).not.toHaveBeenCalled();
+    });
+
+    it('explains which features are unavailable in a callout', () => {
+      renderPage('/', { agentBuilderShow: false });
+
+      expect(screen.getByTestId('alertZeroAgentBuilderPrivilegeCallout')).toHaveTextContent(
+        'You need the Agent Builder Kibana privilege to open investigations and chats'
+      );
+    });
+
+    it('leaves the card inert and disables its chat control', () => {
+      const { history } = renderPage('/', { agentBuilderShow: false });
+
+      expect(screen.queryByRole('button', { name: proposal.title })).not.toBeInTheDocument();
+      expect(screen.getByTestId('conversationCardOpenInChat')).toBeDisabled();
+      expect(history.location.search).toBe('');
+    });
+  });
+
+  it('shows no privilege callout when Agent Builder is accessible', () => {
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertZeroAgentBuilderPrivilegeCallout')).not.toBeInTheDocument();
   });
 
   it('opens nothing with no conversation in the URL', () => {
@@ -722,6 +767,58 @@ describe('ConversationsPage decisions', () => {
     expect(setStatusMutate).toHaveBeenCalledWith({
       investigationId: 'inv-1',
       body: { status: 'closed', dismiss_reason: undefined, rationale: undefined },
+    });
+  });
+
+  describe('reopening a closed investigation', () => {
+    const closedInvestigationProposal = {
+      ...actionProposal,
+      conversationStatus: 'closed' as const,
+    };
+
+    const openMenuOf = () => {
+      mockProposals({ investigate: [closedInvestigationProposal] });
+      const rendered = renderPage('/', { capabilities: { manageInvestigations: true } });
+      fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
+      return rendered;
+    };
+
+    it('offers Open instead of Close for a closed investigation', () => {
+      openMenuOf();
+
+      expect(screen.getByText('Open investigation')).toBeInTheDocument();
+      expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
+    });
+
+    it('reopens the investigation at once, with a success toast and no modal', async () => {
+      const { core } = openMenuOf();
+
+      fireEvent.click(screen.getByText('Open investigation'));
+
+      await waitFor(() =>
+        expect(setStatusMutateAsync).toHaveBeenCalledWith({
+          investigationId: 'inv-1',
+          body: { status: 'open' },
+        })
+      );
+      await waitFor(() =>
+        expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Investigation reopened')
+      );
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('shows an error toast when the reopen fails', async () => {
+      setStatusMutateAsync.mockRejectedValueOnce(new Error('boom'));
+      const { core } = openMenuOf();
+
+      fireEvent.click(screen.getByText('Open investigation'));
+
+      await waitFor(() =>
+        expect(core.notifications.toasts.addDanger).toHaveBeenCalledWith(
+          'Could not reopen the investigation'
+        )
+      );
+      expect(core.notifications.toasts.addSuccess).not.toHaveBeenCalled();
     });
   });
 

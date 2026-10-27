@@ -26,6 +26,7 @@ export interface RuleTypeModalComponentProps {
   onClose: RuleTypeModalProps['onClose'];
   onSelectRuleType: RuleTypeModalProps['onSelectRuleType'];
   onSelectTemplate: RuleTypeModalProps['onSelectTemplate'];
+  showClassicBadge?: RuleTypeModalProps['showClassicBadge'];
 }
 
 const EMPTY_ARRAY: string[] = [];

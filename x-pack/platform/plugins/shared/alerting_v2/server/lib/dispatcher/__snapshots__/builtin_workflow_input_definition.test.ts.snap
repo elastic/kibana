@@ -24,6 +24,11 @@ Object {
             ],
             "type": "string",
           },
+          "alert_url": Object {
+            "description": "Absolute URL of the alert details page in Kibana, in the alert space",
+            "format": "uri",
+            "type": "string",
+          },
           "data": Object {
             "additionalProperties": true,
             "description": "Data of the alert",
@@ -72,6 +77,7 @@ Object {
           "space_id",
           "group_hash",
           "alert_id",
+          "alert_url",
           "alert_status",
         ],
         "type": "object",
