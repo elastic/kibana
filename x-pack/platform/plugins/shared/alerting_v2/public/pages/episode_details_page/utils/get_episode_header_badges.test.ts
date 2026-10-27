@@ -71,7 +71,7 @@ describe('getEpisodeHeaderBadges', () => {
     });
   });
 
-  it('remaps high severity risk color to warning', () => {
+  it('renders high severity as a custom soft badge', () => {
     const badges = getEpisodeHeaderBadges({
       status: undefined,
       severity: 'high',
@@ -82,8 +82,8 @@ describe('getEpisodeHeaderBadges', () => {
     expect(badges).toEqual([
       expect.objectContaining({
         label: 'High',
-        color: 'warning',
         'data-test-subj': 'alertingV2EpisodeSeverityBadge-high',
+        renderCustomBadge: expect.any(Function),
       }),
     ]);
   });

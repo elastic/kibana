@@ -24,9 +24,9 @@ import {
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { EpisodesFilterState, EpisodesSortState } from '../../queries/episodes_query';
 import {
-  EPISODE_SEVERITY_CHART_VALUE,
   EPISODE_SEVERITIES,
   EPISODE_SEVERITY_FILTER_NONE,
+  EPISODE_SEVERITY_SORT_RANK,
 } from '../../components/severity/severity_utils';
 import type { SeverityExtension } from '../../types/episode_data_source';
 
@@ -166,7 +166,7 @@ const buildSeveritySortScript = (extensions: SeverityExtension[] = []): string =
   [
     `def v = doc.containsKey('${ALERT_SEVERITY}') && !doc['${ALERT_SEVERITY}'].empty ? doc['${ALERT_SEVERITY}'].value : '';`,
     ...EPISODE_SEVERITIES.map(
-      (s) => `if (v == '${s}') { return ${EPISODE_SEVERITY_CHART_VALUE[s]}; }`
+      (s) => `if (v == '${s}') { return ${EPISODE_SEVERITY_SORT_RANK[s]}; }`
     ),
     ...extensions.map((ext) => `if (v == '${ext.value}') { return ${ext.sortRank}; }`),
     `return -1;`,

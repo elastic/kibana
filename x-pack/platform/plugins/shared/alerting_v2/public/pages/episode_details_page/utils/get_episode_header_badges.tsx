@@ -74,17 +74,6 @@ const getEffectiveStatus = (
   return status;
 };
 
-const getSeverityBadgeColor = (severity: string): AppHeaderBadgeColor => {
-  const normalized = normalizeEpisodeSeverity(severity);
-  const color = EPISODE_SEVERITY_BADGE_COLORS[normalized];
-
-  if (color === 'risk') {
-    return 'warning';
-  }
-
-  return color as AppHeaderBadgeColor;
-};
-
 const getSnoozeTooltip = (groupAction: AlertEpisodeGroupAction): string => {
   if (groupAction.snoozedUntil) {
     return i18n.getSnoozedUntilTooltip(new Date(groupAction.snoozedUntil));
@@ -116,11 +105,11 @@ const renderIconBadge =
       </EuiToolTip>
     );
 
-const renderFilledBadge =
+const renderSeverityBadge =
   (color: EuiBadgeProps['color'], dataTestSubj: string) =>
   ({ badgeText }: { badgeText: string }) =>
     (
-      <EuiBadge color={color} fill data-test-subj={dataTestSubj}>
+      <EuiBadge color={color} data-test-subj={dataTestSubj}>
         {badgeText}
       </EuiBadge>
     );
@@ -189,13 +178,14 @@ export const getEpisodeHeaderBadges = ({
 
   if (isSupportedEpisodeSeverity(severity)) {
     const normalized = normalizeEpisodeSeverity(severity);
-    const severityColor = getSeverityBadgeColor(severity);
+    const severityColor = EPISODE_SEVERITY_BADGE_COLORS[normalized];
     badges.push({
       label: getEpisodeSeverityLabel(normalized),
-      color: severityColor,
+      color: 'default',
       'data-test-subj': `alertingV2EpisodeSeverityBadge-${normalized}`,
-      // `renderCustomBadge` is used here to ensure the badge is filled with the appropriate severity color, as native AppHeader badges do not support "fill" styling.
-      renderCustomBadge: renderFilledBadge(
+      // AppHeader badge colors omit `risk` / `neutral`; render through EuiBadge so the
+      // shared severity tokens apply.
+      renderCustomBadge: renderSeverityBadge(
         severityColor,
         `alertingV2EpisodeSeverityBadge-${normalized}`
       ),
