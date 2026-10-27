@@ -185,31 +185,7 @@ describe('diffDashboardStates', () => {
         config: { title: 'Count' },
         ...overrides,
       } as DashboardPanel);
-    const panelsState = (panel: DashboardPanel) =>
-      state({
-        panels: [panel, { ...section(false), panels: [panel] }],
-        pinned_panels: [{ type: 'options_list_control', width: 'medium', config: {} }],
-      } as Partial<DashboardState>);
     const ignoreConfig = { compareSerializedState: () => true };
-
-    it('finds no changes between equal panels without ids', () => {
-      expect(diffDashboardStates(panelsState(lensPanel()), panelsState(lensPanel()))).toEqual({});
-    });
-
-    it('does not let a panel without an id collide with an explicit id', () => {
-      const withFirstPanel = (title: string) =>
-        state({
-          panels: [
-            lensPanel({ config: { title } }),
-            lensPanel({ id: '__position_0', grid: { x: 12, y: 0, w: 12, h: 8 } }),
-          ],
-        });
-      const current = withFirstPanel('Errors');
-
-      expect(diffDashboardStates(withFirstPanel('Count'), current)).toEqual({
-        panels: current.panels,
-      });
-    });
 
     it('returns the panels when a panel type changes', () => {
       const current = state({ panels: [lensPanel({ id: 'panel-1', type: 'visualization' })] });

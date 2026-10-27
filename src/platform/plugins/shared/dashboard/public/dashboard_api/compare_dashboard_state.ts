@@ -14,7 +14,6 @@ import {
   diffComparators,
 } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
-import { isDashboardSection } from '../../common';
 import {
   arePanelLayoutsEqual,
   arePinnedPanelLayoutsEqual,
@@ -25,70 +24,6 @@ import { getProjectRoutingComparators } from './project_routing_manager';
 import { diffDashboardSettings } from './settings_manager';
 import { getUnifiedSearchComparators } from './unified_search_manager';
 
-// The current state only has time_range / project_routing while its restore flag is on, the
-// flag unsaved changes reads. Flag changes themselves are reported by the settings diff.
-const diffOtherState = (baseline: DashboardState, current: DashboardState) => {
-  const timeRestore = Boolean(current.time_range);
-  const projectRoutingRestore = Boolean(current.project_routing);
-  return diffComparators<
-    Pick<
-      DashboardState,
-      | 'filters'
-      | 'query'
-      | 'refresh_interval'
-      | 'time_range'
-      | 'esql_approximation'
-      | 'project_routing'
-    >
-  >(
-    {
-      ...getUnifiedSearchComparators(() => timeRestore),
-      ...approximationComparators,
-      ...getProjectRoutingComparators(() => projectRoutingRestore),
-    },
-    baseline,
-    current
-  );
-};
-
-// ids are optional, so panels without one are matched by position instead of a random id
-const deserializeComparableLayout = ({ panels, pinned_panels: pinnedPanels }: DashboardState) => {
-  const takenIds = new Set(
-    [
-      ...(panels ?? []).flatMap((widget) =>
-        isDashboardSection(widget) ? [widget, ...widget.panels] : [widget]
-      ),
-      ...(pinnedPanels ?? []),
-    ].flatMap(({ id }) => (id ? [id] : []))
-  );
-  const positionId = (base: string) => {
-    let id = base;
-    while (takenIds.has(id)) id = `_${id}`;
-    takenIds.add(id);
-    return id;
-  };
-
-  return deserializeLayout(
-    panels?.map((widget, index) => {
-      const id = widget.id ?? positionId(`__position_${index}`);
-      return isDashboardSection(widget)
-        ? {
-            ...widget,
-            id,
-            panels: widget.panels.map((panel, panelIndex) => ({
-              ...panel,
-              id: panel.id ?? positionId(`${id}_${panelIndex}`),
-            })),
-          }
-        : { ...widget, id };
-    }),
-    pinnedPanels?.map((panel, index) => ({
-      ...panel,
-      id: panel.id ?? positionId(`__pinned_${index}`),
-    }))
-  );
-};
-
 const getRefId = (config?: object) => (config && 'ref_id' in config ? config.ref_id : undefined);
 
 const diffLayout = (
@@ -96,8 +31,8 @@ const diffLayout = (
   current: DashboardState,
   children?: { [id: string]: unknown }
 ): Partial<Pick<DashboardState, 'panels' | 'pinned_panels'>> => {
-  const baselineLayout = deserializeComparableLayout(baseline);
-  const currentLayout = deserializeComparableLayout(current);
+  const baselineLayout = deserializeLayout(baseline.panels, baseline.pinned_panels);
+  const currentLayout = deserializeLayout(current.panels, current.pinned_panels);
 
   const panelChanged = (panelId: string, baselineType?: string, currentType?: string) => {
     if (baselineType !== currentType) return true;
@@ -136,8 +71,32 @@ export const diffDashboardStates = (
   baseline: DashboardState,
   current: DashboardState,
   children?: { [id: string]: unknown }
-): Partial<DashboardState> => ({
-  ...diffDashboardSettings(baseline, current),
-  ...diffOtherState(baseline, current),
-  ...diffLayout(baseline, current, children),
-});
+): Partial<DashboardState> => {
+  // The current state only has time_range / project_routing while its restore flag is on, the
+  // flag unsaved changes reads. Flag changes themselves are reported by the settings diff.
+  const timeRestore = Boolean(current.time_range);
+  const projectRoutingRestore = Boolean(current.project_routing);
+  return {
+    ...diffDashboardSettings(baseline, current),
+    ...diffComparators<
+      Pick<
+        DashboardState,
+        | 'filters'
+        | 'query'
+        | 'refresh_interval'
+        | 'time_range'
+        | 'esql_approximation'
+        | 'project_routing'
+      >
+    >(
+      {
+        ...getUnifiedSearchComparators(() => timeRestore),
+        ...approximationComparators,
+        ...getProjectRoutingComparators(() => projectRoutingRestore),
+      },
+      baseline,
+      current
+    ),
+    ...diffLayout(baseline, current, children),
+  };
+};
