@@ -235,6 +235,28 @@ describe('gradeSubmissions', () => {
     expect(explanation).toContain('merged_nodes is empty');
   });
 
+  it('rejects a visited path whose only edge does not name its nodes', () => {
+    const { score, explanation } = gradeSubmissions({
+      submissions: [
+        {
+          traversals: [
+            {
+              tree_id: 'symptom:eql-slo-burn-rate',
+              visited_path: [{}],
+              causal_path: [],
+            },
+          ],
+        },
+      ],
+      prior,
+      submitted: prior,
+      response: 'No confirmed cause.',
+    });
+
+    expect(score).toBe(0);
+    expect(explanation).toContain('missing source_node_id or target_node_id');
+  });
+
   it('rejects a causal path when the response does not confirm a cause', () => {
     const { score, explanation } = gradeSubmissions({
       submissions: [

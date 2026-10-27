@@ -55,6 +55,78 @@ const headId = (treeId: string): string => {
 
 const versionId = (treeId: string, version: number): string => `${headId(treeId)}_v${version}`;
 
+interface IndexedTreeDoc {
+  id: string;
+  source: Record<string, unknown>;
+}
+
+/** Head and version documents for one tree, so a replay can put the space back afterward. */
+const snapshotDecisionTree = async (
+  esClient: Client,
+  treeId: string
+): Promise<IndexedTreeDoc[]> => {
+  const docs: IndexedTreeDoc[] = [];
+  try {
+    const head = await esClient.get<Record<string, unknown>>({
+      index: DECISION_TREE_AI_INDEX_DEST,
+      id: headId(treeId),
+    });
+    if (head.found && head._source) {
+      docs.push({ id: headId(treeId), source: head._source });
+    }
+  } catch {
+    // The tree is not in this space yet.
+  }
+
+  try {
+    const versions = await esClient.search<Record<string, unknown>>({
+      index: DECISION_TREE_AI_INDEX_DEST,
+      size: 100,
+      query: {
+        bool: {
+          filter: [
+            { term: { type: 'decision_tree_version' } },
+            { term: { 'attributes.tree_id': treeId } },
+            { term: { 'attributes.space_id': SPACE_ID } },
+          ],
+        },
+      },
+    });
+    for (const hit of versions.hits.hits) {
+      if (hit._id && hit._source) {
+        docs.push({ id: hit._id, source: hit._source });
+      }
+    }
+  } catch {
+    // The index may not exist on a fresh server.
+  }
+  return docs;
+};
+
+/** Deletes what the replay wrote for `treeId` and puts the previous documents back. */
+const restoreDecisionTree = async (
+  esClient: Client,
+  treeId: string,
+  snapshot: readonly IndexedTreeDoc[]
+): Promise<void> => {
+  const current = await snapshotDecisionTree(esClient, treeId);
+  for (const doc of current) {
+    try {
+      await esClient.delete({ index: DECISION_TREE_AI_INDEX_DEST, id: doc.id });
+    } catch {
+      // A concurrent delete already removed it.
+    }
+  }
+  for (const doc of snapshot) {
+    await esClient.index({
+      index: DECISION_TREE_AI_INDEX_DEST,
+      id: doc.id,
+      document: doc.source,
+      refresh: 'wait_for',
+    });
+  }
+};
+
 /** Writes the prior tree as the space's head so hydrate and prepare can see it. */
 export const seedPriorTree = async (
   esClient: Client,
@@ -136,62 +208,72 @@ export const runReinforcementExample = async ({
     submissions: [],
   };
 
-  await seedPriorTree(esClient, example);
-  const started = (await fetch(
-    `/api/workflows/workflow/${encodeURIComponent(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID)}/run`,
-    {
-      method: 'POST',
-      version: API_VERSION,
-      headers,
-      body: JSON.stringify({
-        inputs: {
-          prompt: example.input.question,
-          response: example.input.response,
-          round_id: example.metadata.case_id,
-          agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
-          connector_id: connectorId,
-          tool_calls: example.input.tool_calls,
-          tool_results: example.input.tool_results,
-        },
-      }),
-    }
-  )) as { workflowExecutionId: string };
-
-  const executionId = started.workflowExecutionId;
-  const deadline = Date.now() + MAX_WAIT_MS;
-  let execution = await readExecution(fetch, executionId);
-  while (!isTerminal(execution.status) && Date.now() < deadline) {
-    await delay(POLL_INTERVAL_MS);
-    execution = await readExecution(fetch, executionId);
-  }
-
-  const reinforce = reinforceStep(execution);
-  const output = reinforce?.output as
-    | {
-        submissions_json?: string;
-        skipped?: boolean;
-        trace_id?: string;
+  const snapshot = await snapshotDecisionTree(esClient, treeId);
+  try {
+    await seedPriorTree(esClient, example);
+    const started = (await fetch(
+      `/api/workflows/workflow/${encodeURIComponent(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID)}/run`,
+      {
+        method: 'POST',
+        version: API_VERSION,
+        headers,
+        body: JSON.stringify({
+          inputs: {
+            prompt: example.input.question,
+            response: example.input.response,
+            round_id: example.metadata.case_id,
+            agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+            connector_id: connectorId,
+            tool_calls: example.input.tool_calls,
+            tool_results: example.input.tool_results,
+          },
+        }),
       }
-    | undefined;
-  const submittedMarkdown = (await readSubmittedMarkdown(esClient, treeId)) ?? priorMarkdown;
-  const finished = isTerminal(execution.status);
-  const reinforced = reinforce?.status === ExecutionStatus.COMPLETED && output?.skipped !== true;
-  const failed = !finished || execution.status !== ExecutionStatus.COMPLETED || !reinforced;
+    )) as { workflowExecutionId: string };
 
-  return {
-    ...base,
-    execution_id: executionId,
-    ...(output?.trace_id ? { traceId: output.trace_id } : {}),
-    workflow_status: execution.status,
-    execution_error: failed
-      ? execution.error?.message ||
-        (output?.skipped || reinforce?.status === ExecutionStatus.SKIPPED
-          ? 'Decision-tree reinforcement was skipped. Select NIGHTSHIFT_DATASETS=reinforcement so decision trees and the sandbox are enabled.'
-          : `Workflow ${execution.status}; reinforce step ${reinforce?.status ?? 'missing'}`)
-      : undefined,
-    submissions: parseSubmissions(output?.submissions_json),
-    submitted_mermaid: submittedMarkdown,
-  };
+    const executionId = started.workflowExecutionId;
+    const deadline = Date.now() + MAX_WAIT_MS;
+    let execution = await readExecution(fetch, executionId);
+    while (!isTerminal(execution.status) && Date.now() < deadline) {
+      await delay(POLL_INTERVAL_MS);
+      execution = await readExecution(fetch, executionId);
+    }
+
+    const reinforce = reinforceStep(execution);
+    const output = reinforce?.output as
+      | {
+          submissions_json?: string;
+          skipped?: boolean;
+          trace_id?: string;
+          submit_rejected?: boolean;
+        }
+      | undefined;
+    const submittedMarkdown = (await readSubmittedMarkdown(esClient, treeId)) ?? priorMarkdown;
+    const finished = isTerminal(execution.status);
+    const reinforced = reinforce?.status === ExecutionStatus.COMPLETED && output?.skipped !== true;
+    const submitRejected = output?.submit_rejected === true;
+    const failed =
+      !finished || execution.status !== ExecutionStatus.COMPLETED || !reinforced || submitRejected;
+
+    return {
+      ...base,
+      execution_id: executionId,
+      ...(output?.trace_id ? { traceId: output.trace_id } : {}),
+      workflow_status: execution.status,
+      execution_error: failed
+        ? submitRejected
+          ? 'The reinforcement submit was rejected, so this round is not a successful reinforcement.'
+          : execution.error?.message ||
+            (output?.skipped || reinforce?.status === ExecutionStatus.SKIPPED
+              ? 'Decision-tree reinforcement was skipped. Select NIGHTSHIFT_DATASETS=reinforcement so decision trees and the sandbox are enabled.'
+              : `Workflow ${execution.status}; reinforce step ${reinforce?.status ?? 'missing'}`)
+        : undefined,
+      submissions: parseSubmissions(output?.submissions_json),
+      submitted_mermaid: submittedMarkdown,
+    };
+  } finally {
+    await restoreDecisionTree(esClient, treeId, snapshot);
+  }
 };
 
 const readExecution = async (
@@ -422,13 +504,15 @@ export const runCustomer0Reinforcement = async ({
         submissions_json?: string;
         skipped?: boolean;
         trace_id?: string;
+        submit_rejected?: boolean;
       }
     | undefined;
   const submissions = parseSubmissions(output?.submissions_json);
   const treeIds = treeIdsInSubmission(submissions.at(-1));
   const trees = await treesAfterRun(esClient, treeIds, startedAtMs);
   const reinforced = reinforce?.status === ExecutionStatus.COMPLETED && output?.skipped !== true;
-  const failed = execution.status !== ExecutionStatus.COMPLETED || !reinforced;
+  const submitRejected = output?.submit_rejected === true;
+  const failed = execution.status !== ExecutionStatus.COMPLETED || !reinforced || submitRejected;
 
   return {
     ...base,
@@ -437,10 +521,12 @@ export const runCustomer0Reinforcement = async ({
     ...(output?.trace_id ? { traceId: output.trace_id } : {}),
     workflow_status: execution.status,
     execution_error: failed
-      ? execution.error?.message ||
-        (output?.skipped || reinforce?.status === ExecutionStatus.SKIPPED
-          ? 'Decision-tree reinforcement was skipped. Select NIGHTSHIFT_DATASETS=reinforcement so decision trees and the sandbox are enabled.'
-          : `Workflow ${execution.status}; reinforce step ${reinforce?.status ?? 'missing'}`)
+      ? submitRejected
+        ? 'The reinforcement submit was rejected, so this round is not a successful reinforcement.'
+        : execution.error?.message ||
+          (output?.skipped || reinforce?.status === ExecutionStatus.SKIPPED
+            ? 'Decision-tree reinforcement was skipped. Select NIGHTSHIFT_DATASETS=reinforcement so decision trees and the sandbox are enabled.'
+            : `Workflow ${execution.status}; reinforce step ${reinforce?.status ?? 'missing'}`)
       : undefined,
     submissions,
     tree_id: trees[0]?.tree_id ?? '',

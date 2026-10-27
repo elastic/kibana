@@ -70,6 +70,14 @@ export const parseTreeMarkdown = (
   }
 };
 
+/** An edge that names neither end is not a path, even though the array itself is non-empty. */
+const malformedEdgeRefs = (refs: EdgeRef[] | undefined, label: string, treeId: string): string[] =>
+  (refs ?? []).flatMap((ref, index) =>
+    ref.source_node_id && ref.target_node_id
+      ? []
+      : [`${label} for ${treeId} entry ${index + 1} is missing source_node_id or target_node_id.`]
+  );
+
 const asEdgeRefs = (refs: EdgeRef[] | undefined): DecisionEdgeRef[] =>
   (refs ?? []).flatMap((ref) => {
     if (!ref.source_node_id || !ref.target_node_id) return [];
@@ -174,6 +182,10 @@ const traversalProblems = (
     if ((traversal.visited_path ?? []).length === 0) {
       problems.push(`visited_path for ${treeId} is empty.`);
     }
+    problems.push(
+      ...malformedEdgeRefs(traversal.visited_path, 'visited_path', treeId),
+      ...malformedEdgeRefs(traversal.causal_path, 'causal_path', treeId)
+    );
     const causal = traversal.causal_path ?? [];
     if (confirmed && causal.length === 0) {
       problems.push(`The response confirms a cause, but causal_path for ${treeId} is empty.`);
