@@ -18,6 +18,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { RunQuotaGroup } from '@kbn/significant-events-plugin/common';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
+import {
+  isDetectionRunQuotaGroup,
+  isRunQuotaReached,
+  RunQuotaReachedCallout,
+} from '../../components/ui/run_quota_reached_callout';
 import { isFiniteRunLimit, RUN_QUOTA_GROUPS } from './run_limit_draft';
 import { RunLimitRow, RUN_QUOTA_GROUP_LABELS } from './run_limit_row';
 import { RunQuotaExhaustionCallout } from './run_quota_exhaustion_callout';
@@ -28,12 +33,14 @@ export const RunLimitsSection = ({
   groups = RUN_QUOTA_GROUPS,
   form,
   description,
+  exhaustionCallouts,
   onSave,
   onConfirmSave,
 }: {
   groups?: readonly RunQuotaGroup[];
   form: RunLimitsForm;
   description?: ReactNode;
+  exhaustionCallouts: 'automations' | 'groups';
   onSave: () => Promise<void>;
   onConfirmSave: () => Promise<void>;
 }) => {
@@ -95,25 +102,46 @@ export const RunLimitsSection = ({
 
         {!quotas.isLoading && !quotas.isError && response && draftState && (
           <>
-            <RunQuotaExhaustionCallout
-              enabled={response.enabled}
-              limits={response.limits}
-              counts={response.counts}
-              groups={groups}
-            />
+            {exhaustionCallouts === 'automations' ? (
+              <RunQuotaExhaustionCallout
+                enabled={response.enabled}
+                limits={response.limits}
+                counts={response.counts}
+                groups={groups}
+              />
+            ) : null}
 
             <EuiForm component="div">
-              {groups.map((group) => (
-                <RunLimitRow
-                  key={group}
-                  group={group}
-                  count={response.counts[group]}
-                  limit={draftState.draft.limits[group]}
-                  disabled={!canManage || isSaving}
-                  onChange={(limit) => updateLimitDraft(group, limit)}
-                  onEnabledChange={(enabled) => setLimitEnabled(group, enabled)}
-                />
-              ))}
+              {groups.map((group) => {
+                const showGroupCallout =
+                  exhaustionCallouts === 'groups' &&
+                  isDetectionRunQuotaGroup(group) &&
+                  isRunQuotaReached({
+                    enabled: response.enabled,
+                    limit: response.limits[group],
+                    count: response.counts[group],
+                  });
+
+                return (
+                  <React.Fragment key={group}>
+                    {showGroupCallout ? (
+                      <>
+                        <EuiSpacer size="m" />
+                        <RunQuotaReachedCallout group={group} />
+                        <EuiSpacer size="m" />
+                      </>
+                    ) : null}
+                    <RunLimitRow
+                      group={group}
+                      count={response.counts[group]}
+                      limit={draftState.draft.limits[group]}
+                      disabled={!canManage || isSaving}
+                      onChange={(limit) => updateLimitDraft(group, limit)}
+                      onEnabledChange={(enabled) => setLimitEnabled(group, enabled)}
+                    />
+                  </React.Fragment>
+                );
+              })}
             </EuiForm>
 
             <EuiSpacer size="s" />

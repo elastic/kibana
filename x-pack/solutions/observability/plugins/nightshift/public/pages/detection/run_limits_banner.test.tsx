@@ -10,16 +10,13 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RunQuotasResponse } from '@kbn/significant-events-plugin/common';
 import { useRunQuotas } from '../../data/run_quotas/use_significant_events_run_quotas';
-import { useKibana } from '../../hooks/use_kibana';
-import { getRunQuotaSettingsTab, RunLimitsBanner } from './run_limits_banner';
+import { RunLimitsBanner } from './run_limits_banner';
 
-jest.mock('../../hooks/use_kibana');
 jest.mock('../../data/run_quotas/use_significant_events_run_quotas');
 jest.mock('../../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({ isBlocked: false }),
 }));
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas>;
 
 const response = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse => ({
@@ -44,25 +41,20 @@ const response = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse
 });
 
 describe('RunLimitsBanner', () => {
-  beforeEach(() => {
-    mockUseKibana.mockReturnValue({
-      services: {
-        application: {
-          getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
-        },
-      },
-    } as never);
-  });
-
-  it('maps exhausted groups to the tab that owns their settings', () => {
-    expect(getRunQuotaSettingsTab(['investigation'])).toBe('investigations');
-    expect(getRunQuotaSettingsTab(['detection'])).toBe('detections');
-    expect(getRunQuotaSettingsTab(['investigation', 'ki_extraction'])).toBe('detections');
-  });
-
-  it('shows read-only wording and no link to a viewer', () => {
+  it('shows the Discovery message without unrelated reached limits', () => {
     mockUseRunQuotas.mockReturnValue({
-      data: response({ canManage: false }),
+      data: response({
+        limits: {
+          detection: 100,
+          investigation: 5,
+          ki_extraction: 500,
+        },
+        counts: {
+          detection: 100,
+          investigation: 5,
+          ki_extraction: 500,
+        },
+      }),
     } as ReturnType<typeof useRunQuotas>);
 
     render(
@@ -71,11 +63,32 @@ describe('RunLimitsBanner', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('nightshiftDetectionRunLimitsBanner')).toHaveTextContent(
-      'An administrator with the Nightshift Manage engines privilege can change these limits.'
+    const callout = screen.getByTestId('nightshiftRunQuotaReached-detection');
+    expect(callout).toHaveTextContent('Discovery reached daily run limit for this deployment');
+    expect(callout).toHaveTextContent(
+      'Further scheduled runs will be paused until the limit resets at midnight (UTC). You can still trigger discovery process manually.'
     );
-    expect(
-      screen.queryByTestId('nightshiftDetectionRunLimitsBannerReviewButton')
-    ).not.toBeInTheDocument();
+    expect(callout).not.toHaveTextContent('Investigation');
+    expect(callout).not.toHaveTextContent('Knowledge indicators extraction');
+  });
+
+  it('stays hidden when only another quota group has reached its limit', () => {
+    mockUseRunQuotas.mockReturnValue({
+      data: response({
+        limits: {
+          detection: 101,
+          investigation: 5,
+          ki_extraction: 500,
+        },
+      }),
+    } as ReturnType<typeof useRunQuotas>);
+
+    render(
+      <I18nProvider>
+        <RunLimitsBanner />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByTestId('nightshiftRunQuotaReached-detection')).not.toBeInTheDocument();
   });
 });
