@@ -64,7 +64,7 @@ export class ServerlessObservabilityPlugin
           genAiSettingsAvailable: core.pricing.isFeatureAvailable('observability:gen_ai_settings'),
           isCasesAvailable: Boolean(setupDeps.cases),
           showAiAssistant: chatExperience !== AIChatExperience.Agent,
-          entityInventoryNavChildren: setupDeps.entityInventoryApp?.navTreeChildren,
+          entityInventoryNavGroup: setupDeps.entityInventoryApp?.navTreeGroup,
         });
       })
     );

@@ -8,33 +8,37 @@
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { EuiBetaBadge, EuiPageSection, EuiText } from '@elastic/eui';
-import { AppHeader } from '@kbn/app-header';
-import type { AppHeaderBadge } from '@kbn/app-header';
+import { i18n } from '@kbn/i18n';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { Redirect, useLocation } from 'react-router-dom';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderBadge } from '@kbn/app-header';
+import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from '../pages';
 import type { EntityInventoryAppStartDependencies, EntityInventoryEntityType } from '../types';
 import { EntityInventoryPageShell } from './components/entity_inventory_page_shell';
-import { DEFAULT_ENTITY_PAGE_PATH, ENTITY_PAGES } from './constants';
-import {
-  ENTITY_INVENTORY_TITLE,
-  ENTITY_LIST_PLACEHOLDER,
-  ENTITY_PAGE_TITLES,
-  TECH_PREVIEW_BADGE_LABEL,
-  TECH_PREVIEW_BADGE_TOOLTIP,
-} from './translations';
+import { ENTITY_LIST_PLACEHOLDER } from './translations';
 
-const TECH_PREVIEW_BADGES: AppHeaderBadge[] = [
+const DEFAULT_PAGE_PATH = ENTITY_INVENTORY_PAGES[0].path;
+
+const techPreviewLabel = i18n.translate('xpack.entityInventoryApp.techPreviewBadgeLabel', {
+  defaultMessage: 'Technical preview',
+});
+
+const TECH_PREVIEW_BADGE: AppHeaderBadge[] = [
   {
-    label: TECH_PREVIEW_BADGE_LABEL,
+    label: techPreviewLabel,
     renderCustomBadge: () => (
       <EuiBetaBadge
-        label={TECH_PREVIEW_BADGE_LABEL}
+        label={techPreviewLabel}
         color="hollow"
         size="s"
         iconType="flask"
-        tooltipContent={TECH_PREVIEW_BADGE_TOOLTIP}
+        tooltipContent={i18n.translate('xpack.entityInventoryApp.techPreviewBadgeTooltip', {
+          defaultMessage:
+            'This functionality is in technical preview and may be changed or removed in a future release.',
+        })}
       />
     ),
   },
@@ -58,23 +62,23 @@ export const EntityInventoryApp = ({ core, plugins }: EntityInventoryAppProps) =
   const services = useMemo(() => ({ ...core, ...plugins }), [core, plugins]);
   const { PageTemplate } = plugins.observabilityShared.navigation;
   const { pathname } = useLocation();
-  const currentPage = ENTITY_PAGES.find(({ path }) => path === pathname);
-  const title = currentPage ? ENTITY_PAGE_TITLES[currentPage.entityType] : ENTITY_INVENTORY_TITLE;
+  const title =
+    ENTITY_INVENTORY_PAGES.find((page) => page.path === pathname)?.title ?? ENTITY_INVENTORY_TITLE;
 
   return (
     <KibanaContextProvider services={services}>
       <PageTemplate isPageDataLoaded={true} pageSectionProps={{ paddingSize: 'none' }}>
-        <AppHeader title={title} badges={TECH_PREVIEW_BADGES} menu={{}} spacing="standard" />
+        <AppHeader title={title} badges={TECH_PREVIEW_BADGE} menu={{}} spacing="standard" />
         <EuiPageSection paddingSize="m" grow restrictWidth={false}>
           <Routes>
-            {ENTITY_PAGES.map(({ entityType, path }) => (
+            {ENTITY_INVENTORY_PAGES.map(({ entityType, path }) => (
               <Route
                 key={path}
                 path={path}
                 render={() => <EntityInventoryPage entityType={entityType} />}
               />
             ))}
-            <Redirect from="/" to={DEFAULT_ENTITY_PAGE_PATH} />
+            <Redirect from="/" to={DEFAULT_PAGE_PATH} />
           </Routes>
         </EuiPageSection>
       </PageTemplate>

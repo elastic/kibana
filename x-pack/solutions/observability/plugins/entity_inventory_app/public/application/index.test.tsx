@@ -12,7 +12,8 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { Router } from '@kbn/shared-ux-router';
 import { createCoreStartMock, createStartDependenciesMock } from '../mocks';
-import { ENTITY_LIST_PLACEHOLDER, ENTITY_PAGE_TITLES } from './translations';
+import { ENTITY_INVENTORY_PAGES } from '../pages';
+import { ENTITY_LIST_PLACEHOLDER } from './translations';
 import { EntityInventoryApp, renderApp } from '.';
 
 const renderAtPath = (path: string) => {
@@ -35,7 +36,8 @@ describe('EntityInventoryApp', () => {
       'data-entity-type',
       'hosts'
     );
-    expect(screen.getByRole('heading', { name: ENTITY_PAGE_TITLES.hosts })).toBeInTheDocument();
+    const hostsPage = ENTITY_INVENTORY_PAGES.find(({ entityType }) => entityType === 'hosts');
+    expect(screen.getByRole('heading', { name: hostsPage?.title })).toBeInTheDocument();
     expect(screen.getByTestId('mockSearchBar')).toBeInTheDocument();
     expect(screen.getByTestId('entityInventoryPlaceholder')).toHaveTextContent(
       ENTITY_LIST_PLACEHOLDER

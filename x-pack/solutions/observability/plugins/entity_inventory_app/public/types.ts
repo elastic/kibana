@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import type { PanelOpenerChildDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -26,5 +26,5 @@ export type EntityInventoryAppServices = CoreStart & EntityInventoryAppStartDepe
 export interface EntityInventoryAppPublicSetup {}
 
 export interface EntityInventoryAppPublicStart {
-  navTreeChildren: NodeDefinition[];
+  navTreeGroup: PanelOpenerChildDefinition;
 }

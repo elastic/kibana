@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
+import type {
+  NavigationTreeDefinition,
+  PanelOpenerChildDefinition,
+} from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
@@ -52,7 +55,7 @@ function createNavTree({
   showAiAssistant,
   isCloudEnabled,
   ingestHubAvailable,
-  entityInventoryNavChildren,
+  entityInventoryNavGroup,
 }: {
   coreStart: CoreStart;
   significantEventsAvailable: boolean;
@@ -60,7 +63,7 @@ function createNavTree({
   showAiAssistant?: boolean;
   isCloudEnabled?: boolean;
   ingestHubAvailable?: boolean;
-  entityInventoryNavChildren?: NodeDefinition[];
+  entityInventoryNavGroup?: PanelOpenerChildDefinition;
 }) {
   const navTree: NavigationTreeDefinition = {
     body: [
@@ -238,52 +241,32 @@ function createNavTree({
           {
             children: [
               {
-                link: 'metrics:inventory' as const,
+                link: 'metrics:inventory',
                 title: i18n.translate('xpack.observability.infrastructure.inventory', {
                   defaultMessage: 'Infrastructure inventory',
                 }),
-                getIsActive: ({
-                  pathNameSerialized,
-                  prepend,
-                }: {
-                  pathNameSerialized: string;
-                  prepend: (p: string) => string;
-                }) => {
+                getIsActive: ({ pathNameSerialized, prepend }) => {
                   return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
                 },
               },
               {
-                link: 'metrics:hosts' as const,
-                getIsActive: ({
-                  pathNameSerialized,
-                  prepend,
-                }: {
-                  pathNameSerialized: string;
-                  prepend: (p: string) => string;
-                }) => {
+                link: 'metrics:hosts',
+                getIsActive: ({ pathNameSerialized, prepend }) => {
                   return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
                 },
               },
               {
-                link: 'metrics:metrics-explorer' as const,
+                link: 'metrics:metrics-explorer',
                 title: i18n.translate(
                   'xpack.observability.obltNav.infrastructure.metricsExplorer',
-                  { defaultMessage: 'Metrics explorer' }
+                  {
+                    defaultMessage: 'Metrics explorer',
+                  }
                 ),
               },
             ],
           },
-          ...(entityInventoryNavChildren
-            ? [
-                {
-                  title: i18n.translate(
-                    'xpack.observability.obltNav.infrastructure.entitiesGroupTitle',
-                    { defaultMessage: 'Entity Inventory' }
-                  ),
-                  children: entityInventoryNavChildren,
-                },
-              ]
-            : []),
+          ...(entityInventoryNavGroup ? [entityInventoryNavGroup] : []),
           {
             id: 'profiling',
             title: i18n.translate('xpack.observability.obltNav.infrastructure.universalProfiling', {
@@ -778,7 +761,7 @@ export const createDefinition = (
           showAiAssistant: chatExperience !== AIChatExperience.Agent,
           isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
           ingestHubAvailable,
-          entityInventoryNavChildren: pluginsStart.entityInventoryApp?.navTreeChildren,
+          entityInventoryNavGroup: pluginsStart.entityInventoryApp?.navTreeGroup,
         })
       )
     ),

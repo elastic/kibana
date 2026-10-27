@@ -53,13 +53,10 @@ describe('EntityInventoryAppPlugin start', () => {
   it('registers the entity pages in the classic nav and exposes them for the solution nav tree', () => {
     const plugins = createStartDependenciesMock();
 
-    const { navTreeChildren } = new EntityInventoryAppPlugin().start(
-      coreMock.createStart(),
-      plugins
-    );
+    const { navTreeGroup } = new EntityInventoryAppPlugin().start(coreMock.createStart(), plugins);
 
     expect(plugins.observabilityShared.navigation.registerSections).toHaveBeenCalledTimes(1);
-    expect(navTreeChildren.map(({ link }) => link)).toEqual([
+    expect(navTreeGroup.children?.map(({ link }) => link)).toEqual([
       'entityInventoryApp:allResources',
       'entityInventoryApp:hosts',
       'entityInventoryApp:kubernetes',
