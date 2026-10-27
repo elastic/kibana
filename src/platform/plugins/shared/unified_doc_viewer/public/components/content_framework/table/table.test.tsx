@@ -51,6 +51,7 @@ jest.mock('@kbn/discover-utils/src/utils/get_formatted_fields', () => ({
     fieldA: 'formattedA',
     fieldB: 'formattedB',
     fieldC: 'formattedC',
+    fieldZero: '0',
   }),
 }));
 jest.mock('@kbn/discover-utils/src/utils/get_flattened_fields', () => ({
@@ -58,6 +59,7 @@ jest.mock('@kbn/discover-utils/src/utils/get_flattened_fields', () => ({
     fieldA: 'valueA',
     fieldB: 'valueB',
     fieldC: null,
+    fieldZero: 0,
   }),
 }));
 
@@ -123,6 +125,21 @@ describe('ContentFrameworkTable', () => {
       />
     );
     expect(screen.queryByText('Field C Title')).not.toBeInTheDocument();
+  });
+
+  it('renders fields whose value is zero', () => {
+    render(
+      <ContentFrameworkTable
+        {...defaultProps}
+        fieldNames={['fieldA', 'fieldZero']}
+        fieldConfigurations={{
+          ...defaultProps.fieldConfigurations,
+          fieldZero: { title: 'Field Zero Title' },
+        }}
+      />
+    );
+    expect(screen.getByText('Field Zero Title')).toBeInTheDocument();
+    expect(screen.getByText('0')).toBeInTheDocument();
   });
 
   it('returns null if hit.flattened is empty', () => {

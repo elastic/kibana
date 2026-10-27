@@ -6,7 +6,7 @@
  */
 
 import type { SLODefinitionResponse } from '@kbn/slo-schema';
-import { durationTypeZod } from '@kbn/slo-schema';
+import { durationType } from '@kbn/slo-schema';
 
 export function getDelayInSecondsFromSLO(slo: SLODefinitionResponse) {
   const fixedInterval =
@@ -22,7 +22,7 @@ function durationStringToSeconds(duration: string | undefined) {
   if (!duration) {
     return 0;
   }
-  const result = durationTypeZod.safeParse(duration);
+  const result = durationType.safeParse(duration);
   if (!result.success) {
     throw new Error(`Invalid duration string: ${duration}`);
   }

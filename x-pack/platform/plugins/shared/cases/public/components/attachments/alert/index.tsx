@@ -17,7 +17,7 @@ import { STACK_ALERT_ATTACHMENT_TYPE } from '../../../../common/constants/attach
 import {
   StackAlertAttachmentPayloadSchema,
   type AlertAttachmentMetadata,
-} from '../../../../common/types/domain_zod/attachment/alert/v2';
+} from '../../../../common/types/domain/attachment/alert/v2';
 import { toStringArray } from '../../../../common/utils/attachments';
 import * as i18n from './translations';
 import { ShowTableButton } from '../common/show_table_button';

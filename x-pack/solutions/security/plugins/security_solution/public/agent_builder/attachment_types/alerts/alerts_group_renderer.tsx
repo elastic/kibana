@@ -11,12 +11,12 @@ import { GroupedAttachmentRow } from '@kbn/agentic-investigations-common';
 import type { FlyoutGroupedAttachmentRendererProps } from '@kbn/agentic-investigations-common';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ISearchGeneric } from '@kbn/search-types';
+import { buildAlertsPagePath } from '@kbn/securitysolution-alerts-page-url';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 import { ALERTS_PATH, APP_UI_ID, DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { FLYOUT_DESCRIPTOR_KIND } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import { ALERT_SUBTITLE, FlyoutRow, alertsTitle, useSpaceId } from '../grouped_attachments';
-import { buildAlertsPagePath } from './build_alerts_page_path';
 import { collectAlerts } from './collect_alerts';
 import { useAlertRuleName } from './use_alert_rule_name';
 

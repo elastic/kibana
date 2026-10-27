@@ -184,6 +184,7 @@ describe('useInvestigateAlert', () => {
     expect(result.current.isInvestigating).toBe(true);
     expect(result.current.showInvestigateButton).toBe(false);
     expect(result.current.showViewInvestigation).toBe(false);
+    expect(result.current.viewInvestigationUrl).toBe('/app/nightshift?investigationId=inv-running');
     await act(() => result.current.handleInvestigate());
     expect(fetchMock).not.toHaveBeenCalledWith(
       'POST /internal/nightshift/investigations',
@@ -318,8 +319,18 @@ describe('useInvestigateAlert', () => {
     const viewLink = screen.getByRole('link', { name: 'View investigation' });
     expect(viewLink).toHaveAttribute('href', '/app/nightshift?investigationId=investigation-1');
     // The list does not show the started investigation yet: it counts as in progress anyway.
-    expect(result.current.investigateActionLabel).toBe('Investigating…');
+    await waitFor(() => expect(result.current.investigateActionLabel).toBe('Investigating…'));
     expect(result.current.isInvestigating).toBe(true);
+    expect(result.current.isStarting).toBe(false);
+    expect(result.current.viewInvestigationUrl).toBe(
+      '/app/nightshift?investigationId=investigation-1'
+    );
+    expect(result.current.viewInvestigationEbtProps).toEqual({
+      'data-ebt-action': 'viewInvestigation',
+      'data-ebt-element': 'testElement',
+      'data-ebt-detail': 'running',
+    });
+    act(() => result.current.markInvestigationViewed());
 
     viewLink.addEventListener('click', (event) => event.preventDefault());
     fireEvent.click(viewLink);
@@ -356,6 +367,140 @@ describe('useInvestigateAlert', () => {
     expect(screen.queryByRole('link', { name: 'View investigation' })).not.toBeInTheDocument();
   });
 
+  it('exposes the started investigation before the list refresh completes', async () => {
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+    let resolveList = (value: ReturnType<typeof list>) => {};
+    httpGet.mockImplementationOnce(
+      () =>
+        new Promise<ReturnType<typeof list>>((resolve) => {
+          resolveList = resolve;
+        })
+    );
+    let start = Promise.resolve();
+    act(() => {
+      start = result.current.handleInvestigate();
+    });
+
+    await waitFor(() =>
+      expect(result.current.viewInvestigationUrl).toBe(
+        '/app/nightshift?investigationId=investigation-1'
+      )
+    );
+    expect(result.current.isStarting).toBe(false);
+    expect(result.current.showViewInvestigation).toBe(false);
+    await act(async () => {
+      resolveList(list(summary('investigation-1', { in_progress: true })));
+      await start;
+    });
+  });
+
+  it('prevents another start while the start request is pending', async () => {
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+    let resolveStart = (value: { investigation_id: string }) => {};
+    fetchMock.mockImplementationOnce(
+      () =>
+        new Promise<{ investigation_id: string }>((resolve) => {
+          resolveStart = resolve;
+        })
+    );
+    let start = Promise.resolve();
+    act(() => {
+      start = result.current.handleInvestigate();
+    });
+    await waitFor(() => expect(result.current.isStarting).toBe(true));
+    await act(() => result.current.handleInvestigate());
+    expect(
+      fetchMock.mock.calls.filter(
+        ([endpoint]) => endpoint === 'POST /internal/nightshift/investigations'
+      )
+    ).toHaveLength(1);
+    await act(async () => {
+      resolveStart({ investigation_id: 'investigation-1' });
+      await start;
+    });
+  });
+
+  it('does not expose a pending start belonging to another alert', async () => {
+    const { result, rerender } = renderHook(
+      ({ alertId }) => useInvestigateAlert({ alertId, ebtElement: 'testElement' }),
+      { wrapper, initialProps: { alertId: 'alert-1' } }
+    );
+    await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+    await act(() => result.current.handleInvestigate());
+    rerender({ alertId: 'alert-2' });
+
+    await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+    expect(result.current.viewInvestigationUrl).toBeUndefined();
+    expect(result.current.isInvestigating).toBe(false);
+    act(() => result.current.markInvestigationViewed());
+    expect(
+      JSON.parse(window.localStorage.getItem(VIEWED_INVESTIGATIONS_STORAGE_KEY) || '[]')
+    ).toEqual([]);
+  });
+
+  it.each([false, true])(
+    'keeps the current alert start when an earlier alert request settles with failure=%s',
+    async (shouldFail) => {
+      const { result, rerender } = renderHook(
+        ({ alertId }) => useInvestigateAlert({ alertId, ebtElement: 'testElement' }),
+        { wrapper, initialProps: { alertId: 'alert-1' } }
+      );
+      await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+      let finishStart = () => {};
+      fetchMock.mockImplementationOnce(
+        () =>
+          new Promise<{ investigation_id: string }>((resolve, reject) => {
+            finishStart = () => {
+              if (shouldFail) {
+                reject(new Error('Request failed'));
+              } else {
+                resolve({ investigation_id: 'first-investigation' });
+              }
+            };
+          })
+      );
+      let request = Promise.resolve();
+      act(() => {
+        request = result.current.handleInvestigate();
+      });
+      await waitFor(() => expect(result.current.isStarting).toBe(true));
+
+      rerender({ alertId: 'alert-2' });
+      await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+      expect(result.current.isStarting).toBe(false);
+      expect(result.current.viewInvestigationUrl).toBeUndefined();
+      fetchMock.mockResolvedValueOnce({ investigation_id: 'second-investigation' });
+      await act(() => result.current.handleInvestigate());
+
+      await act(async () => {
+        finishStart();
+        await request;
+      });
+      expect(result.current.isStarting).toBe(false);
+      expect(result.current.viewInvestigationUrl).toBe(
+        '/app/nightshift?investigationId=second-investigation'
+      );
+      expect(result.current.isInvestigating).toBe(true);
+    }
+  );
+
+  it('stops exposing an unlisted start after the pending timeout', async () => {
+    const { result, rerender } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+    await act(() => result.current.handleInvestigate());
+    const now = Date.now();
+    const dateNow = jest.spyOn(Date, 'now').mockReturnValue(now + 2 * 60_000);
+    try {
+      rerender();
+      await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+      expect(result.current.viewInvestigationUrl).toBeUndefined();
+    } finally {
+      dateNow.mockRestore();
+    }
+  });
+
   it('stops waiting for a started investigation once the list shows it', async () => {
     const { result } = renderInvestigateAlert();
     await waitFor(() => expect(result.current.showInvestigateAction).toBe(true));
@@ -384,8 +529,21 @@ describe('useInvestigateAlert', () => {
       title: 'Failed to start investigation',
       text: 'Request failed',
     });
+    expect(result.current.isStarting).toBe(false);
+    expect(result.current.showInvestigateButton).toBe(true);
+    expect(result.current.viewInvestigationUrl).toBeUndefined();
     expect(addSuccess).not.toHaveBeenCalled();
     expect(screen.queryByRole('link', { name: 'View investigation' })).not.toBeInTheDocument();
+  });
+
+  it('hides actions when the investigation lookup fails', async () => {
+    httpGet.mockRejectedValue(new Error('Lookup failed'));
+    const { result } = renderInvestigateAlert();
+
+    await waitFor(() => expect(httpGet).toHaveBeenCalled());
+    expect(result.current.showInvestigateButton).toBe(false);
+    expect(result.current.showViewInvestigation).toBe(false);
+    expect(result.current.viewInvestigationUrl).toBeUndefined();
   });
 
   it('does not fetch alert investigations when enabled is false', async () => {
