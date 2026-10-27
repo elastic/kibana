@@ -8,7 +8,10 @@
  */
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { firstValueFrom } from 'rxjs';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { initializeStateApi } from '@kbn/presentation-publishing';
+import { waitFor } from '@testing-library/react';
+import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
 import type { DashboardReadResponseBody } from '../../server';
 import type { DashboardChangeSource } from '../../common/change_sources';
 import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
@@ -16,6 +19,7 @@ import { coreServices } from '../services/kibana_services';
 import { getDashboardApi } from './get_dashboard_api';
 import { openSaveModal } from './save_modal/open_save_modal';
 import { saveDashboard } from './save_modal/save_dashboard';
+import type { DashboardApi } from './types';
 
 jest.mock('./save_modal/save_dashboard', () => ({
   saveDashboard: jest.fn(),
@@ -153,6 +157,68 @@ describe('diffStates', () => {
       expect(Object.keys(unsavedChanges).length).toBeGreaterThan(0);
       expect(diff).toStrictEqual(unsavedChanges);
       cleanup();
+    });
+
+    describe('with a loaded panel', () => {
+      interface PanelConfig {
+        title?: string;
+        description?: string;
+      }
+      const panel = {
+        id: 'panel-1',
+        type: 'testPanelType',
+        grid: { x: 0, y: 0, w: 12, h: 8 },
+        config: { title: 'Logs' } as PanelConfig,
+      };
+      const savedState: DashboardState = { ...DEFAULT_DASHBOARD_STATE, panels: [panel] };
+
+      const loadPanel = () => {
+        const dashboard = getDashboardApi({
+          incomingEmbeddables: [],
+          initialState: savedState,
+          readResult: { data: savedState, meta: { managed: false } } as DashboardReadResponseBody,
+        });
+        const panelConfig$ = new BehaviorSubject<PanelConfig>(panel.config);
+        const stateApi = initializeStateApi<PanelConfig>({
+          uuid: panel.id,
+          parentApi: dashboard.api,
+          serializeState: () => panelConfig$.value,
+          applySerializedState: (config) => panelConfig$.next(config),
+          anyStateChange$: panelConfig$.pipe(map(() => undefined)),
+          getComparators: () => ({
+            title: 'referenceEquality',
+            description: (a, b) => (a ?? '') === (b ?? ''),
+          }),
+        });
+        dashboard.api.registerChildApi({
+          ...stateApi,
+          uuid: panel.id,
+          type: panel.type,
+        } as unknown as DefaultEmbeddableApi);
+        return { ...dashboard, panelConfig$ };
+      };
+
+      const getPanelConfig = (dashboardApi: DashboardApi) =>
+        dashboardApi.getSerializedState().attributes.panels?.[0] as typeof panel | undefined;
+
+      test.each<[string, PanelConfig, string[]]>([
+        ['a changed panel', { title: 'Errors' }, ['panels']],
+        ['a panel change its comparators ignore', { title: 'Logs', description: '' }, []],
+      ])('for %s', async (_, nextConfig, changedKeys) => {
+        const { api: dashboardApi, internalApi, cleanup, panelConfig$ } = loadPanel();
+        panelConfig$.next(nextConfig);
+        await waitFor(() => expect(getPanelConfig(dashboardApi)?.config).toEqual(nextConfig));
+
+        const unsavedChanges = await firstValueFrom(internalApi.unsavedChanges$);
+        const diff = dashboardApi.diffStates(
+          internalApi.getLastSavedState(),
+          dashboardApi.getSerializedState().attributes
+        );
+
+        expect(Object.keys(unsavedChanges)).toEqual(changedKeys);
+        expect(diff).toStrictEqual(unsavedChanges);
+        cleanup();
+      });
     });
   });
 });
