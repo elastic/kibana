@@ -119,6 +119,25 @@ describe('DetectionsList', () => {
     expect(screen.queryByText('No detections found for this event.')).not.toBeInTheDocument();
   });
 
+  it('marks a detection the classifier skipped, and only that one', () => {
+    setLifecycle({
+      detections: [
+        mockDetection({ detection_id: 'det-1', rule_name: 'handled-detection' }),
+        mockDetection({
+          detection_id: 'det-2',
+          rule_name: 'skipped-detection',
+          skip: { reason: 'still_breaching', checked_at: '2026-07-10T12:05:00Z' },
+        }),
+      ],
+    });
+    renderList();
+
+    expect(screen.getAllByTestId('nightshiftSkippedDetectionBadge')).toHaveLength(1);
+    expect(
+      screen.getByText('skipped-detection').closest('[data-test-subj="nightshiftDetectionCard"]')
+    ).toContainElement(screen.getByTestId('nightshiftSkippedDetectionBadge'));
+  });
+
   it('keeps cached detections visible while refetching', () => {
     setLifecycle({
       detections: [

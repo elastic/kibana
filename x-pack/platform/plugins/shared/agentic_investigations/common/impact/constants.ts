@@ -21,6 +21,11 @@ export const IMPACT_PROPOSAL_SUMMARY_URL = `${IMPACT_INTERNAL_URL}/summary/propo
 /** Entities, with counts, across every open and closed escalation. */
 export const IMPACT_ESCALATION_SUMMARY_URL = `${IMPACT_INTERNAL_URL}/summary/escalations` as const;
 
+export const IMPACT_PILLS_PAGE_SIZE = 10;
+export const MAX_IMPACT_PILLS_PAGE_SIZE = 100;
+/** Deepest `from + size` of a pills request: the ES|QL result ceiling. */
+export const MAX_IMPACT_PILLS_REACH = 10_000;
+
 /** Ceiling on `listByConversationIds` so a caller cannot ask for an unbounded terms query. */
 export const MAX_IMPACT_CONVERSATION_IDS = 1000;
 

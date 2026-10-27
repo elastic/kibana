@@ -300,6 +300,7 @@ describe('ObservabilityAlertingApp', () => {
         },
       })
     );
+    expect(mockTriggersActionsUi.getClassicRulesPage.mock.calls[0][0].showClassicBadge).toBe(false);
   });
 
   it('shows both rules tabs for a mixed v1 and v2 user on the classic rules page', async () => {
@@ -322,6 +323,11 @@ describe('ObservabilityAlertingApp', () => {
     );
     expect(getByTestId('v1RulesTab')).toHaveAttribute('aria-selected', 'true');
     expect(getByTestId('v2RulesTab')).toHaveAttribute('aria-selected', 'false');
+    expect(mockTriggersActionsUi.getClassicRulesPage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        showClassicBadge: true,
+      })
+    );
   });
 
   it('hides the rules tab bar for a v1-only user', async () => {
@@ -334,6 +340,7 @@ describe('ObservabilityAlertingApp', () => {
       expect(getByTestId('classicRulesPage')).toBeInTheDocument();
     });
     expect(queryAllByRole('tab')).toHaveLength(0);
+    expect(mockTriggersActionsUi.getClassicRulesPage.mock.calls[0][0].showClassicBadge).toBe(false);
   });
 
   it('renders RulesPage at /rules/universal with observability host', async () => {

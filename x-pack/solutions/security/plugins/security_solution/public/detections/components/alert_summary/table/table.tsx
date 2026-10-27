@@ -108,6 +108,10 @@ export interface AdditionalTableContext {
    * List of installed EASE integrations
    */
   packages: PackageListItem[];
+  /**
+   * Adds a "Remove from case" item to each row's actions menu, used in the case view
+   */
+  onRemoveFromCase?: (alertId: string) => void;
 }
 
 export interface TableProps {

@@ -50,6 +50,14 @@ const ATOM = `<?xml version="1.0" encoding="utf-8"?>
     <published>2025-05-11T08:00:00Z</published>
     <summary>Only a summary.</summary>
   </entry>
+  <entry>
+    <id>tag:vendor.example,2022:post-3</id>
+    <title>Post three</title>
+    <link href="https://vendor.example/post-3"/>
+    <published>2022-03-01T08:00:00Z</published>
+    <updated>2026-05-01T08:00:00Z</updated>
+    <summary>Old post with a later edit.</summary>
+  </entry>
 </feed>`;
 
 const RDF = `<?xml version="1.0"?>
@@ -88,11 +96,11 @@ describe('parseRssFeed', () => {
     expect((parsed.entries[0].body as { html: string }).html).toContain('<b>APT-1</b>');
   });
 
-  it('parses an Atom feed and prefers updated over published', async () => {
+  it('parses an Atom feed, preferring published and falling back to updated', async () => {
     const parsed = await parseRssFeed(ATOM);
     expect(parsed.feedTitle).toBe('Vendor Labs');
     expect(parsed.language).toBe('en');
-    expect(parsed.entries).toHaveLength(2);
+    expect(parsed.entries).toHaveLength(3);
     expect(parsed.entries[0].publishedAt).toBe('2025-05-12T09:30:00.000Z');
     expect(parsed.entries[0].link).toBe('https://vendor.example/post-1');
     expect(parsed.entries[0].body).toEqual({ kind: 'markup', html: '<p>Long body</p>' });
@@ -101,6 +109,7 @@ describe('parseRssFeed', () => {
     // literal text, not markup, so it is classified `text` and never run through the
     // fragment-to-text conversion.
     expect(parsed.entries[1].body).toEqual({ kind: 'text', text: 'Only a summary.' });
+    expect(parsed.entries[2].publishedAt).toBe('2022-03-01T08:00:00.000Z');
   });
 
   it('parses an RDF / RSS 1.0 feed using rdf:about as the id', async () => {
