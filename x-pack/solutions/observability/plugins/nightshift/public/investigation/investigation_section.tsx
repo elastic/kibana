@@ -264,7 +264,7 @@ const SectionRows = ({
             data-test-subj="nightshiftInvestigationListItem"
             {...(onInvestigationClick
               ? getEbtProps({
-                  action: NIGHTSHIFT_EBT_ACTIONS.CLICK_TO_VIEW_INVESTIGATION,
+                  action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
                   element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
                   detail: investigation.in_progress ? 'running' : 'complete',
                 })

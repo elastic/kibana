@@ -60,12 +60,8 @@ export const EBT_CLICK_ACTIONS = {
   SET_SORT_DIRECTION: 'setSortDirection',
   /** User intends to start an investigation of an entity, such as an alert. */
   START_INVESTIGATION: 'startInvestigation',
-  /**
-   * User clicks to view an investigation's results. Named after the click, not the result, so it
-   * stays distinguishable from events reporting that an investigation was actually rendered
-   * (which a click event cannot tell you: the click may never resolve into a view).
-   */
-  CLICK_TO_VIEW_INVESTIGATION: 'clickToViewInvestigation',
+  /** User intends to view an investigation's results. */
+  VIEW_INVESTIGATION: 'viewInvestigation',
 } as const;
 
 /** EBT click `element` for the charts toolbar, shared by the unified histogram and metrics grid toolbars. */

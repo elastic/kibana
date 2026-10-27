@@ -75,7 +75,7 @@ export const EventInvestigationCard = ({
       data-test-subj="nightshiftEventInvestigationCard"
       {...(canOpen
         ? getEbtProps({
-            action: NIGHTSHIFT_EBT_ACTIONS.CLICK_TO_VIEW_INVESTIGATION,
+            action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
             element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT_INVESTIGATION,
             detail: status,
           })

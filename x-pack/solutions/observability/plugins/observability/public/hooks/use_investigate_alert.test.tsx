@@ -227,7 +227,7 @@ describe('useInvestigateAlert', () => {
       'data-ebt-detail': 'reinvestigation',
     });
     expect(result.current.viewInvestigationEbtProps).toEqual({
-      'data-ebt-action': 'clickToViewInvestigation',
+      'data-ebt-action': 'viewInvestigation',
       'data-ebt-element': 'testElement',
       'data-ebt-detail': 'completed',
     });

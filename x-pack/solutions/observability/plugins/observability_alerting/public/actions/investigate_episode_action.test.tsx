@@ -74,7 +74,7 @@ const ebtProps = {
     'data-ebt-element': 'episodesTableRowActions',
   },
   viewInvestigationEbtProps: {
-    'data-ebt-action': 'clickToViewInvestigation',
+    'data-ebt-action': 'viewInvestigation',
     'data-ebt-element': 'episodesTableRowActions',
   },
 };
