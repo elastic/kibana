@@ -174,9 +174,9 @@ const BUILTIN_ACCOUNT_NAMES = new Set([
   'network service',
   'administrator',
   'root',
-  's-1-5-18',
-  's-1-5-19',
-  's-1-5-20',
+  's-1-5-18', // Local System
+  's-1-5-19', // Local Service
+  's-1-5-20', // Network Service
 ]);
 
 /** `NT AUTHORITY\\SYSTEM@host` and `SYSTEM@host` both reduce to `system`. */
