@@ -569,6 +569,23 @@ describe('groupTimelineEvents while a run streams', () => {
     data,
   });
 
+  it('carries the current thinking line while the answer has not started', () => {
+    const started = createExecutionStartedEvent({ execution_id: 'exec-live' });
+    const events = [
+      started,
+      streamingEvent({ message: '', thinking: 'Composing the final answer' }),
+    ];
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('running');
+      expect(turn.response).toBeUndefined();
+      expect(turn.thinking).toBe('Composing the final answer');
+    }
+  });
+
   it('keeps the turn running and shows the half-written answer', () => {
     const started = createExecutionStartedEvent({ execution_id: 'exec-live' });
     const events = [started, streamingEvent({ message: 'Hel' })];

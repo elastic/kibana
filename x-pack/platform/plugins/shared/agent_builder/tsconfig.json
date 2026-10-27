@@ -112,6 +112,7 @@
     "@kbn/connector-schemas",
     "@kbn/mcp-client",
     "@kbn/react-kibana-context-theme",
+    "@kbn/react-kibana-context-root",
     "@kbn/alerts-ui-shared",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/home-plugin",

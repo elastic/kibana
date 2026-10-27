@@ -47,7 +47,6 @@ const panelTitle = i18n.translate('core.ui.chrome.headerGlobalNav.motionRefreshT
   defaultMessage: 'Motion refresh',
 });
 
-
 const allMotionsLabel = i18n.translate(
   'core.ui.chrome.headerGlobalNav.motionRefreshAllMotionsToggleSwitch',
   {
@@ -301,6 +300,14 @@ const shimmerTitle = i18n.translate('core.ui.chrome.headerGlobalNav.motionRefres
   defaultMessage: 'Shimmer text loader',
 });
 
+const shimmerDescription = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshShimmerDescription',
+  {
+    defaultMessage:
+      'While an agent is thinking, and while a tool says running…, that line is subdued text with a title-color highlight sweeping through it. The workers running line uses the same sweep.',
+  }
+);
+
 const shimmerSwitchLabel = i18n.translate(
   'core.ui.chrome.headerGlobalNav.motionRefreshShimmerToggleSwitch',
   {
@@ -308,14 +315,92 @@ const shimmerSwitchLabel = i18n.translate(
   }
 );
 
+const shimmerBaseUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshShimmerBaseUseLabel',
+  {
+    defaultMessage: 'Base',
+  }
+);
+
+const shimmerHighlightUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshShimmerHighlightUseLabel',
+  {
+    defaultMessage: 'Highlight',
+  }
+);
+
+const shimmerSweepUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshShimmerSweepUseLabel',
+  {
+    defaultMessage: 'Sweep',
+  }
+);
+
 const dotsTitle = i18n.translate('core.ui.chrome.headerGlobalNav.motionRefreshDotsTitle', {
-  defaultMessage: 'Dot Loader',
+  defaultMessage: 'Orbit dots',
 });
+
+const dotsDescription = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshDotsDescription',
+  {
+    defaultMessage:
+      'In an agent conversation the orbit sits inside the avatar. When the turn finishes, the Elastic logo fades in at the avatar’s size. The workers panel uses the 16px orbit on its own.',
+  }
+);
 
 const dotsSwitchLabel = i18n.translate(
   'core.ui.chrome.headerGlobalNav.motionRefreshDotsToggleSwitch',
   {
-    defaultMessage: 'Enable dot loader',
+    defaultMessage: 'Enable orbit dots',
+  }
+);
+
+const dotsCycleUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshDotsCycleUseLabel',
+  {
+    defaultMessage: 'Cycle',
+  }
+);
+
+const dotsRestUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshDotsRestUseLabel',
+  {
+    defaultMessage: 'Rest',
+  }
+);
+
+const dotsPeakUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshDotsPeakUseLabel',
+  {
+    defaultMessage: 'Peak',
+  }
+);
+
+const dotsDelayUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshDotsDelayUseLabel',
+  {
+    defaultMessage: 'Step delay',
+  }
+);
+
+const dotsConversationSizeUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshDotsConversationSizeUseLabel',
+  {
+    defaultMessage: 'Orbit',
+  }
+);
+
+const dotsLogoUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshDotsLogoUseLabel',
+  {
+    defaultMessage: 'Logo',
+  }
+);
+
+const dotsWorkersSizeUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshDotsWorkersSizeUseLabel',
+  {
+    defaultMessage: 'Workers',
   }
 );
 
@@ -548,11 +633,73 @@ export const MotionRefreshSidebar = ({ onClose }: MotionRefreshSidebarProps) => 
     { id: 'line', token: '#0B64DD', value: '#0B64DD', use: loginLineUseLabel },
   ];
 
+  const shimmerSweep = `${Math.round(
+    (parseFloat(String(euiTheme.animation.extraSlow)) || 500) * 4
+  )}ms`;
+
+  const shimmerRows: TokenRow[] = [
+    {
+      id: 'base',
+      token: 'colors.textSubdued',
+      value: euiTheme.colors.textSubdued,
+      use: shimmerBaseUseLabel,
+    },
+    {
+      id: 'highlight',
+      token: 'colors.title',
+      value: euiTheme.colors.title,
+      use: shimmerHighlightUseLabel,
+    },
+    {
+      id: 'sweep',
+      token: '4 × animation.extraSlow',
+      value: shimmerSweep,
+      use: shimmerSweepUseLabel,
+    },
+    { id: 'easing', token: 'linear', value: 'linear', use: easingUseLabel },
+  ];
+
+  const dotsRows: TokenRow[] = [
+    { id: 'cycle', token: '1.2s', value: '1.2s', use: dotsCycleUseLabel },
+    { id: 'easing', token: 'ease-in-out', value: 'ease-in-out', use: easingUseLabel },
+    {
+      id: 'rest',
+      token: 'colors.lightShade',
+      value: euiTheme.colors.lightShade,
+      use: dotsRestUseLabel,
+    },
+    {
+      id: 'peak',
+      token: 'colors.textSubdued',
+      value: euiTheme.colors.textSubdued,
+      use: dotsPeakUseLabel,
+    },
+    { id: 'delay', token: 'cycle / 8', value: '150ms', use: dotsDelayUseLabel },
+    {
+      id: 'conversation',
+      token: 'size.base',
+      value: euiTheme.size.base,
+      use: dotsConversationSizeUseLabel,
+    },
+    {
+      id: 'logo',
+      token: 'size.l',
+      value: euiTheme.size.l,
+      use: dotsLogoUseLabel,
+    },
+    {
+      id: 'workers',
+      token: 'size.base',
+      value: euiTheme.size.base,
+      use: dotsWorkersSizeUseLabel,
+    },
+  ];
+
   return (
     <>
       <SidebarHeader title={panelTitle} onClose={onClose} />
       <SidebarBody scrollable>
-        <div data-test-subj="motionRefreshSidebar">          
+        <div data-test-subj="motionRefreshSidebar">
           <EuiSpacer size="m" />
           <EuiSwitch
             label={allMotionsLabel}
@@ -622,19 +769,19 @@ export const MotionRefreshSidebar = ({ onClose }: MotionRefreshSidebarProps) => 
           <MotionSection
             id="shimmer"
             title={shimmerTitle}
-            description=""
+            description={shimmerDescription}
             switchLabel={shimmerSwitchLabel}
             checked={settings.shimmer}
-            rows={[]}
+            rows={shimmerRows}
             caption={shimmerTitle}
           />
           <MotionSection
             id="dots"
             title={dotsTitle}
-            description=""
+            description={dotsDescription}
             switchLabel={dotsSwitchLabel}
             checked={settings.dots}
-            rows={[]}
+            rows={dotsRows}
             caption={dotsTitle}
           />
           <MotionSection

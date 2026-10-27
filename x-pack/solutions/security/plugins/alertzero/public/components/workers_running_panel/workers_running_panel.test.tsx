@@ -18,9 +18,13 @@ describe('WorkersRunningPanel', () => {
       </EuiProvider>
     );
 
-    expect(
-      screen.getByRole('heading', { name: 'Workers are running in the background' })
-    ).toBeVisible();
+    expect(screen.getByText('Workers are running in the background...')).toBeVisible();
+    expect(screen.queryByText(/Proposals land here/)).not.toBeInTheDocument();
+    expect(screen.getByRole('progressbar', { name: 'Loading' })).toHaveAttribute(
+      'data-variant',
+      'orbit'
+    );
+    expect(screen.getByTestId('alertZeroOrbitDots')).toHaveAttribute('width', '16');
   });
 
   it('should not use first-run wording', () => {

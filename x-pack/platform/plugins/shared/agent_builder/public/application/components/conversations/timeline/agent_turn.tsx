@@ -6,12 +6,20 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import {
+  EuiAvatar,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingElastic,
+  EuiText,
+  euiCanAnimate,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useMotionRefreshSettings } from '@kbn/react-kibana-context-root';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { AgentAvatar } from '../../common/agent_avatar';
 import { AuthorHeader } from './author_header';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { EventSteps } from './event_steps/event_steps';
@@ -21,6 +29,8 @@ import { ExecutionFailedEvent } from './items/execution_failed_event';
 import { ExecutionAbortedEvent } from './items/execution_aborted_event';
 import { PendingPrompts } from './items/pending_prompts';
 import type { AgentTurnItem } from './types';
+import { OrbitAvatarIcon } from './orbit_dots_loader';
+import { ShimmeringText } from './shimmering_text';
 import {
   isCompletedTurn,
   isFailedTurn,
@@ -31,6 +41,19 @@ import {
 const loadingLabel = i18n.translate('xpack.agentBuilder.timeline.agentLoading', {
   defaultMessage: 'Agent is generating a response',
 });
+
+const thinkingFallback = i18n.translate('xpack.agentBuilder.timeline.agentThinkingLabel', {
+  defaultMessage: 'Thinking...',
+});
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`;
 
 interface AgentTurnProps {
   item: AgentTurnItem;
@@ -122,6 +145,7 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
   isResuming = false,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { dots, shimmer } = useMotionRefreshSettings();
   const conversationId = useConversationId();
   const { status, startedAt, origin } = item;
   const isLoading = status === 'running' || isResuming;
@@ -129,6 +153,15 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
   const avatarColumnStyles = css`
     min-inline-size: ${euiTheme.size.l};
   `;
+
+  const avatarSettleStyles = css`
+    display: flex;
+    ${euiCanAnimate} {
+      animation: ${fadeIn} ${euiTheme.animation.slow} ease-out;
+    }
+  `;
+
+  const showOrbit = isLoading && dots;
 
   const content = renderContent(item, conversationId, conversationAttachments);
 
@@ -140,11 +173,22 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
         css={avatarColumnStyles}
         data-test-subj="agentBuilderTimelineAvatar"
       >
-        {isLoading ? (
+        {showOrbit || (!isLoading && agent) ? (
+          <span key={showOrbit ? 'orbit' : 'logo'} css={avatarSettleStyles}>
+            <EuiAvatar
+              size="s"
+              type="user"
+              color="subdued"
+              name={showOrbit ? loadingLabel : agent?.name ?? loadingLabel}
+              iconType={showOrbit ? OrbitAvatarIcon : 'logoElastic'}
+              iconSize={showOrbit ? 'm' : 'l'}
+              iconColor={null}
+              data-test-subj="agentBuilderTurnAvatar"
+            />
+          </span>
+        ) : isLoading ? (
           <EuiLoadingElastic size="l" aria-label={loadingLabel} />
-        ) : (
-          agent && <AgentAvatar agent={agent} size="s" iconSize="l" />
-        )}
+        ) : null}
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <EuiFlexGroup direction="column" gutterSize="s">
@@ -156,6 +200,19 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
                 origin={origin}
                 startedAt={startedAt ?? new Date().toISOString()}
               />
+            </EuiFlexItem>
+          )}
+          {isLoading && !item.response?.message && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" data-test-subj="agentBuilderThinkingText">
+                <p>
+                  {shimmer ? (
+                    <ShimmeringText text={item.thinking || thinkingFallback} />
+                  ) : (
+                    item.thinking || thinkingFallback
+                  )}
+                </p>
+              </EuiText>
             </EuiFlexItem>
           )}
           {content && <EuiFlexItem grow={false}>{content}</EuiFlexItem>}

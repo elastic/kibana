@@ -205,6 +205,30 @@ describe('sseToEvents', () => {
     expect(state.cursor).toBeUndefined();
   });
 
+  it('keeps transient reasoning as the current thinking line', () => {
+    const state = fold(executionStarted(), {
+      type: ChatEventType.reasoning,
+      data: { reasoning: 'Planning my next step', transient: true },
+    } as ChatEvent);
+
+    expect(state.steps).toEqual([]);
+    expect(streamingEvent(state)?.data).toMatchObject({
+      message: '',
+      thinking: 'Planning my next step',
+    });
+  });
+
+  it('clears the thinking line once the answer starts', () => {
+    const thinking = fold(executionStarted(), {
+      type: ChatEventType.reasoning,
+      data: { reasoning: 'Planning my next step', transient: true },
+    } as ChatEvent);
+    const state = sseToEvents(thinking, chunk('Hel'));
+
+    expect(streamingEvent(state)?.data.thinking).toBeUndefined();
+    expect(streamingEvent(state)?.data.message).toBe('Hel');
+  });
+
   it('puts time_to_first_token on the streaming event', () => {
     const state = fold(executionStarted(), {
       type: ChatEventType.thinkingComplete,

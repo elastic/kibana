@@ -38,7 +38,10 @@ describe('EventSteps — single vs grouped tool calls', () => {
       <EventSteps steps={[toolStep('tc-1', 'search'), toolStep('tc-2', 'read')]} />
     );
     expect(screen.getByTestId('agentBuilderToolCallGroup')).toBeInTheDocument();
-    expect(screen.queryByTestId('agentBuilderToolCallStep')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /tools running/ })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
   });
 
   it('renders nothing when every step is hidden', () => {

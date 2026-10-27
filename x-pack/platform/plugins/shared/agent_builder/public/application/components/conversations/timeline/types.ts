@@ -39,6 +39,8 @@ export interface AgentTurnItem {
   origin?: ConversationRoundOrigin;
   steps: ConversationRoundStep[];
   response?: { message: string };
+  /** Transient reasoning shown while this turn is running and the answer has not started. */
+  thinking?: string;
   terminal?: TerminalEvent;
   pendingPrompts?: PromptRequest[];
   /** Highest version of every attachment referenced up to and including this turn's trigger. */

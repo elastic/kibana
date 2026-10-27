@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { isErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolCallStep as ToolCallStepData } from '@kbn/agent-builder-common/chat/conversation';
+import { useMotionRefreshSettings } from '@kbn/react-kibana-context-root';
+import { ShimmeringText } from '../../shimmering_text';
 
 const toolCallAriaLabel = i18n.translate('xpack.agentBuilder.eventSteps.steps.toolCall.ariaLabel', {
   defaultMessage: 'Tool call',
@@ -21,6 +23,10 @@ const toolBadgeToolLabel = i18n.translate(
   'xpack.agentBuilder.eventSteps.steps.toolCall.toolBadgeToolLabel',
   { defaultMessage: 'tool' }
 );
+
+const runningLabel = i18n.translate('xpack.agentBuilder.eventSteps.steps.toolCall.running', {
+  defaultMessage: 'running…',
+});
 
 interface ToolCallStepHeadlineProps {
   step: ToolCallStepData;
@@ -34,6 +40,7 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
   isAborted = false,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { shimmer } = useMotionRefreshSettings();
   const suffixFontSize = useEuiFontSize('s');
   const hasErrorResult = step.results.some(isErrorResult);
 
@@ -77,11 +84,10 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
                 id="xpack.agentBuilder.eventSteps.steps.toolCall.stopped"
                 defaultMessage="stopped"
               />
+            ) : shimmer ? (
+              <ShimmeringText text={runningLabel} />
             ) : (
-              <FormattedMessage
-                id="xpack.agentBuilder.eventSteps.steps.toolCall.running"
-                defaultMessage="running…"
-              />
+              runningLabel
             )}
           </span>
         </EuiFlexItem>

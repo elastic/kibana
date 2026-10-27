@@ -61,6 +61,8 @@ export interface ExecutionStreamingEventData {
   message: string;
   /** Known once `thinking_complete` arrives; the terminal event carries it afterwards. */
   time_to_first_token?: number;
+  /** Latest transient reasoning line, shown while the answer has not started. */
+  thinking?: string;
 }
 
 export type ExecutionStreamingEvent = ConversationEvent<
@@ -99,6 +101,8 @@ export interface LiveEventsState {
   /** Answer text accumulated for the current execution. */
   message: string;
   timeToFirstToken?: number;
+  /** Latest transient reasoning line for the current execution. */
+  thinking?: string;
 }
 
 export const emptyLiveEventsState = (): LiveEventsState => ({
@@ -183,7 +187,8 @@ const withStreamingEvent = (state: LiveEventsState): LiveEventsState => {
   }
   const { roundId, index, executionId, triggerEventId, actor } = cursor;
   const id = executionTerminatedEventId(roundId, index);
-  const hasContent = state.message !== '' || state.timeToFirstToken !== undefined;
+  const hasContent =
+    state.message !== '' || state.timeToFirstToken !== undefined || Boolean(state.thinking);
   // Nothing to show and nothing to clear: do not put an empty event on the timeline.
   if (!hasContent && !state.events.some((event) => event.id === id)) {
     return state;
@@ -200,6 +205,7 @@ const withStreamingEvent = (state: LiveEventsState): LiveEventsState => {
       ...(state.timeToFirstToken !== undefined
         ? { time_to_first_token: state.timeToFirstToken }
         : {}),
+      ...(state.thinking ? { thinking: state.thinking } : {}),
     },
   };
   return { ...state, events: upsertEvent(state.events, streaming) };
@@ -236,6 +242,7 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
       steps: [],
       message: '',
       timeToFirstToken: undefined,
+      thinking: undefined,
       events: upsertEvent(state.events, event),
     };
   }
@@ -253,6 +260,7 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
       steps: [],
       message: '',
       timeToFirstToken: undefined,
+      thinking: undefined,
       events: upsertEvent(events, event),
     };
   }
@@ -265,8 +273,12 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
   }
 
   if (isReasoningEvent(event)) {
+    // Transient reasoning is the current-thinking line. It stays off the thinking panel.
     if (event.data.transient) {
-      return state;
+      if (state.message) {
+        return state;
+      }
+      return withStreamingEvent({ ...state, thinking: event.data.reasoning });
     }
     // A reasoning block ends the answer text written so far; the next chunks start a new one.
     return withStreamingEvent(
@@ -282,11 +294,19 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
   }
 
   if (isMessageChunkEvent(event)) {
-    return withStreamingEvent({ ...state, message: state.message + event.data.text_chunk });
+    return withStreamingEvent({
+      ...state,
+      message: state.message + event.data.text_chunk,
+      thinking: undefined,
+    });
   }
 
   if (isMessageCompleteEvent(event)) {
-    return withStreamingEvent({ ...state, message: event.data.message_content });
+    return withStreamingEvent({
+      ...state,
+      message: event.data.message_content,
+      thinking: undefined,
+    });
   }
 
   if (isThinkingCompleteEvent(event)) {

@@ -14,6 +14,7 @@ import { createExecutionTerminatedEvent } from './items/execution_terminated_eve
 import { createExecutionPausedEvent } from './items/execution_paused_event.factory';
 import { createExecutionFailedEvent } from './items/execution_failed_event.factory';
 import { createExecutionAbortedEvent } from './items/execution_aborted_event.factory';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { TimelineItem } from './types';
 import { Timeline } from './timeline';
@@ -95,11 +96,23 @@ const aborted: TimelineItem = {
   response: undefined,
 };
 
-const renderTimeline = (item: TimelineItem, conversationAttachments?: VersionedAttachment[]) =>
+const elasticAgent = {
+  id: 'elastic-ai-agent',
+  type: 'chat',
+  name: 'Elastic AI Agent',
+  description: '',
+  configuration: { tools: [] },
+} as AgentDefinition;
+
+const renderTimeline = (
+  item: TimelineItem,
+  conversationAttachments?: VersionedAttachment[],
+  agent?: AgentDefinition
+) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <Timeline items={[item]} conversationAttachments={conversationAttachments} />
+        <Timeline items={[item]} agent={agent} conversationAttachments={conversationAttachments} />
       </EuiProvider>
     </I18nProvider>
   );
@@ -139,14 +152,14 @@ describe('AgentTurn', () => {
     };
     renderTimeline(answeredPause);
 
-    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByRole('button', { name: /tools running/ }));
     expect(screen.getAllByTestId('agentBuilderToolCallStep')).toHaveLength(2);
   });
 
   it('renders the steps that ran above a collapsed error line for a failed turn', () => {
     renderTimeline(failed);
 
-    fireEvent.click(screen.getByRole('button', { name: /tool/ }));
+    fireEvent.click(screen.getByRole('button', { name: /tools stopped/ }));
     expect(screen.getAllByTestId('agentBuilderToolCallStep')).toHaveLength(2);
     expect(screen.getByText('2 tools stopped')).toBeInTheDocument();
     expect(screen.getByTestId('agentBuilderExecutionFailedToggle')).toHaveTextContent(
@@ -175,17 +188,66 @@ describe('AgentTurn', () => {
   it('renders the steps that ran above the stopped notice for an aborted turn', () => {
     renderTimeline(aborted);
 
-    fireEvent.click(screen.getByRole('button', { name: /tool/ }));
+    fireEvent.click(screen.getByRole('button', { name: /tools stopped/ }));
     expect(screen.getAllByTestId('agentBuilderToolCallStep')).toHaveLength(2);
     expect(screen.getByText('2 tools stopped')).toBeInTheDocument();
     expect(screen.getByText('Response stopped by Jane Doe')).toBeInTheDocument();
   });
 
+  it('shows an orbit and shimmering thinking text until the answer starts', () => {
+    renderTimeline({ ...running, steps: [], response: undefined });
+
+    const avatar = screen.getByRole('img', { name: 'Agent is generating a response' });
+    expect(avatar).toHaveClass('euiAvatar--s');
+    expect(avatar.querySelector('[data-euiicon-type="OrbitAvatarIcon"]')).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderThinkingText')).toHaveTextContent('Thinking...');
+  });
+
+  it('shows the current thinking line from the run', () => {
+    renderTimeline({
+      ...running,
+      steps: [],
+      response: undefined,
+      thinking: 'Composing the final answer',
+    });
+
+    expect(screen.getByTestId('agentBuilderThinkingText')).toHaveTextContent(
+      'Composing the final answer'
+    );
+  });
+
+  it('hides the thinking line once the answer has started', () => {
+    renderTimeline(running);
+
+    expect(screen.queryByTestId('agentBuilderThinkingText')).not.toBeInTheDocument();
+    expect(
+      screen
+        .getByRole('img', { name: 'Agent is generating a response' })
+        .querySelector('[data-euiicon-type="OrbitAvatarIcon"]')
+    ).toBeInTheDocument();
+  });
+
+  it('fades the elastic logo in at the avatar size once the turn finishes', () => {
+    renderTimeline(
+      { ...running, status: 'completed', steps: [], response: { message: 'Done' } },
+      undefined,
+      elasticAgent
+    );
+
+    const avatar = screen.getByRole('img', { name: 'Elastic AI Agent' });
+    expect(avatar).toHaveClass('euiAvatar--s');
+    expect(avatar.querySelector('[data-euiicon-type="logoElastic"]')).toBeInTheDocument();
+    expect(avatar.querySelector('[data-euiicon-type="OrbitAvatarIcon"]')).not.toBeInTheDocument();
+  });
+
   it('keeps an expanded tool group open through completion and the saved replacement', () => {
     const { rerender } = renderTimeline(running);
-    expect(screen.queryByTestId('agentBuilderToolCallStep')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /tools running/ })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
 
-    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByRole('button', { name: /tools running/ }));
     expect(screen.getAllByTestId('agentBuilderToolCallStep')).toHaveLength(2);
     expect(screen.getByTestId('response')).toHaveTextContent('loading');
 

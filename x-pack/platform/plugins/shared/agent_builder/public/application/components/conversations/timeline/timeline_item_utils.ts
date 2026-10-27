@@ -90,6 +90,9 @@ export const accumulatorToItem = (
   } else if (streaming?.message) {
     item.response = { message: streaming.message };
   }
+  if (!item.response?.message && streaming?.thinking && status === 'running') {
+    item.thinking = streaming.thinking;
+  }
 
   if (
     status === 'awaiting_prompt' &&
