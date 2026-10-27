@@ -82,6 +82,9 @@ export const conversationPrincipal = (
     return { profileUid: user.profile_uid, username: user.username };
   }
 
+  // The server fills `profile_uid` from the API key before calling this. A key whose
+  // creator has no profile must not fall through to a realm id: that is not the id
+  // Agent Builder stored.
   if (user.authentication_type === 'api_key') {
     return { username: user.username };
   }

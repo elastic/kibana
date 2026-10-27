@@ -65,6 +65,16 @@ describe('canLinkEscalation', () => {
     });
   });
 
+  it('returns username only for an API key whose profile was not resolved', () => {
+    expect(
+      conversationPrincipal({
+        username: 'esc_member',
+        authentication_type: 'api_key',
+        authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+      })
+    ).toEqual({ username: 'esc_member' });
+  });
+
   it('prefers an activated profile uid over the realm id', () => {
     expect(
       conversationPrincipal({

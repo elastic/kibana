@@ -16,7 +16,7 @@ import {
 import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgenticInvestigationsConfig } from './config';
-import { conversationPrincipal } from '../common/escalations/can_link_escalation';
+import { resolveLinkActor } from './escalations/services/link_actor';
 import { registerFeatures } from './features';
 import { registerImpactAttachment } from './impact/attachments';
 import { registerImpactRoutes } from './impact/routes/register_routes';
@@ -309,7 +309,11 @@ export class AgenticInvestigationsPlugin
           }),
         resolveUser: (request) => this.requireUserResolver()(request),
         getLinkActor: (request) =>
-          conversationPrincipal(coreStart.security.authc.getCurrentUser(request) ?? undefined),
+          resolveLinkActor({
+            request,
+            security: coreStart.security,
+            esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+          }),
       });
     }
 
