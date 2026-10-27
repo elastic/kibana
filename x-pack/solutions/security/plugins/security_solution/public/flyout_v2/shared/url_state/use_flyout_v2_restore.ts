@@ -795,7 +795,15 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
   const isNewFlyoutEnabled = useIsNewFlyoutEnabled();
   const history = useHistory();
   const flyoutApi = useFlyoutApi();
+  // The deferred restore open must use the latest API: on the first render `useIsInSecurityApp`
+  // has not resolved yet, so that render's API carries Discover's history key, whose flyouts never
+  // write the URL param. A descriptor that needs no fetch restores right on that first render.
+  const flyoutApiRef = useRef(flyoutApi);
   const hasRestoredRef = useRef(false);
+
+  useEffect(() => {
+    flyoutApiRef.current = flyoutApi;
+  }, [flyoutApi]);
 
   // Read URL param exactly once (useState initializer runs on the first render only).
   // Rule preview documents are stored in a transient index that no longer exists after the page
@@ -1012,9 +1020,10 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
     // Defer to a macrotask to avoid z-index ordering races with Timeline restore, which also
     // fires on mount and claims its slot in the same render cycle.
     setTimeout(() => {
-      openDescriptorAsStart(first, ctx, flyoutApi, FLYOUT_ORIGIN.URL_RESTORE);
+      const { current: api } = flyoutApiRef;
+      openDescriptorAsStart(first, ctx, api, FLYOUT_ORIGIN.URL_RESTORE);
       if (second) {
-        openDescriptorAsChild(second, ctx, flyoutApi, FLYOUT_ORIGIN.URL_RESTORE);
+        openDescriptorAsChild(second, ctx, api, FLYOUT_ORIGIN.URL_RESTORE);
       }
     }, 0);
   }, [
@@ -1030,6 +1039,5 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
     attackHitRecord,
     iocRequestState,
     iocHitRecord,
-    flyoutApi,
   ]);
 };

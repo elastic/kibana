@@ -650,6 +650,22 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     });
   });
 
+  it('opens the restored flyout with the API of the latest render', () => {
+    const firstRenderFlyoutApi = createFlyoutApiMock();
+    (useFlyoutApi as jest.Mock).mockReturnValueOnce(firstRenderFlyoutApi);
+    const { rerender } = renderRestore(
+      buildUrl([{ kind: 'document', documentId: 'doc-1', indexName: 'logs-*' }])
+    );
+
+    rerender();
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(firstRenderFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+    expect(mockFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledTimes(1);
+  });
+
   it('opens a documentFromPattern flyout', () => {
     renderRestore(
       buildUrl([{ kind: 'documentFromPattern', documentId: 'doc-1', indexName: '.siem-signals-*' }])
