@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { LogMeta } from '@kbn/logging';
+import type { WorkerLoggingConfig } from '@kbn/core-threads-server-internal';
+import type { BlockStatsSnapshot } from './block_stats';
+
 export const WATCHDOG_WORKER_NAME = 'event-loop-watchdog';
 
 /** How often the main thread stamps its heartbeat. */
@@ -40,3 +44,35 @@ export const Slot = {
 export const SLOT_COUNT = 2;
 
 export const monotonicUs = (): number => Number(process.hrtime.bigint() / 1000n);
+
+/** Passed to the worker as `workerData.data`. */
+export interface WatchdogWorkerData {
+  shared: SharedArrayBuffer;
+  thresholdsMs: Readonly<Record<Phase, number>>;
+  statsIntervalMs: number;
+  logging: WorkerLoggingConfig;
+}
+
+export interface BlockLogMeta extends LogMeta {
+  kibana: {
+    event_loop_watchdog: {
+      blockedMs: number;
+      startedAt: string;
+      phase: Phase;
+      suppressedBlocks: number;
+    };
+  };
+}
+
+export interface StatsLogMeta extends LogMeta {
+  kibana: {
+    event_loop_watchdog: {
+      stats: BlockStatsSnapshot & {
+        /** The worker's own heap, so its memory use is visible. */
+        heapUsed: number;
+        /** Worker log lines lost since the last stats log line that was written. */
+        droppedLogLines: number;
+      };
+    };
+  };
+}
