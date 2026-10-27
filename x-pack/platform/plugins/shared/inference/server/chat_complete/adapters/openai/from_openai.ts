@@ -33,6 +33,7 @@ export function chunkFromOpenAI(chunk: OpenAI.ChatCompletionChunk): ChatCompleti
     content: delta.content ?? '',
     refusal: refusalFromFinishReason(delta.refusal, choice.finish_reason),
     reasoning: delta.reasoning ?? undefined,
+    finish_reason: choice.finish_reason ?? undefined,
     tool_calls:
       delta.tool_calls?.map((toolCall) => {
         return {
@@ -75,6 +76,7 @@ export function chunkFromCompletionResponse(
     content: message.content ?? '',
     refusal: refusalFromFinishReason(message.refusal, choice.finish_reason),
     reasoning: message.reasoning ?? undefined,
+    finish_reason: choice.finish_reason ?? undefined,
     tool_calls:
       message.tool_calls?.map((toolCall, i) => {
         return {

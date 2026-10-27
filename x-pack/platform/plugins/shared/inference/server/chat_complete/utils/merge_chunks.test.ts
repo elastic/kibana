@@ -34,6 +34,28 @@ describe('mergeChunks', () => {
     });
   });
 
+  it('keeps the finish_reason reported on the final chunk', async () => {
+    const message = mergeChunks([
+      {
+        content: 'Hello',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [],
+        finish_reason: 'content_filter',
+      },
+    ]);
+
+    expect(message).toEqual({
+      content: 'Hello',
+      tool_calls: [],
+      finish_reason: 'content_filter',
+    });
+  });
+
   it('concatenates tool calls', async () => {
     const message = mergeChunks([
       {

@@ -34,6 +34,14 @@ const getTokenAttributes = (): Record<string, number> => {
   return call?.[0];
 };
 
+const getOutputMessages = (): Array<{ finish_reason: string }> => {
+  const call = (mockSpan.setAttribute as jest.Mock).mock.calls.find(
+    ([key]) => key === GenAISemanticConventions.GenAIOutputMessages
+  );
+  expect(call).toBeDefined();
+  return JSON.parse(call![1]);
+};
+
 const options = { messages: [] };
 
 describe('withChatCompleteSpan token attributes', () => {
@@ -100,6 +108,95 @@ describe('withChatCompleteSpan token attributes', () => {
       const attributes = getTokenAttributes();
       expect(attributes[CACHE_READ]).toBe(40);
       expect(CACHE_WRITE in attributes).toBe(false);
+    });
+  });
+});
+
+describe('withChatCompleteSpan output message finish_reason', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (mockSpan.isRecording as jest.Mock).mockReturnValue(true);
+  });
+
+  describe('streaming responses', () => {
+    it('propagates the provider-reported finish_reason (content_filter) onto the span', async () => {
+      await lastValueFrom(
+        withChatCompleteSpan(
+          options,
+          () =>
+            of({
+              type: ChatCompletionEventType.ChatCompletionMessage,
+              content: '',
+              toolCalls: [],
+              finish_reason: 'content_filter',
+            } as unknown as ChatCompleteCompositeResponse) as ReturnType<typeof of>
+        )
+      );
+
+      expect(getOutputMessages()[0].finish_reason).toBe('content_filter');
+    });
+
+    it('keeps finish_reason "stop" for a normal response (no regression)', async () => {
+      await lastValueFrom(
+        withChatCompleteSpan(
+          options,
+          () =>
+            of({
+              type: ChatCompletionEventType.ChatCompletionMessage,
+              content: 'all good',
+              toolCalls: [],
+            } as unknown as ChatCompleteCompositeResponse) as ReturnType<typeof of>
+        )
+      );
+
+      expect(getOutputMessages()[0].finish_reason).toBe('stop');
+    });
+
+    it('keeps finish_reason "tool_calls" for a tool-call response without a reported finish reason', async () => {
+      await lastValueFrom(
+        withChatCompleteSpan(
+          options,
+          () =>
+            of({
+              type: ChatCompletionEventType.ChatCompletionMessage,
+              content: '',
+              toolCalls: [
+                { toolCallId: 'tc-1', function: { name: 'myTool', arguments: { a: 1 } } },
+              ],
+            } as unknown as ChatCompleteCompositeResponse) as ReturnType<typeof of>
+        )
+      );
+
+      expect(getOutputMessages()[0].finish_reason).toBe('tool_calls');
+    });
+  });
+
+  describe('non-streaming responses', () => {
+    it('propagates the provider-reported finish_reason (content_filter) onto the span', async () => {
+      await withChatCompleteSpan(
+        options,
+        () =>
+          Promise.resolve({
+            content: '',
+            toolCalls: [],
+            finish_reason: 'content_filter',
+          }) as unknown as ChatCompleteCompositeResponse
+      );
+
+      expect(getOutputMessages()[0].finish_reason).toBe('content_filter');
+    });
+
+    it('keeps finish_reason "stop" for a normal response (no regression)', async () => {
+      await withChatCompleteSpan(
+        options,
+        () =>
+          Promise.resolve({
+            content: 'all good',
+            toolCalls: [],
+          }) as unknown as ChatCompleteCompositeResponse
+      );
+
+      expect(getOutputMessages()[0].finish_reason).toBe('stop');
     });
   });
 });

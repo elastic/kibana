@@ -307,6 +307,12 @@ export interface ChatCompleteResponse<
    * Optional metadata attached by inference runtime.
    */
   metadata?: AnonymizationResponseMetadata;
+  /**
+   * Reason why the model stopped generating, as reported by the provider
+   * (e.g. `stop`, `tool_calls`, `length`, `content_filter`).
+   * Absent when the provider does not report it.
+   */
+  finish_reason?: string;
 }
 
 /**

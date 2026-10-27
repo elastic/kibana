@@ -122,7 +122,12 @@ export interface GenAIInputMessage {
 
 export interface GenAIOutputMessage {
   role: 'assistant';
-  finish_reason: 'stop' | 'tool_calls';
+  /**
+   * Why generation stopped. Propagated from the provider-reported finish
+   * reason when available (e.g. `content_filter`, `length`); falls back to
+   * `tool_calls` / `stop` derived from the response content.
+   */
+  finish_reason: 'stop' | 'tool_calls' | string;
   parts: GenAIMessagePart[];
 }
 
