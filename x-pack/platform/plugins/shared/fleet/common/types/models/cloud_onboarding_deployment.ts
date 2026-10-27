@@ -58,6 +58,8 @@ export interface CloudOnboardingDeployment {
   integrationName?: string;
   /** Integration description as entered in the Service settings step. Set on every package policy created by the deploy. */
   description?: string;
+  /** Global data stream namespace from the Service settings step. Absent or empty means each policy inherits its agent policy's namespace. */
+  namespace?: string;
   /** Data format selected in the Services step. Used to hydrate the services step on resume so service filtering is consistent. */
   dataFormat?: 'ecs' | 'otel';
   packagePolicyIds?: string[];
@@ -93,11 +95,13 @@ export type CreateCloudOnboardingDeploymentInput = Omit<
 export type UpdateCloudOnboardingDeploymentInput = Partial<
   Omit<
     CloudOnboardingDeployment,
-    'id' | 'provider' | 'connectorId' | 'globalRegion' | 'authMethod' | 'description'
+    'id' | 'provider' | 'connectorId' | 'globalRegion' | 'authMethod' | 'description' | 'namespace'
   >
 > & {
   /** Set to null to clear the description. */
   description?: string | null;
+  /** Set to null to clear the namespace. */
+  namespace?: string | null;
   /** Set to null to clear the connector association (e.g. on MI→ECF transition). */
   connectorId?: string | null;
   /** Set to null to clear the auth method (e.g. on MI→ECF transition). */
