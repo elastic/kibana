@@ -709,13 +709,10 @@ export const slackEvents: ConnectorSpecEvents = {
       title: i18n.translate('connectorSpecs.slack.events.slashCommand.title', {
         defaultMessage: 'Slash command',
       }),
-      description: i18n.translate(
-        'connectorSpecs.slack.events.slashCommand.description',
-        {
-          defaultMessage:
-            'A Slack slash command was invoked. Reply by posting a message to the response URL.',
-        }
-      ),
+      description: i18n.translate('connectorSpecs.slack.events.slashCommand.description', {
+        defaultMessage:
+          'A Slack slash command was invoked. Reply by posting a message to the response URL.',
+      }),
       eventSchema: SlackSlashCommandEventSchema,
     },
   },
