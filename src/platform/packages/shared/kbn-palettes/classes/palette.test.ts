@@ -82,6 +82,7 @@ describe('KbnColorFnPalette', () => {
     const { palette } = createColorFnPalette(5);
     palette.colors().reverse();
     expect(palette.colors()[0]).toBe('#c5-0');
+    expect(palette.getColor(0)).toBe('#c5-0');
   });
 });
 

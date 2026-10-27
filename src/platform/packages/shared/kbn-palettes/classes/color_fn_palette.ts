@@ -51,7 +51,7 @@ export class KbnColorFnPalette extends KbnBasePalette implements IKbnPalette {
     this.#defaultNumberOfColors = defaultNumberOfColors ?? colorCount;
   }
 
-  public colors = (n: number = this.#defaultNumberOfColors) => {
+  #cachedColors(n: number = this.#defaultNumberOfColors): string[] {
     const count = n === undefined ? n : Math.max(1, n);
     if (this.#cachedVisColors !== EUI_VIS_COLOR_STORE.visColors) {
       this.#cachedVisColors = EUI_VIS_COLOR_STORE.visColors;
@@ -62,7 +62,15 @@ export class KbnColorFnPalette extends KbnBasePalette implements IKbnPalette {
       colors = this.#colorFn(count);
       this.#colorsByCount.set(count, colors);
     }
-    // Copy so callers can't mutate the cached colors
-    return [...colors];
+    return colors;
+  }
+
+  // Copy so callers can't mutate the cached colors
+  public colors = (n?: number) => [...this.#cachedColors(n)];
+
+  // Hot path (one call per chart series): read from the cache without copying
+  public getColor = (colorIndex: number, numberOfColors?: number) => {
+    const colors = this.#cachedColors(numberOfColors);
+    return colors[colorIndex % colors.length];
   };
 }
