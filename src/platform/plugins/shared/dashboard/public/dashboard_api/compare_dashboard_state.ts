@@ -8,18 +8,14 @@
  */
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import {
-  apiComparesSerializedState,
-  apiHasType,
-  diffComparators,
-} from '@kbn/presentation-publishing';
+import { apiComparesSerializedState, apiHasType } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { deserializeLayout } from './layout_manager/deserialize_layout';
 import { getLayoutChanges } from './layout_manager/get_layout_changes';
-import { approximationComparators } from './approximation_manager';
-import { getProjectRoutingComparators } from './project_routing_manager';
+import { diffApproximationState } from './approximation_manager';
+import { diffProjectRoutingState } from './project_routing_manager';
 import { diffDashboardSettings } from './settings_manager';
-import { getUnifiedSearchComparators } from './unified_search_manager';
+import { diffUnifiedSearchState } from './unified_search_manager';
 
 const getRefId = (config?: object) => (config && 'ref_id' in config ? config.ref_id : undefined);
 
@@ -70,29 +66,11 @@ export const diffDashboardStates = (
 ): Partial<DashboardState> => {
   // The current state only has time_range / project_routing while its restore flag is on, the
   // flag unsaved changes reads. Flag changes themselves are reported by the settings diff.
-  const timeRestore = Boolean(current.time_range);
-  const projectRoutingRestore = Boolean(current.project_routing);
   return {
     ...diffDashboardSettings(baseline, current),
-    ...diffComparators<
-      Pick<
-        DashboardState,
-        | 'filters'
-        | 'query'
-        | 'refresh_interval'
-        | 'time_range'
-        | 'esql_approximation'
-        | 'project_routing'
-      >
-    >(
-      {
-        ...getUnifiedSearchComparators(() => timeRestore),
-        ...approximationComparators,
-        ...getProjectRoutingComparators(() => projectRoutingRestore),
-      },
-      baseline,
-      current
-    ),
+    ...diffUnifiedSearchState(baseline, current, Boolean(current.time_range)),
+    ...diffApproximationState(baseline, current),
+    ...diffProjectRoutingState(baseline, current, Boolean(current.project_routing)),
     ...diffLayout(baseline, current, children),
   };
 };

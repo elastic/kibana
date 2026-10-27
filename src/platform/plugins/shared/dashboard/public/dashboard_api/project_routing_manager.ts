@@ -26,12 +26,26 @@ import { cpsService } from '../services/kibana_services';
 
 export const COMPARE_DEBOUNCE = 100;
 
+type ProjectRoutingState = Pick<DashboardState, 'project_routing'>;
+
 /** Unsaved-changes comparator of the project routing, which counts only with project routing restore on. */
-export const getProjectRoutingComparators = (
+const getProjectRoutingComparators = (
   isProjectRoutingRestore: () => boolean
-): StateComparators<Pick<DashboardState, 'project_routing'>> => ({
+): StateComparators<ProjectRoutingState> => ({
   project_routing: (a, b) => !isProjectRoutingRestore() || a === b,
 });
+
+/** The project routing change from `baseline` to `current`, as unsaved changes reports it. */
+export const diffProjectRoutingState = (
+  baseline: ProjectRoutingState,
+  current: ProjectRoutingState,
+  isProjectRoutingRestore: boolean
+): Partial<ProjectRoutingState> =>
+  diffComparators(
+    getProjectRoutingComparators(() => isProjectRoutingRestore),
+    baseline,
+    current
+  );
 
 export function initializeProjectRoutingManager(
   initialState: DashboardState,
@@ -69,7 +83,7 @@ export function initializeProjectRoutingManager(
 
   const comparators = getProjectRoutingComparators(() => projectRoutingRestore$.value);
 
-  const getState = (): Pick<DashboardState, 'project_routing'> => {
+  const getState = (): ProjectRoutingState => {
     if (!projectRoutingRestore$.value) {
       // Don't save anything when projectRestore is false
       return {};
@@ -101,9 +115,9 @@ export function initializeProjectRoutingManager(
           debounceTime(COMPARE_DEBOUNCE),
           map(() => getState()),
           combineLatestWith(lastSavedState$),
-          map(([latestState, lastSavedState]) => {
-            return diffComparators(comparators, lastSavedState, latestState);
-          })
+          map(([latestState, lastSavedState]) =>
+            diffProjectRoutingState(lastSavedState, latestState, projectRoutingRestore$.value)
+          )
         );
       },
       comparators,

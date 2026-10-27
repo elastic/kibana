@@ -52,7 +52,7 @@ type UnifiedSearchState = Pick<
 >;
 
 /** Unsaved-changes comparators of the unified search state; time and refresh count only with time restore on. */
-export const getUnifiedSearchComparators = (
+const getUnifiedSearchComparators = (
   isTimeRestore: () => boolean
 ): StateComparators<UnifiedSearchState> => ({
   filters: (a, b) =>
@@ -66,6 +66,18 @@ export const getUnifiedSearchComparators = (
   time_range: (a, b) =>
     !isTimeRestore() || (areTimesEqual(a?.from, b?.from) && areTimesEqual(a?.to, b?.to)),
 });
+
+/** The unified search keys that changed from `baseline` to `current`, as unsaved changes reports them. */
+export const diffUnifiedSearchState = (
+  baseline: Partial<UnifiedSearchState>,
+  current: Partial<UnifiedSearchState>,
+  isTimeRestore: boolean
+): Partial<UnifiedSearchState> =>
+  diffComparators(
+    getUnifiedSearchComparators(() => isTimeRestore),
+    baseline,
+    current
+  );
 
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
@@ -262,8 +274,6 @@ export function initializeUnifiedSearchManager(
     );
   }
 
-  const comparators = getUnifiedSearchComparators(() => timeRestore$.value);
-
   const getState = (): UnifiedSearchState => {
     const serializableFilters = asCodeFilters$.value;
     const asCodeQuery = query$.value ? toAsCodeQuery(query$.value) : undefined;
@@ -333,7 +343,7 @@ export function initializeUnifiedSearchManager(
           }),
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) =>
-            diffComparators(comparators, lastSavedState, latestState)
+            diffUnifiedSearchState(lastSavedState, latestState, timeRestore$.value)
           )
         );
       },
