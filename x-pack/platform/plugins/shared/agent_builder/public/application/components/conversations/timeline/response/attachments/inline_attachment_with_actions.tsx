@@ -113,7 +113,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         agentId,
         updateOrigin,
         openCanvas,
-        openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+        openSidebarConversation,
         isCanvas: false,
         setPreviewBadgeState: (nextPreviewState) => {
           setPreviewedAttachmentKey(
@@ -204,7 +204,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
                   attachment,
                   isSidebar,
                   screenContext,
-                  openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+                  openSidebarConversation,
                 },
                 {
                   registerActionButtons,
