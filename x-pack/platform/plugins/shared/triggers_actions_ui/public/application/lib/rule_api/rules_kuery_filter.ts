@@ -59,6 +59,7 @@ export async function loadRulesWithKueryFilter({
     body: JSON.stringify({
       page: page.index + 1,
       per_page: page.size,
+      allow_partial_results: true,
       ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
       sort_field: sort.field,
       sort_order: sort.direction,
