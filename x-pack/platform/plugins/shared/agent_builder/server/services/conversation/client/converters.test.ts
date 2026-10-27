@@ -2688,11 +2688,11 @@ describe('conversation model converters', () => {
       expect(toEs(conversation, 'space').active_execution).toEqual(activeExecution);
     });
 
-    it('omits active_execution when absent', () => {
+    it('leaves active_execution undefined when absent', () => {
       const conversation = fromEs(documentWith({}), requestingUser);
 
-      expect(conversation).not.toHaveProperty('active_execution');
-      expect(toEs(conversation, 'space')).not.toHaveProperty('active_execution');
+      expect(conversation.active_execution).toBeUndefined();
+      expect(toEs(conversation, 'space').active_execution).toBeUndefined();
     });
 
     it('is not exposed on list rows', () => {

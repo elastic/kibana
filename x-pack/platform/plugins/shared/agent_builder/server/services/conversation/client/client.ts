@@ -928,7 +928,7 @@ class ConversationClientImpl implements ConversationClient {
         ...(resolvedTemplateVersion !== undefined
           ? { template_version: resolvedTemplateVersion }
           : {}),
-        ...(activeExecution ? { active_execution: toActiveExecution(activeExecution) } : {}),
+        active_execution: activeExecution && toActiveExecution(activeExecution),
       },
       currentUser: this.getUser(),
       creationDate: new Date(createdAt),

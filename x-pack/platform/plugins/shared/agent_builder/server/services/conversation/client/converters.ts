@@ -278,9 +278,7 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
     ...(attachmentsForRefs.length > 0 ? { attachments: attachmentsForRefs } : {}),
     ...(document._source!.state ? { state: document._source!.state } : {}),
     ...(isEventsNative ? { schema_version: storedSchemaVersion } : {}),
-    ...(document._source!.active_execution
-      ? { active_execution: document._source!.active_execution }
-      : {}),
+    active_execution: document._source!.active_execution,
   };
 
   const events =
@@ -433,7 +431,7 @@ export const toEs = (
     ...(conversation.parent_conversation
       ? { parent_conversation: conversation.parent_conversation }
       : {}),
-    ...(conversation.active_execution ? { active_execution: conversation.active_execution } : {}),
+    active_execution: conversation.active_execution,
     // Only events-native conversations persist their timeline; legacy ones keep deriving it
     // from rounds on read (see fromEs).
     ...(isEventsNative
@@ -577,6 +575,6 @@ export const createRequestToEs = ({
     ...(conversation.parent_conversation
       ? { parent_conversation: conversation.parent_conversation }
       : {}),
-    ...(conversation.active_execution ? { active_execution: conversation.active_execution } : {}),
+    active_execution: conversation.active_execution,
   };
 };
