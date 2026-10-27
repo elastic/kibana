@@ -36,8 +36,8 @@ const getS3Errors = (s3: S3DestinationFormData): S3FieldsErrors => {
     bucket: !bucket
       ? 'required'
       : bucket.length < S3_BUCKET_MIN_LENGTH || bucket.length > S3_BUCKET_MAX_LENGTH
-      ? 'invalid'
-      : undefined,
+        ? 'invalid'
+        : undefined,
     accessKeyId: s3.accessKeyId.trim() ? undefined : 'required',
     secretAccessKey: s3.secretAccessKey.trim() ? undefined : 'required',
   };

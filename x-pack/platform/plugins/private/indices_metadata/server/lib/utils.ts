@@ -13,7 +13,10 @@
 export class Chunked<T> {
   public weight: number = 0;
 
-  constructor(public chunks: T[][] = [], public current: T[] = []) {}
+  constructor(
+    public chunks: T[][] = [],
+    public current: T[] = []
+  ) {}
 
   /**
    * Finalizes the current chunk (if not empty), adds it to `chunks`, and returns all non-empty chunks.

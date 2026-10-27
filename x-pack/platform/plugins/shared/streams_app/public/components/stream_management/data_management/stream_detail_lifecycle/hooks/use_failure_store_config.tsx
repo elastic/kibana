@@ -70,8 +70,8 @@ export function useFailureStoreConfig(definition: Streams.ingest.all.GetResponse
       ? retentionPeriod
       : clusterDefaultRetention
     : isDefaultRetention
-    ? retentionPeriod ?? clusterDefaultRetention
-    : undefined;
+      ? (retentionPeriod ?? clusterDefaultRetention)
+      : undefined;
 
   return {
     defaultRetentionPeriod,

@@ -519,10 +519,10 @@ describe('getSourceOfJoinTarget', () => {
 
 describe('hasWiredStreamsInQuery', () => {
   const wiredStreamSource = (name: string) =>
-    ({ name, hidden: false, type: SOURCES_TYPES.WIRED_STREAM } as ESQLSourceResult);
+    ({ name, hidden: false, type: SOURCES_TYPES.WIRED_STREAM }) as ESQLSourceResult;
 
   const indexSource = (name: string) =>
-    ({ name, hidden: false, type: SOURCES_TYPES.INDEX } as ESQLSourceResult);
+    ({ name, hidden: false, type: SOURCES_TYPES.INDEX }) as ESQLSourceResult;
 
   it('returns false when getSources is missing', async () => {
     const result = await hasWiredStreamsInQuery('FROM logs-ds', {});

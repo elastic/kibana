@@ -11,9 +11,7 @@ import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common'
 
 export type NightshiftSettingsLocator = LocatorPublic<NightshiftSettingsLocatorParams>;
 
-export class NightshiftSettingsLocatorDefinition
-  implements LocatorDefinition<NightshiftSettingsLocatorParams>
-{
+export class NightshiftSettingsLocatorDefinition implements LocatorDefinition<NightshiftSettingsLocatorParams> {
   public readonly id = NIGHTSHIFT_SETTINGS_LOCATOR_ID;
 
   public readonly getLocation = async (params: NightshiftSettingsLocatorParams = {}) => ({

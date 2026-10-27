@@ -44,7 +44,7 @@ export const buildLatestAlertEvent = ({
   last_episode_status_count: statusCount ?? null,
   last_episode_timestamp: previousTimestamp ?? DEFAULT_TIMESTAMP,
   last_episode_phase_started_at:
-    phaseStartedAt !== undefined ? phaseStartedAt : previousTimestamp ?? DEFAULT_TIMESTAMP,
+    phaseStartedAt !== undefined ? phaseStartedAt : (previousTimestamp ?? DEFAULT_TIMESTAMP),
   last_lifecycle_action_type: lifecycleActionType,
   group_hash: groupHash,
 });

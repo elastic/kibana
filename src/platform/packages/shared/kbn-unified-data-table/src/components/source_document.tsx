@@ -120,7 +120,7 @@ export function SourceDocument({
 type UnformattedTopLevelObjectPair = [
   fieldDisplayName: string,
   values: unknown[],
-  fieldName: string
+  fieldName: string,
 ];
 
 /**

@@ -77,8 +77,8 @@ const collectFields = (properties: Record<string, unknown>, prefix = ''): Schema
     const nestedProperties = isRecord(node.properties)
       ? node.properties
       : isRecord(items?.properties)
-      ? items?.properties
-      : undefined;
+        ? items?.properties
+        : undefined;
     const nested = isRecord(nestedProperties) ? collectFields(nestedProperties, path) : [];
     return [{ node, path }, ...nested];
   });

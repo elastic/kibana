@@ -54,7 +54,7 @@ const makeStored = (
     summary: 'P99 latency breached SLO',
     confidence: 0.8,
     ...overrides,
-  } as SignificantEvent);
+  }) as SignificantEvent;
 
 const makeCandidate = (
   signals: SignalEntry[],

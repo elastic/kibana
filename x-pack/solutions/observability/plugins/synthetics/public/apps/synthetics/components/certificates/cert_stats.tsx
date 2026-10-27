@@ -80,11 +80,13 @@ export const CertStats: React.FC<Props> = ({ counts, selected, onSelect }) => {
                       transition: background-color ${euiTheme.animation.fast} ease-in;
                       &:hover,
                       &:focus {
-                        background-color: ${isDisabled
-                          ? selectedBg
-                          : isSelected
-                          ? euiTheme.colors.lightShade
-                          : euiTheme.colors.lightestShade};
+                        background-color: ${
+                          isDisabled
+                            ? selectedBg
+                            : isSelected
+                              ? euiTheme.colors.lightShade
+                              : euiTheme.colors.lightestShade
+                        };
                       }
                     `}
                   >

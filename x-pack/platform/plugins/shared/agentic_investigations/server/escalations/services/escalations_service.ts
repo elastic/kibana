@@ -720,9 +720,8 @@ export class EscalationsService {
     if (allLinkedIds.length === 0) return escalations;
 
     try {
-      const entitiesByInvestigation = await this.getImpactClient(
-        request
-      ).getEntitiesByConversationId(allLinkedIds);
+      const entitiesByInvestigation =
+        await this.getImpactClient(request).getEntitiesByConversationId(allLinkedIds);
 
       return escalations.map((escalation, index) => {
         const entities = linkedIdsByEscalation[index].flatMap(
@@ -798,7 +797,7 @@ export class EscalationsService {
       ? summaries.map((summary) => ({
           ...summary,
           pending_proposal_count:
-            summary.status === 'open' ? pendingCounts.get(summary.id) ?? 0 : 0,
+            summary.status === 'open' ? (pendingCounts.get(summary.id) ?? 0) : 0,
         }))
       : summaries;
 

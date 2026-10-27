@@ -143,18 +143,18 @@ export const useAlertBasedTiles = ({
     i18n.translate('xpack.securitySolution.entityAnalytics.home.alertBasedTiles.queryError', {
       defaultMessage: 'There was an error loading entity alert data',
     }),
-    isTimedOut ? undefined : filteredError ?? indexError
+    isTimedOut ? undefined : (filteredError ?? indexError)
   );
 
   return {
     severeAlertsCount: shownResult?.severeAlertsCount ?? 0,
     severeAlertsEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
-      : shownResult?.severeAlertsEntityIds ?? EMPTY_ENTITY_IDS,
+      : (shownResult?.severeAlertsEntityIds ?? EMPTY_ENTITY_IDS),
     watchlistedCount: shownResult?.watchlistedCount ?? 0,
     watchlistedEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
-      : shownResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS,
+      : (shownResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS),
     // A query that can never run (no index, failed inputs) is not loading: react-query reports a
     // disabled query with no data as loading for ever.
     isLoading: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),

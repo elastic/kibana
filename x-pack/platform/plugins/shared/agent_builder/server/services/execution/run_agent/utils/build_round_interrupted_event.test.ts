@@ -36,7 +36,7 @@ const getTypeDefinition = (type: string) =>
     id: type,
     validate: (input: unknown) => ({ valid: true, data: input }),
     isReadonly: false,
-  } as unknown as AttachmentTypeDefinition);
+  }) as unknown as AttachmentTypeDefinition;
 
 jest.mock('../../../../tracing', () => ({
   getCurrentTraceId: () => 'trace-1',
@@ -49,7 +49,7 @@ describe('buildRoundInterruptedEvent', () => {
     ({
       getAll: jest.fn(() => [{ id: 'a1' }]),
       drainChanges: jest.fn(() => []),
-    } as unknown as AttachmentStateManager);
+    }) as unknown as AttachmentStateManager;
 
   const runEventsOver = (attachmentStateManager: AttachmentStateManager) =>
     new RunAttachmentEvents({

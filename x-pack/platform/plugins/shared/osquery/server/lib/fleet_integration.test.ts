@@ -27,7 +27,7 @@ const getInternalSavedObjectsClientForSpaceIdMock =
 const buildSoClient = (spaceId: string | undefined): SavedObjectsClientContract =>
   ({
     getCurrentNamespace: jest.fn().mockReturnValue(spaceId),
-  } as unknown as SavedObjectsClientContract);
+  }) as unknown as SavedObjectsClientContract;
 
 const buildDeletedPackagePolicy = (
   policyIds: string[],

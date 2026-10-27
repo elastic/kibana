@@ -20,9 +20,8 @@ apiTest.describe('Inference settings authorization', { tag: [...INFERENCE_LOCAL_
   let viewerCookie: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {
-    ({ cookieHeader: featureUserCookie } = await samlAuth.asInteractiveUser(
-      FEATURE_PRIVILEGED_ROLE
-    ));
+    ({ cookieHeader: featureUserCookie } =
+      await samlAuth.asInteractiveUser(FEATURE_PRIVILEGED_ROLE));
     ({ cookieHeader: viewerCookie } = await samlAuth.asInteractiveUser('viewer'));
   });
 

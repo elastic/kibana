@@ -293,8 +293,8 @@ function validateIndexSources(
     const sources = isList(indexValue)
       ? indexValue.values.filter(isSource)
       : isSource(indexValue)
-      ? [indexValue]
-      : [];
+        ? [indexValue]
+        : [];
 
     for (const source of sources) {
       const indexName = source.name;

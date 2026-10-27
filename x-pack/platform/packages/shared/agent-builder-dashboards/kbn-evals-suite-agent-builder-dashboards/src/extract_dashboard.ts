@@ -32,7 +32,7 @@ export const getToolErrors = (steps: Step[]): ToolError[] =>
             ? [
                 {
                   toolId: String(step.tool_id),
-                  error: isRecord(result.data) ? result.data.message ?? result.data : result.data,
+                  error: isRecord(result.data) ? (result.data.message ?? result.data) : result.data,
                 },
               ]
             : []

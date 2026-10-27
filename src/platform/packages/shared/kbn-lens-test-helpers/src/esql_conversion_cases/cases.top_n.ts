@@ -40,7 +40,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     from?: string;
     where?: string | null;
   }) => {
-    const where = whereOption === null ? undefined : whereOption ?? logsWhere;
+    const where = whereOption === null ? undefined : (whereOption ?? logsWhere);
     const subquery = [
       from,
       ...(where ? [where] : []),

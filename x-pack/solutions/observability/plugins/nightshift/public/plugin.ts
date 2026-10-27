@@ -25,15 +25,12 @@ import type {
   NightshiftStartDependencies,
 } from './types';
 
-export class NightshiftPlugin
-  implements
-    Plugin<
-      NightshiftPublicSetup,
-      NightshiftPublicStart,
-      NightshiftSetupDependencies,
-      NightshiftStartDependencies
-    >
-{
+export class NightshiftPlugin implements Plugin<
+  NightshiftPublicSetup,
+  NightshiftPublicStart,
+  NightshiftSetupDependencies,
+  NightshiftStartDependencies
+> {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({ visibleIn: [] }));
   private availabilitySubscription?: Subscription;
   private stopped = false;

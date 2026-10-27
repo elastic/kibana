@@ -194,7 +194,7 @@ export function buildRankingCaseEsql(
     const parts = composedField
       .map((attr) =>
         isEuidField(attr)
-          ? presentOrNullAliases.get(attr.field) ?? `TO_STRING(${attr.field})`
+          ? (presentOrNullAliases.get(attr.field) ?? `TO_STRING(${attr.field})`)
           : `"${escapeEsqlString(attr.sep)}"`
       )
       .join(', ');

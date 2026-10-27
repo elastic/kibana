@@ -31,7 +31,7 @@ const getTypeDefinition = (type: string) =>
     id: type,
     validate: (input: unknown) => ({ valid: true, data: input }),
     isReadonly: false,
-  } as unknown as AttachmentTypeDefinition);
+  }) as unknown as AttachmentTypeDefinition;
 
 const setup = () => {
   const attachmentStateManager = createAttachmentStateManager([], { getTypeDefinition });

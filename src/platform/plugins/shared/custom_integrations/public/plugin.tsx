@@ -24,9 +24,10 @@ import {
 
 import { CustomIntegrationsServicesProvider } from './services';
 import { servicesFactory } from './services/kibana';
-export class CustomIntegrationsPlugin
-  implements Plugin<CustomIntegrationsSetup, CustomIntegrationsStart>
-{
+export class CustomIntegrationsPlugin implements Plugin<
+  CustomIntegrationsSetup,
+  CustomIntegrationsStart
+> {
   public setup(core: CoreSetup): CustomIntegrationsSetup {
     // Return methods that should be available to other plugins
     return {

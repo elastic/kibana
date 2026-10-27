@@ -195,7 +195,7 @@ describe('pickCreatedOrExistingAttachment', () => {
       pushed_by: null,
       updated_at: null,
       updated_by: null,
-    } as unknown as AttachmentV2);
+    }) as unknown as AttachmentV2;
 
   it('returns the newly created attachment by saved object id', () => {
     const created = commentAttachment(savedObjectID, 'hello');

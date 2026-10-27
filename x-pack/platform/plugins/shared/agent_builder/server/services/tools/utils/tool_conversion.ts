@@ -13,7 +13,7 @@ import type { Runner, ExecutableTool, InternalToolDefinition } from '@kbn/agent-
 
 export const toExecutableTool = <
   TConfig extends object = {},
-  RunInput extends ZodObject<any> = ZodObject<any>
+  RunInput extends ZodObject<any> = ZodObject<any>,
 >({
   tool,
   runner,

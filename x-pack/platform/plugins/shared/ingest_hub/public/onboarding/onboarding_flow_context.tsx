@@ -399,7 +399,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
           },
           failedInstances: rest.failedInstances ?? prev?.failedInstances ?? [],
           deployErrors:
-            rest.deployErrors !== undefined ? rest.deployErrors : prev?.deployErrors ?? {},
+            rest.deployErrors !== undefined ? rest.deployErrors : (prev?.deployErrors ?? {}),
           onboardingDeploymentId: rest.onboardingDeploymentId ?? prev?.onboardingDeploymentId,
           ecfStacks: rest.ecfStacks ?? prev?.ecfStacks,
           // Explicit undefined clears the map (post-cleanup); absent preserves it.
@@ -510,7 +510,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   // 'managed_integration' and send Step 2 and the deploy builders down the agentless path.
   const deploymentMethod: DeploymentMethod = isSelfManaged
     ? 'agent_based'
-    : persistedAuthenticateAndDeployStep?.deploymentMethod ?? defaultDeploymentMethod;
+    : (persistedAuthenticateAndDeployStep?.deploymentMethod ?? defaultDeploymentMethod);
 
   // Service settings depend on the selected deployment method: ECF needs only the trigger ARN,
   // agent-based needs the package's own vars. Every step reads the matrix through the context, so
@@ -564,7 +564,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       // the deploy state on every mount.
       const current = isSelfManaged
         ? 'agent_based'
-        : prev?.deploymentMethod ?? defaultDeploymentMethod;
+        : (prev?.deploymentMethod ?? defaultDeploymentMethod);
       if (current === method) return;
 
       // Switching method invalidates every artifact of the previous one: an agent policy is

@@ -65,7 +65,7 @@ jest.mock('../../../hooks/use_profiling_params', () => ({
 }));
 
 const createTopNFunctions = (functionIds: string[]) =>
-  ({ TopN: functionIds.map((Id) => ({ Id })) } as unknown as TopNFunctions);
+  ({ TopN: functionIds.map((Id) => ({ Id })) }) as unknown as TopNFunctions;
 
 // The baseline and comparison functions are fetched in this order on every render.
 const mockTopNFunctionsStates = (

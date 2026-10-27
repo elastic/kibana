@@ -39,9 +39,10 @@ const RESERVED_EVENT_TYPES: ReadonlySet<string> = new Set([
  * handler unchanged. Use it to thread a `KibanaRequest` (or similar) from
  * the rule task into workflow subscribers without coupling the bus to it.
  */
-export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TContext = void>
-  implements EventBus<TEvent, TContext>
-{
+export class AsyncDomainEventBus<
+  TEvent extends DomainEvent = DomainEvent,
+  TContext = void,
+> implements EventBus<TEvent, TContext> {
   readonly #emitter = new EventEmitterAsyncResource({
     captureRejections: true,
     name: ASYNC_RESOURCE_NAME,

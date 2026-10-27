@@ -52,10 +52,10 @@ export function MemoryHome({
   const keywordStatus = !isFiltering
     ? 'ready'
     : isKeywordError
-    ? 'error'
-    : isKeywordLoading
-    ? 'loading'
-    : 'ready';
+      ? 'error'
+      : isKeywordLoading
+        ? 'loading'
+        : 'ready';
   const keywordPages = useMemo(() => keywordResult?.pages ?? [], [keywordResult]);
 
   const filteredPages = useMemo(

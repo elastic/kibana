@@ -131,7 +131,8 @@ const getStyles = (euiTheme: EuiThemeComputed, gutter: string) => {
           --label-fade-start: ${fadeStartWidth};
           --label-fade-end: 0px;
           // A slide shorter than the fade would otherwise start the end fade before the slide.
-          animation: ${fadeStartIn} ${fadeDuration} ${delay} both,
+          animation:
+            ${fadeStartIn} ${fadeDuration} ${delay} both,
             ${fadeEndOut} ${fadeDuration} calc(${delay} + max(0ms, ${duration} - ${fadeDuration}))
               both;
         }

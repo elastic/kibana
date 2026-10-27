@@ -19,12 +19,10 @@ import { EMPTY_MODEL } from './types';
 import { buildSchema } from './parse_query_text';
 import { useQueryModel } from './use_query_model';
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-    items: [],
-    total: 0,
-  })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: [],
+  total: 0,
+}));
 
 const mockTagsService: ContentManagementTagsServices = {
   getTagList: () => [

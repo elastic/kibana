@@ -16,13 +16,13 @@ let observedBars: Element[];
 const addBar = (testSubj: string, height: number): HTMLElement => {
   const bar = document.createElement('div');
   bar.setAttribute('data-test-subj', testSubj);
-  bar.getBoundingClientRect = () => ({ height } as DOMRect);
+  bar.getBoundingClientRect = () => ({ height }) as DOMRect;
   document.body.appendChild(bar);
   return bar;
 };
 
 const setBarHeight = (bar: HTMLElement, height: number) => {
-  bar.getBoundingClientRect = () => ({ height } as DOMRect);
+  bar.getBoundingClientRect = () => ({ height }) as DOMRect;
 };
 
 const renderPinnedBarsHeight = () => {

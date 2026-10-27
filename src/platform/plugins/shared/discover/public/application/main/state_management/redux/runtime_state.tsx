@@ -152,7 +152,7 @@ export const getDataViewOfSource = (dataSource: DataSource | undefined): DataVie
   }
   return dataSource.kind === 'index-pattern'
     ? dataSource.getDataView()
-    : esqlDataViewsBySource.get(dataSource) ?? getRegisteredEsqlDataView(dataSource);
+    : (esqlDataViewsBySource.get(dataSource) ?? getRegisteredEsqlDataView(dataSource));
 };
 
 /** Pins the registered shim of an ES|QL source for as long as the source is in use. */

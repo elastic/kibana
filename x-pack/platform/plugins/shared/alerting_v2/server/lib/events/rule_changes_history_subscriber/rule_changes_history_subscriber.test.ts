@@ -51,7 +51,7 @@ const payload: RuleEvent['payload'] = {
 };
 
 const eventOf = (type: RuleEvent['type'], override = payload): RuleEvent =>
-  ({ type, payload: override } as RuleEvent);
+  ({ type, payload: override }) as RuleEvent;
 
 describe('RuleChangesHistorySubscriber', () => {
   let bus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;

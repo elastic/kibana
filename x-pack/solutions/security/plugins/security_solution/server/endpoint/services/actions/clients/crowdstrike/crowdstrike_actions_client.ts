@@ -172,16 +172,19 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
 
     const agentIdsFound: string[] = [];
     const fleetAgentIdToCrowdstrikeAgentIdMap: Record<string, string> =
-      crowdstrikeEsResults.hits.hits.reduce((acc, esDoc) => {
-        const doc = esDoc.inner_hits?.most_recent.hits.hits[0]._source;
+      crowdstrikeEsResults.hits.hits.reduce(
+        (acc, esDoc) => {
+          const doc = esDoc.inner_hits?.most_recent.hits.hits[0]._source;
 
-        if (doc) {
-          agentIdsFound.push(doc.device.id);
-          acc[doc.agent.id] = doc.device.id;
-        }
+          if (doc) {
+            agentIdsFound.push(doc.device.id);
+            acc[doc.agent.id] = doc.device.id;
+          }
 
-        return acc;
-      }, {} as Record<string, string>);
+          return acc;
+        },
+        {} as Record<string, string>
+      );
     const elasticAgentIds = Object.keys(fleetAgentIdToCrowdstrikeAgentIdMap);
 
     if (elasticAgentIds.length === 0) {
@@ -211,7 +214,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   protected async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       TParameters,

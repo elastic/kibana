@@ -123,7 +123,7 @@ describe('GoogleGke', () => {
   } as unknown as ActionContext;
 
   const withConfig = (config: Record<string, unknown>) =>
-    ({ ...mockContext, config } as unknown as ActionContext);
+    ({ ...mockContext, config }) as unknown as ActionContext;
 
   const run = (action: ActionName, raw: Record<string, unknown>, ctx = mockContext) =>
     GoogleGke.actions[action].handler(ctx, parse(action, raw));

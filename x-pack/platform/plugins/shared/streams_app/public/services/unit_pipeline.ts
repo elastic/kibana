@@ -194,7 +194,7 @@ export const pruneUnit = (previous: Unit, next: Unit): Unit => {
   );
   const reachableBefore = reachablePipelineIds(previous.unit.pipelines);
   let pipelines = next.unit.pipelines;
-  for (let changed = true; changed; ) {
+  for (let changed = true; changed;) {
     const ids = new Set(pipelines.map(({ id }) => id));
     const cleaned = pipelines.flatMap((pipeline) => {
       const updated = dropMissingDelegations(pipeline, ids);

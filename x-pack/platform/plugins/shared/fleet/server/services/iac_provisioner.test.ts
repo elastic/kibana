@@ -72,7 +72,7 @@ const jsonResponse = (status: number, body: unknown) =>
     ok: status >= 200 && status < 300,
     status,
     json: async () => body,
-  } as any);
+  }) as any;
 
 function mockFeatureFlag(enabled = true) {
   jest.spyOn(appContextService, 'getFeatureFlags').mockReturnValue({

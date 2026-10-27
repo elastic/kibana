@@ -55,22 +55,20 @@ function makeStreamQuery(overrides: Partial<StreamQuery> = {}): StreamQuery {
 }
 
 function catalogFor(ids: string[]): SourceCatalog {
-  const sources = ids.map(
-    (id): NightshiftSource => ({
-      id,
-      slug: id,
-      title: id,
-      tags: [],
-      esql: '',
-      type: 'unknown',
-      view_name: `$.nightshift.sources.default.${id}`,
-      enabled: true,
-      created_by: 'user',
-      created_at: '2026-01-01T00:00:00.000Z',
-      updated_at: '2026-01-01T00:00:00.000Z',
-      esql_updated_at: '2026-01-01T00:00:00.000Z',
-    })
-  );
+  const sources = ids.map((id): NightshiftSource => ({
+    id,
+    slug: id,
+    title: id,
+    tags: [],
+    esql: '',
+    type: 'unknown',
+    view_name: `$.nightshift.sources.default.${id}`,
+    enabled: true,
+    created_by: 'user',
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_at: '2026-01-01T00:00:00.000Z',
+    esql_updated_at: '2026-01-01T00:00:00.000Z',
+  }));
   return {
     bySlug: new Map(sources.map((source) => [source.slug, source])),
     byId: new Map(sources.map((source) => [source.id, source])),

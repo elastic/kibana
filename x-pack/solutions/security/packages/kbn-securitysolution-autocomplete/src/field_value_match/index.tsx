@@ -325,7 +325,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
               value={
                 typeof selectedValue === 'string' && selectedValue.trim().length > 0
                   ? parseFloat(selectedValue)
-                  : selectedValue ?? ''
+                  : (selectedValue ?? '')
               }
               onChange={handleNonComboBoxInputChange}
               data-test-subj="valueAutocompleteFieldMatchNumber"

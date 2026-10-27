@@ -133,8 +133,8 @@ const clampPipelineLimit = (
     existingLimit === null
       ? [...pipeline, { $limit: maxLimit }]
       : typeof existingLimit === 'number' && existingLimit <= maxLimit
-      ? pipeline
-      : [...pipeline.slice(0, -1), { $limit: maxLimit }];
+        ? pipeline
+        : [...pipeline.slice(0, -1), { $limit: maxLimit }];
 
   return limited.map((stage) => {
     if ('$facet' in stage) {

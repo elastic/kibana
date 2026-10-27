@@ -66,7 +66,7 @@ export const buildCoverageTitle = ({
   techniqueName?: string;
   phrase: string;
 }): string => {
-  const prefix = techniqueId ? techniqueName ?? techniqueId : undefined;
+  const prefix = techniqueId ? (techniqueName ?? techniqueId) : undefined;
   return truncateAtWord(prefix ? `${prefix}: ${phrase}` : phrase, MAX_COVERAGE_TITLE_CHARS);
 };
 

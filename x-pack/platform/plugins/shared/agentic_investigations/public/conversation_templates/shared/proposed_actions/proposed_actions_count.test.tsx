@@ -27,7 +27,7 @@ const withPages = (
     total: number;
     proposals: Array<{ decision?: ProposalDecision; status?: ProposalStatus }>;
   }>
-) => ({ data: { pages } } as unknown as ReturnType<typeof useConversationProposals>);
+) => ({ data: { pages } }) as unknown as ReturnType<typeof useConversationProposals>;
 
 describe('ProposedActionsCount', () => {
   it('shows the total number of proposals, not just the loaded page', () => {

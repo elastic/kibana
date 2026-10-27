@@ -99,7 +99,10 @@ const extractBodyTextFromError = (e: unknown): string => {
 };
 
 export class AttackDiscoveryGenerateApiClient {
-  constructor(private readonly fetch: HttpHandler, private readonly log: ToolingLog) {}
+  constructor(
+    private readonly fetch: HttpHandler,
+    private readonly log: ToolingLog
+  ) {}
 
   async fetchAnonymizationFields(): Promise<AnonymizationField[]> {
     try {
@@ -180,9 +183,8 @@ export class AttackDiscoveryGenerateApiClient {
       };
     }
 
-    const { discoveries, status, alertsContextCount, error } = await this.pollUntilDone(
-      executionUuid
-    );
+    const { discoveries, status, alertsContextCount, error } =
+      await this.pollUntilDone(executionUuid);
 
     return {
       discoveries,

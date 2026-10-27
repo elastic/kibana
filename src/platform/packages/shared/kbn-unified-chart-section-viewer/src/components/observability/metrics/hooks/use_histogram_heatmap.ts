@@ -64,7 +64,7 @@ export const useHistogramHeatmap = ({
       firstNonNullable(metricItem.metricTypes)
     );
   const { bounds, error: boundsError } = isHistogramDistribution
-    ? histogramBounds.get(getMetricUniqueKey(metricItem)) ?? {}
+    ? (histogramBounds.get(getMetricUniqueKey(metricItem)) ?? {})
     : {};
   // A breakdown splits the series chart. Heatmaps do not encode that split yet.
   const hasBreakdown = applicableDimensions.length > 0;

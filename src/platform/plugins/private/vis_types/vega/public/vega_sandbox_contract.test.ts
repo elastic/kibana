@@ -103,7 +103,7 @@ describe('Vega render path across the sandbox boundary', () => {
       searchAPI,
       {} as TimeCache,
       {},
-      async () => ({} as never),
+      async () => ({}) as never,
       { darkMode: false, name: 'borealis' }
     );
     await parser.parseAsync();

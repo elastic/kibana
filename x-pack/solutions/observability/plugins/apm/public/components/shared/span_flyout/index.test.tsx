@@ -89,7 +89,7 @@ const buildSpan = (overrides: Record<string, unknown> = {}) =>
       db: { statement: 'SELECT * FROM orders' },
       ...overrides,
     },
-  } as unknown as Span);
+  }) as unknown as Span;
 
 const setFetch = (span: Span | undefined, status: FETCH_STATUS) =>
   mockUseFetcher.mockReturnValue({

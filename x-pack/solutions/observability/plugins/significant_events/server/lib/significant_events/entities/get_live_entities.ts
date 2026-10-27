@@ -43,7 +43,9 @@ export const getLiveEntities = async (
     return {
       id,
       name:
-        typeof feature.properties.name === 'string' ? feature.properties.name : feature.title ?? id,
+        typeof feature.properties.name === 'string'
+          ? feature.properties.name
+          : (feature.title ?? id),
       subtype,
       source_ids: [...new Set(features.map(({ source_id: sourceId }) => sourceId))],
     };

@@ -47,11 +47,10 @@ import { lastValueFrom } from 'rxjs';
 import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
 import type { IMyStrategyResponse } from '../../common/types';
 
-interface SearchExamplesAppDeps
-  extends Pick<
-    CoreStart,
-    'notifications' | 'http' | 'analytics' | 'i18n' | 'theme' | 'userProfile'
-  > {
+interface SearchExamplesAppDeps extends Pick<
+  CoreStart,
+  'notifications' | 'http' | 'analytics' | 'i18n' | 'theme' | 'userProfile'
+> {
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;

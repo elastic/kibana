@@ -32,7 +32,7 @@ const createMockEsClient = (esqlResponse?: { values: unknown[][] }): Client =>
     esql: {
       query: jest.fn().mockResolvedValue(esqlResponse ?? { columns: [], values: [] }),
     },
-  } as unknown as Client);
+  }) as unknown as Client;
 
 describe('getDestinationInfo', () => {
   it('extracts data stream name from backing index', () => {
@@ -239,7 +239,7 @@ describe('replaySnapshot', () => {
         getMapping: jest.fn().mockResolvedValue({}),
         putMapping: jest.fn().mockResolvedValue({ acknowledged: true }),
       },
-    } as unknown as Client);
+    }) as unknown as Client;
 
   const mockRepo = {
     type: 'gcs' as const,

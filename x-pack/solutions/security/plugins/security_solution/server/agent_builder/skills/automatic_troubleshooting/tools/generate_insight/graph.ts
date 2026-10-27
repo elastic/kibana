@@ -104,7 +104,7 @@ ${problemDescription}
   async function generateInsights({ insightType, refetchedData }: StateType): Promise<{
     insights: DefendInsights;
   }> {
-    const generationData = isPolicyResponseFailureType(insightType) ? refetchedData ?? [] : data;
+    const generationData = isPolicyResponseFailureType(insightType) ? (refetchedData ?? []) : data;
 
     const { insights } = await model.chatModel.withStructuredOutput(
       getDefendInsightsOutputSchema({ type: insightType })

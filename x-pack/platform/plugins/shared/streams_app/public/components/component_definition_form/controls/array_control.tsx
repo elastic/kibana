@@ -92,7 +92,7 @@ export function ArrayControl({ field, value, onChange, pointer }: ArrayControlPr
   const showItemTelemetry = allowsItemTelemetry(field) && context.telemetry.length > 1;
 
   const setItem = (index: number, item: FormValue | undefined) =>
-    onChange(items.map((current, position) => (position === index ? item ?? '' : current)));
+    onChange(items.map((current, position) => (position === index ? (item ?? '') : current)));
   const remove = (index: number) => {
     rowKeys.remove(index);
     onChange(items.filter((_, position) => position !== index));

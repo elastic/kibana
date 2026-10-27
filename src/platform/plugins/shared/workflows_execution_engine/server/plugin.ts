@@ -161,15 +161,12 @@ const BULK_CANCEL_PAGE_SIZE = 10;
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
-export class WorkflowsExecutionEnginePlugin
-  implements
-    Plugin<
-      WorkflowsExecutionEnginePluginSetup,
-      WorkflowsExecutionEnginePluginStart,
-      WorkflowsExecutionEnginePluginSetupDeps,
-      WorkflowsExecutionEnginePluginStartDeps
-    >
-{
+export class WorkflowsExecutionEnginePlugin implements Plugin<
+  WorkflowsExecutionEnginePluginSetup,
+  WorkflowsExecutionEnginePluginStart,
+  WorkflowsExecutionEnginePluginSetupDeps,
+  WorkflowsExecutionEnginePluginStartDeps
+> {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
   private concurrencyManager!: ConcurrencyManager;
@@ -1393,8 +1390,8 @@ export class WorkflowsExecutionEnginePlugin
         refresh: workflowExecution.effectiveIdentity
           ? options.refresh || 'wait_for'
           : workflowExecution.concurrencyGroupKey
-          ? options.refresh
-          : false,
+            ? options.refresh
+            : false,
       });
 
       await ensureBoundExecutionAdmitted(
@@ -1459,7 +1456,7 @@ export class WorkflowsExecutionEnginePlugin
       // Only honoured for internal API requests (KbnClient sets x-elastic-internal-origin).
       if (request?.isInternalApiRequest) {
         const raw = request.headers['x-kbn-test-run-delay-ms'];
-        const delayMs = parseInt(String(Array.isArray(raw) ? raw[0] : raw ?? '0'), 10);
+        const delayMs = parseInt(String(Array.isArray(raw) ? raw[0] : (raw ?? '0')), 10);
         if (delayMs > 0) {
           await new Promise((r) => setTimeout(r, delayMs));
         }
@@ -1640,7 +1637,7 @@ export class WorkflowsExecutionEnginePlugin
         ({ access_control }) => access_control?.access_mode === 'private'
       );
       const profileId = hasPrivateWorkflows
-        ? (await coreStart.userProfile.getCurrentProfileId({ request })) ?? undefined
+        ? ((await coreStart.userProfile.getCurrentProfileId({ request })) ?? undefined)
         : undefined;
 
       interface PreparedItem {
@@ -1994,11 +1991,11 @@ export class WorkflowsExecutionEnginePlugin
       const resumedBy =
         options?.resumedBy ??
         (request
-          ? (await getAuthenticatedUser(
+          ? ((await getAuthenticatedUser(
               request,
               coreStart.security,
               coreStart.elasticsearch.client
-            )) ?? UNKNOWN_EXECUTION_IDENTITY
+            )) ?? UNKNOWN_EXECUTION_IDENTITY)
           : UNKNOWN_EXECUTION_IDENTITY);
       const resumedAt = new Date().toISOString();
 

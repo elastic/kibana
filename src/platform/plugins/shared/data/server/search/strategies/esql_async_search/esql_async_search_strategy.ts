@@ -153,8 +153,8 @@ export const esqlAsyncSearchStrategyProvider = (
       const response = await (!id
         ? submitEsqlSearch({ id, ...request }, options, deps)
         : options.returnIntermediateResults
-        ? stopEsqlAsyncSearch(id, options, deps)
-        : getEsqlAsyncSearch({ id, ...request }, options, deps));
+          ? stopEsqlAsyncSearch(id, options, deps)
+          : getEsqlAsyncSearch({ id, ...request }, options, deps));
 
       const { body, headers, meta } = response;
 

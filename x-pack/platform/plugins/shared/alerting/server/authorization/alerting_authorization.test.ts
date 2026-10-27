@@ -2692,9 +2692,8 @@ describe('AlertingAuthorization', () => {
         authorization: securityStart.authz,
       });
 
-      const { ensureRuleTypeIsAuthorized } = await auth.getByRuleTypeAuthorizationFilter(
-        findAuthParams
-      );
+      const { ensureRuleTypeIsAuthorized } =
+        await auth.getByRuleTypeAuthorizationFilter(findAuthParams);
 
       expect(() =>
         ensureRuleTypeIsAuthorized('rule-type-id-1', AlertingAuthorizationEntity.Rule)
@@ -2724,9 +2723,8 @@ describe('AlertingAuthorization', () => {
         authorization: securityStart.authz,
       });
 
-      const { ensureRuleTypeIsAuthorized } = await auth.getByRuleTypeAuthorizationFilter(
-        findAuthParams
-      );
+      const { ensureRuleTypeIsAuthorized } =
+        await auth.getByRuleTypeAuthorizationFilter(findAuthParams);
 
       expect(() =>
         ensureRuleTypeIsAuthorized('rule-type-id-2', AlertingAuthorizationEntity.Rule)
@@ -2758,9 +2756,8 @@ describe('AlertingAuthorization', () => {
         authorization: securityStart.authz,
       });
 
-      const { ensureRuleTypeIsAuthorized } = await auth.getByRuleTypeAuthorizationFilter(
-        findAuthParams
-      );
+      const { ensureRuleTypeIsAuthorized } =
+        await auth.getByRuleTypeAuthorizationFilter(findAuthParams);
 
       expect(() =>
         ensureRuleTypeIsAuthorized('rule-type-id-1', AlertingAuthorizationEntity.Alert)
@@ -2845,9 +2842,8 @@ describe('AlertingAuthorization', () => {
         authorization: securityStart.authz,
       });
 
-      const { ensureRuleTypeIsAuthorized } = await auth.getByRuleTypeAuthorizationFilter(
-        findAuthParams
-      );
+      const { ensureRuleTypeIsAuthorized } =
+        await auth.getByRuleTypeAuthorizationFilter(findAuthParams);
 
       expect(() => ensureRuleTypeIsAuthorized('non-existent-type', 'rule')).not.toThrow();
       expect(() =>

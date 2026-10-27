@@ -218,7 +218,7 @@ const callerSuppliedQueryMatches = (
     // is always undefined for them and a top-level mapping could never be satisfied. Match
     // against the pack's per-query mappings instead; a mapping matching none of them still fails.
     const storedMappings = resolved.isPack
-      ? resolved.queryEcsMappings ?? []
+      ? (resolved.queryEcsMappings ?? [])
       : [toEcsMappingRecord(resolved.ecs_mapping)];
 
     if (!storedMappings.some((stored) => deepEqual(suppliedMapping, stored))) {

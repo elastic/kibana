@@ -70,17 +70,13 @@ describe('EndpointActionsClient', () => {
     );
 
     // @ts-expect-error mocking this for testing purposes
-    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump =
-      true;
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump = true;
     // @ts-expect-error mocking this for testing purposes
-    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointRunScript =
-      true;
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointRunScript = true;
     // @ts-expect-error mocking this for testing purposes
-    classConstructorOptions.endpointService.experimentalFeatures.responseActionsScriptLibraryManagement =
-      true;
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsScriptLibraryManagement = true;
     // @ts-expect-error mocking this for testing purposes
-    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointCancel =
-      true;
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointCancel = true;
   });
 
   it('should validate endpoint ids and log those that are invalid', async () => {
@@ -642,14 +638,12 @@ describe('EndpointActionsClient', () => {
     describe('when `kill_descendants` parameter is set to `true`', () => {
       beforeEach(() => {
         // @ts-expect-error mocking this for testing purposes
-        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
-          true;
+        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants = true;
       });
 
       it('should throw error when feature flag is disabled', async () => {
         // @ts-expect-error mocking this for testing purposes
-        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
-          false;
+        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants = false;
 
         await expect(
           endpointActionsClient.killProcess(
@@ -707,8 +701,7 @@ describe('EndpointActionsClient', () => {
 
       it('should succeed without checking capability when `kill_descendants` is false', async () => {
         // @ts-expect-error mocking this for testing purposes
-        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
-          false;
+        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants = false;
 
         await expect(
           endpointActionsClient.killProcess(
@@ -725,8 +718,7 @@ describe('EndpointActionsClient', () => {
   describe('#memoryDump()', () => {
     it('should error when feature flag is false', async () => {
       // @ts-expect-error mocking this for testing purposes
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump = false;
 
       await expect(
         endpointActionsClient.memoryDump(
@@ -755,8 +747,7 @@ describe('EndpointActionsClient', () => {
 
         if (memoryDumpParameters.type === 'raw') {
           // @ts-expect-error update of readonly property is ok here
-          classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
-            true;
+          classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw = true;
         }
 
         await expect(
@@ -774,8 +765,7 @@ describe('EndpointActionsClient', () => {
 
     it('should validate that agent supports memory dump of raw', async () => {
       // @ts-expect-error mocking this for testing purposes
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
-        true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw = true;
 
       const generator = new EndpointMetadataGenerator('seed');
 
@@ -801,8 +791,7 @@ describe('EndpointActionsClient', () => {
 
     it('should error when `raw` type is used but the feature flag is disabled', async () => {
       // @ts-expect-error mocking this for testing purposes
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw = false;
 
       await expect(
         endpointActionsClient.memoryDump(
@@ -816,8 +805,7 @@ describe('EndpointActionsClient', () => {
 
     it('should process `raw` memory dump when the agent supports it', async () => {
       // @ts-expect-error mocking this for testing purposes
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
-        true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw = true;
 
       const generator = new EndpointMetadataGenerator('seed');
 
@@ -872,8 +860,7 @@ describe('EndpointActionsClient', () => {
 
     it('should error when feature flag is false', async () => {
       // @ts-expect-error mocking this for testing purposes
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointCancel =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointCancel = false;
 
       await expect(
         endpointActionsClient.cancel(
@@ -960,8 +947,7 @@ describe('EndpointActionsClient', () => {
   describe('#runscript()', () => {
     it('should error if feature flag is disabled', async () => {
       // @ts-expect-error mocking this for testing purposes
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointRunScript =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointRunScript = false;
 
       await expect(
         endpointActionsClient.runscript(endpointActionClientMock.createRunScriptOptions())

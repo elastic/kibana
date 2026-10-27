@@ -35,9 +35,10 @@ export interface StartDeps {
 }
 
 /** @internal */
-export class ExecutionContextService
-  implements CoreService<ExecutionContextSetup, ExecutionContextStart>
-{
+export class ExecutionContextService implements CoreService<
+  ExecutionContextSetup,
+  ExecutionContextStart
+> {
   private context$: BehaviorSubject<KibanaExecutionContext> = new BehaviorSubject({});
   private appId?: string;
   private subscription: Subscription = new Subscription();

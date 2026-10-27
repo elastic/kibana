@@ -106,15 +106,12 @@ const getConversationPath = ({
   return search ? `${basePath}?${search}` : basePath;
 };
 
-export class AgentBuilderPlugin
-  implements
-    Plugin<
-      AgentBuilderPluginSetup,
-      AgentBuilderPluginStart,
-      AgentBuilderSetupDependencies,
-      AgentBuilderStartDependencies
-    >
-{
+export class AgentBuilderPlugin implements Plugin<
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  AgentBuilderSetupDependencies,
+  AgentBuilderStartDependencies
+> {
   logger: Logger;
   private conversationActiveConfig: EmbeddableConversationProps = {};
   private internalServices?: AgentBuilderInternalService;
@@ -274,9 +271,8 @@ export class AgentBuilderPlugin
       onClose,
       trailingActions,
     }: OpenConversationDetailsOptions): Promise<() => void> => {
-      const { openConversationDetailsFlyout } = await import(
-        './flyout/open_conversation_details_flyout'
-      );
+      const { openConversationDetailsFlyout } =
+        await import('./flyout/open_conversation_details_flyout');
       return openConversationDetailsFlyout({
         core,
         conversationsService,
@@ -320,9 +316,8 @@ export class AgentBuilderPlugin
     setSidebarServices(core, internalServices);
 
     const LazyConfiguredEmbeddableConversation = React.lazy(async () => {
-      const { createEmbeddableConversation } = await import(
-        './embeddable/create_embeddable_conversation'
-      );
+      const { createEmbeddableConversation } =
+        await import('./embeddable/create_embeddable_conversation');
 
       return {
         default: createEmbeddableConversation({
@@ -347,9 +342,8 @@ export class AgentBuilderPlugin
     );
 
     const LazyConfiguredEmbeddableConversationInput = React.lazy(async () => {
-      const { createEmbeddableConversationInput } = await import(
-        './embeddable/create_embeddable_conversation_input'
-      );
+      const { createEmbeddableConversationInput } =
+        await import('./embeddable/create_embeddable_conversation_input');
 
       return {
         default: createEmbeddableConversationInput({

@@ -175,7 +175,7 @@ export const suppressAlertsInMemory = <
       [ALERT_SUPPRESSION_START]: Date;
       [ALERT_SUPPRESSION_END]: Date;
     };
-  }
+  },
 >(
   alerts: T[]
 ): {
@@ -244,7 +244,7 @@ export const getAlertSourceField = <T = unknown>(
  * Compare existing alert suppression date props with alert to suppressed alert values
  **/
 export const isExistingDateGtEqThanAlert = <
-  T extends { [ALERT_SUPPRESSION_END]: Date; [ALERT_SUPPRESSION_START]: Date }
+  T extends { [ALERT_SUPPRESSION_END]: Date; [ALERT_SUPPRESSION_START]: Date },
 >(
   existingAlert: estypes.SearchHit<BackendAlertWithSuppressionFields870>,
   alert: { _id: string; _source: T },

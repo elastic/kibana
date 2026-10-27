@@ -207,7 +207,7 @@ export class LogsExtractionClient {
     ]);
     const engineState =
       this.extractionMode === EXTRACTION_MODE.nonPriority
-        ? engineDescriptor.nonPriorityLogExtractionState ?? FRESH_ENGINE_LOG_EXTRACTION_STATE
+        ? (engineDescriptor.nonPriorityLogExtractionState ?? FRESH_ENGINE_LOG_EXTRACTION_STATE)
         : engineDescriptor.logExtractionState;
     return {
       config: getMergedConfig(
@@ -266,9 +266,8 @@ export class LogsExtractionClient {
     let lastPersistedCheckpointISO: string | undefined;
 
     try {
-      const { config, engineState, excludedUserNames } = await this.getLogExtractionConfigAndState(
-        type
-      );
+      const { config, engineState, excludedUserNames } =
+        await this.getLogExtractionConfigAndState(type);
       ({ fromDateISO: resumePointISO } = resolveMainExtractionWindow({ config, engineState }));
       const entityDefinitionOptions: EntityDefinitionOptions = { excludedUserNames };
       const entityDefinition = getEntityDefinition(

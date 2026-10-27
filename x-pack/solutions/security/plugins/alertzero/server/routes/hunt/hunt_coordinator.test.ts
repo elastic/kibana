@@ -87,7 +87,7 @@ const makeDeps = ({
       ({
         getInference: () => ({}),
         getSearchInferenceEndpoints: () => undefined,
-      } as unknown as ReturnType<RouteDependencies['getHuntServices']>),
+      }) as unknown as ReturnType<RouteDependencies['getHuntServices']>,
     getAgentBuilderAttachments: () => {
       if (!agentBuilderStarted) {
         throw new Error(
@@ -166,12 +166,12 @@ type FieldsMissingFromSchema<Service, Schema> = Service extends readonly (infer 
     ? FieldsMissingFromSchema<ServiceItem, SchemaItem>
     : never
   : Service extends object
-  ? {
-      [K in keyof Service]-?: [PropOf<Schema, K>] extends [never]
-        ? K
-        : FieldsMissingFromSchema<NonNullable<Service[K]>, NonNullable<PropOf<Schema, K>>>;
-    }[keyof Service]
-  : never;
+    ? {
+        [K in keyof Service]-?: [PropOf<Schema, K>] extends [never]
+          ? K
+          : FieldsMissingFromSchema<NonNullable<Service[K]>, NonNullable<PropOf<Schema, K>>>;
+      }[keyof Service]
+    : never;
 
 type AssertNever<T extends never> = T;
 

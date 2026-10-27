@@ -42,7 +42,7 @@ const createHit = (
     raw: { _id: id, _index: index },
     flattened: { 'event.kind': eventKind },
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const createAlertHit = (): DataTableRecord => createHit('doc-id', 'signal');
 

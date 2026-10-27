@@ -10,7 +10,7 @@ import { control, dashboard } from '../test_helpers';
 import { createControlQueriesEvaluator } from './control_queries';
 
 const createEsClient = (run: (query: string) => Promise<{ values: unknown[][] }>): EsClient =>
-  ({ esql: { query: ({ query }: { query: string }) => run(query) } } as unknown as EsClient);
+  ({ esql: { query: ({ query }: { query: string }) => run(query) } }) as unknown as EsClient;
 
 const evaluateWith = (esClient: EsClient, controls: Array<Record<string, unknown>> | undefined) =>
   createControlQueriesEvaluator(esClient).evaluate({

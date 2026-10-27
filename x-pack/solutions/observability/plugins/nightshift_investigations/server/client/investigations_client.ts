@@ -272,7 +272,7 @@ const toNotifiableInvestigation = (
   fallbackTitle: string | undefined
 ): NotifiableInvestigation => ({
   investigation_id: id,
-  title: titlePending ? fallbackTitle ?? '' : title,
+  title: titlePending ? (fallbackTitle ?? '') : title,
   ...(metadata.severity && { severity: metadata.severity }),
   ...(metadata.summary && { summary: metadata.summary }),
   ...(metadata.verdict && { verdict: metadata.verdict }),

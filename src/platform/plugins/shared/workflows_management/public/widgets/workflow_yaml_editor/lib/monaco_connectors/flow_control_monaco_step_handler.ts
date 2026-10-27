@@ -43,13 +43,13 @@ export class FlowControlMonacoStepHandler extends BaseMonacoConnectorHandler {
             '- `channels` _(optional)_ — External notification channels (`slack`, `slack_api`, `email`, `slack2`, `teams`, `servicenow`, `http`)',
           ]
         : connectorType === 'waitForApproval'
-        ? [
-            '- `message` _(optional)_ — Message displayed to approvers',
-            '- `approveLabel` _(optional)_ — Label for the approve action (default: Approve)',
-            '- `rejectLabel` _(optional)_ — Label for the reject action (default: Decline)',
-            '- `channels` _(optional)_ — External notification channels (`slack`, `slack_api`, `email`, `slack2`, `teams`, `servicenow`, `http`)',
-          ]
-        : ['- `duration` _(required)_ — Duration to wait, e.g. `"5s"`, `"1m"`, `"2h"`'];
+          ? [
+              '- `message` _(optional)_ — Message displayed to approvers',
+              '- `approveLabel` _(optional)_ — Label for the approve action (default: Approve)',
+              '- `rejectLabel` _(optional)_ — Label for the reject action (default: Decline)',
+              '- `channels` _(optional)_ — External notification channels (`slack`, `slack_api`, `email`, `slack2`, `teams`, `servicenow`, `http`)',
+            ]
+          : ['- `duration` _(required)_ — Duration to wait, e.g. `"5s"`, `"1m"`, `"2h"`'];
 
     const content = this.prependStabilityBadgeToContent(getBuiltInStepStability(connectorType), [
       `**Step**: \`${connectorType}\``,

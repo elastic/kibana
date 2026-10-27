@@ -62,9 +62,8 @@ describe('persona_matrix_tools_seed', () => {
 
   describe('seedPersonaMatrixTools({ parity: false })', () => {
     it('appends PERSONA_MATRIX_TOOL_IDS as a new selection entry alongside preserved entries', async () => {
-      const { seedPersonaMatrixTools, PERSONA_MATRIX_TOOL_IDS } = await import(
-        './persona_matrix_tools_seed'
-      );
+      const { seedPersonaMatrixTools, PERSONA_MATRIX_TOOL_IDS } =
+        await import('./persona_matrix_tools_seed');
       const client = createClient(agentWith([{ tool_ids: ['builtin_search'] }]));
 
       await seedPersonaMatrixTools({ kbnClient: asKbn(client), log, parity: false });
@@ -78,9 +77,8 @@ describe('persona_matrix_tools_seed', () => {
     });
 
     it('is idempotent: issues no PUT when the agent already has all tool ids', async () => {
-      const { seedPersonaMatrixTools, PERSONA_MATRIX_TOOL_IDS } = await import(
-        './persona_matrix_tools_seed'
-      );
+      const { seedPersonaMatrixTools, PERSONA_MATRIX_TOOL_IDS } =
+        await import('./persona_matrix_tools_seed');
       const client = createClient(agentWith([{ tool_ids: [...PERSONA_MATRIX_TOOL_IDS] }]));
 
       await seedPersonaMatrixTools({ kbnClient: asKbn(client), log, parity: false });

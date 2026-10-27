@@ -114,10 +114,10 @@ export function MemoryPageView({
     page.context && page.context.length > 0
       ? page.context
       : conversationId
-      ? i18n.translate('xpack.nightshift.knowledge.memory.metadata.conversationLabel', {
-          defaultMessage: 'Agent Builder conversation',
-        })
-      : undefined;
+        ? i18n.translate('xpack.nightshift.knowledge.memory.metadata.conversationLabel', {
+            defaultMessage: 'Agent Builder conversation',
+          })
+        : undefined;
   const archiveReason = page.archived ? page.archive_reason : undefined;
   const hasProvenance = sourceTask !== undefined || (page.merged_from?.length ?? 0) > 0;
 

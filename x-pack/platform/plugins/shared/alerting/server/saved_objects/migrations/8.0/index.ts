@@ -72,7 +72,7 @@ function addSecuritySolutionAADRuleTypeTags(
           tags:
             !doc.attributes.enabled && doc.attributes.scheduledTaskId
               ? [...(doc.attributes.tags ?? []), 'auto_disabled_8.0']
-              : doc.attributes.tags ?? [],
+              : (doc.attributes.tags ?? []),
         },
       }
     : doc;

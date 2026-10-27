@@ -120,8 +120,8 @@ export class TaskClaiming {
         definition.maxConcurrency
           ? 'limitedConcurrency'
           : definition.maxConcurrency === 0
-          ? 'skippedTypes'
-          : 'unlimitedConcurrency'
+            ? 'skippedTypes'
+            : 'unlimitedConcurrency'
     );
 
     if (skippedTypes?.length) {

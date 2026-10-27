@@ -52,7 +52,7 @@ const createMockSearchResponse = (hits: unknown[], total: number | { value: numb
 const createMockSearch = () =>
   ({
     search: jest.fn(),
-  } as unknown as jest.Mocked<IScopedSearchClient>);
+  }) as unknown as jest.Mocked<IScopedSearchClient>;
 
 const createMockFormatter = (): ResultFormatter => ({
   contentType: 'application/ndjson',

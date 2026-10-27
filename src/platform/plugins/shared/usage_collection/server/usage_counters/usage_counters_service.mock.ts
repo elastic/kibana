@@ -24,7 +24,7 @@ const createSetupContractMock = () => {
         domainId,
         ...(params?.retentionPeriodDays && { retentionPeriodDays: params.retentionPeriodDays }),
         incrementCounter: jest.fn(),
-      } as unknown as jest.Mocked<UsageCounter>)
+      }) as unknown as jest.Mocked<UsageCounter>
   );
 
   return setupContract;

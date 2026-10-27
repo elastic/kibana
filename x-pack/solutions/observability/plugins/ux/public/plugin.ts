@@ -106,9 +106,8 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
     const pluginSetupDeps = plugins;
     if (plugins.observability) {
       const getUxDataHelper = async () => {
-        const { fetchUxOverviewDate, hasRumData, createCallApmApi } = await import(
-          './components/app/rum_dashboard/ux_overview_fetchers'
-        );
+        const { fetchUxOverviewDate, hasRumData, createCallApmApi } =
+          await import('./components/app/rum_dashboard/ux_overview_fetchers');
         // have to do this here as well in case app isn't mounted yet
         createCallApmApi(core);
 
@@ -258,9 +257,8 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
         return classicRumDashboard;
       },
       fetchClassicRumApplications: async (params) => {
-        const { fetchClassicRumApplications } = await import(
-          './services/rest/fetch_classic_rum_applications'
-        );
+        const { fetchClassicRumApplications } =
+          await import('./services/rest/fetch_classic_rum_applications');
         return fetchClassicRumApplications({ ...params, core, data: plugins.data });
       },
       hideLegacyNavigation: () => {

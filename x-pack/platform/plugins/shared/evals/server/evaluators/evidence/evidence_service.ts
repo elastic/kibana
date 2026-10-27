@@ -56,8 +56,7 @@ export interface EvidenceExtractionResult {
 }
 
 export interface InstrumentationProfileEvidenceResult
-  extends InstrumentationProfileProbeResult,
-    EvidenceExtractionResult {}
+  extends InstrumentationProfileProbeResult, EvidenceExtractionResult {}
 
 export interface EvidenceSelectionResult {
   selected?: InstrumentationProfileEvidenceResult;
@@ -573,12 +572,10 @@ export const extractProfilesEvidence = async (
   };
 
   return Promise.all(
-    profileNames.map(
-      async (profile): Promise<InstrumentationProfileEvidenceResult> => ({
-        profile,
-        ...(await extractEvidenceWithSearch(runSearch, getInstrumentationProfile(profile))),
-      })
-    )
+    profileNames.map(async (profile): Promise<InstrumentationProfileEvidenceResult> => ({
+      profile,
+      ...(await extractEvidenceWithSearch(runSearch, getInstrumentationProfile(profile))),
+    }))
   );
 };
 

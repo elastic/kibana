@@ -102,8 +102,8 @@ export const EditMonitorContextItem = ({
           hasUndefinedRemoteKibanaUrl
             ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL
             : canEditSynthetics
-            ? undefined
-            : PERMISSIONS_ON_ORIGIN_CLUSTER
+              ? undefined
+              : PERMISSIONS_ON_ORIGIN_CLUSTER
         }
       >
         {EDIT_MONITOR}

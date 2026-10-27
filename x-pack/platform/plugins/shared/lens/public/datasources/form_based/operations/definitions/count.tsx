@@ -186,10 +186,10 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
 
     return Boolean(
       newField &&
-        (newField.type === 'document' ||
-          (supportedTypes.has(newField.type) &&
-            newField.aggregatable &&
-            (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)))
+      (newField.type === 'document' ||
+        (supportedTypes.has(newField.type) &&
+          newField.aggregatable &&
+          (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)))
     );
   },
   timeScalingMode: 'optional',

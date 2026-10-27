@@ -18,7 +18,7 @@ export interface VersionableObject<
   UpIn = unknown,
   UpOut = unknown,
   DownIn = unknown,
-  DownOut = unknown
+  DownOut = unknown,
 > {
   /**
    * Schema used to validate a versioned object before up/down transforms.
@@ -47,7 +47,7 @@ export interface ObjectTransforms<
   UpIn = unknown,
   UpOut = unknown,
   DownIn = unknown,
-  DownOut = unknown
+  DownOut = unknown,
 > {
   up: <I = UpIn, O = UpOut>(
     obj: I,

@@ -32,7 +32,7 @@ const createSetupDependencies = ({
     cloud: {},
     usageCollection: {},
     fleet: {},
-  } as unknown as ObservabilityOnboardingPluginSetupDependencies);
+  }) as unknown as ObservabilityOnboardingPluginSetupDependencies;
 
 const startPlugin = async ({
   serverless,

@@ -16,4 +16,4 @@ const ENTITY_TYPE_ICONS: Record<string, IconType> = {
 
 /** Icon for an Impact entity type; unknown types get a neutral node, absent types get none. */
 export const entityTypeIcon = (entityType: string | undefined): IconType | undefined =>
-  entityType ? ENTITY_TYPE_ICONS[entityType.toLowerCase()] ?? 'node' : undefined;
+  entityType ? (ENTITY_TYPE_ICONS[entityType.toLowerCase()] ?? 'node') : undefined;

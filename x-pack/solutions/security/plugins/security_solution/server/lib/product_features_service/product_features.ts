@@ -37,7 +37,7 @@ export class ProductFeatures {
     P extends ProductFeatureParams<
       ProductFeatureParamsKey<P> & ProductFeatureKeyType,
       ProductFeatureParamsSubFeatureId<P>
-    >
+    >,
   >(featureGroup: ProductFeatureGroup, versions: P[]) {
     this.groupVersions.set(featureGroup, versions);
   }

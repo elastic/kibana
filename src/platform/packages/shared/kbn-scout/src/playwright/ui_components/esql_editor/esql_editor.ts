@@ -66,7 +66,10 @@ export class EsqlEditor {
   private readonly resizeHandle: Locator;
   private readonly formatButton: Locator;
 
-  constructor(private readonly page: ScoutPage, containerTestSubj?: string) {
+  constructor(
+    private readonly page: ScoutPage,
+    containerTestSubj?: string
+  ) {
     this.scope = containerTestSubj ? page.testSubj.locator(containerTestSubj) : page;
     this.codeEditor = new KibanaCodeEditorWrapper(page);
 

@@ -531,21 +531,20 @@ export interface WorkflowListDto {
   total: number;
   results: WorkflowListItemDto[];
 }
-export interface WorkflowExecutionEngineModel
-  extends Pick<
-    EsWorkflow,
-    | 'id'
-    | 'name'
-    | 'enabled'
-    | 'definition'
-    | 'yaml'
-    | 'managed'
-    | 'managedBy'
-    | 'billable'
-    | 'originManagedWorkflowId'
-    | 'managedVersion'
-    | 'version'
-  > {
+export interface WorkflowExecutionEngineModel extends Pick<
+  EsWorkflow,
+  | 'id'
+  | 'name'
+  | 'enabled'
+  | 'definition'
+  | 'yaml'
+  | 'managed'
+  | 'managedBy'
+  | 'billable'
+  | 'originManagedWorkflowId'
+  | 'managedVersion'
+  | 'version'
+> {
   isTestRun?: boolean;
   isEphemeral?: boolean;
   spaceId?: string;
@@ -693,7 +692,7 @@ export interface InternalConnectorContract extends BaseConnectorContract {
 export interface EditorHandlers<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 > {
   config?: EditorHandlersConfig<Config, Input>;
   input?: EditorHandlersInput<Input, Config>;
@@ -702,7 +701,7 @@ export interface EditorHandlers<
 
 export type EditorHandlersConfig<
   Config extends z.ZodObject = z.ZodObject,
-  Input extends z.ZodType = z.ZodType
+  Input extends z.ZodType = z.ZodType,
 > = {
   [K in DotKeysOf<z.infer<Config>>]?: StepPropertyHandler<
     DotObject<z.infer<Config>>[K],
@@ -713,7 +712,7 @@ export type EditorHandlersConfig<
 
 export type EditorHandlersInput<
   Input extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 > = Input extends z.ZodObject
   ? {
       [K in DotKeysOf<z.infer<Input>>]?: StepPropertyHandler<
@@ -730,7 +729,7 @@ export type EditorHandlersInput<
 export interface DynamicSchema<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 > {
   /**
    * Dynamic Zod schema for validating step output based on input.
@@ -747,7 +746,7 @@ export interface DynamicSchema<
 export interface StepPropertyHandler<
   T = unknown,
   TConfig extends Record<string, unknown> = Record<string, unknown>,
-  TInput extends Record<string, unknown> = Record<string, unknown>
+  TInput extends Record<string, unknown> = Record<string, unknown>,
 > {
   /**
    * Entity selection configuration for the property.
@@ -767,7 +766,7 @@ type DependsOnValuePath = `config.${string}` | `input.${string}`;
 export interface PropertySelectionHandler<
   T = unknown,
   TConfig extends Record<string, unknown> = Record<string, unknown>,
-  TInput extends Record<string, unknown> = Record<string, unknown>
+  TInput extends Record<string, unknown> = Record<string, unknown>,
 > {
   /**
    * Dot paths (e.g. `config.proxy.ssl`, `input.owner`) whose values are passed in `context.values`
@@ -837,7 +836,7 @@ export interface SelectionDetails {
  */
 export interface StepSelectionValues<
   TConfig extends Record<string, unknown> = Record<string, unknown>,
-  TInput extends Record<string, unknown> = Record<string, unknown>
+  TInput extends Record<string, unknown> = Record<string, unknown>,
 > {
   /** Root-level step properties (everything outside the `with` block). */
   config: RecursivePartial<TConfig>;
@@ -847,7 +846,7 @@ export interface StepSelectionValues<
 
 export interface SelectionContext<
   TConfig extends Record<string, unknown> = Record<string, unknown>,
-  TInput extends Record<string, unknown> = Record<string, unknown>
+  TInput extends Record<string, unknown> = Record<string, unknown>,
 > {
   /** The step type ID (e.g., "onechat.runAgent") */
   stepType: string;

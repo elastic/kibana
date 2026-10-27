@@ -74,7 +74,7 @@ describe('seedResponseActionsEndpointPolicy failure cleanup', () => {
   const AGENT_POLICY_NAME = `eval-agent-era-agent-policy-${RUN_ID}`;
 
   const createLog = () =>
-    ({ error: jest.fn(), warning: jest.fn(), info: jest.fn(), debug: jest.fn() } as never);
+    ({ error: jest.fn(), warning: jest.fn(), info: jest.fn(), debug: jest.fn() }) as never;
 
   // A Fleet that lists the leaked agent policy by name and records every delete.
   const createKbnClient = (leakedAgentPolicyIds: string[]) => {

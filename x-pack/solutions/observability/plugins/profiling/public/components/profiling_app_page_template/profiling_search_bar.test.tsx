@@ -22,7 +22,7 @@ describe('ProfilingSearchBar', () => {
   const create = jest.fn();
 
   // Each schema gets a data view titled after its events index.
-  const createDataView = (title: string) => ({ title } as DataView);
+  const createDataView = (title: string) => ({ title }) as DataView;
 
   const renderSearchBar = (schema?: ProfilingSchema) => {
     const props = { kuery: '', onQuerySubmit: jest.fn(), onRefreshClick: jest.fn() };

@@ -44,7 +44,7 @@ const makeService = ({
   const service = new ImpactPillsService({
     esClient,
     logger: loggingSystemMock.createLogger(),
-    getImpactService: () => ({ reconcileMappings, getEntityLabels } as never),
+    getImpactService: () => ({ reconcileMappings, getEntityLabels }) as never,
     privileges: { assertCanRead: assertCanReadInvestigations, assertCanManage: jest.fn() },
     getSpaceId: () => 'space-1',
     getProposals: () =>
@@ -53,7 +53,7 @@ const makeService = ({
             getProposalPrivileges: () => ({ assertCanRead }),
           } as unknown as ProposalsPluginStart)
         : undefined,
-    getEscalationsService: () => ({ scanWithEntityIds } as unknown as EscalationsService),
+    getEscalationsService: () => ({ scanWithEntityIds }) as unknown as EscalationsService,
     ...(getEntityStoreNames ? { getEntityStoreNames } : {}),
   });
   return { service, esClient, reconcileMappings, getEntityLabels, scanWithEntityIds };

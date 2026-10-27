@@ -48,15 +48,12 @@ export interface WorkflowsExtensionsExamplePublicPluginStartDeps {
   // No dependencies needed
 }
 
-export class WorkflowsExtensionsExamplePlugin
-  implements
-    Plugin<
-      WorkflowsExtensionsExamplePublicPluginSetup,
-      WorkflowsExtensionsExamplePublicPluginStart,
-      WorkflowsExtensionsExamplePublicPluginSetupDeps,
-      WorkflowsExtensionsExamplePublicPluginStartDeps
-    >
-{
+export class WorkflowsExtensionsExamplePlugin implements Plugin<
+  WorkflowsExtensionsExamplePublicPluginSetup,
+  WorkflowsExtensionsExamplePublicPluginStart,
+  WorkflowsExtensionsExamplePublicPluginSetupDeps,
+  WorkflowsExtensionsExamplePublicPluginStartDeps
+> {
   public setup(
     core: CoreSetup,
     plugins: WorkflowsExtensionsExamplePublicPluginSetupDeps

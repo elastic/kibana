@@ -23,7 +23,7 @@ const createMockExecutionClient = (
     readEvents: jest.fn(),
     find: jest.fn(),
     ...overrides,
-  } as jest.Mocked<AgentExecutionClient>);
+  }) as jest.Mocked<AgentExecutionClient>;
 
 describe('HeartbeatReporter', () => {
   let logger: MockedLogger;

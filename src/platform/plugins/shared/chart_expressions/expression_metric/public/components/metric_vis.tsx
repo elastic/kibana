@@ -60,8 +60,9 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
 
 const getIcon =
   (type: string) =>
-  ({ width, height, color }: { width: number; height: number; color: string }) =>
-    <EuiIcon type={resolveVisIcon(type)} fill={color} css={{ width, height }} aria-hidden="true" />;
+  ({ width, height, color }: { width: number; height: number; color: string }) => (
+    <EuiIcon type={resolveVisIcon(type)} fill={color} css={{ width, height }} aria-hidden="true" />
+  );
 
 const SecondaryMetricLabelTooltip: NonNullable<SecondaryMetricProps['labelTooltip']> = ({
   children,
@@ -213,7 +214,7 @@ export const MetricVis = ({
     // has no backing data row, so resolving its maximum dimension would throw.
     const paletteColor =
       config.metric.palette?.params && typeof value === 'number' && Number.isFinite(value)
-        ? getColor(
+        ? (getColor(
             value,
             config.metric.palette,
             {
@@ -223,7 +224,7 @@ export const MetricVis = ({
             },
             data,
             rowIdx
-          ) ?? defaultColor
+          ) ?? defaultColor)
         : undefined;
 
     const tileColor = paletteColor ?? config.metric.color ?? defaultColor;
@@ -264,7 +265,7 @@ export const MetricVis = ({
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
         extra: secondaryMetricProps,
-        color: config.metric.applyColorTo ? config.metric.color ?? defaultColor : defaultColor,
+        color: config.metric.applyColorTo ? (config.metric.color ?? defaultColor) : defaultColor,
       };
       return Array.isArray(value)
         ? { ...nonNumericMetricBase, value: value.map((v) => formatPrimaryMetric(v)) }

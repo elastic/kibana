@@ -382,10 +382,10 @@ function convertTreeToOpenNodes(
     const selected = ifBranchVirtualId
       ? selectedId === ifBranchVirtualId
       : enterCaseBranchVirtualId
-      ? selectedId === enterCaseBranchVirtualId
-      : iterationVirtualId
-      ? selectedId === iterationVirtualId
-      : selectedId === stepExecution?.id;
+        ? selectedId === enterCaseBranchVirtualId
+        : iterationVirtualId
+          ? selectedId === iterationVirtualId
+          : selectedId === stepExecution?.id;
 
     const stepId = stepExecution?.stepId ?? item.stepId;
     const stepType = stepExecution?.stepType ?? item.stepType ?? '';
@@ -693,7 +693,8 @@ function convertTreeToOpenNodes(
 
     const isFailureAttempt =
       item.isRetryAttempt && item.isFinalAttempt && status != null && isDangerousStatus(status);
-    const errorMessage = status && isDangerousStatus(status) ? stepExecution?.error ?? null : null;
+    const errorMessage =
+      status && isDangerousStatus(status) ? (stepExecution?.error ?? null) : null;
     const retryLeadIn =
       isFailureAttempt && item.retryAttemptCount != null && errorMessage
         ? i18n.translate('workflows.executionFlyout.failedStep.allAttemptsFailed', {
@@ -918,8 +919,8 @@ const OpenTreeNodes = ({
         const isExpandable = !leafList && (Boolean(node.row.isExpandable) || hasTreeChildren);
         const handleToggle = leafList
           ? undefined
-          : node.row.onToggleExpand ??
-            (hasTreeChildren ? () => onToggleExpand(node.id) : undefined);
+          : (node.row.onToggleExpand ??
+            (hasTreeChildren ? () => onToggleExpand(node.id) : undefined));
         const isExpanded = isNodeExpanded(node, expandedIds, leafList);
         const showChildren = isExpanded && hasTreeChildren;
         const message = getErrorMessage(node.row.error);

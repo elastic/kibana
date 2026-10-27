@@ -40,7 +40,7 @@ const buildCasesClient = (statuses: Record<string, CaseStatuses>) => {
       ({
         cases: ids.flatMap((id) => (statuses[id] ? [{ id, status: statuses[id] }] : [])),
         errors: [],
-      } as unknown as CasesBulkGetResponse)
+      }) as unknown as CasesBulkGetResponse
   );
   return casesClient;
 };

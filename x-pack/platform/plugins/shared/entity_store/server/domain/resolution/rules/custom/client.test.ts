@@ -447,7 +447,7 @@ describe('CustomResolutionRulesClient', () => {
           total: 101,
           per_page: 100,
           page: 1,
-        } as never);
+        }) as never;
       soClient.find
         .mockResolvedValueOnce(page(Array.from({ length: 100 }, (_, i) => `r${i}`)))
         .mockResolvedValueOnce(page(['r100']));

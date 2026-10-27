@@ -16,8 +16,7 @@ import type {
   BulkAttackContextMenuItems,
 } from '../types';
 
-export interface UseAttackWorkflowStatusContextMenuItemsProps
-  extends BaseAttackContextMenuItemsProps {
+export interface UseAttackWorkflowStatusContextMenuItemsProps extends BaseAttackContextMenuItemsProps {
   /** Array of attacks with workflow status */
   attacksWithWorkflowStatus: AttackWithWorkflowStatus[];
 }

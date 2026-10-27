@@ -591,7 +591,7 @@ describe('#asScoped', () => {
             roles: [],
             authentication_provider: { type: 'http', name: '__http__' },
             authentication_realm: { type: '_service_account', name: '_service_account' },
-          } as never),
+          }) as never,
       });
 
       await auditSetup

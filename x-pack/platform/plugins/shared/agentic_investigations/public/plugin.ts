@@ -29,9 +29,8 @@ import type {
 } from './types';
 
 const LazyInvestigationCardComponent = React.lazy(async () => {
-  const { InvestigationCard } = await import(
-    './conversation_templates/templates/investigation/card'
-  );
+  const { InvestigationCard } =
+    await import('./conversation_templates/templates/investigation/card');
   return { default: InvestigationCard };
 });
 
@@ -50,15 +49,12 @@ const LazyInvestigationCard: AgenticInvestigationsPublicPluginStart['Investigati
  * user profiles and the connected investigation components are also consumed directly by a
  * solution's UI.
  */
-export class AgenticInvestigationsPublicPlugin
-  implements
-    Plugin<
-      AgenticInvestigationsPublicPluginSetup,
-      AgenticInvestigationsPublicPluginStart,
-      AgenticInvestigationsPublicSetupDependencies,
-      AgenticInvestigationsPublicStartDependencies
-    >
-{
+export class AgenticInvestigationsPublicPlugin implements Plugin<
+  AgenticInvestigationsPublicPluginSetup,
+  AgenticInvestigationsPublicPluginStart,
+  AgenticInvestigationsPublicSetupDependencies,
+  AgenticInvestigationsPublicStartDependencies
+> {
   private readonly escalationsEnabled: boolean;
   private readonly groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
   private impactEntityOpener: ImpactEntityOpener | undefined;

@@ -48,7 +48,7 @@ const esqlSource = createMockEsqlSource(
 const record = { raw: { avg_bytes: 12 } } as unknown as DataTableRecord;
 
 const createFetchParams = (overrides: Partial<FetchParams> = {}): FetchParams =>
-  ({ query: { esql: ESQL }, dataSource: esqlSource, ...overrides } as FetchParams);
+  ({ query: { esql: ESQL }, dataSource: esqlSource, ...overrides }) as FetchParams;
 
 const createDocuments = (
   overrides: Partial<DataDocumentsMsg> & Pick<DataDocumentsMsg, 'fetchStatus'>

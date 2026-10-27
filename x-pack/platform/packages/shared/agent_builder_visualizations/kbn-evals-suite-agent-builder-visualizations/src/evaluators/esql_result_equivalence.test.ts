@@ -58,7 +58,7 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
           return { columns: [], values: result };
         }),
       },
-    } as unknown as ElasticsearchClient);
+    }) as unknown as ElasticsearchClient;
 
   const evaluate = (esClient: ElasticsearchClient, goldQuery = GOLD, candidateQuery = CANDIDATE) =>
     createEsqlResultEquivalenceEvaluator({
@@ -173,7 +173,7 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
             };
           }),
         },
-      } as unknown as ElasticsearchClient);
+      }) as unknown as ElasticsearchClient;
 
     it('skips when the LIMIT cuts through rows tied on the SORT key', async () => {
       const esClient = buildTopEsClient([

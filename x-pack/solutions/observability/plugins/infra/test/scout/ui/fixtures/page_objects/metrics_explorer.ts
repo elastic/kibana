@@ -25,7 +25,10 @@ export class MetricsExplorerPage {
   public readonly selectedMetricPills: Locator;
   private readonly loadedSavedViewButton: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.metricsComboBox = this.page.getByTestId('metricsExplorer-metrics');
     this.charts = this.page.getByTestId('metricsExplorer-chart');
     this.missingMetricMessage = this.page.getByTestId('metricsExplorer-missingMetricMessage');

@@ -274,7 +274,7 @@ describe('executeRegexRulesTask', () => {
         entityClass: 'MISC',
         pattern,
         ...overrides,
-      } as RegexAnonymizationRule);
+      }) as RegexAnonymizationRule;
 
     it('is false for every shipped built-in rule and for a pattern RE2 can compile', () => {
       DEFAULT_BUILTIN_REGEX_RULES.forEach((rule) => expect(usesNativeFallback(rule)).toBe(false));

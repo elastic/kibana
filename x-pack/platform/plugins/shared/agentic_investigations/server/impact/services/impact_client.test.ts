@@ -44,10 +44,10 @@ const createClient = ({
       ({
         listByConversationIds,
         getDocumentService: () => ({ searchConversationIds }),
-      } as unknown as ImpactService),
+      }) as unknown as ImpactService,
     getSpaceId,
     privileges,
-    getConversationClient: async () => ({ bulkGet } as unknown as ConversationPublicClient),
+    getConversationClient: async () => ({ bulkGet }) as unknown as ConversationPublicClient,
   })(request);
 
   return {

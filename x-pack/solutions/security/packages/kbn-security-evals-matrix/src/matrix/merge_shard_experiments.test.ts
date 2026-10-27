@@ -19,7 +19,7 @@ const experiment = (
     execution_id: executionId,
     timestamp,
     task_model: { id: modelId },
-  } as EvaluationExperimentSummary);
+  }) as EvaluationExperimentSummary;
 
 describe('pickShardExperiments', () => {
   it('keeps every shard of the same sweep, not just the newest', () => {

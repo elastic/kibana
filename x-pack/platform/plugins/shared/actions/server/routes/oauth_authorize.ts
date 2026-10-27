@@ -34,7 +34,10 @@ import { OAUTH_API_TAG } from '../feature';
 import { getConnectorAuthInitiateErrorType, recordConnectorAuth } from '../lib/connector_metrics';
 
 class OAuthRouteError extends Error {
-  constructor(message: string, public readonly statusCode: number) {
+  constructor(
+    message: string,
+    public readonly statusCode: number
+  ) {
     super(message);
     this.name = 'OAuthRouteError';
   }
@@ -374,10 +377,10 @@ function handleOAuthStartError(
     err instanceof OAuthRouteError
       ? err.statusCode
       : Boom.isBoom(err)
-      ? err.output.statusCode
-      : err instanceof Error && typeof (err as { statusCode?: unknown }).statusCode === 'number'
-      ? (err as Error & { statusCode: number }).statusCode
-      : 500;
+        ? err.output.statusCode
+        : err instanceof Error && typeof (err as { statusCode?: unknown }).statusCode === 'number'
+          ? (err as Error & { statusCode: number }).statusCode
+          : 500;
 
   // The connector may not have been resolved when the flow failed, so its type is unknown here.
   recordConnectorAuth({

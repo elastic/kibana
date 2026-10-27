@@ -44,8 +44,8 @@ export type ChartsConfigMap = MetricConfigMap<ChartsConfig>;
 export type SchemaWrappedEntry<T> = T extends AggregationConfig
   ? SchemaBasedAggregations
   : T extends LensBaseLayer
-  ? SchemaBasedFormula
-  : never;
+    ? SchemaBasedFormula
+    : never;
 
 export type MetricConfigEntry<T extends RawConfig = RawConfig> =
   | MetricsUIAggregation
@@ -55,8 +55,8 @@ export type MetricConfigEntry<T extends RawConfig = RawConfig> =
 export type UnwrapMetricConfig<T> = T extends SchemaBasedFormula
   ? LensBaseLayer
   : T extends SchemaBasedAggregations
-  ? MetricsUIAggregation
-  : T;
+    ? MetricsUIAggregation
+    : T;
 
 export type ResolvedMetricMap<T extends MetricConfigMap> = {
   [K in keyof T]: UnwrapMetricConfig<T[K]>;
@@ -97,7 +97,7 @@ export interface InventoryTsvbMetrics {
 }
 export interface InventoryMetricsConfigWithLens<
   TFormulas extends FormulasConfigMap,
-  TCharts extends ChartsConfigMap
+  TCharts extends ChartsConfigMap,
 > {
   getFormulas: (args?: { schema?: DataSchemaFormat }) => Promise<FormulasCatalog<TFormulas>>;
   getCharts: (args?: { schema?: DataSchemaFormat }) => Promise<TCharts>;
@@ -106,12 +106,12 @@ export interface InventoryMetricsConfigWithLens<
 export type InventoryMetricsConfig<
   TAggregations extends AggregationConfigMap = AggregationConfigMap,
   TFormulas extends FormulasConfigMap | undefined = undefined,
-  TCharts extends ChartsConfigMap | undefined = undefined
+  TCharts extends ChartsConfigMap | undefined = undefined,
 > = BaseInventoryMetricsConfig<TAggregations> &
   (TFormulas extends undefined
     ? TCharts extends undefined
       ? InventoryTsvbMetrics
       : never
     : TCharts extends undefined
-    ? never
-    : InventoryMetricsConfigWithLens<NonNullable<TFormulas>, NonNullable<TCharts>>);
+      ? never
+      : InventoryMetricsConfigWithLens<NonNullable<TFormulas>, NonNullable<TCharts>>);

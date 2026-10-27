@@ -21,7 +21,7 @@ const createMockSecurityContext = () =>
   ({
     getInternalFleetServices: jest.fn(),
     getAppClient: jest.fn(),
-  } as unknown);
+  }) as unknown;
 
 const createMockInitializationFlowContext = (): InitializationFlowContext =>
   ({
@@ -29,7 +29,7 @@ const createMockInitializationFlowContext = (): InitializationFlowContext =>
       securitySolution: Promise.resolve(createMockSecurityContext()),
     },
     logger: loggerMock.create(),
-  } as unknown as InitializationFlowContext);
+  }) as unknown as InitializationFlowContext;
 
 describe('initAiPromptsFlow', () => {
   beforeEach(() => {

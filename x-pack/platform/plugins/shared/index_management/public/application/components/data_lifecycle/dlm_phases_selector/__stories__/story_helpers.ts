@@ -32,4 +32,4 @@ export const createStoryAppContext = (canManageSnapshotRestore: boolean): AppDep
         trialDaysLeft: () => undefined,
       },
     },
-  } as unknown as AppDependencies);
+  }) as unknown as AppDependencies;

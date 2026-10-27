@@ -31,10 +31,10 @@ const makeClassicEpisode = (
       workflowTags: [],
       caseIds,
     } as ClassicAlertActionContext,
-  } as unknown as AlertEpisode);
+  }) as unknown as AlertEpisode;
 
 const makeNativeEpisode = (id: string): AlertEpisode =>
-  ({ 'episode.id': id, 'rule.id': 'rule-v2', 'rule.name': 'V2 rule' } as unknown as AlertEpisode);
+  ({ 'episode.id': id, 'rule.id': 'rule-v2', 'rule.name': 'V2 rule' }) as unknown as AlertEpisode;
 
 const setup = (permissions = { create: true, read: true }) => {
   const canUseCases = jest.fn().mockReturnValue(permissions);

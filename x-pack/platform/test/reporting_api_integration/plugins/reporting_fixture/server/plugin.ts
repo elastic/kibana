@@ -21,9 +21,12 @@ export interface ReportingFixtureStartDeps {
   taskManager: TaskManagerStartContract;
 }
 
-export class ReportingFixture
-  implements Plugin<void, void, ReportingFixtureSetupDeps, ReportingFixtureStartDeps>
-{
+export class ReportingFixture implements Plugin<
+  void,
+  void,
+  ReportingFixtureSetupDeps,
+  ReportingFixtureStartDeps
+> {
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
   taskManagerStart: Promise<TaskManagerStartContract> = firstValueFrom(this.taskManagerStart$);
 

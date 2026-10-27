@@ -11,7 +11,10 @@ export abstract class Tab {
   public abstract readonly tabName: string;
   public abstract readonly tab: Locator;
 
-  constructor(protected readonly page: ScoutPage, protected readonly kbnUrl: KibanaUrl) {}
+  constructor(
+    protected readonly page: ScoutPage,
+    protected readonly kbnUrl: KibanaUrl
+  ) {}
 
   protected abstract waitForTabLoad(): Promise<void>;
 

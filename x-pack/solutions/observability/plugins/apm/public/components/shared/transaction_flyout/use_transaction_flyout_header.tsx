@@ -97,7 +97,7 @@ export function useTransactionFlyoutHeader({
         {transactionName}
       </TransactionDetailLink>
     ) : (
-      transactionName ?? NOT_AVAILABLE_LABEL
+      (transactionName ?? NOT_AVAILABLE_LABEL)
     );
 
   const url = getTransactionUrl(transaction);

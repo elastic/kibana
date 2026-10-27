@@ -101,18 +101,21 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
           defaultMessage: 'Enter a destination name.',
         })
       : destinationNameError === 'duplicate'
-      ? i18n.translate('xpack.streams.destinations.destinationNameDuplicateErrorMessage', {
-          defaultMessage: 'A destination with this name already exists.',
-        })
-      : destinationNameError === 'tooLong'
-      ? i18n.translate('xpack.streams.destinations.destinationNameTooLongErrorMessage', {
-          defaultMessage: 'This name is too long for an S3 destination.',
-        })
-      : destinationNameError === 'credentialConflict'
-      ? i18n.translate('xpack.streams.destinations.destinationNameCredentialConflictErrorMessage', {
-          defaultMessage: 'This name conflicts with an existing credential.',
-        })
-      : undefined;
+        ? i18n.translate('xpack.streams.destinations.destinationNameDuplicateErrorMessage', {
+            defaultMessage: 'A destination with this name already exists.',
+          })
+        : destinationNameError === 'tooLong'
+          ? i18n.translate('xpack.streams.destinations.destinationNameTooLongErrorMessage', {
+              defaultMessage: 'This name is too long for an S3 destination.',
+            })
+          : destinationNameError === 'credentialConflict'
+            ? i18n.translate(
+                'xpack.streams.destinations.destinationNameCredentialConflictErrorMessage',
+                {
+                  defaultMessage: 'This name conflicts with an existing credential.',
+                }
+              )
+            : undefined;
 
   const selectStorageKind = useCallback(
     (nextStorageKind: DestinationStorageKind) => () => setStorageKind(nextStorageKind),

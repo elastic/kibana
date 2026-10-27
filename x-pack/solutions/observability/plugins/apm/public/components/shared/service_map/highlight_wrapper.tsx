@@ -33,18 +33,20 @@ export function HighlightWrapper({
       padding: ${euiTheme.size.s};
       border: ${euiTheme.border.width.thick} solid transparent;
       border-radius: ${euiTheme.border.radius.medium};
-      ${isActiveSearchMatch
-        ? `
+      ${
+        isActiveSearchMatch
+          ? `
         outline: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.textSubdued};
         outline-offset: -${euiTheme.border.width.thick};
         background-color: ${euiTheme.colors.backgroundBaseSubdued};
       `
-        : contextHighlight
-        ? `
+          : contextHighlight
+            ? `
         border: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.primary};
         background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};
       `
-        : ''}
+            : ''
+      }
     `,
     [euiTheme, isActiveSearchMatch, contextHighlight]
   );
@@ -52,8 +54,8 @@ export function HighlightWrapper({
   const testSubj = isActiveSearchMatch
     ? 'serviceMapNodeSearchHighlightFrame'
     : contextHighlight
-    ? 'serviceMapNodeContextHighlightFrame'
-    : undefined;
+      ? 'serviceMapNodeContextHighlightFrame'
+      : undefined;
 
   return (
     <div

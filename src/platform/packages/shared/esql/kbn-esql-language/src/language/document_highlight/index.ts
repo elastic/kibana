@@ -44,5 +44,5 @@ export function getDocumentHighlightItems(
     },
   });
 
-  return targetName ? columnsByName.get(targetName) ?? [] : [];
+  return targetName ? (columnsByName.get(targetName) ?? []) : [];
 }

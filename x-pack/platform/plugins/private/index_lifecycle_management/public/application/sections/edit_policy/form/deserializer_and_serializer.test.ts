@@ -455,7 +455,7 @@ describe('deserializer and serializer', () => {
           getFormData: () => formData,
           getFields: () => fields,
         },
-      } as unknown as ValidationFuncArg<FormData, unknown>);
+      }) as unknown as ValidationFuncArg<FormData, unknown>;
 
     it('requires at least one data phase enabled', () => {
       const hotEnabledField = { value: false, clearErrors: jest.fn() };

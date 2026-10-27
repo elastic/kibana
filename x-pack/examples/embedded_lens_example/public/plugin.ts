@@ -20,9 +20,12 @@ export interface StartDependencies {
   lens: LensPublicStart;
 }
 
-export class EmbeddedLensExamplePlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class EmbeddedLensExamplePlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   public setup(core: CoreSetup<StartDependencies>, { developerExamples }: SetupDependencies) {
     core.application.register({
       id: 'embedded_lens_example',

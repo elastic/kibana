@@ -442,15 +442,13 @@ export const loadInvestigationRound = async ({
     source: 'tool_call_params_only',
     roundId,
     steps: paramOnlySteps,
-    rawSteps: mergedFallbackCalls.map(
-      (call, index): ToolCallStep => ({
-        type: 'tool_call' as ToolCallStep['type'],
-        tool_call_id: call.tool_call_id ?? `investigation-call-${index}`,
-        tool_id: call.tool_id ?? 'unknown',
-        params: call.params ?? {},
-        results: (call.results as ToolResult[] | undefined) ?? [],
-      })
-    ),
+    rawSteps: mergedFallbackCalls.map((call, index): ToolCallStep => ({
+      type: 'tool_call' as ToolCallStep['type'],
+      tool_call_id: call.tool_call_id ?? `investigation-call-${index}`,
+      tool_id: call.tool_id ?? 'unknown',
+      params: call.params ?? {},
+      results: (call.results as ToolResult[] | undefined) ?? [],
+    })),
     toolCalls: mergedFallbackCalls,
   };
 };

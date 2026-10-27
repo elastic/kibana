@@ -40,13 +40,13 @@ const sourceResponse = (rows: MockRow[]): ESQLSearchResponse =>
       ...(row.createdAt !== undefined ? [row.createdAt] : []),
       ...(row.operatorClosed !== undefined ? [row.operatorClosed] : []),
     ]),
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 const countResponse = (total: number): ESQLSearchResponse =>
   ({
     columns: [{ name: 'total', type: 'long' }],
     values: [[total]],
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 const dataDoc = {
   event_id: 'agent-event-1',
@@ -115,7 +115,7 @@ const makeStatusAlertEventsClient = (
   ({
     createAlertEvent: jest.fn().mockResolvedValue(undefined),
     ...overrides,
-  } as jest.Mocked<AlertEventsClientApi>);
+  }) as jest.Mocked<AlertEventsClientApi>;
 
 const createStatusSearchClient = (
   latest: SignificantEvent | undefined,
@@ -927,9 +927,9 @@ describe('RuleEventsClient', () => {
       ...overrides,
     });
     const makeWriter = () =>
-      ({ createAlertEvent: jest.fn().mockResolvedValue(undefined) } as jest.Mocked<
+      ({ createAlertEvent: jest.fn().mockResolvedValue(undefined) }) as jest.Mocked<
         Pick<AlertEventsClientApi, 'createAlertEvent'>
-      >);
+      >;
     const clientWith = ({
       head,
       writer,

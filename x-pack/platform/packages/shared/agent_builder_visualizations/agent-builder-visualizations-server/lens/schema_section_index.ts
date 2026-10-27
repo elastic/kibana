@@ -167,7 +167,7 @@ const describeSection = (section: z.ZodType): string => {
   const fields = toFieldModels(getFields(section));
   return fields.length > 0
     ? fields.map((field) => renderField(field)).join(', ')
-    : z.toJSONSchema(section, { io: 'input' }).type?.toString() ?? 'value';
+    : (z.toJSONSchema(section, { io: 'input' }).type?.toString() ?? 'value');
 };
 
 /**

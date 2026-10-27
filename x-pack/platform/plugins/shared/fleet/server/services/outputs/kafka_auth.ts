@@ -268,8 +268,8 @@ const mergeSettings = (base: object, override: object): Record<string, unknown> 
         isPlainObject(baseValue) && isPlainObject(overrideValue)
           ? mergeSettings(baseValue as object, overrideValue as object)
           : overrideValue !== undefined
-          ? overrideValue
-          : baseValue,
+            ? overrideValue
+            : baseValue,
       ];
     })
   );

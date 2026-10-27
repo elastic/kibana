@@ -56,7 +56,7 @@ const agentBuilderWithSkill = (present: boolean): AgentBuilderPluginStart =>
         ),
       })),
     },
-  } as unknown as AgentBuilderPluginStart);
+  }) as unknown as AgentBuilderPluginStart;
 
 interface PersistentWorkerDocument {
   id: string;
@@ -1353,11 +1353,11 @@ describe('WorkersService', () => {
         assertHardGate: jest.fn(async () => undefined),
         ensureSupplyForSpace: jest.fn(async () => undefined),
         teardownSupplyForSpace: jest.fn(async () => undefined),
-      } as unknown as ThreatIntelSupplyService & {
+      }) as unknown as ThreatIntelSupplyService & {
         assertHardGate: jest.Mock;
         ensureSupplyForSpace: jest.Mock;
         teardownSupplyForSpace: jest.Mock;
-      });
+      };
 
     const makeHuntService = (
       harness: ReturnType<typeof createPersistentHarness>,
@@ -1771,8 +1771,8 @@ describe('WorkersService', () => {
         logger: loggingSystemMock.createLogger() as Logger,
         getEsClient: async () => createHardGateEsClient(row.hardGateOk !== false),
         enumerateSpaceIds: async () => ['default', SPACE_A, SPACE_B],
-        getInference: () => ({ getDefaultConnector: jest.fn() } as unknown as InferenceServerStart),
-        getUiSettingsClient: () => ({ get: jest.fn() } as unknown as IUiSettingsClient),
+        getInference: () => ({ getDefaultConnector: jest.fn() }) as unknown as InferenceServerStart,
+        getUiSettingsClient: () => ({ get: jest.fn() }) as unknown as IUiSettingsClient,
       });
       const service = new WorkersService(
         harness.management,
@@ -1796,9 +1796,10 @@ describe('WorkersService', () => {
         harness.updateWorkflow.mockRejectedValueOnce(new Error('enable write failed'));
       }
 
-      const result = await (row.operation === 'enable'
-        ? service.update(HUNT, ENABLE, SPACE_A, request)
-        : service.update(HUNT, { enabled: false }, SPACE_A, request)
+      const result = await (
+        row.operation === 'enable'
+          ? service.update(HUNT, ENABLE, SPACE_A, request)
+          : service.update(HUNT, { enabled: false }, SPACE_A, request)
       ).then(
         (outcome) =>
           outcome.outcome === 'blocked' ? `blocked: ${outcome.reason}` : outcome.outcome,

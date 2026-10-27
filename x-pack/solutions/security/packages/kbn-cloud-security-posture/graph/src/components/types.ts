@@ -56,9 +56,7 @@ export interface NodeToolbarItem {
 }
 
 export interface EntityNodeViewModel
-  extends Record<string, unknown>,
-    EntityNodeDataModel,
-    BaseNodeDataViewModel {
+  extends Record<string, unknown>, EntityNodeDataModel, BaseNodeDataViewModel {
   expandButtonClick?: ExpandButtonClickCallback;
   /**
    * Returns the toolbar action items for this specific node. When provided, actions
@@ -72,16 +70,12 @@ export interface EntityNodeViewModel
 }
 
 export interface GroupNodeViewModel
-  extends Record<string, unknown>,
-    GroupNodeDataModel,
-    BaseNodeDataViewModel {}
+  extends Record<string, unknown>, GroupNodeDataModel, BaseNodeDataViewModel {}
 
 export type NodeDocumentDataViewModel = NodeDocumentDataModel;
 
 export interface LabelNodeViewModel
-  extends Record<string, unknown>,
-    LabelNodeDataModel,
-    BaseNodeDataViewModel {
+  extends Record<string, unknown>, LabelNodeDataModel, BaseNodeDataViewModel {
   expandButtonClick?: ExpandButtonClickCallback;
   /**
    * Returns the toolbar action items for this specific label node. When provided, actions
@@ -96,9 +90,7 @@ export interface LabelNodeViewModel
 }
 
 export interface RelationshipNodeViewModel
-  extends Record<string, unknown>,
-    RelationshipNodeDataModel,
-    BaseNodeDataViewModel {}
+  extends Record<string, unknown>, RelationshipNodeDataModel, BaseNodeDataViewModel {}
 
 export type NodeViewModel =
   | EntityNodeViewModel

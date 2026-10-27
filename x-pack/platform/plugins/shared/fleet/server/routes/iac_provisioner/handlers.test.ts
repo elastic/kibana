@@ -39,7 +39,7 @@ const mockedIsEnabled = jest.mocked(isIacProvisionerEnabled);
 const buildContext = () =>
   ({
     fleet: Promise.resolve({ internalSoClient: {} }),
-  } as any);
+  }) as any;
 
 const buildRequest = (body: Record<string, unknown>) =>
   httpServerMock.createKibanaRequest({ body });

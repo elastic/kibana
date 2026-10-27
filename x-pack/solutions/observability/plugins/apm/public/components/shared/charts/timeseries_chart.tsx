@@ -97,7 +97,7 @@ export function TimeseriesChart({
   );
   const allSeries = [
     ...timeseriesWithEdgeDots,
-    ...(isComparingExpectedBounds ? anomalyChartTimeseries?.boundaries ?? [] : []),
+    ...(isComparingExpectedBounds ? (anomalyChartTimeseries?.boundaries ?? []) : []),
     ...(anomalyChartTimeseries?.scores ?? []),
   ]
     // Sorting series so that area type series are before line series

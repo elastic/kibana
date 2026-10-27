@@ -106,8 +106,8 @@ export const resolveWarmStartCalibrationOrientation = (
     orientation === 'aa'
       ? WARM_START_CALIBRATION_ARTIFACT_A
       : orientation === 'ab'
-      ? WARM_START_CALIBRATION_ARTIFACT_B
-      : WARM_START_CALIBRATION_ARTIFACT_A;
+        ? WARM_START_CALIBRATION_ARTIFACT_B
+        : WARM_START_CALIBRATION_ARTIFACT_A;
 
   return {
     orientation,

@@ -22,7 +22,7 @@ const createHit = (
     raw: { _id: id, _index: index },
     flattened: { _id: id, _index: index, ...flattened },
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const parseUrlParams = (url: string) => {
   const params = new URLSearchParams(url.split('?')[1]);

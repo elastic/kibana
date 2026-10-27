@@ -41,7 +41,7 @@ const createMockAttachments = (
 ): AttachmentStateManager =>
   ({
     getActive: jest.fn().mockReturnValue(active),
-  } as unknown as AttachmentStateManager);
+  }) as unknown as AttachmentStateManager;
 
 const createMockPersistedWorkflowLookup = (
   workflows: Map<string, { id: string; name?: string; yaml?: string }> = new Map()

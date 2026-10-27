@@ -77,7 +77,7 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
     // if action is a summary action, show the default summary message
     return (action as RuleAction).frequency?.summary
       ? selectedRuleTypeModel.defaultSummaryMessage
-      : selectedActionGroup?.defaultActionMessage ?? selectedRuleTypeModel.defaultActionMessage;
+      : (selectedActionGroup?.defaultActionMessage ?? selectedRuleTypeModel.defaultActionMessage);
   }, [isSystemAction, action, selectedRuleTypeModel, selectedActionGroup]);
 
   if (!ParamsFieldsComponent) {

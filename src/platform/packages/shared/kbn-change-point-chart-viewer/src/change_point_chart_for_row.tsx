@@ -16,11 +16,10 @@ import { getCardForRow } from './utils/derive_change_point_cards';
 import { useChangePointCards } from './hooks/use_change_point_cards';
 import type { UnifiedChangePointGridProps } from './types';
 
-export interface ChangePointChartForRowProps
-  extends Pick<
-    UnifiedChangePointGridProps,
-    'services' | 'fetchParams' | 'fetch$' | 'onBrushEnd' | 'onFilter' | 'actions'
-  > {
+export interface ChangePointChartForRowProps extends Pick<
+  UnifiedChangePointGridProps,
+  'services' | 'fetchParams' | 'fetch$' | 'onBrushEnd' | 'onFilter' | 'actions'
+> {
   row: Readonly<Record<string, unknown>>;
 }
 

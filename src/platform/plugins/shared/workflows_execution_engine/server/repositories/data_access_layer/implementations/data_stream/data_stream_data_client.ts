@@ -47,9 +47,9 @@ export interface DataStreamDataClientDeps<TExecution extends { id: string }> {
   logger: Logger;
 }
 
-export class DataStreamDataClient<TExecution extends { id: string }>
-  implements DataClient<TExecution>
-{
+export class DataStreamDataClient<
+  TExecution extends { id: string },
+> implements DataClient<TExecution> {
   private indexesToQuery: string[] = [];
   private readonly additionalIndexesToQuery: string[] = [];
 

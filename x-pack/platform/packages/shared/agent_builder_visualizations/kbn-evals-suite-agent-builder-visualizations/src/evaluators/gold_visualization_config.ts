@@ -12,13 +12,14 @@ import { isRecord } from '../evaluator_utils';
  * Deep-partial of a Config API type. String `type` fields also accept
  * alternatives (`'bar'` or `['bar', 'bar_horizontal']`).
  */
-export type GoldPartial<T> = T extends ReadonlyArray<infer U>
-  ? ReadonlyArray<GoldPartial<U>>
-  : T extends object
-  ? {
-      [K in keyof T]?: K extends 'type' ? GoldTypeAlternatives<T[K]> : GoldPartial<T[K]>;
-    }
-  : T;
+export type GoldPartial<T> =
+  T extends ReadonlyArray<infer U>
+    ? ReadonlyArray<GoldPartial<U>>
+    : T extends object
+      ? {
+          [K in keyof T]?: K extends 'type' ? GoldTypeAlternatives<T[K]> : GoldPartial<T[K]>;
+        }
+      : T;
 
 type GoldTypeAlternatives<T> = [T] extends [string] ? T | readonly T[] : GoldPartial<T>;
 

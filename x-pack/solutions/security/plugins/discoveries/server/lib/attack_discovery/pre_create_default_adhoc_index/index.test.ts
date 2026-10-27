@@ -15,10 +15,10 @@ const flushPromises = async () => {
   await new Promise((resolve) => setImmediate(resolve));
 };
 
-const createLogger = (): Logger => ({ warn: jest.fn() } as unknown as Logger);
+const createLogger = (): Logger => ({ warn: jest.fn() }) as unknown as Logger;
 
 const createDataClient = (getWriter = jest.fn().mockResolvedValue({})) =>
-  ({ getWriter } as unknown as IRuleDataClient);
+  ({ getWriter }) as unknown as IRuleDataClient;
 
 const createCore = (getComponentTemplate: jest.Mock): CoreSetup =>
   ({
@@ -29,7 +29,7 @@ const createCore = (getComponentTemplate: jest.Mock): CoreSetup =>
         },
       },
     ]),
-  } as unknown as CoreSetup);
+  }) as unknown as CoreSetup;
 
 describe('preCreateDefaultAdhocAttackDiscoveryIndex', () => {
   const contextNotRegistered = async () => ({

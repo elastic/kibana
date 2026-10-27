@@ -93,7 +93,9 @@ export const verifyAlertsRagSnapshot = async ({
   };
 
   const totalOpenAlerts =
-    typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
+    typeof response.hits.total === 'number'
+      ? response.hits.total
+      : (response.hits.total?.value ?? 0);
 
   const aggs = response.aggregations;
   const severities = new Set((aggs?.severities.buckets ?? []).map((b) => b.key));

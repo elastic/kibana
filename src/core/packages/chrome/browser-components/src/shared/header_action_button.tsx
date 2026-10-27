@@ -53,8 +53,10 @@ export const useHeaderButtonStyleVars = () => {
   } as React.CSSProperties;
 };
 
-export interface HeaderActionButtonProps
-  extends Pick<React.AriaAttributes, 'aria-expanded' | 'aria-haspopup'> {
+export interface HeaderActionButtonProps extends Pick<
+  React.AriaAttributes,
+  'aria-expanded' | 'aria-haspopup'
+> {
   variant: 'bordered' | 'plain';
   children: ReactNode;
   onClick: () => void;

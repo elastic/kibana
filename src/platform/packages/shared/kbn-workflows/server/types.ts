@@ -154,8 +154,7 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
 }
 
 export interface ManagedWorkflowsSystemApi
-  extends RegisteredManagedWorkflowsLifecycleApi,
-    ManagedWorkflowStateApi {}
+  extends RegisteredManagedWorkflowsLifecycleApi, ManagedWorkflowStateApi {}
 
 /**
  * Plugin-bound API for managed workflow operations that do not require a Kibana request.
@@ -200,8 +199,7 @@ export interface ManagedWorkflowsApi {
  * Consumer-facing managed workflows client returned by workflows_extensions.
  */
 export interface PluginScopedManagedWorkflowsApi
-  extends RegisteredManagedWorkflowsLifecycleApi,
-    ManagedWorkflowStateApi {
+  extends RegisteredManagedWorkflowsLifecycleApi, ManagedWorkflowStateApi {
   execute: (
     request: KibanaRequest,
     id: ManagedWorkflowId,

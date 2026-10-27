@@ -13,7 +13,7 @@ type MgetDoc = Record<string, unknown>;
 const esClientWith = (docs: MgetDoc[]): ElasticsearchClient =>
   ({
     mget: jest.fn().mockResolvedValue({ docs }),
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 const found = (index: string, id: string, source: Record<string, unknown>): MgetDoc => ({
   _index: index,

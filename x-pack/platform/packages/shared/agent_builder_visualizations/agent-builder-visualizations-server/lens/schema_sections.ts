@@ -47,11 +47,10 @@ const xySectionsSchema = toSectionsSchema(xyConfigSchemaESQL).extend({
 });
 
 /** The top-level config keys the model can load for a chart type. */
-const getSectionsSchema = memoize(
-  (chartType: SupportedChartType): z.ZodObject =>
-    chartType === SupportedChartType.XY
-      ? xySectionsSchema
-      : toSectionsSchema(chartTypeRegistry[chartType].schema)
+const getSectionsSchema = memoize((chartType: SupportedChartType): z.ZodObject =>
+  chartType === SupportedChartType.XY
+    ? xySectionsSchema
+    : toSectionsSchema(chartTypeRegistry[chartType].schema)
 );
 
 /** Names of the sections the config author can load for a chart type. */
@@ -85,7 +84,10 @@ export const filterSchemaSections = (
 };
 
 /** Sections that hold the fields a config validation error points at. */
-export const getFailingSchemaSections = (chartType: SupportedChartType, error: unknown): string[] =>
+export const getFailingSchemaSections = (
+  chartType: SupportedChartType,
+  error: unknown
+): string[] =>
   error instanceof z.ZodError
     ? filterSchemaSections(
         chartType,

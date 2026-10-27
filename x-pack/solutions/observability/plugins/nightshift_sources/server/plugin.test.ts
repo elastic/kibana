@@ -54,7 +54,7 @@ const createSetup = () => {
 
   const setup = plugin.setup(coreSetup);
   const [{ dependencies }] = jest.mocked(registerRoutes).mock.calls[0] as unknown as [
-    { dependencies: { getSourcesClient: GetSourcesClient } }
+    { dependencies: { getSourcesClient: GetSourcesClient } },
   ];
   return { plugin, coreStart, setup, routeGetSourcesClient: dependencies.getSourcesClient };
 };

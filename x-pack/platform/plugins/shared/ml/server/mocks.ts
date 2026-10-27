@@ -22,7 +22,7 @@ const createSetupContract = () =>
     resultsServiceProvider: createResultsServiceProviderMock(),
     alertingServiceProvider: createAlertingServiceProviderMock(),
     trainedModelsProvider: createTrainedModelsProviderMock(),
-  } as unknown as jest.Mocked<MlPluginSetup>);
+  }) as unknown as jest.Mocked<MlPluginSetup>;
 
 const createStartContract = () => jest.fn();
 

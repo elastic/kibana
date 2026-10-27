@@ -28,7 +28,7 @@ export const useEntityFilter = ({ pills, total }: Pick<PagedImpactPills, 'pills'
   const selectedPill =
     isQueueEmpty || selected === null
       ? null
-      : pills.find((pill) => pill.entityId === selected.entityId) ?? selected;
+      : (pills.find((pill) => pill.entityId === selected.entityId) ?? selected);
 
   return {
     entityFilter: selectedPill?.entityId ?? null,

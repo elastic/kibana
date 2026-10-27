@@ -74,7 +74,7 @@ export const isToolHandlerStandardReturn = (
  */
 export type ToolHandlerFn<
   TParams extends Record<string, unknown> = Record<string, unknown>,
-  TResult extends ToolResult = ToolResult
+  TResult extends ToolResult = ToolResult,
 > = (args: TParams, context: ToolHandlerContext) => MaybePromise<ToolHandlerReturn<TResult>>;
 
 export interface ToolHandlerCallContext {

@@ -8,7 +8,10 @@
 /* eslint-disable max-classes-per-file */
 
 export class FetchFieldsMetadataError extends Error {
-  constructor(message: string, public cause?: Error) {
+  constructor(
+    message: string,
+    public cause?: Error
+  ) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'FetchFieldsMetadataError';
@@ -16,7 +19,10 @@ export class FetchFieldsMetadataError extends Error {
 }
 
 export class DecodeFieldsMetadataError extends Error {
-  constructor(message: string, public cause?: Error) {
+  constructor(
+    message: string,
+    public cause?: Error
+  ) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'DecodeFieldsMetadataError';

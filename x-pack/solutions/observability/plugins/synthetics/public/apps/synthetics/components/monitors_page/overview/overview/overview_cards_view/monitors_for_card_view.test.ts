@@ -22,7 +22,7 @@ const monitor = (
     overallStatus: 'pending',
     locations: [],
     ...overrides,
-  } as OverviewStatusMetaData);
+  }) as OverviewStatusMetaData;
 
 const twoLocations = monitor({
   configId: 'fast',

@@ -107,8 +107,9 @@ export interface DocTypeObject extends PartialWithArrayValues<{ a: { b: string; 
 }
 
 // Test allows casting to arrays of nested fields with optional values
-export interface DocTypeObjectOptional
-  extends PartialWithArrayValues<{ a: { b: string; c: number } }> {
+export interface DocTypeObjectOptional extends PartialWithArrayValues<{
+  a: { b: string; c: number };
+}> {
   a?: { b: string; c?: number }[];
 }
 

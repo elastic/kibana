@@ -155,18 +155,20 @@ const CompactRow = ({
     font: inherit;
     text-align: start;
     text-decoration: none;
-    ${isInteractive &&
-    css`
-      cursor: pointer;
-      &:hover {
-        background: ${euiTheme.colors.backgroundBaseSubdued};
-        text-decoration: none;
-      }
-      &:focus-visible {
-        outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
-        outline-offset: -${euiTheme.focus.width};
-      }
-    `}
+    ${
+      isInteractive &&
+      css`
+        cursor: pointer;
+        &:hover {
+          background: ${euiTheme.colors.backgroundBaseSubdued};
+          text-decoration: none;
+        }
+        &:focus-visible {
+          outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
+          outline-offset: -${euiTheme.focus.width};
+        }
+      `
+    }
   `;
   const textStyles = css`
     display: flex;

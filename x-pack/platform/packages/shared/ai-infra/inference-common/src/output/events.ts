@@ -42,7 +42,7 @@ export type OutputUpdateEvent<TId extends string = string> = InferenceTaskEventB
  */
 export type OutputCompleteEvent<
   TId extends string = string,
-  TOutput extends Output = Output
+  TOutput extends Output = Output,
 > = InferenceTaskEventBase<
   OutputEventType.OutputComplete,
   {

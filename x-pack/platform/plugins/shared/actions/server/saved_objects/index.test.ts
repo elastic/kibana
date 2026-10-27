@@ -40,7 +40,7 @@ describe('setupSavedObjects - onImport', () => {
       references: [],
       namespaces: ['default'],
       ...overrides,
-    } as unknown as SavedObject<RawAction> & { destinationId?: string });
+    }) as unknown as SavedObject<RawAction> & { destinationId?: string };
 
   let onImport: (connectors: SavedObject[]) => Promise<{ warnings: unknown[] }>;
 
@@ -150,7 +150,7 @@ describe('setupSavedObjects - isExportable', () => {
     );
     const isExportable = savedObjectsSetup.registerType.mock.calls[0][0].management!.isExportable!;
     const connector = (actionTypeId: string) =>
-      ({ type: 'action', id: '1', attributes: { actionTypeId }, references: [] } as SavedObject);
+      ({ type: 'action', id: '1', attributes: { actionTypeId }, references: [] }) as SavedObject;
 
     expect(isExportable(connector('.ssf'))).toBe(false);
     expect(isExportable(connector('.webhook'))).toBe(true);

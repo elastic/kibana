@@ -31,15 +31,12 @@ import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../common/telemetry_ev
 import { ObservabilityOnboardingPricingFeature } from '../common/pricing_features';
 import { installReceiptsDestination } from './lib/ingest_receipts';
 
-export class ObservabilityOnboardingPlugin
-  implements
-    Plugin<
-      ObservabilityOnboardingPluginSetup,
-      ObservabilityOnboardingPluginStart,
-      ObservabilityOnboardingPluginSetupDependencies,
-      ObservabilityOnboardingPluginStartDependencies
-    >
-{
+export class ObservabilityOnboardingPlugin implements Plugin<
+  ObservabilityOnboardingPluginSetup,
+  ObservabilityOnboardingPluginStart,
+  ObservabilityOnboardingPluginSetupDependencies,
+  ObservabilityOnboardingPluginStartDependencies
+> {
   private readonly logger: Logger;
   private isServerless = false;
   private managedOtlpServiceUrl?: string;

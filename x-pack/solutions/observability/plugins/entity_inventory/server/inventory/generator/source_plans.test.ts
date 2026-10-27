@@ -74,10 +74,9 @@ describe('planSources', () => {
 
   it(`throws when the definition expands to more than ${MAX_QUERY_PLANS} plans`, () => {
     // Built directly: the store's schema caps sources at 16, below the plan budget.
-    const sources = Array.from(
-      { length: MAX_QUERY_PLANS + 1 },
-      (_, index): DynamicSource => ({ indexPattern: `metrics-${index}-*` })
-    );
+    const sources = Array.from({ length: MAX_QUERY_PLANS + 1 }, (_, index): DynamicSource => ({
+      indexPattern: `metrics-${index}-*`,
+    }));
     const engines = sources.map((): QueryEngine => 'FROM');
     expect(() => planSources(withSources(sources), engines)).toThrow(InventoryDefinitionError);
     expect(() => planSources(withSources(sources), engines)).toThrow(

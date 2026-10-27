@@ -11,7 +11,7 @@ import type { ApprovalProposal } from './types';
 import { ProposalCaption } from './proposal_caption';
 
 const proposal = (overrides: Partial<ApprovalProposal>): ApprovalProposal =>
-  ({ title: 'Do something', comment: 'Do it.', ...overrides } as ApprovalProposal);
+  ({ title: 'Do something', comment: 'Do it.', ...overrides }) as ApprovalProposal;
 
 describe('ProposalCaption', () => {
   it('shows the same text as the plain caption line', () => {

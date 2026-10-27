@@ -191,7 +191,7 @@ export const addFilter: InternalStateThunkActionCreator<
        * Filter on the "Other" bucket; `value` holds the displayed top values
        */
       otherBucket?: boolean;
-    }>
+    }>,
   ]
 > = ({ tabId, field, value, mode, otherBucket }) =>
   function addFilterThunkFn(_, getState, { runtimeStateManager, services }) {

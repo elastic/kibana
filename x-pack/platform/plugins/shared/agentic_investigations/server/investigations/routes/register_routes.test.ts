@@ -59,7 +59,7 @@ const registerAndCollect = (assignFn: jest.Mock) => {
   registerInvestigationRoutes({
     router,
     logger: loggingSystemMock.createLogger(),
-    getAssignmentsService: () => ({ assign: assignFn } as unknown as AssignmentsService),
+    getAssignmentsService: () => ({ assign: assignFn }) as unknown as AssignmentsService,
   } as unknown as InvestigationRouteDependencies);
 
   const byPath = (routes: RegisteredRoute[], path: string) =>

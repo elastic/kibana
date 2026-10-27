@@ -51,12 +51,12 @@ describe('getResolvedFromRecordCount', () => {
 });
 
 const withCriticality = (criticality?: string): Pick<Entity, 'asset'> =>
-  ({ asset: criticality ? { criticality } : undefined } as Pick<Entity, 'asset'>);
+  ({ asset: criticality ? { criticality } : undefined }) as Pick<Entity, 'asset'>;
 
 const withWatchlists = (watchlists?: unknown): Pick<Entity, 'entity'> =>
   ({
     entity: { id: 'x', attributes: watchlists === undefined ? undefined : { watchlists } },
-  } as unknown as Pick<Entity, 'entity'>);
+  }) as unknown as Pick<Entity, 'entity'>;
 
 describe('getMaxCriticality', () => {
   it('returns undefined for an empty list', () => {
@@ -446,7 +446,7 @@ describe('getEntityGroupLifecycle malformed data and edge cases', () => {
 
 describe('getUnionEntitySources', () => {
   const withSources = (source?: string | string[]): Pick<Entity, 'entity'> =>
-    ({ entity: { id: 'id', source } } as unknown as Pick<Entity, 'entity'>);
+    ({ entity: { id: 'id', source } }) as unknown as Pick<Entity, 'entity'>;
 
   it('returns an empty list for no records', () => {
     expect(getUnionEntitySources([])).toEqual([]);

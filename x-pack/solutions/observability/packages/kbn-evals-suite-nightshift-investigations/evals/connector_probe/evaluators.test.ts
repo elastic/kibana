@@ -83,9 +83,12 @@ describe('connector probe evaluators', () => {
 
   it('grades against a per-example criterion built from the reference answer', async () => {
     const evaluate = jest.fn().mockResolvedValue({ score: 1 });
-    const criteria = jest.fn(
-      (): Evaluator => ({ name: 'criteria', kind: 'LLM', direction: 'maximize', evaluate })
-    );
+    const criteria = jest.fn((): Evaluator => ({
+      name: 'criteria',
+      kind: 'LLM',
+      direction: 'maximize',
+      evaluate,
+    }));
     const evaluator = createReferenceBehaviourEvaluator({ criteria });
 
     expect((await evaluator.evaluate(params(output()))).score).toBe(1);

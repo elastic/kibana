@@ -187,9 +187,8 @@ apiTest.describe(
     apiTest(
       'rejects users without any Nightshift privilege in the space',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader: noAccessCookie } = await samlAuth.asInteractiveUser(
-          NIGHTSHIFT_NO_ACCESS_ROLE
-        );
+        const { cookieHeader: noAccessCookie } =
+          await samlAuth.asInteractiveUser(NIGHTSHIFT_NO_ACCESS_ROLE);
 
         const listed = await getSandboxSecrets(apiClient, noAccessCookie, SPACE_ID);
         expect(listed).toHaveStatusCode(403);

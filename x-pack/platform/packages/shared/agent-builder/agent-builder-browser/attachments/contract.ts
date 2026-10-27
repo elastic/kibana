@@ -38,7 +38,7 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
 
 /** Props passed to attachment renderers in the conversation details flyout. */
 export interface ConversationDetailsRenderProps<
-  TAttachment extends UnknownAttachment = UnknownAttachment
+  TAttachment extends UnknownAttachment = UnknownAttachment,
 > {
   /** The attachment to render, with version data selected by the consumer. */
   attachment: TAttachment;
@@ -133,7 +133,7 @@ export interface ActionButton {
  * Parameters passed to attachment lifecycle hooks.
  */
 export interface AttachmentLifecycleParams<
-  TAttachment extends UnknownAttachment = UnknownAttachment
+  TAttachment extends UnknownAttachment = UnknownAttachment,
 > {
   /** Returns the current attachment state */
   getAttachment: () => TAttachment;

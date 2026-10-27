@@ -124,11 +124,11 @@ const readConfigStringArray = (
         (pattern): pattern is string => typeof pattern === 'string' && pattern.trim().length > 0
       )
     : typeof value === 'string'
-    ? value
-        .split(',')
-        .map((pattern) => pattern.trim())
-        .filter((pattern) => pattern.length > 0)
-    : [];
+      ? value
+          .split(',')
+          .map((pattern) => pattern.trim())
+          .filter((pattern) => pattern.length > 0)
+      : [];
   return patterns.length > 0 ? patterns : undefined;
 };
 

@@ -19,7 +19,7 @@ import { sameInvestigationAttachmentDocument } from './same_document';
 
 export interface InvestigationAttachmentTypeOptions<
   TType extends string,
-  TStored extends StoredInvestigationAttachment
+  TStored extends StoredInvestigationAttachment,
 > {
   type: TType;
   /** Full stored document, including documents written by earlier schema versions. */
@@ -67,7 +67,7 @@ const defaultIsStale = (stored: object, current: object): boolean =>
  */
 export const createInvestigationAttachmentType = <
   TType extends string,
-  TStored extends StoredInvestigationAttachment
+  TStored extends StoredInvestigationAttachment,
 >({
   type,
   schema,

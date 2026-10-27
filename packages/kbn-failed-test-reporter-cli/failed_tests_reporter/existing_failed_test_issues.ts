@@ -166,9 +166,8 @@ export class ExistingFailedTestIssues {
     }
 
     this.log.debug('finding', unseenFailures.length, 'existing issues via ci-stats');
-    const { existingIssues: failedTestIssues, suiteIssues = [] } = await this.findExistingIssues(
-      unseenFailures
-    );
+    const { existingIssues: failedTestIssues, suiteIssues = [] } =
+      await this.findExistingIssues(unseenFailures);
     this.log.debug(
       'found',
       failedTestIssues.length,

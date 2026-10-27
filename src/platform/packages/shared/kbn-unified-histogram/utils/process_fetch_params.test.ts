@@ -268,7 +268,7 @@ describe('processFetchParams ES|QL data view shim', () => {
     ({
       ...unifiedHistogramServicesMock,
       dataViews,
-    } as UnifiedHistogramServices);
+    }) as UnifiedHistogramServices;
 
   const fetch = (dataSource: EsqlSource, dataViews: DataViewsPublicPluginStart) =>
     processFetchParams({

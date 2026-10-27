@@ -162,14 +162,14 @@ export const assertCanPerformMonitorBulkActionInAllSpaces = async (
                 'This monitor is shared to spaces where you do not have delete permissions. To delete it, request access to those spaces.',
             })
           : isCreateAction
-          ? i18n.translate('xpack.synthetics.validation.multiSpaceCreatePermissions', {
-              defaultMessage:
-                'You do not have create permissions in all spaces this monitor is shared to. To create it, request access to those spaces or remove them from the monitor.',
-            })
-          : i18n.translate('xpack.synthetics.validation.multiSpacePermissions', {
-              defaultMessage:
-                'This monitor is shared to spaces where you do not have update permissions. To save changes, either request access to those spaces or remove them from the monitor.',
-            }),
+            ? i18n.translate('xpack.synthetics.validation.multiSpaceCreatePermissions', {
+                defaultMessage:
+                  'You do not have create permissions in all spaces this monitor is shared to. To create it, request access to those spaces or remove them from the monitor.',
+              })
+            : i18n.translate('xpack.synthetics.validation.multiSpacePermissions', {
+                defaultMessage:
+                  'This monitor is shared to spaces where you do not have update permissions. To save changes, either request access to those spaces or remove them from the monitor.',
+              }),
       },
     });
   }

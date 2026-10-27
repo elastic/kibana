@@ -18,7 +18,7 @@ const createConnector = (overrides: Partial<ActionConnector> = {}): ActionConnec
     isSystemAction: false,
     isDeprecated: false,
     ...overrides,
-  } as ActionConnector);
+  }) as ActionConnector;
 
 describe('usesOAuthAuthorizationCode', () => {
   it('returns false for preconfigured connectors', () => {

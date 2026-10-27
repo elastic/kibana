@@ -67,7 +67,7 @@ describe('registerSkills', () => {
         cacheMode: 'none',
         handler: jest.fn().mockResolvedValue({ status: 'available' }),
       },
-    } as const);
+    }) as const;
 
   it('registers both skills and logs success at debug', () => {
     registerSkills(agentBuilder, deps());

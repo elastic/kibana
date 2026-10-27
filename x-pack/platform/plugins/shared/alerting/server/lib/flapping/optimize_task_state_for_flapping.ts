@@ -13,7 +13,7 @@ import type { AlertInstanceState, AlertInstanceContext } from '../../types';
 export function optimizeTaskStateForFlapping<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >(
   logger: Logger,
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {},

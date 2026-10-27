@@ -17,11 +17,8 @@ interface DispatchAction<P = unknown> {
 export type StoreReducer<State, Payload = void> = (state: State, payload: Payload) => State;
 
 // Helper type to extract payload type from a reducer
-type ExtractPayload<T> = T extends StoreReducer<any, infer P>
-  ? P extends void
-    ? never
-    : P
-  : never;
+type ExtractPayload<T> =
+  T extends StoreReducer<any, infer P> ? (P extends void ? never : P) : never;
 
 // Check if a reducer expects a payload
 type HasPayload<T> = T extends StoreReducer<any, void> ? false : true;

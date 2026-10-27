@@ -44,8 +44,10 @@ interface ProjectPickerContext {
   fetchProjectsByRouting: (projectRouting?: ProjectRouting) => Promise<ProjectsData | null>;
 }
 
-export interface ProjectPickerStateProviderProps
-  extends Pick<ProjectPickerState, 'originProjectId'> {
+export interface ProjectPickerStateProviderProps extends Pick<
+  ProjectPickerState,
+  'originProjectId'
+> {
   children: React.ReactNode;
   /**
    * Controls if the control button for toggling the project routing picker.

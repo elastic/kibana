@@ -33,15 +33,12 @@ import {
   observabilityParentFeature,
   observabilityAIAssistantInferenceFeatures,
 } from './inference_feature';
-export class ObservabilityAIAssistantPlugin
-  implements
-    Plugin<
-      ObservabilityAIAssistantServerSetup,
-      ObservabilityAIAssistantServerStart,
-      ObservabilityAIAssistantPluginSetupDependencies,
-      ObservabilityAIAssistantPluginStartDependencies
-    >
-{
+export class ObservabilityAIAssistantPlugin implements Plugin<
+  ObservabilityAIAssistantServerSetup,
+  ObservabilityAIAssistantServerStart,
+  ObservabilityAIAssistantPluginSetupDependencies,
+  ObservabilityAIAssistantPluginStartDependencies
+> {
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
   service: ObservabilityAIAssistantService | undefined;

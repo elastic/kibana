@@ -87,9 +87,9 @@ export const LayoutGlobalCSS = () => {
     ${layoutVarName('sidebar.left')}: calc(100vw - ${sidebarWidth}px);
     ${layoutVarName('sidebar.height')}: calc(100vh - ${headerAndBannerHeight + footerHeight}px);
     ${layoutVarName('sidebar.width')}: ${sidebarWidth}px;
-    ${layoutVarName('sidebar.borderRadius')}: ${appearance === 'framed'
-      ? euiTheme.border.radius.frame
-      : '0px'};
+    ${layoutVarName('sidebar.borderRadius')}: ${
+      appearance === 'framed' ? euiTheme.border.radius.frame : '0px'
+    };
   `;
 
   const application = css`
@@ -110,14 +110,16 @@ export const LayoutGlobalCSS = () => {
     ${layoutVarName('application.topBar.left')}: ${navigationWidth}px;
     ${layoutVarName('application.topBar.right')}: ${applicationRight}px;
     ${layoutVarName('application.topBar.width')}: calc(100vw - ${applicationHorizontalOffset}px);
-    ${layoutVarName('application.topBar.bottom')}: calc(100vh - ${applicationTop +
-    applicationTopBarHeight}px);
+    ${layoutVarName('application.topBar.bottom')}: calc(
+      100vh - ${applicationTop + applicationTopBarHeight}px
+    );
   `;
 
   const applicationBottomBar = css`
     ${layoutVarName('application.bottomBar.height')}: ${applicationBottomBarHeight}px;
-    ${layoutVarName('application.bottomBar.top')}: calc(100vh - ${footerHeight +
-    applicationBottomBarHeight}px);
+    ${layoutVarName('application.bottomBar.top')}: calc(
+      100vh - ${footerHeight + applicationBottomBarHeight}px
+    );
     ${layoutVarName('application.bottomBar.left')}: ${navigationWidth}px;
     ${layoutVarName('application.bottomBar.right')}: ${applicationRight}px;
     ${layoutVarName('application.bottomBar.width')}: calc(100vw - ${applicationHorizontalOffset}px);

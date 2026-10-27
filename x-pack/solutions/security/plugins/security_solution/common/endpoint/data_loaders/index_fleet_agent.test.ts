@@ -39,7 +39,7 @@ const createEsClient = ({
     count,
     updateByQuery,
     indices: { refresh },
-  } as unknown as Client);
+  }) as unknown as Client;
 
 describe('deleteIndexedFleetAgents', () => {
   beforeEach(() => {

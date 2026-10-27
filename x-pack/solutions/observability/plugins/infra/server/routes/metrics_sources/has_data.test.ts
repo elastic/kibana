@@ -54,7 +54,7 @@ const makeHitsResponse = (
       total: { value: total, relation: 'eq' },
       hits: [],
     },
-  } as unknown as estypes.SearchResponse);
+  }) as unknown as estypes.SearchResponse;
 
 /** A metrics client whose `search` returns the given responses in order. */
 const createClient = (...responses: estypes.SearchResponse[]) => {
@@ -64,7 +64,7 @@ const createClient = (...responses: estypes.SearchResponse[]) => {
 };
 
 /** Minimal logger stub; only `warn` is asserted on. */
-const createLogger = () => ({ warn: jest.fn() } as unknown as Logger & { warn: jest.Mock });
+const createLogger = () => ({ warn: jest.fn() }) as unknown as Logger & { warn: jest.Mock };
 
 describe('getHasData', () => {
   let logger: Logger & { warn: jest.Mock };

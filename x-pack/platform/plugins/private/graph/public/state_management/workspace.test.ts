@@ -45,7 +45,7 @@ const createWorkspaceMock = () =>
     search: jest.fn(),
     callElasticsearch: jest.fn(),
     options: {},
-  } as unknown as jest.Mocked<Workspace>);
+  }) as unknown as jest.Mocked<Workspace>;
 
 const createWorkspaceListenerEnvironment = () => {
   const workspace = createWorkspaceMock();

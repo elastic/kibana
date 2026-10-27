@@ -99,7 +99,7 @@ describe('registerEntityAttachment impact entity opener', () => {
   const spacesWithSolution = (solution?: string) =>
     ({
       getActiveSpace: jest.fn().mockResolvedValue({ id: 'default', name: 'Default', solution }),
-    } as unknown as SpacesPluginStart);
+    }) as unknown as SpacesPluginStart;
 
   it('registers the opener in a security space', async () => {
     const registerImpactEntityOpener = setup(spacesWithSolution('security'));

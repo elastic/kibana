@@ -200,8 +200,8 @@ const ConversationsPageContent: React.FC = () => {
   const isSubmittingSelected = isApprovingSelected
     ? 'applying'
     : isDecliningSelected
-    ? 'declining'
-    : undefined;
+      ? 'declining'
+      : undefined;
 
   const {
     selectedConversationId,

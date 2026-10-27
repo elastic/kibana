@@ -29,7 +29,7 @@ const createContext = (overrides: Partial<ActionsClientContext> = {}): ActionsCl
     isESOCanEncrypt: true,
     encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
     ...overrides,
-  } as ActionsClientContext);
+  }) as ActionsClientContext;
 
 describe('mintInboundEventIdentityAttributes', () => {
   test('returns undefined for non-inbound connectors', async () => {

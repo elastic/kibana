@@ -131,8 +131,8 @@ export const useRulesTableActions = ({
         !canManualRunRules
           ? i18n.MANUAL_RULE_RUN_PERMISSIONS_TOOLTIP
           : !rule.enabled
-          ? i18n.MANUAL_RULE_RUN_TOOLTIP
-          : i18n.MANUAL_RULE_RUN,
+            ? i18n.MANUAL_RULE_RUN_TOOLTIP
+            : i18n.MANUAL_RULE_RUN,
       icon: 'play',
       name: i18n.MANUAL_RULE_RUN,
       onClick: async (rule: Rule) => {

@@ -1529,7 +1529,7 @@ describe('dataset routes', () => {
         canEncrypt,
         evaluatorRegistry: createEvaluatorRegistryMock(),
         getInferenceStart: async () =>
-          ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+          ({ getClient: jest.fn() }) as unknown as InferenceServerStart,
         getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
         getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
       });

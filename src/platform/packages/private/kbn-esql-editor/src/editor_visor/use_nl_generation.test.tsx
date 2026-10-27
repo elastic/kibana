@@ -23,8 +23,9 @@ describe('useNlGeneration', () => {
 
   const createWrapper =
     () =>
-    ({ children }: { children: React.ReactNode }) =>
-      <KibanaContextProvider services={{ core: coreStart }}>{children}</KibanaContextProvider>;
+    ({ children }: { children: React.ReactNode }) => (
+      <KibanaContextProvider services={{ core: coreStart }}>{children}</KibanaContextProvider>
+    );
 
   const defaultParams = {
     query: 'FROM test_index',

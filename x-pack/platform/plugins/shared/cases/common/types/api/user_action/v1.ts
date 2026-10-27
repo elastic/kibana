@@ -41,7 +41,7 @@ type UserActionFindRequestTypeValue =
   (typeof UserActionFindRequestTypes)[keyof typeof UserActionFindRequestTypes];
 const UserActionFindRequestTypesValues = Object.values(UserActionFindRequestTypes) as [
   UserActionFindRequestTypeValue,
-  ...UserActionFindRequestTypeValue[]
+  ...UserActionFindRequestTypeValue[],
 ];
 
 const ActionSourceTypeValues = Object.values(ActionSourceTypes) as [string, ...string[]];

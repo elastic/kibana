@@ -45,4 +45,4 @@ export const mockUiSettingsService = (
         },
       };
     },
-  } as unknown as IUiSettingsClient);
+  }) as unknown as IUiSettingsClient;

@@ -28,9 +28,12 @@ interface StartDependencies {
 
 const NOOP_TASK_TYPE = 'serviceAccountsTest:noop';
 
-export class ServiceAccountsTestPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class ServiceAccountsTestPlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   setup(core: CoreSetup<StartDependencies>, { security, taskManager }: SetupDependencies): void {
     // Resolves jobs by the prefix of their ID, so tests can pick what the management page gets
     // back: no details, a path Core must refuse, a title alone, or a title and a path.
@@ -302,8 +305,8 @@ export class ServiceAccountsTestPlugin
           const statusCode = Boom.isBoom(error)
             ? error.output.statusCode
             : error instanceof errors.ResponseError
-            ? error.statusCode ?? 500
-            : 500;
+              ? (error.statusCode ?? 500)
+              : 500;
           return response.customError({
             statusCode,
             body: { message: 'Service account test operation failed.' },

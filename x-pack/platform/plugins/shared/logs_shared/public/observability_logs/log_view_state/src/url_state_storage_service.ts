@@ -107,11 +107,10 @@ export const listenForUrlChanges = ({
     urlStateStorage
       .change$(logViewKey)
       .pipe(
-        map(
-          (value): LogViewEvent =>
-            value === undefined || value === null
-              ? { type: 'LOG_VIEW_URL_KEY_REMOVED' }
-              : { type: 'LOG_VIEW_URL_KEY_CHANGED' }
+        map((value): LogViewEvent =>
+          value === undefined || value === null
+            ? { type: 'LOG_VIEW_URL_KEY_REMOVED' }
+            : { type: 'LOG_VIEW_URL_KEY_CHANGED' }
         )
       )
   );

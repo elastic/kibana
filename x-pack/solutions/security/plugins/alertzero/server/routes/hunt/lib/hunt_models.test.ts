@@ -26,7 +26,7 @@ const uiSettingsClient = { get: jest.fn() } as never;
 const inference = {} as never;
 
 const modelFor = (featureId: string) =>
-  ({ connector: { id: featureId } } as unknown as ScopedModel);
+  ({ connector: { id: featureId } }) as unknown as ScopedModel;
 
 const resolve = (tiers?: Array<'efficient' | 'balanced' | 'frontier'>) =>
   resolveHuntModels({ inference, request, uiSettingsClient, logger, tiers });

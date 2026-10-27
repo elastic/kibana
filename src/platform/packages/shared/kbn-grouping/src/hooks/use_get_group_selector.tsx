@@ -47,16 +47,15 @@ export interface UseGetGroupSelectorArgs {
   settings?: GroupSettings;
 }
 
-interface UseGetGroupSelectorStateless
-  extends Pick<
-    UseGetGroupSelectorArgs,
-    | 'allowedFieldTypes'
-    | 'defaultGroupingOptions'
-    | 'groupingId'
-    | 'fields'
-    | 'maxGroupingLevels'
-    | 'settings'
-  > {
+interface UseGetGroupSelectorStateless extends Pick<
+  UseGetGroupSelectorArgs,
+  | 'allowedFieldTypes'
+  | 'defaultGroupingOptions'
+  | 'groupingId'
+  | 'fields'
+  | 'maxGroupingLevels'
+  | 'settings'
+> {
   onGroupChange: (selectedGroups: string[]) => void;
 }
 

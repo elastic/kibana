@@ -21,7 +21,7 @@ const createQueryResult = (overrides: Record<string, unknown> = {}) =>
     isSuccess: false,
     isError: false,
     ...overrides,
-  } as unknown);
+  }) as unknown;
 
 describe('usePreviewDocumentLoader', () => {
   beforeEach(() => {

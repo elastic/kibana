@@ -30,7 +30,10 @@ const DEFAULT_TIMEOUT_MS = 5 * 60_000;
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class LeadGenerationClient {
-  constructor(private readonly kbnClient: KbnClient, private readonly log: ToolingLog) {}
+  constructor(
+    private readonly kbnClient: KbnClient,
+    private readonly log: ToolingLog
+  ) {}
 
   async generate({ connectorId }: { connectorId: string }): Promise<{ executionUuid: string }> {
     this.log.info(`[LeadGenerationClient] Triggering lead generation (connectorId=${connectorId})`);

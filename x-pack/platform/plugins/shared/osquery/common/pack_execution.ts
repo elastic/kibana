@@ -58,7 +58,7 @@ export const resolveEffectiveQueryExecution = (
 
   const perQueryPlatform = isEmptyOrAllPlatforms(query.platform)
     ? undefined
-    : query.platform ?? undefined;
+    : (query.platform ?? undefined);
   const effectivePlatform = perQueryPlatform ?? packExecutionDefaults?.platform ?? undefined;
 
   return {

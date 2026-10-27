@@ -16,7 +16,7 @@ const createMouseEvent = (overrides: Partial<MouseEvent> = {}) =>
     ctrlKey: false,
     shiftKey: false,
     ...overrides,
-  } as MouseEvent);
+  }) as MouseEvent;
 
 describe('isModifiedClick', () => {
   it('returns false when no modifier key is pressed', () => {

@@ -68,7 +68,7 @@ const VisDimensionArgInput: React.FC<VisDimensionArgInputProps> = ({
   const selectedValue =
     typeof value === 'string'
       ? value
-      : value.chain[0].arguments._?.[0] ?? value.chain[0].arguments.accessor?.[0];
+      : (value.chain[0].arguments._?.[0] ?? value.chain[0].arguments.accessor?.[0]);
 
   const columnId =
     typeof selectedValue === 'number'

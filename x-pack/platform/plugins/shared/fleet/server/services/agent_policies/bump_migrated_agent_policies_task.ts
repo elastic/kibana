@@ -79,16 +79,19 @@ export async function _updatePackagePoliciesThatNeedBump(
     `Found ${packagePoliciesToBump.total} package policies that need agent policy revision bump`
   );
 
-  const packagePoliciesIndexedBySpace = packagePoliciesToBump.items.reduce((acc, policy) => {
-    const spaceId = getSpaceForPackagePolicy(policy);
-    if (!acc[spaceId]) {
-      acc[spaceId] = [];
-    }
+  const packagePoliciesIndexedBySpace = packagePoliciesToBump.items.reduce(
+    (acc, policy) => {
+      const spaceId = getSpaceForPackagePolicy(policy);
+      if (!acc[spaceId]) {
+        acc[spaceId] = [];
+      }
 
-    acc[spaceId].push(policy);
+      acc[spaceId].push(policy);
 
-    return acc;
-  }, {} as { [k: string]: PackagePolicy[] });
+      return acc;
+    },
+    {} as { [k: string]: PackagePolicy[] }
+  );
 
   const start = Date.now();
 

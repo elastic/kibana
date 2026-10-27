@@ -42,7 +42,7 @@ export const resolveCanvasSearch = (
 /** Hides everything outside the matched flows. */
 export const applyCanvasSearch = <
   NodeType extends ClassicCanvasNode,
-  EdgeType extends ClassicCanvasEdge
+  EdgeType extends ClassicCanvasEdge,
 >(
   nodes: NodeType[],
   edges: EdgeType[],

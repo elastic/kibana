@@ -13,7 +13,7 @@ const buildAttachment = (data: unknown): EntityAttachment =>
     id: 'a',
     type: 'security.entity',
     data: data as EntityAttachment['data'],
-  } as EntityAttachment);
+  }) as EntityAttachment;
 
 const riskStatsFixture = (
   override: Partial<EntityAttachmentRiskStats> = {}

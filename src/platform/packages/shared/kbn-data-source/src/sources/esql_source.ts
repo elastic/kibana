@@ -207,8 +207,8 @@ export class EsqlSource implements DataSourceBase {
       args.timeFieldName != null
         ? `${baseKey}\0${args.timeFieldName}`
         : skipsTimeField
-        ? `${baseKey}\0without-time-field`
-        : baseKey;
+          ? `${baseKey}\0without-time-field`
+          : baseKey;
 
     // A caller that skips the time field prefers an instance that has it.
     const cached =

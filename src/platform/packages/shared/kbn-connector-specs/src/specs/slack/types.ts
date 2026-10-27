@@ -93,9 +93,8 @@ const slackConversationTypesWithPublicDefault = () =>
     .array(z.enum(SLACK_CONVERSATION_TYPES))
     .max(SLACK_CONVERSATION_TYPES.length)
     .optional()
-    .transform(
-      (val): Array<(typeof SLACK_CONVERSATION_TYPES)[number]> =>
-        val && val.length > 0 ? val : ['public_channel']
+    .transform((val): Array<(typeof SLACK_CONVERSATION_TYPES)[number]> =>
+      val && val.length > 0 ? val : ['public_channel']
     );
 
 export const SlackResolveChannelIdInputSchema = lazySchema(() =>
@@ -475,9 +474,8 @@ const slackConversationTypesAllDefault = () =>
     .array(z.enum(SLACK_CONVERSATION_TYPES))
     .max(SLACK_CONVERSATION_TYPES.length)
     .optional()
-    .transform(
-      (val): Array<(typeof SLACK_CONVERSATION_TYPES)[number]> =>
-        val && val.length > 0 ? val : ['public_channel', 'private_channel', 'im', 'mpim']
+    .transform((val): Array<(typeof SLACK_CONVERSATION_TYPES)[number]> =>
+      val && val.length > 0 ? val : ['public_channel', 'private_channel', 'im', 'mpim']
     );
 
 export const SlackListUserConversationsInputSchema = lazySchema(() =>

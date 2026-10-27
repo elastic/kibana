@@ -311,16 +311,14 @@ const SavedSearchComponentTable: React.FC<
           // Debounce to avoid too many updates during rapid changes
           debounceTime(300),
           // Map to our table config structure
-          map(
-            (savedSearch): SavedSearchTableConfig => ({
-              columns: savedSearch.columns,
-              sort: savedSearch.sort,
-              grid: savedSearch.grid,
-              rowHeight: savedSearch.rowHeight,
-              rowsPerPage: savedSearch.rowsPerPage,
-              density: savedSearch.density,
-            })
-          ),
+          map((savedSearch): SavedSearchTableConfig => ({
+            columns: savedSearch.columns,
+            sort: savedSearch.sort,
+            grid: savedSearch.grid,
+            rowHeight: savedSearch.rowHeight,
+            rowsPerPage: savedSearch.rowsPerPage,
+            density: savedSearch.density,
+          })),
           // Only emit when config actually changes
           distinctUntilChanged((prev, curr) => isEqual(prev, curr))
         )

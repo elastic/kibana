@@ -138,13 +138,13 @@ export const buildStepExecutions = (
           isInferredTerminal && typeof execution.duration === 'number'
             ? execution.duration
             : undefined,
-        finishedAt: isInferredTerminal ? execution.finishedAt ?? undefined : undefined,
+        finishedAt: isInferredTerminal ? (execution.finishedAt ?? undefined) : undefined,
         globalExecutionIndex: index,
         id: `${execution.id ?? 'unknown'}-${step.name}-pending`,
         input: undefined,
         output: undefined,
         scopeStack: [],
-        startedAt: shouldInferStepStatusFromExecution ? execution.startedAt ?? '' : '',
+        startedAt: shouldInferStepStatusFromExecution ? (execution.startedAt ?? '') : '',
         state: undefined,
         status: inferredStatus,
         stepExecutionIndex: 0,

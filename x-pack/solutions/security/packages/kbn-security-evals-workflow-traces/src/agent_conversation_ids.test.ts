@@ -12,7 +12,7 @@ import {
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 
 const step = (over: Partial<WorkflowStepExecutionDto>): WorkflowStepExecutionDto =>
-  ({ stepId: 'draft_creation', ...over } as WorkflowStepExecutionDto);
+  ({ stepId: 'draft_creation', ...over }) as WorkflowStepExecutionDto;
 
 describe('extractAgentConversationIds', () => {
   it('skips the step_level_timeout wrapper and reads the real ai.agent step', () => {

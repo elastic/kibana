@@ -360,8 +360,8 @@ export function CloudForwarderPanel() {
       status: (hasData || hasPreExistingData
         ? 'complete'
         : isMonitoringStepActive
-        ? 'current'
-        : 'incomplete') as EuiStepStatus,
+          ? 'current'
+          : 'incomplete') as EuiStepStatus,
       children: isMonitoringStepActive ? (
         <>
           {!(hasPreExistingData && !hasData) && (

@@ -26,20 +26,19 @@ import { recordHasContext } from '../../context_awareness/profiles_manager/recor
 
 export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
 
-export interface DiscoverGridFlyoutProps
-  extends Pick<
-    UnifiedDocViewerFlyoutProps,
-    | 'initialDocViewerState'
-    | 'onInitialDocViewerStateChange'
-    | 'onUpdateSelectedTabId'
-    | 'initialShareableState'
-    | 'onShareableStateChange'
-    | 'requestState'
-    | 'requestStateMeta'
-    | 'notice'
-    | 'flyoutMenuTrailingActions'
-    | 'flyoutType'
-  > {
+export interface DiscoverGridFlyoutProps extends Pick<
+  UnifiedDocViewerFlyoutProps,
+  | 'initialDocViewerState'
+  | 'onInitialDocViewerStateChange'
+  | 'onUpdateSelectedTabId'
+  | 'initialShareableState'
+  | 'onShareableStateChange'
+  | 'requestState'
+  | 'requestStateMeta'
+  | 'notice'
+  | 'flyoutMenuTrailingActions'
+  | 'flyoutType'
+> {
   savedSearchId?: string;
   filters?: Filter[];
   query?: Query | AggregateQuery;

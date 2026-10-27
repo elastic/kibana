@@ -112,12 +112,12 @@ export const LatestFindingsTable = ({
           defaultMessage: 'Passed findings',
         })
       : activeEvaluation === 'failed'
-      ? i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabelFailed', {
-          defaultMessage: 'Failed findings',
-        })
-      : i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
-          defaultMessage: 'Findings',
-        });
+        ? i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabelFailed', {
+            defaultMessage: 'Failed findings',
+          })
+        : i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
+            defaultMessage: 'Findings',
+          });
 
   const createMisconfigurationRuleFn = (rowIndex: number) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);

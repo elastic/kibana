@@ -116,7 +116,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         useCoreSelfClient
           ? 'Cannot set both use_server_info and use_localhost — they are mutually exclusive.'
           : 'Cannot set both use_server_info and use_localhost — they are mutually exclusive. ' +
-            'Use use_server_info to route via the internal server address, or use_localhost to route via localhost:5601.'
+              'Use use_server_info to route via the internal server address, or use_localhost to route via localhost:5601.'
       );
     }
     if (useCoreSelfClient && use_localhost) {

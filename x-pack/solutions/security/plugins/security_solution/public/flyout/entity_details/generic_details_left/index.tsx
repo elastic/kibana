@@ -94,8 +94,8 @@ export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps
       field === 'user.name' || fields['user.entity.id'] !== undefined
         ? 'user'
         : String(field).startsWith('service.')
-        ? 'service'
-        : 'host';
+          ? 'service'
+          : 'host';
 
     const insightsTab =
       hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts

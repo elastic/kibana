@@ -22,7 +22,7 @@ const createPresentationContainer = (children: unknown[]) =>
     children$: {
       getValue: () => Object.fromEntries(children.map((child, index) => [`child-${index}`, child])),
     },
-  } as unknown as PresentationContainer);
+  }) as unknown as PresentationContainer;
 
 const createControlState = (variableName: string): OptionsListESQLControlState => ({
   title: 'Control title',

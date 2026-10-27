@@ -79,8 +79,8 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
       const reason = core.elasticsearch.config.credentialsSpecified
         ? 'Kibana system user credentials are specified'
         : core.elasticsearch.config.hosts.length > 1
-        ? 'more than one Elasticsearch host is specified'
-        : 'non-default Elasticsearch host is used';
+          ? 'more than one Elasticsearch host is specified'
+          : 'non-default Elasticsearch host is used';
       this.#logger.debug(
         `Interactive setup mode will not be activated since Elasticsearch connection is already configured: ${reason}.`
       );
@@ -145,8 +145,8 @@ Go to ${chalk.cyanBright.underline(url)} to get started.
 
     // If possible, try to use `*.dev.yml` config when Kibana is run in development mode.
     const configPath = this.initializerContext.env.mode.dev
-      ? this.initializerContext.env.configs.find((config) => config.endsWith('.dev.yml')) ??
-        this.initializerContext.env.configs[0]
+      ? (this.initializerContext.env.configs.find((config) => config.endsWith('.dev.yml')) ??
+        this.initializerContext.env.configs[0])
       : this.initializerContext.env.configs[0];
 
     core.http.registerRoutes('', (router) => {

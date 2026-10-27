@@ -40,7 +40,7 @@ jest.mock('../use_on_refresh_case_view_page');
 
 const getConfigMock = jest.spyOn(KibanaServices, 'getConfig');
 const getCasesConfig = (attachmentsEnabled: boolean): ReturnType<typeof KibanaServices.getConfig> =>
-  ({ attachments: { enabled: attachmentsEnabled } } as ReturnType<typeof KibanaServices.getConfig>);
+  ({ attachments: { enabled: attachmentsEnabled } }) as ReturnType<typeof KibanaServices.getConfig>;
 
 const SelectTimelineModalMock: React.FC<{
   onSelect: (args: { savedObjectId: string; title: string }) => void;

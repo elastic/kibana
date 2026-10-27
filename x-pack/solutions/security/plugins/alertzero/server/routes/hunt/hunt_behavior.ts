@@ -74,8 +74,8 @@ export const registerHuntBehaviorRoute = ({
                 failure.reason === 'no_inference_plugin'
                   ? 503
                   : failure.reason === 'resolution_error'
-                  ? 500
-                  : 400,
+                    ? 500
+                    : 400,
               body: {
                 message: failure.message,
                 attributes: {

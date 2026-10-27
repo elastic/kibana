@@ -189,8 +189,8 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
       const kqlFilter = hostName
         ? `host.name: "${hostName}"`
         : serviceName
-        ? `service.name: "${serviceName}"`
-        : null;
+          ? `service.name: "${serviceName}"`
+          : null;
 
       if (!kqlFilter) return null;
 

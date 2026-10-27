@@ -150,7 +150,7 @@ export const updateTabs: InternalStateThunkActionCreator<
       selectedItem: TabState | TabItem | null;
       updatedDiscoverSession?: DiscoverSession;
     },
-    void
+    void,
   ],
   Promise<void>
 > = ({ items, selectedItem, updatedDiscoverSession }) =>
@@ -215,8 +215,8 @@ export const updateTabs: InternalStateThunkActionCreator<
         const refreshInterval =
           existingTabToDuplicateFrom.id === currentTab.id
             ? services.timefilter.getRefreshInterval()
-            : existingTabToDuplicateFrom.globalState.refreshInterval ??
-              services.timefilter.getRefreshInterval();
+            : (existingTabToDuplicateFrom.globalState.refreshInterval ??
+              services.timefilter.getRefreshInterval());
         tab.globalState = {
           ...tab.globalState,
           refreshInterval: cloneDeep(refreshInterval),
@@ -589,7 +589,7 @@ export const openInNewTab: InternalStateThunkActionCreator<
       searchSessionId?: string;
       dataViewSpec?: DataViewSpec;
       profileState?: ProfileStateMap;
-    }
+    },
   ],
   Promise<void>
 > = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec, profileState }) =>
@@ -651,7 +651,7 @@ export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
   [
     {
       searchSession: UISession;
-    }
+    },
   ],
   Promise<void>
 > = ({ searchSession }) =>

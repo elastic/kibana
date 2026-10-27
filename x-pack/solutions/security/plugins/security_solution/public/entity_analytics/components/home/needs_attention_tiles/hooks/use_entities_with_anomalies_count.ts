@@ -99,8 +99,8 @@ export const useEntitiesWithAnomaliesCount = ({
       const entityIds: string[] = Array.isArray(rawIds)
         ? (rawIds as string[]).filter(Boolean)
         : typeof rawIds === 'string' && rawIds
-        ? [rawIds]
-        : [];
+          ? [rawIds]
+          : [];
       return { count, entityIds };
     },
     {
@@ -126,12 +126,12 @@ export const useEntitiesWithAnomaliesCount = ({
       defaultMessage: 'There was an error loading entities with anomalies count',
     }),
     // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
-    isTimedOut ? undefined : filteredError ?? indexError
+    isTimedOut ? undefined : (filteredError ?? indexError)
   );
 
   return {
     count: shownResult?.count ?? 0,
-    entityIds: isFetching ? EMPTY_ENTITY_IDS : shownResult?.entityIds ?? EMPTY_ENTITY_IDS,
+    entityIds: isFetching ? EMPTY_ENTITY_IDS : (shownResult?.entityIds ?? EMPTY_ENTITY_IDS),
     // A query that can never run (skipped, no index, no job) is not loading: react-query reports a
     // disabled query with no data as loading for ever.
     isLoading:

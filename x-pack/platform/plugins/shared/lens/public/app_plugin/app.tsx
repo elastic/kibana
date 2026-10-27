@@ -162,8 +162,8 @@ export function App({
     initialContext && 'legacyEditorOriginatingApp' in initialContext
       ? initialContext.legacyEditorOriginatingApp
       : initialContext && 'originatingApp' in initialContext
-      ? initialContext.originatingApp
-      : undefined;
+        ? initialContext.originatingApp
+        : undefined;
   const legacyEditorAppUrl =
     initialContext && 'visEditorOriginatingAppUrl' in initialContext
       ? initialContext.visEditorOriginatingAppUrl
@@ -358,7 +358,7 @@ export function App({
             redirectTo,
             switchDatasource,
             originatingApp: isSaveAndReturn(incomingState)
-              ? incomingState?.originatingApp ?? initialContext?.originatingApp
+              ? (incomingState?.originatingApp ?? initialContext?.originatingApp)
               : undefined,
             textBasedLanguageSave: shouldCloseAndSaveTextBasedQuery,
             ...lensAppServices,
@@ -532,7 +532,7 @@ export function App({
           lensServices={lensAppServices}
           originatingApp={
             isSaveAndReturn(incomingState) || legacyEditorAppName
-              ? incomingState?.originatingApp ?? initialContext?.originatingApp
+              ? (incomingState?.originatingApp ?? initialContext?.originatingApp)
               : undefined
           }
           isSaveable={isSaveable}

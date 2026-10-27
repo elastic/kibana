@@ -114,9 +114,10 @@ export interface SavedObjectsStartDeps {
   node: NodeInfo;
 }
 
-export class SavedObjectsService
-  implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart>
-{
+export class SavedObjectsService implements CoreService<
+  InternalSavedObjectsServiceSetup,
+  InternalSavedObjectsServiceStart
+> {
   private logger: Logger;
   private readonly kibanaVersion: string;
 

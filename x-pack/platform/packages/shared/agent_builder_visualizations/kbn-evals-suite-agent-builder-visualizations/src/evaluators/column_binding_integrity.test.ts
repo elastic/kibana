@@ -222,7 +222,7 @@ describe('createColumnBindingIntegrityEvaluator', () => {
   const buildEsClient = (columns = RESULT_COLUMNS) =>
     ({
       esql: { query: jest.fn().mockResolvedValue({ columns, values: [] }) },
-    } as unknown as ElasticsearchClient);
+    }) as unknown as ElasticsearchClient;
 
   const evaluate = (visualizations: ExtractedVisualization[], esClient = buildEsClient()) =>
     createColumnBindingIntegrityEvaluator({

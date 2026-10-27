@@ -424,7 +424,7 @@ describe('createBoundWorkloadResolver', () => {
       ],
       [
         'returns something other than an array',
-        async () => ({ title: 'x' } as never),
+        async () => ({ title: 'x' }) as never,
         'Workload type [rule] registered by plugin [alerting] returned an unexpected result for 1 workload(s), ignoring it.',
       ],
     ])('falls back for that type only when it %s', async (_, resolveWorkloads, message) => {

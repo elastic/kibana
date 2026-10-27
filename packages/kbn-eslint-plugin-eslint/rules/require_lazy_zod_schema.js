@@ -244,11 +244,11 @@ const isMetaGetterCall = (node) => {
   const callee = unwrapExpression(unwrapped.callee);
   return Boolean(
     callee &&
-      callee.type === esTypes.MemberExpression &&
-      !callee.computed &&
-      callee.property.type === esTypes.Identifier &&
-      callee.property.name === 'meta' &&
-      unwrapped.arguments.length === 0
+    callee.type === esTypes.MemberExpression &&
+    !callee.computed &&
+    callee.property.type === esTypes.Identifier &&
+    callee.property.name === 'meta' &&
+    unwrapped.arguments.length === 0
   );
 };
 
@@ -386,8 +386,8 @@ const isEagerDerivedSchemaChain = (init, state, sourceCode) => {
   const root = getChainRootIdentifier(init);
   return Boolean(
     root &&
-      !resolvesToImportedName(root, sourceCode, state.zodNamespaces) &&
-      (state.schemaBindings.has(root.name) || state.schemaFactoryBindings.has(root.name))
+    !resolvesToImportedName(root, sourceCode, state.zodNamespaces) &&
+    (state.schemaBindings.has(root.name) || state.schemaFactoryBindings.has(root.name))
   );
 };
 

@@ -24,7 +24,7 @@ export const getAnomaliesHostTableColumns = (
   Columns<Anomaly['jobId'], AnomaliesByHost>,
   Columns<Anomaly['entityValue'], AnomaliesByHost>,
   Columns<Anomaly['influencers'], AnomaliesByHost>,
-  Columns<Anomaly['time'], AnomaliesByHost>
+  Columns<Anomaly['time'], AnomaliesByHost>,
 ] => [
   {
     name: i18n.HOST_NAME,

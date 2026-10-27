@@ -66,7 +66,7 @@ const createMockToasts = (): jest.Mocked<IToasts> =>
     add: jest.fn(),
     remove: jest.fn(),
     get$: jest.fn(),
-  } as unknown as jest.Mocked<IToasts>);
+  }) as unknown as jest.Mocked<IToasts>;
 
 const createForbiddenError = () => {
   const error = new Error('Forbidden');
@@ -172,7 +172,7 @@ const createMockDataStreamStatsClient = (
     getNonAggregatableDatasets: jest.fn().mockResolvedValue(defaultNonAggregatableDatasetsResponse),
     updateFailureStore: jest.fn().mockResolvedValue({ headers: {} }),
     ...overrides,
-  } as unknown as jest.Mocked<IDataStreamsStatsClient>);
+  }) as unknown as jest.Mocked<IDataStreamsStatsClient>;
 
 const buildStateMachine = (
   overrides: Partial<DatasetQualityControllerStateMachineDependencies> = {}

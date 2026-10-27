@@ -57,15 +57,12 @@ import { hostEntityDefinition } from '../common/domain/definitions/host';
 import { serviceEntityDefinition } from '../common/domain/definitions/service';
 import { genericEntityDefinition } from '../common/domain/definitions/generic';
 
-export class EntityStorePlugin
-  implements
-    Plugin<
-      EntityStoreSetupContract,
-      EntityStoreStartContract,
-      EntityStoreSetupPlugins,
-      EntityStoreStartPlugins
-    >
-{
+export class EntityStorePlugin implements Plugin<
+  EntityStoreSetupContract,
+  EntityStoreStartContract,
+  EntityStoreSetupPlugins,
+  EntityStoreStartPlugins
+> {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
   private readonly stop$ = new Subject<void>();

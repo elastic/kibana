@@ -27,7 +27,7 @@ describe('SDK-based step types', () => {
       IsRequired<CommandStep, 'key'>,
       IsRequired<CommandStep, 'label'>,
       IsRequired<CommandStep, 'agents'>,
-      IsRequired<GroupStep, 'key'>
+      IsRequired<GroupStep, 'key'>,
     ] = [true, true, true, true];
     expect(assertions.every(Boolean)).toBe(true);
   });

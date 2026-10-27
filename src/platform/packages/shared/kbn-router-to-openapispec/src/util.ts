@@ -119,7 +119,7 @@ export const prepareRoutes = <
       excludeFromOAS?: boolean;
       options?: { excludeFromOAS?: boolean };
     };
-  }
+  },
 >(
   routes: R[],
   filters: GenerateOpenApiDocumentOptionsFilters

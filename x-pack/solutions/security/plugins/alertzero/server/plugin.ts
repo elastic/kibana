@@ -90,15 +90,12 @@ import {
   registerStepDefinitions,
 } from './step_types';
 
-export class AlertZeroPlugin
-  implements
-    Plugin<
-      AlertZeroPluginSetup,
-      AlertZeroPluginStart,
-      AlertZeroSetupDependencies,
-      AlertZeroStartDependencies
-    >
-{
+export class AlertZeroPlugin implements Plugin<
+  AlertZeroPluginSetup,
+  AlertZeroPluginStart,
+  AlertZeroSetupDependencies,
+  AlertZeroStartDependencies
+> {
   private readonly logger: Logger;
   private readonly config: AlertZeroConfig;
   private readonly isServerless: boolean;

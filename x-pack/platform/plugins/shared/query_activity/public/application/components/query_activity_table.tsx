@@ -280,14 +280,13 @@ export const QueryActivityTable: React.FC<QueryActivityTableProps> = ({
   handleRunTimeChangeRef.current = handleRunTimeChange;
 
   const RunTimeFilterCustom = useMemo(
-    () => () =>
-      (
-        <RunTimeFilter
-          value={runTimeValueRef.current}
-          unit={runTimeUnitRef.current}
-          onChange={(v, u) => handleRunTimeChangeRef.current(v, u)}
-        />
-      ),
+    () => () => (
+      <RunTimeFilter
+        value={runTimeValueRef.current}
+        unit={runTimeUnitRef.current}
+        onChange={(v, u) => handleRunTimeChangeRef.current(v, u)}
+      />
+    ),
     []
   );
 

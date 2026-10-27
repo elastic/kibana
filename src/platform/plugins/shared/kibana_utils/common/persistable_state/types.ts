@@ -96,7 +96,7 @@ export type GetMigrationFunctionObjectFn = () => MigrateFunctionsObject;
 export type MigrateFunctionsObject = { [semver: string]: MigrateFunction<any, any> };
 export type MigrateFunction<
   FromVersion extends Serializable = SerializableRecord,
-  ToVersion extends Serializable = SerializableRecord
+  ToVersion extends Serializable = SerializableRecord,
 > = (state: FromVersion) => ToVersion;
 
 /**

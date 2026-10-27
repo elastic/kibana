@@ -106,7 +106,7 @@ export const mapChangeHistoryHttpError = (error: unknown): Error => {
   const code =
     structuredCode && isChangeHistoryErrorCode(structuredCode)
       ? structuredCode
-      : mapStatusToCode(getHttpStatus(error), structuredBody) ?? 'UNKNOWN';
+      : (mapStatusToCode(getHttpStatus(error), structuredBody) ?? 'UNKNOWN');
 
   const mappedError = new Error(message);
   Object.assign(mappedError, { body: { code, message } });

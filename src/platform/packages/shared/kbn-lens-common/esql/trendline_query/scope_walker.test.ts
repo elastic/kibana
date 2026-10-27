@@ -47,7 +47,7 @@ describe('resolveTrackedColumn', () => {
       description: string,
       pipeline: string,
       resolvedName: string | undefined,
-      resolvedAliases: string[]
+      resolvedAliases: string[],
     ]
   >([
     ['prefers a direct EVAL alias', 'EVAL time = bucket', 'time', ['bucket', 'time']],

@@ -88,10 +88,10 @@ export const createActionService = (osqueryContext: OsqueryAppContext) => {
       // Rule runs dispatch the stored content, so once it resolves the persisted copy no longer
       // matters: it can carry stale templates, or a pack's disabled queries that are never sent.
       const stored = resolved.isPack
-        ? resolved.enabledQueries ?? []
+        ? (resolved.enabledQueries ?? [])
         : resolved.query
-        ? [resolved.query]
-        : [];
+          ? [resolved.query]
+          : [];
 
       return {
         isDynamic: stored.some((query) => query && containsDynamicQuery(query)),

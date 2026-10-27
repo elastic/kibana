@@ -297,8 +297,8 @@ export function useDiscoverStreamLink({
         useViews: features.wiredStreamViews.enabled,
       })
     : indexName
-    ? `FROM "${indexName.replaceAll('"', '')}"`
-    : undefined;
+      ? `FROM "${indexName.replaceAll('"', '')}"`
+      : undefined;
 
   const discoverLink = share.url.locators.useUrl<DiscoverAppLocatorParams>(
     () => ({

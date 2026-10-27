@@ -44,7 +44,7 @@ function renderTile(status: ServiceChipState, agentInfo?: ServiceAgentInfo) {
 }
 
 const AGENT_INFO = (health: ServiceAgentInfo['health'], issue?: ServiceAgentInfo['issue']) =>
-  ({ health, agentIds: [], liveAgentIds: [], policyId: 'p1', issue } as ServiceAgentInfo);
+  ({ health, agentIds: [], liveAgentIds: [], policyId: 'p1', issue }) as ServiceAgentInfo;
 
 describe('ServiceTile', () => {
   it('renders the service name', () => {

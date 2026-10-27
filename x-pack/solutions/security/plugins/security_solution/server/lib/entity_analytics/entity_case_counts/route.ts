@@ -68,9 +68,7 @@ export const registerEntityCaseCountsRoute = ({
           const { entity_ids: entityIds, include_members: includeMembers } = request.body;
           const memberIds = includeMembers
             ? await fetchGroupMemberIds(
-                (
-                  await context.core
-                ).elasticsearch.client.asCurrentUser,
+                (await context.core).elasticsearch.client.asCurrentUser,
                 spaceId,
                 entityIds
               )

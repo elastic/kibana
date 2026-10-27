@@ -60,7 +60,7 @@ const pickFinding = (
   techniqueId: string | undefined
 ): CurrentRunFinding | undefined =>
   techniqueId === undefined
-    ? findings.find((finding) => finding.corroboratedTechniqueId === undefined) ?? findings[0]
+    ? (findings.find((finding) => finding.corroboratedTechniqueId === undefined) ?? findings[0])
     : findings.find((finding) => finding.corroboratedTechniqueId === techniqueId);
 
 /**
@@ -168,7 +168,7 @@ export const deriveCoverageSubjects = ({
           techniqueName,
           reportTitle: state.reportContext?.title,
         })
-      : state.reportContext?.title ?? 'Threat report with no environment hit';
+      : (state.reportContext?.title ?? 'Threat report with no environment hit');
 
     const needsReportBody =
       !confirmedHitForSubject || finding === undefined || hypothesis === undefined;

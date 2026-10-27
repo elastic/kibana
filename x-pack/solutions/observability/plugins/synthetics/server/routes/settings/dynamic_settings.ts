@@ -31,9 +31,8 @@ export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   path: SYNTHETICS_API_URLS.DYNAMIC_SETTINGS,
   validate: false,
   handler: async ({ savedObjectsClient, server }) => {
-    const dynamicSettingsAttributes: DynamicSettingsAttributes = await getSyntheticsDynamicSettings(
-      savedObjectsClient
-    );
+    const dynamicSettingsAttributes: DynamicSettingsAttributes =
+      await getSyntheticsDynamicSettings(savedObjectsClient);
 
     const rebalancePrivateLocationShardsEnabled = await getRebalancePrivateLocationShardsEnabled(
       server.pluginsStart.taskManager

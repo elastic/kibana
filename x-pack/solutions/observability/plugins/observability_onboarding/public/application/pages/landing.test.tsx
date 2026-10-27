@@ -256,7 +256,7 @@ const createObservabilityServices = (
 const renderWithFlag = (enabled: boolean | undefined, initialPath: string = '/') => {
   const coreStart = coreMock.createStart();
   coreStart.featureFlags.useBooleanValue.mockImplementation((id, fallback) =>
-    id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled ?? fallback : fallback
+    id === IS_ADD_DATA_PAGE_V2_ENABLED ? (enabled ?? fallback) : fallback
   );
   createCallApi(coreStart);
   const services = createObservabilityServices(coreStart);

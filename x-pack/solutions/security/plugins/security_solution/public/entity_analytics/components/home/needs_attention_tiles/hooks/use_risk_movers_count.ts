@@ -84,8 +84,8 @@ export const useRiskMoversCount = ({
       const entityIds: string[] = Array.isArray(rawIds)
         ? (rawIds as string[]).filter(Boolean)
         : typeof rawIds === 'string' && rawIds
-        ? [rawIds]
-        : [];
+          ? [rawIds]
+          : [];
       return { count, entityIds };
     },
     {
@@ -111,12 +111,12 @@ export const useRiskMoversCount = ({
       defaultMessage: 'There was an error loading risk movers data',
     }),
     // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
-    isTimedOut ? undefined : filteredError ?? indexError
+    isTimedOut ? undefined : (filteredError ?? indexError)
   );
 
   return {
     count: shownResult?.count ?? 0,
-    entityIds: isFetching ? EMPTY_ENTITY_IDS : shownResult?.entityIds ?? EMPTY_ENTITY_IDS,
+    entityIds: isFetching ? EMPTY_ENTITY_IDS : (shownResult?.entityIds ?? EMPTY_ENTITY_IDS),
     // A query that can never run (no index, failed inputs) is not loading: react-query reports a
     // disabled query with no data as loading for ever.
     isLoading: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),

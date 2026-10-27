@@ -11,7 +11,10 @@ import { AIOPS_API_ENDPOINT, AIOPS_USAGE_ID } from '@kbn/aiops-common/constants'
 import type { AiopsUsageId } from '@kbn/aiops-common/constants';
 
 export class AiopsUsage {
-  constructor(private readonly http: HttpStart, private readonly application: ApplicationStart) {}
+  constructor(
+    private readonly http: HttpStart,
+    private readonly application: ApplicationStart
+  ) {}
 
   public trackCategorization(origin?: string) {
     return this.track(AIOPS_USAGE_ID.CATEGORIZATION, origin);

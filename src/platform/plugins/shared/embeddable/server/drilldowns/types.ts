@@ -19,7 +19,7 @@ export type SerializedDrilldowns = {
 
 export type DrilldownSetup<
   StoredState extends DrilldownState = DrilldownState,
-  State extends DrilldownState = DrilldownState
+  State extends DrilldownState = DrilldownState,
 > = {
   /**
    * Schema defining distinct state for the drilldown type

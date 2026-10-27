@@ -16,7 +16,7 @@ const request = httpServerMock.createKibanaRequest();
 const setup = ({ holder }: { holder?: string } = {}) => {
   const findClaimHolder = jest.fn().mockResolvedValue(holder);
   const resolve = createThreadConversationResolver({
-    getSubjectsService: () => ({ findClaimHolder } as unknown as SubjectsService),
+    getSubjectsService: () => ({ findClaimHolder }) as unknown as SubjectsService,
   });
   const resolveThread = () =>
     resolve({

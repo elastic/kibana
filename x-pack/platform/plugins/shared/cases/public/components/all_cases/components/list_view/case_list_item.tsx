@@ -110,7 +110,9 @@ export const CaseListItem: React.FC<{
           opacity: ${showCheckbox ? 1 : 0};
           overflow: hidden;
           margin-right: ${showCheckbox ? euiTheme.size.s : '0'};
-          transition: max-width 150ms ease-in-out, opacity 150ms ease-in-out,
+          transition:
+            max-width 150ms ease-in-out,
+            opacity 150ms ease-in-out,
             margin-right 150ms ease-in-out;
         `,
         titleRow: css`

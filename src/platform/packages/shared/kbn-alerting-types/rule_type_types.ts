@@ -19,7 +19,7 @@ interface ConsumerPrivileges {
 
 export interface RuleType<
   ActionGroupIds extends Exclude<string, RecoveredActionGroupId> = DefaultActionGroupId,
-  RecoveryActionGroupId extends string = RecoveredActionGroupId
+  RecoveryActionGroupId extends string = RecoveredActionGroupId,
 > {
   id: string;
   name: string;
@@ -43,8 +43,9 @@ export interface RuleType<
   autoRecoverAlerts?: boolean;
 }
 
-export type ActionGroupIdsOf<T> = T extends ActionGroup<infer groups>
-  ? groups
-  : T extends Readonly<ActionGroup<infer groups>>
-  ? groups
-  : never;
+export type ActionGroupIdsOf<T> =
+  T extends ActionGroup<infer groups>
+    ? groups
+    : T extends Readonly<ActionGroup<infer groups>>
+      ? groups
+      : never;

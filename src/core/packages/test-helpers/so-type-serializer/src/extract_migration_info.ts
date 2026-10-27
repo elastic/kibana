@@ -67,7 +67,7 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
   const modelVersionMap =
     typeof soType.modelVersions === 'function'
       ? soType.modelVersions()
-      : soType.modelVersions ?? {};
+      : (soType.modelVersions ?? {});
 
   const getModelVersionHash = (
     modelVersion: SavedObjectsModelVersion | SavedObjectsFullModelVersion

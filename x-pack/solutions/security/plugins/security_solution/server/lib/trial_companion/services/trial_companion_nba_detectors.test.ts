@@ -95,7 +95,7 @@ describe('Trial companion NBA detectors', () => {
         title: '',
         version: '',
         status,
-      } as PackageListItem);
+      }) as PackageListItem;
     it.each([
       [
         'installed one default package',

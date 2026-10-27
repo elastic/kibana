@@ -289,10 +289,10 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
               strategy != null
                 ? { strategy }
                 : interval != null
-                ? needsInterval(inferred)
-                  ? { strategy: inferred, interval }
-                  : { strategy: inferred }
-                : null;
+                  ? needsInterval(inferred)
+                    ? { strategy: inferred, interval }
+                    : { strategy: inferred }
+                  : null;
 
             return {
               document: { ...doc, attributes: { ...attributes, throttle: next } },

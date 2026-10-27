@@ -140,7 +140,8 @@ export const DetectionPage = ({
     margin-block-end: ${expanded && spaceAfter ? euiTheme.size.m : 0};
 
     ${euiCanAnimate} {
-      transition: grid-template-rows ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
+      transition:
+        grid-template-rows ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
         opacity ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
         margin-block-end ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
         visibility 0s linear ${expanded ? '0s' : euiTheme.animation.normal};

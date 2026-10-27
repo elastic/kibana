@@ -163,7 +163,7 @@ export function UnifiedHistogramChart({
   const isEsql = dataSource.kind === 'esql';
   const hasLensSuggestions = Boolean(
     isEsql &&
-      lensVisServiceCurrentSuggestionContext?.type === UnifiedHistogramSuggestionType.lensSuggestion
+    lensVisServiceCurrentSuggestionContext?.type === UnifiedHistogramSuggestionType.lensSuggestion
   );
 
   useTotalHits({

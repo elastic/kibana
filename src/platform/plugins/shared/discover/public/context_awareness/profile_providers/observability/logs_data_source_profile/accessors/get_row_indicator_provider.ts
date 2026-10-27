@@ -17,7 +17,6 @@ import { LOG_LEVEL_FIELDS } from '../../../../../../common/data_types/logs/const
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
 export const getRowIndicatorProvider: DataSourceProfileProvider['profile']['getRowIndicatorProvider'] =
-
     () =>
     ({ dataView, dataSource }) => {
       // ES|QL shims only expose a time field on the DataView — use the live source schema.

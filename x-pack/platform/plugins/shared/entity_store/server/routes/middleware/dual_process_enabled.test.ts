@@ -17,12 +17,12 @@ describe('dualProcessEnabledMiddleware', () => {
         logger: loggerMock.create(),
         isDualProcessEnabled: jest.fn().mockResolvedValue(enabled),
       }),
-    } as unknown as EntityStoreRequestHandlerContext);
+    }) as unknown as EntityStoreRequestHandlerContext;
 
   const createRes = () =>
     ({
       notFound: jest.fn(({ body }) => ({ status: 404, payload: body })),
-    } as unknown as KibanaResponseFactory);
+    }) as unknown as KibanaResponseFactory;
 
   const req = {} as KibanaRequest;
 

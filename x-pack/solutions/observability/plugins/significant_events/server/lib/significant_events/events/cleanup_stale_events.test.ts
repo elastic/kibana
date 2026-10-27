@@ -26,7 +26,7 @@ const makeAlertEventsClient = (
   ({
     createAlertEvent: jest.fn().mockResolvedValue(undefined),
     ...overrides,
-  } as jest.Mocked<AlertEventsClientApi>);
+  }) as jest.Mocked<AlertEventsClientApi>;
 
 const makeLogger = (): jest.Mocked<Logger> =>
   ({
@@ -34,7 +34,7 @@ const makeLogger = (): jest.Mocked<Logger> =>
     warn: jest.fn(),
     info: jest.fn(),
     debug: jest.fn(),
-  } as unknown as jest.Mocked<Logger>);
+  }) as unknown as jest.Mocked<Logger>;
 
 const createEvent = (eventId: string, ruleIds: string[]): SignificantEventResponse =>
   ({
@@ -45,7 +45,7 @@ const createEvent = (eventId: string, ruleIds: string[]): SignificantEventRespon
       type: 'detection',
       metadata: { rule_uuid: ruleId },
     })),
-  } as SignificantEventResponse);
+  }) as SignificantEventResponse;
 
 const groupHashOf = (eventId: string) => `group-${eventId}`;
 
@@ -85,7 +85,7 @@ const createEventSearchClient = (
 const createRulesClient = (existingIds: string[]): IRulesManagementClient =>
   ({
     findExistingRuleIds: jest.fn().mockResolvedValue(existingIds),
-  } as unknown as IRulesManagementClient);
+  }) as unknown as IRulesManagementClient;
 
 describe('cleanupStaleEvents', () => {
   beforeEach(() => {

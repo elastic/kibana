@@ -75,7 +75,7 @@ const dataLayer = ({
     isStacked: false,
     isHorizontal: false,
     palette: { type: 'palette', name: 'default', params: {} },
-  } as unknown as CommonXYDataLayerConfig);
+  }) as unknown as CommonXYDataLayerConfig;
 
 const referenceLayer = (
   accessor: string,
@@ -90,7 +90,7 @@ const referenceLayer = (
     accessors: [accessor],
     table: table([column(accessor, format)], { [accessor]: value }),
     decorations: [{ type: 'referenceLineDecorationConfig', forAccessor: accessor, position }],
-  } as ReferenceLineLayerConfig);
+  }) as ReferenceLineLayerConfig;
 
 const standaloneReferenceLine = (
   accessor: string,

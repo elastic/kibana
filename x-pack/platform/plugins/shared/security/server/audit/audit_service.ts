@@ -132,7 +132,7 @@ export class AuditService {
     ]).pipe(
       map(([{ features, writeAccess }, runtimeFailure]) => ({
         features,
-        writeAccess: features.allowAuditLogging ? runtimeFailure ?? writeAccess : writeAccess,
+        writeAccess: features.allowAuditLogging ? (runtimeFailure ?? writeAccess) : writeAccess,
       })),
       shareReplay(1)
     );
@@ -205,8 +205,8 @@ export class AuditService {
         const principal = user
           ? getAuthenticatedPrincipal(user)
           : request.isFakeRequest
-          ? getFakeRequestPrincipal(request)
-          : null;
+            ? getFakeRequestPrincipal(request)
+            : null;
         const serviceAccountId =
           principal?.type === 'service_account' ? principal.serviceAccountId : undefined;
         const sessionId = await getSID(request);
@@ -231,9 +231,9 @@ export class AuditService {
                 ...(target ? { target } : {}),
               }
             : serviceAccountId
-            ? // The registry knows only which account a fake request runs as, not its roles.
-              { id: serviceAccountId, name: serviceAccountId, ...(target ? { target } : {}) }
-            : event.user,
+              ? // The registry knows only which account a fake request runs as, not its roles.
+                { id: serviceAccountId, name: serviceAccountId, ...(target ? { target } : {}) }
+              : event.user,
           kibana: {
             space_id: spaceId,
             session_id: sessionId,

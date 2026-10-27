@@ -106,7 +106,7 @@ const createContext = (
     rawInput: input,
     stepId: 'report_run_completed',
     stepType: ReportWorkerOutcomeStepId,
-  } as unknown as StepHandlerContext<never, never>);
+  }) as unknown as StepHandlerContext<never, never>;
 
 const createManagedWorkflowState = (): jest.Mocked<ManagedWorkflowStateApi> => ({
   getInstalledWorkflowState: jest.fn(async (_workflowId: string, spaceId: string) =>
@@ -625,14 +625,12 @@ describe('alertzero.reportWorkerOutcome step', () => {
     );
 
     it.each<SkipCase>([
-      ...ITEM_EVENTS.map(
-        ([eventType, , input]): SkipCase => ({
-          input,
-          level: 'warn',
-          reason: 'wrong_worker',
-          title: `reports nothing, at warn level, for a ${eventType} payload from the Attack Discovery Worker`,
-        })
-      ),
+      ...ITEM_EVENTS.map(([eventType, , input]): SkipCase => ({
+        input,
+        level: 'warn',
+        reason: 'wrong_worker',
+        title: `reports nothing, at warn level, for a ${eventType} payload from the Attack Discovery Worker`,
+      })),
       {
         arrange: () => ({
           overrides: rootedAt(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID),

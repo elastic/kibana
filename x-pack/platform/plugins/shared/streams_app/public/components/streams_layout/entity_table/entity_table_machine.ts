@@ -39,8 +39,8 @@ export const createEntityTableMachine = <TItem>() =>
     },
     actors: {
       initializeUrl: getPlaceholderFor(createUrlInitializerActor),
-      fetchItems: getPlaceholderFor(
-        (): PromiseActorLogic<TItem[]> => fromPromise(() => Promise.resolve<TItem[]>([]))
+      fetchItems: getPlaceholderFor((): PromiseActorLogic<TItem[]> =>
+        fromPromise(() => Promise.resolve<TItem[]>([]))
       ),
     },
     actions: {

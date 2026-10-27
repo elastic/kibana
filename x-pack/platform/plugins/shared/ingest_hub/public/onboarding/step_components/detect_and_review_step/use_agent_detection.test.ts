@@ -39,7 +39,7 @@ const mockUseBulkPolicies = useBulkGetAgentPoliciesQuery as jest.Mock;
 const mockUsePolicyAgents = useAgentsForPolicyIds as jest.Mock;
 
 const entry = (id: string, overrides: Record<string, unknown> = {}) =>
-  ({ id, packageName: 'aws', ...overrides } as unknown as AwsServiceMatrixEntry);
+  ({ id, packageName: 'aws', ...overrides }) as unknown as AwsServiceMatrixEntry;
 
 const packagePolicy = (id: string, packageName = 'aws', version = '4.0.0') => ({
   id,

@@ -16,7 +16,7 @@ const makeStep = (
     customIdentifier: id,
     parentId,
     action: 'set',
-  } as PipelineStepWithUIAttributes);
+  }) as PipelineStepWithUIAttributes;
 
 const steps: PipelineStepWithUIAttributes[] = [
   makeStep('root'),

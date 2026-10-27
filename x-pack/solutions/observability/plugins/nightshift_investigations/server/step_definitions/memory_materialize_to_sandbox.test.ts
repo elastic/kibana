@@ -85,7 +85,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
       abortSignal: new AbortController().signal,
       stepId: 'memory_materialize_to_sandbox',
       stepType: 'nightshift.memoryMaterializeToSandbox',
-    } as never);
+    }) as never;
 
   it('materializes memory with the workflow-scoped client', async () => {
     const sandboxStart = makeSandboxStart();

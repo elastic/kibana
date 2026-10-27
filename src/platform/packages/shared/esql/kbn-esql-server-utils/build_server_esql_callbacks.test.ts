@@ -14,7 +14,7 @@ import { buildServerESQLCallbacks } from './build_server_esql_callbacks';
 import { resetSourcesScopeCache } from './sources_scope';
 
 const makeClient = (resolveIndex: jest.Mock, nodesInfo: jest.Mock) =>
-  ({ indices: { resolveIndex }, nodes: { info: nodesInfo } } as unknown as ElasticsearchClient);
+  ({ indices: { resolveIndex }, nodes: { info: nodesInfo } }) as unknown as ElasticsearchClient;
 
 const logger = loggerMock.create();
 

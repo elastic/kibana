@@ -148,12 +148,12 @@ export const useWorkerDependencyChecks = (workerId: string) => {
   const defendStatus: DependencyStatus = !needsDefend
     ? 'satisfied'
     : defendPolicies.isLoading
-    ? 'loading'
-    : defendPolicies.error || !defendPolicies.data
-    ? 'unknown'
-    : defendPolicies.data.total > 0
-    ? 'satisfied'
-    : 'missing';
+      ? 'loading'
+      : defendPolicies.error || !defendPolicies.data
+        ? 'unknown'
+        : defendPolicies.data.total > 0
+          ? 'satisfied'
+          : 'missing';
 
   const workflowStatus = (id: string): DependencyStatus => {
     if (!needsThreatReports) return 'satisfied';
@@ -172,33 +172,34 @@ export const useWorkerDependencyChecks = (workerId: string) => {
   const alertAnalysisWorkflowStatus: DependencyStatus = !needsAlertAnalysis
     ? 'satisfied'
     : alertAnalysisWorkflow.isLoading
-    ? 'loading'
-    : alertAnalysisWorkflow.error || !alertAnalysisWorkflow.data
-    ? 'unknown'
-    : !alertAnalysisWorkflowState
-    ? 'unknown'
-    : alertAnalysisWorkflowState.enabled === true
-    ? 'satisfied'
-    : 'missing';
+      ? 'loading'
+      : alertAnalysisWorkflow.error || !alertAnalysisWorkflow.data
+        ? 'unknown'
+        : !alertAnalysisWorkflowState
+          ? 'unknown'
+          : alertAnalysisWorkflowState.enabled === true
+            ? 'satisfied'
+            : 'missing';
   const alertAnalysisRuntimeStatus: DependencyStatus = !needsAlertAnalysis
     ? 'satisfied'
     : alertAnalysisSetting.isLoading
-    ? 'loading'
-    : alertAnalysisSetting.error || !alertAnalysisSetting.data
-    ? 'unknown'
-    : (alertAnalysisSetting.data.settings[SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED]
-        ?.userValue ??
-        uiSettings.getAll()[SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED]?.value) === true
-    ? 'satisfied'
-    : 'missing';
+      ? 'loading'
+      : alertAnalysisSetting.error || !alertAnalysisSetting.data
+        ? 'unknown'
+        : (alertAnalysisSetting.data.settings[SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED]
+              ?.userValue ??
+              uiSettings.getAll()[SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED]?.value) ===
+            true
+          ? 'satisfied'
+          : 'missing';
   const alertAnalysisStatus: DependencyStatus =
     alertAnalysisWorkflowStatus === 'missing' || alertAnalysisRuntimeStatus === 'missing'
       ? 'missing'
       : alertAnalysisWorkflowStatus === 'unknown' || alertAnalysisRuntimeStatus === 'unknown'
-      ? 'unknown'
-      : alertAnalysisWorkflowStatus === 'loading' || alertAnalysisRuntimeStatus === 'loading'
-      ? 'loading'
-      : 'satisfied';
+        ? 'unknown'
+        : alertAnalysisWorkflowStatus === 'loading' || alertAnalysisRuntimeStatus === 'loading'
+          ? 'loading'
+          : 'satisfied';
 
   return {
     alertAnalysis: alertAnalysisStatus,

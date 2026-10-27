@@ -55,7 +55,7 @@ const summary = (overrides: Partial<MemorySummary> = {}): MemorySummary =>
     usefulness: 0.9,
     confidence: 0.9,
     ...overrides,
-  } as MemorySummary);
+  }) as MemorySummary;
 
 const PAGES = [
   summary({ id: 'memory_a', title: 'Kafka and Redis', tags: ['memory', 'kafka', 'redis'] }),
@@ -141,7 +141,7 @@ beforeEach(() => {
     (tags: readonly string[] = []) =>
       ({
         data: { pages: serverFilter(PAGES, tags), total: PAGES.length, stats },
-      } as unknown as ReturnType<typeof useMemoryKeywordPages>)
+      }) as unknown as ReturnType<typeof useMemoryKeywordPages>
   );
 });
 
@@ -217,7 +217,7 @@ describe('MemoryHome keyword filtering', () => {
       (tags: readonly string[] = []) =>
         ({
           data: { pages: serverFilter([...PAGES, older], tags), total: 4, stats, capped: false },
-        } as unknown as ReturnType<typeof useMemoryKeywordPages>)
+        }) as unknown as ReturnType<typeof useMemoryKeywordPages>
     );
     renderHome();
 

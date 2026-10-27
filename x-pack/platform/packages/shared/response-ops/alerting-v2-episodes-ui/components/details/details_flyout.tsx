@@ -269,7 +269,7 @@ export const AlertEpisodeDetailsFlyout = ({
   const titleNode = isLoading ? (
     <EuiSkeletonTitle size="xs" />
   ) : (
-    ruleName ?? i18n.HEADER_EPISODE_TITLE_FALLBACK
+    (ruleName ?? i18n.HEADER_EPISODE_TITLE_FALLBACK)
   );
 
   // Header description: triggered timestamp.
@@ -540,7 +540,7 @@ export const AlertEpisodeDetailsFlyout = ({
           <FlyoutTemplate.Body.TabPanel tabId="timeline">
             <AlertEpisodeTimelineSection
               episodeId={episodeId}
-              seriesId={episode ? episode.series_id ?? null : undefined}
+              seriesId={episode ? (episode.series_id ?? null) : undefined}
               groupHash={episode?.group_hash}
               services={services}
             />

@@ -242,9 +242,9 @@ export const useEditDataLifecycle = ({
     const retention = inheritFailedLifecycle
       ? inheritedRetention
       : dataStream?.failureStoreEnabled === true
-      ? dataStream?.failureStoreRetention?.customRetentionPeriod ??
-        dataStream?.failureStoreRetention?.defaultRetentionPeriod
-      : inheritedRetention;
+        ? (dataStream?.failureStoreRetention?.customRetentionPeriod ??
+          dataStream?.failureStoreRetention?.defaultRetentionPeriod)
+        : inheritedRetention;
     const retentionDisabled = inheritFailedLifecycle
       ? flyoutSeed.templateFailureStoreDefaults?.retentionDisabled === true
       : dataStream?.failureStoreRetention?.retentionDisabled === true;
@@ -399,8 +399,8 @@ export const useEditDataLifecycle = ({
         nextMethod !== 'ilm'
           ? undefined
           : seedFromHistory
-          ? getIlmPolicyNameForSummary(dataStream)
-          : resolvedLifecycle.resolvedIlmPolicyName;
+            ? getIlmPolicyNameForSummary(dataStream)
+            : resolvedLifecycle.resolvedIlmPolicyName;
       setLifecycleMethod(nextMethod);
       setSelectedIlmPolicyName(nextIlmPolicyName);
 
@@ -930,10 +930,10 @@ export const useEditDataLifecycle = ({
       inheritLabel,
       indexTemplateHref: inheritIndexTemplateHref,
       failureStoreEnabled: inheritFailedLifecycle
-        ? flyoutSeed.templateFailureStoreDefaults?.enabled ??
+        ? (flyoutSeed.templateFailureStoreDefaults?.enabled ??
           (dataStream?.failureStoreSettings === undefined
             ? failureStoreEnabled
-            : dataStream?.matchesFailureStoreClusterPattern === true)
+            : dataStream?.matchesFailureStoreClusterPattern === true))
         : failureStoreEnabled,
       onFailureStoreChange: setFailureStoreEnabled,
       deletePhaseDefaultValue: failedDeletePhaseDefaultValue,

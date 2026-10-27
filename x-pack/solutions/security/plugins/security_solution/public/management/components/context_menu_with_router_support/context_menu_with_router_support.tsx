@@ -15,7 +15,8 @@ import { ContextMenuItemNavByRouter } from './context_menu_item_nav_by_router';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 export interface ContextMenuWithRouterSupportProps
-  extends CommonProps,
+  extends
+    CommonProps,
     Pick<EuiPopoverProps, 'button' | 'anchorPosition' | 'panelPaddingSize'>,
     Pick<ContextMenuItemNavByRouterProps, 'isNavigationDisabled'> {
   items: ContextMenuItemNavByRouterProps[];

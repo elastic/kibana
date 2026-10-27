@@ -115,7 +115,7 @@ const installationFixture = (installStartedAt: string): Installation =>
     keep_policies_up_to_date: true,
     verification_status: 'verified',
     verification_key_id: 'mock',
-  } as unknown as Installation);
+  }) as unknown as Installation;
 
 const packagePolicyFor = (postureType: PostureType, agentPolicyId: string): PackagePolicy => {
   const policy = createPackagePolicyMock();
@@ -150,7 +150,7 @@ const agentPolicyFor = (id: string): AgentPolicy =>
     updated_by: 'test',
     is_protected: false,
     status: 'active',
-  } as unknown as AgentPolicy);
+  }) as unknown as AgentPolicy;
 
 interface OrchestrationDeps {
   esClient: jest.Mocked<ElasticsearchClient>;
@@ -296,7 +296,7 @@ const setupAgents = (
   });
   (agentService.asInternalUser.getAgentStatusForAgentPolicy as jest.Mock).mockImplementation(
     async (agentPolicyId?: string) => ({
-      online: agentPolicyId ? healthyAgentsByPolicyId[agentPolicyId] ?? 0 : 0,
+      online: agentPolicyId ? (healthyAgentsByPolicyId[agentPolicyId] ?? 0) : 0,
       updating: 0,
       offline: 0,
       error: 0,

@@ -48,7 +48,7 @@ const buildTemplateSO = (
       isEnabled: true,
       ...overrides,
     } as unknown as Template,
-  } as SavedObject<Template>);
+  }) as SavedObject<Template>;
 
 const baseRequest: CasePostRequest = {
   title: 'My Case',

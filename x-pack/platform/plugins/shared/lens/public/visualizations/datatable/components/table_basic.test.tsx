@@ -149,7 +149,7 @@ describe('DatatableComponent', () => {
     const props: DatatableRenderProps = {
       data,
       args,
-      formatFactory: () => ({ convertToText: (x) => x, convertToReact: (x) => x } as IFieldFormat),
+      formatFactory: () => ({ convertToText: (x) => x, convertToReact: (x) => x }) as IFieldFormat,
       dispatchEvent: onDispatchEvent,
       getType: jest.fn().mockReturnValue({
         type: 'buckets',
@@ -333,7 +333,7 @@ describe('DatatableComponent', () => {
           ) : (
             <span>{String(x)}</span>
           ),
-      } as unknown as IFieldFormat);
+      }) as unknown as IFieldFormat;
 
     test('it hides the header action button (hide, reset, sort)', () => {
       renderDatatableComponent({ viewMode: 'non-interactive' });

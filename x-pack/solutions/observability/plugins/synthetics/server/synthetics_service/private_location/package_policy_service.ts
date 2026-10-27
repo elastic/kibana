@@ -519,7 +519,7 @@ export class PackagePolicyService {
     );
 
     await this.scheduleOrDeferRevisionBumps(
-      result.flatMap(({ success, policy_ids: policyIds }) => (success ? policyIds ?? [] : [])),
+      result.flatMap(({ success, policy_ids: policyIds }) => (success ? (policyIds ?? []) : [])),
       deferredBumps
     );
     return result;

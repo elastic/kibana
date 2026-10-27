@@ -14,7 +14,7 @@ const buildSearchResponse = (hits: Array<Record<string, unknown>>) =>
     timed_out: false,
     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
     hits: { total: { value: hits.length, relation: 'eq' as const }, max_score: null, hits },
-  } as const);
+  }) as const;
 
 describe('getThreatReport', () => {
   const defaultArgs = {

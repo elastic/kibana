@@ -18,8 +18,10 @@ export const DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON = 'aiCTAInstallKnowled
 /**
  * Props for the `InstallKnowledgeBase` call to action.
  */
-export interface InstallKnowledgeBaseProps
-  extends Pick<AssistantCallToActionProps, 'data-test-subj' | 'centered'> {
+export interface InstallKnowledgeBaseProps extends Pick<
+  AssistantCallToActionProps,
+  'data-test-subj' | 'centered'
+> {
   /** Callback to handle installing a knowledge base. */
   onInstallKnowledgeBase: () => void;
   /** True if the Knowledge Base is currently installing, false otherwise. */

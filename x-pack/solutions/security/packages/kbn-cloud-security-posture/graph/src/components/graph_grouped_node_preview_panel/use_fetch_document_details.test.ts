@@ -21,7 +21,7 @@ const SOURCE = {
 };
 
 const buildHit = (source: Record<string, unknown>, index = 'logs-gcp.audit-default'): EsHitRecord =>
-  ({ _id: 'doc-1', _index: index, _source: source } as EsHitRecord);
+  ({ _id: 'doc-1', _index: index, _source: source }) as EsHitRecord;
 
 describe('buildItemFromHit', () => {
   it('maps the document fields and the resolved actor and targets', () => {

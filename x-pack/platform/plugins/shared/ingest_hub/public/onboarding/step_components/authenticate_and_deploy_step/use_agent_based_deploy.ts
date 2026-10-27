@@ -149,8 +149,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       const targetsToDeploy = isRetry
         ? targets.filter((g) => g.instanceIds.some((id) => instanceIds.includes(id)))
         : isNewPolicySwitch
-        ? targets
-        : targets.filter((g) => g.instanceIds.some((id) => !alreadyDeployedIds.has(id)));
+          ? targets
+          : targets.filter((g) => g.instanceIds.some((id) => !alreadyDeployedIds.has(id)));
 
       // Step-1 deselections skip removeDeployInstance — detect stale entries via reconciled targets.
       const activeInstanceIds = new Set(targets.flatMap((g) => g.instanceIds));
@@ -209,10 +209,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       const { dataFormat } = servicesStep;
       const targetPolicyIds =
         agentHostsMode === 'existing'
-          ? selectedAgentPolicyIds ?? []
+          ? (selectedAgentPolicyIds ?? [])
           : agentPolicyId
-          ? [agentPolicyId]
-          : selectedAgentPolicyIds ?? [];
+            ? [agentPolicyId]
+            : (selectedAgentPolicyIds ?? []);
 
       try {
         // A group whose package already has a package policy joins it (PUT) instead of creating a
@@ -551,8 +551,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               ...(agentHostsMode === 'existing' && selectedAgentPolicyIds?.length
                 ? { agentPolicyIds: selectedAgentPolicyIds }
                 : agentPolicyId
-                ? { agentPolicyIds: [agentPolicyId] }
-                : {}),
+                  ? { agentPolicyIds: [agentPolicyId] }
+                  : {}),
             })) ?? undefined;
           if (onboardingDeploymentId) persistDeploymentId(onboardingDeploymentId);
         }

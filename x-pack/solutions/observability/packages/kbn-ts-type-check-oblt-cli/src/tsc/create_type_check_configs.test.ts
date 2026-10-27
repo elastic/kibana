@@ -29,10 +29,10 @@ const makeProject = (dir: string): TsProject =>
     getBase: () => undefined,
     getKbnRefs: () => [],
     isTypeCheckDisabled: () => false,
-  } as unknown as TsProject);
+  }) as unknown as TsProject;
 
 const makeLog = (): SomeDevLog =>
-  ({ verbose: jest.fn(), info: jest.fn() } as unknown as SomeDevLog);
+  ({ verbose: jest.fn(), info: jest.fn() }) as unknown as SomeDevLog;
 
 // Content that createTypeCheckConfigs generates for a project with empty config and no refs.
 const expectedContent = JSON.stringify(

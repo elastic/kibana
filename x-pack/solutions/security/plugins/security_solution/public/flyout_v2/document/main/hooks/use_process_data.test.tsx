@@ -26,7 +26,7 @@ const createHit = (flattened: Record<string, unknown>): DataTableRecord =>
       _index: 'test-index',
     } as EsHitRecord,
     flattened,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 describe('getUserDisplayName', () => {
   it('should return userName', () => {

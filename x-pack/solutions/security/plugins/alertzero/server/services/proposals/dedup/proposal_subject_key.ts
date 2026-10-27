@@ -87,8 +87,8 @@ export const buildProposalSubjectKeyFromActionInput = ({
       entityId !== undefined
         ? `entity_id:${entityId}`
         : pid !== undefined
-        ? `pid:${pid}`
-        : undefined;
+          ? `pid:${pid}`
+          : undefined;
     return buildProposalSubjectKey({ subjectId: agentId, actionWorkflowId, processKey });
   }
   const idField = asString(actionInput.id_field);

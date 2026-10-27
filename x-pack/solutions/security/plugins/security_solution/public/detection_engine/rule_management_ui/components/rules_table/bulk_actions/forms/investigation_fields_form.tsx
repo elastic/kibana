@@ -120,8 +120,8 @@ const InvestigationFieldsFormComponent = ({
     const event = data.overwrite
       ? TELEMETRY_EVENT.SET_INVESTIGATION_FIELDS
       : editAction === 'delete_investigation_fields'
-      ? TELEMETRY_EVENT.DELETE_INVESTIGATION_FIELDS
-      : TELEMETRY_EVENT.ADD_INVESTIGATION_FIELDS;
+        ? TELEMETRY_EVENT.DELETE_INVESTIGATION_FIELDS
+        : TELEMETRY_EVENT.ADD_INVESTIGATION_FIELDS;
     track(METRIC_TYPE.CLICK, event);
 
     onConfirm({

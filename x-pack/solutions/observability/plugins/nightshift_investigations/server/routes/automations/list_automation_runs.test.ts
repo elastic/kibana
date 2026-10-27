@@ -315,13 +315,13 @@ it('links activation and recovery runs of an alert-only workflow to their own st
             },
           ]
         : stepId === 'follow_up_recovered_alert'
-        ? [
-            {
-              workflowRunId: 'exec-recovered',
-              output: { investigation_id: 'inv-1', execution_id: 'exec-round' },
-            },
-          ]
-        : [],
+          ? [
+              {
+                workflowRunId: 'exec-recovered',
+                output: { investigation_id: 'inv-1', execution_id: 'exec-round' },
+              },
+            ]
+          : [],
   }));
 
   const result = await call('auto-1');

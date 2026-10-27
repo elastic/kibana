@@ -12,4 +12,4 @@ export const alertDeleteCategoryIds = {
 } as const;
 
 export type AlertDeleteCategoryIds =
-  | (typeof alertDeleteCategoryIds)[keyof typeof alertDeleteCategoryIds];
+  (typeof alertDeleteCategoryIds)[keyof typeof alertDeleteCategoryIds];

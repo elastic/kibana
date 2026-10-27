@@ -49,11 +49,11 @@ function setupContext({
       share:
         share === null
           ? undefined
-          : share ?? {
+          : (share ?? {
               url: {
                 locators: { get: getLocator },
               },
-            },
+            }),
     },
     filters: {
       serviceName: 'checkout',

@@ -15,7 +15,7 @@ const buildEuidApi = (getEuidFilterBasedOnDocument: jest.Mock): EntityStoreEuidA
   ({
     euid: { dsl: { getEuidFilterBasedOnDocument } },
     getBuiltInEntityDefinition: jest.fn((entityType: string) => entityType),
-  } as unknown as EntityStoreEuidApi);
+  }) as unknown as EntityStoreEuidApi;
 
 const termOnHostName = jest.fn((_type: string, document: { host?: { name?: string } }) =>
   document?.host?.name ? { term: { 'host.name': document.host.name } } : undefined

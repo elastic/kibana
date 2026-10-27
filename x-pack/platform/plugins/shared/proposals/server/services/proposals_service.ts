@@ -335,7 +335,7 @@ export class ProposalsService {
     const total =
       typeof response.hits.total === 'number'
         ? response.hits.total
-        : response.hits.total?.value ?? current.length;
+        : (response.hits.total?.value ?? current.length);
     return { proposals, total: total - settledAway };
   }
 

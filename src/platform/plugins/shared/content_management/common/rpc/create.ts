@@ -37,7 +37,7 @@ export const createSchemas = {
 export interface CreateIn<
   T extends string = string,
   Data extends object = object,
-  Options extends void | object = object
+  Options extends void | object = object,
 > {
   contentTypeId: T;
   data: Data;

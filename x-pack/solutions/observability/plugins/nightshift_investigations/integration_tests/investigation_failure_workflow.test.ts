@@ -79,7 +79,7 @@ const setup = (failure?: Failure, persistenceFailures = 0) => {
         startedAt: new Date().toISOString(),
       }),
     })) as never,
-    getActions: () => ({ getActionsClientWithRequestInSpace: async () => ({ execute }) } as never),
+    getActions: () => ({ getActionsClientWithRequestInSpace: async () => ({ execute }) }) as never,
     getRoutingClient: async () => routing.client,
     getTriggerEmitter: () => emitter,
   };

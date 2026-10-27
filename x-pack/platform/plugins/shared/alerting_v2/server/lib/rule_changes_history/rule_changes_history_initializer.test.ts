@@ -12,9 +12,9 @@ import { RuleChangesHistoryInitializer } from './rule_changes_history_initialize
 
 describe('RuleChangesHistoryInitializer', () => {
   const createClientMock = () =>
-    ({ initialize: jest.fn().mockResolvedValue(undefined) } as unknown as jest.Mocked<
+    ({ initialize: jest.fn().mockResolvedValue(undefined) }) as unknown as jest.Mocked<
       Pick<ChangeHistoryClient, 'initialize'>
-    >);
+    >;
 
   it('initializes the change history client with the ES client and user profile service', async () => {
     const client = createClientMock();

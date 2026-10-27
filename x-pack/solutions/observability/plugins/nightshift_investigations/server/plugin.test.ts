@@ -28,7 +28,7 @@ const createPlugin = (memoryEnabled = false) =>
 const createSetupDeps = () =>
   ({
     share: { url: new MockUrlService() },
-  } as unknown as NightshiftInvestigationsSetupDeps);
+  }) as unknown as NightshiftInvestigationsSetupDeps;
 
 describe('NightshiftInvestigationsPlugin setup', () => {
   it('registers the investigation locator on the server', async () => {

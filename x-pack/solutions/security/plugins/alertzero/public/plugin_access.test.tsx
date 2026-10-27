@@ -121,8 +121,8 @@ describe.each(['threat', 'event'] as const)('%s registered content', (surface) =
           change === 'setting'
             ? 'AlertZero is not enabled'
             : change === 'tier'
-            ? 'Upgrade your subscription'
-            : 'Upgrade your license'
+              ? 'Upgrade your subscription'
+              : 'Upgrade your license'
         )
       ).toBeInTheDocument();
       mockRequest.mockClear();

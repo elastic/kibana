@@ -104,7 +104,7 @@ describe('addToHistory', () => {
   const getContext = (user: unknown = { username: 'elastic', profile_uid: 'u_1' }) =>
     ({
       core: Promise.resolve({ security: { authc: { getCurrentUser: () => user } } }),
-    } as unknown as RequestHandlerContext);
+    }) as unknown as RequestHandlerContext;
 
   const getClient = (latestHistorySnapshot?: DashboardState) => ({
     getHistory: jest.fn().mockResolvedValue({

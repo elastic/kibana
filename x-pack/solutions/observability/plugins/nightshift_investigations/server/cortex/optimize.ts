@@ -143,7 +143,7 @@ export const isSeededWorkspaceRead = ({
 }: InvestigationToolCall): boolean => isSeededWorkspaceAccess(toolId, params);
 
 const renderToolResultValue = (value: unknown): string =>
-  typeof value === 'string' ? value : JSON.stringify(value, boundToolCallResult) ?? '';
+  typeof value === 'string' ? value : (JSON.stringify(value, boundToolCallResult) ?? '');
 
 // Top-level string fields (e.g. `stdout`) are rendered raw so command output isn't JSON-escaped.
 const renderToolResultData = (data: unknown): string => {
@@ -348,8 +348,8 @@ export const applyCortexEdits = async ({
       const status = !existing
         ? 'tentative'
         : alreadyTouched
-        ? existing.status
-        : statusAfterCorroboration(existing.status, corroborations ?? 0);
+          ? existing.status
+          : statusAfterCorroboration(existing.status, corroborations ?? 0);
       await store.upsert({
         entityType: edit.entity_type,
         slug,

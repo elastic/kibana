@@ -79,7 +79,7 @@ describe('verification handler', () => {
         }),
       },
       params: { query: { apiKeyId } },
-    } as unknown as Parameters<typeof handler>[0]);
+    }) as unknown as Parameters<typeof handler>[0];
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -25,7 +25,7 @@ export type StartServices = [
     | 'notifications'
   >,
   unknown,
-  unknown
+  unknown,
 ];
 
 export interface ExportModalShareOpts {
@@ -35,8 +35,10 @@ export interface ExportModalShareOpts {
   isServerless?: boolean;
 }
 
-export interface ScreenCaptureExportShareOpts
-  extends Pick<ExportModalShareOpts, 'apiClient' | 'startServices$'> {
+export interface ScreenCaptureExportShareOpts extends Pick<
+  ExportModalShareOpts,
+  'apiClient' | 'startServices$'
+> {
   /**
    * marks the PDF/PNG export as experimental in the export flyout
    */

@@ -223,7 +223,7 @@ export const useAgentBuilderRuleCreation = ({
         durationSinceSessionStartMs: Date.now() - session.startTimestamp,
       });
 
-      const ruleIdForSync = syncRuleIdRef.current ? rule.id ?? syncRuleIdRef.current : undefined;
+      const ruleIdForSync = syncRuleIdRef.current ? (rule.id ?? syncRuleIdRef.current) : undefined;
       if (ruleIdForSync) {
         syncRuleIdRef.current = ruleIdForSync;
       }

@@ -31,7 +31,7 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
     abortSignal: new AbortController().signal,
     stepId: 'reopen_investigation',
     stepType: 'investigations.reopen',
-  } as unknown as StepHandlerContext<never, never>);
+  }) as unknown as StepHandlerContext<never, never>;
 
 const makeConversation = (status: string, title: string, rename = true) => ({
   id: 'conv-1',

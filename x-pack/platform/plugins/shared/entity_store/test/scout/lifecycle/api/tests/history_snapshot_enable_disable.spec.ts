@@ -52,9 +52,8 @@ apiTest.describe('Entity Store history snapshot enable/disable', { tag: ENTITY_S
     );
     operatorApiKeyHeader = { ...operatorKey, ...PUBLIC_HEADERS };
 
-    const { apiKeyHeader: unprivilegedKey } = await requestAuth.getApiKeyForCustomRole(
-      NO_SECURITY_SOLUTION_ROLE
-    );
+    const { apiKeyHeader: unprivilegedKey } =
+      await requestAuth.getApiKeyForCustomRole(NO_SECURITY_SOLUTION_ROLE);
     unprivilegedApiKeyHeader = { ...unprivilegedKey, ...PUBLIC_HEADERS };
   });
 

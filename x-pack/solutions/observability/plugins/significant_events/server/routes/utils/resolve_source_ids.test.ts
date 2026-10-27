@@ -10,7 +10,7 @@ import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { filterReadableSourceIds } from './resolve_source_ids';
 
 const sourcesClientWith = (assertReadable: jest.Mock): SourcesClient =>
-  ({ assertReadable } as unknown as SourcesClient);
+  ({ assertReadable }) as unknown as SourcesClient;
 
 describe('filterReadableSourceIds', () => {
   it('drops the sources the caller is denied and keeps the order of the rest', async () => {

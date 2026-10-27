@@ -346,8 +346,8 @@ export function importTestSuiteFactory(context: FtrProviderContext) {
             const query = test.overwrite
               ? '?overwrite=true'
               : test.createNewCopies
-              ? '?createNewCopies=true'
-              : '';
+                ? '?createNewCopies=true'
+                : '';
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import${query}`)
               .auth(user?.username!, user?.password!)

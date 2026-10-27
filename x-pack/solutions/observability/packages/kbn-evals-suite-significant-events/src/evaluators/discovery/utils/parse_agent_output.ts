@@ -117,7 +117,7 @@ const mergeComputedFields = (
     event_id: result.event_id,
     ...(result.status !== undefined ? { status: result.status } : {}),
     ...(result.severity !== undefined ? { severity: result.severity } : {}),
-  } as SignificantEvent);
+  }) as SignificantEvent;
 
 /**
  * Extract events from `events_write` tool call steps for continuation seeding.

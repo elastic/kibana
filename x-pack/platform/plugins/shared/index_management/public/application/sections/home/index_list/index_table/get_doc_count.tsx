@@ -53,9 +53,11 @@ export const docCountApi = (httpSetup: HttpSetup) => {
           signal: abortController.signal,
         })
       ).pipe(
-        map(
-          (response): RequestResult => ({ type: RequestResultType.Success, indexNames, response })
-        ),
+        map((response): RequestResult => ({
+          type: RequestResultType.Success,
+          indexNames,
+          response,
+        })),
         catchError(() => {
           // Avoid showing errors when navigating away; IndexTable aborts in componentWillUnmount.
           if (abortController.signal.aborted) {
@@ -66,26 +68,29 @@ export const docCountApi = (httpSetup: HttpSetup) => {
       )
     ),
     // combine all the responses into a single object (but keep per-index error state)
-    scan((acc, result): Record<string, DocCountResult> => {
-      const next = { ...acc };
+    scan(
+      (acc, result): Record<string, DocCountResult> => {
+        const next = { ...acc };
 
-      if (result.type === RequestResultType.Error) {
-        // If the request fails, mark only indices in that request as errored.
-        for (const indexName of result.indexNames) {
-          next[indexName] = next[indexName] || { status: RequestResultType.Error };
-        }
-        return next;
-      } else {
-        for (const indexName of result.indexNames) {
-          next[indexName] = {
-            status: RequestResultType.Success,
-            count: result.response[indexName] ?? 0,
-          };
-        }
+        if (result.type === RequestResultType.Error) {
+          // If the request fails, mark only indices in that request as errored.
+          for (const indexName of result.indexNames) {
+            next[indexName] = next[indexName] || { status: RequestResultType.Error };
+          }
+          return next;
+        } else {
+          for (const indexName of result.indexNames) {
+            next[indexName] = {
+              status: RequestResultType.Success,
+              count: result.response[indexName] ?? 0,
+            };
+          }
 
-        return next;
-      }
-    }, {} as Record<string, DocCountResult>),
+          return next;
+        }
+      },
+      {} as Record<string, DocCountResult>
+    ),
     // replay the latest accumulated state to late subscribers (e.g. the index actions context menu)
     shareReplay({ bufferSize: 1, refCount: true })
   );

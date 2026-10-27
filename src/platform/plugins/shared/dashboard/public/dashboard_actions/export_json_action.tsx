@@ -53,10 +53,10 @@ export type ExportJSONActionApi = SupportsJsonExport &
 const isApiCompatible = (api: unknown | null): api is ExportJSONActionApi =>
   Boolean(
     apiSupportsJsonExport(api) &&
-      apiHasUniqueId(api) &&
-      apiHasType(api) &&
-      apiPublishesTitle(api) &&
-      apiHasSerializableState(api)
+    apiHasUniqueId(api) &&
+    apiHasType(api) &&
+    apiPublishesTitle(api) &&
+    apiHasSerializableState(api)
   );
 
 export class ExportJSONAction implements Action<EmbeddableApiContext> {

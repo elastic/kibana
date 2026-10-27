@@ -172,21 +172,20 @@ export const resolveUnitIndicesRoute = createServerRoute({
           {
             indices: names
               .filter((name) => patterns.some((pattern) => matchesIndexPattern(name, pattern)))
-              .map(
-                (name): ResolvedDestinationIndex =>
-                  dataStreamNames.has(name)
-                    ? {
-                        name,
-                        is_data_stream: true,
-                        lifecycle: lifecycleByName.get(name) ?? {
-                          error: { message: 'Data stream not found' },
-                        },
-                        failure_store_enabled: failureStoreEnabledByName.get(name) ?? true,
-                        privileges: {
-                          read_failure_store: privilegesByName[name]?.read_failure_store ?? false,
-                        },
-                      }
-                    : { name, is_data_stream: false }
+              .map((name): ResolvedDestinationIndex =>
+                dataStreamNames.has(name)
+                  ? {
+                      name,
+                      is_data_stream: true,
+                      lifecycle: lifecycleByName.get(name) ?? {
+                        error: { message: 'Data stream not found' },
+                      },
+                      failure_store_enabled: failureStoreEnabledByName.get(name) ?? true,
+                      privileges: {
+                        read_failure_store: privilegesByName[name]?.read_failure_store ?? false,
+                      },
+                    }
+                  : { name, is_data_stream: false }
               ),
           },
         ])

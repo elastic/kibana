@@ -40,7 +40,7 @@ const attackTarget = (
       owner: 'securitySolution',
       metadata: { title: attackId, alertCount: 1, index },
     },
-  } as unknown as AttachmentDeleteTarget);
+  }) as unknown as AttachmentDeleteTarget;
 
 const ALERT_INDEX = '.alerts-security.alerts-default';
 
@@ -65,7 +65,7 @@ const alertTarget = (
         ...metadata,
       },
     },
-  } as unknown as AttachmentDeleteTarget);
+  }) as unknown as AttachmentDeleteTarget;
 
 const attackHit = (
   id: string,

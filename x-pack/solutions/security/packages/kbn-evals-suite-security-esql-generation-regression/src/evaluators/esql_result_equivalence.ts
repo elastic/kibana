@@ -179,7 +179,7 @@ function labelFromScore(score: number): string {
  */
 export function createEsqlResultEquivalenceEvaluator<
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(config: {
   esClient: ElasticsearchClient;
   predictionExtractor: (output: TTaskOutput) => string;
@@ -306,15 +306,15 @@ export function createEsqlResultEquivalenceEvaluator<
               goldRowCount === 1 ? '' : 's'
             } match exactly.`
           : jaccard === 0
-          ? `Result sets have no overlap (gold: ${goldRowCount} row${
-              goldRowCount === 1 ? '' : 's'
-            }, candidate: ${candidateRowCount} row${candidateRowCount === 1 ? '' : 's'}).`
-          : `Partial match: ${intersectionRowCount} of ${Math.max(
-              goldRowCount,
-              candidateRowCount
-            )} rows overlap (Jaccard=${jaccard.toFixed(
-              3
-            )}, gold=${goldRowCount}, candidate=${candidateRowCount}).`;
+            ? `Result sets have no overlap (gold: ${goldRowCount} row${
+                goldRowCount === 1 ? '' : 's'
+              }, candidate: ${candidateRowCount} row${candidateRowCount === 1 ? '' : 's'}).`
+            : `Partial match: ${intersectionRowCount} of ${Math.max(
+                goldRowCount,
+                candidateRowCount
+              )} rows overlap (Jaccard=${jaccard.toFixed(
+                3
+              )}, gold=${goldRowCount}, candidate=${candidateRowCount}).`;
 
       return {
         score: jaccard,

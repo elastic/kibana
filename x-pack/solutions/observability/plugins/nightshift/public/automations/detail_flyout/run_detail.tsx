@@ -139,14 +139,14 @@ export const RunDetail = ({
                           values: { limit: run.dailyLimit ?? '—' },
                         })
                       : run.skipReason === 'no_open_investigation'
-                      ? i18n.translate(
-                          'xpack.nightshift.automations.detail.noOpenInvestigationReason',
-                          {
-                            defaultMessage:
-                              'The alert recovered, but no open investigation holds it, so there was nothing to follow up on.',
-                          }
-                        )
-                      : '—',
+                        ? i18n.translate(
+                            'xpack.nightshift.automations.detail.noOpenInvestigationReason',
+                            {
+                              defaultMessage:
+                                'The alert recovered, but no open investigation holds it, so there was nothing to follow up on.',
+                            }
+                          )
+                        : '—',
                 },
                 { title: labels.automation, description: automationName },
               ]}

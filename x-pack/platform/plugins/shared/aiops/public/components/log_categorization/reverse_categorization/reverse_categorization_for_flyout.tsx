@@ -207,7 +207,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
         : {}),
       searchQuery: buildEsQuery(
         dataView,
-        isEsqlQuery ? [] : query ?? [],
+        isEsqlQuery ? [] : (query ?? []),
         filters,
         uiSettings ? getEsQueryConfig(uiSettings) : undefined
       ),

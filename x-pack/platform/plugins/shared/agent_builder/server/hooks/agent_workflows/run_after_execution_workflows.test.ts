@@ -54,7 +54,7 @@ const makeWorkflow = (inputs?: Record<string, unknown>): Workflow =>
         },
       ],
     },
-  } as unknown as Workflow);
+  }) as unknown as Workflow;
 
 const existingWorkflowInputs = {
   additionalProperties: false,

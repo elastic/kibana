@@ -55,7 +55,7 @@ export const bindLocatorToHost = <P extends HostParams>(
     ({
       ...params,
       host: params.host ?? host,
-    } as P);
+    }) as P;
 
   const bound = Object.create(locator) as LocatorPublic<WithOptionalHost<P>>;
   bound.getLocation = (params) => locator.getLocation(withHost(params));

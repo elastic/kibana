@@ -42,7 +42,7 @@ const createMockInjection = (scope: ReturnType<typeof createMockScope>): CoreDiS
   ({
     fork: jest.fn().mockReturnValue(scope),
     getContainer: jest.fn(),
-  } as unknown as CoreDiServiceStart);
+  }) as unknown as CoreDiServiceStart;
 
 const createRunContext = (overrides: Partial<RunContext> = {}): RunContext =>
   ({
@@ -51,7 +51,7 @@ const createRunContext = (overrides: Partial<RunContext> = {}): RunContext =>
     executionUuid: 'execution-1',
     setCustomTaskRunEventFields: jest.fn(),
     ...overrides,
-  } as unknown as RunContext);
+  }) as unknown as RunContext;
 
 describe('createTaskRunnerFactory', () => {
   it('waits for the injection promise to resolve before forking the container', async () => {

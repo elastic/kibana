@@ -265,7 +265,7 @@ describe('runTool', () => {
           id: 'text',
           validate: (input: unknown) => ({ valid: true, data: input }),
           format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-        } as unknown as AttachmentTypeDefinition),
+        }) as unknown as AttachmentTypeDefinition,
     });
     const manager = new RunnerManager({ ...runnerDeps, attachmentStateManager });
 

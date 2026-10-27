@@ -19,7 +19,7 @@ const makeResponse = (
   values: unknown[][] = [],
   opts: Partial<ESQLSearchResponse> = {}
 ): ESQLSearchResponse =>
-  ({ columns, values, all_columns: undefined, ...opts } as unknown as ESQLSearchResponse);
+  ({ columns, values, all_columns: undefined, ...opts }) as unknown as ESQLSearchResponse;
 
 describe('mapEsqlResponseToDatatable', () => {
   it('returns a serializable datatable', () => {

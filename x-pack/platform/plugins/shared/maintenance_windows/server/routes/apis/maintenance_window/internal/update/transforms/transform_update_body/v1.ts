@@ -52,10 +52,10 @@ export const transformUpdateBody = (
           ...(scope.alerting_v2 !== undefined ? { alertingV2: scope.alerting_v2 } : {}),
         }
       : rawScopedQuery === null
-      ? { alerting: { enabled: true } }
-      : scopedQuery != null
-      ? { alerting: { enabled: true, kql: scopedQuery.kql, filters: scopedQuery.filters } }
-      : undefined;
+        ? { alerting: { enabled: true } }
+        : scopedQuery != null
+          ? { alerting: { enabled: true, kql: scopedQuery.kql, filters: scopedQuery.filters } }
+          : undefined;
 
   return {
     ...(title !== undefined ? { title } : {}),

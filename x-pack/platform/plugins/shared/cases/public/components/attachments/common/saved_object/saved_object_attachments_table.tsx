@@ -38,8 +38,10 @@ interface SavedObjectAttachmentRow {
   createdBy: string;
 }
 
-export interface SavedObjectAttachmentsTableProps
-  extends Pick<CommonAttachmentListViewProps, 'onRemove' | 'isRemoving'> {
+export interface SavedObjectAttachmentsTableProps extends Pick<
+  CommonAttachmentListViewProps,
+  'onRemove' | 'isRemoving'
+> {
   caseData: CaseUI;
   searchTerm?: string;
   /** Attachment registration id (e.g. `dashboard`, `map`, `discoverSession`). */

@@ -787,7 +787,7 @@ describe('formatSavedMonitors', () => {
         secrets: '{}',
         ...overrides.attributes,
       },
-    } as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>);
+    }) as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>;
 
   // `fields` is added when the config is formatted but is not part of the monitor fields type
   const fieldsOf = (formatted: Partial<MonitorFields>) =>

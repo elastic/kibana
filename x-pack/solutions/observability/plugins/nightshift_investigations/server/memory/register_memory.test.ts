@@ -260,7 +260,7 @@ describe('runMemoryOptimize', () => {
 describe('loadRoundSteps', () => {
   const request = { headers: {} } as never;
   const agentBuilderWith = (get: jest.Mock) =>
-    ({ conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) } } as never);
+    ({ conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) } }) as never;
 
   it('does not read anything without a conversation and round id', async () => {
     const get = jest.fn();

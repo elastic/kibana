@@ -52,7 +52,7 @@ const createMockContextValue = (
     dataFormattedForFieldBrowser: [],
     refetch: jest.fn(),
     ...overrides,
-  } as AttackDetailsContextType);
+  }) as AttackDetailsContextType;
 
 const renderFooter = (contextOverrides: Partial<AttackDetailsContextType> = {}) =>
   render(

@@ -331,7 +331,9 @@ export class EvaluatorDefinitionClient {
         space_ids: [this.spaceId],
         created_at: timestamp,
         updated_at: timestamp,
-        ...(createdBy ?? current.created_by ? { created_by: createdBy ?? current.created_by } : {}),
+        ...((createdBy ?? current.created_by)
+          ? { created_by: createdBy ?? current.created_by }
+          : {}),
       };
 
       // Keyed by the version read, not `nextVersion`, so concurrent edits of it collide even

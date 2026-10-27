@@ -152,7 +152,9 @@ export const buildPhaseTimelineSegments = (phases: SegmentPhase[]): TimelineSegm
     // Boundaries are each non-delete phase's start (`min_age`), then the retention end if present.
     const boundaries = [
       ...nonDeletePhases.map((phase, index) =>
-        index === 0 ? getZeroLabel(secondMinAge ?? phase.min_age) : phase.min_age ?? getZeroLabel()
+        index === 0
+          ? getZeroLabel(secondMinAge ?? phase.min_age)
+          : (phase.min_age ?? getZeroLabel())
       ),
       ...(retentionLabel ? [retentionLabel] : []),
     ];

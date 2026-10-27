@@ -25,7 +25,7 @@ const mockRouteContext = (request: { body?: unknown; params?: unknown } = {}) =>
       ok: jest.fn((opts: any) => ({ status: 200, ...opts })),
       badRequest: jest.fn((opts: any) => ({ status: 400, ...opts })),
     } as any,
-  } as any);
+  }) as any;
 
 describe('deleteSyntheticsMonitorRoute', () => {
   const route = deleteSyntheticsMonitorRoute();

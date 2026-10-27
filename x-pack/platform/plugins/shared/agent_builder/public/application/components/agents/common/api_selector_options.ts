@@ -52,17 +52,17 @@ const toDestructiveApiSelectorOptions = (
     { kind: 'all', selector: allApisSelector, apiCount: destructiveApis.length },
     ...Object.keys(apiCountByNamespace)
       .sort()
-      .map(
-        (namespace): NamespaceApiSelectorOption => ({
-          kind: 'namespace',
-          selector: toNamespaceSelector(namespace),
-          namespace,
-          apiCount: apiCountByNamespace[namespace],
-        })
-      ),
-    ...destructiveApis.map(
-      ({ id, description }): ExactApiSelectorOption => ({ kind: 'api', selector: id, description })
-    ),
+      .map((namespace): NamespaceApiSelectorOption => ({
+        kind: 'namespace',
+        selector: toNamespaceSelector(namespace),
+        namespace,
+        apiCount: apiCountByNamespace[namespace],
+      })),
+    ...destructiveApis.map(({ id, description }): ExactApiSelectorOption => ({
+      kind: 'api',
+      selector: id,
+      description,
+    })),
   ];
 };
 

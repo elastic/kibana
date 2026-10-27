@@ -561,7 +561,7 @@ describe('indexpattern_datasource utils', () => {
             },
           },
         },
-      } as FormBasedPrivateState);
+      }) as FormBasedPrivateState;
 
     const framePublicAPI = {
       dataViews: {

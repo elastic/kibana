@@ -122,9 +122,12 @@ export interface UptimePluginServices extends Partial<CoreStart> {
 export type ClientSetup = void;
 export type ClientStart = void;
 
-export class UptimePlugin
-  implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
-{
+export class UptimePlugin implements Plugin<
+  ClientSetup,
+  ClientStart,
+  ClientPluginsSetup,
+  ClientPluginsStart
+> {
   constructor(private readonly initContext: PluginInitializerContext<UptimeConfig>) {
     this.experimentalFeatures =
       this.initContext.config.get().experimental || this.experimentalFeatures;

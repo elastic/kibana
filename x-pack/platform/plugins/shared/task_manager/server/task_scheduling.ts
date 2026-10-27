@@ -233,7 +233,7 @@ export class TaskScheduling {
           scheduling =
             arr.length === 1
               ? { runAt: new Date(), scheduledAt: new Date() }
-              : addJitter(modifiedTask.schedule?.interval) ?? {};
+              : (addJitter(modifiedTask.schedule?.interval) ?? {});
         }
         return {
           ...modifiedTask,
@@ -390,7 +390,7 @@ export class TaskScheduling {
     forceOrOptions?: boolean | RunSoonOptions
   ): Promise<RunSoonResult> {
     const options: RunSoonOptions =
-      typeof forceOrOptions === 'boolean' ? { force: forceOrOptions } : forceOrOptions ?? {};
+      typeof forceOrOptions === 'boolean' ? { force: forceOrOptions } : (forceOrOptions ?? {});
     const force = options.force === true;
     const { priority } = options;
     // The refresh only serves the nudge, so both are skipped together.

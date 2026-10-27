@@ -38,10 +38,10 @@ const execution = (overrides: Partial<WorkflowExecutionDto>): WorkflowExecutionD
     stepExecutions: [],
     error: null,
     ...overrides,
-  } as WorkflowExecutionDto);
+  }) as WorkflowExecutionDto;
 
 const outputStep = (overrides: Partial<WorkflowStepExecutionDto>): WorkflowStepExecutionDto =>
-  ({ output, ...overrides } as WorkflowStepExecutionDto);
+  ({ output, ...overrides }) as WorkflowStepExecutionDto;
 
 const seededIds: FpTpSeededIds = {
   attackDiscoveryId: 'ad-1',

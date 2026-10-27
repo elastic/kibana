@@ -69,12 +69,12 @@ const makeActiveEvent = (overrides: Partial<SignificantEvent> = {}): Significant
     summary: 'Test summary',
     confidence: 0.8,
     ...overrides,
-  } as SignificantEvent);
+  }) as SignificantEvent;
 
 const makeClient = (
   hits: SignificantEvent[] = []
 ): jest.Mocked<Pick<RuleEventsClient, 'findLatestActive'>> & RuleEventsClient =>
-  ({ findLatestActive: jest.fn().mockResolvedValue({ hits }) } as never);
+  ({ findLatestActive: jest.fn().mockResolvedValue({ hits }) }) as never;
 
 const dedupCandidates = (inputs: EventsWriteInput[]): DedupCandidate[] =>
   buildWriteCandidates(inputs).filter((c): c is DedupCandidate => c.mode === 'dedup');

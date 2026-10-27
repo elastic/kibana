@@ -126,33 +126,32 @@ export type EsSorting = Dictionary<{
 /**
  * Return type of the `useIndexData` custom hook.
  */
-export interface UseIndexDataReturnType
-  extends Pick<
-    UseDataGridReturnType,
-    | 'chartsVisible'
-    | 'chartsButtonVisible'
-    | 'ccsWarning'
-    | 'columnsWithCharts'
-    | 'errorMessage'
-    | 'invalidSortingColumnns'
-    | 'noDataMessage'
-    | 'onChangeItemsPerPage'
-    | 'onChangePage'
-    | 'onSort'
-    | 'pagination'
-    | 'setPagination'
-    | 'setVisibleColumns'
-    | 'rowCount'
-    | 'rowCountRelation'
-    | 'sortingColumns'
-    | 'status'
-    | 'tableItems'
-    | 'toggleChartVisibility'
-    | 'visibleColumns'
-    | 'baseline'
-    | 'predictionFieldName'
-    | 'resultsField'
-  > {
+export interface UseIndexDataReturnType extends Pick<
+  UseDataGridReturnType,
+  | 'chartsVisible'
+  | 'chartsButtonVisible'
+  | 'ccsWarning'
+  | 'columnsWithCharts'
+  | 'errorMessage'
+  | 'invalidSortingColumnns'
+  | 'noDataMessage'
+  | 'onChangeItemsPerPage'
+  | 'onChangePage'
+  | 'onSort'
+  | 'pagination'
+  | 'setPagination'
+  | 'setVisibleColumns'
+  | 'rowCount'
+  | 'rowCountRelation'
+  | 'sortingColumns'
+  | 'status'
+  | 'tableItems'
+  | 'toggleChartVisibility'
+  | 'visibleColumns'
+  | 'baseline'
+  | 'predictionFieldName'
+  | 'resultsField'
+> {
   /**
    * Callback to render cell values.
    */

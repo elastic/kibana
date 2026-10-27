@@ -285,12 +285,14 @@ const buildEntities = (
 
   const tier2Entities = scopedBehaviors(result, onlyTechniqueId).flatMap(
     (behavior): SseEntityRef[] => [
-      ...(behavior.affected_hosts ?? []).map(
-        (host): SseEntityRef => ({ field: 'host.name', value: host })
-      ),
-      ...(behavior.affected_users ?? []).map(
-        (user): SseEntityRef => ({ field: 'user.name', value: user })
-      ),
+      ...(behavior.affected_hosts ?? []).map((host): SseEntityRef => ({
+        field: 'host.name',
+        value: host,
+      })),
+      ...(behavior.affected_users ?? []).map((user): SseEntityRef => ({
+        field: 'user.name',
+        value: user,
+      })),
     ]
   );
 
@@ -633,8 +635,8 @@ const buildChrome = ({
   const title = behavior?.title
     ? behavior.title.slice(0, 512)
     : huntResult.has_confirmed_hit
-    ? `Hunt confirmed for ${reportId}`.slice(0, 512)
-    : `Hunt complete for ${reportId}`.slice(0, 512);
+      ? `Hunt confirmed for ${reportId}`.slice(0, 512)
+      : `Hunt complete for ${reportId}`.slice(0, 512);
 
   const confidence = behavior?.confidence ?? (huntResult.has_confirmed_hit ? 0.7 : 0.3);
   const severity: SeverityLevel = behavior?.severity

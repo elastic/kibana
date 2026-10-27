@@ -70,8 +70,8 @@ export const useCellActionsOptions = (
           const arrValue = Array.isArray(value)
             ? (value as string[])
             : value != null
-            ? [String(value)]
-            : [];
+              ? [String(value)]
+              : [];
           return { field, value: arrValue };
         })
       ),

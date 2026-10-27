@@ -64,14 +64,13 @@ export const CasesTimelineIntegrationProvider: FC<
   PropsWithChildren<{
     timelineIntegration?: CasesTimelineIntegration;
   }>
-> =
-  ({ children, timelineIntegration }) => {
-    const [activeTimelineIntegration] = useState(timelineIntegration ?? null);
+> = ({ children, timelineIntegration }) => {
+  const [activeTimelineIntegration] = useState(timelineIntegration ?? null);
 
-    return (
-      <CasesTimelineIntegrationContext.Provider value={activeTimelineIntegration}>
-        {children}
-      </CasesTimelineIntegrationContext.Provider>
-    );
-  };
+  return (
+    <CasesTimelineIntegrationContext.Provider value={activeTimelineIntegration}>
+      {children}
+    </CasesTimelineIntegrationContext.Provider>
+  );
+};
 /* eslint-enable react/display-name */

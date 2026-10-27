@@ -158,7 +158,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             timeRange: input?.timeRange,
             timeField,
             kibanaFilters: [
-              ...(ignoreGlobalFilters ? [] : input?.filters ?? []),
+              ...(ignoreGlobalFilters ? [] : (input?.filters ?? [])),
               ...(delayFilter ? [delayFilter] : []),
             ],
             kqlQuery: ignoreGlobalFilters ? undefined : input?.query,

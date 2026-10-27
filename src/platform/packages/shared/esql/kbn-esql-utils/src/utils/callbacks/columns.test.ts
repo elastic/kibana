@@ -21,7 +21,7 @@ const createHttp = () =>
         { name: 'bytes', esType: 'unsupported', originalTypes: ['long', 'keyword'] },
       ],
     }),
-  } as unknown as HttpStart & { post: jest.Mock });
+  }) as unknown as HttpStart & { post: jest.Mock };
 
 const postedBody = (http: { post: jest.Mock }) => JSON.parse(http.post.mock.calls[0][1].body);
 

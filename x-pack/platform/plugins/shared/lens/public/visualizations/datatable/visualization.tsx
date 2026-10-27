@@ -309,8 +309,8 @@ export const getDatatableVisualization = ({
       changeType === 'reduced' || changeType === 'layers'
         ? 0.3
         : changeType === 'unchanged'
-        ? 0.5
-        : 1;
+          ? 0.5
+          : 1;
 
     // forcing datatable as a suggestion when there are no metrics (number fields)
     const forceSuggestion = Boolean(table?.notAssignedMetrics);
@@ -739,7 +739,7 @@ export const getDatatableVisualization = ({
               transposable: isTransposable,
               alignment: column.alignment,
               colorMode: canColor
-                ? column.colorMode ?? COLUMN_CELL_DECORATION_MODE.NONE
+                ? (column.colorMode ?? COLUMN_CELL_DECORATION_MODE.NONE)
                 : COLUMN_CELL_DECORATION_MODE.NONE,
               palette:
                 !canColor || !column.palette
@@ -759,7 +759,7 @@ export const getDatatableVisualization = ({
               summaryRow: hasNoSummaryRow ? undefined : column.summaryRow!,
               summaryLabel: hasNoSummaryRow
                 ? undefined
-                : column.summaryLabel ?? getDefaultSummaryLabel(column.summaryRow!),
+                : (column.summaryLabel ?? getDefaultSummaryLabel(column.summaryRow!)),
               sortingHint,
             }
           );

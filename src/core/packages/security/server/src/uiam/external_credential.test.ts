@@ -14,7 +14,7 @@ const createRequest = ({
   isFakeRequest = true,
   authorization = 'ApiKey essu_user_created_key',
 }: { isFakeRequest?: boolean; authorization?: string } = {}) =>
-  ({ isFakeRequest, headers: { authorization } } as unknown as KibanaRequest);
+  ({ isFakeRequest, headers: { authorization } }) as unknown as KibanaRequest;
 
 describe('external UIAM credential marker', () => {
   it('reports an unmarked request as internal', () => {

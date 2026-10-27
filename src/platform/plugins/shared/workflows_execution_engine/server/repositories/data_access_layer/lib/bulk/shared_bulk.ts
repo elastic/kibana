@@ -399,7 +399,7 @@ export async function sharedBulk<TExecution extends { id: string }>(params: {
   let queuedItems: Array<QueueItem<TExecution>> = request.items.map((item, index) => ({
     item,
     originalIndex: index,
-    remainingRetries: isBulkUpdaterItem(item) ? item.retryOnConflict ?? 0 : 0,
+    remainingRetries: isBulkUpdaterItem(item) ? (item.retryOnConflict ?? 0) : 0,
   }));
 
   const result = new Array<BulkItemResponse>(request.items.length);

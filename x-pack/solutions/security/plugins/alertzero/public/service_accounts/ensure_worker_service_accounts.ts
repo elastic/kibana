@@ -170,12 +170,10 @@ export const ensureWorkerServiceAccounts = async (
 
   const findRole = findBuiltInRole(http, isServerless);
   const results = await Promise.all(
-    workerIds.map(
-      async (workerId): Promise<[string, WorkerServiceAccountResult]> => [
-        workerId,
-        await ensureOne(http, serviceAccounts, findRole, accounts, workerId),
-      ]
-    )
+    workerIds.map(async (workerId): Promise<[string, WorkerServiceAccountResult]> => [
+      workerId,
+      await ensureOne(http, serviceAccounts, findRole, accounts, workerId),
+    ])
   );
   return new Map(results);
 };

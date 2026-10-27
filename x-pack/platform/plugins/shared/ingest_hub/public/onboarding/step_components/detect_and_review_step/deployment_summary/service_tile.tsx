@@ -55,7 +55,7 @@ export function ServiceTile({
   const isPending = PENDING_STATES.includes(status);
   const icon = STATUS_ICON[status];
   const agentErrorReason: AgentErrorReason | undefined =
-    agentInfo?.health === 'unhealthy' ? agentInfo.issue?.type ?? 'unhealthy' : undefined;
+    agentInfo?.health === 'unhealthy' ? (agentInfo.issue?.type ?? 'unhealthy') : undefined;
 
   return (
     <EuiPanel paddingSize="m" hasBorder data-test-subj={`serviceTile-${entry.id}`}>

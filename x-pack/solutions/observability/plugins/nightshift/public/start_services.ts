@@ -49,16 +49,13 @@ export const startNightshiftServices = ({
           .error(`Failed to fetch Significant Events availability: ${error}`);
         return of(false);
       }),
-      map(
-        (isAvailable): AppUpdater =>
-          (app) => ({
-            visibleIn: isAvailable ? ['globalSearch', 'projectSideNav'] : [],
-            deepLinks: (app.deepLinks ?? []).map((link) => ({
-              ...link,
-              visibleIn: isAvailable ? ['globalSearch'] : [],
-            })),
-          })
-      )
+      map((isAvailable): AppUpdater => (app) => ({
+        visibleIn: isAvailable ? ['globalSearch', 'projectSideNav'] : [],
+        deepLinks: (app.deepLinks ?? []).map((link) => ({
+          ...link,
+          visibleIn: isAvailable ? ['globalSearch'] : [],
+        })),
+      }))
     )
     .subscribe(appUpdater$);
 };

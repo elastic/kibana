@@ -23,7 +23,10 @@ export class RulesListPage {
   /** Heading tab for this (v2) Rules page; hidden alongside v1RulesTab when only one would show. */
   public readonly v2RulesTab: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly mountConfig: AlertingMountConfig
+  ) {
     this.tagsFilterButton = this.page.testSubj.locator('rulesListTagsFilter');
     this.selectAllRulesButton = this.page.testSubj.locator('selectAllRulesButton');
     this.bulkActionsButton = this.page.testSubj.locator('bulkActionsButton');

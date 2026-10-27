@@ -21,7 +21,7 @@ export type TlsColumns = [
   Columns<NetworkTlsNode>,
   Columns<NetworkTlsNode['_id']>,
   Columns<NetworkTlsNode>,
-  Columns<NetworkTlsNode>
+  Columns<NetworkTlsNode>,
 ];
 
 export const getTlsColumns = (tableId: string): TlsColumns => [

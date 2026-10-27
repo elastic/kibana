@@ -54,18 +54,17 @@ export function getConfigFromPalette(
       return color;
     })
     .filter(isNotNull)
-    .map(
-      (color): ColorMapping.ColorStep =>
-        typeof color === 'number'
-          ? {
-              paletteId: KbnPalette.Default,
-              type: 'categorical',
-              colorIndex: color,
-            }
-          : {
-              type: 'colorCode',
-              colorCode: color,
-            }
+    .map((color): ColorMapping.ColorStep =>
+      typeof color === 'number'
+        ? {
+            paletteId: KbnPalette.Default,
+            type: 'categorical',
+            colorIndex: color,
+          }
+        : {
+            type: 'colorCode',
+            colorCode: color,
+          }
     );
 
   return {

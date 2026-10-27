@@ -66,7 +66,7 @@ export const BlockListFlyout = memo(
           os_types: ['windows'],
           tags: ['policy:all'],
           type: 'simple',
-        } as unknown as ExceptionListItemSchema),
+        }) as unknown as ExceptionListItemSchema,
       [entries]
     );
 

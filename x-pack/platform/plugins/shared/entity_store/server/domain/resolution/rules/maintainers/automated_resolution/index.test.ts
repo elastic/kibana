@@ -71,7 +71,7 @@ const createEsClient = () =>
     search: jest.fn(),
     esql: { query: jest.fn() },
     indices: { refresh: jest.fn().mockResolvedValue({}) },
-  } as unknown as jest.Mocked<ElasticsearchClient>);
+  }) as unknown as jest.Mocked<ElasticsearchClient>;
 
 const runConfig = async (
   esClient: ElasticsearchClient,

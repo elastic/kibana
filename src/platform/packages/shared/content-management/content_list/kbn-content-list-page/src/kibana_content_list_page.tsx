@@ -128,7 +128,7 @@ const KibanaContentListPageSection = ({
     'KibanaContentListPage.Section'
   );
 
-  const ariaLabelledBy = ariaLabel ? undefined : ariaLabelledByProp ?? headingId;
+  const ariaLabelledBy = ariaLabel ? undefined : (ariaLabelledByProp ?? headingId);
 
   return (
     <KibanaPageTemplate.Section

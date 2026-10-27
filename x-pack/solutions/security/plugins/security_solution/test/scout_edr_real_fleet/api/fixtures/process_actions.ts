@@ -25,7 +25,7 @@ const ACTION_TIMEOUT_MS = 120_000;
 type GetProcessesOutput = Extract<EndpointActionResponseDataOutput, { entries: ProcessesEntry[] }>;
 
 type ActionResponse<
-  TOutput extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutput extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
 > = ActionDetailsApiResponse<TOutput>;
 
 const actionDetailsPath = (actionId: string): string =>
@@ -65,7 +65,7 @@ const createAction = async (
 };
 
 const waitForSuccessfulAction = async <
-  TOutput extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutput extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
 >(
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
@@ -117,7 +117,7 @@ const waitForSuccessfulAction = async <
 };
 
 const runAction = async <
-  TOutput extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutput extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
 >(
   apiClient: ApiClientFixture,
   headers: Record<string, string>,

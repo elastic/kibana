@@ -18,7 +18,7 @@ const scope: HuntForThreatParams['scope'] = {
 const buildEsClient = (searchResponse: unknown): ElasticsearchClient =>
   ({
     search: jest.fn().mockResolvedValue(searchResponse),
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 const emptySearchResponse = {
   hits: { total: { value: 0 }, hits: [] },
@@ -726,7 +726,7 @@ describe('huntForThreat', () => {
     const buildPartialEsClient = (searchOverrides: Record<string, unknown>): ElasticsearchClient =>
       ({
         search: jest.fn().mockResolvedValue({ ...emptySearchResponse, ...searchOverrides }),
-      } as unknown as ElasticsearchClient);
+      }) as unknown as ElasticsearchClient;
 
     it('reports a timed-out scope search as a retryable gap instead of a quiet environment', async () => {
       const esClient = buildPartialEsClient({ timed_out: true });

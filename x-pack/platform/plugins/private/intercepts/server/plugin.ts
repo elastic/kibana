@@ -24,9 +24,12 @@ interface InterceptsServerSetupDeps {
   usageCollection?: UsageCollectionSetup;
 }
 
-export class InterceptsServerPlugin
-  implements Plugin<object, object, InterceptsServerSetupDeps, never>
-{
+export class InterceptsServerPlugin implements Plugin<
+  object,
+  object,
+  InterceptsServerSetupDeps,
+  never
+> {
   private readonly logger: Logger;
   private readonly config: ServerConfigSchema;
   private readonly interceptsOrchestrator?: InterceptsTriggerOrchestrator;

@@ -417,7 +417,7 @@ describe('EvaluatorEditorFlyout', () => {
             isLoading: false,
             error: null,
             refetch,
-          } as unknown as ReturnType<typeof useEvaluator>)
+          }) as unknown as ReturnType<typeof useEvaluator>
       );
       const conflict = Object.assign(new Error('Conflict'), {
         name: 'HttpFetchError',
@@ -479,7 +479,7 @@ describe('EvaluatorEditorFlyout', () => {
             isLoading: false,
             error: reloadError,
             refetch,
-          } as unknown as ReturnType<typeof useEvaluator>)
+          }) as unknown as ReturnType<typeof useEvaluator>
       );
       updateMutateAsync.mockRejectedValueOnce(
         Object.assign(new Error('Conflict'), {

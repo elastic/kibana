@@ -226,7 +226,7 @@ describe('migrateAttributes', () => {
           ],
         },
       },
-    } as unknown as LensByValueSerializedState['attributes']);
+    }) as unknown as LensByValueSerializedState['attributes'];
 
   const getAreaFill = (attributes: { state: unknown }) =>
     (attributes.state as { visualization: XYVisualizationState }).visualization.areaFill;

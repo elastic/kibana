@@ -18,7 +18,7 @@ const createContext = (input: Record<string, unknown>, callKibanaApi: jest.Mock)
   ({
     input,
     contextManager: { callKibanaApi },
-  } as unknown as StepHandlerContext<unknown, unknown>);
+  }) as unknown as StepHandlerContext<unknown, unknown>;
 
 const taskManagerWithLag = (lagMs: number | 'fails') =>
   ({
@@ -26,7 +26,7 @@ const taskManagerWithLag = (lagMs: number | 'fails') =>
       if (lagMs === 'fails') throw new Error('aggregate failed');
       return { aggregations: { oldest: { value: lagMs === 0 ? null : Date.now() - lagMs } } };
     }),
-  } as unknown as Pick<TaskManagerStartContract, 'aggregate'>);
+  }) as unknown as Pick<TaskManagerStartContract, 'aggregate'>;
 
 const liveExecutions = (ids: string[]) =>
   jest

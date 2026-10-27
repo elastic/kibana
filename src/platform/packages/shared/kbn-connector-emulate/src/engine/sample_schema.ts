@@ -214,7 +214,7 @@ export const sampleSchema = (
     if (Array.isArray(node.enum) && node.enum.length > 0) {
       // The last value, unless it is the `null` that nullable enums end with.
       return boundary
-        ? [...node.enum].reverse().find((value) => value !== null) ?? null
+        ? ([...node.enum].reverse().find((value) => value !== null) ?? null)
         : node.enum[0];
     }
     const pointerTo = (...tokens: Array<string | number>) =>

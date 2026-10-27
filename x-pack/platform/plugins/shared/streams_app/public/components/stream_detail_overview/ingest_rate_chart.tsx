@@ -75,8 +75,8 @@ export function IngestRateChart() {
   const esqlSource = isQueryStream
     ? definition.stream.query.view
     : isDraft
-    ? getEsqlViewName(streamName)
-    : streamName;
+      ? getEsqlViewName(streamName)
+      : streamName;
 
   return (
     <IngestRateChartContent

@@ -53,9 +53,9 @@ export const ConversationInputShell = React.forwardRef<
       border: ${euiTheme.border.thin};
       border-radius: ${CONVERSATION_INPUT_SHELL_RADIUS}px;
       border-color: ${euiTheme.colors.borderBaseSubdued};
-      background-color: ${isDisabled
-        ? euiTheme.colors.backgroundBaseDisabled
-        : euiTheme.colors.backgroundBasePlain};
+      background-color: ${
+        isDisabled ? euiTheme.colors.backgroundBaseDisabled : euiTheme.colors.backgroundBasePlain
+      };
       min-height: ${isCollapsed ? '0' : INPUT_MIN_HEIGHT};
       padding: ${euiTheme.size.base};
       display: flex;
@@ -63,7 +63,10 @@ export const ConversationInputShell = React.forwardRef<
       gap: ${euiTheme.size.s};
       align-items: stretch;
       width: 100%;
-      transition: box-shadow 250ms, border-color 250ms, min-height 250ms ease-out;
+      transition:
+        box-shadow 250ms,
+        border-color 250ms,
+        min-height 250ms ease-out;
       ${!suppressShadow && shadowS}
       &:hover {
         ${!suppressShadow && shadowSHover}

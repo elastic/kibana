@@ -98,9 +98,9 @@ function formatAlertmanagerError(action: string, error: unknown): Error {
   const detail =
     typeof data === 'string' && data.trim().length > 0
       ? data
-      : (data as { message?: string; error?: string } | undefined)?.message ??
+      : ((data as { message?: string; error?: string } | undefined)?.message ??
         (data as { message?: string; error?: string } | undefined)?.error ??
-        err.message;
+        err.message);
   return new Error(
     `Alertmanager ${action} failed (status ${err.response?.status ?? 'unknown'}): ${detail}`
   );

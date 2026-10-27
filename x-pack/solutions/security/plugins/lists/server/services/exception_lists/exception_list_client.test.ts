@@ -596,7 +596,7 @@ describe('exception_list_client', () => {
             ({
               ...data,
               blockedLists: [{ bogus: true }],
-            } as unknown as ExtensionPointCallbackDataArgument)
+            }) as unknown as ExtensionPointCallbackDataArgument
         );
 
         const result = await exceptionListClient.bulkDeleteExceptionList({

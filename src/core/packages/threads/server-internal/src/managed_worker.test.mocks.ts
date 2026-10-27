@@ -19,7 +19,10 @@ export class MockWorker extends EventEmitter {
     this.emit('exit', 1);
     return 1;
   });
-  constructor(public readonly entry: string, public readonly workerOptions: object) {
+  constructor(
+    public readonly entry: string,
+    public readonly workerOptions: object
+  ) {
     super();
     if (MockWorker.failNextConstruction > 0) {
       MockWorker.failNextConstruction--;

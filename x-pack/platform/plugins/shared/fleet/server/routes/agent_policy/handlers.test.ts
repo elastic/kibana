@@ -249,7 +249,7 @@ describe('Agent policy API handlers', () => {
       // Tag each SO client with the space it was created for so tests can assert which space a lookup used.
       jest
         .spyOn(appContextService, 'getInternalUserSOClientForSpaceId')
-        .mockImplementation((spaceId) => ({ spaceTag: spaceId } as any));
+        .mockImplementation((spaceId) => ({ spaceTag: spaceId }) as any);
     });
 
     afterEach(() => {

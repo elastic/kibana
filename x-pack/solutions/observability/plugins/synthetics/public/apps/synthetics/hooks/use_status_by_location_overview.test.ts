@@ -22,7 +22,7 @@ const makeMeta = (
     overallStatus: 'up',
     locations: [{ id: 'us_east', label: 'US East', status: 'up' }],
     ...overrides,
-  } as OverviewStatusMetaData);
+  }) as OverviewStatusMetaData;
 
 const makeStatus = (overrides: Partial<OverviewStatusState> = {}): OverviewStatusState =>
   ({
@@ -41,7 +41,7 @@ const makeStatus = (overrides: Partial<OverviewStatusState> = {}): OverviewStatu
     pendingConfigs: {},
     disabledConfigs: {},
     ...overrides,
-  } as OverviewStatusState);
+  }) as OverviewStatusState;
 
 describe('getConfigStatusByLocation', () => {
   it('returns pending with configIdByLocation when status is null', () => {

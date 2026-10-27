@@ -70,7 +70,7 @@ export const FieldGroup = (props: FieldGroupProps) => {
   const isCollapsible = isControlled || isUncontrolled;
 
   const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState<boolean>(
-    isUncontrolled ? props.defaultOpen ?? false : false
+    isUncontrolled ? (props.defaultOpen ?? false) : false
   );
 
   const isOpen = isControlled ? props.isOpen : isUncontrolled ? uncontrolledIsOpen : true;
@@ -93,8 +93,8 @@ export const FieldGroup = (props: FieldGroupProps) => {
           onToggle: () => props.onToggle(),
         }
       : isUncontrolled
-      ? { initialIsOpen: props.defaultOpen ?? false }
-      : { initialIsOpen: true };
+        ? { initialIsOpen: props.defaultOpen ?? false }
+        : { initialIsOpen: true };
 
     return (
       <>

@@ -12,8 +12,8 @@ import { compatibilityFromNodesInfo, sameCompatibility } from './nodes_version_c
 
 const KIBANA_VERSION = '5.1.0';
 
-const responded = (value: NodesInfo) => ({ ok: true, value } as const);
-const failed = (error: Error) => ({ ok: false, error } as const);
+const responded = (value: NodesInfo) => ({ ok: true, value }) as const;
+const failed = (error: Error) => ({ ok: false, error }) as const;
 
 const createNodes = (...versions: string[]): NodesInfo => ({
   nodes: Object.fromEntries(

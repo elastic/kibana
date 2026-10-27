@@ -41,7 +41,7 @@ const createMockVis = (overrides: Partial<Vis<VisParams>> = {}): Vis<VisParams> 
     description: '',
     data: {},
     ...overrides,
-  } as Vis<VisParams>);
+  }) as Vis<VisParams>;
 
 describe('getExpressionRendererProps', () => {
   describe('projectRouting handling', () => {

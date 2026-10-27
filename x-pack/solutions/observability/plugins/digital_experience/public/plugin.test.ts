@@ -21,7 +21,7 @@ const createCapabilities = (show: boolean, apmShow = true) =>
     catalogue: {},
     digital_experience: { show },
     apm: { show: apmShow },
-  } as CoreStart['application']['capabilities']);
+  }) as CoreStart['application']['capabilities'];
 
 const createUx = () => ({ hideLegacyNavigation: jest.fn() });
 

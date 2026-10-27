@@ -195,7 +195,7 @@ const buildAttachmentFromPayload = (
     updatedAt: null,
     updatedBy: null,
     version: '',
-  } as AttachmentUIV2);
+  }) as AttachmentUIV2;
 
 /** Returns the ids the create user action added, when a partial removal dropped some of them. */
 const getAddedReferences = (

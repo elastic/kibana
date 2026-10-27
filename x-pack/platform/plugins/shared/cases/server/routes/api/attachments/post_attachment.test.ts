@@ -47,7 +47,7 @@ describe('postAttachmentRoute', () => {
       async ({ id }) =>
         ({
           comments: [{ id, version: '1', ...attachmentSO.attributes }],
-        } as never)
+        }) as never
     );
 
     await callHandler();

@@ -397,7 +397,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         openEntityAlertsInsights({
           entityType,
           value:
-            entityType === SecurityEntityType.generic ? entity.entityId : entity.entityName ?? '',
+            entityType === SecurityEntityType.generic ? entity.entityId : (entity.entityName ?? ''),
           entityId: entity.entityId,
           scopeId,
           mode: getEntityViewMode(rowMode),
@@ -922,8 +922,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         noDataMessage: !canReadAlerts
           ? NO_ALERTS_ACCESS_MESSAGE
           : alertBasedTimedOut
-          ? TILE_TIMEOUT_MESSAGE
-          : undefined,
+            ? TILE_TIMEOUT_MESSAGE
+            : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
           {
@@ -958,13 +958,13 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         noDataMessage: !canReadAnomalies
           ? NO_ANOMALIES_ACCESS_MESSAGE
           : anomaliesTimedOut
-          ? TILE_TIMEOUT_MESSAGE
-          : anomaliesMissingJobs
-          ? i18n.translate(
-              'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.noJobs',
-              { defaultMessage: 'Requires anomaly detection jobs' }
-            )
-          : undefined,
+            ? TILE_TIMEOUT_MESSAGE
+            : anomaliesMissingJobs
+              ? i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.noJobs',
+                  { defaultMessage: 'Requires anomaly detection jobs' }
+                )
+              : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
           {
@@ -998,12 +998,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         noDataMessage: !canReadRisk
           ? NO_RISK_ACCESS_MESSAGE
           : riskMoversTimedOut
-          ? TILE_TIMEOUT_MESSAGE
-          : riskMoversMissingIndex
-          ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.noData', {
-              defaultMessage: 'Requires risk score history data',
-            })
-          : undefined,
+            ? TILE_TIMEOUT_MESSAGE
+            : riskMoversMissingIndex
+              ? i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.noData',
+                  {
+                    defaultMessage: 'Requires risk score history data',
+                  }
+                )
+              : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.description',
           {
@@ -1037,15 +1040,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         noDataMessage: !canReadRisk
           ? NO_RISK_ACCESS_MESSAGE
           : newlyHCTimedOut
-          ? TILE_TIMEOUT_MESSAGE
-          : newlyHCMissingIndex
-          ? i18n.translate(
-              'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.noData',
-              {
-                defaultMessage: 'Requires risk score history data',
-              }
-            )
-          : undefined,
+            ? TILE_TIMEOUT_MESSAGE
+            : newlyHCMissingIndex
+              ? i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.noData',
+                  {
+                    defaultMessage: 'Requires risk score history data',
+                  }
+                )
+              : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.description',
           {
@@ -1078,8 +1081,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         noDataMessage: !canReadAlerts
           ? NO_ALERTS_ACCESS_MESSAGE
           : alertBasedTimedOut
-          ? TILE_TIMEOUT_MESSAGE
-          : undefined,
+            ? TILE_TIMEOUT_MESSAGE
+            : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
           {

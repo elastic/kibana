@@ -11,9 +11,7 @@ import type { MapsAppRegionMapLocatorParams, MapsAppRegionMapLocatorDependencies
 
 export const MAPS_APP_REGION_MAP_LOCATOR = 'MAPS_APP_REGION_MAP_LOCATOR' as const;
 
-export class MapsAppRegionMapLocatorDefinition
-  implements LocatorDefinition<MapsAppRegionMapLocatorParams>
-{
+export class MapsAppRegionMapLocatorDefinition implements LocatorDefinition<MapsAppRegionMapLocatorParams> {
   public readonly id = MAPS_APP_REGION_MAP_LOCATOR;
 
   constructor(protected readonly deps: MapsAppRegionMapLocatorDependencies) {}

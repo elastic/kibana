@@ -24,7 +24,7 @@ const PIPELINE = 'kibana-on-merge';
 const artifactsPath = (buildNumber: number) =>
   `/v2/organizations/elastic/pipelines/${PIPELINE}/builds/${buildNumber}/artifacts`;
 
-const buildFixture = (number: number): Build => ({ id: `uuid-${number}`, number } as Build);
+const buildFixture = (number: number): Build => ({ id: `uuid-${number}`, number }) as Build;
 
 describe('kibana_distributable', () => {
   let client: BuildkiteClient;

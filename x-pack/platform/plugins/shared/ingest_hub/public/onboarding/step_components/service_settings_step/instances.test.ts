@@ -10,7 +10,7 @@ import { reconcileInstances } from './instances';
 import type { ServiceInstance } from './use_service_settings';
 
 const makeService = (id: string, overrides: Partial<AwsServiceMatrixEntry> = {}) =>
-  ({ id, name: `${id} name`, showInUI: true, ...overrides } as unknown as AwsServiceMatrixEntry);
+  ({ id, name: `${id} name`, showInUI: true, ...overrides }) as unknown as AwsServiceMatrixEntry;
 
 const servicesMap = new Map<string, AwsServiceMatrixEntry>([
   ['cloudtrail', makeService('cloudtrail')],

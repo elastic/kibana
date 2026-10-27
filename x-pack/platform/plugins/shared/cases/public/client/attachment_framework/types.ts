@@ -111,7 +111,7 @@ interface UnifiedAttachmentViewPropsBase extends CommonAttachmentViewProps {
 export interface UnifiedReferenceAttachmentViewProps<
   Metadata = ReferenceMetadata,
   Id = AttachmentId,
-  Data = ReferenceData
+  Data = ReferenceData,
 > extends UnifiedAttachmentViewPropsBase {
   attachmentId: Id;
   data?: Data;
@@ -119,8 +119,9 @@ export interface UnifiedReferenceAttachmentViewProps<
 }
 
 /** Value attachments store all renderable content directly on the case comment. */
-export interface UnifiedValueAttachmentViewProps<Data = ValueData>
-  extends UnifiedAttachmentViewPropsBase {
+export interface UnifiedValueAttachmentViewProps<
+  Data = ValueData,
+> extends UnifiedAttachmentViewPropsBase {
   data: Data;
 }
 
@@ -128,7 +129,7 @@ export interface UnifiedValueAttachmentViewProps<Data = ValueData>
 export interface UnifiedHybridAttachmentViewProps<
   Data = HybridData,
   Metadata = ReferenceMetadata,
-  Id = AttachmentId
+  Id = AttachmentId,
 > extends UnifiedAttachmentViewPropsBase {
   attachmentId?: Id;
   metadata?: Metadata;
@@ -214,7 +215,7 @@ type UnifiedAttachmentRegistration<Props> = AttachmentType<Props> & UnifiedAttac
 export type UnifiedReferenceAttachmentType<
   Metadata = ReferenceMetadata,
   Id = AttachmentId,
-  Data = ReferenceData
+  Data = ReferenceData,
 > = UnifiedAttachmentRegistration<UnifiedReferenceAttachmentViewProps<Metadata, Id, Data>>;
 
 export type UnifiedValueAttachmentType<Data = ValueData> = UnifiedAttachmentRegistration<
@@ -224,7 +225,7 @@ export type UnifiedValueAttachmentType<Data = ValueData> = UnifiedAttachmentRegi
 export type UnifiedHybridAttachmentType<
   Data = HybridData,
   Metadata = ReferenceMetadata,
-  Id = AttachmentId
+  Id = AttachmentId,
 > = UnifiedAttachmentRegistration<UnifiedHybridAttachmentViewProps<Data, Metadata, Id>>;
 
 export type RegisteredUnifiedAttachmentType =

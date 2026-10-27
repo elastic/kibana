@@ -69,9 +69,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       adminApiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
-      customRoleApiClient = await createStreamsRepositoryCustomRoleClient(
-        customRoleScopedSupertest
-      );
+      customRoleApiClient =
+        await createStreamsRepositoryCustomRoleClient(customRoleScopedSupertest);
       await enableStreams(adminApiClient);
     });
 

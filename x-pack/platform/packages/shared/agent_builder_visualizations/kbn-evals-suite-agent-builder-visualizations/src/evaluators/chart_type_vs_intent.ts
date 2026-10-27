@@ -234,7 +234,7 @@ function readVegaMarks(spec: unknown): { mark?: string; layerMarks: string[] } {
  */
 export function createChartTypeVsIntentEvaluator<
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(config: {
   visualizationExtractor: (output: TTaskOutput) => ExtractedVisualization[];
   questionExtractor: (input: TExample['input']) => string;

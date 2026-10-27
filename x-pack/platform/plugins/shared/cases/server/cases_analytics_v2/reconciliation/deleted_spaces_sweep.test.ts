@@ -17,14 +17,14 @@ const spacesFindResponse = (ids: string[]) =>
     total: ids.length,
     per_page: 1000,
     page: 1,
-  } as unknown as SavedObjectsFindResponse);
+  }) as unknown as SavedObjectsFindResponse;
 
 const indexedSpacesResponse = (ids: string[]) =>
   ({
     aggregations: {
       space_ids: { buckets: ids.map((id) => ({ key: { space_id: id }, doc_count: 1 })) },
     },
-  } as unknown as estypes.SearchResponse);
+  }) as unknown as estypes.SearchResponse;
 
 describe('sweepDeletedSpaces', () => {
   const setup = ({ indexed, existing }: { indexed: string[]; existing: string[] }) => {

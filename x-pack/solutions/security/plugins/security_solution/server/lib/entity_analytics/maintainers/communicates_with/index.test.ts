@@ -35,7 +35,7 @@ describe('communicatesWithMaintainer', () => {
       crudClient: {} as never,
       telemetry: makeTelemetry(),
       ...overrides,
-    } as unknown as Ctx);
+    }) as unknown as Ctx;
 
   afterEach(() => {
     jest.restoreAllMocks();

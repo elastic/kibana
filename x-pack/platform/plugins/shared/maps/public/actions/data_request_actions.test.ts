@@ -25,7 +25,7 @@ const dispatchMock = jest.fn();
 const getState = () =>
   ({
     map: { __pauseSyncData: false },
-  } as any);
+  }) as any;
 
 describe('data_request_actions', () => {
   afterEach(() => {

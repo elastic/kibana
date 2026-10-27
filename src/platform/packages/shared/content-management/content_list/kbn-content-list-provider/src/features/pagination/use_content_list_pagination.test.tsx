@@ -15,16 +15,14 @@ import { useContentListPagination } from './use_content_list_pagination';
 import { DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE_OPTIONS } from './types';
 
 describe('useContentListPagination', () => {
-  const mockFindItems = jest.fn(
-    async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-      items: Array.from({ length: 5 }, (_, i) => ({
-        id: `item-${i}`,
-        title: `Item ${i}`,
-        type: 'dashboard',
-      })),
-      total: 55,
-    })
-  );
+  const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+    items: Array.from({ length: 5 }, (_, i) => ({
+      id: `item-${i}`,
+      title: `Item ${i}`,
+      type: 'dashboard',
+    })),
+    total: 55,
+  }));
 
   const createWrapper = (options?: {
     paginationDisabled?: boolean;
@@ -35,8 +33,8 @@ describe('useContentListPagination', () => {
     const features = paginationDisabled
       ? { pagination: false as const }
       : initialPageSize || pageSizeOptions
-      ? { pagination: { initialPageSize, pageSizeOptions } }
-      : undefined;
+        ? { pagination: { initialPageSize, pageSizeOptions } }
+        : undefined;
 
     return ({ children }: { children: React.ReactNode }) => (
       <ContentListProvider

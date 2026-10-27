@@ -14,7 +14,7 @@ const makeEvaluators = (gapScore: number): DefaultEvaluators =>
     criteria: jest.fn().mockReturnValue({
       evaluate: jest.fn().mockResolvedValue({ score: gapScore }),
     }),
-  } as unknown as DefaultEvaluators);
+  }) as unknown as DefaultEvaluators;
 
 const makeArgs = (rule: RuleCreationResult['rule']) => ({
   input: {

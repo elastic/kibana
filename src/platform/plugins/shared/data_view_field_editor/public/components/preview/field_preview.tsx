@@ -70,7 +70,7 @@ export const FieldPreview = () => {
   // The custom label applies to the field as a whole, so it does not replace the
   // "<parent>.<subfield>" keys of composite subfield rows
   const previewRowLabel =
-    type !== 'composite' && !parentName ? customLabel ?? undefined : undefined;
+    type !== 'composite' && !parentName ? (customLabel ?? undefined) : undefined;
 
   const renderFieldsToPreview = () => {
     if (fields.length === 0) {

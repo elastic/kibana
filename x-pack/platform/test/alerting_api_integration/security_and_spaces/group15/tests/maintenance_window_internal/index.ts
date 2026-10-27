@@ -34,9 +34,7 @@ export default function maintenanceWindowInternalTests({
       require.resolve('../../../group3/tests/maintenance_window/internal/delete_maintenance_window')
     );
     loadTestFile(
-      require.resolve(
-        '../../../group3/tests/maintenance_window/internal/archive_maintenance_window'
-      )
+      require.resolve('../../../group3/tests/maintenance_window/internal/archive_maintenance_window')
     );
     loadTestFile(
       require.resolve('../../../group3/tests/maintenance_window/internal/finish_maintenance_window')
@@ -45,9 +43,7 @@ export default function maintenanceWindowInternalTests({
       require.resolve('../../../group3/tests/maintenance_window/internal/find_maintenance_windows')
     );
     loadTestFile(
-      require.resolve(
-        '../../../group3/tests/maintenance_window/internal/active_maintenance_windows'
-      )
+      require.resolve('../../../group3/tests/maintenance_window/internal/active_maintenance_windows')
     );
   });
 }

@@ -104,7 +104,8 @@ export function SharedSettingsSection({
     grid-template-rows: 0fr;
     visibility: hidden;
     ${euiCanAnimate} {
-      transition: grid-template-rows ${ADVANCED_ANIMATION_MS}ms ease-in-out,
+      transition:
+        grid-template-rows ${ADVANCED_ANIMATION_MS}ms ease-in-out,
         visibility 0s linear ${ADVANCED_ANIMATION_MS}ms;
     }
     &[data-open='true'] {

@@ -44,15 +44,18 @@ export class EcsFieldsRepository {
       return this.fieldsDictionary;
     }
 
-    const fields = fieldNames.reduce((fieldsMetadata, fieldName) => {
-      const field = this.getByName(fieldName);
+    const fields = fieldNames.reduce(
+      (fieldsMetadata, fieldName) => {
+        const field = this.getByName(fieldName);
 
-      if (field) {
-        fieldsMetadata[fieldName] = field;
-      }
+        if (field) {
+          fieldsMetadata[fieldName] = field;
+        }
 
-      return fieldsMetadata;
-    }, {} as Record<EcsFieldName, FieldMetadata>);
+        return fieldsMetadata;
+      },
+      {} as Record<EcsFieldName, FieldMetadata>
+    );
 
     // Create a new dictionary with the filtered fields (also gets proxy)
     return FieldsMetadataDictionary.create(fields);

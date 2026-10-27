@@ -45,15 +45,12 @@ interface UpgradeAssistantServerStartDependencies {
   security: SecurityPluginStart;
   reindexService: ReindexServiceServerPluginStart;
 }
-export class UpgradeAssistantServerPlugin
-  implements
-    Plugin<
-      void,
-      void,
-      UpgradeAssistantServerSetupDependencies,
-      UpgradeAssistantServerStartDependencies
-    >
-{
+export class UpgradeAssistantServerPlugin implements Plugin<
+  void,
+  void,
+  UpgradeAssistantServerSetupDependencies,
+  UpgradeAssistantServerStartDependencies
+> {
   private readonly logger: Logger;
   private readonly kibanaVersion: string;
   private readonly initialFeatureSet: FeatureSet;

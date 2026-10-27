@@ -73,7 +73,7 @@ const isAbstention = (result: EvaluationResult): boolean =>
  */
 export const withLowScoreLogging = <
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(
   evaluator: Evaluator<TExample, TTaskOutput>,
   log: ToolingLog
@@ -118,7 +118,7 @@ export const withLowScoreLogging = <
 /** Wraps an evaluator so it only scores examples `applies` accepts and skips the rest. */
 export const onlyWhen = <
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(
   evaluator: Evaluator<TExample, TTaskOutput>,
   applies: (expected: TExample['output']) => boolean,

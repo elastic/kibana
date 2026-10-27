@@ -16,7 +16,7 @@ export const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 export function createIsNarrowSchema<
   TBaseSchema extends z.ZodType,
-  TNarrowSchema extends z.ZodType
+  TNarrowSchema extends z.ZodType,
 >(_base: TBaseSchema, narrow: TNarrowSchema) {
   return <TValue extends z.output<TBaseSchema>>(
     value: TValue
@@ -27,7 +27,7 @@ export function createIsNarrowSchema<
 
 export function createAsSchemaOrThrow<
   TBaseSchema extends z.ZodType,
-  TNarrowSchema extends z.ZodType
+  TNarrowSchema extends z.ZodType,
 >(_base: TBaseSchema, narrow: TNarrowSchema) {
   return <TValue extends z.output<TBaseSchema>>(
     value: TValue
