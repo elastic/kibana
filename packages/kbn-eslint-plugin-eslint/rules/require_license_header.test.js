@@ -321,5 +321,25 @@ console.log('foo')`,
         console.log('foo')
       `,
     },
+
+    // a line-comment license must not swallow code that follows the pragma on the same line
+    {
+      code: `/** @jest-environment node */ console.log('foo')`,
+
+      options: [{ license: '// license' }],
+      errors: [
+        {
+          message: 'File must start with a license header',
+        },
+      ],
+
+      output: dedent`
+        /** @jest-environment node */
+
+        // license
+
+         console.log('foo')
+      `,
+    },
   ],
 });

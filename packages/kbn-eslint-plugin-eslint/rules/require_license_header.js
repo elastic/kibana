@@ -82,9 +82,14 @@ module.exports = {
           .find((node) => normalizeWhitespace(node.value) === license.nodeValue);
 
         const pragmaEnd = getLeadingPragmaEnd(sourceCode);
+        // code sharing the pragma's line needs its own line, or a `//` license would comment it out
+        const codeFollowsPragma = !/^(\r?\n|$)/.test(sourceCode.getText().slice(pragmaEnd));
         const insertLicense = (fixer) =>
           pragmaEnd
-            ? fixer.insertTextAfterRange([0, pragmaEnd], '\n\n' + license.source)
+            ? fixer.insertTextAfterRange(
+                [0, pragmaEnd],
+                '\n\n' + license.source + (codeFollowsPragma ? '\n\n' : '')
+              )
             : fixer.replaceTextRange([0, 0], license.source + '\n\n');
 
         // no licence comment
