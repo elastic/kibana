@@ -58,6 +58,31 @@ describe('ConversationCard', () => {
     expect(onClickCard).toHaveBeenCalledWith('inv-1');
   });
 
+  describe.each([
+    { canOpenInvestigationDetails: true, expectedAssignees: 1 },
+    { canOpenInvestigationDetails: false, expectedAssignees: 0 },
+  ])(
+    'with canOpenInvestigationDetails $canOpenInvestigationDetails',
+    ({ canOpenInvestigationDetails, expectedAssignees }) => {
+      it(`renders ${expectedAssignees} assignee control`, () => {
+        renderWithKibanaRenderContext(
+          <ConversationCard
+            investigation={investigation}
+            canOpenInvestigationDetails={canOpenInvestigationDetails}
+            onClickCard={jest.fn()}
+            onClickAction={jest.fn()}
+            onCopyLink={jest.fn()}
+            onOpenChat={jest.fn()}
+            onClickRecommendedAction={jest.fn()}
+            renderAssignees={() => <span>Assignees</span>}
+          />
+        );
+
+        expect(screen.queryAllByText('Assignees')).toHaveLength(expectedAssignees);
+      });
+    }
+  );
+
   it('marks the card as current while its flyout is open', () => {
     renderCard(true);
 
