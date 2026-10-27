@@ -134,6 +134,29 @@ describe('NodeService', () => {
         service: { node: { roles: ['background_tasks', 'ui'] } },
       });
     });
+
+    it('returns the role names, with the wildcard expanded', async () => {
+      configService = getMockedConfigService({ roles: ['*'] });
+      coreContext = mockCoreContext.create({ logger, configService });
+
+      service = new NodeService(coreContext);
+      const { roleNames } = await service.preboot({ loggingSystem: logger });
+
+      expect(roleNames).toEqual(['background_tasks', 'ui']);
+    });
+
+    it('returns the same role names as the global context, in the same order', async () => {
+      configService = getMockedConfigService({ roles: ['ui', 'background_tasks'] });
+      coreContext = mockCoreContext.create({ logger, configService });
+
+      service = new NodeService(coreContext);
+      const { roleNames } = await service.preboot({ loggingSystem: logger });
+
+      expect(roleNames).toEqual(['ui', 'background_tasks']);
+      expect(logger.setGlobalContext).toHaveBeenCalledWith({
+        service: { node: { roles: roleNames } },
+      });
+    });
   });
   describe('#start()', () => {
     it('returns default roles values when wildcard is provided', async () => {
