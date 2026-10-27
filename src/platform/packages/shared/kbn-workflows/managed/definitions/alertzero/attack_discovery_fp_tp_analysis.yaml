@@ -272,14 +272,23 @@ steps:
       index: entities-latest-{{ workflow.spaceId }}
       size: 50
       # The template caps this string at 200k characters.
+      # entity.sub_type, entity.name, and the asset fields are what entity_role
+      # uses to tell a management host from a workstation.
       _source:
         - entity.id
         - entity.type
+        - entity.sub_type
+        - entity.name
         - host.name
         - host.id
         - user.name
         - user.id
         - asset.criticality
+        - asset.environment
+        - asset.name
+        - asset.model
+        - asset.owner
+        - asset.vendor
       query:
         bool:
           minimum_should_match: 1

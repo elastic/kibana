@@ -23,7 +23,11 @@ export const getUserAccessControlData = async () => {
       return;
     }
 
-    return { uid: currentUser.uid, hasGlobalAccessControlPrivilege: isGloballyAuthorized };
+    return {
+      uid: currentUser.uid,
+      name: currentUser.user.full_name ?? currentUser.user.username,
+      hasGlobalAccessControlPrivilege: isGloballyAuthorized,
+    };
   } catch (error) {
     return;
   }

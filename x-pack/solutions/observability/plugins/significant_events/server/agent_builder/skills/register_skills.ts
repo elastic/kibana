@@ -19,7 +19,6 @@ import { createKiIdentificationManagementSkill } from './ki_identification_manag
 import { featureIdentificationSkill } from './feature_identification';
 import { significantEventsManagementSkill } from './significant_events_management';
 import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
-import { streamsInvestigationManagementSkill } from './investigation_management';
 
 type SignificantEventsSkill = Parameters<AgentBuilderPluginStart['skills']['register']>[0];
 
@@ -89,7 +88,6 @@ export const registerSignificantEventsSkills = async ({
           }),
         ]
       : []),
-    streamsInvestigationManagementSkill,
   ];
 
   // Registers only the skills not registered yet. Already-registered skills are skipped (a second
