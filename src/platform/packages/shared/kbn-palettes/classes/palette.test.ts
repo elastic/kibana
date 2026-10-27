@@ -105,3 +105,34 @@ describe('elasticPalette', () => {
     expect(after).toBe(euiPaletteColorBlind({ rotations: 3 })[0]);
   });
 });
+
+describe('KbnColorFnPalette color reuse', () => {
+  const originalVisColors = EUI_VIS_COLOR_STORE.visColors;
+  afterEach(() => EUI_VIS_COLOR_STORE.setVisColors(originalVisColors));
+
+  it('does not regenerate colors on subsequent getColor calls', () => {
+    const { palette, colorFn } = createColorFnPalette(5);
+    for (let i = 0; i < 100; i++) {
+      palette.getColor(i);
+    }
+    expect(colorFn).toHaveBeenCalledTimes(1);
+  });
+
+  it('generates colors once per requested number of colors', () => {
+    const { palette, colorFn } = createColorFnPalette(5);
+    palette.getColor(0, 5);
+    palette.getColor(0, 7);
+    palette.getColor(1, 5);
+    palette.getColor(1, 7);
+    expect(colorFn).toHaveBeenCalledTimes(2);
+  });
+
+  it('regenerates colors after EUI vis colors change', () => {
+    const { palette, colorFn } = createColorFnPalette(5);
+    palette.getColor(0);
+    EUI_VIS_COLOR_STORE.setVisColors({ ...originalVisColors, euiColorVis0: '#123456' });
+    palette.getColor(0);
+    palette.getColor(1);
+    expect(colorFn).toHaveBeenCalledTimes(2);
+  });
+});
