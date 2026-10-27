@@ -186,7 +186,9 @@ steps:
         delay: 5s
       continue: true
 
-  # Reads the alerts back. The write refreshes the index, so this sees it.
+  # Reads the alerts back. The write refreshes the index, so this sees it. The
+  # shared alerts are left out, as in the write: they stay open on purpose, so
+  # counting them would report a close that did not land.
   # Best-effort: the note below says when the read failed.
   - name: verify_alerts
     type: elasticsearch.search
@@ -196,8 +198,13 @@ steps:
       size: 0
       track_total_hits: true
       query:
-        ids:
-          values: "${{ steps.resolve_attack.output.alert_ids }}"
+        bool:
+          filter:
+            - ids:
+                values: "${{ steps.resolve_attack.output.alert_ids }}"
+          must_not:
+            - ids:
+                values: "${{ steps.resolve_shared_alerts.output.ids }}"
       aggregations:
         open:
           filter:
@@ -207,10 +214,6 @@ steps:
           filter:
             term:
               kibana.alert.workflow_status: acknowledged
-        closed:
-          filter:
-            term:
-              kibana.alert.workflow_status: closed
     on-failure:
       retry:
         max-attempts: 3
@@ -218,6 +221,9 @@ steps:
       continue: true
 
   # Resolves the counts once: Liquid can't compare the result of a filter chain.
+  # `closed` is what this run's write updated, from the update-by-query response,
+  # not the read-back's closed bucket: that one also counts alerts already closed
+  # before the run (say as a duplicate), which the write skips.
   - name: resolve_alerts_closed
     type: data.set
     with:
@@ -225,7 +231,7 @@ steps:
       requested: "${{ steps.resolve_attack.output.alert_ids | size | default: 0 }}"
       open: "${{ steps.verify_alerts.output.aggregations.open.doc_count | default: 0 }}"
       acknowledged: "${{ steps.verify_alerts.output.aggregations.acknowledged.doc_count | default: 0 }}"
-      closed: "${{ steps.verify_alerts.output.aggregations.closed.doc_count | default: 0 }}"
+      closed: "${{ steps.close_alerts.output.updated | default: 0 }}"
       shared: "${{ steps.resolve_shared_alerts.output.count | default: 0 }}"
       attack_closed: "${{ steps.close_attack.output.success == true }}"
 
