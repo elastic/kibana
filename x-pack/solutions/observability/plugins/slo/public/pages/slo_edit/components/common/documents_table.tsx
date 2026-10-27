@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { QuerySchema } from '@kbn/slo-schema';
-import { kqlQuerySchema } from '@kbn/slo-schema';
+import { is, kqlQuerySchemaZod } from '@kbn/slo-schema';
 import { EuiResizableContainer, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { TimeRange } from '@kbn/es-query';
@@ -118,7 +118,7 @@ export function DocumentsTable({ dataView, name, searchBarProps }: Props) {
                         val as Serializable,
                         null
                       );
-                      if (kqlQuerySchema.is(filter)) {
+                      if (is(kqlQuerySchemaZod, filter)) {
                         setValue(name, {
                           filters: [filterN],
                           kqlQuery: filter,
