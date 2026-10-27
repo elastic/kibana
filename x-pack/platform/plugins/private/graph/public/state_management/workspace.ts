@@ -463,6 +463,7 @@ const toNodeState = (node: WorkspaceNode): WorkspaceNodeState => ({
   data: {
     field: node.data.field,
     term: node.data.term,
+    ...(node.data.label !== undefined ? { label: node.data.label } : {}),
   },
 });
 

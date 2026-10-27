@@ -20,6 +20,7 @@ export interface WorkspaceNode {
   data: {
     field: string;
     term: string;
+    label?: string;
   };
   scaledSize: number;
   parent?: WorkspaceNode | null;

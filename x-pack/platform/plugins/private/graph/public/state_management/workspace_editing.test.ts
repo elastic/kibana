@@ -116,6 +116,26 @@ describe('workspace editing', () => {
     );
   });
 
+  it('preserves intersection labels through deletion and undo/redo', () => {
+    const { store, workspace } = setup();
+    store.dispatch(toggleNodeSelection({ nodeId: 'field..third', replace: true }));
+    store.dispatch(deleteSelectedNodes());
+
+    const expectIntersectionLabels = () => {
+      for (const term of ['first', 'second']) {
+        const nodeId = `field..${term}`;
+        expect(store.getState().workspace.nodesById[nodeId].data.label).toBe(term);
+        expect(workspace.nodesMap[nodeId].data.label).toBe(term);
+      }
+    };
+
+    expectIntersectionLabels();
+    store.dispatch(undoWorkspace());
+    expectIntersectionLabels();
+    store.dispatch(redoWorkspace());
+    expectIntersectionLabels();
+  });
+
   it('removes a selected group, its descendants and dangling edges from Redux and the runtime', () => {
     const { store, workspace } = setup();
     store.dispatch(mergeNodes({ parentId: 'field..third', childId: 'field..second' }));
