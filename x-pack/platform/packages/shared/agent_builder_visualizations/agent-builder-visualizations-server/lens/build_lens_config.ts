@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/logging';
 import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { removePromqlTimeRangeParams } from '../shared/remove_promql_time_range';
-import { createVisualizationGraph, getExistingEsqlQueries } from './graph_lens';
+import { getExistingEsqlQueries } from './esql_data_source_carriers';
 import type { VisualizationConfig } from './types';
 
 const SUPPORTED_CHART_TYPES = new Set<string>(Object.values(SupportedChartType));
@@ -81,6 +81,7 @@ export const buildLensConfig = async ({
     );
   }
 
+  const { createVisualizationGraph } = await import('./graph_lens');
   const graph = await createVisualizationGraph(modelProvider, logger, events, esClient);
 
   // If the user provides ES|QL, use it only when validation says it is safe.

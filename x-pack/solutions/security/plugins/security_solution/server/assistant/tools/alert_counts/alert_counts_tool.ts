@@ -6,7 +6,6 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { tool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { contentReferenceString, securityAlertsPageReference } from '@kbn/elastic-assistant-common';
@@ -33,6 +32,7 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
   },
   async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
+    const { tool } = await import('@langchain/core/tools');
     const { alertsIndexPattern, esClient, contentReferencesStore } =
       params as AlertCountsToolParams;
     return tool(

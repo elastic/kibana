@@ -16,7 +16,6 @@ import {
   transformRawData,
   contentReferenceBlock,
 } from '@kbn/elastic-assistant-common';
-import { tool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
@@ -54,6 +53,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
   async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
+    const { tool } = await import('@langchain/core/tools');
     const {
       alertsIndexPattern,
       anonymizationFields,

@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { runLeadGenerationPipeline, type RunPipelineParams } from './run_pipeline';
+import type { RunPipelineParams } from './run_pipeline';
 import { upsertLeadGenerationConfig } from './saved_object';
 
 export interface RunLeadGenerationInBackgroundArgs {
@@ -32,6 +32,7 @@ export const runLeadGenerationInBackground = ({
 
   void (async () => {
     try {
+      const { runLeadGenerationPipeline } = await import('./run_pipeline');
       await runLeadGenerationPipeline(pipelineArgs);
       await upsertLeadGenerationConfig(savedObjectsClient, spaceId, {
         connectorId,

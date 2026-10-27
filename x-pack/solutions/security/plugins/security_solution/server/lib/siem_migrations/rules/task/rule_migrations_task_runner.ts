@@ -14,7 +14,6 @@ import type {
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { MigrateRuleConfigSchema, MigrateRuleState } from './agent/types';
-import { getRuleMigrationAgent, getRuleMigrationAgentV2 } from './agent';
 import { RuleMigrationsRetriever } from './retrievers';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import type { StoredRuleMigrationRule } from '../types';
@@ -22,7 +21,6 @@ import { EsqlKnowledgeBase } from '../../common/task/util/esql_knowledge_base';
 import { nullifyMissingProperties } from '../../common/task/util/nullify_missing_properties';
 import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_runner';
 import { RuleMigrationTelemetryClient } from './rule_migrations_telemetry_client';
-import { getRulesMigrationTools } from './agent/tools';
 import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/types';
 import { enrichLookupResourcesWithMappings } from '../../common/task/util/enrich_lookup_resources';
 
@@ -60,6 +58,8 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
 
   /** Retrieves the connector and creates the migration agent */
   public async setup(connectorId: string): Promise<void> {
+    const { getRuleMigrationAgent, getRuleMigrationAgentV2 } = await import('./agent');
+    const { getRulesMigrationTools } = await import('./agent/tools');
     const { inferenceService } = this.dependencies;
 
     const model = await this.actionsClientChat.createModel({

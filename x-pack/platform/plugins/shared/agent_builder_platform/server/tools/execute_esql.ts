@@ -15,7 +15,7 @@ import {
   buildTimeRangeParams,
   interpolateEsqlQuery,
 } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
-import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';

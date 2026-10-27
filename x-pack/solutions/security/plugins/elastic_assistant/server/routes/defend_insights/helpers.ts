@@ -16,10 +16,8 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
   ApiConfig,
-  ContentReferencesStore,
   DefendInsightGenerationInterval,
   DefendInsights,
-  DefendInsightsPostRequestBody,
   DefendInsightsResponse,
   Replacements,
 } from '@kbn/elastic-assistant-common';
@@ -33,15 +31,13 @@ import type {
   InferenceConnectorType,
 } from '@kbn/inference-common';
 import moment from 'moment';
-import { ActionsClientLlm } from '@kbn/langchain/server';
-import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   DEFEND_INSIGHTS_ID,
   DefendInsightStatus,
   DefendInsightType,
 } from '@kbn/elastic-assistant-common';
-import { DEFEND_INSIGHTS_GRAPH_RUN_NAME, getDefaultDefendInsightsGraph } from '@kbn/discoveries';
+import { DEFEND_INSIGHTS_GRAPH_RUN_NAME } from '@kbn/discoveries/impl/defend_insights/graphs/default_defend_insights_graph/constants';
 
 import type { DefendInsightsGraphState } from '@kbn/discoveries';
 import type { AIAssistantKnowledgeBaseDataClient } from '../../ai_assistant_data_clients/knowledge_base';
@@ -100,102 +96,6 @@ export function getAssistantTool(
 ): AssistantTool | undefined {
   const assistantTools = getRegisteredTools(pluginName);
   return assistantTools.find((tool) => tool.id === DEFEND_INSIGHTS_ID);
-}
-
-export function getAssistantToolParams({
-  endpointIds,
-  insightType,
-  actionsClient,
-  anonymizationFields,
-  apiConfig,
-  esClient,
-  connectorTimeout,
-  inferenceClient,
-  langChainTimeout,
-  langSmithProject,
-  langSmithApiKey,
-  logger,
-  contentReferencesStore,
-  latestReplacements,
-  onNewReplacements,
-  request,
-}: {
-  endpointIds: string[];
-  insightType: DefendInsightType;
-  actionsClient: PublicMethodsOf<ActionsClient>;
-  anonymizationFields?: AnonymizationFieldResponse[];
-  apiConfig: ApiConfig;
-  esClient: ElasticsearchClient;
-  connectorTimeout: number;
-  inferenceClient?: InferenceClient;
-  langChainTimeout: number;
-  langSmithProject?: string;
-  langSmithApiKey?: string;
-  logger: Logger;
-  contentReferencesStore: ContentReferencesStore | undefined;
-  latestReplacements: Replacements;
-  onNewReplacements: (newReplacements: Replacements) => void;
-  request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
-}): {
-  endpointIds: string[];
-  insightType: DefendInsightType;
-  anonymizationFields?: AnonymizationFieldResponse[];
-  esClient: ElasticsearchClient;
-  langChainTimeout: number;
-  llm: ActionsClientLlm;
-  logger: Logger;
-  contentReferencesStore: ContentReferencesStore | undefined;
-  replacements: Replacements;
-  onNewReplacements: (newReplacements: Replacements) => void;
-  request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
-  modelExists: boolean;
-  isEnabledKnowledgeBase: boolean;
-} {
-  const traceOptions = {
-    projectName: langSmithProject,
-    tracers: [
-      ...getLangSmithTracer({
-        apiKey: langSmithApiKey,
-        projectName: langSmithProject,
-        logger,
-      }),
-    ],
-  };
-
-  const isInferenceEndpoint =
-    apiConfig.actionTypeId === ('.inference' as InferenceConnectorType.Inference) &&
-    inferenceClient != null;
-
-  const llm = new ActionsClientLlm({
-    actionsClient,
-    connectorId: apiConfig.connectorId,
-    inferenceClient: isInferenceEndpoint ? inferenceClient : undefined,
-    isInferenceEndpoint,
-    llmType: getLlmType(apiConfig.actionTypeId),
-    logger,
-    temperature: 0, // zero temperature because we want structured JSON output
-    timeout: connectorTimeout,
-    traceOptions,
-    telemetryMetadata: {
-      pluginId: 'security_defend_insights',
-    },
-  });
-
-  return {
-    endpointIds,
-    insightType,
-    anonymizationFields,
-    esClient,
-    replacements: latestReplacements,
-    langChainTimeout,
-    llm,
-    logger,
-    contentReferencesStore,
-    onNewReplacements,
-    request,
-    modelExists: false,
-    isEnabledKnowledgeBase: false,
-  };
 }
 
 export async function handleToolError({
@@ -473,6 +373,13 @@ export const invokeDefendInsightsGraph = async ({
   anonymizedEvents: Document[];
   insights: DefendInsights | null;
 }> => {
+  const [{ getLangSmithTracer }, { ActionsClientLlm }, { getDefaultDefendInsightsGraph }] =
+    await Promise.all([
+      import('@kbn/langchain/server/tracers/langsmith'),
+      import('@kbn/langchain/server'),
+      import('@kbn/discoveries'),
+    ]);
+
   if (KB_REQUIRED_TYPES.has(insightType)) {
     await waitForKB(kbDataClient);
   }

@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { decode, encode } from 'gpt-tokenizer';
 import { last, omit, pick, take } from 'lodash';
 import type { Observable, OperatorFunction } from 'rxjs';
 import {
@@ -140,21 +139,23 @@ export function executeFunctionAndCatchError({
           return of(response);
         }
 
-        const encoded = encode(JSON.stringify(response.content || {}));
+        return from(import('gpt-tokenizer')).pipe(
+          map(({ encode, decode }) => {
+            const encoded = encode(JSON.stringify(response.content || {}));
 
-        const exceededTokenLimit = encoded.length >= MAX_FUNCTION_RESPONSE_TOKEN_COUNT;
+            const exceededTokenLimit = encoded.length >= MAX_FUNCTION_RESPONSE_TOKEN_COUNT;
 
-        return of(
-          createFunctionResponseMessage({
-            name,
-            content: exceededTokenLimit
-              ? {
-                  message:
-                    'Function response exceeded the maximum length allowed and was truncated',
-                  truncated: decode(take(encoded, MAX_FUNCTION_RESPONSE_TOKEN_COUNT)),
-                }
-              : response.content,
-            data: response.data,
+            return createFunctionResponseMessage({
+              name,
+              content: exceededTokenLimit
+                ? {
+                    message:
+                      'Function response exceeded the maximum length allowed and was truncated',
+                    truncated: decode(take(encoded, MAX_FUNCTION_RESPONSE_TOKEN_COUNT)),
+                  }
+                : response.content,
+              data: response.data,
+            });
           })
         );
       })

@@ -12,7 +12,6 @@ import type { ModelProvider, ToolEventEmitter, ToolHandlerResult } from '@kbn/ag
 import type { TimeRange } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools';
 import type { TopSnippetsConfig } from '../steps/extract_snippets';
-import { createSearchToolGraph } from './graph';
 
 export const runSearchTool = async ({
   nlQuery,
@@ -46,6 +45,7 @@ export const runSearchTool = async ({
   includeDatasets?: boolean;
   includeFrozen?: boolean;
 }): Promise<ToolHandlerResult[]> => {
+  const { createSearchToolGraph } = await import('./graph');
   const toolGraph = await createSearchToolGraph({
     modelProvider,
     esClient,

@@ -11,13 +11,8 @@ import type { OpenAIRequest } from './types';
 import { emitTokenCountEstimateIfMissing } from './emit_token_count_if_missing';
 
 jest.mock('./manually_count_tokens');
-import { manuallyCountPromptTokens, manuallyCountCompletionTokens } from './manually_count_tokens';
-const manuallyCountPromptTokensMock = manuallyCountPromptTokens as jest.MockedFn<
-  typeof manuallyCountPromptTokens
->;
-const manuallyCountCompletionTokensMock = manuallyCountCompletionTokens as jest.MockedFn<
-  typeof manuallyCountCompletionTokens
->;
+import { manuallyCountTokens } from './manually_count_tokens';
+const manuallyCountTokensMock = manuallyCountTokens as jest.MockedFn<typeof manuallyCountTokens>;
 
 const stubRequest = (content: string = 'foo'): OpenAIRequest => {
   return {
@@ -27,8 +22,7 @@ const stubRequest = (content: string = 'foo'): OpenAIRequest => {
 
 describe('emitTokenCountEstimateIfMissing', () => {
   beforeEach(() => {
-    manuallyCountPromptTokensMock.mockReset();
-    manuallyCountCompletionTokensMock.mockReset();
+    manuallyCountTokensMock.mockReset();
   });
 
   it('mirrors the source when token count is emitted', async () => {
@@ -44,21 +38,18 @@ describe('emitTokenCountEstimateIfMissing', () => {
 
     expect(output).toEqual(events);
 
-    expect(manuallyCountPromptTokensMock).not.toHaveBeenCalled();
-    expect(manuallyCountCompletionTokensMock).not.toHaveBeenCalled();
+    expect(manuallyCountTokensMock).not.toHaveBeenCalled();
   });
 
   it('emits a tokenCount event if the source completes without emitting one', async () => {
-    manuallyCountPromptTokensMock.mockReturnValue(5);
-    manuallyCountCompletionTokensMock.mockReturnValue(10);
+    manuallyCountTokensMock.mockReturnValue(tokensEvent({ prompt: 5, completion: 10, total: 15 }));
 
     const events = [chunkEvent('chunk-1'), chunkEvent('chunk-2'), chunkEvent('chunk-3')];
 
     const result$ = of(...events).pipe(emitTokenCountEstimateIfMissing({ request: stubRequest() }));
     const output = await lastValueFrom(result$.pipe(toArray()));
 
-    expect(manuallyCountPromptTokensMock).toHaveBeenCalledTimes(1);
-    expect(manuallyCountCompletionTokensMock).toHaveBeenCalledTimes(1);
+    expect(manuallyCountTokensMock).toHaveBeenCalledTimes(1);
 
     expect(output).toEqual([...events, tokensEvent({ prompt: 5, completion: 10, total: 15 })]);
   });

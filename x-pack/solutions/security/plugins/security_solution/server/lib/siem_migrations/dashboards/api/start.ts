@@ -18,7 +18,6 @@ import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
 import { authz } from './util/authz';
 import { getRetryFilter } from '../../common/api/util/retry';
 import { withLicense } from '../../common/api/util/with_license';
-import { createTracersCallbacks } from '../../common/api/util/tracing';
 import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 
 export const registerSiemDashboardMigrationsStartRoute = (
@@ -74,6 +73,7 @@ export const registerSiemDashboardMigrationsStartRoute = (
                 }
               }
 
+              const { createTracersCallbacks } = await import('../../common/api/util/tracing');
               const callbacks = createTracersCallbacks(langsmithOptions, logger);
 
               const { exists, started } = await dashboardMigrationsClient.task.start({

@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Document } from '@langchain/core/documents';
-import type { DefendInsights, ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import type { DefendInsights } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
 import {
   DEFEND_INSIGHTS_ID,
@@ -23,7 +23,6 @@ import {
 } from '../../lib/telemetry/event_based_telemetry';
 import {
   getAssistantTool,
-  getAssistantToolParams,
   handleToolError,
   updateDefendInsights,
   updateDefendInsightLastViewedAt,
@@ -47,33 +46,6 @@ describe('defend insights route helpers', () => {
       const getRegisteredTools = jest.fn().mockReturnValue([{ id: DEFEND_INSIGHTS_ID }]);
       const result = getAssistantTool(getRegisteredTools, 'pluginName');
       expect(result).toEqual({ id: DEFEND_INSIGHTS_ID });
-    });
-  });
-
-  describe('getAssistantToolParams', () => {
-    it('should return the correct tool params', () => {
-      const params = {
-        endpointIds: ['endpoint-id1'],
-        insightType: DefendInsightType.enum.incompatible_antivirus,
-        actionsClient: {} as any,
-        anonymizationFields: [],
-        apiConfig: { connectorId: 'connector-id1', actionTypeId: 'action-type-id1' },
-        esClient: {} as any,
-        connectorTimeout: 1000,
-        langChainTimeout: 1000,
-        langSmithProject: 'project',
-        langSmithApiKey: 'apiKey',
-        logger: {} as any,
-        latestReplacements: {},
-        onNewReplacements: jest.fn(),
-        request: {} as any,
-        contentReferencesStore: {} as ContentReferencesStore,
-      };
-      const result = getAssistantToolParams(params);
-
-      expect(result).toHaveProperty('endpointIds', params.endpointIds);
-      expect(result).toHaveProperty('insightType', params.insightType);
-      expect(result).toHaveProperty('llm');
     });
   });
 

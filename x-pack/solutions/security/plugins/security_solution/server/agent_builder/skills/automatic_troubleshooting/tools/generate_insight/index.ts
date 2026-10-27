@@ -11,7 +11,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { GENERATE_INSIGHT_TOOL_ID } from '../..';
-import { createGenerateInsightGraph } from './graph';
 
 const generateInsightSchema = lazySchema(() =>
   z.object({
@@ -63,6 +62,7 @@ This tool creates structured insights for persisting the results of the troubles
       { spaceId, modelProvider, logger, esClient }
     ) => {
       try {
+        const { createGenerateInsightGraph } = await import('./graph');
         await endpointAppContextService
           .getInternalFleetServices(spaceId)
           .ensureInCurrentSpace({ agentIds: endpointIds });

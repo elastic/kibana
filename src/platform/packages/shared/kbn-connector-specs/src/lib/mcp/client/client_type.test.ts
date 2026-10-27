@@ -7,15 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  McpClient,
-  McpError,
-  McpErrorCode,
-  McpNotConnectedError,
-  StreamableHTTPError,
-  UnauthorizedError,
-  type FetchLike,
-} from '@kbn/mcp-client';
+import { McpClient, McpNotConnectedError, type FetchLike } from '@kbn/mcp-client';
+import { StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
+import { McpError, ErrorCode as McpErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import type { BuildContext } from '../../clients/client_type_spec';
 import {
   createMcpClientType,
@@ -27,8 +22,20 @@ import {
 
 jest.mock('@kbn/mcp-client', () => {
   const actual = jest.requireActual('@kbn/mcp-client');
+  // The real predicates only recognize SDK errors after McpClient.connect() has lazily loaded
+  // the SDK; these tests construct SDK errors directly, so wire the predicates to the SDK classes.
+  const { StreamableHTTPError: SdkStreamableHTTPError } = jest.requireActual(
+    '@modelcontextprotocol/sdk/client/streamableHttp.js'
+  );
+  const { UnauthorizedError: SdkUnauthorizedError } = jest.requireActual(
+    '@modelcontextprotocol/sdk/client/auth.js'
+  );
+  const { McpError: SdkMcpError } = jest.requireActual('@modelcontextprotocol/sdk/types.js');
   return {
     ...actual,
+    isStreamableHTTPError: (error: unknown) => error instanceof SdkStreamableHTTPError,
+    isUnauthorizedError: (error: unknown) => error instanceof SdkUnauthorizedError,
+    isMcpError: (error: unknown) => error instanceof SdkMcpError,
     McpClient: jest.fn().mockImplementation(() => ({
       connect: jest.fn().mockResolvedValue({ connected: true }),
       disconnect: jest.fn().mockResolvedValue(undefined),

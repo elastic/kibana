@@ -9,7 +9,6 @@ import { serverUnavailable } from '@hapi/boom';
 import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
-import { encode } from 'gpt-tokenizer';
 import { isLockAcquisitionError } from '@kbn/lock-manager';
 import type { DocumentationManagerAPI } from '@kbn/product-doc-base-plugin/server/services/doc_manager';
 import type { SpaceId } from '@kbn/core-spaces-common';
@@ -197,6 +196,7 @@ export class KnowledgeBaseService {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return [];
     }
+    const { encode } = await import('gpt-tokenizer');
 
     this.dependencies.logger.debug(
       () => `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`

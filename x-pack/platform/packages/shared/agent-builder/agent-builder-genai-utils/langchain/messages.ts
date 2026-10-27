@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 } from 'uuid';
 import type { BaseMessage, MessageContentComplex } from '@langchain/core/messages';
 import { ToolMessage, AIMessage, HumanMessage } from '@langchain/core/messages';
 import { isAIMessage } from '@langchain/core/messages';
@@ -114,10 +113,6 @@ export const extractToolReturn = (message: ToolMessage): RunToolReturn => {
       throw new Error(`No artifact attached to tool message: ${JSON.stringify(message)}`);
     }
   }
-};
-
-export const generateFakeToolCallId = () => {
-  return v4().substr(0, 6);
 };
 
 export const createUserMessage = (

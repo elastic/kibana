@@ -13,7 +13,6 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import { CONVERSATION_TITLE_MAX_LENGTH } from '@kbn/agent-builder-common';
-import { createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
 
 /**
  * Enforces the stored title bound on a model-generated title. The prompt asks the model to stay
@@ -58,6 +57,7 @@ const generateConversationTitle = async ({
       },
     },
     async (span) => {
+      const { createUserMessage } = await import('@kbn/agent-builder-genai-utils/langchain');
       const structuredModel = chatModel.withStructuredOutput(
         z
           .object({

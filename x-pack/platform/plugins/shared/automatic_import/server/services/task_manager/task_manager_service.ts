@@ -25,7 +25,7 @@ import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
 import { getConnectorDefaultModel } from '@kbn/inference-common';
 import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
 import { TASK_STATUSES } from '../saved_objects/constants';
-import { AgentService } from '../agents/agent_service';
+import type { AgentService } from '../agents/agent_service';
 import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
 import { generateFieldMappings } from '../build_integration/fields';
 import { validateFieldMappings } from '../build_integration/validate_fields';
@@ -72,8 +72,10 @@ export function isUnrecoverableByStatus(error: unknown): boolean {
 
 export class TaskManagerService {
   private logger: Logger;
+  private readonly loggerFactory: LoggerFactory;
+  private readonly samplesIndexService: AutomaticImportSamplesIndexService;
   private taskManager: TaskManagerStartContract | null = null;
-  private agentService: AgentService;
+  private agentService?: AgentService;
   private automaticImportSavedObjectService: AutomaticImportSavedObjectService | null = null;
   private analytics: AnalyticsServiceSetup;
   private readonly inFlightRunAbortSignals = new Map<string, AbortSignal>();
@@ -86,7 +88,8 @@ export class TaskManagerService {
     samplesIndexService: AutomaticImportSamplesIndexService
   ) {
     this.logger = logger.get('taskManagerService');
-    this.agentService = new AgentService(samplesIndexService, logger);
+    this.loggerFactory = logger;
+    this.samplesIndexService = samplesIndexService;
     this.analytics = analytics;
 
     taskManagerSetup.registerTaskDefinitions({
@@ -205,7 +208,11 @@ export class TaskManagerService {
     request: KibanaRequest,
     abortSignal: AbortSignal
   ) {
-    assert(this.agentService, 'Agent service not initialized');
+    if (!this.agentService) {
+      const { AgentService } = await import('../agents/agent_service');
+      this.agentService = new AgentService(this.samplesIndexService, this.loggerFactory);
+    }
+    const agentService = this.agentService;
     assert(
       automaticImportSavedObjectService,
       'Automatic import saved object service not initialized'
@@ -287,7 +294,7 @@ export class TaskManagerService {
         );
       };
 
-      const result = await this.agentService.invokeAutomaticImportAgent(
+      const result = await agentService.invokeAutomaticImportAgent(
         integrationId,
         dataStreamId,
         esClient,

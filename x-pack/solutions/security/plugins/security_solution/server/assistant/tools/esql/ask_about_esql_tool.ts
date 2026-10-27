@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { tool } from '@langchain/core/tools';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { z } from '@kbn/zod/v4';
 import { lastValueFrom } from 'rxjs';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
-import { getPromptSuffixForOssModel } from './utils/common';
 
 export type ESQLToolParams = Require<AssistantToolParams, 'assistantContext'>;
 
@@ -45,6 +43,8 @@ export const ASK_ABOUT_ESQL_TOOL: AssistantTool = {
   async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
+    const { tool } = await import('@langchain/core/tools');
+    const { getPromptSuffixForOssModel } = await import('./utils/common');
     const { connectorId, inference, logger, request, isOssModel } = params as ESQLToolParams;
     if (inference == null || connectorId == null) return null;
 

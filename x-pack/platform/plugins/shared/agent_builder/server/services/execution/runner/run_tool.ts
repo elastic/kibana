@@ -22,7 +22,7 @@ import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunInternalToolParams,
 } from '@kbn/agent-builder-server/runner';
-import { generateFakeToolCallId } from '@kbn/agent-builder-genai-utils/langchain';
+import { generateFakeToolCallId } from '@kbn/agent-builder-genai-utils/langchain/tools';
 import { createErrorResult, createNonInteractiveDeclinedResult } from '@kbn/agent-builder-server';
 import type {
   InternalToolDefinition,

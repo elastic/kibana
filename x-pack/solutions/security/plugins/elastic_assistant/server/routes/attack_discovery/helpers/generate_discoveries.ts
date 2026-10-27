@@ -12,8 +12,6 @@ import type { InferenceClient } from '@kbn/inference-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
-import { invokeAttackDiscoveryGraph } from '../public/post/helpers/invoke_attack_discovery_graph';
-
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
 const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
@@ -35,6 +33,10 @@ export const generateAttackDiscoveries = async ({
   logger,
   savedObjectsClient,
 }: GenerateAttackDiscoveriesParams) => {
+  const { invokeAttackDiscoveryGraph } = await import(
+    '../public/post/helpers/invoke_attack_discovery_graph'
+  );
+
   // get parameters from the request body
   const alertsIndexPattern = decodeURIComponent(config.alertsIndexPattern);
   const {

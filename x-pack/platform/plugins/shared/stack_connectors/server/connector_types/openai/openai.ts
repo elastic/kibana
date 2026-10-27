@@ -9,7 +9,7 @@ import type { SSLSettings } from '@kbn/actions-utils';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import OpenAI from 'openai';
+import type OpenAI from 'openai';
 import { PassThrough } from 'stream';
 import type { Agent as HttpsAgent } from 'https';
 import type { Agent as HttpAgent, IncomingMessage } from 'http';
@@ -61,7 +61,14 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   private url: string;
   private provider: OpenAiProviderType;
   private key: string;
-  private openAI: OpenAI;
+  private openAIClient?: OpenAI;
+  private readonly openAIClientOptions: {
+    apiKey: string;
+    baseURL: string;
+    defaultHeaders: Record<string, string>;
+    httpAgent?: HttpsAgent | HttpAgent;
+    defaultQuery?: Record<string, string>;
+  };
   private headers: Record<string, string>;
   private sslOverrides?: SSLSettings;
 
@@ -126,13 +133,13 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         }
       }
 
-      this.openAI = this.createOpenAIClient({
+      this.openAIClientOptions = {
         apiKey: this.key,
         baseURL,
         defaultHeaders,
         httpAgent,
         defaultQuery,
-      });
+      };
     } catch (error) {
       this.logger.error(`Error initializing OpenAI client: ${error.message}`);
       throw error;
@@ -141,26 +148,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     this.registerSubActions();
   }
 
-  private createOpenAIClient({
-    apiKey,
-    baseURL,
-    defaultHeaders,
-    httpAgent,
-    defaultQuery,
-  }: {
-    apiKey: string;
-    baseURL: string;
-    defaultHeaders: Record<string, string>;
-    httpAgent?: HttpsAgent | HttpAgent;
-    defaultQuery?: Record<string, string>;
-  }): OpenAI {
-    return new OpenAI({
-      apiKey,
-      baseURL,
-      defaultHeaders,
-      httpAgent,
-      defaultQuery,
-    });
+  private async getOpenAIClient(): Promise<OpenAI> {
+    if (!this.openAIClient) {
+      const { default: OpenAIClient } = await import('openai');
+      this.openAIClient = new OpenAIClient(this.openAIClientOptions);
+    }
+    return this.openAIClient;
   }
 
   private registerSubActions() {
@@ -431,7 +424,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       };
 
       connectorUsageCollector.addRequestBodyBytes(undefined, requestBody);
-      const stream = await this.openAI.chat.completions.create(requestBody, {
+      const openAIClient = await this.getOpenAIClient();
+      const stream = await openAIClient.chat.completions.create(requestBody, {
         signal,
         timeout, // do not default if not provided
       });

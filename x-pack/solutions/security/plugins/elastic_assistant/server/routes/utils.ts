@@ -13,11 +13,6 @@ import type {
   KibanaResponseFactory,
   CustomHttpResponseOptions,
 } from '@kbn/core/server';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientChatBedrockConverse,
-  ActionsClientChatVertexAI,
-} from '@kbn/langchain/server';
 import { OPENAI_CHAT_URL, OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import { InferenceConnectorType } from '@kbn/inference-common';
 import type { InferenceConnector } from '@kbn/inference-common';
@@ -188,18 +183,6 @@ export const getActionTypeId = (llmType: string): string | undefined => {
     inference: `.inference`,
   };
   return actionTypeDictionary[llmType];
-};
-
-export const getLlmClass = (llmType?: string) => {
-  switch (llmType) {
-    case 'bedrock':
-      return ActionsClientChatBedrockConverse;
-    case 'gemini':
-      return ActionsClientChatVertexAI;
-    case 'openai':
-    default:
-      return ActionsClientChatOpenAI;
-  }
 };
 
 export const isOpenSourceModel = (connector?: InferenceConnector): boolean => {

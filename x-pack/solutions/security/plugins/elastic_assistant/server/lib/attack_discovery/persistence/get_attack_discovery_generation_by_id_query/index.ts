@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import { getAttackDiscoveryEventOwnerFilter } from '@kbn/discoveries';
+import { getAttackDiscoveryEventOwnerFilter } from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';
 
 import { ATTACK_DISCOVERY_EVENT_PROVIDER } from '../../../../../common/constants';
 import { getAttackDiscoveryGenerationsAggs } from '../get_attack_discovery_generations_aggs';

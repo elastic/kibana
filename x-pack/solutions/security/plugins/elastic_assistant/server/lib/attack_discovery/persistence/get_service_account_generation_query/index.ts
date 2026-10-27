@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG } from '@kbn/discoveries';
+import { ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG } from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';
 
 import { ATTACK_DISCOVERY_EVENT_PROVIDER } from '../../../../../common/constants';
 

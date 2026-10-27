@@ -8,7 +8,7 @@
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { chartTypeRegistry } from './chart_type_registry';
 import { getConfigExamples } from './config_examples';
-import { getEsqlDataSourceCarriers } from './graph_lens';
+import { getEsqlDataSourceCarriers } from './esql_data_source_carriers';
 
 const withDataSource = (config: object): object => {
   const configWithDataSource = structuredClone(config);

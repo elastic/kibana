@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { InferenceConnector } from '@kbn/inference-common';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import type { DefendInsightsCombinedPrompts } from '@kbn/discoveries';
-import { InvalidDefendInsightTypeError } from '@kbn/discoveries';
+import { InvalidDefendInsightTypeError } from '@kbn/discoveries/impl/lib/errors';
 
 import { getIncompatibleAntivirusPrompt } from './incompatible_antivirus';
 import { getPolicyResponseFailurePrompt } from './policy_response_failure';

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { writeAttackDiscoveryEvent } from '@kbn/discoveries';
-export type { EventLogRefresher } from '@kbn/discoveries';
+export { writeAttackDiscoveryEvent } from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';
+export type { EventLogRefresher } from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';

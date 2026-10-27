@@ -7,7 +7,10 @@
 
 import type { IEventLogService } from '@kbn/event-log-plugin/server';
 
-import { ATTACK_DISCOVERY_EVENT_ACTIONS, ATTACK_DISCOVERY_EVENT_PROVIDER } from '@kbn/discoveries';
+import {
+  ATTACK_DISCOVERY_EVENT_ACTIONS,
+  ATTACK_DISCOVERY_EVENT_PROVIDER,
+} from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';
 
 export const registerEventLogProvider = (eventLog: IEventLogService) =>
   eventLog.registerProviderActions(ATTACK_DISCOVERY_EVENT_PROVIDER, ATTACK_DISCOVERY_EVENT_ACTIONS);

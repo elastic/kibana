@@ -9,11 +9,8 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Message, ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
-import {
-  getLangChainMessage,
-  getLangChainMessages,
-  requestHasRequiredAnonymizationParams,
-} from './helpers';
+import { getLangChainMessage, getLangChainMessages } from './get_langchain_messages';
+import { requestHasRequiredAnonymizationParams } from './helpers';
 import { langChainMessages } from '../../__mocks__/lang_chain_messages';
 
 describe('helpers', () => {

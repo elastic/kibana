@@ -156,10 +156,17 @@ describe('McpClient', () => {
     jest.clearAllMocks();
   });
 
-  describe('constructor', () => {
-    it('creates transport with correct URL and headers', () => {
+  describe('SDK construction on connect', () => {
+    it('does not construct the SDK transport or client before connect', () => {
+      new McpClient(mockLogger, clientDetails);
+
+      expect(StreamableHTTPClientTransport).not.toHaveBeenCalled();
+      expect(Client).not.toHaveBeenCalled();
+    });
+
+    it('creates transport with correct URL and headers', async () => {
       const customHeaders = { 'X-Custom': 'value' };
-      new McpClient(mockLogger, clientDetails, { headers: customHeaders });
+      await new McpClient(mockLogger, clientDetails, { headers: customHeaders }).connect();
 
       expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
         expect.objectContaining({ href: 'https://example.com/mcp' }),
@@ -171,8 +178,8 @@ describe('McpClient', () => {
       );
     });
 
-    it('creates transport with empty headers when customHeaders not provided', () => {
-      new McpClient(mockLogger, clientDetails);
+    it('creates transport with empty headers when customHeaders not provided', async () => {
+      await new McpClient(mockLogger, clientDetails).connect();
 
       expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
         expect.objectContaining({ href: 'https://example.com/mcp' }),
@@ -184,8 +191,8 @@ describe('McpClient', () => {
       );
     });
 
-    it('creates transport with reconnection options', () => {
-      new McpClient(mockLogger, clientDetails);
+    it('creates transport with reconnection options', async () => {
+      await new McpClient(mockLogger, clientDetails).connect();
 
       expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
         expect.anything(),
@@ -200,9 +207,9 @@ describe('McpClient', () => {
       );
     });
 
-    it('creates transport with custom fetch when provided', () => {
+    it('creates transport with custom fetch when provided', async () => {
       const customFetch = jest.fn();
-      new McpClient(mockLogger, clientDetails, { fetch: customFetch });
+      await new McpClient(mockLogger, clientDetails, { fetch: customFetch }).connect();
 
       expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
         expect.objectContaining({ href: 'https://example.com/mcp' }),
@@ -212,15 +219,15 @@ describe('McpClient', () => {
       );
     });
 
-    it('does not include fetch in transport options when not provided', () => {
-      new McpClient(mockLogger, clientDetails);
+    it('does not include fetch in transport options when not provided', async () => {
+      await new McpClient(mockLogger, clientDetails).connect();
 
       const transportCallArgs = (StreamableHTTPClientTransport as jest.Mock).mock.calls[0][1];
       expect(transportCallArgs).not.toHaveProperty('fetch');
     });
 
-    it('creates client with correct name and version', () => {
-      new McpClient(mockLogger, clientDetails);
+    it('creates client with correct name and version', async () => {
+      await new McpClient(mockLogger, clientDetails).connect();
 
       expect(Client).toHaveBeenCalledWith(
         {
@@ -231,6 +238,17 @@ describe('McpClient', () => {
           jsonSchemaValidator: expect.any(ZodJsonSchemaValidator),
         })
       );
+    });
+
+    it('does not construct the SDK transport or client again on reconnect', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      await client.connect();
+      await client.disconnect();
+      await client.connect();
+
+      expect(StreamableHTTPClientTransport).toHaveBeenCalledTimes(1);
+      expect(Client).toHaveBeenCalledTimes(1);
+      expect(mockClient.connect).toHaveBeenCalledTimes(2);
     });
   });
 

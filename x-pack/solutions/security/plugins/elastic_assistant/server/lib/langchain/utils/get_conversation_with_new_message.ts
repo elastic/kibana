@@ -11,7 +11,7 @@ import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistan
 import type { BaseMessage } from '@langchain/core/messages';
 import { _isMessageFieldWithRole } from '@langchain/core/messages';
 import type { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
-import { getLangChainMessages } from '../helpers';
+import { getLangChainMessages } from '../get_langchain_messages';
 
 interface Params {
   logger: Logger;

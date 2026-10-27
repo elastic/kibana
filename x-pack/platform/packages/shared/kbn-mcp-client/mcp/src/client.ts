@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import {
+import type { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
+import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import type {
   StreamableHTTPClientTransport,
   StreamableHTTPError,
 } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import type { ServerCapabilities } from '@modelcontextprotocol/sdk/types.js';
+import type { McpError, ServerCapabilities } from '@modelcontextprotocol/sdk/types.js';
 import type { Logger } from '@kbn/core/server';
 import type {
   ClientDetails,
@@ -25,6 +25,33 @@ import type {
 import { isEmbeddedResourcePart, isResourceLinkPart, isTextPart } from './types';
 import { ZodJsonSchemaValidator } from './json_schema_validator';
 import { McpNotConnectedError } from './mcp_not_connected_error';
+
+/**
+ * MCP SDK modules are loaded lazily on `connect()` so that merely importing this package
+ * does not pull the SDK into the Kibana server startup path. The loaded modules are cached
+ * here for the error predicates below: until the SDK has been loaded, no SDK error instance
+ * can exist, so the predicates safely return false.
+ */
+let streamableHttpSdk:
+  | typeof import('@modelcontextprotocol/sdk/client/streamableHttp.js')
+  | undefined;
+let authSdk: typeof import('@modelcontextprotocol/sdk/client/auth.js') | undefined;
+let typesSdk: typeof import('@modelcontextprotocol/sdk/types.js') | undefined;
+
+/** JSON-RPC error code emitted by the MCP SDK when the connection closed. */
+export const MCP_ERROR_CODE_CONNECTION_CLOSED = -32000;
+
+export function isStreamableHTTPError(error: unknown): error is StreamableHTTPError {
+  return streamableHttpSdk !== undefined && error instanceof streamableHttpSdk.StreamableHTTPError;
+}
+
+export function isUnauthorizedError(error: unknown): error is UnauthorizedError {
+  return authSdk !== undefined && error instanceof authSdk.UnauthorizedError;
+}
+
+export function isMcpError(error: unknown): error is McpError {
+  return typesSdk !== undefined && error instanceof typesSdk.McpError;
+}
 
 /**
  * Produces a human-readable error message from a connection error,
@@ -48,8 +75,8 @@ function formatConnectionErrorMessage(error: unknown): string {
  * listing tools, and calling tools.
  */
 export class McpClient {
-  private readonly client: Client;
-  private readonly transport: StreamableHTTPClientTransport;
+  private client?: Client;
+  private transport?: StreamableHTTPClientTransport;
 
   private connected: boolean = false;
 
@@ -58,49 +85,11 @@ export class McpClient {
 
   constructor(
     private readonly logger: Logger,
-    clientDetails: ClientDetails,
-    {
-      headers = {},
-      fetch: customFetch,
-      maxRetries = 3,
-      reconnectionDelayGrowFactor = 1.5,
-      initialReconnectionDelay = 1000,
-      maxReconnectionDelay = 10000,
-    }: McpClientOptions = {}
+    private readonly clientDetails: ClientDetails,
+    private readonly options: McpClientOptions = {}
   ) {
-    this.transport = new StreamableHTTPClientTransport(new URL(clientDetails.url), {
-      requestInit: {
-        headers,
-      },
-      ...(customFetch ? { fetch: customFetch } : {}),
-      reconnectionOptions: {
-        maxRetries,
-        reconnectionDelayGrowFactor,
-        initialReconnectionDelay,
-        maxReconnectionDelay,
-      },
-    });
-
     this.name = clientDetails.name;
     this.version = clientDetails.version;
-
-    this.client = new Client(
-      {
-        name: clientDetails.name,
-        version: clientDetails.version,
-      },
-      {
-        jsonSchemaValidator: new ZodJsonSchemaValidator(this.logger),
-      }
-    );
-    // The SDK drops its transport when the connection closes. Track that so a pooled, long-lived
-    // instance does not keep reporting itself as connected.
-    this.client.onclose = () => {
-      if (this.connected) {
-        this.connected = false;
-        this.logger.debug(`MCP server ${this.name}, ${this.version} closed the connection`);
-      }
-    };
   }
 
   /**
@@ -117,6 +106,61 @@ export class McpClient {
     if (!this.connected) {
       this.logger.debug(`Attempting to connect to MCP server ${this.name}, ${this.version}`);
       try {
+        const [{ Client: ClientClass }, streamableHttp, auth, types] = await Promise.all([
+          import('@modelcontextprotocol/sdk/client/index.js'),
+          import('@modelcontextprotocol/sdk/client/streamableHttp.js'),
+          import('@modelcontextprotocol/sdk/client/auth.js'),
+          import('@modelcontextprotocol/sdk/types.js'),
+        ]);
+        streamableHttpSdk = streamableHttp;
+        authSdk = auth;
+        typesSdk = types;
+
+        if (!this.client || !this.transport) {
+          const {
+            headers = {},
+            fetch: customFetch,
+            maxRetries = 3,
+            reconnectionDelayGrowFactor = 1.5,
+            initialReconnectionDelay = 1000,
+            maxReconnectionDelay = 10000,
+          } = this.options;
+
+          this.transport = new streamableHttp.StreamableHTTPClientTransport(
+            new URL(this.clientDetails.url),
+            {
+              requestInit: {
+                headers,
+              },
+              ...(customFetch ? { fetch: customFetch } : {}),
+              reconnectionOptions: {
+                maxRetries,
+                reconnectionDelayGrowFactor,
+                initialReconnectionDelay,
+                maxReconnectionDelay,
+              },
+            }
+          );
+
+          this.client = new ClientClass(
+            {
+              name: this.clientDetails.name,
+              version: this.clientDetails.version,
+            },
+            {
+              jsonSchemaValidator: new ZodJsonSchemaValidator(this.logger),
+            }
+          );
+          // The SDK drops its transport when the connection closes. Track that so a pooled,
+          // long-lived instance does not keep reporting itself as connected.
+          this.client.onclose = () => {
+            if (this.connected) {
+              this.connected = false;
+              this.logger.debug(`MCP server ${this.name}, ${this.version} closed the connection`);
+            }
+          };
+        }
+
         // connect() performs the initialization handshake with the MCP server as per MCP protocol
         await this.client.connect(this.transport);
         this.connected = true;
@@ -126,9 +170,9 @@ export class McpClient {
         this.logger.error(
           `Error connecting to MCP server ${this.name}, ${this.version}: ${errorMessage}`
         );
-        if (error instanceof StreamableHTTPError) {
+        if (isStreamableHTTPError(error)) {
           throw new Error(errorMessage);
-        } else if (error instanceof UnauthorizedError) {
+        } else if (isUnauthorizedError(error)) {
           throw new Error(`Unauthorized error: ${errorMessage}`);
         } else {
           throw new Error(`Error connecting to MCP server: ${errorMessage}`);
@@ -136,7 +180,7 @@ export class McpClient {
       }
     }
     // return the full list of capabilities as a by-product of the initialization handshake
-    const capabilities = this.client.getServerCapabilities();
+    const capabilities = this.client?.getServerCapabilities();
 
     return {
       connected: this.connected,
@@ -149,14 +193,14 @@ export class McpClient {
     if (!this.connected) {
       return undefined;
     }
-    return this.client.getServerCapabilities();
+    return this.client?.getServerCapabilities();
   }
 
   /**
    * Disconnect from the MCP client and return the disconnected status.
    */
   async disconnect(): Promise<void> {
-    if (this.connected) {
+    if (this.connected && this.client) {
       this.logger.debug(`Attempting to disconnect from MCP server ${this.name}, ${this.version}`);
       await this.client.close();
       this.connected = false;
@@ -168,13 +212,11 @@ export class McpClient {
    * List the tools available on the MCP client.
    */
   async listTools(): Promise<ListToolsResponse> {
-    if (!this.connected) {
-      throw new McpNotConnectedError(this.name, this.version);
-    }
+    const client = this.getConnectedClient();
 
     this.logger.debug(`Listing tools from MCP server ${this.name}, ${this.version}`);
     const getNextPage = async (cursor?: string): Promise<Tool[]> => {
-      const response = await this.client.listTools({
+      const response = await client.listTools({
         cursor,
       });
 
@@ -211,12 +253,10 @@ export class McpClient {
    * @param {CallToolParams} params - The parameters for the tool call.
    */
   async callTool(params: CallToolParams): Promise<CallToolResponse> {
-    if (!this.connected) {
-      throw new McpNotConnectedError(this.name, this.version);
-    }
+    const client = this.getConnectedClient();
 
     this.logger.debug(`Calling tool ${params.name} on MCP server ${this.name}, ${this.version}`);
-    const response = await this.client.callTool({
+    const response = await client.callTool({
       name: params.name,
       arguments: params.arguments,
     });
@@ -244,5 +284,12 @@ export class McpClient {
     return {
       content: allowedParts,
     };
+  }
+
+  private getConnectedClient(): Client {
+    if (!this.connected || !this.client) {
+      throw new McpNotConnectedError(this.name, this.version);
+    }
+    return this.client;
   }
 }

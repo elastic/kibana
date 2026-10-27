@@ -13,7 +13,6 @@ import { GenerateStepCommonDefinition } from '../../../../common/step_types/gene
 import type { DiscoveriesPluginStartDeps } from '../../../types';
 import { asNonEmpty } from '../../../lib/non_empty_string';
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
-import { invokeGenerationGraph } from './helpers/invoke_generation_graph';
 import { transformDiscoveriesOutput } from './helpers/transform_discoveries_output';
 
 /**
@@ -46,6 +45,7 @@ export const getGenerateStepDefinition = ({
       let executionUuid: string | undefined;
 
       try {
+        const { invokeGenerationGraph } = await import('./helpers/invoke_generation_graph');
         const workflowContext = context.contextManager.getContext();
 
         const {

@@ -6,13 +6,14 @@
  */
 
 // Client
-export { McpClient } from './mcp/src/client';
+export {
+  McpClient,
+  isStreamableHTTPError,
+  isUnauthorizedError,
+  isMcpError,
+  MCP_ERROR_CODE_CONNECTION_CLOSED,
+} from './mcp/src/client';
 export { McpNotConnectedError } from './mcp/src/mcp_not_connected_error';
-
-// Errors - re-exported from SDK for use by consumers
-export { StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-export { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
-export { McpError, ErrorCode as McpErrorCode } from '@modelcontextprotocol/sdk/types.js';
 
 // Types
 export type { ServerCapabilities } from '@modelcontextprotocol/sdk/types.js';

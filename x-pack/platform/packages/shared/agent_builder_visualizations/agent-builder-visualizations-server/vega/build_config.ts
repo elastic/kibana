@@ -12,7 +12,6 @@ import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_re
 import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { removePromqlTimeRangeParams } from '../shared/remove_promql_time_range';
-import { createVegaGraph } from './graph';
 import { extractEsqlFromSpec } from './recover_esql';
 
 interface BuildVegaConfigParams {
@@ -103,6 +102,7 @@ export const buildVegaConfig = async ({
     );
   }
 
+  const { createVegaGraph } = await import('./graph');
   const graph = await createVegaGraph(modelProvider, logger, events, esClient);
 
   const finalState = await graph.invoke({

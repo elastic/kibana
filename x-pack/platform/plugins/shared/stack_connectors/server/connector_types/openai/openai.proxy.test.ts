@@ -12,6 +12,7 @@ import {
   OpenAiProviderType,
   RunActionResponseSchema,
 } from '@kbn/connector-schemas/openai';
+import type OpenAI from 'openai';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { OpenAIConnector } from './openai';
@@ -102,9 +103,10 @@ describe('OpenAI with proxy config', () => {
     jest.clearAllMocks();
   });
 
-  it('verifies that the OpenAI client is initialized with the custom proxy HTTP agent', () => {
-    // @ts-ignore .openAI is private
-    const openAIClient = connector.openAI;
+  it('verifies that the OpenAI client is initialized with the custom proxy HTTP agent', async () => {
+    const openAIClient = await (
+      connector as unknown as { getOpenAIClient: () => Promise<OpenAI> }
+    ).getOpenAIClient();
 
     // Verify the client was initialized with the custom agent configuration
     expect(openAIClient).toBeDefined();

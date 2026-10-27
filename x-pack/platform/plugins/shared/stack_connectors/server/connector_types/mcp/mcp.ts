@@ -30,8 +30,8 @@ import {
   type ListToolsResponse,
   type Tool,
   type ServerCapabilities,
-  StreamableHTTPError,
-  UnauthorizedError,
+  isStreamableHTTPError,
+  isUnauthorizedError,
 } from '@kbn/mcp-client';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
 import { clientTypes } from '@kbn/connector-specs/server';
@@ -306,10 +306,10 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     // But we must implement it to satisfy the abstract method requirement
 
     // Handle MCP-specific errors that might be wrapped
-    if (error.cause instanceof StreamableHTTPError) {
+    if (isStreamableHTTPError(error.cause)) {
       return `MCP Connection Error: ${error.cause.message}`;
     }
-    if (error.cause instanceof UnauthorizedError) {
+    if (isUnauthorizedError(error.cause)) {
       return `MCP Unauthorized Error: ${error.cause.message}`;
     }
 

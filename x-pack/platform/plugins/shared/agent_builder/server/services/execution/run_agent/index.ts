@@ -7,4 +7,3 @@
 
 export { runAgent } from './run_agent';
 export { createAgentHandler } from './create_handler';
-export { runDefaultAgentMode } from './run_chat_agent';

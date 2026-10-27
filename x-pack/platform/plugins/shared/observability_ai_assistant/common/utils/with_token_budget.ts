@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { encode } from 'gpt-tokenizer';
-
 export function withTokenBudget<T extends unknown>(
   items: T[],
   budget: number,
+  encode: (content: string) => number[],
   options?: {
     contentAccessor?: (item: T) => string;
     maximizeBudget?: boolean;

@@ -13,7 +13,6 @@ import type {
 } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { DashboardMigrationsDataClient } from '../data/dashboard_migrations_data_client';
 import type { MigrateDashboardConfigSchema, MigrateDashboardState } from './agent/types';
-import { getDashboardMigrationAgent } from './agent';
 import { DashboardMigrationsRetriever } from './retrievers';
 import type { StoredDashboardMigrationDashboard } from '../types';
 import { EsqlKnowledgeBase } from '../../common/task/util/esql_knowledge_base';
@@ -62,6 +61,7 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
 
   /** Retrieves the connector and creates the migration agent */
   public async setup(connectorId: string): Promise<void> {
+    const { getDashboardMigrationAgent } = await import('./agent');
     const { inferenceService } = this.dependencies;
 
     const model = await this.actionsClientChat.createModel({

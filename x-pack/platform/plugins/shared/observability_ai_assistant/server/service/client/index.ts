@@ -272,15 +272,17 @@ export class ObservabilityAIAssistantClient {
             }).pipe(shareReplay());
 
       const systemMessage$ = kbUserInstructions$.pipe(
-        map((kbUserInstructions) =>
-          getSystemMessageFromInstructions({
-            applicationInstructions: functionClient.getInstructions(),
-            kbUserInstructions,
-            apiUserInstructions,
-            availableFunctionNames: disableFunctions
-              ? []
-              : functionClient.getFunctions().map((fn) => fn.definition.name),
-          })
+        switchMap((kbUserInstructions) =>
+          from(
+            getSystemMessageFromInstructions({
+              applicationInstructions: functionClient.getInstructions(),
+              kbUserInstructions,
+              apiUserInstructions,
+              availableFunctionNames: disableFunctions
+                ? []
+                : functionClient.getFunctions().map((fn) => fn.definition.name),
+            })
+          )
         ),
         shareReplay()
       );

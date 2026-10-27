@@ -9,11 +9,11 @@
 
 import {
   McpClient,
-  McpError,
-  McpErrorCode,
   McpNotConnectedError,
-  StreamableHTTPError,
-  UnauthorizedError,
+  isMcpError,
+  isStreamableHTTPError,
+  isUnauthorizedError,
+  MCP_ERROR_CODE_CONNECTION_CLOSED,
   type FetchLike,
 } from '@kbn/mcp-client';
 import type { BuildContext, ClientTypeSpec } from '../../clients/client_type_spec';
@@ -266,10 +266,10 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
       if (current instanceof McpConnectionHttpError) {
         return USER_ERROR_HTTP_STATUS_CODES.has(current.httpStatus);
       }
-      if (current instanceof UnauthorizedError) {
+      if (isUnauthorizedError(current)) {
         return true;
       }
-      if (current instanceof StreamableHTTPError) {
+      if (isStreamableHTTPError(current)) {
         return current.code === 401 || current.code === 403;
       }
       return false;
@@ -278,7 +278,7 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
 
   shouldInvalidateOnError(err: unknown): boolean {
     return matchesErrorOrCause(err, (current) => {
-      if (current instanceof UnauthorizedError) {
+      if (isUnauthorizedError(current)) {
         return true;
       }
       // The SDK dropped its transport: pending requests fail with ConnectionClosed and later
@@ -286,13 +286,13 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
       if (current instanceof McpNotConnectedError) {
         return true;
       }
-      if (current instanceof McpError) {
-        return current.code === McpErrorCode.ConnectionClosed;
+      if (isMcpError(current)) {
+        return current.code === MCP_ERROR_CODE_CONNECTION_CLOSED;
       }
       if (current instanceof Error && current.message === SDK_NOT_CONNECTED_MESSAGE) {
         return true;
       }
-      if (current instanceof StreamableHTTPError) {
+      if (isStreamableHTTPError(current)) {
         return current.code === 401 || current.code === 403 || current.code === 404;
       }
       const code = getErrorCode(current);

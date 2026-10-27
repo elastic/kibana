@@ -28,7 +28,6 @@ import {
   SecurityAgentBuilderAttachments,
   SECURITY_RULE_ATTACHMENT_ID,
 } from '../../../common/constants';
-import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import type { RuleAttachmentData } from '../attachments/rule';
 
@@ -214,6 +213,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
       { esClient, modelProvider, request, events, attachments }
     ) => {
       try {
+        const { getBuildAgent } = await import('../../lib/detection_engine/ai_rule_creation/agent');
         logger.debug(
           `Create detection rule tool invoked with query: ${userQuery.substring(0, 100)}...`
         );

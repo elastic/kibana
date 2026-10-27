@@ -8,7 +8,6 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { CoreStart, Logger } from '@kbn/core/server';
 import type { Replacements } from '@kbn/elastic-assistant-common';
-import { getAnonymizedAlerts } from '@kbn/discoveries/impl/attack_discovery/graphs';
 import { DefaultAlertRetrievalStepCommonDefinition } from '../../../../common/step_types/default_alert_retrieval_step';
 import type { DiscoveriesPluginStartDeps } from '../../../types';
 import { asNonEmpty } from '../../../lib/non_empty_string';
@@ -42,6 +41,9 @@ export const getDefaultAlertRetrievalStepDefinition = ({
       let spaceId: string | undefined;
 
       try {
+        const { getAnonymizedAlerts } = await import(
+          '@kbn/discoveries/impl/attack_discovery/graphs'
+        );
         const workflowContext = context.contextManager.getContext();
 
         spaceId = workflowContext.workflow.spaceId;

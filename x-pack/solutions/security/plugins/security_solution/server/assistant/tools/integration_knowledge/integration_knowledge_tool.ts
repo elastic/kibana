@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tool } from '@langchain/core/tools';
-
 import { z } from '@kbn/zod/v4';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { ContentReference } from '@kbn/elastic-assistant-common';
@@ -15,7 +13,6 @@ import {
   hrefReference,
   knowledgeBaseReference,
 } from '@kbn/elastic-assistant-common/impl/content_references/references';
-import { Document } from '@langchain/core/documents';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
 
@@ -45,6 +42,8 @@ export const INTEGRATION_KNOWLEDGE_TOOL: AssistantTool = {
   async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
+    const { tool } = await import('@langchain/core/tools');
+    const { Document } = await import('@langchain/core/documents');
     const { assistantContext, contentReferencesStore } = params as IntegrationKnowledgeToolParams;
 
     // Check if the .integration_knowledge index exists before registering the tool

@@ -6,7 +6,6 @@
  */
 
 import type { Serializable } from '@kbn/utility-types';
-import { encode } from 'gpt-tokenizer';
 import { compact, last } from 'lodash';
 import { Observable } from 'rxjs';
 import type { FunctionRegistrationParameters } from '..';
@@ -37,6 +36,7 @@ export function registerContextFunction({
       const { analytics } = await plugins.core.start();
 
       async function getContext() {
+        const { encode } = await import('gpt-tokenizer');
         const screenDescription = compact(
           screenContexts.map((context) => context.screenDescription)
         ).join('\n\n');

@@ -10,8 +10,8 @@ import {
   createToolIdMappings,
   sanitizeToolId,
   toolToLangchain,
-} from '@kbn/agent-builder-genai-utils/langchain';
-import { reverseMap } from '@kbn/agent-builder-genai-utils/langchain/tools';
+  reverseMap,
+} from '@kbn/agent-builder-genai-utils/langchain/tools';
 import { LRUCache } from 'lru-cache';
 import type { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, ExecutableTool } from '@kbn/agent-builder-server';
@@ -28,7 +28,6 @@ import type {
   DynamicToolInput,
 } from '@kbn/agent-builder-server/runner/tool_manager';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner/tool_manager';
-import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 import {
   buildGuardedToolContent,
   DEFAULT_MAX_TOOL_RESULT_TOKENS,
@@ -104,7 +103,7 @@ export class ToolManager implements IToolManager {
         ({ langchainTools, idMappings } = await this.convertExecutableTools(input));
         break;
       case ToolManagerToolType.browser:
-        ({ langchainTools, idMappings } = this.convertBrowserTools(input));
+        ({ langchainTools, idMappings } = await this.convertBrowserTools(input));
         break;
       case ToolManagerToolType.dynamic:
         this.addDynamicTools(input);
@@ -251,7 +250,8 @@ export class ToolManager implements IToolManager {
     };
   }
 
-  private convertBrowserTools(input: BrowserToolInput): ConvertedTools {
+  private async convertBrowserTools(input: BrowserToolInput): Promise<ConvertedTools> {
+    const { browserToolsToLangchain } = await import('../../../tools/browser_tool_adapter');
     const browserToolsWithOrigin = Array.isArray(input.tools) ? input.tools : [input.tools];
     const browserApiTools = browserToolsWithOrigin.map(({ origin, ...tool }) => {
       this.toolOrigins.set(sanitizeToolId(`browser_${tool.id}`), origin);

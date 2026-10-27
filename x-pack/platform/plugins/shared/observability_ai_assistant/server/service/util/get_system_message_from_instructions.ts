@@ -17,7 +17,7 @@ as long as they don't conflict with anything you've been told so far:
 
 `;
 
-export function getSystemMessageFromInstructions({
+export async function getSystemMessageFromInstructions({
   // application instructions registered by the functions. These will be displayed first
   applicationInstructions,
 
@@ -32,7 +32,8 @@ export function getSystemMessageFromInstructions({
   kbUserInstructions: Instruction[];
   apiUserInstructions: Instruction[];
   availableFunctionNames: string[];
-}): string {
+}): Promise<string> {
+  const { encode } = await import('gpt-tokenizer');
   const allApplicationInstructions = compact(
     applicationInstructions.flatMap((instruction) => {
       if (typeof instruction === 'function') {
@@ -46,7 +47,8 @@ export function getSystemMessageFromInstructions({
   // api instructions will be prioritized over Knowledge Base instructions if the id is the same
   const allUserInstructions = withTokenBudget(
     uniqBy([...apiUserInstructions, ...kbUserInstructions], (i) => i.id),
-    1000
+    1000,
+    encode
   );
 
   return [

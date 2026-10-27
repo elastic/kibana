@@ -9,7 +9,7 @@ import type { ConversationRound, ToolCallWithResult, ToolResult } from '@kbn/age
 import { isToolCallStep } from '@kbn/agent-builder-common';
 import { isExcludedFromFilestore } from '@kbn/agent-builder-common/tools';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
-import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain/tools';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import { MOUNT_POINTS } from '../../../../filesystem/mount_points';
 import type {

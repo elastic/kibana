@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { tool } from '@langchain/core/tools';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { z } from '@kbn/zod/v4';
-import { HumanMessage } from '@langchain/core/messages';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
-import { getPromptSuffixForOssModel } from './utils/common';
-import { getGenerateEsqlGraph } from './graphs/generate_esql/generate_esql';
 
 export type GenerateEsqlParams = Require<
   AssistantToolParams,
@@ -49,6 +45,10 @@ export const GENERATE_ESQL_TOOL: AssistantTool = {
   async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
+    const { tool } = await import('@langchain/core/tools');
+    const { HumanMessage } = await import('@langchain/core/messages');
+    const { getPromptSuffixForOssModel } = await import('./utils/common');
+    const { getGenerateEsqlGraph } = await import('./graphs/generate_esql/generate_esql');
     const { connectorId, inference, logger, request, isOssModel, esClient, createLlmInstance } =
       params as GenerateEsqlParams;
 

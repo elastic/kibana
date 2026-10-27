@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod/v4';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { Document } from '@langchain/core/documents';
-import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import type { Document } from '@langchain/core/documents';
 import { knowledgeBaseReference, contentReferenceBlock } from '@kbn/elastic-assistant-common';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
@@ -73,9 +71,29 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
   async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
+    const { tool } = await import('@langchain/core/tools');
+    const { Document: DocumentClass } = await import('@langchain/core/documents');
+
     const { kbDataClient, logger, contentReferencesStore } =
       params as KnowledgeBaseRetrievalToolParams;
     if (kbDataClient == null) return null;
+
+    const enrichDocument = (document: Document<Record<string, string>>) => {
+      if (document.id == null) {
+        return document;
+      }
+      const documentId = document.id;
+      const reference = contentReferencesStore.add((p) =>
+        knowledgeBaseReference(p.id, document.metadata.name, documentId)
+      );
+      return new DocumentClass({
+        ...document,
+        metadata: {
+          ...document.metadata,
+          citation: contentReferenceBlock(reference),
+        },
+      });
+    };
 
     return tool(
       async (input) => {
@@ -89,7 +107,7 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
           required: false,
         });
 
-        return JSON.stringify(docs.map(enrichDocument(contentReferencesStore)));
+        return JSON.stringify(docs.map(enrichDocument));
       },
       {
         name: toolDetails.name,
@@ -102,22 +120,3 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
     );
   },
 };
-
-function enrichDocument(contentReferencesStore: ContentReferencesStore) {
-  return (document: Document<Record<string, string>>) => {
-    if (document.id == null) {
-      return document;
-    }
-    const documentId = document.id;
-    const reference = contentReferencesStore.add((p) =>
-      knowledgeBaseReference(p.id, document.metadata.name, documentId)
-    );
-    return new Document({
-      ...document,
-      metadata: {
-        ...document.metadata,
-        citation: contentReferenceBlock(reference),
-      },
-    });
-  };
-}

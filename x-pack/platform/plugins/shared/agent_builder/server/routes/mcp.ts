@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
-import { createToolIdMappings } from '@kbn/agent-builder-genai-utils/langchain';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { MCP_SERVER_PATH } from '@kbn/agent-builder-common';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
+import type { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
@@ -104,14 +102,26 @@ To learn more about the Agent Builder MCP server, refer to the [MCP documentatio
         },
       },
       wrapHandler(async (ctx, request, response) => {
+        const [
+          { McpServer: McpServerClass },
+          { ErrorCode },
+          { KibanaMcpHttpTransport: KibanaMcpHttpTransportClass },
+          { createToolIdMappings },
+        ] = await Promise.all([
+          import('@modelcontextprotocol/sdk/server/mcp.js'),
+          import('@modelcontextprotocol/sdk/types.js'),
+          import('../utils/mcp/kibana_mcp_http_transport'),
+          import('@kbn/agent-builder-genai-utils/langchain/tools'),
+        ]);
+
         let transport: KibanaMcpHttpTransport | undefined;
         let server: McpServer | undefined;
 
         try {
-          transport = new KibanaMcpHttpTransport({ sessionIdGenerator: undefined, logger });
+          transport = new KibanaMcpHttpTransportClass({ sessionIdGenerator: undefined, logger });
 
           // Instantiate new MCP server upon every request, no session persistence
-          server = new McpServer({
+          server = new McpServerClass({
             name: MCP_SERVER_NAME,
             version: MCP_SERVER_VERSION,
           });

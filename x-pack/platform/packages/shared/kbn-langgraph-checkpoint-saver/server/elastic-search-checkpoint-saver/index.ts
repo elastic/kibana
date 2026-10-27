@@ -18,6 +18,7 @@ import {
   type PendingWrite,
   type CheckpointMetadata,
 } from '@langchain/langgraph-checkpoint';
+import { checkpointsFieldMap, checkpointWritesFieldMap } from './field_maps';
 
 interface CheckpointDocument {
   '@timestamp': string;
@@ -58,42 +59,9 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
 
   static defaultCheckpointWritesIndex = 'checkpoint_writes';
 
-  /**
-   * When modifying the field maps, ensure you perform upgrade testing for all graphs depending on this saver.
-   */
-  static readonly checkpointsFieldMap = {
-    '@timestamp': {
-      type: 'date',
-      required: true,
-      array: false,
-    },
-    thread_id: { type: 'keyword', required: true, array: false },
-    checkpoint_ns: { type: 'keyword', required: true, array: false },
-    checkpoint_id: { type: 'keyword', required: false, array: false },
-    parent_checkpoint_id: { type: 'keyword', required: true, array: false },
-    type: { type: 'keyword', required: true, array: false },
-    checkpoint: { type: 'binary', required: true, array: false },
-    metadata: { type: 'binary', required: true, array: false },
-  } as const;
+  static readonly checkpointsFieldMap = checkpointsFieldMap;
 
-  /**
-   * When modifying the field maps, ensure you perform upgrade testing for all graphs depending on this saver.
-   */
-  static readonly checkpointWritesFieldMap = {
-    '@timestamp': {
-      type: 'date',
-      required: true,
-      array: false,
-    },
-    thread_id: { type: 'keyword', required: true, array: false },
-    checkpoint_ns: { type: 'keyword', required: true, array: false },
-    checkpoint_id: { type: 'keyword', required: true, array: false },
-    task_id: { type: 'keyword', required: true, array: false },
-    idx: { type: 'unsigned_long', required: true, array: false },
-    channel: { type: 'keyword', required: true, array: false },
-    type: { type: 'keyword', required: true, array: false },
-    value: { type: 'binary', required: true, array: false },
-  } as const;
+  static readonly checkpointWritesFieldMap = checkpointWritesFieldMap;
 
   protected client: ElasticsearchClient;
   protected logger: Logger;

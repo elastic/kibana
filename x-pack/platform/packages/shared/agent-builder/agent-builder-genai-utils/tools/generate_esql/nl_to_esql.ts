@@ -15,11 +15,9 @@ import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import type { EsqlResponse } from '../utils/esql';
-import { createNlToEsqlGraph, requestDocumentationSchema } from './graph';
 import type { RequestDocumentationAction } from './actions';
 import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
-import { createRequestDocumentationPromptNoResource } from './prompts';
 import { withPromqlKeyword } from './promql_keyword';
 
 export class GenerateEsqlNoDataError extends Error {
@@ -163,6 +161,10 @@ export const generateEsql = async ({
   logger,
   sessionId,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
+  const [
+    { createNlToEsqlGraph, requestDocumentationSchema },
+    { createRequestDocumentationPromptNoResource },
+  ] = await Promise.all([import('./graph'), import('./prompts')]);
   const model = modelProvider
     ? await modelProvider.selectModel({ effortLevel: EffortLevels.low })
     : inputModel!;

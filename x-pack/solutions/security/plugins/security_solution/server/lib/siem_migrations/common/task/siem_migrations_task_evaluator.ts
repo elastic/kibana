@@ -7,9 +7,6 @@
 import type { EvaluationResult } from 'langsmith/evaluation';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import type { Run, Example } from 'langsmith/schemas';
-import { evaluate } from 'langsmith/evaluation';
-import { isLangSmithEnabled } from '@kbn/langchain/server/tracers/langsmith';
-import { Client } from 'langsmith';
 import type { Logger } from '@kbn/logging';
 // Structural copy of langsmith's internal `TargetConfigT` — not exported from the public entry.
 type TargetConfigT = Record<string, unknown> & {
@@ -59,6 +56,10 @@ export abstract class SiemMigrationsBaseEvaluator<
   ) {}
 
   public async evaluate({ connectorId, langsmithOptions }: EvaluateParams): Promise<void> {
+    const { evaluate } = await import('langsmith/evaluation');
+    const { isLangSmithEnabled } = await import('@kbn/langchain/server/tracers/langsmith');
+    const { Client } = await import('langsmith');
+
     if (!isLangSmithEnabled()) {
       throw Error('LangSmith is not enabled');
     }

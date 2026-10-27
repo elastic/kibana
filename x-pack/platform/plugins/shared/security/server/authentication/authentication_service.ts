@@ -6,7 +6,6 @@
  */
 
 import type { errors } from '@elastic/elasticsearch';
-import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import url from 'url';
 
 import type { BuildFlavor } from '@kbn/config';
@@ -56,6 +55,10 @@ import {
   type UiamServicePublic,
 } from '../uiam';
 import type { UserProfileServiceStartInternal } from '../user_profile';
+
+// Matches `ErrorCode.ConnectionClosed` from `@modelcontextprotocol/sdk/types.js`, inlined to avoid
+// loading the MCP SDK at startup.
+const MCP_CONNECTION_CLOSED_ERROR_CODE = -32000;
 
 interface AuthenticationServiceSetupParams {
   http: Pick<
@@ -255,7 +258,7 @@ export class AuthenticationService {
             // TODO: In MCP SDK v2, ErrorCode is renamed to ProtocolErrorCode, and ConnectionClosed moves to
             // SdkErrorCode (local-only, string-valued). Update this import when upgrading to SDK v2.
             // https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/migration.md#error-hierarchy-refactoring
-            error: { code: ErrorCode.ConnectionClosed, message: 'Unauthorized' },
+            error: { code: MCP_CONNECTION_CLOSED_ERROR_CODE, message: 'Unauthorized' },
           }),
           headers: {
             'WWW-Authenticate': `Bearer resource_metadata="${resourceMetadataUrl}"`,

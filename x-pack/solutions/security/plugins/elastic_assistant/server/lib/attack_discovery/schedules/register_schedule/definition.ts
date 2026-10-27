@@ -20,7 +20,6 @@ import {
 } from '@kbn/attack-discovery-schedules-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { AttackDiscoveryWorkflowExecutorFactory } from '../../../../types';
-import { attackDiscoveryScheduleExecutor } from './executor';
 
 export interface GetAttackDiscoveryScheduleParams {
   getInference: () => InferenceServerStart | undefined;
@@ -68,6 +67,7 @@ export const getAttackDiscoveryScheduleType = ({
     autoRecoverAlerts: false,
     alerts: ATTACK_DISCOVERY_ALERTS_AAD_CONFIG,
     executor: async (options: AttackDiscoveryExecutorOptions) => {
+      const { attackDiscoveryScheduleExecutor } = await import('./executor');
       return attackDiscoveryScheduleExecutor({
         getInference,
         getWorkflowExecutorFactory,

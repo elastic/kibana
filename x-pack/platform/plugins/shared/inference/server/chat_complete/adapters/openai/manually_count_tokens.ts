@@ -6,7 +6,11 @@
  */
 
 import { encode } from 'gpt-tokenizer';
-import type { ChatCompletionChunkEvent } from '@kbn/inference-common';
+import type {
+  ChatCompletionChunkEvent,
+  ChatCompletionTokenCountEvent,
+} from '@kbn/inference-common';
+import { ChatCompletionEventType } from '@kbn/inference-common';
 import type { OpenAIRequest } from './types';
 import { mergeChunks } from '../../utils';
 
@@ -81,3 +85,21 @@ export const manuallyCountCompletionTokens = (chunks: ChatCompletionChunkEvent[]
 
   return tokenFromContent + tokenFromToolCalls;
 };
+
+export function manuallyCountTokens(
+  request: OpenAIRequest,
+  chunks: ChatCompletionChunkEvent[]
+): ChatCompletionTokenCountEvent {
+  const promptTokens = manuallyCountPromptTokens(request);
+  const completionTokens = manuallyCountCompletionTokens(chunks);
+
+  return {
+    type: ChatCompletionEventType.ChatCompletionTokenCount,
+    tokens: {
+      prompt: promptTokens,
+      completion: completionTokens,
+      total: promptTokens + completionTokens,
+    },
+    ...(request.model ? { model: request.model } : {}),
+  };
+}

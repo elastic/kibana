@@ -12,13 +12,8 @@ import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
-import {
-  ChatCompletionEventType,
-  isChatCompletionTokenCountEvent,
-  isChatCompletionChunkEvent,
-} from '@kbn/inference-common';
+import { isChatCompletionTokenCountEvent, isChatCompletionChunkEvent } from '@kbn/inference-common';
 import type { OpenAIRequest } from './types';
-import { manuallyCountPromptTokens, manuallyCountCompletionTokens } from './manually_count_tokens';
 
 /**
  * Operator mirroring the source and then emitting a tokenCount event when the source completes,
@@ -60,37 +55,24 @@ export function emitTokenCountEstimateIfMissing({
           },
           complete: () => {
             if (!tokenCountEmitted) {
-              try {
-                subscriber.next(manuallyCountTokens(request, chunks));
-              } catch (err) {
-                // Intentionally broad: token counting must never crash the chat stream.
-                logger?.warn('Failed to manually count tokens, skipping token count event', {
-                  error: err,
+              import('./manually_count_tokens')
+                .then(({ manuallyCountTokens }) => {
+                  subscriber.next(manuallyCountTokens(request, chunks));
+                  subscriber.complete();
+                })
+                .catch((err) => {
+                  // Intentionally broad: token counting must never crash the chat stream.
+                  logger?.warn('Failed to manually count tokens, skipping token count event', {
+                    error: err,
+                  });
+                  subscriber.complete();
                 });
-              }
+            } else {
+              subscriber.complete();
             }
-            subscriber.complete();
           },
         });
       }
     );
-  };
-}
-
-export function manuallyCountTokens(
-  request: OpenAIRequest,
-  chunks: ChatCompletionChunkEvent[]
-): ChatCompletionTokenCountEvent {
-  const promptTokens = manuallyCountPromptTokens(request);
-  const completionTokens = manuallyCountCompletionTokens(chunks);
-
-  return {
-    type: ChatCompletionEventType.ChatCompletionTokenCount,
-    tokens: {
-      prompt: promptTokens,
-      completion: completionTokens,
-      total: promptTokens + completionTokens,
-    },
-    ...(request.model ? { model: request.model } : {}),
   };
 }

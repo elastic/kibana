@@ -369,12 +369,7 @@ export const getGenAiTokenTracking = async ({
   return null;
 };
 
-export const shouldTrackGenAiToken = (actionTypeId: string, subAction?: string) =>
-  (actionTypeId === '.gen-ai' ||
-    actionTypeId === '.bedrock' ||
-    actionTypeId === '.gemini' ||
-    actionTypeId === '.inference') &&
-  subAction !== 'getDashboard';
+export { shouldTrackGenAiToken } from './should_track_gen_ai_token';
 
 function hasTelemetryMetadata(obj: unknown): obj is { telemetryMetadata: TelemetryMetadata } {
   return obj !== null && typeof obj === 'object' && 'telemetryMetadata' in obj;

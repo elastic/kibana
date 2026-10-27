@@ -11,8 +11,8 @@ import {
   createAIMessage,
   createToolResultMessage,
   createToolCallMessage,
-  generateFakeToolCallId,
 } from '@kbn/agent-builder-genai-utils/langchain/messages';
+import { generateFakeToolCallId } from '@kbn/agent-builder-genai-utils/langchain/tools';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import type {
   ExecutionAbortReason,

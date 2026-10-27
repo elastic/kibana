@@ -34,7 +34,6 @@ import {
   stateSchemaByVersion,
   type LatestTaskStateSchema as LeadGenerationTaskState,
 } from './state';
-import { runLeadGenerationPipeline } from '../run_pipeline';
 import { fetchCandidateEntities } from '../entity_conversion';
 import { getLeadGenerationConfig, updateLeadGenerationConfig } from '../saved_object';
 import { resolveChatModel } from '../utils';
@@ -174,6 +173,7 @@ const runLeadGenerationTask = async ({
   kibanaVersion: string;
   ml: SetupPlugins['ml'];
 }): Promise<{ state: LeadGenerationTaskState }> => {
+  const { runLeadGenerationPipeline } = await import('../run_pipeline');
   const state = taskInstance.state as LeadGenerationTaskState;
   const taskStartTime = moment().utc().toISOString();
   const updatedState: LeadGenerationTaskState = {

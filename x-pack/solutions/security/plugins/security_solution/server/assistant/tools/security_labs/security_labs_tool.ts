@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tool } from '@langchain/core/tools';
-
 import { z } from '@kbn/zod/v4';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
@@ -17,7 +15,6 @@ import {
   hrefReference,
   knowledgeBaseReference,
 } from '@kbn/elastic-assistant-common/impl/content_references/references';
-import { Document } from '@langchain/core/documents';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { getIsKnowledgeBaseInstalled } from '@kbn/elastic-assistant-plugin/server/routes/helpers';
 import { APP_UI_ID } from '../../../../common';
@@ -46,6 +43,8 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
   async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
+    const { tool } = await import('@langchain/core/tools');
+    const { Document } = await import('@langchain/core/documents');
     const { kbDataClient, contentReferencesStore } = params as SecurityLabsKnowledgeBaseToolParams;
 
     return tool(

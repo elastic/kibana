@@ -10,9 +10,9 @@ import {
 } from './get_system_message_from_instructions';
 
 describe('getSystemMessageFromInstructions', () => {
-  it('handles plain instructions', () => {
+  it('handles plain instructions', async () => {
     expect(
-      getSystemMessageFromInstructions({
+      await getSystemMessageFromInstructions({
         applicationInstructions: ['first', 'second'],
         kbUserInstructions: [],
         apiUserInstructions: [],
@@ -21,9 +21,9 @@ describe('getSystemMessageFromInstructions', () => {
     ).toEqual(`first\n\nsecond`);
   });
 
-  it('handles callbacks', () => {
+  it('handles callbacks', async () => {
     expect(
-      getSystemMessageFromInstructions({
+      await getSystemMessageFromInstructions({
         applicationInstructions: [
           'first',
           ({ availableFunctionNames }) => {
@@ -37,9 +37,9 @@ describe('getSystemMessageFromInstructions', () => {
     ).toEqual(`first\n\nmyFunction`);
   });
 
-  it('overrides kb instructions with adhoc instructions', () => {
+  it('overrides kb instructions with adhoc instructions', async () => {
     expect(
-      getSystemMessageFromInstructions({
+      await getSystemMessageFromInstructions({
         applicationInstructions: ['first'],
         kbUserInstructions: [{ id: 'second', text: 'second from kb' }],
         apiUserInstructions: [
@@ -53,9 +53,9 @@ describe('getSystemMessageFromInstructions', () => {
     ).toEqual(`first\n\n${USER_INSTRUCTIONS_HEADER}\n\nsecond from adhoc instruction`);
   });
 
-  it('includes kb instructions if there is no request instruction', () => {
+  it('includes kb instructions if there is no request instruction', async () => {
     expect(
-      getSystemMessageFromInstructions({
+      await getSystemMessageFromInstructions({
         applicationInstructions: ['first'],
         kbUserInstructions: [{ id: 'second', text: 'second_kb' }],
         apiUserInstructions: [],
@@ -64,9 +64,9 @@ describe('getSystemMessageFromInstructions', () => {
     ).toEqual(`first\n\n${USER_INSTRUCTIONS_HEADER}\n\nsecond_kb`);
   });
 
-  it('handles undefined values', () => {
+  it('handles undefined values', async () => {
     expect(
-      getSystemMessageFromInstructions({
+      await getSystemMessageFromInstructions({
         applicationInstructions: [
           'first',
           ({ availableFunctionNames }) => {

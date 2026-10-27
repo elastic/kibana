@@ -35,7 +35,6 @@ import { i18n } from '@kbn/i18n';
 import type { AwaitedProperties, PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
-import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { isEmpty } from 'lodash';
@@ -53,11 +52,9 @@ import type {
   OnLlmResponse,
   StaticReturnType,
 } from '../lib/langchain/executors/types';
-import { getLangChainMessages } from '../lib/langchain/helpers';
 
 import type { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import type { ElasticAssistantRequestHandlerContext } from '../types';
-import { callAssistantGraph } from '../lib/langchain/graphs/default_assistant_graph';
 
 interface GetPluginNameFromRequestParams {
   request: KibanaRequest;
@@ -315,6 +312,13 @@ export const langChainExecute = async ({
   systemPrompt,
   timeout,
 }: LangChainExecuteParams) => {
+  const [{ getLangSmithTracer }, { getLangChainMessages }, { callAssistantGraph }] =
+    await Promise.all([
+      import('@kbn/langchain/server/tracers/langsmith'),
+      import('../lib/langchain/get_langchain_messages'),
+      import('../lib/langchain/graphs/default_assistant_graph'),
+    ]);
+
   // Fetch any tools registered by the request's originating plugin
   const pluginName = getPluginNameFromRequest({
     request,

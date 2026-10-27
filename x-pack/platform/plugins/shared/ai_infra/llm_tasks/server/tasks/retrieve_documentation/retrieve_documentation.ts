@@ -8,7 +8,6 @@
 import type { Logger } from '@kbn/logging';
 import { type OutputAPI } from '@kbn/inference-common';
 import type { ProductDocSearchAPI, DocSearchResult } from '@kbn/product-doc-base-plugin/server';
-import { truncate, count as countTokens } from '../../utils/tokens';
 import type { RetrieveDocumentationAPI } from './types';
 import { summarizeDocument } from './summarize_document';
 
@@ -36,6 +35,7 @@ export const retrieveDocumentation =
     maxDocumentTokens = MAX_TOKENS_DEFAULT,
     tokenReductionStrategy = 'highlight',
   }) => {
+    const { truncate, count: countTokens } = await import('../../utils/tokens');
     const applyTokenReductionStrategy = async (doc: DocSearchResult): Promise<string> => {
       let content: string;
       switch (tokenReductionStrategy) {

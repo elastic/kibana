@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod/v4';
 import {
   getAnonymizedValue,
@@ -39,6 +38,7 @@ export const ASSET_MISCONFIGURATIONS_TOOL: AssistantTool = {
   },
   async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
+    const { tool } = await import('@langchain/core/tools');
     const { anonymizationFields, esClient, onNewReplacements, replacements } =
       params as AssetMisconfigurationsToolParams;
 

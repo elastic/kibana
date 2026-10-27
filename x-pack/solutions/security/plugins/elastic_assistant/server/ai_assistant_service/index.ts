@@ -30,7 +30,10 @@ import type { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_service
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { IndexPatternAdapter } from '@kbn/index-adapter';
-import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver';
+import {
+  checkpointsFieldMap,
+  checkpointWritesFieldMap,
+} from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver/field_maps';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
 import type { ESSearchRequest } from '@kbn/es-types';
 import {
@@ -63,11 +66,11 @@ import {
   ASSISTANT_ELSER_INFERENCE_ID,
   knowledgeBaseFieldMap,
 } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
-import type { GetAIAssistantKnowledgeBaseDataClientParams } from '../ai_assistant_data_clients/knowledge_base';
-import {
+import type {
   AIAssistantKnowledgeBaseDataClient,
-  ensureDedicatedInferenceEndpoint,
+  GetAIAssistantKnowledgeBaseDataClientParams,
 } from '../ai_assistant_data_clients/knowledge_base';
+import { ensureDedicatedInferenceEndpoint } from '../ai_assistant_data_clients/knowledge_base/ensure_dedicated_inference_endpoint';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
 import { createGetElserId, ensureProductDocumentationInstalled } from './helpers';
@@ -193,12 +196,12 @@ export class AIAssistantService {
     this.checkpointsDataStream = this.createIndexPattern({
       resource: 'checkpoints',
       kibanaVersion: options.kibanaVersion,
-      fieldMap: ElasticSearchSaver.checkpointsFieldMap,
+      fieldMap: checkpointsFieldMap,
     });
     this.checkpointWritesDataStream = this.createIndexPattern({
       resource: 'checkpointWrites',
       kibanaVersion: options.kibanaVersion,
-      fieldMap: ElasticSearchSaver.checkpointWritesFieldMap,
+      fieldMap: checkpointWritesFieldMap,
     });
 
     this.initPromise = this.initializeResources();
@@ -677,6 +680,9 @@ export class AIAssistantService {
   }
 
   public async createCheckpointSaver(opts: CreateAIAssistantClientParams) {
+    const { ElasticSearchSaver } = await import(
+      '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver'
+    );
     const esClient = await this.options.elasticsearchClientPromise;
     const checkpointIndex = getIndexTemplateAndPattern(
       this.resourceNames.aliases.checkpoints,
@@ -716,6 +722,10 @@ export class AIAssistantService {
     if (res === null) {
       return null;
     }
+
+    const { AIAssistantKnowledgeBaseDataClient } = await import(
+      '../ai_assistant_data_clients/knowledge_base'
+    );
 
     return new AIAssistantKnowledgeBaseDataClient({
       logger: this.options.logger.get('knowledgeBase'),

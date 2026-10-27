@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { InvalidDefendInsightTypeError } from '@kbn/discoveries';
+export { InvalidDefendInsightTypeError } from '@kbn/discoveries/impl/lib/errors';

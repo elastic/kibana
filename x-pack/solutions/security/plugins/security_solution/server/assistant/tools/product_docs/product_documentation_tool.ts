@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tool } from '@langchain/core/tools';
-
 import { z } from '@kbn/zod/v4';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import {
@@ -45,6 +43,7 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
   async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
+    const { tool } = await import('@langchain/core/tools');
     const { connectorId, llmTasks, request, contentReferencesStore, esClient } =
       params as ProductDocumentationToolParams;
 

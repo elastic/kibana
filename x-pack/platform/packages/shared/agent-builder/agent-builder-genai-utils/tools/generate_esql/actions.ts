@@ -12,8 +12,8 @@ import {
   createAIMessage,
   createToolResultMessage,
   createToolCallMessage,
-  generateFakeToolCallId,
 } from '../../langchain/messages';
+import { generateFakeToolCallId } from '../../langchain/tools';
 
 export interface RequestDocumentationAction {
   type: 'request_documentation';

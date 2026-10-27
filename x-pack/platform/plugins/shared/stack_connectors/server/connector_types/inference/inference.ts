@@ -16,7 +16,7 @@ import type {
 } from '@kbn/core/server';
 import { GEN_AI_SETTINGS_INFERENCE_STREAMING } from '@kbn/management-settings-ids';
 import { supportsNonStreamingChat, type InferenceProvider } from '@kbn/inference-common';
-import { Stream } from 'openai/streaming';
+import type { Stream } from 'openai/streaming';
 import type { Readable } from 'stream';
 
 import type { AxiosError } from 'axios';
@@ -392,6 +392,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     tokenCountStream: Stream<ChatCompletionChunk>;
   }> {
     try {
+      const { Stream } = await import('openai/streaming');
       connectorUsageCollector.addRequestBodyBytes(undefined, params.body);
       const res = await this.performApiUnifiedCompletionStream(params);
       const controller = new AbortController();

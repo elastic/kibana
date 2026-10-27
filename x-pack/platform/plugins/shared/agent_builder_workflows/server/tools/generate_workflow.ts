@@ -9,7 +9,7 @@ import { v4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { generateWorkflow, type GenerateWorkflowEdit } from '@kbn/agent-builder-workflow-gen';
+import type { GenerateWorkflowEdit } from '@kbn/agent-builder-workflow-gen';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -158,6 +158,7 @@ When the workflow is alert-triggered (\`type: alert\`), runtime alert data is ex
       }
 
       try {
+        const { generateWorkflow } = await import('@kbn/agent-builder-workflow-gen');
         const {
           workflow,
           yaml: afterYaml,

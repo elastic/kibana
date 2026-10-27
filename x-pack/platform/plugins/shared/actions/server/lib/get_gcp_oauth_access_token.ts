@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import { GoogleAuth } from 'google-auth-library';
 import type { ConnectorToken, ConnectorTokenClientContract } from '../types';
 
 interface GetOAuthJwtAccessTokenOpts {
@@ -20,6 +19,7 @@ export const getGoogleOAuthJwtAccessToken = async ({
   credentials,
   connectorTokenClient,
 }: GetOAuthJwtAccessTokenOpts) => {
+  const { GoogleAuth } = await import('google-auth-library');
   let accessToken;
   let connectorToken: ConnectorToken | null = null;
   let hasErrors = false;

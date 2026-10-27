@@ -6,9 +6,9 @@
  */
 
 import { omit } from 'lodash';
+import { v4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import type { StructuredTool } from '@langchain/core/tools';
-import { tool as toTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatAgentEvent, ToolResult } from '@kbn/agent-builder-common';
@@ -74,6 +74,10 @@ export const toolsToLangchain = async ({
   };
 };
 
+export const generateFakeToolCallId = () => {
+  return v4().substr(0, 6);
+};
+
 export const sanitizeToolId = (toolId: string): string => {
   return toolId.replaceAll('.', '_').replace(/[^a-zA-Z0-9_-]/g, '');
 };
@@ -124,6 +128,7 @@ export const toolToLangchain = async ({
   addReasoningParam?: boolean;
   buildContent?: BuildToolContentFn;
 }): Promise<StructuredTool> => {
+  const { tool: toTool } = await import('@langchain/core/tools');
   const description = tool.getLlmDescription
     ? await tool.getLlmDescription({ description: tool.description, config: tool.configuration })
     : tool.description;

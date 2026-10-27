@@ -17,7 +17,7 @@ import { generateChatTitle } from './nodes/generate_chat_title';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../../prompt/helpers';
-import { getLlmClass } from '../../../../routes/utils';
+import { getLlmClass } from '../../get_llm_class';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
 import type { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import type { AssistantToolParams } from '../../../../types';
