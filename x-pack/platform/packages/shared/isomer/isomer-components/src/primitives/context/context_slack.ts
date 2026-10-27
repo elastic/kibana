@@ -22,6 +22,8 @@ export const contextSlackRenderer = (node: ContextNode): SlackContextBlock => ({
     {
       type: 'mrkdwn',
       text: clampEscapedMrkdwn(joined(node, SLACK_SEPARATOR), SLACK_LIMITS.contextElementChars),
+      // Plain text must not trigger Slack's automatic `@here`/`#channel` parsing.
+      verbatim: true,
     },
   ],
 });

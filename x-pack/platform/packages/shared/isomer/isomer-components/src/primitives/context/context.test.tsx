@@ -37,13 +37,19 @@ describe('context', () => {
     expect(validate({ type: 'view', body: [line(...Array(11).fill('a'))] }).valid).toBe(false);
   });
 
-  it('joins items into one escaped Slack mrkdwn element', () => {
+  it('joins items into one escaped, verbatim Slack mrkdwn element', () => {
     expect(
-      surfaces.slack.renderNode(line('⏳ Investigating…', 'Automation: <a & b>')).blocks
+      surfaces.slack.renderNode(line('⏳ Investigating…', 'Automation: <a & b> @here')).blocks
     ).toEqual([
       {
         type: 'context',
-        elements: [{ type: 'mrkdwn', text: '⏳ Investigating…  ·  Automation: &lt;a &amp; b&gt;' }],
+        elements: [
+          {
+            type: 'mrkdwn',
+            text: '⏳ Investigating…  ·  Automation: &lt;a &amp; b&gt; @here',
+            verbatim: true,
+          },
+        ],
       },
     ]);
   });
