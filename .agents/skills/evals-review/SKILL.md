@@ -12,7 +12,6 @@ Review changes to `@kbn/evals` suites against three questions: does the suite co
 - PR adds or edits a Security suite package: `x-pack/solutions/security/packages/kbn-evals-suite-*` or `kbn-security-evals-*`
 - PR adds or edits a dataset, task, evaluator, fixture, or Playwright config in such a package
 - PR changes a Security suite entry in `.buildkite/pipelines/evals/evals.suites.json` or its step in `.buildkite/pipelines/evals/llm_evals.yml`
-- PR changes the feature code a Security suite evaluates, without touching the suite
 
 ## Scope
 
@@ -40,15 +39,11 @@ The dataset covers the behaviors the feature must get right, not only the happy 
 
 The dataset includes cases whose correct result is "no finding", "benign", or "escalate". A suite where every example expects a positive result cannot detect over-reporting.
 
-### C3: Feature change without eval change
-
-The PR changes the behavior of an evaluated feature (prompt, tool, graph node, output schema) and neither the dataset nor an evaluator reflects it. Flag only when the feature is clearly covered by an existing Security suite.
-
-### C4: Ground truth source
+### C3: Ground truth source
 
 Expected outputs come from a named, reviewable source: labeled incidents, a golden snapshot, or a documented rule. Flag expected values that are only the current model output copied in.
 
-### C5: Ambiguity is explicit
+### C4: Ambiguity is explicit
 
 Examples with more than one defensible answer record that, through multiple accepted answers or a scoring treatment. They are not forced into a single binary label.
 
