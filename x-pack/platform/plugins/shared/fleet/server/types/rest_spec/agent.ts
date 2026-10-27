@@ -507,7 +507,7 @@ export const PostAgentUnenrollRequestSchema = {
         schema.boolean({
           meta: {
             description:
-              'Unenrolls the agent even if it is enrolled in a hosted agent policy or a managed integration policy. Does not revoke API keys immediately. To do so, also set `revoke`.',
+              'Unenrolls the agent even if it is enrolled in a hosted agent policy or is a managed agent. Does not revoke API keys immediately. To do so, also set `revoke`.',
           },
         })
       ),
@@ -515,7 +515,7 @@ export const PostAgentUnenrollRequestSchema = {
         schema.boolean({
           meta: {
             description:
-              'Immediately invalidates the API keys of the agent without notifying it. The agent keeps running and can still send data to outputs that do not use these keys, such as Kafka, Logstash, or remote Elasticsearch.',
+              'Immediately invalidates the API keys of the agent without notifying it. The agent keeps running and can still send data to outputs not covered by the invalidated keys, such as Kafka and Logstash. Remote Elasticsearch keys are invalidated by Fleet Server on a best-effort basis. This action cannot be undone. Use it only for offline or compromised agents.',
           },
         })
       ),
@@ -533,7 +533,7 @@ export const PostBulkAgentUnenrollRequestSchema = {
       schema.boolean({
         meta: {
           description:
-            'Also unenrolls agents enrolled in hosted agent policies or managed integration policies. Does not revoke API keys immediately. To do so, also set `revoke`.',
+            'Also unenrolls agents that are enrolled in hosted agent policies or are managed agents. Does not revoke API keys immediately. To do so, also set `revoke`.',
         },
       })
     ),
@@ -541,7 +541,7 @@ export const PostBulkAgentUnenrollRequestSchema = {
       schema.boolean({
         meta: {
           description:
-            'Immediately invalidates the API keys of the agents without notifying them. The agents keep running and can still send data to outputs that do not use these keys, such as Kafka, Logstash, or remote Elasticsearch.',
+            'Immediately invalidates the API keys of the agents without notifying them. The agents keep running and can still send data to outputs not covered by the invalidated keys, such as Kafka and Logstash. Remote Elasticsearch keys are invalidated by Fleet Server on a best-effort basis. This action cannot be undone. Use it only for offline or compromised agents.',
         },
       })
     ),
