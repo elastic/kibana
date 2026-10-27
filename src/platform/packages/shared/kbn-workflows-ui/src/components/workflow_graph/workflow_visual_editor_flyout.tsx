@@ -94,7 +94,7 @@ export function WorkflowVisualEditorFlyout({
 
   // Display-only, mirrors workflow_graph_node.tsx: `target.stepName`/`stepInfo.stepId`
   // are raw step names and must stay untouched elsewhere (e.g. YAML lookups).
-  // Trigger labels are already human-readable (getTriggerLabel), so left as-is.
+  // Trigger labels are already human-readable (getTriggerName), so left as-is.
   const title =
     target.kind === 'step'
       ? deslugifyStepName(target.stepInfo?.stepId ?? target.stepName)
@@ -102,7 +102,7 @@ export function WorkflowVisualEditorFlyout({
   const subtitle =
     target.kind === 'step'
       ? target.stepInfo?.stepType ?? target.stepType
-      : i18n.translate('workflowsUi.visualEditorFlyout.triggerSubtitle', {
+      : i18n.translate('workflowsUi.visualEditor.flyout.triggerSubtitle', {
           defaultMessage: 'trigger / {triggerType}',
           values: { triggerType: target.triggerType },
         });
@@ -129,25 +129,25 @@ export function WorkflowVisualEditorFlyout({
   const hasMoreActions = Boolean(renderMoreMenuItems);
   const hasHeaderActions = hasRunAction || hasMoreActions;
   const runDisabled = isTrigger || !canExecuteWorkflow || !isYamlValid;
-  const moreActionsLabel = i18n.translate('workflowsUi.visualEditorFlyout.more', {
+  const moreActionsLabel = i18n.translate('workflowsUi.visualEditor.flyout.more', {
     defaultMessage: 'More actions',
   });
-  const closeLabel = i18n.translate('workflowsUi.visualEditorFlyout.close', {
+  const closeLabel = i18n.translate('workflowsUi.visualEditor.flyout.close', {
     defaultMessage: 'Close',
   });
   const runDisabledReason = isTrigger
-    ? i18n.translate('workflowsUi.visualEditorFlyout.runDisabledTrigger', {
+    ? i18n.translate('workflowsUi.visualEditor.flyout.runDisabledTrigger', {
         defaultMessage: 'Triggers cannot be run individually.',
       })
     : !canExecuteWorkflow
-    ? i18n.translate('workflowsUi.visualEditorFlyout.runDisabledNoCapability', {
+    ? i18n.translate('workflowsUi.visualEditor.flyout.runDisabledNoCapability', {
         defaultMessage: 'You do not have permission to run workflows.',
       })
     : !isYamlValid
-    ? i18n.translate('workflowsUi.visualEditorFlyout.runDisabledInvalidYaml', {
+    ? i18n.translate('workflowsUi.visualEditor.flyout.runDisabledInvalidYaml', {
         defaultMessage: 'Fix YAML errors to run this step.',
       })
-    : i18n.translate('workflowsUi.visualEditorFlyout.runStep', {
+    : i18n.translate('workflowsUi.visualEditor.flyout.runStep', {
         defaultMessage: 'Run step',
       });
 
@@ -254,7 +254,7 @@ export function WorkflowVisualEditorFlyout({
                   size="s"
                   onClick={onRunStep}
                   isDisabled={runDisabled}
-                  aria-label={i18n.translate('workflowsUi.visualEditorFlyout.runStep.aria', {
+                  aria-label={i18n.translate('workflowsUi.visualEditor.flyout.runStep.aria', {
                     defaultMessage: 'Run step',
                   })}
                   data-test-subj="workflowVisualEditorFlyoutRunStep"
@@ -344,7 +344,7 @@ export function WorkflowVisualEditorFlyout({
           <div css={{ padding: 16 }}>
             <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="workflowsUi.visualEditorFlyout.unavailable"
+                id="workflowsUi.visualEditor.flyout.unavailable"
                 defaultMessage="Step details unavailable. The YAML may have errors."
               />
             </EuiText>
@@ -371,7 +371,7 @@ export function WorkflowVisualEditorFlyout({
             data-test-subj="workflowVisualEditorFlyoutOpenInYaml"
           >
             <FormattedMessage
-              id="workflowsUi.visualEditorFlyout.openInYaml"
+              id="workflowsUi.visualEditor.flyout.openInYaml"
               defaultMessage="Open in YAML editor"
             />
           </EuiButtonEmpty>

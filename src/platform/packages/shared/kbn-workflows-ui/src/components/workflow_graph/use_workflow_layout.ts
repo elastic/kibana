@@ -11,7 +11,7 @@ import type { Edge, Node } from '@xyflow/react';
 import { Position } from '@xyflow/react';
 import { useMemo, useRef } from 'react';
 import useLatest from 'react-use/lib/useLatest';
-import { ExecutionStatus, transformWorkflowToGraph } from '@kbn/workflows';
+import { ExecutionStatus, getTriggerName, transformWorkflowToGraph } from '@kbn/workflows';
 import type {
   HandleSide,
   LayoutDirection,
@@ -23,6 +23,7 @@ import type {
 import { computeWorkflowLayout } from './workflow_layout_pipeline';
 import type { LayoutSnapshot } from './workflow_layout_pipeline';
 import { nodeLabel } from './workflow_node_data';
+import { useOptionalWorkflowsUiServices } from '../../context';
 
 /** Stable empty result used when no workflow is loaded, avoiding `as TransformResult` casts. */
 const EMPTY_TRANSFORM: TransformResult = {
@@ -141,14 +142,20 @@ export function useWorkflowLayout({
   const onPerfMarkRef = useLatest(onPerfMark);
   const onLayoutFailedRef = useLatest(onLayoutFailed);
 
+  const services = useOptionalWorkflowsUiServices();
   const transformed: TransformResult = useMemo(() => {
     if (transformedProp) return transformedProp;
     if (!workflow) return EMPTY_TRANSFORM;
     const t0 = performance.now();
-    const next = transformWorkflowToGraph(workflow);
+    const next = transformWorkflowToGraph(workflow, (triggerType) =>
+      getTriggerName(
+        triggerType,
+        services?.workflowsExtensions.getTriggerDefinition(triggerType)?.title
+      )
+    );
     onPerfMarkRef.current?.('transform_ms', performance.now() - t0);
     return next;
-  }, [transformedProp, workflow, onPerfMarkRef]);
+  }, [transformedProp, workflow, onPerfMarkRef, services]);
 
   // Keyed on the layout inputs (not `transformed` identity) so edits that change
   // neither the topology nor an empty branch's label never retrigger dagre.

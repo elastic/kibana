@@ -159,12 +159,6 @@ interface WorkflowVisualEditorStatefulProps {
   editorRef?: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
 }
 
-const TRIGGER_LABEL: Record<string, string> = {
-  manual: 'Manual',
-  alert: 'Alert',
-  scheduled: 'Scheduled',
-};
-
 /** Floating read-only flyout inset from the canvas edges (top, right, bottom). */
 const PANEL_MARGIN = CANVAS_CONFIG_PANEL_MARGIN;
 const CONFIG_PANEL_WIDTH_STORAGE_KEY = 'workflows:configPanelWidth.v3';
@@ -513,7 +507,13 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     return hasManual ? (['manual'] as const) : undefined;
   }, [workflow?.triggers]);
 
-  const transformed = useMemo(() => transformWorkflowToGraph(workflow), [workflow]);
+  const transformed = useMemo(
+    () =>
+      transformWorkflowToGraph(workflow, (triggerType) =>
+        triggerSchemas.getTriggerName(triggerType)
+      ),
+    [workflow]
+  );
 
   const stepsByName = useMemo(() => collectStepsByName(workflow), [workflow]);
 
@@ -652,7 +652,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       if (!insertion) return;
       if (insertion.context.mode === 'trigger') {
         const fragment = triggerFragmentFor(action.id);
-        const triggerLabel = TRIGGER_LABEL[action.id] ?? action.label;
+        const triggerLabel = triggerSchemas.getTriggerName(action.id);
         setPendingInsert({
           phase: 'configuring',
           context: { mode: 'trigger' },
@@ -873,7 +873,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         (trigger ? stringifyYaml(trigger, { lineWidth: 0 }) : undefined);
       if (!fragment || !trigger) return;
       const triggerType = trigger.type;
-      const triggerLabel = TRIGGER_LABEL[triggerType] ?? triggerType;
+      const triggerLabel = triggerSchemas.getTriggerName(triggerType);
       setInsertion(null);
       setPendingInsert(null);
       setSettingsBKind(null);
@@ -1041,7 +1041,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       return {
         kind: 'trigger',
         triggerType: trigger.type,
-        triggerLabel: TRIGGER_LABEL[trigger.type] ?? trigger.type,
+        triggerLabel: triggerSchemas.getTriggerName(trigger.type),
         yamlSnippet,
       };
     }
@@ -1147,7 +1147,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   }, [editorRef]);
 
   const handleCreationPickTrigger = useCallback((triggerType: 'manual' | 'alert' | 'scheduled') => {
-    const triggerLabel = TRIGGER_LABEL[triggerType] ?? triggerType;
+    const triggerLabel = triggerSchemas.getTriggerName(triggerType);
     setPendingInsert({
       phase: 'configuring',
       context: { mode: 'trigger' },

@@ -171,7 +171,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   editorViewRef.current = editorView;
 
   // A navigation can hand `/create` its initial content through history
-  // state (`WorkflowsCreateRouteState`) — e.g. the Template Library's
+  // state (`WorkflowsCreateRouteState`) — e.g. the Template library's
   // "Remix with AI" passes the rendered template. The state travels on the
   // history entry, not the URL, so plain `/create` links and shared URLs
   // fall back to the default YAML. The effect below depends on this value, not

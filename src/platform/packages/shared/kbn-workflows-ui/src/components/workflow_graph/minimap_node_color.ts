@@ -8,7 +8,13 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
+import { transparentize } from '@elastic/eui';
 import { TRIGGER_STEP_TYPES } from '@kbn/workflows';
+
+// Minimap tint per loop-container (any CONTAINER_STEP_TYPES step: foreach,
+// while, …) nesting depth, index 0 = outermost. Deeper containers fall back to
+// solid primary; inner steps paint solid on top.
+const MINIMAP_CONTAINER_ALPHAS = [0.2, 0.35] as const;
 
 export type MinimapNodeColors = Pick<
   EuiThemeComputed['colors'],
@@ -18,14 +24,24 @@ export type MinimapNodeColors = Pick<
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
 
-/** Resolves the minimap dot colour for a graph node from its execution / lane / trigger state. */
+/**
+ * Resolves the minimap dot colour for a graph node from its execution / lane / trigger state.
+ * `containerDepth` is the nesting depth of a loop container (outermost = 1).
+ */
 export const getMinimapNodeColor = (
   node: { type?: string; data?: unknown },
-  colors: MinimapNodeColors
+  colors: MinimapNodeColors,
+  containerDepth = 1
 ): string => {
   // Placeholder nodes for empty `if` branches are invisible — hide them in
   // the minimap too so they don't appear as spurious coloured dots.
   if (node.type === 'bypassLane') return 'transparent';
+  // Loop containers are a translucent primary tint (regardless of execution
+  // status) so the solid inner steps painted on top of them stay visible.
+  if (node.type === 'foreachGroup') {
+    const alpha = MINIMAP_CONTAINER_ALPHAS[containerDepth - 1];
+    return alpha === undefined ? colors.primary : transparentize(colors.primary, alpha);
+  }
   const data = isRecord(node.data) ? node.data : undefined;
   const stepExecution = isRecord(data?.stepExecution) ? data.stepExecution : undefined;
   const status = stepExecution?.status;

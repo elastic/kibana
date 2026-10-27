@@ -83,6 +83,7 @@ export const casesMutationsKeys = {
   updateComment: ['update-comment'] as const,
   deleteComment: ['delete-comment'] as const,
   deleteFileAttachment: ['delete-file-attachment'] as const,
+  bulkDeleteAttachments: ['bulk-delete-attachments'] as const,
   bulkCreateAttachments: ['bulk-create-attachments'] as const,
   persistCaseConfiguration: ['persist-case-configuration'] as const,
   replaceCustomField: ['replace-custom-field'] as const,

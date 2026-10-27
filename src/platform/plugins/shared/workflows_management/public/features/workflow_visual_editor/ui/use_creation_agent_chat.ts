@@ -67,7 +67,7 @@ export function useCreationAgentChat({
       const attachmentId = workflowId ?? unsavedIdRef.current;
       agentBuilder.openChat({
         sessionTag: `workflow-editor:${attachmentId}`,
-        greetingMessage: i18n.translate('workflowsManagement.agentBuilder.workflowEditorGreeting', {
+        greetingMessage: i18n.translate('workflows.agentBuilder.workflowEditorGreeting', {
           defaultMessage: 'What do you want to automate?',
         }),
         initialMessage: options?.initialMessage,

@@ -121,7 +121,7 @@ export function CanvasZoomControls({
 export function CanvasMinimap({
   nodeColor,
 }: {
-  nodeColor: (n: { type?: string; data?: unknown }) => string;
+  nodeColor: (n: { id: string; type?: string; data?: unknown }) => string;
 }) {
   const { euiTheme } = useEuiTheme();
   // Keep the shadow mixin's dark-mode ::after ring off this wrapper; that

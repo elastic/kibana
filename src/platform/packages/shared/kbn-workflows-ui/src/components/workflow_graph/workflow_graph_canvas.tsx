@@ -358,16 +358,36 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   // ⌘K / Ctrl+K appends to the selected sequence (trunk when nothing selected).
   useAppendStepShortcut({ edit, suppressInsertionControls, insertionPoints, selectedStepId });
 
+  // Nesting depth of each loop container (outermost = 1), from the `parentId`
+  // chain of the stable layout output.
+  const containerDepthById = useMemo(() => {
+    const parentById = new Map(nodes.map((n) => [n.id, n.parentId]));
+    const depths = new Map<string, number>();
+    for (const n of nodes) {
+      if (n.type === 'foreachGroup') {
+        let depth = 1;
+        for (let id = n.parentId; id !== undefined; id = parentById.get(id)) depth++;
+        depths.set(n.id, depth);
+      }
+    }
+    return depths;
+  }, [nodes]);
+
   const minimapNodeColor = useCallback(
-    (n: { type?: string; data?: unknown }) =>
-      getMinimapNodeColor(n, {
-        danger: euiTheme.colors.danger,
-        success: euiTheme.colors.success,
-        dangerText: euiTheme.colors.dangerText,
-        accent: euiTheme.colors.accent,
-        primary: euiTheme.colors.primary,
-      }),
+    (n: { id: string; type?: string; data?: unknown }) =>
+      getMinimapNodeColor(
+        n,
+        {
+          danger: euiTheme.colors.danger,
+          success: euiTheme.colors.success,
+          dangerText: euiTheme.colors.dangerText,
+          accent: euiTheme.colors.accent,
+          primary: euiTheme.colors.primary,
+        },
+        containerDepthById.get(n.id)
+      ),
     [
+      containerDepthById,
       euiTheme.colors.danger,
       euiTheme.colors.success,
       euiTheme.colors.dangerText,

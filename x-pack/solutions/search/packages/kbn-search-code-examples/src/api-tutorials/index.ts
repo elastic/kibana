@@ -16,6 +16,7 @@ import { agentBuilderTutorialCommands } from './agent_builder';
 import type { ConsoleTutorial } from './types';
 import { timeSeriesDataStreamTutorialCommands } from './time_series_data_stream_tutorial';
 import { vectorDatabaseTutorialCommands } from './vector_database_tutorial';
+import { promqlTutorialCommands } from './promql_tutorial';
 
 export const consoleTutorials: ConsoleTutorial = {
   basics: basicsTutorialCommands,
@@ -27,4 +28,5 @@ export const consoleTutorials: ConsoleTutorial = {
   hybridSearch: `# Hybrid Search Tutorial`,
   vectorDatabase: vectorDatabaseTutorialCommands,
   agentBuilder: agentBuilderTutorialCommands,
+  promql: promqlTutorialCommands,
 };

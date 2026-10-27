@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { transparentize, useEuiTheme } from '@elastic/eui';
+import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
 import React from 'react';
 import { ensureWorkflowGraphEuiIcons } from './ensure_eui_icons';
 import { WorkflowGraphCanvasWithoutProvider } from './workflow_graph_canvas';
@@ -21,6 +22,9 @@ let mockStoreWidth = 0;
 let mockStoreHeight = 0;
 let mockNodesInitialized = false;
 let mockCapturedOnInit: ((instance: unknown) => void) | undefined;
+let mockCapturedMinimapNodeColor:
+  | ((node: { id: string; type?: string; data?: unknown }) => string)
+  | undefined;
 
 // A minimal two-node layout (trigger + one step). graphBounds derived from this:
 // minX=0, minY=0, maxX=200, maxY=214 => centerX=100.
@@ -31,7 +35,7 @@ const mockNodes = [
 const EXPECTED_CENTER_X = 100;
 // When set, `useWorkflowLayout` returns this array instead of `mockNodes`, so a
 // test can hand the canvas a new `nodes` identity (a re-layout) on re-render.
-let mockLayoutNodesOverride: typeof mockNodes | undefined;
+let mockLayoutNodesOverride: Array<Record<string, unknown>> | undefined;
 
 jest.mock('./use_workflow_layout', () => ({
   useWorkflowLayout: () => ({
@@ -64,7 +68,10 @@ jest.mock('@xyflow/react', () => ({
     return <div data-test-subj="reactflow-mock">{children}</div>;
   },
   Background: () => null,
-  MiniMap: () => null,
+  MiniMap: ({ nodeColor }: { nodeColor?: typeof mockCapturedMinimapNodeColor }) => {
+    mockCapturedMinimapNodeColor = nodeColor;
+    return null;
+  },
   Panel: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
   Handle: () => null,
   useReactFlow: () => ({
@@ -771,5 +778,86 @@ describe('WorkflowGraphCanvas EUI icon seeding', () => {
 
     rerender(<WorkflowGraphCanvasWithoutProvider {...baseProps} />);
     expect(ensureWorkflowGraphEuiIcons).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('WorkflowGraphCanvas minimap node colour', () => {
+  const group = (id: string, stepType: string, parentId?: string, data: object = {}) => ({
+    id,
+    type: 'foreachGroup',
+    parentId,
+    position: { x: 0, y: 0 },
+    width: 400,
+    height: 400,
+    data: { stepType, ...data },
+  });
+
+  const renderMinimapNodeColor = () => {
+    render(<WorkflowGraphCanvasWithoutProvider {...baseProps} />);
+    return mockCapturedMinimapNodeColor!;
+  };
+
+  const getColors = () => renderHook(() => useEuiTheme()).result.current.euiTheme.colors;
+
+  beforeEach(() => {
+    mockCapturedMinimapNodeColor = undefined;
+    mockLayoutNodesOverride = [
+      group('loop1', 'foreach'),
+      group('loop2', 'while', 'loop1'),
+      group('loop3', 'foreach', 'loop2'),
+      group('failedLoop', 'while', undefined, { stepExecution: { status: 'failed' } }),
+      { id: 'inner', type: 'step', parentId: 'loop3', position: { x: 0, y: 0 }, data: {} },
+      {
+        id: 'failedStep',
+        type: 'step',
+        position: { x: 0, y: 0 },
+        data: { stepExecution: { status: 'failed' } },
+      },
+      { id: 'trigger', type: 'trigger', position: { x: 0, y: 0 }, data: { isTrigger: true } },
+      { id: 'lane', type: 'bypassLane', position: { x: 0, y: 0 }, data: {} },
+    ];
+  });
+
+  afterEach(() => {
+    mockLayoutNodesOverride = undefined;
+  });
+
+  it('tints loop containers by nesting depth, whatever the loop step type', () => {
+    const nodeColor = renderMinimapNodeColor();
+    const { primary } = getColors();
+
+    expect(nodeColor({ id: 'loop1', type: 'foreachGroup' })).toBe(transparentize(primary, 0.2));
+    expect(nodeColor({ id: 'loop2', type: 'foreachGroup' })).toBe(transparentize(primary, 0.35));
+  });
+
+  it('paints containers nested three levels deep or more as solid primary', () => {
+    const nodeColor = renderMinimapNodeColor();
+
+    expect(nodeColor({ id: 'loop3', type: 'foreachGroup' })).toBe(getColors().primary);
+  });
+
+  it('ignores execution status for loop containers', () => {
+    const nodeColor = renderMinimapNodeColor();
+    const { primary } = getColors();
+
+    expect(
+      nodeColor({
+        id: 'failedLoop',
+        type: 'foreachGroup',
+        data: { stepType: 'while', stepExecution: { status: 'failed' } },
+      })
+    ).toBe(transparentize(primary, 0.2));
+  });
+
+  it('keeps the existing colours for non-container nodes', () => {
+    const nodeColor = renderMinimapNodeColor();
+    const { primary, danger, accent } = getColors();
+
+    expect(nodeColor({ id: 'inner', type: 'step', data: {} })).toBe(primary);
+    expect(
+      nodeColor({ id: 'failedStep', type: 'step', data: { stepExecution: { status: 'failed' } } })
+    ).toBe(danger);
+    expect(nodeColor({ id: 'trigger', type: 'trigger', data: { isTrigger: true } })).toBe(accent);
+    expect(nodeColor({ id: 'lane', type: 'bypassLane' })).toBe('transparent');
   });
 });

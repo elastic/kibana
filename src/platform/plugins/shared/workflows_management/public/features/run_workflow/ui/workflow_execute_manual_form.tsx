@@ -15,7 +15,11 @@ import { CodeEditor, jsonDefaults, type monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
-import { applyInputDefaults, hasDefaultsRecursive } from '@kbn/workflows/spec/lib/field_conversion';
+import {
+  applyInputDefaults,
+  hasDefaultsRecursive,
+  omitRequiredWithDefaults,
+} from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { generateSampleFromJsonSchema, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import { InputValidationCallout } from './input_validation_callout';
@@ -97,8 +101,9 @@ export const WorkflowExecuteManualForm = ({
     if (!inputs || useFieldsForm) {
       return undefined;
     }
-    return (mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema(inputs as object) ??
+    const merged = (mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema(inputs as object) ??
       inputs) as JsonModelSchemaType;
+    return omitRequiredWithDefaults(merged);
   }, [inputs, useFieldsForm]);
 
   const fieldErrors = useMemo(() => {

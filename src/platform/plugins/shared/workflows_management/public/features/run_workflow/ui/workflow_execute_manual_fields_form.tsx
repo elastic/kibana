@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
+import { omitRequiredWithDefaults } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import type { JsonSchema } from '@kbn/workflows/spec/schema/common/json_model_shape_schema';
 
@@ -51,7 +52,11 @@ export function WorkflowExecuteManualFieldsForm({
   onChange,
   fieldErrors,
 }: WorkflowExecuteManualFieldsFormProps) {
-  const required = useMemo(() => new Set(inputs.required ?? []), [inputs.required]);
+  // Inputs with a default are filled in on run, so they are not flagged as required.
+  const required = useMemo(
+    () => new Set(omitRequiredWithDefaults(inputs).required ?? []),
+    [inputs]
+  );
   const entries = useMemo(
     () => Object.entries(inputs.properties ?? {}) as Array<[string, JsonSchema]>,
     [inputs.properties]

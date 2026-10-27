@@ -214,6 +214,9 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   // Keep the panel on Border Plain; the shadow mixin otherwise overlays a subdued ring in dark mode.
   const nodeShadow = useEuiShadow('xs', { border: 'none' });
   const isTriggerNode = isTrigger || TRIGGER_STEP_TYPES.has(stepType);
+  // Display-only: trigger labels are already human-readable (getTriggerName);
+  // step labels are frequently authored as slugs, so deslugify for display.
+  // `label` itself must stay untouched — it's used to key execution status.
   const displayLabel = isTriggerNode ? label : deslugifyStepName(label);
 
   const iconType = isTriggerNode ? getTriggerTypeIconType(stepType) : getStepIconType(stepType);

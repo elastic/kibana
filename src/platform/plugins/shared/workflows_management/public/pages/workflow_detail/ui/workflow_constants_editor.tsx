@@ -168,7 +168,8 @@ export function WorkflowConstantsEditor({
           <p>
             {i18n.translate('workflows.workflowSettingsFlyout.noConstantsBody', {
               defaultMessage:
-                'Constants are fixed values reused across steps — a channel name, an API base URL, a case owner. They are stored in the workflow definition and visible to anyone who can edit it. Reference them as consts.<name>.',
+                'Constants are fixed values reused across steps — a channel name, an API base URL, a case owner. They are stored in the workflow definition and visible to anyone who can edit it. Reference them as {reference}.',
+              values: { reference: 'consts.<name>' },
             })}
           </p>
         }

@@ -227,7 +227,7 @@ If you are adding unit tests (which we recommend), you will need to add a `jest.
 ```js
 module.exports = {
   // Default Jest settings, defined in kbn-test package
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   // The root of the directory containing package.json
   rootDir: '../../..',
   // The directory which Jest should use to search for files in

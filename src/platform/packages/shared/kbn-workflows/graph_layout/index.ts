@@ -27,7 +27,11 @@ export {
   type StructureSequence,
   type StructureStep,
 } from './types';
-export { transformWorkflowToGraph, type TransformResult } from './transform_workflow_to_graph';
+export {
+  transformWorkflowToGraph,
+  type GetTriggerLabel,
+  type TransformResult,
+} from './transform_workflow_to_graph';
 export {
   visitStepChildSlots,
   walkStepTree,

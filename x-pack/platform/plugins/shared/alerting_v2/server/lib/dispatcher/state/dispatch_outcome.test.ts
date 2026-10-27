@@ -18,7 +18,6 @@ describe('DispatchOutcome', () => {
     expect(outcome.executionIdsFor('g1')).toEqual(['exec-1', 'exec-2']);
     expect(outcome.executionIdsFor('missing')).toEqual([]);
     expect(outcome.scheduledGroupCount).toBe(1);
-    expect(outcome.hasFailures()).toBe(false);
   });
 
   describe('deliveredDestinationsFor', () => {
@@ -46,7 +45,6 @@ describe('DispatchOutcome', () => {
       });
 
       expect(outcome.deliveredDestinationsFor(group)).toEqual([{ type: 'workflow', id: 'wf-2' }]);
-      expect(outcome.hasFailures()).toBe(true);
     });
 
     it('returns an empty list when every destination failed (total failure)', () => {

@@ -76,11 +76,11 @@ function solutionReason(solution: string): RecommendationReason {
   const label = humanizeSolutionId(solution);
   return {
     signal: 'solution',
-    label: i18n.translate('workflows.library.recommend.reason.solution', {
+    label: i18n.translate('workflowsUi.library.recommend.reason.solution', {
       defaultMessage: 'Popular in {solution}',
       values: { solution: label },
     }),
-    tooltip: i18n.translate('workflows.library.recommend.reason.solutionTooltip', {
+    tooltip: i18n.translate('workflowsUi.library.recommend.reason.solutionTooltip', {
       defaultMessage: 'Based on your current solution — {solution}',
       values: { solution: label },
     }),
@@ -91,11 +91,11 @@ function connectorReason(actionTypeId: string): RecommendationReason {
   const name = humanizeConnectorId(actionTypeId);
   return {
     signal: 'connector',
-    label: i18n.translate('workflows.library.recommend.reason.connector', {
+    label: i18n.translate('workflowsUi.library.recommend.reason.connector', {
       defaultMessage: '{connector} connector configured',
       values: { connector: name },
     }),
-    tooltip: i18n.translate('workflows.library.recommend.reason.connectorTooltip', {
+    tooltip: i18n.translate('workflowsUi.library.recommend.reason.connectorTooltip', {
       defaultMessage: 'Based on connectors configured in your deployment',
     }),
   };
@@ -105,11 +105,11 @@ function dataReason(tag: string): RecommendationReason {
   const label = humanizeSolutionId(tag);
   return {
     signal: 'data',
-    label: i18n.translate('workflows.library.recommend.reason.data', {
+    label: i18n.translate('workflowsUi.library.recommend.reason.data', {
       defaultMessage: '{data} data detected',
       values: { data: label },
     }),
-    tooltip: i18n.translate('workflows.library.recommend.reason.dataTooltip', {
+    tooltip: i18n.translate('workflowsUi.library.recommend.reason.dataTooltip', {
       defaultMessage: 'Based on data in your environment — {data}',
       values: { data: label },
     }),
@@ -119,10 +119,10 @@ function dataReason(tag: string): RecommendationReason {
 function popularReason(): RecommendationReason {
   return {
     signal: 'popular',
-    label: i18n.translate('workflows.library.recommend.reason.popular', {
+    label: i18n.translate('workflowsUi.library.recommend.reason.popular', {
       defaultMessage: 'Popular starter',
     }),
-    tooltip: i18n.translate('workflows.library.recommend.reason.popularTooltip', {
+    tooltip: i18n.translate('workflowsUi.library.recommend.reason.popularTooltip', {
       defaultMessage: 'A frequently used template from the Template library',
     }),
   };

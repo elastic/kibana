@@ -83,6 +83,11 @@ export const getTriagePlanSweepStepDefinition = () =>
             : { status: 'unknown' };
 
         const now = Date.now();
+        const filters = {
+          minSeverity: input.min_severity,
+          excludeBuildingBlocks: input.exclude_building_blocks,
+          excludedRuleTags: input.excluded_rule_tags,
+        };
         const plan = await planSweep(
           {
             readHeadroom: async () => headroom,
@@ -90,13 +95,15 @@ export const getTriagePlanSweepStepDefinition = () =>
               countAgedOutAlerts(
                 contextManager,
                 input.analysis_tag_prefix,
-                now - input.lookback_hours * 60 * 60 * 1000
+                now - input.lookback_hours * 60 * 60 * 1000,
+                filters
               ),
             fetchAlerts: () =>
               fetchTriageAlerts(
                 contextManager,
                 input.analysis_tag_prefix,
-                now - input.lookback_hours * 60 * 60 * 1000
+                now - input.lookback_hours * 60 * 60 * 1000,
+                filters
               ),
             listLiveExecutionIds: () =>
               listLiveExecutionIds(contextManager, input.batch_workflow_id, logger),

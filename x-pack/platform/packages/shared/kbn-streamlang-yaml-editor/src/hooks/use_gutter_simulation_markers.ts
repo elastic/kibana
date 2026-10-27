@@ -12,25 +12,25 @@ import type { ProcessorMetrics, ProcessorsMetrics, StepStatus, StepSummary } fro
 import type { YamlLineMap } from '../utils/yaml_line_mapper';
 
 const SKIPPED_MESSAGE = i18n.translate(
-  'xpack.streams.streamlangYamlEditor.simulationStatus.skipped',
+  'xpack.streamlang.streamlangYamlEditor.simulationStatus.skipped',
   {
     defaultMessage: 'This step was skipped during the last simulation run.',
   }
 );
 const DISABLED_MESSAGE = i18n.translate(
-  'xpack.streams.streamlangYamlEditor.simulationStatus.disabled',
+  'xpack.streamlang.streamlangYamlEditor.simulationStatus.disabled',
   {
     defaultMessage: 'Simulation is disabled.',
   }
 );
 const GENERIC_FAILURE_MESSAGE = i18n.translate(
-  'xpack.streams.streamlangYamlEditor.simulationStatus.genericFailure',
+  'xpack.streamlang.streamlangYamlEditor.simulationStatus.genericFailure',
   {
     defaultMessage: 'Simulation failed for this step.',
   }
 );
 const PENDING_MESSAGE = i18n.translate(
-  'xpack.streams.streamlangYamlEditor.simulationStatus.pending',
+  'xpack.streamlang.streamlangYamlEditor.simulationStatus.pending',
   {
     defaultMessage: 'Pending simulation.',
   }
@@ -183,16 +183,16 @@ function formatErrorMessages(
       .replace(/\b\w/g, (letter) => letter.toUpperCase());
     const message =
       error.message ??
-      i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.unknownError', {
+      i18n.translate('xpack.streamlang.streamlangYamlEditor.simulationStatus.unknownError', {
         defaultMessage: 'An unknown error occurred.',
       });
-    return i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.errorEntry', {
+    return i18n.translate('xpack.streamlang.streamlangYamlEditor.simulationStatus.errorEntry', {
       defaultMessage: '**{entry}. {errorType}**\n\n{errorMessage}',
       values: { entry: index + 1, errorType, errorMessage: message },
     });
   });
 
-  return i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.errorSummary', {
+  return i18n.translate('xpack.streamlang.streamlangYamlEditor.simulationStatus.errorSummary', {
     defaultMessage: '**⚠️ Processor Errors ({count})**\n\n{errors}',
     values: { count: errors.length, errors: formattedErrors.join('\n\n---\n\n') },
   });
@@ -213,7 +213,7 @@ function formatMetricsMessage(metrics?: ProcessorMetrics): string | undefined {
   const parsedRateStr = formatRate(parsedRate);
   if (parsedRateStr) {
     sections.push(
-      i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.parsedRate', {
+      i18n.translate('xpack.streamlang.streamlangYamlEditor.simulationStatus.parsedRate', {
         defaultMessage: '✅ **Parsed:** {rate} of documents',
         values: { rate: parsedRateStr },
       })
@@ -223,7 +223,7 @@ function formatMetricsMessage(metrics?: ProcessorMetrics): string | undefined {
   const failedRateStr = formatRate(failedRate);
   if (failedRateStr) {
     sections.push(
-      i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.failedRate', {
+      i18n.translate('xpack.streamlang.streamlangYamlEditor.simulationStatus.failedRate', {
         defaultMessage: '❌ **Failed:** {rate} of documents',
         values: { rate: failedRateStr },
       })
@@ -233,7 +233,7 @@ function formatMetricsMessage(metrics?: ProcessorMetrics): string | undefined {
   const skippedRateStr = formatRate(skippedRate);
   if (skippedRateStr) {
     sections.push(
-      i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.skippedRate', {
+      i18n.translate('xpack.streamlang.streamlangYamlEditor.simulationStatus.skippedRate', {
         defaultMessage: '⏭️ **Skipped:** {rate} of documents',
         values: { rate: skippedRateStr },
       })
@@ -243,7 +243,7 @@ function formatMetricsMessage(metrics?: ProcessorMetrics): string | undefined {
   if (Array.isArray(detectedFields) && detectedFields.length > 0) {
     const fieldCount = detectedFields.length;
     const fieldLabel = i18n.translate(
-      'xpack.streams.streamlangYamlEditor.simulationStatus.detectedFieldsLabel',
+      'xpack.streamlang.streamlangYamlEditor.simulationStatus.detectedFieldsLabel',
       {
         defaultMessage: '{count, plural, one {field} other {fields}}',
         values: { count: fieldCount },
@@ -252,15 +252,18 @@ function formatMetricsMessage(metrics?: ProcessorMetrics): string | undefined {
 
     const fieldList = detectedFields
       .map((field) =>
-        i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.detectedFieldEntry', {
-          defaultMessage: '  - `{field}`',
-          values: { field },
-        })
+        i18n.translate(
+          'xpack.streamlang.streamlangYamlEditor.simulationStatus.detectedFieldEntry',
+          {
+            defaultMessage: '  - `{field}`',
+            values: { field },
+          }
+        )
       )
       .join('\n');
 
     sections.push(
-      i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.detectedFields', {
+      i18n.translate('xpack.streamlang.streamlangYamlEditor.simulationStatus.detectedFields', {
         defaultMessage: '📋 **Detected {count} {label}:**\n{fields}',
         values: { count: fieldCount, label: fieldLabel, fields: fieldList },
       })
@@ -271,7 +274,7 @@ function formatMetricsMessage(metrics?: ProcessorMetrics): string | undefined {
     return undefined;
   }
 
-  return i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.metricsSummary', {
+  return i18n.translate('xpack.streamlang.streamlangYamlEditor.simulationStatus.metricsSummary', {
     defaultMessage: '**📊 Processor Metrics**\n\n{sections}',
     values: { sections: sections.join('\n\n') },
   });

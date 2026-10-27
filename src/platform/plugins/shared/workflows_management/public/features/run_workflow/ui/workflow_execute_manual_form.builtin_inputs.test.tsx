@@ -112,6 +112,39 @@ describe('WorkflowExecuteManualForm built-in kibana input refs', () => {
     });
   });
 
+  it('does not mark required inputs with a default as required in the Monaco schema', async () => {
+    const jsonDefaultsSetDiagnosticsOptionsSpy = jest.spyOn(jsonDefaults, 'setDiagnosticsOptions');
+
+    render(
+      <WorkflowExecuteManualForm
+        value="{}"
+        inputs={
+          {
+            type: 'object',
+            properties: {
+              who: { type: 'string', default: 'world' },
+              name: { type: 'string' },
+              // `anyOf` is not builder-editable, so the form falls back to the Monaco editor.
+              either: { anyOf: [{ type: 'string' }, { type: 'number' }] },
+            },
+            required: ['who', 'name'],
+          } as JsonModelSchemaType
+        }
+        setValue={jest.fn()}
+        errors={null}
+        setErrors={jest.fn()}
+      />,
+      { wrapper: I18nProvider }
+    );
+
+    await waitFor(() => {
+      expect(jsonDefaultsSetDiagnosticsOptionsSpy).toHaveBeenCalled();
+    });
+
+    const options = jsonDefaultsSetDiagnosticsOptionsSpy.mock.calls.at(-1)?.[0];
+    expect(options?.schemas?.[0]?.schema).toMatchObject({ required: ['name'] });
+  });
+
   it('reports Zod validation errors when required built-in ref payload is incomplete', async () => {
     const { setErrors } = renderForm(
       JSON.stringify(
@@ -146,6 +179,7 @@ describe('WorkflowExecuteManualForm built-in kibana input refs', () => {
                 space_id: 'default',
                 group_hash: 'hash-1',
                 alert_id: 'alert-1',
+                alert_url: 'https://kibana.example.com/app/r?l=ALERTING_V2_EPISODES_LOCATOR',
                 alert_status: 'active',
               },
             ],

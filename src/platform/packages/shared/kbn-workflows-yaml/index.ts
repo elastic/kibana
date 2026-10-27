@@ -112,5 +112,12 @@ export { validateLiquidYamlScalars } from './common/validation/variables/validat
 export { validateLiquidForLoopCollections } from './common/validation/variables/validate_liquid_for_loop_collections';
 
 // Yaml editing utilities
-export { insertStep, modifyStep, modifyStepProperty, deleteStep } from './lib/yaml_edit';
+export {
+  insertStep,
+  modifyStep,
+  modifyStepProperty,
+  modifyWorkflowProperty,
+  deleteStep,
+  WORKFLOW_PROPERTY_KEYS,
+} from './lib/yaml_edit';
 export type { StepDefinition } from './lib/yaml_edit';

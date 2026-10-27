@@ -32,14 +32,8 @@ import {
   isStep,
 } from './types';
 import { visitStepChildSlots } from './walk_step_tree';
+import { getTriggerName } from '../common/get_trigger_name';
 import type { IfStep, MergeStep, ParallelStep, SwitchStep, WorkflowYaml } from '../spec/schema';
-
-const TRIGGER_LABEL: Record<string, string> = {
-  manual: 'Manual',
-  alert: 'Alert',
-  scheduled: 'Scheduled',
-  document: 'Document',
-};
 
 /** Height of every layout-only bypass and join node. */
 const BYPASS_LANE_HEIGHT = 1;
@@ -55,9 +49,10 @@ const BYPASS_LANE_MEASURABLE_WIDTH = 80;
 /** Keeps only well-formed steps, like `visitStepChildSlots` does for the fingerprint. */
 const toSteps = (value: unknown): Step[] => (Array.isArray(value) ? value.filter(isStep) : []);
 
-function getTriggerLabel(triggerType: string): string {
-  return TRIGGER_LABEL[triggerType] ?? triggerType;
-}
+/** Resolves the label drawn on a trigger node. Defaults to {@link getTriggerName}. */
+export type GetTriggerLabel = (triggerType: string) => string;
+
+const defaultGetTriggerLabel: GetTriggerLabel = (triggerType) => getTriggerName(triggerType);
 
 /** Collapse duplicate exit ids when empty branches fall through via the same gate. */
 function dedupeIds(ids: string[]): string[] {
@@ -126,9 +121,14 @@ interface InternalTransformResult extends Omit<TransformResult, 'structure'> {
  * and edges plus an optional list of `foreachGroup` containers (top-level
  * foreach steps render their body inside a visual container).
  *
- * Pure: same input → same output. Safe to memoize on the topology fingerprint.
+ * Pure for a given `getTriggerLabel`: same workflow and label function → same output.
+ * Safe to memoize on the topology fingerprint. Without `getTriggerLabel`, names come
+ * from {@link getTriggerName}: Manual, Alert, and Scheduled, then the type id.
  */
-export function transformWorkflowToGraph(workflow: WorkflowYaml | undefined): TransformResult {
+export function transformWorkflowToGraph(
+  workflow: WorkflowYaml | undefined,
+  getTriggerLabel: GetTriggerLabel = defaultGetTriggerLabel
+): TransformResult {
   if (!workflow)
     return {
       nodes: [],
@@ -152,9 +152,13 @@ export function transformWorkflowToGraph(workflow: WorkflowYaml | undefined): Tr
     fallbackLanes,
     forkNodeToJoinId,
     items,
-  } = transformInternal(workflow.triggers ?? [], toSteps(workflow.steps), ids, {
-    fallbackDepth: 0,
-  });
+  } = transformInternal(
+    workflow.triggers ?? [],
+    toSteps(workflow.steps),
+    ids,
+    { fallbackDepth: 0 },
+    getTriggerLabel
+  );
   // Boundary 1: concatenate all failure edges after all structural edges so
   // the outer graph's edge list keeps [structural, failure] order (plan step 6).
   return {
@@ -183,7 +187,10 @@ function transformInternal(
   triggers: WorkflowYaml['triggers'],
   steps: Step[],
   ids: IdAllocator,
-  ctx: LevelContext
+  ctx: LevelContext,
+  // Nested calls pass no triggers, so they keep the default. The root call
+  // passes the caller's function, which is what labels the trigger nodes.
+  getTriggerLabel: GetTriggerLabel = defaultGetTriggerLabel
 ): InternalTransformResult {
   const nodes: PreLayoutNode[] = [];
   const bypassLaneNodes: PreLayoutBypassLaneNode[] = [];

@@ -26,6 +26,7 @@ import {
   CONTEXT_PREAMBLE,
   ESQL_GENERATION_INSTRUCTIONS,
 } from './extraction_contract';
+import { collapseByArtifactSet, queryHuntsArtifacts } from './behavior_artifact_set';
 import { toIndexedBehaviors } from './indexed_behaviors';
 import { getMitreCatalog } from './mitre_catalog';
 import { assertEsqlSourcesAllowed } from './assert_esql_sources_allowed';
@@ -430,10 +431,28 @@ const buildGenerationContext = ({
 };
 
 /**
- * One `generateEsql` call per validated behavior, keyed by technique id. The
- * shared generator grounds the query in ES|QL docs and the target's mappings,
- * autocorrects, validates the AST, and retries; anything that still fails
- * falls back to a non-executable placeholder (no FROM clause).
+ * One behavior's outcome from {@link generateGroundedEsql}: either a query ready to hand to
+ * the outer source/grounding gates (grounded in-scope, or out-of-scope and passed through
+ * untouched so the outer source gate labels it `query_out_of_scope` as today), or a query that
+ * stayed ungrounded through the retry, carrying the first gate's rejection reason.
+ */
+type GeneratedEsqlEntry =
+  | { outcome: 'generated'; techniqueId: string; esql: string }
+  | { outcome: 'ungrounded'; techniqueId: string; reason: string };
+
+/**
+ * One `generateEsql` call per validated behavior, keyed by technique id, followed by this
+ * module's own grounding check and — on the first failure — exactly one corrective retry that
+ * hands the model its own rejected query and the gate's reason. The shared generator still
+ * grounds the query in ES|QL docs and the target's mappings, autocorrects, validates the AST,
+ * and retries on its own schedule; that loop is unchanged and separate from this one.
+ *
+ * Returns two maps rather than one: `generated` holds every query this function hands on to
+ * the publish loop's own source/grounding gates (grounded in-scope queries, plus out-of-scope
+ * queries passed through so the outer source gate labels them, exactly as before this function
+ * existed); `ungrounded` holds the first gate's rejection reason for a behavior that stayed
+ * ungrounded through the retry. A technique id in neither map means generation itself failed
+ * (an `error`, no query, or a throw), unchanged from before.
  */
 const generateGroundedEsql = async ({
   esqlModel,
@@ -455,35 +474,40 @@ const generateGroundedEsql = async ({
   articleContext?: HuntBehaviorArticleContext;
   allowedIndices: string[];
   rowLimit: number;
-}): Promise<Map<string, string>> => {
+}): Promise<{ generated: Map<string, string>; ungrounded: Map<string, string> }> => {
   const index = resolveGenerationIndex(allowedIndices);
   const additionalContext = buildGenerationContext({ text, iocs, articleContext });
   // The schema probe runs the model's FROM before the publish/execute scope gate, so gate the
   // client it runs on with the same allowlist — an out-of-scope probe is refused before it
   // reaches Elasticsearch, and generation falls back to the non-executable placeholder.
   const probeClient = scopedEsqlProbeClient(esClient, allowedIndices);
+  const iocValues = (iocs ?? []).map((ioc) => ioc.value);
 
   const entries = await pMap(
     behaviors,
-    async (behavior): Promise<[string, string] | undefined> => {
+    async (behavior): Promise<GeneratedEsqlEntry | undefined> => {
+      // Shared across both calls: only `additionalInstructions` differs on the retry.
+      const baseArgs = {
+        model: esqlModel,
+        esClient: probeClient,
+        logger,
+        nlQuery:
+          `Hunt for MITRE ATT&CK ${behavior.technique_id} (${behavior.technique_name}) ` +
+          `as described by this report evidence: "${behavior.evidence_quote}"`,
+        index,
+        additionalContext,
+        // The hunt window is bound as an execute-time filter, not ?_tstart/?_tend params.
+        disableNamedParams: true,
+        // AST-validate against mappings, then probe-execute (LIMIT 1) so environment
+        // errors feed the generator's retry loop. The real execute runs below with
+        // METADATA columns and the hunt window.
+        execute: 'schema' as const,
+        rowLimit,
+      };
       try {
         const { query, error } = await generateEsql({
-          model: esqlModel,
-          esClient: probeClient,
-          logger,
-          nlQuery:
-            `Hunt for MITRE ATT&CK ${behavior.technique_id} (${behavior.technique_name}) ` +
-            `as described by this report evidence: "${behavior.evidence_quote}"`,
-          index,
+          ...baseArgs,
           additionalInstructions: ESQL_GENERATION_INSTRUCTIONS,
-          additionalContext,
-          // The hunt window is bound as an execute-time filter, not ?_tstart/?_tend params.
-          disableNamedParams: true,
-          // AST-validate against mappings, then probe-execute (LIMIT 1) so environment
-          // errors feed the generator's retry loop. The real execute runs below with
-          // METADATA columns and the hunt window.
-          execute: 'schema',
-          rowLimit,
         });
         if (error || !query) {
           logger.warn(
@@ -495,7 +519,81 @@ const generateGroundedEsql = async ({
           );
           return undefined;
         }
-        return [behavior.technique_id, query.trim()];
+        const esql = query.trim();
+        // Out of scope → hand it on unchanged, no retry: the outer source gate labels it
+        // `query_out_of_scope` exactly as today.
+        const sourcesAllowed = assertEsqlSourcesAllowed(
+          prepareEsqlForExecute(esql),
+          allowedIndices
+        );
+        if (!sourcesAllowed.ok) {
+          return { outcome: 'generated', techniqueId: behavior.technique_id, esql };
+        }
+        // Raw `query.trim()`, the same input the outer grounding gate uses today.
+        const grounded = assertEsqlGroundedInReport(esql, { reportText: text, iocValues });
+        if (grounded.ok) {
+          return { outcome: 'generated', techniqueId: behavior.technique_id, esql };
+        }
+        const firstReason = grounded.reason;
+        // Debug-level, exact shape, so a future local run can be harvested into fixtures by
+        // grepping `[hunt:esql] ungrounded query`.
+        logger.debug(
+          `[hunt:esql] ungrounded query technique=${behavior.technique_id} attempt=1 ` +
+            `reason=${firstReason}\n${esql.slice(0, 2000)}`
+        );
+        const retryInstructions =
+          `${ESQL_GENERATION_INSTRUCTIONS}\n\n` +
+          `Your previous query was rejected because it is not grounded in the report:\n\n` +
+          `${esql.slice(0, 4000)}\n\n` +
+          `Rejection reason: ${firstReason}\n\n` +
+          `Rewrite the query so every OR branch, IN member and FORK branch filters on a ` +
+          `verbatim report artifact; remove any branch that does not. Do not add new generic ` +
+          `branches.`;
+        try {
+          const { query: retryQuery, error: retryError } = await generateEsql({
+            ...baseArgs,
+            additionalInstructions: retryInstructions,
+          });
+          if (retryError || !retryQuery) {
+            logger.warn(
+              `[hunt:esql] grounded ES|QL retry for ${behavior.technique_id} failed — ` +
+                `keeping the non-executable placeholder. first reason: ${firstReason}; ` +
+                `second-call error: ${(retryError ?? 'no query returned').slice(0, 300)}`
+            );
+            return {
+              outcome: 'ungrounded',
+              techniqueId: behavior.technique_id,
+              reason: firstReason,
+            };
+          }
+          // No source pre-check of its own: an out-of-scope retry still grounds here and lands
+          // in `generated`, where the outer source gate labels it as today.
+          const retryEsql = retryQuery.trim();
+          const retryGrounded = assertEsqlGroundedInReport(retryEsql, {
+            reportText: text,
+            iocValues,
+          });
+          if (retryGrounded.ok) {
+            return { outcome: 'generated', techniqueId: behavior.technique_id, esql: retryEsql };
+          }
+          logger.debug(
+            `[hunt:esql] ungrounded query technique=${behavior.technique_id} attempt=2 ` +
+              `reason=${retryGrounded.reason}\n${retryEsql.slice(0, 2000)}`
+          );
+          logger.warn(
+            `[hunt:esql] discarding the retried query for ${behavior.technique_id} — ` +
+              `first reason: ${firstReason}; second reason: ${retryGrounded.reason}. ` +
+              `Keeping the non-executable placeholder.`
+          );
+          return { outcome: 'ungrounded', techniqueId: behavior.technique_id, reason: firstReason };
+        } catch (retryErr) {
+          logger.warn(
+            `[hunt:esql] grounded ES|QL retry for ${behavior.technique_id} threw — ` +
+              `keeping the non-executable placeholder. first reason: ${firstReason}; ` +
+              `second-call error: ${((retryErr as Error).message ?? '').slice(0, 300)}`
+          );
+          return { outcome: 'ungrounded', techniqueId: behavior.technique_id, reason: firstReason };
+        }
       } catch (err) {
         logger.warn(
           `[hunt:esql] grounded ES|QL generation for ${behavior.technique_id} threw — ` +
@@ -510,16 +608,23 @@ const generateGroundedEsql = async ({
     { concurrency: ESQL_GENERATION_CONCURRENCY }
   );
 
-  const generated = new Map<string, string>(
-    entries.filter((entry): entry is [string, string] => entry !== undefined)
-  );
+  const generated = new Map<string, string>();
+  const ungrounded = new Map<string, string>();
+  for (const entry of entries) {
+    if (!entry) continue;
+    if (entry.outcome === 'generated') {
+      generated.set(entry.techniqueId, entry.esql);
+    } else {
+      ungrounded.set(entry.techniqueId, entry.reason);
+    }
+  }
   if (generated.size < behaviors.length) {
     logger.warn(
       `[hunt:esql] grounded ES|QL generation covered ${generated.size}/${behaviors.length} ` +
         `behaviors — uncovered behaviors fall back to a non-executable placeholder.`
     );
   }
-  return generated;
+  return { generated, ungrounded };
 };
 
 const renderArticleContext = (context: HuntBehaviorArticleContext | undefined): string => {
@@ -752,14 +857,23 @@ export const huntBehavior = async (
   }
 
   if (validated.length > 0 && esClient) {
+    // Behaviors whose evidence names the same report artifacts are hunting the same thing
+    // under different technique ids, so pay for one query per shared artifact set rather than
+    // one per technique — and do it before the budget slice below, so a duplicate never spends
+    // a slot a distinct behavior could have used. Siblings are not written off here, though:
+    // they are deferred behind their survivor and generated in a second wave with whatever
+    // budget remains, and only one that loses to the budget is settled on what the survivor's
+    // query turned out to search.
+    const { survivors, collapsed: collapsedSiblings } = collapseByArtifactSet(validated, iocs);
+
     // Highest confidence first, so a report that overruns the budget spends it on
     // its best-supported behaviors rather than whichever the model emitted first.
-    const generationTargets = [...validated]
+    const generationTargets = [...survivors]
       .sort((a, b) => b.confidence - a.confidence)
       .slice(0, MAX_GENERATED_BEHAVIORS);
     const targeted = new Set(generationTargets.map((b) => b.technique_id));
-    if (generationTargets.length < validated.length) {
-      const skipped = validated.filter((b) => !targeted.has(b.technique_id));
+    if (generationTargets.length < survivors.length) {
+      const skipped = survivors.filter((b) => !targeted.has(b.technique_id));
       for (const behavior of skipped) {
         behavior.execution = notExecuted('generation_budget');
         gap(
@@ -770,37 +884,58 @@ export const huntBehavior = async (
         );
       }
       logger.warn(
-        `[hunt:esql] ${validated.length} validated behaviors exceed the generation budget of ` +
+        `[hunt:esql] ${survivors.length} surviving behaviors exceed the generation budget of ` +
           `${MAX_GENERATED_BEHAVIORS}; ${skipped.length} techniques are left ` +
           `uncorroborated and keep a non-executable placeholder: ` +
           `${skipped.map((b) => b.technique_id).join(', ')}.`
       );
     }
-    const groundedEsql = await generateGroundedEsql({
-      esqlModel: models.esql,
-      esClient,
-      logger,
-      behaviors: generationTargets,
-      text,
-      iocs,
-      articleContext,
-      allowedIndices,
-      rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
-    });
-    for (const behavior of validated) {
-      // Budget-skipped behaviors are already recorded above; re-reporting them here
-      // as generation failures would name the same technique twice for two causes.
-      if (!targeted.has(behavior.technique_id)) continue;
-      const esql = groundedEsql.get(behavior.technique_id);
+
+    // A sibling whose survivor missed the budget cut was never going to be covered: nothing
+    // hunted those artifacts, so it gets `generation_budget` rather than a coverage claim.
+    const deferredSiblings = collapsedSiblings.filter((c) => targeted.has(c.survivor.technique_id));
+    for (const { behavior, survivor } of collapsedSiblings) {
+      if (targeted.has(survivor.technique_id)) continue;
+      behavior.execution = notExecuted('generation_budget');
+      gap(
+        behavior.technique_id,
+        'generation_budget',
+        `The run reached its budget of ${MAX_GENERATED_BEHAVIORS} generated queries before ` +
+          `${survivor.technique_id} (which shares report artifacts with ${behavior.technique_id}), ` +
+          `so neither was generated and ${behavior.technique_id} was never searched.`
+      );
+    }
+
+    /**
+     * Carries one generated query through the publish gates and, when the run has a window,
+     * execution. Returns the published query so a caller can see what the behavior now hunts,
+     * or `undefined` when the behavior kept its placeholder.
+     */
+    const publishBehavior = async (
+      behavior: ValidatedBehavior,
+      groundedEsql: Awaited<ReturnType<typeof generateGroundedEsql>>
+    ): Promise<string | undefined> => {
+      const esql = groundedEsql.generated.get(behavior.technique_id);
       if (!esql) {
-        behavior.execution = notExecuted('generation_failed');
-        gap(
-          behavior.technique_id,
-          'generation_failed',
-          `No query could be generated for ${behavior.technique_id}, so it was never searched. ` +
-            `A later run may succeed.`
-        );
-        continue;
+        const firstReason = groundedEsql.ungrounded.get(behavior.technique_id);
+        if (firstReason) {
+          behavior.execution = notExecuted('query_ungrounded');
+          gap(
+            behavior.technique_id,
+            'query_ungrounded',
+            `The query generated for ${behavior.technique_id} was discarded ` +
+              `(${firstReason}), so the technique was never searched.`
+          );
+        } else {
+          behavior.execution = notExecuted('generation_failed');
+          gap(
+            behavior.technique_id,
+            'generation_failed',
+            `No query could be generated for ${behavior.technique_id}, so it was never searched. ` +
+              `A later run may succeed.`
+          );
+        }
+        return undefined;
       }
       // Publication clears a source gate of its own. A staged rule reads as
       // grounded and authoritative to whoever picks it up in Investigation, so a
@@ -821,7 +956,7 @@ export const huntBehavior = async (
           `The query generated for ${behavior.technique_id} was discarded (${sourcesAllowed.reason}), ` +
             `so the technique was never searched.`
         );
-        continue;
+        return undefined;
       }
       // The source gate proves the query stays in scope; it does not prove the query
       // filters on anything from the report. An unfiltered query (`FROM <required> |
@@ -844,10 +979,10 @@ export const huntBehavior = async (
           `The query generated for ${behavior.technique_id} was discarded ` +
             `(${groundedInReport.reason}), so the technique was never searched.`
         );
-        continue;
+        return undefined;
       }
       behavior.validated_esql = `${buildGroundedEsqlHeader(behavior)}\n${esql}`;
-      if (!canExecute) continue;
+      if (!canExecute) return esql;
       const executed = await executeValidatedEsql({
         esClient,
         logger,
@@ -875,6 +1010,98 @@ export const huntBehavior = async (
       if (executed.affected_hosts_truncated) behavior.affected_hosts_truncated = true;
       if (executed.affected_users_truncated) behavior.affected_users_truncated = true;
       if (executed.hits) behavior.hits = executed.hits;
+      return esql;
+    };
+
+    const firstWave = await generateGroundedEsql({
+      esqlModel: models.esql,
+      esClient,
+      logger,
+      behaviors: generationTargets,
+      text,
+      iocs,
+      articleContext,
+      allowedIndices,
+      rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
+    });
+    const published = new Map<string, string>();
+    for (const behavior of validated) {
+      // Budget-skipped and deferred behaviors are recorded elsewhere; re-reporting them
+      // here as generation failures would name the same technique twice for two causes.
+      if (!targeted.has(behavior.technique_id)) continue;
+      const esql = await publishBehavior(behavior, firstWave);
+      if (esql) published.set(behavior.technique_id, esql);
+    }
+
+    // Now the survivors' queries are known, settle their siblings. Sharing an artifact set was
+    // reason enough to let the survivor generate first; it is not reason to drop the sibling's
+    // technique for good, because a query written for the survivor's technique and evidence can
+    // filter on the shared artifacts and still not express what the sibling's technique does
+    // with them. So every deferred sibling gets its own generation while budget remains. Only
+    // one that loses to the budget is settled on what its survivor did: `collapsed` when the
+    // survivor published a query seen to filter on every shared artifact, since the artifacts
+    // were at least searched, and `generation_budget` otherwise, since nothing searched them.
+    const remainingBudget = Math.max(0, MAX_GENERATED_BEHAVIORS - generationTargets.length);
+    const secondWave = deferredSiblings
+      .map(({ behavior }) => behavior)
+      .sort((a, b) => b.confidence - a.confidence)
+      .slice(0, remainingBudget);
+    const secondWaveIds = new Set(secondWave.map((b) => b.technique_id));
+    let collapsedCount = 0;
+    let budgetCount = 0;
+    for (const { behavior, survivor, key } of deferredSiblings) {
+      if (secondWaveIds.has(behavior.technique_id)) continue;
+      const survivorEsql = published.get(survivor.technique_id);
+      const sharedValues = key.split('\u0000').join(', ');
+      if (survivorEsql && queryHuntsArtifacts(survivorEsql, key)) {
+        collapsedCount += 1;
+        behavior.execution = notExecuted('collapsed');
+        gap(
+          behavior.technique_id,
+          'collapsed',
+          (
+            `The run reached its budget of ${MAX_GENERATED_BEHAVIORS} generated queries before ` +
+            `${behavior.technique_id}; its report artifacts (${sharedValues}) were searched by the ` +
+            `query for ${survivor.technique_id}, but no query for ${behavior.technique_id} itself ` +
+            `was written.`
+          ).slice(0, 500)
+        );
+      } else {
+        budgetCount += 1;
+        behavior.execution = notExecuted('generation_budget');
+        gap(
+          behavior.technique_id,
+          'generation_budget',
+          `The run reached its budget of ${MAX_GENERATED_BEHAVIORS} generated queries before ` +
+            `${behavior.technique_id}, and the query for ${survivor.technique_id} did not search ` +
+            `its report artifacts (${sharedValues}), so it was never searched.`
+        );
+      }
+    }
+    if (deferredSiblings.length > 0) {
+      logger.info(
+        `[hunt:esql] ${deferredSiblings.length} behavior(s) share report artifacts with a ` +
+          `survivor; generating ${secondWave.length} with the remaining budget, ` +
+          `${collapsedCount} collapsed onto a survivor query that searches their artifacts, ` +
+          `${budgetCount} left to the budget gap.`
+      );
+    }
+    if (secondWave.length > 0) {
+      const secondWaveEsql = await generateGroundedEsql({
+        esqlModel: models.esql,
+        esClient,
+        logger,
+        behaviors: secondWave,
+        text,
+        iocs,
+        articleContext,
+        allowedIndices,
+        rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
+      });
+      for (const behavior of validated) {
+        if (!secondWaveIds.has(behavior.technique_id)) continue;
+        await publishBehavior(behavior, secondWaveEsql);
+      }
     }
   }
 

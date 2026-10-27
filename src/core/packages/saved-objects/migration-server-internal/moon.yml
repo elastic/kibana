@@ -52,6 +52,4 @@ fileGroups:
     - '**/*.ts'
     - src/hash_to_version_map.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

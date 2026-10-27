@@ -76,6 +76,8 @@ export interface InferenceFeatureResponse {
   isBeta?: boolean;
   isTechPreview?: boolean;
   ignoreGlobalDefault?: boolean;
+  /** When true, Add model lists only endpoints that accept a prompt template. */
+  allowTemplateRequiredModels?: boolean;
   visibilityCondition?: {
     key: string;
     value: string | number | boolean | null;
