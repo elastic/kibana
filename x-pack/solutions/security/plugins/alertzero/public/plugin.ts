@@ -132,6 +132,7 @@ export class AlertZeroPublicPlugin
           startDeps,
           params,
           availability$: this.availability$,
+          spaceSupported$: this.spaceSupported$,
           isServerless: this.isServerless,
         });
       },
@@ -217,6 +218,7 @@ export class AlertZeroPublicPlugin
             AccessBoundary,
             {
               availability$: this.availability$,
+              spaceSupported$: this.spaceSupported$,
               serviceAccountsEnabled: core.security.serviceAccounts.isEnabled(),
             },
             children
