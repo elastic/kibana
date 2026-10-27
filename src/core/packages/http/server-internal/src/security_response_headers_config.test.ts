@@ -135,6 +135,8 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
       );
     });
 
+    // `report-to` belongs to each directive. Appended once to the end, it only covered `web-share`,
+    // and browsers dropped violations of every other directive.
     it('attaches the report-to parameter to every directive', () => {
       const config = schema.validate({});
       const result = parse(config, permissionsPolicy({ report_to: ['violations-endpoint'] }));
@@ -147,6 +149,28 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
       const config = schema.validate({});
       const result = parse(config, permissionsPolicy({ fullscreen: ['*'] }));
       expect(result.securityResponseHeaders['Permissions-Policy']).toContain('fullscreen=*');
+    });
+
+    it('uses only the first reporting endpoint', () => {
+      const config = schema.validate({ permissionsPolicy: 'camera=(), microphone=()' });
+      const result = parse(config, permissionsPolicy({ report_to: ['first', 'second'] }));
+      // The whole list used to be interpolated, which serialized as `report-to=first,second` and
+      // turned `second` into a member of the policy.
+      expect(result.securityResponseHeaders['Permissions-Policy']).toEqual(
+        'camera=();report-to=first, microphone=();report-to=first'
+      );
+    });
+
+    // A `report-to` inside the inner list belongs to an origin, not to the directive, so the
+    // directive still gets its own.
+    it('attaches report-to to a directive whose inner list carries one', () => {
+      const config = schema.validate({
+        permissionsPolicy: 'geolocation=("https://other.example";report-to=ignored)',
+      });
+      const result = parse(config, permissionsPolicy({ report_to: ['violations-endpoint'] }));
+      expect(result.securityResponseHeaders['Permissions-Policy']).toEqual(
+        'geolocation=("https://other.example";report-to=ignored);report-to=violations-endpoint'
+      );
     });
   });
 
@@ -195,6 +219,14 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
       const config = schema.validate({ permissionsPolicyReportOnly: '' });
       const result = parse(config, permissionsPolicy({ report_to: ['violations-endpoint'] }));
       expect(result.securityResponseHeaders['Permissions-Policy-Report-Only']).toBeUndefined();
+    });
+
+    it('attaches report-to to every directive of the report-only policy', () => {
+      const config = schema.validate({ permissionsPolicyReportOnly: 'camera=(), microphone=()' });
+      const result = parse(config, permissionsPolicy({ report_to: ['violations-endpoint'] }));
+      expect(result.securityResponseHeaders['Permissions-Policy-Report-Only']).toEqual(
+        'camera=();report-to=violations-endpoint, microphone=();report-to=violations-endpoint'
+      );
     });
 
     it('includes Permissions-Policy-Report-Only only if report-to directive is set', () => {

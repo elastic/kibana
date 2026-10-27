@@ -29,16 +29,18 @@ export class ConditionalType<A extends ConditionalTypeValue, B, C> extends Type<
     notEqualType: Type<C>,
     options?: TypeOptions<B | C>
   ) {
-    const schema = internals.when(leftOperand.getSchema(), {
-      is:
-        Reference.isReference(rightOperand) || rightOperand instanceof Type
-          ? rightOperand.getSchema()
-          : rightOperand,
-      then: equalType.getSchema(),
-      otherwise: notEqualType.getSchema(),
-    });
-
-    super(schema, options);
+    super(
+      () =>
+        internals.when(leftOperand.getSchema(), {
+          is:
+            Reference.isReference(rightOperand) || rightOperand instanceof Type
+              ? rightOperand.getSchema()
+              : rightOperand,
+          then: equalType.getSchema(),
+          otherwise: notEqualType.getSchema(),
+        }),
+      options
+    );
     this.leftOperand = leftOperand;
     this.rightOperand = rightOperand;
     this.equalType = equalType;

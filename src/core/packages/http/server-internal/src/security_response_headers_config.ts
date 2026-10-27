@@ -15,6 +15,7 @@ import type {
   PermissionsPolicyDirectiveSetting,
 } from './permissions_policy';
 import {
+  addReportToParameter,
   getReportingEndpoint,
   PermissionsPolicyDirectives,
   permissionsPolicyDirectiveSettings,
@@ -156,7 +157,8 @@ export function parseRawSecurityResponseHeadersConfig(
 
   // An invalid endpoint name is dropped here, so it never reaches either header.
   const reportTo = getReportingEndpoint(rawPermissionsPolicyConfig);
-  const reportToParameter = reportTo ? `;report-to=${reportTo}` : '';
+  const withReportTo = (policy: string) =>
+    reportTo ? addReportToParameter(policy, reportTo) : policy;
   const { enforceHeader, reportOnlyHeader } = PermissionsPolicyDirectives.fromConfig(
     rawPermissionsPolicyConfig
   ).getPermissionsPolicyHeadersByDisposition(reportTo);
@@ -165,14 +167,10 @@ export function parseRawSecurityResponseHeadersConfig(
   // header below has its own settings and is still sent when they are configured.
   if (rawPermissionsPolicyConfig.enabled !== false) {
     if (typeof raw.permissionsPolicy === 'string') {
-      // A wholesale policy is opaque to Kibana, so the report-to parameter is appended as-is
-      // rather than distributed across the directives it contains. An empty policy carries no
-      // directive to attach it to, and would serialize as a malformed `;report-to=...`, so it
-      // sends no header.
+      // An empty policy carries no directive to attach `report-to` to, and would serialize as a
+      // malformed `;report-to=...`, so it sends no header.
       if (raw.permissionsPolicy.trim()) {
-        securityResponseHeaders[
-          'Permissions-Policy'
-        ] = `${raw.permissionsPolicy}${reportToParameter}`;
+        securityResponseHeaders['Permissions-Policy'] = withReportTo(raw.permissionsPolicy);
       }
     } else if (raw.permissionsPolicy === undefined) {
       securityResponseHeaders['Permissions-Policy'] = enforceHeader;
@@ -183,9 +181,9 @@ export function parseRawSecurityResponseHeadersConfig(
   if (reportTo) {
     if (typeof raw.permissionsPolicyReportOnly === 'string') {
       if (raw.permissionsPolicyReportOnly.trim()) {
-        securityResponseHeaders[
-          'Permissions-Policy-Report-Only'
-        ] = `${raw.permissionsPolicyReportOnly}${reportToParameter}`;
+        securityResponseHeaders['Permissions-Policy-Report-Only'] = withReportTo(
+          raw.permissionsPolicyReportOnly
+        );
       }
     } else if (reportOnlyHeader) {
       securityResponseHeaders['Permissions-Policy-Report-Only'] = reportOnlyHeader;

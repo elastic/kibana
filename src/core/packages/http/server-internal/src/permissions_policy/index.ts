@@ -15,3 +15,4 @@ export {
 export type { PermissionsPolicyConfigType, PermissionsPolicyDirectiveSetting } from './config';
 export { PermissionsPolicyDirectives, defaultRules } from './permissions_policy_directives';
 export type { PermissionsPolicyDirectiveName } from './permissions_policy_directives';
+export { addReportToParameter } from './report_to_parameter';

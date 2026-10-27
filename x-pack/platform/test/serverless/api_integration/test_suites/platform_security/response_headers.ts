@@ -19,8 +19,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('security/response_headers', function () {
     const baseCSP = `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; frame-ancestors 'self'`;
     const defaultCOOP = 'same-origin';
-    // `report-to` is a parameter of each dictionary member, not of the header, so it is repeated
-    // on every directive. Serverless configures `permissionsPolicy.report_to` to mimic MKI.
+    // `report-to` is a parameter of each directive, not of the header, so it is repeated on every
+    // directive. Serverless configures `permissionsPolicy.report_to` to mimic MKI.
     const defaultPermissionsPolicy = [
       'camera=()',
       'display-capture=()',

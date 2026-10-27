@@ -31,15 +31,7 @@ export type ConfigDistributorClient = Required<Pick<UnitConfigHooks, 'publish' |
   resolveTargetId: ResolveTargetId;
 };
 
-export type UnitDiagnosticSeverity = 'error' | 'warning' | 'info';
-
-export interface UnitDiagnostic {
-  severity: UnitDiagnosticSeverity;
-  code: string;
-  message: string;
-  path?: string;
-  line?: number;
-}
+type UnitDiagnostic = StreamsUnit.Diagnostic;
 
 const REQUEST_TIMEOUT_MS = 30_000;
 
