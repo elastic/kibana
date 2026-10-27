@@ -8,15 +8,11 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowYamlValidationAccordion } from '../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion';
-
-/** Collapsed footer row height — matches the YAML editor validation accordion. */
-export const WORKFLOW_CHANGE_HISTORY_PREVIEW_FOOTER_HEIGHT = '48px';
 
 /** Space reserved for the fixed settings button (icon + right padding). */
 export const WORKFLOW_CHANGE_HISTORY_PREVIEW_SETTINGS_RESERVE_PX = 48;
@@ -26,69 +22,36 @@ export interface WorkflowChangeHistoryPreviewFooterProps {
   isEditorMounted: boolean;
   isValidationLoading: boolean;
   validationError: Error | null;
-  highlightValidationErrors: boolean;
   onValidationErrorClick?: (error: YamlValidationResult) => void;
 }
 
+/** Validation results accordion shown in the shared preview footer when highlighting is enabled. */
 export const WorkflowChangeHistoryPreviewFooter = ({
   validationResults,
   isEditorMounted,
   isValidationLoading,
   validationError,
-  highlightValidationErrors,
   onValidationErrorClick,
 }: WorkflowChangeHistoryPreviewFooterProps): JSX.Element => {
   const styles = useMemoCss(componentStyles);
-  const showValidationLoading = isValidationLoading;
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="none"
-      responsive={false}
-      css={styles.footer}
-      data-test-subj="workflowChangeHistoryPreviewFooter"
+    <div
+      css={styles.validationAccordion}
+      data-test-subj="workflowChangeHistoryPreviewValidationAccordion"
     >
-      {highlightValidationErrors ? (
-        <div
-          css={styles.validationAccordion}
-          data-test-subj="workflowChangeHistoryPreviewValidationAccordion"
-        >
-          <WorkflowYamlValidationAccordion
-            isMounted={isEditorMounted}
-            isLoading={showValidationLoading}
-            error={validationError}
-            validationErrors={showValidationLoading ? null : validationResults}
-            onErrorClick={onValidationErrorClick}
-          />
-        </div>
-      ) : (
-        <div css={styles.footerBarSpacer} aria-hidden={true} />
-      )}
-    </EuiFlexGroup>
+      <WorkflowYamlValidationAccordion
+        isMounted={isEditorMounted}
+        isLoading={isValidationLoading}
+        error={validationError}
+        validationErrors={isValidationLoading ? null : validationResults}
+        onErrorClick={onValidationErrorClick}
+      />
+    </div>
   );
 };
 
 const componentStyles = {
-  footer: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: '100%',
-      flexShrink: 0,
-      minHeight: WORKFLOW_CHANGE_HISTORY_PREVIEW_FOOTER_HEIGHT,
-      overflow: 'hidden',
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-
-      '.euiAccordion': {
-        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-        borderTop: euiTheme.border.thin,
-      },
-    }),
-  footerBarSpacer: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      minHeight: WORKFLOW_CHANGE_HISTORY_PREVIEW_FOOTER_HEIGHT,
-      borderTop: euiTheme.border.thin,
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    }),
   validationAccordion: ({ euiTheme }: UseEuiTheme) =>
     css({
       paddingRight: `calc(${euiTheme.size.m} + ${WORKFLOW_CHANGE_HISTORY_PREVIEW_SETTINGS_RESERVE_PX}px)`,

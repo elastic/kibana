@@ -26,31 +26,6 @@ export const VERSION_BADGE = (version: number): string =>
     values: { version },
   });
 
-export const VERSION_BADGE_FALLBACK = i18n.translate(
-  'workflows.changeHistory.versionBadgeFallback',
-  {
-    defaultMessage: 'Selected version',
-  }
-);
-
-export const COMPARING_WITH_LABEL = i18n.translate('workflows.changeHistory.comparingWithLabel', {
-  defaultMessage: 'Comparing with:',
-});
-
-export const PREVIOUS_VERSION_LABEL = i18n.translate(
-  'workflows.changeHistory.previousVersionLabel',
-  {
-    defaultMessage: 'Previous version:',
-  }
-);
-
-export const SELECTED_VERSION_LABEL = i18n.translate(
-  'workflows.changeHistory.selectedVersionLabel',
-  {
-    defaultMessage: 'Selected version:',
-  }
-);
-
 export const UNSAVED_CHANGES_ACTION = i18n.translate(
   'workflows.changeHistory.unsavedChangesAction',
   {

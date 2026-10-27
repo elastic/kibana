@@ -23,6 +23,25 @@ export type {
   ChangeHistoryListGroupItemProps,
 } from './src/components/modal';
 export {
+  ChangeHistoryPreview,
+  ChangeHistoryPreviewFooter,
+  ChangeHistoryPreviewFooterSpacer,
+  ChangeHistoryPreviewSettingsSection,
+  createChangeHistoryEuiMonacoTheme,
+  euiChangeHistoryMonacoTheme,
+  getChangeHistoryValidationDisplayOptions,
+} from './src/components/preview';
+export type {
+  ChangeHistoryCompareBadgeColor,
+  ChangeHistoryCompareIndicator,
+  ChangeHistoryPreviewProps,
+  ChangeHistoryMonacoLanguage,
+  ChangeHistoryMonacoTheme,
+  ChangeHistoryMonacoThemeDefinition,
+  ChangeHistoryPreviewEditorContext,
+  CreateChangeHistoryEuiMonacoThemeOptions,
+} from './src/components/preview';
+export {
   ChangeHistoryTimeline,
   ChangeHistoryItem,
   ChangeHistoryFooter,

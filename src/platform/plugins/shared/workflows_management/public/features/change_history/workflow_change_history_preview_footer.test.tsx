@@ -60,7 +60,6 @@ const renderFooter = (
         isEditorMounted={true}
         isValidationLoading={false}
         validationError={null}
-        highlightValidationErrors={true}
         {...props}
       />
     </I18nProvider>
@@ -104,19 +103,8 @@ describe('WorkflowChangeHistoryPreviewFooter', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders a spacer when highlight is disabled', () => {
-    renderFooter({
-      highlightValidationErrors: false,
-      isValidationLoading: true,
-      validationResults: [sampleError],
-    });
-
-    expect(screen.queryByTestId('workflowYamlEditorValidationErrorsList')).not.toBeInTheDocument();
-    expect(screen.getByTestId('workflowChangeHistoryPreviewFooter')).toBeInTheDocument();
-  });
-
   it('wraps the validation accordion to reserve space for the settings button', () => {
-    renderFooter({ highlightValidationErrors: true });
+    renderFooter();
 
     expect(
       screen.getByTestId('workflowChangeHistoryPreviewValidationAccordion')

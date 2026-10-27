@@ -8,17 +8,12 @@
  */
 
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { monaco } from '@kbn/code-editor';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { renderWorkflowChangeHistoryPreview } from './workflow_change_history_preview';
-
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useDefineWorkflowsMonacoTheme: jest.fn(),
-}));
 
 jest.mock('./use_workflow_change_history_preview_validation', () => ({
   useWorkflowChangeHistoryPreviewValidation: jest.fn(() => ({
@@ -103,7 +98,7 @@ describe('workflow change history preview', () => {
     });
 
     expect(screen.getByTestId('workflowChangeHistoryMonacoPreview')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowChangeHistoryMonacoEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowChangeHistoryMonacoPreviewEditor')).toBeInTheDocument();
     expect(monaco.editor.create).toHaveBeenCalled();
     expect(monaco.editor.createModel).toHaveBeenCalledWith('name: historical\n', 'yaml');
     expect(screen.queryByTestId('workflowChangeHistoryCompareSettings')).not.toBeInTheDocument();
@@ -136,11 +131,9 @@ describe('workflow change history preview', () => {
     expect(mockCreateDiffEditor).toHaveBeenCalled();
     expect(monaco.editor.createModel).toHaveBeenNthCalledWith(1, 'name: historical\n', 'yaml');
     expect(monaco.editor.createModel).toHaveBeenNthCalledWith(2, 'name: current\n', 'yaml');
-    expect(screen.getByTestId('workflowChangeHistoryCompareIndicator')).toBeInTheDocument();
+    expect(screen.getByTestId('changeHistoryCompareIndicator')).toBeInTheDocument();
     expect(screen.getByText('Comparing with:')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowChangeHistoryCompareIndicatorBadge')).toHaveTextContent(
-      'v1'
-    );
+    expect(screen.getByTestId('changeHistoryCompareIndicatorBadge')).toHaveTextContent('v1');
   });
 
   it('shows target yaml while compare context is loading', () => {
@@ -158,5 +151,43 @@ describe('workflow change history preview', () => {
     expect(mockCreateEditor).toHaveBeenCalled();
     expect(mockCreateDiffEditor).not.toHaveBeenCalled();
     expect(monaco.editor.createModel).toHaveBeenCalledWith('name: current\n', 'yaml');
+  });
+
+  it('offers the YAML validation setting and keeps the popover open when toggling it', () => {
+    renderPreview({
+      objectId: 'workflow-1',
+      change: makeDetail('name: historical\n'),
+      compareSpec: {
+        comparisonType: 'vs_previous',
+        baseline: makeDetail('name: historical\n'),
+        target: makeDetail('name: current\n'),
+      },
+    });
+
+    const settingsButton = screen.getByTestId('changeHistoryPreviewSettingsButton');
+    expect(settingsButton).toHaveAttribute('aria-label', 'Settings');
+    expect(screen.queryByTestId('workflowYamlEditorValidationErrorsList')).not.toBeInTheDocument();
+
+    fireEvent.click(settingsButton);
+    expect(screen.getByTestId('changeHistoryCompareUnified')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('workflowChangeHistoryHighlightValidationErrors'));
+
+    expect(screen.getByTestId('workflowYamlEditorValidationErrorsList')).toBeInTheDocument();
+    expect(screen.getByTestId('changeHistoryCompareUnified')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('workflowChangeHistoryHighlightValidationErrors')
+    ).toBeInTheDocument();
+  });
+
+  it('offers the validation setting without a compare baseline, but no compare mode', () => {
+    renderPreview({ objectId: 'workflow-1', change: makeDetail('name: historical\n') });
+
+    fireEvent.click(screen.getByTestId('changeHistoryPreviewSettingsButton'));
+
+    expect(
+      screen.getByTestId('workflowChangeHistoryHighlightValidationErrors')
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('changeHistoryCompareUnified')).not.toBeInTheDocument();
   });
 });

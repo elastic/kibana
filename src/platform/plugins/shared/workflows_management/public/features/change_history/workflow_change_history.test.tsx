@@ -489,23 +489,21 @@ describe('WorkflowChangeHistoryListItem', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton')).toBeInTheDocument();
+      expect(screen.getByTestId('changeHistoryPreviewSettingsButton')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton'));
-    fireEvent.click(screen.getByTestId('workflowChangeHistoryCompareSplit'));
+    fireEvent.click(screen.getByTestId('changeHistoryPreviewSettingsButton'));
+    fireEvent.click(screen.getByTestId('changeHistoryCompareSplit'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('workflowChangeHistoryCompareSplitPaneLabels')).toBeInTheDocument();
+      expect(screen.getByTestId('changeHistoryCompareSplitPaneLabels')).toBeInTheDocument();
     });
 
     expect(screen.getByText('Selected version:')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowChangeHistoryCompareSplitCurrentBadge')).toHaveTextContent(
+    expect(screen.getByTestId('changeHistoryCompareSplitCurrentBadge')).toHaveTextContent(
       UNSAVED_CHANGES_ACTION
     );
-    expect(screen.getByTestId('workflowChangeHistoryCompareSplitBaselineBadge')).toHaveTextContent(
-      'v3'
-    );
+    expect(screen.getByTestId('changeHistoryCompareSplitBaselineBadge')).toHaveTextContent('v3');
   });
 
   it('warns when restoring with unsaved workflow changes', async () => {
