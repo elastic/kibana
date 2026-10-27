@@ -14,7 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { AGENT_BUILDER_UI_EBT, DEFAULT_CONVERSATION_TITLE } from '@kbn/agent-builder-common';
 import { downloadFileAs } from '@kbn/share-plugin/public';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -27,8 +27,7 @@ import { appPaths } from '../../../utils/app_paths';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useLoadTraceFromFile } from '../../../hooks/use_load_trace_from_file';
-import { ActivityLogFlyout } from '../activity_log/activity_log_flyout';
-import { isListedActivityEvent } from '../activity_log/to_activity_items';
+import { useActivityLogMenuItem } from '../activity_log/use_activity_log_menu_item';
 import { TraceFlyout } from '../timeline/response/trace_flyout';
 
 const labels = {
@@ -56,15 +55,6 @@ const labels = {
       defaultMessage: 'Download conversation',
     }
   ),
-  activityLog: i18n.translate('xpack.agentBuilder.conversationActions.activityLog', {
-    defaultMessage: 'Activity log',
-  }),
-  activityLogNoActivityTooltip: i18n.translate(
-    'xpack.agentBuilder.conversationActions.activityLogNoActivityTooltip',
-    {
-      defaultMessage: 'No activity has been recorded for this conversation.',
-    }
-  ),
   loadTrace: i18n.translate('xpack.agentBuilder.conversationActions.loadTrace', {
     defaultMessage: 'Load trace from file',
   }),
@@ -76,16 +66,11 @@ interface MoreActionsButtonProps {
 
 export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSidebar }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
 
   const agentId = useAgentId();
   const { createAgentBuilderUrl, navigateToAgentBuilderUrl } = useNavigation();
   const { isEmbeddedContext } = useConversationContext();
   const conversationId = useConversationId();
-
-  useEffect(() => {
-    setIsActivityLogOpen(false);
-  }, [conversationId]);
   const { manageAgents } = useUiPrivileges();
 
   const {
@@ -107,6 +92,9 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   } = useLoadTraceFromFile();
 
   const closePopover = () => setIsPopoverOpen(false);
+  const { menuItem: activityLogMenuItem, flyout: activityLogFlyout } = useActivityLogMenuItem({
+    onSelect: closePopover,
+  });
   const togglePopover = () => setIsPopoverOpen((v) => !v);
 
   const handleOpenFullScreen = useCallback(() => {
@@ -135,11 +123,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       type: 'application/json',
     });
   }, [conversationTitle, conversation]);
-
-  const handleOpenActivityLog = useCallback(() => {
-    setIsPopoverOpen(false);
-    setIsActivityLogOpen(true);
-  }, []);
 
   const handleLoadTrace = useCallback(() => {
     setIsPopoverOpen(false);
@@ -184,29 +167,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       {labels.loadTrace}
     </EuiContextMenuItem>,
   ];
-
-  const hasActivity = useMemo(
-    () => Boolean(conversation?.events?.some(isListedActivityEvent)),
-    [conversation?.events]
-  );
-
-  const activityLogMenuItem = (
-    <EuiContextMenuItem
-      key="activity-log"
-      icon="timeline"
-      disabled={!hasActivity}
-      toolTipContent={hasActivity ? undefined : labels.activityLogNoActivityTooltip}
-      data-test-subj="agentBuilderActivityLogMenuItem"
-      onClick={handleOpenActivityLog}
-      {...getEbtProps({
-        element: AGENT_BUILDER_UI_EBT.element.pageContent,
-        action: AGENT_BUILDER_UI_EBT.action.conversation.OPEN_ACTIVITY_LOG,
-        detail: 'conversation',
-      })}
-    >
-      {labels.activityLog}
-    </EuiContextMenuItem>
-  );
 
   const embeddedContextMenuItems = [
     <EuiContextMenuItem
@@ -302,7 +262,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       >
         <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
-      {isActivityLogOpen && <ActivityLogFlyout onClose={() => setIsActivityLogOpen(false)} />}
+      {activityLogFlyout}
       {isTraceFlyoutOpen && (
         <TraceFlyout
           traceId={loadedTraceId}
