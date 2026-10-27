@@ -59,6 +59,7 @@ export const OBSERVABILITY_ALERTING_ALERTS_PATH = '/alerts';
 export const OBSERVABILITY_ALERTING_INBOX_PATH = '/inbox';
 export const OBSERVABILITY_ALERTING_RULES_V1_PATH = '/rules/classic';
 export const OBSERVABILITY_ALERTING_RULES_V2_PATH = '/rules/universal';
+export const OBSERVABILITY_ALERTING_RULES_MIGRATE_PATH = '/rules/migrate';
 export const OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH = '/rule-library';
 export const OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH = '/action-policies';
 export const OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH = '/execution-history';

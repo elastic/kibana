@@ -96,7 +96,26 @@ describe('ComposableClassicRulesPage', () => {
     expect(deps.hideListBackButton).toBeUndefined();
     expect(deps.host).toEqual(STACK_MANAGEMENT_RULES_HOST);
     expect(deps.showClassicBadge).toBeUndefined();
+    expect(deps.onMigrateRule).toBeUndefined();
     expect(getFeatures).toHaveBeenCalledTimes(1);
+  });
+
+  it('forwards onMigrateRule onto RulesPageApp deps', async () => {
+    const getFeatures = jest.fn().mockResolvedValue([]);
+    const onMigrateRule = jest.fn();
+
+    render(
+      <ComposableClassicRulesPage
+        coreStart={coreStart}
+        setBreadcrumbs={setBreadcrumbs}
+        onMigrateRule={onMigrateRule}
+        internalDeps={createInternalDeps(getFeatures)}
+      />
+    );
+
+    await waitFor(() => {
+      expect(getLatestDeps().onMigrateRule).toBe(onMigrateRule);
+    });
   });
 
   it('forwards showClassicBadge onto RulesPageApp deps', async () => {

@@ -105,6 +105,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   hideListBackButton?: boolean;
   host?: LocatorHost;
   showClassicBadge?: boolean;
+  onMigrateRule?: (ruleId: string) => void;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

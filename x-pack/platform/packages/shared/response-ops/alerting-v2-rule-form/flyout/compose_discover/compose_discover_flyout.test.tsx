@@ -36,6 +36,7 @@ let latestFlyoutKey: number | undefined;
 let latestFlyoutSession: EuiFlyoutProps['session'];
 let latestFlyoutMenuTitle: string | undefined;
 let latestFlyoutHasAnimation: EuiFlyoutProps['hasAnimation'];
+let latestFlyoutType: EuiFlyoutProps['type'];
 
 jest.mock('@elastic/eui', () => {
   const ReactActual = jest.requireActual('react') as typeof import('react');
@@ -52,6 +53,7 @@ jest.mock('@elastic/eui', () => {
           latestFlyoutSession = props.session;
           latestFlyoutMenuTitle = props.flyoutMenuProps?.title;
           latestFlyoutHasAnimation = props.hasAnimation;
+          latestFlyoutType = props.type;
         }
         return ReactActual.createElement(EuiFlyoutActual, { ...props, ref });
       }
@@ -420,6 +422,7 @@ describe('ComposeDiscoverFlyout', () => {
     latestFlyoutKey = undefined;
     latestFlyoutSession = undefined;
     latestFlyoutMenuTitle = undefined;
+    latestFlyoutType = undefined;
     sandboxFlyoutProps = undefined;
     yamlRuleFormProps = undefined;
     readCommittedQuery = undefined;
@@ -600,6 +603,16 @@ describe('ComposeDiscoverFlyout', () => {
     it('starts a managed session for create so the form can stack on the picker', () => {
       renderFlyout({ mode: 'create' });
       expect(latestFlyoutSession).toBe('start');
+    });
+
+    it('renders as an overlay flyout by default', () => {
+      renderFlyout();
+      expect(latestFlyoutType).toBe('overlay');
+    });
+
+    it('renders as a push flyout when flyoutType is push', () => {
+      renderFlyout({ flyoutType: 'push' });
+      expect(latestFlyoutType).toBe('push');
     });
 
     it('shows "Clone rule" in clone mode', () => {

@@ -34,6 +34,7 @@ import { setKibanaServices } from './kibana_services';
 import type { AlertingV2UIConfig } from './kibana_services';
 import type { AlertingV2PublicStart } from './types';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
+import type { CreateRuleFlyoutProps } from './create_rule_flyout';
 import type { AlertingV2PageProps } from './application/composable_pages';
 import {
   AlertingV2RulesLocatorDefinition,
@@ -63,6 +64,17 @@ const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
  * *host* container, which does not bind `PluginStart('share')` or this
  * plugin's internal services.
  */
+const LazyCreateRuleFlyout = React.lazy(() =>
+  import('./create_rule_flyout').then((m) => ({ default: m.CreateRuleFlyout }))
+);
+
+const CreateRuleFlyout = (props: CreateRuleFlyoutProps) =>
+  React.createElement(
+    React.Suspense,
+    { fallback: null },
+    React.createElement(LazyCreateRuleFlyout, props)
+  );
+
 const lazyPageWithContainer = (
   loader: () => Promise<{
     default: React.ComponentType<AlertingV2PageProps & { container: Container }>;
@@ -88,6 +100,7 @@ export type {
   PrivilegeCheck,
 } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
+export type { CreateRuleFlyoutProps } from './create_rule_flyout';
 export type { AlertingV2HostApp, CreateAlertingV2HostApp } from '../common/locators';
 export type {
   AlertingV2RulesLocatorParams,
@@ -116,6 +129,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
       const container = get(Container);
       return {
         CreateRuleOptionsFlyout,
+        CreateRuleFlyout,
         RulesPage: lazyPageWithContainer(
           () =>
             import('./application/composable_pages').then((m) => ({

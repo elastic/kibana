@@ -459,6 +459,54 @@ describe('CollapsedItemActions', () => {
       expect(screen.getByTestId('cloneRule')).toBeDisabled();
     });
 
+    describe('migrate action', () => {
+      const getKibanaMock = jest.mocked(useKibana);
+
+      const onMigrateRule = jest.fn();
+
+      afterEach(() => {
+        delete getKibanaMock().services.onMigrateRule;
+        onMigrateRule.mockClear();
+      });
+
+      test('is hidden by default', async () => {
+        render(<CollapsedItemActions {...getPropsWithRule({ ruleTypeId: '.es-query' })} />);
+
+        await userEvent.click(screen.getByTestId('selectActionButton'));
+        await waitForEuiPopoverOpen();
+
+        expect(screen.queryByTestId('migrateRule')).not.toBeInTheDocument();
+      });
+
+      test('is shown for Elasticsearch query rules when enabled', async () => {
+        getKibanaMock().services.onMigrateRule = onMigrateRule;
+        render(<CollapsedItemActions {...getPropsWithRule({ ruleTypeId: '.es-query' })} />);
+
+        await userEvent.click(screen.getByTestId('selectActionButton'));
+        await waitForEuiPopoverOpen();
+
+        const migrateBtn = screen.getByTestId('migrateRule');
+        expect(migrateBtn).not.toBeDisabled();
+        expect(migrateBtn).toHaveTextContent('Migrate');
+
+        await userEvent.click(migrateBtn);
+        expect(onMigrateRule).toHaveBeenCalledWith('1');
+        await waitFor(() => {
+          expect(screen.queryByTestId('collapsedActionPanel')).not.toBeInTheDocument();
+        });
+      });
+
+      test('is hidden for other rule types when enabled', async () => {
+        getKibanaMock().services.onMigrateRule = onMigrateRule;
+        render(<CollapsedItemActions {...getPropsWithRule()} />);
+
+        await userEvent.click(screen.getByTestId('selectActionButton'));
+        await waitForEuiPopoverOpen();
+
+        expect(screen.queryByTestId('migrateRule')).not.toBeInTheDocument();
+      });
+    });
+
     test('handles case when clone rule is clicked', async () => {
       render(<CollapsedItemActions {...getPropsWithRule()} />);
 

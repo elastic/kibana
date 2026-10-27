@@ -27,6 +27,8 @@ export interface ClassicRulesPageProps {
   tabs?: AppHeaderTab[];
   /** When true, Classic surfaces render the Classic badge. */
   showClassicBadge?: boolean;
+  /** When set, Elasticsearch query rules expose a Migrate row action that calls this with the rule id. */
+  onMigrateRule?: (ruleId: string) => void;
 }
 
 export type ClassicRulesPagePluginsStart = Pick<

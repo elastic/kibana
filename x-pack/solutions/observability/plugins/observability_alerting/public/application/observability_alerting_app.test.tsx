@@ -8,11 +8,12 @@
 import type { Capabilities, ScopedHistory } from '@kbn/core/public';
 import {
   type AlertingV2PageProps,
+  type CreateRuleFlyoutProps,
   V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY,
 } from '@kbn/alerting-v2-plugin/public';
 import type { EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
 import { coreMock } from '@kbn/core/public/mocks';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
@@ -33,6 +34,7 @@ import {
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
+  OBSERVABILITY_ALERTING_RULES_MIGRATE_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
@@ -79,6 +81,21 @@ const HostTabs = ({ tabs }: { tabs?: AlertingV2PageProps['tabs'] }) => (
   </>
 );
 
+const createdRule: Parameters<NonNullable<CreateRuleFlyoutProps['onRuleCreated']>>[0] = {
+  id: 'v2-rule-1',
+  kind: 'alert',
+  enabled: true,
+  version: 1,
+  metadata: { name: 'Migrated rule', description: '', tags: [] },
+  time_field: '@timestamp',
+  schedule: { every: '1m', lookback: '5m' },
+  query: { base: 'FROM logs-*' },
+  created_by: null,
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_by: null,
+  updated_at: '2026-01-01T00:00:00.000Z',
+};
+
 const mockAlertingVTwo = {
   RulesPage: ({ hostApp, tabs, privilegeCheck }: AlertingV2PageProps) => (
     <>
@@ -123,6 +140,14 @@ const mockAlertingVTwo = {
     />
   ),
   CreateRuleOptionsFlyout: () => null,
+  CreateRuleFlyout: ({ flyoutType, onRuleCreated }: CreateRuleFlyoutProps) => (
+    <button
+      type="button"
+      data-test-subj="createRuleFlyout"
+      data-flyout-type={flyoutType}
+      onClick={() => onRuleCreated?.(createdRule)}
+    />
+  ),
   createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) => ({
     rules: { app: appId, pathPrefix: paths.rules },
     ruleLibrary: { app: appId, pathPrefix: paths.ruleLibrary },
@@ -298,9 +323,53 @@ describe('ObservabilityAlertingApp', () => {
           app: OBSERVABILITY_ALERTING_APP_ID,
           pathPrefix: OBSERVABILITY_ALERTING_RULES_V1_PATH,
         },
+        onMigrateRule: expect.any(Function),
       })
     );
     expect(mockTriggersActionsUi.getClassicRulesPage.mock.calls[0][0].showClassicBadge).toBe(false);
+  });
+
+  it('navigates to the migrate page with the rule id when onMigrateRule is called', async () => {
+    const { getByTestId, history } = renderAt(OBSERVABILITY_ALERTING_RULES_V1_PATH);
+
+    await waitFor(() => {
+      expect(getByTestId('classicRulesPage')).toBeInTheDocument();
+    });
+    act(() => {
+      mockTriggersActionsUi.getClassicRulesPage.mock.calls[0][0].onMigrateRule?.('rule-1');
+    });
+
+    expect(history.location.pathname).toBe(`${OBSERVABILITY_ALERTING_RULES_MIGRATE_PATH}/rule-1`);
+    expect(getByTestId('migrateRulePage')).toHaveAttribute('data-rule-id', 'rule-1');
+    await waitFor(() => {
+      expect(getByTestId('migrateRuleOriginalRuleError')).toBeInTheDocument();
+    });
+  });
+
+  it('renders MigrateRulePage at /rules/migrate/:ruleId', async () => {
+    const { getByTestId, queryByTestId } = renderAt(
+      `${OBSERVABILITY_ALERTING_RULES_MIGRATE_PATH}/abc-123`
+    );
+
+    expect(getByTestId('migrateRulePage')).toHaveAttribute('data-rule-id', 'abc-123');
+    expect(getByTestId('createRuleFlyout')).toHaveAttribute('data-flyout-type', 'push');
+    expect(queryByTestId('classicRulesPage')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(getByTestId('migrateRuleOriginalRuleError')).toBeInTheDocument();
+    });
+  });
+
+  it('navigates to the Universal rules page once the migrated rule is created', async () => {
+    const { getByTestId, history } = renderAt(`${OBSERVABILITY_ALERTING_RULES_MIGRATE_PATH}/abc-123`);
+    await waitFor(() => {
+      expect(getByTestId('migrateRuleOriginalRuleError')).toBeInTheDocument();
+    });
+
+    act(() => {
+      getByTestId('createRuleFlyout').click();
+    });
+
+    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_RULES_V2_PATH);
   });
 
   it('shows both rules tabs for a mixed v1 and v2 user on the classic rules page', async () => {

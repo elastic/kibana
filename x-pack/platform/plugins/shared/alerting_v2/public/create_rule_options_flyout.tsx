@@ -19,19 +19,16 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
-import type { ComposeDiscoverFlyoutProps } from '@kbn/alerting-v2-rule-form';
-import { Context, useService } from '@kbn/core-di-browser';
-import { PluginStart } from '@kbn/core-di';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './kibana_services';
+import { Context } from '@kbn/core-di-browser';
+import { untilPluginStartServicesReady } from './kibana_services';
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
-import { RulesApi } from './services/rules_api';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
-import { useCreateActionPolicyDisabledReason } from './hooks/use_create_action_policy_disabled_reason';
-import { getAlertingV2Locators } from './application/bind_locators_to_host';
-import { OBSERVABILITY_ALERTING_HOST } from '../common/locators';
+import {
+  ActionPolicyAwareComposeDiscoverFlyout,
+  loadComposeDiscoverModules,
+  useCreateRuleSubmit,
+} from './compose_discover_flyout_loader';
 
 export interface CreateRuleOptionsFlyoutLegacyItem {
   id: string;
@@ -64,39 +61,6 @@ type Step =
   | { type: 'threshold' }
   | { type: 'legacy'; id: string };
 
-interface LoadedModules {
-  services: AlertingV2KibanaServices;
-  ComposeDiscoverFlyout: React.ComponentType<ComposeDiscoverFlyoutProps>;
-}
-
-const ActionPolicyAwareComposeDiscoverFlyout = ({
-  services,
-  ComposeDiscoverFlyout,
-  ...props
-}: Omit<ComposeDiscoverFlyoutProps, 'services'> & {
-  services: AlertingV2KibanaServices;
-  ComposeDiscoverFlyout: React.ComponentType<ComposeDiscoverFlyoutProps>;
-}) => {
-  const createActionPolicyDisabledReason = useCreateActionPolicyDisabledReason();
-  const share = useService(PluginStart('share')) as SharePluginStart;
-
-  const getActionPolicyEditHref = useCallback(
-    (actionPolicyId: string) =>
-      getAlertingV2Locators(share).actionPolicyLocators.getRedirectUrl({
-        page: 'edit',
-        actionPolicyId,
-        host: OBSERVABILITY_ALERTING_HOST.actionPolicies,
-      }),
-    [share]
-  );
-  const actionPolicyAwareServices = useMemo(
-    () => ({ ...services, createActionPolicyDisabledReason, getActionPolicyEditHref }),
-    [services, createActionPolicyDisabledReason, getActionPolicyEditHref]
-  );
-
-  return <ComposeDiscoverFlyout {...props} services={actionPolicyAwareServices} />;
-};
-
 const noopSubscribe = () => () => {};
 
 interface DiscoverQuerySnapshot {
@@ -115,7 +79,6 @@ const CreateRuleOptionsFlyoutInner = ({
   history,
 }: CreateRuleOptionsFlyoutProps) => {
   const [step, setStep] = useState<Step>({ type: 'selector' });
-  const [isSaving, setIsSaving] = useState(false);
 
   const snapshotRef = useRef<DiscoverQuerySnapshot>({
     query: getQuery?.() ?? initialQuery,
@@ -146,20 +109,7 @@ const CreateRuleOptionsFlyoutInner = ({
 
   const { query, esqlVariables } = useSyncExternalStore(wrappedSubscribe, getDiscoverQuerySnapshot);
 
-  const { loading, value } = useAsync(async (): Promise<LoadedModules> => {
-    const [services, ruleFormModule, actionPolicyFormModule] = await Promise.all([
-      untilPluginStartServicesReady(),
-      import('@kbn/alerting-v2-rule-form'),
-      import('./components/action_policy/form_flyout/create_action_policy_form_flyout'),
-    ]);
-    return {
-      services: {
-        ...services,
-        createActionPolicyFormFlyout: actionPolicyFormModule.CreateActionPolicyFormFlyout,
-      },
-      ComposeDiscoverFlyout: ruleFormModule.ComposeDiscoverFlyout,
-    };
-  }, []);
+  const { loading, value } = useAsync(loadComposeDiscoverModules, []);
 
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -228,35 +178,7 @@ const CreateRuleOptionsFlyoutInner = ({
     onClose();
   }, [isAuthoringStep, onClose]);
 
-  const rulesApi = useMemo(
-    () => (value?.services ? new RulesApi(value.services.http) : undefined),
-    [value]
-  );
-
-  const handleCreateRule = useCallback(
-    async (payload: CreateRuleData) => {
-      if (!rulesApi || !value?.services) return;
-      setIsSaving(true);
-      try {
-        const rule = await rulesApi.createRule(payload);
-        value.services.notifications.toasts.addSuccess(
-          i18n.translate('xpack.alertingV2.createAlertFlyout.createSuccess', {
-            defaultMessage: 'Rule "{ruleName}" created successfully',
-            values: { ruleName: rule.metadata.name },
-          })
-        );
-        onClose();
-      } catch (err) {
-        value.services.notifications.toasts.addDanger(
-          i18n.translate('xpack.alertingV2.createAlertFlyout.createError', {
-            defaultMessage: 'Failed to create rule',
-          })
-        );
-        setIsSaving(false);
-      }
-    },
-    [rulesApi, value, onClose]
-  );
+  const { isSaving, createRule: handleCreateRule } = useCreateRuleSubmit(value?.services, onClose);
 
   const legacyPanelItems = useMemo(
     () =>

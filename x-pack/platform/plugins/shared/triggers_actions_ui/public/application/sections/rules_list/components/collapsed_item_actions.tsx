@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { asyncScheduler } from 'rxjs';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -67,6 +67,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   const {
     ruleTypeRegistry,
     notifications: { toasts },
+    onMigrateRule,
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
@@ -242,6 +243,24 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         ),
   });
 
+  const migratePanelItem =
+    onMigrateRule && item.ruleTypeId === ES_QUERY_ID
+      ? [
+          {
+            disabled: !item.isEditable,
+            'data-test-subj': 'migrateRule',
+            onClick: () => {
+              setIsPopoverOpen(false);
+              onMigrateRule(item.id);
+            },
+            name: i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.migrateRule',
+              { defaultMessage: 'Migrate' }
+            ),
+          },
+        ]
+      : [];
+
   const panels = item.isInternallyManaged
     ? [
         {
@@ -300,6 +319,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
                 { defaultMessage: 'Run rule' }
               ),
             },
+            ...migratePanelItem,
             {
               disabled: !item.isEditable,
               className: 'collapsedItemActions__deleteButton',

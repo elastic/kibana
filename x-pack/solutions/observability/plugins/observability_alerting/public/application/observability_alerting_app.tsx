@@ -35,9 +35,11 @@ import {
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
+  OBSERVABILITY_ALERTING_RULES_MIGRATE_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
+import { MigrateRulePage } from '../migrate_rule/migrate_rule_page';
 import type { ObservabilityAlertingCases } from '../types';
 import { createInvestigateEpisodeAction } from '../actions/investigate_episode_action';
 import { useInvestigateEpisodeHeaderMenuItems } from '../actions/use_investigate_episode_header_menu_items';
@@ -137,6 +139,11 @@ const ClassicRulesV1Route = ({
     () => history.createSubHistory(OBSERVABILITY_ALERTING_RULES_V1_PATH),
     [history]
   );
+  const onMigrateRule = useCallback(
+    (ruleId: string) =>
+      history.push(`${OBSERVABILITY_ALERTING_RULES_MIGRATE_PATH}/${encodeURIComponent(ruleId)}`),
+    [history]
+  );
 
   return getClassicRulesPage({
     coreStart,
@@ -149,6 +156,7 @@ const ClassicRulesV1Route = ({
     },
     tabs,
     showClassicBadge,
+    onMigrateRule,
   });
 };
 
@@ -167,6 +175,7 @@ export const ObservabilityAlertingApp = ({
     EpisodesPage,
     ActionPoliciesPage,
     ExecutionHistoryPage,
+    CreateRuleFlyout,
     createAlertingV2HostApp: createHost,
   } = alertingVTwo;
 
@@ -202,6 +211,11 @@ export const ObservabilityAlertingApp = ({
     'v2',
     rulesTabVisibility,
     v2RulesTabNewBadge
+  );
+
+  const navigateToUniversalRules = useCallback(
+    () => history.push(OBSERVABILITY_ALERTING_RULES_V2_PATH),
+    [history]
   );
 
   const createActions = useCallback(
@@ -253,6 +267,16 @@ export const ObservabilityAlertingApp = ({
               setBreadcrumbs={setBreadcrumbs}
               tabs={rulesV1Tabs}
               showClassicBadge={hasV2Rules}
+            />
+          </EuiPageSection>
+        </Route>
+        <Route exact path={`${OBSERVABILITY_ALERTING_RULES_MIGRATE_PATH}/:ruleId`}>
+          <EuiPageSection paddingSize="m">
+            <MigrateRulePage
+              http={coreStart.http}
+              setBreadcrumbs={setBreadcrumbs}
+              CreateRuleFlyout={CreateRuleFlyout}
+              onRuleCreated={navigateToUniversalRules}
             />
           </EuiPageSection>
         </Route>

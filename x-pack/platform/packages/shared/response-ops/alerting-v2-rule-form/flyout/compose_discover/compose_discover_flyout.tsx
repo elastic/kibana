@@ -266,6 +266,8 @@ export interface ComposeDiscoverFlyoutProps {
    * leaving and the form closes.
    */
   stackedOnPicker?: boolean;
+  /** `push` keeps the host page visible beside the form. Defaults to `overlay`. */
+  flyoutType?: 'overlay' | 'push';
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -338,6 +340,7 @@ export function ComposeDiscoverFlyout({
   onSwitchToEsql,
   closeRequestRef,
   stackedOnPicker = false,
+  flyoutType = 'overlay',
 }: ComposeDiscoverFlyoutProps): React.ReactElement | null {
   const isBuilderMode = Boolean(builderType);
   /*
@@ -1426,7 +1429,7 @@ export function ComposeDiscoverFlyout({
         <>
           <EuiFlyout
             key={flyoutKey}
-            type="overlay"
+            type={flyoutType}
             session="start"
             historyKey={historyKey}
             flyoutMenuProps={{ title: sessionTitleRef.current }}

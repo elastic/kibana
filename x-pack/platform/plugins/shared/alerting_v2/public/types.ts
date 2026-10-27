@@ -7,6 +7,7 @@
 
 import type { ComponentType } from 'react';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
+import type { CreateRuleFlyoutProps } from './create_rule_flyout';
 import type { AlertingV2PageProps } from './application/composable_pages';
 import type { CreateAlertingV2HostApp } from '../common/locators';
 
@@ -16,6 +17,7 @@ export type { PrivilegeCheck } from './application/privilege_check_context';
 
 export interface AlertingV2PublicStart {
   CreateRuleOptionsFlyout: ComponentType<CreateRuleOptionsFlyoutProps>;
+  CreateRuleFlyout: ComponentType<CreateRuleFlyoutProps>;
   RulesPage: ComponentType<AlertingV2PageProps>;
   RuleLibraryPage: ComponentType<AlertingV2PageProps>;
   EpisodesPage: ComponentType<AlertingV2PageProps>;
