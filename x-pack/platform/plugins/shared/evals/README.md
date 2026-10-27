@@ -181,7 +181,7 @@ A plugin can ship its own evaluators through `registerEvaluator()` on the evals 
 
 ```ts
 evals.registerEvaluator({
-  name: 'rca_quality',
+  name: 'nightshift_rca_quality',
   version: '1.0.0',
   kind: 'llm',
   description: 'Grades a root cause analysis',
@@ -193,6 +193,7 @@ evals.registerEvaluator({
 - A registered evaluator is treated like the ones Kibana ships: it is listed and resolved as `built_in` in every space, and its name is reserved, so a user-defined evaluator can't be created under it or shadow it.
 - Names follow the same rules as user-defined ones, and versions must be semver. Registering several versions of one name is allowed; the latest is used unless a version is pinned.
 - Registration throws for a name Kibana ships, a name and version already registered, or a call made after setup.
+- Prefix names with the owning plugin, for example `nightshift_`. The registry can't tell which plugin registered a name, so two plugins could otherwise claim the same one. And when a registered name matches a user-defined evaluator already stored in a space, that stored evaluator is hidden and can no longer be updated or deleted, as happens for names Kibana ships.
 
 ## API routes
 

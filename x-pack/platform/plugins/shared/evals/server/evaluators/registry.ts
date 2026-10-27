@@ -7,6 +7,7 @@
 
 import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
+import { MAX_EVALUATOR_VERSION_LENGTH } from '@kbn/evals-common';
 import {
   assertValidEvaluatorName,
   type EvaluatorDefinitionClient,
@@ -19,6 +20,7 @@ import {
   outputTokensEvaluatorDef,
   toolCallsEvaluatorDef,
 } from './trace_metrics';
+import { toBuiltIn } from './to_built_in';
 import { compileUserDefinedEvaluator } from './user_defined/compile';
 import type {
   EvaluatorDefinition,
@@ -71,6 +73,11 @@ export const createEvaluatorRegistry = ({
         `Cannot register evaluator "${name}": version "${version}" is not a semver version`
       );
     }
+    if (version.length > MAX_EVALUATOR_VERSION_LENGTH) {
+      throw new Error(
+        `Cannot register evaluator "${name}": version must be at most ${MAX_EVALUATOR_VERSION_LENGTH} characters`
+      );
+    }
     if (shippedNames.has(name)) {
       throw new Error(
         `Cannot register evaluator "${name}": the name belongs to an evaluator that ships with Kibana`
@@ -80,7 +87,7 @@ export const createEvaluatorRegistry = ({
       throw new Error(`Cannot register evaluator "${name}@${version}": it is already registered`);
     }
 
-    addBuiltIn({ ...definition, origin: 'built_in' });
+    addBuiltIn(toBuiltIn(definition));
   };
 
   const getBuiltIn = (name: string, version?: string): EvaluatorDefinition | undefined => {

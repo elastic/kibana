@@ -289,6 +289,38 @@ describe('createEvaluatorRegistry', () => {
       );
     });
 
+    it('rejects a semver version longer than the API accepts', () => {
+      const { registry } = createRegistry();
+      const version = `1.0.0+${'a'.repeat(60)}`;
+
+      expect(() => registry.register(registered({ version }))).toThrow(
+        'Cannot register evaluator "rca_quality": version must be at most 64 characters'
+      );
+    });
+
+    it('runs an evaluator written as a class with its own receiver', async () => {
+      class RcaQualityEvaluator implements RegisteredEvaluatorDefinition {
+        readonly name = 'rca_quality';
+        readonly version = '1.0.0';
+        readonly kind = 'code' as const;
+        readonly description = 'Grades a root cause analysis';
+        readonly direction = 'maximize' as const;
+        private readonly scoreName = 'rca_quality';
+
+        async evaluate() {
+          return { scores: [{ name: this.scoreName, score: 1 }] };
+        }
+      }
+      const { registry, scoped } = createRegistry();
+      registry.register(new RcaQualityEvaluator());
+
+      const definition = await scoped.get('rca_quality');
+
+      await expect(
+        definition?.evaluate({} as Parameters<RegisteredEvaluatorDefinition['evaluate']>[0])
+      ).resolves.toEqual({ scores: [{ name: 'rca_quality', score: 1 }] });
+    });
+
     it('rejects a version that is not semver', () => {
       const { registry } = createRegistry();
 

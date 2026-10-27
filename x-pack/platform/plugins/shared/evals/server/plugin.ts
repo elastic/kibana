@@ -245,10 +245,10 @@ export class EvalsPlugin
   }
 
   start(coreStart: CoreStart, plugins: EvalsStartDependencies): EvalsPluginStart {
-    this.started = true;
     if (!this.config.enabled) {
       return {};
     }
+    this.started = true;
 
     const evaluatorRegistry = this.evaluatorRegistry;
     if (!evaluatorRegistry) {

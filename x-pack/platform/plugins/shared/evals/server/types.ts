@@ -30,7 +30,10 @@ export interface EvalsPluginSetup {
   registerTaskProvider: (provider: EvalsTaskProvider) => void;
   /**
    * Adds an evaluator the calling plugin owns. It resolves in every space as `built_in`, and
-   * its name is reserved so user-defined evaluators can't shadow it. Call during setup; throws
+   * its name is reserved so user-defined evaluators can't shadow it. Prefix the name with the
+   * owning plugin (for example `nightshift_`), because the registry can't tell plugins apart
+   * and a user-defined evaluator stored under the same name can no longer be updated or
+   * deleted. Call during setup; throws
    * for an invalid name or version, a name Kibana ships, a name and version already
    * registered, or a call after setup.
    */
