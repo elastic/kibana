@@ -998,6 +998,10 @@ const huntCoordinatorCore = async (
         // Every reader downstream (the allowlist, the schema probe, the publish/execute
         // gates, the hit bar) treats this as the set Tier 2 may read.
         allowed_indices: targets.tier2_targets,
+        // The ledger belongs to the report's own text; caller-supplied text is a different search.
+        ...(callerText === undefined && reportContext
+          ? { already_searched_technique_ids: reportContext.already_searched_technique_ids }
+          : {}),
       },
       esClient,
       mitreDataClient

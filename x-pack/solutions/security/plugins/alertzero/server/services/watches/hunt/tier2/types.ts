@@ -56,6 +56,12 @@ export interface HuntBehaviorParams {
    * and the hit bar. Empty allows nothing, so every generated query is refused.
    */
   allowed_indices?: string[];
+  /**
+   * Technique ids an earlier run on this report already searched. Candidates with these ids are
+   * dropped before the generation budget is spent, so a rerun covers what the earlier one did not
+   * rather than the same highest-confidence techniques again. They take no slot and leave no gap.
+   */
+  already_searched_technique_ids?: string[];
 }
 
 /** A candidate behavior that passed ATT&CK catalog validation. */

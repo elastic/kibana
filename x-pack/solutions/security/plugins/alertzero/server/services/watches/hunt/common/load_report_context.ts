@@ -37,6 +37,12 @@ export interface ReportHuntContext {
    * retire.
    */
   extraction_pending: boolean;
+  /**
+   * The techniques earlier hunts in this space already searched for this report (the coverage
+   * ledger on its per-space `evidence` element), so a run can spend its generation budget on
+   * the rest. Empty when no earlier run recorded any.
+   */
+  already_searched_technique_ids: string[];
   /** Descriptive fields the Investigation narratives cite; absent when the report does not carry them. */
   title?: string;
   source_name?: string;
@@ -73,6 +79,10 @@ interface StoredReportSource {
   source?: { name?: string };
   lineage?: { extraction_method?: string };
   severity?: { level?: string };
+  evidence?: Array<{
+    space_id?: string;
+    hunted_technique_ids?: string[];
+  }>;
   extracted?: {
     iocs?: Array<{ type?: string; value?: string; tier?: unknown; deferred_unreviewed?: unknown }>;
     ttps?: { techniques?: string[] };
@@ -174,6 +184,8 @@ export const loadReportHuntContext = async ({
       'source.name',
       'severity.level',
       'lineage.extraction_method',
+      'evidence.space_id',
+      'evidence.hunted_technique_ids',
       'extracted.iocs',
       'extracted.ttps.techniques',
       'extracted.vulnerability.vendor',
@@ -262,8 +274,18 @@ export const loadReportHuntContext = async ({
       ? source.lineage.extraction_method.trim()
       : '';
   const extractionPending = method.length === 0 || method === 'pending';
+  // One element per space; another space's ledger is never read.
+  const ledger = (Array.isArray(source.evidence) ? source.evidence : []).find(
+    (element) => element?.space_id === spaceId
+  );
+  const alreadySearched = (
+    Array.isArray(ledger?.hunted_technique_ids) ? ledger.hunted_technique_ids : []
+  )
+    .filter(isHuntTechnique)
+    .slice(0, MAX_HUNT_TECHNIQUE_IDS);
   return {
     extraction_pending: extractionPending,
+    already_searched_technique_ids: alreadySearched,
     ...(title !== undefined ? { title } : {}),
     ...(sourceName !== undefined ? { source_name: sourceName } : {}),
     ...(publishedAt !== undefined ? { published_at: publishedAt } : {}),

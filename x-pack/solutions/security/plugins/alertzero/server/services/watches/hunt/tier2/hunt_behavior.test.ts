@@ -1561,4 +1561,69 @@ describe('huntBehavior', () => {
       expect(result.next_step).not.toContain('partially hunted');
     });
   });
+  describe('techniques an earlier run already searched', () => {
+    const catalogIds = () => [...enterpriseCatalog.techniqueById.keys()].slice(0, 22);
+    const candidatesFor = (ids: string[]) =>
+      ids.map((technique_id, index) => ({
+        technique_id,
+        evidence_quote: 'evidence',
+        // Ascending, so the last ids are the highest-confidence ones.
+        llm_confidence: 0.5 + index * 0.01,
+      }));
+
+    it('spends the budget on the techniques not yet searched instead of the same top ones', async () => {
+      const ids = catalogIds();
+      const highest = ids.slice(2);
+      generateEsqlMock.mockResolvedValue({ query: GROUNDED_ESQL });
+
+      const result = await huntBehavior(
+        buildMockModel(candidatesFor(ids)),
+        logger,
+        { ...executeParams, already_searched_technique_ids: highest },
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      expect(result.behaviors.map((b) => b.technique_id).sort()).toEqual(ids.slice(0, 2).sort());
+      expect(result.incomplete?.some((i) => i.reason === 'generation_budget')).not.toBe(true);
+    });
+
+    it('reports no gap and no behavior for a technique it skipped as already searched', async () => {
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate, t1566Candidate]),
+        logger,
+        { ...executeParams, already_searched_technique_ids: ['T1078.004'] },
+        esClient
+      );
+
+      expect(result.behaviors.map((b) => b.technique_id)).toEqual(['T1566']);
+      expect(result.indexed_behaviors.map((b) => b.technique_id)).toEqual(['T1566']);
+      expect(result.incomplete).toBeUndefined();
+    });
+
+    it('says there was nothing new to hunt when every extracted technique was already searched', async () => {
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate, t1566Candidate]),
+        logger,
+        { ...executeParams, already_searched_technique_ids: ['T1078.004', 'T1566'] },
+        esClient
+      );
+
+      expect(generateEsqlMock).not.toHaveBeenCalled();
+      expect(result.behaviors).toEqual([]);
+      expect(result.incomplete).toBeUndefined();
+      expect(result.next_step).toContain('already searched by an earlier run');
+    });
+
+    it('hunts everything when the earlier run recorded nothing', async () => {
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate, t1566Candidate]),
+        logger,
+        { ...executeParams, already_searched_technique_ids: [] },
+        esClient
+      );
+
+      expect(result.behaviors).toHaveLength(2);
+    });
+  });
 });

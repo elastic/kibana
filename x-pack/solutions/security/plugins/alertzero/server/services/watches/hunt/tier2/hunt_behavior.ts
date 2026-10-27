@@ -702,7 +702,9 @@ export const huntBehavior = async (
     size,
     row_limit: rowLimitFromParams,
     allowed_indices: allowedIndices = [],
+    already_searched_technique_ids: alreadySearchedIds = [],
   } = params;
+  const alreadySearched = new Set(alreadySearchedIds);
 
   const rowLimit = size ?? rowLimitFromParams;
   const canExecute =
@@ -778,6 +780,7 @@ export const huntBehavior = async (
   const validated: ValidatedBehavior[] = [];
   const droppedIds: string[] = [];
   const ungroundedQuoteIds: string[] = [];
+  const skippedAsSearched = new Set<string>();
 
   for (const candidate of candidates) {
     const technique = techniqueById.get(candidate.technique_id);
@@ -798,6 +801,12 @@ export const huntBehavior = async (
     // A revoked id resolves to its live successor; carry the live id forward so
     // the hunt query and the indexed projection never cite a retired technique.
     const techniqueId = entry.id;
+    // An earlier run already searched this technique. Dropped here, before any generation, so it
+    // takes no slot of the budget and is not reported as a gap: it was covered, not missed.
+    if (alreadySearched.has(techniqueId)) {
+      skippedAsSearched.add(techniqueId);
+      continue;
+    }
     // One behavior per live technique id. The LLM can emit the same id twice
     // (or a revoked id alongside its successor); generation, execution, and the
     // indexed `reportId:techniqueId` projection are all keyed by that id, so a
@@ -838,6 +847,13 @@ export const huntBehavior = async (
       // result or replaces it with the reason the query never ran.
       execution: notExecuted(),
     });
+  }
+
+  if (skippedAsSearched.size > 0) {
+    logger.info(
+      `[hunt:extract] skipped ${skippedAsSearched.size} technique(s) an earlier run on this ` +
+        `report already searched: ${[...skippedAsSearched].join(', ')}.`
+    );
   }
 
   if (ungroundedQuoteIds.length > 0) {
@@ -1155,7 +1171,10 @@ export const huntBehavior = async (
     has_hit: hasHit,
     ...(incomplete.length > 0 && { incomplete }),
     next_step:
-      validated.length === 0
+      validated.length === 0 && skippedAsSearched.size > 0 && incomplete.length === 0
+        ? 'Every extracted technique was already searched by an earlier run on this report, so ' +
+          'there was nothing new to hunt.'
+        : validated.length === 0
         ? 'No extracted candidate survived validation: each was either absent from the ' +
           'canonical ATT&CK catalog or offered a quote the report does not contain. ' +
           'Consider lowering the LLM threshold or falling back to IOC matching for this ' +

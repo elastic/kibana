@@ -598,6 +598,62 @@ describe('huntCoordinator', () => {
     );
   });
 
+  describe('the techniques an earlier run already searched', () => {
+    const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+    const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+    const loaded = {
+      iocs: [{ type: 'ip', value: '192.0.2.30' }],
+      techniques: ['T1078.004'],
+      text: 'report body text',
+      already_searched_technique_ids: ['T1078.004', 'T1566'],
+    };
+
+    it("hands the report's ledger to huntBehavior on a report-driven run", async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+
+      await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        allTiers({} as ScopedModel),
+        logger,
+        {
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'scheduled',
+          run_id: 'run-ledger',
+          report_id: 'rpt-1',
+        }
+      );
+
+      expect(mockT2).toHaveBeenCalledWith(
+        expect.anything(),
+        logger,
+        expect.objectContaining({ already_searched_technique_ids: ['T1078.004', 'T1566'] }),
+        esClient,
+        undefined
+      );
+    });
+
+    it('does not apply the ledger to text the caller supplied, which is a different search', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+
+      await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        allTiers({} as ScopedModel),
+        logger,
+        {
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'scheduled',
+          run_id: 'run-ledger-caller-text',
+          report_id: 'rpt-1',
+          text: 'a different report text',
+        }
+      );
+
+      expect(mockT2.mock.calls.at(-1)?.[2]).not.toHaveProperty('already_searched_technique_ids');
+    });
+  });
+
   describe('what scope resolution is handed', () => {
     const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
     const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
