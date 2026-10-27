@@ -51,9 +51,8 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
   setPreviewTitle: (title: string) => void;
   inheritedTimeRange?: DashboardState['time_range'];
 }> = ({ change, setPreviewTitle, inheritedTimeRange }) => {
-  const snapshot = change.snapshot as DashboardState;
   const initialState = useRef<DashboardInitializationState>({
-    ...withInheritedTimeRange(snapshot, inheritedTimeRange),
+    ...withInheritedTimeRange(change.snapshot as DashboardState, inheritedTimeRange),
   });
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
 
@@ -63,8 +62,8 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
 
   useEffect(() => {
     if (!dashboardApi) return;
-    setPreviewTitle(snapshot.title);
-    const state = withInheritedTimeRange(snapshot, inheritedTimeRange);
+    setPreviewTitle((change.snapshot as DashboardState).title);
+    const state = withInheritedTimeRange(change.snapshot as DashboardState, inheritedTimeRange);
     /** `setState` awaits async child state application, so wait for the previous call to avoid overlapping; skip snapshots that were superseded while queued */
     let isStale = false;
     setFailedChange(undefined);
@@ -77,17 +76,16 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
     return () => {
       isStale = true;
     };
-  }, [change, snapshot, dashboardApi, inheritedTimeRange, setPreviewTitle]);
+  }, [change, dashboardApi, inheritedTimeRange, setPreviewTitle]);
 
-  const timeRange = snapshot.time_range ?? inheritedTimeRange;
-  const searchBarVisibilityProps = useMemo(
-    () => ({
-      showFilterBar: (snapshot.filters ?? []).length > 0,
-      showQueryInput: snapshot.query?.expression !== '',
-      showDatePicker: Boolean(snapshot.time_range), // if time range is saved, then `time_restore` is true
-    }),
-    [snapshot]
-  );
+  const timeRange = (change.snapshot as DashboardState).time_range ?? inheritedTimeRange;
+  const searchBarVisibilityProps = useMemo(() => {
+    return {
+      showFilterBar: ((change.snapshot as DashboardState).filters ?? []).length > 0,
+      showQueryInput: (change.snapshot as DashboardState).query?.expression !== '',
+      showDatePicker: Boolean((change.snapshot as DashboardState).time_range), // if time range is saved, then `time_restore` is true
+    };
+  }, [change.snapshot]);
 
   const hasApplyError = failedChange === change;
 
@@ -117,13 +115,11 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
       {Object.values(searchBarVisibilityProps).some((visible) => visible) && (
         <unifiedSearchService.ui.SearchBar
           appName={DASHBOARD_APP_ID}
-          filters={toStoredFilters(snapshot.filters)}
-          query={toStoredQuery(snapshot.query)}
+          filters={toStoredFilters((change.snapshot as DashboardState).filters)}
+          query={toStoredQuery((change.snapshot as DashboardState).query)}
           dateRangeFrom={timeRange?.from}
           dateRangeTo={timeRange?.to}
           disableSubscribingToGlobalDataServices
-          isDisabled={true}
-          {...searchBarVisibilityProps}
         />
       )}
       <PreviewRenderer initialState={initialState.current} onApiAvailable={setDashboardApi} />

@@ -62,8 +62,7 @@ export const DashboardChangeHistoryProvider = ({
     [dashboardApi]
   );
 
-  // Clicking the "changes" button also selects its row, so keep a comparison requested for the
-  // row being selected and drop it when the selection moves elsewhere.
+  // the "changes" button also selects its row; keep that row's comparison, drop any other
   const onSelectChange = useCallback<NonNullable<ChangeHistoryProviderProps['onSelectChange']>>(
     ({ id }) => setComparisonChangeId((current) => (current === id ? current : undefined)),
     []

@@ -24,7 +24,6 @@ export type {
 } from './src/components/modal';
 export {
   ChangeHistoryPreview,
-  ChangeHistoryPreviewFooter,
   ChangeHistoryPreviewFooterSpacer,
   ChangeHistoryPreviewSettingsSection,
   getChangeHistoryValidationDisplayOptions,

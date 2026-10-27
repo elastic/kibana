@@ -29,8 +29,7 @@ export interface DashboardChangeHistoryViewProps {
   previewProps: PreviewProps;
   setPreviewTitle: (title: string) => void;
   inheritedTimeRange: DashboardState['time_range'];
-  /** Id of the change whose comparison was requested from the timeline. */
-  comparisonChangeId?: string;
+  comparisonChangeId?: string; // when it matches the previewed change, shows the JSON comparison instead of the dashboard
 }
 
 /** Switches between the rendered dashboard preview and the JSON comparison of a change. */
