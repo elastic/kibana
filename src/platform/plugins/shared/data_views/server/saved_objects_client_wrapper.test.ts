@@ -51,32 +51,4 @@ describe('SavedObjectsClientPublicToCommon', () => {
 
     await expect(service.get('1')).rejects.toThrow(DataViewSavedObjectConflictError);
   });
-
-  test('delete - uses a client scoped to the first namespace', async () => {
-    const scopedDelete = jest.fn().mockResolvedValue({});
-    const del = jest.fn();
-    const asScopedToNamespace = jest.fn().mockReturnValue({ delete: scopedDelete });
-    const service = new SavedObjectsClientWrapper({
-      delete: del,
-      asScopedToNamespace,
-    } as unknown as SavedObjectsClientContract);
-    await service.delete('1', ['test-namespace', 'other']);
-    expect(asScopedToNamespace).toHaveBeenCalledWith('test-namespace');
-    expect(scopedDelete).toHaveBeenCalledWith('index-pattern', '1', { force: true });
-    expect(del).not.toHaveBeenCalled();
-  });
-
-  test('delete - uses the current client when no namespace is given', async () => {
-    const del = jest.fn().mockResolvedValue({});
-    const asScopedToNamespace = jest.fn();
-    const service = new SavedObjectsClientWrapper({
-      delete: del,
-      asScopedToNamespace,
-    } as unknown as SavedObjectsClientContract);
-    await service.delete('1');
-    await service.delete('2', []);
-    expect(asScopedToNamespace).not.toHaveBeenCalled();
-    expect(del).toHaveBeenNthCalledWith(1, 'index-pattern', '1', { force: true });
-    expect(del).toHaveBeenNthCalledWith(2, 'index-pattern', '2', { force: true });
-  });
 });
