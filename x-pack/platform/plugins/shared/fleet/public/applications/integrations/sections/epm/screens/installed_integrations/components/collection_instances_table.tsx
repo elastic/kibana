@@ -38,8 +38,23 @@ const DEPLOYMENT_METHOD_LABELS: Record<DeploymentMethod, string> = {
   ),
 };
 
-/** Services named in a Services tooltip before the rest are elided. */
+/** Services named in a Services tooltip before the rest are only counted. */
 const MAX_TOOLTIP_SERVICES = 3;
+
+/** `<method>: A, B, C and 2 more services`. */
+const getServicesTooltip = (method: DeploymentMethod, serviceNames: string[]): string => {
+  const named = serviceNames.slice(0, MAX_TOOLTIP_SERVICES).join(', ');
+  const moreCount = serviceNames.length - MAX_TOOLTIP_SERVICES;
+  const services =
+    moreCount > 0
+      ? i18n.translate('xpack.fleet.epmInstalledIntegrations.collectionInstances.moreServices', {
+          defaultMessage:
+            '{named} and {moreCount, plural, one {# more service} other {# more services}}',
+          values: { named, moreCount },
+        })
+      : named;
+  return `${DEPLOYMENT_METHOD_LABELS[method]}: ${services}`;
+};
 
 const DEPLOYMENT_METHOD_ORDER: DeploymentMethod[] = ['managed_integration', 'ecf', 'agent_based'];
 
@@ -121,12 +136,10 @@ export const CollectionInstancesTable: React.FunctionComponent<{
               {
                 key: method,
                 value: serviceIds.length,
-                tooltip: `${DEPLOYMENT_METHOD_LABELS[method]}: ${[
-                  ...serviceIds
-                    .slice(0, MAX_TOOLTIP_SERVICES)
-                    .map((id) => item.serviceNames?.[id] ?? id),
-                  ...(serviceIds.length > MAX_TOOLTIP_SERVICES ? ['...'] : []),
-                ].join(', ')}`,
+                tooltip: getServicesTooltip(
+                  method,
+                  serviceIds.map((id) => item.serviceNames?.[id] ?? id)
+                ),
               },
             ];
           })}

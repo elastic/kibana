@@ -142,21 +142,25 @@ describe('CollectionInstancesTable', () => {
     expect(within(row).getByText('2.1.0')).not.toHaveAttribute('tabindex');
   });
 
-  it('names up to 3 services in a tooltip and elides the rest', async () => {
+  it.each([
+    [4, 'Elastic Cloud Forwarder: A, B, C and 1 more service'],
+    [6, 'Elastic Cloud Forwarder: A, B, C and 3 more services'],
+  ])('names up to 3 of %i services in a tooltip and counts the rest', async (count, tooltip) => {
+    const ids = ['a', 'b', 'c', 'd', 'e', 'f'].slice(0, count);
     renderTable([
       makeInstance({
-        services: ['a', 'b', 'c', 'd'],
-        serviceNames: { a: 'A', b: 'B', c: 'C', d: 'D' },
-        servicesByMethod: { ecf: ['a', 'b', 'c', 'd'] },
+        services: ids,
+        serviceNames: Object.fromEntries(ids.map((id) => [id, id.toUpperCase()])),
+        servicesByMethod: { ecf: ids },
       }),
     ]);
 
     const row = screen.getByTestId('collectionInstancesTableRow');
     await act(async () => {
-      within(row).getByText('4').focus();
+      within(row).getByText(String(count)).focus();
     });
 
-    expect(await screen.findByText('Elastic Cloud Forwarder: A, B, C, ...')).toBeInTheDocument();
+    expect(await screen.findByText(tooltip)).toBeInTheDocument();
   });
 
   it('shows dashes where an instance has no policies, like an ECF-only instance', () => {
