@@ -11,6 +11,7 @@ import { EuiLoadingSpinner, EuiSpacer, useEuiTheme, useGeneratedHtmlId } from '@
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApprovalContent } from '@kbn/proposals-ui';
 import type { ApprovalAction, DeclineParams } from '@kbn/proposals-ui';
@@ -88,7 +89,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const titleId = useGeneratedHtmlId({ prefix: 'ApprovalChatCard' });
   const {
     services: { application },
-  } = useKibana();
+  } = useKibana<CoreStart>();
   const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
 
   const proposalQuery = useProposal(proposalId);
