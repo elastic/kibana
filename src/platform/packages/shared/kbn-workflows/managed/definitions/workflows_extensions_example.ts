@@ -53,6 +53,8 @@ export interface ServiceAccountWorkflowTemplateValues extends ManagedWorkflowTem
   asynchronous?: boolean;
   waitForInput?: boolean;
   fallbackChild?: boolean;
+  /** Wrap the child call in an `if` step that always runs. Keeps the inherit reachable at runtime while making it conditional for `requiresDelegatedIdentity`. */
+  conditionalChild?: boolean;
   message?: string;
 }
 
@@ -64,7 +66,9 @@ export const EXAMPLE_SERVICE_ACCOUNT_WORKFLOW = {
   yamlTemplate: (values) => {
     const childCall = values.childWorkflowId
       ? `  - name: child
-    type: ${values.asynchronous ? 'workflow.executeAsync' : 'workflow.execute'}
+${values.conditionalChild ? "    if: '${{ workflow.spaceId != blank }}'\n" : ''}    type: ${
+          values.asynchronous ? 'workflow.executeAsync' : 'workflow.execute'
+        }
     with:
       workflow-id: ${JSON.stringify(values.childWorkflowId)}
 ${values.runAsMode !== undefined ? `      run-as-mode: ${values.runAsMode}\n` : ''}`
