@@ -21,7 +21,7 @@ import {
 } from '../../../../eui_components';
 import type { ScoutPage } from '.';
 import { attachBrowserConsoleErrors, collectBrowserConsoleErrors } from './browser_console_errors';
-import type { PathOptions } from '../../../../../common/services/kibana_url';
+import { navigateToApp, type GotoAppOptions } from './goto_app';
 import { keyTo, checkA11y } from '../../../../utils';
 import type { KibanaUrl, ScoutLogger } from '../../worker';
 
@@ -137,8 +137,13 @@ export function extendPlaywrightPage({
   // Extend page with EUI Component Object factories ('@elastic/eui-test-helpers')
   extendedPage.components = extendPageWithComponents(page);
   // Method to navigate to specific Kibana apps
+<<<<<<< HEAD
   extendedPage.gotoApp = (appName: string, pathOptions?: PathOptions) =>
     page.goto(kbnUrl.app(appName, { pathOptions }));
+=======
+  extendedPage.gotoApp = (appName: string, options?: GotoAppOptions) =>
+    navigateToApp(page, (pathOptions) => kbnUrl.app(appName, { pathOptions }), options);
+>>>>>>> b426c0a385ec ([Scout] Add readyWhen option to gotoApp to gate navigation on the app's ready element (#300454))
   // Method to press a key until an element with the provided selector is in focus.
   extendedPage.keyTo = async (
     selector: string,
