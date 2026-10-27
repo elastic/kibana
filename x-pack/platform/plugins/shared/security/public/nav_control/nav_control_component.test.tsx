@@ -210,7 +210,12 @@ describe('SecurityNavControl', () => {
               class="euiContextMenuPanelTitle__text css-8u7lys-text"
               id="generated-id_euiContextMenuPanelTitle"
             >
-              full name
+              <span
+                class="eui-displayBlock eui-textTruncate"
+                title="full name"
+              >
+                full name
+              </span>
             </h2>
           </div>
           <div
@@ -390,7 +395,12 @@ describe('SecurityNavControl', () => {
               class="euiContextMenuPanelTitle__text css-8u7lys-text"
               id="generated-id_euiContextMenuPanelTitle"
             >
-              full name
+              <span
+                class="eui-displayBlock eui-textTruncate"
+                title="full name"
+              >
+                full name
+              </span>
             </h2>
           </div>
           <div
@@ -501,6 +511,32 @@ describe('SecurityNavControl', () => {
     `);
   });
 
+  it('should open external user menu links in a new tab with a custom test subject', async () => {
+    renderWithIntl(
+      <SecurityNavControl
+        editProfileUrl=""
+        logoutUrl=""
+        userMenuLinks$={
+          new BehaviorSubject([
+            {
+              label: 'External',
+              href: 'https://cloud.elastic.co',
+              iconType: 'empty',
+              isExternal: true,
+              dataTestSubj: 'customTestSubj',
+            },
+            { label: 'Internal', href: '/app/home', iconType: 'empty' },
+          ])
+        }
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('userMenuButton'));
+
+    expect(screen.getByTestId('customTestSubj')).toHaveAttribute('target', '_blank');
+    expect(screen.getByTestId('userMenuLink__Internal')).not.toHaveAttribute('target');
+  });
+
   it('should render anonymous user', async () => {
     useCurrentUserMock.mockReturnValue({
       isLoading: false,
@@ -537,7 +573,12 @@ describe('SecurityNavControl', () => {
               class="euiContextMenuPanelTitle__text css-8u7lys-text"
               id="generated-id_euiContextMenuPanelTitle"
             >
-              full name
+              <span
+                class="eui-displayBlock eui-textTruncate"
+                title="full name"
+              >
+                full name
+              </span>
             </h2>
           </div>
           <div
