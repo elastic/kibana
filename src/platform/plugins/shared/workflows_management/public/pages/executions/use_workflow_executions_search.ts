@@ -93,8 +93,13 @@ export const useWorkflowExecutionsSearch = ({
   // Remaining filters (e.g. workflowId, triggeredBy) and negated structured filters go through KQL.
   const remainingFiltersKql = useMemo(() => {
     const STRUCTURED_FIELDS = new Set(['status', 'executedBy']);
+    // exists/range filters can't be sent as include lists, so they also go through KQL.
     const remaining = filters.filter(
-      (f) => f.meta.negate || !STRUCTURED_FIELDS.has(f.meta.key ?? '')
+      (f) =>
+        f.meta.negate ||
+        f.meta.type === 'exists' ||
+        f.meta.type === 'range' ||
+        !STRUCTURED_FIELDS.has(f.meta.key ?? '')
     );
     return filtersToKql(remaining);
   }, [filters]);
