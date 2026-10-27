@@ -76,16 +76,12 @@ const createContext = () => ({
   agentConfiguration: { connector_ids: [] },
 });
 
-interface EdgeRef {
-  source_node_id: string;
-  target_node_id: string;
-  condition?: string;
-}
+type PathStep = string | { id: string; condition?: string };
 
 interface Traversal {
   tree_id: string;
-  visited_path: EdgeRef[];
-  causal_path: EdgeRef[];
+  visited_path: PathStep[];
+  causal_path: PathStep[];
 }
 
 const runSubmit = async ({
@@ -485,12 +481,7 @@ describe('nightshift_submit_optimizer_result', () => {
 });
 
 describe('nightshift_submit_optimizer_result counts', () => {
-  const MAIN_PATH: EdgeRef[] = [
-    { source_node_id: 'S1', target_node_id: 'E1' },
-    { source_node_id: 'E1', target_node_id: 'D1' },
-    { source_node_id: 'D1', target_node_id: 'E2' },
-    { source_node_id: 'E2', target_node_id: 'X1' },
-  ];
+  const MAIN_PATH: PathStep[] = ['S1', 'E1', 'D1', 'E2', 'X1'];
   const CAUSAL_TREE = FULL_TREE.replace(
     'S1([Checkout latency]) -->',
     'S1([Checkout latency]) -->|✅|'
@@ -614,7 +605,7 @@ describe('nightshift_submit_optimizer_result counts', () => {
     [
       'a visited edge the tree does not have',
       {
-        traversals: [traversal({ visited_path: [{ source_node_id: 'S1', target_node_id: 'X2' }] })],
+        traversals: [traversal({ visited_path: ['S1', 'X2'] })],
       },
       /has no edge S1 --> X2/,
     ],
@@ -849,9 +840,7 @@ describe('nightshift_submit_optimizer_result counts', () => {
       { symptom_trees: [submission, other], traversals: [], summary: '' },
       createContext() as never
     );
-    const path = MAIN_PATH.map((edge) =>
-      edge.source_node_id === 'D1' ? { ...edge, condition: 'yes' } : edge
-    );
+    const path: PathStep[] = ['S1', 'E1', 'D1', { id: 'E2', condition: 'yes' }, 'X1'];
     const second = await tool.handler(
       {
         symptom_trees: [submission, other],

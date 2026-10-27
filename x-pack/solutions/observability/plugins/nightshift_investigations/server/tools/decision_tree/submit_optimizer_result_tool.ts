@@ -17,6 +17,7 @@ import {
   carryCounts,
   countsForTree,
   decisionEdgeKey,
+  edgesFromWalk,
   enforceMinimumGraph,
   enforceNodePreservation,
   enforceParsedSizeFloor,
@@ -72,19 +73,24 @@ const treeIdSchema = lazySchema(() =>
 
 const nodeIdSchema = lazySchema(() => z.string().max(MAX_NODE_ID_LENGTH));
 
-const edgeRefSchema = lazySchema(() =>
-  z.object({
-    source_node_id: nodeIdSchema.describe('Mermaid id of the node the edge starts at, e.g. D1.'),
-    target_node_id: nodeIdSchema.describe('Mermaid id of the node the edge ends at, e.g. E3.'),
-    condition: z
-      .string()
-      .max(MAX_CONDITION_LENGTH)
-      .optional()
-      .describe('The edge label. Only needed when several edges join the same two nodes.'),
-  })
+const pathStepSchema = lazySchema(() =>
+  z.union([
+    nodeIdSchema.describe('Mermaid id of the next node, e.g. E2.'),
+    z.object({
+      id: nodeIdSchema.describe('Mermaid id of the next node.'),
+      condition: z
+        .string()
+        .max(MAX_CONDITION_LENGTH)
+        .optional()
+        .describe(
+          'Label of the edge from the previous node. Only when several edges join those two nodes.'
+        ),
+    }),
+  ])
 );
 
-const pathSchema = lazySchema(() => z.array(edgeRefSchema).max(MAX_PATH_EDGES));
+/** A path is the node ids in order. One entry per node, not per edge. */
+const pathSchema = lazySchema(() => z.array(pathStepSchema).max(MAX_PATH_EDGES + 1));
 
 const nodeMergeSchema = lazySchema(() =>
   z.object({
@@ -127,12 +133,12 @@ const traversalSchema = lazySchema(() =>
     visited_path: pathSchema
       .default([])
       .describe(
-        'Every edge this investigation followed, as node ids in the tree you are submitting (after your edits, if any).'
+        'Node ids this investigation followed, in order, on the tree you are submitting (after your edits). Example: ["S1","E1","D1",{"id":"E2","condition":"yes"},"X1"]. Use an object only when several edges join the previous node to this one.'
       ),
     causal_path: pathSchema
       .default([])
       .describe(
-        'Only when the root cause was verified: the edges from the symptom to the confirmed end node. Each of them must carry ✅ in the tree. Leave empty otherwise.'
+        'Only when the root cause was verified: the same node-id walk from the symptom to the confirmed end. Each edge on it must carry ✅. Leave empty otherwise.'
       ),
   })
 );
@@ -151,7 +157,7 @@ const submitSchema = lazySchema(() =>
       .max(MAX_SUBMISSIONS)
       .default([])
       .describe(
-        'One entry per decision tree this investigation followed, whether or not you edited it, recording which edges it took.'
+        'One entry per decision tree this investigation followed, whether or not you edited it. Name the nodes in order, not each edge.'
       ),
     summary: z
       .string()
@@ -504,23 +510,38 @@ export const createSubmitOptimizerResultTool = ({
 
 type Traversal = z.infer<typeof traversalSchema>;
 
+/** Consecutive node ids are the edges. One id names nothing, so it is rejected before any write. */
+const edgesOf = (steps: Traversal['visited_path'], treeId: string) => {
+  if (steps.length === 1) {
+    throw new DecisionTreeValidationError(
+      treeId,
+      'A path lists node ids in order and needs at least two.'
+    );
+  }
+  return edgesFromWalk(steps);
+};
+
 /** Records a traversal on `counts`: a visit along `visited_path`, then reinforcement along `causal_path`. */
 const applyTraversal = (
   tree: DecisionTreeView,
   counts: DecisionTreeCounts,
-  { visited_path: visitedPath, causal_path: causalPath }: Traversal,
+  { visited_path: visitedPath, causal_path: causalPath, tree_id: treeId }: Traversal,
   now: string
 ): DecisionTreeCounts => {
+  const visitedEdges = edgesOf(visitedPath, treeId);
+  const causalEdges = edgesOf(causalPath, treeId);
   const visited =
-    visitedPath.length > 0 ? recordVisit({ tree, counts, path: visitedPath, now }) : counts;
-  return causalPath.length > 0
-    ? reinforcePath({ tree, counts: visited, path: causalPath, now })
+    visitedEdges.length > 0 ? recordVisit({ tree, counts, path: visitedEdges, now }) : counts;
+  return causalEdges.length > 0
+    ? reinforcePath({ tree, counts: visited, path: causalEdges, now })
     : visited;
 };
 
 /** The causal path must be the ✅ path in the file, so the tree and its counts tell one story. */
-const assertCausalPathMarked = (tree: DecisionTreeView, { causal_path: causalPath }: Traversal) => {
-  const unmarked = resolveEdgeRefs(tree, causalPath).filter((edge) => !edge.is_taken);
+const assertCausalPathMarked = (tree: DecisionTreeView, traversal: Traversal) => {
+  const unmarked = resolveEdgeRefs(tree, edgesOf(traversal.causal_path, traversal.tree_id)).filter(
+    (edge) => !edge.is_taken
+  );
   if (unmarked.length > 0) {
     throw new DecisionTreeValidationError(
       tree.tree_id,
@@ -725,7 +746,9 @@ const persistSubmission = async ({
 };
 
 const traversalDetail = (traversal: Traversal | undefined): string[] => [
-  ...(traversal?.visited_path.length ? [`${traversal.visited_path.length} edges visited`] : []),
+  ...(traversal && traversal.visited_path.length > 1
+    ? [`${traversal.visited_path.length - 1} edges visited`]
+    : []),
   ...(traversal?.causal_path.length ? ['causal path reinforced'] : []),
 ];
 

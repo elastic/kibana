@@ -12,7 +12,7 @@ import {
   resolveEdgeRefs,
 } from '@kbn/nightshift-decision-trees';
 import type { DecisionEdgeRef, DecisionTreeView } from '@kbn/nightshift-decision-trees';
-import type { EdgeRef, SubmitArguments, TraversalSubmission } from './types';
+import type { PathStep, SubmitArguments, TraversalSubmission } from './types';
 
 const SUBMIT_TOOL = 'nightshift_submit_optimizer_result';
 
@@ -70,25 +70,50 @@ export const parseTreeMarkdown = (
   }
 };
 
-/** An edge that names neither end is not a path, even though the array itself is non-empty. */
-const malformedEdgeRefs = (refs: EdgeRef[] | undefined, label: string, treeId: string): string[] =>
-  (refs ?? []).flatMap((ref, index) =>
-    ref.source_node_id && ref.target_node_id
-      ? []
-      : [`${label} for ${treeId} entry ${index + 1} is missing source_node_id or target_node_id.`]
-  );
+const stepId = (step: PathStep): string | undefined => {
+  if (typeof step === 'string' && step.length > 0) return step;
+  if (step && typeof step === 'object' && step.id) return step.id;
+  return undefined;
+};
 
-const asEdgeRefs = (refs: EdgeRef[] | undefined): DecisionEdgeRef[] =>
-  (refs ?? []).flatMap((ref) => {
-    if (!ref.source_node_id || !ref.target_node_id) return [];
-    return [
-      {
-        source_node_id: ref.source_node_id,
-        target_node_id: ref.target_node_id,
-        ...(ref.condition ? { condition: ref.condition } : {}),
-      },
-    ];
+/**
+ * A path is node ids in order. Consecutive ids are one edge. A step with no id, or a single id,
+ * does not name an edge.
+ */
+const walkEdges = (
+  steps: PathStep[] | undefined,
+  label: string,
+  treeId: string
+): { refs: DecisionEdgeRef[]; problems: string[] } => {
+  if (!steps || steps.length === 0) return { refs: [], problems: [] };
+  const problems: string[] = [];
+  const ids: Array<string | undefined> = steps.map((step, index) => {
+    const id = stepId(step);
+    if (!id) problems.push(`${label} for ${treeId} step ${index + 1} is missing a node id.`);
+    return id;
   });
+  if (problems.length > 0) return { refs: [], problems };
+  if (ids.length === 1) {
+    return {
+      refs: [],
+      problems: [`${label} for ${treeId} names no edge. List at least two node ids.`],
+    };
+  }
+  const refs: DecisionEdgeRef[] = [];
+  for (let index = 1; index < ids.length; index++) {
+    const source = ids[index - 1];
+    const target = ids[index];
+    if (!source || !target) continue;
+    const step = steps[index];
+    const condition = typeof step === 'string' ? undefined : step.condition;
+    refs.push({
+      source_node_id: source,
+      target_node_id: target,
+      ...(condition ? { condition } : {}),
+    });
+  }
+  return { refs, problems };
+};
 
 const formatArguments = (submission: SubmitArguments): string =>
   JSON.stringify(
@@ -183,8 +208,8 @@ const traversalProblems = (
       problems.push(`visited_path for ${treeId} is empty.`);
     }
     problems.push(
-      ...malformedEdgeRefs(traversal.visited_path, 'visited_path', treeId),
-      ...malformedEdgeRefs(traversal.causal_path, 'causal_path', treeId)
+      ...walkEdges(traversal.visited_path, 'visited_path', treeId).problems,
+      ...walkEdges(traversal.causal_path, 'causal_path', treeId).problems
     );
     const causal = traversal.causal_path ?? [];
     if (confirmed && causal.length === 0) {
@@ -255,10 +280,14 @@ const pathProblems = (submission: SubmitArguments, submitted: DecisionTreeView):
         `traversals names ${traversal.tree_id}, but this round's tree is ${submitted.tree_id}.`
       );
     }
+    const visited = walkEdges(traversal.visited_path, 'visited_path', submitted.tree_id);
+    const causal = walkEdges(traversal.causal_path, 'causal_path', submitted.tree_id);
     problems.push(
-      ...unresolved(submitted, asEdgeRefs(traversal.visited_path), 'visited_path'),
-      ...unresolved(submitted, asEdgeRefs(traversal.causal_path), 'causal_path'),
-      ...unmarkedCausal(submitted, asEdgeRefs(traversal.causal_path))
+      ...visited.problems,
+      ...causal.problems,
+      ...unresolved(submitted, visited.refs, 'visited_path'),
+      ...unresolved(submitted, causal.refs, 'causal_path'),
+      ...unmarkedCausal(submitted, causal.refs)
     );
   }
   return problems;

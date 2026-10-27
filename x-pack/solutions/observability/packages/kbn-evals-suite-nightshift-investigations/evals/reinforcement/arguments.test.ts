@@ -42,11 +42,8 @@ describe('gradeSubmissions', () => {
           traversals: [
             {
               tree_id: 'symptom:eql-slo-burn-rate',
-              visited_path: [
-                { source_node_id: 'S1', target_node_id: 'E1' },
-                { source_node_id: 'D1', target_node_id: 'E2', condition: 'yes' },
-              ],
-              causal_path: [{ source_node_id: 'D1', target_node_id: 'E2', condition: 'yes' }],
+              visited_path: ['S1', 'E1', 'D1', { id: 'E2', condition: 'yes' }],
+              causal_path: ['D1', { id: 'E2', condition: 'yes' }],
             },
           ],
         },
@@ -86,7 +83,7 @@ describe('gradeSubmissions', () => {
           traversals: [
             {
               tree_id: 'symptom:eql-slo-burn-rate',
-              causal_path: [{ source_node_id: 'S1', target_node_id: 'E1' }],
+              causal_path: ['S1', 'E1'],
             },
           ],
         },
@@ -106,7 +103,7 @@ describe('gradeSubmissions', () => {
         {
           traversals: [
             {
-              visited_path: [{ source_node_id: 'S1', target_node_id: 'X2' }],
+              visited_path: ['S1', 'X2'],
             },
           ],
         },
@@ -145,7 +142,7 @@ describe('gradeSubmissions', () => {
           traversals: [
             {
               tree_id: 'symptom:eql-slo-burn-rate',
-              visited_path: [{ source_node_id: 'S1', target_node_id: 'E1' }],
+              visited_path: ['S1', 'E1'],
               causal_path: [],
             },
           ],
@@ -169,7 +166,7 @@ describe('gradeSubmissions', () => {
           traversals: [
             {
               tree_id: 'symptom:eql-slo-burn-rate',
-              visited_path: [{ source_node_id: 'S1', target_node_id: 'E1' }],
+              visited_path: ['S1', 'E1'],
               causal_path: [],
             },
           ],
@@ -196,7 +193,7 @@ describe('gradeSubmissions', () => {
           traversals: [
             {
               tree_id: 'symptom:eql-slo-burn-rate',
-              visited_path: [{ source_node_id: 'S1', target_node_id: 'E1' }],
+              visited_path: ['S1', 'E1'],
               causal_path: [],
             },
           ],
@@ -219,7 +216,7 @@ describe('gradeSubmissions', () => {
           traversals: [
             {
               tree_id: 'symptom:eql-slo-burn-rate',
-              visited_path: [{ source_node_id: 'S1', target_node_id: 'E1' }],
+              visited_path: ['S1', 'E1'],
               causal_path: [],
             },
           ],
@@ -254,7 +251,7 @@ describe('gradeSubmissions', () => {
     });
 
     expect(score).toBe(0);
-    expect(explanation).toContain('missing source_node_id or target_node_id');
+    expect(explanation).toContain('missing a node id');
   });
 
   it('rejects a causal path when the response does not confirm a cause', () => {
@@ -264,8 +261,8 @@ describe('gradeSubmissions', () => {
           traversals: [
             {
               tree_id: 'symptom:eql-slo-burn-rate',
-              visited_path: [{ source_node_id: 'S1', target_node_id: 'E1' }],
-              causal_path: [{ source_node_id: 'S1', target_node_id: 'E1' }],
+              visited_path: ['S1', 'E1'],
+              causal_path: ['S1', 'E1'],
             },
           ],
         },
