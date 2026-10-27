@@ -70,7 +70,7 @@ const DEFAULT_EXPIRES_IN = '72h';
 
 /** Step types of every step in a branch, including nested ones. */
 const flattenTypes = (steps: WorkflowStep[]): string[] =>
-  steps.flatMap((step) => [step.type, ...flattenTypes(childrenOf(step))]);
+  steps.flatMap((step) => [step.type ?? '', ...flattenTypes(childrenOf(step))]);
 
 const findStep = (steps: WorkflowStep[], name: string): WorkflowStep | undefined => {
   for (const step of steps) {
