@@ -359,6 +359,29 @@ describe('matchAttackFingerprints', () => {
     expect(index).not.toHaveBeenCalled();
   });
 
+  it('allows a missing index once the template install reports success', async () => {
+    let allowed = false;
+    setFingerprintCreateAllowed(() => allowed);
+    const { esClient, contextManager, index } = createHarness();
+    const run = () =>
+      matchAttackFingerprints({
+        attacks: [attackDocument(ATTACK_ID, ['a1', 'a2'])],
+        contextManager,
+        esClient,
+        logger,
+        now: new Date('2026-10-21T12:00:00.000Z'),
+        spaceId: 'default',
+      });
+
+    await expect(run()).rejects.toBeInstanceOf(FingerprintIndexUnscopedError);
+
+    allowed = true;
+    const output = await run();
+
+    expect(output.reviews).toHaveLength(1);
+    expect(index).toHaveBeenCalled();
+  });
+
   it('reviews every attack when the template was not installed and the index is missing', async () => {
     setFingerprintCreateAllowed(false);
     const { esClient, contextManager, index } = createHarness();
