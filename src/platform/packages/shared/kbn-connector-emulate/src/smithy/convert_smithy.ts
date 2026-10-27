@@ -134,13 +134,21 @@ export const convertSmithy = (
         'application/vnd.amazon.eventstream': { schema: { type: 'string', format: 'binary' } },
       };
     }
+    if (target?.type === 'blob' && typeof mediaType !== 'string') {
+      // Blobs without a `@mediaType` are opaque, and AWS takes any content type for them: Lambda
+      // Invoke payloads, for one, are sent as JSON, which may hold any value.
+      return {
+        'application/octet-stream': {
+          schema: converter.toSchema(member.target, 'payload', member.traits),
+        },
+        'application/json': { schema: {} },
+      };
+    }
     if (target?.type === 'blob' || target?.type === 'string') {
       return {
-        [typeof mediaType === 'string'
-          ? mediaType
-          : target.type === 'blob'
-          ? 'application/octet-stream'
-          : 'text/plain']: { schema: converter.toSchema(member.target, 'payload', member.traits) },
+        [typeof mediaType === 'string' ? mediaType : 'text/plain']: {
+          schema: converter.toSchema(member.target, 'payload', member.traits),
+        },
       };
     }
     return {
@@ -237,7 +245,10 @@ export const convertSmithy = (
       content: requestContent,
     };
 
-    const status = String(typeof http.code === 'number' ? http.code : 200);
+    // An `@httpResponseCode` member sets the status, such as Lambda Invoke's 202 for `Event`.
+    const status = output.some(([, member]) => bindingOf(member) === 'smithy.api#httpResponseCode')
+      ? '2XX'
+      : String(typeof http.code === 'number' ? http.code : 200);
     const errors = new Map<string, string[]>();
     for (const { target } of [...(operation.errors ?? []), ...serviceErrors]) {
       const code = errorStatus(getShape(model, target));
@@ -301,7 +312,7 @@ export const convertSmithy = (
     }
     // `{Key+}` labels may span segments.
     const greedy = new Set<string>();
-    const uri = http.uri.replace(/\{([^}]+)\+\}/g, (_, label: string) => {
+    const uri = http.uri.replace(/\{([^{}+]+)\+\}/g, (_, label: string) => {
       greedy.add(label);
       return `{${label}}`;
     });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import type { SmithyModel } from '.';
 import { convertSmithy, isSmithyModel } from '.';
@@ -56,8 +58,10 @@ const model: SmithyModel = {
         maxResults: { target: id('MaxResults'), traits: { 'smithy.api#httpQuery': 'max-results' } },
         states: { target: id('StateList'), traits: { 'smithy.api#httpQuery': 'state' } },
         since: { target: 'smithy.api#Timestamp', traits: { 'smithy.api#httpQuery': 'since' } },
+        labels: { target: id('Labels'), traits: { 'smithy.api#httpQueryParams': {} } },
       },
     },
+    [id('Labels')]: { type: 'map', key: ref('smithy.api#String'), value: ref('smithy.api#String') },
     [id('ListBucketsOutput')]: {
       type: 'structure',
       members: {
@@ -180,7 +184,8 @@ const model: SmithyModel = {
           traits: { 'smithy.api#default': false, 'smithy.api#documentation': 'Keeps versions.' },
         },
         tags: { target: id('Tags') },
-        checksum: { target: 'smithy.api#Blob' },
+        checksum: { target: id('Checksum') },
+        snapshots: { target: id('Snapshots') },
         policy: { target: 'smithy.api#Document' },
         replication: { target: id('Replication') },
         parent: { target: id('BucketDetail') },
@@ -189,6 +194,12 @@ const model: SmithyModel = {
       },
     },
     [id('Secret')]: { type: 'string', traits: { 'smithy.api#sensitive': {} } },
+    [id('Checksum')]: { type: 'blob', traits: { 'smithy.api#length': { min: 1, max: 1 } } },
+    [id('Snapshots')]: {
+      type: 'list',
+      member: ref('ObjectMetadata'),
+      traits: { 'smithy.api#sparse': {} },
+    },
     [id('WatchBucket')]: {
       type: 'operation',
       input: ref('GetBucketInput'),
@@ -311,6 +322,14 @@ describe('convertSmithy', () => {
         required: false,
         schema: { type: 'string', format: 'date-time' },
       },
+      {
+        name: 'labels',
+        in: 'query',
+        required: false,
+        schema: { type: 'object', additionalProperties: { type: 'string' } },
+        style: 'form',
+        explode: true,
+      },
     ]);
     expect(paths['/buckets/{name}'].get.parameters).toEqual([
       {
@@ -338,9 +357,10 @@ describe('convertSmithy', () => {
       },
       responses: { '201': { description: 'PutObject 201 response' } },
     });
+    // The `@httpResponseCode` member sets the status.
     expect(paths['/buckets/{name}/objects/{key}'].get.responses).toEqual({
-      '200': {
-        description: 'GetObject 200 response',
+      '2XX': {
+        description: 'GetObject 2XX response',
         content: {
           'application/json': { schema: { $ref: '#/components/schemas/ObjectMetadata' } },
         },
@@ -421,7 +441,12 @@ describe('convertSmithy', () => {
           minProperties: 1,
           maxProperties: 50,
         },
-        checksum: { type: 'string', format: 'byte' },
+        // `@length` counts bytes; one byte is four base64 characters.
+        checksum: { type: 'string', format: 'byte', minLength: 4, maxLength: 4 },
+        snapshots: {
+          type: 'array',
+          items: { allOf: [{ $ref: '#/components/schemas/ObjectMetadata' }], nullable: true },
+        },
         policy: {},
         replication: { $ref: '#/components/schemas/Replication' },
         parent: { $ref: '#/components/schemas/BucketDetail' },
@@ -484,6 +509,85 @@ describe('convertSmithy', () => {
     expect(response.status).toBe(404);
     expect(rejectedResponses).toEqual([]);
     expect(calls[0].responseViolations).toEqual([]);
+  });
+
+  it('reads `@httpQueryParams` maps from the query keys no other member binds', async () => {
+    const { fetch, calls } = createEmulatorFetch({ specs: [document] });
+
+    const response = await fetch(
+      'https://storage.eu-west-1.amazonaws.com/buckets?max-results=5&env=prod&team=core'
+    );
+    const invalid = await fetch(
+      'https://storage.eu-west-1.amazonaws.com/buckets?max-results=500&env=prod'
+    );
+
+    expect(response.status).toBe(200);
+    expect(calls[0].requestViolations).toEqual([]);
+    expect(invalid.status).toBe(422);
+    expect(calls[1].requestViolations).toEqual([
+      expect.objectContaining({ path: ['query', 'max-results'] }),
+    ]);
+  });
+
+  it('accepts nulls in sparse lists of structures and base64 blobs of their byte length', async () => {
+    const { fetch, calls, rejectedResponses } = createEmulatorFetch({
+      specs: [document],
+      fixtures: [
+        {
+          operation: { method: 'get', path: '/buckets/{name}' },
+          response: {
+            status: 200,
+            body: { bucket: { name: 'logs', checksum: 'AA==', snapshots: [null, { size: 1 }] } },
+          },
+        },
+      ],
+    });
+
+    const response = await fetch('https://storage.eu-west-1.amazonaws.com/buckets/logs', {
+      headers: { authorization: 'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE' },
+    });
+
+    expect(response.status).toBe(200);
+    expect(rejectedResponses).toEqual([]);
+    expect(calls[0].responseViolations).toEqual([]);
+  });
+
+  it('serves Lambda Invoke as the connector calls it, with JSON payloads and dynamic statuses', async () => {
+    const lambda: unknown = JSON.parse(
+      readFileSync(join(__dirname, '__fixtures__', 'smithy_openapi', 'lambda.smithy.json'), 'utf8')
+    );
+    if (!isSmithyModel(lambda)) {
+      throw new Error('lambda.smithy.json is not a Smithy model');
+    }
+    const { fetch, calls, rejectedResponses } = createEmulatorFetch({
+      specs: [convertSmithy(lambda)],
+      fixtures: [
+        {
+          operation: { method: 'post', path: '/2015-03-31/functions/{FunctionName}/invocations' },
+          response: { status: 202 },
+        },
+      ],
+    });
+
+    // As the connector sends it: a JSON payload, signed with SigV4.
+    const response = await fetch(
+      'https://lambda.eu-west-1.amazonaws.com/2015-03-31/functions/my-function/invocations',
+      {
+        method: 'POST',
+        headers: {
+          authorization: 'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20240101/eu-west-1/lambda',
+          'content-type': 'application/json',
+          'x-amz-invocation-type': 'Event',
+          'x-amz-log-type': 'Tail',
+        },
+        body: JSON.stringify({ orderId: 42 }),
+      }
+    );
+
+    expect(response.status).toBe(202);
+    expect(calls[0].requestViolations).toEqual([]);
+    expect(calls[0].responseViolations).toEqual([]);
+    expect(rejectedResponses).toEqual([]);
   });
 
   it('rejects services of other protocols and ambiguous models', () => {

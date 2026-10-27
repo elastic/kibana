@@ -58,8 +58,19 @@ const timestampSchema = (format: unknown): JsonSchema => {
   }
 };
 
-/** Applies `@length`, `@range`, `@pattern` and the legacy `@enum` trait to a schema. */
-const withConstraints = (schema: JsonSchema, type: string, traits: Traits): JsonSchema => {
+// The length of n bytes in padded base64.
+const base64Length = (bytes: number): number => 4 * Math.ceil(bytes / 3);
+
+/**
+ * Applies `@length`, `@range`, `@pattern` and the legacy `@enum` trait to a schema. `@length`
+ * counts a blob's bytes, so base64-encoded blobs get the lengths of their encodings.
+ */
+const withConstraints = (
+  schema: JsonSchema,
+  type: string,
+  traits: Traits,
+  base64: boolean
+): JsonSchema => {
   const length = traitRecord(traits, 'smithy.api#length');
   const range = traitRecord(traits, 'smithy.api#range');
   const pattern = traits['smithy.api#pattern'];
@@ -70,10 +81,13 @@ const withConstraints = (schema: JsonSchema, type: string, traits: Traits): Json
       : type === 'map'
       ? ['minProperties', 'maxProperties']
       : ['minLength', 'maxLength'];
+  const [minLength, maxLength] = [toNumber(length?.min), toNumber(length?.max)].map((bound) =>
+    bound !== undefined && base64 ? base64Length(bound) : bound
+  );
   return {
     ...schema,
-    ...(length && toNumber(length.min) !== undefined ? { [min]: length.min } : {}),
-    ...(length && toNumber(length.max) !== undefined ? { [max]: length.max } : {}),
+    ...(minLength !== undefined ? { [min]: minLength } : {}),
+    ...(maxLength !== undefined ? { [max]: maxLength } : {}),
     ...(range && toNumber(range.min) !== undefined ? { minimum: range.min } : {}),
     ...(range && toNumber(range.max) !== undefined ? { maximum: range.max } : {}),
     ...(typeof pattern === 'string' && type === 'string' ? { pattern } : {}),
@@ -86,6 +100,11 @@ const withConstraints = (schema: JsonSchema, type: string, traits: Traits): Json
       : {}),
   };
 };
+
+// `@sparse` collections may hold nulls. A `$ref` ignores its siblings, so a referenced shape
+// is wrapped, keeping the component itself non-nullable.
+const toNullable = (schema: JsonSchema): JsonSchema =>
+  '$ref' in schema ? { allOf: [schema], nullable: true } : { ...schema, nullable: true };
 
 /** The JSON name of a structure member in a document body (`@jsonName`). */
 export const jsonName = (name: string, member: MemberShape): string => {
@@ -223,10 +242,7 @@ export const createShapeConverter = (model: SmithyModel): ShapeConverter => {
             : {};
           return {
             type: 'array',
-            items:
-              hasTrait(traits, 'smithy.api#sparse') && !('$ref' in items)
-                ? { ...items, nullable: true }
-                : items,
+            items: hasTrait(traits, 'smithy.api#sparse') ? toNullable(items) : items,
             ...(shape.type === 'set' || hasTrait(traits, 'smithy.api#uniqueItems')
               ? { uniqueItems: true }
               : {}),
@@ -236,10 +252,7 @@ export const createShapeConverter = (model: SmithyModel): ShapeConverter => {
           const value = shape.value ? toSchema(shape.value.target, 'body', shape.value.traits) : {};
           return {
             type: 'object',
-            additionalProperties:
-              hasTrait(traits, 'smithy.api#sparse') && !('$ref' in value)
-                ? { ...value, nullable: true }
-                : value,
+            additionalProperties: hasTrait(traits, 'smithy.api#sparse') ? toNullable(value) : value,
           };
         }
         default:
@@ -248,7 +261,8 @@ export const createShapeConverter = (model: SmithyModel): ShapeConverter => {
       }
     })();
     return {
-      ...withConstraints(base, shape.type, traits),
+      // Blobs are base64 everywhere but in a payload.
+      ...withConstraints(base, shape.type, traits, shape.type === 'blob' && location !== 'payload'),
       ...annotations,
       ...(typeof documentation === 'string' && member ? { description: documentation } : {}),
     };

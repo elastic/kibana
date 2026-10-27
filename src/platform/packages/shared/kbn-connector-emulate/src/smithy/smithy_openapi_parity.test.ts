@@ -36,6 +36,12 @@ const KNOWN_DIFFERENCES = {
   // Senders may leave out members with a `@default`, which receivers fill in; AWS's protocol
   // tests require servers to accept requests without them.
   requiredWithDefault: '`@required` members with a `@default` are optional',
+  // AWS takes blob payloads without a `@mediaType` as any content type; the Lambda connector
+  // sends Invoke payloads as JSON.
+  opaquePayload: 'blob payloads without a `@mediaType` also take JSON',
+  // smithy-openapi declares only the `@http` code, though an `@httpResponseCode` member sets it,
+  // as Lambda Invoke's 202 for `Event` and 204 for `DryRun`.
+  responseCode: 'outputs with an `@httpResponseCode` member answer at `2XX`',
 } as const;
 
 type Paths = Record<string, Record<string, Record<string, unknown>>>;
@@ -127,10 +133,16 @@ const flatten = (
   ].sort();
 };
 
-const contentOf = (document: OpenApiDocument, holder: unknown, lastVariant = false) =>
-  Object.fromEntries(
-    Object.entries(isRecord(holder) && isRecord(holder.content) ? holder.content : {}).map(
-      ([mediaType, content]) => {
+const contentOf = (document: OpenApiDocument, holder: unknown, lastVariant = false) => {
+  const contents = isRecord(holder) && isRecord(holder.content) ? holder.content : {};
+  return Object.fromEntries(
+    Object.entries(contents)
+      // KNOWN_DIFFERENCES.opaquePayload
+      .filter(
+        ([mediaType]) =>
+          !(mediaType === 'application/json' && 'application/octet-stream' in contents)
+      )
+      .map(([mediaType, content]) => {
         const schema = isRecord(content) ? content.schema : undefined;
         // KNOWN_DIFFERENCES.errorsPerStatus
         const compared =
@@ -138,9 +150,9 @@ const contentOf = (document: OpenApiDocument, holder: unknown, lastVariant = fal
             ? schema.anyOf[schema.anyOf.length - 1]
             : schema;
         return [mediaType, flatten(document, compared)];
-      }
-    )
+      })
   );
+};
 
 /** What the test compares of each operation, keyed by `operationId`. */
 const describeOperations = (document: OpenApiDocument, errorsAsLastVariant: boolean) =>
@@ -166,12 +178,17 @@ const describeOperations = (document: OpenApiDocument, errorsAsLastVariant: bool
           responses: Object.fromEntries(
             Object.entries(isRecord(operation.responses) ? operation.responses : {}).map(
               ([status, response]) => [
-                status,
+                // KNOWN_DIFFERENCES.responseCode: the connectors' operations default to 200.
+                status === '2XX' ? '200' : status,
                 {
                   headers: Object.keys(
                     isRecord(response) && isRecord(response.headers) ? response.headers : {}
                   ).sort(),
-                  content: contentOf(document, response, errorsAsLastVariant && status !== '200'),
+                  content: contentOf(
+                    document,
+                    response,
+                    errorsAsLastVariant && !status.startsWith('2')
+                  ),
                 },
               ]
             )
@@ -189,6 +206,8 @@ describe('convertSmithy compared with smithy-openapi', () => {
       'blobPayload',
       'sensitive',
       'requiredWithDefault',
+      'opaquePayload',
+      'responseCode',
     ]);
   });
 
