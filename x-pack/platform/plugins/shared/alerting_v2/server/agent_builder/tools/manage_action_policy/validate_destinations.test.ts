@@ -7,7 +7,7 @@
 
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
-import { createAttachmentsClient } from '../../../lib/services/attachments_service';
+import { createAttachmentsClient } from '../../../lib/attachments_client';
 import { ActionPolicyOperationValidationError } from './operations';
 import { validateDestinations } from './validate_destinations';
 

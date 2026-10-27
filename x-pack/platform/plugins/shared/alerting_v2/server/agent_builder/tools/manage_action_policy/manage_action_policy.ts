@@ -24,7 +24,7 @@ import {
 import { validateDestinations, type WorkflowDestinationDiagnostic } from './validate_destinations';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
-import { createAttachmentsClient } from '../../../lib/services/attachments_service';
+import { createAttachmentsClient } from '../../../lib/attachments_client';
 
 const manageActionPolicySchema = lazySchema(() =>
   z.object({

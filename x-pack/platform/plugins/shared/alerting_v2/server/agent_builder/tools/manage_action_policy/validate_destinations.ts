@@ -12,7 +12,7 @@ import type { LoggerServiceContract } from '../../../lib/services/logger_service
 import type {
   TypedAttachmentClient,
   WorkflowYamlAttachmentData,
-} from '../../../lib/services/attachments_service';
+} from '../../../lib/attachments_client';
 import {
   DestinationValidator,
   type PersistedWorkflowLookup,

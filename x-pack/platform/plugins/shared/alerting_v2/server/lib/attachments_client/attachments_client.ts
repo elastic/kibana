@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ActionPolicyAttachmentData, RuleAttachmentData } from '@kbn/alerting-v2-schemas';
@@ -22,7 +22,7 @@ import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
  * Workflow attachment payloads are owned by the workflows plugin. This client only
  * checks that the payload is an object, so a schema change there does not drop it.
  */
-const workflowYamlAttachmentDataSchema = z.looseObject({});
+const workflowYamlAttachmentDataSchema = lazySchema(() => z.looseObject({}));
 
 export type WorkflowYamlAttachmentData = Record<string, unknown>;
 
