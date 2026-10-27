@@ -468,8 +468,8 @@
       }
     },
     {
-      "id": "62e8d809df42e39-70e582e72ffdc19",
-      "title": "Rules settings flyout opens, shows configured values, and persists changes",
+      "id": "62e8d809df42e39-6d598720f2d75a8",
+      "title": "Rules settings page opens, shows configured values, and persists changes",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -477,7 +477,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_settings.spec.ts",
-        "line": 36,
+        "line": 35,
         "column": 65
       }
     },
