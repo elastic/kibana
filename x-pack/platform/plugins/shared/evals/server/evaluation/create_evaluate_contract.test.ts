@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import { createEvaluateContract } from './create_evaluate_contract';
+import { createEvaluateContract, MAX_TRANSCRIPT_MESSAGES } from './create_evaluate_contract';
 import { EvaluationExecutionError } from './evaluation_execution_error';
 import type { EvaluationService } from './evaluation_service';
 
@@ -141,6 +141,28 @@ describe('createEvaluateContract', () => {
             role: 'user';
             content: string;
           }>,
+        },
+      });
+
+      await expect(evaluation).rejects.toMatchObject({
+        message: expect.stringContaining('Invalid evaluation input'),
+        responseType: 'badRequest',
+      });
+      expect(evaluationService.evaluate).not.toHaveBeenCalled();
+    });
+
+    it(`rejects a transcript longer than ${MAX_TRANSCRIPT_MESSAGES} messages`, async () => {
+      const { evaluate, evaluationService } = setup();
+
+      const evaluation = evaluate({
+        request,
+        evaluators: [{ name: 'tree_coverage' }],
+        evidence: {
+          round: ROUND,
+          transcript: Array.from({ length: MAX_TRANSCRIPT_MESSAGES + 1 }, () => ({
+            role: 'assistant' as const,
+            content: 'Still investigating.',
+          })),
         },
       });
 

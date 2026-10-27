@@ -48,11 +48,14 @@ const parseForEvaluators = ({
   input,
   inputName,
   getSchema,
+  getUnavailableMessage,
 }: {
   evaluators: ResolvedEvaluator[];
   input: Record<string, unknown> | undefined;
   inputName: 'reference_data' | 'context';
   getSchema: (definition: EvaluatorDefinition) => z.ZodType | undefined;
+  /** Explains a refusal when the input can't be supplied at all on this path. */
+  getUnavailableMessage?: (definition: EvaluatorDefinition) => string;
 }): Map<EvaluatorDefinition, Record<string, unknown> | undefined> => {
   const parsedByDefinition = new Map<EvaluatorDefinition, Record<string, unknown> | undefined>();
   for (const { definition } of evaluators) {
@@ -65,7 +68,10 @@ const parseForEvaluators = ({
     const parsed = schema.safeParse(input);
     if (!parsed.success) {
       throw new EvaluationExecutionError(
-        `Invalid ${inputName} for evaluator "${definition.name}": ${z.prettifyError(parsed.error)}`,
+        getUnavailableMessage?.(definition) ??
+          `Invalid ${inputName} for evaluator "${definition.name}": ${z.prettifyError(
+            parsed.error
+          )}`,
         'badRequest'
       );
     }
@@ -182,6 +188,10 @@ export const executeEvaluators = async (
     input: options.evidence?.context,
     inputName: 'context',
     getSchema: ({ contextSchema }) => contextSchema,
+    getUnavailableMessage: options.evidence
+      ? undefined
+      : ({ name }) =>
+          `Evaluator "${name}" needs context, which only in-memory evidence passed to evals.evaluate() carries, so it cannot grade a trace`,
   });
 
   const { round, traceAccessor } = await readRound();

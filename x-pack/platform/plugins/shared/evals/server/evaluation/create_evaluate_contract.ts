@@ -16,6 +16,12 @@ import { lazySchema, z } from '@kbn/zod/v4';
 import { EvaluationExecutionError } from './evaluation_execution_error';
 import type { EvaluationService } from './evaluation_service';
 
+/**
+ * Catches a runaway transcript early. It doesn't bound prompt size, since message content is
+ * uncapped; judges guard their own model's context window.
+ */
+export const MAX_TRANSCRIPT_MESSAGES = 1000;
+
 const TranscriptMessageInput = lazySchema(() =>
   z.object({
     role: z.enum(['user', 'assistant', 'tool']),
@@ -71,7 +77,7 @@ const EvaluateEvidenceInput = lazySchema(() =>
     evidence: z.object({
       round: EvidenceRound,
       reference_data: z.object({}).catchall(z.unknown()).optional(),
-      transcript: z.array(TranscriptMessageInput).optional(),
+      transcript: z.array(TranscriptMessageInput).max(MAX_TRANSCRIPT_MESSAGES).optional(),
       context: z.object({}).catchall(z.unknown()).optional(),
     }),
   })

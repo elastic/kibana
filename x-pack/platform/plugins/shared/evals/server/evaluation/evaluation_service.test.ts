@@ -333,6 +333,22 @@ describe('createEvaluationService', () => {
       expect(treeCoverage.evaluate).not.toHaveBeenCalled();
     });
 
+    it('explains that a trace cannot supply context an evaluator requires', async () => {
+      const treeCoverage: EvaluatorDefinition = {
+        ...buildEvaluator({ name: 'tree_coverage' }),
+        contextSchema: z.object({ decision_tree: z.string().min(1) }),
+      };
+      const { evaluate } = setup([treeCoverage]);
+
+      await expect(evaluate({ evaluators: [{ name: 'tree_coverage' }] })).rejects.toMatchObject({
+        message:
+          'Evaluator "tree_coverage" needs context, which only in-memory evidence passed to evals.evaluate() carries, so it cannot grade a trace',
+        responseType: 'badRequest',
+      });
+      expect(awaitTraceReadyMock).not.toHaveBeenCalled();
+      expect(treeCoverage.evaluate).not.toHaveBeenCalled();
+    });
+
     it('validates reference data against the evaluator schema', async () => {
       const correctness: EvaluatorDefinition = {
         ...buildEvaluator({ name: 'correctness' }),
