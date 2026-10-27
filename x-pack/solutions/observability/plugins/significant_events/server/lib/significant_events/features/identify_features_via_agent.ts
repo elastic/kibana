@@ -17,15 +17,8 @@ import {
   isRoundCompleteEvent,
   isToolCallEvent,
   isToolResultEvent,
-  platformSignificantEventsTools,
-  type ChatEvent,
 } from '@kbn/agent-builder-common';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import {
-  normalizeFeatureSlug,
-  type BaseFeature,
-  type IgnoredFeature,
-} from '@kbn/significant-events-schema';
+import type { BaseFeature, IgnoredFeature } from '@kbn/significant-events-schema';
 import {
   NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
   NIGHTSHIFT_USAGE_PARENT_ID,
@@ -59,33 +52,6 @@ export interface ExecuteFeatureIdentificationAgentOptions {
   logger: Logger;
 }
 
-const hasFeatureIds = (data: unknown): data is { features: Array<{ id: unknown }> } =>
-  typeof data === 'object' &&
-  data !== null &&
-  'features' in data &&
-  Array.isArray(data.features) &&
-  data.features.every((feature) => typeof feature === 'object' && feature !== null);
-
-/** Slugs the similarity tool showed the agent; reusing one is a deliberate match, not a guess. */
-export const collectSuggestedSlugs = (events: ChatEvent[]): string[] => {
-  const slugs = new Set<string>();
-  for (const event of events) {
-    if (
-      !isToolResultEvent(event) ||
-      event.data.tool_id !== platformSignificantEventsTools.searchSimilarFeatures
-    ) {
-      continue;
-    }
-    for (const { type, data } of event.data.results) {
-      if (type !== ToolResultType.other || !hasFeatureIds(data)) continue;
-      for (const { id } of data.features) {
-        if (typeof id === 'string') slugs.add(normalizeFeatureSlug(id));
-      }
-    }
-  }
-  return Array.from(slugs);
-};
-
 export async function executeFeatureIdentificationAgent({
   agentBuilder,
   request,
@@ -101,7 +67,6 @@ export async function executeFeatureIdentificationAgent({
 }: ExecuteFeatureIdentificationAgentOptions): Promise<{
   features: BaseFeature[];
   ignoredFeatures: IgnoredFeature[];
-  suggestedSlugs: string[];
   tokensUsed: ChatCompletionTokenCount;
 }> {
   const userMessage = buildFeatureIdentificationUserMessage({
@@ -187,7 +152,6 @@ export async function executeFeatureIdentificationAgent({
   return {
     features,
     ignoredFeatures,
-    suggestedSlugs: collectSuggestedSlugs(events),
     tokensUsed,
   };
 }

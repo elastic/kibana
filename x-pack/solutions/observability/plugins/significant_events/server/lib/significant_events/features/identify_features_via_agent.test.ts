@@ -9,19 +9,11 @@ import { of } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import {
-  AgentExecutionMode,
-  ChatEventType,
-  platformSignificantEventsTools,
-  type ChatEvent,
-} from '@kbn/agent-builder-common';
+import { AgentExecutionMode, ChatEventType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../agent_builder/agents/feature_identification';
 import { FINALIZE_FEATURES_TOOL_ID } from '../../../agent_builder/skills/feature_identification';
-import {
-  collectSuggestedSlugs,
-  executeFeatureIdentificationAgent,
-} from './identify_features_via_agent';
+import { executeFeatureIdentificationAgent } from './identify_features_via_agent';
 
 describe('executeFeatureIdentificationAgent', () => {
   it('persists into a pre-titled private conversation and returns finalized features', async () => {
@@ -98,7 +90,6 @@ describe('executeFeatureIdentificationAgent', () => {
     ).resolves.toEqual({
       features: [],
       ignoredFeatures: [],
-      suggestedSlugs: [],
       tokensUsed: {
         prompt: 10,
         completion: 5,
@@ -138,31 +129,5 @@ describe('executeFeatureIdentificationAgent', () => {
     const executionParams = executeAgent.mock.calls[0][0].params;
     expect(executionParams).not.toHaveProperty('structuredOutput');
     expect(executionParams).not.toHaveProperty('outputSchema');
-  });
-});
-
-describe('collectSuggestedSlugs', () => {
-  const toolResult = (toolId: string, results: unknown[]) =>
-    ({
-      type: ChatEventType.toolResult,
-      data: { tool_id: toolId, tool_call_id: 'call', results },
-    } as unknown as ChatEvent);
-
-  it('collects normalized hit slugs from similarity search results only', () => {
-    const events = [
-      toolResult(platformSignificantEventsTools.searchSimilarFeatures, [
-        {
-          type: ToolResultType.other,
-          data: { candidate_id: 'a', features: [{ id: ' Redis ' }, { id: 'checkout' }] },
-        },
-        { type: ToolResultType.other, data: { candidate_id: 'b', features: [{ id: 'redis' }] } },
-        { type: ToolResultType.error, data: { message: 'boom' } },
-      ]),
-      toolResult(FINALIZE_FEATURES_TOOL_ID, [
-        { type: ToolResultType.other, data: { features: [{ id: 'not-suggested' }] } },
-      ]),
-    ];
-
-    expect(collectSuggestedSlugs(events)).toEqual(['redis', 'checkout']);
   });
 });
