@@ -79,7 +79,7 @@ export const diffDashboardStates = (
   baseline: DashboardState,
   current: DashboardState,
   children?: { [id: string]: unknown }
-): Partial<DashboardState> => {
+): Partial<DashboardState> & ReturnType<typeof diffDashboardSettings> => {
   // The current state only has time_range / project_routing while its restore flag is on, the
   // flag unsaved changes reads. Flag changes themselves are reported by the settings diff.
   return {

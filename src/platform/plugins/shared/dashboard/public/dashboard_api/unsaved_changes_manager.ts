@@ -13,7 +13,7 @@ import {
   debounceTime,
   filter,
   map,
-  of,
+  merge,
   type Observable,
 } from 'rxjs';
 
@@ -27,13 +27,10 @@ import type {
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
 import { type DashboardBackupState } from '../services/dashboard_backup_service';
-import type { initializeApproximationManager } from './approximation_manager';
 import type { ChangeSourceTracker } from './change_source_tracker';
+import { diffDashboardStates } from './compare_dashboard_state';
 import type { initializeLayoutManager } from './layout_manager';
-import type { initializeProjectRoutingManager } from './project_routing_manager';
-import type { initializeSettingsManager } from './settings_manager';
 import type { PublishesOnSave } from './types';
-import type { initializeUnifiedSearchManager } from './unified_search_manager';
 
 const DEBOUNCE_TIME = 100;
 
@@ -41,12 +38,11 @@ export function initializeUnsavedChangesManager({
   layoutManager,
   savedObjectId$,
   lastSavedState,
-  settingsManager,
+  getState,
+  anyStateChange$,
+  hasProjectRouting,
   viewMode$,
   storeUnsavedChanges,
-  unifiedSearchManager,
-  projectRoutingManager,
-  approximationManager,
   setState,
   onSave$,
   changeSourceTracker,
@@ -56,10 +52,9 @@ export function initializeUnsavedChangesManager({
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
   layoutManager: ReturnType<typeof initializeLayoutManager>;
   viewMode$: PublishingSubject<ViewMode>;
-  settingsManager: ReturnType<typeof initializeSettingsManager>;
-  unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
-  projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
-  approximationManager: ReturnType<typeof initializeApproximationManager>;
+  getState: () => DashboardState;
+  anyStateChange$: Observable<unknown>;
+  hasProjectRouting: boolean;
   setState: (state: DashboardState) => Promise<void>;
   onSave$: PublishesOnSave['onSave$'];
   changeSourceTracker: ChangeSourceTracker;
@@ -84,16 +79,28 @@ export function initializeUnsavedChangesManager({
     lastSavedState$.next(dashboardState);
   });
 
-  const dashboardStateChanges$ = combineLatest([
-    settingsManager.internalApi.startComparing(lastSavedState$),
-    unifiedSearchManager.internalApi.startComparing(lastSavedState$),
-    layoutManager.internalApi.startComparing(lastSavedState$),
-    projectRoutingManager?.internalApi.startComparing(lastSavedState$) ?? of({}),
-    approximationManager.internalApi.startComparing(lastSavedState$),
-  ]).pipe(
-    map(([settings, unifiedSearch, layout, projectRouting, approximation]) => {
-      return { ...settings, ...unifiedSearch, ...layout, ...projectRouting, ...approximation };
-    })
+  const getCurrentState = (): DashboardState => {
+    const state = getState();
+    if (hasProjectRouting) return state;
+    // without cross-project search the project routing cannot change, so keep the saved one
+    const { project_routing: savedProjectRouting } = lastSavedState$.value;
+    return savedProjectRouting ? { ...state, project_routing: savedProjectRouting } : state;
+  };
+
+  const dashboardStateChanges$ = merge(
+    anyStateChange$,
+    // re-compare once a panel loads, so it is compared with its own comparators
+    layoutManager.api.children$,
+    lastSavedState$
+  ).pipe(
+    debounceTime(DEBOUNCE_TIME),
+    map(() =>
+      diffDashboardStates(
+        lastSavedState$.value,
+        getCurrentState(),
+        layoutManager.api.children$.getValue()
+      )
+    )
   );
 
   const unsavedChangesSubscription = combineLatest([viewMode$, dashboardStateChanges$])

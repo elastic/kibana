@@ -9,79 +9,76 @@
 
 import { BehaviorSubject, Subject, skip } from 'rxjs';
 import type { ViewMode } from '@kbn/presentation-publishing';
+import type { DashboardPanel, DashboardState } from '@kbn/as-code-dashboard-schema';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeChangeSourceTracker } from './change_source_tracker';
 import type { DashboardChangeSource } from '../../common/change_sources';
 import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
 import type { initializeLayoutManager } from './layout_manager';
 import type { DashboardChildren } from './layout_manager/types';
-import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { isDashboardSection } from '../../common';
-import type { DashboardSettings } from './settings_manager';
-import { initializeSettingsManager } from './settings_manager';
-import type { initializeUnifiedSearchManager } from './unified_search_manager';
-import type { initializeProjectRoutingManager } from './project_routing_manager';
-import type { initializeApproximationManager } from './approximation_manager';
-import type { DashboardPanel } from '@kbn/as-code-dashboard-schema';
 import type { DashboardSaveEvent } from './types';
 import { getSampleDashboardState } from '../mocks';
 
 const setStateMock = () => new Promise<void>((resolve) => resolve());
 
-const layoutUnsavedChanges$ = new BehaviorSubject<{ panels?: DashboardState['panels'] }>({});
 const layoutManagerMock = {
   api: {
     children$: new BehaviorSubject<DashboardChildren>({}),
   },
   internalApi: {
-    startComparing: () => layoutUnsavedChanges$,
     setLastSavedState: jest.fn(),
-    serializeLayout: () => {
-      const panels = layoutUnsavedChanges$.getValue()?.panels ?? [];
-      return {
-        panels,
-        // create one reference per panel
-        references: panels
-          .filter((panel) => !isDashboardSection(panel))
-          .map((panel, index) => ({
-            name: 'savedObjectRef',
-            type: (panel as DashboardPanel).type,
-            id: `savedObject${index + 1}`,
-          })),
-      };
-    },
   },
 } as unknown as ReturnType<typeof initializeLayoutManager>;
 
-const settingsManagerMock = {
-  internalApi: {
-    startComparing: () => new BehaviorSubject<Partial<DashboardSettings>>({}),
-  },
-} as unknown as ReturnType<typeof initializeSettingsManager>;
-const unifiedSearchManagerMock = {
-  internalApi: {
-    startComparing: () =>
-      new BehaviorSubject<
-        Partial<Pick<DashboardState, 'filters' | 'query' | 'refresh_interval' | 'time_range'>>
-      >({}),
-  },
-} as unknown as ReturnType<typeof initializeUnifiedSearchManager>;
-const projectRoutingManagerMock = {
-  internalApi: {
-    startComparing: () => new BehaviorSubject<Partial<Pick<DashboardState, 'project_routing'>>>({}),
-  },
-} as unknown as ReturnType<typeof initializeProjectRoutingManager>;
-const approximationManagerMock = {
-  internalApi: {
-    startComparing: () =>
-      new BehaviorSubject<Partial<Pick<DashboardState, 'esql_approximation'>>>({}),
-  },
-} as unknown as ReturnType<typeof initializeApproximationManager>;
+const grid = { x: 0, y: 0, w: 12, h: 8 };
 const savedObjectId$ = new BehaviorSubject<string | undefined>('dashboard1234');
 const viewMode$ = new BehaviorSubject<ViewMode>('edit');
 let onSave$: Subject<DashboardSaveEvent>;
+let currentState$: BehaviorSubject<DashboardState>;
 
 const setBackupStateMock = jest.fn();
+
+const createManager = ({
+  lastSavedState = DEFAULT_DASHBOARD_STATE,
+  storeUnsavedChanges = false,
+  hasProjectRouting = true,
+  initialChangeSources,
+  setState = setStateMock,
+}: {
+  lastSavedState?: DashboardState;
+  storeUnsavedChanges?: boolean;
+  hasProjectRouting?: boolean;
+  initialChangeSources?: DashboardChangeSource[];
+  setState?: (state: DashboardState) => Promise<void>;
+} = {}) => {
+  currentState$ = new BehaviorSubject<DashboardState>(lastSavedState);
+  const changeSourceTracker = initializeChangeSourceTracker(initialChangeSources);
+  const manager = initializeUnsavedChangesManager({
+    viewMode$,
+    storeUnsavedChanges,
+    lastSavedState,
+    layoutManager: layoutManagerMock,
+    savedObjectId$,
+    getState: () => currentState$.getValue(),
+    anyStateChange$: currentState$.pipe(skip(1)),
+    hasProjectRouting,
+    setState,
+    onSave$: onSave$.asObservable(),
+    changeSourceTracker,
+  });
+  return { ...manager, changeSourceTracker };
+};
+
+const expectUnsavedChanges = (
+  manager: ReturnType<typeof createManager>,
+  expected: boolean,
+  done: jest.DoneCallback
+) => {
+  manager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasUnsavedChanges) => {
+    expect(hasUnsavedChanges).toBe(expected);
+    done();
+  });
+};
 
 describe('unsavedChangesManager', () => {
   beforeEach(() => {
@@ -89,60 +86,44 @@ describe('unsavedChangesManager', () => {
     setBackupStateMock.mockReset();
     onSave$ = new Subject<DashboardSaveEvent>();
 
-    layoutUnsavedChanges$.next({});
-
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../services/dashboard_api_services').getDashboardBackupService = () => ({
       setState: setBackupStateMock,
     });
   });
 
+  it('passes the last saved state to the layout before comparing', () => {
+    const lastSavedState = getSampleDashboardState();
+    createManager({ lastSavedState });
+    expect(layoutManagerMock.internalApi.setLastSavedState).toHaveBeenCalledWith(lastSavedState);
+  });
+
   describe('onUnsavedChanges', () => {
     describe('onSettingsChanges', () => {
       test('should have unsaved changes when tags change', (done) => {
-        const settingsManager = initializeSettingsManager(getSampleDashboardState());
-        const unsavedChangesManager = initializeUnsavedChangesManager({
-          viewMode$,
-          storeUnsavedChanges: false,
-          lastSavedState: DEFAULT_DASHBOARD_STATE,
-          layoutManager: layoutManagerMock,
-          savedObjectId$,
-          settingsManager,
-          unifiedSearchManager: unifiedSearchManagerMock,
-          projectRoutingManager: projectRoutingManagerMock,
-          approximationManager: approximationManagerMock,
-          setState: setStateMock,
-          onSave$: onSave$.asObservable(),
-          changeSourceTracker: initializeChangeSourceTracker(),
-        });
+        const manager = createManager({ lastSavedState: getSampleDashboardState() });
+        expectUnsavedChanges(manager, true, done);
 
-        unsavedChangesManager.api.hasUnsavedChanges$
-          .pipe(skip(1))
-          .subscribe((hasUnsavedChanges) => {
-            expect(hasUnsavedChanges).toBe(true);
-            done();
-          });
+        currentState$.next({ ...currentState$.getValue(), tags: ['New tag'] });
+      });
+    });
 
-        settingsManager.api.setTags(['New tag']);
+    test('should have unsaved changes when a panel that has not loaded changes', (done) => {
+      const panel: DashboardPanel = { id: 'panel1', type: 'testType', grid, config: { a: 1 } };
+      const manager = createManager({
+        lastSavedState: { ...DEFAULT_DASHBOARD_STATE, panels: [panel] },
+      });
+      expectUnsavedChanges(manager, true, done);
+
+      currentState$.next({
+        ...currentState$.getValue(),
+        panels: [{ ...panel, config: { a: 2 } }],
       });
     });
 
     describe('session state', () => {
-      test('should backup unsaved panel changes and references when only layout changes', (done) => {
-        initializeUnsavedChangesManager({
-          viewMode$,
-          storeUnsavedChanges: true,
-          lastSavedState: DEFAULT_DASHBOARD_STATE,
-          layoutManager: layoutManagerMock,
-          savedObjectId$,
-          settingsManager: settingsManagerMock,
-          unifiedSearchManager: unifiedSearchManagerMock,
-          projectRoutingManager: projectRoutingManagerMock,
-          approximationManager: approximationManagerMock,
-          setState: setStateMock,
-          onSave$: onSave$.asObservable(),
-          changeSourceTracker: initializeChangeSourceTracker(),
-        });
+      test('should backup unsaved panel changes when only layout changes', (done) => {
+        createManager({ storeUnsavedChanges: true });
 
         setBackupStateMock.mockImplementation((id, backupState) => {
           expect(id).toBe(savedObjectId$.value);
@@ -153,6 +134,12 @@ describe('unsavedChangesManager', () => {
                   "config": Object {
                     "title": "New panel",
                   },
+                  "grid": Object {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 0,
+                  },
                   "type": "testType",
                 },
               ],
@@ -162,15 +149,9 @@ describe('unsavedChangesManager', () => {
           done();
         });
 
-        layoutUnsavedChanges$.next({
-          panels: [
-            {
-              type: 'testType',
-              config: {
-                title: 'New panel',
-              },
-            } as unknown as DashboardPanel,
-          ],
+        currentState$.next({
+          ...currentState$.getValue(),
+          panels: [{ type: 'testType', grid, config: { title: 'New panel' } }],
         });
       });
     });
@@ -178,145 +159,55 @@ describe('unsavedChangesManager', () => {
 
   describe('projectRouting changes', () => {
     it('should detect projectRouting changes as unsaved changes', (done) => {
-      const projectRoutingChanges$ = new BehaviorSubject<
-        Partial<Pick<DashboardState, 'project_routing'>>
-      >({});
-      const customProjectRoutingManagerMock = {
-        internalApi: {
-          startComparing: () => projectRoutingChanges$,
-        },
-      } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
+      const manager = createManager({ lastSavedState: getSampleDashboardState() });
+      expectUnsavedChanges(manager, true, done);
 
-      const unsavedChangesManager = initializeUnsavedChangesManager({
-        viewMode$,
-        lastSavedState: getSampleDashboardState(),
-        layoutManager: layoutManagerMock,
-        savedObjectId$,
-        settingsManager: settingsManagerMock,
-        unifiedSearchManager: unifiedSearchManagerMock,
-        projectRoutingManager: customProjectRoutingManagerMock,
-        approximationManager: approximationManagerMock,
-        setState: setStateMock,
-        onSave$: onSave$.asObservable(),
-        changeSourceTracker: initializeChangeSourceTracker(),
-      });
-
-      unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
-        expect(hasChanges).toBe(true);
-        done();
-      });
-
-      // Simulate projectRouting change
-      projectRoutingChanges$.next({ project_routing: '_alias:_origin' });
+      currentState$.next({ ...currentState$.getValue(), project_routing: '_alias:_origin' });
     });
 
     it('should have unsaved changes when projectRouting is different from saved value', (done) => {
-      const lastSavedState = {
-        ...getSampleDashboardState(),
-        projectRouting: '_alias:_origin',
-      };
-      const projectRoutingChanges$ = new BehaviorSubject<
-        Partial<Pick<DashboardState, 'project_routing'>>
-      >({});
-      const customProjectRoutingManagerMock = {
-        internalApi: {
-          startComparing: () => projectRoutingChanges$,
-        },
-      } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
+      const manager = createManager({
+        lastSavedState: getSampleDashboardState({ project_routing: '_alias:_origin' }),
+      });
+      expectUnsavedChanges(manager, true, done);
 
-      const unsavedChangesManager = initializeUnsavedChangesManager({
-        viewMode$,
-        lastSavedState,
-        layoutManager: layoutManagerMock,
-        savedObjectId$,
-        settingsManager: settingsManagerMock,
-        unifiedSearchManager: unifiedSearchManagerMock,
-        projectRoutingManager: customProjectRoutingManagerMock,
-        approximationManager: approximationManagerMock,
-        setState: setStateMock,
-        onSave$: onSave$.asObservable(),
-        changeSourceTracker: initializeChangeSourceTracker(),
+      currentState$.next({ ...currentState$.getValue(), project_routing: 'ALL' });
+    });
+
+    it('keeps the saved projectRouting without cross-project search', () => {
+      jest.useFakeTimers();
+      createManager({
+        lastSavedState: getSampleDashboardState({ project_routing: '_alias:_origin' }),
+        hasProjectRouting: false,
+        storeUnsavedChanges: true,
       });
 
-      unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
-        expect(hasChanges).toBe(true);
-        done();
-      });
+      const { project_routing: _, ...stateWithoutProjectRouting } = currentState$.getValue();
+      currentState$.next(stateWithoutProjectRouting);
+      jest.advanceTimersByTime(200);
 
-      // Change to different value
-      projectRoutingChanges$.next({ project_routing: 'ALL' });
+      expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', { viewMode: 'edit' });
+      jest.useRealTimers();
     });
   });
 
   describe('approximation changes', () => {
     it('should detect esql_approximation changes as unsaved changes', (done) => {
-      const approximationChanges$ = new BehaviorSubject<
-        Partial<Pick<DashboardState, 'esql_approximation'>>
-      >({});
-      const customApproximationManagerMock = {
-        internalApi: {
-          startComparing: () => approximationChanges$,
-        },
-      } as unknown as ReturnType<typeof initializeApproximationManager>;
+      const manager = createManager({ lastSavedState: getSampleDashboardState() });
+      expectUnsavedChanges(manager, true, done);
 
-      const unsavedChangesManager = initializeUnsavedChangesManager({
-        viewMode$,
-        lastSavedState: getSampleDashboardState(),
-        layoutManager: layoutManagerMock,
-        savedObjectId$,
-        settingsManager: settingsManagerMock,
-        unifiedSearchManager: unifiedSearchManagerMock,
-        projectRoutingManager: projectRoutingManagerMock,
-        approximationManager: customApproximationManagerMock,
-        setState: setStateMock,
-        onSave$: onSave$.asObservable(),
-        changeSourceTracker: initializeChangeSourceTracker(),
-      });
-
-      unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
-        expect(hasChanges).toBe(true);
-        done();
-      });
-
-      approximationChanges$.next({ esql_approximation: true });
+      currentState$.next({ ...currentState$.getValue(), esql_approximation: true });
     });
   });
 
   describe('change sources', () => {
-    const grid = { x: 0, y: 0, w: 12, h: 8 };
     const agentPanel: DashboardPanel = { type: 'testType', grid, config: { title: 'Agent panel' } };
     const userPanel: DashboardPanel = { type: 'testType', grid, config: { title: 'User panel' } };
 
-    const createManager = ({
-      storeUnsavedChanges = false,
-      initialChangeSources,
-      setState = setStateMock,
-    }: {
-      storeUnsavedChanges?: boolean;
-      initialChangeSources?: DashboardChangeSource[];
-      setState?: (state: DashboardState) => Promise<void>;
-    } = {}) => {
-      const changeSourceTracker = initializeChangeSourceTracker(initialChangeSources);
-      const manager = initializeUnsavedChangesManager({
-        viewMode$,
-        storeUnsavedChanges,
-        lastSavedState: DEFAULT_DASHBOARD_STATE,
-        layoutManager: layoutManagerMock,
-        savedObjectId$,
-        settingsManager: settingsManagerMock,
-        unifiedSearchManager: unifiedSearchManagerMock,
-        projectRoutingManager: projectRoutingManagerMock,
-        approximationManager: approximationManagerMock,
-        setState,
-        onSave$: onSave$.asObservable(),
-        changeSourceTracker,
-      });
-      return { ...manager, changeSourceTracker };
-    };
-
-    const emitLayoutChanges = (changes: { panels?: DashboardState['panels'] }) => {
-      layoutUnsavedChanges$.next(changes);
-      jest.advanceTimersByTime(100);
+    const emitLayoutChanges = (panels: DashboardState['panels']) => {
+      currentState$.next({ ...currentState$.getValue(), panels });
+      // the state diff and the backup are each debounced
+      jest.advanceTimersByTime(200);
     };
 
     beforeEach(() => {
@@ -353,7 +244,7 @@ describe('unsavedChangesManager', () => {
       const { changeSourceTracker } = createManager({ storeUnsavedChanges: true });
 
       changeSourceTracker.recordChange(['agent']);
-      emitLayoutChanges({ panels: [agentPanel] });
+      emitLayoutChanges([agentPanel]);
 
       expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
         viewMode: 'edit',
@@ -369,14 +260,14 @@ describe('unsavedChangesManager', () => {
       });
       changeSourceTracker.markSaved(changeSourceTracker.getLatestChanges());
 
-      emitLayoutChanges({ panels: [agentPanel, userPanel] });
+      emitLayoutChanges([agentPanel, userPanel]);
       expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
         viewMode: 'edit',
         panels: [agentPanel, userPanel],
       });
 
       changeSourceTracker.recordChange(['agent']);
-      emitLayoutChanges({ panels: [agentPanel] });
+      emitLayoutChanges([agentPanel]);
       expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
         viewMode: 'edit',
         panels: [agentPanel],
@@ -387,43 +278,15 @@ describe('unsavedChangesManager', () => {
     it('backs up sources only alongside dashboard edits', () => {
       createManager({ storeUnsavedChanges: true, initialChangeSources: ['agent'] });
 
-      emitLayoutChanges({});
+      emitLayoutChanges(DEFAULT_DASHBOARD_STATE.panels);
       expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', { viewMode: 'edit' });
 
-      emitLayoutChanges({ panels: [agentPanel] });
+      emitLayoutChanges([agentPanel]);
       expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
         viewMode: 'edit',
         panels: [agentPanel],
         changedBy: ['agent'],
       });
-    });
-  });
-
-  describe('save events', () => {
-    it('updates the last saved state when a save event is published', () => {
-      const currentState = { ...getSampleDashboardState(), title: 'Updated title' };
-      const unsavedChangesManager = initializeUnsavedChangesManager({
-        viewMode$,
-        lastSavedState: getSampleDashboardState(),
-        layoutManager: layoutManagerMock,
-        savedObjectId$,
-        settingsManager: settingsManagerMock,
-        unifiedSearchManager: unifiedSearchManagerMock,
-        projectRoutingManager: projectRoutingManagerMock,
-        approximationManager: approximationManagerMock,
-        setState: setStateMock,
-        onSave$: onSave$.asObservable(),
-        changeSourceTracker: initializeChangeSourceTracker(),
-      });
-      const saveEvent = {
-        previousDashboardId: 'dashboard-a',
-        dashboardId: 'dashboard-b',
-        dashboardState: currentState,
-      };
-
-      onSave$.next(saveEvent);
-
-      expect(unsavedChangesManager.internalApi.getLastSavedState()).toEqual(currentState);
     });
   });
 });
