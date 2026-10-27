@@ -32,6 +32,11 @@ interface OfrepBulkResponse {
   flags?: OfrepBulkEvaluation[];
 }
 
+/** A 304 keeps the flags already cached for this context. A 200 replaces them. */
+type BulkEvaluation =
+  | { notModified: true; etag?: string }
+  | { notModified: false; flags: Record<string, unknown>; etag?: string };
+
 export interface CachedOfrepProviderOptions {
   baseUrl: string;
   sdkKey: string;
@@ -88,7 +93,8 @@ const valueMatchesType = (value: unknown, type: FlagValueType): value is JsonVal
  * The official OFREP server provider calls the single-flag endpoint on every evaluation.
  * Kibana evaluates the same flags repeatedly and only republishes them when a provider
  * emits {@link ServerProviderEvents.ConfigurationChanged}, so this provider polls the bulk
- * endpoint and resolves from the cached response.
+ * endpoint and resolves from the cached response. Polls for a context send the ETag from the
+ * last bulk response for that context. A 304 keeps the cached flags.
  *
  * The server SDK does not notify providers of context changes. Each evaluation carries the
  * current context, and a change triggers one new bulk evaluation.
@@ -103,6 +109,9 @@ export class CachedOfrepProvider implements Provider {
   private flags: Record<string, unknown> = {};
   private context: EvaluationContext = {};
   private loadedKey?: string;
+  /** ETag of the last bulk response for {@link etagKey}. */
+  private etag?: string;
+  private etagKey?: string;
   /** Context key of the latest attempt, including attempts that failed. */
   private attemptedKey?: string;
   private stale = false;
@@ -264,18 +273,22 @@ export class CachedOfrepProvider implements Provider {
     }
     this.attemptedKey = key;
     try {
-      const next = await this.fetchFlagValues(context);
+      const evaluation = await this.fetchFlagValues(context);
       if (this.closed || stableSerialize(this.context) !== key) {
         return;
       }
-      const flagsChanged = changedFlagKeys(this.flags, next);
-      this.flags = next;
+      if (!evaluation.notModified) {
+        const flagsChanged = changedFlagKeys(this.flags, evaluation.flags);
+        this.flags = evaluation.flags;
+        if (flagsChanged.length > 0) {
+          this.events.emit(ServerProviderEvents.ConfigurationChanged, { flagsChanged });
+        }
+      }
+      this.etag = evaluation.etag;
+      this.etagKey = evaluation.etag ? key : undefined;
       this.loadedKey = key;
       this.stale = false;
       this.retryNotBefore = 0;
-      if (flagsChanged.length > 0) {
-        this.events.emit(ServerProviderEvents.ConfigurationChanged, { flagsChanged });
-      }
     } catch (error) {
       this.options.logger?.warn(`OFREP bulk evaluation failed: ${error}`);
       this.stale = this.loadedKey !== undefined;
@@ -285,21 +298,32 @@ export class CachedOfrepProvider implements Provider {
 
   /**
    * Evaluates every flag for one context through OFREP's bulk endpoint.
-   * Flags that come back with an error code are omitted.
+   * Sends the stored ETag when it belongs to this context. Flags that come back with an error code are omitted.
    */
-  private async fetchFlagValues(context: EvaluationContext): Promise<Record<string, unknown>> {
+  private async fetchFlagValues(context: EvaluationContext): Promise<BulkEvaluation> {
     const base = this.options.baseUrl.endsWith('/')
       ? this.options.baseUrl
       : `${this.options.baseUrl}/`;
     const endpoint = new URL('ofrep/v1/evaluate/flags', base);
+    const key = stableSerialize(context);
+    const headers: Record<string, string> = {
+      'content-type': 'application/json',
+      authorization: `Bearer ${this.options.sdkKey}`,
+    };
+    if (this.etag && this.etagKey === key) {
+      headers['If-None-Match'] = this.etag;
+    }
     const response = await this.fetchImpl(endpoint, {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${this.options.sdkKey}`,
-      },
+      headers,
       body: JSON.stringify({ context }),
     });
+    if (response.status === 304) {
+      if (!this.etag || this.etagKey !== key) {
+        throw new Error('OFREP bulk evaluation returned 304 without a cached response');
+      }
+      return { notModified: true, etag: response.headers.get('etag') ?? this.etag };
+    }
     if (!response.ok) {
       throw new Error(`OFREP bulk evaluation failed with status ${response.status}`);
     }
@@ -310,6 +334,6 @@ export class CachedOfrepProvider implements Provider {
         flags[flag.key] = flag.value;
       }
     }
-    return flags;
+    return { notModified: false, flags, etag: response.headers.get('etag') ?? undefined };
   }
 }

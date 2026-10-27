@@ -15,10 +15,24 @@ import { CachedOfrepProvider } from './ofrep_provider';
 
 const logger = { error() {}, warn() {}, info() {}, debug() {} } as Logger;
 
-const response = (flags: unknown[]) => ({
+const headersOf = (etag?: string) => ({
+  get: (name: string) => (name.toLowerCase() === 'etag' ? etag ?? null : null),
+});
+
+const response = (flags: unknown[], etag?: string) => ({
   ok: true,
   status: 200,
+  headers: headersOf(etag),
   json: async () => ({ flags }),
+});
+
+const notModified = (etag: string) => ({
+  ok: false,
+  status: 304,
+  headers: headersOf(etag),
+  json: async () => {
+    throw new Error('a 304 response has no body');
+  },
 });
 
 describe('CachedOfrepProvider', () => {
@@ -182,6 +196,83 @@ describe('CachedOfrepProvider', () => {
 
     await jest.advanceTimersByTimeAsync(60_000);
     expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  test('sends If-None-Match and keeps the cache when the bulk response is unchanged', async () => {
+    fetchImpl
+      .mockResolvedValueOnce(response([{ key: 'a.flag', value: true }], '"v1"'))
+      .mockResolvedValueOnce(notModified('"v1"'));
+    const provider = createProvider();
+    const onChange = jest.fn();
+    provider.events.addHandler(ServerProviderEvents.ConfigurationChanged, onChange);
+    await provider.initialize({});
+    onChange.mockClear();
+
+    await jest.advanceTimersByTimeAsync(30_000);
+
+    expect(fetchImpl.mock.calls[0][1].headers['If-None-Match']).toBeUndefined();
+    expect(fetchImpl.mock.calls[1][1].headers['If-None-Match']).toBe('"v1"');
+    expect(onChange).not.toHaveBeenCalled();
+    await expect(provider.resolveBooleanEvaluation('a.flag', false, {}, logger)).resolves.toEqual({
+      value: true,
+      reason: StandardResolutionReasons.CACHED,
+    });
+
+    await provider.onClose();
+  });
+
+  test('sends the replacement ETag after a poll returns new flags', async () => {
+    fetchImpl
+      .mockResolvedValueOnce(response([{ key: 'a.flag', value: true }], '"v1"'))
+      .mockResolvedValueOnce(response([{ key: 'a.flag', value: false }], '"v2"'))
+      .mockResolvedValueOnce(notModified('"v2"'));
+    const provider = createProvider();
+    await provider.initialize({});
+
+    await jest.advanceTimersByTimeAsync(30_000);
+    await jest.advanceTimersByTimeAsync(30_000);
+
+    expect(fetchImpl.mock.calls[1][1].headers['If-None-Match']).toBe('"v1"');
+    expect(fetchImpl.mock.calls[2][1].headers['If-None-Match']).toBe('"v2"');
+
+    await provider.onClose();
+  });
+
+  test('does not send the previous context ETag when the context changes', async () => {
+    fetchImpl
+      .mockResolvedValueOnce(response([{ key: 'a.flag', value: false }], '"one"'))
+      .mockResolvedValueOnce(response([{ key: 'a.flag', value: true }], '"two"'));
+    const provider = createProvider();
+    await provider.initialize({ targetingKey: 'one' });
+
+    await provider.resolveBooleanEvaluation('a.flag', false, { targetingKey: 'two' }, logger);
+
+    expect(fetchImpl.mock.calls[1][1].headers['If-None-Match']).toBeUndefined();
+    expect(JSON.parse(fetchImpl.mock.calls[1][1].body as string).context).toEqual({
+      targetingKey: 'two',
+    });
+
+    await provider.onClose();
+  });
+
+  test('retries a failed poll with the ETag from the last successful response', async () => {
+    fetchImpl
+      .mockResolvedValueOnce(response([{ key: 'a.flag', value: true }], '"v1"'))
+      .mockResolvedValueOnce({ ok: false, status: 503, json: async () => ({}) })
+      .mockResolvedValueOnce(notModified('"v1"'));
+    const provider = createProvider();
+    await provider.initialize({});
+
+    await jest.advanceTimersByTimeAsync(30_000);
+    await jest.advanceTimersByTimeAsync(30_000);
+
+    expect(fetchImpl.mock.calls[2][1].headers['If-None-Match']).toBe('"v1"');
+    await expect(provider.resolveBooleanEvaluation('a.flag', false, {}, logger)).resolves.toEqual({
+      value: true,
+      reason: StandardResolutionReasons.CACHED,
+    });
+
+    await provider.onClose();
   });
 
   test('getBulkFlagValues returns the cache and evaluates only when it is missing', async () => {
