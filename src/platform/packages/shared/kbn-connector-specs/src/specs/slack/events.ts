@@ -706,11 +706,11 @@ export const slackEvents: ConnectorSpecEvents = {
     },
     [SLACK_SLASH_COMMAND_EVENT_KEY]: {
       eventId: SLACK_SLASH_COMMAND_EVENT_ID,
-      title: i18n.translate('core.kibanaConnectorSpecs.slack.events.slashCommand.title', {
+      title: i18n.translate('connectorSpecs.slack.events.slashCommand.title', {
         defaultMessage: 'Slash command',
       }),
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.slack.events.slashCommand.description',
+        'connectorSpecs.slack.events.slashCommand.description',
         {
           defaultMessage:
             'A Slack slash command was invoked. Reply by posting a message to the response URL.',

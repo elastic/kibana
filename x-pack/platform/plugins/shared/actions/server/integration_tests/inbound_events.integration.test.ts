@@ -15,7 +15,12 @@ import { buildInboundEventsPath } from '../../common/inbound_events';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import { INBOUND_EVENTS_API_VERSION } from '../inbound/constants';
+import { dispatchConnectorEvents } from '../inbound/dispatch_connector_events';
 import { setupTestServers } from './lib';
+
+jest.mock('../inbound/dispatch_connector_events', () => ({
+  dispatchConnectorEvents: jest.fn().mockResolvedValue({ ok: true }),
+}));
 
 interface ConnectorHttpBody {
   id: string;
@@ -190,6 +195,77 @@ describe('Inbound events HTTP API', () => {
 
     await postHub(created.id, ingestToken!).expect(404);
     await postHub(created.id, newToken!).expect(202, { ok: true });
+  });
+
+  it('decodes a Slack slash command form post and returns an empty HTTP 200 ack', async () => {
+    const dispatchConnectorEventsMock = jest.mocked(dispatchConnectorEvents);
+    dispatchConnectorEventsMock.mockClear();
+
+    const createRes = await getSupertest(kibanaServer.root, 'post', '/api/actions/connector')
+      .set('kbn-xsrf', 'kibana')
+      .send({
+        name: 'slack-slash-command-ingress',
+        connector_type_id: '.slack2',
+        config: {},
+        secrets: { authType: 'bearer', token: 'xoxb-test-token' },
+        is_inbound_events_enabled: true,
+      })
+      .expect(200);
+    const created = createRes.body as ConnectorHttpBody;
+
+    const mintRes = await getSupertest(
+      kibanaServer.root,
+      'post',
+      `${INTERNAL_BASE_ACTION_API_PATH}/connector/${created.id}/_rotate_event_token`
+    )
+      .set('kbn-xsrf', 'kibana')
+      .set('x-elastic-internal-origin', 'kibana')
+      .expect(200);
+    const ingestToken = (mintRes.body as { ingest_token: string }).ingest_token;
+
+    const response = await getSupertest(
+      kibanaServer.root,
+      'post',
+      buildInboundEventsPath({ connectorTypeId: '.slack2', connectorId: created.id })
+    )
+      .set('elastic-api-version', INBOUND_EVENTS_API_VERSION)
+      .set('kbn-xsrf', 'kibana')
+      .set('Authorization', `Bearer ${ingestToken}`)
+      .type('form')
+      .send({
+        team_id: 'T123',
+        channel_id: 'C123',
+        channel_name: 'general',
+        user_id: 'U123',
+        user_name: 'ada',
+        command: '/investigate',
+        text: 'host & cluster=one + café',
+        api_app_id: 'A123',
+        response_url: 'https://hooks.slack.com/commands/T123/1/secret',
+        trigger_id: '13345224609.738474920.8088930838d88f008e0',
+      })
+      .expect(200);
+
+    expect(response.text).toBe('');
+    expect(dispatchConnectorEventsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventId: 'slack2.slash_command',
+        connectorId: created.id,
+        connectorTypeId: '.slack2',
+        correlationKey: '13345224609.738474920.8088930838d88f008e0',
+        payload: {
+          workspace: 'T123',
+          channel: 'C123',
+          channelName: 'general',
+          user: 'U123',
+          userName: 'ada',
+          command: '/investigate',
+          text: 'host & cluster=one + café',
+          responseUrl: 'https://hooks.slack.com/commands/T123/1/secret',
+          apiAppId: 'A123',
+        },
+      })
+    );
   });
 
   it('stores an unencrypted presence flag and strips encrypted identity on a scoped get', async () => {
