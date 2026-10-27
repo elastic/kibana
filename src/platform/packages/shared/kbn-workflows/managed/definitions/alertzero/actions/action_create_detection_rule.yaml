@@ -101,11 +101,11 @@ outputs:
 steps:
   # The approval is meant to close the coverage gap, and a disabled rule detects
   # nothing, so the rule is created enabled and starts running on its first
-  # scheduled interval as the approver. Creating it enabled is a single API call:
-  # the engine checks privileges and mints the API key before the rule is saved,
-  # and deletes the rule again if scheduling it fails, so an approver who may not
-  # enable rules gets one error and no rule is left behind. The gate then
-  # re-offers the proposal as it does for any failed action.
+  # scheduled interval as the approver. Creating it enabled is a single API call
+  # rather than a create followed by an enable: the privilege check and the API
+  # key for the approver happen before the rule is saved, so an approver who may
+  # not enable rules gets one error and no rule. The gate then re-offers the
+  # proposal as it does for any failed action.
   #
   # Spelled out field by field, because the action owns `enabled` and the drafted
   # body cannot carry it (`actionInput` rejects unknown fields). An optional field
