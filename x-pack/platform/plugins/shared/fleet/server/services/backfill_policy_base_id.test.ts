@@ -133,7 +133,9 @@ describe('backfillIndex', () => {
   });
 
   it('updates the documents in bounded batches until a batch is not full', async () => {
-    esClient.count.mockResolvedValue({ count: 70 } as any);
+    esClient.count
+      .mockResolvedValueOnce({ count: 70 } as any)
+      .mockResolvedValueOnce({ count: 0 } as any);
     esClient.updateByQuery
       .mockResolvedValueOnce({ total: 50, updated: 50 } as any)
       .mockResolvedValueOnce({ total: 20, updated: 20 } as any);
@@ -155,11 +157,27 @@ describe('backfillIndex', () => {
             must_not: [{ exists: { field: 'policy_base_id' } }],
           },
         },
-      })
+      }),
+      { signal: undefined }
     );
     expect(logger.info).toHaveBeenCalledWith(
       'Backfilled policy_base_id on 70 fleet-policies documents: completed'
     );
+  });
+
+  it('continues after a batch that is not full when documents were skipped on a conflict', async () => {
+    esClient.count
+      .mockResolvedValueOnce({ count: 21 } as any)
+      .mockResolvedValueOnce({ count: 1 } as any)
+      .mockResolvedValueOnce({ count: 0 } as any);
+    esClient.updateByQuery
+      .mockResolvedValueOnce({ total: 20, updated: 19, version_conflicts: 1 } as any)
+      .mockResolvedValueOnce({ total: 1, updated: 1 } as any);
+
+    const result = await backfillIndex(esClient, target, { logger });
+
+    expect(result).toEqual({ label: 'fleet-policies', status: 'completed', updated: 20 });
+    expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
   });
 
   it('stops at the time budget and reports the remaining documents', async () => {
@@ -177,7 +195,34 @@ describe('backfillIndex', () => {
     expect(result).toEqual({ label: 'fleet-policies', status: 'partial', updated: 50 });
     expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
     expect(logger.info).toHaveBeenCalledWith(
-      'Backfilled policy_base_id on 50 fleet-policies documents: partial, 70 remaining for the next Fleet setup'
+      'Backfilled policy_base_id on 50 fleet-policies documents: partial, 70 remaining, continuing on the next Fleet setup'
+    );
+  });
+
+  it('passes the signal to Elasticsearch and does not count after a cancelled request', async () => {
+    esClient.count.mockResolvedValue({ count: 120 } as any);
+    const abortController = new AbortController();
+    esClient.updateByQuery.mockImplementation(async () => {
+      abortController.abort();
+      throw new Error('Request aborted');
+    });
+
+    const result = await backfillIndex(esClient, target, {
+      logger,
+      signal: abortController.signal,
+    });
+
+    expect(result).toEqual({ label: 'fleet-policies', status: 'partial', updated: 0 });
+    expect(esClient.count).toHaveBeenCalledTimes(1);
+    expect(esClient.count).toHaveBeenCalledWith(expect.anything(), {
+      signal: abortController.signal,
+    });
+    expect(esClient.updateByQuery).toHaveBeenCalledWith(expect.anything(), {
+      signal: abortController.signal,
+    });
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith(
+      'Backfilled policy_base_id on 0 fleet-policies documents: partial, task cancelled, continuing on the next Fleet setup'
     );
   });
 
@@ -196,6 +241,8 @@ describe('backfillIndex', () => {
 
     expect(result.status).toBe('partial');
     expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
+    // no count of the remaining documents after the cancellation
+    expect(esClient.count).toHaveBeenCalledTimes(1);
   });
 
   it('stops when a full batch updates nothing', async () => {
@@ -227,7 +274,11 @@ describe('backfillPolicyBaseId', () => {
   it('backfills the indices one after the other with their batch sizes', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const logger = loggingSystemMock.createLogger();
-    esClient.count.mockResolvedValue({ count: 1 } as any);
+    esClient.count
+      .mockResolvedValueOnce({ count: 1 } as any)
+      .mockResolvedValueOnce({ count: 0 } as any)
+      .mockResolvedValueOnce({ count: 1 } as any)
+      .mockResolvedValueOnce({ count: 0 } as any);
     let running = 0;
     esClient.updateByQuery.mockImplementation(async () => {
       running++;
@@ -252,7 +303,10 @@ describe('backfillPolicyBaseId', () => {
   it('continues with the next index when one fails', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const logger = loggingSystemMock.createLogger();
-    esClient.count.mockResolvedValue({ count: 1 } as any);
+    esClient.count
+      .mockResolvedValueOnce({ count: 1 } as any)
+      .mockResolvedValueOnce({ count: 1 } as any)
+      .mockResolvedValueOnce({ count: 0 } as any);
     esClient.updateByQuery
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValueOnce({ total: 1, updated: 1 } as any);

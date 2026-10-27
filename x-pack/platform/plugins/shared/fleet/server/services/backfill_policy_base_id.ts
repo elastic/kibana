@@ -85,12 +85,19 @@ interface BackfillOptions {
   timeBudgetMs?: number;
 }
 
-const countDocumentsToBackfill = async (esClient: ElasticsearchClient, index: string) => {
-  const { count } = await esClient.count({
-    index,
-    ignore_unavailable: true,
-    query: BACKFILL_QUERY,
-  });
+const countDocumentsToBackfill = async (
+  esClient: ElasticsearchClient,
+  index: string,
+  signal?: AbortSignal
+) => {
+  const { count } = await esClient.count(
+    {
+      index,
+      ignore_unavailable: true,
+      query: BACKFILL_QUERY,
+    },
+    { signal }
+  );
   return count;
 };
 
@@ -100,36 +107,50 @@ export async function backfillIndex(
   { logger, signal, timeBudgetMs = BACKFILL_TIME_BUDGET_MS }: BackfillOptions
 ): Promise<BackfillResult> {
   let updated = 0;
+  const partial = (detail: string): BackfillResult => {
+    logger.info(
+      `Backfilled policy_base_id on ${updated} ${label} documents: partial, ${detail}, continuing on the next Fleet setup`
+    );
+    return { label, status: 'partial', updated };
+  };
   try {
     // Cheap check, so that a setup after a completed backfill does not update anything
-    if ((await countDocumentsToBackfill(esClient, index)) === 0) {
+    if ((await countDocumentsToBackfill(esClient, index, signal)) === 0) {
       logger.debug(`No ${label} documents without policy_base_id to backfill`);
       return { label, status: 'completed', updated };
     }
 
     const deadline = Date.now() + timeBudgetMs;
     while (!signal?.aborted && Date.now() < deadline) {
-      const result = await esClient.updateByQuery({
-        index,
-        ignore_unavailable: true,
-        conflicts: 'proceed',
-        max_docs: maxDocs,
-        scroll_size: scrollSize,
-        // The next batch must not select the documents of this one again
-        refresh: true,
-        script: {
-          lang: 'painless',
-          source: BACKFILL_SCRIPT,
-          params: {
-            separator: AGENT_POLICY_VERSION_SEPARATOR,
-            sentinelVersion: AGENT_POLICY_SENTINEL_VERSION,
+      const result = await esClient.updateByQuery(
+        {
+          index,
+          ignore_unavailable: true,
+          conflicts: 'proceed',
+          max_docs: maxDocs,
+          scroll_size: scrollSize,
+          // The next batch must not select the documents of this one again
+          refresh: true,
+          script: {
+            lang: 'painless',
+            source: BACKFILL_SCRIPT,
+            params: {
+              separator: AGENT_POLICY_VERSION_SEPARATOR,
+              sentinelVersion: AGENT_POLICY_SENTINEL_VERSION,
+            },
           },
+          query: BACKFILL_QUERY,
         },
-        query: BACKFILL_QUERY,
-      });
+        { signal }
+      );
       const batchUpdated = result.updated ?? 0;
       updated += batchUpdated;
-      if ((result.total ?? 0) < maxDocs) {
+      // A batch that is not full went through every document, but skipped those with a version
+      // conflict: the next batch selects them again
+      if (
+        (result.total ?? 0) < maxDocs &&
+        (await countDocumentsToBackfill(esClient, index, signal)) === 0
+      ) {
         logger.info(`Backfilled policy_base_id on ${updated} ${label} documents: completed`);
         return { label, status: 'completed', updated };
       }
@@ -139,12 +160,15 @@ export async function backfillIndex(
       }
     }
 
-    const remaining = await countDocumentsToBackfill(esClient, index);
-    logger.info(
-      `Backfilled policy_base_id on ${updated} ${label} documents: partial, ${remaining} remaining for the next Fleet setup`
-    );
-    return { label, status: 'partial', updated };
+    if (signal?.aborted) {
+      return partial('task cancelled');
+    }
+    const remaining = await countDocumentsToBackfill(esClient, index, signal);
+    return partial(`${remaining} remaining`);
   } catch (err) {
+    if (signal?.aborted) {
+      return partial('task cancelled');
+    }
     logger.warn(
       `Failed to backfill policy_base_id on ${label} after updating ${updated} documents: ${
         err instanceof Error ? err.message : String(err)
