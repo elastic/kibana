@@ -355,4 +355,15 @@ export const mainPanelTexts = {
     'sharedUXPackages.dateRangePicker.mainPanel.settingsAriaLabel',
     { defaultMessage: 'Settings' }
   ),
+  useFullDataLabel: i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.useFullDataLabel', {
+    defaultMessage: 'Use full time range of data',
+  }),
+  fullDataNoDataMessage: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.fullDataNoDataMessage',
+    { defaultMessage: 'No data found' }
+  ),
+  fullDataErrorMessage: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.fullDataErrorMessage',
+    { defaultMessage: 'Could not determine the full data range' }
+  ),
 };

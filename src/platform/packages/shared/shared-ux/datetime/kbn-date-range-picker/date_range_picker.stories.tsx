@@ -18,7 +18,7 @@ import {
   type DateRangePickerProps,
   type DateRangePickerOnChangeProps,
 } from './date_range_picker';
-import type { DateRangePickerSettings, TimeRangeBoundsOption } from './types';
+import type { DateRangePickerSettings, TimeRangeBounds, TimeRangeBoundsOption } from './types';
 
 const meta: Meta<DateRangePickerProps> = {
   title: 'Date Time/DateRangePicker',
@@ -177,6 +177,27 @@ export const Collapsed: Story = {
       { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
       { start: 'now-30d', end: 'now', label: 'Last 30 days' },
     ],
+  },
+  render: (args) => <StatefulDateRangePicker {...args} />,
+};
+
+/** Simulates a 1s query that resolves the earliest and latest timestamps of an index. */
+const mockGetFullDataRange = (signal: AbortSignal) =>
+  new Promise<TimeRangeBounds>((resolve, reject) => {
+    const timeout = setTimeout(
+      () => resolve({ start: '2024-01-01T00:00:00.000Z', end: '2024-06-30T12:00:00.000Z' }),
+      1000
+    );
+    signal.addEventListener('abort', () => {
+      clearTimeout(timeout);
+      reject(signal.reason);
+    });
+  });
+
+export const UseFullData: Story = {
+  args: {
+    defaultValue: 'last 15 minutes',
+    getFullDataRange: mockGetFullDataRange,
   },
   render: (args) => <StatefulDateRangePicker {...args} />,
 };

@@ -194,6 +194,14 @@ export interface DateRangePickerProps {
    * @default false
    */
   canAccessAdvancedSettings?: boolean;
+  /**
+   * Resolves the time range covering all available data, e.g. the earliest and
+   * latest timestamps of the current index. When provided, a "Use full time range of data"
+   * option is shown in the main panel; selecting it applies the resolved range.
+   * Resolve to `null` when there is no data. The signal is aborted when the
+   * dialog closes before the request finishes.
+   */
+  getFullDataRange?: (signal: AbortSignal) => Promise<TimeRangeBounds | null>;
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
