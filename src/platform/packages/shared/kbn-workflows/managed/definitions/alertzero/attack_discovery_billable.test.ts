@@ -13,14 +13,21 @@ import {
   ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
+  ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
+  ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
 } from '.';
 import { managedWorkflowDefinitions } from '../..';
+import {
+  ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
+  ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+  ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
+} from '../discoveries';
 
-// Metering reads the persisted `billable` flag, so a regression here silently stops metering
-// the Attack Discovery worker and the workflows it runs. Journal notes stay out of this list:
-// `ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS` includes that shared helper. The handoff is the
-// action the review's proposal runs after approval.
+// Metering reads the persisted `billable` flag. The billable list is the Attack Discovery
+// worker chain plus the handoff action the review's proposal runs after approval. The
+// unbilled list is the helpers and shared Attack Discovery workflows this change leaves
+// out. Other workers own their own flags.
 describe('Attack Discovery Worker: billable', () => {
   const billableIds = [
     ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
@@ -31,9 +38,23 @@ describe('Attack Discovery Worker: billable', () => {
     ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
   ];
 
+  const unbilledIds = [
+    ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
+    ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
+    ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
+    ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+    ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
+  ];
+
   it.each(billableIds)('%s is billable', (id) => {
     const definition = managedWorkflowDefinitions.find((candidate) => candidate.id === id);
 
     expect(definition?.billable).toBe(true);
+  });
+
+  it.each(unbilledIds)('%s stays unbilled', (id) => {
+    const definition = managedWorkflowDefinitions.find((candidate) => candidate.id === id);
+
+    expect(definition?.billable).toBe(false);
   });
 });
