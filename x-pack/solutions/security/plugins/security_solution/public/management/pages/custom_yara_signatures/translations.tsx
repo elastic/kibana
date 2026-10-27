@@ -14,7 +14,7 @@ export const CUSTOM_YARA_SIGNATURES_PAGE_LABELS: ArtifactListPageLabels = {
   }),
   pageAboutInfo: i18n.translate('xpack.securitySolution.customYaraSignatures.list.pageAboutInfo', {
     defaultMessage:
-      'Add and manage custom YARA signatures to enhance endpoint threat detection by scanning files and memory for patterns unique to your environment.',
+      'Add and manage custom YARA signatures to enhance endpoint threat detection by scanning memory for patterns unique to your environment.',
   }),
   pageAddButtonTitle: i18n.translate(
     'xpack.securitySolution.customYaraSignatures.list.pageAddButtonTitle',
