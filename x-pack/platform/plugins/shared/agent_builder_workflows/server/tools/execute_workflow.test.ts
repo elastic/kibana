@@ -405,6 +405,105 @@ steps:
       expect(executeWorkflowMock).toHaveBeenCalled();
     });
 
+    it('shows the step parameters and the run inputs', async () => {
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
+      const context = buildContext({ interactive: true });
+
+      const result = (await tool.handler(
+        { yaml: UNSAFE_YAML, inputs: { reason: 'cleanup' } } as never,
+        context
+      )) as any;
+
+      const { message } = result.prompt;
+      expect(message).toContain('`drop` (`elasticsearch.indices.delete`)');
+      expect(message).toContain('  index: logs');
+      expect(message).toContain('**The agent will send:**');
+      expect(message).toContain('"reason": "cleanup"');
+    });
+
+    it('shows the run inputs but not the step parameters to a caller without read', async () => {
+      const getWorkflow = jest.fn().mockResolvedValue({ name: 'Notify', yaml: UNSAFE_YAML });
+      const atSpace = jest
+        .fn()
+        .mockImplementation(async (_space: string, { kibana }: { kibana: string[] }) => ({
+          hasAllRequested: kibana.includes('api:workflowsManagement:execute'),
+        }));
+      const tool = executeWorkflowTool({
+        workflowsManagement: { management: { getWorkflow } } as any,
+        getSecurity: () =>
+          ({
+            authz: {
+              actions: { api: { get: (a: string) => `api:${a}` } },
+              checkPrivilegesWithRequest: () => ({ atSpace }),
+            },
+          } as any),
+      });
+
+      const result = (await tool.handler(
+        { workflowId: 'wf-1', inputs: { reason: 'cleanup' } } as never,
+        buildContext({ interactive: true })
+      )) as any;
+
+      expect(result.prompt.message).not.toContain('index: logs');
+      expect(result.prompt.message).toContain('"reason": "cleanup"');
+    });
+
+    it('asks again when the persisted definition changed after the prompt', async () => {
+      const getWorkflow = jest.fn().mockResolvedValue({ name: 'Notify', yaml: UNSAFE_YAML });
+      const tool = executeWorkflowTool({
+        workflowsManagement: { management: { getWorkflow } } as any,
+        getSecurity,
+      });
+      const first = buildContext({ interactive: true });
+      await tool.handler({ workflowId: 'wf-1' } as never, first);
+      const shownId = first.prompts.askForConfirmation.mock.calls[0][0].id;
+
+      getWorkflow.mockResolvedValue({
+        name: 'Notify',
+        yaml: UNSAFE_YAML.replace('index: logs\n', 'index: everything\n'),
+      });
+      const afterAccept = buildContext({ interactive: true });
+      afterAccept.prompts.checkConfirmationStatus.mockImplementation((id: string) => ({
+        status: id === shownId ? ConfirmationStatus.accepted : ConfirmationStatus.unprompted,
+      }));
+      await tool.handler({ workflowId: 'wf-1' } as never, afterAccept);
+
+      expect(executeWorkflowMock).not.toHaveBeenCalled();
+      expect(afterAccept.prompts.askForConfirmation.mock.calls[0][0].id).not.toBe(shownId);
+    });
+
+    it('runs after acceptance when the persisted definition did not change', async () => {
+      executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
+      const getWorkflow = jest.fn().mockResolvedValue({ name: 'Notify', yaml: UNSAFE_YAML });
+      const tool = executeWorkflowTool({
+        workflowsManagement: { management: { getWorkflow } } as any,
+        getSecurity,
+      });
+      const first = buildContext({ interactive: true });
+      await tool.handler({ workflowId: 'wf-1' } as never, first);
+      const shownId = first.prompts.askForConfirmation.mock.calls[0][0].id;
+
+      const afterAccept = buildContext({ interactive: true });
+      afterAccept.prompts.checkConfirmationStatus.mockImplementation((id: string) => ({
+        status: id === shownId ? ConfirmationStatus.accepted : ConfirmationStatus.unprompted,
+      }));
+      await tool.handler({ workflowId: 'wf-1' } as never, afterAccept);
+
+      expect(executeWorkflowMock).toHaveBeenCalled();
+    });
+
+    it('asks when the steps cannot be read because of a recursive alias', async () => {
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
+
+      const result = (await tool.handler(
+        { yaml: 'name: &a\n  b: *a\nsteps:\n  - name: log\n    type: console\n' } as never,
+        buildContext({ interactive: true })
+      )) as any;
+
+      expect(executeWorkflowMock).not.toHaveBeenCalled();
+      expect(result.prompt.message).toContain('Workflow YAML has a recursive alias.');
+    });
+
     it('skips the prompt when the run pre-approved the execute_api selector', async () => {
       executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
       const tool = executeWorkflowTool({ workflowsManagement, getSecurity });

@@ -19,16 +19,13 @@ import {
 } from '@kbn/agent-builder-tools-base/workflows';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import { confirmToolCall } from './utils/confirm_tool_call';
+import { formatCodeBlock } from './utils/code_block';
 
 /** `execute_api` selector for the same operation, so one auto-approval covers both tools. */
 const RESUME_EXECUTION_API = 'workflows.post-workflows-executions-executionid-resume';
 const MAX_INPUT_PREVIEW_CHARS = 2000;
 
 const buildConfirmationMessage = (input: Record<string, unknown>, waitingMessage?: string) => {
-  let rendered = JSON.stringify(input, null, 2);
-  if (rendered.length > MAX_INPUT_PREVIEW_CHARS) {
-    rendered = `${rendered.slice(0, MAX_INPUT_PREVIEW_CHARS)}\n…`;
-  }
   const lines: string[] = [];
   if (waitingMessage) {
     lines.push(
@@ -43,9 +40,7 @@ const buildConfirmationMessage = (input: Record<string, unknown>, waitingMessage
     i18n.translate('workflows.agentBuilder.resumeExecution.confirmation.input', {
       defaultMessage: '**The agent will send:**',
     }),
-    '```json',
-    rendered,
-    '```'
+    formatCodeBlock('json', JSON.stringify(input, null, 2), MAX_INPUT_PREVIEW_CHARS)
   );
   return lines.join('\n');
 };

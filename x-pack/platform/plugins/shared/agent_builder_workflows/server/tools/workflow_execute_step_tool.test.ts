@@ -148,9 +148,8 @@ const createMockContext = (yaml?: string, options: MockContextOptions = {}) => {
   return {
     spaceId: 'default',
     request: { headers: {} },
-    // Default to standalone so legacy tests (which expect the unsafe-step
-    // preview path) keep passing. Override with conversation mode to exercise
-    // the in-handler HITL gate.
+    // Default to standalone: no user to ask, so unsafe steps run. Override with
+    // conversation mode to exercise the confirmation prompt.
     executionMode: options.executionMode ?? AgentExecutionMode.standalone,
     interactivity: {
       enabled:
@@ -191,7 +190,6 @@ describe('registerWorkflowExecuteStepTool', () => {
   const mockApi = {
     testStep: jest.fn(),
     getWorkflowExecution: jest.fn(),
-    validateWorkflow: jest.fn(),
   } as any;
 
   beforeEach(() => {
@@ -585,46 +583,25 @@ steps:
     });
   });
 
-  describe('unsafe step blocking', () => {
-    it('blocks a step whose own type is unsafe', async () => {
-      mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
-
-      const context = createMockContext(VALID_WORKFLOW_YAML);
-      const result = await invokeHandler(registeredTool, { stepName: 'send_slack' }, context);
-      const data = result.results[0].data as Record<string, unknown>;
-
-      expect(data.blocked).toBe(true);
-      expect(data.stepType).toBe('slack');
-      expect(data.unsafeStepType).toBe('slack');
-      expect(data.unsafeChildStepId).toBeUndefined();
-      expect(data.validation).toEqual({ valid: true });
-      expect(data.hint).toContain('Run step');
+  describe('unsafe step detection', () => {
+    const askedFor = async (stepName: string, yaml = VALID_WORKFLOW_YAML) => {
+      const context = createMockContext(yaml, { executionMode: AgentExecutionMode.conversation });
+      await registeredTool.handler({ stepName } as never, context as never);
       expect(mockApi.testStep).not.toHaveBeenCalled();
+      const [[prompt]] = (context.prompts.askForConfirmation as jest.Mock).mock.calls;
+      return prompt as ConfirmPromptDefinition;
+    };
+
+    it('asks before a step whose own type is unsafe', async () => {
+      const prompt = await askedFor('send_slack');
+      expect(prompt.title).toContain('send_slack');
+      expect(prompt.message).toContain('`send_slack` (`slack`)');
     });
 
-    it('blocks elasticsearch.indices.delete with validation errors', async () => {
-      mockApi.validateWorkflow.mockResolvedValue({
-        valid: false,
-        diagnostics: [{ severity: 'error', source: 'schema', message: 'Invalid index name' }],
-      });
-
-      const context = createMockContext(VALID_WORKFLOW_YAML);
-      const result = await invokeHandler(registeredTool, { stepName: 'delete_index' }, context);
-      const data = result.results[0].data as Record<string, unknown>;
-
-      expect(data.blocked).toBe(true);
-      expect(data.stepType).toBe('elasticsearch.indices.delete');
-      expect(data.reason).toContain('external side effects');
-      expect(data.validation).toEqual({
-        valid: false,
-        errors: ['[schema] Invalid index name'],
-      });
-    });
-
-    it('blocks an unsafe step whose type is a YAML alias', async () => {
-      mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
-
-      const yaml = `name: alias
+    it('asks before an unsafe step whose type is a YAML alias', async () => {
+      const prompt = await askedFor(
+        'elasticsearch.indices.delete',
+        `name: alias
 triggers:
   - type: manual
 steps:
@@ -632,24 +609,15 @@ steps:
     type: *delete_type
     with:
       index: test-x
-`;
-      const context = createMockContext(yaml);
-      const result = await invokeHandler(
-        registeredTool,
-        { stepName: 'elasticsearch.indices.delete' },
-        context
+`
       );
-      const data = result.results[0].data as Record<string, unknown>;
-
-      expect(data.blocked).toBe(true);
-      expect(data.stepType).toBe('elasticsearch.indices.delete');
-      expect(mockApi.testStep).not.toHaveBeenCalled();
+      expect(prompt.color).toBe('danger');
     });
 
-    it('blocks a step whose unsafe children are a YAML alias', async () => {
-      mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
-
-      const yaml = `name: alias
+    it('asks before a step whose unsafe children are a YAML alias', async () => {
+      const prompt = await askedFor(
+        'loop',
+        `name: alias
 consts:
   children: &children
     - name: drop
@@ -663,27 +631,20 @@ steps:
     type: foreach
     foreach: '[1]'
     steps: *children
-`;
-      const context = createMockContext(yaml);
-      const result = await invokeHandler(registeredTool, { stepName: 'loop' }, context);
-      const data = result.results[0].data as Record<string, unknown>;
-
-      expect(data.blocked).toBe(true);
-      expect(data.unsafeStepType).toBe('elasticsearch.indices.delete');
-      expect(mockApi.testStep).not.toHaveBeenCalled();
+`
+      );
+      expect(prompt.message).toContain('`drop` (`elasticsearch.indices.delete`)');
     });
 
-    it('blocks a nested unsafe step referenced directly', async () => {
-      mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
+    it('asks before a nested unsafe step referenced directly', async () => {
+      const prompt = await askedFor('nested_slack');
+      expect(prompt.message).toContain('`nested_slack` (`slack`)');
+    });
 
-      const context = createMockContext(VALID_WORKFLOW_YAML);
-      const result = await invokeHandler(registeredTool, { stepName: 'nested_slack' }, context);
-      const data = result.results[0].data as Record<string, unknown>;
-
-      expect(data.blocked).toBe(true);
-      expect(data.stepType).toBe('slack');
-      expect(data.unsafeStepType).toBe('slack');
-      expect(mockApi.testStep).not.toHaveBeenCalled();
+    it('asks before a foreach with a deeply nested unsafe step', async () => {
+      const prompt = await askedFor('outer_foreach');
+      expect(prompt.title).toContain('deep_http');
+      expect(prompt.message).toContain('`deep_http` (`http`)');
     });
 
     it('stubs and executes an if step that contains an unsafe child', async () => {
@@ -703,25 +664,9 @@ steps:
 
       expect(data.success).toBe(true);
       expect(data.conditionTest).toBe(true);
-      expect(data.blocked).toBeUndefined();
       expect(stubbedYaml).toContain('name: __stub_then');
       expect(stubbedYaml).toContain('name: __stub_else');
       expect(stubbedYaml).not.toContain('name: nested_slack');
-    });
-
-    it('blocks a foreach with a deeply nested unsafe step', async () => {
-      mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
-
-      const context = createMockContext(VALID_WORKFLOW_YAML);
-      const result = await invokeHandler(registeredTool, { stepName: 'outer_foreach' }, context);
-      const data = result.results[0].data as Record<string, unknown>;
-
-      expect(data.blocked).toBe(true);
-      expect(data.stepType).toBe('foreach');
-      expect(data.unsafeStepType).toBe('http');
-      expect(data.unsafeChildStepId).toBe('deep_http');
-      expect(data.reason).toContain('contains child step "deep_http"');
-      expect(mockApi.testStep).not.toHaveBeenCalled();
     });
 
     it('allows an if step where all children are safe', async () => {
@@ -740,7 +685,6 @@ steps:
       const data = result.results[0].data as Record<string, unknown>;
 
       expect(data.success).toBe(true);
-      expect(data.blocked).toBeUndefined();
       expect(mockApi.testStep).toHaveBeenCalled();
     });
 
@@ -827,19 +771,42 @@ steps:
       expect(result.prompt.title).toContain('elasticsearch.indices.delete');
     });
 
-    it('returns the preview instead of prompting when interactivity is off (ai.agent step)', async () => {
+    it('runs without prompting when interactivity is off (ai.agent step), like execute_workflow', async () => {
+      jest.useRealTimers();
+      mockApi.testStep.mockResolvedValue('exec-run');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [],
+        error: null,
+        duration: 1,
+      });
       const context = createMockContext(VALID_WORKFLOW_YAML, {
         executionMode: AgentExecutionMode.conversation,
         interactive: false,
       });
-      const result = await registeredTool.handler(
-        { stepName: 'send_slack' } as never,
-        context as never
-      );
+      await registeredTool.handler({ stepName: 'send_slack' } as never, context as never);
 
       expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
-      expect(JSON.stringify(result)).toContain('"blocked":true');
-      expect(mockApi.testStep).not.toHaveBeenCalled();
+      expect(mockApi.testStep).toHaveBeenCalled();
+    });
+
+    it('runs without prompting when the run pre-approved workflows.*', async () => {
+      jest.useRealTimers();
+      mockApi.testStep.mockResolvedValue('exec-run');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [],
+        error: null,
+        duration: 1,
+      });
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+        autoApprovedApis: [{ target: 'kibana', api: 'workflows.*' }],
+      });
+      await registeredTool.handler({ stepName: 'send_slack' } as never, context as never);
+
+      expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+      expect(mockApi.testStep).toHaveBeenCalled();
     });
 
     it('runs a destructive step without prompting when the run pre-approved its API', async () => {
@@ -1005,24 +972,170 @@ steps:
         promptStatus: ConfirmationStatus.rejected,
       });
       const result = await invokeHandler(registeredTool, { stepName: 'send_slack' }, context);
-      const data = result.results[0].data as Record<string, unknown>;
 
-      expect(data.success).toBe(false);
-      expect(data.error).toBe('User declined to execute this step.');
+      expect(result.results[0].type).toBe('error');
+      expect(JSON.stringify(result.results[0])).toContain(
+        'The user declined to execute this step.'
+      );
       expect(mockApi.testStep).not.toHaveBeenCalled();
     });
 
-    it('falls back to the preview path in standalone mode (no prompt)', async () => {
-      mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
+    it('runs without prompting in standalone mode', async () => {
+      jest.useRealTimers();
+      mockApi.testStep.mockResolvedValue('exec-run');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [],
+        error: null,
+        duration: 1,
+      });
       const context = createMockContext(VALID_WORKFLOW_YAML, {
         executionMode: AgentExecutionMode.standalone,
       });
-      const result = await invokeHandler(registeredTool, { stepName: 'send_slack' }, context);
-      const data = result.results[0].data as Record<string, unknown>;
+      await registeredTool.handler({ stepName: 'send_slack' } as never, context as never);
 
-      expect(data.blocked).toBe(true);
-      expect(data.stepType).toBe('slack');
       expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+      expect(mockApi.testStep).toHaveBeenCalled();
+    });
+
+    it('asks again when the step YAML changed after the prompt', async () => {
+      const first = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      await invokePromptHandler(registeredTool, { stepName: 'send_slack' }, first);
+      const shownId = (first.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
+
+      const changed = createMockContext(
+        VALID_WORKFLOW_YAML.replace('message: "notification"', 'message: "changed"'),
+        { executionMode: AgentExecutionMode.conversation }
+      );
+      (changed.prompts.checkConfirmationStatus as jest.Mock).mockImplementation((id: string) => ({
+        status: id === shownId ? ConfirmationStatus.accepted : ConfirmationStatus.unprompted,
+      }));
+      await invokePromptHandler(registeredTool, { stepName: 'send_slack' }, changed);
+
+      expect(mockApi.testStep).not.toHaveBeenCalled();
+      expect((changed.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id).not.toBe(
+        shownId
+      );
+    });
+
+    it('uses danger when any unsafe descendant is destructive, not only the first', async () => {
+      const { prompt } = await invokePromptHandler(
+        registeredTool,
+        {
+          stepName: 'loop',
+          yaml: `steps:
+  - name: loop
+    type: foreach
+    foreach: '[1]'
+    steps:
+      - name: notify
+        type: slack
+        connector-id: my-slack
+        with:
+          message: hi
+      - name: drop
+        type: elasticsearch.indices.delete
+        with:
+          index: logs
+`,
+        },
+        createMockContext(undefined, { executionMode: AgentExecutionMode.conversation })
+      );
+
+      expect(prompt.color).toBe('danger');
+      expect(prompt.message).toContain(
+        '`notify` (`slack`), `drop` (`elasticsearch.indices.delete`)'
+      );
+    });
+
+    it('puts the agent summary on its own lines, so its Markdown renders', async () => {
+      const { prompt } = await invokePromptHandler(
+        registeredTool,
+        { stepName: 'send_slack', confirmation_body: '## Inputs\n- channel: #alerts' },
+        createMockContext(VALID_WORKFLOW_YAML, { executionMode: AgentExecutionMode.conversation })
+      );
+
+      expect(prompt.message).toMatch(/^## Inputs$/m);
+    });
+
+    it('names an unsafe child even when the step YAML is cut', async () => {
+      const { prompt } = await invokePromptHandler(
+        registeredTool,
+        {
+          stepName: 'loop',
+          yaml: `steps:
+  - name: loop
+    type: foreach
+    foreach: '[1]'
+    with:
+      payload: "${'x'.repeat(3000)}"
+    steps:
+      - name: hidden_http
+        type: http
+        with:
+          url: https://example.com
+`,
+        },
+        createMockContext(undefined, { executionMode: AgentExecutionMode.conversation })
+      );
+
+      const message = prompt.message ?? '';
+      expect(message).toContain('`hidden_http` (`http`)');
+      expect(message.indexOf('hidden_http')).toBeLessThan(message.indexOf('```'));
+    });
+
+    it('keeps a step value with a code fence inside the YAML block', async () => {
+      const { prompt } = await invokePromptHandler(
+        registeredTool,
+        {
+          stepName: 'fenced',
+          yaml: `steps:
+  - name: fenced
+    type: http
+    with:
+      body: |
+        \`\`\`
+        injected
+`,
+        },
+        createMockContext(undefined, { executionMode: AgentExecutionMode.conversation })
+      );
+
+      const lines = (prompt.message ?? '').split('\n');
+      const open = lines.findIndex((line) => line.startsWith('````yaml'));
+      const close = lines.findIndex((line, i) => i > open && line === '````');
+      const injected = lines.findIndex((line) => line.includes('injected'));
+      expect(open).toBeGreaterThan(-1);
+      expect(injected).toBeGreaterThan(open);
+      expect(injected).toBeLessThan(close);
+    });
+
+    it.each([
+      ['a recursive alias', 'name: &a\n  b: *a\nsteps:\n  - name: log\n    type: console\n'],
+      [
+        'too many aliases',
+        [
+          'a: &a [x, x, x, x, x, x, x, x, x, x]',
+          ...'bcdefghij'.split('').map((key, i) => {
+            const prev = 'abcdefghij'[i];
+            return `${key}: &${key} [*${prev}, *${prev}, *${prev}, *${prev}, *${prev}, *${prev}, *${prev}, *${prev}, *${prev}, *${prev}]`;
+          }),
+          'steps:\n  - name: log\n    type: console',
+        ].join('\n'),
+      ],
+    ])('returns an error result for %s instead of throwing', async (_label, yaml) => {
+      const result = await invokeHandler(
+        registeredTool,
+        { stepName: 'log', yaml },
+        createMockContext(undefined, { executionMode: AgentExecutionMode.conversation })
+      );
+
+      expect(result.results[0].data).toEqual({
+        success: false,
+        error: expect.stringContaining('Invalid workflow YAML'),
+      });
       expect(mockApi.testStep).not.toHaveBeenCalled();
     });
 

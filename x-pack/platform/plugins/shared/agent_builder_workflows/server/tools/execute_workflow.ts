@@ -20,28 +20,70 @@ import {
   hasWorkflowExecutePrivilege,
   hasWorkflowReadPrivilege,
 } from '@kbn/agent-builder-tools-base/workflows';
-import { confirmToolCall } from './utils/confirm_tool_call';
+import { stringify } from 'yaml';
+import { confirmToolCall, hashDefinition } from './utils/confirm_tool_call';
+import { formatCodeBlock } from './utils/code_block';
 import { findUnsafeSteps, getWorkflowSteps, type UnsafeStep } from './utils/step_risk';
 
 /** `execute_api` selectors for the same operations, so one auto-approval covers both tools. */
 const RUN_PERSISTED_WORKFLOW_API = 'workflows.post-workflows-workflow-id-run';
 const RUN_INLINE_WORKFLOW_API = 'workflows.post-workflows-test';
 const MAX_LISTED_STEPS = 10;
+const MAX_STEP_PARAMS_CHARS = 500;
+const MAX_INPUTS_CHARS = 2000;
 
-const buildConfirmationMessage = (unsafeSteps: UnsafeStep[]): string => {
-  const listed = unsafeSteps
-    .slice(0, MAX_LISTED_STEPS)
-    .map(({ step }) => `- \`${step.stepId}\` (\`${step.stepType}\`)`);
-  if (unsafeSteps.length > MAX_LISTED_STEPS) {
-    listed.push(`- … ${unsafeSteps.length - MAX_LISTED_STEPS} more`);
+const formatStepParams = ({ step }: UnsafeStep): string[] => {
+  const params = step.stepYamlNode.get('with');
+  if (params == null) {
+    return [];
   }
-  return [
-    i18n.translate('workflows.agentBuilder.executeWorkflow.confirmation.message', {
-      defaultMessage: 'This workflow has steps that can change data or call external services:',
-    }),
-    '',
-    ...listed,
-  ].join('\n');
+  const block = formatCodeBlock('yaml', stringify(params).trimEnd(), MAX_STEP_PARAMS_CHARS);
+  return block.split('\n').map((line) => `  ${line}`);
+};
+
+const buildConfirmationMessage = ({
+  unsafeSteps,
+  inputs,
+  showSteps,
+}: {
+  unsafeSteps: UnsafeStep[];
+  inputs: Record<string, unknown>;
+  /** False when the caller cannot read the definition: the steps stay hidden. */
+  showSteps: boolean;
+}): string => {
+  const lines: string[] = [];
+  if (showSteps) {
+    lines.push(
+      i18n.translate('workflows.agentBuilder.executeWorkflow.confirmation.message', {
+        defaultMessage: 'This workflow has steps that can change data or call external services:',
+      }),
+      ''
+    );
+    for (const unsafeStep of unsafeSteps.slice(0, MAX_LISTED_STEPS)) {
+      const { stepId, stepType } = unsafeStep.step;
+      lines.push(`- \`${stepId}\` (\`${stepType}\`)`, ...formatStepParams(unsafeStep));
+    }
+    if (unsafeSteps.length > MAX_LISTED_STEPS) {
+      lines.push(`- … ${unsafeSteps.length - MAX_LISTED_STEPS} more`);
+    }
+  } else {
+    lines.push(
+      i18n.translate('workflows.agentBuilder.executeWorkflow.confirmation.messageWithoutSteps', {
+        defaultMessage: 'This workflow has steps that can change data or call external services.',
+      })
+    );
+  }
+
+  if (Object.keys(inputs).length > 0) {
+    lines.push(
+      '',
+      i18n.translate('workflows.agentBuilder.executeWorkflow.confirmation.inputs', {
+        defaultMessage: '**The agent will send:**',
+      }),
+      formatCodeBlock('json', JSON.stringify(inputs, null, 2), MAX_INPUTS_CHARS)
+    );
+  }
+  return lines.join('\n');
 };
 
 const executeWorkflowSchema = z.object({
@@ -70,6 +112,7 @@ const confirmRun = ({
   yaml,
   workflowId,
   name,
+  inputs,
 }: {
   toolContext: ToolHandlerContext;
   workflowApi: WorkflowsServerPluginSetup['management'];
@@ -77,24 +120,42 @@ const confirmRun = ({
   yaml?: string;
   workflowId?: string;
   name?: string;
-}) =>
-  confirmToolCall({
-    context: toolContext,
-    toolId: platformCoreTools.executeWorkflow,
-    api: yaml ? RUN_INLINE_WORKFLOW_API : RUN_PERSISTED_WORKFLOW_API,
-    declinedMessage: 'The user declined to run this workflow. Do not retry it.',
-    getPrompt: async () => {
-      const { request, spaceId, interactivity } = toolContext;
+  inputs: Record<string, unknown>;
+}) => {
+  const { request, spaceId, interactivity } = toolContext;
+  // Loaded once: the prompt key and the prompt must describe the same definition.
+  let definition: Promise<{ persisted?: { name?: string }; workflowYaml?: string }> | undefined;
+  const loadDefinition = () => {
+    definition ??= (async () => {
       const persisted =
         yaml === undefined && workflowId
           ? await workflowApi.getWorkflow(workflowId, spaceId, request)
           : undefined;
-      const workflowYaml = yaml ?? persisted?.yaml;
+      return { persisted: persisted ?? undefined, workflowYaml: yaml ?? persisted?.yaml };
+    })();
+    return definition;
+  };
+
+  return confirmToolCall({
+    context: toolContext,
+    toolId: platformCoreTools.executeWorkflow,
+    api: yaml ? RUN_INLINE_WORKFLOW_API : RUN_PERSISTED_WORKFLOW_API,
+    declinedMessage: 'The user declined to run this workflow. Do not retry it.',
+    // A persisted workflow can change after the prompt; a changed definition asks again.
+    getPromptKey: async () => {
+      const { workflowYaml } = await loadDefinition();
+      return workflowYaml === undefined ? undefined : hashDefinition(workflowYaml);
+    },
+    getPrompt: async () => {
+      const { persisted, workflowYaml } = await loadDefinition();
       // An unknown workflow runs on, so the execution reports the error.
-      const unsafeSteps = workflowYaml
-        ? findUnsafeSteps(getWorkflowSteps(workflowYaml), interactivity)
-        : [];
-      if (unsafeSteps.length === 0) {
+      if (workflowYaml === undefined) {
+        return undefined;
+      }
+      const parsed = getWorkflowSteps(workflowYaml);
+      // Steps that cannot be read are not known to be safe, so ask.
+      const unsafeSteps = 'error' in parsed ? [] : findUnsafeSteps(parsed.steps, interactivity);
+      if ('steps' in parsed && unsafeSteps.length === 0) {
         return undefined;
       }
 
@@ -112,15 +173,16 @@ const confirmRun = ({
           : i18n.translate('workflows.agentBuilder.executeWorkflow.confirmation.titleInline', {
               defaultMessage: 'Run inline workflow?',
             }),
-        message: canReadDefinition
-          ? buildConfirmationMessage(unsafeSteps)
-          : i18n.translate(
-              'workflows.agentBuilder.executeWorkflow.confirmation.messageWithoutSteps',
-              {
-                defaultMessage:
-                  'This workflow has steps that can change data or call external services.',
-              }
-            ),
+        message:
+          'error' in parsed
+            ? i18n.translate(
+                'workflows.agentBuilder.executeWorkflow.confirmation.unreadableSteps',
+                {
+                  defaultMessage: 'The steps of this workflow cannot be checked: {error}',
+                  values: { error: parsed.error },
+                }
+              )
+            : buildConfirmationMessage({ unsafeSteps, inputs, showSteps: canReadDefinition }),
         confirm_text: i18n.translate(
           'workflows.agentBuilder.executeWorkflow.confirmation.confirmText',
           { defaultMessage: 'Run workflow' }
@@ -133,6 +195,7 @@ const confirmRun = ({
       };
     },
   });
+};
 
 export const executeWorkflowTool = ({
   workflowsManagement,
@@ -258,6 +321,7 @@ If set to false, or if the workflow does not complete within the timeout, the to
         yaml: resolvedYaml,
         workflowId: resolvedWorkflowId,
         name: resolvedName,
+        inputs: workflowParams,
       });
       if (confirmation) {
         return confirmation;

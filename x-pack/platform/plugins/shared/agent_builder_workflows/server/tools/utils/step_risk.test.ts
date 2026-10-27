@@ -75,12 +75,14 @@ steps:
     with:
       index: test-x
 `;
-    expect(getWorkflowSteps(yaml)).toEqual([
-      expect.objectContaining({
-        stepId: 'elasticsearch.indices.delete',
-        stepType: 'elasticsearch.indices.delete',
-      }),
-    ]);
+    expect(getWorkflowSteps(yaml)).toEqual({
+      steps: [
+        expect.objectContaining({
+          stepId: 'elasticsearch.indices.delete',
+          stepType: 'elasticsearch.indices.delete',
+        }),
+      ],
+    });
   });
 
   it('resolves child steps shared through a YAML alias', () => {
@@ -99,15 +101,30 @@ steps:
     foreach: '[1]'
     steps: *children
 `;
-    expect(getWorkflowSteps(yaml).map(({ stepId, stepType }) => [stepId, stepType])).toEqual([
+    const result = getWorkflowSteps(yaml);
+    const steps = 'steps' in result ? result.steps : [];
+    expect(steps.map(({ stepId, stepType }) => [stepId, stepType])).toEqual([
       ['drop', 'elasticsearch.indices.delete'],
       ['loop', 'foreach'],
     ]);
   });
 
-  it('throws on a recursive alias', () => {
-    expect(() => getWorkflowSteps('name: &a\n  b: *a\n')).toThrow(
-      'Workflow YAML has a recursive alias.'
-    );
+  it('returns an error for a recursive alias', () => {
+    expect(getWorkflowSteps('name: &a\n  b: *a\n')).toEqual({
+      error: 'Workflow YAML has a recursive alias.',
+    });
+  });
+
+  it('returns an error when expanding the aliases would build a huge document', () => {
+    const laughs = [
+      'a: &a [x, x, x, x, x, x, x, x, x, x]',
+      ...'bcdefghij'.split('').map((key, i) => {
+        const prev = 'abcdefghij'[i];
+        return `${key}: &${key} [*${prev}, *${prev}, *${prev}, *${prev}, *${prev}, *${prev}, *${prev}, *${prev}, *${prev}, *${prev}]`;
+      }),
+    ].join('\n');
+    expect(getWorkflowSteps(laughs)).toEqual({
+      error: expect.stringContaining('Workflow YAML aliases cannot be expanded'),
+    });
   });
 });

@@ -147,8 +147,9 @@ export const findUnsafeSteps = (
 /**
  * Expands YAML aliases, so a step lookup sees the same step names and types the
  * workflow runs with. The workflow parser resolves aliases; the lookup does not.
+ * Returns an error for a recursive alias or too many aliases.
  */
-export const resolveYamlAliases = (yaml: string): string => {
+export const resolveYamlAliases = (yaml: string): { yaml: string } | { error: string } => {
   const doc = parseDocument(yaml);
   let hasAlias = false;
   visit(doc, {
@@ -158,25 +159,36 @@ export const resolveYamlAliases = (yaml: string): string => {
     },
   });
   if (!hasAlias || doc.errors.length > 0) {
-    return yaml;
+    return { yaml };
   }
   try {
     // By default `stringify` writes shared objects back as aliases; write each copy in full.
-    return stringify(doc.toJS({ maxAliasCount: 100 }), { aliasDuplicateObjects: false });
+    return {
+      yaml: stringify(doc.toJS({ maxAliasCount: 100 }), { aliasDuplicateObjects: false }),
+    };
   } catch (error) {
-    if (error instanceof RangeError) {
-      throw new Error('Workflow YAML has a recursive alias.');
-    }
-    throw error;
+    return {
+      error:
+        error instanceof RangeError
+          ? 'Workflow YAML has a recursive alias.'
+          : `Workflow YAML aliases cannot be expanded: ${error.message}`,
+    };
   }
 };
 
-/** Parses workflow YAML into its steps; returns an empty list when the YAML does not parse. */
-export const getWorkflowSteps = (yaml: string): StepInfo[] => {
-  const lineCounter = new LineCounter();
-  const doc = parseDocument(resolveYamlAliases(yaml), { lineCounter });
-  if (doc.errors.length > 0) {
-    return [];
+/**
+ * Parses workflow YAML into its steps. Returns an empty list when the YAML does not
+ * parse, and an error when its aliases cannot be expanded.
+ */
+export const getWorkflowSteps = (yaml: string): { steps: StepInfo[] } | { error: string } => {
+  const resolved = resolveYamlAliases(yaml);
+  if ('error' in resolved) {
+    return resolved;
   }
-  return Object.values(buildWorkflowLookup(doc, lineCounter).steps);
+  const lineCounter = new LineCounter();
+  const doc = parseDocument(resolved.yaml, { lineCounter });
+  if (doc.errors.length > 0) {
+    return { steps: [] };
+  }
+  return { steps: Object.values(buildWorkflowLookup(doc, lineCounter).steps) };
 };

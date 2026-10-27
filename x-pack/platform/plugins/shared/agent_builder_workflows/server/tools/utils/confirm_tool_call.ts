@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { AgentExecutionMode, isApiAutoApproved } from '@kbn/agent-builder-common';
 import {
   ConfirmationStatus,
@@ -20,6 +21,10 @@ import { errorResult } from '@kbn/agent-builder-genai-utils/tools/utils/results'
 export const hasLiveUser = ({ executionMode, interactivity }: ToolHandlerContext): boolean =>
   executionMode !== AgentExecutionMode.standalone && interactivity.enabled;
 
+/** Short hash of the definition a prompt shows, for `confirmToolCall`'s `getPromptKey`. */
+export const hashDefinition = (definition: string): string =>
+  createHash('sha256').update(definition).digest('hex').slice(0, 16);
+
 /**
  * Asks the user to confirm a tool call. Returns undefined when the call can go
  * ahead: no live user, an `auto_approved_apis` match on `api`, an accepted prompt,
@@ -30,6 +35,7 @@ export const confirmToolCall = async ({
   toolId,
   api,
   declinedMessage,
+  getPromptKey,
   getPrompt,
 }: {
   context: ToolHandlerContext;
@@ -37,6 +43,11 @@ export const confirmToolCall = async ({
   /** The `execute_api` Kibana selector for the same operation. */
   api: string;
   declinedMessage: string;
+  /**
+   * Identifies what the prompt shows, for example a hash of the workflow definition.
+   * When it changes after the user answered, the user is asked again.
+   */
+  getPromptKey?: () => Promise<string | undefined>;
   getPrompt: () => Promise<Omit<ConfirmPromptDefinition, 'id'> | undefined>;
 }): Promise<ToolHandlerReturn | undefined> => {
   const { interactivity, prompts, callContext } = context;
@@ -44,7 +55,8 @@ export const confirmToolCall = async ({
     return undefined;
   }
 
-  const id = `${toolId}.${callContext.toolCallId}`;
+  const promptKey = await getPromptKey?.();
+  const id = [toolId, callContext.toolCallId, promptKey].filter(Boolean).join('.');
   const { status } = prompts.checkConfirmationStatus(id);
   if (status === ConfirmationStatus.accepted) {
     return undefined;
