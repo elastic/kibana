@@ -454,12 +454,6 @@ describe('Detection Coverage review', () => {
         'close_investigation_dismissed',
         'report_investigation_closed_dismissed',
       ]);
-      // No proposal was made, so the chat says why before the investigation closes.
-      expect(caseSteps('rejected')).toEqual([
-        'post_no_rule',
-        'close_investigation_rejected',
-        'report_investigation_closed_rejected',
-      ]);
 
       const resolved = stepByName('close_investigation_resolved');
       const dismissed = stepByName('close_investigation_dismissed');
@@ -508,12 +502,6 @@ describe('Detection Coverage review', () => {
       ],
       ['a dismissal', { approved: false, dismissed: true }, {}, 'dismissed'],
       ['an expired proposal', { approved: false, dismissed: false }, {}, ''],
-      [
-        'a gap with no working rule',
-        { approved: false, dismissed: false },
-        { creation_rejected: true },
-        'rejected',
-      ],
     ])('routes %s to the matching close', (_scenario, decision, outcome, expected) => {
       const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
         String(stepByName('close_investigation')?.expression),
@@ -801,23 +789,6 @@ describe('Detection Coverage review', () => {
       }
     );
 
-    // A gap for which the agent made no working rule gives the same result on every run,
-    // so it is retired. A failed run is not: the next sweep tries again.
-    it.each([
-      ['the agent made no working rule', null, true, true],
-      ['the rule creation run failed', { message: 'boom' }, undefined, false],
-      ['the rule was proposed', null, false, false],
-    ])('retires the indicator when %s', (_s, error, rejected, expected) => {
-      expect(
-        evaluateExpression(withOf('resolve_outcome')!.creation_rejected, {
-          steps: {
-            coverage_check: { output: { structured_output: { verdict: 'no_coverage' } } },
-            run_rule_creation: { error, output: { rejected } },
-          },
-        })
-      ).toBe(expected);
-    });
-
     // A retired indicator is never also marked processed: the two writes read
     // disjoint flags, and a failed write leaves the indicator pending.
     it('retires the indicator as invalid and reports it', () => {
@@ -825,7 +796,6 @@ describe('Detection Coverage review', () => {
       expect(markInvalid?.type).toBe('context-engine.updateKi');
       expect(markInvalid?.['on-failure']?.continue).toBe(true);
       expect(markInvalid?.if).toContain('steps.resolve_outcome.output.no_content == true');
-      expect(markInvalid?.if).toContain('steps.resolve_outcome.output.creation_rejected == true');
       expect(
         (markInvalid?.with?.ki as { attributes: Record<string, string> }).attributes.status
       ).toBe('invalid');

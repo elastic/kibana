@@ -7,10 +7,9 @@ description: >
   confirm an enabled rule already covers the gap. The action runs only once an analyst
   approves. Without a rule, drafts one and proposes it on the same investigation. After
   a decision, marks the indicator processed. Without a decision, or when an approved
-  action changed nothing, the indicator stays pending. An indicator with no content,
-  or a gap for which the agent cannot make a working rule, is marked invalid and is
-  not retried. In manual mode, an analyst must approve the review before the coverage
-  check runs.
+  action changed nothing, the indicator stays pending. An indicator with no content is
+  marked invalid and is not retried. In manual mode, an analyst must approve the review
+  before the coverage check runs.
 enabled: true
 tags:
   - security
@@ -905,9 +904,8 @@ steps:
   # `created: false` and no error without asking anyone when the draft is incomplete
   # or could not be attached to the investigation.
   #
-  # `no_content` and `creation_rejected` retire the indicator: it has no content, or the
-  # agent could not make a working rule for it. A retry gives the same result, so the
-  # sweep must not ask again.
+  # `no_content` retires the indicator: it has no content. A retry gives the same
+  # result, so the sweep must not ask again.
   - name: resolve_outcome
     type: data.set
     with:
@@ -930,10 +928,6 @@ steps:
       no_content: >-
         ${{ steps.read_ki.output.hits.total.value > 0
           and steps.gap.output.ready != true }}
-      creation_rejected: >-
-        ${{ steps.coverage_check.output.structured_output.verdict == 'no_coverage'
-          and steps.run_rule_creation.error == null
-          and steps.run_rule_creation.output.rejected == true }}
 
   # Step 9 of 10: close the investigation. Metadata writes fire the
   # ai.conversation.metadataUpdated trigger, which is the emit point for downstream
@@ -944,7 +938,7 @@ steps:
   - name: close_investigation
     type: switch
     if: "${{ steps.create_investigation.output.conversation_id != null }}"
-    expression: "{% if steps.record_decision.output.approved == true and steps.resolve_outcome.output.enable_approved_not_applied == false and steps.resolve_outcome.output.install_approved_not_applied == false %}approved{% elsif steps.record_decision.output.dismissed == true %}dismissed{% elsif steps.resolve_outcome.output.creation_rejected == true %}rejected{% endif %}"
+    expression: "{% if steps.record_decision.output.approved == true and steps.resolve_outcome.output.enable_approved_not_applied == false and steps.resolve_outcome.output.install_approved_not_applied == false %}approved{% elsif steps.record_decision.output.dismissed == true %}dismissed{% endif %}"
     cases:
       - match: approved
         steps:
@@ -992,44 +986,6 @@ steps:
               investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
               close_reason: other
 
-      - match: rejected
-        steps:
-          # The investigation closes without a proposal, so the chat says why.
-          - name: post_no_rule
-            type: ai.conversation.add_user_message
-            with:
-              author_name: "{{ consts.author_name }}"
-              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-              message: |-
-                **No rule for this gap**
-
-                The agent could not make a working rule, so there is no proposal. The gap is not checked again.
-
-                {{ steps.run_rule_creation.output.skip_reason | truncate: 2000 }}
-            on-failure:
-              continue: true
-
-          - name: close_investigation_rejected
-            type: ai.conversation.metadata.patch
-            with:
-              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-              updates:
-                status: closed
-                close_reason: other
-                verdict: "The agent could not make a working rule for the gap. {{ steps.run_rule_creation.output.skip_reason | truncate: 1000 }}"
-            on-failure:
-              continue: true
-
-          - name: report_investigation_closed_rejected
-            type: alertzero.reportWorkerOutcome
-            if: "${{ steps.close_investigation_rejected.error == blank and steps.close_investigation_rejected.output.changed_fields contains 'status' }}"
-            on-failure:
-              continue: true
-            with:
-              event: worker_investigation_closed
-              investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
-              close_reason: other
-
   # Step 10 of 10: mark the indicator processed. Except for a declined entry gate,
   # this is the only write to the indicator. It runs only after an applied decision.
   # A check without a verdict asked nobody. An expired proposal decided nothing. A failed
@@ -1069,16 +1025,14 @@ steps:
     type: context-engine.updateKi
     on-failure:
       continue: true
-    if: >-
-      ${{ steps.resolve_outcome.output.no_content == true
-        or steps.resolve_outcome.output.creation_rejected == true }}
+    if: "${{ steps.resolve_outcome.output.no_content == true }}"
     with:
       ai_index_id: "{{ inputs.ai_index_id }}"
       ki_id: "{{ inputs.ki_id }}"
       ki:
         attributes:
           status: invalid
-          invalid_reason: "{% if steps.resolve_outcome.output.no_content == true %}The indicator has no content.{% else %}No working rule for the gap.{% endif %}"
+          invalid_reason: The indicator has no content.
 
   # Telemetry: the review's outcome. Free-text outputs are sent only as flags.
   - name: report_review_completed
@@ -1188,8 +1142,7 @@ steps:
       creation_error: >-
         {% if steps.run_rule_creation.error != null %}rule creation failed: {{ steps.run_rule_creation.error.message }}{% endif %}
       # Set when the rule-creation run completed without proposing a rule, for example
-      # because no data source exists for the gap. When the agent made no working rule,
-      # the indicator is marked invalid. Otherwise it stays pending.
+      # because no data source exists for the gap. The indicator stays pending.
       creation_skip_reason: "{{ steps.run_rule_creation.output.skip_reason }}"
       # False after no decision, after a failed action, and after a failed write.
       ki_id: "{{ inputs.ki_id }}"

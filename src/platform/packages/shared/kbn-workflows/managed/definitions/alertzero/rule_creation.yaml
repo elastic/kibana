@@ -66,8 +66,6 @@ outputs:
     type: boolean
   - name: reviewed
     type: boolean
-  - name: rejected
-    type: boolean
   - name: decision
     type: string
   - name: rule_name
@@ -195,10 +193,9 @@ steps:
           - attachment_id
 
   # A draft missing its query, name, description or attachment is not reviewable, so
-  # nothing below runs for it and `reviewed` stays false. When the agent says why it
-  # made no draft, `rejected` tells the caller to retire the gap. Otherwise the caller
-  # keeps the gap open. When the tool built nothing the prompt asks for exactly those
-  # four empty, and plain values everywhere else so the structured output still validates. The
+  # nothing below runs for it and `reviewed` stays false: the caller keeps the gap
+  # open. When the tool built nothing the prompt asks for exactly those four empty,
+  # and plain values everywhere else so the structured output still validates. The
   # create action requires a name and a description, so such a draft can never be
   # created: proposing it fails the run instead of asking the analyst anything
   # answerable. Step `if` cannot group with parentheses, so the compound test lives
@@ -240,22 +237,12 @@ steps:
           invocationCount: "${{ inputs.preview_invocation_count }}"
           timeframeEnd: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
 
-  # A rule whose query fails in the preview does not work, for example because the
-  # query is not valid or the index does not exist. It is not attached and not
-  # proposed, and `rejected` tells the caller not to try again.
-  - name: rule_ready
-    type: data.set
-    with:
-      ok: >-
-        ${{ steps.draft_ready.output.ok == true
-          and steps.preview_creation.output.error_text == '' }}
-
   # The draft lives as an attachment in the agent's own conversation, which stays
   # opaque to the analyst. Copy it by value onto the investigation so the rule the
   # proposal asks about is right next to the decision.
   - name: attach_draft
     type: ai.attachment.add
-    if: "${{ steps.rule_ready.output.ok == true }}"
+    if: "${{ steps.draft_ready.output.ok == true }}"
     with:
       conversation_id: "{{ inputs.investigation_id }}"
       id: "rule-draft"
@@ -276,7 +263,7 @@ steps:
     type: data.set
     with:
       ok: >-
-        ${{ steps.rule_ready.output.ok == true
+        ${{ steps.draft_ready.output.ok == true
           and steps.attach_draft.error == null }}
 
   # The proposal gate records the draft on the investigation, parks on the
@@ -312,7 +299,8 @@ steps:
           {% if inputs.technique != null and inputs.technique != '' %}ATT&CK technique: {{ inputs.technique }}
           {% endif %}{{ inputs.gap_description }}
           {% endif %}
-          **Preview:** {% if steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs{% else %}inconclusive{% endif %}
+          **Preview:** {% if steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs{% else %}inconclusive{% endif %}{% if steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
+          Preview errors: {{ steps.preview_creation.output.error_text }}{% endif %}
           **Severity:** {{ steps.draft_creation.output.structured_output.rule.severity }}. **Risk score:** {{ steps.draft_creation.output.structured_output.rule.risk_score }}.
 
           **On approval**
@@ -339,17 +327,9 @@ steps:
       reviewed: >-
         ${{ steps.propose_creation.output.decision == 'approved'
           or steps.propose_creation.output.decision == 'dismissed' }}
-      # The agent made no working rule: it said why it made no draft, or the query fails
-      # in the preview. A new run gives the same result, so the caller retires the gap.
-      # A draft that is incomplete without a reason can be a model or tool failure, so
-      # the gap stays open for the next run.
-      rejected: >-
-        ${{ steps.rule_ready.output.ok != true
-          and (steps.preview_creation.output.error_text != blank
-            or steps.draft_creation.output.structured_output.reason != blank) }}
       decision: "{{ steps.propose_creation.output.decision }}"
       rule_name: "{{ steps.draft_creation.output.structured_output.rule.name }}"
       # Why nothing was proposed, so a gap that keeps coming back can be explained
       # without opening the agent conversation. Empty when the draft reached the gate.
       skip_reason: >-
-        {% if steps.draft_ready.output.ok != true %}{% if steps.draft_creation.output.structured_output.reason != null and steps.draft_creation.output.structured_output.reason != '' %}{{ steps.draft_creation.output.structured_output.reason }}{% else %}The draft is incomplete: it needs a query, a name, a description and an attachment.{% endif %}{% elsif steps.rule_ready.output.ok != true %}The rule query failed in the preview: {{ steps.preview_creation.output.error_text | truncate: 1000 }}{% elsif steps.attach_draft.error != null %}The draft could not be attached to the investigation: {{ steps.attach_draft.error.message }}{% endif %}
+        {% if steps.draft_ready.output.ok != true %}{% if steps.draft_creation.output.structured_output.reason != null and steps.draft_creation.output.structured_output.reason != '' %}{{ steps.draft_creation.output.structured_output.reason }}{% else %}The draft is incomplete: it needs a query, a name, a description and an attachment.{% endif %}{% elsif steps.attach_draft.error != null %}The draft could not be attached to the investigation: {{ steps.attach_draft.error.message }}{% endif %}

@@ -139,11 +139,8 @@ describe('Detection Rule Creation worker', () => {
       expect(evaluate(ready, draftContext({ attachment_id: '', rule: complete }))).toBe(false);
       expect(evaluate(ready, draftContext({ rule: complete }))).toBe(false);
 
-      for (const name of ['preview_creation', 'rule_ready']) {
+      for (const name of ['preview_creation', 'attach_draft', 'proposal_ready']) {
         expect(JSON.stringify(stepByName(name))).toContain('steps.draft_ready.output.ok == true');
-      }
-      for (const name of ['attach_draft', 'proposal_ready']) {
-        expect(JSON.stringify(stepByName(name))).toContain('steps.rule_ready.output.ok == true');
       }
     });
 
@@ -159,43 +156,7 @@ describe('Detection Rule Creation worker', () => {
       );
       expect(
         evaluate(flagOf('proposal_ready', 'ok'), {
-          steps: { rule_ready: { output: { ok } }, attach_draft: { error: attachError } },
-        })
-      ).toBe(expected);
-    });
-
-    // A query that fails in the preview does not work, so it is not proposed, and the
-    // caller retires the gap. A preview that finds no errors keeps the draft.
-    it.each([
-      ['a draft whose preview ran', true, '', true],
-      ['a draft whose query failed in the preview', true, 'Unknown index [logs-x]; ', false],
-      ['a draft that was never ready', false, undefined, false],
-    ])('decides whether %s works', (_scenario, ok, errorText, expected) => {
-      const context = {
-        steps: {
-          draft_ready: { output: { ok } },
-          preview_creation: { output: { error_text: errorText } },
-        },
-      };
-      expect(evaluate(flagOf('rule_ready', 'ok'), context)).toBe(expected);
-    });
-
-    // Only a result that a new run repeats retires the gap: a reason from the agent or a
-    // preview error. An incomplete draft without a reason can be a model or tool failure.
-    it.each([
-      ['a query that failed in the preview', false, 'Unknown index [logs-x]; ', '', true],
-      ['no draft, with a reason from the agent', false, undefined, 'No data source.', true],
-      ['an incomplete draft without a reason', false, undefined, '', false],
-      ['a working rule', true, '', '', false],
-      ['a working rule with a stray reason', true, '', 'Some text.', false],
-    ])('reports %s as rejected or not', (_scenario, ok, errorText, reason, expected) => {
-      expect(
-        evaluate(emit.rejected, {
-          steps: {
-            rule_ready: { output: { ok } },
-            preview_creation: { output: { error_text: errorText } },
-            draft_creation: { output: { structured_output: { reason } } },
-          },
+          steps: { draft_ready: { output: { ok } }, attach_draft: { error: attachError } },
         })
       ).toBe(expected);
     });
@@ -237,11 +198,9 @@ describe('Detection Rule Creation worker', () => {
       expect(schema.safeParse(allEmpty).success).toBe(false);
     });
 
-    // A preview error gates the proposal through `rule_ready`. A preview without errors,
-    // also an aborted one, only informs the analyst.
-    it('gates the proposal only on preview errors', () => {
+    // The preview informs the analyst; it does not gate the proposal.
+    it('proposes the draft whatever the preview returned', () => {
       expect(stepByName('propose_creation')?.if).not.toContain('preview_creation');
-      expect(flagOf('rule_ready', 'ok')).toContain('steps.preview_creation.output.error_text');
       expect(String(inputsOf(stepByName('propose_creation')).comment)).toContain(
         'steps.preview_creation.output.alert_count'
       );
@@ -325,14 +284,6 @@ describe('Detection Rule Creation worker', () => {
         'The draft is incomplete: it needs a query, a name, a description and an attachment.',
       ],
       [
-        'the preview error for a query that does not run',
-        { ok: true },
-        { reason: '' },
-        null,
-        'The rule query failed in the preview: Unknown index [logs-aws.cloudtrail-*]; ',
-        { ok: false },
-      ],
-      [
         'the attachment error for a draft that could not be copied',
         { ok: true },
         { reason: '' },
@@ -340,21 +291,16 @@ describe('Detection Rule Creation worker', () => {
         'The draft could not be attached to the investigation: boom',
       ],
       ['nothing for a proposed draft', { ok: true }, { reason: '' }, null, ''],
-    ])(
-      'reports %s as skip_reason',
-      (_scenario, ready, structured, attachError, expected, rule = ready) => {
-        const rendered = createWorkflowLiquidEngine().parseAndRenderSync(emit.skip_reason, {
-          steps: {
-            draft_ready: { output: ready },
-            rule_ready: { output: rule },
-            preview_creation: { output: { error_text: 'Unknown index [logs-aws.cloudtrail-*]; ' } },
-            draft_creation: { output: { structured_output: structured } },
-            attach_draft: { error: attachError },
-          },
-        });
-        expect(rendered).toBe(expected);
-      }
-    );
+    ])('reports %s as skip_reason', (_scenario, ready, structured, attachError, expected) => {
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(emit.skip_reason, {
+        steps: {
+          draft_ready: { output: ready },
+          draft_creation: { output: { structured_output: structured } },
+          attach_draft: { error: attachError },
+        },
+      });
+      expect(rendered).toBe(expected);
+    });
   });
 
   describe('inputs', () => {
