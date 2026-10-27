@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { dynamic } from '@kbn/shared-ux-utility';
@@ -24,13 +24,19 @@ const LazyHomePage = dynamic(async () => ({
 export class ElasticsearchHomePlugin
   implements Plugin<void, ElasticsearchHomePublicStart, {}, ElasticsearchHomeStartDependencies>
 {
+  private readonly isServerless: boolean;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+  }
+
   public setup() {}
 
   public start(
     core: CoreStart,
     deps: ElasticsearchHomeStartDependencies
   ): ElasticsearchHomePublicStart {
-    const services = { ...core, ...deps };
+    const services = { ...core, ...deps, isServerless: this.isServerless };
     const queryClient = new QueryClient();
 
     const HomePage = (props: ElasticsearchHomePageProps) => (

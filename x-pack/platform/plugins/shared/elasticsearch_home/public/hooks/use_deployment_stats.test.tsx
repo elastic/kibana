@@ -22,6 +22,7 @@ import { useDeploymentStats } from './use_deployment_stats';
 const FAVORITES_PATH = '/internal/content_management/favorites/dashboard';
 
 const esStats = {
+  dataPanelAccess: { showPanel: true, showDocuments: false, showTotalSize: true },
   indicesCount: 3,
   vectorCount: 120,
   storeSizeBytes: 2048,
@@ -98,6 +99,7 @@ describe('useDeploymentStats', () => {
 
     expect(result.current.isLoading).toBe(true);
     expect(result.current.stats).toEqual({
+      dataPanelAccess: { showPanel: true, showDocuments: true, showTotalSize: true },
       indicesCount: null,
       vectorCount: null,
       storeSizeBytes: null,
@@ -132,6 +134,8 @@ describe('useDeploymentStats', () => {
 
     expect(result.current.stats).toEqual(
       expect.objectContaining({
+        // the stats show as unavailable rather than disappearing
+        dataPanelAccess: { showPanel: true, showDocuments: true, showTotalSize: true },
         indicesCount: null,
         vectorCount: null,
         storeSizeBytes: null,

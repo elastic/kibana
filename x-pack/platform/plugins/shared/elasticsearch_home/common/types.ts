@@ -8,11 +8,19 @@
 export interface NewIndexDetails {
   indexName: string;
   documentsCount: number;
-  sizeInBytes: number;
+  sizeInBytes: number | null;
   createdAt: number;
 }
 
+/** Which parts of the data panel the caller's index privileges allow, as Elasticsearch reported. */
+export interface DataPanelAccess {
+  showPanel: boolean;
+  showDocuments: boolean;
+  showTotalSize: boolean;
+}
+
 export interface DeploymentStatsResponse {
+  dataPanelAccess: DataPanelAccess;
   indicesCount: number | null;
   vectorCount: number | null;
   storeSizeBytes: number | null;

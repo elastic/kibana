@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { anthropicIcon, cursorIcon, visualStudioCodeIcon } from '@kbn/custom-icons';
 import { useHomeConfig, useHomeServices, useTelemetryId } from '../context';
+import { useCanOpenAgentChat } from '../hooks/use_can_open_agent_chat';
 import { PromptModal } from './prompt_modal';
 import { brandIcon } from './chat_with_data_section_styles';
 
@@ -42,6 +43,7 @@ export const ChatWithYourDataSection = () => {
   const { agentBuilder } = useHomeServices();
   const { ideSetup } = useHomeConfig();
   const getTelemetryId = useTelemetryId();
+  const canOpenAgentChat = useCanOpenAgentChat();
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
 
   return (
@@ -86,35 +88,39 @@ export const ChatWithYourDataSection = () => {
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="l" />
-        <EuiTitle size="xxs">
-          <h2>
-            {i18n.translate('xpack.elasticsearchHome.home.chat.skipSetupTitle', {
-              defaultMessage: 'Skip the setup and use the Elastic Agent',
-            })}
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <span>
-          <AiButton
-            variant="outlined"
-            iconType="productAgent"
-            onClick={() =>
-              agentBuilder.openChat({
-                initialMessage: ideSetup.agentInitialMessage,
-                autoSendInitialMessage: true,
-                newConversation: true,
-                sessionTag: ideSetup.agentSessionTag,
-              })
-            }
-            data-test-subj="openElasticAgentButton"
-            data-telemetry-id={getTelemetryId('chat-openElasticAgent')}
-          >
-            {i18n.translate('xpack.elasticsearchHome.home.chat.openAgent', {
-              defaultMessage: 'Chat with AI Agent',
-            })}
-          </AiButton>
-        </span>
+        {canOpenAgentChat && (
+          <>
+            <EuiSpacer size="l" />
+            <EuiTitle size="xxs">
+              <h2>
+                {i18n.translate('xpack.elasticsearchHome.home.chat.skipSetupTitle', {
+                  defaultMessage: 'Skip the setup and use the Elastic Agent',
+                })}
+              </h2>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <span>
+              <AiButton
+                variant="outlined"
+                iconType="productAgent"
+                onClick={() =>
+                  agentBuilder.openChat({
+                    initialMessage: ideSetup.agentInitialMessage,
+                    autoSendInitialMessage: true,
+                    newConversation: true,
+                    sessionTag: ideSetup.agentSessionTag,
+                  })
+                }
+                data-test-subj="openElasticAgentButton"
+                data-telemetry-id={getTelemetryId('chat-openElasticAgent')}
+              >
+                {i18n.translate('xpack.elasticsearchHome.home.chat.openAgent', {
+                  defaultMessage: 'Chat with AI Agent',
+                })}
+              </AiButton>
+            </span>
+          </>
+        )}
         {isPromptModalOpen && (
           <PromptModal prompt={ideSetup.prompt} onClose={() => setIsPromptModalOpen(false)} />
         )}
