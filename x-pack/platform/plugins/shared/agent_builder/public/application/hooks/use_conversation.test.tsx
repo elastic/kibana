@@ -283,14 +283,22 @@ describe('useConversation polling', () => {
   });
 });
 
+const mockPrivileges = jest.fn();
+
 const capabilitiesFor = (manageInvestigations: boolean) =>
   ({
     services: {
       application: {
         capabilities: { agenticInvestigations: { manageInvestigations } },
       },
+      http: { get: mockPrivileges },
     },
   } as unknown as ReturnType<typeof useKibana>);
+
+const deniedPrivileges = {
+  investigations: { read: false, manage: false },
+  escalations: { read: false, manage: false },
+};
 
 describe('useConversationReadOnly', () => {
   beforeEach(() => {
@@ -298,6 +306,7 @@ describe('useConversationReadOnly', () => {
     mockUseConversationId.mockReturnValue(conversationId);
     mockUseStreamRecord.mockReturnValue({});
     mockUseKibana.mockReturnValue(capabilitiesFor(true));
+    mockPrivileges.mockResolvedValue(deniedPrivileges);
   });
 
   const setStreaming = (isStreaming: boolean) =>
@@ -335,6 +344,50 @@ describe('useConversationReadOnly', () => {
     const { result } = renderHook(() => useConversationReadOnly(), { wrapper: Wrapper });
 
     await waitFor(() => expect(result.current.isReadOnly).toBe(true));
+    expect(mockPrivileges).toHaveBeenCalledWith('/internal/investigations/_privileges', {
+      version: '1',
+    });
+    queryClient.clear();
+  });
+
+  it('keeps an investigation writable when another feature grants the manage API privilege', async () => {
+    setStreaming(false);
+    mockUseKibana.mockReturnValue(capabilitiesFor(false));
+    mockPrivileges.mockResolvedValue({
+      investigations: { read: true, manage: true },
+      escalations: { read: false, manage: false },
+    });
+    mockGet.mockResolvedValue({
+      ...createFetchedConversation(publicAcl),
+      template_id: 'investigation',
+      read_only: false,
+    });
+    const { queryClient, Wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useConversationReadOnly(), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.isReadOnly).toBe(false);
+    expect(mockPrivileges).toHaveBeenCalledWith('/internal/investigations/_privileges', {
+      version: '1',
+    });
+    queryClient.clear();
+  });
+
+  it('treats a failed privileges probe as no permission to change the investigation', async () => {
+    setStreaming(false);
+    mockUseKibana.mockReturnValue(capabilitiesFor(false));
+    mockPrivileges.mockRejectedValue(new Error('privileges unavailable'));
+    mockGet.mockResolvedValue({
+      ...createFetchedConversation(publicAcl),
+      template_id: 'investigation',
+      read_only: false,
+    });
+    const { queryClient, Wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useConversationReadOnly(), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.isReadOnly).toBe(true));
     queryClient.clear();
   });
 
@@ -351,6 +404,7 @@ describe('useConversationReadOnly', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.isReadOnly).toBe(false);
+    expect(mockPrivileges).not.toHaveBeenCalled();
     queryClient.clear();
   });
 
@@ -367,6 +421,7 @@ describe('useConversationReadOnly', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.isReadOnly).toBe(false);
+    expect(mockPrivileges).not.toHaveBeenCalled();
     queryClient.clear();
   });
 });

@@ -20,6 +20,13 @@ import { useKibana } from './use_kibana';
 
 /** Matches the investigations template id without importing that plugin. */
 const INVESTIGATION_TEMPLATE_ID = 'investigation';
+/** Authz is disabled: the route only reports the caller's privileges. */
+const INVESTIGATION_PRIVILEGES_URL = '/internal/investigations/_privileges';
+const INVESTIGATION_PRIVILEGES_VERSION = '1';
+
+interface InvestigationPrivilegesResponse {
+  investigations: { manage: boolean };
+}
 
 const POLL_INTERVAL_MS = 5_000;
 
@@ -134,19 +141,36 @@ export const useConversationReadOnly = () => {
   const conversationId = useConversationId();
   const { conversation, isFetching } = useConversation();
   const {
-    services: { application },
+    services: { application, http },
   } = useKibana();
-  const canChangeInvestigation =
+  const hasManageCapability =
     application.capabilities.agenticInvestigations?.manageInvestigations === true;
+  const isInvestigation = conversation?.template_id === INVESTIGATION_TEMPLATE_ID;
+  // AlertZero All and Nightshift All grant `manage_investigations` without this UI capability.
+  // The flyout asks the privileges route in that case; the composer follows it.
+  const needsPrivilegeCheck = isInvestigation && !hasManageCapability;
+  const privileges = useQuery({
+    queryKey: queryKeys.investigationPrivileges,
+    queryFn: () =>
+      http.get<InvestigationPrivilegesResponse>(INVESTIGATION_PRIVILEGES_URL, {
+        version: INVESTIGATION_PRIVILEGES_VERSION,
+      }),
+    enabled: needsPrivilegeCheck,
+    staleTime: Infinity,
+    retry: false,
+  });
+  const privilegePending = needsPrivilegeCheck && !privileges.isSuccess && !privileges.isError;
+  const canChangeInvestigation =
+    hasManageCapability || privileges.data?.investigations.manage === true;
   // The stored `read_only` flag applies to every participant. A viewer can still read a shared
   // investigation, but posting would change it, so the composer stays closed for that template.
-  const lacksInvestigationAccess =
-    conversation?.template_id === INVESTIGATION_TEMPLATE_ID && !canChangeInvestigation;
+  const lacksInvestigationAccess = isInvestigation && !canChangeInvestigation && !privilegePending;
 
   return {
     isReadOnly: (conversation?.read_only ?? false) || lacksInvestigationAccess,
-    // Not `isLoading`: v4 reports it for disabled queries too.
-    isLoading: Boolean(conversationId) && !conversation && isFetching,
+    // Not the query `isLoading`: v4 reports it for disabled queries too. While the privilege
+    // probe is in flight the composer stays closed without flashing the read-only badge.
+    isLoading: (Boolean(conversationId) && !conversation && isFetching) || privilegePending,
   };
 };
 
