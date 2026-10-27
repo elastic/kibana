@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule, AST } from 'eslint';
-import { getReportLocFromComment, parseEslintDisableComment } from '../helpers';
+import type { CreateOnceRule, RuleMeta } from '@oxlint/plugins';
+import { getReportLocFromComment, parseDisableComment } from '../helpers';
 
 export const NAKED_DISABLE_MSG_ID = 'no-naked-eslint-disable';
 const messages = {
@@ -16,56 +16,35 @@ const messages = {
     'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
 };
 
-const meta: Rule.RuleMetaData = {
+const meta: RuleMeta = {
   type: 'problem',
   fixable: 'code',
   docs: {
     description:
-      'Prevents declaring naked eslint-disable* comments who do not provide specific rules to disable',
+      'Prevents declaring naked eslint-disable* or oxlint-disable* comments who do not provide specific rules to disable',
   },
   messages,
 };
 
-const create = (context: Rule.RuleContext): Rule.RuleListener => {
-  return {
+export const NoNakedESLintDisableRule: CreateOnceRule = {
+  meta,
+  createOnce: (context) => ({
     Program(node) {
-      const nodeComments = node.comments || [];
+      for (const comment of context.sourceCode.getAllComments()) {
+        const parsedDisable = parseDisableComment(comment);
 
-      nodeComments.forEach((comment) => {
-        // get parsedEslintDisable from comment
-        const parsedEslintDisable = parseEslintDisableComment(comment);
-
-        // no regex match, exit early
-        if (!parsedEslintDisable) {
-          return;
+        // no regex match, or we have a rule name, so we can exit early
+        if (!parsedDisable || parsedDisable.rules.length > 0) {
+          continue;
         }
 
-        // we have a rule name so we can exit early
-        if (parsedEslintDisable.rules.length > 0) {
-          return;
-        }
-
-        // collect position to report
-        const reportLoc = getReportLocFromComment(parsedEslintDisable);
-        if (!reportLoc) {
-          return;
-        }
-
-        // At this point we have a regex match, no rule name and a valid loc so lets report here
         context.report({
           node,
-          loc: reportLoc,
+          loc: getReportLocFromComment(comment, parsedDisable.disableValueType),
           messageId: NAKED_DISABLE_MSG_ID,
-          fix(fixer) {
-            return fixer.removeRange(parsedEslintDisable.range as AST.Range);
-          },
+          fix: (fixer) => fixer.removeRange(comment.range),
         });
-      });
+      }
     },
-  };
-};
-
-export const NoNakedESLintDisableRule: Rule.RuleModule = {
-  meta,
-  create,
+  }),
 };

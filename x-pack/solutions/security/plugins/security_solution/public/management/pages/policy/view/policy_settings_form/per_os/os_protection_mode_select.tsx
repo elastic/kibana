@@ -10,7 +10,10 @@ import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { OS_CONTROL_WIDTH } from './os_control_layout';
-import { buildOsControlSelectOptions } from './os_control_select_options';
+import {
+  buildOsControlSelectOptions,
+  OS_CONTROL_SELECT_POPOVER_PROPS,
+} from './os_control_select_options';
 
 const PREVENT_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.perOs.protectionMode.detectAndPrevent',
@@ -65,6 +68,7 @@ export const OsProtectionModeSelect = memo<OsProtectionModeSelectProps>(
         onChange={onModeChange}
         disabled={disabled}
         fullWidth={true}
+        popoverProps={OS_CONTROL_SELECT_POPOVER_PROPS}
         data-test-subj={dataTestSubj}
         aria-label={PROTECTION_MODE_SELECT_ARIA_LABEL}
       />

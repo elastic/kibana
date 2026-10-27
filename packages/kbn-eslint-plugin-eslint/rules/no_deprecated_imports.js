@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Linter = require('eslint').Linter;
-
-const coreRule = new Linter().getRules().get('no-restricted-imports');
+const { rules } = require('@typescript-eslint/eslint-plugin');
 
 /**
- * This rule is used to prevent the use of deprecated imports in Kibana code.
- * It is a wrapper around the core ESLint rule `no-restricted-imports` with
- * a different id to avoid conflicts with the core rule.
+ * Warn about deprecated imports independently of the error-level
+ * no-restricted-imports config, which has a single severity per file.
  */
-module.exports = coreRule;
+module.exports = rules['no-restricted-imports'];

@@ -35,6 +35,7 @@ import { InlineReleaseBadge } from '../../../components';
 import { useStartServices } from '../../../hooks';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
 import { VariantCountBadge } from '../screens/home/components/variant_count_badge';
+import { CollectionSizeBadge } from '../screens/home/components/collection_size_badge';
 
 import {
   InstallationStatus,
@@ -42,6 +43,7 @@ import {
   shouldShowInstallationStatus,
 } from './installation_status';
 import { buildPackageCardNavigateState } from './package_card_navigate_state';
+import { SearchMemberMatchDescription } from './search_member_match_description';
 import { wrapTitleWithDeprecated } from './utils';
 
 export type PackageCardProps = IntegrationCardItem;
@@ -71,6 +73,7 @@ export function PackageCard({
   installStatus,
   onCardClick: onClickProp = undefined,
   isCollectionCard = false,
+  collectionSize,
   groupMembers,
   titleLineClamp,
   titleBadge,
@@ -81,6 +84,7 @@ export function PackageCard({
   showDescription = true,
   showReleaseBadge = true,
   hasDataStreams,
+  searchMemberMatch,
 }: PackageCardProps) {
   const theme = useEuiTheme();
   const defaultPackageCardMinHeight = theme.euiTheme.base * 8;
@@ -178,6 +182,15 @@ export function PackageCard({
         <EuiSpacer size="xs" />
         <span>
           <VariantCountBadge count={groupMembers.length} />
+        </span>
+      </EuiFlexItem>
+    );
+  } else if (collectionSize) {
+    collectionBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <CollectionSizeBadge count={collectionSize} />
         </span>
       </EuiFlexItem>
     );
@@ -289,7 +302,20 @@ export function PackageCard({
           )
         }
         titleSize={titleSize}
-        description={showDescription ? description : ''}
+        description={
+          showDescription ? (
+            searchMemberMatch ? (
+              <SearchMemberMatchDescription
+                memberTitles={searchMemberMatch.memberTitles}
+                collectionTitle={searchMemberMatch.collectionTitle}
+              />
+            ) : (
+              description
+            )
+          ) : (
+            ''
+          )
+        }
         hasBorder
         icon={
           <CardIcon

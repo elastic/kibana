@@ -89,6 +89,7 @@ export async function deleteLogsExperienceData(esClient: EsClient) {
       name: [
         `logs-${LOGS.SYNTH_LOGS_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE}`,
         `logs-${LOGS.SYNTH_DOCVIEWER_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE}`,
+        `logs-${LOGS.SYNTH_NO_MESSAGE_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE}`,
       ].join(','),
     },
     { ignore: [404] }

@@ -156,7 +156,6 @@ describe('legacy_security_assets_migration_task', () => {
         coreStart,
         taskManager: taskManager as unknown as TaskManagerStartContract,
         logger,
-        isMigrationEnabled: async () => true,
       });
 
       expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
@@ -172,7 +171,6 @@ describe('legacy_security_assets_migration_task', () => {
         coreStart,
         taskManager: taskManager as unknown as TaskManagerStartContract,
         logger,
-        isMigrationEnabled: async () => true,
       });
 
       expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
@@ -195,27 +193,9 @@ describe('legacy_security_assets_migration_task', () => {
         coreStart,
         taskManager: taskManager as unknown as TaskManagerStartContract,
         logger,
-        isMigrationEnabled: async () => true,
       });
 
       expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
-    });
-
-    it('does not schedule when the feature flag is off even if legacy assets remain', async () => {
-      mockFind.mockResolvedValue({
-        saved_objects: [{ namespaces: ['default'] }],
-      });
-      mockHasLegacySecurityAssets.mockResolvedValue(true);
-
-      await scheduleLegacySecurityAssetsMigrationIfNeeded({
-        coreStart,
-        taskManager: taskManager as unknown as TaskManagerStartContract,
-        logger,
-        isMigrationEnabled: async () => false,
-      });
-
-      expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
-      expect(mockHasLegacySecurityAssets).not.toHaveBeenCalled();
     });
   });
 });

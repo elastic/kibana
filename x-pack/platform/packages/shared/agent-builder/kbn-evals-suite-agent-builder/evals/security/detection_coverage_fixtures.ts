@@ -16,6 +16,9 @@ import type { ToolingLog } from '@kbn/tooling-log';
  * builder emits placeholder queries (`process.name:*`) and cannot express that, and
  * changing it would move the find-rules baselines.
  *
+ * Names must not collide with `find_rules_fixtures.ts`: both specs run in parallel in one space
+ * and delete their fixtures by name.
+ *
  * Each rule below encodes one judgement the skill must get right:
  *
  * - `POWERSHELL` — an enabled exact match. Its `-enc` behaviour lives only in the query,
@@ -25,8 +28,8 @@ import type { ToolingLog } from '@kbn/tooling-log';
  *   a duplicate.
  * - `OFFICE_CMD` — shares technique T1059 with `POWERSHELL` but detects a different
  *   behaviour on a different parent process. Traps "same technique means covered".
- * - `KUBECTL_STAGING` — scoped to the staging namespace only, so a production ask is a
- *   `no_coverage` with the close rule named, not a stretched `covered_enabled`.
+ * - `KUBECTL_STAGING` — scoped to the staging namespace only, so a production ask must name
+ *   the close rule but never return a stretched `covered_enabled`.
  */
 
 const ENDPOINT_INDEX = 'logs-endpoint.events.*';
@@ -57,7 +60,7 @@ interface CoverageFixtureRule {
 
 export const COVERAGE_FIXTURE_RULES: CoverageFixtureRule[] = [
   {
-    name: 'Suspicious PowerShell Execution',
+    name: 'Encoded PowerShell Command on Windows Endpoints',
     description: 'Detects suspicious PowerShell process execution on Windows endpoints',
     query: 'process.name:powershell.exe and process.args:*-enc*',
     index: ENDPOINT_INDEX,
@@ -73,7 +76,7 @@ export const COVERAGE_FIXTURE_RULES: CoverageFixtureRule[] = [
     },
   },
   {
-    name: 'Lateral Movement via SMB',
+    name: 'SMB Admin Share Lateral Movement (Event 5145)',
     description: 'Detects lateral movement via SMB connections between Windows hosts',
     query: 'event.code:5145 and network.protocol:smb',
     index: WINLOG_INDEX,
@@ -126,8 +129,8 @@ export const COVERAGE_FIXTURE_RULES: CoverageFixtureRule[] = [
 
 /** Rule names the skill must be able to name back, keyed for readable assertions. */
 export const COVERAGE_RULE_NAMES = {
-  powershell: 'Suspicious PowerShell Execution',
-  smb: 'Lateral Movement via SMB',
+  powershell: 'Encoded PowerShell Command on Windows Endpoints',
+  smb: 'SMB Admin Share Lateral Movement (Event 5145)',
   officeCmd: 'Office Spawning Windows Command Shell',
   kubectlStaging: 'Suspicious kubectl exec in Staging Namespace',
 } as const;

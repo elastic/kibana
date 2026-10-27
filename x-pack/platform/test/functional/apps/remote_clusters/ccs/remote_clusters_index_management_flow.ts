@@ -7,14 +7,14 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { RemoteClustersPageProvider } from './remote_clusters_page';
+import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 
-export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects([
-    'common',
-    'remoteClusters',
-    'indexManagement',
-    'crossClusterReplication',
-  ]);
+export default (ctx: FtrProviderContext) => {
+  const { getPageObjects, getService } = ctx;
+  const pageObjects = getPageObjects(['common', 'indexManagement']);
+  const remoteClusters = RemoteClustersPageProvider(ctx);
+  const crossClusterReplication = CrossClusterReplicationPageProvider(ctx);
   const security = getService('security');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -42,7 +42,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.waitFor('table to be visible', async () => {
           return await testSubjects.isDisplayed('remoteClusterListTable');
         });
-        const remotes = await pageObjects.remoteClusters.getRemoteClustersList();
+        const remotes = await remoteClusters.getRemoteClustersList();
         const filteredRemotes = remotes.filter((remote) => remote.remoteName === 'ftr-remote');
         expect(filteredRemotes.length).to.eql(1);
         expect(filteredRemotes[0].remoteAddress).to.contain('localhost');
@@ -64,13 +64,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
       it('Create Follower Index', async () => {
-        await pageObjects.crossClusterReplication.clickCreateFollowerIndexButton();
-        await pageObjects.crossClusterReplication.createFollowerIndex(
-          leaderName,
-          followerName,
-          true,
-          '1s'
-        );
+        await crossClusterReplication.clickCreateFollowerIndexButton();
+        await crossClusterReplication.createFollowerIndex(leaderName, followerName, true, '1s');
       });
     });
     describe('Index Management', function () {

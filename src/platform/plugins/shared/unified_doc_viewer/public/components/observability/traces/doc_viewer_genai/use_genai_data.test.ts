@@ -8,7 +8,12 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { GEN_AI_LONG_MESSAGE_FIELDS } from '@kbn/apm-ui-shared';
+import {
+  GEN_AI_INPUT_MESSAGE_FIELDS,
+  GEN_AI_LONG_MESSAGE_FIELDS,
+  GEN_AI_OUTPUT_MESSAGE_FIELDS,
+} from '@kbn/genai-common';
+import { GEN_AI_INPUT_FIELD_FIXTURES, GEN_AI_OUTPUT_FIELD_FIXTURES } from '@kbn/genai-common/mocks';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { of } from 'rxjs';
 import { useGenAiData } from './use_genai_data';
@@ -134,23 +139,6 @@ describe('useGenAiData', () => {
     expect(result.current.isGenAiSpan).toBe(true);
     expect(result.current.genAi?.requestModel).toBe('gpt-4o');
     expect(result.current.genAi?.inputMessages).toEqual([{ role: 'user', content: 'hi' }]);
-    expect(result.current.loading).toBe(false);
-    expect(mockSearch).not.toHaveBeenCalled();
-  });
-
-  it('merges an ignored long message from raw._source without fetching', () => {
-    const longMessage = '{"role":"user","content":"' + 'x'.repeat(2000) + '"}';
-    const { result } = renderHook(() =>
-      useGenAiData({
-        hit: buildHit({
-          flattened: { 'attributes.gen_ai.request.model': ['gpt-4o'] },
-          _ignored: [INPUT_MESSAGES_FIELD],
-          _source: { attributes: { 'gen_ai.input.messages': [longMessage] } },
-        }),
-      })
-    );
-
-    expect(result.current.genAi?.inputMessages[0].content).toHaveLength(2000);
     expect(result.current.loading).toBe(false);
     expect(mockSearch).not.toHaveBeenCalled();
   });
@@ -733,5 +721,55 @@ describe('useGenAiData', () => {
     // The cacheKey stayed the same, so no second fetch should have fired.
     expect(mockSearch).toHaveBeenCalledTimes(1);
     expect(result.current.genAi?.inputMessages[0].content).toHaveLength(2000);
+  });
+
+  describe('_source recovery for all message fields', () => {
+    describe('input fields', () => {
+      GEN_AI_INPUT_MESSAGE_FIELDS.forEach((field) => {
+        it(`prefers raw._source over indexed value for ${field} when flagged as ignored`, () => {
+          const fixture = GEN_AI_INPUT_FIELD_FIXTURES[field];
+          const { result } = renderHook(() =>
+            useGenAiData({
+              hit: buildHit({
+                flattened: {
+                  'attributes.gen_ai.request.model': ['gpt-4o'],
+                  [field]: ['{"role":"user","content":"partial"}'],
+                },
+                _ignored: [field],
+                _source: fixture.source,
+              }),
+            })
+          );
+
+          expect(result.current.genAi?.inputMessages).toEqual(fixture.expectedMessages);
+          expect(result.current.loading).toBe(false);
+          expect(mockSearch).not.toHaveBeenCalled();
+        });
+      });
+    });
+
+    describe('output fields', () => {
+      GEN_AI_OUTPUT_MESSAGE_FIELDS.forEach((field) => {
+        it(`prefers raw._source over indexed value for ${field} when flagged as ignored`, () => {
+          const fixture = GEN_AI_OUTPUT_FIELD_FIXTURES[field];
+          const { result } = renderHook(() =>
+            useGenAiData({
+              hit: buildHit({
+                flattened: {
+                  'attributes.gen_ai.request.model': ['gpt-4o'],
+                  [field]: ['{"role":"assistant","content":"partial"}'],
+                },
+                _ignored: [field],
+                _source: fixture.source,
+              }),
+            })
+          );
+
+          expect(result.current.genAi?.outputMessages).toEqual(fixture.expectedMessages);
+          expect(result.current.loading).toBe(false);
+          expect(mockSearch).not.toHaveBeenCalled();
+        });
+      });
+    });
   });
 });

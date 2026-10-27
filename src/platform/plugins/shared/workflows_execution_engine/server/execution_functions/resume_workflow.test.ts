@@ -46,7 +46,7 @@ const mockWorkflowExecutionLoop = workflowExecutionLoop as jest.MockedFunction<
 const mockWorkflowExecutionEngine = workflowsExecutionEngineMock.createStart();
 
 describe('resumeWorkflow', () => {
-  it('finalizes pending steps before publishing an identity failure', async () => {
+  it.each([false, true])('finalizes identity failure (inherited: %s)', async (inherited) => {
     jest.clearAllMocks();
     const dependencies = mockContextDependencies();
     jest.spyOn(dependencies.coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
@@ -74,13 +74,22 @@ describe('resumeWorkflow', () => {
       workflowId: 'workflow',
       spaceId: 'default',
       status: ExecutionStatus.WAITING_FOR_INPUT,
+      effectiveIdentity: inherited
+        ? {
+            type: 'service_account',
+            id: 'account-a',
+            inheritedFrom: {
+              workloadId: 'root-parent',
+            },
+          }
+        : undefined,
       workflowDefinition: {
         version: '1',
         name: 'Identity test',
         enabled: true,
         triggers: [{ type: 'manual' }],
         steps: [],
-        settings: { run_as: 'account-a' },
+        settings: inherited ? undefined : { run_as: 'account-a' },
       },
     });
     const execution = await workflowExecutionRepository.getWorkflowExecutionById(
@@ -209,7 +218,7 @@ describe('resumeWorkflow', () => {
         signal: new AbortController().signal,
         dependencies,
         logger: logger as Logger,
-        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        config: { logging: { console: false } } as never,
         fakeRequest,
         workflowsExecutionEngine: mockWorkflowExecutionEngine,
         workflowExecutionRepository: mockWorkflowExecutionRepositoryForResume as any,
@@ -363,7 +372,7 @@ describe('resumeWorkflow', () => {
         signal: new AbortController().signal,
         dependencies,
         logger: logger as Logger,
-        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        config: { logging: { console: false } } as never,
         fakeRequest,
         workflowsExecutionEngine: mockWorkflowExecutionEngine,
         workflowExecutionRepository: mockWorkflowExecutionRepositoryForResume as any,
@@ -402,7 +411,7 @@ describe('resumeWorkflow', () => {
         signal: new AbortController().signal,
         dependencies,
         logger: logger as Logger,
-        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        config: { logging: { console: false } } as never,
         fakeRequest,
         workflowsExecutionEngine: mockWorkflowExecutionEngine,
         workflowExecutionRepository: mockWorkflowExecutionRepositoryForResume as any,
@@ -442,7 +451,7 @@ describe('resumeWorkflow', () => {
         signal: new AbortController().signal,
         dependencies,
         logger: logger as Logger,
-        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        config: { logging: { console: false } } as never,
         fakeRequest,
         workflowsExecutionEngine: mockWorkflowExecutionEngine,
         workflowExecutionRepository: mockWorkflowExecutionRepositoryForResume as any,
@@ -738,7 +747,7 @@ describe('resumeWorkflow', () => {
           spaceId,
           signal: new AbortController().signal,
           logger: logger as Logger,
-          config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
+          config: { logging: { console: false } } as any,
           fakeRequest,
           dependencies,
           workflowsExecutionEngine: mockWorkflowExecutionEngineEmit,
@@ -794,7 +803,7 @@ describe('resumeWorkflow', () => {
           spaceId,
           signal: new AbortController().signal,
           logger: logger as Logger,
-          config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
+          config: { logging: { console: false } } as any,
           fakeRequest,
           dependencies,
           workflowsExecutionEngine: mockWorkflowExecutionEngineEmit,

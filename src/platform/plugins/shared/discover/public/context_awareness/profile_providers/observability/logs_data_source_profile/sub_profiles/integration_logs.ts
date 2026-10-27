@@ -8,6 +8,7 @@
  */
 
 import { APACHE_ERROR_LOGS_PROFILE, KUBERNETES_CONTAINER_LOGS_PROFILE } from '@kbn/discover-utils';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { CreateGetDefaultAppStateParams } from '../accessors';
 import type { LogsDataSourceProfileProvider } from '../profile';
 import { CLIENT_IP_COLUMN, HOST_NAME_COLUMN, LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
@@ -19,6 +20,7 @@ type IntegrationLogsProfileProvider = Pick<LogsDataSourceProfileProvider, 'profi
   baseIndexPattern: string;
   defaultAppState: CreateGetDefaultAppStateParams;
   recommendedFields?: string[];
+  enabledInClassicNav?: boolean;
 };
 
 const integrationLogsProfileProviders: IntegrationLogsProfileProvider[] = [
@@ -95,14 +97,17 @@ const integrationLogsProfileProviders: IntegrationLogsProfileProvider[] = [
     defaultAppState: {
       defaultColumns: [LOG_LEVEL_COLUMN, HOST_NAME_COLUMN, MESSAGE_COLUMN],
     },
+    // This integration is also Security-relevant, so keep it out of Classic auto-detection.
+    enabledInClassicNav: false,
   },
 ];
 
 export const createIntegrationLogsDataSourceProfileProviders = (
-  logsDataSourceProfileProvider: LogsDataSourceProfileProvider
+  logsDataSourceProfileProvider: LogsDataSourceProfileProvider,
+  uiSettings: IUiSettingsClient
 ) => {
   return integrationLogsProfileProviders.map(
-    ({ profileId, baseIndexPattern, defaultAppState, recommendedFields }) =>
+    ({ profileId, baseIndexPattern, defaultAppState, recommendedFields, enabledInClassicNav }) =>
       extendProfileProvider(logsDataSourceProfileProvider, {
         profileId,
         profile: {
@@ -115,7 +120,7 @@ export const createIntegrationLogsDataSourceProfileProviders = (
               }
             : {}),
         },
-        resolve: createResolve(baseIndexPattern),
+        resolve: createResolve(baseIndexPattern, uiSettings, { enabledInClassicNav }),
       })
   );
 };

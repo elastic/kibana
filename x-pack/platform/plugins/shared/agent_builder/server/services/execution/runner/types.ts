@@ -15,6 +15,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { Runner, HooksServiceStart } from '@kbn/agent-builder-server';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ToolsServiceStart } from '../../tools';
@@ -27,6 +28,7 @@ import type { AnalyticsService, TrackingService } from '../../../telemetry';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
 import type { ConversationTemplatesServiceStart } from '../../conversation/templates';
+import type { DeploymentInfo } from '../../../utils/deployment_info';
 
 export interface RunnerFactoryDeps {
   // core services
@@ -40,6 +42,7 @@ export interface RunnerFactoryDeps {
   inference: InferenceServerStart;
   spaces: SpacesPluginStart | undefined;
   actions: ActionsPluginStart;
+  licensing: LicensingPluginStart;
   // internal service deps
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
@@ -56,6 +59,7 @@ export interface RunnerFactoryDeps {
   /** Lazy getter for the execution service (breaks circular dep with runner). */
   getExecutionService: () => AgentExecutionService;
   conversationTemplates: ConversationTemplatesServiceStart;
+  deploymentInfo: DeploymentInfo;
   /** `xpack.agentBuilder.deductive.register` for this deployment. */
   deductiveRegister: boolean;
 }

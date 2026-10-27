@@ -2,7 +2,7 @@
 
 This folder defines the managed Elasticsearch resources for alerting v2:
 
-- data streams with explicit mappings and ILM policies
+- data streams with explicit mappings and data stream lifecycle
 - ES|QL views layered over those streams
 - the startup registration path that initializes them at plugin start
 
@@ -50,9 +50,10 @@ This stream is the durable history of rule evaluation.
 | `status` | `keyword` | `breached`, `recovered`, or `no_data`. |
 | `source` | `keyword` | Origin marker. |
 | `type` | `keyword` | `signal` or `alert`. |
-| `episode.id` | `keyword` | Episode id for alert-type events. |
-| `episode.status` | `keyword` | `inactive`, `pending`, `active`, or `recovering`. |
-| `episode.status_count` | `long` | Consecutive count within the current episode status. |
+| `alert.id` | `keyword` | Alert id for alert-type events. |
+| `alert.status` | `keyword` | `inactive`, `pending`, `active`, or `recovering`. |
+| `alert.status_count` | `long` | Consecutive count within the current alert status. |
+| `episode.id`, `episode.status`, `episode.status_count` | `alias` | Aliases of the `alert.*` fields, so queries on the pre-v8 names keep working. Aliases are not stored in `_source` and cannot be written. |
 | `severity` | `keyword` | Optional. Best-effort severity extracted from the ES\|QL `severity` column on breached events. One of `info`, `low`, `medium`, `high`, `critical`. |
 
 Writers:
@@ -78,20 +79,23 @@ This stream is the dispatcher's durable memory and also stores user/system actio
 | `@timestamp` | `date` | Action time; stamped by ES via the final pipeline. |
 | `last_series_event_timestamp` | `date` | Timestamp of the related series event. |
 | `expiry` | `date` | Optional expiry for temporary actions such as snooze. |
-| `actor` | `keyword` | Who performed the action. |
+| `actor.type` | `keyword` | `user`, or `internal` for writes made by Kibana itself (e.g. the dispatcher). |
+| `actor.profile_uid` | `keyword` | User profile uid of a `user` actor. Absent for `internal` actors and for users without a resolvable profile. |
 | `action_type` | `keyword` | `fire`, `suppress`, `notified`, `ack`, `deactivate`, and related values. |
 | `group_hash` | `keyword` | Series identity. |
-| `episode_id` | `keyword` | Optional episode scope. |
-| `episode_status` | `keyword` | Optional episode status captured with the action. |
+| `alert_id` | `keyword` | Optional episode scope. Null for series-level actions such as `snooze`. Named `episode_id` before v8. |
+| `alert_status` | `keyword` | Optional episode status captured with the action. Named `episode_status` before v8. |
 | `rule_id` | `keyword` | Rule identifier. |
-| `tags` | `keyword` | Optional tags. |
-| `notification_group_id` | `keyword` | Group identity for throttling / notify tracking. |
+| `tags` | `keyword` | Tag set of a `tag` action. |
+| `assignee_uid` | `keyword` | User profile uid set by an `assign` action; null when unassigned. |
+| `action_group_id` | `keyword` | Action group of a `notified` record. With `alert_id`, the key read by throttling and the already-notified lookup. |
 | `source` | `keyword` | Origin marker. |
 | `reason` | `text` | Human-readable explanation. |
 
 Writers:
 
-- `lib/dispatcher/steps/store_actions_step.ts`
+- `lib/dispatcher/steps/dispatch_step.ts` (with `lib/dispatcher/steps/utils/series_ledger.ts`)
+- `lib/dispatcher/dispatcher.ts` (`unmatched` records written by the stuck-watermark escape hatch)
 - alert action routes under `server/routes/alert_actions/`
 
 Readers:
@@ -117,27 +121,28 @@ These actions are created through the alert action routes and clients. They chan
 | `unsnooze` | User/API | Clears an active snooze. |
 | `deactivate` | User/API | Disables the alert or episode from active notification handling. |
 | `activate` | User/API | Reverses a previous deactivation. |
-| `tag` | User/API | Attaches tags/metadata to the alert action history. |
+| `assign` | User/API | Sets the episode's assignee (`assignee_uid`, null to unassign). The latest `assign` wins. Not read by the dispatcher. |
+| `tag` | User/API | Replaces the episode's tags with the given set (`tags`). The latest `tag` wins. Not read by the dispatcher. |
 
 ### Dispatcher outcome actions
 
-These actions are written by `StoreActionsStep` to record what the dispatcher decided during a run.
+These actions are written by `DispatchStep` to record what the dispatcher decided during a run, after each dispatch chunk (and `unmatched`, by the escape hatch in `dispatcher.ts`). `fire`, `suppress` and `unmatched` are written for a series only once every action group holding one of its alerts has concluded, because one of these records hides every event of the series up to its `last_series_event_timestamp`.
 
 | Action type | Written by | Meaning |
 | --- | --- | --- |
-| `fire` | Dispatcher | This episode was eligible for dispatch in the current run. |
-| `notified` | Dispatcher | A notification group was actually scheduled/sent. This is group-level history used for throttling. |
-| `suppress` | Dispatcher | The episode was intentionally not fired in this run, for example because suppression logic or throttling held it back. |
-| `unmatched` | Dispatcher | The episode stayed dispatchable but matched no enabled notification policy. |
+| `fire` | Dispatcher | The series was dispatched in this run, or its content was already notified by an earlier run. Series-level: no `alert_id`. |
+| `notified` | Dispatcher | The action group concluded for this alert: its workflows were scheduled, or their scheduling failed (reported as a `dispatch_failed` event, not retried). Written once per (`action_group_id`, `alert_id`) right after the dispatch chunk, with `last_series_event_timestamp` set to the alert's event time. Used for throttling and to skip content an aborted tick already handled. Records written before this carry no `alert_id`. |
+| `suppress` | Dispatcher | The series was intentionally not fired in this run, for example because a user action (ack, snooze, deactivate), a maintenance window or throttling held it back. Series-level: no `alert_id`. |
+| `unmatched` | Dispatcher | The series stayed dispatchable but matched no enabled action policy. Also written by the stuck-watermark escape hatch for every alert of a window it skips. Series-level: no `alert_id`. |
 
 ### Why both `fire` and `notified` exist
 
-The dispatcher records both per-episode and per-group outcomes:
+The dispatcher records both per-series and per-group outcomes:
 
-- `fire` means an individual episode reached the dispatch stage
-- `notified` means a notification group was actually sent and is the durable record later throttling queries look at
+- `fire` means the series reached the dispatch stage. It carries no `alert_id`, and the scan uses it to skip the series on later ticks
+- `notified` means an action group concluded for one alert (scheduled, or failed to schedule), keyed by (`action_group_id`, `alert_id`). It is the durable record that throttling and the already-notified guard read; whether a workflow actually ran is in the `dispatched` / `dispatch_failed` events
 
-That distinction is why `.alert-actions` stores both episode-scoped and notification-group-scoped fields.
+That distinction is why `.alert-actions` stores both series-scoped and action-group-scoped fields.
 
 ## ES|QL views
 
@@ -179,6 +184,12 @@ Disallowed changes:
 4. Update writers and readers that need to understand the new field.
 5. Update the relevant README if the field changes the architecture or contributor mental model.
 
+### Mapping changes that cannot be applied in place
+
+Elasticsearch cannot apply some mapping changes to existing backing indices, for example turning a concrete field into an `alias`. For those, set `forceReset: { version }` on the resource definition, where `version` is the last datastream version with the old mapping. On startup, `DatastreamInitializer` installs the current template, then deletes a data stream created from that version or below and recreates it. Installing the template first means that a write from a node still running the previous version recreates the data stream with the current mapping. All of its documents are lost. A field renamed without an alias uses the same reset, so that no document keeps the old name.
+
+`.rule-events` uses `forceReset: { version: 7 }` for the `episode.*` to `alert.*` rename in v8. `.alert-actions` uses `forceReset: { version: 7 }` for the `episode_id` / `episode_status` to `alert_id` / `alert_status` rename in v8, which also covers the `actor` keyword to object change in v7. Keep `forceReset.version` unchanged when bumping the datastream versions later.
+
 ## Example: adding a new optional alert event field
 
 If you add a new optional field to `.rule-events`, the minimum change set is usually:
@@ -190,14 +201,35 @@ If you add a new optional field to `.rule-events`, the minimum change set is usu
 
 That keeps stored schema, runtime validation, and application code aligned.
 
-## ILM and retention
+## Lifecycle and retention
 
-Current ILM policies keep both streams in the hot phase with rollover on:
+Both streams use data stream lifecycle (DSL), not ILM. Rollover follows the Elasticsearch DSL defaults. `.alert-actions` has no DSL retention; a cleanup task deletes its dispatcher docs instead (see below).
 
-- `30d` max age
-- `50gb` primary shard size
+`.rule-events` retention is set in `kibana.yml`:
 
-See the `*_ILM_POLICY` definitions in the datastream files if you need to change retention behavior.
+| Setting | Default | Notes |
+| --- | --- | --- |
+| `xpack.alerting_v2.retention.ruleEvents.enabled` | `false` | `config/serverless.oblt.yml` turns it on for Observability Serverless. |
+| `xpack.alerting_v2.retention.ruleEvents.dataRetention` | `90d` | Units `d`, `h`, `m`, `s` or `ms` (no `w`). Minimum `30d`. |
+
+`DatastreamInitializer` applies the `.rule-events` lifecycle with `PUT _data_stream/.rule-events/_lifecycle` on every startup (`manageLifecycle: true`), because `@kbn/data-streams` only updates it on a template version bump. Changes take effect on restart, disabling retention removes `data_retention`, and any retention set by hand on `.rule-events` is overwritten. `.alert-actions` is left untouched. A failed update fails the stream's initialization, so a previous, retention is never silently kept.
+
+Caveats:
+
+- An active episode that stops getting new events expires once its last event is older than the window, with no recovery event or notification. This happens for rules using `no_data: ignore` with manual, condition or query recovery, and for rules that are disabled or keep failing.
+- Retention applies to the whole stream, not per rule, source or space. Significant Events shares this stream.
+- DSL deletes whole backing indices measured from rollover, so documents can live a little longer than the window.
+
+### `.alert-actions` cleanup
+
+The `alerting_v2:alert_actions_cleanup` task runs daily and deletes the dispatcher's bookkeeping docs (`action_type` of `fire`, `suppress` or `unmatched`) older than the retention. All other action types, including user actions and `notified`, are kept.
+
+| Setting | Default | Notes |
+| --- | --- | --- |
+| `xpack.alerting_v2.retention.alertActions.dispatcher.enabled` | `false` | When `false`, the task is removed at startup. |
+| `xpack.alerting_v2.retention.alertActions.dispatcher.dataRetention` | `90d` | Minimum `1d`. |
+
+Deleted docs only free disk space once their segments merge.
 
 ## Related server code
 
@@ -205,6 +237,6 @@ See the `*_ILM_POLICY` definitions in the datastream files if you need to change
 | --- | --- |
 | `lib/services/resource_service/` | Resource registration and initialization orchestration |
 | `lib/rule_executor/steps/store_alert_events.ts` | Writes `.rule-events` |
-| `lib/dispatcher/steps/store_actions_step.ts` | Writes `.alert-actions` |
+| `lib/dispatcher/steps/dispatch_step.ts` | Writes `.alert-actions` |
 | `lib/dispatcher/queries.ts` | Reads from `.rule-events` and `.alert-actions` |
 | `lib/director/queries.ts` | Reads latest alert state from `.rule-events` |

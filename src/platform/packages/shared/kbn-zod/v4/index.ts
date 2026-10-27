@@ -14,6 +14,7 @@ import './openapi';
 export * from 'zod/v4';
 export { isZod } from './utils';
 export { lazySchema, setLazySchemaDisabled } from './lazy_schema';
+export { lazyImmutableGCableObject } from './lazy_immutable_gcable_object';
 export type { ZodObjectType } from './types';
 export type { OasMetaExtensions, OasMetaAvailability } from './openapi';
 
@@ -35,3 +36,5 @@ export type {
   ZodStringHelper,
   UnboundedStringOptions,
 } from './string_helpers';
+export { normalizeJsonSchemaTypeArrays, inlineRootJsonSchemaRef } from './json_schema_utils';
+export { isoDateTime } from './iso_datetime';

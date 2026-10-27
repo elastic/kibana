@@ -35,7 +35,14 @@
       "triggersActionsUi",
       "licensing"
     ],
-    "optionalPlugins": ["usageCollection", "agentBuilder", "agentBuilderSml", "dashboard", "cps"],
+    "optionalPlugins": [
+      "usageCollection",
+      "agentBuilder",
+      "agentBuilderSml",
+      "dashboard",
+      "cps",
+      "cloud"
+    ],
     "requiredBundles": ["alerting", "kibanaReact", "agentBuilder", "esql"],
     "extraPublicDirs": []
   }

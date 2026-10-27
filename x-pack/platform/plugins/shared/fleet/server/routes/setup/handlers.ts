@@ -67,6 +67,7 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
     is_space_awareness_enabled: isSpaceAwarenessEnabledRes,
     is_ssl_secrets_storage_enabled: useSSLSecretsStorage,
     is_action_secrets_storage_enabled: isActionSecretStorageEnabledRes,
+    is_fips_enabled: appContextService.getIsFipsEnabled(),
   };
 
   const packageVerificationKeyId = await getGpgKeyIdOrUndefined();

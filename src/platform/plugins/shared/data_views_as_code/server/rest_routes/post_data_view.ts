@@ -22,13 +22,16 @@ export const registerPostDataViewAsCodeRoute = ({
   router.versioned
     .post({
       path: CREATE_DATA_VIEW_AS_CODE_PATH,
-      access: 'internal',
+      access: 'public',
       enableQueryVersion: true,
-      description: 'Create a data view',
+      summary: 'Create a data view',
+      description:
+        'Creates a data view and returns it. Kibana generates the data view ID. If a data view with the same name already exists, the request fails with a conflict.',
       options: {
+        tags: ['oas-tag:data-views-v2'],
         availability: {
-          stability: 'tech_preview',
-          since: '9.5.0',
+          stability: 'stable',
+          since: '9.6.0',
         },
       },
       security: {
@@ -40,6 +43,10 @@ export const registerPostDataViewAsCodeRoute = ({
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).postDataViewOASOperationObject,
+        },
         validate: {
           request: {
             body: savedDataViewSpecSchemaWithoutId,
@@ -47,18 +54,17 @@ export const registerPostDataViewAsCodeRoute = ({
           response: {
             201: {
               body: () => asCodeResponseSchema,
+              description: 'The data view was created.',
             },
             400: {
-              description: 'invalid request',
+              description:
+                'The request is invalid, for example when a field format type does not exist.',
             },
             403: {
               description: 'forbidden',
             },
-            404: {
-              description: 'not found',
-            },
             409: {
-              description: 'conflict',
+              description: 'A data view with the same name already exists.',
             },
           },
         },

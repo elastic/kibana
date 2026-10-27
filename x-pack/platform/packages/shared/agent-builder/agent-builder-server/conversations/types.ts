@@ -7,6 +7,7 @@
 
 import type {
   ConversationAccessControlInput,
+  ConversationAccessControlEntryInput,
   ConversationEvent,
   Conversation,
   ConversationListOptions,
@@ -82,9 +83,31 @@ export interface ConversationPublicClient {
    */
   create(request: ConversationCreatePublicRequest): Promise<ConversationWithPermissions>;
   /**
+   * Adds entries to a private conversation's ACL without removing existing entries or
+   * changing the access mode. A no-op for public conversations; never removes entries.
+   * Existing entries are left unchanged — even if the requested role differs. Role changes
+   * go through `updateAccessControl` (owner-only). Safe to call with `access: 'converse'`
+   * so collaborators (e.g. existing assignees) can add new members.
+   */
+  addAccessControlEntries(
+    conversationId: string,
+    entries: ConversationAccessControlEntryInput[],
+    options?: { access?: 'owner' | 'converse' }
+  ): Promise<Conversation>;
+  /**
+   * Removes principals from a private conversation's ACL. A no-op for public conversations
+   * or when none of the principals are present. Never changes the access mode or the owner.
+   * Safe to call with `access: 'converse'` so assignees can revoke access when un-assigning.
+   */
+  removeAccessControlEntries(
+    conversationId: string,
+    principals: Array<Pick<ConversationAccessControlEntryInput, 'type' | 'id'>>,
+    options?: { access?: 'owner' | 'converse' }
+  ): Promise<Conversation>;
+  /**
    * Validate updates against the conversation's template and merge them into its metadata.
-   * Defaults to owner-only access. Pass `{ access: 'converse' }` to allow collaborators or
-   * any authenticated user (for public conversations) to write metadata.
+   * Defaults to `converse` access, so members and anyone who can converse in a public conversation
+   * can write metadata. Pass `{ access: 'owner' }` to restrict the write to the owner.
    * The conversation must have a template applied.
    */
   patchMetadata(
@@ -98,8 +121,14 @@ export interface ConversationPublicClient {
    */
   update(request: ConversationUpdatePublicRequest): Promise<Conversation>;
   /**
+   * Permanently delete a conversation and cascade to its persistent sub-agent conversations.
+   * Requires `delete` access (the owner, or a principal the ACL grants it to). Resolves `false`
+   * when the conversation does not exist. Irreversible.
+   */
+  delete(conversationId: string): Promise<boolean>;
+  /**
    * Append custom events to a conversation timeline. Requires converse access.
-   * Only custom event types are accepted; built-in timeline event types are rejected.
+   * Only custom event types are accepted; built-in event types (timeline and activity) are rejected.
    */
   addEvents(request: ConversationAddEventsRequest): Promise<ConversationEvent[]>;
 }

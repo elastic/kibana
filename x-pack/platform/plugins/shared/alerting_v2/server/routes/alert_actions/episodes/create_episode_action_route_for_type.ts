@@ -38,6 +38,7 @@ interface CreateEpisodeActionRouteForTypeOptions<
   >;
   oasOperationObject?: RouteConfigOptions<RouteMethod>['oasOperationObject'];
   access?: RouteConfigOptions<RouteMethod>['access'];
+  availability?: RouteConfigOptions<RouteMethod>['availability'];
   /** Statuses only some action types can produce, declared by those routes. */
   additionalResponses?: NonNullable<AlertingRouteSchemas['response']>;
 }
@@ -51,6 +52,7 @@ export const createEpisodeActionRouteForType = <
   bodySchema,
   oasOperationObject,
   access,
+  availability,
   additionalResponses,
 }: CreateEpisodeActionRouteForTypeOptions<TAction>): RouteDefinition<
   EpisodeAlertActionParams,
@@ -66,7 +68,7 @@ export const createEpisodeActionRouteForType = <
   @injectable()
   class CreateTypedEpisodeActionRoute extends BaseAlertingRoute {
     static method = 'post' as const;
-    static path = `${ALERTING_V2_EPISODES_API_PATH}/{episode_id}/${pathSuffix}`;
+    static path = `${ALERTING_V2_EPISODES_API_PATH}/{id}/${pathSuffix}`;
     static security: RouteSecurity = {
       authz: {
         requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],
@@ -74,8 +76,9 @@ export const createEpisodeActionRouteForType = <
     };
     static routeOptions = {
       access,
+      availability,
       summary,
-      description: 'Create an action for a specific alert episode.',
+      description: 'Create an action for a specific alert.',
       oasOperationObject,
     } as const;
     static schemas = {
@@ -93,7 +96,7 @@ export const createEpisodeActionRouteForType = <
         },
         404: {
           body: () => errorResponseSchema,
-          description: 'Indicates the alert episode was not found.',
+          description: 'Indicates the alert was not found.',
         },
         ...additionalResponses,
       },
@@ -112,7 +115,7 @@ export const createEpisodeActionRouteForType = <
 
     protected async execute() {
       await this.alertActionsClient.createEpisodeAction({
-        episodeId: this.request.params.episode_id,
+        episodeId: this.request.params.id,
         action: {
           action_type: actionType,
           ...this.request.body,

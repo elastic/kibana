@@ -23,8 +23,8 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import {
-  DISCOVER_SESSION_API_VERSION,
   DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
+  DISCOVER_SESSION_INTERNAL_API_VERSION,
 } from '../../common/constants';
 import {
   discoverSessionInternalParamsSchema,
@@ -64,7 +64,7 @@ export const registerInternalRoutes = (
     })
     .addVersion(
       {
-        version: DISCOVER_SESSION_API_VERSION,
+        version: DISCOVER_SESSION_INTERNAL_API_VERSION,
         validate: {
           request: { body: discoverSessionInternalDataSchema },
           response: {
@@ -98,7 +98,7 @@ export const registerInternalRoutes = (
     })
     .addVersion(
       {
-        version: DISCOVER_SESSION_API_VERSION,
+        version: DISCOVER_SESSION_INTERNAL_API_VERSION,
         validate: {
           request: {
             params: discoverSessionInternalParamsSchema,
@@ -151,7 +151,7 @@ export const registerInternalRoutes = (
     })
     .addVersion(
       {
-        version: DISCOVER_SESSION_API_VERSION,
+        version: DISCOVER_SESSION_INTERNAL_API_VERSION,
         validate: {
           request: { params: discoverSessionInternalParamsSchema },
           response: {

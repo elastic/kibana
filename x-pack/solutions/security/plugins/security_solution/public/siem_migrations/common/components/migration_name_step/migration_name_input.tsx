@@ -55,6 +55,7 @@ export const MigrationNameInput = React.memo<MigrationNameInputProps>(
           <EuiForm>
             <EuiFormRow isInvalid={isInvalid} error={errors} fullWidth>
               <EuiFieldText
+                aria-label={i18n.MIGRATION_NAME_INPUT_TITLE}
                 placeholder={i18n.MIGRATION_NAME_INPUT_DESCRIPTION}
                 value={name}
                 onChange={handleNameChange}

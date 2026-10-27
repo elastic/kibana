@@ -29,6 +29,24 @@ import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine
 import { RiskEnginePrivilegesCallOut } from './risk_engine_privileges_callout';
 import { useUpsellingComponent } from '../../common/hooks/use_upselling';
 import { RiskScoresNoDataDetected } from './risk_score_no_data_detected';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../common/utils/execution_context';
+
+const USERS_RISK_TAB_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_USERS_PAGE,
+  'users_risk_score'
+);
+const USERS_RISK_TAB_KPI_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_USERS_PAGE,
+  'users_risk_score_kpi'
+);
+// Shared by both hooks so the tab sends a single risk-engine-status request.
+const USERS_RISK_TAB_STATUS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_USERS_PAGE,
+  'users_risk_score_status'
+);
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 
@@ -52,12 +70,16 @@ const useUserRiskScoreTabData = ({
     skip: querySkip,
     sort,
     timerange,
+    executionContext: USERS_RISK_TAB_CONTEXT,
+    statusExecutionContext: USERS_RISK_TAB_STATUS_CONTEXT,
   });
 
   const entityStoreKpi = useEntityStoreRiskScoreKpi({
     filterQuery,
     skip: querySkip,
     riskEntity: EntityType.user,
+    executionContext: USERS_RISK_TAB_KPI_CONTEXT,
+    statusExecutionContext: USERS_RISK_TAB_STATUS_CONTEXT,
   });
 
   return {

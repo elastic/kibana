@@ -33,6 +33,7 @@ describe('xyVis', () => {
       value: {
         args: {
           ...rest,
+          axisFormatPolicies: expect.any(Array),
           layers: [
             {
               layerType,
@@ -334,6 +335,7 @@ describe('xyVis', () => {
       value: {
         args: {
           ...rest,
+          axisFormatPolicies: expect.any(Array),
           xAxisConfig: {
             type: 'xAxisConfig',
             extent: {
@@ -393,6 +395,7 @@ describe('xyVis', () => {
       value: {
         args: {
           ...rest,
+          axisFormatPolicies: expect.any(Array),
           layers: [
             {
               layerType,

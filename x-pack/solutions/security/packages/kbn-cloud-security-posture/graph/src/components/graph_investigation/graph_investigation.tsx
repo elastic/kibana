@@ -51,20 +51,28 @@ import {
 } from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
-import type { NodeViewModel } from '../types';
+import type {
+  ItemExpandPopoverListItemProps,
+  SeparatorExpandPopoverListItemProps,
+} from '../popovers/primitives/list_graph_popover';
+import type { NodeProps, NodeViewModel } from '../types';
 import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
 import { useGraphFilters } from '../filters/use_graph_filters';
 import { getEntityTimelineFilter } from './entity_timeline_filters';
+import type { GraphTelemetryHandler } from '../graph_telemetry';
+import { getFiltersChangedEvent, getSearchSubmittedEvent } from '../graph_telemetry';
 
 const useGraphPopovers = ({
   scopeId,
   onOpenEventPreview,
   onOpenNetworkPreview,
+  onTelemetryEvent,
 }: {
   scopeId: string;
   onOpenEventPreview?: (node: NodeViewModel) => void;
   onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
+  onTelemetryEvent?: GraphTelemetryHandler;
 }) => {
   const [currentIps, setCurrentIps] = useState<string[]>([]);
   const [currentCountryCodes, setCurrentCountryCodes] = useState<string[]>([]);
@@ -74,10 +82,25 @@ const useGraphPopovers = ({
   const [currentEventText, setCurrentEventText] = useState<string>('');
   // Async-hydrated: `null` until the EUID chunk loads, in which case entity filters fall back to
   // the unnarrowed sourceFields (see getIdentityFilterFields).
-  const euidApi = useEntityStoreEuidApi()?.euid;
-  const nodeExpandPopover = useEntityNodeExpandPopover(scopeId, onOpenEventPreview, euidApi);
-  const labelExpandPopover = useLabelNodeExpandPopover(scopeId, onOpenEventPreview);
-  const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID);
+  const euidApi = useEntityStoreEuidApi() ?? undefined;
+  const nodeExpandPopover = useEntityNodeExpandPopover(
+    scopeId,
+    onOpenEventPreview,
+    euidApi,
+    onTelemetryEvent
+  );
+  const labelExpandPopover = useLabelNodeExpandPopover(
+    scopeId,
+    onOpenEventPreview,
+    onTelemetryEvent
+  );
+  // Pass onOpenNetworkPreview so popover items call it directly instead of relying on PreviewLink.
+  const onNetworkPreviewForPopover = useMemo(
+    () =>
+      onOpenNetworkPreview ? (ip: string) => onOpenNetworkPreview(ip, GRAPH_SCOPE_ID) : undefined,
+    [onOpenNetworkPreview]
+  );
+  const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID, onNetworkPreviewForPopover);
   const countryFlagsPopover = useCountryFlagsPopover(currentCountryCodes);
   const eventPopover = useEventDetailsPopover(currentEventAnalysis, currentEventText);
 
@@ -265,6 +288,12 @@ export interface GraphInvestigationProps {
    * Whether to show toggle search action button. Defaults value is false.
    */
   showToggleSearch?: boolean;
+
+  /**
+   * Optional callback invoked with semantic engagement events (popover actions, filter and
+   * search changes). Events carry enums and booleans only. When omitted, nothing is reported.
+   */
+  onTelemetryEvent?: GraphTelemetryHandler;
 }
 
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' } as const;
@@ -289,6 +318,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     onInvestigateInTimeline,
     onOpenEventPreview,
     onOpenNetworkPreview,
+    onTelemetryEvent,
   }: GraphInvestigationProps) => {
     const emptyEntityIds = useMemo(() => [], []);
 
@@ -391,6 +421,15 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
 
+    const onFiltersUpdated = useCallback(
+      (filters: Filter[]) => {
+        const event = getFiltersChangedEvent(searchFilters, filters);
+        if (event) onTelemetryEvent?.(event);
+        setSearchFilters(filters);
+      },
+      [searchFilters, setSearchFilters, onTelemetryEvent]
+    );
+
     const {
       services: { uiSettings, notifications },
     } = useKibana();
@@ -435,7 +474,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       },
     });
 
-    const euidApi = useEntityStoreEuidApi()?.euid;
+    const euidApi = useEntityStoreEuidApi() ?? undefined;
     const entityTimelineFilters = useMemo(() => {
       if (originEventIds?.length) return [];
       const filters: Filter[] = [];
@@ -529,12 +568,58 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       scopeId,
       onOpenEventPreview,
       onOpenNetworkPreview,
+      onTelemetryEvent,
     });
 
     const nodeExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
     const labelExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
+
+    // Converts a raw expand-popover itemsFn into the minimal NodeToolbarItem shape:
+    // filters out separators and maps iconType + label + onClick + disabled + testSubject.
+    // testSubject is forwarded so FTR tests can locate toolbar buttons by the same IDs
+    // they previously used to find popover items.
+    // toolTipText and toolTipTestSubj are forwarded so disabled-action explanations
+    // (e.g. "Details not available") are preserved in the toolbar tooltip.
+    // Stable via useCallback (no deps) — the returned function reads item properties at call time.
+    const toToolbarItemsFn = useCallback(
+      (
+          itemsFn: (
+            node: NodeProps
+          ) => Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>
+        ) =>
+        (node: NodeProps) =>
+          (itemsFn(node) ?? []).flatMap((item) =>
+            item.type === 'item'
+              ? [
+                  {
+                    iconType: item.iconType,
+                    label: item.label,
+                    onClick: item.onClick,
+                    disabled: item.disabled,
+                    testSubject: item.testSubject,
+                    toolTipText: item.toolTipText,
+                    toolTipTestSubj: item.toolTipProps?.['data-test-subj'] as string | undefined,
+                  },
+                ]
+              : []
+          ),
+      []
+    );
+
+    const { itemsFn: nodeItemsFn } = nodeExpandPopover;
+    // Stable when nodeItemsFn is stable (useCallback([scopeId, onOpenEventPreview, euidApi])).
+    const nodeToolbarItemsFn = useMemo(
+      () => (nodeItemsFn ? toToolbarItemsFn(nodeItemsFn) : undefined),
+      [nodeItemsFn, toToolbarItemsFn]
+    );
+
+    const { itemsFn: labelItemsFn } = labelExpandPopover;
+    const labelToolbarItemsFn = useMemo(
+      () => (labelItemsFn ? toToolbarItemsFn(labelItemsFn) : undefined),
+      [labelItemsFn, toToolbarItemsFn]
+    );
     const isPopoverOpen = [
       nodeExpandPopover,
       labelExpandPopover,
@@ -642,6 +727,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               ...node,
               ...(isOrigin && { isOrigin }),
               expandButtonClick: nodeExpandButtonClickHandler,
+              toolbarItemsFn: nodeToolbarItemsFn,
               ipClickHandler: createIpClickHandler(nodeIps),
               countryClickHandler: createCountryClickHandler(nodeCountryCodes),
             };
@@ -664,6 +750,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               isOrigin: docEventIds.some((id) => originEventIdsSet.has(id)),
               isOriginAlert: docEventIds.some((id) => originAlertIdsSet.has(id)),
               expandButtonClick: labelExpandButtonClickHandler,
+              toolbarItemsFn: labelToolbarItemsFn,
               ipClickHandler: createIpClickHandler(nodeIps),
               countryClickHandler: createCountryClickHandler(nodeCountryCodes),
               eventClickHandler: createEventClickHandler(analysis, text),
@@ -681,6 +768,14 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           return { ...node };
         }) ?? []
       );
+      // Callbacks (expandButtonClick, ipClickHandler, etc.) are excluded from deps intentionally —
+      // they are stable or recreated from memoized state and do not affect layout or node keys.
+      // nodeToolbarItemsFn and labelToolbarItemsFn ARE included: they capture euidApi which
+      // hydrates asynchronously; excluding them would leave nodes with a stale factory until an
+      // unrelated dep (e.g. searchFilters) triggers a rebuild.
+      // searchFilters IS included: when a filter is toggled the node list recomputes so
+      // that toolbarItemsFn(props) — called without its own useMemo inside the node component —
+      // reads the updated filter-active state and reflects the correct "Show" ↔ "Hide" label.
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
       data?.nodes,
@@ -688,6 +783,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       originAlertIdsSet,
       originEntityIdsSet,
       relationshipNodeSources,
+      searchFilters,
+      nodeToolbarItemsFn,
+      labelToolbarItemsFn,
     ]);
 
     const searchFilterCounter = useMemo(() => {
@@ -770,9 +868,14 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                       ) : undefined
                     }
                     submitButtonStyle={'iconOnly'}
-                    onFiltersUpdated={setSearchFilters}
+                    onFiltersUpdated={onFiltersUpdated}
                     onQuerySubmit={(payload, isUpdate) => {
                       if (isUpdate) {
+                        const event = getSearchSubmittedEvent(
+                          { timeRange, query: kquery },
+                          payload
+                        );
+                        if (event) onTelemetryEvent?.(event);
                         setTimeRange({ ...payload.dateRange });
                         setKQuery(payload.query || EMPTY_QUERY);
                       } else {

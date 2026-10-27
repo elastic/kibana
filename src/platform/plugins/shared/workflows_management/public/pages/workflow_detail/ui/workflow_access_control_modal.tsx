@@ -22,7 +22,6 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { isHttpFetchError } from '@kbn/core-http-browser';
@@ -31,7 +30,7 @@ import { AccessControlForm } from '@kbn/entity-access-control-ui';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQuery } from '@kbn/react-query';
-import { KbnDangerCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type {
   WorkflowAccessControlRole,
@@ -69,12 +68,19 @@ export const WorkflowAccessControlModal = ({
   const [value, setValue] = useState<AccessControlInput<WorkflowAccessControlRole>>(
     workflow.access_control ?? { access_mode: 'public', entries: [] }
   );
-  const { data: currentProfile, isError: isCurrentProfileError } = useQuery({
+  const {
+    data: currentProfile,
+    isError: isCurrentProfileError,
+    isLoading: isCurrentProfileLoading,
+  } = useQuery({
     queryKey: ['workflowAccessCurrentProfile'],
     queryFn: () => userProfile.getCurrent<UserProfileWithAvatar['data']>({ dataPath: 'avatar' }),
   });
   const ownerId =
-    workflow.owner_id ?? (workflow.permissions?.manage ? currentProfile?.uid : undefined);
+    workflow.owner_id ??
+    (value.access_mode === 'private' && workflow.permissions?.manage
+      ? currentProfile?.uid
+      : undefined);
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 200);
   const [isSaving, setIsSaving] = useState(false);
@@ -98,7 +104,7 @@ export const WorkflowAccessControlModal = ({
     isError: isSearchError,
   } = useQuery({
     queryKey: ['workflowAccessSuggestions', workflow.id, debouncedSearch],
-    enabled: value.access_mode === 'private' && Boolean(currentProfile),
+    enabled: value.access_mode === 'private' && Boolean(workflow.permissions?.manage),
     queryFn: () =>
       userProfile.suggest<UserProfileWithAvatar['data']>(
         `/internal/workflows/${encodeURIComponent(workflow.id)}/_suggest_user_profiles`,
@@ -127,13 +133,13 @@ export const WorkflowAccessControlModal = ({
     <EuiModal
       onClose={onClose}
       aria-labelledby="workflowAccessTitle"
-      css={css({ width: euiTheme.breakpoint.m })}
+      maxWidth={euiTheme.breakpoint.s}
     >
       <EuiModalHeader>
         <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
           <EuiFlexItem grow={false}>
             <EuiModalHeaderTitle id="workflowAccessTitle">
-              {i18n.translate('workflows.access.modalTitle', { defaultMessage: 'Workflow access' })}
+              {i18n.translate('workflows.access.modalTitle', { defaultMessage: 'Access control' })}
             </EuiModalHeaderTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -172,11 +178,23 @@ export const WorkflowAccessControlModal = ({
             <EuiSpacer size="m" />
           </>
         )}
+        {!workflow.owner_id && value.access_mode === 'private' && workflow.permissions?.manage && (
+          <>
+            <KbnInfoCallout
+              size="s"
+              title={i18n.translate('workflows.access.claimOwnershipNotice', {
+                defaultMessage: 'You will become the owner when you make this workflow private.',
+              })}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <AccessControlForm
           value={value}
           onChange={setValue}
           ownerId={ownerId}
           currentUserId={currentProfile?.uid}
+          canManage={!isCurrentProfileLoading && workflow.permissions?.manage}
           profiles={currentProfile ? [...profiles, currentProfile] : profiles}
           suggestedProfiles={suggestedProfiles}
           onSearch={setSearch}
@@ -184,18 +202,25 @@ export const WorkflowAccessControlModal = ({
           isSearching={isFetching}
           isDisabled={isSaving}
           allowPublicEntries={false}
+          privateDescription={i18n.translate('workflows.access.privateDescription', {
+            defaultMessage:
+              'Only the owner, selected users, and administrators can view this workflow. Administrators must add themselves to edit or run it.',
+          })}
           publicDescription={i18n.translate('workflows.access.publicDescription', {
             defaultMessage:
               'Access is controlled by workflow permissions in this space. User-specific restrictions apply only when this workflow is private.',
           })}
         />
         {value.access_mode === 'private' && (
-          <EuiText size="s">
-            {i18n.translate('workflows.access.rolesDescription', {
-              defaultMessage:
-                'Viewers can view. Executors can view and run. Editors can view, run, and edit. Feature privileges still apply.',
-            })}
-          </EuiText>
+          <>
+            <EuiSpacer size="m" />
+            <EuiText size="xs">
+              {i18n.translate('workflows.access.rolesDescription', {
+                defaultMessage:
+                  'Viewers can view. Executors can view and run. Editors can view, run, and edit. Feature privileges still apply.',
+              })}
+            </EuiText>
+          </>
         )}
       </EuiModalBody>
       <EuiModalFooter>
@@ -206,7 +231,7 @@ export const WorkflowAccessControlModal = ({
           onClick={save}
           fill
           isLoading={isSaving}
-          isDisabled={!ownerId}
+          isDisabled={value.access_mode === 'private' && !ownerId}
           data-test-subj="workflowAccessSave"
         >
           {i18n.translate('workflows.access.saveButtonLabel', { defaultMessage: 'Save' })}

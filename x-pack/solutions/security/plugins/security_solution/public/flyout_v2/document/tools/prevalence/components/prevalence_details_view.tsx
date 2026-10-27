@@ -147,13 +147,23 @@ export const PrevalenceDetailsView: React.FC<PrevalenceDetailsViewProps> = ({
   const euidApi = useEntityStoreEuidApi();
   const documentHostEntityIdentifiers = useMemo(
     () =>
-      hit.flattened ? euidApi?.euid.getEntityIdentifiersFromDocument('host', hit.flattened) : null,
-    [hit.flattened, euidApi?.euid]
+      hit.flattened
+        ? euidApi?.euid.getEntityIdentifiersFromDocument(
+            euidApi.getBuiltInEntityDefinition('host'),
+            hit.flattened
+          )
+        : null,
+    [hit.flattened, euidApi]
   );
   const documentUserEntityIdentifiers = useMemo(
     () =>
-      hit.flattened ? euidApi?.euid.getEntityIdentifiersFromDocument('user', hit.flattened) : null,
-    [hit.flattened, euidApi?.euid]
+      hit.flattened
+        ? euidApi?.euid.getEntityIdentifiersFromDocument(
+            euidApi.getBuiltInEntityDefinition('user'),
+            hit.flattened
+          )
+        : null,
+    [hit.flattened, euidApi]
   );
 
   // add timeRange to pass it down to timeline and license to drive the rendering of the last 2 prevalence columns

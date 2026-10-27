@@ -54,28 +54,67 @@ export const MOCK_AWS_PACKAGE_IDENTITY_FEDERATION_SUPPORTED = {
   },
 };
 
+export type OnboardingStepId =
+  | 'services'
+  | 'service-settings'
+  | 'authenticate-and-deploy'
+  | 'detect-and-review';
+
 // Derives the root test-subj for a step from its id, matching the convention used in each step's
 // root <div data-test-subj={`onboardingStep-${id}`}>.
 const stepSubj = (step: string) => `onboardingStep-${step}`;
 
-export async function mockAwsPackage(page: ScoutPage, response: unknown): Promise<void> {
+/**
+ * The onboarding shell renders a spinner instead of the current step until the `aws` package
+ * manifest resolves, and Fleet serves `full=true` by downloading the package archive from the
+ * registry and unpacking it on *every* request — there is no cross-request archive cache, and the
+ * Scout stateful config does not set `xpack.fleet.registryUrl`, so this is an uncached
+ * multi-megabyte fetch from the public registry rather than a local render. That does not fit
+ * Scout's default 10s `expect` budget when the registry or the CI lane is slow.
+ */
+const ONBOARDING_SHELL_LOAD_TIMEOUT = 30_000;
+
+/** Waits for a step to replace the onboarding shell's loading spinner. */
+export async function expectOnboardingStepVisible(
+  page: ScoutPage,
+  step: OnboardingStepId
+): Promise<void> {
+  await expect(page.testSubj.locator(stepSubj(step))).toBeVisible({
+    timeout: ONBOARDING_SHELL_LOAD_TIMEOUT,
+  });
+}
+
+export async function mockPackage(
+  page: ScoutPage,
+  packageName: string,
+  response: unknown
+): Promise<void> {
   const body = JSON.stringify(response);
   // Intercept both the unversioned path and any versioned path (e.g. /aws/7.1.1) so that
   // cleanup flows calling sendGetPackageInfoByKey(name, existingVersion) don't hit the real
   // package registry and get a different manifest or time out.
   await page.route(
-    (url) => /\/api\/fleet\/epm\/packages\/aws(\/[^/]+)?$/.test(url.pathname),
+    (url) => new RegExp(`/api/fleet/epm/packages/${packageName}(/[^/]+)?$`).test(url.pathname),
     (route) => route.fulfill({ status: 200, contentType: 'application/json', body })
   );
 }
 
+export const mockAwsPackage = (page: ScoutPage, response: unknown): Promise<void> =>
+  mockPackage(page, 'aws', response);
+
 export async function navigateToOnboardingStep(
   browserAuth: BrowserAuthFixture,
   page: ScoutPage,
-  step: 'services' | 'service-settings' | 'authenticate-and-deploy' | 'detect-and-review',
+  step: OnboardingStepId,
   opts: {
     selectedServiceIds: string[];
+    /** Data format to seed. Omitted leaves it unset, so the solution default applies. */
+    dataFormat?: 'ecs' | 'otel';
     globalRegion?: string;
+    /** Global namespace to seed. Omitted leaves it empty. */
+    namespace?: string;
+    /** Integration name to seed. Omitted leaves it for the app to prefill (`aws-<n>`). */
+    integrationName?: string;
     serviceVars?: Record<string, ServiceVars>;
     instances?: unknown[];
     /** Optional ECF launch step to seed — sets the post-launch state without clicking the button. */
@@ -98,7 +137,10 @@ export async function navigateToOnboardingStep(
 ): Promise<void> {
   const {
     selectedServiceIds,
+    dataFormat,
     globalRegion = 'us-east-1',
+    namespace,
+    integrationName,
     serviceVars = {},
     instances,
     ecfLaunchStep,
@@ -106,11 +148,16 @@ export async function navigateToOnboardingStep(
     detectAndReviewStep,
   } = opts;
   await browserAuth.loginAsAdmin();
-  await page.gotoApp(`onboarding/aws#${step}`);
-  await page.evaluate(
+  // Seed before navigating so the app reads the state on its first mount. Loading the app once to
+  // seed and then reloading would double the shell's package-manifest fetches (see
+  // ONBOARDING_SHELL_LOAD_TIMEOUT), and every one of those is an uncached registry download.
+  await page.addInitScript(
     ({
       ids,
+      format,
       region,
+      globalNamespace,
+      name,
       vars,
       insts,
       ecfStep,
@@ -123,7 +170,10 @@ export async function navigateToOnboardingStep(
       detectReviewKey,
     }: {
       ids: string[];
+      format: 'ecs' | 'otel' | undefined;
       region: string;
+      globalNamespace: string | undefined;
+      name: string | undefined;
       vars: Record<string, ServiceVars>;
       insts: unknown[] | undefined;
       ecfStep: PersistedEcfLaunchStep | undefined;
@@ -141,8 +191,18 @@ export async function navigateToOnboardingStep(
       authStepKey: string;
       detectReviewKey: string;
     }) => {
-      sessionStorage.setItem(servicesKey, JSON.stringify({ selectedServiceIds: ids }));
+      // addInitScript runs on every document load, so only prime a fresh session — a test that
+      // reloads to assert persistence must keep the state the app itself wrote.
+      if (sessionStorage.getItem(servicesKey) !== null) {
+        return;
+      }
+      sessionStorage.setItem(
+        servicesKey,
+        JSON.stringify({ selectedServiceIds: ids, ...(format ? { dataFormat: format } : {}) })
+      );
       const settingsPayload: Record<string, unknown> = { globalRegion: region, serviceVars: vars };
+      if (name !== undefined) settingsPayload.integrationName = name;
+      if (globalNamespace !== undefined) settingsPayload.namespace = globalNamespace;
       if (insts !== undefined) settingsPayload.instances = insts;
       sessionStorage.setItem(settingsKey, JSON.stringify(settingsPayload));
       if (ecfStep !== undefined) {
@@ -164,7 +224,10 @@ export async function navigateToOnboardingStep(
     },
     {
       ids: selectedServiceIds,
+      format: dataFormat,
       region: globalRegion,
+      globalNamespace: namespace,
+      name: integrationName,
       vars: serviceVars,
       insts: instances,
       ecfStep: ecfLaunchStep,
@@ -177,8 +240,20 @@ export async function navigateToOnboardingStep(
       detectReviewKey: DETECT_AND_REVIEW_SESSION_KEY,
     }
   );
-  await page.reload();
-  await expect(page.testSubj.locator(stepSubj(step))).toBeVisible();
+  await page.gotoApp(`onboarding/aws#${step}`);
+  await expectOnboardingStepVisible(page, step);
+}
+
+/**
+ * Picks the "Access keys" credential method. The radio input is visually hidden, so the click is
+ * forced, which clicks at the element's coordinates whatever is on top. Scroll it to the middle of
+ * the viewport first: at the bottom edge the sticky step footer covers it and the click would land
+ * on the footer's Back button.
+ */
+export async function selectStaticKeysAuth(page: ScoutPage): Promise<void> {
+  const accessKeysRadio = page.getByRole('radio', { name: /access keys/i });
+  await accessKeysRadio.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+  await accessKeysRadio.click({ force: true });
 }
 
 /** Enables the onboarding flag plus any extra overrides for the describe block; afterAll removes them (null deletes an override). */

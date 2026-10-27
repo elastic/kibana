@@ -63,7 +63,7 @@ const matchesExpectedEvent = (
 };
 
 /**
- * CODE evaluator: matched open events must equal the expected severity tier.
+ * CODE evaluator: matched active events must equal the expected severity tier.
  *
  * - Unmatched expected events are excluded from the score (grouping owns that failure mode).
  * - Under-escalation (actual below expected) and over-escalation (actual above expected) both fail.
@@ -76,25 +76,25 @@ export const severityExactEvaluator: DiscoveryEvaluator = {
   evaluate: ({ output, expected }) => {
     const expectedEvents = expected?.expected_significant_events ?? [];
     const expectedOpenEvents = expectedEvents.filter(
-      (event) => event.status === 'open' && event.severity
+      (event) => event.status === 'active' && event.severity
     );
 
     if (expectedOpenEvents.length === 0) {
       return Promise.resolve({
         score: null,
         label: 'unavailable',
-        explanation: 'No open expected_significant_events with severity declared',
+        explanation: 'No active expected_significant_events with severity declared',
       });
     }
 
     const actualEvents = output?.significantEvents ?? [];
-    const openActualEvents = actualEvents.filter((event) => event.status === 'open');
+    const openActualEvents = actualEvents.filter((event) => event.status === 'active');
 
     if (openActualEvents.length === 0) {
       return Promise.resolve({
         score: 0,
-        label: 'missing-open-events',
-        explanation: 'Agent emitted no open significant events',
+        label: 'missing-active-events',
+        explanation: 'Agent emitted no active significant events',
       });
     }
 
@@ -166,7 +166,7 @@ export const severityExactEvaluator: DiscoveryEvaluator = {
         label: hasFixtureError ? 'fixture-error' : 'unmatched',
         explanation: hasFixtureError
           ? `Fixture errors prevented severity scoring: ${issues.join('; ')}`
-          : `No expected open events matched an actual event for severity scoring: ${issues.join(
+          : `No expected active events matched an actual event for severity scoring: ${issues.join(
               '; '
             )}`,
       });
@@ -178,7 +178,7 @@ export const severityExactEvaluator: DiscoveryEvaluator = {
       explanation:
         issues.length > 0
           ? `${issues.join('; ')} (score=${score.toFixed(2)})`
-          : `All ${scoredCount} matched open event(s) met their severity tier`,
+          : `All ${scoredCount} matched active event(s) met their severity tier`,
     });
   },
 };

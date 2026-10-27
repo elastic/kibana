@@ -366,6 +366,22 @@ describe('extractMigrationInfo', () => {
       });
     });
 
+    it('stores the update schema only when the model version defines one', () => {
+      const typeSchema = schema.object({ title: schema.string() });
+      const type = createType({
+        modelVersions: {
+          1: { changes: [], schemas: { create: typeSchema } },
+          2: { changes: [], schemas: { create: typeSchema, update: typeSchema } },
+        },
+      });
+      const output = extractMigrationInfo(type);
+
+      expect(output.modelVersions[0].schemas).not.toHaveProperty('update');
+      expect(output.modelVersions[1].schemas.update).toEqual(
+        output.modelVersions[1].schemas.create
+      );
+    });
+
     it('returns the same serialized schema for two structurally identical config-schema objects', () => {
       const makeType = () =>
         createType({

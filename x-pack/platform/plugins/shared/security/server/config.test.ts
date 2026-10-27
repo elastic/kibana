@@ -70,7 +70,7 @@ describe('config schema', () => {
         "public": Object {},
         "secureCookies": false,
         "serviceAccounts": Object {
-          "enabled": false,
+          "enabled": true,
           "requestLifetime": "PT10M",
         },
         "session": Object {
@@ -132,7 +132,7 @@ describe('config schema', () => {
         "public": Object {},
         "secureCookies": false,
         "serviceAccounts": Object {
-          "enabled": false,
+          "enabled": true,
           "requestLifetime": "PT10M",
         },
         "session": Object {
@@ -193,7 +193,7 @@ describe('config schema', () => {
         "public": Object {},
         "secureCookies": false,
         "serviceAccounts": Object {
-          "enabled": false,
+          "enabled": true,
           "requestLifetime": "PT10M",
         },
         "session": Object {
@@ -1740,16 +1740,16 @@ describe('config schema', () => {
       expect(
         ConfigSchema.validate(
           {
-            serviceAccounts: { enabled: true },
+            serviceAccounts: { enabled: false },
           },
           { serverless: false }
         ).serviceAccounts
-      ).toMatchObject({ enabled: true });
+      ).toMatchObject({ enabled: false });
     });
 
-    it('should be disabled by default outside of the serverless context', () => {
+    it('should be enabled by default outside of the serverless context', () => {
       expect(ConfigSchema.validate({}, { serverless: false }).serviceAccounts).toMatchObject({
-        enabled: false,
+        enabled: true,
       });
     });
 
@@ -1952,6 +1952,47 @@ describe('config schema', () => {
         certificate: '/path/to/cert.pem',
         key: '/path/to/key.pem',
       });
+    });
+
+    it('accepts UIAM unsafe API key default expiration', () => {
+      expect(
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'some-secret',
+              unsafe: { grantedApiKeyDefaultExpiration: '4h' },
+            },
+          },
+          { serverless: true }
+        ).uiam.unsafe?.grantedApiKeyDefaultExpiration?.asMilliseconds()
+      ).toBe(14_400_000);
+    });
+
+    it.each([0, -1, Infinity, -Infinity, NaN, '0h', '-1h', 'invalid'])(
+      'rejects invalid UIAM unsafe API key default expiration %s',
+      (grantedApiKeyDefaultExpiration) => {
+        expect(() =>
+          ConfigSchema.validate(
+            {
+              uiam: {
+                enabled: true,
+                url: 'https://uiam.service',
+                sharedSecret: 'some-secret',
+                unsafe: { grantedApiKeyDefaultExpiration },
+              },
+            },
+            { serverless: true }
+          )
+        ).toThrow('uiam.unsafe.grantedApiKeyDefaultExpiration');
+      }
+    );
+
+    it('does not allow UIAM unsafe API key default expiration outside of serverless', () => {
+      expect(() =>
+        ConfigSchema.validate({ uiam: { unsafe: { grantedApiKeyDefaultExpiration: '4h' } } })
+      ).toThrow("[uiam]: a value wasn't expected to be present");
     });
 
     it('should throw error if ssl.certificate is specified without ssl.key', () => {

@@ -25,6 +25,12 @@ export const ERROR_DELETING_FILE = i18n.translate('xpack.cases.containers.errorD
   defaultMessage: 'Error deleting file',
 });
 
+export const ATTACHMENTS_REMOVED = (attachments: string) =>
+  i18n.translate('xpack.cases.containers.attachmentsRemoved', {
+    values: { attachments },
+    defaultMessage: 'Removed {attachments}',
+  });
+
 export const ERROR_UPDATING = i18n.translate('xpack.cases.containers.errorUpdatingTitle', {
   defaultMessage: 'Error updating data',
 });
@@ -82,6 +88,12 @@ export const OBSERVABLE_CREATED = i18n.translate('xpack.cases.caseView.observabl
 export const OBSERVABLE_REMOVED = i18n.translate('xpack.cases.caseView.observables.removed', {
   defaultMessage: 'Observable removed',
 });
+
+export const OBSERVABLES_BULK_REMOVED = (count: number) =>
+  i18n.translate('xpack.cases.caseView.observables.bulkRemoved', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# observable removed} other {# observables removed}}',
+  });
 
 export const OBSERVABLE_UPDATED = i18n.translate('xpack.cases.caseView.observables.updated', {
   defaultMessage: 'Observable updated',

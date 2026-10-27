@@ -331,7 +331,7 @@ run(
       var directly:
 
         node scripts/replay_sigevents_eval_snapshot.js \\
-          --run-id 2026-03-27 --dataset otel-demo --scenario healthy-baseline
+          --run-id 2026-09-18 --dataset otel-demo --scenario healthy-baseline
 
         node scripts/replay_sigevents_eval_snapshot.js \\
           --run-id 2026-03-31 --dataset bank-of-anthos --scenario healthy-baseline
@@ -343,7 +343,7 @@ run(
       To list available snapshots for a dataset and run:
 
         node scripts/replay_sigevents_eval_snapshot.js \\
-          --run-id 2026-03-27 --dataset otel-demo --scenario list
+          --run-id 2026-09-18 --dataset otel-demo --scenario list
     `,
     flags: {
       string: [

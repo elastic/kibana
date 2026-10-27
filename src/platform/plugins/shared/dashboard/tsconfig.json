@@ -13,9 +13,10 @@
     "test/scout_oas_schema/**/*.json",
     "test/scout_anonymous_authc/**/*",
     "test/scout_search_sessions/**/*",
-    "test/scout_test_plugins/**/*",
+    "test/scout_test_plugins/**/*"
   ],
   "kbn_references": [
+    "@kbn/search-sessions-management-plugin",
     "@kbn/core",
     "@kbn/inspector-plugin",
     "@kbn/kibana-react-plugin",
@@ -135,6 +136,10 @@
     "@kbn/ui-callout",
     "@kbn/zod-helpers",
     "@kbn/as-code-dashboard-schema",
+    "@kbn/change-history",
+    "@kbn/change-history-ui",
+    "@kbn/spaces-plugin",
+    "@kbn/core-http-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

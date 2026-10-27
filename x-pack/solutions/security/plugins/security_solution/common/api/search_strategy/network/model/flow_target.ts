@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export enum FlowTargetSourceDest {
   destination = 'destination',
   source = 'source',
 }
 
-export const flowTarget = z.enum([FlowTargetSourceDest.destination, FlowTargetSourceDest.source]);
+export const flowTarget = lazySchema(() =>
+  z.enum([FlowTargetSourceDest.destination, FlowTargetSourceDest.source])
+);

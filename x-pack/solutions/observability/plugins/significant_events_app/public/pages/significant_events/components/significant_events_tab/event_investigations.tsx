@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import moment from 'moment';
 import {
   EuiAccordion,
@@ -23,16 +23,9 @@ import type {
   SignificantEvent,
   SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
-import {
-  InvestigationOutput,
-  useInvestigationState,
-  type InvestigationDiscoverParams,
-} from '@kbn/investigation-output';
-import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { InvestigationOutput, useInvestigation } from '@kbn/investigation-output';
 import { formatTimestamp } from '../../../../util/formatters';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { isInvestigationRunning } from '../shared/investigation_status';
 
 const SECTION_TITLE = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.flyout.investigationsSectionTitle',
@@ -80,35 +73,26 @@ const InvestigationRow = ({
 }) => {
   const {
     core: { http },
-    dependencies: {
-      start: { share },
-    },
   } = useKibana();
-  const { started_at: startedAt, completed_at: completedAt, workflow_execution_id } = investigation;
+  // The recorded id is the investigation (Agent Builder conversation) id.
+  const {
+    started_at: startedAt,
+    completed_at: completedAt,
+    workflow_execution_id: investigationId,
+  } = investigation;
   const duration = formatDuration(startedAt, completedAt);
   const accordionId = useGeneratedHtmlId({ prefix: 'sigEventInvestigation' });
 
   /**
-   * The hook's `status` is authoritative over the doc-derived flag — it settles as soon as the
-   * live stream ends and the final result is fetched, which can happen before the next 5s
-   * lifecycle poll updates `completed_at` on the sig-event doc (and, conversely, it keeps
-   * showing "running" when the doc lags a run that is actually still going).
+   * The hook's `status` is authoritative over the doc-derived `completed_at`: it reads the
+   * investigation's own in-progress state, which a follow-up round can set again after the event
+   * recorded a completion.
    */
-  const { state, error, status, conversationId } = useInvestigationState({
-    http,
-    workflowExecutionId: workflow_execution_id,
-    isRunning: isInvestigationRunning(investigation),
-  });
+  const { investigation: details, error, status } = useInvestigation({ http, investigationId });
 
-  const conversationHref = conversationId
-    ? http.basePath.prepend(`/app/agent_builder/conversations/${conversationId}`)
+  const conversationHref = details
+    ? http.basePath.prepend(`/app/agent_builder/conversations/${encodeURIComponent(details.id)}`)
     : undefined;
-
-  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
-  const getQueryHref = useCallback(
-    (params: InvestigationDiscoverParams) => discoverLocator?.getRedirectUrl(params),
-    [discoverLocator]
-  );
 
   return (
     <EuiAccordion
@@ -142,12 +126,7 @@ const InvestigationRow = ({
       }
     >
       <EuiSpacer size="s" />
-      <InvestigationOutput
-        status={status}
-        state={state}
-        error={error}
-        getQueryHref={getQueryHref}
-      />
+      <InvestigationOutput status={status} investigation={details} error={error} />
     </EuiAccordion>
   );
 };

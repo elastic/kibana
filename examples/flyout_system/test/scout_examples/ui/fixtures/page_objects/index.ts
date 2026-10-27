@@ -8,4 +8,4 @@
  */
 
 export { FlyoutSystemApp } from './flyout_system_app';
-export type { ChildLabel, FlyoutForm } from './flyout_system_app';
+export type { ChildLabel, FlyoutForm, PushFlyoutLabel } from './flyout_system_app';

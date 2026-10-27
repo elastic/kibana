@@ -1,0 +1,37 @@
+version: "1"
+name: AlertZero investigation summary
+description: >
+  Reads an investigation or escalation timeline — journal user messages, comments,
+  and newly added attachments, with the content of proposals — and writes metadata.summary. It
+  waits until the conversation has been quiet for 10 seconds, so a burst of notes gives one
+  summary. An investigation is summarized only once a proposal is attached; an escalation always
+  is. An agent execution ending, a close, or an attachment edit does not start it. The summary is
+  one direct model call on the efficient tier, so it does not append a chat round.
+enabled: true
+tags:
+  - security
+  - alertzero
+settings:
+  concurrency:
+    key: "{{ workflow.id }}:{{ event.conversationId }}"
+    strategy: cancel-in-progress
+    max: 1
+triggers:
+  - type: ai.conversation.updated
+    on:
+      condition: >-
+        (event.templateId: "investigation" or event.templateId: "escalation")
+        and (
+          event.eventTypes: "user_message"
+          or event.eventTypes: "text_note"
+          or event.eventTypes: "attachment_added"
+        )
+steps:
+  - name: settle
+    type: wait
+    with:
+      duration: 10s
+  - name: summarize
+    type: alertzero.investigation.summarize
+    with:
+      conversation_id: "{{ event.conversationId }}"

@@ -29,7 +29,7 @@ export const AlertTimelineViewAllButton: React.FC<AlertTimelineViewAllButtonProp
         data-test-subj="alertTimelineViewAllEpisodes"
       >
         {i18n.translate('xpack.alertingV2.alertTimeline.viewAllEpisodes', {
-          defaultMessage: 'View all episodes',
+          defaultMessage: 'View all alerts',
         })}
       </EuiButton>
     );
@@ -47,7 +47,7 @@ export const AlertTimelineViewAllButton: React.FC<AlertTimelineViewAllButtonProp
         data-test-subj="alertTimelineViewAllEpisodes"
       >
         {i18n.translate('xpack.alertingV2.alertTimeline.viewAllEpisodes', {
-          defaultMessage: 'View all episodes',
+          defaultMessage: 'View all alerts',
         })}
       </EuiSplitButton.ActionPrimary>
       <EuiSplitButton.ActionSecondary
@@ -73,7 +73,7 @@ export const AlertTimelineViewAllButton: React.FC<AlertTimelineViewAllButtonProp
                       name: i18n.translate('xpack.alertingV2.alertTimeline.viewInDiscover', {
                         defaultMessage: 'View in Discover',
                       }),
-                      icon: 'discoverApp',
+                      icon: 'productDiscover',
                       href: discoverHref,
                       'data-test-subj': 'alertTimelineViewInDiscover',
                     },

@@ -98,10 +98,12 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     render: (props) => (
       <LinkedActionPoliciesStep
         http={props.services.http}
-        canCreateActionPolicy={props.services.canCreateActionPolicy}
+        createActionPolicyDisabledReason={props.services.createActionPolicyDisabledReason}
         CreateActionPolicyFormFlyout={props.services.createActionPolicyFormFlyout}
+        getActionPolicyEditHref={props.services.getActionPolicyEditHref}
       />
     ),
+    fields: ['metadata.routingTags'],
   },
 };
 

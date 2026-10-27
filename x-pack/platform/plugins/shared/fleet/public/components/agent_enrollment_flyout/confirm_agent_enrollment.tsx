@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { sendGetAgents, useLink, useStartServices } from '../../hooks';
 import { AGENTS_PREFIX } from '../../constants';
 import { AGENT_TYPE_OPAMP } from '../../../common/constants';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services/version_specific_policies_utils';
 
 interface Props {
   policyId?: string;
@@ -61,7 +62,11 @@ export const usePollingAgentCount = (
   const lowerTimeLimitKuery = opts?.noLowerTimeLimit
     ? ''
     : `and ${AGENTS_PREFIX}.enrolled_at >= now-10m`;
-  const kuery = `${AGENTS_PREFIX}.policy_id:"${policyId}" and not (_exists_:"${AGENTS_PREFIX}.unenrolled_at") ${lowerTimeLimitKuery}`;
+  const kuery = `${buildPolicyBaseIdWithFallbackKuery(
+    policyId,
+    `${AGENTS_PREFIX}.policy_base_id`,
+    `${AGENTS_PREFIX}.policy_id`
+  )} and not (_exists_:"${AGENTS_PREFIX}.unenrolled_at") ${lowerTimeLimitKuery}`;
 
   const getNewAgentIds = useCallback(async () => {
     if (!enabled) {

@@ -15,6 +15,7 @@ import {
   euiShadowHover,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { CHAT_MESSAGE_MAX_LENGTH } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -32,7 +33,9 @@ import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
+import { useAgentModel } from '../../../hooks/agents/use_agent_model';
 import {
   useAgentId,
   useConversationReadOnly,
@@ -55,6 +58,16 @@ const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.
 const postToTeamLabel = i18n.translate('xpack.agentBuilder.conversationInput.postToTeam.label', {
   defaultMessage: 'Leaving a post to the team',
 });
+
+const getMessageTooLongLabel = (characterCount: number): string =>
+  i18n.translate('xpack.agentBuilder.conversationInput.messageTooLong', {
+    defaultMessage:
+      'Message is too long ({characterCount, number} / {maxLength, number} characters). Shorten it to send.',
+    values: {
+      characterCount,
+      maxLength: CHAT_MESSAGE_MAX_LENGTH,
+    },
+  });
 
 const wrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
   flex-grow: 0;
@@ -80,6 +93,12 @@ const composerFocusShadowStyles = (euiThemeContext: UseEuiTheme) => css`
       ${euiShadowHover(euiThemeContext, 'xl')}
     }
   }
+`;
+
+// In dark mode the wrapper's shadow draws a border overlay over the shell, hiding its focus border.
+const shellStyles = ({ euiTheme }: UseEuiTheme) => css`
+  position: relative;
+  z-index: ${Number(euiTheme.levels.content) + 1};
 `;
 
 const wrapperWithHeaderStyles = ({ euiTheme }: UseEuiTheme) => css`
@@ -150,6 +169,7 @@ const InputContainer: React.FC<
         isDisabled={isDisabled}
         isCollapsed={isCollapsed}
         suppressShadow
+        css={shellStyles}
         data-test-subj="agentBuilderConversationInputForm"
         aria-label={containerAriaLabel}
       >
@@ -228,7 +248,7 @@ const getMessageEditorAriaLabel = ({
   });
 };
 
-export const ConversationInput: React.FC<ConversationInputProps> = ({
+const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   onSubmit,
   onEditorFocus,
   onSubmitOverride,
@@ -271,9 +291,14 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     }
   }, [saveDraft]);
 
-  const { messageEditor, controller: messageEditorController } = useMessageEditor({
+  const {
+    messageEditor,
+    controller: messageEditorController,
+    overLimitCharacterCount,
+  } = useMessageEditor({
     onEditorFocus,
     onContentChange: handleContentChange,
+    maxLength: CHAT_MESSAGE_MAX_LENGTH,
   });
   messageEditorControllerRef.current = messageEditorController;
 
@@ -311,16 +336,25 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
+  const { isLoading: isAgentModelLoading } = useAgentModel(agentId);
 
-  const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
+  const { agent: agentById, isLoading: isLoadingAgentById } = useAgentBuilderAgentById(
+    !isAgentIdValid && isFetched && Boolean(agentId) ? agentId : undefined
+  );
+  const agentExists = isAgentIdValid || Boolean(agentById);
+
+  const isAgentDeleted = !agentExists && !isLoadingAgentById && isFetched && Boolean(agentId);
   const isInputDisabled =
     isAgentDeleted || isAwaitingPrompt || isCreatingConversation || isSendingUserMessage;
+  const isMessageTooLong = overLimitCharacterCount > 0;
   const isSubmitDisabled =
     messageEditorController.isEmpty ||
+    isMessageTooLong ||
     isResponseLoading ||
     isSendingUserMessage ||
     isCreatingConversation ||
-    !isAgentIdValid ||
+    !agentExists ||
+    isAgentModelLoading ||
     isAwaitingPrompt ||
     uploadingNames.size > 0;
 
@@ -501,6 +535,13 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           uploadingNames={uploadingNames}
         />
       </EuiFlexItem>
+      {isMessageTooLong && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="danger" data-test-subj="agentBuilderConversationInputTooLong">
+            {getMessageTooLongLabel(overLimitCharacterCount)}
+          </EuiText>
+        </EuiFlexItem>
+      )}
       {!isAgentDeleted && (
         <InputActions
           onSubmit={handleSubmit}
@@ -514,3 +555,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     </InputContainer>
   );
 };
+
+export const ConversationInput = React.memo(ConversationInputComponent);
+ConversationInput.displayName = 'ConversationInput';

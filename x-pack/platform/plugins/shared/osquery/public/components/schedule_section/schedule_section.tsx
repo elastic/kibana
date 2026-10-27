@@ -46,8 +46,8 @@ export interface ScheduleSectionProps {
   showErrors?: boolean;
 }
 
-const weekdaysAreValid = (data: ScheduleFormData): boolean => {
-  if (data.scheduleType !== 'rrule') return true;
+const weekdaysAreValid = (data: ScheduleFormData, scheduleType: ScheduleType): boolean => {
+  if (scheduleType !== 'rrule') return true;
   if (data.recurrence.frequency !== 'custom') return true;
   if ((data.recurrence.repeatUnit ?? 'weeks') !== 'weeks') return true;
 
@@ -128,12 +128,16 @@ export const ScheduleSection = ({
     return null;
   }
 
-  const isRecurrence = value.scheduleType === 'rrule';
+  // A locked section belongs to the pack, not to the value it was handed: the
+  // selector already presents the locked mode, so the fields below have to
+  // match it or the two halves of the section describe different schedules.
+  const effectiveScheduleType = lockedScheduleType ?? value.scheduleType;
+  const isRecurrence = effectiveScheduleType === 'rrule';
   const hasUnknownParts =
     isRecurrence &&
     !!value.recurrence._unknown &&
     Object.keys(value.recurrence._unknown).length > 0;
-  const weekdaysError = !weekdaysAreValid(value);
+  const weekdaysError = !weekdaysAreValid(value, effectiveScheduleType);
 
   return (
     <div data-test-subj="osquery-schedule-section">
@@ -147,7 +151,7 @@ export const ScheduleSection = ({
       ) : null}
 
       <ScheduleTypeSelector
-        value={value.scheduleType}
+        value={effectiveScheduleType}
         onChange={handleTypeChange}
         lockedScheduleType={lockedScheduleType}
         disabled={disabled}

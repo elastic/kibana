@@ -14,15 +14,42 @@ import type { SandboxCallContext } from './tool_utils';
 const renderConnectorSection = (connector: AgentConnector): string =>
   `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`;
 
+const renderSecretsSections = (secretKeys: readonly string[]): string[] => {
+  const sections = [
+    '',
+    '---',
+    '',
+    '# Sandbox Secrets',
+    '',
+    'Secrets configured for this space are never stored in this sandbox either. To use one, pass its',
+    'name in the `secret_keys` parameter of the bash tool. For that single command only, the',
+    'environment contains a variable of the same name, e.g. with `secret_keys: ["GITHUB_TOKEN"]`:',
+    '```bash',
+    'curl -sS -H "Authorization: Bearer $GITHUB_TOKEN" "https://api.example.com/..."',
+    '```',
+    'Never print, log, or write secret values to files; they are redacted from command output.',
+    'Only the secrets listed below can be requested.',
+    '',
+  ];
+  if (secretKeys.length === 0) {
+    sections.push('*(No secrets are configured in this space.)*');
+  } else {
+    sections.push(...secretKeys.map((key) => `- \`${key}\``));
+  }
+  return sections;
+};
+
 export const writeConnectorManifest = async ({
   session,
   callContext,
   getActionsClient,
+  secretKeys,
   logger,
 }: {
   session: SandboxSession;
   callContext: SandboxCallContext;
   getActionsClient: ((req: KibanaRequest) => Promise<ActionsClient>) | undefined;
+  secretKeys: readonly string[];
   logger: Logger;
 }): Promise<void> => {
   const connectors = await listAgentConnectors(callContext, getActionsClient);
@@ -35,7 +62,7 @@ export const writeConnectorManifest = async ({
     '',
     '- `CONNECTOR_ID`, `CONNECTOR_TYPE`',
     '- `CONNECTOR_CONFIG_<KEY>` for each connector setting (e.g. `CONNECTOR_CONFIG_APIURL`)',
-    '- `CONNECTOR_SECRET_<KEY>` for each credential (e.g. `CONNECTOR_SECRET_TOKEN`, `CONNECTOR_SECRET_APIKEY`)',
+    '- `CONNECTOR_HEADER_<NAME>` for each normalized authentication header (e.g. `CONNECTOR_HEADER_AUTHORIZATION`)',
     '',
     'Keys are upper-cased with non-alphanumerics replaced by `_`. Discover the names available for a connector with:',
     '```bash',
@@ -43,7 +70,7 @@ export const writeConnectorManifest = async ({
     '```',
     'Then call the service directly, e.g.:',
     '```bash',
-    'curl -sS -H "Authorization: Bearer $CONNECTOR_SECRET_TOKEN" "$CONNECTOR_CONFIG_APIURL/..."',
+    'curl -sS -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" "$CONNECTOR_CONFIG_APIURL/..."',
     '```',
     'Never print, log, or write credential values to files; they are redacted from command output.',
     'Only the connectors listed below can be requested.',
@@ -57,9 +84,13 @@ export const writeConnectorManifest = async ({
     }
   }
 
+  sections.push(...renderSecretsSections(secretKeys));
+
   const content = sections.join('\n') + '\n';
 
-  logger.debug(`Writing connector manifest (${connectors.length} connector(s))`);
+  logger.debug(
+    `Writing connector manifest (${connectors.length} connector(s), ${secretKeys.length} secret(s))`
+  );
 
   await session.writeFiles([
     { path: '/workspace/connectors.md', content: Buffer.from(content, 'utf8') },

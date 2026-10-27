@@ -10,9 +10,9 @@
 import {
   ACCESS_CONTROL_MAX_ENTRIES,
   createAccessControlSchema,
-  hasEntityAccess,
+  resolveEntityAccess,
 } from '@kbn/entity-access-control';
-import type { AccessControl } from '@kbn/entity-access-control';
+import type { AccessControl, EntityAccessDecision } from '@kbn/entity-access-control';
 import { z } from '@kbn/zod/v4';
 
 export const WORKFLOW_ACCESS_CONTROL_ROLES = ['viewer', 'executor', 'editor'] as const;
@@ -36,26 +36,55 @@ export interface WorkflowAccessSubject {
   owner_id?: string;
 }
 
+const ADMIN_OVERRIDE_OPERATIONS = new Set<WorkflowAccessOperation>(['read', 'manage']);
+const operationRoles: Record<WorkflowAccessOperation, readonly WorkflowAccessControlRole[]> = {
+  read: WORKFLOW_ACCESS_CONTROL_ROLES,
+  execute: ['executor', 'editor'],
+  edit: ['editor'],
+  manage: [],
+};
+
+/** Resolves workflow ACL decisions independently of feature privileges. */
+export const getWorkflowAccessDecisions = (
+  workflow: WorkflowAccessSubject,
+  profileId: string | undefined,
+  isAdmin = false
+): Record<WorkflowAccessOperation, EntityAccessDecision> => {
+  const { access_control: accessControl, owner_id: ownerId } = workflow;
+  const can = (operation: WorkflowAccessOperation) =>
+    resolveEntityAccess({
+      accessControl: accessControl ?? { access_mode: 'public', entries: [] },
+      ownerId,
+      profileId,
+      roles: operationRoles[operation],
+      isAdmin: isAdmin && ADMIN_OVERRIDE_OPERATIONS.has(operation),
+    });
+  if (!accessControl || accessControl.access_mode === 'public') {
+    return { read: 'allowed', execute: 'allowed', edit: 'allowed', manage: can('manage') };
+  }
+  return {
+    read: can('read'),
+    execute: can('execute'),
+    edit: can('edit'),
+    manage: can('manage'),
+  };
+};
+
 /** Resolves workflow ACL permissions independently of feature privileges. */
 export const getWorkflowPermissions = (
   workflow: WorkflowAccessSubject,
-  profileId: string | undefined
+  profileId: string | undefined,
+  isAdmin = false
+): WorkflowPermissions =>
+  toWorkflowPermissions(getWorkflowAccessDecisions(workflow, profileId, isAdmin));
+
+export const toWorkflowPermissions = (
+  decisions: Record<WorkflowAccessOperation, EntityAccessDecision>
 ): WorkflowPermissions => {
-  const { access_control: accessControl, owner_id: ownerId } = workflow;
-  if (!accessControl || accessControl.access_mode === 'public') {
-    return {
-      read: true,
-      execute: true,
-      edit: true,
-      manage: Boolean(profileId && profileId === ownerId),
-    };
-  }
-  const can = (roles: readonly WorkflowAccessControlRole[]) =>
-    hasEntityAccess({ accessControl, ownerId, profileId, roles });
   return {
-    read: can(WORKFLOW_ACCESS_CONTROL_ROLES),
-    execute: can(['executor', 'editor']),
-    edit: can(['editor']),
-    manage: can([]),
+    read: decisions.read !== 'denied',
+    execute: decisions.execute !== 'denied',
+    edit: decisions.edit !== 'denied',
+    manage: decisions.manage !== 'denied',
   };
 };

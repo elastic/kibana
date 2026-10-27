@@ -25,11 +25,12 @@ import { DiscoverTabType, UnifiedHistogramSuggestionType } from '@kbn/discover-s
 import { FILTERS, FilterStateStore } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
 import { type DiscoverSessionTabTypeState, VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { SCHEMA_DISCOVER_SESSION_LATEST } from '@kbn/saved-search-plugin/server';
 import { fromStoredSearchEmbeddableByValue } from '../../../common/embeddable/transform_utils';
 import { toByValuePanelState } from '../../../common/embeddable/transform_utils.fixtures';
 import {
   fromStoredSessionSearchAndTable,
-  fromStoredSessionSettings,
+  fromStoredClassicSessionSettings,
 } from '../../../common/session/session_tab_mapping';
 import {
   transformDiscoverSessionIn,
@@ -235,7 +236,8 @@ describe('discover session API transforms', () => {
         type: 'dropped_property',
         tab_id: id,
         key: 'control_panels',
-        message: 'Unable to transform control panels. Error: controlGroupJson is not valid JSON',
+        value: '{',
+        message: 'Invalid JSON.',
       })),
     });
     expect(session).toStrictEqual(original);
@@ -260,6 +262,7 @@ describe('discover session API transforms', () => {
       ...classicTab,
       attributes: {
         ...classicTab.attributes,
+        timeRange: { from: 'now/d', to: 'now/d', mode: 'relative' },
         tabTypeState: metricsTab.attributes.tabTypeState,
         visContext: metricsTab.attributes.visContext,
         controlGroupJson: '{', // Invalid JSON: this mapper must leave control parsing to the caller.
@@ -277,7 +280,7 @@ describe('discover session API transforms', () => {
       tab.attributes.kibanaSavedObjectMeta.searchSourceJSON
     );
     const searchAndTableFields = fromStoredSessionSearchAndTable(tab.attributes, searchSource);
-    const sessionFields = fromStoredSessionSettings(tab.attributes);
+    const sessionFields = fromStoredClassicSessionSettings(tab.attributes);
     expect(searchAndTableFields).not.toHaveProperty('hide_chart');
     expect(sessionFields).not.toHaveProperty('data_source');
     expect({
@@ -290,6 +293,23 @@ describe('discover session API transforms', () => {
   });
 
   describe('transform out', () => {
+    it('replaces an unsupported Classic chart interval with auto in the response', () => {
+      const [tab] = discoverSessionAttributes.tabs;
+      const attributes = {
+        ...discoverSessionAttributes,
+        tabs: [{ ...tab, attributes: { ...tab.attributes, chartInterval: '5m' } }],
+      };
+
+      const { sessionState } = transformDiscoverSessionOut(attributes);
+
+      expect(sessionState.tabs[0]).toHaveProperty('chart_interval', 'auto');
+      expect(discoverSessionApiDataSchema.safeParse(sessionState).success).toBe(true);
+      expect(attributes.tabs[0].attributes.chartInterval).toBe('5m');
+      expect(
+        transformDiscoverSessionIn(sessionState).attributes.tabs[0].attributes.chartInterval
+      ).toBe('auto');
+    });
+
     it('maps saved object attributes to API data', () => {
       const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes);
       expect(transformed).toEqual(discoverSessionApiData);
@@ -540,6 +560,31 @@ describe('discover session API transforms', () => {
       expect(sessionState.tabs[0]).not.toHaveProperty('esql_approximation');
     });
 
+    it.each([
+      { name: 'public', transform: transformDiscoverSessionOut },
+      { name: 'internal', transform: transformInternalDiscoverSessionOut },
+    ])(
+      'omits unused ES|QL fields from the $name session response and preserves the panel sample size',
+      ({ transform }) => {
+        const [, esqlTab] = discoverSessionAttributes.tabs;
+        const { sessionState } = transform({
+          ...discoverSessionAttributes,
+          tabs: [esqlTab],
+        });
+        const panel = fromStoredSearchEmbeddableByValue(toByValuePanelState(esqlTab.attributes));
+
+        expect(esqlTab.attributes).toMatchObject({
+          sampleSize: 100,
+          hideAggregatedPreview: false,
+          chartInterval: 'h',
+        });
+        expect(sessionState.tabs[0]).not.toHaveProperty('sample_size');
+        expect(sessionState.tabs[0]).not.toHaveProperty('hide_aggregated_preview');
+        expect(sessionState.tabs[0]).not.toHaveProperty('chart_interval');
+        expect(panel.tabs[0]).toHaveProperty('sample_size', 100);
+      }
+    );
+
     it('converts legacy flat tab sort to API sort objects', () => {
       const attributes = {
         ...discoverSessionAttributes,
@@ -636,7 +681,6 @@ describe('discover session API transforms', () => {
                 searchSourceJSON:
                   '{"query":{"esql":"FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value"}}',
               },
-              hideAggregatedPreview: false,
               rowHeight: 1,
               headerRowHeight: 1,
               timeRestore: true,
@@ -649,9 +693,7 @@ describe('discover session API transforms', () => {
                 pause: false,
               },
               rowsPerPage: 25,
-              sampleSize: 100,
               breakdownField: 'transaction.id',
-              chartInterval: 'h',
               density: 'compact',
               documentsDisplayMode: 'json',
               jsonModeSettings: {
@@ -705,6 +747,8 @@ describe('discover session API transforms', () => {
                 counterAggregation: 'max',
                 gaugeAggregation: 'min',
                 histogramPercentile: 'p99',
+                gridSortField: 'recency',
+                gridSortDirection: 'desc',
               },
             },
           },
@@ -713,14 +757,17 @@ describe('discover session API transforms', () => {
       expect(references).toEqual([]);
     });
 
-    it('enables time restore when time_range is present', () => {
+    it('enables time restore and persists only date bounds when time_range includes mode', () => {
       const [classicTab] = apiData.tabs;
-      const { attributes } = transformDiscoverSessionIn({
+      const request = discoverSessionApiDataSchema.parse({
         ...apiData,
-        tabs: [classicTab],
+        tabs: [{ ...classicTab, time_range: { from: 'now-15m', to: 'now', mode: 'relative' } }],
       });
+      const { attributes } = transformDiscoverSessionIn(request);
 
       expect(attributes.tabs[0].attributes.timeRestore).toBe(true);
+      expect(attributes.tabs[0].attributes.timeRange).toEqual({ from: 'now-15m', to: 'now' });
+      expect(() => SCHEMA_DISCOVER_SESSION_LATEST.validate(attributes)).not.toThrow();
     });
 
     it.each([5000, 0])(
@@ -994,6 +1041,26 @@ describe('discover session API transforms', () => {
   });
 
   describe('round-trip', () => {
+    it('round-trips a Lucene JSON query without converting the stored DSL to text', () => {
+      const query = {
+        language: 'lucene' as const,
+        expression: '{"term":{"extension":"png"}}',
+      };
+      const { attributes, references } = transformDiscoverSessionIn({
+        ...apiData,
+        tabs: [{ ...classicApiTab, query }],
+      });
+      const { kibanaSavedObjectMeta } = attributes.tabs[0].attributes;
+
+      expect(parseSearchSourceJSON(kibanaSavedObjectMeta.searchSourceJSON).query).toEqual({
+        language: 'lucene',
+        query: { term: { extension: 'png' } },
+      });
+
+      const { sessionState } = transformDiscoverSessionOut(attributes, references);
+      expect(sessionState.tabs[0]).toHaveProperty('query', query);
+    });
+
     it('round-trips legacy pinned filters as app filters', () => {
       const pinnedFilter = {
         meta: {
@@ -1175,6 +1242,9 @@ describe('discover session API transforms', () => {
         counterAggregation: 'max',
         gaugeAggregation: 'min',
         histogramPercentile: 'p99',
+        gridSortField: 'recency',
+        gridSortDirection: 'desc',
+        histogramVisualization: 'lnsHeatmap',
       };
       const savedMetricsSession = {
         ...discoverSessionAttributes,
@@ -1198,6 +1268,9 @@ describe('discover session API transforms', () => {
         counter_aggregation: 'max',
         gauge_aggregation: 'min',
         histogram_percentile: 'p99',
+        histogram_visualization: 'lnsHeatmap',
+        grid_sort_field: 'recency',
+        grid_sort_direction: 'desc',
       });
 
       expect(sessionState.tabs[0]).not.toHaveProperty('tabTypeState');
@@ -1209,25 +1282,29 @@ describe('discover session API transforms', () => {
       expect(writtenBack.tabs[0].attributes.tabTypeState).toEqual(savedTabTypeState);
     });
 
-    it('rejects saved metrics state on a classic tab instead of dropping it', () => {
+    it('ignores saved metrics state on a classic tab while preserving its classic settings', () => {
       const [classicTab, metricsTab] = discoverSessionAttributes.tabs;
 
-      expect(() =>
-        transformDiscoverSessionOut({
-          ...discoverSessionAttributes,
-          tabs: [
-            {
-              ...classicTab,
-              attributes: {
-                ...classicTab.attributes,
-                tabTypeState: metricsTab.attributes.tabTypeState,
-              },
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...classicTab,
+            attributes: {
+              ...classicTab.attributes,
+              tabTypeState: metricsTab.attributes.tabTypeState,
             },
-          ],
-        })
-      ).toThrow(
-        `Metrics tab "${classicTab.label}" with ID "${classicTab.id}" requires an ES|QL data source.`
+          },
+        ],
+      });
+
+      expect(sessionState.tabs).toStrictEqual([discoverSessionApiData.tabs[0]]);
+
+      const { attributes: writtenBack } = transformDiscoverSessionIn(
+        discoverSessionApiDataSchema.parse(sessionState)
       );
+
+      expect(writtenBack.tabs[0].attributes.tabTypeState).toBeUndefined();
     });
 
     it('round-trips fixture saved object attributes preserving API-representable persistence values', () => {

@@ -35,12 +35,12 @@ export const TavilyConnector: ConnectorSpec = {
   metadata: {
     id: '.tavily_mcp',
     displayName: 'Tavily',
-    description: i18n.translate('core.kibanaConnectorSpecs.tavily.metadata.description', {
+    description: i18n.translate('connectorSpecs.tavily.metadata.description', {
       defaultMessage: 'Search the web and extract content from pages using Tavily',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
     docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/tavily-action-type`,
   },
 

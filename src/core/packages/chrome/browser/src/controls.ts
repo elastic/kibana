@@ -77,6 +77,14 @@ export interface ChromeControls {
      */
     set(content?: ReactNode): void;
   };
+  /** Subscription badge content. Only rendered in the project header. */
+  subscriptionBadge: {
+    /**
+     * Set the subscription badge content.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
+  };
   userMenu: {
     /**
      * Set the user menu content.

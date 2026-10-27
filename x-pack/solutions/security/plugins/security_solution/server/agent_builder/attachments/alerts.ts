@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
@@ -21,9 +21,11 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_c
 import { getAlertsById } from '../tools/get_alerts_by_id';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
-export const bulkAlertsAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  alertIds: z.array(z.string().max(512)).min(1).max(ALERTS_BATCH_MAX_SIZE),
-});
+export const bulkAlertsAttachmentDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    alertIds: z.array(z.string().max(512)).min(1).max(ALERTS_BATCH_MAX_SIZE),
+  })
+);
 
 export type BulkAlertsAttachmentData = z.infer<typeof bulkAlertsAttachmentDataSchema>;
 

@@ -9,6 +9,8 @@ import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
   HasTypeDisplayName,
   HasEditCapabilities,
@@ -16,6 +18,7 @@ import type {
   PublishesDataLoading,
   PublishesEsql,
   PublishesWritableTimeRange,
+  ViewMode,
 } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
@@ -28,6 +31,7 @@ import {
   apiPublishesTimeRange,
   apiIsPresentationContainer,
   fetch$,
+  getViewModeSubject,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout, tracksOverlays } from '@kbn/presentation-util';
 import { i18n } from '@kbn/i18n';
@@ -48,8 +52,12 @@ import {
   skip,
   switchMap,
 } from 'rxjs';
-import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import {
+  isExecutionTerminalEvent,
+  isToolUiEvent,
+  type ToolUiEvent,
+} from '@kbn/agent-builder-common';
+import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   readEsqlQuery,
@@ -64,17 +72,22 @@ import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { css } from '@emotion/react';
 import { getServices } from './services';
 import { getTelemetry } from './telemetry';
+import { MAX_PREVIEW_HEIGHT } from '../common/panel_context_attachment';
 import {
-  CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
-  MAX_PREVIEW_HEIGHT,
-} from '../common/panel_context_attachment';
+  CUSTOM_CONTENT_UPDATED_UI_EVENT,
+  type CustomContentUpdatedUiEventData,
+} from '../common/ui_events';
 import {
   buildCustomContentContextAttachment,
   type CustomContentFetchContext,
 } from './utils/chat_integration';
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
-import { readPanelContextData } from '../common/read_panel_context_data';
 import type { CustomContentEmbeddableState } from '../server';
+
+const isCustomContentUpdatedUiEvent = (
+  event: BrowserChatEvent
+): event is ToolUiEvent<typeof CUSTOM_CONTENT_UPDATED_UI_EVENT, CustomContentUpdatedUiEventData> =>
+  isToolUiEvent(event, CUSTOM_CONTENT_UPDATED_UI_EVENT);
 
 const panelMeasureCss = css({
   display: 'flex',
@@ -89,7 +102,8 @@ export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState
   PublishesDataViews &
   PublishesDataLoading &
   PublishesEsql &
-  PublishesWritableTimeRange;
+  PublishesWritableTimeRange &
+  HasInspectorAdapters;
 
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   CustomContentEmbeddableState,
@@ -124,6 +138,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     let isRetained = false;
     const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
+    const requestAdapter = new RequestAdapter();
     const previewHtml$ = new BehaviorSubject<string | null>(null);
     const isGenerating$ = new BehaviorSubject<boolean>(false);
     const chatGeneratingCallbacks = {
@@ -203,6 +218,9 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       approximationApplied$,
       dataViews$,
       dataLoading$,
+      // A static panel makes no request, so it offers no Inspect entry.
+      getInspectorAdapters: () =>
+        esqlQuery$.getValue() ? { requests: requestAdapter } : undefined,
       getTypeDisplayName: () =>
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
           defaultMessage: 'Custom panel',
@@ -365,6 +383,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       }
     });
 
+    const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('edit');
+
     return {
       api,
       Component: function CustomContentEmbeddableComponent() {
@@ -380,6 +400,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           previewHtml,
           timeRange,
           isGenerating,
+          viewMode,
         ] = useBatchedPublishingSubjects(
           esqlQuery$,
           template$,
@@ -391,7 +412,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           esqlVariables$,
           previewHtml$,
           effectiveTimeRange$,
-          isGenerating$
+          isGenerating$,
+          viewMode$
         );
         const [generationVersion, setGenerationVersion] = useState(0);
 
@@ -439,39 +461,25 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               )
             )
             .subscribe((event) => {
-              if (!isRoundCompleteEvent(event)) return;
-              if (isGenerating$.getValue()) {
-                isGenerating$.next(false);
+              if (isExecutionTerminalEvent(event)) {
+                if (isGenerating$.getValue()) isGenerating$.next(false);
+                return;
               }
 
-              // A round can touch several attachments — the dashboard's, and one per custom content
-              // panel. Scan every agent-authored ref instead of only the first, or an unrelated
-              // attachment leading the list would make this panel skip its own update.
-              const agentRefs = event.data.round.input.attachment_refs?.filter(
-                (ref) =>
-                  ref.actor === ATTACHMENT_REF_ACTOR.agent &&
-                  (ref.operation === 'updated' || ref.operation === 'created')
-              );
-              if (!agentRefs?.length) return;
+              if (!isCustomContentUpdatedUiEvent(event)) return;
 
-              for (const ref of agentRefs) {
-                const updatedAttachment = event.data.attachments?.find(
-                  (a) =>
-                    a.id === ref.attachment_id && a.type === CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE
-                );
-                if (!updatedAttachment) continue;
+              const {
+                data: { data },
+              } = event.data;
+              if (data.embeddable_id !== uuid) return;
 
-                const data = readPanelContextData(updatedAttachment);
-                if (!data || data.embeddable_id !== uuid) continue;
-
-                template$.next(data.panel_template);
-                esqlQuery$.next(data.esql_query);
-                getTelemetry().trackAgentUpdateApplied({
-                  hasEsqlQuery: Boolean(data.esql_query),
-                  templateSizeBytes: data.panel_template.length,
-                });
-                break;
-              }
+              template$.next(data.panel_template);
+              esqlQuery$.next(data.esql_query);
+              if (isGenerating$.getValue()) isGenerating$.next(false);
+              getTelemetry().trackAgentUpdateApplied({
+                hasEsqlQuery: Boolean(data.esql_query),
+                templateSizeBytes: data.panel_template.length,
+              });
             });
 
           return () => sub.unsubscribe();
@@ -530,8 +538,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               filters={filters}
               esqlVariables={esqlVariables}
               previewHtml={previewHtml}
-              isAiAvailable={Boolean(agentBuilder)}
+              isAiAvailable={Boolean(agentBuilder) && viewMode === 'edit'}
               isGenerating={isGenerating}
+              isInteractive={viewMode !== 'non-interactive'}
+              requestAdapter={requestAdapter}
               onLoadingChange={handleLoadingChange}
               setApproximationApplied={setApproximationApplied}
               onGenerateWithChat={handleGenerateWithChat}

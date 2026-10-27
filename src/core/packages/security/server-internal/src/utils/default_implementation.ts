@@ -19,6 +19,7 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
   return {
     authc: {
       getCurrentUser: () => null,
+      getPrincipal: () => null,
       getRedactedSessionId: () => Promise.resolve(undefined),
       apiKeys: {
         areAPIKeysEnabled: () => Promise.resolve(false),
@@ -46,6 +47,7 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
     serviceAccounts: {
       isEnabled: () => false,
       create: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
+      delete: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       bindWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       unbindWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       getWorkloadBinding: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,

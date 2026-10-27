@@ -8,9 +8,6 @@
 import type { EvaluationCriterion, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import {
   ASSESSMENT_NOTE_ROLE_RULE,
-  MAX_ASSESSMENT_NOTE_LENGTH,
-  MAX_SUMMARY_LENGTH,
-  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
   NO_RAW_SENSITIVE_VALUES_RULE,
   SUMMARY_ROLE_RULE,
   SYMPTOM_HYPOTHESIS_ROLE_RULE,
@@ -45,22 +42,22 @@ const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
 const NARRATIVE_FIELDS_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'narrative_fields_bounded_and_safe',
-    text: `symptom_hypothesis is at most ${MAX_SYMPTOM_HYPOTHESIS_LENGTH} characters, summary is at most ${MAX_SUMMARY_LENGTH} characters, and assessment_note is at most ${MAX_ASSESSMENT_NOTE_LENGTH} characters. ${NO_RAW_SENSITIVE_VALUES_RULE}`,
+    text: `symptom_hypothesis is one sentence, summary is at most three sentences, and assessment_note is at most three sentences. Judge sentence counts, not character counts: a sentence ends at a full stop, question mark or exclamation mark, so clauses joined by a comma, semicolon or "while" are one sentence. Judge only sentence counts and sensitive values here; counts, timestamps, wording and format belong to the other criteria. ${NO_RAW_SENSITIVE_VALUES_RULE}`,
     score: 1,
   },
   {
     id: 'symptom_hypothesis_mechanism',
-    text: `symptom_hypothesis is the evidence-supported technical mechanism for the incident. ${SYMPTOM_HYPOTHESIS_ROLE_RULE}`,
+    text: `symptom_hypothesis follows its field contract:\n${SYMPTOM_HYPOTHESIS_ROLE_RULE}\nJudge the mechanism against what this event's own signals, causal_features and blast_radius evidence. Do not require a cause, component or propagation that the evidence does not show: an evidenced failure path with no evidenced root cause meets the contract, and naming an unevidenced cause does not.`,
     score: 1,
   },
   {
     id: 'summary_observed_state',
-    text: `Summary leads with the normalized observed error signature and affected component or dependency path, preserving decisive technical details such as the error type/code, operation, protocol, endpoint, port, and relevant non-sensitive address. It may use query KI context or resolved feature metadata to clarify that path without asserting it as a proven cause. It then describes the affected operation and scoped impact. ${SUMMARY_ROLE_RULE} It does not include p_value or severity_score.`,
+    text: `summary follows its field contract:\n${SUMMARY_ROLE_RULE}`,
     score: 1,
   },
   {
     id: 'assessment_note_reasoning_only',
-    text: `assessment_note is operator-facing lifecycle reasoning and may be detailed when that improves the decision record. ${ASSESSMENT_NOTE_ROLE_RULE} It must add status, severity, confidence, or uncertainty reasoning rather than merely repeat the observed condition, error signature, impact, or signal description.`,
+    text: `assessment_note follows its field contract:\n${ASSESSMENT_NOTE_ROLE_RULE}`,
     score: 1,
   },
   {
@@ -83,7 +80,7 @@ const SIGNAL_EVIDENCE_CONSISTENCY_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'event_decision_matches_signal_evidence',
-    text: 'If no signal confirms a failure, degradation, or exposure, dismiss the event unless independent current evidence leaves one plausibly unresolved. In that case, keep it open with an explicit evidence gap. A concrete non-benign error in an off-topic found row directly confirms a separate observed-error event: keep the original rule signal `verdict: off_topic` (not `refutes`), but create or merge an `open` event grounded only in that row’s error signature and impact. The exception does not apply to healthy, ambiguous, or merely unrelated rows; evaluate the observed-error event’s severity and confidence from its direct evidence rather than the source rule’s `verdict`. Exception: close an established same-rule episode when a successful exact query has verified healthy/opposite rows or no matching failure rows, even if the detection direction is ambiguous and the prior signal was not `confirms`. Do not create a new dismissed event for that recovery reconciliation. Same-rule empty/healthy authored-query evidence recovers only episodes grounded in that rule’s hypothesis; for an off-topic observed-error episode, keep it open until evidence of that error class clears (or an operator dismisses it). A query error, telemetry gap, or unrelated result blocks closure. Do not infer a root cause, impact, or severity tier from empty evidence alone.',
+    text: 'If no signal confirms a failure, degradation, or exposure, dismiss the event unless independent current evidence leaves one plausibly unresolved. In that case, keep it active with an explicit evidence gap. A concrete non-benign error in an off-topic found row directly confirms a separate observed-error event: keep the original rule signal `verdict: off_topic` (not `refutes`), but create or merge an `active` event grounded only in that row’s error signature and impact. The exception does not apply to healthy, ambiguous, or merely unrelated rows; evaluate the observed-error event’s severity and confidence from its direct evidence rather than the source rule’s `verdict`. Exception: close an established same-rule episode when a successful exact query has verified healthy/opposite rows or no matching failure rows, even if the detection direction is ambiguous and the prior signal was not `confirms`. Do not create a new inactive event for that recovery reconciliation. Same-rule empty/healthy authored-query evidence recovers only episodes grounded in that rule’s hypothesis; for an off-topic observed-error episode, keep it active until evidence of that error class clears (or an operator dismisses it). A query error, telemetry gap, or unrelated result blocks closure. Do not infer a root cause, impact, or severity tier from empty evidence alone.',
     score: 1,
   },
 ];

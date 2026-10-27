@@ -129,6 +129,8 @@ await managed.ready();
 
 If any `install` for the plugin was skipped or aborted incomplete this boot, `ready()` **skips destructive orphan cleanup** so still-desired docs are not force-deleted. Missing installs are retried on a later Kibana boot when the owner runs `install` → `ready` again. **Dynamic auto upgrades still run** once `ready()` itself has passed Elasticsearch readiness (they do not depend on the incomplete static `installedDocKeys` set). Logs WARN when orphan cleanup is skipped and again when upgrades proceed despite an incomplete install pass.
 
+When cleanup does run, each orphan is deleted on its own. A failure to remove one document, for example because it still has a non-terminal execution, is logged at error level and does not stop the others. That document is disabled so no new runs start, and a later boot deletes it.
+
 ### Granularity of tracking
 
 Reconciliation tracks installs at the **full document identity** level: `${workflowDocumentId}:${spaceId}`. The `workflowDocumentId` includes any suffix (e.g., `system-my-wf-us-east`). This means:
@@ -331,7 +333,7 @@ Choosing rules of thumb:
 
 Key distinction: **static** workflows are declarative — the set installed at startup is the source of truth and anything not declared is cleaned up. **Dynamic** workflows are imperative — only explicit `uninstall` removes them during normal operation.
 
-> **Global orphan cleanup (both lifecycles):** Regardless of lifecycle, all managed documents are removed at startup if their owning plugin is no longer registered or their definition has been removed from `@kbn/workflows/managed`. This ensures that uninstalling a plugin or deleting a definition leaves no dangling documents behind.
+> **Global orphan cleanup (both lifecycles):** Regardless of lifecycle, managed documents are removed at startup if their owning plugin is no longer registered or their definition has been removed from `@kbn/workflows/managed`. Each document is removed independently. A document that fails to delete, for example because it still has a non-terminal execution, is logged at error level, disabled, and retried on the next startup.
 
 ## 7) Authoring a definition
 

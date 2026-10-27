@@ -15,6 +15,14 @@
  *     https://github.com/mitre/cti/blob/master/USAGE.md
  */
 
+/**
+ * Identifies which MITRE framework a STIX object belongs to. Appears as
+ * `external_references[].source_name` and `kill_chain_phases[].kill_chain_name`.
+ * ATLAS bundles may also carry 'mitre-attack' references on techniques that map
+ * to ATT&CK; those are secondary and must not be used to resolve ATLAS IDs.
+ */
+export type StixSourceName = 'mitre-attack' | 'mitre-atlas';
+
 /** A STIX bundle: the top-level container holding every entity in a MITRE release. */
 export interface StixBundle {
   readonly objects: StixEntity[];
@@ -29,7 +37,7 @@ export interface StixEntity {
   readonly name?: string;
   /** Markdown description, e.g. 'Adversaries may attempt to dump credentials...' */
   readonly description?: string;
-  /** External links; the entry with source_name 'mitre-attack' carries the ATT&CK ID and URL */
+  /** External links; the entry whose source_name matches the framework carries its MITRE ID and URL */
   readonly external_references?: StixExternalReference[];
   /** True when MITRE revoked this entity in favor of a successor */
   readonly revoked?: boolean;
@@ -52,16 +60,16 @@ export interface StixEntity {
 }
 
 export interface StixExternalReference {
-  /** Source of the reference; 'mitre-attack' marks the canonical MITRE entry */
+  /** Source of the reference; 'mitre-attack' (ATT&CK) or 'mitre-atlas' (ATLAS) marks the canonical MITRE entry */
   readonly source_name: string;
-  /** ATT&CK identifier, e.g. 'T1003', 'TA0006', 'T1003.001' */
+  /** MITRE identifier, e.g. 'T1003', 'TA0006', 'T1003.001' (ATT&CK) or 'AML.T0024.002' (ATLAS) */
   readonly external_id?: string;
-  /** ATT&CK URL, e.g. 'https://attack.mitre.org/techniques/T1003/' */
+  /** MITRE URL, e.g. 'https://attack.mitre.org/techniques/T1003/' or 'https://atlas.mitre.org/techniques/AML.T0024' */
   readonly url?: string;
 }
 
 export interface StixKillChainPhase {
-  /** Always 'mitre-attack' for ATT&CK */
+  /** 'mitre-attack' for ATT&CK, 'mitre-atlas' for ATLAS */
   readonly kill_chain_name: string;
   /** Tactic shortname, e.g. 'credential-access'; matches a tactic's x_mitre_shortname */
   readonly phase_name: string;

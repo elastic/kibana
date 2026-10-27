@@ -30,6 +30,12 @@ const makeManagement = (
   };
 };
 
+// Every valid action declares an approval policy; fixtures that omit one get a default.
+const withApprovalPolicy = (actionMetadata: unknown): unknown =>
+  typeof actionMetadata === 'object' && actionMetadata !== null
+    ? { approvalPolicy: 'autonomy-dependent', ...actionMetadata }
+    : actionMetadata;
+
 const workflowItem = (
   id: string,
   actionMetadata: unknown,
@@ -44,7 +50,10 @@ const workflowItem = (
   managedBy: 'alertzero',
   definition: (actionMetadata === null
     ? null
-    : { consts: { actionMetadata }, ...extraDefinition }) as WorkflowListItemDto['definition'],
+    : {
+        consts: { actionMetadata: withApprovalPolicy(actionMetadata) },
+        ...extraDefinition,
+      }) as WorkflowListItemDto['definition'],
   createdAt: '2026-01-01T00:00:00.000Z',
   tags,
   valid: true,
@@ -136,6 +145,46 @@ describe('ActionsService', () => {
       page([
         workflowItem('invalid', { name: 'x', impact: 'nuclear' }),
         workflowItem('valid', { name: 'Valid', category: 'contain' }),
+      ]),
+    ]);
+    const service = new ActionsService(() => client, logger);
+    const result = await service.list('default', request);
+    expect(result.actions.map((a) => a.workflowId)).toEqual(['valid']);
+  });
+
+  it('normalizes a single actionMetadata.subject to a one-element subjects list', async () => {
+    const { client } = makeManagement([
+      page([workflowItem('isolate', { name: 'Isolate host', subject: 'host' })]),
+    ]);
+    const service = new ActionsService(() => client, logger);
+    const result = await service.list('default', request);
+    expect(result.actions[0].subjects).toEqual(['host']);
+  });
+
+  it('passes a subject list through as subjects and omits subjects when undeclared', async () => {
+    const { client } = makeManagement([
+      page([
+        workflowItem('both', {
+          name: 'Isolate host or kill process',
+          subject: ['host', 'process'],
+        }),
+        workflowItem('legacy', { name: 'Legacy action' }),
+      ]),
+    ]);
+    const service = new ActionsService(() => client, logger);
+    const result = await service.list('default', request);
+    expect(result.actions.find((a) => a.workflowId === 'both')?.subjects).toEqual([
+      'host',
+      'process',
+    ]);
+    expect(result.actions.find((a) => a.workflowId === 'legacy')).not.toHaveProperty('subjects');
+  });
+
+  it('skips a workflow whose actionMetadata.subject names an unknown kind', async () => {
+    const { client } = makeManagement([
+      page([
+        workflowItem('bad-subject', { name: 'Bad', subject: 'container' }),
+        workflowItem('valid', { name: 'Valid', subject: ['host'] }),
       ]),
     ]);
     const service = new ActionsService(() => client, logger);

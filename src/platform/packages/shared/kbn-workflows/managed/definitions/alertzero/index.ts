@@ -8,6 +8,7 @@
  */
 
 import { ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID } from './actions/action_add_rule_exception';
+import { ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID } from './actions/action_close_alerts_false_positive';
 import { ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID } from './actions/action_create_detection_rule';
 import { ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID } from './actions/action_edit_detection_rule';
 import { ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW_ID } from './actions/action_enable_detection_rule';
@@ -16,6 +17,7 @@ import { ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW_ID } from './actions/ac
 import {
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+  ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
 } from './actions/defend';
 import {
@@ -25,13 +27,23 @@ import {
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
 } from './attack_discovery_workflows';
 import { ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID } from './create_proposal';
-import { ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID } from './detection_rule_creation';
+import { ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID } from './detection_rule_coverage';
 import { ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID } from './detection_rule_tuning';
 import { ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID } from './floor_alert_triage';
+import { ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID } from './floor_alert_triage_batch';
+import { ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID } from './floor_alert_triage_review';
 import { ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID } from './floor_attack_discovery';
 import { ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_endpoint_analysis';
+import { ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID } from './forensics_proposal_gate';
 import { ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_run_endpoint_analysis';
-import { ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from './hunt_continuous_threat_hunt';
+import {
+  ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
+  ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID,
+  ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID,
+  ALERTZERO_HUNT_WORKFLOW_ID,
+  ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+} from './hunt';
+import { ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_ID } from './investigation_summary';
 import { ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID } from './journal_note';
 import {
   ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
@@ -70,6 +82,10 @@ export {
   ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW_ID,
 } from './actions/action_install_prebuilt_rule';
 export {
+  ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW,
+  ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID,
+} from './actions/action_close_alerts_false_positive';
+export {
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW,
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
 } from './actions/action_edit_detection_rule';
@@ -87,6 +103,8 @@ export {
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+  ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW,
+  ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
 } from './actions/defend';
@@ -105,17 +123,29 @@ export {
   ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
 } from './journal_note';
 export {
+  ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW,
+  ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_ID,
+} from './investigation_summary';
+export {
+  ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW,
+  ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
+  ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW,
+  ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID,
+  ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW,
+  ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID,
+  ALERTZERO_HUNT_WORKFLOW,
+  ALERTZERO_HUNT_WORKFLOW_ID,
+  ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW,
+  ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+} from './hunt';
+export {
   ALERTZERO_CREATE_PROPOSAL_WORKFLOW,
   ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
 } from './create_proposal';
 export {
-  ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW,
-  ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
-} from './hunt_continuous_threat_hunt';
-export {
-  ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW,
-  ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
-} from './detection_rule_creation';
+  ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW,
+  ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
+} from './detection_rule_coverage';
 export {
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
@@ -124,6 +154,14 @@ export {
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW,
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
 } from './floor_alert_triage';
+export {
+  ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW,
+  ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID,
+} from './floor_alert_triage_batch';
+export {
+  ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW,
+  ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
+} from './floor_alert_triage_review';
 export {
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
@@ -136,13 +174,17 @@ export {
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW,
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 } from './forensics_run_endpoint_analysis';
+export {
+  ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW,
+  ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
+} from './forensics_proposal_gate';
 
 export const ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS = [
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
-  ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
+  ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 ] as const;
 
@@ -171,12 +213,48 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS = [
 ] as const;
 
 /**
- * The forensic pass the per-space Endpoint analysis worker dispatches. Installed
- * globally so every space's worker shares one copy; it inherits the dispatching
- * worker's space at run time.
+ * The forensic pass the per-space Endpoint analysis worker dispatches, and the
+ * per-proposal gate that pass dispatches in turn. Installed globally so every
+ * space's worker shares one copy; they inherit the dispatching worker's space at
+ * run time.
  */
 export const ALERTZERO_FORENSICS_WORKFLOW_IDS = [
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
+  ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
+] as const;
+
+/**
+ * The batch and the closure review the per-space Alert Triage sweep starts. Installed globally so
+ * every space's sweep shares one copy; each inherits the starting workflow's space at run time.
+ */
+export const ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS = [
+  ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID,
+  ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
+] as const;
+
+/**
+ * Hunt Watch's children invoked via `workflow.execute`/`workflow.executeAsync`
+ * from the tagged Worker (`hunt_continuous_threat_hunt.yaml`) or from each
+ * other: the hunt child (`system-security-hunt-execute`), the
+ * find-or-create-Investigation child (the deterministic id it mints needs a
+ * uuidv5 hash Liquid cannot compute, so it cannot live inline in the Worker's
+ * `parallel` branch), the packaging child (wraps `hunt.packageReport`, fans mint
+ * payloads out to the proposal-gate child, closes the Investigation on a clean
+ * run), and the proposal-gate child (wraps `system-create-proposal`'s single
+ * `waitForApproval`, closes the Investigation on settlement). Own no trigger,
+ * so — like `journal_note` above — all four must be installed globally for the
+ * calling `workflow.execute`/`workflow.executeAsync` steps to resolve them.
+ * Cross-report correlation (`system-security-hunt-correlation`) is not part of
+ * this set yet. `find_or_create_investigation` and `hunt` stay untagged
+ * (Worker-branch-internal plumbing); `package_report` and `proposal_gate` carry
+ * `security` + `continuous-threat-hunt` as feature children, for Workflows-list
+ * findability.
+ */
+export const ALERTZERO_HUNT_CHILD_WORKFLOW_IDS = [
+  ALERTZERO_HUNT_WORKFLOW_ID,
+  ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
+  ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID,
+  ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID,
 ] as const;
 
 /**
@@ -187,11 +265,13 @@ export const ALERTZERO_ACTION_WORKFLOW_IDS = [
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
   ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW_ID,
   ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW_ID,
+  ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID,
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
   ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID,
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+  ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
   ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
 ] as const;
 
@@ -200,3 +280,11 @@ export const ALERTZERO_ACTION_WORKFLOW_IDS = [
  * globally because both the rule tuning and attack discovery reviews invoke it.
  */
 export const ALERTZERO_PROPOSAL_WORKFLOW_IDS = [ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID] as const;
+
+/**
+ * Card summary for investigation and escalation conversations. Installed globally
+ * and shipped disabled; enabling it turns the reader on in every space.
+ */
+export const ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_IDS = [
+  ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_ID,
+] as const;

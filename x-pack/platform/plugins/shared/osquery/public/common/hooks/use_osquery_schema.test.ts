@@ -133,7 +133,7 @@ describe('useOsquerySchema', () => {
     });
   });
 
-  describe('staleTime: Infinity caching', () => {
+  describe('staleTime caching', () => {
     it('should only make one HTTP request when the hook is rendered twice in the same client', async () => {
       const { result: result1 } = renderHook(() => useOsquerySchema(), {
         wrapper: createWrapper(queryClient),
@@ -161,6 +161,28 @@ describe('useOsquerySchema', () => {
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
       expect(result.current.osqueryVersion).toBe('5.20.0');
+    });
+
+    it('should return pkgVersion from the API response', async () => {
+      mockHttp.get.mockResolvedValue({ ...MOCK_API_RESPONSE, pkgVersion: '1.35.1' });
+
+      const { result } = renderHook(() => useOsquerySchema(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(result.current.pkgVersion).toBe('1.35.1');
+    });
+
+    it('should return undefined pkgVersion when absent from API response', async () => {
+      const { result } = renderHook(() => useOsquerySchema(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(result.current.pkgVersion).toBeUndefined();
     });
 
     it('should fall back to FALLBACK_OSQUERY_VERSION when the API response has no version field', async () => {

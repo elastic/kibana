@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import type { WorkflowDetailDto } from '@kbn/workflows';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { DEFAULT_GROUPING_MODE } from '../constants';
+import { buildAlertDetailsUrl } from '../alert_details_url';
+import { DEFAULT_GROUPING } from '../constants';
 import {
   DispatchOutcome,
   DispatchPlan,
-  EpisodeScan,
-  EpisodeTriage,
+  AlertScan,
+  AlertTriage,
   PolicyCatalog,
   RuleCatalog,
   SuppressionIndex,
-  type SuppressedEpisode,
+  type SuppressedAlert,
 } from '../state';
 import { DISPATCH_FAILURE_REASONS } from '../steps/constants';
 import type {
@@ -24,17 +26,21 @@ import type {
   ActionGroupId,
   ActionPolicy,
   ActionPolicyId,
-  AlertEpisode,
-  AlertEpisodeSuppression,
+  Alert,
+  SuppressionRow,
   DispatchFailure,
   DispatcherPipelineInput,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
+  AlertSuppressionRow,
   MatchedPair,
   Rule,
   RuleId,
+  SeriesSuppressionRow,
 } from '../types';
+
+export const MOCK_KIBANA_BASE_URL = 'https://kibana.example.com';
 
 export function createStepLogger(): LoggerServiceContract {
   return createLoggerService().loggerService;
@@ -58,7 +64,7 @@ export function createDispatcherPipelineInput(
 
 /**
  * Flat overrides for building a pipeline state: value-object fields are given
- * through their raw source data (`episodes`, `rules`, `policies`) and folded
+ * through their raw source data (`alerts`, `rules`, `policies`) and folded
  * into the value objects here.
  */
 export interface DispatcherPipelineStateOverrides
@@ -67,10 +73,10 @@ export interface DispatcherPipelineStateOverrides
     'input' | 'scan' | 'rules' | 'policies' | 'suppressions' | 'triage' | 'plan' | 'outcome'
   > {
   input?: DispatcherPipelineInput;
-  episodes?: AlertEpisode[];
-  suppressions?: AlertEpisodeSuppression[];
-  dispatchable?: AlertEpisode[];
-  suppressed?: SuppressedEpisode[];
+  alerts?: Alert[];
+  suppressions?: SuppressionRow[];
+  dispatchable?: Alert[];
+  suppressed?: SuppressedAlert[];
   rules?: Map<RuleId, Rule>;
   policies?: Map<ActionPolicyId, ActionPolicy>;
   dispatch?: ActionGroup[];
@@ -83,7 +89,7 @@ export function createDispatcherPipelineState(
   state: DispatcherPipelineStateOverrides = {}
 ): DispatcherPipelineState {
   const {
-    episodes,
+    alerts,
     suppressions,
     dispatchable,
     suppressed,
@@ -98,11 +104,11 @@ export function createDispatcherPipelineState(
   } = state;
   return {
     ...rest,
-    ...(episodes ? { scan: EpisodeScan.of({ episodes }) } : {}),
+    ...(alerts ? { scan: AlertScan.of({ alerts }) } : {}),
     ...(suppressions ? { suppressions: SuppressionIndex.of(suppressions) } : {}),
     ...(dispatchable || suppressed
       ? {
-          triage: EpisodeTriage.of({
+          triage: AlertTriage.of({
             dispatchable: dispatchable ?? [],
             suppressed: suppressed ?? [],
           }),
@@ -115,6 +121,7 @@ export function createDispatcherPipelineState(
           plan: DispatchPlan.of({
             toDispatch: dispatch ?? [],
             throttled: throttled ?? [],
+            alreadyNotified: [],
             dispatchable: dispatchable ?? [],
           }),
         }
@@ -131,28 +138,55 @@ export function createDispatcherPipelineState(
   };
 }
 
-export function createAlertEpisode(overrides: Partial<AlertEpisode> = {}): AlertEpisode {
+export function createAlert(overrides: Partial<Alert> = {}): Alert {
+  const { space_id: spaceId = 'default', alert_id: alertId = 'alert-1' } = overrides;
   return {
     last_event_timestamp: '2026-01-22T07:10:00.000Z',
     rule_id: 'rule-1',
     source: 'internal',
-    space_id: 'default',
+    space_id: spaceId,
     group_hash: 'hash-1',
-    episode_id: 'episode-1',
-    episode_status: 'active',
+    alert_id: alertId,
+    alert_status: 'active',
+    alert_url: buildAlertDetailsUrl({ baseUrl: MOCK_KIBANA_BASE_URL, spaceId, alertId }),
     ...overrides,
   };
 }
 
-export function createAlertEpisodeSuppression(
-  overrides: Partial<AlertEpisodeSuppression> = {}
-): AlertEpisodeSuppression {
+export function createSuppressionRow(overrides: Partial<SuppressionRow> = {}): SuppressionRow {
   return {
     rule_id: 'rule-1',
     source: 'internal',
     space_id: 'default',
     group_hash: 'hash-1',
-    episode_id: 'episode-1',
+    alert_id: 'alert-1',
+    should_suppress: false,
+    ...overrides,
+  };
+}
+
+export function createAlertSuppressionRow(
+  overrides: Partial<AlertSuppressionRow> = {}
+): AlertSuppressionRow {
+  return {
+    rule_id: 'rule-1',
+    source: 'internal',
+    space_id: 'default',
+    group_hash: 'hash-1',
+    alert_id: 'alert-1',
+    should_suppress: false,
+    ...overrides,
+  };
+}
+
+export function createSeriesSuppressionRow(
+  overrides: Partial<SeriesSuppressionRow> = {}
+): SeriesSuppressionRow {
+  return {
+    rule_id: 'rule-1',
+    source: 'internal',
+    space_id: 'default',
+    group_hash: 'hash-1',
     should_suppress: false,
     ...overrides,
   };
@@ -163,7 +197,7 @@ export function createRule(overrides: Partial<Rule> = {}): Rule {
     id: 'rule-1',
     spaceId: 'default',
     name: 'Test rule',
-    tags: [],
+    routingTags: [],
     ...overrides,
   };
 }
@@ -175,8 +209,7 @@ export function createActionPolicy(overrides: Partial<ActionPolicy> = {}): Actio
     name: 'Test policy',
     enabled: true,
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
-    groupBy: [],
-    groupingMode: DEFAULT_GROUPING_MODE,
+    grouping: DEFAULT_GROUPING,
     ...overrides,
   };
 }
@@ -194,7 +227,7 @@ export function createRuleScopedActionPolicy(
 
 export function createMatchedPair(overrides: Partial<MatchedPair> = {}): MatchedPair {
   return {
-    episode: createAlertEpisode(),
+    alert: createAlert(),
     policy: createActionPolicy(),
     ...overrides,
   };
@@ -207,8 +240,27 @@ export function createActionGroup(overrides: Partial<ActionGroup> = {}): ActionG
     policyId: 'policy-1',
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupKey: {},
-    episodes: [createAlertEpisode()],
+    alerts: [createAlert()],
     rules: {},
+    ...overrides,
+  };
+}
+
+export function createWorkflowDetailDto(
+  overrides: Partial<WorkflowDetailDto> = {}
+): WorkflowDetailDto {
+  return {
+    id: 'workflow-1',
+    name: 'Test Workflow',
+    description: 'A test workflow',
+    enabled: true,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    createdBy: 'elastic',
+    lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+    lastUpdatedBy: 'elastic',
+    definition: null,
+    yaml: 'name: Test Workflow',
+    valid: true,
     ...overrides,
   };
 }
@@ -219,7 +271,7 @@ export function createDispatchFailure(overrides: Partial<DispatchFailure> = {}):
     spaceId: 'default',
     actionGroupId: 'group-1',
     workflowId: 'workflow-1',
-    episodes: [createAlertEpisode()],
+    alerts: [createAlert()],
     reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
     message: 'Dispatch failed',
     ...overrides,

@@ -25,6 +25,7 @@ export interface AttackDiscoveryAttachmentData {
   mitre_attack_tactics?: string[];
   replacements?: Replacements;
   summary_markdown: string;
+  timestamp?: string;
   title: string;
 }
 
@@ -34,7 +35,8 @@ export interface AttackDiscoveryAttachmentData {
  * The title and markdown are the discovery's anonymized text, with the `{{ field value }}`
  * syntax the attachment renderer draws as field pills. The replacements it uses travel with
  * them, so the attachment's view and the agent insert the same original values from one source.
- * The alert ids are sent as their original values, which the agent's tools look up.
+ * The alert ids are sent as their original values, which the agent's tools look up. The timestamp
+ * lets the card's "Open in Attacks" link set the Attacks page's time range to include it.
  */
 export const getAttackDiscoveryAttachmentData = ({
   attackDiscovery,
@@ -50,6 +52,7 @@ export const getAttackDiscoveryAttachmentData = ({
     id,
     mitreAttackTactics,
     summaryMarkdown,
+    timestamp,
     title,
   } = attackDiscovery;
 
@@ -66,6 +69,7 @@ export const getAttackDiscoveryAttachmentData = ({
     ...(mitreAttackTactics != null ? { mitre_attack_tactics: mitreAttackTactics } : {}),
     ...(usedReplacements != null ? { replacements: usedReplacements } : {}),
     summary_markdown: summaryMarkdown,
+    ...(timestamp != null && timestamp !== '' ? { timestamp } : {}),
     title,
   };
 };

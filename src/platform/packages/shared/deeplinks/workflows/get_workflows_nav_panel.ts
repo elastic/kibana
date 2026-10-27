@@ -43,7 +43,7 @@ interface WorkflowsNavNode {
 /**
  * Returns Workflows side-nav entries for solution navigation trees.
  *
- * When the Workflow Template Library tech preview is enabled, returns a panel
+ * When the Workflow Template library tech preview is enabled, returns a panel
  * opener with list and library children. Otherwise returns a single direct link.
  *
  * ```ts
@@ -53,11 +53,11 @@ interface WorkflowsNavNode {
 export const getWorkflowsNavPanel = (core: WorkflowsNavPanelCore): WorkflowsNavNode[] => {
   const libraryEnabled = core.settings.globalClient.get<boolean>(
     WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
-    false
+    true
   );
   const executionsViewEnabled = core.settings.globalClient.get<boolean>(
     WORKFLOWS_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
-    false
+    true
   );
 
   const links: NonNullable<WorkflowsNavNode['children']> = [];

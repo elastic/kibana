@@ -22,11 +22,11 @@ import {
   type EuiFlyoutProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { hasGenAiData } from '@kbn/genai-common';
 import {
   GenAiTabImpression,
   GenAiTechnicalPreviewBadge,
   GENAI_EBT_CLICK_ACTIONS,
-  hasGenAiData,
 } from '@kbn/apm-ui-shared';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { DataTableRecord } from '@kbn/discover-utils';

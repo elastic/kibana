@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, screen } from '@testing-library/react';
 
 import { connectorsMock } from '../../containers/mock';
 import { Connector } from './connector';
@@ -18,6 +17,11 @@ import { noConnectorsCasePermission, renderWithTestingProviders } from '../../co
 import { FormTestComponent } from '../../common/test_utils';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { coreMock } from '@kbn/core/public/mocks';
+
+// Warm Jest's module cache for the React.lazy connector fields at module load (not governed by
+// testTimeout), so tests don't race the dynamic import under CI load.
+import '../connectors/jira/case_fields';
+import '../connectors/resilient/case_fields';
 
 jest.mock('../connectors/servicenow/use_get_choices');
 
@@ -84,7 +88,7 @@ describe('Connector', () => {
     );
 
     expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
-    await userEvent.click(await screen.findByTestId('dropdown-connectors'));
+    fireEvent.click(await screen.findByTestId('dropdown-connectors'));
 
     await waitForEuiPopoverOpen();
 
@@ -104,11 +108,11 @@ describe('Connector', () => {
     );
 
     expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
-    await userEvent.click(await screen.findByTestId('dropdown-connectors'));
+    fireEvent.click(await screen.findByTestId('dropdown-connectors'));
 
     await waitForEuiPopoverOpen();
 
-    await userEvent.click(await screen.findByTestId('dropdown-connector-resilient-2'));
+    fireEvent.click(await screen.findByTestId('dropdown-connector-resilient-2'));
 
     expect(await screen.findByTestId('connector-fields-resilient')).toBeInTheDocument();
   });

@@ -6,7 +6,7 @@
  */
 
 import { ApiPrivileges } from '@kbn/core-security-server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   API_VERSIONS,
   ALERTZERO_PROPOSALS_CATEGORY_URL,
@@ -18,6 +18,7 @@ import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { ProposalsPageResponse } from '../../../common/proposals/list';
 import {
   MAX_QUEUE_PAGE_SIZE,
+  MAX_ENTITY_FILTER_LENGTH,
   MAX_QUEUE_REACH,
   fitsQueueReach,
 } from '../../../common/proposals/list';
@@ -29,18 +30,23 @@ import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 // ProposalsService reads as asInternalUser, so authz is enforced only at this layer.
 const PROPOSALS_API_PRIVILEGE_READ = ApiPrivileges.read('proposals');
 
-const GetProposalsByCategoryParams = z.object({
-  category: proposalCategorySchema,
-});
+const GetProposalsByCategoryParams = lazySchema(() =>
+  z.object({
+    category: proposalCategorySchema,
+  })
+);
 
 // `size: 0` is a count-only read: a collapsed accordion needs the group total
 // without paying for its rows.
-const GetProposalsByCategoryQuery = z
-  .object({
-    size: z.coerce.number().int().min(0).max(MAX_QUEUE_PAGE_SIZE).default(10),
-    from: z.coerce.number().int().min(0).max(MAX_QUEUE_REACH).default(0),
-  })
-  .refine(fitsQueueReach, { message: `from + size must not exceed ${MAX_QUEUE_REACH}` });
+const GetProposalsByCategoryQuery = lazySchema(() =>
+  z
+    .object({
+      size: z.coerce.number().int().min(0).max(MAX_QUEUE_PAGE_SIZE).default(10),
+      from: z.coerce.number().int().min(0).max(MAX_QUEUE_REACH).default(0),
+      entity: z.string().min(1).max(MAX_ENTITY_FILTER_LENGTH).optional(),
+    })
+    .refine(fitsQueueReach, { message: `from + size must not exceed ${MAX_QUEUE_REACH}` })
+);
 
 export const registerGetProposalsByCategoryRoute = ({
   router,
@@ -73,14 +79,14 @@ export const registerGetProposalsByCategoryRoute = ({
       withAlertZeroEnabled(async (_context, request, response) => {
         try {
           const { category } = request.params;
-          const { size, from } = request.query;
+          const { size, from, entity } = request.query;
 
           const body: ProposalsPageResponse =
             await getConversationProposalsService().listByCategory(
               category,
               request,
               getSpaceId(request),
-              { size, from }
+              { size, from, entity }
             );
 
           return response.ok({ body });

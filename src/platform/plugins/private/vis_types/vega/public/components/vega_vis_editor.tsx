@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { CodeEditor, HJSON_LANG_ID } from '@kbn/code-editor';
-import { type UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { VegaByValueState } from '../../server';
@@ -70,6 +70,9 @@ const vegaVisStyles = {
       right: euiTheme.size.xxl,
       lineHeight: 1,
     }),
+  toolbarEditor: css({
+    minHeight: 0,
+  }),
 };
 
 const monacoOverride = {
@@ -89,11 +92,14 @@ export function VegaSpecEditor({
   initialFormat,
   onChange,
   onFormatChange,
+  actionsPlacement = 'overlay',
 }: {
   editorValue: string;
   initialFormat?: VegaByValueState['spec']['format'];
   onChange: (value: string) => void;
   onFormatChange?: (format: VegaByValueState['spec']['format']) => void;
+  /** `overlay` floats the actions over the top-right corner; `toolbar` renders them in a row above the editor. */
+  actionsPlacement?: 'overlay' | 'toolbar';
 }) {
   const styles = useMemoCss(vegaVisStyles);
   const monacoStyles = useMemoCss(monacoOverride);
@@ -147,31 +153,67 @@ export function VegaSpecEditor({
     return null;
   }
 
+  const actions = (
+    <>
+      <VegaHelpMenu />
+      <VegaActionsMenu formatHJson={formatHJson} formatJson={formatJson} />
+    </>
+  );
+
+  const editor = (
+    <CodeEditor
+      classNameCss={monacoStyles.override}
+      width="100%"
+      height="100%"
+      languageId={languageId}
+      value={editorValue}
+      onChange={handleChange}
+      options={{
+        lineNumbers: 'on',
+        fontSize: 12,
+        minimap: {
+          enabled: false,
+        },
+        folding: true,
+        wordWrap: 'on',
+        wrappingIndent: 'indent',
+        automaticLayout: true,
+      }}
+    />
+  );
+
+  if (actionsPlacement === 'toolbar') {
+    return (
+      <EuiFlexGroup
+        className="vgaEditor"
+        data-test-subj="vega-editor"
+        css={styles.base}
+        direction="column"
+        gutterSize="xs"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            className="vgaEditor__editorActions"
+            justifyContent="flexEnd"
+            alignItems="center"
+            gutterSize="xs"
+            responsive={false}
+          >
+            {actions}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem css={styles.toolbarEditor}>{editor}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
     <div className="vgaEditor" data-test-subj="vega-editor" css={styles.base}>
       <div className="vgaEditor__editorActions" css={styles.editorActions}>
-        <VegaHelpMenu />
-        <VegaActionsMenu formatHJson={formatHJson} formatJson={formatJson} />
+        {actions}
       </div>
-      <CodeEditor
-        classNameCss={monacoStyles.override}
-        width="100%"
-        height="100%"
-        languageId={languageId}
-        value={editorValue}
-        onChange={handleChange}
-        options={{
-          lineNumbers: 'on',
-          fontSize: 12,
-          minimap: {
-            enabled: false,
-          },
-          folding: true,
-          wordWrap: 'on',
-          wrappingIndent: 'indent',
-          automaticLayout: true,
-        }}
-      />
+      {editor}
     </div>
   );
 }

@@ -17,10 +17,14 @@
     ],
     "requiredPlugins": [
       "management",
-      "features"
+      "features",
+      "licensing",
+      "licenseApiGuard"
     ],
     "optionalPlugins": [
-      "cloud"
+      "cloud",
+      "share",
+      "usageCollection"
     ],
     "requiredBundles": [
       "kibanaReact"

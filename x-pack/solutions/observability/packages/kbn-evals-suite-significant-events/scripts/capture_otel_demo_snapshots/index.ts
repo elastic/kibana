@@ -35,13 +35,14 @@ import { captureDiscoveryForScenario } from '../lib/capture_discovery';
 import { sleep } from '../lib/sleep';
 import {
   cleanupExtractedData,
-  configureModelSelectionSettings,
   disableStreams,
   enableLogsNativeStream,
   enableSignificantEvents,
   logExtractedKIFeatures,
   persistKIFeaturesForSnapshot,
   persistKnowledgeIndicatorsForSnapshot,
+  createCaptureSource,
+  deleteCaptureSource,
   triggerKIExtraction,
   waitForKIExtraction,
 } from '../lib/significant_events_workflow';
@@ -83,9 +84,10 @@ run(
     if (!connectorId) {
       throw new Error(
         'Required: --connector-id <id>\n' +
-          'Provide the ID of an LLM connector for feature extraction ' +
+          'Provide a chat model connector or inference endpoint ID for KI onboarding ' +
+          'and optional discovery ' +
           '(e.g.: "bedrock-opus-46").\n' +
-          'This connector must be preconfigured in your kibana.dev.yml.'
+          'The model must be available in Kibana.'
       );
     }
 
@@ -206,7 +208,7 @@ run(
         1. Deploys the demo app on minikube
         2. Waits for baseline traffic
         3. Optionally patches a failure scenario and waits
-        4. Enables streams and triggers LLM feature extraction
+        4. Enables streams and runs KI onboarding with the requested model
         5. Snapshots logs + extracted features to GCS
         6. Cleans up and tears down the demo
 
@@ -244,7 +246,7 @@ run(
       boolean: ['dry-run', 'with-discovery'],
       help: `
         --logs-index       Logs index to use (default: logs)
-        --connector-id     (required) LLM connector ID for feature extraction (e.g.: bedrock-opus-46)
+        --connector-id     (required) Chat model connector or inference endpoint ID passed to each KI onboarding and discovery request (e.g.: bedrock-opus-46)
         --run-id           Run identifier used as GCS subfolder (default: today's date in format YYYY-MM-DD)
         --scenario         Process only specific scenario(s) - can be repeated. Omit for all.
         --dry-run          Print what would happen without executing
@@ -283,6 +285,7 @@ async function processScenario(
   onboardingSteps: KIsOnboardingStep[] = [KIsOnboardingStep.FeaturesIdentification]
 ): Promise<void> {
   const isFailure = isFailureScenario(scenario);
+  let captureSource: Awaited<ReturnType<typeof createCaptureSource>> | undefined;
 
   const snapshotIndices: string[] = ['logs*'];
 
@@ -303,11 +306,10 @@ async function processScenario(
     await deployDemo({ demoType, log, logsIndex });
     log.info('[2/8] Deployment complete');
 
-    // Step 3 — Configure significant events and the connector. Must run after
+    // Step 3 — Configure significant events. Must run after
     // deployDemo (Step 2) which enables Kibana Streams and its settings APIs.
     log.info('[3/8] Configuring significant events...');
     await enableSignificantEvents(config, log);
-    await configureModelSelectionSettings(config, log, connectorId);
 
     // Step 4 — Accumulate baseline traffic
     log.info('[4/8] Accumulating baseline traffic...');
@@ -324,16 +326,22 @@ async function processScenario(
       log.info('[5/8] Skipped failure data accumulation (healthy baseline)');
     }
 
-    // Step 6 — Run KI onboarding (persists features for the snapshot)
+    // Step 6 — Run KI onboarding (persists features for the snapshot). The source is created here,
+    // after the data exists: a source created earlier would run its own automatic onboarding on the
+    // baseline data and leave KIs in the snapshot that the capture did not extract.
+    log.info('[6/8] Creating the capture source...');
+    captureSource = await createCaptureSource(config, logsIndex);
+    const sourceId = captureSource.id;
     log.info(`[6/8] Running KI onboarding (${onboardingSteps.join(', ')})...`);
-    await triggerKIExtraction(config, log, logsIndex, onboardingSteps);
-    await waitForKIExtraction(config, log, logsIndex, extractionTimeoutMs);
-    await logExtractedKIFeatures(config, log, logsIndex);
+    await triggerKIExtraction(config, log, connectorId, sourceId, onboardingSteps);
+    await waitForKIExtraction(config, log, sourceId, extractionTimeoutMs);
+    await logExtractedKIFeatures(config, log, sourceId);
     const featuresResult = await persistKIFeaturesForSnapshot(
       config,
       esClient,
       log,
       scenario.id,
+      sourceId,
       logsIndex
     );
     log.info(`[6/8] Persisted ${featuresResult.count} feature KI(s)`);
@@ -345,7 +353,9 @@ async function processScenario(
       esClient,
       log,
       scenario.id,
-      logsIndex
+      sourceId,
+      logsIndex,
+      captureSource.view_name
     );
     log.info(`[6/8] Persisted ${knowledgeIndicatorsResult.count} knowledge indicators`);
     snapshotIndices.push(knowledgeIndicatorsResult.index);
@@ -385,6 +395,11 @@ async function processScenario(
     });
   } finally {
     log.info('[8/8] Cleaning up...');
+    if (captureSource) {
+      await deleteCaptureSource(config, captureSource.id).catch((error) =>
+        log.error(`deleteCaptureSource failed: ${error}`)
+      );
+    }
     await disableStreams(config, log).catch((e) => log.error(`disableStreams failed: ${e}`));
     await cleanupExtractedData(esClient, log).catch((e) =>
       log.error(`cleanupSigEventsExtractedData failed: ${e}`)

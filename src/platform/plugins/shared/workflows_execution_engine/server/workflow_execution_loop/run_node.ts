@@ -112,10 +112,8 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
 
     if (params.workflowExecutionState.getWorkflowExecution().cancelRequested) {
       await cancelWorkflowIfRequested(
-        params.workflowExecutionRepository,
         params.workflowExecutionState,
         stepExecutionRuntime,
-        params.workflowLogger,
         workflowExecutionCursor,
         stepExecutionRuntime.abortController
       );
@@ -163,17 +161,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       !stepExecutionRuntime.abortController.signal.aborted
     ) {
       runStepPromise = (async () => {
-        try {
-          await Promise.resolve(nodeImplementation.run());
-          if (stepExecutionRuntime) {
-            await handleExecutionDelay(params, stepExecutionRuntime);
-          }
-        } finally {
-          if (stepExecutionRuntime) {
-            await stepExecutionRuntime.flushEventLogs({
-              signal: params.signal,
-            });
-          }
+        await Promise.resolve(nodeImplementation.run());
+        if (stepExecutionRuntime) {
+          await handleExecutionDelay(params, stepExecutionRuntime);
         }
       })();
     }

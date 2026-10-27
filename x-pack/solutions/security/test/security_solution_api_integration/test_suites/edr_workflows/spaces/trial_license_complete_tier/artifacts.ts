@@ -93,9 +93,6 @@ export default function ({ getService }: FtrProviderContext) {
         siemFeatureId
       ].filter((privilege) => privilege !== 'global_artifact_management_all');
 
-      // Custom YARA signatures privilege is not added to pre-defined roles yet
-      artifactManagerRole.kibana[0].feature[siemFeatureId].push('custom_yara_signatures_all');
-
       const globalArtifactManagerRole = Object.assign(
         rolesUsersProvider.loader.getPreDefinedRole('t3_analyst'),
         { name: 'globalArtifactManager' }
@@ -110,9 +107,6 @@ export default function ({ getService }: FtrProviderContext) {
           'global_artifact_management_all'
         );
       }
-
-      // Custom YARA signatures privilege is not added to pre-defined roles yet
-      globalArtifactManagerRole.kibana[0].feature[siemFeatureId].push('custom_yara_signatures_all');
 
       supertestArtifactManager = await utils.createSuperTestWithCustomRole({
         name: 'artifactManager',

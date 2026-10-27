@@ -105,6 +105,141 @@ describe('usePackQueryForm', () => {
     });
   });
 
+  // A per-query override changes schedule details, never the mode (D11): a
+  // mixed-mode pack makes osquerybeat return ErrPackMixedScheduleModes and halt
+  // its osquery runner. When the pack's mode moves out from under a stored
+  // override, the override is stale and the query inherits — the same outcome
+  // as the server's `stripPriorModePerQueryFields` on a pack mode change.
+  describe('stale override mode normalization (elastic/kibana#272441)', () => {
+    const RRULE_PACK_SCHEDULE = {
+      schedule_type: 'rrule' as const,
+      rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00.000Z' },
+    };
+
+    it('seeds from the pack when an interval override meets a recurrence pack', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          defaultValue: makeSOPayload({ schedule_type: 'interval', interval: '670' }),
+          packSchedule: RRULE_PACK_SCHEDULE,
+        })
+      );
+
+      expect(result.current.getValues('schedule')?.scheduleType).toBe('rrule');
+    });
+
+    it('seeds from the pack when a recurrence override meets an interval pack', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          defaultValue: makeSOPayload({
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00.000Z' },
+          }),
+          packSchedule: { schedule_type: 'interval', interval: 900, hasExplicitSchedule: true },
+        })
+      );
+
+      const schedule = result.current.getValues('schedule');
+      expect(schedule?.scheduleType).toBe('interval');
+      expect(schedule?.interval).toBe(900);
+    });
+
+    it('turns the override toggle off for a stale-mode override', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          defaultValue: makeSOPayload({ schedule_type: 'interval', interval: '670' }),
+          packSchedule: RRULE_PACK_SCHEDULE,
+        })
+      );
+
+      expect(result.current.getValues('override_pack_schedule')).toBe(false);
+    });
+
+    it('keeps the override toggle on for a same-mode override', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          defaultValue: makeSOPayload({ schedule_type: 'interval', interval: '670' }),
+          packSchedule: { schedule_type: 'interval', interval: 3600, hasExplicitSchedule: true },
+        })
+      );
+
+      expect(result.current.getValues('override_pack_schedule')).toBe(true);
+    });
+
+    it('leaves a same-mode override untouched', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          defaultValue: makeSOPayload({ schedule_type: 'interval', interval: '670' }),
+          packSchedule: { schedule_type: 'interval', interval: 3600, hasExplicitSchedule: true },
+        })
+      );
+
+      expect(result.current.getValues('schedule')?.interval).toBe(670);
+    });
+
+    // A legacy pack (no persisted pack schedule) still locks the flyout to its
+    // synthesized interval mode, and the server rejects any per-query
+    // schedule_type on it. A stored recurrence override is therefore stale:
+    // the query inherits and keeps its own interval (elastic/kibana#277700).
+    it('treats a recurrence override in a legacy pack as stale and keeps the query interval', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          defaultValue: makeSOPayload({
+            interval: '80',
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00.000Z' },
+          }),
+          packSchedule: { schedule_type: 'interval', interval: 3600 },
+        })
+      );
+
+      const schedule = result.current.getValues('schedule');
+      expect(schedule?.scheduleType).toBe('interval');
+      expect(schedule?.interval).toBe(80);
+      expect(result.current.getValues('override_pack_schedule')).toBe(false);
+    });
+
+    // The edited interval must reach the wire rather than be dropped by the
+    // serializer's mode-mismatch branch.
+    it('serializes a legacy stale override as a bare interval with the edited value', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          defaultValue: makeSOPayload({
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00.000Z' },
+          }),
+          packSchedule: { schedule_type: 'interval', interval: 3600 },
+        })
+      );
+
+      const serialized = result.current.serializer({
+        ...result.current.getValues(),
+        interval: 120,
+      });
+
+      expect(serialized.interval).toBe('120');
+      expect(serialized).not.toHaveProperty('schedule_type');
+      expect(serialized).not.toHaveProperty('rrule_schedule');
+    });
+
+    it('leaves overrides alone when there is no pack schedule (flag off)', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          defaultValue: makeSOPayload({ schedule_type: 'interval', interval: '670' }),
+        })
+      );
+
+      expect(result.current.getValues('override_pack_schedule')).toBe(true);
+    });
+  });
+
   describe('serializer', () => {
     it('should strip schedule_type and interval from query when pack is rrule-scheduled and override is off', () => {
       const serialize = getSerializer({

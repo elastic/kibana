@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiFlyoutProps, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBadgeGroup,
@@ -20,8 +20,8 @@ import {
   EuiTabs,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiMemoizedStyles,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -37,9 +37,12 @@ import {
   useFlyoutTabs,
   useFlyoutTemplateConfig,
 } from '../context';
-import { renderTitleIcon, renderTitleWithIcon } from '../title_adornments';
+import {
+  renderTitleIcon,
+  renderTitleLoading,
+  renderTitleWithAdornments,
+} from '../title_adornments';
 import type { FlyoutHeaderProps } from '../types';
-import { FLYOUT_HEADER_CLASS_NAME } from '../use_header_collapse';
 import { Badge, badgePart, BADGE_PART_NAME, type HeaderBadgeDescriptor } from './badge';
 import { InfoBlock, infoBlockPart, INFO_BLOCK_PART_NAME } from './info_block';
 import { MetaBlock as MetaBlockPart, metaBlockPart, META_BLOCK_PART_NAME } from './meta_block';
@@ -59,27 +62,19 @@ export const Header = Object.assign(BaseHeader, {
   MetaBlock: MetaBlockPart,
 });
 
-/** Maps `paddingSize` to the header's horizontal padding; `undefined` follows EuiFlyout's `'l'` default. */
-const resolveHorizontalPadding = (
-  euiTheme: UseEuiTheme['euiTheme'],
-  paddingSize: EuiFlyoutProps['paddingSize']
-): string => {
-  switch (paddingSize) {
-    case 'none':
-      return '0';
-    case 's':
-      return euiTheme.size.s;
-    case 'm':
-      return euiTheme.size.base;
-    case 'l':
-    default:
-      return euiTheme.size.l;
-  }
-};
-
 const dividerStyles = ({ euiTheme }: UseEuiTheme) => ({
   divider: css`
     border-block-end: ${euiTheme.border.thin};
+    margin-inline: -${euiTheme.size.base};
+  `,
+});
+
+const titleStyles = () => ({
+  title: css`
+    a,
+    button {
+      font-weight: inherit;
+    }
   `,
 });
 
@@ -129,19 +124,13 @@ const collapsibleRegionStyles = ({ euiTheme }: UseEuiTheme) => {
   };
 };
 
-/** Full-width divider: negative horizontal margins bleed it past the header padding to the flyout edges. */
-const FullBleedDivider = ({ horizontalPadding }: { horizontalPadding: string }) => {
+/**
+ * Full-width divider: negative horizontal margins bleed it past the header padding to the flyout
+ * edges. `size.base` is the padding `EuiFlyout` applies for the template's `paddingSize="m"`.
+ */
+const FullBleedDivider = () => {
   const styles = useEuiMemoizedStyles(dividerStyles);
-  return (
-    <div
-      aria-hidden
-      css={styles.divider}
-      style={{
-        marginInlineStart: `-${horizontalPadding}`,
-        marginInlineEnd: `-${horizontalPadding}`,
-      }}
-    />
-  );
+  return <div aria-hidden css={styles.divider} />;
 };
 
 /** Badge counts above `MAX_VISIBLE_BADGES` collapse to `MAX_BADGES_BEFORE_OVERFLOW` plus an overflow badge. */
@@ -205,12 +194,27 @@ const BadgeOverflow = ({ badges, isHidden }: { badges: ReactNode[]; isHidden: bo
   );
 };
 
-/** Renders a resolved `Header.Badge` descriptor. */
-const renderBadge = ({ label, ...badgeProps }: HeaderBadgeDescriptor, key: string): ReactNode => (
-  <EuiBadge key={key} {...badgeProps}>
-    {label}
-  </EuiBadge>
-);
+/** Renders a resolved `Header.Badge` descriptor, wrapping in a tooltip when one is provided. */
+const renderBadge = (
+  { label, toolTipContent, toolTipPosition, ...badgeProps }: HeaderBadgeDescriptor,
+  key: string
+): ReactNode => {
+  // Tooltips open from keyboard focus, so a tooltipped non-interactive badge needs a tab stop.
+  const needsTabStop = Boolean(toolTipContent) && !badgeProps.onClick && !badgeProps.href;
+  const badge = (
+    <EuiBadge key={key} tabIndex={needsTabStop ? 0 : undefined} {...badgeProps}>
+      {label}
+    </EuiBadge>
+  );
+  if (!toolTipContent) {
+    return badge;
+  }
+  return (
+    <EuiToolTip key={key} content={toolTipContent} position={toolTipPosition}>
+      {badge}
+    </EuiToolTip>
+  );
+};
 
 type HeaderZoneProps = FlyoutHeaderProps & {
   flyoutTitleId?: string;
@@ -219,19 +223,21 @@ type HeaderZoneProps = FlyoutHeaderProps & {
 /** Internal renderer for the header zone; dividers are template-owned for full bleed. */
 export const HeaderZone = ({
   title,
+  titleText,
   titleIcon,
   titleTooltip,
+  isLoading = false,
   description,
   collapsed = false,
   children,
   flyoutTitleId,
   'data-test-subj': dataTestSubj,
 }: HeaderZoneProps) => {
-  const { euiTheme } = useEuiTheme();
   const badgeStyles = useEuiMemoizedStyles(badgeGroupStyles);
   const collapseStyles = useEuiMemoizedStyles(collapsibleRegionStyles);
-  const { dataTestSubj: rootTestSubj, paddingSize } = useFlyoutTemplateConfig();
-  const { tabs, selectedTabId, selectTab } = useFlyoutTabs();
+  const { title: titleCss } = useEuiMemoizedStyles(titleStyles);
+  const { dataTestSubj: rootTestSubj } = useFlyoutTemplateConfig();
+  const { tabs, tabBarProps, selectedTabId, selectTab } = useFlyoutTabs();
   const items = useMemo(() => headerAssembly.parseChildren(children), [children]);
   const {
     isCollapsed: isScrollCollapsed,
@@ -241,8 +247,12 @@ export const HeaderZone = ({
     headerRef,
   } = useFlyoutHeaderCollapse();
   const isCollapsed = collapsed || isScrollCollapsed;
-  const horizontalPadding = resolveHorizontalPadding(euiTheme, paddingSize);
   const titleIconNode = renderTitleIcon(titleIcon, titleTooltip);
+  const titleLoadingNode = renderTitleLoading(isLoading);
+  // The collapsed title truncates, so a string title gets a native hover reveal. A node title is
+  // left untitled: a native `title` on its ancestor would cover any tooltip the node renders.
+  const collapsedTitleText = typeof title === 'string' ? titleText ?? title : undefined;
+  const headerTestSubj = resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Header');
 
   // Every block kind carries its `instanceId` forward as its React key, so reordering or
   // removing one does not make React reuse the wrong element.
@@ -285,122 +295,134 @@ export const HeaderZone = ({
 
   return (
     <KibanaErrorBoundaryProvider>
-      <EuiFlyoutHeader
-        hasBorder={false}
-        className={FLYOUT_HEADER_CLASS_NAME}
-        data-test-subj={resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Header')}
-      >
+      <EuiFlyoutHeader hasBorder={false} ref={headerRef} data-test-subj={headerTestSubj}>
         <KibanaErrorBoundary>
-          {/* Wraps the header content so the collapse hook can reach the header element for wheel forwarding. */}
-          <div ref={headerRef}>
-            {/* Always visible: title row. Switches between expanded and compact on collapse. */}
-            <div ref={!isCollapsed ? expandedTitleRef : undefined}>
-              {isCollapsed ? (
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  responsive={false}
-                  css={collapseStyles.collapsedRow}
-                >
-                  <EuiFlexItem grow={false} css={collapseStyles.collapsedTitleItem}>
-                    <EuiTitle size="xs">
-                      <h3
-                        id={flyoutTitleId}
-                        css={collapseStyles.collapsedTitle}
-                        title={typeof title === 'string' ? title : undefined}
-                      >
-                        {title}
-                      </h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  {titleIconNode && <EuiFlexItem grow={false}>{titleIconNode}</EuiFlexItem>}
-                </EuiFlexGroup>
-              ) : (
-                renderTitleWithIcon(
-                  <EuiTitle size="m">
-                    <h3 id={flyoutTitleId}>{title}</h3>
-                  </EuiTitle>,
-                  titleIconNode
-                )
+          {/* Always visible: title row. Switches between expanded and compact on collapse. */}
+          <div ref={!isCollapsed ? expandedTitleRef : undefined}>
+            {isCollapsed ? (
+              <EuiFlexGroup
+                gutterSize="xs"
+                alignItems="center"
+                responsive={false}
+                css={collapseStyles.collapsedRow}
+              >
+                <EuiFlexItem grow={false} css={collapseStyles.collapsedTitleItem}>
+                  <EuiTitle size="xs">
+                    <h3
+                      id={flyoutTitleId}
+                      css={[titleCss, collapseStyles.collapsedTitle]}
+                      title={collapsedTitleText}
+                    >
+                      {title}
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                {titleIconNode && <EuiFlexItem grow={false}>{titleIconNode}</EuiFlexItem>}
+                {titleLoadingNode && <EuiFlexItem grow={false}>{titleLoadingNode}</EuiFlexItem>}
+              </EuiFlexGroup>
+            ) : (
+              renderTitleWithAdornments(
+                <EuiTitle size="m">
+                  <h3 id={flyoutTitleId} css={titleCss}>
+                    {title}
+                  </h3>
+                </EuiTitle>,
+                titleIconNode,
+                titleLoadingNode
+              )
+            )}
+          </div>
+
+          {/* Collapsible region: description, meta blocks, badges, info blocks. */}
+          <div
+            css={[
+              collapseStyles.wrapper,
+              isCollapsed ? collapseStyles.wrapperCollapsed : collapseStyles.wrapperExpanded,
+            ]}
+            aria-hidden={isCollapsed || undefined}
+            // `visibility` is delayed by the collapse animation, so it cannot be what removes
+            // this content from the tab order: for the length of the transition the region
+            // would be `aria-hidden` yet still focusable. `inert` applies immediately, which
+            // keeps the accessibility tree and the tab order in agreement. React 18 has no
+            // typing for the native attribute, hence the spread.
+            {...(isCollapsed && { inert: '' })}
+            data-test-subj="flyoutHeaderCollapsibleRegion"
+          >
+            <div css={collapseStyles.inner} ref={!collapsed ? collapsibleRef : undefined}>
+              {hasDescription && (
+                <>
+                  <EuiSpacer size="xs" />
+                  {/* No `<p>` wrapper: `description` accepts block content, which cannot nest in a paragraph. */}
+                  <EuiText size="s" color="subdued">
+                    {description}
+                  </EuiText>
+                </>
+              )}
+              {hasMetaBlocks && (
+                <>
+                  <EuiSpacer size="xs" />
+                  <MetaBlocks
+                    items={metaBlockItems}
+                    data-test-subj={resolveZoneTestSubj(undefined, headerTestSubj, 'MetaBlocks')}
+                  />
+                </>
+              )}
+              {hasBadges && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiBadgeGroup gutterSize="s" css={badgeStyles.group}>
+                    {visibleBadges}
+                    {overflowBadges.length > 0 && (
+                      <BadgeOverflow badges={overflowBadges} isHidden={isCollapsed} />
+                    )}
+                  </EuiBadgeGroup>
+                </>
+              )}
+              {hasInfoBlocks && (
+                <>
+                  <EuiSpacer size="m" />
+                  <InfoBlocks
+                    items={infoBlockItems}
+                    data-test-subj={resolveZoneTestSubj(undefined, headerTestSubj, 'InfoBlocks')}
+                  />
+                </>
               )}
             </div>
-
-            {/* Collapsible region: description, meta blocks, badges, info blocks. */}
-            <div
-              css={[
-                collapseStyles.wrapper,
-                isCollapsed ? collapseStyles.wrapperCollapsed : collapseStyles.wrapperExpanded,
-              ]}
-              aria-hidden={isCollapsed || undefined}
-              // `visibility` is delayed by the collapse animation, so it cannot be what removes
-              // this content from the tab order: for the length of the transition the region
-              // would be `aria-hidden` yet still focusable. `inert` applies immediately, which
-              // keeps the accessibility tree and the tab order in agreement. React 18 has no
-              // typing for the native attribute, hence the spread.
-              {...(isCollapsed && { inert: '' })}
-              data-test-subj="flyoutHeaderCollapsibleRegion"
-            >
-              <div css={collapseStyles.inner} ref={!collapsed ? collapsibleRef : undefined}>
-                {hasDescription && (
-                  <>
-                    <EuiSpacer size="xs" />
-                    {/* No `<p>` wrapper: `description` accepts block content, which cannot nest in a paragraph. */}
-                    <EuiText size="s" color="subdued">
-                      {description}
-                    </EuiText>
-                  </>
-                )}
-                {hasMetaBlocks && (
-                  <>
-                    <EuiSpacer size="xs" />
-                    <MetaBlocks items={metaBlockItems} />
-                  </>
-                )}
-                {hasBadges && (
-                  <>
-                    <EuiSpacer size="s" />
-                    <EuiBadgeGroup gutterSize="s" css={badgeStyles.group}>
-                      {visibleBadges}
-                      {overflowBadges.length > 0 && (
-                        <BadgeOverflow badges={overflowBadges} isHidden={isCollapsed} />
-                      )}
-                    </EuiBadgeGroup>
-                  </>
-                )}
-                {hasInfoBlocks && (
-                  <>
-                    <EuiSpacer size="m" />
-                    <InfoBlocks items={infoBlockItems} maxColumns="auto" />
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Spacing before tabs/divider adapts to collapsed state. */}
-            <div ref={!isCollapsed ? expandedSpacerRef : undefined}>
-              <EuiSpacer size={isCollapsed ? 'xs' : showTabs ? 's' : 'm'} />
-            </div>
-
-            {/* Always visible: tab bar. */}
-            {showTabs && (
-              <EuiTabs bottomBorder={false} size="m">
-                {tabs.map(({ id, label, tabDomId, panelDomId, ...tabProps }) => (
-                  <EuiTab
-                    key={id}
-                    {...tabProps}
-                    id={tabDomId}
-                    aria-controls={panelDomId}
-                    isSelected={id === selectedTabId}
-                    onClick={() => selectTab(id)}
-                  >
-                    {label}
-                  </EuiTab>
-                ))}
-              </EuiTabs>
-            )}
-
-            <FullBleedDivider horizontalPadding={horizontalPadding} />
           </div>
+
+          {/* Spacing before tabs/divider adapts to collapsed state. */}
+          <div ref={!isCollapsed ? expandedSpacerRef : undefined}>
+            <EuiSpacer size={isCollapsed ? 'xs' : showTabs ? 's' : 'm'} />
+          </div>
+
+          {/* Always visible: tab bar. */}
+          {showTabs && (
+            <EuiTabs
+              {...tabBarProps}
+              data-test-subj={resolveZoneTestSubj(
+                tabBarProps?.['data-test-subj'],
+                headerTestSubj,
+                'Tabs'
+              )}
+              bottomBorder={false}
+              size="m"
+            >
+              {tabs.map(({ id, label, tabDomId, panelDomId, ...tabProps }) => (
+                <EuiTab
+                  key={id}
+                  {...tabProps}
+                  id={tabDomId}
+                  aria-controls={panelDomId}
+                  isSelected={id === selectedTabId}
+                  onClick={() => selectTab(id)}
+                >
+                  {label}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+          )}
+
+          <FullBleedDivider />
         </KibanaErrorBoundary>
       </EuiFlyoutHeader>
     </KibanaErrorBoundaryProvider>

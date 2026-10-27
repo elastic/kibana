@@ -14,7 +14,6 @@ import {
   SAVE_PACK_BUTTON,
   FLYOUT_SAVED_QUERY_SAVE_BUTTON,
   customActionEditSavedQuerySelector,
-  POLICY_SELECT_COMBOBOX,
   SAVED_QUERY_DROPDOWN_SELECT,
   UPDATE_PACK_BUTTON,
   TABLE_ROWS,
@@ -26,6 +25,7 @@ import {
   changePackActiveStatus,
   preparePack,
   openScheduledPackExecutionDetails,
+  selectPackPolicy,
 } from '../../tasks/packs';
 import {
   closeModalIfVisible,
@@ -187,7 +187,7 @@ describe.skip(
         cy.contains('Snapshot').click();
         cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
-        cy.getBySel(POLICY_SELECT_COMBOBOX).type(`${DEFAULT_POLICY} {downArrow}{enter}`);
+        selectPackPolicy(DEFAULT_POLICY);
 
         cy.getBySel(UPDATE_PACK_BUTTON).click();
         closeModalIfVisible();
@@ -260,7 +260,7 @@ describe.skip(
         cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
         cy.get(formFieldInputSelector('name')).type(`${packName}{downArrow}{enter}`);
         cy.get(formFieldInputSelector('description')).type(`Pack description{downArrow}{enter}`);
-        cy.getBySel(POLICY_SELECT_COMBOBOX).type(`${DEFAULT_POLICY} {downArrow}{enter}`);
+        selectPackPolicy(DEFAULT_POLICY);
         cy.getBySel(ADD_QUERY_BUTTON).click();
 
         cy.contains('Attach next query');

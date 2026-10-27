@@ -12,24 +12,22 @@ import {
   addUserMessageStepCommonDefinition,
   type AddUserMessageInputSchema,
 } from '../../../common/workflows/steps/add_user_message';
+import { normalizeOptionalStringParam } from '../../../common/normalize_optional_string_param';
 import type { ConversationStepDeps } from '../registry';
 
-export const addUserMessageStepDefinition = ({
-  getExecutionService,
-  isExperimentalEnabled,
-}: ConversationStepDeps) =>
+export const addUserMessageStepDefinition = ({ getExecutionService }: ConversationStepDeps) =>
   createServerStepDefinition({
     ...addUserMessageStepCommonDefinition,
     handler: async (context: StepHandlerContext<AddUserMessageInputSchema>) => {
       try {
         const request = context.contextManager.getFakeRequest();
-        if (!(await isExperimentalEnabled(request))) {
-          return {
-            error: new Error('User message steps require experimental features to be enabled'),
-          };
-        }
 
-        const { conversation_id: conversationId, message } = context.input;
+        const {
+          conversation_id: conversationId,
+          message,
+          author_name: authorNameRaw,
+        } = context.input;
+        const authorName = normalizeOptionalStringParam(authorNameRaw);
 
         await getExecutionService().maybeExecuteAgent({
           mode: AgentExecutionMode.conversation,
@@ -38,6 +36,7 @@ export const addUserMessageStepDefinition = ({
             conversationId,
             nextInput: { message },
             triggerMode: ChatTriggerMode.Never,
+            ...(authorName ? { author: { full_name: authorName } } : {}),
           },
         });
 
