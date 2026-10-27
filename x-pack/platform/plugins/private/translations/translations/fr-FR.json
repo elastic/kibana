@@ -26481,7 +26481,6 @@
     "xpack.infra.hostsViewPage.table.nameColumnHeader": "Nom",
     "xpack.infra.hostsViewPage.table.nameTooltip": "{providerName} : {name}",
     "xpack.infra.hostsViewPage.table.normalizedLoad1mColumnHeader": "Charge normalisée (moy.)",
-    "xpack.infra.hostsViewPage.table.openHostDetailsLink.ariaLabel": "Ouvrir les détails de l'hôte {hostName}",
     "xpack.infra.hostsViewPage.table.rx.screenReaderOnlyLabel": "Réseau entrant",
     "xpack.infra.hostsViewPage.table.rxColumnHeader": "RX (moy.)",
     "xpack.infra.hostsViewPage.table.tooltip.activeAlertsExplanation": "Alertes actives",
