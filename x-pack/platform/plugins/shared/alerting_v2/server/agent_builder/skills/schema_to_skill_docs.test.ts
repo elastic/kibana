@@ -906,6 +906,17 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('message: |');
       expect(doc).not.toContain('message: >');
     });
+
+    it('puts each example message field in its own nested bullet', () => {
+      const doc = generateActionPolicyWorkflowPayloadDoc();
+      const fieldLines = doc
+        .split('\n')
+        .filter((line) => /^ {10}\S/.test(line) && line.includes('{{ alert.'));
+      expect(fieldLines.length).toBeGreaterThan(0);
+      for (const line of fieldLines) {
+        expect(line).toMatch(/^ {10}- /);
+      }
+    });
   });
 
   describe('Universal alerting agent builder start contract', () => {
