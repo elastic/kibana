@@ -1,0 +1,191 @@
+version: '1'
+# Bounded breadth-first traversal of the entity graph, driven by a scenario.
+#
+# A scenario (see ./scenarios/*.yaml) is an ordered list of hops. Each hop names an index, the
+# field the current frontier of ids is matched against, and the fields that yield the next
+# frontier. The workflow loads the scenario, then runs one hop per iteration until the hop
+# list, the frontier or a limit runs out. The two Security step types do the work that has to
+# be bounded in code: `security.loadEntityGraphTraversalScenario` clamps every limit to a
+# hard ceiling, and `security.runEntityGraphTraversalHop` binds the frontier as ES|QL
+# parameters, caps the rows it reads, skips hub nodes, and refuses to grow the visited set or
+# the edge list past the limits. The loop state kept here is ids and compact edges only, and
+# `stop_reason` is what ends the loop: an exhausted frontier, the hop budget, or a cap.
+name: Security - Entity graph traversal
+description: >
+  Walk the entity graph from a seed entity according to a named scenario and return the
+  reachable nodes and the edges that connect them, within explicit limits.
+enabled: true
+tags:
+  - security
+  - entity-analytics
+  - entity-graph
+settings:
+  timeout: 30m
+triggers:
+  - type: manual
+    inputs:
+      additionalProperties: false
+      required:
+        - scenario_id
+        - seed_id
+      properties:
+        scenario_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Id of a shipped traversal scenario, for example okta-user-to-aws-resources
+        seed_id:
+          type: string
+          minLength: 1
+          maxLength: 2048
+          description: >-
+            The entity to start from, in the form the first hop matches: the entity store EUID
+            (for example user:john.doe@acmecrm.com@okta) when the hop uses match_euid, or the
+            raw field value when it uses match_field
+        lookback:
+          type: string
+          pattern: '^[0-9]{1,5}(m|h|d)$'
+          description: Only consider documents newer than this on hops that declare a time_field, for example 7d
+        max_hops:
+          type: integer
+          minimum: 1
+          maximum: 20
+          description: Hop budget for the run; clamped to the scenario's ceiling
+        max_nodes:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          description: Distinct nodes admitted, including the seed
+        max_frontier:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          description: Ids expanded per hop; the rest are dropped and the run is marked truncated
+        max_edges_per_hop:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          description: Rows one hop query may return
+        max_edges_total:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          description: Edges kept across the whole run
+        hub_degree:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          description: A node with more distinct targets than this is not expanded
+        exclusions:
+          type: array
+          maxItems: 50
+          description: >-
+            Field/values pairs to leave out of every hop. Documents carrying one of the values in
+            the field are not read; values on entity.id also remove those nodes from the frontier
+            and from the reached targets, since node ids are entity ids.
+          items:
+            type: object
+            required:
+              - field
+              - values
+            properties:
+              field:
+                type: string
+                minLength: 1
+                maxLength: 256
+              values:
+                type: array
+                minItems: 1
+                maxItems: 100
+                items:
+                  type: string
+                  minLength: 1
+                  maxLength: 2048
+consts:
+  empty: []
+steps:
+  - name: load_scenario
+    type: security.loadEntityGraphTraversalScenario
+    with:
+      scenario_id: '{{ inputs.scenario_id }}'
+      overrides:
+        max_hops: '${{ inputs.max_hops }}'
+        max_nodes: '${{ inputs.max_nodes }}'
+        max_frontier: '${{ inputs.max_frontier }}'
+        max_edges_per_hop: '${{ inputs.max_edges_per_hop }}'
+        max_edges_total: '${{ inputs.max_edges_total }}'
+        hub_degree: '${{ inputs.hub_degree }}'
+
+  - name: init
+    type: data.set
+    with:
+      frontier: '${{ consts.empty | push: inputs.seed_id }}'
+      visited: '${{ consts.empty | push: inputs.seed_id }}'
+      edges: '${{ consts.empty }}'
+      # The seed is hop 0 of the result so consumers can draw it and the hop-1 edges from it.
+      nodes:
+        - id: '{{ inputs.seed_id }}'
+          hop: 0
+          via: seed
+          type: '{{ steps.load_scenario.output.seed.type }}'
+      hops_executed: 0
+      truncated: false
+      stop_reason: ''
+
+  # One iteration per expanded hop. The hop step reports `stop_reason` when the frontier is
+  # exhausted or a cap fires, which is what ends the loop; `max-iterations` is the same value
+  # as the hard hop ceiling and only exists as a second guard.
+  - name: traverse
+    type: while
+    condition: "${{ variables.stop_reason == '' and variables.hops_executed < steps.load_scenario.output.hops.size }}"
+    max-iterations:
+      limit: 20
+      on-limit: continue
+    steps:
+      - name: run_hop
+        type: security.runEntityGraphTraversalHop
+        with:
+          hop: '${{ steps.load_scenario.output.hops[variables.hops_executed] }}'
+          frontier: '${{ variables.frontier }}'
+          visited: '${{ variables.visited }}'
+          edges_so_far: '${{ variables.edges.size }}'
+          truncated_so_far: '${{ variables.truncated }}'
+          limits: '${{ steps.load_scenario.output.limits }}'
+          lookback: '{{ inputs.lookback }}'
+          exclusions: '${{ inputs.exclusions }}'
+
+      - name: advance
+        type: data.set
+        with:
+          frontier: '${{ steps.run_hop.output.next_frontier }}'
+          visited: '${{ steps.run_hop.output.visited }}'
+          edges: '${{ variables.edges | concat: steps.run_hop.output.edges }}'
+          nodes: '${{ variables.nodes | concat: steps.run_hop.output.nodes }}'
+          hops_executed: '${{ variables.hops_executed | plus: 1 }}'
+          truncated: '${{ steps.run_hop.output.truncated }}'
+          stop_reason: '{{ steps.run_hop.output.stop_reason }}'
+
+  # Annotate every admitted node with what the entity store of the execution space knows
+  # about it: its EUID, whether the store has it, the canonical entity for aliases, and the
+  # stored name, type, criticality and risk.
+  - name: resolve_nodes
+    type: security.resolveEntityGraphTraversalNodes
+    with:
+      nodes: '${{ variables.nodes }}'
+
+  - name: emit
+    type: workflow.output
+    with:
+      scenario_id: '{{ steps.load_scenario.output.id }}'
+      scenario_name: '{{ steps.load_scenario.output.name }}'
+      seed_id: '{{ inputs.seed_id }}'
+      exclusions: '${{ inputs.exclusions | default: consts.empty }}'
+      limits: '${{ steps.load_scenario.output.limits }}'
+      hops_planned: '${{ steps.load_scenario.output.hops.size }}'
+      hops_executed: '${{ variables.hops_executed }}'
+      stop_reason: '{{ variables.stop_reason }}'
+      truncated: '${{ variables.truncated }}'
+      node_count: '${{ variables.visited.size }}'
+      edge_count: '${{ variables.edges.size }}'
+      nodes: '${{ steps.resolve_nodes.output.nodes }}'
+      edges: '${{ variables.edges }}'

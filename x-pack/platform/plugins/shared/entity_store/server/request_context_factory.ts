@@ -30,6 +30,8 @@ import { ResolutionRulesClient } from './domain/resolution/rules';
 import { CustomResolutionRulesClient } from './domain/resolution/rules';
 import type { TelemetryReporter } from './telemetry/events';
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
+import { GraphTraversalClient } from './domain/graph_traversal';
+import type { GraphTraversalClientDeps } from './domain/graph_traversal';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   coreSetup: EntityStoreCoreSetup;
@@ -38,6 +40,7 @@ interface EntityStoreApiRequestHandlerContextDeps {
   request: KibanaRequest;
   isServerless: boolean;
   analytics: TelemetryReporter;
+  getWorkflowsManagement: GraphTraversalClientDeps['getWorkflowsManagement'];
 }
 
 export async function createRequestHandlerContext({
@@ -47,6 +50,7 @@ export async function createRequestHandlerContext({
   request,
   isServerless,
   analytics,
+  getWorkflowsManagement,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
   const [coreStart, startPlugins] = await coreSetup.getStartServices();
@@ -162,6 +166,11 @@ export async function createRequestHandlerContext({
       esClient: core.elasticsearch.client.asCurrentUser,
       spaceId: namespace,
       logger,
+    }),
+    graphTraversalClient: new GraphTraversalClient({
+      logger,
+      namespace,
+      getWorkflowsManagement,
     }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
     isDualProcessEnabled: () => isDualProcessEnabled(coreStart.featureFlags),

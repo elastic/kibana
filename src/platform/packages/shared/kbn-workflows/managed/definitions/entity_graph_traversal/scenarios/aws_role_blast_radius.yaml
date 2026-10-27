@@ -1,0 +1,38 @@
+version: '1'
+id: aws-role-blast-radius
+name: AWS IAM role blast radius
+description: >
+  Everything an AWS IAM role can reach through configuration, from Cloud Asset Discovery
+  documents only: roles it may assume, instances it may connect to, the roles those instances
+  run as, and the buckets those roles may access. One hop specification repeated up to the
+  hop budget.
+seed:
+  type: role
+  description: The IAM role ARN, for example arn:aws:iam::123456789012:role/okta-prod-admin
+limits:
+  max_hops: 6
+  max_nodes: 2000
+  max_frontier: 500
+  max_edges_per_hop: 5000
+  max_edges_total: 5000
+  hub_degree: 500
+hops:
+  - name: aws_asset_relationships
+    index: logs-cloud_asset_inventory.asset_inventory-*
+    match_field: entity.id
+    target_fields:
+      - field: entity.relationships.can_assume.entity.id
+        relation: can_assume
+      - field: entity.relationships.can_connect.entity.id
+        relation: can_connect
+      - field: entity.relationships.runs_as.entity.id
+        relation: runs_as
+      - field: entity.relationships.grants_access_to.entity.id
+        relation: grants_access_to
+    payload_fields:
+      - entity.name
+      - entity.sub_type
+    filter: 'cloud.provider == "aws"'
+    source_type: asset
+    target_type: asset
+    repeat: 6

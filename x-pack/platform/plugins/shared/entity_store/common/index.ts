@@ -93,6 +93,7 @@ export const ENTITY_STORE_ROUTES = {
     RESOLUTION_CUSTOM_RULES: `${INTERNAL_BASE_ROUTE}/resolution/custom_rules`,
     RESOLUTION_CUSTOM_RULE: `${INTERNAL_BASE_ROUTE}/resolution/custom_rules/{id}`,
     RESOLUTION_CUSTOM_RULES_PREVIEW: `${INTERNAL_BASE_ROUTE}/resolution/custom_rules/_preview`,
+    GRAPH_TRAVERSAL_RUN: `${INTERNAL_BASE_ROUTE}/graph_traversal/run`,
   },
 } as const satisfies Record<string, Record<string, string>>;
 
@@ -231,3 +232,18 @@ export type {
   AiSummaryMetadataStaleness,
   AiSummaryMetadataStalenessSnapshot,
 } from './domain/entity_metadata/ai_summary_metadata';
+
+export {
+  DEFAULT_GRAPH_TRAVERSAL_SCENARIO_ID,
+  HOST_GRAPH_TRAVERSAL_SCENARIO_ID,
+  getDefaultGraphTraversalScenarioId,
+} from './graph_traversal';
+export type {
+  GraphTraversalEdge,
+  GraphTraversalEntity,
+  GraphTraversalExclusion,
+  GraphTraversalNode,
+  GraphTraversalOutput,
+  RunGraphTraversalRequestBody,
+  RunGraphTraversalResponse,
+} from './graph_traversal';

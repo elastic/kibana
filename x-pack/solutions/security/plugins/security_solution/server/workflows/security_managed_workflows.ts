@@ -8,6 +8,7 @@
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { installSecurityAlertAnalysisWorkflow } from './alert_analysis_workflow/install';
+import { installSecurityEntityGraphTraversalWorkflow } from './entity_graph_traversal_workflow/install';
 import {
   initSecurityManagedWorkflowsClient,
   type SecurityManagedWorkflowsClient,
@@ -59,6 +60,12 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
     await installSecurityAlertAnalysisWorkflow({ managedWorkflowsClient });
   } catch (error) {
     logger.warn('Failed to install the alert analysis workflow', { error });
+  }
+
+  try {
+    await installSecurityEntityGraphTraversalWorkflow({ managedWorkflowsClient });
+  } catch (error) {
+    logger.warn('Failed to install the entity graph traversal workflow', { error });
   }
 
   try {

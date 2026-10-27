@@ -37,6 +37,7 @@ import {
   registerEngineConfig,
   registerInternalStart,
   registerInternalStop,
+  registerRunGraphTraversal,
 } from './apis';
 import type { EntityStorePluginRouter } from '../types';
 
@@ -59,6 +60,7 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerUpdate(router);
   registerEngineConfig(router);
   registerInternalStart(router);
+  registerRunGraphTraversal(router);
   registerInternalStop(router);
   registerResolutionLink(router);
   registerResolutionUnlink(router);

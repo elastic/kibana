@@ -59,6 +59,7 @@ import {
   ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW,
   ATTACK_DISCOVERY_VALIDATE_WORKFLOW,
 } from './discoveries';
+import { SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW } from './entity_graph_traversal';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW } from './nightshift_investigations/agent_optimize';
 import { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW } from './nightshift_investigations/decision_tree_hydrate';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW } from './nightshift_investigations/investigation';
@@ -111,6 +112,7 @@ export {
   SECURITY_ALERT_ANALYSIS_WORKFLOW,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
 } from './alert_analysis';
+export * from './entity_graph_traversal';
 export { DATADOG_ALERT_TRANSLATION_WORKFLOW_ID } from './datadog_alerts';
 export {
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW,
@@ -225,6 +227,7 @@ export const managedWorkflowDefinitions = [
   EXAMPLE_MANAGED_WORKFLOW,
   EXAMPLE_SERVICE_ACCOUNT_WORKFLOW,
   SECURITY_ALERT_ANALYSIS_WORKFLOW,
+  SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW,

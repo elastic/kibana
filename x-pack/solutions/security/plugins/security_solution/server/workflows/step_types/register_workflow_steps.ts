@@ -26,6 +26,11 @@ import { updateNoteStepDefinition } from './update_note_step/update_note_step';
 import { createRuleStepDefinition } from './create_rule_step/create_rule_step';
 import { patchRuleStepDefinition } from './patch_rule_step/patch_rule_step';
 import { getAlertEntitiesStepDefinition } from './get_alert_entities_step';
+import {
+  loadEntityGraphTraversalScenarioStepDefinition,
+  resolveEntityGraphTraversalNodesStepDefinition,
+  runEntityGraphTraversalHopStepDefinition,
+} from './entity_graph_traversal';
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
@@ -53,4 +58,7 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(createRuleStepDefinition);
   workflowsExtensions.registerStepDefinition(patchRuleStepDefinition);
   workflowsExtensions.registerStepDefinition(getAlertEntitiesStepDefinition);
+  workflowsExtensions.registerStepDefinition(loadEntityGraphTraversalScenarioStepDefinition);
+  workflowsExtensions.registerStepDefinition(runEntityGraphTraversalHopStepDefinition);
+  workflowsExtensions.registerStepDefinition(resolveEntityGraphTraversalNodesStepDefinition);
 };

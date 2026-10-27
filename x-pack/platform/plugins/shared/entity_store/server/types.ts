@@ -47,6 +47,7 @@ import type { RelationshipsClient } from './domain/relationships';
 import type { ResolutionClient } from './domain/resolution';
 import type { ResolutionRulesClient } from './domain/resolution/rules';
 import type { CustomResolutionRulesClient } from './domain/resolution/rules';
+import type { GraphTraversalClient } from './domain/graph_traversal';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import type { TelemetryReporter } from './telemetry/events';
 import type {
@@ -84,6 +85,7 @@ export interface EntityStoreApiRequestHandlerContext {
   resolutionClient: ResolutionClient;
   entityResolutionRuleClient: ResolutionRulesClient;
   customResolutionRulesClient: CustomResolutionRulesClient;
+  graphTraversalClient: GraphTraversalClient;
   featureFlags: FeatureFlags;
   /** Cloud feature flag gating the dual-process (priority + non-priority) extraction architecture. */
   isDualProcessEnabled: () => Promise<boolean>;

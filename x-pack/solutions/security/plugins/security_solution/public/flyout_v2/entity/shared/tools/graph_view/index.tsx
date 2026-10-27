@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
+import React, { memo, useCallback, useState } from 'react';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import {
   GraphGroupedNodePreviewPanel,
@@ -32,6 +32,8 @@ import {
   FLYOUT_SURFACE,
   FLYOUT_TOOL,
 } from '../../../../../common/lib/telemetry';
+import { GraphViewSubTab, GraphViewSubTabs } from './graph_view_sub_tabs';
+import { BlastRadiusSubTab } from './blast_radius';
 
 const TITLE = ENTITY_GRAPH_VIEW_TITLE;
 
@@ -53,12 +55,14 @@ export interface GraphViewProps {
 }
 
 /**
- * Tool flyout rendering the shared {@link GraphVisualization} centered on an entity. Node clicks
- * open documents / networks / grouped nodes / entities as separate system flyouts via
- * `overlays.openSystemFlyout` instead of the legacy expandable flyout API.
+ * Tool flyout rendering the shared {@link GraphVisualization} centered on an entity, or the
+ * on-demand blast radius traversal, switched with a button group. Node clicks open documents /
+ * networks / grouped nodes / entities as separate system flyouts via `overlays.openSystemFlyout`
+ * instead of the legacy expandable flyout API.
  */
 export const GraphView = memo(
   ({ entityId, scopeId, entityName, onShowEntity, onShowOriginatingEntity }: GraphViewProps) => {
+    const [subTab, setSubTab] = useState<GraphViewSubTab>(GraphViewSubTab.ENTITY_GRAPH);
     const open = useOpenFlyout();
     const { historyKey } = useFlyoutSessionContext();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
@@ -131,15 +135,21 @@ export const GraphView = memo(
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <GraphVisualization
-            mode="entity"
-            scopeId={scopeId}
-            entityId={entityId}
-            onShowDocument={onShowDocument}
-            onShowEntity={onShowEntity}
-            onShowNetwork={onShowNetwork}
-            onShowGrouped={onShowGrouped}
-          />
+          <GraphViewSubTabs selected={subTab} onChange={setSubTab} />
+          <EuiSpacer size="s" />
+          {subTab === GraphViewSubTab.ENTITY_GRAPH ? (
+            <GraphVisualization
+              mode="entity"
+              scopeId={scopeId}
+              entityId={entityId}
+              onShowDocument={onShowDocument}
+              onShowEntity={onShowEntity}
+              onShowNetwork={onShowNetwork}
+              onShowGrouped={onShowGrouped}
+            />
+          ) : (
+            <BlastRadiusSubTab entityId={entityId} />
+          )}
         </EuiFlyoutBody>
       </>
     );
