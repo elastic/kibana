@@ -95,6 +95,58 @@ describe('groupByPackage — namespaces', () => {
     });
   });
 
+  describe('global namespace', () => {
+    it('puts every original without a namespace of its own in the global one', () => {
+      const groups = groupByPackage(originals, [], {}, DEFAULT_NAMESPACE, 'prod');
+
+      expect(groups.map((g) => [g.groupId, g.namespace, g.instanceIds])).toEqual([
+        ['aws__prod', 'prod', ['elb', 's3']],
+      ]);
+    });
+
+    it('lets a duplicate keep its own namespace over the global one', () => {
+      const [, duplicate] = groupByPackage(
+        originals,
+        [original('elb__dup-1')],
+        { 'elb__dup-1': withNamespace('staging') },
+        DEFAULT_NAMESPACE,
+        'prod'
+      );
+
+      expect(duplicate.namespace).toBe('staging');
+    });
+
+    it('gives a duplicate without a namespace the global one', () => {
+      const [, duplicate] = groupByPackage(
+        originals,
+        [original('elb__dup-1')],
+        { 'elb__dup-1': withNamespace() },
+        DEFAULT_NAMESPACE,
+        'prod'
+      );
+
+      expect(duplicate.namespace).toBe('prod');
+    });
+
+    it('keeps the global namespace without a default namespace too', () => {
+      const [group] = groupByPackage(originals, [], {}, undefined, 'prod');
+
+      expect(group.namespace).toBe('prod');
+    });
+
+    it('still finds the policy of a tracked instance after the namespace changed', () => {
+      const groups = groupByPackage(originals, [], {}, DEFAULT_NAMESPACE, 'prod');
+
+      const { createGroups, policyUpdates } = planPolicyUpdates(groups, groups, {
+        elb: 'policy-A',
+        s3: 'policy-A',
+      });
+
+      expect(createGroups).toEqual([]);
+      expect(policyUpdates.map((u) => u.policyId)).toEqual(['policy-A']);
+    });
+  });
+
   describe('without a default namespace (agent-based: empty means the agent policy namespace)', () => {
     it('keeps an empty namespace and an explicit default apart', () => {
       const groups = groupByPackage(originals, [], {
