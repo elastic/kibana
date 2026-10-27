@@ -15,6 +15,7 @@ import {
 import { isRuleExecutionCancellationError } from '../../execution_context';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { isEsqlUserError } from '../../errors/esql_user_error';
+import { resolveErrorSource } from '../../errors/error_source';
 import { getFailedStep, tagFailedStep } from '../execution_outcome';
 
 /**
@@ -61,11 +62,13 @@ export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
         const alreadyReported = getFailedStep(error) !== undefined;
 
         if (!alreadyReported && !isRuleExecutionCancellationError(error)) {
-          (latestState?.logger ?? fallbackLogger).withLabels({ step: ctx.step.name }).error({
-            message: isEsqlUserError(error) ? 'Rule query failed to parse or verify' : undefined,
-            error,
-            code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
-          });
+          (latestState?.logger ?? fallbackLogger)
+            .withLabels({ step: ctx.step.name, error_source: resolveErrorSource(error) })
+            .error({
+              message: isEsqlUserError(error) ? 'Rule query failed to parse or verify' : undefined,
+              error,
+              code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+            });
         }
 
         throw tagFailedStep(error, ctx.step.name);

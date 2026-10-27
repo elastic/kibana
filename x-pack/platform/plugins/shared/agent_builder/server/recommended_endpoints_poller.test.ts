@@ -9,6 +9,7 @@ import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/
 import { deriveRecommendations } from './recommended_endpoints_poller';
 
 const SONNET = '.anthropic-claude-4.6-sonnet-chat_completion';
+const SONNET_NEW = '.anthropic-claude-5.5-sonnet-chat_completion';
 const OPUS = '.anthropic-claude-4.6-opus-chat_completion';
 const HAIKU = '.anthropic-claude-4.5-haiku-chat_completion';
 const GEMINI_FLASH = '.google-gemini-3.0-flash-chat_completion';
@@ -17,7 +18,7 @@ const makeEndpoint = (
   inferenceId: string,
   overrides: {
     capability?: string;
-    family?: string;
+    status?: string;
     releaseDate?: string;
     endOfLifeDate?: string;
     properties?: string[];
@@ -36,47 +37,44 @@ const makeEndpoint = (
     return base as unknown as InferenceInferenceEndpointInfo;
   }
 
+  const baseProperties = overrides.properties ?? ['kibana-connector'];
+  const properties = overrides.capability
+    ? [...baseProperties, overrides.capability]
+    : baseProperties;
+
   return {
     ...base,
     metadata: {
       heuristics: {
-        properties: overrides.properties ?? ['kibana-connector'],
+        properties,
+        status: overrides.status ?? 'ga',
         ...(overrides.releaseDate ? { release_date: overrides.releaseDate } : {}),
         ...(overrides.endOfLifeDate ? { end_of_life_date: overrides.endOfLifeDate } : {}),
       },
-      ...(overrides.capability ? { capability: overrides.capability } : {}),
-      ...(overrides.family ? { family: overrides.family } : {}),
     },
   } as unknown as InferenceInferenceEndpointInfo;
 };
 
 describe('deriveRecommendations', () => {
-  describe('null gates — EIS fields not yet available', () => {
-    it('returns null when no eligible endpoint has a capability field', () => {
-      expect(deriveRecommendations([makeEndpoint(SONNET, { family: 'claude-sonnet' })])).toBeNull();
+  describe('null gates — no eligible endpoints', () => {
+    it('returns null when no endpoint has a recognized capability in heuristics.properties', () => {
+      expect(deriveRecommendations([makeEndpoint(SONNET)])).toBeNull();
     });
 
-    it('returns null when no eligible endpoint has a family field', () => {
-      expect(deriveRecommendations([makeEndpoint(SONNET, { capability: 'capable' })])).toBeNull();
-    });
-
-    it('returns null when capability/family endpoints are ineligible (wrong task type)', () => {
-      expect(
-        deriveRecommendations([
-          makeEndpoint(SONNET, { capability: 'capable', family: 'claude', taskType: 'rerank' }),
-        ])
-      ).toBeNull();
-    });
-
-    it('returns null when all endpoints have unrecognised capability', () => {
+    it('returns null when all eligible endpoints have an unrecognised capability', () => {
       expect(
         deriveRecommendations([
           makeEndpoint(SONNET, {
             capability: 'multilingual',
-            family: 'claude-sonnet',
             releaseDate: '2025-01-01',
           }),
         ])
+      ).toBeNull();
+    });
+
+    it('returns null when capability endpoints are ineligible (wrong task type)', () => {
+      expect(
+        deriveRecommendations([makeEndpoint(SONNET, { capability: 'capable', taskType: 'rerank' })])
       ).toBeNull();
     });
   });
@@ -84,11 +82,7 @@ describe('deriveRecommendations', () => {
   describe('partial results — independent list application', () => {
     it('returns only recommended when no efficient model is present', () => {
       const result = deriveRecommendations([
-        makeEndpoint(SONNET, {
-          capability: 'capable',
-          family: 'claude-sonnet',
-          releaseDate: '2025-01-01',
-        }),
+        makeEndpoint(SONNET, { capability: 'capable', releaseDate: '2025-01-01' }),
       ]);
       expect(result?.recommended).toContain(SONNET);
       expect(result?.fast).toBeUndefined();
@@ -96,11 +90,7 @@ describe('deriveRecommendations', () => {
 
     it('returns only fast when no capable/balanced model is present', () => {
       const result = deriveRecommendations([
-        makeEndpoint(HAIKU, {
-          capability: 'efficient',
-          family: 'claude-haiku',
-          releaseDate: '2025-01-01',
-        }),
+        makeEndpoint(HAIKU, { capability: 'efficient', releaseDate: '2025-01-01' }),
       ]);
       expect(result?.fast).toContain(HAIKU);
       expect(result?.recommended).toBeUndefined();
@@ -111,46 +101,41 @@ describe('deriveRecommendations', () => {
     it('excludes endpoints with no metadata', () => {
       const result = deriveRecommendations([
         makeEndpoint(SONNET, { noMetadata: true }),
-        makeEndpoint(HAIKU, {
-          capability: 'efficient',
-          family: 'claude-haiku',
-          releaseDate: '2025-01-01',
-        }),
+        makeEndpoint(HAIKU, { capability: 'efficient', releaseDate: '2025-01-01' }),
       ]);
-      // SONNET has no metadata so it cannot contribute a capability → no main list → null or fast-only
+      // SONNET has no metadata so it cannot contribute a capability → no main list → fast-only
       expect(result?.recommended).toBeUndefined();
     });
 
     it('excludes endpoints without kibana-connector property', () => {
       const result = deriveRecommendations([
-        makeEndpoint(SONNET, {
-          capability: 'capable',
-          family: 'claude',
-          properties: [],
-          releaseDate: '2025-01-01',
-        }),
-        makeEndpoint(HAIKU, {
-          capability: 'efficient',
-          family: 'claude-haiku',
-          releaseDate: '2025-01-01',
-        }),
+        makeEndpoint(SONNET, { capability: 'capable', properties: [], releaseDate: '2025-01-01' }),
+        makeEndpoint(HAIKU, { capability: 'efficient', releaseDate: '2025-01-01' }),
       ]);
       expect(result?.recommended).toBeUndefined();
+    });
+
+    it('excludes endpoints with non-ga status', () => {
+      const result = deriveRecommendations([
+        makeEndpoint(SONNET, {
+          capability: 'capable',
+          releaseDate: '2025-01-01',
+          status: 'preview',
+        }),
+        makeEndpoint(HAIKU, { capability: 'efficient', releaseDate: '2025-01-01' }),
+      ]);
+      expect(result?.recommended).toBeUndefined();
+      expect(result?.fast).toContain(HAIKU);
     });
 
     it('excludes endpoints with end_of_life_date set', () => {
       const result = deriveRecommendations([
         makeEndpoint(SONNET, {
           capability: 'capable',
-          family: 'claude-sonnet',
           releaseDate: '2025-01-01',
           endOfLifeDate: '2026-01-01',
         }),
-        makeEndpoint(HAIKU, {
-          capability: 'efficient',
-          family: 'claude-haiku',
-          releaseDate: '2025-01-01',
-        }),
+        makeEndpoint(HAIKU, { capability: 'efficient', releaseDate: '2025-01-01' }),
       ]);
       expect(result?.recommended).toBeUndefined();
       expect(result?.fast).toContain(HAIKU);
@@ -158,16 +143,8 @@ describe('deriveRecommendations', () => {
 
     it('excludes endpoints with non-chat_completion task type', () => {
       const result = deriveRecommendations([
-        makeEndpoint(SONNET, {
-          capability: 'capable',
-          family: 'claude',
-          taskType: 'sparse_embedding',
-        }),
-        makeEndpoint(HAIKU, {
-          capability: 'efficient',
-          family: 'claude-haiku',
-          releaseDate: '2025-01-01',
-        }),
+        makeEndpoint(SONNET, { capability: 'capable', taskType: 'sparse_embedding' }),
+        makeEndpoint(HAIKU, { capability: 'efficient', releaseDate: '2025-01-01' }),
       ]);
       expect(result?.recommended).toBeUndefined();
     });
@@ -176,16 +153,8 @@ describe('deriveRecommendations', () => {
   describe('capability tier routing', () => {
     it('routes capable to recommended, not fast', () => {
       const result = deriveRecommendations([
-        makeEndpoint(SONNET, {
-          capability: 'capable',
-          family: 'claude-sonnet',
-          releaseDate: '2025-01-01',
-        }),
-        makeEndpoint(HAIKU, {
-          capability: 'efficient',
-          family: 'claude-haiku',
-          releaseDate: '2025-01-01',
-        }),
+        makeEndpoint(SONNET, { capability: 'capable', releaseDate: '2025-01-01' }),
+        makeEndpoint(HAIKU, { capability: 'efficient', releaseDate: '2025-01-01' }),
       ]);
       expect(result?.recommended).toContain(SONNET);
       expect(result?.fast).not.toContain(SONNET);
@@ -193,32 +162,16 @@ describe('deriveRecommendations', () => {
 
     it('routes balanced to recommended', () => {
       const result = deriveRecommendations([
-        makeEndpoint(SONNET, {
-          capability: 'balanced',
-          family: 'claude-sonnet',
-          releaseDate: '2025-01-01',
-        }),
-        makeEndpoint(HAIKU, {
-          capability: 'efficient',
-          family: 'claude-haiku',
-          releaseDate: '2025-01-01',
-        }),
+        makeEndpoint(SONNET, { capability: 'balanced', releaseDate: '2025-01-01' }),
+        makeEndpoint(HAIKU, { capability: 'efficient', releaseDate: '2025-01-01' }),
       ]);
       expect(result?.recommended).toContain(SONNET);
     });
 
     it('routes efficient to fast, not recommended', () => {
       const result = deriveRecommendations([
-        makeEndpoint(SONNET, {
-          capability: 'capable',
-          family: 'claude-sonnet',
-          releaseDate: '2025-01-01',
-        }),
-        makeEndpoint(HAIKU, {
-          capability: 'efficient',
-          family: 'claude-haiku',
-          releaseDate: '2025-01-01',
-        }),
+        makeEndpoint(SONNET, { capability: 'capable', releaseDate: '2025-01-01' }),
+        makeEndpoint(HAIKU, { capability: 'efficient', releaseDate: '2025-01-01' }),
       ]);
       expect(result?.fast).toContain(HAIKU);
       expect(result?.recommended).not.toContain(HAIKU);
@@ -228,66 +181,30 @@ describe('deriveRecommendations', () => {
   describe('newest-per-family selection', () => {
     it('picks the model with the more recent release_date within a family', () => {
       const result = deriveRecommendations([
-        makeEndpoint(SONNET, {
-          capability: 'capable',
-          family: 'claude-sonnet',
-          releaseDate: '2025-01-01',
-        }),
-        makeEndpoint(OPUS, {
-          capability: 'capable',
-          family: 'claude-sonnet',
-          releaseDate: '2025-06-01',
-        }),
-        makeEndpoint(HAIKU, {
-          capability: 'efficient',
-          family: 'claude-haiku',
-          releaseDate: '2025-01-01',
-        }),
+        makeEndpoint(SONNET, { capability: 'capable', releaseDate: '2025-01-01' }),
+        makeEndpoint(SONNET_NEW, { capability: 'capable', releaseDate: '2025-06-01' }),
+        makeEndpoint(HAIKU, { capability: 'efficient', releaseDate: '2025-01-01' }),
       ]);
-      expect(result?.recommended).toContain(OPUS);
+      expect(result?.recommended).toContain(SONNET_NEW);
       expect(result?.recommended).not.toContain(SONNET);
     });
 
     it('prefers any release_date over no release_date', () => {
       const result = deriveRecommendations([
-        makeEndpoint(SONNET, { capability: 'capable', family: 'claude-sonnet' }), // no date
-        makeEndpoint(OPUS, {
-          capability: 'capable',
-          family: 'claude-sonnet',
-          releaseDate: '2025-01-01',
-        }),
-        makeEndpoint(HAIKU, {
-          capability: 'efficient',
-          family: 'claude-haiku',
-          releaseDate: '2025-01-01',
-        }),
+        makeEndpoint(SONNET, { capability: 'capable' }), // no date
+        makeEndpoint(SONNET_NEW, { capability: 'capable', releaseDate: '2025-01-01' }),
+        makeEndpoint(HAIKU, { capability: 'efficient', releaseDate: '2025-01-01' }),
       ]);
-      expect(result?.recommended).toContain(OPUS);
+      expect(result?.recommended).toContain(SONNET_NEW);
       expect(result?.recommended).not.toContain(SONNET);
     });
 
     it('picks one winner per family across multiple families', () => {
       const result = deriveRecommendations([
-        makeEndpoint(SONNET, {
-          capability: 'capable',
-          family: 'claude-sonnet',
-          releaseDate: '2025-01-01',
-        }),
-        makeEndpoint(OPUS, {
-          capability: 'capable',
-          family: 'claude-opus',
-          releaseDate: '2025-01-01',
-        }),
-        makeEndpoint(HAIKU, {
-          capability: 'efficient',
-          family: 'claude-haiku',
-          releaseDate: '2025-01-01',
-        }),
-        makeEndpoint(GEMINI_FLASH, {
-          capability: 'efficient',
-          family: 'gemini-flash',
-          releaseDate: '2025-01-01',
-        }),
+        makeEndpoint(SONNET, { capability: 'capable', releaseDate: '2025-01-01' }),
+        makeEndpoint(OPUS, { capability: 'capable', releaseDate: '2025-01-01' }),
+        makeEndpoint(HAIKU, { capability: 'efficient', releaseDate: '2025-01-01' }),
+        makeEndpoint(GEMINI_FLASH, { capability: 'efficient', releaseDate: '2025-01-01' }),
       ]);
       expect(result?.recommended).toHaveLength(2);
       expect(result?.fast).toHaveLength(2);
@@ -297,16 +214,8 @@ describe('deriveRecommendations', () => {
   describe('successful result shape', () => {
     it('returns correct inference IDs in both lists', () => {
       const result = deriveRecommendations([
-        makeEndpoint(SONNET, {
-          capability: 'capable',
-          family: 'claude-sonnet',
-          releaseDate: '2025-01-01',
-        }),
-        makeEndpoint(HAIKU, {
-          capability: 'efficient',
-          family: 'claude-haiku',
-          releaseDate: '2025-01-01',
-        }),
+        makeEndpoint(SONNET, { capability: 'capable', releaseDate: '2025-01-01' }),
+        makeEndpoint(HAIKU, { capability: 'efficient', releaseDate: '2025-01-01' }),
       ]);
       expect(result).toEqual({ recommended: [SONNET], fast: [HAIKU] });
     });

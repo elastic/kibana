@@ -14,7 +14,7 @@ import {
   ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
 } from '@kbn/alerting-v2-constants';
 import { MAX_KQL_LENGTH } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_ALERTS_READ_ROLE, apiTest, NO_ACCESS_ROLE } from '../fixtures';
+import { ALERTING_V2_ALERTS_READ_ROLE, apiTest, NO_ACCESS_ROLE, testData } from '../fixtures';
 
 const RULE_ID_A = 'matcher-suggestions-rule-a';
 const RULE_ID_B = 'matcher-suggestions-rule-b';
@@ -67,7 +67,7 @@ apiTest.describe('Rule event fields suggestions API', { tag: tags.stateful.all }
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     adminCredentials = await requestAuth.getApiKeyForAdmin();
-    adminHeaders = { ...adminCredentials.apiKeyHeader };
+    adminHeaders = { ...testData.COMMON_HEADERS, ...adminCredentials.apiKeyHeader };
   });
 
   apiTest.beforeEach(async ({ apiServices, esClient }) => {
@@ -148,7 +148,7 @@ apiTest.describe('Rule event fields suggestions API', { tag: tags.stateful.all }
       );
 
       const response = await apiClient.get(ruleEventFieldsUrl(), {
-        headers: readerCredentials.apiKeyHeader,
+        headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         responseType: 'json',
       });
 
@@ -162,7 +162,7 @@ apiTest.describe('Rule event fields suggestions API', { tag: tags.stateful.all }
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
 
       const response = await apiClient.get(ruleEventFieldsUrl(), {
-        headers: noAccessCredentials.apiKeyHeader,
+        headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         responseType: 'json',
       });
 

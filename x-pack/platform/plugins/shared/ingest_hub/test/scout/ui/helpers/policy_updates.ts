@@ -7,7 +7,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { mockAwsPackage, navigateToOnboardingStep } from './onboarding';
+import { mockAwsPackage, navigateToOnboardingStep, selectStaticKeysAuth } from './onboarding';
 import { ACCESS_KEY_REF, SECRET_KEY_REF, fulfillJson } from './stored_secrets';
 
 // Two services of the `aws` package: adding the second one to a deployed first one must update the
@@ -19,8 +19,8 @@ const template = (name: string) => ({
   deployment_modes: { agentless: { enabled: true } },
   inputs: [{ type: 'aws-s3' }],
 });
-// guardduty has an optional setting, so its settings flyout (where the namespace is set) can be
-// opened; elb has none and stays untouched.
+// guardduty has an optional setting, so its settings flyout can be opened; elb has none and stays
+// untouched.
 const dataStream = (name: string, vars: unknown[] = []) => ({
   path: `${name}_logs`,
   type: 'logs',
@@ -150,7 +150,7 @@ export async function deployElbWithTypedKeys(
     selectedServiceIds: ['elb'],
     globalRegion: 'us-east-1',
   });
-  await page.getByRole('radio', { name: /access keys/i }).click({ force: true });
+  await selectStaticKeysAuth(page);
   await page.testSubj.locator('awsStaticKeysForm-accessKeyId').fill('mi1');
   await page.testSubj.locator('awsStaticKeysForm-secretAccessKey').fill('mis1');
   const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');
