@@ -288,6 +288,71 @@ describe('floor_alert_triage_review — live revision', () => {
   });
 });
 
+describe('floor_alert_triage_review — decisions', () => {
+  const approval = () => stepByName('store_fp_decisions_after_approval');
+  const dismissal = () => stepByName('store_fp_decisions_after_dismissal');
+
+  it('stores decisions after an approval and after a dismissal, with the same step', () => {
+    expect(approval()?.type).toBe('alertzero.triage.storeFpDecisions');
+    expect(dismissal()?.type).toBe('alertzero.triage.storeFpDecisions');
+    expect(approval()?.with?.outcome).toBe('approved');
+    expect(dismissal()?.with?.outcome).toBe('dismissed');
+  });
+
+  it('does not fail a finished approval or dismissal when the store fails', () => {
+    expect(approval()?.['on-failure']?.continue).toBe(true);
+    expect(dismissal()?.['on-failure']?.continue).toBe(true);
+  });
+
+  it('runs inside the approved and dismissed branches only', () => {
+    const inBranch = (branch: string) =>
+      flatten(stepByName(branch)?.steps ?? []).map(({ name }) => name);
+    expect(inBranch('handle_approved')).toContain('store_fp_decisions_after_approval');
+    expect(inBranch('handle_dismissed')).toContain('store_fp_decisions_after_dismissal');
+    expect(inBranch('handle_expired')).not.toEqual(
+      expect.arrayContaining(['store_fp_decisions_after_approval'])
+    );
+  });
+
+  it('stores the alerts of the live revision, and nothing when the live revision could not be read', () => {
+    for (const step of [approval(), dismissal()]) {
+      expect(step?.with?.alert_ids).toBe('${{ variables.live_alert_ids }}');
+      expect(step?.if).toBe('${{ steps.get_live_revision.error == blank }}');
+    }
+  });
+
+  it('passes the autonomy, defaulting to manual, so a supervised approval stores nothing', () => {
+    const expr = approval()?.with?.autonomy as string;
+    expect(evalExpr(expr, { inputs: { autonomy: 'supervised' } })).toBe('supervised');
+    expect(evalExpr(expr, { inputs: {} })).toBe('manual');
+  });
+
+  it('names the proposal, the Investigation and the approver in the decision', () => {
+    const inputs = { conversation_id: 'conversation-1' };
+    const steps = {
+      create_fp_proposal: { output: { proposalId: 'proposal-1' } },
+      get_proposal: { output: { decidedBy: { username: 'analyst' } } },
+    };
+    const context = { inputs, steps, workflow: { spaceId: 'default' } };
+    expect(renderString(approval()?.with?.proposal_id as string, context)).toBe('proposal-1');
+    expect(renderString(approval()?.with?.investigation_id as string, context)).toBe(
+      'conversation-1'
+    );
+    expect(renderString(approval()?.with?.approver as string, context)).toBe('analyst');
+    expect(renderString(approval()?.with?.space_id as string, context)).toBe('default');
+  });
+
+  it('stores the dismissal after the re-tag, before the Investigation closes', () => {
+    const names = flatten(stepByName('handle_dismissed')?.steps ?? []).map(({ name }) => name);
+    expect(names.indexOf('store_fp_decisions_after_dismissal')).toBeGreaterThan(
+      names.indexOf('retag_dismissed_alerts')
+    );
+    expect(names.indexOf('store_fp_decisions_after_dismissal')).toBeLessThan(
+      names.indexOf('close_investigation_after_dismissal')
+    );
+  });
+});
+
 // `kibana.SetAlertTags` validates its body: both lists are required, even when one is empty. A call
 // that only adds a tag fails with HTTP 400 at run time, and `continue: true` hides it.
 describe('floor_alert_triage_review — kibana.SetAlertTags calls', () => {

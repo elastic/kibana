@@ -449,6 +449,50 @@ export const readKeyHistory = async (
   };
 };
 
+/** Keys per search, so the `terms` clauses stay far below the default clause limit. */
+const BLOCKED_KEYS_CHUNK = 500;
+
+/**
+ * The strict key tags among `keyTags` that some alert carries together with a verdict tag other
+ * than false positive. Every alert counts, with no time limit: the consistency rule is about
+ * every earlier verdict of the key. A failed read throws, so no decision is written on a guess.
+ */
+export const findKeyTagsWithVerdicts = async (
+  { callKibanaApi }: KibanaApi,
+  keyTags: readonly string[],
+  verdictTags: readonly string[]
+): Promise<Set<string>> => {
+  const found = new Set<string>();
+  for (let from = 0; from < keyTags.length; from += BLOCKED_KEYS_CHUNK) {
+    const chunk = keyTags.slice(from, from + BLOCKED_KEYS_CHUNK);
+    const { body } = await callKibanaApi<{
+      aggregations?: { keys?: { buckets?: Array<{ key: string }> } };
+    }>({
+      method: 'POST',
+      path: SIGNALS_SEARCH_PATH,
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { terms: { [ALERT_FIELDS.tags]: chunk } },
+              { terms: { [ALERT_FIELDS.tags]: [...verdictTags] } },
+            ],
+          },
+        },
+        // `include` keeps only the key tags: the matching alerts carry other tags as well.
+        aggs: {
+          keys: { terms: { field: ALERT_FIELDS.tags, include: chunk, size: chunk.length } },
+        },
+      },
+    });
+    const buckets = body.aggregations?.keys?.buckets;
+    if (buckets === undefined) throw new Error('Key verdicts missing from the search response');
+    for (const { key } of buckets) found.add(key);
+  }
+  return found;
+};
+
 /** With `fields`, only those `_source` paths are returned, which keeps a read of many alerts small. */
 export const loadAlertsByIds = async (
   { callKibanaApi }: KibanaApi,

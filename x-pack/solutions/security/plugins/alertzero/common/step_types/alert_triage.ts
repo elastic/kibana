@@ -17,6 +17,7 @@ export const TRIAGE_TAG_PATTERN_KEYS_STEP_ID = 'alertzero.triage.tagPatternKeys'
 export const TRIAGE_GROUP_FP_CANDIDATES_STEP_ID = 'alertzero.triage.groupFpCandidates' as const;
 export const TRIAGE_JOIN_PROPOSAL_STEP_ID = 'alertzero.triage.joinProposal' as const;
 export const TRIAGE_RETAG_PROPOSAL_ALERTS_STEP_ID = 'alertzero.triage.retagProposalAlerts' as const;
+export const TRIAGE_STORE_FP_DECISIONS_STEP_ID = 'alertzero.triage.storeFpDecisions' as const;
 
 const idSchema = z.string().trim().min(1).max(256);
 
@@ -413,4 +414,78 @@ export const triageRetagProposalAlertsStepCommonDefinition: CommonStepDefinition
   stability: 'tech_preview',
   inputSchema: retagProposalAlertsInputSchema,
   outputSchema: retagProposalAlertsOutputSchema,
+};
+
+export const STORE_FP_DECISIONS_SKIP_REASONS = [
+  'none',
+  'supervised',
+  'disabled',
+  'denied',
+  'storage_failure',
+  'no_strict_keys',
+] as const;
+export type StoreFpDecisionsSkipReason = (typeof STORE_FP_DECISIONS_SKIP_REASONS)[number];
+
+const storeFpDecisionsInputSchema = lazySchema(() =>
+  z.object({
+    outcome: z
+      .enum(['approved', 'dismissed'])
+      .describe(
+        'An approval stores false positive decisions, a dismissal stores do-not-propose items.'
+      ),
+    alert_ids: z
+      .array(idSchema)
+      .min(1)
+      .max(1000)
+      .describe("The alerts of the proposal's live revision."),
+    space_id: idSchema.describe('Space of the alerts. It is part of every key hash.'),
+    autonomy: z
+      .enum(['manual', 'supervised'])
+      .describe(
+        'A supervised approval is automatic, so nobody saw the pattern and nothing is stored.'
+      ),
+    proposal_id: idSchema.describe('The proposal that was decided.'),
+    investigation_id: idSchema.describe("The proposal's Investigation."),
+    approver: z
+      .string()
+      .max(256)
+      .optional()
+      .describe('Who decided the proposal, for the audit trail.'),
+  })
+);
+
+const storeFpDecisionsOutputSchema = lazySchema(() =>
+  z.object({
+    skip_reason: z.enum(STORE_FP_DECISIONS_SKIP_REASONS),
+    keys_seen: z.number().describe('Strict keys among the alerts.'),
+    alerts_without_strict_key: z.number(),
+    keys_below_minimum: z.number().describe('Keys seen on too few alerts to become decisions.'),
+    keys_with_other_verdicts: z
+      .number()
+      .describe('Keys where an earlier alert is a true positive or inconclusive.'),
+    keys_over_cap: z.number().describe('Keys left out by the per-approval cap.'),
+    written: z.number(),
+    failed: z.number(),
+  })
+);
+
+export const triageStoreFpDecisionsStepCommonDefinition: CommonStepDefinition<
+  typeof storeFpDecisionsInputSchema,
+  typeof storeFpDecisionsOutputSchema
+> = {
+  id: TRIAGE_STORE_FP_DECISIONS_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageStoreFpDecisions.label', {
+    defaultMessage: 'Store triage decisions',
+  }),
+  description: i18n.translate(
+    'xpack.alertzero.workflows.steps.triageStoreFpDecisions.description',
+    {
+      defaultMessage:
+        'Stores the exact patterns of an approved or dismissed closure proposal as Knowledge Items, so later alerts can be matched without the model.',
+    }
+  ),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: storeFpDecisionsInputSchema,
+  outputSchema: storeFpDecisionsOutputSchema,
 };

@@ -445,6 +445,24 @@ steps:
           message: >-
             Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} closed as false positive.{% if steps.retag_approved_leftovers.output.matched > 0 %} {{ steps.retag_approved_leftovers.output.matched }} open alert{% if steps.retag_approved_leftovers.output.matched != 1 %}s{% endif %} that {% if steps.retag_approved_leftovers.output.matched != 1 %}were{% else %}was{% endif %} not part of the approved closure {% if steps.retag_approved_leftovers.output.matched != 1 %}were{% else %}was{% endif %} re-tagged az:inconclusive.{% endif %}{% if steps.retag_approved_leftovers.error != blank or variables.failed_retag_count > 0 %} ⚠️ Re-tagging the alerts that were not part of the approved closure did not fully succeed, so some may still be tagged az:false_positive.{% endif %}
 
+      # Remember the exact patterns the analyst approved, so later alerts can be matched
+      # without the model. The alerts are closed already: a store that is off, denied or down
+      # must not fail a finished approval, and the step reports why instead of throwing.
+      # It reads the live revision's alerts, so a failed live read stores nothing.
+      - name: store_fp_decisions_after_approval
+        type: alertzero.triage.storeFpDecisions
+        if: "${{ steps.get_live_revision.error == blank }}"
+        on-failure:
+          continue: true
+        with:
+          outcome: approved
+          alert_ids: "${{ variables.live_alert_ids }}"
+          space_id: "{{ workflow.spaceId }}"
+          autonomy: "${{ inputs.autonomy | default: 'manual' }}"
+          proposal_id: "{{ steps.create_fp_proposal.output.proposalId }}"
+          investigation_id: "{{ inputs.conversation_id }}"
+          approver: "{{ steps.get_proposal.output.decidedBy.username }}"
+
   - name: handle_dismissed
     type: if
     condition: "${{ variables.proposal_outcome == 'dismissed' }}"
@@ -486,6 +504,22 @@ steps:
             type: data.set
             with:
               failed_retag_count: "${{ steps.retag_dismissed_alerts.output.failed | default: variables.fp_candidate_count }}"
+
+          # A dismissed pattern is not proposed again for a while. Same failure tolerance as the
+          # approval's store: the dismissal has landed.
+          - name: store_fp_decisions_after_dismissal
+            type: alertzero.triage.storeFpDecisions
+            if: "${{ steps.get_live_revision.error == blank }}"
+            on-failure:
+              continue: true
+            with:
+              outcome: dismissed
+              alert_ids: "${{ variables.live_alert_ids }}"
+              space_id: "{{ workflow.spaceId }}"
+              autonomy: "${{ inputs.autonomy | default: 'manual' }}"
+              proposal_id: "{{ steps.create_fp_proposal.output.proposalId }}"
+              investigation_id: "{{ inputs.conversation_id }}"
+              approver: "{{ steps.get_proposal.output.decidedBy.username }}"
 
           # Same failure tolerance as close_investigation_after_approval: the decision has
           # landed, so a failed bookkeeping patch must not fail the run.

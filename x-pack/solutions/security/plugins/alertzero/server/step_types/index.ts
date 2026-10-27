@@ -30,6 +30,7 @@ import {
   getTriageJoinProposalStepDefinition,
   type GroupProposalsStepDependencies,
 } from './alert_triage/group_proposals_step';
+import { getTriageStoreFpDecisionsStepDefinition } from './alert_triage/store_fp_decisions_step';
 import type { ReportWorkerOutcomeStepDeps } from './report_worker_outcome/report_worker_outcome_step';
 import { getReportWorkerOutcomeStepDefinition } from './report_worker_outcome/report_worker_outcome_step';
 
@@ -97,6 +98,9 @@ export const registerStepDefinitions = ({
     getTriageGroupFpCandidatesStepDefinition(groupingDeps)
   );
   workflowsExtensions.registerStepDefinition(getTriageJoinProposalStepDefinition(groupingDeps));
+  workflowsExtensions.registerStepDefinition(
+    getTriageStoreFpDecisionsStepDefinition({ isContextEngineEnabled })
+  );
 };
 
 export { getPackageReportStepDefinition } from './package_report';
