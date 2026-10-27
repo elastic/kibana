@@ -254,18 +254,13 @@ export interface UnifiedHistogramFetchParamsExternal {
 }
 
 /**
- * Custom colouring and optional ordering for the values of a single breakdown field
+ * Custom colouring for the values of a single breakdown field
  */
 export interface UnifiedHistogramBreakdownColorMapping {
   /**
    * The Lens colour mapping applied to the chart's split series
    */
   colorMapping: ColorMapping.Config;
-  /**
-   * Raw breakdown values in the order their series and legend entries should appear.
-   * Values not listed are appended after the listed ones. Currently only honoured in ES|QL mode.
-   */
-  valueOrder?: Array<string | number>;
 }
 
 /**

@@ -210,17 +210,6 @@ describe('logsDataSourceProfileProvider', () => {
         { rules: [{ type: 'other' }], color: { type: 'loop' } },
       ]);
     });
-
-    it('should order values by severity, most severe first, without duplicates', () => {
-      const { valueOrder = [] } = getBreakdownColorMappings()!['log.level'];
-
-      expect(valueOrder[0]).toBe('emergency');
-      expect(valueOrder.indexOf('fatal')).toBeLessThan(valueOrder.indexOf('error'));
-      expect(valueOrder.indexOf('error')).toBeLessThan(valueOrder.indexOf('warn'));
-      expect(valueOrder.indexOf('warn')).toBeLessThan(valueOrder.indexOf('info'));
-      expect(valueOrder[valueOrder.length - 1]).toBe('Trac');
-      expect(new Set(valueOrder).size).toBe(valueOrder.length);
-    });
   });
 
   describe('getRowIndicator', () => {

@@ -542,11 +542,10 @@ export interface Profile {
   ) => TypedLensByValueInput['attributes'];
 
   /**
-   * Gets custom colour mappings (and optional value ordering) for histogram breakdown fields, keyed by
-   * field name, so a single profile can cover multiple fields. Applied in data view and ES|QL mode to
-   * automatically created charts; a chart the user customized in Lens is left untouched.
-   * Only `raw` and whole-word `match` colour rules are matched when rendering, and `valueOrder` is
-   * currently only honoured in ES|QL mode (data view mode keeps the default count-descending order).
+   * Gets custom colour mappings for histogram breakdown fields, keyed by field name, so a single
+   * profile can cover multiple fields. Applied in data view and ES|QL mode to automatically created
+   * charts; a chart the user customized in Lens is left untouched.
+   * Only `raw` and whole-word `match` colour rules are matched when rendering.
    * @param params The breakdown colour mappings extension parameters
    * @returns A map of breakdown field name to colour mapping
    */

@@ -127,7 +127,6 @@ export const createContextAwarenessMocks = ({
             ],
             specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
           },
-          valueOrder: ['css', 'js'],
         },
       })),
     },

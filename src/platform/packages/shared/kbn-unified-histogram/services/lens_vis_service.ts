@@ -70,7 +70,6 @@ import {
 } from '../utils/external_vis_context';
 import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
 import { applyBreakdownColorMapping } from '../utils/apply_breakdown_color_mapping';
-import { getESQLBreakdownSortCommands } from '../utils/get_esql_breakdown_sort';
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
 const ESQL_HISTOGRAM_RESULT_LIMIT = 10000;
@@ -111,7 +110,6 @@ export class LensVisService {
         dataView: DataView | undefined;
         timeInterval: string | undefined;
         breakdownField: DataViewField | undefined;
-        breakdownColorMappings: UnifiedHistogramBreakdownColorMappings | undefined;
         table: Datatable | undefined;
         onSuggestionContextChange?: (
           suggestionContext: UnifiedHistogramSuggestionContext | undefined
@@ -178,7 +176,6 @@ export class LensVisService {
       queryParams,
       timeInterval,
       breakdownField,
-      breakdownValueOrder: breakdownColorMapping?.valueOrder,
     });
 
     const lensAttributesState = this.getLensAttributesState({
@@ -188,7 +185,6 @@ export class LensVisService {
       dataView,
       timeInterval,
       breakdownField,
-      breakdownValueOrder: breakdownColorMapping?.valueOrder,
       breakdownColorMapping: breakdownColorMapping?.colorMapping,
       table,
       getModifiedVisAttributes,
@@ -213,7 +209,6 @@ export class LensVisService {
       dataView,
       timeInterval,
       breakdownField,
-      breakdownColorMappings,
       table,
       onSuggestionContextChange,
       onVisContextChanged,
@@ -231,15 +226,8 @@ export class LensVisService {
       return;
     }
 
-    const {
-      queryParams,
-      dataView,
-      timeInterval,
-      breakdownField,
-      breakdownColorMappings,
-      table,
-      onVisContextChanged,
-    } = this.prevUpdateContext;
+    const { queryParams, dataView, timeInterval, breakdownField, table, onVisContextChanged } =
+      this.prevUpdateContext;
 
     const lensAttributesState = this.getLensAttributesState({
       currentSuggestionContext: editedSuggestionContext,
@@ -248,11 +236,6 @@ export class LensVisService {
       dataView,
       timeInterval,
       breakdownField,
-      // keeps the ES|QL histogram query consistent with the fetched one; the colour mapping itself
-      // is not applied to a manually customized vis
-      breakdownValueOrder: breakdownField
-        ? breakdownColorMappings?.[breakdownField.name]?.valueOrder
-        : undefined,
       table,
     });
 
@@ -267,13 +250,11 @@ export class LensVisService {
     queryParams,
     timeInterval,
     breakdownField,
-    breakdownValueOrder,
   }: {
     externalVisContext: UnifiedHistogramVisContext | undefined;
     queryParams: QueryParams;
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
-    breakdownValueOrder: Array<string | number> | undefined;
   }): {
     currentSuggestionContext: UnifiedHistogramSuggestionContext;
   } => {
@@ -297,7 +278,6 @@ export class LensVisService {
               },
             },
             breakdownField,
-            breakdownValueOrder,
             preferredVisAttributes: externalVisContext?.attributes,
           });
 
@@ -333,7 +313,6 @@ export class LensVisService {
           const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({
             queryParams,
             breakdownField,
-            breakdownValueOrder,
             preferredVisAttributes: externalVisContext?.attributes,
           });
 
@@ -551,12 +530,10 @@ export class LensVisService {
   private getHistogramSuggestionForESQL = ({
     queryParams,
     breakdownField,
-    breakdownValueOrder,
     preferredVisAttributes: originalPreferredVisAttributes,
   }: {
     queryParams: QueryParams;
     breakdownField?: DataViewField;
-    breakdownValueOrder?: Array<string | number>;
     preferredVisAttributes?: UnifiedHistogramVisContext['attributes'];
   }): Suggestion | undefined => {
     const { query, timeRange, columns, dataSource } = queryParams;
@@ -606,7 +583,6 @@ export class LensVisService {
         timeRange,
         interval,
         breakdownColumn,
-        breakdownValueOrder,
       });
       const dateFieldLabel = `${timeFieldName} every ${interval}`;
       const context = {
@@ -697,14 +673,12 @@ export class LensVisService {
     query,
     interval,
     breakdownColumn,
-    breakdownValueOrder,
   }: {
     timeFieldName: string;
     timeRange: TimeRange;
     query: AggregateQuery;
     interval?: string;
     breakdownColumn?: DatatableColumn;
-    breakdownValueOrder?: Array<string | number>;
   }): string => {
     const queryInterval = interval ?? computeInterval(timeRange, this.services.data);
     const language = getAggregateQueryMode(query);
@@ -714,7 +688,7 @@ export class LensVisService {
 
     const sortBy =
       breakdownColumn && isESQLColumnSortable(breakdownColumn)
-        ? getESQLBreakdownSortCommands(breakdownColumn, breakdownValueOrder)
+        ? ` | sort \`${breakdownColumn.name}\` asc`
         : '';
 
     const timeBuckets = `${TIMESTAMP_COLUMN} = BUCKET(${timeFieldName}, ${queryInterval})`;
@@ -780,7 +754,6 @@ export class LensVisService {
     dataView,
     timeInterval,
     breakdownField,
-    breakdownValueOrder,
     breakdownColorMapping,
     table,
     getModifiedVisAttributes,
@@ -791,7 +764,6 @@ export class LensVisService {
     dataView: DataView | undefined;
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
-    breakdownValueOrder?: Array<string | number>;
     breakdownColorMapping?: ColorMapping.Config;
     table: Datatable | undefined;
     getModifiedVisAttributes?: (
@@ -834,7 +806,6 @@ export class LensVisService {
               breakdownColumn: breakdownField?.name
                 ? columns?.find((column) => column.name === breakdownField.name)
                 : undefined,
-              breakdownValueOrder,
             }),
           }
         : query;

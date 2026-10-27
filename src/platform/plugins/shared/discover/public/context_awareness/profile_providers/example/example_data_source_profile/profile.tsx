@@ -475,7 +475,6 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           ],
           specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
         },
-        valueOrder: ['error', 'info', 'debug'],
       },
     }),
     getAdditionalCellActions: (prev) => () =>

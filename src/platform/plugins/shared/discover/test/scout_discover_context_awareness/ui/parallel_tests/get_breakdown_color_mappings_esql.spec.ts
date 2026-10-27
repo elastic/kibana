@@ -23,9 +23,8 @@ import {
 
 /**
  * `example-data-source-profile` colours the `log.level` breakdown values through
- * `getBreakdownColorMappings` and, in ES|QL mode, orders them by its `valueOrder` instead of
- * alphabetically. Every `my-example-logs` document has a distinct level, so the legend lists all of
- * them, and no other order (alphabetical or by count) would put `error` first.
+ * `getBreakdownColorMappings`. Every `my-example-logs` document has a distinct level, so the legend
+ * lists all of them. The legend order is not asserted: it is the default alphabetical ES|QL order.
  */
 spaceTest.describe(
   'Discover context awareness - extension getBreakdownColorMappings, ES|QL mode',
@@ -45,7 +44,7 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'colours and orders the breakdown legend as the profile defines',
+      'colours the breakdown legend as the profile defines',
       async ({ page, pageObjects }) => {
         const { discover } = pageObjects;
 
@@ -57,7 +56,10 @@ spaceTest.describe(
         );
 
         await expect
-          .poll(() => getHistogramLegend(page.testSubj.locator(EXAMPLE_CHART)))
+          .poll(async () => {
+            const legend = await getHistogramLegend(page.testSubj.locator(EXAMPLE_CHART));
+            return legend.sort(([labelA], [labelB]) => labelA.localeCompare(labelB));
+          })
           .toStrictEqual(LOGS_PROFILE_BREAKDOWN_LEGEND);
       }
     );

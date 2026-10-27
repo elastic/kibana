@@ -96,13 +96,13 @@ columns: [
 
 ### Breakdown colour mappings — `getBreakdownColorMappings`
 
-**Changes:** The colours of the histogram breakdown series and legend entries, and (in ES|QL mode) their order.
+**Changes:** The colours of the histogram breakdown series and legend entries.
 
-**Use when:** Breakdown values carry a meaning users already associate with a colour or a rank, e.g. `log.level` severities.
+**Use when:** Breakdown values carry a meaning users already associate with a colour, e.g. `log.level` severities.
 
-**Returns:** `Record<fieldName, { colorMapping: ColorMapping.Config; valueOrder?: Array<string | number> }>`
+**Returns:** `Record<fieldName, { colorMapping: ColorMapping.Config }>`
 
-A single profile can define mappings for several fields; the one matching the current breakdown field is applied. `colorMapping` is a Lens colour mapping (`@kbn/coloring`): use `raw` rules (or `match` rules with `matchEntireWord: true`) with `colorCode` colours, since only exact raw values are matched when rendering, and keep the `other` special assignment for unlisted values (the data view "Other" and missing buckets end up there too). `valueOrder` lists raw values in the order their series and legend entries should appear; unlisted values follow alphabetically.
+A single profile can define mappings for several fields; the one matching the current breakdown field is applied. `colorMapping` is a Lens colour mapping (`@kbn/coloring`): use `raw` rules (or `match` rules with `matchEntireWord: true`) with `colorCode` colours, since only exact raw values are matched when rendering, and keep the `other` special assignment for unlisted values (the data view "Other" and missing buckets end up there too).
 
 ```ts
 getBreakdownColorMappings: (prev) => (params) => ({
@@ -117,7 +117,6 @@ getBreakdownColorMappings: (prev) => (params) => ({
       ],
       specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
     },
-    valueOrder: ['error', 'info'],
   },
 }),
 ```
@@ -125,7 +124,7 @@ getBreakdownColorMappings: (prev) => (params) => ({
 Limitations:
 
 - The mapping is applied to automatically created charts only; a chart the user customised in Lens is left untouched.
-- `valueOrder` is only honoured in ES|QL mode. Data view mode keeps the default count-descending order until Lens supports custom breakdown ordering ([#191988](https://github.com/elastic/kibana/issues/191988)).
+- The order of the breakdown values cannot be customised: data view mode keeps the count-descending order and ES|QL mode the alphabetical one until Lens supports custom breakdown ordering ([#191988](https://github.com/elastic/kibana/issues/191988)).
 - `params.euiTheme` is the computed EUI theme, so colours can be derived from theme-aware helpers such as `getLogLevelColor` from `@kbn/discover-utils`.
 
 **Screenshot:**

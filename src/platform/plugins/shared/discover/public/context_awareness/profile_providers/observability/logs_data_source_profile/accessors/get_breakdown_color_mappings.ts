@@ -39,8 +39,7 @@ export const getLogLevelRawValues = (level: LogLevelCoalescedValue): string[] =>
 };
 
 /**
- * Builds a breakdown colour mapping that colours log levels like the data grid does and orders them
- * by severity, most severe first.
+ * Builds a breakdown colour mapping that colours log levels like the data grid does.
  */
 export const buildLogLevelBreakdownColorMapping = (
   euiTheme: EuiThemeComputed
@@ -67,7 +66,6 @@ export const buildLogLevelBreakdownColorMapping = (
       assignments,
       specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
     },
-    valueOrder: severityOrder.flatMap(getLogLevelRawValues),
   };
 };
 

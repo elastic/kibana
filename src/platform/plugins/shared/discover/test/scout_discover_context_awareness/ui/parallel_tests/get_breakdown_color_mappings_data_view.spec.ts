@@ -62,11 +62,7 @@ spaceTest.describe(
             const legend = await getHistogramLegend(page.testSubj.locator(EXAMPLE_CHART));
             return legend.sort(([labelA], [labelB]) => labelA.localeCompare(labelB));
           })
-          .toStrictEqual(
-            [...LOGS_PROFILE_BREAKDOWN_LEGEND].sort(([labelA], [labelB]) =>
-              labelA.localeCompare(labelB)
-            )
-          );
+          .toStrictEqual(LOGS_PROFILE_BREAKDOWN_LEGEND);
       }
     );
   }

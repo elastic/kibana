@@ -141,13 +141,13 @@ export const EXAMPLE_CHART = 'exampleHistogramChart';
 
 /**
  * Legend entries of the `log.level` breakdown as `example-data-source-profile` colours them through
- * `getBreakdownColorMappings`, in the order its `valueOrder` ranks them: by severity rather than
- * alphabetically. Colours are the computed `rgb(...)` form of the profile's hex codes.
+ * `getBreakdownColorMappings`, sorted by label. Colours are the computed `rgb(...)` form of the
+ * profile's hex codes.
  */
 export const LOGS_PROFILE_BREAKDOWN_LEGEND: Array<[string, string]> = [
+  ['debug', 'rgb(152, 162, 179)'],
   ['error', 'rgb(189, 39, 30)'],
   ['info', 'rgb(0, 119, 204)'],
-  ['debug', 'rgb(152, 162, 179)'],
 ];
 
 /** Query the `example-root-profile` supplies through `getDefaultEsqlQuery`. */

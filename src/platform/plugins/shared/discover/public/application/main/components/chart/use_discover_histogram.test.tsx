@@ -782,7 +782,9 @@ describe('useDiscoverHistogram', () => {
         fetch$.next({});
       });
       expect(breakdownColorMappings).toEqual({
-        extension: expect.objectContaining({ valueOrder: ['css', 'js'] }),
+        extension: expect.objectContaining({
+          colorMapping: expect.objectContaining({ paletteId: 'default' }),
+        }),
       });
     });
   });
