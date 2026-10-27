@@ -131,7 +131,10 @@ export const enableSessions = async ({
   const droppedDestIndices = new Set<string>();
   for (const stale of installed.filter(({ id }) => !desiredIds.has(id))) {
     const destIndex = stale.dest.index;
-    const dropDest = versionOf(stale) !== SESSIONS_VERSION && !droppedDestIndices.has(destIndex);
+    const dropDest =
+      versionOf(stale) !== SESSIONS_VERSION &&
+      destIndex != null &&
+      !droppedDestIndices.has(destIndex);
     logger.info(
       `Removing sessions transform [${stale.id}]${dropDest ? ' and its dest index' : ''}`
     );
@@ -140,7 +143,7 @@ export const enableSessions = async ({
       force: true,
       delete_dest_index: dropDest,
     });
-    if (dropDest) {
+    if (dropDest && destIndex != null) {
       droppedDestIndices.add(destIndex);
     }
   }
@@ -202,7 +205,9 @@ const transformStatus = (
   now: number
 ): SessionsTransformStatus => {
   const version = versionOf(transform);
-  const frequency = transform.frequency ?? SESSIONS_DEFAULT_FREQUENCY;
+  // `frequency` is a Duration (a time string, or -1 / 0); anything else means the default.
+  const frequency =
+    typeof transform.frequency === 'string' ? transform.frequency : SESSIONS_DEFAULT_FREQUENCY;
   const state = stats?.state ?? null;
   const lagSeconds = lagSecondsOf(stats, now);
   const healthStatus = stats?.health?.status?.toLowerCase();
