@@ -42,6 +42,7 @@ import {
 import type { HuntForThreatServiceResult } from './tier1/types';
 import { huntBehavior } from './tier2/hunt_behavior';
 import type { HuntBehaviorResult } from './tier2/types';
+import { getSearchedTechniqueIds } from './tier2/searched_technique_ids';
 
 export type HuntCoordinatorTier2SkipReason =
   /**
@@ -187,6 +188,12 @@ export interface HuntCoordinatorCoreResult {
    * it chose not to search those values.
    */
   excluded_report_iocs?: { count: number };
+  /**
+   * The techniques Tier 2 searched on this run, which the caller records so a later run on
+   * the same report spends its generation budget on the ones still unsearched. Absent when
+   * Tier 2 did not run.
+   */
+  searched_technique_ids?: string[];
   /**
    * Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible
    * entities. Absent when there is no confirmed hit or the run stopped before Tier 2.
@@ -1055,6 +1062,7 @@ const huntCoordinatorCore = async (
     completed_successfully: completedSuccessfully(completeness),
     ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
     ...(excludedIocs ? { excluded_report_iocs: { count: excludedIocs.count } } : {}),
+    searched_technique_ids: getSearchedTechniqueIds(tier2Raw),
   };
 
   if (!hasConfirmedHit) {
