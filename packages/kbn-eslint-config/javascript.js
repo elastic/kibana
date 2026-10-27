@@ -59,7 +59,6 @@ module.exports = {
         'no-multi-str': 'off',
         'no-new': 'off',
         'no-path-concat': 'off',
-        'no-restricted-imports': [2, RESTRICTED_MODULES],
         'no-restricted-modules': [2, RESTRICTED_MODULES],
         'no-return-assign': 'off',
         'no-shadow': 'off',
