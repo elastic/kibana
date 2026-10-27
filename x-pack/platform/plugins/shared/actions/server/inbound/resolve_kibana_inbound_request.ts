@@ -134,6 +134,17 @@ const kibanaBearerRequest = (
   return kibanaRequestFactory(fakeRawRequest);
 };
 
+/**
+ * Internal-only path for Relay. It is deliberately absent from the public OAS: the route
+ * description and docs only advertise the ingest token.
+ *
+ * Requirements, any of which failing returns undefined (the route answers 404):
+ * - `Authorization: Bearer essu_…` for a Cloud service-account.
+ * - `x-client-authentication` present on a real (non-fake) request. It is internal client
+ *   authentication and is not a customer-facing option.
+ * - Elasticsearch authenticates the bearer in the cloud service-account realm.
+ * - The credential can access the space and the connector is an events-enabled in-memory connector.
+ */
 const resolveServiceAccountBearer = async ({
   authorization,
   inboundRequest,
