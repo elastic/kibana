@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { DynamicStructuredTool } from '@langchain/core/tools';
+import type { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
 import type {
   QueryDslQueryContainer,
@@ -143,7 +143,7 @@ export const getKBVectorSearchQuery = ({
 /**
  * Returns a StructuredTool for a given IndexEntry
  */
-export const getStructuredToolForIndexEntry = ({
+export const getStructuredToolForIndexEntry = async ({
   indexEntry,
   esClient,
   contentReferencesStore,
@@ -153,7 +153,9 @@ export const getStructuredToolForIndexEntry = ({
   esClient: ElasticsearchClient;
   contentReferencesStore: ContentReferencesStore;
   logger: Logger;
-}): DynamicStructuredTool => {
+}): Promise<DynamicStructuredTool> => {
+  // lazy import to keep the langchain stack out of the plugin startup path
+  const { DynamicStructuredTool } = await import('@langchain/core/tools');
   const inputSchema = indexEntry.inputSchema?.reduce((prev, input) => {
     const fieldType =
       input.fieldType === 'string'

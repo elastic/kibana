@@ -32,7 +32,10 @@ import {
   recordConnectorAuth,
   recordConnectorExecute,
 } from './connector_metrics';
-import { shouldTrackGenAiToken } from './token_tracking/should_track_gen_ai_token';
+import {
+  getGenAiTokenTracking,
+  shouldTrackGenAiToken,
+} from './token_tracking/gen_ai_token_tracking';
 import {
   validateConfig,
   validateConnector,
@@ -783,15 +786,12 @@ export class ActionExecutor {
           result.status === 'ok' &&
           shouldTrackGenAiToken(actionTypeId, `${validatedParams.subAction}`)
         ) {
-          import('./token_tracking/gen_ai_token_tracking')
-            .then(({ getGenAiTokenTracking }) =>
-              getGenAiTokenTracking({
-                actionTypeId,
-                logger,
-                result,
-                validatedParams,
-              })
-            )
+          getGenAiTokenTracking({
+            actionTypeId,
+            logger,
+            result,
+            validatedParams,
+          })
             .then((tokenTracking) => {
               if (tokenTracking != null) {
                 set(event, 'kibana.action.execution.gen_ai.usage', {

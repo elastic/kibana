@@ -9,8 +9,11 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Message, ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
-import { getLangChainMessage, getLangChainMessages } from './get_langchain_messages';
-import { requestHasRequiredAnonymizationParams } from './helpers';
+import {
+  getLangChainMessage,
+  getLangChainMessages,
+  requestHasRequiredAnonymizationParams,
+} from './helpers';
 import { langChainMessages } from '../../__mocks__/lang_chain_messages';
 
 describe('helpers', () => {
@@ -52,14 +55,14 @@ describe('helpers', () => {
     ];
 
     testCases.forEach(([testCase, expectedClass]) => {
-      it(`returns the expected content when role is ${testCase.role}`, () => {
-        const result = getLangChainMessage(testCase);
+      it(`returns the expected content when role is ${testCase.role}`, async () => {
+        const result = await getLangChainMessage(testCase);
 
         expect(result.content).toEqual(testCase.content);
       });
 
-      it(`returns the expected BaseMessage instance when role is ${testCase.role}`, () => {
-        const result = getLangChainMessage(testCase);
+      it(`returns the expected BaseMessage instance when role is ${testCase.role}`, async () => {
+        const result = await getLangChainMessage(testCase);
 
         expect(result instanceof expectedClass).toBeTruthy();
       });
@@ -92,8 +95,8 @@ describe('helpers', () => {
       },
     ];
 
-    it('returns the expected BaseMessage instances', () => {
-      expect(getLangChainMessages(assistantMessages)).toEqual(langChainMessages);
+    it('returns the expected BaseMessage instances', async () => {
+      expect(await getLangChainMessages(assistantMessages)).toEqual(langChainMessages);
     });
   });
 

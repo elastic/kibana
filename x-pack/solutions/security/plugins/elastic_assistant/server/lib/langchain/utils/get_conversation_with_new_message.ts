@@ -11,7 +11,7 @@ import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistan
 import type { BaseMessage } from '@langchain/core/messages';
 import { _isMessageFieldWithRole } from '@langchain/core/messages';
 import type { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
-import { getLangChainMessages } from '../get_langchain_messages';
+import { getLangChainMessages } from '../helpers';
 
 interface Params {
   logger: Logger;
@@ -70,7 +70,9 @@ export const getConversationWithNewMessage = async (params: Params) => {
   }
 
   // Anonymized conversation
-  const conversationLangChainMessages = getLangChainMessages(existingConversation.messages ?? []);
+  const conversationLangChainMessages = await getLangChainMessages(
+    existingConversation.messages ?? []
+  );
   // Anonymized new messages
   const newLangChainMessages = params.newMessages;
 

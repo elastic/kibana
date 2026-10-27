@@ -15,15 +15,8 @@ import {
   type SmithyStream,
 } from './get_token_count_from_bedrock_client_send';
 import type { InvokeAsyncIteratorBody } from './get_token_count_from_invoke_async_iterator';
-import { getTokenCountFromInvokeAsyncIterator } from './get_token_count_from_invoke_async_iterator';
-import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
 import type { ActionTypeExecutorRawResult } from '../../../common';
-import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
 import type { InvokeBody } from './get_token_count_from_invoke_stream';
-import {
-  getTokenCountFromInvokeStream,
-  parseGeminiStreamForUsageMetadata,
-} from './get_token_count_from_invoke_stream';
 
 export interface TelemetryMetadata {
   pluginId?: string;
@@ -79,6 +72,10 @@ export const getGenAiTokenTracking = async ({
             ? (validatedParams as { subActionParams: { body: InvokeAsyncIteratorBody } })
                 .subActionParams.body
             : (validatedParams as { subActionParams: InvokeAsyncIteratorBody }).subActionParams;
+        // lazy import to avoid loading gpt-tokenizer at plugin startup
+        const { getTokenCountFromInvokeAsyncIterator } = await import(
+          './get_token_count_from_invoke_async_iterator'
+        );
         const { total, prompt, completion } = await getTokenCountFromInvokeAsyncIterator({
           streamIterable: data.tokenCountStream,
           body,
@@ -116,6 +113,9 @@ export const getGenAiTokenTracking = async ({
     actionTypeId === '.gemini'
   ) {
     try {
+      const { parseGeminiStreamForUsageMetadata } = await import(
+        './get_token_count_from_invoke_stream'
+      );
       const usageMetadata = await parseGeminiStreamForUsageMetadata({
         responseStream: result.data.pipe(new PassThrough()),
         logger,
@@ -149,6 +149,9 @@ export const getGenAiTokenTracking = async ({
         actionTypeId === '.inference'
           ? (validatedParams as { subActionParams: { body: InvokeBody } }).subActionParams.body
           : (validatedParams as { subActionParams: InvokeBody }).subActionParams;
+      const { getTokenCountFromInvokeStream } = await import(
+        './get_token_count_from_invoke_stream'
+      );
       const { total, prompt, completion } = await getTokenCountFromInvokeStream({
         responseStream: result.data.pipe(new PassThrough()),
         actionTypeId,
@@ -171,6 +174,9 @@ export const getGenAiTokenTracking = async ({
   // this is a streamed OpenAI response, which did not use the subAction invokeStream
   if (actionTypeId === '.gen-ai' && result.data instanceof Readable) {
     try {
+      const { getTokenCountFromOpenAIStream } = await import(
+        './get_token_count_from_openai_stream'
+      );
       const { total, prompt, completion } = await getTokenCountFromOpenAIStream({
         responseStream: result.data.pipe(new PassThrough()),
         body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
@@ -217,6 +223,9 @@ export const getGenAiTokenTracking = async ({
         usage?: { input_tokens: number; output_tokens: number };
       };
       if (typeof rData.completion === 'string') {
+        const { getTokenCountFromBedrockInvoke } = await import(
+          './get_token_count_from_bedrock_invoke'
+        );
         const { total, prompt, completion } = await getTokenCountFromBedrockInvoke({
           response: rData.completion,
           body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
@@ -274,6 +283,9 @@ export const getGenAiTokenTracking = async ({
       };
 
       if (typeof rData.message === 'string') {
+        const { getTokenCountFromBedrockInvoke } = await import(
+          './get_token_count_from_bedrock_invoke'
+        );
         const { total, prompt, completion } = await getTokenCountFromBedrockInvoke({
           response: rData.message,
           body: JSON.stringify({
@@ -369,7 +381,12 @@ export const getGenAiTokenTracking = async ({
   return null;
 };
 
-export { shouldTrackGenAiToken } from './should_track_gen_ai_token';
+export const shouldTrackGenAiToken = (actionTypeId: string, subAction?: string) =>
+  (actionTypeId === '.gen-ai' ||
+    actionTypeId === '.bedrock' ||
+    actionTypeId === '.gemini' ||
+    actionTypeId === '.inference') &&
+  subAction !== 'getDashboard';
 
 function hasTelemetryMetadata(obj: unknown): obj is { telemetryMetadata: TelemetryMetadata } {
   return obj !== null && typeof obj === 'object' && 'telemetryMetadata' in obj;

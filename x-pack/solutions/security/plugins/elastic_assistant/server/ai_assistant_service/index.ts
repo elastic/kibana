@@ -66,11 +66,11 @@ import {
   ASSISTANT_ELSER_INFERENCE_ID,
   knowledgeBaseFieldMap,
 } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
-import type {
+import type { GetAIAssistantKnowledgeBaseDataClientParams } from '../ai_assistant_data_clients/knowledge_base';
+import {
   AIAssistantKnowledgeBaseDataClient,
-  GetAIAssistantKnowledgeBaseDataClientParams,
+  ensureDedicatedInferenceEndpoint,
 } from '../ai_assistant_data_clients/knowledge_base';
-import { ensureDedicatedInferenceEndpoint } from '../ai_assistant_data_clients/knowledge_base/ensure_dedicated_inference_endpoint';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
 import { createGetElserId, ensureProductDocumentationInstalled } from './helpers';
@@ -722,10 +722,6 @@ export class AIAssistantService {
     if (res === null) {
       return null;
     }
-
-    const { AIAssistantKnowledgeBaseDataClient } = await import(
-      '../ai_assistant_data_clients/knowledge_base'
-    );
 
     return new AIAssistantKnowledgeBaseDataClient({
       logger: this.options.logger.get('knowledgeBase'),

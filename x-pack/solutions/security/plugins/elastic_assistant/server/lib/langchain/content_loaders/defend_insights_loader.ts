@@ -9,8 +9,6 @@ import type { Document } from '@langchain/core/documents';
 import type { Logger } from '@kbn/core/server';
 import type { Metadata } from '@kbn/elastic-assistant-common';
 import { globSync } from 'fs';
-import { DirectoryLoader } from '@langchain/classic/document_loaders/fs/directory';
-import { TextLoader } from '@langchain/classic/document_loaders/fs/text';
 import { resolve } from 'path';
 import pMap from 'p-map';
 import normalizePath from 'normalize-path';
@@ -38,6 +36,11 @@ export const loadDefendInsights = async (
   }
 
   try {
+    // lazy imports to keep the langchain stack out of the plugin startup path
+    const [{ DirectoryLoader }, { TextLoader }] = await Promise.all([
+      import('@langchain/classic/document_loaders/fs/directory'),
+      import('@langchain/classic/document_loaders/fs/text'),
+    ]);
     const subdirectories = [
       {
         path: 'policy_response_failure',

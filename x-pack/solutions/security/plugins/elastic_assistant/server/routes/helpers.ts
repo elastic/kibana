@@ -39,6 +39,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { isEmpty } from 'lodash';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
+import { getLangChainMessages } from '../lib/langchain/helpers';
 import type { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import type { FindResponse } from '../ai_assistant_data_clients/find';
 import type { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
@@ -312,12 +313,10 @@ export const langChainExecute = async ({
   systemPrompt,
   timeout,
 }: LangChainExecuteParams) => {
-  const [{ getLangSmithTracer }, { getLangChainMessages }, { callAssistantGraph }] =
-    await Promise.all([
-      import('@kbn/langchain/server/tracers/langsmith'),
-      import('../lib/langchain/get_langchain_messages'),
-      import('../lib/langchain/graphs/default_assistant_graph'),
-    ]);
+  const [{ getLangSmithTracer }, { callAssistantGraph }] = await Promise.all([
+    import('@kbn/langchain/server/tracers/langsmith'),
+    import('../lib/langchain/graphs/default_assistant_graph'),
+  ]);
 
   // Fetch any tools registered by the request's originating plugin
   const pluginName = getPluginNameFromRequest({
@@ -338,7 +337,7 @@ export const langChainExecute = async ({
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   // convert the new messages to LangChain messages:
-  const langChainMessages = getLangChainMessages(messages);
+  const langChainMessages = await getLangChainMessages(messages);
 
   const anonymizationFieldsDataClient =
     await assistantContext.getAIAssistantAnonymizationFieldsDataClient();

@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { StateGraph, Annotation } from '@langchain/langgraph';
-import { ToolMessage, type BaseMessage, type BaseMessageLike } from '@langchain/core/messages';
+import type { BaseMessage, BaseMessageLike } from '@langchain/core/messages';
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
@@ -32,7 +31,6 @@ import {
   isGenerateConfigAction,
   isValidateConfigAction,
 } from './actions_lens';
-import { getEsqlDataSourceCarriers, getExistingEsqlQueries } from './esql_data_source_carriers';
 import { createGenerateConfigPrompt } from './prompts';
 import {
   createLoadSchemaSectionsTool,
@@ -115,44 +113,86 @@ const validateConfigForChartType = (
   config: unknown
 ): VisualizationConfig => chartTypeRegistry[chartType].schema.parse(config);
 
-const VisualizationStateAnnotation = Annotation.Root({
-  // inputs
-  nlQuery: Annotation<string>(),
-  index: Annotation<string | undefined>(),
-  chartType: Annotation<SupportedChartType>(),
-  existingConfig: Annotation<string | undefined>(),
-  parsedExistingConfig: Annotation<VisualizationConfig | null>(),
-  /**
-   * Preserve the existing ES|QL queries. Each layer keeps its existing
-   * `data_source` instead of receiving the single resolved query.
-   */
-  preserveESQL: Annotation<boolean>(),
-  applyChartRules: Annotation<boolean>(),
-  // internal
-  esqlQuery: Annotation<string>(),
-  /** Result columns of the resolved query. Absent when they could not be collected. */
-  columns: Annotation<EsqlEsqlColumnInfo[] | undefined>(),
-  /** The tool exchange that loaded schema sections, replayed on every later attempt. */
-  schemaSectionMessages: Annotation<BaseMessage[]>({
-    reducer: (_, newValue) => newValue,
-    default: () => [],
-  }),
-  loadedSchemaSections: Annotation<string[]>({
-    reducer: (_, newValue) => newValue,
-    default: () => [],
-  }),
-  currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
-  actions: Annotation<Action[]>({
-    reducer: (a, b) => [...a, ...b],
-    default: () => [],
-  }),
-  // outputs
-  validatedConfig: Annotation<VisualizationConfig | null>(),
-  authoringNote: Annotation<string | null>(),
-  error: Annotation<string | null>(),
-});
+export interface EsqlDataSourceCarrier {
+  data_source?: { type?: string; query?: string };
+}
 
-type VisualizationState = typeof VisualizationStateAnnotation.State;
+/**
+ * Returns the objects that carry a `data_source` for this config shape:
+ * XY-ESQL configs keep one `data_source` per layer; every other ESQL chart
+ * (metric, gauge, tagcloud, ...) carries it on the config itself. Used both to
+ * read existing queries (edits) and to inject the validated query (generation).
+ */
+export const getEsqlDataSourceCarriers = (config: unknown): EsqlDataSourceCarrier[] => {
+  if (!config || typeof config !== 'object') return [];
+  const { layers } = config as { layers?: unknown };
+  return Array.isArray(layers)
+    ? (layers as EsqlDataSourceCarrier[])
+    : [config as EsqlDataSourceCarrier];
+};
+
+/**
+ * Helper to extract ESQL queries from a visualization config.
+ * Handles both single-dataset configs (metric, gauge, tagcloud) and layers-based configs (XY).
+ * For XY charts with multiple layers, returns all unique ESQL queries.
+ */
+export function getExistingEsqlQueries(config: VisualizationConfig | null): string[] {
+  if (!config) return [];
+
+  const queries: string[] = [];
+  for (const carrier of getEsqlDataSourceCarriers(config)) {
+    const dataSource = carrier.data_source;
+    if (dataSource?.type === 'esql' && dataSource.query && !queries.includes(dataSource.query)) {
+      queries.push(dataSource.query);
+    }
+  }
+
+  return queries;
+}
+
+// Constructed lazily inside createVisualizationGraph so importing this module
+// does not load @langchain/langgraph.
+const createVisualizationStateAnnotation = (
+  Annotation: typeof import('@langchain/langgraph').Annotation
+) =>
+  Annotation.Root({
+    // inputs
+    nlQuery: Annotation<string>(),
+    index: Annotation<string | undefined>(),
+    chartType: Annotation<SupportedChartType>(),
+    existingConfig: Annotation<string | undefined>(),
+    parsedExistingConfig: Annotation<VisualizationConfig | null>(),
+    /**
+     * Preserve the existing ES|QL queries. Each layer keeps its existing
+     * `data_source` instead of receiving the single resolved query.
+     */
+    preserveESQL: Annotation<boolean>(),
+    applyChartRules: Annotation<boolean>(),
+    // internal
+    esqlQuery: Annotation<string>(),
+    /** Result columns of the resolved query. Absent when they could not be collected. */
+    columns: Annotation<EsqlEsqlColumnInfo[] | undefined>(),
+    /** The tool exchange that loaded schema sections, replayed on every later attempt. */
+    schemaSectionMessages: Annotation<BaseMessage[]>({
+      reducer: (_, newValue) => newValue,
+      default: () => [],
+    }),
+    loadedSchemaSections: Annotation<string[]>({
+      reducer: (_, newValue) => newValue,
+      default: () => [],
+    }),
+    currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
+    actions: Annotation<Action[]>({
+      reducer: (a, b) => [...a, ...b],
+      default: () => [],
+    }),
+    // outputs
+    validatedConfig: Annotation<VisualizationConfig | null>(),
+    authoringNote: Annotation<string | null>(),
+    error: Annotation<string | null>(),
+  });
+
+type VisualizationState = ReturnType<typeof createVisualizationStateAnnotation>['State'];
 
 type LoadedSchemaSections = Pick<
   VisualizationState,
@@ -171,6 +211,14 @@ export const createVisualizationGraph = async (
   events: ToolEventEmitter,
   esClient: IScopedClusterClient
 ) => {
+  // Loaded lazily so the langgraph dependency tree stays out of memory until a
+  // visualization is actually built.
+  const [{ StateGraph, Annotation }, { ToolMessage }] = await Promise.all([
+    import('@langchain/langgraph'),
+    import('@langchain/core/messages'),
+  ]);
+  const VisualizationStateAnnotation = createVisualizationStateAnnotation(Annotation);
+
   const defaultModel = await modelProvider.getDefaultModel();
 
   // Node: Generate ES|QL query

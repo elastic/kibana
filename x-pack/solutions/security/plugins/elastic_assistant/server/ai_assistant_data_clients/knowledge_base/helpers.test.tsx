@@ -167,8 +167,8 @@ describe('getStructuredToolForIndexEntry', () => {
   const mockIndexEntry = getCreateKnowledgeBaseEntrySchemaMock({ type: 'index' }) as IndexEntry;
   const contentReferencesStore = newContentReferencesStoreMock();
 
-  it('should return a DynamicStructuredTool with correct name and schema', () => {
-    const tool = getStructuredToolForIndexEntry({
+  it('should return a DynamicStructuredTool with correct name and schema', async () => {
+    const tool = await getStructuredToolForIndexEntry({
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
@@ -208,7 +208,7 @@ describe('getStructuredToolForIndexEntry', () => {
 
     mockEsClient.search = jest.fn().mockResolvedValue(mockSearchResult);
 
-    const tool = getStructuredToolForIndexEntry({
+    const tool = await getStructuredToolForIndexEntry({
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
@@ -244,7 +244,7 @@ describe('getStructuredToolForIndexEntry', () => {
     const mockError = new Error('Elasticsearch error');
     mockEsClient.search = jest.fn().mockRejectedValue(mockError);
 
-    const tool = getStructuredToolForIndexEntry({
+    const tool = await getStructuredToolForIndexEntry({
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
@@ -260,8 +260,8 @@ describe('getStructuredToolForIndexEntry', () => {
     expect(result).toContain(`I'm sorry, but I was unable to find any information`);
   });
 
-  it('should match the name regex correctly', () => {
-    const tool = getStructuredToolForIndexEntry({
+  it('should match the name regex correctly', async () => {
+    const tool = await getStructuredToolForIndexEntry({
       indexEntry: getCreateKnowledgeBaseEntrySchemaMock({
         type: 'index',
         name: `1bad-name?`,
@@ -275,8 +275,8 @@ describe('getStructuredToolForIndexEntry', () => {
     expect(tool.lc_kwargs.name).toMatch(nameRegex);
   });
 
-  it('dashes get removed before `a` is prepended', () => {
-    const tool = getStructuredToolForIndexEntry({
+  it('dashes get removed before `a` is prepended', async () => {
+    const tool = await getStructuredToolForIndexEntry({
       indexEntry: getCreateKnowledgeBaseEntrySchemaMock({
         type: 'index',
         name: `-testing`,

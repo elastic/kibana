@@ -6,7 +6,12 @@
  */
 
 import type { StructuredTool } from '@langchain/core/tools';
-import { getDefaultArguments } from '@kbn/langchain/server';
+import {
+  ActionsClientChatBedrockConverse,
+  ActionsClientChatOpenAI,
+  ActionsClientChatVertexAI,
+  getDefaultArguments,
+} from '@kbn/langchain/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import type { MessageMetadata } from '@kbn/elastic-assistant-common';
@@ -17,7 +22,6 @@ import { generateChatTitle } from './nodes/generate_chat_title';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../../prompt/helpers';
-import { getLlmClass } from '../../get_llm_class';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
 import type { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import type { AssistantToolParams } from '../../../../types';
@@ -29,6 +33,18 @@ import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
 import { getConversationWithNewMessage } from '../../utils/get_conversation_with_new_message';
+
+export const getLlmClass = (llmType?: string) => {
+  switch (llmType) {
+    case 'bedrock':
+      return ActionsClientChatBedrockConverse;
+    case 'gemini':
+      return ActionsClientChatVertexAI;
+    case 'openai':
+    default:
+      return ActionsClientChatOpenAI;
+  }
+};
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,

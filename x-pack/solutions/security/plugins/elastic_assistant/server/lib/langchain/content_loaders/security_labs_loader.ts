@@ -8,7 +8,6 @@
 import { globSync } from 'fs';
 import normalizePath from 'normalize-path';
 import type { Logger } from '@kbn/core/server';
-import { DirectoryLoader } from '@langchain/classic/document_loaders/fs/directory';
 import { resolve } from 'path';
 import type { Document } from '@langchain/core/documents';
 import type { Metadata } from '@kbn/elastic-assistant-common';
@@ -17,7 +16,6 @@ import { ENCODED_FILE_MICROMATCH_PATTERN } from '@kbn/ai-security-labs-content';
 import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';
 import { SECURITY_LABS_RESOURCE } from '../../../routes/knowledge_base/constants';
 import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
-import { EncodedSecurityLabsContentLoader } from './encoded_security_labs_content_loader';
 
 /**
  * Loads the Elastic Security Labs mdx files into the Knowledge Base.
@@ -27,6 +25,11 @@ export const loadSecurityLabs = async (
   logger: Logger
 ): Promise<boolean> => {
   try {
+    // lazy imports to keep the langchain stack out of the plugin startup path
+    const [{ DirectoryLoader }, { EncodedSecurityLabsContentLoader }] = await Promise.all([
+      import('@langchain/classic/document_loaders/fs/directory'),
+      import('./encoded_security_labs_content_loader'),
+    ]);
     const docsLoader = new DirectoryLoader(
       resolve(__dirname, '../../../knowledge_base/security_labs'),
       {
