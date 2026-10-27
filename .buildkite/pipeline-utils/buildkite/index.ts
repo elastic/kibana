@@ -9,5 +9,6 @@
 
 export * from './client.ts';
 export * from './kibana_distributable.ts';
+export * from './merge_queue_validation.ts';
 export * from './types/index.ts';
 export * from './utils.ts';
