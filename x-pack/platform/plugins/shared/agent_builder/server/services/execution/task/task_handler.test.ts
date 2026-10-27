@@ -22,6 +22,7 @@ import { deliverCallbackEvents } from '../callback/deliver_callback_events';
 import { collectAndWriteEvents, handleAgentExecution } from '../execution_runner';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import { createAgentExecutionClient } from '../persistence';
+import { createConversationClientMock } from '../../../test_utils/conversations';
 
 jest.mock('../execution_runner');
 jest.mock('../utils/serialize_execution_error');
@@ -103,6 +104,10 @@ describe('TaskHandler event streaming and finalization', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let callbackDeliveryService: jest.Mocked<CallbackDeliveryService>;
   const surfacesService = {};
+  const conversationClient = createConversationClientMock();
+  const conversationService = {
+    getScopedClientAsUser: jest.fn().mockResolvedValue(conversationClient),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -115,6 +120,7 @@ describe('TaskHandler event streaming and finalization', () => {
       updateHeartbeat: jest.fn().mockResolvedValue(undefined),
     };
     createAgentExecutionClientMock.mockReturnValue(executionClient as never);
+    conversationService.getScopedClientAsUser.mockResolvedValue(conversationClient);
     handleAgentExecutionMock.mockResolvedValue(of(...events));
     collectAndWriteEventsMock.mockImplementation(async ({ events$ }) => {
       await firstValueFrom(events$.pipe(toArray()));
@@ -131,6 +137,7 @@ describe('TaskHandler event streaming and finalization', () => {
       elasticsearch: { client: { asInternalUser: {} } },
       callbackDeliveryService,
       surfacesService,
+      conversationService,
     } as never);
 
   const fakeRequest = httpServerMock.createKibanaRequest();
@@ -323,5 +330,67 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(logger.error).toHaveBeenCalledWith(
       'Failed to update status for execution execution-1: status update failed'
     );
+  });
+
+  describe('an execution aborted before it started', () => {
+    const owner = { id: 'user-1', username: 'elastic' };
+
+    const runAborted = (overrides: Record<string, unknown> = {}) => {
+      executionClient.get.mockResolvedValue({
+        ...execution,
+        status: ExecutionStatus.aborted,
+        owner,
+        ...overrides,
+      });
+
+      return run();
+    };
+
+    it('releases the conversation without running the agent', async () => {
+      await runAborted();
+
+      expect(handleAgentExecutionMock).not.toHaveBeenCalled();
+      expect(conversationService.getScopedClientAsUser).toHaveBeenCalledWith({
+        request: fakeRequest,
+        user: { ...owner, isAdmin: false },
+      });
+      expect(conversationClient.update).toHaveBeenCalledWith(
+        { id: 'conversation-1' },
+        {
+          source: 'execution',
+          access: 'converse',
+          retryOnConflict: true,
+          activeExecution: { releaseExecutionId: 'execution-1' },
+        }
+      );
+    });
+
+    it('releases nothing when the execution stores no conversation', async () => {
+      await runAborted({
+        agentParams: { ...execution.agentParams, storeConversation: false },
+      });
+
+      expect(conversationClient.update).not.toHaveBeenCalled();
+    });
+
+    it('releases nothing for a standalone execution', async () => {
+      await runAborted({
+        executionMode: AgentExecutionMode.standalone,
+        agentParams: { nextInput: { message: 'hello' } },
+      });
+
+      expect(conversationClient.update).not.toHaveBeenCalled();
+    });
+
+    it('logs and still skips the run when the release fails', async () => {
+      conversationClient.update.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(runAborted()).resolves.toBeUndefined();
+
+      expect(handleAgentExecutionMock).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Failed to release conversation conversation-1 after execution execution-1 was aborted before it started: boom'
+      );
+    });
   });
 });
