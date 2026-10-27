@@ -16,11 +16,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RunQuotaGroup } from '@kbn/significant-events-plugin/common';
+import { isRunQuotaReached, type RunQuotaGroup } from '@kbn/significant-events-plugin/common';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import {
   isDetectionRunQuotaGroup,
-  isRunQuotaReached,
   RunQuotaReachedCallout,
 } from '../../components/ui/run_quota_reached_callout';
 import { isFiniteRunLimit, RUN_QUOTA_GROUPS } from './run_limit_draft';

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RunQuotaGroup } from '@kbn/significant-events-plugin/common';
+import { isRunQuotaReached, type RunQuotaGroup } from '@kbn/significant-events-plugin/common';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useBlocksNewActivity } from '../../data/maintenance/use_significant_events_maintenance';
 import { useRunQuotas } from '../../data/run_quotas/use_significant_events_run_quotas';
@@ -17,16 +17,6 @@ export type DetectionRunQuotaGroup = Extract<RunQuotaGroup, 'detection' | 'ki_ex
 
 export const isDetectionRunQuotaGroup = (group: RunQuotaGroup): group is DetectionRunQuotaGroup =>
   group === 'detection' || group === 'ki_extraction';
-
-export const isRunQuotaReached = ({
-  enabled,
-  limit,
-  count,
-}: {
-  enabled: boolean;
-  limit: number;
-  count: number;
-}): boolean => enabled && limit > 0 && count >= limit;
 
 const getCalloutTitle = (group: DetectionRunQuotaGroup): string =>
   group === 'detection'

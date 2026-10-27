@@ -134,7 +134,7 @@ export function NightshiftAppHeader({
   const menu = useMemo<AppMenuConfig>(
     () => ({
       items: [
-        // Landing: Automations and Detections buttons; Knowledge, Settings, Sandbox Secrets in overflow.
+        // Landing: Automations and Detections buttons; Settings and Sandbox Secrets in overflow.
         ...(isLandingPage && onAutomationsClick && automationsHref
           ? [
               {
@@ -165,7 +165,8 @@ export function NightshiftAppHeader({
               },
             ]
           : []),
-        ...(isLandingPage && onKnowledgeClick && knowledgeHref
+        // Landing and Detections: Knowledge in overflow.
+        ...((isLandingPage || isDetectionPage) && onKnowledgeClick && knowledgeHref
           ? [
               {
                 id: 'nightshiftKnowledge',
@@ -210,23 +211,7 @@ export function NightshiftAppHeader({
             ]
           : []),
 
-        // Detections: Knowledge in overflow; Sources and Settings as buttons.
-        ...(isDetectionPage && onKnowledgeClick && knowledgeHref
-          ? [
-              {
-                id: 'nightshiftKnowledge',
-                label: knowledgeLabel,
-                iconType: 'documentation' as const,
-                href: knowledgeHref,
-                run: (params?: AppMenuRunActionParams) => {
-                  applyEbtProps(knowledgeEbtProps, params);
-                  void onKnowledgeClick();
-                },
-                testId: 'nightshiftKnowledgeLink',
-                overflow: true,
-              },
-            ]
-          : []),
+        // Detections: Sources and Settings as buttons.
         ...(isDetectionPage && onSourcesClick && sourcesHref
           ? [
               {
