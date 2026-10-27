@@ -7,5 +7,5 @@
 
 export { useEuiTheme } from './use_eui_theme';
 export { useSetFilter } from './use_filter';
-export { useLastUpdated } from './use_last_updated';
+export { useLastUpdatedText } from './use_last_updated_text';
 export { useScroll } from './use_scroll';

@@ -8,13 +8,13 @@
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { getRegisteredSpec } from '../../../../specs_client/lib/get_registered_spec';
 import { serializeSpecDetail } from '../../../../specs_client/lib/serialize_spec_detail';
-import type { GetConnectorSpecParams } from './types';
+import type { GetConnectorSpecParams, GetConnectorSpecResult } from './types';
 
 export async function getConnectorSpecAsJsonSchema({
   context,
   id,
   configurationUtilities,
-}: GetConnectorSpecParams) {
+}: GetConnectorSpecParams): Promise<GetConnectorSpecResult> {
   try {
     await context.authorization.ensureAuthorized({ operation: 'get' });
   } catch (error) {
@@ -34,11 +34,17 @@ export async function getConnectorSpecAsJsonSchema({
     metadata: registered.spec.metadata,
     schema: detail.formSchema,
     isTestable: detail.isTestable,
-    actions: detail.actions.map(({ name, isTool, description, scope }) => ({
+    authTypeIds: detail.authTypeIds,
+    hasInboundEvents: detail.hasInboundEvents,
+    isInboundOnly: detail.isInboundOnly,
+    isEarsExperimental: detail.isEarsExperimental,
+    ...(detail.skill !== undefined ? { skill: detail.skill } : {}),
+    actions: detail.actions.map(({ name, isTool, description, scope, inputSchema }) => ({
       name,
       isTool,
       ...(description !== undefined ? { description } : {}),
       scope,
+      inputSchema,
     })),
   };
 }

@@ -9,7 +9,7 @@ import {
   DISCOVER_SESSION_ATTACHMENT_TYPE,
   DISCOVER_SESSION_SO_TYPE,
 } from '../../../../common/constants/attachments';
-import type { DiscoverSessionAttachmentPayload } from '../../../../common/types/domain_zod/attachment/saved_object/v2';
+import type { DiscoverSessionAttachmentPayload } from '../../../../common/types/domain/attachment/saved_object/v2';
 
 export type DiscoverSessionPayload = Omit<DiscoverSessionAttachmentPayload, 'owner'>;
 

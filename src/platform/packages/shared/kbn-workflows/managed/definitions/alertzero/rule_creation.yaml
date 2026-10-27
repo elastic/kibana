@@ -287,8 +287,6 @@ steps:
           Preview errors: {{ steps.preview_creation.output.error_text }}{% endif %}
           **Severity:** {{ steps.draft_creation.output.structured_output.rule.severity }}. **Risk score:** {{ steps.draft_creation.output.structured_output.rule.risk_score }}.
 
-          **Draft:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.draft_creation.output.conversation_id }})
-
           **On approval**
           If you approve, the agent creates and enables the rule under your identity, so it starts running on its next scheduled interval. If you dismiss, the agent discards the draft.
         actionWorkflowId: system-alertzero-action-create-rule
