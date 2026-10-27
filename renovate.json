@@ -2548,15 +2548,6 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "dotenv",
-      "matchDepNames": ["dotenv"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip", "backport:all-open"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "oxlint",
       "matchDepNames": ["oxlint"],
       "reviewers": ["team:kibana-operations"],
