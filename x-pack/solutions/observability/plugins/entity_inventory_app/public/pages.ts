@@ -15,11 +15,11 @@ export const ENTITY_INVENTORY_TITLE = i18n.translate('xpack.entityInventoryApp.a
 interface EntityInventoryPage {
   /** Deep link ID of the page, checked against the navigation `link` type where it is used. */
   deepLinkId: string;
-  /** Also reported as the click detail of the empty state button: changing a value changes the telemetry data. */
+  /** Also reported as the click detail of the no data button: changing a value changes the telemetry data. */
   entityCategory: string;
   path: string;
   title: string;
-  /** Onboarding locator params for the empty state "Add data" button. */
+  /** Onboarding locator params for the "Add data" button of the no data state. */
   onboarding: ObservabilityOnboardingLocatorParams;
 }
 

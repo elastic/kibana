@@ -10,7 +10,7 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "entityInventoryApp"],
-    "requiredPlugins": ["observabilityShared"],
+    "requiredPlugins": ["observabilityShared", "share"],
     "optionalPlugins": [],
     "requiredBundles": []
   }

@@ -24,11 +24,16 @@ dependsOn:
   - '@kbn/observability-shared-plugin'
   - '@kbn/app-header'
   - '@kbn/shared-ux-router'
+  - '@kbn/deeplinks-observability'
+  - '@kbn/share-plugin'
+  - '@kbn/ebt-click'
+  - '@kbn/i18n-react'
 tags:
   - plugin
   - prod
   - group-observability
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
