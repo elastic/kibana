@@ -8,7 +8,6 @@
 import { ACTION_POLICY_AUTHORING_SKILL_ID, ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
-import { AttachmentsService } from '../../lib/services/attachments_service';
 import { createAlertingV2Availability } from './alerting_v2_availability';
 import { createActionPolicyAuthoringSkill } from './action_policy_authoring_skill';
 import {
@@ -27,7 +26,6 @@ const createDeps = (): ManageActionPolicyToolDeps & {
     error: jest.fn(),
     forSubsystem: jest.fn(),
   } as unknown as LoggerServiceContract,
-  attachmentsService: new AttachmentsService(),
   getWorkflowClient: jest.fn(() => ({ getWorkflow: jest.fn(async () => null) })),
   getAvailableConnectors: jest.fn(async () => ({ connectorTypes: {} })),
   availability: createAlertingV2Availability({

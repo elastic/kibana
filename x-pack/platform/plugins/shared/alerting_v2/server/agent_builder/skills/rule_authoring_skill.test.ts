@@ -13,8 +13,6 @@ import {
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import { createAlertingV2Availability } from './alerting_v2_availability';
 import { createRuleAuthoringSkill } from './rule_authoring_skill';
-import { AttachmentsService } from '../../lib/services/attachments_service';
-
 const createDeps = () => ({
   logger: {
     debug: jest.fn(),
@@ -23,7 +21,6 @@ const createDeps = () => ({
     error: jest.fn(),
     forSubsystem: jest.fn(),
   } as unknown as LoggerServiceContract,
-  attachmentsService: new AttachmentsService(),
   availability: createAlertingV2Availability({
     getActiveSpace: jest.fn().mockResolvedValue({}),
   }),

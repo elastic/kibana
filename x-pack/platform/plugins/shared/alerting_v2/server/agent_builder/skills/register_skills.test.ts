@@ -11,7 +11,6 @@ import {
 } from '@kbn/alerting-v2-constants';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
-import { AttachmentsService } from '../../lib/services/attachments_service';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import { createActionPolicyAuthoringSkill } from './action_policy_authoring_skill';
 import { createRuleAuthoringSkill } from './rule_authoring_skill';
@@ -62,7 +61,6 @@ describe('registerSkills', () => {
   const deps = () =>
     ({
       logger: logger as unknown as LoggerServiceContract,
-      attachmentsService: new AttachmentsService(),
       getWorkflowClient: jest.fn(() => ({ getWorkflow: jest.fn() })),
       getAvailableConnectors: jest.fn(),
       availability: {

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-export { AttachmentsService } from './attachments_service';
-export type { AttachmentsServiceContract } from './attachments_service';
-export { AttachmentsServiceToken } from './tokens';
+export { createAttachmentsClient } from './attachments_client';
 export type {
   AttachmentDraft,
   AttachmentEntry,

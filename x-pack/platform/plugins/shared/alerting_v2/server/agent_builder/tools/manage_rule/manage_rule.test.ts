@@ -15,7 +15,6 @@ import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mo
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
-import { AttachmentsService } from '../../../lib/services/attachments_service';
 import { manageRuleTool } from './manage_rule';
 
 const getEsqlQueryMock = (ctx: ToolHandlerContextMock) =>
@@ -72,7 +71,6 @@ describe('manageRuleTool', () => {
     logger = createLogger();
     tool = manageRuleTool({
       logger: logger as unknown as LoggerServiceContract,
-      attachmentsService: new AttachmentsService(),
     });
   });
 

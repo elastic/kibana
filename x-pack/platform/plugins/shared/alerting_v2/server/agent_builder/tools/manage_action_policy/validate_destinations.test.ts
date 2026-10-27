@@ -7,7 +7,7 @@
 
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
-import { AttachmentsService } from '../../../lib/services/attachments_service';
+import { createAttachmentsClient } from '../../../lib/services/attachments_service';
 import { ActionPolicyOperationValidationError } from './operations';
 import { validateDestinations } from './validate_destinations';
 
@@ -40,7 +40,7 @@ const createMockAttachments = (
     versions: Array<{ data: Record<string, unknown> }>;
   }> = []
 ) =>
-  new AttachmentsService().getClient({
+  createAttachmentsClient({
     getActive: jest.fn().mockReturnValue(active),
   } as unknown as AttachmentStateManager).workflows;
 

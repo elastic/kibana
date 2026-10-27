@@ -24,7 +24,7 @@ import {
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import { generateRuleOperationsUsageList } from '../../skills/schema_to_skill_docs';
-import type { AttachmentsServiceContract } from '../../../lib/services/attachments_service';
+import { createAttachmentsClient } from '../../../lib/services/attachments_service';
 
 const manageRuleSchema = lazySchema(() =>
   z.object({
@@ -40,12 +40,10 @@ const manageRuleSchema = lazySchema(() =>
 
 export interface ManageRuleToolDeps {
   logger: LoggerServiceContract;
-  attachmentsService: AttachmentsServiceContract;
 }
 
 export const manageRuleTool = ({
   logger,
-  attachmentsService,
 }: ManageRuleToolDeps): BuiltinSkillBoundedTool<typeof manageRuleSchema> => ({
   id: ALERTING_TOOL_IDS.manageRule,
   type: ToolType.builtin,
@@ -65,7 +63,7 @@ ${generateRuleOperationsUsageList()}`,
   ) => {
     let ruleId: string | undefined;
     try {
-      const { rules } = attachmentsService.getClient(attachments);
+      const { rules } = createAttachmentsClient(attachments);
       const draft = rules.getDraft(previousAttachmentId);
       const { isNew, data: currentData } = draft;
       ruleId = draft.origin;

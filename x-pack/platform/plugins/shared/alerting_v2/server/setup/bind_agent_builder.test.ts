@@ -19,7 +19,6 @@ import { registerSkills } from '../agent_builder/skills/register_skills';
 import { createActionPolicySmlType } from '../agent_builder/sml/action_policy_sml_type';
 import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
-import { AttachmentsService, AttachmentsServiceToken } from '../lib/services/attachments_service';
 import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { createLoggerService } from '../lib/services/logger_service/logger_service.mock';
 import { UiSettingsClientToken } from '../lib/services/settings_service/tokens';
@@ -128,7 +127,6 @@ describe('bindAgentBuilder', () => {
     container.bind(LoggerServiceToken).toConstantValue(loggerService);
     container.bind(UiSettingsClientToken).toConstantValue(uiSettingsClient as never);
     container.bind(WorkflowsManagementApiToken).toConstantValue(workflowsManagementApi as never);
-    container.bind(AttachmentsServiceToken).toConstantValue(new AttachmentsService());
 
     container.load(new ContainerModule((options) => bindAgentBuilder(options)));
   });

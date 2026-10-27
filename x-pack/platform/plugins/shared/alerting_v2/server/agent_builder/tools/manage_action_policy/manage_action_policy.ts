@@ -24,7 +24,7 @@ import {
 import { validateDestinations, type WorkflowDestinationDiagnostic } from './validate_destinations';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
-import type { AttachmentsServiceContract } from '../../../lib/services/attachments_service';
+import { createAttachmentsClient } from '../../../lib/services/attachments_service';
 
 const manageActionPolicySchema = lazySchema(() =>
   z.object({
@@ -40,7 +40,6 @@ const manageActionPolicySchema = lazySchema(() =>
 
 export interface ManageActionPolicyToolDeps {
   logger: LoggerServiceContract;
-  attachmentsService: AttachmentsServiceContract;
   getWorkflowClient: (request: KibanaRequest) => Pick<WorkflowsManagementClient, 'getWorkflow'>;
   getAvailableConnectors: (
     spaceId: string,
@@ -63,7 +62,6 @@ export interface ManageActionPolicyToolDeps {
 
 export const manageActionPolicyTool = ({
   logger,
-  attachmentsService,
   getWorkflowClient,
   getAvailableConnectors,
   validateWorkflow,
@@ -90,7 +88,7 @@ Use operations[] to:
   ) => {
     let policyId: string | undefined;
     try {
-      const attachmentsClient = attachmentsService.getClient(attachments);
+      const attachmentsClient = createAttachmentsClient(attachments);
       const draft = attachmentsClient.actionPolicies.getDraft(previousAttachmentId);
       const { isNew, data: currentData } = draft;
       policyId = draft.origin;
