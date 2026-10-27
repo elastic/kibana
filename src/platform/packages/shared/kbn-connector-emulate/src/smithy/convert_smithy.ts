@@ -266,26 +266,36 @@ export const convertSmithy = (
     // match several of them. smithy-openapi keeps only the last one.
     const errorResponses = [...errors].map(([code, targets]) => {
       const schemas: JsonSchema[] = [];
-      let headers: ResponseHeaders = {};
       const headersOf: ResponseHeaders[] = [];
       for (const target of targets) {
         const members = membersOf(model, target);
         const body = members.filter(([, member]) => bindingOf(member) === undefined);
         headersOf.push(toHeaders(members));
-        headers = { ...headers, ...headersOf[headersOf.length - 1] };
         if (body.length > 0) {
           const component = `${shapeName(target)}ResponseContent`;
           components[component] = converter.toObjectSchema(body);
           schemas.push({ $ref: `#/components/schemas/${component}` });
         }
       }
-      // A header is only mandatory when every alternative requires it.
-      headers = Object.fromEntries(
-        Object.entries(headers).map(([headerName, header]) => [
+      // Header names are case-insensitive, and a header is only mandatory when every
+      // alternative requires it.
+      const merged = new Map<string, [string, ResponseHeaders[string]]>();
+      for (const own of headersOf) {
+        for (const [headerName, header] of Object.entries(own)) {
+          const key = headerName.toLowerCase();
+          merged.set(key, [merged.get(key)?.[0] ?? headerName, header]);
+        }
+      }
+      const headers: ResponseHeaders = Object.fromEntries(
+        [...merged].map(([key, [headerName, header]]) => [
           headerName,
           {
             ...header,
-            required: headersOf.every((own) => own[headerName]?.required === true),
+            required: headersOf.every((own) =>
+              Object.entries(own).some(
+                ([ownName, { required }]) => ownName.toLowerCase() === key && required
+              )
+            ),
           },
         ])
       );

@@ -89,11 +89,31 @@ export const declaresProperty = (
     ({ properties }) => isRecord(properties) && Object.hasOwn(properties, key)
   );
 
-/** Whether an object schema takes properties it doesn't declare. */
-export const allowsUndeclaredProperties = (schema: unknown, document: OpenApiDocument): boolean =>
-  collectParts(schema, document).every(
-    ({ additionalProperties }) => additionalProperties !== false
+const allowsUndeclared = (schema: unknown, document: OpenApiDocument, depth = 0): boolean => {
+  const node = resolveSchema(schema, document);
+  const parts = (keyword: string): unknown[] => {
+    const variants = node[keyword];
+    return Array.isArray(variants) ? variants : [];
+  };
+  const alternatives = (keyword: string): boolean =>
+    parts(keyword).length === 0 ||
+    depth >= MAX_DEPTH ||
+    parts(keyword).some((variant) => allowsUndeclared(variant, document, depth + 1));
+  return (
+    node.additionalProperties !== false &&
+    (depth >= MAX_DEPTH ||
+      parts('allOf').every((variant) => allowsUndeclared(variant, document, depth + 1))) &&
+    alternatives('anyOf') &&
+    alternatives('oneOf')
   );
+};
+
+/**
+ * Whether an object schema takes properties it doesn't declare: every `allOf` part must allow
+ * them, and at least one `anyOf`/`oneOf` alternative.
+ */
+export const allowsUndeclaredProperties = (schema: unknown, document: OpenApiDocument): boolean =>
+  allowsUndeclared(schema, document);
 
 const matchesPattern = (pattern: string, value: string): boolean => {
   try {

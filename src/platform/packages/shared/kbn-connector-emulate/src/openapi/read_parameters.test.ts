@@ -182,6 +182,35 @@ describe('readParameters', () => {
     });
   });
 
+  it('gives unknown keys to an object with an open alternative', () => {
+    const parameters = [
+      {
+        name: 'color',
+        in: 'query',
+        schema: {
+          type: 'object',
+          properties: { color: { type: 'string' } },
+          additionalProperties: false,
+        },
+      },
+      {
+        name: 'extra',
+        in: 'query',
+        schema: {
+          oneOf: [
+            { type: 'object', additionalProperties: false },
+            { type: 'object', additionalProperties: { type: 'string' } },
+          ],
+        },
+      },
+    ];
+
+    expect(read(parameters, { query: { color: 'blue', env: 'prod' } })).toEqual({
+      'query.color': { color: 'blue' },
+      'query.extra': { env: 'prod' },
+    });
+  });
+
   it('leaves the keys of deepObject parameters out of form-exploded maps', () => {
     const parameters = [
       {

@@ -236,12 +236,22 @@ const model: SmithyModel = {
           target: 'smithy.api#String',
           traits: { ...required, 'smithy.api#httpHeader': 'x-error-id' },
         },
+        traceId: {
+          target: 'smithy.api#String',
+          traits: { ...required, 'smithy.api#httpHeader': 'x-trace-id' },
+        },
       },
       traits: { 'smithy.api#error': 'client', 'smithy.api#httpError': 404 },
     },
     [id('GoneException')]: {
       type: 'structure',
-      members: { message: { target: 'smithy.api#String' } },
+      members: {
+        message: { target: 'smithy.api#String' },
+        errorId: {
+          target: 'smithy.api#String',
+          traits: { ...required, 'smithy.api#httpHeader': 'X-Error-Id' },
+        },
+      },
       traits: { 'smithy.api#error': 'client', 'smithy.api#httpError': 404 },
     },
     [id('ThrottlingException')]: {
@@ -407,8 +417,12 @@ describe('convertSmithy', () => {
     expect(paths['/buckets/{name}'].get.responses).toMatchObject({
       '404': {
         description: 'NotFoundException, GoneException 404 response',
-        // Only one of the alternatives defines the header, so it isn't mandatory.
-        headers: { 'x-error-id': { required: false, schema: { type: 'string' } } },
+        // Both alternatives require the header, however they spell its name.
+        headers: {
+          'x-error-id': { required: true, schema: { type: 'string' } },
+          // Only one of the alternatives defines this header, so it isn't mandatory.
+          'x-trace-id': { required: false, schema: { type: 'string' } },
+        },
         content: {
           'application/json': {
             schema: {
@@ -506,7 +520,11 @@ describe('convertSmithy', () => {
       fixtures: [
         {
           operation: { method: 'get', path: '/buckets/{name}' },
-          response: { status: 404, body: { message: 'No such bucket' } },
+          response: {
+            status: 404,
+            headers: { 'x-error-id': 'err-1' },
+            body: { message: 'No such bucket' },
+          },
         },
       ],
     });
