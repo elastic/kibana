@@ -159946,23 +159946,28 @@ components:
               type: string
             groupBy:
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 100
               type: array
             searchConfiguration:
               additionalProperties: false
               type: object
               properties:
                 index:
+                  maxLength: 10000
                   type: string
               required:
                 - index
             threshold:
               items:
                 type: number
+              maxItems: 2
               type: array
             timeSize:
               type: number
             timeUnit:
+              maxLength: 64
               type: string
           required:
             - timeUnit
@@ -166479,6 +166484,11 @@ components:
                               - p95
                               - p99
                             type: string
+                          histogram_visualization:
+                            description: How histogram metrics are drawn. If omitted, Discover uses the percentile chart.
+                            enum:
+                              - lnsXY
+                            type: string
                           row_height:
                             anyOf:
                               - maximum: 20
@@ -168606,6 +168616,11 @@ components:
                       - p90
                       - p95
                       - p99
+                    type: string
+                  histogram_visualization:
+                    description: How histogram metrics are drawn. If omitted, Discover uses the percentile chart.
+                    enum:
+                      - lnsXY
                     type: string
                   id:
                     description: A unique identifier. Must contain only lowercase letters, numbers, hyphens, and underscores.
@@ -182031,12 +182046,16 @@ components:
             excludeTransforms:
               default: null
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 1000
               nullable: true
               type: array
             includeTransforms:
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 1000
               type: array
             testsConfig:
               additionalProperties: false

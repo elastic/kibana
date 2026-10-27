@@ -1,5 +1,5 @@
 {
-  "sha1": "143456547c609561b8b4c42b96e71c401822d7af",
+  "sha1": "cb96eec1c3a60bd8f355ad5c7654f66f63bfcade",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -479,8 +479,8 @@
       }
     },
     {
-      "id": "2bd6d8da5d00a5a-19f05d1b7f407a6",
-      "title": "POST /internal/nightshift/investigations returns 400 when subject.id exceeds 500 characters",
+      "id": "2bd6d8da5d00a5a-e6ea4c64c57ead7",
+      "title": "POST /internal/nightshift/investigations returns 400 when an entry of subject.ids exceeds 500 characters",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -495,6 +495,22 @@
       }
     },
     {
+      "id": "2bd6d8da5d00a5a-28ea4cc4fe80260",
+      "title": "POST /internal/nightshift/investigations returns 400 when subject.ids is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
+        "line": 65,
+        "column": 44
+      }
+    },
+    {
       "id": "2bd6d8da5d00a5a-33c57d77cff5e33",
       "title": "POST /internal/nightshift/investigations returns 404 for a well-formed alert body whose alert does not exist",
       "expectedStatus": "passed",
@@ -506,8 +522,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
-        "line": 65,
-        "column": 58
+        "line": 76,
+        "column": 18
       }
     },
     {
@@ -522,8 +538,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
-        "line": 78,
-        "column": 27
+        "line": 88,
+        "column": 25
       }
     }
   ]

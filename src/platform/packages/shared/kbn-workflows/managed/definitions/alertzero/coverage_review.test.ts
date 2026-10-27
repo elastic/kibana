@@ -580,10 +580,16 @@ describe('Detection Coverage review', () => {
       }
     });
 
-    it('runs the enable action against the resolved saved-object id', () => {
+    // The revision lets the action refuse a rule edited since; the investigation gets
+    // the note when the rule was enabled by hand.
+    it('runs the enable action against the resolved rule as it was at proposal time', () => {
       const enable = inputsOf(stepByName('propose_enable'));
       expect(enable.actionWorkflowId).toBe(ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW_ID);
-      expect(enable.actionInput).toEqual({ id: '{{ steps.resolve_rule.output.id }}' });
+      expect(enable.actionInput).toEqual({
+        id: '{{ steps.resolve_rule.output.id }}',
+        expected_revision: '${{ steps.resolve_rule.output.revision }}',
+        investigation_id: '{{ steps.create_investigation.output.conversation_id }}',
+      });
       expect(enable.autoApprove).toBe(false);
     });
 

@@ -635,6 +635,8 @@ steps:
                 actionWorkflowId: system-alertzero-action-enable-rule
                 actionInput:
                   id: "{{ steps.resolve_rule.output.id }}"
+                  expected_revision: "${{ steps.resolve_rule.output.revision }}"
+                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 impact: low
                 confidence: medium
                 # Enabling a rule always waits for an analyst; matches the action's approvalPolicy.
