@@ -265,6 +265,7 @@ export const EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS: Record<
           'feature_alertzero.all',
           'feature_contextEngine.all',
           'feature_proposals.all',
+          'feature_securitySolutionAlertsV1.all',
           'feature_siemV5.actions_log_management_read',
           'feature_siemV5.host_isolation_all',
           'feature_siemV5.minimal_read',

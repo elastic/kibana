@@ -94,6 +94,11 @@ outputs:
     type: boolean
   - name: entry_decision
     type: string
+consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Rule Coverage worker"
+
 steps:
   # Step 1 of 10: read the indicator. No `on-failure: continue`: if the read fails, the
   # run fails, the indicator stays pending, and the next sweep starts a new review. If the
@@ -296,6 +301,7 @@ steps:
       continue: true
     create-conversation: true
     with:
+      author_name: "{{ consts.author_name }}"
       # The thin agent has no skills or tools of its own. List every skill the
       # step needs, including the skills those skills load.
       configuration_overrides:
@@ -515,6 +521,8 @@ steps:
                 actionWorkflowId: system-alertzero-action-enable-rule
                 actionInput:
                   id: "{{ steps.resolve_rule.output.id }}"
+                  expected_revision: "${{ steps.resolve_rule.output.revision }}"
+                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 impact: low
                 confidence: medium
                 # Enabling a rule always waits for an analyst; matches the action's approvalPolicy.

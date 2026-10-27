@@ -86,8 +86,13 @@ export const podMemorySeries = (schema?: DataSchemaFormat): TSVBSeries => {
  * Network series for a pod.
  *
  * SemConv stores both directions on `k8s.pod.network.io` and splits them with
- * `direction`. `max` across interfaces in one bucket under-reports pods with
- * more than one interface; snapshot uses a per-interface sum.
+ * `direction`. A pod can report the metric once per network interface, so the
+ * total traffic for a direction is the sum across interfaces. Taking `max`
+ * across interfaces in a single bucket under-reports multi-interface pods, which
+ * is why the series splits on `interface` (per-interface `max` + derivative) and
+ * then sums the per-interface rates with a `series_agg`, matching the Inventory
+ * snapshot's `networkTrafficWithInterfacesWithFilter` sum semantics. For
+ * single-interface pods `sum == max`, so their behavior is unchanged.
  */
 export const podNetworkSeries = (
   schema: DataSchemaFormat | undefined,
@@ -99,10 +104,11 @@ export const podNetworkSeries = (
   const derivId = `deriv-max-network-${direction}`;
   const ecsField =
     direction === 'rx' ? 'kubernetes.pod.network.rx.bytes' : 'kubernetes.pod.network.tx.bytes';
+  const isSemconv = schema === 'semconv';
 
   const metrics: TSVBSeries['metrics'] = [
     {
-      field: schema === 'semconv' ? SEMCONV_K8S_POD_NETWORK_IO : ecsField,
+      field: isSemconv ? SEMCONV_K8S_POD_NETWORK_IO : ecsField,
       id: rateId,
       type: 'max',
     },
@@ -129,7 +135,7 @@ export const podNetworkSeries = (
     });
   }
 
-  if (schema !== 'semconv') {
+  if (!isSemconv) {
     return {
       id: direction,
       split_mode: 'everything',
@@ -137,11 +143,21 @@ export const podNetworkSeries = (
     };
   }
 
-  // split_mode filter applies the kuery as a series aggregation filter. Inventory
-  // snapshot uses a term filter on the same `direction` field.
+  // Split on `interface` so the per-interface `max` rate is derived independently,
+  // then sum those rates back into a single series with a `series_agg`. This makes
+  // the Pod Detail total match the Inventory snapshot, which sums per-interface
+  // rates rather than collapsing interfaces with a single `max`. The direction is
+  // applied as a series `filter` (the same term filter the snapshot uses).
+  metrics.push({
+    id: `sum-interfaces-network-${direction}`,
+    function: 'sum',
+    type: 'series_agg',
+  });
+
   return {
     id: direction,
-    split_mode: 'filter',
+    split_mode: 'terms',
+    terms_field: 'interface',
     filter: {
       query: direction === 'rx' ? 'direction: receive' : 'direction: transmit',
       language: 'kuery',

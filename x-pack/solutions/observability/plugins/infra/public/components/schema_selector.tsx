@@ -24,7 +24,8 @@ import {
   type DataSchemaFormat,
 } from '@kbn/metrics-data-access-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DEFAULT_SCHEMA } from '../../common/constants';
+import { DEFAULT_SCHEMA, SCHEMA_SELECTOR_DOCS_LINKS } from '../../common/constants';
+import type { EntityTypes } from '../../common/http_api/shared/entity_type';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 import { Popover } from './popover';
 
@@ -32,13 +33,13 @@ const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvail
   defaultMessage: 'Selected schema is not available for this query.',
 });
 
-const SCHEMA_DOCUMENTATION_LINK = 'https://ela.st/docs-otel-schema-selector-hosts';
-
 const SCHEMA_LABEL = i18n.translate('xpack.infra.schemaSelector.label', {
   defaultMessage: 'Schema',
 });
 
-const PrependLabel = () => {
+const PrependLabel = ({ nodeType }: { nodeType: EntityTypes }) => {
+  const documentationLink = SCHEMA_SELECTOR_DOCS_LINKS[nodeType];
+
   return (
     <EuiFormLabel>
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
@@ -47,20 +48,22 @@ const PrependLabel = () => {
           <Popover buttonAriaLabelText={SCHEMA_LABEL}>
             <FormattedMessage
               id="xpack.infra.schemaSelector.description"
-              defaultMessage="Select which data collection schema your entities are observed with.{nextLine} See {documentation} for more information."
+              defaultMessage="Select which data collection schema your entities are observed with.{hasDocumentation, select, true {{nextLine} See {documentation} for more information.} other {}}"
               values={{
+                hasDocumentation: String(!!documentationLink),
                 nextLine: <br />,
-                documentation: (
+                documentation: documentationLink ? (
                   <EuiLink
                     data-test-subj="infraSchemaSelectorDocumentationLink"
-                    href={SCHEMA_DOCUMENTATION_LINK}
+                    href={documentationLink}
                     target="_blank"
+                    external
                   >
                     {i18n.translate('xpack.infra.schemaSelector.documentation', {
                       defaultMessage: 'documentation',
                     })}
                   </EuiLink>
-                ),
+                ) : null,
               }}
             />
           </Popover>
@@ -126,8 +129,6 @@ const getInputDisplay = (schema: DataSchemaFormat | null) => {
     defaultMessage: 'Unknown schema',
   });
 };
-
-import type { EntityTypes } from '../../common/http_api/shared/entity_type';
 
 type SelectOptions = DataSchemaFormat | 'unknown';
 
@@ -237,7 +238,7 @@ export const SchemaSelector = ({
         css={{
           fontSize: useEuiFontSize('s').fontSize,
         }}
-        prepend={<PrependLabel />}
+        prepend={<PrependLabel nodeType={nodeType} />}
       />
     </EuiFormRow>
   );

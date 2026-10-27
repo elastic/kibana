@@ -1,5 +1,5 @@
 {
-  "sha1": "aff04c37d71d61208f778044b756f4b06eb16340",
+  "sha1": "4b3a5778fe34864bf20525ce069fd0986b0e7b4f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -7,65 +7,65 @@
     {
       "id": "52827b1febb8e62-c3ec081304d7575",
       "title": "Synthetics real-agent monitor types runs a http monitor on an enrolled agent",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/tests/monitor_types.spec.ts",
-        "line": 124,
+        "line": 123,
         "column": 24
       }
     },
     {
       "id": "52827b1febb8e62-e03817ceb61a16a",
       "title": "Synthetics real-agent monitor types runs a tcp monitor on an enrolled agent",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/tests/monitor_types.spec.ts",
-        "line": 124,
+        "line": 123,
         "column": 24
       }
     },
     {
       "id": "52827b1febb8e62-2fadf41dd089d49",
       "title": "Synthetics real-agent monitor types runs a icmp monitor on an enrolled agent",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/tests/monitor_types.spec.ts",
-        "line": 124,
+        "line": 123,
         "column": 24
       }
     },
     {
       "id": "52827b1febb8e62-e30a241f00f9366",
       "title": "Synthetics real-agent monitor types runs a browser monitor on an enrolled agent",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/tests/monitor_types.spec.ts",
-        "line": 124,
+        "line": 123,
         "column": 24
       }
     },
     {
       "id": "52827b1febb8e62-479be61a444f155",
       "title": "Synthetics real-agent monitor types records a down http check when the target returns 5xx",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/tests/monitor_types.spec.ts",
-        "line": 141,
+        "line": 140,
         "column": 13
       }
     }

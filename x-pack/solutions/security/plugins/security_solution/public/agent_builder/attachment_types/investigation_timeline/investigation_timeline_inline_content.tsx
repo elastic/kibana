@@ -22,8 +22,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { getMaybeDate } from '../../../common/components/formatted_date/maybe_date';
-import { parseTimelineEvents } from './parse_timeline_events';
+import { parseTimelineEvents, parseTimelineWindow } from './parse_timeline_events';
 import { TimelineTimestamp } from './timeline_timestamp';
+import { TimelineWindowNote } from './timeline_window_note';
 import type { InvestigationTimelineEvent } from './types';
 
 export const INVESTIGATION_TIMELINE_ATTACHMENT_TEST_ID =
@@ -135,6 +136,7 @@ export const InvestigationTimelineInlineContent: React.FC<
 > = ({ attachment }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'investigationTimeline' });
   const events = useMemo(() => parseTimelineEvents(attachment.data), [attachment.data]);
+  const window = useMemo(() => parseTimelineWindow(attachment.data), [attachment.data]);
   const items = useMemo<TimelineRow[]>(
     () =>
       events.map((event, index) => ({
@@ -193,6 +195,12 @@ export const InvestigationTimelineInlineContent: React.FC<
             defaultMessage="No events were reconstructed from the available telemetry."
           />
         </EuiText>
+        {window ? (
+          <>
+            <EuiSpacer size="xs" />
+            <TimelineWindowNote window={window} />
+          </>
+        ) : null}
       </EuiPanel>
     );
   }
@@ -205,6 +213,12 @@ export const InvestigationTimelineInlineContent: React.FC<
       css={containedCss}
       data-test-subj={INVESTIGATION_TIMELINE_ATTACHMENT_TEST_ID}
     >
+      {window ? (
+        <>
+          <TimelineWindowNote window={window} />
+          <EuiSpacer size="xs" />
+        </>
+      ) : null}
       <EuiAccordion
         id={accordionId}
         buttonContent={<TimelineSummary events={events} />}
