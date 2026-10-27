@@ -12,8 +12,10 @@ export const ESQL_PROFILE_PAGE_INTERVAL = 20;
 
 const TOP_OPERATORS = 3;
 
-export const shouldProfilePage = (pageNumber: number): boolean =>
-  pageNumber > 0 && pageNumber <= 81 && (pageNumber - 1) % ESQL_PROFILE_PAGE_INTERVAL === 0;
+export const shouldProfilePage = (
+  pageNumber: number,
+  interval = ESQL_PROFILE_PAGE_INTERVAL
+): boolean => pageNumber > 0 && (pageNumber - 1) % interval === 0;
 
 export interface EsqlPageProfileSummary {
   wallMs: number;
@@ -28,16 +30,6 @@ export interface EsqlPageProfileSummary {
   /** The operators with the most processing time, summed over every driver. */
   topOperators?: Array<{ operator: string; ms: number }>;
 }
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-const numberAt = (record: Record<string, unknown>, key: string): number | undefined => {
-  const value = record[key];
-  return typeof value === 'number' ? value : undefined;
-};
-
-const roundMs = (nanos: number): number => Math.round(nanos / 1e5) / 10;
 
 /**
  * Condenses an ES|QL response into a loggable summary. The profile section is unstable across
@@ -98,3 +90,13 @@ export const summarizeEsqlPage = (
   summary.valuesLoaded ??= valuesLoaded;
   return summary;
 };
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const numberAt = (record: Record<string, unknown>, key: string): number | undefined => {
+  const value = record[key];
+  return typeof value === 'number' ? value : undefined;
+};
+
+const roundMs = (nanos: number): number => Math.round(nanos / 1e5) / 10;

@@ -6,7 +6,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { RunContext } from '@kbn/task-manager-plugin/server';
 import type { TelemetryReporter, EntityMaintainerRunSummaryEvent } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_RUN_SUMMARY_EVENT } from '../../telemetry/events';
 
@@ -45,12 +44,10 @@ export const createMaintainerTelemetryClient = ({
   id,
   namespace,
   analytics,
-  setCustomTaskRunEventFields,
 }: {
   id: string;
   namespace: string;
   analytics: TelemetryReporter;
-  setCustomTaskRunEventFields?: RunContext['setCustomTaskRunEventFields'];
 }): InternalMaintainerTelemetryClient => {
   const runId = uuidv4();
   const buffer: MaintainerRunReport[] = [];
@@ -62,30 +59,6 @@ export const createMaintainerTelemetryClient = ({
 
     flush({ durationMs, aborted, errorClass, errorMessage }) {
       if (buffer.length === 0) return;
-      const taskData = {
-        runId,
-        durationMs,
-        aborted,
-        errorClass,
-        summaries: buffer.map(({ scope, calculationRunId, funnel, stages }) => ({
-          scope,
-          calculationRunId,
-          funnel,
-          stages: stages?.map(({ name, status, durationMs: stageDuration, errorKind }) => ({
-            name,
-            status,
-            durationMs: stageDuration,
-            errorKind,
-          })),
-        })),
-        omittedSummaries: 0,
-      };
-      // Task Manager accepts at most 4 KiB of custom data; keep the shared run identity on overflow.
-      while (taskData.summaries.length > 0 && Buffer.byteLength(JSON.stringify(taskData)) > 3500) {
-        taskData.summaries.pop();
-        taskData.omittedSummaries += 1;
-      }
-      setCustomTaskRunEventFields?.(taskData);
       for (const report of buffer) {
         analytics.reportEvent(ENTITY_MAINTAINER_RUN_SUMMARY_EVENT, {
           id,

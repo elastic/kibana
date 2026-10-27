@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PageStepTimingsSummary } from './page_step_timings';
+import type { PageStepTimingsSummary } from './page_timing_types';
 import type { StepResult } from '../steps/pipeline_types';
 
 export interface RunMetrics {
@@ -33,77 +33,6 @@ export interface RunMetrics {
   entitiesCreateSkipped: number;
   /** Missing scores rejected by EUID/field validation or bulk creation. */
   entitiesCreateFailed: number;
-}
-
-const METRIC_KEYS: ReadonlyArray<keyof RunMetrics> = [
-  'scoresWrittenRiskIndexBase',
-  'scoresWrittenRiskIndexResolution',
-  'scoresWrittenRiskIndexResetToZero',
-  'scoresWrittenEntityStoreBase',
-  'scoresWrittenEntityStoreResolution',
-  'scoresWrittenEntityStoreResetToZero',
-  'scoresCalculatedBase',
-  'scoresDroppedNotInStore',
-  'scoresMissingFromStoreBase',
-  'scoresFailedBase',
-  'scoresFailedResolution',
-  'scoresFailedResetToZero',
-  'pagesProcessed',
-  'lookupPrunedDocs',
-  'entitiesCreated',
-  'entitiesCreateSkipped',
-  'entitiesCreateFailed',
-];
-
-const emptyMetrics = (): RunMetrics => ({
-  scoresWrittenRiskIndexBase: 0,
-  scoresWrittenRiskIndexResolution: 0,
-  scoresWrittenRiskIndexResetToZero: 0,
-  scoresWrittenEntityStoreBase: 0,
-  scoresWrittenEntityStoreResolution: 0,
-  scoresWrittenEntityStoreResetToZero: 0,
-  scoresCalculatedBase: 0,
-  scoresDroppedNotInStore: 0,
-  scoresMissingFromStoreBase: 0,
-  scoresFailedBase: 0,
-  scoresFailedResolution: 0,
-  scoresFailedResetToZero: 0,
-  pagesProcessed: 0,
-  lookupPrunedDocs: 0,
-  entitiesCreated: 0,
-  entitiesCreateSkipped: 0,
-  entitiesCreateFailed: 0,
-});
-
-const scoresWrittenRiskIndexTotal = (metrics: RunMetrics): number =>
-  metrics.scoresWrittenRiskIndexBase +
-  metrics.scoresWrittenRiskIndexResolution +
-  metrics.scoresWrittenRiskIndexResetToZero;
-
-const scoresFailedTotal = (metrics: RunMetrics): number =>
-  metrics.scoresFailedBase + metrics.scoresFailedResolution + metrics.scoresFailedResetToZero;
-
-interface SummaryContext {
-  namespace: string;
-  idBasedRiskScoringEnabled: boolean;
-}
-
-interface RunSummaryContext extends SummaryContext {
-  entityType: string;
-  status: string;
-  errorKind?: string;
-  durationMs: number;
-  /** Per-stage wall time for this entity type. Stages that didn't run are left out. */
-  stageDurationsMs?: Partial<
-    Record<'base' | 'resolution' | 'resetToZero' | 'scoreDistributions' | 'prune', number>
-  >;
-}
-
-interface AggregateSummaryContext extends SummaryContext {
-  durationMs: number;
-  /** Stage 0 (lookup build) wall time, shared by every entity type in the run. */
-  stage0Ms?: number;
-  entityTypesProcessed: number;
 }
 
 export const createRunMetricsTracker = () => {
@@ -214,3 +143,74 @@ export const createRunMetricsTracker = () => {
     },
   };
 };
+
+const METRIC_KEYS: ReadonlyArray<keyof RunMetrics> = [
+  'scoresWrittenRiskIndexBase',
+  'scoresWrittenRiskIndexResolution',
+  'scoresWrittenRiskIndexResetToZero',
+  'scoresWrittenEntityStoreBase',
+  'scoresWrittenEntityStoreResolution',
+  'scoresWrittenEntityStoreResetToZero',
+  'scoresCalculatedBase',
+  'scoresDroppedNotInStore',
+  'scoresMissingFromStoreBase',
+  'scoresFailedBase',
+  'scoresFailedResolution',
+  'scoresFailedResetToZero',
+  'pagesProcessed',
+  'lookupPrunedDocs',
+  'entitiesCreated',
+  'entitiesCreateSkipped',
+  'entitiesCreateFailed',
+];
+
+const emptyMetrics = (): RunMetrics => ({
+  scoresWrittenRiskIndexBase: 0,
+  scoresWrittenRiskIndexResolution: 0,
+  scoresWrittenRiskIndexResetToZero: 0,
+  scoresWrittenEntityStoreBase: 0,
+  scoresWrittenEntityStoreResolution: 0,
+  scoresWrittenEntityStoreResetToZero: 0,
+  scoresCalculatedBase: 0,
+  scoresDroppedNotInStore: 0,
+  scoresMissingFromStoreBase: 0,
+  scoresFailedBase: 0,
+  scoresFailedResolution: 0,
+  scoresFailedResetToZero: 0,
+  pagesProcessed: 0,
+  lookupPrunedDocs: 0,
+  entitiesCreated: 0,
+  entitiesCreateSkipped: 0,
+  entitiesCreateFailed: 0,
+});
+
+const scoresWrittenRiskIndexTotal = (metrics: RunMetrics): number =>
+  metrics.scoresWrittenRiskIndexBase +
+  metrics.scoresWrittenRiskIndexResolution +
+  metrics.scoresWrittenRiskIndexResetToZero;
+
+const scoresFailedTotal = (metrics: RunMetrics): number =>
+  metrics.scoresFailedBase + metrics.scoresFailedResolution + metrics.scoresFailedResetToZero;
+
+interface SummaryContext {
+  namespace: string;
+  idBasedRiskScoringEnabled: boolean;
+}
+
+interface RunSummaryContext extends SummaryContext {
+  entityType: string;
+  status: string;
+  errorKind?: string;
+  durationMs: number;
+  /** Per-stage wall time for this entity type. Stages that didn't run are left out. */
+  stageDurationsMs?: Partial<
+    Record<'base' | 'resolution' | 'resetToZero' | 'scoreDistributions' | 'prune', number>
+  >;
+}
+
+interface AggregateSummaryContext extends SummaryContext {
+  durationMs: number;
+  /** Stage 0 (lookup build) wall time, shared by every entity type in the run. */
+  stage0Ms?: number;
+  entityTypesProcessed: number;
+}

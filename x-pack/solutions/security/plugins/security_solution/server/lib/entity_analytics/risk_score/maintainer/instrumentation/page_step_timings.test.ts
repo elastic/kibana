@@ -106,7 +106,7 @@ describe('createPageStepTimings', () => {
   });
 });
 
-describe('failed steps and bounded profiling', () => {
+describe('failed steps and full-run profiling', () => {
   afterEach(() => jest.restoreAllMocks());
 
   it('accounts for rejected requests and synchronous failures while preserving errors', async () => {
@@ -137,21 +137,62 @@ describe('failed steps and bounded profiling', () => {
     });
   });
 
-  it('profiles only the first five eligible pages when explicitly enabled', () => {
-    const timings = createPageStepTimings({ profile: true });
-    const sampledPages: number[] = [];
+  it('profiles throughout the run with bounded retained aggregates', () => {
+    const onProfile = jest.fn();
+    const onPage = jest.fn();
+    const timings = createPageStepTimings({ onProfile, onPage });
     for (let page = 1; page <= 1000; page++) {
       timings.startPage();
-      if (timings.shouldProfile()) {
-        sampledPages.push(page);
-        timings.recordProfile({ wallMs: 10, rows: 1 });
-      }
+      if (timings.shouldProfile()) timings.recordProfile({ wallMs: 10, tookMs: 8, rows: 1 });
     }
-    expect(sampledPages).toEqual([1, 21, 41, 61, 81]);
-    expect(timings.summary().profiles).toHaveLength(5);
-    const defaults = createPageStepTimings();
-    defaults.startPage();
-    expect(defaults.shouldProfile()).toBe(false);
+    const summary = timings.summary();
+    expect(onProfile.mock.calls.map(([page]) => page)).toEqual(
+      Array.from({ length: 50 }, (_, i) => 1 + i * 20)
+    );
+    expect(onPage).toHaveBeenCalledTimes(1000);
+    expect(summary.profiles).toEqual({
+      firstPage: { samples: 1, tookMs: 8 },
+      laterPages: { samples: 49, tookMs: 392 },
+    });
+    timings.summary();
+    expect(onPage).toHaveBeenCalledTimes(1000);
+  });
+
+  it.each([1, 7, 100])('samples every %i pages including the first page', (profileInterval) => {
+    const timings = createPageStepTimings({ profileInterval });
+    const sampledPages: number[] = [];
+    for (let page = 1; page <= 201; page++) {
+      timings.startPage();
+      if (timings.shouldProfile()) sampledPages.push(page);
+    }
+    expect(sampledPages).toEqual(
+      Array.from(
+        { length: Math.floor(200 / profileInterval) + 1 },
+        (_, i) => 1 + i * profileInterval
+      )
+    );
+  });
+
+  it('keeps ordinary page diagnostics when ES|QL profiling is disabled', async () => {
+    const onPage = jest.fn();
+    const timings = createPageStepTimings({ profile: false, onPage });
+    const failure = new Error('failed page');
+    timings.startPage();
+    timings.count('riskDocumentsWritten', 3);
+    expect(timings.shouldProfile()).toBe(false);
+    await expect(
+      timings.time('esql', async () => {
+        throw failure;
+      })
+    ).rejects.toBe(failure);
+    timings.summary();
+    expect(onPage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        page: 1,
+        counters: { riskDocumentsWritten: 3 },
+        steps: { esql: expect.objectContaining({ calls: 1, failures: 1 }) },
+      })
+    );
   });
 
   it('keeps exact totals and bounded percentile estimates over many calls', async () => {

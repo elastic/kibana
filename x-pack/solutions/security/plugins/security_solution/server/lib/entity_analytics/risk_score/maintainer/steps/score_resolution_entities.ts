@@ -20,10 +20,10 @@ import { MAX_RESOLUTION_TARGETS_PER_PAGE, RISK_SCORING_REQUEST_TIMEOUT } from '.
 import { RESOLUTION_RELATIONSHIP_TYPE } from '../lookup/lookup_types';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
 import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
-import type { EsqlPageProfileSummary } from '../utils/esql_page_profile';
-import { summarizeEsqlPage } from '../utils/esql_page_profile';
-import type { PageStepTimings } from '../utils/page_step_timings';
-import { createPageStepTimings } from '../utils/page_step_timings';
+import type { EsqlPageProfileSummary } from '../instrumentation/esql_page_profile';
+import { summarizeEsqlPage } from '../instrumentation/esql_page_profile';
+import type { PageStepTimings } from '../instrumentation/page_timing_types';
+import { createPageStepTimings } from '../instrumentation/page_step_timings';
 import { buildResolutionModifierEntity } from './resolution_modifiers';
 import { getResolutionPageMemberFilter } from './resolution_member_filter';
 import { parseEsqlResolutionScoreRow } from './parse_esql_row';

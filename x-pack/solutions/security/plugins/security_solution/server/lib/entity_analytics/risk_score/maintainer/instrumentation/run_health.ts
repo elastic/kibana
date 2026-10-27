@@ -40,34 +40,6 @@ interface ProcessSnapshot {
   elu: EventLoopUtilization;
 }
 
-const HEAP_SAMPLE_INTERVAL_MS = 1000;
-
-const GC_KIND_NAMES: Record<number, string> = {
-  [constants.NODE_PERFORMANCE_GC_MAJOR]: 'major',
-  [constants.NODE_PERFORMANCE_GC_MINOR]: 'minor',
-  [constants.NODE_PERFORMANCE_GC_INCREMENTAL]: 'incremental',
-  [constants.NODE_PERFORMANCE_GC_WEAKCB]: 'weakcb',
-};
-
-const toMb = (bytes: number): number => Math.round(bytes / 1024 / 1024);
-const round = (value: number, digits = 2): number => Number(value.toFixed(digits));
-const nanosToMs = (nanos: number): number => round(nanos / 1e6, 1);
-
-const gcKindName = (entry: PerformanceEntry): string => {
-  if ('detail' in entry && typeof entry.detail === 'object' && entry.detail !== null) {
-    if ('kind' in entry.detail && typeof entry.detail.kind === 'number') {
-      return GC_KIND_NAMES[entry.detail.kind] ?? 'other';
-    }
-  }
-  return 'other';
-};
-
-const takeSnapshot = (): ProcessSnapshot => ({
-  atMs: performance.now(),
-  cpu: process.cpuUsage(),
-  elu: performance.eventLoopUtilization(),
-});
-
 export interface RunHealthTracker {
   start: () => RunHealthMonitor;
 }
@@ -210,3 +182,31 @@ export const createRunHealthTracker = (): RunHealthTracker => {
 
   return { start };
 };
+
+const HEAP_SAMPLE_INTERVAL_MS = 1000;
+
+const GC_KIND_NAMES: Record<number, string> = {
+  [constants.NODE_PERFORMANCE_GC_MAJOR]: 'major',
+  [constants.NODE_PERFORMANCE_GC_MINOR]: 'minor',
+  [constants.NODE_PERFORMANCE_GC_INCREMENTAL]: 'incremental',
+  [constants.NODE_PERFORMANCE_GC_WEAKCB]: 'weakcb',
+};
+
+const toMb = (bytes: number): number => Math.round(bytes / 1024 / 1024);
+const round = (value: number, digits = 2): number => Number(value.toFixed(digits));
+const nanosToMs = (nanos: number): number => round(nanos / 1e6, 1);
+
+const gcKindName = (entry: PerformanceEntry): string => {
+  if ('detail' in entry && typeof entry.detail === 'object' && entry.detail !== null) {
+    if ('kind' in entry.detail && typeof entry.detail.kind === 'number') {
+      return GC_KIND_NAMES[entry.detail.kind] ?? 'other';
+    }
+  }
+  return 'other';
+};
+
+const takeSnapshot = (): ProcessSnapshot => ({
+  atMs: performance.now(),
+  cpu: process.cpuUsage(),
+  elu: performance.eventLoopUtilization(),
+});

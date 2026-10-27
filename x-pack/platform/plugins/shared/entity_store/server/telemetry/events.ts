@@ -157,14 +157,7 @@ interface EntityMaintainerRunSummaryBreakdown {
   count: number;
 }
 
-interface EntityMaintainerMeasurement {
-  name: string;
-  value: number;
-  unit: 'ms' | 'MiBy' | 'count' | 'ratio';
-}
-
 interface EntityMaintainerRunSummaryStage {
-  measurements?: EntityMaintainerMeasurement[];
   /** Stage name (fixed enum per maintainer) */
   name: string;
   /** Stage outcome: success | error | skipped */
@@ -180,8 +173,6 @@ interface EntityMaintainerRunSummaryStage {
 }
 
 export interface EntityMaintainerRunSummaryEvent {
-  measurements?: EntityMaintainerMeasurement[];
-  calculationRunId?: string;
   /** Entity maintainer identifier */
   id: string;
   /** Kibana space the maintainer runs in (e.g. "default") */
@@ -226,27 +217,6 @@ export interface EntityMaintainerRunSummaryEvent {
 
 // ------------------------------------
 // Event definitions
-
-const maintainerMeasurementsSchema = {
-  type: 'array',
-  items: {
-    properties: {
-      name: {
-        type: 'keyword',
-        _meta: { description: 'Fixed measurement name defined by the maintainer' },
-      },
-      value: { type: 'float', _meta: { description: 'Measured numeric value' } },
-      unit: {
-        type: 'keyword',
-        _meta: { description: 'Measurement unit: ms, MiBy, count or ratio' },
-      },
-    },
-  },
-  _meta: {
-    optional: true,
-    description: 'Bounded resource and timing aggregates for this execution window',
-  },
-} as const;
 // ------------------------------------
 
 export const ENTITY_STORE_INITIALIZATION_EVENT = {
@@ -462,14 +432,6 @@ export const ENTITY_MAINTAINER_EVENT = {
 export const ENTITY_MAINTAINER_RUN_SUMMARY_EVENT = {
   eventType: 'entity_store_entity_maintainer_run_summary',
   schema: {
-    measurements: maintainerMeasurementsSchema,
-    calculationRunId: {
-      type: 'keyword',
-      _meta: {
-        optional: true,
-        description: 'Calculation identifier shared with scoring logs and output documents',
-      },
-    },
     id: {
       type: 'keyword',
       _meta: { description: 'Entity maintainer identifier' },
@@ -667,7 +629,6 @@ export const ENTITY_MAINTAINER_RUN_SUMMARY_EVENT = {
       type: 'array',
       items: {
         properties: {
-          measurements: maintainerMeasurementsSchema,
           name: {
             type: 'keyword',
             _meta: { description: 'Stage name (fixed enum per maintainer)' },

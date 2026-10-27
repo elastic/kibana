@@ -45,16 +45,16 @@ import {
   getRiskScoreResolutionDistribution,
 } from './risk_score_distribution';
 import { fetchWatchlistConfigs } from './utils/fetch_watchlist_configs';
-import { riskScoreLogMeta } from './utils/risk_score_log_meta';
+import { riskScoreLogMeta } from './instrumentation/risk_score_log_meta';
 import { withLogContext } from './utils/with_log_context';
 import { ensureLookupIndex, getLookupIndexName } from './lookup/lookup_index';
 import { pruneLookupIndex } from './lookup/prune_lookup_index';
 import { runResolutionScoringStep } from './steps/run_resolution_scoring_step';
-import { createRunMetricsTracker } from './utils/run_metrics_tracker';
-import { createRunHealthTracker } from './utils/run_health';
-import { pageTimingMeasurements, runHealthMeasurements } from './utils/performance_measurements';
-import type { PageStepTimings } from './utils/page_step_timings';
-import { createPageStepTimings } from './utils/page_step_timings';
+import { createRunMetricsTracker } from './instrumentation/run_metrics_tracker';
+import { createRunHealthTracker } from './instrumentation/run_health';
+import { createRunInstrumentation } from './instrumentation/reporting';
+import type { RunInstrumentation } from './instrumentation/reporting';
+import { ESQL_PROFILE_PAGE_INTERVAL } from './instrumentation/esql_page_profile';
 import { buildLookupIndex } from './steps/build_lookup_index';
 import { DEFAULT_ALERT_SAMPLE_SIZE } from '../constants';
 import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan, wrapTaskRun } from '../../telemetry/traces';
@@ -82,7 +82,6 @@ type CoreStart = StartServices[0];
 type PluginsStart = StartServices[1];
 type RunMetricsTracker = ReturnType<typeof createRunMetricsTracker>;
 type TelemetryReporter = ReturnType<typeof createRiskScoreMaintainerTelemetryReporter>;
-const toRunTag = (calculationRunId: string) => calculationRunId.slice(0, 8);
 
 type LookupIndexReadinessStatus = 'ready' | 'mapping_upgrade_failed';
 
@@ -116,6 +115,7 @@ interface LoadedRunConfig {
   writer: Awaited<ReturnType<RiskScoreDataClient['getWriter']>>;
   sampleSize: number;
   esqlProfiling: boolean;
+  esqlProfilingInterval: number;
   pageSize: number;
   entityTypes: EntityType[];
 }
@@ -163,7 +163,13 @@ export const createRiskScoreMaintainer = ({
       logger.info(`Risk score maintainer setup completed for namespace "${namespace}"`);
       return status.state;
     },
-    run: async ({ status, crudClient, signal, telemetry: frameworkTelemetry }) => {
+    run: async ({
+      status,
+      crudClient,
+      signal,
+      telemetry: frameworkTelemetry,
+      setCustomTaskRunEventFields,
+    }) => {
       return wrapTaskRun({
         spanName: ENTITY_ANALYTICS_SPAN_NAMES.maintainerRun,
         namespace: status.metadata.namespace,
@@ -205,25 +211,13 @@ export const createRiskScoreMaintainer = ({
           const metricsTracker = createRunMetricsTracker();
           const runHealth = runHealthTracker.start();
           let outcome: 'success' | 'error' = 'success';
-          const logRunHealth = () => {
-            const health = runHealth.stop();
-            const runStatus = signal.aborted ? 'aborted' : outcome;
-            logger.info(
-              'Risk score maintainer process health',
-              riskScoreLogMeta({
-                calculationRunId,
-                namespace: runContext.namespace,
-                status: runStatus,
-                processHealth: health,
-              })
-            );
-            frameworkTelemetry.report({
-              calculationRunId,
-              scope: { kind: 'process', value: 'run_window' },
-              funnel: { scanned: 0, qualified: 0, applied: 0, failed: 0 },
-              measurements: runHealthMeasurements(health),
-            });
-          };
+          const instrumentation = createRunInstrumentation({
+            logger,
+            telemetry,
+            calculationRunId,
+            namespace: runContext.namespace,
+            setCustomTaskRunEventFields,
+          });
           logger.info(
             'Risk score maintainer started',
             riskScoreLogMeta({
@@ -233,6 +227,7 @@ export const createRiskScoreMaintainer = ({
               pageSize: runConfig.pageSize,
               entityTypes: runConfig.entityTypes,
               esqlProfiling: runConfig.esqlProfiling,
+              esqlProfilingInterval: runConfig.esqlProfilingInterval,
               idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
             })
           );
@@ -262,6 +257,11 @@ export const createRiskScoreMaintainer = ({
               });
               stage0Ms = Date.now() - phase0StartedAtMs;
               runHealth.mark('stage0');
+              instrumentation.reportStage({
+                stage: 'phase0_lookup_build',
+                status: 'success',
+                durationMs: stage0Ms,
+              });
               phase0LookupStage.success({
                 lookupRowsWritten: phase0Summary.lookupRowsWritten,
                 entitiesIterated: phase0Summary.entitiesIterated,
@@ -277,6 +277,11 @@ export const createRiskScoreMaintainer = ({
                 })
               );
             } catch (error) {
+              instrumentation.reportStage({
+                stage: 'phase0_lookup_build',
+                status: 'error',
+                durationMs: Date.now() - phase0StartedAtMs,
+              });
               phase0LookupStage.error({ errorKind: 'unexpected' });
               frameworkTelemetry.report(
                 buildRiskScorePhase0EntityMaintainerRunSummary({
@@ -318,6 +323,7 @@ export const createRiskScoreMaintainer = ({
                         runConfig,
                         calculationRunId,
                         runNow,
+                        instrumentation,
                         markStage: (stage) => runHealth.mark(`${entityType}.${stage}`),
                       }),
                   });
@@ -352,7 +358,8 @@ export const createRiskScoreMaintainer = ({
             );
             return status.state;
           } finally {
-            logRunHealth();
+            const health = runHealth.stop();
+            instrumentation.finishRun(health, signal.aborted ? 'aborted' : outcome);
           }
         },
       });
@@ -529,7 +536,9 @@ const loadRunConfiguration = async ({
     watchlistConfigs,
     writer,
     sampleSize,
-    esqlProfiling: entityAnalyticsConfig?.riskEngine?.esqlProfiling ?? false,
+    esqlProfiling: entityAnalyticsConfig?.riskEngine?.esqlProfiling ?? true,
+    esqlProfilingInterval:
+      entityAnalyticsConfig?.riskEngine?.esqlProfilingInterval ?? ESQL_PROFILE_PAGE_INTERVAL,
     pageSize,
     entityTypes,
   };
@@ -548,6 +557,7 @@ const executeEntityTypeRun = async ({
   calculationRunId,
   runNow,
   markStage,
+  instrumentation,
 }: {
   entityType: EntityType;
   crudClient: Parameters<NonNullable<RiskScoreMaintainerConfig['run']>>[0]['crudClient'];
@@ -564,6 +574,7 @@ const executeEntityTypeRun = async ({
   calculationRunId: string;
   runNow: string;
   markStage: (stage: RiskScoreFrameworkStageSummary['name']) => void;
+  instrumentation: RunInstrumentation;
 }): Promise<'success' | 'error' | 'aborted' | undefined> => {
   const entityRunStartedAtMs = Date.now();
   const runTag = toRunTag(calculationRunId);
@@ -572,23 +583,6 @@ const executeEntityTypeRun = async ({
     `[risk_score_maintainer][${entityType}][run:${runTag}]`,
     riskScoreLogMeta({ calculationRunId, namespace: runContext.namespace, entityType })
   );
-  const logPageTimings = (stage: 'base' | 'resolution', pageTimings: PageStepTimings) => {
-    const timing = pageTimings.summary();
-    markStage(stage);
-    const summary = frameworkTelemetryStages.find(({ name }) => name === stage);
-    if (summary) summary.measurements = pageTimingMeasurements(timing);
-    metricsTracker.recordPageProgress(runMetrics, stage, timing);
-    runLogger.info(
-      'Risk score stage timings',
-      riskScoreLogMeta({
-        calculationRunId,
-        namespace: runContext.namespace,
-        entityType,
-        stage,
-        timing,
-      })
-    );
-  };
   let runStatus: 'success' | 'error' | 'aborted' = 'success';
   const markRunError = () => {
     runStatus = 'error';
@@ -627,8 +621,11 @@ const executeEntityTypeRun = async ({
   const alertFilters = buildAlertFilters(runConfig.configuration, entityType, runLogger);
   const baseStage = runTelemetry.startBaseStage();
   const baseStartedAtMs = Date.now();
-  const basePageTimings = createPageStepTimings({ profile: runConfig.esqlProfiling });
-  let baseSucceeded = false;
+  const profiling = {
+    profile: runConfig.esqlProfiling,
+    profileInterval: runConfig.esqlProfilingInterval,
+  };
+  const basePageTimings = instrumentation.createPageTimings(entityType, 'base', profiling);
 
   try {
     const baseSummary = await runWithSpan({
@@ -671,7 +668,6 @@ const executeEntityTypeRun = async ({
       durationMs: Date.now() - baseStartedAtMs,
       applied: baseSummary.scoresWrittenEntityStore + baseSummary.entitiesCreated,
     });
-    baseSucceeded = true;
   } catch (error) {
     const errorMessage = telemetryReporter.getErrorMessage(error);
     markRunError();
@@ -686,20 +682,28 @@ const executeEntityTypeRun = async ({
       durationMs: Date.now() - baseStartedAtMs,
       errorKind: 'unexpected',
     });
-    logPageTimings('base', basePageTimings);
+    const timing = instrumentation.finishStage(
+      { entityType, stage: 'base', status: 'error', durationMs: Date.now() - baseStartedAtMs },
+      basePageTimings
+    );
+    metricsTracker.recordPageProgress(runMetrics, 'base', timing);
+    markStage('base');
     frameworkTelemetry.report(
       buildRiskScoreEntityMaintainerRunSummary({
         entityType,
-        calculationRunId,
         metrics: runMetrics,
         stages: frameworkTelemetryStages,
       })
     );
 
     throw error;
-  } finally {
-    if (baseSucceeded) logPageTimings('base', basePageTimings);
   }
+  const baseTiming = instrumentation.finishStage(
+    { entityType, stage: 'base', status: 'success', durationMs: Date.now() - baseStartedAtMs },
+    basePageTimings
+  );
+  metricsTracker.recordPageProgress(runMetrics, 'base', baseTiming);
+  markStage('base');
 
   checkAbortBetweenStages();
 
@@ -707,7 +711,12 @@ const executeEntityTypeRun = async ({
     // Stage 2: score resolution targets (group scores).
     const resolutionStage = runTelemetry.startResolutionStage();
     const resolutionStartedAtMs = Date.now();
-    const resolutionPageTimings = createPageStepTimings({ profile: runConfig.esqlProfiling });
+    const resolutionPageTimings = instrumentation.createPageTimings(
+      entityType,
+      'resolution',
+      profiling
+    );
+    let resolutionStatus: 'success' | 'skipped' | 'error' = 'success';
     try {
       const resolutionResult = await runWithSpan({
         name: ENTITY_ANALYTICS_SPAN_NAMES.stageResolution,
@@ -735,6 +744,7 @@ const executeEntityTypeRun = async ({
       });
       metricsTracker.recordResolution(runMetrics, resolutionResult);
       if (resolutionResult.skippedReason) {
+        resolutionStatus = 'skipped';
         resolutionStage.skipped(resolutionResult.skippedReason);
         frameworkTelemetryStages.push({
           name: 'resolution',
@@ -760,6 +770,7 @@ const executeEntityTypeRun = async ({
       markRunError();
       runErrorKind = 'unexpected';
       runLogger.error(`resolution scoring failed: ${errorMessage}`);
+      resolutionStatus = 'error';
       resolutionStage.error({ errorKind: 'unexpected' });
       frameworkTelemetryStages.push({
         name: 'resolution',
@@ -767,9 +778,18 @@ const executeEntityTypeRun = async ({
         durationMs: Date.now() - resolutionStartedAtMs,
         errorKind: 'unexpected',
       });
-    } finally {
-      logPageTimings('resolution', resolutionPageTimings);
     }
+    const resolutionTiming = instrumentation.finishStage(
+      {
+        entityType,
+        stage: 'resolution',
+        status: resolutionStatus,
+        durationMs: Date.now() - resolutionStartedAtMs,
+      },
+      resolutionPageTimings
+    );
+    metricsTracker.recordPageProgress(runMetrics, 'resolution', resolutionTiming);
+    markStage('resolution');
   } else {
     frameworkTelemetryStages.push({
       name: 'resolution',
@@ -948,11 +968,16 @@ const executeEntityTypeRun = async ({
   frameworkTelemetry.report(
     buildRiskScoreEntityMaintainerRunSummary({
       entityType,
-      calculationRunId,
       metrics: runMetrics,
       stages: frameworkTelemetryStages,
     })
   );
+
+  frameworkTelemetryStages
+    .filter(({ name }) => ['reset_to_zero', 'score_distributions', 'prune'].includes(name))
+    .forEach(({ name, status: stageStatus, durationMs }) => {
+      instrumentation.reportStage({ entityType, stage: name, status: stageStatus, durationMs });
+    });
 
   const entityRunDurationMs = Date.now() - entityRunStartedAtMs;
   const stageDurationMs = (name: RiskScoreFrameworkStageSummary['name']) =>
@@ -978,5 +1003,7 @@ const executeEntityTypeRun = async ({
   );
   return runStatus;
 };
+
+const toRunTag = (calculationRunId: string) => calculationRunId.slice(0, 8);
 
 export type RegisterRiskScoreMaintainerDeps = RiskScoreMaintainerDeps;

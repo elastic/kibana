@@ -78,3 +78,24 @@ describe('config', () => {
     });
   });
 });
+
+describe('risk-score ES|QL profile sampling', () => {
+  it('enables profiling every twenty pages by default', () => {
+    expect(configSchema.validate({}).entityAnalytics.riskEngine).toMatchObject({
+      esqlProfiling: true,
+      esqlProfilingInterval: 20,
+    });
+  });
+  it.each([1, 20, 100])('accepts a %i-page interval', (esqlProfilingInterval) => {
+    expect(
+      configSchema.validate({ entityAnalytics: { riskEngine: { esqlProfilingInterval } } })
+        .entityAnalytics.riskEngine.esqlProfilingInterval
+    ).toBe(esqlProfilingInterval);
+  });
+
+  it.each([0, -1, 1.5])('rejects interval %s', (esqlProfilingInterval) => {
+    expect(() =>
+      configSchema.validate({ entityAnalytics: { riskEngine: { esqlProfilingInterval } } })
+    ).toThrow();
+  });
+});

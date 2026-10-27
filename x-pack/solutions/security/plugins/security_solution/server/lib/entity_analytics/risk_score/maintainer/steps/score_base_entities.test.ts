@@ -14,7 +14,7 @@ import {
   persistZeroBaseScore,
   scoreBaseEntities,
 } from './score_base_entities';
-import { createPageStepTimings } from '../utils/page_step_timings';
+import { createPageStepTimings } from '../instrumentation/page_step_timings';
 import type { ScopedLogger } from '../utils/with_log_context';
 import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
 
@@ -396,7 +396,7 @@ describe('score_base_entities', () => {
         nextSearchAfter: undefined,
       });
       const writer = buildWriter();
-      const pageTimings = createPageStepTimings();
+      const pageTimings = createPageStepTimings({ profile: false });
       await expect(
         scoreBaseEntities({
           ...baseParams,

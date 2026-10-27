@@ -18,8 +18,8 @@ import {
 } from './score_resolution_entities';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
 import type { ResolutionStepResult } from './pipeline_types';
-import type { PageStepTimings } from '../utils/page_step_timings';
-import { createPageStepTimings } from '../utils/page_step_timings';
+import type { PageStepTimings } from '../instrumentation/page_timing_types';
+import { createPageStepTimings } from '../instrumentation/page_step_timings';
 import type { ScopedLogger } from '../utils/with_log_context';
 
 interface RunResolutionScoringParams {

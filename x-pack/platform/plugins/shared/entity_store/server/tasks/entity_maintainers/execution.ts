@@ -171,7 +171,6 @@ export async function executeMaintainerRun({
     id,
     namespace: maintainerStatus.metadata.namespace,
     analytics,
-    setCustomTaskRunEventFields,
   });
 
   return await wrapTaskRun({
@@ -184,6 +183,7 @@ export async function executeMaintainerRun({
     },
     run: () =>
       runEntityMaintainerTask({
+        setCustomTaskRunEventFields,
         status: maintainerStatus,
         fakeRequest: request,
         logger: taskLogger,
@@ -222,6 +222,7 @@ export async function persistMaintainerState({
 }
 
 export async function runEntityMaintainerTask({
+  setCustomTaskRunEventFields,
   status,
   fakeRequest,
   logger,
@@ -238,6 +239,7 @@ export async function runEntityMaintainerTask({
   analytics,
   telemetryClient,
 }: {
+  setCustomTaskRunEventFields?: RunContext['setCustomTaskRunEventFields'];
   status: EntityMaintainerStatus;
   fakeRequest: KibanaRequest;
   logger: Logger;
@@ -294,6 +296,7 @@ export async function runEntityMaintainerTask({
     }
     logger.debug(`Executing run`);
     status.state = await run({
+      setCustomTaskRunEventFields,
       status: { ...status },
       signal,
       logger,
