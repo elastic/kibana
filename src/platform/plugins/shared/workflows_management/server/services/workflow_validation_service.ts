@@ -33,29 +33,51 @@ import {
 } from '../../common/schema';
 import { getAvailableConnectors } from '../api/lib/workflow_connectors';
 
+/**
+ * How many ES|QL steps one validation checks. Each check runs the ES|QL
+ * validator on Kibana's event loop, so the cap bounds the CPU one request costs.
+ */
+export const MAX_VALIDATED_ESQL_STEPS = 100;
+
+/**
+ * How many distinct ES|QL column requests one validation sends to
+ * Elasticsearch. One step can read many sources (`FROM`, `LOOKUP JOIN`,
+ * `ENRICH`), so the step cap alone does not bound them.
+ */
+export const MAX_ESQL_COLUMNS_REQUESTS = 200;
+
 /** How many ES|QL column requests one validation sends to Elasticsearch at a time. */
 export const MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS = 5;
 
 type GetColumnsFor = NonNullable<ESQLCallbacks['getColumnsFor']>;
 
 /**
- * Wraps `getColumnsFor` for one validation: identical queries share one
- * request, and at most {@link MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS} requests
- * run at a time. The memo lives only as long as the callbacks, so it never
- * answers one user's validation with another user's columns.
+ * Wraps `getColumnsFor` for one validation: steps that read the same source
+ * share one request, at most {@link MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS}
+ * requests run at a time, and sources past {@link MAX_ESQL_COLUMNS_REQUESTS}
+ * get no columns, so their fields are not checked. The memo lives only as long
+ * as the callbacks, so it never answers one user's validation with another
+ * user's columns.
  */
-const shareColumnsRequests = (getColumnsFor: GetColumnsFor): GetColumnsFor => {
+const shareColumnsRequests = (getColumnsFor: GetColumnsFor) => {
   const limit = pLimit(MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS);
   const requests = new Map<string, ReturnType<GetColumnsFor>>();
-  return (ctx) => {
+  const skippedSources = new Set<string>();
+  const shared: GetColumnsFor = (ctx) => {
     const key = ctx?.query ?? '';
-    let request = requests.get(key);
-    if (!request) {
-      request = limit(() => getColumnsFor(ctx));
-      requests.set(key, request);
+    const existing = requests.get(key);
+    if (existing) {
+      return existing;
     }
+    if (requests.size >= MAX_ESQL_COLUMNS_REQUESTS) {
+      skippedSources.add(key);
+      return Promise.resolve([]);
+    }
+    const request = limit(() => getColumnsFor(ctx));
+    requests.set(key, request);
     return request;
   };
+  return { getColumnsFor: shared, skippedSources };
 };
 
 export class WorkflowValidationService {
@@ -121,14 +143,25 @@ export class WorkflowValidationService {
         .getCoreStart()
         .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)
     );
-    return validateWorkflowYaml(yaml, zodSchema, {
+    const esql = includeEsqlRules ? this.createEsqlCallbacks(request) : undefined;
+    const result = await validateWorkflowYaml(yaml, zodSchema, {
       triggerDefinitions,
       warnIgnoredKibanaFetcher,
       ...(includeVariableRules && {
         variableValidationRegistry: this.createContextRegistry(allConnectors),
       }),
-      ...(includeEsqlRules && { esqlCallbacks: this.createEsqlCallbacks(request) }),
+      ...(esql && { esqlCallbacks: esql.callbacks, esqlMaxSteps: MAX_VALIDATED_ESQL_STEPS }),
     });
+    if (!esql?.skippedSources.size) {
+      return result;
+    }
+    return {
+      ...result,
+      notChecked: [
+        ...(result.notChecked ?? []),
+        `ES|QL: fields of ${esql.skippedSources.size} sources were not checked: one validation fetches columns for at most ${MAX_ESQL_COLUMNS_REQUESTS} sources.`,
+      ],
+    };
   }
 
   async getWorkflowZodSchema(
@@ -159,19 +192,27 @@ export class WorkflowValidationService {
   /**
    * The callbacks the editor supplies (see `useWorkflowEsqlCallbacks`), backed
    * by the current user's ES client. Sources and policies are fetched once per
-   * validation, not once per ES|QL step, and columns once per distinct query.
+   * validation, not once per ES|QL step, and columns once per source.
+   * `skippedSources` lists the sources whose columns were not fetched.
    */
-  private createEsqlCallbacks(request: KibanaRequest): ESQLCallbacks {
+  private createEsqlCallbacks(request: KibanaRequest): {
+    callbacks: ESQLCallbacks;
+    skippedSources: ReadonlySet<string>;
+  } {
     const esClient = this.deps.getCoreStart().elasticsearch.client.asScoped(request);
     const { getSources, getColumnsFor, getPolicies } = buildServerESQLCallbacks({
       esClient,
       logger: this.deps.logger,
     });
+    const columns = getColumnsFor && shareColumnsRequests(getColumnsFor);
     return {
-      getSources: getSources && once(getSources),
-      getColumnsFor: getColumnsFor && shareColumnsRequests(getColumnsFor),
-      getPolicies: getPolicies && once(getPolicies),
-      getLicense: once(() => this.deps.licensing.getLicense()),
+      callbacks: {
+        getSources: getSources && once(getSources),
+        getColumnsFor: columns?.getColumnsFor,
+        getPolicies: getPolicies && once(getPolicies),
+        getLicense: once(() => this.deps.licensing.getLicense()),
+      },
+      skippedSources: columns?.skippedSources ?? new Set(),
     };
   }
 

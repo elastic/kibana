@@ -11,7 +11,7 @@
 // agent sees from `validate_workflow` for a given step.
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { collectEsqlDiagnostics, MAX_VALIDATED_ESQL_STEPS } from './collect_esql_diagnostics';
+import { collectEsqlDiagnostics } from './collect_esql_diagnostics';
 import { MAX_VALIDATED_ESQL_QUERY_LENGTH } from './validate_esql_query';
 
 const workflow = (steps: string): string => `name: esql
@@ -346,22 +346,22 @@ ${esqlStep('inner', 'FROM logs-app | WHERE', '      ')}`);
     expect(notChecked).toEqual([expect.stringContaining('step "huge": it is longer than')]);
   });
 
-  it('validates only the first steps past the step cap and says so in notChecked', async () => {
-    const stepCount = MAX_VALIDATED_ESQL_STEPS + 3;
-    const steps = Array.from({ length: stepCount }, (_, i) =>
-      esqlStep(`step_${i}`, i === stepCount - 1 ? 'FROM logs-app | WHERE' : 'FROM logs-app')
-    ).join('');
-    const getSources = jest.fn(schemaCallbacks.getSources);
+  it('validates only the first maxSteps steps and says so in notChecked', async () => {
+    const steps = [
+      esqlStep('first', 'FROM logs-app'),
+      esqlStep('second', 'FROM logs-app'),
+      esqlStep('third', 'FROM logs-app | WHERE'),
+    ].join('');
 
-    const { diagnostics, notChecked } = await collectEsqlDiagnostics(workflow(steps), {
-      ...schemaCallbacks,
-      getSources,
-    });
+    const { diagnostics, notChecked } = await collectEsqlDiagnostics(
+      workflow(steps),
+      schemaCallbacks,
+      2
+    );
 
-    expect(getSources).toHaveBeenCalledTimes(MAX_VALIDATED_ESQL_STEPS);
     expect(diagnostics).toEqual([]);
     expect(notChecked).toEqual([
-      `ES|QL queries of 3 steps: only the first ${MAX_VALIDATED_ESQL_STEPS} ES|QL steps are validated.`,
+      'ES|QL queries of 1 steps: only the first 2 ES|QL steps are validated.',
     ]);
   });
 

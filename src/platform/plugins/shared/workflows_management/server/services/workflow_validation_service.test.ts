@@ -15,6 +15,8 @@ import { z } from '@kbn/zod/v4';
 import type { WorkflowValidationDeps } from './types';
 import {
   MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS,
+  MAX_ESQL_COLUMNS_REQUESTS,
+  MAX_VALIDATED_ESQL_STEPS,
   WorkflowValidationService,
 } from './workflow_validation_service';
 
@@ -576,6 +578,60 @@ describe('WorkflowValidationService', () => {
 
       expect(mockGetColumnsFor).toHaveBeenCalledTimes(indices.length);
       expect(maxInFlight).toBe(MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS);
+    });
+
+    it(`validates only the first ${MAX_VALIDATED_ESQL_STEPS} ES|QL steps`, async () => {
+      const service = new WorkflowValidationService(makeDeps().deps);
+      const queries = Array.from(
+        { length: MAX_VALIDATED_ESQL_STEPS + 1 },
+        (_, i) =>
+          `FROM logs-app | KEEP ${i === MAX_VALIDATED_ESQL_STEPS ? 'hostname' : 'host.name'}`
+      );
+
+      const result = await service.validateWorkflow(esqlSteps(queries), 'default', {} as any, {
+        includeVariableRules: false,
+        includeEsqlRules: true,
+      });
+
+      expect(result.diagnostics.filter(({ source }) => source === 'esql')).toEqual([]);
+      expect(result.notChecked).toContain(
+        `ES|QL queries of 1 steps: only the first ${MAX_VALIDATED_ESQL_STEPS} ES|QL steps are validated.`
+      );
+    });
+
+    it(`fetches columns for at most ${MAX_ESQL_COLUMNS_REQUESTS} sources`, async () => {
+      const joinsPerStep = 3;
+      const lookups = Array.from(
+        { length: MAX_VALIDATED_ESQL_STEPS * joinsPerStep },
+        (_, i) => `lookup-${i}`
+      );
+      mockGetSources.mockResolvedValue(
+        ['logs-app', ...lookups].map((name) => ({ name, hidden: false }))
+      );
+      const queries = Array.from({ length: MAX_VALIDATED_ESQL_STEPS }, (_, step) =>
+        [
+          'FROM logs-app',
+          ...Array.from(
+            { length: joinsPerStep },
+            (__, join) => `LOOKUP JOIN ${lookups[step * joinsPerStep + join]} ON host.name`
+          ),
+          'KEEP host.name',
+        ].join(' | ')
+      );
+      const service = new WorkflowValidationService(makeDeps().deps);
+
+      const result = await service.validateWorkflow(esqlSteps(queries), 'default', {} as any, {
+        includeVariableRules: false,
+        includeEsqlRules: true,
+      });
+
+      const sourceCount = 1 + lookups.length;
+      expect(mockGetColumnsFor).toHaveBeenCalledTimes(MAX_ESQL_COLUMNS_REQUESTS);
+      expect(result.notChecked).toContain(
+        `ES|QL: fields of ${
+          sourceCount - MAX_ESQL_COLUMNS_REQUESTS
+        } sources were not checked: one validation fetches columns for at most ${MAX_ESQL_COLUMNS_REQUESTS} sources.`
+      );
     });
   });
 });

@@ -23,14 +23,6 @@ import {
   validateEsqlQuery,
 } from './validate_esql_query';
 
-/**
- * How many ES|QL steps one validation checks. Each checked step can cost an
- * Elasticsearch request, so a workflow with thousands of steps must not turn
- * one validation into thousands of requests. Steps past the cap are listed in
- * `notChecked` as one entry.
- */
-export const MAX_VALIDATED_ESQL_STEPS = 100;
-
 /** One ES|QL diagnostic in YAML coordinates (1-based line and column). */
 export interface EsqlStepDiagnostic extends EsqlQueryDiagnostic {
   stepName: string;
@@ -48,11 +40,14 @@ export interface CollectEsqlDiagnosticsResult {
 /**
  * Validates the query of every `elasticsearch.esql.query` step in a workflow
  * YAML and returns the findings in YAML coordinates. Uses the same Liquid
- * policy as the editor (see {@link validateEsqlQuery}).
+ * policy as the editor (see {@link validateEsqlQuery}). Only the first
+ * `maxSteps` steps are validated; the rest are listed in `notChecked` as one
+ * entry.
  */
 export async function collectEsqlStepDiagnostics(
   yaml: string,
-  callbacks: ESQLCallbacks
+  callbacks: ESQLCallbacks,
+  maxSteps = Infinity
 ): Promise<{ diagnostics: EsqlStepDiagnostic[]; notChecked: string[] }> {
   if (!yaml.includes(ESQL_QUERY_STEP_TYPE)) {
     return { diagnostics: [], notChecked: [] };
@@ -61,7 +56,7 @@ export async function collectEsqlStepDiagnostics(
   const lineCounter = new LineCounter();
   const document = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
   const allLocations = collectEsqlStepsFromLookup(buildWorkflowLookup(document, lineCounter), yaml);
-  const locations = allLocations.slice(0, MAX_VALIDATED_ESQL_STEPS);
+  const locations = allLocations.slice(0, maxSteps);
   const results = await Promise.all(
     locations.map((location) =>
       validateEsqlQuery(getEsqlToValidate(location.region), callbacks, {
@@ -75,7 +70,7 @@ export async function collectEsqlStepDiagnostics(
   const skippedCount = allLocations.length - locations.length;
   if (skippedCount > 0) {
     notChecked.push(
-      `ES|QL queries of ${skippedCount} steps: only the first ${MAX_VALIDATED_ESQL_STEPS} ES|QL steps are validated.`
+      `ES|QL queries of ${skippedCount} steps: only the first ${maxSteps} ES|QL steps are validated.`
     );
   }
   results.forEach((result, index) => {
@@ -131,9 +126,10 @@ export async function collectEsqlStepDiagnostics(
  */
 export async function collectEsqlDiagnostics(
   yaml: string,
-  callbacks: ESQLCallbacks
+  callbacks: ESQLCallbacks,
+  maxSteps?: number
 ): Promise<CollectEsqlDiagnosticsResult> {
-  const { diagnostics, notChecked } = await collectEsqlStepDiagnostics(yaml, callbacks);
+  const { diagnostics, notChecked } = await collectEsqlStepDiagnostics(yaml, callbacks, maxSteps);
   return {
     diagnostics: diagnostics.map(({ severity, message, path, line, column, ruleId }) => ({
       severity,
