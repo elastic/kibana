@@ -60,3 +60,22 @@ describe('dashboard saved object model version transformations', () => {
     });
   });
 });
+
+describe('dashboard saved object onExport', () => {
+  it('omits the history sequence and deduplicates references', () => {
+    const { onExport } = createDashboardSavedObjectType({
+      migrationDeps: { embeddable: embeddableSetupMock },
+    }).management!;
+    const ref = { name: 'panel_0', type: 'visualization', id: 'a' };
+    const [exported] = onExport!({} as never, [
+      {
+        id: 'some-id',
+        type: 'dashboard',
+        attributes: { title: 'Some Title', historySequence: 13 },
+        references: [ref, ref],
+      },
+    ]) as Array<{ attributes: Record<string, unknown>; references: unknown[] }>;
+    expect(exported.attributes).toEqual({ title: 'Some Title' });
+    expect(exported.references).toEqual([ref]);
+  });
+});

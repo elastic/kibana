@@ -103,6 +103,8 @@ const threatReportsTemplate = {
               type: 'keyword' as const,
               ignore_above: FEED_TEXT_IGNORE_ABOVE,
             },
+            // Feed publication date when the source supplies one; `@timestamp` stays ingest time.
+            published_at: { type: 'date' as const },
           },
         },
         severity: {
@@ -919,6 +921,46 @@ const migrateExistingContentScrubbedMapping = async (
   }
 };
 
+/** `content.published_at` for clusters created before publish-date lookback existed. */
+const migrateExistingPublishedAtMapping = async (
+  esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('published-at-mapping-migration');
+
+  for (const indexName of reportIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const contentProps = (
+        (
+          indexMappings?.mappings?.properties as
+            | Record<string, { properties?: Record<string, unknown> }>
+            | undefined
+        )?.content as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+
+      if (!contentProps?.published_at) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            content: { properties: { published_at: { type: 'date' } } },
+          },
+        });
+        log.info(`Migrated content.published_at on ${indexName}`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate content.published_at on ${indexName}: ${
+          (err as Error).message
+        }. The mapping is dynamic: strict, so writes of reports carrying published_at will be rejected and ingest will fail until the mapping is updated.`
+      );
+    }
+  }
+};
+
 /**
  * Index templates only apply at creation time, so clusters that created these
  * indices before `index.hidden` was set still expose them to index patterns and
@@ -1586,6 +1628,7 @@ interface RequiredMapping {
 
 const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   { path: 'content.article_url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+  { path: 'content.published_at' },
   { path: 'extracted.artifacts' },
   { path: 'extracted.core.model_id' },
   { path: 'extracted.core.context_mode' },
@@ -1833,6 +1876,7 @@ export const installIndexTemplates = async ({
   await backfillKevRankScore(esClient, reportIndices, log);
   await migrateExistingContentScrubbedMapping(esClient, reportIndices, log);
   await migrateExistingCoreEnrichmentMappings(esClient, reportIndices, log);
+  await migrateExistingPublishedAtMapping(esClient, reportIndices, log);
   await migrateExistingIndicesToHidden(esClient, reportIndices, log);
 
   // Fails the install (and therefore bootstrap readiness) when a migration left the

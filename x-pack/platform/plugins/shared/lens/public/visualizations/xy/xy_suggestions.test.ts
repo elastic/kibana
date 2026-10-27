@@ -637,6 +637,76 @@ describe('xy_suggestions', () => {
     `);
   });
 
+  test.each(['textBased', 'formBased'])(
+    'defaults a new %s XY chart legend to bottom list',
+    (datasourceId) => {
+      const [suggestion] = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('price'), dateCol('date')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        keptLayerIds: [],
+        datasourceId,
+      });
+
+      expect(suggestion.state.legend).toEqual({
+        isVisible: true,
+        position: 'bottom',
+        layout: 'list',
+      });
+    }
+  );
+
+  test('uses the default legend for a new XY chart', () => {
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+      datasourceId: 'textBased',
+      defaultOverrides: { legend: { isVisible: true, position: 'right' } },
+    });
+
+    expect(suggestion.state.legend).toEqual({ isVisible: true, position: 'right' });
+  });
+
+  test('keeps the current legend over the default legend', () => {
+    const currentState: XYVisualizationState = {
+      legend: { isVisible: false, position: 'left' },
+      valueLabels: 'hide',
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          seriesType: 'bar',
+          xAccessor: 'date',
+          accessors: ['price'],
+        },
+      ],
+    };
+
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      state: currentState,
+      keptLayerIds: ['first'],
+      datasourceId: 'textBased',
+      defaultOverrides: { legend: { isVisible: true, position: 'right' } },
+    });
+
+    expect(suggestion.state.legend).toEqual({ isVisible: false, position: 'left' });
+  });
+
   test('suggests a split x y chart with date on x', () => {
     const [suggestion, ...rest] = getSuggestions({
       table: {

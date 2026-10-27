@@ -1130,7 +1130,10 @@ export const assertHistoricReportsPerPackInRange = (reportsPerPack: number): num
   return floored;
 };
 
-/** Place the single current RSS item just before endMs (pubDate is narrative-only; ingest uses now). */
+/**
+ * Place the single current RSS item just before endMs (ingest uses now). The item is only
+ * ingested when `--end-date` is within the 30-day RSS ingest window.
+ */
 const RSS_CURRENT_OFFSET_MS = 15 * 60 * 1000;
 
 /**
@@ -1228,6 +1231,7 @@ export interface HistoricThreatReportDoc {
     title: string;
     body_text: string;
     language: 'en';
+    published_at: string;
   };
   severity: { level: string; score: number };
   extracted?: {
@@ -1440,6 +1444,11 @@ ${itemsXml}
   return `data:application/rss+xml;charset=utf-8,${encodeURIComponent(feedBody)}`;
 };
 
+/**
+ * The target index must already carry the `content.published_at` mapping (`dynamic: 'strict'`
+ * rejects the field otherwise), so the Kibana that owns the index must have started once with
+ * that mapping before seeding.
+ */
 export const buildHistoricThreatReportDoc = ({
   scenario,
   item,
@@ -1498,6 +1507,7 @@ export const buildHistoricThreatReportDoc = ({
       title,
       body_text: bodyText,
       language: 'en',
+      published_at: item.reportTimestamp,
     },
     severity: { level: severity.level, score: severity.score },
     lineage: {

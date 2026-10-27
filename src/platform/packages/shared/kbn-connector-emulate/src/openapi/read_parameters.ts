@@ -65,13 +65,20 @@ const splitValue = (
   return value;
 };
 
-/** Query keys that aren't operation parameters: the mock's page and API keys sent in the query. */
-export const nonParameterQueryKeys = ({ security }: ContractOperation): Set<string> =>
+/**
+ * Query keys that aren't operation parameters: the mock's page key, API keys sent in the query,
+ * and the query parameters an `x-ms-paths` key fixes.
+ */
+export const nonParameterQueryKeys = ({
+  security,
+  fixedQuery = [],
+}: ContractOperation): Set<string> =>
   new Set([
     MOCK_PAGE_PARAM,
     ...security
       .flat()
       .flatMap(({ credential }) => (credential?.in === 'query' ? [credential.name] : [])),
+    ...fixedQuery.map(({ name }) => name),
   ]);
 
 /** Whether a query parameter is an object sent as one query key per property (form, exploded). */

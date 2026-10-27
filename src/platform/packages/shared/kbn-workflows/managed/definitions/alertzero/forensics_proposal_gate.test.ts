@@ -13,7 +13,7 @@ import {
   ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW,
   ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
 } from './forensics_proposal_gate';
-import { ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW } from './hunt_proposal_gate';
+import { ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW } from './hunt';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface YamlStep {
@@ -206,6 +206,7 @@ describe('Forensics proposal gate', () => {
         'workflow-id': 'system-alertzero-journal-note',
         'run-as-mode': 'inherit',
         inputs: {
+          author_name: '{{ consts.author_name }}',
           conversation_id: '{{ inputs.investigationConversationId }}',
           message: '{{ variables.lost_race_note }}',
         },

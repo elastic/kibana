@@ -63,7 +63,10 @@ export const evaluatePerAlertSnoozeConditions = (
  * or nested object structure (as returned from ES queries). Flat key takes
  * priority since it reflects the current execution's computed value.
  */
-const getAlertFieldValue = (alertAsData: Record<string, unknown>, fieldPath: string): unknown => {
+export const getAlertFieldValue = (
+  alertAsData: Record<string, unknown>,
+  fieldPath: string
+): unknown => {
   if (Object.prototype.hasOwnProperty.call(alertAsData, fieldPath)) {
     return alertAsData[fieldPath];
   }
