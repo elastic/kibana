@@ -11,7 +11,8 @@ import React from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { stubLogstashDataView as dataView } from '@kbn/data-plugin/common/stubs';
 import { FieldName } from './field_name';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('FieldName', () => {
   test('renders a string field by providing fieldType and fieldName', () => {
@@ -113,5 +114,41 @@ describe('FieldName', () => {
     expect(screen.getByText('String')).toBeVisible();
     expect(screen.getByText(FIELD_DISPLAY_NAME)).toBeVisible();
     expect(screen.queryByText(FIELD_NAME)).not.toBeInTheDocument();
+  });
+
+  describe('tooltip', () => {
+    const hoverFieldName = async (name: string) => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      await user.hover(screen.getByText(name));
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    test('shows the field name in a tooltip when the display name differs from it', async () => {
+      render(
+        <FieldName fieldName="test" displayNameOverride="Test display name" fieldType="string" />
+      );
+
+      await hoverFieldName('Test display name');
+
+      expect(screen.getByRole('tooltip')).toHaveTextContent('Test display name (test)');
+    });
+
+    test('does not show a tooltip when the display name matches the field name', async () => {
+      render(<FieldName fieldName="test" fieldType="string" />);
+
+      await hoverFieldName('test');
+
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    });
   });
 });
