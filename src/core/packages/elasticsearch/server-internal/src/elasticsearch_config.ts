@@ -28,6 +28,12 @@ export const DEFAULT_API_VERSION = 'master';
 
 export const DEFAULT_HEALTH_CHECK_RETRY = 3;
 
+/** The longest delay a Node.js timer supports; a longer one fires after 1ms instead. */
+const MAX_HEALTH_CHECK_DELAY_MS = 2 ** 31 - 1;
+
+/** Shorter health check delays poll Elasticsearch excessively, and are deprecated. */
+const MIN_HEALTH_CHECK_DELAY_MS = 100;
+
 export type ElasticsearchConfigType = TypeOf<typeof configSchema>;
 
 const requestHeadersWhitelistSchemas = [
@@ -163,9 +169,9 @@ export const configSchema = schema.object({
   ),
   apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
   healthCheck: schema.object({
-    delay: schema.duration({ defaultValue: 2500 }),
-    onFailureDelay: schema.maybe(schema.duration()),
-    startupDelay: schema.duration({ defaultValue: 500 }),
+    delay: schema.duration({ defaultValue: 2500, max: MAX_HEALTH_CHECK_DELAY_MS }),
+    onFailureDelay: schema.maybe(schema.duration({ max: MAX_HEALTH_CHECK_DELAY_MS })),
+    startupDelay: schema.duration({ defaultValue: 500, max: MAX_HEALTH_CHECK_DELAY_MS }),
     retry: schema.number({ defaultValue: DEFAULT_HEALTH_CHECK_RETRY, min: 1 }),
   }),
   ignoreVersionMismatch: offeringBasedSchema({
@@ -326,9 +332,56 @@ const deprecations: ConfigDeprecationProvider = () => [
         },
       });
     }
+
+    // A zero startup or failure delay means "use `delay`", so only `delay` may not be zero.
+    for (const key of ['delay', 'startupDelay', 'onFailureDelay'] as const) {
+      const delayMs = toMilliseconds(es.healthCheck?.[key]);
+      if (delayMs === undefined || delayMs >= MIN_HEALTH_CHECK_DELAY_MS) {
+        continue;
+      }
+      if (delayMs === 0 && key !== 'delay') {
+        continue;
+      }
+      const setting = `${fromPath}.healthCheck.${key}`;
+      const min = `${MIN_HEALTH_CHECK_DELAY_MS}ms`;
+      addDeprecation({
+        configPath: setting,
+        title: i18n.translate('core.deprecations.elasticsearchHealthCheckDelay.title', {
+          defaultMessage: 'Setting "{setting}" below {min} is deprecated',
+          values: { setting, min },
+        }),
+        message: i18n.translate('core.deprecations.elasticsearchHealthCheckDelay.message', {
+          defaultMessage:
+            '"{setting}" is set to {value}ms, so Kibana checks the Elasticsearch connection more often than needed, adding load to Elasticsearch. Values below {min} will be rejected in a future major version.',
+          values: { setting, value: delayMs, min },
+        }),
+        level: 'warning',
+        correctiveActions: {
+          manualSteps: [
+            i18n.translate('core.deprecations.elasticsearchHealthCheckDelay.manualSteps1', {
+              defaultMessage:
+                'Set "{setting}" to {min} or more, or remove it from your kibana configs to use the default.',
+              values: { setting, min },
+            }),
+          ],
+        },
+      });
+    }
     return;
   },
 ];
+
+/** A raw duration setting in milliseconds, or undefined if unset or invalid (validation reports it). */
+const toMilliseconds = (value: unknown): number | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+  try {
+    return schema.duration().validate(value).asMilliseconds();
+  } catch {
+    return undefined;
+  }
+};
 
 export const config: ServiceConfigDescriptor<ElasticsearchConfigType> = {
   path: 'elasticsearch',
