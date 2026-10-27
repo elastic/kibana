@@ -756,6 +756,29 @@ steps:
                 alertIds: "${{ foreach.item }}"
               description: "Alerts in this closure proposal"
 
+      # First message of the Investigation. It describes only this proposal's alerts. The batch counts
+      # and the model summary cover other alerts too, which made the numbers disagree.
+      - name: post_comment_mint_analysis
+        type: ai.conversation.add_user_message
+        on-failure:
+          continue: true
+        with:
+          author_name: "{{ consts.author_name }}"
+          conversation_id: "{{ steps.create_proposal_investigation.output.conversation_id }}"
+          message: |-
+            Proposing to close **{{ steps.process_mints.item.alert_ids.size }} alert{% if steps.process_mints.item.alert_ids.size != 1 %}s{% endif %}** from rule **{{ inputs.rule_name }}** as false positives.
+
+            Every one was classified as a false positive with confidence of at least {{ inputs.confidence_floor }}, and they share one pattern.
+            {%- assign shown = 0 -%}
+            {%- for v in steps.classify_alerts.output.verdicts -%}{%- if shown < 1 and steps.process_mints.item.alert_ids contains v.alert_id %}
+
+            **Why:** {{ v.rationale }}
+            {%- assign shown = shown | plus: 1 -%}{%- endif -%}{%- endfor %}
+
+            If more alerts match this pattern while the proposal is open, they are added here and noted in a separate message.
+
+            [View execution]({{ execution.url }})
+
       - name: attach_mint_impact_gate
         type: if
         condition: "${{ steps.process_mints.item.impacted_entities.size > 0 }}"
@@ -847,8 +870,16 @@ steps:
         with:
           author_name: "{{ consts.author_name }}"
           conversation_id: "{{ steps.process_joins.item.conversation_id }}"
-          message: >-
-            +{{ steps.process_joins.item.alert_ids.size }} alert{% if steps.process_joins.item.alert_ids.size != 1 %}s{% endif %} from rule "{{ inputs.rule_name }}" with the same pattern joined this proposal (revision {{ steps.process_joins.item.revision }}).
+          message: |-
+            The proposal above now holds **{{ steps.process_joins.item.total_alerts }} alerts**: {{ steps.process_joins.item.alert_ids.size }} more from rule **{{ inputs.rule_name }}** joined it (revision {{ steps.process_joins.item.revision }}).
+
+            They share the pattern, and each was classified as a false positive with confidence of at least {{ inputs.confidence_floor }}.
+            {%- assign shown = 0 -%}
+            {%- for v in steps.classify_alerts.output.verdicts -%}{%- if shown < 1 and steps.process_joins.item.alert_ids contains v.alert_id %}
+
+            **Why:** {{ v.rationale }}
+            {%- assign shown = shown | plus: 1 -%}{%- endif -%}{%- endfor %}
+
             [View the added alert{% if steps.process_joins.item.alert_ids.size != 1 %}s{% endif %}](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.process_joins.item.alerts_page_query }})
 
   # ---------------------------------------------------------------------------

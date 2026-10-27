@@ -232,6 +232,7 @@ const groupFpCandidatesOutputSchema = lazySchema(() =>
           revision: z.number(),
           conversation_id: z.string().describe("The owner's Investigation."),
           alert_ids: z.array(z.string()).describe('Only the alerts the proposal did not hold.'),
+          total_alerts: z.number().describe('How many alerts the proposal holds after this join.'),
           alerts_page_query: z
             .string()
             .describe('Query string of the Alerts page link that shows just the added alerts.'),

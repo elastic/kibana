@@ -303,6 +303,7 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
               revision: join.revision,
               conversation_id: join.conversationId,
               alert_ids: join.alertIds,
+              total_alerts: join.totalAlerts,
               alerts_page_query: buildAlertsPagePath(join.alertIds, new Date().toISOString()),
               impacted_entities: entitiesOf(join.alertIds),
             })),

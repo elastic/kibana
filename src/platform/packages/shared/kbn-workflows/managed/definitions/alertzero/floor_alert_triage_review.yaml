@@ -140,18 +140,6 @@ steps:
   #    The gate completes normally on every outcome, including an unanswered
   #    deadline (`status: expired`), so each outcome gets its own branch below.
   # ---------------------------------------------------------------------------
-  - name: post_comment_proposal
-    type: ai.conversation.add_user_message
-    on-failure:
-      continue: true
-    with:
-      author_name: "{{ consts.author_name }}"
-      conversation_id: "{{ inputs.conversation_id }}"
-      message: >-
-        Proposing closure of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ inputs.confidence_floor }} confidence floor.
-        Autonomy level: {{ inputs.autonomy | default: 'manual' }}.
-        {% if inputs.autonomy == 'supervised' %}The closure is approved automatically at this autonomy level; reopen any alert you disagree with.{% else %}A human decision is required.{% endif %}
-
   - name: create_fp_proposal
     type: workflow.execute
     # Reached only when the proposal workflow itself fails (for example, the proposal could

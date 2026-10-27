@@ -74,6 +74,8 @@ export interface GroupedJoin {
   conversationId: string;
   /** Only the alerts the head did not already hold. */
   alertIds: string[];
+  /** How many alerts the proposal holds once this join is in. */
+  totalAlerts: number;
 }
 
 export interface GroupingPlan {
@@ -135,6 +137,7 @@ export const tryJoinHead = async ({
         revision: current.revision,
         conversationId: current.conversationId,
         alertIds: [],
+        totalAlerts: current.alertIds.length,
       };
     }
     try {
@@ -145,6 +148,7 @@ export const tryJoinHead = async ({
         revision,
         conversationId: current.conversationId,
         alertIds: added,
+        totalAlerts: current.alertIds.length + added.length,
       };
     } catch (error) {
       if (!(error instanceof ProposalConflictError)) throw error;

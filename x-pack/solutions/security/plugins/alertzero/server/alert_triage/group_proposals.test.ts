@@ -137,6 +137,7 @@ describe('groupFpCandidates', () => {
         revision: 2,
         conversationId: 'conv-owner',
         alertIds: ['a2'],
+        totalAlerts: 2,
       },
     ]);
   });
