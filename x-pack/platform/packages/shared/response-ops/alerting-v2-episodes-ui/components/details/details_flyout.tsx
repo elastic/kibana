@@ -28,7 +28,7 @@ import { useEpisodeDetailsHeaderData } from '../../hooks/use_episode_details_hea
 import { isRuleLoaded } from '../../types/rule_state';
 import { isEpisodeSnoozed } from '../../utils/is_episode_snoozed';
 import { isSupportedEpisodeSeverity, normalizeEpisodeSeverity } from '../severity/severity_utils';
-import { AlertEpisodeSeverityHealth } from '../severity/episode_severity_health';
+import { AlertEpisodeSeverityBadge } from '../severity/episode_severity_badge';
 import { EPISODE_STATUS_BADGE_COLORS, getEpisodeStatusBadgeLabel } from '../status/status_badge';
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
 import { UserProfileDisplay } from '../user_profile_display';
@@ -382,13 +382,11 @@ export const AlertEpisodeDetailsFlyout = ({
             </Suspense>
           </FlyoutTemplate.Header.InfoBlock>
 
-          {/* Severity. The dot carries the color, so the value text stays default. */}
           {normalizedSeverity && (
             <FlyoutTemplate.Header.InfoBlock title={i18n.FLYOUT_INFO_BLOCK_SEVERITY}>
-              <AlertEpisodeSeverityHealth
-                severity={normalizedSeverity}
-                data-test-subj="alertingV2EpisodeFlyoutSeverity"
-              />
+              <span data-test-subj="alertingV2EpisodeFlyoutSeverity">
+                <AlertEpisodeSeverityBadge severity={normalizedSeverity} />
+              </span>
             </FlyoutTemplate.Header.InfoBlock>
           )}
 

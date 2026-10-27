@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { decode as decodeRison } from '@kbn/rison';
 import {
   ALERTING_V2_RULES_LOCATOR,
   ALERTING_V2_RULE_LIBRARY_LOCATOR,
@@ -203,6 +204,18 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
         host: OBSERVABILITY_HOST.alerts,
       });
       expect(loc.path).toContain('_a=');
+    });
+
+    it('resolves list with a search query', async () => {
+      const loc = await locator.getLocation({
+        filters: { queryString: 'alert.id: "a-1"', status: 'all' },
+        host: OBSERVABILITY_HOST.alerts,
+      });
+      const appState = decodeRison(
+        new URLSearchParams(loc.path.split('?')[1]).get('_a') as string
+      ) as { alertsList: { queryString: string; status: string } };
+
+      expect(appState.alertsList).toEqual({ queryString: 'alert.id: "a-1"', status: 'all' });
     });
 
     it('ignores empty filters', async () => {

@@ -907,12 +907,14 @@ export class WorkflowExecutionQueryService {
    * Claims a `waitForInput` step by writing HITL audit metadata before resume.
    *
    * Returns `true` when this caller won the claim, or `false` when the doc is
-   * missing, belongs to another space, has already settled (terminal status
-   * or `finishedAt` set), or was already claimed. Unexpected ES failures are
-   * rethrown.
+   * missing, belongs to another space or to an execution other than
+   * `executionId`, is not a HITL wait step, has already settled (terminal
+   * status or `finishedAt` set), or was already claimed. Unexpected ES
+   * failures are rethrown.
    */
   async markStepAsResponded(
     stepExecutionId: string,
+    executionId: string,
     audit: { respondedBy: string; respondedAt: string; channel?: string },
     spaceId: string
   ): Promise<boolean> {
@@ -928,7 +930,7 @@ export class WorkflowExecutionQueryService {
             documentId: stepExecutionId,
             sourceFields: MARK_STEP_AS_RESPONDED_SOURCE_FIELDS,
             retryOnConflict: 3,
-            updater: createMarkStepAsRespondedUpdater(audit, spaceId),
+            updater: createMarkStepAsRespondedUpdater(audit, spaceId, executionId),
           }),
         ],
       });
