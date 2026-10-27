@@ -49,7 +49,10 @@ evaluate.describe(
                   mode: 'generateApi' as const,
                   connectorId: connector.id,
                   alertsIndexPattern: '.alerts-security.alerts-default',
-                  size: 100,
+                  // EXP (50-alert ceiling probe): lowered from 100 to find the batch size at
+                  // which claude-5.5-opus / claude-5.1-fable / gemini-3.5-flash-lite stop
+                  // failing (10/10 truncated-JSON attempts at size 100). Revert before merge.
+                  size: 50,
                   ...CORPUS_WINDOW,
                 },
                 output: { attackDiscoveries: [] },
