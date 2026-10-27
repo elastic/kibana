@@ -9,7 +9,9 @@
 import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
-import type { DatatableConfig } from './datatable';
+import type { ColorByValueType, ColorMappingType } from '../color';
+import { AUTO_COLOR } from '../color';
+import type { DatatableConfig, DatatableConfigInput } from './datatable';
 import { datatableConfigSchema } from './datatable';
 
 type DefaultDatatableConfig = Pick<DatatableConfig, 'sampling' | 'ignore_global_filters'>;
@@ -27,6 +29,10 @@ describe('Datatable Schema', () => {
   const defaultValues: DefaultDatatableConfig = {
     sampling: 1,
     ignore_global_filters: false,
+  };
+
+  type InvalidMetricsConfig<Metric> = Omit<DatatableWithoutDefaultsConfig, 'metrics'> & {
+    metrics: Metric[];
   };
 
   describe('basic configuration', () => {
@@ -278,6 +284,125 @@ describe('Datatable Schema', () => {
 
       const validated = datatableConfigSchema.parse(input);
       expect(validated).toMatchObject({ ...defaultValues, ...input });
+    });
+
+    it('validates progress bars with each fill mode', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'count',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+            apply_color_to: 'progress_bar',
+            fill_mode: 'single',
+            color: { type: 'static', color: '#abcdef' },
+            value_range: { type: 'custom', min: -20, max: 100 },
+            alignment: 'left',
+          },
+          {
+            operation: 'median',
+            field: 'bytes',
+            apply_color_to: 'progress_bar',
+            fill_mode: 'solid',
+            color: { type: 'distributed_palette', palette: 'status' },
+            value_range: { type: 'auto' },
+            alignment: 'right',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+            apply_color_to: 'progress_bar',
+            fill_mode: 'gradient',
+            color: {
+              type: 'dynamic',
+              range: 'absolute',
+              steps: [
+                { lt: 30, color: '#54B399' },
+                { gte: 30, color: '#E7664C' },
+              ],
+            },
+            value_range: { type: 'auto' },
+            alignment: 'right',
+          },
+        ],
+      };
+
+      const validated = datatableConfigSchema.parse(input);
+      expect(validated).toMatchObject({ ...defaultValues, ...input });
+    });
+
+    it('validates progress bars on esql metrics and rows', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        type: 'data_table',
+        data_source: {
+          type: 'esql',
+          query: 'FROM my-index | LIMIT 100',
+        },
+        metrics: [
+          {
+            column: 'bytes',
+            apply_color_to: 'progress_bar',
+            fill_mode: 'single',
+            color: AUTO_COLOR,
+            value_range: { type: 'auto' },
+            alignment: 'right',
+          },
+        ],
+        rows: [
+          {
+            column: 'memory',
+            apply_color_to: 'progress_bar',
+            fill_mode: 'gradient',
+            color: { type: 'distributed_palette', palette: 'status' },
+            value_range: { type: 'custom', min: 0, max: 100 },
+            alignment: 'left',
+          },
+        ],
+      };
+
+      const validated = datatableConfigSchema.parse(input);
+      expect(validated).toMatchObject({ ...defaultValues, ...input });
+    });
+
+    it('validates a custom value range with zero bounds', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'count',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+            apply_color_to: 'progress_bar',
+            fill_mode: 'single',
+            color: AUTO_COLOR,
+            value_range: { type: 'custom', min: 0, max: 0 },
+            alignment: 'right',
+          },
+        ],
+      };
+
+      const validated = datatableConfigSchema.parse(input);
+      expect(validated).toMatchObject({ ...defaultValues, ...input });
+    });
+
+    it('applies the progress bar defaults on metrics and rows', () => {
+      const input: DatatableConfigInput = {
+        type: 'data_table',
+        data_source: {
+          type: 'esql',
+          query: 'FROM my-index | LIMIT 100',
+        },
+        metrics: [{ column: 'bytes', apply_color_to: 'progress_bar', fill_mode: 'single' }],
+        rows: [{ column: 'memory', apply_color_to: 'progress_bar', fill_mode: 'gradient' }],
+      };
+
+      const validated = datatableConfigSchema.parse(input);
+      const progressBarDefaults = {
+        color: AUTO_COLOR,
+        value_range: { type: 'auto' },
+        alignment: 'right',
+      };
+      expect(validated.metrics?.[0]).toMatchObject(progressBarDefaults);
+      expect(validated.rows?.[0]).toMatchObject(progressBarDefaults);
     });
   });
 
@@ -713,6 +838,240 @@ describe('Datatable Schema', () => {
       expectPrettyError(result).toMatchInlineSnapshot(
         `"✖ The 'sort_by.index' (2) is out of bounds. The 'metrics' array has 2 item(s)."`
       );
+    });
+
+    it('throws when the fill_mode is missing', () => {
+      const input: InvalidMetricsConfig<{ operation: 'count'; apply_color_to: 'progress_bar' }> = {
+        ...baseDatatableConfig,
+        metrics: [{ operation: 'count', apply_color_to: 'progress_bar' }],
+      };
+
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+    });
+
+    it('throws when the fill_mode is unknown', () => {
+      const input: InvalidMetricsConfig<{
+        operation: 'count';
+        apply_color_to: 'progress_bar';
+        fill_mode: 'unknown';
+      }> = {
+        ...baseDatatableConfig,
+        metrics: [{ operation: 'count', apply_color_to: 'progress_bar', fill_mode: 'unknown' }],
+      };
+
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+    });
+
+    it('throws when a solid fill has a static color', () => {
+      const input: InvalidMetricsConfig<{
+        operation: 'count';
+        apply_color_to: 'progress_bar';
+        fill_mode: 'solid';
+        color: { type: 'static'; color: string };
+      }> = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'count',
+            apply_color_to: 'progress_bar',
+            fill_mode: 'solid',
+            color: { type: 'static', color: '#abcdef' },
+          },
+        ],
+      };
+
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+    });
+
+    it('throws when a gradient fill has a static color', () => {
+      const input: InvalidMetricsConfig<{
+        operation: 'count';
+        apply_color_to: 'progress_bar';
+        fill_mode: 'gradient';
+        color: { type: 'static'; color: string };
+      }> = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'count',
+            apply_color_to: 'progress_bar',
+            fill_mode: 'gradient',
+            color: { type: 'static', color: '#abcdef' },
+          },
+        ],
+      };
+
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+    });
+
+    it('throws when a single fill has a distributed palette', () => {
+      const input: InvalidMetricsConfig<{
+        operation: 'count';
+        apply_color_to: 'progress_bar';
+        fill_mode: 'single';
+        color: { type: 'distributed_palette'; palette: string };
+      }> = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'count',
+            apply_color_to: 'progress_bar',
+            fill_mode: 'single',
+            color: { type: 'distributed_palette', palette: 'status' },
+          },
+        ],
+      };
+
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+    });
+
+    it('throws when a single fill has a dynamic color', () => {
+      const input: InvalidMetricsConfig<{
+        operation: 'count';
+        apply_color_to: 'progress_bar';
+        fill_mode: 'single';
+        color: ColorByValueType;
+      }> = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'count',
+            apply_color_to: 'progress_bar',
+            fill_mode: 'single',
+            color: {
+              type: 'dynamic',
+              range: 'absolute',
+              steps: [{ lt: 30, color: '#54B399' }],
+            },
+          },
+        ],
+      };
+
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+    });
+
+    it('throws when a progress bar has a color mapping', () => {
+      const input: InvalidMetricsConfig<{
+        operation: 'count';
+        apply_color_to: 'progress_bar';
+        fill_mode: 'gradient';
+        color: ColorMappingType;
+      }> = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'count',
+            apply_color_to: 'progress_bar',
+            fill_mode: 'gradient',
+            color: { mode: 'categorical', palette: 'default', mapping: [] },
+          },
+        ],
+      };
+
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+    });
+
+    it('throws when a progress bar is center aligned', () => {
+      const input: InvalidMetricsConfig<{
+        operation: 'count';
+        apply_color_to: 'progress_bar';
+        fill_mode: 'single';
+        alignment: 'center';
+      }> = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'count',
+            apply_color_to: 'progress_bar',
+            fill_mode: 'single',
+            alignment: 'center',
+          },
+        ],
+      };
+
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+    });
+
+    it('throws when a custom value range is missing a bound', () => {
+      const input: InvalidMetricsConfig<{
+        operation: 'count';
+        apply_color_to: 'progress_bar';
+        fill_mode: 'single';
+        value_range: { type: 'custom'; min: number };
+      }> = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'count',
+            apply_color_to: 'progress_bar',
+            fill_mode: 'single',
+            value_range: { type: 'custom', min: 0 },
+          },
+        ],
+      };
+
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+    });
+
+    it('throws when an auto value range has bounds', () => {
+      const input: InvalidMetricsConfig<{
+        operation: 'count';
+        apply_color_to: 'progress_bar';
+        fill_mode: 'single';
+        value_range: { type: 'auto'; min: number; max: number };
+      }> = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'count',
+            apply_color_to: 'progress_bar',
+            fill_mode: 'single',
+            value_range: { type: 'auto', min: 0, max: 100 },
+          },
+        ],
+      };
+
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Unrecognized keys: \\"min\\", \\"max\\"
+          → at metrics[0].value_range"
+      `);
+    });
+
+    it('throws when a progress bar is applied to a dsl row', () => {
+      const input: Omit<DatatableWithoutDefaultsConfig, 'rows'> & {
+        rows: Array<{
+          operation: 'terms';
+          fields: string[];
+          limit: number;
+          apply_color_to: 'progress_bar';
+          fill_mode: 'single';
+        }>;
+      } = {
+        ...baseDatatableConfig,
+        metrics: [{ operation: 'count', empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE }],
+        rows: [
+          {
+            operation: 'terms',
+            fields: ['geo.dest'],
+            limit: 10,
+            apply_color_to: 'progress_bar',
+            fill_mode: 'single',
+          },
+        ],
+      };
+
+      const result = datatableConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
   });
 

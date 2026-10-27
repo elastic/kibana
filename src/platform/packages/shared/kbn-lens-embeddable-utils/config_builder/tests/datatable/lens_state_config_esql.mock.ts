@@ -684,3 +684,87 @@ export const sortedByTransposedMetricColumnESQLDatatableAttributes: LensAttribut
   },
   version: LENS_ITEM_LATEST_VERSION,
 };
+
+/**
+ * ES|QL progress bars as the editor saves them, including the values it keeps for another fill mode:
+ * - a metric with the default seed: a gradient fill with the inert seed color and a bare `status` palette
+ * - a numeric row with a single fill, a leftover palette and a left alignment
+ */
+export const progressBarESQLDatatableAttributes: LensAttributes = {
+  title: 'Progress bars',
+  references: [],
+  state: {
+    visualization: {
+      layerId: '8d3c5f0a-1b2e-4c6d-9e7f-0a1b2c3d4e5f',
+      layerType: 'data',
+      columns: [
+        {
+          columnId: 'bytes',
+          isTransposed: false,
+          isMetric: true,
+          alignment: 'right',
+          colorMode: 'progress',
+          palette: { type: 'palette', name: 'status' },
+          fillStyle: { fillMode: 'gradient', color: '#61A2FF', valueRange: { mode: 'auto' } },
+        },
+        {
+          columnId: 'memory',
+          isTransposed: false,
+          isMetric: false,
+          alignment: 'left',
+          colorMode: 'progress',
+          palette: { type: 'palette', name: 'status' },
+          fillStyle: { fillMode: 'single', color: '#16C5C0', valueRange: { mode: 'auto' } },
+        },
+      ],
+    },
+    query: { language: 'kuery', query: '' },
+    filters: [],
+    datasourceStates: {
+      textBased: {
+        layers: {
+          '8d3c5f0a-1b2e-4c6d-9e7f-0a1b2c3d4e5f': {
+            index: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
+            query: { esql: 'FROM kibana_sample_data_logs | LIMIT 10' },
+            columns: [
+              {
+                columnId: 'bytes',
+                fieldName: 'bytes',
+                label: 'bytes',
+                customLabel: false,
+                meta: { type: 'number', esType: 'long' },
+                inMetricDimension: true,
+              },
+              {
+                columnId: 'memory',
+                fieldName: 'memory',
+                label: 'memory',
+                customLabel: false,
+                meta: { type: 'number', esType: 'double' },
+              },
+            ],
+            timeField: '@timestamp',
+          },
+        },
+      },
+    },
+    adHocDataViews: {
+      e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a: {
+        id: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
+        title: 'kibana_sample_data_logs',
+        timeFieldName: '@timestamp',
+        sourceFilters: [],
+        type: 'esql',
+        fieldFormats: {},
+        runtimeFieldMap: {},
+        allowNoIndex: false,
+        name: 'kibana_sample_data_logs',
+        allowHidden: false,
+        managed: false,
+      },
+    },
+    needsRefresh: false,
+  },
+  visualizationType: 'lnsDatatable',
+  version: LENS_ITEM_LATEST_VERSION,
+};
