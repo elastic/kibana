@@ -288,15 +288,23 @@ export const crawlerCustomSchedulingClientToServer = (
   const mapToServerFormat = (
     crawlerSchedule: CrawlerCustomSchedule
   ): CrawlerCustomScheduleClient => {
+    const sitemapUrls = [
+      ...crawlerSchedule.selectedSitemapUrls,
+      ...crawlerSchedule.customSitemapUrls,
+    ];
+    const seedUrls = [
+      ...crawlerSchedule.selectedEntryPointUrls,
+      ...crawlerSchedule.customEntryPointUrls,
+    ];
+
+    // An empty array fails crawler-side validation and the crawl is never requested. Omitting
+    // the key instead falls back to the domain's configured URLs, as the one-time crawl does.
     const configurationOverrides: CrawlerCustomScheduleConfigOverridesClient = {
       maxCrawlDepth: crawlerSchedule.maxCrawlDepth,
       sitemapDiscoveryDisabled: !crawlerSchedule.includeSitemapsInRobotsTxt,
       domainAllowlist: crawlerSchedule.selectedDomainUrls,
-      sitemapUrls: [...crawlerSchedule.selectedSitemapUrls, ...crawlerSchedule.customSitemapUrls],
-      seedUrls: [
-        ...crawlerSchedule.selectedEntryPointUrls,
-        ...crawlerSchedule.customEntryPointUrls,
-      ],
+      ...(sitemapUrls.length > 0 && { sitemapUrls }),
+      ...(seedUrls.length > 0 && { seedUrls }),
     };
 
     return {
