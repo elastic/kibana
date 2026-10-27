@@ -762,3 +762,45 @@ describe('floor_alert_triage_review — settings.timeout', () => {
     expect(hours).toBeGreaterThan(168);
   });
 });
+
+// ---------------------------------------------------------------------------
+// post_comment_outcome_approved — alerts an analyst kept out of the close
+// ---------------------------------------------------------------------------
+
+describe('floor_alert_triage_review — post_comment_outcome_approved', () => {
+  const approvedComment = (candidates: number, leftOpen: number | undefined) =>
+    renderString(
+      (stepByName('post_comment_outcome_approved')?.with as { message: string }).message,
+      {
+        variables: { fp_candidate_count: candidates },
+        steps: {
+          get_proposal: { output: { decision: 'approved' } },
+          count_alerts_left_open: {
+            output: leftOpen === undefined ? {} : { hits: { total: { value: leftOpen } } },
+          },
+        },
+      }
+    );
+
+  it('reports every alert as closed when none was kept open', () => {
+    expect(approvedComment(40, 0)).toContain('40 alerts closed as false positive.');
+    expect(approvedComment(40, 0)).not.toContain('left open');
+  });
+
+  it('reports the alerts an analyst re-tagged as left open, not as closed', () => {
+    expect(approvedComment(40, 3)).toContain(
+      '37 alerts closed as false positive. 3 were left open because an analyst gave them another verdict.'
+    );
+  });
+
+  it('uses the singular for one alert', () => {
+    expect(approvedComment(2, 1)).toContain(
+      '1 alert closed as false positive. 1 was left open because an analyst gave it another verdict.'
+    );
+  });
+
+  // The count is a convenience read that may fail; the note must then read as it did before.
+  it('reports every alert as closed when the count could not be read', () => {
+    expect(approvedComment(5, undefined)).toContain('5 alerts closed as false positive.');
+  });
+});

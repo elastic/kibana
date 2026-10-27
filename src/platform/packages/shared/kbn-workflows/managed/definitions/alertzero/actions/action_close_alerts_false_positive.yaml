@@ -5,6 +5,12 @@ description: >
   Executed by the investigation proposal gate once an analyst approves (or
   auto-approved by the Alert Triage Worker at Supervised autonomy), so the
   close is attributed to the approving principal.
+
+  Closes only the alerts that are still false positives: they carry
+  `az:false_positive` and no other verdict tag. An analyst who re-tags an alert
+  `az:true_positive` or `az:inconclusive` takes it out of the proposal, even if
+  the approval lands before the proposal is revised. Those alerts are returned
+  as `skipped_alert_ids`.
 enabled: true
 tags:
   # Generic tag every action workflow carries; lets the catalog discover
@@ -64,14 +70,57 @@ outputs:
     type: number
   - name: alert_ids
     type: array
+  - name: skipped_alert_ids
+    type: array
 steps:
+  # The alerts this run may close. An analyst excludes an alert from a proposal by giving it another
+  # verdict tag, and may leave `az:false_positive` on it, so the tag alone does not make an alert
+  # eligible. Approval can land before the proposal is revised without the alert, so the close
+  # re-checks the tags itself. Ids only: `_source` is not needed.
+  - name: find_eligible_alerts
+    type: elasticsearch.search
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      index: .alerts-security.alerts-{{ workflow.spaceId }}
+      size: 1000
+      _source: false
+      track_total_hits: true
+      query:
+        bool:
+          filter:
+            - terms:
+                _id: "${{ inputs.actionInput.alertIds }}"
+            - term:
+                kibana.alert.workflow_tags: az:false_positive
+          must_not:
+            - terms:
+                kibana.alert.workflow_tags:
+                  - az:true_positive
+                  - az:inconclusive
+
+  - name: resolve_eligible_alerts
+    type: data.set
+    with:
+      eligible_alert_ids: "${{ steps.find_eligible_alerts.output.hits.hits | map: '_id' }}"
+
+  # Input minus eligible. This also holds ids that no longer match an alert.
+  - name: resolve_skipped_alerts
+    type: data.set
+    with:
+      skipped_alert_ids: "${{ inputs.actionInput.alertIds | reject_exp: 'id', 'variables.eligible_alert_ids contains id' }}"
+
   # Close the alerts. `conflicts: proceed` prevents one alert whose mapping
   # changed mid-request from aborting the close for the entire batch.
   # `reason: false_positive` is the cross-Watch contract: rule_tuning_worker.yaml
   # harvests on `kibana.alert.workflow_reason == "false_positive"`, so this value
   # must not change without coordinating with that Worker.
+  # Nothing eligible: skip the call, an empty `terms` list matches nothing but is not worth a request.
   - name: close_alerts
     type: kibana.SetAlertsStatus
+    if: "${{ variables.eligible_alert_ids.size > 0 }}"
     on-failure:
       retry:
         max-attempts: 3
@@ -84,7 +133,12 @@ steps:
         bool:
           filter:
             terms:
-              _id: "${{ inputs.actionInput.alertIds }}"
+              _id: "${{ variables.eligible_alert_ids }}"
+
+  - name: count_closed_alerts
+    type: data.set
+    with:
+      closed_count: "${{ steps.close_alerts.output.updated | default: 0 }}"
 
   # `conflicts: proceed` lets close_alerts finish without throwing even when it
   # updates fewer alerts than requested (including zero) — e.g. version conflicts
@@ -93,13 +147,15 @@ steps:
   # not closed_count, so an incomplete close
   # would otherwise be reported as a full success and the Investigation closed
   # while some alerts remain open. Fail loud instead so that check catches it.
+  # The comparison is with the eligible alerts: an alert an analyst excluded is skipped on
+  # purpose and is not a shortfall.
   - name: fail_incomplete_close
     type: workflow.fail
-    if: "${{ steps.close_alerts.output.updated != inputs.actionInput.alertIds.size }}"
+    if: "${{ variables.closed_count != variables.eligible_alert_ids.size }}"
     with:
       message: >-
-        Closed {{ steps.close_alerts.output.updated }} of
-        {{ inputs.actionInput.alertIds.size }} requested alert(s) as false
+        Closed {{ variables.closed_count }} of
+        {{ variables.eligible_alert_ids.size }} eligible alert(s) as false
         positive; the rest were not updated (conflicts: proceed skips
         version conflicts and no-ops instead of aborting the batch).
 
@@ -111,5 +167,6 @@ steps:
     type: workflow.output
     status: completed
     with:
-      closed_count: "${{ steps.close_alerts.output.updated }}"
-      alert_ids: "${{ inputs.actionInput.alertIds }}"
+      closed_count: "${{ variables.closed_count }}"
+      alert_ids: "${{ variables.eligible_alert_ids }}"
+      skipped_alert_ids: "${{ variables.skipped_alert_ids }}"

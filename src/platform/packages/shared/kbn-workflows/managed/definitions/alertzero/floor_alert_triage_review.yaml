@@ -435,6 +435,28 @@ steps:
           investigation_id: "{{ inputs.conversation_id }}"
           close_reason: false_positive
 
+      # The close skips an alert an analyst re-tagged with another verdict, so some alerts of an
+      # approved proposal can stay open. Count them for the note. A failed read leaves the note
+      # as it was.
+      - name: count_alerts_left_open
+        type: elasticsearch.search
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+          continue: true
+        with:
+          index: .alerts-security.alerts-{{ workflow.spaceId }}
+          size: 0
+          track_total_hits: true
+          query:
+            bool:
+              filter:
+                - ids:
+                    values: "${{ variables.live_alert_ids }}"
+                - term:
+                    kibana.alert.workflow_status: open
+
       - name: post_comment_outcome_approved
         type: ai.conversation.add_user_message
         on-failure:
@@ -443,7 +465,7 @@ steps:
           author_name: "{{ consts.author_name }}"
           conversation_id: "{{ inputs.conversation_id }}"
           message: >-
-            Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} closed as false positive.{% if steps.retag_approved_leftovers.output.matched > 0 %} {{ steps.retag_approved_leftovers.output.matched }} open alert{% if steps.retag_approved_leftovers.output.matched != 1 %}s{% endif %} that {% if steps.retag_approved_leftovers.output.matched != 1 %}were{% else %}was{% endif %} not part of the approved closure {% if steps.retag_approved_leftovers.output.matched != 1 %}were{% else %}was{% endif %} re-tagged az:inconclusive.{% endif %}{% if steps.retag_approved_leftovers.error != blank or variables.failed_retag_count > 0 %} ⚠️ Re-tagging the alerts that were not part of the approved closure did not fully succeed, so some may still be tagged az:false_positive.{% endif %}
+            Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {% assign left_open = steps.count_alerts_left_open.output.hits.total.value | default: 0 %}{% assign closed = variables.fp_candidate_count | minus: left_open %}{{ closed }} alert{% if closed != 1 %}s{% endif %} closed as false positive.{% if left_open > 0 %} {{ left_open }} {% if left_open == 1 %}was{% else %}were{% endif %} left open because an analyst gave {% if left_open == 1 %}it{% else %}them{% endif %} another verdict.{% endif %}{% if steps.retag_approved_leftovers.output.matched > 0 %} {{ steps.retag_approved_leftovers.output.matched }} open alert{% if steps.retag_approved_leftovers.output.matched != 1 %}s{% endif %} that {% if steps.retag_approved_leftovers.output.matched != 1 %}were{% else %}was{% endif %} not part of the approved closure {% if steps.retag_approved_leftovers.output.matched != 1 %}were{% else %}was{% endif %} re-tagged az:inconclusive.{% endif %}{% if steps.retag_approved_leftovers.error != blank or variables.failed_retag_count > 0 %} ⚠️ Re-tagging the alerts that were not part of the approved closure did not fully succeed, so some may still be tagged az:false_positive.{% endif %}
 
   - name: handle_dismissed
     type: if
