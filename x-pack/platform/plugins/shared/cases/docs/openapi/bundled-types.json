@@ -3997,7 +3997,8 @@
         "name": "search",
         "description": "An Elasticsearch simple_query_string query that filters the objects in the response.",
         "schema": {
-          "type": "string"
+          "type": "string",
+          "maxLength": 30000
         },
         "example": "Case title 1"
       },
@@ -7221,68 +7222,137 @@
           },
           "total": {
             "type": "integer",
-            "description": "The total number of attachments that match the query.",
+            "description": "The total number of attachments that match the query. It includes attachments that can't be read. Those are left out of `data`, so a page can have fewer items than `per_page`.\n",
             "example": 1
           }
         }
       },
       "unified_attachment_request": {
         "title": "Create case attachment request",
-        "description": "The attachment to add to the case. Reference attachment types, such as alerts, require `attachmentId`. Value attachment types, such as comments, require `data`. The `owner` must match the owner of the case. Unknown properties are rejected.\n",
-        "type": "object",
-        "required": [
-          "owner",
-          "type"
-        ],
-        "properties": {
-          "attachmentId": {
-            "$ref": "#/components/schemas/unified_attachment_attachment_id"
+        "description": "The attachment to add to the case. Reference attachment types, such as alerts, require `attachmentId`. Value attachment types, such as comments, require `data` and don't accept `attachmentId`. The `owner` must match the owner of the case. Unknown properties are rejected.\n",
+        "oneOf": [
+          {
+            "title": "Reference attachment",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "attachmentId",
+              "owner",
+              "type"
+            ],
+            "properties": {
+              "attachmentId": {
+                "$ref": "#/components/schemas/unified_attachment_attachment_id"
+              },
+              "data": {
+                "$ref": "#/components/schemas/unified_attachment_data"
+              },
+              "metadata": {
+                "$ref": "#/components/schemas/unified_attachment_metadata"
+              },
+              "owner": {
+                "$ref": "#/components/schemas/owner"
+              },
+              "type": {
+                "$ref": "#/components/schemas/unified_attachment_type"
+              }
+            }
           },
-          "data": {
-            "$ref": "#/components/schemas/unified_attachment_data"
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/unified_attachment_metadata"
-          },
-          "owner": {
-            "$ref": "#/components/schemas/owner"
-          },
-          "type": {
-            "$ref": "#/components/schemas/unified_attachment_type"
+          {
+            "title": "Value attachment",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "data",
+              "owner",
+              "type"
+            ],
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/unified_attachment_data"
+              },
+              "metadata": {
+                "$ref": "#/components/schemas/unified_attachment_metadata"
+              },
+              "owner": {
+                "$ref": "#/components/schemas/owner"
+              },
+              "type": {
+                "$ref": "#/components/schemas/unified_attachment_type"
+              }
+            }
           }
-        }
+        ]
+      },
+      "unified_attachment_version": {
+        "type": "string",
+        "description": "The current version of the attachment. To retrieve it, use the get case attachment API. If the attachment changed since you read it, the request fails with a 409 status code.\n",
+        "example": "WzIwNDMxLDFd"
       },
       "unified_attachment_put_request": {
         "title": "Replace case attachment request",
-        "description": "The full replacement for the attachment. The `type` and `owner` must match the existing attachment. Reference attachment types require `attachmentId` and value attachment types require `data`. Unknown properties are rejected.\n",
-        "type": "object",
-        "required": [
-          "owner",
-          "type",
-          "version"
-        ],
-        "properties": {
-          "attachmentId": {
-            "$ref": "#/components/schemas/unified_attachment_attachment_id"
+        "description": "The full replacement for the attachment. The `type` and `owner` must match the existing attachment. Reference attachment types require `attachmentId`. Value attachment types require `data` and don't accept `attachmentId`. Unknown properties are rejected.\n",
+        "oneOf": [
+          {
+            "title": "Reference attachment",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "attachmentId",
+              "owner",
+              "type",
+              "version"
+            ],
+            "properties": {
+              "attachmentId": {
+                "$ref": "#/components/schemas/unified_attachment_attachment_id"
+              },
+              "data": {
+                "$ref": "#/components/schemas/unified_attachment_data"
+              },
+              "metadata": {
+                "$ref": "#/components/schemas/unified_attachment_metadata"
+              },
+              "owner": {
+                "$ref": "#/components/schemas/owner"
+              },
+              "type": {
+                "$ref": "#/components/schemas/unified_attachment_type"
+              },
+              "version": {
+                "$ref": "#/components/schemas/unified_attachment_version"
+              }
+            }
           },
-          "data": {
-            "$ref": "#/components/schemas/unified_attachment_data"
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/unified_attachment_metadata"
-          },
-          "owner": {
-            "$ref": "#/components/schemas/owner"
-          },
-          "type": {
-            "$ref": "#/components/schemas/unified_attachment_type"
-          },
-          "version": {
-            "type": "string",
-            "description": "The current version of the attachment. To retrieve it, use the get case attachment API. If the attachment changed since you read it, the request fails with a 409 status code.\n",
-            "example": "WzIwNDMxLDFd"
+          {
+            "title": "Value attachment",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "data",
+              "owner",
+              "type",
+              "version"
+            ],
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/unified_attachment_data"
+              },
+              "metadata": {
+                "$ref": "#/components/schemas/unified_attachment_metadata"
+              },
+              "owner": {
+                "$ref": "#/components/schemas/owner"
+              },
+              "type": {
+                "$ref": "#/components/schemas/unified_attachment_type"
+              },
+              "version": {
+                "$ref": "#/components/schemas/unified_attachment_version"
+              }
+            }
           }
-        }
+        ]
       },
       "alert_identifiers": {
         "title": "Alert identifiers",
@@ -9374,7 +9444,7 @@
         "summary": "The case has no attachments.",
         "value": {
           "error": "Not Found",
-          "message": "No comments found for 293f1bc0-74f6-11ea-b83a-553aecdb28b6.",
+          "message": "No attachments found for case 293f1bc0-74f6-11ea-b83a-553aecdb28b6.",
           "statusCode": 404
         }
       },

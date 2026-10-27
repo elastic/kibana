@@ -2247,49 +2247,79 @@ export const UnifiedAttachmentsFindResponse = lazySchema(() =>
      */
     per_page: z.number().int().describe('The number of items per page.'),
     /**
-     * The total number of attachments that match the query.
-     */
-    total: z.number().int().describe('The total number of attachments that match the query.'),
+      * The total number of attachments that match the query. It includes attachments that can't be read. Those are left out of `data`, so a page can have fewer items than `per_page`.
+
+      */
+    total: z
+      .number()
+      .int()
+      .describe(
+        "The total number of attachments that match the query. It includes attachments that can't be read. Those are left out of `data`, so a page can have fewer items than `per_page`.\n"
+      ),
   })
 );
 export type UnifiedAttachmentsFindResponse = z.infer<typeof UnifiedAttachmentsFindResponse>;
 
 /**
-  * The attachment to add to the case. Reference attachment types, such as alerts, require `attachmentId`. Value attachment types, such as comments, require `data`. The `owner` must match the owner of the case. Unknown properties are rejected.
+  * The attachment to add to the case. Reference attachment types, such as alerts, require `attachmentId`. Value attachment types, such as comments, require `data` and don't accept `attachmentId`. The `owner` must match the owner of the case. Unknown properties are rejected.
 
   */
 export const UnifiedAttachmentRequest = lazySchema(() =>
-  z.object({
-    attachmentId: UnifiedAttachmentAttachmentId.optional(),
-    data: UnifiedAttachmentData.optional(),
-    metadata: UnifiedAttachmentMetadata.optional(),
-    owner: Owner,
-    type: UnifiedAttachmentType,
-  })
+  z.union([
+    z
+      .object({
+        attachmentId: UnifiedAttachmentAttachmentId,
+        data: UnifiedAttachmentData.optional(),
+        metadata: UnifiedAttachmentMetadata.optional(),
+        owner: Owner,
+        type: UnifiedAttachmentType,
+      })
+      .strict(),
+    z
+      .object({
+        data: UnifiedAttachmentData,
+        metadata: UnifiedAttachmentMetadata.optional(),
+        owner: Owner,
+        type: UnifiedAttachmentType,
+      })
+      .strict(),
+  ])
 );
 export type UnifiedAttachmentRequest = z.infer<typeof UnifiedAttachmentRequest>;
 
 /**
-  * The full replacement for the attachment. The `type` and `owner` must match the existing attachment. Reference attachment types require `attachmentId` and value attachment types require `data`. Unknown properties are rejected.
+  * The current version of the attachment. To retrieve it, use the get case attachment API. If the attachment changed since you read it, the request fails with a 409 status code.
+
+  */
+export const UnifiedAttachmentVersion = lazySchema(() => z.string());
+export type UnifiedAttachmentVersion = z.infer<typeof UnifiedAttachmentVersion>;
+
+/**
+  * The full replacement for the attachment. The `type` and `owner` must match the existing attachment. Reference attachment types require `attachmentId`. Value attachment types require `data` and don't accept `attachmentId`. Unknown properties are rejected.
 
   */
 export const UnifiedAttachmentPutRequest = lazySchema(() =>
-  z.object({
-    attachmentId: UnifiedAttachmentAttachmentId.optional(),
-    data: UnifiedAttachmentData.optional(),
-    metadata: UnifiedAttachmentMetadata.optional(),
-    owner: Owner,
-    type: UnifiedAttachmentType,
-    /**
-      * The current version of the attachment. To retrieve it, use the get case attachment API. If the attachment changed since you read it, the request fails with a 409 status code.
-
-      */
-    version: z
-      .string()
-      .describe(
-        'The current version of the attachment. To retrieve it, use the get case attachment API. If the attachment changed since you read it, the request fails with a 409 status code.\n'
-      ),
-  })
+  z.union([
+    z
+      .object({
+        attachmentId: UnifiedAttachmentAttachmentId,
+        data: UnifiedAttachmentData.optional(),
+        metadata: UnifiedAttachmentMetadata.optional(),
+        owner: Owner,
+        type: UnifiedAttachmentType,
+        version: UnifiedAttachmentVersion,
+      })
+      .strict(),
+    z
+      .object({
+        data: UnifiedAttachmentData,
+        metadata: UnifiedAttachmentMetadata.optional(),
+        owner: Owner,
+        type: UnifiedAttachmentType,
+        version: UnifiedAttachmentVersion,
+      })
+      .strict(),
+  ])
 );
 export type UnifiedAttachmentPutRequest = z.infer<typeof UnifiedAttachmentPutRequest>;
 

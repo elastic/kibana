@@ -21,5 +21,7 @@ properties:
     example: 20
   total:
     type: integer
-    description: The total number of attachments that match the query.
+    description: >
+      The total number of attachments that match the query. It includes attachments that can't
+      be read. Those are left out of `data`, so a page can have fewer items than `per_page`.
     example: 1
