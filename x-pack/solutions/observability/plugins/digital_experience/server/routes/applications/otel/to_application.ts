@@ -8,7 +8,7 @@
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import type { ApplicationSummary } from '../../../../common/types/applications';
 import { bucketKeys, ratio, toLastSeen } from '../../../lib/helpers/aggregations';
-import { toDurationVital, toScoreVital } from '../../../lib/helpers/web_vitals';
+import { toWebVitals } from '../../../lib/helpers/web_vitals';
 import type { EnvironmentAggregations, LogsBucket, SpansBucket } from './search_responses';
 
 /** The environment names in the given aggregations, without duplicates. */
@@ -32,13 +32,7 @@ export const toApplication = (logs: LogsBucket, spans?: SpansBucket): Applicatio
     source: APPLICATION_SOURCE.otel,
     environments: environmentsOf(logs, spans),
     pageLoads: { count: logs.pageLoads.doc_count },
-    webVitals: {
-      lcp: toDurationVital(logs.lcp),
-      inp: toDurationVital(logs.inp),
-      cls: toScoreVital(logs.cls),
-      fcp: toDurationVital(logs.fcp),
-      ttfb: toDurationVital(logs.ttfb),
-    },
+    webVitals: toWebVitals(logs),
     jsErrors: {
       count: logs.jsErrors.doc_count,
       perPageLoad: ratio(logs.jsErrors.doc_count, logs.pageLoads.doc_count),

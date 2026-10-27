@@ -7,7 +7,12 @@
 
 import type { CoreWebVital } from '../../../common/core_web_vitals';
 import { CORE_WEB_VITAL_THRESHOLDS } from '../../../common/core_web_vitals';
-import type { DurationVital, ScoreVital, VitalRatings } from '../../../common/types/applications';
+import type {
+  DurationVital,
+  ScoreVital,
+  VitalRatings,
+  WebVitals,
+} from '../../../common/types/applications';
 import type { PercentilesAggregation } from './aggregations';
 import { getP75, p75Of } from './aggregations';
 
@@ -62,3 +67,31 @@ export const toScoreVital = (aggregation: VitalAggregation): ScoreVital => ({
   sampleCount: aggregation.doc_count,
   ratings: toRatings(aggregation),
 });
+
+/** The vital aggregations of a bucket, one per Core Web Vital. */
+export interface WebVitalAggregations {
+  lcp: VitalAggregation;
+  inp: VitalAggregation;
+  cls: VitalAggregation;
+  fcp: VitalAggregation;
+  ttfb: VitalAggregation;
+}
+
+export const toWebVitals = ({ lcp, inp, cls, fcp, ttfb }: WebVitalAggregations): WebVitals => ({
+  lcp: toDurationVital(lcp),
+  inp: toDurationVital(inp),
+  cls: toScoreVital(cls),
+  fcp: toDurationVital(fcp),
+  ttfb: toDurationVital(ttfb),
+});
+
+const NO_DURATION_VITAL: DurationVital = { p75Ms: null, sampleCount: 0, ratings: null };
+
+/** The web vitals without any sample, e.g. when the index does not exist. */
+export const NO_WEB_VITALS: WebVitals = {
+  lcp: NO_DURATION_VITAL,
+  inp: NO_DURATION_VITAL,
+  cls: { p75: null, sampleCount: 0, ratings: null },
+  fcp: NO_DURATION_VITAL,
+  ttfb: NO_DURATION_VITAL,
+};

@@ -33,6 +33,15 @@ export interface ScoreVital {
   ratings: VitalRatings | null;
 }
 
+/** The Core Web Vitals of an application, CLS as a score and the others in milliseconds. */
+export interface WebVitals {
+  lcp: DurationVital;
+  inp: DurationVital;
+  cls: ScoreVital;
+  fcp: DurationVital;
+  ttfb: DurationVital;
+}
+
 /** One application of one source, over the requested time range and environment. */
 export interface ApplicationSummary {
   serviceName: string;
@@ -40,13 +49,7 @@ export interface ApplicationSummary {
   /** Environments the application reported in the time range, up to 10; empty when none is set. */
   environments: string[];
   pageLoads: { count: number };
-  webVitals: {
-    lcp: DurationVital;
-    inp: DurationVital;
-    cls: ScoreVital;
-    fcp: DurationVital;
-    ttfb: DurationVital;
-  };
+  webVitals: WebVitals;
   jsErrors: {
     count: number;
     /** Errors per page load, `null` without page loads. */
