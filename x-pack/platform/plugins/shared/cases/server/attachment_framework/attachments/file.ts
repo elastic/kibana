@@ -9,8 +9,8 @@ import { badRequest } from '@hapi/boom';
 import {
   FileAttachmentMetadataSchema,
   FileAttachmentPayloadSchema,
-} from '../../../common/types/domain_zod/attachment/file/v2';
-import type { FileAttachmentMetadata } from '../../../common/types/domain_zod/attachment/file/v2';
+} from '../../../common/types/domain/attachment/file/v2';
+import type { FileAttachmentMetadata } from '../../../common/types/domain/attachment/file/v2';
 import type { UnifiedAttachmentTypeSetup } from '../types';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 

@@ -16,10 +16,12 @@ import {
   getDestinationCreateSpecs,
   getDestinationWritePatterns,
   getStaticIndexRemainder,
+  toS3DestinationViewModel,
   validateAutoWritePattern,
   validateStaticSignalIndex,
   withUnitDestinations,
 } from './destination_models';
+import { createS3UnitDestination } from './s3_destination_models';
 
 const storedUnit: StreamsUnit.GetResponse = {
   unit: {
@@ -254,7 +256,11 @@ describe('destination models', () => {
         indexPatterns: undefined,
       },
     ]);
-    expect(getDestinationWritePatterns(destinations[0])).toEqual(['logs-*-*']);
+    const [destination] = destinations;
+    if (destination.type !== 'elasticsearch') {
+      throw new Error('Expected an Elasticsearch destination');
+    }
+    expect(getDestinationWritePatterns(destination)).toEqual(['logs-*-*']);
   });
 
   it('expands every auto signal into a write pattern', () => {
@@ -348,5 +354,73 @@ describe('destination models', () => {
     expect(validateAutoWritePattern('logs', 'logs-billing-prod-*')).toBe('signalPattern');
     expect(validateAutoWritePattern('logs', 'Logs-billing-*')).toBe('uppercase');
     expect(validateAutoWritePattern('logs', 'logs-billing,prod-*')).toBe('invalidCharacter');
+  });
+});
+
+describe('S3', () => {
+  const s3Input = {
+    id: 's3-archive',
+    name: 'S3 archive',
+    region: 'eu-west-1',
+    bucket: 'demo-bucket',
+    prefix: '',
+  };
+
+  it('builds an S3 node with credential references and no prefix entry when empty', () => {
+    expect(createS3UnitDestination(s3Input)).toEqual({
+      id: 's3-archive',
+      name: 'S3 archive',
+      type: 's3',
+      supported_telemetry: ['logs', 'metrics', 'traces'],
+      config: [
+        { name: 'bucket', value: 'demo-bucket' },
+        { name: 'region', value: 'eu-west-1' },
+        { name: 'access_key_id', value: { credential: 's3-archive-access-key-id' } },
+        { name: 'secret_access_key', value: { credential: 's3-archive-secret-access-key' } },
+      ],
+    });
+  });
+
+  it.each([
+    [
+      'credential references',
+      { credential: 's3-archive-access-key-id' },
+      { credential: 's3-archive-secret-access-key' },
+    ],
+    ['plain strings', 'AKIAEXAMPLE', 'wJalrXUtnFEMI'],
+  ])('maps a stored S3 node with %s without exposing keys', (_, accessKeyId, secretAccessKey) => {
+    const unit = withUnitDestinations(storedUnit, [
+      {
+        id: 's3-archive',
+        name: 'S3 archive',
+        type: 's3',
+        supported_telemetry: ['logs', 'metrics', 'traces'],
+        config: [
+          { name: 'bucket', value: 'demo-bucket' },
+          { name: 'region', value: 'eu-west-1' },
+          { name: 'access_key_id', value: accessKeyId },
+          { name: 'secret_access_key', value: secretAccessKey },
+        ],
+      },
+    ]);
+    const [viewModel] = getConfiguredDestinations(unit);
+    expect(viewModel).toEqual({
+      id: 's3-archive',
+      name: 'S3 archive',
+      type: 's3',
+      signals: ['logs', 'metrics', 'traces'],
+      bucket: 'demo-bucket',
+      region: 'eu-west-1',
+      prefix: undefined,
+    });
+    const serialized = JSON.stringify(viewModel);
+    expect(serialized).not.toContain('access-key');
+    expect(serialized).not.toContain('AKIAEXAMPLE');
+    expect(serialized).not.toContain('wJalrXUtnFEMI');
+  });
+
+  it('round-trips a prefix through the S3 node', () => {
+    const node = createS3UnitDestination({ ...s3Input, prefix: 'archive/' });
+    expect(toS3DestinationViewModel(node).prefix).toBe('archive/');
   });
 });

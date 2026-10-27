@@ -15,7 +15,7 @@ import { Type } from './type';
 
 export class StreamType extends Type<Stream> {
   constructor(options?: TypeOptions<Stream>) {
-    super(internals.stream(), options);
+    super(() => internals.stream(), options);
   }
 
   protected handleError(type: string, { value }: Record<string, any>) {
