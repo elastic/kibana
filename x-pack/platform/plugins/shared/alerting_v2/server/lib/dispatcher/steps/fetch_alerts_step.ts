@@ -25,6 +25,8 @@ import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { isEsqlSubPlanTooLargeError } from '../../errors/esql_sub_plan_too_large_error';
 import { PRE_FETCH_STUCK_ADVANCE_LAG_MS } from '../constants';
 import type { PluginConfig } from '../../../config';
+import { buildAlertDetailsUrl } from '../alert_details_url';
+import { KibanaBaseUrlToken } from '../tokens';
 
 interface RawAlert {
   last_event_timestamp: string;
@@ -44,6 +46,7 @@ export class FetchAlertsStep implements DispatcherStep {
 
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
+    @inject(KibanaBaseUrlToken) private readonly kibanaBaseUrl: string,
     @inject(PluginInitializer('config'))
     pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {
@@ -95,7 +98,7 @@ export class FetchAlertsStep implements DispatcherStep {
     // the scan has a defined upper edge to advance to.
     const truncated = result.length === this.alertsPerTick;
 
-    const alerts = parseAlerts(result);
+    const alerts = parseAlerts(result, this.kibanaBaseUrl);
 
     if (alerts.length === 0) {
       return { type: 'halt', reason: 'no_alerts' };
@@ -105,9 +108,14 @@ export class FetchAlertsStep implements DispatcherStep {
   }
 }
 
-export function parseAlerts(raw: RawAlert[]): Alert[] {
+export function parseAlerts(raw: RawAlert[], kibanaBaseUrl: string): Alert[] {
   return raw.map(({ severity, ...rest }) => ({
     ...rest,
     ...(severity ? { severity } : {}),
+    alert_url: buildAlertDetailsUrl({
+      baseUrl: kibanaBaseUrl,
+      spaceId: rest.space_id,
+      alertId: rest.alert_id,
+    }),
   }));
 }

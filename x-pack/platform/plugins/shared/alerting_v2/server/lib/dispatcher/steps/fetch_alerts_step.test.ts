@@ -17,6 +17,7 @@ import {
   createDispatcherConfigAccessor,
   createDispatcherPipelineState,
   createStepLogger,
+  MOCK_KIBANA_BASE_URL,
 } from '../fixtures/test_utils';
 import { ESQL_QUERY_ROW_LIMIT } from '../queries';
 
@@ -37,14 +38,18 @@ describe('FetchAlertsStep', () => {
   it('is named fetch_alerts', () => {
     const { queryService } = createQueryService();
 
-    expect(new FetchAlertsStep(queryService, createDispatcherConfigAccessor()).name).toBe(
-      'fetch_alerts'
-    );
+    expect(
+      new FetchAlertsStep(queryService, MOCK_KIBANA_BASE_URL, createDispatcherConfigAccessor()).name
+    ).toBe('fetch_alerts');
   });
 
   it('returns alerts and continues when alerts are found', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchAlertsStep(queryService, createDispatcherConfigAccessor());
+    const step = new FetchAlertsStep(
+      queryService,
+      MOCK_KIBANA_BASE_URL,
+      createDispatcherConfigAccessor()
+    );
 
     const alerts = [
       createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
@@ -63,7 +68,11 @@ describe('FetchAlertsStep', () => {
 
   it('halts with no_alerts when none are found', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchAlertsStep(queryService, createDispatcherConfigAccessor());
+    const step = new FetchAlertsStep(
+      queryService,
+      MOCK_KIBANA_BASE_URL,
+      createDispatcherConfigAccessor()
+    );
 
     mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
 
@@ -75,7 +84,11 @@ describe('FetchAlertsStep', () => {
 
   it('does not cap the Lucene filter at windowEnd so actions stamped after the settle buffer still join last_fired', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchAlertsStep(queryService, createDispatcherConfigAccessor());
+    const step = new FetchAlertsStep(
+      queryService,
+      MOCK_KIBANA_BASE_URL,
+      createDispatcherConfigAccessor()
+    );
 
     mockEsClient.esql.query.mockResolvedValueOnce(
       createDispatchableAlertEventsResponse([createAlert()])
@@ -102,6 +115,7 @@ describe('FetchAlertsStep', () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchAlertsStep(
       queryService,
+      MOCK_KIBANA_BASE_URL,
       createDispatcherConfigAccessor({ run: { alerts: { max: 1000 } } })
     );
 
@@ -121,7 +135,11 @@ describe('FetchAlertsStep', () => {
 
   it('sets truncated: true when the query returns exactly ESQL_QUERY_ROW_LIMIT rows', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchAlertsStep(queryService, createDispatcherConfigAccessor());
+    const step = new FetchAlertsStep(
+      queryService,
+      MOCK_KIBANA_BASE_URL,
+      createDispatcherConfigAccessor()
+    );
 
     const maxAlerts = Array.from({ length: ESQL_QUERY_ROW_LIMIT }, (_, i) =>
       createAlert({ alert_id: `ep-${i}`, group_hash: `h-${i}` })
@@ -138,7 +156,11 @@ describe('FetchAlertsStep', () => {
 
   it('sets truncated: false when the query returns fewer than ESQL_QUERY_ROW_LIMIT rows', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchAlertsStep(queryService, createDispatcherConfigAccessor());
+    const step = new FetchAlertsStep(
+      queryService,
+      MOCK_KIBANA_BASE_URL,
+      createDispatcherConfigAccessor()
+    );
 
     const alerts = Array.from({ length: ESQL_QUERY_ROW_LIMIT - 1 }, (_, i) =>
       createAlert({ alert_id: `ep-${i}`, group_hash: `h-${i}` })
@@ -155,7 +177,11 @@ describe('FetchAlertsStep', () => {
 
   it('propagates unclassified query errors', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchAlertsStep(queryService, createDispatcherConfigAccessor());
+    const step = new FetchAlertsStep(
+      queryService,
+      MOCK_KIBANA_BASE_URL,
+      createDispatcherConfigAccessor()
+    );
 
     mockEsClient.esql.query.mockRejectedValueOnce(new Error('ES error'));
 
@@ -165,7 +191,11 @@ describe('FetchAlertsStep', () => {
 
   it('halts with inline_stats_too_large on a 400 illegal_argument_exception sub-plan error', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchAlertsStep(queryService, createDispatcherConfigAccessor());
+    const step = new FetchAlertsStep(
+      queryService,
+      MOCK_KIBANA_BASE_URL,
+      createDispatcherConfigAccessor()
+    );
 
     mockEsClient.esql.query.mockRejectedValueOnce(makeSubPlanError());
 
@@ -178,7 +208,11 @@ describe('FetchAlertsStep', () => {
   it('logs the held watermark, its lag, and the force-advance threshold on a sub-plan error', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService, mockLogger } = createLoggerService();
-    const step = new FetchAlertsStep(queryService, createDispatcherConfigAccessor());
+    const step = new FetchAlertsStep(
+      queryService,
+      MOCK_KIBANA_BASE_URL,
+      createDispatcherConfigAccessor()
+    );
 
     mockEsClient.esql.query.mockRejectedValueOnce(makeSubPlanError());
 
@@ -198,7 +232,11 @@ describe('FetchAlertsStep', () => {
 
   it('propagates a 400 with a different reason (not sub-plan)', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchAlertsStep(queryService, createDispatcherConfigAccessor());
+    const step = new FetchAlertsStep(
+      queryService,
+      MOCK_KIBANA_BASE_URL,
+      createDispatcherConfigAccessor()
+    );
 
     const otherError = new errors.ResponseError({
       statusCode: 400,
@@ -229,7 +267,7 @@ describe('parseAlerts', () => {
       },
     ];
 
-    const result = parseAlerts(raw);
+    const result = parseAlerts(raw, MOCK_KIBANA_BASE_URL);
 
     expect(result).toStrictEqual([
       {
@@ -240,6 +278,7 @@ describe('parseAlerts', () => {
         group_hash: 'h1',
         alert_id: 'e1',
         alert_status: 'active',
+        alert_url: 'https://kibana.example.com/app/observability/alerting/alerts/e1',
       },
     ]);
   });
@@ -258,7 +297,7 @@ describe('parseAlerts', () => {
       },
     ];
 
-    const result = parseAlerts(raw);
+    const result = parseAlerts(raw, MOCK_KIBANA_BASE_URL);
 
     expect(result).toHaveLength(1);
     expect(result[0].severity).toBe('medium');
@@ -278,11 +317,14 @@ describe('parseAlerts', () => {
       },
     ];
 
-    const result = parseAlerts(raw);
+    const result = parseAlerts(raw, MOCK_KIBANA_BASE_URL);
 
     expect(result).toHaveLength(1);
     expect(result[0].rule_id).toBeNull();
     expect(result[0].source).toBe('pagerduty');
     expect(result[0].space_id).toBe('space-a');
+    expect(result[0].alert_url).toBe(
+      'https://kibana.example.com/s/space-a/app/observability/alerting/alerts/e1'
+    );
   });
 });
