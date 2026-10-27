@@ -102,7 +102,10 @@ interface Span {
  * rules statement-wide and pick `<a>` for standing nearer the verdict — crediting the wrong
  * sibling in exactly the shape this check exists to catch.
  */
-const clauseAt = (statementText: string, indexInStatement: number): { start: number; end: number } => {
+const clauseAt = (
+  statementText: string,
+  indexInStatement: number
+): { start: number; end: number } => {
   const breaks = new RegExp(CLAUSE_BREAK, 'g');
   let start = 0;
   for (let match = breaks.exec(statementText); match; match = breaks.exec(statementText)) {
