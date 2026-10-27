@@ -58,6 +58,7 @@ export interface ResolutionGroupTableProps {
   isError?: boolean;
   showActions?: boolean;
   canModify?: boolean;
+  isPrivilegesLoading?: boolean;
   onRemoveEntity?: (entityId: string) => void;
   targetEntityId?: string;
   removingEntityId?: string;
@@ -71,6 +72,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
   isError = false,
   showActions = false,
   canModify = true,
+  isPrivilegesLoading = false,
   onRemoveEntity,
   targetEntityId,
   removingEntityId,
@@ -97,6 +99,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
           const isTarget = entityId === targetEntityId;
           const isCurrentEntity = currentEntityId === entityId;
           const isThisEntityRemoving = removingEntityId === entityId;
+          const lacksPrivileges = !isPrivilegesLoading && !canModify;
 
           const expandButton = (
             <EuiToolTip content={EXPAND_ENTITY_BUTTON} disableScreenReaderOutput>
@@ -115,14 +118,14 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
               <EuiFlexItem grow={false}>{expandButton}</EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip
-                  content={getRemoveButtonTooltip(canModify, isTarget)}
-                  disableScreenReaderOutput={canModify && !isTarget}
+                  content={getRemoveButtonTooltip(lacksPrivileges, isTarget)}
+                  disableScreenReaderOutput={!lacksPrivileges && !isTarget}
                 >
                   <EuiButtonIcon
                     iconType="cross"
                     color="primary"
                     aria-label={REMOVE_ENTITY_BUTTON}
-                    disabled={!canModify || isTarget || !!removingEntityId}
+                    disabled={isPrivilegesLoading || !canModify || isTarget || !!removingEntityId}
                     onClick={() => onRemoveEntity?.(entityId)}
                     isLoading={isThisEntityRemoving}
                   />
@@ -218,6 +221,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
   }, [
     showActions,
     canModify,
+    isPrivilegesLoading,
     targetEntityId,
     onRemoveEntity,
     removingEntityId,
@@ -268,8 +272,8 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
   );
 };
 
-const getRemoveButtonTooltip = (canModify: boolean, isTarget: boolean) => {
-  if (!canModify) {
+const getRemoveButtonTooltip = (lacksPrivileges: boolean, isTarget: boolean) => {
+  if (lacksPrivileges) {
     return INSUFFICIENT_PRIVILEGES_TOOLTIP;
   }
   if (isTarget) {

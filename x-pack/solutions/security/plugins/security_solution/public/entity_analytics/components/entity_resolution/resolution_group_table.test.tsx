@@ -11,7 +11,7 @@ import { TestProviders } from '../../../common/mock';
 import { ResolutionGroupTable } from './resolution_group_table';
 import { RESOLUTION_GROUP_TABLE_TEST_ID, RESOLUTION_EMPTY_STATE_TEST_ID } from './test_ids';
 import type { ResolutionGroup } from './hooks/use_resolution_group';
-import { INSUFFICIENT_PRIVILEGES_TOOLTIP } from './translations';
+import { INSUFFICIENT_PRIVILEGES_TOOLTIP, REMOVE_ENTITY_BUTTON } from './translations';
 
 const mockGroup: ResolutionGroup = {
   target: {
@@ -142,6 +142,31 @@ describe('ResolutionGroupTable', () => {
     await waitFor(() =>
       expect(removeButtons[1]).toHaveAccessibleDescription(INSUFFICIENT_PRIVILEGES_TOOLTIP)
     );
+  });
+
+  it('does not show the permission tooltip while privileges are still loading', async () => {
+    const { getAllByLabelText, findByText, queryByText } = render(
+      <TestProviders>
+        <ResolutionGroupTable
+          group={mockGroup}
+          isLoading={false}
+          showActions
+          canModify={false}
+          isPrivilegesLoading
+          targetEntityId="alice-id"
+        />
+      </TestProviders>
+    );
+
+    const removeButtons = getAllByLabelText(/remove from resolution group/i);
+    removeButtons.forEach((button) => {
+      expect(button).toBeDisabled();
+    });
+    // Alias row: the action label, not a permission denial, until privileges settle.
+    fireEvent.mouseOver(removeButtons[1].parentElement!);
+
+    expect(await findByText(REMOVE_ENTITY_BUTTON)).toBeInTheDocument();
+    expect(queryByText(INSUFFICIENT_PRIVILEGES_TOOLTIP)).not.toBeInTheDocument();
   });
 
   it('disables expand button for current entity', () => {

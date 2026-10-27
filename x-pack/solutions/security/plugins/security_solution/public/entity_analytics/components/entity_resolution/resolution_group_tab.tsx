@@ -95,7 +95,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
       queryClient.invalidateQueries({ queryKey: [RESOLUTION_GROUP_QUERY_KEY] });
     }, [queryClient])
   );
-  const canModify = useCanModifyResolution();
+  const { canModify, isLoading: isPrivilegesLoading } = useCanModifyResolution();
 
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -263,6 +263,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
           isError={isError}
           showActions
           canModify={canModify}
+          isPrivilegesLoading={isPrivilegesLoading}
           onRemoveEntity={handleRemoveEntity}
           targetEntityId={targetEntityId}
           removingEntityId={removingEntityId}
@@ -278,6 +279,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
           addingEntityId={addingEntityId}
           disabled={!groupQueryReady}
           canModify={canModify}
+          isPrivilegesLoading={isPrivilegesLoading}
         />
       </div>
       {modalState.isOpen && modalState.newEntity && currentEntityForModal && (

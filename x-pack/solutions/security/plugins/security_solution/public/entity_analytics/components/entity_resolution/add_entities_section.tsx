@@ -65,6 +65,7 @@ interface AddEntitiesSectionProps {
   addingEntityId?: string;
   disabled?: boolean;
   canModify?: boolean;
+  isPrivilegesLoading?: boolean;
 }
 
 export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
@@ -72,6 +73,7 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
   excludeEntityIds,
   disabled,
   canModify = true,
+  isPrivilegesLoading = false,
   onAddEntity,
   onEntityNameClick,
   addingEntityId,
@@ -121,6 +123,8 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
         render: (entity: Record<string, unknown>) => {
           const entityId = getEntityId(entity);
           const isThisEntityAdding = addingEntityId === entityId;
+          const lacksPrivileges = !isPrivilegesLoading && !canModify;
+
           return (
             <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -135,15 +139,15 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip
-                  content={canModify ? ADD_ENTITY_BUTTON : INSUFFICIENT_PRIVILEGES_TOOLTIP}
-                  disableScreenReaderOutput={canModify}
+                  content={lacksPrivileges ? INSUFFICIENT_PRIVILEGES_TOOLTIP : ADD_ENTITY_BUTTON}
+                  disableScreenReaderOutput={!lacksPrivileges}
                 >
                   <EuiButtonIcon
                     iconType="plus"
                     color="primary"
                     aria-label={ADD_ENTITY_BUTTON}
                     onClick={() => onAddEntity(entity)}
-                    disabled={disabled || !canModify || !!addingEntityId}
+                    disabled={disabled || isPrivilegesLoading || !canModify || !!addingEntityId}
                     isLoading={isThisEntityAdding}
                   />
                 </EuiToolTip>
@@ -196,7 +200,7 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
         },
       },
     ],
-    [onAddEntity, onEntityNameClick, addingEntityId, disabled, canModify]
+    [onAddEntity, onEntityNameClick, addingEntityId, disabled, canModify, isPrivilegesLoading]
   );
 
   const pagination = useMemo(
