@@ -46,6 +46,8 @@ class FsCache {
   #prefix;
   /** @type {import('stream').Writable | undefined} */
   #log;
+  /** @type {Map<string, { code: string, map?: object | null }>} */
+  #pendingEntries = new Map();
   /** Resolves once the background prune sweep (if any) finished; for tests. */
   /** @type {Promise<void> | undefined} */
   pruneComplete;
@@ -81,6 +83,11 @@ class FsCache {
    * @returns {string|undefined}
    */
   getCode(key) {
+    const pending = this.#pendingEntries.get(key);
+    if (pending) {
+      return pending.code;
+    }
+
     const path = this.#pathFor(key, CODE_EXT);
 
     try {
@@ -103,6 +110,11 @@ class FsCache {
    * @returns {object|undefined}
    */
   getSourceMap(key) {
+    const pending = this.#pendingEntries.get(key);
+    if (pending) {
+      return pending.map ?? undefined;
+    }
+
     try {
       return JSON.parse(Fs.readFileSync(this.#pathFor(key, MAP_EXT), 'utf8'));
     } catch {
@@ -116,19 +128,25 @@ class FsCache {
    * @returns {Promise<void>}
    */
   async update(key, entry) {
+    // Module execution and stack formatting can happen before the first async write finishes.
+    const pending = { ...entry };
+    this.#pendingEntries.set(key, pending);
     try {
       const codePath = this.#pathFor(key, CODE_EXT);
       await Fs.promises.mkdir(Path.dirname(codePath), { recursive: true });
 
-      const writes = [this.#writeAtomic(codePath, entry.code)];
       if (entry.map) {
-        writes.push(this.#writeAtomic(this.#pathFor(key, MAP_EXT), JSON.stringify(entry.map)));
+        await this.#writeAtomic(this.#pathFor(key, MAP_EXT), JSON.stringify(entry.map));
       }
 
-      await Promise.all(writes);
+      await this.#writeAtomic(codePath, entry.code);
       this.#debug('PUT', key);
     } catch (error) {
       this.#logError('PUT', key, error);
+    } finally {
+      if (this.#pendingEntries.get(key) === pending) {
+        this.#pendingEntries.delete(key);
+      }
     }
   }
 
@@ -195,9 +213,21 @@ class FsCache {
         for (const name of await Fs.promises.readdir(dirPath)) {
           const filePath = Path.resolve(dirPath, name);
           try {
-            const stat = await Fs.promises.stat(filePath);
+            // A map lives as long as its code entry, whose mtime tracks cache hits.
+            const entryPath = name.endsWith(MAP_EXT)
+              ? Path.resolve(dirPath, `${name.slice(0, -MAP_EXT.length)}${CODE_EXT}`)
+              : filePath;
+            const stat = await Fs.promises.stat(entryPath).catch((error) => {
+              if (error.code === 'ENOENT' && entryPath !== filePath) {
+                return Fs.promises.stat(filePath);
+              }
+              throw error;
+            });
             if (stat.mtimeMs < ageLimit || name.endsWith('.tmp')) {
               await Fs.promises.unlink(filePath);
+              if (name.endsWith(CODE_EXT)) {
+                await Fs.promises.unlink(`${filePath.slice(0, -CODE_EXT.length)}${MAP_EXT}`);
+              }
             }
           } catch {
             // raced with another process; ignore

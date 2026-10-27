@@ -75,6 +75,24 @@ it('stores entries without a map', async () => {
   expect(cache.getSourceMap(key)).toBeUndefined();
 });
 
+it('makes code and maps available synchronously while writes are pending', async () => {
+  const cache = makeCache();
+  await cache.pruneComplete;
+  const key = cache.getKey(Path.resolve(DIR, 'missing.ts'), 'source');
+  const map = { version: 3 };
+
+  const write = cache.update(key, { code: 'compiled', map });
+
+  expect(cache.getCode(key)).toBe('compiled');
+  expect(cache.getSourceMap(key)).toEqual(map);
+
+  await write;
+
+  const other = makeCache();
+  expect(other.getCode(key)).toBe('compiled');
+  expect(other.getSourceMap(key)).toEqual(map);
+});
+
 it('uses a stat-based key for existing files and a hash key otherwise', () => {
   const cache = makeCache();
   const path = makeTestFile('b.ts', 'const b = 2;');
@@ -98,7 +116,7 @@ it('produces distinct entries for distinct keys', async () => {
 it('prunes entries older than the age limit', async () => {
   const cache = makeCache();
   await cache.pruneComplete;
-  await cache.update('old-key', { code: 'old' });
+  await cache.update('old-key', { code: 'old', map: { old: true } });
   await cache.update('fresh-key', { code: 'fresh' });
 
   const old = new Date(Date.now() - 45 * DAY);
@@ -114,5 +132,26 @@ it('prunes entries older than the age limit', async () => {
   await next.pruneComplete;
 
   expect(next.getCode('old-key')).toBeUndefined();
+  expect(next.getSourceMap('old-key')).toBeUndefined();
   expect(next.getCode('fresh-key')).toBe('fresh');
+});
+
+it('retains an old source map when its code entry was recently used', async () => {
+  const cache = makeCache();
+  await cache.pruneComplete;
+  await cache.update('active-key', { code: 'active', map: { version: 3 } });
+
+  const old = new Date(Date.now() - 45 * DAY);
+  for (const file of listEntryFiles()) {
+    if (file.endsWith('.map.json')) {
+      Fs.utimesSync(file, old, old);
+    }
+  }
+  Fs.utimesSync(Path.resolve(DIR, 'fs1', 'last-clean'), old, old);
+
+  const next = makeCache();
+  await next.pruneComplete;
+
+  expect(next.getCode('active-key')).toBe('active');
+  expect(next.getSourceMap('active-key')).toEqual({ version: 3 });
 });
