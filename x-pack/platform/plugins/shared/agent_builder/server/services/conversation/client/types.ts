@@ -47,15 +47,23 @@ export type ConversationCreateRequest = Omit<
    */
   user?: UserIdAndName;
   access_control?: ConversationAccessControl;
-  /** Claims the run lock for this execution in the create write. */
-  claim?: ConversationClaim;
+  /** Makes this execution the new conversation's active execution. */
+  activeExecution?: SetActiveExecution;
 };
 
-/** An execution asking to hold a conversation's run lock (`active_execution`). */
-export interface ConversationClaim {
+/** Makes an execution the conversation's active execution, unless another one holds it. */
+export interface SetActiveExecution {
   executionId: string;
   triggerEventId: string;
 }
+
+/** Clears the conversation's active execution when this execution still holds it. */
+export interface ReleaseActiveExecution {
+  releaseExecutionId: string;
+}
+
+/** A change to the conversation's active execution, applied in the same write. */
+export type ActiveExecutionUpdate = SetActiveExecution | ReleaseActiveExecution;
 
 export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
   Partial<
@@ -114,10 +122,8 @@ export interface AppendEventsRequest {
    * on the returned conversation.
    */
   skipIfTerminalExistsFor?: string;
-  /** Claims the run lock for this execution in the same write; fails when a live execution holds it. */
-  claim?: ConversationClaim;
-  /** Releases the run lock in the same write, when this execution still holds it. */
-  releaseExecutionId?: string;
+  /** Changes the active execution in the same write. */
+  activeExecution?: ActiveExecutionUpdate;
 }
 
 export interface ReplaceRoundEventsRequest {
@@ -144,8 +150,8 @@ export interface ReplaceRoundEventsRequest {
    * on the returned conversation.
    */
   skipIfTerminalExistsFor?: string;
-  /** Releases the run lock in the same write, when this execution still holds it. */
-  releaseExecutionId?: string;
+  /** Changes the active execution in the same write. */
+  activeExecution?: ActiveExecutionUpdate;
 }
 
 export interface ConversationListOptions {

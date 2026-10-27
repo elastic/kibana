@@ -1895,9 +1895,9 @@ describe('AgentExecutionService', () => {
         },
       });
 
-    const appendedClaim = () => {
-      const [{ claim }] = conversationClient.appendEvents.mock.calls[0];
-      return claim;
+    const appendedActiveExecution = () => {
+      const [{ activeExecution }] = conversationClient.appendEvents.mock.calls[0];
+      return activeExecution;
     };
 
     beforeEach(() => {
@@ -1945,7 +1945,7 @@ describe('AgentExecutionService', () => {
       expect(logger.warn).toHaveBeenCalled();
     });
 
-    it('deletes its record when the claim write keeps conflicting', async () => {
+    it('deletes its record when the active execution write keeps conflicting', async () => {
       conversationClient.appendEvents.mockRejectedValueOnce(
         createConversationWriteConflictError({ conversationId: 'conversation-1' })
       );
@@ -1963,7 +1963,7 @@ describe('AgentExecutionService', () => {
       expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
     });
 
-    it('releases the claim when scheduling fails after claiming', async () => {
+    it('releases the active execution when scheduling fails after setting it', async () => {
       const scheduleError = new Error('task manager unavailable');
       mockTaskManagerEnsureScheduled.mockRejectedValueOnce(scheduleError);
 
@@ -1977,12 +1977,12 @@ describe('AgentExecutionService', () => {
           source: 'execution',
           access: 'converse',
           retryOnConflict: true,
-          releaseExecutionId: executionId,
+          activeExecution: { releaseExecutionId: executionId },
         }
       );
     });
 
-    it('rethrows the scheduling error when releasing the claim fails', async () => {
+    it('rethrows the scheduling error when releasing the active execution fails', async () => {
       const scheduleError = new Error('task manager unavailable');
       mockTaskManagerEnsureScheduled.mockRejectedValueOnce(scheduleError);
       conversationClient.update.mockRejectedValueOnce(new Error('ES unavailable'));
@@ -1993,7 +1993,7 @@ describe('AgentExecutionService', () => {
       expect(logger.warn).toHaveBeenCalled();
     });
 
-    it('does not release when scheduling fails without a claim', async () => {
+    it('does not release when scheduling fails without an active execution', async () => {
       mockTaskManagerEnsureScheduled.mockRejectedValueOnce(new Error('task manager unavailable'));
 
       await converse({ storeConversation: false }).catch(() => undefined);
@@ -2034,22 +2034,22 @@ describe('AgentExecutionService', () => {
       expect(result.executionId).toBe('exec-1');
       expect(mockExecutionClient.create).toHaveBeenCalledTimes(2);
       expect(conversationClient.appendEvents).toHaveBeenCalledTimes(2);
-      expect(conversationClient.appendEvents.mock.calls[1][0].claim).toMatchObject({
+      expect(conversationClient.appendEvents.mock.calls[1][0].activeExecution).toMatchObject({
         executionId: 'exec-1',
       });
       expect(mockTaskManagerEnsureScheduled).toHaveBeenCalledTimes(1);
     });
 
-    it("passes a claim for the round's user message", async () => {
+    it("sets the active execution with the round's user message", async () => {
       await converse();
 
-      const claim = appendedClaim();
+      const activeExecution = appendedActiveExecution();
       const [{ executionId, agentParams }] = mockExecutionClient.create.mock.calls[0];
       const { roundId } = agentParams as { roundId?: string };
-      expect(claim).toEqual({ executionId, triggerEventId: `${roundId}::user_message` });
+      expect(activeExecution).toEqual({ executionId, triggerEventId: `${roundId}::user_message` });
     });
 
-    it('claims with a lock-only update on a HITL resume', async () => {
+    it('sets the active execution with an update without fields on a HITL resume', async () => {
       conversationClient.get.mockResolvedValue({
         ...conversation,
         rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.awaitingPrompt })],
@@ -2064,13 +2064,13 @@ describe('AgentExecutionService', () => {
           source: 'execution',
           access: 'converse',
           retryOnConflict: true,
-          claim: { executionId, triggerEventId: 'round-1::user_message' },
+          activeExecution: { executionId, triggerEventId: 'round-1::user_message' },
         }
       );
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
 
-    it('claims for a sub-agent conversation too', async () => {
+    it('sets the active execution for a sub-agent conversation too', async () => {
       conversationClient.get.mockResolvedValue({
         ...conversation,
         parent_conversation: { id: 'parent-1', relation: ConversationParentRelation.subagent },
@@ -2078,10 +2078,12 @@ describe('AgentExecutionService', () => {
 
       await converse();
 
-      expect(appendedClaim()).toEqual(expect.objectContaining({ executionId: expect.any(String) }));
+      expect(appendedActiveExecution()).toEqual(
+        expect.objectContaining({ executionId: expect.any(String) })
+      );
     });
 
-    it('does not claim when storeConversation is false', async () => {
+    it('does not set the active execution when storeConversation is false', async () => {
       await converse({ storeConversation: false });
 
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
@@ -2089,7 +2091,7 @@ describe('AgentExecutionService', () => {
       expect(conversationClient.update).not.toHaveBeenCalled();
     });
 
-    it('still returns the existing execution on an idempotent replay without claiming', async () => {
+    it('still returns the existing execution on an idempotent replay without setting the active execution', async () => {
       mockExecutionClient.create.mockRejectedValueOnce(conflictError());
       mockExecutionClient.peek.mockResolvedValueOnce({
         status: ExecutionStatus.completed,
@@ -2112,7 +2114,7 @@ describe('AgentExecutionService', () => {
       expect(mockExecutionClient.delete).not.toHaveBeenCalled();
     });
 
-    it('trigger_mode never appends without a claim', async () => {
+    it('trigger_mode never appends without setting the active execution', async () => {
       (attachmentsService.createStateManager as jest.Mock).mockReturnValue({
         getAccessedRefs: () => [],
         getAll: () => [],
@@ -2131,7 +2133,7 @@ describe('AgentExecutionService', () => {
       });
 
       expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
-      expect(appendedClaim()).toBeUndefined();
+      expect(appendedActiveExecution()).toBeUndefined();
       expect(conversationClient.update).not.toHaveBeenCalled();
     });
   });

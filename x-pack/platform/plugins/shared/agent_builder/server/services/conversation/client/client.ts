@@ -15,7 +15,6 @@ import type {
 import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
-  ActiveExecution,
   ConversationOrigin,
   ConversationRoundAuthor,
   ConversationRoundAuthorDecoration,
@@ -77,7 +76,7 @@ import {
 } from '../access_control';
 import type {
   AppendEventsRequest,
-  ConversationClaim,
+  ActiveExecutionUpdate,
   ConversationCreateRequest,
   ConversationUpdatableFields,
   ConversationUpdateRequest,
@@ -88,6 +87,12 @@ import type {
   ConversationListResult,
 } from './types';
 import { createSpaceDslFilter, isDefaultSpace } from '../../../utils/spaces';
+import {
+  ConversationBusySignal,
+  applyActiveExecutionUpdate,
+  isActiveExecutionUpdateNoop,
+  toActiveExecution,
+} from './active_execution';
 import {
   MAX_CONVERSATIONS_PER_PAGE,
   MAX_CONVERSATION_SEARCH_PER_PAGE,
@@ -154,16 +159,6 @@ type ConversationWriteEmission =
   | { source: ConversationWriteSource; emit?: true }
   | { emit: false; source?: never };
 
-type WriteConversationParams = {
-  conversationId: string;
-  access: ConversationAccess;
-  fields: (current: NormalizedConversation) => Omit<ConversationUpdatableFields, 'id'>;
-  maxRetries?: number;
-  refresh?: Refresh;
-  /** Claims the run lock (`active_execution`) in the same write. */
-  claim?: ConversationClaim;
-} & ConversationWriteEmission;
-
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
   exists(conversationId: string): Promise<boolean>;
@@ -178,10 +173,8 @@ export interface ConversationClient {
       access?: ConversationAccess;
       retryOnConflict?: boolean;
       activity?: ActivityContext;
-      /** Claims the run lock in the same write. */
-      claim?: ConversationClaim;
-      /** Releases the run lock in the same write when this execution still holds it. */
-      releaseExecutionId?: string;
+      /** Changes the active execution in the same write. */
+      activeExecution?: ActiveExecutionUpdate;
     }
   ): Promise<Conversation>;
   appendEvents(
@@ -366,61 +359,6 @@ const skipWrite = (current: NormalizedConversation): WriteSkipped => ({
 });
 const isWriteSkipped = (value: unknown): value is WriteSkipped =>
   typeof value === 'object' && value !== null && WRITE_SKIPPED in value;
-
-/**
- * Thrown from inside an OCC `fields` callback when another execution holds the run lock. The busy
- * error itself carries a 409, which `OccWriter` would mistake for a version conflict and retry.
- */
-const CONVERSATION_BUSY = Symbol('conversation busy');
-interface ConversationBusy {
-  [CONVERSATION_BUSY]: true;
-  activeExecutionId: string;
-}
-const conversationBusy = (activeExecutionId: string): ConversationBusy => ({
-  [CONVERSATION_BUSY]: true,
-  activeExecutionId,
-});
-const isConversationBusy = (value: unknown): value is ConversationBusy =>
-  typeof value === 'object' && value !== null && CONVERSATION_BUSY in value;
-
-/** How long a claim holds the run lock before another execution may take it over. */
-const ACTIVE_EXECUTION_TTL_MS = 5 * 60 * 1000;
-
-const toActiveExecution = ({
-  executionId,
-  triggerEventId,
-}: ConversationClaim): ActiveExecution => ({
-  execution_id: executionId,
-  trigger_event_id: triggerEventId,
-  started_at: new Date().toISOString(),
-});
-
-/** Takes the run lock for `claim`, refusing while another execution claimed it within the TTL. */
-const takeActiveExecution = (
-  current: NormalizedConversation,
-  claim: ConversationClaim
-): Pick<ConversationUpdatableFields, 'active_execution'> => {
-  const { active_execution: held } = current;
-
-  if (
-    held &&
-    held.execution_id !== claim.executionId &&
-    Date.now() - Date.parse(held.started_at) < ACTIVE_EXECUTION_TTL_MS
-  ) {
-    throw conversationBusy(held.execution_id);
-  }
-
-  return { active_execution: toActiveExecution(claim) };
-};
-
-/** Clears the run lock when `releaseExecutionId` still holds it; leaves a newer holder alone. */
-const releaseIfHeldBy = (
-  current: NormalizedConversation,
-  releaseExecutionId: string | undefined
-): Pick<ConversationUpdatableFields, 'active_execution'> =>
-  releaseExecutionId !== undefined && current.active_execution?.execution_id === releaseExecutionId
-    ? { active_execution: undefined }
-    : {};
 
 /** True when the stored events already end `executionId` with a terminal lifecycle event. */
 const hasTerminalEventFor = (current: NormalizedConversation, executionId: string): boolean =>
@@ -914,7 +852,11 @@ class ConversationClientImpl implements ConversationClient {
     const now = new Date();
     const id = conversation.id ?? uuidv4();
 
-    const { template_id: templateId, claim, ...conversationWithoutTemplateId } = conversation;
+    const {
+      template_id: templateId,
+      activeExecution,
+      ...conversationWithoutTemplateId
+    } = conversation;
 
     let resolvedMetadata = conversationWithoutTemplateId.metadata;
     let resolvedTemplateId: string | undefined;
@@ -992,7 +934,7 @@ class ConversationClientImpl implements ConversationClient {
         ...(resolvedTemplateVersion !== undefined
           ? { template_version: resolvedTemplateVersion }
           : {}),
-        ...(claim ? { active_execution: toActiveExecution(claim) } : {}),
+        ...(activeExecution ? { active_execution: toActiveExecution(activeExecution) } : {}),
       },
       currentUser: this.getUser(),
       creationDate: new Date(createdAt),
@@ -1054,34 +996,33 @@ class ConversationClientImpl implements ConversationClient {
       retryOnConflict = false,
       source,
       activity,
-      claim,
-      releaseExecutionId,
+      activeExecution,
     }: ConversationWriteOptions & {
       access?: ConversationAccess;
       retryOnConflict?: boolean;
       activity?: ActivityContext;
-      claim?: ConversationClaim;
-      releaseExecutionId?: string;
+      activeExecution?: ActiveExecutionUpdate;
     }
   ): Promise<Conversation> {
     const { id: conversationId, ...fields } = conversationUpdate;
     const envelope = this.activityEnvelope(activity);
 
-    // The run lock is bookkeeping, not conversation content: a lock-only update emits no
-    // `ai.conversation.updated`.
-    const isLockOnly = Object.keys(fields).length === 0;
-    const emission: ConversationWriteEmission = isLockOnly ? { emit: false } : { source };
+    // An update without fields changes no conversation content, so it emits no
+    // `ai.conversation.updated`, and writes only to change the active execution.
+    const hasFields = Object.keys(fields).length > 0;
+    const emission: ConversationWriteEmission = hasFields ? { source } : { emit: false };
 
     const result = await this.writeConversation({
       conversationId,
       access,
       ...emission,
       ...(retryOnConflict ? {} : { maxRetries: 0 }),
-      claim,
+      activeExecution,
       fields: (current) => {
-        const release = releaseIfHeldBy(current, releaseExecutionId);
-
-        if (isLockOnly && !claim && !('active_execution' in release)) {
+        if (
+          !hasFields &&
+          (!activeExecution || isActiveExecutionUpdateNoop(current, activeExecution))
+        ) {
           throw skipWrite(current);
         }
 
@@ -1100,7 +1041,7 @@ class ConversationClientImpl implements ConversationClient {
               )
             : []),
         ];
-        return { ...bounded, ...withActivityEvents(current, activityEvents), ...release };
+        return { ...bounded, ...withActivityEvents(current, activityEvents) };
       },
     });
 
@@ -1146,8 +1087,7 @@ class ConversationClientImpl implements ConversationClient {
       attachments,
       workspaceId,
       skipIfTerminalExistsFor,
-      claim,
-      releaseExecutionId,
+      activeExecution,
     } = request;
     const createdAt = new Date().toISOString();
 
@@ -1159,7 +1099,7 @@ class ConversationClientImpl implements ConversationClient {
       access,
       source,
       refresh,
-      claim,
+      activeExecution,
       fields: (current) => {
         if (skipIfTerminalExistsFor && hasTerminalEventFor(current, skipIfTerminalExistsFor)) {
           throw skipWrite(current);
@@ -1197,7 +1137,6 @@ class ConversationClientImpl implements ConversationClient {
               }
             : {}),
           ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
-          ...releaseIfHeldBy(current, releaseExecutionId),
           read_by: [],
           read: false,
         };
@@ -1222,7 +1161,7 @@ class ConversationClientImpl implements ConversationClient {
       attachments,
       workspaceId,
       skipIfTerminalExistsFor,
-      releaseExecutionId,
+      activeExecution,
     } = request;
     const roundPrefix = `${roundId}::`;
     const createdAt = new Date().toISOString();
@@ -1233,6 +1172,7 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access,
       source,
+      activeExecution,
       fields: (current) => {
         if (skipIfTerminalExistsFor && hasTerminalEventFor(current, skipIfTerminalExistsFor)) {
           throw skipWrite(current);
@@ -1280,7 +1220,6 @@ class ConversationClientImpl implements ConversationClient {
               }
             : {}),
           ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
-          ...releaseIfHeldBy(current, releaseExecutionId),
           read_by: [],
           read: false,
         };
@@ -1837,8 +1776,22 @@ class ConversationClientImpl implements ConversationClient {
    * Read-modify-write against the stored conversation, retrying on conflict.
    * `fields` is replayed per attempt against the freshly read conversation, so it must be free of side effects.
    */
-  private async writeConversation(params: WriteConversationParams): Promise<Conversation> {
-    const { conversationId, access, fields, maxRetries = 5, refresh, claim, ...emission } = params;
+  private async writeConversation({
+    conversationId,
+    access,
+    fields,
+    maxRetries = 5,
+    refresh,
+    activeExecution,
+    ...emission
+  }: {
+    conversationId: string;
+    access: ConversationAccess;
+    fields: (current: NormalizedConversation) => Omit<ConversationUpdatableFields, 'id'>;
+    maxRetries?: number;
+    refresh?: Refresh;
+    activeExecution?: ActiveExecutionUpdate;
+  } & ConversationWriteEmission): Promise<Conversation> {
     const writer = this.createWriter({ access, maxRetries, refresh });
     // `mutate` may run more than once on OCC retry; the last run is the one that was written.
     // Typed through `as` so the assignment inside the closure does not narrow it to `undefined`.
@@ -1854,7 +1807,7 @@ class ConversationClientImpl implements ConversationClient {
             update: {
               id: conversationId,
               ...fields(current),
-              ...(claim && takeActiveExecution(current, claim)),
+              ...(activeExecution && applyActiveExecutionUpdate(current, activeExecution)),
             },
             updateDate: new Date(),
             space: this.space,
@@ -1885,7 +1838,7 @@ class ConversationClientImpl implements ConversationClient {
           resolveTemplate: getTemplate,
         });
       }
-      if (isConversationBusy(error)) {
+      if (error instanceof ConversationBusySignal) {
         const { activeExecutionId } = error;
 
         throw createConversationBusyError({ conversationId, activeExecutionId });

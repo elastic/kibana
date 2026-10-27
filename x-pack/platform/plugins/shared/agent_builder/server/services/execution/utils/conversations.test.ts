@@ -42,7 +42,7 @@ import {
   createConversationClientMock,
 } from '../../../test_utils';
 import { nextResumeIndex } from '../../conversation/client/rounds_to_events';
-import type { ConversationClaim } from '../../conversation/client/types';
+import type { SetActiveExecution } from '../../conversation/client/types';
 import type { ConversationWithOperation } from './conversations';
 import {
   appendResumeExecution$,
@@ -292,7 +292,7 @@ describe('conversations utils', () => {
       author,
       additionalEvents,
       attachments,
-      claim,
+      activeExecution,
     }: {
       conversation: ConversationWithOperation;
       conversationClient: ReturnType<typeof createConversationClientMock>;
@@ -302,7 +302,7 @@ describe('conversations utils', () => {
       author?: ConversationRoundAuthor;
       additionalEvents?: TimelineEvent[];
       attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
-      claim?: ConversationClaim;
+      activeExecution?: SetActiveExecution;
     }) => {
       conversationClient.appendEvents.mockResolvedValue(conversation);
       return persistUserMessage({
@@ -314,57 +314,57 @@ describe('conversations utils', () => {
         author,
         additionalEvents,
         attachments,
-        claim,
+        activeExecution,
       });
     };
 
-    const claim: ConversationClaim = {
+    const activeExecution: SetActiveExecution = {
       executionId: 'exec-1',
       triggerEventId: 'round-1::user_message',
     };
 
-    it('passes the claim to create on CREATE', async () => {
+    it('passes the active execution to create on CREATE', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
 
-      await runReceipt({ conversation, conversationClient, claim });
+      await runReceipt({ conversation, conversationClient, activeExecution });
 
       const [createArgs] = conversationClient.create.mock.calls[0];
-      expect(createArgs.claim).toBe(claim);
+      expect(createArgs.activeExecution).toBe(activeExecution);
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
 
-    it('passes the claim to the append on UPDATE', async () => {
+    it('passes the active execution to the append on UPDATE', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE');
 
-      await runReceipt({ conversation, conversationClient, claim });
+      await runReceipt({ conversation, conversationClient, activeExecution });
 
       const [appendArgs] = conversationClient.appendEvents.mock.calls[0];
-      expect(appendArgs.claim).toBe(claim);
+      expect(appendArgs.activeExecution).toBe(activeExecution);
     });
 
-    it('persistUserMessage passes the claim to the append fallback when create finds an existing conversation', async () => {
+    it('persistUserMessage passes the active execution to the append fallback when create finds an existing conversation', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
       conversationClient.create.mockRejectedValueOnce(
         createConversationAlreadyExistsError({ conversationId: 'conv-1' })
       );
 
-      await runReceipt({ conversation, conversationClient, claim });
+      await runReceipt({ conversation, conversationClient, activeExecution });
 
       const [appendArgs] = conversationClient.appendEvents.mock.calls[0];
-      expect(appendArgs.claim).toBe(claim);
+      expect(appendArgs.activeExecution).toBe(activeExecution);
     });
 
-    it('writes no claim when none is given', async () => {
+    it('sets no active execution when none is given', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE');
 
       await runReceipt({ conversation, conversationClient });
 
       const [appendArgs] = conversationClient.appendEvents.mock.calls[0];
-      expect(appendArgs).not.toHaveProperty('claim');
+      expect(appendArgs).not.toHaveProperty('activeExecution');
     });
 
     it('atomically creates the conversation doc with the user_message seeded on CREATE (single write, no separate append)', async () => {
@@ -574,7 +574,7 @@ describe('conversations utils', () => {
       });
 
       const [args] = conversationClient.replaceRoundEvents.mock.calls[0];
-      expect(args.releaseExecutionId).toBe('exec-1');
+      expect(args.activeExecution).toEqual({ releaseExecutionId: 'exec-1' });
     });
 
     it('appends attachment_events after the projected round events in the same write', async () => {
@@ -944,7 +944,7 @@ describe('conversations utils', () => {
       });
 
       const [args] = conversationClient.appendEvents.mock.calls[0];
-      expect(args.releaseExecutionId).toBe('exec-1');
+      expect(args.activeExecution).toEqual({ releaseExecutionId: 'exec-1' });
     });
 
     it('appends attachment_events re-stamped with the resume execution id', async () => {
@@ -1302,7 +1302,7 @@ describe('conversations utils', () => {
       });
 
       const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
-      expect(call.releaseExecutionId).toBe('exec-1');
+      expect(call.activeExecution).toEqual({ releaseExecutionId: 'exec-1' });
     });
 
     it('fresh round, aborted: writes execution_aborted without an error payload', async () => {
@@ -1516,7 +1516,7 @@ describe('conversations utils', () => {
       expect(call.status).toBe(ConversationRoundStatus.completed);
       expect(call).not.toHaveProperty('state');
       expect(written.map((e) => e.id)).toEqual(['r1::execution::1::execution_failed']);
-      expect(call.releaseExecutionId).toBe('exec-1');
+      expect(call.activeExecution).toEqual({ releaseExecutionId: 'exec-1' });
     });
 
     it('an interrupted resume consumed the prompt: the next interruption is a fresh round write', async () => {

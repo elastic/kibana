@@ -70,7 +70,7 @@ import { AbortMonitor } from './task/abort_monitor';
 import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
 import type { ConversationClient } from '../conversation';
-import type { ConversationClaim } from '../conversation/client/types';
+import type { SetActiveExecution } from '../conversation/client/types';
 import type { CallbackDeliveryService } from './callback';
 import {
   getConversation,
@@ -239,13 +239,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     }
 
     // After the record, so an idempotency-key replay is recognised before a second message lands
-    // or the run lock is claimed. A resume continues a round that is already open, so it claims
-    // the lock without writing a new message.
-    let claimedConversationId: string | undefined;
+    // or the execution becomes active. A resume continues a round that is already open, so it
+    // sets the active execution without writing a new message.
+    let activeConversationId: string | undefined;
 
     if (conversationParams && conversation && conversationParams.storeConversation !== false) {
       const pendingResumeRound = getPendingResumeRound(conversation);
-      const claim: ConversationClaim = {
+      const activeExecution: SetActiveExecution = {
         executionId,
         triggerEventId: roundUserMessageEventId(pendingResumeRound?.id ?? roundId),
       };
@@ -254,7 +254,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         if (pendingResumeRound) {
           await conversationClient.update(
             { id: conversation.id },
-            { source: 'execution', access: 'converse', retryOnConflict: true, claim }
+            { source: 'execution', access: 'converse', retryOnConflict: true, activeExecution }
           );
         } else {
           await this.writeUserMessage({
@@ -270,14 +270,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             // listed, so a list search before the next scheduled refresh only sees the previous
             // `updated_at`.
             appendRefresh: false,
-            claim,
+            activeExecution,
           });
         }
 
-        claimedConversationId = conversation.id;
+        activeConversationId = conversation.id;
       } catch (err) {
         // A refused run never started, so it leaves no execution record behind: a keyed
-        // redelivery then claims afresh instead of replaying the refusal.
+        // redelivery then starts afresh instead of replaying the refusal.
         if (isConversationBusyError(err) || isConversationWriteConflictError(err)) {
           try {
             await executionClient.delete(executionId);
@@ -335,21 +335,21 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           })
         : await this.executeLocally({ execution, request, interactivity });
     } catch (err) {
-      // A run that never got dispatched would otherwise hold the lock until it goes stale.
-      if (claimedConversationId) {
+      // A run that never got dispatched would otherwise stay active until it goes stale.
+      if (activeConversationId) {
         try {
           await conversationClient.update(
-            { id: claimedConversationId },
+            { id: activeConversationId },
             {
               source: 'execution',
               access: 'converse',
               retryOnConflict: true,
-              releaseExecutionId: executionId,
+              activeExecution: { releaseExecutionId: executionId },
             }
           );
         } catch (releaseErr) {
           this.logger.warn(
-            `Failed to release conversation ${claimedConversationId} after execution ${executionId} failed to start: ${releaseErr.message}`
+            `Failed to release conversation ${activeConversationId} after execution ${executionId} failed to start: ${releaseErr.message}`
           );
         }
       }
@@ -941,7 +941,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     mergeAttachments,
     parentExecution,
     appendRefresh,
-    claim,
+    activeExecution,
   }: {
     conversation: ConversationWithOperation;
     conversationClient: ConversationClient;
@@ -952,7 +952,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     mergeAttachments: boolean;
     parentExecution?: ParentExecution;
     appendRefresh?: Refresh;
-    claim?: ConversationClaim;
+    activeExecution?: SetActiveExecution;
   }): Promise<string> {
     const { nextInput, origin: requestOrigin, author: requestAuthor } = params;
     const author = conversationClient.getAuthor(requestOrigin?.author, requestAuthor);
@@ -964,7 +964,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       eventId,
       author,
       appendRefresh,
-      ...(claim ? { claim } : {}),
+      ...(activeExecution ? { activeExecution } : {}),
       ...(origin ? { origin } : {}),
       ...(parentExecution
         ? {
