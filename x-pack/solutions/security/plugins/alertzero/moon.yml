@@ -17,6 +17,8 @@ project:
   owner: '@elastic/security-solution'
   sourceRoot: x-pack/solutions/security/plugins/alertzero
 dependsOn:
+  - '@kbn/securitysolution-alerts-page-url'
+  - '@kbn/std'
   - '@kbn/security-plugin-types-server'
   - '@kbn/security-plugin'
   - '@kbn/agentic-investigations-common'
