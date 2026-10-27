@@ -101,6 +101,7 @@ import {
 import { createOnboardingClient } from './onboarding/onboarding_client';
 import { createSandboxSecretsClient } from './sandbox_secrets';
 import { createCustomContextClient } from './custom_context';
+import { createSlackTurnAdmissionCheck } from './lib/slack_turn_admission';
 import type {
   InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
@@ -252,6 +253,12 @@ export class NightshiftInvestigationsPlugin
         },
         logger: this.logger,
       });
+      plugins.agentBuilder.callbacks.registerAdmissionCheck(
+        createSlackTurnAdmissionCheck({
+          getQuotaCallback: () => this.investigationQuotaCallback,
+          logger: this.logger,
+        })
+      );
       const config = this.ctx.config.get();
       const telemetryConnectorId = config.sandbox?.telemetry_connector_id;
       const nightshiftAgentOptions: NightshiftAgentTypeOptions = {

@@ -21,6 +21,15 @@ export type CallbackConversationResolver = (
   context: CallbackConversationResolverContext
 ) => Promise<{ conversationId: string } | undefined>;
 
+/** A turn from an external conversation that no existing conversation continues. */
+export interface CallbackAdmissionContext extends CallbackConversationResolverContext {
+  /** The agent the new conversation runs on. */
+  agentId: string;
+}
+
+/** Throws to refuse a turn that would open a new conversation; the error is returned to the caller. */
+export type CallbackAdmissionCheck = (context: CallbackAdmissionContext) => Promise<void>;
+
 /** Delivers callback payloads to the callback URLs it handles. */
 export interface CallbackTransportDefinition {
   /** Whether this transport delivers to the given callback URL. */

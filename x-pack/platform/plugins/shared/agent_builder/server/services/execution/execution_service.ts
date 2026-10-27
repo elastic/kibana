@@ -842,7 +842,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
   /**
    * The conversation an execution continues and the agent it runs on: the ones it names, else the
-   * ones its origin resolves to. No conversation id starts a new conversation.
+   * ones its origin resolves to. No conversation id starts a new conversation, which an origin's
+   * execution only does once the admission checks allow it.
    */
   private async resolveConversation({
     params,
@@ -867,9 +868,19 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       conversationClient
     );
 
+    if (!resolution) {
+      await this.deps.callbackDeliveryService.admitNewConversation({
+        origin,
+        spaceId,
+        request,
+        agentId,
+      });
+      return { agentId };
+    }
+
     return {
-      conversationId: resolution?.conversationId,
-      agentId: resolution?.agentId ?? agentId,
+      conversationId: resolution.conversationId,
+      agentId: resolution.agentId ?? agentId,
     };
   }
 

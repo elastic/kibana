@@ -83,6 +83,8 @@ If none match, the start claims the subjects for a new investigation id. That wa
 
 The daily quota for automatic starts (`trigger_type: automatic`) only counts starts that open a new investigation. It is checked after the subject matching and before the claim, so a follow-up on an open investigation is never denied, and a denied start claims nothing.
 
+A Slack mention of the Nightshift assistant or investigation agent that opens a new Agent Builder conversation is charged against the same quota, through an Agent Builder callback admission check that runs before the conversation is written. A mention in a thread that already has a conversation is not charged. A denied mention is refused with 429 and leaves nothing behind.
+
 The start then runs the `system-nightshift-investigation` workflow with `investigation_id` and the new subjects, and returns `{ investigation_id }`. It does not write to the investigation itself. The workflow's `_ensure` step does all of that:
 
 - creates the conversation;

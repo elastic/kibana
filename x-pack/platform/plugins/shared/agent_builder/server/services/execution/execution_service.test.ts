@@ -162,6 +162,7 @@ describe('AgentExecutionService', () => {
     logger,
   });
   const resolveConversation = jest.spyOn(callbackDeliveryService, 'resolveConversation');
+  const admitNewConversation = jest.spyOn(callbackDeliveryService, 'admitNewConversation');
 
   const service = createAgentExecutionService({
     logger,
@@ -1503,6 +1504,40 @@ describe('AgentExecutionService', () => {
           'lookup failed'
         );
         expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      });
+
+      it('admits a new conversation on the requested agent before creating it', async () => {
+        await converse({ conversationId: undefined, origin });
+
+        expect(admitNewConversation).toHaveBeenCalledWith({
+          origin,
+          spaceId: 'default',
+          request: expect.anything(),
+          agentId: 'agent-1',
+        });
+        expect(admitNewConversation.mock.invocationCallOrder[0]).toBeLessThan(
+          conversationClient.create.mock.invocationCallOrder[0]
+        );
+      });
+
+      it('writes nothing when the admission is refused', async () => {
+        admitNewConversation.mockRejectedValueOnce(new Error('limit reached'));
+
+        await expect(converse({ conversationId: undefined, origin })).rejects.toThrow(
+          'limit reached'
+        );
+        expect(conversationClient.create).not.toHaveBeenCalled();
+        expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+        expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      });
+
+      it('does not admit a turn that continues a conversation', async () => {
+        resolveConversation.mockResolvedValueOnce({ conversationId: 'investigation-1' });
+        conversationClient.get.mockResolvedValueOnce(boundConversation);
+
+        await converse({ conversationId: undefined, origin });
+
+        expect(admitNewConversation).not.toHaveBeenCalled();
       });
     });
 

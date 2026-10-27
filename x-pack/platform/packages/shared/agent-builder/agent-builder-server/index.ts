@@ -228,6 +228,8 @@ export type {
   ConversationAddEventsRequest,
 } from './conversations';
 export type {
+  CallbackAdmissionCheck,
+  CallbackAdmissionContext,
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbackTransportDefinition,
