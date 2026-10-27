@@ -150,6 +150,24 @@ describe('appendTimeBucketToEsqlQuery', () => {
 });
 
 describe('buildTrendlineQueryWithMetricFieldMap', () => {
+  it('rejects a bucket overwritten by EVAL when no equivalent alias survives', () => {
+    expect(() =>
+      buildTrendlineQueryWithMetricFieldMap(
+        'FROM kibana_sample_data_logs | STATS avg_bytes = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour) | EVAL b = TO_STRING(b)',
+        '@timestamp'
+      )
+    ).toThrow('Cannot build trendline: time column [b] is no longer available');
+  });
+
+  it('rejects a source time field overwritten before aggregation', () => {
+    expect(() =>
+      buildTrendlineQueryWithMetricFieldMap(
+        'FROM index | EVAL @timestamp = TO_STRING(@timestamp) | STATS avg_bytes = AVG(bytes)',
+        '@timestamp'
+      )
+    ).toThrow('Cannot build trendline: time column [@timestamp] is no longer available');
+  });
+
   // Aliases containing spaces are not expressible in the executable case matrix
   // (no such fields in the archive); pins backtick-quoted alias unquoting.
   it('returns a backtick-quoted TBUCKET alias unquoted as the time result column', () => {
