@@ -574,13 +574,14 @@ describe('WorkflowsService (facade)', () => {
         const service = await buildService();
         const request = { headers: {} } as unknown as Parameters<
           typeof service.markStepAsResponded
-        >[1];
+        >[2];
         await expect(
-          service.markStepAsResponded('step-exec-1', request, 'inbox', 'default')
+          service.markStepAsResponded('step-exec-1', 'run-1', request, 'inbox', 'default')
         ).resolves.toBe(claim);
 
         expect(markSpy).toHaveBeenCalledWith(
           'step-exec-1',
+          'run-1',
           expect.objectContaining({
             channel: 'inbox',
             // The mock security service returns `system` for fake
@@ -597,7 +598,7 @@ describe('WorkflowsService (facade)', () => {
   });
 
   describe('claimHitlStepForExternalResume', () => {
-    it('claims on the external channel and returns the claim', async () => {
+    it('scopes the claim to the execution the link resolved, stamps the external channel and returns the claim', async () => {
       const markSpy = jest
         .spyOn(WorkflowExecutionQueryService.prototype, 'markStepAsResponded')
         .mockResolvedValue(claim);
@@ -607,6 +608,7 @@ describe('WorkflowsService (facade)', () => {
         await expect(
           service.claimHitlStepForExternalResume(
             'step-exec-1',
+            'run-1',
             'external_resume:step-exec-1',
             'default'
           )
@@ -614,6 +616,7 @@ describe('WorkflowsService (facade)', () => {
 
         expect(markSpy).toHaveBeenCalledWith(
           'step-exec-1',
+          'run-1',
           {
             respondedBy: 'external_resume:step-exec-1',
             respondedAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),

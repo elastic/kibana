@@ -1476,7 +1476,7 @@ describe('WorkflowExecutionQueryService', () => {
         items: [{ id: 'step-exec-1', index: '.workflows-step-executions', result: 'updated' }],
       });
 
-      const claim = await service.markStepAsResponded('step-exec-1', audit, 'default');
+      const claim = await service.markStepAsResponded('step-exec-1', 'run-1', audit, 'default');
 
       expect(claim).toEqual(audit);
       expect(mockStepDataClient.bulk).toHaveBeenCalledWith(
@@ -1487,11 +1487,34 @@ describe('WorkflowExecutionQueryService', () => {
               operation: 'update',
               documentId: 'step-exec-1',
               retryOnConflict: 3,
+              sourceFields: expect.arrayContaining(['spaceId', 'workflowRunId']),
               updater: expect.any(Function),
             }),
           ],
         })
       );
+    });
+
+    it('scopes the claim to the given execution so a step of another run is not stamped', async () => {
+      mockStepDataClient.bulk.mockResolvedValueOnce({
+        errors: false,
+        items: [{ id: 'step-exec-1', index: '.workflows-step-executions', result: 'updated' }],
+      });
+
+      await service.markStepAsResponded('step-exec-1', 'run-1', audit, 'default');
+
+      const { updater } = mockStepDataClient.bulk.mock.calls[0][0].items[0] as unknown as {
+        updater: (current: Record<string, unknown>) => unknown;
+      };
+      const waitingStep = {
+        spaceId: 'default',
+        stepType: 'waitForInput',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+      };
+      expect(updater({ ...waitingStep, workflowRunId: 'run-1' })).toEqual(
+        expect.objectContaining({ hitl: expect.objectContaining({ respondedBy: 'alice' }) })
+      );
+      expect(updater({ ...waitingStep, workflowRunId: 'run-2' })).toBe('noop');
     });
 
     it('returns null when the bulk updater no-ops', async () => {
@@ -1500,7 +1523,7 @@ describe('WorkflowExecutionQueryService', () => {
         items: [{ id: 'step-exec-1', index: '.workflows-step-executions', result: 'noop' }],
       });
 
-      const claim = await service.markStepAsResponded('step-exec-1', audit, 'default');
+      const claim = await service.markStepAsResponded('step-exec-1', 'run-1', audit, 'default');
 
       expect(claim).toBeNull();
     });
@@ -1520,7 +1543,7 @@ describe('WorkflowExecutionQueryService', () => {
         ],
       });
 
-      const claim = await service.markStepAsResponded('step-exec-gone', audit, 'default');
+      const claim = await service.markStepAsResponded('step-exec-gone', 'run-1', audit, 'default');
 
       expect(claim).toBeNull();
     });
@@ -1537,9 +1560,9 @@ describe('WorkflowExecutionQueryService', () => {
         ],
       });
 
-      await expect(service.markStepAsResponded('step-exec-1', audit, 'default')).rejects.toThrow(
-        'Bulk updater write failed'
-      );
+      await expect(
+        service.markStepAsResponded('step-exec-1', 'run-1', audit, 'default')
+      ).rejects.toThrow('Bulk updater write failed');
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to mark step execution step-exec-1 as responded')
       );
@@ -1557,9 +1580,9 @@ describe('WorkflowExecutionQueryService', () => {
         ],
       });
 
-      await expect(service.markStepAsResponded('step-exec-1', audit, 'default')).rejects.toThrow(
-        'Version conflict claiming step execution step-exec-1'
-      );
+      await expect(
+        service.markStepAsResponded('step-exec-1', 'run-1', audit, 'default')
+      ).rejects.toThrow('Version conflict claiming step execution step-exec-1');
     });
 
     it('returns the token stripped by the last updater run that produced a patch', async () => {
@@ -1575,7 +1598,7 @@ describe('WorkflowExecutionQueryService', () => {
         }),
       ]);
 
-      const claim = await service.markStepAsResponded('step-exec-1', audit, 'default');
+      const claim = await service.markStepAsResponded('step-exec-1', 'run-1', audit, 'default');
 
       expect(patches).toHaveLength(2);
       expect(patches).not.toContain('noop');
@@ -1588,7 +1611,7 @@ describe('WorkflowExecutionQueryService', () => {
     it('returns no token when the claimed step did not hold one', async () => {
       mockBulkUpdaterRuns([stepDoc({ foo: 'bar' })]);
 
-      const claim = await service.markStepAsResponded('step-exec-1', audit, 'default');
+      const claim = await service.markStepAsResponded('step-exec-1', 'run-1', audit, 'default');
 
       expect(claim).toStrictEqual(audit);
     });

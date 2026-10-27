@@ -16,6 +16,8 @@ export interface SignificantEventsFilters {
   status: SignificantEventStatus[];
   severity: Severity[];
   investigation: SignificantEventInvestigationState[];
+  entities: string[];
+  unassigned: boolean;
 }
 
 const nonEmpty = <Value>(values: Value[]): Value[] | undefined =>
@@ -29,10 +31,14 @@ export const toEventsFilterQuery = ({
   status,
   severity,
   investigation,
+  entities,
+  unassigned,
 }: SignificantEventsFilters) => ({
   ...getAbsoluteTimeRange({ from, to }, { forceNow: new Date() }),
   search: search || undefined,
   status: nonEmpty(status),
   severity: nonEmpty(severity),
   investigation_state: nonEmpty(investigation),
+  topology_feature_id: nonEmpty(entities),
+  unassigned_entities: unassigned || undefined,
 });

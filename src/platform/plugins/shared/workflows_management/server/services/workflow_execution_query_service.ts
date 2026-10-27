@@ -911,16 +911,18 @@ export class WorkflowExecutionQueryService {
    * Claims a `waitForInput` step by writing HITL audit metadata before resume.
    *
    * Returns the claim when this caller won it, or `null` when the doc is
-   * missing, belongs to another space, has already settled (terminal status
-   * or `finishedAt` set), or was already claimed. Unexpected ES failures are
-   * rethrown.
+   * missing, belongs to another space or to an execution other than
+   * `executionId`, is not a HITL wait step, has already settled (terminal
+   * status or `finishedAt` set), or was already claimed. Unexpected ES
+   * failures are rethrown.
    */
   async markStepAsResponded(
     stepExecutionId: string,
+    executionId: string,
     audit: { respondedBy: string; respondedAt: string; channel?: string },
     spaceId: string
   ): Promise<HitlStepClaim | null> {
-    const claimUpdater = createMarkStepAsRespondedUpdater(audit, spaceId);
+    const claimUpdater = createMarkStepAsRespondedUpdater(audit, spaceId, executionId);
     // The bulk helper re-runs the updater after a version conflict and only the last patch can land.
     let claimedSource: MarkStepAsRespondedCurrent | undefined;
     try {

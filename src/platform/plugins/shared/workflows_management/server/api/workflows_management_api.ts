@@ -1418,6 +1418,7 @@ export class WorkflowsManagementApi {
       const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
       const claim = await this.workflowsService.markStepAsResponded(
         stepExecutionId,
+        executionId,
         request,
         channel,
         spaceId
