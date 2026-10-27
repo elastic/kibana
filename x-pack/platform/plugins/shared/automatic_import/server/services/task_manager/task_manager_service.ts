@@ -287,9 +287,19 @@ export class TaskManagerService {
         );
       };
 
+      const [integration, dataStream] = await Promise.all([
+        automaticImportSavedObjectService.getIntegration(integrationId),
+        automaticImportSavedObjectService.getDataStream(dataStreamId, integrationId),
+      ]);
+      this.throwIfAborted(abortSignal);
+
       const result = await this.agentService.invokeAutomaticImportAgent(
         integrationId,
         dataStreamId,
+        {
+          integrationDescription: integration.metadata.description,
+          dataStreamDescription: dataStream.attributes.description,
+        },
         esClient,
         model,
         fieldsMetadataClient,

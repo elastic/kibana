@@ -30,6 +30,7 @@ import {
 import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
 import type { AutomaticImportAgentStateUpdateType } from '../../agents/state';
 import { INGEST_PIPELINE_GENERATOR_PROMPT } from '../../agents/prompts';
+import { formatUserContextBlock, type UserProvidedContext } from '../../agents/user_context';
 import type { LangSmithOptions } from '../../routes/types';
 import { PhaseCallbackHandler, type ReportPhaseFn } from '../../agents/phase_callback_handler';
 
@@ -46,6 +47,7 @@ export class AgentService {
   public async invokeAutomaticImportAgent(
     integrationId: string,
     dataStreamId: string,
+    userContext: UserProvidedContext,
     esClient: ElasticsearchClient,
     model: InferenceChatModel,
     fieldsMetadataClient: IFieldsMetadataClient,
@@ -129,6 +131,7 @@ ${ecsRootFieldsSummary}
     const automaticImportAgent = createAutomaticImportAgent({
       model,
       samples,
+      userContext,
       subagents: [logAndEcsAnalyzerSubAgent, pipelineGeneratorSubAgent, reviewSubAgent],
     });
 
@@ -148,7 +151,12 @@ ${ecsRootFieldsSummary}
     const invokeInput: AutomaticImportAgentStateUpdateType = {
       messages: [
         new HumanMessage({
-          content: `You are tasked with generating an Elasticsearch ingest pipeline for the integration \`${integrationId}\` and data stream \`${dataStreamId}\`.`,
+          content: [
+            `You are tasked with generating an Elasticsearch ingest pipeline for the integration \`${integrationId}\` and data stream \`${dataStreamId}\`.`,
+            formatUserContextBlock(userContext),
+          ]
+            .filter(Boolean)
+            .join('\n\n'),
         }),
       ],
       current_pipeline: BOILERPLATE_PIPELINE,

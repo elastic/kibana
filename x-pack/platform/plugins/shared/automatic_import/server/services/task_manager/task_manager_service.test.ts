@@ -129,6 +129,12 @@ describe('runTask abort handling', () => {
     mockSavedObjectService = {
       updateDataStreamSavedObjectAttributes: jest.fn().mockResolvedValue(undefined),
       updateDataStreamPhase: jest.fn().mockResolvedValue(undefined),
+      getIntegration: jest
+        .fn()
+        .mockResolvedValue({ metadata: { description: 'Test integration description' } }),
+      getDataStream: jest
+        .fn()
+        .mockResolvedValue({ attributes: { description: 'Test data stream description' } }),
     } as unknown as jest.Mocked<AutomaticImportSavedObjectService>;
 
     const mockTaskManagerSetup = {
@@ -203,6 +209,46 @@ describe('runTask abort handling', () => {
       { name: 'my_app.created_at', type: 'date' },
       { name: 'my_app.status', type: 'keyword' },
     ]);
+  });
+
+  it('passes the integration and data stream descriptions to the agent', async () => {
+    const invokeAutomaticImportAgent = jest.fn().mockResolvedValue({
+      current_pipeline: { name: 'test', processors: [] },
+      pipeline_generation_results: [],
+    });
+    AgentService.mockImplementation(() => ({ invokeAutomaticImportAgent }));
+
+    new TaskManagerService(
+      loggerFactory,
+      {
+        registerTaskDefinitions: jest.fn((defs: Record<string, unknown>) => {
+          Object.assign(taskDefinition, defs);
+        }),
+      } as never,
+      mockCore as never,
+      mockAnalytics as never,
+      mockSamplesIndexService as never
+    ).initialize({} as never, mockSavedObjectService);
+
+    const { signal } = new AbortController();
+    await createRunner(signal).run();
+
+    expect(mockSavedObjectService.getIntegration).toHaveBeenCalledWith('test-int');
+    expect(mockSavedObjectService.getDataStream).toHaveBeenCalledWith('test-ds', 'test-int');
+    expect(invokeAutomaticImportAgent).toHaveBeenCalledWith(
+      'test-int',
+      'test-ds',
+      {
+        integrationDescription: 'Test integration description',
+        dataStreamDescription: 'Test data stream description',
+      },
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      undefined,
+      expect.anything(),
+      expect.any(Function)
+    );
   });
 
   it('marks data stream as cancelled when aborted before agent invocation returns', async () => {
@@ -742,6 +788,12 @@ describe('runTask error edge cases', () => {
     mockSavedObjectService = {
       updateDataStreamSavedObjectAttributes: jest.fn().mockResolvedValue(undefined),
       updateDataStreamPhase: jest.fn().mockResolvedValue(undefined),
+      getIntegration: jest
+        .fn()
+        .mockResolvedValue({ metadata: { description: 'Test integration description' } }),
+      getDataStream: jest
+        .fn()
+        .mockResolvedValue({ attributes: { description: 'Test data stream description' } }),
     } as unknown as jest.Mocked<AutomaticImportSavedObjectService>;
 
     AgentService.mockImplementation(() => ({
