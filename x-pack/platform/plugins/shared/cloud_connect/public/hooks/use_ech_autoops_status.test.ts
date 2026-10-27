@@ -9,14 +9,14 @@ import { renderHook } from '@testing-library/react';
 import { createUseEchAutoOpsStatusHook } from './use_ech_autoops_status';
 
 describe('createUseEchAutoOpsStatusHook', () => {
-  it('reports AutoOps as enabled with the ECH deployment URL', () => {
+  it('reports AutoOps as enabled with the ECH deployment URL without claiming Cloud Connect', () => {
     const deploymentUrl = 'https://cloud.elastic.co/deployments/deployment-id';
-    const useEchAutoOpsStatus = createUseEchAutoOpsStatusHook(deploymentUrl);
+    const useEchAutoOpsStatus = createUseEchAutoOpsStatusHook({ deploymentUrl });
 
     const { result } = renderHook(() => useEchAutoOpsStatus());
 
     expect(result.current).toEqual({
-      isCloudConnected: true,
+      isCloudConnected: false,
       isCloudConnectEisEnabled: false,
       isCloudConnectAutoopsEnabled: true,
       autoOpsServiceUrl: deploymentUrl,
@@ -31,6 +31,25 @@ describe('createUseEchAutoOpsStatusHook', () => {
     const { result } = renderHook(() => useEchAutoOpsStatus());
 
     expect(result.current.isCloudConnectAutoopsEnabled).toBe(true);
+    expect(result.current.isCloudConnected).toBe(false);
     expect(result.current.autoOpsServiceUrl).toBeUndefined();
+  });
+
+  it('reports AutoOps as disabled without a deployment URL', () => {
+    const useEchAutoOpsStatus = createUseEchAutoOpsStatusHook({
+      deploymentUrl: 'https://cloud.elastic.co/deployments/deployment-id',
+      isAutoOpsEnabled: false,
+    });
+
+    const { result } = renderHook(() => useEchAutoOpsStatus());
+
+    expect(result.current).toEqual({
+      isCloudConnected: false,
+      isCloudConnectEisEnabled: false,
+      isCloudConnectAutoopsEnabled: false,
+      autoOpsServiceUrl: undefined,
+      isLoading: false,
+      error: null,
+    });
   });
 });

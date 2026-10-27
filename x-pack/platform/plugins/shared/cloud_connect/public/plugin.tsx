@@ -42,6 +42,7 @@ export class CloudConnectedPlugin
   private readonly telemetry = new CloudConnectTelemetryService();
   private homeSetup?: HomePublicPluginSetup;
   private managementSetup?: ManagementSetup;
+  private isElasticCloudHosted = false;
   private shouldShowEchAutoOpsBanner = false;
   private echDeploymentUrl?: string;
 
@@ -53,13 +54,17 @@ export class CloudConnectedPlugin
     core: CoreSetup<CloudConnectedStartDeps>,
     plugins: CloudConnectedSetupDeps
   ): CloudConnectedPluginSetup {
-    const shouldShowEchAutoOpsBanner =
-      plugins.cloud?.isElasticCloudHosted === true && plugins.cloud?.isFedrampHigh !== true;
+    // Track ECH independently from the AutoOps banner so FedRAMP High still gets a
+    // static disabled status (no Cloud Connect API calls) instead of the ESS API hook.
+    if (plugins.cloud?.isElasticCloudHosted === true) {
+      this.isElasticCloudHosted = true;
 
-    if (shouldShowEchAutoOpsBanner) {
-      this.shouldShowEchAutoOpsBanner = true;
-      this.echDeploymentUrl = plugins.cloud?.deploymentUrl;
-      this.managementSetup = plugins.management;
+      if (plugins.cloud?.isFedrampHigh !== true) {
+        this.shouldShowEchAutoOpsBanner = true;
+        this.echDeploymentUrl = plugins.cloud?.deploymentUrl;
+        this.managementSetup = plugins.management;
+      }
+
       return {};
     }
 
@@ -107,8 +112,11 @@ export class CloudConnectedPlugin
   }
 
   public start(core: CoreStart): CloudConnectedPluginStart {
-    const useCloudConnectStatus = this.shouldShowEchAutoOpsBanner
-      ? createUseEchAutoOpsStatusHook(this.echDeploymentUrl)
+    const useCloudConnectStatus = this.isElasticCloudHosted
+      ? createUseEchAutoOpsStatusHook({
+          deploymentUrl: this.echDeploymentUrl,
+          isAutoOpsEnabled: this.shouldShowEchAutoOpsBanner,
+        })
       : createUseCloudConnectStatusHook({ http: core.http });
 
     // Register the hook with home plugin if available.
