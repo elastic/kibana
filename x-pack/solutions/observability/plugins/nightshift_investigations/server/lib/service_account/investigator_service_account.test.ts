@@ -285,6 +285,22 @@ describe('createInvestigatorServiceAccountService', () => {
     );
   });
 
+  it('refuses to disable a space the caller cannot access', async () => {
+    const { service, managedWorkflows } = setup({ spaceExists: false });
+
+    await expect(service.disable(request, SPACE_ID)).rejects.toThrow(
+      `Space [${SPACE_ID}] does not exist.`
+    );
+    expect(managedWorkflows.uninstall).not.toHaveBeenCalled();
+  });
+
+  it('refuses to disable without manage_security', async () => {
+    const { service, managedWorkflows } = setup({ canManageSecurity: false });
+
+    await expect(service.disable(request, SPACE_ID)).rejects.toThrow(/manage_security/);
+    expect(managedWorkflows.uninstall).not.toHaveBeenCalled();
+  });
+
   describe('automations', () => {
     const automation = (id: string) => ({
       id,

@@ -72,6 +72,7 @@ const storageSettings = {
       previousExecutionError: types.text({}),
 
       workflowExecutionId: types.keyword({}),
+      gateReleasedAt: types.date({}),
 
       createdAt: types.date({}),
       createdBy: types.object({
