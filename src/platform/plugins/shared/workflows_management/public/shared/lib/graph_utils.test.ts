@@ -8,7 +8,7 @@
  */
 
 import type { graphlib } from '@dagrejs/dagre';
-import { getAllPredecessors, getTriggerLabel } from './graph_utils';
+import { getAllPredecessors } from './graph_utils';
 
 type MockGraph = Pick<graphlib.Graph, 'predecessors'>;
 
@@ -78,21 +78,5 @@ describe('getAllPredecessors', () => {
     });
     const result = getAllPredecessors(graph as graphlib.Graph, 'Z');
     expect(result).toEqual(['X', 'Y']);
-  });
-});
-
-describe('getTriggerLabel', () => {
-  it.each([
-    ['manual', 'Manual'],
-    ['alert', 'Alert'],
-    ['scheduled', 'Scheduled'],
-  ])('returns correct label for known trigger type "%s"', (input, expected) => {
-    expect(getTriggerLabel(input)).toBe(expected);
-  });
-
-  it('returns the raw trigger type string for unknown types', () => {
-    expect(getTriggerLabel('webhook')).toBe('webhook');
-    expect(getTriggerLabel('custom')).toBe('custom');
-    expect(getTriggerLabel('')).toBe('');
   });
 });

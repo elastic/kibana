@@ -1,5 +1,5 @@
 {
-  "sha1": "9b2849aa54646d344ed9d70f2a0373dbb71b5b23",
+  "sha1": "d88e306f16623a9fa5bf5b17902c3f6e8e4bdf46",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -750,8 +750,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/privileges_index_scoped.spec.ts",
-        "line": 130,
-        "column": 13
+        "line": 126,
+        "column": 25
       }
     },
     {
@@ -766,8 +766,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/privileges_index_scoped.spec.ts",
-        "line": 152,
-        "column": 7
+        "line": 148,
+        "column": 15
       }
     },
     {

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 
-import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import { AGENTS_INDEX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { checkBulkAgentAction } from './helpers';
@@ -19,6 +19,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
+  const kibanaServer = getService('kibanaServer');
 
   describe('fleet_unenroll_agent', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -265,6 +266,100 @@ export default function (providerContext: FtrProviderContext) {
 
       const actionId = body.actionId;
       await checkBulkAgentAction(supertest, actionId);
+    });
+
+    describe('agentless agents', () => {
+      const getAgentDoc = async (agentId: string) => {
+        const { _source: agentDoc } = await esClient.get<{
+          active: boolean;
+          unenrolled_at?: string;
+          unenrollment_started_at?: string;
+        }>({ index: AGENTS_INDEX, id: agentId });
+        return agentDoc;
+      };
+
+      const expectAgentNotUnenrolled = async (agentId: string) => {
+        const agentDoc = await getAgentDoc(agentId);
+        expect(agentDoc?.active).to.be(true);
+        expect(agentDoc?.unenrolled_at).to.be(undefined);
+        expect(agentDoc?.unenrollment_started_at).to.be(undefined);
+      };
+
+      beforeEach(async () => {
+        // agent1 and agent2 are enrolled in policy1: make it an agentless policy.
+        // Setting the flag through the API would deploy a real agentless agent.
+        await kibanaServer.savedObjects.update({
+          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          id: 'policy1',
+          attributes: { supports_agentless: true },
+        });
+      });
+
+      it('/agents/{agent_id}/unenroll should fail for an agentless agent by default', async () => {
+        await supertest
+          .post(`/api/fleet/agents/agent1/unenroll`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(400);
+        await supertest
+          .post(`/api/fleet/agents/agent1/unenroll`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ revoke: true })
+          .expect(400);
+
+        await expectAgentNotUnenrolled('agent1');
+      });
+
+      it('/agents/{agent_id}/unenroll { force: true, revoke: true } should unenroll an agentless agent', async () => {
+        await supertest
+          .post(`/api/fleet/agents/agent1/unenroll`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ force: true, revoke: true })
+          .expect(200);
+
+        const agentDoc = await getAgentDoc('agent1');
+        expect(agentDoc?.active).to.be(false);
+        expect(agentDoc?.unenrolled_at).to.be.a('string');
+      });
+
+      it('/agents/bulk_unenroll should not unenroll agentless agents by default', async () => {
+        await supertest
+          .post(`/api/fleet/agents/bulk_unenroll`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ agents: ['agent1', 'agent2'] })
+          .expect(200);
+
+        await expectAgentNotUnenrolled('agent1');
+        await expectAgentNotUnenrolled('agent2');
+      });
+
+      it('/agents/bulk_unenroll { force: true, revoke: true } should unenroll agentless agents', async () => {
+        await supertest
+          .post(`/api/fleet/agents/bulk_unenroll`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ agents: ['agent1', 'agent2'], force: true, revoke: true })
+          .expect(200);
+
+        for (const agentId of ['agent1', 'agent2']) {
+          const agentDoc = await getAgentDoc(agentId);
+          expect(agentDoc?.active).to.be(false);
+          expect(agentDoc?.unenrolled_at).to.be.a('string');
+        }
+      });
+
+      it('should unenroll the agents of an agentless policy when the policy is deleted (skipAgentlessValidation)', async () => {
+        // deleting an agentless policy unenrolls its agents internally, bypassing the agentless validation
+        await supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ agentPolicyId: 'policy1', force: true })
+          .expect(200);
+
+        for (const agentId of ['agent1', 'agent2']) {
+          const agentDoc = await getAgentDoc(agentId);
+          expect(agentDoc?.active).to.be(false);
+          expect(agentDoc?.unenrolled_at).to.be.a('string');
+        }
+      });
     });
   });
 }

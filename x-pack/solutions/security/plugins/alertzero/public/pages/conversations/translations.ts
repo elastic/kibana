@@ -17,6 +17,12 @@ export const QUEUE_PAGE_INFO = Object.freeze({
   assignError: i18n.translate('xpack.alertzero.queue.assignError', {
     defaultMessage: 'Could not update assignees',
   }),
+  reopenSuccess: i18n.translate('xpack.alertzero.queue.reopenSuccess', {
+    defaultMessage: 'Investigation reopened',
+  }),
+  reopenError: i18n.translate('xpack.alertzero.queue.reopenError', {
+    defaultMessage: 'Could not reopen the investigation',
+  }),
 });
 
 export const COPY_LINK_TOASTS = Object.freeze({
@@ -25,6 +31,13 @@ export const COPY_LINK_TOASTS = Object.freeze({
   }),
   failed: i18n.translate('xpack.alertzero.queue.copyLinkFailed', {
     defaultMessage: 'Could not copy the link',
+  }),
+});
+
+export const AGENT_BUILDER_PRIVILEGE_REQUIRED = Object.freeze({
+  toast: i18n.translate('xpack.alertzero.queue.proposalsAgentBuilderPrivilegeRequired.toast', {
+    defaultMessage:
+      'You need the Agent Builder Kibana privilege to view this investigation. Ask an administrator to update your role.',
   }),
 });
 
