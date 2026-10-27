@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { LeasePool, createConnectorTypeFromSpec } from '@kbn/actions-plugin/server/lib';
-import { buildExecutor } from '@kbn/actions-plugin/server/sub_action_framework/executor';
+import {
+  LeasePool,
+  buildClientLeaseKey,
+  createConnectorTypeFromSpec,
+} from '@kbn/actions-plugin/server/lib';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { MCPConnectorConfig, MCPConnectorSecrets } from '@kbn/connector-schemas/mcp';
 import { clientTypes, mcpConnectorSpec } from '@kbn/connector-specs/server';
 import { UnauthorizedError } from '@kbn/mcp-client';
 import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { getMcpConnectorType } from '.';
 
 jest.mock('@kbn/connector-specs/server', () => {
   const actual = jest.requireActual('@kbn/connector-specs/server');
@@ -37,9 +38,11 @@ const mockedMcp = clientTypes.mcp as unknown as {
   terminate: jest.Mock;
 };
 
-describe('mcp spec and legacy executor parity', () => {
+/**
+ * Recorded legacy MCP executor results. Captured against McpConnector before that class was removed.
+ */
+describe('mcp spec executor parity', () => {
   const logger = loggingSystemMock.createLogger();
-  const configurationUtilities = actionsConfigMock.create();
   const connectorId = 'test-connector-1';
   const connectorVersion = 'WzEsMV0=';
   const config: MCPConnectorConfig = {
@@ -66,29 +69,37 @@ describe('mcp spec and legacy executor parity', () => {
   actions.getAxiosInstanceWithAuth.mockResolvedValue({} as never);
 
   const specExecutor = createConnectorTypeFromSpec(mcpConnectorSpec, actions).executor!;
-  const legacyExecutor = buildExecutor({
-    connector: getMcpConnectorType({ getClientLeasePool }),
-    logger,
-    configurationUtilities,
+  const leaseKey = buildClientLeaseKey({
+    connectorId,
+    clientTypeId: 'mcp',
+    connectorVersion,
   });
 
-  const execOptions = (params: Record<string, unknown>, usage: ConnectorUsageCollector) =>
-    ({
-      actionId: connectorId,
-      params,
-      config,
-      secrets,
-      logger,
-      connectorUsageCollector: usage,
-      connectorVersion,
-      services: {} as never,
-      configurationUtilities,
-    } as unknown as Parameters<typeof legacyExecutor>[0]);
+  const run = async (params: Record<string, unknown>) => {
+    const usage = new ConnectorUsageCollector({ logger, connectorId });
+    const keys: string[] = [];
+    const original = LeasePool.prototype.acquire;
+    LeasePool.prototype.acquire = function (key, build, terminate) {
+      keys.push(key);
+      return original.call(this, key, build, terminate);
+    };
 
-  const publicError = (err: Error) => ({
-    message: err.message,
-    errorSource: getErrorSource(err) || TaskErrorSource.FRAMEWORK,
-  });
+    try {
+      const result = await specExecutor({
+        actionId: connectorId,
+        params,
+        config,
+        secrets,
+        logger,
+        connectorUsageCollector: usage,
+        connectorVersion,
+        services: {} as never,
+      } as unknown as Parameters<typeof specExecutor>[0]);
+      return { result, keys: [...keys], usage, build: mockedMcp.build.mock.calls.at(-1)?.[0] };
+    } finally {
+      LeasePool.prototype.acquire = original;
+    }
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -103,140 +114,91 @@ describe('mcp spec and legacy executor parity', () => {
     await Promise.all(pools.splice(0).map((pool) => pool.stop()));
   });
 
-  const runBoth = async (params: Record<string, unknown>) => {
-    const legacyUsage = new ConnectorUsageCollector({ logger, connectorId });
-    const specUsage = new ConnectorUsageCollector({ logger, connectorId });
-    const keys: string[] = [];
-    const original = LeasePool.prototype.acquire;
-    LeasePool.prototype.acquire = function (key, build, terminate) {
-      keys.push(key);
-      return original.call(this, key, build, terminate);
-    };
+  it('keeps the isolated test client, legacy name, and auth headers', async () => {
+    const testRun = await run({ subAction: 'test', subActionParams: {} });
 
-    try {
-      const legacy = await legacyExecutor(execOptions(params, legacyUsage));
-      const legacyKeys = [...keys];
-      const legacyBuild = mockedMcp.build.mock.calls.at(-1)?.[0];
+    expect(testRun.result).toEqual({
+      status: 'ok',
+      data: { connected: true, capabilities: { tools: {} } },
+      actionId: connectorId,
+    });
+    expect(testRun.keys).toEqual([]);
+    expect(mockedMcp.terminate).toHaveBeenCalledTimes(1);
+    expect(testRun.build?.config?.clientName).toBe(`kibana-mcp-connector-${connectorId}`);
+    await expect(testRun.build?.credential?.getAuthHeaders()).resolves.toEqual({
+      Authorization: 'Bearer secret',
+      'X-Custom': 'from-config',
+    });
+  });
 
-      const legacyTerminateCalls = mockedMcp.terminate.mock.calls.length;
-      mockedMcp.build.mockClear();
-      keys.length = 0;
-      const spec = await specExecutor(
-        execOptions(params, specUsage) as Parameters<typeof specExecutor>[0]
-      );
-      const specBuild = mockedMcp.build.mock.calls.at(-1)?.[0];
-
-      return {
-        legacy,
-        spec,
-        legacyKeys,
-        specKeys: [...keys],
-        legacyBuild,
-        specBuild,
-        legacyUsage,
-        specUsage,
-        legacyTerminateCalls,
-        specTerminateCalls: mockedMcp.terminate.mock.calls.length - legacyTerminateCalls,
-      };
-    } finally {
-      LeasePool.prototype.acquire = original;
-    }
-  };
-
-  const expectSameBuildIdentity = async (
-    legacyBuild:
-      | {
-          config?: { clientName?: string };
-          credential?: { getAuthHeaders: () => Promise<Record<string, string>> };
-        }
-      | undefined,
-    specBuild:
-      | {
-          config?: { clientName?: string };
-          credential?: { getAuthHeaders: () => Promise<Record<string, string>> };
-        }
-      | undefined
-  ) => {
-    expect(specBuild?.config?.clientName).toBe(`kibana-mcp-connector-${connectorId}`);
-    expect(specBuild?.config?.clientName).toBe(legacyBuild?.config?.clientName);
-    await expect(specBuild?.credential?.getAuthHeaders()).resolves.toEqual(
-      await legacyBuild?.credential?.getAuthHeaders()
-    );
-  };
-
-  it('returns the same test, listTools, and callTool data', async () => {
-    const testRun = await runBoth({ subAction: 'test', subActionParams: {} });
-    expect(testRun.spec).toEqual(testRun.legacy);
-    expect(testRun.legacyKeys).toEqual([]);
-    expect(testRun.specKeys).toEqual([]);
-    expect(testRun.legacyTerminateCalls).toBeGreaterThan(0);
-    expect(testRun.specTerminateCalls).toBe(testRun.legacyTerminateCalls);
-    await expectSameBuildIdentity(testRun.legacyBuild, testRun.specBuild);
-
-    const listRun = await runBoth({
+  it('keeps listTools and callTool data, lease key, and request bytes', async () => {
+    const listRun = await run({
       subAction: 'listTools',
       subActionParams: { forceRefresh: true },
     });
-    expect(listRun.spec).toEqual(listRun.legacy);
-    expect(listRun.specKeys).toEqual(listRun.legacyKeys);
-    expect(listRun.legacyKeys.length).toBeGreaterThan(0);
-    await expectSameBuildIdentity(listRun.legacyBuild, listRun.specBuild);
-    expect(listRun.specUsage.getRequestBodyByte()).toBe(listRun.legacyUsage.getRequestBodyByte());
+    expect(listRun.result).toEqual({
+      status: 'ok',
+      data: { tools: [{ name: 'echo' }] },
+      actionId: connectorId,
+    });
+    expect(listRun.keys).toEqual([leaseKey]);
+    expect(listRun.usage.getRequestBodyByte()).toBeGreaterThan(0);
 
     fakeClient.callTool.mockResolvedValue({
       content: [{ type: 'text', text: 'ok' }],
       isError: true,
     });
-    const callRun = await runBoth({
+    const callRun = await run({
       subAction: 'callTool',
       subActionParams: { name: 'echo', arguments: { q: 1 } },
     });
-    expect(callRun.spec).toEqual(callRun.legacy);
-    expect(callRun.spec.data).toEqual(expect.objectContaining({ isError: true }));
-    expect(callRun.specKeys).toEqual(callRun.legacyKeys);
-    await expectSameBuildIdentity(callRun.legacyBuild, callRun.specBuild);
-    expect(callRun.specUsage.getRequestBodyByte()).toBe(callRun.legacyUsage.getRequestBodyByte());
+    expect(callRun.result).toEqual({
+      status: 'ok',
+      data: { content: [{ type: 'text', text: 'ok' }], isError: true },
+      actionId: connectorId,
+    });
+    expect(callRun.keys).toEqual([leaseKey]);
+    expect(callRun.usage.getRequestBodyByte()).toBeGreaterThan(0);
   });
 
-  it('throws the same user and transport errors', async () => {
+  it('keeps user and transport error class, source, and log text', async () => {
     fakeClient.callTool.mockRejectedValue(new UnauthorizedError('unauthorized'));
     const userParams = { subAction: 'callTool', subActionParams: { name: 'echo', arguments: {} } };
     logger.warn.mockClear();
-    logger.error.mockClear();
-    const legacyUser = await legacyExecutor(
-      execOptions(userParams, new ConnectorUsageCollector({ logger, connectorId }))
-    ).catch((err) => err);
-    const legacyWarn = [...logger.warn.mock.calls];
-    logger.warn.mockClear();
-    const specUser = await specExecutor(
-      execOptions(userParams, new ConnectorUsageCollector({ logger, connectorId })) as Parameters<
-        typeof specExecutor
-      >[0]
-    ).catch((err) => err);
+    const userError = await specExecutor({
+      actionId: connectorId,
+      params: userParams,
+      config,
+      secrets,
+      logger,
+      connectorUsageCollector: new ConnectorUsageCollector({ logger, connectorId }),
+      connectorVersion,
+      services: {} as never,
+    } as unknown as Parameters<typeof specExecutor>[0]).catch((err) => err);
 
-    expect(legacyUser).toBeInstanceOf(Error);
-    expect(specUser).toBeInstanceOf(Error);
-    expect(getErrorSource(specUser)).toBe(TaskErrorSource.USER);
-    expect(getErrorSource(specUser)).toBe(getErrorSource(legacyUser));
-    expect(publicError(specUser)).toEqual(publicError(legacyUser));
-    expect(logger.warn.mock.calls).toEqual(legacyWarn);
+    expect(userError).toBeInstanceOf(Error);
+    expect(userError.message).toBe('unauthorized');
+    expect(getErrorSource(userError)).toBe(TaskErrorSource.USER);
+    expect(logger.warn).toHaveBeenCalledWith('MCP callTool(echo) failed: unauthorized');
 
     fakeClient.callTool.mockRejectedValue(new Error('socket closed'));
     logger.error.mockClear();
-    const legacyTransport = await legacyExecutor(
-      execOptions(userParams, new ConnectorUsageCollector({ logger, connectorId }))
-    ).catch((err) => err);
-    const legacyErrorLogs = [...logger.error.mock.calls];
-    logger.error.mockClear();
-    const specTransport = await specExecutor(
-      execOptions(userParams, new ConnectorUsageCollector({ logger, connectorId })) as Parameters<
-        typeof specExecutor
-      >[0]
-    ).catch((err) => err);
+    const transportError = await specExecutor({
+      actionId: connectorId,
+      params: userParams,
+      config,
+      secrets,
+      logger,
+      connectorUsageCollector: new ConnectorUsageCollector({ logger, connectorId }),
+      connectorVersion,
+      services: {} as never,
+    } as unknown as Parameters<typeof specExecutor>[0]).catch((err) => err);
 
-    expect(specTransport).toBeInstanceOf(Error);
-    expect(specTransport.message).toBe(legacyTransport.message);
-    expect(publicError(specTransport)).toEqual(publicError(legacyTransport));
-    expect(logger.error.mock.calls).toEqual(legacyErrorLogs);
+    expect(transportError).toBeInstanceOf(Error);
+    expect(transportError.message).toBe('socket closed');
+    expect(getErrorSource(transportError) || TaskErrorSource.FRAMEWORK).toBe(
+      TaskErrorSource.FRAMEWORK
+    );
+    expect(logger.error).toHaveBeenCalledWith('MCP callTool(echo) failed');
   });
 });

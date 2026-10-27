@@ -83,10 +83,7 @@ const getErrorMeta = ({
 
 const DEFAULT_ISOLATED_SUB_ACTIONS = ['test', TEST_CONNECTOR_SUB_ACTION];
 
-const legacyClientBuildConfig = (
-  config: RecordUnknown,
-  connectorId: string
-): RecordUnknown => ({
+const legacyClientBuildConfig = (config: RecordUnknown, connectorId: string): RecordUnknown => ({
   ...config,
   // Legacy MCP names the client after the connector id. Only the MCP client type
   // reads `clientName`; other client types ignore the extra field.

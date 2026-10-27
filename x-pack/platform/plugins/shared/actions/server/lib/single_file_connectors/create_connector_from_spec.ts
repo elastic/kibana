@@ -117,9 +117,7 @@ export const createConnectorTypeFromSpec = (
         getRelayClient: actions.getRelayClient,
         networkSettings,
         platform,
-        ...(stackCompat
-          ? { stackCompat, connectorName: spec.metadata.displayName }
-          : {}),
+        ...(stackCompat ? { stackCompat, connectorName: spec.metadata.displayName } : {}),
         ...(signingKey
           ? {
               getJwtSigner: (connectorId: string) =>

@@ -6,7 +6,6 @@
  */
 
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import { buildValidators } from '@kbn/actions-plugin/server/sub_action_framework/validators';
 import { createConnectorTypeFromSpec } from '@kbn/actions-plugin/server/lib';
 import { z } from '@kbn/zod';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
@@ -18,8 +17,6 @@ import {
 } from '@kbn/connector-schemas/mcp';
 import type { MCPConnectorConfig, MCPConnectorSecrets } from '@kbn/connector-schemas/mcp';
 import { mcpConnectorSpec } from '@kbn/connector-specs/server';
-import { buildHeadersFromSecrets } from './auth_helpers';
-import { getMcpConnectorType } from '.';
 
 describe('mcp spec stack compat validators', () => {
   const configurationUtilities = actionsConfigMock.create();
@@ -116,8 +113,9 @@ describe('mcp spec stack compat validators', () => {
     };
 
     await expect(mcpConnectorSpec.stackCompat!.getAuthHeaders(config, secrets)).resolves.toEqual({
-      ...config.headers,
-      ...buildHeadersFromSecrets(secrets, config),
+      Authorization: 'Bearer secret',
+      'X-Custom': 'from-config',
+      'X-Secret': 's',
     });
   });
 
@@ -136,9 +134,9 @@ describe('mcp spec stack compat validators', () => {
   });
 
   it('keeps the public config, secrets, and params JSON schemas identical', () => {
-    const legacy = buildValidators({
-      connector: getMcpConnectorType({ getClientLeasePool: () => ({}) as never }),
-      configurationUtilities,
+    const legacyParams = z.object({
+      subAction: z.string(),
+      subActionParams: z.object({}).passthrough().default({}),
     });
     const toJsonSchema = (schema: unknown) => {
       const { $schema, ...jsonSchema } = z.toJSONSchema(schema as z.ZodType, {
@@ -149,14 +147,12 @@ describe('mcp spec stack compat validators', () => {
     };
 
     expect(toJsonSchema(connectorType.validate.config.schema)).toEqual(
-      toJsonSchema(legacy.config.schema)
+      toJsonSchema(MCPConnectorConfigSchema)
     );
     expect(toJsonSchema(connectorType.validate.secrets.schema)).toEqual(
-      toJsonSchema(legacy.secrets.schema)
+      toJsonSchema(MCPConnectorSecretsSchema)
     );
-    expect(toJsonSchema(connectorType.validate.params!.schema)).toEqual(
-      toJsonSchema(legacy.params.schema)
-    );
+    expect(toJsonSchema(connectorType.validate.params!.schema)).toEqual(toJsonSchema(legacyParams));
   });
 
   it('does not add description or isExperimental to the public type', () => {

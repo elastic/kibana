@@ -15,6 +15,20 @@ The `@kbn/connector-specs` package provides a simplified, declarative way to def
 - **Standard Auth Patterns**: Reusable authentication schemas (Basic, Bearer, Headers)
 - **Policy-Based Configuration**: Built-in support for rate limiting, retry policies, pagination, and more
 
+## Stack compatibility mode
+
+`stackCompat` on a `ConnectorSpec` lets a legacy stack connector run through `createConnectorTypeFromSpec` without changing saved objects or the public connector-type payload.
+
+Set it when the connector must keep:
+
+- the existing config and secrets schemas (no `authType` union, no `selectedActions`)
+- `source: 'stack'`
+- the loose params schema, with per-action checks inside the executor
+- isolated `test` and `_test` clients
+- handler errors rethrown the same way the sub-action framework does
+
+Do not add that spec to `all_specs.ts` unless Agent Builder and Workflows should treat it as a generic spec connector. The MCP connector uses this mode. See `src/specs/mcp/README.md`.
+
 ## Quick Start (Recommended): Build a Connector with AI
 
 This package includes Agent Skills that automate the full connector development lifecycle.

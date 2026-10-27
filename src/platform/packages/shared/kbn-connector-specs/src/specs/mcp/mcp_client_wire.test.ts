@@ -1,20 +1,24 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * @jest-environment node
  */
 
-/* eslint-disable @kbn/eslint/require-license-header */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import { randomUUID } from 'node:crypto';
-import { clientTypes } from '@kbn/connector-specs/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { BuildContext } from '@kbn/connector-specs';
+import type { ActionContext } from '../../connector_spec';
+import type { BuildContext } from '../../lib/clients/client_type_spec';
+import { clientTypes } from '../../lib/clients';
+import { buildMcpAuthHeaders } from './auth_headers';
+import { mcpConnectorSpec } from './mcp';
 
 const AUTH_HEADER = 'Bearer secret-token';
 
@@ -55,6 +59,7 @@ type FailNextInitializeWith = 503 | 'destroy' | undefined;
 const startMcpServer = async (): Promise<{
   url: string;
   authorizations: string[];
+  seenHeaders: Array<Record<string, string | string[] | undefined>>;
   initializeCount: number;
   getCount: number;
   heldGetCount: number;
@@ -67,12 +72,14 @@ const startMcpServer = async (): Promise<{
 }> => {
   const state: {
     authorizations: string[];
+    seenHeaders: Array<Record<string, string | string[] | undefined>>;
     initializeCount: number;
     getCount: number;
     failNextInitializeWith: FailNextInitializeWith;
     holdGetStream: boolean;
   } = {
     authorizations: [],
+    seenHeaders: [],
     initializeCount: 0,
     getCount: 0,
     failNextInitializeWith: undefined,
@@ -96,6 +103,7 @@ const startMcpServer = async (): Promise<{
   };
 
   const httpServer: Server = createServer(async (req, res) => {
+    state.seenHeaders.push({ ...req.headers });
     const authorization = req.headers.authorization;
     if (authorization !== AUTH_HEADER) {
       if (req.method === 'POST') {
@@ -203,6 +211,7 @@ const startMcpServer = async (): Promise<{
   return {
     url: `http://127.0.0.1:${address.port}/mcp`,
     authorizations: state.authorizations,
+    seenHeaders: state.seenHeaders,
     get initializeCount() {
       return state.initializeCount;
     },
@@ -242,6 +251,7 @@ const startMcpServer = async (): Promise<{
       state.failNextInitializeWith = undefined;
       state.holdGetStream = false;
       state.authorizations.length = 0;
+      state.seenHeaders.length = 0;
       heldGetWaiters = [];
       for (const res of heldStreams) {
         heldStreams.delete(res);
@@ -264,7 +274,7 @@ const makeBuildContext = (serverUrl: string, authorization: string): BuildContex
   logger: loggerMock.create(),
   config: { serverUrl },
   networkSettings: {
-    ensureUriAllowed: (uri) => {
+    ensureUriAllowed: (uri: string) => {
       const { hostname } = new URL(uri);
       if (hostname !== '127.0.0.1') {
         throw new Error(`target url "${uri}" is not allowed`);
@@ -357,5 +367,48 @@ describe('MCP client wire', () => {
       clientTypes.mcp.build(makeBuildContext(server.url, 'Bearer wrong'))
     ).rejects.toThrow();
     expect(server.initializeCount).toBe(1);
+  });
+
+  it('sends config headers and secret headers from the spec handler credential', async () => {
+    const config = {
+      serverUrl: server.url,
+      hasAuth: true,
+      authType: 'bearer' as const,
+      headers: { 'X-Custom': 'from-config', Authorization: 'from-config' },
+    };
+    const secrets = {
+      token: 'secret-token',
+      secretHeaders: { 'X-Secret': 'from-secret' },
+    };
+    const authHeaders = await buildMcpAuthHeaders(config, secrets);
+    const logger = loggerMock.create();
+    const client = await clientTypes.mcp.build({
+      ...makeBuildContext(server.url, AUTH_HEADER),
+      logger,
+      config: { serverUrl: server.url, clientName: 'kibana-mcp-connector-wire' },
+      credential: { getAuthHeaders: async () => authHeaders },
+    });
+
+    const ctx = {
+      log: logger,
+      config,
+      secrets,
+      connectorId: 'wire',
+      client: {},
+      getClient: async () => client,
+    } as unknown as ActionContext;
+
+    try {
+      const result = await mcpConnectorSpec.actions.callTool.handler(ctx, {
+        name: 'ping',
+        arguments: {},
+      });
+      expect(result.content).toEqual([{ type: 'text', text: 'pong' }]);
+      const sent = server.seenHeaders.find((headers) => headers['x-custom'] === 'from-config');
+      expect(sent?.authorization).toBe(AUTH_HEADER);
+      expect(sent?.['x-secret']).toBe('from-secret');
+    } finally {
+      await clientTypes.mcp.terminate(client);
+    }
   });
 });

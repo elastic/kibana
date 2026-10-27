@@ -1915,7 +1915,9 @@ describe('generateExecutorFunction', () => {
       const acquire = jest.spyOn(fakeLeasePool, 'acquire');
 
       await executor(makeExecOptions({ subAction: 'test', subActionParams: {} }));
-      await executor(makeExecOptions({ subAction: TEST_CONNECTOR_SUB_ACTION, subActionParams: {} }));
+      await executor(
+        makeExecOptions({ subAction: TEST_CONNECTOR_SUB_ACTION, subActionParams: {} })
+      );
 
       expect(acquire).not.toHaveBeenCalled();
       expect(fakeClientType.build).toHaveBeenCalledTimes(2);

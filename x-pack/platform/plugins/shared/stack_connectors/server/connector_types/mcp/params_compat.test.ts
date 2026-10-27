@@ -9,23 +9,31 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { createConnectorTypeFromSpec } from '@kbn/actions-plugin/server/lib';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { buildExecutor } from '@kbn/actions-plugin/server/sub_action_framework/executor';
-import { SUB_ACTION } from '@kbn/connector-schemas/mcp';
+import {
+  CallToolRequestSchema,
+  SUB_ACTION,
+  TestConnectorRequestSchema,
+} from '@kbn/connector-schemas/mcp';
 import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import { mcpConnectorSpec } from '@kbn/connector-specs/server';
+import { z } from '@kbn/zod';
 import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { getMcpConnectorType } from '.';
 
 describe('mcp spec params compatibility', () => {
   const connectorType = createConnectorTypeFromSpec(mcpConnectorSpec, actionsMock.createSetup());
   const parse = (params: Record<string, unknown>) =>
     connectorType.validate.params!.schema.parse(params);
   const logger = loggingSystemMock.createLogger();
-  const legacyExecutor = buildExecutor({
-    connector: getMcpConnectorType({ getClientLeasePool: () => ({}) as never }),
-    logger,
-    configurationUtilities: actionsConfigMock.create(),
-  });
+
+  const legacyValidationMessage = (schema: z.ZodType, value: unknown): string => {
+    try {
+      schema.parse(value);
+    } catch (err) {
+      const detail = err instanceof z.ZodError ? z.prettifyError(err) : String(err);
+      return `Request validation failed (${detail})`;
+    }
+    throw new Error('expected schema parse to fail');
+  };
 
   const validationError = async (params: Record<string, unknown>) => {
     const specError = await connectorType.executor!({
@@ -38,18 +46,8 @@ describe('mcp spec params compatibility', () => {
       services: {} as never,
       configurationUtilities: actionsConfigMock.create(),
     } as never).catch((err) => err);
-    const legacyError = await legacyExecutor({
-      actionId: 'connector-1',
-      params,
-      config: { serverUrl: 'https://example.com/mcp', hasAuth: false },
-      secrets: {},
-      logger,
-      connectorVersion: 'WzEsMV0=',
-      services: {} as never,
-      configurationUtilities: actionsConfigMock.create(),
-    } as never).catch((err) => err);
 
-    return { specError, legacyError };
+    return specError;
   };
 
   it('accepts the same top-level payloads as the legacy params schema', () => {
@@ -91,27 +89,24 @@ describe('mcp spec params compatibility', () => {
       subAction: 'test',
       subActionParams: { x: 1 },
     });
-    expect(invalid.specError).toBeInstanceOf(Error);
-    expect(invalid.specError.message).toContain('Request validation failed');
-    expect(invalid.specError.message).toBe(invalid.legacyError.message);
-    expect(getErrorSource(invalid.specError)).toBe(TaskErrorSource.USER);
-    expect(getErrorSource(invalid.specError)).toBe(getErrorSource(invalid.legacyError));
+    expect(invalid).toBeInstanceOf(Error);
+    expect(invalid.message).toBe(legacyValidationMessage(TestConnectorRequestSchema, { x: 1 }));
+    expect(getErrorSource(invalid)).toBe(TaskErrorSource.USER);
 
     const missingName = await validationError({
       subAction: 'callTool',
       subActionParams: {},
     });
-    expect(missingName.specError.message).toBe(missingName.legacyError.message);
-    expect(missingName.specError.message).toContain('Request validation failed');
+    expect(missingName.message).toBe(legacyValidationMessage(CallToolRequestSchema, {}));
+    expect(missingName.message).toContain('Request validation failed');
   });
 
   it('rejects an unknown sub-action with the legacy registration message', async () => {
     const unknown = await validationError({ subAction: 'unknown', subActionParams: {} });
 
-    expect(unknown.specError.message).toBe(
+    expect(unknown.message).toBe(
       'Sub action "unknown" is not registered. Connector id: connector-1. Connector name: MCP. Connector type: .mcp'
     );
-    expect(unknown.specError.message).toBe(unknown.legacyError.message);
     expect(Object.values(SUB_ACTION).sort()).toEqual(['callTool', 'listTools', 'test']);
   });
 });
