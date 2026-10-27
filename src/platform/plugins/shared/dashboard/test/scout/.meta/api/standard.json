@@ -1,9 +1,135 @@
 {
-  "sha1": "0121b2af0c16d873cab9b92beca05d41379ea843",
+  "sha1": "c2eda7f14640ba0ab668401fa49b23087ab3d9f4",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "6ef67d716f27cd1-58c939b2f7bd3a6",
+      "title": "dashboard change history - list lists every version, newest first, with the current one flagged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/change_history_list.spec.ts",
+        "line": 76,
+        "column": 30
+      }
+    },
+    {
+      "id": "6ef67d716f27cd1-1ec763554326974",
+      "title": "dashboard change history - list pages through history with page and per_page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/change_history_list.spec.ts",
+        "line": 113,
+        "column": 12
+      }
+    },
+    {
+      "id": "6ef67d716f27cd1-928804e95ce526d",
+      "title": "dashboard change history - list rejects invalid query parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/change_history_list.spec.ts",
+        "line": 141,
+        "column": 27
+      }
+    },
+    {
+      "id": "d2ae139f245a33b-31313579c445ab2",
+      "title": "dashboard change history - restore round trip and authorization restore persists the snapshot and records a new version",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/change_history_restore.spec.ts",
+        "line": 163,
+        "column": 13
+      }
+    },
+    {
+      "id": "d2ae139f245a33b-32cccb5bb09a45d",
+      "title": "dashboard change history - restore round trip and authorization restore brings back configured panels and their references",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/change_history_restore.spec.ts",
+        "line": 206,
+        "column": 27
+      }
+    },
+    {
+      "id": "d2ae139f245a33b-7cce4be42028152",
+      "title": "dashboard change history - restore round trip and authorization a user with read-only access cannot read or restore history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/change_history_restore.spec.ts",
+        "line": 316,
+        "column": 46
+      }
+    },
+    {
+      "id": "d2ae139f245a33b-f5f7c12a9c6b294",
+      "title": "dashboard change history - restore round trip and authorization privileges in one space do not grant access to history in another space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/change_history_restore.spec.ts",
+        "line": 382,
+        "column": 16
+      }
+    },
+    {
+      "id": "d2ae139f245a33b-cd16b949bbc1075",
+      "title": "dashboard change history - restore round trip and authorization history and restore never cross Spaces for a user who can access both",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/change_history_restore.spec.ts",
+        "line": 403,
+        "column": 9
+      }
+    },
+    {
+      "id": "d2ae139f245a33b-826bb02384a8b18",
+      "title": "dashboard change history - restore round trip and authorization retained history of a deleted dashboard is not reachable from another space reusing its id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/change_history_restore.spec.ts",
+        "line": 462,
+        "column": 21
+      }
+    },
     {
       "id": "65fe2f541b6ad11-864f48536870f42",
       "title": "dashboards - create should create a dashboard",
