@@ -205,6 +205,13 @@ const groupFpCandidatesInputSchema = lazySchema(() =>
       .max(100)
       .optional()
       .describe('Entities the analysis found. Each new proposal keeps those its alerts name.'),
+    other_alert_ids: z
+      .array(idSchema)
+      .max(1000)
+      .optional()
+      .describe(
+        'Alerts of the batch that are in no proposal, for the entities of their Investigation.'
+      ),
     inconclusive_alert_ids: z
       .array(idSchema)
       .max(1000)
@@ -258,6 +265,9 @@ const groupFpCandidatesOutputSchema = lazySchema(() =>
     alerts_pooled: z.number(),
     proposals_created: z.number(),
     missing_alert_ids: z.array(z.string()).describe('Ids that no longer match an alert.'),
+    other_impacted_entities: z
+      .array(z.object({ id: z.string(), name: z.string(), type: z.enum(['host', 'user']) }))
+      .describe('Entities that the alerts in `other_alert_ids` name. Empty if none could be read.'),
     inconclusive_alerts_page_query: z
       .string()
       .describe(

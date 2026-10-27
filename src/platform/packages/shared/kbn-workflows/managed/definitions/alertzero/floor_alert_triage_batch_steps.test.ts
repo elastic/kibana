@@ -984,6 +984,8 @@ describe('floor_alert_triage_batch — a failed batch Investigation', () => {
     expect(evalExpr(gate.condition, { variables: { home_conversation_id: 'conv-1' } })).toBe(true);
     expect(gate.steps.map((step) => step.name)).toEqual([
       'attach_other_alerts',
+      'count_other_entities',
+      'attach_other_impact_gate',
       'post_comment_other_alerts',
       'close_batch_investigation',
       'report_batch_investigation_closed',
@@ -996,6 +998,42 @@ describe('floor_alert_triage_batch — a failed batch Investigation', () => {
       evalExpr(set.if, { steps: { create_batch_investigation: { error: { message: 'x' } } } })
     ).toBe(false);
     expect(evalExpr(set.if, { steps: { create_batch_investigation: { output: {} } } })).toBe(true);
+  });
+});
+
+describe('floor_alert_triage_batch — the entities of the alerts in no proposal', () => {
+  it('records them on the Investigation that holds those alerts, without failing the run', () => {
+    expect(stepByName('attach_other_impact')?.type).toBe('investigations.attachImpact');
+    expect(stepByName('attach_other_impact')?.['on-failure']).toEqual({ continue: true });
+    expect(stepByName('attach_other_impact')?.with).toEqual({
+      conversationId: '{{ variables.home_conversation_id }}',
+      entities: '${{ steps.group_fp_candidates_call.output.other_impacted_entities }}',
+    });
+  });
+
+  it('attaches none when the grouping step returned none or did not run', () => {
+    const count = stepByName('count_other_entities')?.with?.other_entity_count as string;
+    const gate = (stepByName('attach_other_impact_gate') as { condition: string }).condition;
+    const entities = (list?: unknown[]) => ({
+      variables: { no_items: [] },
+      steps: {
+        group_fp_candidates_call: list ? { output: { other_impacted_entities: list } } : {},
+      },
+    });
+    expect(evalExpr(count, entities([{ id: 'h', name: 'h', type: 'host' }]))).toBe(1);
+    expect(evalExpr(count, entities([]))).toBe(0);
+    expect(evalExpr(count, entities())).toBe(0);
+    expect(evalExpr(gate, { variables: { other_entity_count: 0 } })).toBe(false);
+    expect(evalExpr(gate, { variables: { other_entity_count: 2 } })).toBe(true);
+  });
+
+  it('hands the grouping step the alerts in no proposal, and runs it for every classified batch', () => {
+    const call = stepByName('group_fp_candidates_call');
+    expect((call?.with as Record<string, string>).other_alert_ids).toBe(
+      '${{ variables.other_alert_ids }}'
+    );
+    expect(evalExpr(call?.if as string, { variables: { verdict_count: 0 } })).toBe(false);
+    expect(evalExpr(call?.if as string, { variables: { verdict_count: 4 } })).toBe(true);
   });
 });
 

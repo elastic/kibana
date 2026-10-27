@@ -619,11 +619,26 @@ steps:
       failed_review_count: 0
       started_alert_count: 0
 
+  # The alerts that are in no proposal (true positives, inconclusive verdicts, false positives below the
+  # floor), routed to an Investigation after the grouping.
+  - name: compute_other_alerts
+    type: data.set
+    with:
+      other_alert_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | reject_exp: 'v', 'variables.fp_candidate_ids contains v.alert_id'
+            | map: 'alert_id' }}
+
+  - name: count_other_alerts
+    type: data.set
+    with:
+      other_alert_count: "${{ variables.other_alert_ids | size }}"
+
   # A failure here re-tags the candidates and fails the run (the fallback re-throws): no proposal
   # exists for them, and they must not stay `az:false_positive`.
   - name: group_fp_candidates_call
     type: alertzero.triage.groupFpCandidates
-    if: "${{ variables.fp_candidate_count > 0 or steps.classify_alerts.output.inconclusive_count > 0 }}"
+    if: "${{ variables.verdict_count > 0 }}"
     on-failure:
       retry:
         max-attempts: 3
@@ -677,6 +692,7 @@ steps:
       rule_name: "{{ inputs.rule_name }}"
       confidence_floor: "${{ inputs.confidence_floor }}"
       impacted_entities: "${{ steps.classify_alerts.output.impacted_entities }}"
+      other_alert_ids: "${{ variables.other_alert_ids }}"
       inconclusive_alert_ids: >-
         ${{ steps.classify_alerts.output.verdicts
             | where: 'classification', 'inconclusive'
@@ -693,6 +709,11 @@ steps:
     with:
       mint_count: "${{ variables.group_mints | size }}"
       join_count: "${{ variables.group_joins | size }}"
+
+  - name: count_proposals
+    type: data.set
+    with:
+      proposal_count: "${{ variables.mint_count | plus: variables.join_count }}"
 
   # One Investigation per new proposal, seeded from the `investigation` template, with its alerts and
   # impacted entities attached. The alerts get `az:proposal:<root id>`, so an analyst can find
@@ -879,20 +900,6 @@ steps:
   #     several, so no single Investigation is the obvious home) they get an Investigation of their
   #     own, closed straight away, as there is nothing to decide.
   # ---------------------------------------------------------------------------
-  - name: compute_other_alerts
-    type: data.set
-    with:
-      other_alert_ids: >-
-        ${{ steps.classify_alerts.output.verdicts
-            | reject_exp: 'v', 'variables.fp_candidate_ids contains v.alert_id'
-            | map: 'alert_id' }}
-
-  - name: count_other_alerts
-    type: data.set
-    with:
-      other_alert_count: "${{ variables.other_alert_ids | size }}"
-      proposal_count: "${{ variables.mint_count | plus: variables.join_count }}"
-
   - name: route_other_alerts
     type: if
     condition: "${{ variables.other_alert_count > 0 }}"
@@ -970,6 +977,23 @@ steps:
                   data:
                     alertIds: "${{ foreach.item }}"
                   description: "Alerts analysed in this triage run that are not in a closure proposal"
+
+          - name: count_other_entities
+            type: data.set
+            with:
+              other_entity_count: "${{ steps.group_fp_candidates_call.output.other_impacted_entities | default: variables.no_items | size }}"
+
+          - name: attach_other_impact_gate
+            type: if
+            condition: "${{ variables.other_entity_count > 0 }}"
+            steps:
+              - name: attach_other_impact
+                type: investigations.attachImpact
+                on-failure:
+                  continue: true
+                with:
+                  conversationId: "{{ variables.home_conversation_id }}"
+                  entities: "${{ steps.group_fp_candidates_call.output.other_impacted_entities }}"
 
           - name: post_comment_other_alerts
             type: ai.conversation.add_user_message

@@ -180,6 +180,26 @@ describe('triage group false positives step', () => {
     expect(service.revise).not.toHaveBeenCalled();
   });
 
+  it('names the entities of the alerts in no proposal, even for a batch with no candidates', async () => {
+    const { group } = setup({ heads: [] });
+
+    const output = await group({
+      ...baseInput,
+      fp_candidate_ids: [],
+      other_alert_ids: ['a1'],
+      impacted_entities: [
+        { id: 'h1', name: 'h1', type: 'host' },
+        { id: 'host-2', name: 'host-2', type: 'host' },
+      ],
+    });
+
+    expect(output).toEqual(
+      expect.objectContaining({
+        other_impacted_entities: [{ id: 'h1', name: 'h1', type: 'host' }],
+      })
+    );
+  });
+
   it('requires manage_proposals before it revises a proposal', async () => {
     const { group, privileges } = setup({ heads: [openHead()] });
 

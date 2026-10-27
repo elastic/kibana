@@ -191,6 +191,16 @@ const createRuntime = async (
   return { spaceId, groupingDeps };
 };
 
+/** The entities of the batch that the given alerts name, by host and user name. */
+const entitiesNamedBy = (
+  docs: ReadonlyArray<Record<string, unknown>>,
+  entities: ReadonlyArray<{ id: string; name: string; type: 'host' | 'user' }>
+) => {
+  const hosts = new Set(docs.map((doc) => getField(doc, 'host.name')));
+  const users = new Set(docs.map((doc) => getField(doc, 'user.name')));
+  return entities.filter(({ name, type }) => (type === 'host' ? hosts : users).has(name));
+};
+
 export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsStepDependencies) =>
   createServerStepDefinition({
     ...triageGroupFpCandidatesStepCommonDefinition,
@@ -198,6 +208,21 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
       try {
         const { input, contextManager } = context;
         const text = { ruleName: input.rule_name, confidenceFloor: input.confidence_floor };
+        // The entities of the alerts in no proposal are a convenience for their Investigation, so a
+        // read failure must not fail the batch: it only leaves the Investigation without them.
+        const otherImpactedEntities = await (async () => {
+          if (!input.other_alert_ids?.length || !input.impacted_entities?.length) return [];
+          try {
+            const { alerts: otherDocs } = await loadAlertsByIds(
+              contextManager,
+              input.other_alert_ids
+            );
+            return entitiesNamedBy(otherDocs, input.impacted_entities);
+          } catch (error) {
+            deps.logger?.warn(`alert_triage grouping: could not read the other alerts: ${error}`);
+            return [];
+          }
+        })();
         // A batch with no candidates has nothing to group; it only asks for the inconclusive link.
         if (input.fp_candidate_ids.length === 0) {
           return {
@@ -210,6 +235,7 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
               alerts_pooled: 0,
               proposals_created: 0,
               missing_alert_ids: [],
+              other_impacted_entities: otherImpactedEntities,
               inconclusive_alerts_page_query: input.inconclusive_alert_ids?.length
                 ? buildAlertsPagePath(input.inconclusive_alert_ids, new Date().toISOString())
                 : '',
@@ -248,11 +274,7 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
             const doc = byId.get(id);
             return doc ? [doc] : [];
           });
-          const hosts = new Set(docs.map((doc) => getField(doc, 'host.name')));
-          const users = new Set(docs.map((doc) => getField(doc, 'user.name')));
-          return (input.impacted_entities ?? []).filter(({ name, type }) =>
-            (type === 'host' ? hosts : users).has(name)
-          );
+          return entitiesNamedBy(docs, input.impacted_entities ?? []);
         };
         const empty = {
           mints: [],
@@ -263,6 +285,7 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
           alerts_pooled: 0,
           proposals_created: 0,
           missing_alert_ids: missingAlertIds,
+          other_impacted_entities: otherImpactedEntities,
           inconclusive_alerts_page_query: input.inconclusive_alert_ids?.length
             ? buildAlertsPagePath(input.inconclusive_alert_ids, new Date().toISOString())
             : '',
