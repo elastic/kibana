@@ -125,6 +125,8 @@ sandbox:
 # Check out the PR head by number (available for every trigger) so the
 # `push_to_pull_request_branch` handler's own branch fetch is a fast no-op
 # instead of an unbounded fetch that hangs on a repo Kibana's size.
+# This replaces gh-aw's base-branch checkout, so the agent job's first custom
+# step below restores the agent config folders from the base-branch snapshot.
 checkout:
   ref: refs/pull/${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}/head
   fetch-depth: 2
@@ -189,6 +191,15 @@ jobs:
       artifact_name: *same_team_fix_prs_artifact_name
 
 steps:
+  # The workspace holds the PR head, so Claude Code would otherwise load the PR's
+  # `.claude/settings.json` hooks, skills and instruction files. gh-aw only emits
+  # this step for its own PR checkout; mirror it here using the snapshot the
+  # activation job saved from the base branch (lists must match the save step).
+  - name: Restore agent config folders from base branch
+    env:
+      GH_AW_AGENT_FOLDERS: '.agents .claude .github'
+      GH_AW_AGENT_FILES: 'AGENTS.md CLAUDE.md'
+    run: bash "${RUNNER_TEMP}/gh-aw/actions/restore_base_github_folders.sh"
   - name: Download prefetched PR context
     uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
     with:

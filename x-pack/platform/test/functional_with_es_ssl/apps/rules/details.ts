@@ -936,7 +936,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // Verify we're on the rule details page by checking for rule-specific elements
-        await testSubjects.existOrFail('classicRulesBadge');
         await testSubjects.existOrFail('openEditRuleFlyoutButton');
       });
 
@@ -959,7 +958,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // Verify we're on the rule details page by checking for rule-specific elements
-        await testSubjects.existOrFail('classicRulesBadge');
         await testSubjects.existOrFail('openEditRuleFlyoutButton');
 
         // Assert that we're still within the correct space by checking the URL

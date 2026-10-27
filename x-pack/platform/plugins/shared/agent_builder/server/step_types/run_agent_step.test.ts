@@ -34,6 +34,7 @@ import {
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
 } from '../../common/resolve_connector_or_inference_id';
 import { getRunAgentStepDefinition, parseMaxStepSize } from './run_agent_step';
+import type { ServiceManager } from '../services';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 
 describe('parseMaxStepSize', () => {
@@ -1201,6 +1202,63 @@ describe('ai.agent workflow step (Agent Builder)', () => {
           params: expect.objectContaining({ workflowExecutionId: 'exec-1' }),
         })
       );
+    });
+  });
+
+  describe('author attribution', () => {
+    const roundCompleteEvents = () =>
+      of({
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
+          },
+        },
+      });
+
+    const createServiceManager = (execution: ReturnType<typeof createExecutionMock>) =>
+      ({ internalStart: { execution } } as unknown as ServiceManager);
+
+    const runStep = async (input: Record<string, unknown>) => {
+      const execution = createExecutionMock(roundCompleteEvents());
+      const step = getRunAgentStepDefinition(createServiceManager(execution));
+
+      await step.handler(createContext({ input, config: {} }));
+
+      return execution.executeAgent.mock.calls[0][0].params;
+    };
+
+    it('passes a trimmed author_name as the author decoration', async () => {
+      const params = await runStep({
+        message: 'hello',
+        author_name: '  Attack Discovery Review  ',
+      });
+
+      expect(params.author).toEqual({ full_name: 'Attack Discovery Review' });
+    });
+
+    it.each([
+      { label: 'absent', input: { message: 'hello' } },
+      { label: 'blank', input: { message: 'hello', author_name: '   ' } },
+    ])('omits the author when author_name is $label', async ({ input }) => {
+      const params = await runStep(input);
+
+      expect(params).not.toHaveProperty('author');
+    });
+
+    it.each([
+      { label: 'absent', authorName: undefined, success: true },
+      { label: 'a name', authorName: 'Attack Discovery', success: true },
+      { label: 'exactly 256 characters', authorName: 'a'.repeat(256), success: true },
+      { label: 'empty', authorName: '', success: false },
+      { label: 'blank', authorName: '   ', success: false },
+      { label: '257 characters', authorName: 'a'.repeat(257), success: false },
+    ])('author_name $label -> success $success', ({ authorName, success }) => {
+      const input =
+        authorName === undefined ? { message: 'x' } : { message: 'x', author_name: authorName };
+
+      expect(InputSchema.safeParse(input).success).toBe(success);
     });
   });
 

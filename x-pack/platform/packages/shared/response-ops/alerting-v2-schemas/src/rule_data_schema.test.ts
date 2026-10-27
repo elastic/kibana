@@ -1735,13 +1735,13 @@ describe('updateRuleDataSchema', () => {
 });
 
 describe('ruleResponseSchema metadata', () => {
-  it('returns metadata.template when present', () => {
-    const result = ruleResponseSchema.shape.metadata.parse({
+  it('does not carry metadata.template: the strict response block omits it', () => {
+    const result = ruleResponseSchema.shape.metadata.safeParse({
       name: 'test rule',
       template: { id: 'template-1' },
     });
 
-    expect(result.template).toEqual({ id: 'template-1' });
+    expect(result.success).toBe(false);
   });
 
   it('accepts metadata without a template', () => {
@@ -2072,19 +2072,41 @@ describe('bulkGetRulesResponseSchema', () => {
     updated_at: '2026-01-01T00:00:00.000Z',
   };
 
-  it('accepts an empty items array', () => {
-    const result = bulkGetRulesResponseSchema.parse({ items: [] });
-    expect(result).toEqual({ items: [] });
+  it('accepts empty items and errors arrays', () => {
+    const result = bulkGetRulesResponseSchema.parse({ items: [], errors: [] });
+    expect(result).toEqual({ items: [], errors: [] });
   });
 
   it('accepts a populated items array', () => {
-    const result = bulkGetRulesResponseSchema.parse({ items: [sampleRule] });
+    const result = bulkGetRulesResponseSchema.parse({ items: [sampleRule], errors: [] });
     expect(result.items).toHaveLength(1);
     expect(result.items[0]).toEqual(expect.objectContaining({ id: 'rule-1' }));
   });
 
+  it('accepts a per-item RULE_NOT_FOUND error beside found rules', () => {
+    const result = bulkGetRulesResponseSchema.parse({
+      items: [sampleRule],
+      errors: [
+        {
+          id: 'rule-missing',
+          error: {
+            code: 'RULE_NOT_FOUND',
+            message: 'Rule with id "rule-missing" not found',
+            details: { rule_id: 'rule-missing' },
+          },
+        },
+      ],
+    });
+
+    expect(result.errors).toEqual([expect.objectContaining({ id: 'rule-missing' })]);
+  });
+
   it('rejects a missing items field', () => {
-    expect(() => bulkGetRulesResponseSchema.parse({})).toThrow();
+    expect(() => bulkGetRulesResponseSchema.parse({ errors: [] })).toThrow();
+  });
+
+  it('rejects a missing errors field', () => {
+    expect(() => bulkGetRulesResponseSchema.parse({ items: [] })).toThrow();
   });
 });
 
@@ -2181,6 +2203,7 @@ describe('bulkCreateRulesResponseSchema', () => {
       items: [],
       errors: [
         {
+          index: 0,
           id: 'rule-1',
           error: { code: 'RULE_ALREADY_EXISTS', message: 'already exists' },
         },
@@ -2188,6 +2211,26 @@ describe('bulkCreateRulesResponseSchema', () => {
     });
     expect(result.items).toEqual([]);
     expect(result.errors).toHaveLength(1);
+  });
+
+  it('accepts an error for an item that had no id, addressed by index only', () => {
+    const result = bulkCreateRulesResponseSchema.parse({
+      items: [],
+      errors: [{ index: 2, error: { code: 'INVALID_RULE_DATA', message: 'bad schedule' } }],
+    });
+    expect(result.errors[0]).toEqual({
+      index: 2,
+      error: { code: 'INVALID_RULE_DATA', message: 'bad schedule' },
+    });
+  });
+
+  it('rejects an error without an index', () => {
+    expect(() =>
+      bulkCreateRulesResponseSchema.parse({
+        items: [],
+        errors: [{ id: 'rule-1', error: { code: 'RULE_ALREADY_EXISTS', message: 'x' } }],
+      })
+    ).toThrow();
   });
 
   it('rejects a missing items field', () => {
@@ -2453,5 +2496,16 @@ describe('isRecoveryTransitionConsistentWithStrategy', () => {
         state_transition: { recovering: { timeframe: '5m' } },
       })
     ).toBe(false);
+  });
+});
+
+describe('findRulesRequestSchema filter', () => {
+  it('trims the filter', () => {
+    expect(findRulesRequestSchema.parse({ filter: ' kind: alert ' }).filter).toBe('kind: alert');
+  });
+
+  it('rejects a blank filter', () => {
+    expect(findRulesRequestSchema.safeParse({ filter: '' }).success).toBe(false);
+    expect(findRulesRequestSchema.safeParse({ filter: '   ' }).success).toBe(false);
   });
 });

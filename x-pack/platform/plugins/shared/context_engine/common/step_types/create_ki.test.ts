@@ -39,8 +39,9 @@ describe('createKiInputSchema', () => {
 });
 
 describe('createKiOutputSchema', () => {
-  it('accepts a failed verification without an id', () => {
+  it('accepts a failed verification with an id', () => {
     const result = createKiOutputSchema.safeParse({
+      id: 'ki-1',
       verification: {
         passed: false,
         results: [{ verifier: ESQL_VALID_SYNTAX_VERIFIER_ID, passed: false, reason: 'x' }],
@@ -48,5 +49,9 @@ describe('createKiOutputSchema', () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  it('requires an id', () => {
+    expect(createKiOutputSchema.safeParse({}).success).toBe(false);
   });
 });
