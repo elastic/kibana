@@ -10,6 +10,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import {
+  getNightshiftBoundKiOnboardingWorkflowId,
+  NIGHTSHIFT_SOURCE_KI_EXTRACTION_TRIGGER_SOURCE,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
@@ -187,10 +189,14 @@ const parseWorkflowOutput = (
 });
 
 const CONCURRENCY_KEY_PREFIX = 'nightshift-source-onboarding-';
+// The space entry point's key, which must stay in sync with its YAML.
+const ENTRY_POINT_CONCURRENCY_KEY_PREFIX = 'nightshift-source-onboarding-bound-';
 const FEATURES_IDENTIFICATION_CONCURRENCY_KEY_PREFIX = 'nightshift-source-features-identification-';
 const QUERIES_GENERATION_CONCURRENCY_KEY_PREFIX = 'nightshift-source-queries-generation-';
 
+// The entry point's prefix comes first: the onboarding prefix is a prefix of it.
 const KI_CONCURRENCY_KEY_PREFIXES = [
+  ENTRY_POINT_CONCURRENCY_KEY_PREFIX,
   CONCURRENCY_KEY_PREFIX,
   FEATURES_IDENTIFICATION_CONCURRENCY_KEY_PREFIX,
   QUERIES_GENERATION_CONCURRENCY_KEY_PREFIX,
@@ -256,11 +262,14 @@ const CANCEL_WAIT_POLL_INTERVAL_MS = 1_000;
  * Client that wraps the workflows management API to provide a source-centric
  * interface for running, querying, and canceling KI onboarding workflows.
  *
- * Executions live in the space of the request. Each source's onboarding
- * execution is keyed by a concurrency group derived from its slug and id, so at most
- * one onboarding run is active per source in a space.
+ * Executions live in the space of the request. A run starts the space's entry point, which runs
+ * the shared onboarding workflow as the Nightshift KI extraction service account; a space that is
+ * not set up cannot run it. Each source's onboarding execution is keyed by a concurrency group
+ * derived from its slug and id, so at most one onboarding run is active per source in a space.
  */
 export class SignificantEventsKIsOnboardingClient {
+  private readonly managementApi: WorkflowsServerPluginSetup['management'];
+  private readonly isServiceAccountsEnabled: () => Promise<boolean>;
   private readonly workflowExecutionService: WorkflowExecutionService<OnboardingWorkflowInputPayload>;
   /**
    * The sub-workflows an onboarding run starts. They are keyed by the source slug and id with `drop`
@@ -276,13 +285,17 @@ export class SignificantEventsKIsOnboardingClient {
 
   constructor({
     managementApi,
+    isServiceAccountsEnabled,
     telemetry,
     getSourcesClient,
   }: {
     managementApi: WorkflowsServerPluginSetup['management'];
+    isServiceAccountsEnabled: () => Promise<boolean>;
     telemetry: EbtTelemetryClient;
     getSourcesClient: (request: KibanaRequest) => Promise<SourcesClient>;
   }) {
+    this.managementApi = managementApi;
+    this.isServiceAccountsEnabled = isServiceAccountsEnabled;
     this.workflowExecutionService = new WorkflowExecutionService({
       managementApi,
       workflowId: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
@@ -309,12 +322,35 @@ export class SignificantEventsKIsOnboardingClient {
     this.getSourcesClient = getSourcesClient;
   }
 
+  private getEntryPointService(
+    spaceId: string
+  ): WorkflowExecutionService<OnboardingWorkflowInputPayload> {
+    return new WorkflowExecutionService({
+      managementApi: this.managementApi,
+      workflowId: getNightshiftBoundKiOnboardingWorkflowId(spaceId),
+      workflowSpaceId: spaceId,
+    });
+  }
+
   /**
-   * Triggers a new onboarding workflow execution for a source.
-   * Fetches the managed workflow definition from the global space and
-   * runs it in the space of the request with the provided inputs.
+   * Whether the space of the request can run KI onboarding: service accounts are on and its entry
+   * point is installed, enabled and bound to an account.
+   */
+  async isSetUp(request: KibanaRequest): Promise<boolean> {
+    if (!(await this.isServiceAccountsEnabled())) {
+      return false;
+    }
+    const entryPoint = await this.managementApi
+      .getClient(request)
+      .getWorkflow(getNightshiftBoundKiOnboardingWorkflowId(request.spaceId), request.spaceId);
+    return Boolean(entryPoint?.enabled && entryPoint.definition?.settings?.run_as);
+  }
+
+  /**
+   * Starts KI onboarding for a source in the space of the request, through the space's entry
+   * point, so it runs as the Nightshift KI extraction service account.
    *
-   * @throws If the managed onboarding workflow definition is not found.
+   * @throws A 503 when the space is not set up, or if the entry point is not found.
    */
   async run({
     inputs,
@@ -328,7 +364,10 @@ export class SignificantEventsKIsOnboardingClient {
       throw new StatusError('Source query changed before onboarding could be scheduled', 409);
     }
     const sourceSlug = source.slug;
-    const executionId = await this.workflowExecutionService.execute({
+    if (!(await this.isSetUp(request))) {
+      throw new StatusError('Nightshift is not set up in this space', 503);
+    }
+    const executionId = await this.getEntryPointService(request.spaceId).execute({
       executionSpaceId: request.spaceId,
       inputs: toWorkflowInputPayload({
         inputs,
@@ -336,6 +375,7 @@ export class SignificantEventsKIsOnboardingClient {
         sourceRevision: source.esql_updated_at,
       }),
       request,
+      triggeredBy: NIGHTSHIFT_SOURCE_KI_EXTRACTION_TRIGGER_SOURCE,
     });
 
     this.telemetry.trackOnboardingScheduled({
@@ -480,13 +520,23 @@ export class SignificantEventsKIsOnboardingClient {
    * that were already deleted.
    *
    * Cancelling the parent leaves its running sub-workflow to wind down on its own, which can take
-   * a while; cancelling it directly asks it to stop right away.
+   * a while; cancelling it directly asks it to stop right away. The space entry point is cancelled
+   * first: it waits for the onboarding run, and a cancelled child does not end its waiting parent,
+   * which would hold the source's slot until it times out.
    */
   async cancelBySource({
     sourceId,
     sourceSlug,
     request,
   }: ISourceRunIdentity & { request: KibanaRequest }): Promise<string | null> {
+    await this.getEntryPointService(request.spaceId).cancelActive({
+      spaceId: request.spaceId,
+      request,
+      concurrencyGroupKey: `${ENTRY_POINT_CONCURRENCY_KEY_PREFIX}${formatSourceIdentity({
+        sourceId,
+        sourceSlug,
+      })}`,
+    });
     const executionId = await this.workflowExecutionService.cancelActive({
       spaceId: request.spaceId,
       request,
@@ -553,6 +603,7 @@ export class SignificantEventsKIsOnboardingClient {
     request: KibanaRequest;
   }): Promise<WorkflowExecutionListItemDto[]> {
     const services = [
+      this.getEntryPointService(request.spaceId),
       this.workflowExecutionService,
       ...this.subWorkflowExecutionServices.map(({ service }) => service),
     ];
@@ -575,27 +626,28 @@ export class SignificantEventsKIsOnboardingClient {
    * @returns The number of executions that were canceled.
    */
   async cancelAllRunning({ request }: { request: KibanaRequest }): Promise<number> {
-    const { results } = await this.workflowExecutionService.getExecutions(
-      { statuses: [...NonTerminalExecutionStatuses], size: MAX_SOURCES_PER_QUERY },
-      request.spaceId,
-      request
-    );
-
-    if (results.length === 0) {
-      return 0;
-    }
+    // The entry point runs wait for the onboarding runs, so they are cancelled too.
+    const services = [this.getEntryPointService(request.spaceId), this.workflowExecutionService];
+    const runs = (
+      await Promise.all(
+        services.map(async (service) => {
+          const { results } = await service.getExecutions(
+            { statuses: [...NonTerminalExecutionStatuses], size: MAX_SOURCES_PER_QUERY },
+            request.spaceId,
+            request
+          );
+          return results.map(({ id }) => ({ id, service }));
+        })
+      )
+    ).flat();
 
     await Promise.all(
-      results.map((result) =>
-        this.workflowExecutionService.cancelExecution({
-          id: result.id,
-          spaceId: request.spaceId,
-          request,
-        })
+      runs.map(({ id, service }) =>
+        service.cancelExecution({ id, spaceId: request.spaceId, request })
       )
     );
 
-    return results.length;
+    return runs.length;
   }
 
   /**

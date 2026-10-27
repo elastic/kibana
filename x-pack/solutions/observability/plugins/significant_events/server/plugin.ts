@@ -111,6 +111,7 @@ import {
   type SignificantEventsScheduledWorkflowsService,
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
+import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from './lib/workflows/managed_workflow_owner';
 import { removeLegacyDefaultSpaceWorkflows } from './lib/workflows/setup/remove_legacy_default_space_workflows';
 import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { createTriggerEmitter } from './workflows/triggers/emit';
@@ -134,7 +135,6 @@ import { WorkflowExecutionService } from './lib/workflows/workflow_execution_ser
 import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 
-const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
 const RULE_CREATION_APP = 'nightshift';
 
@@ -337,7 +337,9 @@ export class SignificantEventsPlugin
               !(await uiSettingsClient.get<boolean>(
                 OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED
               ))) ||
-            (await this.maintenanceService?.getState({ request })) === 'paused'
+            (await this.maintenanceService?.getState({ request })) === 'paused' ||
+            // KI extraction runs as the space's service account only.
+            !(await streamsKIsOnboardingClient.isSetUp(request))
           ) {
             return false;
           }
@@ -375,14 +377,18 @@ export class SignificantEventsPlugin
 
     const telemetryClient = this.ebtTelemetryService.getClient();
 
-    const workflowClients = createWorkflowClients(
-      plugins.workflowsManagement?.management,
-      telemetryClient,
-      async (request) => {
+    const workflowClients = createWorkflowClients({
+      managementApi: plugins.workflowsManagement?.management,
+      telemetry: telemetryClient,
+      getSourcesClient: async (request) => {
         const [, pluginsStart] = await core.getStartServices();
         return pluginsStart.nightshiftSources.getSourcesClient({ request });
-      }
-    );
+      },
+      isServiceAccountsEnabled: async () => {
+        const [coreStart] = await core.getStartServices();
+        return coreStart.security.serviceAccounts.isEnabled();
+      },
+    });
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
     this.streamsKIsOnboardingClient = streamsKIsOnboardingClient;
 

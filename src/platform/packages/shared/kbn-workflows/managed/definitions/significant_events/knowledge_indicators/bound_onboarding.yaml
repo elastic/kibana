@@ -1,0 +1,61 @@
+version: '1'
+name: KI Onboarding (space entry point)
+description: >
+  Runs KI onboarding in this space as the Nightshift KI extraction service account. It only hands
+  its inputs to the shared KI onboarding workflow, which runs with this workflow's identity.
+enabled: true
+settings:
+  # Replaced with the bound service account when the workflow is installed in a space.
+  run_as: __SERVICE_ACCOUNT_ID__
+  # Longer than the onboarding's own timeout, since this run waits for it.
+  timeout: '35m'
+  # One run per source at a time, like the shared onboarding. The key differs from the shared
+  # workflow's, which this run would otherwise block.
+  concurrency:
+    key: 'nightshift-source-onboarding-bound-{{ inputs.sourceSlug }}:{{ inputs.sourceId }}'
+    strategy: drop
+    max: 1
+tags:
+  - observability
+  - knowledge-indicators
+  - onboarding
+  - nightshift
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        sourceId:
+          type: string
+          description: Target source id.
+        sourceSlug:
+          type: string
+          description: Slug of the target source. Together with the source id it keys concurrency.
+      required:
+        - sourceId
+        - sourceSlug
+      # The shared onboarding validates the rest of the inputs.
+      additionalProperties: true
+
+steps:
+  # Only the detection engine may start this workflow: it checks the caller's privileges before
+  # starting a run. Anyone allowed to run workflows could otherwise run KI onboarding as the
+  # service account. Only server code sets `triggeredBy`.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : "nightshift-source-ki-extraction"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow runs KI onboarding as the Nightshift service account. Start KI
+            extraction from Nightshift instead. This run was started by
+            {{ execution.triggeredBy }}.
+
+  - name: onboard
+    type: workflow.execute
+    with:
+      workflow-id: system-streams-ki-onboarding
+      run-as-mode: inherit
+      inputs: ${{ inputs }}

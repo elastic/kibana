@@ -7,6 +7,7 @@
 
 import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import {
+  NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
@@ -39,6 +40,13 @@ export const GLOBAL_CORE_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
 ] as const;
+
+/**
+ * Bound to a service account and installed per space, as `${id}-${spaceId}`, by the space's setup.
+ * Pausing cancels their executions but never disables them: changing a bound workflow needs
+ * `manage_security`, which pausing does not.
+ */
+export const PER_SPACE_BOUND_WORKFLOW_IDS = [NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID] as const;
 
 /** Scheduled discovery workflows controlled by the per-space Settings toggle. */
 export const SCHEDULED_DISCOVERY_WORKFLOW_IDS = [
@@ -138,6 +146,10 @@ export const buildDisableTargets = (spaceIds: SpaceId[]): MaintenanceWorkflowTar
  * space, so cancellation sweeps each given space for those ids.
  */
 export const buildCancelTargets = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] => [
+  // The bound entry points first: they wait for the shared workflows below.
+  ...spaceIds.flatMap((spaceId) =>
+    PER_SPACE_BOUND_WORKFLOW_IDS.map((baseId) => ({ id: `${baseId}-${spaceId}`, spaceId }))
+  ),
   ...spaceIds.flatMap((spaceId) => GLOBAL_MAINTENANCE_WORKFLOW_IDS.map((id) => ({ id, spaceId }))),
   ...buildDisableTargets(spaceIds),
 ];

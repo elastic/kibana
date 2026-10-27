@@ -96,6 +96,20 @@ triggers:
         required: false
         description: "Root workflow trigger type propagated by a managed driver."
 steps:
+  # Runs only as the Nightshift KI extraction service account, which a space's entry point
+  # (`system-sources-ki-onboarding-bound-<space>`) hands down. Any other run is refused before it
+  # spends a run quota or starts a sub-workflow, which could not inherit the account anyway.
+  - name: refuse_runs_without_service_account
+    type: if
+    condition: 'not execution.effectiveIdentity.type : "service_account"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            KI onboarding runs as the Nightshift service account. Start KI extraction from
+            Nightshift in a space that is set up.
+
   - name: check_budget
     type: kibana.request
     if: '${{ inputs.rootTriggeredBy == "scheduled" }}'
@@ -184,6 +198,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: "system-streams-ki-features-identification"
+          run-as-mode: inherit
           inputs:
             sourceId: "${{ inputs.sourceId }}"
             sourceSlug: "${{ inputs.sourceSlug }}"
@@ -231,6 +246,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: "system-streams-ki-queries-generation"
+          run-as-mode: inherit
           inputs:
             sourceId: "${{ inputs.sourceId }}"
             sourceSlug: "${{ inputs.sourceSlug }}"

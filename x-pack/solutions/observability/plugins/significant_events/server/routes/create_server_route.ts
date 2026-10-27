@@ -7,7 +7,15 @@
 
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
-import { badRequest, conflict, forbidden, internal, isBoom, notFound } from '@hapi/boom';
+import {
+  badRequest,
+  conflict,
+  forbidden,
+  internal,
+  isBoom,
+  notFound,
+  serverUnavailable,
+} from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import {
   NightshiftModelBlockedError,
@@ -57,6 +65,8 @@ export const createServerRoute: CreateServerRouteFactory<
               throw notFound(error.message);
             case 409:
               throw conflict(error.message);
+            case 503:
+              throw serverUnavailable(error.message);
             default:
               throw internal(error.message);
           }

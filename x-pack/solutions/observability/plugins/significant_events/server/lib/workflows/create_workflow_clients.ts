@@ -16,11 +16,17 @@ export interface WorkflowClients {
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient | undefined;
   significantEventsDiscoveryClient: SignificantEventsDiscoveryClient | undefined;
 }
-export const createWorkflowClients = (
-  managementApi: WorkflowsServerPluginSetup['management'] | undefined,
-  telemetry: EbtTelemetryClient,
-  getSourcesClient: (request: KibanaRequest) => Promise<SourcesClient>
-): WorkflowClients => {
+export const createWorkflowClients = ({
+  managementApi,
+  telemetry,
+  getSourcesClient,
+  isServiceAccountsEnabled,
+}: {
+  managementApi: WorkflowsServerPluginSetup['management'] | undefined;
+  telemetry: EbtTelemetryClient;
+  getSourcesClient: (request: KibanaRequest) => Promise<SourcesClient>;
+  isServiceAccountsEnabled: () => Promise<boolean>;
+}): WorkflowClients => {
   if (!managementApi) {
     return { streamsKIsOnboardingClient: undefined, significantEventsDiscoveryClient: undefined };
   }
@@ -28,6 +34,7 @@ export const createWorkflowClients = (
   return {
     streamsKIsOnboardingClient: new SignificantEventsKIsOnboardingClient({
       managementApi,
+      isServiceAccountsEnabled,
       telemetry,
       getSourcesClient,
     }),
