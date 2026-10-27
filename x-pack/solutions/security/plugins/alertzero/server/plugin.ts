@@ -63,6 +63,7 @@ import { ScanFailuresService } from './services/scan_failures/scan_failures_serv
 import { ActionsService } from './services/actions/actions_service';
 import type { HuntServices } from './services/watches/hunt';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
+import { isSpaceSupported } from './lib/is_space_supported';
 import { createAssertAlertZeroAccess } from './agent_builder_tools/assert_alertzero_access';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { createActionDiscoverySkill } from './agent_builder/skills/action_discovery';
@@ -288,10 +289,15 @@ export class AlertZeroPlugin
 
     coreSetup.http.registerRouteHandlerContext<AlertZeroRequestHandlerContext, 'alertzero'>(
       'alertzero',
-      async (context) => ({
+      async (context, request) => ({
         hasRequiredDependencies: Boolean(
           agentBuilder && proposals && agenticInvestigations && this.serviceAccountsEnabled
         ),
+        isSpaceSupported: await isSpaceSupported({
+          isServerless: this.isServerless,
+          spaces: this.spaces,
+          request,
+        }),
         subscription: getSubscriptionAvailability({
           isServerless: this.isServerless,
           serverlessTierAvailable: this.serverlessTierAvailable,
