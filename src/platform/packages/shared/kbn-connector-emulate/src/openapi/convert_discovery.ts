@@ -128,7 +128,8 @@ const toOperation = (method: Node, path: string, globalParameters: Node) => {
             },
           }
         : { '2XX': { description: 'Successful response' } },
-    ...(scopes.length > 0 ? { security: [{ [OAUTH2]: scopes }] } : {}),
+    // Discovery lists scopes a method accepts any one of; OpenAPI requirements are alternatives.
+    ...(scopes.length > 0 ? { security: scopes.map((scope) => ({ [OAUTH2]: [scope] })) } : {}),
   };
 };
 

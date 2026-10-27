@@ -8,12 +8,17 @@
  */
 
 import Path from 'path';
-import type { TestFramework } from '@kbn/scout-reporting';
+import type { FlakyTestEntry, TestFramework } from '@kbn/scout-reporting';
 import { getLocationFromClassname } from '../failed_tests_reporter/get_failures';
 import type { GithubIssue } from '../failed_tests_reporter/github_api';
 import { getIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import { readFlakySuiteIssueMetadata } from './issue_body';
 import type { FlakySuite } from './suites';
+
+/** What matching a suite against issues takes: its file, framework, title and tests. */
+export type MatchableSuite = Pick<FlakySuite, 'filePath' | 'framework' | 'suiteTitle'> & {
+  tests: ReadonlyArray<Pick<FlakyTestEntry, 'testId' | 'title'>>;
+};
 
 /**
  * What a `failed-test` issue says about its test: a suite issue records the file in its
@@ -164,7 +169,7 @@ export const indexIssues = (issues: readonly IssueDetails[]): IssueIndex => {
 };
 
 /** The issues that could match the suite: they name its file, its Jest directory or one of its tests. */
-export const candidateIssues = (suite: FlakySuite, index: IssueIndex): IssueDetails[] => {
+export const candidateIssues = (suite: MatchableSuite, index: IssueIndex): IssueDetails[] => {
   const candidates = new Set<IssueDetails>([
     ...(index.byFileName.get(Path.basename(suite.filePath)) ?? []),
     ...(index.byJestDirectory.get(Path.dirname(suite.filePath)) ?? []),
@@ -183,7 +188,7 @@ export const candidateIssues = (suite: FlakySuite, index: IssueIndex): IssueDeta
  * describe with a test of the same title must not match. A name that is the bare title still
  * does, for reporters that record no describes.
  */
-const namesTest = (testName: string, suite: FlakySuite): boolean =>
+const namesTest = (testName: string, suite: MatchableSuite): boolean =>
   suite.tests.some(({ title }) => {
     const full = suite.suiteTitle ? `${suite.suiteTitle} ${title}` : title;
     return testName === full || testName.endsWith(` ${full}`) || testName === title;
@@ -202,7 +207,7 @@ export const compareMatches = (a: MatchedIssue, b: MatchedIssue): number =>
  * with the file name alone (the file was moved), then any mention of the file.
  */
 export const findMatchingIssues = (
-  suite: FlakySuite,
+  suite: MatchableSuite,
   issues: readonly IssueDetails[]
 ): MatchedIssue[] => {
   const testIds = new Set(suite.tests.map((test) => test.testId));

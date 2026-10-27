@@ -70,7 +70,7 @@ export const buildFieldsDefinitions = (
       label,
       text: getSafeInsertText(label),
       kind: 'Variable',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.fieldDefinition', {
+      detail: i18n.translate('esqlLanguage.esql.autocomplete.fieldDefinition', {
         defaultMessage: `Field specified by the input table`,
       }),
       category: SuggestionCategory.FIELD,
@@ -367,7 +367,7 @@ export const buildColumnSuggestions = (
   const fieldsSuggestions = columns.map((column) => {
     const fieldType = column.type.charAt(0).toUpperCase() + column.type.slice(1);
     const unmmapedSuffix = column.isUnmappedField
-      ? i18n.translate('kbn-esql-language.esql.autocomplete.unmappedFieldTypeSuffix', {
+      ? i18n.translate('esqlLanguage.esql.autocomplete.unmappedFieldTypeSuffix', {
           defaultMessage: ' - Unmapped Field',
         })
       : '';

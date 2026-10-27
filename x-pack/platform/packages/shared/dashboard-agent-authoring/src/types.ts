@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import type { InlinePanelOperationType, PanelContentAttempt } from './resolve_panel';
+import type { PanelContentAttempt } from './resolve_panel';
 
 /**
  * Turns a visualization attachment id into panel content. Injected like the other resolvers so
  * dashboard authoring stays free of store access. Synchronous because the attachment state is in memory.
  */
-export type ResolveAttachmentPanel = (
-  attachmentId: string,
-  operationType: InlinePanelOperationType
-) => PanelContentAttempt;
+export type ResolveAttachmentPanel = (attachmentId: string) => PanelContentAttempt;
 
 /** Whether a mapped field can back a `STATS BY` across the whole index, and why not. */
 export type ControlFieldCapability =
