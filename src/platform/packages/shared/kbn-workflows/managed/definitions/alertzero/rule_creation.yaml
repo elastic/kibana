@@ -282,6 +282,7 @@ steps:
 
           **Rule:** {{ steps.draft_creation.output.structured_output.rule.name }}
           **Recommended action:** Create the rule in the disabled state
+
           {% if inputs.review_context != blank %}{{ inputs.review_context }}
           {% else %}**Detection gap**
           {% if inputs.technique != null and inputs.technique != '' %}ATT&CK technique: {{ inputs.technique }}
