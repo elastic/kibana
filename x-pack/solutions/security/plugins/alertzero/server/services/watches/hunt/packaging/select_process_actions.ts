@@ -17,6 +17,7 @@ import type { CurrentRunHost, CurrentRunState, ProcessSelector } from './types';
 export type ProcessActionKind = 'kill' | 'suspend' | 'memory_dump';
 
 export type ProcessRule =
+  | 'exited'
   | 'protected_system_process'
   | 'stale'
   | 'destructive_technique'
@@ -181,6 +182,15 @@ export const selectProcessActions = ({
 }): ProcessDecision => {
   const process = describeProcess(selector);
   const canDump = host.capabilities.includes(MEMDUMP_PROCESS_CAPABILITY);
+
+  if (selector.exitedAt) {
+    return {
+      rule: 'exited',
+      actions: [],
+      why: `Rule: exited process; ${process} exited at ${selector.exitedAt}`,
+      heldBack: `No action was proposed for ${process} on ${host.name}: it exited at ${selector.exitedAt}`,
+    };
+  }
 
   if (isStale(selector, state)) {
     return {

@@ -44,6 +44,8 @@ export interface ProcessSelector {
   /** Full executable path (`process.executable`) when the source document carried one. */
   processExecutable?: string;
   observedAt?: string;
+  /** When Defend recorded this process's `end` event; absent while it is live or unknown. */
+  exitedAt?: string;
   /**
    * ATT&CK technique this specific process was matched against (from the source event's
    * `matched.technique_id`), when the event that produced this selector carried one. Lets the

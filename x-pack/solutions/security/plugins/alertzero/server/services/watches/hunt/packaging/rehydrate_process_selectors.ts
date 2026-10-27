@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { splitRemoteCluster } from '../../../../../common/remote_cluster';
+import { STALE_PROCESS_AGE_MS } from './select_process_actions';
 import type { ProcessSelector } from './types';
 
 /**
@@ -28,6 +29,8 @@ export type RehydrateProcessSelectors = (args: {
 const MAX_REHYDRATE_DOCS = 100;
 /** Bounds fan-out; an isolate-host-sized proposal count per host was already a lot. */
 const MAX_PROCESS_SELECTORS_PER_HOST = 5;
+/** Elastic Defend's process events: the only source whose entity_id a Defend action accepts. */
+const DEFEND_PROCESS_EVENTS_INDEX = 'logs-endpoint.events.process-*';
 
 const REHYDRATE_SOURCE_FIELDS = [
   '@timestamp',
@@ -80,6 +83,10 @@ interface Candidate {
   iocMatched: boolean;
 }
 
+interface ExitedAggregations {
+  exited: { buckets: Array<{ key: string; exited_at: { value_as_string: string } }> };
+}
+
 const asTypeList = (value: string | string[] | undefined): string[] =>
   value === undefined ? [] : Array.isArray(value) ? value : [value];
 
@@ -117,6 +124,73 @@ const isBetterCandidate = (next: Candidate, current: Candidate): boolean =>
   Boolean(next.techniqueId) !== Boolean(current.techniqueId)
     ? Boolean(next.techniqueId)
     : next.rankTimestamp > current.rankTimestamp;
+
+/**
+ * entity_id → when Defend recorded the process's `end` event, for the candidates that have
+ * exited. Fails open: on any error the processes are treated as live.
+ */
+const findExitedAt = async (
+  esClient: ElasticsearchClient,
+  candidates: Candidate[],
+  logger?: Logger
+): Promise<Map<string, string>> => {
+  const entityIds = candidates.flatMap(({ entityId }) => (entityId ? [entityId] : []));
+  if (entityIds.length === 0) {
+    return new Map();
+  }
+  try {
+    // An alert ref's timestamp is when the alert was created, which can be after the process
+    // ended, so the lower bound leaves a full stale window of slack.
+    const earliestObservedAt = Math.min(
+      ...candidates.map(({ timestamp }) => Date.parse(timestamp))
+    );
+    const response = await esClient.search<unknown, ExitedAggregations>({
+      index: DEFEND_PROCESS_EVENTS_INDEX,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { terms: { 'process.entity_id': entityIds } },
+            { term: { 'event.type': 'end' } },
+            {
+              range: {
+                '@timestamp': {
+                  gte: new Date(earliestObservedAt - STALE_PROCESS_AGE_MS).toISOString(),
+                },
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        exited: {
+          terms: { field: 'process.entity_id', size: entityIds.length },
+          aggs: { exited_at: { min: { field: '@timestamp' } } },
+        },
+      },
+    });
+    // A wildcard silently skips indices the user cannot read, so no shards means no answer.
+    if (response._shards.total === 0) {
+      logger?.warn(
+        'rehydrateProcessSelectors: no readable Defend process events index, treating processes as live'
+      );
+      return new Map();
+    }
+    return new Map(
+      (response.aggregations?.exited.buckets ?? []).map(({ key, exited_at: exitedAt }) => [
+        key,
+        exitedAt.value_as_string,
+      ])
+    );
+  } catch (err) {
+    logger?.warn(
+      `rehydrateProcessSelectors: exit lookup failed, treating processes as live — ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+    return new Map();
+  }
+};
 
 /**
  * Builds process selectors from the SSE's own event/alert refs via one `mget`, so kill-process
@@ -207,6 +281,10 @@ export const makeRehydrateProcessSelectors = (
       });
     }
 
+    const exitedAtByEntityId = await findExitedAt(esClient, [...byKey.values()], logger);
+    const exitedAtOf = ({ entityId }: Candidate): string | undefined =>
+      entityId === undefined ? undefined : exitedAtByEntityId.get(entityId);
+
     const byHost = new Map<string, Candidate[]>();
     for (const candidate of byKey.values()) {
       const list = byHost.get(candidate.hostName) ?? [];
@@ -216,10 +294,16 @@ export const makeRehydrateProcessSelectors = (
 
     const selectors: ProcessSelector[] = [];
     for (const list of byHost.values()) {
+      // Live before exited, so exited processes never crowd a live one out of the cap.
       const capped = list
-        .sort((a, b) => (a.timestamp < b.timestamp ? 1 : a.timestamp > b.timestamp ? -1 : 0))
+        .sort(
+          (a, b) =>
+            Number(exitedAtOf(a) !== undefined) - Number(exitedAtOf(b) !== undefined) ||
+            (a.timestamp < b.timestamp ? 1 : a.timestamp > b.timestamp ? -1 : 0)
+        )
         .slice(0, MAX_PROCESS_SELECTORS_PER_HOST);
       for (const candidate of capped) {
+        const exitedAt = exitedAtOf(candidate);
         selectors.push({
           pid: candidate.pid,
           entityId: candidate.entityId,
@@ -233,6 +317,7 @@ export const makeRehydrateProcessSelectors = (
           techniqueId: candidate.techniqueId,
           ...(candidate.techniqueIds.length > 0 ? { techniqueIds: candidate.techniqueIds } : {}),
           iocMatched: candidate.iocMatched,
+          ...(exitedAt ? { exitedAt } : {}),
         });
       }
     }
