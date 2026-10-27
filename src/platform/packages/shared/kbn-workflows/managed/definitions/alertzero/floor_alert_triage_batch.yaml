@@ -674,6 +674,10 @@ steps:
       rule_name: "{{ inputs.rule_name }}"
       confidence_floor: "${{ inputs.confidence_floor }}"
       impacted_entities: "${{ steps.classify_alerts.output.impacted_entities }}"
+      inconclusive_alert_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'inconclusive'
+            | map: 'alert_id' }}
 
   - name: resolve_grouping
     type: data.set
@@ -766,7 +770,9 @@ steps:
           author_name: "{{ consts.author_name }}"
           conversation_id: "{{ steps.create_proposal_investigation.output.conversation_id }}"
           message: |-
-            Proposing to close **{{ steps.process_mints.item.alert_ids.size }} alert{% if steps.process_mints.item.alert_ids.size != 1 %}s{% endif %}** from rule **{{ inputs.rule_name }}** as false positives.
+            Proposing to close **{{ steps.process_mints.item.alert_ids.size }} alert{% if steps.process_mints.item.alert_ids.size != 1 %}s{% endif %}** out of {{ variables.alert_count }} analyzed from rule **{{ inputs.rule_name }}** as false positives.
+
+            Verdicts across the batch: {{ steps.classify_alerts.output.false_positive_count }} false positive, {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.{% if steps.classify_alerts.output.inconclusive_count > 0 and steps.group_fp_candidates_call.output.inconclusive_alerts_page_query != blank %} [View the inconclusive alerts](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.group_fp_candidates_call.output.inconclusive_alerts_page_query }}){% endif %}
 
             Every one was classified as a false positive with confidence of at least {{ inputs.confidence_floor }}{% if steps.process_mints.item.kind == 'keyed' or steps.process_mints.item.kind == 'overflow' or steps.process_mints.item.kind == 'failed_join' %}, and they share one pattern{% else %}. They do not necessarily share a pattern{% endif %}.
             {%- assign shown = 0 -%}

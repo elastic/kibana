@@ -245,6 +245,9 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
           alerts_pooled: 0,
           proposals_created: 0,
           missing_alert_ids: missingAlertIds,
+          inconclusive_alerts_page_query: input.inconclusive_alert_ids?.length
+            ? buildAlertsPagePath(input.inconclusive_alert_ids, new Date().toISOString())
+            : '',
         };
         const foundIds = [...byId.keys()];
         if (foundIds.length === 0) return { output: empty };

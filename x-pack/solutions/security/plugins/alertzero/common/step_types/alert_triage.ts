@@ -204,6 +204,13 @@ const groupFpCandidatesInputSchema = lazySchema(() =>
       .max(100)
       .optional()
       .describe('Entities the analysis found. Each new proposal keeps those its alerts name.'),
+    inconclusive_alert_ids: z
+      .array(idSchema)
+      .max(1000)
+      .optional()
+      .describe(
+        'Alerts of the batch that were inconclusive, for the link in the proposal message.'
+      ),
     ...proposalTextInputShape,
   })
 );
@@ -250,6 +257,11 @@ const groupFpCandidatesOutputSchema = lazySchema(() =>
     alerts_pooled: z.number(),
     proposals_created: z.number(),
     missing_alert_ids: z.array(z.string()).describe('Ids that no longer match an alert.'),
+    inconclusive_alerts_page_query: z
+      .string()
+      .describe(
+        'Query string of the Alerts page link that shows the inconclusive alerts. Empty if none.'
+      ),
   })
 );
 
