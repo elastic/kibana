@@ -54,7 +54,7 @@ export function WorkflowExecutionsPage() {
       css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}
       data-test-subj="workflowExecutionsPage"
     >
-      <AppHeader title={executionsPageTitle} badges={headerBadges} />
+      <AppHeader title={executionsPageTitle} badges={headerBadges} spacing="compact" />
       <EuiScreenReaderOnly>
         <h2 id="workflowExecutionsTableLabel">{executionsPageTitle}</h2>
       </EuiScreenReaderOnly>
