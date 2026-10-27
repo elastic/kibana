@@ -810,10 +810,8 @@ export function applyDeploymentMethodView(
 // ── Main builder ─────────────────────────────────────────────────────────────
 
 /**
- * Whether a package or policy template offers AWS Identity Federation through its var_groups.
- * Fleet treats a var_group option carrying a cloud `provider` as the Cloud Connector option
- * (see Fleet's `getCloudConnectorOption`), so an option with `provider: 'aws'` is the
- * manifest's signal that the AWS service supports it.
+ * Fleet treats a var_group option with a cloud `provider` as the Cloud Connector option, so an
+ * option with `provider: 'aws'` is the manifest's signal of Identity Federation support.
  */
 export function hasIdentityFederationVarGroup(varGroups: PackageInfo['var_groups']): boolean {
   return (varGroups ?? []).some((group) =>
@@ -964,10 +962,8 @@ export function buildAwsServiceMatrix(
           // pt.inputs[] is empty for input packages, so the normal inputTitles loop below
           // never fires. Store pt.title here so getInputDisplayLabel can return it.
           if ((pt as any).title) inputTitles[ptInputType] = (pt as any).title as string;
-          // Input packages (e.g. otelcol) have no pt.inputs[], so the per-input IDF derivation
-          // below cannot run. They signal Identity Federation support the way Fleet detects it:
-          // a var_groups option carrying a cloud `provider` (package level, or on the policy
-          // template). Without one, the gate (`!== false`) must see an explicit false.
+          // Input packages have no pt.inputs[], so the per-input IDF derivation below cannot run;
+          // their manifest signals support through a var_group option with a cloud provider.
           identityFederationSupported = hasIdentityFederationVarGroup(
             (pt as any).var_groups ?? packageInfo.var_groups
           );
