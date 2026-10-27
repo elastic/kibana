@@ -40,16 +40,14 @@ describe('buildEpisodesBaseQuery', () => {
     expect(queryString).toContain('"ms"');
     expect(queryString).toContain('first_timestamp');
     expect(queryString).toContain('last_timestamp');
-    expect(queryString).toContain('WHERE _id == last_event_id');
+    expect(queryString).toContain('WHERE @timestamp == last_timestamp');
   });
 
   it('keeps a single row per episode when its latest events share a timestamp', () => {
     const esql = buildEpisodesBaseQuery(SPACE_ID).print('basic');
 
-    expect(esql).toMatch(/METADATA _source, _id/);
-    expect(esql).toContain('last_event_id = LAST(_id, @timestamp) BY episode.id');
-    expect(esql).toContain('| WHERE _id == last_event_id | DROP last_event_id');
-    expect(esql).not.toContain('@timestamp == last_timestamp');
+    expect(esql).toContain('| WHERE @timestamp == last_timestamp | LIMIT 1 BY episode.id');
+    expect(esql).not.toMatch(/\b_id\b/);
   });
 
   it('computes last_snooze_action and snoozed_until grouped by series_id', () => {
