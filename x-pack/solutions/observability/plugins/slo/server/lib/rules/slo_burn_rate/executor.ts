@@ -13,6 +13,7 @@ import type { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
 import { addTransactionLabels, withSpan } from '@kbn/apm-utils';
 import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { IBasePath } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { PROJECT_ROUTING_ORIGIN } from '@kbn/cps-server-utils';
 import { i18n } from '@kbn/i18n';
 import { flattenObject } from '@kbn/object-utils';
@@ -43,12 +44,14 @@ import {
   SUPPRESSED_PRIORITY_ACTION,
 } from '../../../../common/constants';
 import type { Duration, SLODefinition } from '../../../domain/models';
+import { SLONotFound } from '../../../errors';
 import { DefaultSLODefinitionRepository } from '../../../services';
 import type { EsSummaryDocument } from '../../../services/summary_transform_generator/helpers/create_temp_summary';
 import { getSloApmLabels } from '../../../services/utils';
 import { BURN_RATE_EXECUTOR_SPAN_NAMES } from './constants';
 import { evaluate } from './lib/evaluate';
 import { evaluateDependencies } from './lib/evaluate_dependencies';
+import { getAuthenticationFailure } from './lib/get_authentication_failure';
 import { shouldSuppressInstanceId } from './lib/should_suppress_instance_id';
 import { getSloSummary } from './lib/summary_repository';
 import type {
@@ -102,14 +105,34 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
         () => sloRepository.findById(params.sloId)
       );
     } catch (err) {
-      // Preserve the original failure as `cause` so callers can still inspect why the lookup failed
-      // (for example a 401) rather than only seeing a missing-SLO message.
-      throw createTaskRunError(
-        new Error(
-          `Rule "${options.rule.name}" ${options.rule.id} is referencing an SLO which cannot be found: "${params.sloId}": ${err.message}`,
-          { cause: err }
-        ),
-        TaskErrorSource.USER
+      // Classify the lookup failure (missing SLO, rejected rule API key, or anything else) and keep
+      // the original failure as `cause` so callers can still inspect it.
+      const { name, id } = options.rule;
+      const ruleLabel = `Rule "${name}" ${id}`;
+      const lookupError = (message: string, source = TaskErrorSource.USER) =>
+        createTaskRunError(new Error(message, { cause: err }), source);
+
+      if (err instanceof SLONotFound) {
+        throw lookupError(
+          `${ruleLabel} is referencing an SLO which cannot be found: "${params.sloId}": ${err.message}`
+        );
+      }
+
+      const authFailure = getAuthenticationFailure(err);
+      if (authFailure) {
+        const { statusCode = 'unknown', type = 'unknown' } = authFailure;
+        const reason =
+          statusCode === 403
+            ? `because the rule's API key is not authorized to read SLOs (403 ${type}). Re-save the rule as a user with SLO read privileges.`
+            : `because the rule's API key was rejected (${statusCode} ${type}). Re-save or re-enable the rule to regenerate its API key.`;
+        throw lookupError(`${ruleLabel} could not load SLO "${params.sloId}" ${reason}`);
+      }
+
+      throw lookupError(
+        `${ruleLabel} could not load SLO "${params.sloId}": ${err.message}`,
+        SavedObjectsErrorHelpers.isEsUnavailableError(err)
+          ? TaskErrorSource.FRAMEWORK
+          : TaskErrorSource.USER
       );
     }
 
