@@ -46,7 +46,7 @@ const ACTION_COPY: Record<
       }),
     body: i18n.translate('xpack.nightshift.sources.changeQueryModal.body', {
       defaultMessage:
-        'Its knowledge indicators and rules describe the old query, so they are deleted and any running onboarding is stopped. Onboard the source again to rebuild them.',
+        'Its knowledge indicators and rules describe the old query, so they are deleted and any running onboarding is stopped. An enabled source is then onboarded again with the new query.',
     }),
     confirmLabel: i18n.translate('xpack.nightshift.sources.changeQueryModal.confirm', {
       defaultMessage: 'Save and reset knowledge',

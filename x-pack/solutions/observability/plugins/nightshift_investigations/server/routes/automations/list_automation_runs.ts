@@ -14,7 +14,7 @@ import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_sa
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { readAutomationUsage } from '../../lib/automations/automation_budget';
 
-const SKIP_REASONS = ['daily_limit', 'investigation_limit'] as const;
+const SKIP_REASONS = ['daily_limit', 'investigation_limit', 'no_open_investigation'] as const;
 
 const mapRunStatus = (status: ExecutionStatus): 'succeeded' | 'running' | 'failed' | 'skipped' => {
   if (status === ExecutionStatus.COMPLETED) return 'succeeded';
@@ -91,6 +91,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         'trigger_alert_investigation',
         'trigger_investigation_alert',
         'trigger_investigation_slack',
+        'follow_up_recovered_alert',
       ].map((stepId) =>
         workflowsManagement.management.searchStepExecutions(
           {
@@ -108,14 +109,17 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         )
       )
     );
-    const [defaultSteps, legacyAlertSteps, alertSteps, slackSteps] = stepExecutions.map(
-      ({ results }) => new Map(results.map((step) => [step.workflowRunId, step]))
-    );
+    const [defaultSteps, legacyAlertSteps, alertSteps, slackSteps, recoveredAlertSteps] =
+      stepExecutions.map(
+        ({ results }) => new Map(results.map((step) => [step.workflowRunId, step]))
+      );
 
     const runs = executions.results.map((exec) => {
       const step =
         (exec.triggeredBy === 'alerting.v1.alertStatusChanged'
-          ? alertSteps.get(exec.id) ?? legacyAlertSteps.get(exec.id)
+          ? alertSteps.get(exec.id) ??
+            legacyAlertSteps.get(exec.id) ??
+            recoveredAlertSteps.get(exec.id)
           : exec.triggeredBy === 'slack2.message'
           ? slackSteps.get(exec.id)
           : undefined) ?? defaultSteps.get(exec.id);

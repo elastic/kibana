@@ -40,6 +40,12 @@ const getSkipReasonDescription = ({ skipReason, dailyLimit }: Run) => {
       values: { limit: dailyLimit ?? '—' },
     });
   }
+  if (skipReason === 'no_open_investigation') {
+    return i18n.translate('xpack.nightshift.automations.detail.noOpenInvestigationReason', {
+      defaultMessage:
+        'The alert recovered, but no open investigation holds it, so there was nothing to follow up on.',
+    });
+  }
   return '—';
 };
 
