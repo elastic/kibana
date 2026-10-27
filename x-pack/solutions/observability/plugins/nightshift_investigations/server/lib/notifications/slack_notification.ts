@@ -79,9 +79,18 @@ export const slackNotificationHandler: NotificationHandler = {
         }
         const resolvedChannel =
           data && typeof data === 'object' && 'channel' in data ? data.channel : undefined;
+        const externalConversationId =
+          data && typeof data === 'object' && 'externalConversationId' in data
+            ? data.externalConversationId
+            : undefined;
         return {
           status: 'sent',
           message_ts: messageTs,
+          ...(typeof externalConversationId === 'string' &&
+          externalConversationId.length > 0 &&
+          externalConversationId.length <= 500
+            ? { external_conversation_id: externalConversationId }
+            : {}),
           sent_at: new Date().toISOString(),
           channel:
             typeof resolvedChannel === 'string' &&

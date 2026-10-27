@@ -51,7 +51,7 @@ import {
 import type { InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
-  AlertSnapshot,
+  InvestigationAlertSnapshot,
   InvestigationContext,
   InvestigationSubject,
   InvestigationTriggerType,
@@ -63,7 +63,11 @@ import {
   DEFAULT_INVESTIGATION_TRIGGER_TYPE,
   freeFormContextSchema,
 } from '../../common';
-import { buildInvestigationMessage } from './build_investigation_message';
+import {
+  buildAlertRecoveredFollowUpMessage,
+  buildInvestigationMessage,
+  type AlertRecoveredMessageInput,
+} from './build_investigation_message';
 import {
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
@@ -72,6 +76,7 @@ import {
 } from './errors';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
 import {
+  findInvestigationConversation,
   findInvestigationConversations,
   getOrCreateInvestigationConversation,
   type InvestigationConversation,
@@ -93,6 +98,14 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 function asString(v: unknown): string | undefined {
   return typeof v === 'string' ? v || undefined : undefined;
 }
+
+/** `inputs.context.follow_up` of the investigation runs `followUpRecoveredAlert` starts. */
+const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
+
+const isAlertRecoveredFollowUp = (inputs: Record<string, unknown> | undefined): boolean => {
+  const context = inputs?.context;
+  return isPlainObject(context) && context.follow_up === ALERT_RECOVERED_FOLLOW_UP;
+};
 
 /** Keeps a derived summary to one readable line, since it is rendered as a list headline. */
 const MAX_DERIVED_SUBJECT_SUMMARY_LENGTH = 200;
@@ -312,6 +325,12 @@ const runsAsInvestigator = (
 
 const NOT_RUN_AS_INVESTIGATOR_MESSAGE =
   'Investigations only run as the Nightshift service account, through the entry point of the space.';
+type StoredWorkflow = NonNullable<
+  Awaited<ReturnType<WorkflowsServerPluginSetup['management']['getWorkflow']>>
+>;
+type InstalledWorkflow = StoredWorkflow & {
+  definition: NonNullable<StoredWorkflow['definition']>;
+};
 
 export interface NightshiftInvestigationsClientDeps {
   request: KibanaRequest;
@@ -416,7 +435,7 @@ export class NightshiftInvestigationsClient {
     subject: InvestigationSubject,
     message: string | undefined,
     context: InvestigationContext | AlertInvestigationContext
-  ): { message: string; context: Record<string, unknown>; alerts: AlertSnapshot[] } {
+  ): { message: string; context: Record<string, unknown>; alerts: InvestigationAlertSnapshot[] } {
     if (subject.type === 'alert') {
       const parsed = alertInvestigationContextSchema.safeParse(context);
       if (!parsed.success) {
@@ -457,7 +476,7 @@ export class NightshiftInvestigationsClient {
     if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
-    const { workflowsManagement, agentBuilder, agenticInvestigations } = this.requireWriteDeps();
+    const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
     if (!this.inference || !this.savedObjects || !this.uiSettings) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
@@ -482,24 +501,7 @@ export class NightshiftInvestigationsClient {
     const spaceId = this.getSpaceId();
     this.warnOnSpaceMismatch(spaceId);
 
-    // Investigations only run as the Nightshift service account, through the entry point an admin
-    // binds in each space. There is no fallback that runs as the caller.
-    if (!this.isServiceAccountExecutionEnabled()) {
-      throw new InvestigationUnavailableError(SERVICE_ACCOUNT_REQUIRED_MESSAGE);
-    }
-    const workflowId = getBoundInvestigationWorkflowId(spaceId);
-    const workflow = await workflowsManagement.management.getWorkflow(
-      workflowId,
-      spaceId,
-      this.request
-    );
-
-    if (!workflow?.definition || !isEntryPointReady(workflow)) {
-      this.logger.warn(
-        `Investigation workflow "${workflowId}" is not set up in space "${spaceId}"; an admin must enable the Nightshift service account`
-      );
-      throw new InvestigationUnavailableError(SERVICE_ACCOUNT_REQUIRED_MESSAGE);
-    }
+    const workflow = await this.getInvestigationWorkflow(spaceId);
 
     const { alerts } = prepared;
     const newInvestigationId = uuidv4();
@@ -550,9 +552,6 @@ export class NightshiftInvestigationsClient {
       ...(source_ids?.length ? { source_ids } : {}),
       ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
       investigation_id: investigationId,
-      // The entry point caps its investigation step with this, rather than the run overriding
-      // `settings.timeout`: a workflow bound to a service account only runs its saved definition.
-      ...(timeout_seconds === undefined ? {} : { timeout_seconds }),
       subjects: newSubjects,
       ...(parsedNotificationDestinations?.length
         ? { notificationDestinations: parsedNotificationDestinations }
@@ -566,15 +565,11 @@ export class NightshiftInvestigationsClient {
       },
     };
 
-    const executionId = await workflowsManagement.management.runWorkflow(
-      // Runs the entry point exactly as it is stored: a workflow bound to a service account only
-      // runs its saved definition, so the per-run timeout travels as an input instead.
-      { ...workflow, definition: workflow.definition },
+    const executionId = await this.runInvestigationWorkflow(
+      workflow,
       spaceId,
       inputs,
-      this.request,
-      // The entry point refuses runs without it.
-      NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE
+      timeout_seconds
     );
 
     if (!isFollowUp) {
@@ -623,6 +618,52 @@ export class NightshiftInvestigationsClient {
         }`
       );
     }
+  }
+
+  /**
+   * The space's investigation entry point, which runs as the Nightshift agent service account.
+   * Investigations only run through it: there is no fallback that runs as the caller.
+   */
+  private async getInvestigationWorkflow(spaceId: string): Promise<InstalledWorkflow> {
+    const { workflowsManagement } = this.requireWriteDeps();
+    if (!this.isServiceAccountExecutionEnabled()) {
+      throw new InvestigationUnavailableError(SERVICE_ACCOUNT_REQUIRED_MESSAGE);
+    }
+    const workflowId = getBoundInvestigationWorkflowId(spaceId);
+    const workflow = await workflowsManagement.management.getWorkflow(
+      workflowId,
+      spaceId,
+      this.request
+    );
+    if (!workflow?.definition || !isEntryPointReady(workflow)) {
+      this.logger.warn(
+        `Investigation workflow "${workflowId}" is not set up in space "${spaceId}"; an admin must enable the Nightshift service account`
+      );
+      throw new InvestigationUnavailableError(SERVICE_ACCOUNT_REQUIRED_MESSAGE);
+    }
+    return { ...workflow, definition: workflow.definition };
+  }
+
+  /**
+   * Runs the space's entry point exactly as it is stored: a workflow bound to a service account
+   * only runs its saved definition, so a caller's timeout travels as an input, which the entry
+   * point applies to the step that runs the investigation.
+   */
+  private async runInvestigationWorkflow(
+    workflow: InstalledWorkflow,
+    spaceId: string,
+    inputs: Record<string, unknown>,
+    timeoutSeconds?: number
+  ): Promise<string> {
+    const { workflowsManagement } = this.requireWriteDeps();
+    return workflowsManagement.management.runWorkflow(
+      workflow,
+      spaceId,
+      timeoutSeconds === undefined ? inputs : { ...inputs, timeout_seconds: timeoutSeconds },
+      this.request,
+      // The entry point refuses runs it did not start.
+      NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE
+    );
   }
 
   /** Charges the daily automatic quota for a start that opens a new investigation. */
@@ -789,6 +830,14 @@ export class NightshiftInvestigationsClient {
     const conversations = await agentBuilder.conversations.getScopedClient({
       request: this.request,
     });
+    // A recovery follow-up waits in the investigation's queue after its lookup found it open, so
+    // it only continues an investigation that is still open when it gets its turn.
+    if (isAlertRecoveredFollowUp(inputs)) {
+      const found = await findInvestigationConversation(conversations, investigationId);
+      if (found?.status !== 'open') {
+        throw new InvestigationNotFoundError(investigationId);
+      }
+    }
     const conversation = await getOrCreateInvestigationConversation({
       conversations,
       id: investigationId,
@@ -1090,6 +1139,120 @@ export class NightshiftInvestigationsClient {
         slack: { channel, thread_ts: threadTs, status_message_ts: messageTs },
       },
     ]);
+  }
+
+  /**
+   * Runs a recovery round on the open investigation holding a recovered alert, with a brief
+   * asking whether the recovery confirms its root cause. Resolves to undefined, and runs nothing,
+   * when no open investigation holds the alert: a recovery never starts an investigation, so it is
+   * not charged to the automatic quota. The round waits in the investigation's queue and only
+   * works on the investigation if it is still open when its turn comes; the returned execution
+   * records what became of it.
+   */
+  async followUpRecoveredAlert(
+    alertInput: Omit<AlertRecoveredMessageInput, 'snapshot'>
+  ): Promise<{ investigation_id: string; execution_id: string } | undefined> {
+    if (!(await this.checkInfrastructureAvailability())) {
+      throw new InvestigationUnavailableError('Investigations are not available');
+    }
+    const { agenticInvestigations } = this.requireWriteDeps();
+    const { alertUuid } = alertInput;
+    const existing = await this.findOpenInvestigationHoldingAlert(alertUuid);
+    if (!existing) {
+      this.logger.debug(`No open investigation holds alert/${alertUuid}; no recovery round to run`);
+      return undefined;
+    }
+
+    const subjectsClient = agenticInvestigations.getSubjectsClient(this.request);
+    const alertSubject = (await subjectsClient.listByConversationIds([existing.id])).find(
+      ({ subjectType, subjectId }) => subjectType === 'alert' && subjectId === alertUuid
+    );
+    const message = buildAlertRecoveredFollowUpMessage({
+      ...alertInput,
+      snapshot: alertSubject?.snapshot,
+    });
+
+    const spaceId = this.getSpaceId();
+    this.warnOnSpaceMismatch(spaceId);
+    const workflow = await this.getInvestigationWorkflow(spaceId);
+    const executionId = await this.runInvestigationWorkflow(workflow, spaceId, {
+      investigation_id: existing.id,
+      message,
+      context: { source: 'alert', follow_up: ALERT_RECOVERED_FOLLOW_UP },
+    });
+    this.logger.info(
+      `Requested a recovery round on investigation "${existing.id}" for alert/${alertUuid}, execution_id=${executionId}`
+    );
+    return { investigation_id: existing.id, execution_id: executionId };
+  }
+
+  /**
+   * The most recently updated open investigation that records the alert as a subject. Subjects are
+   * recorded by an investigation's first run, so an investigation whose first run has not started
+   * yet is not found.
+   */
+  private async findOpenInvestigationHoldingAlert(
+    alertUuid: string
+  ): Promise<InvestigationConversation | undefined> {
+    const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
+    const open = await agenticInvestigations
+      .getInvestigationsClient(this.request)
+      .findOpenBySubjects([{ type: 'alert', id: alertUuid }]);
+    if (open.length === 0) return undefined;
+    const conversations = await agentBuilder.conversations.getScopedClient({
+      request: this.request,
+    });
+    const candidates = await findInvestigationConversations(
+      conversations,
+      open.map(({ id }) => id)
+    );
+    return candidates.find(({ status }) => status === 'open');
+  }
+
+  /**
+   * Claims the Slack thread a root notification started for the investigation, so a mention or
+   * reply in it reaches the investigation. `externalConversationId` is the thread key the Relay
+   * returned for the post. A thread another investigation holds is left with that one. Resolves to
+   * whether the investigation now holds the thread.
+   */
+  async claimSlackThread({
+    investigationId,
+    externalConversationId,
+    channel,
+    threadTs,
+  }: {
+    investigationId: string;
+    externalConversationId: string;
+    channel: string;
+    threadTs: string;
+  }): Promise<boolean> {
+    const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
+    const conversations = await agentBuilder.conversations.getScopedClient({
+      request: this.request,
+    });
+    const subjectsClient = agenticInvestigations.getSubjectsClient(this.request);
+    const claim = await subjectsClient.claimSubjects({
+      conversationId: investigationId,
+      subjects: [{ type: 'slack_thread', id: externalConversationId }],
+      isHolderOpen: async (conversationId) => {
+        const [holder] = await findInvestigationConversations(conversations, [conversationId]);
+        return holder?.status === 'open';
+      },
+    });
+    if (!claim.claimed) {
+      this.logger.warn(
+        `Slack thread "${externalConversationId}" is held by investigation "${claim.heldBy}"; not claiming it for "${investigationId}"`
+      );
+      return false;
+    }
+    await subjectsClient.upsertSubjects(investigationId, [
+      {
+        type: 'slack_thread',
+        id: externalConversationId,
+        slack: { channel, thread_ts: threadTs },
+      },
+    ]);
+    return true;
   }
 
   /**

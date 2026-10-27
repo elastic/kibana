@@ -64,6 +64,11 @@ const mockUseFetchAutomations = useFetchAutomations as jest.Mock;
 const mockUseToggleAutomation = useToggleAutomation as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 
+const uiSettingsValues: Record<string, string> = {
+  'dateFormat:tz': 'Browser',
+  'dateFormat:dow': 'Sunday',
+};
+
 describe('AutomationsPage', () => {
   beforeAll(() => {
     Element.prototype.scrollIntoView = jest.fn();
@@ -78,6 +83,9 @@ describe('AutomationsPage', () => {
         application: { capabilities: { nightshift: { manage: true } }, navigateToUrl: jest.fn() },
         http: { basePath: { prepend: (path: string) => path } },
         charts: { theme: { useChartsBaseTheme: () => ({}), useSparklineOverrides: () => ({}) } },
+        uiSettings: {
+          get: jest.fn((key: string) => uiSettingsValues[key]),
+        },
       },
     });
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
@@ -490,7 +498,12 @@ describe('AutomationsPage', () => {
 
     it('hides management actions for read-only users', () => {
       mockUseKibana.mockReturnValue({
-        services: { application: { capabilities: { nightshift: {} } } },
+        services: {
+          application: { capabilities: { nightshift: {} } },
+          uiSettings: {
+            get: jest.fn((key: string) => uiSettingsValues[key]),
+          },
+        },
       });
       renderPage();
 
