@@ -80,7 +80,8 @@ export const withHitlClaim = async <T>(
     return await resume();
   } catch (error) {
     if (isResumeNotPendingError(error)) {
-      onRelease?.(await releaseClaimAfterFailedResume(params));
+      const released = await releaseClaimAfterFailedResume(params);
+      onRelease?.(released);
     }
     throw unwrapResumeError(error);
   }
