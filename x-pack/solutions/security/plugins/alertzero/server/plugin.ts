@@ -230,11 +230,15 @@ export class AlertZeroPlugin
       });
       agentBuilder.skills.register(createActionDiscoverySkill(assertAlertZeroAccess));
       // `ai.conversation.updated` is opt-in, so Agent Builder only emits it where a consumer
-      // subscribes. Scoped per space, like the routes, so spaces without AlertZero stay quiet.
+      // subscribes. Scoped per space, like the routes, so spaces without AlertZero, and Classic
+      // spaces, stay quiet.
       agentBuilder.conversations.enableUpdatedTrigger({
         templateIds: [TEMPLATE_ID_INVESTIGATION, TEMPLATE_ID_ESCALATION],
         isEnabled: async (request) => {
-          const [{ savedObjects, uiSettings }] = await coreSetup.getStartServices();
+          const [{ savedObjects, uiSettings }, { spaces }] = await coreSetup.getStartServices();
+          if (!(await isSpaceSupported({ isServerless: this.isServerless, spaces, request }))) {
+            return false;
+          }
           return uiSettings
             .asScopedToClient(savedObjects.getScopedClient(request))
             .get<boolean>(ALERTZERO_ENABLED_SETTING_ID);
