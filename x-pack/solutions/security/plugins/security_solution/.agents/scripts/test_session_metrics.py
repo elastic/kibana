@@ -26,7 +26,6 @@ from session_metrics import (  # noqa: E402
     PriceCatalog,
     TokenTotals,
     build_session_metrics,
-    estimate_cost_usd,
     estimate_session_cost,
     fetch_price_catalog,
     find_model_price,
@@ -541,7 +540,7 @@ class SessionMetricsParserTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            cost = estimate_cost_usd(parse_transcript(transcript).usage_by_model, CATALOG)
+            cost = estimate_session_cost(parse_transcript(transcript).usage_by_model, CATALOG).usd
 
             sonnet_5_5 = 2 * 2e-6 + 10 * 1e-5 + 1000 * 1e-7 + 40 * 2.5e-6 + 60 * 4e-6
             sonnet_5 = 2 * 2e-6 + 20 * 1e-5 + 1000 * 2e-7 + 100 * 2.5e-6
@@ -564,8 +563,8 @@ class SessionMetricsParserTests(unittest.TestCase):
 
             for transcript in (unknown, no_model):
                 usage_by_model = parse_transcript(transcript).usage_by_model
-                self.assertIsNone(estimate_cost_usd(usage_by_model, CATALOG))
-            self.assertIsNone(estimate_cost_usd({}, CATALOG))
+                self.assertIsNone(estimate_session_cost(usage_by_model, CATALOG).usd)
+            self.assertIsNone(estimate_session_cost({}, CATALOG).usd)
 
     def test_model_less_usage_is_left_out_only_below_one_percent_of_the_cost(self):
         cache_reads = ModelUsage(TokenTotals(cache_read_input_tokens=990_000))

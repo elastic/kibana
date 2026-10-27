@@ -412,7 +412,8 @@ def estimate_session_cost(
     model_less = usage_by_model.get(None)
     if model_less is None:
         return SessionCost(usd=cost)
-    # Priced at the session's highest prices, the left-out share is an upper bound.
+    # Priced at the session's highest prices, the left-out share is an upper bound
+    # across the session's models.
     # When the named models cost $0 (e.g. aborted responses), any model-less usage is over 1%.
     highest = _highest_prices(list(prices.values()))
     if _usage_cost(model_less, highest) > cost * MAX_MODEL_LESS_COST_SHARE:
@@ -432,26 +433,15 @@ def _highest_prices(prices: Sequence[ModelPrice]) -> ModelPrice:
     )
 
 
-def estimate_cost_usd(
-    usage_by_model: Mapping[str | None, ModelUsage],
-    catalog: PriceCatalog,
-) -> float | None:
-    """Return the list-price cost in USD, or None when any model has no price."""
-    prices = _resolve_prices(usage_by_model, catalog)
-    if prices is None:
-        return None
-    return _priced_cost(usage_by_model, prices)
-
-
 def _resolve_prices(
-    usage_by_model: Mapping[str | None, ModelUsage],
+    usage_by_model: Mapping[str, ModelUsage],
     catalog: PriceCatalog,
-) -> dict[str | None, ModelPrice] | None:
+) -> dict[str, ModelPrice] | None:
     if not usage_by_model:
         return None
-    prices: dict[str | None, ModelPrice] = {}
+    prices: dict[str, ModelPrice] = {}
     for model in usage_by_model:
-        price = find_model_price(catalog, model) if model else None
+        price = find_model_price(catalog, model)
         if price is None:
             return None
         prices[model] = price
@@ -459,8 +449,8 @@ def _resolve_prices(
 
 
 def _priced_cost(
-    usage_by_model: Mapping[str | None, ModelUsage],
-    prices: Mapping[str | None, ModelPrice],
+    usage_by_model: Mapping[str, ModelUsage],
+    prices: Mapping[str, ModelPrice],
 ) -> float:
     return sum(_usage_cost(usage_by_model[model], price) for model, price in prices.items())
 
