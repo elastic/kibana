@@ -1393,18 +1393,31 @@ describe('floor_alert_triage_batch — grouping', () => {
     ).toContain('[View the added alerts](/s/team/app/security/alerts?filters=x)');
   });
 
-  it('reports whether the batch created a conversation, which only a new proposal does', () => {
+  it('reports whether the batch created a conversation, for a proposal, a failure or its own alerts', () => {
     const input = stepByName('report_batch_grouped')?.with as Record<string, string>;
     const count = stepByName('count_grouping')?.with?.mint_count as string;
     expect(evalExpr(count, { variables: { group_mints: [{}, {}] } })).toBe(2);
-    const created = (mints: number, failures: number) =>
+    const created = (mints: number, failures: number, batchConversation = false) =>
       evalExpr(input.conversation_created, {
-        variables: { mint_count: mints, failure_conversation_count: failures },
+        variables: {
+          mint_count: mints,
+          failure_conversation_count: failures,
+          batch_conversation_created: batchConversation,
+        },
       });
     expect(created(2, 0)).toBe(true);
     expect(created(0, 0)).toBe(false);
     // A failure that does not end the run (no verdicts, or some alerts without one) opens one too.
     expect(created(0, 1)).toBe(true);
+    // A batch of true positives only has no proposal, but its alerts get an Investigation.
+    expect(created(0, 0, true)).toBe(true);
+  });
+
+  it('reports the grouping after the alerts in no proposal are routed, which may create the Investigation', () => {
+    const order = parsed.steps.map((step) => step.name);
+    expect(order.indexOf('report_batch_grouped')).toBeGreaterThan(
+      order.indexOf('route_other_alerts')
+    );
   });
 
   it('counts the failure Investigations that do not end the run, and only those', () => {

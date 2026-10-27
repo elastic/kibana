@@ -694,26 +694,6 @@ steps:
       mint_count: "${{ variables.group_mints | size }}"
       join_count: "${{ variables.group_joins | size }}"
 
-  # Telemetry: how well the keys group the batch, and what grouping did with it.
-  - name: report_batch_grouped
-    type: alertzero.reportWorkerOutcome
-    if: "${{ variables.verdict_count > 0 and steps.tag_pattern_keys.error == blank }}"
-    on-failure:
-      continue: true
-    with:
-      event: alert_triage_batch_grouped
-      alerts_with_strict_key: "${{ steps.tag_pattern_keys.output.alerts_with_strict_key }}"
-      strict_keys: "${{ steps.tag_pattern_keys.output.strict_keys }}"
-      strict_keys_single_alert: "${{ steps.tag_pattern_keys.output.strict_keys_single_alert }}"
-      wide_keys: "${{ steps.tag_pattern_keys.output.wide_keys }}"
-      wide_keys_single_alert: "${{ steps.tag_pattern_keys.output.wide_keys_single_alert }}"
-      fp_candidates_on_fallback: "${{ steps.tag_pattern_keys.output.fp_candidates_on_fallback }}"
-      grouping: "{% if variables.fp_candidate_count == 0 %}no_candidates{% else %}{{ steps.group_fp_candidates_call.output.grouping | default: 'no_candidates' }}{% endif %}"
-      alerts_joined: "${{ steps.group_fp_candidates_call.output.alerts_joined | default: 0 }}"
-      proposals_created: "${{ steps.group_fp_candidates_call.output.proposals_created | default: 0 }}"
-      alerts_pooled: "${{ steps.group_fp_candidates_call.output.alerts_pooled | default: 0 }}"
-      conversation_created: "${{ variables.mint_count > 0 or variables.failure_conversation_count > 0 }}"
-
   # One Investigation per new proposal, seeded from the `investigation` template, with its alerts and
   # impacted entities attached. The alerts get `az:proposal:<root id>`, so an analyst can find
   # the proposal from an alert. The tag is not a verdict tag, so the sweep ignores it.
@@ -1026,6 +1006,27 @@ steps:
               event: worker_investigation_closed
               investigation_id: "{{ variables.home_conversation_id }}"
               close_reason: other
+
+  # Telemetry: how well the keys group the batch, and what grouping did with it. After the alerts in no
+  # proposal are routed, because that can create the batch's only Investigation.
+  - name: report_batch_grouped
+    type: alertzero.reportWorkerOutcome
+    if: "${{ variables.verdict_count > 0 and steps.tag_pattern_keys.error == blank }}"
+    on-failure:
+      continue: true
+    with:
+      event: alert_triage_batch_grouped
+      alerts_with_strict_key: "${{ steps.tag_pattern_keys.output.alerts_with_strict_key }}"
+      strict_keys: "${{ steps.tag_pattern_keys.output.strict_keys }}"
+      strict_keys_single_alert: "${{ steps.tag_pattern_keys.output.strict_keys_single_alert }}"
+      wide_keys: "${{ steps.tag_pattern_keys.output.wide_keys }}"
+      wide_keys_single_alert: "${{ steps.tag_pattern_keys.output.wide_keys_single_alert }}"
+      fp_candidates_on_fallback: "${{ steps.tag_pattern_keys.output.fp_candidates_on_fallback }}"
+      grouping: "{% if variables.fp_candidate_count == 0 %}no_candidates{% else %}{{ steps.group_fp_candidates_call.output.grouping | default: 'no_candidates' }}{% endif %}"
+      alerts_joined: "${{ steps.group_fp_candidates_call.output.alerts_joined | default: 0 }}"
+      proposals_created: "${{ steps.group_fp_candidates_call.output.proposals_created | default: 0 }}"
+      alerts_pooled: "${{ steps.group_fp_candidates_call.output.alerts_pooled | default: 0 }}"
+      conversation_created: "${{ variables.mint_count > 0 or variables.failure_conversation_count > 0 or variables.batch_conversation_created }}"
 
   # ---------------------------------------------------------------------------
   # 8. Write a verdict note to each alert referencing the Investigation (R4, R13).
