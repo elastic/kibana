@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import type { PanelOpenerChildDefinition } from '@kbn/core-chrome-browser';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -19,5 +19,5 @@ export interface EntityInventoryAppStartDependencies {
 export interface EntityInventoryAppPublicSetup {}
 
 export interface EntityInventoryAppPublicStart {
-  navTreeChildren: NodeDefinition[];
+  navTreeGroup: PanelOpenerChildDefinition;
 }

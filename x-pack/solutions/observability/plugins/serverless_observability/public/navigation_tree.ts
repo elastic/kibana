@@ -8,7 +8,6 @@
 import type {
   AppDeepLinkId,
   NavigationTreeDefinition,
-  NodeDefinition,
   PanelOpenerChildDefinition,
   RootNodeDefinition,
 } from '@kbn/core-chrome-browser';
@@ -40,7 +39,7 @@ export const createNavigationTree = ({
   genAiSettingsAvailable = true,
   isCasesAvailable = true,
   showAiAssistant = true,
-  entityInventoryNavChildren,
+  entityInventoryNavGroup,
 }: {
   core: CoreStart;
   significantEventsAvailable?: boolean;
@@ -49,7 +48,7 @@ export const createNavigationTree = ({
   genAiSettingsAvailable?: boolean;
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
-  entityInventoryNavChildren?: NodeDefinition[];
+  entityInventoryNavGroup?: PanelOpenerChildDefinition;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -232,16 +231,7 @@ export const createNavigationTree = ({
               { link: 'metrics:settings', sideNavStatus: 'hidden' },
             ],
           },
-          ...(entityInventoryNavChildren
-            ? [
-                {
-                  title: i18n.translate('xpack.serverlessObservability.nav.entityInventory', {
-                    defaultMessage: 'Entity Inventory',
-                  }),
-                  children: entityInventoryNavChildren,
-                },
-              ]
-            : []),
+          ...(entityInventoryNavGroup ? [entityInventoryNavGroup] : []),
           {
             id: 'profiling',
             title: i18n.translate('xpack.serverlessObservability.nav.profiling', {

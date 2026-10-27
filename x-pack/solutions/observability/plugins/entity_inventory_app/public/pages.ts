@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ENTITY_INVENTORY_TITLE = i18n.translate('xpack.entityInventoryApp.appTitle', {
+  defaultMessage: 'Entity Inventory',
+});
+
 /**
  * Each page here requires a matching ID in EntityInventoryAppLinkId:
  * src/platform/packages/shared/deeplinks/observability/deep_links.ts

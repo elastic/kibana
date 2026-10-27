@@ -6,7 +6,11 @@
  */
 
 import { createNavigationTree, filterForFeatureAvailability } from './navigation_tree';
-import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
+import type {
+  NavigationTreeDefinition,
+  NodeDefinition,
+  PanelOpenerChildDefinition,
+} from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { NightshiftNavigationIcon } from '@kbn/observability-plugin/public';
@@ -336,24 +340,28 @@ describe('Navigation Tree', () => {
       expect(children.find((item) => item.title === 'Entity Inventory')).toBeUndefined();
     });
 
-    it('includes the group with the links provided by the plugin when it is present', () => {
-      const entityInventoryNavChildren: NodeDefinition[] = [
-        { link: 'entityInventoryApp:allResources' as const },
-        { link: 'entityInventoryApp:hosts' as const },
-        { link: 'entityInventoryApp:kubernetes' as const },
-      ];
+    it('includes the group provided by the plugin when it is present', () => {
+      const entityInventoryNavGroup: PanelOpenerChildDefinition = {
+        title: 'Entity Inventory',
+        children: [
+          { link: 'entityInventoryApp:allResources' as const },
+          { link: 'entityInventoryApp:hosts' as const },
+          { link: 'entityInventoryApp:kubernetes' as const },
+        ],
+      };
 
-      const children = getInfrastructureSectionChildren({ core, entityInventoryNavChildren });
+      const children = getInfrastructureSectionChildren({ core, entityInventoryNavGroup });
 
-      expect(children.find((item) => item.title === 'Entity Inventory')?.children).toEqual(
-        entityInventoryNavChildren
-      );
+      expect(children).toContainEqual(entityInventoryNavGroup);
     });
 
     it('keeps the original Infrastructure links when the plugin is present', () => {
       const children = getInfrastructureSectionChildren({
         core,
-        entityInventoryNavChildren: [{ link: 'entityInventoryApp:allResources' as const }],
+        entityInventoryNavGroup: {
+          title: 'Entity Inventory',
+          children: [{ link: 'entityInventoryApp:allResources' as const }],
+        },
       });
       const infrastructureLinks = children[0].children?.map((item) => item.link);
 

@@ -15,7 +15,7 @@ import { Redirect, useLocation } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
-import { ENTITY_INVENTORY_PAGES } from '../pages';
+import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from '../pages';
 
 interface EntityInventoryShellProps {
   PageTemplate: ObservabilitySharedPluginStart['navigation']['PageTemplate'];
@@ -46,10 +46,7 @@ const TECH_PREVIEW_BADGE: AppHeaderBadge[] = [
 function EntityInventoryShell({ PageTemplate }: EntityInventoryShellProps) {
   const { pathname } = useLocation();
   const title =
-    ENTITY_INVENTORY_PAGES.find((page) => page.path === pathname)?.title ??
-    i18n.translate('xpack.entityInventoryApp.entityInventoryTitle', {
-      defaultMessage: 'Entity Inventory',
-    });
+    ENTITY_INVENTORY_PAGES.find((page) => page.path === pathname)?.title ?? ENTITY_INVENTORY_TITLE;
 
   return (
     <PageTemplate isPageDataLoaded={true} pageSectionProps={{ paddingSize: 'none' }}>

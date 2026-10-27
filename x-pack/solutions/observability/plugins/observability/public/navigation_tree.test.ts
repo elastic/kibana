@@ -94,20 +94,21 @@ describe('Observability solution navigation tree', () => {
       expect(entityGroup).toBeUndefined();
     });
 
-    it('includes the Entity Inventory group with its three links when the plugin is present', async () => {
-      const navTreeChildren: NodeDefinition[] = [
-        { link: 'entityInventoryApp:allResources' as const },
-        { link: 'entityInventoryApp:hosts' as const },
-        { link: 'entityInventoryApp:kubernetes' as const },
-      ];
+    it('includes the group provided by the plugin, with its three links, when it is present', async () => {
+      const navTreeGroup: NodeDefinition = {
+        title: 'Entity Inventory',
+        children: [
+          { link: 'entityInventoryApp:allResources' as const },
+          { link: 'entityInventoryApp:hosts' as const },
+          { link: 'entityInventoryApp:kubernetes' as const },
+        ],
+      };
 
       const children = await getInfrastructureSectionChildren({
-        navTreeChildren,
+        navTreeGroup,
       } as unknown as ObservabilityPublicPluginsStart['entityInventoryApp']);
 
-      const entityGroup = children.find((item) => item.title === 'Entity Inventory');
-      expect(entityGroup).toBeDefined();
-      expect(entityGroup?.children).toEqual(navTreeChildren);
+      expect(children).toContainEqual(navTreeGroup);
     });
 
     it('keeps the original Infrastructure links regardless of entity inventory plugin state', async () => {

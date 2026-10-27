@@ -12,8 +12,7 @@ import type {
   CoreStart,
   Plugin,
 } from '@kbn/core/public';
-import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import { i18n } from '@kbn/i18n';
+import type { PanelOpenerChildDefinition } from '@kbn/core-chrome-browser';
 import { of } from 'rxjs';
 import type {
   EntityInventoryAppPublicSetup,
@@ -21,7 +20,7 @@ import type {
   EntityInventoryAppSetupDependencies,
   EntityInventoryAppStartDependencies,
 } from './types';
-import { ENTITY_INVENTORY_PAGES } from './pages';
+import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from './pages';
 
 export class EntityInventoryAppPlugin
   implements
@@ -40,9 +39,7 @@ export class EntityInventoryAppPlugin
 
     core.application.register({
       id: 'entityInventoryApp',
-      title: i18n.translate('xpack.entityInventoryApp.appTitle', {
-        defaultMessage: 'Entity Inventory',
-      }),
+      title: ENTITY_INVENTORY_TITLE,
       appRoute: '/app/entity-inventory',
       visibleIn: [],
       deepLinks: ENTITY_INVENTORY_PAGES.map(({ deepLinkId, title, path }) => ({
@@ -68,9 +65,7 @@ export class EntityInventoryAppPlugin
     plugins.observabilityShared.navigation.registerSections(
       of([
         {
-          label: i18n.translate('xpack.entityInventoryApp.nav.entitiesLabel', {
-            defaultMessage: 'Entity Inventory',
-          }),
+          label: ENTITY_INVENTORY_TITLE,
           sortKey: 300,
           entries: ENTITY_INVENTORY_PAGES.map(({ title, path }) => ({
             label: title,
@@ -81,8 +76,9 @@ export class EntityInventoryAppPlugin
       ])
     );
 
-    const navTreeChildren: NodeDefinition[] = ENTITY_INVENTORY_PAGES.map(
-      ({ deepLinkId, title, path }) => ({
+    const navTreeGroup: PanelOpenerChildDefinition = {
+      title: ENTITY_INVENTORY_TITLE,
+      children: ENTITY_INVENTORY_PAGES.map(({ deepLinkId, title, path }) => ({
         link: `entityInventoryApp:${deepLinkId}` as const,
         title,
         getIsActive: ({
@@ -92,9 +88,9 @@ export class EntityInventoryAppPlugin
           pathNameSerialized: string;
           prepend: (p: string) => string;
         }) => pathNameSerialized.startsWith(prepend(`/app/entity-inventory${path}`)),
-      })
-    );
+      })),
+    };
 
-    return { navTreeChildren };
+    return { navTreeGroup };
   }
 }
