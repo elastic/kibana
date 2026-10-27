@@ -210,7 +210,23 @@ export function NightshiftAppHeader({
             ]
           : []),
 
-        // Detections: Sources and Settings as buttons.
+        // Detections: Knowledge in overflow; Sources and Settings as buttons.
+        ...(isDetectionPage && onKnowledgeClick && knowledgeHref
+          ? [
+              {
+                id: 'nightshiftKnowledge',
+                label: knowledgeLabel,
+                iconType: 'documentation' as const,
+                href: knowledgeHref,
+                run: (params?: AppMenuRunActionParams) => {
+                  applyEbtProps(knowledgeEbtProps, params);
+                  void onKnowledgeClick();
+                },
+                testId: 'nightshiftKnowledgeLink',
+                overflow: true,
+              },
+            ]
+          : []),
         ...(isDetectionPage && onSourcesClick && sourcesHref
           ? [
               {

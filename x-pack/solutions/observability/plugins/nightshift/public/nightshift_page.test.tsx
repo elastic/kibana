@@ -309,12 +309,20 @@ describe('NightshiftPage', () => {
     expect(history.location.search).toBe('?entity=checkout&signalsSearch=latency');
   });
 
-  it('shows Sources and detection Settings in the Detections header', async () => {
+  it('shows Knowledge, Sources, and detection Settings in the Detections header', async () => {
     renderPage('/detections/events');
 
     expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Detections');
     expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
+
+    await openAppMenuOverflow();
+    const knowledgeLink = await screen.findByTestId('nightshiftKnowledgeLink');
+    expect(knowledgeLink).toHaveAttribute('href', '/app/nightshift/knowledge');
+    expect(screen.getAllByRole('menuitem')[0]).toBe(knowledgeLink);
+
+    await act(async () => fireEvent.click(knowledgeLink));
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/knowledge');
 
     const sourcesLink = screen.getByTestId('nightshiftSourcesLink');
     expect(sourcesLink).toBeVisible();
