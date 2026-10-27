@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-/** One edge the reinforcement agent names in a traversal. */
-export interface EdgeRef {
-  source_node_id?: string;
-  target_node_id?: string;
-  condition?: string;
-}
+/** One step of a path: a node id, or an id plus the label of the edge that arrived there. */
+export type PathStep = string | { id?: string; condition?: string };
 
 /** Nodes the agent says it collapsed, so their counts move onto `into`. */
 export interface NodeMerge {
@@ -28,8 +24,8 @@ export interface SymptomTreeSubmission {
 /** One traversal inside a submit call. */
 export interface TraversalSubmission {
   tree_id?: string;
-  visited_path?: EdgeRef[];
-  causal_path?: EdgeRef[];
+  visited_path?: PathStep[];
+  causal_path?: PathStep[];
 }
 
 /** Arguments of one submit call. Extra fields are ignored by the grader. */

@@ -49,8 +49,8 @@ const judgePrompt = createPrompt({
 
 The agent was given an investigation round and the prior tree. It may edit the tree and must call the submit tool with:
 - symptom_trees[].merged_nodes: nodes it folded together. from nodes should be near-duplicates it removed. into is the node that absorbed them. An empty list means it merged nothing.
-- traversals[].visited_path: edges the investigation actually followed.
-- traversals[].causal_path: only the edges from the symptom to the confirmed end. Empty when the response does not confirm a cause. Those edges should be the ones marked taken in the submitted tree.
+- traversals[].visited_path: node ids the investigation followed, in order. An object {"id","condition"} is used only when several edges join the previous node to that one.
+- traversals[].causal_path: the same walk from the symptom to the confirmed end. Empty when the response does not confirm a cause. Those edges should be the ones marked taken in the submitted tree.
 
 Score how well the arguments match the round:
 - arguments_ok: paths exist for the right reason, and causal_path is present only when the response confirms a cause.

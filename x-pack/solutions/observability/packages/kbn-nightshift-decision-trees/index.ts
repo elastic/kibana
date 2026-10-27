@@ -40,11 +40,13 @@ export {
   penalizePath,
   recordVisit,
   reinforcePath,
+  edgesFromWalk,
   resolveEdgeRefs,
 } from './src/counts';
 export type {
   DecisionEdgeCounts,
   DecisionEdgeRef,
+  DecisionPathStep,
   DecisionElementCounts,
   DecisionNodeCounts,
   DecisionNodeMerge,
