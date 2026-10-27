@@ -36,7 +36,12 @@ const VERDICTS = [
 const CASE_STEPS = {
   no_coverage: ['run_rule_creation'],
   covered_disabled: ['propose_enable', 'report_unresolved_rule'],
-  prebuilt_available: ['install_target', 'propose_install', 'report_missing_version'],
+  prebuilt_available: [
+    'install_target',
+    'fetch_prebuilt_rule',
+    'propose_install',
+    'report_missing_version',
+  ],
   covered_enabled: ['propose_confirm', 'report_unconfirmed_rule'],
 } as const;
 
@@ -535,9 +540,7 @@ describe('Detection Coverage review', () => {
     // space prefix opens the default space.
     it('links every proposal to the current space', () => {
       const evidence = withOf('compose_evidence') ?? {};
-      for (const line of ['rule_line', 'investigation_line', 'check_line']) {
-        expect(evidence[line]).toContain('/s/{{ workflow.spaceId }}/');
-      }
+      expect(evidence.rule_line).toContain('/s/{{ workflow.spaceId }}/');
     });
   });
 

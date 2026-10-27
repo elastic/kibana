@@ -394,7 +394,8 @@ steps:
 
         Write the rationale as a markdown list, in ASD-STE100 Simplified Technical
         English: one item for each search or finding, and a last item with the
-        conclusion.
+        conclusion. Also write the conclusion alone as one sentence in
+        rationale_summary.
       schema:
         type: object
         properties:
@@ -422,12 +423,17 @@ steps:
               or less, active voice, one topic for each sentence, no em dashes. A list
               with one item for each search or finding, and a last item with the
               conclusion.
+          rationale_summary:
+            type: string
+            description: >-
+              The conclusion of the rationale as one sentence of 25 words or less:
+              which rule covers the gap, or why no rule matches.
           technique_matches:
             type: boolean
             description: >-
               True when the ATT&CK technique is a real ATT&CK id and matches the content.
               False when it is not a real id, or does not match. False when it is empty.
-        required: [verdict, rule_id, rule_name, prebuilt_version, rationale, technique_matches]
+        required: [verdict, rule_id, rule_name, prebuilt_version, rationale, rationale_summary, technique_matches]
 
   # Step 5 of 10: resolve the matched rule to its saved object. Only an installed rule
   # has one. Step `if` cannot group with parentheses, so the verdict test lives here and
@@ -515,6 +521,8 @@ steps:
         {% if steps.coverage_check.output.structured_output.rule_id != blank %}
         **Rule:** {{ steps.coverage_check.output.structured_output.rule_name }} (`{{ steps.coverage_check.output.structured_output.rule_id }}`)
         {% endif %}
+        {% if steps.coverage_check.output.structured_output.rationale_summary != blank %}**Summary:** {{ steps.coverage_check.output.structured_output.rationale_summary }}
+        {% endif %}
         **Reasoning**
 
         {{ steps.coverage_check.output.structured_output.rationale }}
@@ -528,7 +536,9 @@ steps:
     type: data.set
     with:
       rule_line: "{% if steps.resolve_rule.output.id != null %}**Rule:** [{{ steps.resolve_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ steps.resolve_rule.output.id }}) (`{{ steps.resolve_rule.output.id }}`){% elsif steps.coverage_check.output.structured_output.rule_id != null and steps.coverage_check.output.structured_output.rule_id != '' %}**Rule:** {{ steps.coverage_check.output.structured_output.rule_name }} (`{{ steps.coverage_check.output.structured_output.rule_id }}`){% endif %}"
-      investigation_line: "**Investigation:** [Detection coverage](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }})"
+      # One sentence from the check. The full reasoning is on the investigation,
+      # written by post_reasoning.
+      summary_line: "{% if steps.coverage_check.output.structured_output.rationale_summary != blank %}**Summary:** {{ steps.coverage_check.output.structured_output.rationale_summary }}{% endif %}"
       gap_block: |-
         **Detection gap**
         {% if steps.gap.output.technique != null and steps.gap.output.technique != '' %}ATT&CK technique: {{ steps.gap.output.technique }}
@@ -537,24 +547,19 @@ steps:
         **Evidence**
         {{ steps.gap.output.evidence }}
         {% endif %}
-      check_line: "**Coverage check:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }})"
 
-  # Body shared by the four report proposals below: what the check found, where
-  # to look, and that approving applies nothing.
+  # Body shared by the four report proposals below: what the check found and that
+  # approving applies nothing. The check's reasoning is not repeated here:
+  # post_reasoning already wrote it to the investigation.
   - name: compose_report
     type: data.set
     with:
       body: |-
         **Verdict:** {{ steps.coverage_check.output.structured_output.verdict }}
         {{ steps.compose_evidence.output.rule_line }}
-        {{ steps.compose_evidence.output.investigation_line }}
+        {{ steps.compose_evidence.output.summary_line }}
 
         {{ steps.compose_evidence.output.gap_block }}
-
-        {% if steps.coverage_check.output.structured_output.rationale != null and steps.coverage_check.output.structured_output.rationale != '' %}**Rationale**
-        {{ steps.coverage_check.output.structured_output.rationale }}
-        {% endif %}
-        {{ steps.compose_evidence.output.check_line }}
 
         **On approval**
         The agent applies nothing. If you approve, you acknowledge the follow-up. If you approve or dismiss, the gap is removed from future coverage checks.
@@ -592,16 +597,13 @@ steps:
                 evidence: "{{ steps.gap.output.evidence }}"
                 preview_invocation_count: "${{ inputs.preview_invocation_count }}"
                 investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
-                # The sections every other proposal shows, so the create proposal has
-                # the same structure.
-                investigation_line: "{{ steps.compose_evidence.output.investigation_line }}"
+                # The summary and gap sections every other proposal shows, so the
+                # create proposal has the same structure. The full reasoning is not
+                # repeated here: post_reasoning already wrote it to the investigation.
                 review_context: |-
-                  {{ steps.compose_evidence.output.gap_block }}
+                  {{ steps.compose_evidence.output.summary_line }}
 
-                  {% if steps.coverage_check.output.structured_output.rationale != blank %}**Why no rule matches**
-                  {{ steps.coverage_check.output.structured_output.rationale | truncate: 8000 }}
-                  {% endif %}
-                  {{ steps.compose_evidence.output.check_line }}
+                  {{ steps.compose_evidence.output.gap_block }}
 
       - match: covered_disabled
         steps:
@@ -620,14 +622,9 @@ steps:
 
                   {{ steps.compose_evidence.output.rule_line }}
                   **Recommended action:** Enable rule
-                  {{ steps.compose_evidence.output.investigation_line }}
+                  {{ steps.compose_evidence.output.summary_line }}
 
                   {{ steps.compose_evidence.output.gap_block }}
-
-                  **Why it matches**
-                  {{ steps.coverage_check.output.structured_output.rationale }}
-
-                  {{ steps.compose_evidence.output.check_line }}
 
                   **On approval**
                   If you approve, the agent enables the rule. The rule makes alerts at its next scheduled run. If you dismiss, the rule stays off.
@@ -672,6 +669,35 @@ steps:
                 ${{ steps.coverage_check.output.structured_output.rule_id != ''
                   and steps.coverage_check.output.structured_output.prebuilt_version > 0 }}
 
+          # The rule is not installed, so it has no saved object to read. The
+          # installation review API reads it from the package by its signature
+          # rule_id. `fields` narrows the payload; rule_id, name and type always
+          # come back. On failure the proposal still stands: every rendered field
+          # below checks for blank.
+          - name: fetch_prebuilt_rule
+            type: kibana.request
+            if: "${{ steps.install_target.output.ready == true }}"
+            with:
+              method: POST
+              path: "/s/{{ workflow.spaceId }}/internal/detection_engine/prebuilt_rules/installation/_review"
+              headers:
+                kbn-xsrf: "true"
+                elastic-api-version: "1"
+                Content-Type: application/json
+              body:
+                page: 1
+                per_page: 1
+                filter:
+                  term: 'security-rule.rule_id: "{{ steps.coverage_check.output.structured_output.rule_id }}"'
+                fields:
+                  - description
+                  - query
+                  - language
+                  - severity
+                  - risk_score
+            on-failure:
+              continue: true
+
           - name: propose_install
             type: workflow.execute
             if: "${{ steps.install_target.output.ready == true }}"
@@ -685,15 +711,18 @@ steps:
 
                   {{ steps.compose_evidence.output.rule_line }}
                   **Recommended action:** Install and enable prebuilt rule (version {{ steps.coverage_check.output.structured_output.prebuilt_version }})
-                  **Rule page:** [Add Elastic rules](/s/{{ workflow.spaceId }}/app/security/rules/add_rules). The rule is not installed, so it has no page of its own.
-                  {{ steps.compose_evidence.output.investigation_line }}
-
+                  {{ steps.compose_evidence.output.summary_line }}
+                  {% if steps.fetch_prebuilt_rule.output.rules[0].severity != blank %}**Severity:** {{ steps.fetch_prebuilt_rule.output.rules[0].severity }}. **Risk score:** {{ steps.fetch_prebuilt_rule.output.rules[0].risk_score }}.
+                  {% endif %}
+                  {% if steps.fetch_prebuilt_rule.output.rules[0].description != blank %}
+                  {{ steps.fetch_prebuilt_rule.output.rules[0].description }}
+                  {% endif %}
+                  {% if steps.fetch_prebuilt_rule.output.rules[0].query != blank %}
+                  ~~~{{ steps.fetch_prebuilt_rule.output.rules[0].language }}
+                  {{ steps.fetch_prebuilt_rule.output.rules[0].query }}
+                  ~~~
+                  {% endif %}
                   {{ steps.compose_evidence.output.gap_block }}
-
-                  **Why it matches**
-                  {{ steps.coverage_check.output.structured_output.rationale }}
-
-                  {{ steps.compose_evidence.output.check_line }}
 
                   **On approval**
                   If you approve, the agent installs the Elastic prebuilt rule from the package and enables it at once. If you dismiss, the rule stays uninstalled.
@@ -741,16 +770,11 @@ steps:
 
                   {{ steps.compose_evidence.output.rule_line }}
                   **Recommended action:** None. Confirm the coverage.
-                  {{ steps.compose_evidence.output.investigation_line }}
+                  {{ steps.compose_evidence.output.summary_line }}
 
                   {{ steps.compose_evidence.output.gap_block }}
 
-                  **Why it covers**
-                  {{ steps.coverage_check.output.structured_output.rationale }}
-
                   This check does not look at rule exceptions. Exceptions may reduce coverage.
-
-                  {{ steps.compose_evidence.output.check_line }}
 
                   **On approval**
                   Nothing changes. If you approve, the review records that the rule covers the gap. Dismiss if the rule does not fully cover the reported behavior.

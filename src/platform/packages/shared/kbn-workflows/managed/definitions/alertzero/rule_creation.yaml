@@ -48,16 +48,12 @@ triggers:
           description: >-
             Investigation the proposal is recorded on. The caller opened it for the gap,
             so the analyst sees a single record whichever route the gap takes.
-        investigation_line:
-          type: string
-          maxLength: 1024
-          description: Markdown link to the caller's investigation, shown in the proposal.
         review_context:
           type: string
           maxLength: 20000
           description: >-
-            Markdown sections from the caller: the gap with its evidence, the check's
-            reasoning and the check link. The proposal shows them in place of its own
+            Markdown sections from the caller: the check's one-sentence summary and
+            the gap with its evidence. The proposal shows them in place of its own
             gap section, so it has the same structure as the caller's other proposals.
       required: [investigation_id]
       additionalProperties: false
@@ -286,8 +282,6 @@ steps:
 
           **Rule:** {{ steps.draft_creation.output.structured_output.rule.name }}
           **Recommended action:** Create the rule in the disabled state
-          {% if inputs.investigation_line != blank %}{{ inputs.investigation_line }}
-          {% endif %}
           {{ steps.draft_creation.output.structured_output.rule.description }}
 
           ```esql
