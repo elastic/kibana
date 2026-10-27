@@ -46,9 +46,9 @@ export const DashboardChangeHistoryPreview = ({
   comparisonChangeId,
 }: DashboardChangeHistoryPreviewProps): JSX.Element => {
   const { compareSpec, diffTelemetry, change } = previewProps;
-  const isComparison = compareSpec?.comparisonType === 'vs_row' || comparisonChangeId === change.id;
 
-  if (isComparison && compareSpec) {
+  const isComparison = comparisonChangeId && comparisonChangeId === change?.id && compareSpec;
+  if (isComparison) {
     return (
       <ChangeHistoryPreview
         baseline={compareSpec.baseline.snapshot as object}

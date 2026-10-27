@@ -32,9 +32,8 @@ export const DashboardChangeHistoryProvider = ({
   const dashboardId = dashboardApi.savedObjectId$.getValue() ?? dashboardApi.uuid;
 
   const { analytics } = coreServices;
-  const [comparisonChangeId, setComparisonChangeId] = useState<string>();
-  // set by the "N changes" button, whose click bubbles up to the row and selects the change
-  const requestedComparisonIdRef = useRef<string>();
+  const [comparisonChangeId, setComparisonChangeId] = useState<string | undefined>();
+
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [previewTitle, setPreviewTitle] = useState<string>(
     dashboardApi?.title$.getValue() ?? dashboardId
@@ -63,23 +62,26 @@ export const DashboardChangeHistoryProvider = ({
     [dashboardApi]
   );
 
-  const onSelectChange = useCallback((item: ChangeHistoryListItem) => {
-    const { id } = item;
-    setComparisonChangeId(requestedComparisonIdRef.current === id ? id : undefined);
-    requestedComparisonIdRef.current = undefined;
-  }, []);
+  // Clicking the "changes" button also selects its row, so keep a comparison requested for the
+  // row being selected and drop it when the selection moves elsewhere.
+  const onSelectChange = useCallback<NonNullable<ChangeHistoryProviderProps['onSelectChange']>>(
+    ({ id }) => setComparisonChangeId((current) => (current === id ? current : undefined)),
+    []
+  );
 
   const renderChanges = useCallback<NonNullable<ChangeHistoryProviderProps['renderChanges']>>(
     ({ item, nChanges }) =>
       item.metadata?.version === 1 ? (
-        nChanges // version 1 has nothing to compare to so don't make it a button
+        nChanges // version 1 has nothing to compare to so don't make it a button, even if it has a change count
       ) : (
         <EuiButtonEmpty
           data-test-subj="changeHistoryItemChanges"
           size={'xs'}
           flush={'both'}
-          onClick={() => {
-            requestedComparisonIdRef.current = item.id;
+          onClick={(e: React.MouseEvent) => {
+            console.log('CLICK N CHANGES', item);
+            // e.stopPropagation(); // prevent bubbling up to `onSelectChange`
+            setComparisonChangeId(item.id);
           }}
         >
           {nChanges}
