@@ -179,7 +179,7 @@ describe('unit connections', () => {
     ]);
   });
 
-  it('draws a route rule as a wire and keeps its condition when another destination is added', () => {
+  it('puts a new source line beside a routing pipeline and leaves its rules as they are', () => {
     const routed = unitWith([
       {
         id: 'main',
@@ -200,19 +200,19 @@ describe('unit connections', () => {
     ]);
 
     const next = connectSourceToDestination(routed, 'otlp-input', 'es-metrics');
-    const routes = next.unit.pipelines[0]?.config.find((entry) => entry.name === 'routes');
 
-    expect(routes?.value).toEqual([
-      { when: 'body["service.name"] == "nginx"', destinations: ['es-logs'] },
-      { destinations: ['es-metrics'] },
+    expect(next.unit.pipelines[0]).toEqual(routed.unit.pipelines[0]);
+    expect(next.unit.pipelines[1]?.config).toEqual([
+      { name: 'sources', value: ['otlp-input'] },
+      { name: 'destinations', value: ['es-metrics'] },
     ]);
     expect(getUnitConnections(next, configuredSources, configuredDestinations)).toEqual([
       { sourceId: 'otlp-input', destinationId: 'es-logs', forwarding: 'route' },
-      { sourceId: 'otlp-input', destinationId: 'es-metrics', forwarding: 'route' },
+      { sourceId: 'otlp-input', destinationId: 'es-metrics', forwarding: 'direct' },
     ]);
   });
 
-  it('adds a destination to an existing catch-all route', () => {
+  it('does not add a source line to an existing catch-all route', () => {
     const routed = unitWith([
       {
         id: 'main',
@@ -227,12 +227,15 @@ describe('unit connections', () => {
       },
     ]);
     const next = connectSourceToDestination(routed, 'otlp-input', 'es-metrics');
-    const routes = next.unit.pipelines[0]?.config.find((entry) => entry.name === 'routes');
 
-    expect(routes?.value).toEqual([{ destinations: ['es-logs', 'es-metrics'] }]);
+    expect(next.unit.pipelines[0]).toEqual(routed.unit.pipelines[0]);
+    expect(next.unit.pipelines[1]?.config).toEqual([
+      { name: 'sources', value: ['otlp-input'] },
+      { name: 'destinations', value: ['es-metrics'] },
+    ]);
   });
 
-  it('refuses a line that would join a catch-all route with its own processors', () => {
+  it('refuses a processing line that would join a catch-all route with its own processors', () => {
     const routed = unitWith([
       {
         id: 'main',
@@ -264,11 +267,17 @@ describe('unit connections', () => {
 
     expect(canConnectToDestination(routed, processing('main'), 'debug-out')).toBe(false);
     expect(connectToDestination(routed, processing('main'), 'debug-out')).toBe(routed);
-    expect(canConnectSourceToDestination(unprocessed, 'otlp-input', 'debug-out')).toBe(false);
-    expect(connectSourceToDestination(unprocessed, 'otlp-input', 'debug-out')).toBe(unprocessed);
+    // A source line gets a pipeline of its own instead, so the route's processors do not apply.
+    const next = connectSourceToDestination(unprocessed, 'otlp-input', 'debug-out');
+
+    expect(next.unit.pipelines[0]).toEqual(unprocessed.unit.pipelines[0]);
+    expect(next.unit.pipelines[1]?.config).toEqual([
+      { name: 'sources', value: ['otlp-input'] },
+      { name: 'destinations', value: ['debug-out'] },
+    ]);
   });
 
-  it('unhooks one destination from a route and keeps the other rule', () => {
+  it('leaves routed lines to their rule when unhooking a source line', () => {
     const routed = unitWith([
       {
         id: 'main',
@@ -285,10 +294,8 @@ describe('unit connections', () => {
         ],
       },
     ]);
-    const next = disconnectSourceFromDestination(routed, 'otlp-input', 'es-logs');
-    const routes = next.unit.pipelines[0]?.config.find((entry) => entry.name === 'routes');
-
-    expect(routes?.value).toEqual([{ destinations: ['es-metrics'] }]);
+    expect(disconnectSourceFromDestination(routed, 'otlp-input', 'es-logs')).toBe(routed);
+    expect(canDisconnectFromDestination(routed, source('otlp-input'), 'es-logs')).toBe(false);
   });
 
   it('removes a deleted destination from route rules', () => {
@@ -733,7 +740,8 @@ describe('unit connections', () => {
       const unit = delegated([{ name: 'destinations', value: ['es-metrics'] }]);
 
       expect(canDisconnectFromDestination(unit, source('otlp-input'), 'es-metrics')).toBe(false);
-      expect(canDisconnectFromDestination(unit, source('otlp-input'), 'es-logs')).toBe(true);
+      // Routed lines are unhooked from the routing node's rule, not from the source.
+      expect(canDisconnectFromDestination(unit, source('otlp-input'), 'es-logs')).toBe(false);
     });
   });
 
