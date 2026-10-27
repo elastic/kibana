@@ -39,7 +39,7 @@ import {
 } from './common';
 import {
   getAccessorName,
-  inferDatatypeFromColor,
+  inferColumnDatatype,
   isMetricColumnNoESQL,
   isMetricColumnESQL,
 } from '../../../../transforms/charts/datatable/helpers';
@@ -323,12 +323,12 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
         return;
       }
       const visCol = visColumnByNewId.get(newColumnId);
-      const color = visCol ? buildColorProps(visCol).color : undefined;
+      const colorProps = visCol ? buildColorProps(visCol) : {};
       if (isMetricColumnId(newColumnId)) {
-        return inferDatatypeFromColor(color, 'number');
+        return inferColumnDatatype(colorProps, 'number');
       }
       if (isRowColumnId(newColumnId)) {
-        return inferDatatypeFromColor(color, 'string');
+        return inferColumnDatatype(colorProps, 'string');
       }
       return;
     }
@@ -342,7 +342,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
       return;
     }
 
-    return inferDatatypeFromColor(buildColorProps(visCol).color, 'number');
+    return inferColumnDatatype(buildColorProps(visCol), 'number');
   };
 
   // Filter out visualization columns that only exist in the visualization state

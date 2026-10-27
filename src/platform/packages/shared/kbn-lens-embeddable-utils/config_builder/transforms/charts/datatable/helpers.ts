@@ -15,7 +15,7 @@ import type {
 } from '@kbn/lens-common';
 
 import { ACCESSOR } from './constants';
-import type { AutoColorType, ColorByValueType, ColorMappingType } from '../../../schema/color';
+import type { AllColoringTypes } from '../../../schema/color';
 import { isColorByValueColor, isColorMappingColor } from '../../coloring';
 import { getReversibleMappings } from '../utils';
 
@@ -79,15 +79,22 @@ export function getAccessorName(
 }
 
 /**
- * Infers the datatype from the color configuration.
+ * Infers the datatype of an API metric or row column from its color configuration.
+ * - progress bar → 'number', whatever its color
  * - colorMapping → 'string'
  * - colorByValue → 'number'
  * - No color → uses the provided default
  */
-export function inferDatatypeFromColor(
-  color: ColorByValueType | ColorMappingType | AutoColorType | undefined,
+export function inferColumnDatatype(
+  {
+    apply_color_to: applyColorTo,
+    color,
+  }: { apply_color_to?: ApiColorTarget; color?: AllColoringTypes },
   defaultType: Extract<DataType, 'number' | 'string'>
 ): Extract<DataType, 'number' | 'string'> {
+  if (applyColorTo === 'progress_bar') {
+    return 'number';
+  }
   if (isColorByValueColor(color)) {
     return 'number';
   }
