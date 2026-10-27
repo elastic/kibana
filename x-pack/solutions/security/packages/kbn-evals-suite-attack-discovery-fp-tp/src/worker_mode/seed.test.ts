@@ -111,7 +111,7 @@ describe('cleanupWorkerModeSpace', () => {
     expect(esClient.deleteByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         index: stream,
-        query: { term: { 'labels.ad_portable_seed': 'ad-fp-tp-twins-2026-09' } },
+        query: { prefix: { 'labels.ad_portable_seed': 'ad-fp-tp-twins-2026-09' } },
       })
     );
   });

@@ -342,14 +342,16 @@ export const cleanupWorkerModeSpace = async ({
   if (serverless) {
     // A seeder-owned stream DOES index labels.ad_portable_seed (explicit keyword
     // mapping in the seeder-owned template), so a label sweep catches a crashed
-    // run's leftovers whose host ids the alerts search above cannot name.
+    // run's leftovers whose host ids the alerts search above cannot name. Prefix,
+    // not term: worker-mode events carry their full run marker, which starts
+    // with the seed label (verified live — a term sweep silently matches 0).
     const { data_streams: streams } = await esClient.indices
       .getDataStream({ name: targets.eventsIndexPattern })
       .catch(() => ({ data_streams: [] as Array<{ name: string }> }));
     for (const index of rawEventIndexNames(streams.map(({ name }) => ({ index: name })))) {
       await esClient.deleteByQuery({
         index,
-        query: { term: { 'labels.ad_portable_seed': FP_TP_TWIN_SEED_LABEL } },
+        query: { prefix: { 'labels.ad_portable_seed': FP_TP_TWIN_SEED_LABEL } },
         conflicts: 'proceed',
         refresh: true,
       });
