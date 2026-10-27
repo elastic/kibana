@@ -374,6 +374,7 @@ const CloudOnboardingDeploymentListItemSchema = CloudOnboardingDeploymentItemSch
   packages: schema.arrayOf(
     schema.object({
       name: schema.string({ meta: { description: 'Package name.' } }),
+      title: schema.string({ meta: { description: 'Package title.' } }),
       version: schema.string({
         meta: { description: 'Package version the deployment policies run.' },
       }),

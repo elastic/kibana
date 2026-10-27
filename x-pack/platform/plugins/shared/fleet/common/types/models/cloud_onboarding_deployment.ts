@@ -129,6 +129,7 @@ export type UpdateCloudOnboardingDeploymentInput = Partial<
 /** A package a deployment installed policies for, with the version those policies run. */
 export interface CloudOnboardingDeploymentPackage {
   name: string;
+  title: string;
   version: string;
 }
 

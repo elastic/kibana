@@ -42,8 +42,8 @@ const makeInstance = (
   updatedBy: 'elastic',
   updatedAt: '2026-10-20T10:00:00.000Z',
   packages: [
-    { name: 'aws', version: '8.11.0' },
-    { name: 'aws_bedrock', version: '1.2.0' },
+    { name: 'aws', title: 'AWS', version: '8.11.0' },
+    { name: 'aws_bedrock', title: 'Amazon Bedrock', version: '1.2.0' },
   ],
   servicesByMethod: { managed_integration: ['cloudtrail', 'vpcflow'], ecf: ['elb_logs'] },
   agentCount: 5,
@@ -98,7 +98,7 @@ describe('CollectionInstancesTable', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows one version per package with the package name in a tooltip', async () => {
+  it('shows one version per package with the package title in a tooltip', async () => {
     renderTable([makeInstance()]);
 
     const row = screen.getByTestId('collectionInstancesTableRow');
@@ -108,7 +108,24 @@ describe('CollectionInstancesTable', () => {
     await act(async () => {
       within(row).getByText('1.2.0').focus();
     });
-    expect(await screen.findByText('aws_bedrock')).toBeInTheDocument();
+    expect(await screen.findByText('Amazon Bedrock')).toBeInTheDocument();
+  });
+
+  it('names up to 3 services in a tooltip and elides the rest', async () => {
+    renderTable([
+      makeInstance({
+        services: ['a', 'b', 'c', 'd'],
+        serviceNames: { a: 'A', b: 'B', c: 'C', d: 'D' },
+        servicesByMethod: { ecf: ['a', 'b', 'c', 'd'] },
+      }),
+    ]);
+
+    const row = screen.getByTestId('collectionInstancesTableRow');
+    await act(async () => {
+      within(row).getByText('4').focus();
+    });
+
+    expect(await screen.findByText('Elastic Cloud Forwarder: A, B, C, ...')).toBeInTheDocument();
   });
 
   it('shows dashes where an instance has no policies, like an ECF-only instance', () => {

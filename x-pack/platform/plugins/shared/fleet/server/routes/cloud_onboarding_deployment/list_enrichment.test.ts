@@ -81,9 +81,13 @@ describe('enrichDeployments', () => {
     jest.clearAllMocks();
     jest.mocked(appContextService.getInternalUserESClient).mockReturnValue({} as any);
     jest.mocked(packagePolicyService.getByIDs).mockResolvedValue([
-      { id: 'pp1', policy_ids: ['ap1'], package: { name: 'aws', version: '8.11.0' } },
-      { id: 'pp2', policy_ids: ['ap2'], package: { name: 'aws_bedrock', version: '1.2.0' } },
-      { id: 'pp3', policy_ids: ['ap1'], package: { name: 'aws', version: '8.11.0' } },
+      { id: 'pp1', policy_ids: ['ap1'], package: { name: 'aws', title: 'AWS', version: '8.11.0' } },
+      {
+        id: 'pp2',
+        policy_ids: ['ap2'],
+        package: { name: 'aws_bedrock', title: 'Amazon Bedrock', version: '1.2.0' },
+      },
+      { id: 'pp3', policy_ids: ['ap1'], package: { name: 'aws', title: 'AWS', version: '8.11.0' } },
     ] as any);
     jest.mocked(getAgentCountForAgentPolicies).mockResolvedValue({ ap1: 1, ap2: 2 });
   });
@@ -94,8 +98,8 @@ describe('enrichDeployments', () => {
     ]);
 
     expect(item.packages).toEqual([
-      { name: 'aws', version: '8.11.0' },
-      { name: 'aws_bedrock', version: '1.2.0' },
+      { name: 'aws', title: 'AWS', version: '8.11.0' },
+      { name: 'aws_bedrock', title: 'Amazon Bedrock', version: '1.2.0' },
     ]);
     expect(item.agentCount).toBe(3);
     expect(item.servicesByMethod).toEqual({ managed_integration: ['cloudtrail', 'vpcflow'] });
@@ -123,6 +127,6 @@ describe('enrichDeployments', () => {
       makeDeployment({ packagePolicyIds: ['pp1', 'missing'] }),
     ]);
 
-    expect(item.packages).toEqual([{ name: 'aws', version: '8.11.0' }]);
+    expect(item.packages).toEqual([{ name: 'aws', title: 'AWS', version: '8.11.0' }]);
   });
 });

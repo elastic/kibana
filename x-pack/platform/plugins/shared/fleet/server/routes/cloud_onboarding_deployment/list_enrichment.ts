@@ -78,7 +78,7 @@ export async function enrichDeployments(
     for (const id of deployment.packagePolicyIds ?? []) {
       const pkg = packagePolicyById.get(id)?.package;
       if (pkg && !packages.has(pkg.name)) {
-        packages.set(pkg.name, { name: pkg.name, version: pkg.version });
+        packages.set(pkg.name, { name: pkg.name, title: pkg.title, version: pkg.version });
       }
     }
     return {

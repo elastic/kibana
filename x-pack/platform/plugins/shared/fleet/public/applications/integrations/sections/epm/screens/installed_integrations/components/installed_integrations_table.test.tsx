@@ -233,20 +233,14 @@ describe('InstalledIntegrationsTable', () => {
   });
 
   describe('collection instances', () => {
-    it('shows no column and no badge without collection instances', () => {
+    it('shows no column without collection instances', () => {
       renderComponent([basePackage]);
-      expect(screen.queryByText('Collection Instances')).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId('installedIntegrationsTable.collectionBadge.test-package')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText('Instances')).not.toBeInTheDocument();
     });
 
-    it('shows the count as a link and the Collection badge for a package with instances', () => {
+    it('shows the count as a link for a package with instances', () => {
       renderComponent([basePackage], { collectionInstanceCounts: { 'test-package': 3 } });
-      expect(screen.getByText('Collection Instances')).toBeInTheDocument();
-      expect(
-        screen.getByTestId('installedIntegrationsTable.collectionBadge.test-package')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Instances')).toBeInTheDocument();
       expect(
         screen.getByTestId('installedIntegrationsTable.collectionInstancesLink.test-package')
       ).toHaveTextContent('3');

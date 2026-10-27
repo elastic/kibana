@@ -28,6 +28,7 @@ responses:
                   updatedAt: '2026-10-20T10:15:00.000Z'
                   packages:
                     - name: 'aws'
+                      title: 'AWS'
                       version: '8.11.0'
                   servicesByMethod:
                     managed_integration:

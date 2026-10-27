@@ -29,13 +29,16 @@ const DEPLOYMENT_METHOD_LABELS: Record<DeploymentMethod, string> = {
     { defaultMessage: 'Managed integration' }
   ),
   ecf: i18n.translate('xpack.fleet.epmInstalledIntegrations.collectionInstances.ecfMethod', {
-    defaultMessage: 'ECF',
+    defaultMessage: 'Elastic Cloud Forwarder',
   }),
   agent_based: i18n.translate(
     'xpack.fleet.epmInstalledIntegrations.collectionInstances.agentBasedMethod',
     { defaultMessage: 'Agent-based' }
   ),
 };
+
+/** Services named in a Services tooltip before the rest are elided. */
+const MAX_TOOLTIP_SERVICES = 3;
 
 const DEPLOYMENT_METHOD_ORDER: DeploymentMethod[] = ['managed_integration', 'ecf', 'agent_based'];
 
@@ -77,7 +80,7 @@ export const CollectionInstancesTable: React.FunctionComponent<{
     {
       field: 'integrationName',
       name: i18n.translate('xpack.fleet.epmInstalledIntegrations.collectionInstances.nameColumn', {
-        defaultMessage: 'Collection instance',
+        defaultMessage: 'Instance',
       }),
       render: (_: unknown, item: CloudOnboardingDeploymentListItem) => (
         <EuiLink onClick={() => openInstance(item.id)} data-test-subj="collectionInstanceLink">
@@ -99,9 +102,12 @@ export const CollectionInstancesTable: React.FunctionComponent<{
               {
                 key: method,
                 value: serviceIds.length,
-                tooltip: `${DEPLOYMENT_METHOD_LABELS[method]}: ${serviceIds
-                  .map((id) => item.serviceNames?.[id] ?? id)
-                  .join(', ')}`,
+                tooltip: `${DEPLOYMENT_METHOD_LABELS[method]}: ${[
+                  ...serviceIds
+                    .slice(0, MAX_TOOLTIP_SERVICES)
+                    .map((id) => item.serviceNames?.[id] ?? id),
+                  ...(serviceIds.length > MAX_TOOLTIP_SERVICES ? ['...'] : []),
+                ].join(', ')}`,
               },
             ];
           })}
@@ -118,7 +124,7 @@ export const CollectionInstancesTable: React.FunctionComponent<{
           values={item.packages.map((pkg) => ({
             key: pkg.name,
             value: pkg.version,
-            tooltip: pkg.name,
+            tooltip: pkg.title,
           }))}
         />
       ),
