@@ -12,14 +12,13 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest, LOGS, setupLogsExperience, teardownLogsExperience } from '../fixtures';
 
 /**
- * The actions under test open Data Quality, the custom-threshold rule type and the SLO flyout, all
- * of which only exist in an Observability deployment — hence the narrower tag than the rest of the
- * suite.
+ * The actions under test are contributed by the Observability root profile, which stateful spaces
+ * get through the `oblt` solution view set in setup. Logs Essentials projects have no SLOs.
  */
 spaceTest.describe(
   'Logs profile - App menu as an editor (getAppMenu)',
   {
-    tag: tags.serverless.observability.complete,
+    tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace, config }) => {

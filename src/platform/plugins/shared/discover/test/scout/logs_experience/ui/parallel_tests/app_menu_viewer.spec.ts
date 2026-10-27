@@ -11,11 +11,11 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, LOGS, setupLogsExperience, teardownLogsExperience } from '../fixtures';
 
-/** Same Observability-only scope as the editor counterpart; see `app_menu_editor.spec.ts`. */
+/** Same deployments as the editor counterpart; see `app_menu_editor.spec.ts`. */
 spaceTest.describe(
   'Logs profile - App menu as a viewer (getAppMenu)',
   {
-    tag: tags.serverless.observability.complete,
+    tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace, config }) => {
