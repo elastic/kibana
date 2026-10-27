@@ -378,6 +378,40 @@ describe('TimeWindowButtons', () => {
     });
   });
 
+  describe('zoom in on whole-second windows', () => {
+    const zoomIn = async (value: string, zoomFactor?: number) => {
+      const { onChange } = renderPicker({
+        defaultValue: value,
+        showTimeWindowButtons: { showZoomIn: true, ...(zoomFactor ? { zoomFactor } : {}) },
+      });
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('dateRangePickerZoomInButton'));
+      });
+      return onChange.mock.calls[0][0];
+    };
+
+    it('lands on whole seconds when the rounded delta fits in the window', async () => {
+      // 7s * 0.25 = 1.75s, rounded to 2s
+      const call = await zoomIn('2025-01-01T00:00:00.000Z to 2025-01-01T00:00:07.000Z');
+      expect(call.start).toBe('2025-01-01T00:00:02.000Z');
+      expect(call.end).toBe('2025-01-01T00:00:05.000Z');
+    });
+
+    it('switches to milliseconds when zooming in past one second', async () => {
+      // 1s * 0.25 = 250ms; the rounded 1s delta would collapse the window
+      const call = await zoomIn('2025-01-01T00:00:00.000Z to 2025-01-01T00:00:01.000Z');
+      expect(call.start).toBe('2025-01-01T00:00:00.250Z');
+      expect(call.end).toBe('2025-01-01T00:00:00.750Z');
+    });
+
+    it('does not reverse the bounds when rounding would cross the midpoint', async () => {
+      // 7s * 0.5 = 3.5s, rounded to 4s would cross the midpoint
+      const call = await zoomIn('2025-01-01T00:00:00.000Z to 2025-01-01T00:00:07.000Z', 1);
+      expect(call.start).toBe('2025-01-01T00:00:03.500Z');
+      expect(call.end).toBe('2025-01-01T00:00:03.500Z');
+    });
+  });
+
   describe('timePrecision', () => {
     // A full calendar day: the `.999` end is what a display precision of
     // seconds or minutes would truncate.

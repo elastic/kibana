@@ -255,7 +255,12 @@ function useTimeWindow(
   const durationText = isInvalid ? '' : durationToDisplayFullText(min.toDate(), max.toDate());
   const zoomMultiplier = parseZoomFactor(options.zoomFactor);
   const rawZoomDelta = windowDuration * (zoomMultiplier / 2);
-  const zoomDelta = isWholeSecondWindow ? Math.round(rawZoomDelta / 1000) * 1000 : rawZoomDelta;
+  const wholeSecondZoomDelta = Math.round(rawZoomDelta / 1000) * 1000;
+  // Stay in whole seconds while the rounded delta is non-zero and leaves a
+  // non-empty window; past that, drop to milliseconds.
+  const canZoomInWholeSeconds =
+    isWholeSecondWindow && wholeSecondZoomDelta > 0 && wholeSecondZoomDelta * 2 < windowDuration;
+  const zoomDelta = canZoomInWholeSeconds ? wholeSecondZoomDelta : rawZoomDelta;
 
   const applyDates = useCallback(
     (s: moment.Moment, e: moment.Moment) => {
