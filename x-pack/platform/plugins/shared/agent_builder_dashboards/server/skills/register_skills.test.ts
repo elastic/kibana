@@ -46,11 +46,17 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('Do not query the data before generating');
   });
 
-  it('treats by-reference panels like non-ES|QL Lens panels that can only be rearranged', () => {
-    expect(skill.content).toContain(
-      'and by-reference panels that only reference a saved object (`config.savedObjectId` or `config.ref_id`), cannot be edited. They can be moved, resized, or removed.'
-    );
+  it('treats by-reference panels as unknown content that can only be rearranged', () => {
+    expect(skill.content).toContain('so its content is unknown');
+    expect(skill.content).toContain('Do not look it up with any tool or API');
+    expect(skill.content).toContain('It can be moved, resized, or removed, but not edited.');
     expect(enhanceGuidance()).toContain('Unsupported panels, including by-reference panels,');
+    expect(skill.content).toContain(
+      'only when its title makes clear that it is the panel the user means and what it shows; otherwise ask the user'
+    );
+    expect(enhanceGuidance()).toContain(
+      'replace a by-reference panel only when its title makes clear what it shows; otherwise keep it'
+    );
   });
 
   it('inlines the dashboard design guidance directly in the skill body', () => {
