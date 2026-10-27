@@ -345,6 +345,14 @@ export const createInvestigatorServiceAccountService = ({
     request: KibanaRequest,
     spaceId: string
   ): Promise<InvestigatorServiceAccountStatus> => {
+    // The route opts out of Kibana authorization, and the delegated deletion only checks the
+    // caller's cluster privileges, so the caller's access to this space is checked here.
+    await assertSpaceExists(request, spaceId);
+    if (!(await canManageSecurity(request))) {
+      throw Boom.forbidden(
+        'Removing the Nightshift service account setup requires the manage_security cluster privilege.'
+      );
+    }
     const client = await workflowsExtensions.getClient(request);
     // The entry point goes first, so the space stops reading as set up before anything else goes.
     for (const id of [...BOUND_WORKFLOW_IDS].reverse()) {

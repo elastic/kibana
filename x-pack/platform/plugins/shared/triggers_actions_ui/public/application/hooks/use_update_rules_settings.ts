@@ -42,10 +42,10 @@ export const useUpdateRuleSettings = (props: UseUpdateRuleSettingsProps) => {
   return useMutation({
     mutationFn,
     onMutate: () => {
-      onClose();
       setUpdatingRulesSettings?.(true);
     },
     onSuccess: () => {
+      onClose();
       toasts.addSuccess(
         i18n.translate('xpack.triggersActionsUI.rulesSettings.updateRulesSettingsSuccess', {
           defaultMessage: 'Rules settings updated successfully.',

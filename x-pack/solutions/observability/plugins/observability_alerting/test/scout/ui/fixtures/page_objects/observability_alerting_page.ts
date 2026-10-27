@@ -79,6 +79,8 @@ export class ObservabilityAlertingPage {
   public readonly viewDetailsLink: Locator;
   public readonly viewRuleDetailsLink: Locator;
   public readonly episodeDetailsPage: Locator;
+  public readonly detailsInvestigateButton: Locator;
+  public readonly detailsViewInvestigationButton: Locator;
   public readonly ruleDetailLayout: Locator;
   public readonly toasts: Locator;
   public readonly addToCaseRowControl: Locator;
@@ -117,6 +119,10 @@ export class ObservabilityAlertingPage {
       'alertingV2EpisodeDetailsViewRuleDetailsButton'
     );
     this.episodeDetailsPage = this.page.testSubj.locator('alertingV2AlertDetailsPage');
+    this.detailsInvestigateButton = this.page.testSubj.locator('episodeDetailsInvestigate');
+    this.detailsViewInvestigationButton = this.page.testSubj.locator(
+      'episodeDetailsViewInvestigation'
+    );
     this.ruleDetailLayout = this.page.testSubj.locator('ruleDetailLayout');
     this.toasts = this.page.components.toast().toasts;
     this.addToCaseRowControl = this.page.testSubj.locator(
@@ -192,6 +198,22 @@ export class ObservabilityAlertingPage {
   async gotoEpisodeDetails(episodeId: string): Promise<void> {
     await this.goto(`${OBSERVABILITY_ALERTING_ALERTS_PATH}/${encodeURIComponent(episodeId)}`);
     await this.episodeDetailsPage.waitFor({ state: 'visible' });
+  }
+
+  async investigateFromDetails(): Promise<void> {
+    await this.detailsInvestigateButton.click();
+  }
+
+  async viewInvestigationFromDetails(): Promise<void> {
+    await this.detailsViewInvestigationButton.click();
+  }
+
+  async viewInvestigationFromDetailsInNewTab(): Promise<void> {
+    await this.detailsViewInvestigationButton.click({ modifiers: ['ControlOrMeta'] });
+  }
+
+  async openDetailsOverflow(): Promise<void> {
+    await this.episodeDetailsPage.getByRole('button', { name: 'More' }).click();
   }
 
   async clickViewRuleDetails(): Promise<void> {
