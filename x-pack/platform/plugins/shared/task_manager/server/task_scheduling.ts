@@ -513,7 +513,10 @@ export class TaskScheduling {
   ): Promise<TaskInstanceWithId> {
     await this.ensureExistingCredentialMatchesRunAs(taskInstance);
 
-    const regenerateApiKey = options?.regenerateApiKey === true;
+    // Without a request (or with security disabled) no key could be granted, so there is nothing to
+    // replace; the store would otherwise reject the update of a task that carries a key.
+    const regenerateApiKey =
+      options?.regenerateApiKey === true && this.store.willGrantApiKeys(options);
 
     // check if task specifies a schedule interval
     // if so,try to update the just the schedule

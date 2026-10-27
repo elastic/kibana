@@ -410,6 +410,21 @@ describe('TaskScheduling', () => {
       });
     });
 
+    test('does not write an existing one-off task when regenerateApiKey is set without a request', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      // No request: the existence pre-check is skipped and the task is found through the conflict.
+      mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+
+      const result = await taskScheduling.ensureScheduled(
+        { id: 'resume-task', taskType: 'foo', params: {}, state: {} },
+        { regenerateApiKey: true }
+      );
+
+      expect(result.id).toEqual('resume-task');
+      expect(mockTaskStore.bulkGet).not.toHaveBeenCalled();
+      expect(mockTaskStore.bulkUpdate).not.toHaveBeenCalled();
+    });
+
     test('does not write an existing one-off task when regenerateApiKey is not set', async () => {
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
       mockTaskStore.taskExists.mockResolvedValue(true);
