@@ -38,7 +38,7 @@ import { useTablePage } from '../use_table_page';
 import { useShowsEstimates } from '../../prototype/estimates_setting';
 import { EmptyCell } from '../empty_cell';
 import { formatDataSourceCount, formatMaxAge } from '../format';
-import { SHOW_HIDDEN_LABEL } from '../hidden_data';
+import { ShowHiddenSwitch } from '../hidden_data';
 import { TargetName } from './target_name';
 
 /** Whether the rule applies to a match, or a higher-ranked rule outranks it. */
@@ -225,8 +225,8 @@ interface MatchedTableProps {
  * a data stream's retention, and each match's data and search cost at rest and at peak. Those a higher-ranked rule
  * applies to instead are struck through, with that rule in a column that only shows when there are
  * any. A search box filters them by name, and a filter group by whether the rule applies to them,
- * with how many of the search results each would show. Hidden matches are left out until a toggle
- * beside the filters shows them, with how many there are.
+ * with how many of the search results each would show. Hidden matches are left out until a switch
+ * beside the filters shows them.
  */
 export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTableProps) => {
   const { euiTheme } = useEuiTheme();
@@ -267,6 +267,8 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
   const getStatus = ({ outrankedBy }: MatchedRow): MatchStatus =>
     outrankedBy === undefined ? 'applied' : 'outranked';
   const normalizedQuery = query.trim().toLowerCase();
+  // Whether the switch that shows hidden matches has any to show, which the search doesn't change.
+  const hasHidden = rows.some(({ hidden }) => hidden);
   const searchedAll = rows.filter(({ name }) => name.toLowerCase().includes(normalizedQuery));
   const searched = includesHidden ? searchedAll : searchedAll.filter(({ hidden }) => !hidden);
   // Each filter counts what it would show with the current search.
@@ -275,10 +277,11 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
   const isShownByStatus = (dataSource: MatchedRow) =>
     status === undefined || getStatus(dataSource) === status;
   const items = searched.filter(isShownByStatus);
-  // Hidden matches that the search and filter would show, which the toggle counts.
-  const hiddenCount = searchedAll.filter(
-    (dataSource) => dataSource.hidden && isShownByStatus(dataSource)
-  ).length;
+  // Whether the search and filter leave only hidden matches, which the switch would show.
+  const hasOnlyHidden =
+    !includesHidden &&
+    items.length === 0 &&
+    searchedAll.some((dataSource) => dataSource.hidden && isShownByStatus(dataSource));
 
   // A new search or filter starts again at the first page.
   const { pageIndex, pageSize, pagination, onTableChange } = useTablePage<MatchedRow>(
@@ -390,11 +393,10 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
       : []),
   ];
 
-  // Above the table: the search, the filters whose counts follow it, and the toggle that shows
-  // hidden matches. The toggle adds to what the table shows rather than narrowing it, so it's
-  // apart from the filters.
+  // Above the table: the search, the filters whose counts follow it, and the switch that shows
+  // hidden matches.
   const toolbar = (
-    <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
       <EuiFlexItem css={{ minInlineSize: '12em' }}>
         <EuiFieldSearch
           compressed
@@ -428,20 +430,13 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
         </EuiFilterGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFilterGroup compressed>
-          {/* Like the filters, it's off while it has nothing to show, unless it's on already. */}
-          <EuiFilterButton
-            isToggle
-            isSelected={includesHidden}
-            hasActiveFilters={includesHidden}
-            numFilters={hiddenCount}
-            isDisabled={hiddenCount === 0 && !includesHidden}
-            onClick={() => setIncludesHidden(!includesHidden)}
-            data-test-subj="boostMatchedShowHidden"
-          >
-            {SHOW_HIDDEN_LABEL}
-          </EuiFilterButton>
-        </EuiFilterGroup>
+        {/* Like the filters, it's off while it has nothing to show, unless it's on already. */}
+        <ShowHiddenSwitch
+          checked={includesHidden}
+          onChange={setIncludesHidden}
+          disabled={!hasHidden && !includesHidden}
+          data-test-subj="boostMatchedShowHidden"
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -488,7 +483,7 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
               ? i18n.translate('xpack.boost.matchedTable.noMatches', {
                   defaultMessage: 'This rule matches nothing yet.',
                 })
-              : !includesHidden && hiddenCount > 0
+              : hasOnlyHidden
               ? isDataStreams
                 ? i18n.translate('xpack.boost.matchedTable.onlyHiddenDataStreams', {
                     defaultMessage: 'Only hidden data streams match. Show hidden to see them.',

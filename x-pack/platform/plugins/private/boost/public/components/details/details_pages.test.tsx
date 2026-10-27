@@ -479,7 +479,6 @@ describe('RuleDetailsPage', () => {
     expect(screen.getByTestId('boostRuleUsage')).toHaveTextContent('Applies to2 indices');
     expect(matched.queryByText('.catalog-archive')).not.toBeInTheDocument();
     expect(matched.getByTestId('boostMatchedCount')).toHaveTextContent('Showing 1–3 of 3 indices');
-    expect(matched.getByTestId('boostMatchedShowHidden')).toHaveTextContent('Show hidden1');
 
     await userEvent.click(matched.getByTestId('boostMatchedShowHidden'));
 

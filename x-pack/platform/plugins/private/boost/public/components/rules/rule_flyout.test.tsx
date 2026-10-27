@@ -873,10 +873,8 @@ describe('RuleFlyout hidden data sources', () => {
     await userEvent.type(screen.getByTestId('boostRulePattern'), '.catalog-*');
 
     expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('1 exact match');
-    // In place of the list, as the other empty messages are.
-    expect(screen.queryByRole('region', { name: 'Exact matches' })).not.toBeInTheDocument();
-    expect(screen.getByTestId('boostRuleHiddenNotShown')).toHaveTextContent(
-      '1 hidden index not shown'
+    expect(screen.getByRole('region', { name: 'Exact matches' })).toHaveTextContent(
+      /^1 hidden index not shown$/
     );
   });
 

@@ -849,6 +849,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                           checked={includesHidden}
                           onChange={setIncludesHidden}
                           disabled={!type || (!hasHidden && !includesHidden)}
+                          labelSize="xs"
                           data-test-subj="boostRuleShowHidden"
                         />
                       </EuiFlexItem>

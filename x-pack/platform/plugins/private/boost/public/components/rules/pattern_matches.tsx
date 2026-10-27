@@ -74,8 +74,6 @@ const NO_DATA_SOURCES: Readonly<Record<BoostProfileType, string>> = {
 
 type MatchKind = 'exact' | 'partial';
 
-const HIDDEN_NOTE_TEST_SUBJ = 'boostRuleHiddenNotShown';
-
 // Each row shows whether the pattern matches it exactly or partly.
 const MATCH_ICONS: Readonly<Record<MatchKind, { iconType: string; label: string }>> = {
   exact: {
@@ -95,21 +93,24 @@ const MATCH_ICONS: Readonly<Record<MatchKind, { iconType: string; label: string 
 interface MatchIconProps {
   /** How the name matches the pattern, or nothing when it doesn't. */
   match?: MatchKind;
-  /** Whether a higher-ranked rule keeps the match, so its icon is disabled like its name. */
-  isSuperseded?: boolean;
+  /**
+   * Whether the icon is disabled, like the name of a match that a higher-ranked rule keeps, or the
+   * count of hidden matches a list leaves out.
+   */
+  isDisabled?: boolean;
   /** Whether screen readers hear what the icon means, which a list's label may already say. */
   isLabeled: boolean;
 }
 
 /** An exact or partial match's icon, or a blank space as wide, so names line up. */
-const MatchIcon = ({ match, isSuperseded = false, isLabeled }: MatchIconProps) => {
+const MatchIcon = ({ match, isDisabled = false, isLabeled }: MatchIconProps) => {
   const { euiTheme } = useEuiTheme();
   if (!match) {
     return <EuiIcon type="empty" size="m" aria-hidden={true} />;
   }
   const { iconType, label } = MATCH_ICONS[match];
   // Green for an exact match, and a partial match in the same color as its name.
-  const color = isSuperseded
+  const color = isDisabled
     ? euiTheme.colors.textDisabled
     : match === 'exact'
     ? 'success'
@@ -205,32 +206,36 @@ export const PatternMatches = ({
   );
   const matchKind: MatchKind = hasExactMatches ? 'exact' : 'partial';
 
-  const renderEmpty = (message: string, testSubj = 'boostRulePatternMatchesEmpty') => (
+  const renderEmpty = (message: string) => (
     <EuiText
       size="s"
       color={euiTheme.colors.textDisabled}
       textAlign="center"
       // 24px from the tabs and the panel's bottom edge, after the space around the tab's content.
       css={{ paddingBlock: euiTheme.size.base }}
-      data-test-subj={testSubj}
+      data-test-subj="boostRulePatternMatchesEmpty"
     >
       <p>{message}</p>
     </EuiText>
   );
 
-  // Hidden data sources that a list leaves out, said as the empty messages are.
-  const getHiddenNote = (count: number) => formatHiddenNotShown(targetType, count);
-  const renderHiddenNote = (count: number) =>
+  // How many hidden data sources a list leaves out, in a row after the rest, disabled, after the
+  // icon of how they match, if they do.
+  const renderHiddenNote = (count: number, match?: MatchKind) =>
     count > 0 && (
-      <EuiText
+      <div
         key="hiddenNote"
-        size="s"
-        color={euiTheme.colors.textDisabled}
-        textAlign="center"
-        data-test-subj={HIDDEN_NOTE_TEST_SUBJ}
+        css={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: euiTheme.size.s,
+          color: euiTheme.colors.textDisabled,
+        }}
+        data-test-subj="boostRuleHiddenNotShown"
       >
-        <p>{getHiddenNote(count)}</p>
-      </EuiText>
+        <MatchIcon match={match} isDisabled isLabeled={false} />
+        {formatHiddenNotShown(targetType, count)}
+      </div>
     );
 
   // The scrolling area keeps 8px of padding, which its scroll mask fades.
@@ -284,11 +289,7 @@ export const PatternMatches = ({
     >
       <EuiFlexItem grow={false}>
         <span css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.s }}>
-          <MatchIcon
-            match={match}
-            isSuperseded={overriddenBy !== undefined}
-            isLabeled={isLabeled}
-          />
+          <MatchIcon match={match} isDisabled={overriddenBy !== undefined} isLabeled={isLabeled} />
           <TargetName
             name={name}
             pattern={rowPattern}
@@ -308,8 +309,7 @@ export const PatternMatches = ({
   );
 
   // The list's label says how these match, so their icons don't repeat it to screen readers.
-  // Hidden ones are counted after the rest until they're shown, or instead of them if they're all
-  // hidden.
+  // Hidden ones are counted after the rest until they're shown.
   const renderTargets = (
     label: string,
     targets: readonly TargetPreview[],
@@ -318,10 +318,6 @@ export const PatternMatches = ({
     testSubj?: string
   ) => {
     const shown = includesHidden ? targets : targets.filter(({ isHidden }) => !isHidden);
-    const hiddenCount = targets.length - shown.length;
-    if (shown.length === 0) {
-      return renderEmpty(getHiddenNote(hiddenCount), HIDDEN_NOTE_TEST_SUBJ);
-    }
     return renderList(label, [
       ...shown.map(({ name, overriddenBy, isHidden }) =>
         renderRow({
@@ -334,7 +330,7 @@ export const PatternMatches = ({
           testSubj,
         })
       ),
-      renderHiddenNote(hiddenCount),
+      renderHiddenNote(targets.length - shown.length, match),
     ]);
   };
 
@@ -381,10 +377,6 @@ export const PatternMatches = ({
       return renderEmpty(NO_DATA_SOURCES[targetType]);
     }
     const shown = includesHidden ? dataSources : dataSources.filter(({ hidden }) => !hidden);
-    const hiddenCount = dataSources.length - shown.length;
-    if (shown.length === 0) {
-      return renderEmpty(getHiddenNote(hiddenCount), HIDDEN_NOTE_TEST_SUBJ);
-    }
     return renderList(
       TAB_LABELS.all[targetType],
       // Matches are mixed with everything else here, so their icons say which they are, and each
@@ -402,7 +394,8 @@ export const PatternMatches = ({
             testSubj: 'boostRuleAvailableTarget',
           });
         }),
-        renderHiddenNote(hiddenCount),
+        // Lined up with the names, without an icon, as some may not match.
+        renderHiddenNote(dataSources.length - shown.length),
       ]
     );
   };
@@ -450,6 +443,7 @@ export const PatternMatches = ({
           checked={includesHidden}
           onChange={onIncludesHiddenChange}
           disabled={!type || (!hasHidden && !includesHidden)}
+          labelSize="xs"
           data-test-subj="boostRuleShowHidden"
         />
       </div>

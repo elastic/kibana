@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiSwitch } from '@elastic/eui';
+import { EuiBadge, EuiSwitch, useEuiFontSize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoostProfileType } from '../../common/types';
 import { HIDDEN_BADGE_LABEL } from './badge_labels';
@@ -41,6 +41,8 @@ interface ShowHiddenSwitchProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
   disabled?: boolean;
+  /** The label's size, smaller beside small tabs. */
+  labelSize?: 's' | 'xs';
   'data-test-subj'?: string;
 }
 
@@ -49,14 +51,19 @@ export const ShowHiddenSwitch = ({
   checked,
   onChange,
   disabled = false,
+  labelSize = 's',
   'data-test-subj': dataTestSubj,
-}: ShowHiddenSwitchProps) => (
-  <EuiSwitch
-    compressed
-    label={SHOW_HIDDEN_LABEL}
-    checked={checked}
-    disabled={disabled}
-    onChange={(event) => onChange(event.target.checked)}
-    data-test-subj={dataTestSubj}
-  />
-);
+}: ShowHiddenSwitchProps) => {
+  const { fontSize } = useEuiFontSize(labelSize);
+  return (
+    <EuiSwitch
+      compressed
+      label={SHOW_HIDDEN_LABEL}
+      labelProps={{ css: { fontSize } }}
+      checked={checked}
+      disabled={disabled}
+      onChange={(event) => onChange(event.target.checked)}
+      data-test-subj={dataTestSubj}
+    />
+  );
+};
