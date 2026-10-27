@@ -96,7 +96,9 @@ When a user asks about existing rules, read them with the Kibana API tools:
 - To read a single rule, call ${internalTools.executeApi} for \`${ALERTING_API_IDS.getRule}\` with the rule \`id\`.
 - Summarize matches in plain language: name, kind, schedule, and query snippet.
 - Do **not** attach rules by default when only listing or comparing.
-- To inspect or edit a saved rule, attach it with \`platform.core.sml_attach\` using the \`entry_id\` from the search result.
+- To inspect or edit a saved rule, attach it with ${
+      ALERTING_TOOL_IDS.attachRule
+    } using the rule \`id\`.
 - After attaching, use the returned \`attachment_id\` for subsequent ${
       ALERTING_TOOL_IDS.manageRule
     } calls.

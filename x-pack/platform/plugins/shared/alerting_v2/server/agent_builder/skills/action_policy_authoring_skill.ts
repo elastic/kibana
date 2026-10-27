@@ -128,9 +128,13 @@ An action policy is a **space-scoped saved object** that controls how alerts are
 ## Action Policy Discovery
 
 When a user asks about existing action policies:
-- Search with \`platform.core.sml_search\`, using keywords like the policy name, matcher, or destination.
+- Search with ${
+      ALERTING_TOOL_IDS.findActionPolicies
+    }, using keywords like the policy name. Omit \`search\` for a broad listing and page with \`page\` and \`perPage\`.
 - Summarize matches: name, enabled/disabled, destination count, matcher snippet, grouping mode.
-- To inspect or edit a saved policy, attach it with \`platform.core.sml_attach\` using the \`entry_id\`.
+- To inspect or edit a saved policy, attach it with ${
+      ALERTING_TOOL_IDS.attachActionPolicy
+    } using the policy \`id\`.
 - After attaching, use the returned \`attachment_id\` for subsequent ${
       ALERTING_TOOL_IDS.manageActionPolicy
     } calls.

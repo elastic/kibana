@@ -85,7 +85,7 @@ describe('createRuleAuthoringSkill', () => {
     expect(skill.content).toContain(ALERTING_API_IDS.getRule);
     expect(skill.content).toContain(internalTools.describeApi);
     expect(skill.content).toContain(internalTools.executeApi);
-    expect(skill.content).not.toContain('sml_search');
+    expect(skill.content).toContain(ALERTING_TOOL_IDS.attachRule);
   });
 
   it('references API operation ids that exist, and are read-only, in the Kibana API registry', async () => {

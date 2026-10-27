@@ -94,6 +94,8 @@ describe('createActionPolicyAuthoringSkill', () => {
     const skill = createActionPolicyAuthoringSkill(createDeps());
 
     expect(skill.content).toContain('Action Policy Discovery');
+    expect(skill.content).toContain(ALERTING_TOOL_IDS.findActionPolicies);
+    expect(skill.content).toContain(ALERTING_TOOL_IDS.attachActionPolicy);
     expect(skill.content).toContain('space-scoped saved object');
     expect(skill.content).not.toContain('Part 1: Action Policies');
     expect(skill.content).toContain('Default Notification Setup');
