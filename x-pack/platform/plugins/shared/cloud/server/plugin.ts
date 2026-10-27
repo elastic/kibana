@@ -277,6 +277,8 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       organizationId,
       trialEndDate: this.config.trial_end_date,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
+      isFedrampHigh: this.config.isFedrampHigh,
+      isElasticCloudHosted: this.config.isElasticCloudHosted,
       deploymentId,
       projectId,
       projectType,

@@ -12,6 +12,8 @@ export interface CloudUsageCollectorConfig {
   // Using * | undefined instead of ?: to force the calling code to list all the options (even when they can be undefined)
   trialEndDate: string | undefined;
   isElasticStaffOwned: boolean | undefined;
+  isFedrampHigh: boolean | undefined;
+  isElasticCloudHosted: boolean | undefined;
   organizationId: string | undefined;
   deploymentId: string | undefined;
   projectId: string | undefined;
@@ -26,6 +28,8 @@ interface CloudUsage {
   trialEndDate?: string;
   inTrial?: boolean;
   isElasticStaffOwned?: boolean;
+  isFedrampHigh?: boolean;
+  isElasticCloudHosted?: boolean;
   organizationId?: string;
   deploymentId?: string;
   projectId?: string;
@@ -42,6 +46,8 @@ export function createCloudUsageCollector(
     isCloudEnabled,
     trialEndDate,
     isElasticStaffOwned,
+    isFedrampHigh,
+    isElasticCloudHosted,
     organizationId,
     deploymentId,
     projectId,
@@ -67,6 +73,17 @@ export function createCloudUsageCollector(
       isElasticStaffOwned: {
         type: 'boolean',
         _meta: { description: 'Is the deploymend owned by an Elastician' },
+      },
+      isFedrampHigh: {
+        type: 'boolean',
+        _meta: { description: 'Is the deployment running on FedRAMP High?' },
+      },
+      isElasticCloudHosted: {
+        type: 'boolean',
+        _meta: {
+          description:
+            'Is the deployment running on Elastic Cloud Hosted (ECH)? False on ECE and self-managed.',
+        },
       },
       organizationId: {
         type: 'keyword',
@@ -99,6 +116,8 @@ export function createCloudUsageCollector(
       return {
         isCloudEnabled,
         isElasticStaffOwned,
+        isFedrampHigh,
+        isElasticCloudHosted,
         organizationId,
         trialEndDate,
         ...(organizationInTrial

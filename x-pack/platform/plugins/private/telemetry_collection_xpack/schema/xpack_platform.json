@@ -10435,6 +10435,18 @@
             "description": "Is the deploymend owned by an Elastician"
           }
         },
+        "isFedrampHigh": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Is the deployment running on FedRAMP High?"
+          }
+        },
+        "isElasticCloudHosted": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Is the deployment running on Elastic Cloud Hosted (ECH)? False on ECE and self-managed."
+          }
+        },
         "organizationId": {
           "type": "keyword",
           "_meta": {
