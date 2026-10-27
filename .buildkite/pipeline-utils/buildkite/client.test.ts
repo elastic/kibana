@@ -8,7 +8,7 @@
  */
 
 import { execFileSync } from 'child_process';
-import { BuildkiteClient } from './client.ts';
+import { BuildkiteClient, isFullCommitSha } from './client.ts';
 import type { Build } from './types/build.ts';
 import type { Job } from './types/job.ts';
 
@@ -280,6 +280,70 @@ describe('BuildkiteClient', () => {
           stdio: ['pipe', 'inherit', 'inherit'],
         }
       );
+    });
+  });
+
+  describe('getBuildsForCommit', () => {
+    const sha = 'a'.repeat(40);
+    const path = 'v2/organizations/elastic/pipelines/kibana-merge-queue/builds';
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('requests the commit and state filters', async () => {
+      const builds = [{ number: 1 }, { number: 2 }] as Build[];
+      const get = jest.spyOn(buildkite.http, 'get').mockResolvedValue({ data: builds });
+
+      const result = await buildkite.getBuildsForCommit('kibana-merge-queue', sha, 'passed');
+
+      expect(get).toHaveBeenCalledWith(path, {
+        params: { commit: sha, state: 'passed' },
+        timeout: 30_000,
+      });
+      expect(result).toEqual(builds);
+    });
+
+    it('omits the state filter when none is given', async () => {
+      const get = jest.spyOn(buildkite.http, 'get').mockResolvedValue({ data: [] });
+
+      await buildkite.getBuildsForCommit('kibana-merge-queue', sha);
+
+      expect(get).toHaveBeenCalledWith(path, { params: { commit: sha }, timeout: 30_000 });
+    });
+
+    it('encodes the pipeline slug in the path', async () => {
+      const get = jest.spyOn(buildkite.http, 'get').mockResolvedValue({ data: [] });
+
+      await buildkite.getBuildsForCommit('a/b', sha);
+
+      expect(get).toHaveBeenCalledWith('v2/organizations/elastic/pipelines/a%2Fb/builds', {
+        params: { commit: sha },
+        timeout: 30_000,
+      });
+    });
+
+    it('rejects short commits', async () => {
+      const get = jest.spyOn(buildkite.http, 'get');
+
+      await expect(
+        buildkite.getBuildsForCommit('kibana-merge-queue', 'a'.repeat(39))
+      ).rejects.toThrow('Invalid commit hash');
+      expect(get).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('isFullCommitSha', () => {
+    it.each([
+      ['a 40-character SHA-1 id', 'a'.repeat(40), true],
+      ['a 64-character SHA-256 id', 'a'.repeat(64), true],
+      ['a 39-character string', 'a'.repeat(39), false],
+      ['a 41-character string', 'a'.repeat(41), false],
+      ['a 63-character string', 'a'.repeat(63), false],
+      ['a 65-character string', 'a'.repeat(65), false],
+      ['an empty string', '', false],
+    ])('%s', (_label, commit, expected) => {
+      expect(isFullCommitSha(commit)).toBe(expected);
     });
   });
 });
