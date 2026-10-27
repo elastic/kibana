@@ -57,6 +57,19 @@ const OVERFETCH_MULTIPLIER = 3;
  */
 const MAX_SELECTION_PAGES = 5;
 
+/** Whether the report's evidence element for this space says an earlier hunt left it partly unsearched. */
+const hasPendingCoverage = (source: unknown, spaceId: string): boolean => {
+  const evidence = (source as { evidence?: unknown } | undefined)?.evidence;
+  const elements = Array.isArray(evidence) ? evidence : [evidence];
+  return elements.some(
+    (element) =>
+      typeof element === 'object' &&
+      element !== null &&
+      (element as { space_id?: unknown }).space_id === spaceId &&
+      (element as { coverage_pending?: unknown }).coverage_pending === true
+  );
+};
+
 /**
  * Both callers below must fail closed: an empty result would read as "nothing
  * to hunt" and hide a broken index or store behind a clean 200.
@@ -127,6 +140,11 @@ export const buildCandidateQuery = async (
     // on `feedback.last_hunted_at` matches nothing and the `must_not` would
     // always pass, letting every sweep re-hunt the whole pool. The nested form
     // below is the only one that actually gates.
+    //
+    // A hunted report is retired unless it is flagged `coverage_pending`: an earlier run searched
+    // only part of it (techniques past the generation budget, or a transient gap) and recorded the
+    // rest as still to do. A report without the flag, including every one hunted before the flag
+    // existed, stays retired.
     filterClauses.push({
       bool: {
         must_not: [
@@ -139,6 +157,7 @@ export const buildCandidateQuery = async (
                     { term: { 'evidence.space_id': spaceId } },
                     { exists: { field: 'evidence.last_hunted_at' } },
                   ],
+                  must_not: [{ term: { 'evidence.coverage_pending': true } }],
                 },
               },
             },
@@ -206,7 +225,8 @@ export const buildCandidateQuery = async (
         // is.
         ignore_unavailable: false,
         track_total_hits: true,
-        _source: false,
+        // Only the per-space ledger flag, which decides whether an open Proposal parks the report.
+        _source: ['evidence.space_id', 'evidence.coverage_pending'],
         sort,
         query: {
           bool: {
@@ -280,6 +300,11 @@ export const buildCandidateQuery = async (
     const pageIds = (response.hits.hits ?? [])
       .map((h) => h._id)
       .filter((id): id is string => typeof id === 'string');
+    const coveragePendingIds = new Set(
+      (response.hits.hits ?? [])
+        .filter((h) => hasPendingCoverage(h._source, spaceId))
+        .map((h) => h._id)
+    );
 
     if (page === 0) {
       // Read before any id exclusion narrows it, so `total` keeps meaning every report
@@ -292,8 +317,12 @@ export const buildCandidateQuery = async (
 
     for (const id of pageIds) {
       examined.push(id);
+      // A report an earlier run left partly unsearched is resumed even with a Proposal open:
+      // the Investigation is one per (space, report), and a finding on a subject that already has
+      // a live Proposal converges onto it rather than minting a second.
       if (
         openProposalConversationIds &&
+        !coveragePendingIds.has(id) &&
         openProposalConversationIds.has(
           buildHuntInvestigationConversationId({ spaceId, reportId: id })
         )
