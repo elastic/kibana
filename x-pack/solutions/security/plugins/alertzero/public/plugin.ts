@@ -105,7 +105,7 @@ export class AlertZeroPublicPlugin
       // `deepLinks` for us, which is what removes the AlertZero nodes from the Security
       // navigation tree — those trees hold no check of their own.
       status: AppStatus.inaccessible,
-      visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+      visibleIn: ['projectSideNav', 'globalSearch'],
       order: 101,
       // Initial deep links without capability filtering — capabilities are not available at
       // setup. `start()` emits an update via appUpdater$ once capabilities are known.
@@ -163,7 +163,7 @@ export class AlertZeroPublicPlugin
         const showNavigation = settingEnabled && canRead && availability === 'available';
         this.appUpdater$.next(() => ({
           status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
-          visibleIn: showNavigation ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : [],
+          visibleIn: showNavigation ? ['projectSideNav', 'globalSearch'] : [],
           deepLinks: showNavigation ? getAlertZeroDeepLinks(core.application.capabilities) : [],
         }));
       }
