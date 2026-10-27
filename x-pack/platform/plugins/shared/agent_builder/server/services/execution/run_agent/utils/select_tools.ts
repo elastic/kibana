@@ -39,6 +39,7 @@ export const selectTools = async ({
   request,
   toolProvider,
   agentConfiguration,
+  rawAgent = false,
   aiIndexCatalog,
   aiIndicesEnabled,
   attachmentsService,
@@ -53,6 +54,8 @@ export const selectTools = async ({
   toolProvider: ToolProvider;
   attachmentsService: AttachmentsService;
   agentConfiguration: AgentConfiguration;
+  /** A raw agent gets only the tools it selects explicitly, which leaves out the attachment tools. */
+  rawAgent?: boolean;
   aiIndexCatalog?: AiIndexCatalogEntry[];
   aiIndicesEnabled: boolean;
   spaceId: string;
@@ -60,9 +63,7 @@ export const selectTools = async ({
 }): Promise<SelectToolsResult> => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
-  // Agents that opt out of the internal tools get only the tools they select explicitly, which
-  // leaves out the attachment tools too.
-  const includeAttachmentTools = !agentConfiguration.disable_internal_tools;
+  const includeAttachmentTools = !rawAgent;
 
   // create tool selection for attachments types
   const attachmentTypes = conversation.attachmentTypes.map((type) => type.type);

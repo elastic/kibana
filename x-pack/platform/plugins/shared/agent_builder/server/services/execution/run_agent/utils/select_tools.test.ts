@@ -200,8 +200,8 @@ describe('selectTools', () => {
       agentConfiguration: {
         tools: [{ tool_ids: ['registry.static'] }],
         enable_elastic_capabilities: false,
-        disable_internal_tools: true,
       } as any,
+      rawAgent: true,
       aiIndicesEnabled: false,
       attachmentsService,
       spaceId: 'default',

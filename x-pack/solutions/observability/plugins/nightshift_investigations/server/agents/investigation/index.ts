@@ -117,8 +117,8 @@ export type NightshiftAgentTypeOptions = Omit<
 /**
  * Builds the configuration every Nightshift agent type shares: tools, connectors, the Cortex and
  * Memory hooks and the space's custom context. Only the instructions differ between types.
- * With `standalone`, the agent gets only the tools it lists and the instructions as its whole system
- * prompt: no Agent Builder internal tools, attachment tools or generic prompt.
+ * With `standalone`, the agent lists only its own tools. Agent Builder strips the rest (internal
+ * tools, attachment tools, generic prompt) because the agent is on its raw agent allow list.
  */
 export const buildNightshiftAgentConfiguration = ({
   instructions: agentInstructions,
@@ -150,14 +150,6 @@ export const buildNightshiftAgentConfiguration = ({
       },
     ],
     enable_elastic_capabilities: false,
-    ...(standalone
-      ? {
-          // Only the tools listed above: none of Agent Builder's internal file, API, todo,
-          // attachment or metadata tools, and the agent's own prompt without Agent Builder's.
-          disable_internal_tools: true,
-          raw_system_prompt: true,
-        }
-      : {}),
     connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
     ...(() => {
       // Decision trees are no longer a separate before-agent hook: they hydrate as a third

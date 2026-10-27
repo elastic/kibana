@@ -253,25 +253,6 @@ describe('mergeAgentConfiguration', () => {
     });
   });
 
-  describe('disable_internal_tools and raw_system_prompt', () => {
-    it.each(['disable_internal_tools', 'raw_system_prompt'] as const)(
-      'pins %s from the base so the delta cannot undo it',
-      (flag) => {
-        expect(mergeAgentConfiguration({ [flag]: true }, { tools: [], [flag]: false })[flag]).toBe(
-          true
-        );
-        expect(mergeAgentConfiguration({ [flag]: true }, { tools: [] })[flag]).toBe(true);
-      }
-    );
-
-    it('leaves the delta value alone when the base sets nothing', () => {
-      expect(
-        mergeAgentConfiguration({ skill_ids: [] }, { tools: [], raw_system_prompt: true })
-          .raw_system_prompt
-      ).toBe(true);
-    });
-  });
-
   it('does not mutate its inputs', () => {
     const base: AgentBaseConfiguration = { skill_ids: ['s1'], tools: [{ tool_ids: ['a'] }] };
     const delta: AgentConfiguration = { tools: [{ tool_ids: ['b'] }], skill_ids: ['s2'] };

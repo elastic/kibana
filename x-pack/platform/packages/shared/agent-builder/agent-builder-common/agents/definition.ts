@@ -137,18 +137,6 @@ export interface AgentConfiguration {
   enable_elastic_capabilities?: boolean;
 
   /**
-   * When true, the agent gets none of Agent Builder's internal tools (file, todo, API, skill,
-   * sub-agent and metadata tools): only the tools it selects explicitly.
-   */
-  disable_internal_tools?: boolean;
-
-  /**
-   * When true, the system prompt is exactly `instructions`, without Agent Builder's own
-   * sections (trust boundaries, tool rules, skills, rendering, attachments, deployment).
-   */
-  raw_system_prompt?: boolean;
-
-  /**
    * Optional list of workflow IDs. When set, these workflows run before the agent is executed.
    */
   workflow_ids?: string[];

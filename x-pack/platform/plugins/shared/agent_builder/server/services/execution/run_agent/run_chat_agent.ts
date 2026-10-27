@@ -20,6 +20,7 @@ import type {
   TodosStep,
 } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
+import { isRawAgent } from '@kbn/agent-builder-server/allow_lists';
 import {
   ChatEventType,
   AgentExecutionMode,
@@ -185,9 +186,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
   // configured. Without a fast model, `selectModel({ effortLevel: 'low' })` falls back to the default
   // (expensive) model, which defeats the feature — so we treat it as off (original full-list behavior).
+  // An agent on the raw list runs on its own instructions and tools alone, with none of Agent
+  // Builder's prompt sections or internal tools.
+  const rawAgent = isRawAgent(agentId ?? conversation?.agent_id);
   const [model, resolvedConfiguration, relevantSkillsEnabled, pluginSkillIds] = await Promise.all([
     modelProvider.getDefaultModel(),
     resolveConfiguration(agentConfiguration, {
+      rawSystemPrompt: rawAgent,
       aiIndicesEnabled: experimentalFeatures.aiIndices,
       request,
       resolver: context.aiIndexResolver,
@@ -231,7 +236,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     context,
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
-    includeAttachmentTypes: !agentConfiguration.disable_internal_tools,
+    includeAttachmentTypes: !rawAgent,
   });
   processedConversation.resumedRoundId = pendingTurn?.id;
   // Everything in the log at this point came from the incoming message's attachments; anything
@@ -319,6 +324,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       skills,
       toolProvider,
       agentConfiguration,
+      rawAgent,
       aiIndexCatalog: resolvedConfiguration.aiIndexCatalog,
       aiIndicesEnabled: experimentalFeatures.aiIndices,
       attachmentsService: attachments,
@@ -372,6 +378,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       subagentTracker,
       conversationExists: (id: string) => conversationClient.exists(id),
       agentConfiguration,
+      rawAgent,
     });
 
     // Then add dynamic tools

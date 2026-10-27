@@ -145,9 +145,9 @@ describe('buildRecorderMessages', () => {
   it('does not add the final message to a live pass', () => {
     const messages = buildRecorderMessages({ steps, turns: [], final: false, answer: 'x' });
 
-    expect(messages.some(({ role, content }) => role === 'assistant' && content === 'x')).toBe(
-      false
-    );
+    expect(
+      messages.some((message) => message.role === MessageRole.Assistant && message.content === 'x')
+    ).toBe(false);
   });
 
   it('slots an earlier recorder answer in after the agent turns that preceded it', () => {

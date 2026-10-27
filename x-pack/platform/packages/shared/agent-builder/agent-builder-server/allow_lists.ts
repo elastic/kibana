@@ -186,6 +186,21 @@ export const AGENT_BUILDER_BUILTIN_AGENTS = [
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
 
+/**
+ * Agents that run on their own instructions alone: they get no system prompt sections from Agent
+ * Builder (trust boundaries, tool rules, skills, rendering, attachments) and none of its internal
+ * tools (file, todo, API, skill, sub-agent, attachment and metadata tools), only the tools they
+ * select explicitly. The intention is to force a code review from the Agent Builder team when any
+ * team adds an agent here, as such an agent carries its own guardrails.
+ */
+export const AGENT_BUILDER_RAW_AGENTS = ['nightshift.investigation'] as const;
+
+export type AgentBuilderRawAgent = (typeof AGENT_BUILDER_RAW_AGENTS)[number];
+
+export const isRawAgent = (agentId: string | undefined): agentId is AgentBuilderRawAgent => {
+  return agentId !== undefined && (AGENT_BUILDER_RAW_AGENTS as readonly string[]).includes(agentId);
+};
+
 export const isAllowedBuiltinTool = (toolName: string): toolName is AgentBuilderBuiltinTool => {
   return (AGENT_BUILDER_BUILTIN_TOOLS as readonly string[]).includes(toolName);
 };

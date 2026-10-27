@@ -10,6 +10,7 @@ import {
   isAllowedBuiltinTool,
   isAllowedCycleHook,
   isAllowedSkillRegistration,
+  isRawAgent,
 } from './allow_lists';
 import { ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
 
@@ -30,6 +31,14 @@ describe('isAllowedBuiltinTool', () => {
 
   it('rejects unlisted tool ids', () => {
     expect(isAllowedBuiltinTool('agentic_investigations.not_a_tool')).toBe(false);
+  });
+});
+
+describe('isRawAgent', () => {
+  it('is true only for agents on the raw list', () => {
+    expect(isRawAgent('nightshift.investigation')).toBe(true);
+    expect(isRawAgent('nightshift.assistant')).toBe(false);
+    expect(isRawAgent(undefined)).toBe(false);
   });
 });
 

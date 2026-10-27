@@ -80,7 +80,11 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
   return { context, toolManager };
 };
 
-const register = async (context: AgentHandlerContext, subagentIds: string[] = ['other-agent']) => {
+const register = async (
+  context: AgentHandlerContext,
+  subagentIds: string[] = ['other-agent'],
+  rawAgent = false
+) => {
   const params = {
     context,
     agentId: 'agent-1',
@@ -91,6 +95,7 @@ const register = async (context: AgentHandlerContext, subagentIds: string[] = ['
     subagentTracker: {},
     conversationExists: jest.fn(),
     agentConfiguration: { subagent_ids: subagentIds },
+    rawAgent,
   } as unknown as RegisterInternalToolsParams;
   await registerInternalTools(params);
 };
@@ -112,6 +117,14 @@ describe('registerInternalTools - subagents', () => {
     await register(context);
 
     expect(addedToolIds(toolManager)).toEqual(expect.arrayContaining(SUBAGENT_TOOL_IDS));
+  });
+
+  it('registers no internal tools for a raw agent', async () => {
+    const { context, toolManager } = createContext();
+
+    await register(context, ['other-agent'], true);
+
+    expect(toolManager.addTools).not.toHaveBeenCalled();
   });
 
   it('does not register the subagent tools when the allowlist resolves empty', async () => {
