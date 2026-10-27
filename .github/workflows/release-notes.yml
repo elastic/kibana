@@ -4,12 +4,14 @@
 name: release-notes
 on:
   pull_request:
-    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled, ready_for_review]
   push:
     branches: [main]
 permissions: {}
 jobs:
   release-notes:
+    # Skip draft PRs; ready_for_review re-runs the check when the PR leaves draft.
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     permissions:
       contents: read
       id-token: write

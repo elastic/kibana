@@ -16,5 +16,5 @@ concurrency:
   cancel-in-progress: false
 jobs:
   comment:
-    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled'
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled' && github.event.workflow_run.conclusion != 'skipped'
     uses: elastic/docs-actions/.github/workflows/release-notes-comments.yml@v1
