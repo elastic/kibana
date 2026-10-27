@@ -336,6 +336,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           // `undefined` will drop the param from the url
           filter: filterValue.trim() === '' ? undefined : filterValue,
           includedPolicies: selectedPolicies.trim() === '' ? undefined : selectedPolicies,
+          ...(didFilterChange ? { page: 1 } : {}),
         });
 
         // We don't want to trigger a refresh of the list twice because the URL above was already
@@ -350,7 +351,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
     const handleOnEnabledStatusChange = useCallback(
       (newEnabledStatus: ArtifactEnabledStatus | undefined) => {
-        setUrlParams({ enabledStatus: newEnabledStatus });
+        setUrlParams({ enabledStatus: newEnabledStatus, page: 1 });
       },
       [setUrlParams]
     );
