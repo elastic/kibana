@@ -109,6 +109,7 @@ describe('Alert Triage outcome reports', () => {
       alerts: number;
       fpCandidates?: number;
       startedAlerts?: number;
+      alertsJoined?: number;
       verdicts: { fp: number; inconclusive: number; tp: number };
     }): Record<string, unknown> => ({
       steps: {
