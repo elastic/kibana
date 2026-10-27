@@ -15,22 +15,11 @@ import { Redirect, useLocation } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import { ENTITY_INVENTORY_PAGES } from '../pages';
 
 interface EntityInventoryShellProps {
   PageTemplate: ObservabilitySharedPluginStart['navigation']['PageTemplate'];
 }
-
-const PATH_TITLES: Record<string, string> = {
-  '/all-resources': i18n.translate('xpack.entityInventoryApp.allResourcesTitle', {
-    defaultMessage: 'All resources',
-  }),
-  '/hosts': i18n.translate('xpack.entityInventoryApp.hostsTitle', {
-    defaultMessage: 'Hosts',
-  }),
-  '/kubernetes': i18n.translate('xpack.entityInventoryApp.kubernetesTitle', {
-    defaultMessage: 'Kubernetes',
-  }),
-};
 
 const techPreviewLabel = i18n.translate('xpack.entityInventoryApp.techPreviewBadgeLabel', {
   defaultMessage: 'Technical preview',
@@ -57,7 +46,7 @@ const TECH_PREVIEW_BADGE: AppHeaderBadge[] = [
 function EntityInventoryShell({ PageTemplate }: EntityInventoryShellProps) {
   const { pathname } = useLocation();
   const title =
-    PATH_TITLES[pathname] ??
+    ENTITY_INVENTORY_PAGES.find((page) => page.path === pathname)?.title ??
     i18n.translate('xpack.entityInventoryApp.entityInventoryTitle', {
       defaultMessage: 'Entity Inventory',
     });

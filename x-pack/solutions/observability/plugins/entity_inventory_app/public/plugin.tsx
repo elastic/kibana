@@ -21,34 +21,7 @@ import type {
   EntityInventoryAppSetupDependencies,
   EntityInventoryAppStartDependencies,
 } from './types';
-
-/**
- * Each entity type entry here requires a matching ID in EntityInventoryAppLinkId:
- * src/platform/packages/shared/deeplinks/observability/deep_links.ts
- *
- * Pattern: path = /<entityType>, deepLinkId = <entityType>
- * Adding a new entity type = one entry below + one ID in EntityInventoryAppLinkId.
- */
-const NAV_ITEMS = [
-  {
-    label: () =>
-      i18n.translate('xpack.entityInventoryApp.nav.hostsLabel', {
-        defaultMessage: 'Hosts',
-      }),
-    app: 'entityInventoryApp' as const,
-    path: '/hosts',
-    deepLinkId: 'hosts',
-  },
-  {
-    label: () =>
-      i18n.translate('xpack.entityInventoryApp.nav.kubernetesLabel', {
-        defaultMessage: 'Kubernetes',
-      }),
-    app: 'entityInventoryApp' as const,
-    path: '/kubernetes',
-    deepLinkId: 'kubernetes',
-  },
-] as const;
+import { ENTITY_INVENTORY_PAGES } from './pages';
 
 export class EntityInventoryAppPlugin
   implements
@@ -72,22 +45,12 @@ export class EntityInventoryAppPlugin
       }),
       appRoute: '/app/entity-inventory',
       visibleIn: [],
-      deepLinks: [
-        {
-          id: 'allResources',
-          title: i18n.translate('xpack.entityInventoryApp.nav.allResourcesLabel', {
-            defaultMessage: 'All resources',
-          }),
-          path: '/all-resources',
-          visibleIn,
-        },
-        ...NAV_ITEMS.map(({ deepLinkId, label, path }) => ({
-          id: deepLinkId,
-          title: label(),
-          path,
-          visibleIn,
-        })),
-      ],
+      deepLinks: ENTITY_INVENTORY_PAGES.map(({ deepLinkId, title, path }) => ({
+        id: deepLinkId,
+        title,
+        path,
+        visibleIn,
+      })),
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');
@@ -109,41 +72,19 @@ export class EntityInventoryAppPlugin
             defaultMessage: 'Entity Inventory',
           }),
           sortKey: 300,
-          entries: [
-            {
-              label: i18n.translate('xpack.entityInventoryApp.nav.allResourcesLabel', {
-                defaultMessage: 'All resources',
-              }),
-              app: 'entityInventoryApp',
-              path: '/all-resources',
-            },
-            ...NAV_ITEMS.map(({ label, app, path }) => ({
-              label: label(),
-              app,
-              path,
-            })),
-          ],
+          entries: ENTITY_INVENTORY_PAGES.map(({ title, path }) => ({
+            label: title,
+            app: 'entityInventoryApp',
+            path,
+          })),
         },
       ])
     );
 
-    const navTreeChildren: NodeDefinition[] = [
-      {
-        link: 'entityInventoryApp:allResources',
-        title: i18n.translate('xpack.entityInventoryApp.nav.allResourcesLabel', {
-          defaultMessage: 'All resources',
-        }),
-        getIsActive: ({
-          pathNameSerialized,
-          prepend,
-        }: {
-          pathNameSerialized: string;
-          prepend: (p: string) => string;
-        }) => pathNameSerialized.startsWith(prepend('/app/entity-inventory/all-resources')),
-      },
-      ...NAV_ITEMS.map(({ deepLinkId, label, path }) => ({
+    const navTreeChildren: NodeDefinition[] = ENTITY_INVENTORY_PAGES.map(
+      ({ deepLinkId, title, path }) => ({
         link: `entityInventoryApp:${deepLinkId}` as const,
-        title: label(),
+        title,
         getIsActive: ({
           pathNameSerialized,
           prepend,
@@ -151,8 +92,8 @@ export class EntityInventoryAppPlugin
           pathNameSerialized: string;
           prepend: (p: string) => string;
         }) => pathNameSerialized.startsWith(prepend(`/app/entity-inventory${path}`)),
-      })),
-    ];
+      })
+    );
 
     return { navTreeChildren };
   }
