@@ -11,8 +11,6 @@ import type { SmlSearchFilters, SmlSearchConstraints } from '@kbn/agent-builder-
  * Query keys for react-query
  */
 export const queryKeys = {
-  /** Same probe the investigations flyout uses when another feature grants the API privilege. */
-  investigationPrivileges: ['investigationPrivileges'] as const,
   conversations: {
     all: ['conversations'] as const,
     list: ['conversations', 'list'] as const,
