@@ -3479,6 +3479,9 @@ importers:
       '@kbn/security-ui-components':
         specifier: workspace:*
         version: link:x-pack/platform/packages/private/security/ui_components
+      '@kbn/securitysolution-alerts-page-url':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-securitysolution-alerts-page-url
       '@kbn/securitysolution-autocomplete':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-securitysolution-autocomplete
@@ -9837,6 +9840,8 @@ importers:
   x-pack/solutions/security/packages/kbn-security-evals-matrix: {}
 
   x-pack/solutions/security/packages/kbn-security-evals-workflow-traces: {}
+
+  x-pack/solutions/security/packages/kbn-securitysolution-alerts-page-url: {}
 
   x-pack/solutions/security/packages/kbn-securitysolution-autocomplete: {}
 
