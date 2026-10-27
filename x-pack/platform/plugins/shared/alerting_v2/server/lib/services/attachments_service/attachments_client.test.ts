@@ -12,7 +12,6 @@ jest.mock('uuid', () => ({
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
 import { ACTION_POLICY_ATTACHMENT_TYPE, RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
-import { z } from '@kbn/zod/v4';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { createAttachmentsClient } from './attachments_client';
 
@@ -23,8 +22,6 @@ const ruleData = {
   schedule: { every: '5m', lookback: '15m' },
   query: { base: 'FROM metrics-* | LIMIT 10' },
 };
-
-const dashboardSchema = z.object({ title: z.string() });
 
 const record = (
   id: string,
@@ -84,20 +81,6 @@ describe('createAttachmentsClient', () => {
           origin: undefined,
           data: { yaml: 'new' },
         },
-      ]);
-    });
-
-    it('supports arbitrary attachment types via ofType', () => {
-      attachments.getActive.mockReturnValue([
-        record('dash-att', 'dashboard', { title: 'Overview' }, { origin: 'dash-so-id' }),
-        record('rule-att', RULE_ATTACHMENT_TYPE, {}),
-      ]);
-
-      const dashboards = createAttachmentsClient(attachments).ofType('dashboard', dashboardSchema);
-
-      expect(dashboards.type).toBe('dashboard');
-      expect(dashboards.list().map(({ id, origin, data }) => ({ id, origin, data }))).toEqual([
-        { id: 'dash-att', origin: 'dash-so-id', data: { title: 'Overview' } },
       ]);
     });
 
@@ -304,16 +287,6 @@ describe('createAttachmentsClient', () => {
           type: WORKFLOW_YAML_ATTACHMENT_TYPE,
           description: 'Workflow: generated-attachment-id',
         })
-      );
-    });
-
-    it('omits the description when no label is configured', async () => {
-      const dashboards = createAttachmentsClient(attachments).ofType('dashboard', z.object({}));
-
-      await dashboards.saveDraft(dashboards.getDraft(), {});
-
-      expect(attachments.add).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'dashboard', description: undefined })
       );
     });
 

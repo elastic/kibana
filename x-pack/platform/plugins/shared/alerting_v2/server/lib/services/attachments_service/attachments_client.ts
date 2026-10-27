@@ -71,7 +71,7 @@ export interface TypedAttachmentClient<TData> {
 export interface TypedAttachmentClientOptions<TData> {
   /** Human-readable type name used in the saved description (`<label>: <name>`) and errors. */
   label?: string;
-  getName?: (data: Partial<TData>) => string | undefined;
+  getName: (data: Partial<TData>) => string | undefined;
 }
 
 interface AttachmentDataSchema<TData> {
@@ -83,12 +83,6 @@ export interface AttachmentsClient {
   rules: TypedAttachmentClient<RuleAttachmentData>;
   actionPolicies: TypedAttachmentClient<ActionPolicyAttachmentData>;
   workflows: TypedAttachmentClient<WorkflowYamlAttachmentData>;
-  /** Creates a client for any other registered attachment type. */
-  ofType<TData>(
-    type: string,
-    schema: AttachmentDataSchema<TData>,
-    options?: TypedAttachmentClientOptions<TData>
-  ): TypedAttachmentClient<TData>;
 }
 
 const parsedBy =
@@ -118,7 +112,7 @@ const createTypedAttachmentClient = <TData>(
   attachments: AttachmentStateManager,
   type: string,
   schema: AttachmentDataSchema<TData>,
-  { label, getName }: TypedAttachmentClientOptions<TData> = {}
+  { label, getName }: TypedAttachmentClientOptions<TData>
 ): TypedAttachmentClient<TData> => {
   const isData = parsedBy<TData>(schema);
   const isDraft = parsedBy<Partial<TData>>(schema.partial());
@@ -152,10 +146,10 @@ const createTypedAttachmentClient = <TData>(
       };
     },
     saveDraft: async ({ attachmentId, isNew }, data) => {
-      const description = label ? `${label}: ${getName?.(data) ?? attachmentId}` : undefined;
+      const description = `${label ?? type}: ${getName(data) ?? attachmentId}`;
       const attachment = isNew
         ? await attachments.add({ id: attachmentId, type, description, data })
-        : await attachments.update(attachmentId, { data, description });
+        : await attachments.update(attachmentId, label ? { data, description } : { data });
 
       if (!attachment) {
         throw new Error(
@@ -167,7 +161,7 @@ const createTypedAttachmentClient = <TData>(
   };
 };
 
-/** Creates a typed client for reading and writing conversation attachments of any type. */
+/** Creates a typed client for rule, action policy, and workflow conversation attachments. */
 export const createAttachmentsClient = (
   attachments: AttachmentStateManager
 ): AttachmentsClient => ({
@@ -190,6 +184,4 @@ export const createAttachmentsClient = (
       getName: (data) => (typeof data.name === 'string' ? data.name : undefined),
     }
   ),
-  ofType: (type, schema, options) =>
-    createTypedAttachmentClient(attachments, type, schema, options),
 });
