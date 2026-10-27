@@ -20,14 +20,14 @@ import type { HitlStepClaim } from '../services/mark_step_as_responded_updater';
  * An execution that is no longer waiting for input keeps the claim, so its step does not come back
  * as answerable.
  */
-export const isResumeNotPendingError = (error: unknown): boolean =>
+const isResumeNotPendingError = (error: unknown): boolean =>
   error instanceof WorkflowExecutionNotFoundError || error instanceof WorkflowResumeNotAppliedError;
 
 /** Unwraps the engine's original resume error so callers keep their error-to-status mapping. */
-export const unwrapResumeError = (error: unknown): unknown =>
+const unwrapResumeError = (error: unknown): unknown =>
   error instanceof WorkflowResumeNotAppliedError ? error.cause ?? error : error;
 
-export interface ReleaseClaimAfterFailedResumeParams {
+interface ReleaseHitlClaimParams {
   workflowsService: Pick<WorkflowsService, 'releaseHitlStepClaim'>;
   logger: Logger;
   executionId: string;
@@ -36,18 +36,15 @@ export interface ReleaseClaimAfterFailedResumeParams {
   spaceId: string;
 }
 
-/**
- * Releases the step claim of a resume that was not applied, resolving to whether it was released
- * and never throwing.
- */
-export const releaseClaimAfterFailedResume = async ({
+/** Resolves to whether the claim was released, never throwing. */
+const releaseClaimAfterFailedResume = async ({
   workflowsService,
   logger,
   executionId,
   stepExecutionId,
   claim,
   spaceId,
-}: ReleaseClaimAfterFailedResumeParams): Promise<boolean> => {
+}: ReleaseHitlClaimParams): Promise<boolean> => {
   try {
     const released = await workflowsService.releaseHitlStepClaim(stepExecutionId, claim, spaceId);
     if (!released) {
@@ -63,5 +60,28 @@ export const releaseClaimAfterFailedResume = async ({
       }`
     );
     return false;
+  }
+};
+
+export interface WithHitlClaimParams extends ReleaseHitlClaimParams {
+  /** Called with whether the claim was released, when the failed resume left nothing pending. */
+  onRelease?: (released: boolean) => void;
+}
+
+/**
+ * Runs the resume of a claimed step, releasing the claim when the resume fails and leaves nothing
+ * pending. The engine's original error is rethrown either way.
+ */
+export const withHitlClaim = async <T>(
+  { onRelease, ...params }: WithHitlClaimParams,
+  resume: () => Promise<T>
+): Promise<T> => {
+  try {
+    return await resume();
+  } catch (error) {
+    if (isResumeNotPendingError(error)) {
+      onRelease?.(await releaseClaimAfterFailedResume(params));
+    }
+    throw unwrapResumeError(error);
   }
 };

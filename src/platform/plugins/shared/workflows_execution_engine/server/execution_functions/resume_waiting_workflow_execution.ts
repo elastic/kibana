@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import pRetry from 'p-retry';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -18,13 +19,17 @@ import {
 import type { RevertResumeContextResult } from '../repositories/resume_context_revert';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { InternalResumeWorkflowExecution, ResumeWorkflowExecutionResponse } from '../types';
-import { applyBackoffJitter } from '../utils/backoff_jitter/backoff_jitter';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
-/** Delays before the second and third handoff attempts, jittered down to half. */
-const HANDOFF_RETRY_DELAYS_MS: readonly number[] = [100, 400];
-/** No attempt starts after this: a failing Task Manager call can take a whole ES timeout. */
-const HANDOFF_RETRY_BUDGET_MS = 5_000;
+/** Three handoff attempts, 100-200ms and then 400-800ms apart. */
+const HANDOFF_RETRY_OPTIONS = {
+  retries: 2,
+  minTimeout: 100,
+  factor: 4,
+  randomize: true,
+  // No attempt starts after this: a failing Task Manager call can take a whole ES timeout.
+  maxRetryTime: 5_000,
+} as const;
 
 export interface ResumeWaitingWorkflowExecutionDeps {
   workflowExecutionRepository: Pick<
@@ -36,9 +41,6 @@ export interface ResumeWaitingWorkflowExecutionDeps {
   assertLicensed: () => Promise<void>;
   resolveResumedBy: (request: KibanaRequest | undefined) => Promise<string>;
   logger: Logger;
-  retryDelaysMs?: readonly number[];
-  retryBudgetMs?: number;
-  sleep?: (ms: number) => Promise<void>;
 }
 
 export interface ResumeWaitingWorkflowExecutionParams {
@@ -56,8 +58,7 @@ interface PreparedResume {
   resumeContext: Record<string, unknown>;
 }
 
-const defaultSleep = (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+type ResumeProgress = 'in_progress' | 'idle' | 'unknown';
 
 const toMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -116,84 +117,116 @@ const prepareResume = async (
   };
 };
 
-const handOffWithRetry = async (
+/** Nothing has been written yet, so any failure other than the execution's state is not applied. */
+const prepareInteractiveResume = async (
   deps: ResumeWaitingWorkflowExecutionDeps,
-  executionId: string,
-  handOff: () => Promise<void>
-): Promise<void> => {
-  const delaysMs = deps.retryDelaysMs ?? HANDOFF_RETRY_DELAYS_MS;
-  const sleep = deps.sleep ?? defaultSleep;
-  const deadline = Date.now() + (deps.retryBudgetMs ?? HANDOFF_RETRY_BUDGET_MS);
-
-  for (const [index, delayMs] of delaysMs.entries()) {
-    try {
-      await handOff();
-      return;
-    } catch (error) {
-      if (Date.now() >= deadline) {
-        throw error;
-      }
-      deps.logger.warn(
-        `Handing the resume of workflow execution ${executionId} to Task Manager failed on attempt ${
-          index + 1
-        }, retrying: ${toMessage(error)}`
-      );
-      await sleep(applyBackoffJitter(delayMs));
+  params: ResumeWaitingWorkflowExecutionParams
+): Promise<PreparedResume> => {
+  try {
+    return await prepareResume(deps, params);
+  } catch (error) {
+    if (
+      error instanceof WorkflowExecutionNotFoundError ||
+      error instanceof WorkflowExecutionInvalidStatusError
+    ) {
+      throw error;
     }
+    throw new WorkflowResumeNotAppliedError(params.executionId, error);
   }
-
-  await handOff();
 };
 
-/**
- * Takes back the response this request wrote and decides the outcome: a response a runner already
- * has is a success, one that is gone means nothing is pending, anything else keeps the failure.
- */
-const revertResponse = async (
+const handOffWithRetry = (
+  deps: ResumeWaitingWorkflowExecutionDeps,
+  { executionId, spaceId, request }: ResumeWaitingWorkflowExecutionParams
+): Promise<void> =>
+  pRetry(
+    () =>
+      deps.internalResumeWorkflowExecution(executionId, spaceId, undefined, request, {
+        isUserInteractive: true,
+      }),
+    {
+      ...HANDOFF_RETRY_OPTIONS,
+      onFailedAttempt: (error) => {
+        deps.logger.warn(
+          `Handing the resume of workflow execution ${executionId} to Task Manager failed on attempt ${error.attemptNumber}: ${error.message}`
+        );
+      },
+    }
+  );
+
+const getResumeProgress = async (
+  deps: ResumeWaitingWorkflowExecutionDeps,
+  executionId: string
+): Promise<ResumeProgress> => {
+  try {
+    return (await deps.workflowTaskManager.isResumeInProgress(executionId))
+      ? 'in_progress'
+      : 'idle';
+  } catch (error) {
+    deps.logger.error(
+      `Could not tell whether workflow execution ${executionId} is already resuming: ${toMessage(
+        error
+      )}`
+    );
+    return 'unknown';
+  }
+};
+
+const revertResumeContext = async (
   deps: ResumeWaitingWorkflowExecutionDeps,
   { executionId, spaceId }: ResumeWaitingWorkflowExecutionParams,
-  { execution, resumedBy, resumedAt }: PreparedResume,
-  failure: unknown
-): Promise<ResumeWorkflowExecutionResponse> => {
-  let result: RevertResumeContextResult;
+  { execution, resumedBy, resumedAt }: PreparedResume
+): Promise<RevertResumeContextResult | 'error'> => {
   try {
-    result = await deps.workflowExecutionRepository.tryRevertResumeContext({
+    return await deps.workflowExecutionRepository.tryRevertResumeContext({
       workflowExecutionId: executionId,
       spaceId,
       resumedBy,
       resumedAt,
       previousContext: execution.context,
     });
-  } catch (revertError) {
+  } catch (error) {
     deps.logger.error(
-      `Failed to revert the resume of workflow execution ${executionId}: ${toMessage(revertError)}`
+      `Failed to revert the resume of workflow execution ${executionId}: ${toMessage(error)}`
     );
-    throw failure;
+    return 'error';
   }
+};
 
-  switch (result) {
-    case 'reverted':
-    case 'not_pending':
-    case 'not_found':
-      deps.logger.warn(
-        `Resume of workflow execution ${executionId} was not applied (${result}): ${toMessage(
-          failure
-        )}`
-      );
-      throw new WorkflowResumeNotAppliedError(executionId, failure);
+/**
+ * Decides the outcome of a response that could not be handed off: one a runner has or is about to
+ * get is a success, one taken back is not applied, and anything uncertain keeps the failure.
+ */
+const settleFailedHandOff = async (
+  deps: ResumeWaitingWorkflowExecutionDeps,
+  params: ResumeWaitingWorkflowExecutionParams,
+  prepared: PreparedResume,
+  failure: unknown,
+  { checkProgress }: { checkProgress: boolean }
+): Promise<ResumeWorkflowExecutionResponse> => {
+  const { executionId } = params;
+  const progress = checkProgress ? await getResumeProgress(deps, executionId) : 'idle';
+  const state = progress === 'idle' ? await revertResumeContext(deps, params, prepared) : progress;
+  const details = `(${state}): ${toMessage(failure)}`;
+
+  switch (state) {
+    case 'in_progress':
     case 'consumed':
     case 'in_flight':
       deps.logger.warn(
-        `Resume of workflow execution ${executionId} reached a runner despite failing: ${toMessage(
-          failure
-        )}`
+        `Resume of workflow execution ${executionId} reached a runner despite failing ${details}`
       );
-      return { resumedBy };
+      return { resumedBy: prepared.resumedBy };
+    case 'reverted':
+    case 'not_pending':
+    case 'not_found':
+      deps.logger.warn(`Resume of workflow execution ${executionId} was not applied ${details}`);
+      throw new WorkflowResumeNotAppliedError(executionId, failure);
+    case 'unknown':
     case 'conflict':
+    case 'error':
       deps.logger.error(
-        `Resume of workflow execution ${executionId} failed and could not be reverted: ${toMessage(
-          failure
-        )}`
+        `Resume of workflow execution ${executionId} failed and its response was kept ${details}`
       );
       throw failure;
   }
@@ -213,25 +246,11 @@ export const resumeWaitingWorkflowExecution = async (
   // External resumes keep their original flow; they hand off through the retained wake task.
   if (!request) {
     const { resumedBy, resumeContext } = await prepareResume(deps, params);
-    await deps.internalResumeWorkflowExecution(executionId, spaceId, resumeContext, undefined, {
-      isUserInteractive: true,
-    });
+    await deps.internalResumeWorkflowExecution(executionId, spaceId, resumeContext);
     return { resumedBy };
   }
 
-  let prepared: PreparedResume;
-  try {
-    prepared = await prepareResume(deps, params);
-  } catch (error) {
-    if (
-      error instanceof WorkflowExecutionNotFoundError ||
-      error instanceof WorkflowExecutionInvalidStatusError
-    ) {
-      throw error;
-    }
-    // Nothing has been written yet.
-    throw new WorkflowResumeNotAppliedError(executionId, error);
-  }
+  const prepared = await prepareInteractiveResume(deps, params);
 
   try {
     await deps.workflowExecutionRepository.updateWorkflowExecution({
@@ -240,38 +259,14 @@ export const resumeWaitingWorkflowExecution = async (
     });
   } catch (error) {
     // A failed write may still have landed, so only the revert can tell what is pending.
-    return revertResponse(deps, params, prepared, error);
+    return settleFailedHandOff(deps, params, prepared, error, { checkProgress: false });
   }
 
   try {
-    await handOffWithRetry(deps, executionId, () =>
-      deps.internalResumeWorkflowExecution(executionId, spaceId, undefined, request, {
-        isUserInteractive: true,
-      })
-    );
-    return { resumedBy: prepared.resumedBy };
-  } catch (handOffError) {
-    let inProgress: boolean;
-    try {
-      inProgress = await deps.workflowTaskManager.isResumeInProgress(executionId);
-    } catch (checkError) {
-      deps.logger.error(
-        `Could not tell whether workflow execution ${executionId} is already resuming, keeping its response: ${toMessage(
-          checkError
-        )}`
-      );
-      throw handOffError;
-    }
-
-    if (inProgress) {
-      deps.logger.warn(
-        `Handing the resume of workflow execution ${executionId} failed, but a resume is already in progress: ${toMessage(
-          handOffError
-        )}`
-      );
-      return { resumedBy: prepared.resumedBy };
-    }
-
-    return revertResponse(deps, params, prepared, handOffError);
+    await handOffWithRetry(deps, params);
+  } catch (error) {
+    return settleFailedHandOff(deps, params, prepared, error, { checkProgress: true });
   }
+
+  return { resumedBy: prepared.resumedBy };
 };

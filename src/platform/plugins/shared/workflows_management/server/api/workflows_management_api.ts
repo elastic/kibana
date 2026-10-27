@@ -72,11 +72,7 @@ import {
   resumeWorkflowExecutionExternallyViaGet,
   resumeWorkflowExecutionExternallyWithInput,
 } from './external_resume/external_resume_service';
-import {
-  isResumeNotPendingError,
-  releaseClaimAfterFailedResume,
-  unwrapResumeError,
-} from './hitl_claim_release';
+import { withHitlClaim } from './hitl_claim_release';
 import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
@@ -1434,28 +1430,20 @@ export class WorkflowsManagementApi {
         );
       }
 
-      let result: ResumeWorkflowExecutionResponseDto;
-      try {
-        result = await workflowsExecutionEngine.resumeWorkflowExecution(
+      const result = await withHitlClaim(
+        {
+          workflowsService: this.workflowsService,
+          logger: this.logger,
           executionId,
+          stepExecutionId,
+          claim,
           spaceId,
-          input,
-          request
-        );
-      } catch (error) {
-        // Only release when the engine left nothing pending; otherwise the claim must stay.
-        if (isResumeNotPendingError(error)) {
-          claimReleased = await releaseClaimAfterFailedResume({
-            workflowsService: this.workflowsService,
-            logger: this.logger,
-            executionId,
-            stepExecutionId,
-            claim,
-            spaceId,
-          });
-        }
-        throw unwrapResumeError(error);
-      }
+          onRelease: (released) => {
+            claimReleased = released;
+          },
+        },
+        () => workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request)
+      );
       this.audit?.logExecutionResumed(request, {
         executionId,
         resumedBy: result.resumedBy,

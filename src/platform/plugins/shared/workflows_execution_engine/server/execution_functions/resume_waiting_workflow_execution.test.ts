@@ -42,9 +42,6 @@ const createDeps = () => ({
   assertLicensed: jest.fn().mockResolvedValue(undefined),
   resolveResumedBy: jest.fn().mockResolvedValue('analyst'),
   logger: loggingSystemMock.createLogger(),
-  retryDelaysMs: [100, 400],
-  retryBudgetMs: 5_000,
-  sleep: jest.fn().mockResolvedValue(undefined),
 });
 
 describe('resumeWaitingWorkflowExecution', () => {
@@ -52,8 +49,14 @@ describe('resumeWaitingWorkflowExecution', () => {
   const handOffError = new Error('the API key could not be granted');
   let deps: ReturnType<typeof createDeps>;
 
-  const resume = (overrides: { resumedBy?: string } = {}) =>
-    resumeWaitingWorkflowExecution(deps, { executionId, spaceId, input, request, ...overrides });
+  // Runs the retry delays while the resume settles.
+  const resume = async (overrides: { resumedBy?: string } = {}) => {
+    const [response] = await Promise.all([
+      resumeWaitingWorkflowExecution(deps, { executionId, spaceId, input, request, ...overrides }),
+      jest.runAllTimersAsync(),
+    ]);
+    return response;
+  };
   const resumeError = (): Promise<unknown> =>
     resume().then(
       () => {
@@ -65,7 +68,12 @@ describe('resumeWaitingWorkflowExecution', () => {
     deps.workflowExecutionRepository.updateWorkflowExecution.mock.calls[0][0].context.resumedAt;
 
   beforeEach(() => {
+    jest.useFakeTimers();
     deps = createDeps();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   describe('with a request', () => {
@@ -146,22 +154,22 @@ describe('resumeWaitingWorkflowExecution', () => {
       await expect(resume()).resolves.toEqual({ resumedBy: 'analyst' });
 
       expect(deps.internalResumeWorkflowExecution).toHaveBeenCalledTimes(2);
-      expect(deps.sleep).toHaveBeenCalledTimes(1);
-      const [[delayMs]] = deps.sleep.mock.calls;
-      expect(delayMs).toBeGreaterThanOrEqual(50);
-      expect(delayMs).toBeLessThanOrEqual(100);
       expect(deps.workflowTaskManager.isResumeInProgress).not.toHaveBeenCalled();
       expect(deps.workflowExecutionRepository.tryRevertResumeContext).not.toHaveBeenCalled();
     });
 
     it('stops retrying once the budget is spent', async () => {
-      deps.retryBudgetMs = 0;
-      deps.internalResumeWorkflowExecution.mockRejectedValue(handOffError);
+      deps.internalResumeWorkflowExecution.mockImplementation(async () => {
+        // A Task Manager call that fails after a whole ES timeout.
+        jest.setSystemTime(Date.now() + 5_000);
+        throw handOffError;
+      });
 
-      await expect(resume()).rejects.toBeInstanceOf(WorkflowResumeNotAppliedError);
+      const error = await resumeError();
 
+      expect(error).toBeInstanceOf(WorkflowResumeNotAppliedError);
+      expect((error as WorkflowResumeNotAppliedError).cause).toBe(handOffError);
       expect(deps.internalResumeWorkflowExecution).toHaveBeenCalledTimes(1);
-      expect(deps.sleep).not.toHaveBeenCalled();
     });
 
     describe('when every handoff attempt fails', () => {
@@ -261,19 +269,14 @@ describe('resumeWaitingWorkflowExecution', () => {
     it('stores the response and hands it off in one call, as before', async () => {
       await expect(resumeExternally()).resolves.toEqual({ resumedBy: 'external_resume:step-1' });
 
-      expect(deps.internalResumeWorkflowExecution).toHaveBeenCalledWith(
-        executionId,
-        spaceId,
-        {
-          ...previousContext,
-          resumeInput: input,
-          resumedBy: 'external_resume:step-1',
-          resumedAt: expect.any(String),
-          pendingInteractiveResume: false,
-        },
-        undefined,
-        { isUserInteractive: true }
-      );
+      expect(deps.internalResumeWorkflowExecution).toHaveBeenCalledWith(executionId, spaceId, {
+        ...previousContext,
+        resumeInput: input,
+        resumedBy: 'external_resume:step-1',
+        resumedAt: expect.any(String),
+        pendingInteractiveResume: false,
+      });
+      expect(deps.internalResumeWorkflowExecution.mock.calls[0]).toHaveLength(3);
       expect(deps.workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
     });
 

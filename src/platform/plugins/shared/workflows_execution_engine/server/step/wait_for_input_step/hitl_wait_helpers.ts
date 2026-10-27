@@ -132,7 +132,7 @@ export function failHitlWaitOnTimeout(params: {
 
 function enrichHitlStepOutput(
   stepOutput: unknown,
-  hitl: { channel?: string; respondedAt?: string } | undefined
+  hitl: { channel?: string; respondedAt?: string } | null | undefined
 ): unknown {
   if (!hitl || stepOutput == null || typeof stepOutput !== 'object' || Array.isArray(stepOutput)) {
     return stepOutput;

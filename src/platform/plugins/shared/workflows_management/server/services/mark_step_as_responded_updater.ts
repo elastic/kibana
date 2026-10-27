@@ -134,10 +134,8 @@ export const createReleaseHitlStepClaimUpdater = (
     }
 
     // `null` drops the whole object (a `doc` merge keeps every sub-key the patch leaves out), which
-    // also puts the step back in the pending list. The document type does not allow `null`.
-    const patch: Partial<EsWorkflowStepExecution> = {
-      hitl: null as unknown as EsWorkflowStepExecution['hitl'],
-    };
+    // also puts the step back in the pending list.
+    const patch: Partial<EsWorkflowStepExecution> = { hitl: null };
     const { strippedToken } = claim;
     const { input } = current;
     if (

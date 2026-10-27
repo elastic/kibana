@@ -40,7 +40,6 @@ describe.each([
           assertLicensed: async () => {},
           resolveResumedBy: async () => 'analyst',
           logger: loggingSystemMock.createLogger(),
-          retryDelaysMs: [],
         },
         {
           executionId: 'fake_workflow_execution_id',

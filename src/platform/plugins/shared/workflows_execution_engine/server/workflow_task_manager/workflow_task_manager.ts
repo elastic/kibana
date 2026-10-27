@@ -396,7 +396,7 @@ export class WorkflowTaskManager {
         id === wakeTaskId
           ? WORKFLOW_WAKE_POLL_INTERVAL_MS + RESUME_TASK_DUE_GRACE_MS
           : RESUME_TASK_DUE_GRACE_MS;
-      return status === TaskStatus.Idle && new Date(runAt).getTime() <= now + dueWithinMs;
+      return status === TaskStatus.Idle && runAt.getTime() <= now + dueWithinMs;
     };
 
     let unreadableTaskId: string | undefined;
