@@ -348,6 +348,12 @@ describe('alerting_v2 config schema', () => {
         configSchema.validate({ dispatcher: { run: { alerts: { max: 10001 } } } })
       ).toThrow();
     });
+
+    it('rejects non-integer values', () => {
+      expect(() =>
+        configSchema.validate({ dispatcher: { run: { alerts: { max: 1000.5 } } } })
+      ).toThrow(/must be an integer/);
+    });
   });
 
   describe('esql', () => {

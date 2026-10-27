@@ -205,6 +205,8 @@ const dispatcherSchema = schema.object({
         defaultValue: MAX_DISPATCHER_ALERTS_PER_TICK,
         min: MIN_DISPATCHER_ALERTS_PER_TICK,
         max: MAX_DISPATCHER_ALERTS_PER_TICK,
+        validate: (value: number): string | undefined =>
+          Number.isInteger(value) ? undefined : 'value must be an integer',
       }),
     }),
   }),
