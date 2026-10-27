@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
@@ -113,7 +113,7 @@ export const DashboardListingPage = ({
     };
   }, [title, redirectTo, kbnUrlStateStorage]);
 
-  // Memoized so `DashboardListing` can keep its tab definitions referentially stable across re-renders.
+  // Both feed `DashboardListing`'s tab definitions; an unstable identity there remounts the active tab.
   const goToDashboard = useCallback(
     (id?: string, viewMode?: ViewMode) => {
       redirectTo({ destination: 'dashboard', id, editMode: viewMode === 'edit' });
@@ -121,10 +121,14 @@ export const DashboardListingPage = ({
     [redirectTo]
   );
 
+  // Rebuilt per router render, and URL-synced search triggers one per keystroke.
+  const kbnUrlStateStorageRef = useRef(kbnUrlStateStorage);
+  kbnUrlStateStorageRef.current = kbnUrlStateStorage;
+
   const getDashboardUrl = useCallback(
     (id: string, timeRestore: boolean) =>
-      getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore),
-    [kbnUrlStateStorage]
+      getDashboardListItemLink(kbnUrlStateStorageRef.current, id, timeRestore),
+    []
   );
 
   const titleFilter = title ? `${title}` : '';
