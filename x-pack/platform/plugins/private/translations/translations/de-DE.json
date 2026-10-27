@@ -8499,7 +8499,6 @@
     "securitySolutionPackages.ruleManagement.prebuiltRuleCustomization.upsell": "{requiredLicense} {licenseKind} ist erforderlich, um vorgefertigte Regeln anzupassen",
     "securitySolutionPackages.sideNav.betaBadge.label": "Beta",
     "securitySolutionPackages.sideNav.togglePanel": "Panel-Navigation umschalten",
-    "securitySolutionPackages.siemMigration.pageTitle": "Regeln übersetzen",
     "securitySolutionPackages.upselling.graphVisualization.description": "Dieses Feature erfordert ein {subscription}.",
     "securitySolutionPackages.upselling.graphVisualization.subscriptionLink": "Platinum-Abonnement",
     "securitySolutionPackages.upselling.pages.attackDiscovery.pageTitle.pageTitle": "Angriffserkennung",

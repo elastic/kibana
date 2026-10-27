@@ -7,15 +7,18 @@
 
 import React from 'react';
 import { EntityAnalyticsUpsellingPage } from '@kbn/security-solution-upselling/pages/entity_analytics';
+import type { UpsellingPageProps } from '@kbn/security-solution-upselling/service';
 import { useKibana } from '../../common/services';
 import * as i18n from '../translations';
 
-export const EntityAnalyticsUpsellingPageESS = () => {
+export const EntityAnalyticsUpsellingPageESS = ({ appHeader }: UpsellingPageProps) => {
   const { services } = useKibana();
   const requiredLicense = 'Platinum';
 
   return (
     <EntityAnalyticsUpsellingPage
+      appHeader={appHeader}
+      docLink={services.docLinks.links.securitySolution.entityAnalytics.entityRiskScoring}
       upgradeMessage={i18n.UPGRADE_LICENSE_MESSAGE(requiredLicense ?? '')}
       upgradeHref={services.application.getUrlForApp('management', {
         path: 'stack/license_management',

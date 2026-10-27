@@ -8512,7 +8512,6 @@
     "securitySolutionPackages.ruleManagement.prebuiltRuleCustomization.upsell": "{requiredLicense} {licenseKind} é necessário para personalizar regras pré-criadas",
     "securitySolutionPackages.sideNav.betaBadge.label": "Beta",
     "securitySolutionPackages.sideNav.togglePanel": "Alternar navegação do painel",
-    "securitySolutionPackages.siemMigration.pageTitle": "Regras de tradução",
     "securitySolutionPackages.upselling.graphVisualization.description": "Esse recurso requer um {subscription}.",
     "securitySolutionPackages.upselling.graphVisualization.subscriptionLink": "Assinatura Platinum",
     "securitySolutionPackages.upselling.pages.attackDiscovery.pageTitle.pageTitle": "Descoberta de ataques",

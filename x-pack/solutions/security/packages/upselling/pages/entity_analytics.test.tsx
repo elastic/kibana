@@ -4,9 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { EntityAnalyticsUpsellingPage } from './entity_analytics';
+import { ENTITY_ANALYTICS_TITLE } from './translations';
 
 jest.mock('@kbn/security-solution-navigation', () => {
   const original = jest.requireActual('@kbn/security-solution-navigation');
@@ -18,36 +23,51 @@ jest.mock('@kbn/security-solution-navigation', () => {
   };
 });
 
-describe('EntityAnalyticsUpselling', () => {
-  it('should render', () => {
-    const { getByTestId } = render(
+const renderPage = (props: Partial<React.ComponentProps<typeof EntityAnalyticsUpsellingPage>>) =>
+  render(
+    <MockAppHeaderProvider>
       <EntityAnalyticsUpsellingPage
         upgradeMessage="test upgrade message"
         upgradeToLabel="TEST LICENSE"
+        {...props}
       />
+    </MockAppHeaderProvider>
+  );
+
+describe('EntityAnalyticsUpselling', () => {
+  it('should render', () => {
+    renderPage({});
+    expect(screen.getByTestId('paywallCardDescription')).toBeInTheDocument();
+  });
+
+  it('should render the page title in the app header', () => {
+    renderPage({});
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      ENTITY_ANALYTICS_TITLE
     );
-    expect(getByTestId('paywallCardDescription')).toBeInTheDocument();
+  });
+
+  it('should render the documentation link in the app header menu', async () => {
+    const docLink = 'https://www.elastic.co/docs/entity-risk-scoring';
+    renderPage({ docLink });
+
+    await openAppMenuOverflow();
+
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toHaveAttribute(
+      'href',
+      docLink
+    );
   });
 
   it('should show upgrade label badge', () => {
-    const { getByText } = render(
-      <EntityAnalyticsUpsellingPage
-        upgradeToLabel="TEST PRODUCT"
-        upgradeMessage="test upgrade message"
-      />
-    );
+    renderPage({ upgradeToLabel: 'TEST PRODUCT' });
 
-    expect(getByText('TEST PRODUCT')).toBeInTheDocument();
+    expect(screen.getByText('TEST PRODUCT')).toBeInTheDocument();
   });
 
   it('should show license message', () => {
-    const { getByTestId } = render(
-      <EntityAnalyticsUpsellingPage
-        upgradeToLabel="TEST PRODUCT"
-        upgradeMessage="test upgrade message"
-      />
-    );
+    renderPage({ upgradeToLabel: 'TEST PRODUCT' });
 
-    expect(getByTestId('paywallCardDescription')).toHaveTextContent('test upgrade message');
+    expect(screen.getByTestId('paywallCardDescription')).toHaveTextContent('test upgrade message');
   });
 });

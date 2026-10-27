@@ -21,6 +21,7 @@ import type {
   PageUpsellings,
   SectionUpsellings,
   UpsellingMessageId,
+  UpsellingPageComponent,
   UpsellingSectionId,
   UpsellingService,
 } from '@kbn/security-solution-upselling/service';
@@ -50,7 +51,12 @@ interface UpsellingsMessageConfig {
   id: UpsellingMessageId;
 }
 
-type UpsellingPages = Array<UpsellingsConfig & { pageName: SecurityPageName }>;
+type UpsellingPages = Array<
+  Omit<UpsellingsConfig, 'component'> & {
+    pageName: SecurityPageName;
+    component: UpsellingPageComponent;
+  }
+>;
 type UpsellingSections = Array<UpsellingsConfig & { id: UpsellingSectionId }>;
 type UpsellingMessages = UpsellingsMessageConfig[];
 

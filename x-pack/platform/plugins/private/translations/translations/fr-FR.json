@@ -8500,7 +8500,6 @@
     "securitySolutionPackages.ruleManagement.prebuiltRuleCustomization.upsell": "{requiredLicense} {licenseKind} est nécessaire pour personnaliser les règles prédéfinies",
     "securitySolutionPackages.sideNav.betaBadge.label": "Bêta",
     "securitySolutionPackages.sideNav.togglePanel": "Activer/Désactiver le panneau de navigation",
-    "securitySolutionPackages.siemMigration.pageTitle": "Traduire les règles",
     "securitySolutionPackages.upselling.graphVisualization.description": "Cette fonctionnalité requiert un {subscription}.",
     "securitySolutionPackages.upselling.graphVisualization.subscriptionLink": "Abonnement Platinum",
     "securitySolutionPackages.upselling.pages.attackDiscovery.pageTitle.pageTitle": "Attack discovery",

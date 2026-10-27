@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiPageHeader, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { AppHeader } from '@kbn/app-header';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
 import { SIEM_MIGRATION_MANAGER_LICENSE_BTN } from '../messages';
+import type { UpsellingPageProps } from '../service/types';
 import * as i18n from './translations';
 
 export const SiemMigrationsTranslatedRulesUpsellPage = React.memo(
   function SiemMigrationsTranslatedRulesUpsellPage({
+    appHeader: Header = AppHeader,
+    docLink,
     title,
     upgradeMessage,
     upgradeHref,
-  }: {
+  }: UpsellingPageProps & {
+    docLink?: string;
     title: React.ReactNode;
     upgradeMessage: React.ReactNode;
     upgradeHref?: string;
@@ -38,7 +43,11 @@ export const SiemMigrationsTranslatedRulesUpsellPage = React.memo(
     return (
       <KibanaPageTemplate contentBorder={false} grow={true} restrictWidth={false}>
         <KibanaPageTemplate.Section color="plain" paddingSize="none">
-          <EuiPageHeader bottomBorder pageTitle={i18n.SIEM_MIGRATION_UPSELLING_PAGE_TITLE} />
+          <Header
+            title={i18n.SIEM_MIGRATION_UPSELLING_PAGE_TITLE}
+            docLink={docLink}
+            spacing="largeBleed"
+          />
           <EuiFlexGroup
             css={css`
               /**
