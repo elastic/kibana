@@ -257,6 +257,18 @@
       ]
     },
     {
+      "id": "security-phishing-triage",
+      "name": "Security Phishing Triage",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-phishing-triage/playwright.config.ts",
+      "tags": [
+        "security",
+        "phishing-triage"
+      ],
+      "ciLabels": [
+        "evals:security-phishing-triage"
+      ]
+    },
+    {
       "id": "security-persona-matrix",
       "name": "Security Persona Matrix",
       "slackChannel": "#security-generative-ai-evals",
