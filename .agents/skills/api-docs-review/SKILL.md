@@ -1,6 +1,6 @@
 ---
 name: api-docs-review
-description: Use when drafting or reviewing public Kibana HTTP API docs for `access: 'public'` routes (`summary`, `description`, `options.availability`, `options.deprecated`, `oasOperationObject`), their `@kbn/config-schema` or Zod schemas, hand-written OpenAPI in `docs/openapi/`, `common/api/`, or `*.schema.yaml`, or generated `oas_docs/output/`.
+description: Use when drafting or reviewing public Kibana HTTP API docs for `access: 'public'` routes.
 ---
 
 # Review Kibana API docs
