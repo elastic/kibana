@@ -13,48 +13,11 @@ import {
 } from '@kbn/evals';
 import type { ExperimentTask, TaskOutput } from '@kbn/evals';
 import { evaluate } from '../../../src/evaluate';
-import { ensureCorpusRestored } from '../../../src/ensure_corpus_restored';
+import { ensureRegressionCorporaRestored } from '../../../src/ensure_corpus_restored';
+import { ANALYTICAL_CORPUS } from '../../../src/regression_corpora';
 import { runJudgeAnalyses } from '../../../src/regression_analyses';
 import type { AnalyticalRegressionExample } from './analytical_regression_dataset';
 import { ANALYTICAL_REGRESSION_DATASET } from './analytical_regression_dataset';
-
-const CORPUS_SNAPSHOT = {
-  bucket: 'agent-builder-data-science-datasets',
-  basePath: 'snapshots/analytical_datasets_multi_domain',
-  snapshotName: 'analytical_datasets_multi_domain',
-};
-
-// The full corpus, restored in its entirety (not just the indices the dataset queries) so
-// the agent's index discovery sees the same contextual landscape as a real deployment.
-const CORPUS_INDICES = [
-  'customer_flight_activity',
-  'customer_loyalty_history',
-  'users',
-  'projects',
-  'invoice',
-  'invoice_item',
-  'project_entitlement_catalog',
-  'project_entitlement_access',
-  'plans',
-  'plan_entitlement_access',
-  'project_plan_changelogs',
-  'requests_daily_count',
-  'error_rate_daily',
-  'support_user',
-  'support_ticket',
-  'customers',
-  'exchange_rates',
-  'products',
-  'sales',
-  'stores',
-  'measures',
-  'national_results',
-  'questions',
-  'reports',
-  'responses',
-  'state_results',
-  'states',
-] as const;
 
 /** The corpus indices this dataset queries, derived from its reference ES|QL. */
 const getDatasetIndices = (): string[] => {
@@ -74,12 +37,11 @@ evaluate.describe(
   { tag: tags.serverless.search },
   () => {
     evaluate.beforeAll(async ({ esClient, log }) => {
-      await ensureCorpusRestored({
+      await ensureRegressionCorporaRestored({
         esClient,
         log,
         suite: 'analytical-regression',
-        snapshot: CORPUS_SNAPSHOT,
-        corpusIndices: CORPUS_INDICES,
+        corpus: ANALYTICAL_CORPUS,
         datasetIndices: getDatasetIndices(),
       });
     });

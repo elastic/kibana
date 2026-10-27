@@ -234,6 +234,13 @@ export interface ResolveProfileEnvOverridesOptions {
   flagsReader: FlagsReader;
   profile?: string;
   suite?: EvalSuiteDefinition;
+  /**
+   * The judge connector the run resolved (flag, env or prompt). Exposed to the suite's
+   * `scoutHook` as EVAL_CONNECTOR_ID so a hook that pins the judge can tell a deliberate
+   * selection apart from an inherited default — hook env is applied after flag resolution
+   * and would otherwise silently override `--evaluation-connector-id`.
+   */
+  evaluationConnectorId?: string;
 }
 
 /**
@@ -259,6 +266,7 @@ export const resolveProfileEnvOverrides = async ({
   flagsReader,
   profile,
   suite,
+  evaluationConnectorId,
 }: ResolveProfileEnvOverridesOptions): Promise<ResolvedProfileEnv> => {
   const datasetsProfile = flagsReader.string('datasets-profile') ?? profile;
   const exportProfile =
@@ -289,7 +297,14 @@ export const resolveProfileEnvOverrides = async ({
   }
 
   const suiteScoutEnv = suite?.scoutHook
-    ? runScoutHook(repoRoot, suite.scoutHook, loadScoutHookConfig(repoRoot, datasetsProfile, suite))
+    ? runScoutHook(
+        repoRoot,
+        suite.scoutHook,
+        loadScoutHookConfig(repoRoot, datasetsProfile, suite),
+        evaluationConnectorId
+          ? { env: { ...process.env, EVAL_CONNECTOR_ID: evaluationConnectorId } }
+          : {}
+      )
     : {};
 
   return { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv };
@@ -378,6 +393,7 @@ export const resolveEvalRunContext = async ({
       flagsReader,
       profile,
       suite,
+      evaluationConnectorId,
     });
 
   return {

@@ -13,32 +13,12 @@ import {
 } from '@kbn/evals';
 import type { ExperimentTask, TaskOutput } from '@kbn/evals';
 import { evaluate } from '../../../src/evaluate';
-import { ensureCorpusRestored } from '../../../src/ensure_corpus_restored';
+import { ensureRegressionCorporaRestored } from '../../../src/ensure_corpus_restored';
+import { ENTERPRISE_RAG_BENCH_CORPUS } from '../../../src/regression_corpora';
 import { runJudgeAnalyses } from '../../../src/regression_analyses';
 import type { EnterpriseRagBenchRegressionExample } from './enterprise_rag_bench_regression_dataset';
 import { ENTERPRISE_RAG_BENCH_REGRESSION_DATASET } from './enterprise_rag_bench_regression_dataset';
 import { createRetrievalIrEvaluators } from './ir_evaluators';
-
-const CORPUS_SNAPSHOT = {
-  bucket: 'agent-builder-data-science-datasets',
-  basePath: 'snapshots/enterprise_rag_bench',
-  snapshotName: 'enterprise_rag_bench_documents_semantic',
-};
-
-// The full Redwood Inference workspace — all 9 source indices, restored in their
-// entirety so the agent's index discovery sees the same landscape as a real deployment
-// (questions may require picking the right source among look-alikes).
-const CORPUS_INDICES = [
-  'enterprise_rag_bench_slack_documents_semantic',
-  'enterprise_rag_bench_gmail_documents_semantic',
-  'enterprise_rag_bench_linear_documents_semantic',
-  'enterprise_rag_bench_google_drive_documents_semantic',
-  'enterprise_rag_bench_hubspot_documents_semantic',
-  'enterprise_rag_bench_fireflies_documents_semantic',
-  'enterprise_rag_bench_github_documents_semantic',
-  'enterprise_rag_bench_jira_documents_semantic',
-  'enterprise_rag_bench_confluence_documents_semantic',
-] as const;
 
 /** The corpus indices this dataset's ground truth references. */
 const getDatasetIndices = (): string[] => {
@@ -56,12 +36,11 @@ evaluate.describe(
   { tag: tags.serverless.search },
   () => {
     evaluate.beforeAll(async ({ esClient, log }) => {
-      await ensureCorpusRestored({
+      await ensureRegressionCorporaRestored({
         esClient,
         log,
         suite: 'enterprise-rag-bench-regression',
-        snapshot: CORPUS_SNAPSHOT,
-        corpusIndices: CORPUS_INDICES,
+        corpus: ENTERPRISE_RAG_BENCH_CORPUS,
         datasetIndices: getDatasetIndices(),
       });
     });

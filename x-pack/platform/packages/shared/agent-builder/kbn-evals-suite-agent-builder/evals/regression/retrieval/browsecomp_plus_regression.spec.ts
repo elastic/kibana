@@ -13,19 +13,12 @@ import {
 } from '@kbn/evals';
 import type { ExperimentTask, TaskOutput } from '@kbn/evals';
 import { evaluate } from '../../../src/evaluate';
-import { ensureCorpusRestored } from '../../../src/ensure_corpus_restored';
+import { ensureRegressionCorporaRestored } from '../../../src/ensure_corpus_restored';
+import { BROWSECOMP_PLUS_CORPUS } from '../../../src/regression_corpora';
 import { runJudgeAnalyses } from '../../../src/regression_analyses';
 import type { BrowsecompPlusRegressionExample } from './browsecomp_plus_regression_dataset';
 import { BROWSECOMP_PLUS_REGRESSION_DATASET } from './browsecomp_plus_regression_dataset';
 import { createRetrievalIrEvaluators } from './ir_evaluators';
-
-const CORPUS_SNAPSHOT = {
-  bucket: 'agent-builder-data-science-datasets',
-  basePath: 'snapshots/browsecomp_plus',
-  snapshotName: 'browsecomp_plus_documents_semantic',
-};
-
-const CORPUS_INDICES = ['browsecomp_plus_documents_semantic'] as const;
 
 /** The corpus indices this dataset's ground truth references. */
 const getDatasetIndices = (): string[] => {
@@ -43,12 +36,11 @@ evaluate.describe(
   { tag: tags.serverless.search },
   () => {
     evaluate.beforeAll(async ({ esClient, log }) => {
-      await ensureCorpusRestored({
+      await ensureRegressionCorporaRestored({
         esClient,
         log,
         suite: 'browsecomp-plus-regression',
-        snapshot: CORPUS_SNAPSHOT,
-        corpusIndices: CORPUS_INDICES,
+        corpus: BROWSECOMP_PLUS_CORPUS,
         datasetIndices: getDatasetIndices(),
       });
     });

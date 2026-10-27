@@ -10,11 +10,10 @@ set -euo pipefail
 # https://github.com/elastic/kibana/pull/297038), which would silently invalidate every
 # stored baseline.
 #
-# A deliberately overridden judge (CI `models:judge:` label, or an explicit
-# EVAL_CONNECTOR_ID env var locally) differs from the Vault default and is left alone;
-# an unset or default-inherited judge is replaced with the pin. Note the local
-# `--evaluation-connector-id` flag is not visible here and would be overridden by the
-# pin — use the EVAL_CONNECTOR_ID env var for deliberate local overrides instead.
+# A deliberately overridden judge differs from the Vault default and is left alone; an
+# unset or default-inherited judge is replaced with the pin. Overrides reach this hook as
+# EVAL_CONNECTOR_ID: in CI via the `models:judge:` label, locally via the env var or the
+# `--evaluation-connector-id` flag (the CLI exports the resolved flag value to hooks).
 
 PINNED_JUDGE_CONNECTOR_ID="eis-zai-glm-5-2"
 
