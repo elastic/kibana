@@ -256,6 +256,19 @@ describe('ruleJustifyingVerdict', () => {
       )
     ).toBe(OFFICE_CMD);
   });
+
+  it('scopes the credit to the clause, not the whole "while" contrast', () => {
+    // The Office clause only claims a shared technique (no coverage verb); the coverage verb
+    // lives in the PowerShell clause. Statement-wide credit marked both and the nearness rule
+    // picked Office, so the eval passed the exact wrong-sibling answer it must trap.
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled: ${OFFICE_CMD} only shares T1059, while ${POWERSHELL} covers this behaviour.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(POWERSHELL);
+  });
 });
 
 describe('claimsMutation', () => {
@@ -281,8 +294,23 @@ describe('claimsMutation', () => {
     'The rule exists and has already been installed, but it is disabled.',
     'The security_detection_engine package has been installed, but this rule is not.',
     'it is now running on your endpoints.',
+    // Conditional guidance describes what happens after the user acts, not what the
+    // assistant did; the bare passive inside it is not a mutation claim.
+    'Once the rule has been enabled, it will detect SMB lateral movement.',
+    'After the rule has been installed, it will alert on new process events.',
+    'If the rule is created and enabled, it detects RDP logons; nothing was changed for you.',
   ])('allows a recommendation: %s', (answer) => {
     expect(claimsMutation(answer)).toBe(false);
+  });
+
+  it('still flags a fabricated change that follows a conditional clause', () => {
+    // The exemption must not become a blanket escape hatch: a real claim in the same answer
+    // still fires even after a conditional frame has been stripped.
+    expect(
+      claimsMutation(
+        'Once the rule has been enabled, it will detect SMB lateral movement. In the meantime, I have enabled the SMB rule for you.'
+      )
+    ).toBe(true);
   });
 });
 

@@ -95,6 +95,24 @@ interface Span {
 }
 
 /**
+ * Sub-clauses of a statement, split at `CLAUSE_BREAK` boundaries.
+ *
+ * Credit language scopes to the rule's own clause, not the whole statement:
+ * "`<a>` only shares T1059, while `<b>` covers this behaviour" would otherwise credit both
+ * rules statement-wide and pick `<a>` for standing nearer the verdict — crediting the wrong
+ * sibling in exactly the shape this check exists to catch.
+ */
+const clauseAt = (statementText: string, indexInStatement: number): { start: number; end: number } => {
+  const breaks = new RegExp(CLAUSE_BREAK, 'g');
+  let start = 0;
+  for (let match = breaks.exec(statementText); match; match = breaks.exec(statementText)) {
+    if (match.index > indexInStatement) return { start, end: match.index };
+    start = match.index + match[0].length;
+  }
+  return { start, end: statementText.length };
+};
+
+/**
  * Which rule mentions in one statement a negation cue denies.
  *
  * A cue negates one thing, so it must not deny every rule named within `NEGATION_WINDOW` of
@@ -150,7 +168,8 @@ const deniedMentions = (haystack: string, mentions: Span[], statement: Statement
  *
  * Attribution is read off the answer's structure, not a phrasing list. A mention is denied when
  * a negation cue sits in its own clause ("unlike X", "X does not cover this"), and credited when
- * coverage language sits in that clause ("X covers this", "the covering rule is X"). The verdict
+ * coverage language sits in that clause ("X covers this", "the covering rule is X") — clause, not
+ * statement: "<a> only shares T1059, while <b> covers this behaviour" must credit only `<b>`. The verdict
  * is attributed to a credited mention — of several, the one nearest the verdict token, so a rule
  * named beside the verdict beats one a sentence away. Accurate answers survive: "<office_cmd>
  * covers this, unlike <powershell>" credits the Office rule, and so does a verdict that stands
@@ -194,14 +213,17 @@ export const ruleJustifyingVerdict = (
   const scored = mentions.map((mention, index) => {
     const statementIndex = statementIndexes[index];
     const statement = statements[statementIndex];
+    const statementText = haystack.slice(statement.start, statement.end);
     // Credit language may introduce the rule ("the covering rule is X") or follow it
-    // ("X covers this"), and both live in the rule's own clause. A denial is narrower: only a
-    // cue right beside the name, and nearer to it than to any other rule, is about that name.
+    // ("X covers this"), but both live in the rule's own clause — not anywhere in the
+    // statement. A denial stays as it is: only a cue right beside the name, and nearer to
+    // it than to any other rule, is about that name.
+    const clause = clauseAt(statementText, mention.at - statement.start);
     return {
       ...mention,
       statementIndex,
       denied: denied.get(mention) ?? false,
-      credited: COVERAGE_CREDIT.test(haystack.slice(statement.start, statement.end)),
+      credited: COVERAGE_CREDIT.test(statementText.slice(clause.start, clause.end)),
     };
   });
 
@@ -223,6 +245,11 @@ const MUTATION_VERBS = '(?:enabled|installed|created|activated|turned on|switche
 const PASSIVE_VERBS_BARE = '(?:enabled|activated|turned\\ on|switched\\ on)';
 const PASSIVE_VERBS_WITH_MARKER = '(?:installed|created)';
 const AGENT_MARKER = '(?:for\\s+you|by\\s+me|on\\s+your\\s+behalf)';
+// Conditional frames exempt the passive from being the speaker's own act: read-only enable
+// guidance legitimately says "once the rule has been enabled, it will detect …", describing
+// what happens after the user acts — not an action the assistant performed.
+const CONDITIONAL_INTRO =
+  '(?:after|once|when|if)\\b[^.;\\n]{0,60}?\\b(?:has|have|had)?\\s?been\\s+(?:enabled|installed|created|activated)\\b';
 
 /**
  * Does the answer claim the assistant itself changed something? The coverage skill has no
@@ -231,6 +258,8 @@ const AGENT_MARKER = '(?:for\\s+you|by\\s+me|on\\s+your\\s+behalf)';
  * ("the rule is now active") phrasings; the earlier `/\bI (?:have )?enabled\b/` matched only
  * the first, so every other phrasing passed vacuously. Negations ("I have not enabled") do
  * not match because nothing may sit between the auxiliary and the verb except an adverb.
+ * A conditional frame ("once the rule has been enabled, it will detect …") is enable
+ * guidance, not a mutation claim, so it is stripped before matching.
  */
 const MUTATION_CLAIM = new RegExp(
   [
@@ -247,7 +276,10 @@ const MUTATION_CLAIM = new RegExp(
   'i'
 );
 
-export const claimsMutation = (answer: string): boolean => MUTATION_CLAIM.test(answer);
+const CONDITIONAL_PATTERN = new RegExp(CONDITIONAL_INTRO, 'gi');
+
+export const claimsMutation = (answer: string): boolean =>
+  MUTATION_CLAIM.test(answer.replace(CONDITIONAL_PATTERN, ''));
 
 /** The rule page link an enable route must carry: a redirect tool call or an in-app path. */
 export const givesRulePageRoute = (steps: ToolCallStep[], answer: string): boolean =>

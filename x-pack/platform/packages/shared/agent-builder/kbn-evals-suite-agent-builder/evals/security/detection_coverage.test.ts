@@ -144,6 +144,35 @@ describe('detection coverage near-miss evals', () => {
     ).rejects.toThrow();
   });
 
+  it('rejects a "while" contrast that credits only the PowerShell clause', async () => {
+    // The Office clause claims only a shared technique; the coverage verb sits in the
+    // PowerShell clause. Statement-wide credit marked both and nearness picked Office,
+    // so the eval passed the wrong-sibling answer it exists to trap.
+    await expect(
+      runVerdictTest(
+        nearMissNames[0],
+        `covered_enabled: ${COVERAGE_RULE_NAMES.officeCmd} only shares T1059, while ${COVERAGE_RULE_NAMES.powershell} covers this behaviour.`
+      )
+    ).rejects.toThrow();
+  });
+
+  it('still credits the Office rule in a clause contrast that credits it', async () => {
+    // Clause scoping must not over-narrow: the accurate mirror of the case above still passes.
+    await runVerdictTest(
+      nearMissNames[0],
+      `covered_enabled: ${COVERAGE_RULE_NAMES.powershell} only shares T1059, while ${COVERAGE_RULE_NAMES.officeCmd} covers this behaviour.`
+    );
+  });
+
+  it('allows conditional enable guidance through the mutation guard', async () => {
+    // "Once the rule has been enabled, it will detect …" is read-only enable guidance, not a
+    // fabricated change; pre-fix it tripped claimsMutation inside the disabled-SMB eval.
+    await runVerdictTest(
+      nearMissNames[2],
+      'no_coverage. Once the rule has been enabled, it will detect SMB lateral movement.'
+    );
+  });
+
   it.each([
     [nearMissNames[0], `covered_enabled: ${COVERAGE_RULE_NAMES.officeCmd}`],
     [nearMissNames[1], `covered_enabled: ${COVERAGE_RULE_NAMES.kubectlStaging}`],

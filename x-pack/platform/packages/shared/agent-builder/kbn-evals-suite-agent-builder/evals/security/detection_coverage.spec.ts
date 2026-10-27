@@ -346,7 +346,8 @@ evaluate.describe(
           options: { agentId: coverageAgentId },
           messages: [
             {
-              message: 'Is kubectl exec into pods in the staging namespace already detected?',
+              message:
+                'We need detection for kubectl exec into pods in the staging namespace. I want that covered.',
             },
           ],
         });
