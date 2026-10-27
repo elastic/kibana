@@ -636,12 +636,24 @@ describe('detection rule workflows', () => {
       // the harvest then rejects, never drop a real candidate.
       it('pre-filters on the FP count without replacing the harvest gate', () => {
         expect(screenQuery).toContain(
-          'WHERE fp_rate_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}'
+          'WHERE untagged_fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}'
+        );
+        expect(screenQuery).toContain(
+          'untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")'
         );
         expect(harvestQuery).toContain(
           'WHERE fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}'
         );
         expect(harvestQuery).not.toContain('fp_rate_count');
+      });
+
+      // A reviewed rule keeps its tagged FPs in the window and would outrank
+      // unreviewed rules for the screen's slots on fp_rate_count alone; ranking on
+      // untagged FPs lets it fall out while the rate gate still counts every FP.
+      it('ranks the screen on untagged false positives', () => {
+        expect(screenQuery).toContain('| SORT untagged_fp_count DESC');
+        expect(screenQuery).not.toContain('SORT fp_rate_count');
+        expect(screenQuery).toContain('fp_rate_count * 100 >= total_count');
       });
 
       it('screens only when there are enabled rules and harvests only screened rules', () => {

@@ -80,8 +80,10 @@ consts:
   # The max number of rules to consider for tuning.
   max_candidate_rules: 20
   # Rules the FP-rate screen hands to the harvest. Applied after aggregation, so
-  # raising it only lengthens the harvest's terms list.
-  max_screened_rules: 50
+  # raising it only lengthens the harvest's terms list. Room for the rows the
+  # harvest then drops: older revisions of edited rules, and untagged FPs that
+  # sit below a rule's reviewed watermark.
+  max_screened_rules: 200
   # Ids handed to the diagnosing agent and tagged once the gate resolves; must
   # match ALERTS_BY_IDS_MAX in the investigate-rule skill (investigate_rule_skill.ts).
   max_diagnosis_ids: 100
@@ -217,8 +219,10 @@ steps:
   # a cross-space harvest would keep rediagnosing alerts it can never mark.
   # `total_count` spans every alert the rule produced in the window. `fp_rate_count`
   # includes reviewed false positives so processing a batch does not dilute the rule's
-  # measured FP rate. It is an upper bound on the unreviewed count the harvest
-  # measures, so the min_fp_count check here is a pre-filter, not the gate.
+  # measured FP rate. `untagged_fp_count` is an upper bound on the unreviewed count
+  # the harvest measures (every unreviewed FP is untagged), so the min_fp_count check
+  # here is a pre-filter, not the gate; ranking on it keeps rules reviewed earlier in
+  # the window from holding screen slots that unreviewed rules need.
   # The DSL filter carries every per-document exclusion (window, EQL sequence
   # members, enabled rules, in-flight rules), pushed down to Lucene before ES|QL sees
   # a row. Skipping an in-flight rule here, before STATS/LIMIT, frees its slot for
@@ -248,11 +252,12 @@ steps:
         | EVAL is_fp = `kibana.alert.workflow_status` == "closed"
             AND `kibana.alert.workflow_reason` == "false_positive"
         | STATS total_count = COUNT(*),
-            fp_rate_count = COUNT(*) WHERE is_fp
+            fp_rate_count = COUNT(*) WHERE is_fp,
+            untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
           BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
-        | WHERE fp_rate_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
+        | WHERE untagged_fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
           AND fp_rate_count * 100 >= total_count * {{ inputs.min_fp_rate_pct | default: consts.min_fp_rate_pct }}
-        | SORT fp_rate_count DESC
+        | SORT untagged_fp_count DESC
         | LIMIT {{ consts.max_screened_rules }}
         | EVAL rule_revision_key = CONCAT(",", `kibana.alert.rule.uuid`, "@", TO_STRING(`kibana.alert.rule.revision`), ",")
         | KEEP `kibana.alert.rule.uuid`, total_count, fp_rate_count, rule_revision_key

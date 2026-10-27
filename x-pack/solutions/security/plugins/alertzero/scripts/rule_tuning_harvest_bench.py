@@ -16,7 +16,7 @@ import argparse, base64, getpass, json, netrc, os, sys, time, urllib.error, urll
 
 TAG = "detection-watch:tuning-reviewed"
 INDEX = ".alerts-security.alerts-default"
-TOP_IDS, SCREEN_LIMIT, HARVEST_LIMIT = 100, 50, 20
+TOP_IDS, SCREEN_LIMIT, HARVEST_LIMIT = 100, 200, 20
 
 
 def build_queries(min_fp, min_rate):
@@ -39,9 +39,9 @@ def build_queries(min_fp, min_rate):
 
     screen = f"""FROM {INDEX}
 | EVAL is_fp = `kibana.alert.workflow_status` == "closed" AND `kibana.alert.workflow_reason` == "false_positive"
-| STATS total_count = COUNT(*), fp_rate_count = COUNT(*) WHERE is_fp BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
-| WHERE fp_rate_count >= {min_fp} AND fp_rate_count * 100 >= total_count * {min_rate}
-| SORT fp_rate_count DESC
+| STATS total_count = COUNT(*), fp_rate_count = COUNT(*) WHERE is_fp, untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{TAG}") BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
+| WHERE untagged_fp_count >= {min_fp} AND fp_rate_count * 100 >= total_count * {min_rate}
+| SORT untagged_fp_count DESC
 | LIMIT {SCREEN_LIMIT}
 | EVAL rule_revision_key = CONCAT(",", `kibana.alert.rule.uuid`, "@", TO_STRING(`kibana.alert.rule.revision`), ",")
 | KEEP `kibana.alert.rule.uuid`, total_count, fp_rate_count, rule_revision_key"""
@@ -192,7 +192,7 @@ def deleted_check(cluster, enabled):
     a = cluster.esql("deleted-check unfiltered", loose)
     b = cluster.esql("deleted-check enabled", loose, [{"terms": {"kibana.alert.rule.uuid": list(enabled)}}])
     ghosts = [row[0] for row in a["rows"] if row[0] not in enabled]
-    print(f"\ndeleted-rule check (gate relaxed to fp_rate_count >= 1, LIMIT {SCREEN_LIMIT}):")
+    print(f"\ndeleted-rule check (gate relaxed to untagged_fp_count >= 1, LIMIT {SCREEN_LIMIT}):")
     print(f"  without enabled filter: {len(a['rows'])} rules, {len(ghosts)} of them have no enabled rule object")
     print(f"  with enabled filter:    {len(b['rows'])} rules, all enabled: {all(row[0] in enabled for row in b['rows'])}")
 

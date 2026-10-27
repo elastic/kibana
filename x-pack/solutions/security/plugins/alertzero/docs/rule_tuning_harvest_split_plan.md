@@ -100,8 +100,10 @@ before any slot is taken.
 ```yaml
 # total_count spans every alert the rule produced in the window; fp_rate_count
 # includes reviewed FPs so processing a batch does not dilute the measured rate.
-# fp_rate_count is an upper bound on the unreviewed count the harvest measures,
-# so the min_fp_count check here is a pre-filter, not the gate.
+# untagged_fp_count is an upper bound on the unreviewed count the harvest
+# measures (every unreviewed FP is untagged), so the min_fp_count check here is
+# a pre-filter, not the gate; ranking on it keeps rules reviewed earlier in the
+# window from holding screen slots that unreviewed rules need.
 - name: screen_rule_fp_rates
   type: elasticsearch.esql.query
   if: "${{ steps.resolve_enabled_rules.output.count > 0 }}"
@@ -125,11 +127,12 @@ before any slot is taken.
       | EVAL is_fp = `kibana.alert.workflow_status` == "closed"
           AND `kibana.alert.workflow_reason` == "false_positive"
       | STATS total_count = COUNT(*),
-          fp_rate_count = COUNT(*) WHERE is_fp
+          fp_rate_count = COUNT(*) WHERE is_fp,
+          untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
         BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
-      | WHERE fp_rate_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
+      | WHERE untagged_fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
         AND fp_rate_count * 100 >= total_count * {{ inputs.min_fp_rate_pct | default: consts.min_fp_rate_pct }}
-      | SORT fp_rate_count DESC
+      | SORT untagged_fp_count DESC
       | LIMIT {{ consts.max_screened_rules }}
       | EVAL rule_revision_key = CONCAT(",", `kibana.alert.rule.uuid`, "@", TO_STRING(`kibana.alert.rule.revision`), ",")
       | KEEP `kibana.alert.rule.uuid`, total_count, fp_rate_count, rule_revision_key
@@ -148,10 +151,26 @@ before any slot is taken.
 
 Row layout: `[uuid, total_count, fp_rate_count, rule_revision_key]`.
 
-New const `max_screened_rules: 50`. Only enabled, existing rules compete for
+New const `max_screened_rules: 200`. Only enabled, existing rules compete for
 the slots now, so the limit is a cap on harvest work, not a correctness
 boundary. It is applied after aggregation, so raising it costs nothing on the
 ES side; it only lengthens the harvest's `terms` list.
+
+Two kinds of row still pass the screen and get dropped later, which is what the
+headroom above the harvest's 20 is for:
+
+- A rule reviewed earlier in the window keeps its tagged FPs in `fp_rate_count`
+  (by design, so a batch does not dilute the rate), so on that count alone it
+  would outrank unreviewed rules for the slots, the same starvation as #20315
+  with "reviewed" in place of "disabled". The screen pre-filters and sorts on
+  `untagged_fp_count` instead, which drops fully reviewed rules in the screen
+  itself. Untagged FPs older than the rule's watermark still count here and
+  not in the harvest, so a partly reviewed rule can pass the screen and then
+  miss `min_fp_count`; the gate stays exact because untagged ≥ unreviewed.
+  Measured cost of the extra `COUNT WHERE` over the tags doc values: none
+  visible (0.2s / 0.3s, 1.0 / 1.1 CPU-s on the perf cluster).
+- A rule edited mid-window has one row per revision with FPs; the old-revision
+  rows are dropped by `resolve_screened_rules`.
 
 ## Step 2: `harvest_fp_alerts_by_rule`
 
@@ -447,8 +466,8 @@ which counts every pass over a document):
 
 Checks for #20315, from the same run:
 
-- Deleted rules: with the gate relaxed to `fp_rate_count >= 1`, the screen
-  without the enabled filter returned 50 rules, 44 of them with no rule object;
+- Deleted rules: with the gate relaxed to `untagged_fp_count >= 1` and the cap at 200, the screen
+  without the enabled filter returned 168 rules, 150 of them with no rule object;
   with the filter it returned 18, all enabled.
 - Disabled rule: disabling the top candidate (`2a799fab`, 169k FPs) via
   `PATCH /api/detection_engine/rules` and rerunning gave 4 candidates, the
@@ -543,7 +562,7 @@ POST _query?allow_partial_results=false
       "must_not": [{ "exists": { "field": "kibana.alert.group.index" } }]
     }
   },
-  "query": "FROM .alerts-security.alerts-default | EVAL is_fp = `kibana.alert.workflow_status` == \"closed\" AND `kibana.alert.workflow_reason` == \"false_positive\" | STATS total_count = COUNT(*), fp_rate_count = COUNT(*) WHERE is_fp BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision` | WHERE fp_rate_count >= 10 AND fp_rate_count * 100 >= total_count * 50 | SORT fp_rate_count DESC | LIMIT 50 | EVAL rule_revision_key = CONCAT(\",\", `kibana.alert.rule.uuid`, \"@\", TO_STRING(`kibana.alert.rule.revision`), \",\") | KEEP `kibana.alert.rule.uuid`, total_count, fp_rate_count, rule_revision_key"
+  "query": "FROM .alerts-security.alerts-default | EVAL is_fp = `kibana.alert.workflow_status` == \"closed\" AND `kibana.alert.workflow_reason` == \"false_positive\" | STATS total_count = COUNT(*), fp_rate_count = COUNT(*) WHERE is_fp, untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, \"detection-watch:tuning-reviewed\") BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision` | WHERE untagged_fp_count >= 10 AND fp_rate_count * 100 >= total_count * 50 | SORT untagged_fp_count DESC | LIMIT 200 | EVAL rule_revision_key = CONCAT(\",\", `kibana.alert.rule.uuid`, \"@\", TO_STRING(`kibana.alert.rule.revision`), \",\") | KEEP `kibana.alert.rule.uuid`, total_count, fp_rate_count, rule_revision_key"
 }
 ```
 
