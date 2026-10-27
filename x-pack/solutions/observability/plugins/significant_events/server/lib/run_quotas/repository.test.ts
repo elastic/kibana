@@ -41,9 +41,9 @@ describe('run quota settings repository', () => {
     await expect(readRunQuotaSettings(repository)).resolves.toEqual({
       enabled: true,
       limits: {
-        detection: 15,
-        investigation: 3,
-        ki_extraction: 3,
+        detection: 40,
+        investigation: 5,
+        ki_extraction: 5,
       },
     });
   });
