@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { fold } from 'fp-ts/Either';
-import { identity } from 'fp-ts/function';
-import { pipe } from 'fp-ts/pipeable';
-
 import type {
   CasesFindResponse,
   CasesSearchResponse,
@@ -17,43 +13,32 @@ import type {
   CasesSimilarResponse,
 } from '../../common/types/api';
 import {
-  CasesFindResponseRt,
-  CasesSearchResponseRt,
-  CasesBulkGetResponseRt,
-  CasesMetricsResponseRt,
-  CasesSimilarResponseRt,
+  CasesFindResponseSchema,
+  CasesSearchResponseSchema,
+  CasesBulkGetResponseSchema,
+  CasesMetricsResponseSchema,
+  CasesSimilarResponseSchema,
 } from '../../common/types/api';
-import { createToasterPlainError } from '../containers/utils';
-import { throwErrors } from '../../common';
+import { decodeWithToasterError } from '../containers/utils';
 
 export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
-  pipe(CasesFindResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
+  decodeWithToasterError(CasesFindResponseSchema, respCases);
 
 /**
  * Decodes the internal `_search` response, which is a superset of the public `_find` response that
- * additionally carries `mttr` for the cases list metrics bar. Using the search RT here (rather than
- * `CasesFindResponseRt`) keeps the strict decode from stripping/rejecting the `mttr` key.
+ * additionally carries `mttr` for the cases list metrics bar. Using the search schema here (rather
+ * than `CasesFindResponseSchema`) keeps the decode from stripping the `mttr` key.
  */
 export const decodeCasesSearchResponse = (respCases?: CasesSearchResponse) =>
-  pipe(
-    CasesSearchResponseRt.decode(respCases),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+  decodeWithToasterError(CasesSearchResponseSchema, respCases);
 
 export const decodeCasesMetricsResponse = (metrics?: CasesMetricsResponse) =>
-  pipe(
-    CasesMetricsResponseRt.decode(metrics),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+  decodeWithToasterError(CasesMetricsResponseSchema, metrics);
 
 export const decodeCasesBulkGetResponse = (res: CasesBulkGetResponse) => {
-  pipe(CasesBulkGetResponseRt.decode(res), fold(throwErrors(createToasterPlainError), identity));
-
+  decodeWithToasterError(CasesBulkGetResponseSchema, res);
   return res;
 };
 
 export const decodeCasesSimilarResponse = (respCases?: CasesSimilarResponse) =>
-  pipe(
-    CasesSimilarResponseRt.decode(respCases),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+  decodeWithToasterError(CasesSimilarResponseSchema, respCases);

@@ -9,8 +9,8 @@ import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/ap
 import type { TimesliceMetricIndicator } from '@kbn/slo-schema';
 import {
   timesliceMetricComparatorMapping,
-  timesliceMetricIndicatorSchema,
-  timeslicesBudgetingMethodSchema,
+  is,
+  timesliceMetricIndicatorSchemaZod,
 } from '@kbn/slo-schema';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
@@ -28,7 +28,7 @@ const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\
 
 export class TimesliceMetricTransformGenerator extends TransformGenerator {
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
-    if (!timesliceMetricIndicatorSchema.is(slo.indicator)) {
+    if (!is(timesliceMetricIndicatorSchemaZod, slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
@@ -78,7 +78,7 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
       throw new Error(`Invalid equation: ${indicator.params.metric.equation}`);
     }
 
-    if (!timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
+    if (slo.budgetingMethod !== 'timeslices') {
       throw new Error('The sli.metric.timeslice indicator MUST have a timeslice budgeting method.');
     }
 
