@@ -12,6 +12,11 @@ import { getConnectorAuth } from '../../lib/get_connector_auth';
 import { isSandboxCapableConnector } from '../../lib/is_sandbox_capable_connector';
 import type { GetSandboxCredentialsOptions, ResolvedSandboxCredentials } from './types';
 
+// Hosts the sandbox credential proxy accepts: lowercase letters, digits, '.' and '-', not at
+// either end, at most 253 characters. It rejects the whole command for any other entry, such
+// as an IPv6 literal or '_', and treats '*' as any host, so those entries are dropped here.
+const SANDBOX_HOST_PATTERN = /^(?![.-])[a-z0-9.-]{1,253}(?<![.-])$/;
+
 const getSelectedAuthTypeId = (secrets: Record<string, unknown>): string | undefined => {
   const { authType } = secrets;
   return typeof authType === 'string' && authType.length > 0 ? authType : undefined;
@@ -67,7 +72,7 @@ export async function getSandboxCredentials(
     ...new Set(
       (actionType.getSandboxHosts?.({ config }) ?? [])
         .map((host) => host.trim().toLowerCase())
-        .filter((host) => host.length > 0 && host !== '*')
+        .filter((host) => SANDBOX_HOST_PATTERN.test(host))
     ),
   ];
   if (hosts.length === 0) {

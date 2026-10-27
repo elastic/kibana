@@ -459,6 +459,22 @@ describe('getSandboxCredentials()', () => {
         })
       );
 
+    it('drops hosts the credential proxy rejects', async () => {
+      registerWithHosts(() => [
+        'api.example.com',
+        '[::1]',
+        'under_score.example.com',
+        '.leading.example.com',
+        'trailing-',
+        `${'a'.repeat(254)}`,
+        '10.0.0.5',
+      ]);
+
+      const result = await actionsClient.getSandboxCredentials({ id: inMemoryConnectorId });
+
+      expect(result.hosts).toEqual(['api.example.com', '10.0.0.5']);
+    });
+
     it('lowercases, trims, and deduplicates the hosts', async () => {
       registerWithHosts(() => [' API.example.com ', 'api.example.com', 'other.example.com']);
 
@@ -471,6 +487,7 @@ describe('getSandboxCredentials()', () => {
       ['the action type has no getSandboxHosts hook', undefined],
       ['getSandboxHosts returns no hosts', () => []],
       ['getSandboxHosts only returns empty or wildcard hosts', () => ['', ' ', '*']],
+      ['getSandboxHosts only returns an IPv6 host', () => ['[::1]']],
     ])('fails closed when %s', async (_name, getSandboxHosts) => {
       registerWithHosts(getSandboxHosts);
 
