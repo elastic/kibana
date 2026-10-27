@@ -33,6 +33,8 @@ const mockFetchMonitorPrivileges = fetchMonitorPrivileges as jest.MockedFunction
   typeof fetchMonitorPrivileges
 >;
 
+const FULL_ACCESS = { showPanel: true, showDocuments: true, showTotalSize: true };
+
 describe('registerDeploymentStatsRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -51,7 +53,7 @@ describe('registerDeploymentStatsRoute', () => {
     });
     mockFetchApiKeysStats.mockResolvedValue({ total: null, expiring: null });
 
-    registerDeploymentStatsRoute(router, logger);
+    registerDeploymentStatsRoute(router, logger, { isServerless: true });
   });
 
   const getHandler = () => router.get.mock.calls[0][1];
@@ -68,6 +70,7 @@ describe('registerDeploymentStatsRoute', () => {
 
   it('returns index stats, dashboard count and api key stats combined in a single body', async () => {
     mockFetchIndexStats.mockResolvedValue({
+      dataPanelAccess: FULL_ACCESS,
       indicesCount: 3,
       storeSizeBytes: 1024,
       vectorCount: 5,
@@ -84,6 +87,7 @@ describe('registerDeploymentStatsRoute', () => {
 
     expect(response.ok).toHaveBeenCalledWith({
       body: {
+        dataPanelAccess: FULL_ACCESS,
         indicesCount: 3,
         storeSizeBytes: 1024,
         vectorCount: 5,
@@ -98,6 +102,7 @@ describe('registerDeploymentStatsRoute', () => {
 
   it('surfaces null values (unavailable) without failing the response', async () => {
     mockFetchIndexStats.mockResolvedValue({
+      dataPanelAccess: FULL_ACCESS,
       indicesCount: null,
       storeSizeBytes: null,
       vectorCount: null,
@@ -113,6 +118,7 @@ describe('registerDeploymentStatsRoute', () => {
 
     expect(response.ok).toHaveBeenCalledWith({
       body: {
+        dataPanelAccess: FULL_ACCESS,
         indicesCount: null,
         storeSizeBytes: null,
         vectorCount: null,
@@ -132,6 +138,7 @@ describe('registerDeploymentStatsRoute', () => {
       canMonitorCluster: true,
     });
     mockFetchIndexStats.mockResolvedValue({
+      dataPanelAccess: FULL_ACCESS,
       indicesCount: 3,
       storeSizeBytes: 1024,
       vectorCount: null,
@@ -145,13 +152,16 @@ describe('registerDeploymentStatsRoute', () => {
 
     await getHandler()(createContext(), request, response);
 
-    expect(mockFetchIndexStats).toHaveBeenCalledWith(esClient, logger, {
-      canMonitorAllIndices: false,
-      canMonitorCluster: true,
-    });
+    expect(mockFetchIndexStats).toHaveBeenCalledWith(
+      esClient,
+      logger,
+      { canMonitorAllIndices: false, canMonitorCluster: true },
+      { isServerless: true }
+    );
     expect(response.forbidden).not.toHaveBeenCalled();
     expect(response.ok).toHaveBeenCalledWith({
       body: {
+        dataPanelAccess: FULL_ACCESS,
         indicesCount: 3,
         storeSizeBytes: 1024,
         vectorCount: null,

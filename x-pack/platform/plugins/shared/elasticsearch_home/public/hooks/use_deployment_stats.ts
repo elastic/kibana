@@ -15,7 +15,11 @@ import {
   STARRED_DASHBOARDS_COUNT_PATH,
   WORKFLOWS_STATS_PATH,
 } from '../../common/constants';
-import type { DeploymentStatsResponse, StarredDashboardsCountResponse } from '../../common/types';
+import type {
+  DataPanelAccess,
+  DeploymentStatsResponse,
+  StarredDashboardsCountResponse,
+} from '../../common/types';
 import { useHomeServices } from '../context';
 
 interface WorkflowsStats {
@@ -28,7 +32,18 @@ export interface DeploymentStats extends DeploymentStatsResponse {
   starredDashboardsCount: number | null;
 }
 
+/**
+ * Used when the request fails, so the panel shows the stats as unavailable rather than hiding
+ * them. A stat is hidden only when Elasticsearch refuses its request.
+ */
+const FULL_DATA_PANEL_ACCESS: DataPanelAccess = {
+  showPanel: true,
+  showDocuments: true,
+  showTotalSize: true,
+};
+
 const initialStats: DeploymentStats = {
+  dataPanelAccess: FULL_DATA_PANEL_ACCESS,
   indicesCount: null,
   vectorCount: null,
   storeSizeBytes: null,
@@ -90,6 +105,7 @@ export const useDeploymentStats = () => {
       ]);
 
       return {
+        dataPanelAccess: esStats?.dataPanelAccess ?? FULL_DATA_PANEL_ACCESS,
         indicesCount: esStats?.indicesCount ?? null,
         vectorCount: esStats?.vectorCount ?? null,
         storeSizeBytes: esStats?.storeSizeBytes ?? null,

@@ -11,11 +11,11 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLink,
-  EuiPageTemplate,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { TrialUsageBadge } from '@kbn/shared-components';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { AddDataSection } from './components/add_data_section';
 import { ChatWithYourDataSection } from './components/chat_with_data_section';
@@ -23,13 +23,14 @@ import { ConnectionDetails } from './components/connection_details';
 import { HomePageBanner } from './components/home_page_banner';
 import { getDataCard, getSecondaryCards } from './components/home_page_stat_cards';
 import { HomePageStatPanel } from './components/home_page_stat_panel';
+import { HomePageLoading } from './components/home_page_loading';
 import { useHomeConfig, useHomeServices, useTelemetryId } from './context';
 import { useAuthenticatedUser } from './hooks/use_authenticated_user';
 import { useDeploymentStats } from './hooks/use_deployment_stats';
 
 export const HomePage = () => {
   const { cloud, application, chrome } = useHomeServices();
-  const { docsLink } = useHomeConfig();
+  const { docsLink, solutionNav, dataCardTooltip } = useHomeConfig();
   const getTelemetryId = useTelemetryId();
   const { user } = useAuthenticatedUser();
   const { stats, isLoading } = useDeploymentStats();
@@ -37,13 +38,18 @@ export const HomePage = () => {
 
   const username = user?.full_name || user?.email;
 
-  const statCardDeps = { application, chrome, stats, isLoading, getTelemetryId };
+  const statCardDeps = { application, chrome, stats, getTelemetryId, dataCardTooltip };
   const dataCard = getDataCard(statCardDeps);
   const secondaryCards = getSecondaryCards(statCardDeps);
 
   return (
-    <EuiPageTemplate restrictWidth panelled={false} grow={false}>
-      <EuiPageTemplate.Section paddingSize="xl" grow={false}>
+    <KibanaPageTemplate
+      restrictWidth
+      grow={false}
+      solutionNav={solutionNav}
+      data-test-subj="elasticsearchHomePage"
+    >
+      <KibanaPageTemplate.Section paddingSize="xl" grow={false}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup
@@ -83,49 +89,59 @@ export const HomePage = () => {
         <EuiSpacer size="m" />
         <EuiHorizontalRule margin="none" />
 
-        <EuiFlexGroup gutterSize="l" direction="column">
-          <EuiFlexItem>
-            <HomePageBanner hasData={hasData} isLoading={isLoading} />
-          </EuiFlexItem>
+        {isLoading ? (
+          <HomePageLoading />
+        ) : (
+          <>
+            <EuiFlexGroup gutterSize="l" direction="column">
+              <EuiFlexItem>
+                <HomePageBanner hasData={hasData} />
+              </EuiFlexItem>
 
-          <EuiFlexItem>
-            <HomePageStatPanel {...dataCard} newIndex={stats.newIndex} />
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="l">
-              {secondaryCards.map((card) => (
-                <EuiFlexItem key={card.testSubj}>
-                  <HomePageStatPanel {...card} />
+              {dataCard && (
+                <EuiFlexItem>
+                  <HomePageStatPanel {...dataCard} newIndex={stats.newIndex} />
                 </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+              )}
 
-          <EuiSpacer size="s" />
+              {secondaryCards.length > 0 && (
+                <EuiFlexItem>
+                  <EuiFlexGroup gutterSize="l">
+                    {secondaryCards.map((card) => (
+                      <EuiFlexItem key={card.testSubj}>
+                        <HomePageStatPanel {...card} />
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              )}
 
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="xl">
+              <EuiSpacer size="s" />
+
               <EuiFlexItem>
-                <AddDataSection />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ChatWithYourDataSection />
+                <EuiFlexGroup gutterSize="xl">
+                  <EuiFlexItem>
+                    <AddDataSection />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <ChatWithYourDataSection />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiHorizontalRule margin="l" />
-        <EuiLink
-          href={docsLink.href}
-          target="_blank"
-          external
-          data-test-subj="elasticsearchHomeDocumentationLink"
-          data-telemetry-id={getTelemetryId('documentationLink')}
-        >
-          {docsLink.label}
-        </EuiLink>
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
+            <EuiHorizontalRule margin="l" />
+            <EuiLink
+              href={docsLink.href}
+              target="_blank"
+              external
+              data-test-subj="elasticsearchHomeDocumentationLink"
+              data-telemetry-id={getTelemetryId('documentationLink')}
+            >
+              {docsLink.label}
+            </EuiLink>
+          </>
+        )}
+      </KibanaPageTemplate.Section>
+    </KibanaPageTemplate>
   );
 };
