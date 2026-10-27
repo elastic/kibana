@@ -3479,6 +3479,9 @@ importers:
       '@kbn/security-ui-components':
         specifier: workspace:*
         version: link:x-pack/platform/packages/private/security/ui_components
+      '@kbn/securitysolution-alerts-page-url':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-securitysolution-alerts-page-url
       '@kbn/securitysolution-autocomplete':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-securitysolution-autocomplete
@@ -5559,6 +5562,9 @@ importers:
       '@kbn/evals-suite-attack-discovery-fp-tp':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp
+      '@kbn/evals-suite-automatic-import':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-evals-suite-automatic-import
       '@kbn/evals-suite-detection-watch-rule-creation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation
@@ -9122,6 +9128,8 @@ importers:
 
   x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2: {}
 
+  x-pack/platform/packages/shared/kbn-evals-suite-automatic-import: {}
+
   x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests: {}
 
   x-pack/platform/packages/shared/kbn-evals-suite-streams: {}
@@ -9837,6 +9845,8 @@ importers:
   x-pack/solutions/security/packages/kbn-security-evals-matrix: {}
 
   x-pack/solutions/security/packages/kbn-security-evals-workflow-traces: {}
+
+  x-pack/solutions/security/packages/kbn-securitysolution-alerts-page-url: {}
 
   x-pack/solutions/security/packages/kbn-securitysolution-autocomplete: {}
 
