@@ -143,6 +143,24 @@ describe('useRuleDetailsBadges', () => {
     expect(onRuleEnabledChange).toHaveBeenCalledWith(true);
   });
 
+  it('names the "Enabled" badge with the rule name, its state and the action it opens', () => {
+    renderHeader({ rule: { ...mockRule('rule-id'), enabled: true } });
+
+    expect(screen.getByTestId('ruleDetailsEnabledBadge')).toHaveAttribute(
+      'aria-label',
+      `${mockRule('rule-id').name} is enabled. Open the menu to disable the rule.`
+    );
+  });
+
+  it('names the "Disabled" badge with the rule name, its state and the action it opens', () => {
+    renderHeader({ rule: { ...mockRule('rule-id'), enabled: false } });
+
+    expect(screen.getByTestId('ruleDetailsEnabledBadge')).toHaveAttribute(
+      'aria-label',
+      `${mockRule('rule-id').name} is disabled. Open the menu to enable the rule.`
+    );
+  });
+
   it('disables the enable/disable action without the privilege', async () => {
     mockEnableDisablePrivilege(false);
     renderHeader({ rule: mockRule('rule-id') });

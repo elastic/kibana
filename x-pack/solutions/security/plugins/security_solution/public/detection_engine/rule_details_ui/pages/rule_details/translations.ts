@@ -194,6 +194,18 @@ export const ELASTIC_VERSION_BADGE = (version: number) =>
     values: { version },
   });
 
+export const ENABLED_BADGE_ARIA_LABEL = (ruleName: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.enabledBadgeAriaLabel', {
+    defaultMessage: '{ruleName} is enabled. Open the menu to disable the rule.',
+    values: { ruleName },
+  });
+
+export const DISABLED_BADGE_ARIA_LABEL = (ruleName: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.disabledBadgeAriaLabel', {
+    defaultMessage: '{ruleName} is disabled. Open the menu to enable the rule.',
+    values: { ruleName },
+  });
+
 export const REVISION_BADGE = (revision: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.revisionBadgeLabel', {
     defaultMessage: 'Revision: {revision}',

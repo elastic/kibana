@@ -136,6 +136,9 @@ export const useRuleDetailsBadges = ({
       {
         label: isEnabled ? i18n.ENABLED_BADGE : i18n.DISABLED_BADGE,
         color: isEnabled ? 'primary' : 'hollow',
+        onClickAriaLabel: isEnabled
+          ? i18n.ENABLED_BADGE_ARIA_LABEL(rule?.name ?? '')
+          : i18n.DISABLED_BADGE_ARIA_LABEL(rule?.name ?? ''),
         'data-test-subj': 'ruleDetailsEnabledBadge',
         items: [
           {
