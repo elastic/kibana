@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 
 const STICKY_KQL_HEADER_ID = 'securitySolutionStickyKQL';
 
@@ -37,16 +38,18 @@ const useStickyKqlHeaderHeight = (): number => {
  * scrolls. The AppHeader inside must be rendered with `sticky={false}`, and this container must be a
  * direct child of a container as tall as the page, otherwise CSS sticky is confined to the parent's
  * height. The top offset compensates the AppHeader's `largeBleed` negative top margin, which pulls it
- * above this box.
+ * above this box. The box is hidden, but stays mounted, while the page is in global full screen mode.
  */
 export const RuleDetailsStickyHeader = React.memo<RuleDetailsStickyHeaderProps>(({ children }) => {
   const { euiTheme } = useEuiTheme();
   const kqlHeaderHeight = useStickyKqlHeaderHeight();
+  const { globalFullScreen } = useGlobalFullScreen();
 
   return (
     <div
       data-test-subj="ruleDetailsStickyHeader"
       css={css`
+        display: ${globalFullScreen ? 'none' : 'block'};
         position: sticky;
         top: calc(
           var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0px)) + ${kqlHeaderHeight}px +
