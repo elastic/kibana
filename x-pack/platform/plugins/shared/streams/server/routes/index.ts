@@ -26,6 +26,7 @@ import { attachmentRoutes } from './attachments/route';
 import { internalAttachmentRoutes } from './internal/attachments/route';
 import { timeSeriesRoutes } from './internal/streams/time_series/route';
 import { internalSourceRoutes } from './internal/streams/sources/route';
+import { internalDestinationRoutes } from './internal/streams/destinations/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -38,6 +39,7 @@ export const streamsRouteRepository = {
   ...timeSeriesRoutes,
   ...internalIngestRoutes,
   ...internalSourceRoutes,
+  ...internalDestinationRoutes,
   ...unitRoutes,
   ...connectorRoutes,
   ...internalAttachmentRoutes,

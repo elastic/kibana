@@ -306,11 +306,11 @@ describe('getCompletionItemProvider', () => {
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([
         {
-          label: 'Alerting - Alert acknowledged',
+          label: 'alerting.actions.alertAcked',
           insertText: 'alerting.actions.alertAcked snippet',
           insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
           filterText: 'alerting.actions.alertAcked',
-          detail: 'alerting.actions.alertAcked',
+          detail: 'Alerting - Alert acknowledged',
         },
       ]);
 
@@ -339,8 +339,8 @@ describe('getCompletionItemProvider', () => {
 
       expect(result?.suggestions).toHaveLength(1);
       expect(result?.suggestions?.[0]).toMatchObject({
-        label: 'Alerting - Alert acknowledged',
-        detail: 'alerting.actions.alertAcked',
+        label: 'alerting.actions.alertAcked',
+        detail: 'Alerting - Alert acknowledged',
         filterText: 'alerting.actions.alertAcked',
       });
     });

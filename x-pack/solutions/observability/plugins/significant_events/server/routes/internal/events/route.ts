@@ -24,6 +24,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z, isoDateTime } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import {
@@ -47,6 +48,10 @@ import { assertNotPaused } from '../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { MAX_SOURCE_IDS_PER_REQUEST, sourceIdsQuerySchema } from '../../utils/resolve_source_ids';
 import { StatusChange } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
+import { getLiveEntities } from '../../../lib/significant_events/entities/get_live_entities';
+import { filterReadableSourceIds } from '../../utils/resolve_source_ids';
+import { listAllSources } from '../../utils/list_all_sources';
+import type { RouteHandlerScopedClients } from '../../types';
 
 const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
@@ -126,6 +131,7 @@ const eventsFilterQuerySchema = z.object({
   topology_feature_id: z
     .union([z.string().max(255), z.array(z.string().max(255)).max(100)])
     .optional(),
+  unassigned_entities: BooleanFromString.optional(),
   investigation_state: z
     .union([
       investigationStateSchema,
@@ -134,28 +140,54 @@ const eventsFilterQuerySchema = z.object({
     .optional(),
 });
 
-const toEventsFilterOptions = ({
-  from,
-  to,
-  status,
-  source_id: sourceIdFilter,
-  search,
-  severity,
-  topology_feature_id: topologyFeatureId,
-  investigation_state: investigationState,
-}: z.infer<typeof eventsFilterQuerySchema>): EventsFilterOptions & {
-  from?: string;
-  to?: string;
-} => ({
-  from,
-  to,
-  status: toArray(status),
-  sourceIds: toArray(sourceIdFilter),
-  severity: toArray(severity),
-  topologyFeatureIds: toArray(topologyFeatureId),
-  investigationStates: toArray(investigationState),
-  search: search || undefined,
-});
+const toEventsFilterOptions = async (
+  {
+    from,
+    to,
+    status,
+    source_id: sourceIdFilter,
+    search,
+    severity,
+    topology_feature_id: topologyFeatureId,
+    investigation_state: investigationState,
+    unassigned_entities: unassignedEntities,
+  }: z.infer<typeof eventsFilterQuerySchema>,
+  scopedClients: RouteHandlerScopedClients
+): Promise<
+  EventsFilterOptions & {
+    from?: string;
+    to?: string;
+  }
+> => {
+  let unassignedEntityIds: string[] | undefined;
+  if (unassignedEntities) {
+    const { sourcesClient, getKnowledgeIndicatorClient } = scopedClients;
+    const sources = await listAllSources(sourcesClient);
+    const sourceIds = await filterReadableSourceIds(
+      sources.map(({ id }) => id),
+      sourcesClient
+    );
+    const { entities, truncated } = await getLiveEntities(
+      await getKnowledgeIndicatorClient(),
+      sourceIds
+    );
+    // A truncated live set would misreport entities past the cap as unassigned, so skip the filter.
+    if (!truncated) {
+      unassignedEntityIds = entities.map(({ id }) => id);
+    }
+  }
+  return {
+    from,
+    to,
+    status: toArray(status),
+    sourceIds: toArray(sourceIdFilter),
+    severity: toArray(severity),
+    topologyFeatureIds: toArray(topologyFeatureId),
+    ...(unassignedEntityIds ? { unassignedEntityIds } : {}),
+    investigationStates: toArray(investigationState),
+    search: search || undefined,
+  };
+};
 
 /**
  * The detections the classifier closed without the agent on the strength of this event. They are in
@@ -209,7 +241,8 @@ const eventsSearchRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<PaginatedResponse<SignificantEventResponse>> => {
-    const { getEventSearchClient, licensing } = await getScopedClients({ request });
+    const scopedClients = await getScopedClients({ request });
+    const { getEventSearchClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -224,7 +257,7 @@ const eventsSearchRoute = createServerRoute({
 
     const eventClient = await getEventSearchClient();
     return eventClient.findLatestByCurrentStatePaginated({
-      ...toEventsFilterOptions(filters),
+      ...(await toEventsFilterOptions(filters, scopedClients)),
       page,
       perPage,
       sortField,
@@ -256,12 +289,13 @@ const eventsFacetsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsFacets> => {
-    const { getEventSearchClient, licensing } = await getScopedClients({ request });
+    const scopedClients = await getScopedClients({ request });
+    const { getEventSearchClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const eventClient = await getEventSearchClient();
-    return eventClient.countFacets(toEventsFilterOptions(params.query ?? {}));
+    return eventClient.countFacets(await toEventsFilterOptions(params.query ?? {}, scopedClients));
   },
 });
 
@@ -282,6 +316,16 @@ const eventsLifecycleRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
+    query: z
+      .object({
+        include_skipped: z
+          .enum(['true', 'false'])
+          .optional()
+          .describe(
+            'Also list the detections the classifier closed without the agent, with why. Off by default.'
+          ),
+      })
+      .optional(),
   }),
   handler: async ({
     params,
@@ -315,6 +359,10 @@ const eventsLifecycleRoute = createServerRoute({
       const detection = hit && toLifecycleDetection(hit, { rule_name, source_id });
       return detection ? [detection] : [];
     });
+
+    if (params.query?.include_skipped !== 'true') {
+      return { detections, events };
+    }
 
     const skipped = await findSkippedDetections({
       detectionClient,
