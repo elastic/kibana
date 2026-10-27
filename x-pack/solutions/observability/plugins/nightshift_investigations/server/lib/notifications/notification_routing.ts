@@ -26,6 +26,7 @@ export const notificationAttemptSchema = z.strictObject({
   attempted_at: timestamp,
   creates_root: z.boolean(),
   message_ts: messageId.optional(),
+  external_conversation_id: identifier.optional(),
   sent_at: timestamp.optional(),
   error: z.string().max(MAX_TEXT_LENGTH).optional(),
 });
@@ -64,7 +65,7 @@ export type NotificationPhase = z.infer<typeof notificationPhaseSchema>;
 export type NotificationAttempt = z.infer<typeof notificationAttemptSchema>;
 export type NotificationOutcome = Pick<
   NotificationAttempt,
-  'status' | 'message_ts' | 'sent_at' | 'error'
+  'status' | 'message_ts' | 'external_conversation_id' | 'sent_at' | 'error'
 > & {
   channel?: string;
 };
