@@ -61,7 +61,7 @@ export async function findRules<Params extends RuleParams = never>(
   context: RulesClientContext,
   params?: FindRulesParams
 ): Promise<FindResult<Params>> {
-  const { options } = params || {};
+  const { options, allowPartialResults = false } = params || {};
 
   const { fields, ruleTypeIds, consumers, ...restOptions } = options || {};
 
@@ -178,10 +178,12 @@ export async function findRules<Params extends RuleParams = never>(
         ruleTypeRegistry: context.ruleTypeRegistry,
       });
     } catch (error) {
+      context.logger.warn(`Error transforming rule with id ${id}: ${error.message}`);
+      if (!allowPartialResults) {
+        throw error;
+      }
+
       // A rule that cannot be transformed at all is omitted rather than failing the whole find
-      context.logger.warn(
-        `Error transforming rule with id ${id}, the rule will be omitted from the results: ${error.message}`
-      );
       errors.push({
         message: error.message,
         rule: { id, ...(attributes.name && { name: attributes.name }) },

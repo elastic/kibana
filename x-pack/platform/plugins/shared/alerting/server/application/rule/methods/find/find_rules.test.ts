@@ -760,6 +760,51 @@ describe('find()', () => {
     `);
   });
 
+  test.each([{}, { allowPartialResults: false }])(
+    'propagates the original transformation error with find parameters %j',
+    async (params) => {
+      const error = new Error('Unable to transform rule');
+      ruleTypeRegistry.get.mockImplementation(() => {
+        throw error;
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+
+      await expect(rulesClient.find(params)).rejects.toBe(error);
+      expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+        'Error transforming rule with id 1: Unable to transform rule'
+      );
+    }
+  );
+
+  test('returns an error array when allowPartialResults is true', async () => {
+    const error = new Error('Unable to transform rule');
+    ruleTypeRegistry.get.mockImplementation(() => {
+      throw error;
+    });
+
+    const rulesClient = new RulesClient(rulesClientParams);
+
+    await expect(rulesClient.find({ allowPartialResults: true })).resolves.toEqual({
+      data: [],
+      errors: [
+        {
+          message: 'Unable to transform rule',
+          rule: {
+            id: '1',
+            name: 'fakeRuleName',
+          },
+        },
+      ],
+      page: 1,
+      perPage: 10,
+      total: 1,
+    });
+    expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+      'Error transforming rule with id 1: Unable to transform rule'
+    );
+  });
+
   test('omits the rule from the results and reports an error if useSavedObjectReferences.injectReferences throws an error', async () => {
     jest.resetAllMocks();
     authorization.getFindAuthorizationFilter.mockResolvedValue({
@@ -940,10 +985,10 @@ describe('find()', () => {
       ],
     });
     const rulesClient = new RulesClient(rulesClientParams);
-    const result = await rulesClient.find({ options: {} });
+    const result = await rulesClient.find({ options: {}, allowPartialResults: true });
 
     expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
-      'Error transforming rule with id 2, the rule will be omitted from the results: Error injecting reference into rule params for rule id 2 - something went wrong!'
+      'Error transforming rule with id 2: Error injecting reference into rule params for rule id 2 - something went wrong!'
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -1077,10 +1122,10 @@ describe('find()', () => {
     });
 
     const rulesClient = new RulesClient(rulesClientParams);
-    const result = await rulesClient.find({ options: {} });
+    const result = await rulesClient.find({ options: {}, allowPartialResults: true });
 
     expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
-      'Error transforming rule with id 2, the rule will be omitted from the results: Action reference "action_0" not found in alert id: 2'
+      'Error transforming rule with id 2: Action reference "action_0" not found in alert id: 2'
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -1167,6 +1212,26 @@ describe('find()', () => {
       await expect(rulesClient.find({ options: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
         `"not authorized"`
       );
+    });
+
+    test('propagates authorization filter errors when partial results are allowed', async () => {
+      const error = new Error('not authorized');
+      authorization.getFindAuthorizationFilter.mockRejectedValue(error);
+      const rulesClient = new RulesClient(rulesClientParams);
+
+      await expect(rulesClient.find({ allowPartialResults: true })).rejects.toBe(error);
+    });
+
+    test('propagates rule type authorization errors when partial results are allowed', async () => {
+      const error = new Error('not authorized');
+      authorization.getFindAuthorizationFilter.mockResolvedValue({
+        ensureRuleTypeIsAuthorized: () => {
+          throw error;
+        },
+      });
+      const rulesClient = new RulesClient(rulesClientParams);
+
+      await expect(rulesClient.find({ allowPartialResults: true })).rejects.toBe(error);
     });
 
     test('ensures authorization even when the fields required to authorize are omitted from the find', async () => {

@@ -10,6 +10,7 @@ import { findInternalRulesRoute } from './find_internal_rules_route';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../../rules_client.mock';
 import type { FindResult } from '../../../../../application/rule/methods/find/find_rules';
+import { findRulesInternalRequestBodySchemaV1 } from '../../../../../../common/routes/rule/apis/find/internal';
 
 jest.mock('../../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
@@ -86,6 +87,7 @@ describe('findInternalRulesRoute', () => {
     expect(rulesClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "allowPartialResults": false,
           "options": Object {
             "consumers": Array [
               "bar",
@@ -110,6 +112,30 @@ describe('findInternalRulesRoute', () => {
       },
     });
   });
+
+  it.each([undefined, false, true])(
+    'forwards the partial-results preference when allow_partial_results is %s',
+    async (allowPartialResults) => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      findInternalRulesRoute(router, licenseState);
+      const [, handler] = router.post.mock.calls[0];
+      rulesClient.find.mockResolvedValueOnce({ page: 1, perPage: 1, total: 0, data: [] });
+
+      const body = findRulesInternalRequestBodySchemaV1.validate({
+        per_page: 1,
+        allow_partial_results: allowPartialResults,
+      });
+      const [context, req, res] = mockHandlerArguments({ rulesClient }, { body }, ['ok']);
+
+      await handler(context, req, res);
+
+      expect(rulesClient.find).toHaveBeenCalledWith({
+        options: { perPage: 1, page: 1, defaultSearchOperator: 'OR' },
+        allowPartialResults: !!allowPartialResults
+      });
+    }
+  );
 
   it('includes errors in the response when the rules client returns them', async () => {
     const licenseState = licenseStateMock.create();
@@ -141,6 +167,7 @@ describe('findInternalRulesRoute', () => {
           per_page: 1,
           page: 1,
           default_search_operator: 'OR',
+          allow_partial_results: true,
         },
       },
       ['ok']
@@ -212,6 +239,7 @@ describe('findInternalRulesRoute', () => {
     expect(rulesClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "allowPartialResults": false,
           "options": Object {
             "consumers": Array [
               "bar",
@@ -392,6 +420,7 @@ describe('findInternalRulesRoute', () => {
     expect(rulesClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "allowPartialResults": false,
           "options": Object {
             "consumers": Array [
               "bar",

@@ -18,6 +18,7 @@ import {
 } from '../../../../../../constants';
 
 export const findRulesInternalRequestBodySchema = schema.object({
+  allow_partial_results: schema.maybe(schema.boolean()),
   per_page: schema.number({
     defaultValue: 10,
     min: 0,
