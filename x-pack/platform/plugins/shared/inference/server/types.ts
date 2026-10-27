@@ -119,7 +119,7 @@ export type InferenceClientCreateOptions =
  */
 export interface InferenceServerStart {
   /**
-   * Creates an {@link InferenceClient}, scoped to a request.
+   * Creates an {@link InferenceServerClient}, scoped to a request.
    *
    * @example
    * ```ts
@@ -127,6 +127,17 @@ export interface InferenceServerStart {
    *
    * const chatResponse = inferenceClient.chatComplete({
    *   connectorId: 'my-connector-id',
+   *   messages: [{ role: MessageRole.User, content: 'Do something' }],
+   * });
+   * ```
+   *
+   * Server features can pass a `featureId` instead of a `connectorId`. The feature's top model,
+   * and its `temperature` and `reasoning`, are then resolved from the model settings.
+   *
+   * @example
+   * ```ts
+   * const chatResponse = inferenceClient.chatComplete({
+   *   featureId: 'my-feature-id',
    *   messages: [{ role: MessageRole.User, content: 'Do something' }],
    * });
    * ```

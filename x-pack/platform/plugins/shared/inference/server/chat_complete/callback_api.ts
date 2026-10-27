@@ -219,6 +219,7 @@ async function resolveEndpoint({
       `Cannot call chatComplete with featureId "${featureId}": no feature endpoint resolver is registered`
     );
   }
+  // Skips the resolver call for an already-aborted request; `handleCancellation` covers later aborts.
   if (abortSignal?.aborted) {
     throw createInferenceRequestAbortedError();
   }

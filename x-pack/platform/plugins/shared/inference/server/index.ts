@@ -13,13 +13,20 @@ import type {
 import type { InferenceConfig } from './config';
 import { configSchema } from './config';
 import type {
+  FeatureEndpointResolver,
+  InferenceServerClient,
   InferenceServerSetup,
   InferenceServerStart,
   InferenceSetupDependencies,
   InferenceStartDependencies,
 } from './types';
 
-export type { InferenceServerSetup, InferenceServerStart };
+export type {
+  FeatureEndpointResolver,
+  InferenceServerClient,
+  InferenceServerSetup,
+  InferenceServerStart,
+};
 export type { InferenceEndpoint } from './util/get_inference_endpoints';
 
 export {
