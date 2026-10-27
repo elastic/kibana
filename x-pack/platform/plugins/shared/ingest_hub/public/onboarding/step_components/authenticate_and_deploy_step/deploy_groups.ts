@@ -77,7 +77,8 @@ export function buildDeployGroups(
   instances: ServiceInstance[],
   selectedServiceIds: string[],
   servicesMap: Map<string, AwsServiceMatrixEntry>,
-  storedServiceVars: Record<string, ServiceVars> = {}
+  storedServiceVars: Record<string, ServiceVars> = {},
+  globalNamespace?: string
 ): DeployGroup[] {
   // Reconcile persisted instances against the current selectedServiceIds — the same logic
   // use_service_settings applies in-memory. Without this, a user who goes back to step 1 and
@@ -109,9 +110,15 @@ export function buildDeployGroups(
     }
   }
 
-  // An instance without a namespace deploys into the default one, so it shares a policy with the
-  // instances that name it explicitly.
-  return groupByPackage(originals, duplicates, storedServiceVars, DEFAULT_NAMESPACE);
+  // An instance without a namespace of its own takes the global one, and without that deploys into
+  // the default one, so it shares a policy with the instances that name it explicitly.
+  return groupByPackage(
+    originals,
+    duplicates,
+    storedServiceVars,
+    DEFAULT_NAMESPACE,
+    globalNamespace
+  );
 }
 
 function buildAgentlessPolicyName(group: DeployGroup, integrationName?: string): string {
