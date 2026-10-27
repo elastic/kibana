@@ -418,6 +418,43 @@ describe('makeRehydrateProcessSelectors', () => {
     expect(esClient.mget).not.toHaveBeenCalled();
   });
 
+  it('leaves cross-cluster refs out of the mget, which cannot read a remote index', async () => {
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-local', {
+        '@timestamp': '2026-09-26T10:00:00.000Z',
+        host: { name: 'WIN-ANALYST01' },
+        process: { entity_id: 'ent-1', pid: 4312, name: 'powershell.exe' },
+        event: { type: 'start' },
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [{ alert_id: 'al-remote', index: 'remote:.alerts-security.alerts-default' }],
+      events: [
+        eventRef('remote:.ds-logs-endpoint.events.process-default-2026.10.26-000001', 'ev-remote'),
+        eventRef('logs-endpoint.events-default', 'ev-local'),
+      ],
+    });
+
+    expect(esClient.mget).toHaveBeenCalledWith(
+      expect.objectContaining({
+        docs: [
+          expect.objectContaining({ _index: 'logs-endpoint.events-default', _id: 'ev-local' }),
+        ],
+      })
+    );
+    expect(selectors).toHaveLength(1);
+  });
+
+  it('makes no mget call when every ref is remote', async () => {
+    const esClient = esClientWith([]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [eventRef('remote:logs-endpoint.events.process-default', 'ev-remote')],
+    });
+    expect(selectors).toEqual([]);
+    expect(esClient.mget).not.toHaveBeenCalled();
+  });
+
   it('returns [] rather than throwing when mget itself fails', async () => {
     const esClient = {
       mget: jest.fn().mockRejectedValue(new Error('cluster unavailable')),

@@ -19,6 +19,7 @@ const sseAttachment = ({
   title = 'Test SSE',
   evidenceFor = ['Tier 1 hit'],
   tier1TotalHits = 1,
+  tier1Indices = ['.ds-logs-endpoint.events.process-default-2026.09.25-000001'],
   tier2Behaviors = [],
   techniqueIds = ['T1078.004'],
   techniqueLabels = [],
@@ -44,6 +45,8 @@ const sseAttachment = ({
   title?: string;
   evidenceFor?: string[];
   tier1TotalHits?: number;
+  /** Tier 1 `per_index` hit indices, each carrying `tier1TotalHits` hits. */
+  tier1Indices?: string[];
   entities?: Array<{ field: string; value: string }>;
   severity?: 'low' | 'medium' | 'high' | 'critical';
   tier2Behaviors?: Array<{
@@ -117,18 +120,16 @@ const sseAttachment = ({
           tier1: {
             status: 'environment_hits_found',
             counts: {
-              total_hits: tier1TotalHits,
-              returned_hits: tier1TotalHits,
+              total_hits: tier1TotalHits * Math.max(tier1Indices.length, 1),
+              returned_hits: tier1TotalHits * Math.max(tier1Indices.length, 1),
               affected_hosts: 1,
               affected_users: 0,
             },
-            per_index: [
-              {
-                index: '.ds-logs-endpoint.events.process-default-2026.09.25-000001',
-                hit_count: tier1TotalHits,
-                required: true,
-              },
-            ],
+            per_index: tier1Indices.map((index) => ({
+              index,
+              hit_count: tier1TotalHits,
+              required: true,
+            })),
             resolved_iocs: [],
           },
           ...(tier2Behaviors.length > 0
@@ -214,6 +215,98 @@ describe('readCurrentRunState', () => {
 
     expect(state?.allEventsActionable).toBe(false);
     expect(state?.hasProcessBearingEvent).toBe(false);
+  });
+
+  it('never reads remote evidence as host-scoped, even when a remote pattern is actionable', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({
+          actionableIndices: [
+            'logs-endpoint.events.process-*',
+            'infosec_zocalo:logs-endpoint.events.process-*',
+          ],
+          events: [
+            {
+              event_id: 'evt-remote',
+              source_index:
+                'infosec_zocalo:.ds-logs-endpoint.events.process-default-2026.09.25-000001',
+            },
+          ],
+        }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.allEventsActionable).toBe(false);
+    expect(state?.hasProcessBearingEvent).toBe(false);
+  });
+
+  describe('resolving host enrollment when the evidence is remote', () => {
+    const remoteIndex = 'infosec_zocalo:.ds-logs-endpoint.events.process-default-2026.09.25-000001';
+    const localIndex = '.ds-logs-endpoint.events.process-default-2026.09.25-000001';
+
+    it('resolves no host when every hit is on a remote cluster', async () => {
+      const resolve = jest.fn(resolveHostEnrollment);
+      const state = await readCurrentRunState({
+        attachments: [
+          sseAttachment({
+            tier1Indices: [remoteIndex],
+            events: [{ event_id: 'evt-remote', source_index: remoteIndex }],
+          }),
+        ],
+        reportId,
+        runId,
+        resolveHostEnrollment: resolve,
+        rehydrateProcessSelectors,
+      });
+
+      expect(resolve).not.toHaveBeenCalled();
+      expect(state?.hosts).toEqual([{ name: 'host-a', enrolled: false, capabilities: [] }]);
+    });
+
+    it('resolves no host when the only hits are remote alerts, which carry no ref', async () => {
+      const resolve = jest.fn(resolveHostEnrollment);
+      await readCurrentRunState({
+        attachments: [
+          sseAttachment({
+            tier1Indices: ['infosec_zocalo:.internal.alerts-security.alerts-default-000001'],
+            events: [],
+          }),
+        ],
+        reportId,
+        runId,
+        resolveHostEnrollment: resolve,
+        rehydrateProcessSelectors,
+      });
+
+      expect(resolve).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['a local Tier 1 hit index', [remoteIndex, localIndex], [remoteIndex]],
+      ['a local event ref', [remoteIndex], [remoteIndex, localIndex]],
+      ['no hit index at all', [], []],
+    ])('still resolves hosts when the run has %s', async (_label, tier1Indices, sources) => {
+      const resolve = jest.fn(resolveHostEnrollment);
+      const state = await readCurrentRunState({
+        attachments: [
+          sseAttachment({
+            tier1Indices,
+            events: sources.map((source, i) => ({ event_id: `evt-${i}`, source_index: source })),
+          }),
+        ],
+        reportId,
+        runId,
+        resolveHostEnrollment: resolve,
+        rehydrateProcessSelectors,
+      });
+
+      expect(resolve).toHaveBeenCalledWith('host-a');
+      expect(state?.hosts[0]?.enrolled).toBe(true);
+    });
   });
 
   it('unions actionable_indices across current-run SSEs', async () => {

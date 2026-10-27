@@ -24,6 +24,7 @@ import dateMath from '@kbn/datemath';
 import { HuntIoc } from '@kbn/alertzero-common';
 import type { SignificantSecurityEventAttachmentData } from '../../../../../common/significant_security_event_schema';
 import type { SeverityLevel } from '../../../../../common/attachment_enums';
+import { splitRemoteCluster, stripBackingPrefix } from '../../../../../common/remote_cluster';
 import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
 
 /**
@@ -304,20 +305,23 @@ const buildEntities = (
   return { entities: taken, truncated, originalCount };
 };
 
-const DATA_STREAM_BACKING_PREFIX = '.ds-';
-
 /**
  * Alerts indices are hidden (`.alerts-security.alerts-*` and their
  * `.internal.alerts-*` backing indices), and the attachment schema rejects a
- * hidden index as an event source. Strip a data stream backing prefix first so
- * `.ds-logs-aws...` is not mistaken for a hidden index.
+ * hidden index as an event source. Strip a remote `<cluster>:` and a data stream
+ * backing prefix first so `.ds-logs-aws...` is not mistaken for a hidden index and
+ * `remote:.alerts-...` is not mistaken for an event index.
  */
-const isAlertsIndex = (index: string): boolean => {
-  const bare = index.startsWith(DATA_STREAM_BACKING_PREFIX)
-    ? index.slice(DATA_STREAM_BACKING_PREFIX.length)
-    : index;
-  return bare.startsWith('.');
-};
+const isAlertsIndex = (name: string): boolean =>
+  splitRemoteCluster(stripBackingPrefix(name)).index.startsWith('.');
+
+/**
+ * Every alert exit ramp is pinned to this space's local alerts alias, so an alert on a
+ * remote cluster has nothing to open and gets no ref. Its hit still counts in
+ * `hunt_result.tier1.per_index` and the tier counts.
+ */
+const isRemoteAlertsIndex = (name: string): boolean =>
+  isAlertsIndex(name) && splitRemoteCluster(name).cluster !== undefined;
 
 /**
  * A hit's `timestamp` is the raw indexed `@timestamp` string, so it may carry an
@@ -364,6 +368,7 @@ const splitHits = (
     ) {
       continue;
     }
+    if (isRemoteAlertsIndex(hit.index)) continue;
     const timestamp = hitTimestamp(hit);
     const matched = toEventMatched(hit.matched);
     if (isAlertsIndex(hit.index)) {
@@ -392,6 +397,7 @@ const behaviorHitRefs = (
   const alerts: SseAlertRef[] = [];
   for (const behavior of behaviors) {
     for (const ref of behavior.hits ?? []) {
+      if (isRemoteAlertsIndex(ref.index)) continue;
       const timestamp = hitTimestamp(ref);
       if (isAlertsIndex(ref.index)) {
         alerts.push({

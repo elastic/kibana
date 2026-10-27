@@ -1261,4 +1261,49 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     expect(byId.get('evt-datemath')).toBeUndefined();
     expect(entry.data.timeline).toHaveLength(2);
   });
+
+  it('keeps a remote event ref and drops a remote alert ref, which no local exit ramp can open', () => {
+    const remoteBacking = 'infosec_zocalo:.ds-logs-aws.cloudtrail-default-2026.10.26-000001';
+    const remoteAlerts = 'infosec_zocalo:.alerts-security.alerts-default';
+    const result = tier1Result({
+      hits: [
+        { id: 'evt-remote', index: remoteBacking, timestamp: '2026-07-30T13:05:00.000Z' },
+        { id: 'alert-remote', index: remoteAlerts, timestamp: '2026-07-30T13:06:00.000Z' },
+      ],
+      counts: { total_hits: 2, returned_hits: 2, affected_hosts: 0, affected_users: 0 },
+      per_index: [
+        { index: remoteBacking, hit_count: 1, required: true },
+        { index: remoteAlerts, hit_count: 1, required: true },
+      ],
+    });
+
+    expect(schemaIssues(result)).toEqual([]);
+    const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
+    expect(entry.data.events).toEqual([
+      expect.objectContaining({ event_id: 'evt-remote', source_index: remoteBacking }),
+    ]);
+    // Not filed as an event either: the remote alert gets no ref at all.
+    expect(entry.data.alerts ?? []).toEqual([]);
+    // The hit still counts where the hunt reports it.
+    expect(huntResultOf(entry).tier1.per_index.map((row) => row.index)).toContain(remoteAlerts);
+  });
+
+  it('drops a remote alert ref from Tier 2 hits too', () => {
+    const remoteAlerts = 'infosec_zocalo:.alerts-security.alerts-default';
+    const result = withBehaviors(tier1Result({}), [
+      behaviorFixture({
+        hits: [
+          { id: 't2-remote-alert', index: remoteAlerts },
+          { id: 't2-local-alert', index: '.alerts-security.alerts-default' },
+        ],
+      }),
+    ]);
+
+    expect(schemaIssues(result)).toEqual([]);
+    const alertIds = buildSseData(result, 'tr-1', { spaceId: 'default' }).flatMap((entry) =>
+      (entry.data.alerts ?? []).map((alert) => alert.alert_id)
+    );
+    expect(alertIds).toContain('t2-local-alert');
+    expect(alertIds).not.toContain('t2-remote-alert');
+  });
 });
