@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { type FC, type ReactNode } from 'react';
 
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 
@@ -20,110 +20,18 @@ import type { TransformListRow } from '../../../../common';
 
 import { useDocumentationLinks, useRefreshTransformList } from '../../../../hooks';
 
-import type { TransformStatsBarStats } from '../stats_bar';
 import { StatsBar } from '../stats_bar';
 
-function createTransformStats(
-  transformNodes: number,
-  transformsList: TransformListRow[],
-  showNodeInfo: boolean
-): TransformStatsBarStats {
-  const transformStats: TransformStatsBarStats = {
-    total: {
-      label: i18n.translate('xpack.transform.statsBar.totalTransformsLabel', {
-        defaultMessage: 'Total transforms',
-      }),
-      value: 0,
-      show: true,
-    },
-    batch: {
-      label: i18n.translate('xpack.transform.statsBar.batchTransformsLabel', {
-        defaultMessage: 'Batch',
-      }),
-      value: 0,
-      show: true,
-    },
-    continuous: {
-      label: i18n.translate('xpack.transform.statsBar.continuousTransformsLabel', {
-        defaultMessage: 'Continuous',
-      }),
-      value: 0,
-      show: true,
-    },
-    failed: {
-      label: i18n.translate('xpack.transform.statsBar.failedTransformsLabel', {
-        defaultMessage: 'Failed',
-      }),
-      value: 0,
-      show: false,
-    },
-    started: {
-      label: i18n.translate('xpack.transform.statsBar.startedTransformsLabel', {
-        defaultMessage: 'Started',
-      }),
-      value: 0,
-      show: true,
-    },
-  };
-
-  if (showNodeInfo) {
-    transformStats.nodes = {
-      label: i18n.translate('xpack.transform.statsBar.transformNodesLabel', {
-        defaultMessage: 'Nodes',
-      }),
-      value: transformNodes,
-      show: true,
-    };
-  }
-
-  if (transformsList === undefined) {
-    return transformStats;
-  }
-
-  let failedTransforms = 0;
-  let startedTransforms = 0;
-
-  transformsList.forEach((transform) => {
-    if (
-      transform.mode === TRANSFORM_MODE.CONTINUOUS &&
-      typeof transformStats.continuous.value === 'number'
-    ) {
-      transformStats.continuous.value++;
-    } else if (
-      transform.mode === TRANSFORM_MODE.BATCH &&
-      typeof transformStats.batch.value === 'number'
-    ) {
-      transformStats.batch.value++;
-    }
-
-    if (transform.stats) {
-      if (transform.stats.state === TRANSFORM_STATE.FAILED) {
-        failedTransforms++;
-      } else if (transform.stats.state === TRANSFORM_STATE.STARTED) {
-        startedTransforms++;
-      }
-    }
-  });
-
-  transformStats.total.value = transformsList.length;
-  transformStats.started.value = startedTransforms;
-
-  if (failedTransforms !== 0) {
-    transformStats.failed.value = failedTransforms;
-    transformStats.failed.show = true;
-  } else {
-    transformStats.failed.show = false;
-  }
-
-  return transformStats;
-}
-
 interface TransformStatsBarProps {
+  pageIndex: number;
+  pageSize: number;
   transformNodes: number;
   transformsList: TransformListRow[];
 }
 
 export const TransformStatsBar: FC<TransformStatsBarProps> = ({
+  pageIndex,
+  pageSize,
   transformNodes,
   transformsList,
 }) => {
@@ -131,11 +39,60 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
   const refreshTransformList = useRefreshTransformList();
   const { esNodeRoles } = useDocumentationLinks();
 
-  const transformStats: TransformStatsBarStats = createTransformStats(
-    transformNodes,
-    transformsList,
-    showNodeInfo
-  );
+  const oneTimeCount = transformsList.filter(({ mode }) => mode === TRANSFORM_MODE.BATCH).length;
+  const continuousCount = transformsList.filter(
+    ({ mode }) => mode === TRANSFORM_MODE.CONTINUOUS
+  ).length;
+  const startedCount = transformsList.filter(
+    ({ stats }) => stats?.state === TRANSFORM_STATE.STARTED
+  ).length;
+  const firstItem = transformsList.length === 0 ? 0 : pageIndex * pageSize + 1;
+  const lastItem = Math.min((pageIndex + 1) * pageSize, transformsList.length);
+  const stats: Array<{ key: string; content: ReactNode }> = [
+    {
+      key: 'showing',
+      content: i18n.translate('xpack.transform.statsBar.showingTransformsLabel', {
+        defaultMessage:
+          'Showing {firstItem}–{lastItem} of {totalCount} {totalCount, plural, one {transform} other {transforms}}',
+        values: {
+          firstItem,
+          lastItem,
+          totalCount: transformsList.length,
+        },
+      }),
+    },
+    {
+      key: 'oneTime',
+      content: i18n.translate('xpack.transform.statsBar.oneTimeTransformsLabel', {
+        defaultMessage: '{count} one-time',
+        values: { count: oneTimeCount },
+      }),
+    },
+    {
+      key: 'continuous',
+      content: i18n.translate('xpack.transform.statsBar.continuousTransformsLabel', {
+        defaultMessage: '{count} continuous',
+        values: { count: continuousCount },
+      }),
+    },
+    {
+      key: 'started',
+      content: i18n.translate('xpack.transform.statsBar.startedTransformsLabel', {
+        defaultMessage: '{count} started',
+        values: { count: startedCount },
+      }),
+    },
+  ];
+
+  if (showNodeInfo) {
+    stats.push({
+      key: 'nodes',
+      content: i18n.translate('xpack.transform.statsBar.transformNodesLabel', {
+        defaultMessage: '{count} {count, plural, one {node} other {nodes}}',
+        values: { count: transformNodes },
+      }),
+    });
+  }
 
   return (
     <>
@@ -182,7 +139,7 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
           <EuiSpacer size="s" />
         </>
       )}
-      <StatsBar stats={transformStats} dataTestSub={'transformStatsBar'} />
+      <StatsBar stats={stats} dataTestSub="transformStatsBar" />
     </>
   );
 };

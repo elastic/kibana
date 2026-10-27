@@ -12,10 +12,11 @@ import {
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiTitle,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
@@ -36,17 +37,29 @@ interface SectionProps {
 }
 
 export const Section: FC<SectionProps> = ({ section }) => {
+  const { euiTheme } = useEuiTheme();
+
   if (section.items.length === 0) {
     return null;
   }
 
   return (
-    <EuiPanel>
+    <section>
       <EuiTitle size="xs">
         <span>{section.title}</span>
       </EuiTitle>
-      <EuiDescriptionList compressed type="column" listItems={section.items} />
-    </EuiPanel>
+      <EuiSpacer size="xs" />
+      <EuiDescriptionList
+        compressed
+        type="column"
+        listItems={section.items}
+        titleProps={{
+          css: {
+            fontSize: euiTheme.font.scale.xs * euiTheme.base,
+          },
+        }}
+      />
+    </section>
   );
 };
 
@@ -61,6 +74,20 @@ export const ExpandedRowColumnView: FC<ExpandedRowDetailsPaneProps> = ({
   showErrorCallout = false,
   dataTestSubj,
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const columnStyles = {
+    left: css`
+      padding-inline-end: ${euiTheme.size.l};
+    `,
+    right: css`
+      border-inline-start: ${euiTheme.border.thin};
+      padding-inline-start: ${euiTheme.size.l};
+    `,
+  };
+  const contentStyles = css`
+    padding-block-start: ${euiTheme.size.s};
+  `;
+
   return (
     <div data-test-subj={dataTestSubj ?? 'transformDetailsTabContent'}>
       {showErrorCallout && (
@@ -78,8 +105,8 @@ export const ExpandedRowColumnView: FC<ExpandedRowDetailsPaneProps> = ({
           />
         </>
       )}
-      <EuiFlexGroup>
-        <EuiFlexItem style={{ width: '50%' }}>
+      <EuiFlexGroup gutterSize="none" responsive={false} css={contentStyles}>
+        <EuiFlexItem css={columnStyles.left}>
           {sections
             .filter((s) => s.position === 'left')
             .map((s) => (
@@ -89,7 +116,7 @@ export const ExpandedRowColumnView: FC<ExpandedRowDetailsPaneProps> = ({
               </Fragment>
             ))}
         </EuiFlexItem>
-        <EuiFlexItem style={{ width: '50%' }}>
+        <EuiFlexItem css={columnStyles.right}>
           {sections
             .filter((s) => s.position === 'right')
             .map((s) => (

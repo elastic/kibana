@@ -31,8 +31,7 @@ describe('Transform: Transform List <ExpandedRow />', () => {
   });
 
   test('Minimal initialization', async () => {
-    // @ts-expect-error mock data is too loosely typed
-    const item: TransformListRow = transformListRow;
+    const item = transformListRow as unknown as TransformListRow;
 
     renderWithI18n(
       <QueryClientProvider client={queryClient}>
@@ -42,7 +41,7 @@ describe('Transform: Transform List <ExpandedRow />', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Details')).toBeInTheDocument();
-      expect(screen.getByText('Stats')).toBeInTheDocument();
+      expect(screen.getByText('Statistics')).toBeInTheDocument();
       expect(screen.getByText('JSON')).toBeInTheDocument();
       expect(screen.getByText('Messages')).toBeInTheDocument();
       expect(screen.getByText('Preview')).toBeInTheDocument();
