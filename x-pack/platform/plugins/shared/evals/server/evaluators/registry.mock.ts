@@ -27,6 +27,12 @@ export const createEvaluatorRegistryMock = (
   };
 
   return {
+    register: (definition) => {
+      byName.set(definition.name, [
+        ...(byName.get(definition.name) ?? []),
+        { ...definition, origin: 'built_in' },
+      ]);
+    },
     isBuiltIn: (name) => visibleDefinitions(name).some(({ origin }) => origin === 'built_in'),
     asScoped: () => ({
       list: async () =>

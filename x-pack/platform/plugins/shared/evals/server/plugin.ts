@@ -54,6 +54,7 @@ export class EvalsPlugin
   private evaluatorDefinitionService?: EvaluatorDefinitionService;
   private taskProviderRegistry?: TaskProviderRegistry;
   private onlineScoreService?: OnlineScoreService;
+  private started = false;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -72,7 +73,7 @@ export class EvalsPlugin
   ): EvalsPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('Evals plugin is disabled');
-      return { enabled: false, registerTaskProvider: () => {} };
+      return { enabled: false, registerTaskProvider: () => {}, registerEvaluator: () => {} };
     }
 
     this.logger.info('Setting up Evals plugin');
@@ -228,13 +229,23 @@ export class EvalsPlugin
     }
 
     const taskProviderRegistry = this.taskProviderRegistry;
+    const evaluatorRegistry = this.evaluatorRegistry;
     return {
       enabled: true,
       registerTaskProvider: (provider) => taskProviderRegistry.register(provider),
+      registerEvaluator: (definition) => {
+        if (this.started) {
+          throw new Error(
+            `Cannot register evaluator "${definition.name}": evaluators must be registered during setup`
+          );
+        }
+        evaluatorRegistry.register(definition);
+      },
     };
   }
 
   start(coreStart: CoreStart, plugins: EvalsStartDependencies): EvalsPluginStart {
+    this.started = true;
     if (!this.config.enabled) {
       return {};
     }
