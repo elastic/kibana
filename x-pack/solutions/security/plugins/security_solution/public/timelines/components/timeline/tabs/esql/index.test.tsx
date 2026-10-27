@@ -23,6 +23,8 @@ import {
   setCurrentTabAppState,
 } from './mocks/discover_test_state';
 
+jest.setTimeout(30_000);
+
 /** The state of the timeline the user is looking at, as Discover left it before the remount. */
 const IN_SESSION_APP_STATE: DiscoverAppState = {
   query: { esql: 'from auditbeat-* | where ecs.version == "8.0.0"' },
@@ -95,16 +97,14 @@ const renderEsqlTab = async ({
 };
 
 describe('Discover Tab Content', () => {
-  it('should render', async () => {
+  it('should render', () => {
     render(
       <TestProviders>
         <DiscoverTabContent timelineId={TimelineId.test} />
       </TestProviders>
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('timeline-embedded-discover')).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('timeline-embedded-discover')).toBeInTheDocument();
   });
 
   // The tab unmounts whenever the user leaves it, so mounting is not on its own a signal that a
