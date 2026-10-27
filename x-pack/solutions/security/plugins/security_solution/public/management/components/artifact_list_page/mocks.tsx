@@ -114,8 +114,14 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
   let renderResult: ReturnType<AppContextTestRender['render']>;
 
   const renderArtifactListPage = (props: Partial<ArtifactListPageProps> = {}) => {
-    const { showAsSimpleTable, showEnabledColumn, ViewModeComponent, CardDecorator, ...baseProps } =
-      props;
+    const {
+      showAsSimpleTable,
+      showEnabledColumn,
+      ViewModeComponent,
+      CardDecorator,
+      showCommentsInViewFlyout,
+      ...baseProps
+    } = props;
 
     const sharedProps = {
       apiClient,
@@ -133,6 +139,7 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
           {...sharedProps}
           showAsSimpleTable
           showEnabledColumn={showEnabledColumn}
+          showCommentsInViewFlyout={showCommentsInViewFlyout}
           ViewModeComponent={
             ViewModeComponent ??
             (({ item }: ArtifactViewModeComponentProps) => (
