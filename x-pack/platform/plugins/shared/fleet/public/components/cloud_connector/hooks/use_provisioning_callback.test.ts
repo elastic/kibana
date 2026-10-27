@@ -72,7 +72,7 @@ describe('useProvisioningCallback', () => {
     jest.useFakeTimers().setSystemTime(NOW);
     setAvailability({ available: true, kibana_url: 'https://kb.example.com' });
     mockedCreate.mockResolvedValue({
-      data: { item: pendingItem(), api_key: 'encoded-key' },
+      data: { item: pendingItem(), token: 'tok-1' },
       error: null,
     } as any);
     mockedGet.mockResolvedValue({ data: { item: pendingItem() }, error: null } as any);
@@ -147,7 +147,7 @@ describe('useProvisioningCallback', () => {
     });
     expect(params).toEqual({
       ElasticCallbackUrl: 'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-1',
-      ElasticApiKey: 'encoded-key',
+      ElasticCallbackToken: 'tok-1',
     });
     expect(result.current.status).toBe('pending');
   });
@@ -328,7 +328,7 @@ describe('useProvisioningCallback', () => {
 
       // The clock is past the first record's expiry; the new one expires later.
       const later = pendingItem('cb-2', { expires_at: '2026-10-13T14:00:00.000Z' });
-      mockedCreate.mockResolvedValue({ data: { item: later, api_key: 'k2' }, error: null } as any);
+      mockedCreate.mockResolvedValue({ data: { item: later, token: 'k2' }, error: null } as any);
       mockedGet.mockResolvedValue({ data: { item: later }, error: null } as any);
       await act(async () => {
         await result.current.start({});
@@ -400,11 +400,11 @@ describe('useProvisioningCallback', () => {
   it('a second start() waits on the new record only', async () => {
     mockedCreate
       .mockResolvedValueOnce({
-        data: { item: pendingItem('cb-1'), api_key: 'k1' },
+        data: { item: pendingItem('cb-1'), token: 'k1' },
         error: null,
       } as any)
       .mockResolvedValueOnce({
-        data: { item: pendingItem('cb-2'), api_key: 'k2' },
+        data: { item: pendingItem('cb-2'), token: 'k2' },
         error: null,
       } as any);
     mockedGet.mockResolvedValue({ data: { item: pendingItem('cb-2') }, error: null } as any);
@@ -647,7 +647,7 @@ describe('useProvisioningCallback', () => {
     await act(async () => {});
     expect(mockedCreate).toHaveBeenCalledTimes(1);
     unmount();
-    resolveCreate({ data: { item: pendingItem('cb-late'), api_key: 'k' }, error: null });
+    resolveCreate({ data: { item: pendingItem('cb-late'), token: 'k' }, error: null });
     await started;
 
     expect(params).toBeUndefined();

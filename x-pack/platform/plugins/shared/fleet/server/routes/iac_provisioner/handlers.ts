@@ -39,6 +39,7 @@ import type {
   ReceiveProvisioningCallbackRequestSchema,
 } from '../../types/rest_spec/provisioning_callback';
 import type { CloudConnectorCallback } from '../../../common/types/models/provisioning_callback';
+import { PROVISIONING_CALLBACK_TOKEN_HEADER } from '../../../common/constants';
 import type { IacProvisionerRenderFlow } from '../../../common/telemetry/iac_provisioner_events';
 
 export const renderIacTemplateHandler: FleetRequestHandler<
@@ -240,7 +241,7 @@ export const createProvisioningCallbackHandler: FleetRequestHandler<
   if (!(await isAwsIdentityFederationEnabled(context))) {
     return response.notFound(AWS_IDENTITY_FEDERATION_DISABLED);
   }
-  // A public URL the stack cannot be given (not https) is refused, so no key is minted for a
+  // A public URL the stack cannot be given (not https) is refused, so no token is minted for a
   // report that cannot arrive. Without a configured public URL there is nothing to check; the
   // caller supplies the URL to the stack and is responsible for it.
   const availability = getProvisioningCallbackAvailability();
@@ -266,16 +267,13 @@ export const createProvisioningCallbackHandler: FleetRequestHandler<
     });
   }
 
-  // The key is granted for the caller through the security plugin, so they need no
-  // `manage_api_key` privilege (unavailable on Serverless). The type is space-agnostic, hence the
-  // internal saved objects client.
-  const { item, apiKey } = await provisioningCallbackService.create(
+  // The type is space-agnostic, hence the internal saved objects client.
+  const { item, token } = await provisioningCallbackService.create(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
-    request,
     { provider, createdBy: user?.username, spaceId, identity }
   );
 
-  return response.ok({ body: { item, api_key: apiKey } });
+  return response.ok({ body: { item, token } });
 };
 
 export const getProvisioningCallbackHandler: FleetRequestHandler<
@@ -312,8 +310,8 @@ export const deleteProvisioningCallbackHandler: FleetRequestHandler<
 };
 
 /**
- * Called by the stack's Lambda. Kibana has already authenticated the API key; the service then
- * checks that it is this record's key.
+ * Called by the stack's Lambda. The route is not authenticated: the only thing that admits the
+ * report is the record's own token, presented in a header and checked by the service.
  */
 export const receiveProvisioningCallbackHandler: FleetRequestHandler<
   TypeOf<typeof ReceiveProvisioningCallbackRequestSchema.params>,
@@ -323,15 +321,15 @@ export const receiveProvisioningCallbackHandler: FleetRequestHandler<
   const logger = appContextService
     .getLogger()
     .get('IacProvisioner receiveProvisioningCallbackHandler');
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request);
-  const apiKeyId = user?.authentication_type === 'api_key' ? user.api_key?.id : undefined;
+  const header = request.headers[PROVISIONING_CALLBACK_TOKEN_HEADER];
+  const token = typeof header === 'string' ? header : undefined;
 
   const result = await provisioningCallbackService.receive(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
     request.params.callbackId,
-    { apiKeyId, payload: request.body }
+    { token, payload: request.body }
   );
-  // Never log the key.
+  // Never log the token.
   logger.info(
     `Provisioning callback report [id=${request.params.callbackId}] outcome=${result.outcome}`
   );

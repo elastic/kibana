@@ -430,8 +430,8 @@ export interface CloudOnboardingDeploymentSOAttributes {
   apiKeyId?: string;
 }
 
-/** Stored shape of a callback record: the item without its id, plus the key binding. */
+/** Stored shape of a callback record: the item without its id, plus the token binding. */
 export interface ProvisioningCallbackSOAttributes extends Omit<CloudConnectorCallback, 'id'> {
-  /** Id of the record's API key. The key itself is never stored. */
-  api_key_id: string;
+  /** Keyed hash of the record's token, bound to its id, space and expiry. The token itself is never stored. */
+  token_hash: string;
 }

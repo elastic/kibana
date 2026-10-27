@@ -29,7 +29,7 @@ const ProvisioningCallbackStatusSchema = schema.oneOf(
   {
     meta: {
       description:
-        'State of the callback record. `pending`: waiting for the stack. `receiving`: a report is being applied. `received`: values stored and the identity exists. `cancelled`: the form stopped waiting and the key was invalidated.',
+        'State of the callback record. `pending`: waiting for the stack. `receiving`: a report is being applied. `received`: values stored and the identity exists. `cancelled`: the form stopped waiting and the token is refused.',
     },
   }
 );
@@ -123,10 +123,10 @@ export const CreateProvisioningCallbackRequestSchema = {
 
 export const CreateProvisioningCallbackResponseSchema = schema.object({
   item: CloudConnectorCallbackItemSchema,
-  api_key: schema.string({
+  token: schema.string({
     meta: {
       description:
-        'Base64 id:api_key of the zero-privilege key bound to this record. Returned exactly once; never persisted.',
+        'The token the stack presents to report to this record, in the `x-elastic-callback-token` header. Not an Elasticsearch credential. Returned exactly once; only its hash is kept.',
     },
   }),
 });

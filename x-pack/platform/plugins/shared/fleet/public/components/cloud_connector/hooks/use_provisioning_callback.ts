@@ -383,16 +383,16 @@ export const useProvisioningCallback = ({
       setStatus('pending');
       startPolling(data.item.id, data.item.expires_at);
 
-      // The stack gets the complete URL to report to, so only Kibana knows the route. The key
-      // travels in the quick-create link as a stack parameter. It can only be used to report to
-      // this one record: it carries no privileges, works once, expires with the record, and the
-      // template hides it in the AWS console.
+      // The stack gets the complete URL to report to, so only Kibana knows the route. The token
+      // travels in the quick-create link as a stack parameter. It is no credential: it admits
+      // nothing but a report to this one record, expires with it, and the template hides it in
+      // the AWS console.
       return {
         ElasticCallbackUrl: `${kibanaUrl}${IAC_PROVISIONER_API_ROUTES.CALLBACK_RECEIVE_PATTERN.replace(
           '{callbackId}',
           encodeURIComponent(data.item.id)
         )}`,
-        ElasticApiKey: data.api_key,
+        ElasticCallbackToken: data.token,
       };
     },
     [enabled, kibanaUrl, recheckAvailability, stopPolling, startPolling]

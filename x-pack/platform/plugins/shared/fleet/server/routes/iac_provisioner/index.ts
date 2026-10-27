@@ -9,6 +9,9 @@ import path from 'path';
 
 import { IAC_PROVISIONER_API_ROUTES, API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
+import { withDefaultErrorHandler } from '../../services/security/fleet_router';
+import { getRequestStore } from '../../services/request_store';
+import type { FleetRouter } from '../../types/request_context';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
 import { genericErrorResponse, notFoundResponse } from '../schema/errors';
@@ -204,21 +207,30 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       deleteProvisioningCallbackHandler
     );
+};
 
-  // Public: the stack's Lambda calls this with the record's API key. Kibana rejects an invalid
-  // key before the handler runs; the handler then checks that the key belongs to the record.
+/**
+ * The route the stack's Lambda calls. It goes on the plain router: the Fleet router checks the
+ * caller's Fleet privileges on every request, and this caller has no identity to check.
+ */
+export const registerPublicRoutes = (router: FleetRouter) => {
   router.versioned
     .post({
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_RECEIVE_PATTERN,
       summary: 'Receive a provisioning callback',
       operationId: 'receive-provisioning-callback',
       description:
-        'Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. Authenticate with the one-time API key issued when the callback was created, sent as `Authorization: ApiKey <encoded-key>`. The key has no other privileges. `role_arn` and `stack_arn` must be in the same AWS account. While the key is valid, a repeat report with the same values succeeds and different values return 409. The key is invalidated once the first report has been applied, so a later retry is rejected with 401 before these checks run.',
+        'Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. `role_arn` and `stack_arn` must be in the same AWS account. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.',
       access: 'public',
       security: {
+        authc: {
+          enabled: false,
+          reason:
+            'The caller is a Lambda in the customer AWS account with no Kibana identity; the record it reports to is admitted by its own token, checked in the handler',
+        },
         authz: {
           enabled: false,
-          reason: 'Authorized by the per-callback API key bound to the record in the handler',
+          reason: 'Authorized by the per-callback token bound to the record in the handler',
         },
       },
       options: {
@@ -256,6 +268,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           },
         },
       },
-      receiveProvisioningCallbackHandler
+      withDefaultErrorHandler((context, request, response) =>
+        getRequestStore().run(request, () =>
+          receiveProvisioningCallbackHandler(context, request, response)
+        )
+      )
     );
 };

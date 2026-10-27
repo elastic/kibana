@@ -21,9 +21,9 @@ export type ProvisioningCallbackDeployStatus = 'pending' | 'deploying' | 'deploy
 
 /**
  * A one-time record that lets something launched from Kibana report back to it, whatever the
- * report creates. The record has a short-lived API key with no privileges. The key is returned
- * once, when the record is created, and is never stored. Flows extend this with what they store
- * at launch and what the report carries.
+ * report creates. The record has a short-lived random token, which is not a credential and admits
+ * nothing but the report. The token is returned once, when the record is created, and only its
+ * hash is stored. Flows extend this with what they store at launch and what the report carries.
  */
 export interface ProvisioningCallback {
   id: string;

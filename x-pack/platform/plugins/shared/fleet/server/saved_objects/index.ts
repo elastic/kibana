@@ -2212,8 +2212,8 @@ export const getSavedObjectTypes = (
       },
       mappings: {
         dynamic: false,
+        // The token hash is deliberately not mapped: nothing searches it.
         properties: {
-          api_key_id: { type: 'keyword', ignore_above: 1024 },
           status: { type: 'keyword', ignore_above: 1024 },
           expires_at: { type: 'date' },
         },

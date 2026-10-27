@@ -181,7 +181,7 @@ describe('useCloudConnectorTemplate', () => {
     describe('with callback stack params (getLaunchStackParams)', () => {
       const CALLBACK_PARAMS = {
         ElasticCallbackUrl: 'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-1',
-        ElasticApiKey: 'encoded-key',
+        ElasticCallbackToken: 'tok-1',
       };
 
       it('launches the static template on click with the callback params', async () => {
@@ -197,7 +197,7 @@ describe('useCloudConnectorTemplate', () => {
         const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
         expect(params.get('templateURL')).toBe('https://static.example/template.yml');
         expect(params.get('param_ElasticResourceId')).toBe('kibana-component-id');
-        expect(params.get('param_ElasticApiKey')).toBe('encoded-key');
+        expect(params.get('param_ElasticCallbackToken')).toBe('tok-1');
         expect(params.get('param_ElasticCallbackUrl')).toBe(
           'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-1'
         );
@@ -946,7 +946,7 @@ describe('useCloudConnectorTemplate', () => {
     describe('callback stack params (getLaunchStackParams)', () => {
       const CALLBACK_PARAMS = {
         ElasticCallbackUrl: 'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-1',
-        ElasticApiKey: 'encoded-key',
+        ElasticCallbackToken: 'tok-1',
       };
 
       it('adds the callback params to the rendered quick-create link', async () => {
@@ -964,7 +964,7 @@ describe('useCloudConnectorTemplate', () => {
         });
         const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
         expect(params.get('templateURL')).toBe(ARTIFACT_URL);
-        expect(params.get('param_ElasticApiKey')).toBe('encoded-key');
+        expect(params.get('param_ElasticCallbackToken')).toBe('tok-1');
         expect(params.get('param_ElasticCallbackUrl')).toBe(
           'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-1'
         );
@@ -986,7 +986,7 @@ describe('useCloudConnectorTemplate', () => {
         expect(getLaunchStackParams).toHaveBeenCalledWith(STATIC_FALLBACK_CONFIRM);
         const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
         expect(params.get('templateURL')).toBe('https://static.example/template.yml');
-        expect(params.get('param_ElasticApiKey')).toBe('encoded-key');
+        expect(params.get('param_ElasticCallbackToken')).toBe('tok-1');
         expect(params.get('param_ElasticCallbackUrl')).toBe(
           'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-1'
         );

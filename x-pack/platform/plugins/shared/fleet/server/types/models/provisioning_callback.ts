@@ -27,7 +27,7 @@ const AccountTypeSchema = schema.oneOf([
 export const ProvisioningCallbackSchemaV1 = schema.object({
   provider: schema.literal('aws'),
   status: ProvisioningCallbackStatusSchema,
-  api_key_id: schema.string({ minLength: 1, maxLength: 256 }),
+  token_hash: schema.string({ minLength: 64, maxLength: 64 }),
   created_at: schema.string({ maxLength: 64 }),
   created_by: schema.maybe(schema.string({ maxLength: 1024 })),
   space_id: schema.maybe(schema.string({ maxLength: 1024 })),

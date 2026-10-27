@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -15,24 +15,21 @@ import {
 } from '../../common/constants';
 import type { ProvisioningCallbackSOAttributes } from '../types/so_attributes';
 
-import { CloudConnectorCreateError, FleetError } from '../errors';
+import { CloudConnectorCreateError } from '../errors';
 
 import { appContextService } from './app_context';
 import { auditLoggingService } from './audit_logging';
-import { invalidateAPIKeys } from './api_keys/security';
 import { cloudConnectorService } from './cloud_connector';
+import { provisioningCallbackService, PROVISIONING_CALLBACK_TTL_MS } from './provisioning_callback';
 import {
-  provisioningCallbackService,
-  PROVISIONING_CALLBACK_EXPIRATION,
-  PROVISIONING_CALLBACK_TTL_MS,
-} from './provisioning_callback';
+  isProvisioningCallbackTokenValid,
+  mintProvisioningCallbackToken,
+} from './provisioning_callback_token';
 
 jest.mock('./app_context');
 jest.mock('./audit_logging');
-jest.mock('./api_keys/security');
 jest.mock('uuid', () => ({ v4: () => 'cb-1' }));
 
-const mockedInvalidate = jest.mocked(invalidateAPIKeys);
 const mockedAudit = jest.mocked(auditLoggingService);
 
 const ROLE_ARN = 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc';
@@ -46,12 +43,25 @@ const NOW = new Date('2026-10-13T10:00:00.000Z');
 const FUTURE = '2026-10-13T12:00:00.000Z';
 const PAST = '2026-10-13T09:00:00.000Z';
 
+/** A record's own token and the hash stored for it. */
+const mintFor = (attributes: Pick<ProvisioningCallbackSOAttributes, 'space_id' | 'expires_at'>) =>
+  mintProvisioningCallbackToken({
+    callbackId: 'cb-1',
+    spaceId: attributes.space_id,
+    expiresAt: attributes.expires_at,
+  });
+const { token: TOKEN, tokenHash: TOKEN_HASH } = mintFor({
+  space_id: 'default',
+  expires_at: FUTURE,
+});
+const OTHER_TOKEN = mintFor({ space_id: 'default', expires_at: FUTURE }).token;
+
 const pendingAttrs = (
   overrides: Partial<ProvisioningCallbackSOAttributes> = {}
 ): ProvisioningCallbackSOAttributes => ({
   provider: 'aws',
   status: 'pending',
-  api_key_id: 'key-1',
+  token_hash: TOKEN_HASH,
   created_at: '2026-10-13T09:59:00.000Z',
   created_by: 'elastic',
   space_id: 'default',
@@ -78,18 +88,13 @@ const CLAIMED = pendingAttrs({ status: 'receiving', ...PAYLOAD });
 describe('provisioningCallbackService', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let grantAsInternalUser: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers().setSystemTime(NOW);
     soClient = savedObjectsClientMock.create();
     logger = loggerMock.create();
-    grantAsInternalUser = jest.fn();
     jest.mocked(appContextService.getLogger).mockReturnValue(logger);
-    jest
-      .mocked(appContextService.getSecurity)
-      .mockReturnValue({ authc: { apiKeys: { grantAsInternalUser } } } as any);
     jest.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReturnValue(soClient);
     jest.spyOn(cloudConnectorService, 'create').mockResolvedValue({
       id: 'cc-1',
@@ -100,11 +105,6 @@ describe('provisioningCallbackService', () => {
       updated_at: NOW.toISOString(),
       packagePolicyCount: 0,
     });
-    mockedInvalidate.mockResolvedValue({
-      invalidated_api_keys: ['key-1'],
-      previously_invalidated_api_keys: [],
-      error_count: 0,
-    });
   });
 
   afterEach(() => {
@@ -113,14 +113,7 @@ describe('provisioningCallbackService', () => {
   });
 
   describe('create', () => {
-    const request = httpServerMock.createKibanaRequest();
-
     beforeEach(() => {
-      grantAsInternalUser.mockResolvedValue({
-        id: 'key-1',
-        name: 'fleet-provisioning-callback-cb-1',
-        api_key: 'secret',
-      });
       soClient.create.mockImplementation(async (type, attributes, options) => ({
         id: options?.id ?? 'cb-1',
         type,
@@ -129,43 +122,20 @@ describe('provisioningCallbackService', () => {
       }));
     });
 
-    it('grants a zero-privilege key for the caller through the security plugin and returns it encoded once', async () => {
-      const { item, apiKey } = await provisioningCallbackService.create(soClient, request, {
+    it('mints a token bound to the record, stores only its hash and returns the token once', async () => {
+      const { item, token } = await provisioningCallbackService.create(soClient, {
         provider: 'aws',
         createdBy: 'elastic',
         spaceId: 'default',
       });
 
-      // The security plugin grants the key on the caller's behalf, so the caller needs no
-      // `manage_api_key` privilege and the key stays attributed to them.
-      expect(grantAsInternalUser).toHaveBeenCalledWith(request, {
-        name: 'fleet-provisioning-callback-cb-1',
-        expiration: PROVISIONING_CALLBACK_EXPIRATION,
-        metadata: {
-          managed_by: 'fleet',
-          managed: true,
-          type: 'provisioning_callback',
-          callback_id: 'cb-1',
-        },
-        role_descriptors: {
-          'fleet-apikey-provisioning-callback': {
-            cluster: [],
-            index: [],
-            applications: [
-              { application: 'fleet', privileges: ['no-privileges'], resources: ['*'] },
-            ],
-          },
-        },
-      });
-      expect(apiKey).toBe(Buffer.from('key-1:secret').toString('base64'));
-      // The grant answer carries no expiration, so the record's comes from the TTL.
       const expiresAt = new Date(NOW.getTime() + PROVISIONING_CALLBACK_TTL_MS).toISOString();
       expect(soClient.create).toHaveBeenCalledWith(
         'fleet-provisioning-callback',
         {
           provider: 'aws',
           status: 'pending',
-          api_key_id: 'key-1',
+          token_hash: expect.stringMatching(/^[0-9a-f]{64}$/),
           created_at: NOW.toISOString(),
           created_by: 'elastic',
           space_id: 'default',
@@ -173,6 +143,20 @@ describe('provisioningCallbackService', () => {
         },
         { id: 'cb-1' }
       );
+      // The stored hash is the one for this token, this record and this expiry.
+      const [, attributes] = soClient.create.mock.calls[0] as [
+        string,
+        ProvisioningCallbackSOAttributes
+      ];
+      expect(token).toMatch(/^[0-9a-f]{64}$/);
+      expect(
+        isProvisioningCallbackTokenValid(
+          token,
+          { callbackId: 'cb-1', spaceId: 'default', expiresAt },
+          attributes.token_hash
+        )
+      ).toBe(true);
+      expect(attributes.token_hash).not.toBe(token);
       expect(item).toEqual({
         id: 'cb-1',
         provider: 'aws',
@@ -182,18 +166,19 @@ describe('provisioningCallbackService', () => {
         space_id: 'default',
         expires_at: expiresAt,
       });
-      // The stored record and the returned item never carry the key or its id.
-      expect(JSON.stringify(item)).not.toContain('secret');
-      expect(item).not.toHaveProperty('api_key_id');
-      // Operators can see the launch in the server log, without the key.
+      // The returned item never carries the token or its hash.
+      expect(JSON.stringify(item)).not.toContain(token);
+      expect(item).not.toHaveProperty('token_hash');
+      // Operators can see the launch in the server log, without the token.
       expect(logger.info).toHaveBeenCalledWith(
         `Provisioning callback created [id=cb-1] [space_id=default] [expires_at=${expiresAt}]`
       );
-      expect(JSON.stringify(logger.info.mock.calls)).not.toContain('secret');
+      expect(JSON.stringify(logger.info.mock.calls)).not.toContain(token);
+      expect(JSON.stringify(mockedAudit.writeCustomAuditLog.mock.calls)).not.toContain(token);
     });
 
     it('stores the name, account type and template details on the record', async () => {
-      const { item } = await provisioningCallbackService.create(soClient, request, {
+      const { item } = await provisioningCallbackService.create(soClient, {
         provider: 'aws',
         identity: {
           connector_name: 'my-identity',
@@ -220,7 +205,7 @@ describe('provisioningCallbackService', () => {
     });
 
     it('stores the onboarding deployment id and starts the deploy stage pending', async () => {
-      await provisioningCallbackService.create(soClient, request, {
+      await provisioningCallbackService.create(soClient, {
         provider: 'aws',
         identity: { onboarding_deployment_id: 'dep-1' },
       });
@@ -233,39 +218,11 @@ describe('provisioningCallbackService', () => {
     });
 
     it('has no deploy stage when no deployment is attached', async () => {
-      await provisioningCallbackService.create(soClient, request, { provider: 'aws' });
+      await provisioningCallbackService.create(soClient, { provider: 'aws' });
 
       const [, attributes] = soClient.create.mock.calls[0];
       expect(attributes).not.toHaveProperty('deploy_status');
       expect(attributes).not.toHaveProperty('onboarding_deployment_id');
-    });
-
-    it('fails without creating a record when the security plugin cannot grant a key', async () => {
-      // `null` is the contract's answer when API keys are unavailable (licence or security off).
-      grantAsInternalUser.mockResolvedValue(null);
-
-      await expect(
-        provisioningCallbackService.create(soClient, request, { provider: 'aws' })
-      ).rejects.toThrow(FleetError);
-      expect(soClient.create).not.toHaveBeenCalled();
-    });
-
-    it('fails without creating a record when the security plugin is unavailable', async () => {
-      jest.mocked(appContextService.getSecurity).mockReturnValue(undefined as any);
-
-      await expect(
-        provisioningCallbackService.create(soClient, request, { provider: 'aws' })
-      ).rejects.toThrow(FleetError);
-      expect(soClient.create).not.toHaveBeenCalled();
-    });
-
-    it('wraps a grant failure so the record is not created', async () => {
-      grantAsInternalUser.mockRejectedValue(new Error('boom'));
-
-      await expect(
-        provisioningCallbackService.create(soClient, request, { provider: 'aws' })
-      ).rejects.toThrow('Impossible to create an api key: boom');
-      expect(soClient.create).not.toHaveBeenCalled();
     });
   });
 
@@ -280,7 +237,7 @@ describe('provisioningCallbackService', () => {
       expect(await provisioningCallbackService.get(soClient, 'nope')).toBeUndefined();
     });
 
-    it('strips the api key id from the item', async () => {
+    it('strips the token hash from the item', async () => {
       soClient.get.mockResolvedValue(soWith(pendingAttrs()));
       const item = await provisioningCallbackService.get(soClient, 'cb-1');
       expect(item).toEqual({
@@ -327,48 +284,60 @@ describe('provisioningCallbackService', () => {
         )
       );
       const result = await provisioningCallbackService.receive(soClient, 'nope', {
-        apiKeyId: 'key-1',
+        token: TOKEN,
         payload: PAYLOAD,
       });
       expect(result).toEqual({ outcome: 'not_found' });
       expect(soClient.update).not.toHaveBeenCalled();
     });
 
-    it('is not_found when the caller key is not the one bound to the record', async () => {
+    it('is not_found when the token is not the one bound to the record', async () => {
       mockRecord(pendingAttrs());
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
-        apiKeyId: 'key-other',
+        token: OTHER_TOKEN,
         payload: PAYLOAD,
       });
       expect(result).toEqual({ outcome: 'not_found' });
       expect(soClient.update).not.toHaveBeenCalled();
-      expect(mockedInvalidate).not.toHaveBeenCalled();
     });
 
-    it('is not_found when the caller did not authenticate with an API key', async () => {
+    it('is not_found when no token was presented', async () => {
       mockRecord(pendingAttrs());
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
-        apiKeyId: undefined,
+        token: undefined,
         payload: PAYLOAD,
       });
       expect(result).toEqual({ outcome: 'not_found' });
+      expect(soClient.update).not.toHaveBeenCalled();
     });
 
-    it('is gone for an expired pending record and invalidates its key', async () => {
-      mockRecord(pendingAttrs({ expires_at: PAST }));
+    it('is not_found when the record was altered under its hash', async () => {
+      // The token was minted for another expiry; the hash no longer matches this record.
+      mockRecord(pendingAttrs({ expires_at: '2026-10-13T13:00:00.000Z' }));
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
-        apiKeyId: 'key-1',
+        token: TOKEN,
+        payload: PAYLOAD,
+      });
+      expect(result).toEqual({ outcome: 'not_found' });
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('is gone for an expired pending record', async () => {
+      const expired = pendingAttrs({ expires_at: PAST });
+      const { token, tokenHash } = mintFor(expired);
+      mockRecord({ ...expired, token_hash: tokenHash });
+      const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token,
         payload: PAYLOAD,
       });
       expect(result).toEqual({ outcome: 'gone' });
-      expect(mockedInvalidate).toHaveBeenCalledWith(['key-1']);
       expect(soClient.update).not.toHaveBeenCalled();
     });
 
     it('is gone for a cancelled record', async () => {
       mockRecord(pendingAttrs({ status: 'cancelled' }));
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
-        apiKeyId: 'key-1',
+        token: TOKEN,
         payload: PAYLOAD,
       });
       expect(result).toEqual({ outcome: 'gone' });
@@ -379,7 +348,7 @@ describe('provisioningCallbackService', () => {
     it('is invalid when the role ARN and the stack ARN are in different accounts', async () => {
       mockRecord(pendingAttrs());
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
-        apiKeyId: 'key-1',
+        token: TOKEN,
         payload: { ...PAYLOAD, role_arn: 'arn:aws:iam::999999999999:role/other' },
       });
       expect(result).toEqual({
@@ -389,11 +358,11 @@ describe('provisioningCallbackService', () => {
       expect(soClient.update).not.toHaveBeenCalled();
     });
 
-    it('claims the record, creates the connector under its id, invalidates the key and audit-logs', async () => {
+    it('claims the record, creates the connector under its id and audit-logs', async () => {
       mockRecord(pendingAttrs());
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
-        apiKeyId: 'key-1',
+        token: TOKEN,
         payload: PAYLOAD,
       });
 
@@ -427,9 +396,8 @@ describe('provisioningCallbackService', () => {
           cloud_connector_id: 'cc-1',
         }
       );
-      expect(mockedInvalidate).toHaveBeenCalledWith(['key-1']);
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
-        message: `Provisioning callback received [id=cb-1] [api_key_id=key-1] [cloud_connector_id=cc-1] [role_arn=${ROLE_ARN}]`,
+        message: `Provisioning callback received [id=cb-1] [cloud_connector_id=cc-1] [role_arn=${ROLE_ARN}]`,
       });
       expect(logger.info).toHaveBeenCalledWith(
         'Provisioning callback received [id=cb-1] [cloud_connector_id=cc-1]'
@@ -466,7 +434,7 @@ describe('provisioningCallbackService', () => {
       });
 
       await provisioningCallbackService.receive(soClient, 'cb-1', {
-        apiKeyId: 'key-1',
+        token: TOKEN,
         payload: PAYLOAD,
       });
 
@@ -503,7 +471,7 @@ describe('provisioningCallbackService', () => {
         });
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
-        apiKeyId: 'key-1',
+        token: TOKEN,
         payload: PAYLOAD,
       });
 
@@ -532,7 +500,7 @@ describe('provisioningCallbackService', () => {
       );
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
-        apiKeyId: 'key-1',
+        token: TOKEN,
         payload: PAYLOAD,
       });
 
@@ -549,7 +517,7 @@ describe('provisioningCallbackService', () => {
       mockRecord(CLAIMED, { name: 'my-identity' });
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
-        apiKeyId: 'key-1',
+        token: TOKEN,
         payload: PAYLOAD,
       });
 
@@ -565,7 +533,6 @@ describe('provisioningCallbackService', () => {
           cloud_connector_id: 'cb-1',
         }
       );
-      expect(mockedInvalidate).toHaveBeenCalledWith(['key-1']);
       expect(result).toMatchObject({
         outcome: 'received',
         item: { status: 'received', cloud_connector_id: 'cb-1', connector_name: 'my-identity' },
@@ -595,7 +562,7 @@ describe('provisioningCallbackService', () => {
       });
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
-        apiKeyId: 'key-1',
+        token: TOKEN,
         payload: PAYLOAD,
       });
 
@@ -613,7 +580,7 @@ describe('provisioningCallbackService', () => {
 
       await expect(
         provisioningCallbackService.receive(soClient, 'cb-1', {
-          apiKeyId: 'key-1',
+          token: TOKEN,
           payload: PAYLOAD,
         })
       ).rejects.toThrow('boom');
@@ -625,7 +592,6 @@ describe('provisioningCallbackService', () => {
         { status: 'pending' },
         { version: 'v2' }
       );
-      expect(mockedInvalidate).not.toHaveBeenCalled();
     });
 
     it('leaves the record alone when a concurrent attempt finished it before the release', async () => {
@@ -644,7 +610,7 @@ describe('provisioningCallbackService', () => {
 
       await expect(
         provisioningCallbackService.receive(soClient, 'cb-1', {
-          apiKeyId: 'key-1',
+          token: TOKEN,
           payload: PAYLOAD,
         })
       ).rejects.toThrow('boom');
@@ -660,7 +626,7 @@ describe('provisioningCallbackService', () => {
 
       await expect(
         provisioningCallbackService.receive(soClient, 'cb-1', {
-          apiKeyId: 'key-1',
+          token: TOKEN,
           payload: PAYLOAD,
         })
       ).rejects.toThrow('boom');
@@ -669,7 +635,7 @@ describe('provisioningCallbackService', () => {
     it('is a conflict when a different payload arrives while the first is being applied', async () => {
       mockRecord(CLAIMED);
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
-        apiKeyId: 'key-1',
+        token: TOKEN,
         payload: { ...PAYLOAD, role_arn: 'arn:aws:iam::123456789012:role/another' },
       });
       expect(result).toMatchObject({ outcome: 'conflict' });
@@ -679,18 +645,17 @@ describe('provisioningCallbackService', () => {
     it('is idempotent: the same payload after received is received again without writes', async () => {
       mockRecord(pendingAttrs({ status: 'received', received_at: PAST, ...PAYLOAD }));
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
-        apiKeyId: 'key-1',
+        token: TOKEN,
         payload: PAYLOAD,
       });
       expect(result).toMatchObject({ outcome: 'received' });
       expect(soClient.update).not.toHaveBeenCalled();
-      expect(mockedInvalidate).not.toHaveBeenCalled();
     });
 
     it('is a conflict when a different payload arrives after received', async () => {
       mockRecord(pendingAttrs({ status: 'received', received_at: PAST, ...PAYLOAD }));
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
-        apiKeyId: 'key-1',
+        token: TOKEN,
         payload: { ...PAYLOAD, role_arn: 'arn:aws:iam::123456789012:role/another' },
       });
       expect(result).toMatchObject({ outcome: 'conflict' });
@@ -710,7 +675,7 @@ describe('provisioningCallbackService', () => {
       expect(soClient.update).not.toHaveBeenCalled();
     });
 
-    it('marks a pending record cancelled, kills its key and audit-logs', async () => {
+    it('marks a pending record cancelled and audit-logs', async () => {
       soClient.get.mockResolvedValue(soWith(pendingAttrs()));
       soClient.update.mockResolvedValue({
         id: 'cb-1',
@@ -727,12 +692,11 @@ describe('provisioningCallbackService', () => {
         { status: 'cancelled' },
         { version: 'v1' }
       );
-      expect(mockedInvalidate).toHaveBeenCalledWith(['key-1']);
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
-        message: 'User cancelling provisioning callback [id=cb-1] [api_key_id=key-1]',
+        message: 'User cancelling provisioning callback [id=cb-1]',
       });
       expect(item).toMatchObject({ id: 'cb-1', status: 'cancelled' });
-      expect(item).not.toHaveProperty('api_key_id');
+      expect(item).not.toHaveProperty('token_hash');
     });
 
     it.each(['received', 'cancelled'] as const)('leaves a %s record as it is', async (status) => {
@@ -743,7 +707,6 @@ describe('provisioningCallbackService', () => {
       const item = await provisioningCallbackService.cancel(soClient, 'cb-1');
 
       expect(soClient.update).not.toHaveBeenCalled();
-      expect(mockedInvalidate).not.toHaveBeenCalled();
       expect(item).toMatchObject({ status, cloud_connector_id: 'cb-1' });
     });
 
@@ -758,7 +721,6 @@ describe('provisioningCallbackService', () => {
       const item = await provisioningCallbackService.cancel(soClient, 'cb-1');
 
       expect(soClient.update).not.toHaveBeenCalled();
-      expect(mockedInvalidate).not.toHaveBeenCalled();
       expect(item).toMatchObject({ status: 'receiving', ...PAYLOAD });
     });
 
@@ -783,7 +745,6 @@ describe('provisioningCallbackService', () => {
           cloud_connector_id: 'cb-1',
         }
       );
-      expect(mockedInvalidate).toHaveBeenCalledWith(['key-1']);
       expect(item).toMatchObject({
         status: 'received',
         cloud_connector_id: 'cb-1',
@@ -804,7 +765,6 @@ describe('provisioningCallbackService', () => {
 
       const item = await provisioningCallbackService.cancel(soClient, 'cb-1');
 
-      expect(mockedInvalidate).not.toHaveBeenCalled();
       expect(item).toMatchObject({ status: 'receiving', ...PAYLOAD });
     });
   });

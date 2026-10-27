@@ -37,8 +37,8 @@ responses:
       application/json:
         examples:
           notFoundExample:
-            summary: Unknown callback or API key
-            description: 'No record has this ID, or the API key is not the one issued for it'
+            summary: Unknown callback or token
+            description: 'No record has this ID, or the token is not the one issued for it'
             value:
               statusCode: 404
               error: 'Not Found'

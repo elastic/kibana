@@ -112,7 +112,7 @@ describe('renderArtifactTemplate', () => {
       templateSha: TEMPLATE_SHA,
       blueprint: BLUEPRINT,
     });
-    const getExtraStackParams = jest.fn().mockResolvedValue({ ElasticApiKey: 'encoded-key' });
+    const getExtraStackParams = jest.fn().mockResolvedValue({ ElasticCallbackToken: 'tok-1' });
 
     const result = await renderArtifactTemplate({
       ...PARAMS,
@@ -127,7 +127,7 @@ describe('renderArtifactTemplate', () => {
     expect(result).toMatchObject({
       status: 'rendered',
       launchUrl: expect.stringContaining(
-        '&param_ElasticOrganizationId=2070044029&param_ElasticApiKey=encoded-key'
+        '&param_ElasticOrganizationId=2070044029&param_ElasticCallbackToken=tok-1'
       ),
     });
   });

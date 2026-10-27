@@ -30,8 +30,8 @@ export interface CreateProvisioningCallbackRequest {
 
 export interface CreateProvisioningCallbackResponse {
   item: CloudConnectorCallback;
-  /** Base64 `id:api_key`, returned exactly once. Passed to the stack as a parameter; never persisted. */
-  api_key: string;
+  /** The record's token, returned exactly once. Passed to the stack as a parameter; only its hash is kept. */
+  token: string;
 }
 
 export interface GetProvisioningCallbackRequest {

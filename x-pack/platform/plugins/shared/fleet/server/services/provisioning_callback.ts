@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { KibanaRequest, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import {
@@ -23,15 +23,17 @@ import type {
   CloudConnectorSOAttributes,
   ProvisioningCallbackSOAttributes,
 } from '../types/so_attributes';
-import { CloudConnectorCreateError, FleetError } from '../errors';
+import { CloudConnectorCreateError } from '../errors';
 
 import { appContextService } from './app_context';
 import { auditLoggingService } from './audit_logging';
-import { invalidateAPIKeys } from './api_keys/security';
 import { cloudConnectorService } from './cloud_connector';
+import {
+  isProvisioningCallbackTokenValid,
+  mintProvisioningCallbackToken,
+} from './provisioning_callback_token';
 
-/** How long the stack has to call back. Also the lifetime of the key bound to the record. */
-export const PROVISIONING_CALLBACK_EXPIRATION = '2h';
+/** How long the stack has to call back. Also the lifetime of the token bound to the record. */
 export const PROVISIONING_CALLBACK_TTL_MS = 2 * 60 * 60 * 1000;
 
 export interface CreateProvisioningCallbackOptions {
@@ -64,15 +66,15 @@ const isDuplicateName = (error: unknown): boolean =>
   error instanceof CloudConnectorCreateError && error.message.includes('already exists');
 
 export interface ProvisioningCallbackReceiveInput {
-  /** Id of the API key the caller authenticated with; undefined for any other authentication. */
-  apiKeyId: string | undefined;
+  /** The token the caller presented; undefined when it sent none. */
+  token: string | undefined;
   payload: CloudConnectorCallbackReceivedValues;
 }
 
 export type ProvisioningCallbackReceiveResult =
   /** Stored now, or an exact replay of what is already stored. */
   | { outcome: 'received'; item: CloudConnectorCallback }
-  /** No such record, or the caller's key is not the one bound to it. Indistinguishable on purpose. */
+  /** No such record, or the caller's token is not the one bound to it. Indistinguishable on purpose. */
   | { outcome: 'not_found' }
   /** A different payload arrived after the record was already received. */
   | { outcome: 'conflict'; item: CloudConnectorCallback }
@@ -92,8 +94,8 @@ const toItem = (
   id: string,
   attributes: ProvisioningCallbackSOAttributes
 ): CloudConnectorCallback => {
-  // The API key id never leaves this service.
-  const { api_key_id: _apiKeyId, ...rest } = attributes;
+  // The token hash never leaves this service.
+  const { token_hash: _tokenHash, ...rest } = attributes;
   return { id, ...rest };
 };
 
@@ -113,61 +115,31 @@ class ProvisioningCallbackService {
   }
 
   /**
-   * Creates a pending record and a zero-privilege key bound to it. The key is granted on the
-   * caller's behalf through the security plugin, so the caller needs no `manage_api_key`
-   * privilege and the key stays attributed to them. The encoded key is returned exactly once and
-   * never stored; only its id is, so it can be matched and invalidated.
+   * Creates a pending record and the token that lets the stack report to it. The token is not a
+   * credential of any kind: it is random, bound to this record, its space and its expiry, and
+   * only its keyed hash is stored. It is returned exactly once and never logged.
    */
   public async create(
     soClient: SavedObjectsClientContract,
-    request: KibanaRequest,
     { provider, createdBy, spaceId, identity = {} }: CreateProvisioningCallbackOptions
-  ): Promise<{ item: CloudConnectorCallback; apiKey: string }> {
+  ): Promise<{ item: CloudConnectorCallback; token: string }> {
     const id = uuidv4();
     const now = new Date();
-
-    const security = appContextService.getSecurity();
-    if (!security) {
-      throw new FleetError('Impossible to create an api key: security plugin is not available');
-    }
-    const key = await security.authc.apiKeys
-      .grantAsInternalUser(request, {
-        name: `fleet-provisioning-callback-${id}`,
-        expiration: PROVISIONING_CALLBACK_EXPIRATION,
-        metadata: {
-          managed_by: 'fleet',
-          managed: true,
-          type: 'provisioning_callback',
-          callback_id: id,
-        },
-        role_descriptors: {
-          // Named descriptor with no privileges. An empty `role_descriptors: {}` would inherit
-          // the caller's privileges instead.
-          'fleet-apikey-provisioning-callback': {
-            cluster: [],
-            index: [],
-            applications: [
-              { application: 'fleet', privileges: ['no-privileges'], resources: ['*'] },
-            ],
-          },
-        },
-      })
-      .catch((err) => {
-        throw new FleetError(`Impossible to create an api key: ${err.message}`);
-      });
-    if (!key) {
-      throw new FleetError('Impossible to create an api key: API keys are not available');
-    }
+    const expiresAt = new Date(now.getTime() + PROVISIONING_CALLBACK_TTL_MS).toISOString();
+    const { token, tokenHash } = mintProvisioningCallbackToken({
+      callbackId: id,
+      spaceId,
+      expiresAt,
+    });
 
     const attributes: ProvisioningCallbackSOAttributes = {
       provider,
       status: 'pending',
-      api_key_id: key.id,
+      token_hash: tokenHash,
       created_at: now.toISOString(),
       ...(createdBy ? { created_by: createdBy } : {}),
       ...(spaceId ? { space_id: spaceId } : {}),
-      // The grant answer carries no expiration; the key was asked for the same lifetime.
-      expires_at: new Date(now.getTime() + PROVISIONING_CALLBACK_TTL_MS).toISOString(),
+      expires_at: expiresAt,
     };
     for (const field of IDENTITY_FIELDS) {
       if (identity[field] !== undefined) {
@@ -180,7 +152,7 @@ class ProvisioningCallbackService {
     }
 
     auditLoggingService.writeCustomAuditLog({
-      message: `User creating provisioning callback [id=${id}] [api_key_id=${key.id}]`,
+      message: `User creating provisioning callback [id=${id}]`,
     });
 
     const so = await soClient.create<ProvisioningCallbackSOAttributes>(
@@ -194,10 +166,7 @@ class ProvisioningCallbackService {
       }]`
     );
 
-    return {
-      item: toItem(so.id, so.attributes),
-      apiKey: Buffer.from(`${key.id}:${key.api_key}`).toString('base64'),
-    };
+    return { item: toItem(so.id, so.attributes), token };
   }
 
   /** Moves the deploy stage on; only the deploy executor writes it. */
@@ -222,8 +191,9 @@ class ProvisioningCallbackService {
   }
 
   /**
-   * Applies the stack's report. A caller without the record's own key gets the same answer as
-   * for a missing record.
+   * Applies the stack's report. A caller without the record's own token gets the same answer as
+   * for a missing record. The token is checked against the record as stored, so a record whose
+   * id, space or expiry was altered rejects its own token.
    *
    * The report is claimed with a version-guarded update before the cloud connector is created,
    * and the connector takes the record's id, so concurrent or retried reports converge on one
@@ -233,10 +203,17 @@ class ProvisioningCallbackService {
   public async receive(
     soClient: SavedObjectsClientContract,
     id: string,
-    { apiKeyId, payload }: ProvisioningCallbackReceiveInput
+    { token, payload }: ProvisioningCallbackReceiveInput
   ): Promise<ProvisioningCallbackReceiveResult> {
     const so = await this.getSavedObject(soClient, id);
-    if (!so || !apiKeyId || so.attributes.api_key_id !== apiKeyId) {
+    if (
+      !so ||
+      !isProvisioningCallbackTokenValid(
+        token,
+        { callbackId: so.id, spaceId: so.attributes.space_id, expiresAt: so.attributes.expires_at },
+        so.attributes.token_hash
+      )
+    ) {
       return { outcome: 'not_found' };
     }
 
@@ -250,8 +227,6 @@ class ProvisioningCallbackService {
     let { attributes, version } = so;
     if (attributes.status === 'pending') {
       if (new Date(attributes.expires_at).getTime() <= Date.now()) {
-        // The key expires at the same time; invalidate it anyway in case the clocks differ.
-        await invalidateAPIKeys([attributes.api_key_id]);
         return { outcome: 'gone' };
       }
       const claimed = await this.claim(soClient, so, payload);
@@ -293,7 +268,10 @@ class ProvisioningCallbackService {
     return { outcome: 'received', item };
   }
 
-  /** Marks the record received for the connector made from it and kills the key. */
+  /**
+   * Marks the record received for the connector made from it. The token has nothing left to do
+   * from here: a repeat of the same report is answered the same way, anything else is refused.
+   */
   private async finish(
     soClient: SavedObjectsClientContract,
     id: string,
@@ -312,11 +290,8 @@ class ProvisioningCallbackService {
       update
     );
 
-    // The key is single use.
-    await invalidateAPIKeys([attributes.api_key_id]);
-
     auditLoggingService.writeCustomAuditLog({
-      message: `Provisioning callback received [id=${id}] [api_key_id=${attributes.api_key_id}] [cloud_connector_id=${connector.id}] [role_arn=${attributes.role_arn}]`,
+      message: `Provisioning callback received [id=${id}] [cloud_connector_id=${connector.id}] [role_arn=${attributes.role_arn}]`,
     });
 
     return toItem(id, { ...attributes, ...update });
@@ -350,7 +325,7 @@ class ProvisioningCallbackService {
   }
 
   /**
-   * Retires a record the browser no longer waits on and kills its key. A record the stack has
+   * Retires a record the browser no longer waits on, so its token is refused. A record the stack has
    * already reported to is returned as it is, so the caller can pick up the identity instead of
    * creating one by hand. A report that made its connector but never got marked received is
    * finished here.
@@ -391,11 +366,10 @@ class ProvisioningCallbackService {
       const claimed = await this.getSavedObject(soClient, id);
       return claimed ? toItem(claimed.id, claimed.attributes) : undefined;
     }
-    await invalidateAPIKeys([attributes.api_key_id]);
     this.logger.info(`Provisioning callback cancelled [id=${so.id}]`);
 
     auditLoggingService.writeCustomAuditLog({
-      message: `User cancelling provisioning callback [id=${so.id}] [api_key_id=${attributes.api_key_id}]`,
+      message: `User cancelling provisioning callback [id=${so.id}]`,
     });
 
     return toItem(so.id, { ...attributes, ...update });

@@ -138,9 +138,15 @@ export const IAC_PROVISIONER_API_ROUTES = {
   CALLBACK_AVAILABILITY_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callback_availability`,
   CALLBACK_INFO_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callbacks/{callbackId}`,
   CALLBACK_DELETE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callbacks/{callbackId}`,
-  // Public: called by the stack's Lambda with the record's API key, not by the browser.
+  // Public: called by the stack's Lambda with the record's token, not by the browser.
   CALLBACK_RECEIVE_PATTERN: `${API_ROOT}/iac_provisioner/callbacks/{callbackId}`,
 };
+
+/**
+ * Header the stack's Lambda sends the callback token in. A header rather than a query parameter,
+ * so the token never lands in a URL, and not `Authorization`, since the token is no credential.
+ */
+export const PROVISIONING_CALLBACK_TOKEN_HEADER = 'x-elastic-callback-token';
 
 // Kubernetes Manifest API routes
 export const K8S_API_ROUTES = {

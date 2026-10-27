@@ -22,6 +22,7 @@ import { isAwsIdentityFederationEnabled } from '../../services/utils/aws_identit
 import { getProvisioningCallbackAvailability } from '../../services/utils/provisioning_callback_availability';
 import { deployProvisioningCallback } from '../../services/provisioning_callback_deploy';
 import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
+import { PROVISIONING_CALLBACK_TOKEN_HEADER } from '../../../common/constants';
 import type { CloudConnectorCallback } from '../../../common/types/models/provisioning_callback';
 import {
   reportIacProvisionerRenderCompleted,
@@ -483,12 +484,6 @@ const ITEM: CloudConnectorCallback = {
   expires_at: '2026-10-13T12:00:00.000Z',
 };
 
-const apiKeyUser = (id: string) =>
-  ({
-    username: 'fleet-provisioning-callback',
-    authentication_type: 'api_key',
-    api_key: { id, name: 'k' },
-  } as unknown as AuthenticatedUser);
 const realmUser = () =>
   ({ username: 'elastic', authentication_type: 'realm' } as unknown as AuthenticatedUser);
 
@@ -608,13 +603,13 @@ describe('Provisioning callback handlers', () => {
         reason: 'Kibana has no public URL: server.publicBaseUrl is not set.',
       });
       getCurrentUser.mockReturnValue(realmUser());
-      mockedService.create.mockResolvedValue({ item: ITEM, apiKey: 'encoded-key' });
+      mockedService.create.mockResolvedValue({ item: ITEM, token: 'tok-1' });
       const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
 
       await createProvisioningCallbackHandler(buildCallbackContext(), request, response);
 
       expect(mockedService.create).toHaveBeenCalled();
-      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, api_key: 'encoded-key' } });
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, token: 'tok-1' } });
     });
 
     it('returns 404 when AWS identity federation is not enabled', async () => {
@@ -632,35 +627,34 @@ describe('Provisioning callback handlers', () => {
     it('creates the record when the IaC Provisioner is off', async () => {
       mockedIsEnabled.mockResolvedValue(false);
       getCurrentUser.mockReturnValue(realmUser());
-      mockedService.create.mockResolvedValue({ item: ITEM, apiKey: 'encoded-key' });
+      mockedService.create.mockResolvedValue({ item: ITEM, token: 'tok-1' });
       const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
 
       await createProvisioningCallbackHandler(buildCallbackContext(), request, response);
 
       expect(mockedService.create).toHaveBeenCalled();
-      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, api_key: 'encoded-key' } });
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, token: 'tok-1' } });
     });
 
     it('creates the record for the request, tagged with the caller and space', async () => {
       getCurrentUser.mockReturnValue(realmUser());
-      mockedService.create.mockResolvedValue({ item: ITEM, apiKey: 'encoded-key' });
+      mockedService.create.mockResolvedValue({ item: ITEM, token: 'tok-1' });
       const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
 
       await createProvisioningCallbackHandler(buildCallbackContext('marketing'), request, response);
 
-      // The request is handed down so the key can be granted on the caller's behalf.
-      expect(mockedService.create).toHaveBeenCalledWith(soClient, request, {
+      expect(mockedService.create).toHaveBeenCalledWith(soClient, {
         provider: 'aws',
         createdBy: 'elastic',
         spaceId: 'marketing',
         identity: {},
       });
-      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, api_key: 'encoded-key' } });
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, token: 'tok-1' } });
     });
 
     it('passes an attached onboarding deployment to the record', async () => {
       getCurrentUser.mockReturnValue(realmUser());
-      mockedService.create.mockResolvedValue({ item: ITEM, apiKey: 'encoded-key' });
+      mockedService.create.mockResolvedValue({ item: ITEM, token: 'tok-1' });
       const request = httpServerMock.createKibanaRequest({
         body: { provider: 'aws', onboarding_deployment_id: 'dep-1' },
       });
@@ -669,7 +663,6 @@ describe('Provisioning callback handlers', () => {
 
       expect(mockedService.create).toHaveBeenCalledWith(
         soClient,
-        request,
         expect.objectContaining({ identity: { onboarding_deployment_id: 'dep-1' } })
       );
     });
@@ -692,7 +685,7 @@ describe('Provisioning callback handlers', () => {
 
     it('passes the name, account type and template details to the record', async () => {
       getCurrentUser.mockReturnValue(realmUser());
-      mockedService.create.mockResolvedValue({ item: ITEM, apiKey: 'encoded-key' });
+      mockedService.create.mockResolvedValue({ item: ITEM, token: 'tok-1' });
       const request = httpServerMock.createKibanaRequest({
         body: {
           provider: 'aws',
@@ -708,7 +701,6 @@ describe('Provisioning callback handlers', () => {
 
       expect(mockedService.create).toHaveBeenCalledWith(
         soClient,
-        request,
         expect.objectContaining({
           provider: 'aws',
           identity: {
@@ -804,28 +796,42 @@ describe('Provisioning callback handlers', () => {
   });
 
   describe('receiveProvisioningCallbackHandler', () => {
-    const receive = (user: AuthenticatedUser | null) => {
-      getCurrentUser.mockReturnValue(user);
+    // The route is not authenticated: the handler only sees the record's token, in a header.
+    const receive = (headers: Record<string, string | string[]> = {}) => {
+      getCurrentUser.mockReturnValue(null);
       const request = httpServerMock.createKibanaRequest({
         params: { callbackId: 'cb-1' },
         body: PAYLOAD,
+        // A repeated header reaches the handler as an array; the mock's type only knows strings.
+        headers: headers as Record<string, string>,
       });
       return receiveProvisioningCallbackHandler(buildCallbackContext(), request, response);
     };
+    const withToken = { [PROVISIONING_CALLBACK_TOKEN_HEADER]: 'tok-1' };
 
-    it('passes the caller key id to the service and answers 200 on receive', async () => {
+    it('passes the presented token to the service and answers 200 on receive', async () => {
       mockedService.receive.mockResolvedValue({
         outcome: 'received',
         item: { ...ITEM, status: 'received' },
       });
 
-      await receive(apiKeyUser('key-1'));
+      await receive(withToken);
 
       expect(mockedService.receive).toHaveBeenCalledWith(soClient, 'cb-1', {
-        apiKeyId: 'key-1',
+        token: 'tok-1',
         payload: PAYLOAD,
       });
       expect(response.ok).toHaveBeenCalledWith({ body: { status: 'received' } });
+    });
+
+    it('never logs the token', async () => {
+      const logger = loggingSystemMock.createLogger();
+      mockedAppContext.getLogger.mockReturnValue(logger);
+      mockedService.receive.mockResolvedValue({ outcome: 'not_found' });
+
+      await receive(withToken);
+
+      expect(JSON.stringify(loggingSystemMock.collect(logger))).not.toContain('tok-1');
     });
 
     it('starts the deploy after answering when the record carries a deployment', async () => {
@@ -840,7 +846,7 @@ describe('Provisioning callback handlers', () => {
         },
       });
 
-      await receive(apiKeyUser('key-1'));
+      await receive(withToken);
 
       expect(response.ok).toHaveBeenCalledWith({ body: { status: 'received' } });
       expect(mockedDeploy).toHaveBeenCalledWith('cb-1');
@@ -852,7 +858,7 @@ describe('Provisioning callback handlers', () => {
         item: { ...ITEM, status: 'received' },
       });
 
-      await receive(apiKeyUser('key-1'));
+      await receive(withToken);
 
       expect(mockedDeploy).not.toHaveBeenCalled();
     });
@@ -868,26 +874,37 @@ describe('Provisioning callback handlers', () => {
         },
       });
 
-      await receive(apiKeyUser('key-1'));
+      await receive(withToken);
 
       expect(mockedDeploy).not.toHaveBeenCalled();
     });
 
-    it('passes no key id when the caller did not authenticate with an API key', async () => {
+    it('passes no token when the header is missing', async () => {
       mockedService.receive.mockResolvedValue({ outcome: 'not_found' });
 
-      await receive(realmUser());
+      await receive();
 
       expect(mockedService.receive).toHaveBeenCalledWith(soClient, 'cb-1', {
-        apiKeyId: undefined,
+        token: undefined,
         payload: PAYLOAD,
       });
       expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
     });
 
+    it('passes no token when the header is repeated', async () => {
+      mockedService.receive.mockResolvedValue({ outcome: 'not_found' });
+
+      await receive({ [PROVISIONING_CALLBACK_TOKEN_HEADER]: ['tok-1', 'tok-2'] });
+
+      expect(mockedService.receive).toHaveBeenCalledWith(soClient, 'cb-1', {
+        token: undefined,
+        payload: PAYLOAD,
+      });
+    });
+
     it('answers 409 on a conflicting payload', async () => {
       mockedService.receive.mockResolvedValue({ outcome: 'conflict', item: ITEM });
-      await receive(apiKeyUser('key-1'));
+      await receive(withToken);
       expect(response.conflict).toHaveBeenCalledWith({
         body: { message: 'Callback already received with different values' },
       });
@@ -895,7 +912,7 @@ describe('Provisioning callback handlers', () => {
 
     it('answers 410 when the record has expired', async () => {
       mockedService.receive.mockResolvedValue({ outcome: 'gone' });
-      await receive(apiKeyUser('key-1'));
+      await receive(withToken);
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 410,
         body: { message: 'Callback is no longer accepting values' },
@@ -904,7 +921,7 @@ describe('Provisioning callback handlers', () => {
 
     it('answers 400 on cross-field validation failure', async () => {
       mockedService.receive.mockResolvedValue({ outcome: 'invalid', message: 'mismatch' });
-      await receive(apiKeyUser('key-1'));
+      await receive(withToken);
       expect(response.badRequest).toHaveBeenCalledWith({ body: { message: 'mismatch' } });
     });
   });
