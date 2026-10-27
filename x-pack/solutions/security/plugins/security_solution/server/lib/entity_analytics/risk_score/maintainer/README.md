@@ -7,7 +7,8 @@ and entity type in the same metadata object.
 
 The risk-owned `risk_score_maintainer_performance` telemetry event carries stage measurements
 and a process-window report. Each measurement has a fixed name, numeric value and unit.
-Stage names, measurement names and units come from code. Entity identifiers, page bounds,
+Step measurements carry a `tags` array such as `["store", "write"]`. Stage names, measurement
+names, tags and units come from code. Entity identifiers, page bounds,
 queries and configured filters stay in their existing diagnostic paths.
 
 Scheduled executions also attach compact stage summaries to `kibana.task.data` in the Task
@@ -26,6 +27,16 @@ ES|QL requests, row parsing, entity reads, modifiers, entity creation and both w
 Request wall time includes client scheduling, serialization, transport and response decoding.
 `esTookMs` is the accumulated duration reported by Elasticsearch for responses that expose it.
 The difference includes all of that client-side and transport work.
+
+Timing operations accept tag arrays. Page logs and stage summaries expose `steps` as an array
+of tagged totals, and telemetry carries the same tags alongside names such as
+`firstPage.steps.ms`. Aggregation sorts and deduplicates tags into a private key, so equivalent
+tag sets share one distribution. The tag vocabulary is defined in `page_timing_types.ts`.
+
+Each stage boundary creates and finalizes its collector, sharing it across scoring and
+persistence. The maintainer and on-demand recalculation entry points pass their configured
+profiling settings and report completed observations on success or failure. HTTP requests and
+Agent Builder recalculations use the same configured sampling interval and enablement flag.
 
 Step summaries contain call counts, failures, total duration, maximum duration and p50/p95
 estimates. Failed operations contribute elapsed time and preserve their original errors.

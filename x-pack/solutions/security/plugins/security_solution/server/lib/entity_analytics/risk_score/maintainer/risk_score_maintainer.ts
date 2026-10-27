@@ -577,10 +577,9 @@ const executeEntityTypeRun = async ({
   instrumentation: RunInstrumentation;
 }): Promise<'success' | 'error' | 'aborted' | undefined> => {
   const entityRunStartedAtMs = Date.now();
-  const runTag = toRunTag(calculationRunId);
   const runLogger = withLogContext(
     logger,
-    `[risk_score_maintainer][${entityType}][run:${runTag}]`,
+    `[risk_score_maintainer][${entityType}][run:${calculationRunId}]`,
     riskScoreLogMeta({ calculationRunId, namespace: runContext.namespace, entityType })
   );
   let runStatus: 'success' | 'error' | 'aborted' = 'success';
@@ -1003,7 +1002,5 @@ const executeEntityTypeRun = async ({
   );
   return runStatus;
 };
-
-const toRunTag = (calculationRunId: string) => calculationRunId.slice(0, 8);
 
 export type RegisterRiskScoreMaintainerDeps = RiskScoreMaintainerDeps;

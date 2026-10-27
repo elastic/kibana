@@ -10,7 +10,11 @@ import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 import { RISK_SCORE_PERFORMANCE_EVENT } from './events';
 import type { RiskScorePerformanceEvent } from './events';
 import { createPageStepTimings } from './page_step_timings';
-import type { PageStepTimings, PageStepTimingsSummary } from './page_timing_types';
+import type {
+  PageProfilingOptions,
+  PageStepTimings,
+  PageStepTimingsSummary,
+} from './page_timing_types';
 import { pageTimingMeasurements, runHealthMeasurements } from './performance_measurements';
 import type { RunHealthSummary } from './run_health';
 import { riskScoreLogMeta } from './risk_score_log_meta';
@@ -53,7 +57,7 @@ export const createRunInstrumentation = ({
     createPageTimings: (
       entityType: string,
       stage: 'base' | 'resolution',
-      options: { profile: boolean; profileInterval: number }
+      options: PageProfilingOptions
     ) =>
       createPageStepTimings({
         ...options,

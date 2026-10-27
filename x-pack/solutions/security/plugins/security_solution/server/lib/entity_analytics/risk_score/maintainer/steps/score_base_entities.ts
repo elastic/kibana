@@ -30,7 +30,6 @@ import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import type { EsqlPageProfileSummary } from '../instrumentation/esql_page_profile';
 import { summarizeEsqlPage } from '../instrumentation/esql_page_profile';
 import type { PageStepTimings } from '../instrumentation/page_timing_types';
-import { createPageStepTimings } from '../instrumentation/page_step_timings';
 import type { ScopedLogger } from '../utils/with_log_context';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
 import { createMissingEntities as runCreateMissingEntities } from './create_missing_entities';
@@ -50,8 +49,8 @@ interface ScoreBaseEntitiesParams {
   abortSignal?: AbortSignal;
   /** Explicit creation opt-in; also makes lookup failures fatal so they cannot be treated as misses. */
   createMissingEntities: boolean;
-  /** Collects each page's step times; pass one in to read them after the stage. */
-  pageTimings?: PageStepTimings;
+  /** Stage-owned collector shared across scoring and persistence, including failed pages. */
+  pageTimings: PageStepTimings;
 }
 
 interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
@@ -118,7 +117,7 @@ export const calculateBaseEntityScores = async function* ({
   calculationRunId,
   abortSignal,
   createMissingEntities,
-  pageTimings = createPageStepTimings(),
+  pageTimings,
 }: ScoreBaseEntitiesParams): AsyncGenerator<ScoredEntityPage> {
   let afterKey: Record<string, string> | undefined;
   let previousPageUpperBound: string | undefined;
@@ -138,7 +137,7 @@ export const calculateBaseEntityScores = async function* ({
     }
 
     pageTimings.startPage();
-    const pageResult = await pageTimings.time('discovery', () =>
+    const pageResult = await pageTimings.time(['discovery'], () =>
       fetchNextEuidPage({
         esClient,
         entityType,
@@ -173,7 +172,7 @@ export const calculateBaseEntityScores = async function* ({
     }
 
     if (scores.length > 0) {
-      const entities = await pageTimings.time('entityFetch', () =>
+      const entities = await pageTimings.time(['entity', 'fetch'], () =>
         fetchEntitiesByIds({
           onError: () => pageTimings.count('entityFetchFailures', 1),
           crudClient,
@@ -185,7 +184,7 @@ export const calculateBaseEntityScores = async function* ({
         })
       );
 
-      yield pageTimings.timeSync('modifiers', () =>
+      yield pageTimings.timeSync(['modifiers'], () =>
         applyBaseScoreModifiers({
           scores,
           entities,
@@ -205,7 +204,7 @@ export const scoreBaseEntities = async ({
   createMissingEntities: createMissingEntitiesEnabled,
   refresh,
   collectScores,
-  pageTimings = createPageStepTimings(),
+  pageTimings,
   ...params
 }: ScoreAndPersistBaseEntitiesParams): Promise<Phase1BaseScoringSummary> => {
   let pagesProcessed = 0;
@@ -241,7 +240,7 @@ export const scoreBaseEntities = async ({
 
     if (missingScores.length > 0) {
       if (createMissingEntitiesEnabled) {
-        const createResult = await pageTimings.time('entityCreation', () =>
+        const createResult = await pageTimings.time(['entity', 'create'], () =>
           runCreateMissingEntities({
             esClient: params.esClient,
             crudClient: params.crudClient,
@@ -293,7 +292,7 @@ export const scoreBaseEntities = async ({
       refresh,
       pageTimings,
     });
-    const { docsWritten, errorsCount } = await pageTimings.time('storeWrite', () =>
+    const { docsWritten, errorsCount } = await pageTimings.time(['store', 'write'], () =>
       persistScoresToEntityStore({
         crudClient: params.crudClient,
         logger: params.logger,
@@ -425,7 +424,7 @@ const scorePageFromAlerts = async ({
   const query = getBaseScoreESQL(entityType, bounds, sampleSize, pageSize, alertsIndex);
   const startedAt = Date.now();
   const esqlResponse = await pageTimings.time(
-    'esql',
+    ['esql'],
     () =>
       esClient.esql.query(
         {
@@ -448,7 +447,7 @@ const scorePageFromAlerts = async ({
   pageTimings.count('partialResponses', Number(esqlResponse.is_partial === true));
 
   return {
-    scores: pageTimings.timeSync('parse', () =>
+    scores: pageTimings.timeSync(['parse'], () =>
       (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex, sampleSize))
     ),
     profileSummary: profile ? summarizeEsqlPage(esqlResponse, wallMs) : undefined,

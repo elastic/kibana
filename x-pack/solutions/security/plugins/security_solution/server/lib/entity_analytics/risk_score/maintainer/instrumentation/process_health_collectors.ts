@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PerformanceEntry } from 'perf_hooks';
+import type { NodeGCPerformanceDetail, PerformanceEntry } from 'perf_hooks';
 import { constants, monitorEventLoopDelay, PerformanceObserver } from 'perf_hooks';
 import { getHeapStatistics } from 'v8';
 import type {
@@ -114,14 +114,8 @@ const summarizeGcActivity = (
   ),
 });
 
-const gcKindName = (entry: PerformanceEntry): string => {
-  if ('detail' in entry && typeof entry.detail === 'object' && entry.detail !== null) {
-    if ('kind' in entry.detail && typeof entry.detail.kind === 'number') {
-      return GC_KIND_NAMES[entry.detail.kind] ?? 'other';
-    }
-  }
-  return 'other';
-};
+const gcKindName = ({ detail }: PerformanceEntry & { detail?: NodeGCPerformanceDetail }): string =>
+  detail?.kind === undefined ? 'other' : GC_KIND_NAMES[detail.kind] ?? 'other';
 
 const roundPause = (pauseMs: number): number => Number(pauseMs.toFixed(1));
 const MEMORY_SAMPLE_INTERVAL_MS = 1000;

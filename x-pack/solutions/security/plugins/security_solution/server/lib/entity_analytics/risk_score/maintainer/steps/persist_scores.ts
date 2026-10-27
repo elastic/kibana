@@ -31,7 +31,7 @@ export const persistScoresToRiskIndex = async ({
 }): Promise<number> => {
   const bulkResponse = pageTimings
     ? await pageTimings.time(
-        'riskWrite',
+        ['risk', 'write'],
         () => writer.bulk({ [entityType]: scores, refresh }),
         (response) => response.took
       )

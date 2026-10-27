@@ -27,29 +27,54 @@ describe('createPageStepTimings', () => {
       return value;
     };
 
+  it('aggregates equivalent tag sets and preserves dimensions in page and stage records', async () => {
+    const onPage = jest.fn();
+    const timings = createPageStepTimings({ onPage });
+    const tags = ['write', 'store', 'write'] as const;
+    timings.startPage();
+    await timings.time(tags, takes(20, undefined));
+    await timings.time(['store', 'write'], takes(30, undefined));
+    await timings.time(['risk', 'write'], takes(10, undefined));
+
+    const summary = timings.summary();
+    expect(summary.firstPage?.steps).toEqual([
+      expect.objectContaining({ tags: ['store', 'write'], calls: 2, ms: 50 }),
+      expect.objectContaining({ tags: ['risk', 'write'], calls: 1, ms: 10 }),
+    ]);
+    expect(onPage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        steps: [
+          expect.objectContaining({ tags: ['store', 'write'], calls: 2, ms: 50 }),
+          expect.objectContaining({ tags: ['risk', 'write'], calls: 1, ms: 10 }),
+        ],
+      })
+    );
+    expect(tags).toEqual(['write', 'store', 'write']);
+  });
+
   it('reports page 1 apart from the pages after it', async () => {
     const timings = createPageStepTimings();
 
     timings.startPage();
-    await timings.time('esql', takes(500, { took: 300 }), (response) => response.took);
+    await timings.time(['esql'], takes(500, { took: 300 }), (response) => response.took);
     now += 50;
     timings.startPage();
-    await timings.time('esql', takes(100, { took: 60 }), (response) => response.took);
+    await timings.time(['esql'], takes(100, { took: 60 }), (response) => response.took);
     timings.startPage();
-    await timings.time('esql', takes(120, { took: 70 }), (response) => response.took);
+    await timings.time(['esql'], takes(120, { took: 70 }), (response) => response.took);
 
     expect(timings.summary()).toMatchObject({
       firstPage: {
         pages: 1,
         wallMs: 550,
         untimedMs: 50,
-        steps: { esql: { ms: 500, calls: 1, esTookMs: 300 } },
+        steps: [{ tags: ['esql'], ms: 500, calls: 1, esTookMs: 300 }],
       },
       laterPages: {
         pages: 2,
         wallMs: 220,
         untimedMs: 0,
-        steps: { esql: { ms: 220, calls: 2, esTookMs: 130 } },
+        steps: [{ tags: ['esql'], ms: 220, calls: 2, esTookMs: 130 }],
       },
     });
   });
@@ -58,18 +83,18 @@ describe('createPageStepTimings', () => {
     const timings = createPageStepTimings();
 
     timings.startPage();
-    await timings.time('discovery', takes(10, {}));
+    await timings.time(['discovery'], takes(10, {}));
     timings.startPage();
-    await timings.time('discovery', takes(10, {}));
+    await timings.time(['discovery'], takes(10, {}));
     timings.startPage();
-    await timings.time('discovery', takes(5, null));
+    await timings.time(['discovery'], takes(5, null));
     timings.dropPage();
 
     expect(timings.summary().laterPages).toMatchObject({
       pages: 1,
       wallMs: 15,
       untimedMs: 0,
-      steps: { discovery: { ms: 15, calls: 2 } },
+      steps: [{ tags: ['discovery'], ms: 15, calls: 2 }],
     });
   });
 
@@ -77,14 +102,19 @@ describe('createPageStepTimings', () => {
     const timings = createPageStepTimings();
 
     timings.startPage();
-    const parsed = timings.timeSync('parse', () => {
+    const parsed = timings.timeSync(['parse'], () => {
       now += 40;
       return ['row'];
     });
 
     expect(parsed).toEqual(['row']);
     expect(timings.summary()).toMatchObject({
-      firstPage: { pages: 1, wallMs: 40, untimedMs: 0, steps: { parse: { ms: 40, calls: 1 } } },
+      firstPage: {
+        pages: 1,
+        wallMs: 40,
+        untimedMs: 0,
+        steps: [{ tags: ['parse'], ms: 40, calls: 1 }],
+      },
       laterPages: undefined,
     });
   });
@@ -93,7 +123,7 @@ describe('createPageStepTimings', () => {
     const timings = createPageStepTimings();
 
     timings.startPage();
-    await timings.time('discovery', takes(0, null));
+    await timings.time(['discovery'], takes(0, null));
     timings.dropPage();
 
     expect(timings.summary().laterPages).toBeUndefined();
@@ -101,7 +131,7 @@ describe('createPageStepTimings', () => {
       pages: 0,
       wallMs: 0,
       untimedMs: 0,
-      steps: { discovery: { ms: 0, calls: 1 } },
+      steps: [{ tags: ['discovery'], ms: 0, calls: 1 }],
     });
   });
 });
@@ -116,13 +146,13 @@ describe('failed steps and full-run profiling', () => {
     const failure = new Error('request failed');
     timings.startPage();
     await expect(
-      timings.time('esql', async () => {
+      timings.time(['esql'], async () => {
         now = 40;
         throw failure;
       })
     ).rejects.toBe(failure);
     expect(() =>
-      timings.timeSync('parse', () => {
+      timings.timeSync(['parse'], () => {
         now = 50;
         throw failure;
       })
@@ -130,10 +160,10 @@ describe('failed steps and full-run profiling', () => {
     expect(timings.summary().firstPage).toMatchObject({
       wallMs: 50,
       untimedMs: 0,
-      steps: {
-        esql: { calls: 1, failures: 1, ms: 40, maxMs: 40 },
-        parse: { calls: 1, failures: 1, ms: 10 },
-      },
+      steps: [
+        { tags: ['esql'], calls: 1, failures: 1, ms: 40, maxMs: 40 },
+        { tags: ['parse'], calls: 1, failures: 1, ms: 10 },
+      ],
     });
   });
 
@@ -181,7 +211,7 @@ describe('failed steps and full-run profiling', () => {
     timings.count('riskDocumentsWritten', 3);
     expect(timings.shouldProfile()).toBe(false);
     await expect(
-      timings.time('esql', async () => {
+      timings.time(['esql'], async () => {
         throw failure;
       })
     ).rejects.toBe(failure);
@@ -190,7 +220,7 @@ describe('failed steps and full-run profiling', () => {
       expect.objectContaining({
         page: 1,
         counters: { riskDocumentsWritten: 3 },
-        steps: { esql: expect.objectContaining({ calls: 1, failures: 1 }) },
+        steps: [expect.objectContaining({ tags: ['esql'], calls: 1, failures: 1 })],
       })
     );
   });
@@ -202,11 +232,11 @@ describe('failed steps and full-run profiling', () => {
     timings.startPage();
     timings.startPage();
     for (let duration = 1; duration <= 1000; duration++) {
-      await timings.time('esql', async () => {
+      await timings.time(['esql'], async () => {
         now += duration;
       });
     }
-    const total = timings.summary().laterPages?.steps.esql;
+    const total = timings.summary().laterPages?.steps.find(({ tags }) => tags.includes('esql'));
     expect(total).toMatchObject({ calls: 1000, ms: 500500, maxMs: 1000, failures: 0 });
     expect(total?.p50Ms).toBeGreaterThanOrEqual(500);
     expect(total?.p50Ms).toBeLessThanOrEqual(546);

@@ -23,7 +23,6 @@ import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import type { EsqlPageProfileSummary } from '../instrumentation/esql_page_profile';
 import { summarizeEsqlPage } from '../instrumentation/esql_page_profile';
 import type { PageStepTimings } from '../instrumentation/page_timing_types';
-import { createPageStepTimings } from '../instrumentation/page_step_timings';
 import { buildResolutionModifierEntity } from './resolution_modifiers';
 import { getResolutionPageMemberFilter } from './resolution_member_filter';
 import { parseEsqlResolutionScoreRow } from './parse_esql_row';
@@ -47,8 +46,8 @@ interface ScoreResolutionEntitiesParams {
   targetEntityIds?: string[];
   /** Same time range, status and custom filters base scoring applies to alerts. */
   alertFilters: QueryDslQueryContainer[];
-  /** Collects each page's step times; pass one in to read them after the stage. */
-  pageTimings?: PageStepTimings;
+  /** Stage-owned collector shared across scoring and persistence, including failed pages. */
+  pageTimings: PageStepTimings;
 }
 
 interface ResolutionPageResult {
@@ -74,7 +73,7 @@ export const calculateResolutionEntityScores = async function* ({
   abortSignal,
   targetEntityIds,
   alertFilters,
-  pageTimings = createPageStepTimings(),
+  pageTimings,
 }: ScoreResolutionEntitiesParams): AsyncGenerator<EntityRiskScoreRecord[], number> {
   let afterKey: Record<string, string> | undefined;
   let previousPageUpperBound: string | undefined;
@@ -88,7 +87,7 @@ export const calculateResolutionEntityScores = async function* ({
 
     // Per page: fetch groups, score them, then apply merged group modifiers.
     pageTimings.startPage();
-    const pageResult = await pageTimings.time('discovery', () =>
+    const pageResult = await pageTimings.time(['discovery'], () =>
       fetchNextResolutionPage({
         esClient,
         entityType,
@@ -111,7 +110,7 @@ export const calculateResolutionEntityScores = async function* ({
 
     // Fetched before scoring so the query can skip alerts outside the page's groups, and reused
     // for the group modifiers below.
-    const lookupMemberIds = await pageTimings.time('memberFetch', () =>
+    const lookupMemberIds = await pageTimings.time(['member', 'fetch'], () =>
       fetchResolutionGroupMemberIds({
         esClient,
         logger,
@@ -165,7 +164,7 @@ export const calculateResolutionEntityScores = async function* ({
         allMemberIds.add(memberId);
       }
 
-      const memberEntities = await pageTimings.time('entityFetch', () =>
+      const memberEntities = await pageTimings.time(['entity', 'fetch'], () =>
         fetchEntitiesByIds({
           onError: () => pageTimings.count('entityFetchFailures', 1),
           crudClient,
@@ -179,7 +178,7 @@ export const calculateResolutionEntityScores = async function* ({
         `[resolution][page:${pagesProcessed}] member_entities_requested=${allMemberIds.size}, fetched=${memberEntities.size}`
       );
 
-      modifiedScores = pageTimings.timeSync('modifiers', () =>
+      modifiedScores = pageTimings.timeSync(['modifiers'], () =>
         applyResolutionModifiers({
           parsedScores,
           memberEntities,
@@ -452,7 +451,7 @@ const scoreResolutionPage = async ({
       );
   const startedAt = Date.now();
   const esqlResponse = await pageTimings.time(
-    'esql',
+    ['esql'],
     () =>
       esClient.esql.query(
         {
@@ -468,7 +467,7 @@ const scoreResolutionPage = async ({
   pageTimings.count('esqlRows', esqlResponse.values?.length ?? 0);
   pageTimings.count('partialResponses', Number(esqlResponse.is_partial === true));
   return {
-    parsedScores: pageTimings.timeSync('parse', () =>
+    parsedScores: pageTimings.timeSync(['parse'], () =>
       (esqlResponse.values ?? []).map(parseEsqlResolutionScoreRow(alertsIndex, sampleSize))
     ),
     esqlRows: esqlResponse.values?.length ?? 0,

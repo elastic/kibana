@@ -14,7 +14,7 @@ describe('performance telemetry measurements', () => {
     const timings = createPageStepTimings();
     timings.startPage();
     await timings.time(
-      'esql',
+      ['esql'],
       async () => ({ took: 4 }),
       ({ took }) => took
     );
@@ -23,7 +23,7 @@ describe('performance telemetry measurements', () => {
     const metrics = pageTimingMeasurements(timings.summary());
     expect(metrics).toEqual(
       expect.arrayContaining([
-        { name: 'firstPage.esql.esTookMs', value: 4, unit: 'ms' },
+        { name: 'firstPage.steps.esTookMs', tags: ['esql'], value: 4, unit: 'ms' },
         { name: 'firstPage.pages', value: 1, unit: 'count' },
         { name: 'laterPages.pages', value: 1, unit: 'count' },
         { name: 'partialResponses', value: 1, unit: 'count' },

@@ -6,6 +6,7 @@
  */
 
 import {
+  analyticsServiceMock,
   elasticsearchServiceMock,
   savedObjectsClientMock,
   loggingSystemMock,
@@ -13,6 +14,10 @@ import {
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { recalculateEntityRiskScore } from './recalculate_entity_risk_score';
+import type {
+  PageProfilingOptions,
+  PageStepTimings,
+} from './maintainer/instrumentation/page_timing_types';
 import type { RiskEngineDataWriter } from './risk_engine_data_writer';
 
 const mockGetConfiguration = jest.fn();
@@ -80,7 +85,9 @@ describe('recalculateEntityRiskScore', () => {
     typeof elasticsearchServiceMock.createScopedClusterClient
   >['asCurrentUser'];
 
-  const run = () =>
+  const telemetry = analyticsServiceMock.createAnalyticsServiceSetup();
+  const logger = loggingSystemMock.createLogger();
+  const run = (profiling: PageProfilingOptions = { profile: true, profileInterval: 20 }) =>
     recalculateEntityRiskScore({
       esClient,
       soClient: savedObjectsClientMock.create(),
@@ -90,7 +97,9 @@ describe('recalculateEntityRiskScore', () => {
       identifierType: EntityType.user,
       getWriter: async () => writer,
       idBasedRiskScoringEnabled: true,
-      logger: loggingSystemMock.createLogger(),
+      logger,
+      telemetry,
+      profiling,
     });
 
   beforeEach(() => {
@@ -107,6 +116,69 @@ describe('recalculateEntityRiskScore', () => {
     });
     mockPersistZeroBaseScore.mockResolvedValue(1);
     mockRunResolutionScoringStep.mockResolvedValue({ scores: {} });
+  });
+
+  it.each([true, false])(
+    'uses explicit profiling settings and emits stage observations (enabled: %s)',
+    async (profile) => {
+      (crudClient.listEntities as jest.Mock).mockResolvedValue({ entities: [storeEntity()] });
+      const observed: PageStepTimings[] = [];
+      const sampled: boolean[] = [];
+      const observePages = ({ pageTimings }: { pageTimings: PageStepTimings }) => {
+        observed.push(pageTimings);
+        [1, 2, 3, 4].forEach(() => {
+          pageTimings.startPage();
+          sampled.push(pageTimings.shouldProfile());
+          pageTimings.timeSync(['store', 'write'], () => undefined);
+        });
+      };
+      mockScoreBaseEntities.mockImplementation(async (params) => {
+        observePages(params);
+        return { scores: {}, scoresCalculated: 1 };
+      });
+      mockRunResolutionScoringStep.mockImplementation(async (params) => {
+        observePages(params);
+        return { scores: {} };
+      });
+      await run({ profile, profileInterval: 3 });
+      expect(sampled).toEqual([profile, false, false, profile, profile, false, false, profile]);
+      expect(observed[0]).not.toBe(observed[1]);
+      expect(
+        logger.info.mock.calls.filter(([message]) => message === 'Risk score page timings')
+      ).toHaveLength(8);
+      expect(telemetry.reportEvent).toHaveBeenCalledTimes(2);
+      expect(telemetry.reportEvent.mock.calls.map(([, event]) => event)).toEqual([
+        expect.objectContaining({ stage: 'base', status: 'success' }),
+        expect.objectContaining({ stage: 'resolution', status: 'success' }),
+      ]);
+    }
+  );
+
+  it('finalizes failed pages and preserves the scoring error', async () => {
+    (crudClient.listEntities as jest.Mock).mockResolvedValue({ entities: [storeEntity()] });
+    const failure = new Error('query failed');
+    mockScoreBaseEntities.mockImplementation(
+      async ({ pageTimings }: { pageTimings: PageStepTimings }) => {
+        pageTimings.startPage();
+        return pageTimings.time(['esql'], async () => {
+          throw failure;
+        });
+      }
+    );
+    await expect(run()).rejects.toBe(failure);
+    expect(logger.info).toHaveBeenCalledWith(
+      'Risk score page timings',
+      expect.objectContaining({
+        risk_score: expect.objectContaining({
+          steps: [expect.objectContaining({ tags: ['esql'], failures: 1 })],
+        }),
+      })
+    );
+    expect(telemetry.reportEvent).toHaveBeenCalledWith(
+      'risk_score_maintainer_performance',
+      expect.objectContaining({ stage: 'base', status: 'error' })
+    );
+    expect(mockRunResolutionScoringStep).not.toHaveBeenCalled();
   });
 
   // Fix for https://github.com/elastic/kibana/issues/280414. Base scoring calculates nothing for

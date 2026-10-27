@@ -7,19 +7,24 @@
 
 import type { EsqlPageProfileSummary } from './esql_page_profile';
 
-/** Page operations include client serialization and response decoding in their request duration. */
-export type PageStep =
+/** Code-defined operation dimensions keep timing aggregates bounded across pages. */
+export type PageStepTag =
   | 'discovery'
-  | 'memberFetch'
+  | 'member'
+  | 'fetch'
   | 'esql'
   | 'parse'
-  | 'entityFetch'
+  | 'entity'
   | 'modifiers'
-  | 'entityCreation'
-  | 'riskWrite'
-  | 'storeWrite';
+  | 'create'
+  | 'risk'
+  | 'store'
+  | 'write';
+
+export type PageStep = readonly PageStepTag[];
 
 export interface StepTotals {
+  tags: PageStep;
   ms: number;
   calls: number;
   failures: number;
@@ -48,7 +53,7 @@ export interface PageTimingRecord {
   empty: boolean;
   wallMs: number;
   untimedMs: number;
-  steps: Partial<Record<PageStep, StepTotals>>;
+  steps: StepTotals[];
   counters: Partial<Record<PageCounter, number>>;
 }
 
@@ -57,7 +62,7 @@ export interface PageGroupTimings {
   wallMs: number;
   /** Wall time outside every timed step: Kibana work between the steps. */
   untimedMs: number;
-  steps: Partial<Record<PageStep, PageStepTotal>>;
+  steps: PageStepTotal[];
 }
 
 export type PageCounter =
@@ -103,4 +108,9 @@ export interface PageStepTimings {
   timeSync: <T>(step: PageStep, run: () => T) => T;
   /** Stops the clock of the page in progress and totals every page so far. */
   summary: () => PageStepTimingsSummary;
+}
+
+export interface PageProfilingOptions {
+  profile: boolean;
+  profileInterval: number;
 }

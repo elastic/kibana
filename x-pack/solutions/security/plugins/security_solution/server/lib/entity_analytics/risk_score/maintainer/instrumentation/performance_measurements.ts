@@ -9,45 +9,75 @@ import type { PerformanceMeasurement as Measurement } from './events';
 import type { PageGroupTimings, PageStepTimingsSummary, ProfileTotals } from './page_timing_types';
 import type { RunHealthSummary } from './run_health';
 
-export const pageTimingMeasurements = (summary: PageStepTimingsSummary): Measurement[] => [
-  ...(['firstPage', 'laterPages'] as const).flatMap((name) =>
-    groupMeasurements(name, summary[name])
-  ),
-  ...Object.entries(summary.counters).map(
-    ([name, value]): Measurement => ({ name, value, unit: 'count' })
-  ),
-  ...(summary.stamped === undefined
-    ? []
-    : [{ name: 'stamped', value: Number(summary.stamped), unit: 'count' as const }]),
-  ...(['firstPage', 'laterPages'] as const).flatMap((name) =>
-    profileMeasurements(name, summary.profiles[name])
-  ),
-];
+export const pageTimingMeasurements = (summary: PageStepTimingsSummary): Measurement[] => {
+  const measurements = {
+    timing: (['firstPage', 'laterPages'] as const).flatMap((name) =>
+      groupMeasurements(name, summary[name])
+    ),
+    counter: Object.entries(summary.counters).map(
+      ([name, value]): Measurement => ({ name, value, unit: 'count' })
+    ),
+    paging:
+      summary.stamped === undefined
+        ? []
+        : [{ name: 'stamped', value: Number(summary.stamped), unit: 'count' }],
+    profile: (['firstPage', 'laterPages'] as const).flatMap((name) =>
+      profileMeasurements(name, summary.profiles[name])
+    ),
+  } satisfies Record<string, Measurement[]>;
+  return measurements.timing.concat(
+    measurements.counter,
+    measurements.paging,
+    measurements.profile
+  );
+};
 
-export const runHealthMeasurements = (health: RunHealthSummary): Measurement[] => [
-  { name: 'process.cpu.user', value: health.cpu.userMs, unit: 'ms' },
-  { name: 'process.cpu.system', value: health.cpu.systemMs, unit: 'ms' },
-  { name: 'process.eventLoop.utilization', value: health.eventLoop.utilization, unit: 'ratio' },
-  { name: 'process.gc.count', value: health.gc.count, unit: 'count' },
-  { name: 'process.gc.pause', value: health.gc.pauseMs, unit: 'ms' },
-  { name: 'concurrentRunsAtStart', value: health.concurrentRunsAtStart, unit: 'count' },
-  ...Object.entries(health.eventLoop.delayMs).map(
-    ([name, value]): Measurement => ({ name: `process.eventLoop.delay.${name}`, value, unit: 'ms' })
-  ),
-  ...(['heapMb', 'rssMb', 'externalMb', 'arrayBuffersMb'] as const).flatMap((name) =>
-    Object.entries(health[name]).map(
-      ([point, value]): Measurement => ({ name: `process.${name}.${point}`, value, unit: 'MiBy' })
-    )
-  ),
-];
+export const runHealthMeasurements = (health: RunHealthSummary): Measurement[] => {
+  const measurements = {
+    cpu: [
+      { name: 'process.cpu.user', value: health.cpu.userMs, unit: 'ms' },
+      { name: 'process.cpu.system', value: health.cpu.systemMs, unit: 'ms' },
+    ],
+    eventLoop: [
+      { name: 'process.eventLoop.utilization', value: health.eventLoop.utilization, unit: 'ratio' },
+      ...Object.entries(health.eventLoop.delayMs).map(
+        ([name, value]): Measurement => ({
+          name: `process.eventLoop.delay.${name}`,
+          value,
+          unit: 'ms',
+        })
+      ),
+    ],
+    gc: [
+      { name: 'process.gc.count', value: health.gc.count, unit: 'count' },
+      { name: 'process.gc.pause', value: health.gc.pauseMs, unit: 'ms' },
+    ],
+    concurrency: [
+      { name: 'concurrentRunsAtStart', value: health.concurrentRunsAtStart, unit: 'count' },
+    ],
+    memory: (['heapMb', 'rssMb', 'externalMb', 'arrayBuffersMb'] as const).flatMap((name) =>
+      Object.entries(health[name]).map(
+        ([point, value]): Measurement => ({ name: `process.${name}.${point}`, value, unit: 'MiBy' })
+      )
+    ),
+  } satisfies Record<string, Measurement[]>;
+  return measurements.memory.concat(
+    measurements.cpu,
+    measurements.eventLoop,
+    measurements.gc,
+    measurements.concurrency
+  );
+};
 
 const groupMeasurements = (name: string, group: PageGroupTimings | undefined): Measurement[] => {
   if (!group) return [];
-  return [
-    { name: `${name}.pages`, value: group.pages, unit: 'count' },
-    { name: `${name}.wall`, value: group.wallMs, unit: 'ms' },
-    { name: `${name}.untimed`, value: group.untimedMs, unit: 'ms' },
-    ...Object.entries(group.steps).flatMap(([step, total]) =>
+  const measurements = {
+    page: [
+      { name: `${name}.pages`, value: group.pages, unit: 'count' },
+      { name: `${name}.wall`, value: group.wallMs, unit: 'ms' },
+      { name: `${name}.untimed`, value: group.untimedMs, unit: 'ms' },
+    ],
+    step: group.steps.flatMap((total) =>
       (
         [
           ['ms', 'ms'],
@@ -60,10 +90,13 @@ const groupMeasurements = (name: string, group: PageGroupTimings | undefined): M
         ] as const
       ).flatMap(([field, unit]): Measurement[] => {
         const value = total[field];
-        return value === undefined ? [] : [{ name: `${name}.${step}.${field}`, value, unit }];
+        return value === undefined
+          ? []
+          : [{ name: `${name}.steps.${field}`, tags: total.tags, value, unit }];
       })
     ),
-  ];
+  } satisfies Record<string, Measurement[]>;
+  return measurements.step.concat(measurements.page);
 };
 
 const profileMeasurements = (name: string, profile: ProfileTotals | undefined): Measurement[] => {

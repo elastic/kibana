@@ -100,6 +100,7 @@ describe('score_base_entities', () => {
 
     await collectPages(
       calculateBaseEntityScores({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -135,6 +136,7 @@ describe('score_base_entities', () => {
 
     await collectPages(
       calculateBaseEntityScores({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -166,6 +168,7 @@ describe('score_base_entities', () => {
 
     await collectPages(
       calculateBaseEntityScores({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -187,6 +190,7 @@ describe('score_base_entities', () => {
 
     await collectPages(
       calculateBaseEntityScores({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -207,6 +211,7 @@ describe('score_base_entities', () => {
 
     await collectPages(
       calculateBaseEntityScores({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -227,6 +232,7 @@ describe('score_base_entities', () => {
     const run = () =>
       collectPages(
         calculateBaseEntityScores({
+          pageTimings: createPageStepTimings(),
           esClient,
           crudClient,
           logger,
@@ -306,6 +312,7 @@ describe('score_base_entities', () => {
 
       await collectPages(
         calculateBaseEntityScores({
+          pageTimings: createPageStepTimings(),
           esClient,
           crudClient,
           logger,
@@ -326,6 +333,7 @@ describe('score_base_entities', () => {
 
       await collectPages(
         calculateBaseEntityScores({
+          pageTimings: createPageStepTimings(),
           esClient,
           crudClient,
           logger,
@@ -348,6 +356,7 @@ describe('score_base_entities', () => {
 
       await collectPages(
         calculateBaseEntityScores({
+          pageTimings: createPageStepTimings(),
           esClient,
           crudClient,
           logger,
@@ -412,7 +421,11 @@ describe('score_base_entities', () => {
       expect(writer.bulk).toHaveBeenCalledTimes(1);
       expect(pageTimings.summary()).toMatchObject({
         counters: { riskDocumentsWritten: 1, partialResponses: 1 },
-        laterPages: { steps: { esql: { calls: 1, failures: 1 } } },
+        laterPages: {
+          steps: expect.arrayContaining([
+            expect.objectContaining({ tags: ['esql'], calls: 1, failures: 1 }),
+          ]),
+        },
       });
       expect(jest.mocked(esClient.esql.query).mock.calls[0][0]).not.toHaveProperty('profile');
     });
@@ -433,6 +446,7 @@ describe('score_base_entities', () => {
       const writer = buildWriter();
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -473,6 +487,7 @@ describe('score_base_entities', () => {
       const writer = buildWriter();
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -510,6 +525,7 @@ describe('score_base_entities', () => {
       const writer = buildWriter();
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -585,6 +601,7 @@ describe('score_base_entities', () => {
       const writer = buildWriter();
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -638,6 +655,7 @@ describe('score_base_entities', () => {
       const writer = buildWriter();
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -686,6 +704,7 @@ describe('score_base_entities', () => {
       const writer = buildWriter();
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -732,6 +751,7 @@ describe('score_base_entities', () => {
       const writer = buildWriter();
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -759,6 +779,7 @@ describe('score_base_entities', () => {
       const writer = buildWriter();
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,

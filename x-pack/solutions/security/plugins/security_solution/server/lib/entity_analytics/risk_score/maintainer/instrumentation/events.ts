@@ -11,6 +11,7 @@ export interface PerformanceMeasurement {
   name: string;
   value: number;
   unit: 'ms' | 'MiBy' | 'count' | 'ratio';
+  tags?: readonly string[];
 }
 
 export interface RiskScorePerformanceEvent {
@@ -41,6 +42,11 @@ export const RISK_SCORE_PERFORMANCE_EVENT: EventTypeOpts<RiskScorePerformanceEve
         properties: {
           name: { type: 'keyword', _meta: { description: 'Fixed measurement name' } },
           value: { type: 'float', _meta: { description: 'Measured numeric value' } },
+          tags: {
+            type: 'array',
+            items: { type: 'keyword', _meta: { description: 'Timing operation tag' } },
+            _meta: { optional: true, description: 'Code-defined timing operation dimensions' },
+          },
           unit: {
             type: 'keyword',
             _meta: { description: 'Measurement unit: ms, MiBy, count or ratio' },

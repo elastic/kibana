@@ -20,6 +20,7 @@ import type {
   PageStepTimingsSummary,
   PageTimingRecord,
   ProfileTotals,
+  StepTotals,
 } from './page_timing_types';
 
 interface PageTimingOptions {
@@ -118,36 +119,44 @@ interface TimingState {
   groups: Record<'firstPage' | 'laterPages', ReturnType<typeof createPageTimingGroup>>;
   pageNumber: number;
   stamped?: boolean;
-  page?: PageTimingRecord & { startedAt: number };
+  page?: Omit<PageTimingRecord, 'steps'> & { startedAt: number; steps: Record<string, StepTotals> };
 }
 
 const finishPage = (state: TimingState, onPage: PageTimingOptions['onPage']) => {
   if (state.page) {
     const { startedAt, ...record } = state.page;
     const wallMs = performance.now() - startedAt;
+    const steps = Object.values(record.steps);
     state.groups[groupName(state.pageNumber)].finishPage(wallMs, !record.empty);
     state.page = undefined;
     onPage?.({
       ...record,
       wallMs: Math.round(wallMs),
-      untimedMs: untimedDuration(wallMs, record.steps),
-      steps: Object.fromEntries(
-        Object.entries(record.steps).map(([step, total]) => [step, roundStepTotals(total)])
-      ),
+      untimedMs: untimedDuration(wallMs, steps),
+      steps: steps.map(roundStepTotals),
     });
   }
 };
 
 const recordStep = (
   state: TimingState,
-  step: PageStep,
+  tags: PageStep,
   ms: number,
   took: number | undefined,
   failed: boolean
 ) => {
-  state.groups[groupName(state.pageNumber)].record(step, ms, took, failed);
-  if (state.page)
-    state.page.steps[step] = addStepObservation(state.page.steps[step], ms, took, failed);
+  const normalizedTags = [...new Set(tags)].sort();
+  const step = normalizedTags.join('::');
+  state.groups[groupName(state.pageNumber)].record(normalizedTags, ms, took, failed);
+  if (state.page) {
+    state.page.steps[step] = addStepObservation(
+      state.page.steps[step],
+      normalizedTags,
+      ms,
+      took,
+      failed
+    );
+  }
 };
 
 const groupName = (pageNumber: number) => (pageNumber <= 1 ? 'firstPage' : 'laterPages');

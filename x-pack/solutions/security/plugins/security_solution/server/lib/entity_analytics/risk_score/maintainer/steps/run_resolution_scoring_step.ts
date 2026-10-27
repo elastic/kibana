@@ -19,7 +19,6 @@ import {
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
 import type { ResolutionStepResult } from './pipeline_types';
 import type { PageStepTimings } from '../instrumentation/page_timing_types';
-import { createPageStepTimings } from '../instrumentation/page_step_timings';
 import type { ScopedLogger } from '../utils/with_log_context';
 
 interface RunResolutionScoringParams {
@@ -42,8 +41,8 @@ interface RunResolutionScoringParams {
   refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
   /** When true, populate `scores` in the result. Omit for full-population runs. */
   collectScores?: boolean;
-  /** Collects each page's step times; pass one in to read them after the stage. */
-  pageTimings?: PageStepTimings;
+  /** Stage-owned collector shared across scoring and persistence, including failed pages. */
+  pageTimings: PageStepTimings;
 }
 
 export const runResolutionScoringStep = async ({
@@ -65,7 +64,7 @@ export const runResolutionScoringStep = async ({
   alertFilters,
   refresh,
   collectScores,
-  pageTimings = createPageStepTimings(),
+  pageTimings,
 }: RunResolutionScoringParams): Promise<ResolutionStepResult> => {
   runLogger.debug(
     `starting phase 2 resolution scoring: page_size=${pageSize}, sample_size=${sampleSize}`
@@ -87,7 +86,7 @@ export const runResolutionScoringStep = async ({
       refresh,
       pageTimings,
     });
-    const { docsWritten, errorsCount } = await pageTimings.time('storeWrite', () =>
+    const { docsWritten, errorsCount } = await pageTimings.time(['store', 'write'], () =>
       persistScoresToEntityStore({
         crudClient,
         logger: runLogger,

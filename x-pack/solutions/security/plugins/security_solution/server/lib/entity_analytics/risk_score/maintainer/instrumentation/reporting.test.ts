@@ -57,3 +57,40 @@ it('correlates every page, sampled profiles, telemetry and the scheduled event',
     })
   );
 });
+
+it('preserves operation tags through structured logs and telemetry', () => {
+  const logger = loggingSystemMock.createLogger();
+  const telemetry = analyticsServiceMock.createAnalyticsServiceSetup();
+  const reporting = createRunInstrumentation({
+    logger,
+    telemetry,
+    calculationRunId: 'run-2',
+    namespace: 'default',
+  });
+  const pages = reporting.createPageTimings('host', 'base', {
+    profile: false,
+    profileInterval: 20,
+  });
+  pages.startPage();
+  pages.timeSync(['store', 'write'], () => undefined);
+  reporting.finishStage(
+    { entityType: 'host', stage: 'base', status: 'success', durationMs: 1 },
+    pages
+  );
+  expect(logger.info).toHaveBeenCalledWith(
+    'Risk score page timings',
+    expect.objectContaining({
+      risk_score: expect.objectContaining({
+        steps: [expect.objectContaining({ tags: ['store', 'write'] })],
+      }),
+    })
+  );
+  expect(telemetry.reportEvent).toHaveBeenCalledWith(
+    'risk_score_maintainer_performance',
+    expect.objectContaining({
+      measurements: expect.arrayContaining([
+        { name: 'firstPage.steps.calls', tags: ['store', 'write'], value: 1, unit: 'count' },
+      ]),
+    })
+  );
+});
