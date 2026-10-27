@@ -11,6 +11,7 @@ import type {
   DatatableVisualizationState,
   TextBasedLayer,
   ColumnState,
+  CellDecorationFillConfig,
 } from '@kbn/lens-common';
 import type { PaletteOutput } from '@kbn/coloring';
 import type {
@@ -29,21 +30,13 @@ import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../../../colum
 import { isMetricColumnESQL, isMetricColumnNoESQL, colorModeToApplyColorTo } from '../helpers';
 import { stripUndefined } from '../../utils';
 
-type APIMetricRowCommonProps = Partial<
-  Pick<NonNullable<DatatableConfig['metrics']>[number], 'visible' | 'alignment' | 'width'>
+type APIMetric = NonNullable<DatatableConfig['metrics']>[number];
+
+type APIMetricRowCommonProps = Partial<Pick<APIMetric, 'visible' | 'alignment' | 'width'>>;
+
+type APIClassicColorProps = Partial<
+  Pick<Exclude<APIMetric, { apply_color_to: 'progress_bar' }>, 'apply_color_to' | 'color'>
 >;
-
-type NonProgressColorMode = Exclude<NonNullable<ColumnState['colorMode']>, 'progress'>;
-
-function assertNoUnsupportedProgressDecoration(
-  column: ColumnState
-): asserts column is ColumnState & { colorMode?: NonProgressColorMode } {
-  if (column.colorMode === 'progress') {
-    throw new Error(
-      `Datatable column ${column.columnId} uses the unsupported 'progress' cell decoration in Lens as code export`
-    );
-  }
-}
 
 function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps {
   return stripUndefined<APIMetricRowCommonProps>({
@@ -53,20 +46,98 @@ function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps
   });
 }
 
+type ProgressBarColumn = Extract<
+  NonNullable<DatatableConfigESQL['metrics']>[number],
+  { apply_color_to: 'progress_bar' }
+>;
+
+type DistributivePick<T, K extends PropertyKey> = T extends unknown
+  ? Pick<T, Extract<keyof T, K>>
+  : never;
+
+type ProgressBarFillProps = DistributivePick<ProgressBarColumn, 'fill_mode' | 'color'>;
+
+type ProgressBarProps = Pick<ProgressBarColumn, 'apply_color_to' | 'value_range' | 'alignment'> &
+  ProgressBarFillProps;
+
+type PaletteFillColor = Extract<ProgressBarColumn, { fill_mode: 'solid' | 'gradient' }>['color'];
+
+function buildValueRange({
+  valueRange,
+}: CellDecorationFillConfig): ProgressBarColumn['value_range'] {
+  // The editor always stores both custom bounds. Only a hand-edited range can miss one
+  return valueRange?.mode === 'custom' &&
+    valueRange.min !== undefined &&
+    valueRange.max !== undefined
+    ? { type: 'custom', min: valueRange.min, max: valueRange.max }
+    : { type: 'auto' };
+}
+
+function buildPaletteFillColor(palette: ColumnState['palette']): PaletteFillColor {
+  if (!palette) {
+    return AUTO_COLOR;
+  }
+  // The editor's seed palette has no params until the user edits it, and renders as a distributed palette.
+  return (
+    fromColorByValueLensStateToAPI(palette.params ? palette : { ...palette, params: {} }) ??
+    AUTO_COLOR
+  );
+}
+
+function buildFillProps(
+  { fillMode, color }: CellDecorationFillConfig,
+  palette: ColumnState['palette']
+): ProgressBarFillProps {
+  switch (fillMode) {
+    case 'single':
+      return {
+        fill_mode: fillMode,
+        color: color !== undefined ? { type: 'static', color } : AUTO_COLOR,
+      };
+    case 'solid':
+    case 'gradient':
+      return { fill_mode: fillMode, color: buildPaletteFillColor(palette) };
+  }
+}
+
+/**
+ * Values kept for another fill mode (the palette behind a single fill, the color behind a palette
+ * fill, custom bounds while the range is `auto`) are editor memory rather than chart configuration,
+ * so they are dropped.
+ */
+function buildProgressBarProps({
+  fillStyle,
+  palette,
+  alignment,
+}: ColumnState): ProgressBarProps | undefined {
+  // The editor always seeds `fillStyle` together with the progress decoration.
+  if (!fillStyle) {
+    return;
+  }
+
+  return {
+    apply_color_to: 'progress_bar',
+    value_range: buildValueRange(fillStyle),
+    // The editor leaves the alignment unset, which renders `right`.
+    alignment: alignment === 'left' ? 'left' : 'right',
+    ...buildFillProps(fillStyle, palette),
+  } satisfies ProgressBarProps;
+}
+
 /**
  * Build the color props for a metric column or an esql row.
+ * - If the column has a progress bar → output the progress bar props
  * - If colorMapping is present → output colorMapping
  * - If palette is present → output colorByValue
  */
-export function buildColorProps(
-  column: ColumnState
-): Partial<Pick<NonNullable<DatatableConfig['metrics']>[number], 'apply_color_to' | 'color'>> {
-  assertNoUnsupportedProgressDecoration(column);
-
+export function buildColorProps(column: ColumnState): APIClassicColorProps | ProgressBarProps {
   const { colorMode, palette, colorMapping } = column;
   if (!colorMode || colorMode === 'none') return {};
 
   const applyColorTo = colorModeToApplyColorTo(colorMode);
+  if (applyColorTo === 'progress_bar') {
+    return buildProgressBarProps(column) ?? {};
+  }
 
   // Prefer colorMapping if present, otherwise use palette
   if (colorMapping) {
@@ -90,9 +161,8 @@ export function buildColorProps(
 }
 
 type APIMetricProps = APIMetricRowCommonProps &
-  Partial<
-    Pick<NonNullable<DatatableConfig['metrics']>[number], 'apply_color_to' | 'color' | 'summary'>
-  >;
+  (APIClassicColorProps | ProgressBarProps) &
+  Partial<Pick<APIMetric, 'summary'>>;
 
 function buildMetricsAPI(column: ColumnState): APIMetricProps {
   const { summaryRow, summaryLabel } = column;
@@ -124,32 +194,39 @@ type APIRowPropsNoESQL = APIMetricRowCommonProps &
     >
   >;
 
-function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
-  assertNoUnsupportedProgressDecoration(column);
-
+function buildRowColorPropsNoESQL(
+  column: ColumnState
+): Pick<APIRowPropsNoESQL, 'apply_color_to' | 'color'> {
   const { colorMode, colorMapping, palette } = column;
+  if (!colorMode || colorMode === 'none') {
+    return {};
+  }
+
+  const applyColorTo = colorModeToApplyColorTo(colorMode);
+  // The editor never offers a progress bar on DSL rows, and their schema has no branch for it.
+  if (applyColorTo === 'progress_bar') {
+    return {};
+  }
+  return {
+    apply_color_to: applyColorTo,
+    color:
+      colorMapping || palette
+        ? // Intentional `as PaletteOutput` type assertion as the legacy palette export bridge accepts palettes with opaque params.
+          fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput)
+        : AUTO_COLOR,
+  };
+}
+
+function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
   return {
     ...buildRowCommonProps(column),
-    ...(colorMode && colorMode !== 'none'
-      ? {
-          apply_color_to: colorModeToApplyColorTo(colorMode),
-          color:
-            colorMapping || palette
-              ? // Intentional `as PaletteOutput` type assertion as the legacy palette export bridge accepts palettes with opaque params.
-                fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput)
-              : AUTO_COLOR,
-        }
-      : {}),
+    ...buildRowColorPropsNoESQL(column),
   };
 }
 
 type APIRowPropsESQL = APIMetricRowCommonProps &
-  Partial<
-    Pick<
-      NonNullable<DatatableConfigESQL['rows']>[number],
-      'apply_color_to' | 'color' | 'collapse_by' | 'click_filter'
-    >
-  >;
+  (APIClassicColorProps | ProgressBarProps) &
+  Partial<Pick<NonNullable<DatatableConfigESQL['rows']>[number], 'collapse_by' | 'click_filter'>>;
 
 function buildRowsAPIESQL(column: ColumnState): APIRowPropsESQL {
   return {

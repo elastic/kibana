@@ -23,13 +23,12 @@ const colorModeCompat = getReversibleMappings([
   ['value', 'text'],
   ['badge', 'badge'],
   ['background', 'cell'],
+  ['progress_bar', 'progress'],
 ]);
 
-type ApiColorTarget = 'value' | 'badge' | 'background';
+type ApiColorTarget = 'value' | 'badge' | 'background' | 'progress_bar';
 
-// 'progress' is a numeric-only cell decoration and is rejected at the as-code export boundary
-// until the datatable API grows an explicit representation for it.
-type ApiColorMode = Exclude<NonNullable<ColumnState['colorMode']>, 'none' | 'progress'>;
+type ApiColorMode = Exclude<NonNullable<ColumnState['colorMode']>, 'none'>;
 
 export const colorModeToApplyColorTo = (mode: ApiColorMode): ApiColorTarget =>
   colorModeCompat.toAPI(mode);
