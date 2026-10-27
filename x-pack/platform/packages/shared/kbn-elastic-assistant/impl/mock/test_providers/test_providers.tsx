@@ -102,6 +102,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
         uninstall: jest.fn(),
         updateAll: jest.fn(),
         getDefaultInferenceId: jest.fn(),
+        getUpdateAvailability: jest.fn(),
       },
     },
     userProfileService: jest.fn() as unknown as UserProfileService,

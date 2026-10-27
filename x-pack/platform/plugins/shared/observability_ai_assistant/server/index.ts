@@ -85,3 +85,4 @@ export const plugin = async (ctx: PluginInitializerContext<ObservabilityAIAssist
 };
 
 export { getInferenceIdFromWriteIndex } from './service/knowledge_base_service/get_inference_id_from_write_index';
+export { resolveObservabilityProductDocInferenceId } from './service/resolve_product_doc_inference_id';

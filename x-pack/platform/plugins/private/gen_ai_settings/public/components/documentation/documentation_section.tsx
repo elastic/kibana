@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 import {
   EuiBasicTable,
@@ -44,7 +44,7 @@ import {
   type ProductDocBasePluginStart,
 } from '@kbn/product-doc-base-plugin/public';
 import { ResourceTypes } from '@kbn/product-doc-common';
-import { useQueries, useQueryClient } from '@kbn/react-query';
+import { useQueries, useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DocumentationItem, DocumentationStatus } from './types';
 import { DOCUMENTATION_ITEMS_CONFIG, type NormalizedDocStatus } from './documentation_items';
@@ -54,6 +54,18 @@ import * as i18n from './translations';
 interface DocumentationSectionProps {
   productDocBase: ProductDocBasePluginStart;
 }
+
+const latestInstalledArtifactDate = (
+  byProduct: Partial<Record<string, string>> | undefined
+): string | undefined => {
+  let latest: string | undefined;
+  for (const value of Object.values(byProduct ?? {})) {
+    if (value && (!latest || value > latest)) {
+      latest = value;
+    }
+  }
+  return latest;
+};
 
 export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ productDocBase }) => {
   const { services } = useKibana();
@@ -81,6 +93,22 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
   const isInferenceIdLoading = isProductDocInferenceIdLoading || isSecurityLabsInferenceIdLoading;
 
   const docsConfig = DOCUMENTATION_ITEMS_CONFIG;
+
+  const productDocUpdateAvailability = useQuery({
+    queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_UPDATE_AVAILABILITY, productDocInferenceId],
+    queryFn: () => {
+      if (!productDocInferenceId) {
+        throw new Error('Inference ID is not available');
+      }
+      return productDocBase.installation.getUpdateAvailability({
+        inferenceId: productDocInferenceId,
+      });
+    },
+    enabled: Boolean(productDocInferenceId) && !isProductDocInferenceIdLoading,
+    refetchOnWindowFocus: false,
+    // Mount-only. Install, uninstall, and update invalidate this query when they finish.
+    staleTime: Infinity,
+  });
 
   const statusQueries = useQueries({
     queries: docsConfig.map((doc) => {
@@ -117,10 +145,27 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
   }, [queryClient]);
 
   const documentationItems: DocumentationItem[] = useMemo(() => {
+    const availability = productDocUpdateAvailability.data;
     return docsConfig.map((doc, idx) => {
       const data = statusQueries[idx]?.data;
       const status: DocumentationStatus = data?.status ?? 'uninstalled';
-      const updateAvailable = doc.supportsUpdates ? Boolean(data?.updateAvailable) : false;
+      const isProductDoc = doc.resourceType === ResourceTypes.productDoc;
+      const updateAvailable = doc.supportsUpdates
+        ? isProductDoc
+          ? Boolean(availability?.isUpdateAvailable)
+          : Boolean(data?.updateAvailable)
+        : false;
+      const availableArtifactLastModified = isProductDoc
+        ? availability?.availableArtifactLastModified
+        : data?.availableArtifactLastModified;
+      const availableStackVersion = isProductDoc
+        ? availability?.availableStackVersion
+        : data?.availableStackVersion;
+      const artifactLastModified =
+        data?.artifactLastModified ??
+        (isProductDoc
+          ? latestInstalledArtifactDate(availability?.installedArtifactLastModifiedByProduct)
+          : undefined);
 
       return {
         id: doc.id,
@@ -129,24 +174,20 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         resourceType: doc.resourceType,
         inferenceId: inferenceIdByResourceType[doc.resourceType],
         ...(updateAvailable ? { updateAvailable } : {}),
-        ...(data?.availableArtifactLastModified
-          ? { availableArtifactLastModified: data.availableArtifactLastModified }
-          : {}),
-        ...(data?.availableStackVersion
-          ? { availableStackVersion: data.availableStackVersion }
-          : {}),
+        ...(availableArtifactLastModified ? { availableArtifactLastModified } : {}),
+        ...(availableStackVersion ? { availableStackVersion } : {}),
         isTechPreview: doc.isTechPreview,
         isStubbed: doc.isStubbed,
         icon: doc.icon,
         ...(data?.failureReason ? { failureReason: data.failureReason } : {}),
         ...(data?.installedAt ? { installedAt: data.installedAt } : {}),
-        ...(data?.artifactLastModified ? { artifactLastModified: data.artifactLastModified } : {}),
+        ...(artifactLastModified ? { artifactLastModified } : {}),
         ...(data?.installedStackVersion
           ? { installedStackVersion: data.installedStackVersion }
           : {}),
       };
     });
-  }, [docsConfig, statusQueries, inferenceIdByResourceType]);
+  }, [docsConfig, statusQueries, inferenceIdByResourceType, productDocUpdateAvailability.data]);
 
   const getActionButton = useCallback(
     (item: DocumentationItem) => {
@@ -554,10 +595,6 @@ const InstallUpdateControl: React.FC<{
   );
 };
 
-const UPDATE_STATUS_POLL_MS = 2000;
-// Failed updates that happen before replacement leave the installed status untouched, so give up waiting.
-const UPDATE_STATUS_TIMEOUT_MS = 10 * 60 * 1000;
-
 const DocumentationRowActions: React.FC<{
   item: DocumentationItem;
   productDocBase: ProductDocBasePluginStart;
@@ -567,14 +604,6 @@ const DocumentationRowActions: React.FC<{
 }> = ({ item, productDocBase, hasManagePrivilege, isInferenceIdLoading, onRefetch }) => {
   const { services } = useKibana();
   const { notifications, rendering, docLinks } = services;
-  const [isUpdating, setIsUpdating] = useState(false);
-  const isUpdatingRef = useRef(false);
-  const sawInstallingRef = useRef(false);
-  const baselineRef = useRef<{
-    installedAt?: string;
-    artifactLastModified?: string;
-    updateAvailable?: boolean;
-  } | null>(null);
 
   const installMutation = useInstallProductDoc(productDocBase, {
     onSuccess: () => {
@@ -601,11 +630,10 @@ const DocumentationRowActions: React.FC<{
   });
 
   const updateMutation = useUpdateProductDoc(productDocBase, {
+    onSuccess: () => {
+      notifications.toasts.addSuccess({ title: i18n.getUpdateSuccessTitle(item.name) });
+    },
     onError: (error) => {
-      isUpdatingRef.current = false;
-      sawInstallingRef.current = false;
-      baselineRef.current = null;
-      setIsUpdating(false);
       const message = error.body?.message ?? error.message;
       notifications.toasts.addDanger({
         title: i18n.getUpdateErrorTitle(item.name),
@@ -650,67 +678,9 @@ const DocumentationRowActions: React.FC<{
   const isItemUninstalling = item.status === 'uninstalling' || uninstallMutation.isLoading;
   const isActionDisabled = !hasManagePrivilege || isInferenceIdLoading;
 
-  useEffect(() => {
-    if (!isUpdating) {
-      return;
-    }
-    const timer = window.setInterval(() => {
-      onRefetch();
-    }, UPDATE_STATUS_POLL_MS);
-    const timeout = window.setTimeout(() => {
-      isUpdatingRef.current = false;
-      sawInstallingRef.current = false;
-      baselineRef.current = null;
-      setIsUpdating(false);
-      notifications.toasts.addDanger({ title: i18n.getUpdateErrorTitle(item.name) });
-    }, UPDATE_STATUS_TIMEOUT_MS);
-    return () => {
-      window.clearInterval(timer);
-      window.clearTimeout(timeout);
-    };
-  }, [isUpdating, onRefetch, notifications, item.name]);
-
-  useEffect(() => {
-    if (!isUpdating || !isUpdatingRef.current) {
-      return;
-    }
-    if (item.status === 'installing') {
-      sawInstallingRef.current = true;
-      return;
-    }
-    const baseline = baselineRef.current;
-    const releaseChanged =
-      baseline != null &&
-      (item.installedAt !== baseline.installedAt ||
-        item.artifactLastModified !== baseline.artifactLastModified ||
-        Boolean(item.updateAvailable) !== Boolean(baseline.updateAvailable));
-    const finished =
-      item.status === 'error' ||
-      ((item.status === 'installed' || item.status === 'uninstalled') &&
-        (sawInstallingRef.current || releaseChanged));
-    if (!finished) {
-      return;
-    }
-    isUpdatingRef.current = false;
-    sawInstallingRef.current = false;
-    baselineRef.current = null;
-    setIsUpdating(false);
-    if (item.status === 'installed') {
-      notifications.toasts.addSuccess({ title: i18n.getUpdateSuccessTitle(item.name) });
-    }
-  }, [isUpdating, item, notifications]);
-
   const onUpdate = () => {
     if (isProductDoc) {
       notifications.toasts.addInfo({ title: i18n.UPDATING_TO_NEWEST_VERSION });
-      baselineRef.current = {
-        installedAt: item.installedAt,
-        artifactLastModified: item.artifactLastModified,
-        updateAvailable: item.updateAvailable,
-      };
-      sawInstallingRef.current = false;
-      isUpdatingRef.current = true;
-      setIsUpdating(true);
       updateMutation.mutate({ inferenceId: item.inferenceId });
       return;
     }
@@ -808,9 +778,8 @@ const DocumentationRowActions: React.FC<{
     );
   }
 
-  // Update schedules a background install. Keep this control until that install finishes,
-  // including the gap before status flips to `installing`.
-  if (isUpdating) {
+  // updateAll waits until the task finishes, so the mutation stays loading for the whole update.
+  if (isProductDoc && updateMutation.isLoading) {
     return (
       <EuiButton
         size="s"

@@ -9,6 +9,7 @@ import type { ProductName, ResourceType } from '@kbn/product-doc-common';
 import type { ProductInstallState, InstallationStatus } from '../install_status';
 
 export const INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/status';
+export const UPDATE_AVAILABILITY_API_PATH = '/internal/product_doc_base/update_availability';
 export const INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
 export const UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
 export const UPDATE_ALL_API_PATH = '/internal/product_doc_base/update_all';
@@ -21,15 +22,24 @@ export interface InstallationStatusResponse {
   /** Resource type for this installation status */
   resourceType?: ResourceType;
   openApiStatus?: OpenAPISpecInstallStatusResponse;
-  /**
-   * Whether a newer artifact is available in the repository than what is installed
-   * (version drift or a newer GCS LastModified than the stored artifactLastModified).
-   */
-  isUpdateAvailable?: boolean;
+}
+
+/**
+ * Repository artifact check for GenAI Settings. Separate from installation status so
+ * status polling does not list artifacts on every request.
+ */
+export interface ProductDocUpdateAvailabilityResponse {
+  inferenceId: string;
+  isUpdateAvailable: boolean;
   /** ISO 8601 LastModified of the newer repository artifact, when an update is available. */
   availableArtifactLastModified?: string;
   /** Major.minor stack version of that artifact, when it is a versioned zip rather than `latest`. */
   availableStackVersion?: string;
+  /**
+   * Repository LastModified for an installed zip that has no stored date.
+   * Keyed by product so the version line can show the installed release.
+   */
+  installedArtifactLastModifiedByProduct?: Partial<Record<ProductName, string>>;
 }
 
 export interface PerformInstallResponse {
@@ -58,11 +68,6 @@ export interface ProductDocInstallParams {
    * - 'security_labs': Elastic Security Labs content
    */
   resourceType?: ResourceType;
-  /**
-   * When true, the status response includes repository artifacts and their last-modified
-   * dates even when nothing is installed. GenAI Settings sets this whenever the page mounts.
-   */
-  includeAvailableArtifacts?: boolean;
 }
 export interface BaseInstallStatusResponse<T extends ResourceType> {
   inferenceId: string;

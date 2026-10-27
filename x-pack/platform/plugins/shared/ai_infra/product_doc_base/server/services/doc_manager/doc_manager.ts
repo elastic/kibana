@@ -215,7 +215,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }> {
-    const { forceUpdate, inferenceIds, request } = options ?? {};
+    const { forceUpdate, inferenceIds, request, wait = false } = options ?? {};
     const previouslyInstalled =
       (await this.docInstallClient.getPreviouslyInstalledInferenceIds()) ?? [];
     const explicitRequest = Array.isArray(inferenceIds) && inferenceIds.length > 0;
@@ -243,17 +243,13 @@ export class DocumentationManager implements DocumentationManagerAPI {
         (inferenceId) => !supersededKeys.has(getDefaultInferenceIndexKey(inferenceId))
       );
       const currentKey = getDefaultInferenceIndexKey(migration.currentDefaultInferenceId);
-      if (
-        !idsToUpdate.some((inferenceId) => getDefaultInferenceIndexKey(inferenceId) === currentKey)
-      ) {
-        idsToUpdate = [...idsToUpdate, migration.currentDefaultInferenceId];
-      }
-
-      this.logger.info(
-        `Default inference ID changed to [${
-          migration.currentDefaultInferenceId
-        }]; removing product documentation for [${migration.supersededInferenceIds.join(', ')}]`
-      );
+      const includesCurrent = () =>
+        idsToUpdate.some((inferenceId) => getDefaultInferenceIndexKey(inferenceId) === currentKey);
+      const withoutCurrent = () => {
+        idsToUpdate = idsToUpdate.filter(
+          (inferenceId) => getDefaultInferenceIndexKey(inferenceId) !== currentKey
+        );
+      };
 
       // Some (not all) products of the current default may be installed, or its install may still
       // be running. Only delete the previous default once the current one is fully installed.
@@ -261,14 +257,38 @@ export class DocumentationManager implements DocumentationManagerAPI {
         ? 'uninstalled'
         : (await this.getStatus({ inferenceId: migration.currentDefaultInferenceId })).status;
       if (currentStatus === 'uninstalled' || currentStatus === 'error') {
-        // Wait so the previous default is removed only after the new documentation is installed.
-        await this.install({
-          inferenceId: migration.currentDefaultInferenceId,
-          request,
-          wait: true,
-        });
+        const license = await this.licensing.getLicense();
+        if (!checkLicense(license)) {
+          this.logger.debug(
+            `Skipping product documentation inference switch to [${migration.currentDefaultInferenceId}]: invalid license`
+          );
+        } else {
+          // Wait so the previous default is removed only after the new documentation is installed.
+          await this.install({
+            inferenceId: migration.currentDefaultInferenceId,
+            request,
+            wait: true,
+          });
+          // install() already wrote this model. The update loop below would install it again.
+          withoutCurrent();
+        }
       } else if (currentStatus === 'installed') {
+        this.logger.info(
+          `Default inference ID changed to [${
+            migration.currentDefaultInferenceId
+          }]; removing product documentation for [${migration.supersededInferenceIds.join(', ')}]`
+        );
         await this.uninstallInferenceIds(migration.supersededInferenceIds, request);
+        if (forceUpdate) {
+          if (!includesCurrent()) {
+            idsToUpdate = [...idsToUpdate, migration.currentDefaultInferenceId];
+          }
+        } else {
+          // Already installed. update() below would schedule another install of this model.
+          withoutCurrent();
+        }
+      } else if (!includesCurrent()) {
+        idsToUpdate = [...idsToUpdate, migration.currentDefaultInferenceId];
       }
     }
 
@@ -276,7 +296,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
       `Updating product documentation to latest version for Inference IDs: ${idsToUpdate}`
     );
     await Promise.all(
-      idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate, request }))
+      idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate, request, wait }))
     );
     return {
       inferenceIds: idsToUpdate,

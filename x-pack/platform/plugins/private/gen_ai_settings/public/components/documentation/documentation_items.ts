@@ -161,11 +161,6 @@ export const DOCUMENTATION_ITEMS_CONFIG: readonly DocumentationItemConfig[] = [
       const release = status === 'installed' ? installedRelease(res.perProducts) : {};
       return {
         status,
-        updateAvailable: Boolean(res.isUpdateAvailable),
-        ...(res.availableArtifactLastModified
-          ? { availableArtifactLastModified: res.availableArtifactLastModified }
-          : {}),
-        ...(res.availableStackVersion ? { availableStackVersion: res.availableStackVersion } : {}),
         failureReason,
         ...(installedAt ? { installedAt } : {}),
         ...release,

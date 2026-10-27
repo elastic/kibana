@@ -218,4 +218,9 @@ export interface DocUpdateAllOptions {
    * inferenceIds to update
    */
   inferenceIds?: string[];
+  /**
+   * If true, the returned promise waits until each update task has completed.
+   * Defaults to `false`. Startup calls stay asynchronous; the HTTP route waits.
+   */
+  wait?: boolean;
 }

@@ -38,6 +38,7 @@ describe('ensureSecurityLabsInstalled', () => {
         install: jest.fn().mockResolvedValue({ installed: true }),
         uninstall: jest.fn(),
         updateAll: jest.fn(),
+        getUpdateAvailability: jest.fn(),
       },
     };
     uiSettings = {

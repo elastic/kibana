@@ -12,6 +12,7 @@ import type {
   PerformUpdateResponse,
   UninstallResponse,
   ProductDocInstallParams,
+  ProductDocUpdateAvailabilityResponse,
 } from '../../../common/http_api/installation';
 
 export interface InstallationAPI {
@@ -27,4 +28,11 @@ export interface InstallationAPI {
   getDefaultInferenceId(params?: {
     resourceType?: ProductDocInstallParams['resourceType'];
   }): Promise<string>;
+  /**
+   * Whether a newer product-doc artifact is in the repository.
+   * GenAI Settings calls this on mount, not on the installation-status poll.
+   */
+  getUpdateAvailability(params: {
+    inferenceId: string;
+  }): Promise<ProductDocUpdateAvailabilityResponse>;
 }

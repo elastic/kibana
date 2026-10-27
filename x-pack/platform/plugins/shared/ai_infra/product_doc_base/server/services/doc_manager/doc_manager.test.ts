@@ -544,17 +544,15 @@ describe('DocumentationManager', () => {
         inferenceId: defaultInferenceEndpoints.ELSER,
         resourceType: ResourceTypes.productDoc,
       });
-      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledTimes(2);
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledTimes(1);
       expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
         taskManager,
         logger,
         inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
       });
-      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
-        taskManager,
-        logger,
-        inferenceId: defaultInferenceEndpoints.JINAv5,
-      });
+      expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalledWith(
+        expect.objectContaining({ inferenceId: defaultInferenceEndpoints.JINAv5 })
+      );
       expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalledWith(
         expect.objectContaining({ inferenceId: defaultInferenceEndpoints.ELSER })
       );
@@ -580,14 +578,48 @@ describe('DocumentationManager', () => {
         inferenceId: defaultInferenceEndpoints.ELSER,
         resourceType: ResourceTypes.productDoc,
       });
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledTimes(1);
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+      });
+      expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalledWith(
+        expect.objectContaining({ inferenceId: defaultInferenceEndpoints.JINAv5 })
+      );
+      expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalledWith(
+        expect.objectContaining({ inferenceId: defaultInferenceEndpoints.ELSER })
+      );
+    });
+
+    it('still updates the current default when a user forces an update', async () => {
+      docInstallClient.getPreviouslyInstalledInferenceIds.mockResolvedValue([
+        defaultInferenceEndpoints.JINAv5,
+        defaultInferenceEndpoints.ELSER,
+        defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+      ]);
+      docInstallClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'installed' },
+      } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>);
+
+      await docManager.updateAll({
+        forceUpdate: true,
+        inferenceIds: [defaultInferenceEndpoints.JINAv5],
+      });
+
+      expect(scheduleInstallAllTaskMock).not.toHaveBeenCalled();
+      expect(scheduleUninstallAllTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+        resourceType: ResourceTypes.productDoc,
+      });
       expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
         taskManager,
         logger,
         inferenceId: defaultInferenceEndpoints.JINAv5,
+        forceUpdate: true,
       });
-      expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalledWith(
-        expect.objectContaining({ inferenceId: defaultInferenceEndpoints.ELSER })
-      );
     });
 
     it('does not switch models when the default inference ID cannot be resolved', async () => {
@@ -634,11 +666,22 @@ describe('DocumentationManager', () => {
         licensingMock.createLicense({ license: { type: 'basic' } })
       );
 
-      await expect(docManager.updateAll()).rejects.toThrow(
-        'Elastic documentation requires an enterprise license'
-      );
+      await docManager.updateAll();
+
+      expect(scheduleInstallAllTaskMock).not.toHaveBeenCalled();
       expect(scheduleUninstallAllTaskMock).not.toHaveBeenCalled();
-      expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalled();
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledTimes(1);
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+      });
+      expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalledWith(
+        expect.objectContaining({ inferenceId: defaultInferenceEndpoints.ELSER })
+      );
+      expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalledWith(
+        expect.objectContaining({ inferenceId: defaultInferenceEndpoints.JINAv5 })
+      );
     });
   });
 

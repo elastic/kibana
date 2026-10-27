@@ -12,7 +12,6 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import {
   resolveDefaultInferenceIdFromInferenceGet,
   ResourceTypes,
-  type ProductName,
   type ResourceType,
 } from '@kbn/product-doc-common';
 import type {
@@ -23,9 +22,11 @@ import type {
   SecurityLabsInstallStatusResponse,
   OpenAPISpecInstallStatusResponse,
   DefaultInferenceIdResponse,
+  ProductDocUpdateAvailabilityResponse,
 } from '../../common/http_api/installation';
 import {
   INSTALLATION_STATUS_API_PATH,
+  UPDATE_AVAILABILITY_API_PATH,
   INSTALL_ALL_API_PATH,
   UNINSTALL_ALL_API_PATH,
   UPDATE_ALL_API_PATH,
@@ -102,7 +103,6 @@ export const registerInstallationRoutes = ({
         query: schema.object({
           inferenceId: schema.string({ defaultValue: defaultInferenceEndpoints.ELSER }),
           resourceType: resourceTypeSchema,
-          includeAvailableArtifacts: schema.boolean({ defaultValue: false }),
         }),
       },
       options: {
@@ -118,13 +118,11 @@ export const registerInstallationRoutes = ({
       const { installClient, documentationManager } = getServices();
       const inferenceId = req.query?.inferenceId;
       const resourceType = req.query?.resourceType as ResourceType;
-      const includeAvailableArtifacts = req.query?.includeAvailableArtifacts === true;
 
       // Handle Security Labs status separately
       if (resourceType === ResourceTypes.securityLabs) {
         const securityLabsStatus = await documentationManager.getSecurityLabsStatus({
           inferenceId,
-          includeAvailableArtifacts,
         });
         return res.ok<SecurityLabsInstallStatusResponse>({
           body: {
@@ -165,42 +163,14 @@ export const registerInstallationRoutes = ({
         return res.ok({ body: openApiSpecStatusResponse });
       }
 
-      // Default: product documentation status
-      const { packageInstaller } = getServices();
+      // Cluster install check only. Repository version checks live on UPDATE_AVAILABILITY_API_PATH
+      // so callers polling this route do not list artifacts on every request.
       const installStatus = await installClient.getInstallationStatus({
         inferenceId,
       });
-      // installStatus[ResourceTypes.openapiSpec] = openApiSpecStatus;
       const { status: overallStatus } = await documentationManager.getStatus({
         inferenceId,
       });
-
-      let isUpdateAvailable: boolean | undefined;
-      let availableArtifactLastModified: string | undefined;
-      let availableStackVersion: string | undefined;
-      // Installed docs always check for a newer zip. GenAI Settings also asks on mount when
-      // nothing is installed, so the page can show the repository artifact and its date.
-      if (includeAvailableArtifacts || overallStatus === 'installed') {
-        const updateAvailability = await packageInstaller.isProductDocUpdateAvailable({
-          inferenceId,
-          includeAvailableArtifacts,
-        });
-        isUpdateAvailable = updateAvailability?.isUpdateAvailable;
-        availableArtifactLastModified = updateAvailability?.availableArtifactLastModified;
-        availableStackVersion = updateAvailability?.availableStackVersion;
-        const installedDates = updateAvailability?.installedArtifactLastModifiedByProduct;
-        if (installedDates) {
-          for (const [productName, lastModified] of Object.entries(installedDates)) {
-            const product = installStatus[productName as ProductName];
-            if (product && lastModified && !product.artifactLastModified) {
-              installStatus[productName as ProductName] = {
-                ...product,
-                artifactLastModified: lastModified,
-              };
-            }
-          }
-        }
-      }
 
       return res.ok<InstallationStatusResponse>({
         body: {
@@ -209,9 +179,55 @@ export const registerInstallationRoutes = ({
           overall: overallStatus,
           resourceType: ResourceTypes.productDoc,
           openApiStatus: openApiSpecStatusResponse,
-          ...(isUpdateAvailable !== undefined ? { isUpdateAvailable } : {}),
-          ...(availableArtifactLastModified ? { availableArtifactLastModified } : {}),
-          ...(availableStackVersion ? { availableStackVersion } : {}),
+        },
+      });
+    }
+  );
+
+  router.get(
+    {
+      path: UPDATE_AVAILABILITY_API_PATH,
+      validate: {
+        query: schema.object({
+          inferenceId: schema.string({
+            defaultValue: defaultInferenceEndpoints.ELSER,
+            maxLength: 256,
+          }),
+        }),
+      },
+      options: {
+        access: 'internal',
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [ApiPrivileges.manage('llm_product_doc')],
+        },
+      },
+    },
+    async (ctx, req, res) => {
+      const { packageInstaller } = getServices();
+      const inferenceId = req.query?.inferenceId ?? defaultInferenceEndpoints.ELSER;
+      const updateAvailability = await packageInstaller.isProductDocUpdateAvailable({
+        inferenceId,
+        includeAvailableArtifacts: true,
+      });
+
+      return res.ok<ProductDocUpdateAvailabilityResponse>({
+        body: {
+          inferenceId,
+          isUpdateAvailable: updateAvailability?.isUpdateAvailable ?? false,
+          ...(updateAvailability?.availableArtifactLastModified
+            ? { availableArtifactLastModified: updateAvailability.availableArtifactLastModified }
+            : {}),
+          ...(updateAvailability?.availableStackVersion
+            ? { availableStackVersion: updateAvailability.availableStackVersion }
+            : {}),
+          ...(updateAvailability?.installedArtifactLastModifiedByProduct
+            ? {
+                installedArtifactLastModifiedByProduct:
+                  updateAvailability.installedArtifactLastModifiedByProduct,
+              }
+            : {}),
         },
       });
     }
@@ -342,6 +358,7 @@ export const registerInstallationRoutes = ({
       const updated = await documentationManager.updateAll({
         request: req,
         forceUpdate,
+        wait: true,
         // If inferenceIds is provided, use it, otherwise use all previously installed inference IDs
         inferenceIds: req.body.inferenceIds ?? [],
       });

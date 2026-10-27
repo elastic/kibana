@@ -99,6 +99,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
         uninstall: jest.fn(),
         updateAll: jest.fn(),
         getDefaultInferenceId: jest.fn(),
+        getUpdateAvailability: jest.fn(),
       },
     },
     currentAppId: 'securitySolutionUI',
