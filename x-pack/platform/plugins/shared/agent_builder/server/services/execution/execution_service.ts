@@ -42,7 +42,6 @@ import type {
   AbortExecutionResult,
   AgentExecutionService,
   AgentExecution,
-  AgentExecutionPeek,
   ConversationExecutionParams,
   ExecuteAgentParams,
   ExecuteAgentResult,
@@ -441,18 +440,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   async getExecution(executionId: string): Promise<AgentExecution | undefined> {
     const executionClient = this.createExecutionClient();
     return executionClient.get(executionId);
-  }
-
-  async peekExecution(executionId: string): Promise<AgentExecutionPeek | undefined> {
-    const execution = await this.createExecutionClient().peek(executionId);
-
-    if (!execution) {
-      return undefined;
-    }
-
-    const { status, lastHeartbeat } = execution;
-
-    return { status, ...(lastHeartbeat ? { lastHeartbeat } : {}) };
   }
 
   async abortExecution(

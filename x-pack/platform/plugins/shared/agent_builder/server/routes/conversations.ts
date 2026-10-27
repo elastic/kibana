@@ -24,7 +24,6 @@ import {
 } from '@kbn/agent-builder-common';
 import { createConversationPublicClient } from '../services/conversation/conversation_public_client';
 import type { RouteDependencies } from './types';
-import { isExecutionLive } from '../services/execution/utils';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
   AddConversationEventsResponse,
@@ -260,29 +259,14 @@ export function registerConversationRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { conversations: conversationsService, execution } = getInternalServices();
+        const { conversations: conversationsService } = getInternalServices();
         const { conversation_id: conversationId } = request.params;
 
         const client = await conversationsService.getScopedClient({ request });
-        const { active_execution: activeExecution, ...conversation } = await client.get(
-          conversationId,
-          { includeActiveExecution: true }
-        );
-
-        // Liveness is best effort: a failed read omits `active_execution` rather than the GET.
-        const holder = activeExecution
-          ? await execution.peekExecution(activeExecution.execution_id).catch((err) => {
-              logger.warn(
-                `Failed to read execution ${activeExecution.execution_id} holding conversation ${conversationId}: ${err.message}`
-              );
-              return undefined;
-            })
-          : undefined;
+        const conversation = await client.get(conversationId);
 
         return response.ok<GetConversationResponse>({
-          body: isExecutionLive(holder)
-            ? { ...conversation, active_execution: activeExecution }
-            : conversation,
+          body: conversation,
         });
       })
     );

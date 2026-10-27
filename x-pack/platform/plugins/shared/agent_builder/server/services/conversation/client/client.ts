@@ -165,10 +165,7 @@ type WriteConversationParams = {
 } & ConversationWriteEmission;
 
 export interface ConversationClient {
-  get(
-    conversationId: string,
-    options?: { includeActiveExecution?: boolean }
-  ): Promise<ConversationWithPermissions>;
+  get(conversationId: string): Promise<ConversationWithPermissions>;
   exists(conversationId: string): Promise<boolean>;
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
   create(
@@ -786,10 +783,7 @@ class ConversationClientImpl implements ConversationClient {
     ];
   }
 
-  async get(
-    conversationId: string,
-    { includeActiveExecution = false }: { includeActiveExecution?: boolean } = {}
-  ): Promise<ConversationWithPermissions> {
+  async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
     const response = await toResponseConversation({
       document,
@@ -798,10 +792,9 @@ class ConversationClientImpl implements ConversationClient {
     });
 
     const { active_execution: activeExecution } = document._source;
-    const conversation =
-      includeActiveExecution && activeExecution
-        ? { ...response, active_execution: activeExecution }
-        : response;
+    const conversation = activeExecution
+      ? { ...response, active_execution: activeExecution }
+      : response;
 
     const isOwner = hasConversationOwnerAccess({ conversation, user: this.getUser() });
     if (!isOwner) {

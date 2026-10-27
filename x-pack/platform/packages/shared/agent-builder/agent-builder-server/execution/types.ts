@@ -353,12 +353,6 @@ export interface AbortExecutionResult {
   terminalPersisted: boolean;
 }
 
-/** The status and last heartbeat of an execution, read without its events. */
-export interface AgentExecutionPeek {
-  status: ExecutionStatus;
-  lastHeartbeat?: string;
-}
-
 export interface AgentExecutionService {
   /**
    * Execute an agent, either locally or on a Task Manager node.
@@ -375,11 +369,6 @@ export interface AgentExecutionService {
    * Retrieve an agent execution by its ID.
    */
   getExecution(executionId: string): Promise<AgentExecution | undefined>;
-
-  /**
-   * Read the status and last heartbeat of an execution without loading its events.
-   */
-  peekExecution(executionId: string): Promise<AgentExecutionPeek | undefined>;
 
   /**
    * Abort an ongoing execution.

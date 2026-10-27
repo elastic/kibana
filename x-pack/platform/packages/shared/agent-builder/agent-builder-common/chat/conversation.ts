@@ -828,7 +828,7 @@ export interface Conversation {
   read?: boolean;
   /** current status of the conversation */
   status?: ConversationRoundStatus;
-  /** The run lock held while an execution is active; only reported by GET by id, and only while the holder is live. */
+  /** The run lock held by the conversation's current execution; only reported by GET by id. */
   active_execution?: ActiveExecution;
   /**
    * Identifier of the bash/VFS workspace for this conversation.

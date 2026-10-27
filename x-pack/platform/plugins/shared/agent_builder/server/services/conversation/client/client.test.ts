@@ -6096,7 +6096,7 @@ describe('ConversationClient', () => {
       });
       expect(indexed).not.toHaveProperty('claim');
       expect(claim.isHolderLive).not.toHaveBeenCalled();
-      expect(result).not.toHaveProperty('active_execution');
+      expect(result.active_execution).toMatchObject({ execution_id: 'e2' });
     });
 
     it('claimActiveExecution writes only active_execution', async () => {
@@ -6178,14 +6178,12 @@ describe('ConversationClient', () => {
       expect(indexedSource().active_execution).toEqual(activeExecution('e1'));
     });
 
-    it('get strips active_execution unless includeActiveExecution is set', async () => {
+    it('get returns the stored active_execution', async () => {
       mockGetDocumentResponse(documentWithHolder('e1'));
 
-      const stripped = await client.get('conversation-1');
-      const included = await client.get('conversation-1', { includeActiveExecution: true });
+      const conversation = await client.get('conversation-1');
 
-      expect(stripped).not.toHaveProperty('active_execution');
-      expect(included.active_execution).toEqual(activeExecution('e1'));
+      expect(conversation.active_execution).toEqual(activeExecution('e1'));
     });
   });
 });

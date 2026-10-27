@@ -27,5 +27,4 @@ export type {
   AbortExecutionOptions,
   AbortExecutionResult,
   AgentExecutionService,
-  AgentExecutionPeek,
 } from './types';
